@@ -1,6 +1,6 @@
 # Signal Hub — STATUS
 
-公開技術進度快照，日期：2026-10-14。任務認領與 owner 驗收仍以 owner 帳本為準。
+公開技術進度快照，日期：2026-10-16。任務認領與 owner 驗收仍以 owner 帳本為準。
 
 ## 目前狀態
 
@@ -16,7 +16,15 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 | 圖表 | 原生 React／SVG、時間／分組、版本分隔、partial、threshold、可操作的精確資料表 |
 | M4 | 訂閱、webhook／ntfy、摘要、重試、DLQ／重放與投遞看板已通過獨立審查及全部CI；整合紀錄見PR #351 |
 | M5 | AC-10–14封存／匯回、一致備份與隔離還原已通過完整gate及獨立審查；整合紀錄見PR #352 |
-| M6 | 準備包已通過獨立審查與完整CI（PR #357）：來源契約／離線工具、部署與復原 runbook、隔離驗證；真實接入／部署／完整驗收仍未完成 |
+| M6 | 準備包已合併（PR #357）；本輪實機 Docker 合成整合及 resolver 修正見下方。正式三來源／手機／七天觀測及完整驗收仍未完成 |
+
+## M6 Docker 測試續作
+
+2026-10-16 在明確授權的測試機器執行 hub、持久化 release／inspection fixtures、真實 Alertmanager 與獨立 HTTPS 收件器。Docker 使用普通網橋，收件器僅發佈於真實 tailnet 位址；全數非 root、cap-drop ALL、no-new-privileges、seccomp／AppArmor、唯讀 rootfs、資源限制及私有測試憑證經實際檢查。Bark 使用無對外路由的 internal 網路，只做健康及無效請求測試。
+
+實際投遞找到 Go resolver 將 IPv4 回傳為 mapped IPv6 的產品缺陷；新修正只在 production resolver 邊界正規化無 zone 的 IPv4，既有完整回答檢查、CIDR、mapped URL 拒絕、精確 allowlist、TLS 與 literal pinning 保持。實際 resolver 的 Red/Green 回歸與 delivery race 通過，修正版已成功送達並持久化六種事件。設計見 [Docker 測試設計](m6-docker-test.md)，逐項結果與保留失敗見 [Docker 範圍驗收紀錄](../.team/reports/M6-docker-acceptance.md)。
+
+本輪是合成 Docker 整合；Bark 並非直接相容的 webhook 收件端，沒有新增 production Bark adapter、device 註冊、APNs 或手機成功宣稱。三來源七天真實觀測、手機收件、獨立主機停機通知、前一日真實快照及 OneFleet generic adapter 的 production admission 缺口均仍待完成，未進入完整 M6 review／done。
 
 ## M6 準備驗證
 
@@ -71,7 +79,7 @@ M3產品版本 `e44afd8e595af46a1867b48aaef89a9f3db5032e` 的[CI38293396899](htt
 - [Quickstart](quickstart.md)、[runtime](runtime.md)、[M3實作契約](m3-design.md) 提供操作及精確語義。設定仍使用JSON子集；M4訂閱契約見 [M4設計](m4-design.md)。
 - 200分組上限包含前桶保留的zero／null系列；新增分組可能進入`__other__`。圖表完整載入所選區间的全部分頁，大範圍／高基數會增加瀏覽器記憶體使用。舊版本bucket寬度變更時可能呈現離散點，精確資料仍可查表。
 - M5 只在手動命令或明確維護目錄設定時執行驗證後封存清除；recomputable_from是實際熱資料的最早事件。單次評估／回填最多1,000,000桶，超過時明確拒絕且不截斷。
-- readyz僅代表DB可用；尚未驗證磁碟耗盡、實體斷電、tailnet ACL、非root部署及持續運作。M5封存還原與M6真實來源／部署驗收各自獨立；部署仍需明確授權。
+- readyz僅代表DB可用；尚未驗證磁碟耗盡、實體斷電、正式 tailnet ACL 及持續運作；非 root 實機 Docker 測試已另行記錄。M5封存還原與M6真實來源／部署驗收各自獨立；部署仍需明確授權。
 
 首次M3遠端CI run38292215976的6個browser案例中5個通過；指標主流程斷言通過，但console404使最後檢查失敗。補上隨binary提供的favicon與Go資源回歸測試；CI另安裝Noto CJK測試字型以修正截圖缺字。最終瀏覽器結果與截圖驗收見[PR #349](https://github.com/fallrising/newclear/pull/349)及[PLAN](../.team/PLAN.md)，保留首次失敗紀錄。
 

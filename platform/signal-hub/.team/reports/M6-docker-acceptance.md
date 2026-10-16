@@ -1,0 +1,46 @@
+# M6 bounded Docker integration record — 2026-10-16
+
+The authorized synthetic Docker slice passed the execution checks below. This is not full M6 acceptance: seven-day real-source observation, phone receipt, independent-host outage notification, yesterday's real snapshot and OneFleet production admission remain pending. Required final branch CI, independent review and normal merge are tracked on this change's PR; this document does not predeclare them passed.
+
+## Product change and scope
+
+Actual production delivery failed before dialing because Go's real `LookupNetIP` returned IPv4 as mapped IPv6. Injected earlier tests supplied canonical IPv4 and missed this resolver boundary. `NewSender` now uses a small resolver wrapper that canonicalizes unzoned results before the unchanged complete-answer policy. It preserves all answers/order/errors, invalid values and zones. Mapped literal URLs remain rejected. Tailnet CIDRs, exact HTTPS allowlist, TLS hostname/trust verification, per-dial lookup, literal-IP pinning, redirect/proxy restrictions and test-only sender isolation are unchanged.
+
+The regression first failed against the actual Go1.26.8 resolver, then passed with normalization. It covers allowed IPv4/IPv6, forbidden addresses, mapped literal URLs and mixed actual-resolver outputs with zero dial. Existing security/TLS tests remain unchanged. Added Python standard-library fixtures provide durable immutable producers, an observable Alertmanager relay and a signed HTTPS receiver; no runtime dependency, production source controller or Bark adapter was added.
+
+Initial binary SHA256 `5b9d8ce449bb5df94180e96ca599eb377ebb0bad28be7f4fc8decd849ee19a5c`; repaired binary `7dcf7b3433353f10fcd7f8466dbae15eef83ae39d188a3929b2c32a3b5905a24`. Repaired scratch image `sha256:7b1d7a819b84753c7acf01f5b30285891e0f7ecf69af8e48da0488d3927d5cb5`. Pinned upstream images: Python3.13.16, Alertmanager0.34.1 and Bark server2.3.9; exact digests/config/script hashes and original failures are in the private execution bundle. Private host identifiers and generated credential values are deliberately absent here.
+
+## Observed execution
+
+| Requirement | Actual result and evidence identifier |
+| --- | --- |
+| Admission | Real test machine and Tailscale rechecked. Ordinary Docker bridges; receiver publishes only the real tailnet address; no hub/Bark published ports. Inspect and `/proc` prove UID/GID1001, all capability masks zero, NoNewPrivs1, seccomp2 and docker-default AppArmor. Read-only rootfs, bounded CPU/memory/pids/tmpfs/logs and owned mounts retained. `audit-final.json`, admission/runtime inspect files |
+| Three sources | Two immutable release runs and74 inspection runs persisted with receipts; real Alertmanager API generated firing/resolved. Every generated source event marks the synthetic Docker context. Hub-generated freshness events retain their native shape and are traceable to that synthetic inspection source. `source-events[-r5].json`, `resolved[-r5].json`, `audit-final.json` |
+| Identity and authorization | Release/inspection new202, duplicate200 original seq, changed-content409 and cross-source403; original event unchanged. Alertmanager HTTP200 contains per-member202/200, deliberate member409 and cross-source member403.11 actual relay captures all passed member validation. `members.json`, `verified-alertmanager-members.json` |
+| Production HTTPS/HMAC | Repaired production sender reached the actual tailnet endpoint with strict CA/hostname checks. At the correspondence checkpoint,56 durable receipts had exactly the hub's original bodies and succeeded state, covering release, inspection, Alertmanager firing/resolved, silent/recovered. The later snapshot-outage delivery also succeeded; final audit then counted57 receipts. `verified-delivery-correspondence.json`, `main-pending-recovered.json` |
+| Receiver persistence | Current valid duplicate200; invalid signature401 and stale301-second signature401 even for accepted ID; changed body409; original current duplicate200 again. Repeated after receiver restart with the same durable DB. `receiver-dedup.json`, `receiver-dedup-after-restart.json` |
+| Silence/recovery | Real elapsed silence8.213328s initially and8.039107s with repaired binary, exceeding twice configured4s interval. Producer restart becomes fresh/recovered; signed collector contains both freshness event types. `silence[-r5].json`, `recovery[-r5].json` |
+| Hub restart | Repaired hub and its namespace clients stopped/started; strict TLS, relay and Alertmanager health rechecked. Original release/firing seq and event bodies, duplicate/conflict behavior, subscriptions and delivery queries survive. `health-after-restart.json`, `restart-api-r5.json` |
+| Snapshot/restore | Receiver stopped to create pending work, native consistent snapshot and manifest produced. Fresh offline target passed SQLite integrity/foreign-key checks; events, identities, subscriptions, deliveries, attempts and source state matched exactly before startup. Separate credentials and `network=none` precede restored startup. Query/seq/dedup/conflict pass, old reader401/new reader and owner200; no default route and outbound connection fails. Original snapshot/manifest hashes unchanged after queries. Pending queue stays isolated; resumed restored delivery is not claimed. `snapshot-state.json`, `restore-before-start.json`, `restore-api-r5.json`, `restore-isolation.json`, `restore-credential-isolation.json`, `restore-after-query.json` |
+| Bark server only | Real pinned server `/ping`200 and plaintext `/healthz`200 `ok`; malformed JSON, missing key, native CloudEvent schema and invalid device-key type each400. Internal network has no default route, no exposed ports or registered device. No APNs or phone success. `bark-api.json` |
+
+Snapshot SHA256 `502415c0b9aed584ae7ce98f21acf3580b01ae88d179b29addef425d82dc0464`; manifest `6247bcb6985c5aee0acc11ec6da697a4be1afb244818e11577a7952853a15382`. Original pre-repair snapshot is also retained. This is a same-run synthetic backup, not a previous-day production snapshot. Early failed delivery attempts remain in original DBs/backups with normal retry timing; the test did not rewrite queue clocks or manufacture success.
+
+## Checks and independent review
+
+From `platform/signal-hub`:
+
+- `GOTOOLCHAIN=go1.26.8 go test -race -count=1 ./...`:10 packages passed, store375.299s; delivery1.187s. Independent focused delivery race and vet also passed.
+- `GOTOOLCHAIN=go1.26.8 go vet ./...`: passed.
+- `GOTOOLCHAIN=go1.26.8 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o <private-binary> ./cmd/signalhub`: passed; digest above is the deployed repaired binary.
+- `python3 -m unittest discover -s deployment/docker-test -p 'test_*.py' -v`:14 tests passed, including immutable retry/resume, per-member failures and durable HMAC dedup/auth-before-dedup.
+- `python3 deployment/docker-test/fixture.py --help`, gofmt and `git diff --check`: passed.
+- Repository CI retains frontend format/types/28 unit tests/reproducible assets, contracts, native race, all HTTP/CLI smoke suites and10 sandboxed Chromium cases, and now also runs the14 new fixture tests. Final-head results belong to the PR checks. Prior PR357/native/Chromium evidence and original failures remain preserved; no UI behavior was changed.
+
+Independent prestart review and resolver/security/script review found and resolved operational issues before the corresponding retry. Final execution review is a separate evidence gate; it must verify the exact artifacts, cleanup and final diff before merge. Private operation scripts never operate existing services or alter the host firewall/trust policy. Only named, label-verified test containers/networks may be cleaned up; synthetic DBs, generated test credentials and evidence remain privately preserved.
+
+## Preserved failures and limits
+
+Original evidence remains available for the prestart AppArmor lifecycle assertion, wrong manifest retry, same-bridge DNAT exclusion, missing CA KeyUsage, Bark plaintext parsing, actual Go resolver delivery failure, Alertmanager member-vs-envelope403 probe, nonexistent `/v1/self` probe, SSH quoting/working-directory errors and initial sandbox cache/socket denials. Corrections retained admission/security requirements and used the existing API contracts. The backup/restore JSON writer uses stderr; independent review caught the private orchestration's initial stdout assumption before those scripts executed. No snapshot was overwritten to hide a failure.
+
+Bark's push schema/device-key/APNs flow is not directly compatible with the hub's signed CloudEvent webhook. A server-only test establishes availability and validation behavior, not notification delivery. This slice adds no production channel conversion. All original live M6 gates and the generic OneFleet adapter production-admission gap remain open; full review/done is not warranted.

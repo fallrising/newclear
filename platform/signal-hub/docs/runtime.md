@@ -50,7 +50,7 @@
 
 `GET /v1/subscriptions` 與 `/v1/deliveries` 接受 owner／readonly，僅回安全狀態、counts 與最近嘗試摘要。`POST /v1/deliveries/{id}:replay` 只接受 owner 與 `application/json` 的非空白 `reason`，將 audit 與 pending 狀態同時提交。只有仍生效訂閱的 DLQ 可以重放；保留 ID、訊息與歷史次數，重設該輪12次上限。看板提供篩選、分頁、最近嘗試與理由必填重放；設定維持檔案管理。
 
-兩個 channel 都只允許精確列出的 HTTPS URL。每次 dial 重新解析 DNS，整組位址必須都在 Tailscale 範圍，再直接連線到核准 IP 並驗證原主機名 TLS。禁止 redirect、環境 proxy、連線重用與非 tailnet 位址；10秒逾時。不記錄接收端 body、原始 transport error、URL 或憑證。正式 binary 沒有 loopback outbound 例外；真正 TLS 接收端測試使用僅 Go 測試可注入的單一位址／port／憑證。這不證明實際 tailnet ACL 或部署安全，M6 仍另行驗收。
+兩個 channel 都只允許精確列出的 HTTPS URL。每次 dial 重新解析 DNS，先將 Go resolver 的無 zone IPv4-mapped 表示正規化為 IPv4，再要求整組位址都在 Tailscale 範圍，再直接連線到核准 IP 並驗證原主機名 TLS。禁止 redirect、環境 proxy、連線重用與非 tailnet 位址；10秒逾時。不記錄接收端 body、原始 transport error、URL 或憑證。正式 binary 沒有 loopback outbound 例外；真正 TLS 接收端測試使用僅 Go 測試可注入的單一位址／port／憑證。這不證明實際 tailnet ACL 或部署安全，M6 仍另行驗收。
 
 
 ## M5 封存、備份與隔離還原

@@ -58,3 +58,11 @@ and `make integration-storage` for M4 on a separate fresh runner, plus
 Link the current evidence from
 `docs/STATUS.md`; the quickstart is the single operator path. Add tests for
 meaningful failure boundaries rather than duplicating implementation text.
+
+For controlled callback failures, read `docs/SDD-M6.md` before editing. M6 uses
+`retry.py`, `retry_contract.py` and a separate fixed `fixtures/retry_worker.js`.
+Run `make integration-retry` on a fresh non-root runner. Record independent
+callback entries and post-effect acknowledgements; public attempt/config fields
+are placeholders. Keep strict ordered cases, finite deadlines/GET budgets and
+normal owned cleanup. Synthetic keyed D1 effects do not prove external exactly-once
+behavior or crash safety. Preserve the original fixture and all historical reports.

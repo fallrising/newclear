@@ -265,6 +265,47 @@ original report hashes are linked from STATUS. Sequential process signals at
 one public committed checkpoint keep kernel/filesystem alive; no power-loss,
 in-flight step, atomic whole-tree or production recovery conclusion follows.
 
+## 8. Controlled Workflow failures and retries (M6)
+
+On a fresh disposable non-root Linux x64 account, after any previous invocation
+has verified removal of its scope, run:
+
+```sh
+make -C labs/open-compute integration-retry
+```
+
+The CLI equivalent is `python3 labs/open-compute/retry.py`, with `--cache`,
+`--port` and a new `--output` directory. Read the [M6 contract](SDD-M6.md).
+This uses the same pinned original artifact and a separate fixed trusted Worker.
+It seeds three jobs before creating their Workflows, then runs them sequentially:
+unguarded post-effect failure/retry (two effects), keyed post-effect failure/retry
+(one effect), and retry exhaustion (two effects and an errored Workflow).
+Independent callback entries record attempts 1/2 and the explicit policy. Each
+entry must also acknowledge the successful effect statement and intended
+throw/return outcome; effect counts alone cannot establish the injection point.
+
+The harness checks exact initial state, original IDs, terminal output/error and
+D1 observations, then repeats terminal and D1 reads. Public attempt/config
+history is a placeholder and is not used as proof. Successful cases are recorded
+only after stable readback. There is no restart, kill, approval event or external
+application request in this scenario.
+
+The scenario budget is 300 seconds, including setup. Each case has one absolute
+60-second budget and the cases share at most 256 GET attempts, charged before
+I/O. Final cleanup has 150 seconds, owned removal 30 seconds and evidence write
+10 seconds. Success requires a running daemon to exit normally on SIGTERM,
+all observed owned generations to exit, observers to drain and verified scope
+removal. Failed ownership or cleanup cannot produce a successful report.
+The separate fresh non-root Python 3.11 CI job has a 10-minute limit and retains
+only its explicit sanitized report for seven days.
+
+Markers record the reached post-effect checkpoint and intended outcome, not an
+independent exception trace or exclusion of acknowledgement-loss windows.
+These finite observations concern a synthetic local effect row. They do not
+prove external exactly-once behavior, crash safety, future execution absence,
+retry timing, throughput, concurrency or production readiness. Actual execution
+and precise source/report provenance are linked from STATUS.
+
 ## Cleanup and a failed run
 
 Normal completion stops all owned processes and removes only the scope created

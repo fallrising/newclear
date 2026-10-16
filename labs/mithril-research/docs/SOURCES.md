@@ -4,6 +4,8 @@
 
 P1b 配置設計亦查閱 [Redis ACL 官方文件](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/) 與 [Compose services 規格](https://docs.docker.com/reference/compose-file/services/)。這些是設計參考；實際 parser／ACL／listener／UID 權限驗收仍須對固定 runtime artifacts 另行執行。
 
+P1c（2026-10-17）查閱 Redis 官方 [CLUSTER NODES](https://redis.io/docs/latest/commands/cluster-nodes/)、[CLUSTER INFO](https://redis.io/docs/latest/commands/cluster-info/)、[SET-CONFIG-EPOCH](https://redis.io/docs/latest/commands/cluster-set-config-epoch/) 及 bootstrap commands。另按 Redis 7.4.11 的 [redis-cli.c](https://raw.githubusercontent.com/redis/redis/7.4.11/src/redis-cli.c)、[cluster_legacy.c](https://raw.githubusercontent.com/redis/redis/7.4.11/src/cluster_legacy.c) 與 [server.c](https://raw.githubusercontent.com/redis/redis/7.4.11/src/server.c) 核對 pre-MEET epoch assignment、replica epoch 輸出及 INFO keyspace 的 subexpiry 欄位；有界讀取範圍見 [T-008](../.team/reports/T-008.md)。這是 SOURCE／DESIGN，未啟動 Redis，未改 Mithril research pin。
+
 研究日期：2026-09-27。上游 ref `refs/heads/master` 經 GitHub connector 核對為 `9959fe2e5cd466614dc20ef7b710befaaf1d746a`。所有上游結論固定在此 commit；不以浮動 master URL 當版本證據。blob IDs 見 [upstream.lock.json](../upstream.lock.json)。
 
 ## 證據分級

@@ -87,6 +87,8 @@ credentials 只放私有 runtime 檔案／secret store；報告保留 hash 與�
 
 ## 7. 交付順序
 
+2026-10-17 工具實作補充：[P1c contract](P1-BOOTSTRAP-CONTRACT.md) 把初始六節點 topology 與 bootstrap proposal 落成離線驗證器；匯入的觀察、node ID map 與 digest 不能建立實機身分、freshness 或操作批准。Startup 執行與 MR-R02 runtime lifecycle 仍待後續驗收。
+
 M0：來源鎖定、研究、設計與證據邊界（本次）。
 
 M1：固定版本 fixture、build/native tests、核心命令／隔離與精確清理。

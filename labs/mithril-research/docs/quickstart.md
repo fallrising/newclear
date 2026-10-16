@@ -6,6 +6,8 @@
 
 **這裡還沒有一鍵四機啟動包。** P1a 提供 [runtime lock](../runtime.lock.json) 和 local-fixture CLI；[P1b tools](P1-TOOLS.md) 提供私有 Compose/auth 產生、固定 SSH observe/down/reconcile 與 purge preview。Startup／cluster orchestration、purge apply 與 live smoke 仍待。Fixture 不執行遠端命令，其結果不能變成 Redis/Mithril PASS。歷史與本輪驗證見 [VALIDATION](VALIDATION.md)。
 
+[P1c bootstrap planner](P1-BOOTSTRAP.md) 可離線驗證六份 backend 觀察並產生精確提案；只有 pristine／already-converged 兩種狀態可通過，沒有遠端 collector 或 phase executor。
+
 ## 正式接手順序
 
 完整閱讀 [AGENTS](../AGENTS.md) 指定文件，核對 main／PR／既有工作樹；先唯讀盤點四台與保留服務，再建立精確部署計劃。首輪實機批准後依 P1–P3 完成固定 artifacts、交叉副本、健康／安全、真正讀寫、保留資料重啟與精確清理。

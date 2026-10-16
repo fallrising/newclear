@@ -2,6 +2,8 @@
 
 2026-10-15 接續狀態：P1a strict plan／synthetic lifecycle 已提供，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 與 [VALIDATION](VALIDATION.md)。P1b 接續提供 Compose/auth 產生、固定 SSH observe/down 與 purge preview，見 [P1-TOOLS](P1-TOOLS.md)；startup／cluster orchestration、purge apply 與 M1–M3 runtime 尚未驗收。接手先讀新增 P1 文件及 runtime.lock，不能把 local-fixture plan 或 demo 當作可執行實機批准。
 
+P1c 另提供 [離線 bootstrap planner](P1-BOOTSTRAP.md)，只驗證匯入的六節點觀察並產生 conditional proposal；未提供 collector／phase executor，完整 startup 與實機驗收仍缺。
+
 本 Prompt 是交接文件，不會因被閱讀就授權任何遠端操作。預設 mode 是 `plan-only`；Owner 明確選擇 `develop-only` 或批准精確實機變更計劃後，才可進入對應工作。文檔合併不是 runtime PASS。
 
 ---
@@ -41,6 +43,8 @@ labs/mithril-research/docs/P1-CONTRACT.md
 labs/mithril-research/docs/P1-LOCAL.md
 labs/mithril-research/docs/P1-TOOLS-CONTRACT.md
 labs/mithril-research/docs/P1-TOOLS.md
+labs/mithril-research/docs/P1-BOOTSTRAP-CONTRACT.md
+labs/mithril-research/docs/P1-BOOTSTRAP.md
 ```
 
 [四機計劃](FOUR-NODE-PLAN.md) 是目前部署順序；[SDD](SDD.md) 保持需求／測例權威；[STATUS](STATUS.md) 是唯一任務狀態帳。資料衝突先指出並作最小文件修正，不默默改變研究 commit 或驗收口徑。

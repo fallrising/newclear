@@ -1,58 +1,61 @@
-# Mithril P1b develop-only tools — T-0310
+# P1c offline bootstrap delivery plan
 
-Root owns PLAN, routing, integration and acceptance. Previous accepted source snapshot is [P1A-PLAN](P1A-PLAN.md). Claim was published and remotely read back before source modification. Source base: 873eb7e9 (full identity in protected evidence). Research stays 9959fe2e5cd466614dc20ef7b710befaaf1d746a.
+Root owns this plan, integration and acceptance. Baseline: 6492e4f92916837c519dbeb98764b4fdf5921885. Previous plan archived verbatim in P1B-PLAN.md. Published task claim and exact remote readback are recorded in the protected ledger; no private records are copied here.
 
-## Objective and bounded scope
+## Objective and boundaries
 
-Complete one source-deliverable P1 tools segment: four-host Compose/auth bundle generation; a thin, one-shot SSH transport with fixed operations and fail-closed identity/observation handling; exact plan/ownership-bound cleanup planning and guarded down. Destructive purge is a reviewable interface with independent approval conditions, not an automatically enabled deletion capability. No remote invocation, service start, VPS mutation, actual purge, image publication or deployment occurs during this delivery. Cluster initialization/orchestration and runtime acceptance remain later P1/P2 work if not covered by these tools.
+Deliver strict six-node Redis Cluster observations and deterministic, private bootstrap proposals bound to the existing source plan and bundle. Develop-only: no SSH, Redis/Mithril service, remote mutation, reset/flush, automatic repair, purge, release or image publication. Research commit remains 9959fe2e5cd466614dc20ef7b710befaaf1d746a. Full P1 incomplete; MR-004 BLOCKED_ENV.
 
-The reviewed design must make exact supported operations and remaining gaps explicit before implementation. Avoid a generic arbitrary-command SSH API or a control plane. Local-fixture remains a separate unchanged evidence lane. Every remote/mock result must identify its origin and cannot upgrade synthetic observations to live evidence. Plan digest is integrity/binding only, never approval.
+## Team and model decision
 
-## Team and budget
+Scenario standard-delivery with contract review before implementation. Root owns shared docs; one Sol builder owns new bootstrap code/tests in an isolated worktree; Astra owns independent design/final review reports in another worktree. Workers do not delegate or commit.
 
-Scenario: standard-delivery with disjoint specialists if design supports it. Native builder gpt-6.1-sol high; independent design/final reviewer gpt-6-astra high. Both exact IDs exposed by current native collaboration tools and official pages fetched 2026-10-15: https://developers.openai.com/api/docs/models/gpt-6.1-sol and https://developers.openai.com/api/docs/models/gpt-6-astra. Freeze these IDs; no silent substitution, external CLI dispatch or paid API route.
+Native collaboration catalog exposes gpt-6.1-sol (builder, high) and gpt-6-astra (reviewer, high). Exact IDs frozen; no fallback. Current official model pages checked 2026-10-17: https://developers.openai.com/api/docs/models/gpt-6.1-sol and https://developers.openai.com/api/docs/models/gpt-6-astra. Model existence/client exposure are observed; provider-resolved telemetry, account quota, tokens and cost remain unknown. Use recent accepted P1b native team experience; no external CLI route, installation or paid discovery probe. Common cli-team source pinned 39fb407d71c7c5aae5f50a9bc01df6b3c215daa3. One bounded slice; reserve independent review capacity, no invented numerical budget.
 
-cli-team common source: 39fb407d71c7c5aae5f50a9bc01df6b3c215daa3; resolved README, CONTRACT, planning guide and Codex card read. Native kit governs hosted workers. Subscription quota/window, resolved provider model telemetry, full request/tool/token counts and actual billed cost are unknown. Plan two disjoint Sol assignments plus Astra review capacity; no invented numeric hard budget. Checkpoint/reassess on concrete blockers, scope change or repeated failure.
+## Dependency order
 
-## Tasks and ownership
+1. T-008 Astra design review: exact minimal schema and fail-closed semantics. Root accepts/adjusts contract.
+2. T-009 Sol implementation: scripts/bootstrap.py and tests/test_bootstrap.py only, plus own report. Real Red-Green logs; all checks through shared workspace launcher with distinct private task IDs.
+3. Root integrates, documents usage/STATUS/VALIDATION, reruns Python 3.11, baseline demo and CLI offline acceptance.
+4. T-010 Astra independent final review and adversarial probes. Root resolves findings, reruns affected checks and evidence gate.
+5. Source commit with required task trailer; PR/required CI/normal merge; exact remote main readback; ledger review. No task marked done by agent.
 
-- T-004 Astra: independent contract/design review; only its report writable. Identify the smallest sound supported SSH/config/cleanup slice and concrete acceptance corrections.
-- T-005 Sol: bounded configuration/auth generation and tests, independent worktree; API frozen after T-004.
-- T-006 Sol: bounded transport/cleanup and tests, independent worktree; API frozen after T-004. No overlap with T-005.
-- Root: integration, documentation, Make/CI only as needed, actual checks/evidence and all Git/ledger delivery.
-- T-007 Astra: independent review of integrated final diff, required negative probes and evidence; root resolves all findings.
+## Acceptance gates
 
-Workers use codex-task-worker, cannot delegate/commit/push or modify PLAN. New builds/tests use the common workspace launcher with unique IDs; raw artifacts remain private outside source. No cleanup of existing data. Source/PR contain H1-H4 and synthetic inputs only.
+- Bound strict inputs, six exact node identities/endpoints, roles, cross-host replicas, full unique slot coverage; reject malformed/duplicate/oversize/unknown/partial/migrating/foreign/drifted observations.
+- Distinguish pristine proposal from already-converged evidence and incomplete/unsafe inputs; never turn observations or unkeyed digest into freshness, authorization or runtime PASS.
+- Fixed typed plans without shell/credential interpolation, semantic rederivation and independent expected digests, private exclusive outputs and sanitized summaries.
+- Python 3.11 stdlib only; retain existing down/lost-reply/cleanup gates. P1a local-fixture remains unchanged.
+- Actual Red-Green, root reruns, independent review, required CI, remote readback and honest remaining gaps.
 
-## Proposed acceptance contract for design review
+## Decisions and evidence
 
-1. Preserve strict P1a plans; use their validated inventory/artifact/caps/topology as bound input, never relabel a fixture plan executable remotely. New bundle/operation manifests have their own schema/lane/digests and link source plan.
-2. Generate per-host Compose JSON (valid Compose input), six Redis configs and Mithril config plus separate private credentials. Fixed Redis digest; Mithril image identity must be independently supplied verified immutable digest/provenance or explicit unresolved draft. Never fabricate or publish an image. Non-root UID/GID, host networking, exact private binds, resource caps, read-only config mounts, isolated data paths, labels, no socket/host-root mounts or wildcard listeners.
-3. Authentication per fixed upstream syntax: disabled passwordless default, distinct proxy app/admin and backend proxy/replication/operator credentials. Secrets enter via private bounded files, never argv/output/logs or public hashes. Deny injection/newlines and ambiguous syntax; config hashes exclude secret material. Root/source evidence remains sanitized.
-4. Thin SSH transport: fixed remote entrypoint/operations, subprocess argv without local shell; never interpolate untrusted values into remote shell command. BatchMode and strict host checking, no agent/port forwarding, bounded deadline/output. Explicit request/response operation ID, exact host/run/plan binding. Unknown/nonzero/malformed/timeout/lost reply stays unknown/uncertain, with no automatic mutation replay. Machine identity rechecked within the operation session; drift blocks effects.
-5. Ownership cleanup: exact container IDs + run/plan/role labels and host identity; inspect failures are unknown, never absent. Down only stops/removes exact observed matching containers in proxy-first order and retains data/config/journal/evidence; no compose-down/prune or volume deletion. Destructive cleanup preview binds exact paths/objects/references and independent approval requirements; refuse unknown/foreign/live references/link/mount ambiguity. No actual purge here.
-6. If mutations are exposed, explicit independently supplied exact action approval is required in addition to digest, with an admission record that cannot be mistaken for authenticated authority. Develop-only tests inject mock SSH/runtime; no remote calls are made by tests or demo. Persist intent before effects and fence uncertain results; reconciliation observes exact IDs only.
-7. Red-Green evidence: argv/credential injection, malformed and overlarge output, timeout/lost reply, drift, foreign/unknown resources, source/plan binding, retained down data, cleanup approval separation and real subprocess mock transport. Root repeats full relevant suite on Python 3.11 and existing CLI demo.
-8. Gate: full diff/scope/privacy inspection; independent review and task/report validators; necessary PR checks; normal merge with exact head; remote SHA/content readback; ledger review report. STATUS keeps MR-004 BLOCKED_ENV and full P1 incomplete unless actual requirements are all evidenced.
+Planning/claim complete. T-008 design accepted and frozen; integration evidence and review decisions follow.
 
-## Current decisions
+Root design decision: accept D1–D5 with the precise barrier/unmet constants and
+required plan/validate CLI in docs/P1-BOOTSTRAP-CONTRACT.md (p1c-v1). Sol may now
+write tests before implementation. Baseline root test run t0320-root-baseline
+passed 70 tests; t0320-reading-audit matched 29 required inputs byte-for-byte
+to the previously fully read P1b source and validated T-008. Native Sol reading
+may overlap Astra report completion; behavioral writes depend on this freeze.
 
-T-004 accepted with D1-D5 fully adopted as binding requirements in P1-TOOLS-CONTRACT. Scope is offline bundle + fixed observe/stop/remove with guarded down/reconcile + purge preview only; no up/bootstrap/upload/purge effects. Builder API and file ownership frozen below before implementation. Public source snapshot must not preclaim remote checks/merge. External delivery facts belong to the later ledger report and GitHub.
+T-009 integrated after full source/test read and hash verification. Final worker
+module 7c6b8cbecf0e88c5c603cdb4b17c48f30830297c56921cac7b15aff1b6be5378;
+tests 6a191c8060a0b3e8f33c066152f4ed99b906d6baff2d3f996a2817822f8b9593.
+Actual Red01 and Red02 retained. Root full01 passed87 on Python3.13.5;
+root-cli01 independently passed7 CLI cases. First py311 attempt was denied
+Docker socket access before execution; approved py311-02 passed87 on3.11.17
+and original8-call/28-operation synthetic demo. No runtime service was started.
+Final independent T-010 review and external delivery remain pending.
 
-T-005 owns scripts/bundle.py and tests/test_bundle.py. T-006 owns scripts/ssh_executor.py, scripts/ssh_helper.py, tests/test_ssh_executor.py. bundle.validate_manifest(manifest, expected_digest) is the only dependency of transport on bundle; root will copy the completed bundle module to the transport worktree as a read-only integration input. No concurrent writer shares a source path.
-
-## Root integration checkpoint — 2026-10-17
-
-Initial source base 873eb7e9 was fast-forwarded to latest main 2c0cb8c4 before delivery; intervening changes are in other components and no required Mithril/root contract changed. Existing branches, worktrees and evidence remain preserved.
-
-T-005 accepted after full root code/test diff inspection, actual Green03/Red02 evidence inspection and 7 Compose config-only parses. T-006 initially passed 30 focused/67 integrated tests but T-007 independently reproduced delayed original effects after unsafe abandonment (R1), plus unresolved persisted approval references (R2). Root required actual Red-Green correction. Final transport has 33 focused tests; remote journal accepts only uncertain/completed, opposite observations remain fenced, and unresolved references are refused. Initial failures remain visible in reports/protected evidence.
-
-Root has inspected all new implementation/tests and changed documentation, preserving labctl, its fixture semantics and both locks. Final host suite t0310-root-full02: 70 tests, Python 3.13.5, exit 0. Fixed image Python 3.11.17 t0310-root-py311-03: make check (70 tests) and make demo, exit 0; no network, read-only source, nonroot local container. Demo remains local-fixture, 8 CLI calls/28 operations with retained marker and zero remaining synthetic resources/uncertainty. t0310-root-py311-02 was interrupted without a completed result, not counted. t0310-compose-parse01 passed 7 synthetic config-only parses; draft H4 is nonrunnable.
-
-T-007 final corrected-source review and root static/task/report gate are pending at this checkpoint. Source acceptance and external delivery are separate: normal PR/CI/merge/readback and the final ledger review report will follow only after review passes. No remote SSH, Redis/Mithril startup, VPS write, purge, image publication or release is authorized or executed. Full P1 and MR-004 remain incomplete.
-
-## Root acceptance — 2026-10-17
-
-ACCEPT T-004/T-005/T-006/T-007 for the bounded offline slice. T-007 independently reran 70 tests and separately reproduced delayed stop/remove recovery plus 12 malformed-journal refusals; R1/R2 are resolved with no remaining blocker. Root inspected the complete diff, actual report/check outputs and independent probe records. t0310-root-acceptance01 passed 30-file scope/privacy/UTF-8/whitespace/link checks, four task/four report validators and git diff --check. Both locks, prior fixture implementation/tests and archived P1a PLAN are unchanged. Root's actual purge-preview CLI also passed, with six synthetic candidates and no eligibility/apply.
-
-Evidence gate maps the task scope to private bundle/CLI artifacts, fixed helper and controller tests, independent recovery probes, retained-data checks, separate approval assertions, final guide/STATUS/VALIDATION and passing reports. All required local gates pass; original failures and unexecuted live gates remain explicit. Proceed with the already authorized normal source delivery. PR/main CI, merge SHA, remote-content verification and task review publication are recorded after they occur in GitHub and the ledger, not preclaimed here.
+Root acceptance decision: ACCEPT the bounded offline slice after T-010's
+independent87 tests/48 probes, full21-file review and actual evidence audit.
+No blocking findings or implementation rework requested. T-010 SHA256
+0c314853aab04bf4c6818bf63c6f234c29efe2f8379f702f2e42c96f6628c7d4.
+Root static01 passed scope/privacy/links/syntax,3task/2report validators and
+unchanged locks/prior tools; final acceptance reruns metadata/static/report
+gates after adding T-010 and these evidence-only updates. Code/test/contract
+identities remain the independently reviewed ones. Full P1/MR-004 stays open.
+Source delivery continues through normal PR/required CI/merge/readback; exact
+external outcomes are recorded by GitHub and the protected ledger, not predicted
+by this pre-merge source snapshot. No next task is automatically claimed.

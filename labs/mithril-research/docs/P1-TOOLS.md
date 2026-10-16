@@ -7,6 +7,9 @@ bindings. They do not provide upload, up, cluster initialization, live smoke,
 installation, image publication or data deletion. Full P1 and MR-004 remain
 incomplete; the formal status is in [STATUS](STATUS.md).
 
+The separate [P1c bootstrap planner](P1-BOOTSTRAP.md) validates imported six-node
+snapshots and produces conditional proposals. It adds no remote execution.
+
 Use [P1-LOCAL](P1-LOCAL.md) for the original synthetic lifecycle. Its result lane
 stays local-fixture. New mock transport evidence is labelled mock-ssh and real
 transport results ssh; neither a bundle digest nor a mock result grants remote

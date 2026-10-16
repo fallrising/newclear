@@ -1,5 +1,41 @@
 # Mithril 研究與計劃驗證記錄
 
+## P1c bootstrap tools：2026-10-17（develop-only）
+
+新增 Python stdlib 六節點觀察 parser／topology validator、獨立 node ID map
+binding、四階段 bootstrap proposal 與 private plan/validate CLI。`offline-snapshot`
+的 origin 保留 synthetic／operator-supplied 宣告；本輪實際測例全為 synthetic，
+結果 lane 為 offline-bootstrap。沒有 collector、SSH／Redis 連線或 phase executor，
+未啟動 Redis/Mithril、寫入 VPS、改網路、purge、release 或 publication。
+完整 P1 未完成，MR-004 保持 BLOCKED_ENV，4 DONE／1 BLOCKED_ENV／4 TODO。
+
+### Actual offline evidence
+
+- Native `gpt-6-astra` [T-008 design review](../.team/reports/T-008.md) 先審 exact schema、獨立 node identity、epoch／slot／replica 規則、private output 和 conditional barriers；root 凍結 [contract](P1-BOOTSTRAP-CONTRACT.md) 後，native `gpt-6.1-sol` 才修改 behavior。Exact model IDs 未替換；usage/quota/cost 未知。
+- Root `t0320-reading-audit`：29 份 required-reading inputs 與本對話已全文讀取的 P1b source byte-identical；本輪相關契約、STATUS、VALIDATION、四機計劃與 execution prompt 再次全文讀取。Root `t0320-root-baseline`：原有 70 tests 通過。
+- [T-009 builder](../.team/reports/T-009.md) `t0320-sol-red01`：先有測試，缺 bootstrap module 的實際 exit 1 保留；初輪 Green01 為 15 methods。追加邊界測試的 Red02 實際重現五個 malformed output-path TypeErrors，修正後 Green02 的 17 methods 通過。Full01 共 87 tests 通過。Red logs 沒有被覆寫為成功結果。
+- Root `t0320-root-full01`：`python3 -m unittest discover -s labs/mithril-research/tests -v`，Python 3.13.5，**87 tests**，exit 0。既有 70 methods、labctl/bundle/SSH helper/controller 與兩份 locks 均保留。
+- Root `t0320-root-cli01`：獨立撰寫的 Python probe 實際呼叫 bootstrap CLI **7 次**，pristine 17 actions／converged 0 actions 各產生與獨立 digest reload 成功；重算 hash 後移除 barrier、slot gap、六節點一致換 ID 均以 exit 2 拒絕。後兩項未建立 output；所有輸出經 synthetic identity/path sentinel 檢查，stderr 空。Raw proposals/receipts 留私有 evidence。
+- Root `t0320-root-py311-01` 首次 Docker socket 存取被 sandbox 拒絕，exit 1，未執行 Python 容器；失敗記錄保留。相同有界 local-test 透過核准執行的 `t0320-root-py311-02`，固定 `python@sha256:c3cd26fd6259ce667be208ab9c118463210a745ffc97e0e85af5121c10bc71c5`，Python **3.11.17**、network none、source read-only、nonroot/cap-drop/no-new-privileges，`make -C labs/mithril-research check` **87 tests** 及 `make ... demo` 均 exit 0。Demo 實際為 8 CLI calls／28 synthetic operations，兩輪重建 process instance、marker 保留、最後 resources/uncertainty 皆為 0。
+
+- Astra [T-010 final review](../.team/reports/T-010.md) ACCEPT：獨立完整 **87 tests**、另寫的 **48 probes**（含 9 次 CLI）通過；核對 source identities、Red/Green、root Python3.11／CLI logs 及所有文件，無 blocking findings。Root `t0320-root-static01` 的 21-file scope/privacy/link/whitespace/Python syntax、三 task／兩 report validators、P1b PLAN byte-exact archive 與 MR counts 均通過；最終 acceptance gate 另核對新增 review report 與收尾文件。
+
+以上每個新 check 均經 common workspace launcher、使用唯一 task ID，明確保存
+stdout/stderr、exit 和 artifacts。固定 Python 容器只執行測試／synthetic demo，
+不是 Redis/Mithril service。Root 沒有重跑歷史 native 121 tests、Clippy/fmt，
+也沒有重跑 Compose parser；下方 P1b/P1a 的結果保持歷史分類。
+
+### Evidence limits
+
+Imported snapshots、container/labels／machine identity 與獨立 node map 仍是宣告，
+不證明真實 collection、freshness、storage ownership、loading 或 quiescence。
+Already-converged 只描述給定拓撲，沒有 replication-link／lag 或 live-health
+驗收。四階段 barriers 為未實作的 live gates，不能由 plan hash 解除。
+Collector、startup/upload/create/up、phase-aware execution／uncertainty journal、
+Mithril runtime image provenance、有效 ACL/network、retained-data lifecycle、
+proxy smoke 及獨立批准的 purge 仍待完成。PR/main CI、merge 和遠端回讀以
+後續 GitHub／帳本紀錄為準，不由本 source snapshot 預先宣告。
+
 ## P1b tools：2026-10-15–17（develop-only）
 
 這段交付 private four-host Compose/auth bundle、固定 SSH observe/stop/remove

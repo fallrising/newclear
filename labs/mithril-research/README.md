@@ -4,7 +4,7 @@
 
 研究對象是 [projecteru2/mithril](https://github.com/projecteru2/mithril)，不是 Mithril.js。本目錄是原創研究與實驗設計，**不是上游 fork、Redis server 實作或已部署的代理服務**。
 
-**目前：P1a 本機 plan／合成 lifecycle 核心已提供；M1–M3 的 Redis／Mithril runtime 尚未驗證。** 固定研究來源已完成隔離 release build、121 項上游測試、Clippy 與格式檢查，binary hash 記於 [runtime lock](runtime.lock.json)。四機 SSH 唯讀盤點有私有紀錄；本機 fixture 不連 SSH、不啟動 Redis／Mithril，也不批准實機變更。[P1b tools](docs/P1-TOOLS.md) 接續提供 per-host Compose/auth 產生、固定 SSH observe/down/reconcile 與 purge preview。完整 P1 的 startup／cluster orchestration、purge apply 與 runtime 驗收仍缺。操作與界線見 [P1a 本機入口](docs/P1-LOCAL.md)／[VALIDATION](docs/VALIDATION.md)。
+**目前：P1a 本機 plan／合成 lifecycle 核心已提供；M1–M3 的 Redis／Mithril runtime 尚未驗證。** 固定研究來源已完成隔離 release build、121 項上游測試、Clippy 與格式檢查，binary hash 記於 [runtime lock](runtime.lock.json)。四機 SSH 唯讀盤點有私有紀錄；本機 fixture 不連 SSH、不啟動 Redis／Mithril，也不批准實機變更。[P1b tools](docs/P1-TOOLS.md) 接續提供 per-host Compose/auth 產生、固定 SSH observe/down/reconcile 與 purge preview。[P1c](docs/P1-BOOTSTRAP.md) 提供六節點離線觀察驗證與綁定 ownership/node IDs 的 bootstrap proposal；完整 startup／cluster 執行、purge apply 與 runtime 驗收仍缺。操作與界線見 [P1a 本機入口](docs/P1-LOCAL.md)／[VALIDATION](docs/VALIDATION.md)。
 
 ## 從哪裡開始
 
@@ -28,6 +28,7 @@ Mithril 集中處理 Redis Cluster 路由、連線與部分協議複雜度，但
 | [VALIDATION](docs/VALIDATION.md) | 本輪／歷史驗證與未執行項目 |
 | [upstream.lock.json](upstream.lock.json) | 研究 commit、toolchain 與來源 blob IDs |
 | [mithril.local.conf](examples/mithril.local.conf) | 舊單機可信隔離範例；不是四機部署設定 |
+| [P1-BOOTSTRAP](docs/P1-BOOTSTRAP.md) | P1c 私有離線拓撲驗證、bootstrap proposal 與未實作的實機閘門 |
 | [AGENTS](AGENTS.md) | Agent 接續規則 |
 
 上游固定 commit：`9959fe2e5cd466614dc20ef7b710befaaf1d746a`；Cargo manifest 為 `0.1.7`，不把 manifest 版本等同於已核實 release tag。[S01] P1a 的 `scripts/labctl.py` 只執行明示的 local fixture；P1b 的獨立工具見 P1-TOOLS；完整遠端 lifecycle 與實機 evidence 尚未交付。

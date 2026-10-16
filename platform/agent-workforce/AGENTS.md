@@ -4,7 +4,7 @@ Read the repository [AGENTS.md](../../AGENTS.md), then [SDD.md](SDD.md), the [pr
 
 ## Current scope
 
-- M1 is an offline Python 3.11 standard-library/SQLite control core with a fake backend. Scope and actual verification are recorded in docs/m1.md and docs/verification.md. M2 adds bounded Codex writer/Claude reviewer ports (docs/m2.md); complete descendant stop and native resume remain blocked. Later API/live milestones require an explicit scoped request; reading the SDD does not create accounts, log in, spend quota or deploy services.
+- M1 is an offline Python 3.11 standard-library/SQLite control core with a fake backend. Scope and actual verification are recorded in docs/m1.md and docs/verification.md. M2 adds bounded Codex writer/Claude reviewer ports (docs/m2.md); the polling port still cannot prove descendant stop; an opt-in dedicated subreaper port provides separately qualified local closure. Native route promotion and resume need their own evidence. Later API/live milestones require an explicit scoped request; reading the SDD does not create accounts, log in, spend quota or deploy services.
 - Keep product facts, proposed interfaces and observed runtime evidence separate. Every provider route starts unverified until its exact environment and entitlement are evidenced.
 - The SDD owns domain names and invariants. Companion documents explain provider differences and acceptance scenarios; reconcile changes across them.
 - Examples must use synthetic identifiers and opaque credential references. Do not publish actual accounts, environment inventories, secrets, private repository paths or the task ledger.

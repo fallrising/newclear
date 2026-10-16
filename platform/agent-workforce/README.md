@@ -5,7 +5,7 @@
 
 Agent Workforce 的 M1 是可在本機執行的 Python 標準庫控制核心：可信 registry／grant admission、SQLite inbox/outbox 與命令去重、fake dispatch、有限預算、資源保留及普通重啟恢復。範圍與測試對應見 [M1 契約](docs/m1.md) 和 [驗收](docs/verification.md)。
 
-**狀態：M1 離線核心與有界 M2 adapter 切片已實作。** [M2 契約](docs/m2.md) 分列 Codex writer／Claude reviewer 的事件、程序、會話與逐 route 證據。完整後代程序停止尚無可靠證明，因此停止與原生 resume 驗收仍受阻，不能宣稱完整 M2 通過。Daemon、SaaS/API、完整 artifact/review/publisher、ContextPack、backup/restore 與長時間運作仍未交付。用來開發程式的模型工具不構成本產品的原生 adapter 驗收。
+**狀態：M1 離線核心與有界 M2 adapter 切片已實作。** [M2 契約](docs/m2.md) 分列 Codex writer／Claude reviewer 的事件、程序、會話與逐 route 證據。明確選用的 subreaper port 已對兩條新原生呼叫取得本機後代停止證明；原 polling operations 保持 unknown。遠端 effects、完整 native resume／auth 與 Codex 串流工具觀測仍有缺口，不能宣稱完整 M2 通過。Daemon、SaaS/API、完整 artifact/review/publisher、ContextPack、backup/restore 與長時間運作仍未交付。用來開發程式的模型工具不構成本產品的原生 adapter 驗收。
 
 從本目錄執行：
 

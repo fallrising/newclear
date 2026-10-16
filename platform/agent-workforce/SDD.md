@@ -1,6 +1,6 @@
 # Agent Workforce — Software Design Document
 
-- 版本：0.3；M2 切片更新：2026-10-15（原設計：2026-10-11）。
+- 版本：0.3；M2 切片更新：2026-10-17（原設計：2026-10-11）。
 - 狀態：**M1 核心與有界 M2 原生切片已實作；完整 M2 及跨產品設計仍待驗收**。[M1 契約](docs/m1.md) 記錄 Python/SQLite/fake 的實際範圍與延期項；[M2 契約](docs/m2.md) 記錄原生 adapter 的實作與未通過 gate；帳號配置及部署未完成。
 - 範圍：單一 owner 的跨產品、多帳號數位工作者；六類原生 agent 產品，以及可由 harness 使用的 DeepSeek API。
 - 讀者入口：[README](README.md)；供應商事實：[能力表](docs/provider-capabilities.md)；執行場景：[first-scenario](docs/first-scenario.md)；AC：[verification](docs/verification.md)。
@@ -347,3 +347,5 @@ Operator 至少能看到：工作者可用／未驗證／暫停原因；排隊�
 - 相鄰公開元件讀取基準：newclear@5b4dd565d4f269ce49e08a5381eb60943312d87f；當前整合基準為 82ee784c3329acdf640c9f4867afe64cbf8b1b8a。來源狀態以各元件文件／程式為準；本次不推定線上環境狀態。
 - 供應商官方來源、2026-10-11 查核結果與政策適用限制集中在 [provider-capabilities](docs/provider-capabilities.md)，實機 promotion 證據仍為未驗證。
 - 設計中的物件、上限、儲存選擇、責任分工和里程碑是本項目提案；不視為供應商保證，也不代表已進行帳號／資源／部署操作。
+
+M2 stop port 補充：可信呼叫端可明確選用 operation 專屬 subreaper，以核心 ECHILD 與匹配持久 receipt 證明本機子孫結束；原 polling journals 與未知 effects 不被提升。詳細邊界與逐 route 驗收仍以 [M2 契約](docs/m2.md) 為準。

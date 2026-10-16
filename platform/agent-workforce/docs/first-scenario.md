@@ -1,6 +1,6 @@
 # 第一場景：一張工程工單，兩種原生 Agent，交付可審查成果
 
-- 狀態：Proposed；僅設計，未實作、未呼叫真實 Agent、未部署。
+- 狀態：完整協作場景仍 Proposed／LIVE NotRun；M1 離線核心及 M2 有界原生 qualification 的實作結果另見 [M2 契約](m2.md)，未部署。
 - 設計日期：2026-10-11。
 - 主規格：[SDD](../SDD.md)；驗收對照：[verification](verification.md)。
 
@@ -10,7 +10,7 @@ Operator 給定一張範圍清楚的小型工程工單，由 Codex 原生呼叫�
 
 第一輪交付是一份固定的 candidate、驗收證據、review 結論與可追溯的工作歷史。任務已授權遠端交付時，再由可信 publisher 建立 branch／Draft PR。先前授權仍有效且足以涵蓋固定成果時，機械核對即可，不要求 operator 為同一範圍重複批准；沒有相應授權時，遠端操作保持待處理。
 
-這是實作階段的目標場景，不表示本 repository 已有 worker daemon、CLI adapter、publisher 或可執行命令。Codex／Claude 的具體調用接口、方案許可、版本、登入與 tool capabilities，必須先通過該 route 的查證與實機驗收；產品名稱本身不構成可用性證據。
+這是完整協作的目標場景；已有核心與有界 CLI adapter 不表示 worker daemon、完整 publisher 或本場景已通過。Codex／Claude 的具體調用接口、方案許可、版本、登入與 tool capabilities，必須先通過該 route 的查證與實機驗收；產品名稱本身不構成可用性證據。
 
 ## 2. 固定場景與前置輸入
 

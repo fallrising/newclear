@@ -277,7 +277,7 @@ class ProcessSupervisor:
                 record[key] = self._base(operation_id, intent["request"]["binding"])[key]
         for name in ("stdout", "stderr"):
             try:
-                output = os.open(name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=fd)
+                output = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
             except FileNotFoundError:
                 continue
             try:

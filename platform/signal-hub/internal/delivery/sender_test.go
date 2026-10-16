@@ -179,6 +179,98 @@ func TestProductionRejectsNonTailnetAndMixedDNS(t *testing.T) {
 		}
 	}
 }
+
+// Literal inputs exercise the real Go resolver conversion without DNS or sockets.
+func TestProductionResolverCanonicalTailnet(t *testing.T) {
+	for _, literal := range []string{"100.64.0.9", "fd7a:115c:a1e0::9"} {
+		t.Run(literal, func(t *testing.T) {
+			addresses, err := lookupDeliveryIP(t.Context(), "ip", literal)
+			if err != nil || len(addresses) != 1 {
+				t.Fatalf("literal resolution: addresses=%v err=%v", addresses, err)
+			}
+			if addresses[0] != netip.MustParseAddr(literal) || !tailnetAddress(addresses[0]) {
+				t.Fatalf("production resolver denied canonical tailnet literal: %v", addresses)
+			}
+			// A canceled dial context prevents network access. Reaching the dial
+			// failure establishes that NewSender uses the production adapter.
+			target := "https://" + net.JoinHostPort(literal, "443") + "/hook"
+			sub := receiverSubscription(t, "webhook", target, []byte("synthetic-key"))
+			sender, err := NewSender([]Subscription{sub}, []string{target})
+			if err != nil {
+				t.Fatal(err)
+			}
+			ctx, cancel := context.WithCancel(t.Context())
+			cancel()
+			transport := sender.targets[sub.ID].client.Transport.(*http.Transport)
+			conn, err := transport.DialContext(ctx, "tcp", net.JoinHostPort(literal, "443"))
+			if conn != nil {
+				conn.Close()
+				t.Fatal("canceled context opened a connection")
+			}
+			if err == nil || err.Error() != "delivery connection failed" {
+				t.Fatalf("production resolver did not reach canceled dial: %v", err)
+			}
+		})
+	}
+}
+
+func TestProductionResolverNonTailnetAndMixedAnswers(t *testing.T) {
+	for _, literal := range []string{"8.8.8.8", "10.0.0.1", "127.0.0.1", "169.254.169.254", "::1", "fd00::1", "::ffff:8.8.8.8", "100.63.255.255", "100.128.0.0", "fd7a:115c:a1e1::1"} {
+		t.Run(literal, func(t *testing.T) {
+			addresses, err := lookupDeliveryIP(t.Context(), "ip", literal)
+			if err != nil || len(addresses) == 0 {
+				t.Fatalf("literal resolution: addresses=%v err=%v", addresses, err)
+			}
+			for _, addr := range addresses {
+				if tailnetAddress(addr) {
+					t.Fatalf("non-tailnet resolver answer allowed: %v", addresses)
+				}
+			}
+		})
+	}
+	for _, literal := range []string{"::ffff:100.64.0.9", "::ffff:8.8.8.8"} {
+		target := "https://[" + literal + "]/hook"
+		sub := receiverSubscription(t, "webhook", target, []byte("synthetic-key"))
+		if _, err := NewSender([]Subscription{sub}, []string{target}); err == nil {
+			t.Fatalf("mapped literal URL accepted: %s", literal)
+		}
+	}
+	// Compose actual resolver output from deterministic literal lookups. The
+	// complete-answer check must retain and reject the forbidden sibling.
+	sub := receiverSubscription(t, "webhook", "https://receiver.example.invalid/hook", []byte("synthetic-key"))
+	dials := 0
+	sender, err := newSender([]Subscription{sub}, []string{sub.Channel.URL}, transportDependencies{
+		lookup: func(ctx context.Context, network, _ string) ([]netip.Addr, error) {
+			var answers []netip.Addr
+			for _, literal := range []string{"100.64.0.9", "8.8.8.8"} {
+				resolved, err := lookupDeliveryIP(ctx, network, literal)
+				if err != nil {
+					return nil, err
+				}
+				answers = append(answers, resolved...)
+			}
+			return answers, nil
+		},
+		allowed: tailnetAddress,
+		dial: func(context.Context, string, string) (net.Conn, error) {
+			dials++
+			return nil, errors.New("must not dial mixed answers")
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := sender.Send(t.Context(), sub.ID, "test-hook:1", Message{}, time.Now())
+	if dials != 0 || result.Error == nil || result.HTTPStatus != nil {
+		t.Fatalf("mixed resolver answer reached dial: dials=%d result=%#v", dials, result)
+	}
+	for _, addr := range []netip.Addr{{}, netip.MustParseAddr("fd7a:115c:a1e0::9%test"), netip.MustParseAddr("::ffff:100.64.0.9%test")} {
+		if tailnetAddress(addr) {
+			t.Fatalf("invalid or zoned address accepted: %v", addr)
+		}
+	}
+}
+
 func TestDNSPinningFreshResolutionAndTLSVerification(t *testing.T) {
 	var received atomic.Int64
 	receiver := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { received.Add(1); w.WriteHeader(204) }))

@@ -48,11 +48,23 @@ func tailnetAddress(addr netip.Addr) bool {
 	return addr.IsValid() && addr.Zone() == "" && !addr.Is4In6() && (tailnet4.Contains(addr) || tailnet6.Contains(addr))
 }
 
+func lookupDeliveryIP(ctx context.Context, network, host string) ([]netip.Addr, error) {
+	addresses, err := net.DefaultResolver.LookupNetIP(ctx, network, host)
+	// LookupNetIP can represent IPv4 as mapped IPv6. Canonicalize only the
+	// resolver boundary; preserve zones so address validation still rejects them.
+	for i, addr := range addresses {
+		if addr.Zone() == "" {
+			addresses[i] = addr.Unmap()
+		}
+	}
+	return addresses, err
+}
+
 // NewSender validates the complete candidate and loads all credential files
 // before returning. It never uses environment proxies or follows redirects.
 func NewSender(subscriptions []Subscription, allowlist []string) (*Sender, error) {
 	dialer := &net.Dialer{Timeout: 10 * time.Second}
-	return newSender(subscriptions, allowlist, transportDependencies{lookup: net.DefaultResolver.LookupNetIP, dial: dialer.DialContext, allowed: tailnetAddress})
+	return newSender(subscriptions, allowlist, transportDependencies{lookup: lookupDeliveryIP, dial: dialer.DialContext, allowed: tailnetAddress})
 }
 
 // NewLocalTestSender is only for synthetic integration-test receivers. It pins

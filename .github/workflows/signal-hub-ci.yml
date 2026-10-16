@@ -63,6 +63,7 @@ jobs:
           /tmp/signalhub-contracts/bin/python scripts/test_check_sources.py
           /tmp/signalhub-contracts/bin/python scripts/check_sources.py
           python3 scripts/test_check_deployment.py
+          python3 -m unittest discover -s deployment/docker-test -p 'test_*.py' -v
           python3 scripts/check_deployment.py
           /tmp/signalhub-contracts/bin/python -c "import sys; sys.path.insert(0, 'contracts'); import check; check.validate('config', check.loads(open('deployment/config.example.json').read()))"
           sh -n deployment/launch.sh

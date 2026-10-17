@@ -1,10 +1,8 @@
 # Issue-task contract — bounded phase 1 and phase 2
 
-This contract applies only to the `tools/codex-usage` pilot in this public repository.
-Other components retain their existing tracking rules. The published private-ledger `doing` claim,
-Scope/`touches`, and `Desk-Task: T-####` commit trailer remain mandatory during the pilot.
-The root orchestrator assigns work serially; an assignee or draft PR is not an exclusive lock.
-Phase 2 adds explicitly invoked manual dispatch and receipt gates below; later migrations remain out of scope.
+> **認領規則已被取代。** 唯一依據：https://github.com/fallrising/desk 的 docs/operating-method.md。
+
+本檔仍只描述 [`tools/codex-usage`](../../tools/codex-usage/) 的 issue、task、report 怎麼放。doing claim、Scope／`touches` 與 phase 2 認領不再作為認領依據。
 
 ## Identity and files
 
@@ -17,8 +15,8 @@ number must match that issue. Do not maintain a second lifecycle status in these
 Use the [task](task-template.md) and [report](report-template.md) templates. The task records outcome,
 reason, exact inputs, bounded writable scope, exclusions, acceptance criteria, verification,
 budget/checkpoint, stop conditions, and explicit action authority. Missing authority is not permission.
-Workers still receive bounded `.team/tasks/T-###.md` assignments; those IDs do not replace issue identity
-or the private-ledger task. The orchestrator owns routing, review, and acceptance of worker output.
+Workers still receive bounded `.team/tasks/T-###.md` assignments; those IDs do not replace issue identity.
+The orchestrator owns routing, review, and acceptance of worker output.
 
 ## Lifecycle derived from GitHub
 
@@ -44,7 +42,7 @@ PR descriptions use `Refs #N` in the same repository (or `Refs owner/repository#
 Never use automatic closing keywords `Closes`, `Fixes`, or `Resolves` for tracked issues.
 The PR links the task and report; the issue links the PR. Merge does not close the issue.
 Owner decision requests use `needs-owner` and decision comments; record the final decision summary
-and its comment link in the component task. Re-check private-ledger instructions before an authorized commit.
+and its comment link in the component task. 認領見檔首。
 
 ## Labels and requests
 
@@ -63,38 +61,20 @@ The [request form](../../.github/ISSUE_TEMPLATE/task-request.yml) collects summa
 Selecting a component does **not** apply its project label. The manifest/form include indexed components
 for routing, but do not enroll them in the pilot. Paths are authoritative; display text may change.
 Non-pilot issues are intake only: do not mark them `ready` under this contract or start issue-only work.
-They continue through the existing private-ledger workflow until a separately authorized cutover; intake grants
-no work authorization.
+本契約不另給開工授權。認領見檔首。
 
 ## Phase 2 manual dispatch and claims
 
-Manual intake remains limited to the existing pilot and uses the approved dispatcher through a private
-control location. Compare concrete issue/task outcomes before recording new, duplicate, split, or needs-owner
-decisions. Public decisions contain sanitized reasons and abstract private-config/evidence references only;
-do not copy private control policy, receipts, content, names, paths, links, or account details here.
-
-Before every authorized triage metadata write, the orchestrator inspects a held singleton receipt and
-matches its exact current head and claim ID. Historical receipts do not grant current authority. Before
-product edits, require an eligible issue claim receipt plus the independently published private-ledger
-doing claim, bounded scope and explicit action authority. Ready, assignment and draft PR alone do not lock
-work. Eligibility excludes blocked/needs-owner/duplicate, assignees, component mismatch and open/merged linked
-PRs. Canonical issue identities prevent case-alias claims; control storage must be private before writes.
-
-Issue/PR checks and control updates are not a cross-resource transaction. Honor owner changes and re-check
-snapshots at work checkpoints; the protocol coordinates cooperating callers, not malicious shared-credential
-actors. Release only a held generation with matching claim ID and expected head; no force/delete, takeover,
-automatic expiry, retry of uncertain mutations, daemon or scheduler. Denied/unknown outcomes grant no work.
-Integration evidence and owner fixture judgment are separate acceptance gates. Existing enrollment,
-Desk-Task trailers, Refs links and owner-only closure remain in force. No phase 3 migration, broader enrollment
-or deployment follows from phase 2.
+認領規則已被取代。唯一依據：https://github.com/fallrising/desk 的 docs/operating-method.md。
+本節不再規定 dispatcher、claim receipt 或 doing claim。
 
 ## Public information boundary
 
 Sanitize repository files, issue bodies/comments, PR descriptions/comments, commits, and evidence before publishing.
-Never copy private-ledger contents or links, private repository names/paths, personal filesystem paths,
-host names, IP addresses, domains, accounts, or credentials. Use abstract private-config location names only.
-The task records an abstract authorization reference confirming the published claim and scope; keep its
-private source and detailed coordination reports outside this public repository. Public evidence must be
+Never copy private task contents or links, personal filesystem paths,
+host names, IP addresses, domains, accounts, or credentials. The public pointer to
+`fallrising/desk` `docs/operating-method.md` is the allowed repository reference.
+Keep private task contents and coordination reports outside this public repository. Public evidence must be
 safe to share; identify restricted evidence abstractly rather than linking it. Privacy review is required
 for requests and reports as well as code changes.
 
@@ -110,10 +90,9 @@ Before publishing, the orchestrator checks:
 1. Issue URL/number, component, directory name, and task/report/PR backlinks agree; local links resolve.
 2. Task scope, authority, budget, stop conditions, DoD, and runnable checks are concrete; report evidence supports its result.
 3. Form required fields/options agree with the manifest; label names are unique and mapped to real indexed paths.
-4. `Refs` syntax cannot auto-close the issue; private-ledger claim/trailer and serial assignment remain in force.
+4. `Refs` syntax cannot auto-close the issue.
 5. Files, issues, PRs, commits, and evidence obey the public information boundary.
 6. Changed paths match scope; `git diff --check` and JSON parsing pass; the owner acceptance gate remains open.
 
-These are manual contract checks. Phase 2 adds bounded explicit coordination through the dispatcher;
-no new workflow, runtime dependency, automatic status ledger, or history migration is introduced.
+These are manual contract checks for the pilot files. 認領規則已被取代，見檔首。
 Later planning and migration phases require separate authorization.

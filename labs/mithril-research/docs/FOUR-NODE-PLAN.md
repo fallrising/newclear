@@ -4,7 +4,7 @@
 
 2026-10-17 P1c 補充：[offline bootstrap tools](P1-BOOTSTRAP.md) 可驗證 synthetic／operator-supplied snapshots 及產生四階段提案，未執行任何實機階段，也不替代以下健康與批准門檻。
 
-2026-10-17 P1d 補充：[獨立唯讀 collector](P1-COLLECTOR.md) 以 mock SSH/runtime 驗證完整回應與身份綁定；不代表 authenticated live collection、freshness 或 phase admission 已通過。Phase-aware validator 留後續獨立段落。
+2026-10-17 P1d 補充：[獨立唯讀 collector](P1-COLLECTOR.md) 以 mock SSH/runtime 驗證完整回應與身份綁定；不代表 authenticated live collection、freshness 或 phase admission 已通過。P1e 的 [獨立離線 validator](P1-PHASE.md) 已另定五個 snapshot predicates；實機 phase-aware validation／execution 仍缺。
 
 版本：0.1；日期：2026-09-27；狀態：**文件設計完成，尚未部署或驗收**。
 

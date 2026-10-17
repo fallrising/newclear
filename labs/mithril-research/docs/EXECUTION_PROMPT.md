@@ -4,7 +4,7 @@
 
 P1c 另提供 [離線 bootstrap planner](P1-BOOTSTRAP.md)，只驗證匯入的六節點觀察並產生 conditional proposal；未提供 collector／phase executor，完整 startup 與實機驗收仍缺。
 
-P1d [唯讀 collector](P1-COLLECTOR.md) 已另定契約；complete/partial collection 不授權下一階段，也不自動轉成 P1c snapshot。先讀新契約與 mock 證據，phase validator／executor 仍缺。
+P1d [唯讀 collector](P1-COLLECTOR.md) 已另定契約；complete/partial collection 不授權下一階段，也不自動轉成 P1c snapshot。先讀 collector 契約與 mock 證據，再讀 P1e [獨立離線階段驗證](P1-PHASE.md)；phase-aware live validation／executor 仍缺。
 
 本 Prompt 是交接文件，不會因被閱讀就授權任何遠端操作。預設 mode 是 `plan-only`；Owner 明確選擇 `develop-only` 或批准精確實機變更計劃後，才可進入對應工作。文檔合併不是 runtime PASS。
 
@@ -49,6 +49,8 @@ labs/mithril-research/docs/P1-BOOTSTRAP-CONTRACT.md
 labs/mithril-research/docs/P1-BOOTSTRAP.md
 labs/mithril-research/docs/P1-COLLECTOR-CONTRACT.md
 labs/mithril-research/docs/P1-COLLECTOR.md
+labs/mithril-research/docs/P1-PHASE-CONTRACT.md
+labs/mithril-research/docs/P1-PHASE.md
 ```
 
 [四機計劃](FOUR-NODE-PLAN.md) 是目前部署順序；[SDD](SDD.md) 保持需求／測例權威；[STATUS](STATUS.md) 是唯一任務狀態帳。資料衝突先指出並作最小文件修正，不默默改變研究 commit 或驗收口徑。

@@ -89,7 +89,7 @@ credentials 只放私有 runtime 檔案／secret store；報告保留 hash 與�
 
 2026-10-17 工具實作補充：[P1c contract](P1-BOOTSTRAP-CONTRACT.md) 把初始六節點 topology 與 bootstrap proposal 落成離線驗證器；匯入的觀察、node ID map 與 digest 不能建立實機身分、freshness 或操作批准。Startup 執行與 MR-R02 runtime lifecycle 仍待後續驗收。
 
-P1d 補充：[collector contract](P1-COLLECTOR-CONTRACT.md) 定義有界唯讀 acquisition；complete 是完整回應與綁定結果，不是六節點原子 snapshot、健康或操作批准。Phase-aware predicates 的設計見 T-011 D6，實作／執行仍待後續；不改 P1c 只接受 pristine／already-converged 的契約。
+P1d 補充：[collector contract](P1-COLLECTOR-CONTRACT.md) 定義有界唯讀 acquisition；complete 是完整回應與綁定結果，不是六節點原子 snapshot、健康或操作批准。P1e [phase contract](P1-PHASE-CONTRACT.md) 實作獨立純離線五個 barrier predicates，只驗證原始 complete collection；phase-aware live validation／execution 仍待後續，不改 P1c 只接受 pristine／already-converged 的契約。
 
 M0：來源鎖定、研究、設計與證據邊界（本次）。
 

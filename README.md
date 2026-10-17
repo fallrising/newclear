@@ -97,6 +97,7 @@ fixture judgment remain separate. Production enrollment is unchanged; later migr
 | [`labs/zircon-godot`](labs/zircon-godot/) | 傳奇 3 Godot/C# fork 的固定版本研究、SDD 與分階段學習實驗（runtime 未驗證） | A |
 | [`labs/pg-jev-router`](labs/pg-jev-router/) | pg-jev 輸入判斷、攔截與模型分流實驗；真 extension + 合成 provider | A |
 | [`labs/browser-fingerprint`](labs/browser-fingerprint/) | Go mock CRUD 與瀏覽器設備／操作觀測，支援私人 Quick Tunnel | 未分級 |
+| [`labs/m4-seat`](labs/m4-seat/) | M4 Max 48GB MacBook Pro 的單人推論座位方案；無 runtime | 未分級 |
 
 ### 外部參考
 

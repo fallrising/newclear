@@ -1,3 +1,15 @@
+# Current M6 personal-use scope reduction
+
+The2026-10-17 owner-approved scope supersedes the original all-or-nothing live gate below. Current acceptance is [SDD06](../docs/sdd/06-security-operations-acceptance.md): one useful source, one non-root persistent instance and usable backup. Reuse existing functional evidence; defer phone, independent-host notification, three-source seven-day observation and previous-calendar-day snapshot constraints. Docker is an allowed personal design path without requiring OneFleet generic-adapter work. No deployment or new runtime feature is part of this document change.
+
+Root owns the coherent documentation change and verification. A bounded independent native audit checks code-backed development gaps; a fresh independent reviewer checks the final diff, safety/integrity preservation, claims and links. Exact previously evidenced native routes remain gpt-6.1-sol/high and gpt-6-astra/high; no recursive delegation or new provider setup. Quota/cost and unobserved provider totals remain unknown.
+
+Verification: relevant existing offline contracts/source/deployment validators, shell syntax, document links and diff scope, independent review, required CI, normal PR merge and postmerge readback. No repeat remote Docker campaign. The old expanded checker stays strict and optional. STATUS lists the actual remaining packaging/source hookup and deferred self-observation gap; a static audit is not new runtime verification. Publication and actual personal deployment remain distinct.
+
+## Historical preparation and Docker plan
+
+The following records retain their original context, including unsuccessful checks and then-pending original live gates. They are not the current first-use checklist.
+
 # M6 preparation delivery plan
 
 Objective: prepare three real-source integrations, the OneFleet deployment acceptance pack, external liveness design, recovery runbooks and reproducible isolated synthetic verification. Real deployment and the full seven-day/outage/phone/yesterday-snapshot acceptance remain separate and incomplete.

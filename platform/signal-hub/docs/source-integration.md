@@ -1,6 +1,6 @@
-# Three-source integration preparation
+# Source integration — start with one useful producer
 
-These synthetic captures prepare source admission. They do not enroll a producer, start a deployment, contact a notification account or establish seven-day operation. The [M6 design](m6-design.md) owns acceptance; [runtime](runtime.md) and existing contracts own API behavior.
+These synthetic captures prepare source admission. They do not enroll a producer, start a deployment, contact a notification account or establish seven-day operation. Current acceptance is [SDD06 personal use](sdd/06-security-operations-acceptance.md); [runtime](runtime.md) and existing contracts own API behavior. Start with one producer that reports actual work. Docker and Python are valid execution choices; synthetic events test the protocol but do not establish a real source integration. Add other sources only when useful.
 
 | Configured name | Source prefix | Allowed types | Example payload |
 | --- | --- | --- | --- |
@@ -62,7 +62,7 @@ python scripts/check_sources.py
 python scripts/check_sources.py /path/to/private/captures
 ```
 
-Every directory requires `config.json`, `release.json`, `inspection.json`, `alertmanager-firing.json` and `alertmanager-resolved.json`. Additional JSON files use `release-*.json`, `inspection-*.json` or `alertmanager-*.json` for repeated captures. Filename family states which configured producer credential would be used; payload URI alone cannot establish attribution. Unknown JSON filenames fail instead of being silently ignored. Files are compared in sorted filename order; the tool establishes equality/conflict, not chronological order or a baseline database state.
+This checker validates the existing three-source reference pack, not a mandatory enrollment form for one source. A first single-source integration can use the [quickstart ingest/query flow](quickstart.md) with its own runtime-validated source config and captured responses; do not invent two extra sources to satisfy this tool. For the three-source checker, every directory requires `config.json`, `release.json`, `inspection.json`, `alertmanager-firing.json` and `alertmanager-resolved.json`. Additional JSON files use `release-*.json`, `inspection-*.json` or `alertmanager-*.json` for repeated captures. Filename family states which configured producer credential would be used; payload URI alone cannot establish attribution. Unknown JSON filenames fail instead of being silently ignored. Files are compared in sorted filename order; the tool establishes equality/conflict, not chronological order or a baseline database state.
 
 Optional receipt files use the same family and end in `.response.json`, for example `alertmanager-firing.response.json`:
 
@@ -86,6 +86,6 @@ The tool reuses `contracts/check.py` strict JSON parsing, JCS and schema checks,
 
 Freshness belongs to the authenticated configured source name and successful receipt time. Identical authorized duplicates refresh it, while conflict/invalid/forbidden requests do not. A duplicate proves receipt of old content, not a new release or inspection. Empty Alertmanager alerts create no attributed delivery and cannot refresh freshness. The tool warns on empty batches; the existing OpenAPI description calling them a heartbeat is not evidence of runtime freshness.
 
-Inspection's synthetic expected interval is1h. Release and Alertmanager omit it because they may be naturally quiet: age checks are disabled, but an unseen source remains never. Before live enrollment define an approved genuine reporting cadence or an independent heartbeat/watchdog policy, with allowed types and expected interval reviewed together. Silence starts strictly after twice the interval, not at the exact boundary. Do not fabricate events or treat repeated payloads as seven days of new activity.
+Inspection's synthetic expected interval is1h. Release and Alertmanager omit it because they may be naturally quiet: age checks are disabled, but an unseen source remains never. When a source actually reports periodically, configure its genuine cadence and allowed types together. Leave freshness disabled for naturally irregular sources; no heartbeat/watchdog is required just for enrollment. Silence starts strictly after twice the interval, not at the exact boundary. Do not fabricate events or treat repeated payloads as seven days of new activity.
 
-Live acceptance stays pending: all three actual sources observed continuously for seven days with gap/new-event/duplicate records and no unexpected409; an authorized real producer outage produces silent plus phone receipt; an authorized hub outage reaches an independent notifier within five minutes; and yesterday's real snapshot restores in an approved isolated environment. Offline captures and synthetic service tests satisfy preparation only.
+Current personal acceptance checks the one selected source and actual instance under [SDD06](sdd/06-security-operations-acceptance.md). The original three-source/seven-day/phone/independent-outage/previous-day-restore criteria remain unverified optional expanded checks. Offline captures and synthetic tests retain their functional value, but do not prove actual enrollment or operation.

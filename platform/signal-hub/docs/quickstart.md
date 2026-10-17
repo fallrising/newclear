@@ -252,4 +252,4 @@ python3 scripts/check_deployment.py
 
 HTTP 演練從 `examples/sources/` 讀取三來源範例，在本輪新建目錄產生合成憑證、設定與 SQLite；檢查原 seq、重送／衝突、來源權限、Alertmanager member 狀態、真實經過四秒以上的沉默／恢復，以及一致快照還原到新路徑。結束只清理這次自建的合成目錄。沒有真實通知、外部 monitor 或七天觀測；新產生的快照也不是前一天的真實快照。M5 的 archive／queue／lease／DLQ 恢復回歸仍須另外執行。
 
-完整 [來源接入說明](source-integration.md) 與 [部署／還原驗收包](deployment-acceptance.md) 列出尚待核准的具體操作；不要把範例設定或離線 checker 通過當成部署授權。
+個人使用先依 [目前驗收](sdd/06-security-operations-acceptance.md) 接一個有用來源；[來源接入說明](source-integration.md) 保留錯誤與重試處理。[擴展部署／還原包](deployment-acceptance.md) 及其三來源／七天 checker 為選用，不必為首次使用填齊。不要把範例設定或離線 checker 通過當成部署授權。

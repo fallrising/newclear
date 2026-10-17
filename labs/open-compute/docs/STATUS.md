@@ -66,6 +66,14 @@ startup after shared daemon health; a bounded exact-identity readiness gate and
 sanitized failed-owner diagnostics were added and reviewed. The initial generic
 bootstrap error does not identify its exact underlying cause.
 
+A later [integrated-main validation](https://github.com/fallrising/newclear/actions/runs/39048597519)
+failed M4 at `cold_after_writes`: its unchanged process observer reported a
+parent-edge change during shutdown. Exit 0 and no forced kill did not prove all
+owned generations exited, so that cold observation and cleanup were refused.
+The failed report is preserved. The generic observation error does not establish
+its underlying cause or imply data loss. Historical guards remain unchanged;
+this uncertainty is a limitation to investigate before sustained host use.
+
 This is a finite CI rehearsal of the same foreground commands available to a
 human operator. It does not install a machine, account, system service, resource
 quota or detached daemon. The lease bound (default one hour, maximum 24 hours)

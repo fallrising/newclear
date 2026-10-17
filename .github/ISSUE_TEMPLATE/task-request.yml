@@ -4,10 +4,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Intake is not work authorization. Phase 1 enrolls only tools/codex-usage.
-        Existing private-ledger claims and Desk-Task trailers remain mandatory. Other components retain the private-ledger workflow.
+        One issue is one piece of work, delivered by one pull request; no private-ledger task or commit trailer is needed.
         This repository is public: omit private content/links, names/paths, hosts/IPs, domains, accounts, and credentials.
-        Use abstract private authorization references only.
         Component selection does not apply a project label; the orchestrator triages manually.
         After routing, link the component task directory in this issue. The issue stays open until owner acceptance.
   - type: input

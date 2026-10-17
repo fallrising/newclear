@@ -2,7 +2,6 @@
 
 Issue: <full repository issue URL>
 Component: <repository-relative component path>
-Private-ledger authorization: <abstract reference confirming published doing claim and approved scope; no private ID, content, or link>
 Task directory: <component>/tasks/<issue-number>-<slug>/
 
 Outcome: <observable result>

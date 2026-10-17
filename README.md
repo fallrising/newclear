@@ -17,27 +17,18 @@
 
 **文檔深度跟檔位走，不跟「有沒有目錄」走。** 只有 A 檔需要 `docs/quickstart.md`；C/D 禁止新開 tutorial。
 
-**Commit trailer：** 2026-09-28 起，開發工作先在私人項目帳本開任務，每個 commit 帶 `Desk-Task: T-####` trailer；
-依賴更新 bot、mirror 與 owner 標記的 hotfix（帶 `Desk-Exempt: <原因>`）例外。沒有 trailer 的 commit 會在定期稽核中被列出。
+**工作追蹤：** 一件工作 = 一個 GitHub issue = 一個 PR。不再需要先在私人帳本開任務，commit 也不必帶 `Desk-Task` trailer
+（歷史 commit 不動）。規則見 [docs/work-tracking](docs/work-tracking/README.md)：
 
-### Phase 1 issue-task pilot
-
-The public pilot is limited to [`tools/codex-usage`](tools/codex-usage/).
-[The contract](docs/work-tracking/README.md) keeps detailed tasks and reports beside the component, with a GitHub
-issue as their identity and queue. Existing private-ledger claims and `Desk-Task: T-####` trailers remain mandatory;
-the root orchestrator assigns pilot work serially. Assignees and draft PRs are visibility, not exclusive locks.
-Use `Refs #N`; merging delivers the change, and the issue stays open until the owner accepts and closes it.
+- 先有 issue（用 [request form](.github/ISSUE_TEMPLATE/task-request.yml) 開）；自己指派並盡早開 draft PR 作為認領。
+- 詳細需求、證據與交付報告放在 `<component>/tasks/<issue-number>-<slug>/task.md`、`report.md`，與程式碼同一個 PR。
+- PR 用 `Refs #N`，不用 `Closes`；合併代表交付，owner 驗收後才關閉 issue。
+- 本 repo 是公開的：issue、PR、檔案與證據不得放私有內容、主機名稱、路徑或帳號。
 
 Start with the [task template](docs/work-tracking/task-template.md),
 [report template](docs/work-tracking/report-template.md), and [request form](.github/ISSUE_TEMPLATE/task-request.yml).
 The [versioned label manifest](docs/work-tracking/labels.json) describes manual triage; a form's component selection
-does not apply its project label or mark it ready. Sanitize public issues, PRs, files, and evidence; private
-authorization is recorded only through abstract references. See the contract's manual validation checklist.
-Phase 2 extends the existing pilot with explicitly invoked manual dispatch and validated private control
-receipts; see [the bounded receipt gates](docs/work-tracking/README.md#phase-2-manual-dispatch-and-claims).
-Singleton and issue receipts supplement published tracking authority; assignment/draft PR are visibility only.
-Owner changes still govern work, and merge still awaits owner acceptance. Integration evidence and owner
-fixture judgment remain separate. Production enrollment is unchanged; later migration phases remain out of scope.
+does not apply its project label or mark it ready.
 
 ## 目錄
 

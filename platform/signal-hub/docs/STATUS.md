@@ -37,7 +37,7 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 
 ## 個人 Docker 啟動包驗證
 
-新增 Dockerfile、Compose、私人初始化器與包裝測試。本機8項初始化回歸與固定 digest 的實際映像建置通過；映像內含 CA 與 IANA 時區資料。Linux host network 預設僅綁 loopback，非 root、唯讀 rootfs／設定與憑證；DB 及備份分開持久掛載。啟用既有啟動／每24小時備份，不預設封存或刪除。專屬 CI 的 `docker-package` job 使用交付的 Compose 驗證角色隔離、原 seq 去重、容器重建持久化、自動／手動快照與 network-none 還原／啟動，再停止還原副本並唯讀查詢 SQLite；結果以該變更的 CI 為準。本機未安裝 Compose，未將本機映像 build 冒充容器生命週期通過。這不代表實際安裝、來源接入或異地備份已驗收。
+新增 Dockerfile、Compose、私人初始化器與包裝測試。本機11項初始化／清理回歸與固定 digest 的實際映像建置通過；映像內含 CA 與 IANA 時區資料。Linux host network 預設僅綁 loopback，非 root、唯讀 rootfs／設定與憑證；DB 及備份分開持久掛載。啟用既有啟動／每24小時備份，不預設封存或刪除。專屬 CI 的 `docker-package` job 使用交付的 Compose 驗證角色隔離、原 seq 去重、容器重建持久化、自動／手動快照與 network-none 還原／啟動，再停止還原副本並唯讀查詢 SQLite；初版[CI39031280023](https://github.com/fallrising/newclear/actions/runs/39031280023)的 Docker job 已通過上述功能檢查。獨立審查另發現 Docker 失聯時清理可能誤報成功，已用 Red/Green 回歸修正為失敗並保留診斷；最終結果以修正版 PR 的 CI 為準。本機未安裝 Compose，未將本機映像 build 冒充容器生命週期通過。這不代表實際安裝、來源接入或異地備份已驗收。
 
 ## M6 Docker 測試續作
 

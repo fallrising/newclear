@@ -21,6 +21,53 @@ COMPOSE = ROOT / "deployment/docker/compose.yaml"
 LABEL = "io.signalhub.instance"
 
 
+def cleanup_containers(command, compose, owned, run_id, evidence, redact):
+    """Remove only verified owned containers; unavailable is not absent."""
+    cleanup_errors = []
+
+    def attempt(arguments):
+        try:
+            return command(arguments, check=False)
+        except (OSError, subprocess.TimeoutExpired):
+            cleanup_errors.append("cleanup command unavailable or timed out")
+            return None
+
+    found = attempt(compose + ["ps", "--all", "--quiet"])
+    if found is None or found.returncode:
+        cleanup_errors.append("could not discover this smoke project's containers")
+    candidates = set(found.stdout.split() if found and not found.returncode else []) | {run_id + "-restore", run_id + "-query"} | owned
+    for candidate in candidates:
+        result = attempt(["docker", "inspect", candidate])
+        if result is None:
+            continue
+        if result.returncode:
+            absent = {"Error: No such object: " + candidate, "Error response from daemon: No such container: " + candidate}
+            if result.stderr.strip() not in absent:
+                cleanup_errors.append("could not verify a smoke container's existence")
+            continue
+        try:
+            info = json.loads(result.stdout)[0]
+            identifier = info["Id"]
+            labels = info["Config"].get("Labels") or {}
+        except (ValueError, KeyError, IndexError, TypeError):
+            cleanup_errors.append("invalid container inspection response")
+            continue
+        if labels.get(LABEL) != run_id:
+            cleanup_errors.append("refused container without this run label")
+            continue
+        logs = attempt(["docker", "logs", identifier])
+        if logs is None or logs.returncode:
+            cleanup_errors.append("could not preserve smoke container logs")
+        else:
+            (evidence / (identifier[:12] + ".log")).write_text(redact(logs.stdout + logs.stderr))
+        removed = attempt(["docker", "rm", "--force", identifier])
+        if removed is None or removed.returncode:
+            cleanup_errors.append("exact smoke container removal failed")
+    (evidence / "cleanup.json").write_text(json.dumps({"status": "failed" if cleanup_errors else "passed", "errors": cleanup_errors}, indent=2) + "\n")
+    if cleanup_errors:
+        raise RuntimeError("smoke cleanup incomplete; inspect evidence/cleanup.json")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--image", required=True, help="prebuilt local image tag or digest; never pulls or builds")
@@ -191,32 +238,17 @@ def main():
         assert before == (digest(snapshot), digest(manifest_path)), "original backup pair changed"
         steps.append("startup snapshot; manual consistent backup pair; network-none restore/startup with new credentials and no subscriptions; stopped copy queried via read-only SQLite; original pair preserved")
         (evidence / "result.json").write_text(json.dumps({"status": "passed", "checks": steps, "seq": first["seq"], "snapshot_sha256": before[0]}, indent=2) + "\n")
-        print("PASS: Compose auth, recreation persistence, startup/manual backup and isolated restore/SQLite query; sanitized evidence retained in state-dir/evidence")
+
     except BaseException as error:
         (evidence / "result.json").write_text(json.dumps({"status": "failed", "checks_passed": steps, "error": redact(str(error))}, indent=2) + "\n")
         raise
     finally:
-        # Discover only this unpredictable project/name, then require our label.
-        found = command(compose + ["ps", "--all", "--quiet"], check=False)
-        candidates = set(found.stdout.split()) | {run_id + "-restore", run_id + "-query"} | owned
-        cleanup_errors = []
-        for candidate in candidates:
-            result = command(["docker", "inspect", candidate], check=False)
-            if result.returncode:
-                continue
-            info = json.loads(result.stdout)[0]
-            if info["Config"]["Labels"].get(LABEL) != run_id:
-                cleanup_errors.append("refused container without this run label")
-                continue
-            identifier = info["Id"]
-            logs = command(["docker", "logs", identifier], check=False)
-            (evidence / (identifier[:12] + ".log")).write_text(redact(logs.stdout + logs.stderr))
-            removed = command(["docker", "rm", "--force", identifier], check=False)
-            if removed.returncode:
-                cleanup_errors.append("exact smoke container removal failed")
-        (evidence / "cleanup.json").write_text(json.dumps({"status": "failed" if cleanup_errors else "passed", "errors": cleanup_errors}, indent=2) + "\n")
-        if cleanup_errors:
-            raise RuntimeError("smoke cleanup incomplete; inspect evidence/cleanup.json")
+        try:
+            cleanup_containers(command, compose, owned, run_id, evidence, redact)
+        except RuntimeError:
+            (evidence / "result.json").write_text(json.dumps({"status": "failed", "checks_passed": steps, "error": "smoke cleanup incomplete; inspect cleanup.json"}, indent=2) + "\n")
+            raise
+    print("PASS: Compose auth, recreation persistence, startup/manual backup and isolated restore/SQLite query; sanitized evidence retained in state-dir/evidence")
 
 
 if __name__ == "__main__":

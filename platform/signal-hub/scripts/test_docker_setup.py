@@ -104,5 +104,56 @@ class SetupTests(unittest.TestCase):
         self.assertNotEqual(again.returncode, 0)
 
 
+class CleanupTests(unittest.TestCase):
+    def test_daemon_outage_is_not_successful_cleanup(self):
+        from e2e_docker import cleanup_containers
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            def unavailable(arguments, check=True):
+                return SimpleNamespace(returncode=1, stdout="", stderr="Cannot connect to the Docker daemon")
+            with self.assertRaises(RuntimeError):
+                cleanup_containers(unavailable, ["docker", "compose"], {"known-owned-container"}, "synthetic-run", evidence, lambda value: value)
+            result = json.loads((evidence / "cleanup.json").read_text())
+            self.assertEqual(result["status"], "failed")
+            self.assertTrue(result["errors"])
+
+    def test_confirmed_absence_succeeds_but_foreign_container_is_untouched(self):
+        from e2e_docker import cleanup_containers
+        from types import SimpleNamespace
+        for foreign in (False, True):
+            calls = []
+            with self.subTest(foreign=foreign), tempfile.TemporaryDirectory() as directory:
+                evidence = Path(directory)
+                def command(arguments, check=True):
+                    calls.append(arguments)
+                    if "ps" in arguments:
+                        return SimpleNamespace(returncode=0, stdout="foreign-id" if foreign else "", stderr="")
+                    self.assertEqual(arguments[:2], ["docker", "inspect"])
+                    if arguments[-1] == "foreign-id":
+                        return SimpleNamespace(returncode=0, stdout=json.dumps([{"Id": "foreign-id", "Config": {"Labels": None}}]), stderr="")
+                    return SimpleNamespace(returncode=1, stdout="[]", stderr="Error: No such object: " + arguments[-1])
+                if foreign:
+                    with self.assertRaises(RuntimeError):
+                        cleanup_containers(command, ["docker", "compose"], set(), "synthetic-run", evidence, lambda value: value)
+                else:
+                    cleanup_containers(command, ["docker", "compose"], set(), "synthetic-run", evidence, lambda value: value)
+                self.assertFalse(any("rm" in call for call in calls))
+                self.assertEqual(json.loads((evidence / "cleanup.json").read_text())["status"], "failed" if foreign else "passed")
+
+    def test_timeout_records_failure_and_keeps_checking_owned_ids(self):
+        from e2e_docker import cleanup_containers
+        calls = []
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            def timeout(arguments, check=True):
+                calls.append(arguments)
+                raise subprocess.TimeoutExpired(arguments, 90)
+            with self.assertRaises(RuntimeError):
+                cleanup_containers(timeout, ["docker", "compose"], {"known-owned"}, "synthetic-run", evidence, lambda value: value)
+            self.assertIn(["docker", "inspect", "known-owned"], calls)
+            self.assertEqual(json.loads((evidence / "cleanup.json").read_text())["status"], "failed")
+
+
 if __name__ == "__main__":
     unittest.main()

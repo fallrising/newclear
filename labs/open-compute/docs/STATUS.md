@@ -2,6 +2,94 @@
 
 Updated: 2026-10-17 (operator date; CI timestamps below use UTC).
 
+## M7 result
+
+**Passed on the original open-compute v0.2.4 release.** A fresh non-root Linux
+runner exercised the retained manual path using separate owner/client processes.
+Initialization deployed the original Worker/D1/Workflow and stopped with its data
+retained. Repeated initialization refused without changing the manifest.
+
+Three subsequent foreground owners served finite commands. Duplicate submissions
+returned the same single D1 row; conflicting payload input was rejected unchanged.
+The first owner created the original waiting Workflow and stopped. The second
+verified the original deployment, row, Workflow and nonce before approval; the
+third read back completed state after another stop/start. All three stops recorded
+SIGTERM, exit 0, no force and all observed owned generations exited. State existed
+after each stop. Only explicit cold destroy removed the exact owned runtime scope;
+the private state directory remained. M7-01 through M7-05 passed, with the fixed
+20 command responses (including the two expected refusals), three distinct daemon
+generations and three clean stop receipts.
+
+The [M7 contract](SDD-M7.md), [operator steps](quickstart.md#9-operate-a-retained-manual-trial-m7)
+and original [sanitized report](evidence/2026-10-17-m7-ci.json) describe this result.
+Report SHA256: `e2f06e69e16efcccb324603944eb18263dcea22bb9e8629c9d84f0dceb7ba847`.
+Historical M1–M6 implementations, contracts, fixtures, release pin and reports
+remain unchanged.
+
+### M7 design and execution provenance
+
+| Item | Exact reference |
+| --- | --- |
+| Independently reviewed SDD before code | [`8e81d9ae`](https://github.com/fallrising/newclear/commit/8e81d9ae), path/UTF-16 clarification [`4bc1ce11`](https://github.com/fallrising/newclear/commit/4bc1ce11) |
+| Reviewed implementation and readiness correction | [`9c25b62f`](https://github.com/fallrising/newclear/commit/9c25b62f), [`c4ddd385`](https://github.com/fallrising/newclear/commit/c4ddd385) |
+| Candidate including current main | `4e2d74bf299f72eb55930f2dcb1f7e597d80f43b` |
+| Actual CI checkout | [`edd46382`](https://github.com/fallrising/newclear/commit/edd463825d37b95b6980b5ae56b2d34892073471) |
+| Tested complete Git tree | `bcfa98bda4ca998b83bd4f8309f1ad5ad14b6e96` |
+| Original successful runtime CI | [Run 39030725849](https://github.com/fallrising/newclear/actions/runs/39030725849), [M7 job 117390467939](https://github.com/fallrising/newclear/actions/runs/39030725849/job/117390467939) |
+| M7 runtime step window | 2026-10-17T11:58:53Z through 2026-10-17T12:00:13Z |
+| Environment | Linux x86_64, EUID 1001, Python 3.11.17; Ubuntu 24.04 runner |
+| Original fixture SHA256 | `4618b185c706f1895856a881cd5b7426229931328f7725db7adbbda5fe7c0a37` |
+| Upstream identity | Original v0.2.4/source `73efa56a1b1ad51a4519b2253ffaa499cb29fb2d`; unchanged artifact/SHA256 in [the lock](../upstream.lock.json) |
+
+The actual checkout is GitHub's synthetic merge of main `ffe09f07` and the
+candidate. Its full tree equals the candidate; emitted JSON and all seven report
+artifacts match byte for byte. This checked-in report keeps its original checkout
+attribution. Later documentation commits and validation reports do not become the
+source of this observation.
+
+### M7 verification and limits
+
+Root's full suite and Python 3.11 CI each passed **276 tests, no skips**. All five
+CI jobs and their steps passed, covering original-runtime M1/M2/M3, cold storage
+M4, checkpoint SIGKILL M5, controlled retries M6 and retained manual operation M7.
+Independent reviews covered manifest/protocol, owner/client, integration oracle
+and original evidence. Meaningful regressions cover ownership and path replacement,
+UTF-16 payload bounds, uncertain Workflow mutations, clean-shutdown authority,
+full deployment identity, D1 detail identity, protocol framing, cleanup deadlines
+and retained-instance readiness. Local tests used Python 3.13.5; original-runtime
+and Python 3.11 evidence came from fresh CI, not the authoring account.
+
+The [initial candidate run](https://github.com/fallrising/newclear/actions/runs/39027518316)
+passed M1–M6 but failed before the first retained owner was ready. Its failure
+report remains preserved. Review then found a missing wait for retained-instance
+startup after shared daemon health; a bounded exact-identity readiness gate and
+sanitized failed-owner diagnostics were added and reviewed. The initial generic
+bootstrap error does not identify its exact underlying cause.
+
+A later [integrated-main validation](https://github.com/fallrising/newclear/actions/runs/39048597519)
+failed M4 at `cold_after_writes`: its unchanged process observer reported a
+parent-edge change during shutdown. Exit 0 and no forced kill did not prove all
+owned generations exited, so that cold observation and cleanup were refused.
+The failed report is preserved. The generic observation error does not establish
+its underlying cause or imply data loss. Historical guards remain unchanged;
+this uncertainty is a limitation to investigate before sustained host use.
+
+This is a finite CI rehearsal of the same foreground commands available to a
+human operator. It does not install a machine, account, system service, resource
+quota or detached daemon. The lease bound (default one hour, maximum 24 hours)
+is not soak evidence. Use a fresh approved account with its real passwd home;
+changing HOME cannot relocate the runtime. Stop retains data; dirty/unknown state
+refuses resume or destruction and has no automatic orphan recovery.
+
+The one Workflow per trial retains the original five-minute wait: resume/approve
+must satisfy the same-boot clock checks within 270 seconds of creation. This does
+not establish overnight waits or machine-reboot recovery. Host installation still
+needs a concrete target, account/path, network exposure, data, resource and rollback
+scope. Network loss, disk-full, concurrent submissions and long-running behavior
+remain future tests. No production adoption, hostile-code isolation, power-loss,
+capacity or external exactly-once claim follows; M4 cold endpoint differences
+still cannot establish per-row costs.
+
 ## M6 result
 
 **Passed on the original open-compute v0.2.4 release.** A fresh non-root Linux

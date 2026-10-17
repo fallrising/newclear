@@ -306,9 +306,105 @@ prove external exactly-once behavior, crash safety, future execution absence,
 retry timing, throughput, concurrency or production readiness. Actual execution
 and precise source/report provenance are linked from STATUS.
 
-## Cleanup and a failed run
+## 9. Operate a retained manual trial (M7)
 
-Normal completion stops all owned processes and removes only the scope created
+This separate [M7 contract](SDD-M7.md) supports a foreground owner and finite
+commands in another terminal. It does not install an account, machine, service,
+boot hook or resource quota. Obtain host-specific permission before using a test
+machine. Use a fresh disposable real non-root Linux x64 account whose passwd
+home has no `.open-compute`. The M1–M6 integration runners must never be pointed
+at this retained account: their cleanup contract is different.
+
+Choose short absolute private paths below that account's actual passwd home;
+replace `/home/trial-user` with that home in every command. Parent directories
+must already exist, be owned and not group/world writable; no symlink ancestry.
+The `state/control.sock` pathname must fit within 100 UTF-8 bytes. State and
+cache must be separate and outside `.open-compute`. Changing HOME is insufficient.
+From the repository root, initialize once:
+
+```sh
+python3 labs/open-compute/trial.py init --state /home/trial-user/oc-state --cache /home/trial-user/oc-cache
+```
+
+Expected: one JSON response with `command: init`, `result: passed`,
+`data.initialized: true`. Initialization verifies the pinned artifact, deploys
+the original trusted Worker/D1/Workflow, stops normally and **retains** its data.
+Repeated init fails without replacing the original manifest or scope.
+
+In terminal A, keep the owner in the foreground:
+
+```sh
+python3 labs/open-compute/trial.py serve --state /home/trial-user/oc-state --seconds 3600
+```
+
+Expected: `command: serve`, `result: passed`, `data.ready: true`; the command
+remains running. It verifies the original deployment before accepting commands.
+The default one-hour lease (maximum 24 hours) is a stop bound, not evidence of
+reliability for that duration. Closing the terminal is not a way to install a
+background service.
+
+In terminal B, perform bounded operations:
+
+```sh
+python3 labs/open-compute/trial.py status --state /home/trial-user/oc-state
+python3 labs/open-compute/trial.py submit --state /home/trial-user/oc-state --id trial-01 --payload synthetic-m7
+python3 labs/open-compute/trial.py submit --state /home/trial-user/oc-state --id trial-01 --payload synthetic-m7
+python3 labs/open-compute/trial.py read --state /home/trial-user/oc-state --id trial-01
+python3 labs/open-compute/trial.py workflow --state /home/trial-user/oc-state --id trial-flow-01 --job-id trial-01
+python3 labs/open-compute/trial.py stop --state /home/trial-user/oc-state
+```
+
+Status requires actual Worker health and original resource IDs. Both submissions
+return the same row with `row_count: 1`; changing the payload under that ID returns
+a failed `conflict` response and leaves the first payload unchanged. Workflow
+returns `waiting`, callback_count 1 and a nonce hash. Stop returns normal
+SIGTERM/exit0/no force/all owned exited; terminal A exits with clean=true.
+The state directory and runtime data remain.
+
+Restart the same serve command in terminal A. In B, use status and read first,
+then approve the **original** Workflow and stop again:
+
+```sh
+python3 labs/open-compute/trial.py status --state /home/trial-user/oc-state
+python3 labs/open-compute/trial.py read --state /home/trial-user/oc-state --id trial-01
+python3 labs/open-compute/trial.py approve --state /home/trial-user/oc-state
+python3 labs/open-compute/trial.py stop --state /home/trial-user/oc-state
+```
+
+Expected: the original row/Workflow IDs and nonce hash survive; approve returns
+complete, callback_count 1 and completed 1. Start a third owner and read again to
+verify the completed state survives another stop/start. There is only one
+Workflow per trial. Complete this sequence within 270 seconds of creating it:
+the fixture's original five-minute timeout is unchanged, with a 30-second
+completion margin. Same-boot monotonic and wall clocks must agree; reboot or
+clock uncertainty refuses pending approval. This is not an overnight wait test.
+
+Stop before retirement. In an authorized disposable environment, this separate
+command removes only the exact cold owned runtime scope:
+
+```sh
+python3 labs/open-compute/trial.py destroy --state /home/trial-user/oc-state
+```
+
+Expected: destroyed=true, `.open-compute` absent; private manifest/state and cache
+remain for diagnosis. Repeated destroy refuses. Do not upload the state manifest,
+keys, configs, database or raw runtime files. A lost response to a write may mean
+the operation committed: inspect status/read; do not automatically retry it.
+
+Dirty or incomplete state, stale sockets, altered ownership, uncertain Workflow
+mutation, forced shutdown or surviving processes fail closed. Retain everything
+and inspect within the approved environment; never edit clean=true, delete a
+marker/socket to bypass admission, or run another init over existing state.
+No automatic orphan recovery is implemented.
+
+For a finite independent rehearsal, use `make -C labs/open-compute integration-trial`
+on a separate fresh non-root account. This runs the above separate-process
+sequence, including duplicate/conflicting inputs and explicit cold disposal.
+CI uploads only its bounded sanitized report; actual results are in STATUS.
+
+## Cleanup after a disposable M1–M6 runner
+
+For the disposable integration runners, normal completion stops all owned processes and removes only the scope created
 by that invocation, after checking its marker and identity. The downloaded
 binary and sanitized report remain. If normal shutdown requires forced cleanup,
 the integration fails even when cleanup eventually succeeds. A changed marker,

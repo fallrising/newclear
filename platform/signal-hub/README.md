@@ -9,6 +9,7 @@ M5 提供驗證後封存清除、可重複匯回、一致 SQLite 備份與隔離
 ## 閱讀入口
 
 - [快速開始](docs/quickstart.md)：建置、啟動及本機端到端範例
+- [個人 Docker 啟動包](deployment/docker/README.md)：Linux 非 root 執行、私人設定、持久資料與備份還原
 - [runtime 契約](docs/runtime.md)：啟動限制、HTTP 邊界與已實作範圍
 - [來源新鮮度契約](docs/source-freshness.md)：狀態轉換、認證來源歸屬與 M1 升級
 - [M6 設計](docs/m6-design.md)、[來源接入](docs/source-integration.md)與[選用擴展驗收包](docs/deployment-acceptance.md)：個人接入、失敗復原與擴展運維的適用範圍

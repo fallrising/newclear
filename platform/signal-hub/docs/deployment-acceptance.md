@@ -1,5 +1,7 @@
 # M6 optional expanded-operation recovery and acceptance packet
 
+個人 Linux Docker 使用入口：[啟動包](../deployment/docker/README.md)。它的合成包驗證與實際安裝／來源驗收分開記錄。
+
 For current personal use, follow [SDD06](sdd/06-security-operations-acceptance.md): one useful source, one safe persistent instance and usable backup. This document retains the original expanded-operation worksheet/runbook; it is optional and its eight gates are not first-use blockers. Its preparation is offline and synthetic. Deployment, continued operation and owner acceptance are separate states. The four original real M6 requirements remain unverified: three actual sources continuously observed for seven days without unexpected 409; authorized producer stop with dashboard silence and phone receipt; authorized hub stop with independent phone notification within five minutes; isolated restore of the previous day's real snapshot. A merged preparation PR or successful worksheet checker proves none of these.
 
 ## Concrete future approval packet

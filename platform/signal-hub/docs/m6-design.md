@@ -71,3 +71,14 @@ The original [expanded-operation worksheet](deployment-acceptance.md) and checke
 From component root: `go test -race -count=1 ./...`; `go vet ./...`; `test -z "$(gofmt -l .)"`; `go build -trimpath -o .local/run/signalhub ./cmd/signalhub`; `git diff --check`. Web: `npm ci`, `npm run format:check`, `npm run typecheck`, `npm test`, `npm run build`, reproducible dist check. Existing contract venv: `python contracts/check.py`; all four `python scripts/e2e_{smoke,rules,delivery,archive}.py --binary .local/run/signalhub`; new `python scripts/check_sources.py`, source tool unit tests and `python scripts/e2e_m6.py --binary .local/run/signalhub`. Deployment checker/tests commands will be frozen in its README before implementation. Browser: `SIGNALHUB_BINARY=<absolute-built-binary> SIGNALHUB_CHROMIUM=/opt/google/chrome/chrome npm test` with sandbox unchanged; unsupported local libraries must remain failed/skipped until supported CI supplies genuine evidence. Native task/report validators and scope review are mandatory.
 
 Original failures and correction evidence stay retained. These are the existing preparation/runtime verification commands, not a new first-use checklist. STATUS records actual deployment and operation separately, with the original four real gates explicitly deferred/unverified under the reduced scope.
+
+
+## 個人 Docker 啟動包
+
+最小 Linux Docker Compose 包沿用現有 binary，不新增常駐服務或 runtime dependency。採 host network，預設 `127.0.0.1:8080`，不宣告 published ports；現有 tailnet ingress 可反代至 loopback，啟用入口是另外的部署操作。不得改成 wildcard 或用 Docker 網段冒充 tailnet。這個模式共用宿主網路命名空間，不宣稱容器網路隔離。
+
+映像使用固定版本／digest 的 Go build stage、靜態 binary 與 CA bundle，最終非 root；Compose 對應執行者非 root UID/GID，唯讀 rootfs、config/secrets，drop capabilities、no-new-privileges、有限資源與 log rotation。持久 DB 和 backups 是明確 bind mounts；不將任何私密狀態傳入 build context。
+
+一次性 Python 標準庫初始化器建立新的私人目錄，三個獨立角色 token、單一示範來源、無訂閱／規則；已有路徑即拒絕，不覆寫 secret、設定或資料。Compose 啟用既有 `--backup-dir`（啟動後及每24小時）；不預設 `--archive-dir`，不自動刪備份，不將24小時當作 owner 可接受的資料遺失量。備份需另按資料價值安排與異地保存。
+
+包驗證只需實際 image/Compose 啟動、auth／原文去重、容器重建後查詢同事件、完整 snapshot/manifest 到新位置的 network-none 還原。使用合成資料驗證包裝接線，不重跑先前三來源88筆活動、不冒充實際來源／部署驗收。restore 命令容器不啟動 daemon；還原副本以無訂閱的新設定與新憑證在 network-none 啟動，停止後用唯讀 SQLite 查詢事件與原 seq；不把 SQLite 查詢稱為還原後 HTTP 驗證。詳細使用入口見[個人 Docker 啟動包](../deployment/docker/README.md)。

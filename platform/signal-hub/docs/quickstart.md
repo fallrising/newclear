@@ -2,6 +2,8 @@
 
 M5 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。已提供規則指標與圖表、webhook／ntfy、摘要、重試與DLQ重放；另有封存／匯回與一致備份／隔離還原；部署尚未驗收；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
 
+若要使用 Docker，請從[個人 Docker 啟動包](../deployment/docker/README.md)開始；它包含持久目錄、既有備份與隔離還原步驟。以下保留直接執行 binary 的開發範例。
+
 以下步驟會在專案目錄的 `.local/` 建立合成 token、設定和資料庫；該目錄已加入 git ignore。請從 `platform/signal-hub` 執行，並使用 Go 1.26.8 或相容的 Go 1.26 工具鏈。
 
 ## 建置並建立本機設定

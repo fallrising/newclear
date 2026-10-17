@@ -172,3 +172,5 @@ SessionBinding 最少保存 worker、role、account、route/profile revision、h
 ## M2 實作邊界
 
 有界原生 ports 與逐 route qualification 見 [M2 契約](m2.md)。它們不等於本文件的完整 writer→reviewer→rework 工作流程；完整後代停止尚未證明時，保留 operation 與 reservations，不 resume 或重建工作。上述完整場景故障矩陣及 M3 LIVE 驗收仍為 NotRun。
+
+Persisted-session source 是 M2 的明確 opt-in 證據入口：其 operation/session/turn/prompt binding 與封存 bytes 可在重新開啟後核對，reconcile 不執行工具或模型。Opaque wrapper 的文字輸出仍不是內層工具成功／拒絕的權威來源；完整場景的成果驗收、遠端 effects 與 native continuity gate 仍須各自成立。

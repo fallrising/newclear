@@ -177,3 +177,9 @@ Raw transcript、provider events 與 private config 不直接公開。公開摘�
 ## 11. M1 離線交付
 
 Python3.11.16 實際執行完整 component unittest suite；root獨立整合測試使用SQLite持久狀態、單獨reader、backend呼叫歷史及受控fault/clock。範圍為FAKE-01/02/03/04/05/07/08/10/12/13及FAKE-16普通重啟部分；對應API／oracles與延期清單在[M1契約](m1.md)。不同完整AC仍須通過本表要求的其餘層，不能把離線部分標為完整AC完成。候選source/test內容摘要保存在[m1-evidence.json](m1-evidence.json)；實際PR／CI固定合併來源，獨立審查及原始執行證據由交付流程保存。公開摘要只包含合成測試、必要版本／hash，不包含私有工作環境或帳號資料。
+
+## M2 persisted-session 與有界故障補充：2026-10-17
+
+Root／獨立 Python3.11.16 各299tests；固定來源新 Codex session 接入與兩條 native profile 各三項故障案例通過其有界 oracle，詳見 [M2 契約](m2.md#本次固定來源原生驗證) 及 [hash-bound evidence](m2-evidence.json)。Parent-crash、最終 native receipt-write gap、logical lease-expiry 都只對本次隔離 fixture 注入；inspect 不重跑，原 claim／binding 保留，lease stale fence 拒絕且原五層 holds 保留。這不提升完整第一場景或 LIVE/SOAK。
+
+Codex 37個持久事件被產品封存並接入，4個 opaque tool calls 仍留下 coverage gap，結果 unknown；不能將 wrapper 列印內容當作 authenticated nested-tool denial。歷史 stop 切片的版本標籤及 denial 解讀在 evidence 中保留並附明確更正。七個新 operation 的 local closure 不解決遠端 effects/billing，未重試或釋放任何舊未知工作。Full M2 仍為 PARTIAL；成功 native continuity、受控 auth-expiry 和 Codex secret-read boundary 尚未合格。

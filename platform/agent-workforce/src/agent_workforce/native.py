@@ -194,7 +194,7 @@ class NativeRunner:
     after an intent, including exceptions or a controller receipt gap.
     """
 
-    def __init__(self, root, *, supervisor=None):
+    def __init__(self, root, *, supervisor=None, session_source=None):
         from .native_process import ProcessSupervisor
         self.root = Path(root).absolute()
         if any(p.is_symlink() for p in (self.root, *self.root.parents)):
@@ -204,6 +204,13 @@ class NativeRunner:
         if info.st_uid != os.getuid() or info.st_mode & 0o077:
             raise NativeError("private journal required")
         self.supervisor = supervisor or ProcessSupervisor(self.root / "processes")
+        if session_source is not None:
+            from .native_session_source import CodexSessionSource
+            from .native_reaping import ReapingProcessSupervisor
+            if (not isinstance(session_source, CodexSessionSource)
+                    or not isinstance(self.supervisor, ReapingProcessSupervisor)):
+                raise NativeError("session evidence requires trusted source and reaping supervisor")
+        self.session_source = session_source
 
     @contextmanager
     def _lock(self):
@@ -317,6 +324,14 @@ class NativeRunner:
                     raise NativeError("operation identity conflict")
             else:
                 created = True
+                if self.session_source is not None:
+                    if profile.provider != "codex" or resume_from or reconstruct_from:
+                        raise NativeError("session evidence supports fresh Codex operations only")
+                    source_intent = self.session_source.prepare(dict(
+                        cwd=profile.workspace, model=profile.model,
+                        cli_version=profile.harness_version,
+                        prompt_sha256=hashlib.sha256(prompt.encode("utf-8")).hexdigest()))
+                    stable["session_source"] = source_intent
                 session = self._read(session_path)
                 if session is None:
                     self._reject_orphan_session(session_key)
@@ -398,6 +413,42 @@ class NativeRunner:
             status = "running"
         result = dict(native=normalized, process=process, parse_error=parse_error,
                       lineage=record.get("lineage"))
+        if "session_source" in record["stable"]:
+            # Never infer evidence policy for a legacy operation. Source intent
+            # is bound before spawn, and only the reaper validates closure.
+            from .native_reaping import ReapingProcessSupervisor
+            from .native_session_source import CodexSessionSource, SessionSourceError
+            from .native_session_events import normalize_session, SessionEventError
+            session_summary = None
+            source_error = None
+            seal = None
+            if (isinstance(self.supervisor, ReapingProcessSupervisor) and stopped
+                    and normalized and normalized.get("session_id")
+                    and process.get("containment_proof")):
+                try:
+                    intent = record["stable"]["session_source"]
+                    with self._lock():
+                        captured = CodexSessionSource.restore(intent).capture(
+                            intent, normalized["session_id"], self.root,
+                            binding_digest=_digest(dict(record["stable"], signature=record["signature"])),
+                            closure_digest=_digest(process["containment_proof"]),
+                            expected_seal=record.get("session_seal"))
+                    seal = captured["manifest"]
+                    session_summary = normalize_session(captured["raw"], expected=dict(
+                        intent["expected"], session_id=normalized["session_id"]))
+                    if session_summary["status"] == "failed":
+                        status = "failed"
+                    elif session_summary["status"] != "complete" and status != "failed":
+                        status = "unknown"
+                except (SessionSourceError, SessionEventError, NativeError, OSError, KeyError) as exc:
+                    source_error = type(exc).__name__
+                    if status != "failed":
+                        status = "unknown"
+            else:
+                source_error = "session_prerequisite_missing"
+                if status not in ("failed", "running"):
+                    status = "unknown"
+            result.update(session=session_summary, session_seal=seal, session_error=source_error)
         # Keep bounded raw output outside SQLite; normalized metadata can also
         # be oversized and must not be silently truncated into a success.
         try:
@@ -418,10 +469,22 @@ class NativeRunner:
                 if session and session["operation_id"] == operation_id:
                     session["native_id"] = native_id
                     self._write(session_path, session)
+            if "session_source" in record["stable"] and seal is not None:
+                if record.get("session_seal") not in (None, seal):
+                    return self._unknown(operation_id)
+                record["session_seal"] = seal
             record["local_stopped"] = stopped
             receipt = dict(operation_id=operation_id, status=status, stopped=stopped,
                            effects_resolved=stopped and bool(record.get("effects_evidence")), result=result)
             record["receipt"] = receipt
+            try:
+                # The stable source baseline is also stored in the process
+                # binding. Bound the complete durable record, not only result.
+                _encoded(record)
+            except NativeError:
+                receipt["status"] = "unknown"
+                receipt["result"] = dict(native=None, process_status=process.get("status"),
+                                         parse_error="metadata_limit")
             self._write(self._path("operation", operation_id), record)
             return json.loads(_encoded(receipt))
 

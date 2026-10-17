@@ -88,3 +88,9 @@ Baseline 固定 cache=no、slave-mode=off、backend-sharding=no。預編譯 bina
 回報當前 MR 任務／P 階段、實際做過的動作、固定版本、測例與數量、結果分類、私有 evidence 位置的安全描述、未完成原因與下一步。更新 STATUS／VALIDATION，不增加第二份 backlog，不把合併 PR 當作部署完成。
 
 以 branch／PR 交付。只有 Owner 對本輪明確要求合併時才合併；核對完整 diff、來源／靜態檢查、適用 CI 與精確 head SHA，合併後再回讀 main 和 PR 狀態。不跳過 required checks，不改 branch protection。
+
+## P1f 本機 intent journal 邊界
+
+[P1-JOURNAL](P1-JOURNAL.md) 與[獨立契約](P1-JOURNAL-CONTRACT.md) 定義本機持久化 intent／uncertainty 基礎。它不執行 action、不推進 phase、不接收新 snapshot 或批准來清除 uncertainty；未知或部分本機狀態拒絕使用。Timeout／lost reply 不等於遠端取消。保護只涵蓋同一保留的 journal root，不能用新 root 或 rollback 取得重送授權。
+
+實機階段前後 authenticated fresh collection、逐效果身分核對、精確獨立批准、durable executor／reconciliation、runtime image provenance、有效 network／ACL、replication health／lag、保留資料 lifecycle 與 proxy smoke 仍須完成。Down 保留資料，purge 必須另有精確條件與批准。完整 P1／MR-004 尚未完成；正式計數以 STATUS 的 4 DONE／1 BLOCKED_ENV／4 TODO 為準。

@@ -2,7 +2,7 @@
 
 Scope: `fallrising/newclear/labs/mithril-research/`.
 
-先完整讀取 README、`upstream.lock.json`、`runtime.lock.json`、`docs/STATUS.md`、`docs/RESEARCH.md`、`docs/SDD.md`、`docs/SOURCES.md`、`docs/VALIDATION.md`、`docs/quickstart.md`、`docs/FOUR-NODE-PLAN.md`、`docs/EXECUTION_PROMPT.md`、`docs/P1-CONTRACT.md`、`docs/P1-LOCAL.md`、`docs/P1-TOOLS-CONTRACT.md`、`docs/P1-TOOLS.md`、`docs/P1-BOOTSTRAP-CONTRACT.md`、`docs/P1-BOOTSTRAP.md`、`docs/P1-COLLECTOR-CONTRACT.md`、`docs/P1-COLLECTOR.md`、`docs/P1-PHASE-CONTRACT.md`、`docs/P1-PHASE.md`；再讀 root README、PORTFOLIO、taxonomy、portfolio-doc-tiers 及 monorepo-ci 規範。超過輸出限制就分段續讀，不只讀搜尋片段。
+先完整讀取 README、`upstream.lock.json`、`runtime.lock.json`、`docs/STATUS.md`、`docs/RESEARCH.md`、`docs/SDD.md`、`docs/SOURCES.md`、`docs/VALIDATION.md`、`docs/quickstart.md`、`docs/FOUR-NODE-PLAN.md`、`docs/EXECUTION_PROMPT.md`、`docs/P1-CONTRACT.md`、`docs/P1-LOCAL.md`、`docs/P1-TOOLS-CONTRACT.md`、`docs/P1-TOOLS.md`、`docs/P1-BOOTSTRAP-CONTRACT.md`、`docs/P1-BOOTSTRAP.md`、`docs/P1-COLLECTOR-CONTRACT.md`、`docs/P1-COLLECTOR.md`、`docs/P1-PHASE-CONTRACT.md`、`docs/P1-PHASE.md`、`docs/P1-JOURNAL-CONTRACT.md`、`docs/P1-JOURNAL.md`；再讀 root README、PORTFOLIO、taxonomy、portfolio-doc-tiers 及 monorepo-ci 規範。超過輸出限制就分段續讀，不只讀搜尋片段。
 
 ## 接手契約
 
@@ -22,3 +22,5 @@ MR-004 尚未完成。P1a 已提供 runtime lock 與僅 local-fixture 的 plan/u
 P1c 提供離線六節點觀察驗證及四階段 bootstrap proposal，見 `docs/P1-BOOTSTRAP.md`；沒有 collector／phase executor／up，不能把 proposal 當作實機准入。
 
 P1d 的獨立唯讀 collector 與 mock 證據見 `docs/P1-COLLECTOR.md`；不會把 collection 轉成 P1c admission。P1e 的獨立離線 phase-snapshot validator 見 `docs/P1-PHASE.md`；它只比對指定 barrier，不代表 phase admission。實機 collection/freshness、phase-aware live validation／executor 尚未驗收。
+
+P1f 的本機 durable intent 基礎見 `docs/P1-JOURNAL.md`：單一 unresolved intent 在同一 retained journal 阻擋再次記錄，沒有 dispatcher、resolution、phase advance 或實機授權。新 root／rollback 不受跨根防重放保證；完整 live journal／executor 仍待後續契約。

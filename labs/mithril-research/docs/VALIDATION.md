@@ -1,5 +1,44 @@
 # Mithril 研究與計劃驗證記錄
 
+## P1f local durable intent：2026-10-17（develop-only）
+
+新增獨立本機 journal，精確契約見 [P1-JOURNAL-CONTRACT](P1-JOURNAL-CONTRACT.md)。
+沒有 dispatcher、resolution、phase advance 或實機操作；原有 scripts/tests/contracts
+與兩份 locks 保持原樣。完整 P1／MR-004 仍未完成，正式計數4 DONE／1 BLOCKED_ENV／4 TODO。
+
+### Actual offline evidence
+
+- Native `gpt-6-astra` [T-017 design](../.team/reports/T-017.md) 的 D1–D7 經 root 凍結為 p1f-v1，native `gpt-6.1-sol` 才開始 T-018 tests-first 實作。沿用本 session2026-10-17 已核對的 exact model IDs／accepted route，未替換；provider-resolved identity／usage／quota／cost 未知。
+- Root `t0333-root-reading01` 核對44份前輪完整閱讀輸入 byte-identical；`t0333-root-baseline01` 執行 `python3 -m unittest discover -s labs/mithril-research/tests -v`，Python3.13.5 原有 **133 tests**，exit0。
+- T-017 `t0333-astra-design-audit01` 核對58項輸入；`t0333-astra-design-report02` validator／scope／privacy／whitespace 全部通過。report01 的 scope recorder 錯把 root 已配置的 PLAN/task 當成 worker 修改，exit1 保留；report02 對照起始 snapshot 修正檢查，沒有變更 D1–D7。
+
+- [T-018 builder](../.team/reports/T-018.md) 的 `t0333-sol-red01` 保存 focused unittest 缺少新 module 的實際 exit1、完整 stdout/stderr/result。實作前已加入原始17 actions、process race／crash／late effect 與 persistence failure tests；這個 Red 本身不算行為通過。
+
+- Root R1 發現新 lock inode 尚未 fsync 就建立 metadata binding；Astra 同意補強，契約明確更新為 p1f-v1.1。`t0333-sol-red02` 的23 methods 中兩項實際 assertion failures 重現缺少 lock-fsync／其失敗未阻止初始化，exit1 保留；修正後 `green03` **24 methods**、`full01` **157 tests** 通過。Green01 的6個 errors 是測試 sanitizer 誤讀 plan.run_id（正確在 ownership 下），已修正並保留原 logs，沒有隱藏為 PASS。
+- Root `t0333-root-full01`：`python3 -m unittest discover -s labs/mithril-research/tests -v`，Python **3.13.5**、**157 tests**，exit0。Root 完整閱讀315行新 module、528行測試與所有文件 diff，檢查實際 Red／Green／R1 修正。
+- Root `t0333-root-probe01`：獨立 **139 checks／8次實際 CLI calls**，exit0；覆蓋全部17 actions、同根永久阻擋重複記錄、malformed／partial／private modes、raw lexical aliases、strict indexes、新 subprocess timeout 後原子行程仍存活並產生晚到 mock effect。效果晚到前後 intent 都保持 uncertain，沒有重送。CLI 輸出通過 path／ID／digest privacy checks。
+- Root `t0333-root-py311-01`：固定 `python@sha256:c3cd26fd6259ce667be208ab9c118463210a745ffc97e0e85af5121c10bc71c5`，Python **3.11.17**、network none、source read-only、nonroot／cap-drop／no-new-privileges；`make -C labs/mithril-research check` **157 tests** 與既有 `make -C labs/mithril-research demo DEMO_OUTPUT=PRIVATE_OUTPUT` 均 exit0。Demo **8 CLI calls／28 synthetic operations**，兩輪 process instance 重建、marker 保留，最後 synthetic resources／uncertainty 都0。這是本機測試容器，不是 Redis／Mithril service。
+
+- Astra [T-019 independent review](../.team/reports/T-019.md) 的 `t0333-astra-review-full02` 通過 **157 tests**；`probe01`／`crash01`／`nested02` 合計 **5494 checks**，包含 **14次實際 CLI**、**6個實際 SIGKILL boundaries**、5354項 nested-input／retained-inode／R1檢查，均 exit0。普通 copied root 因 inode binding 拒絕；合法路徑搬移後同一 inode 的 uncertainty 仍保留。獨立 audit01 核對28個原有 scripts/tests/P1 contracts與guides/locks 不變。
+- Reviewer full01 因 host 無 make，在測試啟動前失敗，原 traceback／空 recorder streams 與 failure-note 保留；full02 改跑 Makefile 的實際 unittest 命令。nested01 是 probe 等價性預檢未捕獲 canonical NaN 的 LabError，在 probe 的 NaN 等價性預檢中止，沒有完整結果；nested02 修正 probe 後通過。T-018 報告的 copied-root 描述依審查修得更精確，`t0333-sol-handoff02` 驗證單句差異、privacy／report 與 frozen hashes，程式未改。
+
+- T-019 最終建議 **ACCEPT**，無剩餘 blocker。`t0333-astra-review-handoff02` 通過六個 task/report validators、20-file scope／privacy／UTF-8／whitespace、P1e PLAN archive、28個原檔與固定MR計數。handoff01 的簡單 privacy regex 誤把 slash-separated prose 當作 `/root/` 路徑；原失敗保留，修正 scanner 邊界後通過，產品與文件不需改動。
+
+- Root `t0333-root-static01` 通過20檔 scope／privacy／UTF-8／whitespace／AST／新文件連結、六個 task/report validators、23個既有檔 byte comparison、P1e PLAN archive 與4/1/4計數。Root evidence gate 接受本有界 source；後續 GitHub 交付仍須正常完成。
+
+### Evidence limits
+
+Same-retained-root cooperative lock／intent fence 不能阻止另一個 root、同 UID rollback
+或外部操作者。Process/mock 與故障注入測試只驗證本機順序和中斷，不是斷電耐久性
+或真實遠端結果。No-intent 不能當作 absent／empty／healthy 或安全重試；任何回覆
+遺失、timeout、重啟或晚到效果都不清除 uncertainty。部分 artifacts 保留並拒絕使用。
+
+Authenticated live collection／freshness、階段前後與逐效果身分核對、精確獨立批准、
+完整 startup／phase-aware executor／authenticated resolution、runtime image provenance、
+有效 host/network/ACL、replication health／lag、實機保留資料 lifecycle、proxy smoke
+與精確 purge 仍未驗收。Down 保留資料，purge 另須批准。未重跑歷史 native build、
+Compose parser 或四機盤點。PR/main CI、merge／遠端回讀以後續 GitHub／帳本紀錄為準。
+
 ## P1e offline phase predicates：2026-10-17（develop-only）
 
 新增獨立純離線五 barrier validator 與 validate-only private CLI；只讀原始

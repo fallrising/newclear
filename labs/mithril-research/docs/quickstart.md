@@ -52,3 +52,9 @@ P2 通過後才提供私有 Mithril endpoint、app user、密碼提示式連線�
 
 [U01]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/installation.md
 [U04]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/rust-toolchain.toml
+
+## P1f 本機 intent journal 邊界
+
+[P1-JOURNAL](P1-JOURNAL.md) 與[獨立契約](P1-JOURNAL-CONTRACT.md) 定義本機持久化 intent／uncertainty 基礎。它不執行 action、不推進 phase、不接收新 snapshot 或批准來清除 uncertainty；未知或部分本機狀態拒絕使用。Timeout／lost reply 不等於遠端取消。保護只涵蓋同一保留的 journal root，不能用新 root 或 rollback 取得重送授權。
+
+實機階段前後 authenticated fresh collection、逐效果身分核對、精確獨立批准、durable executor／reconciliation、runtime image provenance、有效 network／ACL、replication health／lag、保留資料 lifecycle 與 proxy smoke 仍須完成。Down 保留資料，purge 必須另有精確條件與批准。完整 P1／MR-004 尚未完成；正式計數以 STATUS 的 4 DONE／1 BLOCKED_ENV／4 TODO 為準。

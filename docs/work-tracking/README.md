@@ -93,6 +93,14 @@ Keep any private source and detailed coordination reports outside this public re
 safe to share; identify restricted evidence abstractly rather than linking it. Privacy review is required
 for requests and reports as well as code changes.
 
+## Execution records (replaces the separate journal repository)
+
+The execution record of a piece of work lives in its task directory, in the same PR as the code, so nothing is
+written to another repository: `log.md` (optional, append-only) holds one entry per run or attempt — who or which
+agent and model ran it, start and end, usage or cost when known (state "unknown" otherwise), and where the
+evidence is; `report.md` holds the delivery result. Temporary artifacts are named there with purpose, location and
+whether they must be kept. The old separate execution-ledger repository takes no new records. Keep public records free of private details.
+
 ## Evidence and manual validation
 
 Reports name commands that actually ran, outcomes, immutable evidence links/paths, and failed or skipped

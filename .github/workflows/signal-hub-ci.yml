@@ -93,3 +93,28 @@ jobs:
           path: platform/signal-hub/browser/test-results/
           retention-days: 14
           if-no-files-found: ignore
+
+  docker-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: platform/signal-hub
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Private setup regression
+        run: python3 -m unittest discover -s scripts -p test_docker_setup.py -v
+      - name: Build the personal Docker image
+        run: docker build --tag "signalhub:ci-$GITHUB_SHA" .
+      - name: Packaged persistence and isolated restore
+        run: python3 scripts/e2e_docker.py --image "signalhub:ci-$GITHUB_SHA" --state-dir "$RUNNER_TEMP/signalhub-docker-smoke"
+      - name: Sanitized package evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signal-hub-docker-package
+          path: ${{ runner.temp }}/signalhub-docker-smoke/evidence/
+          retention-days: 14
+          if-no-files-found: ignore

@@ -1,37 +1,35 @@
-# P1d observation foundations delivery plan
+# P1e offline phase validation delivery plan
 
-Root owns PLAN/routing/integration/acceptance. Baseline7dd0169c440cc3eec397244740d9b1cea3756cd4; prior plan archived verbatim as P1C-PLAN.md. Published bounded claim/readback is held privately.
+Root owns PLAN, routing, integration and acceptance. Baseline e00b1846172f753ece2020bbfe52df07584c77e5; P1d PLAN archived verbatim. The new bounded doing claim is published and remotely read back; private publication details stay private.
 
-## Objective and boundary
+## Scope
 
-Select the minimum six-node read-only collector and separate phase-snapshot validation foundation after contract review. Preserve P1c pristine/already-converged classification, independent node-ID binding and intermediate refusal unchanged. No actual SSH or runtime calls, provision/upload/create/up, phase executor/advance, new uncertainty journal, network changes, purge, release/publication. All new verification is offline/mock; full P1 incomplete, MR-004 BLOCKED_ENV, fixed task counts unchanged. Pin9959fe2e5cd466614dc20ef7b710befaaf1d746a unchanged.
+Implement a separate pure offline phase-snapshot validator for the five barriers specified by T-011 D6. Freeze exact input/API/predicates after independent design. Preserve all existing scripts/tests/contracts and both locks byte-identically. No collection invocation, actual SSH/runtime, executor, phase advance, mutation journal, deployment, network changes, purge or publication of images/releases. Full P1 incomplete; MR-004 BLOCKED_ENV; formal task counts remain 4 DONE / 1 BLOCKED_ENV / 4 TODO. Research pin 9959fe2e5cd466614dc20ef7b710befaaf1d746a unchanged.
 
-## Team selection
+## Team and evidence
 
-standard-delivery: root integration/docs; native gpt-6-astra high design/final review in its isolated worktree; native gpt-6.1-sol high bounded implementation in another fresh worktree. No nested delegation or worker commits. Current native tool catalog exposes both exact IDs; official pages searched and opened2026-10-17: https://developers.openai.com/api/docs/models/gpt-6.1-sol and https://developers.openai.com/api/docs/models/gpt-6-astra. Retain accepted P1c route experience. Provider resolution/entitlement/quota/windows/usage/cost unknown; no invented hard budget, reserve review capacity. No external CLI route selected or silent fallback. Common cli-team source39fb407d71c7c5aae5f50a9bc01df6b3c215daa3 pinned/read.
+Root integrates and documents; native gpt-6-astra high independently designs/reviews; native gpt-6.1-sol high implements in a separate fresh worktree. Exact IDs remain exposed by current tool catalog. Reuse the same-session official model check dated2026-10-17 recorded in P1D-PLAN and accepted P1c/P1d route evidence. Provider-resolved identity, entitlement, quota, usage and cost unknown. No silent fallback, nested delegation or worker commits. cli-team canonical source39fb407d71c7c5aae5f50a9bc01df6b3c215daa3 retained. All checks use common workspace launcher with unique private task IDs and explicit stdout/stderr/exit evidence.
 
-## Order and gates
+## Sequence
 
-1. T-011 independent design defines minimal exact contract and whether collector/phase validation should split. Root freezes before behavior writes.
-2. T-012 bounded Sol builder, real Red-Green evidence with explicit stdout/stderr/exits via common workspace launcher.
-3. Root full diff inspection, integration/docs, baseline regressions, Python3.11, CLI/mock acceptance.
-4. T-013 independent Astra final review/adversarial probes, findings fixed and rechecked; root evidence gate.
-5. Correct task trailer, commit/push/PR/required CI/normal merge/remote main readback; private ledger review then stop.
+1. T-014 Astra exact offline contract design; root freezes before behavior writes.
+2. T-015 Sol bounded new module/tests; preserved Red-Green evidence.
+3. Root full diff/readback inspection, documentation, regression and independent probes, Python3.11/3.13 and existing synthetic demo.
+4. T-016 Astra independent final review; root addresses findings and evidence-gates acceptance.
+5. Authorized commit with task trailer, push, PR, necessary CI, normal merge, remote main readback and private ledger review; stop.
 
-## Required evidence
+## Acceptance concerns
 
-Unknown/partial/timeout/lost reply must refuse without absence/health/cancellation inference. Machine/container/node/ownership drift, complete response framing and credentials outside argv/public output. Phase snapshots are separate offline predicates, not authority to advance; fresh pre/post observations and independent approval remain unmet live gates. Preserve down retention and separate purge gates. Full source/privacy/scope review, task/report contracts and honest missing runtime evidence.
+Original independently bound collection only; unknown/partial/foreign/drift refuse. No transformation that admits intermediate snapshots to unchanged P1c. Exact per-barrier topology, epochs, INFO and empty-keyspace predicates; final retained-data semantics preserved. No origin upgrade, freshness, health, cancellation, authorization, phase admission or uncertainty clearance. Credentials are not inputs. Future live execution still requires fresh pre/post observation, independent exact approval, durable uncertainty and runtime/network/storage/health gates. Down retains data; purge remains separately approved.
 
-## Decisions
+## Progress
 
-Design narrowed to collector only after Astra initial review: new collector.py/collector_helper.py/test_collector.py; separate phase-aware validator deferred to an independently contracted follow-up. P1c and P1b implementation stay byte-identical. Exact collector contract was frozen before behavior writes. Root baseline87 tests passed. Initial T-011 validator rejected multiline empty field headers; corrected to inline nonempty fields, original failure retained.
+Claim/readback complete. Existing required-reading identities retained from accepted P1d baseline; current root README/AGENTS, component AGENTS, collector contract, T-011 and relevant collector/bootstrap implementations reread. Design pending.
 
-Root freeze: ACCEPT T-011 D1–D7 as p1d-v1 in P1-COLLECTOR-CONTRACT. Collector only; D6 phase predicates deferred. Sol may begin tests/Red after reading the frozen contract and full report. No existing implementation/test/lock edits authorized.
+Root freeze: ACCEPT T-014 D1–D7 as p1e-v1 in P1-PHASE-CONTRACT. Sol may begin tests/Red then implementation. Root baseline02 passed112 tests; baseline01 failed before testing because host make is absent (original traceback/limitation retained). Root reading-audit01 confirmed39 previously fully read inputs byte-identical to accepted P1d source. Task-check01 passes both new assignments.
 
-## Root integration evidence
+T-015 integrated after root full implementation/tests/R1 diff and actual Red/Green inspection. Root R1 noncanonical paths reproduced three actual CLI successes in Red02, fixed before read in Green03. Final21 new methods; root full01 Python3.13.5 and py311-01 Python3.11.17 each133 pass. Root probe02 passes60 checks/9CLI, probe01 root fixture-field lookup error retained. Fixed-image existing synthetic demo passes8CLI/28operations/two rounds/retained marker/zero resources+uncertainty. T-016 independent review pending.
 
-T-012 accepted for integration after complete source/test/report inspection and actual Red/Green log review. Both Red failures retained; final25 new methods/112 full tests pass. Root full01 independently passed112 on Python3.13.5, probe01 passed14 API/mocked-CLI checks, and fixed Python3.11.17 py311-02 passed make check112 plus the existing8-call/28-operation two-round synthetic demo. py311-01 sandbox socket refusal retained, not PASS. No old scripts/tests/locks/contracts changed. T-013 independently passed112 tests and74 probes including5 CLI calls, inspected actual evidence and recommends ACCEPT with no behavior findings. Root required removal of a private absolute path from T-013 before publication; handoff02 validated the corrected report, source hashes unchanged. Final static/remote delivery gates follow.
+T-016 independently ACCEPTS:133 tests and375 checks/30CLI pass,20 baseline files/archive exact, actual Red/Green/root evidence and full docs checked; no blockers. Before commit, main advanced only in unrelated signal-hub documentation to786491ea4c42b3461ffd1454335f5256e878fdc2. Root inspected path scope and safely fast-forwarded this new worktree, preserving all P1e changes; Mithril/policies unchanged. Final static/evidence gate pending.
 
-Task files retain assignment checkboxes unchecked because the installed contract validator requires an unchecked Definition-of-done item; completion acceptance is recorded in reports and this PLAN. Root static01 stopped on that mechanical format requirement after boxes were marked; original failure retained, boxes restored without behavior changes.
-
-Root evidence gate ACCEPTS the bounded source after full diff inspection, final112-test suites on both interpreters,14 independent root probes, independent Astra112/74 checks and static02 scope/privacy/contract gates. All required source DoD items map to the reports/VALIDATION and preserved logs; failures are historical and resolved. Remaining work is authorized source GitHub delivery, exact remote readback and private ledger review. Full P1/MR-004 remain incomplete.
+Root evidence gate ACCEPTS the bounded source: every task DoD maps to T-014/T-015/T-016, actual final test/probe/demo logs and static01. Static01 passes20-file scope/privacy/new-guide links/UTF8/whitespace/AST, all six task/report validators,20 unchanged baseline files, exact P1d archive and4/1/4 counts. Root completed full diff review; R1 resolved, historical failed attempts explicit, no outstanding source findings. Assignment checkboxes remain unchecked to satisfy installed task format; reports/PLAN record completion. Authorized commit/push/PR/necessary CI/normal merge/readback/private ledger review remain; full P1/MR-004 incomplete.

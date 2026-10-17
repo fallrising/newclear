@@ -1,5 +1,48 @@
 # Mithril 研究與計劃驗證記錄
 
+## P1e offline phase predicates：2026-10-17（develop-only）
+
+新增獨立純離線五 barrier validator 與 validate-only private CLI；只讀原始
+complete redis-collection，核對獨立 bundle／ownership／node-ID map 與指定
+snapshot predicate。原有全部 scripts/tests/contracts 和兩份 locks 未修改。
+沒有 collector invocation、phase advance、executor、startup 或新 journal。
+實機 runtime 為 UNEXECUTED；完整 P1 未完成，MR-004 BLOCKED_ENV，
+固定計數4 DONE／1 BLOCKED_ENV／4 TODO。
+
+### Actual offline evidence
+
+- Native `gpt-6-astra` [T-014 design](../.team/reports/T-014.md) 完成獨立設計，root 凍結 [p1e-v1](P1-PHASE-CONTRACT.md) 後，native `gpt-6.1-sol` 開始 tests／Red。沿用同 session2026-10-17 已核對的 exact model IDs 與 accepted P1c/P1d route，當前 catalog 仍提供兩模型；沒有替換，provider-resolved identity／usage／quota／cost 未知。
+- Root `t0332-root-reading-audit01`：39份前輪完整閱讀輸入與 P1d source byte-identical；當前 root README、AGENTS、collector contract、T-011 及相關完整實作重讀。`t0332-root-baseline02`：Python3.13.5 原有112 tests 通過。baseline01 因 host 缺 make，在測試啟動前 exit1；recorder 未捕獲 startup exception 的完整 streams，traceback 留 tool transcript，另保存明確 failure note，未算 PASS。
+- [T-015 builder](../.team/reports/T-015.md) 保存 Red01 缺 module 的實際 exit1，以及 Red02 三個實際 CLI failures：dot component、重複中間 slash、雙前導 slash 在初版被接受。Root R1 要求先重現再修正；新 reader 在開檔前要求原字串 normalized 與 single-root anchor。Green03 最終21 methods、Full01 **133 tests** 通過；原17／20 methods green 保留為修正前歷史。20個既有 scripts/tests/contracts/locks byte-identical。
+- Root `t0332-root-full01`：`python3 -m unittest discover -s labs/mithril-research/tests -v`，Python **3.13.5**，**133 tests**，exit0。Root 已完整閱讀新 module/tests、R1修正與實際 Red/Green logs。
+- Root `t0332-root-probe02`：另寫的 **60 checks／9次實際 CLI calls**，exit0。包括5x5 barrier discrimination、各階段 machine/container/process／partial拒絕、P1c持續拒絕中間狀態、非零 keyspace counters、API不呼叫 collection/socket/subprocess、CLI大於舊1MiB envelope、duplicate JSON、private modes、三種 path aliases、額外 execute flag 與 help。probe01 因 root probe 錯讀 manifest.run_id 而 KeyError，原失敗保留；修正的只是 probe，source 未改。
+- Root `t0332-root-py311-01`：固定既有 `python@sha256:c3cd26fd6259ce667be208ab9c118463210a745ffc97e0e85af5121c10bc71c5`，Python **3.11.17**、network none、source read-only、nonroot/cap-drop/no-new-privileges；`make -C labs/mithril-research check` **133 tests**，`make -C labs/mithril-research demo DEMO_OUTPUT=PRIVATE_OUTPUT` 均 exit0。Demo實際 **8 CLI calls／28 synthetic operations**，兩輪 process instance重建、marker保留，最後synthetic resources／uncertainty都0。
+
+- Astra [T-016 independent review](../.team/reports/T-016.md) 建議 ACCEPT，無 blocker：獨立 **133 tests**、**375 checks／30次實際 CLI** 通過；核對20個 baseline files、P1d PLAN archive、實際 Red/Green、root兩個 Python版本／demo／CLI證據與全部文件。三種 path aliases 由獨立 probes 再驗拒絕，public privacy檢查無私有路徑。
+
+- Root `t0332-root-static01`：20個交付檔scope／privacy／新文件links／UTF-8／whitespace／AST、三task／三report validators、20個既有scripts/tests/contracts/locks byte comparison、P1d PLAN archive與固定MR計數均通過。
+
+所有新 build/test/check 都經 common launcher、唯一 task IDs，明確保存
+stdout/stderr/exit 與 artifacts/evidence；baseline01 recorder startup failure
+的例外已如上標示。本機 Python 測試容器不是 Redis/Mithril service。
+歷史 native121 tests／Clippy／fmt、Compose parser 與四機盤點沒有在本段重跑。
+
+### Evidence limits
+
+Predicate match只描述輸入 assertion，collection fingerprint只綁定原始內容。
+Imported ssh origin不代表authenticated receipt；完整回應不代表freshness、
+原子六節點狀態、空磁碟、loading／quiescence或健康。最終predicate保留合法
+非空資料與既有P1c epoch規則，不能推定先前階段已執行。中間predicate不讓
+P1c admission放寬，也不提供下一步或自動轉換。
+
+Authenticated live collection／freshness、實機phase-aware validation、獨立精確
+批准與逐效果身分重核、durable mutation intent／uncertainty、runtime/image/config/
+storage/process-to-endpoint provenance、有效host/network/ACL、replication health/
+lag、retained-data lifecycle、proxy smoke與獨立批准的精確purge仍未通過。
+Timeout／lost reply不是遠端取消；既有uncertainty不被讀為授權或清除。
+Down保留資料，purge另有條件。PR/main CI、merge與遠端回讀由後續GitHub／
+帳本紀錄確認，不由本source snapshot預先宣告。
+
 ## P1d read-only collector：2026-10-17（develop-only）
 
 本段新增獨立六節點唯讀 collector、固定 SSH helper 與 private CLI，

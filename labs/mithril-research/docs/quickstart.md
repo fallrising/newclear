@@ -8,7 +8,7 @@
 
 [P1c bootstrap planner](P1-BOOTSTRAP.md) 可離線驗證六份 backend 觀察並產生精確提案；只有 pristine／already-converged 兩種狀態可通過，沒有遠端 collector 或 phase executor。
 
-[P1d collector](P1-COLLECTOR.md) 提供六節點唯讀收集介面；mock 結果與 ssh origin 分開，實機 collection/freshness 未驗收。使用前須有精確讀取授權；本輪沒有執行真實 SSH/runtime。Phase-aware validator 與 executor 仍缺。
+[P1d collector](P1-COLLECTOR.md) 提供六節點唯讀收集介面；mock 結果與 ssh origin 分開，實機 collection/freshness 未驗收。使用前須有精確讀取授權；本輪沒有執行真實 SSH/runtime。[P1e phase validator](P1-PHASE.md) 另提供離線指定 barrier 驗證；phase-aware live validation 與 executor 仍缺。
 
 ## 正式接手順序
 

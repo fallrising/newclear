@@ -112,7 +112,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | 元件 | 使用 | 檔位 | 範圍與限制 |
 | --- | --- | --- | --- |
 | `newclear/labs/browser-fingerprint` | 未知 | 未分級 | 有界的瀏覽器設備／操作觀測實驗：Go mock CRUD、既有五步操作教學、分析工具與公開／私人 Quick Tunnel 啟動方式；未決定長期投入。見 [README](labs/browser-fingerprint/README.md)。 |
-| `newclear/labs/m4-seat` | 未知 | 未分級 | 只收錄 M4 48GB 單人座位的運行方案與驗收清單。沒有 runtime，沒有在目標機器計時，不授權部署或 24/7 服務。見 [README](labs/m4-seat/README.md)。 |
+| `newclear/labs/m4-seat` | 未知 | 未分級 | 只收錄 M4 Max 48GB 單人座位的運行方案與驗收清單。沒有 runtime，沒有在目標機器計時，不授權部署或 24/7 服務。見 [README](labs/m4-seat/README.md)。 |
 
 ## 重疊與 canonical 邊界
 

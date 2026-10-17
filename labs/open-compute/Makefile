@@ -1,4 +1,4 @@
-.PHONY: check preflight integration integration-restore integration-resources integration-storage integration-crash integration-retry
+.PHONY: check preflight integration integration-restore integration-resources integration-storage integration-crash integration-retry integration-trial
 
 check:
 	PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
@@ -23,3 +23,6 @@ integration-crash:
 
 integration-retry:
 	PYTHONDONTWRITEBYTECODE=1 python3 retry.py $(LAB_ARGS)
+
+integration-trial:
+	PYTHONDONTWRITEBYTECODE=1 python3 trial_integration.py $(LAB_ARGS)

@@ -141,3 +141,12 @@ Follow the [quickstart](docs/quickstart.md), then run
 [STATUS](docs/STATUS.md); a contract or offline test alone is not runtime evidence.
 The synthetic effect is a local D1 row. This does not test external exactly-once
 effects, process crashes between statements, concurrency or production adoption.
+
+## Retained manual operator trial
+
+The separate M7 operator path uses `trial.py` initialization, a foreground owner
+and finite commands from another terminal. Normal stop retains state; explicit
+cold disposal is separate. See [quickstart section9](docs/quickstart.md#9-operate-a-retained-manual-trial-m7)
+and [SDD-M7](docs/SDD-M7.md). `make integration-trial` rehearses separate-process
+operation on a fresh non-root environment. This does not install a test machine
+or service; [STATUS](docs/STATUS.md) distinguishes executed evidence and limits.

@@ -66,3 +66,13 @@ callback entries and post-effect acknowledgements; public attempt/config fields
 are placeholders. Keep strict ordered cases, finite deadlines/GET budgets and
 normal owned cleanup. Synthetic keyed D1 effects do not prove external exactly-once
 behavior or crash safety. Preserve the original fixture and all historical reports.
+
+For retained manual trials, read `docs/SDD-M7.md` before editing. M7 alone may
+resume its exact prior initialized scope with a matching private manifest and
+verified clean shutdown receipt. This exception does not change M1–M6's disposable
+no-adoption rules. Use `trial.py` with a foreground owner and finite private Unix
+clients; never detach it or present it as a system service. Stop retains data;
+only explicit cold `destroy` may remove that exact scope. Dirty, incomplete or
+uncertain Workflow authority refuses resume/disposal. Run `make integration-trial`
+on a separate fresh non-root runner. Keep host installation and long-running
+reliability claims outside this lab/CI milestone.

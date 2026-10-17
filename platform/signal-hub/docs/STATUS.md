@@ -1,6 +1,6 @@
 # Signal Hub — STATUS
 
-公開技術進度快照，日期：2026-10-16。任務認領與 owner 驗收仍以 owner 帳本為準。
+公開技術進度快照，日期：2026-10-17。任務認領與 owner 驗收仍以 owner 帳本為準。
 
 ## 目前狀態
 
@@ -16,7 +16,24 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 | 圖表 | 原生 React／SVG、時間／分組、版本分隔、partial、threshold、可操作的精確資料表 |
 | M4 | 訂閱、webhook／ntfy、摘要、重試、DLQ／重放與投遞看板已通過獨立審查及全部CI；整合紀錄見PR #351 |
 | M5 | AC-10–14封存／匯回、一致備份與隔離還原已通過完整gate及獨立審查；整合紀錄見PR #352 |
-| M6 | 準備包已合併（PR #357）；本輪實機 Docker 合成整合及 resolver 修正見下方。正式三來源／手機／七天觀測及完整驗收仍未完成 |
+| M6 | 準備包（PR #357）與 Docker／resolver 修正（PR #363）已合併；目前採個人使用範圍，功能證據沿用。實際單來源接入與持久部署／實例備份仍待驗證；原擴展條件未視為通過 |
+
+## 個人使用範圍與剩餘開發
+
+2026-10-17 已採納[縮減後的 M6 契約](sdd/06-security-operations-acceptance.md)：先一個有用來源與單一非 root 實例，可用 Docker，不要求先改造 OneFleet。三來源齊備、固定七天、手機、獨立主機五分鐘通知及前一日快照改為選用擴展驗收；歷史未完成結果保持未驗證。現有安全、永久去重、TLS／HMAC、持久化與安全還原不變，未新增 runtime 功能或執行部署。
+
+目前沒有新的核心業務功能是首次個人使用的必要前置。程式盤點的最小後續如下：
+
+| 優先與類型 | 真正剩餘事項 | 現有能力／界線 |
+| --- | --- | --- |
+| 先做：執行包／接線 | 一份最小的持久 Docker 啟動設定，接一個實際腳本／管線的結果 | 已有非 root Docker 測試證據，但沒有維護中的 Dockerfile／Compose 成品；[測試 fixtures](../deployment/docker-test/README.md) 不是實際來源 adapter。不建新控制器／通用 SDK |
+| 同時確認：備份配置 | 啟用既有 `-backup-dir` 或沿用既有排程，驗證實例的持久快照與隔離還原 | [main.go](../cmd/signalhub/main.go) 已有啟動及每24小時的選用維護；未帶旗標就不自動備份。[OneFleet launch](../deployment/launch.sh) 未傳備份旗標，不能假設預設已啟用；不預設可接受24小時資料損失 |
+| 延後的小型程式補強 | `/v1/self` 自我觀測、主動低磁碟空間檢查 | OpenAPI／SDD 有設計，但 [HTTP 路由](../internal/httpapi/server.go) 未實作 `/v1/self`，目前回404；也尚無 free-space threshold。現有寫入失敗回503及交易保護仍在。補強前須定義門檻，不虛報已完成 |
+| 選到才處理：來源相容性 | 若先接 Alertmanager，檢查真實重送內容與逐筆結果 | [adapter](../internal/adapter/alertmanager.go) 的固定身分搭配變動 annotations／groupKey 可能409；先看實際樣本，不預先重寫 adapter |
+
+事件庫、查詢／看板、規則圖表、投遞重試／DLQ、封存及備份引擎已有實作。手機恢復需求時再接現有 ntfy；不新增 Bark adapter、更多消息通道、HA、多使用者或第二層監控。上述執行包／接線是下一個最小工作建議，尚未在本次文件變更中開發或部署；資料保存、通知與停機容忍度仍依實際用途決定。
+
+以下保留各次執行當時的證據與失敗；歷史「完整 M6 待驗」描述指原擴展條件，不再是目前首次個人使用的硬門檻。
 
 ## M6 Docker 測試續作
 

@@ -14,6 +14,10 @@
 
 資料庫 time 欄位使用內部可排序 UTC 日期鍵，保留任意小數秒精度；它不是公開 RFC3339 欄位。原始時間與事件 bytes 保存在 raw_json，API 從原事件回傳。
 
+## 尚未提供的自我觀測
+
+OpenAPI／SDD 中的 `/v1/self` 仍是設計契約，目前路由回 `404`；尚無磁碟剩餘空間查詢或低空間門檻的主動 ingest 拒絕。現有 DB 寫入錯誤會回 `503`，交易成功才回成功，不能把兩者混為已實作磁碟預警。這項補強目前延後，不阻擋縮減後的個人接入；使用現有主機工具觀察磁碟，不從 `/readyz` 推定容量正常。程式定位及下一步見 [STATUS](STATUS.md)。
+
 ## HTTP 邊界
 
 事件 API 回應依 OpenAPI；所有錯誤使用既有 code。HTTP header／request target 上限為128 KiB，容納合法大分組鍵的URL轉義；metric cursor使用固定長度group雜湊，避免大分組讓翻頁失敗。每個 HTTP body 最多 **4 MiB**（單筆、批次與 adapter 共用），超過回413 payload_too_large；data 仍另依 JCS 限16384 bytes。JSON 巢狀深度最多64層，超過回400 invalid_json。這兩個資源限制亦適用於包含大量 extension 或空白的請求。

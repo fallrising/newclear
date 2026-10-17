@@ -2,6 +2,8 @@
 
 This explicitly authorized test-environment continuation runs the production hub with generated release/inspection sources and a real Alertmanager container. Every generated source event identifies itself as a synthetic Docker test; native freshness events retain their shape and are traceable to those synthetic sources. It does not satisfy the original four live M6 gates, seven-day production observation, phone receipt, independent-host outage notification, yesterday's real snapshot or OneFleet production admission.
 
+The completed results may be reused for unchanged personal-use functionality under [SDD06](sdd/06-security-operations-acceptance.md). The original live gates above are now optional expanded-operation criteria; this historical test design does not require another Docker campaign.
+
 ## Design before execution
 
 The normal hub CLI permits only explicit loopback or actual tailnet listener addresses. Use a private Docker bridge with the hub listening on loopback and producer/Alertmanager fixture containers sharing its network namespace. No host networking or published hub port. A separate test-only HTTPS receiver publishes exclusively on an existing real tailnet address; configure the exact full URL allowlist and a certificate hostname resolving to that address. A generated CA is trusted only by the test hub container. Use a distinct ordinary receiver bridge when same-bridge hairpin traffic cannot reach the host-published tailnet endpoint; no host firewall change is needed. Include strict CA keyCertSign/cRLSign and leaf keyUsage/serverAuth/SAN extensions. Never assign Docker a fake tailnet subnet, disable TLS verification or expose the Go-only local test sender through the CLI.

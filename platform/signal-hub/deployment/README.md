@@ -1,10 +1,10 @@
-# Deployment preparation contract
+# Optional expanded deployment preparation contract
 
-Frozen before implementation for M6 preparation. This directory is a synthetic review packet, not native OneFleet configuration or a deployment command. All actual gates default to pending. See [design](../docs/m6-design.md), [acceptance and runbook](../docs/deployment-acceptance.md) and [runtime](../docs/runtime.md).
+Current personal use follows [SDD06](../docs/sdd/06-security-operations-acceptance.md), with one useful source and a non-root Docker or admitted OneFleet instance. This directory preserves worksheet v1 and the original expanded-operation preparation. It is optional for personal use, not native OneFleet configuration, a persistent Docker recipe or a deployment command. All worksheet gates default to pending; pending here does not block the reduced scope. See [design](../docs/m6-design.md), [acceptance and runbook](../docs/deployment-acceptance.md) and [runtime](../docs/runtime.md).
 
 ## Inspected lifecycle boundary
 
-The existing OneFleet generic binary adapter launches `app`, sets `PORT` and uses the workload data directory as its working directory. Its remote systemd unit does not declare `User`, and the catalog CLI has no Signal Hub config/secret/mount/non-root flags. The raw hub binary needs explicit CLI paths. A wrapper alone does not repair host admission: the approved service UID, environment/path injection, mount permissions, isolation and tailnet ingress must be designed and reviewed before deployment. Do not issue a direct generic deploy as if these gates were met. OneFleet stays lifecycle authority; privileged host work belongs to the host authority. `register` writes the catalog; `visibility=internal` is not a network ACL. No public ingress command belongs here.
+The existing OneFleet generic binary adapter launches `app`, sets `PORT` and uses the workload data directory as its working directory. Its remote systemd unit does not declare `User`, and the catalog CLI has no Signal Hub config/secret/mount/non-root flags. The raw hub binary needs explicit CLI paths. A wrapper alone does not repair host admission: the approved service UID, environment/path injection, mount permissions, isolation and tailnet ingress must be designed and reviewed before deployment. Do not issue a direct generic deploy as if these gates were met. For the OneFleet route, OneFleet stays lifecycle authority; privileged host work belongs to the host authority. The generic-adapter gap does not block a separately admitted personal Docker instance. `register` writes the catalog; `visibility=internal` is not a network ACL. No public ingress command belongs here.
 
 ## Frozen files and checker interface
 
@@ -19,4 +19,4 @@ Worksheet v1 has exact top-level keys `version`, `evidence_kind`, `authorization
 
 ## Required local verification
 
-From component root: `python3 scripts/test_check_deployment.py`; `python3 scripts/check_deployment.py`; `sh -n deployment/launch.sh`; `git diff --check`; native `teamctl.py validate-report .team/reports/T-602.md`. Retain Red and Green logs under `.local/run/`; they are synthetic preparation evidence. Full M6 real seven-day, phone, <=5-minute outage and previous-day restore acceptance stays pending.
+From component root: `python3 scripts/test_check_deployment.py`; `python3 scripts/check_deployment.py`; `sh -n deployment/launch.sh`; `git diff --check`; native `teamctl.py validate-report .team/reports/T-602.md`. Retain Red and Green logs under `.local/run/`; they are synthetic preparation evidence. The original expanded seven-day, phone, <=5-minute outage and previous-day restore criteria stay unverified; they are not the personal-use acceptance checklist.

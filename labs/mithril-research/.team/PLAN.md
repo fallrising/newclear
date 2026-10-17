@@ -1,35 +1,45 @@
-# P1e offline phase validation delivery plan
+# P1f durable bootstrap intent foundation
 
-Root owns PLAN, routing, integration and acceptance. Baseline e00b1846172f753ece2020bbfe52df07584c77e5; P1d PLAN archived verbatim. The new bounded doing claim is published and remotely read back; private publication details stay private.
+Root owns PLAN/routing/integration/acceptance. Baseline ffe09f07c6130bb6d9edb3375aacd01eeab6fde2; prior P1e PLAN archived verbatim. New bounded doing claim published and remotely read back before source work; details held privately.
 
-## Scope
+## Objective and boundary
 
-Implement a separate pure offline phase-snapshot validator for the five barriers specified by T-011 D6. Freeze exact input/API/predicates after independent design. Preserve all existing scripts/tests/contracts and both locks byte-identically. No collection invocation, actual SSH/runtime, executor, phase advance, mutation journal, deployment, network changes, purge or publication of images/releases. Full P1 incomplete; MR-004 BLOCKED_ENV; formal task counts remain 4 DONE / 1 BLOCKED_ENV / 4 TODO. Research pin 9959fe2e5cd466614dc20ef7b710befaaf1d746a unchanged.
+Develop the minimum local durable bootstrap intent/uncertainty foundation, with exact contract selected after independent design. Existing scripts/tests/contracts and both locks remain byte-identical. No real effect dispatcher, phase advance/live admission, actual SSH/runtime/Redis/Mithril calls, provision/upload/create/up, shared runtime/network changes, faults, purge, release/image publication. An offline predicate, operator assertion, fingerprint or journal record grants no authority. Timeout/lost reply/restart is not cancellation; no blind retry or uncertainty clearance.
 
-## Team and evidence
+Full P1 and MR-004 remain incomplete: formal research count 4 DONE/1 BLOCKED_ENV/4 TODO, five unfinished tasks. P1a–P1e are foundations inside MR-004, not additional formal DONE milestones. Research pin 9959fe2e5cd466614dc20ef7b710befaaf1d746a fixed. Root will document remaining work without inventing a fixed number of future PRs. This task stops at review, no next milestone auto-claim.
 
-Root integrates and documents; native gpt-6-astra high independently designs/reviews; native gpt-6.1-sol high implements in a separate fresh worktree. Exact IDs remain exposed by current tool catalog. Reuse the same-session official model check dated2026-10-17 recorded in P1D-PLAN and accepted P1c/P1d route evidence. Provider-resolved identity, entitlement, quota, usage and cost unknown. No silent fallback, nested delegation or worker commits. cli-team canonical source39fb407d71c7c5aae5f50a9bc01df6b3c215daa3 retained. All checks use common workspace launcher with unique private task IDs and explicit stdout/stderr/exit evidence.
+## Team
 
-## Sequence
+Root integration/docs; native gpt-6-astra high independent T-017 design/T-019 review; native gpt-6.1-sol high T-018 builder, each in fresh isolated worktrees. Reuse same-session exact ID official check dated 2026-10-17 and accepted P1c/P1d/P1e route evidence; current native catalog still exposes both. Provider-resolved identity/full usage/quota/cost unknown. No external CLI, silent fallback, nested delegation or worker commits. cli-team canonical 39fb407d71c7c5aae5f50a9bc01df6b3c215daa3 remains clean/pinned.
 
-1. T-014 Astra exact offline contract design; root freezes before behavior writes.
-2. T-015 Sol bounded new module/tests; preserved Red-Green evidence.
-3. Root full diff/readback inspection, documentation, regression and independent probes, Python3.11/3.13 and existing synthetic demo.
-4. T-016 Astra independent final review; root addresses findings and evidence-gates acceptance.
-5. Authorized commit with task trailer, push, PR, necessary CI, normal merge, remote main readback and private ledger review; stop.
+## Order and gates
 
-## Acceptance concerns
+1. T-017 evaluates minimum useful journal-only slice, freezes API/schema/bindings/atomic persistence/crash uncertainty and mock-only evidence rules; root accepts before behavior writes.
+2. T-018 tests first, actual Red preserved, new module/tests only. One unresolved intent must fence replay across failures/restarts; unrelated snapshots cannot clear it.
+3. Root full diff and actual evidence inspection, necessary regressions/Python3.11/3.13/synthetic demo plus independent failure-window/CLI probes.
+4. T-019 independent final review, findings fixed/rechecked; root evidence gate.
+5. Correct task trailer, commit/push/PR/necessary CI/normal merge/remote SHA+content/main CI readback; publish private ledger review and stop.
 
-Original independently bound collection only; unknown/partial/foreign/drift refuse. No transformation that admits intermediate snapshots to unchanged P1c. Exact per-barrier topology, epochs, INFO and empty-keyspace predicates; final retained-data semantics preserved. No origin upgrade, freshness, health, cancellation, authorization, phase admission or uncertainty clearance. Credentials are not inputs. Future live execution still requires fresh pre/post observation, independent exact approval, durable uncertainty and runtime/network/storage/health gates. Down retains data; purge remains separately approved.
+## Frozen design
 
-## Progress
+p1f-v1.1 adopts T-017 D1–D7: initialize_journal, journal_status and record_intent; exact original independently digested pristine plan/action selection; immutable private metadata, permanent inode-bound lock and once-only uncertain intent. Any original action may be reserved without asserting phase order or admission. No dispatcher, mock callback, resolution or phase advancement. Same-root cooperating callers only; new roots/rollback and physical power loss remain outside demonstrated guarantees.
 
-Claim/readback complete. Existing required-reading identities retained from accepted P1d baseline; current root README/AGENTS, component AGENTS, collector contract, T-011 and relevant collector/bootstrap implementations reread. Design pending.
+All new checks use common workspace launcher with unique IDs and explicit stdout/stderr/exits/artifacts. Preserve old worktrees, branches, raw evidence and publisher outboxes. Actual runtime gates remain independently approved future work.
 
-Root freeze: ACCEPT T-014 D1–D7 as p1e-v1 in P1-PHASE-CONTRACT. Sol may begin tests/Red then implementation. Root baseline02 passed112 tests; baseline01 failed before testing because host make is absent (original traceback/limitation retained). Root reading-audit01 confirmed39 previously fully read inputs byte-identical to accepted P1d source. Task-check01 passes both new assignments.
+## Root design freeze
 
-T-015 integrated after root full implementation/tests/R1 diff and actual Red/Green inspection. Root R1 noncanonical paths reproduced three actual CLI successes in Red02, fixed before read in Green03. Final21 new methods; root full01 Python3.13.5 and py311-01 Python3.11.17 each133 pass. Root probe02 passes60 checks/9CLI, probe01 root fixture-field lookup error retained. Fixed-image existing synthetic demo passes8CLI/28operations/two rounds/retained marker/zero resources+uncertainty. T-016 independent review pending.
+D1–D7 of T-017 accepted as p1f-v1.1. Three APIs, immutable metadata/permanent lock/once-only intent, no resolution or dispatcher. Root reviewed complete design and actual audit evidence. Report01 failed because its scope check counted root-provisioned files; report02 correctly compares the starting snapshot and passes, preserving the initial failure. Root design-gate01 passes three task validators, report validator and whitespace check. T-018 is released for tests-first implementation against P1-JOURNAL-CONTRACT. Root independent probes cover all 17 actions, malformed/private state, lexical aliases, actual late child effects and private CLI.
 
-T-016 independently ACCEPTS:133 tests and375 checks/30CLI pass,20 baseline files/archive exact, actual Red/Green/root evidence and full docs checked; no blockers. Before commit, main advanced only in unrelated signal-hub documentation to786491ea4c42b3461ffd1454335f5256e878fdc2. Root inspected path scope and safely fast-forwarded this new worktree, preserving all P1e changes; Mithril/policies unchanged. Final static/evidence gate pending.
+Root R1: initial implementation did not fsync the permanent empty lock before persisting its inode binding. Astra independently agrees to explicit initialization-only lock fsync. p1f-v1.1 clarifies this ordering without API/schema/scope changes; builder must preserve actual Red ordering/failure evidence before fixing. A failed lock fsync retains a partial root that cannot be adopted.
 
-Root evidence gate ACCEPTS the bounded source: every task DoD maps to T-014/T-015/T-016, actual final test/probe/demo logs and static01. Static01 passes20-file scope/privacy/new-guide links/UTF8/whitespace/AST, all six task/report validators,20 unchanged baseline files, exact P1d archive and4/1/4 counts. Root completed full diff review; R1 resolved, historical failed attempts explicit, no outstanding source findings. Assignment checkboxes remain unchecked to satisfy installed task format; reports/PLAN record completion. Authorized commit/push/PR/necessary CI/normal merge/readback/private ledger review remain; full P1/MR-004 incomplete.
+## Integration progress
+
+T-018 behavior frozen and integrated after root full source/test/diff and actual Red/Green inspection. R1 Red02 preserves two failures; Green03 passes 24 methods, full01 passes 157. Root full01 Python3.13.5 and py311-01 Python3.11.17 each pass 157; probe01 passes 139 checks/8 CLI. Existing synthetic demo passes 8 CLI/28 operations/two rounds/retained marker/zero resources+uncertainty. No actual runtime effects. T-019 final independent review in progress; static/evidence gate and delivery remain.
+
+Precommit source main advanced only in unrelated signal-hub paths to e5c9f0070fc854acf3e01066544596f61f8bd724. Root checked Mithril/root policies/applicable CI unchanged and fast-forwarded only this fresh root worktree, preserving edits. Current task/policy/parent still unchanged; an unrelated new ledger decision has no bearing on this scope. Reviewer retains original component-identical baseline.
+
+T-019 independently ACCEPTS: full157 tests plus5494 checks including14 CLI/6 SIGKILL pass; ordinary copied-root wording clarified in T-018. Actual root/worker evidence and all docs reviewed, no unresolved blocker. Handoff02 passes scope/privacy/archive/preservation/counts/validators; handoff01 privacy scanner falsely matched slash-separated prose and is retained. Root final static/evidence gate follows.
+
+## Root evidence gate
+
+ACCEPT this bounded source slice. Every source DoD maps to T-017/T-018/T-019, actual final Red/Green/full/probe/crash/demo evidence and root static01. Static01 passes 20-file scope/privacy/UTF-8/whitespace/AST/links, all six task/report validators, 23 unchanged baseline files, exact P1e PLAN archive and 4/1/4 counts. Full diff inspected; R1 resolved; original failed attempts retained; no outstanding findings. Assignment checkboxes remain unchecked to satisfy the installed task format; reports and this decision record completion. Commit/push/PR/necessary CI/normal merge/remote readback/private ledger review follow. Full P1 and MR-004 remain incomplete; stop after this bounded review delivery.

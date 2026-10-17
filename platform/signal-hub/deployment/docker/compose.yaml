@@ -1,0 +1,57 @@
+services:
+  hub:
+    image: ${SIGNALHUB_IMAGE:-signalhub:personal}
+    user: "${SIGNALHUB_UID:?use initializer compose.env}:${SIGNALHUB_GID:?use initializer compose.env}"
+    network_mode: host
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    stop_grace_period: 20s
+    cpus: 1.0
+    mem_limit: 512m
+    pids_limit: 64
+    labels:
+      io.signalhub.package: personal
+      io.signalhub.instance: ${SIGNALHUB_INSTANCE_LABEL:-personal}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    command:
+      - -config
+      - /etc/signalhub/config.json
+      - -db
+      - /var/lib/signalhub/events.sqlite
+      - -owner-token-ref
+      - file:/run/secrets/owner.token
+      - -readonly-token-ref
+      - file:/run/secrets/readonly.token
+      - -listen
+      - 127.0.0.1:${SIGNALHUB_PORT:-8080}
+      - -backup-dir
+      - /var/backups/signalhub
+    volumes:
+      - type: bind
+        source: ${SIGNALHUB_STATE_DIR:?use initializer compose.env}/config
+        target: /etc/signalhub
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SIGNALHUB_STATE_DIR:?use initializer compose.env}/secrets
+        target: /run/secrets
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SIGNALHUB_STATE_DIR:?use initializer compose.env}/data
+        target: /var/lib/signalhub
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SIGNALHUB_STATE_DIR:?use initializer compose.env}/backups
+        target: /var/backups/signalhub
+        bind:
+          create_host_path: false

@@ -26,14 +26,18 @@ M0 契約、M1 事件 runtime、M2 事件看板／來源新鮮度已分別由 PR
 
 | 優先與類型 | 真正剩餘事項 | 現有能力／界線 |
 | --- | --- | --- |
-| 先做：執行包／接線 | 一份最小的持久 Docker 啟動設定，接一個實際腳本／管線的結果 | 已有非 root Docker 測試證據，但沒有維護中的 Dockerfile／Compose 成品；[測試 fixtures](../deployment/docker-test/README.md) 不是實際來源 adapter。不建新控制器／通用 SDK |
+| 先做：執行包／接線 | 完成[Docker 啟動包](../deployment/docker/README.md)後，接一個實際腳本／管線的結果 | 本次新增 Dockerfile／Compose／私人初始化器，包驗證結果見下；[測試 fixtures](../deployment/docker-test/README.md) 不是實際來源 adapter。不建新控制器／通用 SDK |
 | 同時確認：備份配置 | 啟用既有 `-backup-dir` 或沿用既有排程，驗證實例的持久快照與隔離還原 | [main.go](../cmd/signalhub/main.go) 已有啟動及每24小時的選用維護；未帶旗標就不自動備份。[OneFleet launch](../deployment/launch.sh) 未傳備份旗標，不能假設預設已啟用；不預設可接受24小時資料損失 |
 | 延後的小型程式補強 | `/v1/self` 自我觀測、主動低磁碟空間檢查 | OpenAPI／SDD 有設計，但 [HTTP 路由](../internal/httpapi/server.go) 未實作 `/v1/self`，目前回404；也尚無 free-space threshold。現有寫入失敗回503及交易保護仍在。補強前須定義門檻，不虛報已完成 |
 | 選到才處理：來源相容性 | 若先接 Alertmanager，檢查真實重送內容與逐筆結果 | [adapter](../internal/adapter/alertmanager.go) 的固定身分搭配變動 annotations／groupKey 可能409；先看實際樣本，不預先重寫 adapter |
 
-事件庫、查詢／看板、規則圖表、投遞重試／DLQ、封存及備份引擎已有實作。手機恢復需求時再接現有 ntfy；不新增 Bark adapter、更多消息通道、HA、多使用者或第二層監控。上述執行包／接線是下一個最小工作建議，尚未在本次文件變更中開發或部署；資料保存、通知與停機容忍度仍依實際用途決定。
+事件庫、查詢／看板、規則圖表、投遞重試／DLQ、封存及備份引擎已有實作。手機恢復需求時再接現有 ntfy；不新增 Bark adapter、更多消息通道、HA、多使用者或第二層監控。本次開發限 Docker 執行包；實際來源接線及部署尚未執行；資料保存、通知與停機容忍度仍依實際用途決定。
 
 以下保留各次執行當時的證據與失敗；歷史「完整 M6 待驗」描述指原擴展條件，不再是目前首次個人使用的硬門檻。
+
+## 個人 Docker 啟動包驗證
+
+新增 Dockerfile、Compose、私人初始化器與包裝測試。本機8項初始化回歸與固定 digest 的實際映像建置通過；映像內含 CA 與 IANA 時區資料。Linux host network 預設僅綁 loopback，非 root、唯讀 rootfs／設定與憑證；DB 及備份分開持久掛載。啟用既有啟動／每24小時備份，不預設封存或刪除。專屬 CI 的 `docker-package` job 使用交付的 Compose 驗證角色隔離、原 seq 去重、容器重建持久化、自動／手動快照與 network-none 還原／啟動，再停止還原副本並唯讀查詢 SQLite；結果以該變更的 CI 為準。本機未安裝 Compose，未將本機映像 build 冒充容器生命週期通過。這不代表實際安裝、來源接入或異地備份已驗收。
 
 ## M6 Docker 測試續作
 

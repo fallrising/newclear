@@ -1,0 +1,18 @@
+# Allow only compilation inputs. Private config, tokens, state, tests and VCS
+# metadata are excluded even if they live below the component root.
+**
+!Dockerfile
+!go.mod
+!go.sum
+!cmd/
+!cmd/**/
+!cmd/**/*.go
+!internal/
+!internal/**/
+!internal/**/*.go
+!internal/store/migrations/*.sql
+!web/
+!web/embed.go
+!web/dist/
+!web/dist/**
+**/*_test.go

@@ -349,3 +349,5 @@ Operator 至少能看到：工作者可用／未驗證／暫停原因；排隊�
 - 設計中的物件、上限、儲存選擇、責任分工和里程碑是本項目提案；不視為供應商保證，也不代表已進行帳號／資源／部署操作。
 
 M2 stop port 補充：可信呼叫端可明確選用 operation 專屬 subreaper，以核心 ECHILD 與匹配持久 receipt 證明本機子孫結束；原 polling journals 與未知 effects 不被提升。詳細邊界與逐 route 驗收仍以 [M2 契約](docs/m2.md) 為準。
+
+M2 session-source 補充：fresh Codex operation 可明確綁定 bounded persisted-session source；啟動前保存 source intent，匹配本機 closure 後封存原始 bytes／manifest。重新開啟只驗證封存資料，不從 mutable provider tree 重新採樣。型別化工具失敗維持 failed；opaque wrapper 與不支援事件保留 coverage gap，不能把 stdout success 提升成任務完成。原 operation、effects 與 reservation 不因新接入方式而改變。

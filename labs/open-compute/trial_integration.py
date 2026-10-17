@@ -182,6 +182,27 @@ def finalize_children(children, deadline=None):
     need(not failed,'shutdown')
 
 
+def observe_ready(child,commands):
+    from trial_state import decode_message
+    exited=child.process.poll() is not None
+    if exited:
+        child.finish_threads()
+    need(not child.observation_error,'bootstrap')
+    output=child.text()
+    if '\n' in output:
+        value=decode_message(output.splitlines(keepends=True)[0].encode())
+        need(value['command']=='serve','protocol')
+        if value['result']=='failed':
+            commands.append(dict(command='serve',result='failed'))
+            raise TrialFailure(value['error'])
+        need(not exited and value==dict(schema_version=1,command='serve',result='passed',
+             error=None,data={'ready':True}),'bootstrap')
+        commands.append(dict(command='serve',result='passed'))
+        return True
+    need(not exited,'bootstrap')
+    return False
+
+
 class Capture(lab.Process):
     """Count complete output as well as keeping the inherited bounded ring."""
     def __init__(self, argv):
@@ -244,14 +265,7 @@ def execute(args, report):
         current = spawn('serve','--seconds','600')
         cutoff = min(end,time.monotonic()+120)
         while time.monotonic()<cutoff:
-            need(current.process.poll() is None and not current.observation_error, 'bootstrap')
-            text = current.text()
-            if '\n' in text:
-                line = text.splitlines(keepends=True)[0]
-                value = decode_message(line.encode())
-                need(value==dict(schema_version=1,command='serve',result='passed',
-                                error=None,data={'ready':True}), 'bootstrap')
-                report['commands'].append(dict(command='serve',result='passed'))
+            if observe_ready(current,report['commands']):
                 return
             time.sleep(.05)
         raise TrialFailure('deadline')

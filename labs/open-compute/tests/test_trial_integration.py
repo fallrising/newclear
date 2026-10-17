@@ -86,6 +86,17 @@ class LifecycleOracleTests(unittest.TestCase):
             with self.assertRaises(trial.TrialFailure): trial.finalize_children([other,bad])
             other.finish_threads.assert_called_once()
 
+    def test_exited_owner_failure_keeps_sanitized_reason_and_receipt(self):
+        child=Mock();child.process.poll.return_value=1
+        child.observation_error=None
+        child.text.return_value='{"schema_version":1,"command":"serve","result":"failed","error":"ownership","data":{}}\n'
+        commands=[]
+        with self.assertRaises(trial.TrialFailure) as failure:
+            trial.observe_ready(child,commands)
+        self.assertEqual(str(failure.exception),'ownership')
+        self.assertEqual(commands,[dict(command='serve',result='failed')])
+        child.finish_threads.assert_called_once()
+
     def test_cleanup_expired_alarm_does_not_continue_to_next_child(self):
         bad=Mock();bad.process.poll.return_value=None
         bad.stop.side_effect=lambda **kwargs: time.sleep(.2)

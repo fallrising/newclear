@@ -288,6 +288,36 @@ class TrialOwner:
             except (OSError,http.client.HTTPException,TrialError):return False
         lab.poll(probe,bool,min(60,max(.001,self.deadline-time.monotonic())),'M7 readiness')
 
+    def wait_instance(self,binary):
+        """Shared daemon health precedes asynchronous retained-instance startup."""
+        limit=min(self.deadline,time.monotonic()+60)
+        identity=self.manifest['identity']
+        def probe():
+            self.live()
+            remaining=limit-time.monotonic()
+            require(remaining>0,'deadline')
+            result=json.loads(lab.command([str(binary),'--no-update-check',
+                'instances','--json'],timeout=min(20,remaining)))
+            self.live()
+            require(type(result) is dict and type(result.get('instances')) is list and
+                len(result['instances'])<=1,'deployment')
+            records=result['instances']
+            if not records:return False
+            record=records[0]
+            require(type(record) is dict and record.get('name')==lab.INSTANCE and
+                type(record.get('instance_id')) is str and
+                record['instance_id']==identity['instance_id'] and
+                type(record.get('state')) is str and len(record['state'])<=32,'deployment')
+            require(record['state']!='failed','runtime')
+            return record['state']=='running'
+        lab.poll(probe,bool,max(.001,limit-time.monotonic()),'M7 retained instance')
+
+    def resume(self,binary):
+        self.start(binary)
+        self.wait_instance(binary)
+        self.connect()
+        self.verify_identity(binary)
+
     def connect(self):
         data=self.scope.path/'instances'/lab.INSTANCE/'data'
         token=read_private(data/'keys/deployer.token').decode('ascii').strip()
@@ -595,8 +625,8 @@ def run_serve(args):
         lease=None
         try:
             with owner.operation(120):
-                require(not interrupted,'interrupted');owner.start(binary);owner.connect()
-                owner.verify_identity(binary);require(not interrupted,'interrupted')
+                require(not interrupted,'interrupted');owner.resume(binary)
+                require(not interrupted,'interrupted')
             state.check()
             with lab.defer_owner_signals():
                 server=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)

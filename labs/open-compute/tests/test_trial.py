@@ -137,6 +137,35 @@ class OwnerTests(unittest.TestCase):
     def test_resume_accepts_exact_bounded_database_uuid(self):
         self.verify_database(dict(uuid='db',name='lab-db'))
 
+    def test_resume_waits_for_instance_before_endpoint_discovery(self):
+        owner=self.owner();order=[]
+        owner.start=lambda binary:order.append('start')
+        owner.wait_instance=lambda binary:order.append('wait_instance')
+        owner.connect=lambda:order.append('connect')
+        owner.verify_identity=lambda binary:order.append('verify_identity')
+        owner.resume(Path('/fake/binary'))
+        self.assertEqual(order,['start','wait_instance','connect','verify_identity'])
+
+    def test_instance_gate_waits_through_starting_with_live_owner(self):
+        owner=self.owner();owner.live=Mock()
+        def data(state,identity='instance'):
+            return trial.json.dumps(dict(instances=[dict(name='lab',state=state,instance_id=identity)]))
+        def poll(probe,predicate,*args):
+            self.assertFalse(predicate(probe()))
+            self.assertTrue(predicate(probe()))
+        with patch.object(trial.lab,'command',side_effect=[data('starting'),data('running')]) as command,patch.object(trial.lab,'poll',side_effect=poll):
+            owner.wait_instance(Path('/fake/binary'))
+        self.assertEqual(command.call_count,2)
+        self.assertGreaterEqual(owner.live.call_count,4)
+
+    def test_instance_gate_refuses_foreign_running_or_starting_instance(self):
+        for state in ('starting','running'):
+            owner=self.owner();owner.live=Mock()
+            records=trial.json.dumps(dict(instances=[dict(name='lab',state=state,instance_id='foreign')]))
+            with self.subTest(state=state),patch.object(trial.lab,'command',return_value=records):
+                with self.assertRaises(trial.TrialError) as caught:owner.wait_instance(Path('/fake/binary'))
+                self.assertEqual(caught.exception.reason,'deployment')
+
     def test_get_ceiling_fails_before_transport(self):
         owner=self.owner();owner.gets=64;transport=Mock()
         bounded=trial.BudgetHTTP(owner,transport)

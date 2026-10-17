@@ -8,6 +8,8 @@
 
 [P1c bootstrap planner](P1-BOOTSTRAP.md) 可離線驗證六份 backend 觀察並產生精確提案；只有 pristine／already-converged 兩種狀態可通過，沒有遠端 collector 或 phase executor。
 
+[P1d collector](P1-COLLECTOR.md) 提供六節點唯讀收集介面；mock 結果與 ssh origin 分開，實機 collection/freshness 未驗收。使用前須有精確讀取授權；本輪沒有執行真實 SSH/runtime。Phase-aware validator 與 executor 仍缺。
+
 ## 正式接手順序
 
 完整閱讀 [AGENTS](../AGENTS.md) 指定文件，核對 main／PR／既有工作樹；先唯讀盤點四台與保留服務，再建立精確部署計劃。首輪實機批准後依 P1–P3 完成固定 artifacts、交叉副本、健康／安全、真正讀寫、保留資料重啟與精確清理。

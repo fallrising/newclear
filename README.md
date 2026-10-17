@@ -17,27 +17,9 @@
 
 **文檔深度跟檔位走，不跟「有沒有目錄」走。** 只有 A 檔需要 `docs/quickstart.md`；C/D 禁止新開 tutorial。
 
-**Commit trailer：** 2026-09-28 起，開發工作先在私人項目帳本開任務，每個 commit 帶 `Desk-Task: T-####` trailer；
-依賴更新 bot、mirror 與 owner 標記的 hotfix（帶 `Desk-Exempt: <原因>`）例外。沒有 trailer 的 commit 會在定期稽核中被列出。
+**認領規則已被取代。** 唯一依據：https://github.com/fallrising/desk 的 docs/operating-method.md。
 
-### Phase 1 issue-task pilot
-
-The public pilot is limited to [`tools/codex-usage`](tools/codex-usage/).
-[The contract](docs/work-tracking/README.md) keeps detailed tasks and reports beside the component, with a GitHub
-issue as their identity and queue. Existing private-ledger claims and `Desk-Task: T-####` trailers remain mandatory;
-the root orchestrator assigns pilot work serially. Assignees and draft PRs are visibility, not exclusive locks.
-Use `Refs #N`; merging delivers the change, and the issue stays open until the owner accepts and closes it.
-
-Start with the [task template](docs/work-tracking/task-template.md),
-[report template](docs/work-tracking/report-template.md), and [request form](.github/ISSUE_TEMPLATE/task-request.yml).
-The [versioned label manifest](docs/work-tracking/labels.json) describes manual triage; a form's component selection
-does not apply its project label or mark it ready. Sanitize public issues, PRs, files, and evidence; private
-authorization is recorded only through abstract references. See the contract's manual validation checklist.
-Phase 2 extends the existing pilot with explicitly invoked manual dispatch and validated private control
-receipts; see [the bounded receipt gates](docs/work-tracking/README.md#phase-2-manual-dispatch-and-claims).
-Singleton and issue receipts supplement published tracking authority; assignment/draft PR are visibility only.
-Owner changes still govern work, and merge still awaits owner acceptance. Integration evidence and owner
-fixture judgment remain separate. Production enrollment is unchanged; later migration phases remain out of scope.
+[`tools/codex-usage`](tools/codex-usage/) 的 issue-task pilot 檔仍在 [docs/work-tracking/README.md](docs/work-tracking/README.md)，不再作為認領依據。
 
 ## 目錄
 

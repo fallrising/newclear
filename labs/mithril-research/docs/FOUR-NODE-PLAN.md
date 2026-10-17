@@ -4,6 +4,8 @@
 
 2026-10-17 P1c 補充：[offline bootstrap tools](P1-BOOTSTRAP.md) 可驗證 synthetic／operator-supplied snapshots 及產生四階段提案，未執行任何實機階段，也不替代以下健康與批准門檻。
 
+2026-10-17 P1d 補充：[獨立唯讀 collector](P1-COLLECTOR.md) 以 mock SSH/runtime 驗證完整回應與身份綁定；不代表 authenticated live collection、freshness 或 phase admission 已通過。Phase-aware validator 留後續獨立段落。
+
 版本：0.1；日期：2026-09-27；狀態：**文件設計完成，尚未部署或驗收**。
 
 Owner 已確認有四台測試機，要求文檔先行並以 PR 合併。本次授權只涵蓋文件與 GitHub 交付；不是登入、安裝、重灌、故障注入或資料清除授權。主機身分、可用資源與既有服務尚未現場核對。以下拓撲、配額、門檻均是 **DESIGN／INFERENCE**，不是實測事實。

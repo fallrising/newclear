@@ -1,5 +1,47 @@
 # Mithril 研究與計劃驗證記錄
 
+## P1d read-only collector：2026-10-17（develop-only）
+
+本段新增獨立六節點唯讀 collector、固定 SSH helper 與 private CLI，
+只以 offline／mock SSH／mock runtime 驗證。原有 P1c parser／pristine 或
+already-converged admission、獨立 node-ID binding、中間狀態拒絕，以及
+P1b down／purge／uncertainty 行為均未修改。Phase-aware validator 的獨立
+predicates 已評估，但實作延後，沒有 phase advance、executor 或新 journal。
+完整 P1 未完成；MR-004 保持 BLOCKED_ENV，4 DONE／1 BLOCKED_ENV／4 TODO。
+
+### Actual offline evidence
+
+- Native `gpt-6-astra` [T-011](../.team/reports/T-011.md) 完成設計審查，root 凍結 [p1d-v1](P1-COLLECTOR-CONTRACT.md) 後，native `gpt-6.1-sol` 才開始行為修改。兩個 exact model IDs 已按工具 catalog／官方頁核對，沒有替換；provider-resolved identity、usage/quota/cost 未知。
+- Root `t0327-root-baseline01`：原有 **87 tests** 通過。`t0327-root-baseline-identity`：P1c 的 22 個交付檔在原 source、merge 與本輪 baseline byte-identical，確認 ancestry/trailer；兩份 locks 與固定 research pin 不變。
+- [T-012 builder](../.team/reports/T-012.md) 保存 `t0327-sol-red01` 缺 module 的實際 exit 1，以及 `t0327-sol-red02` 重現 mapping 父目錄非私有仍被接受的實際 failure。修正後 `green03` **25** 新 methods、`full02` **112 tests** 通過；baseline 13 個 scripts/tests/locks byte-identical。中間 Green01 的 test injection seam 錯誤及 Audit01 的零檔選取錯誤保留，不能作 final acceptance。
+- Root `t0327-root-full01`：`python3 -m unittest discover -s labs/mithril-research/tests -v`，Python **3.13.5**，**112 tests**，exit 0。Root 已逐段閱讀新 implementation/tests 與所有文件 diff。
+- Root `t0327-root-probe01`：另寫的 **14 checks** 通過，包括六節點完整、最後一節點 malformed process 變 partial、保留私有 partial、status/map/order/admission/origin/process 偽造拒絕且不建立 output，以及 P1c 拒收 collection envelope。兩個實際 CLI subprocess 只以 Python wrapper 注入 mock Transport：complete exit 0、partial exit 2，stdout/stderr 通過 private identity／credential sentinel 檢查。
+- Root `t0327-root-py311-01`：sandbox 拒絕 Docker socket，exit 1，未執行測試容器；失敗保留。核准後 `t0327-root-py311-02` 使用固定 `python@sha256:c3cd26fd6259ce667be208ab9c118463210a745ffc97e0e85af5121c10bc71c5`，Python **3.11.17**、network none、source read-only、nonroot/cap-drop/no-new-privileges。`make -C labs/mithril-research check` **112 tests** 與 `make -C labs/mithril-research demo DEMO_OUTPUT=PRIVATE_OUTPUT` 都 exit 0；demo 實際 **8 CLI calls／28 synthetic operations**，兩輪 process instance 重建、marker 保留，最後 synthetic resources／uncertainty 都為 0。
+
+- Astra [T-013 final review](../.team/reports/T-013.md) 建議 ACCEPT：獨立 **112 tests** 與另寫的 **74 checks**（內含 5 次實際 CLI help/refusal calls）通過；核對原有 13 個 scripts/tests/locks、P1c PLAN archive、worker Red/Green 與 root Python 3.11／mocked CLI 實際 logs，沒有 behavior blocker。Root 發現 report 含私有絕對路徑，已在發表前去識別，handoff02 report／whitespace／privacy 檢查通過；原 handoff01 保留，已驗的 source hashes 不變。
+
+- Root `t0327-root-static02` 通過 **21-file** scope/privacy/link/UTF-8/whitespace/Python AST 檢查、三 task／三 report validators、16 個既有 implementation/tests/locks/contracts 的 byte comparison、P1c PLAN archive 與固定 MR 計數。前一個 static01 因 task validator 要求保留 unchecked assignment checklist 而停止；已恢復 task 格式，完成狀態記於 reports／PLAN，原失敗保留。
+
+所有新 build/test/check 均經 common workspace launcher，使用唯一 task ID，
+分別保存完整 stdout/stderr、exit、artifacts/evidence。Python 測試容器只是
+本機隔離測試；沒有啟動 Redis/Mithril service。歷史 upstream 121 tests、
+Clippy/fmt、Compose parser 與私有四機盤點沒有在本段重跑。
+
+### Evidence limits
+
+Complete 僅表示固定回應 framing、原始 parser 與獨立輸入 binding 通過，
+不是健康、空磁碟、freshness、原子六節點 snapshot、phase admission 或授權。
+每節點一次嘗試；unknown/null 不代表 absent/empty/healthy。Timeout 或本機
+SSH process-group cleanup 不代表遠端取消，現有 uncertainty journal 不會被清除。
+Mock origin 保留；輸入 collection 仍是 assertion，不是簽章或實機 receipt。
+
+實機 authenticated collection/freshness、half-close 相容性、process-to-endpoint
+及 image/config/storage provenance、loading/quiescence、有效 host/network/ACL、
+replication health/lag、retained-data lifecycle、proxy smoke，以及獨立批准的
+精確 purge 都尚未通過。Startup/upload/create/up、phase-aware validation／
+execution 與 durable uncertainty fencing 仍缺。PR/main CI、merge 與遠端回讀
+由後續 GitHub／帳本紀錄確認，不由本 source snapshot 預先宣告。
+
 ## P1c bootstrap tools：2026-10-17（develop-only）
 
 新增 Python stdlib 六節點觀察 parser／topology validator、獨立 node ID map

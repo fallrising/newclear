@@ -4,48 +4,34 @@ This file covers **work tracking** and the few engineering rules shared by every
 engineering rules live in that component's own `AGENTS.md`
 (for example `platform/edge-ops/AGENTS.md`, `products/kith/AGENTS.md`); follow the nearest one.
 
-## Work is tracked in the owner's private ledger
+## Work is tracked in GitHub issues
 
-Whether something gets built, and how far it has got, is decided in the owner's private project ledger, not in this
-repository ([`PORTFOLIO.md`](PORTFOLIO.md) is only its public summary). The ledger's contents are not published here.
-If your session has access to the ledger, read its agent briefing before doing anything; the ledger's own rules take
-precedence over this summary. In short:
+An issue in this repository is the identity and queue of one piece of work. There is no separate ledger to claim
+in, and no commit trailer is required. The contract is [docs/work-tracking](docs/work-tracking/README.md); in short:
 
-1. **No task, no work.** Development starts from a ledger task (`T-####`). If you were not given one, stop and ask
-   the owner to create or name one.
-2. **Other agents may be working at the same time.** Claim the task in the ledger before editing here, and stay
-   inside its scope.
-3. **Every commit carries `Desk-Task: T-####`.** Commits without it are reported by the ledger's drift audit, and pull
-   requests get a non-blocking reminder. Dependency bots, mirrors and owner-marked hotfixes
-   (`Desk-Exempt: <reason>`) are the only exceptions.
-4. **The owner steers by editing the ledger.** Before every commit, re-read your task and its discussion there. A
-   task moved back to `todo`, `dropped` or `blocked` means stop.
-5. **Report in the ledger, not to the owner.** Do not ask the owner about state the ledger already records.
+1. **No issue, no work.** Work starts from an issue here. If you were given none, open one with the
+   [request form](.github/ISSUE_TEMPLATE/task-request.yml) or ask the owner.
+2. **Claim before editing.** Check the issue is open with no blocking label, no other assignee and no linked PR from
+   another session, then assign yourself and open a draft PR early. The root orchestrator assigns work serially;
+   an assignee or draft PR is how others see the claim.
+3. **One issue, one PR.** Detailed scope, evidence and the delivery report live in
+   `<component>/tasks/<issue-number>-<slug>/task.md` and `report.md` in the same PR as the code. Stay inside the
+   task's writable scope.
+4. **`Refs #N`, never `Closes`.** A merge delivers the change; only the owner accepts and closes the issue.
+5. **The owner steers through the issue.** Before each commit re-read the issue and its comments. `blocked`,
+   `needs-owner`, `duplicate`, a closed issue or an unassigned issue means stop.
+6. **Report in the task directory and PR**, not to the owner. Use `needs-owner` and a comment only when a
+   judgment is needed.
 
-This repository is public. Do not copy ledger contents, private repository names or paths, host names, or other
-private details into commits, pull requests or files here.
+This repository is public. Do not copy private notes, private repository names or paths, host names, accounts or
+other private details into commits, issues, pull requests or files here. Old `Desk-Task:` trailers in history are
+historical and need no change.
 
-`.team/PLAN.md` and `docs/HANDOFF.md` inside components are worker breakdowns and handoff notes, not investment
-decisions; their `.team/T-###` numbers are a different layer from the ledger's `T-####`.
+`.team/PLAN.md` and `docs/HANDOFF.md` inside components are worker breakdowns and handoff notes, not work
+identity; their `.team/T-###` numbers are a different layer from issue numbers.
 
-## Phase 1 issue-task pilot
-
-Only `tools/codex-usage` is enrolled in this repository's pilot. Follow
-[the issue-task contract](docs/work-tracking/README.md): an issue identifies the work; detailed scope and evidence
-live in `<component>/tasks/<issue-number>-<slug>/task.md` and `report.md`. Use `Refs #N` in PRs; a merge delivers
-the change, and the issue remains open until the owner accepts it and closes it.
-
-The existing published private-ledger `doing` claim, Scope/`touches`, and `Desk-Task: T-####` commit trailer remain
-mandatory. The root orchestrator assigns pilot work serially. An assignee or draft PR provides visibility,
-not an exclusive lock. `.team` files still bound workers; a worker's `DONE` report is evidence, not owner acceptance.
-Use abstract private-config authorization references; sanitize public files, issues, PRs, and evidence.
-Do not roll this out to other components or migrate private history. Phase 2 uses an explicitly invoked
-manual dispatcher and private control receipts under [the contract](docs/work-tracking/README.md#phase-2-manual-dispatch-and-claims).
-Before each triage metadata write, inspect the held singleton's exact current head and claim ID. Product edits
-also require a valid issue claim receipt, published private-ledger doing scope and bounded worker authority.
-Assignees/draft PRs alone do not grant exclusivity. Honor owner edits at work checkpoints; uncertain or denied
-claims grant no work. Keep private receipts/configuration abstract in public records. No broader enrollment,
-phase 3 migration, daemon, scheduling or deployment is authorized here.
+The manual dispatcher and private control receipts described in the contract are optional tools for unattended
+workers. Ordinary work needs only the rules above.
 
 ## Writing Go
 

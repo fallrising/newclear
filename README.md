@@ -17,18 +17,11 @@
 
 **文檔深度跟檔位走，不跟「有沒有目錄」走。** 只有 A 檔需要 `docs/quickstart.md`；C/D 禁止新開 tutorial。
 
-**工作追蹤：** 一件工作 = 一個 GitHub issue = 一個 PR。不再需要先在私人帳本開任務，commit 也不必帶 `Desk-Task` trailer
-（歷史 commit 不動）。規則見 [docs/work-tracking](docs/work-tracking/README.md)：
+**兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務。不要求卡片編號或 `Desk-Task`。
 
-- 先有 issue（用 [request form](.github/ISSUE_TEMPLATE/task-request.yml) 開）；自己指派並盡早開 draft PR 作為認領。
-- 詳細需求、證據與交付報告放在 `<component>/tasks/<issue-number>-<slug>/task.md`、`report.md`，與程式碼同一個 PR。
-- PR 用 `Refs #N`，不用 `Closes`；合併代表交付，owner 驗收後才關閉 issue。
-- 本 repo 是公開的：issue、PR、檔案與證據不得放私有內容、主機名稱、路徑或帳號。
+[`tools/codex-usage`](tools/codex-usage/) 的 issue、task、report 仍可放在 [docs/work-tracking/README.md](docs/work-tracking/README.md)。模板見 [task](docs/work-tracking/task-template.md)、[report](docs/work-tracking/report-template.md)、[request form](.github/ISSUE_TEMPLATE/task-request.yml)。選元件不會自動上標籤，也不等於可以 merge。
 
-Start with the [task template](docs/work-tracking/task-template.md),
-[report template](docs/work-tracking/report-template.md), and [request form](.github/ISSUE_TEMPLATE/task-request.yml).
-The [versioned label manifest](docs/work-tracking/labels.json) describes manual triage; a form's component selection
-does not apply its project label or mark it ready.
+本 repo 是公開的：issue、PR、檔案與證據不得放私有內容、主機名稱、路徑或帳號。desk 的 repo 名稱與 `docs/operating-method.md` 這條路徑可以寫。
 
 ## 目錄
 

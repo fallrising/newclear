@@ -17,9 +17,9 @@
 
 **文檔深度跟檔位走，不跟「有沒有目錄」走。** 只有 A 檔需要 `docs/quickstart.md`；C/D 禁止新開 tutorial。
 
-**兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務。不要求卡片編號或 `Desk-Task`。
+**兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務。不要求卡片編號或 `Desk-Task`。現在是第一階段；第二階段尚未啟用。見 [AGENTS.md](AGENTS.md)。
 
-[`tools/codex-usage`](tools/codex-usage/) 的 issue、task、report 仍可放在 [docs/work-tracking/README.md](docs/work-tracking/README.md)。模板見 [task](docs/work-tracking/task-template.md)、[report](docs/work-tracking/report-template.md)、[request form](.github/ISSUE_TEMPLATE/task-request.yml)。選元件不會自動上標籤，也不等於可以 merge。
+可選格式在 [docs/work-tracking](docs/work-tracking/README.md)，不是認領依據，也不等於可以 merge。舊任務紀錄在 [archive](archive/README.md)，不要照它做。
 
 本 repo 是公開的：issue、PR、檔案與證據不得放私有內容、主機名稱、路徑或帳號。desk 的 repo 名稱與 `docs/operating-method.md` 這條路徑可以寫。
 

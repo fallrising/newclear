@@ -8,6 +8,8 @@ commands ran between `2026-09-04T07:08:22+02:00` and
 `2026-09-04T09:13:40+02:00` from
 `<monorepo-root>/platform/local-ocr-services`.
 
+The `.team/` evidence scripts and task files cited below are no longer in this tree. They are archived at journal `archive/team-ledgers/newclear/platform/local-ocr-services/.team/` (source tag `team-archive-20261018`, which also keeps files the journal copy skipped). The commands in this record are historical.
+
 Evidence labels used below:
 
 - **CURRENT:** executed during this target-server verification.

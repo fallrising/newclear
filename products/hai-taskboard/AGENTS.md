@@ -2,8 +2,8 @@
 
 HAI Taskboard is specification-first and currently restricted to P0-A Fake-only development.
 
-1. Read `products/hai-taskboard/.team/PLAN.md`, this file, the assigned task, accepted ADRs, relevant mini-SDDs and
-   `docs/traceability.md` before changing production behavior.
+1. Read the archived ledger at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/`, this file, the assigned task, accepted ADRs, relevant mini-SDDs and
+   `docs/traceability.md` before changing production behavior. The in-repo `.team/` copy has been removed.
 2. Work on exactly one Ready bounded task and only within its writable scope.
 3. The board is a projection. Adapters and UI must submit application commands and may not write
    domain tables or accepted state directly.
@@ -24,6 +24,6 @@ HAI Taskboard is specification-first and currently restricted to P0-A Fake-only 
     make a test pass.
 12. Workers do not delegate. This file does not make an orchestrator the claim or acceptance
     authority, and it does not enable phase-2 dispatch. Do not rewrite
-    `products/hai-taskboard/.team/PLAN.md` unless that file is in scope.
+    the archived ledger at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/`; it is not an in-repo writable plan.
 13. Commits, pushes, PRs, releases, deployment and external mutations require separate explicit user
     authorization.

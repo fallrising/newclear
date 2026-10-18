@@ -29,6 +29,6 @@
 
 ## 驗證與未完成工作
 
-測試僅使用 temporary synthetic fixture，覆蓋 lock admission、durable reservation、異常 publication、跨程序／inherited lock 與入口副作用前拒絕。`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest -v test_pending_generation test_pending_generation_review test_labctl.LockTests`：31 tests／1.478 秒通過；`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v`：514 tests／74.501 秒通過，沒有 failures／errors／skips。獨立審查另跑 31 tests／0.671 秒通過；原 workflow AST／JSON／Markdown／tracked private exclusion、compileall 與 diff checks 通過。完整範圍與未驗證部分見 [evidence gate](../.team/reports/T-218.md)。
+測試僅使用 temporary synthetic fixture，覆蓋 lock admission、durable reservation、異常 publication、跨程序／inherited lock 與入口副作用前拒絕。`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest -v test_pending_generation test_pending_generation_review test_labctl.LockTests`：31 tests／1.478 秒通過；`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v`：514 tests／74.501 秒通過，沒有 failures／errors／skips。獨立審查另跑 31 tests／0.671 秒通過；原 workflow AST／JSON／Markdown／tracked private exclusion、compileall 與 diff checks 通過。完整範圍與未驗證部分見 evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-218.md`）。
 
 下一步仍是 production execution envelope 與即時 authorization／fence／host bindings、barrier-aware observation/recovery、四機 bootstrap 與 probes、generation CAS／commit／accepted-run seal。沒有 production executor 呼叫 reserve，也沒有真實 private 資料、VPS、provider、部署或三次 fresh generation 證據。這些缺口不能以本機 barrier 測試取代。

@@ -68,14 +68,14 @@ python3 scripts/smoke-lab.py
 
 ## Fresh-run 本機主線
 
-目前續作的 [replay／generation completion 契約](docs/M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 定義 `prepare_replay`、`execute_replay`、唯讀 `reconcile_replay`、`prepare_generation` 及明確 `finalize_generation`；原有公開 `fresh-run next/recover/status` 沿用 exact request／renewal 邊界。完整本機 acceptance、pending retirement 與下一個普通 consumer 的證據以 [root evidence gate](.team/reports/T-271.md) 為準；在該 gate 完成前不把已寫好的程式當作完成主線。另見 [本機 DoD 核對](docs/LOCAL-CLOSEOUT-2026-10-06.md) 及 [未執行 E2E 操作包](docs/E2E-OPERATIONS-2026-10-06.md)。
+目前續作的 [replay／generation completion 契約](docs/M3-FRESH-COMPLETION-MAINLINE-2026-10-06.md) 定義 `prepare_replay`、`execute_replay`、唯讀 `reconcile_replay`、`prepare_generation` 及明確 `finalize_generation`；原有公開 `fresh-run next/recover/status` 沿用 exact request／renewal 邊界。完整本機 acceptance、pending retirement 與下一個普通 consumer 的證據以 root evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-271.md`） 為準；在該 gate 完成前不把已寫好的程式當作完成主線。另見 [本機 DoD 核對](docs/LOCAL-CLOSEOUT-2026-10-06.md) 及 [未執行 E2E 操作包](docs/E2E-OPERATIONS-2026-10-06.md)。
 
 已接續 [fresh-run owned admission／續期](docs/M3-FRESH-RUN-MAINLINE-2026-10-05.md) 與 [fresh bootstrap](docs/M3-FRESH-BOOTSTRAP-MAINLINE-2026-10-06.md)：`labctl fresh-run next` 接受固定 bootstrap 操作，`recover` 僅觀察 uncertain intent，`status` 只核對歷史完整性。每步需要私有 hash-bound request、有效 current renewal 與 operation authorization；普通 mutation 在 pending 期間仍被擋住。本機 synthetic 路徑已完成應用重播與 generation completion；正式 VPS 驗收尚未完成，完成6／剩餘12不變。
 
 
-2026-10-06 本機 bootstrap 主線驗收：完整離線 1,133 項／2723.389 秒、root focused60項及獨立最終49項通過，見 [T-267 evidence gate](.team/reports/T-267.md)。現有 fresh-run 可完成22個固定 bootstrap 步驟；驗證使用 synthetic transport／temp roots，整體 PARTIAL、正式完成6／剩12。下一主線為 apps replay/resources/residue 與 generation completion；遠端交付結果記於 desk T-0075。
+2026-10-06 本機 bootstrap 主線驗收：完整離線 1,133 項／2723.389 秒、root focused60項及獨立最終49項通過，見 T-267 evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-267.md`）。現有 fresh-run 可完成22個固定 bootstrap 步驟；驗證使用 synthetic transport／temp roots，整體 PARTIAL、正式完成6／剩12。下一主線為 apps replay/resources/residue 與 generation completion；遠端交付結果記於 desk T-0075。
 
 
 ## Metadata 備份本機切片
 
-ERU-016 已完成本機實作與驗證： [本機備份格式與不可執行還原計畫](docs/M3-METADATA-BACKUP-LOCAL-2026-10-09.md)。此功能檢查操作者提供的私有檔案之精確 bytes 與 checksum；不取得 snapshot、不驗證 bbolt、不連線或還原 etcd。完整原生 1,284 項／20,949.108 秒／OK／exit 0 與 candidate02 獨立審查已通過，見 [本機驗收](.team/reports/T-297.md)。遠端 CI／合併仍待，實機 V10 保持 UNEXECUTED。
+ERU-016 已完成本機實作與驗證： [本機備份格式與不可執行還原計畫](docs/M3-METADATA-BACKUP-LOCAL-2026-10-09.md)。此功能檢查操作者提供的私有檔案之精確 bytes 與 checksum；不取得 snapshot、不驗證 bbolt、不連線或還原 etcd。完整原生 1,284 項／20,949.108 秒／OK／exit 0 與 candidate02 獨立審查已通過，見 本機驗收（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-297.md`）。遠端 CI／合併仍待，實機 V10 保持 UNEXECUTED。

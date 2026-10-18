@@ -10,4 +10,4 @@ attention queues are projections over that state.
 Status: P0-A specification and deterministic Fake-core development. Real agent execution and channel
 integrations are intentionally disabled.
 
-See `docs/SDD.md` and `.team/PLAN.md` once the initial design adoption task is accepted.
+See `docs/SDD.md`. The class A ledger is archived at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/`.

@@ -44,4 +44,4 @@ The new coordinator deliberately uses a scoped adaptation of the reviewed file-s
 
 ## Final local evidence
 
-Root57 tests／21.787s、independent79／107.028s及full893／316.562s通過，full無failure/error/skip。之後僅source-drift test改為實際sha欄位，root單獨1test／1.235s與independent1test／1.238s通過，production未變；完整結果不混稱已跑過最後test edit。compileall、原workflow、frozenhash及team/privacy/diff gates通過。[T-247 evidence gate](../.team/reports/T-247.md) 接受本地slice，完整fresh仍PARTIAL。下一步network activation/observations，接bootstrap/probes、generation commit/seal與live acceptance。
+Root57 tests／21.787s、independent79／107.028s及full893／316.562s通過，full無failure/error/skip。之後僅source-drift test改為實際sha欄位，root單獨1test／1.235s與independent1test／1.238s通過，production未變；完整結果不混稱已跑過最後test edit。compileall、原workflow、frozenhash及team/privacy/diff gates通過。T-247 evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-247.md`） 接受本地slice，完整fresh仍PARTIAL。下一步network activation/observations，接bootstrap/probes、generation commit/seal與live acceptance。

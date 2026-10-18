@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -21,6 +22,17 @@ from ice_maker.execution import (
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICIES = ROOT / "orchestration" / "policies"
+POINTER = ROOT / "docs" / "evidence-pointer.json"
+
+
+def _task_pointer() -> str:
+    record = json.loads(POINTER.read_text(encoding="utf-8"))
+    journal_path = record["journal_path"]
+    source_tag = record["source_tag"]
+    source_sha = record["source_sha"]
+    if not isinstance(journal_path, str) or not isinstance(source_tag, str) or not isinstance(source_sha, str):
+        raise AssertionError("evidence pointer fields must be strings")
+    return f"{journal_path}#{source_tag}#{source_sha}"
 
 
 def contract(**changes: object) -> dict[str, object]:
@@ -29,7 +41,7 @@ def contract(**changes: object) -> dict[str, object]:
         "repo": "owner/repo",
         "base_sha": ExecutionContractTests._head(),
         "spec_path": "specs/active/secure-execution/spec.md",
-        "task_path": ".team/tasks/T-008.md",
+        "task_path": _task_pointer(),
         "role": "builder",
         "allowed_paths": ["src/**"],
         "network_policy": "deny-by-default",
@@ -42,6 +54,29 @@ def contract(**changes: object) -> dict[str, object]:
 
 
 class ExecutionContractTests(unittest.TestCase):
+    def test_task_path_is_a_journal_pointer_not_a_local_team_file(self) -> None:
+        pointer = _task_pointer()
+        self.assertTrue(pointer.startswith("archive/team-ledgers/newclear/platform/ice-maker/.team/"))
+        self.assertIn("#team-archive-20261018#", pointer)
+        self.assertRegex(pointer.rsplit("#", 1)[-1], r"^[0-9a-f]{40}$")
+        self.assertFalse((ROOT / ".team" / "tasks" / "T-008.md").exists())
+        parsed = validate_task_contract(contract(), ROOT, POLICIES / "data-providers.json", provider="local")
+        self.assertEqual(parsed.task_id, "T-008")
+        for broken in (
+            pointer.replace("team-archive-20261018", "other-tag"),
+            pointer[:-1],
+            "archive/team-ledgers/newclear/../platform/ice-maker/.team/tasks/T-008.md#team-archive-20261018#" + pointer.rsplit("#", 1)[-1],
+            "https://example.invalid/archive/team-ledgers/newclear/platform/ice-maker/.team/tasks/T-008.md",
+        ):
+            with self.subTest(pointer=broken):
+                with self.assertRaisesRegex(ContractError, "evidence pointer|relative path"):
+                    validate_task_contract(
+                        contract(task_path=broken),
+                        ROOT,
+                        POLICIES / "data-providers.json",
+                        provider="local",
+                    )
+
     def test_valid_contract_has_immutable_identity(self) -> None:
         parsed = validate_task_contract(
             contract(), ROOT, POLICIES / "data-providers.json", provider="local"

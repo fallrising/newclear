@@ -19,6 +19,10 @@
 4. [開發里程碑](docs/sdd/07-roadmap.md)：M0–M6，每個階段的輸入、產物、驗收與禁止越界事項。
 5. [本機 Wrangler 開發](#本機-wrangler-開發l1)：先 `wrangler dev`，再談上線。
 
+## 設計探索
+
+- [Cloudflare 閱讀與快記模組：重用評估與粗略執行計劃](docs/plans/cloudflare-reading-capture.md)（2026-10-18）：評估沿用 Kith 的 Web／Cloudflare 基礎，支援手機閱讀、原文快記、人類批註、公私發布及自寫頁面事件統計。這是待討論的候選模組，尚未排程或實作；Kith 現行聊天室與 v2 契約仍適用。
+
 ## 規格章節
 
 | 文件 | 開發時解決的問題 |
@@ -134,3 +138,4 @@ Worker 已在 <https://kith.fallrising.workers.dev>。`wrangler.toml` 的 `ff_mc
 ## 授權
 
 與 newclear 根目錄一致：MIT。禁止把 GPL-3.0 原始碼複製進本目錄。
+

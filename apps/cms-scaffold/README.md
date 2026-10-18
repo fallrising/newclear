@@ -55,7 +55,10 @@ npm run lint && npm run typecheck && npm test && npm run build
 npm run test:bundle
 npx playwright install chromium   # 第一次
 npm run e2e:mock
+npm run test:a11y && npm run test:hardening && npm run test:visual
 ```
+
+Mock e2e 與前端品質（a11y、hardening、visual）只在本機手動跑，不進 GitHub Actions。
 
 不接後端開發前端（MSW）：
 

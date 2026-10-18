@@ -41,7 +41,7 @@ Scenario: Kith source changes
   Given a change under `products/kith/**` or `.github/workflows/kith.yml`
   When GitHub evaluates root workflows
   Then `.github/workflows/kith.yml` is eligible
-  And it runs Node 24.18.0 `npm ci`, `npm run lint`, and `npm test` in `products/kith`, `npm ci` and `npm run build` in `products/kith/web`, and the Playwright E2E suite (`npm run e2e:all`, `npm run e2e:validate`) with evidence uploaded as an artifact, with `contents: read` and no secrets or deploy
+  And it runs Node 24.18.0 `npm ci`, `npm run lint`, and `npm test` in `products/kith`, plus `npm ci` and `npm run build` in `products/kith/web`, with `contents: read` and no secrets or deploy
 
 Scenario: mkfk source changes
   Given a change under `systems/mkfk/**` or `.github/workflows/mkfk-ci.yml`
@@ -73,7 +73,7 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | Local OCR Services | `local-ocr-services-ci.yml` | `platform/local-ocr-services/**`, `.github/workflows/local-ocr-services-ci.yml` | Repository-native `make check` (syntax, contract-test image, Compose rendering) |
 | CMS Scaffold | `cms-scaffold-ci.yml` | `apps/cms-scaffold/**`, `.github/workflows/cms-scaffold-ci.yml` | Java 25 `./gradlew test`; Node 24 `npm ci`, test, lint, typecheck, and build |
 | Dim Gate | `dim-gate-ci.yml` | `platform/dim-gate/**`, `.github/workflows/dim-gate-ci.yml` | Component-native lint/test with `contents: read` |
-| Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `npm ci`, `npm run build` in `products/kith/web`; `npm run e2e:all` + `npm run e2e:validate` (Playwright 1.56.1 Chromium), evidence artifact kept 14 days; `contents: read`; no secrets or deploy |
+| Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `npm ci`, `npm run build` in `products/kith/web`; `contents: read`; no secrets or deploy |
 | Edge Ops | `edge-ops-ci.yml` | `platform/edge-ops/**`, `.github/workflows/edge-ops-ci.yml` | Node 24.18.0 `npm ci`, `npm run typecheck`, `npm test` in `platform/edge-ops/backend`; Go 1.24.7 `gofmt` check, `go vet`, `go test` in `platform/edge-ops/agent`; offline contract vectors only, no Cloudflare credentials or deploy |
 | cc-quota | `cc-quota-ci.yml` | `tools/cc-quota/**`, `.github/workflows/cc-quota-ci.yml` | Python 3 stdlib `unittest` offline suite (no network or credentials); `bash -n install.sh` |
 | mkfk | `mkfk-ci.yml` | `systems/mkfk/**`, `.github/workflows/mkfk-ci.yml` | Go from `go.mod`: `make fmt-check vet test test-race test-model test-integration`; `make test-chaos CHAOS_PROFILE=short` with its output uploaded as an artifact; `make demo` (three-broker Compose on a locally built `FROM scratch` image, no registry pull, loopback-only ports) followed by `make demo-down DELETE_DATA=1` |

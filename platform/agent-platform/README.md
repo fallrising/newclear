@@ -67,6 +67,8 @@ AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌
 
 目前提供 FastAPI／獨立 worker、PostgreSQL schema／queue、operator login、fake／真實 runtime adapters、私有 connector 與 React 工作台。現行操作見 [單節點手冊](docs/SINGLE-NODE.md)，M1 歷史驗收見 [M1 文件](docs/M1.md)。M0 Python CLI、guest rootfs、Docker／KVM 實測工具繼續保留。
 
+瀏覽器驗收只在本機手動跑：`npm --prefix web ci && npm --prefix web run build && web/node_modules/.bin/playwright install --with-deps chromium && make browser-test`。Pull request CI 保留 `make platform-check`。
+
 M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修改驗收，並顯示事件與 diff。它尚不解讀自然語言工作目標、不呼叫付費 provider；專案測試未設定。啟動與能力限制見 [M2](docs/M2.md)。
 
 離線維護工具及操作邊界見 [備份與封存保留](docs/BACKUP-RETENTION.md)。它只在 operator 明確執行時動作；封存清理先預覽、再以 digest 確認，不清理 active/recovery 或 export 引用的成果。

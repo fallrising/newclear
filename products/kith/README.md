@@ -7,6 +7,8 @@
 
 對外產品名：**Kith**。目錄與程式 id 為 `kith`。
 
+完整瀏覽器 e2e 只在本機手動跑：在 `products/kith` 執行 `npm run e2e:all`，然後 `npm run e2e:validate`。Pull request CI 只跑 lint、單元測試與 web build。
+
 **狀態：** M0–M7 已在 `main`（#12 `c5b26b1`）。線上 Worker 與 SPA 綁定在 #26 `b76283b`，網址 <https://kith.fallrising.workers.dev>。人跟人聊天 P0（operator 開房、以 handle 邀請、桌面並排／窄螢幕先列表）見 [09](docs/sdd/09-human-chat-ui.md)。**不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
 
 **v2（W7 起為現行前端）：** 前端是 `web/`（設計見 [docs/v2](docs/v2/README.md)）；舊 `frontend/` 已刪除。hosted agent 經 provider 連線呼叫主流 LLM API 格式，外部 CLI 以 `kith-runner`（`runner/`）接入。v1 文件中未被 [docs/v2/10](docs/v2/10-decisions.md) §2 修訂的條文仍是現行契約。

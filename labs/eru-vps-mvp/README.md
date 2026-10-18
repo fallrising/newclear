@@ -2,6 +2,8 @@
 
 2026-10-08 本機完成、待 E2E：完整離線 1258 項／20828.887 秒／OK；222 個 native Python 檔前後 SHA256 一致，唯一 public CLI 主線通過。五項 local DoD、正式剩餘12與 live 界線見 [TASKS](docs/TASKS.md)／[handoff](docs/HANDOFF.md)；最終 CI／合併事實另記 PR／帳本。
 
+完整控制器測試只在本機手動跑：`python3 -m unittest discover -s tests -v`（在 `labs/eru-vps-mvp`）。Pull request CI 只做來源、連結與 private path 檢查。
+
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 

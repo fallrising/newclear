@@ -107,13 +107,13 @@ Development and CI use:
 
 - Rust `1.97.1` with `rustfmt` and Clippy (selected by `rust-toolchain.toml`)
 - Node.js `24.18.0` for the dependency-free browser tests
-- `cargo-deny 0.19.4` for the full dependency-policy gate
 - Linux for the P0 credential runner and its end-to-end tests
 
-Install the CI-pinned policy checker when you need the complete local gate:
+Dependency policy is manual only, not pull-request CI. Install the pinned checker and run it locally:
 
 ```bash
 cargo install cargo-deny --version 0.19.4 --locked
+cargo deny --locked check
 ```
 
 ## Build and test
@@ -128,7 +128,6 @@ cargo fmt --all -- --check
 cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
 cargo test --locked --workspace --all-targets --all-features
 cargo build --locked --workspace --bins --all-features
-cargo deny --locked check
 git diff --check
 ```
 

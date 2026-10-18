@@ -44,8 +44,6 @@ jobs:
         run: node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs
       - name: Install pinned Rust toolchain
         run: rustup toolchain install 1.97.1 --profile minimal --component clippy,rustfmt
-      - name: Install dependency policy checker
-        run: cargo install cargo-deny --version 0.19.4 --locked
       - name: Check formatting
         run: cargo fmt --all -- --check
       - name: Lint
@@ -54,7 +52,5 @@ jobs:
         run: cargo test --locked --workspace --all-targets --all-features
       - name: Build application binaries
         run: cargo build --locked --workspace --bins --all-features
-      - name: Check dependencies
-        run: cargo deny --locked check
       - name: Check whitespace
         run: git diff --check

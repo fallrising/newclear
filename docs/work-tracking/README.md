@@ -59,7 +59,8 @@ and do not delete or rename labels. Manifest values describe defaults for missin
 
 The [request form](../../.github/ISSUE_TEMPLATE/task-request.yml) collects summary, component, and outcome.
 Selecting a component does **not** apply its project label. The manifest/form include indexed components
-for routing. Paths are authoritative; display text may change.
+for routing, but do not enroll them in the pilot. Paths are authoritative; display text may change.
+Non-pilot issues are intake only: do not mark them `ready` under this contract or start issue-only work.
 本契約不另給開工授權。技術任務見檔首。
 
 ## Phase 2 manual dispatch and claims

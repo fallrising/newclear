@@ -4,7 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Intake is not work authorization.
+        Intake is not work authorization. Phase 1 enrolls only tools/codex-usage.
         Technical tasks are managed in this repo and may be split. Desk (https://github.com/fallrising/desk docs/operating-method.md) only shows high-level requirement progress for people. Completion of those requirements is called 驗收. Card numbers and Desk-Task are not required.
         This repository is public: omit private content/links, names/paths, hosts/IPs, domains, accounts, and credentials.
         Component selection does not apply a project label; the orchestrator triages manually.

@@ -3,7 +3,7 @@
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
 Updated: 2026-10-06
-Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood migration
+Authority: the class A ledger is archived at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/` (source tag `team-archive-20261018`). The in-repo copy is removed. Historical bootstrap authority was that ledger until the explicit dogfood migration.
 
 ## Current checkpoint
 
@@ -39,9 +39,9 @@ Authority: `products/hai-taskboard/.team/PLAN.md` until the explicit dogfood mig
 
 ## Read first
 
-1. `products/hai-taskboard/.team/PLAN.md` and `products/hai-taskboard/AGENTS.md`.
+1. journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/` and `products/hai-taskboard/AGENTS.md`.
 2. `docs/SDD.md`, every accepted ADR and the relevant mini-SDD.
-3. `docs/traceability.md` and the exact `.team/tasks/T-*.md` envelope.
+3. `docs/traceability.md` and the archived `.team/tasks/T-*.md` envelopes under that journal path.
 4. Existing report evidence, remembering that a report does not accept itself.
 5. Before issuing the next child, read the complete T-047/T-082 through T-090 lineage, including all
    retained PARTIAL/FAIL evidence, and verify the separately accepted predecessor and integration
@@ -205,5 +205,5 @@ UI and providers require later assignments. No runtime or API exposes this found
 ## Restore invariant
 
 A resumed agent MUST verify the branch/baseline and actual diff before trusting this handoff. If the
-files disagree, `products/hai-taskboard/.team/PLAN.md` plus Git/SQLite authority rules win; record the discrepancy rather
+files disagree, the archived ledger at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/PLAN.md` plus Git/SQLite authority rules win; record the discrepancy rather
 than silently repairing history.

@@ -52,4 +52,4 @@ request 上限 64 KiB、精確 schema：`schema` 固定 `eru.metadata-restore-re
 
 必要 focused、公開 CLI 整合、原生整體 unittest、workflow靜態、compileall、team validators、diff/privacy 與獨立審查均需實際證據。長測用獨立背景 collector 記錄 PID/start_ticks/source/HEAD、真實 exit 與完整 footer；測試凍結期間不改來源或 HEAD。僅局部成功不等於里程碑完成。正式仍6/18完成、12剩餘、live UNEXECUTED；既有 v0.1.7雙build不重做。
 
-2026-10-09 本機驗收：candidate02修補後focused26與獨立審查通過，完整原生1284／20949.108s／OK／actual exit0且來源／inventory／HEAD一致；最終短gates通過，詳見 [T-297](../.team/reports/T-297.md)。遠端CI／合併及所有V10實機gates未完成；上述契約未因驗收而放寬。
+2026-10-09 本機驗收：candidate02修補後focused26與獨立審查通過，完整原生1284／20949.108s／OK／actual exit0且來源／inventory／HEAD一致；最終短gates通過，詳見 T-297（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-297.md`）。遠端CI／合併及所有V10實機gates未完成；上述契約未因驗收而放寬。

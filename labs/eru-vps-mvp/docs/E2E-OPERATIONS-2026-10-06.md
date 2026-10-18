@@ -95,4 +95,4 @@ python3 scripts/labctl.py fresh-run recover --run RUN_ID --sha256 EXECUTION_SHA2
 
 ## 2026-10-08 本機前置驗收
 
-完整離線 1258 項／20828.887 秒／OK；222 個 native Python 檔前後 SHA256 一致，唯一 public CLI 主線通過，full09 log SHA256 `08ff99ffac01dd96cf22caea99d98696f82b7190e990996c528bc6ad19e04b07`，native09 manifest SHA256 `ab0da4d1a14aadf7acebff735a4fa093f44b4f847aba99acce86668ce33750bb`。五項 local DoD「本機完成、待 E2E」，最終來源／必要 CI與交付事實見 [T-271](../.team/reports/T-271.md) 及 PR／帳本；本操作包仍 UNEXECUTED。原基線缺少入口的歷史敘述保留，不能當作當輪完成來源。沒有執行或回填任何真實 provider／machine timing、RTO 或 deployment。
+完整離線 1258 項／20828.887 秒／OK；222 個 native Python 檔前後 SHA256 一致，唯一 public CLI 主線通過，full09 log SHA256 `08ff99ffac01dd96cf22caea99d98696f82b7190e990996c528bc6ad19e04b07`，native09 manifest SHA256 `ab0da4d1a14aadf7acebff735a4fa093f44b4f847aba99acce86668ce33750bb`。五項 local DoD「本機完成、待 E2E」，最終來源／必要 CI與交付事實見 T-271（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-271.md`） 及 PR／帳本；本操作包仍 UNEXECUTED。原基線缺少入口的歷史敘述保留，不能當作當輪完成來源。沒有執行或回填任何真實 provider／machine timing、RTO 或 deployment。

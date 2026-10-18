@@ -17,9 +17,9 @@
 
 **文檔深度跟檔位走，不跟「有沒有目錄」走。** 只有 A 檔需要 `docs/quickstart.md`；C/D 禁止新開 tutorial。
 
-**認領規則已被取代。** 唯一依據：https://github.com/fallrising/desk 的 docs/operating-method.md。
+**兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務。不要求卡片編號或 `Desk-Task`。
 
-[`tools/codex-usage`](tools/codex-usage/) 的 issue-task pilot 檔仍在 [docs/work-tracking/README.md](docs/work-tracking/README.md)，不再作為認領依據。
+[`tools/codex-usage`](tools/codex-usage/) 的 issue-task pilot 檔仍在 [docs/work-tracking/README.md](docs/work-tracking/README.md)，用來放該元件的 issue、task、report。
 
 ## 目錄
 

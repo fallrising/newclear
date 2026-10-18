@@ -4,7 +4,7 @@
 
 > **權威來源**：投入決策（做不做）以 owner 的私人項目帳本為準；本檔是它的**公開摘要**，
 > 不再是第二份決策來源。兩者不一致時以帳本為準，並回頭修正本檔。帳本裡的目標、計畫與任務內容不在此公開。
-> 工作追蹤（做到哪、認領）唯一依據：https://github.com/fallrising/desk 的 docs/operating-method.md。
+> 大需求進度（給人看）在 https://github.com/fallrising/desk 的 docs/operating-method.md；完成稱「驗收」。本 repo 技術任務自己管，可拆子任務。不要求卡片編號或 `Desk-Task`。
 
 ## 怎麼讀
 
@@ -19,7 +19,7 @@
 - **檔位**：文檔深度 A–D，只決定文件深度，不決定投入。政策見 [docs/portfolio-doc-tiers.md](docs/portfolio-doc-tiers.md)，
   分類見 [docs/taxonomy.md](docs/taxonomy.md)。C 檔的 `Dormant since` 預設 2026-09-04，除非元件 README 另有更明確的日期。
   「—」表示不在 newclear 的檔位制度內（其他 repository）。
-- 進度、測試結果與 milestone 以各元件的 README、SDD、`.team/` 為準，本檔不記錄。排程與優先序見 https://github.com/fallrising/desk 的 docs/operating-method.md。
+- 進度、測試結果與 milestone 以各元件的 README、SDD、`.team/` 為準，本檔不記錄。大需求進度見 https://github.com/fallrising/desk 的 docs/operating-method.md；本 repo 技術任務自己管。
 - 帳本只有「投入中」與「暫停」兩種開發狀態：「繼續投入」對應投入中；「維護」與「休眠」都是暫停（不規劃新功能，
   在用的產品出問題仍可修復），兩者的差別只在修復的積極程度。
 - `newclear/refs/` 是第三方索引，不是自有元件，不列入。
@@ -157,7 +157,7 @@ edge 擁有 request／effect admission，policy 擁有 feature resolution／eval
 
 ## 下一步
 
-下一步與排程在私人項目帳本追蹤，本檔不列。
+大需求進度在 https://github.com/fallrising/desk 的 docs/operating-method.md，給人看；本檔不列。本 repo 技術任務自己管。
 
 ## 待決
 

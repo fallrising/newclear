@@ -1,6 +1,12 @@
 # AGENTS.md
 
-本文件適用於所有實作 Prism 的 coding agent。子目錄若有更嚴格的 `AGENTS.md`，以更嚴格者為準。
+本文件是 Prism 的實作契約，適用於所有實作 Prism 的 coding agent。`platform/prism/AGENTS.md` 只指向本檔。子目錄若有更嚴格的 `AGENTS.md`，以更嚴格者為準。
+
+## 工作方式
+
+過程紀錄以 desk 的 [`docs/operating-method.md`](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) 為準。本檔不複製該文。
+
+任務板 `docs/tasks/BOARD.md` 與 journal run 紀錄是允許改動的路徑。
 
 ## Mission
 

@@ -2,9 +2,15 @@
 
 ## Scope and authority
 
-本文件適用於 `systems/mkfk/**`。先讀 `SDD-enhanced-csr.md`（實作權威）、`SDD.md`、本次 milestone 所引用章節及 `docs/sdd/06-decisions-sources.md`。目前已有 M0–M5 實作；完成範圍以 README、ADR 與測試證據為準，不要把規格中的未執行測試、未建立命令或預期吞吐量描述成已完成。
+本文件適用於 `systems/mkfk/**`。先讀 `SDD-enhanced-csr.md`（實作權威）、`SDD.md`、本次 milestone 所引用章節及 `docs/sdd/06-decisions-sources.md`。目前 M0–M7 已驗證；完成範圍以 README、ADR 與測試證據為準，不要把規格中的未執行測試、未建立命令或預期吞吐量描述成已完成。
 
 安全不變量以 `SDD-enhanced-csr.md` / `SDD.md` 為準（取更嚴格者）；章節優先於 milestone 範例。發現互相矛盾時，先提出修訂及測試反例，不能挑較容易的版本實作。
+
+## 工作方式
+
+過程紀錄以 desk 的 [`docs/operating-method.md`](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) 為準。本檔不複製該文。
+
+任務板 `docs/tasks/BOARD.md` 與 journal run 紀錄是允許改動的路徑。
 
 ## Change boundary
 

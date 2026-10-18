@@ -22,7 +22,8 @@ HAI Taskboard is specification-first and currently restricted to P0-A Fake-only 
     exact file, read the full result, and apply relevant guidance.
 11. Do not weaken a gate, delete failed/skipped evidence, or rewrite an acceptance oracle merely to
     make a test pass.
-12. Workers do not delegate. The root orchestrator owns task routing, diff review, rework, integration
-    and changes to `products/hai-taskboard/.team/PLAN.md`.
+12. Workers do not delegate. This file does not make an orchestrator the claim or acceptance
+    authority, and it does not enable phase-2 dispatch. Do not rewrite
+    `products/hai-taskboard/.team/PLAN.md` unless that file is in scope.
 13. Commits, pushes, PRs, releases, deployment and external mutations require separate explicit user
     authorization.

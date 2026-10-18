@@ -42,10 +42,11 @@ keep hosted CI and independent review separate. Follow the
 [delivery report example](docs/quickstart.md#delivery-report-example); retain **offline-tested / live-unverified**
 until the [live acceptance gate](docs/quickstart.md#acceptance-gate) passes.
 
-For the [phase 1 issue-task pilot](../../docs/work-tracking/README.md), required pending checks keep a report
-`PARTIAL` or `BLOCKED`. Sanitize evidence before sharing; use abstract references for private configuration,
-without account data, private paths, or authorization contents. Merge delivers the change; the issue stays
-open until the owner records acceptance and closes it.
+Required pending checks keep a report `PARTIAL` or `BLOCKED`. Sanitize evidence before sharing; do not
+include account data, private paths, or authorization contents. This component does not use desk claims
+or a `Desk-Task` trailer. Merge delivers the change; the issue stays open until the owner records
+acceptance and closes it. The filled task under `archive/tools/codex-usage/tasks/` is an old record, not
+a template.
 
 ## Output contract
 

@@ -26,7 +26,7 @@ shared workspace launcher, outside the source tree. A local pass does not establ
 
 ## Delivery report example
 
-Use the [report template](../../../docs/work-tracking/report-template.md) beside the issue's task file.
+Use the [report template](../../../docs/work-tracking/report-template.md) if you keep a local report. It is an optional format, not a claim.
 Replace every placeholder with an observed result and a public-safe evidence reference; preserve failed or
 skipped required checks with their reasons. Do not publish account data, private configuration contents,
 private paths, or raw snapshots. Restricted logs stay outside the public tree and use abstract references.
@@ -64,8 +64,7 @@ Merge delivers; only the owner records acceptance and closes the issue.
 Use `passed`, `failed`, or `skipped` for actual results. Required failures/skips prevent `DONE`;
 use `PARTIAL` or `BLOCKED`. Live collection is outside this documentation task: state that limitation explicitly
 rather than inventing a pass. Completing an offline documentation task does not satisfy the live acceptance
-gate below. The [phase 1 contract](../../../docs/work-tracking/README.md) keeps issue lifecycle in GitHub;
-a report's `DONE` means its required work and evidence are complete, while owner acceptance remains separate.
+gate below. A report's `DONE` means its required work and evidence are complete, while owner acceptance remains separate. Do not treat the archived phase-1 contract as the current claim process.
 
 ## Target selection
 

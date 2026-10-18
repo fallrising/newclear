@@ -1,14 +1,14 @@
 name: Task request
-description: Request a scoped component outcome for manual triage.
+description: Request a scoped component outcome. This form is not work authorization.
 body:
   - type: markdown
     attributes:
       value: |
-        Intake is not work authorization. Phase 1 enrolls only tools/codex-usage.
-        Technical tasks are managed in this repo and may be split. Desk (https://github.com/fallrising/desk docs/operating-method.md) only shows high-level requirement progress for people. Completion of those requirements is called 驗收. Card numbers and Desk-Task are not required.
+        Intake is not work authorization.
+        Technical tasks are managed in this repo and may be split. Desk (https://github.com/fallrising/desk docs/operating-method.md) only shows high-level requirement progress for people. Completion of those requirements is called 驗收. Card numbers and Desk-Task are not required. Phase 2 platform dispatch is not enabled.
         This repository is public: omit private content/links, names/paths, hosts/IPs, domains, accounts, and credentials.
-        Component selection does not apply a project label; the orchestrator triages manually.
-        After routing, link the component task directory in this issue. The issue stays open until owner acceptance.
+        Component selection does not apply a project label or grant permission to merge.
+        If this issue has a task directory, link it. The issue stays open until owner acceptance.
   - type: input
     id: summary
     attributes:

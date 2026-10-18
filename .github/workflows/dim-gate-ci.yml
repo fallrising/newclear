@@ -5,19 +5,11 @@ on:
     paths:
       - platform/dim-gate/**
       - .github/workflows/dim-gate-ci.yml
-      - .team/PLAN.md
-      - .team/tasks/T-*.md
-      - .team/reports/T-*.md
-      - .team/reports/dim-gate-*.md
   push:
     branches: [main]
     paths:
       - platform/dim-gate/**
       - .github/workflows/dim-gate-ci.yml
-      - .team/PLAN.md
-      - .team/tasks/T-*.md
-      - .team/reports/T-*.md
-      - .team/reports/dim-gate-*.md
   workflow_dispatch:
 
 permissions:

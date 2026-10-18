@@ -67,6 +67,30 @@ _REQUIRED = frozenset({
     "task_id", "repo", "base_sha", "spec_path", "task_path", "role", "allowed_paths",
     "network_policy", "max_seconds", "max_cost_usd", "required_commands",
 })
+_SOURCE_TAG = "team-archive-20261018"
+_JOURNAL_POINTER = re.compile(
+    r"^archive/team-ledgers/newclear/"
+    r"(?:[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*/)?"
+    r"\.team(?:/[A-Za-z0-9._-]+)*"
+    rf"#{re.escape(_SOURCE_TAG)}#[0-9a-f]{{40}}$"
+)
+
+
+def _is_journal_pointer(value: str) -> bool:
+    """True when a task reference is a format-only journal pointer.
+
+    The journal repository is private. This check does not fetch it and does not
+    open a local ``.team`` evidence file.
+    """
+    if _JOURNAL_POINTER.fullmatch(value) is None:
+        return False
+    path = value.split("#", 1)[0]
+    return all(part not in {".", ".."} for part in path.split("/"))
+
+
+def _accept_journal_pointer(value: object) -> None:
+    if not isinstance(value, str) or not _is_journal_pointer(value):
+        raise ContractError("evidence pointer is malformed")
 
 
 def _safe_relative(value: object, *, pattern: bool = False, allow_git: bool = False) -> str:
@@ -150,9 +174,14 @@ def validate_task_contract(
         raise ContractError("invalid task identity")
     root = root.resolve(strict=True)
     spec_path = root / _safe_relative(raw["spec_path"])
-    task_path = root / _safe_relative(raw["task_path"])
-    for path in (spec_path, task_path):
-        if path.is_symlink() or not path.is_file() or root not in path.resolve().parents:
+    if spec_path.is_symlink() or not spec_path.is_file() or root not in spec_path.resolve().parents:
+        raise ContractError("governed file must be a regular in-repository file")
+    task_value = raw["task_path"]
+    if isinstance(task_value, str) and task_value.startswith("archive/team-ledgers/"):
+        _accept_journal_pointer(task_value)
+    else:
+        task_path = root / _safe_relative(task_value)
+        if task_path.is_symlink() or not task_path.is_file() or root not in task_path.resolve().parents:
             raise ContractError("governed file must be a regular in-repository file")
     allowed = raw["allowed_paths"]
     if (

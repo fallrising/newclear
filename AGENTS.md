@@ -1,10 +1,9 @@
 # AGENTS.md
 
-任務管理唯一依據：https://github.com/fallrising/desk 的 docs/operating-method.md。
-- 無對應卡片（desk T-####）不動工；commit message 帶 `Desk-Task: T-####`。
-- 只改卡片 Scope 內的檔案；變更走 PR，不直接動 main。
+任務在本 repo 自行管理，可拆子任務；位置與格式由本 repo 決定。
+desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，不要求卡片編號或 `Desk-Task`。
+- 變更走 PR，不直接動 main。
 - 只有不可逆或危險操作（刪除、發布、花錢、force push、繞過 CI、改授權、改本檔）才問 owner。
-- 卡片被 owner 改成 todo / blocked / dropped 就停。
 - 本檔以外的 repo 專屬規則（建置、測試、風格）寫在下方，不要複製看板規則。
 
 ## Repo 專屬

@@ -17,8 +17,12 @@
 
 ## 公開邊界
 
-不要把私人任務內容、個人檔案路徑、主機名、IP、網域、帳號或憑證寫進這個公開 repo。可以寫的公開指標只有 `fallrising/desk` 的 `docs/operating-method.md`。
+不要把私人任務內容、個人檔案路徑、主機名、IP、網域、帳號或憑證寫進這個公開 repo。公開可以指向 `fallrising/desk` 的 `docs/operating-method.md`，以及 journal 的 run 路徑格式。
 
 ## 執行紀錄
 
-一件工作的執行紀錄放在該工作自己的目錄，與程式同一個 PR，不寫到另一個 repo。可選的 `log.md` 只追加：誰或哪個 agent、何時開始與結束、已知的用量或成本（不知道就寫 unknown）、證據在哪。`report.md` 放交付結果。暫存檔要寫用途、位置，以及要不要留。舊的獨立執行紀錄庫不再收新紀錄。公開紀錄不要帶私人細節。
+過程紀錄以 desk 的 [`docs/operating-method.md`](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) 為準。owner 選用時，寫到 `fallrising/journal` 的 `runs/<repo>/<project>/YYYY/MM/<UTC>-<run-id>/run.md`。公開紀錄不要帶私人細節。
+
+## 任務板
+
+項目任務板預設放在 `<項目目錄>/docs/tasks/BOARD.md`（hai-taskboard 已用 `docs/tasks/`）。板檔是工作流本身的文件，不受各項目 AGENTS「只改當前 task 允許路徑」限制。

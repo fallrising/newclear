@@ -129,7 +129,10 @@ func (w *hintWalk) collect(re *resyn.Regexp, depth int, keep bool) []string {
 	}
 	switch re.Op {
 	case resyn.OpLiteral:
-		if !keep || len(re.Rune) == 0 {
+		// U+FFFD matches either that character or one illegal UTF-8 byte.
+		// The character's UTF-8 encoding is not a substring of the raw byte,
+		// so the literal is not a safe Contains hint.
+		if !keep || len(re.Rune) == 0 || slices.Contains(re.Rune, utf8.RuneError) {
 			return nil
 		}
 		return []string{string(re.Rune)}

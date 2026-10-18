@@ -25,6 +25,7 @@ func TestExtractLiteralHintSeeds(t *testing.T) {
 		{pattern: `(?i)Error`, want: ""},
 		{pattern: `\d+ERROR\d+`, want: "ERROR"},
 		{pattern: `[a-z]+fatal`, want: "fatal"},
+		{pattern: `abc\x{FFFD}`, want: ""},
 	}
 	for _, tc := range cases {
 		t.Run(tc.pattern, func(t *testing.T) {
@@ -45,6 +46,7 @@ func TestExtractLiteralHintConservative(t *testing.T) {
 		{pattern: `abcd.*wxyz`, want: "abcd"},
 		{pattern: `foo(?i:x)bar`, want: ""},
 		{pattern: `error|errorfoo`, want: "error"},
+		{pattern: `timeout.*abc\x{FFFD}`, want: "timeout"},
 		{pattern: `[`, want: ""},
 		{pattern: "", want: ""},
 		{pattern: strings.Repeat("a", MaxRegexBytes+1), want: ""},
@@ -84,6 +86,9 @@ func FuzzLiteralHint(f *testing.F) {
 	} {
 		f.Add(pattern, "error then timeout")
 	}
+	// Go regexp treats one illegal byte as U+FFFD. The seed pairs that match
+	// with the byte the character encoding does not contain.
+	f.Add(`abc\x{FFFD}`, "abc\xff")
 	f.Fuzz(func(t *testing.T, pattern, input string) {
 		re, err := regexp.Compile(pattern)
 		if err != nil {
@@ -93,8 +98,10 @@ func FuzzLiteralHint(f *testing.F) {
 		if hint == "" {
 			return
 		}
-		if re.MatchString(input) && !strings.Contains(input, hint) {
-			t.Fatalf("hint %q not present in matching input %q (pattern %q)", hint, input, pattern)
+		for _, candidate := range []string{input, input + "\xff"} {
+			if re.MatchString(candidate) && !strings.Contains(candidate, hint) {
+				t.Fatalf("hint %q not present in matching input %q (pattern %q)", hint, candidate, pattern)
+			}
 		}
 	})
 }

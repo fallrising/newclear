@@ -19,7 +19,9 @@
 
 **兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務。不要求卡片編號或 `Desk-Task`。
 
-[`tools/codex-usage`](tools/codex-usage/) 的 issue-task pilot 檔仍在 [docs/work-tracking/README.md](docs/work-tracking/README.md)，用來放該元件的 issue、task、report。
+[`tools/codex-usage`](tools/codex-usage/) 的 issue、task、report 仍可放在 [docs/work-tracking/README.md](docs/work-tracking/README.md)。模板見 [task](docs/work-tracking/task-template.md)、[report](docs/work-tracking/report-template.md)、[request form](.github/ISSUE_TEMPLATE/task-request.yml)。選元件不會自動上標籤，也不等於可以 merge。
+
+本 repo 是公開的：issue、PR、檔案與證據不得放私有內容、主機名稱、路徑或帳號。desk 的 repo 名稱與 `docs/operating-method.md` 這條路徑可以寫。
 
 ## 目錄
 

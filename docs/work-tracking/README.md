@@ -1,8 +1,8 @@
 # Issue-task contract — bounded phase 1 and phase 2
 
-> **兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務。不要求卡片編號或 `Desk-Task`。
+> **兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務；位置與格式由本 repo 決定。不要求卡片編號或 `Desk-Task`。
 
-本檔仍只描述 [`tools/codex-usage`](../../tools/codex-usage/) 的 issue、task、report 怎麼放。不使用 doing claim、Scope／`touches` 或 phase 2 認領。
+下面描述既有的 issue、task、report 可以怎麼放（目前 [`tools/codex-usage`](../../tools/codex-usage/) 在用）。這不是認領權威。doing claim、Scope／`touches`、phase 2 dispatcher 不使用。run 狀態、心跳、Grok Bot 掃描尚未啟用。
 
 ## Identity and files
 
@@ -59,8 +59,7 @@ and do not delete or rename labels. Manifest values describe defaults for missin
 
 The [request form](../../.github/ISSUE_TEMPLATE/task-request.yml) collects summary, component, and outcome.
 Selecting a component does **not** apply its project label. The manifest/form include indexed components
-for routing, but do not enroll them in the pilot. Paths are authoritative; display text may change.
-Non-pilot issues are intake only: do not mark them `ready` under this contract or start issue-only work.
+for routing. Paths are authoritative; display text may change.
 本契約不另給開工授權。技術任務見檔首。
 
 ## Phase 2 manual dispatch and claims
@@ -78,6 +77,14 @@ host names, IP addresses, domains, accounts, or credentials. The public pointer 
 Keep private task contents and coordination reports outside this public repository. Public evidence must be
 safe to share; identify restricted evidence abstractly rather than linking it. Privacy review is required
 for requests and reports as well as code changes.
+
+## Execution records (replaces the separate journal repository)
+
+The execution record of a piece of work lives in its task directory, in the same PR as the code, so nothing is
+written to another repository: `log.md` (optional, append-only) holds one entry per run or attempt — who or which
+agent and model ran it, start and end, usage or cost when known (state "unknown" otherwise), and where the
+evidence is; `report.md` holds the delivery result. Temporary artifacts are named there with purpose, location and
+whether they must be kept. The old separate execution-ledger repository takes no new records. Keep public records free of private details.
 
 ## Evidence and manual validation
 

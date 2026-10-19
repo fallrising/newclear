@@ -258,7 +258,7 @@ type LogQuery struct {
     Stages     []ParseStage  // | json | logfmt
     Fields     []FieldFilter // 解析後欄位過濾
     Direction  Direction     // Backward（新→舊，預設）/ Forward
-    Limit      int           // 0 = 用設定檔預設
+    Limit      int           // <=0：尚未填預設。沒有對應的 query 設定欄；Loki query API 的預設是 100，由 HTTP 層寫成正數後再規劃。Execute 看到 <=0 不截斷
     Agg        *LogAggregation // nil = 回原始日誌行
 }
 
@@ -303,7 +303,7 @@ type LogAggregation struct {
 | `ParsedFieldLogfmt=true` | 上述 + `\| logfmt` 後的 Fields | Agg（若 `Aggregation=false`） |
 | `NativeLogQuery=true` | 全部 | 無 |
 
-**`Limit` 的陷阱**：只有在驅動已套用**全部**過濾條件時才能下推 `Limit`。否則驅動必須忽略 `Limit`，改由中間層在補算後截斷；驅動應改用設定檔的 `max_scan_rows` 做保護並在超出時回 `ErrTooLarge`。這一條寫錯會導致「日誌少了」這種最難查的 bug。
+**`Limit` 的陷阱**：只有在驅動已套用**全部**過濾條件時才能下推 `Limit`。否則驅動必須忽略 `Limit`，改由中間層在補算後截斷；驅動應改用設定檔的 `max_scan_rows` 做保護並在超出時回 `ErrTooLarge`。這一條寫錯會導致「日誌少了」這種最難查的 bug。執行器只在 `PushdownPlan.Limit == false` 且 `q.Limit > 0` 時截斷；`Limit == true` 表示驅動已經截過，不得再截。`promqladapter.Limits` 不參與。
 
 ### 4.3 迭代器
 
@@ -316,8 +316,9 @@ type LogIterator interface {
 }
 
 type LogResult struct {
-    Streams []LogStream  // 原始日誌結果
-    Matrix  []SeriesData // 聚合結果
+    Streams []LogStreamData // Agg == nil；元素見 14，不是 Tail 用的 LogStream
+    Matrix  []SeriesData    // Agg != nil
+    Stats   LogStats
 }
 ```
 

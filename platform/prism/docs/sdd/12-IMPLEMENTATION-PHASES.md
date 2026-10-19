@@ -54,7 +54,7 @@
 |---|---|---|---|---|
 | P2-01 | `internal/query/logql`：lexer + parser → `spi.LogQuery`（**EBNF 與錯誤訊息表見 `16-LOGQL-GRAMMAR.md` §1–§3.3**） | P0-03 | `internal/query/logql/**` | `16` §4.1 的 parser 驗收全綠（完整矩陣依 P2-01/02/03/04 分期）；有效但不支援的語法回「不支援」，格式錯誤仍回「語法錯誤」 |
 | P2-02 | `internal/query/logql/compile.go`：正則預編譯 + `LiteralHint` 抽取（**演算法見 `16` §3.4**） | P2-01 | 同上 | `FuzzLiteralHint` 通過；8 個種子語料全綠 |
-| P2-03 | `internal/query/logql/exec.go` + `agg.go`：串流補算與聚合（**執行順序見 `16` §3.5–§3.7**） | P2-02 | 同上 | 16 種 `PushdownPlan` 組合結果一致；100 萬行 + limit=100 的讀取量斷言通過 |
+| P2-03 | `internal/query/logql/exec.go` + `agg.go`：串流補算與聚合（**執行順序見 `16` §3.5–§3.7**） | P2-02 | 同上 | `16` §4.2 的 AC-1 至 AC-19 |
 | P2-04 | `internal/compat/lokiapi`：query_range/query/labels/label values/series/index stats/ready | P2-03 | `internal/compat/lokiapi/**` | Grafana Loki datasource health 綠；Explore 可查與自動完成 |
 | P2-05 | `drivers/clickhouse`：`NativeLogQuerier`（**翻譯規則見 `17` §6**） | P2-01,P1-10 | `drivers/clickhouse/**` | `C-LOG-03`/`C-LOG-04`/`C-LOG-05` 綠；logfmt 正確回 `ErrUnsupported` 觸發回退 |
 | P2-06 | `internal/alerting/rules`：規則檔解析（Prometheus 格式 + `prism_` 擴充）、熱重載 | P0-07 | `internal/alerting/rules/**` | 真實 rule 檔載入；`promtool check rules` 相容性實測並記入 ADR |

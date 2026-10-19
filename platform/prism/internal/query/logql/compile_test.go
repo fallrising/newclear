@@ -11,8 +11,8 @@ import (
 )
 
 func TestExtractLiteralHintSeeds(t *testing.T) {
-	// SDD 16 §3.4 keeps the longest necessary literal. error.*timeout therefore
-	// yields "timeout", not the shorter "error" used as an illustration in 06 §3.3.
+	// SDD 16 §3.4 and 06 §3.3 keep the longest necessary literal.
+	// error.*timeout therefore yields "timeout".
 	cases := []struct {
 		pattern string
 		want    string

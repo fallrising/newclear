@@ -141,8 +141,11 @@ parse error at line 1, col 15: syntax error: unexpected IDENTIFIER, expecting ST
    OpCharClass / OpAnyChar / OpAnyCharNotNL → {}
    其他             → {}
 4. 從集合中取最長者；長度 < 3 則回空字串
-5. 若走訪到的任一節點帶大小寫折疊旗標（FoldCase），整段 hint 回空字串：大小寫不敏感的子串無法用於精確索引。看的是 Simplify 之後留在節點上的旗標，不是原始字串裡有沒有寫 (?i)。regexp/syntax 對沒有大小寫區別的字元也留旗標，所以 (?i)123 回空，不是 123。旗標沒有留在任何節點上時不回空，例如 abc(?i) 仍抽出 abc。星號、可選與交替的子節點仍會走訪，巢狀旗標一樣讓整段回空。
+5. 若走訪到的任一節點帶大小寫折疊旗標（FoldCase），整段 hint 回空字串：大小寫不敏感的子串無法用於精確索引。看的是 Simplify 之後留在節點上的旗標，不是原始字串裡有沒有寫 (?i)。星號、可選與交替的子節點仍會走訪，巢狀旗標一樣讓整段回空。
+6. 走訪節點上限 8192、深度上限 128。超過任一個就回空 hint。
 ```
+
+實測 `ExtractLiteralHint`：`(?i)123` 為空字串（語法樹仍把旗標留在 `123` 上），`abc(?i)` 為 `abc`（旗標沒有留在節點上），`(?i:k)abc` 為空字串（`k` 帶旗標，整段回空）。
 
 含 U+FFFD 的字面不得作 hint（Go regexp 把非法 UTF-8 byte 當 U+FFFD 匹配）。同一正則裡其他不含 U+FFFD 的必要字面仍可作 hint。
 

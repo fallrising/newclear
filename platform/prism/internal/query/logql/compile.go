@@ -109,10 +109,15 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 }
 
 // compileAnchoredField compiles a field matcher once, equivalent to ^(?:pattern)$.
+// The raw pattern is compiled first: wrapping alone can turn an invalid pattern
+// such as a)|(?:b into the legal, unanchored ^(?:a)|(?:b)$.
 // Line filters stay unanchored in compilePattern.
 func compileAnchoredField(pattern string) (*regexp.Regexp, error) {
 	if len(pattern) > MaxRegexBytes {
 		return nil, spi.Wrap(spi.ErrTooLarge, "logql", "Execute", errors.New("regular expression byte limit exceeded"))
+	}
+	if _, err := regexp.Compile(pattern); err != nil {
+		return nil, spi.Wrap(spi.ErrBadRequest, "logql", "Execute", errors.New("invalid regular expression"))
 	}
 	compiled, err := regexp.Compile("^(?:" + pattern + ")$")
 	if err != nil {

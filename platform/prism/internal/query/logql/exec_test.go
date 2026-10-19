@@ -588,6 +588,19 @@ func TestExecute_AC22_AnchoredFieldRegex(t *testing.T) {
 	}
 }
 
+func TestExecute_AC22_InvalidPatternRejected(t *testing.T) {
+	q := spi.LogQuery{Direction: spi.Forward, Fields: []spi.FieldFilter{{
+		Field: "status", Op: spi.CmpRe, Value: `a)|(?:b`,
+	}}}
+	got, err := Execute(t.Context(), &observeIter{recs: []utm.LogRecord{{
+		Labels: labels.FromStrings("status", "ab"),
+	}}}, q, logPlan(true, false, true, true))
+	if spi.Classify(err) != spi.ErrBadRequest {
+		t.Fatalf("class %v err %v", spi.Classify(err), err)
+	}
+	assertEmpty(t, got)
+}
+
 func TestExecute_AC23_TopKByGroup(t *testing.T) {
 	var recs []utm.LogRecord
 	add := func(job, instance string, n int) {

@@ -69,6 +69,102 @@ func TestM5PR03LeaderFailoverReplaysCommittedDedup(t *testing.T) {
 	}
 }
 
+func TestProduceOnReplicaMissingPrefixRejectsBeforeSequenceCheck(t *testing.T) {
+	t.Parallel()
+	cluster := newProducerCluster(t)
+	leader := cluster.elect(t, 1)
+	openResult, ready, _, err := leader.Open(protocolOpenRequest(-1, "open-stale-prefix"), cluster.now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueue(ready.Messages)
+	cluster.drain(t, 300)
+	if openResult.Status == OperationPending {
+		cluster.heartbeat(t, 1)
+	}
+	followerState, exists := cluster.partitions[3].State().Producer(testProducerID)
+	if !exists || followerState.Epoch != 0 || followerState.NextSequence != 0 {
+		t.Fatalf("follower did not have the opened producer at sequence 0: %#v exists=%v", followerState, exists)
+	}
+
+	cluster.isolate(3)
+	committed := testProduceRequest(t, 0, 0, "committed-without-node-3")
+	result, ready, _, err := leader.Produce("produce-without-node-3", committed, 1, cluster.now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueue(ready.Messages)
+	cluster.drain(t, 300)
+	cluster.heartbeat(t, 1)
+	leaderState, exists := leader.State().Producer(testProducerID)
+	if !exists || leaderState.NextSequence != 1 || len(leaderState.Batches) != 1 {
+		t.Fatalf("leader did not apply the prefix: produce %#v state %#v", result, leaderState)
+	}
+	followerState, exists = cluster.partitions[3].State().Producer(testProducerID)
+	if !exists || followerState.NextSequence != 0 || len(followerState.Batches) != 0 {
+		t.Fatalf("isolated follower applied the committed prefix: %#v", followerState)
+	}
+
+	ahead := testProduceRequest(t, 0, 1, "acked-next-sequence")
+	before := cluster.nodes[3].Snapshot().LastLogIndex
+	_, _, _, err = cluster.partitions[3].Produce("stale-follower", ahead, 1, cluster.now)
+	if !errors.Is(err, raft.ErrNotLeader) || IsCode(err, CodeOutOfOrderSequence) {
+		t.Fatalf("follower missing the prefix = %v, want NOT_LEADER", err)
+	}
+	if cluster.nodes[3].Snapshot().LastLogIndex != before {
+		t.Fatal("follower appended while it was not leader")
+	}
+}
+
+func TestReadyLeaderStillRejectsASequenceGap(t *testing.T) {
+	t.Parallel()
+	cluster := newProducerCluster(t)
+	leader := cluster.elect(t, 1)
+	_, ready, _, err := leader.Open(protocolOpenRequest(-1, "open-gap"), cluster.now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueue(ready.Messages)
+	cluster.drain(t, 300)
+	cluster.heartbeat(t, 1)
+	before := cluster.nodes[1].Snapshot().LastLogIndex
+	_, _, _, err = leader.Produce("ready-leader-gap", testProduceRequest(t, 0, 2, "gap"), 1, cluster.now)
+	if !IsCode(err, CodeOutOfOrderSequence) {
+		t.Fatalf("ready leader sequence gap = %v, want OUT_OF_ORDER_SEQUENCE", err)
+	}
+	if cluster.nodes[1].Snapshot().LastLogIndex != before {
+		t.Fatal("ready leader appended a sequence gap")
+	}
+}
+
+func TestProduceOnNotReadyLeaderRejectsBeforeSequenceCheck(t *testing.T) {
+	t.Parallel()
+	cluster := newProducerCluster(t)
+	leader := cluster.elect(t, 1)
+	_, ready, _, err := leader.Open(protocolOpenRequest(-1, "open-not-ready"), cluster.now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueue(ready.Messages)
+	cluster.drain(t, 300)
+	cluster.heartbeat(t, 1)
+	opened, exists := cluster.partitions[2].State().Producer(testProducerID)
+	if !exists || opened.NextSequence != 0 {
+		t.Fatalf("peer producer state = %#v exists=%v", opened, exists)
+	}
+
+	cluster.becomeLeaderBeforeReady(t, 2)
+	ahead := testProduceRequest(t, 0, 1, "ahead-of-unapplied-prefix")
+	before := cluster.nodes[2].Snapshot().LastLogIndex
+	_, _, _, err = cluster.partitions[2].Produce("not-ready-leader", ahead, 1, cluster.now)
+	if !errors.Is(err, raft.ErrLeaderNotReady) || IsCode(err, CodeOutOfOrderSequence) {
+		t.Fatalf("not-ready leader = %v, want NOT_READY", err)
+	}
+	if cluster.nodes[2].Snapshot().LastLogIndex != before {
+		t.Fatal("not-ready leader appended before its barrier")
+	}
+}
+
 func TestM5PendingBatchCoalescesWithoutPipelining(t *testing.T) {
 	t.Parallel()
 	cluster := newProducerCluster(t)
@@ -327,6 +423,35 @@ func (cluster *producerCluster) heartbeat(t *testing.T, id uint32) {
 	}
 	cluster.enqueue(ready.Messages)
 	cluster.drain(t, 300)
+}
+
+// becomeLeaderBeforeReady wins an election and leaves the NOOP uncommitted,
+// so the node is leader and LeaderReady is still false.
+func (cluster *producerCluster) becomeLeaderBeforeReady(t *testing.T, id uint32) {
+	t.Helper()
+	ready, err := cluster.nodes[id].Campaign()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := cluster.partitions[id].HandleReady(ready, cluster.now); err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueue(ready.Messages)
+	for range 30 {
+		if snapshot := cluster.nodes[id].Snapshot(); snapshot.Role == raft.Leader && !snapshot.LeaderReady {
+			return
+		}
+		if len(cluster.queue) == 0 {
+			break
+		}
+		message := cluster.queue[0]
+		cluster.queue = cluster.queue[1:]
+		if message.Kind == raft.MessageAppendEntries || message.Kind == raft.MessageAppendResponse {
+			continue
+		}
+		cluster.deliver(t, message)
+	}
+	t.Fatalf("node %d did not stop as a not-ready leader: %#v", id, cluster.nodes[id].Snapshot())
 }
 
 func (cluster *producerCluster) isolate(id uint32) {

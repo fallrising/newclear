@@ -113,7 +113,13 @@ Status: accepted（可觀測性與選項 1 已實作；選項 2–5 未決）；
 
 Status: accepted（已實作）。沒有獨立 ADR；不改持久狀態、ack／HW／ISR、epoch 或資料格式。
 
-原本每個 replica 在 process 啟動時選一次 election timeout（6–12 tick，7 個值），之後不變。leader 消失後，剩下兩個 voter 若選到同一個值，就在同一個 tick 一起成為 candidate、各投自己，之後每一輪都相同，直到第三個 voter 回來才選得出 leader；三 process 的 failover 測試因此在 2 CPU 上 30 次失敗 9 次。改為：節點每次開始選舉，或離開 candidate／leader、或在更高 term 成為 follower 時，由注入的 random source 重新選取；收到 heartbeat 不重選。`TestM7EqualElectionTimeoutsStillElectALeader` 以固定 seed 驗證。pre-vote 與 check-quorum 未處理。
+原本每個 replica 在 process 啟動時選一次 election timeout（6–12 tick，7 個值），之後不變。leader 消失後，剩下兩個 voter 若選到同一個值，就在同一個 tick 一起成為 candidate、各投自己，之後每一輪都相同，直到第三個 voter 回來才選得出 leader；三 process 的 failover 測試因此在 2 CPU 上 30 次失敗 9 次。改為：節點每次開始選舉，或離開 candidate／leader、或在更高 term 成為 follower 時，由注入的 random source 重新選取；收到 heartbeat 不重選。`TestM7EqualElectionTimeoutsStillElectALeader` 以固定 seed 驗證。pre-vote 與 check-quorum 仍未實作，評估見 ADR-014。
+
+### ADR-014 — Raft pre-vote：評估後不實作
+
+Status: accepted（決定不實作）；完整內容見 [ADR-014](../adr/014-raft-pre-vote-not-implemented.md)。
+
+02 §3 與程式一致，本節不改那一節。Follower 逾時即 `currentTerm+1`、持久化自票、送 `RequestVote`；較高 term 的 `RequestVote` 會先讓收到的節點（含現任 leader）持久化新 term 並退為 follower，即使這一票因 log 較舊被拒、candidate 也還沒有 quorum。`TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader` 鎖住這段。Pre-vote、check-quorum、調長 election timeout、把 tick 與 fsync 拆開，都沒有實作。環境 B 的靜默 follower 不在這份決定裡。
 
 ## 4. 來源目錄
 

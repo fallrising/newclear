@@ -1,0 +1,162 @@
+{
+  "commit": "0606e663",
+  "go": "go1.27.1",
+  "config": "rf3-isr2-b1-p1",
+  "workload": {
+    "record_bytes": 1024,
+    "producers_per_partition": 4,
+    "batch_records": 1,
+    "partitions": 1,
+    "acks": "all",
+    "warmup": "10s",
+    "measure": "60s",
+    "repeats": 3
+  },
+  "launcher": "existing three-broker compose; no netem; no injected disk latency",
+  "definition": "A non-leader of events partition 0 (leader gauge 0 at both scrapes of one 60s measurement window) reproduces the finding when mkfk_fsync_total delta is 0 and that broker's log has zero lines timestamped in the same window.",
+  "verdict": "沒有",
+  "scope": "this compose run only",
+  "repeats": [
+    {
+      "repeat": 1,
+      "window_start": "2026-10-19T15:36:20.979411149Z",
+      "window_end": "2026-10-19T15:37:20.979411149Z",
+      "produce_records_per_sec": 369.25,
+      "produce_errors": {},
+      "brokers": [
+        {
+          "broker": "broker-1",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": true,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": true,
+          "fsync_known": true,
+          "fsync_delta": 79971,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        },
+        {
+          "broker": "broker-2",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": false,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": false,
+          "fsync_known": true,
+          "fsync_delta": 75810,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        },
+        {
+          "broker": "broker-3",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": false,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": false,
+          "fsync_known": true,
+          "fsync_delta": 75910,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "window_start": "2026-10-19T15:37:30.986407349Z",
+      "window_end": "2026-10-19T15:38:30.986407349Z",
+      "produce_records_per_sec": 363.65,
+      "produce_errors": {},
+      "brokers": [
+        {
+          "broker": "broker-1",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": true,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": true,
+          "fsync_known": true,
+          "fsync_delta": 79064,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        },
+        {
+          "broker": "broker-2",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": false,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": false,
+          "fsync_known": true,
+          "fsync_delta": 76358,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        },
+        {
+          "broker": "broker-3",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": false,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": false,
+          "fsync_known": true,
+          "fsync_delta": 76355,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        }
+      ]
+    },
+    {
+      "repeat": 3,
+      "window_start": "2026-10-19T15:38:40.991704685Z",
+      "window_end": "2026-10-19T15:39:40.991704685Z",
+      "produce_records_per_sec": 337.46666666666664,
+      "produce_errors": {},
+      "brokers": [
+        {
+          "broker": "broker-1",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": true,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": true,
+          "fsync_known": true,
+          "fsync_delta": 73603,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        },
+        {
+          "broker": "broker-2",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": false,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": false,
+          "fsync_known": true,
+          "fsync_delta": 71493,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        },
+        {
+          "broker": "broker-3",
+          "events_leader_known_at_start": true,
+          "events_leader_at_start": false,
+          "events_leader_known_at_end": true,
+          "events_leader_at_end": false,
+          "fsync_known": true,
+          "fsync_delta": 71619,
+          "log_lines_in_window": 0,
+          "unparsed_log_lines": 0,
+          "silent": false
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "有 means the finding's measurement occurred on this compose run",
+    "沒有 means it was not seen here; it does not mean environment B is fine",
+    "Docker does not reproduce another machine's clock skew or network",
+    "leader and fsync are the two scrapes at the window boundaries, the same pair the bench records"
+  ]
+}

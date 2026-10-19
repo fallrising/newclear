@@ -88,7 +88,8 @@ func electsWithin(t *testing.T, cluster *memoryCluster, ticks int) bool {
 // unchanged by ADR-014. A candidate increments its term and sends RequestVote
 // before any peer has granted a vote. One such request makes the current
 // leader persist that term and step down, even when the candidate's log is
-// stale, the vote is refused, and the candidate has not heard a quorum.
+// stale and the vote is refused. The candidate stays a candidate after that
+// refusal is delivered: it becomes leader only with a majority of granted votes.
 // Pre-vote would change this sequence; it is not implemented.
 func TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader(t *testing.T) {
 	t.Parallel()
@@ -152,7 +153,11 @@ func TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader(t *testing
 		t.Fatalf("persisted hard state = %+v, want term %d and no vote", persisted, candidate.Term)
 	}
 	if cluster.nodes[3].Snapshot().Role != Candidate {
-		t.Fatalf("candidate became %s without a delivered quorum", cluster.nodes[3].Snapshot().Role)
+		t.Fatalf("candidate became %s without a majority of granted votes", cluster.nodes[3].Snapshot().Role)
+	}
+	selfVote := cluster.logs[3].HardState()
+	if selfVote.VotedFor == nil || *selfVote.VotedFor != 3 || selfVote.CurrentTerm != candidate.Term {
+		t.Fatalf("candidate hard state = %+v, want term %d and a vote for itself", selfVote, candidate.Term)
 	}
 	peer := cluster.nodes[2].Snapshot()
 	if peer.Role != Follower || peer.Term != leader.Term {
@@ -161,6 +166,12 @@ func TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader(t *testing
 	if len(cluster.queue) != 1 || cluster.queue[0].Kind != MessageRequestVoteResponse ||
 		cluster.queue[0].VoteResp == nil || cluster.queue[0].VoteResp.Granted {
 		t.Fatalf("vote response = %+v, want one refusal", cluster.queue)
+	}
+	refusal := cluster.queue[0]
+	cluster.queue = nil
+	cluster.deliver(t, refusal)
+	if after := cluster.nodes[3].Snapshot(); after.Role != Candidate || after.Term != candidate.Term {
+		t.Fatalf("candidate after the delivered refusal: %+v", after)
 	}
 }
 

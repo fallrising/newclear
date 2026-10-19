@@ -6,15 +6,15 @@
 
 ## Context
 
-A follower that times out becomes a candidate, increments `currentTerm`, persists a vote for itself, and sends `RequestVote`. A receiver of a higher term persists that term and steps down to follower before it decides the vote. Both rules are in 02 §3, and `raft.(*Node).Step` follows them: any higher term calls `becomeFollower` first, and only a granted vote resets the election timer.
+A follower that times out becomes a candidate, increments `currentTerm`, persists a vote for itself, and sends `RequestVote`. A receiver of a higher term persists that term and steps down to follower before it decides the vote. Both rules are in 02 §3, and `raft.(*Node).Step` follows them: any higher term calls `becomeFollower` first. For a higher-term `RequestVote`, only a granted vote resets the election timer. `AppendEntries` from the current leader resets it as well (`stepAppendEntries`).
 
-The effect is that one `RequestVote` from a candidate that has not won a quorum deposes the current leader. The vote can then be refused because the candidate's log is stale. The candidate still does not become leader, because the refusal is not delivered back to it, but the leader has already left the term in which it was serving. `TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader` records that sequence.
+The effect is that one `RequestVote` from a candidate that has not won a quorum deposes the current leader. The vote can then be refused because the candidate's log is stale. The candidate becomes leader only with a majority of granted votes, whether or not that refusal is delivered. The leader has already left the term in which it was serving. `TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader` records that sequence.
 
 ADR-012 stopped a refused vote from resetting up-to-date election timers, so a stale candidate can no longer prevent an election forever. It does not stop the term bump itself. There is no pre-vote, and there is no check-quorum. `leaderReady == false` in `becomeLeader` and `clearLeaderState` is only the current-term NOOP barrier.
 
 Two observations motivated the question, and they are not the same event:
 
-- On a slow overlay path, RF3 leadership moved through high terms while heartbeats were late. The write-up attributes that to the absence of pre-vote ([adr-013-real-host](../benchmarks/adr-013-real-host.md)). The same note says the path's delay was not measured, so the attribution is an inference.
+- On a slow overlay path, RF3 leadership moved through high terms. The write-up infers that heartbeats were late, and attributes the elections to the absence of pre-vote ([adr-013-real-host](../benchmarks/adr-013-real-host.md)). That note records pair RTTs of 29 / 44 / 50 ms. No per-link delay/loss was recorded during the run, so the late-heartbeat account stays an inference.
 - On environment B, one follower in `rf3-isr2-b1-p1` did no fsyncs and wrote no logs for a whole 60 s window ([m7-environment-b](../benchmarks/m7-environment-b.md), finding 4). Two later diagnostic reruns on B did not reproduce it. ADR-013 added slow-fsync and actor-stall logs so a rerun could explain it. That rerun is issue #401 and is outside this ADR.
 
 ## Options
@@ -25,11 +25,11 @@ Two observations motivated the question, and they are not the same event:
 
 3. **Longer election timeout** (ADR-013 option 5). A deployment knob. A follower that still times out deposes the leader in the same way, only later. It does not change the `RequestVote` rule.
 
-4. **Ticks separate from fsync** (ADR-013 option 4). Election timing would not wait on the partition actor's sync, so one slow sync would not by itself start an election. ADR-013 already declines this without evidence that healthy disks stall often: a leader that cannot persist should not keep claiming leadership, and the change weakens the single-owner model. It does not change the `RequestVote` rule, and it does not explain a follower that logs nothing for 60 s.
+4. **Ticks separate from fsync** (ADR-013 option 4). Election timing would not wait on the partition actor's sync, so one slow sync would not by itself start an election. ADR-013 does not recommend it without evidence that healthy disks stall often: a leader that cannot persist should not keep claiming leadership, and the change weakens the single-owner model. It does not change the `RequestVote` rule, and it does not explain a follower that logs nothing for 60 s.
 
 ## Decision
 
-Do not implement pre-vote or check-quorum. 02 §3 stays as written. The deterministic test locks the current step-down. A later change that adds either extension has to edit §3 first and replace that test; this ADR is not permission to do that inside an implementation PR.
+Do not implement pre-vote or check-quorum. 02 §3 stays as written. Options 3 and 4 stay undecided, as in ADR-013. The deterministic test locks the current step-down. A later change that adds either extension has to edit §3 first and replace that test; this ADR is not permission to do that inside an implementation PR.
 
 ## Consequences
 

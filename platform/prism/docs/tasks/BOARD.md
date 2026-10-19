@@ -62,13 +62,22 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 結束時間是第一輪本機 `make lint`、依賴檢查與 `make test` 通過後記下的時鐘。另一個 agent 審查後補了三條 §3.6 規則：JSON 重複鍵留第一個值、抽出欄位依出現順序合併、欄位 `=~`/`!~` 整段比對。P2-03a 的結束時間是 AC-1 到 AC-19 的提交 `2fe6753f`（2026-10-19T07:41:24Z）。AC-20 到 AC-28 是 #420 之後補的，提交 `00893625`（2026-10-19T09:41:00Z），last_activity 對這個提交。
 
+## P2-04 前
+
+兩項一起做完。狀態關閉。P2-04 仍在 backlog，不拆。
+
+| ID | 任務 | desk | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P2-04 前 | `addBucket` 只更新受影響的固定桶；無向量聚合時，一萬輸出序列在 `findBucket` 新建時拒絕 | T-0354 | 關閉 | 2026-10-19T10:18:00Z | 2026-10-19T10:22:27Z | 2026-10-19T10:30:47Z |
+
+開始是 owner 指示這兩項的時鐘。結束是第一輪本機 `make lint` 與 `make test` 通過後的時鐘。審查後改成：輸出序列上限只在 `VectorOp` 為空時於建立時生效，`sum` 等仍在輸出階段檢查；`ts - t0` 溢位回空範圍。last_activity 是這次修正的本機測試通過後的時鐘。
+
 ## Backlog
 
 不拆、不做。
 
 | ID | 任務 |
 | --- | --- |
-| P2-04 前 | `agg.go` 的 `addBucket` 對每筆記錄掃全部 step（records×steps）。應照 `06-QUERY-ENGINE.md` 第 101 行的固定桶，直接算這筆落在哪些 step。一萬 series 上限要在 `findBucket` 新建序列時就檢查（現在要到 `agg.go` 建立 bucket 之後與 `plainSeries` 才查）。這兩項先記下，這次不改。 |
 | P2-04 | Loki query API |
 | P2-05 | ClickHouse `NativeLogQuerier` |
 | P2-06 | 告警規則檔 |

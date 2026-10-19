@@ -74,26 +74,121 @@ func inWindow(ts, t, window int64) bool {
 	return t-ts < window
 }
 
-func addBucket(groups map[uint64][]*bucket, rec utm.LogRecord, times []int64, window int64) {
-	g := findBucket(groups, rec.Labels, len(times))
-	for i, t := range times {
-		if inWindow(rec.TS, t, window) {
-			g.count[i]++
-			g.bytes[i] += len(rec.Body)
-		}
+func addBucket(groups map[uint64][]*bucket, rec utm.LogRecord, times []int64, window int64, capInput bool, series *int) error {
+	g, err := findBucket(groups, rec.Labels, len(times), capInput, series)
+	if err != nil {
+		return err
 	}
+	lo, hi := affectedRange(rec.TS, times, window)
+	nbytes := len(rec.Body)
+	for i := lo; i < hi; i++ {
+		g.count[i]++
+		g.bytes[i] += nbytes
+	}
+	return nil
 }
 
-func findBucket(groups map[uint64][]*bucket, ls utm.Labels, n int) *bucket {
+// affectedRange is the half-open index range of fixed buckets that contain ts.
+// Buckets are times[i] = times[0] + i*step, and a bucket t covers (t-window, t].
+func affectedRange(ts int64, times []int64, window int64) (int, int) {
+	n := len(times)
+	if n == 0 || window <= 0 {
+		return 0, 0
+	}
+	if n == 1 {
+		if inWindow(ts, times[0], window) {
+			return 0, 1
+		}
+		return 0, 0
+	}
+	t0 := times[0]
+	step := times[1] - t0
+	if step <= 0 {
+		return scannedRange(ts, times, window)
+	}
+	lo := 0
+	if ts > t0 {
+		delta, ok := subInt64(ts, t0)
+		if !ok {
+			return 0, 0
+		}
+		lo64 := delta / step
+		if delta%step != 0 {
+			lo64++
+		}
+		if lo64 >= int64(n) {
+			return 0, 0
+		}
+		lo = int(lo64)
+	}
+	limit, ok := addInt64(ts, window)
+	if !ok {
+		return lo, n
+	}
+	span, ok := subInt64(limit, t0)
+	if !ok {
+		return lo, n
+	}
+	if span <= 0 {
+		return 0, 0
+	}
+	hi64 := min((span-1)/step+1, int64(n))
+	hi := int(hi64)
+	if lo >= hi {
+		return 0, 0
+	}
+	return lo, hi
+}
+
+func scannedRange(ts int64, times []int64, window int64) (int, int) {
+	lo, hi := 0, 0
+	for i, t := range times {
+		if !inWindow(ts, t, window) {
+			continue
+		}
+		if lo == hi {
+			lo = i
+		}
+		hi = i + 1
+	}
+	return lo, hi
+}
+
+func addInt64(a, b int64) (int64, bool) {
+	c := a + b
+	if (b > 0 && c < a) || (b < 0 && c > a) {
+		return 0, false
+	}
+	return c, true
+}
+
+func subInt64(a, b int64) (int64, bool) {
+	c := a - b
+	if (b > 0 && c > a) || (b < 0 && c < a) {
+		return 0, false
+	}
+	return c, true
+}
+
+func findBucket(groups map[uint64][]*bucket, ls utm.Labels, n int, capInput bool, series *int) (*bucket, error) {
 	h := ls.Hash()
 	for _, g := range groups[h] {
 		if labels.Equal(g.labels, ls) {
-			return g
+			return g, nil
 		}
+	}
+	// The series cap counts output series. With no vector aggregation each
+	// input series is one output series, so reject it at creation. Reducers
+	// still check the reduced result in plainSeries and rankSeries.
+	if capInput && *series >= maxAggSeries {
+		return nil, tooLarge(*series+1, maxAggSeries)
+	}
+	if capInput {
+		*series++
 	}
 	g := &bucket{labels: ls, count: make([]int, n), bytes: make([]int, n)}
 	groups[h] = append(groups[h], g)
-	return g
+	return g, nil
 }
 
 func aggregate(q spi.LogQuery, groups map[uint64][]*bucket, times []int64) ([]spi.SeriesData, error) {

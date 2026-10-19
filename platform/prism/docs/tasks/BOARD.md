@@ -4,7 +4,7 @@ desk 卡：T-0354。本檔是 `platform/prism/docs/tasks/BOARD.md`。
 
 本輪只做 P2-02。時間是 UTC。已關閉的 P0-01 到 P2-01 只附合併證據；當時沒有留下開始時間，不補寫。P2-03 以後只列 backlog，不拆、不做。
 
-P2-02 依 `12-IMPLEMENTATION-PHASES.md` 點名的 `16-LOGQL-GRAMMAR.md` §3.4。`06-QUERY-ENGINE.md` §3.3 的例子把 `error.*timeout` 說成抽出 `error`；§3.4 規定取最長的必要字面，結果是 `timeout`。實作跟 §3.4。
+P2-02 依 `12-IMPLEMENTATION-PHASES.md` 點名的 `16-LOGQL-GRAMMAR.md` §3.4。`06-QUERY-ENGINE.md` §3.3 的 `error.*timeout` 例子與 §3.4 相同，抽出最長必要字面 `timeout`。
 
 ## 已關閉
 

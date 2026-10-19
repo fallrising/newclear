@@ -20,7 +20,9 @@ const (
 // ExtractLiteralHint returns a substring that every match of pattern must
 // contain, or "" when no safe hint of at least three runes exists.
 // The procedure is SDD 16 §3.4: parse with regexp/syntax Perl mode, simplify,
-// union required literals, keep the longest, and drop case-insensitive patterns.
+// union required literals, and keep the longest. A visited node that still
+// carries FoldCase clears the whole hint. regexp/syntax leaves that flag on
+// (?i)123, so the hint is empty; abc(?i) keeps "abc".
 // An empty result is always safe. A wrong non-empty result would drop log lines.
 func ExtractLiteralHint(pattern string) string {
 	if pattern == "" || len(pattern) > MaxRegexBytes {

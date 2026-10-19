@@ -78,6 +78,30 @@ func TestBaseRoutes(t *testing.T) {
 	}
 }
 
+func TestAC40_Ready(t *testing.T) {
+	server, err := New(Options{Address: "127.0.0.1:0", ShutdownTimeout: time.Second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	check := func(path, body string, status int) {
+		t.Helper()
+		response := httptest.NewRecorder()
+		request := httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil)
+		server.httpServer.Handler.ServeHTTP(response, request)
+		if response.Code != status || response.Body.String() != body {
+			t.Fatalf("%s status=%d body=%q", path, response.Code, response.Body.String())
+		}
+		if path == "/ready" && response.Header().Get("Content-Type") != "text/plain; charset=utf-8" {
+			t.Fatalf("%s content-type %q", path, response.Header().Get("Content-Type"))
+		}
+	}
+	check("/-/ready", "not ready\n", http.StatusServiceUnavailable)
+	check("/ready", "not ready\n", http.StatusServiceUnavailable)
+	server.ready.Store(true)
+	check("/-/ready", "ok\n", http.StatusOK)
+	check("/ready", "ready\n", http.StatusOK)
+}
+
 func TestReadyLifecycleAndNotificationFailure(t *testing.T) {
 	var lc net.ListenConfig
 	listener, err := lc.Listen(t.Context(), "tcp", "127.0.0.1:0")

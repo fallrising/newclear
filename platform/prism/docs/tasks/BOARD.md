@@ -2,9 +2,9 @@
 
 desk 卡：T-0354。本檔是 `platform/prism/docs/tasks/BOARD.md`。
 
-本輪做 P2-03。時間是 UTC。已關閉的 P0-01 到 P2-02 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-04 以後只列 backlog，不拆、不做。
+本輪做 P2-04，並補 AC-42 的輸入序列上限。時間是 UTC。已關閉的 P0-01 到 P2-03 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-05 以後只列 backlog，不拆、不做。
 
-P2-03 依 `12-IMPLEMENTATION-PHASES.md`。驗收是 `16-LOGQL-GRAMMAR.md` §4.2 的 AC-1 到 AC-28，執行規則是 §3.5 到 §3.7。
+P2-04 依 `12-IMPLEMENTATION-PHASES.md`。HTTP 驗收是 `02-COMPATIBILITY-CONTRACT.md` §3.4 的 AC-29 到 AC-41。AC-42 在 `16-LOGQL-GRAMMAR.md` §4.2，與這輪一起做。
 
 ## 已關閉
 
@@ -64,7 +64,7 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 ## P2-04 前
 
-兩項一起做完。狀態關閉。P2-04 仍在 backlog，不拆。
+兩項一起做完。狀態關閉。P2-04 已另拆。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -72,13 +72,25 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 開始是 owner 指示這兩項的時鐘。結束是第一輪本機 `make lint` 與 `make test` 通過後的時鐘。審查後改成：輸出序列上限只在 `VectorOp` 為空時於建立時生效，`sum` 等仍在輸出階段檢查；`ts - t0` 溢位回空範圍。last_activity 是這次修正的本機測試通過後的時鐘。
 
+## P2-04
+
+四張一起做完。狀態都是關閉。
+
+| ID | 任務 | desk | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P2-04a | AC-42：`query.max_agg_input_series` 預設 100000，與輸出上限分開 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
+| P2-04b | `query_range` 與 instant `query`：AC-29 到 AC-35 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
+| P2-04c | labels、label values、series、index/stats：AC-36 到 AC-39 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
+| P2-04d | `GET /ready` 與查詢錯誤信封：AC-40、AC-41 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
+
+開始是 owner 指示繼續 T-0354、實作 AC-42 與 P2-04 的時鐘。結束與 last_activity 是本機 `make lint test` 與依賴檢查通過後的時鐘。AC-38 的第二個 `series` body 以 #423 為準：完整 stream 標籤，標籤字典序。
+
 ## Backlog
 
 不拆、不做。
 
 | ID | 任務 |
 | --- | --- |
-| P2-04 | Loki query API |
 | P2-05 | ClickHouse `NativeLogQuerier` |
 | P2-06 | 告警規則檔 |
 | P2-07 | 告警評估與狀態 |

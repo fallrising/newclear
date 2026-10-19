@@ -62,7 +62,7 @@ func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, plan spi.P
 	aggregating := q.Agg != nil && !plan.Agg
 	var times []int64
 	var window int64
-	var series int
+	var input int
 	groups := map[uint64][]*bucket{}
 	if aggregating {
 		if err = validateAgg(q.Agg); err != nil {
@@ -88,7 +88,7 @@ func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, plan spi.P
 			continue
 		}
 		if aggregating {
-			if err = addBucket(groups, rec, times, window, q.Agg.VectorOp == "", &series); err != nil {
+			if err = addBucket(groups, rec, times, window, q.Agg.VectorOp == "", &input); err != nil {
 				return spi.LogResult{}, err
 			}
 			continue

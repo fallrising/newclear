@@ -2,6 +2,7 @@ package logql
 
 import (
 	"context"
+	"errors"
 	"maps"
 	"regexp"
 	"strconv"
@@ -562,6 +563,62 @@ func TestExecute_SumCollapsesManySeries(t *testing.T) {
 	}})
 	if it.reads != len(it.recs) || !it.closed {
 		t.Fatalf("reads %d closed %v", it.reads, it.closed)
+	}
+}
+
+func TestExecute_AC42_InputSeriesLimit(t *testing.T) {
+	const window = time.Minute
+	q := spi.LogQuery{
+		Start:     0,
+		End:       int64(window),
+		Direction: spi.Forward,
+		Agg: &spi.LogAggregation{
+			RangeFunc: "count_over_time",
+			Window:    window,
+			Step:      0,
+			VectorOp:  "sum",
+			By:        []string{"job"},
+		},
+	}
+	run := func(n int) (spi.LogResult, *observeIter, error) {
+		it := &observeIter{recs: make([]utm.LogRecord, n)}
+		for i := range it.recs {
+			it.recs[i] = utm.LogRecord{TS: 1, Labels: labels.FromStrings("host", strconv.Itoa(i), "job", "api")}
+		}
+		got, err := Execute(t.Context(), it, q, logPlan(true, true, false, true))
+		return got, it, err
+	}
+
+	got, it, err := run(maxAggInputSeries)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	assertMatrix(t, got.Matrix, []spi.SeriesData{{
+		Labels:  labels.FromStrings("job", "api"),
+		Samples: []spi.Sample{{TS: utm.NanoToMilli(int64(window)), Value: float64(maxAggInputSeries)}},
+	}})
+	if len(got.Streams) != 0 {
+		t.Fatalf("streams %#v", got.Streams)
+	}
+	if it.reads != maxAggInputSeries || !it.closed {
+		t.Fatalf("reads %d closed %v", it.reads, it.closed)
+	}
+
+	got, it, err = run(maxAggInputSeries + 1)
+	if spi.Classify(err) != spi.ErrTooLarge {
+		t.Fatalf("class %v err %v", spi.Classify(err), err)
+	}
+	want := "query scanned 100001 input series, exceeding the limit of 100000; narrow the stream selector or reduce the time range"
+	classified, ok := errors.AsType[*spi.Error](err)
+	if !ok || classified.Err == nil || classified.Err.Error() != want {
+		t.Fatalf("message %v", err)
+	}
+	assertEmpty(t, got)
+	if it.reads != maxAggInputSeries+1 {
+		t.Fatalf("reads %d, limit must trip when the extra series is accepted", it.reads)
+	}
+	if !it.closed {
+		t.Fatal("iterator was not closed")
 	}
 }
 

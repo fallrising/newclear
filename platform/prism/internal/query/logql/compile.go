@@ -108,6 +108,24 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 	return compiled, nil
 }
 
+// compileAnchoredField compiles a field matcher once, equivalent to ^(?:pattern)$.
+// The raw pattern is compiled first: wrapping alone can turn an invalid pattern
+// such as a)|(?:b into the legal, unanchored ^(?:a)|(?:b)$.
+// Line filters stay unanchored in compilePattern.
+func compileAnchoredField(pattern string) (*regexp.Regexp, error) {
+	if len(pattern) > MaxRegexBytes {
+		return nil, spi.Wrap(spi.ErrTooLarge, "logql", "Execute", errors.New("regular expression byte limit exceeded"))
+	}
+	if _, err := regexp.Compile(pattern); err != nil {
+		return nil, spi.Wrap(spi.ErrBadRequest, "logql", "Execute", errors.New("invalid regular expression"))
+	}
+	compiled, err := regexp.Compile("^(?:" + pattern + ")$")
+	if err != nil {
+		return nil, spi.Wrap(spi.ErrBadRequest, "logql", "Execute", errors.New("invalid regular expression"))
+	}
+	return compiled, nil
+}
+
 // hintWalk records case-folding and a hard node budget. Exceeding the budget
 // drops unread literals; that can only shorten a hint, never invent one.
 type hintWalk struct {

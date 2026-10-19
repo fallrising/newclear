@@ -98,7 +98,7 @@ func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, plan spi.P
 
 `plan` 用已落地的 `spi.PushdownPlan`，不用 `spi.LogPushdown`。不另設 `Limits`；`promqladapter.Limits` 只約束指標查詢。步驟與 P2-03 驗收見 `16` §3.5–§3.7 與 §4.2。**必須串流**：不得先收集全部再處理。只有 `plan.Limit == false` 且 `q.Limit > 0`，而且正在收集原始日誌時，達到筆數才 `Close()` 並返回。
 
-聚合（`count_over_time` 等）用固定桶的滑窗累加，記憶體上限 `query.max_agg_series`（預設 10_000 個輸出序列），超出回 `ErrTooLarge` 並提示使用者加 `by` 或縮小範圍。
+聚合（`count_over_time` 等）用固定桶的滑窗累加。輸出序列上限是 `query.max_agg_series`（預設 10_000），超出回 `ErrTooLarge`，並提示使用者加 `by` 或縮小範圍。輸入序列另計，上限是 `query.max_agg_input_series`（預設 100_000）。超過時回 `ErrTooLarge`，訊息請使用者縮小 stream selector 或時間範圍，不要叫人加 `by`。規則與 AC-42 見 `16` §3.7。
 
 ## 4. Jaeger 查詢
 

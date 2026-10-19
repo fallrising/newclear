@@ -89,7 +89,7 @@ parse error at line 1, col 15: syntax error: unexpected IDENTIFIER, expecting ST
   - 語法錯誤：`parse error at line L, col C: <details>`
   - 語義錯誤：直接是規則訊息（如 §1.1 的五條）
   - 不支援：`<feature> is not supported in this version`
-- 錯誤回應信封（Loki 格式，非 Prometheus 格式）：純文字 body，`Content-Type: text/plain`，HTTP 400。**這是 Loki 與 Prometheus 的一個不一致之處，必須照抄。**
+- 錯誤回應信封（Loki 格式，非 Prometheus 格式）：純文字 body，`Content-Type: text/plain`，HTTP 400。**這是 Loki 與 Prometheus 的一個不一致之處，必須照抄。** 查詢 HTTP 的逐字 body 與 header 見 `02` §3.4 AC-41。
 
 ---
 
@@ -240,7 +240,10 @@ for each record from iterator:
 
 **向量聚合**：`sum` / `avg` / `min` / `max` / `count` 的 `by` 只留列出的標籤，`without` 去掉列出的標籤。`topk` / `bottomk` 的 `by` / `without` 只用來分組：每一組各取 `K` 條，輸出保留原標籤，不先把標籤縮掉再做全域排序。Prometheus 公開的 aggregation operators 寫明 `topk` / `bottomk` 回傳原標籤，`by` / `without` 只做分桶。組內先比數值（topk 大者在前，bottomk 小者在前），數值相同再比標籤字典序。組與組之間依分組標籤字典序排列；Prometheus 不保證組的順序，這裡排定是為了驗收固定。`By` 與 `Without` 同時非空時回 `spi.ErrBadRequest`；parser 已拒絕這種語法，這是 IR 防線。
 
-**記憶體上限**：輸出序列數超過 `query.max_agg_series`（預設 10 000）時回 `spi.ErrTooLarge`，訊息：`query would produce N series, exceeding the limit of M; add a 'by' clause or reduce the time range`。
+**記憶體上限**：兩條分開數，不要共用一個 key。
+
+- 輸出序列數超過 `query.max_agg_series`（預設 10 000）時回 `spi.ErrTooLarge`，訊息：`query would produce N series, exceeding the limit of M; add a 'by' clause or reduce the time range`。
+- 進入向量聚合前的輸入序列數超過 `query.max_agg_input_series`（預設 100 000）時回 `spi.ErrTooLarge`，訊息：`query scanned N input series, exceeding the limit of M; narrow the stream selector or reduce the time range`。這句不要改成叫使用者加 `by`。`sum by` 會把很多輸入收成一條輸出，輸出上限不會觸發，所以輸入要單獨計。只數 stream 數，不數單一 stream 的樣本數。在收下超限的那一條時回錯。驗收是 AC-42。P2-04 的 HTTP 案例仍是 AC-29 至 AC-41。
 
 ---
 
@@ -254,7 +257,7 @@ for each record from iterator:
 | 不支援 | §1.2 每一列有測試，驗證錯誤訊息完全相符 |
 | 抽取 | §3.4 的 property test + 8 個種子語料 |
 | 執行 | §4.2 的 AC-14 至 AC-18，以及 AC-20 至 AC-22、AC-25、AC-28 |
-| 聚合 | §4.2 的 AC-9 至 AC-13、AC-18、AC-23、AC-26、AC-27 |
+| 聚合 | §4.2 的 AC-9 至 AC-13、AC-18、AC-23、AC-26、AC-27、AC-42 |
 | 串流 | §4.2 的 AC-19 |
 | 相容性 | 對照表：同一查詢送給真實 Loki 與 Prism，結果集合相同（人工執行，記錄於 `test/compat/logql-parity.md`） |
 
@@ -262,7 +265,7 @@ for each record from iterator:
 
 ### 4.1 分期驗收邊界
 
-P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與範圍／向量函式組合解析；依 [P2-01 規格](../specs/p2-01-logql-parser.md) 驗證資源上限、取消及錯誤分類。抽取 property test 屬 P2-02；執行、聚合結果與串流驗收屬 P2-03，案例是 §4.2 的 AC-1 至 AC-28；真實 Loki API 行為對照須待 P2-04 HTTP 整合。函式組合在 P2-01 的測試只驗證 IR，不能視為聚合執行或相容性驗收。
+P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與範圍／向量函式組合解析；依 [P2-01 規格](../specs/p2-01-logql-parser.md) 驗證資源上限、取消及錯誤分類。抽取 property test 屬 P2-02；執行、聚合結果與串流驗收屬 P2-03，案例是 §4.2 的 AC-1 至 AC-28，加上 AC-42；Loki HTTP 驗收是 `02` §3.4 的 AC-29 至 AC-41。AC-42 接在 AC-41 的編號之後，但放在本節，因為它測的是聚合器。函式組合在 P2-01 的測試只驗證 IR，不能視為聚合執行或相容性驗收。
 
 ### 4.2 P2-03 驗收
 
@@ -323,3 +326,5 @@ P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與
 **AC-27** Given `Step=500000`（0.5ms）、`Start=0`、`End=2000000`，其餘足以產生兩個以上的點。When Execute。Then `spi.ErrBadRequest`，Streams 與 Matrix 皆空。`Step=0` 仍依 AC-11，不算這個錯誤。
 
 **AC-28** Given Body `not-json`，接著數值過濾 `status > 1` 且 `Num` 指向 `1`。When `| json` 後再過濾。Then 該行保留，`__error__="JSONParserErr"`。沒有 `LabelFilterErr`，也沒有 `__error___extracted`。
+
+**AC-42** Given `query.max_agg_input_series=100000`，`query.max_agg_series=10000`。100000 個 stream，`host` 各不相同，`job` 都是 `api`，每個在窗口內一筆。When `sum by (job) (count_over_time({host=~".+"}[1m]))`。Then 回傳成功，Matrix 有一條 `{job="api"}`。Given 同樣再加第 100001 個 stream。When 同一查詢。Then `spi.ErrTooLarge`，訊息等於 `query scanned 100001 input series, exceeding the limit of 100000; narrow the stream selector or reduce the time range`。Matrix 與 Streams 皆空。這句沒有 `by`。輸出只會有 1 條，所以不是輸出上限那句。

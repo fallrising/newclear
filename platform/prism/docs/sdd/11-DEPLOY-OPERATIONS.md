@@ -77,6 +77,8 @@ query:
   max_range: 7d
   max_points: 11000
   max_samples: 50000000
+  max_agg_series: 10000          # 輸出序列
+  max_agg_input_series: 100000  # 進入聚合的輸入序列
   lookback_delta: 5m
   force_fallback: false
   fallback:

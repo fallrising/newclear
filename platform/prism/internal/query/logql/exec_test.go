@@ -509,9 +509,10 @@ func TestExecute_AC19_StreamLimit(t *testing.T) {
 }
 
 func TestExecute_MaxAggSeries(t *testing.T) {
-	recs := make([]utm.LogRecord, maxAggSeries+1)
-	for i := range recs {
-		recs[i] = utm.LogRecord{TS: 1, Labels: labels.FromStrings("job", strconv.Itoa(i))}
+	const extra = 40
+	it := &observeIter{recs: make([]utm.LogRecord, maxAggSeries+1+extra)}
+	for i := range it.recs {
+		it.recs[i] = utm.LogRecord{TS: 1, Labels: labels.FromStrings("job", strconv.Itoa(i))}
 	}
 	q := spi.LogQuery{
 		Start:     0,
@@ -519,13 +520,51 @@ func TestExecute_MaxAggSeries(t *testing.T) {
 		Direction: spi.Forward,
 		Agg:       &spi.LogAggregation{RangeFunc: "count_over_time", Window: 2, Step: 0},
 	}
-	_, err := Execute(t.Context(), &observeIter{recs: recs}, q, logPlan(true, true, false, true))
+	got, err := Execute(t.Context(), it, q, logPlan(true, true, false, true))
 	if spi.Classify(err) != spi.ErrTooLarge {
 		t.Fatalf("class %v err %v", spi.Classify(err), err)
 	}
 	want := "query would produce 10001 series, exceeding the limit of 10000; add a 'by' clause or reduce the time range"
 	if !strings.Contains(err.Error(), want) {
 		t.Fatalf("message %v", err)
+	}
+	assertEmpty(t, got)
+	if it.reads != maxAggSeries+1 {
+		t.Fatalf("reads %d, limit must trip when the extra series is created", it.reads)
+	}
+	if !it.closed {
+		t.Fatal("iterator was not closed")
+	}
+}
+
+func TestAffectedRangeMatchesScan(t *testing.T) {
+	cases := []struct {
+		start, end, step, window int64
+		stamps                   []int64
+	}{
+		{start: 0, end: 3_000_000, step: 1_000_000, window: 1_000_000, stamps: []int64{0, 1, 999_999, 1_000_000, 1_000_001, 2_000_000, 3_000_000}},
+		{start: 0, end: 2, step: 0, window: 2, stamps: []int64{0, 1, 2, 3}},
+		{start: 1_000, end: 10_000, step: 1_000, window: 2_500, stamps: []int64{-100, 0, 500, 1_000, 1_500, 9_000, 12_000}},
+		{start: 0, end: 5_000, step: 1_000, window: 3_000, stamps: []int64{0, 1, 2_500, 4_999}},
+	}
+	for _, tc := range cases {
+		times := bucketTimes(tc.start, tc.end, time.Duration(tc.step))
+		for _, ts := range tc.stamps {
+			lo, hi := affectedRange(ts, times, tc.window)
+			var wantLo, wantHi int
+			for i, bucket := range times {
+				if !inWindow(ts, bucket, tc.window) {
+					continue
+				}
+				if wantLo == wantHi {
+					wantLo = i
+				}
+				wantHi = i + 1
+			}
+			if lo != wantLo || hi != wantHi {
+				t.Fatalf("ts %d times %v window %d got [%d,%d) want [%d,%d)", ts, times, tc.window, lo, hi, wantLo, wantHi)
+			}
+		}
 	}
 }
 

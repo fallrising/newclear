@@ -1,0 +1,2 @@
+2026-10-19T15:36:10.270392159Z {"time":"2026-10-19T15:36:10.270314846Z","level":"WARN","msg":"binding non-loopback listeners without TLS or authentication","listeners":["[ip]:19092","[ip]:19192","[ip]:19292"]}
+2026-10-19T15:36:10.271692503Z {"time":"2026-10-19T15:36:10.271620184Z","level":"INFO","msg":"broker ready","cluster":"mkfk-compose","node":2,"client":"[ip]:19092","peer":"[ip]:19192","admin":"[ip]:19292"}

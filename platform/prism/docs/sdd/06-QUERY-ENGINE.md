@@ -82,7 +82,7 @@ internal/query/logql/
 
 ### 3.3 `LiteralHint` 抽取（下推優化）
 
-`|~ "error.*timeout"` 這類正則，抽出必然出現的字面子串（此例為 `error`），填入 `LineFilter.LiteralHint`。驅動可用它做粗篩（如 ClickHouse 的 tokenbf 索引 / `hasToken`），中間層再用完整正則精篩。
+`|~ "error.*timeout"` 這類正則，抽出必然出現的字面子串（此例為最長的 `timeout`，與 `16` §3.4 相同），填入 `LineFilter.LiteralHint`。驅動可用它做粗篩（如 ClickHouse 的 tokenbf 索引 / `hasToken`），中間層再用完整正則精篩。
 
 抽取規則（保守，寧可不抽也不抽錯）：
 - 只處理 `^`、`$`、字面字元、`.`、`.*`、`.+`、字元類的簡單組合。

@@ -141,10 +141,12 @@ parse error at line 1, col 15: syntax error: unexpected IDENTIFIER, expecting ST
    OpCharClass / OpAnyChar / OpAnyCharNotNL → {}
    其他             → {}
 4. 從集合中取最長者；長度 < 3 則回空字串
-5. 若正則帶 (?i) 旗標，回空字串（大小寫不敏感的子串無法用於精確索引）
+5. 若走訪到的任一節點帶大小寫折疊旗標（FoldCase），整段 hint 回空字串：大小寫不敏感的子串無法用於精確索引。看的是 Simplify 之後留在節點上的旗標，不是原始字串裡有沒有寫 (?i)。regexp/syntax 對沒有大小寫區別的字元也留旗標，所以 (?i)123 回空，不是 123。旗標沒有留在任何節點上時不回空，例如 abc(?i) 仍抽出 abc。星號、可選與交替的子節點仍會走訪，巢狀旗標一樣讓整段回空。
 ```
 
-**正確性要求**：`LiteralHint` 必須是**必要條件**（所有匹配字串都含它），不需是充分條件。抽錯會導致漏資料，因此規則全部往保守方向設計。
+含 U+FFFD 的字面不得作 hint（Go regexp 把非法 UTF-8 byte 當 U+FFFD 匹配）。同一正則裡其他不含 U+FFFD 的必要字面仍可作 hint。
+
+**正確性要求**：`LiteralHint` 必須是**必要條件**（所有匹配字串都含它），不需是充分條件。抽錯會導致漏資料，因此規則全部往保守方向設計。回空 hint 不會漏資料。
 
 **Property test（必做）**：
 

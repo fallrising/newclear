@@ -33,6 +33,7 @@
 | Sol / gpt-6.1-sol | T-921 P2-01 lexer/parser 與獨立測試 worker | 2026-10-09 | 僅依 Prism SDD、已核准 spec、SPI 與獨立案例實作 bounded lexer/parser；未閱讀 Loki 原始碼、測試碼或衍生 fixtures；不含 compiler/executor/runtime |
 | cursor-grok-4.7-high-fast-pilot | P2-02 LogQL compile 與 LiteralHint | 2026-10-18 | 僅依 Prism SDD 16 §3.4、既有 SPI 與 Go 標準庫 `regexp`/`regexp/syntax` 實作正則預編譯與 LiteralHint；未閱讀、複製、翻譯或改寫 Loki 原始碼、測試碼或其衍生實作；不含 executor 與 HTTP |
 | cursor-grok-4.7-high-fast-pilot | P2-03 LogQL executor | 2026-10-19 | 僅依 Prism SDD 16 §3.5–§3.7 與 §4.2 AC-1 至 AC-28、既有 SPI 與 Go 標準庫實作補算執行器與聚合；未閱讀、複製、翻譯或改寫 Loki 原始碼、測試碼或其衍生實作 |
+| cursor-grok-4.7-high-fast-pilot | P2-04 Loki query API 與 AC-42 | 2026-10-19 | 僅依 Prism SDD 02 §3.4 AC-29 至 AC-41、16 §3.7 與 §4.2 AC-42、既有 SPI 與 Go 標準庫實作 Loki 查詢 HTTP 與輸入序列上限；未閱讀、複製、翻譯或改寫 Loki 原始碼、測試碼或其衍生實作 |
 
 ## 後續簽署要求
 

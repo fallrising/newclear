@@ -12,7 +12,10 @@ import (
 	"github.com/fallrising/newclear/platform/prism/pkg/utm"
 )
 
-const maxAggSeries = 10000
+const (
+	maxAggSeries      = 10000
+	maxAggInputSeries = 100000
+)
 
 type bucket struct {
 	labels utm.Labels
@@ -74,8 +77,8 @@ func inWindow(ts, t, window int64) bool {
 	return t-ts < window
 }
 
-func addBucket(groups map[uint64][]*bucket, rec utm.LogRecord, times []int64, window int64, capInput bool, series *int) error {
-	g, err := findBucket(groups, rec.Labels, len(times), capInput, series)
+func addBucket(groups map[uint64][]*bucket, rec utm.LogRecord, times []int64, window int64, capOutput bool, input *int) error {
+	g, err := findBucket(groups, rec.Labels, len(times), capOutput, input)
 	if err != nil {
 		return err
 	}
@@ -170,22 +173,25 @@ func subInt64(a, b int64) (int64, bool) {
 	return c, true
 }
 
-func findBucket(groups map[uint64][]*bucket, ls utm.Labels, n int, capInput bool, series *int) (*bucket, error) {
+func findBucket(groups map[uint64][]*bucket, ls utm.Labels, n int, capOutput bool, input *int) (*bucket, error) {
 	h := ls.Hash()
 	for _, g := range groups[h] {
 		if labels.Equal(g.labels, ls) {
 			return g, nil
 		}
 	}
-	// The series cap counts output series. With no vector aggregation each
-	// input series is one output series, so reject it at creation. Reducers
-	// still check the reduced result in plainSeries and rankSeries.
-	if capInput && *series >= maxAggSeries {
-		return nil, tooLarge(*series+1, maxAggSeries)
+	// Output and input caps are separate counters. With no vector aggregation
+	// each input series is one output series, so the tighter output cap rejects
+	// it at creation. Reducers still check the reduced result in plainSeries
+	// and rankSeries. The input cap counts streams, including those a sum by
+	// later collapses.
+	if capOutput && *input >= maxAggSeries {
+		return nil, tooLarge(*input+1, maxAggSeries)
 	}
-	if capInput {
-		*series++
+	if *input >= maxAggInputSeries {
+		return nil, tooLargeInput(*input+1, maxAggInputSeries)
 	}
+	*input++
 	g := &bucket{labels: ls, count: make([]int, n), bytes: make([]int, n)}
 	groups[h] = append(groups[h], g)
 	return g, nil
@@ -446,4 +452,8 @@ func rankSeries(agg *spi.LogAggregation, series []rangeSeries, times []int64) ([
 
 func tooLarge(n, m int) error {
 	return spi.Wrap(spi.ErrTooLarge, "logql", "Execute", fmt.Errorf("query would produce %d series, exceeding the limit of %d; add a 'by' clause or reduce the time range", n, m))
+}
+
+func tooLargeInput(n, m int) error {
+	return spi.Wrap(spi.ErrTooLarge, "logql", "Execute", fmt.Errorf("query scanned %d input series, exceeding the limit of %d; narrow the stream selector or reduce the time range", n, m))
 }

@@ -529,41 +529,154 @@ func TestExecute_MaxAggSeries(t *testing.T) {
 	}
 }
 
-func TestExecute_DuplicateJSONKeepsFirst(t *testing.T) {
-	body := `{"a":"1","a":"2"}`
+func TestExecute_AC20_DuplicateJSONKey(t *testing.T) {
+	body := `{"status":"first","status":"second"}`
 	q := spi.LogQuery{Direction: spi.Forward, Stages: []spi.ParseStage{{Kind: spi.ParseJSON}}}
 	got := soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{{Body: body}}}, q, logPlan(false, true, true, true)))
-	assertEntry(t, got, 0, body, labels.FromStrings("a", "1"), nil)
+	assertEntry(t, got, 0, body, labels.FromStrings("status", "first"), nil)
 }
 
-func TestExecute_RenamedLabelKeepsEarlierField(t *testing.T) {
-	body := `{"app_extracted":"first","app":"second"}`
+func TestExecute_AC21_ExtractedNameClash(t *testing.T) {
 	q := spi.LogQuery{Direction: spi.Forward, Stages: []spi.ParseStage{{Kind: spi.ParseJSON}}}
-	rec := utm.LogRecord{Body: body, Labels: labels.FromStrings("app", "web")}
-	got := soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{rec}}, q, logPlan(false, true, true, true)))
-	assertEntry(t, got, 0, body, labels.FromStrings("app", "web", "app_extracted", "first"), nil)
+	plan := logPlan(false, true, true, true)
+	first := `{"app_extracted":"from-key","app":"from-app"}`
+	got := soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{{
+		Body: first, Labels: labels.FromStrings("app", "web"),
+	}}}, q, plan))
+	assertEntry(t, got, 0, first, labels.FromStrings("app", "web", "app_extracted", "from-key"), nil)
+
+	second := `{"app":"from-app","app_extracted":"from-key"}`
+	got = soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{{
+		Body: second, Labels: labels.FromStrings("app", "web"),
+	}}}, q, plan))
+	assertEntry(t, got, 0, second, labels.FromStrings("app", "web", "app_extracted", "from-app"), nil)
+
+	third := `{"app":"x"}`
+	got = soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{{
+		Body: third, Labels: labels.FromStrings("app", "web", "app_extracted", "kept"),
+	}}}, q, plan))
+	assertEntry(t, got, 0, third, labels.FromStrings("app", "web", "app_extracted", "kept"), nil)
 }
 
-func TestExecute_FieldRegexAnchored(t *testing.T) {
+func TestExecute_AC22_AnchoredFieldRegex(t *testing.T) {
 	plan := logPlan(true, false, true, true)
-	match := spi.LogQuery{Direction: spi.Forward, Fields: []spi.FieldFilter{{
-		Field: "status", Op: spi.CmpRe, Value: "401", Compiled: regexp.MustCompile("401"),
-	}}}
-	kept := mustExec(t, &observeIter{recs: []utm.LogRecord{{Labels: labels.FromStrings("status", "401")}}}, match, plan)
-	if rows := entriesOf(t, kept); len(rows) != 1 {
-		t.Fatalf("exact rows %#v", rows)
+	rec := []utm.LogRecord{{Labels: labels.FromStrings("status", "401")}}
+	cases := []struct {
+		name string
+		op   spi.CompareOp
+		pat  string
+		keep bool
+	}{
+		{name: "re-short", op: spi.CmpRe, pat: "40", keep: false},
+		{name: "re-exact", op: spi.CmpRe, pat: "401", keep: true},
+		{name: "re-wild", op: spi.CmpRe, pat: "40.*", keep: true},
+		{name: "nre-short", op: spi.CmpNotRe, pat: "40", keep: true},
 	}
-	dropped := mustExec(t, &observeIter{recs: []utm.LogRecord{{Labels: labels.FromStrings("status", "x401y")}}}, match, plan)
-	if rows := entriesOf(t, dropped); len(rows) != 0 {
-		t.Fatalf("=~ kept %#v", rows)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			q := spi.LogQuery{Direction: spi.Forward, Fields: []spi.FieldFilter{{
+				Field: "status", Op: tc.op, Value: tc.pat, Compiled: regexp.MustCompile(tc.pat),
+			}}}
+			rows := entriesOf(t, mustExec(t, &observeIter{recs: rec}, q, plan))
+			if tc.keep && len(rows) != 1 {
+				t.Fatalf("dropped %#v", rows)
+			}
+			if !tc.keep && len(rows) != 0 {
+				t.Fatalf("kept %#v", rows)
+			}
+		})
 	}
-	neg := spi.LogQuery{Direction: spi.Forward, Fields: []spi.FieldFilter{{
-		Field: "status", Op: spi.CmpNotRe, Value: "401", Compiled: regexp.MustCompile("401"),
-	}}}
-	kept = mustExec(t, &observeIter{recs: []utm.LogRecord{{Labels: labels.FromStrings("status", "x401y")}}}, neg, plan)
-	if rows := entriesOf(t, kept); len(rows) != 1 {
-		t.Fatalf("!~ rows %#v", rows)
+}
+
+func TestExecute_AC23_TopKByGroup(t *testing.T) {
+	var recs []utm.LogRecord
+	add := func(job, instance string, n int) {
+		for range n {
+			recs = append(recs, utm.LogRecord{TS: 1_000_000, Labels: labels.FromStrings("instance", instance, "job", job)})
+		}
 	}
+	add("a", "1", 5)
+	add("a", "2", 1)
+	add("b", "1", 9)
+	q := spi.LogQuery{
+		Start:     0,
+		End:       2_000_000,
+		Direction: spi.Forward,
+		Agg: &spi.LogAggregation{
+			RangeFunc: "count_over_time",
+			Window:    2_000_000,
+			Step:      0,
+			VectorOp:  "topk",
+			K:         1,
+			By:        []string{"job"},
+		},
+	}
+	got := mustExec(t, &observeIter{recs: recs}, q, logPlan(true, true, false, true))
+	assertMatrix(t, got.Matrix, []spi.SeriesData{
+		{Labels: labels.FromStrings("instance", "1", "job", "a"), Samples: []spi.Sample{{TS: 2, Value: 5}}},
+		{Labels: labels.FromStrings("instance", "1", "job", "b"), Samples: []spi.Sample{{TS: 2, Value: 9}}},
+	})
+}
+
+func TestExecute_AC24_JSONNumberFormat(t *testing.T) {
+	body := `{"a":401.0,"b":1e3,"c":1.50,"d":9007199254740993}`
+	q := spi.LogQuery{Direction: spi.Forward, Stages: []spi.ParseStage{{Kind: spi.ParseJSON}}}
+	got := soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{{Body: body}}}, q, logPlan(false, true, true, true)))
+	assertEntry(t, got, 0, body, labels.FromStrings(
+		"a", "401",
+		"b", "1000",
+		"c", "1.5",
+		"d", "9007199254740992",
+	), nil)
+}
+
+func TestExecute_AC25_JSONKeySanitize(t *testing.T) {
+	body := `{"a.b-c":"v"}`
+	q := spi.LogQuery{Direction: spi.Forward, Stages: []spi.ParseStage{{Kind: spi.ParseJSON}}}
+	got := soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{{Body: body}}}, q, logPlan(false, true, true, true)))
+	assertEntry(t, got, 0, body, labels.FromStrings("a_b_c", "v"), nil)
+}
+
+func TestExecute_AC26_ZeroWindow(t *testing.T) {
+	q := spi.LogQuery{
+		Start:     0,
+		End:       2,
+		Direction: spi.Forward,
+		Agg:       &spi.LogAggregation{RangeFunc: "rate", Window: 0, Step: 0},
+	}
+	got, err := Execute(t.Context(), &observeIter{recs: []utm.LogRecord{{TS: 1, Body: "x"}}}, q, logPlan(true, true, false, true))
+	if spi.Classify(err) != spi.ErrBadRequest {
+		t.Fatalf("class %v err %v", spi.Classify(err), err)
+	}
+	assertEmpty(t, got)
+}
+
+func TestExecute_AC27_SubMillisecondStep(t *testing.T) {
+	q := spi.LogQuery{
+		Start:     0,
+		End:       2_000_000,
+		Direction: spi.Forward,
+		Agg: &spi.LogAggregation{
+			RangeFunc: "count_over_time",
+			Window:    2_000_000,
+			Step:      500_000,
+		},
+	}
+	got, err := Execute(t.Context(), &observeIter{recs: []utm.LogRecord{{TS: 1}}}, q, logPlan(true, true, false, true))
+	if spi.Classify(err) != spi.ErrBadRequest {
+		t.Fatalf("class %v err %v", spi.Classify(err), err)
+	}
+	assertEmpty(t, got)
+}
+
+func TestExecute_AC28_KeepJSONParserErr(t *testing.T) {
+	q := spi.LogQuery{
+		Direction: spi.Forward,
+		Stages:    []spi.ParseStage{{Kind: spi.ParseJSON}},
+		Fields:    []spi.FieldFilter{{Field: "status", Op: spi.CmpGt, Num: new(float64(1))}},
+	}
+	got := soleEntry(t, mustExec(t, &observeIter{recs: []utm.LogRecord{{Body: "not-json"}}}, q, logPlan(false, false, true, true)))
+	assertEntry(t, got, 0, "not-json", labels.FromStrings("__error__", "JSONParserErr"), nil)
 }
 
 func TestExecute_CancelClosesIterator(t *testing.T) {

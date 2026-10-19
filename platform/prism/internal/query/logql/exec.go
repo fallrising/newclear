@@ -119,7 +119,7 @@ func anchorFieldPatterns(fields []spi.FieldFilter) ([]spi.FieldFilter, error) {
 		if out[i].Op != spi.CmpRe && out[i].Op != spi.CmpNotRe {
 			continue
 		}
-		compiled, err := compilePatternOp(out[i].Value, true, "Execute")
+		compiled, err := compileAnchoredField(out[i].Value)
 		if err != nil {
 			return nil, err
 		}
@@ -275,7 +275,7 @@ func readObject(dec *jsontext.Decoder, prefix string, depth int, out *parsedFiel
 		if keyTok.Kind() != jsontext.KindString {
 			return errors.New("invalid json key")
 		}
-		name := keyTok.String()
+		name := sanitizeLabelKey(keyTok.String())
 		if prefix != "" {
 			name = prefix + "_" + name
 		}
@@ -299,7 +299,18 @@ func readValue(dec *jsontext.Decoder, name string, depth int, out *parsedFields)
 	case jsontext.KindNull:
 		_, err := dec.ReadToken()
 		return err
-	case jsontext.KindTrue, jsontext.KindFalse, jsontext.KindString, jsontext.KindNumber:
+	case jsontext.KindNumber:
+		tok, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		value, err := formatJSONNumber(tok.String())
+		if err != nil {
+			return err
+		}
+		out.putFirst(name, value)
+		return nil
+	case jsontext.KindTrue, jsontext.KindFalse, jsontext.KindString:
 		tok, err := dec.ReadToken()
 		if err != nil {
 			return err
@@ -409,15 +420,16 @@ func mergeLabels(stream utm.Labels, extracted *parsedFields) utm.Labels {
 }
 
 func renameExtracted(name string, reserved map[string]struct{}) string {
-	for {
-		if _, hit := reserved[name]; !hit {
-			return name
-		}
-		name += "_extracted"
+	if _, hit := reserved[name]; hit {
+		return name + "_extracted"
 	}
+	return name
 }
 
 func addErrorLabel(stream, current utm.Labels, msg string) utm.Labels {
+	if _, ok := labelValue(current, "__error__"); ok {
+		return current
+	}
 	reserved := make(map[string]struct{}, len(stream))
 	for _, lb := range stream {
 		reserved[lb.Name] = struct{}{}
@@ -429,6 +441,31 @@ func addErrorLabel(stream, current utm.Labels, msg string) utm.Labels {
 	b := labels.NewBuilder(current)
 	b.Set(name, msg)
 	return b.Labels()
+}
+
+func sanitizeLabelKey(key string) string {
+	var b strings.Builder
+	b.Grow(len(key))
+	for _, r := range key {
+		if r == '_' || r == ':' || (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+			continue
+		}
+		b.WriteByte('_')
+	}
+	name := b.String()
+	if name == "" || (name[0] >= '0' && name[0] <= '9') {
+		return "_" + name
+	}
+	return name
+}
+
+func formatJSONNumber(raw string) (string, error) {
+	value, err := strconv.ParseFloat(raw, 64)
+	if err != nil && !errors.Is(err, strconv.ErrRange) {
+		return "", err
+	}
+	return strconv.FormatFloat(value, 'f', -1, 64), nil
 }
 
 func labelValue(ls utm.Labels, name string) (string, bool) {

@@ -39,6 +39,12 @@ func validateAgg(agg *spi.LogAggregation) error {
 	if (agg.VectorOp == "topk" || agg.VectorOp == "bottomk") && agg.K < 0 {
 		return badRequest("topk/bottomk require a nonnegative integer K")
 	}
+	if agg.Window <= 0 {
+		return badRequest("range window must be positive")
+	}
+	if agg.Step < 0 || (agg.Step > 0 && agg.Step < time.Millisecond) {
+		return badRequest("step must be zero or at least 1ms")
+	}
 	return nil
 }
 
@@ -180,16 +186,6 @@ func groupLabels(ls utm.Labels, agg *spi.LogAggregation) utm.Labels {
 	return nil
 }
 
-func rankLabels(ls utm.Labels, agg *spi.LogAggregation) utm.Labels {
-	if len(agg.By) > 0 {
-		return keepLabels(ls, agg.By)
-	}
-	if len(agg.Without) > 0 {
-		return dropLabels(ls, agg.Without)
-	}
-	return ls
-}
-
 func keepLabels(ls utm.Labels, names []string) utm.Labels {
 	b := labels.NewBuilder(nil)
 	for _, name := range names {
@@ -280,41 +276,71 @@ func reducedValue(op string, g *redGroup, i int) float64 {
 	}
 }
 
+type rankCand struct {
+	labels utm.Labels
+	group  utm.Labels
+	values []float64
+}
+
+type rankGroup struct {
+	key  utm.Labels
+	idxs []int
+}
+
 func rankSeries(agg *spi.LogAggregation, series []rangeSeries, times []int64) ([]spi.SeriesData, error) {
-	cands := make([]rangeSeries, len(series))
+	cands := make([]rankCand, len(series))
+	buckets := map[uint64][]*rankGroup{}
 	for i, s := range series {
-		cands[i] = rangeSeries{labels: rankLabels(s.labels, agg), values: s.values}
+		cands[i] = rankCand{labels: s.labels, group: groupLabels(s.labels, agg), values: s.values}
+		h := cands[i].group.Hash()
+		placed := false
+		for _, g := range buckets[h] {
+			if labels.Equal(g.key, cands[i].group) {
+				g.idxs = append(g.idxs, i)
+				placed = true
+				break
+			}
+		}
+		if !placed {
+			buckets[h] = append(buckets[h], &rankGroup{key: cands[i].group, idxs: []int{i}})
+		}
 	}
+	groups := make([]*rankGroup, 0, len(series))
+	for _, list := range buckets {
+		groups = append(groups, list...)
+	}
+	slices.SortFunc(groups, func(a, b *rankGroup) int {
+		return labels.Compare(a.key, b.key)
+	})
 	top := agg.VectorOp == "topk"
 	seen := make([]int, len(cands))
 	for i := range seen {
 		seen[i] = -1
 	}
 	var out []spi.SeriesData
-	for ti, t := range times {
-		order := make([]int, len(cands))
-		for i := range order {
-			order[i] = i
-		}
-		slices.SortStableFunc(order, func(a, b int) int {
-			left, right := cands[a].values[ti], cands[b].values[ti]
-			if left != right {
-				if top {
-					return cmp.Compare(right, left)
+	for _, g := range groups {
+		for ti, t := range times {
+			order := slices.Clone(g.idxs)
+			slices.SortStableFunc(order, func(a, b int) int {
+				left, right := cands[a].values[ti], cands[b].values[ti]
+				if left != right {
+					if top {
+						return cmp.Compare(right, left)
+					}
+					return cmp.Compare(left, right)
 				}
-				return cmp.Compare(left, right)
+				return labels.Compare(cands[a].labels, cands[b].labels)
+			})
+			k := min(max(agg.K, 0), len(order))
+			for _, ci := range order[:k] {
+				sample := spi.Sample{TS: utm.NanoToMilli(t), Value: cands[ci].values[ti]}
+				if seen[ci] >= 0 {
+					out[seen[ci]].Samples = append(out[seen[ci]].Samples, sample)
+					continue
+				}
+				seen[ci] = len(out)
+				out = append(out, spi.SeriesData{Labels: cands[ci].labels, Samples: []spi.Sample{sample}})
 			}
-			return labels.Compare(cands[a].labels, cands[b].labels)
-		})
-		k := min(max(agg.K, 0), len(order))
-		for _, ci := range order[:k] {
-			sample := spi.Sample{TS: utm.NanoToMilli(t), Value: cands[ci].values[ti]}
-			if seen[ci] >= 0 {
-				out[seen[ci]].Samples = append(out[seen[ci]].Samples, sample)
-				continue
-			}
-			seen[ci] = len(out)
-			out = append(out, spi.SeriesData{Labels: cands[ci].labels, Samples: []spi.Sample{sample}})
 		}
 	}
 	if len(out) > maxAggSeries {

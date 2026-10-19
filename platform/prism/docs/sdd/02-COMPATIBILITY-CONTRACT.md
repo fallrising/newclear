@@ -205,10 +205,10 @@ sum|avg|min|max|count|topk|bottomk by/without (labels) ( <上述> )
 規則：
 
 - `query_range` 的 `end` 缺省是請求當下的 now，`start` 缺省是 `end` 減 1 小時。區間是 `[start, end)`：時間戳大於等於 start、小於 end。公開 API 寫的是 greater or equal to start、lower than end。
-- `labels`、`label/{name}/values`、`series` 的 `end` 缺省是 now，`start` 缺省是 now 減 6 小時。labels 的公開頁寫了 6 小時；series 頁沒寫缺省，這裡跟 labels 用同一扇窗，因為 Explore 的標籤瀏覽器是同一個時間選擇器。
+- `labels`、`label/{name}/values`、`series` 的 `end` 缺省是 now，`start` 缺省是 now 減 6 小時。labels 的公開頁寫了 6 小時；series 用同一扇窗。
 - `index/stats` 的缺省窗與 `query_range` 相同（1 小時）。
 - 時間字串見 §0.3。`2025-09-05T00:00:00.000000000Z` 等於 `1757030400000000000`。相對值用 `time.ParseDuration`（`ns`/`us`/`µs`/`ms`/`s`/`m`/`h`），意思是 now 減去該長度。`1d`、`1w`、`1y` 不接受。LogQL 範圍裡的 `[1d]` 仍照 `16` 的文法，與 HTTP 參數無關。
-- `step` 只對 matrix 有效，streams 忽略它。接受 Go duration，或純數字（可帶小數）表示秒。`300` 與 `5m` 都是 300 秒；`0.5` 與 `500ms` 都是 500 毫秒。這是公開 API 的 duration or float number of seconds，也是文件裡 `step=300` 的例子。缺省 `15s`（見 AC-32，待 owner 確認）。`step=0`、負數、`1d` 回 400。
+- `step` 只對 matrix 有效，streams 忽略它。接受 Go duration，或純數字（可帶小數）表示秒。`300` 與 `5m` 都是 300 秒；`0.5` 與 `500ms` 都是 500 毫秒。這是公開 API 的 duration or float number of seconds，也是文件裡 `step=300` 的例子。缺省 `15s`。`step=0`、負數、`1d` 回 400。
 - instant 的評估時間參數名是 `time`，缺省 now。單位與 `start` 相同。`/loki/api/v1/query` 只接受 metric query；日誌查詢回 400。公開 API 寫 instant queries return 400 for a log query。
 - `limit` 缺省 `100`，只截 streams。`1` 到 `5000` 有效。缺值、`0`、負數、非整數回 400，body `limit must be a positive integer`。大於 5000 回 400，body `max entries limit per query exceeded, limit > max_entries_limit_per_query (N > 5000)`，`N` 是請求值。5000 是公開 limits 頁的 `max_entries_limit_per_query` 預設。metric query 忽略 `limit`。
 - `direction` 只接受小寫 `backward` 與 `forward`。缺省 `backward`（新到舊）。其他值回 400，body `direction must be forward or backward`。
@@ -225,7 +225,7 @@ sum|avg|min|max|count|topk|bottomk by/without (labels) ( <上述> )
 
 **AC-31** Given 請求的 now 是 `1757034000000000000`，只有 AC-29 那兩筆。When `GET /loki/api/v1/query_range?query=%7Bhost%3D%22h1%22%7D`，不帶 `start`、`end`。Then 查詢區間是 `[1757030400000000000, 1757034000000000000)`，body 與 AC-29 相同。When 改帶 `start=1h`、不帶 `end`。Then 同一區間、同一 body。When 改帶 `start=1d`。Then `400`，body `start must be unix nanoseconds, RFC3339Nano, or a Go duration`。
 
-**AC-32** Given 一筆 `{host="h1"}` 在 `1757030400000000000`。When `GET /loki/api/v1/query_range?query=count_over_time(%7Bhost%3D%22h1%22%7D%5B1s%5D)&start=1757030400000000000&end=1757030700000000000&step=300`。Then `200`，`resultType` 是 `matrix`，只有一個點，時間 `1757030400`。When 只把 `step` 改成 `5m`。Then body 相同。When `step=1d`。Then `400`，body `step must be a Go duration or a number of seconds`。When 同一查詢不帶 `step`，區間改成 `end=1757030460000000000`（60 秒）。Then 四個點，時間依序是 `1757030400`、`1757030415`、`1757030430`、`1757030445`。這條 15 秒缺省是建議：公開 API 只說 dynamic，沒有公式。
+**AC-32** Given 一筆 `{host="h1"}` 在 `1757030400000000000`。When `GET /loki/api/v1/query_range?query=count_over_time(%7Bhost%3D%22h1%22%7D%5B1s%5D)&start=1757030400000000000&end=1757030700000000000&step=300`。Then `200`，`resultType` 是 `matrix`，只有一個點，時間 `1757030400`。When 只把 `step` 改成 `5m`。Then body 相同。When `step=1d`。Then `400`，body `step must be a Go duration or a number of seconds`。When 同一查詢不帶 `step`，區間改成 `end=1757030460000000000`（60 秒）。Then 四個點，時間依序是 `1757030400`、`1757030415`、`1757030430`、`1757030445`。缺省 step 是 15 秒。
 
 **AC-33** Given `{host="h1"}` 在 `1757030399999999999`。When `GET /loki/api/v1/query?query=count_over_time(%7Bhost%3D%22h1%22%7D%5B1s%5D)&time=1757030400000000000`。Then HTTP 層設 `q.End=1757030400000000000`、`q.Start=q.End-window`、`Step=0`。`200`，body 是
 
@@ -249,13 +249,15 @@ When 不帶 `time`，且 now 是 `1757030400000000000`。Then body 相同。When
 
 **AC-37** Given 沒有日誌。When `GET /loki/api/v1/label/host/values?start=1757030400000000000&end=1757030401000000000`。Then `200`，body `{"status":"success","data":[]}`。Given 一筆 `{app="api",host="h1"}` 在 `1757030400000000000`。When 同一路徑與同一組 `start`、`end`。Then `200`，body `{"status":"success","data":["h1"]}`。When 路徑改成 `/loki/api/v1/label/missing/values`。Then `200`，body `{"status":"success","data":[]}`。
 
-**AC-38** Given 沒有日誌。When `GET /loki/api/v1/series?start=1757030400000000000&end=1757030401000000000&match[]=%7Bhost%3D%22h1%22%7D`。Then `200`，body `{"status":"success","data":[]}`。Given AC-37 那筆。When 同一請求。Then `200`，body `{"status":"success","data":[{"app":"api","host":"h1"}]}`。When 拿掉 `match[]`。Then `400`，body `at least one match[] parameter is required`。
+**AC-38** Given 沒有日誌。When `GET /loki/api/v1/series?start=1757030400000000000&end=1757030401000000000&match[]=%7Bhost%3D%22h1%22%7D`。Then `200`，body `{"status":"success","data":[]}`。Given AC-37 那筆、`{host="edge"}` 在 `1757012400000000000`，以及 `{host="out"}` 在 `1757012399999999999`。When 第一個請求。Then `200`，body `{"status":"success","data":[{"app":"api","host":"h1"}]}`。When now 是 `1757034000000000000`，`GET /loki/api/v1/series?match[]=%7Bhost%3D~%22.%2B%22%7D`，不帶 `start`、`end`。Then `200`，body `{"status":"success","data":[{"host":"edge"},{"host":"h1"}]}`。沒有 `out`。窗是 `[1757012400000000000, 1757034000000000000)`。When 拿掉 `match[]`。Then `400`，body `at least one match[] parameter is required`。
 
 **AC-39** Given 沒有實作 `LogStatser`。When `GET /loki/api/v1/index/stats?query=%7Bhost%3D%22h1%22%7D&start=1757030400000000000&end=1757030401000000000`。Then `200`，body `{"streams":0,"chunks":0,"entries":0,"bytes":0}`。沒有 `status` 包裝。Given `LogStats` 為 `Streams=2`、`Chunks=3`、`TotalLinesProcessed=4`、`TotalBytesProcessed=100`、`ExecTimeSeconds=0.5`。When 同一請求。Then body `{"streams":2,"chunks":3,"entries":4,"bytes":100}`。`ExecTimeSeconds` 不出現在這個 JSON。When 改打 AC-29 的 `query_range`，且這次有這個 `LogStatser`。Then `stats` 是 `{"summary":{"bytesProcessedPerSecond":200,"execTime":0.5,"totalBytesProcessed":100,"totalLinesProcessed":4},"ingester":{},"store":{}}`。
 
-**AC-40** Given 行程已就緒，此時 `GET /-/ready` 是 `200`、body `ok\n`。When `GET /ready`。Then `200`，`Content-Type: text/plain; charset=utf-8`，body `ready\n`。`/-/ready` 仍是 `ok\n`。Given 行程未就緒，此時 `GET /-/ready` 是 `503`、body `not ready\n`。When `GET /ready`。Then `503`，同一個 `Content-Type`，body `not ready\n`。`/-/ready` 的路徑、狀態與 body 維持 `11` §2.1 與現有 handler，不改成 `ready\n`。未就緒的 `/ready` body 與 `/-/ready` 用同一句，是建議，公開的 `/ready` 頁只寫了就緒時 200。
+**AC-40** Given 行程已就緒，此時 `GET /-/ready` 是 `200`、body `ok\n`。When `GET /ready`。Then `200`，`Content-Type: text/plain; charset=utf-8`，body `ready\n`。`/-/ready` 仍是 `ok\n`。Given 行程未就緒，此時 `GET /-/ready` 是 `503`、body `not ready\n`。When `GET /ready`。Then `503`，同一個 `Content-Type`，body `not ready\n`。`/-/ready` 的路徑、狀態與 body 維持 `11` §2.1 與現有 handler，不改成 `ready\n`。未就緒的 `/ready` body 是 `not ready\n`。
 
 **AC-41** Given `GET /loki/api/v1/query_range?query=%7Bjob%3DSECRET%7D&start=1757030400000000000&end=1757030401000000000`。Then `400`，body 等於 `parse error at line 1, col 6: syntax error: unexpected IDENTIFIER, expecting STRING`，header `X-Prism-Error-Class: bad_request`，body 第一個字元不是 `{`。Given `query` 改成 `{job!=""}`。Then `400`，body 等於 `queries require at least one regexp or equality matcher that does not have an empty-compatible value`。Given 拿掉 `query`。Then `400`，body `query is required`。
+
+聚合輸入上限是 AC-42，寫在 `16` §4.2，不屬於這組 HTTP 案例。
 
 ---
 

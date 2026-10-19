@@ -32,10 +32,17 @@ func (c fixedClock) Now() time.Time { return c.now }
 
 type statsLogs struct {
 	spi.LogStore
-	stats spi.LogStats
+	stats   spi.LogStats
+	queries []spi.LogQuery
 }
 
-func (s statsLogs) Stats(context.Context, spi.LogQuery) (spi.LogStats, error) { return s.stats, nil }
+func (s *statsLogs) Stats(_ context.Context, q spi.LogQuery) (spi.LogStats, error) {
+	s.queries = append(s.queries, q)
+	if q.Tenant != "default" {
+		return spi.LogStats{}, nil
+	}
+	return s.stats, nil
+}
 
 type statsBackend struct {
 	spi.Backend
@@ -164,6 +171,7 @@ func TestQuery_AC32_MatrixStep(t *testing.T) {
 	path := `/loki/api/v1/query_range?query=count_over_time(%7Bhost%3D%22h1%22%7D%5B1s%5D)&start=` + nsStart + `&end=1757030700000000000&step=`
 	assertJSON(t, doGet(t, handler, path+"300"), one)
 	assertJSON(t, doGet(t, handler, path+"5m"), one)
+	assertPlain(t, doGet(t, handler, path+"300&direction=Backward"), "direction must be forward or backward")
 	assertPlain(t, doGet(t, handler, path+"1d"), "step must be a Go duration or a number of seconds")
 	assertPlain(t, doGet(t, handler, path+"0"), "step must be a Go duration or a number of seconds")
 	assertPlain(t, doGet(t, handler, path+"-1"), "step must be a Go duration or a number of seconds")
@@ -285,13 +293,16 @@ func TestQuery_AC39_IndexStats(t *testing.T) {
 		utm.LogRecord{TS: 1757030400000000000, Body: "old", Labels: labels.FromStrings("host", "h1")},
 		utm.LogRecord{TS: 1757030400500000000, Body: "new", Labels: labels.FromStrings("host", "h1")},
 	)
-	wrapped := statsBackend{Backend: backend, logs: statsLogs{LogStore: backend.Logs(), stats: spi.LogStats{
+	logs := &statsLogs{LogStore: backend.Logs(), stats: spi.LogStats{
 		Streams: 2, Chunks: 3, TotalLinesProcessed: 4, TotalBytesProcessed: 100, ExecTimeSeconds: 0.5,
-	}}}
-	counted := newHandler(t, wrapped, 0)
+	}}
+	counted := newHandler(t, statsBackend{Backend: backend, logs: logs}, 0)
 	assertJSON(t, doGet(t, counted, statsPath), `{"streams":2,"chunks":3,"entries":4,"bytes":100}`)
 	withStats := `{"status":"success","data":{"resultType":"streams","result":[{"stream":{"host":"h1"},"values":[["1757030400500000000","new"],["1757030400000000000","old"]]}],"stats":{"summary":{"bytesProcessedPerSecond":200,"execTime":0.5,"totalBytesProcessed":100,"totalLinesProcessed":4},"ingester":{},"store":{}}}}`
 	assertJSON(t, doGet(t, counted, ac29Path), withStats)
+	if len(logs.queries) != 2 || logs.queries[1].Tenant != "default" {
+		t.Fatalf("query_range stats queries %#v", logs.queries)
+	}
 }
 
 func TestQuery_AC41_ErrorEnvelope(t *testing.T) {

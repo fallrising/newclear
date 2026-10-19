@@ -78,12 +78,12 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-04a | AC-42：`query.max_agg_input_series` 預設 100000，與輸出上限分開 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
-| P2-04b | `query_range` 與 instant `query`：AC-29 到 AC-35 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
-| P2-04c | labels、label values、series、index/stats：AC-36 到 AC-39 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
-| P2-04d | `GET /ready` 與查詢錯誤信封：AC-40、AC-41 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:36:21Z |
+| P2-04a | AC-42：`query.max_agg_input_series` 預設 100000，與輸出上限分開 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:55:04Z |
+| P2-04b | `query_range` 與 instant `query`：AC-29 到 AC-35 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:55:04Z |
+| P2-04c | labels、label values、series、index/stats：AC-36 到 AC-39 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:55:04Z |
+| P2-04d | `GET /ready` 與查詢錯誤信封：AC-40、AC-41 | T-0354 | 關閉 | 2026-10-19T14:27:00Z | 2026-10-19T15:36:21Z | 2026-10-19T15:55:04Z |
 
-開始是 owner 指示繼續 T-0354、實作 AC-42 與 P2-04 的時鐘。結束與 last_activity 是本機 `make lint test` 與依賴檢查通過後的時鐘。AC-38 的第二個 `series` body 以 #423 為準：完整 stream 標籤，標籤字典序。
+開始是 owner 指示繼續 T-0354、實作 AC-42 與 P2-04 的時鐘。結束是第一輪本機 `make lint test` 通過後的時鐘。AC-38 的第二個 `series` body 以 #423 為準：完整 stream 標籤，標籤字典序。審查後補了兩項：`query_range` 與 instant 的統計查詢帶 tenant；每個 `query_range` 都檢查 `direction`。last_activity 是這次修正的本機 `make lint test` 通過後的時鐘。
 
 ## Backlog
 

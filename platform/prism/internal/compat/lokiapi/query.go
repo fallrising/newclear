@@ -189,14 +189,14 @@ func (h *QueryHandler) queryRange(w http.ResponseWriter, r *http.Request) {
 			h.fail(w, limitErr)
 			return
 		}
-		direction, dirErr := parseDirection(values)
-		if dirErr != nil {
-			h.fail(w, dirErr)
-			return
-		}
 		q.Limit = limit
-		q.Direction = direction
 	}
+	direction, dirErr := parseDirection(values)
+	if dirErr != nil {
+		h.fail(w, dirErr)
+		return
+	}
+	q.Direction = direction
 	h.finishQuery(w, r, q)
 }
 
@@ -232,6 +232,7 @@ func (h *QueryHandler) queryInstant(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *QueryHandler) finishQuery(w http.ResponseWriter, r *http.Request, q spi.LogQuery) {
+	q.Tenant = h.tenant
 	result, err := h.execute(r.Context(), q)
 	if err != nil {
 		h.failErr(w, err)

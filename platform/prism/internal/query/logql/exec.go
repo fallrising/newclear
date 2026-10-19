@@ -88,7 +88,7 @@ func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, plan spi.P
 			continue
 		}
 		if aggregating {
-			if err = addBucket(groups, rec, times, window, &series); err != nil {
+			if err = addBucket(groups, rec, times, window, q.Agg.VectorOp == "", &series); err != nil {
 				return spi.LogResult{}, err
 			}
 			continue

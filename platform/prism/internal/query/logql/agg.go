@@ -74,8 +74,8 @@ func inWindow(ts, t, window int64) bool {
 	return t-ts < window
 }
 
-func addBucket(groups map[uint64][]*bucket, rec utm.LogRecord, times []int64, window int64, series *int) error {
-	g, err := findBucket(groups, rec.Labels, len(times), series)
+func addBucket(groups map[uint64][]*bucket, rec utm.LogRecord, times []int64, window int64, capInput bool, series *int) error {
+	g, err := findBucket(groups, rec.Labels, len(times), capInput, series)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,10 @@ func affectedRange(ts int64, times []int64, window int64) (int, int) {
 	}
 	lo := 0
 	if ts > t0 {
-		delta := ts - t0
+		delta, ok := subInt64(ts, t0)
+		if !ok {
+			return 0, 0
+		}
 		lo64 := delta / step
 		if delta%step != 0 {
 			lo64++
@@ -167,17 +170,22 @@ func subInt64(a, b int64) (int64, bool) {
 	return c, true
 }
 
-func findBucket(groups map[uint64][]*bucket, ls utm.Labels, n int, series *int) (*bucket, error) {
+func findBucket(groups map[uint64][]*bucket, ls utm.Labels, n int, capInput bool, series *int) (*bucket, error) {
 	h := ls.Hash()
 	for _, g := range groups[h] {
 		if labels.Equal(g.labels, ls) {
 			return g, nil
 		}
 	}
-	if *series >= maxAggSeries {
+	// The series cap counts output series. With no vector aggregation each
+	// input series is one output series, so reject it at creation. Reducers
+	// still check the reduced result in plainSeries and rankSeries.
+	if capInput && *series >= maxAggSeries {
 		return nil, tooLarge(*series+1, maxAggSeries)
 	}
-	*series++
+	if capInput {
+		*series++
+	}
 	g := &bucket{labels: ls, count: make([]int, n), bytes: make([]int, n)}
 	groups[h] = append(groups[h], g)
 	return g, nil

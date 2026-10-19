@@ -205,8 +205,10 @@ for each record from iterator:
 - 巢狀物件展平為 `a_b_c`（底線，非點）。Loki 公開的 Log queries 文件同樣用 `_`。
 - 無參數形式跳過陣列，不產生 `a_0` 或 `a_0_b`。Loki 公開文件註明 arrays are skipped。
 - 深度從根物件算，根為第 0 層；進入子物件加 1。層數大於 5 的值不再拆開，該鍵的值是子樹的緊湊 JSON（無空白）。深度 5 是本文件既有的資源上限，Loki 公開文件沒有這條。
-- 數字轉十進位字串，整數不帶小數（`401` → `"401"`）。布林為 `true` 或 `false`。JSON `null` 不建標籤。
-- 多個 parser 都讀原始 Body，不改寫 Body。抽出的標籤合併，同名只留先出現的值。Loki 公開文件寫：抽出的鍵出現兩次時留第一個值。
+- 數字先解析成 `float64`，再用 `strconv.FormatFloat(v, 'f', -1, 64)` 轉成十進位，不用科學記號，也不保留 JSON 原文。因此 `401.0` → `401`，`1e3` → `1000`，`1.50` → `1.5`。float64 無法精確表示的數用該 float64 的值，不另報錯：`9007199254740993` → `9007199254740992`。布林為 `true` 或 `false`。JSON `null` 不建標籤。
+- 鍵名只保留 ASCII 字母、數字、底線與冒號，其餘字元改成 `_`，不合併連續底線。`a.b-c` → `a_b_c`。Loki 公開文件要求抽出的鍵符合 Prometheus 標籤字元。清理後若為空或以數字開頭，只在前面加一個 `_`。
+- 同一個 JSON 物件裡的重複鍵留第一個。Loki 公開文件寫抽出的鍵出現兩次時留第一個值。這與 logfmt 同階段的「後者覆蓋」不同。
+- 多個 parser 都讀原始 Body，不改寫 Body。跨 parser 合併時，同名只留先出現的值。上一條的重複鍵不是這條。
 
 **`| logfmt`**：
 
@@ -214,13 +216,14 @@ for each record from iterator:
 - 解析失敗加 `__error__="LogfmtParserErr"`，不丟棄該行。
 - 同一階段內的重複鍵：後者覆蓋前者。併入已經抽出的標籤時，仍是先出現的值保留。
 
-**stream label**：只指 `utm.LogRecord.Labels`。`Attrs` 不是 stream label，不參與撞名，也不當欄位過濾的輸入。parsed field 與 stream label 同名時，stream label 留原名，parsed field 加 `_extracted`（Loki 公開文件）。`__error__` 同樣處理，不另開例外。
+**stream label**：只指 `utm.LogRecord.Labels`。`Attrs` 不是 stream label，不參與撞名，也不當欄位過濾的輸入。parsed field 與 stream label 同名時，stream label 留原名，parsed field 只加一次 `_extracted`，不加第二次（Loki 公開文件會加這個後綴；後綴只加一次是這裡寫死的，避免 `_extracted_extracted`）。目標名若已被 stream label 或先收下的抽出標籤佔用，這筆丟掉。物件文字順序決定誰先佔名。`__error__` 同樣處理，不另開例外。
 
 **欄位過濾**：
 
 - 字串 `=`、`=~` 在標籤不存在時不過；`!=`、`!~` 在標籤不存在時過。Loki 公開文件說字串過濾與 Prometheus label matcher 相同。
+- 欄位 `=~` / `!~` 比對整段標籤值，與 stream selector 一樣等價於 `^(?:樣式)$`。行過濾 `|~` / `!~` 不加錨點。P2-02 的 `Compile` 目前對欄位正則呼叫 `regexp.Compile` 原樣，沒有加錨點；P2-03 不能把未錨定的 `Compiled.MatchString` 子字串命中當成通過。這份文件不改 `compile.go`。
 - 數值比較用抽出的字串解析成 `float64`，與 `FieldFilter.Num` 比較，不把 `Value` 再當成門檻解析。`Num == nil` 回 `spi.ErrBadRequest`。
-- 抽出的字串無法轉成數字，或數值欄位不存在：該行不丟，並加上 `__error__="LabelFilterErr"`。Loki 公開文件說轉換失敗時不丟行並加上 `__error__`；錯誤字串本身公開文件沒有寫死，這裡固定為 `LabelFilterErr`。
+- 抽出的字串無法轉成數字，或數值欄位不存在：該行不丟，並加上 `__error__="LabelFilterErr"`。Loki 公開文件說轉換失敗時不丟行並加上 `__error__`；錯誤字串本身公開文件沒有寫死，這裡固定為 `LabelFilterErr`。該行已有 `__error__` 時留先值，不改寫，也不為第二個錯誤再加 `_extracted`。
 
 ### 3.7 `agg.go` — 聚合
 
@@ -233,9 +236,9 @@ for each record from iterator:
 | `bytes_over_time` | 窗口內 `len(Body)` 總和 |
 | `bytes_rate` | `bytes_over_time / window_seconds` |
 
-窗口為 `(t-Window, t]`（左開右閉）。`t` 與 `LogRecord.TS` 都是奈秒。對齊原點是 `q.Start`，不是 Unix epoch：`Step > 0` 時 `t = Start + n*Step`，且 `Start <= t < End`。`Sample.TS = utm.NanoToMilli(t)`。有輸入紀錄的 stream，每個 `t` 都輸出樣本，空窗口為 0。`Step <= 0` 只輸出一個樣本，`t = q.End`；輸入範圍仍是 `[Start, End)`，所以時間戳等於 `End` 的紀錄不在迭代器裡。Loki 公開文件只說 step 是解析度，沒有寫對齊到 Unix epoch。
+窗口為 `(t-Window, t]`（左開右閉）。`t` 與 `LogRecord.TS` 都是奈秒。對齊原點是 `q.Start`，不是 Unix epoch：`Step > 0` 時 `t = Start + n*Step`，且 `Start <= t < End`。`Sample.TS = utm.NanoToMilli(t)`。有輸入紀錄的 stream，每個 `t` 都輸出樣本，空窗口為 0。`Step == 0` 只輸出一個樣本，`t = q.End`；輸入範圍仍是 `[Start, End)`，所以時間戳等於 `End` 的紀錄不在迭代器裡。`Step < 0`，或 `0 < Step < 1ms`，回 `spi.ErrBadRequest`，避免毫秒時間戳重複。`Window <= 0` 對任一範圍函式也回 `spi.ErrBadRequest`，避免 `rate` 除以 0。Loki 公開文件只說 step 是解析度，沒有寫對齊到 Unix epoch，也沒有寫這兩個拒絕條件。
 
-**向量聚合**：`by` 只留列出的標籤，`without` 去掉列出的標籤。`By` 與 `Without` 同時非空時回 `spi.ErrBadRequest`；parser 已拒絕這種語法，這是 IR 防線。`topk`/`bottomk` 在每個 `t` 獨立取值：先比數值（topk 大者在前，bottomk 小者在前），數值相同再比標籤鍵值字典序，取前 `K`。Loki 沒有保證同分次序；這個次序只為了讓驗收固定。
+**向量聚合**：`sum` / `avg` / `min` / `max` / `count` 的 `by` 只留列出的標籤，`without` 去掉列出的標籤。`topk` / `bottomk` 的 `by` / `without` 只用來分組：每一組各取 `K` 條，輸出保留原標籤，不先把標籤縮掉再做全域排序。Prometheus 公開的 aggregation operators 寫明 `topk` / `bottomk` 回傳原標籤，`by` / `without` 只做分桶。組內先比數值（topk 大者在前，bottomk 小者在前），數值相同再比標籤字典序。組與組之間依分組標籤字典序排列；Prometheus 不保證組的順序，這裡排定是為了驗收固定。`By` 與 `Without` 同時非空時回 `spi.ErrBadRequest`；parser 已拒絕這種語法，這是 IR 防線。
 
 **記憶體上限**：輸出序列數超過 `query.max_agg_series`（預設 10 000）時回 `spi.ErrTooLarge`，訊息：`query would produce N series, exceeding the limit of M; add a 'by' clause or reduce the time range`。
 
@@ -250,8 +253,8 @@ for each record from iterator:
 | 負向（語義） | §1.1 五條約束各有測試 |
 | 不支援 | §1.2 每一列有測試，驗證錯誤訊息完全相符 |
 | 抽取 | §3.4 的 property test + 8 個種子語料 |
-| 執行 | §4.2 的 AC-14 至 AC-18 |
-| 聚合 | §4.2 的 AC-9 至 AC-13 與 AC-18 |
+| 執行 | §4.2 的 AC-14 至 AC-18，以及 AC-20 至 AC-22、AC-25、AC-28 |
+| 聚合 | §4.2 的 AC-9 至 AC-13、AC-18、AC-23、AC-26、AC-27 |
 | 串流 | §4.2 的 AC-19 |
 | 相容性 | 對照表：同一查詢送給真實 Loki 與 Prism，結果集合相同（人工執行，記錄於 `test/compat/logql-parity.md`） |
 
@@ -259,7 +262,7 @@ for each record from iterator:
 
 ### 4.1 分期驗收邊界
 
-P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與範圍／向量函式組合解析；依 [P2-01 規格](../specs/p2-01-logql-parser.md) 驗證資源上限、取消及錯誤分類。抽取 property test 屬 P2-02；執行、聚合結果與串流驗收屬 P2-03，案例是 §4.2 的 AC-1 至 AC-19；真實 Loki API 行為對照須待 P2-04 HTTP 整合。函式組合在 P2-01 的測試只驗證 IR，不能視為聚合執行或相容性驗收。
+P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與範圍／向量函式組合解析；依 [P2-01 規格](../specs/p2-01-logql-parser.md) 驗證資源上限、取消及錯誤分類。抽取 property test 屬 P2-02；執行、聚合結果與串流驗收屬 P2-03，案例是 §4.2 的 AC-1 至 AC-28；真實 Loki API 行為對照須待 P2-04 HTTP 整合。函式組合在 P2-01 的測試只驗證 IR，不能視為聚合執行或相容性驗收。
 
 ### 4.2 P2-03 驗收
 
@@ -302,3 +305,21 @@ P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與
 **AC-18** Given AC-9。When `plan.Agg=false`。Then Matrix 等於 AC-9，Streams 為空。When `plan.Agg=true`。Then Execute 回傳通過過濾的 Streams，不回傳 Matrix。以同一套聚合規則把這批 Streams 算出的 Matrix，必須與 AC-9 的 Matrix 在標籤、`Sample.TS`、`Value` 上完全相等，沒有誤差帶。Streams 不直接與 Matrix 比較。
 
 **AC-19** Given 100 萬行皆匹配，`q.Limit=100`，`plan.Limit=false`。Then 輸出 100 行，從迭代器讀到的筆數 < 100000。
+
+**AC-20** Given Body `{"status":"first","status":"second"}`。When `| json`。Then 標籤 `status="first"`。沒有 `second`。
+
+**AC-21** Given stream label `app="web"`，Body `{"app_extracted":"from-key","app":"from-app"}`。When `| json`。Then `app="web"`、`app_extracted="from-key"`。沒有 `app_extracted_extracted`。Given 同一 stream label，Body `{"app":"from-app","app_extracted":"from-key"}`。Then `app="web"`、`app_extracted="from-app"`。Given stream labels `app="web"` 與 `app_extracted="kept"`，Body `{"app":"x"}`。Then 只有 `app="web"`、`app_extracted="kept"`。
+
+**AC-22** Given 抽出 `status="401"`。When `status=~"40"`。Then 該行不在輸出。When `status=~"401"` 或 `status=~"40.*"`。Then 該行在輸出。When `status!~"40"`。Then 該行在輸出。
+
+**AC-23** Given 同一 `t` 上 `{job="a",instance="1"}=5`、`{job="a",instance="2"}=1`、`{job="b",instance="1"}=9`。When `topk by (job) (1)`。Then 兩條序列，標籤不縮成只有 `job`：先 `{job="a",instance="1"}=5`，再 `{job="b",instance="1"}=9`。
+
+**AC-24** Given Body `{"a":401.0,"b":1e3,"c":1.50,"d":9007199254740993}`。When `| json`。Then `a="401"`、`b="1000"`、`c="1.5"`、`d="9007199254740992"`。
+
+**AC-25** Given Body `{"a.b-c":"v"}`。When `| json`。Then 標籤 `a_b_c="v"`。沒有鍵 `a.b-c`。
+
+**AC-26** Given `Window=0`，範圍函式是 `rate`。When Execute。Then `spi.ErrBadRequest`，Streams 與 Matrix 皆空。
+
+**AC-27** Given `Step=500000`（0.5ms）、`Start=0`、`End=2000000`，其餘足以產生兩個以上的點。When Execute。Then `spi.ErrBadRequest`，Streams 與 Matrix 皆空。`Step=0` 仍依 AC-11，不算這個錯誤。
+
+**AC-28** Given Body `not-json`，接著數值過濾 `status > 1` 且 `Num` 指向 `1`。When `| json` 後再過濾。Then 該行保留，`__error__="JSONParserErr"`。沒有 `LabelFilterErr`，也沒有 `__error___extracted`。

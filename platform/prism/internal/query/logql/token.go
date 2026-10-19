@@ -1,7 +1,8 @@
-// Package logql parses the bounded Prism LogQL subset into intermediate SPI IR
-// and precompiles line and field regular expressions. Execution remains a later
-// milestone. Bounds are parser hard ceilings; future transport/config wiring
-// must enforce its own request and tenant limits before calling Parse.
+// Package logql parses the bounded Prism LogQL subset into intermediate SPI IR,
+// precompiles line and field regular expressions, and executes filters, parsers,
+// and aggregations the storage driver did not push down. Bounds are parser hard
+// ceilings; future transport/config wiring must enforce its own request and
+// tenant limits before calling Parse.
 package logql
 
 // Kind is a lexical token category. Diagnostics use categories, never input values.

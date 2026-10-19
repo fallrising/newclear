@@ -71,7 +71,7 @@ func Compile(ctx context.Context, q spi.LogQuery) (spi.LogQuery, error) {
 		if filter.Op != spi.LineMatch && filter.Op != spi.LineNotMatch {
 			continue
 		}
-		compiled, err := compilePattern(filter.Value)
+		compiled, err := compilePattern(filter.Value, false)
 		if err != nil {
 			return spi.LogQuery{}, err
 		}
@@ -88,7 +88,7 @@ func Compile(ctx context.Context, q spi.LogQuery) (spi.LogQuery, error) {
 		if field.Op != spi.CmpRe && field.Op != spi.CmpNotRe {
 			continue
 		}
-		compiled, err := compilePattern(field.Value)
+		compiled, err := compilePattern(field.Value, true)
 		if err != nil {
 			return spi.LogQuery{}, err
 		}
@@ -97,13 +97,23 @@ func Compile(ctx context.Context, q spi.LogQuery) (spi.LogQuery, error) {
 	return out, nil
 }
 
-func compilePattern(pattern string) (*regexp.Regexp, error) {
+func compilePattern(pattern string, anchor bool) (*regexp.Regexp, error) {
+	return compilePatternOp(pattern, anchor, "Compile")
+}
+
+// compilePatternOp compiles a user regular expression. Field filters are fully
+// anchored, the same rule as a Prometheus label matcher. Line filters are not.
+func compilePatternOp(pattern string, anchor bool, op string) (*regexp.Regexp, error) {
 	if len(pattern) > MaxRegexBytes {
-		return nil, spi.Wrap(spi.ErrTooLarge, "logql", "Compile", errors.New("regular expression byte limit exceeded"))
+		return nil, spi.Wrap(spi.ErrTooLarge, "logql", op, errors.New("regular expression byte limit exceeded"))
 	}
-	compiled, err := regexp.Compile(pattern)
+	expr := pattern
+	if anchor {
+		expr = "^(?:" + pattern + ")$"
+	}
+	compiled, err := regexp.Compile(expr)
 	if err != nil {
-		return nil, spi.Wrap(spi.ErrBadRequest, "logql", "Compile", errors.New("invalid regular expression"))
+		return nil, spi.Wrap(spi.ErrBadRequest, "logql", op, errors.New("invalid regular expression"))
 	}
 	return compiled, nil
 }

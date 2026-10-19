@@ -93,10 +93,10 @@ internal/query/logql/
 ### 3.4 補算執行器
 
 ```go
-func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, done spi.LogPushdown) (spi.LogResult, error)
+func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, plan spi.PushdownPlan) (spi.LogResult, error)
 ```
 
-`done` 標明驅動已經處理過哪些條件；執行器只補做剩下的。**必須串流**：邊讀迭代器邊過濾邊計數，達到 `Limit` 立即 `Close()` 並返回，不得先收集全部再處理。
+`plan` 用已落地的 `spi.PushdownPlan`，不用 `spi.LogPushdown`。不另設 `Limits`；`promqladapter.Limits` 只約束指標查詢。步驟與 P2-03 驗收見 `16` §3.5–§3.7 與 §4.2。**必須串流**：不得先收集全部再處理。只有 `plan.Limit == false` 且 `q.Limit > 0`，而且正在收集原始日誌時，達到筆數才 `Close()` 並返回。
 
 聚合（`count_over_time` 等）用固定桶的滑窗累加，記憶體上限 `query.max_agg_series`（預設 10_000 個輸出序列），超出回 `ErrTooLarge` 並提示使用者加 `by` 或縮小範圍。
 

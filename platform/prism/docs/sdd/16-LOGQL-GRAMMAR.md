@@ -216,7 +216,7 @@ for each record from iterator:
 - 解析失敗加 `__error__="LogfmtParserErr"`，不丟棄該行。
 - 同一階段內的重複鍵：後者覆蓋前者。併入已經抽出的標籤時，仍是先出現的值保留。
 
-**stream label**：只指 `utm.LogRecord.Labels`。`Attrs` 不是 stream label，不參與撞名，也不當欄位過濾的輸入。parsed field 與 stream label 同名時，stream label 留原名，parsed field 只加一次 `_extracted`，不加第二次（Loki 公開文件會加這個後綴；後綴只加一次是這裡寫死的，避免 `_extracted_extracted`）。目標名若已被 stream label 或先收下的抽出標籤佔用，這筆丟掉。物件文字順序決定誰先佔名。`__error__` 同樣處理，不另開例外。
+**stream label**：只指 `utm.LogRecord.Labels`。`Attrs` 不是 stream label，不參與撞名，也不當欄位過濾的輸入。parsed field 與 stream label 同名時，stream label 留原名，parsed field 只加一次 `_extracted`，不加第二次（Loki 公開文件會加這個後綴；後綴只加一次是這裡寫死的，避免 `_extracted_extracted`）。目標名若已被 stream label 或先收下的抽出標籤佔用，這筆丟掉。物件文字順序決定誰先佔名。`__error__` 同樣處理，不另開例外。併入標籤時使用 Prometheus `labels.Builder.Set`：值 `""` 當成刪除，所以空字串值不建標籤。JSON `{"k":""}` 不會留下標籤 `k`。這是現行執行器行為，這份文件不改執行器。Owner 於 2026-10-20 鎖定這句描述。
 
 **欄位過濾**：
 

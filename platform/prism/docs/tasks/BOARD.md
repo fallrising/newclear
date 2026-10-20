@@ -2,7 +2,7 @@
 
 desk 卡：T-0354。本檔是 `platform/prism/docs/tasks/BOARD.md`。
 
-本輪只寫 P2-05 的規格，不實作。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-06 以後只列 backlog，不拆、不做。
+P2-05 規格已鎖定，這一輪是實作。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-06 以後只列 backlog，不拆、不做。
 
 P2-04 依 `12-IMPLEMENTATION-PHASES.md`。HTTP 驗收是 `02-COMPATIBILITY-CONTRACT.md` §3.4 的 AC-29 到 AC-41。AC-42 在 `16-LOGQL-GRAMMAR.md` §4.2，與這輪一起做。
 
@@ -87,13 +87,13 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 ## P2-05
 
-Owner 打開規格，只寫文件，不實作。狀態不是關閉。
+Owner 已鎖定 AC-43 至 AC-71。實作完成，等合併。狀態不是關閉。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-05 | ClickHouse `NativeLogQuerier` 規格：`17` §6.5 的 AC-43 至 AC-71 | T-0354 | 規格 | 2026-10-20T00:27:00Z | 未實作 | 2026-10-20T04:50:00Z |
+| P2-05 | ClickHouse `NativeLogQuerier`：`17` §6.5 的 AC-43 至 AC-71 | T-0354 | 實作完成、等合併 | 2026-10-20T00:27:00Z | 等合併 | 2026-10-20T04:59:26Z |
 
-開始是 owner 指示只寫這份規格的時鐘。允許路徑是 `drivers/clickhouse/**`，外加 `pkg/spi` 的 `Validate`。階段出口仍是 `C-LOG-03`、`C-LOG-04`、`C-LOG-05`，以及 logfmt 回 `ErrUnsupported`。Owner 於 2026-10-20 鎖定先前條文，HTTP 仍不接 `SearchNative`。同日對 JSON `Eq` 漏列選方案 1：SQL 粗篩必須是執行器結果的超集，driver 再以與執行器相同的 parseJSON 規則精篩。AC-49 改為缺欄不在結果中。新增 AC-65 至 AC-71。空字串 `Eq` 鎖定為 AC-71：0 列，空字串值不建標籤，與執行器相同。C-LOG-03 不補巢狀 fixture，owner 鎖定，維持 `10` §2.3 的頂層字串。這次只改文件。last_activity 是寫入這次鎖定的時鐘。
+開始仍是 owner 打開規格的時鐘。實作從 2026-10-20T02:15:00Z 起。允許路徑是 `drivers/clickhouse/**`、`pkg/spi` 的 `Validate`，以及 `pkg/spi/conformance` 的 C-LOG-03/04/05。HTTP 仍不接 `SearchNative`。JSON `Eq` 的 SQL 只做超集粗篩，driver 以與執行器相同的 parseJSON 規則精篩，精篩前不加 `LIMIT`。空字串 `Eq` 是 AC-71：0 列，空字串值不建標籤，與執行器相同。last_activity 是 rebase 到含這條鎖定的 main 之後的時鐘。
 
 ## Backlog
 

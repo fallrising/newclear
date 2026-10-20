@@ -88,7 +88,9 @@ Owner 於 2026-10-20 選定：保住 `Search` 的既有契約，已宣告的過�
 - `NativeLogQuery=true`：宣告的 substring、regex、JSON 字串相等由 `SearchNative` 驗「已濾好」（只留 `Attrs["expected"]="true"` 的那筆，`Body`、`Labels`、`Attrs` 與寫入相同）。同一組查詢的 `Search` 回該組寫入的全部筆，含 `expected=false`。selectors 與時間範圍仍由 `Search` 套用。logfmt 沒宣告：`Search` 回超集，`SearchNative` 回 `ErrUnsupported`，不回成功的部分結果。
 - `NativeLogQuery=true` 的 C-LOG-05：現有三筆是 `keep first`、`drop`、`keep second`，過濾 `|= "keep"`，`Limit=1`，`Direction=Forward`。`Search` 回三筆，或 `ErrTooLarge`；不得只回兩筆 `keep`，也不得只回一筆。`SearchNative` 只回 `Body` 為 `keep first` 的那筆。
 
-編號驗收是 `17` §6.5 的 AC-63、AC-64。
+編號驗收是 `17` §6.5 的 AC-63、AC-64。AC-65 至 AC-71 是 ClickHouse 的 JSON `Eq` 對齊，不改 C-LOG 編號。
+
+Owner 於 2026-10-20 鎖定：C-LOG-03 的 JSON 資料維持現有寫法，不補巢狀 fixture。資料仍是頂層字串 `{"level":"keep"}` 與 `{"level":"drop"}`，欄位 `level`、`Op=Eq`、`Value=keep`。不把巢狀鍵、sanitize 鍵、深度大於 5、數字格式或 `_extracted` 加進這個共用 fixture。那些列與執行器的對齊寫在 `17` §6.5 的 AC-65 至 AC-69，空字串 `Eq` 是 AC-71，由 ClickHouse 整合測試承擔。共用 fixture 一旦改成巢狀，每個宣告 `ParsedFieldJSON` 的驅動（含 `NativeLogQuery=false`）都要在 `Search` 上滿足，超出這次 JSON 漏列的範圍。
 
 ### 2.4 追蹤測項
 

@@ -175,6 +175,83 @@ func TestNativeMatrix_AC52_EmptyWindowEmitsZero(t *testing.T) {
 	}
 }
 
+func TestNativeLogSQL_AC56_AC70_JSONEqHasNoFinalExtractOrLimit(t *testing.T) {
+	query := spi.LogQuery{
+		Tenant: "ac", Direction: spi.Forward, Start: 1, End: 2, Limit: 1,
+		Stages: []spi.ParseStage{{Kind: spi.ParseJSON}},
+		Fields: []spi.FieldFilter{{Field: "a_b", Op: spi.CmpEq, Value: "v"}},
+	}
+	sql, _, err := nativeLogSQL(query, options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(sql, "JSONExtractString") || strings.Contains(sql, " LIMIT ") {
+		t.Fatalf("SQL finalizes JSON or limits before the fine filter: %s", sql)
+	}
+	plain := spi.LogQuery{Tenant: "ac", Direction: spi.Forward, Start: 1, End: 2, Limit: 1}
+	sql, _, err = nativeLogSQL(plain, options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(sql, " LIMIT ?") {
+		t.Fatalf("non-JSON SQL = %s", sql)
+	}
+}
+
+func TestJSONEqMatch_AC49_AC65_AC71(t *testing.T) {
+	eq := func(field, value string) []spi.FieldFilter {
+		return []spi.FieldFilter{{Field: field, Op: spi.CmpEq, Value: value}}
+	}
+	host := labels.FromStrings("host", "h1")
+	if !jsonEqMatch(host, `{"status":"500"}`, eq("status", "500")) || jsonEqMatch(host, `{"status":"200"}`, eq("status", "500")) {
+		t.Fatal("AC-49 status equality")
+	}
+	if jsonEqMatch(host, `{"other":"1"}`, eq("status", "500")) || jsonEqMatch(host, `{"a":{"c":"v"}}`, eq("a_b", "v")) {
+		t.Fatal("AC-49 missing field must drop the row")
+	}
+	if !jsonEqMatch(host, `{"a":{"b":"v"}}`, eq("a_b", "v")) || jsonEqMatch(host, `{"a":{"b":"no"}}`, eq("a_b", "v")) || !jsonEqMatch(host, `{"a_b":"v"}`, eq("a_b", "v")) {
+		t.Fatal("AC-65 nested flatten")
+	}
+	if !jsonEqMatch(host, `{"a.b":"v"}`, eq("a_b", "v")) || !jsonEqMatch(host, `{"a-b":"v"}`, eq("a_b", "v")) || jsonEqMatch(host, `{"a.b":"no"}`, eq("a_b", "v")) {
+		t.Fatal("AC-66 sanitized key")
+	}
+	if !jsonEqMatch(host, `{"1x":"v"}`, eq("_1x", "v")) || jsonEqMatch(host, `{"1x":"v"}`, eq("1x", "v")) {
+		t.Fatal("AC-66 leading digit")
+	}
+	deep := `{"a":{"b":{"c":{"d":{"e":{"f":{"g":1}}}}}}}`
+	if !jsonEqMatch(host, deep, eq("a_b_c_d_e_f", `{"g":1}`)) || jsonEqMatch(host, deep, eq("a_b_c_d_e_f_g", "1")) {
+		t.Fatal("AC-67 depth")
+	}
+	if !jsonEqMatch(host, `{"n":1e-7}`, eq("n", "0.0000001")) || jsonEqMatch(host, `{"n":1e-7}`, eq("n", "1e-7")) {
+		t.Fatal("AC-68 1e-7")
+	}
+	if !jsonEqMatch(host, `{"n":1e21}`, eq("n", "1000000000000000000000")) || jsonEqMatch(host, `{"n":1e21}`, eq("n", "1e21")) {
+		t.Fatal("AC-68 1e21")
+	}
+	if !jsonEqMatch(host, `{"n":9007199254740993}`, eq("n", "9007199254740992")) || jsonEqMatch(host, `{"n":9007199254740993}`, eq("n", "9007199254740993")) {
+		t.Fatal("AC-68 integer precision")
+	}
+	if !jsonEqMatch(host, `{"n":-0}`, eq("n", "-0")) || jsonEqMatch(host, `{"n":-0}`, eq("n", "0")) {
+		t.Fatal("AC-68 negative zero")
+	}
+	web := labels.FromStrings("app", "web")
+	if !jsonEqMatch(web, `{"app":"parsed"}`, eq("app_extracted", "parsed")) || jsonEqMatch(web, `{"app":"parsed"}`, eq("app", "parsed")) {
+		t.Fatal("AC-69 extracted rename")
+	}
+	taken := labels.FromStrings("app", "web", "app_extracted", "kept")
+	if jsonEqMatch(taken, `{"app":"x"}`, eq("app_extracted", "x")) {
+		t.Fatal("AC-69 occupied extracted name")
+	}
+	// The executor stores labels with prometheus labels.Builder.Set, which deletes
+	// a value of "". {"k":""} therefore never creates label k, and k="" keeps none
+	// of these rows. That is the Search+executor result.
+	for _, body := range []string{`{"other":"1"}`, `{"k":null}`, `{"k":{"a":1}}`, `{"k":[1]}`, `{"k":""}`} {
+		if jsonEqMatch(host, body, eq("k", "")) {
+			t.Fatalf("AC-71 kept %s", body)
+		}
+	}
+}
+
 func TestSearchNative_AC54_ErrorText(t *testing.T) {
 	for _, code := range []int32{158, 307, 241} {
 		server := classifiedError("logs.search_native", &clickhouse.Exception{Code: code, Message: "password=private"})

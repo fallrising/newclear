@@ -42,7 +42,7 @@ func (s *logStore) SearchNative(ctx context.Context, q spi.LogQuery) (spi.LogRes
 	if err != nil {
 		return spi.LogResult{}, err
 	}
-	return spi.LogResult{Streams: groupLogStreams(records)}, nil
+	return spi.LogResult{Streams: groupLogStreams(filterJSONEq(records, q))}, nil
 }
 
 func rejectNative(q spi.LogQuery) error {
@@ -91,20 +91,18 @@ func nativeLogSQL(q spi.LogQuery, opts options) (string, []any, error) {
 	if err != nil {
 		return "", nil, err
 	}
-	fieldSQL, fieldArgs := nativeFieldSQL(q.Fields)
 	direction := "DESC"
 	if q.Direction == spi.Forward {
 		direction = "ASC"
 	}
 	args := append([]any{q.Tenant, q.Start, q.End}, selectorArgs...)
 	args = append(args, lineArgs...)
-	args = append(args, fieldArgs...)
 	limit := ""
-	if q.Agg == nil && q.Limit > 0 {
+	if q.Agg == nil && q.Limit > 0 && !hasJSONEq(q) {
 		limit = " LIMIT ?"
 		args = append(args, uint64(q.Limit))
 	}
-	sql := "SELECT ts,observed_ts,tenant,cluster,host,service,env,toString(severity),severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace,write_seq FROM logs WHERE tenant = ? AND ts >= fromUnixTimestamp64Nano(?) AND ts < fromUnixTimestamp64Nano(?)" + selectorSQL + lineSQL + fieldSQL + " ORDER BY ts " + direction + ", write_seq ASC" + limit + querySettings(opts)
+	sql := "SELECT ts,observed_ts,tenant,cluster,host,service,env,toString(severity),severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace,write_seq FROM logs WHERE tenant = ? AND ts >= fromUnixTimestamp64Nano(?) AND ts < fromUnixTimestamp64Nano(?)" + selectorSQL + lineSQL + " ORDER BY ts " + direction + ", write_seq ASC" + limit + querySettings(opts)
 	return sql, args, nil
 }
 
@@ -149,16 +147,6 @@ func hintHasSeparator(hint string) bool {
 		}
 	}
 	return false
-}
-
-func nativeFieldSQL(fields []spi.FieldFilter) (string, []any) {
-	var sql strings.Builder
-	var args []any
-	for _, field := range fields {
-		sql.WriteString(" AND JSONExtractString(body, ?) = ?")
-		args = append(args, field.Field, field.Value)
-	}
-	return sql.String(), args
 }
 
 func scanNativeLogs(ctx context.Context, b *backend, sql string, args []any, selectors []spi.Matcher) ([]utm.LogRecord, error) {
@@ -222,7 +210,7 @@ func searchNativeAgg(ctx context.Context, b *backend, q spi.LogQuery) (spi.LogRe
 	if err != nil {
 		return spi.LogResult{}, err
 	}
-	return spi.LogResult{Matrix: nativeMatrix(q, records, start, end)}, nil
+	return spi.LogResult{Matrix: nativeMatrix(q, filterJSONEq(records, q), start, end)}, nil
 }
 
 func nativeMatrix(q spi.LogQuery, records []utm.LogRecord, start, end int64) []spi.SeriesData {

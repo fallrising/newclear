@@ -331,41 +331,6 @@ func readRuleDirectory(ctx context.Context, path string) ([]os.DirEntry, error) 
 	return entries, nil
 }
 
-func validateRuleDocument(content []byte) error {
-	document, err := parseYAMLDocument(content)
-	if err != nil {
-		return err
-	}
-	root, ok := document.(map[string]any)
-	if !ok {
-		return fmt.Errorf("rule document must be a mapping")
-	}
-	groups, ok := root["groups"].([]any)
-	if !ok || len(groups) == 0 {
-		return fmt.Errorf("rule document must contain a non-empty groups sequence")
-	}
-	for groupIndex, groupValue := range groups {
-		group, ok := groupValue.(map[string]any)
-		if !ok || scalarString(group["name"]) == "" {
-			return fmt.Errorf("groups[%d].name must not be empty", groupIndex)
-		}
-		rules, ok := group["rules"].([]any)
-		if !ok || len(rules) == 0 {
-			return fmt.Errorf("groups[%d].rules must be a non-empty sequence", groupIndex)
-		}
-		for ruleIndex, ruleValue := range rules {
-			rule, ok := ruleValue.(map[string]any)
-			if !ok || scalarString(rule["expr"]) == "" {
-				return fmt.Errorf("groups[%d].rules[%d].expr must not be empty", groupIndex, ruleIndex)
-			}
-			if scalarString(rule["alert"]) == "" && scalarString(rule["record"]) == "" {
-				return fmt.Errorf("groups[%d].rules[%d] must define alert or record", groupIndex, ruleIndex)
-			}
-		}
-	}
-	return nil
-}
-
 func validateTelemetry(telemetry TelemetryConfig) error {
 	var errs []error
 	if !slices.Contains([]string{"trace", "debug", "info", "warn", "error"}, telemetry.LogLevel) {

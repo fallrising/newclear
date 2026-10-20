@@ -281,7 +281,7 @@ CREATE INDEX ON notification_deliveries (tenant_id, created_at DESC);
 - A7：`HostDown` firing 時，同 instance 的 warning 告警被抑制且在 `/api/v2/alerts` 顯示 `status.state="suppressed"`。
 - A8：模板渲染錯誤不影響告警觸發與通知發送。
 
-A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §10。A2 的 promtool 版本與案例也以 §10 為準。
+A1 的「正確評估」、A4、A5 的編號驗收是 §11。A3、A6、A7、A8 的通知與抑制不在 P2-07。P2-06 的編號驗收仍是 §10。A2 的 promtool 版本與案例也以 §10 為準。
 
 ## 10. P2-06 驗收（AC-72 起）
 
@@ -295,7 +295,7 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 
 範圍外：
 
-- 評估、`for` / `keep_firing_for` 狀態機、`ALERTS` 回寫、Postgres `alert_state`。那是 P2-07。
+- 評估、`for` / `keep_firing_for` 狀態機、`ALERTS` 回寫、Postgres `alert_state`。那是 P2-07，見 §11。
 - 靜默、抑制、分組、通知、Alertmanager API。那是 P2-08 至 P2-11。
 - 內建規則與 watchdog。那是 P2-12。`rules.builtin_enabled` 這輪不讀。
 - 控制平面 `rule_groups` / `rules` 與 `rules.db_sync_interval`。這輪不連 Postgres。
@@ -404,3 +404,95 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 **AC-92** Given `prismd` 已載入規則。When 檔案改了，2 秒內沒有 SIGHUP。Then 記憶體中的集合不變，也不做檔案監看。When 收到 SIGHUP 且新檔全部有效。Then 換成新集合。When 收到 SIGHUP 但有一檔無效。Then 程序繼續跑，記憶體仍是上一份成功的集合，並留下錯誤。SIGHUP 不得取消 `SIGINT` / `SIGTERM` 那個 process context，也不得讓程序退出。這輪沒有 `POST /-/reload`。實測 Prometheus 2.53.0：改檔後 2 秒規則不變；SIGHUP 後換成新規則；壞檔的 log 含 `loading groups failed` 與 `previous rule set restored`，API 仍是上一份。沒有 `--web.enable-lifecycle` 時 `POST /-/reload` 是 HTTP 403，本文 `Lifecycle API is not enabled.`。那個 HTTP 路徑不在這輪。
 
 **AC-93** Given 同檔兩筆 alert 都叫 `A`，labels 都空，expr 分別是 `up` 與 `up == 1`。When 載入。Then 成功，兩筆都在，不回錯。同時留下警告，警告裡能對到 `A`。實測 promtool 預設 exit 0，輸出仍含 `lint error 1 duplicate rule(s) found.` 與 `Metric: A`。`--lint-fatal` 才是 exit 3。這輪不採用 exit 3。同 labels 的 recording rule `job:x:rate` 同樣是預設 exit 0 加 lint。
+
+## 11. P2-07 驗收（AC-94 起）
+
+這一節是文件。Owner 於 2026-10-20 打開 P2-07「評估與狀態」，只要規格。合併這份規格前不寫程式、不寫測試。編號接在 §10 的 AC-93 之後。
+
+實測用的仍是 §10 那個官方 Prometheus 2.53.0 linux/amd64，SHA256 `d9900a11e3c89261e6416e3c9989858bad7b206af8b6838dfe9a5392d8ddc60d`。版本行是 `2.53.0`，revision `4c35b9250afefede41c5f5acd76191f90f625898`。下面寫「實測」的句子來自 2026-10-20 這次把該二進位當伺服器跑起來的結果，不是從記憶或原始碼補的。除特別寫明的地方，`evaluation_interval` 是 1 秒。沒有改 `--rules.alert.for-grace-period`（說明書預設 10m），也沒有改 `--rules.alert.for-outage-tolerance`（說明書預設 1h），沒有開 `concurrent-rule-eval`。
+
+§2、§3、§4 這輪不改。和這次實測不一致的地方留在 PR 的「待 owner 決定」。AC-101、AC-102、AC-103、AC-105、AC-106、AC-109 的 Then 是建議，核准前不以它們覆蓋舊節。
+
+### 11.1 範圍
+
+範圍內：
+
+- 每個 group 一個評估迴圈。間隔用載入器存下來的 interval（AC-91：省略或 `0s` 是 30 秒）。組內規則依序跑。
+- `query_offset` 如何移動查詢時間與寫入時間。
+- `limit` 在評估時的語意，含 AC-81 留下的 `-1`。
+- alert 狀態只有 `inactive`、`pending`、`firing`。`for` 與 `keep_firing_for` 怎麼進出這三態。
+- recording rule 把結果寫進儲存，同組後面的規則在同一次評估看得到。
+- `annotations.prism_log_expr` 這輪評不評。建議是不執行，見 AC-106。
+- 對外狀態：`ALERTS`、`ALERTS_FOR_STATE`，以及 `02` §2 的 `GET /prom/api/v1/rules`、`GET /prom/api/v1/alerts`。Prometheus 實測的路徑沒有 `/prom` 前綴，JSON 形狀以這次為準。
+- P2-06 的 SIGHUP 成功換成新規則檔之後，記憶體裡的 pending / firing 怎麼留。不新增檔案監看，也不做 `POST /-/reload`。
+- 查詢錯誤時保留上一筆告警狀態。這是 A5 的形狀。
+- 重啟後 `for` 計時。建議走 `09` 的 `alert_state`，見 AC-109。那一項待決，因為它和這次 Prometheus 的重啟結果不同，也碰到 P5-01 才做 schema 遷移。
+
+允許路徑沿用 `12` 的 P2-07，並加上 `internal/compat/promapi/**`，只為了那兩個 GET。這輪沒有這兩個路由。
+
+範圍外：
+
+- 通知、靜默、抑制、分組、去重、重發。那是 P2-08、P2-09。
+- Alertmanager API，含 `/api/v2/alerts`。那是 P2-11。
+- 內建規則、watchdog、`PrismRuleEvaluationFailing`、`prism_rule_eval_failures_total`。那是 P2-12。這輪失敗只出現在規則的 `health` 與 `lastError`。
+- `rules.builtin_enabled`、`rules.db_sync_interval`、控制平面 `rule_groups` / `rules` 的同步。
+- 單條評估超時仍沿用 §2 的 `rules.eval_timeout`。這次沒有做出一條會超時的查詢，所以不另寫超時 Then。
+- §3 的 `resolve_timeout` 與 mermaid 裡的 Resolved。這次 API 沒有 `resolved` 這個 state。通知要的保留留到 P2-08，這輪不實作 5 分鐘或 15 分鐘的記憶體保留。
+
+`vector(1) == 0` 這種空結果不是錯誤。實測規則 `health` 是 `ok`，`state` 是 `inactive`，`alerts` 是 `[]`，`/api/v1/alerts` 裡沒有它。條件消失會讓告警離開 API。只有查詢本身失敗才走 AC-103。
+
+### 11.2 這次伺服器上看到的
+
+- 省略 interval 與 `interval: 0s` 的 group，API `interval` 都是 1，也就是這次的 `evaluation_interval`。`interval: 2s` 的 `lastEvaluation` 間隔是 2.001、2.000、2.000、2.000 秒。`interval: 10s` 的兩個 group，第一次 `lastEvaluation` 分別在程序啟動後 2.724 秒與 9.052 秒。`NoFor` 在第一次評估前，`health` 是 `unknown`。
+- `query_offset: 30s` 的 recording `timestamp(vector(1))`，樣本時間戳與值都是 `1792483386.129`。該規則的 `lastEvaluation` 是 `2026-10-20T08:03:36.131223796Z`（Unix `1792483416.131`），相差 30.002 秒。同一組 `for: 0s` 的 `ALERTS`，`timestamp(ALERTS{alertname="Off"})` 也是 `1792483386.129`。`activeAt` 是 `2026-10-20T08:03:33.129382428Z`，不是減掉 30 秒的時間。group JSON 沒有 `query_offset`。把 30 秒改成 10 秒再 SIGHUP，`activeAt` 仍是 `2026-10-20T08:01:36.930071468Z`。
+- 同組先 `record: job:x:rate`、`expr: vector(1)`，接著 `alert` 的 expr 是 `job:x:rate == 1`、`for: 0s`。兩者的 `lastEvaluation` 是 `2026-10-20T07:58:36.118417972Z` 與 `2026-10-20T07:58:36.11844105Z`，alert 已是 `firing`，值 `1e+00`。另一個 group 的同 expr 在這次的第一次評估也是 `firing`，但不把「跨組同一輪」寫進規格。
+- 沒寫 `for` 與 `for: 0s`：第一次看到的 state 就是 `firing`，`duration` 是 0。`for: 3s`：先 `pending` 再 `firing`，`activeAt` 都是 `2026-10-20T07:58:33.434454414Z`，規則 `duration` 是 3。`pending` 時條件消失：1.015 秒內從 `/api/v1/alerts` 消失，規則 `state` 變成 `inactive`，不是一筆 `inactive` 或 `resolved` 告警。instant query `ALERTS` 與 `ALERTS_FOR_STATE` 都是空的。
+- `for: 0s`、`keep_firing_for: 4s`：條件還在時沒有 `keepFiringSince`。條件消失後 state 仍是 `firing`，`keepFiringSince` 是 `2026-10-20T07:58:46.194801906Z`，`activeAt` 仍是 `2026-10-20T07:58:38.194801906Z`。規則 `keepFiringFor` 是 4。離開 API 的那次 `lastEvaluation` 是 `2026-10-20T07:58:50.196667346Z`，距 `keepFiringSince` 4.002 秒。沒有 state `resolved`。離開後 instant query 是空的。
+- `limit: 0` 與 `limit: -1`，expr 給出 `k=a` 與 `k=b` 兩條：各兩筆 `firing`，`health` 是 `ok`，沒有 `lastError`。group 的 `limit` JSON 數字分別是 0 與 -1。
+- `limit: 1` 配同樣兩條：alerting 的 `lastError` 是 `exceeded limit of 1 with 2 alerts`，`health` 是 `err`，`state` 是 `inactive`，`alerts` 是空的，不是留下一筆。recording 的 `lastError` 是 `exceeded limit of 1 with 2 series`，系列不存在。先用 `limit: 0` 讓兩筆 firing 且 `ALERTS` 有兩條，再 SIGHUP 改成 `limit: 1`：API 告警變空、`state` 為 `inactive`、同一句 `lastError`；3 秒後 instant query `ALERTS` 仍是兩條、值 `1`。再把 expr 收成一條、`limit` 仍是 1：新的一筆 `firing`，`activeAt` 是 `2026-10-20T08:01:45.299675965Z`，`health` 回到 `ok`，`lastError` 這個鍵消失。
+- 已 firing 的規則把 expr 改成 `label_replace(vector(1), "9bad", "x", "a", ".*")`，name 與 labels 不變。`health` 變成 `err`，`lastError` 是 `invalid destination label name in label_replace(): 9bad`，`state` 仍是 `firing`，`activeAt` 與值 `1e+00` 不變。instant query `ALERTS` 仍回 `1`。`quantile(2, vector(1))` 不是錯誤，值是 `+Inf`。
+- 套上會撞名的 alert labels 後，`lastError` 是 `vector contains metrics with the same labelset after applying alert labels`。recording 則是 `vector contains metrics with the same labelset after applying rule labels`。兩邊 `health` 都是 `err`，沒有告警、也沒有新系列。
+- `ALERTS` 的值是 `1`，標籤有 `alertname`、`alertstate`（`pending` 或 `firing`）、規則 labels、向量上的 labels，沒有全域 external label。`external_labels.cluster=prod` 沒有出現在 `ALERTS` 上。模板 `{{ $externalLabels.cluster }}` 展開成 `prod`。`ALERTS_FOR_STATE` 沒有 `alertstate`，值是 `activeAt` 的 Unix 秒，小數直接去掉。`2026-10-20T07:58:33.116604531Z` 對應 `1792483113`。
+- 模板：`{{ $value }}` 在 annotation 裡是 `1`，告警 API 的 `value` 仍是 `1e+00`；`{{ humanize $value }}` 是 `1`。向量帶 `job=lab` 時 `{{ $labels.job }}` 是 `lab`，並可寫進 label。規則上的字面 label `severity: page` 不會出現在 `{{ $labels.severity }}`，展開是空字串；告警 labels 仍有 `severity=page`。不存在的 label 展開成空字串，不是錯誤。連續四次 `{{ query "vector(1)" }}` 到 `vector(4)` 都有執行，印出來是 `[0xc0006d8b88]` 這種 Go 指標字串，沒有 3 次上限。`{{ .Nope }}` 與 `{{ query "bogus{" }}` 的 annotation 以 `<error expanding template: ` 開頭，後者含 `unexpected end of input inside braces`，前者含 `can't evaluate field Nope`。規則仍是 `firing`，`health` 是 `ok`。沒有 `__template_error__`。`/api/v1/rules` 裡的 annotations 是原始模板，告警物件裡才是展開後的字串。
+- `expr: vector(1)` 加 annotation `prism_log_expr`（block scalar 的 LogQL）：告警 `firing`。annotation 原文保留，含 block scalar 的結尾換行。labels 沒有這個鍵。Prometheus 沒有把它當查詢執行。
+- SIGHUP，name 與 labels 不變，只把 `vector(1)` 改成 `vector(2)`：仍 `firing`，`activeAt` 仍是 `2026-10-20T07:58:33.47955507Z`，值變成 `2e+00`，annotation 變成 `v=2`。接著把 `for` 改成 `1h`：仍 `firing`，同一個 `activeAt`，`duration` 是 3600。只改 label `team` 從 `sre` 到 `other`：新的 `activeAt` 是 `2026-10-20T07:58:59.47955507Z`，舊的 `ALERTS{team="sre"}` instant query 是空的。改 alert 名稱：舊告警與舊 `ALERTS` 消失，新告警有新的 `activeAt`。group 改成 `groups: []`：告警消失，`ALERTS` instant query 是空的，API 裡沒有該 group。`interval` 從 1 秒改成 5 秒：API `interval` 是 5，`activeAt` 不變。
+- 重啟，同一個 TSDB。`for: 0s` 與 `for: 30s` 的 `activeAt` 從 `2026-10-20T08:03:33.054117937Z` 換成 `2026-10-20T08:03:40.054117937Z`。`for: 15m` 先出現 `2026-10-20T08:03:40.054117937Z`，隨後變成 `2026-10-20T08:03:35.056778469Z`，不是原來的 `2026-10-20T08:03:33.054117937Z`。三者重啟前的 `ALERTS_FOR_STATE` 值都是 `1792483413`。
+- `type=alert` 只留 alerting rule，`type=record` 只留 recording rule，混合 group 會拆開。`type=alerting` 是 HTTP 400，body 是 `{"status":"error","errorType":"bad_data","error":"invalid parameter \"type\": not supported value \"alerting\""}`。`exclude_alerts=true` 時 `alerts` 是 JSON `null`，不是 `[]`，鍵還在。`rule_name[]=NoFor` 只回那一筆。`file[]` 只回該檔的 groups。`lastError` 在 `health` 為 `ok` 時不出現。recording rule 沒有 labels 時也不出現 `labels`、`annotations`、`alerts`。alerting rule 的空 labels / annotations 是 `{}`，沒有告警時 `alerts` 是 `[]`。`keepFiringSince` 只在非零時出現。
+
+告警 API 已經顯示 firing 時，instant query 仍可能暫時是空的。這次多等幾秒才看到 `ALERTS`。驗收要輪詢，不要只查一次。
+
+### 11.3 驗收
+
+**AC-94** Given 載入器存好的 group interval。When 評估迴圈跑起來。Then 用那個間隔，不用 Prometheus 的全域 `evaluation_interval`。省略與 `0s` 因此是 AC-91 的 30 秒。實測 Prometheus 在 `evaluation_interval: 1s` 下，這兩種的 API `interval` 都是 1；`interval: 2s` 的 `lastEvaluation` 大約每 2 秒一次。Given 兩個 interval 為 10 秒的 group。When 程序剛啟動。Then 第一次評估不在同一刻，而且不是啟動當下。這次分別是啟動後 2.724 秒與 9.052 秒。不鎖定雜湊公式。Given 規則尚未評估。When 看 `health`。Then 是 `unknown`。這次在 `NoFor` 上看到。組內依序，不開並行評估。
+
+**AC-95** Given group `query_offset: 30s`，recording expr 是 `timestamp(vector(1))`，alerting expr 是 `vector(1)`、`for: 0s`。When 評估。Then 寫入樣本的時間戳比該次 `lastEvaluation` 早 30 秒。這次 recording 的樣本時間戳與值都是 `1792483386.129`，`lastEvaluation` 的 Unix 時間是 `1792483416.131`。`ALERTS` 的樣本時間戳同樣早 30 秒。`activeAt` 用評估時間，不減 offset。`/api/v1/rules` 的 group 沒有 `query_offset` 欄位。Given 只把 offset 從 30 秒改成 10 秒並 SIGHUP，name 與 labels 不變。When 再評估。Then `activeAt` 與改之前相同。這次是 `2026-10-20T08:01:36.930071468Z`。
+
+**AC-96** Given 同一 group 裡，recording rule 寫在 alerting rule 前面，alert 的 expr 讀剛才那個名字。When 同一次評估。Then alert 看得到這次寫入的值。這次 `job:x:rate` 的 `lastEvaluation` 是 `2026-10-20T07:58:36.118417972Z`，後面的 alert 是 `2026-10-20T07:58:36.11844105Z`，state 已是 `firing`。別的 group 讀的是已經寫進儲存的樣本，不保證與這一組同一輪。
+
+**AC-97** Given alerting rule 的 expr 為 `vector(1)`，沒寫 `for`，或 `for: 0s`。When 第一次評估完成。Then state 是 `firing`，不是 `pending`。規則 `duration` 是 0，`keepFiringFor` 是 0。告警 `value` 是 `1e+00`。`ALERTS` 的 `alertstate` 是 `firing`，值是 `1`。`ALERTS_FOR_STATE` 沒有 `alertstate`，值是 `activeAt` 的 Unix 秒，小數直接去掉。全域 `external_labels` 不複製到這兩條系列上。模板 `{{ $externalLabels.cluster }}` 看得到該值。這次 `cluster=prod` 展開成 `prod`，系列上沒有 `cluster`。
+
+**AC-98** Given `for: 3s`，條件一直成立。When 連續評估。Then 先是 `pending`，`activeAt` 是條件首次成立的評估時間；滿 `for` 之後變成 `firing`，`activeAt` 不變。規則 `duration` 是 3。規則 `state` 在只有 pending 時是 `pending`。`/api/v1/alerts` 包含 pending。這次 `activeAt` 是 `2026-10-20T07:58:33.434454414Z`，兩態相同。
+
+**AC-99** Given 告警還在 `pending`。When 條件不再成立。Then 它從 `/api/v1/alerts` 與規則的 `alerts` 消失，不留一筆 `inactive` 或 `resolved`。規則 `state` 變成 `inactive`。instant query 的 `ALERTS` 與 `ALERTS_FOR_STATE` 是空的。這次 `for: 8s` 的 pending 在條件改掉後 1.015 秒內消失，還沒走到 `for`。
+
+**AC-100** Given `for: 0s` 且 `keep_firing_for: 4s`，告警已是 `firing`。When 條件還在。Then 告警 JSON 沒有 `keepFiringSince`，規則 `keepFiringFor` 是 4。When 條件消失，但距離該次評估還沒滿 4 秒。Then state 仍是 `firing`，並帶 `keepFiringSince`，`activeAt` 不變。When 某次評估距 `keepFiringSince` 已滿 `keep_firing_for`。Then 告警離開兩個 API，規則 `state` 變成 `inactive`，instant query `ALERTS` 是空的。沒有 state `resolved`。這次 `keepFiringSince` 是 `2026-10-20T07:58:46.194801906Z`，離開那次的 `lastEvaluation` 是 `2026-10-20T07:58:50.196667346Z`。
+
+**AC-101** Given group `limit` 是 0 或 -1，一次評估產生兩條序列。When 評估。Then 兩筆都在，`health` 是 `ok`，沒有 `lastError`。API 的 `limit` 仍是 0 或 -1，-1 不是上限。兩筆的 `activeAt` 可以相同，因為是同一次評估首次成立。這是 AC-81 留下的評估語意，待 owner 確認要不要就這樣鎖。
+
+**AC-102** Given `limit: 1`，一次評估產生兩條序列。When 評估。Then alerting rule 的 `health` 是 `err`，`lastError` 是 `exceeded limit of 1 with 2 alerts`，`state` 是 `inactive`，`alerts` 是空的，不是留下第一筆。recording rule 的 `health` 是 `err`，`lastError` 是 `exceeded limit of 1 with 2 series`，沒有寫入系列。Given 這兩筆已經在 `limit: 0` 下 firing，而且 `ALERTS` 查得到。When SIGHUP 把 `limit` 改成 1。Then API 告警變空，`state` 為 `inactive`，`lastError` 是同一句；這次 3 秒後 instant query `ALERTS` 仍是兩條、值 `1`。不把「樣本何時從查詢消失」寫死，這輪沒有等到 lookback 結束。Given 之後 expr 只剩一條，`limit` 仍是 1。When 再評估。Then 新的一筆告警，新的 `activeAt`，`health` 是 `ok`，`lastError` 鍵消失。這條與 §2「失敗就保持前一狀態」不同：上限這條會清掉 API 裡的告警。建議上限走這裡，查詢失敗走 AC-103。待 owner 決定。
+
+**AC-103** Given 告警已 `firing`。When 同一條規則的 expr 改成會失敗的查詢，這次是 `label_replace(vector(1), "9bad", "x", "a", ".*")`，name 與 labels 不變，並 SIGHUP 成功。Then `health` 是 `err`，`lastError` 是 `invalid destination label name in label_replace(): 9bad`，`state` 仍是 `firing`，`activeAt` 與 `value` 保持失敗前的值。instant query `ALERTS` 仍回 `1`。空向量不是這條，見 §11.1。這是 A5：後端或查詢失敗時，既有 firing 不變成 resolved，也不從 API 消失。
+
+**AC-104** Given 套上規則 labels 之後，向量裡有兩筆標籤集合相同。When 評估 alerting rule。Then `health` 是 `err`，`lastError` 是 `vector contains metrics with the same labelset after applying alert labels`，沒有告警。When 是 recording rule。Then `lastError` 是 `vector contains metrics with the same labelset after applying rule labels`，沒有寫入系列。
+
+**AC-105** Given annotation 與 label 使用 Go template。When 評估成功。Then `/api/v1/rules` 留原始模板，告警物件用展開後的字串。`{{ $value }}` 這次展開成 `1`，告警 `value` 仍是 `1e+00`。`{{ humanize $value }}` 展開成 `1`。`{{ $labels.job }}` 來自向量，這次是 `lab`，也可以寫進 label。規則自己的字面 label 不在 `$labels` 裡，這次 `{{ $labels.severity }}` 是空的，告警 label `severity` 仍是 `page`。不存在的 `$labels` 鍵展開成空字串。Given 模板在執行期失敗，這次是 `{{ .Nope }}` 與 `{{ query "bogus{" }}`。When 評估。Then 規則仍 `firing`，`health` 是 `ok`。annotation 以 `<error expanding template: ` 開頭，分別含 `can't evaluate field Nope` 與 `unexpected end of input inside braces`。沒有 `__template_error__`。這和 §4 不同。待 owner 決定：跟這次字串，或維持 §4 的原始字串加 `__template_error__`。Given 一個模板裡有四次 `query`。When 用 Prometheus 2.53.0 評估。Then 四次都執行了，輸出是 Go 指標字串，例如 `[0xc0006d8b88]`。§4 的 `rules.max_template_queries` 預設 3 是 Prism 的上限，Prometheus 沒有。待 owner 決定要不要維持 3。若維持，第四次不得執行，規則仍要成功；失敗字串跟上一則模板失敗走同一條，這輪不另造一句錯誤。
+
+**AC-106** Given alerting rule 的 expr 是 `vector(1)`，annotation `prism_log_expr` 是一段不含未閉合 `{{` 的 LogQL。When 評估。Then 成不成立只看 expr。這次因此 `firing`。annotation 把檔案裡的字串留著，含 YAML block scalar 的結尾換行，不解析、不執行，也不進 labels。Prometheus 沒有 LogQL 可對。建議這輪就這樣，LogQL 仍交給既有執行器以後的階段。待 owner 決定。
+
+**AC-107** Given 評估已跑過。When `GET /prom/api/v1/rules` 與 `GET /prom/api/v1/alerts`。Then 信封與 `02` §2 相同。Prometheus 實測路徑是 `/api/v1/rules` 與 `/api/v1/alerts`，Prism 加 `02` 的 base path `/prom`。group 欄位是 `name`、`file`、`rules`、`interval`、`limit`、`evaluationTime`、`lastEvaluation`，沒有 `query_offset`。`interval`、`limit`、`duration`、`keepFiringFor` 是 JSON 數字，單位秒；`limit: -1` 就是 -1。alerting rule 有 `state`、`name`、`query`、`duration`、`keepFiringFor`、`labels`、`annotations`、`alerts`、`health`、`evaluationTime`、`lastEvaluation`、`type`（`alerting`）。`lastError` 只在有錯誤時出現。recording rule 有 `name`、`query`、`health`、`evaluationTime`、`lastEvaluation`、`type`（`recording`）；有 labels 才有 `labels`。告警物件有 `labels`、`annotations`、`state`、`activeAt`、`value`；`keepFiringSince` 只在非零時出現。`value` 這次 1 是 `1e+00`、2 是 `2e+00`。`+Inf` 維持 `+Inf`。`activeAt` 是 RFC3339、帶小數與 `Z`。`type=alert` 只留 alerting，`type=record` 只留 recording。`type=alerting` 是 HTTP 400，`errorType` 是 `bad_data`，`error` 是 `invalid parameter "type": not supported value "alerting"`。`exclude_alerts=true` 時 `alerts` 是 `null`。`rule_name[]` 與 `file[]` 只留對到的 group 與規則。`/api/v1/alerts` 的 `data.alerts` 只有 pending 與 firing。
+
+**AC-108** Given P2-06 的 SIGHUP 成功載入新檔，group 的檔名與名稱沒變。When 規則的 name 與 labels 沒變，只改 expr、`for`、interval 或 `query_offset`。Then 對得上的告警留著原來的 `activeAt`。超過 `limit` 改走 AC-102，這次沒有另測「仍在上限以內的 limit 變更」。這次 expr 從 `vector(1)` 改成 `vector(2)`，`activeAt` 仍是 `2026-10-20T07:58:33.47955507Z`，值變成 `2e+00`；`for` 改成 `1h` 後仍 firing，`duration` 是 3600；interval 改成 5 秒後 `activeAt` 不變。When 改了 alert 名稱或 labels。Then 舊告警不留，`activeAt` 重新起算，舊 labelset 的 `ALERTS` instant query 是空的。When group 被刪掉。Then 告警離開 API，`ALERTS` instant query 是空的，rules API 沒有該 group。比對的是名稱加 labels，不是 expr。失敗的 SIGHUP 仍是 AC-92：整份集合留在上一份，這條不適用。
+
+**AC-109** Given `for: 5m` 的告警已經 pending 或 firing，程序重啟。When 再起來。Then A4：計時不從頭開始，用 `09` 的 `alert_state` 對。檔案規則的 `tenant_id` 是空字串，不填 `tenancy.default_tenant`。`rule_id` 是 NULL。`state` 1 是 pending，2 是 firing。`active_at` 是原來的 `ActiveAt`。每 `rules.state_flush_interval`（預設 60 秒）寫一次。告警不再 pending 或 firing 時刪掉該列，避免重啟把已結束的告警叫回來。`ALERTS` 與 `ALERTS_FOR_STATE` 仍依 AC-97 寫進儲存，供 PromQL 查；它們不是這條的計時來源。SIGHUP 走 AC-108，不靠這張表。
+
+這條待 owner 決定。實測 Prometheus 2.53.0 的預設寬限並不是這樣：`for: 0s` 與 `for: 30s` 重啟後 `activeAt` 換成新的評估時間；`for: 15m` 先出現新時間，再被改成 `2026-10-20T08:03:35.056778469Z`，不是重啟前的 `2026-10-20T08:03:33.054117937Z`。另外 `09` 的整份 schema 遷移在 P5-01，模組裡還沒有 Postgres driver。建議只為 `alert_state` 提前那一張表，不把 P5-01 整包拉進來。若 owner 不提前建表，A4 就不能在這輪驗。

@@ -2,7 +2,7 @@
 
 desk 卡：T-0354。本檔是 `platform/prism/docs/tasks/BOARD.md`。
 
-P2-05 已合併。P2-06 正在實作。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-07 以後只列 backlog，不拆、不做。
+P2-06 已合併。P2-07 正在寫規格。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-08 以後只列 backlog，不拆、不做。
 
 P2-04 依 `12-IMPLEMENTATION-PHASES.md`。HTTP 驗收是 `02-COMPATIBILITY-CONTRACT.md` §3.4 的 AC-29 到 AC-41。AC-42 在 `16-LOGQL-GRAMMAR.md` §4.2，與這輪一起做。
 
@@ -97,21 +97,30 @@ Owner 已鎖定 AC-43 至 AC-71。已合併。
 
 ## P2-06
 
-Owner 已鎖定規格。實作進行中，尚未合併。
+Owner 已鎖定規格。已合併。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-06 | 告警規則檔：`07` §10 的 AC-72 至 AC-93 | T-0354 | 實作中 | 2026-10-20T05:27:00Z | 未完成 | 2026-10-20T07:31:54Z |
+| P2-06 | 告警規則檔：`07` §10 的 AC-72 至 AC-93。證據 #432，`475c36ab` | T-0354 | 已合併 | 2026-10-20T05:27:00Z | 2026-10-20T07:41:31Z | 2026-10-20T07:41:31Z |
 
-開始是 owner 指示寫 P2-06 規格的時鐘。允許路徑是 `internal/alerting/rules/**`，加上 `internal/config/**`（AC-89、AC-90）與 `cmd/prismd/**`（AC-92）。Owner 於 2026-10-20 鎖定 AC-88 至 AC-93。AC-87 用釘選的 promtool 2.53.0，放在 `//go:build integration`，不進預設 `make lint test`。last_activity 是這次實作的時鐘。
+開始是 owner 指示寫 P2-06 規格的時鐘。允許路徑是 `internal/alerting/rules/**`，加上 `internal/config/**`（AC-89、AC-90）與 `cmd/prismd/**`（AC-92）。Owner 於 2026-10-20 鎖定 AC-88 至 AC-93。AC-87 用釘選的 promtool 2.53.0，放在 `//go:build integration`，不進預設 `make lint test`。end 與 last_activity 是 #432 合併提交 `475c36ab` 的時鐘。
+
+## P2-07
+
+規格撰寫中。尚未實作。
+
+| ID | 任務 | desk | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P2-07 | 告警評估與狀態：`07` §11 的 AC-94 至 AC-109 | T-0354 | SDD 撰寫中 | 2026-10-20T07:46:00Z | 未完成 | 2026-10-20T08:08:00Z |
+
+開始是 owner 指示寫 P2-07 規格的時鐘。這輪只改 SDD。允許路徑見 `12`：`internal/alerting/{eval,state}/**`，以及 `internal/compat/promapi/**` 只限兩個 GET。AC-101、AC-102、AC-103、AC-105、AC-106、AC-109 仍待 owner 決定。last_activity 是這次規格的時鐘。
 
 ## Backlog
 
-P2-07 以後。不拆、不做。
+P2-08 以後。不拆、不做。
 
 | ID | 任務 |
 | --- | --- |
-| P2-07 | 告警評估與狀態 |
 | P2-08 | 靜默、抑制、分組 |
 | P2-09 | Notifier 與六個渠道 |
 | P2-10 | 通知投遞、重試、dead letter |

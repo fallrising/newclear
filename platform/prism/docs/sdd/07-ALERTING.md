@@ -332,7 +332,7 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 | label 名稱空、或 `__name__` | 1 | `invalid label name` |
 | `labels.__prism_log_expr__`、`annotations.prism_log_expr`（值是不含未閉合 `{{` 的 LogQL） | 0 | 伺服器把前者放進 labels，後者放進 annotations |
 | `labels.severity: 1`、`on: true`、`n: 1.5` | 0 | API 裡的值是 `"1"`、`"true"`、`"1.5"` |
-| `groups: []`、`rules: []`、空檔、只有註解、`groups:` | 0 | `SUCCESS: 0 rules found`。伺服器對空 groups 檔不產生 group |
+| 空檔、只有註解、`groups: []`、`groups:`、`rules: []` | 0 | `SUCCESS: 0 rules found`。這五種伺服器 `/api/v1/rules` 都回 `groups: []` |
 | 一個檔兩個 YAML 文件（`---`） | 0 | `SUCCESS: 1 rules found`。伺服器只有第一份 |
 | YAML merge key 複製出的第二筆 | 0 | 伺服器上第二筆有被複製的 `expr` 與 labels |
 | 目錄當參數、不存在的路徑 | 1 | `is a directory` / `does not exist` |
@@ -395,9 +395,9 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 
 **AC-88** Given alerting rule：`expr: vector(1)`，`for: 5m`，label `severity: critical`，annotation `prism_log_expr` 的值是 `sum(count_over_time({service="api", level="error"}[5m])) > 100`。When `promtool check rules` 與載入器。Then 兩者都成功。annotation 的值與檔案相同，不解析、不執行。labels 只有 `severity=critical`，沒有 `prism_log_expr`。`expr` 仍是 `vector(1)`。Given 把同一鍵寫成 rule 欄位。When 載入。Then 拒絕，錯誤含 `field prism_log_expr not found in type rulefmt.RuleNode`。Given recording rule 帶這個 annotation。When 載入。Then 拒絕，錯誤含 `invalid field 'annotations' in recording rule`。
 
-**AC-89** Given 同一檔能解出第二份 YAML 文件，包括第二份有 groups，以及檔尾單獨一個 `---`（`gopkg.in/yaml.v3` v3.0.1 把它解成第二份 nil）。When 載入器與 `--config-check`。Then 兩邊都拒絕，錯誤含 `more than one YAML document`。不得只留第一份。實測 promtool 對這兩種檔都是 exit 0：有內容的第二份只報 `SUCCESS: 1 rules found`，伺服器也只載入第一份；檔尾 `---` 同樣 exit 0。這是刻意不跟 promtool。Given 檔首只有一個 `---`，或檔尾是 `...`。When 載入。Then 接受。這兩種實測仍是一份文件，promtool exit 0，`SUCCESS: 1 rules found`。
+**AC-89** Given 同一檔能解出第二份 YAML 文件，包括第二份有 groups，以及檔尾單獨一個 `---`（`gopkg.in/yaml.v3` v3.0.1 把它解成第二份 nil）。When 載入器與 `--config-check`。Then 兩邊都拒絕，錯誤含 `more than one YAML document`。不得只留第一份。實測 promtool 對這兩種檔都是 exit 0：有內容的第二份只報 `SUCCESS: 1 rules found`，伺服器也只載入第一份；檔尾 `---` 同樣 exit 0。這是刻意不跟 promtool。Given 檔首有一個 `---`、後面仍是一份有規則的文件，或檔尾是 `...`。When 載入。Then 接受。這兩種實測仍是一份文件。檔首那個例子 promtool exit 0，`SUCCESS: 1 rules found`。Given 檔內只有一個 `---`。When 載入。Then 接受，視為空檔。`gopkg.in/yaml.v3` v3.0.1 把它解成一份 nil 文件，不是第二份。promtool exit 0，`SUCCESS: 0 rules found`。伺服器 `/api/v1/rules` 回 `groups: []`。要有第二份文件才拒絕。
 
-**AC-90** Given 空檔、只有註解、`groups: []`、`groups:`、或某個 group 的 `rules: []`。When 載入器與 `--config-check`。Then 兩邊都成功，規則集合是空的，不回錯。promtool 對這五種都是 exit 0，`SUCCESS: 0 rules found`。只有 `rules: []` 與 `groups: []` 的兩個檔讓伺服器 `/api/v1/rules` 回 `groups: []`。現有 `validateRuleDocument` 會拒絕，這輪要改掉：空檔與只有註解是 `rule document must be a mapping`，空的或 null 的 groups 是 `rule document must contain a non-empty groups sequence`，空的 rules 是 `groups[0].rules must be a non-empty sequence`。
+**AC-90** Given 空檔、只有註解、`groups: []`、`groups:`、或某個 group 的 `rules: []`。When 載入器與 `--config-check`。Then 兩邊都成功，規則集合是空的，不回錯。promtool 對這五種都是 exit 0，`SUCCESS: 0 rules found`。這五種伺服器 `/api/v1/rules` 都回 `groups: []`。現有 `validateRuleDocument` 會拒絕，這輪要改掉：空檔與只有註解是 `rule document must be a mapping`，空的或 null 的 groups 是 `rule document must contain a non-empty groups sequence`，空的 rules 是 `groups[0].rules must be a non-empty sequence`。
 
 **AC-91** Given 省略 `interval`，或 `interval: 0s`。When 載入。Then interval 是 30 秒。正的 interval 仍照檔案，例如 `30s` 就是 30 秒（AC-80）。實測 Prometheus 在 `evaluation_interval: 15s` 下，省略與 `0s` 的 API `interval` 都是 15，不是 0，也不是 30。Prism 沒有這個鍵，所以不用 15。
 

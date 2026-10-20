@@ -183,3 +183,35 @@ Python3.11.16 實際執行完整 component unittest suite；root獨立整合測�
 Root／獨立 Python3.11.16 各299tests；固定來源新 Codex session 接入與兩條 native profile 各三項故障案例通過其有界 oracle，詳見 [M2 契約](m2.md#本次固定來源原生驗證) 及 [hash-bound evidence](m2-evidence.json)。Parent-crash、最終 native receipt-write gap、logical lease-expiry 都只對本次隔離 fixture 注入；inspect 不重跑，原 claim／binding 保留，lease stale fence 拒絕且原五層 holds 保留。這不提升完整第一場景或 LIVE/SOAK。
 
 Codex 37個持久事件被產品封存並接入，4個 opaque tool calls 仍留下 coverage gap，結果 unknown；不能將 wrapper 列印內容當作 authenticated nested-tool denial。歷史 stop 切片的版本標籤及 denial 解讀在 evidence 中保留並附明確更正。七個新 operation 的 local closure 不解決遠端 effects/billing，未重試或釋放任何舊未知工作。Full M2 仍為 PARTIAL；成功 native continuity、受控 auth-expiry 和 Codex secret-read boundary 尚未合格。
+
+## 12. XN 第一片（FAKE，設計中）
+
+**狀態：未實作。** 設計見 [xn-slice1-design.md](xn-slice1-design.md)；需求來源是 [跨節點傳輸](cross-node-transport.md) 的 XN-01、03、04、06。以下案例只在 FAKE 層（合成 fixture、fake transport、fake backend）驗證，通過後也不能宣稱跨節點、真實網路或任何原生 route 可用。測試名稱帶 AC 編號，例如 `test_xn_ac_01_stored_response_enqueued_with_message`。
+
+每個案例都同時檢查持久狀態與呼叫計數（backend `starts`、transport `deliver` 次數）。
+
+| AC | Given | When | Then |
+| --- | --- | --- | --- |
+| XN-AC-1 | 已安裝允許 worker-b 的規則 | worker-b 寄一則工作類訊息給 worker-a | 同一交易內：`inbox` 一列、`protocol_outbox` 一列 `stored`（seq 1、delivery `pending`）；backend 呼叫 0 次 |
+| XN-AC-2 | 同上，且注入 `response_before_commit` 故障 | 寄同一則訊息 | `inbox` 與 `protocol_outbox` 都沒有新列（整筆回滾）；重送後各一列 |
+| XN-AC-3 | 一則 `stored` 回應 pending；fake transport 第一次丟例外、第二次回 `stored` | 呼叫 `flush_responses` 兩次（時間推進過退避） | 兩次 `deliver` 的 envelope 逐位元相同；最終 `delivered`、`attempts=2`；`response_id` 不變 |
+| XN-AC-4 | 一則回應 pending；注入 `delivery_after_send` 故障 | `flush_responses`，然後重開 Store 再 `flush_responses` | 重開後仍 `pending`；第二次以同一 envelope 送出；fake 對端以 duplicate 回覆後記為 `delivered` |
+| XN-AC-5 | 一則回應 pending；之後 worker-b 的 worker record revision 加一 | `flush_responses` | 該列 `held`（`binding_changed`）；`deliver` 0 次；只有可信 operator 呼叫 `release_held_response` 後才回到 `pending` |
+| XN-AC-6 | 一則回應 pending；之後規則改為 deny worker-b | `flush_responses` | 該列 `held`（`access_denied`）；`deliver` 0 次 |
+| XN-AC-7 | fake transport 一直丟例外 | 推進時間並重複 `flush_responses` | 第 20 次失敗後 `held`（`retry_exhausted`）；或先超過 `expires_at` 則 `expired`；兩者都不換 ID、不自動恢復 |
+| XN-AC-8 | 一則工作類訊息，已 `admitted` 連結 command，最新 attempt 為 `running` | `mark_handled` | 拒絕（`handling_precondition`）；`handled_at` 仍為 NULL |
+| XN-AC-9 | 同上，attempt 進入 `outcome_unknown` | `settle_inbox` | 排入 `outcome_unknown` 回應並 `handled`；之後 attempt 對帳成 `awaiting_review`，再 `settle_inbox` 只多一封 `result_produced`（seq 更大），不重複 `outcome_unknown` |
+| XN-AC-10 | 一則工作類訊息已 `rejected` | `mark_handled` | 只有在 `rejected` 回應已持久保存後才成功；送達與否不影響 |
+| XN-AC-11 | 一則 `notice` | `dispose(noted)` 再 `mark_handled` | 成功；`protocol_outbox` 沒有任何列 |
+| XN-AC-12 | 我方曾寄 message M 給 worker-b | worker-b 寄 `kind="receipt"`、`reply_to=M` 的回應 | 進 `protocol_inbox`；`inbox`、disposition、command 都 0 列；backend 0 次 |
+| XN-AC-13 | 同上 | 回應的 `reply_to` 是我方從未寄給 worker-b 的 ID，或由其他 sender 送來 | 拒絕（`uncorrelated_response`）；沒有任何表新增列 |
+| XN-AC-14 | `protocol_inbox` 已有 seq 3 的回應 | 晚到 seq 2 的回應 | 保存但 `latest_response` 仍回 seq 3；同 ID 不同內容則衝突 |
+| XN-AC-15 | `protocol_inbox` 已有回應 R | 任何訊息 `reply_to=R`；或以 `Store.receive_message` 直接寫 `kind="receipt"`；或對 R 呼叫 `dispose` | 三者都拒絕；沒有新列 |
+| XN-AC-16 | 規則同時 allow 與 deny worker-b | worker-b 寄訊息 | 拒絕（`denied`）；寫 `access.deny` 審計；沒有 inbox 列 |
+| XN-AC-17 | 規則含 `role:reviewer` 的 deny，但 worker-b 不在 registry | worker-b 寄訊息 | 拒絕（deny 規則所需資料缺失時 fail closed） |
+| XN-AC-18 | `records` 中的規則被改成無法正規化的內容 | 任何 sender 寄訊息 | 全部拒絕（`invalid_policy`） |
+| XN-AC-19 | 已有規則 revision 1 | `put_access_policy` 新增一條 allow，未帶 `allow_widen` | `ConflictError("policy_widen_requires_ack")`，規則不變；帶 `allow_widen=True` 且 operator 可信才成功並寫審計 |
+| XN-AC-20 | 從 M1（`user_version=1`）資料庫升級，內有既有 inbox 列，沒有規則 | 新程式開啟並經 `Controller.receive` 收一則工作類訊息 | `user_version=2`；既有列沒有 disposition、也沒補發回應；新訊息照常落盤並排一封 `stored` 回應，寫一次 `access.legacy_open` 審計 |
+| XN-AC-21 | 已安裝規則 | 想回到沒有規則的狀態 | 沒有刪除介面；用空 allow 替換屬於收緊，不需 `allow_widen`，之後全部拒絕，不會回到 `legacy_open` |
+
+XN-AC-20 的 `legacy_open` 行為取決於 owner 對設計 D-4 的決定；若改為預設全拒，此案例改寫為「沒有規則時全部拒絕」。

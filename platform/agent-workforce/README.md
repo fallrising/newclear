@@ -28,6 +28,7 @@ PYTHONPATH=src python3 -m agent_workforce demo --db var/demo.sqlite
 | [第一場景](docs/first-scenario.md) | 未來兩個原生 agent 的工程協作驗收 |
 | [驗收與證據](docs/verification.md) | DOC、FAKE、NATIVE、API、LIVE、SOAK 分層 |
 | [跨節點傳輸](docs/cross-node-transport.md) | 跨節點設計需求與 Yobiru 0.5 參照（只借概念，不採用） |
+| [XN 第一片設計](docs/xn-slice1-design.md) | 協議回應、處理狀態與存取規則的技術設計（待審，未實作） |
 
 ## 系統邊界
 

@@ -2,7 +2,7 @@
 
 desk 卡：T-0354。本檔是 `platform/prism/docs/tasks/BOARD.md`。
 
-P2-06 已完成。P2-07 實作中。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-08 以後只列 backlog，不拆、不做。
+T-0354 做到 P2-07 收尾。P2-08 起是 backlog，不拆、不做。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。
 
 P2-04 依 `12-IMPLEMENTATION-PHASES.md`。HTTP 驗收是 `02-COMPATIBILITY-CONTRACT.md` §3.4 的 AC-29 到 AC-41。AC-42 在 `16-LOGQL-GRAMMAR.md` §4.2，與這輪一起做。
 
@@ -107,17 +107,17 @@ Owner 已鎖定規格。已完成。
 
 ## P2-07
 
-規格已鎖定。實作中。
+Owner 已鎖定規格。已合併。T-0354 收到這裡。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-07 | 告警評估與狀態：`07` §11 的 AC-94 至 AC-109 | T-0354 | 實作中 | 2026-10-20T07:46:00Z | 未完成 | 2026-10-20T10:04:06Z |
+| P2-07 | 告警評估與狀態：`07` §11 的 AC-94 至 AC-109。證據 #433，`d7568263`；#434，`6cdfa421` | T-0354 | 已合併 | 2026-10-20T07:46:00Z | 2026-10-20T10:18:49Z | 2026-10-20T10:18:49Z |
 
-開始是 owner 指示寫 P2-07 規格的時鐘。實作從 2026-10-20T08:54:00Z 起。允許路徑見 `12`：`internal/alerting/{eval,state}/**` 與 `internal/compat/promapi/**` 的兩個 GET。Owner 於 2026-10-20 鎖定 AC-94 至 AC-109。`alert_state` 這輪就建，SQL 在 `internal/alerting/state/migrations/`，不等 P5-01。`cmd/prismd` 尚未接上，GET 在 `SetRules` 之前回空列表。last_activity 是本機 `make lint test` 通過的時鐘。
+開始是 owner 指示寫 P2-07 規格的時鐘。實作從 2026-10-20T08:54:00Z 起。允許路徑見 `12`：`internal/alerting/{eval,state}/**` 與 `internal/compat/promapi/**` 的兩個 GET。Owner 於 2026-10-20 鎖定 AC-94 至 AC-109。`alert_state` 這輪就建，SQL 在 `internal/alerting/state/migrations/`，不等 P5-01。規格是 #433，`d7568263`。end 與 last_activity 是 #434 合併提交 `6cdfa421` 的時鐘（2026-10-20T10:18:49Z）。已知未結項：告警評估未接 `cmd/prismd`；週期 flush、Postgres 整合測試與 AC-87 不在預設 CI。
 
 ## Backlog
 
-P2-08 以後。不拆、不做。
+P2-08 起。T-0354 試行收到 P2-07，這裡不拆、不做。
 
 | ID | 任務 |
 | --- | --- |

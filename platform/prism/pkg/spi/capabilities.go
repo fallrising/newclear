@@ -98,8 +98,8 @@ func (c Capabilities) Validate() error {
 	if c.traceFeaturesEnabled() && !c.Has(SignalTraces) {
 		return fmt.Errorf("spi: trace capabilities require the traces signal")
 	}
-	if c.Logs.NativeLogQuery && !c.Logs.Pushdown.all() {
-		return fmt.Errorf("spi: native log queries require all log pushdown capabilities")
+	if c.Logs.NativeLogQuery && !c.Logs.Pushdown.nativeRequired() {
+		return fmt.Errorf("spi: native log queries require substring, regex, json, and sort pushdown")
 	}
 	if c.Logs.Pushdown.Limit && !c.Logs.Pushdown.allFilters() {
 		return fmt.Errorf("spi: log limit pushdown requires all filter pushdown capabilities")
@@ -129,8 +129,8 @@ func (p LogPushdown) any() bool {
 	return p.Substring || p.Regex || p.ParsedFieldJSON || p.ParsedFieldLogfmt || p.Limit || p.Sort
 }
 
-func (p LogPushdown) all() bool {
-	return p.allFilters() && p.Limit && p.Sort
+func (p LogPushdown) nativeRequired() bool {
+	return p.Substring && p.Regex && p.ParsedFieldJSON && p.Sort
 }
 
 func (p LogPushdown) allFilters() bool {

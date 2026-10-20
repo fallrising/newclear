@@ -156,7 +156,7 @@ func TestReadLeaseClientRowsAndCloseErrorAreBoundedRedacted(t *testing.T) {
 	if lease.Next(func(chdriver.Rows) (int, error) { return 8, nil }) {
 		t.Fatal("second result row exceeded configured max_result_rows")
 	}
-	if spi.Classify(lease.Err()) != spi.ErrTooLarge || strings.Contains(lease.Err().Error(), "secret-native-close") {
+	if spi.Classify(lease.Err()) != spi.ErrTooLarge || !strings.Contains(lease.Err().Error(), "query result exceeds limit") || strings.Contains(lease.Err().Error(), "secret-native-close") {
 		t.Fatalf("limit/close error=%v", lease.Err())
 	}
 	rows.mu.Lock()

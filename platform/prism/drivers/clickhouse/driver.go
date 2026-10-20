@@ -152,6 +152,11 @@ func (b *backend) Logs() spi.LogStore       { return b.logs }
 func (b *backend) Traces() spi.TraceStore   { return b.traces }
 func (b *backend) Capabilities() spi.Capabilities {
 	return spi.Capabilities{Driver: driverName, Version: "1", Signals: []spi.Signal{spi.SignalMetrics, spi.SignalLogs, spi.SignalTraces}, OutOfOrderWindow: -1,
+		Logs: spi.LogCaps{
+			NativeLogQuery: true,
+			Aggregation:    true,
+			Pushdown:       spi.LogPushdown{Substring: true, Regex: true, ParsedFieldJSON: true, Sort: true},
+		},
 		Traces:    spi.TraceCaps{TagFilter: true, DurationFilter: true, SpanKindFilter: true},
 		Retention: spi.RetentionCaps{PerSignal: true, Enforced: false}}
 }

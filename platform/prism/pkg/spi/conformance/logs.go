@@ -43,15 +43,33 @@ func RunLogs(t *testing.T, f Factory, opts Options) {
 		for _, test := range cases {
 			t.Run(test.name, func(t *testing.T) {
 				backend, store := openLogStore(t, f, opts)
-				if !test.supported(backend.Capabilities().Logs.Pushdown) {
-					t.Skip("filter pushdown is not declared")
+				native := backend.Capabilities().Logs.NativeLogQuery
+				name := "AC-64"
+				if native {
+					name = "AC-63"
 				}
-				records, query := test.input()
-				writeLogs(t, store, records, opts)
-				got := searchLogs(t, store, query)
-				if len(got) != 1 || got[0].Attrs["expected"] != "true" {
-					t.Fatalf("Search() returned %#v; declared pushdown did not filter", got)
-				}
+				t.Run(name, func(t *testing.T) {
+					if !test.supported(backend.Capabilities().Logs.Pushdown) {
+						t.Skip("filter pushdown is not declared")
+					}
+					records, query := test.input()
+					writeLogs(t, store, records, opts)
+					if !native {
+						got := searchLogs(t, store, query)
+						if len(got) != 1 || got[0].Attrs["expected"] != "true" {
+							t.Fatalf("Search() returned %#v; declared pushdown did not filter", got)
+						}
+						return
+					}
+					got := searchNativeLogs(t, store, query)
+					if len(got) != 1 || !sameLogIdentity(got[0], expectedLog(records)) {
+						t.Fatalf("SearchNative() returned %#v; declared pushdown did not filter", got)
+					}
+					superset := searchLogs(t, store, query)
+					if !reflect.DeepEqual(superset, records) {
+						t.Fatalf("Search() = %#v, want unfiltered superset %#v", superset, records)
+					}
+				})
 			})
 		}
 	})
@@ -61,15 +79,29 @@ func RunLogs(t *testing.T, f Factory, opts Options) {
 		for _, test := range cases {
 			t.Run(test.name, func(t *testing.T) {
 				backend, store := openLogStore(t, f, opts)
-				if test.supported(backend.Capabilities().Logs.Pushdown) {
-					t.Skip("filter pushdown is declared")
+				native := backend.Capabilities().Logs.NativeLogQuery
+				name := "AC-64"
+				if native {
+					name = "AC-63"
 				}
-				records, query := test.input()
-				writeLogs(t, store, records, opts)
-				got := searchLogs(t, store, query)
-				if !reflect.DeepEqual(got, records) {
-					t.Fatalf("Search() = %#v, want unfiltered superset %#v", got, records)
-				}
+				t.Run(name, func(t *testing.T) {
+					supported := test.supported(backend.Capabilities().Logs.Pushdown)
+					if !native && supported {
+						t.Skip("filter pushdown is declared")
+					}
+					records, query := test.input()
+					writeLogs(t, store, records, opts)
+					got := searchLogs(t, store, query)
+					if !reflect.DeepEqual(got, records) {
+						t.Fatalf("Search() = %#v, want unfiltered superset %#v", got, records)
+					}
+					if native && !supported {
+						_, err := nativeQuerier(t, store).SearchNative(context.Background(), query)
+						if spi.Classify(err) != spi.ErrUnsupported {
+							t.Fatalf("SearchNative() error = %v, want unsupported", err)
+						}
+					}
+				})
 			})
 		}
 	})
@@ -85,33 +117,52 @@ func RunLogs(t *testing.T, f Factory, opts Options) {
 		query := logQuery("limit", 1, 4)
 		query.Filters = []spi.LineFilter{{Op: spi.LineContains, Value: "keep"}}
 		query.Limit = 1
-		plan := query.PushdownPlan(backend.Capabilities().Logs.Pushdown, backend.Capabilities().Logs.Aggregation)
-		iterator, err := store.Search(context.Background(), query)
-		if err != nil {
-			if !plan.Limit && spi.Classify(err) == spi.ErrTooLarge {
-				return
-			}
-			t.Fatalf("Search() error = %v", err)
-		}
-		got := collectLogs(t, iterator)
-		if plan.Limit {
-			if len(got) != 1 || got[0].Attrs["expected"] != "true" {
-				t.Fatalf("Search() returned %#v, want one filtered record", got)
-			}
+		if backend.Capabilities().Logs.NativeLogQuery {
+			t.Run("AC-63", func(t *testing.T) {
+				iterator, err := store.Search(context.Background(), query)
+				if err != nil {
+					if spi.Classify(err) != spi.ErrTooLarge {
+						t.Fatalf("Search() error = %v", err)
+					}
+				} else if got := collectLogs(t, iterator); len(got) != 3 {
+					t.Fatalf("Search() returned %d records, want untruncated 3", len(got))
+				}
+				got := searchNativeLogs(t, store, query)
+				if len(got) != 1 || got[0].Body != "keep first" {
+					t.Fatalf("SearchNative() returned %#v, want the earliest matching line", got)
+				}
+			})
 			return
 		}
-		want := 3
-		if backend.Capabilities().Logs.Pushdown.Substring {
-			want = 2
-		}
-		if len(got) != want {
-			t.Fatalf("Search() returned %d records, want untruncated %d", len(got), want)
-		}
-		for _, record := range got {
-			if backend.Capabilities().Logs.Pushdown.Substring && record.Attrs["expected"] != "true" {
-				t.Fatalf("Search() returned non-matching record after declared filter pushdown: %#v", record)
+		t.Run("AC-64", func(t *testing.T) {
+			plan := query.PushdownPlan(backend.Capabilities().Logs.Pushdown, backend.Capabilities().Logs.Aggregation)
+			iterator, err := store.Search(context.Background(), query)
+			if err != nil {
+				if !plan.Limit && spi.Classify(err) == spi.ErrTooLarge {
+					return
+				}
+				t.Fatalf("Search() error = %v", err)
 			}
-		}
+			got := collectLogs(t, iterator)
+			if plan.Limit {
+				if len(got) != 1 || got[0].Attrs["expected"] != "true" {
+					t.Fatalf("Search() returned %#v, want one filtered record", got)
+				}
+				return
+			}
+			want := 3
+			if backend.Capabilities().Logs.Pushdown.Substring {
+				want = 2
+			}
+			if len(got) != want {
+				t.Fatalf("Search() returned %d records, want untruncated %d", len(got), want)
+			}
+			for _, record := range got {
+				if backend.Capabilities().Logs.Pushdown.Substring && record.Attrs["expected"] != "true" {
+					t.Fatalf("Search() returned non-matching record after declared filter pushdown: %#v", record)
+				}
+			}
+		})
 	})
 
 	t.Run("C-LOG-06 one MiB line round trip", func(t *testing.T) {
@@ -302,6 +353,41 @@ func writeLogs(t *testing.T, store spi.LogStore, records []utm.LogRecord, opts O
 		t.Fatalf("LogStore.Write() error = %v", err)
 	}
 	waitForVisibility(opts)
+}
+
+func nativeQuerier(t *testing.T, store spi.LogStore) spi.NativeLogQuerier {
+	t.Helper()
+	native, ok := store.(spi.NativeLogQuerier)
+	if !ok {
+		t.Fatal("NativeLogQuery is declared but Logs() does not implement NativeLogQuerier")
+	}
+	return native
+}
+
+func searchNativeLogs(t *testing.T, store spi.LogStore, query spi.LogQuery) []utm.LogRecord {
+	t.Helper()
+	result, err := nativeQuerier(t, store).SearchNative(context.Background(), query)
+	if err != nil {
+		t.Fatalf("SearchNative() error = %v", err)
+	}
+	var records []utm.LogRecord
+	for _, stream := range result.Streams {
+		records = append(records, stream.Entries...)
+	}
+	return records
+}
+
+func expectedLog(records []utm.LogRecord) utm.LogRecord {
+	for _, record := range records {
+		if record.Attrs["expected"] == "true" {
+			return record
+		}
+	}
+	return utm.LogRecord{}
+}
+
+func sameLogIdentity(got, want utm.LogRecord) bool {
+	return got.Body == want.Body && labels.Equal(got.Labels, want.Labels) && reflect.DeepEqual(got.Attrs, want.Attrs)
 }
 
 func searchLogs(t *testing.T, store spi.LogStore, query spi.LogQuery) []utm.LogRecord {

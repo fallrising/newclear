@@ -101,9 +101,9 @@ Owner 打開規格，只寫文件，不實作。狀態不是關閉。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-06 | 告警規則檔：`07` §10 的 AC-72 至 AC-93 | T-0354 | SDD 撰寫中 | 2026-10-20T05:27:00Z | 未完成 | 2026-10-20T05:35:32Z |
+| P2-06 | 告警規則檔：`07` §10 的 AC-72 至 AC-93 | T-0354 | SDD 撰寫中 | 2026-10-20T05:27:00Z | 未完成 | 2026-10-20T06:50:00Z |
 
-開始是 owner 指示寫 P2-06 規格的時鐘。允許路徑是 `internal/alerting/rules/**`。AC-72 至 AC-87 對齊 promtool 2.53.0 的實測。AC-88 至 AC-93 未鎖定。這次只改文件。last_activity 是寫入這份規格的時鐘。
+開始是 owner 指示寫 P2-06 規格的時鐘。允許路徑是 `internal/alerting/rules/**`，加上 `internal/config/**`（AC-89、AC-90）與 `cmd/prismd/**`（AC-92）。Owner 於 2026-10-20 鎖定 AC-88 至 AC-93。這次只改文件。last_activity 是寫入這次鎖定的時鐘。
 
 ## Backlog
 

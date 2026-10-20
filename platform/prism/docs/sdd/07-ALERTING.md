@@ -27,25 +27,27 @@ groups:
         expr: sum by (job) (rate(http_requests_total[5m]))
 ```
 
-### 1.2 Prism 擴充（載體未鎖定）
+### 1.2 Prism 擴充（Owner 於 2026-10-20 鎖定）
 
-下面這段是舊草稿，不是已接受的語法。2026-10-20 用 promtool 2.53.0 實測，rule 上的 `prism_log_expr` 會被拒絕（`field prism_log_expr not found in type rulefmt.RuleNode`）。`prism_` 前綴不會被忽略。
+LogQL 放在 alerting rule 的 `annotations.prism_log_expr`。`expr` 仍是必填的 PromQL，兩者不互斥。這輪只保存 annotation 字串，不解析、不執行 LogQL。鍵不得進 labels。
 
 ```yaml
       - alert: ErrorLogSpike
-        prism_log_expr: |                      # 舊草稿。promtool 2.53.0 拒絕這個欄位
-          sum(count_over_time({service="api", level="error"}[5m])) > 100
+        expr: vector(1)                         # promtool 要求的 PromQL，不可省
         for: 5m
         labels: {severity: critical}
+        annotations:
+          prism_log_expr: |
+            sum(count_over_time({service="api", level="error"}[5m])) > 100
 ```
 
-同一輪實測，`annotations.prism_log_expr` 與 `labels.__prism_log_expr__` 可以通過 `promtool check rules`，伺服器也載入。放哪裡、是否與 `expr` 互斥，都還沒鎖定。見 §10 的 AC-88。在鎖定前不得實作這段擴充。LogQL 與 PromQL 走同一條查詢路徑仍是後續評估階段的事，不是 P2-06。
+rule 上的欄位 `prism_log_expr` 仍會被 promtool 2.53.0 拒絕。recording rule 不能帶 annotations。見 AC-88。
 
 ### 1.3 規則來源
 
 兩個來源並存，載入後合併：
 
-1. **檔案**：`rules.path` 指定的目錄，`*.yml` / `*.yaml`。熱重載的接法尚未鎖定，見 §10 的 AC-92。Prometheus 2.53.0 實測沒有檔案監看。
+1. **檔案**：`rules.path` 指定的目錄，`*.yml` / `*.yaml`。P2-06 的熱重載只接 SIGHUP，失敗保留上一份，不做檔案監看，也不做 `POST /-/reload`。見 AC-92。檔案載入的 group，`Tenant` 這輪是空字串。
 2. **控制平面**：Postgres `rule_groups` / `rules` 表，經 `/api/console/v1/rules` CRUD，每 `rules.db_sync_interval`（預設 30s）同步。
 
 衝突時（同名 group）：檔案優先，並記錄警告。理由：檔案是 GitOps 的載體，不應被 UI 意外覆蓋。
@@ -289,7 +291,7 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 
 ### 10.1 範圍
 
-範圍內是 `12` 的 P2-06：`internal/alerting/rules` 載入 Prometheus 規則檔、保留實測得到的欄位、依目錄重新載入。允許路徑仍是 `internal/alerting/rules/**`。標準欄位的接受與拒絕必須跟 promtool 2.53.0 的 `check rules` 相同，解析必須走上述 `rulefmt`，不要另寫一份欄位清單。
+範圍內是 `12` 的 P2-06：`internal/alerting/rules` 載入 Prometheus 規則檔、保留實測得到的欄位、依目錄重新載入。Owner 於 2026-10-20 核准擴大允許路徑：`internal/alerting/rules/**`、`internal/config/**`（只為了空規則檔與第二份 YAML 文件，AC-89、AC-90）、`cmd/prismd/**`（只為了 SIGHUP，AC-92）。標準欄位的接受與拒絕必須跟 promtool 2.53.0 的 `check rules` 相同，解析必須走上述 `rulefmt`，不要另寫一份欄位清單。AC-89 與 AC-91 是刻意不跟 promtool 的兩點，Then 以本節為準。
 
 範圍外：
 
@@ -300,7 +302,7 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 - 模板執行、PromQL 執行、LogQL 執行。載入時只做 promtool 會做的語法檢查，不算結果。
 - 改 `pkg/spi`。
 
-`cmd/prismd` 今天只把 `SIGINT` 與 `SIGTERM` 交給 `signal.NotifyContext`，沒有 SIGHUP，也沒有 `/-/reload`。程序要不要在這輪接上，是 AC-92，未鎖定。
+`cmd/prismd` 今天只把 `SIGINT` 與 `SIGTERM` 交給 `signal.NotifyContext`。AC-92 要加的是 SIGHUP，不是把 SIGHUP 放進這個會取消程序的 context。
 
 ### 10.2 實測
 
@@ -371,7 +373,7 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 
 **AC-80** Given `interval: yesterday` 或 `for: -1s`。When 載入。Then 拒絕，錯誤含 `not a valid duration string`。Given `interval: 30s`。When 載入。Then interval 是 30 秒。Given `for: 0s`。When 載入。Then for 是 0。Given `for: 10m` 與 `keep_firing_for: 5m`。When 載入。Then 分別是 10 分與 5 分。
 
-**AC-81** Given 省略 `limit` 或 `limit: 0`。When 載入。Then 保存的整數是 0。Given `limit: -1`。When 載入。Then 保存的整數是 -1。這輪不規定評估時 0 或 -1 代表什麼。
+**AC-81** Given 省略 `limit` 或 `limit: 0`。When 載入。Then 保存的整數是 0。Given `limit: -1`。When 載入。Then 保存的整數是 -1。Owner 於 2026-10-20 鎖定：負數照單保留，評估語意留 P2-07。promtool 對 `limit: -1` exit 0，`SUCCESS: 1 rules found`。
 
 **AC-82** Given group `query_offset: 1m`。When 載入。Then 成功，並保留 1 分。這個值不從「有沒有出現在 Prometheus 2.53 的 `/api/v1/rules`」來判斷，因為該 API 沒有這個欄位；判斷依據是載入器自己的結果，且 `promtool check rules` exit 0。Given rule 上的 `query_offset`。When 載入。Then 拒絕，同 AC-75。
 
@@ -383,20 +385,22 @@ A1 的「正確評估」、A3 至 A8 不在 P2-06。P2-06 的編號驗收是 §1
 
 **AC-86** Given 已載入一份成功的規則。When 呼叫端沒有要求重新載入，期間檔案被改寫。Then 記憶體中的集合不變。When 重新載入成功。Then 集合等於磁碟上現在的 `.yml` / `.yaml`，新檔出現，已刪的檔消失。When 重新載入時任一檔失敗。Then 回錯，記憶體仍是上一份成功的集合。
 
-**AC-87** Given 實作階段的測試。When 跑相容性。Then 使用 AC-72 至 AC-84 的同一批檔案呼叫釘選的 promtool 2.53.0 `check rules`，exit code 與載入器的接受或拒絕一致。生產路徑不得殼層呼叫 promtool。這份規格 PR 不加入該測試。
+**AC-87** Given 實作階段的測試。When 跑相容性。Then 使用 AC-72 至 AC-84，以及 AC-88、AC-90、AC-93 的檔案，呼叫釘選的 promtool 2.53.0 `check rules`。除了 AC-89，exit code 與載入器的接受或拒絕一致。AC-91 兩邊都接受該檔，差在 Prism 把省略與 `0s` 存成 30 秒。生產路徑不得殼層呼叫 promtool。這份規格 PR 不加入該測試。
 
-### 10.4 未鎖定
+### 10.4 Owner 於 2026-10-20 鎖定
 
-下面的 Then 不是驗收。寫成 AC 編號只是把坑占住，避免實作時自己補。Owner 鎖定前不得實作。
+八點都照建議定案。AC-88 至 AC-93 的 Then 從這裡開始算數。負數 `limit` 仍是 AC-81：照單保留，評估語意留 P2-07。檔案規則的 `Tenant` 這輪是空字串，不填 `tenancy.default_tenant`。
 
-**AC-88** Given LogQL 擴充。When 載入。Then 未鎖定。實測只知道：rule 欄位 `prism_log_expr` 失敗；annotation 與 `labels.__prism_log_expr__` 可以成功。建議與理由放在 PR 的待決清單。
+同一天又跑了一次 2.53.0。下面 Then 裡寫到 promtool 或伺服器的句子，都是這次的結果。
 
-**AC-89** Given 一個檔有第二份 YAML 文件。When 載入。Then 未鎖定。實測是 promtool 與伺服器都只留下第一份，exit 0，沒有警告。
+**AC-88** Given alerting rule：`expr: vector(1)`，`for: 5m`，label `severity: critical`，annotation `prism_log_expr` 的值是 `sum(count_over_time({service="api", level="error"}[5m])) > 100`。When `promtool check rules` 與載入器。Then 兩者都成功。annotation 的值與檔案相同，不解析、不執行。labels 只有 `severity=critical`，沒有 `prism_log_expr`。`expr` 仍是 `vector(1)`。Given 把同一鍵寫成 rule 欄位。When 載入。Then 拒絕，錯誤含 `field prism_log_expr not found in type rulefmt.RuleNode`。Given recording rule 帶這個 annotation。When 載入。Then 拒絕，錯誤含 `invalid field 'annotations' in recording rule`。
 
-**AC-90** Given `groups: []`、`rules: []`、空檔或只有註解。When 載入器與 `--config-check` 分別讀。Then 未鎖定。promtool exit 0。現有 `validateRuleDocument` 拒絕空的 groups 與 rules。
+**AC-89** Given 同一檔能解出第二份 YAML 文件，包括第二份有 groups，以及檔尾單獨一個 `---`（`gopkg.in/yaml.v3` v3.0.1 把它解成第二份 nil）。When 載入器與 `--config-check`。Then 兩邊都拒絕，錯誤含 `more than one YAML document`。不得只留第一份。實測 promtool 對這兩種檔都是 exit 0：有內容的第二份只報 `SUCCESS: 1 rules found`，伺服器也只載入第一份；檔尾 `---` 同樣 exit 0。這是刻意不跟 promtool。Given 檔首只有一個 `---`，或檔尾是 `...`。When 載入。Then 接受。這兩種實測仍是一份文件，promtool exit 0，`SUCCESS: 1 rules found`。
 
-**AC-91** Given 省略 `interval`，或 `interval: 0s`。When 載入。Then 未鎖定。Prometheus 在這次設定下兩者都變成全域 `evaluation_interval`（探針是 15 秒）。Prism 的 `rules` 沒有這個鍵。
+**AC-90** Given 空檔、只有註解、`groups: []`、`groups:`、或某個 group 的 `rules: []`。When 載入器與 `--config-check`。Then 兩邊都成功，規則集合是空的，不回錯。promtool 對這五種都是 exit 0，`SUCCESS: 0 rules found`。只有 `rules: []` 與 `groups: []` 的兩個檔讓伺服器 `/api/v1/rules` 回 `groups: []`。現有 `validateRuleDocument` 會拒絕，這輪要改掉：空檔與只有註解是 `rule document must be a mapping`，空的或 null 的 groups 是 `rule document must contain a non-empty groups sequence`，空的 rules 是 `groups[0].rules must be a non-empty sequence`。
 
-**AC-92** Given 程序收到 SIGHUP，或收到 `POST /-/reload`。When 熱重載。Then 未鎖定。Prometheus 的實測見 §10.2：沒有信號就不會重載；失敗保留上一份；lifecycle 關閉時 HTTP 403。`prismd` 目前沒有這兩條接線。07 §1.3 寫的檔案監看，這次 2 秒內沒有發生。
+**AC-91** Given 省略 `interval`，或 `interval: 0s`。When 載入。Then interval 是 30 秒。正的 interval 仍照檔案，例如 `30s` 就是 30 秒（AC-80）。實測 Prometheus 在 `evaluation_interval: 15s` 下，省略與 `0s` 的 API `interval` 都是 15，不是 0，也不是 30。Prism 沒有這個鍵，所以不用 15。
 
-**AC-93** Given 同檔兩筆規則被 promtool 的預設 duplicate-rules lint 點名。When 載入。Then 未鎖定。實測預設 exit 0，`--lint-fatal` exit 3。伺服器會載入兩筆同名 alert（該次兩筆的 labels 不同）。
+**AC-92** Given `prismd` 已載入規則。When 檔案改了，2 秒內沒有 SIGHUP。Then 記憶體中的集合不變，也不做檔案監看。When 收到 SIGHUP 且新檔全部有效。Then 換成新集合。When 收到 SIGHUP 但有一檔無效。Then 程序繼續跑，記憶體仍是上一份成功的集合，並留下錯誤。SIGHUP 不得取消 `SIGINT` / `SIGTERM` 那個 process context，也不得讓程序退出。這輪沒有 `POST /-/reload`。實測 Prometheus 2.53.0：改檔後 2 秒規則不變；SIGHUP 後換成新規則；壞檔的 log 含 `loading groups failed` 與 `previous rule set restored`，API 仍是上一份。沒有 `--web.enable-lifecycle` 時 `POST /-/reload` 是 HTTP 403，本文 `Lifecycle API is not enabled.`。那個 HTTP 路徑不在這輪。
+
+**AC-93** Given 同檔兩筆 alert 都叫 `A`，labels 都空，expr 分別是 `up` 與 `up == 1`。When 載入。Then 成功，兩筆都在，不回錯。同時留下警告，警告裡能對到 `A`。實測 promtool 預設 exit 0，輸出仍含 `lint error 1 duplicate rule(s) found.` 與 `Metric: A`。`--lint-fatal` 才是 exit 3。這輪不採用 exit 3。同 labels 的 recording rule `job:x:rate` 同樣是預設 exit 0 加 lint。

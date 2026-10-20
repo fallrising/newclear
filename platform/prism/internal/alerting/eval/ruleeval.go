@@ -43,6 +43,12 @@ func (p phase) String() string {
 	}
 }
 
+// signedFingerprint stores the label hash as int64 two's complement.
+// A hash with the high bit set is negative in BIGINT.
+func signedFingerprint(ls labels.Labels) int64 {
+	return int64(utm.Fingerprint(ls)) //nolint:gosec // G115: the bit pattern is the stored fingerprint, including the sign bit.
+}
+
 func (p phase) code() int16 {
 	switch p {
 	case phasePending:
@@ -147,14 +153,12 @@ type alertingRule struct {
 func newAlerting(parent *Engine, g *group, rule ruleInput) *alertingRule {
 	raw := labels.FromMap(rule.labels)
 	return &alertingRule{
-		ruleBase: ruleBase{
-			name:     rule.name,
-			expr:     rule.expr,
-			labels:   maps.Clone(rule.labels),
-			raw:      raw,
-			health:   "unknown",
-			kindName: "alert",
-		},
+		name:        rule.name,
+		expr:        rule.expr,
+		labels:      maps.Clone(rule.labels),
+		raw:         raw,
+		health:      "unknown",
+		kindName:    "alert",
 		hold:        rule.hold,
 		keep:        rule.keep,
 		annotations: maps.Clone(rule.annotations),
@@ -384,7 +388,7 @@ func (r *alertingRule) accepts(row state.Row) bool {
 			return false
 		}
 	}
-	return int64(utm.Fingerprint(labels.FromMap(row.Labels))) == row.Fingerprint
+	return signedFingerprint(labels.FromMap(row.Labels)) == row.Fingerprint
 }
 
 func (r *alertingRule) takeAlerts(from *alertingRule) {
@@ -408,7 +412,7 @@ func (r *alertingRule) rows() []state.Row {
 			continue
 		}
 		row := state.Row{
-			Fingerprint: int64(utm.Fingerprint(a.labels)),
+			Fingerprint: signedFingerprint(a.labels),
 			Labels:      a.labels.Map(),
 			State:       a.phase.code(),
 			ActiveAt:    a.activeAt.UTC(),
@@ -457,18 +461,16 @@ type recordingRule struct {
 
 func newRecording(parent *Engine, g *group, rule ruleInput) *recordingRule {
 	return &recordingRule{
-		ruleBase: ruleBase{
-			name:     rule.name,
-			expr:     rule.expr,
-			labels:   maps.Clone(rule.labels),
-			raw:      labels.FromMap(rule.labels),
-			health:   "unknown",
-			kindName: "record",
-		},
-		offset: g.offset,
-		limit:  g.limit,
-		query:  parent.query,
-		parent: parent,
+		name:     rule.name,
+		expr:     rule.expr,
+		labels:   maps.Clone(rule.labels),
+		raw:      labels.FromMap(rule.labels),
+		health:   "unknown",
+		kindName: "record",
+		offset:   g.offset,
+		limit:    g.limit,
+		query:    parent.query,
+		parent:   parent,
 	}
 }
 

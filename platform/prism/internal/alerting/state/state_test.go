@@ -58,7 +58,7 @@ func TestFingerprintHighBit(t *testing.T) {
 		t.Fatalf("fingerprint = %#v", got)
 	}
 	ls := labels.FromMap(map[string]string{"alertname": "Hi"})
-	if int64(utm.Fingerprint(ls)) == 0 {
+	if utm.Fingerprint(ls) == 0 {
 		t.Fatal("fingerprint helper returned 0")
 	}
 }

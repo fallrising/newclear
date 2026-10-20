@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/fallrising/newclear/platform/prism/internal/alerting/state"
-	"github.com/fallrising/newclear/platform/prism/pkg/utm"
 	"github.com/prometheus/prometheus/model/labels"
 )
 
@@ -146,7 +145,7 @@ FROM alert_state WHERE tenant_id = $1`, tenant).Scan(&gotTenant, &fp, &ruleID, &
 	if err := json.Unmarshal(raw, &lbl); err != nil {
 		t.Fatal(err)
 	}
-	if lbl["alertname"] != "Hold" || fp != int64(utm.Fingerprint(labels.FromMap(lbl))) {
+	if lbl["alertname"] != "Hold" || fp != signedFingerprint(labels.FromMap(lbl)) {
 		t.Fatalf("sql labels %#v fingerprint %d", lbl, fp)
 	}
 }

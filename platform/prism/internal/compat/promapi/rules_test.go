@@ -50,18 +50,18 @@ func TestRulesRoute(t *testing.T) {
 	t.Cleanup(func() { h.Stop() })
 
 	empty := httptest.NewRecorder()
-	h.HTTPHandler().ServeHTTP(empty, httptest.NewRequest(http.MethodGet, "/prom/api/v1/rules", nil))
+	h.HTTPHandler().ServeHTTP(empty, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/prom/api/v1/rules", nil))
 	if empty.Code != http.StatusOK || !strings.Contains(empty.Body.String(), `"groups":[]`) {
 		t.Fatalf("nil source rules: %d %s", empty.Code, empty.Body.String())
 	}
 	emptyAlerts := httptest.NewRecorder()
-	h.HTTPHandler().ServeHTTP(emptyAlerts, httptest.NewRequest(http.MethodGet, "/prom/api/v1/alerts", nil))
+	h.HTTPHandler().ServeHTTP(emptyAlerts, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/prom/api/v1/alerts", nil))
 	if emptyAlerts.Code != http.StatusOK || !strings.Contains(emptyAlerts.Body.String(), `"alerts":[]`) {
 		t.Fatalf("nil source alerts: %d %s", emptyAlerts.Code, emptyAlerts.Body.String())
 	}
 
 	post := httptest.NewRecorder()
-	h.HTTPHandler().ServeHTTP(post, httptest.NewRequest(http.MethodPost, "/prom/api/v1/rules", nil))
+	h.HTTPHandler().ServeHTTP(post, httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/prom/api/v1/rules", nil))
 	if post.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("POST rules = %d", post.Code)
 	}
@@ -69,7 +69,7 @@ func TestRulesRoute(t *testing.T) {
 	msg := `invalid parameter "type": not supported value "alerting"`
 	h.SetRules(stubRules{err: &stubStatusError{msg: msg}})
 	bad := httptest.NewRecorder()
-	h.HTTPHandler().ServeHTTP(bad, httptest.NewRequest(http.MethodGet, "/prom/api/v1/rules?type=alerting", nil))
+	h.HTTPHandler().ServeHTTP(bad, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/prom/api/v1/rules?type=alerting", nil))
 	want := `{"status":"error","errorType":"bad_data","error":"invalid parameter \"type\": not supported value \"alerting\""}`
 	if bad.Code != http.StatusBadRequest || bad.Body.String() != want {
 		t.Fatalf("type error = %d %s", bad.Code, bad.Body.String())
@@ -85,7 +85,7 @@ func TestRulesRoute(t *testing.T) {
 	}
 	t.Cleanup(func() { locked.Stop() })
 	denied := httptest.NewRecorder()
-	locked.HTTPHandler().ServeHTTP(denied, httptest.NewRequest(http.MethodGet, "/prom/api/v1/alerts", nil))
+	locked.HTTPHandler().ServeHTTP(denied, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/prom/api/v1/alerts", nil))
 	if denied.Code != http.StatusUnauthorized {
 		t.Fatalf("unauthenticated alerts = %d %s", denied.Code, denied.Body.String())
 	}
@@ -102,7 +102,7 @@ func FuzzRulesQuery(f *testing.F) {
 		if len(raw) > 4096 {
 			t.Skip()
 		}
-		req, err := http.NewRequest(http.MethodGet, raw, nil)
+		req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, raw, nil)
 		if err != nil {
 			return
 		}

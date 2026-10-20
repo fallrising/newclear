@@ -222,7 +222,7 @@ func rec(name, expr string, lbl map[string]string) rules.Rule {
 func loadYAML(t *testing.T, name, body string) []FileGroup {
 	t.Helper()
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	loader, err := rules.Load(t.Context(), dir)
@@ -1044,7 +1044,7 @@ func TestAC107RulesAndAlertsAPI(t *testing.T) {
 	}
 
 	post := httptest.NewRecorder()
-	h.HTTPHandler().ServeHTTP(post, httptest.NewRequest(http.MethodPost, "/prom/api/v1/rules", nil))
+	h.HTTPHandler().ServeHTTP(post, httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/prom/api/v1/rules", nil))
 	if post.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("POST = %d", post.Code)
 	}
@@ -1058,7 +1058,7 @@ func TestAC107RulesAndAlertsAPI(t *testing.T) {
 	}
 	t.Cleanup(func() { locked.Stop() })
 	denied := httptest.NewRecorder()
-	locked.HTTPHandler().ServeHTTP(denied, httptest.NewRequest(http.MethodGet, "/prom/api/v1/rules", nil))
+	locked.HTTPHandler().ServeHTTP(denied, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/prom/api/v1/rules", nil))
 	if denied.Code != http.StatusUnauthorized {
 		t.Fatalf("auth = %d", denied.Code)
 	}
@@ -1067,7 +1067,7 @@ func TestAC107RulesAndAlertsAPI(t *testing.T) {
 func httpJSON(t *testing.T, h *promapi.QueryHandler, path string) (int, map[string]any, []byte) {
 	t.Helper()
 	rec := httptest.NewRecorder()
-	h.HTTPHandler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+	h.HTTPHandler().ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil))
 	var body map[string]any
 	if rec.Body.Len() > 0 {
 		if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil && rec.Code == http.StatusOK {
@@ -1301,7 +1301,7 @@ func assertRow(t *testing.T, st state.Store, tenant string, code int16, activeAt
 	if row.Labels["alertname"] != "Hold" {
 		t.Fatalf("labels = %#v", row.Labels)
 	}
-	if row.Fingerprint != int64(utm.Fingerprint(labels.FromMap(row.Labels))) {
+	if row.Fingerprint != signedFingerprint(labels.FromMap(row.Labels)) {
 		t.Fatalf("fingerprint %d", row.Fingerprint)
 	}
 }

@@ -583,7 +583,12 @@ func (g *group) slotted(now time.Time) time.Time {
 	if step <= 0 {
 		step = time.Millisecond
 	}
-	offset := time.Duration(g.hash()%uint64(step/time.Millisecond)) * time.Millisecond
+	units := step / time.Millisecond
+	if units <= 0 {
+		units = 1
+	}
+	// The remainder is below a positive duration's millisecond count, which fits in int64.
+	offset := time.Duration(g.hash()%uint64(units)) * time.Millisecond //nolint:gosec // G115: remainder cannot exceed units.
 	now = now.UTC().Truncate(time.Millisecond)
 	start := now.UnixNano()
 	off := int64(offset)

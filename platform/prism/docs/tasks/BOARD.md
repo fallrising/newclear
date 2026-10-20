@@ -91,9 +91,9 @@ Owner 已鎖定 AC-43 至 AC-64。這一輪實作 `SearchNative`。狀態不是�
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-05 | ClickHouse `NativeLogQuerier`：`17` §6.5 的 AC-43 至 AC-64 | T-0354 | 實作 | 2026-10-20T00:27:00Z | 未關閉 | 2026-10-20T02:38:14Z |
+| P2-05 | ClickHouse `NativeLogQuerier`：`17` §6.5 的 AC-43 至 AC-64 | T-0354 | 實作 | 2026-10-20T00:27:00Z | 未關閉 | 2026-10-20T03:02:18Z |
 
-開始仍是 owner 打開規格的時鐘。實作從 2026-10-20T02:15:00Z 起。允許路徑是 `drivers/clickhouse/**`、`pkg/spi` 的 `Validate`，以及 `pkg/spi/conformance` 的 C-LOG-03/04/05。HTTP 仍不接 `SearchNative`。last_activity 是這次實作測試完成的時鐘。
+開始仍是 owner 打開規格的時鐘。實作從 2026-10-20T02:15:00Z 起。允許路徑是 `drivers/clickhouse/**`、`pkg/spi` 的 `Validate`，以及 `pkg/spi/conformance` 的 C-LOG-03/04/05。HTTP 仍不接 `SearchNative`。last_activity 是對齊執行器窗口的那次修正。聚合輸入維持 `[Start, End)`，有紀錄的 stream 空窗輸出 0。
 
 ## Backlog
 

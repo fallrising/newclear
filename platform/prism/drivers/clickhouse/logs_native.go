@@ -80,10 +80,6 @@ func rejectNativeAgg(agg *spi.LogAggregation) error {
 }
 
 func nativeLogSQL(q spi.LogQuery, opts options) (string, []any, error) {
-	return buildNativeSQL(q, opts, false)
-}
-
-func buildNativeSQL(q spi.LogQuery, opts options, lowerExclusive bool) (string, []any, error) {
 	if err := rejectNative(q); err != nil {
 		return "", nil, err
 	}
@@ -96,10 +92,6 @@ func buildNativeSQL(q spi.LogQuery, opts options, lowerExclusive bool) (string, 
 		return "", nil, err
 	}
 	fieldSQL, fieldArgs := nativeFieldSQL(q.Fields)
-	comparison := "ts >= fromUnixTimestamp64Nano(?)"
-	if lowerExclusive {
-		comparison = "ts > fromUnixTimestamp64Nano(?)"
-	}
 	direction := "DESC"
 	if q.Direction == spi.Forward {
 		direction = "ASC"
@@ -108,11 +100,11 @@ func buildNativeSQL(q spi.LogQuery, opts options, lowerExclusive bool) (string, 
 	args = append(args, lineArgs...)
 	args = append(args, fieldArgs...)
 	limit := ""
-	if !lowerExclusive && q.Agg == nil && q.Limit > 0 {
+	if q.Agg == nil && q.Limit > 0 {
 		limit = " LIMIT ?"
 		args = append(args, uint64(q.Limit))
 	}
-	sql := "SELECT ts,observed_ts,tenant,cluster,host,service,env,toString(severity),severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace,write_seq FROM logs WHERE tenant = ? AND " + comparison + " AND ts < fromUnixTimestamp64Nano(?)" + selectorSQL + lineSQL + fieldSQL + " ORDER BY ts " + direction + ", write_seq ASC" + limit + querySettings(opts)
+	sql := "SELECT ts,observed_ts,tenant,cluster,host,service,env,toString(severity),severity_text,body,trace_id,span_id,labels,attrs,res_attrs,service_instance,service_version,namespace,write_seq FROM logs WHERE tenant = ? AND ts >= fromUnixTimestamp64Nano(?) AND ts < fromUnixTimestamp64Nano(?)" + selectorSQL + lineSQL + fieldSQL + " ORDER BY ts " + direction + ", write_seq ASC" + limit + querySettings(opts)
 	return sql, args, nil
 }
 
@@ -221,9 +213,8 @@ func searchNativeAgg(ctx context.Context, b *backend, q spi.LogQuery) (spi.LogRe
 	scan := q
 	scan.Agg = nil
 	scan.Limit = 0
-	scan.Start = start - int64(q.Agg.Window)
-	scan.End = end
-	sql, args, err := buildNativeSQL(scan, b.opts, true)
+	scan.Start, scan.End = start, end
+	sql, args, err := nativeLogSQL(scan, b.opts)
 	if err != nil {
 		return spi.LogResult{}, err
 	}
@@ -245,15 +236,6 @@ func nativeMatrix(q spi.LogQuery, records []utm.LogRecord, start, end int64) []s
 	var groups []accumulator
 	index := map[string]int{}
 	for _, record := range records {
-		var hits []int
-		for i, ts := range times {
-			if nativeInWindow(record.TS, ts, window) {
-				hits = append(hits, i)
-			}
-		}
-		if len(hits) == 0 {
-			continue
-		}
 		key := record.Labels.String()
 		at, ok := index[key]
 		if !ok {
@@ -261,9 +243,11 @@ func nativeMatrix(q spi.LogQuery, records []utm.LogRecord, start, end int64) []s
 			index[key] = at
 			groups = append(groups, accumulator{labels: record.Labels, count: make([]int, len(times)), bytes: make([]int, len(times))})
 		}
-		for _, i := range hits {
-			groups[at].count[i]++
-			groups[at].bytes[i] += len(record.Body)
+		for i, ts := range times {
+			if nativeInWindow(record.TS, ts, window) {
+				groups[at].count[i]++
+				groups[at].bytes[i] += len(record.Body)
+			}
 		}
 	}
 	seconds := q.Agg.Window.Seconds()

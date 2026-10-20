@@ -145,6 +145,33 @@ func TestClickHouseNativeLogQuery(t *testing.T) {
 			assertMatrix(t, result, 1_757_030_400_000, want)
 		}
 	})
+	t.Run("AC-52 empty window emits zero", func(t *testing.T) {
+		const tenant = "ac52-empty"
+		writeNativeLogs(t, f, backend, []utm.LogRecord{
+			nativeRecord(tenant, "late", nativeOrigin+int64(500*time.Millisecond), "host", "h1"),
+		})
+		for _, fn := range []string{"count_over_time", "rate", "bytes_over_time"} {
+			query := nativeQuery(t, tenant, nativeOrigin, nativeOrigin+int64(time.Second), "host", "h1")
+			query.Agg = &spi.LogAggregation{RangeFunc: fn, Window: time.Second, Step: time.Second}
+			assertMatrix(t, mustNative(t, f, native, query), 1_757_030_400_000, 0)
+		}
+	})
+	t.Run("AC-52 rows before start are not counted", func(t *testing.T) {
+		const tenant = "ac52-before"
+		writeNativeLogs(t, f, backend, []utm.LogRecord{
+			nativeRecord(tenant, "early", nativeOrigin-int64(500*time.Millisecond), "host", "h1"),
+			nativeRecord(tenant, "in", nativeOrigin, "host", "h1"),
+		})
+		for _, fn := range []string{"count_over_time", "rate", "bytes_over_time"} {
+			query := nativeQuery(t, tenant, nativeOrigin, nativeOrigin+int64(time.Second), "host", "h1")
+			query.Agg = &spi.LogAggregation{RangeFunc: fn, Window: time.Second, Step: time.Second}
+			want := 1.0
+			if fn == "bytes_over_time" {
+				want = 2
+			}
+			assertMatrix(t, mustNative(t, f, native, query), 1_757_030_400_000, want)
+		}
+	})
 	t.Run("AC-58", func(t *testing.T) {
 		const tenant = "ac58"
 		writeNativeLogs(t, f, backend, []utm.LogRecord{nativeRecord(tenant, "in", nativeOrigin, "host", "h1")})

@@ -7,6 +7,8 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/fallrising/newclear/platform/prism/pkg/spi"
+	"github.com/fallrising/newclear/platform/prism/pkg/utm"
+	"github.com/prometheus/prometheus/model/labels"
 )
 
 func TestLogStore_AC44_ImplementsNativeLogQuerier(t *testing.T) {
@@ -146,6 +148,30 @@ func TestNativeLogSQL_AC55_FixedReadSettings(t *testing.T) {
 	}
 	if strings.Contains(sql, "max_bytes_to_read") {
 		t.Fatalf("SQL sets a byte read cap: %s", sql)
+	}
+}
+
+func TestNativeMatrix_AC52_EmptyWindowEmitsZero(t *testing.T) {
+	start := int64(1_757_030_400) * int64(time.Second)
+	record := utm.LogRecord{
+		TS:     start + int64(500*time.Millisecond),
+		Body:   "late",
+		Labels: labels.FromStrings("host", "h1"),
+	}
+	for _, fn := range []string{"count_over_time", "rate", "bytes_over_time"} {
+		query := spi.LogQuery{Agg: &spi.LogAggregation{RangeFunc: fn, Window: time.Second, Step: time.Second}}
+		matrix := nativeMatrix(query, []utm.LogRecord{record}, start, start+int64(time.Second))
+		if len(matrix) != 1 || matrix[0].Labels.Get("host") != "h1" || len(matrix[0].Samples) != 1 {
+			t.Fatalf("%s matrix = %#v", fn, matrix)
+		}
+		sample := matrix[0].Samples[0]
+		if sample.TS != 1_757_030_400_000 || sample.Value != 0 {
+			t.Fatalf("%s sample = %#v", fn, sample)
+		}
+	}
+	absent := spi.LogQuery{Agg: &spi.LogAggregation{RangeFunc: "count_over_time", Window: time.Second, Step: time.Second}}
+	if matrix := nativeMatrix(absent, nil, start, start+int64(time.Second)); len(matrix) != 0 {
+		t.Fatalf("no input records produced %#v", matrix)
 	}
 }
 

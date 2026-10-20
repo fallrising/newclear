@@ -58,7 +58,7 @@
 | P2-04 | `internal/compat/lokiapi`：query_range/query/labels/label values/series/index stats/ready | P2-03 | `internal/compat/lokiapi/**` | `02` §3.4 的 AC-29 至 AC-41。Grafana Loki datasource health 與 Explore 以這組為準 |
 | P2-05 | `drivers/clickhouse`：`NativeLogQuerier`（**翻譯規則見 `17` §6**） | P2-01,P1-10 | `drivers/clickhouse/**`；`pkg/spi` 的 `Capabilities.Validate`（AC-59）；`pkg/spi/conformance` 只限 C-LOG-03/04/05 的 `NativeLogQuery` 與 pushdown 分流（AC-63、AC-64） | `17` §6.5 的 AC-43 至 AC-71。`C-LOG-03`/`C-LOG-04`/`C-LOG-05` 綠；logfmt 正確回 `ErrUnsupported` 觸發回退。Owner 於 2026-10-20 選 2，並對 JSON `Eq` 選方案 1（粗篩超集，再以與執行器相同的 parseJSON 規則精篩）。空字串 `Eq` 鎖定為 AC-71。規格 PR 不實作 |
 | P2-06 | `internal/alerting/rules`：規則檔解析（Prometheus 格式 + `annotations.prism_log_expr`）、SIGHUP 熱重載 | P0-07 | `internal/alerting/rules/**`；`internal/config/**` 只限空規則檔與第二份 YAML 文件（AC-89、AC-90）；`cmd/prismd/**` 只限 SIGHUP（AC-92） | `07` §10 的 AC-72 至 AC-93。Owner 於 2026-10-20 鎖定 AC-88 至 AC-93。規格 PR 不實作 |
-| P2-07 | `internal/alerting/eval` + `state`：評估器、狀態機、`ALERTS` 回寫、規則與告警 API；重啟計時見 §11 的待決 | P2-06,P1-08 | `internal/alerting/{eval,state}/**`；`internal/compat/promapi/**` 只限 `GET /prom/api/v1/rules` 與 `GET /prom/api/v1/alerts` | `07` §11 的 AC-94 至 AC-109。規格 PR 不實作 |
+| P2-07 | `internal/alerting/eval` + `state`：評估器、狀態機、`ALERTS` 回寫、規則與告警 API、`alert_state` | P2-06,P1-08 | `internal/alerting/{eval,state}/**`（含 `state/migrations/001_alert_state.*`）；`internal/compat/promapi/**` 只限 `GET /prom/api/v1/rules` 與 `GET /prom/api/v1/alerts` | `07` §11 的 AC-94 至 AC-109。Owner 於 2026-10-20 鎖定。規格 PR 不實作 |
 | P2-08 | `internal/alerting/{silence,inhibit,dispatch}`：靜默、抑制、分組 | P2-07 | 對應路徑 | A7 通過；抑制環在載入時被拒絕 |
 | P2-09 | `internal/alerting/notify`：Notifier SPI + 六個渠道（**webhook payload 契約見 `20` §9**） | P2-08,P0-10 | `internal/alerting/notify/**` | 每渠道有測試；payload 與 Alertmanager 逐欄位比對；憑證遮罩測試通過 |
 | P2-10 | 通知投遞持久化 + 重試 + dead letter（`07` §6.2） | P2-09 | `internal/alerting/notify/**`、`internal/controlplane/store/**` | A6 通過 |
@@ -108,7 +108,7 @@
 
 | ID | 任務 | 依賴 | 允許路徑 | 驗收 |
 |---|---|---|---|---|
-| P5-01 | Postgres schema 遷移（`09` §2） | P0-07 | `internal/controlplane/migrations/**` | up/down 皆可執行且冪等 |
+| P5-01 | Postgres schema 遷移（`09` §2） | P0-07 | `internal/controlplane/migrations/**` | up/down 皆可執行且冪等。`alert_state` 若已由 P2-07 建立，up 只用 `CREATE TABLE IF NOT EXISTS`，不改欄位、不加 `tenants` 外鍵、不搬列。見 `07` §11.4 |
 | P5-02 | `internal/controlplane/store`：全部 CRUD，簽章強制帶 tenant | P5-01 | `internal/controlplane/store/**` | 靜態檢查：無不帶 tenant 的查詢 |
 | P5-03 | `authn`：密碼、JWT、API key、快取與失效 | P5-02 | 對應路徑 | P1 通過；SEC-04 通過 |
 | P5-04 | `authz`：RBAC middleware | P5-03 | 對應路徑 | 權限矩陣 table-driven 測試 |

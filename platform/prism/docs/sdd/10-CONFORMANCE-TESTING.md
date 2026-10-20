@@ -72,15 +72,23 @@ func Run(t *testing.T, f Factory, opts Options)
 |---|---|
 | `C-LOG-01` | 寫入 → `Search` 讀回，`Body`、`TS`、`Labels`、`Attrs`、`TraceID` 全部保真 |
 | `C-LOG-02` | `Direction: Backward` 回傳新→舊；`Forward` 回傳舊→新 |
-| `C-LOG-03` | **下推誠實性**：對每個宣告可下推的過濾類型，構造「若未下推則結果不同」的資料，驗證結果正確 |
-| `C-LOG-04` | **未下推不得漏資料**：對驅動宣告**不**支援的過濾，`Search` 回傳的必須是超集（中間層才能補算正確） |
-| `C-LOG-05` | `Limit` 語義：只有全部過濾都下推時才截斷；否則回傳未截斷結果或 `ErrTooLarge` |
+| `C-LOG-03` | **下推誠實性**：對每個宣告可下推的過濾類型，構造「若未下推則結果不同」的資料，驗證結果正確。`NativeLogQuery=false` 時打 `Search`。`NativeLogQuery=true` 時改打 `SearchNative`，結果必須已濾好 |
+| `C-LOG-04` | **未下推不得漏資料**：`Search` 回傳超集，中間層才能補算。`NativeLogQuery=false` 時只查驅動沒宣告的過濾。`NativeLogQuery=true` 時，`Search` 對宣告與未宣告的過濾都回超集 |
+| `C-LOG-05` | `Limit` 語義：只有全部過濾都下推時才截斷；否則回傳未截斷結果或 `ErrTooLarge`。`NativeLogQuery=false` 時打 `Search`。`NativeLogQuery=true` 時，截斷檢查打 `SearchNative`，`Search` 不因 pushdown 位元而少回列 |
 | `C-LOG-06` | 超長日誌行（1 MiB）寫入讀出保真或依限制正確截斷 |
 | `C-LOG-07` | UTF-8 與非 UTF-8 位元組序列不損毀 |
 | `C-LOG-08` | 同一奈秒時間戳的多筆日誌全部回傳，順序穩定（次序鍵為寫入序） |
 | `C-LOG-09` | `LabelValues` 只回傳該時間範圍內存在的值 |
 
 `C-LOG-04` 是最關鍵的一項：它把「部分下推」這個最容易寫錯的機制變成可自動驗證的契約。
+
+Owner 於 2026-10-20 選定：保住 `Search` 的既有契約，已宣告的過濾改由 `SearchNative` 驗。`C-LOG-01`、`C-LOG-02`、`C-LOG-06` 至 `C-LOG-09` 仍只打 `Search`。
+
+- `NativeLogQuery=false`：C-LOG-03、C-LOG-04、C-LOG-05 維持現況，只呼叫 `Search`，不呼叫 `SearchNative`。宣告了的過濾，`Search` 必須濾好；沒宣告的，`Search` 回超集。memory 這類驅動不得因這次分流而失敗。
+- `NativeLogQuery=true`：宣告的 substring、regex、JSON 字串相等由 `SearchNative` 驗「已濾好」（只留 `Attrs["expected"]="true"` 的那筆，`Body`、`Labels`、`Attrs` 與寫入相同）。同一組查詢的 `Search` 回該組寫入的全部筆，含 `expected=false`。selectors 與時間範圍仍由 `Search` 套用。logfmt 沒宣告：`Search` 回超集，`SearchNative` 回 `ErrUnsupported`，不回成功的部分結果。
+- `NativeLogQuery=true` 的 C-LOG-05：現有三筆是 `keep first`、`drop`、`keep second`，過濾 `|= "keep"`，`Limit=1`，`Direction=Forward`。`Search` 回三筆，或 `ErrTooLarge`；不得只回兩筆 `keep`，也不得只回一筆。`SearchNative` 只回 `Body` 為 `keep first` 的那筆。
+
+編號驗收是 `17` §6.5 的 AC-63、AC-64。
 
 ### 2.4 追蹤測項
 

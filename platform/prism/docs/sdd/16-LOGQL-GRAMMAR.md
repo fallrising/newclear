@@ -265,7 +265,7 @@ for each record from iterator:
 
 ### 4.1 分期驗收邊界
 
-P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與範圍／向量函式組合解析；依 [P2-01 規格](../specs/p2-01-logql-parser.md) 驗證資源上限、取消及錯誤分類。抽取 property test 屬 P2-02；執行、聚合結果與串流驗收屬 P2-03，案例是 §4.2 的 AC-1 至 AC-28，加上 AC-42；Loki HTTP 驗收是 `02` §3.4 的 AC-29 至 AC-41。AC-42 接在 AC-41 的編號之後，但放在本節，因為它測的是聚合器。ClickHouse `NativeLogQuerier` 的編號驗收是 `17` §6.5 的 AC-43 至 AC-62；owner 已於 2026-10-20 鎖定，實作不在規格 PR。函式組合在 P2-01 的測試只驗證 IR，不能視為聚合執行或相容性驗收。
+P2-01 驗收 lexer/parser 的正向、語法、五條語義、不支援語法與範圍／向量函式組合解析；依 [P2-01 規格](../specs/p2-01-logql-parser.md) 驗證資源上限、取消及錯誤分類。抽取 property test 屬 P2-02；執行、聚合結果與串流驗收屬 P2-03，案例是 §4.2 的 AC-1 至 AC-28，加上 AC-42；Loki HTTP 驗收是 `02` §3.4 的 AC-29 至 AC-41。AC-42 接在 AC-41 的編號之後，但放在本節，因為它測的是聚合器。ClickHouse `NativeLogQuerier` 的編號驗收是 `17` §6.5 的 AC-43 至 AC-64。Owner 於 2026-10-20 另選 C-LOG 分流（AC-63、AC-64）。實作不在規格 PR。函式組合在 P2-01 的測試只驗證 IR，不能視為聚合執行或相容性驗收。
 
 ### 4.2 P2-03 驗收
 

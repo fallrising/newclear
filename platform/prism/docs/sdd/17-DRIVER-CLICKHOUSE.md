@@ -278,7 +278,7 @@ ORDER BY t
 
 #### 範圍
 
-範圍內是 `12` 的 P2-05：`drivers/clickhouse` 的 `NativeLogQuerier`。另外只改 `pkg/spi` 的 `Capabilities.Validate`（AC-59），讓能力位與 logfmt 的 `ErrUnsupported` 可以同時成立。翻譯規則沿用本節 §6.1 至 §6.4 裡已經寫明、且與 P1-10 契約不衝突的部分。
+範圍內是 `12` 的 P2-05：`drivers/clickhouse` 的 `NativeLogQuerier`。另外改 `pkg/spi` 的 `Capabilities.Validate`（AC-59），以及 `pkg/spi/conformance` 裡 C-LOG-03、C-LOG-04、C-LOG-05 對 `NativeLogQuery` 與 pushdown 的分流（AC-63、AC-64）。不改 conformance 的其他測項。翻譯規則沿用本節 §6.1 至 §6.4 裡已經寫明、且與 P1-10 契約不衝突的部分。Owner 於 2026-10-20 選 2：`Search` 契約不變，已宣告的過濾改由 `SearchNative` 驗。
 
 範圍外：
 
@@ -315,9 +315,9 @@ ORDER BY t
 
 單元測試沒有 `//go:build integration`。`make test` 與 Prism CI 的 `make lint test` 是 `go test -race -count=1 ./...`，不會連上 ClickHouse。這層覆蓋翻譯結果、logfmt 的 `ErrUnsupported`、以及能力位與介面同真同假。
 
-整合測試在 `drivers/clickhouse` 的 `//go:build integration` 檔。`make conformance` 經 `drivers/clickhouse/run-integration.py` 執行：有 `PRISM_CLICKHOUSE_TEST_DSN` 就用它，否則腳本自起容器。`C-LOG-03`、`C-LOG-04`、`C-LOG-05` 要在這層、對著真實 ClickHouse 維持成立。`make test` 通過不表示這三條已經在 ClickHouse 上跑過。
+整合測試在 `drivers/clickhouse` 的 `//go:build integration` 檔。`make conformance` 經 `drivers/clickhouse/run-integration.py` 執行：有 `PRISM_CLICKHOUSE_TEST_DSN` 就用它，否則腳本自起容器。`C-LOG-03`、`C-LOG-04`、`C-LOG-05` 要在這層、對著真實 ClickHouse 維持成立，分流見 `10` §2.3。`make test` 通過不表示這三條已經在 ClickHouse 上跑過。
 
-**AC-43** Given 實作 P2-05。When 看變更路徑。Then 驅動程式在 `drivers/clickhouse/**`。唯一的路徑外改動是 `pkg/spi` 的 `Capabilities.Validate`（AC-59）。沒有 `internal/query` 路由器，也沒有 `internal/compat/lokiapi`：HTTP 繼續 `Search` 加執行器。`LogStore.Search` 的可觀察契約不變：selectors、時間、排序，補算前沒有 `LIMIT`。沒有 Phase 6 的 logfmt SQL，沒有 `LiveTail`、RED、`DependencyQuerier`、非空 `cluster`。
+**AC-43** Given 實作 P2-05。When 看變更路徑。Then 驅動程式在 `drivers/clickhouse/**`。路徑外只允許兩處：`pkg/spi` 的 `Capabilities.Validate`（AC-59），以及 `pkg/spi/conformance` 裡 C-LOG-03、C-LOG-04、C-LOG-05 對 `NativeLogQuery` 與 pushdown 的分流（AC-63、AC-64）。沒有 `internal/query` 路由器，也沒有 `internal/compat/lokiapi`：HTTP 繼續 `Search` 加執行器。`LogStore.Search` 的可觀察契約不變：selectors、時間、排序，補算前沒有 `LIMIT`。沒有 Phase 6 的 logfmt SQL，沒有 `LiveTail`、RED、`DependencyQuerier`、非空 `cluster`。
 
 **AC-44** Given `Logs()`。When `NativeLogQuery` 為 true。Then 同一個值實作 `NativeLogQuerier`：`SearchNative(ctx, LogQuery) (LogResult, error)`。`Agg == nil` 時結果在 `Streams`，`Agg != nil` 時結果在 `Matrix`。`Search` 仍回 `LogIterator`。When 能力位是 false。Then 不得實作這個介面（C-GEN-06）。`NativeLogQuery` 可以在 `ParsedFieldLogfmt=false` 且 `Limit=false` 時為 true，前提是 AC-59 的 `Validate` 通過。
 
@@ -343,7 +343,7 @@ ORDER BY t
 
 **AC-55** Given driver options 用 §1 的預設。When `SearchNative` 送出查詢。Then settings 含 `max_execution_time = 55`、`max_memory_usage = 1000000000`、`max_rows_to_read = 5000000`、`max_result_rows = 5000000`、`max_result_bytes = 67108864`。沒有名為 `max_bytes_to_read` 的設定。超出 `max_result_rows` 回 `ErrTooLarge`，底層文字見 AC-54。
 
-**AC-56** Given 單元測試。When `make test`。Then 不需要 ClickHouse，也不編譯 `//go:build integration`。這層要蓋到 AC-45 的 `ErrUnsupported`，以及能力位與 `NativeLogQuerier` 同真同假。Given 整合測試。When `make conformance`。Then 才連接 ClickHouse，並使 `C-LOG-03`、`C-LOG-04`、`C-LOG-05` 在能力宣告變更之後仍然成立。
+**AC-56** Given 單元測試。When `make test`。Then 不需要 ClickHouse，也不編譯 `//go:build integration`。這層要蓋到 AC-45 的 `ErrUnsupported`，以及能力位與 `NativeLogQuerier` 同真同假。Given 整合測試。When `make conformance`。Then 才連接 ClickHouse。`NativeLogQuery=true` 時，C-LOG-03 的已宣告過濾由 `SearchNative` 驗已濾好，`Search` 驗超集；`NativeLogQuery=false` 的驅動仍只走 `Search`，既有結果不得失敗。見 AC-63、AC-64。
 
 **AC-57** Given P2-05 的目標能力。Then `ParsedFieldLogfmt=false`、`Limit=false`、`Stats=false`、`LiveTail=false`。`Logs()` 不實作 `LogStatser`。`Retention.Enforced`、`Traces.RED`、`Dependencies` 維持 false。不得把 logfmt 標成已下推。§2 草圖不是這組能力。`Aggregation` 的開關見 AC-61，不在本條提前設成 true。
 
@@ -356,6 +356,10 @@ ORDER BY t
 **AC-61** Given AC-52 與 AC-58 都還沒通過。Then `Logs.Aggregation` 為 false。Given 這兩條都通過的 P2-05 驅動。Then `Logs.Aggregation` 為 true。此位為 true 不表示每種聚合都下推。
 
 **AC-62** Given `count_over_time`，`Window=1s`，`Step=0`，區間內一筆。When `SearchNative`。Then `ErrUnsupported`，不是執行器那種落在 `q.End` 的單點。Given `Window=500µs`，`Step=500µs`。When `SearchNative`。Then `ErrUnsupported`。Given AC-52 的資料，`RangeFunc=bytes_rate`，`Window=1s`，`Step=1s`。When `SearchNative`。Then `ErrUnsupported`，不是 `2`。Given AC-52 的資料，`VectorOp` 為 `sum`、`avg`、`min`、`max`、`count`、`topk` 或 `bottomk`。When `SearchNative`。Then `ErrUnsupported`。
+
+**AC-63** Given `NativeLogQuery=true`，`Substring`、`Regex`、`ParsedFieldJSON` 為 true，`ParsedFieldLogfmt=false`。C-LOG-03 的 substring、regex、json 三組各兩筆，一筆 `Attrs["expected"]="true"`。When `SearchNative`。Then 只回那筆 `expected=true`，`Body`、`Labels`、`Attrs` 與寫入相同。When 同一組改走 `Search`。Then 兩筆都在。Given 同一驅動的 logfmt 兩筆。When `Search`。Then 兩筆都在。When `SearchNative`。Then `ErrUnsupported`，不是只回 `expected=true`。Given C-LOG-05 的三筆，時間由早到晚：`keep first`、`drop`、`keep second`，`LineContains "keep"`，`Limit=1`，`Direction=Forward`。When `Search`。Then 三筆都在，或 `ErrTooLarge`。When `SearchNative`。Then 只有 `keep first`。
+
+**AC-64** Given `NativeLogQuery=false`。When 跑 C-LOG-03、C-LOG-04、C-LOG-05。Then 只呼叫 `Search`，不呼叫 `SearchNative`。宣告了 `Substring` 或 regex 或 JSON 的驅動，C-LOG-03 仍要求 `Search` 濾好。沒宣告的過濾，C-LOG-04 仍要求 `Search` 回超集。`NativeLogQuery=false` 的既有驅動不得因 AC-63 失敗。
 
 ## 7. 追蹤查詢
 

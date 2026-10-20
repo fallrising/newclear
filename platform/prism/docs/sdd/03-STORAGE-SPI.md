@@ -303,6 +303,8 @@ type LogAggregation struct {
 | `ParsedFieldLogfmt=true` | 上述 + `\| logfmt` 後的 Fields | Agg（若 `Aggregation=false`） |
 | `NativeLogQuery=true` | 全部 | 無 |
 
+`NativeLogQuery=false` 時，上表的「驅動須處理」由 `Search` 承擔。`NativeLogQuery=true` 時，宣告的 pushdown 過濾由 `SearchNative` 承擔；`Search` 仍回 selectors 與時間範圍的超集，不因那些位元少回列。分流見 `10` §2.3，ClickHouse 的 `Search` 契約見 `17` §6.5 AC-43。
+
 **`Limit` 的陷阱**：只有在驅動已套用**全部**過濾條件時才能下推 `Limit`。否則驅動必須忽略 `Limit`，改由中間層在補算後截斷；驅動應改用設定檔的 `max_scan_rows` 做保護並在超出時回 `ErrTooLarge`。這一條寫錯會導致「日誌少了」這種最難查的 bug。執行器只在 `PushdownPlan.Limit == false` 且 `q.Limit > 0` 時截斷；`Limit == true` 表示驅動已經截過，不得再截。`promqladapter.Limits` 不參與。
 
 ### 4.3 迭代器

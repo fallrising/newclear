@@ -87,13 +87,13 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 ## P2-05
 
-Owner 已鎖定 AC-43 至 AC-71。這一輪實作 `SearchNative`。狀態不是關閉。
+Owner 已鎖定 AC-43 至 AC-71。實作完成，等合併。狀態不是關閉。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-05 | ClickHouse `NativeLogQuerier`：`17` §6.5 的 AC-43 至 AC-71 | T-0354 | 實作 | 2026-10-20T00:27:00Z | 未關閉 | 2026-10-20T04:38:16Z |
+| P2-05 | ClickHouse `NativeLogQuerier`：`17` §6.5 的 AC-43 至 AC-71 | T-0354 | 實作完成、等合併 | 2026-10-20T00:27:00Z | 等合併 | 2026-10-20T04:59:26Z |
 
-開始仍是 owner 打開規格的時鐘。實作從 2026-10-20T02:15:00Z 起。允許路徑是 `drivers/clickhouse/**`、`pkg/spi` 的 `Validate`，以及 `pkg/spi/conformance` 的 C-LOG-03/04/05。HTTP 仍不接 `SearchNative`。JSON `Eq` 的 SQL 只做超集粗篩，driver 以與執行器相同的 parseJSON 規則精篩，精篩前不加 `LIMIT`。last_activity 是寫入這次精篩的時鐘。
+開始仍是 owner 打開規格的時鐘。實作從 2026-10-20T02:15:00Z 起。允許路徑是 `drivers/clickhouse/**`、`pkg/spi` 的 `Validate`，以及 `pkg/spi/conformance` 的 C-LOG-03/04/05。HTTP 仍不接 `SearchNative`。JSON `Eq` 的 SQL 只做超集粗篩，driver 以與執行器相同的 parseJSON 規則精篩，精篩前不加 `LIMIT`。空字串 `Eq` 是 AC-71：0 列，空字串值不建標籤，與執行器相同。last_activity 是 rebase 到含這條鎖定的 main 之後的時鐘。
 
 ## Backlog
 

@@ -57,7 +57,7 @@
 | P2-03 | `internal/query/logql/exec.go` + `agg.go`：串流補算與聚合（**執行順序見 `16` §3.5–§3.7**） | P2-02 | 同上 | `16` §4.2 的 AC-1 至 AC-28，以及 AC-42 |
 | P2-04 | `internal/compat/lokiapi`：query_range/query/labels/label values/series/index stats/ready | P2-03 | `internal/compat/lokiapi/**` | `02` §3.4 的 AC-29 至 AC-41。Grafana Loki datasource health 與 Explore 以這組為準 |
 | P2-05 | `drivers/clickhouse`：`NativeLogQuerier`（**翻譯規則見 `17` §6**） | P2-01,P1-10 | `drivers/clickhouse/**`；`pkg/spi` 的 `Capabilities.Validate`（AC-59）；`pkg/spi/conformance` 只限 C-LOG-03/04/05 的 `NativeLogQuery` 與 pushdown 分流（AC-63、AC-64） | `17` §6.5 的 AC-43 至 AC-71。`C-LOG-03`/`C-LOG-04`/`C-LOG-05` 綠；logfmt 正確回 `ErrUnsupported` 觸發回退。Owner 於 2026-10-20 選 2，並對 JSON `Eq` 選方案 1（粗篩超集，再以與執行器相同的 parseJSON 規則精篩）。空字串 `Eq` 鎖定為 AC-71。規格 PR 不實作 |
-| P2-06 | `internal/alerting/rules`：規則檔解析（Prometheus 格式 + `prism_` 擴充）、熱重載 | P0-07 | `internal/alerting/rules/**` | 真實 rule 檔載入；`promtool check rules` 相容性實測並記入 ADR |
+| P2-06 | `internal/alerting/rules`：規則檔解析（Prometheus 格式 + `prism_` 擴充）、熱重載 | P0-07 | `internal/alerting/rules/**` | `07` §10 的 AC-72 至 AC-87。AC-88 至 AC-93 未鎖定，規格 PR 不實作。promtool 對照是 2.53.0 |
 | P2-07 | `internal/alerting/eval` + `state`：評估器、狀態機、`ALERTS` 回寫、Postgres 狀態持久化 | P2-06,P1-08 | `internal/alerting/{eval,state}/**` | A4/A5 驗收通過 |
 | P2-08 | `internal/alerting/{silence,inhibit,dispatch}`：靜默、抑制、分組 | P2-07 | 對應路徑 | A7 通過；抑制環在載入時被拒絕 |
 | P2-09 | `internal/alerting/notify`：Notifier SPI + 六個渠道（**webhook payload 契約見 `20` §9**） | P2-08,P0-10 | `internal/alerting/notify/**` | 每渠道有測試；payload 與 Alertmanager 逐欄位比對；憑證遮罩測試通過 |

@@ -2,7 +2,7 @@
 
 desk 卡：T-0354。本檔是 `platform/prism/docs/tasks/BOARD.md`。
 
-P2-05 規格已鎖定，這一輪是實作。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-06 以後只列 backlog，不拆、不做。
+P2-05 已合併。P2-06 正在寫規格。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-07 以後只列 backlog，不拆、不做。
 
 P2-04 依 `12-IMPLEMENTATION-PHASES.md`。HTTP 驗收是 `02-COMPATIBILITY-CONTRACT.md` §3.4 的 AC-29 到 AC-41。AC-42 在 `16-LOGQL-GRAMMAR.md` §4.2，與這輪一起做。
 
@@ -87,21 +87,30 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 ## P2-05
 
-Owner 已鎖定 AC-43 至 AC-71。實作完成，等合併。狀態不是關閉。
+Owner 已鎖定 AC-43 至 AC-71。已合併。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-05 | ClickHouse `NativeLogQuerier`：`17` §6.5 的 AC-43 至 AC-71 | T-0354 | 實作完成、等合併 | 2026-10-20T00:27:00Z | 等合併 | 2026-10-20T04:59:26Z |
+| P2-05 | ClickHouse `NativeLogQuerier`：`17` §6.5 的 AC-43 至 AC-71。證據 #428，`dc09beab` | T-0354 | 已合併 | 2026-10-20T00:27:00Z | 2026-10-20T05:02:49Z | 2026-10-20T05:02:49Z |
 
-開始仍是 owner 打開規格的時鐘。實作從 2026-10-20T02:15:00Z 起。允許路徑是 `drivers/clickhouse/**`、`pkg/spi` 的 `Validate`，以及 `pkg/spi/conformance` 的 C-LOG-03/04/05。HTTP 仍不接 `SearchNative`。JSON `Eq` 的 SQL 只做超集粗篩，driver 以與執行器相同的 parseJSON 規則精篩，精篩前不加 `LIMIT`。空字串 `Eq` 是 AC-71：0 列，空字串值不建標籤，與執行器相同。last_activity 是 rebase 到含這條鎖定的 main 之後的時鐘。
+開始仍是 owner 打開規格的時鐘。實作從 2026-10-20T02:15:00Z 起。允許路徑是 `drivers/clickhouse/**`、`pkg/spi` 的 `Validate`，以及 `pkg/spi/conformance` 的 C-LOG-03/04/05。HTTP 仍不接 `SearchNative`。JSON `Eq` 的 SQL 只做超集粗篩，driver 以與執行器相同的 parseJSON 規則精篩，精篩前不加 `LIMIT`。空字串 `Eq` 是 AC-71：0 列，空字串值不建標籤，與執行器相同。end 與 last_activity 是 #428 合併提交 `dc09beab` 的時鐘。
+
+## P2-06
+
+Owner 打開規格，只寫文件，不實作。狀態不是關閉。
+
+| ID | 任務 | desk | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P2-06 | 告警規則檔：`07` §10 的 AC-72 至 AC-93 | T-0354 | SDD 撰寫中 | 2026-10-20T05:27:00Z | 未完成 | 2026-10-20T05:35:32Z |
+
+開始是 owner 指示寫 P2-06 規格的時鐘。允許路徑是 `internal/alerting/rules/**`。AC-72 至 AC-87 對齊 promtool 2.53.0 的實測。AC-88 至 AC-93 未鎖定。這次只改文件。last_activity 是寫入這份規格的時鐘。
 
 ## Backlog
 
-P2-06 以後。不拆、不做。
+P2-07 以後。不拆、不做。
 
 | ID | 任務 |
 | --- | --- |
-| P2-06 | 告警規則檔 |
 | P2-07 | 告警評估與狀態 |
 | P2-08 | 靜默、抑制、分組 |
 | P2-09 | Notifier 與六個渠道 |

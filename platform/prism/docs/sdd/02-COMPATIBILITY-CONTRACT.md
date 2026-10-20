@@ -350,7 +350,7 @@ Silence 物件欄位：`id`、`matchers[{name,value,isRegex,isEqual}]`、`starts
 | C6 | Explore 日誌查詢 + 標籤自動完成 | Grafana Explore | 可用 |
 | C7 | Trace 瀑布圖渲染 | Grafana Explore | 可用 |
 | C8 | trace → logs 關聯跳轉 | Grafana derived fields | 可跳且有結果 |
-| C9 | `promtool check rules` | promtool | 通過 |
+| C9 | `promtool check rules` | promtool 2.53.0 | 通過。案例與實測見 `07` §10 |
 | C10 | `amtool alert query` / `amtool silence add` | amtool | 通過 |
 | C11 | 官方 Node Exporter Full 儀表板 | Grafana Dashboard 1860 | 主要面板有資料 |
 

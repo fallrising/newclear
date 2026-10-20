@@ -32,6 +32,8 @@ type Router struct {
 
 **強制開關**：設定 `query.force_fallback: true` 時，即使後端支援下推也走回退路徑。這是 differential test 的基礎（見 `10-CONFORMANCE-TESTING.md` §4），必須實作。
 
+P2-05 只規格化 `drivers/clickhouse` 的 `SearchNative`（`17` §6.5，AC-43 起）。本表的路由器與 `force_fallback` 接線仍是 P3-07，不在那一階段的允許路徑裡。
+
 ## 2. PromQL 回退引擎
 
 不自己寫 PromQL。使用 `github.com/prometheus/prometheus/promql`（Apache-2.0），只需提供 `storage.Queryable`。

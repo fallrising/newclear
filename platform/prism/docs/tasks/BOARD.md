@@ -2,7 +2,7 @@
 
 desk 卡：T-0354。本檔是 `platform/prism/docs/tasks/BOARD.md`。
 
-本輪做 P2-04，並補 AC-42 的輸入序列上限。時間是 UTC。已關閉的 P0-01 到 P2-03 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-05 以後只列 backlog，不拆、不做。
+本輪只寫 P2-05 的規格，不實作。時間是 UTC。已關閉的 P0-01 到 P2-04 只附證據；P0 到 P2-01 當時沒有留下開始時間，不補寫。P2-06 以後只列 backlog，不拆、不做。
 
 P2-04 依 `12-IMPLEMENTATION-PHASES.md`。HTTP 驗收是 `02-COMPATIBILITY-CONTRACT.md` §3.4 的 AC-29 到 AC-41。AC-42 在 `16-LOGQL-GRAMMAR.md` §4.2，與這輪一起做。
 
@@ -85,13 +85,22 @@ P2-02d 的開始是審查前最後一次記下的時鐘，結束是全模組 `ma
 
 開始是 owner 指示繼續 T-0354、實作 AC-42 與 P2-04 的時鐘。結束是第一輪本機 `make lint test` 通過後的時鐘。AC-38 的第二個 `series` body 以 #423 為準：完整 stream 標籤，標籤字典序。審查後補了兩項：`query_range` 與 instant 的統計查詢帶 tenant；每個 `query_range` 都檢查 `direction`。last_activity 是這次修正的本機 `make lint test` 通過後的時鐘。
 
+## P2-05
+
+Owner 打開規格，只寫文件，不實作。狀態不是關閉。
+
+| ID | 任務 | desk | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P2-05 | ClickHouse `NativeLogQuerier` 規格：`17` §6.5 的 AC-43 至 AC-62 | T-0354 | 規格 | 2026-10-20T00:27:00Z | 未實作 | 2026-10-20T00:50:31Z |
+
+開始是 owner 指示只寫這份規格的時鐘。允許路徑是 `drivers/clickhouse/**`，外加 `pkg/spi` 的 `Validate`。階段出口仍是 `C-LOG-03`、`C-LOG-04`、`C-LOG-05`，以及 logfmt 回 `ErrUnsupported`。Owner 於 2026-10-20 鎖定先前 12 項，HTTP 仍不接 `SearchNative`。last_activity 是這次鎖定寫入規格的時鐘。
+
 ## Backlog
 
-不拆、不做。
+P2-06 以後。不拆、不做。
 
 | ID | 任務 |
 | --- | --- |
-| P2-05 | ClickHouse `NativeLogQuerier` |
 | P2-06 | 告警規則檔 |
 | P2-07 | 告警評估與狀態 |
 | P2-08 | 靜默、抑制、分組 |

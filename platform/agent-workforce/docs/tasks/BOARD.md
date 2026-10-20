@@ -8,7 +8,7 @@
 
 設計：[xn-slice1-design.md](../xn-slice1-design.md)；驗收：[verification §12](../verification.md#12-xn-第一片fake設計中)。
 
-**實作任務（XS-2 起）要等 owner 審過 XS-1 的設計與 AC 才開始。**
+**設計決定已由 owner 2026-10-20 採納；XS-1 合併後即可從 XS-2 開始。**
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |

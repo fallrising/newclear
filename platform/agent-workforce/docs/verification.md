@@ -214,4 +214,4 @@ Codex 37個持久事件被產品封存並接入，4個 opaque tool calls 仍留�
 | XN-AC-20 | 從 M1（`user_version=1`）資料庫升級，內有既有 inbox 列，沒有規則 | 新程式開啟並經 `Controller.receive` 收一則工作類訊息 | `user_version=2`；既有列沒有 disposition、也沒補發回應；新訊息照常落盤並排一封 `stored` 回應，寫一次 `access.legacy_open` 審計 |
 | XN-AC-21 | 已安裝規則 | 想回到沒有規則的狀態 | 沒有刪除介面；用空 allow 替換屬於收緊，不需 `allow_widen`，之後全部拒絕，不會回到 `legacy_open` |
 
-XN-AC-20 的 `legacy_open` 行為取決於 owner 對設計 D-4 的決定；若改為預設全拒，此案例改寫為「沒有規則時全部拒絕」。
+XN-AC-20 的 `legacy_open` 行為依設計 D-4，owner 2026-10-20 已採納。

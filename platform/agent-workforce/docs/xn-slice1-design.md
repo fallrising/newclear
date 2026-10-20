@@ -1,6 +1,6 @@
 # XN 第一片技術設計：協議回應、處理狀態與存取規則（單機）
 
-- 狀態：**設計待審，未實作**。owner 審過本頁與 [verification §12](verification.md#12-xn-第一片fake設計中) 的 XN-AC 之後，才開始寫程式。
+- 狀態：**設計已定（owner 2026-10-20 依建議採納 §10 各項），未實作**。合併本頁與 [verification §12](verification.md#12-xn-第一片fake設計中) 後，即可依任務板開始實作。
 - 範圍：[跨節點傳輸](cross-node-transport.md) §4 的 XN-01、XN-03、XN-04、XN-06，落在現有 M1 控制核心（Python 3.11 標準庫、SQLite、單一可信 controller、fake transport）。
 - 不做：XN-02、XN-05、XN-07；任何真實網路、Tailscale、daemon、帳號或部署；不改 SDD 的不變量與里程碑。
 - 任務：desk T-0366；技術任務在 [tasks/BOARD.md](tasks/BOARD.md)。
@@ -25,7 +25,7 @@ M1 目前沒有喚醒機制，也沒有網路 transport。本片的「不喚醒�
 | D-1 | 協議回應用**新表**（`protocol_outbox`、`protocol_inbox`），不擴充既有 `outbox`／`inbox` | 既有表的語意、測試與 WF-AC-03 不變；協議回應有自己的生命周期與重試欄位 |
 | D-2 | 處理狀態用**新表** `inbox_disposition`，一則 inbox 訊息最多一列 | 不改既有 `inbox` 欄位；決定、結果連結與已處理時間集中一處 |
 | D-3 | 存取規則存在既有 `records` 表，`kind="access_policy"`、`key="local"`，沿用版本化 `put_record` | 不新增表；revision 單調、審計沿用 `record.put` |
-| D-4 | 沒有存取規則時維持 M1 現況（`legacy_open`），並寫審計；一旦安裝規則就不能移除，只能替換 | 升級不改變既有行為，也就不擴權；跨節點 adapter（第二片）必須在有規則時才允許啟用。**此項需 owner 確認**（見 §10） |
+| D-4 | 沒有存取規則時維持 M1 現況（`legacy_open`），並寫審計；一旦安裝規則就不能移除，只能替換 | 升級不改變既有行為，也就不擴權；跨節點 adapter（第二片）必須在有規則時才允許啟用。owner 2026-10-20 已採納 |
 | D-5 | 回應的 message_id 由 `(原 receipt_id, state)` 決定，同一狀態最多一封；`seq` 在同一交易內取該 receipt 的最大值加一 | 固定 ID 讓重送冪等；`seq` 讓收方判斷新舊 |
 | D-6 | 本片回應只帶結構化欄位，不帶模型產生的文字 | 避免回執夾帶未審內容；結果正文走既有 ArtifactRef |
 | D-7 | 投遞在交易外呼叫 transport，前後各一個交易記帳，沿用 `dispatch` 的模式 | 不在持有 SQLite 鎖時做 I/O；回應遺失時以同 ID 重試 |
@@ -235,13 +235,15 @@ sequenceDiagram
 | 新表與審計不保存秘密或 body | WF-INV-11 |
 | 文件、fake 證據分層 | WF-INV-12 |
 
-## 10. 請 owner 決定
+## 10. owner 決定（2026-10-20：全部依建議）
 
-1. **D-4：沒有規則時是否維持現況。** 建議維持（`legacy_open`），因為改成全拒會讓現有 M1 用法全部失效；代價是單機情況下仍不設防，要等你安裝規則。另一個選擇是升級後預設全拒。
-2. **worker revision 變更就暫停回應。** 建議保守：任何 revision 變化都 `held`，由 operator 放行。代價是改了無關欄位（例如 role）也會卡住回應。
-3. **重試邊界。** 建議 2 秒起、上限 60 秒、最多 20 次、原訊息期限再加 24 小時。
-4. **`notice` 是否回應。** 建議不回應。
-5. **`settle_inbox` 由誰觸發。** 本片只提供手動呼叫；是否要排程，等第二片有 daemon 再定。
+| 事項 | 決定 |
+| --- | --- |
+| D-4：沒有存取規則時 | 維持 M1 現況（`legacy_open`），寫審計；安裝規則後不能回到沒有規則 |
+| binding 變更 | 保守：recipient 的 worker revision 或規則 revision 一變就 `held`，由可信 operator 放行 |
+| 重試邊界 | 2 秒起倍增、上限 60 秒、最多 20 次；`expires_at` 為原訊息期限加 24 小時 |
+| `notice` | 不回應 |
+| `settle_inbox` | 本片只提供手動呼叫；排程等第二片有 daemon 再定 |
 
 ## 11. 實作順序與規模
 

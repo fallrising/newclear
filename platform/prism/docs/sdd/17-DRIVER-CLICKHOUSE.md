@@ -4,7 +4,7 @@
 
 ## 當期 P1-10 契約與後续設計
 
-P1-09提供單節點nativefactory、migration與三Storewrites。P1-10完成mandatoryqueries與最小daemon接線的當期設計，見[查詢契約](../specs/p1-10-clickhouse-query.md)與[ADR-019](13-ADR.md#adr-019p1-10-mandatory-query-與現有-spi-語義適配)；驗收只由inventory實測支持。非空cluster明確Unsupported，不聲稱replicated完成。Optionalmetricmetadata/delete/nativequery、NativeLogQuerier及P3RED/Dependencies仍不實作／宣告；Retention.Enforced=false（seriesmetadata無TTL）。後面fullcapabilitytable、groupArray／labels_str排序、logfilter/nativeaggregation與RED/dependencySQL是後续階段草稿，不取代現有SPI或当期spec。
+P1-09提供單節點nativefactory、migration與三Storewrites。P1-10完成mandatoryqueries與最小daemon接線的當期設計，見[查詢契約](../specs/p1-10-clickhouse-query.md)與[ADR-019](13-ADR.md#adr-019p1-10-mandatory-query-與現有-spi-語義適配)；驗收只由inventory實測支持。非空cluster明確Unsupported，不聲稱replicated完成。Optionalmetricmetadata/delete/nativequery、NativeLogQuerier及P3RED/Dependencies仍不實作／宣告；Retention.Enforced=false（seriesmetadata無TTL）。後面fullcapabilitytable、groupArray／labels_str排序、logfilter/nativeaggregation與RED/dependencySQL是後续階段草稿，不取代現有SPI或当期spec。P2-05 的編號驗收在 §6.5。那一節尚未經 owner 同意，也不把本段的「尚未實作／宣告」改成已完成。
 
 當期查詢必須以實際sample存在做catalog，跨monthmetadata合併避免join倍增；完整labels.Compare排序不能單用008分隔符labels_str。Metricsinclusive毫秒，logs/traces依現有半開奈秒；missing鍵與empty值的matcher等價，但catalog只回真正有鍵的值。LogSearch只下推selectors/time/sort且不在補算前limit；trace duration從整個trace取root最大duration，沒有root才maxspan，零durationroot仍有效；GetTrace包含late／末筆span。
 
@@ -31,6 +31,8 @@ clickhouse://user:password@host:9000/database?secure=false&dial_timeout=5s
 | `retention_metrics_days` / `_logs_days` / `_traces_days` / `_red_days` | 30/14/7/90 | 寫入 DDL 的 TTL |
 
 ## 2. 宣告的能力
+
+下面這段是後續草圖，不是當期宣告。`Capabilities.Validate` 要求 `NativeLogQuery == true` 時 `Pushdown.all()` 為真，含 `ParsedFieldLogfmt` 與 `Limit`。§6.3 又寫這兩位為 false。兩邊同時成立時驅動無法既通過 `Validate`、又保住 logfmt 回 `ErrUnsupported`。P2-05 不在本段選定，見 §6.5 AC-57。
 
 ```go
 spi.Capabilities{
@@ -218,6 +220,8 @@ ORDER BY value LIMIT {limit:UInt64}
 
 `hasToken(body, hint)` 能命中 `idx_body_tokens` 的 tokenbf 索引，是日誌查詢效能的關鍵。**前提是 hint 必須是完整 token**（被非字母數字分隔）——若 hint 含分隔符，改用 `position()`（無索引加速但正確）。
 
+上表的次序鍵寫 `_part_offset`。檔頭、ADR-019 與已落地的 `Search` 用 `write_seq`：`_part_offset` 會隨 merge 改變，不能代表寫入序。§6.5 AC-51 只鎖可觀察的寫入序，不改這張表的欄位名。
+
 ### 6.2 完整查詢模板
 
 ```sql
@@ -265,6 +269,85 @@ ORDER BY t
 - 若 `window != step`：拉出每個 step 桶的計數後在 Go 端做滑動累加。此時 SQL 用 `step` 的最大公因數作為桶大小。
 
 **若 `window` 不是 `step` 的整數倍**：回退為中間層完全補算（`Aggregation` 下推對此查詢視為不可用）。這種情形罕見，正確性優先。
+
+### 6.5 P2-05 驗收（AC-43 起）
+
+這一節是文件。owner 同意前不實作。編號接在 AC-42 之後。HTTP 案例仍是 `02` §3.4 的 AC-29 至 AC-41，執行器案例仍是 `16` §4.2 的 AC-1 至 AC-28 與 AC-42。這裡不改那些條文。
+
+未決的業務與預設值不在條文裡選邊。選項列在開這份規格的 PR 描述末尾。條文寫「見待決定」的句子，在 owner 點名那個選項之前不能當成已鎖定的 Then。
+
+#### 範圍
+
+範圍內是 `12` 的 P2-05：`drivers/clickhouse` 的 `NativeLogQuerier`，翻譯規則沿用本節 §6.1 至 §6.4 裡已經寫明、且與 P1-10 契約不衝突的部分。
+
+範圍外：
+
+- Phase 6 的 `extractAllGroupsHorizontal` logfmt SQL。
+- `LiveTail`（Phase 4）、RED、`DependencyQuerier`（P3）、非空 `cluster`。
+- `internal/query` 路由器與 `query.force_fallback` 的接線。那是 P3-07。`11` 已有 `force_fallback: false`，本階段不新造預設值。
+- `internal/compat/lokiapi`。現在的查詢 HTTP 仍是 `Search` 加執行器。
+- P2-06 以後。
+- 改 `LogStore.Search`。P1-10 契約保持：只下推 selectors、時間與排序，補算前不加 `LIMIT`，同奈秒次序鍵是寫入序。
+
+`06` §1 寫：`caps.Logs.NativeLogQuery == true` 時把 `LogQuery` 交給 `NativeLogQuerier`，否則 `Search` 加補算。`NativeLogQuerier.SearchNative` 回 `LogResult`，不是 `LogIterator`。`Agg == nil` 填 `Streams`，`Agg != nil` 填 `Matrix`。`Search` 是 Tier-1，始終保留。logfmt 階段讓 `SearchNative` 回 `spi.ErrUnsupported`，呼叫端改走 `Search` 加執行器。這條回退是階段出口，不是新介面。
+
+#### 設定
+
+`SearchNative` 沿用 §1 的 driver options，不新增值。未覆寫時：
+
+| 項目 | 預設 |
+|---|---|
+| `max_execution_time` | `55` 秒，必須小於 `query.timeout`（`11` 的預設是 60 秒） |
+| `max_memory_usage` | `1000000000` |
+| `max_result_rows` | `5000000`（正值，≤2^30） |
+| `max_rows_to_read` | `5000000`（正值，≤2^30） |
+| `max_result_bytes` | `67108864`（正值，≤2^40） |
+| `async_insert` | 不適用於這條讀取。logs 寫入仍是同步 INSERT |
+| `cluster` | `""`。非空仍是 Unsupported |
+
+超出 `max_result_rows` 回 `ErrTooLarge`。§6.2 模板寫 `max_bytes_to_read`，§1 的名字是 `max_rows_to_read` 與 `max_result_bytes`。實際 setting 名見待決定。數字以 §1 為準。
+
+#### 錯誤
+
+`SearchNative` 使用 §9 的對照，不另做一張表。`SYNTAX_ERROR` 是 `ErrInternal`：SQL 由驅動生成。logfmt 階段是 `ErrUnsupported`，不是語法錯誤。`ErrTooLarge` 的訊息正文 SDD 沒有鎖定。
+
+#### 測試怎麼分
+
+單元測試沒有 `//go:build integration`。`make test` 與 Prism CI 的 `make lint test` 是 `go test -race -count=1 ./...`，不會連上 ClickHouse。這層覆蓋翻譯結果、logfmt 的 `ErrUnsupported`、以及能力位與介面同真同假。
+
+整合測試在 `drivers/clickhouse` 的 `//go:build integration` 檔。`make conformance` 經 `drivers/clickhouse/run-integration.py` 執行：有 `PRISM_CLICKHOUSE_TEST_DSN` 就用它，否則腳本自起容器。`C-LOG-03`、`C-LOG-04`、`C-LOG-05` 要在這層、對著真實 ClickHouse 維持成立。`make test` 通過不表示這三條已經在 ClickHouse 上跑過。
+
+**AC-43** Given 實作 P2-05。When 看變更路徑。Then 只有 `drivers/clickhouse/**`。`LogStore.Search` 的可觀察契約不變：selectors、時間、排序，補算前沒有 `LIMIT`。沒有 Phase 6 的 logfmt SQL，沒有 `LiveTail`、RED、`DependencyQuerier`、非空 `cluster`，也沒有 `internal/query` 路由器或 `internal/compat/lokiapi` 的修改。
+
+**AC-44** Given `Logs()`。When `NativeLogQuery` 為 true。Then 同一個值實作 `NativeLogQuerier`：`SearchNative(ctx, LogQuery) (LogResult, error)`。`Agg == nil` 時結果在 `Streams`，`Agg != nil` 時結果在 `Matrix`。`Search` 仍回 `LogIterator`。When 能力位是 false。Then 不得實作這個介面（C-GEN-06）。本條不決定能力位能否在 `ParsedFieldLogfmt == false` 時為 true。
+
+**AC-45** Given `Stages` 含 `ParseLogfmt`。When `SearchNative`。Then `spi.Classify` 為 `ErrUnsupported`。不得把截斷後的 `Streams` 或 `Matrix` 當成成功。不使用 `extractAllGroupsHorizontal`。`ParsedFieldLogfmt` 維持 false。
+
+**AC-46** Given 兩筆 `{host="h1"}`：`TS=1757030400000000000`／body `in`，`TS=1757030401000000000`／body `out`。When `SearchNative`，`Start=1757030400000000000`，`End=1757030401000000000`，沒有行過濾、沒有 parse、`Agg=nil`，`Limit` 大於 1，`Direction=Forward`。Then `Streams` 只有 `in`。等於 end 的 `out` 不在 `[Start, End)`。
+
+**AC-47** Given 區間內兩筆 `{host="h1"}`，較早的 body 是 `alpha`，較晚的是 `beta`。When `Filters` 為 `LineContains` `"alp"`。Then 只有 `alpha`。When 改成 `LineNotContains` `"alp"`。Then 只有 `beta`。
+
+**AC-48** Given body `hello token` 與 `hello-token`。When `LineMatch`，正則來源是 `hello token`。Then 只有中間為空白的那筆。`LiteralHint` 含分隔符時不得改這個結果：不得多收 `hello-token`，也不得漏掉 `hello token`。Given body `hello` 與 `hello token`。When `LineNotMatch`，正則來源是 `^hello$`，且沒有可用 hint。Then 排除 `hello`，留下 `hello token`。
+
+**AC-49** Given body `{"status":"500"}` 與 `{"status":"200"}`，`Stages` 只有 `ParseJSON`，`Fields` 一筆 `Field=status`、`Op=Eq`、`Value=500`。When `SearchNative`。Then 只有第一筆。`Ne`、`Re`、`NotRe`、`Gt`、`Gte`、`Lt`、`Lte`、巢狀鍵與缺欄不在本條。
+
+**AC-50** Given 區間內三筆，時間由早到晚：body `keep-a`、`drop`、`keep-b`。When `LineContains` `"keep"`，`Limit=1`，`Direction=Forward`，沒有 parse。Then 只有 `keep-a`。When 只把 `Direction` 改成 `Backward`。Then 只有 `keep-b`。When 同一組過濾再加上 `ParseLogfmt`。Then `ErrUnsupported`，不是只回一筆。
+
+**AC-51** Given 同一奈秒兩筆 `{host="h1"}`，寫入順序先 body `a`、後 body `b`。When `Direction=Forward`。Then `a` 在 `b` 前面，兩筆都在。When `Direction=Backward`。Then 兩筆都在，寫入序仍是 `a` 在 `b` 前面。這是 C-LOG-08。SQL 欄位名不在本條鎖定。
+
+**AC-52** Given `{host="h1"}` 的 body `in` 在 `1757030400000000000`，body `out` 在 `1757030399000000000`。`Start=1757030400000000000`，`End=1757030401000000000`，`Window=1s`，`Step=1s`，`VectorOp` 空。When `RangeFunc=count_over_time`。Then `Matrix` 一條 `{host="h1"}`，一個樣本，`TS=1757030400000` 毫秒，`Value=1`。`out` 在左開邊界上，不計入。窗口是 `(t-Window, t]`。When `RangeFunc=rate`。Then 同一個樣本位置，`Value=1`（筆數除以 1 秒，在 Go 端除）。When `RangeFunc=bytes_over_time`。Then `Value=2`。
+
+**AC-53** Given 一筆 `{host="h1"}` 在 `1757030401000000000`。`Start` 是這個時間，`End=Start+3s`，`Window=2s`，`Step=3s`，`count_over_time`。2 不是 3 的整數倍。When `SearchNative` 回成功。Then 樣本 `TS=1757030401000` 毫秒，`Value=1`。這是查詢 `Start` 對齊的 `(t-Window, t]`，不是對齊 Unix epoch 的 `1757030400000`。When 這次聚合不下推。Then 不得把 epoch 桶當成成功的 `Matrix`。用哪個 `ErrClass` 通知呼叫端見待決定。
+
+**AC-54** Given `SearchNative` 碰到 ClickHouse `TOO_MANY_ROWS`(158)、`TOO_MANY_BYTES`(307) 或 `MEMORY_LIMIT_EXCEEDED`(241)。Then `ErrTooLarge`。When `TIMEOUT_EXCEEDED`(159)。Then `ErrTimeout`。When `SYNTAX_ERROR`(62)。Then `ErrInternal`，不是 `ErrBadRequest`。訊息正文不在本條鎖定。
+
+**AC-55** Given driver options 用 §1 的預設。When `SearchNative` 送出查詢。Then 生效的 `max_execution_time` 是 55 秒，`max_result_rows` 是 5000000，`max_memory_usage` 是 1000000000。超出 `max_result_rows` 回 `ErrTooLarge`。`max_rows_to_read` 的預設數字是 5000000，`max_result_bytes` 的預設數字是 67108864。setting 的欄位名見待決定。
+
+**AC-56** Given 單元測試。When `make test`。Then 不需要 ClickHouse，也不編譯 `//go:build integration`。這層要蓋到 AC-45 的 `ErrUnsupported`，以及能力位與 `NativeLogQuerier` 同真同假。Given 整合測試。When `make conformance`。Then 才連接 ClickHouse，並使 `C-LOG-03`、`C-LOG-04`、`C-LOG-05` 在能力宣告變更之後仍然成立。
+
+**AC-57** Given `Validate` 今天的規則：`NativeLogQuery` 為 true 就要 `Substring`、`Regex`、`ParsedFieldJSON`、`ParsedFieldLogfmt`、`Limit`、`Sort` 全為 true。§6.3 寫 `ParsedFieldLogfmt` 與 `Limit` 為 false。When owner 還沒選定。Then 不得把 logfmt 標成已下推來通過 `Validate`，也不得帶著 `Validate` 失敗宣告 P2-05 完成。§2 草圖不是當期能力。`Stats`、`Aggregation`、`Retention.Enforced`、`Traces.RED`、`Dependencies` 不因本階段改成 true。
+
+**AC-58** Given 一筆 `{host="h1"}` 在 `1757030400000000000`。`Start` 是這個時間，`End=Start+2s`，`Window=2s`，`Step=1s`，`count_over_time`，`VectorOp` 空。When `SearchNative` 回成功。Then 兩個樣本，毫秒 `1757030400000` 與 `1757030401000`，值都是 `1`。窗口是 `(t-Window, t]`。SQL 桶用 step 還是 `window` 與 `step` 的最大公因數，不在本條鎖定。
 
 ## 7. 追蹤查詢
 

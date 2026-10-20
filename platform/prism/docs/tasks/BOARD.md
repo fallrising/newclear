@@ -91,9 +91,9 @@ Owner 打開規格，只寫文件，不實作。狀態不是關閉。
 
 | ID | 任務 | desk | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P2-05 | ClickHouse `NativeLogQuerier` 規格：`17` §6.5 的 AC-43 至 AC-58 | T-0354 | 規格 | 2026-10-20T00:27:00Z | 未實作 | 2026-10-20T00:34:12Z |
+| P2-05 | ClickHouse `NativeLogQuerier` 規格：`17` §6.5 的 AC-43 至 AC-62 | T-0354 | 規格 | 2026-10-20T00:27:00Z | 未實作 | 2026-10-20T00:50:31Z |
 
-開始是 owner 指示只寫這份規格的時鐘。允許路徑是 `drivers/clickhouse/**`。階段出口仍是 `C-LOG-03`、`C-LOG-04`、`C-LOG-05`，以及 logfmt 回 `ErrUnsupported`。能力宣告、次序鍵、路由器要不要納入，都不在這張表裡選邊。last_activity 是這份規格文字寫入時的時鐘。
+開始是 owner 指示只寫這份規格的時鐘。允許路徑是 `drivers/clickhouse/**`，外加 `pkg/spi` 的 `Validate`。階段出口仍是 `C-LOG-03`、`C-LOG-04`、`C-LOG-05`，以及 logfmt 回 `ErrUnsupported`。Owner 於 2026-10-20 鎖定先前 12 項，HTTP 仍不接 `SearchNative`。last_activity 是這次鎖定寫入規格的時鐘。
 
 ## Backlog
 

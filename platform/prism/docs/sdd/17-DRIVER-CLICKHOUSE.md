@@ -213,7 +213,7 @@ ORDER BY value LIMIT {limit:UInt64}
 | `LineMatch` + `LiteralHint` | `hasToken(body, {hint:String}) AND match(body, {re:String})` |
 | `LineMatch` 無 hint | `match(body, {re:String})` |
 | `LineNotMatch` | `NOT match(body, {re:String})`（不可用 hint 加速） |
-| `ParseJSON` + `FieldFilter` | `Op=Eq`：SQL 只做粗篩，driver 再精篩（本節下一段，AC-49、AC-65 至 AC-69）。其他 `CompareOp` 回 `ErrUnsupported`（AC-49） |
+| `ParseJSON` + `FieldFilter` | `Op=Eq`：SQL 只做粗篩，driver 再精篩（本節下一段，AC-49、AC-65 至 AC-69、AC-71）。其他 `CompareOp` 回 `ErrUnsupported`（AC-49） |
 | `ParseLogfmt` + `FieldFilter` | `extractGroups(body, ...)`，或退化為中間層補算（見 §6.3） |
 | `Direction` | `ORDER BY ts DESC`（Backward）/ `ASC`（Forward），其後 `write_seq ASC`（AC-51）。不用 `_part_offset` |
 | `Limit` | `LIMIT {n:UInt64}`，僅在全部條件都已在 SQL 下推、且沒有只做粗篩的 JSON `Eq` 時使用。有 JSON `Eq` 時精篩後才截斷（AC-70） |
@@ -233,7 +233,7 @@ Owner 於 2026-10-20 對 JSON `Eq` 漏列選方案 1。SQL 的 JSON 述詞只做
 - 同一個物件裡的重複鍵留第一個。陣列與 JSON `null` 不建標籤。布林為 `true` 或 `false`。
 - stream label 與 parsed field 同名時，stream label 留原名，parsed field 只加一次 `_extracted`。目標名已被 stream label 或先收下的抽出標籤佔用，該值丟掉。`Attrs` 不參與撞名，也不當欄位過濾的輸入。
 
-缺欄，或 parse 之後沒有該標籤：該列不在結果中，不是 `ErrUnsupported`。非 `Eq` 的 `CompareOp` 仍是 `ErrUnsupported`。`ParsedFieldJSON` 維持 true，因為 `SearchNative` 回傳的是精篩後的列。`Pushdown.Limit` 維持 false（AC-57）。沒有 JSON `Eq` 時，AC-50 的 `LIMIT` 仍在 SQL。有 JSON `Eq` 時，SQL 在精篩前不加 `LIMIT`；精篩後依 `Direction` 與 `write_seq` 次序套用 `Limit`。空字串 `Eq`（`Value=""`）的 Then 未鎖定，見 §6.5 末。
+缺欄，或 parse 之後沒有該標籤：該列不在結果中，不是 `ErrUnsupported`。非 `Eq` 的 `CompareOp` 仍是 `ErrUnsupported`。`ParsedFieldJSON` 維持 true，因為 `SearchNative` 回傳的是精篩後的列。`Pushdown.Limit` 維持 false（AC-57）。沒有 JSON `Eq` 時，AC-50 的 `LIMIT` 仍在 SQL。有 JSON `Eq` 時，SQL 在精篩前不加 `LIMIT`；精篩後依 `Direction` 與 `write_seq` 次序套用 `Limit`。空字串 `Eq`（`Value=""`）已鎖定，與執行器相同（AC-71）：標籤必須存在且值為 `""`。缺鍵、JSON `null`、沒建成標籤的物件或陣列都不算，該列不在結果中，不是 `ErrUnsupported`。`JSONExtractString(body, field) = ''` 會把這些列多收回來，只能當超集粗篩，不能當最終條件。
 
 ### 6.2 完整查詢模板
 
@@ -289,7 +289,7 @@ ORDER BY t
 
 ### 6.5 P2-05 驗收（AC-43 起）
 
-這一節是文件。Owner 已於 2026-10-20 鎖定 AC-43 至 AC-64 裡未被本段改寫的條文。同日對 JSON `Eq` 漏列選方案 1，因此 §6.1 的 JSON 與 `Limit` 列、AC-49 改寫，並新增 AC-65 至 AC-70。空字串 `Eq` 的 Then 未鎖定，見本節末。實作另開 PR，合併這次規格前不寫程式。編號接在 AC-42 之後。HTTP 案例仍是 `02` §3.4 的 AC-29 至 AC-41，執行器案例仍是 `16` §4.2 的 AC-1 至 AC-28 與 AC-42。這裡不改那些條文。
+這一節是文件。Owner 已於 2026-10-20 鎖定 AC-43 至 AC-64 裡未被本段改寫的條文。同日對 JSON `Eq` 漏列選方案 1，因此 §6.1 的 JSON 與 `Limit` 列、AC-49 改寫，並新增 AC-65 至 AC-71。空字串 `Eq` 已鎖定為 AC-71，與執行器相同。實作另開 PR，合併這次規格前不寫程式。編號接在 AC-42 之後。HTTP 案例仍是 `02` §3.4 的 AC-29 至 AC-41，執行器案例仍是 `16` §4.2 的 AC-1 至 AC-28 與 AC-42。這裡不改那些條文。
 
 #### 範圍
 
@@ -358,7 +358,7 @@ ORDER BY t
 
 **AC-55** Given driver options 用 §1 的預設。When `SearchNative` 送出查詢。Then settings 含 `max_execution_time = 55`、`max_memory_usage = 1000000000`、`max_rows_to_read = 5000000`、`max_result_rows = 5000000`、`max_result_bytes = 67108864`。沒有名為 `max_bytes_to_read` 的設定。超出 `max_result_rows` 回 `ErrTooLarge`，底層文字見 AC-54。
 
-**AC-56** Given 單元測試。When `make test`。Then 不需要 ClickHouse，也不編譯 `//go:build integration`。這層要蓋到 AC-45 的 `ErrUnsupported`，能力位與 `NativeLogQuerier` 同真同假，以及 JSON `Eq` 的 SQL 在精篩前沒有 `LIMIT`、也沒有會少列的 `JSONExtractString` 相等當成最終條件。Given 整合測試。When `make conformance`。Then 才連接 ClickHouse。`NativeLogQuery=true` 時，C-LOG-03 的已宣告過濾由 `SearchNative` 驗已濾好，`Search` 驗超集；`NativeLogQuery=false` 的驅動仍只走 `Search`，既有結果不得失敗。見 AC-63、AC-64。AC-65 至 AC-70 在這層對真實列比對 `Search` 再經執行器。
+**AC-56** Given 單元測試。When `make test`。Then 不需要 ClickHouse，也不編譯 `//go:build integration`。這層要蓋到 AC-45 的 `ErrUnsupported`，能力位與 `NativeLogQuerier` 同真同假，以及 JSON `Eq` 的 SQL 在精篩前沒有 `LIMIT`、也沒有會少列的 `JSONExtractString` 相等當成最終條件。Given 整合測試。When `make conformance`。Then 才連接 ClickHouse。`NativeLogQuery=true` 時，C-LOG-03 的已宣告過濾由 `SearchNative` 驗已濾好，`Search` 驗超集；`NativeLogQuery=false` 的驅動仍只走 `Search`，既有結果不得失敗。見 AC-63、AC-64。AC-65 至 AC-71 在這層對真實列比對 `Search` 再經執行器。
 
 **AC-57** Given P2-05 的目標能力。Then `ParsedFieldLogfmt=false`、`Limit=false`、`Stats=false`、`LiveTail=false`。`Logs()` 不實作 `LogStatser`。`Retention.Enforced`、`Traces.RED`、`Dependencies` 維持 false。不得把 logfmt 標成已下推。§2 草圖不是這組能力。`Aggregation` 的開關見 AC-61，不在本條提前設成 true。
 
@@ -388,9 +388,7 @@ ORDER BY t
 
 **AC-70** Given 時間由早到晚兩筆：body `{"status":"200"}`、body `{"a":{"b":"v"}}`。`Stages` 只有 `ParseJSON`，`Field=a_b`、`Op=Eq`、`Value=v`，`Limit=1`，`Direction=Forward`。When `SearchNative`。Then 只有第二筆。精篩前的 SQL 不得加 `LIMIT`。粗篩若先截成第一筆，精篩後會變成空結果，那不是本條的結果。`Pushdown.Limit` 仍是 false。
 
-#### 空字串 `Eq`（未鎖定）
-
-`Value=""` 的 `Eq` 尚未鎖定 Then，不設 AC。現況是 `JSONExtractString(body, field) = ''` 在缺鍵時得到空字串，也會命中 JSON `null` 與物件等被該函式抽成空字串的列，因此比執行器多回列。執行器的字串 `=` 要求該標籤存在且值相等（`16` §3.6）；缺鍵不過。建議寫在這次規格 PR，等 owner 拍板後才寫進 AC。拍板前，這條不驗收，實作不得把多回的列當成已驗收的成功，也不得自行改成 `ErrUnsupported`。
+**AC-71** Given 四筆，`Stages` 只有 `ParseJSON`。body `{"other":"1"}`（缺鍵 `k`）、`{"k":null}`、`{"k":{"a":1}}`（物件，parse 之後沒有標籤 `k`）、`{"k":""}`。`Fields` 一筆 `Field=k`、`Op=Eq`、`Value=""`。When `SearchNative`。Then 只有第四筆。前三筆不在結果中。不是 `ErrUnsupported`。Owner 於 2026-10-20 鎖定：與執行器相同，標籤必須存在且值為 `""`。缺鍵、JSON `null`、沒建成標籤的物件或陣列都不算。Given 另外的 body `{"k":[1]}`（陣列，不建標籤 `k`），同一組 `Eq`。When `SearchNative`。Then 該列不在結果中。列集合與同一查詢走 `Search` 再經執行器相同。`JSONExtractString(body, k) = ''` 會多收前三筆與這個陣列，不能當最終條件。
 
 ## 7. 追蹤查詢
 

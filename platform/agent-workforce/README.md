@@ -27,6 +27,7 @@ PYTHONPATH=src python3 -m agent_workforce demo --db var/demo.sqlite
 | [能力表](docs/provider-capabilities.md) | 產品能力與各自的接入／驗收條件 |
 | [第一場景](docs/first-scenario.md) | 未來兩個原生 agent 的工程協作驗收 |
 | [驗收與證據](docs/verification.md) | DOC、FAKE、NATIVE、API、LIVE、SOAK 分層 |
+| [跨節點傳輸](docs/cross-node-transport.md) | 跨節點設計需求與 Yobiru 0.5 參照（只借概念，不採用） |
 
 ## 系統邊界
 

@@ -1,6 +1,6 @@
 # Agent Workforce — Software Design Document
 
-- 版本：0.3；M2 切片更新：2026-10-17（原設計：2026-10-11）。
+- 版本：0.3；M2 切片更新：2026-10-17；§1.1 Yobiru 重新查核：2026-10-20（原設計：2026-10-11）。
 - 狀態：**M1 核心與有界 M2 原生切片已實作；完整 M2 及跨產品設計仍待驗收**。[M1 契約](docs/m1.md) 記錄 Python/SQLite/fake 的實際範圍與延期項；[M2 契約](docs/m2.md) 記錄原生 adapter 的實作與未通過 gate；帳號配置及部署未完成。
 - 範圍：單一 owner 的跨產品、多帳號數位工作者；六類原生 agent 產品，以及可由 harness 使用的 DeepSeek API。
 - 讀者入口：[README](README.md)；供應商事實：[能力表](docs/provider-capabilities.md)；執行場景：[first-scenario](docs/first-scenario.md)；AC：[verification](docs/verification.md)。
@@ -15,9 +15,11 @@
 
 ### 1.1 從 Yobiru 借鑑什麼
 
-來源固定為 [chekusu/yobiru@422f40e9497dd0a842c83e6a89a6528568706fdd](https://github.com/chekusu/yobiru/tree/422f40e9497dd0a842c83e6a89a6528568706fdd)，查核日 2026-10-11。Yobiru 以可尋址訊息、檔案 inbox、喚醒 adapter、回覆關聯與附件交接，把既有 agents 接起來；[SPEC](https://github.com/chekusu/yobiru/blob/422f40e9497dd0a842c83e6a89a6528568706fdd/SPEC.md) 與 [Codex bridge](https://github.com/chekusu/yobiru/blob/422f40e9497dd0a842c83e6a89a6528568706fdd/codex_bridge.py) 分別界定基礎 transport 與可恢復的本地 bridge。
+原始來源固定為 [chekusu/yobiru@422f40e9497dd0a842c83e6a89a6528568706fdd](https://github.com/chekusu/yobiru/tree/422f40e9497dd0a842c83e6a89a6528568706fdd)（0.3.0），查核日 2026-10-11。2026-10-20 重新查核 [fe39463](https://github.com/chekusu/yobiru/tree/fe39463fbbd8ee51f475820bc7c774febf57aa22)（0.5.3），owner 決定**只借概念、不採用**：不部署、不作 transport adapter、不接 Codex bridge。
 
-本設計借用「薄通信層＋既有原生 agent」與「離線收件、按需喚醒」的方式。Yobiru 本機檔案 inbox 與 Grok Bot 的 Internet email 是不同東西；基礎 transport 不提供通用持久重送或 exactly-once execution。主機認證也不自動驗證同機的每個 agent 名稱。這些是新設計需要另立契約的邊界，不能因上游示例存在就宣稱整合可用。
+Yobiru 以可尋址訊息、檔案 inbox、喚醒 adapter、回覆關聯與附件交接，把既有 agents 接起來。本設計借用「薄通信層＋既有原生 agent」與「離線收件、按需喚醒」的方式。Yobiru 本機檔案 inbox 與 Grok Bot 的 Internet email 是不同東西。
+
+0.3.0 時的兩項描述已不成立：0.5 起有可選的請求生命周期（收件回執、處理中、最終結果、逾時即未知，回應以固定 ID 持久重試），但普通訊息仍不重投，也不保證 exactly-once execution；新安裝預設改為 tailnet 存取模式，不再要求白名單。主機認證仍不驗證同機的各 agent 名稱，同一資料目錄的 agents 仍共用 inbox。逐項證據、借用的概念、刻意不採用的做法與跨節點故障矩陣見 [跨節點傳輸](docs/cross-node-transport.md)。上游示例存在不代表整合可用。
 
 ### 1.2 本次目標與非目標
 
@@ -343,7 +345,7 @@ Operator 至少能看到：工作者可用／未驗證／暫停原因；排隊�
 
 ## 15. 來源與查核範圍
 
-- Yobiru 固定 commit 與 SPEC／bridge 連結見 §1.1；此為來源研究，沒有執行上游整合。
+- Yobiru 兩個固定 commit 見 §1.1，逐檔證據見 [跨節點傳輸](docs/cross-node-transport.md)；此為來源研究，沒有安裝、執行或整合上游。
 - 相鄰公開元件讀取基準：newclear@5b4dd565d4f269ce49e08a5381eb60943312d87f；當前整合基準為 82ee784c3329acdf640c9f4867afe64cbf8b1b8a。來源狀態以各元件文件／程式為準；本次不推定線上環境狀態。
 - 供應商官方來源、2026-10-11 查核結果與政策適用限制集中在 [provider-capabilities](docs/provider-capabilities.md)，實機 promotion 證據仍為未驗證。
 - 設計中的物件、上限、儲存選擇、責任分工和里程碑是本項目提案；不視為供應商保證，也不代表已進行帳號／資源／部署操作。

@@ -116,6 +116,11 @@ func writef(writer io.Writer, format string, arguments ...any) bool {
 }
 
 func runService(ctx context.Context, configuration *config.Config, logger *slog.Logger) error {
+	stopRules, err := startRuleReload(ctx, configuration.Rules.Path, logger)
+	if err != nil {
+		return err
+	}
+	defer stopRules()
 	registry, err := newRuntimeRegistry()
 	if err != nil {
 		return err

@@ -1731,6 +1731,25 @@ Resume 2026-10-21 UTC: owner restored Grok login and explicitly selected opencod
 Current main 6cd69eec (Retro RE-0) merged without conflicts. Final checks and final-head independent review required again. Prior LongCat failure is historical. Final acceptance/merge evidence recorded on PR #449 without post-review commit changes.
 
 
+## Program: Handwired HW-0 / Handwired-20261021-1808
+
+Issue #450; draft PR #452. Owner milestone prompt authorizes one milestone, commit/push and conditional merge; no deploy, dependency installation, AGENTS edits or issue closing. Own worktree only. Base cda7571e.
+
+Objective: AC-01 pinned upstream API support table and executable CPU example. HW-1–3 remain pending.
+Tasks: T-450 bounded read-only API audit (native worker, no delegation); root owns implementation, docs, test-first evidence, task/report and decisions; different-family external read-only reviewer on final head before merge.
+Gates: source pin verification; failing example test before implementation; Node built-in tests and actual upstream CPU example via common workspace launcher; project-success tests/validator; llms validator; diff check; final-head CI and independent review; latest main integration then rerun/review if changed; MERGED readback.
+Budget: one native audit up to 15 min, one external review up to 10 min per revision. No paid APIs. Usage/quota unknown.
+State: API audit accepted; local HW-0 checks passed. Final review/CI and merge evidence recorded on PR #452 without post-review edits.
+
+HW0-D01: ACCEPT T-450 source audit after root inspection of exact signatures/callers. Root independently executed real source example. General backward is available; no analytic-only fallback needed.
+HW0-D02: Red missing-module failure observed before implementation. Five focused tests and nine-point example pass using unchanged upstream core; repo 15 structural tests, 41 contracts, llms (0 errors), diff and worker contracts pass. Node isolated reporter only showed one file-level case, so canonical command explicitly uses --test-isolation=none (5 cases observed).
+HW0-D03: External review route follows owner's explicit external-cli-workers.md invocation: grok plan, no subagents, grok-4.7 (xAI; model list observed via authenticated grok.com, no paid API keys). Author family OpenAI. Fixed 600-second read-only budget, max 20 turns. No provider install or permission bypass. Review, final CI, latest-main check and merge readback pending.
+
+HW0-D04: REWORK initial CI: evidence/llms.txt accidentally matched capability-index discovery after git staging; renamed artifact to llms-validation.txt without validator changes. Dedicated pinned-api passed. First Grok attempt was sandbox_init_failed (read-only session storage), not a review; retry requires normal execution-environment escalation and final corrected SHA.
+
+HW0-D05: Grok plan tool attempt returned cancelled with no verdict. Safe retry used complete fixed-commit diff/spec/upstream extracts with tools disabled (max3 turns, no delegation); actual result APPROVE, no blockers, for 9f7452b0610c7aee419f9f44e5406b47fb44fef0. All three CI runs on that head succeeded, including manually dispatched llms. Nonblocking observations are documented limitations (trusted immutable source, Node-only probe, future HW-1–3 pending); no scope expansion.
+HW0-D06: Main advanced through Retro #453 and Kith #449 to 9b31fa1776213b68e7d38b6db4f706e6dd7def15. Merge conflict only appended .team/PLAN sections; preserve current main verbatim and append this Handwired section. Product/test/CI files unchanged. Rerun local gates, final-head CI and a new different-family review before merging. Evidence-gate decision: ACCEPT bounded HW-0 functionality, delivery conditional on those final gates; acceptance/merge SHA recorded in PR and preserved closeout evidence. No second milestone.
+
 ## Program: Kith reading capture phase 1 / Kith-20261021-1837
 
 Issue #456, draft PR #457, base 9b31fa1776213b68e7d38b6db4f706e6dd7def15. Orchestrator owns specification, integration and acceptance.
@@ -1739,3 +1758,5 @@ Gates: local isolated D1 migration; RC-01–04 E2E plus evidence validator; work
 Acceptance: pending. Node24.18.0 official toolchain preparation underway; currently installed24.14.0 cannot substitute silently.
 
 T-456 source accepted after inspection; E2E lint PASS. Runtime RED: capture-link absent after successful login (phase1-e2e-red3); first two attempts were diagnosed missing host browser libs, remedied with isolated Debian library extraction and Chromium smoke141.0.7390.37. Evidence schema exposed duplicate @mobile tag (fix in test metadata, not schema weakening). Seven API integration tests RED due missing tables. Existing base155 + sidecar14 + worker29 passed in broader RED run. Isolated draft D1 apply PASS before promotion. T-457 frontend assigned separate worktree; orchestrator backend/migration writes disjoint paths.
+
+Main integration: fetched 6c61fded (Handwired HW-0). Only appended PLAN sections conflicted; preserved upstream verbatim and appended our program. Kith runtime/tests unchanged by this merge. Required checks rerun before final review.

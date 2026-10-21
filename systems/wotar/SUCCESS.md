@@ -34,6 +34,18 @@ Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完�
 | AC-04 | Given local EMQX 與另一 broker profile，When TLS、ACL negative 及 opt-in synthetic broker-swap smoke，Then 僅合法端點可通信且 crypto 不依賴 broker | historical | [progress](secure-mqtt-e2ee/docs/progress.md)：local integration 與 public smoke Done |
 | AC-05 | Given 現行來源與原生驗證環境；When 執行 make lint／types／test；Then 必要 gate 全部通過且未執行項目明示 | failed | [本次 lint 輸出](../../docs/project-success/evidence/newclear-qualification/wotar-03.log)：test_key_rotation.py import 排序 I001；type／unit 通過但三項 certificate-dependent cases skipped |
 
+## 本次修復計畫（T-0368／newclear #442）
+
+目標：修復 AC-05 的 I001，補跑原本必要的憑證與真 broker gate，維持 AC-01–05。
+範圍：import 排序、必要 test runner／CI 及證據文件；不新增 runtime dependency。
+先執行未修版本 make lint 保存失敗；再只修排序。測試以獨立 source fixture、
+新產生 CA/client/server/keyring、唯一 container 與 loopback 連接埠隔離，
+不在既有 certs／config／.secure_mqtt 路徑覆寫任何內容。
+重跑 doctor、lint、typecheck、test、coverage（原 86% 門檻）、本機 EMQX integration；
+補明三個原 certificate-dependent skip 的實際結果，另核對 opt-in synthetic public broker smoke。
+對外 smoke 只允許新隨機 namespace 與合成密文；無法連線則保留缺口，不用 local 替身冒充。
+獨立審查、必要 CI、合併與遠端核對前不打標；未滿足全部主線則 usable_tag 保持 none。
+
 ## 現況與缺口
 
 2026-10-21 現行 lint gate 未通過，因此保留歷史功能完成紀錄，整體重新驗收與 usable 標記暫不通過；本次不修正產品。

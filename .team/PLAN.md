@@ -1690,3 +1690,10 @@ Tiered documentation: root catalog + policy + component README banners + A-tier 
 ## Program: project-success / Variant: 2026-10-21
 
 本次跨項目驗收契約的目標、分工、驗證與接受決策見 [delivery plan](../docs/project-success/PLAN.md)。本區不改動其他 program 的權責與歷史紀錄。
+
+
+# T-0368 Wotar repair, #442
+
+Orchestrator owns plan and evidence gate. Preceding transfer group delivered as kernel PR199 with remote tags verified.
+Current: docs-first I001 reproduction, minimal import fix, isolated certs and real broker gates, independent review, CI/merge/readback.
+No other product implementation in parallel. Public smoke failure cannot be replaced by a local fake or hidden.

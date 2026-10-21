@@ -26,3 +26,10 @@ Product tests and benchmarks are not required for this documentation-only change
 ## Risks and Follow-ups
 
 The economy design needs two distinct forms of evidence: transaction correctness and real players finding the choices worth repeating. Simulated transactions cannot establish human demand or MMO-scale operation. The learning design needs pinned source review, numerical/gradient checks and a small controlled demonstration before any usefulness or performance claim. Both projects remain documents only.
+
+## MVP revision — 2026-10-22
+
+- Retro Economy SDD cut to a two-profession listing/buy slice on a single-threaded stdlib server with four SQLite tables; escrow, commissions, quality tiers, expiry, migrations and economy simulation are listed as deferred.
+- Handwired SDD now starts with an upstream API check: the pinned docs confirm the `Circuit` builder and CPU evaluator but do not document a callable gradient API. If none exists, the page uses analytic gradients and says so. Holdout, finite differences and evidence export are deferred. Learning rate 0.05 on nine fixed points was checked on paper to converge within 500 steps and 2.0 to diverge; it has not been run.
+- Kith reading/capture plan cut to one private deployment: mobile capture, inbox, reading page and human notes, with one-way D1 → Git export and acceptance cases RC-01 to RC-07. Public deployment, Telegram/Slack, analytics and read-version diff are deferred.
+- Verification: `git diff --check` passed; relative links in the changed documents resolve. No product tests were run; these remain design documents.

@@ -36,3 +36,11 @@ Run root capability-index validator and `git diff --check`; inspect changed-docu
 ## Authority and delivery
 
 Owner requested repository project/SDD creation. Scoped branch/PR documentation delivery only; final design acceptance and implementation are separate. Refs #438.
+
+## Owner revision — 2026-10-22
+
+Owner asked to review the delivered SDDs plus Kith's reading/capture plan and cut them to an MVP without over-design, then said to proceed with the recommendations ("放手幹吧"). This extends the writable scope to:
+
+- `products/kith/docs/plans/cloudflare-reading-capture.md` and its entry in `products/kith/README.md` (documentation only; Kith runtime, schema and contracts untouched).
+
+Merge authority for this PR changes to: merge after green CI, per the owner's standing instruction. Issue closure and design acceptance remain with the owner.

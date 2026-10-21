@@ -61,3 +61,5 @@ Browser retry uses `run_experiments.py dim-browser-attempt3`, `QUALIFICATION_NOD
 | [wotar-unit-commands.json](wotar-unit-commands.json) | `systems/wotar/secure-mqtt-e2ee` | `make test` | 0 | 8.035 | [wotar-unit-01.log](wotar-unit-01.log) |
 
 Public evidence redacts operator directories as `<operator-home>`, `<worker-worktree>` and `<lead-worktree>`. Substitute your own paths when replaying commands; source hashes, command arguments within the project, test assertions and outcomes are preserved. Test-only addresses and owned disposable Docker networks are synthetic fixtures, not production endpoints.
+
+`sha256.json` binds the final public, path-redacted text artifacts after integration; it does not hash private raw operator paths.

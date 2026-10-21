@@ -1,0 +1,96 @@
+=== RUN   TestM1ST03DurableAfterSIGKILL
+--- PASS: TestM1ST03DurableAfterSIGKILL (0.02s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/storage	0.019s
+=== RUN   TestM3ThreeProcessFailoverAndRestartDriver
+--- PASS: TestM3ThreeProcessFailoverAndRestartDriver (0.06s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/raft	0.068s
+=== RUN   TestM4RF1PersistentHWRecoveryAndCommittedFetch
+=== PAUSE TestM4RF1PersistentHWRecoveryAndCommittedFetch
+=== CONT  TestM4RF1PersistentHWRecoveryAndCommittedFetch
+--- PASS: TestM4RF1PersistentHWRecoveryAndCommittedFetch (0.01s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/replication	0.017s
+=== RUN   TestM5PR07CLIResumesDurablePendingBatchBeforeNewInput
+{"request_id":"ledger","data":{"base_offset":"0","last_offset":"0","next_sequence":"1","duplicate":true,"leader_term":"2"}}
+--- PASS: TestM5PR07CLIResumesDurablePendingBatchBeforeNewInput (0.00s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfkctl	0.009s
+=== RUN   TestM6CG04SDKStopsStaleGenerationAndNeverCommitsItsWork
+=== PAUSE TestM6CG04SDKStopsStaleGenerationAndNeverCommitsItsWork
+=== RUN   TestM6SDKRetriesUnknownCommitWithTheSameRequest
+=== PAUSE TestM6SDKRetriesUnknownCommitWithTheSameRequest
+=== RUN   TestM6CG05CG06RealWALRestartKeepsOffsetsAndFencesOldSessions
+=== PAUSE TestM6CG05CG06RealWALRestartKeepsOffsetsAndFencesOldSessions
+=== RUN   TestM6CG03SDKRejoinsAfterItsSessionExpired
+=== PAUSE TestM6CG03SDKRejoinsAfterItsSessionExpired
+=== RUN   TestM6SDKDropsUnknownCommitFromAFencedGeneration
+=== PAUSE TestM6SDKDropsUnknownCommitFromAFencedGeneration
+=== RUN   TestM6DemoRebalanceCrashAndCoordinatorRestart
+=== PAUSE TestM6DemoRebalanceCrashAndCoordinatorRestart
+=== CONT  TestM6CG04SDKStopsStaleGenerationAndNeverCommitsItsWork
+=== CONT  TestM6CG03SDKRejoinsAfterItsSessionExpired
+--- PASS: TestM6CG03SDKRejoinsAfterItsSessionExpired (0.04s)
+=== CONT  TestM6DemoRebalanceCrashAndCoordinatorRestart
+--- PASS: TestM6CG04SDKStopsStaleGenerationAndNeverCommitsItsWork (0.05s)
+=== CONT  TestM6SDKDropsUnknownCommitFromAFencedGeneration
+=== NAME  TestM6DemoRebalanceCrashAndCoordinatorRestart
+    m6_demo_test.go:77: two members: generation=2 phase=STABLE assignment=map[c1:[0 2] c2:[1]]
+--- PASS: TestM6SDKDropsUnknownCommitFromAFencedGeneration (0.04s)
+=== CONT  TestM6CG05CG06RealWALRestartKeepsOffsetsAndFencesOldSessions
+=== NAME  TestM6DemoRebalanceCrashAndCoordinatorRestart
+    m6_demo_test.go:83: third member joined: generation=3 phase=STABLE assignment=map[c1:[0] c2:[1] c3:[2]]
+    m6_demo_test.go:92: c1 processed events/0 offsets 2..3 and was killed before committing
+    m6_demo_test.go:98: c1 session expired: generation=4 phase=STABLE assignment=map[c2:[0 2] c3:[1]]
+    m6_demo_test.go:103: coordinator killed and recovered from its WAL
+    m6_demo_test.go:106: after coordinator restart: generation=5 phase=STABLE assignment=map[c2:[0 2] c3:[1]]
+    m6_demo_test.go:136: generations=[2 3 4 5] process calls=17 (15 records, 2 reprocessed)
+--- PASS: TestM6DemoRebalanceCrashAndCoordinatorRestart (0.11s)
+=== CONT  TestM6SDKRetriesUnknownCommitWithTheSameRequest
+--- PASS: TestM6CG05CG06RealWALRestartKeepsOffsetsAndFencesOldSessions (0.07s)
+--- PASS: TestM6SDKRetriesUnknownCommitWithTheSameRequest (0.03s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/pkg/client	0.195s
+=== RUN   TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData
+=== PAUSE TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData
+=== RUN   TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload
+=== PAUSE TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload
+=== RUN   TestM7OP03FloodSlowClientsAndFetchStormStayBounded
+=== PAUSE TestM7OP03FloodSlowClientsAndFetchStormStayBounded
+=== RUN   TestM7OP04LostProduceReplyIsRetriedWithTheSameIdentity
+=== PAUSE TestM7OP04LostProduceReplyIsRetriedWithTheSameIdentity
+=== RUN   TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines
+=== PAUSE TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines
+=== RUN   TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets
+=== PAUSE TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets
+=== CONT  TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData
+=== CONT  TestM7OP04LostProduceReplyIsRetriedWithTheSameIdentity
+=== NAME  TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData
+    broker_test.go:64: changed topology: mkfk: data directory: provided topology bytes do not match stored cluster.json
+    broker_test.go:64: unformatted dir: mkfk: data directory: open data-dir lock: no such file or directory
+    broker_test.go:64: insecure bind: mkfk: listeners [10.255.255.1:19092] are not loopback; pass --allow-insecure-bind only on an isolated network
+    broker_test.go:64: wrong node: mkfk: data directory: storage node ID mismatch
+    broker_test.go:79: locked data dir: mkfk: data directory: lock data directory: resource temporarily unavailable
+--- PASS: TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData (0.09s)
+=== CONT  TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets
+    replication_test.go:58: SIGKILLed broker 3, leader of events/0
+--- PASS: TestM7OP04LostProduceReplyIsRetriedWithTheSameIdentity (1.19s)
+=== CONT  TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines
+=== NAME  TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets
+    replication_test.go:69: SIGKILLed broker 2, the group coordinator
+--- PASS: TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets (2.71s)
+=== CONT  TestM7OP03FloodSlowClientsAndFetchStormStayBounded
+=== NAME  TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines
+    op04_test.go:141: old leader 3 killed; reached new leader 2; requests per call [1 2]
+--- PASS: TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines (1.66s)
+=== CONT  TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload
+--- PASS: TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload (1.58s)
+=== NAME  TestM7OP03FloodSlowClientsAndFetchStormStayBounded
+    op03_test.go:54: flood answers: 400 acknowledged, errors by code map[]
+    op03_test.go:71: flood: 400 acknowledged, peak pending waiters 28
+    op03_test.go:74: 200 slow-header connections closed by the broker after 5s
+    op03_test.go:77: fetch storm answered in 2.055s: map[200:102 429:306 503:192]
+--- PASS: TestM7OP03FloodSlowClientsAndFetchStormStayBounded (9.66s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfk	12.468s

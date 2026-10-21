@@ -1,5 +1,8 @@
 # M4 48GB 單人座位
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > 有界運行方案；投入與文件檔位尚未分級。見 [Portfolio](../../PORTFOLIO.md) 與[文件政策](../../docs/portfolio-doc-tiers.md)。
 
 把一台 **M4 Max、48GB** 的 MacBook Pro 訂成單人、開著蓋用的推論座位。機主已確認晶片是 M4 Max；對應配置是 16 核 CPU、40 核 GPU、廣告頻寬 546 GB/s。運行組合、記憶體上限與驗收清單在 [方案](docs/plan.md)。

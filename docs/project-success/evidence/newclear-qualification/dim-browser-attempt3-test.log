@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 [chromium] › e2e/foundation.spec.ts:10:1 › AC-01: production demo shell guards three centers and keeps its banner (5.0s)
+  ✓  2 [chromium] › e2e/m4-observability.spec.ts:152:3 › AC-17/18/19/25: aws Guide story preserves correlation through UI diagnosis and three recovery minutes (1.0m)
+  ✓  3 [chromium] › e2e/m4-observability.spec.ts:152:3 › AC-17/18/19/25: aliyun Guide story preserves correlation through UI diagnosis and three recovery minutes (57.5s)
+  ✓  4 [chromium] › e2e/m4-observability.spec.ts:152:3 › AC-17/18/19/25: onprem Guide story preserves correlation through UI diagnosis and three recovery minutes (55.2s)
+
+  4 passed (3.0m)

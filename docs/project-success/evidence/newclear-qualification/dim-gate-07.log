@@ -1,0 +1,2 @@
+$ node scripts/check-ci.mjs
+dim-gate workflow scope, action pins, authority and native gates passed.

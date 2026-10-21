@@ -98,3 +98,7 @@
 
 - **`kernel`**（private）— 私有的技術專案:VPS/fleet 基礎設施、個人工作流、agent 交付協定
 - **`knowledge-base`**、**`doc_analysis_study`**（private）— 獨立的知識來源與研究輸出
+
+## 項目完成度與可用版本
+
+[PROJECTS.md](PROJECTS.md) 列出各項目用途、Category、主線狀態、可用版本及盤點更新日。驗收方法見[共用規範](docs/project-success.md)。

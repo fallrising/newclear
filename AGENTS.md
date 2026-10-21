@@ -26,3 +26,7 @@ sh .agents/skills/use-modern-go/scripts/run-tool.sh list --file-path path/to/fil
 ```
 
 It reads the Go version from the nearest `go.mod`, so each module only gets idioms its version supports.
+
+## 項目完成度與可用版本
+
+所有第一方項目遵循[主線與驗收規範](docs/project-success.md)。接手先讀項目 SUCCESS.md，實作前更新範圍與 AC，收尾補證據、缺口及索引；新增項目也須納入 inventory。只有原定主線全部驗收、必要 CI／審查通過且合併後，才建立 annotated usable tag 並回讀遠端。不得以版本號、測試替身或本次文件盤點冒充可用驗收。

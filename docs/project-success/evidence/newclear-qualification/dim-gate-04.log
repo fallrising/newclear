@@ -1,0 +1,12 @@
+$ vitest run
+
+ RUN  v5.0.1 <worker-worktree>/platform/dim-gate
+
+
+ Test Files  46 passed (46)
+      Tests  426 passed (426)
+   Start at  15:41:45
+   Duration  35.45s (tests 72%, import 16%, environment 8%, transform 4%)
+
+    Isolate  46 workers spawned · ~349ms startup each (spawn + environment, per file)
+             at least ~5.00s faster with isolate: false — reuses workers across files instead of one per file

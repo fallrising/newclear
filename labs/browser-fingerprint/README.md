@@ -1,5 +1,8 @@
 # Daylight · 瀏覽器設備觀測實驗
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > 有界測試 lab；投入與文件檔位尚未分級。見 [Portfolio](../../PORTFOLIO.md) 與[文件政策](../../docs/portfolio-doc-tiers.md)。
 
 繁體中文任務工作台，使用原生 HTML、CSS、JavaScript 與 Go 標準函式庫。Go 提供靜態頁面、記憶體 mock CRUD API，以及本機 JSONL 設備與操作觀測。用途是比較不同瀏覽器／computer-use 的可觀測訊號；指紋無法證明個人身分或真人／AI。

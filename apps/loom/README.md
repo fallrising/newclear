@@ -1,5 +1,8 @@
 # Loom
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: C (dormant)** — Maintenance repairs do not reopen the plugin/runtime backlog. See [PORTFOLIO.md](../../PORTFOLIO.md) and [documentation policy](../../docs/portfolio-doc-tiers.md).
 
 Loom is a Tauri/Rust + React desktop workspace with canvas nodes, real terminal sessions, Markdown editing, runnable blocks, local output Pin, and AI provider adapters. It is an integrated prototype; reliability and desktop acceptance are still incomplete.

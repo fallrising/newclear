@@ -51,7 +51,7 @@
 | --- | --- | --- | --- |
 | [`platform/fanzloud`](platform/fanzloud/) | Cloud coding-agent platform 與 BYOS control layer | Rust | C |
 | [`platform/agent-platform`](platform/agent-platform/) | 自託管多 agent 工作平台（OpenHands Agent Canvas 範本） | React, Python, PostgreSQL, Cocoon | A |
-| [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品、多帳號數位工作者：調用、訊息、持久會話與資源授權（SDD-only） | SQLite、可替換 CLI／SDK／API adapters（規劃） | A |
+| [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品數位工作者：M1 離線核心與有界 M2 原生 adapter；完整 M2／跨產品整合仍有缺口 | Python、SQLite；可替換 adapters | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（M3 runtime） | Go, SQLite, React | A |
@@ -82,6 +82,8 @@
 | [`labs/pg-jev-router`](labs/pg-jev-router/) | pg-jev 輸入判斷、攔截與模型分流實驗；真 extension + 合成 provider | A |
 | [`labs/browser-fingerprint`](labs/browser-fingerprint/) | Go mock CRUD 與瀏覽器設備／操作觀測，支援私人 Quick Tunnel | 未分級 |
 | [`labs/m4-seat`](labs/m4-seat/) | M4 Max 48GB MacBook Pro 的單人推論座位方案；無 runtime | 未分級 |
+| [`labs/retro-economy`](labs/retro-economy/) | 原創復古 RPG 的小鎮經濟、職業分工與交易玩法 SDD；未實作 | 未分級 |
+| [`labs/handwired-learning`](labs/handwired-learning/) | 普通 JS 與固定數值圖對照的入門實驗 SDD；未實作 | 未分級 |
 
 ### 外部參考
 

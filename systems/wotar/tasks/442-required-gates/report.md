@@ -23,3 +23,7 @@ Statistics source=session tools +commands.json; period=2026-10-21 repair; outer/
 Exact command durations/exits recorded. No owner-enabled hard call budget.
 
 Initial CI run39645562049 remained queued: no registered runner matched the new workflow self-hosted labels. Corrected to repository-native ubuntu-24.04; no permissions/runner changes or skipped gate. Pending run is not a pass.
+
+## Post-merge factual update
+
+PR443 merged9b3d42425b1525cbec01020255444c00bd07f676; required-gates39646059025 and contracts39646058907 passed. Final docs independent ACCEPT at57a01326. Source tree byte-identical to33c9663e. Annotated usable/wotar/v0.1.0 objectc876d5fb906204b5b7ba36234a9d3ef0ca9e91fb peels to merge; remote readback verified. Earlier PARTIAL is retained historical pre-publication snapshot. This metadata-only follow-up awaits its own PR checks/merge; no runtime changes. Owner acceptance pending.

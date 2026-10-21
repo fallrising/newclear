@@ -45,7 +45,7 @@
 | [systems/mkfk](systems/mkfk/SUCCESS.md) | systems | 以可重播故障驗證分區日誌、複製與生產消費語義 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-19 |
 | [systems/ojbquay](systems/ojbquay/SUCCESS.md) | systems | 在 Kafka 與 PostgreSQL 上提供自助訊息發布、消費及故障處理 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [systems/snail](systems/snail/SUCCESS.md) | systems | 以 Rust 提供多核心純記憶體 RESP2 鍵值服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-10 |
-| [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-24 |
+| [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 完成 | [usable/wotar/v0.1.0](https://github.com/fallrising/newclear/tree/usable/wotar/v0.1.0/systems/wotar) | 2026-09-24 |
 | [tools/cc-quota](tools/cc-quota/SUCCESS.md) | tools | 採集 Claude Code 額度並用本機歷史呈現 pacing 與偏離通知 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [tools/codex-usage](tools/codex-usage/SUCCESS.md) | tools | 透過官方 Codex App Server 單次唯讀採集訂閱用量 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [tools/streaming-converter](tools/streaming-converter/SUCCESS.md) | tools | 保留 FFmpeg 多畫質 HLS 轉檔與網頁播放的歷史工具 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |

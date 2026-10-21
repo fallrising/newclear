@@ -1,14 +1,20 @@
-# Wotar 修復驗證（發布待完成）
+# Wotar 修復後可用資格
 
-RESULT: PENDING
+RESULT: PASS
 Project: systems/wotar
-Tag: none
+Tag: usable/wotar/v0.1.0
 Source: 33c9663e7590020fb0147c30e81e7a8db375db2b
 Startup: 新 CA/client/server/keyring、doctor 與真 EMQX 5.8.3 mTLS listener — passed
 Core: 真 TLS E2EE、篡改/topic/replay、rotation、durable recovery、ACL negatives、另一 broker 合成 smoke — passed
 Checks: lint/typecheck、183 native tests、86.49% coverage（原86%）、15 integration、1 public smoke — passed
 
-必要 PR CI、合併及遠端核對仍待完成，未建立 usable tag。
+PR443 已合併 `9b3d42425b1525cbec01020255444c00bd07f676`。
+[required-gates](https://github.com/fallrising/newclear/actions/runs/39646059025)51s、
+[contracts](https://github.com/fallrising/newclear/actions/runs/39646058907)7s 通過；獨立程式與文件審查 ACCEPT。
+受驗 source 至 merge 的 secure-mqtt-e2ee tree 完全相同（git diff --exit-code）。
+已建立 annotated tag object `c876d5fb906204b5b7ba36234a9d3ef0ca9e91fb`，
+ls-remote 回讀 peeled commit 為上述 merge，cat-file type=tag。
+Workflow push 均限定 main，tag 未觸發部署。
 環境 Python3.12.3/OpenSSL3.0.13、既有 dev dependencies；沒有新增 runtime dependency。
 EMQX pinned digest 與 exact argv/exit/duration 見 [commands](../evidence/wotar-repair/readiness-fixed/commands.json)。
 隔離暫存 source + 新憑證，唯一容器/bridge，僅發布127.0.0.1:8883。

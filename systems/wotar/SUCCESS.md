@@ -5,7 +5,7 @@ kind: tool
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-10-21
-source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
+source_commit: 33c9663e7590020fb0147c30e81e7a8db375db2b
 ---
 
 # Wotar 成功契約
@@ -23,16 +23,15 @@ Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完�
 
 ## 驗收條件
 
-下表 `historical` 是既有報告的結果，沒有在 2026-10-21 重跑。
-`pending` 保留缺少證據或尚未實作的條件；程式存在不等於通過。
+下表為 2026-10-21 修復後實跑；[完整證據與失敗歷史](../../docs/project-success/qualifications/wotar-repair.md)。發布 gate 仍待完成。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
 | --- | --- | --- | --- |
-| AC-01 | Given 信任的 publisher 與 keyring，When 加密發布並由合法 subscriber 收取，Then broker 只見密文且 endpoint 驗簽解密 | historical | [progress](secure-mqtt-e2ee/docs/progress.md)：local EMQX TLS/E2E integration |
-| AC-02 | Given 篡改 envelope、錯 topic 或 replay，When subscriber 驗證，Then 不交付未授權 plaintext 且重複訊息被去重 | historical | [progress](secure-mqtt-e2ee/docs/progress.md)：40-case tamper matrix 與 replay tests |
-| AC-03 | Given 舊 DEK 與新 active key，When rotation 並讀取歷史 ciphertext，Then 按 key 狀態解密且 revoked/retired 邊界遵守政策 | historical | [progress](secure-mqtt-e2ee/docs/progress.md)、[key lifecycle](secure-mqtt-e2ee/docs/key-lifecycle.md) |
-| AC-04 | Given local EMQX 與另一 broker profile，When TLS、ACL negative 及 opt-in synthetic broker-swap smoke，Then 僅合法端點可通信且 crypto 不依賴 broker | historical | [progress](secure-mqtt-e2ee/docs/progress.md)：local integration 與 public smoke Done |
-| AC-05 | Given 現行來源與原生驗證環境；When 執行 make lint／types／test；Then 必要 gate 全部通過且未執行項目明示 | failed | [本次 lint 輸出](../../docs/project-success/evidence/newclear-qualification/wotar-03.log)：test_key_rotation.py import 排序 I001；type／unit 通過但三項 certificate-dependent cases skipped |
+| AC-01 | Given 信任的 publisher 與 keyring，When 加密發布並由合法 subscriber 收取，Then broker 只見密文且 endpoint 驗簽解密 | passed | [本次原生／真 EMQX／public smoke 證據](../../docs/project-success/qualifications/wotar-repair.md) |
+| AC-02 | Given 篡改 envelope、錯 topic 或 replay，When subscriber 驗證，Then 不交付未授權 plaintext 且重複訊息被去重 | passed | [本次原生／真 EMQX／public smoke 證據](../../docs/project-success/qualifications/wotar-repair.md) |
+| AC-03 | Given 舊 DEK 與新 active key，When rotation 並讀取歷史 ciphertext，Then 按 key 狀態解密且 revoked/retired 邊界遵守政策 | passed | [本次原生／真 EMQX／public smoke 證據](../../docs/project-success/qualifications/wotar-repair.md) |
+| AC-04 | Given local EMQX 與另一 broker profile，When TLS、ACL negative 及 opt-in synthetic broker-swap smoke，Then 僅合法端點可通信且 crypto 不依賴 broker | passed | [本次原生／真 EMQX／public smoke 證據](../../docs/project-success/qualifications/wotar-repair.md) |
+| AC-05 | Given 現行來源與原生驗證環境；When 執行 make lint／types／test；Then 必要 gate 全部通過且未執行項目明示 | passed | [本次原生／真 EMQX／public smoke 證據](../../docs/project-success/qualifications/wotar-repair.md) |
 
 ## 本次修復計畫（T-0368／newclear #442）
 
@@ -50,16 +49,11 @@ Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完�
 
 ## 現況與缺口
 
-2026-10-21 現行 lint gate 未通過，因此保留歷史功能完成紀錄，整體重新驗收與 usable 標記暫不通過；本次不修正產品。
-
-
-歷史完成是 library/CLI 與本機／合成整合功能，不代表任意 production broker 已部署或審核。
-Keyring 檔案以 POSIX 0600 管理；optional passphrase/wrap 是後續保護，不虛稱現有 at-rest encryption。
-Public broker 只用合成資料，production profile 拒絕 public EMQX host。
-歷史 progress 缺本次目標 commit 的完整輸出與環境對帳，新的可用資格仍須補驗。
-
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
-歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
+I001、憑證缺少造成的三項 skips、TCP proxy 假就緒及隔離 runner 清理缺陷已修復。
+原生183 tests、15項真 EMQX integration、1項 opt-in synthetic public smoke 通過，coverage86.49%達原86%。
+歷史 skip／五項 TLS 失敗與審查 REWORK 均保留。技術主線驗證通過，交付仍待最終 CI、合併與遠端核對；目前 usable_tag 維持 none。
+本機／合成 library/CLI 範圍不代表 production 部署、任意 broker ACL、at-rest encryption 或 forward secrecy。
+Owner 驗收與技術交付分開。
 
 ## 啟動與驗證
 
@@ -71,9 +65,8 @@ Public broker 只用合成資料，production profile 拒絕 public EMQX host。
 
 ```sh
 make install
-make doctor
-make test
-make test-integration
+python scripts/verify_isolated.py --output /tmp/wotar-check --integration
+# 另一 broker 合成 smoke：明確加 --public-smoke
 ```
 
 執行後應保留來源 SHA、必要設定的非秘密摘要、命令與結果，
@@ -81,7 +74,6 @@ make test-integration
 
 ## 可用版本
 
-目前 `usable_tag: none`；本次沒有建立或發布任何 tag。
-既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
-
-須將歷史 phase/真 EMQX 證據對齊目前合併 commit，重跑 crypto、TLS/ACL、replay、rotation 與 durable recovery；標記不可宣稱未知 production ACL 或 forward secrecy。
+目前 `usable_tag: none`；必要 PR CI、合併及遠端核對尚待完成。
+全部 gate 通過後才評估建立新的 annotated usable/wotar/v0.1.0，建立並回讀後另行回寫實際 tag。
+不得移動既有 tag 或冒稱 owner 驗收。

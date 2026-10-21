@@ -1697,3 +1697,9 @@ Tiered documentation: root catalog + policy + component README banners + A-tier 
 Orchestrator owns plan and evidence gate. Preceding transfer group delivered as kernel PR199 with remote tags verified.
 Current: docs-first I001 reproduction, minimal import fix, isolated certs and real broker gates, independent review, CI/merge/readback.
 No other product implementation in parallel. Public smoke failure cannot be replaced by a local fake or hidden.
+
+Wotar source33c9663e: native183/coverage86.49%, actualEMQX15, public1 passed.
+Reviewer REWORK cleanup failures resolved;5 independent focused tests=>ACCEPT.
+I001,15skips and5TLSfailures retained with root causes. Runtime evidence PASS;
+committed delivery PARTIAL until final CI/merge/readback. usable_tag remains none until actual publication.
+Owner acceptance pending; next product begins after Wotar remote delivery.

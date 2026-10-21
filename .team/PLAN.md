@@ -1703,3 +1703,18 @@ Reviewer REWORK cleanup failures resolved;5 independent focused tests=>ACCEPT.
 I001,15skips and5TLSfailures retained with root causes. Runtime evidence PASS;
 committed delivery PARTIAL until final CI/merge/readback. usable_tag remains none until actual publication.
 Owner acceptance pending; next product begins after Wotar remote delivery.
+
+
+## Program: Handwired HW-0 / Handwired-20261021-1808
+
+Issue #450; draft PR #452. Owner milestone prompt authorizes one milestone, commit/push and conditional merge; no deploy, dependency installation, AGENTS edits or issue closing. Own worktree only. Base cda7571e.
+
+Objective: AC-01 pinned upstream API support table and executable CPU example. HW-1–3 remain pending.
+Tasks: T-450 bounded read-only API audit (native worker, no delegation); root owns implementation, docs, test-first evidence, task/report and decisions; different-family external read-only reviewer on final head before merge.
+Gates: source pin verification; failing example test before implementation; Node built-in tests and actual upstream CPU example via common workspace launcher; project-success tests/validator; llms validator; diff check; final-head CI and independent review; latest main integration then rerun/review if changed; MERGED readback.
+Budget: one native audit up to 15 min, one external review up to 10 min per revision. No paid APIs. Usage/quota unknown.
+State: claimed, no earlier claim after reread. API audit pending.
+
+HW0-D01: ACCEPT T-450 source audit after root inspection of exact signatures/callers. Root independently executed real source example. General backward is available; no analytic-only fallback needed.
+HW0-D02: Red missing-module failure observed before implementation. Five focused tests and nine-point example pass using unchanged upstream core; repo 15 structural tests, 41 contracts, llms (0 errors), diff and worker contracts pass. Node isolated reporter only showed one file-level case, so canonical command explicitly uses --test-isolation=none (5 cases observed).
+HW0-D03: External review route follows owner's explicit external-cli-workers.md invocation: grok plan, no subagents, grok-4.7 (xAI; model list observed via authenticated grok.com, no paid API keys). Author family OpenAI. Fixed 600-second read-only budget, max 20 turns. No provider install or permission bypass. Review, final CI, latest-main check and merge readback pending.

@@ -5,7 +5,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-10-22
-source_commit: 222c1a8a736dbb3ac89f34345a7bc73fa887aba8
+source_commit: cda7571e8d45c9c9f036d8b65e41ad26362f7492
 ---
 
 # handwired-learning 成功契約
@@ -20,18 +20,29 @@ source_commit: 222c1a8a736dbb3ac89f34345a7bc73fa887aba8
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
 | --- | --- | --- | --- |
-| AC-01 | Given 固定上游 SHA，When 核對 builder、CPU evaluator 與梯度入口，Then 產出支援表與一個最小可執行範例；沒有梯度 API 時明確記錄並改用解析梯度。 | pending | 尚未核對（HW-0）。上游文件只確認 `Circuit` 與 CPU 路徑。 |
+| AC-01 | Given 固定上游 SHA，When 核對 builder、CPU evaluator 與梯度入口，Then 產出支援表與一個最小可執行範例；沒有梯度 API 時明確記錄並改用解析梯度。 | passed | HW-0：[API 支援表](docs/upstream-api.md)、[實際驗證報告](tasks/450-hw0/report.md)；固定版本 CPU 與通用 backward 5 tests 通過。 |
 | AC-02 | Given 合法與不合法輸入，When 執行前向對照，Then 合法點在容許值內、不合法輸入在圖執行前被拒絕（SDD HW-A01、A02）。 | pending | 尚未實作（HW-1）。 |
 | AC-03 | Given 9 個固定訓練點與初始 a=1、b=0，When 學習率 0.05 跑 500 步、以及學習率 2.0，Then 前者最大誤差 ≤ 0.05 °C、後者顯示停止原因（SDD HW-A03～A05）。 | pending | 尚未實作（HW-2）；收斂只在紙上估算過。 |
 | AC-04 | Given 1–2 位未學過 autodiff 的開發者，When 試用頁面，Then 能說出 builder 與 runtime 的差別及「loss 下降不等於一般智能」。 | pending | 尚未試用（HW-3）。 |
 
+## 本次 HW-0 計畫
+
+Session `Handwired-20261021-1808`，Refs #450；僅交付 AC-01。核對固定 SHA、MIT 授權、CPU 與梯度入口，先寫最小範例測試並觀察失敗，再執行真實上游 CPU 範例及 repo validators。HW-1～HW-3 不在本次範圍，AC-01 已取得下列本機證據；AC-02～04 維持 pending。
+
 ## 現況與缺口
 
-只有設計文件；沒有複製上游程式、安裝依賴或執行任何範例。
+HW-0 已執行固定版本的 CPU 與參數梯度範例。上游來源保存在 repo 外，沒有 vendoring 或安裝依賴。HW-1 前向網頁、HW-2 學習區與 HW-3 真人試用仍未交付；主線保持 incomplete。
 
 ## 啟動與驗證
 
-目前沒有可啟動的命令。實作後的開啟方式與測試命令寫回本節。
+依 [API 支援表](docs/upstream-api.md) 下載固定來源並設定 `HANDWIRED_ROOT`，執行：
+
+```sh
+node labs/handwired-learning/examples/api-probe.mjs
+node --test --test-isolation=none labs/handwired-learning/tests/api-probe.test.mjs
+```
+
+Node v24.14.0 已驗證，無 npm 安裝。此命令是 HW-0 API probe，尚無可開啟的教學網頁。
 
 ## 可用版本
 

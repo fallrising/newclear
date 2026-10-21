@@ -1,0 +1,13 @@
+✔ CPU tensor and reference evaluate all nine calibration points (3.25212ms)
+✔ upstream backward produces parameter derivatives, including negative and zero x (0.465134ms)
+✔ parameters are source cells and remain adjustable without rebuilding the graph (0.209157ms)
+✔ boolean backward rejects by default rather than silently inventing a derivative (0.382306ms)
+✔ loader rejects drift before importing upstream code (3.458058ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 63.431176

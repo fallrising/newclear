@@ -16,7 +16,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 現行前端是 v2 web；[W0–W7 roadmap](docs/v2/09-roadmap.md)全部保留 VERIFIED 的歷史工程驗收。
 
 不是 SaaS，也不是 E2EE；不允許個人訂閱池化、非 operator 喚醒 operator_personal 或非官方網頁抓取。
-不與 Fanzloud 共用 CODEX_HOME/workspace；閱讀快記模組只是未排程設計，非聊天室主線。
+不與 Fanzloud 共用 CODEX_HOME/workspace；閱讀快記為另列的階段 0 設計交付，非聊天室主線；runtime 尚未實作。
 
 本契約核對的是上述來源版本中的文件與程式。
 `complete` 只適用明列的主線範圍；沒有延伸為部署或生產保證。
@@ -32,6 +32,17 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 | AC-02 | Given provider 設定與 fake-provider，When mention/stream/error/runtime switch，Then 完整回覆才落盤且失敗與 quota 邊界可見 | historical | [W4–W5 驗收](docs/v2/09-roadmap.md)：fake provider 邊界 |
 | AC-03 | Given scoped bot token 與 fake CLI runner，When mention、trace、thread 及重連，Then accepted/running/摘要與事件接續符合契約 | historical | [W6–W7 驗收](docs/v2/09-roadmap.md)：43 pass、1 平台限定 skip、遮罩 0 |
 | AC-04 | Given 實際選定 provider 與原生 CLI，When operator 完成 hosted/runner 核心對話並驗證撤權與成本限制，Then 同版真實整合證據可核對 | pending | W4 用 fake-provider、W6 用 fake CLI；[roadmap](docs/v2/09-roadmap.md)未提供對應真邊界資格 |
+
+## 本次里程碑：閱讀快記階段 0（IN_PROGRESS）
+
+依 [issue #447](https://github.com/fallrising/newclear/issues/447) 交付 [計劃](docs/plans/cloudflare-reading-capture.md) §7 階段 0，保留原有 AC-01～04。
+
+| AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
+| --- | --- | --- | --- |
+| RC0-01 | Given 現行 schema，When 在隔離 SQLite 載入草稿，Then captures/notes 約束成立且既有表與資料不變 | pending | 草稿與 red/green 驗證待交付 |
+| RC0-02 | Given RC-01～07，When 核對測試清單，Then 每項有前置、操作、oracle、故障與證據需求 | pending | 清單待交付；不等同 runtime 通過 |
+
+驗證計畫與授權見 [task](tasks/447-reading-capture-stage0/task.md)。階段 1/2、D1/瀏覽器 E2E、部署與真 provider 驗收不在本次範圍。
 
 ## 現況與缺口
 

@@ -1703,3 +1703,14 @@ Reviewer REWORK cleanup failures resolved;5 independent focused tests=>ACCEPT.
 I001,15skips and5TLSfailures retained with root causes. Runtime evidence PASS;
 committed delivery PARTIAL until final CI/merge/readback. usable_tag remains none until actual publication.
 Owner acceptance pending; next product begins after Wotar remote delivery.
+
+
+## Program: Kith reading capture / Kith-20261021-1805
+
+- Objective: issue #447, stage 0 only; isolated worktree from cda7571e.
+- Orchestrator owns this section, issue/PR claim, scope, review and acceptance.
+- T-109: bounded sequential native worker authors SQL draft, red/green SQLite checks and RC checklist; no delegation/commits.
+- Orchestrator: reconcile plan/SUCCESS/README, inspect complete diff and rerun checks.
+- Gates: SQLite draft checks; project success and llms validators; diff check; final-head CI; independent non-GPT readonly review; current-main merge/readback.
+- Paid APIs/services, deployment, AGENTS/CLAUDE edits, branch/tag deletion, issue closure prohibited.
+- State: preparing claim; no runtime acceptance claimed.

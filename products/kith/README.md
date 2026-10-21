@@ -26,7 +26,7 @@
 
 ## 設計探索
 
-- [Cloudflare 閱讀與快記模組：MVP 計畫](docs/plans/cloudflare-reading-capture.md)：階段 0 已提供[兩表 migration 草稿](docs/plans/reading-capture-schema.sql)與 [RC 測試清單](docs/plans/reading-capture-tests.md)，SQLite 隔離檢查 9 項通過（[#446 報告](tasks/446-reading-capture-phase0/report.md)）。草稿不會自動套用；快記、收件匣、閱讀、人類補充與 Runner 尚未實作，RC-01～07 仍待驗收。公私發布、通訊收件與事件統計延後；Kith 現行聊天室與 v2 契約仍適用。
+- [Cloudflare 閱讀與快記模組：MVP 計畫](docs/plans/cloudflare-reading-capture.md)：階段 1 已實作 operator 私人 `/captures` 快記與收件匣、冪等重送／衝突及本機草稿；RC-01～04 本地 CF 桌面／手機驗證見 [#456 報告](tasks/456-reading-capture-phase1/report.md)。[0007 migration](migrations/0007_reading_capture.sql) 經隔離 D1 驗證納入；沒有套用正式環境或部署。完全斷網重載須待連線恢復才能開啟介面並取回草稿；沒有離線隊列。閱讀、notes 正向功能與 Runner 留待階段 2，預定端點已有 operator 認證防線。
 
 ## 規格章節
 

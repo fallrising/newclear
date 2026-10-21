@@ -14,7 +14,7 @@ class SchemaDraftTests(unittest.TestCase):
         self.db = sqlite3.connect(":memory:")
         self.addCleanup(self.db.close)
         self.db.execute("PRAGMA foreign_keys = ON")
-        for migration in sorted((KITH / "migrations").glob("*.sql")):
+        for migration in sorted((KITH / "migrations").glob("000[1-6]_*.sql")):
             self.db.executescript(migration.read_text())
         self.before = self.db.execute(
             "SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY name"
@@ -24,6 +24,10 @@ class SchemaDraftTests(unittest.TestCase):
             "VALUES ('human', 'human', 'fixture', 'Fixture', 'synthetic', '2026-01-01T00:00:00Z')"
         )
         self.db.executescript(DRAFT.read_text())
+
+    def test_promoted_migration_preserves_reviewed_draft(self):
+        promoted = (KITH / "migrations/0007_reading_capture.sql").read_text()
+        self.assertIn(DRAFT.read_text().split("CREATE TABLE", 1)[1].strip(), promoted)
 
     def capture(self, **changes):
         row = dict(id="capture-1", body="原文\n keep spacing ", source="web",

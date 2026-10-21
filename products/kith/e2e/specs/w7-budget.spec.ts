@@ -153,7 +153,11 @@ test(
       for (let i = 0; i < 21; i += 1) {
         const started = Date.now();
         await cold.goto("/r/long-history", { waitUntil: "commit" });
-        await cold.locator(`[data-seq="${latest}"]`).waitFor({ state: "visible", timeout: 10_000 });
+        // Fixed polling avoids waitFor's 500 ms observation gap (W7 §7.2).
+        await expect.poll(
+          () => cold.locator(`[data-seq="${latest}"]`).isVisible(),
+          { intervals: [16], timeout: 10_000 },
+        ).toBe(true);
         const elapsed = Date.now() - started;
         if (i > 0) samples.push(elapsed);
       }

@@ -1,0 +1,22 @@
+[
+  {
+    "argv": [
+      "make",
+      "vet",
+      "test",
+      "build"
+    ],
+    "cwd": "systems/clarkq",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:40.841556+00:00",
+    "end": "2026-10-21T15:41:46.072285+00:00",
+    "duration_seconds": 65.231,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "clarkq-01.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  }
+]

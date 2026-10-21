@@ -3,7 +3,8 @@ project: systems/clarkq
 purpose: 以簡單 HTTP 介面提供可持久化的單機訊息佇列
 kind: service
 mainline: complete
-usable_tag: none
+usable_tag: usable/clarkq/v1.5.1
+qualification: docs/project-success/qualifications/clarkq.md
 reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
@@ -23,7 +24,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 驗收條件
 
-下表 `historical` 是既有報告的結果，沒有在 2026-10-21 重跑。
+下表 `historical` 是原有逐項報告；2026-10-21 已補做 [可用版本資格驗證](../../docs/project-success/qualifications/clarkq.md)，區分本次重跑與可沿用的歷史結果。
 `pending` 保留缺少證據或尚未實作的條件；程式存在不等於通過。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
@@ -35,12 +36,12 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 現況與缺口
 
-核心完成依歷史真 runtime 驗收，不是本次重跑。
+核心原有歷史 runtime 驗收；2026-10-21 另重跑推薦單機六情境 49 項實際 API／重啟 assertions。
 2026-10-06 記錄另有三台 VM 驗證，但建議仍是單機；不以 cluster smoke 宣稱跨機房線性一致服務。
 實驗能力的自壓與實際部署設定仍需操作者依使用範圍確認。
 Dormant 不撤回已驗收核心，也不授權新功能、部署或服務升級。
 
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
+本次新增驗收入口並補做可用資格；未改變 runtime 或原有驗收 oracle。
 歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
 
 ## 啟動與驗證
@@ -48,7 +49,7 @@ Dormant 不撤回已驗收核心，也不授權新功能、部署或服務升級
 [README](README.md)與[使用說明](docs/USAGE.md)提供環境/YAML、WAL 路徑、auth 與限制；單機 demo 有自有隔離環境。
 
 已核對入口：[main](cmd/clarkq/main.go)與 [Makefile](Makefile)。
-下列是該入口既有的啟動或驗證命令，並非本次執行紀錄；
+下列提供既有啟動／驗證入口；本次實際執行範圍與結果以資格紀錄為準；
 需先完成連結文件中的依賴、設定及適用環境準備。
 
 ```sh
@@ -63,7 +64,5 @@ cd demo
 
 ## 可用版本
 
-目前 `usable_tag: none`；本次沒有建立或發布任何 tag。
-既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
-
-須比對歷史單機驗收後的 code/config 差異，對目標 commit 重跑單機持久性與 auth 主線；若打標，只能明示推薦單機範圍與 cluster 實驗限制。
+本次資格通過，預定標記 `usable/clarkq/v1.5.1`，範圍與逐命令證據見[資格紀錄](../../docs/project-success/qualifications/clarkq.md)。
+必要 PR CI／獨立審查通過並合併後才發布；不外推 production 或原範圍以外能力。

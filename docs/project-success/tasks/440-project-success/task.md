@@ -11,3 +11,5 @@ Must not change: product implementation, existing historical evidence, SDD seman
 
 Acceptance: every item in PLAN.md Definition of done is supported by actual file/command/CI/review/ref evidence. Product gaps remain explicit; this documentation task does not claim to finish the products.
 
+
+Process handoff: this task selects the existing optional journal protocol for a compact factual run under `runs/newclear/project-success/2026/10/<unique-run>/` only. Independent PR, no raw logs or credentials; product evidence stays here. This implements desk operating-method §4.6 and does not enable runtime tracking services or alter task authority.

@@ -1,0 +1,39 @@
+[
+  {
+    "argv": [
+      "docker",
+      "compose",
+      "-f",
+      "<qualification-evidence>/clarkq-compose.yaml",
+      "-p",
+      "qualification-clarkq-20261021",
+      "up",
+      "-d",
+      "--build",
+      "--wait",
+      "clarkq"
+    ],
+    "cwd": "systems/clarkq",
+    "start": "2026-10-21T15:43:41.768203+00:00",
+    "duration_seconds": 0.016,
+    "exit_code": 125,
+    "log": "clarkq-core-startup.log"
+  },
+  {
+    "argv": [
+      "docker",
+      "compose",
+      "-f",
+      "<qualification-evidence>/clarkq-compose.yaml",
+      "-p",
+      "qualification-clarkq-20261021",
+      "down",
+      "--volumes"
+    ],
+    "cwd": "systems/clarkq",
+    "start": "2026-10-21T15:43:41.784699+00:00",
+    "duration_seconds": 0.016,
+    "exit_code": 125,
+    "log": "clarkq-core-cleanup.log"
+  }
+]

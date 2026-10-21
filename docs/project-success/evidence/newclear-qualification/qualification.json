@@ -1,0 +1,91 @@
+{
+  "status": "PARTIAL",
+  "recorded": "2026-10-21T15:56:51.017481+00:00",
+  "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+  "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+  "tags_created": false,
+  "qualified": [
+    {
+      "project": "platform/dim-gate",
+      "qualification": "PASS",
+      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+      "tree": "527a72abcae93a40d81af72e38311ba34d3c79be",
+      "proposed_tag": "usable/dim-gate/v0.1.0",
+      "scope_and_limitations": "Local mocked application only;426native tests and4freshChromium core journeys. Full100Chromium/12cross-browser/3performance/2isolation coverage inherited from616d67e only after exact runtime/config diff audit.",
+      "evidence": [
+        "dim-gate-commands.json",
+        "dim-browser-attempt3-commands.json",
+        "dim-gate-historical-source.json"
+      ]
+    },
+    {
+      "project": "systems/clarkq",
+      "qualification": "PASS",
+      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+      "tree": "0f46f6833a8e78884cce5b996260f253876cd6cf",
+      "proposed_tag": "usable/clarkq/v1.5.1",
+      "scope_and_limitations": "Recommended single-node core:vet,test,build plus6native scenarios/49assertions including FIFO,auth,tenant quotas,restart persistence,metrics,long-poll. No new distributed-soak or capacity claim.",
+      "evidence": [
+        "clarkq-commands.json",
+        "clarkq-core-attempt2-commands.json"
+      ]
+    },
+    {
+      "project": "systems/mkfk",
+      "qualification": "PASS",
+      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+      "tree": "2be2685d67b3d87f00121744a48e46bf8bbd98bd",
+      "proposed_tag": "usable/mkfk/v0.1.0",
+      "scope_and_limitations": "Current requiredCI gates,three-broker demo,and seeded full28-fault chaos pass. Historical extended model/performance NOT inherited because relevant code changed;extended profile is explicitly optional.",
+      "evidence": [
+        "mkfk-commands.json",
+        "mkfk-core-commands.json",
+        "mkfk-full-chaos-commands.json",
+        "mkfk-native-chaos-report.json"
+      ]
+    },
+    {
+      "project": "labs/pg-jev-router",
+      "qualification": "PASS",
+      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+      "tree": "f8fcc9a114d772b9cf5aa4e743e20cdb9f21b9f3",
+      "proposed_tag": "usable/pg-jev-router/v0.1.0",
+      "scope_and_limitations": "Synthetic policy lab:15unit +6real PostgreSQL16/pg-jev integration tests,9routing fixtures,batch/cache proof;no real classifier or downstream dispatch.",
+      "evidence": [
+        "pg-jev-router-commands.json"
+      ]
+    }
+  ],
+  "unqualified": [
+    {
+      "project": "systems/wotar",
+      "qualification": "FAIL",
+      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+      "tree": "a31132653ba29f4908bf23473072d32aaf850be9",
+      "proposed_tag": null,
+      "scope_and_limitations": "Required Ruff lint I001 failed at tests/unit/test_key_rotation.py:3. Typecheck passes;175tests pass,3certificate-dependent tests skipped,16integration/publicsmoke deselected. No broker startup or full syntheticE2E qualification.",
+      "evidence": [
+        "wotar-commands.json",
+        "wotar-types-commands.json",
+        "wotar-unit-commands.json"
+      ]
+    },
+    {
+      "project": "systems/ojbquay",
+      "qualification": "FAIL",
+      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+      "tree": "698b5a9f60b04c8b65f9e31c2f6c8968b8369eb3",
+      "proposed_tag": null,
+      "scope_and_limitations": "Original150ms retry target with<20%error remains unmet (206–253ms). Functional-complete label does not discharge requiredNFR;expensive runtime checks skipped because this mandatory gap blocks qualification.",
+      "evidence": [
+        "ojbquay-required-gap.json"
+      ]
+    }
+  ]
+}

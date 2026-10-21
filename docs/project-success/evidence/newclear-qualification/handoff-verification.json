@@ -1,0 +1,21 @@
+{
+  "recorded": "2026-10-21T15:58:04.093237+00:00",
+  "required_report_headings": true,
+  "worker_git_diff_check": {
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "worker_tracked_diff": "",
+  "evidence_files_checked": 76,
+  "missing_relative_links": [],
+  "trailing_whitespace": [],
+  "unredacted_operator_home": [],
+  "json_parse": "passed",
+  "result": "PASS",
+  "prior_attempt": "handoff-verification-attempt1.json; privacy scanner found an old operator path in historical documentation diff, now redacted with raw-output hash retained."
+}

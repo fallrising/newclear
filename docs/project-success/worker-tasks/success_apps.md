@@ -50,4 +50,3 @@ Definition of done:
 Verify with: python3 <lead-worktree>/scripts/check_project_success.py --root <worker-worktree> --contracts-only --projects apps/cloudform apps/cms-scaffold apps/flowshot apps/loom examples/bite-pi gateways/pokercase labs/aweshore labs/bee-swarm labs/browser-fingerprint labs/eru-vps-mvp labs/m4-seat labs/mithril-research labs/open-compute labs/openmmo-lab labs/openviking-context labs/pg-jev-router labs/zircon-godot tools/cc-quota tools/codex-usage tools/streaming-converter
 Also run: git -C <worker-worktree> diff --check
 Budget: one bounded leaf task, target 30 minutes; at most two repair rounds per verification failure. If missing evidence, document the gap; don't spend time pursuing live credentials. Do not delegate. Report concise path:line pointers and any scope blocker to root.
-

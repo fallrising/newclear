@@ -5,197 +5,197 @@
   "projects": [
     {
       "path": "apps/cloudform",
-      "last_source_update": "2026-09-27T14:43:37Z",
+      "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"
     },
     {
       "path": "apps/cms-scaffold",
-      "last_source_update": "2026-10-18T12:39:38Z",
+      "last_source_update": "2026-10-18T20:39:38+08:00",
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"
     },
     {
       "path": "apps/flowshot",
-      "last_source_update": "2026-09-27T14:43:37Z",
+      "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"
     },
     {
       "path": "apps/loom",
-      "last_source_update": "2026-10-04T17:34:05Z",
+      "last_source_update": "2026-10-05T01:34:05+08:00",
       "source_commit": "a1b9985203342e36adc5d23c499e40fc86edd7bb"
     },
     {
       "path": "examples/bite-pi",
-      "last_source_update": "2026-09-24T12:51:47Z",
+      "last_source_update": "2026-09-24T14:51:47+02:00",
       "source_commit": "65d41ca3fbe59d324fe2369cf0816a50cac0e647"
     },
     {
       "path": "gateways/pokercase",
-      "last_source_update": "2026-10-11T07:26:36Z",
+      "last_source_update": "2026-10-11T15:26:36+08:00",
       "source_commit": "9d23bd72850af83d32dcd1081b44d09bc4fc7b8d"
     },
     {
       "path": "labs/aweshore",
-      "last_source_update": "2026-09-27T14:43:37Z",
+      "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"
     },
     {
       "path": "labs/bee-swarm",
-      "last_source_update": "2026-09-24T12:51:47Z",
+      "last_source_update": "2026-09-24T14:51:47+02:00",
       "source_commit": "65d41ca3fbe59d324fe2369cf0816a50cac0e647"
     },
     {
       "path": "labs/browser-fingerprint",
-      "last_source_update": "2026-10-03T07:53:31Z",
+      "last_source_update": "2026-10-03T15:53:31+08:00",
       "source_commit": "8356cf04ab87063776838ef082777c6d6c5c7f6f"
     },
     {
       "path": "labs/eru-vps-mvp",
-      "last_source_update": "2026-10-18T12:46:41Z",
+      "last_source_update": "2026-10-18T20:46:41+08:00",
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
       "path": "labs/m4-seat",
-      "last_source_update": "2026-10-17T10:53:31Z",
+      "last_source_update": "2026-10-17T18:53:31+08:00",
       "source_commit": "8526b6411bd11967b98b91a7c2cacadeafe5ef71"
     },
     {
       "path": "labs/mithril-research",
-      "last_source_update": "2026-10-17T12:28:21Z",
+      "last_source_update": "2026-10-17T20:28:21+08:00",
       "source_commit": "777e74483bef1fd011bb8a16c230ad293a238028"
     },
     {
       "path": "labs/open-compute",
-      "last_source_update": "2026-10-17T16:22:35Z",
+      "last_source_update": "2026-10-18T00:22:35+08:00",
       "source_commit": "8c5e35d4ace3e36f0c686e36fa5ae98b8de4aeac"
     },
     {
       "path": "labs/openmmo-lab",
-      "last_source_update": "2026-10-03T20:14:44Z",
+      "last_source_update": "2026-10-04T04:14:44+08:00",
       "source_commit": "49afef64d4d6b18eb18a82788a3e27a62f299079"
     },
     {
       "path": "labs/openviking-context",
-      "last_source_update": "2026-10-03T19:03:55Z",
+      "last_source_update": "2026-10-04T03:03:55+08:00",
       "source_commit": "f1fca73da051e3201999205a5dc9b28ff8226ac1"
     },
     {
       "path": "labs/pg-jev-router",
-      "last_source_update": "2026-10-04T08:46:03Z",
+      "last_source_update": "2026-10-04T16:46:03+08:00",
       "source_commit": "267b12d78b3304d12bb589639650628b22987e95"
     },
     {
       "path": "labs/zircon-godot",
-      "last_source_update": "2026-10-03T18:51:55Z",
+      "last_source_update": "2026-10-04T02:51:55+08:00",
       "source_commit": "d4eecce9f67e6bfe4dc2cc958eb967c3fcead246"
     },
     {
       "path": "platform/agent-platform",
-      "last_source_update": "2026-10-18T12:46:41Z",
+      "last_source_update": "2026-10-18T20:46:41+08:00",
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
       "path": "platform/agent-workforce",
-      "last_source_update": "2026-10-20T12:59:36Z",
+      "last_source_update": "2026-10-20T20:59:36+08:00",
       "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0"
     },
     {
       "path": "platform/dim-gate",
-      "last_source_update": "2026-10-18T12:47:07Z",
+      "last_source_update": "2026-10-18T20:47:07+08:00",
       "source_commit": "e703fa1d07f0da605e6bad214baf31b74e90b270"
     },
     {
       "path": "platform/edge-ops",
-      "last_source_update": "2026-09-28T17:35:45Z",
+      "last_source_update": "2026-09-29T01:35:45+08:00",
       "source_commit": "bde0432a3e51818231a1937b3b561c052a2d97b2"
     },
     {
       "path": "platform/fanzloud",
-      "last_source_update": "2026-10-18T12:39:38Z",
+      "last_source_update": "2026-10-18T20:39:38+08:00",
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"
     },
     {
       "path": "platform/ice-maker",
-      "last_source_update": "2026-10-18T12:47:07Z",
+      "last_source_update": "2026-10-18T20:47:07+08:00",
       "source_commit": "e703fa1d07f0da605e6bad214baf31b74e90b270"
     },
     {
       "path": "platform/local-ocr-services",
-      "last_source_update": "2026-10-18T12:46:41Z",
+      "last_source_update": "2026-10-18T20:46:41+08:00",
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
       "path": "platform/prism",
-      "last_source_update": "2026-10-20T10:30:25Z",
+      "last_source_update": "2026-10-20T18:30:25+08:00",
       "source_commit": "8343727c3498695b26983d20dbb9f6a0e9b0af41"
     },
     {
       "path": "platform/signal-hub",
-      "last_source_update": "2026-10-18T12:39:38Z",
+      "last_source_update": "2026-10-18T20:39:38+08:00",
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"
     },
     {
       "path": "products/goku",
-      "last_source_update": "2026-10-10T14:36:19Z",
+      "last_source_update": "2026-10-10T14:36:19+00:00",
       "source_commit": "79109d62d5d8f47cfe3e673d7467e901e41467eb"
     },
     {
       "path": "products/hai-taskboard",
-      "last_source_update": "2026-10-18T12:46:41Z",
+      "last_source_update": "2026-10-18T20:46:41+08:00",
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
       "path": "products/kith",
-      "last_source_update": "2026-10-18T12:39:38Z",
+      "last_source_update": "2026-10-18T20:39:38+08:00",
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"
     },
     {
       "path": "products/phark",
-      "last_source_update": "2026-09-27T14:43:37Z",
+      "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"
     },
     {
       "path": "specs/fleet",
-      "last_source_update": "2026-09-28T17:37:01Z",
+      "last_source_update": "2026-09-29T01:37:01+08:00",
       "source_commit": "ff6459a8fbc9db69d43ba41b9ac5e7d41df3465b"
     },
     {
       "path": "systems/clarkq",
-      "last_source_update": "2026-10-10T14:36:19Z",
+      "last_source_update": "2026-10-10T14:36:19+00:00",
       "source_commit": "79109d62d5d8f47cfe3e673d7467e901e41467eb"
     },
     {
       "path": "systems/mkfk",
-      "last_source_update": "2026-10-19T15:45:56Z",
+      "last_source_update": "2026-10-19T23:45:56+08:00",
       "source_commit": "e5a163766e8d2610fbcdd4228dba032c16ad4027"
     },
     {
       "path": "systems/ojbquay",
-      "last_source_update": "2026-09-27T14:43:37Z",
+      "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"
     },
     {
       "path": "systems/snail",
-      "last_source_update": "2026-10-10T14:36:19Z",
+      "last_source_update": "2026-10-10T14:36:19+00:00",
       "source_commit": "79109d62d5d8f47cfe3e673d7467e901e41467eb"
     },
     {
       "path": "systems/wotar",
-      "last_source_update": "2026-09-24T12:51:47Z",
+      "last_source_update": "2026-09-24T14:51:47+02:00",
       "source_commit": "65d41ca3fbe59d324fe2369cf0816a50cac0e647"
     },
     {
       "path": "tools/cc-quota",
-      "last_source_update": "2026-09-27T04:12:59Z",
+      "last_source_update": "2026-09-27T12:12:59+08:00",
       "source_commit": "f0c1a46cecf63ecf2c3afec3d9c93cbe2150af75"
     },
     {
       "path": "tools/codex-usage",
-      "last_source_update": "2026-10-18T08:12:15Z",
+      "last_source_update": "2026-10-18T16:12:15+08:00",
       "source_commit": "63e2f3b3a47776e35865fcb28d368e8f4d32be22"
     },
     {
       "path": "tools/streaming-converter",
-      "last_source_update": "2026-09-27T14:43:37Z",
+      "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"
     }
   ],

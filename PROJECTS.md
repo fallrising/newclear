@@ -23,11 +23,11 @@
 | [labs/open-compute](labs/open-compute/SUCCESS.md) | labs | 驗證固定 open-compute release 的有界持久狀態與人工操作生命週期 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-17 |
 | [labs/openmmo-lab](labs/openmmo-lab/SUCCESS.md) | labs | 建立固定 OpenMMO 的本機雙人世界與持久化試驗入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/openviking-context](labs/openviking-context/SUCCESS.md) | labs | 以來源校驗與 byte 預算驗證共享 context 投影服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
-| [labs/pg-jev-router](labs/pg-jev-router/SUCCESS.md) | labs | 以真 PostgreSQL 擴充套件和合成 provider 驗證輸入路由政策接線 | 完成 | 尚無已核准標記 | 2026-10-04 |
+| [labs/pg-jev-router](labs/pg-jev-router/SUCCESS.md) | labs | 以真 PostgreSQL 擴充套件和合成 provider 驗證輸入路由政策接線 | 完成 | [usable/pg-jev-router/v0.1.0](https://github.com/fallrising/newclear/tree/usable/pg-jev-router/v0.1.0/labs/pg-jev-router) | 2026-10-04 |
 | [labs/zircon-godot](labs/zircon-godot/SUCCESS.md) | labs | 研究並規劃 Zircon C# 伺服器與 Godot 客戶端的有界遊戲實驗 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [platform/agent-platform](platform/agent-platform/SUCCESS.md) | platform | 以網頁派送、監看與介入隔離的程式代理任務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/agent-workforce](platform/agent-workforce/SUCCESS.md) | platform | 持久協調不同代理產品的身份、授權、會話與工作交付 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-20 |
-| [platform/dim-gate](platform/dim-gate/SUCCESS.md) | platform | 以有狀態模擬資料展示跨角色資源申請、發布與故障恢復 | 完成 | 尚無已核准標記 | 2026-10-18 |
+| [platform/dim-gate](platform/dim-gate/SUCCESS.md) | platform | 以有狀態模擬資料展示跨角色資源申請、發布與故障恢復 | 完成 | [usable/dim-gate/v0.1.0](https://github.com/fallrising/newclear/tree/usable/dim-gate/v0.1.0/platform/dim-gate) | 2026-10-18 |
 | [platform/edge-ops](platform/edge-ops/SUCCESS.md) | platform | 以非特權代理收集主機狀態並提供受控運維流程 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-28 |
 | [platform/fanzloud](platform/fanzloud/SUCCESS.md) | platform | 提供單人 Codex Cloud 任務控制與可追溯事件儲存 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/ice-maker](platform/ice-maker/SUCCESS.md) | platform | 將文件與工程工作轉為保留來源的知識候選及可重建出版物 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
@@ -39,11 +39,11 @@
 | [products/kith](products/kith/SUCCESS.md) | products | 讓人類與受控代理在同一私有房間協作對話 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [products/phark](products/phark/SUCCESS.md) | products | 以同源網頁提供多欄時間線與基本社交互動 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [specs/fleet](specs/fleet/SUCCESS.md) | specs | 以期望狀態協調個人 VPS 的 Compose 工作負載與入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-28 |
-| [systems/clarkq](systems/clarkq/SUCCESS.md) | systems | 以簡單 HTTP 介面提供可持久化的單機訊息佇列 | 完成 | 尚無已核准標記 | 2026-10-10 |
-| [systems/mkfk](systems/mkfk/SUCCESS.md) | systems | 以可重播故障驗證分區日誌、複製與生產消費語義 | 完成 | 尚無已核准標記 | 2026-10-19 |
+| [systems/clarkq](systems/clarkq/SUCCESS.md) | systems | 以簡單 HTTP 介面提供可持久化的單機訊息佇列 | 完成 | [usable/clarkq/v1.5.1](https://github.com/fallrising/newclear/tree/usable/clarkq/v1.5.1/systems/clarkq) | 2026-10-10 |
+| [systems/mkfk](systems/mkfk/SUCCESS.md) | systems | 以可重播故障驗證分區日誌、複製與生產消費語義 | 完成 | [usable/mkfk/v0.1.0](https://github.com/fallrising/newclear/tree/usable/mkfk/v0.1.0/systems/mkfk) | 2026-10-19 |
 | [systems/ojbquay](systems/ojbquay/SUCCESS.md) | systems | 在 Kafka 與 PostgreSQL 上提供自助訊息發布、消費及故障處理 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [systems/snail](systems/snail/SUCCESS.md) | systems | 以 Rust 提供多核心純記憶體 RESP2 鍵值服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-10 |
-| [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 完成 | 尚無已核准標記 | 2026-09-24 |
+| [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-24 |
 | [tools/cc-quota](tools/cc-quota/SUCCESS.md) | tools | 採集 Claude Code 額度並用本機歷史呈現 pacing 與偏離通知 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [tools/codex-usage](tools/codex-usage/SUCCESS.md) | tools | 透過官方 Codex App Server 單次唯讀採集訂閱用量 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [tools/streaming-converter](tools/streaming-converter/SUCCESS.md) | tools | 保留 FFmpeg 多畫質 HLS 轉檔與網頁播放的歷史工具 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |

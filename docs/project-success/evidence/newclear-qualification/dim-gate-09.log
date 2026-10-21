@@ -1,0 +1,54 @@
+$ tsc -b && vite build --mode demo
+vite v8.3.0 building client environment for demo...
+transforming...
+✓ 2488 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                              0.81 kB │ gzip:   0.52 kB
+dist/.vite/manifest.json                    10.70 kB │ gzip:   1.48 kB
+dist/assets/alerting-BpnngwIt.css            2.19 kB │ gzip:   0.74 kB
+dist/assets/resources-B9X9xRW8.css           2.24 kB │ gzip:   0.73 kB
+dist/assets/observability-BmIQox_l.css       2.88 kB │ gzip:   0.98 kB
+dist/assets/topology-UXIwD2_F.css            3.06 kB │ gzip:   0.94 kB
+dist/assets/service-delivery-DMzgIpwj.css    3.56 kB │ gzip:   1.04 kB
+dist/assets/delivery-DLNmVxwn.css            4.04 kB │ gzip:   1.18 kB
+dist/assets/index-bN_kT6FH.css              39.96 kB │ gzip:   9.17 kB
+dist/assets/plus-oZdKf2nu.js                 0.18 kB │ gzip:   0.16 kB
+dist/assets/arrow-left-BDdsWKAh.js           0.19 kB │ gzip:   0.18 kB
+dist/assets/clock-3-D6kJnZPs.js              0.19 kB │ gzip:   0.18 kB
+dist/assets/play-Bl59_Se5.js                 0.22 kB │ gzip:   0.19 kB
+dist/assets/circle-check-D111VrKO.js         0.24 kB │ gzip:   0.20 kB
+dist/assets/application-CBdLnC8A.js          0.66 kB │ gzip:   0.37 kB
+dist/assets/topology-CX5paH0d.js             0.80 kB │ gzip:   0.47 kB
+dist/assets/boxes-CZWM7A4R.js                0.88 kB │ gzip:   0.41 kB
+dist/assets/wire-views-DGi9mJ5R.js           0.89 kB │ gzip:   0.48 kB
+dist/assets/delivery-p99PwQEr.js             1.04 kB │ gzip:   0.49 kB
+dist/assets/observability-B2gIkvy7.js        1.20 kB │ gzip:   0.56 kB
+dist/assets/resources-CRMybqba.js            1.23 kB │ gzip:   0.57 kB
+dist/assets/self-service-DvOrktph.js         1.30 kB │ gzip:   0.60 kB
+dist/assets/alerting-CwaXpiK-.js             1.68 kB │ gzip:   0.60 kB
+dist/assets/service-delivery-DusgZ2kj.js     1.79 kB │ gzip:   0.63 kB
+dist/assets/notifications-BR4lZhYn.js        1.80 kB │ gzip:   0.61 kB
+dist/assets/feature-policy-COy63dJD.js       2.18 kB │ gzip:   0.88 kB
+dist/assets/StartupFailure-C0iddzMQ.js       2.42 kB │ gzip:   1.17 kB
+dist/assets/policy-Cqo8-2F2.js               3.76 kB │ gzip:   1.27 kB
+dist/assets/admin-OXkz8lHN.js                4.41 kB │ gzip:   1.11 kB
+dist/assets/GuidePage-B1nDLn07.js            5.72 kB │ gzip:   2.35 kB
+dist/assets/GuideStory-CQCsWhls.js           7.42 kB │ gzip:   3.03 kB
+dist/assets/application-BKl0Rm30.js         13.52 kB │ gzip:   3.79 kB
+dist/assets/topology-DN_1dczQ.js            13.94 kB │ gzip:   4.70 kB
+dist/assets/states-DSuJ5TL2.js              17.87 kB │ gzip:   6.91 kB
+dist/assets/self-service-B84b5w_j.js        24.16 kB │ gzip:   7.18 kB
+dist/assets/ci-ClSkl7tz.js                  27.71 kB │ gzip:   8.84 kB
+dist/assets/dialog-CizBIMx-.js              35.31 kB │ gzip:  12.05 kB
+dist/assets/delivery-BiqHPTtD.js            39.83 kB │ gzip:  10.13 kB
+dist/assets/observability-H2MB0DJ4.js       45.55 kB │ gzip:  11.38 kB
+dist/assets/alerting-P2kJb_6c.js            50.31 kB │ gzip:  12.78 kB
+dist/assets/resources-DwPWV72d.js           54.14 kB │ gzip:  14.73 kB
+dist/assets/service-delivery-BUr8cCnT.js    54.85 kB │ gzip:  14.91 kB
+dist/assets/admin-CtWJbSBu.js               63.41 kB │ gzip:  13.38 kB
+dist/assets/engine-commands-DqQIyAlq.js    123.86 kB │ gzip:  32.63 kB
+dist/assets/browser-DrhHDcKR.js            466.11 kB │ gzip: 141.32 kB
+dist/assets/index-lFsAXNzN.js              491.81 kB │ gzip: 146.34 kB
+
+✓ built in 1.03s

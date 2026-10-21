@@ -3,7 +3,8 @@ project: platform/dim-gate
 purpose: 以有狀態模擬資料展示跨角色資源申請、發布與故障恢復
 kind: application
 mainline: complete
-usable_tag: none
+usable_tag: usable/dim-gate/v0.1.0
+qualification: docs/project-success/qualifications/dim-gate.md
 reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
@@ -23,7 +24,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 驗收條件
 
-下表 `historical` 是既有報告的結果，沒有在 2026-10-21 重跑。
+下表 `historical` 是原有逐項報告；2026-10-21 已補做 [可用版本資格驗證](../../docs/project-success/qualifications/dim-gate.md)，區分本次重跑與可沿用的歷史結果。
 `pending` 保留缺少證據或尚未實作的條件；程式存在不等於通過。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
@@ -40,7 +41,7 @@ W5 產品 03c15883、後續 CI 修正 616d67e 的記錄涵蓋跨瀏覽器、效�
 SDD 舊 W5 未驗收描述已落後於 STATUS 的最終事實，本契約保留可追溯來源。
 能力地圖中的後續項沒有 W6 規格，不把尚未立項的真實後端擴充列成本版失敗。
 
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
+本次新增驗收入口並補做可用資格；未改變 runtime 或原有驗收 oracle。
 歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
 
 ## 啟動與驗證
@@ -48,7 +49,7 @@ SDD 舊 W5 未驗收描述已落後於 STATUS 的最終事實，本契約保留�
 [Quickstart](docs/quickstart.md)與[示範指南](docs/DEMO-GUIDE.md)提供重置、角色切換與完整 UI 路線；需要 Node 24 與鎖定 pnpm。
 
 已核對入口：[package scripts](package.json)與 [Guide UI](src/features/foundation/GuidePage.tsx)。
-下列是該入口既有的啟動或驗證命令，並非本次執行紀錄；
+下列提供既有啟動／驗證入口；本次實際執行範圍與結果以資格紀錄為準；
 需先完成連結文件中的依賴、設定及適用環境準備。
 
 ```sh
@@ -64,7 +65,5 @@ pnpm test:e2e
 
 ## 可用版本
 
-目前 `usable_tag: none`；本次沒有建立或發布任何 tag。
-既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
-
-打標前須比對歷史驗收後的 component／workflow 差異，對目標 commit 重演 demo 主線並完成必要檢查；標記範圍只能寫 local mock demo。
+本次資格通過，預定標記 `usable/dim-gate/v0.1.0`，範圍與逐命令證據見[資格紀錄](../../docs/project-success/qualifications/dim-gate.md)。
+必要 PR CI／獨立審查通過並合併後才發布；不外推 production 或原範圍以外能力。

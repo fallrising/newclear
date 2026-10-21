@@ -2,7 +2,7 @@
 project: systems/wotar
 purpose: 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱
 kind: tool
-mainline: complete
+mainline: incomplete
 usable_tag: none
 reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
@@ -19,7 +19,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完成本機功能；維持 dormant 投入狀態。
 
 本契約核對的是上述來源版本中的文件與程式。
-`complete` 只適用明列的主線範圍；沒有延伸為部署或生產保證。
+原功能歷史完成不代表目前必要檢查已通過；未延伸為部署或生產保證。
 
 ## 驗收條件
 
@@ -32,8 +32,12 @@ Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完�
 | AC-02 | Given 篡改 envelope、錯 topic 或 replay，When subscriber 驗證，Then 不交付未授權 plaintext 且重複訊息被去重 | historical | [progress](secure-mqtt-e2ee/docs/progress.md)：40-case tamper matrix 與 replay tests |
 | AC-03 | Given 舊 DEK 與新 active key，When rotation 並讀取歷史 ciphertext，Then 按 key 狀態解密且 revoked/retired 邊界遵守政策 | historical | [progress](secure-mqtt-e2ee/docs/progress.md)、[key lifecycle](secure-mqtt-e2ee/docs/key-lifecycle.md) |
 | AC-04 | Given local EMQX 與另一 broker profile，When TLS、ACL negative 及 opt-in synthetic broker-swap smoke，Then 僅合法端點可通信且 crypto 不依賴 broker | historical | [progress](secure-mqtt-e2ee/docs/progress.md)：local integration 與 public smoke Done |
+| AC-05 | Given 現行來源與原生驗證環境；When 執行 make lint／types／test；Then 必要 gate 全部通過且未執行項目明示 | failed | [本次 lint 輸出](../../docs/project-success/evidence/newclear-qualification/wotar-03.log)：test_key_rotation.py import 排序 I001；type／unit 通過但三項 certificate-dependent cases skipped |
 
 ## 現況與缺口
+
+2026-10-21 現行 lint gate 未通過，因此保留歷史功能完成紀錄，整體重新驗收與 usable 標記暫不通過；本次不修正產品。
+
 
 歷史完成是 library/CLI 與本機／合成整合功能，不代表任意 production broker 已部署或審核。
 Keyring 檔案以 POSIX 0600 管理；optional passphrase/wrap 是後續保護，不虛稱現有 at-rest encryption。

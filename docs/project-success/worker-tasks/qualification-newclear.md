@@ -13,4 +13,3 @@ All six assessed; each includes source SHA, exact commands/results, startup and 
 git -C <worker> diff --check; verify every evidence link exists; report with STATUS, Summary, Verification, Documentation, Risks and Follow-ups. Root independently reviews and controls tags.
 ## Budget
 40 minutes; maximum 2 diagnostic repair attempts per failed command. Do not repair product bugs. No nested agents.
-

@@ -1,0 +1,88 @@
+
+clarkQ capability demo
+URL=http://127.0.0.1:38580  key=qualification-synthetic-key
+
+Waiting for http://127.0.0.1:38580/health ...
+  ✓ server healthy
+
+════════════════════════════════════════
+  01 · Health, version & Admin UI
+════════════════════════════════════════
+  ✓ GET /health without API key (HTTP 200)
+  ✓ health status ok
+  ✓ health includes version field
+  ✓ GET /version (HTTP 200)
+  ✓ version payload
+  ✓ GET /ui/ admin console HTML (HTTP 200)
+  ✓ UI title present
+  ✓ API accepts API key (HTTP 200)
+
+════════════════════════════════════════
+  02 · Task queue (producer → worker FIFO)
+════════════════════════════════════════
+  ✓ prepare queue demo-jobs
+  ✓ producer enqueue job 1 (HTTP 201)
+  ✓ enqueue names queue
+  ✓ producer enqueue job 2 (HTTP 201)
+  ✓ list queues (HTTP 200)
+  ✓ queue appears in list
+  ✓ worker peek (non-destructive) (HTTP 200)
+  ✓ FIFO head is first job
+  ✓ worker consume job 1 (HTTP 200)
+  ✓ consumed first job
+  ✓ worker consume job 2 (HTTP 200)
+  ✓ consumed second job
+  ✓ empty queue returns 204 (HTTP 204)
+  ✓ metrics JSON (HTTP 200)
+  ✓ metrics counters present
+
+════════════════════════════════════════
+  03 · API key authentication
+════════════════════════════════════════
+  ✓ request without API key is rejected (HTTP 401)
+  ✓ error code UNAUTHORIZED
+  ✓ wrong API key is rejected (HTTP 401)
+  ✓ Authorization: Bearer works (HTTP 200)
+  ✓ GET /health stays public under auth (HTTP 200)
+
+════════════════════════════════════════
+  04 · Multi-tenant quotas
+════════════════════════════════════════
+  ✓ tenant acme creates queue acme-jobs (HTTP 201)
+  ✓ tenant acme creates second queue acme-mail (HTTP 201)
+  ✓ third queue hits TENANT_QUOTA (max 2) (HTTP 429)
+  ✓ tenant beta cannot write acme-bound queue (HTTP 403)
+  ✓ tenant beta owns beta-jobs (HTTP 201)
+
+════════════════════════════════════════
+  05 · Persistence across restart (WAL + snapshot)
+════════════════════════════════════════
+  ✓ enqueue message before restart (HTTP 201)
+  ✓ got message id
+  ✓ enqueue names persist queue
+  restarting clarkq container (compose project=qualification-clarkq-20261021) ...
+  ✓ docker compose restart clarkq
+  ✓ server healthy after restart (HTTP 200)
+  ✓ dequeue after restart (HTTP 200)
+  ✓ message survived restart (WAL/snapshot)
+
+════════════════════════════════════════
+  06 · Metrics & long-poll worker
+════════════════════════════════════════
+  ✓ create longpoll queue (warmup) (HTTP 201)
+  ✓ drain warmup so queue is empty (HTTP 200)
+  ✓ enqueue while worker long-polls (HTTP 201)
+  ✓ long-poll received message (HTTP 200)
+  ✓ Prometheus /metrics scrape endpoint (HTTP 200)
+  ✓ prometheus metrics present
+  ✓ JSON metrics (HTTP 200)
+  ✓ json metrics shape
+
+──────── demo summary ────────
+  passed: 49
+  failed: 0
+
+All demo scenarios passed.
+
+Try the UI:  http://127.0.0.1:38580/ui/
+API key:     qualification-synthetic-key

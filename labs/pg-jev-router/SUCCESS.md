@@ -3,7 +3,8 @@ project: labs/pg-jev-router
 purpose: 以真 PostgreSQL 擴充套件和合成 provider 驗證輸入路由政策接線
 kind: lab
 mainline: complete
-usable_tag: none
+usable_tag: usable/pg-jev-router/v0.1.0
+qualification: docs/project-success/qualifications/pg-jev-router.md
 reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
@@ -20,7 +21,7 @@ Jev語意品質、中文校準、真實成本／延遲及正式tenant/RLS屬另�
 
 ## 驗收條件
 
-passed 僅表示本次已核對的靜態條件；historical 是已有紀錄，並非本次重跑。
+passed 表示本次有實際證據；historical 保留原有逐項報告。2026-10-21 補驗結果另見本頁可用版本資格紀錄。
 產品未驗項與後續失敗均保留；文件格式通過不能代替runtime驗收。
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
@@ -48,15 +49,10 @@ SDD真模型評估段落屬後續具名實驗，不反向改寫已完成lab-v1�
 執行container時network none、無host port／volume／secret；外部模型不在此路徑。
 Docker仍需可用daemon及build依賴，不應把離線demo當integration替代。
 
-本次只核對文件、程式入口與既有證據；未執行產品建置或外部整合。
+本次已重跑 make check／demo 與真 PostgreSQL／pg-jev 整合；外部 provider 仍為原規格的合成 fixture。
 歷史命令與結果保留原來源，不以文件盤點日期覆蓋實測日期。
 
 ## 可用版本
 
-目前 `usable_tag: none`。
-尚未完成本次目標commit的版本資格核對，因此不建立tag。
-需比對原head之後程式／Docker設定、必要CI及精確範圍，相關變動補跑後才可標有界合成lab版本。
-真模型、平台與生產使用必須另有對應證據，不包含在任何此lab-v1標記。
-
-標記前須核對已合併目標SHA、必要CI／審查與核心流程證據。
-沿用較早結果須比較其後程式及設定差異，相關變更必須補驗。
+本次資格通過，預定標記 `usable/pg-jev-router/v0.1.0`，範圍與逐命令證據見[資格紀錄](../../docs/project-success/qualifications/pg-jev-router.md)。
+必要 PR CI／獨立審查通過並合併後才發布；不外推 production 或原範圍以外能力。

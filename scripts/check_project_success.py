@@ -154,9 +154,10 @@ def index_text(data, records):
     for item in data["projects"]:
         p = item["path"]
         m = records[p]
-        date = (item.get("last_source_update") or "unknown")[:10]
+        raw_date = item.get("last_source_update")
+        date = dt.datetime.fromisoformat(raw_date.replace("Z", "+00:00")).astimezone(dt.timezone.utc).date().isoformat() if raw_date else "unknown"
         tag = m["usable_tag"]
-        version = "尚無已核准標記" if tag == "none" else f"[{tag}](https://github.com/{data['repository']}/releases/tag/{tag})"
+        version = "尚無已核准標記" if tag == "none" else f"[{tag}](https://github.com/{data['repository']}/tree/{tag}/{p})"
         purpose = m["purpose"].replace("|", "\\|")
         lines.append(f"| [{p}]({p}/SUCCESS.md) | {p.rsplit('/', 1)[0]} | {purpose} | {labels[m['mainline']]} | {version} | {date} |")
     return "\n".join(lines) + "\n"
@@ -216,4 +217,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -3,7 +3,8 @@ project: systems/mkfk
 purpose: 以可重播故障驗證分區日誌、複製與生產消費語義
 kind: lab
 mainline: complete
-usable_tag: none
+usable_tag: usable/mkfk/v0.1.0
+qualification: docs/project-success/qualifications/mkfk.md
 reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
@@ -23,7 +24,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 驗收條件
 
-下表 `historical` 是既有報告的結果，沒有在 2026-10-21 重跑。
+下表 `historical` 是原有逐項報告；2026-10-21 已補做 [可用版本資格驗證](../../docs/project-success/qualifications/mkfk.md)，區分本次重跑與可沿用的歷史結果。
 `pending` 保留缺少證據或尚未實作的條件；程式存在不等於通過。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
@@ -40,7 +41,7 @@ M7 記錄 28 faults/五 seeds、extended 1000×10000 events 與三主機 baselin
 效能結果依既有硬體與 workload，不承諾通用吞吐。
 安全與運作 hardening 屬後續；保留無認證與無 retention 的實際使用限制。
 
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
+本次新增驗收入口並補做可用資格；未改變 runtime 或原有驗收 oracle。
 歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
 
 ## 啟動與驗證
@@ -48,7 +49,7 @@ M7 記錄 28 faults/五 seeds、extended 1000×10000 events 與三主機 baselin
 [README](README.md)的 M7 段與 [Makefile](Makefile)列出 broker、CLI、三 broker Compose demo 與故障 gate。
 
 已核對入口：[demo 程式](cmd/mkfkdemo/main.go)與 [Makefile](Makefile)。
-下列是該入口既有的啟動或驗證命令，並非本次執行紀錄；
+下列提供既有啟動／驗證入口；本次實際執行範圍與結果以資格紀錄為準；
 需先完成連結文件中的依賴、設定及適用環境準備。
 
 ```sh
@@ -64,7 +65,5 @@ make demo
 
 ## 可用版本
 
-目前 `usable_tag: none`；本次沒有建立或發布任何 tag。
-既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
-
-須對照 M7 後的 source/config 差異並在目標 commit 完成必要回歸與 demo；可用標記只能限定無 production hardening 的教學核心。
+本次資格通過，預定標記 `usable/mkfk/v0.1.0`，範圍與逐命令證據見[資格紀錄](../../docs/project-success/qualifications/mkfk.md)。
+必要 PR CI／獨立審查通過並合併後才發布；不外推 production 或原範圍以外能力。

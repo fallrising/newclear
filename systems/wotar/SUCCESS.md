@@ -2,10 +2,11 @@
 project: systems/wotar
 purpose: 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱
 kind: tool
-mainline: incomplete
-usable_tag: none
+mainline: complete
+usable_tag: usable/wotar/v0.1.0
 reviewed: 2026-10-21
 source_commit: 33c9663e7590020fb0147c30e81e7a8db375db2b
+qualification: docs/project-success/qualifications/wotar-repair.md
 ---
 
 # Wotar 成功契約
@@ -23,7 +24,7 @@ Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完�
 
 ## 驗收條件
 
-下表為 2026-10-21 修復後實跑；[完整證據與失敗歷史](../../docs/project-success/qualifications/wotar-repair.md)。發布 gate 仍待完成。
+下表為 2026-10-21 修復後實跑；[完整證據與失敗歷史](../../docs/project-success/qualifications/wotar-repair.md)。PR443 必要 CI／審查／合併及遠端核對已完成。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
 | --- | --- | --- | --- |
@@ -51,7 +52,7 @@ Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完�
 
 I001、憑證缺少造成的三項 skips、TCP proxy 假就緒及隔離 runner 清理缺陷已修復。
 原生183 tests、15項真 EMQX integration、1項 opt-in synthetic public smoke 通過，coverage86.49%達原86%。
-歷史 skip／五項 TLS 失敗與審查 REWORK 均保留。技術主線驗證通過，交付仍待最終 CI、合併與遠端核對；目前 usable_tag 維持 none。
+歷史 skip／五項 TLS 失敗與審查 REWORK 均保留。技術主線與發布 gate 通過；合併及 tag 已遠端核對。
 本機／合成 library/CLI 範圍不代表 production 部署、任意 broker ACL、at-rest encryption 或 forward secrecy。
 Owner 驗收與技術交付分開。
 
@@ -74,6 +75,7 @@ python scripts/verify_isolated.py --output /tmp/wotar-check --integration
 
 ## 可用版本
 
-目前 `usable_tag: none`；必要 PR CI、合併及遠端核對尚待完成。
-全部 gate 通過後才評估建立新的 annotated usable/wotar/v0.1.0，建立並回讀後另行回寫實際 tag。
+已發布 annotated `usable/wotar/v0.1.0`：tag object `c876d5fb906204b5b7ba36234a9d3ef0ca9e91fb`；
+peeled merge `9b3d42425b1525cbec01020255444c00bd07f676`（[PR443](https://github.com/fallrising/newclear/pull/443)）。
+遠端 ref、tag type 及受驗程式 bytes 已核對一致。
 不得移動既有 tag 或冒稱 owner 驗收。

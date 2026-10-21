@@ -19,7 +19,7 @@ AC-01 本機驗證通過：固定上游 `257856e3b221140acb4cc4460626b850c0bd4ff
 | `node labs/handwired-learning/examples/api-probe.mjs` / HW0-1808-green、HW0-1808-verify | [9 點 JSON](evidence/example.txt)；所有前向數值與 JS 相同，da=x、db=1、dx=1.25。 |
 | `python3 -m unittest discover -s scripts/tests -p test_project_success.py -v` / HW0-1808-verify | [15 tests OK](evidence/success-tests.txt)。 |
 | `python3 scripts/check_project_success.py` / HW0-1808-verify | [41 contracts PASS](evidence/success.txt)。 |
-| `python3 .github/scripts/validate_llms_txt.py` / HW0-1808-verify | [5 files / 0 errors](evidence/llms.txt)。 |
+| `python3 .github/scripts/validate_llms_txt.py` / HW0-1808-verify | [5 files / 0 errors](evidence/llms-validation.txt)。 |
 | `git diff --check` / HW0-1808-verify | exit 0。 |
 | installed `scripts/teamctl.py validate-task .team/tasks/T-450.md` / HW0-1808-verify | PASS。 |
 | installed `scripts/teamctl.py validate-report .team/reports/T-450.md` / HW0-1808-verify | PASS。 |
@@ -27,6 +27,8 @@ AC-01 本機驗證通過：固定上游 `257856e3b221140acb4cc4460626b850c0bd4ff
 來源用 GitHub contents API 的固定 SHA raw 內容下載，保存在共用 workspace 的 `HW0-1808-source/preserve/artifacts/upstream`，MIT LICENSE 與原始 core 一併保留。core 的 SHA-256 `75da2a13f39720e34b1e440533460435ead0af9a88fccad8c94e94a816dafa21` 在 import 前核對；沒有安裝上游 package.json 中的依賴。原始紅燈與後續完整輸出留在共用 workspace 各 task 的 `preserve/evidence`。
 
 認領過程中 GitHub sandbox 連線／SSH 設定權限檢查失敗，依執行環境要求升級後成功。首次空 commit 缺 Git identity，改用本命令的 GitHub noreply identity 後成功；沒有改全域設定。draft PR 在有效 commit 推送後建立。未修改或使用其他 session 的 Cost 工作樹。
+
+CI 首輪的專用 pinned-api 通過；llms validator 失敗，原因是本次新增的日誌名 `evidence/llms.txt` 被當成能力索引。已改名為 `llms-validation.txt`，沒有修改或停用 validator。首輪 Grok 在讀取 diff 前因 sandbox 的 session 寫入限制失敗；沒有有效審查結論，須對修正後最終 head 重審。
 
 ## Documentation
 

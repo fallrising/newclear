@@ -1703,3 +1703,29 @@ Reviewer REWORK cleanup failures resolved;5 independent focused tests=>ACCEPT.
 I001,15skips and5TLSfailures retained with root causes. Runtime evidence PASS;
 committed delivery PARTIAL until final CI/merge/readback. usable_tag remains none until actual publication.
 Owner acceptance pending; next product begins after Wotar remote delivery.
+
+## Program: Kith reading capture phase 0 / Kith-20261021-1804
+
+Issue #446, draft PR #449. Base cda7571e8d45c9c9f036d8b65e41ad26362f7492. Orchestrator owns this section and integration; no changes to other programs.
+
+Scope: phase 0 contract, non-applied SQL draft, RC-01–07 checklist, SQL isolation tests, SUCCESS/README and delivery record. No phase 1/2, live migration, paid API or deployment.
+
+Order: T-446 native read-only requirements audit; orchestrator RED tests, schema and documentation, GREEN and repository checks; independent different-family read-only reviewer of final commit; final-head CI, refreshed main and merge readback.
+
+Review route: owner prompt explicitly directs the external-cli-workers.md headless review procedure. Grok catalog reports unauthenticated, excluded without login. OpenCode Go existing credential observed; exact model and readonly profile pending preflight, no model call yet. Quota/cost unknown; only existing subscription route permitted. Final review max 600 seconds, no nested agents, no writes. No automatic CLI installation or configuration changes.
+
+Acceptance: pending; an exit code alone is insufficient. Recheck issue before each commit. Never mark RC E2E passed on SQL-only evidence.
+
+T-446 accepted: independent native requirements audit identified export/edit race and RC-04 stage boundary; addressed by revision CAS and early auth denial coverage for reserved routes. RED: nine missing-draft errors; GREEN: nine passed. Initial success validator found not-yet-created report link; report now added and recheck required.
+
+T-447 final review pin: OpenCode plan, opencode-go/longcat-2.5-preview-free (LongCat; author OpenAI GPT). Official Go catalog and local model listing checked 2026-10-21 UTC: https://opencode.ai/v2/docs/console/go/ lists this exact model as free; selected to respect no-paid-API constraint without assuming subscription overage policy. No fallback. Auth exists; quota/actual model capability not inferred from catalog. Runtime policy denies all tools, edits, shell and delegation; fixed-commit diff/spec context supplied in prompt. --pure, 600-second timeout, max 8 steps. Review result retained outside the source tree so later evidence recording cannot invalidate the reviewed SHA.
+
+Local acceptance: phase-0 nine SQL tests PASS; repository success 41 PASS after report-link fix; capability 5 files / 0 errors; 61 local links PASS; T-446 task/report and T-447 task validated; diff whitespace PASS. Final-commit independent review, CI and merge remain pending; decisions/evidence after that commit are recorded on PR #449 to avoid invalidating review.
+
+Final evidence gate: BLOCKED for merge. Product head 266aab10e78aca400a3827b7c33af4c53b9d6a0a passed local 9 SQL / 41 success / 5 capability and all three remote CI checks (runs 39651400599 and 39651400453). T-447 produced no review: free LongCat endpoint returned non-retryable HTTP 402 unavailable, process exit 1. Two prior preflight stops were config discovery assertions; the inspected herdr observer was made inert per process while retaining --pure and deny-all permissions. No paid fallback, login or same-family substitution.
+
+Decision: retain draft PR, commit failure evidence, mark #446 needs-owner and RELEASE. Owner needs a functioning permitted different-family reviewer. New evidence-only head still needs its own final review/CI before merge. Unmerged worktree remains intact; no second milestone.
+
+Resume 2026-10-21 UTC: owner restored Grok login and explicitly selected opencode-go/deepseek-v4.1-flash if OpenCode is used. Same issue/session re-claimed; reviewer-only needs-owner label removed. Grok models confirms grok.com login; CLI 1.0.62, pin grok-4.7 (xAI family), T-448. Tools disabled with --tools empty, --permission-mode plan, --no-subagents, --disable-web-search; immutable full diff/spec provided, 600-second timeout, max4 turns. Inspected configuration has no MCP/plugins; existing herdr session hooks made inactive per process with HERDR_ENV=0. No credential/config change or login by agent.
+
+Current main 6cd69eec (Retro RE-0) merged without conflicts. Final checks and final-head independent review required again. Prior LongCat failure is historical. Final acceptance/merge evidence recorded on PR #449 without post-review commit changes.

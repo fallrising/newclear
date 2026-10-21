@@ -26,7 +26,7 @@
 
 ## 設計探索
 
-- [Cloudflare 閱讀與快記模組：重用評估與 MVP 計劃](docs/plans/cloudflare-reading-capture.md)（2026-10-18；2026-10-22 縮成 MVP）：沿用 Kith 的 Web／Cloudflare 基礎，MVP 只做私人的手機快記、收件匣、閱讀與人類補充，D1 單向匯出 Git；公私發布、通訊收件與事件統計延後。這是候選模組，尚未排程或實作；Kith 現行聊天室與 v2 契約仍適用。
+- [Cloudflare 閱讀與快記模組：MVP 計畫](docs/plans/cloudflare-reading-capture.md)：階段 0 已提供[兩表 migration 草稿](docs/plans/reading-capture-schema.sql)與 [RC 測試清單](docs/plans/reading-capture-tests.md)，SQLite 隔離檢查 9 項通過（[#446 報告](tasks/446-reading-capture-phase0/report.md)）。草稿不會自動套用；快記、收件匣、閱讀、人類補充與 Runner 尚未實作，RC-01～07 仍待驗收。公私發布、通訊收件與事件統計延後；Kith 現行聊天室與 v2 契約仍適用。
 
 ## 規格章節
 

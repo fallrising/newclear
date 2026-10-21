@@ -1,7 +1,7 @@
 # Cloudflare 閱讀與快記模組：Kith 重用評估與 MVP 計劃
 
 - 日期：2026-10-18；MVP 縮減 2026-10-22（前一版見 commit `b97319d7`）
-- 狀態：設計討論草案；功能尚未排程、尚未實作或驗證
+- 狀態：階段 0 資料契約與測試計畫；API、Web 與 Runner 尚未實作或驗收
 - 核對基準：newclear `main` @ `63e2f3b3a47776e35865fcb28d368e8f4d32be22`
 - 範圍：沿用 Kith 的 Web／Cloudflare 基礎，增加私人的閱讀與快記能力
 
@@ -43,16 +43,24 @@ MVP 實作其中 1、3、4（只做手機）、5、7；2 的公開部分與 6、
 
 不做：公開部署與公開範圍投影、Cloudflare Access、Telegram／Slack adapter、頁面事件統計、閱讀紀錄與「上次讀後改了什麼」、批註版本歷史、離線待送佇列、雙向同步、Markdown 完整格式（先重用 Kith 的安全子集並加標題／連結／清單）。
 
-## 4. 資料（候選）
+## 4. 資料契約（階段 0）
+
+[SQL 草稿](reading-capture-schema.sql)位於 docs/plans，**不會**隨 `db:migrate:local` 自動套用。階段 1 先在隔離 D1 驗證後，才以獨立審查的編號 migration 納入。草稿只新增兩表與待匯出索引，不改聊天室表。
 
 | 表 | 欄位 |
 | --- | --- |
 | captures | id、body、source（`web`）、client_key（冪等鍵，唯一）、created_at、exported_commit（可空） |
-| notes | id、article_id、body、updated_at、exported_commit（可空） |
+| notes | id、article_id（唯一）、body、updated_at、revision（正整數）、exported_commit（可空） |
 
-- 快記由瀏覽器產生 `client_key`；重送同 key 回傳原 `capture_id`，不重複建立。
+- 快記由瀏覽器產生 `client_key`；重送同 key 回傳原 `capture_id`，不重複建立或覆寫原文。若 payload 不同，仍保留原紀錄並在回應明示衝突；不得對另一份文字顯示保存成功。首次成功持久化前不回「已保存」；逾時是結果未知，同 key 重試。
 - 送出前內容留在既有本機草稿（[draftStorage.ts](../../web/src/features/composer/draftStorage.ts) 的做法）；畫面清楚區分「本機草稿」與「已保存」。
-- 匯出以 id 為檔名，Runner 重試時先檢查檔案是否已存在，重複匯出不產生重複檔。
+- captures 是不可編輯的原始快記；每篇文章只有一份可編輯的人類補充，`notes.article_id` 唯一。兩種 body 都保留原字串（不 trim、不經 AI），UTF-8 為 1～16,384 bytes。空白或非法字元的 UI/API 檢查由階段 1/2 定義；SQL 不冒充完整輸入驗證。
+- id/client_key 是非空穩定 opaque ID；API 必須限制長度並拒絕路徑字元，Runner 不把任意輸入直接拼成檔案路徑。時間由 Worker 產生 UTC RFC3339；排序加 id 作 tie-breaker。單 operator 模組不需要 room/member 外鍵；認證仍在 Worker 邊界。
+- `exported_commit = NULL` 表示尚待匯出；非空是已成功推送到內容 repo 的 commit。只有 Runner 確認持久化到遠端後才能回報，不以本機檔案存在或 git commit 成功作為已匯出證據。
+- notes 每次編輯在同一交易中遞增 `revision`、更新 `updated_at` 並清空 `exported_commit`。revision 不以時間戳取代，避免同毫秒或時鐘回撥造成舊 ACK 命中新內容；達 JS 安全整數上限時拒絕編輯，不回捲。匯出 ACK 用 `WHERE id = ? AND revision = ?` 比對快照，零列更新表示仍待匯出。
+- 匯出路徑固定為 captures/<安全編碼 id>.json 與 notes/<安全編碼 id>.json。重試檢查內容及 revision，不只檢查檔案存在；相同快照無需新 commit，修改過的 note 覆寫同一路徑。Runner 單一實例序列執行，避免舊快照覆蓋新版本；Git push 衝突不回報成功。D1 → Git 單向權威不變，偵測人工改檔時記錄覆寫事件。
+
+revision 與每篇唯一補充是本階段定案：前者補足 RC-05 的匯出／編輯競態，後者符合單 operator 的補充編輯區，沒有加入版本歷史或多使用者評論。
 
 ## 5. Kith 重用對照
 
@@ -81,11 +89,13 @@ Kith 現行 SDD 以 Workers Paid 為部署畫像；本模組只用 Workers、D1�
 
 沿用 [AGENTS](../../AGENTS.md) 與 [v2 E2E 規則](../v2/08-testing-e2e.md)：先寫 E2E（合成資料、本地 CF 環境），再實作；不把預期行為當成已完成測試。
 
+完整 fixture、故障切點、觀測與階段分工見 [RC 測試清單](reading-capture-tests.md)。階段 0 的 SQLite 檢查僅驗證草稿，RC-01～07 全部仍為待執行。
+
 ## 7. 階段
 
 | 階段 | 交付 |
 | --- | --- |
-| 0 | 本頁定案＋兩張表的 migration 草稿與 RC 測試清單 |
+| 0 | 本頁資料契約定案＋[兩張表 migration 草稿](reading-capture-schema.sql)與 [RC 測試清單](reading-capture-tests.md)；交付／驗證見 [#446 報告](../../tasks/446-reading-capture-phase0/report.md) |
 | 1 | 快記＋收件匣（RC-01～04） |
 | 2 | 閱讀頁＋人類補充＋CI 建置與 Runner 匯出（RC-05～07） |
 | 之後 | 使用兩週後，依實際需要從延後清單挑下一項：公開部署、Telegram／Slack、已讀與更新差異、事件統計 |
@@ -96,4 +106,4 @@ Kith 現行 SDD 以 Workers Paid 為部署畫像；本模組只用 Workers、D1�
 - 匯出端點的 Runner 憑證放在私人部署環境的方式。
 - 第一個延後項目的優先順序。
 
-本次只更新設計文件，沒有更改程式、依賴、遷移、feature flags、部署或 Agent runtime。
+文章 ID 來源與 Runner 憑證的選定不影響階段 0 的 opaque ID／授權邊界；階段 2 接線前必須記錄具體方案，若需要帳號、秘密或真人操作則標記 needs-owner，不得代答。階段 0 沒有套用 migration、修改 feature flags、部署或 Agent runtime。

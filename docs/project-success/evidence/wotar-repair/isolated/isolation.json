@@ -1,0 +1,8 @@
+{
+  "tracked_source_unchanged": true,
+  "credential_location": "fresh temporary fixture only",
+  "broker_container": "wotar-test-a3bfd9fd2a154bd29784d40509a06539",
+  "broker_network": "internal",
+  "published_listener": "127.0.0.1:8883",
+  "existing_certificates_or_settings_written": false
+}

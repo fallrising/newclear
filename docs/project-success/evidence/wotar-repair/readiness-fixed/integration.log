@@ -1,0 +1,28 @@
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/pytest tests/integration -m integration -v
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0 -- /home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /tmp/wotar-isolated-lj1kdxi_/source
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5, asyncio-1.4.0, cov-7.1.0, hypothesis-6.170.5
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 16 items / 1 deselected / 15 selected
+
+tests/integration/test_emqx_e2e.py::test_emqx_tls_port_reachable PASSED  [  6%]
+tests/integration/test_emqx_e2e.py::test_valid_publisher_subscriber PASSED [ 13%]
+tests/integration/test_emqx_e2e.py::test_wrong_ca_rejects_connection PASSED [ 20%]
+tests/integration/test_emqx_e2e.py::test_missing_ca_file_fails_at_config PASSED [ 26%]
+tests/integration/test_emqx_e2e.py::test_topic_substitution_rejected PASSED [ 33%]
+tests/integration/test_emqx_e2e.py::test_ciphertext_on_broker_plaintext_not_visible PASSED [ 40%]
+tests/integration/test_emqx_e2e.py::test_duplicate_delivery_handler_once PASSED [ 46%]
+tests/integration/test_emqx_e2e.py::test_restart_resumes_pending_outbox PASSED [ 53%]
+tests/integration/test_emqx_e2e.py::test_key_rotation_decrypt_only_still_works PASSED [ 60%]
+tests/integration/test_emqx_e2e.py::test_plaintext_port_not_used_for_client PASSED [ 66%]
+tests/integration/test_emqx_e2e.py::test_outbox_never_contains_plaintext PASSED [ 73%]
+tests/integration/test_emqx_e2e.py::test_wrong_hostname_rejects_connection PASSED [ 80%]
+tests/integration/test_emqx_e2e.py::test_unauthorized_client_publish_rejected PASSED [ 86%]
+tests/integration/test_emqx_e2e.py::test_reconnect_with_queued_outbox PASSED [ 93%]
+tests/integration/test_emqx_e2e.py::test_restart_resumes_pending_inbox PASSED [100%]
+
+====================== 15 passed, 1 deselected in 35.53s =======================

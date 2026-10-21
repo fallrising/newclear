@@ -37,7 +37,9 @@ Cloud KMS、任意 payload schema 與 production broker ACL 審查不屬已完�
 ## 本次修復計畫（T-0368／newclear #442）
 
 目標：修復 AC-05 的 I001，補跑原本必要的憑證與真 broker gate，維持 AC-01–05。
-範圍：import 排序、必要 test runner／CI 及證據文件；不新增 runtime dependency。
+範圍：import 排序、必要 test runner／CI、integration readiness fixture 及證據文件；不新增 runtime dependency。
+實跑另重現 TCP proxy ready 早於 broker TLS：前五個真連線 EOF/reset，後續相同憑證通過。
+修復計畫加入真 mTLS handshake readiness，並以只開 TCP／真 TLS 兩種合成 listener 回歸，不能只 sleep 或重跑。
 先執行未修版本 make lint 保存失敗；再只修排序。測試以獨立 source fixture、
 新產生 CA/client/server/keyring、唯一 container 與 loopback 連接埠隔離，
 不在既有 certs／config／.secure_mqtt 路徑覆寫任何內容。

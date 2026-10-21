@@ -1,0 +1,136 @@
+[
+  {
+    "label": "certificates",
+    "argv": [
+      "bash",
+      "scripts/generate_dev_certs.sh"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 1.166
+  },
+  {
+    "label": "bootstrap",
+    "argv": [
+      "/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/python",
+      "scripts/bootstrap_local_keys.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.064
+  },
+  {
+    "label": "native",
+    "argv": [
+      "make",
+      "VENV=/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv",
+      "lint",
+      "typecheck",
+      "doctor",
+      "test",
+      "coverage"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 13.54
+  },
+  {
+    "label": "broker-start",
+    "argv": [
+      "docker",
+      "run",
+      "-d",
+      "--name",
+      "wotar-test-58684edd4cf1446097428e95deef14e9",
+      "--network",
+      "wotar-test-58684edd4cf1446097428e95deef14e9-net",
+      "-p",
+      "127.0.0.1:8883:8883",
+      "-v",
+      "/tmp/wotar-isolated-emuzpjb6/source/certs:/opt/emqx/etc/certs:ro",
+      "-v",
+      "/tmp/wotar-isolated-emuzpjb6/source/config/emqx/acl.conf:/opt/emqx/etc/acl.conf:ro",
+      "-e",
+      "EMQX_LISTENERS__TCP__DEFAULT__ENABLE=false",
+      "-e",
+      "EMQX_LISTENERS__WS__DEFAULT__ENABLE=false",
+      "-e",
+      "EMQX_LISTENERS__WSS__DEFAULT__ENABLE=false",
+      "-e",
+      "EMQX_LISTENERS__SSL__DEFAULT__BIND=8883",
+      "-e",
+      "EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE=/opt/emqx/etc/certs/ca.pem",
+      "-e",
+      "EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE=/opt/emqx/etc/certs/server.pem",
+      "-e",
+      "EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE=/opt/emqx/etc/certs/server.key",
+      "-e",
+      "EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__VERIFY=verify_peer",
+      "-e",
+      "EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__FAIL_IF_NO_PEER_CERT=true",
+      "-e",
+      "EMQX_AUTHORIZATION__NO_MATCH=deny",
+      "-e",
+      "EMQX_AUTHORIZATION__SOURCES__1__TYPE=file",
+      "-e",
+      "EMQX_AUTHORIZATION__SOURCES__1__ENABLE=true",
+      "-e",
+      "EMQX_AUTHORIZATION__SOURCES__1__PATH=/opt/emqx/etc/acl.conf",
+      "-e",
+      "EMQX_ALLOW_ANONYMOUS=true",
+      "emqx/emqx@sha256:2bb94239a3812cd3443695d29d196cff510660b3fbf1bc56bbd8747fa94c4bd8"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.214
+  },
+  {
+    "label": "integration",
+    "argv": [
+      "make",
+      "VENV=/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv",
+      "test-integration"
+    ],
+    "exit_code": 2,
+    "duration_seconds": 14.796
+  },
+  {
+    "label": "broker-log",
+    "argv": [
+      "docker",
+      "logs",
+      "wotar-test-58684edd4cf1446097428e95deef14e9"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.032
+  },
+  {
+    "label": "broker-stop",
+    "argv": [
+      "docker",
+      "stop",
+      "--time",
+      "15",
+      "wotar-test-58684edd4cf1446097428e95deef14e9"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 1.467
+  },
+  {
+    "label": "broker-remove",
+    "argv": [
+      "docker",
+      "rm",
+      "wotar-test-58684edd4cf1446097428e95deef14e9"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.032
+  },
+  {
+    "label": "network-remove",
+    "argv": [
+      "docker",
+      "network",
+      "rm",
+      "wotar-test-58684edd4cf1446097428e95deef14e9-net"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.114
+  }
+]

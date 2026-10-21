@@ -1,0 +1,418 @@
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/pytest tests/integration -m integration -v
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0 -- /home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /tmp/wotar-isolated-emuzpjb6/source
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5, asyncio-1.4.0, cov-7.1.0, hypothesis-6.170.5
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 16 items / 1 deselected / 15 selected
+
+tests/integration/test_emqx_e2e.py::test_emqx_tls_port_reachable PASSED  [  6%]
+tests/integration/test_emqx_e2e.py::test_valid_publisher_subscriber FAILED [ 13%]
+tests/integration/test_emqx_e2e.py::test_wrong_ca_rejects_connection PASSED [ 20%]
+tests/integration/test_emqx_e2e.py::test_missing_ca_file_fails_at_config PASSED [ 26%]
+tests/integration/test_emqx_e2e.py::test_topic_substitution_rejected PASSED [ 33%]
+tests/integration/test_emqx_e2e.py::test_ciphertext_on_broker_plaintext_not_visible FAILED [ 40%]
+tests/integration/test_emqx_e2e.py::test_duplicate_delivery_handler_once FAILED [ 46%]
+tests/integration/test_emqx_e2e.py::test_restart_resumes_pending_outbox FAILED [ 53%]
+tests/integration/test_emqx_e2e.py::test_key_rotation_decrypt_only_still_works PASSED [ 60%]
+tests/integration/test_emqx_e2e.py::test_plaintext_port_not_used_for_client FAILED [ 66%]
+tests/integration/test_emqx_e2e.py::test_outbox_never_contains_plaintext PASSED [ 73%]
+tests/integration/test_emqx_e2e.py::test_wrong_hostname_rejects_connection PASSED [ 80%]
+tests/integration/test_emqx_e2e.py::test_unauthorized_client_publish_rejected PASSED [ 86%]
+tests/integration/test_emqx_e2e.py::test_reconnect_with_queued_outbox PASSED [ 93%]
+tests/integration/test_emqx_e2e.py::test_restart_resumes_pending_inbox PASSED [100%]
+
+=================================== FAILURES ===================================
+_______________________ test_valid_publisher_subscriber ________________________
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-sub-int-001', tls=TlsConfig(ca_file=PosixPath('/tmp/w...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a4000c0>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+>           self._client.connect(self.host, self.port, keepalive=60)
+
+src/secure_mqtt/mqtt/paho_transport.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1435: in connect
+    return self.reconnect()
+           ^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1598: in reconnect
+    self._sock = self._create_socket()
+                 ^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4612: in _create_socket
+    sock = self._ssl_wrap_socket(sock)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4671: in _ssl_wrap_socket
+    ssl_sock.do_handshake()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ssl.SSLSocket fd=14, family=2, type=1, proto=6, laddr=('127.0.0.1', 47167)>
+block = False
+
+    @_sslcopydoc
+    def do_handshake(self, block=False):
+        self._check_connected()
+        timeout = self.gettimeout()
+        try:
+            if timeout == 0.0 and block:
+                self.settimeout(None)
+>           self._sslobj.do_handshake()
+E           ssl.SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1000)
+
+/usr/lib/python3.12/ssl.py:1320: SSLEOFError
+
+The above exception was the direct cause of the following exception:
+
+unique_topic = 'test/e2ee/78585fb0435c47778ec074a29995cf8e/data'
+registry = <secure_mqtt.keys.public_key_registry.SigningPublicKeyRegistry object at 0x778e0a5b70e0>
+local_tls = TlsConfig(ca_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/ca.pem'), cert_file=PosixPath('/tmp/wotar-isola.../client.pem'), key_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/client.key'), server_hostname='localhost')
+
+    def test_valid_publisher_subscriber(unique_topic, registry, local_tls) -> None:
+        collector = MessageCollector()
+        with tempfile.TemporaryDirectory() as tmp:
+            sub = make_client(
+                client_id="sub-int-001", db_path=Path(tmp) / "sub.db", tls=local_tls, registry=registry
+            )
+            sub.register_subscription(unique_topic, collector.handler, qos=1)
+>           sub.connect()
+
+tests/integration/test_emqx_e2e.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/secure_mqtt/client.py:116: in connect
+    self.transport.connect(timeout=self.config.connect_timeout_seconds)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-sub-int-001', tls=TlsConfig(ca_file=PosixPath('/tmp/w...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a4000c0>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+            self._client.connect(self.host, self.port, keepalive=60)
+        except Exception as exc:
+            self._state = ConnectionState.DISCONNECTED
+            self.metrics.inc("mqtt_connect_total", result="failure")
+            msg = "MQTT connect failed"
+>           raise ConnectionError(msg) from exc
+E           secure_mqtt.errors.ConnectionError: MQTT connect failed
+
+src/secure_mqtt/mqtt/paho_transport.py:112: ConnectionError
+_______________ test_ciphertext_on_broker_plaintext_not_visible ________________
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-pub-cipher-001', tls=TlsConfig(ca_file=PosixPath('/tm...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a179bc0>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+>           self._client.connect(self.host, self.port, keepalive=60)
+
+src/secure_mqtt/mqtt/paho_transport.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1435: in connect
+    return self.reconnect()
+           ^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1598: in reconnect
+    self._sock = self._create_socket()
+                 ^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4612: in _create_socket
+    sock = self._ssl_wrap_socket(sock)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4671: in _ssl_wrap_socket
+    ssl_sock.do_handshake()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ssl.SSLSocket fd=22, family=2, type=1, proto=6, laddr=('127.0.0.1', 45501)>
+block = False
+
+    @_sslcopydoc
+    def do_handshake(self, block=False):
+        self._check_connected()
+        timeout = self.gettimeout()
+        try:
+            if timeout == 0.0 and block:
+                self.settimeout(None)
+>           self._sslobj.do_handshake()
+E           ConnectionResetError: [Errno 104] Connection reset by peer
+
+/usr/lib/python3.12/ssl.py:1320: ConnectionResetError
+
+The above exception was the direct cause of the following exception:
+
+unique_topic = 'test/e2ee/2f20d295c23240f3be9810f211a78032/data'
+registry = <secure_mqtt.keys.public_key_registry.SigningPublicKeyRegistry object at 0x778e0a408aa0>
+local_tls = TlsConfig(ca_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/ca.pem'), cert_file=PosixPath('/tmp/wotar-isola.../client.pem'), key_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/client.key'), server_hostname='localhost')
+
+    def test_ciphertext_on_broker_plaintext_not_visible(unique_topic, registry, local_tls) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            pub = make_client(
+                client_id="pub-cipher-001",
+                db_path=Path(tmp) / "pub.db",
+                tls=local_tls,
+                registry=registry,
+            )
+>           pub.connect()
+
+tests/integration/test_emqx_e2e.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/secure_mqtt/client.py:116: in connect
+    self.transport.connect(timeout=self.config.connect_timeout_seconds)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-pub-cipher-001', tls=TlsConfig(ca_file=PosixPath('/tm...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a179bc0>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+            self._client.connect(self.host, self.port, keepalive=60)
+        except Exception as exc:
+            self._state = ConnectionState.DISCONNECTED
+            self.metrics.inc("mqtt_connect_total", result="failure")
+            msg = "MQTT connect failed"
+>           raise ConnectionError(msg) from exc
+E           secure_mqtt.errors.ConnectionError: MQTT connect failed
+
+src/secure_mqtt/mqtt/paho_transport.py:112: ConnectionError
+_____________________ test_duplicate_delivery_handler_once _____________________
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-sub-dup-001', tls=TlsConfig(ca_file=PosixPath('/tmp/w...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a322880>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+>           self._client.connect(self.host, self.port, keepalive=60)
+
+src/secure_mqtt/mqtt/paho_transport.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1435: in connect
+    return self.reconnect()
+           ^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1598: in reconnect
+    self._sock = self._create_socket()
+                 ^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4612: in _create_socket
+    sock = self._ssl_wrap_socket(sock)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4671: in _ssl_wrap_socket
+    ssl_sock.do_handshake()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ssl.SSLSocket fd=25, family=2, type=1, proto=6, laddr=('127.0.0.1', 55705)>
+block = False
+
+    @_sslcopydoc
+    def do_handshake(self, block=False):
+        self._check_connected()
+        timeout = self.gettimeout()
+        try:
+            if timeout == 0.0 and block:
+                self.settimeout(None)
+>           self._sslobj.do_handshake()
+E           ssl.SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1000)
+
+/usr/lib/python3.12/ssl.py:1320: SSLEOFError
+
+The above exception was the direct cause of the following exception:
+
+unique_topic = 'test/e2ee/85a4b29a73954becaaf57a1556031113/data'
+registry = <secure_mqtt.keys.public_key_registry.SigningPublicKeyRegistry object at 0x778e0a40bcb0>
+local_tls = TlsConfig(ca_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/ca.pem'), cert_file=PosixPath('/tmp/wotar-isola.../client.pem'), key_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/client.key'), server_hostname='localhost')
+
+    def test_duplicate_delivery_handler_once(unique_topic, registry, local_tls) -> None:
+        collector = MessageCollector()
+        sealed_once: list[bytes] = []
+    
+        with tempfile.TemporaryDirectory() as tmp:
+            sub = make_client(
+                client_id="sub-dup-001", db_path=Path(tmp) / "sub.db", tls=local_tls, registry=registry
+            )
+            sub.register_subscription(unique_topic, collector.handler, qos=1)
+>           sub.connect()
+
+tests/integration/test_emqx_e2e.py:156: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/secure_mqtt/client.py:116: in connect
+    self.transport.connect(timeout=self.config.connect_timeout_seconds)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-sub-dup-001', tls=TlsConfig(ca_file=PosixPath('/tmp/w...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a322880>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+            self._client.connect(self.host, self.port, keepalive=60)
+        except Exception as exc:
+            self._state = ConnectionState.DISCONNECTED
+            self.metrics.inc("mqtt_connect_total", result="failure")
+            msg = "MQTT connect failed"
+>           raise ConnectionError(msg) from exc
+E           secure_mqtt.errors.ConnectionError: MQTT connect failed
+
+src/secure_mqtt/mqtt/paho_transport.py:112: ConnectionError
+_____________________ test_restart_resumes_pending_outbox ______________________
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-pub-restart-001', tls=TlsConfig(ca_file=PosixPath('/t...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a68df80>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+>           self._client.connect(self.host, self.port, keepalive=60)
+
+src/secure_mqtt/mqtt/paho_transport.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1435: in connect
+    return self.reconnect()
+           ^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1598: in reconnect
+    self._sock = self._create_socket()
+                 ^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4612: in _create_socket
+    sock = self._ssl_wrap_socket(sock)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4671: in _ssl_wrap_socket
+    ssl_sock.do_handshake()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ssl.SSLSocket fd=31, family=2, type=1, proto=6, laddr=('127.0.0.1', 40923)>
+block = False
+
+    @_sslcopydoc
+    def do_handshake(self, block=False):
+        self._check_connected()
+        timeout = self.gettimeout()
+        try:
+            if timeout == 0.0 and block:
+                self.settimeout(None)
+>           self._sslobj.do_handshake()
+E           ssl.SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1000)
+
+/usr/lib/python3.12/ssl.py:1320: SSLEOFError
+
+The above exception was the direct cause of the following exception:
+
+unique_topic = 'test/e2ee/5ebb72d0a7144fd5a16e35385d82973c/data'
+registry = <secure_mqtt.keys.public_key_registry.SigningPublicKeyRegistry object at 0x778e0a4b9250>
+local_tls = TlsConfig(ca_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/ca.pem'), cert_file=PosixPath('/tmp/wotar-isola.../client.pem'), key_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/client.key'), server_hostname='localhost')
+
+    def test_restart_resumes_pending_outbox(unique_topic, registry, local_tls) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = Path(tmp) / "shared.db"
+            pub = make_client(
+                client_id="pub-restart-001", db_path=db_path, tls=local_tls, registry=registry
+            )
+>           pub.connect()
+
+tests/integration/test_emqx_e2e.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/secure_mqtt/client.py:116: in connect
+    self.transport.connect(timeout=self.config.connect_timeout_seconds)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-pub-restart-001', tls=TlsConfig(ca_file=PosixPath('/t...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a68df80>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+            self._client.connect(self.host, self.port, keepalive=60)
+        except Exception as exc:
+            self._state = ConnectionState.DISCONNECTED
+            self.metrics.inc("mqtt_connect_total", result="failure")
+            msg = "MQTT connect failed"
+>           raise ConnectionError(msg) from exc
+E           secure_mqtt.errors.ConnectionError: MQTT connect failed
+
+src/secure_mqtt/mqtt/paho_transport.py:112: ConnectionError
+___________________ test_plaintext_port_not_used_for_client ____________________
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-tls-only-001', tls=TlsConfig(ca_file=PosixPath('/tmp/...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a460800>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+>           self._client.connect(self.host, self.port, keepalive=60)
+
+src/secure_mqtt/mqtt/paho_transport.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1435: in connect
+    return self.reconnect()
+           ^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:1598: in reconnect
+    self._sock = self._create_socket()
+                 ^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4612: in _create_socket
+    sock = self._ssl_wrap_socket(sock)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/lib/python3.12/site-packages/paho/mqtt/client.py:4671: in _ssl_wrap_socket
+    ssl_sock.do_handshake()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <ssl.SSLSocket fd=36, family=2, type=1, proto=6, laddr=('127.0.0.1', 50037)>
+block = False
+
+    @_sslcopydoc
+    def do_handshake(self, block=False):
+        self._check_connected()
+        timeout = self.gettimeout()
+        try:
+            if timeout == 0.0 and block:
+                self.settimeout(None)
+>           self._sslobj.do_handshake()
+E           ConnectionResetError: [Errno 104] Connection reset by peer
+
+/usr/lib/python3.12/ssl.py:1320: ConnectionResetError
+
+The above exception was the direct cause of the following exception:
+
+local_tls = TlsConfig(ca_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/ca.pem'), cert_file=PosixPath('/tmp/wotar-isola.../client.pem'), key_file=PosixPath('/tmp/wotar-isolated-emuzpjb6/source/certs/client.key'), server_hostname='localhost')
+registry = <secure_mqtt.keys.public_key_registry.SigningPublicKeyRegistry object at 0x778e0a40b8f0>
+unique_topic = 'test/e2ee/08bdca249ba742b3acfa2ba1e5578c91/data'
+
+    def test_plaintext_port_not_used_for_client(local_tls, registry, unique_topic) -> None:
+        """Client must connect on TLS 8883, not plaintext 1883."""
+        with tempfile.TemporaryDirectory() as tmp:
+            client = make_client(
+                client_id="tls-only-001", db_path=Path(tmp) / "c.db", tls=local_tls, registry=registry
+            )
+            assert client.config.broker_port == 8883
+>           client.connect()
+
+tests/integration/test_emqx_e2e.py:287: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/secure_mqtt/client.py:116: in connect
+    self.transport.connect(timeout=self.config.connect_timeout_seconds)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PahoMqttTransport(host='localhost', port=8883, client_id='secure-tls-only-001', tls=TlsConfig(ca_file=PosixPath('/tmp/...suback_reasons={}, _lock=<unlocked _thread.lock object at 0x778e0a460800>, _reconnect_attempt=0, _stop_reconnect=False)
+timeout = 20.0
+
+    def connect(self, *, timeout: float) -> None:
+        self._state = ConnectionState.CONNECTING
+        try:
+            self._client.connect(self.host, self.port, keepalive=60)
+        except Exception as exc:
+            self._state = ConnectionState.DISCONNECTED
+            self.metrics.inc("mqtt_connect_total", result="failure")
+            msg = "MQTT connect failed"
+>           raise ConnectionError(msg) from exc
+E           secure_mqtt.errors.ConnectionError: MQTT connect failed
+
+src/secure_mqtt/mqtt/paho_transport.py:112: ConnectionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_emqx_e2e.py::test_valid_publisher_subscriber - ...
+FAILED tests/integration/test_emqx_e2e.py::test_ciphertext_on_broker_plaintext_not_visible
+FAILED tests/integration/test_emqx_e2e.py::test_duplicate_delivery_handler_once
+FAILED tests/integration/test_emqx_e2e.py::test_restart_resumes_pending_outbox
+FAILED tests/integration/test_emqx_e2e.py::test_plaintext_port_not_used_for_client
+================= 5 failed, 10 passed, 1 deselected in 14.23s ==================
+make: *** [Makefile:34: test-integration] Error 1

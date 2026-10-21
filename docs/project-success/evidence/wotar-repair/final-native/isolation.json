@@ -1,0 +1,9 @@
+{
+  "tracked_source_unchanged": true,
+  "credential_location": "fresh temporary fixture only",
+  "broker_container": null,
+  "cleanup_errors": [],
+  "broker_network": "dedicated bridge; host listener loopback only",
+  "published_listener": "127.0.0.1:8883",
+  "existing_certificates_or_settings_written": false
+}

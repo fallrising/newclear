@@ -43,6 +43,12 @@ docchecks 另驗證 61 個本地文件連結、T-447 task contract、capability 
 
 本機 SQL 檢查不能證明 D1 HTTP 語義、認證、瀏覽器保存或 Git 持久化。草稿要在階段 1 的隔離 D1 通過後才升格為正式 migration。單一 Runner 是此設計的約束；多 Runner 必須另設序列化／競態防護。
 
-原生 Codex worker 已完成唯讀需求審閱，主控接受並整合。最終 commit 的不同模型家族獨立審查、最終 CI 與合併回讀仍待完成；本報告保持 PARTIAL，不以本機通過冒充交付合併。Grok 顯示未登入，未啟動模型；OpenCode Go 既有 credential 和模型目錄已確認；最終審查固定為 opencode-go/longcat-2.5-preview-free（LongCat 家族，作者 OpenAI GPT 家族），官方目錄列為免費，禁止付費 fallback。未進行登入或新增付費服務。
+原生 Codex worker 已完成唯讀需求審閱，主控接受並整合。交付 commit `266aab10e78aca400a3827b7c33af4c53b9d6a0a` 的本機最終檢查通過，CI [Kith test/web](https://github.com/fallrising/newclear/actions/runs/39651400599) 與 [success contracts](https://github.com/fallrising/newclear/actions/runs/39651400453) 全部 SUCCESS。
+
+但不同模型家族獨立審查**未完成**：Grok 顯示未登入，未啟動模型；OpenCode plan / `opencode-go/longcat-2.5-preview-free`（LongCat 家族，作者 OpenAI GPT）在全工具 deny、無 MCP、--pure 的政策下退出 1，回傳 HTTP 402、`Upstream request failed: Endpoint is unavailable.`，沒有審查結論。詳見 [T-447 報告](../../../../.team/reports/T-447.md)。免費模型雖在官方與本地目錄存在，這不證明端點可用。本次未登入、未改付費設定、未換付費 API 或用同家族審查冒充。
+
+證據保存在共用 workspace 的 `kith/Kith-20261021-1804-review/preserve/evidence/`：review-input.txt、policy.json、head.txt、events.jsonl、stderr.log、exit-code.txt。兩次前置檢查因解析設定仍列出 herdr 狀態外掛而停止；檢視來源後，使用 --pure 並將本次 child 的 HERDR_ENV 設為 0 使外掛無作用，保留全部 deny 政策後才啟動模型。沒有降低安全約束。
+
+Evidence gate：**BLOCKED，不合併**。PR 保留 draft，本報告保持 PARTIAL；需要 owner 恢復可用且不產生付費 API 消耗的不同家族審查途徑。此次失敗紀錄提交後，必須對新的最終 head 重新審查並核對 CI/main；不能沿用先前 head 的 CI 當成新 head 證據。最終遠端狀態在 PR 留言回讀，issue 加 needs-owner 並留下 RELEASE，不關閉 issue、不刪除未合併 worktree。
 
 下一里程碑為階段 1：快記＋收件匣（RC-01～04）。本 session 不接續執行。

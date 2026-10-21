@@ -270,7 +270,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^(E2E|PROBE)-W[0-7]-[0-9]{2}$"
+          "pattern": "^((E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-4])$"
         },
         "spec": {
           "type": "string",
@@ -336,7 +336,7 @@
             },
             "path": {
               "type": "string",
-              "pattern": "^screenshots/(E2E|PROBE)-W[0-7]-[0-9]{2}/[0-9]{2}-[a-z0-9-]+-(desktop|mobile)\\.png$"
+              "pattern": "^screenshots/((E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-4])/[0-9]{2}-[a-z0-9-]+-(desktop|mobile)\\.png$"
             },
             "sha256": {
               "type": "string",
@@ -359,7 +359,7 @@
             },
             "path": {
               "type": "string",
-              "pattern": "^api/(E2E|PROBE)-W[0-7]-[0-9]{2}\\.(desktop|mobile)\\.jsonl$"
+              "pattern": "^api/((E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-4])\\.(desktop|mobile)\\.jsonl$"
             },
             "sha256": {
               "type": "string",
@@ -382,7 +382,7 @@
             },
             "path": {
               "type": "string",
-              "pattern": "^ws/(E2E|PROBE)-W[0-7]-[0-9]{2}\\.(desktop|mobile)\\.jsonl$"
+              "pattern": "^ws/((E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-4])\\.(desktop|mobile)\\.jsonl$"
             },
             "sha256": {
               "type": "string",
@@ -405,7 +405,7 @@
             },
             "path": {
               "type": "string",
-              "pattern": "^traces/(E2E|PROBE)-W[0-7]-[0-9]{2}\\.(desktop|mobile)\\.zip$"
+              "pattern": "^traces/((E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-4])\\.(desktop|mobile)\\.zip$"
             },
             "sha256": {
               "type": "string",

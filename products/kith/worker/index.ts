@@ -49,12 +49,19 @@ import { loadAllAgentRuntimes } from "./providers/runtime.ts";
 import { mountAgentRoutes, runtimeSummary } from "./routes/agents.ts";
 import { mountProviderRoutes } from "./routes/providers.ts";
 import { mountTraceRoutes } from "./routes/traces.ts";
+import { isReadingCapturePath, mountReadingCaptureRoutes } from "./routes/reading-capture.ts";
 
 export { HostedGeneration, Inbox, Room };
 
 type AppEnv = { Bindings: Env };
 
 const app = new Hono<AppEnv>();
+
+// Apply even to early CSRF/rate-limit failures on private reading routes.
+app.use("/api/*", async (c, next) => {
+  if (isReadingCapturePath(c.req.path)) c.header("Cache-Control", "no-store");
+  await next();
+});
 
 const HANDLE_RE = /^[a-z0-9_]{2,32}$/;
 const QUOTA_CLASSES = new Set(["api_key", "operator_personal"]);
@@ -760,6 +767,7 @@ app.post("/api/members/:id/password", async (c) => {
   return c.json({ ok: true });
 });
 
+mountReadingCaptureRoutes(app);
 mountProviderRoutes(app);
 mountAgentRoutes(app);
 mountTraceRoutes(app);

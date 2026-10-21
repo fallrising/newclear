@@ -15,6 +15,8 @@ import { RequireAuth } from "./RequireAuth";
 import { RoomPage } from "./RoomPage";
 import { RouteLoading } from "./RouteLoading";
 
+const CapturePage = lazy(() => import("../features/captures/CapturePage").then((m) => ({ default: m.CapturePage })));
+
 const queryClient = createQueryClient();
 const ConsoleRoutes = lazy(() => import("./ConsoleRoutes").then((m) => ({ default: m.ConsoleRoutes })));
 
@@ -54,6 +56,7 @@ export function App(): ReactElement {
               <Route path="/r/:slug" element={<RequireAuth><Layout mobile="content"><RoomPage /></Layout></RequireAuth>}>
                 <Route path="t/:threadId" element={null} />
               </Route>
+              <Route path="/captures" element={<RequireAuth><Layout mobile="content"><Suspense fallback={<RouteLoading />}><CapturePage /></Suspense></Layout></RequireAuth>} />
               <Route path="/settings" element={<RequireAuth><Layout mobile="content"><SettingsRoute /></Layout></RequireAuth>} />
               <Route
                 path="/console/*"

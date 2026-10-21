@@ -35,14 +35,16 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 現況與缺口
 
-### 閱讀快記階段 0（獨立範圍，#446）
+### 閱讀快記階段 1（獨立範圍，#456，IN_PROGRESS）
 
-本次目標：[MVP 計畫](docs/plans/cloudflare-reading-capture.md) §7 的兩表草稿與 RC 測試清單。驗證計畫是先讓缺少草稿的 SQLite 隔離測試失敗，再驗證兩表、唯一鍵、原文與匯出 revision 契約；不將其替代 API/Web/Runner 驗收。聊天室 AC-01～04 的狀態不變。
+本次目標：完成 #456 快記、收件匣、冪等／衝突與離線草稿、全部預定端點認證拒絕；依 [RC 清單](docs/plans/reading-capture-tests.md) 先 RED 再 GREEN，重跑 lint/unit/integration/web/E2E 及證據 validator。階段 2 不在範圍。
+
+階段 0 歷史：[MVP 計畫](docs/plans/cloudflare-reading-capture.md) §7 的兩表草稿與 RC 測試清單。驗證計畫是先讓缺少草稿的 SQLite 隔離測試失敗，再驗證兩表、唯一鍵、原文與匯出 revision 契約；不將其替代 API/Web/Runner 驗收。聊天室 AC-01～04 的狀態不變。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
 | --- | --- | --- | --- |
 | AC-RC0 | Given 既有聊天室 migrations，When 在隔離 SQLite 套用 docs 中兩表草稿並審閱 RC 計畫，Then 既有表／資料不變、唯一鍵與 revision 契約成立，RC-01～07 有 fixture、故障切點與明確斷言 | passed | [9 項 SQL 檢查](test/reading_capture/test_schema_draft.py)、[RC 清單](docs/plans/reading-capture-tests.md)、[RED/GREEN 報告](tasks/446-reading-capture-phase0/report.md)；僅階段 0 本機證據，PR 最終 CI／獨立審查另於 #449 記錄 |
-| AC-RC1 | Given 手機 operator，When 快記、重送與斷線，Then RC-01～04 符合規格 | pending | 階段 1 API/Web 尚未實作；SQL 檢查不是 RC E2E |
+| AC-RC1 | Given 手機 operator，When 快記、重送與斷線，Then RC-01～04 符合規格 | pending | 階段 1 IN_PROGRESS；先執行本地 CF E2E RED，再實作與驗證 RC-01～04；尚無通過證據 |
 | AC-RC2 | Given 閱讀頁與 Runner，When 更新正文、編輯補充、匯出或建置失敗，Then RC-05～07 及 RC-04 接線後回歸通過 | pending | 階段 2 尚未實作；內容 repo／憑證配置仍待接線前確定 |
 
 ### 聊天室既有狀態

@@ -1729,3 +1729,13 @@ Decision: retain draft PR, commit failure evidence, mark #446 needs-owner and RE
 Resume 2026-10-21 UTC: owner restored Grok login and explicitly selected opencode-go/deepseek-v4.1-flash if OpenCode is used. Same issue/session re-claimed; reviewer-only needs-owner label removed. Grok models confirms grok.com login; CLI 1.0.62, pin grok-4.7 (xAI family), T-448. Tools disabled with --tools empty, --permission-mode plan, --no-subagents, --disable-web-search; immutable full diff/spec provided, 600-second timeout, max4 turns. Inspected configuration has no MCP/plugins; existing herdr session hooks made inactive per process with HERDR_ENV=0. No credential/config change or login by agent.
 
 Current main 6cd69eec (Retro RE-0) merged without conflicts. Final checks and final-head independent review required again. Prior LongCat failure is historical. Final acceptance/merge evidence recorded on PR #449 without post-review commit changes.
+
+
+## Program: Kith reading capture phase 1 / Kith-20261021-1837
+
+Issue #456, draft PR #457, base 9b31fa1776213b68e7d38b6db4f706e6dd7def15. Orchestrator owns specification, integration and acceptance.
+Frozen HTTP/UI contract: products/kith/docs/plans/reading-capture-tests.md phase-1 section. T-456 isolated E2E author first; orchestrator prepares pinned toolchain and executes RED before implementation. Subsequent bounded backend/frontend tasks only after RED. No writer shares another writer's worktree. No worker commits/delegates.
+Gates: local isolated D1 migration; RC-01–04 E2E plus evidence validator; worker lint, unit/integration, web build; Python schema and repo contracts; diff check; final-head xAI Grok read-only review, final CI, latest main merge and recheck. No phase2 implementation, deploy or paid service.
+Acceptance: pending. Node24.18.0 official toolchain preparation underway; currently installed24.14.0 cannot substitute silently.
+
+T-456 source accepted after inspection; E2E lint PASS. Runtime RED: capture-link absent after successful login (phase1-e2e-red3); first two attempts were diagnosed missing host browser libs, remedied with isolated Debian library extraction and Chromium smoke141.0.7390.37. Evidence schema exposed duplicate @mobile tag (fix in test metadata, not schema weakening). Seven API integration tests RED due missing tables. Existing base155 + sidecar14 + worker29 passed in broader RED run. Isolated draft D1 apply PASS before promotion. T-457 frontend assigned separate worktree; orchestrator backend/migration writes disjoint paths.

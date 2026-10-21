@@ -1,6 +1,6 @@
 import { runInDurableObject } from "cloudflare:test";
 import { env } from "cloudflare:workers";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../../worker/env.ts";
 import { Room, WS_FRAME_MAX_BYTES, WS_MEMBER_FRAMES_PER_MINUTE, WS_ROOM_FRAMES_PER_MINUTE } from "../../worker/room.ts";
 
@@ -25,6 +25,8 @@ async function fixture() {
   return { stub, prepare };
 }
 
+// Keep each admission scenario within one UTC minute; real wall-clock rollover resets the ledger.
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(120_000); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe("WebSocket frame cost admission", () => {

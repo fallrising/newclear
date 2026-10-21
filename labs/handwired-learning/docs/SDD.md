@@ -1,7 +1,7 @@
 # Handwired Learning：一條溫度校正線
 
 - 日期：2026-10-22（MVP 縮減；前一版見 commit `4bb78370`）。
-- 狀態：Proposed；未實作、未安裝、未執行。
+- 狀態：HW-0 已驗證固定版本 CPU 與梯度 API；HW-1～HW-3 尚未實作／驗收，沒有安裝依賴。
 - 投入／文檔檔位：未分級。
 - 上游觀察版本：`257856e3b221140acb4cc4460626b850c0bd4ff1`。
 
@@ -23,7 +23,7 @@ FP32 與 JS Number 精度不同，結果比較要有容許值。
 ## 3. 第一步：API 核對（HW-0，阻塞後續）
 
 上游文件確認有 `Circuit` builder 與 CPU evaluator（`src/runtime/numeric-ui-core.ts`），
-但沒有寫明可供外部呼叫的梯度／backward API。實作前先核對固定版本：
+初始設計尚未核對可供外部呼叫的梯度／backward API。HW-0 已確認 `Circuit.backpropagateReference` 可用，入口、限制與最小範例見 [API 支援表](upstream-api.md)。原核對問題如下：
 
 - 如何建一個只有輸入、參數、乘法、加法的圖並在 CPU 執行？
 - 能否取得對參數的梯度？
@@ -86,4 +86,4 @@ WebGPU 研究。HW-3 試用後若初學者確實卡在這些點，再逐項加�
 - [固定上游 tree](https://github.com/chenglou/handwired/tree/257856e3b221140acb4cc4460626b850c0bd4ff1)、[上游文件入口](https://github.com/chenglou/handwired/blob/257856e3b221140acb4cc4460626b850c0bd4ff1/docs/README.md)、[上游 tutorial](https://github.com/chenglou/handwired/blob/257856e3b221140acb4cc4460626b850c0bd4ff1/docs/tutorial.md)。
 - [目錄分類](../../../docs/taxonomy.md)、[文檔檔位政策](../../../docs/portfolio-doc-tiers.md)。
 
-本 lab 不複製上游程式碼；尚未執行上游、安裝依賴或驗證梯度。
+本 lab 不將上游程式碼納入 repo。HW-0 從固定 SHA 下載原始碼到 repo 外，已執行 CPU 前向與參數梯度範例，未安裝依賴。這不是 HW-1 網頁或 HW-2 訓練收斂驗收。

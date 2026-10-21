@@ -49,3 +49,7 @@ Roll out the contract in [project-success.md](../project-success.md) to every en
 ## Independent acceptance
 
 2026-10-21T16:03:00.294168Z: [Independent final review](reports/independent-review.md) ACCEPT. Contracts workers accepted after orchestrator reran all 79 structural checks. Newclear qualification report remains PARTIAL with four qualified and two unqualified candidates; only the four proven scopes are accepted for tagging. Kernel native kit/core five candidates accepted after 68 tests on the clean committed navigation source. Both structural suites pass 15 tests. Final CI and remote publication remain gates, not presumed facts.
+
+## Final CI reassessment — 2026-10-21T16:14Z
+
+The initial nine-candidate acceptance is superseded: mkfk required short chaos failed on final head c0f49d40 (run 39631545715, attempt 1); missing hidden artifacts prevent diagnosis. Its mainline is incomplete and usable_tag none. Eight candidates remain (three newclear, five kernel). Preserve all local passes and the failing remote run; a new random seed cannot erase it. A narrow mkfk workflow change retains only chaos.log and chaos-report.json, including hidden paths; no oracle, seed, timeout, product runtime or permissions change. Required checks and independent delta review will rerun. Agent Platform cleanup error and ojbquay Kafka startup timeout are also retained; neither has a usable claim.

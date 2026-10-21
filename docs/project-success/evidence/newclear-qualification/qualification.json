@@ -33,21 +33,6 @@
       ]
     },
     {
-      "project": "systems/mkfk",
-      "qualification": "PASS",
-      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
-      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
-      "tree": "2be2685d67b3d87f00121744a48e46bf8bbd98bd",
-      "proposed_tag": "usable/mkfk/v0.1.0",
-      "scope_and_limitations": "Current requiredCI gates,three-broker demo,and seeded full28-fault chaos pass. Historical extended model/performance NOT inherited because relevant code changed;extended profile is explicitly optional.",
-      "evidence": [
-        "mkfk-commands.json",
-        "mkfk-core-commands.json",
-        "mkfk-full-chaos-commands.json",
-        "mkfk-native-chaos-report.json"
-      ]
-    },
-    {
       "project": "labs/pg-jev-router",
       "qualification": "PASS",
       "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
@@ -86,6 +71,31 @@
       "evidence": [
         "ojbquay-required-gap.json"
       ]
+    },
+    {
+      "project": "systems/mkfk",
+      "qualification": "FAIL",
+      "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+      "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+      "tree": "2be2685d67b3d87f00121744a48e46bf8bbd98bd",
+      "proposed_tag": null,
+      "scope_and_limitations": "Initial local required checks and full chaos passed; final required PR CI short-chaos failed and supersedes qualification. Teaching distributed log only; failure seed and assertion unavailable, root cause unresolved. No usable tag.",
+      "evidence": [
+        "mkfk-commands.json",
+        "mkfk-core-commands.json",
+        "mkfk-full-chaos-commands.json",
+        "mkfk-native-chaos-report.json"
+      ],
+      "initial_local_qualification": "PASS",
+      "withdrawn_proposed_tag": "usable/mkfk/v0.1.0",
+      "superseded_by": "../../qualifications/mkfk.md",
+      "final_ci_failure": {
+        "run": 39631545715,
+        "attempt": 1,
+        "head": "c0f49d40f8a401efd51b79a70867d0cf30eb0363",
+        "reason": "Required short-chaos failure; seed and assertion unavailable because hidden artifact excluded; root cause unresolved. Fresh-seed pass cannot discharge this failure."
+      }
     }
-  ]
+  ],
+  "final_reassessment_utc": "2026-10-21T16:14:00Z"
 }

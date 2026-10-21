@@ -35,6 +35,8 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 現況與缺口
 
+2026-10-21 [最終 CI attempt 1](https://github.com/fallrising/newclear/actions/runs/39631545716/attempts/1) 的 673 項測試有一項 error：`test_runner_interrupt_preserves_python_cleanup` 回報 `rehearsal_cleanup_incomplete`。本次沒有修 runtime；需釐清停止與清理邊界，重跑通過也不代表根因已修復。
+
 M0–M2 已驗收，M3/M4 僅有多個已接受切片；不可把其合計稱作完整平台。
 2026-10-06 單節點演練涵蓋真 TCP API、CLI worker、PostgreSQL 與 Web，模型仍是 local mock。
 真 provider、live GitHub export、release 前長任務與主機 service-manager/TLS 尚缺對應證據。

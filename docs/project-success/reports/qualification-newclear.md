@@ -4,7 +4,7 @@ STATUS: PARTIAL
 
 ## Summary
 
-All six candidates assessed. Four PASS qualification recommendations; two FAIL. PARTIAL preserves failed attempts and skipped gates; it does not label the failed candidates usable. No tags, commits, pushes, deployments or product edits were made.
+All six candidates assessed. Initial worker snapshot had four PASS recommendations and two FAIL. **Final CI supersedes mkfk: three remain PASS and three are unqualified.** [Final reassessment](../qualifications/mkfk.md) records the unresolved short-chaos failure. PARTIAL preserves failed attempts and skipped gates; it does not label the failed candidates usable. No tags, commits, pushes, deployments or product edits were made.
 
 Source: `b97319d74f8442b5173ef42be72a0aa757d87df0`; tested checkout: `d62cf11d722f229c3a048e4021282aa5783b976e`. [Source/tree audit](../evidence/newclear-qualification/source-audit.json) proves exact tracked component-tree equality for all six. [Machine-readable disposition](../evidence/newclear-qualification/qualification.json) and [all exact commands/full logs](../evidence/newclear-qualification/README.md) are the acceptance map.
 
@@ -12,7 +12,7 @@ Source: `b97319d74f8442b5173ef42be72a0aa757d87df0`; tested checkout: `d62cf11d72
 | --- | --- | --- | --- |
 | DimGate | PASS | `usable/dim-gate/v0.1.0` | [Native gates](../evidence/newclear-qualification/dim-gate-commands.json):426 tests, lint/typecheck/docs/contracts/CI/architecture/build. [Fresh Chromium](../evidence/newclear-qualification/dim-browser-attempt3-test.log):4/4 including production shell and aws/aliyun/onprem full UI Guide diagnosis, rollback and recovery. Local mock only. |
 | ClarkQ | PASS | `usable/clarkq/v1.5.1` | [vet/test/build](../evidence/newclear-qualification/clarkq-01.log), [native demo](../evidence/newclear-qualification/clarkq-core-attempt2-scenarios.log):49 assertions across6 scenarios, real container restart persistence, FIFO/auth/tenant quota/metrics/long-poll. Recommended single-node core. |
-| mkfk | PASS | `usable/mkfk/v0.1.0` | [All required CI profiles](../evidence/newclear-qualification/mkfk-commands.json), [three-broker demo](../evidence/newclear-qualification/mkfk-core-demo.log), [current full chaos](../evidence/newclear-qualification/mkfk-native-chaos-report.json):28 faults, seed 1792597790,29,604 acknowledged records, no invariant violations. |
+| mkfk | FAIL after final CI | none | Initial local PASS evidence retained: [All required CI profiles](../evidence/newclear-qualification/mkfk-commands.json), [three-broker demo](../evidence/newclear-qualification/mkfk-core-demo.log), [current full chaos](../evidence/newclear-qualification/mkfk-native-chaos-report.json):28 faults, seed 1792597790,29,604 acknowledged records, no invariant violations. |
 | pg-jev-router | PASS | `usable/pg-jev-router/v0.1.0` | [Native commands](../evidence/newclear-qualification/pg-jev-router-commands.json), [real PostgreSQL/extension integration](../evidence/newclear-qualification/pg-jev-router-02.log):15 unit + 6 integration tests,9 synthetic cases,9 rows / 1 batch request and cache hit. No actual classifier or downstream dispatch. |
 | Wotar | FAIL | none | [Required lint failure](../evidence/newclear-qualification/wotar-03.log):Ruff I001 in `tests/unit/test_key_rotation.py:3`; [unit results](../evidence/newclear-qualification/wotar-unit-01.log):175 passed,3 cert-dependent skips,16 integration/public-smoke deselected. |
 | ojbquay | FAIL | none | [Original required timing gap](../evidence/newclear-qualification/ojbquay-required-gap.json):150 ms retry target with<20%error remains open at206–253 ms. Functional completion does not meet this NFR. |
@@ -36,7 +36,7 @@ Only this report and `docs/project-success/evidence/newclear-qualification/**` w
 
 ## Risks and Follow-ups
 
-Root must bind any tags to the final merged source and required CI/review, with runtime/source diff verification after integration. Four proposals above are qualification recommendations, not published tags. Wotar needs its existing lint failure repaired and all required synthetic certificate/broker integration evidence before requalification. ojbquay needs the original 150 ms/<20%requirement met or an explicit approved specification decision; no narrower mainline was substituted.
+Root must bind any tags to the final merged source and required CI/review, with runtime/source diff verification after integration. Three proposals above are qualification recommendations, not published tags. mkfk has been withdrawn after final CI; successful local test logs below are historical observations, not current qualification. Wotar needs its existing lint failure repaired and all required synthetic certificate/broker integration evidence before requalification. ojbquay needs the original 150 ms/<20%requirement met or an explicit approved specification decision; no narrower mainline was substituted.
 
 mkfk remains the original teaching implementation with trusted peers, at-least-once delivery and platform-fsync assumptions; fresh fault tests are not power-loss or capacity certification. ClarkQ qualification adds no distributed-soak claim. DimGate remains local mock; pg-jev remains a synthetic policy lab. Full successful browser screenshots/traces were ephemeral; complete textual output is retained.
 

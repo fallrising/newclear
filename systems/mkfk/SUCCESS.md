@@ -2,8 +2,8 @@
 project: systems/mkfk
 purpose: 以可重播故障驗證分區日誌、複製與生產消費語義
 kind: lab
-mainline: complete
-usable_tag: usable/mkfk/v0.1.0
+mainline: incomplete
+usable_tag: none
 qualification: docs/project-success/qualifications/mkfk.md
 reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
@@ -13,11 +13,11 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 主線與範圍
 
-[SDD](SDD.md)明定核心版完成線為 M0–M7 全部 VERIFIED；[STATUS](docs/STATUS.md)及 evidence 已達此線。
+[SDD](SDD.md)明定核心版完成線為 M0–M7 全部 VERIFIED；[STATUS](docs/STATUS.md)及既有 evidence 記錄曾達此線，但本次最終 CI 的必要 chaos gate 失敗，現行主線須重新驗收。
 核心是教學用途 Go/Linux distributed log：segmented WAL、per-partition Raft、ISR/HW、冪等 producer 與 durable groups。
 
 不是 Kafka wire/client 相容服務，不提供 TLS/auth、transaction、retention 或動態 membership。
-核心 complete 不等於 production-hardened；不能以成熟 Raft/Kafka 外部服務替代本案演算法學習目標。
+歷史核心 complete 不等於 production-hardened；不能以成熟 Raft/Kafka 外部服務替代本案演算法學習目標。
 
 本契約核對的是上述來源版本中的文件與程式。
 `complete` 只適用明列的主線範圍；沒有延伸為部署或生產保證。
@@ -32,9 +32,11 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 | AC-01 | Given durable partition log，When append 後 SIGKILL/restart 或 index 損壞，Then 已確認 record 可讀且索引可重建 | historical | [M1 evidence](docs/evidence/m1-8235294-storage.json)、[M2 evidence](docs/evidence/m2-3dbd61a-segments.json) |
 | AC-02 | Given RF3 與舊 leader 隔離，When failover/rejoin，Then committed records 保留且 HW/ISR acknowledgement gate 成立 | historical | [M3 evidence](docs/evidence/m3-af2d7d1-raft.json)、[M4 evidence](docs/evidence/m4-dc75958-isr-hw.json) |
 | AC-03 | Given produce 回覆遺失或 group rebalance，When 相同 identity 重試及舊 generation commit，Then 不重複 append 且舊 session 被 fence | historical | [M5 evidence](docs/evidence/m5-002e6cd-producer.json)、[M6 evidence](docs/evidence/m6-8b99818-groups.json) |
-| AC-04 | Given 三 broker 與固定 seed，When 執行整合 chaos/model/demo，Then FR/INV 都能追到故障證據且資料承諾成立 | historical | [M7 evidence](docs/evidence/m7-12aa275-integrated.json)、[traceability](docs/traceability.md) |
+| AC-04 | Given 三 broker 與固定 seed，When 執行整合 chaos/model/demo，Then FR/INV 都能追到故障證據且資料承諾成立 | failed | 2026-10-21 [CI short chaos 失敗](https://github.com/fallrising/newclear/actions/runs/39631545715/attempts/1)；seed／違例細節未上傳，待診斷與重播；歷史 [M7 evidence](docs/evidence/m7-12aa275-integrated.json)、[traceability](docs/traceability.md) |
 
 ## 現況與缺口
+
+2026-10-21 最終 PR CI 的 `TestM7ChaosOP05RotatingCrashesPartitionsAndPauses` 在 115.59 秒後失敗。原 CI 忽略隱藏 `.test-output`，因此無法取得 seed、違例及時間線。已補 CI 證據保留；失敗原因仍未知，未修改 runtime 或放寬 oracle。
 
 M0–M7 的完成範圍包括真程序、WAL 故障、三 broker demo 與 seeded model，不只可編譯。
 M7 記錄 28 faults/五 seeds、extended 1000×10000 events 與三主機 baseline。
@@ -65,5 +67,5 @@ make demo
 
 ## 可用版本
 
-本次資格通過，預定標記 `usable/mkfk/v0.1.0`，範圍與逐命令證據見[資格紀錄](../../docs/project-success/qualifications/mkfk.md)。
-必要 PR CI／獨立審查通過並合併後才發布；不外推 production 或原範圍以外能力。
+`usable_tag: none`。本次本機驗證曾通過，但最終 CI short chaos 失敗，已撤下 `usable/mkfk/v0.1.0` 候選；見[資格紀錄](../../docs/project-success/qualifications/mkfk.md)。
+先取得失敗 seed／違例與時間線並釐清原因，完成對應修復或可核對的環境診斷及必要重驗，才可重新提出資格；換 seed 的成功不能消除已知失敗。

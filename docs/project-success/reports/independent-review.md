@@ -42,3 +42,25 @@ Wotar correctly withholds a tag after its required Ruff failure, certificate-dep
 ## Remaining delivery gates
 
 ACCEPT covers the reviewed change and bounded local qualification decisions. Required PR CI, normal merge, final source equivalence, annotated tag creation and exact remote tag/peeled-commit readback remain necessary before reporting published usable versions. This review does not claim deployment or authorize new product implementation, production operations or paid calls.
+
+## Final CI delta review — 2026-10-21 16:20 UTC
+
+RECOMMENDATION: ACCEPT — readiness correction and CI evidence retention only.
+
+**This dated addendum supersedes the earlier four-candidate qualification assessment above. mkfk is withdrawn; the current newclear set contains three proposed usable versions: DimGate, ClarkQ and pg-jev-router.** Earlier successful local mkfk runs remain historical observations and do not establish current qualification.
+
+The independent reviewer checked the final uncommitted delta against `c0f49d40f8a401efd51b79a70867d0cf30eb0363`, including SUCCESS contracts, qualification/disposition records, PLAN/index and the mkfk workflow. No product runtime, seed selection, test oracle, timeout or workflow permissions changed. The workflow keeps its existing mandatory chaos command and failure behavior; its only change explicitly retains `chaos.log` and `chaos-report.json` from the hidden `.test-output` directory with `include-hidden-files: true`.
+
+GitHub's run, attempt/job and artifacts APIs independently confirmed that [run 39631545715, attempt 1](https://github.com/fallrising/newclear/actions/runs/39631545715/attempts/1), at that exact commit, failed the required short-chaos step. The format/vet/unit/race/model/integration job and three-broker demo passed. The run's artifact count was zero. The missing seed/assertion evidence prevents a root-cause finding; a successful retry with a different seed cannot discharge the known failure.
+
+mkfk now has `mainline: incomplete`, `usable_tag: none`, failed AC-04 and `RESULT: FAIL`. Its proposed tag is withdrawn in the index and both human-readable and machine-readable qualification dispositions. The machine-readable record preserves the initial local PASS and identifies the superseding failed CI attempt. The qualification report explicitly replaces its earlier four-PASS snapshot with three PASS and three unqualified candidates. Agent Platform's separately observed cleanup error is also retained in its incomplete SUCCESS contract; this review makes no claim that it was repaired.
+
+Independent final delta checks:
+
+- `python3 -m unittest discover -s scripts/tests -p test_project_success.py -v` — PASS, 15 tests.
+- `python3 scripts/check_project_success.py` — PASS, 39 contracts and navigation/index.
+- `git diff --check` — PASS.
+- Active SUCCESS frontmatter inspected — exactly three proposed tags, for `platform/dim-gate`, `systems/clarkq` and `labs/pg-jev-router`; no active mkfk tag.
+- Changed paths and workflow diff inspected — documentation/evidence plus the narrow artifact-retention correction; no product runtime change.
+
+ACCEPT covers the truthful readiness downgrade and evidence-retention change. Final-head required CI and review, normal merge, source equivalence and exact remote tag verification remain delivery gates. No tag is justified for mkfk until its unresolved failure is diagnosed and the required requalification evidence is accepted. This addendum does not claim that CI has passed for the newly edited head or that any proposed tag has been published.

@@ -3,7 +3,7 @@
 Issue: https://github.com/fallrising/newclear/issues/440
 Requirement: T-0367 (owner confirmed; claim merged and read back).
 Baseline: b97319d74f8442b5173ef42be72a0aa757d87df0.
-Canonical skill checkout: /home/ckc/test/codex/repos/kernel @ 6240b548b2548a6f5ecb87c1661a1931967620b2. Native collaboration workers inherit model; external CLI routes are not used and no CLI pin is upgraded.
+Canonical skill checkout: authorized shared-skill checkout @ 6240b548b2548a6f5ecb87c1661a1931967620b2. Native collaboration workers inherit model; external CLI routes are not used and no CLI pin is upgraded.
 
 ## Goal and scope
 

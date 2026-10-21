@@ -1686,3 +1686,7 @@ Tiered documentation: root catalog + policy + component README banners + A-tier 
 - ERU15-D005: Green evidence is 16/16 focused fresh-rebuild tests, 45/45 focused plus reused contracts, 429/429 complete ERU tests, and the exact ERU CI AST/JSON/Markdown/private-file/diff validation. No VPS, provider, SSH, generation write, private production input, shared browser E2E, or deployment was used.
 - ERU15-D006: T-108's adversarial review exposed concurrent overwrite, fabricated predecessor, stale controller cleanliness, campaign drift, blocked-predecessor, and non-finite JSON/RTO risks during the correction loop. The final tree closes all findings; the reviewer reran 16/16 tests, passed diff and AST no-executor proofs, and reports no open blocking/high/medium/low finding.
 - ERU15-D007: The `codex-evidence-gate` decision in `reports/ERU-015-evidence.md` is PASS for the bounded local planner candidate. Formal ERU-015 remains in progress: a destructive executor, accepted-run writer, and three live V08 generations are not implemented or accepted. Authorized Git/PR/ERU-CI integration is the next delivery step; deployment remains prohibited.
+
+## Program: project-success / Variant: 2026-10-21
+
+本次跨項目驗收契約的目標、分工、驗證與接受決策見 [delivery plan](../docs/project-success/PLAN.md)。本區不改動其他 program 的權責與歷史紀錄。

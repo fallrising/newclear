@@ -45,3 +45,5 @@ slug 使用項目目錄末段；若發生命名碰撞，先在本規範及索引
 
 文件檢查指令：`python3 scripts/check_project_success.py`。它只檢查覆蓋、格式及導航一致性，不替人判斷產品已可用。
 
+
+Inventory 的 `excluded_roots` 逐項列明非產品根目錄與理由；新增 Category 或元件不得靜默漏列。CI 在所有 PR／main 更新執行結構檢查，包含只新增程式碼的項目。資格紀錄的 RESULT、Project、Tag、Source 必須精確唯一，並連到實際驗證證據。

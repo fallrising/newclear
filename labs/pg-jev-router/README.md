@@ -1,5 +1,8 @@
 # pg-jev Router Lab
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A — bounded experiment.** [Quickstart](docs/quickstart.md) · [SDD](SDD.md) · [Evidence](docs/evidence.md) · [Policy](../../docs/portfolio-doc-tiers.md)
 
 把用戶輸入轉成 `allow / block / review` 與 `small / coding / reasoning` 路由建議，驗證 pg-jev 能否作為 agent 平台的語意判斷接點。

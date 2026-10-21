@@ -1,5 +1,8 @@
 # Agent Workforce
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A（M1 核心與有界 M2 原生切片）** — 跨產品整合仍依里程碑驗證。
 > [Quickstart](docs/quickstart.md) · [文件政策](../../docs/portfolio-doc-tiers.md) · [Portfolio](../../PORTFOLIO.md)
 

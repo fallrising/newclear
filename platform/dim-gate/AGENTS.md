@@ -33,3 +33,11 @@ M0 已建立 component-local commands：`pnpm install --frozen-lockfile`、`pnpm
 M0 起依 [交付與驗收](docs/sdd/07-delivery-validation.md) 建立 component-local commands；CI 放在 repository 根 `.github/workflows/`，使用 path filter、唯讀權限及固定 action SHA。不要在子目錄新增無法執行的 nested workflow。
 
 每個實作 PR 附需求 ID、行為改變、實際測試證據與限制；更新 STATUS 的里程碑和 commit／PR 連結。不自動發布或執行真實基建變更。
+
+## 主線與驗收文件先行
+
+- 接手前先讀 [SUCCESS.md](SUCCESS.md)、相關規格與最近驗證紀錄，核對目前主線及缺口。
+- 實作前先更新 SUCCESS 的本次目標、範圍、AC 與驗證計畫；不得為了完成而縮小已承諾主線。
+- 收尾逐項記錄實際命令、結果、來源版本與未通過原因，同步 README 必要入口及項目進度；未跑不可寫通過。
+- 主線全部驗收、必要 CI／審查通過並合併後，按 repo 共用規範建立 annotated `usable/<slug>/vX.Y.Z`，回讀遠端並更新索引。現行 owner 授權適用；本規則不授權部署或付費服務。
+- 參考／封存項目保留其結束條件，不以新增文件當作可執行版本，也不因此恢復開發。

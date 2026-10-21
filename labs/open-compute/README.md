@@ -1,5 +1,8 @@
 # open-compute runtime lab
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio: A — active experiment.** [Documentation policy](../../docs/portfolio-doc-tiers.md).
 > The current milestone evaluates a pinned upstream release with synthetic data.
 

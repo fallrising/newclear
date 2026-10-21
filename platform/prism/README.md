@@ -1,5 +1,8 @@
 # Prism
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A (active development)** — Development resumed on
 > 2026-10-03. [Portfolio](../../PORTFOLIO.md) ·
 > [Documentation policy](../../docs/portfolio-doc-tiers.md).
@@ -25,11 +28,12 @@ readiness and an owned Compose E2E gate through real Grafana Prometheus queries.
 Storage-free instant PromQL expressions may use historical evaluation times after
 bounded AST validation; data selectors retain the existing lookback restrictions.
 P2-01 adds a bounded clean-room LogQL lexer/parser that produces intermediate SPI
-IR; line/field regex compilation, execution and Loki HTTP query routing remain
-later work.
+IR. P2-02–P2-07 add regex compilation, bounded query execution and Loki HTTP
+query routing; see the current task board and SUCCESS.md for exact boundaries.
 The initial runtime supports a single configured tenant and file-backed bearer
-key. Loki/Jaeger query APIs, complete production drivers, alerting, agent and console
-remain unimplemented; this is not yet a complete APM service.
+key. Jaeger query APIs, native log-search daemon routing, alert evaluation wiring,
+complete production drivers, agent and console remain incomplete; this is not yet
+a complete APM service.
 
 ## Start here
 
@@ -104,7 +108,7 @@ runs real Prometheus and verifies persisted samples and isolation through SPI.
 
 The [P1-06 contract](docs/specs/p1-06-loki-push.md) adds Loki JSON/gzip push;
 Vector acceptance checks actual stored log bodies and metadata. Protobuf push
-and Loki query/ready APIs remain future milestones.
+remains future work; Loki HTTP query routing was subsequently added in P2-07.
 
 The [P1-07 contract](docs/specs/p1-07-promql-adapter.md) describes the storage
 adapter and [corpus gate](test/promqltest/README.md). The [P1-08 contract](docs/specs/p1-08-prometheus-http.md) adds the HTTP layer
@@ -125,10 +129,10 @@ The [P1-11 contract](docs/specs/p1-11-deploy-e2e.md) defines pinned local deploy
 actual Grafana datasource/panel queries, observable stored-data persistence across
 restarts, and guarded cleanup. See the [owned E2E gate](test/e2e/README.md#phase-1-owned-compose-stack)
 for explicit local socket, unique prebuilt image and verified external clients.
-Loki/Jaeger/Alertmanager datasource definitions remain inactive API references;
+In the P1-11 acceptance, Loki/Jaeger/Alertmanager datasource definitions were inactive API references;
 this acceptance does not establish production capacity or crash durability.
 
 The [P2-01 contract](docs/specs/p2-01-logql-parser.md) covers flat LogQL IR,
 classified syntax/semantic/unsupported errors, structural input bounds and
 cancellation. Focused race tests and `FuzzParse` exercise this standalone parser;
-it does not enable Loki query endpoints or execute returned IR.
+P2-01 alone does not enable endpoints or execute IR; subsequent P2-02–P2-07 work adds those bounded capabilities.

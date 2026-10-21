@@ -1,5 +1,8 @@
 # Mithril research lab
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A (active, bounded research)** — 使用入口：[docs/quickstart.md](docs/quickstart.md)。政策：[portfolio-doc-tiers](../../docs/portfolio-doc-tiers.md)。Owner 授權範圍：[PORTFOLIO.md](../../PORTFOLIO.md)。
 
 研究對象是 [projecteru2/mithril](https://github.com/projecteru2/mithril)，不是 Mithril.js。本目錄是原創研究與實驗設計，**不是上游 fork、Redis server 實作或已部署的代理服務**。

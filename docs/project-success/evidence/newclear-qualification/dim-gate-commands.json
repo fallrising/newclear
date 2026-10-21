@@ -1,0 +1,167 @@
+[
+  {
+    "argv": [
+      "pnpm",
+      "install",
+      "--frozen-lockfile"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:39.500503+00:00",
+    "end": "2026-10-21T15:40:56.907567+00:00",
+    "duration_seconds": 17.407,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-01.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "lint"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:56.908939+00:00",
+    "end": "2026-10-21T15:41:17.154564+00:00",
+    "duration_seconds": 20.246,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-02.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "typecheck"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:41:17.154947+00:00",
+    "end": "2026-10-21T15:41:44.288684+00:00",
+    "duration_seconds": 27.134,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-03.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "test"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:41:44.289057+00:00",
+    "end": "2026-10-21T15:42:21.234049+00:00",
+    "duration_seconds": 36.945,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-04.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "check:docs"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:42:21.234464+00:00",
+    "end": "2026-10-21T15:42:22.104581+00:00",
+    "duration_seconds": 0.87,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-05.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "check:contracts"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:42:22.104966+00:00",
+    "end": "2026-10-21T15:42:23.085978+00:00",
+    "duration_seconds": 0.981,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-06.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "check:ci"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:42:23.086297+00:00",
+    "end": "2026-10-21T15:42:23.928446+00:00",
+    "duration_seconds": 0.842,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-07.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "check:architecture"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:42:23.928874+00:00",
+    "end": "2026-10-21T15:42:24.832338+00:00",
+    "duration_seconds": 0.903,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-08.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "pnpm",
+      "build",
+      "--mode",
+      "demo"
+    ],
+    "cwd": "platform/dim-gate",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:42:24.832829+00:00",
+    "end": "2026-10-21T15:42:43.414383+00:00",
+    "duration_seconds": 18.582,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "dim-gate-09.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  }
+]

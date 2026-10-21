@@ -1,0 +1,6 @@
+MKFK_CHAOS_PROFILE=full MKFK_CHAOS_SEED=1792597790 MKFK_CHAOS_REPORT=<worker-worktree>/systems/mkfk/.test-output/chaos-report.json \
+	MKFK_TEST_LOG=<worker-worktree>/systems/mkfk/.test-output/chaos.log GO="go" GOFLAGS="-timeout=30m" \
+	./scripts/run-named-tests.sh "./cmd/mkfk" TestM7ChaosOP05RotatingCrashesPartitionsAndPauses
+--- PASS: TestM7ChaosOP05RotatingCrashesPartitionsAndPauses (97.83s)
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfk	97.839s
+full output: <worker-worktree>/systems/mkfk/.test-output/chaos.log

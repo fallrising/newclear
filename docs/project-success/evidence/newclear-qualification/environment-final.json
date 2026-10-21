@@ -1,0 +1,88 @@
+{
+  "node": {
+    "argv": [
+      "node",
+      "--version"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "output": "v24.18.0"
+  },
+  "pnpm": {
+    "argv": [
+      "pnpm",
+      "--version"
+    ],
+    "cwd": "platform/dim-gate",
+    "exit_code": 0,
+    "output": "11.18.0"
+  },
+  "clarkq_go": {
+    "argv": [
+      "go",
+      "version"
+    ],
+    "cwd": "systems/clarkq",
+    "exit_code": 0,
+    "output": "go version go1.22.2 linux/amd64"
+  },
+  "mkfk_go": {
+    "argv": [
+      "go",
+      "version"
+    ],
+    "cwd": "systems/mkfk",
+    "exit_code": 0,
+    "output": "go version go1.27.1 linux/amd64"
+  },
+  "python": {
+    "argv": [
+      "python3",
+      "--version"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "output": "Python 3.12.3"
+  },
+  "ruff": {
+    "argv": [
+      ".venv/bin/ruff",
+      "--version"
+    ],
+    "cwd": "systems/wotar/secure-mqtt-e2ee",
+    "exit_code": 0,
+    "output": "ruff 0.17.1"
+  },
+  "mypy": {
+    "argv": [
+      ".venv/bin/mypy",
+      "--version"
+    ],
+    "cwd": "systems/wotar/secure-mqtt-e2ee",
+    "exit_code": 0,
+    "output": "mypy 2.4.0 (compiled: yes)"
+  },
+  "docker": {
+    "argv": [
+      "docker",
+      "version",
+      "--format",
+      "{{.Client.Version}} / {{.Server.Version}}"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "output": "29.1.3 / 29.1.3"
+  },
+  "worker_diff_check": {
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "worker_tracked_diff": "",
+  "disk": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1       150G   46G   98G  32% /\n",
+  "recorded": "2026-10-21T15:53:09.476832+00:00"
+}

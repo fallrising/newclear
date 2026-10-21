@@ -1,5 +1,8 @@
 # kith
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 
@@ -140,4 +143,3 @@ Worker 已在 <https://kith.fallrising.workers.dev>。`wrangler.toml` 的 `ff_mc
 ## 授權
 
 與 newclear 根目錄一致：MIT。禁止把 GPL-3.0 原始碼複製進本目錄。
-

@@ -1,5 +1,8 @@
 # Signal Hub
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A (active)** — [文件政策](../../docs/portfolio-doc-tiers.md) · [投入決策](../../PORTFOLIO.md) · [進度與阻擋](docs/STATUS.md)。
 
 Race detector 只在本機手動跑：在 `platform/signal-hub` 執行 `go test -race -count=1 ./...`。Pull request CI 跑 `go test`，不加 `-race`。

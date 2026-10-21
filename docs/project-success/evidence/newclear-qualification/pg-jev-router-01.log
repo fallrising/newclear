@@ -1,0 +1,32 @@
+python3 -m unittest discover -s tests -v
+test_missing_answers_fixture (test_policy.MockContractTests.test_missing_answers_fixture) ... ok
+test_no_credential_accepted (test_policy.MockContractTests.test_no_credential_accepted) ... ok
+test_shape_and_projection (test_policy.MockContractTests.test_shape_and_projection) ... ok
+test_bad_inputs_never_call_provider (test_policy.PolicyTests.test_bad_inputs_never_call_provider) ... ok
+test_exact_byte_limit (test_policy.PolicyTests.test_exact_byte_limit) ... ok
+test_invalid_probabilities_do_not_allow (test_policy.PolicyTests.test_invalid_probabilities_do_not_allow) ... ok
+test_invalid_routes (test_policy.PolicyTests.test_invalid_routes) ... ok
+test_malformed_envelopes (test_policy.PolicyTests.test_malformed_envelopes) ... ok
+test_provider_error_is_redacted (test_policy.PolicyTests.test_provider_error_is_redacted) ... ok
+test_risk_boundaries (test_policy.PolicyTests.test_risk_boundaries) ... ok
+test_routing_fallback_is_not_safety_fallback (test_policy.PolicyTests.test_routing_fallback_is_not_safety_fallback) ... ok
+test_safety_uncertainty_precedes_route (test_policy.PolicyTests.test_safety_uncertainty_precedes_route) ... ok
+test_sql_literal_cannot_inject (test_policy.PolicyTests.test_sql_literal_cannot_inject) ... ok
+test_synthetic_cases (test_policy.PolicyTests.test_synthetic_cases) ... ok
+test_unknown_mock_input_requires_review (test_policy.PolicyTests.test_unknown_mock_input_requires_review) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.530s
+
+OK
+bash -n scripts/integration.sh scripts/container-test.sh
+python3 demo.py
+{"case": "hello", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "allow", "route": "small", "reason": "classified", "dispatch_performed": false}
+{"case": "translation", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "allow", "route": "small", "reason": "classified", "dispatch_performed": false}
+{"case": "code", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "allow", "route": "coding", "reason": "classified", "dispatch_performed": false}
+{"case": "analysis", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "allow", "route": "reasoning", "reason": "classified", "dispatch_performed": false}
+{"case": "exfiltration", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "block", "route": null, "reason": "risk_high", "dispatch_performed": false}
+{"case": "uncertain-risk", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "review", "route": null, "reason": "risk_uncertain", "dispatch_performed": false}
+{"case": "uncertain-route", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "allow", "route": "reasoning", "reason": "route_uncertain", "dispatch_performed": false}
+{"case": "quoted-attack", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "allow", "route": "small", "reason": "classified", "dispatch_performed": false}
+{"case": "sql-literal", "provider": "deterministic-fixture", "extension": false, "policy_revision": "lab-v1", "action": "allow", "route": "coding", "reason": "classified", "dispatch_performed": false}

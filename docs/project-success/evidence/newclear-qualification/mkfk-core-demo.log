@@ -1,0 +1,109 @@
+rm -rf <worker-worktree>/systems/mkfk/.build/image && mkdir -p <worker-worktree>/systems/mkfk/.build/image/data
+CGO_ENABLED=0 GOOS=linux go build -trimpath -o <worker-worktree>/systems/mkfk/.build/image/mkfk ./cmd/mkfk
+cp configs/compose-cluster.json <worker-worktree>/systems/mkfk/.build/image/cluster.json
+<qualification-evidence>/mkfk-docker build -q -t mkfk:local -f deploy/Dockerfile <worker-worktree>/systems/mkfk/.build/image
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+sha256:0b0d54d2ed871ac32e19b44d802f2e6bad50ff45d483718b3969010d1e4d88e1
+GO="go" DOCKER="<qualification-evidence>/mkfk-docker" COMPOSE_PROJECT=qualification-mkfk-20261021 ./scripts/demo.sh
+ Network qualification-mkfk-20261021_mkfk  Creating
+ Network qualification-mkfk-20261021_mkfk  Created
+ Volume "qualification-mkfk-20261021_data-2"  Creating
+ Volume "qualification-mkfk-20261021_data-2"  Created
+ Volume "qualification-mkfk-20261021_data-3"  Creating
+ Volume "qualification-mkfk-20261021_data-3"  Created
+ Volume "qualification-mkfk-20261021_data-1"  Creating
+ Volume "qualification-mkfk-20261021_data-1"  Created
+ Container qualification-mkfk-20261021-format-2-1  Creating
+ Container qualification-mkfk-20261021-format-3-1  Creating
+ Container qualification-mkfk-20261021-format-1-1  Creating
+ Container qualification-mkfk-20261021-format-2-1  Created
+ Container qualification-mkfk-20261021-broker-2-1  Creating
+ Container qualification-mkfk-20261021-format-3-1  Created
+ Container qualification-mkfk-20261021-broker-3-1  Creating
+ Container qualification-mkfk-20261021-format-1-1  Created
+ Container qualification-mkfk-20261021-broker-1-1  Creating
+ Container qualification-mkfk-20261021-broker-1-1  Created
+ Container qualification-mkfk-20261021-broker-3-1  Created
+ Container qualification-mkfk-20261021-broker-2-1  Created
+ Container qualification-mkfk-20261021-format-3-1  Starting
+ Container qualification-mkfk-20261021-format-2-1  Starting
+ Container qualification-mkfk-20261021-format-1-1  Starting
+ Container qualification-mkfk-20261021-format-3-1  Started
+ Container qualification-mkfk-20261021-format-3-1  Waiting
+ Container qualification-mkfk-20261021-format-1-1  Started
+ Container qualification-mkfk-20261021-format-1-1  Waiting
+ Container qualification-mkfk-20261021-format-2-1  Started
+ Container qualification-mkfk-20261021-format-2-1  Waiting
+ Container qualification-mkfk-20261021-format-3-1  Exited
+ Container qualification-mkfk-20261021-format-1-1  Exited
+ Container qualification-mkfk-20261021-broker-1-1  Starting
+ Container qualification-mkfk-20261021-broker-3-1  Starting
+ Container qualification-mkfk-20261021-format-2-1  Exited
+ Container qualification-mkfk-20261021-broker-2-1  Starting
+ Container qualification-mkfk-20261021-broker-1-1  Started
+ Container qualification-mkfk-20261021-broker-3-1  Started
+ Container qualification-mkfk-20261021-broker-2-1  Started
+
+== 1. Three brokers start on this project's fresh named volumes
+   events/0 replicas [1 2 3], leader observed by broker 1: none yet
+   events/1 replicas [1 2 3], leader observed by broker 1: none yet
+   events/2 replicas [1 2 3], leader observed by broker 1: none yet
+   producer 5d1e2f3a-4b5c-4d6e-8f70-81a2b3c4d5e6 opened events/0 at epoch 0
+
+== 2. Produce with acks=all through the partition leader
+   [order-1 order-2 order-3] -> offsets 0..2 (duplicate=false, next sequence 3)
+
+== 3. Lose a reply: the SDK resends the identical batch
+   broker applied offsets 3..3, but the reply is lost on the way back
+   [order-4] -> offsets 3..3 (duplicate=true, next sequence 4)
+
+== 4. Consume with group demo-readers (two members)
+   reader-1: generation 2, events partitions [0 2]
+   reader-2: generation 2, events partitions [1]
+
+== 5. Kill the leader of events/0; a follower takes over and the old leader catches up
+   broker 1 leads events/0; SIGKILL
+ Container qualification-mkfk-20261021-broker-1-1  Killing
+ Container qualification-mkfk-20261021-broker-1-1  Killed
+   [order-5] -> offsets 4..4 (duplicate=false, next sequence 5)
+   broker 3 now leads events/0; restarting broker 1
+ Container qualification-mkfk-20261021-format-1-1  Starting
+ Container qualification-mkfk-20261021-format-1-1  Started
+ Container qualification-mkfk-20261021-format-1-1  Waiting
+ Container qualification-mkfk-20261021-format-1-1  Exited
+ Container qualification-mkfk-20261021-broker-1-1  Starting
+ Container qualification-mkfk-20261021-broker-1-1  Started
+   broker 1 holds all 5 committed records again
+
+== 6. Rebalance: a third member joins
+   reader-1: generation 3, events partitions [0]
+   reader-2: generation 3, events partitions [1]
+   reader-3: generation 3, events partitions [2]
+
+== 7. Restart the group coordinator; members resume from committed offsets
+   coordinator is broker 3; killing and restarting it
+ Container qualification-mkfk-20261021-broker-3-1  Killing
+ Container qualification-mkfk-20261021-broker-3-1  Killed
+   [order-6] -> offsets 5..5 (duplicate=false, next sequence 6)
+ Container qualification-mkfk-20261021-format-3-1  Starting
+ Container qualification-mkfk-20261021-format-3-1  Started
+ Container qualification-mkfk-20261021-format-3-1  Waiting
+ Container qualification-mkfk-20261021-format-3-1  Exited
+ Container qualification-mkfk-20261021-broker-3-1  Starting
+ Container qualification-mkfk-20261021-broker-3-1  Started
+   reader-1: generation 4, events partitions [0]
+   reader-2: generation 4, events partitions [1]
+   reader-3: generation 4, events partitions [2]
+
+== 8. Result
+   order-1 processed 1 time(s)
+   order-2 processed 1 time(s)
+   order-3 processed 1 time(s)
+   order-4 processed 1 time(s)
+   order-5 processed 1 time(s)
+   order-6 processed 1 time(s)
+   at-least-once: a record processed but not yet committed when its member's session ended is processed again;
+   the broker fenced every commit from an older generation. Stop with `make demo-down` (data kept) or DELETE_DATA=1.

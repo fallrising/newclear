@@ -1,0 +1,95 @@
+[
+  {
+    "argv": [
+      "make",
+      "fmt-check",
+      "vet"
+    ],
+    "cwd": "systems/mkfk",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:41.261628+00:00",
+    "end": "2026-10-21T15:41:28.571600+00:00",
+    "duration_seconds": 47.31,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-01.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "make",
+      "test"
+    ],
+    "cwd": "systems/mkfk",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:41:28.571852+00:00",
+    "end": "2026-10-21T15:41:55.707930+00:00",
+    "duration_seconds": 27.136,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-02.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "make",
+      "test-race"
+    ],
+    "cwd": "systems/mkfk",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:41:55.708663+00:00",
+    "end": "2026-10-21T15:43:29.231193+00:00",
+    "duration_seconds": 93.523,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-03.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "make",
+      "test-model",
+      "test-integration"
+    ],
+    "cwd": "systems/mkfk",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:43:29.231481+00:00",
+    "end": "2026-10-21T15:43:44.489528+00:00",
+    "duration_seconds": 15.258,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-04.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "make",
+      "test-chaos",
+      "CHAOS_PROFILE=short"
+    ],
+    "cwd": "systems/mkfk",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:43:44.489842+00:00",
+    "end": "2026-10-21T15:44:08.674136+00:00",
+    "duration_seconds": 24.184,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-05.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  }
+]

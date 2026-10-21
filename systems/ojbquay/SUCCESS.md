@@ -1,0 +1,74 @@
+---
+project: systems/ojbquay
+purpose: 在 Kafka 與 PostgreSQL 上提供自助訊息發布、消費及故障處理
+kind: service
+mainline: incomplete
+usable_tag: none
+reviewed: 2026-10-21
+source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
+---
+
+# ojbquay 成功契約
+
+## 主線與範圍
+
+[product spec](docs/product-spec.md)的 Kafka-first v1 提供 topic/group/subscription 自助管理、gRPC producer、HTTP push、pull SDK、delay/retry/DLQ 與 console。
+[execution plan](docs/execution-plan.md)保留各 milestone 接受與整合結果；以真基礎設施功能驗收作完成依據。
+
+不提供 end-to-end exactly-once、broker fork、任意 executable pipeline、跨區複製或 usage billing。
+維持 dormant；本機十一服務 demo 不是 production certification 或 capacity benchmark。
+
+本契約核對的是上述來源版本中的文件與程式。
+功能完成、原定主線驗收與部署保證分開記錄；本案仍有明列未通過條件。
+
+## 驗收條件
+
+下表 `historical` 是既有報告的結果，沒有在 2026-10-21 重跑。
+`pending` 保留缺少證據或尚未實作的條件；程式存在不等於通過。
+
+| AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
+| --- | --- | --- | --- |
+| AC-01 | Given 有效 owner session/CSRF，When 建立 topic/group/PUSH subscription，Then PostgreSQL、Kafka、config bus 與 audit 收斂 | historical | [執行計畫](docs/execution-plan.md)、[Docker demo 報告](docs/test-reports/docker-functional-demo.md) |
+| AC-02 | Given authenticated gRPC producer，When 傳送已知 payload，Then ACK 含 partition/offset 且 HTTP sink 收到相同 hash | historical | [2026-07-30 demo 報告](docs/test-reports/docker-functional-demo.md)：cd80c5c8，11 services |
+| AC-03 | Given PULL 訂閱與 Java/Go SDK，When ACK/NACK 或 lease 過期，Then 明確逐筆 acknowledgement 與重送符合 at-least-once | historical | [執行計畫 M5](docs/execution-plan.md)：pull_share.sh 真 Kafka 跨語言驗收 |
+| AC-04 | Given 失敗交付與 retry/DLQ，When 延遲、耗盡重試及授權 replay，Then 資料不因本機失敗被提早確認且操作可稽核 | historical | [執行計畫 M3/M4/M6](docs/execution-plan.md)、[messaging semantics](docs/messaging-semantics.md) |
+| AC-05 | Given 原定 150 ms retry；When 量測實際端到端間隔；Then 偏差小於 20% | failed | [M4 原始驗收](docs/specs/m4-push-consumer.md)、[實測 206–253 ms](docs/execution-plan.md)；目前未達標 |
+
+## 現況與缺口
+
+M4 的原定 150 ms retry 端到端偏差 <20% 仍未達標，實測約 206–253 ms。
+[execution plan](docs/execution-plan.md) 雖保留功能完成，不能代替原 SDD 時序條件；因此整體主線尚未驗收、不建立 usable tag。
+這不是本次新加的效能要求，也不能藉縮小主線刪去；需修正實作／驗證或由 owner 明確修訂規格。
+
+完成的是 v1 功能主線與本機整合，不代表任何現存部署健康或容量承諾。
+Demo 記錄 7/7 readiness、真 gRPC ACK、sink payload hash、console 與監測。
+Kafka/PostgreSQL 間仍是 at-least-once；crash 後重送與 DLQ replay 可能產生重複。
+Pull acknowledgement token 在 v1 必須回到發出 token 的 gateway，跨實例需 connection affinity。
+
+這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
+歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
+
+## 啟動與驗證
+
+[README](README.md)、[demo guide](docs/demo.md)與[operations](docs/operations.md)要求 JDK 25、Docker Compose v2 及私人配置。
+
+已核對入口：[Makefile](Makefile)與 [demo runner](demo/run.sh)。
+下列是該入口既有的啟動或驗證命令，並非本次執行紀錄；
+需先完成連結文件中的依賴、設定及適用環境準備。
+
+```sh
+./gradlew build
+make validate-deploy
+make demo
+make e2e
+```
+
+執行後應保留來源 SHA、必要設定的非秘密摘要、命令與結果，
+並將 runtime 證據逐項對回 AC；不得只用 health 或 exit 0 宣告全部完成。
+
+## 可用版本
+
+目前 `usable_tag: none`；本次沒有建立或發布任何 tag。
+既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
+
+須核對歷史測試 tree 與目前目標 commit 差異，重跑必要 build/真 Compose 主線；標記必須保留 at-least-once、連線 affinity 與本機功能資格限制。

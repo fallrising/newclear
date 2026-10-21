@@ -1,0 +1,22 @@
+[
+  {
+    "argv": [
+      "make",
+      "test-chaos",
+      "CHAOS_PROFILE=full",
+      "CHAOS_SEED=1792597790"
+    ],
+    "cwd": "systems/mkfk",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:51:01.183823+00:00",
+    "end": "2026-10-21T15:52:39.526690+00:00",
+    "duration_seconds": 98.343,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-full-chaos-01.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  }
+]

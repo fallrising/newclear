@@ -18,12 +18,14 @@
 | [labs/bee-swarm](labs/bee-swarm/SUCCESS.md) | labs | 保存以 GitHub 角色協作及 SimPy 探索流程的概念框架 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
 | [labs/browser-fingerprint](labs/browser-fingerprint/SUCCESS.md) | labs | 觀測瀏覽器設備訊號與任務操作事件以比較測試環境 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/eru-vps-mvp](labs/eru-vps-mvp/SUCCESS.md) | labs | 驗證四台 VPS 的 Eru 排程、受控重建與控制面恢復 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
+| [labs/handwired-learning](labs/handwired-learning/SUCCESS.md) | labs | 用一頁溫度校正對照，讓初學者看懂固定數值圖與用梯度調整係數的差別 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-21 |
 | [labs/m4-seat](labs/m4-seat/SUCCESS.md) | labs | 保存 M4 Max 48GB 單人本機推論座位的有界規劃 | 參考／封存 | 尚無已核准標記 | 2026-10-17 |
 | [labs/mithril-research](labs/mithril-research/SUCCESS.md) | labs | 以固定 Mithril 來源驗證 Redis Cluster 代理的適配與操作邊界 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-17 |
 | [labs/open-compute](labs/open-compute/SUCCESS.md) | labs | 驗證固定 open-compute release 的有界持久狀態與人工操作生命週期 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-17 |
 | [labs/openmmo-lab](labs/openmmo-lab/SUCCESS.md) | labs | 建立固定 OpenMMO 的本機雙人世界與持久化試驗入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/openviking-context](labs/openviking-context/SUCCESS.md) | labs | 以來源校驗與 byte 預算驗證共享 context 投影服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/pg-jev-router](labs/pg-jev-router/SUCCESS.md) | labs | 以真 PostgreSQL 擴充套件和合成 provider 驗證輸入路由政策接線 | 完成 | [usable/pg-jev-router/v0.1.0](https://github.com/fallrising/newclear/tree/usable/pg-jev-router/v0.1.0/labs/pg-jev-router) | 2026-10-04 |
+| [labs/retro-economy](labs/retro-economy/SUCCESS.md) | labs | 驗證兩種職業與一條短冒險路線能否讓少數真人主動交易並願意再玩 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-21 |
 | [labs/zircon-godot](labs/zircon-godot/SUCCESS.md) | labs | 研究並規劃 Zircon C# 伺服器與 Godot 客戶端的有界遊戲實驗 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [platform/agent-platform](platform/agent-platform/SUCCESS.md) | platform | 以網頁派送、監看與介入隔離的程式代理任務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/agent-workforce](platform/agent-workforce/SUCCESS.md) | platform | 持久協調不同代理產品的身份、授權、會話與工作交付 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-20 |

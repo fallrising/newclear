@@ -29,7 +29,7 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 ## Platform
 
 - [platform/agent-platform](https://github.com/fallrising/newclear/blob/main/platform/agent-platform/README.md): **A** — self-hosted multi-agent web workbench modelled on OpenHands Agent Canvas, with Cocoon sandboxing. Not a deployment claim; deliberately separate from `fanzloud` and `kith`.
-- [platform/agent-workforce](https://github.com/fallrising/newclear/blob/main/platform/agent-workforce/README.md): **A** — specification for persistent digital workers across agent products, accounts and resources: native CLI/SDK/API routes, durable messaging, session bindings and recovery. SDD only; no runtime, account setup or deployment. Preserves Kith's quota gates and external work acceptance authority.
+- [platform/agent-workforce](https://github.com/fallrising/newclear/blob/main/platform/agent-workforce/README.md): **A** — implemented offline M1 core and bounded native M2 adapter slices for digital workers, with durable messaging and session bindings. Full M2, cross-product integration and deployment remain unverified; see the component's dated evidence. Preserves Kith's quota gates and external work acceptance authority.
 - [platform/dim-gate](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/README.md): **A** — CMDB-centred enterprise operations self-service front end, as a demo. Specification baseline, not implemented; [docs/openapi.json](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/docs/openapi.json) is generated from Zod and verified in CI.
 - [platform/edge-ops](https://github.com/fallrising/newclear/blob/main/platform/edge-ops/README.md): **A** — Cloudflare and host-agent monitoring with controlled operations. SDD plus an M0 contract layer; no runtime, no live deployment, monitor-only by default.
 - [platform/signal-hub](https://github.com/fallrising/newclear/blob/main/platform/signal-hub/README.md): **A** — personal event hub: CloudEvents store, rule-generated metrics, subscription delivery. SDD only. It carries events, not decisions or actions.
@@ -64,6 +64,9 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 - [labs/aweshore](https://github.com/fallrising/newclear/blob/main/labs/aweshore/README.md): **D** — early personal notes/PKM attempt, discontinued. Go HTTP service, minimal documentation.
 
 ## Optional
+
+- [labs/retro-economy](https://github.com/fallrising/newclear/blob/main/labs/retro-economy/README.md): **ungraded** — original retro RPG economy and human-play experiment. Spec-only: professions, gathering, crafting, orders, trade and recurring demand; no game server or MMO-scale claim.
+- [labs/handwired-learning](https://github.com/fallrising/newclear/blob/main/labs/handwired-learning/README.md): **ungraded** — spec-only bounded numerical-programming experiment comparing ordinary JavaScript with a fixed FP32 graph. No general JavaScript compiler, runtime or benchmark delivered.
 
 - [README.md](https://github.com/fallrising/newclear/blob/main/README.md): the human-facing catalog in Traditional Chinese, with the technology stack and tier per component, and the commit-trailer rule for contributors.
 - [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md): the public summary of invest/dormant/retire decisions and the standing boundaries between components. Authority lives in the owner's private project ledger.

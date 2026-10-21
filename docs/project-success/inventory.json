@@ -54,6 +54,11 @@
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
+      "path": "labs/handwired-learning",
+      "last_source_update": "2026-10-22T01:17:24+08:00",
+      "source_commit": "222c1a8a736dbb3ac89f34345a7bc73fa887aba8"
+    },
+    {
       "path": "labs/m4-seat",
       "last_source_update": "2026-10-17T18:53:31+08:00",
       "source_commit": "8526b6411bd11967b98b91a7c2cacadeafe5ef71"
@@ -82,6 +87,11 @@
       "path": "labs/pg-jev-router",
       "last_source_update": "2026-10-04T16:46:03+08:00",
       "source_commit": "267b12d78b3304d12bb589639650628b22987e95"
+    },
+    {
+      "path": "labs/retro-economy",
+      "last_source_update": "2026-10-22T01:17:24+08:00",
+      "source_commit": "222c1a8a736dbb3ac89f34345a7bc73fa887aba8"
     },
     {
       "path": "labs/zircon-godot",

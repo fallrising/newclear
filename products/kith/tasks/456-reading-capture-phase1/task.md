@@ -14,7 +14,7 @@ Base: 9b31fa1776213b68e7d38b6db4f706e6dd7def15
 
 ## 驗證
 
-以共用 workspace launcher 執行既有 Node 24.18.0 的 npm lint/test、web build、對應 E2E／證據 validator，以及 Python success/capability validators、diff check。完整命令、exit、工具版本與不可變輸出寫入 report。最終 head 必須經不同模型家族唯讀審查與全綠 CI，再核對最新 main 才可合併。
+以共用 workspace launcher 執行既有 Node 24.18.0 的 npm lint/test、web build、對應 E2E／證據 validator，以及 Python success/capability validators、diff check。完整命令、exit、工具版本與不可變輸出寫入 report。完整回歸若揭露既有量測缺陷，須保留失敗與診斷，先修量測規格、保留門檻及斷言語意，再作最小修正；W7 輪詢修正由獨立 T-459 審核；後續 W5 短暫草稿觀測問題由 T-460 審核。最終 head 必須經不同模型家族唯讀審查與全綠 CI，再核對最新 main 才可合併。
 
 ## 授權與限制
 

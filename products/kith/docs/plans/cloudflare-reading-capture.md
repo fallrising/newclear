@@ -1,7 +1,7 @@
 # Cloudflare 閱讀與快記模組：Kith 重用評估與 MVP 計劃
 
 - 日期：2026-10-18；MVP 縮減 2026-10-22（前一版見 commit `b97319d7`）
-- 狀態：階段 0 資料契約與測試計畫；API、Web 與 Runner 尚未實作或驗收
+- 狀態：階段 1 快記 API／Web 已實作並通過本地 RC-01～04；閱讀、notes 正向功能與 Runner 留待階段 2
 - 核對基準：newclear `main` @ `63e2f3b3a47776e35865fcb28d368e8f4d32be22`
 - 範圍：沿用 Kith 的 Web／Cloudflare 基礎，增加私人的閱讀與快記能力
 
@@ -45,7 +45,7 @@ MVP 實作其中 1、3、4（只做手機）、5、7；2 的公開部分與 6、
 
 ## 4. 資料契約（階段 0）
 
-[SQL 草稿](reading-capture-schema.sql)位於 docs/plans，**不會**隨 `db:migrate:local` 自動套用。階段 1 先在隔離 D1 驗證後，才以獨立審查的編號 migration 納入。草稿只新增兩表與待匯出索引，不改聊天室表。
+[SQL 草稿](reading-capture-schema.sql)位於 docs/plans，**不會**隨 `db:migrate:local` 自動套用。階段 1 已在隔離 D1 驗證並提升為 [0007 migration](../../migrations/0007_reading_capture.sql)，與 runtime 一起接受獨立審查；沒有套用正式環境。草稿只新增兩表與待匯出索引，不改聊天室表。
 
 | 表 | 欄位 |
 | --- | --- |
@@ -89,14 +89,14 @@ Kith 現行 SDD 以 Workers Paid 為部署畫像；本模組只用 Workers、D1�
 
 沿用 [AGENTS](../../AGENTS.md) 與 [v2 E2E 規則](../v2/08-testing-e2e.md)：先寫 E2E（合成資料、本地 CF 環境），再實作；不把預期行為當成已完成測試。
 
-完整 fixture、故障切點、觀測與階段分工見 [RC 測試清單](reading-capture-tests.md)。階段 0 的 SQLite 檢查僅驗證草稿，RC-01～07 全部仍為待執行。
+完整 fixture、故障切點、觀測與階段分工見 [RC 測試清單](reading-capture-tests.md)。階段 0 的 SQLite 檢查僅驗證草稿；階段 1 RC-01～04 已取得本地 CF/API/Web 證據，見 [#456 報告](../../tasks/456-reading-capture-phase1/report.md)，RC-05～07 仍待階段 2。
 
 ## 7. 階段
 
 | 階段 | 交付 |
 | --- | --- |
 | 0 | 本頁資料契約定案＋[兩張表 migration 草稿](reading-capture-schema.sql)與 [RC 測試清單](reading-capture-tests.md)；交付／驗證見 [#446 報告](../../tasks/446-reading-capture-phase0/report.md) |
-| 1 | 快記＋收件匣（RC-01～04） |
+| 1 | 快記＋收件匣（RC-01～04）；[實作／驗證報告](../../tasks/456-reading-capture-phase1/report.md)，最終 CI／審查與 merge 證據在 PR #457 |
 | 2 | 閱讀頁＋人類補充＋CI 建置與 Runner 匯出（RC-05～07） |
 | 之後 | 使用兩週後，依實際需要從延後清單挑下一項：公開部署、Telegram／Slack、已讀與更新差異、事件統計 |
 

@@ -48,7 +48,8 @@ test(
       const trigger = "@" + handle + " [[fake:text=abcdefghijkl;chunks=6;chunk_ms=300;cut_after=3]]";
       await sendViaComposer(ben.page, trigger);
       const draft = ben.page.getByTestId("reply-draft");
-      await expect(draft).toBeVisible({ timeout: 30_000 });
+      // The draft exists for ~900 ms; default assertion polling can skip that entire window.
+      await expect.poll(() => draft.isVisible(), { intervals: [50], timeout: 30_000 }).toBe(true);
       const partial = ((await draft.textContent()) ?? "").trim();
       expect("abcdefghijkl".startsWith(partial)).toBe(true);
       expect(partial.length).toBeGreaterThan(0);

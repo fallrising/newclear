@@ -1,6 +1,6 @@
 # 閱讀快記 RC 測試清單
 
-對應 [MVP 計畫](cloudflare-reading-capture.md) §6–7。本清單是階段 0 的驗收設計，不是已執行的 API、手機或 Cloudflare E2E。所有 RC 狀態：**pending**。
+對應 [MVP 計畫](cloudflare-reading-capture.md) §6–7。本清單於階段 0 設計；階段 1 RC-01～04 已有本地 CF 桌面／手機 E2E，實際命令與限制見 [#456 報告](../../tasks/456-reading-capture-phase1/report.md)。RC-05～07 仍為 **pending**。
 
 ## 共用測試條件
 
@@ -34,7 +34,7 @@
 
 ## 階段 0 已提供的隔離檢查
 
-[test_schema_draft.py](../../test/reading_capture/test_schema_draft.py)用 Python 標準函式庫 SQLite 建立目前全部聊天室 migrations，再套用 docs 內的草稿，檢查兩表隔離、原文保留、client_key 唯一、必要欄位／bytes 上限、notes 唯一／revision、交易 rollback、舊 ACK 與待匯出索引。
+[test_schema_draft.py](../../test/reading_capture/test_schema_draft.py)用 Python 標準函式庫 SQLite 建立原階段 0 聊天室 migrations 0001～0006，再套用 docs 內的草稿；新增檢查確認正式 0007 保留完整草稿 DDL。正式 migration 另由隔離 D1/E2E 載入，檢查兩表隔離、原文保留、client_key 唯一、必要欄位／bytes 上限、notes 唯一／revision、交易 rollback、舊 ACK 與待匯出索引。
 
 從 repository root 執行：
 

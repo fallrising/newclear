@@ -51,4 +51,10 @@ docchecks 另驗證 61 個本地文件連結、T-447 task contract、capability 
 
 Evidence gate：**BLOCKED，不合併**。PR 保留 draft，本報告保持 PARTIAL；需要 owner 恢復可用且不產生付費 API 消耗的不同家族審查途徑。此次失敗紀錄提交後，必須對新的最終 head 重新審查並核對 CI/main；不能沿用先前 head 的 CI 當成新 head 證據。最終遠端狀態在 PR 留言回讀，issue 加 needs-owner 並留下 RELEASE，不關閉 issue、不刪除未合併 worktree。
 
+### Owner 恢復交付（2026-10-21 UTC）
+
+Owner 已通知 Grok 登入完成；`grok models` 實際確認 logged in with grok.com，CLI 1.0.62，固定 reviewer 為 grok-4.7（xAI Grok 家族，作者 OpenAI GPT）。若改用 OpenCode，只能使用 owner 新指定的 opencode-go/deepseek-v4.1-flash。先前 LongCat 失敗保留為歷史證據，不代表恢復後的最終狀態。
+
+已重新 CLAIM 同一 session／issue，移除因本次 reviewer 阻塞而加的 needs-owner；沿用 PR #449。重新 fetch 的 main 為 6cd69eec（Retro RE-0），已無衝突合入。T-448 對含主線更新與本段紀錄的最終 head 審查，全部工具禁用、無子代理、600 秒上限，使用既有 Grok 登入。最終檢查、review 結論、CI 與 merge readback 記錄於 PR，避免再修改已審查 commit。本文件的 PARTIAL 保留提交當下狀態，最終交付以 PR 回讀為準。
+
 下一里程碑為階段 1：快記＋收件匣（RC-01～04）。本 session 不接續執行。

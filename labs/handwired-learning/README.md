@@ -1,5 +1,7 @@
 # Handwired Learning
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
 > 狀態：**Proposed／僅學習設計，尚未實作或執行**。投入與文檔檔位未分級。
 
 用一個小型數值公式，對照普通 JavaScript 與 Handwired 的 FP32 圖，理解「寫出運算」與「調整參數」的差別。目標是讓初學者看懂輸入、每一步計算、誤差與梯度，不建立新的通用框架。

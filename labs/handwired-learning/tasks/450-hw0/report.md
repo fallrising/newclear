@@ -41,3 +41,9 @@ CI 首輪的專用 pinned-api 通過；llms validator 失敗，原因是本次�
 - 上游 backward 將 FP32 視作實數微分；boolean/index 預設拒絕，不能泛稱任意程式可微。
 - 上游來源／Node 版本皆固定；專用 CI 下載來源失敗時必須失敗，不能用替身或浮動版本通過。
 - 沒有部署、公開發佈、tag 或關閉 issue；owner 驗收與 HW-3 真人試用保留給真人。
+
+## 最終整合紀錄
+
+`9f7452b0` 的三個 CI 均成功（pinned-api 39651854285、project-success 39651854282、手動 llms 39652088058）；工具停用、完整 diff/spec/source dossier 的 xAI Grok 4.7 審查為 APPROVE、無阻擋。此前 plan 工具審查回傳 cancelled，不能當成通過。
+
+等待期間 main 前進至 `9b31fa1776213b68e7d38b6db4f706e6dd7def15`，已整合 Kith／Retro；只需合併 .team/PLAN 的新增區塊，保留 main 全文及本 session 區塊。產品、測試與 CI 邏輯未變；整合後的檢查、最終 head 重審與 merge readback 記在 PR #452，避免審查後又改 commit。

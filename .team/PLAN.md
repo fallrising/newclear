@@ -1704,6 +1704,32 @@ I001,15skips and5TLSfailures retained with root causes. Runtime evidence PASS;
 committed delivery PARTIAL until final CI/merge/readback. usable_tag remains none until actual publication.
 Owner acceptance pending; next product begins after Wotar remote delivery.
 
+## Program: Kith reading capture phase 0 / Kith-20261021-1804
+
+Issue #446, draft PR #449. Base cda7571e8d45c9c9f036d8b65e41ad26362f7492. Orchestrator owns this section and integration; no changes to other programs.
+
+Scope: phase 0 contract, non-applied SQL draft, RC-01–07 checklist, SQL isolation tests, SUCCESS/README and delivery record. No phase 1/2, live migration, paid API or deployment.
+
+Order: T-446 native read-only requirements audit; orchestrator RED tests, schema and documentation, GREEN and repository checks; independent different-family read-only reviewer of final commit; final-head CI, refreshed main and merge readback.
+
+Review route: owner prompt explicitly directs the external-cli-workers.md headless review procedure. Grok catalog reports unauthenticated, excluded without login. OpenCode Go existing credential observed; exact model and readonly profile pending preflight, no model call yet. Quota/cost unknown; only existing subscription route permitted. Final review max 600 seconds, no nested agents, no writes. No automatic CLI installation or configuration changes.
+
+Acceptance: pending; an exit code alone is insufficient. Recheck issue before each commit. Never mark RC E2E passed on SQL-only evidence.
+
+T-446 accepted: independent native requirements audit identified export/edit race and RC-04 stage boundary; addressed by revision CAS and early auth denial coverage for reserved routes. RED: nine missing-draft errors; GREEN: nine passed. Initial success validator found not-yet-created report link; report now added and recheck required.
+
+T-447 final review pin: OpenCode plan, opencode-go/longcat-2.5-preview-free (LongCat; author OpenAI GPT). Official Go catalog and local model listing checked 2026-10-21 UTC: https://opencode.ai/v2/docs/console/go/ lists this exact model as free; selected to respect no-paid-API constraint without assuming subscription overage policy. No fallback. Auth exists; quota/actual model capability not inferred from catalog. Runtime policy denies all tools, edits, shell and delegation; fixed-commit diff/spec context supplied in prompt. --pure, 600-second timeout, max 8 steps. Review result retained outside the source tree so later evidence recording cannot invalidate the reviewed SHA.
+
+Local acceptance: phase-0 nine SQL tests PASS; repository success 41 PASS after report-link fix; capability 5 files / 0 errors; 61 local links PASS; T-446 task/report and T-447 task validated; diff whitespace PASS. Final-commit independent review, CI and merge remain pending; decisions/evidence after that commit are recorded on PR #449 to avoid invalidating review.
+
+Final evidence gate: BLOCKED for merge. Product head 266aab10e78aca400a3827b7c33af4c53b9d6a0a passed local 9 SQL / 41 success / 5 capability and all three remote CI checks (runs 39651400599 and 39651400453). T-447 produced no review: free LongCat endpoint returned non-retryable HTTP 402 unavailable, process exit 1. Two prior preflight stops were config discovery assertions; the inspected herdr observer was made inert per process while retaining --pure and deny-all permissions. No paid fallback, login or same-family substitution.
+
+Decision: retain draft PR, commit failure evidence, mark #446 needs-owner and RELEASE. Owner needs a functioning permitted different-family reviewer. New evidence-only head still needs its own final review/CI before merge. Unmerged worktree remains intact; no second milestone.
+
+Resume 2026-10-21 UTC: owner restored Grok login and explicitly selected opencode-go/deepseek-v4.1-flash if OpenCode is used. Same issue/session re-claimed; reviewer-only needs-owner label removed. Grok models confirms grok.com login; CLI 1.0.62, pin grok-4.7 (xAI family), T-448. Tools disabled with --tools empty, --permission-mode plan, --no-subagents, --disable-web-search; immutable full diff/spec provided, 600-second timeout, max4 turns. Inspected configuration has no MCP/plugins; existing herdr session hooks made inactive per process with HERDR_ENV=0. No credential/config change or login by agent.
+
+Current main 6cd69eec (Retro RE-0) merged without conflicts. Final checks and final-head independent review required again. Prior LongCat failure is historical. Final acceptance/merge evidence recorded on PR #449 without post-review commit changes.
+
 
 ## Program: Handwired HW-0 / Handwired-20261021-1808
 
@@ -1713,10 +1739,13 @@ Objective: AC-01 pinned upstream API support table and executable CPU example. H
 Tasks: T-450 bounded read-only API audit (native worker, no delegation); root owns implementation, docs, test-first evidence, task/report and decisions; different-family external read-only reviewer on final head before merge.
 Gates: source pin verification; failing example test before implementation; Node built-in tests and actual upstream CPU example via common workspace launcher; project-success tests/validator; llms validator; diff check; final-head CI and independent review; latest main integration then rerun/review if changed; MERGED readback.
 Budget: one native audit up to 15 min, one external review up to 10 min per revision. No paid APIs. Usage/quota unknown.
-State: claimed, no earlier claim after reread. API audit pending.
+State: API audit accepted; local HW-0 checks passed. Final review/CI and merge evidence recorded on PR #452 without post-review edits.
 
 HW0-D01: ACCEPT T-450 source audit after root inspection of exact signatures/callers. Root independently executed real source example. General backward is available; no analytic-only fallback needed.
 HW0-D02: Red missing-module failure observed before implementation. Five focused tests and nine-point example pass using unchanged upstream core; repo 15 structural tests, 41 contracts, llms (0 errors), diff and worker contracts pass. Node isolated reporter only showed one file-level case, so canonical command explicitly uses --test-isolation=none (5 cases observed).
 HW0-D03: External review route follows owner's explicit external-cli-workers.md invocation: grok plan, no subagents, grok-4.7 (xAI; model list observed via authenticated grok.com, no paid API keys). Author family OpenAI. Fixed 600-second read-only budget, max 20 turns. No provider install or permission bypass. Review, final CI, latest-main check and merge readback pending.
 
 HW0-D04: REWORK initial CI: evidence/llms.txt accidentally matched capability-index discovery after git staging; renamed artifact to llms-validation.txt without validator changes. Dedicated pinned-api passed. First Grok attempt was sandbox_init_failed (read-only session storage), not a review; retry requires normal execution-environment escalation and final corrected SHA.
+
+HW0-D05: Grok plan tool attempt returned cancelled with no verdict. Safe retry used complete fixed-commit diff/spec/upstream extracts with tools disabled (max3 turns, no delegation); actual result APPROVE, no blockers, for 9f7452b0610c7aee419f9f44e5406b47fb44fef0. All three CI runs on that head succeeded, including manually dispatched llms. Nonblocking observations are documented limitations (trusted immutable source, Node-only probe, future HW-1–3 pending); no scope expansion.
+HW0-D06: Main advanced through Retro #453 and Kith #449 to 9b31fa1776213b68e7d38b6db4f706e6dd7def15. Merge conflict only appended .team/PLAN sections; preserve current main verbatim and append this Handwired section. Product/test/CI files unchanged. Rerun local gates, final-head CI and a new different-family review before merging. Evidence-gate decision: ACCEPT bounded HW-0 functionality, delivery conditional on those final gates; acceptance/merge SHA recorded in PR and preserved closeout evidence. No second milestone.

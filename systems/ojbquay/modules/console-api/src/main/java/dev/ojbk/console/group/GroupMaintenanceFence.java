@@ -28,6 +28,7 @@ public final class GroupMaintenanceFence {
     public Gate acquire(long group, long deadline) {
         if (owned.get() != null) throw new IllegalStateException("nested maintenance is not supported");
         Connection connection = null;
+        boolean locked = false;
         try {
             connection = dataSource.getConnection();
             while (System.nanoTime() < deadline) {
@@ -35,11 +36,9 @@ public final class GroupMaintenanceFence {
                     statement.setLong(1, key(group));
                     try (var rows = statement.executeQuery()) {
                         if (rows.next() && rows.getBoolean(1)) {
+                            locked = true;
                             java.util.UUID token = java.util.UUID.randomUUID();
-                            if (!lease(connection, group, token, deadline)) {
-                                unlock(connection, group);
-                                throw busy();
-                            }
+                            if (!lease(connection, group, token, deadline)) throw busy();
                             Gate gate = new Gate(connection, group, deadline, token);
                             owned.set(gate);
                             return gate;
@@ -53,6 +52,14 @@ public final class GroupMaintenanceFence {
         catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); throw busy(); }
         finally {
             if (owned.get() == null && connection != null) {
+                if (locked) {
+                    try { unlock(connection, group); }
+                    catch (SQLException unlockFailure) {
+                        // A pooled close alone retains session locks on the physical connection.
+                        try { connection.abort(Runnable::run); }
+                        catch (SQLException abortFailure) { unlockFailure.addSuppressed(abortFailure); }
+                    }
+                }
                 try { connection.close(); } catch (SQLException ignored) { }
             }
         }

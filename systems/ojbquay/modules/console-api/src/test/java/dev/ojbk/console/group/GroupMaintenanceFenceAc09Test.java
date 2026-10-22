@@ -14,6 +14,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 final class GroupMaintenanceFenceAc09Test {
+    @Test void AC_09_failedLeaseAndUnlockAbortPhysicalSessionBeforePoolReturn() throws Exception {
+        DataSource source = mock(DataSource.class);
+        Connection connection = mock(Connection.class);
+        PreparedStatement statement = mock(PreparedStatement.class);
+        ResultSet rows = mock(ResultSet.class);
+        when(source.getConnection()).thenReturn(connection);
+        when(connection.prepareStatement(anyString())).thenReturn(statement);
+        when(statement.executeQuery()).thenReturn(rows);
+        when(rows.next()).thenReturn(true);
+        when(rows.getBoolean(1)).thenReturn(true);
+        when(statement.executeUpdate()).thenThrow(new java.sql.SQLException("lease insert rejected"));
+        when(statement.execute()).thenThrow(new java.sql.SQLException("unlock unavailable"));
+        var fence = new GroupMaintenanceFence(source, mock(JdbcClient.class));
+        assertThatThrownBy(() -> fence.acquire(1, System.nanoTime() + Duration.ofSeconds(1).toNanos()))
+                .isInstanceOf(ApiException.class);
+        var cleanup = org.mockito.Mockito.inOrder(connection);
+        cleanup.verify(connection).abort(org.mockito.ArgumentMatchers.any());
+        cleanup.verify(connection).close();
+    }
+
     @Test void AC_09_lostPhysicalSessionLockCannotKeepThreadOwnership() throws Exception {
         DataSource source = mock(DataSource.class);
         Connection connection = mock(Connection.class);

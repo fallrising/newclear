@@ -73,8 +73,27 @@ on a fresh session when the gate closes, or expires 5 min after the reset deadli
 `AC_09_sessionLostDuringKafkaAlterStillFencesCompetingMutation` terminates the session inside the
 Kafka alter and races a resume: it succeeded before the fix (`ac09-lease-fence-red.log`) and is
 rejected with GROUP_MAINTENANCE_IN_PROGRESS after it; console-api 44/0, `./gradlew build` and
-`make validate-deploy` pass. Earlier note, now closed: the advisory lock lives on one PG session. If that session is lost after
-the last `verifyOwned` and before or during the Kafka alter, a competing mutation can take the
-freed key. Next slice replaces it with a durable DB lease bounded by the reset deadline.
+`make validate-deploy` pass. This proves a bounded session-loss path using real PostgreSQL and mocked
+Kafka/runtime services, not full cross-system safety.
+
+C1b takeover (T-0374, previously T-0368): independent review found that a rejected lease INSERT
+returned a still-lock-owning physical connection to the pool. The real-PG constraint-failure
+regression observed one residual advisory lock (expected zero). Failed acquisition now releases
+the key; if unlocking fails it aborts the physical session before pool return. The companion
+fault-injection unit test checks that cleanup ordering. See `.team/reports/T-486.md` and
+`.team/evidence/c1b-takeover/` at the repository root for review and local execution receipts.
+
+Still open: the Kafka future's local timeout does not prove the alter operation has terminated.
+The inherited workflow can restore consumers and release protection while that outcome is unknown.
+A five-minute lease margin also does not prevent a process suspended beyond expiry from submitting
+late work after losing its PG session. Neither is settled by this regression; full AC-09 safety
+requires explicit uncertain-outcome reconciliation and stale-owner prevention. Mixed old/new console
+binaries were not validated. Preview/confirm, whole-group coordination and real two-runtime reset
+remain separate gaps.
 
 AC-09 remains partial, AC-05 remains FAIL, `usable_tag: none`, owner acceptance pending.
+
+Takeover verification: `./gradlew :modules:console-api:test --no-daemon --no-parallel` passed46/0/0/0;
+`./gradlew build --no-daemon --no-parallel` succeeded (140 current XML cases including cached unchanged
+modules); `make validate-deploy`,15 project-contract tests and41 project contracts passed. T486
+follow-up accepts the bounded correction; initial REWORK and RED are retained.

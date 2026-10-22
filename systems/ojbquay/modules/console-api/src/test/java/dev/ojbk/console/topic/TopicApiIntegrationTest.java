@@ -284,6 +284,39 @@ final class TopicApiIntegrationTest {
 
     @Test
     @WithMockUser(username = "alice", roles = "USER")
+    void AC_09_failedLeaseInsertDoesNotLeakPooledAdvisoryLock() throws Exception {
+        createTopicAndGroup();
+        long group = id("consume_group", "settlement");
+        long key = group ^ 0x4f4a425100000000L;
+        jdbc.sql("ALTER TABLE group_maintenance_lease ADD CONSTRAINT ac09_reject_lease CHECK (false)")
+                .update();
+        try {
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> maintenance.acquire(
+                    group, System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos()))
+                    .isInstanceOf(dev.ojbk.console.api.ApiException.class);
+            assertThat(jdbc.sql("""
+                    SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'
+                    AND classid::bigint = :high AND objid::bigint = :low AND granted
+                    """).param("high", key >>> 32).param("low", key & 0xffffffffL)
+                    .query(Long.class).single()).isZero();
+        } finally {
+            jdbc.sql("ALTER TABLE group_maintenance_lease DROP CONSTRAINT ac09_reject_lease").update();
+            // Test-only cleanup on RED: terminate only this synthetic group's leaked session.
+            try (var cleanup = java.sql.DriverManager.getConnection(
+                    POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+                    var statement = cleanup.prepareStatement("""
+                            SELECT count(pg_terminate_backend(pid)) FROM pg_locks WHERE locktype = 'advisory'
+                            AND classid::bigint = ? AND objid::bigint = ? AND granted
+                            """)) {
+                statement.setLong(1, key >>> 32);
+                statement.setLong(2, key & 0xffffffffL);
+                statement.execute();
+            }
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "alice", roles = "USER")
     void AC_09_sessionLostDuringKafkaAlterStillFencesCompetingMutation() throws Exception {
         when(runtimePauseVerifier.capture(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong()))
                 .thenReturn(new dev.ojbk.console.group.RuntimePauseVerifier.Barrier(java.util.Map.of("test", "boot")));

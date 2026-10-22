@@ -55,13 +55,28 @@ async fn codex_mock(State(seen): State<Seen>, req: Request) -> Response {
     };
 
     let mut events = vec![created];
+    let last_text = last["content"][0]["text"].as_str().unwrap_or("");
+    if last_text == "quota" {
+        events.push(json!({"type": "response.failed", "response": {"id": "resp_abc", "status": "failed",
+            "error": {"code": "subscription_sharing_usage_limit_exceeded", "message": "plan limit reached"}}}));
+        return Response::builder()
+            .header(header::CONTENT_TYPE, "text/event-stream")
+            .body(Body::from(sse(&events)))
+            .unwrap();
+    }
     if last["type"] == "function_call_output" {
         events.extend(text_events(&format!(
             "result: {}",
             last["output"].as_str().unwrap_or("")
         )));
     } else if v["tools"].as_array().is_some_and(|t| !t.is_empty()) {
-        let name = v["tools"][0]["name"].as_str().unwrap_or("missing_name");
+        // SIWC groups client functions in a namespace tool.
+        let tool = if v["tools"][0]["type"] == "namespace" {
+            &v["tools"][0]["tools"][0]
+        } else {
+            &v["tools"][0]
+        };
+        let name = tool["name"].as_str().unwrap_or("missing_name");
         events.push(json!({"type": "response.output_item.added", "output_index": 0, "item": {"type": "reasoning", "id": "rs_1", "summary": []}}));
         events.push(json!({"type": "response.output_item.done", "output_index": 0, "item": {"type": "reasoning", "id": "rs_1", "summary": []}}));
         events.push(json!({"type": "response.output_item.added", "output_index": 1, "item": {"type": "function_call", "id": "fc_1", "call_id": "call_xyz", "name": name, "arguments": ""}}));
@@ -93,6 +108,10 @@ struct Env {
 
 impl Env {
     async fn start() -> Self {
+        Self::start_with("codex").await
+    }
+
+    async fn start_with(provider: &str) -> Self {
         let seen: Seen = Arc::default();
         let app = Router::new().fallback(codex_mock).with_state(seen.clone());
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -112,7 +131,7 @@ impl Env {
             "--data-dir",
             dir.path().to_str().unwrap(),
             "--provider-base-override",
-            &format!("codex={upstream}"),
+            &format!("codex={upstream},siwc={upstream}"),
             "--codex-version",
             "9.9.9-test",
         ]);
@@ -164,8 +183,12 @@ impl Env {
         let r = post_admin(
             "/admin/api/connections/oauth/import",
             json!({
-                "name": "cx", "provider": "codex", "access_token": "test-access",
-                "base_url": format!("{upstream}/backend-api/codex/responses"),
+                "name": "cx", "provider": provider, "access_token": "test-access",
+                "base_url": if provider == "siwc" {
+                    format!("{upstream}/v1")
+                } else {
+                    format!("{upstream}/backend-api/codex/responses")
+                },
                 "default_model": "gpt-mock", "meta": "{\"account_id\":\"acct-1\"}"
             }),
         )
@@ -639,4 +662,97 @@ async fn responses_api_is_forwarded_natively_to_codex() {
         .await;
     let v: Value = r.json().await.unwrap();
     assert_eq!(v["output"][0]["content"][0]["text"], "saw image");
+}
+
+#[tokio::test]
+async fn siwc_provider_applies_preview_limits() {
+    let env = Env::start_with("siwc").await;
+
+    // Chat with tools: forced stream, store:false, fields dropped, tools in a namespace.
+    let r = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model": "cx", "temperature": 0.5, "max_tokens": 10, "tools": weather_tool_chat(),
+                   "messages": [{"role": "system", "content": "be brief"}, {"role": "user", "content": "weather?"}]}),
+        )
+        .await;
+    let v: Value = r.json().await.unwrap();
+    assert_eq!(
+        v["choices"][0]["message"]["tool_calls"][0]["function"]["name"],
+        "get_weather"
+    );
+    let up = env.upstream_body();
+    assert_eq!(up["stream"], true);
+    assert_eq!(up["store"], false);
+    assert!(up.get("temperature").is_none() && up.get("max_output_tokens").is_none());
+    assert_eq!(up["instructions"], "be brief");
+    assert_eq!(up["tools"][0]["type"], "namespace");
+    assert_eq!(up["tools"][0]["tools"][0]["name"], "get_weather");
+    assert!(!env
+        .upstream_header("user-agent")
+        .unwrap_or_default()
+        .starts_with("codex_cli_rs"));
+    assert!(env.upstream_header("originator").is_none());
+    let key = up["prompt_cache_key"].as_str().unwrap().to_string();
+    assert_eq!(
+        env.upstream_header("session-id").as_deref(),
+        Some(key.as_str())
+    );
+
+    // Responses: explicit system items become developer items.
+    env.post(
+        "/v1/responses",
+        json!({"model": "cx", "metadata": {"x": 1}, "input": [
+            {"type": "message", "role": "system", "content": "rules"},
+            {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "hi"}]}
+        ]}),
+    )
+    .await;
+    let up = env.upstream_body();
+    assert_eq!(up["input"][0]["role"], "developer");
+    assert!(up.get("metadata").is_none());
+
+    // Unsupported state / hosted tools: clear 400, nothing sent upstream.
+    let before = env.seen.lock().unwrap().len();
+    for body in [
+        json!({"model": "cx", "previous_response_id": "resp_1", "input": "hi"}),
+        json!({"model": "cx", "tools": [{"type": "code_interpreter", "container": {"type": "auto"}}], "input": "hi"}),
+    ] {
+        let r = env
+            .client
+            .post(format!("{}/v1/responses", env.base))
+            .json(&body)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(r.status(), 400);
+        assert!(r.text().await.unwrap().contains("siwc"));
+    }
+    assert_eq!(env.seen.lock().unwrap().len(), before);
+
+    // Plan quota exhausted mid-stream: non-stream → 429 with the code; stream → error record.
+    let r = env
+        .client
+        .post(format!("{}/v1/chat/completions", env.base))
+        .json(&json!({"model": "cx", "messages": [{"role": "user", "content": "quota"}]}))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(r.status(), 429);
+    assert!(r
+        .text()
+        .await
+        .unwrap()
+        .contains("subscription_sharing_usage_limit_exceeded"));
+    let r = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model": "cx", "stream": true, "messages": [{"role": "user", "content": "quota"}]}),
+        )
+        .await;
+    let chunks = sse_data(&r.text().await.unwrap());
+    assert!(chunks
+        .iter()
+        .any(|c| c["error"]["code"] == "subscription_sharing_usage_limit_exceeded"));
+    assert_eq!(chunks.last().unwrap(), "[DONE]");
 }

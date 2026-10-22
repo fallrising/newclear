@@ -1,0 +1,709 @@
+{
+  "steps": 68,
+  "elapsed_ms": 645319,
+  "budget_exhausted": false,
+  "kind": "automated UI exploration; not human playtest",
+  "commands_by_type": {
+    "observe": 1,
+    "type": 2,
+    "click": 57,
+    "switch": 5,
+    "select": 2,
+    "finish": 1
+  },
+  "source_actions_sha256": "a35ba2a8e75c2b3f32574fc658ae199503b6117b2b884039ed018ccd005c8c19",
+  "source_kind": "fresh-context OpenAI-family agent; only visible UI controller; no human subjects",
+  "first_completion": {
+    "step": 16,
+    "elapsed_ms": 194155
+  },
+  "second_completion": {
+    "step": 57,
+    "elapsed_ms": 536391
+  },
+  "events": [
+    {
+      "step": 1,
+      "elapsed_ms": 95248,
+      "actor": 0,
+      "command": {
+        "op": "observe"
+      },
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n霧岸鎮\n0, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\nYOUR JOURNEY STARTS HERE\n旅人，怎麼稱呼你？\n\n選一門手藝，帶上一份異職補給出發。職業選定後無法更改。\n\n旅人名字\n你的手藝\n鐵匠 · 礦石 → 修補組\n藥師 · 藥草 → 行路藥\n踏入霧岸鎮\n↗\n\n鐵匠獲得 1 行路藥，藥師獲得 1 修補組。首輪可獨自完成，補給只發一次。\n\n↑\n←\n✦\n→\n↓\n採集\n製作補給\n回鎮後製作你的專精配方\n旅途紀事\n已保存\n\n先選一門手藝。準備好修補組與行路藥，就能登上東邊的望潮塔。\n\nYOUR NEXT STEP\n把一門手藝，帶進旅程裡。\n\n先採集，再回鎮製作；帶齊兩種補給後向東走。登頂可獲得一次性 8 金幣。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 2,
+      "elapsed_ms": 115503,
+      "actor": 0,
+      "command": {
+        "op": "type",
+        "id": 0,
+        "text": "岸行"
+      },
+      "visible_control_label": "旅人名字"
+    },
+    {
+      "step": 3,
+      "elapsed_ms": 119785,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "踏入霧岸鎮\n↗"
+    },
+    {
+      "step": 4,
+      "elapsed_ms": 125384,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 5,
+      "elapsed_ms": 129568,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 6,
+      "elapsed_ms": 133836,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 7,
+      "elapsed_ms": 137620,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 8,
+      "elapsed_ms": 141709,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 9,
+      "elapsed_ms": 150520,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 10,
+      "elapsed_ms": 160325,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 11,
+      "elapsed_ms": 166328,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 12,
+      "elapsed_ms": 172301,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 5
+      },
+      "visible_control_label": "製作修補組"
+    },
+    {
+      "step": 13,
+      "elapsed_ms": 177670,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 14,
+      "elapsed_ms": 183254,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 15,
+      "elapsed_ms": 188559,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 16,
+      "elapsed_ms": 194155,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動",
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n望潮塔\n4, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\n旅\n鐵匠\n岸行\n♥ 3 / 3\n旅途積蓄\n● 20 金幣\n行囊 INVENTORY\n◆\n礦石\n0\n❧\n藥草\n0\n▣\n修補組\n0\n♜\n行路藥\n0\n⚑\n霧影已通過 · 首次獎勵已領\n↑\n←\n✦\n→\n↓\n採集\n製作修補組\n2 礦石 → 1 修補組\n旅途紀事\n已保存\n\n抵達塔頂！獲得首次獎勵 8 枚貨幣。之後重走不再發獎。\n\nSUPPLIES FOR THE NEXT JOURNEY\n旅人市場\n每 1.5 秒更新\n\n鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。\n\n出售物品\n礦石\n藥草\n修補組\n行路藥\n數量（1–99）\n整筆總價（1–99 金幣）\n刊登掛單\n\n價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。\n\n補給與交易紀錄\n\n還沒有掛單。製作多一份補給，讓另一位旅人也能出發。\n\nYOUR NEXT STEP\n你看見了霧後的海\n\n首次登頂獎勵已領，下次不再發獎。沿原路回鎮，製作並交易補給，便能再走一輪。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 17,
+      "elapsed_ms": 224070,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 18,
+      "elapsed_ms": 234383,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 19,
+      "elapsed_ms": 240369,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 20,
+      "elapsed_ms": 245954,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 21,
+      "elapsed_ms": 250921,
+      "actor": 1,
+      "command": {
+        "op": "switch",
+        "actor": 1
+      }
+    },
+    {
+      "step": 22,
+      "elapsed_ms": 255294,
+      "actor": 1,
+      "command": {
+        "op": "type",
+        "id": 0,
+        "text": "潮葉"
+      },
+      "visible_control_label": "旅人名字"
+    },
+    {
+      "step": 23,
+      "elapsed_ms": 259870,
+      "actor": 1,
+      "command": {
+        "op": "select",
+        "id": 1,
+        "option": 1
+      },
+      "visible_control_label": "你的手藝"
+    },
+    {
+      "step": 24,
+      "elapsed_ms": 266166,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "踏入霧岸鎮\n↗"
+    },
+    {
+      "step": 25,
+      "elapsed_ms": 283095,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 3
+      },
+      "visible_control_label": "往南移動"
+    },
+    {
+      "step": 26,
+      "elapsed_ms": 289887,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 3
+      },
+      "visible_control_label": "往南移動"
+    },
+    {
+      "step": 27,
+      "elapsed_ms": 298810,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 3
+      },
+      "visible_control_label": "往南移動"
+    },
+    {
+      "step": 28,
+      "elapsed_ms": 305223,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 3
+      },
+      "visible_control_label": "往南移動"
+    },
+    {
+      "step": 29,
+      "elapsed_ms": 311437,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 30,
+      "elapsed_ms": 321156,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 31,
+      "elapsed_ms": 327559,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 32,
+      "elapsed_ms": 335972,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 33,
+      "elapsed_ms": 343458,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 34,
+      "elapsed_ms": 350543,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 35,
+      "elapsed_ms": 357239,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 0
+      },
+      "visible_control_label": "往北移動"
+    },
+    {
+      "step": 36,
+      "elapsed_ms": 365971,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 0
+      },
+      "visible_control_label": "往北移動"
+    },
+    {
+      "step": 37,
+      "elapsed_ms": 375296,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 0
+      },
+      "visible_control_label": "往北移動"
+    },
+    {
+      "step": 38,
+      "elapsed_ms": 383895,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 0
+      },
+      "visible_control_label": "往北移動"
+    },
+    {
+      "step": 39,
+      "elapsed_ms": 390598,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 5
+      },
+      "visible_control_label": "製作行路藥"
+    },
+    {
+      "step": 40,
+      "elapsed_ms": 398396,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 5
+      },
+      "visible_control_label": "製作行路藥"
+    },
+    {
+      "step": 41,
+      "elapsed_ms": 404377,
+      "actor": 1,
+      "command": {
+        "op": "select",
+        "id": 6,
+        "option": 3
+      },
+      "visible_control_label": "出售物品"
+    },
+    {
+      "step": 42,
+      "elapsed_ms": 411289,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 9
+      },
+      "visible_control_label": "刊登掛單",
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n霧岸鎮\n0, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\n旅\n藥師\n潮葉\n♥ 3 / 3\n旅途積蓄\n● 12 金幣\n行囊 INVENTORY\n◆\n礦石\n0\n❧\n藥草\n0\n▣\n修補組\n1\n♜\n行路藥\n2\n⚑\n尚未出發\n↑\n←\n✦\n→\n↓\n採集\n製作行路藥\n3 藥草 → 1 行路藥\n旅途紀事\n已保存\n\n掛單完成；物品不預扣，購買時會再次檢查庫存。\n\nSUPPLIES FOR THE NEXT JOURNEY\n旅人市場\n每 1.5 秒更新\n\n鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。\n\n出售物品\n礦石\n藥草\n修補組\n行路藥\n數量（1–99）\n整筆總價（1–99 金幣）\n刊登掛單\n\n價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。\n\n補給與交易紀錄\n行路藥 × 1\n潮葉\n#1 · 掛單中\n4 金幣／整筆\n取消掛單\nYOUR NEXT STEP\n補給齊了，向東登塔\n\n沿東側塔路前進 4 格；路障消耗 1 修補組，霧影消耗 1 行路藥。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 43,
+      "elapsed_ms": 417759,
+      "actor": 0,
+      "command": {
+        "op": "switch",
+        "actor": 0
+      }
+    },
+    {
+      "step": 44,
+      "elapsed_ms": 424244,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 10
+      },
+      "visible_control_label": "購買 #1 行路藥 × 1",
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n霧岸鎮\n0, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\n旅\n鐵匠\n岸行\n♥ 3 / 3\n旅途積蓄\n● 16 金幣\n行囊 INVENTORY\n◆\n礦石\n0\n❧\n藥草\n0\n▣\n修補組\n0\n♜\n行路藥\n1\n⚑\n尚未出發 · 首次獎勵已領\n↑\n←\n✦\n→\n↓\n採集\n製作修補組\n2 礦石 → 1 修補組\n旅途紀事\n已保存\n\n購買完成，整筆物品與貨幣已轉移。\n\nSUPPLIES FOR THE NEXT JOURNEY\n旅人市場\n每 1.5 秒更新\n\n鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。\n\n出售物品\n礦石\n藥草\n修補組\n行路藥\n數量（1–99）\n整筆總價（1–99 金幣）\n刊登掛單\n\n價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。\n\n補給與交易紀錄\n行路藥 × 1\n潮葉\n#1 · 已售出\n4 金幣／整筆\nYOUR NEXT STEP\n往西走，到礫坡採集\n\n需要 2 礦石，目前 0。走 3 格抵達礫坡，再按「採集」。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 45,
+      "elapsed_ms": 440161,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 46,
+      "elapsed_ms": 446667,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 47,
+      "elapsed_ms": 457980,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 1
+      },
+      "visible_control_label": "往西移動"
+    },
+    {
+      "step": 48,
+      "elapsed_ms": 465496,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 49,
+      "elapsed_ms": 471277,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 4
+      },
+      "visible_control_label": "採集"
+    },
+    {
+      "step": 50,
+      "elapsed_ms": 483096,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 51,
+      "elapsed_ms": 490716,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 52,
+      "elapsed_ms": 498116,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 53,
+      "elapsed_ms": 505612,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 5
+      },
+      "visible_control_label": "製作修補組"
+    },
+    {
+      "step": 54,
+      "elapsed_ms": 513012,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 55,
+      "elapsed_ms": 521197,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 56,
+      "elapsed_ms": 529093,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 57,
+      "elapsed_ms": 536391,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動",
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n望潮塔\n4, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\n旅\n鐵匠\n岸行\n♥ 3 / 3\n旅途積蓄\n● 16 金幣\n行囊 INVENTORY\n◆\n礦石\n0\n❧\n藥草\n0\n▣\n修補組\n0\n♜\n行路藥\n0\n⚑\n霧影已通過 · 首次獎勵已領\n↑\n←\n✦\n→\n↓\n採集\n製作修補組\n2 礦石 → 1 修補組\n旅途紀事\n已保存\n\n再次抵達塔頂；首次獎勵已領取。\n\nSUPPLIES FOR THE NEXT JOURNEY\n旅人市場\n每 1.5 秒更新\n\n鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。\n\n出售物品\n礦石\n藥草\n修補組\n行路藥\n數量（1–99）\n整筆總價（1–99 金幣）\n刊登掛單\n\n價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。\n\n補給與交易紀錄\n行路藥 × 1\n潮葉\n#1 · 已售出\n4 金幣／整筆\nYOUR NEXT STEP\n你看見了霧後的海\n\n首次登頂獎勵已領，下次不再發獎。沿原路回鎮，製作並交易補給，便能再走一輪。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 58,
+      "elapsed_ms": 563588,
+      "actor": 1,
+      "command": {
+        "op": "switch",
+        "actor": 1
+      }
+    },
+    {
+      "step": 59,
+      "elapsed_ms": 570493,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 9
+      },
+      "visible_control_label": "刊登掛單"
+    },
+    {
+      "step": 60,
+      "elapsed_ms": 580221,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 61,
+      "elapsed_ms": 588422,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 62,
+      "elapsed_ms": 596918,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動"
+    },
+    {
+      "step": 63,
+      "elapsed_ms": 604298,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 2
+      },
+      "visible_control_label": "往東移動",
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n望潮塔\n4, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\n旅\n藥師\n潮葉\n♥ 3 / 3\n旅途積蓄\n● 24 金幣\n行囊 INVENTORY\n◆\n礦石\n0\n❧\n藥草\n0\n▣\n修補組\n0\n♜\n行路藥\n0\n⚑\n霧影已通過 · 首次獎勵已領\n↑\n←\n✦\n→\n↓\n採集\n製作行路藥\n3 藥草 → 1 行路藥\n旅途紀事\n已保存\n\n抵達塔頂！獲得首次獎勵 8 枚貨幣。之後重走不再發獎。\n\nSUPPLIES FOR THE NEXT JOURNEY\n旅人市場\n每 1.5 秒更新\n\n鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。\n\n出售物品\n礦石\n藥草\n修補組\n行路藥\n數量（1–99）\n整筆總價（1–99 金幣）\n刊登掛單\n\n價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。\n\n補給與交易紀錄\n行路藥 × 1\n潮葉\n#1 · 已售出\n4 金幣／整筆\n行路藥 × 1\n潮葉\n#2 · 掛單中\n4 金幣／整筆\n取消掛單\nYOUR NEXT STEP\n你看見了霧後的海\n\n首次登頂獎勵已領，下次不再發獎。沿原路回鎮，製作並交易補給，便能再走一輪。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 64,
+      "elapsed_ms": 611485,
+      "actor": 0,
+      "command": {
+        "op": "switch",
+        "actor": 0
+      }
+    },
+    {
+      "step": 65,
+      "elapsed_ms": 618992,
+      "actor": 0,
+      "command": {
+        "op": "click",
+        "id": 10
+      },
+      "visible_control_label": "購買 #2 行路藥 × 1",
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n望潮塔\n4, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\n旅\n鐵匠\n岸行\n♥ 3 / 3\n旅途積蓄\n● 16 金幣\n行囊 INVENTORY\n◆\n礦石\n0\n❧\n藥草\n0\n▣\n修補組\n0\n♜\n行路藥\n0\n⚑\n霧影已通過 · 首次獎勵已領\n↑\n←\n✦\n→\n↓\n採集\n製作修補組\n2 礦石 → 1 修補組\n旅途紀事\n已保存\n\n賣家目前庫存不足，掛單仍然開放。\n\nSUPPLIES FOR THE NEXT JOURNEY\n旅人市場\n每 1.5 秒更新\n\n鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。\n\n出售物品\n礦石\n藥草\n修補組\n行路藥\n數量（1–99）\n整筆總價（1–99 金幣）\n刊登掛單\n\n價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。\n\n補給與交易紀錄\n行路藥 × 1\n潮葉\n#1 · 已售出\n4 金幣／整筆\n行路藥 × 1\n潮葉\n#2 · 掛單中\n4 金幣／整筆\n購買\nYOUR NEXT STEP\n你看見了霧後的海\n\n首次登頂獎勵已領，下次不再發獎。沿原路回鎮，製作並交易補給，便能再走一輪。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 66,
+      "elapsed_ms": 625766,
+      "actor": 1,
+      "command": {
+        "op": "switch",
+        "actor": 1
+      }
+    },
+    {
+      "step": 67,
+      "elapsed_ms": 634671,
+      "actor": 1,
+      "command": {
+        "op": "click",
+        "id": 10
+      },
+      "visible_control_label": "取消掛單 #2 行路藥 × 1",
+      "visible_text": "霧\n霧岸鎮\nMISTSHORE\n第一片世界\nRE—02\n\nA SMALL ADVENTURE, MADE BY YOU\n\n從一門手藝，走向霧後的海。\n\n採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。\n\nCHAPTER\n01\n望潮塔之路\nTHE MISTSHORE COAST\n霧岸一隅\n望潮塔\n4, 0\n礫坡\n霧岸鎮\n路障\n霧影\n望潮塔\n潮林\n採集礦石\n修補組 × 1\n行路藥 × 1\n首次 +8 金幣\n採集藥草\nN\n霧 海\nTHE MIST SEA\n你的位置\n可行走路徑\n↑\n←\n↓\n→\n或 WASD 移動\n每次一格 · 每步自動保存\n旅\n藥師\n潮葉\n♥ 3 / 3\n旅途積蓄\n● 24 金幣\n行囊 INVENTORY\n◆\n礦石\n0\n❧\n藥草\n0\n▣\n修補組\n0\n♜\n行路藥\n0\n⚑\n霧影已通過 · 首次獎勵已領\n↑\n←\n✦\n→\n↓\n採集\n製作行路藥\n3 藥草 → 1 行路藥\n旅途紀事\n已保存\n\n掛單已取消，物品與貨幣沒有變動。\n\nSUPPLIES FOR THE NEXT JOURNEY\n旅人市場\n每 1.5 秒更新\n\n鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。\n\n出售物品\n礦石\n藥草\n修補組\n行路藥\n數量（1–99）\n整筆總價（1–99 金幣）\n刊登掛單\n\n價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。\n\n補給與交易紀錄\n行路藥 × 1\n潮葉\n#1 · 已售出\n4 金幣／整筆\n行路藥 × 1\n潮葉\n#2 · 已取消\n4 金幣／整筆\nYOUR NEXT STEP\n你看見了霧後的海\n\n首次登頂獎勵已領，下次不再發獎。沿原路回鎮，製作並交易補給，便能再走一輪。\n\n01\n採集原料\n02\n回鎮製作\n03\n向東登塔\n04\n看見霧海\n\n霧岸鎮 · 本機冒險實驗 ／ 角色憑證保存在此瀏覽器，並非正式帳號登入。\n\n重設此瀏覽器角色"
+    },
+    {
+      "step": 68,
+      "elapsed_ms": 645318,
+      "actor": 1,
+      "command": {
+        "op": "finish"
+      }
+    }
+  ]
+}

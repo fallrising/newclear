@@ -1864,3 +1864,6 @@ T-486 is a single native read-only reviewer: explicit six-file PR diff plus adja
 T-486 initial REWORK: failed lease INSERT leaks a session advisory key into the pool. Root real-PG RED expected0/actual1 at14:04Z; initial RED cleanup exception was retained and corrected to use a separate synthetic-container connection. Minimal root fix releases acquired key on every unsuccessful exit and aborts on unlock failure. Root also qualified inherited uncertain-Kafka/expired-owner limits instead of claiming full C1 safety. Console regression in progress; bounded correction review follows.
 
 Root evidence-gate: ACCEPT bounded C1b correction after actual real-PG RED expected0/actual1, console46/0, fullbuild success (140 current XML cases, unchanged modules cached), deploymodels,15 contracttests,41 contracts and diffcheck PASS. T486 follow-up ACCEPT on scoped corrected diff; initial failure remains visible. Exact commands/source hashes in .team/evidence/c1b-takeover/verification.json. Full AC09 remains PARTIAL for uncertain Kafka/stale-owner safety and C2-C4; AC05 FAIL; no usable tag. Final-head CI, merge and remote readback pending.
+## Program: Retro / RE-3 / 20261022-1315
+
+Owner-approved automated acceptance; issue #481 / PR #483. Orchestrator-owned plan: [Retro RE-3](retro-20261022-1315/PLAN.md). Other program records unchanged.

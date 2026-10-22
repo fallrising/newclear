@@ -1,6 +1,6 @@
 # RE-2 交易契約
 
-延伸 [RE-1 HTTP／重試契約](re1-contract.md)，規則來源為 [rules.md](rules.md) 與 [SDD](SDD.md)。只完成交易，不代替 RE-3 真人試玩。
+延伸 [RE-1 HTTP／重試契約](re1-contract.md)，規則來源為 [rules.md](rules.md) 與 [SDD](SDD.md)。此為 RE-2 交付時的交易契約；RE-3 後由 owner 明確改為[自動化可玩性驗收](re3-contract.md)，仍不代表真人試玩。
 
 ## 動作與狀態
 

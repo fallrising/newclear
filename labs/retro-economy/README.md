@@ -1,6 +1,6 @@
 # Retro Economy — 霧岸鎮
 
-> 主線與剩餘驗收：[SUCCESS.md](SUCCESS.md)。RE-1 單人路線已驗證；本次 RE-2 加入掛單、購買、取消，驗證結果見交付報告。RE-3 真人試玩尚未完成。
+> 主線與剩餘驗收：[SUCCESS.md](SUCCESS.md)。RE-1／RE-2 已合併；RE-3 依 owner 決定改為自動化可玩性驗收。真人理解、趣味與自發交易仍未驗證。
 
 原創俯視小鎮冒險：選鐵匠或藥師，走到資源點採集，回鎮製作補給，再走塔路。地圖與素材使用自製 SVG 幾何圖形，沒有外部素材、CDN 或第三方執行期依賴。
 
@@ -42,12 +42,23 @@ python3 labs/retro-economy/server.py --host 127.0.0.1 --port 8080 --db labs/retr
 
 ```sh
 python3 -m unittest discover -s labs/retro-economy/tests -p 'test_*.py' -v
-node --test --test-isolation=none labs/retro-economy/tests/test_ui.mjs
+node --test --test-isolation=none labs/retro-economy/tests/test_ui.mjs labs/retro-economy/tests/test_explorer.mjs
 node labs/retro-economy/tests/browser_smoke.mjs
+python3 labs/retro-economy/tools/simulate.py
 ```
 
 前端單元測試和瀏覽器驗收使用 Node 24；瀏覽器驗收另需可正常啟用 sandbox 的 Chrome／Chromium（預設 `google-chrome`，可用 `CHROME` 指定執行檔）。它會啟動測試伺服器與瀏覽器，使用暫存資料庫。設定 `AGENT_BUILD_DIR` 與 `AGENT_EVIDENCE_DIR` 到測試輸出目錄，或於 CI 使用 `RUNNER_TEMP`。代理工作必須透過 workspace launcher 執行，詳見上層 AGENTS.md。遊戲執行本身不需要 Node 或測試瀏覽器安裝包。
 
-[規則表](docs/rules.md)、[SDD](docs/SDD.md)、[API／重試契約](docs/re1-contract.md)、[RE-1 驗證報告](tasks/454-re1-solo/report.md)、[RE-2 交易契約](docs/re2-contract.md) 與[RE-2 交付報告](tasks/475-re2-trading/report.md)。CI 保存實際瀏覽器截圖及狀態核對結果。數值尚未由真人試玩驗證；RE-3 的 2–3 真人場次仍待完成。
+[規則表](docs/rules.md)、[SDD](docs/SDD.md)、[API／重試契約](docs/re1-contract.md)、[RE-1 驗證報告](tasks/454-re1-solo/report.md)、[RE-2 交易契約](docs/re2-contract.md) 與[RE-2 交付報告](tasks/475-re2-trading/report.md)。CI 保存實際瀏覽器截圖及狀態核對結果。RE-3 依 [自動化契約](docs/re3-contract.md) 驗收，結果見 [RE-3 報告](tasks/481-re3-automated/report.md)。數值尚未由真人試玩驗證，沒有訪談或留存結論。
 
 [OpenMMO Lab](../openmmo-lab/README.md) 與 [Zircon-Godot](../zircon-godot/README.md) 僅是上游研究，不是執行依賴。投入與文檔檔位未分級；本次不改作品集決策。
+
+## UI 探索與策略證據
+
+`tools/simulate.py` 以真實 SQLite Store 執行兩職業三輪與缺供應／高價反例，固定 seed 7／19／41；完整 trace 預設存入 `AGENT_EVIDENCE_DIR/simulation.json`（或 `--output PATH`，拒絕覆寫既有證據），stdout 只印摘要；若預期完成／停滯結果不符或步數耗盡，exit 1。輸出每動作獨立核對的資源帳目及重啟結果。`wait` 只代表排程器等待觀察，不是遊戲 API；步數不是真人耗時。這些交易是預設策略造成，不能解讀為玩家自發需求或平衡證據。
+
+需要重新做 UI-only 探索時，先透過 workspace launcher 啟動 `node labs/retro-economy/tools/browser_explore.mjs`（同樣設定 `CHROME`）。程序保持前景，輸出本次 `control`／`evidence` 目錄，最多 20 分鐘／200 次操作後結束並回收自己啟動的伺服器與瀏覽器。它使用全新暫存資料庫與兩個隔離 context。
+
+探索者不讀程式、路線文件、狀態 API 或資料庫。用另一終端透過 launcher 執行 `python3 labs/retro-economy/tools/ui_command.py CONTROL_DIR '{"op":"observe"}'`，查看回覆中的可見文字、控制項與 screenshot；每次依新的畫面決定操作。可用 `click`（id）、`type`（id、text）、`select`（id、option：零起算選項）、`switch`（actor：0／1）、`scroll`（dy：−1000～1000）及 `finish`。一次送一條，等待回覆；逾時須檢查紀錄，不能盲目重送。控制器不提供任意 JS、URL 導航或 API。它是有界測試工具，不是給不可信 agent 的 OS sandbox。
+
+`actions.jsonl`、每步截圖、`summary.json` 與程序 log 保存在 evidence。另記錄探索者的推理、卡點和實際未完成部分；固定腳本、agent 探索、策略模擬三者各自報告，均不稱為真人驗收。

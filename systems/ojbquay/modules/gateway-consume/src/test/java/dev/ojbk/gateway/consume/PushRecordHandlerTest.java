@@ -37,6 +37,32 @@ final class PushRecordHandlerTest {
     }
 
     @Test
+    void AC_05_preservesResponseCompletionAnchorWithAnAdvancingClock() {
+        var now = new java.util.concurrent.atomic.AtomicReference<>(NOW);
+        Clock clock = new Clock() {
+            @Override public java.time.ZoneId getZone() { return ZoneOffset.UTC; }
+            @Override public Clock withZone(java.time.ZoneId zone) { return this; }
+            @Override public Instant instant() { return now.get(); }
+        };
+        RecordingRetryPublisher retry = new RecordingRetryPublisher();
+        try (PushPipeline pipeline = new PushPipeline()) {
+            PushRecordHandler handler = new PushRecordHandler(
+                    pipeline,
+                    request -> {
+                        assertThat(retry.scheduled).isEmpty();
+                        now.set(NOW.plusMillis(86));
+                        return PushHttpResult.http(503, 1);
+                    },
+                    retry,
+                    clock);
+            assertThat(handler.handle(message(Map.of()), subscription()))
+                    .isEqualTo(AcknowledgeType.ACCEPT);
+            assertThat(retry.scheduled).containsExactly(new Scheduled(
+                    "orders.settlement.retry", NOW.plusMillis(236), 1));
+        }
+    }
+
+    @Test
     void writesExhaustedAndPipelineFailuresToDlqBeforeAccept() {
         RecordingRetryPublisher retry = new RecordingRetryPublisher();
         try (PushPipeline pipeline = new PushPipeline()) {

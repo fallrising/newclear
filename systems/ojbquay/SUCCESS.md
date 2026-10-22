@@ -85,3 +85,7 @@ main `0aac18413a3b39043706f17b8e5f801f41573d70` 的119-test build PASS 是參考
 intervals [703,350,639]ms；後續兩行 fired_at scope correction 只有20 focused PASS，沒有最終完整驗收。
 原始失敗、第一次交付與到達間隔計時都保留，未增加暖機或放寬門檻。
 本頁原五列 historical 不改成新 PASS；SDD 提案也不構成 owner 驗收。usable_tag:none。
+
+## T-0368 未完成程式保存
+
+[WIP checkpoint](tasks/445-retry-timing/wip-checkpoint.md) 保存既有修復候選供後續 session 接手；原 AC-05 FAIL 與其他缺口保留。Git 保存不等於 milestone／主線通過。SDD #477 未批准，usable_tag:none，owner 產品驗收待定。

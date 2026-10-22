@@ -1,0 +1,128 @@
+{
+  "status": "WIP_NOT_ACCEPTED",
+  "source_base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+  "publication_base": "ceafdddcfcfe0d8c11598f821e3d32c2f2c1234d",
+  "selection": "24 runtime/test/generated/CI files byte-identical to frozen closeout backup; excluded local history and duplicated evidence",
+  "files": {
+    ".github/workflows/ojbquay-ci.yml": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "027dab42ef66bf372c0bf5a18f5586ab28a0c039c3efc43a8f66686a40b233e7"
+    },
+    "systems/ojbquay/build.gradle.kts": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "31dba6ebbf5850cda0d204d6f4f37922d867b5c87dba395744a96c2a2ee5e3c9"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/KafkaOrderedPushWorkerTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "a655db080fb3ee1e12d4880650573de87b38c81ec09f836907ed7059605e2dc3"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/PushRecordHandlerTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "eab05c3f326c69d05e76d0252ebe099ffe4a5d64f7afe5f32155fa0c3323e02b"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/PushRetryE2eTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "738c4d3765369122032f922938696c2315a43698912b95186485398cc449f26a"
+    },
+    "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/DelayDispatcher.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "d353a7fe02e92307d970bc0f1bcb4682283b1078420b1f9ac97db3a583648331"
+    },
+    "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/DelayMetadataCodec.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "8fdcf790b94a01e8e745ef7f73a5403e0f8827728b3d93978aac829979fcb460"
+    },
+    "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/DelayRepository.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "563456d600e9e9e95261ac61ed9ec69d8bd89b30ed59fd4aa02791f6bf4f7a76"
+    },
+    "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/JdbcDelayRepository.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "47cfd77b9584e6c91e616e8d581daac6d7c5ae5dfe2961965108d5e0ce92f057"
+    },
+    "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/KafkaDelaySender.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "e38fbca5ee001fe0a919f427e5a59f09335bbce56ad9968a54581bae7ac775d6"
+    },
+    "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/SchedulerRuntime.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "b7c574518859dacbc91a11b6404addfc0a3e90d0917d4e5fd0e62fdd235e7f1f"
+    },
+    "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/JdbcDelayRepositoryTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "67ab2abf4c91795873690cb34605fd0998a56c84a67ab0b2f95f991e1cfe69f5"
+    },
+    "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/SchedulerE2eTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "2d97eb69dc45250064391c71f8c61548a6a35d55ef7b61697fb109e14da031dd"
+    },
+    "systems/ojbquay/sdk/go/gen/ojbk/v1/common.pb.go": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "a5dc27539eaec8241a6fb475fa7622de369bb94dea8d6512cb43be33d7cccab8"
+    },
+    "systems/ojbquay/sdk/go/gen/ojbk/v1/config.pb.go": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "f2b3aca5a83da2505e8b2227b2461eccb78f00e409cc24432d28dd665c428811"
+    },
+    "systems/ojbquay/sdk/go/gen/ojbk/v1/consumer.pb.go": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "875141326aadc7fde516aad7700793aacfcae5e7756772399fe810e70c2d021b"
+    },
+    "systems/ojbquay/sdk/go/gen/ojbk/v1/consumer_grpc.pb.go": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "9b51bed3918786c487d192dd20a599aff8911b1521dc646645822ec74ff82354"
+    },
+    "systems/ojbquay/sdk/go/gen/ojbk/v1/producer.pb.go": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "07f38be07e8e851ab72f6d474bd79e2670f1011fd93851bb7699e3831cf2f93e"
+    },
+    "systems/ojbquay/sdk/go/gen/ojbk/v1/producer_grpc.pb.go": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "6a5042077c16db084203d89723661cecfa15b2a784b5195edb4a70db1559026b"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/DiagnosticKafkaContainer.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "a48db6a35387a4c1a08c76a78c2e130cca58ce3e5911c35ab1209b06137c132a"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/DiagnosticKafkaContainerTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "1e87ce39371fd5cdb07ed39285c4b4911bbb7cb48f0c8e28f9179274a2bf66f3"
+    },
+    "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/WorkerConnections.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "7ed3340181285de92100d8cb6cfb67b8569164ac0ee90d565a0d38eb4ed3b4c7"
+    },
+    "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/DelayDispatcherTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "01419a3f2a455bb2687d2f8f193322c713acb9da9beb6b30b81668b4357bee71"
+    },
+    "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/WorkerConnectionsTest.java": {
+      "candidate": "ojbquay-retry-repair",
+      "base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+      "sha256": "410af76b9c7176a66e5d264a43c3e88dedfe18f884fd63e82f626ad19f06521f"
+    }
+  }
+}

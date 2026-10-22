@@ -278,6 +278,11 @@ final class SchedulerE2eTest {
         }
 
         @Override
+        public java.util.Optional<Instant> nextDueAt() {
+            return delegate.nextDueAt();
+        }
+
+        @Override
         public void applyBatch(List<dev.ojbk.delay.DelayCommand> commands) {
             if (first.compareAndSet(true, false)) {
                 throw new IllegalStateException("simulated database outage");

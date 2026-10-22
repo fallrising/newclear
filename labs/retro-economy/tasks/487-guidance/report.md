@@ -60,3 +60,5 @@ T-0487 各列在 merge 前保持 in_progress；依 repo 規則，合併後以同
 整合 main `6c611778a83b8e2d7198edace1dfc6a04d517516`：僅 Kith 文件與共用 PLAN 追加；PLAN 衝突保留雙方完整紀錄。整合後重跑必要檢查。第一個 Grok 審查對 `f82289525eacdc240c1ba38232379a90fc95aef7` 回傳 max_turn_requests、沒有結論；未算通過，縮減重複上下文後以完整 diff 對新最終 head 重審。
 
 審查的非阻擋建議：其他持有補給時的固定登塔距離、額外邊界案例的base-red及步驟文字節點標記穩健性留待後續；不擴大本次兩處提示修正。最終review以程式／測試未變的hash核對及本次文件diff重新確認，不能直接沿用舊head PASS合併。
+
+第二次整合 main `02f61e1b`（Ojbquay PR#491）：對方使用同名 `.team/tasks/T-487.md`／`reports/T-487.md`，保留 main 檔案完整內容，Retro 歷史 worker task/report 原樣移至 `.team/retro-20261022-1429/{tasks,reports}/T-487.md`，PLAN 保留雙方紀錄。先前 validator 命令是實際原路徑，搬移後另驗新路徑；遊戲與測試來源 hash 不變。

@@ -97,3 +97,9 @@ failed-stop 不終止 config bus、有界 reconcile 收斂、fatal config 失敗
 新增驗收：lease INSERT 在 advisory lock 取得後失敗，API 拒絕操作且連線池不得殘留該 group 的 advisory lock。
 先用真 PG constraint failure 重現，再跑相關 console 測試、Gradle build、部署模型與 CI／獨立審查。
 已批准 SDD 是 #477/adca0174；歷史失敗保留，AC05 未通過，不發 tag。
+
+## T-0374 AC09 uncertain outcome safety slice (2026-10-22)
+
+Acceptance before implementation: a Kafka alter timeout or failed verification must leave the subscription paused and the durable maintenance fence non-expiring. An expired/replaced lease must not authorize submission. Only verified broker success permits automatic restore/release. Target/range rejection before submission retains the existing restore behavior. This conservative quarantine has no automatic recovery endpoint; approved SDD unchanged, full AC09 remains partial and usable_tag:none.
+
+Validation2026-10-22T16:20Z: final `./gradlew build --no-daemon --no-parallel` PASS (console 51/0/0/0 executed; 145 current JUnit cases including cached modules, 21 executed tasks/14 cache/9 up-to-date). Deploy models,15 contract tests,41 project contracts and diff check PASS. Initial RED was an unhandled timeout ServletException before the state assertion, preserved as failure; final integration test verifies pause/infinite row/rejected resume and reacquisition. Independent review and final-head CI remain required. No full AC09 or real delayed-broker acceptance.

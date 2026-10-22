@@ -2,6 +2,7 @@ package dev.ojbk.console.topic;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -93,7 +94,7 @@ final class TopicApiIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.sql("TRUNCATE audit_log, outbox_event, config_publish, subscription, "
+        jdbc.sql("TRUNCATE group_maintenance_lease, audit_log, outbox_event, config_publish, subscription, "
                         + "consume_group, topic RESTART IDENTITY CASCADE")
                 .update();
         jdbc.sql("DELETE FROM app_user").update();
@@ -271,14 +272,14 @@ final class TopicApiIntegrationTest {
                 .update();
         when(groupOperations.awaitEmpty(org.mockito.ArgumentMatchers.eq("settlement"),
                         org.mockito.ArgumentMatchers.any())).thenReturn(true);
-        when(groupOperations.reset("settlement", "orders", 3, "OFFSET", 10))
+        when(groupOperations.reset(eq("settlement"), eq("orders"), eq(3), eq("OFFSET"), eq(10L), any(Runnable.class)))
                 .thenReturn(new GroupOffsetReset("settlement", "orders", List.of()));
         mockMvc.perform(post("/api/v1/groups/{id}/reset-offset", groupId)
                         .with(csrf()).contentType("application/json")
                         .content("{\"topicId\":" + topicId + ",\"mode\":\"OFFSET\",\"value\":10}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("RUNTIME_PAUSE_UNCONFIRMED"));
-        verify(groupOperations, never()).reset("settlement", "orders", 3, "OFFSET", 10);
+        verify(groupOperations, never()).reset(eq("settlement"), eq("orders"), eq(3), eq("OFFSET"), eq(10L), any(Runnable.class));
         assertThat(jdbc.sql("SELECT state FROM subscription").query(Integer.class).single()).isEqualTo(1);
     }
 
@@ -316,6 +317,75 @@ final class TopicApiIntegrationTest {
     }
 
     @Test
+    void AC_09_replacedLeaseTokenCannotArmOrBeDeletedByOldOwner() {
+        try (var gate = maintenance.acquire(123457, System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos())) {
+            jdbc.sql("UPDATE group_maintenance_lease SET token = :token WHERE group_id = 123457")
+                    .param("token", java.util.UUID.randomUUID()).update();
+            org.assertj.core.api.Assertions.assertThatThrownBy(gate::beforeAlter)
+                    .isInstanceOf(dev.ojbk.console.api.ApiException.class);
+        }
+        assertThat(jdbc.sql("SELECT count(*) FROM group_maintenance_lease WHERE group_id = 123457")
+                .query(Long.class).single()).isEqualTo(1);
+    }
+
+    @Test
+    void AC_09_expiredLeaseCannotArmKafkaMutation() {
+        try (var gate = maintenance.acquire(123456, System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos())) {
+            jdbc.sql("UPDATE group_maintenance_lease SET expires_at = now() - interval '1 second' WHERE group_id = 123456")
+                    .update();
+            org.assertj.core.api.Assertions.assertThatThrownBy(gate::beforeAlter)
+                    .isInstanceOf(dev.ojbk.console.api.ApiException.class);
+            assertThat(gate.outcomeUnknown()).isFalse();
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "alice", roles = "USER")
+    void AC_09_uncertainKafkaOutcomeKeepsSubscriptionPausedAndFenced() throws Exception {
+        when(runtimePauseVerifier.capture(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong()))
+                .thenReturn(new dev.ojbk.console.group.RuntimePauseVerifier.Barrier(java.util.Map.of("test", "boot")));
+        when(runtimePauseVerifier.awaitPaused(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(),
+                org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong())).thenReturn(true);
+        createTopicAndGroup();
+        long topicId = id("topic", "orders");
+        long groupId = id("consume_group", "settlement");
+        jdbc.sql("""
+                        INSERT INTO subscription (group_id, topic_id, spec, owner)
+                        VALUES (:groupId, :topicId,
+                           '{"mode":"PUSH","concurrency":4,"maxTps":100,"ordered":true,"orderKeySource":"KEY",
+                             "push":{"urls":["https://service.example/events"],"method":"POST","timeoutMs":5000,
+                             "retryIntervalsMs":[150]}}', 'alice')
+                        """)
+                .param("groupId", groupId).param("topicId", topicId).update();
+        long subscriptionId = jdbc.sql("SELECT id FROM subscription").query(Long.class).single();
+        when(groupOperations.awaitEmpty(
+                        org.mockito.ArgumentMatchers.eq("settlement"), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(true);
+        when(groupOperations.reset(eq("settlement"), eq("orders"), eq(3), eq("OFFSET"), eq(10L), any(Runnable.class))).thenAnswer(invocation -> {
+            invocation.<Runnable>getArgument(5).run();
+            throw new IllegalStateException("alter timed out", new java.util.concurrent.TimeoutException());
+        });
+
+        mockMvc.perform(post("/api/v1/groups/{id}/reset-offset", groupId)
+                        .with(csrf())
+                        .contentType("application/json")
+                        .content("""
+                                {"topicId":%d,"mode":"OFFSET","value":10}
+                                """.formatted(topicId)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("GROUP_RESET_OUTCOME_UNKNOWN"));
+        assertThat(jdbc.sql("SELECT state FROM subscription").query(Integer.class).single()).isZero();
+        assertThat(jdbc.sql("SELECT NOT isfinite(expires_at) FROM group_maintenance_lease WHERE group_id = :id")
+                .param("id", groupId).query(Boolean.class).single()).isTrue();
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> subscriptionService.changeState(subscriptionId, true,
+                new dev.ojbk.console.security.Actor("alice", java.util.Set.of(dev.ojbk.console.security.Actor.Role.ADMIN))))
+                .isInstanceOf(dev.ojbk.console.api.ApiException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> maintenance.acquire(groupId,
+                System.nanoTime() + java.time.Duration.ofSeconds(1).toNanos()))
+                .isInstanceOf(dev.ojbk.console.api.ApiException.class);
+    }
+
+    @Test
     @WithMockUser(username = "alice", roles = "USER")
     void AC_09_sessionLostDuringKafkaAlterStillFencesCompetingMutation() throws Exception {
         when(runtimePauseVerifier.capture(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong()))
@@ -339,7 +409,8 @@ final class TopicApiIntegrationTest {
                 .thenReturn(true);
         var competing = new java.util.concurrent.atomic.AtomicReference<Object>();
         // After the last ownership check: drop the maintenance session, then race an ordinary mutation.
-        when(groupOperations.reset("settlement", "orders", 3, "OFFSET", 10)).thenAnswer(invocation -> {
+        when(groupOperations.reset(eq("settlement"), eq("orders"), eq(3), eq("OFFSET"), eq(10L), any(Runnable.class))).thenAnswer(invocation -> {
+            invocation.<Runnable>getArgument(5).run();
             jdbc.sql("""
                     SELECT count(pg_terminate_backend(pid)) FROM pg_locks
                     WHERE locktype = 'advisory' AND granted AND pid <> pg_backend_pid()
@@ -404,7 +475,7 @@ final class TopicApiIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("GROUP_MAINTENANCE_IN_PROGRESS"));
 
-        verify(groupOperations, never()).reset("settlement", "orders", 3, "OFFSET", 10);
+        verify(groupOperations, never()).reset(eq("settlement"), eq("orders"), eq(3), eq("OFFSET"), eq(10L), any(Runnable.class));
         assertThat(jdbc.sql("SELECT state FROM subscription").query(Integer.class).single())
                 .isEqualTo(1);
     }
@@ -449,7 +520,7 @@ final class TopicApiIntegrationTest {
                 .andExpect(jsonPath("$.code").value("GROUP_NOT_QUIET"));
 
         verify(groupOperations, never())
-                .reset("settlement", "orders", 3, "OFFSET", 10);
+                .reset(eq("settlement"), eq("orders"), eq(3), eq("OFFSET"), eq(10L), any(Runnable.class));
         assertThat(jdbc.sql("SELECT state FROM subscription")
                         .query(Integer.class)
                         .single())
@@ -459,14 +530,12 @@ final class TopicApiIntegrationTest {
                         org.mockito.ArgumentMatchers.eq("settlement"), org.mockito.ArgumentMatchers.any()))
                 .thenReturn(true);
         when(groupOperations.reset(
-                        "settlement", "orders", 3, "OFFSET", 10))
-                .thenReturn(new GroupOffsetReset(
-                        "settlement",
-                        "orders",
-                        List.of(
-                                new PartitionOffset(0, 10),
-                                new PartitionOffset(1, 10),
-                                new PartitionOffset(2, 10))));
+                        eq("settlement"), eq("orders"), eq(3), eq("OFFSET"), eq(10L), any(Runnable.class)))
+                .thenAnswer(invocation -> {
+                    invocation.<Runnable>getArgument(5).run();
+                    return new GroupOffsetReset("settlement", "orders", List.of(
+                            new PartitionOffset(0, 10), new PartitionOffset(1, 10), new PartitionOffset(2, 10)));
+                });
 
         mockMvc.perform(post("/api/v1/groups/{id}/reset-offset", groupId)
                         .with(csrf())

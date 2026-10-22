@@ -450,3 +450,9 @@ Active-repository provenance search completed: no original normative SDD found i
 ## T-0368 timing-contract decision proposal, 2026-10-22
 
 Owner approved original SDD PR472/874517a8. Continued candidate still fails original AC05; details in docs/test-reports/retry-contract-decision-20261022.md. This docs-only PR explicitly proposes changing measurement from adjacent arrivals to failure-result completion→next arrival, with identical numeric limits and original503fixture. It does not change runtime/tests, does not make historical failures pass, and must not merge without owner agreement. AC09 and original candidate work remain separate, uncommitted and unqualified. No usable tag.
+
+## T-0374 AC09 uncertain outcome safety slice (2026-10-22)
+
+In progress: token/expiry-checked durable quarantine before Kafka alter, retained on unverified outcome, restored/released only after successful offset readback. Recovery automation, whole-group coordination and preview remain separate tasks. See [reset outcome safety](reset-outcome-safety.md) for design and acceptance.
+
+Validation2026-10-22T16:20Z: final `./gradlew build --no-daemon --no-parallel` PASS (console 51/0/0/0 executed; 145 current JUnit cases including cached modules, 21 executed tasks/14 cache/9 up-to-date). Deploy models,15 contract tests,41 project contracts and diff check PASS. Initial RED was an unhandled timeout ServletException before the state assertion, preserved as failure; final integration test verifies pause/infinite row/rejected resume and reacquisition. Independent review and final-head CI remain required. No full AC09 or real delayed-broker acceptance.

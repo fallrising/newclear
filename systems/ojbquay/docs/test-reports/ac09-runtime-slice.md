@@ -47,4 +47,28 @@ and `AC_09_failedStopIsRetriedAfterConfigBusLossWithoutConfirming`; both failed 
 --no-parallel`: BUILD SUCCESSFUL, gateway-consume 44 tests, 0 failures/skips.
 Still open from that review: the status endpoint can wait up to 5 s on a worker close.
 
+## Console reset gate
+
+Extracted from the same candidate (console-api only; files and SHA-256 in the PR):
+`RuntimePauseVerifier` (every roster runtime must report the exact paused revision,
+stopped fetch, settled inflight, same boot and roster; bounded HTTP), `GroupMaintenanceFence`
+(PG advisory key shared by ordinary subscription mutations and the reset workflow),
+deadline-bounded group quiet wait, retained-range check and alter readback in
+`DefaultGroupOperations`, and restoration of the paused subscription in `GroupWorkflowService`.
+
+Evidence: `./gradlew build --no-daemon --no-parallel` BUILD SUCCESSFUL; console-api 42 tests,
+0 failures/skips, including `RuntimePauseVerifierAc09Test` 7, `DefaultGroupOperationsAc09Test` 4,
+`GroupMaintenanceFenceAc09Test` 1 (real PG) and `TopicApiIntegrationTest` 22.
+
+Review rework: if the maintenance session is lost mid-reset, restoring the paused subscription
+under the lost gate failed with 409, leaving it paused and hiding the original error. Restoration
+is now retried after the gate is released, as an ordinary fenced mutation; a failed retry is
+logged and attached to the original failure. `AC_09_lostMaintenanceSessionStillRestoresSubscription`
+terminates the advisory session during the quiet wait on real PG: it failed before the fix
+(`ac09-restore-lost-fence-red.log`, state 0) and passes after it (state 1, no Kafka alter).
+
+Known gap kept open: the advisory lock lives on one PG session. If that session is lost after
+the last `verifyOwned` and before or during the Kafka alter, a competing mutation can take the
+freed key. Next slice replaces it with a durable DB lease bounded by the reset deadline.
+
 AC-09 remains partial, AC-05 remains FAIL, `usable_tag: none`, owner acceptance pending.

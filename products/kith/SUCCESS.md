@@ -47,6 +47,18 @@ source_commit: ee51d3560c1d63987cb98498ce46647e25c5921a
 | AC-RC1 | Given 手機 operator，When 快記、重送與斷線，Then RC-01～04 符合規格 | passed | [#456 報告](tasks/456-reading-capture-phase1/report.md)：RC-01～04 桌面／手機 7 項本地 CF E2E；7 項 D1/API 整合與全套後端 284 項通過。僅本機證據；最終 head CI／獨立審查與 merge 狀態在 PR #457 記錄 |
 | AC-RC2 | Given 閱讀頁與 Runner，When 更新正文、編輯補充、匯出或建置失敗，Then RC-05～07 及 RC-04 接線後回歸通過 | passed | [#463 報告](tasks/463-reading-capture-phase2/report.md)：12 項 RC 桌面／手機、真實本地 Git/D1、程序 SIGKILL／revision／push 衝突與發布失敗；僅本機合成驗證。最終回歸、CI、審查及 merge 在 PR #464 |
 
+### 閱讀快記私人試用準備（#473，IN_PROGRESS）
+
+這是 owner 新授權的後續里程碑，非原規格階段3。範圍／AC／驗證計畫見[私人試用準備契約](docs/plans/reading-private-trial.md)。重用階段2 builder/exporter，新增完整版本準備、離線preflight、排程範本與正式接線手冊；不接正式內容、部署或啟用服務。
+
+| AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
+| --- | --- | --- | --- |
+| AC-PT01 | Given 固定私人內容commit，When web＋bundle準備及完整驗證，Then 成功才切換完整版本、失敗保留可用版本 | pending | PT-01；待RED/GREEN及整合驗證 |
+| AC-PT02 | Given 私有設定，When offline preflight，Then 檢查版本／路徑／registry／Git／憑證權限且不洩密不連外 | pending | PT-02；待負例 |
+| AC-PT03 | Given 單次exporter，When 使用Linux排程範本，Then 失敗、停止恢復、撤銷及衝突處理明確 | pending | PT-03；不啟用服務 |
+| AC-PT04 | Given 本地CF與合成Git，When 完整操作與故障注入，Then RC與W0–W7不退化 | pending | PT-04；待完整E2E |
+| AC-PT05 | Given owner正式接線，When 依runbook執行，Then 備份回復／手機驗收／最少輸入清楚 | pending | PT-05；正式環境仍未驗證 |
+
 ### 聊天室既有狀態
 
 既有 M0–M7 與 W0–W7 工程驗收不撤回；incomplete 指完整真實代理使用資格尚未證成。

@@ -1822,3 +1822,9 @@ HW2-D02: root Chromium file:// confirms single step, run-to500, actual nine-poin
 HW2-D03 evidence-gate ACCEPT local AC-03: root19 tests, probe,41 contracts,15 contract tests,5 llms indexes,task/report validators,diff pass. Initial index mismatch preserved and corrected using the unchanged generator: PROJECTS date is historical baseline, not current review date. Portable browser driver rerun passes; private host paths are not committed in new evidence. Final CI/review/merge still pending.
 
 HW2-D04: ecdb62ea passed final local gates, both CI jobs and xAI Grok APPROVE (review receipt on PR). Pre-merge guard observed main advance to33cfc39c through Kith phase2, so merge was not attempted. Integrate main, preserving both appended PLAN sections; no Handwired product/build/test changes or task ID collisions. Rerun final gates and obtain a new final-head review before merge.
+
+## Kith-private-trial-20261022 / #473
+
+Scope: reading-private-trial.md PT01–05. Base main 0aac1841. Root owns plan, docs, integration, review and merge/board closeout. Bounded native worker T-473 owns preparation/preflight code+tests in fresh worktree; second T-474 owns integration E2E after interface freeze. No worker commits/delegation. Root inspects all diffs and reruns gates.
+
+Gates: RED/GREEN; Node24.18.0; full backend/web/E2E+manifest, validators; final-head CI no pending; independent different-family review; latest main. No production/private wiring/deployment/scheduler/API calls/tags. External review: Grok catalog says unauthenticated; authorized alternative OpenCode exact opencode-go/deepseek-v4.1-flash observed, route eligibility pending. Quota/cost unknown; no paid model API. Keep review bounded to 600 seconds and public immutable diff. Accept decisions pending.

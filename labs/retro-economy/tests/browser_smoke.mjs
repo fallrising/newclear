@@ -170,6 +170,7 @@ try {
     assert.equal(complete.coins, 20); assert.equal(complete.tower_reward_claimed, true);
     assert.deepEqual(complete.items, { ore: 0, herb: 0, kit: 0, medicine: 0 });
     await restart(session, complete);
+    assert.ok(await cdp.evaluate(session, `document.querySelector('#gather').disabled && Number(getComputedStyle(document.querySelector('#gather')).opacity) < 1`), 'Disabled gathering is visually distinct at the summit');
     await screenshot(session, profession + '-complete');
     await move(session, 'west', 3, 0); await move(session, 'east', 4, 0);
     assert.equal((await publicState(session)).coins, 20, 'No duplicate summit award');

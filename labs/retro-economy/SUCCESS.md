@@ -5,7 +5,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-10-22
-source_commit: 6cd69eec883fce53133dfafbbc769e33fb588467
+source_commit: 0e90cd284de6f092edf91c829398358e6ece175b
 ---
 
 # retro-economy 成功契約

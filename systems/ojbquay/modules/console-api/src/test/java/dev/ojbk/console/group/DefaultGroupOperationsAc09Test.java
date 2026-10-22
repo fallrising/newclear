@@ -25,17 +25,17 @@ final class DefaultGroupOperationsAc09Test {
     private static final TopicPartition PARTITION = new TopicPartition("orders", 0);
     @Test void AC_09_alterAcknowledgementCannotHideReadbackMismatch() {
         Admin admin = admin(0, Map.of(PARTITION, new OffsetAndMetadata(7)));
-        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1))
+        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1, () -> {}))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("verification");
     }
     @Test void AC_09_missingReadbackPartitionCannotSucceed() {
         Admin admin = admin(0, Map.of());
-        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1))
+        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1, () -> {}))
                 .isInstanceOf(IllegalStateException.class).hasMessageContaining("verification");
     }
     @Test void AC_09_returnsOffsetsOnlyAfterActualBrokerVerification() {
         Admin admin = admin(0, Map.of(PARTITION, new OffsetAndMetadata(1)));
-        assertThat(new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1).offsets())
+        assertThat(new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1, () -> {}).offsets())
                 .containsExactly(new PartitionOffset(0, 1));
         var order = org.mockito.Mockito.inOrder(admin);
         order.verify(admin).alterConsumerGroupOffsets(eq("group"), anyMap());
@@ -43,9 +43,36 @@ final class DefaultGroupOperationsAc09Test {
     }
     @Test void AC_09_offsetBelowRetainedBeginningCannotAlter() {
         Admin admin = admin(5, Map.of(PARTITION, new OffsetAndMetadata(1)));
-        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1))
+        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1, () -> {}))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("retained range");
         verify(admin, never()).alterConsumerGroupOffsets(eq("group"), anyMap());
+    }
+    @Test void AC_09_rejectedGuardCannotSubmitAlter() {
+        Admin admin = admin(0, Map.of(PARTITION, new OffsetAndMetadata(1)));
+        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1,
+                () -> { throw new IllegalStateException("owner expired"); }))
+                .isInstanceOf(IllegalStateException.class).hasMessage("owner expired");
+        verify(admin, never()).alterConsumerGroupOffsets(eq("group"), anyMap());
+    }
+    @Test void AC_09_timeoutCanPrecedeActualKafkaCompletion() throws Exception {
+        Admin admin = admin(0, Map.of(PARTITION, new OffsetAndMetadata(1)));
+        var pending = org.mockito.Mockito.spy(new org.apache.kafka.common.internals.KafkaFutureImpl<Void>());
+        org.mockito.Mockito.doThrow(new java.util.concurrent.TimeoutException("caller deadline"))
+                .when(pending).get(org.mockito.ArgumentMatchers.anyLong(),
+                        org.mockito.ArgumentMatchers.any(java.util.concurrent.TimeUnit.class));
+        var result = mock(AlterConsumerGroupOffsetsResult.class);
+        when(result.all()).thenReturn(pending);
+        when(admin.alterConsumerGroupOffsets(eq("group"), anyMap())).thenReturn(result);
+        Runnable guard = mock(Runnable.class);
+        assertThatThrownBy(() -> new DefaultGroupOperations(admin).reset("group", "orders", 1, "OFFSET", 1, guard))
+                .isInstanceOf(IllegalStateException.class).hasCauseInstanceOf(java.util.concurrent.TimeoutException.class);
+        var order = org.mockito.Mockito.inOrder(guard, admin);
+        order.verify(guard).run();
+        order.verify(admin).alterConsumerGroupOffsets(eq("group"), anyMap());
+        assertThat(pending.isDone()).isFalse();
+        verify(admin, never()).listConsumerGroupOffsets("group");
+        pending.complete(null); // Broker completion can occur after the caller already failed.
+        assertThat(pending.isDone()).isTrue();
     }
     private static Admin admin(long earliest, Map<TopicPartition, OffsetAndMetadata> actual) {
         Admin admin = mock(Admin.class);

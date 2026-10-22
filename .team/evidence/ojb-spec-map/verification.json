@@ -34,5 +34,19 @@
     "real full Compose/demo",
     "browser/dual viewport qualification",
     "ack-queue saturation and producer-deadline fault experiment"
-  ]
+  ],
+  "integrated_main": "96cb12ff",
+  "integrated_build": {
+    "result": "PASS",
+    "seconds": 7,
+    "tasks_executed": 3,
+    "tasks_from_cache": 3,
+    "tasks_up_to_date": 38
+  },
+  "docs": {
+    "links": 278,
+    "ac_mappings": 11,
+    "project_contracts": 41,
+    "contract_tests": 15
+  }
 }

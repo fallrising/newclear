@@ -21,7 +21,7 @@ public final class GroupMaintenanceFence {
     public GroupMaintenanceFence(DataSource dataSource, JdbcClient jdbc) {
         this.dataSource = dataSource; this.jdbc = jdbc;
     }
-    // Outlives the 60 s reset deadline plus bounded Kafka calls; a crashed owner's lease then expires.
+    // Preparation leases expire; an armed Kafka reset is quarantined without expiry.
     private static final java.time.Duration LEASE_MARGIN = java.time.Duration.ofMinutes(5);
     private static long key(long group) { return group ^ 0x4f4a425100000000L; }
 
@@ -93,7 +93,10 @@ public final class GroupMaintenanceFence {
     /** Called inside the existing mutation transaction; retained until commit/rollback. */
     public void mutation(long group) {
         Gate held = owned.get();
-        if (held != null && held.group == group) { held.verifyOwned(); return; }
+        if (held != null && held.group == group) {
+            if (held.outcomeUnknown()) throw busy();
+            held.verifyOwned(); return;
+        }
         if (!TransactionSynchronizationManager.isActualTransactionActive())
             throw new IllegalStateException("subscription mutation requires a transaction");
         boolean acquired = jdbc.sql("SELECT pg_try_advisory_xact_lock(:key)")
@@ -115,6 +118,7 @@ public final class GroupMaintenanceFence {
         private final long group;
         private final long deadline;
         private final java.util.UUID token;
+        private boolean outcomeUnknown;
         private Gate(Connection connection, long group, long deadline, java.util.UUID token) {
             this.connection = connection; this.group = group; this.deadline = deadline; this.token = token;
         }
@@ -136,6 +140,31 @@ public final class GroupMaintenanceFence {
                 }
             } catch (SQLException failure) { throw busy(); }
         }
+        /** Persist protection before Kafka can mutate; an uncertain SQL acknowledgement is also unsafe. */
+        public void beforeAlter() {
+            verifyOwned();
+            if (System.nanoTime() >= deadline || outcomeUnknown) throw busy();
+            outcomeUnknown = true;
+            try (var statement = connection.prepareStatement("""
+                    UPDATE group_maintenance_lease SET expires_at = 'infinity'
+                    WHERE group_id = ? AND token = ? AND expires_at > clock_timestamp()
+                    """)) {
+                statement.setLong(1, group);
+                statement.setObject(2, token);
+                statement.setQueryTimeout(1);
+                if (statement.executeUpdate() != 1) {
+                    outcomeUnknown = false; // Definitive rejection: no Kafka request may be submitted.
+                    throw busy();
+                }
+            } catch (SQLException failure) { throw busy(); }
+        }
+        public boolean outcomeUnknown() { return outcomeUnknown; }
+        /** Only the adapter's acknowledged alter plus matching readback can establish completion. */
+        public void confirmedReset() {
+            if (owned.get() != this || !outcomeUnknown)
+                throw new IllegalStateException("reset was not armed by this owner");
+            outcomeUnknown = false;
+        }
         public void close() {
             IllegalStateException failure = null;
             try { unlock(connection, group); }
@@ -149,12 +178,12 @@ public final class GroupMaintenanceFence {
                     if (failure == null) failure = new IllegalStateException("maintenance connection could not close", closeFailure);
                 }
             }
-            // A fresh pooled session: the lease must go even when the advisory session is gone.
+            // Keep quarantines even after session loss; a caller timeout cannot prove Kafka completion.
             try {
-                jdbc.sql("DELETE FROM group_maintenance_lease WHERE group_id = :group AND token = :token")
+                if (!outcomeUnknown) jdbc.sql("DELETE FROM group_maintenance_lease WHERE group_id = :group AND token = :token")
                         .param("group", group).param("token", token).update();
             } catch (RuntimeException leaseFailure) {
-                if (failure == null) failure = new IllegalStateException("maintenance lease kept until expiry", leaseFailure);
+                if (failure == null) failure = new IllegalStateException("maintenance lease cleanup failed", leaseFailure);
                 else failure.addSuppressed(leaseFailure);
             }
             if (failure != null) throw failure;

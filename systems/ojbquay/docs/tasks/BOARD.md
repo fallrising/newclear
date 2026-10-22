@@ -30,6 +30,11 @@ Full AC09 remains partial: uncertain Kafka completion and expired/stalled owner 
 resolved before C2 whole-group, C3 preview/confirm and C4 real dual-runtime qualification. AC05
 still lacks qualifying execution under approved #477; usable_tag none.
 
+### 2026-10-22 uncertain reset outcome (desk T-0374)
+
+OJB-SDD-09 remains in_progress, last_activity2026-10-22T16:18Z. Bounded next slice: [durable quarantine design](../reset-outcome-safety.md), with paused subscription retained after unverified Kafka alter and token/expiry validation before submission. Console initial GREEN; adapter boundary and stale-token regressions plus full build/review pending. No AC09 completion claim, no recovery automation, no usable tag.
+
+Validation2026-10-22T16:20Z: final `./gradlew build --no-daemon --no-parallel` PASS (console 51/0/0/0 executed; 145 current JUnit cases including cached modules, 21 executed tasks/14 cache/9 up-to-date). Deploy models,15 contract tests,41 project contracts and diff check PASS. Initial RED was an unhandled timeout ServletException before the state assertion, preserved as failure; final integration test verifies pause/infinite row/rejected resume and reacquisition. Independent review and final-head CI remain required. No full AC09 or real delayed-broker acceptance.
 
 ## T-0374 — 規格與程式對照整理
 

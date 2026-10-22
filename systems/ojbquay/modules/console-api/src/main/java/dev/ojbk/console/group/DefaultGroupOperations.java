@@ -99,7 +99,8 @@ public final class DefaultGroupOperations implements GroupOperations {
             String topic,
             int partitions,
             String mode,
-            long value) {
+            long value,
+            Runnable beforeAlter) {
         OffsetSpec requested = switch (mode) {
             case "OFFSET" -> null;
             case "TIMESTAMP" -> OffsetSpec.forTimestamp(value);
@@ -132,6 +133,7 @@ public final class DefaultGroupOperations implements GroupOperations {
             target.put(id, new OffsetAndMetadata(offset));
             response.add(new PartitionOffset(partition, offset));
         }
+        beforeAlter.run();
         await(
                 admin.alterConsumerGroupOffsets(group, target).all(),
                 "consumer group offsets could not be reset");

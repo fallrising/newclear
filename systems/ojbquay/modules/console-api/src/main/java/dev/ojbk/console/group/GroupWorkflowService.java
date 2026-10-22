@@ -138,7 +138,9 @@ final class GroupWorkflowService {
                     ref.topic(),
                     ref.partitions(),
                     mode,
-                    request.value());
+                    request.value(),
+                    gate::beforeAlter);
+            gate.confirmedReset();
             gate.verifyOwned();
             audit.record(
                     actor.username(),
@@ -151,8 +153,16 @@ final class GroupWorkflowService {
                             "value", request.value(),
                             "partitions", result.offsets().size()));
             return result;
+        } catch (RuntimeException failure) {
+            if (gate.outcomeUnknown()) {
+                var unknown = new ApiException("GROUP_RESET_OUTCOME_UNKNOWN", HttpStatus.CONFLICT,
+                        "offset reset outcome is unverified; group remains paused for reconciliation");
+                unknown.addSuppressed(failure);
+                throw unknown;
+            }
+            throw failure;
         } finally {
-            if (resume) {
+            if (resume && !gate.outcomeUnknown()) {
                 Runnable restore = () -> {
                     subscriptions.changeState(ref.subscriptionId(), true, actor);
                     publishConfiguration(ref.subscriptionId());

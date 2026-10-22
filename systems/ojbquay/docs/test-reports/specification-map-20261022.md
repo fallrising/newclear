@@ -32,3 +32,5 @@
 [機器摘要](../../../../.team/evidence/ojb-spec-map/verification.json)。
 
 同期差異：16:30Z回讀origin/main96cb12ff包含PR491／02f61e1b；root核對未知reset結果保留pause與lease的源碼，D-02明列起始版本與後續修復。不將另一輪測試冒充本輪執行。
+
+整合同期main96cb12ff後（只合併四處追加紀錄衝突、保留雙方內容）：重新執行相同Gradle build PASS7s，44tasks：3executed／3fromcache／38up-to-date；278個本地連結與41個project contracts PASS。新SDD／runtime未由本文件切片修改。

@@ -1,6 +1,6 @@
 # Retro Economy — 霧岸鎮
 
-> 主線與剩餘驗收：[SUCCESS.md](SUCCESS.md)。RE-1／RE-2 已合併；RE-3 依 owner 決定改為自動化可玩性驗收。真人理解、趣味與自發交易仍未驗證。
+> 主線與剩餘驗收：[SUCCESS.md](SUCCESS.md)。RE-0～RE-3 已完成（RE-3 為 owner 改定的自動化驗收）；兩處提示修正見[交付報告](tasks/487-guidance/report.md)。真人理解、趣味與自發交易仍未驗證。
 
 原創俯視小鎮冒險：選鐵匠或藥師，走到資源點採集，回鎮製作補給，再走塔路。地圖與素材使用自製 SVG 幾何圖形，沒有外部素材、CDN 或第三方執行期依賴。
 

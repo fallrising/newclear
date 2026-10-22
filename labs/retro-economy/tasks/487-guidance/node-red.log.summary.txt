@@ -1,0 +1,23 @@
+✖ smith gathering guidance follows remaining distance and executable arrival action (3.278719ms)
+✖ smith arrival itself never asks for redundant movement (1.331414ms)
+✖ smith enough raw materials means return, then executable town crafting (0.673492ms)
+✖ smith post-summit return survives polling and reload without eastward command (1.156846ms)
+✖ smith repeated ascent is not mistaken for a completed round (0.646132ms)
+✖ herbalist gathering guidance follows remaining distance and executable arrival action (0.649912ms)
+✖ herbalist arrival itself never asks for redundant movement (0.537784ms)
+✖ herbalist enough raw materials means return, then executable town crafting (0.618723ms)
+✖ herbalist post-summit return survives polling and reload without eastward command (1.055487ms)
+✖ herbalist repeated ascent is not mistaken for a completed round (0.606553ms)
+ℹ tests 30
+ℹ pass 20
+ℹ fail 10
+✖ smith gathering guidance follows remaining distance and executable arrival action (3.278719ms)
+✖ smith arrival itself never asks for redundant movement (1.331414ms)
+✖ smith enough raw materials means return, then executable town crafting (0.673492ms)
+✖ smith post-summit return survives polling and reload without eastward command (1.156846ms)
+✖ smith repeated ascent is not mistaken for a completed round (0.646132ms)
+✖ herbalist gathering guidance follows remaining distance and executable arrival action (0.649912ms)
+✖ herbalist arrival itself never asks for redundant movement (0.537784ms)
+✖ herbalist enough raw materials means return, then executable town crafting (0.618723ms)
+✖ herbalist post-summit return survives polling and reload without eastward command (1.055487ms)
+✖ herbalist repeated ascent is not mistaken for a completed round (0.606553ms)

@@ -22,6 +22,8 @@ final class GroupWorkflowService {
     private static final Duration QUIET_TIMEOUT = Duration.ofSeconds(60);
 
     private final JdbcClient jdbc;
+    private final RuntimePauseVerifier runtimes;
+    private final GroupMaintenanceFence maintenance;
     private final ResourceAuthorization authorization;
     private final GroupOperations groups;
     private final SubscriptionService subscriptions;
@@ -35,8 +37,12 @@ final class GroupWorkflowService {
             GroupOperations groups,
             SubscriptionService subscriptions,
             ObjectProvider<OutboxPublisher> outbox,
-            OperationAudit audit) {
+            OperationAudit audit,
+            RuntimePauseVerifier runtimes,
+            GroupMaintenanceFence maintenance) {
         this.jdbc = jdbc;
+        this.runtimes = runtimes;
+        this.maintenance = maintenance;
         this.authorization = authorization;
         this.groups = groups;
         this.subscriptions = subscriptions;
@@ -60,8 +66,19 @@ final class GroupWorkflowService {
                 .toList();
     }
 
-    GroupOffsetReset reset(
-            long groupId, ResetOffsetRequest request, Actor actor) {
+    GroupOffsetReset reset(long groupId, ResetOffsetRequest request, Actor actor) {
+        // Authorization precedes any runtime or broker contact.
+        subscriptions(groupId, request.topicId(), actor);
+        long deadline = System.nanoTime() + QUIET_TIMEOUT.toNanos();
+        try (var gate = maintenance.acquire(groupId, deadline)) {
+            gate.verifyOwned();
+            return resetGuarded(groupId, request, actor, deadline, gate);
+        }
+    }
+
+    private GroupOffsetReset resetGuarded(
+            long groupId, ResetOffsetRequest request, Actor actor, long deadline,
+            GroupMaintenanceFence.Gate gate) {
         String mode = request.mode() == null
                 ? ""
                 : request.mode().toUpperCase(java.util.Locale.ROOT);
@@ -81,24 +98,28 @@ final class GroupWorkflowService {
                     "Share Group offsets cannot be reset through the classic API");
         }
 
+        RuntimePauseVerifier.Barrier barrier = runtimes.capture(ref.subscriptionId(), deadline);
         boolean resume = ref.state() == 1;
-        if (resume) {
-            subscriptions.changeState(ref.subscriptionId(), false, actor);
-            publishConfiguration(ref.subscriptionId());
-        }
+        long pausedRevision = subscriptions.changeState(ref.subscriptionId(), false, actor).version();
         try {
-            if (!groups.awaitEmpty(ref.group(), QUIET_TIMEOUT)) {
+            if (resume) publishConfiguration(ref.subscriptionId());
+            requirePaused(barrier, ref.subscriptionId(), pausedRevision, deadline);
+            if (!groups.awaitEmpty(ref.group(), RuntimePauseVerifier.remaining(deadline))) {
                 throw new ApiException(
                         "GROUP_NOT_QUIET",
                         HttpStatus.CONFLICT,
                         "consumer group did not become empty before timeout");
             }
+            requirePaused(barrier, ref.subscriptionId(), pausedRevision, deadline);
+            gate.verifyOwned();
+            RuntimePauseVerifier.remaining(deadline);
             GroupOffsetReset result = groups.reset(
                     ref.group(),
                     ref.topic(),
                     ref.partitions(),
                     mode,
                     request.value());
+            gate.verifyOwned();
             audit.record(
                     actor.username(),
                     "GROUP_OFFSET_RESET",
@@ -116,6 +137,15 @@ final class GroupWorkflowService {
                         ref.subscriptionId(), true, actor);
                 publishConfiguration(ref.subscriptionId());
             }
+        }
+    }
+
+    private void requirePaused(RuntimePauseVerifier.Barrier barrier, long subscription,
+            long revision, long deadline) {
+        RuntimePauseVerifier.remaining(deadline);
+        if (!runtimes.awaitPaused(barrier, subscription, revision, deadline)) {
+            throw new ApiException("RUNTIME_PAUSE_UNCONFIRMED", HttpStatus.CONFLICT,
+                    "every runtime must confirm stopped fetch and settled inflight work");
         }
     }
 

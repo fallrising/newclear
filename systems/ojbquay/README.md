@@ -214,7 +214,9 @@ Optional settings are `OJBQUAY_INSTANCE_ID`, `OJBQUAY_GRPC_PORT`,
 `OJBQUAY_METRICS_PORT`, `OJBQUAY_CONFIG_BOOTSTRAP_TIMEOUT_MS`, and
 `OJBQUAY_CONSUME_RUNTIME_ROSTER` (`instance=http://host:port,...`). Without a
 roster the gateway starts normally but `/internal/pause-status` never confirms a
-pause, so offset reset stays fail-closed; with a roster the instance ID must be
+pause, so offset reset stays fail-closed; console-api reads the same variable and
+rejects a reset with `RUNTIME_PAUSE_UNCONFIRMED` unless every listed runtime
+confirms. With a roster the instance ID must be
 a member or startup fails.
 
 Unordered subscriptions use Kafka 4.2 Share Groups with explicit per-record

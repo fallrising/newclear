@@ -1,0 +1,52 @@
+name: Handwired learning
+
+on:
+  pull_request:
+    paths:
+      - 'labs/handwired-learning/**'
+      - '.github/workflows/handwired-learning-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'labs/handwired-learning/**'
+      - '.github/workflows/handwired-learning-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: chenglou/handwired
+          ref: 257856e3b221140acb4cc4460626b850c0bd4ff1
+          path: upstream-handwired
+          persist-credentials: false
+          sparse-checkout: |
+            src/runtime
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24.14.0'
+      - name: Test actual pinned CPU and backward APIs
+        env:
+          HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
+        run: node --test --test-isolation=none labs/handwired-learning/tests/api-probe.test.mjs
+      - name: Run minimal example
+        env:
+          HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
+        run: node labs/handwired-learning/examples/api-probe.mjs
+      - name: Test forward comparison and standalone offline page
+        env:
+          HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
+        run: node --test --test-isolation=none labs/handwired-learning/tests/forward.test.mjs labs/handwired-learning/tests/build.test.mjs
+      - name: Build offline page without installing packages
+        env:
+          HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
+        run: node labs/handwired-learning/scripts/build.mjs "$RUNNER_TEMP/handwired.html"

@@ -1703,3 +1703,105 @@ Reviewer REWORK cleanup failures resolved;5 independent focused tests=>ACCEPT.
 I001,15skips and5TLSfailures retained with root causes. Runtime evidence PASS;
 committed delivery PARTIAL until final CI/merge/readback. usable_tag remains none until actual publication.
 Owner acceptance pending; next product begins after Wotar remote delivery.
+
+## Program: Kith reading capture phase 0 / Kith-20261021-1804
+
+Issue #446, draft PR #449. Base cda7571e8d45c9c9f036d8b65e41ad26362f7492. Orchestrator owns this section and integration; no changes to other programs.
+
+Scope: phase 0 contract, non-applied SQL draft, RC-01–07 checklist, SQL isolation tests, SUCCESS/README and delivery record. No phase 1/2, live migration, paid API or deployment.
+
+Order: T-446 native read-only requirements audit; orchestrator RED tests, schema and documentation, GREEN and repository checks; independent different-family read-only reviewer of final commit; final-head CI, refreshed main and merge readback.
+
+Review route: owner prompt explicitly directs the external-cli-workers.md headless review procedure. Grok catalog reports unauthenticated, excluded without login. OpenCode Go existing credential observed; exact model and readonly profile pending preflight, no model call yet. Quota/cost unknown; only existing subscription route permitted. Final review max 600 seconds, no nested agents, no writes. No automatic CLI installation or configuration changes.
+
+Acceptance: pending; an exit code alone is insufficient. Recheck issue before each commit. Never mark RC E2E passed on SQL-only evidence.
+
+T-446 accepted: independent native requirements audit identified export/edit race and RC-04 stage boundary; addressed by revision CAS and early auth denial coverage for reserved routes. RED: nine missing-draft errors; GREEN: nine passed. Initial success validator found not-yet-created report link; report now added and recheck required.
+
+T-447 final review pin: OpenCode plan, opencode-go/longcat-2.5-preview-free (LongCat; author OpenAI GPT). Official Go catalog and local model listing checked 2026-10-21 UTC: https://opencode.ai/v2/docs/console/go/ lists this exact model as free; selected to respect no-paid-API constraint without assuming subscription overage policy. No fallback. Auth exists; quota/actual model capability not inferred from catalog. Runtime policy denies all tools, edits, shell and delegation; fixed-commit diff/spec context supplied in prompt. --pure, 600-second timeout, max 8 steps. Review result retained outside the source tree so later evidence recording cannot invalidate the reviewed SHA.
+
+Local acceptance: phase-0 nine SQL tests PASS; repository success 41 PASS after report-link fix; capability 5 files / 0 errors; 61 local links PASS; T-446 task/report and T-447 task validated; diff whitespace PASS. Final-commit independent review, CI and merge remain pending; decisions/evidence after that commit are recorded on PR #449 to avoid invalidating review.
+
+Final evidence gate: BLOCKED for merge. Product head 266aab10e78aca400a3827b7c33af4c53b9d6a0a passed local 9 SQL / 41 success / 5 capability and all three remote CI checks (runs 39651400599 and 39651400453). T-447 produced no review: free LongCat endpoint returned non-retryable HTTP 402 unavailable, process exit 1. Two prior preflight stops were config discovery assertions; the inspected herdr observer was made inert per process while retaining --pure and deny-all permissions. No paid fallback, login or same-family substitution.
+
+Decision: retain draft PR, commit failure evidence, mark #446 needs-owner and RELEASE. Owner needs a functioning permitted different-family reviewer. New evidence-only head still needs its own final review/CI before merge. Unmerged worktree remains intact; no second milestone.
+
+Resume 2026-10-21 UTC: owner restored Grok login and explicitly selected opencode-go/deepseek-v4.1-flash if OpenCode is used. Same issue/session re-claimed; reviewer-only needs-owner label removed. Grok models confirms grok.com login; CLI 1.0.62, pin grok-4.7 (xAI family), T-448. Tools disabled with --tools empty, --permission-mode plan, --no-subagents, --disable-web-search; immutable full diff/spec provided, 600-second timeout, max4 turns. Inspected configuration has no MCP/plugins; existing herdr session hooks made inactive per process with HERDR_ENV=0. No credential/config change or login by agent.
+
+Current main 6cd69eec (Retro RE-0) merged without conflicts. Final checks and final-head independent review required again. Prior LongCat failure is historical. Final acceptance/merge evidence recorded on PR #449 without post-review commit changes.
+
+
+## Program: Handwired HW-0 / Handwired-20261021-1808
+
+Issue #450; draft PR #452. Owner milestone prompt authorizes one milestone, commit/push and conditional merge; no deploy, dependency installation, AGENTS edits or issue closing. Own worktree only. Base cda7571e.
+
+Objective: AC-01 pinned upstream API support table and executable CPU example. HW-1–3 remain pending.
+Tasks: T-450 bounded read-only API audit (native worker, no delegation); root owns implementation, docs, test-first evidence, task/report and decisions; different-family external read-only reviewer on final head before merge.
+Gates: source pin verification; failing example test before implementation; Node built-in tests and actual upstream CPU example via common workspace launcher; project-success tests/validator; llms validator; diff check; final-head CI and independent review; latest main integration then rerun/review if changed; MERGED readback.
+Budget: one native audit up to 15 min, one external review up to 10 min per revision. No paid APIs. Usage/quota unknown.
+State: API audit accepted; local HW-0 checks passed. Final review/CI and merge evidence recorded on PR #452 without post-review edits.
+
+HW0-D01: ACCEPT T-450 source audit after root inspection of exact signatures/callers. Root independently executed real source example. General backward is available; no analytic-only fallback needed.
+HW0-D02: Red missing-module failure observed before implementation. Five focused tests and nine-point example pass using unchanged upstream core; repo 15 structural tests, 41 contracts, llms (0 errors), diff and worker contracts pass. Node isolated reporter only showed one file-level case, so canonical command explicitly uses --test-isolation=none (5 cases observed).
+HW0-D03: External review route follows owner's explicit external-cli-workers.md invocation: grok plan, no subagents, grok-4.7 (xAI; model list observed via authenticated grok.com, no paid API keys). Author family OpenAI. Fixed 600-second read-only budget, max 20 turns. No provider install or permission bypass. Review, final CI, latest-main check and merge readback pending.
+
+HW0-D04: REWORK initial CI: evidence/llms.txt accidentally matched capability-index discovery after git staging; renamed artifact to llms-validation.txt without validator changes. Dedicated pinned-api passed. First Grok attempt was sandbox_init_failed (read-only session storage), not a review; retry requires normal execution-environment escalation and final corrected SHA.
+
+HW0-D05: Grok plan tool attempt returned cancelled with no verdict. Safe retry used complete fixed-commit diff/spec/upstream extracts with tools disabled (max3 turns, no delegation); actual result APPROVE, no blockers, for 9f7452b0610c7aee419f9f44e5406b47fb44fef0. All three CI runs on that head succeeded, including manually dispatched llms. Nonblocking observations are documented limitations (trusted immutable source, Node-only probe, future HW-1–3 pending); no scope expansion.
+HW0-D06: Main advanced through Retro #453 and Kith #449 to 9b31fa1776213b68e7d38b6db4f706e6dd7def15. Merge conflict only appended .team/PLAN sections; preserve current main verbatim and append this Handwired section. Product/test/CI files unchanged. Rerun local gates, final-head CI and a new different-family review before merging. Evidence-gate decision: ACCEPT bounded HW-0 functionality, delivery conditional on those final gates; acceptance/merge SHA recorded in PR and preserved closeout evidence. No second milestone.
+
+## Program: Kith reading capture phase 1 / Kith-20261021-1837
+
+Issue #456, draft PR #457, base 9b31fa1776213b68e7d38b6db4f706e6dd7def15. Orchestrator owns specification, integration and acceptance.
+Frozen HTTP/UI contract: products/kith/docs/plans/reading-capture-tests.md phase-1 section. T-456 isolated E2E author first; orchestrator prepares pinned toolchain and executes RED before implementation. Subsequent bounded backend/frontend tasks only after RED. No writer shares another writer's worktree. No worker commits/delegates.
+Gates: local isolated D1 migration; RC-01–04 E2E plus evidence validator; worker lint, unit/integration, web build; Python schema and repo contracts; diff check; final-head xAI Grok read-only review, final CI, latest main merge and recheck. No phase2 implementation, deploy or paid service.
+Acceptance: pending. Node24.18.0 official toolchain preparation underway; currently installed24.14.0 cannot substitute silently.
+
+T-456 source accepted after inspection; E2E lint PASS. Runtime RED: capture-link absent after successful login (phase1-e2e-red3); first two attempts were diagnosed missing host browser libs, remedied with isolated Debian library extraction and Chromium smoke141.0.7390.37. Evidence schema exposed duplicate @mobile tag (fix in test metadata, not schema weakening). Seven API integration tests RED due missing tables. Existing base155 + sidecar14 + worker29 passed in broader RED run. Isolated draft D1 apply PASS before promotion. T-457 frontend assigned separate worktree; orchestrator backend/migration writes disjoint paths.
+
+Main integration: fetched 6c61fded (Handwired HW-0). Only appended PLAN sections conflicted; preserved upstream verbatim and appended our program. Kith runtime/tests unchanged by this merge. Required checks rerun before final review.
+
+Full E2E 49 passed/1 expected desktop skip/1 W7 performance failure (857ms p95 vs600). RC and security cases all pass; gate remains blocked. T-459 read-only audit of trace and measurement semantics; preserve threshold and failure evidence, no rerun-to-pass.
+
+T-459 ACCEPT read-only diagnosis: existing waitFor uses up to500ms polling. Paired diagnostic retained old gate FAIL860ms while passive row-visible times310–444ms. W7 §7.2 revised first; gate now polls Playwright isVisible every16ms with identical selector,20 loads,600ms threshold and included round-trip. No RAF-derived acceptance or time subtraction. Focused corrected check PASS591ms; full regression pending.
+T-456 source ACCEPT after root inspection and actual RED/GREEN; historical worker PARTIAL remains accurate because worker delegated runtime, now independently covered by root. T-457 source ACCEPT after root diff inspection, pinned build and desktop/mobile RC integration. No worker commits or out-of-scope writes. T-459 report-format validator initially rejected trailing periods after outcome tokens; formatting corrected, audit findings unchanged.
+
+Full rerun phase1-e2e-final: 49pass/1expected skip/1fail W5-03 transient draft observer. W7 PASS448ms. T-460 ACCEPT read-only audit: existing trace screenshots directly prove ab/abcdef rendered inside failed wait; 1000ms assertion polling can miss900ms window. W5 §7.3 updated first, only observer changed to fixed50ms Playwright isVisible. Fixture300ms chunks,30s timeout, partial text/screenshot/failure/no-persistence/provider-count assertions unchanged. Fresh focused and full checks required; original failure not relabeled.
+
+W5 focused corrected test PASS2/2 (phase1-stream-cut-corrected). Final immutable candidate prepared while phase1-e2e-accepted full run proceeds. Final full-run/manifest, different-family review, CI and exact-main/merge evidence will be recorded on PR #457 without post-review source mutations. Evidence-gate decision at commit: RC-01–04 functionality locally ACCEPT; merge remains conditional on full regression, final-head review/CI and latest-main check. Historical failures/skips remain explicit.
+
+## Handwired HW-1 — Handwired-20261021-1845 / #459 / PR #460
+
+Scope: AC-02 / HW-A01,A02 only. HW-0 merge 6c61fded520c5e076758972a1942b4887c5581dc confirmed. No earlier competing claim; draft #460 opened. Worktree from latest main. No deploy/tag/issue closure.
+
+Scenario standard-delivery: root owns integration, documentation, gates; bounded native T-901 worker owns page/build/tests, sequential sole writer; root reviews every diff. Required external different-family review follows the user's explicitly prescribed external-cli-workers.md route (overrides skill dispatcher/desk admission mechanism for this task). Common skill source pinned 39fb407d71c7c5aae5f50a9bc01df6b3c215daa3; no installs or settings changes. Reviewer model/profile pending help/catalog check. Quota/cost unknown; use existing subscription CLI only, bounded 600 s per review, no paid API. No nested delegation.
+
+Gates: red/green real upstream tests; file:// browser interaction if installed browser available; standalone artifact pin/license checks; existing API probe; success validator + unit tests; llms validator; diff check; task/report validators; final-head CI; different-family read-only review; latest-main integration; merge readback; release claim and remove only own clean worktree. AC-03/04 remain pending.
+
+T-901 routed to native worker; acceptance pending. Root handles documentation/CI outside worker scope.
+
+HW1-R01 reviewer preflight: Grok 1.0.62 reports not authenticated; not invoked and no login attempted. Owner-authorized alternative OpenCode 1.18.33 is authenticated to Go. Local model catalog and official https://opencode.ai/v2/docs/console/go/ (checked 2026-10-22 UTC) expose opencode-go/minimax-m3.1-flash-free and explicitly list free pricing. Freeze T-902 to this MiniMax-family model, tool-disabled plan, --pure, max4 steps, 600-second deadline. No paid fallback; availability and quota remain unknown until review. OpenCode state stays at existing paths; HERDR_ENV=0 suppresses unrelated observer hooks for this process. Full fixed-head dossier supplied; author family OpenAI GPT. Final verdict remains pending.
+
+HW1-D01 owner-authorized takeover 2026-10-22: Handwired-1844 preserves the original 1845 tree and a hash-checked 12-file snapshot. Current source is an isolated copy, original tree untouched. Refs #459 / PR #460 remain one delivery. No evidence establishes a product concurrency bug.
+HW1-D02 latest-main integration exposed real task filename collisions with Kith T-459/T-460. Keep main's files verbatim; rename Handwired task/report to T-901/T-902. Preserve both PLAN sections.
+HW1-D03 root inspected all product/build/test diffs and accepts T-901 implementation after 13 independently rerun Node tests and actual offline Chromium input/slider/invalid/recovery checks. No runtime code correction was needed. Browser initially lacked libatk in both container and host; rerun with existing private library directory passed. No library installation. Host lacks CJK fonts: screenshots establish layout only; text semantics verified from DOM, not glyph appearance.
+HW1-D04 final reviewer route supersedes historical HW1-R01: installed Grok 1.0.62 reports authenticated grok.com and grok-4.7 available when network is accessible. Pin xAI reviewer, author OpenAI, all tools/web/subagents disabled, 600s and max3 turns; use existing login and no API keys. No paid API or configuration changes. Final-head review and CI pending.
+
+HW1-D05 evidence-gate: ACCEPT bounded HW-1 local behavior. Root reran 13 Node tests, 9-point probe, 41 project contracts, 15 contract tests, 5 llms indexes, task/report validators and diff check; all pass. Offline Chromium with existing libs passed functional and responsive checks. Final delivery remains conditional on final-head CI, different-family review and merge readback recorded on PR #460. No HW-2 or human acceptance claim.
+
+## Program: Kith reading capture phase 2 / Kith-20261022-0352
+
+Issue #463; base cd6412e5. Root owns plan, contracts, integration and accept/rework. Owner explicitly authorizes development, commits, push and conditional merge. One milestone only.
+Scope: RC-05–07 plus RC-01–04 regression; reading content, notes, pinned content build, atomic version and automatic refresh, restricted revocable export credential, local single-instance Git exporter. Native bounded workers in isolated worktrees; no worker delegation/commits. Different-family final-head read-only review via owner-specified external CLI procedure. No deployment/secrets/paid API.
+Gates: spec then RED, backend/runner/build/browser fault tests, all local checks, immutable final-head review/CI, latest main, merge/readback/release. Acceptance pending; no runtime phase2 evidence yet.
+
+T-463 ACCEPT read-only architecture audit; fixed explicit article registry, bounded atomic bundle, worker-first private assets, note CAS/replay, dedicated hashed/revocable token, full reconciliation export feed and journal recovery contract before code. T-464 isolated builder/exporter, T-465 isolated web, T-466 isolated E2E author. Root owns backend/CI/shared contract. RED: six API tests fail missing reading404/notes501/token404 (phase2-api-red); E2E authentic operator reading404 (phase2-e2e-red); safe reading Markdown two missing-parser assertions (phase2-web-markdown-red-inprocess). No gate weakened.
+
+T-464 source ACCEPT for integration after root inspection and independent local19-test run (final worker21 tests includes bound/journal additions; root rerun pending). Root requested fatal UTF8 decoding, initial/ignored/info attribute guards against Git filter execution and16MiB bounds for valid escaped pages; worker implemented/tests passed. T-465/T-466 source accepted for integration, historical PARTIAL reports preserved pending rootbrowseracceptance.
+T-467 REWORK F1 mixed-caseBearer cookie fallback and F2 malformedpath400 cacheheaders. ReproducedF1 RED (200 vs401), fixed scheme parsing/no malformedcredentialfallback and all earlyguardheaders; added realWorker GET/HEAD/malformedassets/session-onlyscope, cap20concurrenttokenissuance and disabledowner/body/ACK bounds.
+Initial integratedRC run:9pass/3fail. RC04 duplicate login helper rotatedcookie while existing app-shell made helper returnearly; trace shows reading usedoldcookie after200login. Remove only redundant secondlogin, retain authassertions. RC06 desktop/mobile reached real409conflict andpreserveddraft butcopy lacked explicit conflictword; clarifiedbilingualcopy, assertions unchanged. RC05actualGit/D1 andRC07failpublication passed. Corrected fullRC rerun pending.
+Main advanced to f9fce6eb via unrelated HW1 and roottechnical-task contract. Read updatedAGENTS; add ownerdirect T-0463 board row, update activity eachpush, board-only completion follow-up aftercode merge. No AGENTS edits.
+
+Latest main f9fce6eb integrated before final gates; conflict only appended PLAN. Upstream content preserved and current program appended.
+
+T-467 findings resolved and independently verified: phase2-api-security-green9/9 includingactualWorker guard; F1 RED retained. CorrectedRC12/12GREEN inphase2-e2e-corrected. Rootfullbackend-after-main314/314PASS; worker/e2e types/schema10/success15+41/llms5/diff/contractsPASS. Evidence-gate ACCEPT boundedphase2localRC functionality; finalfullE2E, immutableheadxAIreview,CI/latestmain andmerge readback remain mandatory. Sourcefreeze for finalreview; subsequent gate evidence storedPR without sourceedit.

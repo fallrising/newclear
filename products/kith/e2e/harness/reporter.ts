@@ -30,7 +30,7 @@ type RunContext = {
   started_at: string;
 };
 
-const ID_RE = /^((?:E2E|PROBE)-W[0-7]-[0-9]{2}) /;
+const ID_RE = /^((?:E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-7]) /;
 const FILES_EXCLUDED_DIRS = ["report", "test-output", "state", "nested"];
 const SCAN_EXCLUDED_DIRS = ["report", "test-output", "traces", "state", "nested"];
 const SCAN_EXTENSIONS = [".jsonl", ".json", ".log", ".md", ".txt"];

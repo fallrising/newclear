@@ -10,7 +10,7 @@
 
 對外產品名：**Kith**。目錄與程式 id 為 `kith`。
 
-完整瀏覽器 e2e 只在本機手動跑：在 `products/kith` 執行 `npm run e2e:all`，然後 `npm run e2e:validate`。Pull request CI 只跑 lint、單元測試與 web build。
+完整瀏覽器 e2e 只在本機手動跑：在 `products/kith` 執行 `npm run e2e:all`，然後 `npm run e2e:validate`。Pull request CI 跑 lint、單元／Git 故障測試、web build 與固定 commit 的合成文章 bundle；不部署。
 
 **狀態：** M0–M7 已在 `main`（#12 `c5b26b1`）。線上 Worker 與 SPA 綁定在 #26 `b76283b`，網址 <https://kith.fallrising.workers.dev>。人跟人聊天 P0（operator 開房、以 handle 邀請、桌面並排／窄螢幕先列表）見 [09](docs/sdd/09-human-chat-ui.md)。**不是**端對端加密（not E2EE），也不是 SaaS。不得把未執行的測試描述成已完成。精確契約見 [SDD.md](SDD.md)。
 
@@ -26,7 +26,7 @@
 
 ## 設計探索
 
-- [Cloudflare 閱讀與快記模組：重用評估與 MVP 計劃](docs/plans/cloudflare-reading-capture.md)（2026-10-18；2026-10-22 縮成 MVP）：沿用 Kith 的 Web／Cloudflare 基礎，MVP 只做私人的手機快記、收件匣、閱讀與人類補充，D1 單向匯出 Git；公私發布、通訊收件與事件統計延後。這是候選模組，尚未排程或實作；Kith 現行聊天室與 v2 契約仍適用。
+- [Cloudflare 閱讀與快記模組：MVP 計畫](docs/plans/cloudflare-reading-capture.md)：階段 1 已實作 operator 私人 `/captures` 快記與收件匣、冪等重送／衝突及本機草稿；RC-01～04 本地 CF 桌面／手機驗證見 [#456 報告](tasks/456-reading-capture-phase1/report.md)。[0007 migration](migrations/0007_reading_capture.sql) 經隔離 D1 驗證納入；沒有套用正式環境或部署。完全斷網重載須待連線恢復才能開啟介面並取回草稿；沒有離線隊列。階段 2 已加入私人 `/reading`、原文筆記 revision CAS、固定 commit 建置、自動更新及可恢復的 D1→Git 匯出；RC-01～07 十二項本地驗收通過。操作與 Linux／Git 衝突限制見 [reading/README](reading/README.md)，證據見 [#463 報告](tasks/463-reading-capture-phase2/report.md)。專用憑證可在閱讀頁建立／撤銷；新 migration 0008 只增加雜湊憑證表。正式內容 repo、憑證、週期排程及部署須另行接線，這次沒有執行。
 
 ## 規格章節
 

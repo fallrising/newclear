@@ -49,12 +49,43 @@ import { loadAllAgentRuntimes } from "./providers/runtime.ts";
 import { mountAgentRoutes, runtimeSummary } from "./routes/agents.ts";
 import { mountProviderRoutes } from "./routes/providers.ts";
 import { mountTraceRoutes } from "./routes/traces.ts";
+import { isReadingCapturePath, mountReadingCaptureRoutes } from "./routes/reading-capture.ts";
+import { isExportEndpoint } from "./routes/reading.ts";
 
 export { HostedGeneration, Inbox, Room };
 
 type AppEnv = { Bindings: Env };
 
 const app = new Hono<AppEnv>();
+
+// All asset requests run through this guard, including encoded paths and HEAD.
+// The private bundle is accessible only through the authenticated API's internal binding.
+app.use("*", async (c,next) => {
+  let path = new URL(c.req.url).pathname;
+  try {
+    for (let depth=0;depth<8;depth++) {
+      if(path.toLowerCase().split(/[\\/]/).includes("_reading")) {
+        c.header("Cache-Control","no-store");
+        return c.json(errorBody("not_found","not found"),404);
+      }
+      const decoded=decodeURIComponent(path);
+      if(decoded===path)break;
+      path=decoded;
+      if(depth===7){c.header("Cache-Control","no-store");return c.body(null,400);}
+    }
+  } catch {c.header("Cache-Control","no-store");return c.body(null,400);}
+  const bearer = authorizationBearer(c);
+  if(bearer === "" || (bearer?.startsWith("kith_export_")&&!isExportEndpoint(c.req.method,c.req.path))) {
+    c.header("Cache-Control","no-store");return unauthorized(c);
+  }
+  return next();
+});
+
+// Apply even to early CSRF/rate-limit failures on private reading routes.
+app.use("/api/*", async (c, next) => {
+  if (isReadingCapturePath(c.req.path)) c.header("Cache-Control", "no-store");
+  await next();
+});
 
 const HANDLE_RE = /^[a-z0-9_]{2,32}$/;
 const QUOTA_CLASSES = new Set(["api_key", "operator_personal"]);
@@ -760,6 +791,7 @@ app.post("/api/members/:id/password", async (c) => {
   return c.json({ ok: true });
 });
 
+mountReadingCaptureRoutes(app);
 mountProviderRoutes(app);
 mountAgentRoutes(app);
 mountTraceRoutes(app);

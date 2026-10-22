@@ -56,3 +56,5 @@ jobs:
           cache-dependency-path: products/kith/web/package-lock.json
       - run: npm ci
       - run: npm run build
+      - name: Build immutable synthetic reading bundle
+        run: node ../reading/build.ts --repo ../../.. --commit "$(git rev-parse HEAD)" --registry products/kith/content/articles.json --output dist/_reading/current.json

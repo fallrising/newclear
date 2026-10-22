@@ -208,7 +208,7 @@ final class TopicConfigPublicationIntegrationTest {
                         group, Duration.ofSeconds(5)))
                 .isTrue();
         assertThat(groupOperations.reset(
-                                group, topic, 1, "OFFSET", 0)
+                                group, topic, 1, "OFFSET", 0, () -> {})
                         .offsets())
                 .containsExactly(
                         new dev.ojbk.console.group.PartitionOffset(0, 0));

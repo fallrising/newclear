@@ -1,6 +1,6 @@
 # Agent Workforce 技術任務板
 
-本項目的技術任務放在這裡。每張連回 desk 大需求卡的 id；desk 只看大方向，細節在此。欄位依 desk [運作方法](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) §4：每張預期 30 分鐘內完成，進行中刷新 `last_activity`（UTC RFC3339）；沒有 `end` 且 `last_activity` 早於預期時長三倍（90 分鐘）算卡住。
+本項目的技術任務放在這裡。每張連回 desk 大需求卡的 id；desk 只看大方向，細節在此。欄位依本 repo 根目錄 [AGENTS.md](../../../../AGENTS.md) 的技術任務合約：每張預期 30 分鐘內完成，進行中刷新 `last_activity`（UTC RFC3339）；沒有 `end` 且 `last_activity` 早於預期時長三倍（90 分鐘）算卡住。
 
 狀態只用 `todo`、`in_progress`、`done`。關閉後留在本表，可以重開。
 

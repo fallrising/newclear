@@ -6,7 +6,7 @@ import sqlite3
 import unicodedata
 from uuid import UUID
 
-from .domain import ITEMS, RuleError, apply_action, new_character
+from .domain import ITEMS, RuleError, apply_action, apply_trade, new_character, validate_trade
 
 
 def error(status, code, message, state=None):
@@ -58,6 +58,14 @@ class Store:
                 item TEXT NOT NULL CHECK(item IN ('ore', 'herb', 'kit', 'medicine')),
                 quantity INTEGER NOT NULL CHECK(typeof(quantity) = 'integer' AND quantity >= 0),
                 PRIMARY KEY(character_id, item)
+            );
+            CREATE TABLE IF NOT EXISTS listings (
+                id INTEGER PRIMARY KEY,
+                seller_id INTEGER NOT NULL REFERENCES characters(id),
+                item TEXT NOT NULL CHECK(item IN ('ore', 'herb', 'kit', 'medicine')),
+                quantity INTEGER NOT NULL CHECK(typeof(quantity) = 'integer' AND quantity BETWEEN 1 AND 99),
+                price INTEGER NOT NULL CHECK(typeof(price) = 'integer' AND price BETWEEN 1 AND 99),
+                status TEXT NOT NULL CHECK(status IN ('open', 'sold', 'cancelled'))
             );
             CREATE TABLE IF NOT EXISTS joins (
                 join_id TEXT PRIMARY KEY,
@@ -111,6 +119,15 @@ class Store:
         if not isinstance(token, str) or not 1 <= len(token) <= 128:
             return None
         row = self.connection.execute("SELECT id, name, x, y, hp, profession, coins, tower_stage, tower_reward_claimed FROM characters WHERE token = ?", (token,)).fetchone()
+        return self._state_from_row(row)
+
+    def _character_by_id(self, character_id):
+        row = self.connection.execute(
+            "SELECT id, name, x, y, hp, profession, coins, tower_stage, tower_reward_claimed FROM characters WHERE id = ?",
+            (character_id,)).fetchone()
+        return self._state_from_row(row)
+
+    def _state_from_row(self, row):
         if row is None:
             return None
         state = dict(row)
@@ -126,14 +143,42 @@ class Store:
         self.connection.executemany("UPDATE items SET quantity = ? WHERE character_id = ? AND item = ?",
                                     [(state["items"][item], state["id"], item) for item in ITEMS])
 
+    def _listings(self):
+        return [dict(row) for row in self.connection.execute(
+            "SELECT listings.id, seller_id, characters.name AS seller_name, item, quantity, price, status "
+            "FROM listings JOIN characters ON characters.id = seller_id ORDER BY listings.id")]
+
+    def _trade(self, state, action):
+        kind = validate_trade(action)
+        listing, seller = None, None
+        if kind != "list":
+            row = self.connection.execute("SELECT * FROM listings WHERE id = ?", (action["listing_id"],)).fetchone()
+            listing = dict(row) if row else None
+            if kind == "buy" and listing:
+                seller = self._character_by_id(listing["seller_id"])
+        updated, updated_seller, offer, message = apply_trade(state, action, listing, seller)
+        if kind == "list":
+            cursor = self.connection.execute(
+                "INSERT INTO listings(seller_id, item, quantity, price, status) VALUES (?, ?, ?, ?, ?)",
+                (offer["seller_id"], offer["item"], offer["quantity"], offer["price"], offer["status"]))
+            return updated, message, {"listing_id": cursor.lastrowid}
+        if updated_seller is not None:
+            self._save_character(updated)
+            self._save_character(updated_seller)
+        self.connection.execute("UPDATE listings SET status = ? WHERE id = ?", (offer["status"], offer["id"]))
+        return updated, message, {}
+
     def state(self, token):
         state = self._character(token)
         if state is None:
             return error(401, "unauthorized", "角色憑證無效，請確認這個瀏覽器的本機角色。")
-        return 200, {"ok": True, "state": state, "message": "角色狀態已同步。"}
+        return 200, {"ok": True, "state": state, "listings": self._listings(), "message": "角色狀態已同步。"}
 
     def action(self, token, body):
         with self.connection:
+            # Lock before reading stock, listing or replay state. HTTPServer is
+            # single-threaded; this also serializes separate DB connections.
+            self.connection.execute("BEGIN IMMEDIATE")
             state = self._character(token)
             if state is None:
                 return error(401, "unauthorized", "角色憑證無效，請確認這個瀏覽器的本機角色。")
@@ -153,9 +198,14 @@ class Store:
                     return error(409, "id_conflict", "此動作識別碼已用於不同內容，請勿更改重送內容。", state)
                 return previous[1], json.loads(previous[2])
             try:
-                updated, message = apply_action(state, body["action"])
-                self._save_character(updated)
-                status, result = 200, {"ok": True, "state": updated, "message": message}
+                action = body["action"]
+                extra = {}
+                if isinstance(action, dict) and action.get("type") in ("list", "buy", "cancel"):
+                    updated, message, extra = self._trade(state, action)
+                else:
+                    updated, message = apply_action(state, action)
+                    self._save_character(updated)
+                status, result = 200, {"ok": True, "state": updated, "message": message, **extra}
             except RuleError as exc:
                 status, result = error(400, exc.code, exc.message, state)
             self.connection.execute(

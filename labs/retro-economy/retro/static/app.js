@@ -24,6 +24,7 @@ class SessionClient {
     this.onState = onState;
     this.onStatus = onStatus;
     this.state = null;
+    this.listings = [];
     this.storageError = null;
     this.session = { token: null, pendingJoin: null, pendingAction: null };
     this.tail = Promise.resolve();
@@ -87,12 +88,18 @@ class SessionClient {
     } finally { clearTimeout(timeout); }
   }
 
-  apply(state) { if (state) { this.state = state; this.onState(state); } }
+  apply(state, listings = []) {
+    if (state) {
+      this.state = state;
+      this.listings = listings;
+      this.onState(state, listings);
+    }
+  }
 
   async refresh(message) {
     const data = await this.request('/api/state');
     if (!data.ok || !data.state) throw new Error('state unavailable');
-    this.apply(data.state);
+    this.apply(data.state, data.listings || []);
     this.onStatus('ready', message);
   }
 
@@ -100,8 +107,8 @@ class SessionClient {
     const data = await this.request('/api/join', this.session.pendingJoin);
     if (data.ok && (typeof data.token !== 'string' || !data.state)) throw new Error('invalid join');
     this.save({ ...this.session, token: data.ok ? data.token : null, pendingJoin: null });
-    if (data.ok) this.apply(data.state);
-    this.onStatus(data.ok ? 'ready' : 'rejected', data.ok ? data.message : data.error.message);
+    if (data.ok) await this.refresh(data.message);
+    else this.onStatus('rejected', data.error.message);
   }
 
   async sendAction() {
@@ -151,6 +158,7 @@ class SessionClient {
     this.session = { token: null, pendingJoin: null, pendingAction: null };
     this.storageError = null;
     this.state = null;
+    this.listings = [];
     return true;
   }
 }
@@ -161,6 +169,8 @@ function startGame() {
   const directions = { west: [-1, 0], east: [1, 0], north: [0, -1], south: [0, 1] };
   const locations = { '-3,0': '礫坡', '0,0': '霧岸鎮', '2,0': '路障', '3,0': '霧影遭遇', '4,0': '望潮塔', '0,4': '潮林' };
   const allowed = new Set(['-3,0', '-2,0', '-1,0', '0,0', '1,0', '2,0', '3,0', '4,0', '0,1', '0,2', '0,3', '0,4']);
+  const itemNames = { ore: '礦石', herb: '藥草', kit: '修補組', medicine: '行路藥' };
+  let marketSnapshot = '';
   let phase = 'ready';
   let reconnecting = false;
   let client;
@@ -181,9 +191,57 @@ function startGame() {
     $('gather').disabled = !s || locked || !['-3,0', '0,4'].includes(`${s.x},${s.y}`);
     $('craft').disabled = !s || locked || s.x !== 0 || s.y !== 0 ||
       (s.profession === 'smith' ? s.items.ore < 2 : s.items.herb < 3);
+    for (const id of ['list-item', 'list-quantity', 'list-price', 'list-submit']) $(id).disabled = !s || locked;
+    document.querySelectorAll('[data-market-action]').forEach(button => {
+      const listing = client.listings.find(row => row.id === Number(button.dataset.listingId));
+      button.disabled = !s || locked || !listing || listing.status !== 'open' ||
+        (button.dataset.marketAction === 'buy' && s.coins < listing.price);
+    });
   }
 
-  function render(s) {
+  function renderMarket(s, listings) {
+    $('market').hidden = false;
+    const snapshot = JSON.stringify([s.id, listings]);
+    if (snapshot === marketSnapshot) return; // Keep focused buttons stable between unchanged polls.
+    marketSnapshot = snapshot;
+    $('market-empty').hidden = listings.length > 0;
+    const rows = listings.map(listing => {
+      const row = document.createElement('li');
+      row.className = 'market-row';
+      row.dataset.listingId = listing.id;
+      row.dataset.status = listing.status;
+      const details = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = `${itemNames[listing.item]} × ${listing.quantity}`;
+      const seller = document.createElement('span');
+      seller.className = 'market-seller';
+      seller.textContent = listing.seller_name;
+      const status = document.createElement('small');
+      status.className = 'market-status';
+      status.textContent = `#${listing.id} · ${{ open: '掛單中', sold: '已售出', cancelled: '已取消' }[listing.status]}`;
+      details.append(title, seller, status);
+      const price = document.createElement('span');
+      price.className = 'market-price';
+      price.textContent = `${listing.price} 金幣／整筆`;
+      row.append(details, price);
+      if (listing.status === 'open') {
+        const own = listing.seller_id === s.id;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = own ? 'secondary' : 'primary';
+        button.dataset.marketAction = own ? 'cancel' : 'buy';
+        button.dataset.listingId = listing.id;
+        button.textContent = own ? '取消掛單' : '購買';
+        button.setAttribute('aria-label', `${button.textContent} #${listing.id} ${itemNames[listing.item]} × ${listing.quantity}`);
+        button.addEventListener('click', () => client.act({ type: own ? 'cancel' : 'buy', listing_id: listing.id }));
+        row.append(button);
+      }
+      return row;
+    });
+    $('market-list').replaceChildren(...rows);
+  }
+
+  function render(s, listings) {
     $('join-card').hidden = true;
     $('character-card').hidden = false;
     $('player-name').textContent = s.name;
@@ -191,7 +249,7 @@ function startGame() {
     $('coins').textContent = s.coins;
     $('hp').textContent = `${s.hp} / 3`;
     for (const item of ['ore', 'herb', 'kit', 'medicine']) $(`inventory-${item}`).textContent = s.items[item];
-    $('tower-status').textContent = s.tower_reward_claimed ? '首次登頂完成 · 獎勵已領' : ['尚未出發', '路障已修補', '霧影已通過'][s.tower_stage];
+    $('tower-status').textContent = `${['尚未出發', '路障已修補', '霧影已通過'][s.tower_stage]}${s.tower_reward_claimed ? ' · 首次獎勵已領' : ''}`;
     $('location').textContent = locations[`${s.x},${s.y}`] || (s.x > 0 ? '塔路' : s.y > 0 ? '潮林小徑' : '礫坡小徑');
     $('coordinates').textContent = `${s.x}, ${s.y}`;
     $('player-marker').setAttribute('transform', `translate(${360 + s.x * 90} ${156 + s.y * 85})`);
@@ -208,11 +266,17 @@ function startGame() {
     if (step === 1) { title = '帶著原料回鎮製作'; hint = `回到中心的霧岸鎮，${smith ? '2 礦石做成修補組' : '3 藥草做成行路藥'}。`; }
     if (step === 2) { title = '補給齊了，向東登塔'; hint = '沿東側塔路前進 4 格；路障消耗 1 修補組，霧影消耗 1 行路藥。'; }
     if (s.x > 0 && s.tower_stage > 0) { step = 2; title = '沿塔路向東，抵達望潮塔'; hint = s.tower_stage === 1 ? '下一格是霧影：有行路藥便能通過，否則會被送回鎮。' : '霧影已散。再向東一格就能首次登頂，獲得 8 金幣。'; }
-    if (!s.tower_reward_claimed && s.tower_stage === 0 && (smith ? s.items.medicine : s.items.kit) === 0) {
+    const missingOther = (smith ? s.items.medicine : s.items.kit) === 0;
+    if (s.tower_stage === 0 && missingOther) {
       title = '這次出發，還缺異職補給';
-      hint = `你需要${smith ? '藥師的行路藥' : '鐵匠的修補組'}。一次性補給已用完；交易功能尚未開放。可探索採集，或從頁尾明確重設新角色。`;
+      hint = `你需要${smith ? '藥師的行路藥' : '鐵匠的修補組'}。到旅人市場向另一位旅人購買；也可採集製作自己的成品掛單，交換下一輪補給。`;
     }
-    if (s.tower_reward_claimed) { step = 3; title = '你看見了霧後的海'; hint = '首次登頂獲得 8 金幣。沿原路回鎮；下一輪需異職補給，交易功能尚未開放。'; }
+    if (s.tower_reward_claimed && s.x === 4) {
+      step = 3; title = '你看見了霧後的海';
+      hint = '首次登頂獎勵已領，下次不再發獎。沿原路回鎮，製作並交易補給，便能再走一輪。';
+    } else if (s.tower_reward_claimed && s.tower_stage === 2) {
+      hint = '霧影已散，繼續向東抵達塔頂。首次獎勵已領，本輪不再發獎。';
+    }
     $('guide-title').textContent = title;
     $('guide-detail').textContent = hint;
     document.querySelectorAll('[data-step]').forEach(el => {
@@ -220,6 +284,7 @@ function startGame() {
       el.classList.toggle('complete', Number(el.dataset.step) < step);
     });
     $('world').classList.toggle('victory', s.tower_reward_claimed);
+    renderMarket(s, listings);
     controls();
   }
 
@@ -248,6 +313,12 @@ function startGame() {
   document.querySelectorAll('[data-move]').forEach(button => button.addEventListener('click', () => move(button.dataset.move)));
   $('gather').addEventListener('click', () => client.act({ type: 'gather' }));
   $('craft').addEventListener('click', () => client.act({ type: 'craft', item: client.state.profession === 'smith' ? 'kit' : 'medicine' }));
+  $('list-form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (client.busy || $('list-submit').disabled || !$('list-form').reportValidity()) return;
+    client.act({ type: 'list', item: $('list-item').value,
+      quantity: Number($('list-quantity').value), price: Number($('list-price').value) });
+  });
   $('retry').addEventListener('click', () => client.resume());
   $('reset-session').addEventListener('click', () => {
     if (client.busy || !window.confirm('重設會移除此瀏覽器的角色憑證，無法再以此瀏覽器接回舊角色。伺服器上的角色不會刪除。確定重設？')) return;

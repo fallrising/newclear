@@ -85,3 +85,62 @@ def apply_action(state, action):
     result["items"][ingredient] -= amount
     result["items"][own_item] += 1
     return result, "製作完成：一份修補組。" if own_item == "kit" else "製作完成：一份行路藥。"
+
+
+def validate_trade(action):
+    """Validate untrusted values before the persistence layer uses an ID."""
+    fields = {"list": {"type", "item", "quantity", "price"},
+              "buy": {"type", "listing_id"}, "cancel": {"type", "listing_id"}}
+    if (not isinstance(action, dict) or not isinstance(action.get("type"), str)
+            or action["type"] not in fields or set(action) != fields[action["type"]]):
+        raise RuleError("invalid_action", "交易動作含有缺少或不支援的欄位。")
+    if action["type"] == "list":
+        if action["item"] not in ITEMS:
+            raise RuleError("invalid_item", "只能掛售礦石、藥草、修補組或行路藥。")
+        if any(type(action[key]) is not int or not 1 <= action[key] <= 99
+               for key in ("quantity", "price")):
+            raise RuleError("invalid_amount", "數量與整筆總價必須是 1 至 99 的整數。")
+    elif type(action["listing_id"]) is not int or not 1 <= action["listing_id"] <= 2**63 - 1:
+        raise RuleError("invalid_listing", "掛單識別碼必須是有效的正整數。")
+    return action["type"]
+
+
+def apply_trade(actor, action, listing=None, seller=None):
+    """Return actor, optional seller, listing and message without input mutation.
+
+    Listings do not reserve inventory. A purchase transfers an entire lot for
+    the listed total price, with every economic precondition checked first.
+    """
+    kind = validate_trade(action)
+    if kind == "list":
+        if actor["items"][action["item"]] < action["quantity"]:
+            raise RuleError("missing_stock", "持有物品不足，無法掛單。")
+        offer = {"seller_id": actor["id"], "item": action["item"],
+                 "quantity": action["quantity"], "price": action["price"], "status": "open"}
+        return deepcopy(actor), None, offer, "掛單完成；物品不預扣，購買時會再次檢查庫存。"
+    if listing is None or listing["id"] != action["listing_id"]:
+        raise RuleError("listing_not_found", "找不到這筆掛單。")
+    if listing["status"] != "open":
+        raise RuleError("listing_closed", "這筆掛單已售出或取消，請更新交易列表。")
+    if kind == "cancel":
+        if listing["seller_id"] != actor["id"]:
+            raise RuleError("not_seller", "只能取消自己的掛單。")
+        closed = deepcopy(listing)
+        closed["status"] = "cancelled"
+        return deepcopy(actor), None, closed, "掛單已取消，物品與貨幣沒有變動。"
+    if listing["seller_id"] == actor["id"]:
+        raise RuleError("own_listing", "不能購買自己的掛單。")
+    if seller is None or seller["id"] != listing["seller_id"]:
+        raise RuleError("listing_not_found", "找不到這筆掛單的賣家。")
+    if actor["coins"] < listing["price"]:
+        raise RuleError("insufficient_coins", "貨幣不足以購買整筆掛單。")
+    item, quantity, price = listing["item"], listing["quantity"], listing["price"]
+    if seller["items"][item] < quantity:
+        raise RuleError("missing_stock", "賣家目前庫存不足，掛單仍然開放。")
+    bought, sold, closed = deepcopy(actor), deepcopy(seller), deepcopy(listing)
+    bought["coins"] -= price
+    sold["coins"] += price
+    bought["items"][item] += quantity
+    sold["items"][item] -= quantity
+    closed["status"] = "sold"
+    return bought, sold, closed, "購買完成，整筆物品與貨幣已轉移。"

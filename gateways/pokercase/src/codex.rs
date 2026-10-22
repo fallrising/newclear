@@ -2,6 +2,7 @@
 //! stable per-conversation `prompt_cache_key` + session headers so prompt-cache hits
 //! route to the machine holding the cached prefix.
 
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use bytes::Bytes;
@@ -102,6 +103,57 @@ pub fn session_headers(key: &str) -> [(&'static str, String); 2] {
     ]
 }
 
+/// Connections imported from `~/.codex/auth.json` borrow the Codex CLI's login: the CLI
+/// owns the rotating refresh token, so thinrouter re-reads the file and never refreshes.
+pub fn borrowed_source(conn: &crate::store::ConnectionRow) -> Option<PathBuf> {
+    let oauth = conn.oauth.as_ref().filter(|o| o.provider == "codex")?;
+    let meta: Value = serde_json::from_str(oauth.meta.as_deref()?).ok()?;
+    let path = PathBuf::from(meta.get("source")?.as_str()?);
+    (path.is_absolute() && path.file_name().is_some_and(|n| n == "auth.json")).then_some(path)
+}
+
+pub const BORROWED_HINT: &str =
+    "the Codex CLI owns this login: run any `codex` command (or `codex login`) to refresh ~/.codex/auth.json";
+
+/// (access token, ChatGPT account id) from a Codex CLI `auth.json`.
+pub fn read_borrowed(path: &Path) -> anyhow::Result<(String, Option<String>)> {
+    let raw = std::fs::read_to_string(path)
+        .map_err(|e| anyhow::anyhow!("read {}: {}", path.display(), e.kind()))?;
+    let v: Value = serde_json::from_str(&raw)
+        .map_err(|_| anyhow::anyhow!("{} is not valid JSON", path.display()))?;
+    let access = v
+        .pointer("/tokens/access_token")
+        .and_then(|t| t.as_str())
+        .filter(|t| !t.is_empty())
+        .ok_or_else(|| {
+            anyhow::anyhow!("{} has no access token; {BORROWED_HINT}", path.display())
+        })?;
+    let account = v
+        .pointer("/tokens/account_id")
+        .and_then(|t| t.as_str())
+        .filter(|t| !t.is_empty())
+        .map(str::to_string);
+    Ok((access.to_string(), account))
+}
+
+/// Replace the connection's access token / account id with the file's current values.
+pub fn apply_borrowed(conn: &mut crate::store::ConnectionRow, path: &Path) -> anyhow::Result<()> {
+    let (access, account) = read_borrowed(path)?;
+    if let Some(o) = conn.oauth.as_mut() {
+        o.access_token = access;
+        let mut meta: Value = o
+            .meta
+            .as_deref()
+            .and_then(|m| serde_json::from_str(m).ok())
+            .unwrap_or_else(|| serde_json::json!({}));
+        if let (Some(obj), Some(acct)) = (meta.as_object_mut(), account) {
+            obj.insert("account_id".into(), Value::String(acct));
+        }
+        o.meta = Some(meta.to_string());
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -132,6 +184,25 @@ mod tests {
         let (b, k) = ensure_prompt_cache_key(&Bytes::from(v.to_string()));
         assert_eq!(k.as_deref(), Some("mine"));
         assert_eq!(b, Bytes::from(v.to_string()));
+    }
+
+    #[test]
+    fn borrowed_login_is_read_from_auth_json() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("auth.json");
+        std::fs::write(
+            &path,
+            r#"{"tokens":{"access_token":"at-1","account_id":"acct"}}"#,
+        )
+        .unwrap();
+        assert_eq!(
+            read_borrowed(&path).unwrap(),
+            ("at-1".to_string(), Some("acct".to_string()))
+        );
+        std::fs::write(&path, r#"{"tokens":{}}"#).unwrap();
+        let err = read_borrowed(&path).unwrap_err().to_string();
+        assert!(err.contains("codex"), "{err}");
+        assert!(read_borrowed(&dir.path().join("missing/auth.json")).is_err());
     }
 
     #[test]

@@ -31,9 +31,19 @@ async fn codex_mock(State(seen): State<Seen>, req: Request) -> Response {
         .iter()
         .map(|(k, v)| (k.to_string(), v.to_str().unwrap_or("").to_string()))
         .collect();
+    let expired = req
+        .headers()
+        .get("authorization")
+        .is_some_and(|a| a == "Bearer expired");
     let body = req.into_body().collect().await.unwrap().to_bytes();
     let v: Value = serde_json::from_slice(&body).unwrap();
     seen.lock().unwrap().push((headers, v.clone()));
+    if expired {
+        return Response::builder()
+            .status(StatusCode::UNAUTHORIZED)
+            .body(Body::from(r#"{"error":{"code":"token_expired"}}"#))
+            .unwrap();
+    }
 
     let input = v["input"].as_array().cloned().unwrap_or_default();
     let last = input.last().cloned().unwrap_or(Value::Null);
@@ -112,6 +122,10 @@ impl Env {
     }
 
     async fn start_with(provider: &str) -> Self {
+        Self::start_full(provider, json!({"account_id": "acct-1"})).await
+    }
+
+    async fn start_full(provider: &str, meta: Value) -> Self {
         let seen: Seen = Arc::default();
         let app = Router::new().fallback(codex_mock).with_state(seen.clone());
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -189,7 +203,7 @@ impl Env {
                 } else {
                     format!("{upstream}/backend-api/codex/responses")
                 },
-                "default_model": "gpt-mock", "meta": "{\"account_id\":\"acct-1\"}"
+                "default_model": "gpt-mock", "meta": meta.to_string()
             }),
         )
         .await
@@ -755,4 +769,50 @@ async fn siwc_provider_applies_preview_limits() {
         .iter()
         .any(|c| c["error"]["code"] == "subscription_sharing_usage_limit_exceeded"));
     assert_eq!(chunks.last().unwrap(), "[DONE]");
+}
+
+#[tokio::test]
+async fn borrowed_codex_login_is_reread_and_never_refreshed() {
+    let auth_dir = tempfile::tempdir().unwrap();
+    let auth = auth_dir.path().join("auth.json");
+    let write = |token: &str| {
+        std::fs::write(
+            &auth,
+            json!({"tokens": {"access_token": token, "account_id": "acct-file"}}).to_string(),
+        )
+        .unwrap()
+    };
+    write("fresh-1");
+    let env = Env::start_full("codex", json!({"source": auth.to_str().unwrap()})).await;
+    let chat = json!({"model": "cx", "messages": [{"role": "user", "content": "hi"}]});
+
+    env.post("/v1/chat/completions", chat.clone()).await;
+    assert_eq!(
+        env.upstream_header("authorization").as_deref(),
+        Some("Bearer fresh-1")
+    );
+    assert_eq!(
+        env.upstream_header("chatgpt-account-id").as_deref(),
+        Some("acct-file")
+    );
+
+    // The Codex CLI refreshed its file: the next call picks it up without a restart.
+    write("fresh-2");
+    env.post("/v1/chat/completions", chat.clone()).await;
+    assert_eq!(
+        env.upstream_header("authorization").as_deref(),
+        Some("Bearer fresh-2")
+    );
+
+    // Expired and not refreshed by the CLI: clear 401, no refresh attempt.
+    write("expired");
+    let r = env
+        .client
+        .post(format!("{}/v1/chat/completions", env.base))
+        .json(&chat)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(r.status(), 401);
+    assert!(r.text().await.unwrap().contains("codex login"));
 }

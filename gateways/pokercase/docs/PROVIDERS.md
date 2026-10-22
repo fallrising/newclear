@@ -126,7 +126,17 @@ key; that only shares a cache prefix they already have in common. The User-Agent
 
 ### Token refresh
 
-Automated for **codex / claude / grok**, and **agy** when Google OAuth client env is set:
+**codex imported by `import-local` is borrowed, never refreshed.** OpenAI refresh tokens
+rotate: if thinrouter refreshed the Codex CLI's login and kept the new pair only in its
+own database, the CLI's copy would become invalid and log it out. So `import-local`
+stores no Codex refresh token and records `~/.codex/auth.json` as the source; every
+upstream attempt re-reads the access token and account id from that file. On a 401
+thinrouter re-reads the file once (the CLI may have refreshed it) and otherwise returns
+401 asking you to run any `codex` command or `codex login`. `thinrouter refresh`,
+refresh-all and the admin refresh endpoint skip or refuse borrowed connections. The
+file is only read, never written. Prefer `siwc`, which has its own tokens.
+
+Automated for **siwc / claude / grok**, codex connections imported by hand with a refresh token, and **agy** when Google OAuth client env is set:
 
 - On request: refresh if `expires_at` is within 5 minutes  
 - On upstream **401**: one refresh + retry  
@@ -146,7 +156,7 @@ export THINROUTER_AGY_CLIENT_SECRET='…'
 ### Local import
 
 ```bash
-thinrouter import-local --routes --refresh
+thinrouter import-local            # --no-routes to skip rt-*, --refresh to refresh non-Codex tokens
 ```
 
 Reads:

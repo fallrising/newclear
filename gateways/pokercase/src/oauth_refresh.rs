@@ -19,6 +19,9 @@ pub struct RefreshedTokens {
 
 /// True if access token should be refreshed (missing expiry, or within lead window).
 pub fn needs_refresh(conn: &ConnectionRow, lead_secs: i64) -> bool {
+    if crate::codex::borrowed_source(conn).is_some() {
+        return false;
+    }
     let Some(oauth) = &conn.oauth else {
         return false;
     };
@@ -62,6 +65,12 @@ fn refresh_lock(connection_id: &str) -> Arc<tokio::sync::Mutex<()>> {
 }
 
 pub async fn refresh_connection(store: &Store, conn: &ConnectionRow) -> AppResult<ConnectionRow> {
+    if crate::codex::borrowed_source(conn).is_some() {
+        return Err(AppError::BadRequest(format!(
+            "not refreshed: {}",
+            crate::codex::BORROWED_HINT
+        )));
+    }
     let lock = refresh_lock(&conn.id);
     let _guard = lock.lock().await;
     // Re-read under the lock: if another task already rotated the token, use its result.

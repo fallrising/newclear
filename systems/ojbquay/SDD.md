@@ -210,4 +210,4 @@ Prometheus scrape；退出後只清除本次 fixture 資源。版本與設定摘
 
 每個 AC 標 PASS/FAIL/NOT RUN，保留實際命令、來源 commit、測試名稱與 CI URL；未跑不可寫通過。
 全部 AC 在同一 commit 通過、必要 CI 綠燈並正常合併後，建立 annotated `usable/ojbquay/vX.Y.Z`。
-步驟見 [specification-map](docs/specification-map.md#到主線驗收的路徑)。
+重跑步驟見 [specification-map](docs/specification-map.md#驗收)。

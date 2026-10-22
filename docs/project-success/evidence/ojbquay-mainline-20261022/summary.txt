@@ -1,0 +1,24 @@
+source 71ac5f775f9c93d679a2b0b3896ddce0d713594a dirty=0
+== teardown 2026-10-22T17:57:28Z
+PASS teardown
+== gradle-build 2026-10-22T17:57:28Z
+PASS gradle-build
+== go-test 2026-10-22T17:59:21Z
+PASS go-test
+== validate-deploy 2026-10-22T17:59:22Z
+PASS validate-deploy
+== compose-e2e 2026-10-22T17:59:23Z
+PASS compose-e2e
+== ac01-ac07 2026-10-22T18:01:06Z
+PASS ac01-ac07
+== console-stack 2026-10-22T18:01:16Z
+PASS console-stack
+== console-mock 2026-10-22T18:01:38Z
+PASS console-mock
+== teardown-e2e 2026-10-22T18:01:58Z
+PASS teardown-e2e
+== pull-interop 2026-10-22T18:02:09Z
+PASS pull-interop
+== teardown-interop 2026-10-22T18:02:34Z
+PASS teardown-interop
+== done 2026-10-22T18:02:35Z

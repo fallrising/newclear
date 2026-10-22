@@ -89,5 +89,17 @@
   ],
   "unindexed_two": "unindexed-search/report.md",
   "raw_private_evidence": "Owner-retained T-0368 backup: active-search-sdd-20261022; raw private content intentionally not published",
-  "conclusion": "No original Ojbquay normative SDD found in the stated scopes. Other branches/history/deleted/external objects are not covered except previously documented archived ojbquay history."
+  "conclusion": "No original Ojbquay normative SDD found in the stated scopes. Other branches/history/deleted/external objects are not covered except previously documented archived ojbquay history.",
+  "exact_search_terms": [
+    "ojbquay",
+    "ddmq",
+    "SDD",
+    "ProduceDelay",
+    "retryIntervals",
+    "__ojbk.delay.inbox"
+  ],
+  "external_reference_classification": {
+    "newclear/refs/DDMQ/README.md": "External didi/DDMQ catalogue reference, not normative Ojbquay SDD",
+    "doc_analysis_study DD-057": "External DDMQ/Carrera architecture source, not this product SDD"
+  }
 }

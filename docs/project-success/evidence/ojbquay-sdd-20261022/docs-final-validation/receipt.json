@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-10-22T06:16:39.876122+00:00",
+  "base_commit": "6718e5bedb96f85fca414396901680c73b0e462e",
+  "source_state": "documentation-only uncommitted correction; runtime/tests/CI unchanged",
+  "command": "DOCKER_CONFIG=/tmp/ojbquay-docker-config make -C systems/ojbquay validate-deploy",
+  "exit_code": 0,
+  "observation": "exec session79488 completed exit0; full command runs validate-brand, compose, promtool, kustomize, dashboards",
+  "log_sha256": "faccd2d2b0901287d26a22e097fd78384c136880fc6bee9ba2b000accfe6e8ea",
+  "files_sha256": {
+    "systems/ojbquay/SDD.md": "39b24103d58745b0c23eec78e028d7551651784e0f03a513f6d45d8fcda95581",
+    "systems/ojbquay/docs/test-reports/mainline-sdd-20261022.md": "c7cb5b95ac19fcaf79c907813f690f0412ed2015832e8c1be5af922740204614",
+    "systems/ojbquay/deploy/validate-brand.sh": "585222d26165a2b820842bb76179b933a22d8c72bf0d0fd74089166277bd4202"
+  },
+  "gradle": {
+    "command": "./gradlew build --no-daemon --no-parallel",
+    "exit_code": 0,
+    "scope": "incremental build; unchanged runtime test tasks up-to-date, not new executions"
+  },
+  "ci": "initial39732446852 deployment-models FAIL retained; corrected-head remote CI pending"
+}

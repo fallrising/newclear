@@ -17,12 +17,13 @@ GitHub repo list offset 0/page_size 100 回傳 62 repos；offset 100 回傳 0。
 | journal | main / `9893f8b5aa93b2c0e376df43be990131bb975f61` | 全 1,144 tracked entries、所有非 binary／非 lock 內容 | 歷史工作／資格紀錄，非 SDD |
 | magpie | main / `e297a8ab27461ed32b03ce8be0f9bf957a2e754d` | 無索引；完整 5,277-entry tree、29 份文檔全文 | 六關鍵詞 0 hit |
 | kernel | main / `a1d62186a95d6693a897a9d87ffebb30e56f24c6` | 全 3,560 tracked entries、所有非 binary／非 lock 內容 | 交接／盤點／舊維護腳本引用，非 SDD |
-| newclear | main / `0aac18413a3b39043706f17b8e5f801f41573d70` | 全 7,383 tracked entries、所有非 binary／非 lock 內容；SDD/產品候選路徑 233 個 | Ojbquay 衍生規格；refs/DDMQ 是外部 didi 專案；Fleet/Kith 命中屬其他產品 |
+| newclear | main / `0aac18413a3b39043706f17b8e5f801f41573d70` | 全 7,383 tracked entries、所有非 binary／非 lock 內容；SDD/產品候選路徑 233 個 | Ojbquay 衍生規格；refs 中同名消息參考是外部 didi 專案；Fleet/Kith 命中屬其他產品 |
 | personal-journal | main / `e60c92b8a2217b283323cb96ad8b75df26461b3c` | 完整 17-entry tree、8 份文字 | 無相關命中 |
-| doc_analysis_study | main / `5c2dc8de04a16f7fe35d51c19d8a1c185f9319af` | 完整 1,562-entry tree、1,162 份文字／JSON/YAML/CSV | DD-057 是外部 DDMQ；另一 SDD 是 ledger study，不是本產品 |
+| doc_analysis_study | main / `5c2dc8de04a16f7fe35d51c19d8a1c185f9319af` | 完整 1,562-entry tree、1,162 份文字／JSON/YAML/CSV | DD-057 是外部消息平台案例；另一 SDD 是 ledger study，不是本產品 |
 | desk | main / `81f11dc2a6cbf5f4912a564cde7728d8f6c41867` | 全 1,252 tracked entries、所有非 binary／非 lock 內容 | 任務／盤點／復原計畫，無原始 SDD |
 
-文字查詢包含 `ojbquay`、`ddmq`、`ProduceDelay`、`retryIntervals`、`__ojbk.delay.inbox`；
+文字查詢包含 `ojbquay`、舊產品名稱、`ProduceDelay`、`retryIntervals`、`__ojbk.delay.inbox`；
+完整原樣查詢及命中分類保存在根目錄 evidence，遵循元件既有 namespace 檢查，不把歷史名稱重新引入產品目錄。
 文檔 corpus 另查 `SDD`，本機 repos 另列 SDD 路徑並檢查跨產品命中。
 REST recursive trees 均未截斷；本機 git tree 無 top-N。tracked entries 與 REST tree（包含 directory）
 分開描述，不混稱同一種計數。未下載大型 repo assets，未新增 clone。
@@ -105,3 +106,10 @@ JDK 25.0.4.1+1，Node 24.18.0，原 lockfiles、共用 caches，合成 fixture�
 
 工具計數：跨 session／provider requests unknown/null；本次 worker T-451 記錄 210 GitHub GET，0 API retry，
 不把 GET、exec 或 worker launch 當模型請求。外層、nested 與 execution/wait totals 未完整計時者維持 unknown/null。
+
+PR472 初次 CI：Java／console-web／project-success PASS，deployment-models FAIL（run39732446852）。
+原因是本報告三處歷史搜尋文字觸發既有 namespace validator；已移除元件內的重複舊名稱，
+精確關鍵詞／外部來源分類保留在根 evidence。未改 validator、runtime、oracle 或任何失敗紀錄。
+先前 configured deploy PASS 是報告完成前參考快照，不能沿用成最終 PASS。修正後已用相同配置
+重跑完整 `make validate-deploy`：exit0，namespace／Compose／Prometheus 5 rules／Kustomize／3 dashboards
+PASS，另有41契約／15 tests PASS；[最終文件執行收據](../../../../docs/project-success/evidence/ojbquay-sdd-20261022/docs-final-validation/receipt.json)。遠端修正後 CI 尚待執行。

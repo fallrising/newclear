@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import clientModule from '../retro/static/app.js';
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 
 const { SessionClient, STORAGE_KEY, createUUID } = clientModule;
 const state = (x = 0) => ({ id: 1, name: '旅人', profession: 'smith', x, y: 0,
@@ -261,3 +263,145 @@ test('rejected buy refreshes market and clears pending intent without altering c
   assert.equal(c.reset(), true);
   assert.deepEqual(c.listings, [], 'reset removes the previous character market');
 });
+
+// Exercise the actual browser render path, including resume and polling, without
+// adding a second copy of guidance logic to the tests.
+const appSource = readFileSync(new URL('../retro/static/app.js', import.meta.url), 'utf8');
+async function guidanceScreen(initial) {
+  let current = initial, poll;
+  const elements = new Map();
+  const element = id => {
+    if (!elements.has(id)) elements.set(id, { textContent: '', dataset: {},
+      classList: { add() {}, toggle() {} }, setAttribute() {}, addEventListener() {}, replaceChildren() {} });
+    return elements.get(id);
+  };
+  const steps = ['採集原料', '回鎮製作', '向東登塔', '看見霧海'].map((label, index) => {
+    const classes = new Set();
+    return { dataset: { step: String(index) }, lastChild: { textContent: label },
+      classList: { toggle(name, enabled) { enabled ? classes.add(name) : classes.delete(name); },
+        contains: name => classes.has(name) } };
+  });
+  const document = { getElementById: element, querySelectorAll: selector => selector === '[data-step]' ? steps : [],
+    addEventListener() {}, hidden: false };
+  runInNewContext(appSource, { document, window: { localStorage: signedIn(),
+    fetch: async () => response({ ok: true, state: current, listings: [] }) },
+    setInterval: callback => { poll = callback; }, setTimeout, clearTimeout, AbortController });
+  const flush = async () => {
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(element('coordinates').textContent, `${current.x}, ${current.y}`, 'actual render completed');
+    return { title: element('guide-title').textContent, detail: element('guide-detail').textContent,
+      gatherDisabled: element('gather').disabled, craftDisabled: element('craft').disabled,
+      towerStepLabel: steps[2].lastChild.textContent,
+      activeStepLabel: steps.find(step => step.classList.contains('current'))?.lastChild.textContent };
+  };
+  return { read: flush, update: async next => { current = next; poll(); return flush(); } };
+}
+function professionState(profession, overrides = {}) {
+  return { ...state(), profession, items: profession === 'smith'
+    ? { ore: 0, herb: 0, kit: 0, medicine: 1 }
+    : { ore: 0, herb: 0, kit: 1, medicine: 0 }, ...overrides };
+}
+for (const profession of ['smith', 'herbalist']) {
+  const smith = profession === 'smith', distance = smith ? 3 : 4, needed = smith ? 2 : 3;
+  const raw = smith ? 'ore' : 'herb';
+  const at = n => ({ x: smith ? -n : 0, y: smith ? 0 : n });
+  test(`${profession} gathering guidance follows remaining distance and executable arrival action`, async () => {
+    const screen = await guidanceScreen(professionState(profession));
+    for (let n = 0; n < distance; n++) {
+      const view = await screen.update(professionState(profession, at(n)));
+      assert.match(view.detail, new RegExp(`(?:走|剩|還有) ${distance - n} 格`));
+      assert.equal(view.gatherDisabled, true);
+    }
+    const arrived = await screen.update(professionState(profession, at(distance)));
+    assert.match(arrived.title, /採集/);
+    assert.match(arrived.detail, /按「採集」/);
+    assert.doesNotMatch(arrived.title + arrived.detail, /往[東西南北]走|走 [1-9] 格|再向/);
+    assert.equal(arrived.gatherDisabled, false);
+  });
+  test(`${profession} arrival itself never asks for redundant movement`, async () => {
+    const view = await (await guidanceScreen(professionState(profession, at(distance)))).read();
+    assert.equal(view.gatherDisabled, false);
+    assert.match(view.detail, /按「採集」/);
+    assert.doesNotMatch(view.title + view.detail, /往[東西南北]走|走 [1-9] 格/);
+  });
+  test(`${profession} cross-branch approach follows the path through town`, async () => {
+    const position = smith ? { x: 0, y: 2 } : { x: -2, y: 0 };
+    const view = await (await guidanceScreen(professionState(profession, position))).read();
+    assert.match(view.detail, smith ? /向北走 2 格回鎮，再向西走 3 格/ : /向東走 2 格回鎮，再向南走 4 格/);
+    assert.equal(view.gatherDisabled, true);
+  });
+  test(`${profession} missing opposite supply never masks next-round gathering or crafting`, async () => {
+    const nextRound = professionState(profession, { ...at(distance), tower_reward_claimed: true,
+      items: { ore: 0, herb: 0, kit: 0, medicine: 0 } });
+    const screen = await guidanceScreen(nextRound);
+    const arrived = await screen.read();
+    assert.match(arrived.title, /已抵達.*採集/);
+    assert.match(arrived.detail, /按「採集」/);
+    assert.equal(arrived.gatherDisabled, false);
+    const enough = { ...nextRound, items: { ...nextRound.items, [raw]: needed } };
+    assert.match((await screen.update(enough)).title, /回鎮製作/);
+    const town = await screen.update({ ...enough, x: 0, y: 0 });
+    assert.match(town.title, /可以製作/);
+    assert.equal(town.craftDisabled, false);
+  });
+  test(`${profession} enough raw materials means return, then executable town crafting`, async () => {
+    const ready = professionState(profession);
+    ready.items[raw] = needed;
+    const screen = await guidanceScreen({ ...ready, ...at(distance) });
+    assert.match((await screen.read()).title, /回鎮製作/);
+    const town = await screen.update(ready);
+    assert.match(town.title, /製作/);
+    assert.doesNotMatch(town.title + town.detail, /回到|回鎮/);
+    assert.equal(town.craftDisabled, false);
+  });
+  test(`${profession} post-summit return survives polling and reload without eastward command`, async () => {
+    const completed = professionState(profession, { x: 4, tower_stage: 2, tower_reward_claimed: true,
+      items: { ore: 0, herb: 0, kit: 0, medicine: 0 } });
+    const screen = await guidanceScreen(completed);
+    assert.match((await screen.read()).detail, /回鎮/);
+    for (const x of [3, 2, 1]) {
+      const returning = { ...completed, x };
+      for (const view of [await screen.update(returning), await (await guidanceScreen(returning)).read()]) {
+        assert.match(view.detail, /向西.*回鎮/);
+        assert.doesNotMatch(view.title + view.detail, /繼續向東|沿塔路向東|再向東|首次登頂.*8/);
+      }
+    }
+    const town = await screen.update({ ...completed, x: 0, tower_stage: 0 });
+    assert.match(town.detail, /市場/);
+    assert.doesNotMatch(town.title + town.detail, /沿原路回鎮|向西.*回鎮|霧影已散/);
+  });
+  test(`${profession} return step label is neutral after poll/reload and resets for the next departure`, async () => {
+    const summit = professionState(profession, { x: 4, tower_stage: 2, tower_reward_claimed: true,
+      items: { ore: 0, herb: 0, kit: 0, medicine: 0 } });
+    const screen = await guidanceScreen(summit);
+    await screen.read();
+    for (const x of [3, 2, 1]) {
+      const returning = { ...summit, x };
+      for (const view of [await screen.update(returning), await (await guidanceScreen(returning)).read()]) {
+        assert.equal(view.activeStepLabel, '塔路往返');
+        assert.equal(view.towerStepLabel, '塔路往返');
+      }
+    }
+    const town = await screen.update({ ...summit, x: 0, tower_stage: 0 });
+    assert.equal(town.towerStepLabel, '向東登塔');
+    const prepared = { ...summit, x: 0, tower_stage: 0, items: { ore: 0, herb: 0, kit: 1, medicine: 1 } };
+    const departure = await screen.update(prepared);
+    assert.equal(departure.activeStepLabel, '向東登塔');
+    const ascent = await screen.update({ ...prepared, x: 2, tower_stage: 1,
+      items: { ...prepared.items, kit: 0 } });
+    assert.equal(ascent.activeStepLabel, '向東登塔');
+    const later = await screen.update({ ...summit, x: 3 });
+    assert.equal(later.activeStepLabel, '塔路往返', 'lifetime reward cannot identify direction');
+  });
+  test(`${profession} repeated ascent is not mistaken for a completed round`, async () => {
+    const prepared = professionState(profession, { tower_reward_claimed: true,
+      items: { ore: 0, herb: 0, kit: 1, medicine: 1 } });
+    const screen = await guidanceScreen(prepared);
+    assert.match((await screen.read()).title, /登塔/);
+    const second = { ...prepared, x: 3, tower_stage: 2, items: { ore: 0, herb: 0, kit: 0, medicine: 0 } };
+    const view = await screen.update(second);
+    assert.match(view.detail, /塔頂/);
+    assert.match(view.detail, /回鎮/);
+    assert.doesNotMatch(view.title + view.detail, /你看見了|本輪已登頂|獲得 8/);
+  });
+}

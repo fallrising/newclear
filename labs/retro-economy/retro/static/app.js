@@ -260,26 +260,51 @@ function startGame() {
     $('craft').textContent = smith ? '製作修補組' : '製作行路藥';
     const own = smith ? s.items.kit : s.items.medicine;
     const raw = smith ? s.items.ore : s.items.herb;
-    let step = own > 0 ? 2 : raw >= (smith ? 2 : 3) ? 1 : 0;
-    let title = smith ? '往西走，到礫坡採集' : '往南走，到潮林採集';
-    let hint = smith ? `需要 2 礦石，目前 ${s.items.ore}。走 3 格抵達礫坡，再按「採集」。` : `需要 3 藥草，目前 ${s.items.herb}。走 4 格抵達潮林，再按「採集」。`;
-    if (step === 1) { title = '帶著原料回鎮製作'; hint = `回到中心的霧岸鎮，${smith ? '2 礦石做成修補組' : '3 藥草做成行路藥'}。`; }
+    const needed = smith ? 2 : 3;
+    const town = s.x === 0 && s.y === 0;
+    const destination = smith ? '礫坡' : '潮林';
+    const remaining = smith ? Math.abs(s.x + 3) + s.y : Math.abs(s.x) + Math.abs(s.y - 4);
+    const homeward = s.y > 0 ? `向北走 ${s.y} 格` : `${s.x < 0 ? '向東' : '向西'}走 ${Math.abs(s.x)} 格`;
+    const approach = smith
+      ? (s.y > 0 ? `${homeward}回鎮，再向西走 3 格` : `向西走 ${remaining} 格`)
+      : (s.x !== 0 ? `${homeward}回鎮，再向南走 4 格` : `向南走 ${remaining} 格`);
+    let step = own > 0 ? 2 : raw >= needed ? 1 : 0;
+    let title = remaining === 0 ? `已抵達${destination}，可以採集` : `前往${destination}採集`;
+    let hint = `需要 ${needed} ${smith ? '礦石' : '藥草'}，目前 ${raw}。` +
+      (remaining === 0 ? `再按「採集」${needed - raw} 次，即可帶原料回鎮製作。` : `${approach}抵達${destination}，再按「採集」。`);
+    if (step === 1) {
+      title = town ? '原料齊了，可以製作' : '帶著原料回鎮製作';
+      hint = town ? `按「${smith ? '製作修補組' : '製作行路藥'}」，${smith ? '2 礦石做成修補組' : '3 藥草做成行路藥'}。`
+        : `${homeward}回到霧岸鎮，再按「${smith ? '製作修補組' : '製作行路藥'}」。`;
+    }
     if (step === 2) { title = '補給齊了，向東登塔'; hint = '沿東側塔路前進 4 格；路障消耗 1 修補組，霧影消耗 1 行路藥。'; }
-    if (s.x > 0 && s.tower_stage > 0) { step = 2; title = '沿塔路向東，抵達望潮塔'; hint = s.tower_stage === 1 ? '下一格是霧影：有行路藥便能通過，否則會被送回鎮。' : '霧影已散。再向東一格就能首次登頂，獲得 8 金幣。'; }
+    if (s.x > 0 && s.tower_stage > 0) {
+      step = 2; title = '沿塔路向東，抵達望潮塔';
+      hint = s.tower_stage === 1 ? '霧影在東側：有行路藥便能通過，否則會被送回鎮。'
+        : `霧影已散。再向東 ${4 - s.x} 格就能首次登頂，獲得 8 金幣。`;
+    }
     const missingOther = (smith ? s.items.medicine : s.items.kit) === 0;
-    if (s.tower_stage === 0 && missingOther) {
+    if (s.tower_stage === 0 && missingOther && (step === 2 || (step === 0 && town))) {
       title = '這次出發，還缺異職補給';
       hint = `你需要${smith ? '藥師的行路藥' : '鐵匠的修補組'}。到旅人市場向另一位旅人購買；也可採集製作自己的成品掛單，交換下一輪補給。`;
     }
     if (s.tower_reward_claimed && s.x === 4) {
       step = 3; title = '你看見了霧後的海';
-      hint = '首次登頂獎勵已領，下次不再發獎。沿原路回鎮，製作並交易補給，便能再走一輪。';
-    } else if (s.tower_reward_claimed && s.tower_stage === 2) {
-      hint = '霧影已散，繼續向東抵達塔頂。首次獎勵已領，本輪不再發獎。';
+      hint = '首次登頂獎勵已領，下次不再發獎。向西走 4 格回鎮，製作並交易補給，便能再走一輪。';
+    } else if (s.tower_reward_claimed && s.tower_stage === 2 && s.x > 0) {
+      // The saved reward is lifetime-only: the same state can be a return trip
+      // or a later ascent. Present both routes without inventing round history.
+      step = 2; title = '本輪霧影已通過';
+      hint = `可前往東側塔頂（還有 ${4 - s.x} 格），或向西走 ${s.x} 格回鎮。首次獎勵已領，再次登頂不再發獎。`;
     }
     $('guide-title').textContent = title;
     $('guide-detail').textContent = hint;
     document.querySelectorAll('[data-step]').forEach(el => {
+      if (Number(el.dataset.step) === 2) {
+        // Keep the numbered span; update only the adjacent label text node.
+        el.lastChild.textContent = s.tower_reward_claimed && s.tower_stage === 2 && s.x > 0 && s.x < 4
+          ? '塔路往返' : '向東登塔';
+      }
       el.classList.toggle('current', Number(el.dataset.step) === step);
       el.classList.toggle('complete', Number(el.dataset.step) < step);
     });

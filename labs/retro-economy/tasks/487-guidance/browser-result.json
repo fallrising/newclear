@@ -1,0 +1,409 @@
+{
+  "result": "PASS",
+  "observations": [
+    {
+      "browser": "Chrome/154.0.8037.57",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+    },
+    {
+      "guidance": "smith-gather-approach-1",
+      "title": "前往礫坡採集",
+      "detail": "需要 2 礦石，目前 0。向西走 2 格抵達礫坡，再按「採集」。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-gather-approach-2",
+      "title": "前往礫坡採集",
+      "detail": "需要 2 礦石，目前 0。向西走 1 格抵達礫坡，再按「採集」。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-gather-approach-3",
+      "title": "已抵達礫坡，可以採集",
+      "detail": "需要 2 礦石，目前 0。再按「採集」2 次，即可帶原料回鎮製作。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": false,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-raw-ready",
+      "title": "帶著原料回鎮製作",
+      "detail": "向東走 3 格回到霧岸鎮，再按「製作修補組」。",
+      "activeStepLabel": "回鎮製作",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": false,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-craft-ready",
+      "title": "原料齊了，可以製作",
+      "detail": "按「製作修補組」，2 礦石做成修補組。",
+      "activeStepLabel": "回鎮製作",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": false
+    },
+    {
+      "guidance": "smith-summit",
+      "title": "你看見了霧後的海",
+      "detail": "首次登頂獎勵已領，下次不再發獎。向西走 4 格回鎮，製作並交易補給，便能再走一輪。",
+      "activeStepLabel": "看見霧海",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-return-3",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 1 格），或向西走 3 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-return-2",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 2 格），或向西走 2 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-return-reloaded",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 2 格），或向西走 2 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-return-1",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 3 格），或向西走 1 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-return-0",
+      "title": "這次出發，還缺異職補給",
+      "detail": "你需要藥師的行路藥。到旅人市場向另一位旅人購買；也可採集製作自己的成品掛單，交換下一輪補給。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "profession": "smith",
+      "nameRenderedSafely": true,
+      "viewport": "desktop",
+      "midwayRestart": {
+        "id": 1,
+        "name": "<b>霧岸旅人</b>",
+        "x": 2,
+        "y": 0,
+        "hp": 3,
+        "profession": "smith",
+        "coins": 12,
+        "tower_stage": 1,
+        "tower_reward_claimed": false,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 1,
+          "ore": 0
+        }
+      },
+      "completedRestart": {
+        "id": 1,
+        "name": "<b>霧岸旅人</b>",
+        "x": 4,
+        "y": 0,
+        "hp": 3,
+        "profession": "smith",
+        "coins": 20,
+        "tower_stage": 2,
+        "tower_reward_claimed": true,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 0,
+          "ore": 0
+        }
+      },
+      "duplicateRewardRejected": true,
+      "missingKitRejected": true
+    },
+    {
+      "guidance": "herbalist-gather-approach-1",
+      "title": "前往潮林採集",
+      "detail": "需要 3 藥草，目前 0。向南走 3 格抵達潮林，再按「採集」。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-gather-approach-2",
+      "title": "前往潮林採集",
+      "detail": "需要 3 藥草，目前 0。向南走 2 格抵達潮林，再按「採集」。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-gather-approach-3",
+      "title": "前往潮林採集",
+      "detail": "需要 3 藥草，目前 0。向南走 1 格抵達潮林，再按「採集」。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-gather-approach-4",
+      "title": "已抵達潮林，可以採集",
+      "detail": "需要 3 藥草，目前 0。再按「採集」3 次，即可帶原料回鎮製作。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": false,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-raw-ready",
+      "title": "帶著原料回鎮製作",
+      "detail": "向北走 4 格回到霧岸鎮，再按「製作行路藥」。",
+      "activeStepLabel": "回鎮製作",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": false,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-craft-ready",
+      "title": "原料齊了，可以製作",
+      "detail": "按「製作行路藥」，3 藥草做成行路藥。",
+      "activeStepLabel": "回鎮製作",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": false
+    },
+    {
+      "guidance": "herbalist-summit",
+      "title": "你看見了霧後的海",
+      "detail": "首次登頂獎勵已領，下次不再發獎。向西走 4 格回鎮，製作並交易補給，便能再走一輪。",
+      "activeStepLabel": "看見霧海",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-return-3",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 1 格），或向西走 3 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-return-2",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 2 格），或向西走 2 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-return-reloaded",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 2 格），或向西走 2 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-return-1",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 3 格），或向西走 1 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-return-0",
+      "title": "這次出發，還缺異職補給",
+      "detail": "你需要鐵匠的修補組。到旅人市場向另一位旅人購買；也可採集製作自己的成品掛單，交換下一輪補給。",
+      "activeStepLabel": "採集原料",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "profession": "herbalist",
+      "nameRenderedSafely": true,
+      "viewport": "390px mobile",
+      "midwayRestart": {
+        "id": 2,
+        "name": "潮林藥師",
+        "x": 2,
+        "y": 0,
+        "hp": 3,
+        "profession": "herbalist",
+        "coins": 12,
+        "tower_stage": 1,
+        "tower_reward_claimed": false,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 1,
+          "ore": 0
+        }
+      },
+      "completedRestart": {
+        "id": 2,
+        "name": "潮林藥師",
+        "x": 4,
+        "y": 0,
+        "hp": 3,
+        "profession": "herbalist",
+        "coins": 20,
+        "tower_stage": 2,
+        "tower_reward_claimed": true,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 0,
+          "ore": 0
+        }
+      },
+      "duplicateRewardRejected": true,
+      "missingKitRejected": true
+    },
+    {
+      "guidance": "smith-second-ready",
+      "title": "補給齊了，向東登塔",
+      "detail": "沿東側塔路前進 4 格；路障消耗 1 修補組，霧影消耗 1 行路藥。",
+      "activeStepLabel": "向東登塔",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-second-barrier",
+      "title": "沿塔路向東，抵達望潮塔",
+      "detail": "霧影在東側：有行路藥便能通過，否則會被送回鎮。",
+      "activeStepLabel": "向東登塔",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "smith-second-ascent",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 1 格），或向西走 3 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "profession": "smith",
+      "secondRound": {
+        "id": 1,
+        "name": "<b>霧岸旅人</b>",
+        "x": 4,
+        "y": 0,
+        "hp": 3,
+        "profession": "smith",
+        "coins": 20,
+        "tower_stage": 2,
+        "tower_reward_claimed": true,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 0,
+          "ore": 1
+        }
+      },
+      "acquiredOppositeSupplyThroughMarket": true
+    },
+    {
+      "guidance": "herbalist-second-ready",
+      "title": "補給齊了，向東登塔",
+      "detail": "沿東側塔路前進 4 格；路障消耗 1 修補組，霧影消耗 1 行路藥。",
+      "activeStepLabel": "向東登塔",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-second-barrier",
+      "title": "沿塔路向東，抵達望潮塔",
+      "detail": "霧影在東側：有行路藥便能通過，否則會被送回鎮。",
+      "activeStepLabel": "向東登塔",
+      "towerStepLabel": "向東登塔",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "guidance": "herbalist-second-ascent",
+      "title": "本輪霧影已通過",
+      "detail": "可前往東側塔頂（還有 1 格），或向西走 3 格回鎮。首次獎勵已領，再次登頂不再發獎。",
+      "activeStepLabel": "塔路往返",
+      "towerStepLabel": "塔路往返",
+      "gatherDisabled": true,
+      "craftDisabled": true
+    },
+    {
+      "profession": "herbalist",
+      "secondRound": {
+        "id": 2,
+        "name": "潮林藥師",
+        "x": 4,
+        "y": 0,
+        "hp": 3,
+        "profession": "herbalist",
+        "coins": 20,
+        "tower_stage": 2,
+        "tower_reward_claimed": true,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 0,
+          "ore": 0
+        }
+      },
+      "acquiredOppositeSupplyThroughMarket": true
+    },
+    {
+      "trading": {
+        "cancelledListing": 1,
+        "soldKit": 2,
+        "openListing": 3,
+        "soldMedicine": 4,
+        "lostBuyReplies": 2,
+        "identicalReplayBodies": true,
+        "safeSellerName": true,
+        "pollingObserved": true,
+        "restartPreservedAllStatuses": true,
+        "totalCoins": 40
+      },
+      "humanPlaytest": false
+    }
+  ]
+}

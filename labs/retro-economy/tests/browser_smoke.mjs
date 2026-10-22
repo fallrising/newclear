@@ -128,6 +128,22 @@ async function screenshot(session, name) {
   const shot = await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: cssContentSize.width, height: cssContentSize.height, scale: 1 } }, session);
   await writeFile(join(evidence, name + '.png'), Buffer.from(shot.data, 'base64'));
 }
+async function guidance(session, label) {
+  const view = await cdp.evaluate(session, `({ title: document.querySelector('#guide-title').textContent,
+    detail: document.querySelector('#guide-detail').textContent,
+    activeStepLabel: document.querySelector('[data-step].current')?.lastChild.textContent,
+    towerStepLabel: document.querySelector('[data-step="2"]').lastChild.textContent,
+    gatherDisabled: document.querySelector('#gather').disabled,
+    craftDisabled: document.querySelector('#craft').disabled })`);
+  observations.push({ guidance: label, ...view });
+  return view;
+}
+function returnGuidance(view, x) {
+  assert.equal(view.activeStepLabel, '塔路往返');
+  assert.equal(view.towerStepLabel, '塔路往返');
+  assert.match(view.detail, new RegExp(`向西走 ${x} 格回鎮`));
+  assert.doesNotMatch(view.title + view.detail, /繼續向東|沿塔路向東|再向東|首次登頂.*8/);
+}
 async function restart(session, expected) {
   await stop(server); await startServer();
   await cdp.send('Page.reload', { ignoreCache: true }, session);
@@ -183,7 +199,17 @@ try {
     assert.equal(await cdp.evaluate(session, `document.querySelector('#player-name').children.length`), 0, 'Names render as text, not HTML');
     assert.ok(await cdp.evaluate(session, 'document.documentElement.scrollWidth <= innerWidth + 1'), 'No horizontal overflow');
     const distance = profession === 'smith' ? 3 : 4;
-    for (let step = 1; step <= distance; step++) await move(session, profession === 'smith' ? 'west' : 'south', profession === 'smith' ? -step : 0, profession === 'smith' ? 0 : step);
+    for (let step = 1; step <= distance; step++) {
+      await move(session, profession === 'smith' ? 'west' : 'south', profession === 'smith' ? -step : 0, profession === 'smith' ? 0 : step);
+      const view = await guidance(session, `${profession}-gather-approach-${step}`);
+      if (step < distance) assert.match(view.detail, new RegExp(`走 ${distance - step} 格`));
+      else {
+        assert.equal(view.gatherDisabled, false);
+        assert.match(view.detail, /按「採集」/);
+        assert.doesNotMatch(view.title + view.detail, /往[東西南北]走|走 [1-9] 格/);
+        await screenshot(session, profession + '-gather-arrived');
+      }
+    }
     const item = profession === 'smith' ? 'ore' : 'herb';
     const quantity = profession === 'smith' ? 2 : 3;
     for (let n = 1; n <= quantity; n++) {
@@ -205,7 +231,11 @@ try {
       await waitFor(session, `document.querySelector('#inventory-${item}')?.textContent === '${n}'`); await ready(session);
     }
     assert.equal((await publicState(session)).items[item], quantity, 'Lost response and reload did not duplicate gathering');
+    assert.match((await guidance(session, profession + '-raw-ready')).title, /回鎮製作/);
     for (let step = distance - 1; step >= 0; step--) await move(session, profession === 'smith' ? 'east' : 'north', profession === 'smith' ? -step : 0, profession === 'smith' ? 0 : step);
+    const craftView = await guidance(session, profession + '-craft-ready');
+    assert.equal(craftView.craftDisabled, false);
+    assert.doesNotMatch(craftView.title + craftView.detail, /回到|回鎮/);
     await click(session, '#craft');
     await waitFor(session, `document.querySelector('#inventory-kit').textContent === '1' && document.querySelector('#inventory-medicine').textContent === '1'`); await ready(session);
     await move(session, 'east', 1, 0); await move(session, 'east', 2, 0);
@@ -218,10 +248,27 @@ try {
     assert.deepEqual(complete.items, { ore: 0, herb: 0, kit: 0, medicine: 0 });
     await restart(session, complete);
     assert.ok(await cdp.evaluate(session, `document.querySelector('#gather').disabled && Number(getComputedStyle(document.querySelector('#gather')).opacity) < 1`), 'Disabled gathering is visually distinct at the summit');
+    assert.match((await guidance(session, profession + '-summit')).detail, /向西走 4 格回鎮/);
     await screenshot(session, profession + '-complete');
     await move(session, 'west', 3, 0); await move(session, 'east', 4, 0);
     assert.equal((await publicState(session)).coins, 20, 'No duplicate summit award');
-    for (let x = 3; x >= 0; x--) await move(session, 'west', x, 0);
+    for (let x = 3; x >= 0; x--) {
+      await move(session, 'west', x, 0);
+      const view = await guidance(session, `${profession}-return-${x}`);
+      if (x > 0) returnGuidance(view, x);
+      else {
+        assert.match(view.detail, /市場/);
+        assert.equal(view.towerStepLabel, '向東登塔');
+        assert.doesNotMatch(view.title + view.detail, /向西.*回鎮|霧影已散/);
+        await screenshot(session, profession + '-returned-town');
+      }
+      if (x === 2) {
+        await cdp.send('Page.reload', { ignoreCache: true }, session);
+        await waitFor(session, `document.querySelector('#coordinates')?.textContent === '2, 0'`); await ready(session);
+        returnGuidance(await guidance(session, profession + '-return-reloaded'), x);
+        await screenshot(session, profession + '-return-reloaded');
+      }
+    }
     assert.equal((await publicState(session)).tower_stage, 0);
     await move(session, 'east', 1, 0); await click(session, '[data-move="east"]');
     await waitFor(session, `document.querySelector('#message').textContent.includes('路障需要')`); await ready(session);
@@ -316,7 +363,20 @@ try {
   }
 
   for (const [profession, { session }] of characters) {
-    for (let x = 1; x <= 4; x++) await move(session, 'east', x, 0);
+    const secondReady = await guidance(session, profession + '-second-ready');
+    assert.match(secondReady.title, /登塔/);
+    assert.equal(secondReady.activeStepLabel, '向東登塔');
+    for (let x = 1; x <= 4; x++) {
+      await move(session, 'east', x, 0);
+      if (x === 2) assert.equal((await guidance(session, profession + '-second-barrier')).activeStepLabel, '向東登塔');
+      if (x === 3) {
+        const view = await guidance(session, profession + '-second-ascent');
+        assert.equal(view.activeStepLabel, '塔路往返');
+        assert.match(view.detail, /塔頂/);
+        assert.match(view.detail, /回鎮/);
+        assert.doesNotMatch(view.title + view.detail, /你看見了|本輪已登頂|獲得 8/);
+      }
+    }
     const second = await publicState(session);
     assert.equal(second.coins, 20, 'Second complete tower round grants no extra reward');
     assert.equal(second.tower_stage, 2);

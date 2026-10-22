@@ -26,3 +26,9 @@ Original geometric top-down map shows exact graph and player marker, locations, 
 ## Testing
 
 Backend tests-first: pure rules (both professions routes, no mutation on refusal, adjacency, specialization, insufficient resource, deterministic encounter, backtrack, reset, one-time award), SQLite reopen/replay and HTTP malformed/body/token/static safety, process restart persistence. UI tests-first for meaningful client retry/state ordering behavior using Node built-in test runner if used, no packages. Orchestrator independently drives real browser via CDP; this is automated acceptance, not RE-3 human testing. All tests launched via agent-workspace launcher with distinct task IDs, evidence in AGENT_EVIDENCE_DIR. No dependencies or lockfiles.
+
+## Guidance correction (#487)
+
+This bounded follow-up corrects two observations from the RE-3 exploration without changing rules or extending its acceptance. Gathering guidance follows current coordinates: remaining route steps while approaching, an immediate gather instruction at the matching resource node, return-to-town when materials suffice, and craft when already in town. Cross-branch travel must first direct the player toward town.
+
+After reaching the summit, return text must not revert to an unconditional eastward command. At town it must reflect the reset stage and actual supplies. The public state has a lifetime reward flag but no per-round summit/direction flag; a later ascent cannot be classified as a return merely because a past reward was claimed. Where the supplied state is ambiguous, truthful conditional route options are acceptable; do not add or alter game mechanics to infer history. Cover first and repeat trips, reload/poll, both professions, visible guidance and action availability in regressions.

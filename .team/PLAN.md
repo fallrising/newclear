@@ -1867,3 +1867,22 @@ Root evidence-gate: ACCEPT bounded C1b correction after actual real-PG RED expec
 ## Program: Retro / RE-3 / 20261022-1315
 
 Owner-approved automated acceptance; issue #481 / PR #483. Orchestrator-owned plan: [Retro RE-3](retro-20261022-1315/PLAN.md). Other program records unchanged.
+
+
+# Retro-20261022-1429 — #487
+
+Orchestrator owns routing, acceptance, docs and Git. One narrow milestone. Main 251cb450, prior four claims RELEASED, no open Retro PR. No old worktree or evidence mutation.
+
+1. Claim + draft PR, re-read competition.
+2. T-487 native hosted worker (inherited GPT model), sequential shared tree, bounded to app.js, test_ui.mjs and browser_smoke.mjs. Tests RED before behavior, GREEN and actual browser.
+3. Orchestrator diff review, rerun full suites/repo gates, necessary docs.
+4. User-template-authorized direct subscription readonly different-family review (Claude Opus 5.5 or Grok 4.7 fallback); no paid API, no tools/delegation/writes. Pin actual head and route before call. No assumption of quota: previous session Claude429 is evidence only; Grok subscription prior PASS. Model freshness to check before call. One600s attempt per eligible family, no blind retries.
+5. Final SHA CI/latest main; merge/readback; board-only closeout and RELEASE. User prohibits tag/deploy/closing issue/AGENTS changes. Preserve worktrees when process visibility incomplete.
+
+Evidence gate: pending. Task budget 20 minutes worker, one assignment, no delegation. Native worker route uses platform capabilities, not external dispatcher.
+
+Review planning: common CLI references checked; user explicitly chooses template direct readonly subscription routes, therefore use that instead of inventing generic desk dispatcher authorization. Canonical pin and official/provider freshness documented in local .team/retro-20261022-1429/route-plan.md. No-tools claude-opus-5-5 preferred, grok-4.7 allowed alternate. Actual final-head result required.
+
+T-487 RED inspection: actual startGame/render VM tests captured both stale distances and return east commands. Corrected DOM stub before definitive red-final run: 20 old PASS, 10 new expected FAIL. Python3.11 run initially denied Docker socket in sandbox, authorized retry on existing no-network readonly image passed54; no backend files changed. Initial scope commit lacked Git identity so failed, subsequent per-command noreply identity succeeded; first PR creation had no diff and failed, subsequent #488 draft succeeded. These are environment/workflow failures, not product RED.
+
+T-487 decision: worker PARTIAL retained truthfully (browser sandbox/aborted approval). Root inspected every runtime/test diff, reran36Node and54Python (host and3.11), and completed actual Chromium under short launcher re3/fix487. Root screenshot review triggered relevant label REWORK:34pass/2fail RED ->36pass GREEN; final browser PASS including active labels, reset and repeat ascent. Accept bounded implementation with root-supplied missing browser evidence; no backend/rule/economy/CI changes. Evidence gate local requirements satisfied, final SHA review/CI/merge still pending externally. Old PLAN history preserved.

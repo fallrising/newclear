@@ -18,7 +18,7 @@ source_commit: d1e47c5574cbd65974ee362507a66d8e3deb761f
 
 ## 本次修正：提示一致性（#487）
 
-Session `Retro-20261022-1429`；[任務](tasks/487-guidance/task.md)。HINT-01 採集抵達／可執行動作、HINT-02 登頂返程／到鎮／再出發、HINT-03 紅綠回歸與實際瀏覽器畫面，目前 pending。只修提示，不改遊戲機制、交易或數值，不重新驗收或擴大 RE-3。計畫與結果見[報告](tasks/487-guidance/report.md)。既有 AC-00～03 及 mainline complete 保持原驗收含義。
+Session `Retro-20261022-1429`；[任務](tasks/487-guidance/task.md)。HINT-01 採集抵達／可執行動作、HINT-02 登頂返程／到鎮／再出發、HINT-03 紅綠回歸與實際瀏覽器畫面，均已通過本機驗證（36 Node、54 Python、實際瀏覽器）；最終 head CI／審查／合併另由 PR #488 回讀。只修提示，不改遊戲機制、交易或數值，不重新驗收或擴大 RE-3。計畫與結果見[報告](tasks/487-guidance/report.md)。既有 AC-00～03 及 mainline complete 保持原驗收含義。
 
 ## 已交付：RE-3
 
@@ -35,7 +35,7 @@ Session `Retro-20261022-1315`；[任務 #481](tasks/481-re3-automated/task.md)�
 
 ## 現況與缺口
 
-RE-0 的[規則表](docs/rules.md) 已整理配方、初始補給、地圖、遭遇及資源收支，驗證紀錄見[報告](tasks/451-re0-rules/report.md)。RE-1 已加入 Python 標準庫伺服器、SQLite、原生瀏覽器地圖與自動驗收。RE-2 已加入掛單／購買／取消、交易持久化與雙角色第二輪的自動驗證。修訂後 RE-3 自動化驗收及 AC-03 已完成；原真人實驗問題未經驗證。兩處非阻斷提示問題及策略停滯限制見 RE-3 報告。
+RE-0 的[規則表](docs/rules.md) 已整理配方、初始補給、地圖、遭遇及資源收支，驗證紀錄見[報告](tasks/451-re0-rules/report.md)。RE-1 已加入 Python 標準庫伺服器、SQLite、原生瀏覽器地圖與自動驗收。RE-2 已加入掛單／購買／取消、交易持久化與雙角色第二輪的自動驗證。修訂後 RE-3 自動化驗收及 AC-03 已完成；原真人實驗問題未經驗證。兩處非阻斷提示的歷史觀察及策略停滯限制見 RE-3 報告；提示修正另見 #487 報告，並不擴大 RE-3 結果。
 
 ## 啟動與驗證
 

@@ -86,6 +86,54 @@ final class PauseLifecycleAc09Test {
         assertThat(orchestrator.workerCount()).isEqualTo(1);
     }
 
+    @Test
+    void AC_09_failedStopIsRetriedAfterConfigBusLossWithoutConfirming() {
+        ConfigStore store = new ConfigStore();
+        java.util.concurrent.atomic.AtomicBoolean bootstrapped = new java.util.concurrent.atomic.AtomicBoolean(true);
+        java.util.concurrent.atomic.AtomicBoolean stuck = new java.util.concurrent.atomic.AtomicBoolean(true);
+        PushSubscriptionWorker worker = new PushSubscriptionWorker() {
+            public void start() {}
+            public boolean running() { return true; }
+            public Optional<String> lastError() { return Optional.empty(); }
+            public long acceptedCount() { return 0; }
+            public void close() { if (stuck.get()) throw new IllegalStateException("still running"); }
+        };
+        PushWorkerOrchestrator orchestrator =
+                new PushWorkerOrchestrator(store, sub -> worker, null, bootstrapped::get);
+        ConfigEvent enabled = event(1, true); store.apply(enabled); orchestrator.onEvent(enabled);
+        ConfigEvent paused = event(2, false); store.apply(paused); orchestrator.onEvent(paused);
+        assertThat(orchestrator.workerCount()).isEqualTo(1);
+        bootstrapped.set(false);
+        stuck.set(false);
+        orchestrator.reconcileAll();
+        assertThat(orchestrator.workerCount()).isZero();
+        assertThat(orchestrator.configVersion("1")).isEqualTo(1);
+        assertThat(orchestrator.pauseStatus("one", "boot", "roster", 1).fetchStopped()).isFalse();
+    }
+
+    @Test
+    void AC_09_reconcileFailureDoesNotCancelLaterReconciles() throws Exception {
+        ConfigStore store = new ConfigStore();
+        java.util.concurrent.atomic.AtomicInteger checks = new java.util.concurrent.atomic.AtomicInteger();
+        CountDownLatch started = new CountDownLatch(1);
+        PushSubscriptionWorker worker = new PushSubscriptionWorker() {
+            public void start() { started.countDown(); }
+            public boolean running() { return true; }
+            public Optional<String> lastError() { return Optional.empty(); }
+            public long acceptedCount() { return 0; }
+            public void close() {}
+        };
+        PushWorkerOrchestrator orchestrator = new PushWorkerOrchestrator(store, sub -> worker, null, () -> {
+            if (checks.incrementAndGet() == 1) throw new IllegalStateException("transient");
+            return true;
+        });
+        store.apply(event(1, true));
+        try {
+            orchestrator.startReconciliation();
+            assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+        } finally { orchestrator.close(); }
+    }
+
     private static ConfigEvent event(long version, boolean enabled) {
         return new ConfigEvent(1, ConfigEntityType.SUBSCRIPTION, "1", version, Instant.EPOCH,
                 "test", Map.of("id", 1, "group", "group", "topic", "orders", "owner", "test",

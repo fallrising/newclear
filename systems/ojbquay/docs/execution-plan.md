@@ -450,3 +450,8 @@ Active-repository provenance search completed: no original normative SDD found i
 ## T-0368 timing-contract decision proposal, 2026-10-22
 
 Owner approved original SDD PR472/874517a8. Continued candidate still fails original AC05; details in docs/test-reports/retry-contract-decision-20261022.md. This docs-only PR explicitly proposes changing measurement from adjacent arrivals to failure-result completion→next arrival, with identical numeric limits and original503fixture. It does not change runtime/tests, does not make historical failures pass, and must not merge without owner agreement. AC09 and original candidate work remain separate, uncommitted and unqualified. No usable tag.
+
+
+## T-0374 specification/source/test map (2026-10-22)
+
+Owner requested consolidation against code. [Specification map](specification-map.md) records existing product/ADR/M2–M6/semantics, AC01–11 source/test links and explicit discrepancies at 6c611778. This is documentation only; approved requirements and historical failures remain unchanged. README/product-spec/SUCCESS/BOARD approval notes are reconciled to PR472/477; M2's value-vs-encoded-request wording is clarified from existing M3/MessageLimits. [Current evidence](test-reports/specification-map-20261022.md) separates cached native build, static review, CI and unrun qualification.

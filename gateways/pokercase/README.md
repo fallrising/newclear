@@ -25,6 +25,15 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 
 **Out of scope (for now):** MITM, cloud sync, 9router.db compatibility, media APIs.
 
+> [!WARNING]
+> **`claude` provider: high account-ban risk.** It sends your Claude subscription OAuth token
+> straight to `api.anthropic.com` while impersonating Claude Code (`claude-cli` User-Agent,
+> `X-App: cli`, Claude Code beta headers) and forwards the caller's own `system` prompt.
+> Using subscription credentials outside the official Claude Code client can violate
+> Anthropic's terms and get the account restricted or banned. Do not enable it on an
+> account you cannot afford to lose; whether to replace it (run real `claude -p`) or remove
+> it is still an open owner decision.
+
 ## Quick start
 
 ```bash

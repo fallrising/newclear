@@ -8,7 +8,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `codex` | `cx` | **active** | OpenAI Responses | `https://chatgpt.com/backend-api/codex/responses` |
-| `claude` | `cc`, `anthropic` | **active** | Anthropic Messages | `https://api.anthropic.com/v1/messages` （订阅原理见 [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md)） |
+| `claude` | `cc`, `anthropic` | **active — high ban risk** (see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md)) | Anthropic Messages | `https://api.anthropic.com/v1/messages` |
 | `cursor` | `cu` | **active** | AgentService HTTP/2 Connect+proto (text) | `https://agent.api5.cursor.sh` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |

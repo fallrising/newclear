@@ -100,10 +100,10 @@ Kith 現行 SDD 以 Workers Paid 為部署畫像；本模組只用 Workers、D1�
 | 2 | 閱讀頁＋人類補充＋CI 建置與 Runner 匯出（RC-05～07） |
 | 之後 | 使用兩週後，依實際需要從延後清單挑下一項：公開部署、Telegram／Slack、已讀與更新差異、事件統計 |
 
-## 8. 仍待決定
+## 8. 階段 2 接線決定與後續
 
-- 內容 repo 的文章穩定 ID 從哪裡來（frontmatter `id` 或路徑雜湊）？改檔名時要保住補充的對應。
-- 匯出端點的 Runner 憑證放在私人部署環境的方式。
+- 文章 ID 採明確 registry 欄位，不從檔名推導；改名保持同 ID。完整限制、介面與原子建置見 [階段 2 契約](reading-capture-phase2.md)。
+- Runner 採專用、可撤銷的匯出／ACK bearer 憑證，D1 只存雜湊；CLI 從 owner-only 檔案讀取。正式憑證由 operator 另行建立，不檢入來源或 CI。
 - 第一個延後項目的優先順序。
 
-文章 ID 來源與 Runner 憑證的選定不影響階段 0 的 opaque ID／授權邊界；階段 2 接線前必須記錄具體方案，若需要帳號、秘密或真人操作則標記 needs-owner，不得代答。階段 0 沒有套用 migration、修改 feature flags、部署或 Agent runtime。
+上述具體方案先於階段 2 程式凍結；不改階段 0 的 opaque ID／授權邊界。CI 建置固定 commit 與本地原子發布驗收不需帳號秘密；私人來源接線與正式發布不在本次授權內。若後續需要真人操作，不得代答。階段 0 沒有套用 migration、修改 feature flags、部署或 Agent runtime。

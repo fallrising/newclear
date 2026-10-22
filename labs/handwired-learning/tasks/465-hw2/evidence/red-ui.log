@@ -1,0 +1,92 @@
+(node:202) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ built HTML runs its real inline graph offline and clears stale UI results (27.686872ms)
+✖ offline learning buttons update independent training state, history and forward coefficients (12.770154ms)
+✔ build refuses absent or modified core/license and never writes a misleading artifact (9.79493ms)
+✔ build requires an explicit absolute HTML output outside the repository (0.473844ms)
+✖ HW-A03: real fixed CPU loss/backward matches independent analytic gradients (0.259997ms)
+✖ HW-A04: immutable single-step and run-to-500 converge with fixed 0.05 (0.223407ms)
+✖ HW-A05: learning rate 2 genuinely proposes an out-of-bounds coefficient and stops (0.176358ms)
+✖ nonfinite boundary metrics stop without zero replacement or stale success (0.141868ms)
+✖ learning evaluator rejects illegal coefficient types and bounds before executing (0.130289ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 3
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.831059
+
+✖ failing tests:
+
+test at labs/handwired-learning/tests/build.test.mjs:90:1
+✖ offline learning buttons update independent training state, history and forward coefficients (12.770154ms)
+  AssertionError [ERR_ASSERTION]: learning-a
+      at Object.getElementById (file://<worktree>/labs/handwired-learning/tests/build.test.mjs:24:40)
+      at el (file://<worktree>/labs/handwired-learning/tests/build.test.mjs:96:29)
+      at TestContext.<anonymous> (file://<worktree>/labs/handwired-learning/tests/build.test.mjs:99:16)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at labs/handwired-learning/tests/learning.test.mjs:11:1
+✖ HW-A03: real fixed CPU loss/backward matches independent analytic gradients (0.259997ms)
+  TypeError: learning.createLearningEvaluator is not a function
+      at TestContext.<anonymous> (file://<worktree>/labs/handwired-learning/tests/learning.test.mjs:12:29)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)
+
+test at labs/handwired-learning/tests/learning.test.mjs:23:1
+✖ HW-A04: immutable single-step and run-to-500 converge with fixed 0.05 (0.223407ms)
+  TypeError: learning.createLearningEvaluator is not a function
+      at TestContext.<anonymous> (file://<worktree>/labs/handwired-learning/tests/learning.test.mjs:24:29)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)
+
+test at labs/handwired-learning/tests/learning.test.mjs:51:1
+✖ HW-A05: learning rate 2 genuinely proposes an out-of-bounds coefficient and stops (0.176358ms)
+  TypeError: learning.createLearningEvaluator is not a function
+      at TestContext.<anonymous> (file://<worktree>/labs/handwired-learning/tests/learning.test.mjs:52:29)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)
+
+test at labs/handwired-learning/tests/learning.test.mjs:68:1
+✖ nonfinite boundary metrics stop without zero replacement or stale success (0.141868ms)
+  TypeError: learning.createLearningEvaluator is not a function
+      at TestContext.<anonymous> (file://<worktree>/labs/handwired-learning/tests/learning.test.mjs:69:25)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)
+
+test at labs/handwired-learning/tests/learning.test.mjs:91:1
+✖ learning evaluator rejects illegal coefficient types and bounds before executing (0.130289ms)
+  TypeError: learning.createLearningEvaluator is not a function
+      at TestContext.<anonymous> (file://<worktree>/labs/handwired-learning/tests/learning.test.mjs:92:29)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)

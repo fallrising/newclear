@@ -1,0 +1,29 @@
+✔ CPU tensor and reference evaluate all nine calibration points (3.28648ms)
+✔ upstream backward produces parameter derivatives, including negative and zero x (0.413875ms)
+✔ parameters are source cells and remain adjustable without rebuilding the graph (0.227917ms)
+✔ boolean backward rejects by default rather than silently inventing a derivative (0.360466ms)
+✔ loader rejects drift before importing upstream code (3.445788ms)
+(node:202) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ built HTML runs its real inline graph offline and clears stale UI results (21.933332ms)
+✔ offline learning buttons update independent training state, history and forward coefficients (55.540231ms)
+✔ build refuses absent or modified core/license and never writes a misleading artifact (9.651642ms)
+✔ build requires an explicit absolute HTML output outside the repository (0.514254ms)
+✔ HW-A01: real pinned graph matches nine points, bounds and fractional coefficients (2.043245ms)
+✔ HW-A02: every invalid class is rejected before the evaluator is called (0.85165ms)
+✔ DOM decimal parsing is explicit while the domain only accepts finite numbers (0.195738ms)
+✔ one real graph accepts repeated source updates without stale results (0.135218ms)
+✔ fixed tolerance boundary and nonfinite graph failures are observable (0.128748ms)
+✔ HW-A03: real fixed CPU loss/backward matches independent analytic gradients (0.82998ms)
+✔ HW-A04: immutable single-step and run-to-500 converge with fixed 0.05 (15.320073ms)
+✔ HW-A05: learning rate 2 genuinely proposes an out-of-bounds coefficient and stops (0.493134ms)
+✔ nonfinite boundary metrics stop without zero replacement or stale success (1.135006ms)
+✔ learning evaluator rejects illegal coefficient types and bounds before executing (0.398966ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 182.214871

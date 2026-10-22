@@ -38,7 +38,7 @@ export async function buildPage(output, upstreamRoot) {
   const stripped = withoutExports(stripTypeScriptTypes(core, { mode: 'strip' }));
   const forward = withoutExports(await readFile(resolve(webRoot, 'forward.mjs'), 'utf8'));
   const template = await readFile(resolve(webRoot, 'index.html'), 'utf8');
-  const code = `(() => {\n'use strict';\nconst Circuit = (() => {\n${stripped}\nreturn Circuit;\n})();\n${forward}\nbindForwardPage(document, createForwardEvaluator(Circuit));\n})();`;
+  const code = `(() => {\n'use strict';\nconst Circuit = (() => {\n${stripped}\nreturn Circuit;\n})();\n${forward}\nconst forwardPage = bindForwardPage(document, createForwardEvaluator(Circuit));\nbindLearningPage(document, createLearningEvaluator(Circuit), forwardPage);\n})();`;
   const html = template.replace('<!-- HANDWIRED_LICENSE -->', license)
     .replace('<!-- HANDWIRED_SCRIPT -->', `<script>${code.replace(/<\/script/gi, '<\\/script')}</script>`);
   // Exclusive creation also prevents overwriting through an existing symlink.

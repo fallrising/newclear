@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "articles": [
+    { "id": "welcome", "title": "閱讀與補充", "path": "products/kith/content/welcome.md" },
+    { "id": "capture", "title": "先保存，再匯出", "path": "products/kith/content/capture.md" }
+  ]
+}

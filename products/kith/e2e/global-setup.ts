@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { chromium } from "@playwright/test";
 import { buildSeed } from "./fixtures/seed.ts";
+import { seedReadingFixture } from "./harness/reading-fixture.ts";
 import { readGit } from "./harness/git.ts";
 import { E2E_DIR, KITH_DIR, WEB_DIR, WEB_DIST_DIR, WRANGLER_BIN } from "./harness/paths.ts";
 import { redactText } from "./harness/redact.ts";
@@ -72,6 +73,7 @@ export default async function globalSetup(): Promise<void> {
     if (exec.status !== 0) throw new Error("seed failed; see server.log");
     writeFileSync(join(runDir, "seed.json"), JSON.stringify(seed.description, null, 2) + "\n");
 
+    await seedReadingFixture();
     const stack = await startStack(runDir, stateDir);
 
     const browser = await chromium.launch();

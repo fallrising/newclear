@@ -1,10 +1,11 @@
 import { Check, Copy } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactElement, type ReactNode } from "react";
+import { createElement, useEffect, useMemo, useState, type ReactElement, type ReactNode } from "react";
 import type { Token } from "markdown-it";
+import { Link } from "react-router";
 import { useT } from "../copy";
 import { IconButton } from "../ui/IconButton";
 import { findMentions } from "./mentions";
-import { md } from "./md";
+import { md, readingMd } from "./md";
 
 // Tokens → React elements; no raw HTML injection and no string rendering (FE-02, BR-34).
 
@@ -59,7 +60,7 @@ function mentionNodes(content: string, handles: readonly string[], key: string):
 }
 
 /** Build React nodes from a flat token list, pairing *_open / *_close. */
-function render(tokens: Token[], keyPrefix: string, handles: readonly string[]): ReactNode[] {
+function render(tokens: Token[], keyPrefix: string, handles: readonly string[], reading: boolean): ReactNode[] {
   const out: ReactNode[] = [];
   let i = 0;
   while (i < tokens.length) {
@@ -73,12 +74,12 @@ function render(tokens: Token[], keyPrefix: string, handles: readonly string[]):
         depth += tokens[j]!.nesting;
         if (depth > 0) j++;
       }
-      const children = render(tokens.slice(i + 1, j), key + ".", handles);
-      out.push(wrap(tok, children, key));
+      const children = render(tokens.slice(i + 1, j), key + ".", handles, reading);
+      out.push(wrap(tok, children, key, reading));
       i = j + 1;
       continue;
     }
-    if (tok.type === "inline") out.push(...render(tok.children ?? [], key + ".", handles));
+    if (tok.type === "inline") out.push(...render(tok.children ?? [], key + ".", handles, reading));
     else if (tok.type === "text") out.push(...mentionNodes(tok.content, handles, key));
     else if (tok.type === "softbreak" || tok.type === "hardbreak") out.push(<br key={key} />);
     else if (tok.type === "code_inline")
@@ -94,8 +95,10 @@ function render(tokens: Token[], keyPrefix: string, handles: readonly string[]):
   return out;
 }
 
-function wrap(tok: Token, children: ReactNode[], key: string): ReactNode {
+function wrap(tok: Token, children: ReactNode[], key: string, reading: boolean): ReactNode {
   switch (tok.type) {
+    case "heading_open":
+      return createElement(/^h[1-6]$/.test(tok.tag) ? tok.tag : "h2", { key, className: "mt-4 mb-2 text-lg font-semibold" }, children);
     case "paragraph_open":
       if (tok.hidden) return <span key={key}>{children}</span>;
       return (
@@ -135,7 +138,8 @@ function wrap(tok: Token, children: ReactNode[], key: string): ReactNode {
       );
     case "link_open": {
       const href = String(tok.attrGet("href") ?? "");
-      if (!md.validateLink(href)) return <span key={key}>{children}</span>;
+      if (!(reading ? readingMd : md).validateLink(href)) return <span key={key}>{children}</span>;
+      if (reading && href.startsWith("/reading/")) return <Link key={key} to={href} className="text-accent-strong underline">{children}</Link>;
       return (
         <a key={key} href={href} target="_blank" rel="noopener noreferrer nofollow" className="text-accent-strong underline">
           {children}
@@ -147,7 +151,7 @@ function wrap(tok: Token, children: ReactNode[], key: string): ReactNode {
   }
 }
 
-export function Markdown(props: { source: string; mentionHandles: readonly string[] }): ReactElement {
-  const tokens = useMemo(() => md.parse(props.source, {}), [props.source]);
-  return <>{render(tokens, "", props.mentionHandles)}</>;
+export function Markdown(props: { source: string; mentionHandles: readonly string[]; reading?: boolean }): ReactElement {
+  const tokens = useMemo(() => (props.reading ? readingMd : md).parse(props.source, {}), [props.source, props.reading]);
+  return <>{render(tokens, "", props.mentionHandles, props.reading === true)}</>;
 }

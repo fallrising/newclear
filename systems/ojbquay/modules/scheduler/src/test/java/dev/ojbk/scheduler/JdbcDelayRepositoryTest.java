@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.Instant;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.postgresql.ds.PGConnectionPoolDataSource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -78,6 +80,159 @@ final class JdbcDelayRepositoryTest {
         try (Connection connection = dataSource.getConnection();
                 Statement statement = connection.createStatement()) {
             statement.execute("TRUNCATE delay_message");
+        }
+    }
+
+    @Test
+    void committedInsertWakesAnEmptyDeadlineSnapshotWithoutEarlyDispatch() throws Exception {
+        PGConnectionPoolDataSource source = workerSource();
+        try (JdbcDelayRepository worker = JdbcDelayRepository.forWorker(source)) {
+            assertThat(worker.nextDueAt()).isEmpty();
+            repository.applyBatch(List.of(add("arrived-after-query", DUE, null, 1, null)));
+            // This must consume the notification queued after the empty snapshot, not sleep it away.
+            assertThat(worker.awaitChange(Duration.ofMillis(100))).isTrue();
+            assertThat(worker.nextDueAt()).contains(DUE);
+            assertThat(worker.dispatchDue(DUE.minusNanos(1), 500, ignored -> {})).isZero();
+            assertThat(worker.dispatchDue(DUE, 500, ignored -> {})).isEqualTo(1);
+            assertThat(worker.awaitChange(Duration.ZERO)).isFalse();
+        }
+    }
+
+    @Test
+    void earlierInsertAndCancelNotifyEveryDispatcherButDoNotPublishEarly() throws Exception {
+        PGConnectionPoolDataSource source = workerSource();
+        repository.applyBatch(List.of(add("later-notify", DUE.plusMillis(300), null, 1, null)));
+        try (JdbcDelayRepository first = JdbcDelayRepository.forWorker(source);
+                JdbcDelayRepository second = JdbcDelayRepository.forWorker(source)) {
+            assertThat(first.nextDueAt()).contains(DUE.plusMillis(300));
+            assertThat(second.nextDueAt()).contains(DUE.plusMillis(300));
+            repository.applyBatch(List.of(add("earlier-notify", DUE, null, 1, null)));
+            assertThat(first.awaitChange(Duration.ofMillis(100))).isTrue();
+            assertThat(second.awaitChange(Duration.ofMillis(100))).isTrue();
+            assertThat(first.nextDueAt()).contains(DUE);
+            assertThat(second.nextDueAt()).contains(DUE);
+            assertThat(first.dispatchDue(DUE.minusNanos(1), 500, ignored -> {})).isZero();
+            repository.applyBatch(List.of(DelayCommand.cancel("earlier-notify", "orders")));
+            assertThat(first.awaitChange(Duration.ofMillis(100))).isTrue();
+            assertThat(second.awaitChange(Duration.ofMillis(100))).isTrue();
+            assertThat(first.nextDueAt()).contains(DUE.plusMillis(300));
+            assertThat(second.dispatchDue(DUE, 500, ignored -> {})).isZero();
+        }
+    }
+
+    @Test
+    void failedBatchEmitsNoNotificationAndTheNextCommittedBatchStillWakes() throws Exception {
+        try (Connection setup = dataSource.getConnection(); Statement constraint = setup.createStatement()) {
+            constraint.execute("ALTER TABLE delay_message ADD CONSTRAINT notification_failure_fixture "
+                    + "CHECK (delay_id <> 'rejected-notify')");
+            try (JdbcDelayRepository worker = JdbcDelayRepository.forWorker(workerSource())) {
+                assertThat(worker.nextDueAt()).isEmpty();
+                assertThatThrownBy(() -> repository.applyBatch(List.of(
+                        add("rolled-back-notify", DUE, null, 1, null),
+                        add("rejected-notify", DUE, null, 1, null))))
+                        .isInstanceOf(IllegalStateException.class);
+                assertThat(worker.pendingCount()).isZero();
+                assertThat(worker.awaitChange(Duration.ofMillis(1))).isFalse();
+                repository.applyBatch(List.of(add("committed-notify", DUE, null, 1, null)));
+                assertThat(worker.awaitChange(Duration.ofMillis(100))).isTrue();
+            } finally {
+                constraint.execute("ALTER TABLE delay_message DROP CONSTRAINT notification_failure_fixture");
+            }
+        }
+    }
+
+    @Test
+    void reconnectRestoresListeningAndZeroOrSubMillisecondWaitNeverBecomesInfinite() throws Exception {
+        PGConnectionPoolDataSource source = workerSource();
+        source.setApplicationName("notification-reconnect-fixture");
+        source.setOptions("-c idle_session_timeout=5000");
+        try (JdbcDelayRepository worker = JdbcDelayRepository.forWorker(source)) {
+            assertThat(worker.nextDueAt()).isEmpty();
+            // The server kills an idle session after five seconds if a regression waits forever.
+            assertThat(worker.awaitChange(Duration.ZERO)).isFalse();
+            assertThat(worker.awaitChange(Duration.ofNanos(1))).isFalse();
+            try (Connection killer = dataSource.getConnection(); Statement query = killer.createStatement()) {
+                try (ResultSet terminated = query.executeQuery("SELECT pg_terminate_backend(pid) "
+                        + "FROM pg_stat_activity WHERE application_name = 'notification-reconnect-fixture'")) {
+                    assertThat(terminated.next()).isTrue();
+                    assertThat(terminated.getBoolean(1)).isTrue();
+                }
+            }
+            assertThatThrownBy(worker::pendingCount).isInstanceOf(IllegalStateException.class);
+            // A new physical connection cannot wait against the old snapshot.
+            assertThat(worker.awaitChange(Duration.ZERO)).isFalse();
+            assertThat(worker.nextDueAt()).isEmpty();
+            repository.applyBatch(List.of(add("after-reconnect", DUE, null, 1, null)));
+            assertThat(worker.awaitChange(Duration.ofMillis(100))).isTrue();
+        }
+    }
+
+    private static PGConnectionPoolDataSource workerSource() {
+        PGConnectionPoolDataSource source = new PGConnectionPoolDataSource();
+        source.setURL(POSTGRES.getJdbcUrl());
+        source.setUser(POSTGRES.getUsername());
+        source.setPassword(POSTGRES.getPassword());
+        source.setSocketTimeout(2);
+        return source;
+    }
+
+    @Test
+    void nextDeadlineTracksOnlyDurablePendingRows() {
+        assertThat(repository.nextDueAt()).isEmpty();
+        repository.applyBatch(List.of(
+                add("later", DUE.plusMillis(150), null, 1, null),
+                add("earlier", DUE, null, 1, null)));
+        assertThat(repository.nextDueAt()).contains(DUE);
+        repository.applyBatch(List.of(DelayCommand.cancel("earlier", "orders")));
+        assertThat(repository.nextDueAt()).contains(DUE.plusMillis(150));
+        assertThat(repository.dispatchDue(DUE.plusMillis(149), 500, ignored -> {})).isZero();
+        repository.dispatchDue(DUE.plusMillis(150), 500, ignored -> {});
+        assertThat(repository.nextDueAt()).isEmpty();
+    }
+
+    @Test
+    void nextDeadlineSkipsPeerLockedRowsInsteadOfPollingThem() throws Exception {
+        repository.applyBatch(List.of(add("locked", DUE, null, 1, null)));
+        try (Connection owner = dataSource.getConnection(); Statement lock = owner.createStatement()) {
+            owner.setAutoCommit(false);
+            lock.executeQuery("SELECT delay_id FROM delay_message FOR UPDATE").close();
+            assertThat(repository.nextDueAt()).isEmpty();
+            repository.applyBatch(List.of(add("available", DUE.plusMillis(50), null, 1, null)));
+            assertThat(repository.nextDueAt()).contains(DUE.plusMillis(50));
+            owner.rollback();
+        }
+        assertThat(repository.nextDueAt()).contains(DUE);
+    }
+
+    @Test
+    void workerSessionReleasesHintLocksAndRollsBackFailedSends() throws Exception {
+        PGConnectionPoolDataSource source = new PGConnectionPoolDataSource();
+        source.setURL(POSTGRES.getJdbcUrl());
+        source.setUser(POSTGRES.getUsername());
+        source.setPassword(POSTGRES.getPassword());
+        try (JdbcDelayRepository worker = JdbcDelayRepository.forWorker(source)) {
+            worker.applyBatch(List.of(add("hinted", DUE, null, 1, null)));
+            assertThat(worker.nextDueAt()).contains(DUE);
+            // A separate session can cancel immediately after the hint returned.
+            PGSimpleDataSource cancellationSource = new PGSimpleDataSource();
+            cancellationSource.setURL(POSTGRES.getJdbcUrl());
+            cancellationSource.setUser(POSTGRES.getUsername());
+            cancellationSource.setPassword(POSTGRES.getPassword());
+            // Fail within the test even if a regression leaves the hint's row locked.
+            cancellationSource.setOptions("-c lock_timeout=1000");
+            JdbcDelayRepository cancellation = new JdbcDelayRepository(cancellationSource);
+            try (var executor = Executors.newSingleThreadExecutor()) {
+                executor.submit(() -> cancellation.applyBatch(
+                        List.of(DelayCommand.cancel("hinted", "orders")))).get(2, TimeUnit.SECONDS);
+            }
+            assertThat(worker.dispatchDue(DUE, 500, ignored -> {})).isZero();
+            worker.applyBatch(List.of(add("rollback-worker", DUE, null, 1, null)));
+            assertThatThrownBy(() -> worker.dispatchDue(DUE, 500, ignored -> {
+                throw new IllegalStateException("synthetic broker failure");
+            })).isInstanceOf(DelayDispatchException.class);
+            assertThat(worker.pendingCount()).isEqualTo(1);
+            assertThat(worker.dispatchDue(DUE, 500, ignored -> {})).isEqualTo(1);
+            assertThat(worker.pendingCount()).isZero();
         }
     }
 

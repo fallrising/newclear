@@ -32,10 +32,13 @@ public final class GatewayConsumeRuntime implements AutoCloseable {
     private final KafkaConfigBusClient configBus;
     private final ExecutorService grpcExecutor;
     private final Server grpcServer;
+    private final AtomicBoolean bootstrapComplete = new AtomicBoolean();
     private final AtomicBoolean closed = new AtomicBoolean();
     private final CountDownLatch terminated = new CountDownLatch(1);
 
     GatewayConsumeRuntime(GatewayConsumeSettings settings) {
+        boolean resetConfigured = !settings.runtimeRoster().endpoints().isEmpty();
+        if (resetConfigured) settings.runtimeRoster().requireMember(settings.instanceId());
         metrics = new ConsumeMetrics();
         metricsHttp = new MetricsHttp(
                 new InetSocketAddress("0.0.0.0", settings.metricsPort()), metrics::scrape);
@@ -47,7 +50,21 @@ public final class GatewayConsumeRuntime implements AutoCloseable {
         orchestrator = new PushWorkerOrchestrator(
                 store,
                 subscription -> worker(settings, subscription),
-                metrics);
+                metrics,
+                bootstrapComplete::get);
+        String bootId = java.util.UUID.randomUUID().toString();
+        metricsHttp.addReadOnlyStatus("/internal/pause-status", query -> {
+            if (query == null || !query.matches("subscriptionId=[1-9][0-9]{0,18}"))
+                throw new IllegalArgumentException("subscription ID required");
+            var status = orchestrator.pauseStatus(settings.instanceId(), bootId,
+                    settings.runtimeRoster().fingerprint(), Long.parseLong(query.substring(15)));
+            if (!resetConfigured) {
+                status = new dev.ojbk.config.RuntimePauseStatus(status.instanceId(), status.bootId(),
+                        status.rosterFingerprint(), status.subscriptionId(), status.revision(), status.paused(),
+                        false, false, status.bootstrapComplete());
+            }
+            return status.toJson();
+        });
         pullWorkers = new PullWorkerRegistry(
                 store,
                 subscription -> new PullShareWorker(
@@ -64,13 +81,14 @@ public final class GatewayConsumeRuntime implements AutoCloseable {
                 "gateway-consume",
                 settings.instanceId(),
                 store);
-        configBus.addListener(event -> {
-            orchestrator.onEvent(event);
-            pullWorkers.onEvent(event);
-        });
-        configBus.addDeletionListener((type, entityId) -> {
-            orchestrator.onDeleted(type, entityId);
-            pullWorkers.onDeleted(type, entityId);
+        // Push lifecycle runs on its bounded reconciler, never the config-bus poll thread.
+        configBus.addListener(pullWorkers::onEvent);
+        configBus.addDeletionListener(pullWorkers::onDeleted);
+        configBus.addFailureListener(() -> {
+            synchronized (bootstrapComplete) {
+                bootstrapComplete.set(false);
+                metricsHttp.setReady(false);
+            }
         });
         grpcExecutor = Executors.newVirtualThreadPerTaskExecutor();
         grpcServer = NettyServerBuilder.forPort(settings.grpcPort())
@@ -83,6 +101,11 @@ public final class GatewayConsumeRuntime implements AutoCloseable {
         try {
             configBus.start();
             awaitConfig(settings.configBootstrapTimeout());
+            synchronized (bootstrapComplete) {
+                if (!configBus.ready() || configBus.lastError().isPresent())
+                    throw new IllegalStateException("config bus failed during startup");
+                bootstrapComplete.set(true);
+            }
             orchestrator.reconcileAll();
             pullWorkers.reconcileAll();
             if (orchestrator.lastError().isPresent()
@@ -94,12 +117,15 @@ public final class GatewayConsumeRuntime implements AutoCloseable {
                                         .orElseThrow());
             }
             grpcServer.start();
-            metricsHttp.setReady(true);
+            orchestrator.startReconciliation();
+            synchronized (bootstrapComplete) {
+                metricsHttp.setReady(configBus.ready() && configBus.lastError().isEmpty());
+            }
         } catch (java.io.IOException failure) {
-            close();
+            try { close(); } catch (RuntimeException cleanup) { failure.addSuppressed(cleanup); }
             throw new IllegalStateException("consumer gRPC server cannot start", failure);
         } catch (RuntimeException failure) {
-            close();
+            try { close(); } catch (RuntimeException cleanup) { failure.addSuppressed(cleanup); }
             throw failure;
         }
         LOGGER.log(
@@ -174,22 +200,34 @@ public final class GatewayConsumeRuntime implements AutoCloseable {
             return;
         }
         metricsHttp.setReady(false);
-        grpcServer.shutdown();
+        bootstrapComplete.set(false);
         try {
-            if (!grpcServer.awaitTermination(10, TimeUnit.SECONDS)) {
-                grpcServer.shutdownNow();
+            closeResources(() -> {
+                grpcServer.shutdown();
+                try {
+                    if (!grpcServer.awaitTermination(10, TimeUnit.SECONDS)) grpcServer.shutdownNow();
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    grpcServer.shutdownNow();
+                    throw new IllegalStateException("consumer gRPC stop interrupted", interrupted);
+                }
+            }, grpcExecutor, configBus, orchestrator, pullWorkers, retryPublisher, pipeline, metricsHttp);
+        } finally { terminated.countDown(); }
+    }
+
+    static void closeResources(AutoCloseable... resources) {
+        IllegalStateException aggregate = null;
+        for (AutoCloseable resource : resources) {
+            try { resource.close(); }
+            catch (Exception failure) {
+                if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
+                if (aggregate == null) aggregate = new IllegalStateException("consumer resources did not all close");
+                aggregate.addSuppressed(failure);
             }
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            grpcServer.shutdownNow();
         }
-        grpcExecutor.close();
-        configBus.close();
-        orchestrator.close();
-        pullWorkers.close();
-        retryPublisher.close();
-        pipeline.close();
-        metricsHttp.close();
-        terminated.countDown();
+        if (aggregate != null) {
+            LOGGER.log(System.Logger.Level.ERROR, "consumer resource shutdown incomplete", aggregate);
+            throw aggregate;
+        }
     }
 }

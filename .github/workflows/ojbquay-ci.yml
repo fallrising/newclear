@@ -36,6 +36,34 @@ jobs:
           java-version: "25"
       - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
       - run: ./gradlew build --no-daemon --no-parallel
+      - name: Retain test reports and container diagnostics on every outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ojbquay-java-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            systems/ojbquay/**/build/test-results/**
+            systems/ojbquay/**/build/reports/tests/**
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
+  go-sdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: systems/ojbquay/sdk/go
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: systems/ojbquay/sdk/go/go.mod
+          cache-dependency-path: systems/ojbquay/sdk/go/go.sum
+      - run: go test ./...
+      - run: go vet ./...
 
   console-web:
     runs-on: ubuntu-latest

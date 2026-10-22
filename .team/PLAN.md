@@ -1848,3 +1848,9 @@ T-452 independent review ACCEPT for proposal publication after five corrections:
 PR472 initial deployment-models CI39732446852 failed on three old-name provenance strings in the component; moved redundant names to exact root evidence, no validator/SDD/runtime change. Corrected final-doc deploy exit0,41 contracts/15tests PASS, incremental Gradle44 up-to-date PASS (no new test execution). T454 independent correction ACCEPT; original CI failure retained. Desk task-only PR108 passed check CI39732956206 and T453 independent review; merged separately without approving SDD. Corrected-head product CI still pending; SDD remains owner-gated.
 
 Kith root gates: full backend329 PASS then new pinned-replacement regression + all37 reading PASS (293+37=330); web/static/schema/success/llms/contracts/diff pass after explicit Node URL correction. FullE2E57pass/1expected desktop skip, mobile counterpart pass; manifest valid and redaction0. Systemd template syntax pass, no service activation. T475 findings all resolved by actual RED/GREEN or bootstrap documentation. Final-head CI/review/re-run still required; no merge claim yet.
+
+## T-0368 bounded WIP preservation — 2026-10-22
+
+Scope: preserve the frozen existing candidates in Git/Draft PR only, no implementation or product-test loop. Started12:33UTC; hard stop12:50UTC with3min closure. No worker/reviewer/model calls. Compare each source SHA and main baseline before copy; keep both original dirty trees. This is not product acceptance or authorization to merge a failing candidate. Full-source provenance and failure status are in tasks/445-retry-timing/wip-checkpoint.md. Token/provider totals unknown.
+
+Checkpoint sources: retry/scheduler/SDK24files in70e17dec; AC09 additional21files in a separate WIP commit. No overlapping paths and no main-source overwrites. Keep draft unaccepted; do not automatically restart prior workers.

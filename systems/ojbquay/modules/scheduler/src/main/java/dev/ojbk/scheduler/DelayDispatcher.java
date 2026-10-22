@@ -1,5 +1,6 @@
 package dev.ojbk.scheduler;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
@@ -43,6 +44,29 @@ public final class DelayDispatcher {
             metrics.recordFailure();
             throw failure;
         }
+    }
+
+    /** Wake at the next durable deadline, retaining bounded idle scans and no early sends. */
+    public Duration nextTickDelay(Clock clock, Duration idleTick) {
+        Objects.requireNonNull(clock, "clock");
+        if (idleTick == null || idleTick.isNegative() || idleTick.isZero()) {
+            throw new IllegalArgumentException("idle tick must be positive");
+        }
+        var due = repository.nextDueAt();
+        if (due.isEmpty()) {
+            return idleTick;
+        }
+        // Read time after the database query: its latency must not extend the deadline.
+        Duration remaining = Duration.between(clock.instant(), due.orElseThrow());
+        if (remaining.isNegative() || remaining.isZero()) {
+            // A peer may hold an overdue row. Do not spin while it completes its transaction.
+            remaining = Duration.ofMillis(1);
+        }
+        return remaining.compareTo(idleTick) < 0 ? remaining : idleTick;
+    }
+
+    public void awaitNextTick(Clock clock, Duration idleTick) throws InterruptedException {
+        repository.awaitChange(nextTickDelay(clock, idleTick));
     }
 
     public int cleanup(Instant before) {

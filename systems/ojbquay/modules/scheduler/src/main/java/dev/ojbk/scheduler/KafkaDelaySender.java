@@ -64,6 +64,8 @@ public final class KafkaDelaySender implements DelaySender, AutoCloseable {
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
         properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         properties.put(ProducerConfig.ACKS_CONFIG, "all");
+        // Each due record is awaited synchronously; batching linger only adds deadline lag.
+        properties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
         properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "zstd");
         properties.put(
                 ProducerConfig.MAX_REQUEST_SIZE_CONFIG,

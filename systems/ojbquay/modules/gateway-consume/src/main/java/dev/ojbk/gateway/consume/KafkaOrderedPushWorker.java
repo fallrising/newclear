@@ -168,6 +168,7 @@ public final class KafkaOrderedPushWorker implements PushSubscriptionWorker {
     @Override
     public void close() {
         running.set(false);
+        consumer.wakeup();
         stripes.close();
         if (!started.get()) {
             consumer.close(CloseOptions.timeout(Duration.ofSeconds(3)));
@@ -178,8 +179,12 @@ public final class KafkaOrderedPushWorker implements PushSubscriptionWorker {
         if (active != null) {
             try {
                 active.join(Duration.ofSeconds(5));
+                if (active.isAlive()) {
+                    throw new IllegalStateException("ordered consumer has not terminated");
+                }
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
+                throw new IllegalStateException("ordered consumer stop interrupted", interrupted);
             }
         }
     }

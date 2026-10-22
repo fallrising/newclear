@@ -1,0 +1,53 @@
+{
+  "status": "HISTORICAL_FAIL_NOT_FINAL_SOURCE_QUALIFICATION",
+  "note": "Last saved T462 run; source changed during interrupted work, so these results do not qualify the checkpoint bytes. Raw evidence remains in local immutable backup. Filename green-runtime-1.log does not mean PASS.",
+  "totals": {
+    "tests": 12,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "suite": "dev.ojbk.gateway.consume.GatewayConsumeSettingsTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_xml_sha256": "ffad8529e5a4eaef064e93e4d77e319110da46c2e50984caadc64bcbd2aa8f68",
+      "failed_cases": []
+    },
+    {
+      "suite": "dev.ojbk.gateway.consume.PauseLifecycleAc09Test",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_xml_sha256": "039606cad182b6b4952928e5200398aa72a48f476bff39b4534e238a77b54b86",
+      "failed_cases": []
+    },
+    {
+      "suite": "dev.ojbk.gateway.consume.PushWorkerOrchestratorTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "source_xml_sha256": "cf3eb17b05714bb13a4425cd096035cfa01f623cf4d0fb3a2d32e11db3bfac0c",
+      "failed_cases": [
+        {
+          "name": "startsReplacesAndStopsWorkersFromSubscriptionRevisions()",
+          "class": "dev.ojbk.gateway.consume.PushWorkerOrchestratorTest"
+        }
+      ]
+    },
+    {
+      "suite": "dev.ojbk.gateway.consume.RuntimeRecoveryAc09IntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_xml_sha256": "585bf52071931571f917e5b03ba3c15b6757a6e35603fbe28ebf7b8c66de593e",
+      "failed_cases": []
+    }
+  ]
+}

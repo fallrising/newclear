@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.common.errors.WakeupException;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.postgresql.ds.PGConnectionPoolDataSource;
 
 public final class SchedulerRuntime implements AutoCloseable {
     private static final System.Logger LOGGER =
@@ -33,7 +34,8 @@ public final class SchedulerRuntime implements AutoCloseable {
     private final MetricsHttp metricsHttp;
     private final KafkaDelayIngestor ingestor;
     private final KafkaDelaySender sender;
-    private final DelayDispatcher dispatcher;
+    private final JdbcDelayRepository ingestionRepository;
+    private final PGConnectionPoolDataSource workerDataSource;
     private final ExecutorService workers;
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final AtomicBoolean closed = new AtomicBoolean();
@@ -59,12 +61,14 @@ public final class SchedulerRuntime implements AutoCloseable {
             metricsHttp.close();
             throw failure;
         }
-        JdbcDelayRepository repository = new JdbcDelayRepository(dataSource);
+        workerDataSource = new PGConnectionPoolDataSource();
+        workerDataSource.setURL(settings.databaseUrl());
+        workerDataSource.setUser(settings.databaseUser());
+        workerDataSource.setPassword(settings.databasePassword());
+        ingestionRepository = JdbcDelayRepository.forWorker(workerDataSource);
         this.ingestor = new KafkaDelayIngestor(
-                settings.kafkaBootstrapServers(), settings.instanceId(), repository, metrics);
+                settings.kafkaBootstrapServers(), settings.instanceId(), ingestionRepository, metrics);
         this.sender = new KafkaDelaySender(settings.kafkaBootstrapServers());
-        this.dispatcher =
-                new DelayDispatcher(repository, sender, metrics, JdbcDelayRepository.MAX_BATCH);
         this.workers = Executors.newVirtualThreadPerTaskExecutor();
         workers.submit(this::ingestLoop);
         for (int index = 0; index < settings.dispatcherWorkers(); index++) {
@@ -105,6 +109,13 @@ public final class SchedulerRuntime implements AutoCloseable {
     }
 
     private void dispatchLoop(boolean ownsCleanup) {
+        try (JdbcDelayRepository repository = JdbcDelayRepository.forWorker(workerDataSource)) {
+            dispatchLoop(new DelayDispatcher(
+                    repository, sender, metrics, JdbcDelayRepository.MAX_BATCH), ownsCleanup);
+        }
+    }
+
+    private void dispatchLoop(DelayDispatcher dispatcher, boolean ownsCleanup) {
         long nextCleanup = System.nanoTime() + CLEANUP_INTERVAL.toNanos();
         long nextMetricsScan = System.nanoTime();
         while (running.get()) {
@@ -120,11 +131,16 @@ public final class SchedulerRuntime implements AutoCloseable {
                     dispatcher.cleanup(before);
                     nextCleanup = System.nanoTime() + CLEANUP_INTERVAL.toNanos();
                 }
+                if (running.get()) {
+                    dispatcher.awaitNextTick(clock, settings.dispatchTick());
+                }
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                running.set(false);
             } catch (RuntimeException failure) {
                 recordWorkerFailure("delay dispatch failed", failure);
                 pause(FAILURE_BACKOFF);
             }
-            pause(settings.dispatchTick());
         }
     }
 
@@ -166,10 +182,11 @@ public final class SchedulerRuntime implements AutoCloseable {
             Thread.currentThread().interrupt();
             workers.shutdownNow();
         }
-        ingestor.close();
-        sender.close();
-        metricsHttp.close();
-        terminated.countDown();
+        try (ingestionRepository; sender; metricsHttp) {
+            ingestor.close();
+        } finally {
+            terminated.countDown();
+        }
     }
 
     private static PGSimpleDataSource dataSource(SchedulerSettings settings) {

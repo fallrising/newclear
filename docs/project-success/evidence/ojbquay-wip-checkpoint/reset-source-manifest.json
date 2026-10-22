@@ -1,0 +1,112 @@
+{
+  "status": "WIP_NOT_ACCEPTED",
+  "source_base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+  "parent_checkpoint": "70e17decfa69c1c19ad4e4ee47a9f5a0baa9e001",
+  "files": {
+    "systems/ojbquay/deploy/compose/docker-compose.yml": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "9a9e56bcb24e943935008f0535421287c2e897900fb0bd0661189d1942293a89"
+    },
+    "systems/ojbquay/modules/common/src/main/java/dev/ojbk/config/KafkaConfigBusClient.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "8d3658d3bb36f703f90cc5f555a9ab99a93ecd340f85b2955d047d4bbea5329c"
+    },
+    "systems/ojbquay/modules/common/src/main/java/dev/ojbk/observability/MetricsHttp.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "ed199d15f50beffbc68cc644826d5000c0558b13506fff6949cf2245faefff79"
+    },
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/DefaultGroupOperations.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "e72446040ffb432fd23b13c8eba4d23a99dc46fdfb06138fda09e4b1261c9f3e"
+    },
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupWorkflowService.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "30fde0f1328b95146de9a3f4c37cdab521d4964c808b5db8f491b85cef0d1475"
+    },
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/subscription/SubscriptionService.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "297840f5255f1ba5a2cff5683a27a406faa41c267055a14af96ded534b56b976"
+    },
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/topic/TopicApiIntegrationTest.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "de8ed6402e3db45a81dbe74d33bc0767288739b162c28af7097e45c134549182"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/BoundedStripedExecutor.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "6cfd406acffb920e41c3c10e19e01954a5c95a95304278cf575304b0748e24c5"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/GatewayConsumeRuntime.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "05485c3e2ff3fcf1890a99cf6b6541727dfeb959491cdcf26bd8b6162d4c0c71"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/GatewayConsumeSettings.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "b224a4fd378f0c45b722693b268631760d93720195898eb89f5de2720ca790af"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/KafkaOrderedPushWorker.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "38dbdee3467b8d0dabf8dcc8ff25214f701f8815e597c02aaed7bbd3ac754622"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/PushWorkerOrchestrator.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "bd9c4edb32927d19d039d0a7c9c38f728fa9ff535300ed8a16c0a0ad340fbdbe"
+    },
+    "systems/ojbquay/modules/common/src/main/java/dev/ojbk/config/RuntimePauseStatus.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "abd1dd4fcfdc20c58335b20cfbebfb4edc3452d1e0ab988c1d1030dc999bf4fc"
+    },
+    "systems/ojbquay/modules/common/src/main/java/dev/ojbk/config/RuntimeRoster.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "350e3dfd38b53670a69725317883b4bc61bceb99688a6b0163ce20a2cc61845b"
+    },
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupMaintenanceFence.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "e3333ba295c74785a4d431383f2b7c406b488bd9f88ac4464455d8c62616d5e8"
+    },
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/RuntimePauseVerifier.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "7378ada2ce557837f589837b4281447e6a42d41265dd3f93dd655431319ffcc0"
+    },
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/DefaultGroupOperationsAc09Test.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "2c08da5807e5838dfde487a6a398eb6c8563bc76728359dcca967df568860139"
+    },
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/GroupMaintenanceFenceAc09Test.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "b0a2aca94cf191718846ae63591bfb89d5fbce33c16aff1866df925c54910352"
+    },
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/RuntimePauseVerifierAc09Test.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "180ce4c85faa5d3e4722da700253b87a970b440588a8a12a902ed201683adee9"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/PauseLifecycleAc09Test.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "5f962e9cc4268caea73cbf2da8de433d498c511629ef1bc1fc312b521d8d5d18"
+    },
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/RuntimeRecoveryAc09IntegrationTest.java": {
+      "candidate": "ojbquay-reset-gate",
+      "base": "874517a896b3be1695b8febb2a852f7e6c5f9307",
+      "sha256": "ff787f2ee53874d79392a45558b1320c8361bbd5f09d8eb7891a87e79d63a2bd"
+    }
+  }
+}

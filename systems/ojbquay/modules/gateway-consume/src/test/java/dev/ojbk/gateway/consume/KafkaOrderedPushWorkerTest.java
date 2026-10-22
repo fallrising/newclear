@@ -29,7 +29,9 @@ import org.testcontainers.kafka.KafkaContainer;
 final class KafkaOrderedPushWorkerTest {
     @Container
     private static final KafkaContainer KAFKA =
-            new KafkaContainer("apache/kafka:4.2.0");
+            new DiagnosticKafkaContainer("apache/kafka:4.2.0", System.out::println)
+                    // Preserve broker startup output in JUnit XML, including initialization failures.
+                    .withLogConsumer(frame -> System.out.print(frame.getUtf8String()));
 
     @Test
     void preservesSameKeyOrderWhileAnotherKeyProgresses() throws Exception {

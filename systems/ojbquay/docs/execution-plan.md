@@ -435,3 +435,9 @@ checks, affected-module checks, documentation, and acceptance evidence pass.
 ## T-0368 mainline SDD proposal (2026-10-22)
 
 Active-repository provenance search completed: no original normative SDD found in the documented scope. [New SDD proposal](../SDD.md) preserves existing AC-01 through AC-05 and strict retry timing, with a source/difference table and [reference execution report](test-reports/mainline-sdd-20261022.md). Unchanged main reference build:119/119 PASS; Go SDK import FAIL. This is not acceptance of the uncommitted repair candidate (prior132 tests:131 PASS/1 strict FAIL703ms; later focused20 PASS). Mainline remains incomplete; usable_tag:none. Owner agreement, missing AC probes and repair qualification remain pending.
+
+## T-0368 WIP preservation — 2026-10-22
+
+Existing retry/scheduler/Go source is preserved as an explicitly unaccepted Git checkpoint for handoff. [Checkpoint status and source provenance](../tasks/445-retry-timing/wip-checkpoint.md). Original strict failure remains; no new product test execution, milestone acceptance, main merge or usable tag is claimed. Delivery gates remain unmet.
+
+The separate interrupted AC09 source is also checkpointed, with an independent source manifest and a derived last-test summary preserving12tests/1FAIL. The combined branch has no full-source acceptance;44PASS belonged to an earlier source. No product tests were rerun for preservation.

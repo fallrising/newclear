@@ -1852,3 +1852,5 @@ Kith root gates: full backend329 PASS then new pinned-replacement regression + a
 ## T-0368 bounded WIP preservation — 2026-10-22
 
 Scope: preserve the frozen existing candidates in Git/Draft PR only, no implementation or product-test loop. Started12:33UTC; hard stop12:50UTC with3min closure. No worker/reviewer/model calls. Compare each source SHA and main baseline before copy; keep both original dirty trees. This is not product acceptance or authorization to merge a failing candidate. Full-source provenance and failure status are in tasks/445-retry-timing/wip-checkpoint.md. Token/provider totals unknown.
+
+Checkpoint sources: retry/scheduler/SDK24files in70e17dec; AC09 additional21files in a separate WIP commit. No overlapping paths and no main-source overwrites. Keep draft unaccepted; do not automatically restart prior workers.

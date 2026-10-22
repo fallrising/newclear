@@ -36,6 +36,17 @@ public final class MetricsHttp implements AutoCloseable {
         server.createContext("/metrics", exchange -> respond(exchange, 200, metrics.get()));
     }
 
+    public void addReadOnlyStatus(String path, java.util.function.Function<String, String> status) {
+        server.createContext(path, exchange -> {
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                respond(exchange, 405, "method not allowed\n");
+                return;
+            }
+            try { respond(exchange, 200, status.apply(exchange.getRequestURI().getRawQuery())); }
+            catch (RuntimeException invalid) { respond(exchange, 400, "invalid status request\n"); }
+        });
+    }
+
     public void start() {
         server.start();
     }

@@ -54,7 +54,23 @@ public final class BoundedStripedExecutor implements AutoCloseable {
     @Override
     public void close() {
         for (ExecutorService stripe : stripes) {
-            stripe.shutdownNow();
+            for (Runnable queued : stripe.shutdownNow()) {
+                if (queued instanceof Future<?> future) {
+                    future.cancel(true);
+                }
+            }
+        }
+        long deadline = System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos();
+        for (ExecutorService stripe : stripes) {
+            try {
+                if (!stripe.awaitTermination(Math.max(0, deadline - System.nanoTime()),
+                        java.util.concurrent.TimeUnit.NANOSECONDS)) {
+                    throw new IllegalStateException("ordered handlers have not terminated");
+                }
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("ordered handler stop interrupted", interrupted);
+            }
         }
     }
 }

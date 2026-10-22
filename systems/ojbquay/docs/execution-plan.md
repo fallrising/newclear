@@ -439,3 +439,5 @@ Active-repository provenance search completed: no original normative SDD found i
 ## T-0368 WIP preservation — 2026-10-22
 
 Existing retry/scheduler/Go source is preserved as an explicitly unaccepted Git checkpoint for handoff. [Checkpoint status and source provenance](../tasks/445-retry-timing/wip-checkpoint.md). Original strict failure remains; no new product test execution, milestone acceptance, main merge or usable tag is claimed. Delivery gates remain unmet.
+
+The separate interrupted AC09 source is also checkpointed, with an independent source manifest and a derived last-test summary preserving12tests/1FAIL. The combined branch has no full-source acceptance;44PASS belonged to an earlier source. No product tests were rerun for preservation.

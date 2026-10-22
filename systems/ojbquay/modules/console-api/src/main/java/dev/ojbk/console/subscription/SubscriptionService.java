@@ -30,6 +30,7 @@ public class SubscriptionService {
     private final ResourceAuthorization authorization;
     private final KafkaAdminOperations kafka;
     private final ChangeRecorder changes;
+    private final dev.ojbk.console.group.GroupMaintenanceFence maintenance;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     SubscriptionService(
@@ -37,12 +38,14 @@ public class SubscriptionService {
             SubscriptionValidator validator,
             ResourceAuthorization authorization,
             KafkaAdminOperations kafka,
-            ChangeRecorder changes) {
+            ChangeRecorder changes,
+            dev.ojbk.console.group.GroupMaintenanceFence maintenance) {
         this.jdbc = jdbc;
         this.validator = validator;
         this.authorization = authorization;
         this.kafka = kafka;
         this.changes = changes;
+        this.maintenance = maintenance;
     }
 
     @Transactional
@@ -52,6 +55,7 @@ public class SubscriptionService {
         ResourceRef topic = topic(request.topicId());
         authorization.requireOwnerOrAdmin(group.owner(), actor);
         authorization.requireOwnerOrAdmin(topic.owner(), actor);
+        maintenance.mutation(group.id());
         requireCompatibleShareLock(group.id(), request.spec(), null);
 
         String specJson = json(request.spec());
@@ -125,6 +129,8 @@ public class SubscriptionService {
             long id, UpdateSubscriptionRequest request, Actor actor) {
         SubscriptionView current = find(id);
         authorization.requireOwnerOrAdmin(current.owner(), actor);
+        maintenance.mutation(current.groupId());
+        current = find(id);
         validator.validate(request.spec());
         requireCompatibleShareLock(
                 current.groupId(), request.spec(), current.id());
@@ -163,6 +169,8 @@ public class SubscriptionService {
     public SubscriptionView changeState(long id, boolean enabled, Actor actor) {
         SubscriptionView current = find(id);
         authorization.requireOwnerOrAdmin(current.owner(), actor);
+        maintenance.mutation(current.groupId());
+        current = find(id);
         short state = enabled ? (short) 1 : (short) 0;
         if (current.state() == state) {
             return current;
@@ -196,6 +204,8 @@ public class SubscriptionService {
     public SubscriptionView delete(long id, Actor actor) {
         SubscriptionView current = find(id);
         authorization.requireOwnerOrAdmin(current.owner(), actor);
+        maintenance.mutation(current.groupId());
+        current = find(id);
         ResourceRef group = group(current.groupId());
         ResourceRef topic = topic(current.topicId());
         SubscriptionView deleted = jdbc.sql("""

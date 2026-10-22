@@ -44,7 +44,7 @@ AC-1～AC-14 可自動檢查：`python3 docs/fe-review/check_design.py`（每個
 | --- | --- | --- | --- |
 | AC-15 | AC-1～AC-14 的每個設計 PR | owner 審閱 | PR 內文有「需要擁有者確認的假設清單」，而且 owner 已合併該 PR。**無法自動化，由 owner 確認** |
 
-## 鎖定前實跑（2026-10-22，newclear main@f9fce6e，輸出原樣）
+## 鎖定前實跑（2026-10-22，newclear main@f9fce6e，tab 換成空白）
 
 ```text
 $ python3 docs/fe-review/check_design.py

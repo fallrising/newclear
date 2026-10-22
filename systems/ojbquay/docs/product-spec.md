@@ -114,3 +114,7 @@ Conventional Commit, and push.
 - Milestone-specific Testcontainers and E2E commands recorded in
   `docs/execution-plan.md`
 - Final `make e2e` once all deployable services exist
+
+## Mainline SDD proposal (2026-10-22)
+
+[SDD.md](../SDD.md) reconstructs the existing mainline with fixed acceptance IDs after the active-repository provenance search found no original normative input. It awaits owner agreement; this does not supersede ADR-001 or relax the 150 ms target. See the [source and execution report](test-reports/mainline-sdd-20261022.md).

@@ -1,0 +1,31 @@
+{
+  "source_base": "cda7571e8d45c9c9f036d8b65e41ad26362f7492",
+  "source_state": "uncommitted preceding candidate; later two-line fired_at-only correction had 20 focused passes, no final full build",
+  "original_artifact": "docs/project-success/evidence/ojbquay-repair/notification-final-build/xml/modules/gateway-consume/TEST-dev.ojbk.gateway.consume.PushRetryE2eTest.xml",
+  "artifact_sha256": "c71b05d518ceb54f6188e55f2244fdd516cbc205c258bc4fa3bdcb67a28d7fe9",
+  "suite": {
+    "name": "dev.ojbk.gateway.consume.PushRetryE2eTest",
+    "tests": "1",
+    "skipped": "0",
+    "failures": "1",
+    "errors": "0",
+    "timestamp": "2026-10-21T19:03:44.883Z",
+    "time": "25.19"
+  },
+  "cases": [
+    {
+      "name": "schedulesThreeRetriesThenWritesFourthFailureToDlq()",
+      "failure": "java.lang.AssertionError: \nExpecting actual:\n  703L\nto be less than:\n  180L "
+    }
+  ],
+  "observed_intervals_ms": [
+    703,
+    350,
+    639
+  ],
+  "overall_result": "132 tests:131 passed,1 strict retry failed,0 skipped",
+  "not_rerun_in_sdd_slice": true,
+  "timing_output": [
+    "retry_intervals_ms=[703, 350, 639]"
+  ]
+}

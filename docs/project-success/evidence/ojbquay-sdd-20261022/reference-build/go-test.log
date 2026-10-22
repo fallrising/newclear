@@ -1,0 +1,19 @@
+panic: runtime error: slice bounds out of range [-1:]
+
+goroutine 1 [running]:
+google.golang.org/protobuf/internal/filedesc.(*File).unmarshalSeed(0xc0000ceb40, {0xae5a77, 0x2ca, 0x2ca})
+	<operator-home>/go/pkg/mod/google.golang.org/protobuf@v1.36.11/internal/filedesc/desc_init.go:110 +0x1770
+google.golang.org/protobuf/internal/filedesc.newRawFile({{0x9d0399, 0x41}, {0xae5a77, 0x2ca, 0x2ca}, 0x1, 0x3, 0x0, 0x0, {0xb9d108, ...}, ...})
+	<operator-home>/go/pkg/mod/google.golang.org/protobuf@v1.36.11/internal/filedesc/desc_init.go:30 +0x1f3
+google.golang.org/protobuf/internal/filedesc.Builder.Build({{0x9d0399, 0x41}, {0xae5a77, 0x2ca, 0x2ca}, 0x1, 0x3, 0x0, 0x0, {0xb9d108, ...}, ...})
+	<operator-home>/go/pkg/mod/google.golang.org/protobuf@v1.36.11/internal/filedesc/build.go:105 +0xf8
+google.golang.org/protobuf/internal/filetype.Builder.Build({{{0x9d0399, 0x41}, {0xae5a77, 0x2ca, 0x2ca}, 0x1, 0x3, 0x0, 0x0, {0x0, ...}, ...}, ...})
+	<operator-home>/go/pkg/mod/google.golang.org/protobuf@v1.36.11/internal/filetype/build.go:138 +0x185
+github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1.file_ojbk_v1_common_proto_init()
+	<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay/sdk/go/gen/ojbk/v1/common.pb.go:327 +0x1d8
+github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1.init.0()
+	<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay/sdk/go/gen/ojbk/v1/common.pb.go:307 +0xf
+FAIL	github.com/fallrising/newclear/systems/ojbquay/sdk/go	0.007s
+?   	github.com/fallrising/newclear/systems/ojbquay/sdk/go/cmd/interop	[no test files]
+?   	github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1	[no test files]
+FAIL

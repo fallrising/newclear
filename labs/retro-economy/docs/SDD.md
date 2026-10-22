@@ -1,10 +1,10 @@
 # Retro Economy：霧岸鎮第一片
 
 - 日期：2026-10-22（MVP 縮減；前一版見 commit `4bb78370`）。
-- 狀態：Proposed；未實作、未建置、未試玩、未部署。
+- 狀態：RE-0 規則與 RE-1 單人路線已交付程式及自動驗證；RE-2 交易、RE-3 真人試玩待完成。未部署。
 - 投入／文檔檔位：未分級。
 - 本文的數值是待驗證起點，不是平衡結果。
-- RE-0 的配方、數量、路程及資源來源／去向見[一頁規則表](rules.md)；仍未實作或試玩。
+- RE-0 的配方、數量、路程及資源來源／去向見[一頁規則表](rules.md)；單人規則已實作，數值尚未真人試玩。
 
 ## 1. MVP 要回答的問題
 
@@ -59,12 +59,13 @@ RE-0 初始背包假設：每個新角色僅獲一次異職成品，讓 RE-1 單
 | --- | --- |
 | characters | id、name、token、x、y、hp、profession、coins、tower_stage（0／1／2）、tower_reward_claimed |
 | items | character_id、item、quantity |
-| listings | id、seller_id、item、quantity、price、status（open／sold／cancelled） |
-| log | seq、character_id、action、result、time |
+| listings（RE-2，尚未建立） | id、seller_id、item、quantity、price、status（open／sold／cancelled） |
+| log | seq、character_id、action_id、action、status、result、time；角色＋action_id 唯一 |
+| joins | join_id、payload、result；建角重試收據 |
 
 數量與金額為非負整數。購買時在同一 transaction 檢查掛單仍 open、買家錢夠、賣家仍有物品，然後轉移並標 sold。
 `tower_stage` 保存本輪路障／遭遇進度；回鎮歸零。`tower_reward_claimed` 是永久的一次性獎勵標記，與發獎一起提交。建角補給與角色一起建立，重啟不補發。細節見[規則表](rules.md)。
-每個動作帶 client 產生的 `action_id`；伺服器記住每角色最近的 action_id，重送時回傳上次結果，不重複執行。
+每個動作帶 client 產生的 `action_id`；RE-1 將原先「最近」明確化為每角色完整的持久收據歷史，包含規則拒絕。同 ID、同內容回傳原結果，不重複執行；同 ID、不同內容拒絕（409）。這讓穿插其他動作後才到達的延遲重試仍安全，重啟不失效。建角同樣用 `join_id` 防止重複發補給；收據與狀態一起提交。此本機原型不清理收據，資料庫會隨動作增長。HTTP／UI 邊界與回復流程見 [RE-1 契約](re1-contract.md)。
 
 ## 7. 里程碑
 
@@ -103,4 +104,4 @@ RE-0 初始背包假設：每個新角色僅獲一次異職成品，讓 RE-1 單
 - [Blizzard：Dragonflight 職業設計](https://news.blizzard.com/en-us/article/23876529/dragonflight-making-it-with-professions)：僅作職業專精與供需的靈感來源。
 - [目錄分類政策](../../../docs/taxonomy.md)、[文檔檔位政策](../../../docs/portfolio-doc-tiers.md)。
 
-以上全部是設計及未來驗收要求，沒有安裝、平衡或試玩結果。
+RE-1 的實際啟動與驗證見 [README](../README.md) 及[交付報告](../tasks/454-re1-solo/report.md)。自動測試不代表 RE-A01／A02 的真人理解、交易或重玩動機成立；RE-2 競爭交易案例與 RE-3 訪談尚未執行。

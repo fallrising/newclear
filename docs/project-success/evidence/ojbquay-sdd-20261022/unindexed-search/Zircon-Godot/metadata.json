@@ -1,0 +1,21 @@
+{
+  "full_name": "fallrising/Zircon-Godot",
+  "default_branch": "master",
+  "archived": false,
+  "private": false,
+  "size": 478387,
+  "updated_at": "2026-10-03T17:40:02Z",
+  "pushed_at": "2026-10-03T17:32:35Z",
+  "retrieved_at": "2026-10-22T05:52:30.044396+00:00",
+  "default_commit": "14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e",
+  "tree_entries": 2416,
+  "truncated": false,
+  "api_queries": [
+    "GET /repos/fallrising/Zircon-Godot",
+    "GET /repos/fallrising/Zircon-Godot/git/ref/heads/master",
+    "GET /repos/fallrising/Zircon-Godot/git/trees/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e?recursive=1",
+    "GET /repos/fallrising/Zircon-Godot/git/commits/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e"
+  ],
+  "commit_tree_sha": "465c3ed90ff31a8ada977ba0aa3be7cfd1f37fc5",
+  "recursive_tree_response_sha": "14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e"
+}

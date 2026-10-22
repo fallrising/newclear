@@ -4,7 +4,7 @@ purpose: 在 Kafka 與 PostgreSQL 上提供自助訊息發布、消費及故障�
 kind: service
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-21
+reviewed: 2026-10-22
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
 
@@ -72,3 +72,16 @@ make e2e
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須核對歷史測試 tree 與目前目標 commit 差異，重跑必要 build/真 Compose 主線；標記必須保留 at-least-once、連線 affinity 與本機功能資格限制。
+
+## 2026-10-22 SDD 提案與現況補記
+
+[新主線 SDD](SDD.md) 已完成提案，待 owner 同意，尚未取代已接受來源；搜尋未找到原始 normative SDD。
+AC-01～05 延用原 ID；新列 AC-06 producer 拒絕、AC-07 LKG、AC-08 pipeline/ordering、AC-09 offset reset、
+AC-10 console、AC-11 同版本啟動，均整理既有 product-spec/M2～M6 行為，詳見 SDD 的 Given/When/Then。
+[逐 AC 實際結果與缺口](docs/test-reports/mainline-sdd-20261022.md#ac-證據矩陣) 與 [任務草案](docs/tasks/BOARD.md)。
+
+main `0aac18413a3b39043706f17b8e5f801f41573d70` 的119-test build PASS 是參考實作結果，其 retry oracle
+仍寬於 AC-05；Go SDK import panic FAIL。另一工作樹未提交候選的132-test 快照仍是131 PASS/1 strict FAIL，
+intervals [703,350,639]ms；後續兩行 fired_at scope correction 只有20 focused PASS，沒有最終完整驗收。
+原始失敗、第一次交付與到達間隔計時都保留，未增加暖機或放寬門檻。
+本頁原五列 historical 不改成新 PASS；SDD 提案也不構成 owner 驗收。usable_tag:none。

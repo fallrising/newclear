@@ -1,0 +1,21 @@
+{
+  "full_name": "fallrising/magpie",
+  "default_branch": "main",
+  "archived": false,
+  "private": false,
+  "size": 139635,
+  "updated_at": "2026-10-13T17:10:06Z",
+  "pushed_at": "2026-10-13T15:30:35Z",
+  "retrieved_at": "2026-10-22T05:52:28.924183+00:00",
+  "default_commit": "e297a8ab27461ed32b03ce8be0f9bf957a2e754d",
+  "tree_entries": 5277,
+  "truncated": false,
+  "api_queries": [
+    "GET /repos/fallrising/magpie",
+    "GET /repos/fallrising/magpie/git/ref/heads/main",
+    "GET /repos/fallrising/magpie/git/trees/e297a8ab27461ed32b03ce8be0f9bf957a2e754d?recursive=1",
+    "GET /repos/fallrising/magpie/git/commits/e297a8ab27461ed32b03ce8be0f9bf957a2e754d"
+  ],
+  "commit_tree_sha": "62ad299d3381ce2c6a428305bd9a4691225451e8",
+  "recursive_tree_response_sha": "e297a8ab27461ed32b03ce8be0f9bf957a2e754d"
+}

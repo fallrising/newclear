@@ -1788,3 +1788,13 @@ HW1-D03 root inspected all product/build/test diffs and accepts T-901 implementa
 HW1-D04 final reviewer route supersedes historical HW1-R01: installed Grok 1.0.62 reports authenticated grok.com and grok-4.7 available when network is accessible. Pin xAI reviewer, author OpenAI, all tools/web/subagents disabled, 600s and max3 turns; use existing login and no API keys. No paid API or configuration changes. Final-head review and CI pending.
 
 HW1-D05 evidence-gate: ACCEPT bounded HW-1 local behavior. Root reran 13 Node tests, 9-point probe, 41 project contracts, 15 contract tests, 5 llms indexes, task/report validators and diff check; all pass. Offline Chromium with existing libs passed functional and responsive checks. Final delivery remains conditional on final-head CI, different-family review and merge readback recorded on PR #460. No HW-2 or human acceptance claim.
+
+## Handwired HW-2 — Handwired-20261022-0411 / #465
+
+One milestone, AC-03 / HW-A03–05 only. HW-1 merged c84941e2; base includes new repo technical task contract. Direct owner instruction and issue authorize work; board T-0465 records UTC activity. No desk claim needed for direct technical task. Original prompt authorizes commit/push/draft/conditional merge; no deploy/tag/issue closure.
+
+Orchestrator uses codex-team-delivery and evidence-gate. T-903 is sole sequential implementation worker on this dedicated tree; no delegation or Git writes. Root owns docs, PLAN, board and CI, and will not write source concurrently. T-904 is final different-family read-only reviewer, route to authenticated Grok grok-4.7 after preflight, fixed diff/spec packet, 600-second limit, plan/read-only, no nested agents or paid API. Previous CLI --tools empty retains Read, so explicitly audit tool transcript and restrict use to supplied packet.
+
+Gates: observe RED before implementation; actual fixed upstream gradients vs analytic formula, nine-point 500-step max error <=0.05, lr2 stop, reset, immutable HW-1 validation/tolerance, actual offline browser clicks; existing/full Node tests, project contracts/tests, llms, task/report validators, links/diff; final-head CI and independent review; integrate current main; merge readback. New board closeout requirement is a separate board-only follow-up PR after actual merge, same milestone. HW-3 needs real users and remains pending.
+
+State: scope recorded, implementation not started. Native worker budget 25 minutes, one fix pass; external review 600 seconds per final revision. No automatic cleanup; preserve source/evidence.

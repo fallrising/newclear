@@ -35,7 +35,7 @@
 
 ## PR
 
-- 一個元件一個 PR（彼此綁定的元件可以合併，例如本 repository 順序中註明的組合）。分支命名 `fe-review/design-<元件名>`；依 issue 執行時，PR 說明寫 `Closes #<issue>`，合併即代表擁有者已確認設計。
+- 一個元件一個 PR（彼此綁定的元件可以合併，例如本 repository 順序中註明的組合）。分支命名 `fe-review/design-<元件名>`；依 issue 執行時，PR 說明寫 `Refs #<issue>`（不自動關閉 issue）；擁有者合併 PR 即代表確認設計，issue 由擁有者關閉。
 - PR 說明包含：本次處理的元件、`DESIGN.md` 的修改項目摘要、**需要擁有者確認的假設清單**、修正過的 `REVIEW.md`／`PROMPT.md`／`targets.json` 內容，以及執行過的檢查（連結檢查、元件自己的文件檢查）。
 - 除非擁有者明確要求，不要自行合併。
 

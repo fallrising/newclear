@@ -4,6 +4,7 @@ import { invalid, requireOperator } from "../auth.ts";
 import type { Env } from "../env.ts";
 import { errorBody } from "../errors.ts";
 import { extraKeys, parseObject, utf8Bytes } from "../json.ts";
+import { isExportEndpoint, mountReadingRoutes, requireExportCaller } from "./reading.ts";
 
 type AppEnv = { Bindings: Env };
 type Capture = { id: string; body: string; source: "web"; created_at: string; exported_commit: string | null };
@@ -12,7 +13,7 @@ const ID = /^[A-Za-z0-9_-]{1,128}$/;
 const COLUMNS = "id, body, source, created_at, exported_commit";
 
 export function isReadingCapturePath(path: string): boolean {
-  return ["/api/captures", "/api/notes", "/api/reading-export"].some((prefix) => path === prefix || path.startsWith(prefix + "/"));
+  return ["/api/captures", "/api/notes", "/api/reading", "/api/reading-export"].some((prefix) => path === prefix || path.startsWith(prefix + "/"));
 }
 
 function validBody(body: unknown): body is string {
@@ -43,6 +44,11 @@ export function mountReadingCaptureRoutes(app: Hono<AppEnv>, options: { now: () 
 }): void {
   app.use("/api/*", async (c, next) => {
     if (!isReadingCapturePath(c.req.path)) return next();
+    if (isExportEndpoint(c.req.method,c.req.path)) {
+      const denied = await requireExportCaller(c);
+      if (denied) return denied;
+      return next();
+    }
     const auth = await requireOperator(c);
     if (auth instanceof Response) return auth;
     await next();
@@ -86,7 +92,5 @@ export function mountReadingCaptureRoutes(app: Hono<AppEnv>, options: { now: () 
     return c.json({ captures, next_cursor: next });
   });
 
-  app.on(["GET", "PUT"], "/api/notes/:article_id", (c) => c.json(errorBody("not_implemented", "notes are not implemented yet"), 501));
-  app.get("/api/reading-export", (c) => c.json(errorBody("not_implemented", "export is not implemented yet"), 501));
-  app.post("/api/reading-export/ack", (c) => c.json(errorBody("not_implemented", "export acknowledgement is not implemented yet"), 501));
+  mountReadingRoutes(app,options,validBody);
 }

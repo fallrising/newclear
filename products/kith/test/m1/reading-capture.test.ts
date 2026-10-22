@@ -102,9 +102,11 @@ describe("reading capture phase 1", () => {
     expect(await rows()).toHaveLength(0);
     expect((await env.DB.prepare("SELECT * FROM notes").all()).results).toHaveLength(0);
   });
-  it("does not pretend reserved operator functionality is implemented", async () => {
+  it("phase2 replaces the reserved routes without bypassing request validation", async () => {
     for (const [method,path] of [["GET","/api/notes/article"],["PUT","/api/notes/article"],["GET","/api/reading-export"],["POST","/api/reading-export/ack"]]) {
-      expect((await call(method!,path!,method === "GET" ? undefined : {})).status).toBe(501);
+      const response = await call(method!,path!,method === "GET" ? undefined : {});
+      expect(response.status).not.toBe(501);
+      expect([400,503]).toContain(response.status);
     }
   });
 });

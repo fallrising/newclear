@@ -10,7 +10,8 @@
     "dev": "vite",
     "lint": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "test:timeline": "node --test test/timeline-anchor.test.mjs",
-    "build": "npm run test:timeline && npm run lint && vite build"
+    "build": "npm run test:reading && npm run test:timeline && npm run lint && vite build",
+    "test:reading": "node --test --test-isolation=none src/markdown/reading-markdown.test.mjs"
   },
   "dependencies": {
     "@fontsource-variable/figtree": "5.3.0",

@@ -1,9 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
-import type { APIRequestContext, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { test, expect } from "../fixtures/kith.ts";
 import { ACCOUNTS } from "../fixtures/accounts.ts";
 import { loginViaUi, openActor } from "../fixtures/actors.ts";
@@ -11,48 +8,9 @@ import { fakeProviderLog } from "../fixtures/console.ts";
 import { note, shot } from "../harness/evidence.ts";
 import { KITH_DIR, WRANGLER_BIN } from "../harness/paths.ts";
 import { wranglerEnv } from "../harness/server.ts";
+import { checkExportBoundaries } from "../harness/reading-auth.ts";
+import { stateDir, query, captures, snapshot, request } from "../harness/reading-db.ts";
 
-// Only inspect the SQLite backing this run's isolated local D1. No production binding or data.
-function stateDir(): string {
-  const dir = process.env.KITH_E2E_RUN_DIR;
-  if (process.env.KITH_E2E_SETUP_OK !== "1" || !dir) throw new Error("isolated E2E setup required");
-  return join(dir, "state");
-}
-function databaseFiles(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name);
-    return entry.isDirectory() ? databaseFiles(path) : entry.name.endsWith(".sqlite") ? [path] : [];
-  });
-}
-function query(sql: string, ...values: string[]): Record<string, unknown>[] {
-  for (const file of databaseFiles(join(stateDir(), "v3", "d1"))) {
-    const db = new DatabaseSync(file, { readOnly: true });
-    try {
-      if (!db.prepare("SELECT 1 FROM sqlite_master WHERE name = 'members'").get()) continue;
-      return db.prepare(sql).all(...values) as Record<string, unknown>[];
-    } finally { db.close(); }
-  }
-  throw new Error("isolated Kith D1 database not found");
-}
-function captures(key: string): Record<string, unknown>[] {
-  return query("SELECT id, body, source, client_key, exported_commit FROM captures WHERE client_key = ?", key);
-}
-function snapshot(): Record<string, unknown> {
-  // Compare complete rows, not merely counts, so an accidental edit also fails.
-  return {
-    messages: query("SELECT * FROM messages ORDER BY id"),
-    captures: query("SELECT * FROM captures ORDER BY id"),
-    notes: query("SELECT * FROM notes ORDER BY id"),
-  };
-}
-async function request(request: APIRequestContext, method: string, path: string, body?: unknown) {
-  const csrf = method === "GET" ? null : await (await request.get("/api/csrf")).json() as { csrf: string };
-  return request.fetch(path, {
-    method,
-    headers: csrf ? { "X-CSRF-Token": csrf.csrf } : {},
-    ...(body === undefined ? {} : { data: body }),
-  });
-}
 async function openCapture(page: Page): Promise<void> {
   await loginViaUi(page, ACCOUNTS.ada);
   await expect(page.getByTestId("capture-link")).toBeVisible();
@@ -291,11 +249,15 @@ test("E2E-RC-03 offline draft and storage failure never claim server persistence
 });
 
 const ENDPOINTS = [
+  { method: "GET", path: "/api/reading" },
+  { method: "GET", path: "/api/reading-export/tokens" },
+  { method: "POST", path: "/api/reading-export/tokens", body: {} },
+  { method: "DELETE", path: "/api/reading-export/tokens/missing-token" },
   { method: "GET", path: "/api/captures" },
   { method: "POST", path: "/api/captures", body: { body: "RC04 denied synthetic body", client_key: "rc04-denied" } },
   { method: "GET", path: "/api/notes/synthetic-article" },
   { method: "PUT", path: "/api/notes/synthetic-article", body: { body: "RC04 denied note" } },
-  { method: "GET", path: "/api/reading-export" },
+  { method: "GET", path: "/api/reading-export?kind=captures" },
   { method: "POST", path: "/api/reading-export/ack", body: { capture_id: "synthetic-id", exported_commit: "a".repeat(40) } },
 ] as const;
 
@@ -339,11 +301,7 @@ test("E2E-RC-04 all private routes enforce session, operator, CSRF and bounded i
           expect(await res.text()).not.toContain(sentinel);
         }
       }
-      if (endpoint.path !== "/api/captures") {
-        const res = await request(page.request, endpoint.method, endpoint.path, body);
-        expect(res.status(), "reserved operator route must not pretend success").toBe(501);
-        expect(await res.text()).not.toContain(sentinel);
-      }
+
     }
     expect(snapshot()).toEqual(before);
     for (const body of [
@@ -371,10 +329,11 @@ test("E2E-RC-04 all private routes enforce session, operator, CSRF and bounded i
     expect(query("SELECT * FROM messages ORDER BY id")).toEqual(before.messages);
     expect(query("SELECT * FROM notes ORDER BY id")).toEqual(before.notes);
     expect((await fakeProviderLog()).length).toBe(providersBefore);
-    note(info, "Anonymous/expired 401, member 403, invalid CSRF 401 and operator reserved-route 501 across captures/notes/export; denied requests preserve every D1 row and reveal no sentinel. UTF-8 bounds and pagination rejected malformed input.");
+    note(info, "Anonymous/expired 401, member 403, invalid CSRF 401 across reading/captures/notes/export/token routes; denied requests preserve every D1 row and reveal no sentinel. UTF-8 bounds and pagination rejected malformed input.");
   } finally {
     await anonymous.close();
     await expired.close();
     await member.context.close();
   }
+  await checkExportBoundaries(page, browser, recorder, info);
 });

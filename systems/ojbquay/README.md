@@ -211,8 +211,11 @@ OJBQUAY_KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
 
 Its pull gRPC port defaults to `9101` and its metrics/readiness port to `9202`.
 Optional settings are `OJBQUAY_INSTANCE_ID`, `OJBQUAY_GRPC_PORT`,
-`OJBQUAY_METRICS_PORT`, and
-`OJBQUAY_CONFIG_BOOTSTRAP_TIMEOUT_MS`.
+`OJBQUAY_METRICS_PORT`, `OJBQUAY_CONFIG_BOOTSTRAP_TIMEOUT_MS`, and
+`OJBQUAY_CONSUME_RUNTIME_ROSTER` (`instance=http://host:port,...`). Without a
+roster the gateway starts normally but `/internal/pause-status` never confirms a
+pause, so offset reset stays fail-closed; with a roster the instance ID must be
+a member or startup fails.
 
 Unordered subscriptions use Kafka 4.2 Share Groups with explicit per-record
 acknowledgement and `record_limit` acquisition. Failed HTTP delivery publishes

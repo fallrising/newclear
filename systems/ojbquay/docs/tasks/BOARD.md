@@ -15,6 +15,6 @@
 | OJB-SDD-06 | 等 owner：producer 拒絕邊界固定 AC tests | AC-06 | todo | — | — | — |
 | OJB-SDD-07 | 等 owner：LKG 控制面中斷 fixture | AC-07 | todo | — | — | — |
 | OJB-SDD-08 | 等 owner：pipeline／ordered 回歸與 broker 退出診斷 | AC-08 | todo | — | — | — |
-| OJB-SDD-09 | 等 owner：classic group active/empty 真 broker 閘門 | AC-09 | todo | — | — | — |
+| OJB-SDD-09 | classic group reset 閘門；runtime lifecycle／啟動切片見 [ac09-runtime-slice](../test-reports/ac09-runtime-slice.md)，preview／整 group／fence 未做 | AC-09 | in_progress | 2026-10-22 | — | 2026-10-22 |
 | OJB-SDD-10 | 等 owner：既有 console 主線／雙 viewport evidence | AC-10 | todo | — | — | — |
 | OJB-SDD-11 | 等 owner：最終同版本真 Compose／核心流程資格 | AC-11 | todo | — | — | — |

@@ -159,6 +159,14 @@ try {
     const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank', browserContextId });
     const { sessionId: session } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
     await cdp.send('Page.enable', {}, session); await cdp.send('Runtime.enable', {}, session);
+    // A test-only switch pauses interval callbacks across reload during fault
+    // injection. Normal market polling is verified before and after that block.
+    await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: `
+      const nativeInterval = window.setInterval.bind(window);
+      window.setInterval = (callback, delay, ...args) => nativeInterval(() => {
+        if (sessionStorage.getItem('smoke-pause-poll') !== '1') callback(...args);
+      }, delay);
+    ` }, session);
     await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] }, session);
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: profession === 'smith' ? 1360 : 390, height: 950, deviceScaleFactor: 1, mobile: profession === 'herbalist' }, session);
     await cdp.send('Page.navigate', { url: base }, session);
@@ -253,6 +261,8 @@ try {
 
   const medicineId = await createListing(herbalist, 'medicine');
   await marketStatus(smith, medicineId, 'open');
+  // Keep automatic retry from racing the intentional reload/Retry sequence.
+  await cdp.evaluate(smith, `sessionStorage.setItem('smoke-pause-poll', '1')`);
   const buyBodies = [];
   let lostBuyReplies = 0;
   const dropBuy = async event => {
@@ -277,6 +287,7 @@ try {
   await click(smith, '#retry');
   await marketStatus(smith, medicineId, 'sold');
   cdp.listeners = cdp.listeners.filter(listener => listener !== dropBuy);
+  await cdp.evaluate(smith, `sessionStorage.removeItem('smoke-pause-poll')`);
   assert.deepEqual(buyBodies, [pendingBuy, pendingBuy], 'Reload retries identical buy ID and body');
   assert.equal(await cdp.evaluate(smith, `JSON.parse(localStorage.getItem('mistshore.session.v1')).pendingAction`), null);
   assert.equal((await publicState(smith)).coins, 20);

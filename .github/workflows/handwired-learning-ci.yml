@@ -42,10 +42,10 @@ jobs:
         env:
           HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
         run: node labs/handwired-learning/examples/api-probe.mjs
-      - name: Test forward comparison and standalone offline page
+      - name: Test forward comparison, learning and standalone offline page
         env:
           HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
-        run: node --test --test-isolation=none labs/handwired-learning/tests/forward.test.mjs labs/handwired-learning/tests/build.test.mjs
+        run: node --test --test-isolation=none labs/handwired-learning/tests/forward.test.mjs labs/handwired-learning/tests/build.test.mjs labs/handwired-learning/tests/learning.test.mjs
       - name: Build offline page without installing packages
         env:
           HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired

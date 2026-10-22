@@ -18,6 +18,7 @@ function documentFor(html) {
       textContent: '', dataset: {}, attributes: {},
       setAttribute(name, value) { this.attributes[name] = value; },
       addEventListener(name, fn) { listeners[name] = fn; },
+      click() { if (!this.disabled) listeners.click(); },
       input(value) { this.value = value; listeners.input(); } });
   }
   return { getElementById(id) { assert.ok(elements.has(id), id); return elements.get(id); } };
@@ -84,6 +85,57 @@ test('built HTML runs its real inline graph offline and clears stale UI results'
     el(`${key}-number`).input(recovery);
     assert.equal(el('status').dataset.state, 'pass');
   }
+});
+
+test('offline learning buttons update independent training state, history and forward coefficients', async () => {
+  const output = join(scratch, 'learning.html');
+  await buildPage(output, upstream);
+  const html = await readFile(output, 'utf8');
+  const document = documentFor(html);
+  runInNewContext(html.match(/<script>([\s\S]*?)<\/script>/)[1], { document });
+  const el = id => document.getElementById(id);
+  assert.equal(el('a-number').value, '1.25');
+  assert.equal(el('b-number').value, '-2');
+  assert.equal(el('learning-a').textContent, '1');
+  assert.equal(el('learning-b').textContent, '0');
+  el('x-number').input('60');
+  el('learning-step').click();
+  assert.equal(el('learning-count').textContent, '1');
+  assert.equal(el('a-number').value, el('learning-a').textContent);
+  assert.equal(el('x-number').value, '60');
+  assert.equal(el('status').dataset.state, 'pass');
+  const learnedA = el('learning-a').textContent;
+  el('a-number').input('1.99');
+  assert.equal(el('learning-a').textContent, learnedA);
+  el('learning-run').click();
+  assert.equal(el('learning-count').textContent, '500');
+  assert.equal(el('learning-status').dataset.state, 'complete');
+  assert.ok(Number(el('learning-max-error').textContent) <= 0.05);
+  assert.equal((el('learning-history').innerHTML.match(/<tr>/g) || []).length, 501);
+  assert.equal(el('learning-step').disabled, true);
+  assert.equal(el('learning-run').disabled, true);
+  el('learning-run').click();
+  assert.equal(el('learning-count').textContent, '500');
+  el('learning-fast').click();
+  assert.equal(el('learning-count').textContent, '0');
+  assert.equal(el('learning-status').dataset.state, 'stopped');
+  assert.match(el('learning-status').textContent, /候選.*a=.*b=/);
+  assert.equal(el('a-number').value, '1');
+  assert.equal(el('b-number').value, '0');
+  assert.equal(el('x-number').value, '60');
+  assert.equal(el('status').dataset.state, 'pass');
+  assert.equal((el('learning-history').innerHTML.match(/<tr>/g) || []).length, 1);
+  el('learning-reset').click();
+  assert.equal(el('learning-status').dataset.state, 'ready');
+  assert.doesNotMatch(el('learning-status').textContent, /候選|停止/);
+  assert.equal(el('learning-step').disabled, false);
+  assert.equal(el('learning-run').disabled, false);
+  el('x-number').input('');
+  el('learning-step').click();
+  assert.equal(el('x-number').value, '');
+  assert.equal(el('status').dataset.state, 'error');
+  assert.equal(el('graph').textContent, '—');
+  assert.equal(el('learning-count').textContent, '1');
 });
 
 test('build refuses absent or modified core/license and never writes a misleading artifact', async () => {

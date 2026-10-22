@@ -4,7 +4,7 @@
 
 > **權威來源**：投入決策（做不做）以 owner 的私人項目帳本為準；本檔是它的**公開摘要**，
 > 不再是第二份決策來源。兩者不一致時以帳本為準，並回頭修正本檔。帳本裡的目標、計畫與任務內容不在此公開。
-> 大需求進度（給人看）在 https://github.com/fallrising/desk 的 docs/operating-method.md，框架是它的 §0；完成是 agent 依 AC 證據寫的 `done`，驗收是 owner 事後認可。本 repo 技術任務照根目錄 AGENTS.md 的技術任務合約管理。不要求 `Desk-Task`。
+> 大需求進度（給人看）在 https://github.com/fallrising/desk 的 docs/operating-method.md（§0），這裡不重述。本 repo 技術任務照根目錄 AGENTS.md 的技術任務合約管理。不要求 `Desk-Task`。
 
 ## 怎麼讀
 

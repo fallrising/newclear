@@ -1805,3 +1805,20 @@ Main advanced to f9fce6eb via unrelated HW1 and roottechnical-task contract. Rea
 Latest main f9fce6eb integrated before final gates; conflict only appended PLAN. Upstream content preserved and current program appended.
 
 T-467 findings resolved and independently verified: phase2-api-security-green9/9 includingactualWorker guard; F1 RED retained. CorrectedRC12/12GREEN inphase2-e2e-corrected. Rootfullbackend-after-main314/314PASS; worker/e2e types/schema10/success15+41/llms5/diff/contractsPASS. Evidence-gate ACCEPT boundedphase2localRC functionality; finalfullE2E, immutableheadxAIreview,CI/latestmain andmerge readback remain mandatory. Sourcefreeze for finalreview; subsequent gate evidence storedPR without sourceedit.
+
+## Handwired HW-2 — Handwired-20261022-0411 / #465
+
+One milestone, AC-03 / HW-A03–05 only. HW-1 merged c84941e2; base includes new repo technical task contract. Direct owner instruction and issue authorize work; board T-0465 records UTC activity. No desk claim needed for direct technical task. Original prompt authorizes commit/push/draft/conditional merge; no deploy/tag/issue closure.
+
+Orchestrator uses codex-team-delivery and evidence-gate. T-903 is sole sequential implementation worker on this dedicated tree; no delegation or Git writes. Root owns docs, PLAN, board and CI, and will not write source concurrently. T-904 is final different-family read-only reviewer, route to authenticated Grok grok-4.7 after preflight, fixed diff/spec packet, 600-second limit, plan/read-only, no nested agents or paid API. Previous CLI --tools empty retains Read, so explicitly audit tool transcript and restrict use to supplied packet.
+
+Gates: observe RED before implementation; actual fixed upstream gradients vs analytic formula, nine-point 500-step max error <=0.05, lr2 stop, reset, immutable HW-1 validation/tolerance, actual offline browser clicks; existing/full Node tests, project contracts/tests, llms, task/report validators, links/diff; final-head CI and independent review; integrate current main; merge readback. New board closeout requirement is a separate board-only follow-up PR after actual merge, same milestone. HW-3 needs real users and remains pending.
+
+State: scope recorded, implementation not started. Native worker budget 25 minutes, one fix pass; external review 600 seconds per final revision. No automatic cleanup; preserve source/evidence.
+
+HW2-D01: T-903 implementation accepted after inspecting every scoped diff and independent actual-browser execution. Worker RED had13 existing pass/5 new failures; UI RED missing learning element; GREEN19/19. The implemented two-source nine-point MSE graph uses real backward, frozen per-step snapshots, and only accepts finite in-bounds candidate coefficients. No analytic-gradient substitute or tolerance adjustment.
+HW2-D02: root Chromium file:// confirms single step, run-to500, actual nine-point maximum error9.5367431640625e-7C, lr2 rejection of b12,501 inspectable rows, reset/repeat identity, invalid x remains invalid, desktop/mobile with zero requests/errors. No source changes needed after browser gate. CJK glyph rendering remains unverified on this host without CJK fonts. Full root repository checks, final review and CI pending.
+
+HW2-D03 evidence-gate ACCEPT local AC-03: root19 tests, probe,41 contracts,15 contract tests,5 llms indexes,task/report validators,diff pass. Initial index mismatch preserved and corrected using the unchanged generator: PROJECTS date is historical baseline, not current review date. Portable browser driver rerun passes; private host paths are not committed in new evidence. Final CI/review/merge still pending.
+
+HW2-D04: ecdb62ea passed final local gates, both CI jobs and xAI Grok APPROVE (review receipt on PR). Pre-merge guard observed main advance to33cfc39c through Kith phase2, so merge was not attempted. Integrate main, preserving both appended PLAN sections; no Handwired product/build/test changes or task ID collisions. Rerun final gates and obtain a new final-head review before merge.

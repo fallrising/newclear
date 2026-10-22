@@ -17,7 +17,7 @@
 
 **文檔深度跟檔位走，不跟「有沒有目錄」走。** 只有 A 檔需要 `docs/quickstart.md`；C/D 禁止新開 tutorial。
 
-**兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）管大需求的認領與進度，框架是它的 §0；完成是 agent 依 AC 證據寫的 `done`，驗收是 owner 事後認可。本 repo 技術任務照 [AGENTS.md](AGENTS.md) 的技術任務合約管理。不要求 `Desk-Task`。現在是第一階段；第二階段尚未啟用。見 [AGENTS.md](AGENTS.md)。
+**兩層。** 大需求的流程依據是 desk（https://github.com/fallrising/desk 的 docs/operating-method.md）§0，這裡不重述。本 repo 技術任務照 [AGENTS.md](AGENTS.md) 的技術任務合約管理。不要求 `Desk-Task`。見 [AGENTS.md](AGENTS.md)。
 
 可選格式在 [docs/work-tracking](docs/work-tracking/README.md)，不是認領依據，也不等於可以 merge。舊任務紀錄在 [archive](archive/README.md)，不要照它做。
 

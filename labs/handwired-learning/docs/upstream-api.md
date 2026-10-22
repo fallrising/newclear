@@ -45,8 +45,7 @@ python3 /home/ckc/test/codex/agent-workspace/workspace.py run handwired hw0-repr
 測試也驗證同一圖更新 source 參數、boolean 預設拒絕 backward，以及漂移來源在 import 前被拒絕。
 
 Node 24 以內建 TypeScript type stripping 載入原始 core，沒有 type-check 或瀏覽器建置。
-瀏覽器不能直接載入這份 TS；HW-1 仍須處理轉成 JS 的載入方式與 MIT 保留（可評估 Node 內建 type stripping，若新增依賴仍須 owner 授權）。
-本次沒有網頁、輸入驗證 UX、500 步訓練或真人試用；HW-1～HW-3 的驗收維持 pending。
+這是 HW-0 的歷史範例範圍。後續 HW-1 已用 Node 內建 stripping 建置含 MIT 的離線頁；HW-2 已以同一固定 core 的 backward 驗證學習。現況與證據以 [SUCCESS](../SUCCESS.md) 為準，HW-3 真人試用仍 pending。
 
 ## 證據
 

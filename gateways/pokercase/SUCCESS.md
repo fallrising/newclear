@@ -4,7 +4,7 @@ purpose: 以 thinrouter 提供個人訂閱憑證的多協定 LLM gateway
 kind: service
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-21
+reviewed: 2026-10-22
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
 
@@ -29,6 +29,7 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 | AC-02 | Given provider adapter 來源，When 核對 refresh／forwarding，Then 可定位 OAuth refresh、agy 與 Cursor text chat。 | passed | [main.rs](src/main.rs)、[oauth_refresh](src/oauth_refresh.rs)、[cursor_agent](src/cursor_agent.rs)；不採用舊上表「未開始」結論。 |
 | AC-03 | Given 無有效 gateway key 或外部 listener 設定，When admission，Then 預設拒絕且 bootstrap 僅限零keys loopback。 | pending | [cost safety](docs/cost-safety.md) 與 [tests](tests/) 定義契約；本次未跑當前回歸，未據 source 宣稱 runtime PASS。 |
 | AC-04 | Given Claude/Cursor 與支援的客戶端工具串流，When 完整訂閱旅程，Then refresh、工具呼叫及錯誤／取消符合契約。 | pending | [進度下半部](docs/GOALS_AND_PROGRESS.md)：Claude 依憑證、Cursor tools及 Anthropic edge cases仍缺完整證據。 |
+| AC-05 | Given 任何 listener 或經 Tailscale Serve／tunnel 轉發，When 存取 admin、改 connection base_url 或 keyless bootstrap，Then 一律要 admin token（session＋CSRF、Host／Origin 檢查），轉發請求視為遠端不得 bootstrap，OAuth token 只送官方網域，secrets 一律 AES-GCM 加密（Argon2id 或 0600 key file）並遷移舊資料。 | passed | [security](docs/security.md)；`tests/admin_security.rs`、`src/guard.rs`、`store::secret_storage_tests`；2026-10-22 本機 `cargo +1.99.0 test --locked` 全綠（只用本機假上游）。 |
 
 ## 現況與缺口
 
@@ -48,7 +49,8 @@ Cursor text chat 已有實作，舊「501」只能代表早期紀錄；tools仍�
 離線回歸可用 `cargo test --locked`；真 subscription smoke需要另外核准的有效憑證。
 本次沒有 import-local、refresh 或發出 provider 請求。
 
-本次只核對文件、入口與證據連結；未執行產品建置、服務或外部整合。
+管理面與憑證安全規則見 [security](docs/security.md)；admin token 預設在資料目錄的 `admin-token`。
+AC-05 只以本機假上游驗證；未對真實 provider 發出請求，未讀取本機 CLI 憑證。
 未執行的產品驗收不會因本文件通過格式檢查而轉為通過。
 
 ## 可用版本

@@ -8,13 +8,15 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
-use crate::secrets::{decrypt_secret, encrypt_secret};
+use crate::secrets::{self, SecretBox, StoredKind};
 
 #[derive(Clone)]
 pub struct Store {
     conn: Arc<Mutex<Connection>>,
-    secrets_key: Option<String>,
+    secrets: Arc<SecretBox>,
 }
+
+const KEY_CHECK_PLAINTEXT: &str = "thinrouter-key-check";
 
 /// Column order shared by the connection SELECT statements and row decoder.
 type ConnectionSqlRow = (
@@ -180,6 +182,8 @@ pub struct ResolvedTarget {
 }
 
 impl Store {
+    /// Open the database. Secrets are encrypted with an Argon2id key derived from
+    /// `secrets_key`, or with the random key file `secrets.key` beside the database.
     pub fn open(path: &Path, secrets_key: Option<String>) -> Result<Self> {
         let conn =
             Connection::open(path).with_context(|| format!("open sqlite {}", path.display()))?;
@@ -189,18 +193,115 @@ impl Store {
             PRAGMA foreign_keys = ON;
             ",
         )?;
-        let store = Self {
-            conn: Arc::new(Mutex::new(conn)),
-            secrets_key,
+        migrate_schema(&conn)?;
+        let source = if secrets_key.is_some() {
+            "passphrase"
+        } else {
+            "key_file"
         };
-        store.migrate()?;
-        Ok(store)
+        let secrets = match secrets_key.as_deref() {
+            Some(pass) => {
+                let salt = match meta_get(&conn, "kdf_salt")? {
+                    Some(hex_salt) => hex::decode(hex_salt).context("corrupt kdf_salt")?,
+                    None => {
+                        let salt = secrets::random_salt();
+                        meta_set(&conn, "kdf_salt", &hex::encode(salt))?;
+                        salt.to_vec()
+                    }
+                };
+                SecretBox::from_passphrase(pass, &salt)?
+            }
+            None => {
+                let dir = path.parent().unwrap_or_else(|| Path::new("."));
+                SecretBox::from_key_file(&dir.join("secrets.key"))?
+            }
+        };
+        if let Some(check) = meta_get(&conn, "key_check")? {
+            let ok = secrets
+                .decrypt(&check)
+                .is_ok_and(|v| v == KEY_CHECK_PLAINTEXT);
+            if !ok {
+                let used = meta_get(&conn, "key_source")?.unwrap_or_default();
+                anyhow::bail!(
+                    "secrets key does not match this database (it was encrypted with: {used}); \
+                     pass the same --secrets-key, or keep the original secrets.key file"
+                );
+            }
+        }
+        migrate_secrets(&conn, &secrets)?;
+        if meta_get(&conn, "key_check")?.is_none() {
+            meta_set(&conn, "key_check", &secrets.encrypt(KEY_CHECK_PLAINTEXT))?;
+            meta_set(&conn, "key_source", source)?;
+        }
+        Ok(Self {
+            conn: Arc::new(Mutex::new(conn)),
+            secrets: Arc::new(secrets),
+        })
     }
+}
 
-    fn migrate(&self) -> Result<()> {
-        let conn = self.conn.lock().unwrap();
-        conn.execute_batch(
-            r#"
+fn meta_get(conn: &Connection, key: &str) -> Result<Option<String>> {
+    Ok(conn
+        .query_row("SELECT value FROM meta WHERE key = ?1", params![key], |r| {
+            r.get(0)
+        })
+        .optional()?)
+}
+
+fn meta_set(conn: &Connection, key: &str, value: &str) -> Result<()> {
+    conn.execute(
+        "INSERT INTO meta (key, value) VALUES (?1, ?2)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        params![key, value],
+    )?;
+    Ok(())
+}
+
+/// Re-encrypt plaintext and `enc:v1:` secrets as v2 in one transaction.
+fn migrate_secrets(conn: &Connection, secrets: &SecretBox) -> Result<()> {
+    let columns: [(&str, &str, &str); 3] = [
+        ("connections", "id", "api_key"),
+        ("oauth_credentials", "connection_id", "access_token"),
+        ("oauth_credentials", "connection_id", "refresh_token"),
+    ];
+    let tx = conn.unchecked_transaction()?;
+    let mut migrated = 0usize;
+    for (table, id_col, col) in columns {
+        let rows: Vec<(String, String)> = {
+            let mut stmt = tx.prepare(&format!(
+                "SELECT {id_col}, {col} FROM {table} WHERE {col} IS NOT NULL"
+            ))?;
+            let mapped = stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?;
+            mapped.collect::<rusqlite::Result<_>>()?
+        };
+        for (id, stored) in rows {
+            let plain = match secrets::classify(&stored) {
+                StoredKind::Empty | StoredKind::V2 => continue,
+                StoredKind::V1 => secrets.decrypt_legacy_v1(&stored)?,
+                StoredKind::Plaintext => stored,
+            };
+            tx.execute(
+                &format!("UPDATE {table} SET {col} = ?1 WHERE {id_col} = ?2"),
+                params![secrets.encrypt(&plain), id],
+            )?;
+            migrated += 1;
+        }
+    }
+    tx.commit()?;
+    if migrated > 0 {
+        tracing::info!(migrated, "re-encrypted stored secrets as enc:v2");
+    }
+    Ok(())
+}
+
+fn migrate_schema(conn: &Connection) -> Result<()> {
+    conn.execute_batch(
+        r#"
+            CREATE TABLE IF NOT EXISTS meta (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS connections (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL UNIQUE,
@@ -262,41 +363,45 @@ impl Store {
                 FOREIGN KEY (connection_id) REFERENCES connections(id) ON DELETE CASCADE
             );
             "#,
-        )?;
-        // Additive columns for older DBs
-        let _ = conn.execute(
-            "ALTER TABLE connections ADD COLUMN input_price_per_m REAL",
-            [],
-        );
-        let _ = conn.execute(
-            "ALTER TABLE connections ADD COLUMN output_price_per_m REAL",
-            [],
-        );
-        let _ = conn.execute(
-            "ALTER TABLE connections ADD COLUMN auth_type TEXT NOT NULL DEFAULT 'api_key'",
-            [],
-        );
-        let _ = conn.execute(
-            "ALTER TABLE usage_events ADD COLUMN prompt_tokens INTEGER",
-            [],
-        );
-        let _ = conn.execute(
-            "ALTER TABLE usage_events ADD COLUMN completion_tokens INTEGER",
-            [],
-        );
-        let _ = conn.execute(
-            "ALTER TABLE usage_events ADD COLUMN estimated_cost_usd REAL",
-            [],
-        );
-        Ok(())
-    }
+    )?;
+    // Additive columns for older DBs
+    let _ = conn.execute(
+        "ALTER TABLE connections ADD COLUMN input_price_per_m REAL",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE connections ADD COLUMN output_price_per_m REAL",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE connections ADD COLUMN auth_type TEXT NOT NULL DEFAULT 'api_key'",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE usage_events ADD COLUMN prompt_tokens INTEGER",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE usage_events ADD COLUMN completion_tokens INTEGER",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE usage_events ADD COLUMN estimated_cost_usd REAL",
+        [],
+    );
+    Ok(())
+}
 
-    fn dec_key(&self, stored: &str) -> String {
-        decrypt_secret(stored, self.secrets_key.as_deref())
+impl Store {
+    fn dec_key(&self, stored: &str) -> Result<String> {
+        if stored.is_empty() {
+            return Ok(String::new());
+        }
+        self.secrets.decrypt(stored)
     }
 
     fn enc_key(&self, plain: &str) -> String {
-        encrypt_secret(plain, self.secrets_key.as_deref())
+        self.secrets.encrypt(plain)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -315,28 +420,34 @@ impl Store {
         created_at: String,
         updated_at: String,
         oauth: Option<OAuthCreds>,
-    ) -> ConnectionRow {
-        ConnectionRow {
+    ) -> Result<ConnectionRow> {
+        let oauth = match oauth {
+            Some(mut o) => {
+                o.access_token = self.dec_key(&o.access_token)?;
+                if let Some(r) = o.refresh_token.take() {
+                    o.refresh_token = Some(self.dec_key(&r)?);
+                }
+                Some(o)
+            }
+            None => None,
+        };
+        Ok(ConnectionRow {
+            api_key: self
+                .dec_key(&api_key)
+                .with_context(|| format!("connection {name}"))?,
             id,
             name,
             base_url,
-            api_key: self.dec_key(&api_key),
             default_model,
             priority,
             enabled,
             input_price_per_m,
             output_price_per_m,
             auth_type,
-            oauth: oauth.map(|mut o| {
-                o.access_token = self.dec_key(&o.access_token);
-                if let Some(r) = o.refresh_token.take() {
-                    o.refresh_token = Some(self.dec_key(&r));
-                }
-                o
-            }),
+            oauth,
             created_at,
             updated_at,
-        }
+        })
     }
 
     fn load_oauth_locked(conn: &Connection, connection_id: &str) -> Result<Option<OAuthCreds>> {
@@ -390,7 +501,7 @@ impl Store {
             let oauth = Self::load_oauth_locked(&conn, &id)?;
             out.push(self.map_connection_row(
                 id, name, base_url, api_key, dm, pr, en, ip, op, at, ca, ua, oauth,
-            ));
+            )?);
         }
         Ok(out)
     }
@@ -412,7 +523,7 @@ impl Store {
         let oauth = Self::load_oauth_locked(&conn, &id)?;
         Ok(Some(self.map_connection_row(
             id, name, base_url, api_key, dm, pr, en, ip, op, at, ca, ua, oauth,
-        )))
+        )?))
     }
 
     pub fn get_connection_by_name(&self, name: &str) -> Result<Option<ConnectionRow>> {
@@ -432,7 +543,7 @@ impl Store {
         let oauth = Self::load_oauth_locked(&conn, &id)?;
         Ok(Some(self.map_connection_row(
             id, name, base_url, api_key, dm, pr, en, ip, op, at, ca, ua, oauth,
-        )))
+        )?))
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1071,5 +1182,91 @@ mod auth_tests {
         assert!(store.delete_api_key(&row.id).unwrap());
         assert!(!store.has_api_keys().unwrap());
         assert!(!store.verify_api_key("").unwrap());
+    }
+}
+
+#[cfg(test)]
+mod secret_storage_tests {
+    use super::*;
+
+    fn raw_column(path: &Path, sql: &str) -> String {
+        Connection::open(path)
+            .unwrap()
+            .query_row(sql, [], |r| r.get(0))
+            .unwrap()
+    }
+
+    #[test]
+    fn plaintext_rows_are_migrated_and_key_mismatch_refuses_to_open() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = dir.path().join("t.db");
+        {
+            let store = Store::open(&db, None).unwrap();
+            store
+                .upsert_connection(
+                    None,
+                    "c",
+                    "http://x/v1",
+                    "sk-123",
+                    None,
+                    100,
+                    true,
+                    None,
+                    None,
+                )
+                .unwrap();
+            store
+                .upsert_oauth_connection(
+                    None,
+                    "o",
+                    "https://chatgpt.com/backend-api/codex/responses",
+                    "codex",
+                    "at-456",
+                    Some("rt-789"),
+                    None,
+                    None,
+                    None,
+                    100,
+                    true,
+                )
+                .unwrap();
+        }
+        assert!(
+            raw_column(&db, "SELECT api_key FROM connections WHERE name='c'")
+                .starts_with("enc:v2:")
+        );
+        // Simulate rows written by an older, plaintext-by-default build.
+        let conn = Connection::open(&db).unwrap();
+        conn.execute("UPDATE connections SET api_key='sk-123' WHERE name='c'", [])
+            .unwrap();
+        conn.execute(
+            "UPDATE oauth_credentials SET access_token='at-456', refresh_token='rt-789'",
+            [],
+        )
+        .unwrap();
+        drop(conn);
+
+        let store = Store::open(&db, None).unwrap();
+        for sql in [
+            "SELECT api_key FROM connections WHERE name='c'",
+            "SELECT access_token FROM oauth_credentials",
+            "SELECT refresh_token FROM oauth_credentials",
+        ] {
+            assert!(raw_column(&db, sql).starts_with("enc:v2:"), "{sql}");
+        }
+        let c = store.get_connection_by_name("c").unwrap().unwrap();
+        assert_eq!(c.api_key, "sk-123");
+        let o = store.get_connection_by_name("o").unwrap().unwrap();
+        let oauth = o.oauth.unwrap();
+        assert_eq!(oauth.access_token, "at-456");
+        assert_eq!(oauth.refresh_token.as_deref(), Some("rt-789"));
+        drop(store);
+
+        let err = Store::open(&db, Some("other-passphrase".into()))
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(err.contains("does not match"), "{err}");
+        assert!(!err.contains("sk-123") && !err.contains("at-456"));
     }
 }

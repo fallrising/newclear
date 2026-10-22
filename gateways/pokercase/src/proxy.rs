@@ -32,6 +32,8 @@ pub struct ProxyState {
     pub sse_stall_secs: u64,
     pub token_saver: bool,
     pub token_saver_max_chars: usize,
+    /// Operator-only `provider=url` upstream overrides (see `providers::base_url_allowed`).
+    pub provider_base_overrides: Vec<(String, String)>,
 }
 
 #[derive(Debug)]
@@ -136,6 +138,21 @@ async fn forward_chat_completions_inner(
     let profile = provider_key.as_deref().and_then(providers::resolve);
 
     if let Some(p) = profile {
+        // Rows written before the allowlist existed are checked again here.
+        if !providers::base_url_allowed(
+            p,
+            &target.connection.base_url,
+            &state.provider_base_overrides,
+        ) {
+            return Err(UpstreamAttemptError {
+                status: 500,
+                body: format!(
+                    "connection '{}' has a base_url not allowed for provider '{}'; fix it in the admin UI",
+                    target.connection.name, p.id
+                ),
+                retryable: false,
+            });
+        }
         if p.format == UpstreamFormat::Stub {
             return Err(UpstreamAttemptError {
                 status: 501,

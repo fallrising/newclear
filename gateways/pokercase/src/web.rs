@@ -7,11 +7,10 @@ use minijinja::context;
 use serde::Deserialize;
 
 use crate::error::{AppError, AppResult};
+use crate::guard::{self, AdminAuth, ADMIN_COOKIE};
 use crate::server::AppState;
 use crate::store::ConnectionPublic;
 use crate::templates;
-
-pub const ADMIN_COOKIE: &str = "tr_admin";
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -36,45 +35,26 @@ pub fn router() -> Router<AppState> {
         .route("/admin/static/style.css", get(style_css))
 }
 
-/// Keyless admin setup is restricted to an exact loopback listener.
+/// Admin access always needs the admin token: `x-admin-token` header or a login session.
 pub fn admin_authorized(state: &AppState, headers: &HeaderMap) -> bool {
-    let Some(token) = &state.cfg.admin_token else {
-        return state.cfg.loopback_listener();
-    };
-    if token.trim().is_empty() {
-        return false;
-    }
-    if let Some(v) = headers.get("x-admin-token").and_then(|v| v.to_str().ok()) {
-        if v == token {
-            return true;
-        }
-    }
-    if let Some(cookie) = headers.get(header::COOKIE).and_then(|v| v.to_str().ok()) {
-        for part in cookie.split(';') {
-            let part = part.trim();
-            if let Some(val) = part.strip_prefix(&format!("{ADMIN_COOKIE}=")) {
-                if val == token {
-                    return true;
-                }
-            }
-        }
-    }
-    false
+    guard::admin_auth(state, headers).is_some()
 }
 
+/// Returns the session CSRF token for rendering forms (empty for header auth).
 #[allow(
     clippy::result_large_err,
     reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
 )]
-fn require_admin_page(state: &AppState, headers: &HeaderMap) -> Result<(), Response> {
-    if admin_authorized(state, headers) {
-        Ok(())
-    } else {
-        Err(Redirect::to("/admin/login").into_response())
+fn require_admin_page(state: &AppState, headers: &HeaderMap) -> Result<String, Response> {
+    match guard::admin_auth(state, headers) {
+        Some(AdminAuth::Session { csrf }) => Ok(csrf),
+        Some(AdminAuth::Header) => Ok(String::new()),
+        None => Err(Redirect::to("/admin/login").into_response()),
     }
 }
 
-fn page(name: &str, ctx: minijinja::Value) -> AppResult<Html<String>> {
+fn page(name: &str, csrf: &str, ctx: minijinja::Value) -> AppResult<Html<String>> {
+    let ctx = context! { csrf => csrf, ..ctx };
     let body = templates::render(name, ctx).map_err(|e| AppError::Internal(e.into()))?;
     Ok(Html(body))
 }
@@ -88,14 +68,12 @@ async fn login_page(
     headers: HeaderMap,
     Query(q): Query<LoginQuery>,
 ) -> Result<Html<String>, Response> {
-    if state.cfg.admin_token.is_none() {
-        return Err(Redirect::to("/admin").into_response());
-    }
     if admin_authorized(&state, &headers) {
         return Err(Redirect::to("/admin").into_response());
     }
     page(
         "login",
+        "",
         context! {
             title => "Admin login",
             error => q.error.unwrap_or_default(),
@@ -114,14 +92,22 @@ struct LoginForm {
     token: String,
 }
 
-async fn login_submit(State(state): State<AppState>, Form(form): Form<LoginForm>) -> Response {
-    let Some(expected) = &state.cfg.admin_token else {
-        return Redirect::to("/admin").into_response();
-    };
-    if form.token.trim() == expected {
+async fn login_submit(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Form(form): Form<LoginForm>,
+) -> Response {
+    let expected = state.cfg.admin_token.as_deref().unwrap_or("");
+    if !expected.is_empty() && guard::ct_eq(form.token.trim(), expected) {
+        // The cookie carries a random session id, never the admin token.
+        let (sid, _csrf) = state.sessions.create();
+        let https = headers
+            .get("x-forwarded-proto")
+            .and_then(|v| v.to_str().ok())
+            .is_some_and(|v| v.eq_ignore_ascii_case("https"));
         let cookie = format!(
-            "{ADMIN_COOKIE}={}; Path=/; HttpOnly; SameSite=Lax",
-            expected
+            "{ADMIN_COOKIE}={sid}; Path=/; HttpOnly; SameSite=Strict{}",
+            if https { "; Secure" } else { "" }
         );
         (
             StatusCode::SEE_OTHER,
@@ -132,11 +118,16 @@ async fn login_submit(State(state): State<AppState>, Form(form): Form<LoginForm>
         )
             .into_response()
     } else {
+        // Slow down online guessing of weak, operator-chosen tokens.
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
         Redirect::to("/admin/login?error=invalid").into_response()
     }
 }
 
-async fn logout() -> Response {
+async fn logout(State(state): State<AppState>, headers: HeaderMap) -> Response {
+    if let Some(sid) = guard::session_cookie(&headers) {
+        state.sessions.remove(&sid);
+    }
     let cookie = format!("{ADMIN_COOKIE}=; Path=/; HttpOnly; Max-Age=0");
     (
         StatusCode::SEE_OTHER,
@@ -156,13 +147,14 @@ async fn dashboard(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let stats = state
         .store
         .stats()
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "dashboard",
+        &csrf,
         context! {
             title => "Dashboard",
             active => "dashboard",
@@ -182,7 +174,7 @@ async fn connections_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let rows: Vec<ConnectionPublic> = state
         .store
         .list_connections()
@@ -192,6 +184,7 @@ async fn connections_page(
         .collect();
     page(
         "connections",
+        &csrf,
         context! {
             title => "Connections",
             active => "connections",
@@ -279,7 +272,7 @@ async fn connections_edit_page(
     headers: HeaderMap,
     Path(id): Path<String>,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let c = state
         .store
         .get_connection(&id)
@@ -294,6 +287,7 @@ async fn connections_edit_page(
         .collect();
     page(
         "connections",
+        &csrf,
         context! {
             title => "Edit connection",
             active => "connections",
@@ -327,14 +321,13 @@ async fn connections_update(
     Form(form): Form<ConnForm>,
 ) -> Result<Response, Response> {
     require_admin_page(&state, &headers)?;
-    if state
+    let existing = state
         .store
         .get_connection(&id)
         .map_err(|e| AppError::Internal(e).into_response())?
-        .is_none()
-    {
-        return Err(AppError::NotFound("connection not found".into()).into_response());
-    }
+        .ok_or_else(|| AppError::NotFound("connection not found".into()).into_response())?;
+    crate::admin::check_connection_update(&state, &existing, &form.base_url, &form.api_key)
+        .map_err(|e| e.into_response())?;
     let default_model = if form.default_model.trim().is_empty() {
         None
     } else {
@@ -383,7 +376,7 @@ async fn routes_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let routes = state
         .store
         .list_routes()
@@ -394,6 +387,7 @@ async fn routes_page(
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "routes",
+        &csrf,
         context! {
             title => "Routes",
             active => "routes",
@@ -503,7 +497,7 @@ async fn routes_edit_page(
     headers: HeaderMap,
     Path(id): Path<String>,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let route = state
         .store
         .get_route(&id)
@@ -528,6 +522,7 @@ async fn routes_edit_page(
 
     page(
         "routes",
+        &csrf,
         context! {
             title => "Edit route",
             active => "routes",
@@ -615,13 +610,14 @@ async fn keys_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let keys = state
         .store
         .list_api_keys()
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "keys",
+        &csrf,
         context! {
             title => "API Keys",
             active => "keys",
@@ -647,7 +643,7 @@ async fn keys_create(
     headers: HeaderMap,
     Form(form): Form<KeyForm>,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let name = if form.name.trim().is_empty() {
         "default"
     } else {
@@ -663,6 +659,7 @@ async fn keys_create(
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "keys",
+        &csrf,
         context! {
             title => "API Keys",
             active => "keys",
@@ -699,7 +696,7 @@ async fn usage_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let events = state
         .store
         .recent_usage(50)
@@ -714,6 +711,7 @@ async fn usage_page(
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "usage",
+        &csrf,
         context! {
             title => "Usage",
             active => "usage",

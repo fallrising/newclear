@@ -8,8 +8,8 @@ use serde_json::{json, Value};
 
 use crate::error::{AppError, AppResult};
 use crate::server::AppState;
-use crate::store::ConnectionPublic;
-use crate::web::{admin_authorized, ADMIN_COOKIE};
+use crate::store::{ConnectionPublic, ConnectionRow};
+use crate::web::admin_authorized;
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -58,6 +58,39 @@ fn check_admin(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
     } else {
         Err(AppError::Unauthorized)
     }
+}
+
+/// Editing a connection must not redirect its stored credential to another host:
+/// OAuth connections stay on their provider's allowlist; API-key connections must
+/// re-enter the key when base_url changes.
+pub fn check_connection_update(
+    state: &AppState,
+    existing: &ConnectionRow,
+    new_base: &str,
+    new_api_key: &str,
+) -> AppResult<()> {
+    let new_base = new_base.trim().trim_end_matches('/');
+    let changed = new_base != existing.base_url;
+    if existing.auth_type == "oauth_import" {
+        let provider = existing.oauth.as_ref().map(|o| o.provider.as_str());
+        match provider.and_then(crate::providers::resolve) {
+            Some(p) => {
+                crate::providers::check_base_url(p, new_base, &state.cfg.provider_base_overrides)
+                    .map_err(AppError::BadRequest)?;
+            }
+            None if changed => {
+                return Err(AppError::BadRequest(
+                    "base_url of an imported OAuth connection cannot be changed; re-import it with its token".into(),
+                ));
+            }
+            None => {}
+        }
+    } else if changed && new_api_key.trim().is_empty() {
+        return Err(AppError::BadRequest(
+            "changing base_url requires entering the API key again".into(),
+        ));
+    }
+    Ok(())
 }
 
 async fn stats(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
@@ -158,13 +191,9 @@ async fn update_connection(
         .store
         .get_connection(&id)?
         .ok_or_else(|| AppError::NotFound("connection not found".into()))?;
-    let api_key = if input.api_key.is_empty() {
-        // empty means keep existing (store handles '' as keep when encrypted write)
-        String::new()
-    } else {
-        input.api_key
-    };
-    let _ = existing;
+    check_connection_update(&state, &existing, &input.base_url, &input.api_key)?;
+    // Empty api_key keeps the stored one (store treats '' as keep).
+    let api_key = input.api_key;
     let row = state.store.upsert_connection(
         Some(id),
         input.name.trim(),
@@ -515,6 +544,25 @@ async fn import_oauth_connection(
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| crate::providers::default_base_url(canonical));
+    if let Some(p) = profile {
+        crate::providers::check_base_url(p, base, &state.cfg.provider_base_overrides)
+            .map_err(AppError::BadRequest)?;
+    }
+    // Re-importing under an existing name keeps its refresh token, so the target
+    // (provider + base_url) may only change when a new refresh token comes with it.
+    if let Some(existing) = state.store.get_connection_by_name(input.name.trim())? {
+        let same_provider = existing.oauth.as_ref().map(|o| o.provider.as_str()) == Some(canonical);
+        let same_base = existing.base_url == base.trim_end_matches('/');
+        let new_refresh = input
+            .refresh_token
+            .as_deref()
+            .is_some_and(|r| !r.trim().is_empty());
+        if !(same_provider && same_base) && !new_refresh {
+            return Err(AppError::BadRequest(
+                "connection exists with another provider/base_url; delete it first or include refresh_token".into(),
+            ));
+        }
+    }
 
     let default_model = input
         .default_model
@@ -558,10 +606,4 @@ async fn import_oauth_connection(
             "notes": profile.map(|p| p.notes).unwrap_or(""),
         })),
     ))
-}
-
-// re-export for cookie name used by tests/docs
-#[allow(dead_code)]
-pub fn admin_cookie_name() -> &'static str {
-    ADMIN_COOKIE
 }

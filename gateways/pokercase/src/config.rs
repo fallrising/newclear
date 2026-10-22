@@ -1,8 +1,9 @@
 use std::fs;
+use std::io::Write;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 
 #[derive(Clone, Debug)]
 pub struct AppConfig {
@@ -20,6 +21,12 @@ pub struct AppConfig {
     pub token_saver: bool,
     /// Max chars kept per tool-like content block.
     pub token_saver_max_chars: usize,
+    /// Extra Host names accepted besides IP literals, `localhost` and `host`
+    /// (e.g. the Tailscale Serve name). Guards against DNS rebinding.
+    pub allowed_hosts: Vec<String>,
+    /// Operator-only upstream base overrides `provider=url`, accepted in addition to
+    /// the provider's official hosts (local mocks, egress proxies). CLI/env only.
+    pub provider_base_overrides: Vec<(String, String)>,
 }
 
 impl AppConfig {
@@ -57,7 +64,79 @@ impl AppConfig {
             sse_stall_secs: sse_stall_secs.unwrap_or(90),
             token_saver: token_saver.unwrap_or(false),
             token_saver_max_chars: token_saver_max_chars.unwrap_or(2_000),
+            allowed_hosts: Vec::new(),
+            provider_base_overrides: Vec::new(),
         })
+    }
+
+    pub fn admin_token_path(&self) -> PathBuf {
+        self.data_dir.join("admin-token")
+    }
+
+    /// The admin UI/API always needs a token. Without `--admin-token`, load or create
+    /// `<data_dir>/admin-token` (mode 0600). Returns the file path when it was used,
+    /// so the caller can log the path; the token itself is never logged.
+    pub fn ensure_admin_token(&mut self) -> Result<Option<PathBuf>> {
+        if self.admin_token.is_some() {
+            return Ok(None);
+        }
+        let path = self.admin_token_path();
+        let token = match fs::read_to_string(&path) {
+            Ok(s) => {
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::PermissionsExt;
+                    let mode = fs::metadata(&path)?.permissions().mode() & 0o777;
+                    if mode & 0o077 != 0 {
+                        bail!(
+                            "{} is readable by group/others (mode {mode:o}); run chmod 600 on it",
+                            path.display()
+                        );
+                    }
+                }
+                s.trim().to_string()
+            }
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                let token = crate::guard::random_hex(32);
+                let mut opts = fs::OpenOptions::new();
+                opts.write(true).create_new(true);
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::OpenOptionsExt;
+                    opts.mode(0o600);
+                }
+                let mut f = opts
+                    .open(&path)
+                    .with_context(|| format!("create {}", path.display()))?;
+                writeln!(f, "{token}")?;
+                token
+            }
+            Err(e) => return Err(e).with_context(|| format!("read {}", path.display())),
+        };
+        if token.is_empty() {
+            bail!("{} is empty", path.display());
+        }
+        self.admin_token = Some(token);
+        Ok(Some(path))
+    }
+
+    /// Parse `provider=url` entries from the CLI / env.
+    pub fn set_provider_base_overrides(&mut self, entries: &[String]) -> Result<()> {
+        for e in entries.iter().flat_map(|e| e.split(',')) {
+            let e = e.trim();
+            if e.is_empty() {
+                continue;
+            }
+            let (p, url) = e
+                .split_once('=')
+                .with_context(|| format!("expected provider=url, got {e}"))?;
+            let id = crate::providers::resolve(p.trim())
+                .map(|p| p.id)
+                .with_context(|| format!("unknown provider {p}"))?;
+            self.provider_base_overrides
+                .push((id.to_string(), url.trim().trim_end_matches('/').to_string()));
+        }
+        Ok(())
     }
 
     pub fn db_path(&self) -> PathBuf {

@@ -265,6 +265,65 @@ pub fn list_public() -> serde_json::Value {
     })
 }
 
+/// Official upstream hosts per provider. OAuth tokens are only ever sent to these
+/// (https, default port) or to an operator-supplied `--provider-base-override`.
+fn official_hosts(provider_id: &str) -> &'static [&'static str] {
+    match provider_id {
+        "codex" => &["chatgpt.com"],
+        "claude" => &["api.anthropic.com"],
+        "cursor" => &["agent.api5.cursor.sh", "api2.cursor.sh"],
+        "grok" => &["cli-chat-proxy.grok.com"],
+        "opencode" => &["opencode.ai"],
+        "agy" => &["cloudcode-pa.googleapis.com"],
+        _ => &[],
+    }
+}
+
+/// Is `base_url` an allowed upstream for this known provider?
+pub fn base_url_allowed(
+    profile: &ProviderProfile,
+    base_url: &str,
+    overrides: &[(String, String)],
+) -> bool {
+    let base = base_url.trim().trim_end_matches('/');
+    let Ok(url) = reqwest::Url::parse(base) else {
+        return false;
+    };
+    if !url.username().is_empty() || url.password().is_some() {
+        return false;
+    }
+    let official = url.scheme() == "https"
+        && url.port().is_none()
+        && url
+            .host_str()
+            .is_some_and(|h| official_hosts(profile.id).contains(&h));
+    official
+        || overrides.iter().any(|(id, prefix)| {
+            id == profile.id
+                && (base == prefix
+                    || base
+                        .strip_prefix(prefix.as_str())
+                        .is_some_and(|rest| rest.starts_with('/')))
+        })
+}
+
+/// Validate a provider connection's base_url; error text is safe to return to clients.
+pub fn check_base_url(
+    profile: &ProviderProfile,
+    base_url: &str,
+    overrides: &[(String, String)],
+) -> Result<(), String> {
+    if base_url_allowed(profile, base_url, overrides) {
+        Ok(())
+    } else {
+        Err(format!(
+            "base_url for provider '{}' must be https on {} (or a --provider-base-override set by the operator)",
+            profile.id,
+            official_hosts(profile.id).join(", ")
+        ))
+    }
+}
+
 /// Build upstream POST URL for this provider + connection base_url.
 pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
     let base = base_url.trim_end_matches('/');
@@ -341,6 +400,38 @@ mod tests {
         assert_eq!(resolve("antigravity").unwrap().id, "agy");
         assert_eq!(resolve("oc").unwrap().id, "opencode");
         assert!(resolve("nope").is_none());
+    }
+
+    #[test]
+    fn base_url_allowlist_rejects_foreign_hosts() {
+        let codex = resolve("codex").unwrap();
+        assert!(base_url_allowed(codex, codex.default_base_url, &[]));
+        for bad in [
+            "https://evil.example/backend-api/codex/responses",
+            "http://chatgpt.com/backend-api/codex/responses",
+            "https://chatgpt.com:8443/backend-api/codex/responses",
+            "https://chatgpt.com.evil.example/x",
+            "https://user:pw@chatgpt.com/x",
+            "not a url",
+        ] {
+            assert!(!base_url_allowed(codex, bad, &[]), "{bad}");
+        }
+        let ov = vec![("codex".to_string(), "http://127.0.0.1:9999".to_string())];
+        assert!(base_url_allowed(codex, "http://127.0.0.1:9999/codex", &ov));
+        assert!(!base_url_allowed(
+            codex,
+            "http://127.0.0.1:99990/codex",
+            &ov
+        ));
+        let claude = resolve("claude").unwrap();
+        assert!(!base_url_allowed(
+            claude,
+            "http://127.0.0.1:9999/codex",
+            &ov
+        ));
+        for p in ACTIVE {
+            assert!(base_url_allowed(p, p.default_base_url, &[]), "{}", p.id);
+        }
     }
 
     #[test]

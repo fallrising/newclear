@@ -97,7 +97,6 @@ pub async fn refresh_connection(store: &Store, conn: &ConnectionRow) -> AppResul
     info!(connection = %conn.name, provider, "refreshing oauth token");
 
     let tokens = match provider {
-        "claude" | "anthropic" | "cc" => refresh_claude(refresh).await?,
         "codex" | "cx" | "openai_codex" => refresh_codex(refresh).await?,
         "siwc" => {
             let client_id = oauth
@@ -169,46 +168,6 @@ pub async fn ensure_fresh(store: &Store, conn: ConnectionRow) -> AppResult<Conne
             Ok(conn)
         }
     }
-}
-
-async fn refresh_claude(refresh_token: &str) -> AppResult<RefreshedTokens> {
-    #[derive(Deserialize)]
-    struct Tok {
-        access_token: String,
-        refresh_token: Option<String>,
-        expires_in: Option<i64>,
-    }
-    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
-    let resp = client
-        .post("https://api.anthropic.com/v1/oauth/token")
-        .header("content-type", "application/json")
-        .header("accept", "application/json")
-        .json(&serde_json::json!({
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "client_id": "9d1c250a-e61b-44d9-88ed-5944d1962f5e",
-        }))
-        .send()
-        .await
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("claude refresh: {e}")))?;
-    if !resp.status().is_success() {
-        let t = resp.text().await.unwrap_or_default();
-        return Err(AppError::Upstream {
-            status: 401,
-            body: format!("claude refresh failed: {t}"),
-        });
-    }
-    let tok: Tok = resp
-        .json()
-        .await
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("claude refresh json: {e}")))?;
-    Ok(RefreshedTokens {
-        access_token: tok.access_token,
-        refresh_token: tok.refresh_token,
-        expires_at: tok
-            .expires_in
-            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
-    })
 }
 
 async fn refresh_codex(refresh_token: &str) -> AppResult<RefreshedTokens> {

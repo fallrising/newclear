@@ -53,13 +53,13 @@ OAuth tokens are only sent to the provider's official hosts (https, default port
 | Provider | Hosts |
 | --- | --- |
 | codex | `chatgpt.com` |
-| claude | `api.anthropic.com` |
 | cursor | `agent.api5.cursor.sh`, `api2.cursor.sh` |
 | grok | `cli-chat-proxy.grok.com` |
 | opencode | `opencode.ai` |
 | agy | `cloudcode-pa.googleapis.com` |
 
-The admin UI/API rejects other base URLs for these providers, and the proxy re-checks
+The `claude` provider sends no token at all (it runs the local Claude Code CLI) and
+ignores its base URL. The admin UI/API rejects other base URLs for the providers above, and the proxy re-checks
 stored rows before every call. An operator can add a base with
 `--provider-base-override codex=http://127.0.0.1:8080` (CLI/env only; used by tests and
 egress proxies). An imported OAuth connection of an unknown provider cannot change its

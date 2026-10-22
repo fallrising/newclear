@@ -531,7 +531,7 @@ async fn import_oauth_connection(
     }
     if profile.is_some()
         && input.access_token.trim().is_empty()
-        && profile.map(|p| p.id) != Some("opencode")
+        && !matches!(profile.map(|p| p.id), Some("opencode" | "claude"))
     {
         return Err(AppError::BadRequest(
             "access_token is required for this provider".into(),

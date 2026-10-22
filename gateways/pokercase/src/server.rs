@@ -88,6 +88,11 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
             token_saver_max_chars: cfg.token_saver_max_chars,
             provider_base_overrides: cfg.provider_base_overrides.clone(),
             codex_user_agent: codex::user_agent(&codex_version),
+            claude_code: crate::claude_code::ClaudeCode::new(
+                cfg.claude_bin.clone(),
+                &cfg.data_dir,
+                cfg.claude_max_runs,
+            ),
         },
         sessions: Sessions::default(),
     };

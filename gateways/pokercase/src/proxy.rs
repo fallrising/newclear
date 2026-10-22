@@ -37,6 +37,129 @@ pub struct ProxyState {
     pub provider_base_overrides: Vec<(String, String)>,
     /// `codex_cli_rs/<version>` sent to the Codex upstream.
     pub codex_user_agent: String,
+    /// Local Claude Code CLI runs for the `claude` provider.
+    pub claude_code: crate::claude_code::ClaudeCode,
+}
+
+/// Which protocol the client speaks (for converting Claude Code output).
+#[derive(Clone, Copy)]
+enum ClientProto {
+    Chat,
+    Anthropic,
+    Responses,
+}
+
+enum ClaudeOutcome {
+    Stream(crate::claude_code::ClaudeRun, StreamMode),
+    Done(Response),
+}
+
+fn is_claude_code(target: &ResolvedTarget) -> bool {
+    provider_id_for(target)
+        .as_deref()
+        .and_then(providers::resolve)
+        .is_some_and(|p| p.format == UpstreamFormat::ClaudeCode)
+}
+
+/// Mark cooldown and log a failed attempt.
+fn record_failure(
+    state: &ProxyState,
+    public_model: &str,
+    target: &ResolvedTarget,
+    e: &UpstreamAttemptError,
+    start: Instant,
+) {
+    let secs = cooldown_secs_for_status(e.status);
+    if secs > 0 {
+        state.cooldown.mark(&target.connection.id, secs);
+    }
+    let _ = state.store.log_usage(
+        Some(public_model),
+        Some(&target.connection.id),
+        Some(e.status as i64),
+        Some(start.elapsed().as_millis() as i64),
+        Some(&e.body.chars().take(500).collect::<String>()),
+        None,
+        None,
+        None,
+    );
+}
+
+/// One target answered by the local Claude Code CLI. `chat_body` is the request in
+/// chat-completions form (every client protocol is converted to it first).
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Mirrors the HTTP forward path's explicit request context"
+)]
+async fn claude_code_attempt(
+    state: &ProxyState,
+    target: &ResolvedTarget,
+    chat_body: &Bytes,
+    public_model: &str,
+    stream: bool,
+    proto: ClientProto,
+    cancel: &CancellationToken,
+    start: Instant,
+) -> Result<ClaudeOutcome, UpstreamAttemptError> {
+    let chat: Value = serde_json::from_slice(chat_body).map_err(|e| UpstreamAttemptError {
+        status: 400,
+        body: format!("invalid JSON body: {e}"),
+        retryable: false,
+    })?;
+    let run = crate::claude_code::start(&state.claude_code, &target.upstream_model, &chat, cancel)
+        .await?;
+    state.cooldown.clear(&target.connection.id);
+    let latency = start.elapsed().as_millis() as i64;
+    if stream {
+        let _ = state.store.log_usage(
+            Some(public_model),
+            Some(&target.connection.id),
+            Some(200),
+            Some(latency),
+            None,
+            None,
+            None,
+            None,
+        );
+        let mode = match proto {
+            ClientProto::Anthropic => StreamMode::Passthrough,
+            ClientProto::Chat => StreamMode::AnthropicToChat(public_model.to_string()),
+            ClientProto::Responses => StreamMode::AnthropicToResponses(public_model.to_string()),
+        };
+        return Ok(ClaudeOutcome::Stream(run, mode));
+    }
+    let to_attempt = |e: AppError| UpstreamAttemptError {
+        status: e.status_code().as_u16(),
+        body: match e {
+            AppError::Upstream { body, .. } => body,
+            other => other.to_string(),
+        },
+        retryable: false,
+    };
+    let anthropic = run.collect(public_model).await.map_err(to_attempt)?;
+    let chat_out = claude::anthropic_to_openai_response(&anthropic).map_err(to_attempt)?;
+    let (pt, ct) = extract_usage_tokens(&chat_out);
+    let _ = state.store.log_usage(
+        Some(public_model),
+        Some(&target.connection.id),
+        Some(200),
+        Some(latency),
+        None,
+        pt,
+        ct,
+        None,
+    );
+    let body = match proto {
+        ClientProto::Anthropic => anthropic,
+        ClientProto::Chat => chat_out,
+        ClientProto::Responses => {
+            responses::chat_to_responses(&chat_out, public_model).map_err(to_attempt)?
+        }
+    };
+    Ok(ClaudeOutcome::Done(json_bytes_response(
+        StatusCode::OK,
+        body,
+    )))
 }
 
 #[derive(Debug)]
@@ -83,8 +206,6 @@ pub enum UpstreamBodyKind {
     OpenAiChat,
     /// Upstream spoke Responses; convert to chat for chat clients.
     OpenAiResponses,
-    /// Upstream spoke Anthropic; convert to chat for chat clients.
-    Anthropic,
     /// Antigravity generateContent envelope.
     Antigravity,
 }
@@ -245,18 +366,6 @@ async fn forward_chat_completions_inner(
                         }
                     }
                 }
-                UpstreamFormat::AnthropicMessages => {
-                    match claude::openai_to_anthropic_request(&prepared) {
-                        Ok(b) => (b, UpstreamBodyKind::Anthropic),
-                        Err(e) => {
-                            return Err(UpstreamAttemptError {
-                                status: 400,
-                                body: e.to_string(),
-                                retryable: false,
-                            });
-                        }
-                    }
-                }
                 UpstreamFormat::Antigravity => {
                     // Resolve project from meta or loadCodeAssist.
                     let project = resolve_agy_project(state, target).await.map_err(|e| {
@@ -281,10 +390,11 @@ async fn forward_chat_completions_inner(
                         }
                     }
                 }
-                UpstreamFormat::CursorAgent => {
+                UpstreamFormat::CursorAgent | UpstreamFormat::ClaudeCode => {
                     return Err(UpstreamAttemptError {
                         status: 500,
-                        body: "cursor agent path should be handled before generic forward".into(),
+                        body: "cursor / claude code paths are handled before the HTTP forward"
+                            .into(),
                         retryable: false,
                     });
                 }
@@ -494,7 +604,6 @@ fn convert_upstream_to_chat(bytes: Bytes, kind: UpstreamBodyKind, model: &str) -
     match kind {
         UpstreamBodyKind::OpenAiChat => Ok(bytes),
         UpstreamBodyKind::OpenAiResponses => responses::responses_body_to_chat(&bytes),
-        UpstreamBodyKind::Anthropic => claude::anthropic_to_openai_response(&bytes),
         UpstreamBodyKind::Antigravity => crate::agy::agy_to_chat_response(&bytes, model),
     }
 }
@@ -679,6 +788,37 @@ pub async fn handle_chat_with_fallback(
             }
         }
 
+        if is_claude_code(target) {
+            match claude_code_attempt(
+                state,
+                target,
+                &body,
+                public_model,
+                stream,
+                ClientProto::Chat,
+                &cancel,
+                start,
+            )
+            .await
+            {
+                Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
+                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                    cancel_guard.disarm();
+                    return stream_body(run.into_stream(), state.sse_stall_secs, mode).await;
+                }
+                Err(e) => {
+                    record_failure(state, public_model, target, &e, start);
+                    if e.retryable && idx + 1 < targets.len() {
+                        last_err = Some(e);
+                        continue;
+                    }
+                    return Err(AppError::Upstream {
+                        status: e.status,
+                        body: e.body,
+                    });
+                }
+            }
+        }
         match forward_chat_completions(state, target, body.clone(), None, stream, &cancel).await {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
@@ -795,6 +935,37 @@ pub async fn handle_anthropic_messages(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
+        if is_claude_code(target) {
+            match claude_code_attempt(
+                state,
+                target,
+                &oai_body,
+                public_model,
+                stream,
+                ClientProto::Anthropic,
+                &cancel,
+                start,
+            )
+            .await
+            {
+                Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
+                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                    cancel_guard.disarm();
+                    return stream_body(run.into_stream(), state.sse_stall_secs, mode).await;
+                }
+                Err(e) => {
+                    record_failure(state, public_model, target, &e, start);
+                    if e.retryable && idx + 1 < targets.len() {
+                        last_err = Some(e);
+                        continue;
+                    }
+                    return Err(AppError::Upstream {
+                        status: e.status,
+                        body: e.body,
+                    });
+                }
+            }
+        }
         match forward_chat_completions(state, target, oai_body.clone(), None, stream, &cancel).await
         {
             Ok(fwd) => {
@@ -819,7 +990,6 @@ pub async fn handle_anthropic_messages(
                         UpstreamBodyKind::OpenAiResponses => {
                             StreamMode::ResponsesToAnthropic(public_model.to_string())
                         }
-                        // Anthropic upstream already speaks the client's protocol.
                         _ => StreamMode::Passthrough,
                     };
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
@@ -911,6 +1081,37 @@ pub async fn handle_responses(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
+        if is_claude_code(target) {
+            match claude_code_attempt(
+                state,
+                target,
+                &chat_body,
+                public_model,
+                stream,
+                ClientProto::Responses,
+                &cancel,
+                start,
+            )
+            .await
+            {
+                Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
+                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                    cancel_guard.disarm();
+                    return stream_body(run.into_stream(), state.sse_stall_secs, mode).await;
+                }
+                Err(e) => {
+                    record_failure(state, public_model, target, &e, start);
+                    if e.retryable && idx + 1 < targets.len() {
+                        last_err = Some(e);
+                        continue;
+                    }
+                    return Err(AppError::Upstream {
+                        status: e.status,
+                        body: e.body,
+                    });
+                }
+            }
+        }
         match forward_chat_completions(
             state,
             target,
@@ -1105,6 +1306,10 @@ enum StreamMode {
     ResponsesToChat(String),
     /// Responses events → chat chunks → Anthropic events.
     ResponsesToAnthropic(String),
+    /// Anthropic events → chat chunks.
+    AnthropicToChat(String),
+    /// Anthropic events → chat chunks → Responses events.
+    AnthropicToResponses(String),
 }
 
 /// Re-encodes one upstream SSE `data:` payload at a time into client SSE records.
@@ -1145,6 +1350,15 @@ impl SseConvert for responses::ResponsesToChatStream {
     }
 }
 
+impl SseConvert for claude::AnthropicToChatStream {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        claude::AnthropicToChatStream::on_data(self, data)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        claude::AnthropicToChatStream::on_end(self)
+    }
+}
+
 /// Two converters in series; the first emits `data: ...` records.
 struct Chain<A, B>(A, B);
 
@@ -1181,6 +1395,11 @@ fn converter(mode: StreamMode) -> Option<Box<dyn SseConvert>> {
             responses::ResponsesToChatStream::new(m.clone()),
             ChatToAnthropic(StreamTranslateState::new(m)),
         )),
+        StreamMode::AnthropicToChat(m) => Box::new(claude::AnthropicToChatStream::new(m)),
+        StreamMode::AnthropicToResponses(m) => Box::new(Chain(
+            claude::AnthropicToChatStream::new(m),
+            ChatToResponses(false),
+        )),
     })
 }
 
@@ -1190,9 +1409,18 @@ async fn stream_response(
     stall_secs: u64,
     mode: StreamMode,
 ) -> AppResult<Response> {
-    let status = StatusCode::from_u16(resp.status().as_u16()).unwrap_or(StatusCode::OK);
+    stream_body(resp.bytes_stream(), stall_secs, mode).await
+}
+
+/// SSE body from any byte stream (HTTP upstream or a Claude Code run).
+async fn stream_body<S, E>(upstream: S, stall_secs: u64, mode: StreamMode) -> AppResult<Response>
+where
+    S: futures_util::Stream<Item = Result<Bytes, E>> + Send + 'static,
+    E: std::fmt::Display + Send + 'static,
+{
+    let status = StatusCode::OK;
     let stall = Duration::from_secs(stall_secs.max(5));
-    let mut upstream = resp.bytes_stream();
+    let mut upstream = Box::pin(upstream);
     let mut conv = converter(mode);
 
     let byte_stream = async_stream::stream! {

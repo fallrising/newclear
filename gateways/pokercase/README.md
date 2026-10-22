@@ -26,13 +26,11 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 **Out of scope (for now):** MITM, cloud sync, 9router.db compatibility, media APIs.
 
 > [!WARNING]
-> **`claude` provider: high account-ban risk.** It sends your Claude subscription OAuth token
-> straight to `api.anthropic.com` while impersonating Claude Code (`claude-cli` User-Agent,
-> `X-App: cli`, Claude Code beta headers) and forwards the caller's own `system` prompt.
-> Using subscription credentials outside the official Claude Code client can violate
-> Anthropic's terms and get the account restricted or banned. Do not enable it on an
-> account you cannot afford to lose; whether to replace it (run real `claude -p`) or remove
-> it is still an open owner decision.
+> **`claude` provider** answers through your local, signed-in Claude Code CLI (`claude -p`);
+> thinrouter never holds or sends a Claude token, and your system prompt never replaces
+> Claude Code's. Automated use of a subscription is still subject to Anthropic's terms —
+> see [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md). Client tools are not
+> bridged yet.
 
 ## Quick start
 
@@ -100,6 +98,8 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_SECRETS_KEY` / `--secrets-key` | Passphrase (Argon2id) for at-rest encryption; default: random `<data_dir>/secrets.key` |
 | `THINROUTER_PROVIDER_BASE_OVERRIDES` / `--provider-base-override` | Operator-only `provider=url` upstream base (mocks, egress proxies) |
 | `THINROUTER_CODEX_VERSION` / `--codex-version` | Codex CLI version in the upstream User-Agent; default: installed `codex --version`, else 0.136.0 |
+| `THINROUTER_CLAUDE_BIN` / `--claude-bin` | Claude Code CLI for the `claude` provider (default `claude` on PATH) |
+| `THINROUTER_CLAUDE_MAX_RUNS` / `--claude-max-runs` | Concurrent Claude Code processes (default 2) |
 | `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
 | `THINROUTER_TOKEN_SAVER` / `--token-saver` | Truncate tool / huge message content |
 | `THINROUTER_TOKEN_SAVER_MAX_CHARS` | Max chars kept per tool-like block (default 2000) |

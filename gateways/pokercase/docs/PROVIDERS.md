@@ -8,7 +8,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `codex` | `cx` | **active** | OpenAI Responses | `https://chatgpt.com/backend-api/codex/responses` |
-| `claude` | `cc`, `anthropic` | **active — high ban risk** (see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md)) | Anthropic Messages | `https://api.anthropic.com/v1/messages` |
+| `claude` | `cc`, `anthropic`, `claude_code` | **active** (text + images; no client tools yet) | local Claude Code CLI (`claude -p`), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
 | `cursor` | `cu` | **active** | AgentService HTTP/2 Connect+proto (text) | `https://agent.api5.cursor.sh` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
@@ -109,7 +109,7 @@ When you need one of these: open an item, implement `ProviderProfile` + forward 
 | Provider | Client → Upstream |
 |----------|-------------------|
 | codex / grok | `/v1/responses` → forwarded natively (all items kept; Codex: `store:false`, `stream:true`, sampling fields dropped). `/v1/chat/completions` and `/v1/messages` → converted to a **Responses** body (tools, `tool_calls` ↔ `function_call`, tool results ↔ `function_call_output`, images ↔ `input_image`); the Responses SSE is converted back to `chat.completion.chunk` or Anthropic events (text and tool calls) |
-| claude | Chat Completions → **Anthropic Messages**; native `/v1/messages` passes through |
+| claude | Every client protocol → one prompt for the local `claude -p` (caller system in `<external_system_instructions>`); its stream events → client protocol |
 | opencode | Chat Completions passthrough (+ `x-opencode-client`) |
 | cursor / agy | Import only until executors land |
 
@@ -136,7 +136,7 @@ thinrouter re-reads the file once (the CLI may have refreshed it) and otherwise 
 refresh-all and the admin refresh endpoint skip or refuse borrowed connections. The
 file is only read, never written. Prefer `siwc`, which has its own tokens.
 
-Automated for **siwc / claude / grok**, codex connections imported by hand with a refresh token, and **agy** when Google OAuth client env is set:
+Automated for **siwc / grok**, codex connections imported by hand with a refresh token, and **agy** when Google OAuth client env is set:
 
 - On request: refresh if `expires_at` is within 5 minutes  
 - On upstream **401**: one refresh + retry  
@@ -164,7 +164,7 @@ Reads:
 | Provider | Path |
 |----------|------|
 | codex | `~/.codex/auth.json` (+ model from `config.toml`) |
-| claude | `~/.claude/.credentials.json` |
+| claude | nothing read: creates the connection when the `claude` CLI is installed |
 | grok | `~/.grok/auth.json` |
 | cursor | `~/.config/cursor/auth.json` |
 | opencode | free (no file) |

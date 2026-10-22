@@ -90,9 +90,11 @@ final class PullShareWorkerTest {
     @Test
     void rejectsAcknowledgementsBeyondTheCommandQueueBound() throws Exception {
         CountDownLatch release = new CountDownLatch(1);
+        CountDownLatch polling = new CountDownLatch(1);
         PullBroker blocked = new PullBroker() {
             @Override
             public List<PullBrokerRecord> poll(Duration timeout) {
+                polling.countDown();
                 try {
                     release.await();
                 } catch (InterruptedException interrupted) {
@@ -121,6 +123,8 @@ final class PullShareWorkerTest {
                         Clock.systemUTC());
                 var callers = Executors.newVirtualThreadPerTaskExecutor()) {
             worker.start();
+            // The worker drains commands only between polls; block it first.
+            assertThat(polling.await(5, TimeUnit.SECONDS)).isTrue();
             List<Future<PullAckResult>> waiting = new ArrayList<>();
             for (int i = 0; i < PullSubscriptionSpec.MAX_INFLIGHT; i++) {
                 String token = "token-" + i;

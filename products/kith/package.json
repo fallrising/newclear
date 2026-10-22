@@ -28,7 +28,7 @@
     "e2e:open": "npm --prefix e2e run open --",
     "e2e:validate": "npm --prefix e2e run validate --",
     "web:build": "npm --prefix web run build",
-    "test:reading": "node --test --test-isolation=none reading/reading.test.ts"
+    "test:reading": "node --test --test-isolation=none reading/reading.test.ts reading/trial.test.ts"
   },
   "dependencies": {
     "hono": "4.13.8"

@@ -45,7 +45,7 @@ source_commit: 0524d26f645477fcbe5e6771ae0f5f61c64ae830
 | --- | --- | --- | --- |
 | AC-RC0 | Given 既有聊天室 migrations，When 在隔離 SQLite 套用 docs 中兩表草稿並審閱 RC 計畫，Then 既有表／資料不變、唯一鍵與 revision 契約成立，RC-01～07 有 fixture、故障切點與明確斷言 | passed | [9 項 SQL 檢查](test/reading_capture/test_schema_draft.py)、[RC 清單](docs/plans/reading-capture-tests.md)、[RED/GREEN 報告](tasks/446-reading-capture-phase0/report.md)；僅階段 0 本機證據，PR 最終 CI／獨立審查另於 #449 記錄 |
 | AC-RC1 | Given 手機 operator，When 快記、重送與斷線，Then RC-01～04 符合規格 | passed | [#456 報告](tasks/456-reading-capture-phase1/report.md)：RC-01～04 桌面／手機 7 項本地 CF E2E；7 項 D1/API 整合與全套後端 284 項通過。僅本機證據；最終 head CI／獨立審查與 merge 狀態在 PR #457 記錄 |
-| AC-RC2 | Given 閱讀頁與 Runner，When 更新正文、編輯補充、匯出或建置失敗，Then RC-05～07 及 RC-04 接線後回歸通過 | pending | 階段 2 尚未實作；內容 repo／憑證配置仍待接線前確定 |
+| AC-RC2 | Given 閱讀頁與 Runner，When 更新正文、編輯補充、匯出或建置失敗，Then RC-05～07 及 RC-04 接線後回歸通過 | pending | 階段 2 IN_PROGRESS（#463）；先凍結文章ID／受限憑證／建置與匯出契約，再依RC-05～07先RED後GREEN；尚無階段2通過證據 |
 
 ### 聊天室既有狀態
 

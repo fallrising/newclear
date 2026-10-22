@@ -1769,3 +1769,10 @@ T-456 source ACCEPT after root inspection and actual RED/GREEN; historical worke
 Full rerun phase1-e2e-final: 49pass/1expected skip/1fail W5-03 transient draft observer. W7 PASS448ms. T-460 ACCEPT read-only audit: existing trace screenshots directly prove ab/abcdef rendered inside failed wait; 1000ms assertion polling can miss900ms window. W5 §7.3 updated first, only observer changed to fixed50ms Playwright isVisible. Fixture300ms chunks,30s timeout, partial text/screenshot/failure/no-persistence/provider-count assertions unchanged. Fresh focused and full checks required; original failure not relabeled.
 
 W5 focused corrected test PASS2/2 (phase1-stream-cut-corrected). Final immutable candidate prepared while phase1-e2e-accepted full run proceeds. Final full-run/manifest, different-family review, CI and exact-main/merge evidence will be recorded on PR #457 without post-review source mutations. Evidence-gate decision at commit: RC-01–04 functionality locally ACCEPT; merge remains conditional on full regression, final-head review/CI and latest-main check. Historical failures/skips remain explicit.
+
+
+## Program: Kith reading capture phase 2 / Kith-20261022-0352
+
+Issue #463; base cd6412e5. Root owns plan, contracts, integration and accept/rework. Owner explicitly authorizes development, commits, push and conditional merge. One milestone only.
+Scope: RC-05–07 plus RC-01–04 regression; reading content, notes, pinned content build, atomic version and automatic refresh, restricted revocable export credential, local single-instance Git exporter. Native bounded workers in isolated worktrees; no worker delegation/commits. Different-family final-head read-only review via owner-specified external CLI procedure. No deployment/secrets/paid API.
+Gates: spec then RED, backend/runner/build/browser fault tests, all local checks, immutable final-head review/CI, latest main, merge/readback/release. Acceptance pending; no runtime phase2 evidence yet.

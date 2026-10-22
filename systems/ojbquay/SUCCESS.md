@@ -89,3 +89,11 @@ intervals [703,350,639]ms；後續兩行 fired_at scope correction 只有20 focu
 AC-09 runtime lifecycle／啟動切片（T461 R1/R2）見 [ac09-runtime-slice](docs/test-reports/ac09-runtime-slice.md)：
 failed-stop 不終止 config bus、有界 reconcile 收斂、fatal config 失敗降 readiness、未配置 roster 正常啟動但不能確認 reset。
 這只是切片；AC-09 整體仍 partial（缺 preview、整 group 協調、PG fence 交錯安全、真雙 runtime 證據），AC-05 仍 FAIL，owner 驗收待定。
+
+
+## 2026-10-22 C1b 接手審查（T-0374，原 T-0368）
+
+本輪只審查並修復 PR485 的持久 lease 交付阻擋；AC09 整體仍 partial。
+新增驗收：lease INSERT 在 advisory lock 取得後失敗，API 拒絕操作且連線池不得殘留該 group 的 advisory lock。
+先用真 PG constraint failure 重現，再跑相關 console 測試、Gradle build、部署模型與 CI／獨立審查。
+已批准 SDD 是 #477/adca0174；歷史失敗保留，AC05 未通過，不發 tag。

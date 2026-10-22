@@ -18,3 +18,14 @@
 | OJB-SDD-09 | classic group reset 閘門；runtime lifecycle／啟動與 console reset gate 見 [ac09-runtime-slice](../test-reports/ac09-runtime-slice.md)；下一切片 PG fence 檢查／使用缺口改 DB lease，其後 整 group／preview／真雙 runtime | AC-09 | in_progress | 2026-10-22 | — | 2026-10-22 |
 | OJB-SDD-10 | 等 owner：既有 console 主線／雙 viewport evidence | AC-10 | todo | — | — | — |
 | OJB-SDD-11 | 等 owner：最終同版本真 Compose／核心流程資格 | AC-11 | todo | — | — | — |
+
+
+### 2026-10-22 C1b takeover (desk T-0374, formerly T-0368)
+
+PR #485 durable lease: initial CI passed; T486 review found failed INSERT leaked a pooled advisory
+lock. Root reproduced real-PG RED (expected0/actual1), fixed acquisition cleanup and added abort
+fallback coverage. Console46/0, build, deploymodels,15 contracttests and41 contracts PASS; bounded
+correction review ACCEPT. Final-head CI/merge/readback pending. Evidence: `.team/evidence/c1b-takeover/verification.json`.
+Full AC09 remains partial: uncertain Kafka completion and expired/stalled owner safety must be
+resolved before C2 whole-group, C3 preview/confirm and C4 real dual-runtime qualification. AC05
+still lacks qualifying execution under approved #477; usable_tag none.

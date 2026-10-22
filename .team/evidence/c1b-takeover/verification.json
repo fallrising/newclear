@@ -1,0 +1,65 @@
+{
+  "task": "T-0374 (formerly T-0368)",
+  "baseline": "ab014b72e93697a242b6ddf7fe2d21e3af578be2",
+  "snapshot_utc": "2026-10-22T14:07:38Z",
+  "source_sha256": {
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupMaintenanceFence.java": "e6c06094182852316b8310db3a4eb268fdbbb0dd1bc2bd3336de37af19f5ac43",
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/GroupMaintenanceFenceAc09Test.java": "89adaa90c67abf70a65c0c3d25a61e56dbf0841a2f76f29077502e312fe88a9f",
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/topic/TopicApiIntegrationTest.java": "1234fe7f2b928474ea812985b5db31f58a669374ca2419c995b7214003c46e39"
+  },
+  "checks": [
+    {
+      "command": "./gradlew :modules:console-api:test --tests *TopicApiIntegrationTest.AC_09_failedLeaseInsertDoesNotLeakPooledAdvisoryLock --no-daemon --no-parallel",
+      "result": "FAIL before fix, expected 0 remaining group advisory locks, actual 1; 1 test/1 failure",
+      "time": "2026-10-22T14:04:24Z"
+    },
+    {
+      "command": "./gradlew :modules:console-api:test --no-daemon --no-parallel",
+      "result": "PASS, 46 tests/0 failures/0 errors/0 skipped, 35s"
+    },
+    {
+      "command": "./gradlew build --no-daemon --no-parallel",
+      "result": "PASS, 44 tasks: 3 executed/41 up-to-date, 4s; aggregate current XML140/0/0/0 includes cached unchanged modules"
+    },
+    {
+      "command": "make validate-deploy",
+      "result": "PASS; model validation only"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts/tests -p test_project_success.py -v",
+      "result": "PASS15"
+    },
+    {
+      "command": "python3 scripts/check_project_success.py",
+      "result": "PASS41"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "setup_failures": [
+    "First red launch did not execute because output directory was absent.",
+    "Initial red test cleanup terminated its reused pooled session, masking assertion; cleanup moved to separate synthetic PG connection, then expected0/actual1 reproduced.",
+    "Initial report validator rejected skipped-entry suffix; moved explanation before outcome without changing skipped result; commit did not execute."
+  ],
+  "review": "T-486 initial REWORK, corrected scoped diff ACCEPT; full AC09 remains partial",
+  "not_run": [
+    "AC05 experiment",
+    "real two-runtime reset",
+    "uncertain Kafka completion or stalled-owner recovery",
+    "K8s runtime"
+  ],
+  "cost": {
+    "whole_turn_start_utc": "2026-10-22T13:54:00Z",
+    "deadline_utc": "2026-10-22T14:14:00Z",
+    "native_agents_started": 1,
+    "bounded_review_followups": 1,
+    "tokens": null,
+    "provider_requests": null,
+    "outer_tool_calls": null,
+    "nested_tool_calls": null,
+    "cost": null,
+    "coverage": "single Codex takeover turn; original Claude session totals unknown; build durations observed above; no complete usage telemetry"
+  }
+}

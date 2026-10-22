@@ -284,6 +284,93 @@ final class TopicApiIntegrationTest {
 
     @Test
     @WithMockUser(username = "alice", roles = "USER")
+    void AC_09_failedLeaseInsertDoesNotLeakPooledAdvisoryLock() throws Exception {
+        createTopicAndGroup();
+        long group = id("consume_group", "settlement");
+        long key = group ^ 0x4f4a425100000000L;
+        jdbc.sql("ALTER TABLE group_maintenance_lease ADD CONSTRAINT ac09_reject_lease CHECK (false)")
+                .update();
+        try {
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> maintenance.acquire(
+                    group, System.nanoTime() + java.time.Duration.ofSeconds(5).toNanos()))
+                    .isInstanceOf(dev.ojbk.console.api.ApiException.class);
+            assertThat(jdbc.sql("""
+                    SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'
+                    AND classid::bigint = :high AND objid::bigint = :low AND granted
+                    """).param("high", key >>> 32).param("low", key & 0xffffffffL)
+                    .query(Long.class).single()).isZero();
+        } finally {
+            jdbc.sql("ALTER TABLE group_maintenance_lease DROP CONSTRAINT ac09_reject_lease").update();
+            // Test-only cleanup on RED: terminate only this synthetic group's leaked session.
+            try (var cleanup = java.sql.DriverManager.getConnection(
+                    POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+                    var statement = cleanup.prepareStatement("""
+                            SELECT count(pg_terminate_backend(pid)) FROM pg_locks WHERE locktype = 'advisory'
+                            AND classid::bigint = ? AND objid::bigint = ? AND granted
+                            """)) {
+                statement.setLong(1, key >>> 32);
+                statement.setLong(2, key & 0xffffffffL);
+                statement.execute();
+            }
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "alice", roles = "USER")
+    void AC_09_sessionLostDuringKafkaAlterStillFencesCompetingMutation() throws Exception {
+        when(runtimePauseVerifier.capture(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong()))
+                .thenReturn(new dev.ojbk.console.group.RuntimePauseVerifier.Barrier(java.util.Map.of("test", "boot")));
+        when(runtimePauseVerifier.awaitPaused(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(),
+                org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong())).thenReturn(true);
+        createTopicAndGroup();
+        long topicId = id("topic", "orders");
+        long groupId = id("consume_group", "settlement");
+        jdbc.sql("""
+                        INSERT INTO subscription (group_id, topic_id, spec, owner)
+                        VALUES (:groupId, :topicId,
+                           '{"mode":"PUSH","concurrency":4,"maxTps":100,"ordered":true,"orderKeySource":"KEY",
+                             "push":{"urls":["https://service.example/events"],"method":"POST","timeoutMs":5000,
+                             "retryIntervalsMs":[150]}}', 'alice')
+                        """)
+                .param("groupId", groupId).param("topicId", topicId).update();
+        long subscriptionId = jdbc.sql("SELECT id FROM subscription").query(Long.class).single();
+        when(groupOperations.awaitEmpty(
+                        org.mockito.ArgumentMatchers.eq("settlement"), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(true);
+        var competing = new java.util.concurrent.atomic.AtomicReference<Object>();
+        // After the last ownership check: drop the maintenance session, then race an ordinary mutation.
+        when(groupOperations.reset("settlement", "orders", 3, "OFFSET", 10)).thenAnswer(invocation -> {
+            jdbc.sql("""
+                    SELECT count(pg_terminate_backend(pid)) FROM pg_locks
+                    WHERE locktype = 'advisory' AND granted AND pid <> pg_backend_pid()
+                    """).query(Long.class).single();
+            Thread racer = Thread.ofPlatform().start(() -> {
+                try {
+                    competing.set(subscriptionService.changeState(subscriptionId, true,
+                            new dev.ojbk.console.security.Actor("alice",
+                                    java.util.Set.of(dev.ojbk.console.security.Actor.Role.ADMIN))));
+                } catch (RuntimeException failure) { competing.set(failure); }
+            });
+            racer.join(10_000);
+            return new GroupOffsetReset("settlement", "orders", List.of(new PartitionOffset(0, 10)));
+        });
+
+        mockMvc.perform(post("/api/v1/groups/{id}/reset-offset", groupId)
+                        .with(csrf())
+                        .contentType("application/json")
+                        .content("""
+                                {"topicId":%d,"mode":"OFFSET","value":10}
+                                """.formatted(topicId)))
+                .andExpect(status().isConflict());
+
+        assertThat(competing.get()).isInstanceOf(dev.ojbk.console.api.ApiException.class);
+        assertThat(((dev.ojbk.console.api.ApiException) competing.get()).code())
+                .isEqualTo("GROUP_MAINTENANCE_IN_PROGRESS");
+        assertThat(jdbc.sql("SELECT state FROM subscription").query(Integer.class).single()).isEqualTo(1);
+    }
+
+    @Test
+    @WithMockUser(username = "alice", roles = "USER")
     void AC_09_lostMaintenanceSessionStillRestoresSubscription() throws Exception {
         when(runtimePauseVerifier.capture(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong()))
                 .thenReturn(new dev.ojbk.console.group.RuntimePauseVerifier.Barrier(java.util.Map.of("test", "boot")));

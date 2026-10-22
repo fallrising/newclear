@@ -1,0 +1,20 @@
+test_a_version_number_is_not_a_usable_certification (test_project_success.SuccessContractTests.test_a_version_number_is_not_a_usable_certification) ... ok
+test_completed_project_cannot_have_unpassed_criteria (test_project_success.SuccessContractTests.test_completed_project_cannot_have_unpassed_criteria) ... ok
+test_dangling_evidence_is_rejected (test_project_success.SuccessContractTests.test_dangling_evidence_is_rejected) ... ok
+test_duplicate_acceptance_ids_are_rejected (test_project_success.SuccessContractTests.test_duplicate_acceptance_ids_are_rejected) ... ok
+test_incomplete_project_is_valid_without_a_release (test_project_success.SuccessContractTests.test_incomplete_project_is_valid_without_a_release) ... ok
+test_inventory_path_cannot_escape_repository (test_project_success.SuccessContractTests.test_inventory_path_cannot_escape_repository) ... ok
+test_local_evidence_cannot_escape_repository (test_project_success.SuccessContractTests.test_local_evidence_cannot_escape_repository) ... ok
+test_missing_readme_navigation_is_rejected (test_project_success.SuccessContractTests.test_missing_readme_navigation_is_rejected) ... ok
+test_navigation_cannot_read_outside_symlink (test_project_success.SuccessContractTests.test_navigation_cannot_read_outside_symlink) ... ok
+test_new_category_is_discovered (test_project_success.SuccessContractTests.test_new_category_is_discovered) ... ok
+test_new_component_is_not_silently_omitted (test_project_success.SuccessContractTests.test_new_component_is_not_silently_omitted) ... ok
+test_qualification_identity_is_exact_and_unique (test_project_success.SuccessContractTests.test_qualification_identity_is_exact_and_unique) ... ok
+test_reference_has_explicit_non_runtime_status (test_project_success.SuccessContractTests.test_reference_has_explicit_non_runtime_status) ... ok
+test_symlink_project_cannot_escape_repository (test_project_success.SuccessContractTests.test_symlink_project_cannot_escape_repository) ... ok
+test_tag_requires_qualification_and_completed_scope (test_project_success.SuccessContractTests.test_tag_requires_qualification_and_completed_scope) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.025s
+
+OK

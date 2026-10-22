@@ -25,7 +25,11 @@ source_commit: cda7571e8d45c9c9f036d8b65e41ad26362f7492
 | AC-03 | Given 9 個固定訓練點與初始 a=1、b=0，When 學習率 0.05 跑 500 步、以及學習率 2.0，Then 前者最大誤差 ≤ 0.05 °C、後者顯示停止原因（SDD HW-A03～A05）。 | pending | 尚未實作（HW-2）；收斂只在紙上估算過。 |
 | AC-04 | Given 1–2 位未學過 autodiff 的開發者，When 試用頁面，Then 能說出 builder 與 runtime 的差別及「loss 下降不等於一般智能」。 | pending | 尚未試用（HW-3）。 |
 
-## 本次 HW-0 計畫
+## 本次 HW-1 計畫
+
+Session `Handwired-20261021-1845`，Refs #459；僅交付 AC-02。先以固定上游真實 CPU 圖測試 HW-A01/A02（含拒絕無效輸入先於執行），再實作可直接本機開啟的靜態前向對照頁。使用 Node 24 內建 TypeScript stripping 產生自包含 HTML，保留 MIT 聲明、不新增套件；驗證建置、互動、既有 API 及 repo gates。HW-2/HW-3 維持 pending。
+
+## 前次 HW-0 計畫
 
 Session `Handwired-20261021-1808`，Refs #450；僅交付 AC-01。核對固定 SHA、MIT 授權、CPU 與梯度入口，先寫最小範例測試並觀察失敗，再執行真實上游 CPU 範例及 repo validators。HW-1～HW-3 不在本次範圍，AC-01 已取得下列本機證據；AC-02～04 維持 pending。
 

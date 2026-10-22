@@ -1,4 +1,4 @@
-name: Handwired HW-0
+name: Handwired learning
 
 on:
   pull_request:
@@ -42,3 +42,11 @@ jobs:
         env:
           HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
         run: node labs/handwired-learning/examples/api-probe.mjs
+      - name: Test forward comparison and standalone offline page
+        env:
+          HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
+        run: node --test --test-isolation=none labs/handwired-learning/tests/forward.test.mjs labs/handwired-learning/tests/build.test.mjs
+      - name: Build offline page without installing packages
+        env:
+          HANDWIRED_ROOT: ${{ github.workspace }}/upstream-handwired
+        run: node labs/handwired-learning/scripts/build.mjs "$RUNNER_TEMP/handwired.html"

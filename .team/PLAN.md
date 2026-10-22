@@ -1749,3 +1749,16 @@ HW0-D04: REWORK initial CI: evidence/llms.txt accidentally matched capability-in
 
 HW0-D05: Grok plan tool attempt returned cancelled with no verdict. Safe retry used complete fixed-commit diff/spec/upstream extracts with tools disabled (max3 turns, no delegation); actual result APPROVE, no blockers, for 9f7452b0610c7aee419f9f44e5406b47fb44fef0. All three CI runs on that head succeeded, including manually dispatched llms. Nonblocking observations are documented limitations (trusted immutable source, Node-only probe, future HW-1–3 pending); no scope expansion.
 HW0-D06: Main advanced through Retro #453 and Kith #449 to 9b31fa1776213b68e7d38b6db4f706e6dd7def15. Merge conflict only appended .team/PLAN sections; preserve current main verbatim and append this Handwired section. Product/test/CI files unchanged. Rerun local gates, final-head CI and a new different-family review before merging. Evidence-gate decision: ACCEPT bounded HW-0 functionality, delivery conditional on those final gates; acceptance/merge SHA recorded in PR and preserved closeout evidence. No second milestone.
+
+
+## Handwired HW-1 — Handwired-20261021-1845 / #459 / PR #460
+
+Scope: AC-02 / HW-A01,A02 only. HW-0 merge 6c61fded520c5e076758972a1942b4887c5581dc confirmed. No earlier competing claim; draft #460 opened. Worktree from latest main. No deploy/tag/issue closure.
+
+Scenario standard-delivery: root owns integration, documentation, gates; bounded native T-459 worker owns page/build/tests, sequential sole writer; root reviews every diff. Required external different-family review follows the user's explicitly prescribed external-cli-workers.md route (overrides skill dispatcher/desk admission mechanism for this task). Common skill source pinned 39fb407d71c7c5aae5f50a9bc01df6b3c215daa3; no installs or settings changes. Reviewer model/profile pending help/catalog check. Quota/cost unknown; use existing subscription CLI only, bounded 600 s per review, no paid API. No nested delegation.
+
+Gates: red/green real upstream tests; file:// browser interaction if installed browser available; standalone artifact pin/license checks; existing API probe; success validator + unit tests; llms validator; diff check; task/report validators; final-head CI; different-family read-only review; latest-main integration; merge readback; release claim and remove only own clean worktree. AC-03/04 remain pending.
+
+T-459 routed to native worker; acceptance pending. Root handles documentation/CI outside worker scope.
+
+HW1-R01 reviewer preflight: Grok 1.0.62 reports not authenticated; not invoked and no login attempted. Owner-authorized alternative OpenCode 1.18.33 is authenticated to Go. Local model catalog and official https://opencode.ai/v2/docs/console/go/ (checked 2026-10-22 UTC) expose opencode-go/minimax-m3.1-flash-free and explicitly list free pricing. Freeze T-460 to this MiniMax-family model, tool-disabled plan, --pure, max4 steps, 600-second deadline. No paid fallback; availability and quota remain unknown until review. OpenCode state stays at existing paths; HERDR_ENV=0 suppresses unrelated observer hooks for this process. Full fixed-head dossier supplied; author family OpenAI GPT. Final verdict remains pending.

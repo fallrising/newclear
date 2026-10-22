@@ -371,4 +371,4 @@ ojbquay is licensed under the
 [Apache License, Version 2.0](LICENSE). Third-party dependencies and images
 retain their own license terms.
 
-主線重新制定提案：[SDD.md](SDD.md)（待 owner 同意）；[搜尋與實跑差異](docs/test-reports/mainline-sdd-20261022.md)。原 strict retry 仍失敗，usable_tag 維持 none。
+規格閱讀入口：[規格、程式與測試對照](docs/specification-map.md)。既有 product-spec／ADR／M2–M6 仍可獨立閱讀；[SDD](SDD.md) 原版 PR472 與 AC-05 量測修訂 PR477 已批准合併。原 strict retry 失敗保留，新指標尚無完整資格；usable_tag 維持 none。

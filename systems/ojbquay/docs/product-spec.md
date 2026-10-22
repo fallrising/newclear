@@ -115,6 +115,12 @@ Conventional Commit, and push.
   `docs/execution-plan.md`
 - Final `make e2e` once all deployable services exist
 
-## Mainline SDD proposal (2026-10-22)
+## Specification navigation (2026-10-22)
 
-[SDD.md](../SDD.md) reconstructs the existing mainline with fixed acceptance IDs after the active-repository provenance search found no original normative input. It awaits owner agreement; this does not supersede ADR-001 or relax the 150 ms target. See the [source and execution report](test-reports/mainline-sdd-20261022.md).
+The [specification/source/test map](specification-map.md) connects this existing
+baseline, ADRs, M2–M6 designs and messaging semantics to the implementation and
+named tests. It records discrepancies without making code the specification.
+[SDD.md](../SDD.md) was approved in PR472; PR477 approved the AC-05 measurement
+amendment only. Original failed measurements remain failed; approval is not
+product qualification. The [provenance report](test-reports/mainline-sdd-20261022.md)
+records the bounded original-file search and historical reference execution.

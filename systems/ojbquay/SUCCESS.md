@@ -75,7 +75,7 @@ make e2e
 
 ## 2026-10-22 SDD 提案與現況補記
 
-[新主線 SDD](SDD.md) 已完成提案，待 owner 同意，尚未取代已接受來源；搜尋未找到原始 normative SDD。
+[主線 SDD](SDD.md) 原版 PR472 及 AC-05 量測修訂 PR477 已批准合併。以下保留提案時的參考執行證據；搜尋未找到被引用的原始 normative SDD 檔案，不代表既有產品規格與分階段設計不存在。
 AC-01～05 延用原 ID；新列 AC-06 producer 拒絕、AC-07 LKG、AC-08 pipeline/ordering、AC-09 offset reset、
 AC-10 console、AC-11 同版本啟動，均整理既有 product-spec/M2～M6 行為，詳見 SDD 的 Given/When/Then。
 [逐 AC 實際結果與缺口](docs/test-reports/mainline-sdd-20261022.md#ac-證據矩陣) 與 [任務草案](docs/tasks/BOARD.md)。
@@ -84,7 +84,7 @@ main `0aac18413a3b39043706f17b8e5f801f41573d70` 的119-test build PASS 是參考
 仍寬於 AC-05；Go SDK import panic FAIL。另一工作樹未提交候選的132-test 快照仍是131 PASS/1 strict FAIL，
 intervals [703,350,639]ms；後續兩行 fired_at scope correction 只有20 focused PASS，沒有最終完整驗收。
 原始失敗、第一次交付與到達間隔計時都保留，未增加暖機或放寬門檻。
-本頁原五列 historical 不改成新 PASS；SDD 提案也不構成 owner 驗收。usable_tag:none。
+本頁原五列 historical 不改成新 PASS；SDD 批准也不構成產品 owner 驗收。usable_tag:none。
 
 AC-09 runtime lifecycle／啟動切片（T461 R1/R2）見 [ac09-runtime-slice](docs/test-reports/ac09-runtime-slice.md)：
 failed-stop 不終止 config bus、有界 reconcile 收斂、fatal config 失敗降 readiness、未配置 roster 正常啟動但不能確認 reset。
@@ -103,3 +103,11 @@ failed-stop 不終止 config bus、有界 reconcile 收斂、fatal config 失敗
 Acceptance before implementation: a Kafka alter timeout or failed verification must leave the subscription paused and the durable maintenance fence non-expiring. An expired/replaced lease must not authorize submission. Only verified broker success permits automatic restore/release. Target/range rejection before submission retains the existing restore behavior. This conservative quarantine has no automatic recovery endpoint; approved SDD unchanged, full AC09 remains partial and usable_tag:none.
 
 Validation2026-10-22T16:20Z: final `./gradlew build --no-daemon --no-parallel` PASS (console 51/0/0/0 executed; 145 current JUnit cases including cached modules, 21 executed tasks/14 cache/9 up-to-date). Deploy models,15 contract tests,41 project contracts and diff check PASS. Initial RED was an unhandled timeout ServletException before the state assertion, preserved as failure; final integration test verifies pause/infinite row/rejected resume and reacquisition. Independent review and final-head CI remain required. No full AC09 or real delayed-broker acceptance.
+
+## 2026-10-22 規格與程式對照整理（T-0374）
+
+本次目標是將既有 product-spec、ADR、M2–M6、messaging-semantics 與目前程式／測試建立可追溯對照，修正文檔入口的過時批准狀態。
+範圍只有文件；保留所有原產品 AC、歷史 FAIL 與未驗證項，不將現有實作提升為規格。
+文件驗收：來源版本固定、AC01–11 有來源／程式／測試／缺口、連結有效、獨立審查及必要檢查；不代表產品主線完成。
+
+閱讀入口：[規格、程式與測試對照](docs/specification-map.md)。盤點固定來源6c611778；包含 SDK parity、ack command queue 與 deadline 的靜態差異，不將新發現偽裝成已修復。

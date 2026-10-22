@@ -43,7 +43,9 @@ message through gRPC and receive the Kafka partition and offset after an
 
 - The data plane has no Spring dependency.
 - Kafka producer settings include idempotence, `acks=all`, bounded batching,
-  zstd compression, and a 4 MiB request ceiling.
+  zstd compression, and a 4 MiB public message-value ceiling. Kafka request
+  limits additionally reserve bounded framing/header overhead, as described in
+  M3 and implemented by `MessageLimits`; 4 MiB is not the entire encoded request.
 - Authentication, quota, and size checks happen locally and do not log tokens
   or payloads.
 - RPC deadlines bound SDK calls; queues and caches remain bounded.

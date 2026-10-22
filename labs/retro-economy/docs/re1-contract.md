@@ -1,6 +1,6 @@
 # RE-1 implementation contract
 
-Source of rules: docs/rules.md and SDD. RE-1 only, no listings/trading yet.
+Source of rules: docs/rules.md and SDD. This document records the RE-1 baseline. The current RE-2 extension is [re2-contract.md](re2-contract.md); its market/API and second-round guidance supersede the historical statements below that trading is unavailable.
 
 ## Runtime and API
 

@@ -442,3 +442,7 @@ Active-repository provenance search completed: no original normative SDD found i
 - [x] Fatal config-bus failure lowers readiness and pause confirmation; shutdown attempts every owned resource.
 - [x] Unconfigured runtime roster keeps ordinary startup but never confirms a pause; a configured roster still requires membership.
 - [ ] Preview/confirm, whole-group coordination, PG fence check/use gap, real two-runtime reset evidence (remaining AC-09).
+
+## T-0368 timing-contract decision proposal, 2026-10-22
+
+Owner approved original SDD PR472/874517a8. Continued candidate still fails original AC05; details in docs/test-reports/retry-contract-decision-20261022.md. This docs-only PR explicitly proposes changing measurement from adjacent arrivals to failure-result completion→next arrival, with identical numeric limits and original503fixture. It does not change runtime/tests, does not make historical failures pass, and must not merge without owner agreement. AC09 and original candidate work remain separate, uncommitted and unqualified. No usable tag.

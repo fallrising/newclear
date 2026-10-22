@@ -16,9 +16,9 @@ source_commit: 0e90cd284de6f092edf91c829398358e6ece175b
 以及 2–3 位真人 30 分鐘試玩後的繼續／修改／停止決定。
 非目標見 SDD §4 與 §10：品質等級、委託與 escrow、經濟模擬、公網與 MMO 規模。
 
-## 本次交付：RE-1
+## 本次交付：RE-2
 
-Session `Retro-20261021-1826`；[任務 #454](tasks/454-re1-solo/task.md)。交付單人規則、瀏覽器路線、SQLite 持久化與重啟續玩。本機 Red/Green 規則／持久化／HTTP 測試、實際瀏覽器路線及重啟、repo 檢查已通過；最終 head 的獨立審查與 CI 結果保存於 PR。RE-2 交易、RE-3 真人驗收保留原範圍，本次不執行。
+Session `Retro-20261022-1029`；[任務 #475](tasks/475-re2-trading/task.md)。本次目標是掛單、購買、取消與 SDD RE-A03～A07。計畫以純規則、SQLite、HTTP 競爭／重啟、client 重送與真實瀏覽器交易驗證；尚未執行，AC-02 保持 pending。RE-1 已合併 #455；RE-3 真人試玩不在本次執行範圍。
 
 ## 驗收條件
 

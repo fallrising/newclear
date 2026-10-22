@@ -54,3 +54,5 @@ README 新增本機啟動、持久化、兩職業路線、測試與 token 說明
 CI 初次 workflow 載入失敗：job-level env 不支援 runner context。依 GitHub context availability 改為 step 將 RUNNER_TEMP 衍生目錄寫入 GITHUB_ENV，重新執行完整 CI；最終結果見 PR。沒有移除任何測試。
 
 獨立 Grok 審查在初版指出四個 CSS pseudo-selector 的格式錯誤（停用、hover、focus、placeholder）。新增真實瀏覽器斷言後，先觀察 `Disabled gathering is visually distinct at the summit` 失敗；修正 selector 後兩職業全流程通過，證據保留於短根 launcher `re1/final` 的 `preserve/evidence/browser-cwZ1WW/`。初次 red 結束時 launcher 偵測短暫殘留 process group；人工核對該 group 已退出後，依 launcher 指示使用新 task ID，不刪鎖或改 manifest。SUCCESS 的 source_commit 同步到實作 commit。
+
+CI 的一次 Chromium 冷啟動超過原本五秒 readiness 期限；保存的 stderr 顯示 DevTools listening 已出現，並非遊戲斷言失敗。僅將 browser readiness 輪詢期限延長為二十秒，保留 sandbox、exit 檢查及所有路線斷言；完整 CI 重跑結果見 PR。

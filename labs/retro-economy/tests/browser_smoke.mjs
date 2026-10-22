@@ -107,7 +107,8 @@ try {
   browser.stderr.on('data', b => browserLogs.push(String(b)));
   browser.on('error', e => errors.push(String(e)));
   let address;
-  for (let i = 0; i < 100; i++) {
+  // Hosted runners can take more than five seconds to cold-start Chromium.
+  for (let i = 0; i < 400; i++) {
     try { const [port, path] = (await readFile(join(profile, 'DevToolsActivePort'), 'utf8')).trim().split('\n'); address = `ws://127.0.0.1:${port}${path}`; break; } catch (_) {}
     if (browser.exitCode !== null) throw new Error('Chromium failed: ' + browserLogs.join(''));
     await pause(50);

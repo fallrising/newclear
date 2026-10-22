@@ -12,7 +12,7 @@ SDD 的「最近 action_id」改成保留每角色完整收據，理由是穿插
 
 ## Verification
 
-所有本機測試由 `python3 /home/ckc/test/codex/agent-workspace/workspace.py run retro-economy <task> -- <command>` 從來源 worktree 啟動。長路徑超過 Chromium Unix socket 限制後，瀏覽器改用 launcher 支援的 `--root /home/ckc/test/codex/aw run re1 e2e`。不停用 Chromium sandbox。
+所有本機測試由 `python3 <workspace-launcher> run retro-economy <task> -- <command>` 從來源 worktree 啟動。長路徑超過 Chromium Unix socket 限制後，瀏覽器改用 launcher 支援的 `--root <short-disk-root> run re1 e2e`。不停用 Chromium sandbox。
 
 實際執行的底層命令與結果：
 
@@ -31,12 +31,12 @@ SDD 的「最近 action_id」改成保留每角色完整收據，理由是穿插
 
 真實瀏覽器使用實際按鈕與地圖，沒有直接修改伺服器資料：鐵匠 desktop 1360px、藥師 mobile 390px 各完成路線；HTML 樣式名字保持純文字，無橫向溢出或未捕獲 JS 例外。鐵匠第二次採集在伺服器提交後刻意丟棄回覆，重載再試仍只有兩個礦石。兩職業在路障後及登頂後都停止、重啟 Python 程序，逐欄核對 state 完全相同。登頂保持 20 金幣、四種物品為 0；重入塔頂不再發獎，回鎮再出發缺修補組時拒絕。
 
-Red/Green 先後證據（機器本地保留；相對根為 `/home/ckc/test/codex/agent-workspace/data/projects/retro-economy/tasks/`）：
+Red/Green 先後證據（機器本地保留；以下相對於 launcher 的 retro-economy tasks 目錄）：
 
 - `Retro-20261021-1826-backend-red/preserve/evidence/red.txt`：實作前模組不存在；後續 `backend-boundary-red` 暴露 surrogate 編碼問題、`backend-schema-red` 暴露缺少明列欄位，修正後 `backend-schema-green` 的 26 項全過。
 - `T455-ui-red-detailed/preserve/evidence/node-red.log`：stub 上七個行為斷言失敗；`T455-uuid-red` 的三個新增 UUID 斷言先失敗，`T455-uuid-green` 全 11 項通過。
 - `Retro-20261021-1826-python311/preserve/evidence/`：parent Python 3.11 實跑輸出；`Retro-20261021-1826-final/preserve/evidence/`：整合檢查與 task/report 合約輸出。
-- `/home/ckc/test/codex/aw/projects/re1/tasks/e2e/preserve/evidence/browser-qimxL2/`：完整瀏覽器結果、伺服器／瀏覽器 log、兩職業開始／完成 PNG；已人工檢視 desktop/mobile 完成畫面。CI 重跑同一 harness 並上傳 artifact。
+- 短根 launcher task `re1/e2e` 的 `preserve/evidence/browser-qimxL2/`：完整瀏覽器結果、伺服器／瀏覽器 log、兩職業開始／完成 PNG；已人工檢視 desktop/mobile 完成畫面。CI 重跑同一 harness 並上傳 artifact。
 
 環境失敗有保留：初次 socket／Docker sandbox 權限受限後，以批准的權限重跑通過；container 的 Chromium 無法建立安全 sandbox，改從既有 image 匯出 browser/libs 在支援 user namespace 的 host 執行。另修正 launcher 暫存路徑太長與 NSS dynamic module 不相容。沒有使用 `--no-sandbox`。第一次截圖缺 CJK 字型，從官方 Noto repo 取測試用字型到 build 目錄，未安裝到系統或遊戲；另以 reduced-motion 截圖避免過場中的角色位置。這些不是遊戲 runtime 依賴。
 

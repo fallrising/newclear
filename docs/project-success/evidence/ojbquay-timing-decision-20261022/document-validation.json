@@ -1,0 +1,9 @@
+{
+  "project_success_contracts": 41,
+  "validator_tests": 15,
+  "validate_deploy": "PASS namespace/compose/prometheus5rules/kustomize3dashboards; modelonly",
+  "diff_check": "PASS",
+  "independent_review": "T460 ACCEPT publication of unapprovedproposal only",
+  "product_acceptance": "FAIL originalAC05; notqualified",
+  "usable_tag": "none"
+}

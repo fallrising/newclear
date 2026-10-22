@@ -1,0 +1,15 @@
+{
+  "status": "FAIL; UNAPPROVED DIAGNOSTIC ONLY",
+  "intervals_ms": [
+    180,
+    311,
+    608
+  ],
+  "tests": 1,
+  "failures": 1,
+  "skipped": 0,
+  "endpoint_response_cost_ms": 0,
+  "source_sha256": "84b72dd9e9753c2934fa9f4018a44a61e690e3a556e0aac5aabb808bb0dd2324",
+  "changes": "Minimal socket503 fixture; production source/anchor/firstarrival/thresholdunchanged. No warmup. Not original AC05.",
+  "initial_compile_failure": "AutoCloseable close declaredException triggered Werror; retained separatefirstlog."
+}

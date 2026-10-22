@@ -435,3 +435,7 @@ checks, affected-module checks, documentation, and acceptance evidence pass.
 ## T-0368 mainline SDD proposal (2026-10-22)
 
 Active-repository provenance search completed: no original normative SDD found in the documented scope. [New SDD proposal](../SDD.md) preserves existing AC-01 through AC-05 and strict retry timing, with a source/difference table and [reference execution report](test-reports/mainline-sdd-20261022.md). Unchanged main reference build:119/119 PASS; Go SDK import FAIL. This is not acceptance of the uncommitted repair candidate (prior132 tests:131 PASS/1 strict FAIL703ms; later focused20 PASS). Mainline remains incomplete; usable_tag:none. Owner agreement, missing AC probes and repair qualification remain pending.
+
+## T-0368 timing-contract decision proposal, 2026-10-22
+
+Owner approved original SDD PR472/874517a8. Continued candidate still fails original AC05; details in docs/test-reports/retry-contract-decision-20261022.md. This docs-only PR explicitly proposes changing measurement from adjacent arrivals to failure-result completion→next arrival, with identical numeric limits and original503fixture. It does not change runtime/tests, does not make historical failures pass, and must not merge without owner agreement. AC09 and original candidate work remain separate, uncommitted and unqualified. No usable tag.

@@ -1822,3 +1822,18 @@ HW2-D02: root Chromium file:// confirms single step, run-to500, actual nine-poin
 HW2-D03 evidence-gate ACCEPT local AC-03: root19 tests, probe,41 contracts,15 contract tests,5 llms indexes,task/report validators,diff pass. Initial index mismatch preserved and corrected using the unchanged generator: PROJECTS date is historical baseline, not current review date. Portable browser driver rerun passes; private host paths are not committed in new evidence. Final CI/review/merge still pending.
 
 HW2-D04: ecdb62ea passed final local gates, both CI jobs and xAI Grok APPROVE (review receipt on PR). Pre-merge guard observed main advance to33cfc39c through Kith phase2, so merge was not attempted. Integrate main, preserving both appended PLAN sections; no Handwired product/build/test changes or task ID collisions. Rerun final gates and obtain a new final-head review before merge.
+
+
+## T-0368 Ojbquay mainline SDD / 2026-10-22
+
+Owner requests completion of active-repo provenance search, then concrete mainline SDD from existing product/code/tests; no repeated inventory or completed product work. Independent docs worktree from origin/main 0aac18413a3b39043706f17b8e5f801f41573d70 preserves uncommitted repair tree at cda7571e. Existing retry oracle, first delivery, thresholds and failures remain unchanged. No runtime changes in this slice.
+
+Lead: complete indexed/default-tree search, write SDD.md with stable AC-01..05 retained and new IDs only for uncovered existing promises, design/observables/non-goals, source/difference table, real execution evidence and SUCCESS consistency. T-451 bounded search inspects two unindexed repos; later independent read-only fixed-diff review checks provenance, scope, AC testability and no hidden timing relaxation.
+
+Gates: complete ten active repo coverage at pinned refs; distinguish historical/present/pending results; docs validator, native Gradle build and smallest meaningful AC reference checks; independent review; commit trailer Desk-Task: T-0368, push/PR/CI. Latest desk §0 N3 and §6 require owner agreement for SDD; prepare reviewable PR before requesting precise confirmation. No SDD merge or dependent runtime change before required approval. T-0368 remains in_progress; usable_tag none. No journal expansion or later-product modification.
+
+Current status: in_progress. Prior tool/provider counts unknown/null; current orchestration counts tracked only where observable. No fixed call cap.
+
+Search completed:10 active repos, listing62 plus empty next page; T-451 two unindexed complete trees/doc corpora accepted after actual evidence checks and report-format correction. No original normative SDD found in stated scope. SDD draft plus AC report/board prepared; native T-452 independent fixed-diff review now pending. Main reference119 tests PASS, Go import FAIL; prior repair strict FAIL preserved. Not product acceptance.
+
+T-452 independent review ACCEPT for proposal publication after five corrections: exact703ms source artifact, full runtime/inflight reset contract, ordered/Share retry distinction, AC08 partial evidence, public hostname removal. Root evidence gate PARTIAL overall (Go import and strict retry remain FAIL; named runtime probes not run), ACCEPT documentation proposal publication. Native41 contracts/15 tests and119-reference Java build pass; CI/owner gate still pending. See docs/project-success/evidence/ojbquay-sdd-20261022/evidence-gate.md.

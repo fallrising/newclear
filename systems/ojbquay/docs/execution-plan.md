@@ -431,3 +431,7 @@ checks, affected-module checks, documentation, and acceptance evidence pass.
     its production 10 ms evaluation budget elapsed. The semantic assertion now
     retries within a bounded five-second test window, matching the existing
     real-Kafka test strategy without changing the production limit.
+
+## T-0368 mainline SDD proposal (2026-10-22)
+
+Active-repository provenance search completed: no original normative SDD found in the documented scope. [New SDD proposal](../SDD.md) preserves existing AC-01 through AC-05 and strict retry timing, with a source/difference table and [reference execution report](test-reports/mainline-sdd-20261022.md). Unchanged main reference build:119/119 PASS; Go SDK import FAIL. This is not acceptance of the uncommitted repair candidate (prior132 tests:131 PASS/1 strict FAIL703ms; later focused20 PASS). Mainline remains incomplete; usable_tag:none. Owner agreement, missing AC probes and repair qualification remain pending.

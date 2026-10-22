@@ -1,0 +1,724 @@
+{
+  "source_commit": "0aac18413a3b39043706f17b8e5f801f41573d70",
+  "command": "./gradlew build --no-daemon --no-parallel --continue",
+  "tests": 119,
+  "passed": 119,
+  "failed": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "class": "dev.ojbk.sdk.OjbkProducerTest",
+      "test": "raisesTypedBusinessFailureWithoutTurningItIntoTransportStatus()",
+      "status": "passed",
+      "seconds": "0.034"
+    },
+    {
+      "class": "dev.ojbk.sdk.OjbkProducerTest",
+      "test": "schedulesAndCancelsWithTheSameStableDelayId()",
+      "status": "passed",
+      "seconds": "0.019"
+    },
+    {
+      "class": "dev.ojbk.sdk.OjbkProducerTest",
+      "test": "sendsSyncAndAsyncWithMetadataToken()",
+      "status": "passed",
+      "seconds": "0.013"
+    },
+    {
+      "class": "dev.ojbk.sdk.OjbkProducerTest",
+      "test": "rejectsARecurrenceWithOnlyOneOccurrence()",
+      "status": "passed",
+      "seconds": "0.004"
+    },
+    {
+      "class": "dev.ojbk.sdk.OjbkConsumerTest",
+      "test": "subscribesHandlerAndBatchesAckAndNackWithMetadataAuth()",
+      "status": "passed",
+      "seconds": "0.781"
+    },
+    {
+      "class": "dev.ojbk.sdk.OjbkConsumerTest",
+      "test": "raisesTypedPollBusinessFailure()",
+      "status": "passed",
+      "seconds": "0.007"
+    },
+    {
+      "class": "dev.ojbk.sdk.OjbkConsumerTest",
+      "test": "reconnectsAfterTransportFailureWithoutSkippingTheDelivery()",
+      "status": "passed",
+      "seconds": "0.011"
+    },
+    {
+      "class": "dev.ojbk.observability.MetricsHttpTest",
+      "test": "exposesLivenessReadinessAndMetricsWithoutPayloads()",
+      "status": "passed",
+      "seconds": "0.22"
+    },
+    {
+      "class": "dev.ojbk.config.PushSubscriptionSpecTest",
+      "test": "convertsAValidatedImmutablePushPolicy()",
+      "status": "passed",
+      "seconds": "0.007"
+    },
+    {
+      "class": "dev.ojbk.config.PushSubscriptionSpecTest",
+      "test": "rejectsUnboundedInvalidAndUnsafePolicyFields()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.delay.DelayCommandCodecTest",
+      "test": "boundsRecurrenceAndDoesNotLeakInvalidCommandPayload()",
+      "status": "passed",
+      "seconds": "0.012"
+    },
+    {
+      "class": "dev.ojbk.delay.DelayCommandCodecTest",
+      "test": "roundTripsAnImmutableVersionedAddCommand()",
+      "status": "passed",
+      "seconds": "0.023"
+    },
+    {
+      "class": "dev.ojbk.delay.DelayCommandCodecTest",
+      "test": "requiresFiniteRecurrenceAndValidCancelShape()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.security.TokenAuthTest",
+      "test": "comparesTokensWithoutAcceptingNullOrDifferentLengthValues()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.config.ConfigSchemaResourceTest",
+      "test": "[1] \"topic\"",
+      "status": "passed",
+      "seconds": "0.022"
+    },
+    {
+      "class": "dev.ojbk.config.ConfigSchemaResourceTest",
+      "test": "[2] \"group\"",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.config.ConfigSchemaResourceTest",
+      "test": "[3] \"subscription\"",
+      "status": "passed",
+      "seconds": "0.008"
+    },
+    {
+      "class": "dev.ojbk.config.ConfigEventCodecTest",
+      "test": "roundTripsTheNormativeConfigEnvelope()",
+      "status": "passed",
+      "seconds": "0.564"
+    },
+    {
+      "class": "dev.ojbk.config.ConfigStoreTest",
+      "test": "appliesOnlyMonotonicallyNewerSupportedRevisions()",
+      "status": "passed",
+      "seconds": "0.029"
+    },
+    {
+      "class": "dev.ojbk.config.ConfigStoreTest",
+      "test": "atomicallyRemovesADeletedResource()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.pipeline.TransitMapperTest",
+      "test": "rejectsInvalidTargetAndSourcePathsDuringPreflight()",
+      "status": "passed",
+      "seconds": "0.009"
+    },
+    {
+      "class": "dev.ojbk.pipeline.TransitMapperTest",
+      "test": "mapsExistingJsonPathsAndSkipsMissingSources()",
+      "status": "passed",
+      "seconds": "0.026"
+    },
+    {
+      "class": "dev.ojbk.config.PullSubscriptionSpecTest",
+      "test": "rejectsOrderedOrUnboundedPullPolicies()",
+      "status": "passed",
+      "seconds": "0.02"
+    },
+    {
+      "class": "dev.ojbk.config.PullSubscriptionSpecTest",
+      "test": "parsesBoundedPullPolicy()",
+      "status": "passed",
+      "seconds": "0.013"
+    },
+    {
+      "class": "dev.ojbk.config.KafkaConfigBusIntegrationTest",
+      "test": "bootstrapsExistingEventsAndPublishesSubsequentChanges()",
+      "status": "passed",
+      "seconds": "2.794"
+    },
+    {
+      "class": "dev.ojbk.contracts.ContractDescriptorTest",
+      "test": "exposesStableProducerAndConsumerServices()",
+      "status": "passed",
+      "seconds": "0.149"
+    },
+    {
+      "class": "dev.ojbk.delay.IdsTest",
+      "test": "createsTimeOrderedRfc4122VersionSevenIds()",
+      "status": "passed",
+      "seconds": "0.006"
+    },
+    {
+      "class": "dev.ojbk.pipeline.CelFilterTest",
+      "test": "evaluatesDeclaredMessageVariablesAndFailsClosed()",
+      "status": "passed",
+      "seconds": "0.608"
+    },
+    {
+      "class": "dev.ojbk.config.TopicConfigTest",
+      "test": "acceptsAValidTopicPolicy()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.config.TopicConfigTest",
+      "test": "rejectsInvalidNamesAndHardMessageLimitViolations()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "cancellationWaitsForLockedOccurrenceThenStopsTheRemainingSeries()",
+      "status": "passed",
+      "seconds": "0.336"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "cancelWinsBeforeDispatch()",
+      "status": "passed",
+      "seconds": "0.063"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "concurrentWorkersDoNotClaimTheSameLockedRow()",
+      "status": "passed",
+      "seconds": "0.065"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "expiresAndCleansTerminalRowsInBoundedBatches()",
+      "status": "passed",
+      "seconds": "0.056"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "duplicateAddCreatesOnePendingSeries()",
+      "status": "passed",
+      "seconds": "0.084"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "sendFailureRollsBackPendingStateForRetry()",
+      "status": "passed",
+      "seconds": "0.055"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "advancesAThreeOccurrenceSeriesAndPreservesMetadata()",
+      "status": "passed",
+      "seconds": "0.104"
+    },
+    {
+      "class": "dev.ojbk.scheduler.JdbcDelayRepositoryTest",
+      "test": "hundredMillisecondTicksFireAfterDueAndWithinOneSecond()",
+      "status": "passed",
+      "seconds": "0.399"
+    },
+    {
+      "class": "dev.ojbk.scheduler.SchedulerMetricsTest",
+      "test": "exposesBoundedDelayCountersGaugeAndLagHistogram()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.scheduler.SchedulerSettingsTest",
+      "test": "usesBoundedOperationalDefaults()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.scheduler.SchedulerSettingsTest",
+      "test": "rejectsUnboundedOrInvalidRuntimeValues()",
+      "status": "passed",
+      "seconds": "0.005"
+    },
+    {
+      "class": "dev.ojbk.scheduler.SchedulerE2eTest",
+      "test": "ingestsCommittedCommandAndDispatchesKafkaRecordWithDelayIdentity()",
+      "status": "passed",
+      "seconds": "2.551"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.KafkaOrderedPushWorkerTest",
+      "test": "preservesSameKeyOrderWhileAnotherKeyProgresses()",
+      "status": "passed",
+      "seconds": "1.95"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushRetryE2eTest",
+      "test": "schedulesThreeRetriesThenWritesFourthFailureToDlq()",
+      "status": "passed",
+      "seconds": "7.832"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.KafkaRetryPublisherTest",
+      "test": "writesVersionedDelayCommandAndDlqRecordWithOriginalIdentity()",
+      "status": "passed",
+      "seconds": "1.019"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushWorkerOrchestratorTest",
+      "test": "keepsLastKnownGoodWorkerWhenReplacementConstructionFails()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushWorkerOrchestratorTest",
+      "test": "startsReplacesAndStopsWorkersFromSubscriptionRevisions()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PullGrpcE2eTest",
+      "test": "javaSdkPollsTransformsAndAcknowledgesThroughRealGatewayAndKafka()",
+      "status": "passed",
+      "seconds": "8.068"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PullShareWorkerTest",
+      "test": "rejectsAStaleTokenWithoutSettlingAnotherDelivery()",
+      "status": "passed",
+      "seconds": "0.004"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PullShareWorkerTest",
+      "test": "commitsAckAndRedeliversNackWithANewTokenAndDeliveryCount()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushRecordHandlerTest",
+      "test": "releasesWithoutHttpWhenRateWaitIsInterrupted()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushRecordHandlerTest",
+      "test": "writesExhaustedAndPipelineFailuresToDlqBeforeAccept()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushRecordHandlerTest",
+      "test": "acceptsFilterAndSuccessWithoutRetryIo()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushRecordHandlerTest",
+      "test": "schedulesConfiguredRetryBeforeAcceptingFailedSource()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushRecordHandlerTest",
+      "test": "releasesRecordWhenDurableHandoffFails()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.JdkPushHttpClientTest",
+      "test": "doesNotFastRetryAnHttpBusinessFailure()",
+      "status": "passed",
+      "seconds": "0.01"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.JdkPushHttpClientTest",
+      "test": "retriesOnlyTransportFailuresAtTwoBoundedBackoffs()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PullWorkerRegistryTest",
+      "test": "rejectsTokensThatDoNotRouteToTheAuthenticatedGroup()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PullWorkerRegistryTest",
+      "test": "startsRoutesAndStopsPullWorkersByRevision()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.OrderKeyExtractorTest",
+      "test": "extractsKafkaKeyHeaderAndJsonPath()",
+      "status": "passed",
+      "seconds": "0.017"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.ConsumerGrpcServiceTest",
+      "test": "metadataAuthStreamsDeliveryAndAckUsesBusinessResponse()",
+      "status": "passed",
+      "seconds": "0.361"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.ConsumerGrpcServiceTest",
+      "test": "invalidAuthenticationIsAStablePollBusinessFrame()",
+      "status": "passed",
+      "seconds": "0.006"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.OrderedPushRecordHandlerTest",
+      "test": "retriesInlineUntilSuccessWithoutScheduling()",
+      "status": "passed",
+      "seconds": "0.004"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.OrderedPushRecordHandlerTest",
+      "test": "writesDlqAfterFiniteInlineRetries()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.FixedRateGateTest",
+      "test": "spacesConcurrentDeliveryStartsAtTheConfiguredRate()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.FixedRateGateTest",
+      "test": "reportsInterruptedWaitWithoutConsumingHttpWork()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.KafkaPullBrokerTest",
+      "test": "releasesWithIncrementedDeliveryCountAndAcceptSurvivesRestart()",
+      "status": "passed",
+      "seconds": "8.275"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.KafkaPullBrokerTest",
+      "test": "releasesAnUnacknowledgedDeliveryAfterItsLease()",
+      "status": "passed",
+      "seconds": "1.179"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.BoundedStripedExecutorTest",
+      "test": "serializesSameKeyAndAllowsAnotherStripeToProgress()",
+      "status": "passed",
+      "seconds": "0.093"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.KafkaSharePushWorkerTest",
+      "test": "acceptsSuccessfulRecordAndDoesNotReacquireItForTheGroup()",
+      "status": "passed",
+      "seconds": "7.154"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.GatewayConsumeSettingsTest",
+      "test": "rejectsInvalidPortsAndTimeouts()",
+      "status": "passed",
+      "seconds": "0.005"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.GatewayConsumeSettingsTest",
+      "test": "usesLocalDefaultsAndAcceptsExplicitRuntimeValues()",
+      "status": "passed",
+      "seconds": "0.001"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushPipelineTest",
+      "test": "transformsMatchingJsonAndPreservesDeliveryMetadata()",
+      "status": "passed",
+      "seconds": "0.09"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushPipelineTest",
+      "test": "filtersShadowTagsAndCelWithoutDeliveryIo()",
+      "status": "passed",
+      "seconds": "0.006"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushPipelineTest",
+      "test": "rejectsInvalidCelAndTransitPathsDuringWorkerPreflight()",
+      "status": "passed",
+      "seconds": "0.009"
+    },
+    {
+      "class": "dev.ojbk.gateway.consume.PushPipelineTest",
+      "test": "marksInvalidTransitInputAsDeterministicPipelineError()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.console.kafka.DefaultKafkaDlqOperationsTest",
+      "test": "browsesTailAndReplaysExactOffsetWithoutRetryHeaders()",
+      "status": "passed",
+      "seconds": "2.33"
+    },
+    {
+      "class": "dev.ojbk.console.configuration.TopicConfigPublicationIntegrationTest",
+      "test": "testMessageSamplingAndClassicOffsetOperationsUseRealKafka()",
+      "status": "passed",
+      "seconds": "3.647"
+    },
+    {
+      "class": "dev.ojbk.console.configuration.TopicConfigPublicationIntegrationTest",
+      "test": "topicApiConvergesPostgresKafkaConfigBusAndAudit()",
+      "status": "passed",
+      "seconds": "1.481"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "softDeletesSubscriptionGroupAndTopicWithoutOrphaningReferences()",
+      "status": "passed",
+      "seconds": "0.144"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "rejectsSnapshotAndAuditForNonOperators()",
+      "status": "passed",
+      "seconds": "0.02"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "exposesDefaultClusterHealthToOperators()",
+      "status": "passed",
+      "seconds": "0.025"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "deniesAdministrativeOperationsToResourceOwners()",
+      "status": "passed",
+      "seconds": "0.018"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "queriesAndRequestsCancellationForAnOwnedPendingDelay()",
+      "status": "passed",
+      "seconds": "0.035"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "deniesMutationAndHidesResourcesOwnedByAnotherUser()",
+      "status": "passed",
+      "seconds": "0.03"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "exposesOperatorSnapshotAndPaginatedAudit()",
+      "status": "passed",
+      "seconds": "0.029"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "samplesAndPublishesBoundedTestMessagesForAnOwnedTopic()",
+      "status": "passed",
+      "seconds": "0.041"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "provisionsPullWithoutRetryTopicAndRejectsConflictingGroupLease()",
+      "status": "passed",
+      "seconds": "0.04"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "rejectsInvalidSubscriptionExpressionBeforePersistence()",
+      "status": "passed",
+      "seconds": "0.034"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "createsAndAuditsUsersWithoutReturningCredentials()",
+      "status": "passed",
+      "seconds": "0.098"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "generatesOpenApiForTheControlPlaneContract()",
+      "status": "passed",
+      "seconds": "0.414"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "rollsBackMetadataAndCompensatesBrokerWhenProvisioningFails()",
+      "status": "passed",
+      "seconds": "0.027"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "resetsClassicOffsetsOnlyAfterTheGroupIsQuietAndRestoresState()",
+      "status": "passed",
+      "seconds": "0.097"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "createsTopicAuditAndOutboxAsOneObservableOperation()",
+      "status": "passed",
+      "seconds": "0.022"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "updatesAndPausesOwnedResourcesWithMonotonicConfigVersions()",
+      "status": "passed",
+      "seconds": "0.075"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "authenticatesAStoredUserAndPersistsTheSession()",
+      "status": "passed",
+      "seconds": "0.217"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "returnsStableUnauthorizedResponseForBadCredentials()",
+      "status": "passed",
+      "seconds": "0.145"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "createsGroupAndValidatedSubscriptionWithVersionedChanges()",
+      "status": "passed",
+      "seconds": "0.039"
+    },
+    {
+      "class": "dev.ojbk.console.topic.TopicApiIntegrationTest",
+      "test": "bootstrapsCsrfWithoutAnAuthenticatedSession()",
+      "status": "passed",
+      "seconds": "0.013"
+    },
+    {
+      "class": "dev.ojbk.console.dlq.DlqApiIntegrationTest",
+      "test": "nonOwnerCannotBrowseDlq()",
+      "status": "passed",
+      "seconds": "0.047"
+    },
+    {
+      "class": "dev.ojbk.console.dlq.DlqApiIntegrationTest",
+      "test": "ownerBrowsesAndReplaysBoundedOffsetsWithAudit()",
+      "status": "passed",
+      "seconds": "0.099"
+    },
+    {
+      "class": "dev.ojbk.console.subscription.SubscriptionPreviewServiceTest",
+      "test": "evaluatesSharedPolicyAndReturnsTheTransformedBody()",
+      "status": "passed",
+      "seconds": "0.023"
+    },
+    {
+      "class": "dev.ojbk.console.subscription.SubscriptionPreviewServiceTest",
+      "test": "reportsTagAndShadowFilteringWithoutReturningPayload()",
+      "status": "passed",
+      "seconds": "0.013"
+    },
+    {
+      "class": "dev.ojbk.console.subscription.SubscriptionPreviewServiceTest",
+      "test": "rejectsMalformedBase64BeforeEvaluation()",
+      "status": "passed",
+      "seconds": "0.008"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerGatewayE2eTest",
+      "test": "javaSdkSendsThroughGrpcAndReturnsTheStoredKafkaPosition()",
+      "status": "passed",
+      "seconds": "6.299"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerGrpcServiceTest",
+      "test": "metadataTokenOverridesBodyTokenAndReturnsBusinessResponse()",
+      "status": "passed",
+      "seconds": "0.051"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerGrpcServiceTest",
+      "test": "streamsBatchResponsesInRequestOrder()",
+      "status": "passed",
+      "seconds": "0.01"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.DelayGatewayTest",
+      "test": "sendsAlreadyDueOneShotDirectly()",
+      "status": "passed",
+      "seconds": "0.126"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.DelayGatewayTest",
+      "test": "publishesFutureFiniteSeriesAfterLocalValidation()",
+      "status": "passed",
+      "seconds": "0.007"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.DelayGatewayTest",
+      "test": "publishesAuthenticatedCancelWithoutConsumingProduceQuota()",
+      "status": "passed",
+      "seconds": "0.005"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.DelayGatewayTest",
+      "test": "rejectsNonDelayTopicAndOutOfRangeSchedule()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerEngineTest",
+      "test": "mapsBrokerFailureToBusinessCode()",
+      "status": "passed",
+      "seconds": "0.005"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerEngineTest",
+      "test": "rejectsUnknownTopicAndBadTokenBeforeBrokerIo()",
+      "status": "passed",
+      "seconds": "0.005"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerEngineTest",
+      "test": "rejectsExhaustedQuotaOversizeAndInvalidPartitionBeforeBrokerIo()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerEngineTest",
+      "test": "treatsDisabledTopicAsUnavailable()",
+      "status": "passed",
+      "seconds": "0.002"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerEngineTest",
+      "test": "sendsValidatedMessageAndReturnsBrokerAcknowledgement()",
+      "status": "passed",
+      "seconds": "0.007"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.GatewaySettingsTest",
+      "test": "rejectsInvalidOrCollidingPorts()",
+      "status": "passed",
+      "seconds": "0.007"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.GatewaySettingsTest",
+      "test": "readsBoundedRuntimeConfigurationFromEnvironment()",
+      "status": "passed",
+      "seconds": "0.003"
+    },
+    {
+      "class": "dev.ojbk.gateway.produce.ProducerMetricsTest",
+      "test": "rendersBoundedPrometheusCountersWithoutPayloadOrTokenData()",
+      "status": "passed",
+      "seconds": "0.004"
+    }
+  ]
+}

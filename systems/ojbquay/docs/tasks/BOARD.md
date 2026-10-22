@@ -1,0 +1,20 @@
+# Ojbquay 技術任務板
+
+## T-0368 — 主線 SDD 提案
+
+需求 T-0368；[SDD](../../SDD.md) 待 owner 同意。以下是 AC 對應草案，尚未依新 SDD 開工或關閉；既有 #445 未提交候選保留。
+每項實作前先補固定 AC 名稱的 executable case。task 預期 30 分鐘；長項另拆 bounded slice，不擴張產品範圍。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| OJB-SDD-01 | 等 owner：資源／配置真流程與五秒觀測 | AC-01 | todo | — | — | — |
+| OJB-SDD-02 | 等 owner：producer→sink 同來源證據 | AC-02 | todo | — | — | — |
+| OJB-SDD-03 | 等 owner：合入既有 Go descriptor 候選後補跨語言驗證 | AC-03 | todo | — | — | — |
+| OJB-SDD-04 | 等 owner：durable delay／retry／DLQ 故障與回歸 | AC-04 | todo | — | — | — |
+| OJB-SDD-05 | 等 owner：延續 #445 strict retry 根因修復，不改 oracle | AC-05 | todo | — | — | — |
+| OJB-SDD-06 | 等 owner：producer 拒絕邊界固定 AC tests | AC-06 | todo | — | — | — |
+| OJB-SDD-07 | 等 owner：LKG 控制面中斷 fixture | AC-07 | todo | — | — | — |
+| OJB-SDD-08 | 等 owner：pipeline／ordered 回歸與 broker 退出診斷 | AC-08 | todo | — | — | — |
+| OJB-SDD-09 | 等 owner：classic group active/empty 真 broker 閘門 | AC-09 | todo | — | — | — |
+| OJB-SDD-10 | 等 owner：既有 console 主線／雙 viewport evidence | AC-10 | todo | — | — | — |
+| OJB-SDD-11 | 等 owner：最終同版本真 Compose／核心流程資格 | AC-11 | todo | — | — | — |

@@ -1,0 +1,93 @@
+{
+  "observed_date": "2026-10-22",
+  "repository_pages": [
+    {
+      "offset": 0,
+      "page_size": 100,
+      "returned": 62
+    },
+    {
+      "offset": 100,
+      "page_size": 100,
+      "returned": 0
+    }
+  ],
+  "active_count": 10,
+  "indexed_eight": [
+    {
+      "repo": "newclear",
+      "sha": "0aac18413a3b39043706f17b8e5f801f41573d70",
+      "tree_entries": 7383,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox",
+      "grep_exit": 0,
+      "matching_lines": 478,
+      "tree_complete": true,
+      "scope": "all tracked nonbinary default-branch contents except lock files"
+    },
+    {
+      "repo": "kernel",
+      "sha": "a1d62186a95d6693a897a9d87ffebb30e56f24c6",
+      "tree_entries": 3560,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox",
+      "grep_exit": 0,
+      "matching_lines": 29,
+      "tree_complete": true,
+      "scope": "all tracked nonbinary default-branch contents except lock files"
+    },
+    {
+      "repo": "desk",
+      "sha": "81f11dc2a6cbf5f4912a564cde7728d8f6c41867",
+      "tree_entries": 1252,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox",
+      "grep_exit": 0,
+      "matching_lines": 40,
+      "tree_complete": true,
+      "scope": "all tracked nonbinary default-branch contents except lock files"
+    },
+    {
+      "repo": "journal",
+      "sha": "9893f8b5aa93b2c0e376df43be990131bb975f61",
+      "tree_entries": 1144,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox",
+      "grep_exit": 0,
+      "matching_lines": 8,
+      "tree_complete": true,
+      "scope": "all tracked nonbinary default-branch contents except lock files"
+    },
+    {
+      "repository": "fallrising",
+      "sha": "dd978ebf67ff6f7342f9136a896e922c4c458789",
+      "tree_entries": 1,
+      "truncated": false,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox|\\bSDD\\b",
+      "text_file_count": 1
+    },
+    {
+      "repository": "knowledge-base",
+      "sha": "702b868ebf6daf6c00a33bc9abf7f6b71a11ab62",
+      "tree_entries": 387,
+      "truncated": false,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox|\\bSDD\\b",
+      "text_file_count": 312
+    },
+    {
+      "repository": "doc_analysis_study",
+      "sha": "5c2dc8de04a16f7fe35d51c19d8a1c185f9319af",
+      "tree_entries": 1562,
+      "truncated": false,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox|\\bSDD\\b",
+      "text_file_count": 1162
+    },
+    {
+      "repository": "personal-journal",
+      "sha": "e60c92b8a2217b283323cb96ad8b75df26461b3c",
+      "tree_entries": 17,
+      "truncated": false,
+      "query": "ojbquay|ddmq|ProduceDelay|retryIntervals|__ojbk\\.delay\\.inbox|\\bSDD\\b",
+      "text_file_count": 8
+    }
+  ],
+  "unindexed_two": "unindexed-search/report.md",
+  "raw_private_evidence": "Owner-retained T-0368 backup: active-search-sdd-20261022; raw private content intentionally not published",
+  "conclusion": "No original Ojbquay normative SDD found in the stated scopes. Other branches/history/deleted/external objects are not covered except previously documented archived ojbquay history."
+}

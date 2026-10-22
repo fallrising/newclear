@@ -1,0 +1,14 @@
+{
+  "source_commit": "0aac18413a3b39043706f17b8e5f801f41573d70",
+  "sha256_of_committed_inputs": {
+    "systems/ojbquay/AGENTS.md": "bd9699b2331481628e6e35e030d5cb16ffcc92a0a3140ffbaab4901e31f6b987",
+    "systems/ojbquay/docs/product-spec.md": "52a8161711d8976ca65ec9cd6bfacf4bdbc8b206dda0ad93666af7ec6c976686",
+    "systems/ojbquay/docs/messaging-semantics.md": "241aaedd60f808945167ad55db12ab4a4d438e16de84433b8e287fa769717a8b",
+    "systems/ojbquay/docs/specs/m3-delay-scheduling.md": "a324b46f8117e928b1b01b4cc5fdcb78056d5f143421ea7195f1bcff1c676e4a",
+    "systems/ojbquay/docs/specs/m4-push-consumer.md": "aa81a8fe960a1ef57021bba210d6d7f54966e4872ad542082c249f32d26679d3",
+    "systems/ojbquay/docs/specs/m6-console-operations.md": "54033eb7655eb29315a82ee439e80439bc55c6c2e0b943cbc7c53274bc766c1e",
+    "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/PushRecordHandler.java": "9e9e78851867c5ab064da56415121e08366a968f54398de81eb5924e215b0242",
+    "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/PushRetryE2eTest.java": "4ae54e7f55ec85caa23dada190c69f7a67033067a21813997882135ed8ffce27"
+  },
+  "scope": "before documentation edits; no runtime changes in this PR"
+}

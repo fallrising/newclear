@@ -1,0 +1,151 @@
+make: Entering directory '<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay'
+docker compose -f deploy/compose/docker-compose.yml config --quiet
+./deploy/validate.sh
+validated OJBK namespace
+Unable to find image 'prom/prometheus:v3.7.3' locally
+v3.7.3: Pulling from prom/prometheus
+9fa9226be034: Pulling fs layer
+1617e25568b2: Pulling fs layer
+1d195e186706: Pulling fs layer
+a3dbf675e35b: Pulling fs layer
+481d3006e989: Pulling fs layer
+2c520e315aed: Pulling fs layer
+02872a85ab69: Pulling fs layer
+8c7998df4188: Pulling fs layer
+67f6de79be21: Pulling fs layer
+7617b730a2c5: Pulling fs layer
+2c520e315aed: Waiting
+a3dbf675e35b: Waiting
+481d3006e989: Waiting
+02872a85ab69: Waiting
+8c7998df4188: Waiting
+67f6de79be21: Waiting
+7617b730a2c5: Waiting
+1617e25568b2: Verifying Checksum
+1617e25568b2: Download complete
+9fa9226be034: Verifying Checksum
+9fa9226be034: Pull complete
+1d195e186706: Verifying Checksum
+1d195e186706: Download complete
+1617e25568b2: Pull complete
+481d3006e989: Verifying Checksum
+481d3006e989: Download complete
+2c520e315aed: Verifying Checksum
+2c520e315aed: Download complete
+02872a85ab69: Verifying Checksum
+02872a85ab69: Download complete
+a3dbf675e35b: Verifying Checksum
+a3dbf675e35b: Download complete
+8c7998df4188: Download complete
+67f6de79be21: Verifying Checksum
+67f6de79be21: Download complete
+7617b730a2c5: Verifying Checksum
+7617b730a2c5: Download complete
+1d195e186706: Pull complete
+a3dbf675e35b: Pull complete
+481d3006e989: Pull complete
+2c520e315aed: Pull complete
+02872a85ab69: Pull complete
+8c7998df4188: Pull complete
+67f6de79be21: Pull complete
+7617b730a2c5: Pull complete
+Digest: sha256:49214755b6153f90a597adcbff0252cc61069f8ab69ce8411285cd4a560e8038
+Status: Downloaded newer image for prom/prometheus:v3.7.3
+Checking /etc/prometheus/prometheus.yml
+  SUCCESS: 1 rule files found
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
+
+Checking /etc/prometheus/alerts.yml
+  SUCCESS: 5 rules found
+
+Unable to find image 'registry.k8s.io/kubectl:v1.35.1' locally
+v1.35.1: Pulling from kubectl
+fab8c4b3fa32: Pulling fs layer
+bfb59b82a9b6: Pulling fs layer
+017886f7e176: Pulling fs layer
+62de241dac5f: Pulling fs layer
+2780920e5dbf: Pulling fs layer
+7c12895b777b: Pulling fs layer
+3214acf345c0: Pulling fs layer
+52630fc75a18: Pulling fs layer
+dd64bf2dd177: Pulling fs layer
+4aa0ea1413d3: Pulling fs layer
+dcaa5a89b0cc: Pulling fs layer
+069d1e267530: Pulling fs layer
+13dee2db30bf: Pulling fs layer
+e4bf76af5526: Pulling fs layer
+dd64bf2dd177: Waiting
+4aa0ea1413d3: Waiting
+dcaa5a89b0cc: Waiting
+069d1e267530: Waiting
+13dee2db30bf: Waiting
+e4bf76af5526: Waiting
+62de241dac5f: Waiting
+2780920e5dbf: Waiting
+7c12895b777b: Waiting
+3214acf345c0: Waiting
+52630fc75a18: Waiting
+bfb59b82a9b6: Verifying Checksum
+bfb59b82a9b6: Download complete
+fab8c4b3fa32: Verifying Checksum
+fab8c4b3fa32: Download complete
+017886f7e176: Verifying Checksum
+017886f7e176: Download complete
+fab8c4b3fa32: Pull complete
+bfb59b82a9b6: Pull complete
+62de241dac5f: Download complete
+2780920e5dbf: Verifying Checksum
+2780920e5dbf: Download complete
+7c12895b777b: Download complete
+3214acf345c0: Verifying Checksum
+3214acf345c0: Download complete
+52630fc75a18: Verifying Checksum
+52630fc75a18: Download complete
+dd64bf2dd177: Verifying Checksum
+dd64bf2dd177: Download complete
+4aa0ea1413d3: Download complete
+dcaa5a89b0cc: Verifying Checksum
+dcaa5a89b0cc: Download complete
+017886f7e176: Pull complete
+069d1e267530: Verifying Checksum
+069d1e267530: Download complete
+62de241dac5f: Pull complete
+2780920e5dbf: Pull complete
+7c12895b777b: Pull complete
+3214acf345c0: Pull complete
+52630fc75a18: Pull complete
+dd64bf2dd177: Pull complete
+4aa0ea1413d3: Pull complete
+dcaa5a89b0cc: Pull complete
+069d1e267530: Pull complete
+13dee2db30bf: Verifying Checksum
+13dee2db30bf: Download complete
+13dee2db30bf: Pull complete
+e4bf76af5526: Verifying Checksum
+e4bf76af5526: Download complete
+e4bf76af5526: Pull complete
+Digest: sha256:c93e4fb811b3217ef69ee7a79a9a15fb277887cd1c3002fbe154e676037a274a
+Status: Downloaded newer image for registry.k8s.io/kubectl:v1.35.1
+Unable to find image 'python:3.14-alpine' locally
+3.14-alpine: Pulling from library/python
+7b229517ed22: Pulling fs layer
+b8c8e17c3768: Pulling fs layer
+21a73207b3c2: Pulling fs layer
+6e039175c5c5: Pulling fs layer
+6e039175c5c5: Waiting
+b8c8e17c3768: Verifying Checksum
+b8c8e17c3768: Download complete
+7b229517ed22: Verifying Checksum
+7b229517ed22: Download complete
+21a73207b3c2: Verifying Checksum
+21a73207b3c2: Download complete
+7b229517ed22: Pull complete
+b8c8e17c3768: Pull complete
+6e039175c5c5: Verifying Checksum
+6e039175c5c5: Download complete
+21a73207b3c2: Pull complete
+6e039175c5c5: Pull complete
+Digest: sha256:01ddf82b43479870a7ea87037b7d68472bef12cc244941843c26bb75bf9a9b04
+Status: Downloaded newer image for python:3.14-alpine
+validated 3 Grafana dashboards
+make: Leaving directory '<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay'

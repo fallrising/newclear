@@ -1,0 +1,15 @@
+{
+  "verified_at": "2026-10-22T06:00:37.066650+00:00",
+  "status": "passed",
+  "checks": {
+    "saved_json_sha256_and_bytes": 13,
+    "all_200_document_gets_success_without_retry": true,
+    "all_200_blob_digests_and_byte_lengths_verified": true,
+    "required_report_headings": true,
+    "no_private_home_paths_or_github_token_patterns_in_saved_evidence": true,
+    "report_trailing_whitespace": false,
+    "teamctl_validate_report": "passed"
+  },
+  "report_sha256": "0e32893b7e840ce44e5bea9c5da4409e7167a7ee015e32052b24653fdaf3188b",
+  "teamctl_result": "validate-report validation passed: unindexed-search/report.md"
+}

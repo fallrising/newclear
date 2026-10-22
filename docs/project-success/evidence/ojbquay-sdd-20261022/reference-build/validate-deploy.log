@@ -1,0 +1,9 @@
+make: Entering directory '<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay'
+docker compose -f deploy/compose/docker-compose.yml config --quiet
+unknown shorthand flag: 'f' in -f
+
+Usage:  docker [OPTIONS] COMMAND [ARG...]
+
+Run 'docker --help' for more information
+make: *** [Makefile:24: validate-deploy] Error 125
+make: Leaving directory '<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay'

@@ -2,11 +2,11 @@
 <testsuite name="dev.ojbk.gateway.consume.PushRetryE2eTest" tests="1" skipped="0" failures="1" errors="0" timestamp="2026-10-22T10:38:34.255Z" hostname="redacted" time="13.856">
   <properties/>
   <testcase name="AC_05_schedulesThreeRetriesThenWritesFourthFailureToDlq()" classname="dev.ojbk.gateway.consume.PushRetryE2eTest" time="8.143">
-    <failure message="java.lang.AssertionError: &#10;Expecting actual:&#10;  199L&#10;to be less than:&#10;  180L " type="java.lang.AssertionError">java.lang.AssertionError: 
+    <failure message="java.lang.AssertionError: &#10;Expecting actual:&#10;  199L&#10;to be less than:&#10;  180L " type="java.lang.AssertionError">java.lang.AssertionError:
 Expecting actual:
   199L
 to be less than:
-  180L 
+  180L
 	at dev.ojbk.gateway.consume.PushRetryE2eTest.AC_05_schedulesThreeRetriesThenWritesFourthFailureToDlq(PushRetryE2eTest.java:186)
 </failure>
   </testcase>
@@ -235,7 +235,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
 [Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
-[Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+[Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker:
   Server Version: 29.1.3
   API Version: 1.52
   Operating System: Ubuntu 24.04.1 LTS
@@ -253,11 +253,11 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [Test worker] INFO tc.postgres:17 - Container postgres:17 is starting: 50d7cb4121af6db90485516f5578fe2159b0ead98425fb6e45965d6a20af81d8
 [Test worker] INFO tc.postgres:17 - Container postgres:17 started in PT1.081004552S
 [Test worker] INFO tc.postgres:17 - Container is started (JDBC URL: jdbc:postgresql://localhost:32957/test?loggerLevel=OFF)
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - AdminClientConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - AdminClientConfig values:
 	bootstrap.controllers = []
 	bootstrap.servers = [localhost:32956]
 	client.dns.lookup = use_all_dns_ips
-	client.id = 
+	client.id =
 	config.providers = []
 	connections.max.idle.ms = 300000
 	default.api.timeout.ms = 60000
@@ -356,11 +356,11 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [kafka-admin-client-thread | adminclient-1] INFO org.apache.kafka.common.metrics.Metrics - Metrics scheduler closed
 [kafka-admin-client-thread | adminclient-1] INFO org.apache.kafka.common.metrics.Metrics - Closing reporter org.apache.kafka.common.metrics.JmxReporter
 [kafka-admin-client-thread | adminclient-1] INFO org.apache.kafka.common.metrics.Metrics - Metrics reporters closed
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - AdminClientConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - AdminClientConfig values:
 	bootstrap.controllers = []
 	bootstrap.servers = [localhost:32956]
 	client.dns.lookup = use_all_dns_ips
-	client.id = 
+	client.id =
 	config.providers = []
 	connections.max.idle.ms = 300000
 	default.api.timeout.ms = 60000
@@ -459,7 +459,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [kafka-admin-client-thread | adminclient-2] INFO org.apache.kafka.common.metrics.Metrics - Metrics scheduler closed
 [kafka-admin-client-thread | adminclient-2] INFO org.apache.kafka.common.metrics.Metrics - Closing reporter org.apache.kafka.common.metrics.JmxReporter
 [kafka-admin-client-thread | adminclient-2] INFO org.apache.kafka.common.metrics.Metrics - Metrics reporters closed
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ProducerConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ProducerConfig values:
 	acks = -1
 	batch.size = 16384
 	bootstrap.servers = [localhost:32956]
@@ -581,7 +581,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [Test worker] INFO org.apache.kafka.common.utils.AppInfoParser - Kafka startTimeMs: 1792665520230
 [kafka-producer-network-thread | ojbquay-consume-retry-publisher] INFO org.apache.kafka.clients.Metadata - [Producer clientId=ojbquay-consume-retry-publisher] Cluster ID: 4L6g3nShT-eMCtK--X86sw
 [kafka-producer-network-thread | ojbquay-consume-retry-publisher] INFO org.apache.kafka.clients.producer.internals.TransactionManager - [Producer clientId=ojbquay-consume-retry-publisher] ProducerId set to 0 with epoch 0
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ConsumerConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ConsumerConfig values:
 	allow.auto.create.topics = true
 	auto.commit.interval.ms = 5000
 	auto.offset.reset = earliest
@@ -589,7 +589,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 	check.crcs = true
 	client.dns.lookup = use_all_dns_ips
 	client.id = ojbquay-scheduler-da70a735
-	client.rack = 
+	client.rack =
 	config.providers = []
 	connections.max.idle.ms = 540000
 	default.api.timeout.ms = 60000
@@ -704,7 +704,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [Test worker] INFO org.apache.kafka.common.utils.AppInfoParser - Kafka commitId: a18251bae0b825c6
 [Test worker] INFO org.apache.kafka.common.utils.AppInfoParser - Kafka startTimeMs: 1792665520457
 [Test worker] INFO org.apache.kafka.clients.consumer.internals.ClassicKafkaConsumer - [Consumer clientId=ojbquay-scheduler-da70a735, groupId=ojbk.scheduler.ingest] Subscribed to topic(s): __ojbk.delay.inbox
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ProducerConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ProducerConfig values:
 	acks = -1
 	batch.size = 16384
 	bootstrap.servers = [localhost:32956]
@@ -824,7 +824,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [Test worker] INFO org.apache.kafka.common.utils.AppInfoParser - Kafka version: 4.2.0
 [Test worker] INFO org.apache.kafka.common.utils.AppInfoParser - Kafka commitId: a18251bae0b825c6
 [Test worker] INFO org.apache.kafka.common.utils.AppInfoParser - Kafka startTimeMs: 1792665520463
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ConsumerConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ConsumerConfig values:
 	allow.auto.create.topics = true
 	auto.commit.interval.ms = 5000
 	auto.offset.reset = earliest
@@ -832,7 +832,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 	check.crcs = true
 	client.dns.lookup = use_all_dns_ips
 	client.id = consumer-dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31-1
-	client.rack = 
+	client.rack =
 	config.providers = []
 	connections.max.idle.ms = 540000
 	default.api.timeout.ms = 60000
@@ -949,7 +949,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [Test worker] INFO org.apache.kafka.common.utils.AppInfoParser - Kafka startTimeMs: 1792665520472
 [Test worker] INFO org.apache.kafka.clients.consumer.internals.ClassicKafkaConsumer - [Consumer clientId=consumer-dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31-1, groupId=dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31] Subscribed to topic(s): retry-e2e-da70a735.push-da70a735.dlq
 [kafka-producer-network-thread | ojbquay-delay-dispatcher] INFO org.apache.kafka.clients.producer.internals.TransactionManager - [Producer clientId=ojbquay-delay-dispatcher] ProducerId set to 1 with epoch 0
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - AdminClientConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - AdminClientConfig values:
 	bootstrap.controllers = []
 	bootstrap.servers = [localhost:32956]
 	client.dns.lookup = use_all_dns_ips
@@ -1053,7 +1053,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [kafka-admin-client-thread | ojbquay-share-1] INFO org.apache.kafka.common.metrics.Metrics - Metrics scheduler closed
 [kafka-admin-client-thread | ojbquay-share-1] INFO org.apache.kafka.common.metrics.Metrics - Closing reporter org.apache.kafka.common.metrics.JmxReporter
 [kafka-admin-client-thread | ojbquay-share-1] INFO org.apache.kafka.common.metrics.Metrics - Metrics reporters closed
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ShareConsumerConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ShareConsumerConfig values:
 	allow.auto.create.topics = true
 	auto.commit.interval.ms = 5000
 	auto.offset.reset = latest
@@ -1061,7 +1061,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 	check.crcs = true
 	client.dns.lookup = use_all_dns_ips
 	client.id = ojbquay-share-1
-	client.rack = 
+	client.rack =
 	config.providers = []
 	connections.max.idle.ms = 540000
 	default.api.timeout.ms = 60000
@@ -1223,7 +1223,7 @@ diagnostic_response_completion_to_next_arrival_ms=[173, 310, 606]
 [Test worker] INFO org.apache.kafka.clients.consumer.internals.ConsumerRebalanceListenerInvoker - [Consumer clientId=consumer-dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31-1, groupId=dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31] Adding newly assigned partitions: [retry-e2e-da70a735.push-da70a735.dlq-0]
 [Test worker] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31-1, groupId=dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31] Found no committed offset for partition retry-e2e-da70a735.push-da70a735.dlq-0
 [Test worker] INFO org.apache.kafka.clients.consumer.internals.SubscriptionState - [Consumer clientId=consumer-dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31-1, groupId=dlq-a94367a7-8b88-4839-8ea7-a4d39c884f31] Resetting offset for partition retry-e2e-da70a735.push-da70a735.dlq-0 to position FetchPosition{offset=0, offsetEpoch=Optional.empty, currentLeader=LeaderAndEpoch{leader=Optional[localhost:32956 (id: 1 rack: null isFenced: false)], epoch=0}}.
-[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ProducerConfig values: 
+[Test worker] INFO org.apache.kafka.common.config.AbstractConfig - ProducerConfig values:
 	acks = -1
 	batch.size = 16384
 	bootstrap.servers = [localhost:32956]

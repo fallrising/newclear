@@ -24,12 +24,20 @@ Reviewed document SHA-256 values:
 - Parsed `advancing-clock.xml`: six tests, zero failures/errors/skips, including `AC_05_preservesResponseCompletionAnchorWithAnAdvancingClock`; inspected source showing HTTP advances the clock by 86 ms and due is +236 ms. This protects the existing anchor rather than proving end-to-end timing — passed
 - Inspected reference-build log and receipt: successful 44-task reference build, 25 executed and 19 from cache; restored XML counts 119 tests, zero failures/errors/skips. Receipt correctly states cached tests are not fresh execution and the broad main oracle is not current candidate qualification — passed
 - `python3 scripts/check_project_success.py`: 41 contracts/navigation/index accepted; `python3 -m unittest discover -s scripts/tests -p test_project_success.py -v`: 15 tests passed — passed
-- Relative-link existence check for changed SDD and new decision report, plus `git diff --check`: no missing local targets or whitespace errors — passed
+- Relative-link existence check for changed SDD and new decision report, plus initial `git diff --check`: local targets exist and tracked documentation had no whitespace errors. This initial command did not cover the then-untracked raw evidence; the publication-wide check failure and correction are recorded below — passed
 - `teamctl.py validate-report .team/reports/T-0368-ojbquay-460.md`: report contract accepted — passed
+- Bounded follow-up against initial proposal commit `a5996129f2bd575a05d56cfe8be535e23d37188a`: byte comparison confirms the three changed log/XML files differ only by per-line trailing whitespace removal; parsed XML tags/attributes, failure/counts, timing events and interval outputs are identical; SDD and decision-document hashes remain exactly as above — passed
+- Follow-up `git diff --check HEAD`: exit 0 after normalization. New initial-failure receipt retains exit 2 and identifies that the first commit command continued after the staged check failed. The first failure is not relabeled as success — passed
 
 ## Documentation
 
 Only this designated review report was written by the worker. The new decision report and SDD form a concrete owner-review packet, not a new accepted specification. Earlier proposal wording retained in historical execution-plan entries is superseded by the appended dated entry, which correctly distinguishes original approval from this pending amendment.
+
+### Bounded publication follow-up
+
+Initial PR #477 commit `a5996129f2bd575a05d56cfe8be535e23d37188a` included raw log/XML trailing spaces. The initial tracked-only review check could not establish cleanliness of those then-untracked evidence files. The later staged check actually exited 2, and the shell continued to the initial commit. This process failure remains preserved in `initial-staged-whitespace-failure.json`; `document-validation.json` now distinguishes it from the final follow-up check. The correction uses a new commit; it does not rewrite history.
+
+The reviewed correction changes only `dual-observation.log`, `dual-observation.xml` and `reference-build.log` trailing whitespace, plus an honest validation receipt and this report. No test result, original failure, proposed AC text or decision-document content changed. ACCEPT remains limited to publication of the unapproved proposal. Root must retain a final staged-check pass before committing the follow-up. No additional heavy build was run by this reviewer.
 
 ## Risks and Follow-ups
 

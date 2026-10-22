@@ -34,11 +34,11 @@ WARNING: sun.misc.Unsafe::arrayBaseOffset will be removed in a future release
 > Task :modules:gateway-consume:test
 
 PushRetryE2eTest > AC_05_schedulesThreeRetriesThenWritesFourthFailureToDlq() FAILED
-    java.lang.AssertionError: 
+    java.lang.AssertionError:
     Expecting actual:
       199L
     to be less than:
-      180L 
+      180L
         at dev.ojbk.gateway.consume.PushRetryE2eTest.AC_05_schedulesThreeRetriesThenWritesFourthFailureToDlq(PushRetryE2eTest.java:186)
 
 1 test completed, 1 failed

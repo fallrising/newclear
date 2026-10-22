@@ -20,7 +20,7 @@ newclear 的 14 個 fe-review 設計單位都交出第 1 輪 `DESIGN.md`，交�
 | AC-8 | `systems/ojbquay` | C | `systems/ojbquay/fe-review/DESIGN.md` | #153 |
 | AC-9 | `products/goku` | C | `products/goku/fe-review/DESIGN.md` | #154 |
 | AC-10 | `products/phark` | C | `products/phark/fe-review/DESIGN.md` | #155 |
-| AC-11 | `apps/flowshot` ＋ `apps/loom`（同一份設計） | C | `apps/flowshot/fe-review/DESIGN.md` | #156 |
+| AC-11 | `apps/flowshot` ＋ `apps/loom`（同一個設計 PR） | C | 兩個元件各自的 `fe-review/DESIGN.md` | #156 |
 | AC-12 | `gateways/pokercase` | C | `gateways/pokercase/fe-review/DESIGN.md` | #157 |
 | AC-13 | `systems/clarkq` | C | `systems/clarkq/fe-review/DESIGN.md` | #158 |
 | AC-14 | `platform/fanzloud` | C | `platform/fanzloud/fe-review/DESIGN.md` | #159 |
@@ -34,7 +34,7 @@ newclear 的 14 個 fe-review 設計單位都交出第 1 輪 `DESIGN.md`，交�
 
 ## 驗收條件
 
-AC-1～AC-14 可自動檢查：`python3 docs/fe-review/check_design.py`（每個 AC 輸出一列）。每條的形式都是：
+AC-1～AC-14 可自動檢查：`python3 docs/fe-review/check_design.py`（每個 AC 輸出一列）。腳本只檢查交付物在當前樹上存在且結構完整；「已合併」以在 main 上執行為準。每條的形式都是：
 
 - **Given** 該單位的 `REVIEW.md` 在第 1 輪
 - **When** 它的設計 PR 合併到 main
@@ -42,26 +42,26 @@ AC-1～AC-14 可自動檢查：`python3 docs/fe-review/check_design.py`（每個
 
 | AC | Given | When | Then |
 | --- | --- | --- | --- |
-| AC-15 | 每份設計都列出「需要擁有者確認的假設」 | owner 讀過設計 | owner 合併該設計 PR，即代表確認假設。**無法自動化，由 owner 確認** |
+| AC-15 | AC-1～AC-14 的每個設計 PR | owner 審閱 | PR 內文有「需要擁有者確認的假設清單」，而且 owner 已合併該 PR。**無法自動化，由 owner 確認** |
 
-## 鎖定前實跑（2026-10-22，newclear main@f9fce6e）
+## 鎖定前實跑（2026-10-22，newclear main@f9fce6e，輸出原樣）
 
 ```text
 $ python3 docs/fe-review/check_design.py
-AC-1   products/kith            PASS
-AC-2   platform/dim-gate        PASS
-AC-3   products/hai-taskboard   PASS
-AC-4   platform/agent-platform  PASS
-AC-5   apps/cms-scaffold        PASS
-AC-6   platform/ice-maker       PASS
-AC-7   specs/fleet              PASS
-AC-8   systems/ojbquay          FAIL  no systems/ojbquay/fe-review/DESIGN.md
-AC-9   products/goku            FAIL  no products/goku/fe-review/DESIGN.md
-AC-10  products/phark           FAIL  no products/phark/fe-review/DESIGN.md
-AC-11  apps/flowshot            FAIL  no apps/flowshot/fe-review/DESIGN.md
-AC-12  gateways/pokercase       FAIL  no gateways/pokercase/fe-review/DESIGN.md
-AC-13  systems/clarkq           FAIL  no systems/clarkq/fe-review/DESIGN.md
-AC-14  platform/fanzloud        FAIL  no platform/fanzloud/fe-review/DESIGN.md
+AC-1  products/kith  PASS  products/kith/fe-review/DESIGN.md
+AC-2  platform/dim-gate  PASS  platform/dim-gate/fe-review/DESIGN.md
+AC-3  products/hai-taskboard  PASS  products/hai-taskboard/fe-review/DESIGN.md
+AC-4  platform/agent-platform  PASS  platform/agent-platform/fe-review/DESIGN.md
+AC-5  apps/cms-scaffold  PASS  apps/cms-scaffold/fe-review/DESIGN.md
+AC-6  platform/ice-maker  PASS  platform/ice-maker/fe-review/DESIGN.md
+AC-7  specs/fleet  PASS  specs/fleet/fe-review/DESIGN.md
+AC-8  systems/ojbquay  FAIL  no systems/ojbquay/fe-review/DESIGN.md
+AC-9  products/goku  FAIL  no products/goku/fe-review/DESIGN.md
+AC-10  products/phark  FAIL  no products/phark/fe-review/DESIGN.md
+AC-11  apps/flowshot+apps/loom  FAIL  no apps/flowshot/fe-review/DESIGN.md; no apps/loom/fe-review/DESIGN.md
+AC-12  gateways/pokercase  FAIL  no gateways/pokercase/fe-review/DESIGN.md
+AC-13  systems/clarkq  FAIL  no systems/clarkq/fe-review/DESIGN.md
+AC-14  platform/fanzloud  FAIL  no platform/fanzloud/fe-review/DESIGN.md
 exit 1
 ```
 

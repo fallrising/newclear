@@ -116,9 +116,11 @@ request bounds, streams one long-poll batch, and forwards bounded Ack batches
 to the owning worker. The consumer runtime starts this service on port 9101
 after config bootstrap and reconciliation.
 
-The Java and Go SDKs expose immutable delivery values, ACK/NACK handler
-outcomes, blocking run loops, cancellable background subscriptions, metadata
-authentication, and plaintext opt-in builders. Go generated Protobuf sources
+Both SDKs expose poll/acknowledge, ACK/NACK handler outcomes, metadata
+authentication, and plaintext opt-in builders, each in its language's idiom:
+Java returns immutable deliveries and a cancellable `subscribe()` handle; Go
+returns copied `Delivery` values and a blocking `Run(ctx)` that stops when the
+context is cancelled. Go generated Protobuf sources
 are produced from the repository contract and are not edited manually.
 
 ## Steps

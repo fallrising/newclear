@@ -84,9 +84,6 @@ Open decisions that do not block M0:
 - Whether offset reset requires two-person approval.
 - Tenant-level gateway deduplication beyond Kafka producer idempotence.
 - Production quotas and delay capacity values, which require load tests.
-- Whether the sub-second retry path needs a different scheduler mechanism to
-  meet the SDD's 150 ms `<20%` timeline target without weakening durable,
-  no-early delivery or creating an unsafe broker poll rate.
 
 ## Design
 

@@ -50,3 +50,5 @@ README 新增本機啟動、持久化、兩職業路線、測試與 token 說明
 - RE-A01／A02、AC-03 的真人理解、交易、重玩動機及數值平衡未測；這些需要後續 RE-3 真實試玩，不由自動瀏覽器代答。
 - localStorage 清除會失去 token，沒有帳號救援；local token 非 production authentication。單執行緒與收據無到期政策只適用目前本機示範。
 - 無規則版本 migration、公網部署、MMO 容量或持久經濟承諾；下一個可交付里程碑為 RE-2。
+
+CI 初次 workflow 載入失敗：job-level env 不支援 runner context。依 GitHub context availability 改為 step 將 RUNNER_TEMP 衍生目錄寫入 GITHUB_ENV，重新執行完整 CI；最終結果見 PR。沒有移除任何測試。

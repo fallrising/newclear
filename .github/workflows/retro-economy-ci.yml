@@ -23,12 +23,13 @@ jobs:
   solo-route:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    env:
-      AGENT_BUILD_DIR: ${{ runner.temp }}/retro-build
-      AGENT_EVIDENCE_DIR: ${{ runner.temp }}/retro-evidence
-      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/retro-pycache
-      TMPDIR: ${{ runner.temp }}
     steps:
+      - name: Configure isolated test output
+        run: |
+          echo "AGENT_BUILD_DIR=$RUNNER_TEMP/retro-build" >> "$GITHUB_ENV"
+          echo "AGENT_EVIDENCE_DIR=$RUNNER_TEMP/retro-evidence" >> "$GITHUB_ENV"
+          echo "PYTHONPYCACHEPREFIX=$RUNNER_TEMP/retro-pycache" >> "$GITHUB_ENV"
+          echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false

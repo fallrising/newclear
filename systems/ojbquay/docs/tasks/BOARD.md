@@ -42,6 +42,10 @@ Owner 直接要求整理既有文件並對照代碼。範圍為文件導航、AC
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| OJB-DOC-01 | [規格／程式／測試對照](../specification-map.md)、入口同步、獨立審查與必要驗證 | AC-01–11（映射，非重新驗收） | in_progress | 2026-10-22T16:17:34Z | — | 2026-10-22T16:26:00Z |
+| OJB-DOC-01 | [規格／程式／測試對照](../specification-map.md)、入口同步、獨立審查與必要驗證 | AC-01–11（映射，非重新驗收） | done | 2026-10-22T16:17:34Z | 2026-10-22T16:58:40Z | 2026-10-22T17:00:53Z |
 
 新發現追蹤 D-07 SDK parity、D-08 ack command queue／deadline；以及既有 D-01 retry、D-02 reset 缺口。均保留待後續選定修復範圍，未默默擴張本輪。
+
+完成紀錄：文件 [PR492](https://github.com/fallrising/newclear/pull/492) 已合併為 `9d94c4ff8c69d7b914d6956220fdbee08a6c34a4`；已審查 head `be021f3c` 的 java／console-web／deployment-models 與 project contracts CI 全部 SUCCESS，無未解 review thread。原獨立審查的來源歸屬問題已修正並核對，原 PARTIAL／失敗與未跑產品驗收仍保留。
+
+Owner 要求更新 GitLab；[既有 mirror run 39818611399](https://github.com/fallrising/newclear/actions/runs/39818611399) 實際推送並回讀 GitLab main，2026-10-22T16:58:52Z 兩端 SHA 均為 `9d94c4ff8c69d7b914d6956220fdbee08a6c34a4`。本列只完成文件整理與發布，不代表產品 AC-05／AC-09 通過；T-0374 保持 in_progress，沒有新 usable tag。

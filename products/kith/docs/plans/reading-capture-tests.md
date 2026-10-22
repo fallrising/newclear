@@ -1,6 +1,6 @@
 # 閱讀快記 RC 測試清單
 
-對應 [MVP 計畫](cloudflare-reading-capture.md) §6–7。本清單是階段 0 的驗收設計，不是已執行的 API、手機或 Cloudflare E2E。所有 RC 狀態：**pending**。
+對應 [MVP 計畫](cloudflare-reading-capture.md) §6–7。本清單於階段 0 設計；階段 1 RC-01～04 已有本地 CF 桌面／手機 E2E，實際命令與限制見 [#456 報告](../../tasks/456-reading-capture-phase1/report.md)。RC-05～07 仍為 **pending**。
 
 ## 共用測試條件
 
@@ -34,7 +34,7 @@
 
 ## 階段 0 已提供的隔離檢查
 
-[test_schema_draft.py](../../test/reading_capture/test_schema_draft.py)用 Python 標準函式庫 SQLite 建立目前全部聊天室 migrations，再套用 docs 內的草稿，檢查兩表隔離、原文保留、client_key 唯一、必要欄位／bytes 上限、notes 唯一／revision、交易 rollback、舊 ACK 與待匯出索引。
+[test_schema_draft.py](../../test/reading_capture/test_schema_draft.py)用 Python 標準函式庫 SQLite 建立原階段 0 聊天室 migrations 0001～0006，再套用 docs 內的草稿；新增檢查確認正式 0007 保留完整草稿 DDL。正式 migration 另由隔離 D1/E2E 載入，檢查兩表隔離、原文保留、client_key 唯一、必要欄位／bytes 上限、notes 唯一／revision、交易 rollback、舊 ACK 與待匯出索引。
 
 從 repository root 執行：
 
@@ -43,3 +43,13 @@ python3 -m unittest discover -s products/kith/test/reading_capture -v
 ```
 
 這不證明 D1 執行環境、HTTP 冪等回應、CSRF、瀏覽器草稿、Git 匯出或 RC-01～07 已通過。實際 RED/GREEN 與工具版本見 [交付報告](../../tasks/446-reading-capture-phase0/report.md)。
+
+## 階段 1 接線契約（#456，實作前凍結）
+
+- `POST /api/captures` 僅接受 `{body, client_key}`；原文 UTF-8 1～16384 bytes（全空白合法，不 trim；拒絕 NUL 與未配對 surrogate）。key 為 1～128 個 ASCII 字母、數字、`_`、`-`。成功 201（新建）或 200（同 key 同原文），JSON `{capture_id}`；同 key 異原文 409 `capture_conflict`。錯誤不含正文。
+- `GET /api/captures?limit=20&cursor=...` 回 `{captures:[{id,body,source,created_at,exported_commit}],next_cursor}`；limit 為 1～100 整數，cursor 是有長度限制的 opaque keyset（created_at/id 降序），無更多資料為 null。錯誤 query 400。
+- 全部 captures 路由、`GET/PUT /api/notes/:article_id`、`GET /api/reading-export`、`POST /api/reading-export/ack` 都先檢查 operator session；後兩種功能階段 1 對 operator 回 501，其他 caller 401/403，不用 404 充數。私人回應 Cache-Control: no-store。沿用 session 寫入 CSRF。
+- Web `/captures` 僅 operator 可見，入口 `capture-link`；`capture-body`、`capture-save`、`capture-status`、`capture-inbox`、`capture-more` 為測試定位點。收件匣每筆 `data-capture-id`，正文保持空白與換行，明示已保存／待匯出或已匯出 Git。
+- 草稿以登入 operator ID 分隔，包含 body、client_key 及不確定結果的送出快照；送出開始後文字鎖定，未知結果以原 key/原文重試。明確成功才清空；衝突保留並告知未保存，不自動換 key；僅使用者明確點選「以目前文字建立新快記」後，以新 key 保留為未送出的草稿。儲存失敗明示，不能標本機已存妥。沒有自動送出或離線隊列。
+- 離線時已開啟的頁面可輸入、保存本機草稿；離線 reload 若靜態 app 無法載入，瀏覽器顯示離線頁，重連 reload 後恢復草稿。這個 MVP 不新增 service worker 或宣稱完整離線 app；另以 API-only 斷線驗證 shell reload 時草稿復原。
+- E2E 使用既有 evidence harness，擴充 acceptance ID 為 E2E-RC-01～04；保留 W0～W7 驗證。以隔離 D1 查詢和 provider spy 計數核對不變量，僅合成資料。

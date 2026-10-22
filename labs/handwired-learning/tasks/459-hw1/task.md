@@ -10,7 +10,7 @@ Session: Handwired-20261021-1845 · Refs #459 · PR #460
 
 提供三欄單頁（滑桿／公式與節點／兩路結果與差值），可直接開啟建出的單一 HTML；使用真正固定 Handwired CPU evaluator，Node 24 內建 stripping，不安裝套件、不 vendoring。MIT 授權隨產物保留。HW-2 學習、HW-3 真人試用及 usable tag 不在範圍。
 
-主控維護 `.team/PLAN.md`、規格／README／SUCCESS／CI，native T-459 worker 僅寫指定程式、測試及報告。不同模型家族唯讀 reviewer 必須審查最終 commit。
+主控維護 `.team/PLAN.md`、規格／README／SUCCESS／CI，native T-901 worker 僅寫指定程式、測試及報告。不同模型家族唯讀 reviewer 必須審查最終 commit。
 
 ## 驗證計畫
 

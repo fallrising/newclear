@@ -435,3 +435,10 @@ checks, affected-module checks, documentation, and acceptance evidence pass.
 ## T-0368 mainline SDD proposal (2026-10-22)
 
 Active-repository provenance search completed: no original normative SDD found in the documented scope. [New SDD proposal](../SDD.md) preserves existing AC-01 through AC-05 and strict retry timing, with a source/difference table and [reference execution report](test-reports/mainline-sdd-20261022.md). Unchanged main reference build:119/119 PASS; Go SDK import FAIL. This is not acceptance of the uncommitted repair candidate (prior132 tests:131 PASS/1 strict FAIL703ms; later focused20 PASS). Mainline remains incomplete; usable_tag:none. Owner agreement, missing AC probes and repair qualification remain pending.
+
+## T-0368 AC-09 runtime lifecycle slice (2026-10-22)
+
+- [x] Push worker lifecycle runs on a bounded reconciler, not the config-bus poll thread; a failed stop keeps the worker and unconfirmed revision and is retried.
+- [x] Fatal config-bus failure lowers readiness and pause confirmation; shutdown attempts every owned resource.
+- [x] Unconfigured runtime roster keeps ordinary startup but never confirms a pause; a configured roster still requires membership.
+- [ ] Preview/confirm, whole-group coordination, PG fence check/use gap, real two-runtime reset evidence (remaining AC-09).

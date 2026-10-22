@@ -9,7 +9,7 @@ record GatewayConsumeSettings(
         String instanceId,
         int grpcPort,
         int metricsPort,
-        Duration configBootstrapTimeout) {
+        Duration configBootstrapTimeout, dev.ojbk.config.RuntimeRoster runtimeRoster) {
 
     static GatewayConsumeSettings from(Map<String, String> environment) {
         String instance = optional(environment, "OJBQUAY_INSTANCE_ID");
@@ -29,7 +29,8 @@ record GatewayConsumeSettings(
                         "OJBQUAY_CONFIG_BOOTSTRAP_TIMEOUT_MS",
                         60_000,
                         1,
-                        Integer.MAX_VALUE)));
+                        Integer.MAX_VALUE)),
+                dev.ojbk.config.RuntimeRoster.parse(environment.get("OJBQUAY_CONSUME_RUNTIME_ROSTER")));
     }
 
     GatewayConsumeSettings {

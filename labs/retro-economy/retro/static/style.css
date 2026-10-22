@@ -1246,3 +1246,34 @@ footer p span {
   }
 
 }
+
+
+.market { margin-top: 25px; }
+.market-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.market-heading h2 { margin: 6px 0; font-size: 21px; }
+.market-intro { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.market-note { color: var(--muted); font-size: 11px; line-height: 1.8; }
+.market-layout { display: grid; grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 28px; margin-top: 22px; }
+#list-form { display: flex; flex-direction: column; gap: 9px; }
+#list-form label { display: block; font-size: 11px; margin-bottom: 5px; }
+#list-form input, #list-form select { width: 100%; min-width: 0; }
+.market-amounts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.market-board { min-width: 0; }
+#market-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+.market-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 7px; background: #f4f5eb; }
+.market-row > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.market-row strong { font-size: 12px; }
+.market-seller { font-size: 11px; overflow-wrap: anywhere; }
+.market-status { font-size: 10px; color: var(--muted); }
+.market-price { font-size: 11px; white-space: nowrap; }
+.market-row button { min-width: 66px; padding: 9px; }
+.market-row[data-status=sold], .market-row[data-status=cancelled] { background: #efefe5; }
+@media(max-width:760px) {
+  .market { margin-top: 17px; }
+  .market-layout { grid-template-columns: 1fr; gap: 24px; }
+  .market-heading { align-items: flex-start; }
+  .market-heading > .market-note { white-space: nowrap; }
+  .market-heading .eyebrow { font-size: 7px; letter-spacing: 1px; }
+  .market-row { gap: 8px; padding: 10px; }
+  .market-price { font-size: 10px; }
+}

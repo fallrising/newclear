@@ -85,3 +85,7 @@ main `0aac18413a3b39043706f17b8e5f801f41573d70` 的119-test build PASS 是參考
 intervals [703,350,639]ms；後續兩行 fired_at scope correction 只有20 focused PASS，沒有最終完整驗收。
 原始失敗、第一次交付與到達間隔計時都保留，未增加暖機或放寬門檻。
 本頁原五列 historical 不改成新 PASS；SDD 提案也不構成 owner 驗收。usable_tag:none。
+
+AC-09 runtime lifecycle／啟動切片（T461 R1/R2）見 [ac09-runtime-slice](docs/test-reports/ac09-runtime-slice.md)：
+failed-stop 不終止 config bus、有界 reconcile 收斂、fatal config 失敗降 readiness、未配置 roster 正常啟動但不能確認 reset。
+這只是切片；AC-09 整體仍 partial（缺 preview、整 group 協調、PG fence 交錯安全、真雙 runtime 證據），AC-05 仍 FAIL，owner 驗收待定。

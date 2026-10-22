@@ -174,3 +174,90 @@ test('UUID fallback preserves random payload bytes and refuses insecure randomne
   } }), '00112233-4455-4677-8899-aabbccddeeff');
   assert.throws(() => createUUID({}), /secure randomness/i);
 });
+
+const listing = (status = 'open', id = 1) => ({ id, seller_id: 2,
+  seller_name: '<b>藥師</b>', item: 'medicine', quantity: 1, price: 4, status });
+
+test('poll replaces the complete market snapshot and exposes it with current character state', async () => {
+  const snapshots = [[listing()], [listing('sold'), listing('cancelled', 2)], []];
+  const rendered = [];
+  const c = client({ onState: (s, listings) => rendered.push({ s, listings }),
+    fetch: async () => response({ ok: true, state: state(), listings: snapshots.shift() }) });
+  await c.poll();
+  assert.deepEqual(c.listings, [listing()]);
+  await c.poll();
+  assert.deepEqual(rendered.at(-1), { s: state(), listings: [listing('sold'), listing('cancelled', 2)] });
+  await c.poll();
+  assert.deepEqual(c.listings, []);
+});
+
+test('join loads current market even when the join receipt has no listings', async () => {
+  const urls = [];
+  const c = client({ storage: storage(), fetch: async url => {
+    urls.push(url);
+    return response(url === '/api/join' ? { ok: true, token: 'secret', state: state(), message: '歡迎' }
+      : { ok: true, state: state(), listings: [listing()] });
+  } });
+  await c.join('旅人', 'smith');
+  assert.deepEqual(urls, ['/api/join', '/api/state']);
+  assert.deepEqual(c.listings, [listing()]);
+});
+
+for (const action of [{ type: 'list', item: 'ore', quantity: 2, price: 5 },
+  { type: 'buy', listing_id: 1 }, { type: 'cancel', listing_id: 1 }]) {
+  test(`lost ${action.type} receipt retries exact persisted ID after reload and renders fresh market`, async () => {
+    const store = signedIn();
+    const bodies = [], seen = new Set(), rendered = [];
+    let lost = true, effects = 0;
+    const latest = { ...state(), coins: 18 };
+    const fetch = async (url, options) => {
+      if (url === '/api/state') return response({ ok: true, state: latest, listings: [listing('sold')] });
+      const body = JSON.parse(options.body);
+      assert.deepEqual(JSON.parse(store.value()).pendingAction, body, 'intent persisted before network');
+      bodies.push(body);
+      if (!seen.has(body.action_id)) { seen.add(body.action_id); effects++; }
+      if (lost) { lost = false; throw new Error('response lost after commit'); }
+      return response({ ok: true, state: state(), listings: [listing()], listing_id: 1, message: '已完成' });
+    };
+    await client({ storage: store, fetch }).act(action);
+    const recovered = client({ storage: store, fetch,
+      onState: (s, listings) => rendered.push({ s, listings }) });
+    await recovered.resume();
+    assert.deepEqual(bodies, [{ action_id: 'uuid-1', action }, { action_id: 'uuid-1', action }]);
+    assert.equal(effects, 1);
+    assert.equal(recovered.session.pendingAction, null);
+    assert.deepEqual(rendered, [{ s: latest, listings: [listing('sold')] }], 'stale receipt never renders');
+  });
+}
+
+test('market poll serializes before buy and cannot overwrite sold state with an old open listing', async () => {
+  let release, entered;
+  const blocked = new Promise(resolve => { release = resolve; });
+  const started = new Promise(resolve => { entered = resolve; });
+  const calls = [], rendered = [];
+  let reads = 0;
+  const c = client({ onState: (_, listings) => rendered.push(listings), fetch: async url => {
+    calls.push(url);
+    if (url === '/api/action') return response({ ok: true, message: '買下補給' });
+    if (++reads === 1) { entered(); await blocked; return response({ ok: true, state: state(), listings: [listing()] }); }
+    return response({ ok: true, state: { ...state(), coins: 8 }, listings: [listing('sold')] });
+  } });
+  const poll = c.poll(); await started;
+  const buy = c.act({ type: 'buy', listing_id: 1 });
+  await Promise.resolve(); assert.deepEqual(calls, ['/api/state']);
+  release(); await Promise.all([poll, buy]);
+  assert.deepEqual(rendered, [[listing()], [listing('sold')]]);
+  assert.equal(c.state.coins, 8);
+});
+
+test('rejected buy refreshes market and clears pending intent without altering coins', async () => {
+  const c = client({ fetch: async url => response(url === '/api/action'
+    ? { ok: false, error: { code: 'rule', message: '掛單已售出' }, state: state(), listings: [listing()] }
+    : { ok: true, state: state(), listings: [listing('sold')] }) });
+  await c.act({ type: 'buy', listing_id: 1 });
+  assert.deepEqual(c.listings, [listing('sold')]);
+  assert.equal(c.state.coins, 12);
+  assert.equal(c.session.pendingAction, null);
+  assert.equal(c.reset(), true);
+  assert.deepEqual(c.listings, [], 'reset removes the previous character market');
+});

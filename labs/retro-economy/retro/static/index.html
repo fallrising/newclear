@@ -12,7 +12,7 @@
   <div class="page-shell">
     <header class="masthead">
       <a class="brand" href="/" aria-label="霧岸鎮首頁"><span class="brand-mark" aria-hidden="true">霧</span><span>霧岸鎮<small>MISTSHORE</small></span></a>
-      <div class="edition"><span class="status-dot"></span> 第一片世界 <span class="edition-number">RE—01</span></div>
+      <div class="edition"><span class="status-dot"></span> 第一片世界 <span class="edition-number">RE—02</span></div>
     </header>
 
     <main>
@@ -100,6 +100,21 @@
           <section class="feedback" aria-label="遊戲訊息"><div class="feedback-heading"><span class="eyebrow">旅途紀事</span><span id="connection" data-status="ready">等待加入</span></div><p id="message" role="status" aria-live="polite">先選一門手藝。準備好修補組與行路藥，就能登上東邊的望潮塔。</p><button id="retry" class="secondary" hidden>重試連線與待確認動作</button></section>
         </aside>
       </div>
+
+      <section id="market" class="market panel" aria-labelledby="market-title" hidden>
+        <div class="market-heading"><div><span class="eyebrow">SUPPLIES FOR THE NEXT JOURNEY</span><h2 id="market-title">旅人市場</h2></div><span class="market-note">每 1.5 秒更新</span></div>
+        <p class="market-intro">鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。</p>
+        <div class="market-layout">
+          <form id="list-form" aria-label="建立掛單">
+            <label for="list-item">出售物品</label>
+            <select id="list-item" name="item"><option value="ore">礦石</option><option value="herb">藥草</option><option value="kit">修補組</option><option value="medicine">行路藥</option></select>
+            <div class="market-amounts"><div><label for="list-quantity">數量（1–99）</label><input id="list-quantity" name="quantity" type="number" min="1" max="99" step="1" value="1" required inputmode="numeric"></div><div><label for="list-price">整筆總價（1–99 金幣）</label><input id="list-price" name="price" type="number" min="1" max="99" step="1" value="4" required inputmode="numeric"></div></div>
+            <button id="list-submit" type="submit" class="primary">刊登掛單</button>
+            <p class="market-note">價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。</p>
+          </form>
+          <div class="market-board"><h3 class="section-label">補給與交易紀錄</h3><p id="market-empty" class="market-note">還沒有掛單。製作多一份補給，讓另一位旅人也能出發。</p><ul id="market-list" aria-label="掛單列表"></ul></div>
+        </div>
+      </section>
 
       <section class="journey-guide" aria-label="旅程引導"><div class="guide-copy"><span class="eyebrow">YOUR NEXT STEP</span><h2 id="guide-title">把一門手藝，帶進旅程裡。</h2><p id="guide-detail">先採集，再回鎮製作；帶齊兩種補給後向東走。登頂可獲得一次性 8 金幣。</p></div><ol class="steps"><li data-step="0" class="current"><span>01</span>採集原料</li><li data-step="1"><span>02</span>回鎮製作</li><li data-step="2"><span>03</span>向東登塔</li><li data-step="3"><span>04</span>看見霧海</li></ol></section>
     </main>

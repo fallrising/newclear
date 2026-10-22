@@ -1,9 +1,9 @@
 # Ojbquay 主線 SDD
 
-狀態：**AC-05 量測定義修訂提案，未獲 owner 同意。**
+狀態：**AC-05 量測定義修訂已獲 owner 同意（2026-10-22，PR477）。**
 原版由 owner 同意並以 [PR472](https://github.com/fallrising/newclear/pull/472) 合併於
-`874517a896b3be1695b8febb2a852f7e6c5f9307`；在本提案獲准前，原版到達間隔仍是有效門檻。
-本提案改變 AC-05 的量測定義，**不是原失敗已修好**，不授予產品可用資格。
+`874517a896b3be1695b8febb2a852f7e6c5f9307`；PR477 修訂其 AC-05 量測定義，其餘不變。
+本修訂改變 AC-05 的量測定義，**不是原失敗已修好**，不授予產品可用資格；AC-05 須在新定義下另行實跑通過。
 需求：T-0368；修復入口 [#445](https://github.com/fallrising/newclear/issues/445)。
 參考實作：`0aac18413a3b39043706f17b8e5f801f41573d70`。
 本文件是依現存產品文件、程式與測試重新制定的主線契約，**不是找回的原始 SDD**。
@@ -56,7 +56,7 @@ pipeline、Redis/HBase/HDFS sink、跨區／HA、usage billing、cron／無限 d
 
 ### 對外行為與不變條件
 
-- REST `/api/v1`、`proto/ojbk/v1`、`dev.ojbk.*` 保持既有介面；本提案沒有 schema、
+- REST `/api/v1`、`proto/ojbk/v1`、`dev.ojbk.*` 保持既有介面；本修訂沒有 schema、
   runtime dependency 或 namespace 變更。
 - 全路徑 at-least-once；客戶端以自然 key／inbox 處理重複。replay 是明確的再次發送。
 - PULL ACK=ACCEPT、NACK=RELEASE；token 唯一、single-use，回到發出 token 的 gateway。
@@ -71,24 +71,24 @@ pipeline、Redis/HBase/HDFS sink、跨區／HA、usage billing、cron／無限 d
   broker group quiet、preview、alter、verify、audit、restore；缺任一安全前提不改 offset。
   Share group reset/progress 回覆 UNSUPPORTED，不虛構 offset。
 
-### Retry 計時：待同意的明確修訂
+### Retry 計時：已批准的明確修訂
 
 原版 AC-05 測相鄰 HTTP endpoint 收到完整 request body 的時刻，包含首次交付，
 不扣 HTTP／Kafka／PG／排程成本。原版仍有效且目前 FAIL；完整原文及實跑差異見
 [修訂決策](docs/test-reports/retry-contract-decision-20261022.md)。
 
-本提案改為：每次 `http.deliver` 完成、503 結果可見時記 `R_i`，下一次 endpoint
+本修訂改為：每次 `http.deliver` 完成、503 結果可見時記 `R_i`，下一次 endpoint
 收到完整 request body 記 `A_(i+1)`；三段等待／交付區間為 `A_(i+1) - R_i`。
 仍從第一次交付的失敗回應算第一次 retry，使用相同四次 503 fixture、相同毫秒截斷
 與 `<180/<360/<720 ms` 上限，不插入暖機、不移動 durable deadline、不提早 dispatch。
 
 這個修訂**明確排除了原量測內的前次 HTTP request 到 failure-result 完成成本**。
 HTTP request 本身仍完整執行並記錄；原 `A_(i+1)-A_i` 也繼續輸出，分開報告原版
-PASS/FAIL。這不是等價重述：它可能讓原到達間隔失敗的樣本符合修訂後指標，因此須
-owner 明確同意，不能因新指標較容易通過而自行採用。
+PASS/FAIL。這不是等價重述：它可能讓原到達間隔失敗的樣本符合修訂後指標；owner 已於
+2026-10-22 明確同意此差異。
 
 現有 handler 在 `http.deliver` 返回後設定 `clock.instant().plusMillis(delay)`；
-本提案不修改這個起算點，只改驗收量測。durable `due_at`、入庫、dispatch 時刻仍需
+本修訂不修改這個起算點，只改驗收量測。durable `due_at`、入庫、dispatch 時刻仍需
 記錄，所有 AC-04 durability／no-early 條件維持。新量測也不能掩蓋晚入庫或晚 dispatch。
 
 ## 固定驗收條件
@@ -144,7 +144,7 @@ NACK、重複 token ACK、斷線／lease 到期，**Then** ACK 的消息不再�
 `PushRecordHandlerTest`、`KafkaRetryPublisherTest`、`PushRetryE2eTest`、
 `DefaultKafkaDlqOperationsTest`、`DlqApiIntegrationTest`。一般 delay 一秒容差不能替代 AC-05。
 
-### AC-05 — Retry 等待與交付時序（修訂提案，未生效）
+### AC-05 — Retry 等待與交付時序（PR477 修訂，已生效）
 
 **Given** 現有 unordered Share PUSH fixture、真 HTTP/Kafka/PG、`[150,300,600]`、
 HTTP endpoint 每次回 503，**When** 首次交付與三次 retry 產生四次請求，記每次完整
@@ -224,12 +224,12 @@ Prometheus scrape；退出後只清除本次 fixture 資源。版本與設定摘
 
 ## 舊契約對照、明確差異與待確認事項
 
-| 來源原文／既有行為 | 本提案如何處理 | 差異與影響 |
+| 來源原文／既有行為 | 本修訂如何處理 | 差異與影響 |
 | --- | --- | --- |
 | product-spec：「create a topic and subscription, send through a stable gRPC SDK, receive by HTTP push or high-level pull」 | AC-01/02/03/10/11 | 保留原用途，補可觀測輸出與固定 ID，沒有新增產品線 |
-| SUCCESS AC-01～05 | 原 ID 保留；本提案僅修訂 AC-05 量測，其餘不變 | 原版 FAIL 保留；不是 historical=pass。AC-06～11 繼續對應原有承諾 |
-| M4：「`<20%` end-to-end timeline target for a 150 ms retry」；原版 AC-05 到達間隔 | 提案將 AC-05 改為 failure-result 完成到下一次到達 | **不再包含前次 HTTP response 成本，與原 end-to-end 指標不等價**；數值門檻／首次 retry／無暖機保留。原指標仍記錄並保留失敗；此差異待 owner 明確同意 |
-| handler：「`clock.instant().plusMillis(delay.getAsLong())`」（在 http.deliver 返回後） | 實作起算點不變；本提案**將驗收起點改到 response completion** | 是量測契約變更、尚未批准；原因、數值影響與 owner 決定見修訂報告。不能混同成既有到達間隔通過 |
+| SUCCESS AC-01～05 | 原 ID 保留；本修訂僅修訂 AC-05 量測，其餘不變 | 原版 FAIL 保留；不是 historical=pass。AC-06～11 繼續對應原有承諾 |
+| M4：「`<20%` end-to-end timeline target for a 150 ms retry」；原版 AC-05 到達間隔 | 修訂將 AC-05 改為 failure-result 完成到下一次到達 | **不再包含前次 HTTP response 成本，與原 end-to-end 指標不等價**；數值門檻／首次 retry／無暖機保留。原指標仍記錄並保留失敗；owner 已同意此差異 |
+| handler：「`clock.instant().plusMillis(delay.getAsLong())`」（在 http.deliver 返回後） | 實作起算點不變；本修訂**將驗收起點改到 response completion** | 是量測契約變更，owner 已於 2026-10-22 批准；原因、數值影響與 owner 決定見修訂報告。不能混同成既有到達間隔通過 |
 | M3：「fire it within ±1 second」；預設 threshold zero | AC-04 同時要求 no-early 與 due 後一秒 | 保留既有 no-early 預設；不能用一般 delay 容差放寬 strict retry |
 | M6：「Production secret distribution, TLS certificate issuance, or a managed Kubernetes operator」為 non-goals | 保持本機功能範圍，保留既有模型驗證 | 沒有正式部署、HA 或容量承諾；舊 load-gate 沒有改成通過 |
 | product-spec：「when any runtime has not confirmed pause, then no broker offset changes」；messaging-semantics 要全部 runtime 停 fetch、inflight drain/abandon、verify | AC-09 全部保留 | M6/current code 的 broker EMPTY/DEAD 觀測不能取代原條文；缺 runtime/inflight confirmation 與讀回證據，未批准 quiet-only 修訂 |
@@ -237,14 +237,14 @@ Prometheus scrape；退出後只清除本次 fixture 資源。版本與設定摘
 
 最新 desk operating-method §0 N3：「卡沒有 `spec` 就先開 SDD PR，等你合併」；§6：
 「修改運作方法、`AGENTS.md` 或 SDD 的 PR 仍等你同意後才合併」。owner 已批准並合併原版 SDD，
-但未批准本 PR 的 AC-05 量測修訂；因此本 PR 等明確同意才合併。原版與其餘 AC 的
-必要修復可繼續，不能預先依新指標宣告通過。沒有要求 owner 找原始 SDD。
+並於 2026-10-22 明確批准本 PR 的 AC-05 量測修訂後才合併。AC-05 仍須在新定義下以
+同一 fixture 實跑通過，不能以既有 diagnostic 樣本宣告通過。沒有要求 owner 找原始 SDD。
 
 ## 驗證、任務與完成規則
 
 實跑 evidence 在 [報告](docs/test-reports/mainline-sdd-20261022.md)；每個 AC 分別標
 PASS/FAIL/PARTIAL/NOT RUN，保留實際命令、來源、測試名稱與 CI URL。尚未執行的預期結果
-不可寫成實測。桌面規則要求鎖定前實跑；本提案將缺少 case 明列為鎖定／完成缺口，
+不可寫成實測。桌面規則要求鎖定前實跑；本修訂將缺少 case 明列為鎖定／完成缺口，
 不因寫好文件自動滿足它。
 
 批准後先建立 [任務板](docs/tasks/BOARD.md) 的 AC 對應可執行測試（名稱含 `AC_01` 等

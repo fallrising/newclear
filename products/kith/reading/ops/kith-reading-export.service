@@ -1,0 +1,18 @@
+# User unit TEMPLATE ONLY. Owner must replace the two /opt paths before installation.
+[Unit]
+Description=Kith single private reading export pass
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/kith
+EnvironmentFile=%h/.config/kith/export.env
+Environment=PATH=/opt/node-v24.18.0/bin:/usr/local/bin:/usr/bin:/bin
+Environment=GIT_TERMINAL_PROMPT=0
+UMask=0077
+ExecStart=/opt/node-v24.18.0/bin/node /opt/kith/reading/export.ts --repo ${KITH_EXPORT_REPO} --branch ${KITH_EXPORT_BRANCH} --url ${KITH_BASE_URL} --token-file ${KITH_TOKEN_FILE}
+TimeoutStartSec=15min
+TimeoutStopSec=30s
+KillMode=control-group
+Restart=no
+StandardOutput=journal
+StandardError=journal

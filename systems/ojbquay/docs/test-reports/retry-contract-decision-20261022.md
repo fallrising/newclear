@@ -1,9 +1,9 @@
-# AC-05 retry 計時修訂決策 — 待 owner 同意
+# AC-05 retry 計時修訂決策 — owner 已同意
 
 原版 [SDD PR472](https://github.com/fallrising/newclear/pull/472) 已獲 owner 同意，
 2026-10-22 合併 `874517a896b3be1695b8febb2a852f7e6c5f9307`。
-**目前有效 AC-05 仍是到達間隔，仍 FAIL。** 本文件與本 PR 的 SDD diff 是新的具體提案，
-不是把先前同意解讀成允許更換量測。產品未交付；`usable_tag: none`；owner 驗收另計。
+**owner 於 2026-10-22 明確同意本 PR 的 AC-05 量測修訂。** 這是獨立的新同意，不是把先前
+同意解讀成允許更換量測。原到達間隔 FAIL 保留；新定義尚無合格實跑，AC-05 仍未通過。產品未交付；`usable_tag: none`；owner 驗收另計。
 
 ## 原文、原因與限制
 

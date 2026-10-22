@@ -1,5 +1,7 @@
 # kith
 
+私人閱讀試用準備（新里程碑 #473，非階段3）：[操作手冊](reading/PRIVATE-TRIAL.md)／[範圍與AC](docs/plans/reading-private-trial.md)。正式內容、憑證、排程啟用、部署與手機真人驗收尚未驗證。
+
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
 

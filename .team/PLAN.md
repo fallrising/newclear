@@ -1852,3 +1852,7 @@ Kith root gates: full backend329 PASS then new pinned-replacement regression + a
 ## T-0368 / AC05 measurement amendment proposal 2026-10-22
 
 Owner approved originalSDD PR472/874517a8; originalAC05 remainsFAIL. Root prepared explicitresponse-completion→nextarrival proposal without changing runtime/test/fixture/threshold. T460 native bounded independent review ACCEPT applies only to reviewableproposal. Actualsamefixture paired intervals199/311/607 originalFAIL versus173/310/606 diagnostic; old703 remainsfailed evenunderproposal. Referencebuild cached119XML plus41contracts/15validator/deploymodels PASS. Owner agreementrequired beforemerging thisSDDchange; priorconsentdoesnotcoverit. Existingdirtyrepair and separateAC09candidate preserved; no productqualification/tag. Cross-session/provider/toolcountsunknown; norecursiveworkers/externalmodelcalls.
+
+## Program: Retro / RE-3 / 20261022-1315
+
+Owner-approved automated acceptance; issue #481 / PR #483. Orchestrator-owned plan: [Retro RE-3](retro-20261022-1315/PLAN.md). Other program records unchanged.

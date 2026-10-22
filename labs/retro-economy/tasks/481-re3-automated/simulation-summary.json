@@ -1,0 +1,595 @@
+{
+  "schema": "re3-strategy-v1",
+  "accepted": true,
+  "full_trace_sha256": "fe8f6ace022a6ee052c19ab598791fb6a5b2e25a4901d3b3f92b503b12317fda",
+  "runs": [
+    {
+      "accounting_checks": 146,
+      "counts": {
+        "buy": 4,
+        "craft": 10,
+        "gather": 25,
+        "list": 4,
+        "move": 90
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 12
+        },
+        "items": {
+          "herb": {
+            "consumed": 15,
+            "created": 15,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 2
+          },
+          "medicine": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 2
+          },
+          "ore": {
+            "consumed": 10,
+            "created": 10,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "completed",
+      "reason": "three_rounds_each",
+      "rejections": {},
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 3,
+        "2": 3
+      },
+      "scenario": "complementary",
+      "seed": 7,
+      "stall_limit": 8,
+      "steps": 144,
+      "target_rounds": 3,
+      "waits": {
+        "missing_complementary_supply": 11
+      }
+    },
+    {
+      "accounting_checks": 145,
+      "counts": {
+        "buy": 4,
+        "craft": 10,
+        "gather": 25,
+        "list": 4,
+        "move": 90
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 12
+        },
+        "items": {
+          "herb": {
+            "consumed": 15,
+            "created": 15,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 2
+          },
+          "medicine": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 2
+          },
+          "ore": {
+            "consumed": 10,
+            "created": 10,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "completed",
+      "reason": "three_rounds_each",
+      "rejections": {},
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 3,
+        "2": 3
+      },
+      "scenario": "complementary",
+      "seed": 19,
+      "stall_limit": 8,
+      "steps": 143,
+      "target_rounds": 3,
+      "waits": {
+        "missing_complementary_supply": 10
+      }
+    },
+    {
+      "accounting_checks": 145,
+      "counts": {
+        "buy": 4,
+        "craft": 10,
+        "gather": 25,
+        "list": 4,
+        "move": 90
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 12
+        },
+        "items": {
+          "herb": {
+            "consumed": 15,
+            "created": 15,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 2
+          },
+          "medicine": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 2
+          },
+          "ore": {
+            "consumed": 10,
+            "created": 10,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "completed",
+      "reason": "three_rounds_each",
+      "rejections": {},
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 3,
+        "2": 3
+      },
+      "scenario": "complementary",
+      "seed": 41,
+      "stall_limit": 8,
+      "steps": 143,
+      "target_rounds": 3,
+      "waits": {
+        "missing_complementary_supply": 10
+      }
+    },
+    {
+      "accounting_checks": 70,
+      "counts": {
+        "craft": 6,
+        "gather": 12,
+        "list": 2,
+        "move": 40
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 0
+        },
+        "items": {
+          "herb": {
+            "consumed": 0,
+            "created": 0,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 2,
+            "created": 6,
+            "final": 4,
+            "transferred": 0
+          },
+          "medicine": {
+            "consumed": 2,
+            "created": 2,
+            "final": 0,
+            "transferred": 0
+          },
+          "ore": {
+            "consumed": 12,
+            "created": 12,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "stalled",
+      "reason": "missing_complementary_supply",
+      "rejections": {},
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 1,
+        "2": 1
+      },
+      "scenario": "same_profession",
+      "seed": 7,
+      "stall_limit": 8,
+      "steps": 68,
+      "target_rounds": 3,
+      "waits": {
+        "missing_complementary_supply": 8
+      }
+    },
+    {
+      "accounting_checks": 70,
+      "counts": {
+        "craft": 6,
+        "gather": 12,
+        "list": 2,
+        "move": 40
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 0
+        },
+        "items": {
+          "herb": {
+            "consumed": 0,
+            "created": 0,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 2,
+            "created": 6,
+            "final": 4,
+            "transferred": 0
+          },
+          "medicine": {
+            "consumed": 2,
+            "created": 2,
+            "final": 0,
+            "transferred": 0
+          },
+          "ore": {
+            "consumed": 12,
+            "created": 12,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "stalled",
+      "reason": "missing_complementary_supply",
+      "rejections": {},
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 1,
+        "2": 1
+      },
+      "scenario": "same_profession",
+      "seed": 19,
+      "stall_limit": 8,
+      "steps": 68,
+      "target_rounds": 3,
+      "waits": {
+        "missing_complementary_supply": 8
+      }
+    },
+    {
+      "accounting_checks": 70,
+      "counts": {
+        "craft": 6,
+        "gather": 12,
+        "list": 2,
+        "move": 40
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 0
+        },
+        "items": {
+          "herb": {
+            "consumed": 0,
+            "created": 0,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 2,
+            "created": 6,
+            "final": 4,
+            "transferred": 0
+          },
+          "medicine": {
+            "consumed": 2,
+            "created": 2,
+            "final": 0,
+            "transferred": 0
+          },
+          "ore": {
+            "consumed": 12,
+            "created": 12,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "stalled",
+      "reason": "missing_complementary_supply",
+      "rejections": {},
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 1,
+        "2": 1
+      },
+      "scenario": "same_profession",
+      "seed": 41,
+      "stall_limit": 8,
+      "steps": 68,
+      "target_rounds": 3,
+      "waits": {
+        "missing_complementary_supply": 8
+      }
+    },
+    {
+      "accounting_checks": 83,
+      "counts": {
+        "craft": 6,
+        "gather": 15,
+        "list": 2,
+        "move": 44
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 0
+        },
+        "items": {
+          "herb": {
+            "consumed": 9,
+            "created": 9,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 2,
+            "created": 4,
+            "final": 2,
+            "transferred": 0
+          },
+          "medicine": {
+            "consumed": 2,
+            "created": 4,
+            "final": 2,
+            "transferred": 0
+          },
+          "ore": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "stalled",
+      "reason": "insufficient_coins",
+      "rejections": {
+        "insufficient_coins": 8
+      },
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 1,
+        "2": 1
+      },
+      "scenario": "unaffordable",
+      "seed": 7,
+      "stall_limit": 8,
+      "steps": 81,
+      "target_rounds": 3,
+      "waits": {
+        "insufficient_coins": 8,
+        "missing_complementary_supply": 6
+      }
+    },
+    {
+      "accounting_checks": 83,
+      "counts": {
+        "craft": 6,
+        "gather": 15,
+        "list": 2,
+        "move": 44
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 0
+        },
+        "items": {
+          "herb": {
+            "consumed": 9,
+            "created": 9,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 2,
+            "created": 4,
+            "final": 2,
+            "transferred": 0
+          },
+          "medicine": {
+            "consumed": 2,
+            "created": 4,
+            "final": 2,
+            "transferred": 0
+          },
+          "ore": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "stalled",
+      "reason": "insufficient_coins",
+      "rejections": {
+        "insufficient_coins": 8
+      },
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 1,
+        "2": 1
+      },
+      "scenario": "unaffordable",
+      "seed": 19,
+      "stall_limit": 8,
+      "steps": 81,
+      "target_rounds": 3,
+      "waits": {
+        "insufficient_coins": 8,
+        "missing_complementary_supply": 6
+      }
+    },
+    {
+      "accounting_checks": 83,
+      "counts": {
+        "craft": 6,
+        "gather": 15,
+        "list": 2,
+        "move": 44
+      },
+      "final_balances": {
+        "1": 20,
+        "2": 20
+      },
+      "ledger": {
+        "coins": {
+          "final": 40,
+          "grants": 24,
+          "rewards": 16,
+          "transferred": 0
+        },
+        "items": {
+          "herb": {
+            "consumed": 9,
+            "created": 9,
+            "final": 0,
+            "transferred": 0
+          },
+          "kit": {
+            "consumed": 2,
+            "created": 4,
+            "final": 2,
+            "transferred": 0
+          },
+          "medicine": {
+            "consumed": 2,
+            "created": 4,
+            "final": 2,
+            "transferred": 0
+          },
+          "ore": {
+            "consumed": 6,
+            "created": 6,
+            "final": 0,
+            "transferred": 0
+          }
+        }
+      },
+      "max_steps": 400,
+      "outcome": "stalled",
+      "reason": "insufficient_coins",
+      "rejections": {
+        "insufficient_coins": 8
+      },
+      "reopen_consistent": true,
+      "rounds": {
+        "1": 1,
+        "2": 1
+      },
+      "scenario": "unaffordable",
+      "seed": 41,
+      "stall_limit": 8,
+      "steps": 81,
+      "target_rounds": 3,
+      "waits": {
+        "insufficient_coins": 8,
+        "missing_complementary_supply": 6
+      }
+    }
+  ]
+}

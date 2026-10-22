@@ -26,6 +26,7 @@ jobs:
     steps:
       - name: Configure isolated test output
         run: |
+          mkdir -p "$RUNNER_TEMP/retro-build" "$RUNNER_TEMP/retro-evidence"
           echo "AGENT_BUILD_DIR=$RUNNER_TEMP/retro-build" >> "$GITHUB_ENV"
           echo "AGENT_EVIDENCE_DIR=$RUNNER_TEMP/retro-evidence" >> "$GITHUB_ENV"
           echo "PYTHONPYCACHEPREFIX=$RUNNER_TEMP/retro-pycache" >> "$GITHUB_ENV"
@@ -43,6 +44,10 @@ jobs:
         run: python3 -m unittest discover -s labs/retro-economy/tests -p 'test_*.py' -v
       - name: Durable browser client tests
         run: node --test --test-isolation=none labs/retro-economy/tests/test_ui.mjs
+      - name: UI-only recorder command boundary
+        run: node --test --test-isolation=none labs/retro-economy/tests/test_explorer.mjs
+      - name: Deterministic strategy and counterexample acceptance
+        run: python3 labs/retro-economy/tools/simulate.py
       - name: Real Chromium route and restart acceptance
         run: node labs/retro-economy/tests/browser_smoke.mjs
       - name: Preserve browser evidence

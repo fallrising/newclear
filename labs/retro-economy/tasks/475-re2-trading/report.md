@@ -51,3 +51,7 @@ RE-1 任務 T-0454-01 補 done，end `2026-10-22T10:06:19Z`。RE-2 任務板合�
 獨立 Claude Opus 5.5 首輪針對 `0c13d9ad` 判定 PASS、無阻擋問題；非阻擋建議指出自動輪詢可能搶在測試重載前耗盡故障注入次數。已在 browser harness 加入僅測試使用、跨重載保留的 interval 暫停開關，只在故障區段暫停輪詢，明確驗證 reload 與手動 Retry；正常輪詢仍在前後驗證。同步說明前景自動重試及背景分頁暫停輪詢。此修改後重新執行 browser/client/syntax/doc gates 並對新 head 重審與 CI（結果另在 PR 留存）。第一輪 Claude 在 sandbox DNS EAI_AGAIN 未產生審查，已保留失敗並以核准網路環境重跑成功，沒有改用付費 API。
 
 審查修正後的 browser 完整重跑 PASS：`/home/ckc/test/codex/aw2/projects/re2/tasks/reviewed/preserve/evidence/browser-9lSiBn/`；client／syntax／repo／合約 gates 的重跑保存在 `Retro-20261022-1029-reviewed-checks/preserve/evidence/`。既有 container 另查 `python3 --version` 確認為 Python 3.11.2。
+
+CI run `39777429600` 的 Chromium 冷啟動超過 20 秒 readiness 期限，尚未進入遊戲斷言；下載 artifact 的 stderr 已有 DevTools listening。保留失敗 log 後，啟動等待改為最多 60 秒並可從 stderr 取得就緒位址；保留程序退出檢查、sandbox 與所有遊戲斷言。修改後完整 browser 與最終 head CI／審查重新執行，結果見 PR。
+
+readiness 修正後 browser／語法驗證通過，最新完整 browser evidence：`/home/ckc/test/codex/aw2/projects/re2/tasks/final/preserve/evidence/browser-le1IlG/`。runtime 檔案自 `87b32667` 未變；之後僅驗收 harness 與文件更動。

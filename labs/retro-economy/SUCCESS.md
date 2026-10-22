@@ -35,6 +35,8 @@ RE-0 的[規則表](docs/rules.md) 已整理配方、初始補給、地圖、遭
 
 ## 啟動與驗證
 
+`source_commit` 指向 runtime 程式來源；之後的 browser harness／文件修正及最終 head 驗證另見 RE-2 報告與 PR #476。
+
 啟動：`python3 labs/retro-economy/server.py`，開啟 `http://127.0.0.1:8080`；持久化與完整命令見 [README](README.md)。RE-1 自動規則／儲存／HTTP／客戶端／瀏覽器驗證見[報告](tasks/454-re1-solo/report.md)。Repo 文件檢查：`python3 scripts/check_project_success.py`、`python3 .github/scripts/validate_llms_txt.py`、`git diff --check`（從 repo 根目錄執行）。文件檢查本身不驗證遊戲玩法；自動瀏覽器驗收亦不代表真人體驗或平衡通過。
 
 ## 可用版本

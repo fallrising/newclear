@@ -142,8 +142,11 @@ try {
   browser.stderr.on('data', b => browserLogs.push(String(b)));
   browser.on('error', e => errors.push(String(e)));
   let address;
-  // Hosted runners can take more than five seconds to cold-start Chromium.
-  for (let i = 0; i < 400; i++) {
+  // Hosted CI cold starts have exceeded 20s; readiness stays bounded to 60s.
+  const browserDeadline = Date.now() + 60000;
+  while (Date.now() < browserDeadline) {
+    const listening = browserLogs.join('').match(/DevTools listening on (ws:\/\/127\.0\.0\.1:\d+\/devtools\/browser\/[^\s]+)/);
+    if (listening) { address = listening[1]; break; }
     try { const [port, path] = (await readFile(join(profile, 'DevToolsActivePort'), 'utf8')).trim().split('\n'); address = `ws://127.0.0.1:${port}${path}`; break; } catch (_) {}
     if (browser.exitCode !== null) throw new Error('Chromium failed: ' + browserLogs.join(''));
     await pause(50);

@@ -35,6 +35,12 @@ source_commit: 893351dfb09be12adbd7979f1b6d53b781066e16
 
 ## 現況與缺口
 
+### AC-04 執行輸入表（文件交付）
+
+Owner 已批准 AC-04 開發、提交及達驗收／CI／獨立審查門檻後合併。所需模型、私有設定位置、呼叫／費用預算及 reviewer 路由集中在[執行輸入填寫表](docs/plans/ac04-owner-inputs.md)；公開庫只保存空白範本，填妥副本置於 repo 外私有目錄。
+
+本次只交付填寫規格與本地交回方式。驗證文件連結、必要欄位、安全邊界與 project-success 契約；不執行真模型。AC-04 仍 pending，待具體輸入齊備後完成 A–D 同版真實整合及必要 gates。
+
 ### 閱讀快記階段 2（獨立範圍，#463，本機 RC VERIFIED）
 
 本次目標：完成 #463 閱讀、筆記 CAS、固定 commit 建置、瀏覽器自動原子更新及可恢復的 Git 匯出；依 [階段 2 契約](docs/plans/reading-capture-phase2.md) 與 RC 清單先 RED 再 GREEN。RC-01～07 桌面／手機 12 項全部通過；全套回歸、最終 head CI／不同模型審查與合併證據見 PR #464。正式來源、憑證、部署未接線。

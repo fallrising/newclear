@@ -1823,6 +1823,13 @@ HW2-D03 evidence-gate ACCEPT local AC-03: root19 tests, probe,41 contracts,15 co
 
 HW2-D04: ecdb62ea passed final local gates, both CI jobs and xAI Grok APPROVE (review receipt on PR). Pre-merge guard observed main advance to33cfc39c through Kith phase2, so merge was not attempted. Integrate main, preserving both appended PLAN sections; no Handwired product/build/test changes or task ID collisions. Rerun final gates and obtain a new final-head review before merge.
 
+## Kith-private-trial-20261022 / #473
+
+Scope: reading-private-trial.md PT01–05. Base main 0aac1841. Root owns plan, docs, integration, review and merge/board closeout. Bounded native worker T-473 owns preparation/preflight code+tests in fresh worktree; second T-474 owns integration E2E after interface freeze. No worker commits/delegation. Root inspects all diffs and reruns gates.
+
+Gates: RED/GREEN; Node24.18.0; full backend/web/E2E+manifest, validators; final-head CI no pending; independent different-family review; latest main. No production/private wiring/deployment/scheduler/API calls/tags. External review: Grok catalog says unauthenticated; authorized alternative OpenCode exact opencode-go/deepseek-v4.1-flash observed, route eligibility pending. Quota/cost unknown; no paid model API. Keep review bounded to 600 seconds and public immutable diff. Accept decisions pending.
+
+Kith #473 integration review: T473 implementation and T474 focused integration accepted provisionally after actual diff inspection; final root checks required. T475 readonly audit raised Git filters, implicit promisor fetch and initial token issuance cycle. All addressed with RED/GREEN tests and explicit empty0600 metadata-only bootstrap guidance. Root found local refs/replace could rewrite pinned commit content, reproduced actual replacement-body RED, added GIT_NO_REPLACE_OBJECTS alongside GIT_NO_LAZY_FETCH to shared reading Git boundary, rerunning all37 reading checks. No exporter journal/CAS/ACK semantics or RC/W oracle relaxed. Root worker typecheck exposed mixed Worker/Node URL type; use explicit Node URL import, corrected gate passed.
 
 ## T-0368 Ojbquay mainline SDD / 2026-10-22
 
@@ -1839,3 +1846,5 @@ Search completed:10 active repos, listing62 plus empty next page; T-451 two unin
 T-452 independent review ACCEPT for proposal publication after five corrections: exact703ms source artifact, full runtime/inflight reset contract, ordered/Share retry distinction, AC08 partial evidence, public hostname removal. Root evidence gate PARTIAL overall (Go import and strict retry remain FAIL; named runtime probes not run), ACCEPT documentation proposal publication. Native41 contracts/15 tests and119-reference Java build pass; CI/owner gate still pending. See docs/project-success/evidence/ojbquay-sdd-20261022/evidence-gate.md.
 
 PR472 initial deployment-models CI39732446852 failed on three old-name provenance strings in the component; moved redundant names to exact root evidence, no validator/SDD/runtime change. Corrected final-doc deploy exit0,41 contracts/15tests PASS, incremental Gradle44 up-to-date PASS (no new test execution). T454 independent correction ACCEPT; original CI failure retained. Desk task-only PR108 passed check CI39732956206 and T453 independent review; merged separately without approving SDD. Corrected-head product CI still pending; SDD remains owner-gated.
+
+Kith root gates: full backend329 PASS then new pinned-replacement regression + all37 reading PASS (293+37=330); web/static/schema/success/llms/contracts/diff pass after explicit Node URL correction. FullE2E57pass/1expected desktop skip, mobile counterpart pass; manifest valid and redaction0. Systemd template syntax pass, no service activation. T475 findings all resolved by actual RED/GREEN or bootstrap documentation. Final-head CI/review/re-run still required; no merge claim yet.

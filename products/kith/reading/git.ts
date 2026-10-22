@@ -4,7 +4,7 @@ import { promisify } from 'node:util';
 const execute = promisify(execFile);
 /** No shell, hooks, signing, textconv, fsmonitor or inherited Git routing. */
 export async function git(repo: string, args: string[], maxBuffer = 8 * 1024 * 1024): Promise<string> {
-  const env: NodeJS.ProcessEnv = { ...process.env, GIT_TERMINAL_PROMPT: '0', GIT_ATTR_NOSYSTEM: '1' };
+  const env: NodeJS.ProcessEnv = { ...process.env, GIT_TERMINAL_PROMPT: '0', GIT_ATTR_NOSYSTEM: '1', GIT_NO_LAZY_FETCH: '1', GIT_NO_REPLACE_OBJECTS: '1' };
   for (const name of Object.keys(env)) if (/^GIT_(DIR|WORK_TREE|INDEX_FILE|OBJECT_DIRECTORY|ALTERNATE_OBJECT_DIRECTORIES|CONFIG_COUNT|CONFIG_KEY_\d+|CONFIG_VALUE_\d+)$/u.test(name)) delete env[name];
   try {
     const { stdout } = await execute('git', ['-c', 'core.hooksPath=/dev/null', '-c', 'core.attributesFile=/dev/null', '-c', 'core.fsmonitor=false', '-c', 'commit.gpgSign=false', '-c', 'tag.gpgSign=false', '-c', 'protocol.ext.allow=never', '-C', repo, ...args], { env, encoding: 'buffer', timeout: 30_000, maxBuffer });

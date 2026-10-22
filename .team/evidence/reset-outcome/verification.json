@@ -1,0 +1,434 @@
+{
+  "base": "6c611778a83b8e2d7198edace1dfc6a04d517516",
+  "commands": [
+    {
+      "command": "JAVA_HOME=/home/ckc/.local/jdks/jdk-25.0.4.1+1 DOCKER_CONFIG=/tmp/ojbquay-docker-config timeout 120s systems/ojbquay/gradlew -p systems/ojbquay :modules:console-api:test --tests *TopicApiIntegrationTest.AC_09_uncertainKafkaOutcomeKeepsSubscriptionPausedAndFenced --no-daemon --no-parallel",
+      "exit": 1,
+      "result": "RED: original unhandled alter timeout surfaced as ServletException before the state assertion; raw XML retained. No claim that RED directly measured restoration."
+    },
+    {
+      "command": "JAVA_HOME=/home/ckc/.local/jdks/jdk-25.0.4.1+1 DOCKER_CONFIG=/tmp/ojbquay-docker-config timeout 150s systems/ojbquay/gradlew -p systems/ojbquay :modules:console-api:test --no-daemon --no-parallel",
+      "exit": 0,
+      "result": "Initial GREEN before two adapter and replaced-token tests."
+    },
+    {
+      "command": "JAVA_HOME=/home/ckc/.local/jdks/jdk-25.0.4.1+1 DOCKER_CONFIG=/tmp/ojbquay-docker-config timeout 180s systems/ojbquay/gradlew -p systems/ojbquay build --no-daemon --no-parallel",
+      "exit": 0,
+      "result": "Final source build 41s; 21 tasks executed,14 from cache,9 up-to-date; console tests executed."
+    },
+    {
+      "command": "DOCKER_CONFIG=/tmp/ojbquay-docker-config timeout 60s make -C systems/ojbquay validate-deploy",
+      "exit": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts/tests -p test_project_success.py -v",
+      "exit": 0,
+      "result": "15 tests"
+    },
+    {
+      "command": "python3 scripts/check_project_success.py",
+      "exit": 0,
+      "result": "41 contracts"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "tests": [
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.config.ConfigEventCodecTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.config.ConfigSchemaResourceTest.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.config.ConfigStoreTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.config.KafkaConfigBusIntegrationTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.config.PullSubscriptionSpecTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.config.PushSubscriptionSpecTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.config.TopicConfigTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.contracts.ContractDescriptorTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.delay.DelayCommandCodecTest.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.delay.IdsTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.observability.MetricsHttpTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.pipeline.CelFilterTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.pipeline.TransitMapperTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/common/build/test-results/test/TEST-dev.ojbk.security.TokenAuthTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.configuration.TopicConfigPublicationIntegrationTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.dlq.DlqApiIntegrationTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.group.DefaultGroupOperationsAc09Test.xml",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.group.GroupMaintenanceFenceAc09Test.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.group.RuntimePauseVerifierAc09Test.xml",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.kafka.DefaultKafkaDlqOperationsTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.subscription.SubscriptionPreviewServiceTest.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/console-api/build/test-results/test/TEST-dev.ojbk.console.topic.TopicApiIntegrationTest.xml",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.BoundedStripedExecutorTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.ConsumerGrpcServiceTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.FixedRateGateTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.GatewayConsumeSettingsTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.JdkPushHttpClientTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.KafkaOrderedPushWorkerTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.KafkaPullBrokerTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.KafkaRetryPublisherTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.KafkaSharePushWorkerTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.OrderKeyExtractorTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.OrderedPushRecordHandlerTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PauseLifecycleAc09Test.xml",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PullGrpcE2eTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PullShareWorkerTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PullWorkerRegistryTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PushPipelineTest.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PushRecordHandlerTest.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PushRetryE2eTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.PushWorkerOrchestratorTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-consume/build/test-results/test/TEST-dev.ojbk.gateway.consume.RuntimeRecoveryAc09IntegrationTest.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-produce/build/test-results/test/TEST-dev.ojbk.gateway.produce.DelayGatewayTest.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-produce/build/test-results/test/TEST-dev.ojbk.gateway.produce.GatewaySettingsTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-produce/build/test-results/test/TEST-dev.ojbk.gateway.produce.ProducerEngineTest.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-produce/build/test-results/test/TEST-dev.ojbk.gateway.produce.ProducerGatewayE2eTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-produce/build/test-results/test/TEST-dev.ojbk.gateway.produce.ProducerGrpcServiceTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/gateway-produce/build/test-results/test/TEST-dev.ojbk.gateway.produce.ProducerMetricsTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/scheduler/build/test-results/test/TEST-dev.ojbk.scheduler.JdbcDelayRepositoryTest.xml",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/scheduler/build/test-results/test/TEST-dev.ojbk.scheduler.SchedulerE2eTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/scheduler/build/test-results/test/TEST-dev.ojbk.scheduler.SchedulerMetricsTest.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "systems/ojbquay/modules/scheduler/build/test-results/test/TEST-dev.ojbk.scheduler.SchedulerSettingsTest.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "console": {
+    "tests": 51,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "all_current_xml_including_cached": {
+    "tests": 145,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "source_sha256": {
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/configuration/TopicConfigPublicationIntegrationTest.java": "be392f131be5d7b44f2bc6f4aacc2eb800febc04689de21f1e073da7211cb09f",
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/DefaultGroupOperationsAc09Test.java": "dee7f2f71abaf1db9dc2c88910fa4015cd074afca5bf32978e81e4aa7f838c0f",
+    "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/topic/TopicApiIntegrationTest.java": "9d8ed536d813ff7d67cc203e5e3421bd2cacc4ac00f47b0a9b810ee01a0ddbc0",
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/DefaultGroupOperations.java": "89ca956ca8529e1332f0320e9ea0da007287b8667e56b1c7288a4ba5e7679e32",
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupOperations.java": "209788fd25c25d32983f972a753070bc5288a4c1170d0af6962e465f89596959",
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupMaintenanceFence.java": "c70de04a054f574285232b3ddd83aa1c8c474c1a8a9509b776c9b2c0e760faf4",
+    "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupWorkflowService.java": "98514378e3f0f75d91b17c2cf86902d4d890d89e42232ba6c1c8702ae77312bc"
+  },
+  "limits": {
+    "delayed_broker_e2e": "not run; pending future simulated without sleeps",
+    "whole_group": "not implemented",
+    "preview_confirm": "not implemented",
+    "recovery_workflow": "not implemented",
+    "AC09": "partial",
+    "AC05": "unqualified",
+    "usable_tag": "none"
+  }
+}

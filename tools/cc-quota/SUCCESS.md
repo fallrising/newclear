@@ -4,8 +4,8 @@ purpose: 採集 Claude Code 額度並用本機歷史呈現 pacing 與偏離通�
 kind: tool
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-21
-source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
+reviewed: 2026-10-23
+source_commit: b7f2a4311d1135977ba273efba8e77702b908036
 ---
 
 # cc-quota 成功契約
@@ -18,42 +18,55 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 不刷新或轉存憑證、不做多帳號／雲端／分析平台。
 真實額度端點、Keychain及launchd是原使用情境的必要驗收，不能只以離線計算通過結案。
 
+## 本次工作（2026-10-23）
+
+Owner 已啟用 START_DEVELOPMENT_PROMPT；恢復既有 AC-01–04，不新增 quota-signal 提案功能。
+先修復並驗證 readonly report、缺欄位／異常資料與失敗落庫、本機去重，再核對安裝／通知。
+驗證採 RED→GREEN、完整離線 suite、CLI／SQLite流程、installer syntax與隔離安裝替身、repo契約。
+AC-03／04 必須另有真實已登入 Mac、Keychain、launchd與通知證據；Linux或mock不能替代。
+初輪只做本機修復；owner後續已明確授權commit／push／PR／merge。release／正式部署不在授權內。進度見 [任務板](docs/tasks/BOARD.md)。
+
 ## 驗收條件
 
-passed 僅表示本次已核對的靜態條件；historical 是已有紀錄，並非本次重跑。
+passed 表示下列本次實際驗證範圍；historical 是已有紀錄，並非本次重跑。
 產品未驗項與後續失敗均保留；文件格式通過不能代替runtime驗收。
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
 | --- | --- | --- | --- |
-| AC-01 | Given 額度快照與reset時間，When collect計算及存SQLite再report，Then remaining/pace/預估正確且report不寫庫。 | pending | [tests](tests/test_cc_quota.py) 已覆蓋離線情境；README記offline-tested，但本次無新執行結果。 |
-| AC-02 | Given 重複本機JSONL及採集失敗，When 去重與記error，Then 不重算token且缺資料不偽造正常快照。 | pending | [README](README.md)、[tests](tests/test_cc_quota.py)；須保留當前命令／exit證據。 |
-| AC-03 | Given 目標macOS已登入Claude，When Keychain取憑證並collect/report，Then 真實usage欄位可用且與可見額度相符。 | pending | [quickstart](docs/quickstart.md) 明列真實端點與Keychain路徑skipped。 |
-| AC-04 | Given 安裝launchd且額度偏離，When 每小時觸發，Then DB新增快照並按門檻通知，睡眠缺口明示。 | pending | [quickstart](docs/quickstart.md) 的install／launchctl未在目標機驗證。 |
+| AC-01 | Given 額度快照與reset時間，When collect計算及存SQLite再report，Then remaining/pace/預估正確且report不寫庫。 | passed | 2026-10-23：離線 regression＋實際 CLI fixture→SQLite→report 通過；report 前後 DB hash／mtime 不變。見[本次證據](docs/tasks/verification-20261023.md)。 |
+| AC-02 | Given 重複本機JSONL及採集失敗，When 去重與記error，Then 不重算token且缺資料不偽造正常快照。 | passed | 2026-10-23：跨檔 ID 去重、異常 JSONL、缺 utilization、無效 schema、HTTP401／通知失敗與同秒重採回歸通過；raw／errors 保留且無部分正常快照。見[本次證據](docs/tasks/verification-20261023.md)。 |
+| AC-03 | Given 目標macOS已登入Claude，When Keychain取憑證並collect/report，Then 真實usage欄位可用且與可見額度相符。 | pending | blocked：目前 Linux；SSH 設定的 8 個候選條目全部回報 Linux。缺已登入 Claude 的授權 Mac及可見額度對照；未讀真憑證／呼叫真usage。見[目標機步驟](docs/quickstart.md#目標-mac-驗收尚未執行)。 |
+| AC-04 | Given 安裝launchd且額度偏離，When 每小時觸發，Then DB新增快照並按門檻通知，睡眠缺口明示。 | pending | blocked：無目標 Mac。installer／plist／Unicode通知／stale-gap 僅離線替身通過；真 launchd 每小時採集、可見通知與睡眠後恢復仍未驗。 |
 
 ## 現況與缺口
 
 [cc_quota.py](cc_quota.py) 是stdlib實作；[install.sh](install.sh) 提供macOS排程安裝。
 README明列離線計算、SQLite、token去重與失敗處理測試，但真live仍未驗。
 內部usage端點無公開契約；schema可變，raw JSON保存供核對。
-通知無狀態，不去重；睡眠不採集，不能視為連續完整歷史。
+通知無狀態，不去重；睡眠不採集，不能視為連續完整歷史。report 將超過 90 分鐘的歷史間隔標 GAP、舊快照／已重置視窗標 STALE，不補造資料。
+採集先驗證所有提供的視窗，缺／錯 utilization 或 reset 會記 errors；原始 JSON 留 raw。
+report 使用 SQLite mode=ro；同秒重採成功會完整取代該秒快照。通知失敗記 errors，不丟棄已提交快照。
 Linux可手動採集／stdout通知，不能拿Linux測試替代macOS使用主線。
 
 ## 啟動與驗證
 
 依 [quickstart](docs/quickstart.md)，本目錄離線命令為
 `python3 -m unittest discover -s tests -v` 與 `bash -n install.sh`。
-`bash install.sh` 會寫使用者bin與LaunchAgents並載入排程，非本次執行範圍。
+`bash install.sh` 只允許 macOS，會寫使用者bin與LaunchAgents並載入排程；本次僅隔離替身執行，未真安裝。
 `python3 cc_quota.py collect -v` 會讀真憑證並連額度端點；`report`讀SQLite。
 DB預設 `~/.local/share/cc-quota/quota.db`，可由CC_QUOTA_DB指定。
 真憑證與raw資料不應放入公開驗收證據。
 
-本次只核對文件、程式入口與既有證據；未執行產品建置或外部整合。
+本次由 7 項 baseline 擴充至 28 項離線測試；另跑 CLI fixture、bash syntax與repo契約。
+執行版本 Python 3.13.5（Linux），Python 3.11 syntax parse通過；沒有宣稱3.11或Mac runtime已驗。
+[本次證據](docs/tasks/verification-20261023.md)列出 RED／GREEN、命令與未跑原因；獨立審查結果同處更新。
 歷史命令與結果保留原來源，不以文件盤點日期覆蓋實測日期。
 
 ## 可用版本
 
 目前 `usable_tag: none`。
-須補當前離線檢查與目標macOS的Keychain、真usage、collect/report、排程及通知證據。
+當前離線檢查已補；仍須目標macOS的Keychain、真usage、collect/report、排程及通知證據。
+本輪正依owner指示提交並合併限定離線修復PR；發布結果見[驗證紀錄](docs/tasks/verification-20261023.md)。Mac驗收未完成，不建立usable tag或部署。
 不因CI只驗離線種子而建立完整額度監控可用標記。
 
 標記前須核對已合併目標SHA、必要CI／審查與核心流程證據。

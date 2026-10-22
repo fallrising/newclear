@@ -6,7 +6,9 @@ Owner direct instruction：交付 AC-04 執行輸入填寫文件，發布至 own
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-9900-INPUTS | 填寫規格、本地私有交回位置與文件檢查；owner 已確認發布至現有 GitHub，文件 PR 待合併 | AC-04（輸入準備，非驗收通過） | in_progress | 2026-10-22T14:30:07Z | | 2026-10-22T15:47:55Z |
+| T-9900-INPUTS | 填寫規格、本地私有交回位置與文件檢查；文件 PR 已合併，owner 延後填寫 | AC-04（輸入準備，非驗收通過） | done | 2026-10-22T14:30:07Z | 2026-10-22T15:54:06Z | 2026-10-22T15:54:42Z |
+
+PR [#489](https://github.com/fallrising/newclear/pull/489) merged at `2026-10-22T15:54:06Z` as `ed32973f9f9352847cb7a89bb7b8e47aeb9e0fc4`, reviewed head `f2106b9f9d90ea72aab6773605784280775dcfec`. [Final document verification and independent native review](https://github.com/fallrising/newclear/pull/489#issuecomment-6345103361): 41 project-success contracts, task/report and document checks passed; exact-head CI test/web/validate all SUCCESS. Owner explicitly requested this document merge and deferred filling the form. This closes the input-document task only; AC-04 runtime development, model inputs and true-boundary acceptance remain pending. No model calls, deployment or usable tag.
 
 ## T-0463
 

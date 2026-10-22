@@ -1,5 +1,7 @@
 # Private reading build and Git export
 
+For the complete web → pinned private content → verified release workflow, use the [private trial runbook](PRIVATE-TRIAL.md). It adds offline preflight and Linux scheduling templates without installing services or deploying. Production wiring and owner mobile acceptance remain unverified.
+
 These commands use Node 24.18.0 and Git. They do not deploy, contact a model provider, or configure live credentials. The examples run from `products/kith` with an operator-owned private content checkout.
 
 ## Build one immutable bundle

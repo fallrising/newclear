@@ -26,6 +26,7 @@ jobs:
     steps:
       - name: Configure isolated test output
         run: |
+          mkdir -p "$RUNNER_TEMP/retro-build" "$RUNNER_TEMP/retro-evidence"
           echo "AGENT_BUILD_DIR=$RUNNER_TEMP/retro-build" >> "$GITHUB_ENV"
           echo "AGENT_EVIDENCE_DIR=$RUNNER_TEMP/retro-evidence" >> "$GITHUB_ENV"
           echo "PYTHONPYCACHEPREFIX=$RUNNER_TEMP/retro-pycache" >> "$GITHUB_ENV"

@@ -70,3 +70,7 @@ T-0475-01 補 done／end `2026-10-22T12:47:31Z`（已核實 RE-2 合併時間）
 探索發現非阻斷提示問題：採集地仍顯示固定旅行步數，登頂回程時提示暫時要求向東；agent 靠地圖與先前提示完成回程。完整 UX 及真人可理解性仍未驗證，這些觀察不隱藏，也不擴張成新功能里程碑。
 
 市場無供應或價格高於餘額會停滯，已以反例證實；受控互補策略的成功不代表真人願意供貨。只有一次 UI 探索，無統計成功率、真人訪談或產品去留結論。既有本機 token、單執行緒、永久收據與掛單歷史限制不變。不部署、不建 tag、不關 issue。
+
+初輪 Claude Opus5.5 對 `d77b9c34e7512f7ace03050dedad1b24bc961dc6` 判 PASS，無 blocking finding。CI run39789113805 仍失敗：變數存在，但新策略步驟早於原 browser 步驟，尚未建立 retro-build／retro-evidence 目錄。workflow 初始化現已明確 mkdir 兩輸出目錄；保留失敗 log，修正後新 head 重新 CI／唯讀審查，不以舊 PASS 合併。
+
+審查非阻擋建議的處理：CI 確認 simulation.json 與 browser evidence 一起上傳；探索者讀到的元件 AGENTS 只有驗收流程，沒有地圖或路線。exploration.json 由原 actions.jsonl 逐列保留 command、step、elapsed_ms、actor，依前次可見 control ID 加 label；steps 1／16／42／44／57／63／65／67 附當時完整可見文字，保留原 log SHA-256。原始紀錄及抽取腳本另存不可變 handoff。混合情境的停滯原因分類、無效控制命令計數／WebSocket open timeout、CI 控制器 E2E 與物品保總量錯收人測例屬非阻擋後續；現行三情境／實際68次UI操作範圍未受影響。任務板 merge 後回填仍列交付步驟。

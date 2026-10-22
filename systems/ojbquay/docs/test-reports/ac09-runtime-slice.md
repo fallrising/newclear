@@ -60,6 +60,13 @@ Evidence: `./gradlew build --no-daemon --no-parallel` BUILD SUCCESSFUL; console-
 0 failures/skips, including `RuntimePauseVerifierAc09Test` 7, `DefaultGroupOperationsAc09Test` 4,
 `GroupMaintenanceFenceAc09Test` 1 (real PG) and `TopicApiIntegrationTest` 22.
 
+Review rework: if the maintenance session is lost mid-reset, restoring the paused subscription
+under the lost gate failed with 409, leaving it paused and hiding the original error. Restoration
+is now retried after the gate is released, as an ordinary fenced mutation; a failed retry is
+logged and attached to the original failure. `AC_09_lostMaintenanceSessionStillRestoresSubscription`
+terminates the advisory session during the quiet wait on real PG: it failed before the fix
+(`ac09-restore-lost-fence-red.log`, state 0) and passes after it (state 1, no Kafka alter).
+
 Known gap kept open: the advisory lock lives on one PG session. If that session is lost after
 the last `verifyOwned` and before or during the Kafka alter, a competing mutation can take the
 freed key. Next slice replaces it with a durable DB lease bounded by the reset deadline.

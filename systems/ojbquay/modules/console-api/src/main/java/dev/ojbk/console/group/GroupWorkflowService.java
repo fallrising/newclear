@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 final class GroupWorkflowService {
+    private static final System.Logger LOGGER = System.getLogger(GroupWorkflowService.class.getName());
     private static final Duration QUIET_TIMEOUT = Duration.ofSeconds(60);
 
     private final JdbcClient jdbc;
@@ -70,15 +71,34 @@ final class GroupWorkflowService {
         // Authorization precedes any runtime or broker contact.
         subscriptions(groupId, request.topicId(), actor);
         long deadline = System.nanoTime() + QUIET_TIMEOUT.toNanos();
+        var pendingRestore = new java.util.concurrent.atomic.AtomicReference<Runnable>();
+        RuntimeException failure = null;
         try (var gate = maintenance.acquire(groupId, deadline)) {
             gate.verifyOwned();
-            return resetGuarded(groupId, request, actor, deadline, gate);
+            return resetGuarded(groupId, request, actor, deadline, gate, pendingRestore);
+        } catch (RuntimeException resetFailure) {
+            failure = resetFailure;
+            throw resetFailure;
+        } finally {
+            // The fence was lost before restoration; retry once it is released, as an ordinary mutation.
+            Runnable restore = pendingRestore.get();
+            if (restore != null) {
+                try { restore.run(); }
+                catch (RuntimeException restoreFailure) {
+                    LOGGER.log(System.Logger.Level.ERROR,
+                            "subscription left paused after offset reset of group " + groupId, restoreFailure);
+                    if (failure != null) failure.addSuppressed(restoreFailure);
+                    else throw new IllegalStateException(
+                            "offset reset finished but the subscription could not be resumed", restoreFailure);
+                }
+            }
         }
     }
 
     private GroupOffsetReset resetGuarded(
             long groupId, ResetOffsetRequest request, Actor actor, long deadline,
-            GroupMaintenanceFence.Gate gate) {
+            GroupMaintenanceFence.Gate gate,
+            java.util.concurrent.atomic.AtomicReference<Runnable> pendingRestore) {
         String mode = request.mode() == null
                 ? ""
                 : request.mode().toUpperCase(java.util.Locale.ROOT);
@@ -133,9 +153,12 @@ final class GroupWorkflowService {
             return result;
         } finally {
             if (resume) {
-                subscriptions.changeState(
-                        ref.subscriptionId(), true, actor);
-                publishConfiguration(ref.subscriptionId());
+                Runnable restore = () -> {
+                    subscriptions.changeState(ref.subscriptionId(), true, actor);
+                    publishConfiguration(ref.subscriptionId());
+                };
+                try { restore.run(); }
+                catch (RuntimeException fenceLost) { pendingRestore.set(restore); }
             }
         }
     }

@@ -441,6 +441,7 @@ Active-repository provenance search completed: no original normative SDD found i
 - [x] Push worker lifecycle runs on a bounded reconciler, not the config-bus poll thread; a failed stop keeps the worker and unconfirmed revision and is retried.
 - [x] Fatal config-bus failure lowers readiness and pause confirmation; shutdown attempts every owned resource.
 - [x] Unconfigured runtime roster keeps ordinary startup but never confirms a pause; a configured roster still requires membership.
+- [x] Scheduled reconcile survives a thrown pass; stop retries continue after config-bus loss without starting or confirming.
 - [ ] Preview/confirm, whole-group coordination, PG fence check/use gap, real two-runtime reset evidence (remaining AC-09).
 
 ## T-0368 timing-contract decision proposal, 2026-10-22

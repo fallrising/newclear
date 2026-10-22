@@ -20,6 +20,7 @@ public final class PushWorkerOrchestrator implements AutoCloseable {
     private final Map<String, Long> versions = new HashMap<>();
     private final Map<String, String> failures = new HashMap<>();
     private ScheduledExecutorService reconciler;
+    private String reconcileFailure;
     private boolean closing;
 
     public PushWorkerOrchestrator(ConfigStore store, PushWorkerFactory factory) {
@@ -44,11 +45,25 @@ public final class PushWorkerOrchestrator implements AutoCloseable {
         if (closing || reconciler != null) throw new IllegalStateException("reconciler cannot be started twice");
         reconciler = Executors.newSingleThreadScheduledExecutor(
                 Thread.ofPlatform().daemon().name("ojbquay-push-reconcile").factory());
-        reconciler.scheduleWithFixedDelay(this::reconcileAll, 0, 250, TimeUnit.MILLISECONDS);
+        reconciler.scheduleWithFixedDelay(this::reconcileScheduled, 0, 250, TimeUnit.MILLISECONDS);
+    }
+
+    // A throwing fixed-delay task is cancelled for good; record the failure and keep the schedule alive.
+    private synchronized void reconcileScheduled() {
+        try {
+            reconcileAll();
+            reconcileFailure = null;
+        } catch (RuntimeException failure) {
+            reconcileFailure = failure.getClass().getSimpleName();
+        }
     }
 
     public synchronized void reconcileAll() {
-        if (closing || !bootstrapComplete.getAsBoolean()) return;
+        if (closing) return;
+        if (!bootstrapComplete.getAsBoolean()) {
+            retryPendingStops();
+            return;
+        }
         // Tombstones no longer appear in the store; retained workers still need stop retries.
         var known = new java.util.HashSet<>(workers.keySet());
         known.addAll(versions.keySet());
@@ -62,6 +77,15 @@ public final class PushWorkerOrchestrator implements AutoCloseable {
                 .map(Map.Entry::getValue)
                 .sorted(java.util.Comparator.comparingLong(ConfigEvent::version))
                 .forEach(this::onEvent);
+    }
+
+    // Without a live config bus only stopping is safe: never start, replace or record a revision.
+    private void retryPendingStops() {
+        for (String id : java.util.List.copyOf(workers.keySet())) {
+            if (store.subscription(id).filter(PushWorkerOrchestrator::isEnabledPush).isPresent()) continue;
+            try { stop(id); }
+            catch (RuntimeException failure) { failures.put(id, failure.getClass().getSimpleName()); }
+        }
     }
 
     public synchronized void onEvent(ConfigEvent event) {
@@ -153,6 +177,7 @@ public final class PushWorkerOrchestrator implements AutoCloseable {
     }
 
     public synchronized Optional<String> lastError() {
+        if (reconcileFailure != null) return Optional.of(reconcileFailure);
         return failures.values().stream().findFirst().or(() -> workers.values().stream()
                 .map(ManagedWorker::worker).map(PushSubscriptionWorker::lastError)
                 .flatMap(Optional::stream).findFirst());

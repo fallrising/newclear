@@ -24,7 +24,8 @@ final class GroupMaintenanceFenceAc09Test {
         when(statement.executeQuery()).thenReturn(rows);
         when(rows.next()).thenReturn(true);
         when(rows.getBoolean(1)).thenReturn(true, false, false);
-        var fence = new GroupMaintenanceFence(source, mock(JdbcClient.class));
+        when(statement.executeUpdate()).thenReturn(1);
+        var fence = new GroupMaintenanceFence(source, mock(JdbcClient.class, org.mockito.Mockito.RETURNS_DEEP_STUBS));
         try (var gate = fence.acquire(1, System.nanoTime() + Duration.ofSeconds(1).toNanos())) {
             assertThatThrownBy(gate::verifyOwned).isInstanceOf(ApiException.class);
             assertThatThrownBy(() -> fence.mutation(1)).isInstanceOf(ApiException.class);

@@ -443,7 +443,7 @@ Active-repository provenance search completed: no original normative SDD found i
 - [x] Unconfigured runtime roster keeps ordinary startup but never confirms a pause; a configured roster still requires membership.
 - [x] Scheduled reconcile survives a thrown pass; stop retries continue after config-bus loss without starting or confirming.
 - [x] Console reset requires every roster runtime to confirm the paused revision, takes a PG advisory maintenance fence shared with subscription mutations, bounds HTTP/Kafka waits by the deadline, and reads back altered offsets.
-- [ ] PG fence check/use gap: a session lost after the last ownership check frees the key before or during the Kafka alter (next: durable DB lease).
+- [x] PG fence check/use gap closed by a committed `group_maintenance_lease` row (reset deadline + 5 min) checked by ordinary mutations and deleted on a fresh session at gate close.
 - [ ] Preview/confirm, whole-group coordination, real two-runtime reset evidence (remaining AC-09).
 
 ## T-0368 timing-contract decision proposal, 2026-10-22

@@ -67,7 +67,13 @@ logged and attached to the original failure. `AC_09_lostMaintenanceSessionStillR
 terminates the advisory session during the quiet wait on real PG: it failed before the fix
 (`ac09-restore-lost-fence-red.log`, state 0) and passes after it (state 1, no Kafka alter).
 
-Known gap kept open: the advisory lock lives on one PG session. If that session is lost after
+Lease fence (C1b): reset also commits a `group_maintenance_lease` row (V2 migration) that ordinary
+mutations check under their advisory lock; it survives loss of the advisory session and is removed
+on a fresh session when the gate closes, or expires 5 min after the reset deadline.
+`AC_09_sessionLostDuringKafkaAlterStillFencesCompetingMutation` terminates the session inside the
+Kafka alter and races a resume: it succeeded before the fix (`ac09-lease-fence-red.log`) and is
+rejected with GROUP_MAINTENANCE_IN_PROGRESS after it; console-api 44/0, `./gradlew build` and
+`make validate-deploy` pass. Earlier note, now closed: the advisory lock lives on one PG session. If that session is lost after
 the last `verifyOwned` and before or during the Kafka alter, a competing mutation can take the
 freed key. Next slice replaces it with a durable DB lease bounded by the reset deadline.
 

@@ -1,6 +1,6 @@
 # 閱讀快記 RC 測試清單
 
-對應 [MVP 計畫](cloudflare-reading-capture.md) §6–7。本清單於階段 0 設計；階段 1 RC-01～04 已有本地 CF 桌面／手機 E2E，實際命令與限制見 [#456 報告](../../tasks/456-reading-capture-phase1/report.md)。RC-05～07 仍為 **pending**。
+對應 [MVP 計畫](cloudflare-reading-capture.md) §6–7。本清單於階段 0 設計；階段 1 RC-01～04 已有本地 CF 桌面／手機 E2E，實際命令與限制見 [#456 報告](../../tasks/456-reading-capture-phase1/report.md)。階段 2 的本地 RC-01～07 十二項已通過，見 [#463 報告](../../tasks/463-reading-capture-phase2/report.md)；最終回歸、CI 與獨立審查以 PR #464 證據為準。
 
 ## 共用測試條件
 
@@ -53,3 +53,7 @@ python3 -m unittest discover -s products/kith/test/reading_capture -v
 - 草稿以登入 operator ID 分隔，包含 body、client_key 及不確定結果的送出快照；送出開始後文字鎖定，未知結果以原 key/原文重試。明確成功才清空；衝突保留並告知未保存，不自動換 key；僅使用者明確點選「以目前文字建立新快記」後，以新 key 保留為未送出的草稿。儲存失敗明示，不能標本機已存妥。沒有自動送出或離線隊列。
 - 離線時已開啟的頁面可輸入、保存本機草稿；離線 reload 若靜態 app 無法載入，瀏覽器顯示離線頁，重連 reload 後恢復草稿。這個 MVP 不新增 service worker 或宣稱完整離線 app；另以 API-only 斷線驗證 shell reload 時草稿復原。
 - E2E 使用既有 evidence harness，擴充 acceptance ID 為 E2E-RC-01～04；保留 W0～W7 驗證。以隔離 D1 查詢和 provider spy 計數核對不變量，僅合成資料。
+
+## 階段 2 接線契約
+
+[reading-capture-phase2.md](reading-capture-phase2.md) 固定 registry／bundle、筆記 CAS 與遺失回應、專用匯出憑證、全量分頁對帳、ACK、journal 與遠端確認。它取代上述階段 1 歷史契約的 operator 501；匿名／member／CSRF 防線保留，並新增專用 bearer 僅限 export/ACK。實作未接入正式發布。

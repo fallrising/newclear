@@ -1803,3 +1803,5 @@ Initial integratedRC run:9pass/3fail. RC04 duplicate login helper rotatedcookie 
 Main advanced to f9fce6eb via unrelated HW1 and roottechnical-task contract. Read updatedAGENTS; add ownerdirect T-0463 board row, update activity eachpush, board-only completion follow-up aftercode merge. No AGENTS edits.
 
 Latest main f9fce6eb integrated before final gates; conflict only appended PLAN. Upstream content preserved and current program appended.
+
+T-467 findings resolved and independently verified: phase2-api-security-green9/9 includingactualWorker guard; F1 RED retained. CorrectedRC12/12GREEN inphase2-e2e-corrected. Rootfullbackend-after-main314/314PASS; worker/e2e types/schema10/success15+41/llms5/diff/contractsPASS. Evidence-gate ACCEPT boundedphase2localRC functionality; finalfullE2E, immutableheadxAIreview,CI/latestmain andmerge readback remain mandatory. Sourcefreeze for finalreview; subsequent gate evidence storedPR without sourceedit.

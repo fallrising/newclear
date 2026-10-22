@@ -365,3 +365,5 @@ docs                   Product spec, ADRs, tasks, and runbooks
 ojbquay is licensed under the
 [Apache License, Version 2.0](LICENSE). Third-party dependencies and images
 retain their own license terms.
+
+主線重新制定提案：[SDD.md](SDD.md)（待 owner 同意）；[搜尋與實跑差異](docs/test-reports/mainline-sdd-20261022.md)。原 strict retry 仍失敗，usable_tag 維持 none。

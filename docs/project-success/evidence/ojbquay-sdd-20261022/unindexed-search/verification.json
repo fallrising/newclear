@@ -1,0 +1,38 @@
+{
+  "verified_at": "2026-10-22T05:54:19.313455+00:00",
+  "checks": [
+    "recursive trees truncated=false",
+    "entry counts match metadata",
+    "all selected document blobs fetched",
+    "each fetched blob byte count and Git SHA-1 verified",
+    "all selected documents scanned for six terms",
+    "no path/content matches",
+    "no API request retries for document reads"
+  ],
+  "repositories": [
+    {
+      "repo": "Zircon-Godot",
+      "sha": "14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e",
+      "branch": "master",
+      "entries": 2416,
+      "blobs": 2245,
+      "docs": 171,
+      "bytes": 3259218,
+      "read_attempts": 171,
+      "other_docs": [],
+      "commit_tree_sha": "465c3ed90ff31a8ada977ba0aa3be7cfd1f37fc5"
+    },
+    {
+      "repo": "magpie",
+      "sha": "e297a8ab27461ed32b03ce8be0f9bf957a2e754d",
+      "branch": "main",
+      "entries": 5277,
+      "blobs": 4950,
+      "docs": 29,
+      "bytes": 910413,
+      "read_attempts": 29,
+      "other_docs": [],
+      "commit_tree_sha": "62ad299d3381ce2c6a428305bd9a4691225451e8"
+    }
+  ]
+}

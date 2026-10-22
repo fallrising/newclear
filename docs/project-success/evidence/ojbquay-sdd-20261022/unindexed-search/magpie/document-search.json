@@ -1,0 +1,514 @@
+{
+  "retrieved_at": "2026-10-22T05:53:40.117456+00:00",
+  "terms": [
+    "ojbquay",
+    "ddmq",
+    "SDD",
+    "ProduceDelay",
+    "retryIntervals",
+    "__ojbk.delay.inbox"
+  ],
+  "matching": "case-insensitive literal alternatives; path + UTF-8 decoded complete document contents",
+  "candidate_selection": "all tree blobs with .md/.markdown/.rst/.txt/.adoc suffix, or extensionless README/AGENTS/SDD/specification/requirements name",
+  "candidate_count": 29,
+  "successful_reads": 29,
+  "total_bytes": 910413,
+  "api_attempts": 29,
+  "documents": [
+    {
+      "path": ".github/ui-preview/README.md",
+      "git_blob_sha": "d971cf93be8c1a0ff19f3785f473178a89f8c452",
+      "bytes": 2890,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/.github/ui-preview/README.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/d971cf93be8c1a0ff19f3785f473178a89f8c452",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1d5d9ad160945595c46a14d6929b6367630d8c1657ba61fe22d03a31e94fa632",
+      "actual_bytes": 2890,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "AGENTS.md",
+      "git_blob_sha": "91b7fdab9407ec72c5b158ae615f2839deeff9a1",
+      "bytes": 5004,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/AGENTS.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/91b7fdab9407ec72c5b158ae615f2839deeff9a1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "5707edbc78e0fb582eca1822b3f4bb24a09d16174ab8e7a01e2cb0f7e2c55034",
+      "actual_bytes": 5004,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "CLAUDE.md",
+      "git_blob_sha": "abed7dc1c45eb8842bedc3262321c9d1ef55e72d",
+      "bytes": 23,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/CLAUDE.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/abed7dc1c45eb8842bedc3262321c9d1ef55e72d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "393eb9b3f95f2e78f501b4ff03e50b6fe0ed5c26d03ba6cd44b6dc885565698e",
+      "actual_bytes": 23,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "LESSONS.md",
+      "git_blob_sha": "1ff76c824fc2b0cd86363c764168ff94bb6884c5",
+      "bytes": 26442,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/LESSONS.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/1ff76c824fc2b0cd86363c764168ff94bb6884c5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1c1fc67511f0857be64eae48113f0a5193fe6939c8496434912b73ad3ded265c",
+      "actual_bytes": 26442,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "README.md",
+      "git_blob_sha": "8d6881d685eff022482c8d81015fe29590f20a1c",
+      "bytes": 18078,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/README.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/8d6881d685eff022482c8d81015fe29590f20a1c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "b4c860b5bc5657f4ec9cf48f9a461f068254d8d4eb9330779e92f57424a73d63",
+      "actual_bytes": 18078,
+      "git_blob_verified": true,
+      "hits": [],
+      "opening_excerpt": "<div align=\"center\">\n\n<a href=\"https://usemagpie.ai\"><img src=\"site/public/img/icon-256.png\" width=\"112\" alt=\"magpie\"></a>\n\n# magpie\n\n### Every agent's model. One place.\n\n**Claude Code on Kimi. Codex on DeepSeek. Gemini CLI on GLM. OpenCode on your ChatGPT plan.**<br>\nSwitch any of them from the menu bar. One local gateway serves them all,<br>\nand when a quota runs out, it quietly moves on to the next account.\n\n[![Release](https://img.shields.io/github/v/release/yetone/magpie-releases?label=release&color=111111)](https://github.com/yetone/magpie-releases/releases/latest) [![Stars](https://img.shields.io/github/stars/yetone/magpie?style=flat&color=111111)](https://github.com/yetone/magpie/stargazers) [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>\n![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Termux](https://img.shields.io/badge/Termux-000000?logo=android&logoColor=white)\n\n<sub>Sponsors</sub><br>\n<a href=\"https://usemagpie.ai/go/apinebula/readme\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"site/public/img/sponsor-apinebula-dark.svg\"><img src=\"site/public/img/sponsor-apinebula.svg\" height=\"36\" alt=\"APINEBULA\"></picture></a>\n\n**[Download](https://usemagpie.ai)** &nbsp;·&nbsp; **[Docs](https://usemagpie.ai/docs/start)** &nbsp;·&nbsp; **[Reference](docs/reference.md)** &nbsp;·&nbsp; **[Plugins](https://github.com/magpie-community/plugins)** &nbsp;·&nbsp; **[Discord](https://discord.gg/vGSnD3ZKQF)** &nbsp;·&nbsp; **English** · [简体中文](README.zh-CN.md)\n\n<br>\n\n<picture>\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"site/public/img/agents-dark.png\">\n  <img src=\"site/public/img/agents-light.png\" width=\"900\" alt=\"magpie's Agents page: Claude Code on Kimi K3, Codex on DeepSeek V4 Pro, Gemini CLI on GLM-5.3, each picked from one list\">\n</picture>\n\n</div>\n\n<br>\n\n## Is magpie for you?\n\nEach agent keeps its model in its own file, in its own format, with its own keys and base URLs. A subscription you pay for works in one agent"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "git_blob_sha": "551b050b77584cee1e739b7db04f2385ac0f7dde",
+      "bytes": 18041,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/README.zh-CN.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/551b050b77584cee1e739b7db04f2385ac0f7dde",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "11d87d35256d4cc41ee22ff2bc235f4dc1f3d5a1b680a309e65c12d14e41efbf",
+      "actual_bytes": 18041,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/code-standards.md",
+      "git_blob_sha": "5907adff44e753c632c0f23f0ea471637a219a42",
+      "bytes": 14238,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/code-standards.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/5907adff44e753c632c0f23f0ea471637a219a42",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "99c009857b82bc1dd2bc6f68abf560e85deb17a36627c3b5de02891deb1d43c6",
+      "actual_bytes": 14238,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/contributors.md",
+      "git_blob_sha": "ded1ff33cdb1afe39b65b181e9aa130b5969c271",
+      "bytes": 4387,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/contributors.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/ded1ff33cdb1afe39b65b181e9aa130b5969c271",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "b85f930728e7a350cf0cc85c2a9b08d07acbeecbc3cc38786232486114553b9d",
+      "actual_bytes": 4387,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/integrating.md",
+      "git_blob_sha": "b73f950cf78a391f7daa73a098a74acb124175bb",
+      "bytes": 8483,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/integrating.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/b73f950cf78a391f7daa73a098a74acb124175bb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "933858c2982f54df61c7e4e70456c16aea4826fa526a37787c5265d5383e4f38",
+      "actual_bytes": 8483,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/reference.md",
+      "git_blob_sha": "7d14ea3371bb2ce47949bf7496cce6c0f72515fa",
+      "bytes": 160355,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/reference.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/7d14ea3371bb2ce47949bf7496cce6c0f72515fa",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "4d2d1a4d59c3145ff5ba8d6cc7a0f3406fcdc17dc0dbe307c21749407cdf1ff5",
+      "actual_bytes": 160355,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/session-relocation.md",
+      "git_blob_sha": "075fa1f5576b8829db5fdd09e2e8f4c051597bfa",
+      "bytes": 3144,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/session-relocation.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/075fa1f5576b8829db5fdd09e2e8f4c051597bfa",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "a688b3dedd6fee7840a4bd41b025e1dbaa30ed6332aff479a2a7ce8f597d54b6",
+      "actual_bytes": 3144,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/README.md",
+      "git_blob_sha": "bd357d3d96c6d5c5c0c9828e1e105ca67ed62885",
+      "bytes": 3933,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/README.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/bd357d3d96c6d5c5c0c9828e1e105ca67ed62885",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "97e00539f4fa36c72ce47f5aeb8ddeeec42d99ac6509ec5dc5fde99d97e543a3",
+      "actual_bytes": 3933,
+      "git_blob_verified": true,
+      "hits": [],
+      "opening_excerpt": "# Subsystem design references\n\nThese pages describe current responsibilities, runtime paths, state, and contracts. Start with the subsystem relevant to your task, then follow its source links to verify the implementation you change.\n\n| Subsystem | Reference |\n| --- | --- |\n| Built-in subscriptions moving to plugins | [Provider and plugin ownership](provider-plugins.md) |\n| Built-in plugins: registry, lifecycle, plugins.yml, presets, settings schemas, the window's kernel (slots, error boundary, kit) | [Plugin runtime](plugin-runtime.md) |\n| Plugins that run on the gateway's requests and replies | [Gateway middleware](gateway-middleware.md) |\n| Claude subscription turns across Claude Code runs | [Claude subscription bridge](claude-subscription-bridge.md) |\n| How the gateway picks a provider, key or account, and falls back | [Gateway routing and fallback](gateway-routing.md) |\n| Gateway Session Aggregation | [Gateway Session Aggregation](gateway-sessions.md) |\n| Connecting an agent's config to the gateway, drift, disconnect, WSL twins | [Agent wiring](agent-wiring.md) |\n| Providers, keys, subscription accounts, refresh and allowance | [Providers and accounts](providers-accounts.md) |\n| Instructions, MCP servers, skills and RTK written into agents | [Library](library.md) |\n| Tray, panel, window, `magpie web` and the page's JSON API | [GUI app shell](gui-shell.md) |\n| Encrypted backups and setup synchronization over WebDAV, S3 or GitHub | [Sync and backup](sync-backup.md) |\n\nA subsystem can span several packages or repositories. Its reference describes the behavior those parts provide together; it does not need to list every function.\n\n## Maintain a reference\n\nUpdate the owning reference in the same PR when a change alters a documented responsibility, interface, state transition, runtime path, compatibility rule, or failure behavior. An internal refactor that preserves these contracts does not require a prose change.\n\nKeep each fact in one reference and link to it from agent instructions or other pages. Link to source files and named symbols rather than copying implementation details that change frequently. Explain field meanings and constraints that signatures alone do not express.\n\nFor a new reference, include the responsibilities and boundaries, source of truth, main runtime paths, state transitions, important constraints, and existing verification commands. I"
+    },
+    {
+      "path": "docs/subsystems/agent-wiring.md",
+      "git_blob_sha": "f83577f12ce855fab0f3674ddb5dc1315811d2f5",
+      "bytes": 52789,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/agent-wiring.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/f83577f12ce855fab0f3674ddb5dc1315811d2f5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "d3a0922eb94a35124236aa4b67a4345befdf432f43373fe16ef19843dab8d75f",
+      "actual_bytes": 52789,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/claude-subscription-bridge.md",
+      "git_blob_sha": "b38c258f147de5583d3ad97cb78284d173b9cb2a",
+      "bytes": 23911,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/claude-subscription-bridge.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/b38c258f147de5583d3ad97cb78284d173b9cb2a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "a6c03c4bb845b7e9fcfe2a5480d5611e7459c4e76e4037a6d20c4e150f025b0a",
+      "actual_bytes": 23911,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/gateway-middleware.md",
+      "git_blob_sha": "e144d40ab04948c58ebed00320a8676aeb0884d5",
+      "bytes": 6228,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/gateway-middleware.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/e144d40ab04948c58ebed00320a8676aeb0884d5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1e80dcce65e01119193e8962043c56d3228909c580d64df44f7e172bb9f49112",
+      "actual_bytes": 6228,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/gateway-routing.md",
+      "git_blob_sha": "e933212f3250b2103d036057ce235ad3f5defd0b",
+      "bytes": 145762,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/gateway-routing.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/e933212f3250b2103d036057ce235ad3f5defd0b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ad702515de7bf115df5fc29cb46f18ad8795582b675667a5435e6b04338c06b1",
+      "actual_bytes": 145762,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/gateway-sessions.md",
+      "git_blob_sha": "448b9fea5599e61856a47bf8b39a565a1b58af3b",
+      "bytes": 23451,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/gateway-sessions.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/448b9fea5599e61856a47bf8b39a565a1b58af3b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e2640f9714186cf72bb2af8d8a3b33df82451a0e77d57b3808e1f9a46586fb03",
+      "actual_bytes": 23451,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/gui-shell.md",
+      "git_blob_sha": "65370a94cca0289bd0a698bb2b0e7b1e28963458",
+      "bytes": 51762,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/gui-shell.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/65370a94cca0289bd0a698bb2b0e7b1e28963458",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e1c43f496a1efe5da462379758207eb315e41d1bde8baf38e852b75956b972b7",
+      "actual_bytes": 51762,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/library.md",
+      "git_blob_sha": "9e1f926e2a58311eeb07a956f93ef5a80172345e",
+      "bytes": 38912,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/library.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/9e1f926e2a58311eeb07a956f93ef5a80172345e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0568fbc3774271927f5ccba46f29371e9a2520afc039b102a153490f98a4f3e7",
+      "actual_bytes": 38912,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/plugin-runtime.md",
+      "git_blob_sha": "d30d685ecffe5a25ffa4dde6aebc6243868da99c",
+      "bytes": 11194,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/plugin-runtime.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/d30d685ecffe5a25ffa4dde6aebc6243868da99c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ed3c283ea127d98ea8f56310a3af45aa2865a7d0cad3ed21bf445143c3c67d47",
+      "actual_bytes": 11194,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/provider-plugins.md",
+      "git_blob_sha": "8ff221e02d4c01420c83e0b0f144f088de3bbe76",
+      "bytes": 29767,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/provider-plugins.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/8ff221e02d4c01420c83e0b0f144f088de3bbe76",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ed04be07ad14f640981356b7b8c34fcfcc6c1b773f0365e5de17d364ff6672f1",
+      "actual_bytes": 29767,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/providers-accounts.md",
+      "git_blob_sha": "4a79e9956e20526bb706d3aa9ffee1925455bacb",
+      "bytes": 77062,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/providers-accounts.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/4a79e9956e20526bb706d3aa9ffee1925455bacb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "8d026394cc7c8492658e6e41641a8fbbc5644897abcbc38d06341ca2509fe438",
+      "actual_bytes": 77062,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/subsystems/sync-backup.md",
+      "git_blob_sha": "216d7d90d01974614b44267c6d4b270b25eb975f",
+      "bytes": 6127,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/docs/subsystems/sync-backup.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/216d7d90d01974614b44267c6d4b270b25eb975f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f82585e6be3afed46ea5c8b180da2fca9ae35ab0e00bbd24c51593dae8b7ffcc",
+      "actual_bytes": 6127,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "internal/codexcat/codex_prompt.md",
+      "git_blob_sha": "8e3f08fb514a6fe82376817aa0a0c960cfbc4656",
+      "bytes": 7589,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/internal/codexcat/codex_prompt.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/8e3f08fb514a6fe82376817aa0a0c960cfbc4656",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1b3dd697043a7f613c691a3721a450251626685b3e97ac3ad3d35ea62758a31e",
+      "actual_bytes": 7589,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "internal/gui/tests/README.md",
+      "git_blob_sha": "216005abd592e14857935cc2964e49e1ebac5f92",
+      "bytes": 145339,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/internal/gui/tests/README.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/216005abd592e14857935cc2964e49e1ebac5f92",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "568655cf802b94f2bf9361cc65c17b3bc739df6da73daf22d407370d6e2cefbb",
+      "actual_bytes": 145339,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "internal/plugin/testdata/github/raw/griffinmartin/opencode-claude-auth/HEAD/README.md",
+      "git_blob_sha": "d720f6d878bd92e5cd221d4bc75fb9d5c97d54e5",
+      "bytes": 18826,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/internal/plugin/testdata/github/raw/griffinmartin/opencode-claude-auth/HEAD/README.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/d720f6d878bd92e5cd221d4bc75fb9d5c97d54e5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "228fb47771b43262852779f3d59cc1c81a84a599f271b50b964d1260060da4ef",
+      "actual_bytes": 18826,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "internal/sessions/testdata/claude-native-replay.md",
+      "git_blob_sha": "8793af6e3fd64870f811d45b0194d32488cd0040",
+      "bytes": 4180,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/internal/sessions/testdata/claude-native-replay.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/8793af6e3fd64870f811d45b0194d32488cd0040",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "90f09fb20833bd359905be01d5ea03e894302fc0cd8f4178f4f2755656dc3073",
+      "actual_bytes": 4180,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "internal/sessions/testdata/codex-native-usage.md",
+      "git_blob_sha": "e08f0cfa6a0aede491e94f1ade57f124c8baaba5",
+      "bytes": 1389,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/internal/sessions/testdata/codex-native-usage.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/e08f0cfa6a0aede491e94f1ade57f124c8baaba5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "03e3f7a1024b6df6b2d23949be79f1c5778458136bd593bc2fce532cc4f26efa",
+      "actual_bytes": 1389,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "internal/sessions/testdata/traces/README.md",
+      "git_blob_sha": "3de9bffd7a7388bbd2baef4183ad83ef22c8f7c9",
+      "bytes": 1107,
+      "source_url": "https://github.com/fallrising/magpie/blob/e297a8ab27461ed32b03ce8be0f9bf957a2e754d/internal/sessions/testdata/traces/README.md",
+      "api_query": "GET /repos/fallrising/magpie/git/blobs/3de9bffd7a7388bbd2baef4183ad83ef22c8f7c9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "464ad87f5fec24ef410d843241eab02c7da685caebf944c65384a42e0817d9b6",
+      "actual_bytes": 1107,
+      "git_blob_verified": true,
+      "hits": []
+    }
+  ]
+}

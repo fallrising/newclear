@@ -9,6 +9,7 @@
 - [PROTOCOL.md](PROTOCOL.md) — 流程、截圖方式、檢查清單、優化範圍、報告格式、`targets.json` 欄位。
 - [DESIGN-TEMPLATE.md](DESIGN-TEMPLATE.md) — 各元件 `DESIGN.md` 的結構（第 1 輪後半、第 2 輪的範圍依據）。
 - [DESIGN-PROMPT.md](DESIGN-PROMPT.md) — 開新 session 撰寫 `DESIGN.md` 時交給 agent 的提示詞，含本 repository 的處理順序。
+- [SDD.md](SDD.md) — 第 1 輪設計的需求依據（desk T-0369），含 AC 與 [check_design.py](check_design.py) 的實跑結果。
 - [capture.mjs](capture.mjs) — Playwright headless 截圖與 browser-health 擷取（console／page error、失敗 request、水平溢出、選用 axe）。
 
 ## 帶 UI 的元件（18）

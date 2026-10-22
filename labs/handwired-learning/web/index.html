@@ -25,7 +25,7 @@
     input[type="number"] { width: 112px; min-height: 42px; padding: 8px; border: 1px solid #96a99e; border-radius: 7px; color: var(--ink); background: white; font: inherit; }
     input[aria-invalid="true"] { border: 2px solid #a33223; }
     input[type="range"] { width: 100%; accent-color: var(--green); margin: 18px 0 0; min-height: 24px; }
-    input:focus-visible, summary:focus-visible { outline: 3px solid #ce792a; outline-offset: 4px; }
+    input:focus-visible, summary:focus-visible, button:focus-visible, .history-wrap:focus-visible { outline: 3px solid #ce792a; outline-offset: 4px; }
     .bounds { display: flex; justify-content: space-between; font-size: .76rem; color: var(--muted); }
     .equation { text-align: center; font: 600 clamp(1.3rem, 2.1vw, 1.8rem) ui-monospace, monospace; padding: 26px 0 8px; }
     #formula-value { text-align: center; font: .82rem ui-monospace, monospace; min-height: 42px; overflow-wrap: anywhere; color: var(--muted); }
@@ -49,6 +49,22 @@
     footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line); font-size: .75rem; color: var(--muted); overflow-wrap: anywhere; }
     summary { cursor: pointer; padding: 10px 0; }
     pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .7rem; }
+    .learning { margin-top: 24px; }
+    .learning .hint { max-width: 900px; }
+    .learning-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+    button { padding: 11px 18px; min-height: 44px; border: 1px solid var(--green); border-radius: 8px; font: inherit; color: white; background: var(--green); cursor: pointer; }
+    button.secondary { background: white; color: var(--green); }
+    button.warning { border-color: var(--accent); color: var(--accent); background: #fff2e7; }
+    button:disabled { opacity: .55; cursor: default; }
+    .learning-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
+    .learning-metrics dd { font-size: .95rem; }
+    #learning-status { padding: 14px; border-radius: 8px; background: #e7eee3; overflow-wrap: anywhere; }
+    #learning-status[data-state="stopped"] { color: #842d19; background: #fbe5db; }
+    .history-wrap { overflow: auto; max-height: 350px; }
+    table { border-collapse: collapse; width: 100%; font: .8rem ui-monospace, monospace; }
+    th, td { padding: 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+    th { position: sticky; top: 0; background: #eef3eb; }
+    caption { text-align: left; padding: 8px 0; font-family: system-ui, sans-serif; }
     @media (max-width: 1000px) { .workspace { grid-template-columns: 1fr 1fr; } .results { grid-column: 1 / -1; } .results dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; } }
     @media (max-width: 640px) { main { padding: 26px 16px; } .workspace, .notes { grid-template-columns: 1fr; } .panel { padding: 20px; } .results { grid-column: auto; } .results dl { display: block; } .notes { gap: 16px; } }
   </style>
@@ -56,7 +72,7 @@
 <body>
 <main>
   <header>
-    <div class="eyebrow">HANDWIRED LEARNING / 01 前向對照</div>
+    <div class="eyebrow">HANDWIRED LEARNING / 前向對照與係數學習</div>
     <h1>一條溫度校正線</h1>
     <p>同一個算式，兩條計算路徑。調整輸入與係數，看看 JavaScript 和 Handwired 數值圖如何得到幾乎相同的答案。</p>
   </header>
@@ -107,9 +123,42 @@
       <p class="rule">通過規則：<br><code>|graph − reference| ≤ 1e-5 + 1e-5 × |reference|</code><br>規則事先固定，不會為結果放寬。</p>
     </section>
   </div>
+  <section class="panel learning" aria-labelledby="learning-heading">
+    <div class="eyebrow">02 / 用梯度調整係數</div>
+    <h2 id="learning-heading">從 a = 1、b = 0 開始學習</h2>
+    <p class="hint">固定九點 x = −20、−10、0、…、60，目標是 1.25 × x − 2。Handwired CPU 計算平均平方誤差（loss），backward 計算梯度。內部使用 z = x / 40 與 alpha = 40 × a，讓更新尺度適合固定學習率；畫面仍顯示 a = alpha / 40。</p>
+    <div class="learning-controls" aria-label="係數學習操作">
+      <button id="learning-step" type="button">單步 · 0.05</button>
+      <button id="learning-run" type="button">跑到 500 步 · 0.05</button>
+      <button id="learning-reset" class="secondary" type="button">重設學習</button>
+      <button id="learning-fast" class="warning" type="button">學習率 2.0 · 從頭示範失敗</button>
+    </div>
+    <p class="rule">每次學習或重設會將已接受的係數套用至上方，保留 x；手動修改上方輸入不會改變學習狀態。跑到 500 步是累計上限。越界候選會停止並顯示原因，不會截斷成合法值。</p>
+    <dl class="learning-metrics">
+      <div><dt>已接受更新步數</dt><dd id="learning-count">—</dd></div>
+      <div><dt>目前 a = alpha / 40</dt><dd id="learning-a">—</dd></div>
+      <div><dt>目前 b（°C）</dt><dd id="learning-b">—</dd></div>
+      <div><dt>目前 loss · 平均平方誤差</dt><dd id="learning-loss">—</dd></div>
+      <div><dt>目前梯度 dL/dalpha</dt><dd id="learning-gradient-alpha">—</dd></div>
+      <div><dt>目前梯度 dL/db</dt><dd id="learning-gradient-b">—</dd></div>
+      <div><dt>九點最大絕對誤差（°C）</dt><dd id="learning-max-error">—</dd></div>
+    </dl>
+    <p class="rule">loss、梯度與最大誤差都對應同一列已接受的 a、b。下一步用目前梯度更新；重設會清除先前歷程與停止狀態。</p>
+    <p id="learning-status" role="status" aria-live="polite" aria-atomic="true" data-state="pending">等待學習</p>
+    <details>
+      <summary>查看每一步的係數、loss 與梯度</summary>
+      <div class="history-wrap" role="region" aria-label="學習歷程，可捲動查看每步數值" tabindex="0">
+        <table>
+          <caption>本輪已接受的狀態（含初始第 0 步，最多 501 列）</caption>
+          <thead><tr><th scope="col">步數</th><th scope="col">a</th><th scope="col">b</th><th scope="col">loss</th><th scope="col">dL/dalpha</th><th scope="col">dL/db</th><th scope="col">最大誤差 °C</th></tr></thead>
+          <tbody id="learning-history"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
   <aside class="notes" aria-label="理解結果與範圍">
     <div><h2>為什麼可能有一點差距？</h2><p>JavaScript Number 使用雙精度；這裡的圖使用 FP32，輸入與運算可能有捨入誤差。差值不必是零，仍可以符合事先設定的容許值。</p></div>
-    <div><h2>這一步只比較，不學習</h2><p>你正在手動調整係數。此頁沒有訓練或梯度更新；單點通過也不代表所有輸入都正確。資料是合成教學示例，不用於醫療、工業或安全控制。</p></div>
+    <div><h2>loss 下降不等於一般智能</h2><p>上方前向區只比較；下方學習區只調整這條固定直線的兩個係數。九點誤差變小不代表所有輸入都正確，也不表示理解世界或具備一般智能。資料是合成教學示例，不用於醫療、工業或安全控制。</p></div>
   </aside>
   <footer>
     <div>本機執行 · 無上傳 · 無網路依賴 · Handwired 固定版本 <code>257856e3b221140acb4cc4460626b850c0bd4ff1</code></div>

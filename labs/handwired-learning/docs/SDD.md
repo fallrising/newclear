@@ -1,7 +1,7 @@
 # Handwired Learning：一條溫度校正線
 
 - 日期：2026-10-22（MVP 縮減；前一版見 commit `4bb78370`）。
-- 狀態：HW-0 已驗證固定版本 CPU 與梯度 API；HW-1 前向對照頁已通過本機驗證；HW-2～HW-3 尚未實作／驗收，沒有安裝依賴。
+- 狀態：HW-0 已驗證固定版本 CPU 與梯度 API；HW-1 前向對照頁已通過本機驗證；HW-2 係數學習已通過本機驗證；HW-3 真人試用尚未驗收，沒有安裝依賴。
 - 投入／文檔檔位：未分級。
 - 上游觀察版本：`257856e3b221140acb4cc4460626b850c0bd4ff1`。
 
@@ -47,6 +47,8 @@ FP32 與 JS Number 精度不同，結果比較要有容許值。
 - 顯示每步的損失、兩個梯度、a、b。損失出現 NaN／Infinity 或係數越界時停止並顯示原因，不截斷、不替換成 0。
 - 「重設」回到初始值。另提供一個「學習率 2.0」示範按鈕，讓使用者看見發散失敗。
 - 學習只改係數；輸入檢查與比較規則不受影響。降低 loss 不等於所有輸入都正確。
+- 互動約定：學習區初始 a=1、b=0，前向區第一次開啟仍保留 a=1.25、b=-2。學習／重設操作將合法學習係數套用到上方並保留 x；手動前向輸入不改變獨立的學習狀態。越界候選顯示在停止原因，不偽裝成已接受的係數。
+- 「跑到 500 步」是累計上限，不是每次再加 500；學習率 2.0 示範由固定初始狀態開始，重設清除停止狀態。介面明確標記梯度與 loss 對應的係數狀態。
 
 ## 6. 實作形式
 
@@ -86,4 +88,4 @@ WebGPU 研究。HW-3 試用後若初學者確實卡在這些點，再逐項加�
 - [固定上游 tree](https://github.com/chenglou/handwired/tree/257856e3b221140acb4cc4460626b850c0bd4ff1)、[上游文件入口](https://github.com/chenglou/handwired/blob/257856e3b221140acb4cc4460626b850c0bd4ff1/docs/README.md)、[上游 tutorial](https://github.com/chenglou/handwired/blob/257856e3b221140acb4cc4460626b850c0bd4ff1/docs/tutorial.md)。
 - [目錄分類](../../../docs/taxonomy.md)、[文檔檔位政策](../../../docs/portfolio-doc-tiers.md)。
 
-本 lab 不將上游程式碼納入 repo。HW-0 從固定 SHA 下載原始碼到 repo 外，已執行 CPU 前向與參數梯度範例，未安裝依賴。HW-1 另以 Node 內建 stripping 建置單一離線 HTML，驗證紀錄見 [HW-1 報告](../tasks/459-hw1/report.md)；尚未做 HW-2 訓練收斂驗收。
+本 lab 不將上游程式碼納入 repo。HW-0 從固定 SHA 下載原始碼到 repo 外，已執行 CPU 前向與參數梯度範例，未安裝依賴。HW-1 另以 Node 內建 stripping 建置單一離線 HTML，驗證紀錄見 [HW-1 報告](../tasks/459-hw1/report.md)；HW-2 的實際梯度、收斂及停止驗證見 [HW-2 報告](../tasks/465-hw2/report.md)，HW-3 仍待真人試用。

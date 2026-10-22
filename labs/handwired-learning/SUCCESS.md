@@ -5,7 +5,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-10-22
-source_commit: 5d44cf296d5c4af7bcbcbd926688802e1812bce3
+source_commit: 5d353a1e6b768f87fcb7c35722df824569d5315e
 ---
 
 # handwired-learning 成功契約
@@ -22,7 +22,7 @@ source_commit: 5d44cf296d5c4af7bcbcbd926688802e1812bce3
 | --- | --- | --- | --- |
 | AC-01 | Given 固定上游 SHA，When 核對 builder、CPU evaluator 與梯度入口，Then 產出支援表與一個最小可執行範例；沒有梯度 API 時明確記錄並改用解析梯度。 | passed | HW-0：[API 支援表](docs/upstream-api.md)、[實際驗證報告](tasks/450-hw0/report.md)；固定版本 CPU 與通用 backward 5 tests 通過。 |
 | AC-02 | Given 合法與不合法輸入，When 執行前向對照，Then 合法點在容許值內、不合法輸入在圖執行前被拒絕（SDD HW-A01、A02）。 | passed | [HW-1 報告](tasks/459-hw1/report.md)：真實固定 CPU、輸入拒絕、離線產物與 Chromium 互動驗證；最終交付狀態以 PR #460 為準。 |
-| AC-03 | Given 9 個固定訓練點與初始 a=1、b=0，When 學習率 0.05 跑 500 步、以及學習率 2.0，Then 前者最大誤差 ≤ 0.05 °C、後者顯示停止原因（SDD HW-A03～A05）。 | pending | 尚未實作（HW-2）；收斂只在紙上估算過。 |
+| AC-03 | Given 9 個固定訓練點與初始 a=1、b=0，When 學習率 0.05 跑 500 步、以及學習率 2.0，Then 前者最大誤差 ≤ 0.05 °C、後者顯示停止原因（SDD HW-A03～A05）。 | passed | [HW-2 報告](tasks/465-hw2/report.md)：真實梯度對照、500 步九點最大誤差約 9.54e-7 °C、lr2 越界停止、重設與瀏覽器互動。 |
 | AC-04 | Given 1–2 位未學過 autodiff 的開發者，When 試用頁面，Then 能說出 builder 與 runtime 的差別及「loss 下降不等於一般智能」。 | pending | 尚未試用（HW-3）。 |
 
 ## 本次 HW-2 計畫
@@ -41,7 +41,7 @@ Session `Handwired-20261021-1808`，Refs #450；僅交付 AC-01。核對固定 S
 
 ## 現況與缺口
 
-HW-0 已執行固定版本的 CPU 與參數梯度範例。上游來源保存在 repo 外，沒有 vendoring 或安裝依賴。HW-1 前向網頁已實作並通過本機測試；HW-2 學習區與 HW-3 真人試用仍待交付，主線保持 incomplete。
+HW-0 已執行固定版本的 CPU 與參數梯度範例。上游來源保存在 repo 外，沒有 vendoring 或安裝依賴。HW-1 前向網頁已實作並通過本機測試；HW-2 學習區已通過本機驗證；HW-3 真人試用仍待交付，主線保持 incomplete。
 
 ## 啟動與驗證
 
@@ -52,7 +52,7 @@ node labs/handwired-learning/examples/api-probe.mjs
 node --test --test-isolation=none labs/handwired-learning/tests/api-probe.test.mjs
 ```
 
-Node v24.14.0 已驗證，無 npm 安裝。上述命令保留 HW-0 API probe；HW-1 的單一離線 HTML 建置與完整測試見 [README](README.md) 及 [報告](tasks/459-hw1/report.md)。
+Node v24.14.0 已驗證，無 npm 安裝。上述命令保留 HW-0 API probe；HW-1／HW-2 的單一離線 HTML 建置與完整測試見 [README](README.md) 及 [報告](tasks/459-hw1/report.md)。
 
 ## 可用版本
 

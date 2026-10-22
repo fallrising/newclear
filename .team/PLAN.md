@@ -1867,3 +1867,16 @@ Root evidence-gate: ACCEPT bounded C1b correction after actual real-PG RED expec
 ## Program: Retro / RE-3 / 20261022-1315
 
 Owner-approved automated acceptance; issue #481 / PR #483. Orchestrator-owned plan: [Retro RE-3](retro-20261022-1315/PLAN.md). Other program records unchanged.
+
+
+## Kith AC-04 owner input document / T-9900 / 2026-10-22
+
+Owner requests a project document to fill privately and publication to GitLab. Existing remote is GitHub only; destination clarification pending. This separate documentation task does not start blocked AC04 runtime development. New isolated docs/kith-ac04-owner-inputs-20261022 worktree from main251cb4506985954547487fc44f80c1c2bc77af0f; preserve all seven original AC04 proposal files and shared checkout.
+
+Root owns template/SUCCESS/BOARD/PLAN, integration and publication. Native read-only T-990 checks fields, private-copy instructions and authorization boundaries; no delegation or external models. This is document review, not the eventual approved external final-head AC04 review. No paid calls, credential reads, login/install/global config changes or source cleanup.
+
+Gates: project-success validator, unchanged AC statuses, local links/public-data checks, task/report validator, root diff review and git diff --check via common launcher. Commit/document branch publication authorized; do not select a different remote without destination clarification. No merge claim or runtime acceptance. Outcomes pending.
+
+T-990 ACCEPT: native read-only document review found no blockers; root inspected the template, SUCCESS/BOARD/PLAN diffs and task/report. Root evidence-gate ACCEPT local document readiness only. Initial task validator rejected four-digit worker ID; corrected to T-990 without changing template content, retained the failed output. Common-launcher ac04-input-doc-final-20261022-1436 passed 41 project-success contracts/index, task/report contracts, local links/public-data checks, unchanged AC statuses and git diff --check. No runtime/model/CI/merge claim. GitLab destination remains missing; no remote publication attempted, and existing GitHub is not silently substituted.
+
+2026-10-22T15:47:55Z: Owner clarified publication destination as the existing GitHub repository. Publish the reviewed blank template on its documentation branch and open a PR in fallrising/newclear; private filled copies remain local. The earlier destination blocker is resolved, while missing model/runtime inputs and AC04 acceptance remain pending. Refresh board activity and run applicable document checks before normal push. Do not merge under the unmet full AC04 merge gate or imply runtime acceptance; return the published document and PR links.

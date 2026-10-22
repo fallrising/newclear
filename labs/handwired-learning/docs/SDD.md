@@ -1,7 +1,7 @@
 # Handwired Learning：一條溫度校正線
 
 - 日期：2026-10-22（MVP 縮減；前一版見 commit `4bb78370`）。
-- 狀態：HW-0 已驗證固定版本 CPU 與梯度 API；HW-1～HW-3 尚未實作／驗收，沒有安裝依賴。
+- 狀態：HW-0 已驗證固定版本 CPU 與梯度 API；HW-1 前向對照頁已通過本機驗證；HW-2～HW-3 尚未實作／驗收，沒有安裝依賴。
 - 投入／文檔檔位：未分級。
 - 上游觀察版本：`257856e3b221140acb4cc4460626b850c0bd4ff1`。
 
@@ -86,4 +86,4 @@ WebGPU 研究。HW-3 試用後若初學者確實卡在這些點，再逐項加�
 - [固定上游 tree](https://github.com/chenglou/handwired/tree/257856e3b221140acb4cc4460626b850c0bd4ff1)、[上游文件入口](https://github.com/chenglou/handwired/blob/257856e3b221140acb4cc4460626b850c0bd4ff1/docs/README.md)、[上游 tutorial](https://github.com/chenglou/handwired/blob/257856e3b221140acb4cc4460626b850c0bd4ff1/docs/tutorial.md)。
 - [目錄分類](../../../docs/taxonomy.md)、[文檔檔位政策](../../../docs/portfolio-doc-tiers.md)。
 
-本 lab 不將上游程式碼納入 repo。HW-0 從固定 SHA 下載原始碼到 repo 外，已執行 CPU 前向與參數梯度範例，未安裝依賴。這不是 HW-1 網頁或 HW-2 訓練收斂驗收。
+本 lab 不將上游程式碼納入 repo。HW-0 從固定 SHA 下載原始碼到 repo 外，已執行 CPU 前向與參數梯度範例，未安裝依賴。HW-1 另以 Node 內建 stripping 建置單一離線 HTML，驗證紀錄見 [HW-1 報告](../tasks/459-hw1/report.md)；尚未做 HW-2 訓練收斂驗收。

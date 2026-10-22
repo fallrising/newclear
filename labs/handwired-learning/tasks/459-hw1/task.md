@@ -25,3 +25,7 @@ Session: Handwired-20261021-1845 · Refs #459 · PR #460
 ## 授權界線
 
 遵循里程碑 prompt 的 commit/push/PR/條件合併授權；不部署、不公開發佈、不呼叫付費 API、不改 AGENTS/CLAUDE、不關 issue。完成一個里程碑即結束。
+
+## Owner 授權接手（2026-10-22）
+
+Handwired-20261021-1844 接手同一 PR #460；原 worktree 保留。12 個檔案已取得 SHA-256 快照後複製到獨立 worktree，產品程式不重寫。main 已包含 Kith T-459/T-460，因此 Handwired task/report 改用 T-901/T-902，避免同名覆蓋。既有里程碑 prompt 的認領與交付流程仍適用。

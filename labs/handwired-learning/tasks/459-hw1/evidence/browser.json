@@ -1,0 +1,12 @@
+{
+  "browser": "153.0.8010.12",
+  "url": "file:///home/ckc/test/codex/agent-workspace/data/projects/handwired/tasks/HW1-takeover-browser-libs/preserve/artifacts/handwired.html",
+  "ninePoints": "PASS",
+  "invalidClearsAllResults": "PASS",
+  "numberSanitization": "PASS",
+  "keyboardSliderImmediate": "PASS",
+  "fractionalComparison": "PASS",
+  "desktopMobile": "PASS",
+  "pageErrors": [],
+  "networkRequests": []
+}

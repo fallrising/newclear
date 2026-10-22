@@ -1,6 +1,6 @@
 # Signal Hub — STATUS
 
-公開技術進度快照，日期：2026-10-17。大需求進度在 https://github.com/fallrising/desk 的 docs/operating-method.md，給人看；完成稱「驗收」。本目錄技術任務自己管，可拆子任務。不要求 `Desk-Task`。
+公開技術進度快照，日期：2026-10-17。大需求進度在 https://github.com/fallrising/desk 的 docs/operating-method.md，給人看；完成是 agent 依 AC 證據寫的 `done`，驗收是 owner 事後認可。本目錄技術任務自己管，可拆子任務。不要求 `Desk-Task`。
 
 ## 目前狀態
 

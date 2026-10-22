@@ -12,16 +12,16 @@
 
 ## 技術任務合約
 
-- **輸入**：已認領的 desk 卡 id 加上它 `spec` 指的 SDD 與 AC 編號；或 owner 的直接指示；或本 repo 的 issue。
+- **輸入**：已認領的 desk 卡 id 加上它 `spec` 指的 SDD 與 AC 編號（SDD 預設放 `<項目目錄>/SDD.md`）；或 owner 的直接指示；或本 repo 的 issue。
 - **開始條件**：desk 卡的任務要等 desk 認領 PR 合併，並已登記在該項目的任務板。其他工作要有 owner 指示或 issue。
 - **步驟**：
   1. 任務板放在 `<項目目錄>/docs/tasks/BOARD.md`。為這張卡開一節，標題寫 `T-####`；每條 AC 至少一列。欄位是 ID、任務、對應 AC、狀態（`todo`／`in_progress`／`done`）、`start`、`end`、`last_activity`，時間用 UTC RFC3339。
   2. 開工時把那一列改成 `in_progress` 並填 `start`；進行中每次 push 刷新 `last_activity`。
   3. 照該項目的 `SUCCESS.md` 與最近的元件 `AGENTS.md` 做，PR 內文寫對應的 AC 與證據。
-- **結束條件**：PR 合併後，把那一列改成 `done`，`end` 填合併時間。關閉後留在板上，可以重開。
+- **結束條件**：PR 合併後，把那一列改成 `done`，`end` 填合併時間（在下一個 PR 一起補；最後一張用一個只改任務板的 PR）。關閉後留在板上，可以重開。
 - **依賴**：元件 CI、`python3 scripts/check_project_success.py`，以及公開邊界：不寫私人內容、主機名、帳號。
 - **合併門檻**：PR 無衝突、必要 CI 通過（desk 最低線）。元件 `AGENTS.md` 可以再加嚴。
-- **進度與卡住**：desk 卡的 `project_board` 指向該任務板。沒有 `end`，而且 `last_activity` 早於 90 分鐘（預期 30 分鐘的 3 倍），就算卡住。
+- **進度與卡住**：desk 卡的 `project_board` 指向該任務板。沒有 `end`，而且 `last_activity` 早於 90 分鐘（預期 30 分鐘的 3 倍），就算卡住；任務欄註明「等 owner」的列不算。
 
 ## Repo 專屬
 

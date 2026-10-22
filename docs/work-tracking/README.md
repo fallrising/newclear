@@ -1,6 +1,6 @@
 # 工作追蹤
 
-> **兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。本 repo 技術任務自己管理，可拆子任務；位置與格式由本 repo 決定。不要求卡片編號或 `Desk-Task`。
+> **兩層。** desk（https://github.com/fallrising/desk 的 docs/operating-method.md）管大需求的認領與進度，框架是它的 §0。本 repo 的技術任務照根目錄 [AGENTS.md](../../AGENTS.md) 的技術任務合約管理（位置、欄位、合併門檻都在那裡）。不要求 `Desk-Task` trailer。
 
 > **兩階段。** 現在是第一階段：用文件與 PR。第二階段（run 狀態、心跳、Grok Bot 掃描、自動派工）尚未啟用，不要寫成已生效。
 
@@ -13,7 +13,7 @@
 - 變更走 PR，不直接動 main。
 - 只有不可逆或危險操作才問 owner。文字以根目錄 [AGENTS.md](../../AGENTS.md) 為準。
 - `Refs` 不得用來自動關閉 issue。
-- 本說明不另給開工、merge 或發布授權。標成 `ready` 不是 merge 許可。
+- 開工條件與合併門檻見根目錄 AGENTS.md 的技術任務合約；本說明不另給授權。標成 `ready` 不是 merge 許可。
 
 ## 公開邊界
 
@@ -21,8 +21,8 @@
 
 ## 執行紀錄
 
-過程紀錄以 desk 的 [`docs/operating-method.md`](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) 為準。owner 選用時，寫到 `fallrising/journal` 的 `runs/<repo>/<project>/YYYY/MM/<UTC>-<run-id>/run.md`。公開紀錄不要帶私人細節。
+過程紀錄以 desk 的 [`docs/operating-method.md`](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) 為準。owner 選用，或做已認領的 desk 卡時，寫到 `fallrising/journal` 的 `runs/<repo>/<project>/YYYY/MM/<UTC>-<run-id>/run.md`。公開紀錄不要帶私人細節。
 
 ## 任務板
 
-項目任務板預設放在 `<項目目錄>/docs/tasks/BOARD.md`（hai-taskboard 已用 `docs/tasks/`）。板檔是工作流本身的文件，不受各項目 AGENTS「只改當前 task 允許路徑」限制。
+項目任務板預設放在 `<項目目錄>/docs/tasks/BOARD.md`（hai-taskboard 已用 `docs/tasks/`），欄位見根目錄 AGENTS.md 的技術任務合約。板檔是工作流本身的文件，不受各項目 AGENTS「只改當前 task 允許路徑」限制。

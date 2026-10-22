@@ -1,5 +1,13 @@
 # Kith technical task board
 
+## T-9900
+
+Owner direct instruction：交付 AC-04 執行輸入填寫文件，發布至 owner 指定的遠端項目；本地編號，非 GitHub issue ID。文件範圍，不啟動依賴未齊的 runtime 開發。範本見[執行輸入表](../plans/ac04-owner-inputs.md)。
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-9900-INPUTS | 填寫規格、本地私有交回位置與文件檢查；等 owner 提供 GitLab 目的地或確認現有 GitHub | AC-04（輸入準備，非驗收通過） | in_progress | 2026-10-22T14:30:07Z | | 2026-10-22T14:30:07Z |
+
 ## T-0463
 
 Owner direct instruction; issue [#463](https://github.com/fallrising/newclear/issues/463), PR [#464](https://github.com/fallrising/newclear/pull/464). No desk card. SDD security invariants and [phase2 contract](../plans/reading-capture-phase2.md) apply.

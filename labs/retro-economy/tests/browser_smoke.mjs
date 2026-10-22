@@ -1,0 +1,193 @@
+// Real Chromium acceptance using Node 22+ built-ins and CDP; no packages.
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { resolve, dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const build = process.env.AGENT_BUILD_DIR || process.env.RUNNER_TEMP;
+const evidenceRoot = process.env.AGENT_EVIDENCE_DIR || process.env.RUNNER_TEMP;
+assert.ok(build && evidenceRoot, 'Set AGENT_BUILD_DIR and AGENT_EVIDENCE_DIR (or RUNNER_TEMP in CI)');
+await mkdir(build, { recursive: true }); await mkdir(evidenceRoot, { recursive: true });
+const evidence = await mkdtemp(join(evidenceRoot, 'browser-'));
+const run = await mkdtemp(join(build, 'browser-'));
+const profile = join(run, 'profile');
+const db = join(run, 'game.sqlite3');
+const pause = ms => new Promise(r => setTimeout(r, ms));
+let server, browser, cdp, base, serverPort;
+const serverLogs = [], browserLogs = [], errors = [], observations = [];
+async function stop(child) {
+  if (!child || child.exitCode !== null || child.signalCode !== null) return;
+  const ended = once(child, 'exit'); child.kill('SIGTERM');
+  const timer = setTimeout(() => child.kill('SIGKILL'), 3000);
+  try { await ended; } finally { clearTimeout(timer); }
+}
+async function startServer() {
+  server = spawn(process.env.PYTHON || 'python3', [join(root, 'server.py'), '--port', String(serverPort || 0), '--db', db], { stdio: ['ignore', 'pipe', 'pipe'] });
+  let output = ''; server.stdout.on('data', b => { output += b; serverLogs.push(String(b)); });
+  server.stderr.on('data', b => serverLogs.push(String(b)));
+  server.on('error', e => { errors.push(String(e)); });
+  for (let i = 0; i < 100; i++) {
+    const match = output.match(/http:\/\/127\.0\.0\.1:(\d+)/);
+    if (match) { serverPort = Number(match[1]); base = match[0]; return; }
+    if (server.exitCode !== null) throw new Error('Server failed: ' + serverLogs.join(''));
+    await pause(50);
+  }
+  throw new Error('Server startup timed out');
+}
+class CDP {
+  constructor(ws) {
+    this.ws = ws; this.seq = 0; this.pending = new Map(); this.listeners = [];
+    ws.addEventListener('message', event => {
+      const message = JSON.parse(event.data);
+      if (message.id) {
+        const item = this.pending.get(message.id); if (!item) return;
+        this.pending.delete(message.id); clearTimeout(item.timer);
+        message.error ? item.reject(new Error(JSON.stringify(message.error))) : item.resolve(message.result);
+      } else {
+        for (const listener of this.listeners) Promise.resolve(listener(message)).catch(e => errors.push(String(e)));
+      }
+    });
+  }
+  send(method, params = {}, sessionId) {
+    return new Promise((resolve, reject) => {
+      const id = ++this.seq;
+      const timer = setTimeout(() => { this.pending.delete(id); reject(new Error('CDP timeout: ' + method)); }, 10000);
+      this.pending.set(id, { resolve, reject, timer });
+      this.ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
+    });
+  }
+  async evaluate(session, expression) {
+    const response = await this.send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }, session);
+    if (response.exceptionDetails) throw new Error(JSON.stringify(response.exceptionDetails));
+    return response.result.value;
+  }
+}
+async function waitFor(session, expression, label = expression) {
+  for (let i = 0; i < 160; i++) {
+    if (await cdp.evaluate(session, expression)) return;
+    await pause(50);
+  }
+  throw new Error('Browser assertion timed out: ' + label);
+}
+async function click(session, selector) {
+  await waitFor(session, `Boolean(document.querySelector(${JSON.stringify(selector)}) && !document.querySelector(${JSON.stringify(selector)}).disabled)`);
+  const point = await cdp.evaluate(session, `(() => {const e=document.querySelector(${JSON.stringify(selector)});e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', clickCount: 1 }, session);
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...point, button: 'left', clickCount: 1 }, session);
+}
+async function ready(session) { await waitFor(session, `document.querySelector('#connection')?.dataset.status === 'ready'`); }
+async function move(session, direction, x, y) {
+  await click(session, `[data-move="${direction}"]`);
+  await waitFor(session, `document.querySelector('#coordinates').textContent === ${JSON.stringify(`${x}, ${y}`)}`);
+  await ready(session);
+}
+async function publicState(session) {
+  return cdp.evaluate(session, `(async()=>{const s=JSON.parse(localStorage.getItem('mistshore.session.v1'));return (await (await fetch('/api/state',{headers:{Authorization:'Bearer '+s.token}})).json()).state;})()`);
+}
+async function screenshot(session, name) {
+  await cdp.evaluate(session, 'window.scrollTo(0,0)');
+  const { cssContentSize } = await cdp.send('Page.getLayoutMetrics', {}, session);
+  const shot = await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: cssContentSize.width, height: cssContentSize.height, scale: 1 } }, session);
+  await writeFile(join(evidence, name + '.png'), Buffer.from(shot.data, 'base64'));
+}
+async function restart(session, expected) {
+  await stop(server); await startServer();
+  await cdp.send('Page.reload', { ignoreCache: true }, session);
+  await waitFor(session, `document.querySelector('#player-name')?.textContent === ${JSON.stringify(expected.name)}`);
+  await ready(session);
+  assert.deepEqual(await publicState(session), expected, 'SQLite and browser token restore exact state');
+}
+
+try {
+  await startServer();
+  browser = spawn(process.env.CHROME || 'google-chrome', ['--headless', '--disable-gpu', '--disable-dev-shm-usage', '--no-first-run', '--remote-debugging-port=0', '--user-data-dir=' + profile, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'], env: { ...process.env, ...(process.env.CHROME_LIBRARY_PATH ? { LD_LIBRARY_PATH: process.env.CHROME_LIBRARY_PATH } : {}) } });
+  browser.stderr.on('data', b => browserLogs.push(String(b)));
+  browser.on('error', e => errors.push(String(e)));
+  let address;
+  for (let i = 0; i < 100; i++) {
+    try { const [port, path] = (await readFile(join(profile, 'DevToolsActivePort'), 'utf8')).trim().split('\n'); address = `ws://127.0.0.1:${port}${path}`; break; } catch (_) {}
+    if (browser.exitCode !== null) throw new Error('Chromium failed: ' + browserLogs.join(''));
+    await pause(50);
+  }
+  assert.ok(address, 'Chromium debugging endpoint started');
+  const ws = new WebSocket(address); await once(ws, 'open'); cdp = new CDP(ws);
+  const version = await cdp.send('Browser.getVersion'); observations.push({ browser: version.product, userAgent: version.userAgent });
+  cdp.listeners.push(event => {
+    if (event.method === 'Runtime.exceptionThrown') errors.push(JSON.stringify(event.params.exceptionDetails));
+  });
+  for (const profession of ['smith', 'herbalist']) {
+    const { browserContextId } = await cdp.send('Target.createBrowserContext');
+    const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank', browserContextId });
+    const { sessionId: session } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
+    await cdp.send('Page.enable', {}, session); await cdp.send('Runtime.enable', {}, session);
+    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] }, session);
+    await cdp.send('Emulation.setDeviceMetricsOverride', { width: profession === 'smith' ? 1360 : 390, height: 950, deviceScaleFactor: 1, mobile: profession === 'herbalist' }, session);
+    await cdp.send('Page.navigate', { url: base }, session);
+    await waitFor(session, `Boolean(document.querySelector('#join'))`); await ready(session);
+    await screenshot(session, profession + '-start');
+    const name = profession === 'smith' ? '<b>霧岸旅人</b>' : '潮林藥師';
+    await cdp.evaluate(session, `document.querySelector('#name').value=${JSON.stringify(name)};document.querySelector('#profession').value=${JSON.stringify(profession)}`);
+    await click(session, '#join');
+    await waitFor(session, `document.querySelector('#player-name').textContent === ${JSON.stringify(name)} && !document.querySelector('#character-card').hidden`);
+    await ready(session);
+    assert.equal(await cdp.evaluate(session, `document.querySelector('#player-name').children.length`), 0, 'Names render as text, not HTML');
+    assert.ok(await cdp.evaluate(session, 'document.documentElement.scrollWidth <= innerWidth + 1'), 'No horizontal overflow');
+    const distance = profession === 'smith' ? 3 : 4;
+    for (let step = 1; step <= distance; step++) await move(session, profession === 'smith' ? 'west' : 'south', profession === 'smith' ? -step : 0, profession === 'smith' ? 0 : step);
+    const item = profession === 'smith' ? 'ore' : 'herb';
+    const quantity = profession === 'smith' ? 2 : 3;
+    for (let n = 1; n <= quantity; n++) {
+      if (profession === 'smith' && n === 2) {
+        let dropped = false;
+        cdp.listeners.push(async event => {
+          if (event.sessionId === session && event.method === 'Fetch.requestPaused' && !dropped) {
+            dropped = true;
+            await cdp.send('Fetch.failRequest', { requestId: event.params.requestId, errorReason: 'Failed' }, session);
+            await cdp.send('Fetch.disable', {}, session);
+          }
+        });
+        await cdp.send('Fetch.enable', { patterns: [{ urlPattern: '*/api/action', requestStage: 'Response' }] }, session);
+        await click(session, '#gather');
+        for (let i = 0; !dropped && i < 100; i++) await pause(50);
+        assert.ok(dropped, 'Lost reply injected only after server response');
+        await cdp.send('Page.reload', { ignoreCache: true }, session);
+      } else await click(session, '#gather');
+      await waitFor(session, `document.querySelector('#inventory-${item}')?.textContent === '${n}'`); await ready(session);
+    }
+    assert.equal((await publicState(session)).items[item], quantity, 'Lost response and reload did not duplicate gathering');
+    for (let step = distance - 1; step >= 0; step--) await move(session, profession === 'smith' ? 'east' : 'north', profession === 'smith' ? -step : 0, profession === 'smith' ? 0 : step);
+    await click(session, '#craft');
+    await waitFor(session, `document.querySelector('#inventory-kit').textContent === '1' && document.querySelector('#inventory-medicine').textContent === '1'`); await ready(session);
+    await move(session, 'east', 1, 0); await move(session, 'east', 2, 0);
+    const midway = await publicState(session); assert.equal(midway.tower_stage, 1); assert.equal(midway.items.kit, 0);
+    await restart(session, midway);
+    await move(session, 'west', 1, 0); await move(session, 'east', 2, 0); // checkpoint does not charge again
+    await move(session, 'east', 3, 0); await move(session, 'east', 4, 0);
+    const complete = await publicState(session);
+    assert.equal(complete.coins, 20); assert.equal(complete.tower_reward_claimed, true);
+    assert.deepEqual(complete.items, { ore: 0, herb: 0, kit: 0, medicine: 0 });
+    await restart(session, complete);
+    await screenshot(session, profession + '-complete');
+    await move(session, 'west', 3, 0); await move(session, 'east', 4, 0);
+    assert.equal((await publicState(session)).coins, 20, 'No duplicate summit award');
+    for (let x = 3; x >= 0; x--) await move(session, 'west', x, 0);
+    assert.equal((await publicState(session)).tower_stage, 0);
+    await move(session, 'east', 1, 0); await click(session, '[data-move="east"]');
+    await waitFor(session, `document.querySelector('#message').textContent.includes('路障需要')`); await ready(session);
+    assert.equal((await publicState(session)).x, 1, 'No free second round without repair kit');
+    observations.push({ profession, nameRenderedSafely: true, viewport: profession === 'smith' ? 'desktop' : '390px mobile', midwayRestart: midway, completedRestart: complete, duplicateRewardRejected: true, missingKitRejected: true });
+    await cdp.send('Target.disposeBrowserContext', { browserContextId });
+  }
+  assert.deepEqual(errors, [], 'No uncaught browser/harness exceptions');
+  await writeFile(join(evidence, 'browser-result.json'), JSON.stringify({ result: 'PASS', observations }, null, 2) + '\n');
+  console.log('Evidence:', evidence);
+  console.log('PASS: both profession routes, real browser controls, lost response/reload replay, midway + summit process restart, reward once-only, desktop/mobile screenshots.');
+} finally {
+  if (cdp) cdp.ws.close();
+  await stop(browser); await stop(server);
+  await writeFile(join(evidence, 'browser-stderr.log'), browserLogs.join(''));
+  await writeFile(join(evidence, 'server.log'), serverLogs.join(''));
+}

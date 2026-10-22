@@ -12,7 +12,7 @@
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| XS-1 | 技術設計與 XN-AC 案例（本 PR，只有文件） | 全部 | in_progress | 2026-10-20T12:35:00Z | | 2026-10-20T12:36:31Z |
+| XS-1 | 技術設計與 XN-AC 案例（#437，只有文件） | 全部 | done | 2026-10-20T12:35:00Z | 2026-10-20T12:59:36Z | 2026-10-20T12:59:36Z |
 | XS-2 | Schema v2：三張新表、版本檢查 0／1／2、`ProtocolStore` 骨架與故障點 | XN-AC-2、20 | todo | | | |
 | XS-3 | `access.py`：normalize、evaluate、widens；`put_access_policy` | XN-AC-16～19、21 | todo | | | |
 | XS-4 | `Controller.receive` 分流與存取檢查；`receive_message` 拒收 `receipt`；`receive_protocol_response` | XN-AC-1、12～15、20 | todo | | | |

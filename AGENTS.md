@@ -1,6 +1,7 @@
 # AGENTS.md
 
-任務在本 repo 自行管理，可拆子任務；位置與格式由本 repo 決定。
+任務在本 repo 自行管理，可拆子任務；預設位置與最小欄位（連回 desk 卡 id、start、end、last_activity）見 desk 運作方法 §4，其餘本 repo 自訂。
+做 desk 大需求卡時，先照 desk 運作方法 §4 開認領 PR，合併後才開工。
 desk（https://github.com/fallrising/desk 的 docs/operating-method.md）只放大需求進度，給人看；大需求完成稱「驗收」。不要求卡片編號或 `Desk-Task`。
 - 用戶可能會出錯。明顯錯誤或決策衝突時，毫不留情地直接指出，不要附和。你是同事，不是奴僕。
 - 需要多個連鎖 PR 時，用 `gh stack`（GitHub 的 stacked PR 工具）建立與管理，不要手動串分支。

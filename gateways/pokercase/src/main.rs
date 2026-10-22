@@ -3,6 +3,7 @@ mod agy;
 mod cancel;
 mod claude;
 mod claude_code;
+mod claude_mcp;
 mod codex;
 mod config;
 mod cooldown;
@@ -141,6 +142,12 @@ enum Commands {
         #[arg(long)]
         model: Option<String>,
     },
+    /// Internal: MCP server offering a client's tools to a Claude Code run
+    #[command(hide = true)]
+    ClaudeMcpHelper {
+        #[arg(long)]
+        tools_file: std::path::PathBuf,
+    },
     /// Refresh OAuth tokens for imported connections
     Refresh {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -267,6 +274,7 @@ async fn main() -> Result<()> {
             )?;
             login_siwc_cmd(&cfg, &name, port, model).await
         }
+        Commands::ClaudeMcpHelper { tools_file } => claude_mcp::run(&tools_file),
         Commands::Refresh {
             data_dir,
             secrets_key,

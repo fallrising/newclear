@@ -29,8 +29,7 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 > **`claude` provider** answers through your local, signed-in Claude Code CLI (`claude -p`);
 > thinrouter never holds or sends a Claude token, and your system prompt never replaces
 > Claude Code's. Automated use of a subscription is still subject to Anthropic's terms —
-> see [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md). Client tools are not
-> bridged yet.
+> see [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md).
 
 ## Quick start
 

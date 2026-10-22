@@ -40,6 +40,21 @@ client
 - 失败：额度用尽 → 429；未登录 → 401；其它 → 502。在第一个回答事件之前的失败可 fallback 到
   route 的下一个 target。
 
+## 客户端工具
+
+- 请求带 `tools` 时，run 多一个 MCP server：`thinrouter claude-mcp-helper --tools-file …`
+  （每个 run 一个暂存目录，结束后删除）。模型看到的工具名是 `mcp__thinrouter__<name>`；
+  名字含 `[A-Za-z0-9_-]` 以外字元或太长时截断并加 hash，每次相同。
+- 参数加 `--mcp-config <run>/mcp.json --allowedTools <这些工具>`；Claude Code 自己的工具仍是
+  `--tools ""`，不用 `--dangerously-skip-permissions`。
+- 模型呼叫工具时，`tool_use` 已在串流里：thinrouter 把名字换回客户端的名字转给客户端
+  （chat 的 `tool_calls`、Anthropic 的 `tool_use`、Responses 的 `function_call`），然后立刻
+  结束这个 run（不等 MCP 回应，也不让 Claude Code 继续下一个 API 请求）。
+- 下一个带工具结果的请求开新 run，整段对话以文字告诉它：
+  `[tool call mcp__thinrouter__<name> id=… args=…]`、`[tool result id=…]`。
+- `tool_choice: required` 或指定工具时，在 `<external_system_instructions>` 里用文字说明
+  （Claude Code 没有对应参数）。
+
 ## 设定
 
 ```bash
@@ -53,8 +68,7 @@ thinrouter serve --claude-bin /path/to/claude   # 不在 PATH 时
 
 ## 目前限制
 
-- **客户端工具还没桥接**：带 `tools` 的请求回 501（可 fallback）。下一步照 magpie 用 MCP
-  helper 把客户端工具提供给 Claude Code，并让同一段对话留在同一个进程以命中 prompt cache。
-- 每个请求启动一个新进程、把整段对话重送，没有跨请求的 prompt cache；启动约需 1–2 秒。
+- 每个请求（含每次工具往返）启动一个新进程、把整段对话重送；没有 magpie 那种跨请求保留
+  run 或 history 分块的 cache 标记，长对话的 prompt cache 命中较差；启动约需 1–2 秒。
 - thinking 区块不回传；`temperature`、`max_tokens` 等取样参数不传给 Claude Code。
 - 旧版存过的 Claude token 会在开启资料库时清掉（不再使用）。

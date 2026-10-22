@@ -11,17 +11,31 @@ pub fn anthropic_to_openai_response(body: &Bytes) -> AppResult<Bytes> {
     let v: Value = serde_json::from_slice(body)
         .map_err(|e| AppError::BadRequest(format!("upstream JSON: {e}")))?;
 
-    let text = v
+    let blocks = v
         .get("content")
         .and_then(|c| c.as_array())
-        .map(|blocks| {
-            blocks
-                .iter()
-                .filter_map(|b| b.get("text").and_then(|t| t.as_str()))
-                .collect::<Vec<_>>()
-                .join("")
-        })
+        .cloned()
         .unwrap_or_default();
+    let text = blocks
+        .iter()
+        .filter(|b| b.get("type").and_then(|t| t.as_str()) != Some("tool_use"))
+        .filter_map(|b| b.get("text").and_then(|t| t.as_str()))
+        .collect::<Vec<_>>()
+        .join("");
+    let calls: Vec<Value> = blocks
+        .iter()
+        .filter(|b| b.get("type").and_then(|t| t.as_str()) == Some("tool_use"))
+        .map(|b| {
+            json!({
+                "id": b.get("id").cloned().unwrap_or(json!("")),
+                "type": "function",
+                "function": {
+                    "name": b.get("name").cloned().unwrap_or(json!("")),
+                    "arguments": b.get("input").map(|i| i.to_string()).unwrap_or_else(|| "{}".into()),
+                }
+            })
+        })
+        .collect();
 
     let id = v
         .get("id")
@@ -41,11 +55,20 @@ pub fn anthropic_to_openai_response(body: &Bytes) -> AppResult<Bytes> {
         .and_then(|s| s.as_str())
         .unwrap_or("end_turn");
     let finish = match stop {
-        "end_turn" => "stop",
+        _ if !calls.is_empty() => "tool_calls",
+        "end_turn" | "stop_sequence" => "stop",
         "max_tokens" => "length",
         "tool_use" => "tool_calls",
+        "refusal" => "content_filter",
         other => other,
     };
+    let mut message = json!({
+        "role": "assistant",
+        "content": if text.is_empty() && !calls.is_empty() { Value::Null } else { Value::String(text) },
+    });
+    if !calls.is_empty() {
+        message["tool_calls"] = Value::Array(calls);
+    }
 
     let out = json!({
         "id": id.replace("msg_", "chatcmpl-"),
@@ -53,7 +76,7 @@ pub fn anthropic_to_openai_response(body: &Bytes) -> AppResult<Bytes> {
         "model": model,
         "choices": [{
             "index": 0,
-            "message": {"role": "assistant", "content": text},
+            "message": message,
             "finish_reason": finish
         }],
         "usage": {

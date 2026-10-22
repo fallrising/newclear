@@ -8,10 +8,13 @@
 //! what makes subscription traffic look non-Claude-Code). Approach and arguments follow
 //! yetone/magpie's Claude subscription bridge.
 //!
-//! This first version answers text and images. Client tools need an MCP bridge and are
-//! refused with a retryable 501 so a route can fall back.
+//! Client tools are offered through an MCP helper (`claude_mcp.rs`) as
+//! `mcp__thinrouter__<name>`. A run that calls one is ended right after the call is
+//! streamed to the client; the request carrying the tool result starts a new run that
+//! is told the whole conversation. Runs are not kept across requests.
 
-use std::path::PathBuf;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::sync::Arc;
 use std::time::Duration;
@@ -51,9 +54,10 @@ impl ClaudeCode {
     }
 }
 
-/// Arguments as magpie's `claudeCLIArgs`, minus the MCP bridge (no tools offered).
-pub fn cli_args(model: &str) -> Vec<String> {
-    [
+/// Arguments as magpie's `claudeCLIArgs`. With client tools, the MCP helper's config
+/// and an allow-list of exactly those tools (no permission prompt in `-p`).
+pub fn cli_args(model: &str, mcp_config: Option<&Path>, allowed: &[String]) -> Vec<String> {
+    let mut args: Vec<String> = [
         "-p",
         "--output-format",
         "stream-json",
@@ -72,7 +76,14 @@ pub fn cli_args(model: &str) -> Vec<String> {
     ]
     .iter()
     .map(|s| s.to_string())
-    .collect()
+    .collect();
+    if let Some(cfg) = mcp_config {
+        args.push("--mcp-config".into());
+        args.push(cfg.display().to_string());
+        args.push("--allowedTools".into());
+        args.push(allowed.join(","));
+    }
+    args
 }
 
 /// Environment the run must not inherit: anything that would point Claude Code at
@@ -159,11 +170,26 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
     let mut blocks: Vec<Value> = Vec::new();
     let mut text = String::new();
 
-    let instructions: Vec<String> = system
+    let mut instructions: Vec<String> = system
         .iter()
         .map(|m| content_text(m.get("content").unwrap_or(&Value::Null)))
         .filter(|s| !s.is_empty())
         .collect();
+    // Claude Code takes no tool-choice flag; say it in words (as magpie does).
+    match chat.get("tool_choice") {
+        Some(Value::String(c)) if c == "required" && has_tools(chat) => {
+            instructions.push("You must call at least one available tool before answering.".into())
+        }
+        Some(c) => {
+            if let Some(name) = c.pointer("/function/name").and_then(|n| n.as_str()) {
+                instructions.push(format!(
+                    "You must call the {} tool.",
+                    crate::claude_mcp::bridged_name(name)
+                ));
+            }
+        }
+        None => {}
+    }
     if !instructions.is_empty() {
         text.push_str("<external_system_instructions>\n");
         text.push_str(&instructions.join("\n"));
@@ -172,6 +198,13 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
     }
 
     let convo: Vec<Value> = convo.into_iter().cloned().collect();
+    let offered: std::collections::HashSet<&str> = chat
+        .get("tools")
+        .and_then(|t| t.as_array())
+        .into_iter()
+        .flatten()
+        .filter_map(|t| t.pointer("/function/name").and_then(|n| n.as_str()))
+        .collect();
     let split = history_end(&convo);
     for (i, m) in convo.iter().enumerate() {
         if split > 0 && i == 0 {
@@ -214,11 +247,19 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
             .into_iter()
             .flatten()
         {
+            let name = call
+                .pointer("/function/name")
+                .and_then(|n| n.as_str())
+                .unwrap_or("");
+            // Offered tools are named as this run's Claude Code knows them.
+            let name = if offered.contains(name) {
+                crate::claude_mcp::bridged_name(name)
+            } else {
+                name.to_string()
+            };
             text.push_str(&format!(
                 "\n[tool call {} id={} args={}]",
-                call.pointer("/function/name")
-                    .and_then(|n| n.as_str())
-                    .unwrap_or(""),
+                name,
                 call.get("id").and_then(|i| i.as_str()).unwrap_or(""),
                 call.pointer("/function/arguments")
                     .and_then(|a| a.as_str())
@@ -250,7 +291,6 @@ fn content_text(c: &Value) -> String {
     }
 }
 
-/// Client tools are not bridged yet.
 pub fn has_tools(chat: &Value) -> bool {
     chat.get("tools")
         .and_then(|t| t.as_array())
@@ -355,13 +395,6 @@ pub async fn start(
         body,
         retryable,
     };
-    if has_tools(chat) {
-        return Err(fail(
-            501,
-            "claude (Claude Code) does not bridge client tools yet; use another target for tool calls".into(),
-            true,
-        ));
-    }
     let permit: OwnedSemaphorePermit = tokio::select! {
         _ = cancel.cancelled() => return Err(fail(499, "client disconnected".into(), false)),
         p = cc.runs.clone().acquire_owned() => p.map_err(|_| fail(503, "claude runs closed".into(), true))?,
@@ -369,8 +402,43 @@ pub async fn start(
     std::fs::create_dir_all(&cc.work_dir)
         .map_err(|e| fail(500, format!("claude work dir: {e}"), false))?;
 
+    // Client tools: a per-run folder with the helper's tool list and MCP config.
+    let mut names: HashMap<String, String> = HashMap::new();
+    let mut run_dir: Option<PathBuf> = None;
+    let mut mcp_config: Option<PathBuf> = None;
+    if let Some(tools) = chat
+        .get("tools")
+        .and_then(|t| t.as_array())
+        .filter(|t| !t.is_empty())
+    {
+        let (list, map) = crate::claude_mcp::mcp_tools(tools);
+        let dir = cc
+            .work_dir
+            .join("runs")
+            .join(uuid::Uuid::new_v4().to_string());
+        let setup = || -> std::io::Result<PathBuf> {
+            std::fs::create_dir_all(&dir)?;
+            let tools_file = dir.join("tools.json");
+            std::fs::write(&tools_file, serde_json::to_vec(&list)?)?;
+            let exe = std::env::current_exe()?;
+            let cfg = json!({"mcpServers": {crate::claude_mcp::SERVER: {
+                "type": "stdio",
+                "command": exe,
+                "args": ["claude-mcp-helper", "--tools-file", tools_file],
+            }}});
+            let cfg_file = dir.join("mcp.json");
+            std::fs::write(&cfg_file, serde_json::to_vec(&cfg)?)?;
+            Ok(cfg_file)
+        };
+        let cfg_file = setup().map_err(|e| fail(500, format!("claude tool bridge: {e}"), false))?;
+        mcp_config = Some(cfg_file);
+        run_dir = Some(dir);
+        names = map;
+    }
+    let allowed: Vec<String> = names.keys().cloned().collect();
+
     let mut cmd = Command::new(&cc.bin);
-    cmd.args(cli_args(model))
+    cmd.args(cli_args(model, mcp_config.as_deref(), &allowed))
         .current_dir(&cc.work_dir)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -411,7 +479,10 @@ pub async fn start(
         let mut lines = BufReader::new(stdout).lines();
         let mut sent = false;
         let mut finished = false;
-        let mut translator = EventFilter::default();
+        let mut translator = EventFilter {
+            names,
+            ..Default::default()
+        };
         loop {
             let next = tokio::select! {
                 _ = cancel.cancelled() => break,
@@ -430,6 +501,11 @@ pub async fn start(
                             finished = true;
                             break;
                         }
+                    }
+                    // The reply is complete. A tool call waits on the client, so the run
+                    // is ended now (the next request starts a new one with the result).
+                    if translator.done {
+                        finished = true;
                     }
                 }
                 Some("result") => {
@@ -484,6 +560,9 @@ pub async fn start(
                 .await;
         }
         stop(child).await;
+        if let Some(dir) = run_dir {
+            let _ = std::fs::remove_dir_all(dir);
+        }
         debug!("claude code run finished");
     });
 
@@ -501,10 +580,13 @@ pub async fn start(
     }
 }
 
-/// Re-emits the first message's stream events as client SSE records: text blocks only
-/// (thinking and stray tool_use blocks dropped, indexes renumbered).
+/// Re-emits the first message's stream events as client SSE records: text blocks and
+/// calls of the client's own tools (renamed back); thinking and anything else dropped,
+/// indexes renumbered.
 #[derive(Default)]
 struct EventFilter {
+    /// bridged MCP name → client tool name
+    names: HashMap<String, String>,
     started: bool,
     done: bool,
     /// upstream block index → client index (None = dropped)
@@ -537,7 +619,15 @@ impl EventFilter {
                     .pointer("/content_block/type")
                     .and_then(|t| t.as_str())
                     .unwrap_or("");
-                if kind != "text" {
+                let client_tool = (kind == "tool_use")
+                    .then(|| {
+                        ev.pointer("/content_block/name")
+                            .and_then(|n| n.as_str())
+                            .and_then(|n| self.names.get(n))
+                            .cloned()
+                    })
+                    .flatten();
+                if kind != "text" && client_tool.is_none() {
                     self.map.insert(idx, None);
                     return Vec::new();
                 }
@@ -546,6 +636,9 @@ impl EventFilter {
                 self.map.insert(idx, Some(out));
                 let mut ev = ev.clone();
                 ev["index"] = json!(out);
+                if let Some(name) = client_tool {
+                    ev["content_block"]["name"] = json!(name);
+                }
                 vec![Self::record(&ev)]
             }
             "content_block_delta" | "content_block_stop" => {
@@ -585,7 +678,7 @@ mod tests {
             "<external_system_instructions>\nYou are a pirate.\n</external_system_instructions>\n\n"
         );
         assert_eq!(blocks[1]["text"], "Human: hi\n\n");
-        let args = cli_args("sonnet");
+        let args = cli_args("sonnet", None, &[]);
         assert!(!args
             .iter()
             .any(|a| a == "--system-prompt" || a == "--system-prompt-file"));

@@ -25,6 +25,22 @@ if grep -q LIMIT "$dir/stdin.txt"; then
   exit 0
 fi
 ev() { printf '{"type":"stream_event","event":%s}\n' "$1"; }
+cfg=""; prev=""
+for a in "$@"; do [ "$prev" = "--mcp-config" ] && cfg="$a"; prev="$a"; done
+if [ -n "$cfg" ] && ! grep -q '\[tool result' "$dir/stdin.txt"; then
+  cp -r "$(dirname "$cfg")" "$dir/rundir"
+  ev '{"type":"message_start","message":{"id":"msg_02","type":"message","role":"assistant","model":"claude-sonnet-x","content":[],"usage":{"input_tokens":20,"output_tokens":0}}}'
+  ev '{"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}'
+  ev '{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Checking."}}'
+  ev '{"type":"content_block_stop","index":0}'
+  ev '{"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_1","name":"mcp__thinrouter__get_weather","input":{}}}'
+  ev '{"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"city\":"}}'
+  ev '{"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\"Taipei\"}"}}'
+  ev '{"type":"content_block_stop","index":1}'
+  ev '{"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":9}}'
+  ev '{"type":"message_stop"}'
+  exec sleep 30
+fi
 ev '{"type":"message_start","message":{"id":"msg_01","type":"message","role":"assistant","model":"claude-sonnet-x","content":[],"usage":{"input_tokens":12,"output_tokens":0}}}'
 ev '{"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}'
 ev '{"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"secret thoughts"}}'
@@ -273,16 +289,148 @@ async fn claude_runs_the_cli_with_claude_codes_own_prompt() {
         .await;
     let v: Value = r.json().await.unwrap();
     assert_eq!(v["output"][0]["content"][0]["text"], "Hello there");
+}
 
-    // Client tools are not bridged yet: clear 501.
+fn weather_tools() -> Value {
+    json!([{"type": "function", "function": {"name": "get_weather", "description": "weather",
+        "parameters": {"type": "object", "properties": {"city": {"type": "string"}}}}}])
+}
+
+#[tokio::test]
+async fn client_tools_are_bridged_through_mcp() {
+    let env = Env::start().await;
+
+    // Chat, stream: the bridged call comes back under the client's own name, and the
+    // run (which would wait for the MCP answer) is ended at once.
+    let started = std::time::Instant::now();
     let r = env
         .post(
             "/v1/chat/completions",
-            json!({"model": "cc", "tools": [{"type": "function", "function": {"name": "f", "parameters": {}}}],
-                   "messages": [{"role": "user", "content": "hi"}]}),
+            json!({"model": "cc", "stream": true, "tools": weather_tools(), "tool_choice": "required",
+                   "messages": [{"role": "user", "content": "weather?"}]}),
         )
         .await;
-    assert_eq!(r.status(), 501);
+    let chunks = sse_data(&r.text().await.unwrap());
+    assert!(
+        started.elapsed() < Duration::from_secs(10),
+        "run must not be awaited"
+    );
+    let calls: Vec<&Value> = chunks
+        .iter()
+        .filter_map(|c| c.pointer("/choices/0/delta/tool_calls/0"))
+        .collect();
+    assert_eq!(calls[0]["id"], "toolu_1");
+    assert_eq!(calls[0]["function"]["name"], "get_weather");
+    let args: String = calls
+        .iter()
+        .filter_map(|c| c["function"]["arguments"].as_str())
+        .collect();
+    assert_eq!(args, "{\"city\":\"Taipei\"}");
+    assert!(chunks
+        .iter()
+        .any(|c| c.pointer("/choices/0/finish_reason") == Some(&json!("tool_calls"))));
+    assert_eq!(chunks.last().unwrap(), "[DONE]");
+
+    // What Claude Code was given: the helper as its only MCP server, only these tools allowed.
+    let argv: Vec<String> = env.file("args.txt").lines().map(str::to_string).collect();
+    assert!(argv
+        .windows(2)
+        .any(|w| w[0] == "--allowedTools" && w[1] == "mcp__thinrouter__get_weather"));
+    assert!(!argv.iter().any(|a| a == "--dangerously-skip-permissions"));
+    let run = env.bin_dir.path().join("rundir");
+    let mcp: Value =
+        serde_json::from_str(&std::fs::read_to_string(run.join("mcp.json")).unwrap()).unwrap();
+    let server = &mcp["mcpServers"]["thinrouter"];
+    assert_eq!(server["args"][0], "claude-mcp-helper");
+    let tools: Value =
+        serde_json::from_str(&std::fs::read_to_string(run.join("tools.json")).unwrap()).unwrap();
+    assert_eq!(tools[0]["name"], "get_weather");
+    assert_eq!(
+        tools[0]["inputSchema"]["properties"]["city"]["type"],
+        "string"
+    );
+    let stdin = env.file("stdin.txt");
+    assert!(stdin.contains("You must call at least one available tool"));
+
+    // Anthropic client, non-stream: tool_use block with parsed input.
+    let r = env
+        .post(
+            "/v1/messages",
+            json!({"model": "cc", "max_tokens": 50,
+                   "tools": [{"name": "get_weather", "input_schema": {"type": "object"}}],
+                   "messages": [{"role": "user", "content": "weather?"}]}),
+        )
+        .await;
+    let v: Value = r.json().await.unwrap();
+    assert_eq!(v["stop_reason"], "tool_use");
+    let tu = v["content"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["type"] == "tool_use")
+        .unwrap();
+    assert_eq!(tu["name"], "get_weather");
+    assert_eq!(tu["input"]["city"], "Taipei");
+
+    // The tool result starts a new run told the whole conversation.
+    let r = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model": "cc", "tools": weather_tools(), "messages": [
+                {"role": "user", "content": "weather?"},
+                {"role": "assistant", "content": null, "tool_calls": [{"id": "toolu_1", "type": "function",
+                    "function": {"name": "get_weather", "arguments": "{\"city\":\"Taipei\"}"}}]},
+                {"role": "tool", "tool_call_id": "toolu_1", "content": "sunny"}
+            ]}),
+        )
+        .await;
+    let v: Value = r.json().await.unwrap();
+    assert_eq!(v["choices"][0]["message"]["content"], "Hello there");
+    let stdin = env.file("stdin.txt");
+    assert!(
+        stdin.contains("[tool call mcp__thinrouter__get_weather id=toolu_1"),
+        "{stdin}"
+    );
+    assert!(stdin.contains("[tool result id=toolu_1]"));
+    assert!(stdin.contains("sunny"));
+}
+
+#[tokio::test]
+async fn mcp_helper_speaks_stdio_json_rpc() {
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+    let dir = tempfile::tempdir().unwrap();
+    let tools = dir.path().join("tools.json");
+    std::fs::write(
+        &tools,
+        json!([{"name": "get_weather", "description": "w", "inputSchema": {"type": "object"}}])
+            .to_string(),
+    )
+    .unwrap();
+    let mut child = tokio::process::Command::new(env!("CARGO_BIN_EXE_thinrouter"))
+        .args(["claude-mcp-helper", "--tools-file", tools.to_str().unwrap()])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .kill_on_drop(true)
+        .spawn()
+        .unwrap();
+    let mut stdin = child.stdin.take().unwrap();
+    let mut out = BufReader::new(child.stdout.take().unwrap()).lines();
+    for msg in [
+        json!({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18"}}),
+        json!({"jsonrpc": "2.0", "method": "notifications/initialized"}),
+        json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list"}),
+    ] {
+        stdin
+            .write_all(format!("{msg}\n").as_bytes())
+            .await
+            .unwrap();
+    }
+    let init: Value = serde_json::from_str(&out.next_line().await.unwrap().unwrap()).unwrap();
+    assert_eq!(init["id"], 1);
+    assert_eq!(init["result"]["serverInfo"]["name"], "thinrouter");
+    let list: Value = serde_json::from_str(&out.next_line().await.unwrap().unwrap()).unwrap();
+    assert_eq!(list["id"], 2);
+    assert_eq!(list["result"]["tools"][0]["name"], "get_weather");
 }
 
 #[tokio::test]

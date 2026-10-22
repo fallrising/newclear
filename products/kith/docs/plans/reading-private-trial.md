@@ -18,8 +18,12 @@ Owner 2026-10-22 直接授權；issue #473。這是階段0–2完成後的新里
 
 候選版本與active指標位於指定私有release root。web build輸出候選的assets，bundle生成於assets/_reading/current.json；完整性manifest記錄來源commit與所有檔案hash。驗證通過才切換active symlink；保留歷史版本供回復。驗證命令必須能拒絕缺bundle、空bundle、來源不符、缺檔／損毀；不提供自動部署命令。
 
-離線preflight只讀本地Git資料與檔案，不fetch、ls-remote或HTTP；現有exporter會fetch/push和呼叫HTTPS，操作說明明示此界線。D1仍是captures/notes權威、Git仍是AI正文權威。
+離線preflight只讀本地Git資料與檔案，不fetch、ls-remote或HTTP；拒絕repository attributes與partial/promisor clone，Git物件讀取停用lazy fetch與replacement refs；現有exporter會fetch/push和呼叫HTTPS，操作說明明示此界線。D1仍是captures/notes權威、Git仍是AI正文權威。
 
 ## 驗證計畫
 
 新增行為先RED再GREEN。Node/Git負例涵蓋完整產物、失敗保留、路徑/permissions/remote/registry錯誤與遮罩；本地Cloudflare完整流程；全套backend、web build/type checks、完整E2E與manifest validator、project-success/llms/diff與task/report validators。最終head CI無pending、不同模型家族唯讀PASS、最新main整合後才merge。不得使用正式資料或付費模型API。
+
+## 交付狀態
+
+本地結果見[報告](../../tasks/473-private-trial/report.md)。PT-01～05只驗收準備工具、操作範本及合成環境；正式接線、遠端權限、token有效性、服務啟用、正式備份回復與手機真人試用均待owner，不能由合成結果替代。

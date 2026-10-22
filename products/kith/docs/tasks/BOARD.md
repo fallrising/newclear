@@ -16,8 +16,8 @@ Owner direct instruction; issue [#473](https://github.com/fallrising/newclear/is
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0473-PT1 | 私人試用準備 PT-01 | AC-PT01 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:02:57Z |
-| T-0473-PT2 | 私人試用準備 PT-02 | AC-PT02 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:02:57Z |
-| T-0473-PT3 | 私人試用準備 PT-03 | AC-PT03 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:02:57Z |
-| T-0473-PT4 | 私人試用準備 PT-04 | AC-PT04 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:02:57Z |
-| T-0473-PT5 | 私人試用準備 PT-05 | AC-PT05 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:02:57Z |
+| T-0473-PT1 | 私人試用準備 PT-01 | AC-PT01 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:36:10Z |
+| T-0473-PT2 | 私人試用準備 PT-02 | AC-PT02 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:36:10Z |
+| T-0473-PT3 | 私人試用準備 PT-03 | AC-PT03 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:36:10Z |
+| T-0473-PT4 | 私人試用準備 PT-04 | AC-PT04 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:36:10Z |
+| T-0473-PT5 | 私人試用準備 PT-05 | AC-PT05 | in_progress | 2026-10-22T10:02:57Z | — | 2026-10-22T10:36:10Z |

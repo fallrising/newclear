@@ -31,6 +31,7 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 | AC-04 | Given Claude/Cursor 與支援的客戶端工具串流，When 完整訂閱旅程，Then refresh、工具呼叫及錯誤／取消符合契約。 | pending | [進度下半部](docs/GOALS_AND_PROGRESS.md)：Claude 依憑證、Cursor tools及 Anthropic edge cases仍缺完整證據。 |
 | AC-05 | Given 任何 listener 或經 Tailscale Serve／tunnel 轉發，When 存取 admin、改 connection base_url 或 keyless bootstrap，Then 一律要 admin token（session＋CSRF、Host／Origin 檢查），轉發請求視為遠端不得 bootstrap，OAuth token 只送官方網域，secrets 一律 AES-GCM 加密（Argon2id 或 0600 key file）並遷移舊資料。 | passed | [security](docs/security.md)；`tests/admin_security.rs`、`src/guard.rs`、`store::secret_storage_tests`；2026-10-22 本機 `cargo +1.99.0 test --locked` 全綠（只用本機假上游）。 |
 | AC-06 | Given Codex（Responses 上游，強制串流），When 用 `/v1/chat/completions`、`/v1/messages`、`/v1/responses` 送純文字、工具呼叫、多輪 tool 往返與圖片（串流與非串流），Then 各端點收到自己的協定格式（chat chunk＋`[DONE]`、Anthropic 事件含 tool_use、原生 Responses），call_id 對得上且圖片保留。 | passed | `tests/codex_e2e.rs`（本機腳本化 SSE 假上游）、`responses`／`claude` 單元測試；2026-10-22 本機全綠。chat 上游經 `/v1/responses` 串流仍只轉文字 delta。 |
+| AC-07 | Given 同一段對話的多輪 Codex 請求，When 經任一端點送出，Then 帶穩定的 `prompt_cache_key` 與同值 `session-id`／`thread-id`（用戶端自帶的 key 優先），User-Agent 版本取自 `--codex-version`、本機 `codex --version` 或內建值。 | passed | `src/codex.rs` 單元測試、`tests/codex_e2e.rs` 標頭與 key 斷言；2026-10-22 本機全綠。快取命中率需真實帳號驗證，未執行。 |
 
 ## 現況與缺口
 

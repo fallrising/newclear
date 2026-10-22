@@ -87,6 +87,7 @@ thinrouter refresh
 | `THINROUTER_ALLOW_KEYLESS_BOOTSTRAP` / `--allow-keyless-bootstrap` | Explicit local bootstrap; default off, exact loopback listener, direct (non-forwarded) requests and zero total keys only |
 | `THINROUTER_SECRETS_KEY` / `--secrets-key` | Passphrase (Argon2id) for at-rest encryption; default: random `<data_dir>/secrets.key` |
 | `THINROUTER_PROVIDER_BASE_OVERRIDES` / `--provider-base-override` | Operator-only `provider=url` upstream base (mocks, egress proxies) |
+| `THINROUTER_CODEX_VERSION` / `--codex-version` | Codex CLI version in the upstream User-Agent; default: installed `codex --version`, else 0.136.0 |
 | `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
 | `THINROUTER_TOKEN_SAVER` / `--token-saver` | Truncate tool / huge message content |
 | `THINROUTER_TOKEN_SAVER_MAX_CHARS` | Max chars kept per tool-like block (default 2000) |

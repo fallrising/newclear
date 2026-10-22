@@ -31,4 +31,20 @@ console preview/group workflow/PG fence changes were left out.
   in regenerated reports, 0 failures/errors/skips. `make validate-deploy`: PASS (model check only).
 - Not run: K8s runtime, real two-runtime reset, preview/UI, AC-05 timing.
 
+## Reconcile robustness follow-up
+
+Closes two non-blocking notes from the PR #480 review:
+
+- The scheduled reconcile catches failures, so one exception no longer cancels every later
+  reconcile; the failure shows in `lastError` until the next clean pass.
+- After config-bus loss, reconcile still retries stops for workers the store no longer wants
+  running. It never starts, replaces or records a revision without a live bus, and pause
+  status stays unconfirmed.
+
+Evidence: `PauseLifecycleAc09Test` adds `AC_09_reconcileFailureDoesNotCancelLaterReconciles`
+and `AC_09_failedStopIsRetriedAfterConfigBusLossWithoutConfirming`; both failed on main
+(`ac09-reconcile-robust-red.log`) and pass after the fix. `./gradlew build --no-daemon
+--no-parallel`: BUILD SUCCESSFUL, gateway-consume 44 tests, 0 failures/skips.
+Still open from that review: the status endpoint can wait up to 5 s on a worker close.
+
 AC-09 remains partial, AC-05 remains FAIL, `usable_tag: none`, owner acceptance pending.

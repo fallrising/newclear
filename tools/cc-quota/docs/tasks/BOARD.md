@@ -31,5 +31,12 @@ Owner直接指示持續開發，完成里程碑提交／合併。Base `f64c7ef01
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0995-1 | Keychain失敗不切換來源；憑證驗證／診斷RED→GREEN | AC-02／AC-03準備 | in_progress | 2026-10-23T01:42:45Z | — | 2026-10-23T01:53:45Z |
-| T-0995-2 | Python3.11雙平台CI與原生Mac邊界測試；不等同真人驗收 | AC-03／AC-04準備 | in_progress | 2026-10-23T01:42:45Z | — | 2026-10-23T01:53:45Z |
+| T-0995-1 | Keychain失敗不切換來源；憑證驗證／診斷RED→GREEN | AC-02／AC-03準備 | done | 2026-10-23T01:42:45Z | 2026-10-23T01:54:47Z | 2026-10-23T01:55:22Z |
+| T-0995-2 | Python3.11雙平台CI與原生Mac邊界測試；不等同真人驗收 | AC-03／AC-04準備 | done | 2026-10-23T01:42:45Z | 2026-10-23T01:54:47Z | 2026-10-23T01:55:22Z |
+
+### M2交付結果
+
+- 實作：[PR #510](https://github.com/fallrising/newclear/pull/510) 已於 `2026-10-23T01:54:47Z` 合併；merge commit `03c5de824fdf9f5e7504fb82e0e3bddf9885d698`，已fetch遠端main核對。
+- 最終head：`a6f0a623f9adc5b4400041716998b76656268506`；[cc-quota CI](https://github.com/fallrising/newclear/actions/runs/39886609441)與[41項契約CI](https://github.com/fallrising/newclear/actions/runs/39886609476)均SUCCESS。Python3.11 Linux／Mac各35項離線測試、Mac另3項原生邊界測試通過；完整日誌已回讀保存。
+- 合併後runtime、tests及workflow SHA256與[M2 manifest](../../../../.team/cc-quota/evidence/m2-manifest.json)一致。T995接受修正後程式；首次workflow context錯誤及修復、實際平台結果見[M2證據](macos-boundaries-20261023.md)。
+- 本PR只關閉T0995里程碑任務板。AC03真登入／Keychain／usage及AC04每小時排程／可見通知／睡眠恢復仍pending；未部署、release或建立usable tag。

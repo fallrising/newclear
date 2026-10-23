@@ -1963,3 +1963,8 @@ Owner now explicitly authorizes commit, PR and merge for completed Codex collect
 Prior evidence: T997/T998 collector review; T970/T971 unified sources; T972/T973 initial WAL REWORK/T974 fixed ACCEPT. Root84tests, prior archived35tests, CLI fixtures,41contracts; delivery candidate rerun and final-head hosted CI required before normal merge. One bounded native readonly delivery reviewer (gpt-6.1-sol/high,6min, no nesting) checks preservation/scope/evidence. No release/tag/deploy authorization. Old task rows become done only after merge in a separate board-only closeout PR per repo rule.
 
 T975 root acceptance: independent ACCEPT, reviewed runtime hashes unchanged, root84+35tests and42contracts pass. Authorize scoped commit/push/PR under current user instruction; no bypass of final-head CI, no tag/deploy. Public evidence is deidentified; original dirty worktree untouched.
+
+
+## OpenMMO authorized publication / 2026-10-23
+
+Owner explicitly requested commit, PR and merge before reboot. Publish only labs/openmmo-lab from an isolated worktree based on main 2c596d43; preserve the original shared dirty tree and index. Bounded OAuth change has RED/GREEN and independent ACCEPT review. Recheck native tests, project-success and diff on this candidate, then require GitHub checks before merge. AC01 verified; AC02 partial and AC03/04 pending; no usable tag or deployment. Private source/runtime/terrain/evidence are disk-backed and retained. Existing component task board remains the progress authority.

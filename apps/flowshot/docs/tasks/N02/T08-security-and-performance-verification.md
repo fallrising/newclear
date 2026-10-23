@@ -33,3 +33,5 @@ forbidden_paths:
 # T08 — security-and-performance-verification
 
 Deliver this named slice from the implementation/test plan, preserving all ADR-003 boundaries. Write its behavior RED first, retain the exact failing log, implement, then rerun its focused native/core/component target. Do not claim completion from contract generation alone. Dependencies follow T01→T02→T03→T04→T05→T06→T07→T08. Root owns final independent acceptance.
+
+Partial-publication follow-up: reproduce a symlinked system temporary directory in Linux Docker, then canonicalize only the test fixture base to satisfy Guard’s existing canonical-root precondition. Keep production no-follow behavior and adversarial symlink assertions unchanged; retain the failing and passing same-command evidence.

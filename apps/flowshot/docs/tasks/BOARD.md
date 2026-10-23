@@ -47,7 +47,7 @@ Direct owner continuation instruction; M0 development evidence accepted, PR #512
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | R01 | Resolve M1 contracts and implement N03 deterministic safe reading model | AC-03 | in_progress | 2026-10-23T03:02:54Z | | 2026-10-23T06:52:00Z |
-| R02 | N02 workspace, PathGuard and lazy tree | AC-03 | in_progress | 2026-10-23T03:12:00Z | | 2026-10-23T06:52:00Z |
+| R02 | N02 workspace, PathGuard and lazy tree | AC-03 | in_progress | 2026-10-23T03:12:00Z | | 2026-10-23T06:57:10Z |
 | R03 | N04 tabs, persistence, native reading and three-day real-KB gate | AC-03 | todo | | | 2026-10-23T03:02:54Z |
 
 M1 current blocker: N03 is blocked by the unchanged 1MiB/<300ms gate (actual WebKit 7975/9139ms on the measured optimized candidate). Functional review corrections passed root frontend checks; T012 profiles the parser without changing the fixture/oracle. N02 targeted repairs passed independent review and integrated Linux checks; the real picker/tree/open/asset WebView journey passed at179ms for500 rendered rows from5000 files. Product composition and Mac-specific checks remain. N04 remains gated; no three-day KB trial or M1 merge is claimed.

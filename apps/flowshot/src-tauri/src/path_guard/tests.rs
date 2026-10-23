@@ -3,7 +3,9 @@ use std::{fs, io::Write, os::unix::fs::symlink};
 fn temp() -> std::path::PathBuf {
     let path = std::env::temp_dir().join(format!("guard-{}", uuid::Uuid::now_v7()));
     fs::create_dir(&path).unwrap();
-    path
+    // System temp paths may contain aliases (for example macOS /var).
+    // Match the canonical root supplied by production workspace admission.
+    fs::canonicalize(path).unwrap()
 }
 #[test]
 fn no_follow_rejects_static_and_intermediate_swaps() {

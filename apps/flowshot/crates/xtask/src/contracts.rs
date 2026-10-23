@@ -189,15 +189,48 @@ fn check_lock(root: &Path, drift: &mut Vec<String>) -> Result<(), String> {
     let lock: serde_json::Value = serde_json::from_slice(&bytes)
         .map_err(|error| format!("failed to parse {}: {error}", lock_path.display()))?;
 
-    if lock["status"] != "frozen" {
-        drift.push("contracts/locks/N00.json is not frozen".into());
+    let spec = fs::read(root.join("SPEC.md"))
+        .map_err(|error| format!("failed to read SPEC.md: {error}"))?;
+    let spec_text =
+        std::str::from_utf8(&spec).map_err(|error| format!("SPEC.md is not UTF-8: {error}"))?;
+    let spec_version = spec_text
+        .lines()
+        .find_map(|line| line.strip_prefix("version: "))
+        .ok_or_else(|| "SPEC.md has no version".to_owned())?;
+    let mut spec_digest = String::with_capacity(64);
+    for byte in Sha256::digest(&spec) {
+        write!(&mut spec_digest, "{byte:02x}")
+            .map_err(|error| format!("failed to encode SPEC digest: {error}"))?;
     }
-    if lock["generator_version"] != GENERATOR_VERSION {
-        drift.push("contracts/locks/N00.json has a stale generator_version".into());
+    let commands = command_descriptors(&Config::default());
+    let names = commands
+        .iter()
+        .map(|command| command.name)
+        .collect::<Vec<_>>();
+    for (field, expected) in [
+        ("schema_version", json!(1)),
+        ("node_id", json!("N00")),
+        ("status", json!("frozen")),
+        ("spec_version", json!(spec_version)),
+        ("spec_sha256", json!(spec_digest)),
+        ("source_files", json!(SOURCE_FILES)),
+        (
+            "source_hash_algorithm",
+            json!("sha256(path + NUL + bytes + NUL, in source_files order)"),
+        ),
+        ("source_sha256", json!(source_digest(root)?)),
+        ("commands", json!(names)),
+        ("generator_version", json!(GENERATOR_VERSION)),
+    ] {
+        if lock[field] != expected {
+            drift.push(format!("contracts/locks/N00.json has an invalid {field}"));
+        }
     }
-    let digest = source_digest(root)?;
-    if lock["source_sha256"] != digest {
-        drift.push("contracts/locks/N00.json has a stale source_sha256".into());
+    if lock["frozen_at"]
+        .as_str()
+        .is_none_or(|value| value.trim().is_empty())
+    {
+        drift.push("contracts/locks/N00.json is missing frozen_at".into());
     }
     Ok(())
 }
@@ -277,17 +310,45 @@ mod tests {
         write_contracts(&destination).expect("fixture generation should succeed");
         fs::write(destination.join("types.ts"), "changed").expect("fixture should mutate");
 
-        let mut drift = Vec::new();
-        let expected = generated_files().expect("expected output should render");
-        for (name, content) in expected {
-            let actual = fs::read_to_string(destination.join(name)).expect("file should exist");
-            if actual != content {
-                drift.push(format!("{name} differs"));
-            }
-        }
-
+        let error = check_destination(&repository_root(), &destination)
+            .expect_err("the actual checker must reject changed output");
         let _ = fs::remove_dir_all(&destination);
-        assert_eq!(drift, ["types.ts differs"]);
+        assert!(error.contains("types.ts differs"));
+    }
+
+    #[test]
+    fn frozen_lock_rejects_metadata_tampering() {
+        let original = repository_root();
+        let fixture = temporary_directory("lock-metadata");
+        fs::create_dir_all(fixture.join("contracts/locks")).expect("fixture directory");
+        for source in SOURCE_FILES.into_iter().chain(["SPEC.md"]) {
+            let destination = fixture.join(source);
+            fs::create_dir_all(destination.parent().expect("parent")).expect("source directory");
+            fs::copy(original.join(source), destination).expect("copy source");
+        }
+        let original_lock: serde_json::Value = serde_json::from_slice(
+            &fs::read(original.join("contracts/locks/N00.json")).expect("read frozen lock"),
+        )
+        .expect("parse frozen lock");
+        for (field, invalid) in [
+            ("schema_version", json!(2)),
+            ("node_id", json!("N09")),
+            ("spec_version", json!("0.0.0")),
+            ("spec_sha256", json!("tampered")),
+            ("source_files", json!([])),
+            ("source_hash_algorithm", json!("md5")),
+            ("commands", json!(["other_command"])),
+            ("frozen_at", json!(null)),
+        ] {
+            let mut lock = original_lock.clone();
+            lock[field] = invalid;
+            fs::write(fixture.join("contracts/locks/N00.json"), lock.to_string())
+                .expect("write lock");
+            let mut drift = Vec::new();
+            check_lock(&fixture, &mut drift).expect("read valid JSON");
+            assert!(!drift.is_empty(), "tampered {field} must be rejected");
+        }
+        fs::remove_dir_all(fixture).expect("remove own fixture");
     }
 
     #[test]

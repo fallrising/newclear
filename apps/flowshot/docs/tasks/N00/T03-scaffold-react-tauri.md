@@ -10,12 +10,12 @@ depends_on:
 derived_from:
   - 00-implementation-plan.md
   - 01-test-plan.md
-source_version: 1.0.1
+source_version: 1.0.2
 source_sha256:
-  SPEC.md: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-  N00: df7ce22a67b3262bc0324b04025fc11723065c03dd8345748f601083a60622be
-  plan: bb4a5bdc4a1a100739c266cd342127a5e5dbac93675fae0a2490e65e2a8c5422
-  test_plan: 15c20c961703b928ba3b0e5170f58f7004a5eb8eb0307fe9332bee09bca8246c
+  SPEC.md: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+  N00: 47754e767664fc4dd86cb2abcaa512317af42663f49546520838f5a7ce691d1a
+  plan: 1502abf90d2cdcf0ee9081043241c95243f9d8919c73e4d13dc2d8ea2b68608d
+  test_plan: d869268f6a67de3c4303a14b3e2aa34486ec50a3c7f85179dc187742befc5c63
 owner: codex
 allowed_paths:
   - package.json

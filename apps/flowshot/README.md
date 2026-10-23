@@ -3,10 +3,10 @@
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
 
-> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+> **Development resumed 2026-10-23** by the owner’s [startup instruction](START_DEVELOPMENT_PROMPT.md). Linux Docker development acceptance and target-Mac release acceptance are tracked separately; see the [task board](docs/tasks/BOARD.md).
 
 
-[![CI](https://github.com/fallrising/flowshot/actions/workflows/ci.yml/badge.svg)](https://github.com/fallrising/flowshot/actions/workflows/ci.yml)
+Active monorepo CI: [flowshot-ci.yml](../../.github/workflows/flowshot-ci.yml). The nested standalone workflow is historical.
 
 Flowshot is the repository for **Markdown Annotator**, a local-first,
 read-only desktop application for reading Markdown and keeping annotations
@@ -48,10 +48,9 @@ gates.
 
 ## Current status
 
-The specification baseline is complete and N00 foundation development is in
-progress. The repository now contains the Rust workspace, React/Tauri shell,
+M0 development acceptance is complete: N00 foundation and N01 SQLite persistence passed Linux native verification. The repository now contains the Rust workspace, React/Tauri shell,
 Rust-authored contract generator, frozen `get_build_info` contract, typed
-command-to-UI slice, and executable core dependency boundary.
+command-to-UI slice, and executable core dependency boundary. The desktop app now initializes a checksummed SQLite schema in platform app-data before showing its main window; failed migration blocks startup. Typed repositories, WAL/restart tests and the release seed benchmark are covered in [M0 verification](docs/verification/N01.md). Workspace reading and annotation UI remain future nodes.
 
 The documentation baseline is available in:
 
@@ -67,11 +66,10 @@ Use Rust 1.97.1 and Node.js 24.18.0. Before launching the desktop app, install
 the official [Tauri platform prerequisites](https://v2.tauri.app/start/prerequisites/).
 The primary macOS target also requires the Xcode command-line tools.
 
-A new checkout needs five commands:
+From the existing monorepo checkout (do not clone a second standalone repo):
 
 ```bash
-git clone https://github.com/fallrising/flowshot.git
-cd flowshot
+cd apps/flowshot
 make bootstrap
 make ci
 npm run tauri -- dev
@@ -99,8 +97,20 @@ Development is specification-driven and test-first:
 3. Preserve red-to-green evidence.
 4. Run the complete CI gate.
 5. Publish a verification report and node outcome.
-6. Pass the milestone's real dogfood gate before advancing.
+6. Pass the milestone's real dogfood gate before advancing. Target-Mac launch acceptance separately blocks usable releases, as specified in SPEC §13.1.
 
 Scope expansion such as Markdown editing, AI/RAG, cloud sync, accounts,
 telemetry, plugins, terminal integration, or arbitrary web content is excluded
 from v1.
+
+## Shared build workspace
+
+Run build/test commands through the common agent workspace launcher when available. It sets `CARGO_TARGET_DIR`, `AGENT_BUILD_DIR` and `AGENT_EVIDENCE_DIR`. Frontend TypeScript/Vite outputs and the Tauri `frontendDist` now use that build directory; the Mac probe uses the same Cargo target and saves evidence under `AGENT_EVIDENCE_DIR/macos-launch`. Explicit `FLOWSHOT_LAUNCH_ARTIFACT_DIR` takes precedence. A default checkout still uses `dist/` and `target/`. The Docker wrapper also redirects Tauri generated schemas to its build directory and keeps native application data/configuration under preserved artifacts. Install npm dependencies into an isolated task directory and link its node_modules into this source checkout when following the shared workspace policy; do not move existing dependency directories.
+
+For target-Mac acceptance, run `make macos-launch-smoke` through the launcher (or equivalent explicit output variables), on the controlled macOS 13+ target. Both a PID-owned visible window and frontend command completion must arrive strictly before 1500 ms. The 15-second observation window is diagnostic only. Hosted or Linux checks cannot close this requirement.
+
+Current executed results and remaining gaps: [N00 resumption evidence](docs/tasks/N00/evidence/T10-foundation-resumption.md). Reading, annotations, persistence and reanchoring remain unimplemented. N00 Linux native verification passed; N01 now continues without waiting for a Mac.
+
+## Linux Docker development gate
+
+Build the test image with `docker build -f scripts/Dockerfile.linux -t flowshot-linux:20261023 scripts` through the shared launcher. Then run `bash scripts/linux-docker-check.sh` through the launcher from this component. The wrapper mounts only this isolated source checkout and that task's output directory, bounds CPU/memory, installs locked dependencies outside source, runs `make ci` and mandatory `make native-ci`, and verifies a PID-owned visible Xvfb window plus actual WebView `get_build_info` completion. The container runs as the invoking UID. Keep its evidence logs and `linux-native/run-*/result.json`; a 30-second functional timeout is not a replacement for the Mac 1500 ms performance oracle.

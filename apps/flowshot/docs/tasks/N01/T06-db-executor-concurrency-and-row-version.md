@@ -3,18 +3,18 @@ document_type: task
 id: T06
 node_id: N01
 title: Add bounded DB execution and optimistic concurrency
-status: todo
+status: done
 depends_on:
   - T04
 derived_from:
   - 00-implementation-plan.md
   - 01-test-plan.md
-source_version: 1.0.1
+source_version: 1.0.2
 source_sha256:
-  SPEC.md: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-  N01: 13de68ca196fd1d302ca4df0bff5d4633cfee1a106656a43e220967f0cc660fc
-  plan: d1e72feb1a8aab1d80873c1890b6e9761cb85463eabf2c19c385bd8100585372
-  test_plan: 6129ff514d939f8971527e9b215eeaedfa3f6e932b153cd3fead8c5814cb7ccd
+  SPEC.md: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+  N01: b50452419cf658893fb76bbb28b891cd5377eeb79971e2933f61150a6a430fd4
+  plan: bb0b2dd670cd5e088357aa0b8226c318e2c316d50317f03f47a3aff03a6bad5f
+  test_plan: 10f0262ca61257d2a4730676d86eeb6f94d6356f752a158a5162e1509b7643a8
 owner: codex
 allowed_paths:
   - crates/db/src/executor/**
@@ -74,3 +74,5 @@ return `CONFLICT` without partial writes.
 
 T07 uses the production execution path for app-data wiring, query-plan evidence
 and the release dataset benchmark.
+
+Development acceptance: [N01/M0 verification](../../verification/N01.md), final complete Docker gate and independent T-006 ACCEPT. Historical RED/rework remains in the evidence; task-board merge closure is separate.

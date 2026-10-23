@@ -40,6 +40,7 @@ check-boundaries:
 	$(CARGO) run --locked -p flowshot-xtask -- check-boundaries
 
 verify-sdd:
+	$(PYTHON) -m unittest discover -s scripts -p 'test_*.py' -v
 	$(PYTHON) scripts/sdd.py verify
 
 rust-ci:
@@ -62,7 +63,7 @@ native-ci:
 	$(NPM) run tauri -- build --debug --no-bundle --ci
 
 macos-launch-smoke-test:
-	$(NODE) --test scripts/macos-launch-smoke.node.mjs
+	$(NODE) --test scripts/*.node.mjs
 
 macos-release:
 	@if [[ "$$(uname -s)" != "Darwin" ]]; then \

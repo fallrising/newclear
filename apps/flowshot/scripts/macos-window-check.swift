@@ -35,6 +35,7 @@ for window in windows {
 
     let result: [String: Any] = [
         "visible": true,
+        "pid": requestedPid,
         "windowId": windowId,
         "width": Int(bounds.width),
         "height": Int(bounds.height),

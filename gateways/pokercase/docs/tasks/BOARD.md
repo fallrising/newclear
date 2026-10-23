@@ -7,6 +7,7 @@
 | ID | 任務 | AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | CUR-01 | 外部容器 runner、回歸與 canary | CI-1–CI-5 | done | 2026-10-23T16:57:52Z | 2026-10-23T18:01:20Z | 2026-10-23T18:05:45Z |
+| CUR-02 | [專用profile登入與一次真實文字驗收](../cursor-live-smoke.md)；登入成功但HTTP502，待遮罩診斷 | AC-17（單次文字） | in_progress | 2026-10-23T18:13:50Z | — | 2026-10-23T18:27:00Z |
 
 原 Claude session 的其餘未驗證產品旅程仍保留 SUCCESS.md，不納入此隔離切片的完成聲明。
 

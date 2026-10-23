@@ -34,3 +34,7 @@ Delivery gates for PR #566 passed (component CI1m27s, contracts7s). The task boa
 ## Execution boundaries
 
 First round16:57:52Z–17:17:52Z; follow-up starts17:53:34Z, deadline18:13:34Z, final3minutes reserved for closeout. Tokens, provider requests and cost are unknown; no paid provider probe was initiated. Detailed local logs and reviews are retained privately; this document contains only reviewed summaries.
+
+## Subsequent authorized live attempt
+
+Owner separately authorized dedicated-profile login and one text request. Login succeeded; the single gateway request returned502 and cleanup passed. No retry was made. See [the live result and diagnostic continuation](../cursor-live-smoke.md); the one-request allowance is consumed, and the root cause remains unconfirmed.

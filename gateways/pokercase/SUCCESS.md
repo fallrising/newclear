@@ -47,6 +47,10 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 
 Owner 決定保留 Cursor。目標／範圍／固定 AC 與驗證計畫見 [隔離規格](docs/cursor-isolation.md)，進度見 [任務板](docs/tasks/BOARD.md)。原 ask＋sandbox 的主機隔離假設已被實測否定；AC-17 的假 CLI 協定測試不能當成隔離 PASS。2026-10-23 第二輪修正 PR #566 的 CLI enum lint 與 Docker workspace 權限，CI-1–CI-5 本機驗證已通過；[命令、歷史失敗及限制](docs/tasks/T-0377-handoff.md)。獨立審查與必要 CI 通過，PR #566 已於2026-10-23T18:01:20Z合併，回讀無差異；官方 CLI 映像的無網路 version/help 啟動亦通過。真帳號、完整推論與網路／plugin 隔離不在本次 PASS 範圍內。
 
+## 已授權的真實 Cursor 文字驗收
+
+2026-10-23 owner另行授權專用容器profile登入及一次簡短文字請求；[範圍、限制及結果](docs/cursor-live-smoke.md)。對應AC-17的單次真實文字旅程，不擴大為全協定／工具／圖片或token生命週期驗收。官方登入成功，但唯一一次非串流ChatCompletions請求回HTTP502；容器清理通過，真實文字旅程未通過。根因尚未確定，不重送已消耗的單次額度。
+
 ## 現況與缺口
 
 舊進度表的 auto refresh／executor「未開始」已被同檔後半部與實際 source 超越。

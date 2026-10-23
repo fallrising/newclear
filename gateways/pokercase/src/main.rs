@@ -2,6 +2,7 @@ mod admin;
 mod agy;
 mod cancel;
 mod claude;
+mod claude_code;
 mod codex;
 mod config;
 mod cooldown;
@@ -89,6 +90,12 @@ enum Commands {
         /// `codex --version`, else a built-in fallback.
         #[arg(long, env = "THINROUTER_CODEX_VERSION")]
         codex_version: Option<String>,
+        /// Claude Code CLI used by the `claude` provider (default: `claude` on PATH)
+        #[arg(long, env = "THINROUTER_CLAUDE_BIN")]
+        claude_bin: Option<String>,
+        /// Concurrent Claude Code processes
+        #[arg(long, env = "THINROUTER_CLAUDE_MAX_RUNS", default_value_t = 2)]
+        claude_max_runs: usize,
     },
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -169,6 +176,8 @@ async fn main() -> Result<()> {
             allowed_hosts,
             provider_base_overrides,
             codex_version,
+            claude_bin,
+            claude_max_runs,
         } => {
             let mut cfg = AppConfig::new(
                 host,
@@ -184,6 +193,8 @@ async fn main() -> Result<()> {
             cfg.allowed_hosts = allowed_hosts;
             cfg.set_provider_base_overrides(&provider_base_overrides)?;
             cfg.codex_version = codex_version;
+            cfg.claude_bin = claude_bin;
+            cfg.claude_max_runs = claude_max_runs;
             server::run(cfg).await
         }
         Commands::Doctor {

@@ -1,79 +1,10 @@
-//! Anthropic Messages API ↔ OpenAI Chat Completions translation.
+//! Anthropic Messages API ↔ OpenAI Chat Completions translation (client side and the
+//! Claude Code bridge's output).
 
 use bytes::Bytes;
 use serde_json::{json, Value};
 
 use crate::error::{AppError, AppResult};
-
-/// Convert OpenAI chat-completions body → Anthropic messages body (for Claude OAuth upstream).
-pub fn openai_to_anthropic_request(body: &Bytes) -> AppResult<Bytes> {
-    let v: Value = serde_json::from_slice(body)
-        .map_err(|e| AppError::BadRequest(format!("invalid JSON body: {e}")))?;
-    let obj = v
-        .as_object()
-        .ok_or_else(|| AppError::BadRequest("body must be a JSON object".into()))?;
-
-    let model = obj
-        .get("model")
-        .and_then(|m| m.as_str())
-        .ok_or_else(|| AppError::BadRequest("model is required".into()))?;
-
-    let mut system: Option<String> = None;
-    let mut messages: Vec<Value> = Vec::new();
-
-    if let Some(msgs) = obj.get("messages").and_then(|m| m.as_array()) {
-        for m in msgs {
-            let role = m.get("role").and_then(|r| r.as_str()).unwrap_or("user");
-            let content = m.get("content").cloned().unwrap_or(Value::Null);
-            let text = match content {
-                Value::String(s) => s,
-                Value::Array(blocks) => blocks_to_text(&blocks),
-                other => other.to_string(),
-            };
-            if role == "system" {
-                system = Some(match system {
-                    Some(prev) => format!("{prev}\n{text}"),
-                    None => text,
-                });
-            } else if role == "tool" {
-                messages.push(json!({
-                    "role": "user",
-                    "content": [{"type": "tool_result", "tool_use_id": m.get("tool_call_id").and_then(|t| t.as_str()).unwrap_or("tool"), "content": text}]
-                }));
-            } else {
-                let anth_role = if role == "assistant" {
-                    "assistant"
-                } else {
-                    "user"
-                };
-                messages.push(json!({"role": anth_role, "content": text}));
-            }
-        }
-    }
-
-    let max_tokens = obj
-        .get("max_tokens")
-        .and_then(|n| n.as_u64())
-        .unwrap_or(4096);
-
-    let mut out = json!({
-        "model": model,
-        "max_tokens": max_tokens,
-        "messages": messages,
-    });
-    let o = out.as_object_mut().unwrap();
-    if let Some(s) = system {
-        o.insert("system".into(), Value::String(s));
-    }
-    if let Some(stream) = obj.get("stream") {
-        o.insert("stream".into(), stream.clone());
-    }
-    if let Some(t) = obj.get("temperature") {
-        o.insert("temperature".into(), t.clone());
-    }
-
-    Ok(Bytes::from(serde_json::to_vec(&out)?))
-}
 
 /// Convert Anthropic messages response → OpenAI chat completions JSON.
 pub fn anthropic_to_openai_response(body: &Bytes) -> AppResult<Bytes> {
@@ -657,6 +588,219 @@ pub fn openai_sse_chunk_to_anthropic(data: &str, state: &mut StreamTranslateStat
         state.stop_reason = Some(stop_reason_for(f).to_string());
     }
     events
+}
+
+/// Fold Anthropic SSE records (`event: ...\ndata: ...`) into one Messages JSON body.
+pub fn anthropic_sse_to_message(records: &[String], model: &str) -> Bytes {
+    let mut msg = json!({
+        "id": "msg_thinrouter", "type": "message", "role": "assistant", "model": model,
+        "content": [], "stop_reason": null, "stop_sequence": null,
+        "usage": {"input_tokens": 0, "output_tokens": 0}
+    });
+    let mut blocks: Vec<Value> = Vec::new();
+    let mut partial: Vec<String> = Vec::new();
+    for rec in records {
+        let Some(data) = rec.lines().find_map(|l| l.strip_prefix("data: ")) else {
+            continue;
+        };
+        let Ok(ev) = serde_json::from_str::<Value>(data) else {
+            continue;
+        };
+        match ev.get("type").and_then(|t| t.as_str()) {
+            Some("message_start") => {
+                if let Some(m) = ev.get("message") {
+                    for k in ["id", "model"] {
+                        if let Some(v) = m.get(k) {
+                            msg[k] = v.clone();
+                        }
+                    }
+                    if let Some(u) = m.get("usage") {
+                        msg["usage"] = u.clone();
+                    }
+                }
+            }
+            Some("content_block_start") => {
+                blocks.push(
+                    ev.get("content_block")
+                        .cloned()
+                        .unwrap_or(json!({"type": "text", "text": ""})),
+                );
+                partial.push(String::new());
+            }
+            Some("content_block_delta") => {
+                let i = ev.get("index").and_then(|i| i.as_u64()).unwrap_or(0) as usize;
+                let (Some(b), Some(p)) = (blocks.get_mut(i), partial.get_mut(i)) else {
+                    continue;
+                };
+                if let Some(t) = ev.pointer("/delta/text").and_then(|t| t.as_str()) {
+                    let cur = b
+                        .get("text")
+                        .and_then(|t| t.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    b["text"] = json!(cur + t);
+                }
+                if let Some(j) = ev.pointer("/delta/partial_json").and_then(|t| t.as_str()) {
+                    p.push_str(j);
+                }
+            }
+            Some("content_block_stop") => {
+                let i = ev.get("index").and_then(|i| i.as_u64()).unwrap_or(0) as usize;
+                if let (Some(b), Some(p)) = (blocks.get_mut(i), partial.get(i)) {
+                    if !p.is_empty() {
+                        b["input"] = serde_json::from_str(p).unwrap_or(json!({}));
+                    }
+                }
+            }
+            Some("message_delta") => {
+                if let Some(r) = ev.pointer("/delta/stop_reason") {
+                    msg["stop_reason"] = r.clone();
+                }
+                if let Some(u) = ev.get("usage").and_then(|u| u.as_object()) {
+                    for (k, v) in u {
+                        msg["usage"][k] = v.clone();
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    msg["content"] = Value::Array(blocks);
+    Bytes::from(serde_json::to_vec(&msg).unwrap_or_default())
+}
+
+/// Anthropic Messages SSE → `chat.completion.chunk` records (text and tool_use).
+pub struct AnthropicToChatStream {
+    id: String,
+    model: String,
+    created: i64,
+    /// Anthropic block index → chat tool index.
+    tools: std::collections::HashMap<i64, usize>,
+    finish: Option<String>,
+    usage: (i64, i64),
+    done: bool,
+}
+
+impl AnthropicToChatStream {
+    pub fn new(model: impl Into<String>) -> Self {
+        Self {
+            id: "chatcmpl-thinrouter".into(),
+            model: model.into(),
+            created: chrono::Utc::now().timestamp(),
+            tools: Default::default(),
+            finish: None,
+            usage: (0, 0),
+            done: false,
+        }
+    }
+
+    fn chunk(&self, delta: Value, finish: Option<&str>, usage: bool) -> String {
+        let mut c = json!({
+            "id": self.id, "object": "chat.completion.chunk", "created": self.created,
+            "model": self.model,
+            "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
+        });
+        if usage {
+            let (p, o) = self.usage;
+            c["usage"] = json!({"prompt_tokens": p, "completion_tokens": o, "total_tokens": p + o});
+        }
+        format!("data: {c}")
+    }
+
+    fn finish(&mut self) -> Vec<String> {
+        if self.done {
+            return Vec::new();
+        }
+        self.done = true;
+        let reason = match self.finish.as_deref() {
+            Some("max_tokens") => "length",
+            Some("tool_use") => "tool_calls",
+            Some("refusal") => "content_filter",
+            _ if !self.tools.is_empty() => "tool_calls",
+            _ => "stop",
+        };
+        vec![
+            self.chunk(json!({}), Some(reason), true),
+            "data: [DONE]".into(),
+        ]
+    }
+
+    pub fn on_data(&mut self, data: &str) -> Vec<String> {
+        if self.done {
+            return Vec::new();
+        }
+        let Ok(ev) = serde_json::from_str::<Value>(data) else {
+            return Vec::new();
+        };
+        let mut out = Vec::new();
+        match ev.get("type").and_then(|t| t.as_str()).unwrap_or("") {
+            "message_start" => {
+                if let Some(id) = ev.pointer("/message/id").and_then(|i| i.as_str()) {
+                    self.id = id.replace("msg_", "chatcmpl-");
+                }
+                if let Some(u) = ev
+                    .pointer("/message/usage/input_tokens")
+                    .and_then(|n| n.as_i64())
+                {
+                    self.usage.0 = u;
+                }
+                out.push(self.chunk(json!({"role": "assistant", "content": ""}), None, false));
+            }
+            "content_block_start" => {
+                if ev.pointer("/content_block/type").and_then(|t| t.as_str()) == Some("tool_use") {
+                    let idx = ev.get("index").and_then(|i| i.as_i64()).unwrap_or(0);
+                    let n = self.tools.len();
+                    self.tools.insert(idx, n);
+                    out.push(self.chunk(
+                        json!({"tool_calls": [{"index": n, "id": ev.pointer("/content_block/id"), "type": "function",
+                            "function": {"name": ev.pointer("/content_block/name"), "arguments": ""}}]}),
+                        None,
+                        false,
+                    ));
+                }
+            }
+            "content_block_delta" => {
+                if let Some(t) = ev.pointer("/delta/text").and_then(|t| t.as_str()) {
+                    out.push(self.chunk(json!({"content": t}), None, false));
+                } else if let Some(j) = ev.pointer("/delta/partial_json").and_then(|t| t.as_str()) {
+                    let idx = ev.get("index").and_then(|i| i.as_i64()).unwrap_or(0);
+                    if let Some(n) = self.tools.get(&idx) {
+                        out.push(self.chunk(
+                            json!({"tool_calls": [{"index": n, "function": {"arguments": j}}]}),
+                            None,
+                            false,
+                        ));
+                    }
+                }
+            }
+            "message_delta" => {
+                if let Some(r) = ev.pointer("/delta/stop_reason").and_then(|r| r.as_str()) {
+                    self.finish = Some(r.to_string());
+                }
+                if let Some(u) = ev.pointer("/usage/input_tokens").and_then(|n| n.as_i64()) {
+                    self.usage.0 = u;
+                }
+                if let Some(u) = ev.pointer("/usage/output_tokens").and_then(|n| n.as_i64()) {
+                    self.usage.1 = u;
+                }
+            }
+            "message_stop" => out.extend(self.finish()),
+            "error" => {
+                out.push(format!(
+                    "data: {}",
+                    json!({"error": ev.get("error").cloned().unwrap_or(Value::Null)})
+                ));
+                out.push("data: [DONE]".into());
+                self.done = true;
+            }
+            _ => {}
+        }
+        out
+    }
+
+    pub fn on_end(&mut self) -> Vec<String> {
+        self.finish()
+    }
 }
 
 fn sse_event(event: &str, data: &Value) -> String {

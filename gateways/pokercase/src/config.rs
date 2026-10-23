@@ -29,6 +29,10 @@ pub struct AppConfig {
     pub provider_base_overrides: Vec<(String, String)>,
     /// Explicit Codex CLI version for the User-Agent (`--codex-version`).
     pub codex_version: Option<String>,
+    /// Claude Code binary for the `claude` provider (`--claude-bin`).
+    pub claude_bin: Option<String>,
+    /// Concurrent Claude Code processes.
+    pub claude_max_runs: usize,
 }
 
 impl AppConfig {
@@ -69,6 +73,8 @@ impl AppConfig {
             allowed_hosts: Vec::new(),
             provider_base_overrides: Vec::new(),
             codex_version: None,
+            claude_bin: None,
+            claude_max_runs: 2,
         })
     }
 

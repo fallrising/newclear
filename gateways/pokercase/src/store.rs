@@ -229,6 +229,20 @@ impl Store {
             }
         }
         migrate_secrets(&conn, &secrets)?;
+        // The claude provider now runs the local Claude Code CLI; stored Claude tokens
+        // are never used again, so they are not kept.
+        let cleared = conn.execute(
+            "UPDATE oauth_credentials SET access_token = '', refresh_token = NULL, expires_at = NULL
+             WHERE provider IN ('claude', 'cc', 'anthropic', 'claude_code')
+               AND (access_token != '' OR refresh_token IS NOT NULL)",
+            [],
+        )?;
+        if cleared > 0 {
+            tracing::info!(
+                cleared,
+                "removed stored Claude tokens (claude now runs Claude Code)"
+            );
+        }
         if meta_get(&conn, "key_check")?.is_none() {
             meta_set(&conn, "key_check", &secrets.encrypt(KEY_CHECK_PLAINTEXT))?;
             meta_set(&conn, "key_source", source)?;

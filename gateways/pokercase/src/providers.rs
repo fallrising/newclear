@@ -27,8 +27,8 @@ pub enum UpstreamFormat {
     OpenAiChat,
     /// OpenAI Responses (Codex / Grok CLI style)
     OpenAiResponses,
-    /// Anthropic Messages
-    AnthropicMessages,
+    /// Local Claude Code CLI (`claude -p`), see claude_code.rs
+    ClaudeCode,
     /// Google Antigravity cloudcode-pa generateContent
     Antigravity,
     /// Cursor AgentService (HTTP/2 Connect+proto)
@@ -42,8 +42,6 @@ pub enum UpstreamFormat {
 #[allow(dead_code)]
 pub enum AuthScheme {
     Bearer,
-    /// Anthropic API-key style (we still send Bearer for OAuth imports).
-    BearerAnthropic,
     /// OpenCode free: Authorization: Bearer public (or token if provided)
     BearerOrPublic,
     None,
@@ -134,25 +132,16 @@ pub const ACTIVE: &[ProviderProfile] = &[
     ProviderProfile {
         id: "claude",
         aliases: &["cc", "anthropic", "claude_code"],
-        display_name: "Claude Code (Anthropic subscription)",
+        display_name: "Claude subscription via the local Claude Code CLI",
         category: "oauth",
         status: ProviderStatus::Active,
-        default_base_url: "https://api.anthropic.com/v1/messages",
-        format: UpstreamFormat::AnthropicMessages,
-        default_model: Some("claude-sonnet-4-5-20250929"),
-        auth: AuthScheme::BearerAnthropic,
-        extra_headers: &[
-            ("Anthropic-Version", "2023-06-01"),
-            (
-                "Anthropic-Beta",
-                "claude-code-20250219,oauth-2025-04-20,interleaved-thinking-2025-05-14",
-            ),
-            ("Anthropic-Dangerous-Direct-Browser-Access", "true"),
-            ("User-Agent", "claude-cli/2.1.92 (external, sdk-cli)"),
-            ("X-App", "cli"),
-        ],
+        default_base_url: "local://claude-code",
+        format: UpstreamFormat::ClaudeCode,
+        default_model: Some("sonnet"),
+        auth: AuthScheme::None,
+        extra_headers: &[],
         force_stream: false,
-        notes: "Anthropic Messages + OAuth bearer. Token: ~/.claude/.credentials.json",
+        notes: "Runs the signed-in `claude` binary (claude -p); thinrouter never holds a Claude token. Client tools not bridged yet.",
     },
     ProviderProfile {
         id: "cursor",
@@ -285,7 +274,6 @@ fn official_hosts(provider_id: &str) -> &'static [&'static str] {
     match provider_id {
         "codex" => &["chatgpt.com"],
         "siwc" => &["api.openai.com"],
-        "claude" => &["api.anthropic.com"],
         "cursor" => &["agent.api5.cursor.sh", "api2.cursor.sh"],
         "grok" => &["cli-chat-proxy.grok.com"],
         "opencode" => &["opencode.ai"],
@@ -300,6 +288,9 @@ pub fn base_url_allowed(
     base_url: &str,
     overrides: &[(String, String)],
 ) -> bool {
+    if profile.format == UpstreamFormat::ClaudeCode {
+        return true; // no credential leaves the machine; base_url is not used
+    }
     let base = base_url.trim().trim_end_matches('/');
     let Ok(url) = reqwest::Url::parse(base) else {
         return false;
@@ -358,18 +349,7 @@ pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
                 format!("{base}/responses")
             }
         }
-        UpstreamFormat::AnthropicMessages => {
-            if base.ends_with("/messages") {
-                // Claude Code often wants ?beta=true
-                if base.contains('?') {
-                    base.to_string()
-                } else {
-                    format!("{base}?beta=true")
-                }
-            } else {
-                format!("{base}/messages?beta=true")
-            }
-        }
+        UpstreamFormat::ClaudeCode => base.to_string(),
         UpstreamFormat::Antigravity => {
             // Full URL used by agy module; base kept for connection display.
             "https://cloudcode-pa.googleapis.com/v1internal:generateContent".into()
@@ -393,7 +373,7 @@ pub fn authorization_header(profile: &ProviderProfile, token: &str) -> Option<St
                 Some(format!("Bearer {token}"))
             }
         }
-        AuthScheme::Bearer | AuthScheme::BearerAnthropic => {
+        AuthScheme::Bearer => {
             if token.is_empty() {
                 None
             } else {
@@ -438,12 +418,8 @@ mod tests {
             "http://127.0.0.1:99990/codex",
             &ov
         ));
-        let claude = resolve("claude").unwrap();
-        assert!(!base_url_allowed(
-            claude,
-            "http://127.0.0.1:9999/codex",
-            &ov
-        ));
+        let grok = resolve("grok").unwrap();
+        assert!(!base_url_allowed(grok, "http://127.0.0.1:9999/codex", &ov));
         for p in ACTIVE {
             assert!(base_url_allowed(p, p.default_base_url, &[]), "{}", p.id);
         }

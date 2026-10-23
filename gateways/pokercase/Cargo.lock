@@ -2134,6 +2134,7 @@ dependencies = [
  "hex",
  "http",
  "http-body-util",
+ "libc",
  "minijinja",
  "rand 0.9.5",
  "ratatui",

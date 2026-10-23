@@ -8,12 +8,12 @@
 | **Binaries** | `fleetd` (control plane), `fleet-agent` (node agent) |
 | **Author** | Cheng Kung Chiang (@fallrising) |
 | **Date** | 2026-09-04 |
-| **Status** | Draft (revised 2026-09-04 after review) |
+| **Status** | Phase 1 implemented; acceptance tracked in SUCCESS.md (reconciled 2026-10-23) |
 | **Audience** | GitHub / senior engineers implementing Phase 1 MVP |
 | **Language** | Go 1.23+, Docker Compose v2, SQLite, Cloudflare Tunnel + Access |
 | **Module path** | `github.com/fallrising/newclear/specs/fleet` (replace `OWNER` at repo creation) |
 
-This document is implementation-ready. Protocols, JSON schemas, SQL, file layout, Cloudflare API calls, and GitHub Actions contracts are specified so Phase 1 can be built without guessing.
+This document is the Phase 1 implementation contract. The component now lives in the monorepo at `specs/fleet`; current acceptance evidence and remaining external gates are in [SUCCESS.md](../SUCCESS.md). Historical PR numbers below describe the implementation sequence, not current delivery status.
 
 ---
 
@@ -122,7 +122,7 @@ If any of these is exceeded by 10×, revisit SQLite and the single-writer CF rec
 16. **Tombstones on the wire, not silent omission.** `GET /api/v1/agent/desired` includes `desired_state=absent` (+ `purge_volumes`) until the owning agent reports the project gone (or 24h timeout). Node-move is a tombstone on the old node plus a live row on the destination.
 17. **Protected-hostname allowlist; never PUT the bootstrap tunnel.** Reconcile is `union(catalog rules for that node tunnel ∪ existing rules whose hostname ∈ FLEET_PROTECTED_HOSTNAMES)`. Register never writes empty ingress over a tunnel that already has rules. `FLEET_BOOTSTRAP_TUNNEL_ID` is immutable and not stored as `nodes.tunnel_id`.
 18. **Agent image is `docker:27.5.1-cli` + `apk add docker-cli-compose`, not distroless.** Official `*-cli` tags do **not** include Compose v2; install the plugin and assert `docker compose version` in the image build. Apply goes through `ComposeClient` (CLI). Agent process is **root** (docker.sock). `fleetd` remains distroless. Node `cloudflared` is the official distroless image. Token handoff is **path B**: bake `agent-stack.yml` into the agent image; agent writes `cloudflared.env` (0600 root — Compose CLI reads it, **not** the sidecar); then `ComposeClient.UpSidecar` recreates **only** the `cloudflared` service of project `fleet-agent`. `Up`/`Down`/`Stop` of the whole `fleet-agent`/`fleet-control` project still return `ErrProtectedProject`. Never a shell wait-loop.
-19. **Every tick reconciles actual Docker state.** Hash/generation equality skips *file writes* only. If desired=running and `Ps` is not running → `Up`; if desired=stopped and a container is running → `Stop`. `--force-recreate` on generation bump (including same image).
+19. **Every tick reconciles actual Docker state.** Hash/generation equality skips *file writes* only. If desired=running and `Ps` is not running → `Up`; if desired=stopped and a container is running → `Stop`. `--force-recreate` on an unapplied generation (including same image) or changed Compose/env hash. A persisted `force_recreate=true` is scoped to its generation and must not recreate the workload again on every tick or process restart.
 20. **Heartbeat is independent of apply/pull.** A dedicated goroutine heartbeats every 15s even during a 5-minute `compose pull`. Apply holds a per-agent lock and processes one service at a time.
 21. **`POST /api/v1/deploy` upsert is allowed for `ci` tokens.** One operator; a leaked CI token can create public hostnames; revoke is the mitigation. Pre-creating catalog rows is not required.
 22. **Do not register `fleetd` as an agent-managed workload in Phase 1.** No `fleet.yaml` for the control plane; no second Compose project fighting `fleet-control`. An agent *may* run on the control-plane VPS for *other* workloads; it must use a distinct node tunnel.
@@ -522,7 +522,7 @@ Highest-leverage artifact. Checked into each **workload** repo as `/fleet.yaml`.
 
 ### JSON Schema (canonical)
 
-Ship as `schemas/fleet.v1.schema.json`. YAML files are parsed then validated against this schema. Go structs in `internal/fleetfile` are generated-by-hand to match (do not introduce a codegen dependency in MVP).
+Ship as `schemas/fleet.v1.schema.json`. YAML files are parsed then validated against this schema. Raw field presence and types are checked before typed decoding and defaults; explicit null is not omission. Compile strings as quoted YAML scalars with Compose dollar escaping, and preserve literal dotenv values including newlines. Volume targets use Compose long syntax so colons remain part of the target path. Go structs in `internal/fleetfile` are generated-by-hand to match (do not introduce a codegen dependency in MVP).
 
 ```json
 {
@@ -752,7 +752,7 @@ spec:
 
 ## Repo / code layout
 
-New GitHub repository `fleet-catalog` (greenfield). Do not nest inside `clarkQ` or `vps-hygiene`.
+The existing component is `specs/fleet` in the monorepo. Do not create a second repository or nest it inside `clarkQ` or `vps-hygiene`. The tree below is relative to this component.
 
 ```text
 fleet-catalog/
@@ -1500,8 +1500,8 @@ Hard excludes: `compose_project ∈ {fleet-agent, fleet-control}` → log `prote
 
 ```
 on apply tick:
-  desired = GET desired
-  write atomic desired.json
+  desired = GET desired, or load same-node desired.json if fetch fails
+  on successful fetch: write atomic desired.json before applying
   actual = []
   for svc in desired.services:          # only these names; never glob
         if svc.compose_project in ProtectedProjects: skip
@@ -1522,7 +1522,7 @@ on apply tick:
         ps = ComposeClient.Ps(project, file)
         if svc.desired_state == running:
               if registry present: ComposeClient.Login(url, "x-access-token", password)
-              if svc.force_recreate or svc.generation != applied.generation:
+              if svc.generation != applied.generation or hash(compose_yaml, env) != applied.hash:
                     actual.append(name, state=progressing, error=pull_in_progress, gen=svc.generation)
                     POST actual          # mid-tick, BEFORE Pull, so UI can see progressing
                     ComposeClient.Pull(...)   # 5 min timeout; heartbeats continue

@@ -1,0 +1,35 @@
+# Fleet task board
+
+## T-0993 — Resume mainline acceptance (2026-10-23)
+
+Owner instruction: [START_DEVELOPMENT_PROMPT](../../START_DEVELOPMENT_PROMPT.md).
+Source: b7f2a4311d1135977ba273efba8e77702b908036 plus scoped working changes; existing unrelated changes preserved.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0993-1 | same-candidate schema/compiler checks; merged in #506 | AC-01 | done | 2026-10-22T18:01:58Z | 2026-10-23T01:44:24Z | 2026-10-23T01:45:09Z |
+| T-0993-2 | isolated real Docker lifecycle; merged in #506 | AC-02 | done | 2026-10-22T18:01:58Z | 2026-10-23T01:44:24Z | 2026-10-23T01:45:09Z |
+| T-0993-3 | Real Cloudflare boundary evidence; awaiting account/zone and WARP client availability | AC-03 | todo | | | 2026-10-23T01:41:40Z |
+| T-0993-4 | persisted process restart/outage recovery; merged in #506 | AC-04 | done | 2026-10-22T18:01:58Z | 2026-10-23T01:44:24Z | 2026-10-23T01:45:09Z |
+
+Order: AC-01 → AC-02 → AC-04; AC-03 depends on real external configuration. Rows become done only after authorized merge. Owner subsequently explicitly authorized milestone commits, pushes, PRs and merges; release/deployment remain outside this delivery.
+
+## 2026-10-23 verification result (before Git delivery)
+
+[Acceptance record](../evidence/2026-10-23-acceptance.md), [source manifest](../evidence/2026-10-23-source.json), and [real Docker result](../evidence/2026-10-23-docker.json). Native tests/example/vet/schema/build PASS. Final round03: ten real Docker checks and cleanup PASS. Reviewer ACCEPT; root evidence gate accepts these bounded candidate results. AC-03 is pending actual Cloudflare/WARP input, and root CI/merge have not run. Rows remain in_progress until authorized merge; no end time fabricated.
+
+Source base/fetched main: b7f2a4311d1135977ba273efba8e77702b908036. Candidate fingerprint: 7416734bd434f50d901d6c421782aae6bae5728ac8d4c4037019ecd67af60245. No production-control takeover or existing-service stop. Generated state/evidence preserved outside repo; own containers/processes cleaned up.
+
+Final documentation/evidence gate: Fleet and all 41 project success contracts/navigation PASS; all worker task/report contracts, local links, source/binary hash equality and git diff --check PASS. Earlier validator formatting failures and concurrent-document failures remain recorded in the acceptance history.
+
+## Milestone delivery
+
+Owner instruction: continue development and commit/merge a PR when a milestone is complete. Delivery branch `agent/fleet-contract-recovery-20261023` starts from `f64c7ef01532f717e963e7c1adec4cbae87f16e7`; only Fleet changes and root Fleet CI are carried from the shared working tree. Runtime fingerprint matches the independently reviewed and real-Docker-tested candidate. PR [#506](https://github.com/fallrising/newclear/pull/506) merged at `2026-10-23T01:44:24Z`, commit `a487a134aaef70e7eee29b5b98c50cb85e5fa376`. Final PR head was `6c1f2f021fd5b7136d4a6f67626c6c38f31780b5`; mergeability was CLEAN and both checks passed before the normal squash merge. The merged state/SHA/time were read back from GitHub. AC-03 remains pending external inputs, so no usable tag or full-mainline claim.
+
+Delivery verification:
+
+- [Fleet CI](https://github.com/fallrising/newclear/actions/runs/39885529743) passed `make test vet validate-schema build` on **Go 1.23.0**; [Project success contracts](https://github.com/fallrising/newclear/actions/runs/39885529728) passed.
+- Isolated delivery-tree native tests/example/vet/schema/three builds also passed using Go 1.27.1; all 41 project contracts, local links and diff checks passed. The first sandbox attempt could not bind test sockets; its failure remains preserved separately from the authorized passing rerun.
+- Runtime content fingerprint equals the independently reviewed/live-tested round03 source. The recorded Docker binary hashes remain those actually executed; delivery rebuild VCS revision/time differ and no new live run is claimed for them.
+- Root evidence gate accepts **this merged AC-01/02/04 milestone**. AC-03 remains pending dedicated Cloudflare test configuration and an enrolled WARP device. Full mainline remains incomplete with `usable_tag: none`; no tag, release or production deployment.
+- This board-only follow-up closes the three completed rows using the actual implementation merge time, as required by the repository task contract.

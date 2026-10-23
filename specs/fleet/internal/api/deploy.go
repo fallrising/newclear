@@ -33,6 +33,18 @@ func (s *Server) handleDeploy(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "validation_failed", "fleet document required", nil)
 		return
 	}
+	// Overlay on raw JSON before schema validation, as required by the CI contract.
+	if req.Image != "" {
+		var raw map[string]json.RawMessage
+		if err := json.Unmarshal(req.Fleet, &raw); err == nil && raw != nil {
+			var spec map[string]json.RawMessage
+			if err := json.Unmarshal(raw["spec"], &spec); err == nil && spec != nil {
+				spec["image"], _ = json.Marshal(req.Image)
+				raw["spec"], _ = json.Marshal(spec)
+				req.Fleet, _ = json.Marshal(raw)
+			}
+		}
+	}
 	doc, err := fleetfile.ParseJSON(req.Fleet)
 	if err != nil {
 		writeFleetErr(w, err)

@@ -21,3 +21,19 @@ func TestMerge(t *testing.T) {
 		t.Fatal(out)
 	}
 }
+
+func TestMergePreservesDotenvSyntax(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "secrets.env")
+	secret := "TOKEN='a secret'\n"
+	if err := os.WriteFile(p, []byte(secret), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	env := "MULTI='first\nline without equals\nEXTRA=literal'\nDOLLAR='${LITERAL}'\nTAIL=\"ends\\\\\"\n"
+	out, err := Merge(env, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != env+secret {
+		t.Fatalf("dotenv syntax changed: %q", out)
+	}
+}

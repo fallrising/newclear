@@ -1,9 +1,11 @@
 package compose
 
 import (
+	"encoding/json"
 	"fmt"
+	"maps"
 	"regexp"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -32,14 +34,14 @@ func Render(in Input) (yamlOut string, envFile string, err error) {
 	fmt.Fprintf(&b, "name: fleet-%s\n", name)
 	b.WriteString("services:\n")
 	b.WriteString("  app:\n")
-	fmt.Fprintf(&b, "    image: %s\n", image)
+	fmt.Fprintf(&b, "    image: %s\n", composeString(image))
 	fmt.Fprintf(&b, "    container_name: fleet-%s-app\n", name)
 	b.WriteString("    restart: unless-stopped\n")
 	if in.Doc.Spec.User != "" {
-		fmt.Fprintf(&b, "    user: %q\n", in.Doc.Spec.User)
+		fmt.Fprintf(&b, "    user: %s\n", composeString(in.Doc.Spec.User))
 	}
 	if in.Doc.Spec.WorkingDir != "" {
-		fmt.Fprintf(&b, "    working_dir: %s\n", in.Doc.Spec.WorkingDir)
+		fmt.Fprintf(&b, "    working_dir: %s\n", composeString(in.Doc.Spec.WorkingDir))
 	}
 	writeList(&b, "    entrypoint", in.Doc.Spec.Command)
 	writeList(&b, "    command", in.Doc.Spec.Args)
@@ -50,7 +52,9 @@ func Render(in Input) (yamlOut string, envFile string, err error) {
 	if len(in.Doc.Spec.Volumes) > 0 {
 		b.WriteString("    volumes:\n")
 		for _, v := range in.Doc.Spec.Volumes {
-			fmt.Fprintf(&b, "      - fleet-%s_%s:%s\n", name, v.Name, v.Mount)
+			b.WriteString("      - type: volume\n")
+			fmt.Fprintf(&b, "        source: fleet-%s_%s\n", name, v.Name)
+			fmt.Fprintf(&b, "        target: %s\n", composeString(v.Mount))
 		}
 	}
 	if in.Doc.Spec.Resources != nil {
@@ -98,24 +102,36 @@ func writeList(b *strings.Builder, key string, items []string) {
 	}
 	fmt.Fprintf(b, "%s:\n", key)
 	for _, it := range items {
-		fmt.Fprintf(b, "      - %s\n", it)
+		fmt.Fprintf(b, "      - %s\n", composeString(it))
 	}
+}
+
+// JSON string syntax is also YAML string syntax. Compose interpolates dollar
+// expressions independently of YAML quoting, so escape dollars as well.
+func composeString(value string) string {
+	b, _ := json.Marshal(strings.ReplaceAll(value, "$", "$$"))
+	return string(b)
 }
 
 func RenderEnv(env map[string]string) string {
 	if len(env) == 0 {
 		return ""
 	}
-	keys := make([]string, 0, len(env))
-	for k := range env {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+	keys := slices.Sorted(maps.Keys(env))
 	var b strings.Builder
 	for _, k := range keys {
 		b.WriteString(k)
 		b.WriteByte('=')
-		b.WriteString(env[k])
+		value := env[k]
+		if strings.HasSuffix(value, "\\") {
+			// A final backslash escapes a single-quoted dotenv terminator.
+			// Double quotes support escaped backslashes and $$ literals.
+			b.WriteString(composeString(value))
+		} else {
+			b.WriteByte('\'')
+			b.WriteString(strings.ReplaceAll(value, "'", "\\'"))
+			b.WriteByte('\'')
+		}
 		b.WriteByte('\n')
 	}
 	return b.String()
@@ -132,16 +148,19 @@ func ValidateOutput(yamlOut, svcName string) error {
 	if name != "fleet-"+svcName {
 		return fmt.Errorf("compose_compile_failed: name %q", name)
 	}
-	if strings.Contains(yamlOut, "privileged: true") {
-		return fmt.Errorf("compose_compile_failed: privileged")
-	}
-	if strings.Contains(yamlOut, "network_mode: host") {
-		return fmt.Errorf("compose_compile_failed: network_mode host")
-	}
 	svcs, _ := raw["services"].(map[string]any)
+	if len(svcs) != 1 {
+		return fmt.Errorf("compose_compile_failed: expected only app service")
+	}
 	app, _ := svcs["app"].(map[string]any)
 	if app == nil {
 		return fmt.Errorf("compose_compile_failed: missing app")
+	}
+	if value, exists := app["privileged"]; exists && value != false {
+		return fmt.Errorf("compose_compile_failed: privileged")
+	}
+	if _, exists := app["network_mode"]; exists {
+		return fmt.Errorf("compose_compile_failed: network_mode")
 	}
 	ports, _ := app["ports"].([]any)
 	if len(ports) != 1 {
@@ -151,10 +170,14 @@ func ValidateOutput(yamlOut, svcName string) error {
 	if !rePort.MatchString(p) {
 		return fmt.Errorf("compose_compile_failed: port %q", p)
 	}
-	if vols, ok := raw["volumes"].(map[string]any); ok {
-		prefix := "fleet-" + svcName + "_"
+	if volumeValue, exists := raw["volumes"]; exists {
+		vols, ok := volumeValue.(map[string]any)
+		if !ok {
+			return fmt.Errorf("compose_compile_failed: volumes")
+		}
+		volumeName := regexp.MustCompile(`^fleet-` + regexp.QuoteMeta(svcName) + `_[a-z][a-z0-9-]{0,30}[a-z0-9]$`)
 		for k := range vols {
-			if !strings.HasPrefix(k, prefix) {
+			if !volumeName.MatchString(k) {
 				return fmt.Errorf("compose_compile_failed: volume %q", k)
 			}
 		}

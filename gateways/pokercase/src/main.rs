@@ -108,11 +108,14 @@ enum Commands {
         data_dir: Option<std::path::PathBuf>,
         #[arg(long, env = "THINROUTER_SECRETS_KEY")]
         secrets_key: Option<String>,
-        /// Also create routes rt-<provider> for each import
-        #[arg(long, default_value_t = true)]
+        /// Do not create routes rt-<provider> for each import
+        #[arg(long)]
+        no_routes: bool,
+        /// Routes are created by default; kept so `--routes` still parses
+        #[arg(long, hide = true)]
         routes: bool,
-        /// After import, try OAuth refresh for each connection
-        #[arg(long, default_value_t = true)]
+        /// After import, refresh OAuth tokens (never the Codex CLI's borrowed login)
+        #[arg(long)]
         refresh: bool,
     },
     /// Sign in with ChatGPT (official plan sharing) and store an `siwc` connection
@@ -218,7 +221,8 @@ async fn main() -> Result<()> {
         Commands::ImportLocal {
             data_dir,
             secrets_key,
-            routes,
+            no_routes,
+            routes: _,
             refresh,
         } => {
             let cfg = AppConfig::new(
@@ -231,7 +235,7 @@ async fn main() -> Result<()> {
                 None,
                 None,
             )?;
-            import_local_cmd(&cfg, routes, refresh).await
+            import_local_cmd(&cfg, !no_routes, refresh).await
         }
         Commands::LoginSiwc {
             data_dir,

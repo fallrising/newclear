@@ -33,6 +33,7 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 | AC-06 | Given Codex（Responses 上游，強制串流），When 用 `/v1/chat/completions`、`/v1/messages`、`/v1/responses` 送純文字、工具呼叫、多輪 tool 往返與圖片（串流與非串流），Then 各端點收到自己的協定格式（chat chunk＋`[DONE]`、Anthropic 事件含 tool_use、原生 Responses），call_id 對得上且圖片保留。 | passed | `tests/codex_e2e.rs`（本機腳本化 SSE 假上游）、`responses`／`claude` 單元測試；2026-10-22 本機全綠。chat 上游經 `/v1/responses` 串流仍只轉文字 delta。 |
 | AC-07 | Given 同一段對話的多輪 Codex 請求，When 經任一端點送出，Then 帶穩定的 `prompt_cache_key` 與同值 `session-id`／`thread-id`（用戶端自帶的 key 優先），User-Agent 版本取自 `--codex-version`、本機 `codex --version` 或內建值。 | passed | `src/codex.rs` 單元測試、`tests/codex_e2e.rs` 標頭與 key 斷言；2026-10-22 本機全綠。快取命中率需真實帳號驗證，未執行。 |
 | AC-08 | Given `thinrouter login-siwc` 取得的官方 Sign in with ChatGPT 憑證，When 經三個端點呼叫 `siwc` provider，Then 打 `api.openai.com/v1/responses` 並強制 `store:false`、`stream:true`，剔除不支援欄位、system→developer、function tools 包進 namespace，`previous_response_id` 與託管工具回 400，額度用盡回 429；refresh 依 issued client_id 輪換並序列化。 | pending | 本機已驗：`siwc` 單元測試（含假 auth server 的完整登入與 refresh）、`tests/codex_e2e.rs::siwc_provider_applies_preview_limits`、`oauth_refresh` 測試。未以真實帳號登入或呼叫；namespace 工具格式未經真實上游確認。 |
+| AC-09 | Given `import-local` 匯入的 Codex 連線（借用 `~/.codex/auth.json`），When 呼叫上游、檔案被 Codex CLI 更新或 token 過期，Then 每次重讀檔案、從不自行 refresh 或寫檔，401 時重讀一次後回明確提示；`import-local` 預設不 refresh、`--no-routes` 可關閉 routes。 | passed | `tests/codex_e2e.rs::borrowed_codex_login_is_reread_and_never_refreshed`（暫存目錄假 auth.json）、`codex`／`local_import` 單元測試；2026-10-22 本機全綠。 |
 
 ## 現況與缺口
 

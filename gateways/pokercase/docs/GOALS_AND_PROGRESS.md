@@ -78,7 +78,7 @@ Legend: ✅ done · 🟨 partial · ❌ not started · 🚫 deferred
 3. [x] Partial: cursor / agy (import tokens; executor later)
 4. [x] Smoke: **codex / grok / opencode / agy OK**; claude depends on local credentials; cursor still 501
 5. [x] OAuth **refresh** for codex / claude / grok / agy (+ 401 retry)
-6. [x] `thinrouter import-local --routes --refresh`
+6. [x] `thinrouter import-local` (routes by default; `--refresh` opt-in, never for the borrowed Codex login)
 7. [x] Antigravity `loadCodeAssist` + `generateContent` executor
 8. [x] Cursor OAuth **refresh** (`api2.cursor.sh/oauth/token`)
 9. [x] Claude subscription integration notes (`docs/CLAUDE_SUBSCRIPTION.md`)

@@ -129,9 +129,19 @@ async fn forward_chat_completions_inner(
     allow_401_refresh: bool,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
     // Refresh OAuth if near expiry (best-effort).
+    let borrowed = codex::borrowed_source(&target.connection);
     let target = {
         let mut t = target.clone();
-        if allow_401_refresh && t.connection.auth_type == "oauth_import" {
+        if let Some(path) = &borrowed {
+            // Re-read the Codex CLI's file on every attempt; never refresh it ourselves.
+            if let Err(e) = codex::apply_borrowed(&mut t.connection, path) {
+                return Err(UpstreamAttemptError {
+                    status: 401,
+                    body: e.to_string(),
+                    retryable: true,
+                });
+            }
+        } else if allow_401_refresh && t.connection.auth_type == "oauth_import" {
             if let Ok(fresh) =
                 crate::oauth_refresh::ensure_fresh(&state.store, t.connection.clone()).await
             {
@@ -400,6 +410,33 @@ async fn forward_chat_completions_inner(
                     response: resp,
                     body_kind,
                     reassemble_stream: reassemble,
+                })
+            } else if status == 401 && borrowed.is_some() {
+                let body_txt = resp.text().await.unwrap_or_default();
+                let mut reread = target.clone();
+                let changed = borrowed
+                    .as_deref()
+                    .and_then(|p| codex::apply_borrowed(&mut reread.connection, p).ok())
+                    .is_some_and(|_| {
+                        reread.connection.bearer_token() != target.connection.bearer_token()
+                    });
+                if changed && allow_401_refresh {
+                    // The CLI refreshed the file since we read it: retry once.
+                    return Box::pin(forward_chat_completions_inner(
+                        state,
+                        target,
+                        body,
+                        native_responses,
+                        stream,
+                        cancel,
+                        false,
+                    ))
+                    .await;
+                }
+                Err(UpstreamAttemptError {
+                    status,
+                    body: format!("{body_txt} ({})", codex::BORROWED_HINT),
+                    retryable: true,
                 })
             } else if status == 401
                 && allow_401_refresh

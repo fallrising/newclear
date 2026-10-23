@@ -98,7 +98,7 @@ export CLAUDE_CODE_OAUTH_TOKEN='…'
 ```bash
 # 1) 优先读 ~/.claude/.credentials.json
 # 2) 若为空，读环境变量 CLAUDE_CODE_OAUTH_TOKEN
-thinrouter import-local --routes --refresh
+thinrouter import-local
 
 # 或 Admin UI → Import OAuth → provider=claude → 粘贴 access token
 ```

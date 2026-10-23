@@ -81,8 +81,9 @@ thinrouter serve --host 127.0.0.1 --port 20128
 thinrouter serve --data-dir ./data --admin-token secret --secrets-key passphrase
 thinrouter doctor
 thinrouter tui
-# Import personal subscription tokens from local agent CLIs + refresh:
-thinrouter import-local --routes --refresh
+# Import personal subscription tokens from local agent CLIs (creates rt-* routes;
+# add --refresh to refresh non-Codex tokens, --no-routes to skip routes):
+thinrouter import-local
 thinrouter refresh
 # Official ChatGPT plan sharing (browser sign-in, loopback 127.0.0.1:1455):
 thinrouter login-siwc [--name siwc] [--model <slug>]

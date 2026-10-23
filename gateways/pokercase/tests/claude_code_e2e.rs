@@ -207,7 +207,6 @@ async fn claude_runs_the_cli_with_claude_codes_own_prompt() {
         "--input-format",
         "--include-partial-messages",
         "--strict-mcp-config",
-        "--no-session-persistence",
     ] {
         assert!(args.iter().any(|a| a == want), "missing {want}: {args:?}");
     }
@@ -218,6 +217,10 @@ async fn claude_runs_the_cli_with_claude_codes_own_prompt() {
         .windows(2)
         .any(|w| w[0] == "--tools" && w[1].is_empty()));
     assert!(!args.iter().any(|a| a.contains("system-prompt")));
+    assert!(
+        !args.iter().any(|a| a == "--no-session-persistence"),
+        "sessions are saved so ended idle runs can be resumed"
+    );
     let env_txt = env.file("env.txt");
     assert!(!env_txt.contains("sk-should-not-leak"));
     assert!(!env_txt.contains("evil.example"));

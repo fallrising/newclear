@@ -16,7 +16,7 @@ client (chat / messages / responses)
         ▼
 claude -p --output-format stream-json --input-format stream-json
           --include-partial-messages --verbose --model <model>
-          --tools "" --strict-mcp-config --setting-sources "" --no-session-persistence
+          --tools "" --strict-mcp-config --setting-sources "" [--resume <session>]
         │  Claude Code 用自己的登录、system prompt、billing 区块与客户端身份请求 Anthropic
         ▼
 stream-json 的 stream_event（Anthropic Messages 事件）
@@ -70,7 +70,20 @@ client
 - 新进程的第一则讯息里，历史每 20 则一个区块，最后一个完整区块加 `cache_control`
   （`ephemeral`、1h）；没有完整区块时标在呼叫方的 instructions 上。之后同一段对话即使开新进程，
   也能读到之前写入的 cache。
-- gateway 关闭时先对所有存活的 Claude Code 送 SIGTERM，最多等 6 秒。
+- gateway 关闭时（Ctrl-C 或 SIGTERM）先对所有存活的 Claude Code 送 SIGTERM，最多等 6 秒。
+
+## 存下的 session（重启后也能续接）
+
+- Claude Code 会把 session 存在 `<CLAUDE_CONFIG_DIR 或 ~/.claude>/projects/<工作目录路径，非英数字换成 ->/<session_id>.jsonl`
+  （thinrouter 不再传 `--no-session-persistence`），session_id 取自它的 `system`/`init` 行。
+- 闲置中的 run 被结束（闲置逾时、名额被让出、gateway 关闭）时，它的 session 登记到资料库的
+  `claude_shelf`：只存 session_id、设定签章的 hash 与每则已知讯息的 hash，不存对话内容。
+- 新请求若续不上闲置进程，就查 shelf：设定相同、历史是已知讯息的前缀、后面只多了使用者讯息，
+  就以 `claude -p ... --resume <session_id>` 开新进程、只写入新讯息，Anthropic 照原样读 cache。
+  session 档不在，或 Claude Code 载入失败（例如 `No conversation found`），自动改开新进程整段重送。
+- shelf 最多 64 笔、保留 6 小时，过期或被挤出时连 session 档一起删除；其他结束的 run（等工具结果
+  逾时、出错）不保留 session。gateway 启动时会删除工作目录专属 project 资料夹里 shelf 没引用的
+  session 档（例如当机遗留），每 10 分钟清一次过期项目。
 - `tool_choice: required` 或指定工具时，在 `<external_system_instructions>` 里用文字说明
   （Claude Code 没有对应参数）。
 
@@ -89,6 +102,6 @@ thinrouter serve --claude-bin /path/to/claude   # 不在 PATH 时
 
 - 只有「对话完全一致、只多了使用者讯息」才续用闲置进程；客户端改写或截短历史、换了
   system/工具/模型，都会开新进程重送整段对话（由 history 分块的 cache 标记减少重写）。
-- thinrouter 重启后没有可续用的进程（不保存 session；magpie 的 `--resume` 搁置区未实作）。
+- 闲置进程被结束后，靠存下的 session 续接（见下节）；但对话被改写时一样整段重送。
 - thinking 区块不回传；`temperature`、`max_tokens` 等取样参数不传给 Claude Code。
 - 旧版存过的 Claude token 会在开启资料库时清掉（不再使用）。

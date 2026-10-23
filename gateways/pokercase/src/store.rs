@@ -337,6 +337,15 @@ fn migrate_schema(conn: &Connection) -> Result<()> {
                 value TEXT NOT NULL
             );
 
+            -- Saved Claude Code sessions of idle runs that were ended, for --resume.
+            -- Only hashes of the conversation are kept, never its text.
+            CREATE TABLE IF NOT EXISTS claude_shelf (
+                session_id TEXT PRIMARY KEY,
+                signature TEXT NOT NULL,
+                known TEXT NOT NULL,
+                saved_at INTEGER NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS connections (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL UNIQUE,
@@ -996,6 +1005,93 @@ impl Store {
     }
 
     /// Disabled keys still close the explicit, local bootstrap exception.
+    /// Keep a saved Claude Code session for its conversation's next turn. `known` is
+    /// the per-message hashes of the conversation it has; at most `max` are kept.
+    pub fn shelf_put(
+        &self,
+        session_id: &str,
+        signature: &str,
+        known: &[String],
+        max: usize,
+    ) -> Result<Vec<String>> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT OR REPLACE INTO claude_shelf (session_id, signature, known, saved_at)
+             VALUES (?1, ?2, ?3, ?4)",
+            params![
+                session_id,
+                signature,
+                serde_json::to_string(known)?,
+                Utc::now().timestamp()
+            ],
+        )?;
+        let mut stmt = conn.prepare(
+            "SELECT session_id FROM claude_shelf ORDER BY saved_at DESC, rowid DESC LIMIT -1 OFFSET ?1",
+        )?;
+        let over: Vec<String> = stmt
+            .query_map(params![max as i64], |r| r.get(0))?
+            .collect::<rusqlite::Result<_>>()?;
+        for sid in &over {
+            conn.execute(
+                "DELETE FROM claude_shelf WHERE session_id = ?1",
+                params![sid],
+            )?;
+        }
+        Ok(over)
+    }
+
+    /// Take the saved session whose conversation `convo` (per-message hashes) goes on
+    /// from: same signature, its known messages a strict prefix. Returns (session, how
+    /// many messages it has). The longest match wins.
+    pub fn shelf_take(&self, signature: &str, convo: &[String]) -> Result<Option<(String, usize)>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt =
+            conn.prepare("SELECT session_id, known FROM claude_shelf WHERE signature = ?1")?;
+        let rows: Vec<(String, String)> = stmt
+            .query_map(params![signature], |r| Ok((r.get(0)?, r.get(1)?)))?
+            .collect::<rusqlite::Result<_>>()?;
+        let best = rows
+            .into_iter()
+            .filter_map(|(sid, known)| {
+                let known: Vec<String> = serde_json::from_str(&known).ok()?;
+                (known.len() < convo.len() && convo[..known.len()] == known[..])
+                    .then_some((sid, known.len()))
+            })
+            .max_by_key(|(_, n)| *n);
+        if let Some((sid, _)) = &best {
+            conn.execute(
+                "DELETE FROM claude_shelf WHERE session_id = ?1",
+                params![sid],
+            )?;
+        }
+        Ok(best)
+    }
+
+    /// Remove and return saved sessions older than `max_age_secs`.
+    pub fn shelf_expire(&self, max_age_secs: i64) -> Result<Vec<String>> {
+        let cutoff = Utc::now().timestamp() - max_age_secs;
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT session_id FROM claude_shelf WHERE saved_at < ?1")?;
+        let old: Vec<String> = stmt
+            .query_map(params![cutoff], |r| r.get(0))?
+            .collect::<rusqlite::Result<_>>()?;
+        conn.execute(
+            "DELETE FROM claude_shelf WHERE saved_at < ?1",
+            params![cutoff],
+        )?;
+        Ok(old)
+    }
+
+    /// Session ids on the shelf.
+    pub fn shelf_ids(&self) -> Result<Vec<String>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT session_id FROM claude_shelf")?;
+        let ids = stmt
+            .query_map([], |r| r.get(0))?
+            .collect::<rusqlite::Result<_>>()?;
+        Ok(ids)
+    }
+
     pub fn has_api_keys(&self) -> Result<bool> {
         let conn = self.conn.lock().unwrap();
         Ok(conn.query_row("SELECT EXISTS(SELECT 1 FROM api_keys)", [], |r| r.get(0))?)
@@ -1338,5 +1434,39 @@ mod secret_storage_tests {
         let o = c.oauth.unwrap();
         assert_eq!(o.access_token, "");
         assert!(o.refresh_token.is_none());
+    }
+
+    #[test]
+    fn claude_shelf_matches_conversation_prefixes() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("t.db"), None).unwrap();
+        let h = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        store.shelf_put("s1", "sig", &h(&["a", "b"]), 64).unwrap();
+        store
+            .shelf_put("s2", "sig", &h(&["a", "b", "c", "d"]), 64)
+            .unwrap();
+        // other settings, edited history, nothing new: no match
+        assert!(store
+            .shelf_take("other", &h(&["a", "b", "c"]))
+            .unwrap()
+            .is_none());
+        assert!(store
+            .shelf_take("sig", &h(&["a", "x", "c"]))
+            .unwrap()
+            .is_none());
+        assert!(store.shelf_take("sig", &h(&["a", "b"])).unwrap().is_none());
+        // longest prefix wins and is taken off the shelf
+        assert_eq!(
+            store
+                .shelf_take("sig", &h(&["a", "b", "c", "d", "e"]))
+                .unwrap(),
+            Some(("s2".into(), 4))
+        );
+        assert_eq!(store.shelf_ids().unwrap(), vec!["s1".to_string()]);
+        // capacity: the oldest are pushed out
+        let out = store.shelf_put("s3", "sig", &h(&["z"]), 1).unwrap();
+        assert_eq!(out, vec!["s1".to_string()]);
+        assert_eq!(store.shelf_expire(-1).unwrap(), vec!["s3".to_string()]);
+        assert!(store.shelf_ids().unwrap().is_empty());
     }
 }

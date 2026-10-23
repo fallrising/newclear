@@ -15,8 +15,11 @@
 //! calls and reads the same process's next message, so the conversation is not sent
 //! again. A run whose reply ended (`end_turn`) parks idle with the conversation it
 //! knows; a request that only adds user messages to exactly that conversation (same
-//! model, instructions and tools) is written to its stdin. Anything else (other
-//! results, edited history, an expired or evicted run) starts a new run told the whole
+//! model, instructions and tools) is written to its stdin. An idle run that is ended
+//! (expired, evicted, gateway shutdown) leaves its Claude Code session on disk and a
+//! shelf entry in the database (hashes only), so a later turn — also after a restart —
+//! starts `claude --resume <session>` told only the new messages. Anything else (other
+//! results, edited history, nothing saved) starts a new run told the whole
 //! conversation, its history in cache-marked blocks.
 
 use std::collections::{HashMap, VecDeque};
@@ -53,6 +56,37 @@ pub struct ClaudeCode {
     live: Arc<Mutex<Live>>,
     /// Processes not yet exited (for shutdown).
     alive: Arc<std::sync::atomic::AtomicUsize>,
+    /// Where saved sessions of ended idle runs are listed (`claude_shelf`).
+    store: Option<crate::store::Store>,
+    /// Claude Code's config folder (`CLAUDE_CONFIG_DIR`, else `~/.claude`).
+    config_dir: PathBuf,
+}
+
+/// Saved sessions kept on the shelf at most, and for how long.
+const SHELF_MOST: usize = 64;
+const SHELF_SECS: i64 = 6 * 3600;
+
+fn sha(s: &str) -> String {
+    use sha2::{Digest, Sha256};
+    hex::encode(Sha256::digest(s.as_bytes()))
+}
+
+/// A session id is only used as a file name when it is plainly an id.
+fn safe_session_id(sid: &str) -> bool {
+    !sid.is_empty()
+        && sid.len() <= 128
+        && sid
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+}
+
+/// Claude Code's folder name for a working directory's sessions: the path with
+/// everything but ASCII letters and digits made `-` (as magpie's claudeProjectName).
+fn project_name(path: &Path) -> String {
+    path.to_string_lossy()
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
+        .collect()
 }
 
 /// Runs that outlive a request.
@@ -98,6 +132,10 @@ struct LiveRun {
     signature: String,
     /// The conversation it has (normalized messages, see `norm`).
     known: Mutex<Vec<Value>>,
+    /// Claude Code's session id (from its `system`/`init` line).
+    session_id: Mutex<Option<String>>,
+    /// Parked after a complete reply (so its session can be shelved when it ends).
+    idle_now: std::sync::atomic::AtomicBool,
 }
 
 /// What must match for a message to count as "the same" in a known conversation.
@@ -178,6 +216,122 @@ impl ClaudeCode {
             callback_base: Arc::new(OnceLock::new()),
             live: Arc::new(Mutex::new(Live::default())),
             alive: Arc::new(std::sync::atomic::AtomicUsize::new(0)),
+            store: None,
+            config_dir: std::env::var_os("CLAUDE_CONFIG_DIR")
+                .map(PathBuf::from)
+                .or_else(|| dirs::home_dir().map(|h| h.join(".claude")))
+                .unwrap_or_else(|| PathBuf::from(".claude")),
+        }
+    }
+
+    pub fn with_store(mut self, store: crate::store::Store) -> Self {
+        self.store = Some(store);
+        self
+    }
+
+    /// Folders Claude Code saves this work dir's sessions in (its own path and, when
+    /// different, the resolved one).
+    fn session_dirs(&self) -> Vec<PathBuf> {
+        let mut dirs = vec![self
+            .config_dir
+            .join("projects")
+            .join(project_name(&self.work_dir))];
+        if let Ok(real) = std::fs::canonicalize(&self.work_dir) {
+            let d = self.config_dir.join("projects").join(project_name(&real));
+            if !dirs.contains(&d) {
+                dirs.push(d);
+            }
+        }
+        dirs
+    }
+
+    fn session_saved(&self, sid: &str) -> bool {
+        safe_session_id(sid)
+            && self
+                .session_dirs()
+                .iter()
+                .any(|d| d.join(format!("{sid}.jsonl")).is_file())
+    }
+
+    /// Remove a session's file and the folder Claude Code may keep beside it.
+    fn remove_session(&self, sid: &str) {
+        if !safe_session_id(sid) {
+            return;
+        }
+        for d in self.session_dirs() {
+            let _ = std::fs::remove_file(d.join(format!("{sid}.jsonl")));
+            let _ = std::fs::remove_dir_all(d.join(sid));
+        }
+    }
+
+    /// Drop expired shelf entries with their files, and session files no shelf entry
+    /// names (left by runs that ended without being shelved, or before a crash).
+    /// Only the work dir's own project folders are touched: no one else works there.
+    pub fn sweep_sessions(&self, at_startup: bool) {
+        let Some(store) = &self.store else { return };
+        for sid in store.shelf_expire(SHELF_SECS).unwrap_or_default() {
+            self.remove_session(&sid);
+        }
+        if !at_startup {
+            return;
+        }
+        let kept: std::collections::HashSet<String> =
+            store.shelf_ids().unwrap_or_default().into_iter().collect();
+        for d in self.session_dirs() {
+            for e in std::fs::read_dir(&d).into_iter().flatten().flatten() {
+                let name = e.file_name().to_string_lossy().to_string();
+                if let Some(sid) = name.strip_suffix(".jsonl") {
+                    if !kept.contains(sid) {
+                        self.remove_session(sid);
+                    }
+                }
+            }
+        }
+    }
+
+    /// A saved session this conversation goes on from: same settings, its messages a
+    /// prefix, only user messages after it, and the file still there.
+    fn unshelve(&self, model: &str, chat: &Value) -> Option<(String, usize)> {
+        let store = self.store.as_ref()?;
+        let msgs = convo(chat);
+        let hashes: Vec<String> = msgs.iter().map(|m| sha(&norm(m).to_string())).collect();
+        let (sid, n) = store
+            .shelf_take(&sha(&signature(model, chat)), &hashes)
+            .ok()??;
+        let only_user = msgs[n..]
+            .iter()
+            .all(|m| m.get("role").and_then(|r| r.as_str()) == Some("user"));
+        if !only_user || !self.session_saved(&sid) {
+            self.remove_session(&sid);
+            return None;
+        }
+        Some((sid, n))
+    }
+
+    /// Put an ended idle run's session on the shelf.
+    fn shelve(&self, run: &LiveRun) -> bool {
+        let (Some(store), Some(sid)) = (&self.store, run.session_id.lock().unwrap().clone()) else {
+            return false;
+        };
+        if !self.session_saved(&sid) {
+            return false;
+        }
+        let known: Vec<String> = run
+            .known
+            .lock()
+            .unwrap()
+            .iter()
+            .map(|m| sha(&m.to_string()))
+            .collect();
+        match store.shelf_put(&sid, &sha(&run.signature), &known, SHELF_MOST) {
+            Ok(pushed_out) => {
+                for old in pushed_out {
+                    self.remove_session(&old);
+                }
+                debug!("saved an ended Claude Code run's session for its next turn");
+                true
+            }
+            Err(_) => false,
         }
     }
 
@@ -252,6 +406,8 @@ impl ClaudeCode {
             live.order.retain(|r| !Arc::ptr_eq(r, &run));
             run
         };
+        run.idle_now
+            .store(false, std::sync::atomic::Ordering::SeqCst);
         let start = run.known.lock().unwrap().len();
         let line = json!({"type": "user", "message": {"role": "user", "content": render_turn(&msgs[start..])}});
         let (tx, rx) = mpsc::channel::<Item>(64);
@@ -404,7 +560,14 @@ fn trailing_tool_results(chat: &Value) -> Option<Vec<(String, ToolResult)>> {
 
 /// Arguments as magpie's `claudeCLIArgs`. With client tools, the MCP helper's config
 /// and an allow-list of exactly those tools (no permission prompt in `-p`).
-pub fn cli_args(model: &str, mcp_config: Option<&Path>, allowed: &[String]) -> Vec<String> {
+/// Sessions are saved (no `--no-session-persistence`) so an ended idle run can be
+/// resumed with `--resume <session>`.
+pub fn cli_args(
+    model: &str,
+    mcp_config: Option<&Path>,
+    allowed: &[String],
+    resume: Option<&str>,
+) -> Vec<String> {
     let mut args: Vec<String> = [
         "-p",
         "--output-format",
@@ -420,7 +583,6 @@ pub fn cli_args(model: &str, mcp_config: Option<&Path>, allowed: &[String]) -> V
         "--strict-mcp-config",
         "--setting-sources",
         "",
-        "--no-session-persistence",
     ]
     .iter()
     .map(|s| s.to_string())
@@ -430,6 +592,10 @@ pub fn cli_args(model: &str, mcp_config: Option<&Path>, allowed: &[String]) -> V
         args.push(cfg.display().to_string());
         args.push("--allowedTools".into());
         args.push(allowed.join(","));
+    }
+    if let Some(sid) = resume {
+        args.push("--resume".into());
+        args.push(sid.to_string());
     }
     args
 }
@@ -831,6 +997,33 @@ pub async fn start(
         debug!("the next turn goes on in the idle Claude Code run");
         return first_record(rx).await;
     }
+    if let Some(saved) = cc.unshelve(model, chat) {
+        match spawn_run(cc, model, chat, cancel, Some(saved)).await {
+            Ok(run) => {
+                debug!("the next turn goes on from a saved Claude Code session");
+                return Ok(run);
+            }
+            Err(e) if !cancel.is_cancelled() => {
+                debug!(
+                    status = e.status,
+                    "saved session not resumable; a new run is told the conversation"
+                );
+            }
+            Err(e) => return Err(e),
+        }
+    }
+    spawn_run(cc, model, chat, cancel, None).await
+}
+
+/// Start `claude -p`: told the whole conversation, or (`resume` = saved session and how
+/// many messages it has) only the messages after it.
+async fn spawn_run(
+    cc: &ClaudeCode,
+    model: &str,
+    chat: &Value,
+    cancel: &CancellationToken,
+    resume: Option<(String, usize)>,
+) -> Result<ClaudeRun, UpstreamAttemptError> {
     let fail = |status: u16, body: String, retryable: bool| UpstreamAttemptError {
         status,
         body,
@@ -894,12 +1087,17 @@ pub async fn start(
     let allowed: Vec<String> = names.keys().cloned().collect();
 
     let mut cmd = Command::new(&cc.bin);
-    cmd.args(cli_args(model, mcp_config.as_deref(), &allowed))
-        .current_dir(&cc.work_dir)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .kill_on_drop(true);
+    cmd.args(cli_args(
+        model,
+        mcp_config.as_deref(),
+        &allowed,
+        resume.as_ref().map(|(sid, _)| sid.as_str()),
+    ))
+    .current_dir(&cc.work_dir)
+    .stdin(Stdio::piped())
+    .stdout(Stdio::piped())
+    .stderr(Stdio::piped())
+    .kill_on_drop(true);
     for k in BLOCKED_ENV {
         cmd.env_remove(k);
     }
@@ -917,7 +1115,11 @@ pub async fn start(
         )
     })?;
 
-    let line = json!({"type": "user", "message": {"role": "user", "content": render_prompt(chat)}});
+    let content = match &resume {
+        Some((_, n)) => render_turn(&convo(chat)[*n..]),
+        None => render_prompt(chat),
+    };
+    let line = json!({"type": "user", "message": {"role": "user", "content": content}});
     let mut stdin = child.stdin.take().expect("piped stdin");
     let stdout = child.stdout.take().expect("piped stdout");
     let mut stderr = child.stderr.take().expect("piped stderr");
@@ -939,6 +1141,8 @@ pub async fn start(
         stdin: tokio::sync::Mutex::new(Some(stdin)),
         signature: signature(model, chat),
         known: Mutex::new(convo(chat).iter().map(norm).collect()),
+        session_id: Mutex::new(resume.as_ref().map(|(sid, _)| sid.clone())),
+        idle_now: std::sync::atomic::AtomicBool::new(false),
     });
     cc.live.lock().unwrap().by_token.insert(token, run.clone());
 
@@ -995,6 +1199,8 @@ pub async fn start(
                             "images": 0,
                         }));
                         *run.waiting_since.lock().unwrap() = Some(Instant::now());
+                        run.idle_now
+                            .store(true, std::sync::atomic::Ordering::SeqCst);
                         let mut live = cc.live.lock().unwrap();
                         live.idle.push(run.clone());
                         live.order.push_back(run.clone());
@@ -1040,6 +1246,11 @@ pub async fn start(
                     }
                     break;
                 }
+                Some("system") if env.get("subtype").and_then(|s| s.as_str()) == Some("init") => {
+                    if let Some(sid) = env.get("session_id").and_then(|s| s.as_str()) {
+                        *run.session_id.lock().unwrap() = Some(sid.to_string());
+                    }
+                }
                 _ => {}
             }
         }
@@ -1074,6 +1285,13 @@ pub async fn start(
         run.stop.cancel();
         *run.sink.lock().unwrap() = None;
         stop(child).await;
+        // An idle run's session is kept for its next turn; any other run's is removed.
+        let idle = run.idle_now.load(std::sync::atomic::Ordering::SeqCst);
+        if !(idle && cc.shelve(&run)) {
+            if let Some(sid) = run.session_id.lock().unwrap().clone() {
+                cc.remove_session(&sid);
+            }
+        }
         cc.alive.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
         if let Some(dir) = run_dir {
             let _ = std::fs::remove_dir_all(dir);
@@ -1232,7 +1450,7 @@ mod tests {
             "<external_system_instructions>\nYou are a pirate.\n</external_system_instructions>\n\n"
         );
         assert_eq!(blocks[1]["text"], "Human: hi\n\n");
-        let args = cli_args("sonnet", None, &[]);
+        let args = cli_args("sonnet", None, &[], None);
         assert!(!args
             .iter()
             .any(|a| a == "--system-prompt" || a == "--system-prompt-file"));

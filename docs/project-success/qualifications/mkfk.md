@@ -16,4 +16,4 @@ PR520 CI 通過後已發布上述 tag。
 
 ## 發布後 CI 推翻資格
 
-合併後的 [CI 39954969817](https://github.com/fallrising/newclear/actions/runs/39954969817)（PR530，僅文件變更，程式與 tag 相同）short chaos 失敗：seed `1792759189506810350`，broker 1 的 `events/1` healing 後 90 s 未追上。第一個 livelock 修復不足以消除此症狀；tag 保留但撤回推薦，待第二個原因修復並重新驗收後發布新版本。
+合併後的 [CI 39954969817](https://github.com/fallrising/newclear/actions/runs/39954969817)（PR530，僅文件變更，程式與 tag 相同）short chaos 失敗：seed `1792759189506810350`，broker 1 的 `events/1` healing 後 90 s 未追上。第一個 livelock 修復不足以消除此症狀；tag 保留但撤回推薦。第二個原因（read barrier 超過追蹤 RPC 數）與測試 port 衝突已修，本機完整 gate 與 CI 連續 14 次全綠，重新資格見 [#545](https://github.com/fallrising/newclear/issues/545)。

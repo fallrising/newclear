@@ -21,19 +21,24 @@ source_commit: fdc534bca955fb30cc21d87b2d849b8c4aa05d77
 
 ## 驗收條件
 
-2026-10-23 在 `source_commit` 實跑全部通過（[證據](../../docs/project-success/evidence/mkfk-livelock-20261023/README.md)），但合併後的 CI 又出現一次 short chaos 失敗，AC-04 改為 failed。
+2026-10-23 在 `source_commit` 實跑全部通過（[證據](../../docs/project-success/evidence/mkfk-livelock-20261023/README.md)），但合併後的 CI 又出現 short chaos 失敗。之後的修復尚未重新資格，AC-04 為 pending。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
 | --- | --- | --- | --- |
 | AC-01 | Given durable partition log，When append 後 SIGKILL/restart 或 index 損壞，Then 已確認 record 可讀且索引可重建 | passed | `make test` 與 `make test-race`（M1/M2 storage tests）；歷史 [M1](docs/evidence/m1-8235294-storage.json)、[M2](docs/evidence/m2-3dbd61a-segments.json) |
 | AC-02 | Given RF3 與舊 leader 隔離，When failover/rejoin，Then committed records 保留且 HW/ISR acknowledgement gate 成立 | passed | `make test-model`、`make test-integration`（三程序 failover）、`TestM7LaggingFollowerCatchesUpWithSeveralAppendsInFlight` |
 | AC-03 | Given produce 回覆遺失或 group rebalance，When 相同 identity 重試及舊 generation commit，Then 不重複 append 且舊 session 被 fence | passed | `make test-integration`（OP-04）、`make test-model`（group model）、`make demo` |
-| AC-04 | Given 三 broker 與固定 seed，When 執行整合 chaos/model/demo，Then FR/INV 都能追到故障證據且資料承諾成立 | failed | CI [39954969817](https://github.com/fallrising/newclear/actions/runs/39954969817) seed `1792759189506810350`：broker 1 的 `events/1` healing 後 90 s 未追上；第一個 livelock 修復後仍有第二個原因，診斷中 |
+| AC-04 | Given 三 broker 與固定 seed，When 執行整合 chaos/model/demo，Then FR/INV 都能追到故障證據且資料承諾成立 | pending | 第二個 livelock 與測試 port 衝突已修（[#545](https://github.com/fallrising/newclear/issues/545)、[#546](https://github.com/fallrising/newclear/issues/546)）；本機完整 gate PASS、CI 連續 14 次全綠，尚未完成重新資格 |
 
 ## 現況與缺口
 
-2026-10-21 CI short chaos 失敗的第一個原因已修復：落後 follower 在 heartbeat 與重送同時在途時，新 leader 永不採用其 conflict hint（[SDD 02-replication §4](docs/sdd/02-replication.md)）。
-修復後本機 short chaos 30/30，但 2026-10-23 合併後 CI 再現同樣症狀（不同 seed、不同 broker），表示還有第二個原因。broker 未記錄 Raft step 拒絕的原因、測試也分不出副本落後或分歧，已補這兩項診斷，正在 2 CPU 條件下重現。
+CI short chaos 間歇失敗有兩個 Raft liveness 原因，都會讓故障中落後超過一批的 follower 在 healing 後永遠追不上（無資料分歧）：
+
+1. conflict hint 只採用最新 RPC 的 reply（PR #520 修復）；
+2. 無法合併的 read barrier 超過 leader 追蹤的 RPC 數，所有 reply 都對應已遺忘的 RPC（修復：read barrier 受 pipelining window 限制）。
+
+規則見 [SDD 02-replication §4](docs/sdd/02-replication.md) 與 [ADR-012](docs/adr/012-replication-flow-control-isr-catchup.md)。另修測試 broker port 取自 ephemeral range 造成的 `bind: address already in use`。
+剩餘：更多 CI 次數確認穩定並重新資格（[#545](https://github.com/fallrising/newclear/issues/545)）。
 
 效能結果依既有硬體與 workload，不承諾通用吞吐。
 安全與運作 hardening 屬後續；保留無認證與無 retention 的實際使用限制。

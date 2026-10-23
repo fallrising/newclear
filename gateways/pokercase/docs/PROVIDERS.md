@@ -110,7 +110,7 @@ When you need one of these: open an item, implement `ProviderProfile` + forward 
 |----------|-------------------|
 | siwc / grok | `/v1/responses` → forwarded natively (all items kept; siwc applies its preview limits above). `/v1/chat/completions` and `/v1/messages` → converted to a **Responses** body (tools, `tool_calls` ↔ `function_call`, tool results ↔ `function_call_output`, images ↔ `input_image`); the Responses SSE is converted back to `chat.completion.chunk` or Anthropic events (text and tool calls) |
 | claude | Every client protocol → one prompt for the local `claude -p` (caller system in `<external_system_instructions>`); its stream events → client protocol |
-| opencode | Chat Completions passthrough (+ `x-opencode-client`) |
+| opencode | Chat Completions passthrough (+ `x-opencode-client`); `/v1/responses` clients get a full Responses event stream (message and `function_call` items, usage) converted from the chat chunks |
 | cursor / agy | Import only until executors land |
 
 ### siwc prompt cache

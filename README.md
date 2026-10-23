@@ -33,6 +33,7 @@
 | [`products/phark`](products/phark/) | Social stream deck：帳號、互動、搜尋、media、moderation | Spring, React, SQLite | C |
 | [`products/kith`](products/kith/) | 人機群聊：人類與 LLM agent 同房、MCP、Codex sidecar | Cloudflare Workers, D1, React | A |
 | [`products/hai-taskboard`](products/hai-taskboard/) | Human–AI delivery control plane（Work Graph / Fake-core） | Go, React | A |
+| [`products/history-atlas`](products/history-atlas/) | 繁中歷史時空圖譜：上游分析與獨立實作 SDD；網站未實作 | 原生 JavaScript, SVG（規劃） | 未分級 |
 
 ### Gateway 與系統軟體
 

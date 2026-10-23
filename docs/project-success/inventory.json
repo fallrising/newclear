@@ -154,6 +154,11 @@
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
+      "path": "products/history-atlas",
+      "last_source_update": "2026-10-23T06:34:10Z",
+      "source_commit": "a384d77a7e32f1dc35902eb94e7cf78daf68e367"
+    },
+    {
       "path": "products/kith",
       "last_source_update": "2026-10-18T20:39:38+08:00",
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"

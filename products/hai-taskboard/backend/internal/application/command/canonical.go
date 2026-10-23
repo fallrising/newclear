@@ -106,7 +106,10 @@ func CanonicalCreateWorkItem(value CreateWorkItem) ([]byte, domain.Digest, error
 		!validText(value.Title, 240) || !validText(value.Goal, 8000) || !validText(string(value.OwnerID), 120) {
 		return nil, domain.Digest{}, ErrInvalidCommand
 	}
-	revisions, err := canonicalizeRevisions(value.RequiredACRevisions)
+	revisions := []canonicalACRevision{}
+	if len(value.RequiredACRevisions) > 0 {
+		revisions, err = canonicalizeRevisions(value.RequiredACRevisions)
+	}
 	if err != nil {
 		return nil, domain.Digest{}, err
 	}

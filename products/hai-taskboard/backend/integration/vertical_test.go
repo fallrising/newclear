@@ -20,6 +20,7 @@ import (
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain/sqlite"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/executor/fake"
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/testfixture"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/transport/httpapi"
 )
 
@@ -467,7 +468,7 @@ func newDispatchedFixture(t *testing.T, scenario fake.Scenario) dispatchedFixtur
 			"AC-1": {VerifierClass: "independent", Independent: true, EnvironmentDigest: domain.HashString("environment-v1")},
 		},
 	}
-	application, err := service.New(store, clock, ids, adapter, artifacts, projections, service.Config{
+	application, err := service.New(testfixture.VerifiedInputUnit{Base: store, View: testfixture.View(projectID, workItemID, "AC-1", domain.HashString("AC-1-revision-v1"), domain.HashString("dependency-graph-v1"), policy.RevisionDigest, policy.RecipeDigest)}, clock, ids, adapter, artifacts, projections, service.Config{
 		Operator: operatorID, IdempotencyTTL: time.Hour, Specification: validSpecification{},
 		Completion: policy,
 	})

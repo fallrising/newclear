@@ -13,6 +13,76 @@ servers:
 security:
   - localSession: []
 paths:
+  /session:
+    description: >-
+      Local configured-token browser bootstrap. The runtime rejects every nonconfigured Host.
+      POST and DELETE require exactly one byte-exact configured Origin. Responses use no-store;
+      tokens never appear in response bodies. Logout clears this browser cookie only and does
+      not revoke or rotate the configured operator token. No header or query credential exists.
+    get:
+      summary: Inspect the authenticated local session
+      operationId: getLocalSession
+      responses:
+        "200":
+          description: Authenticated actor, without token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocalSession"
+        "400": { $ref: "#/components/responses/LocalSessionError" }
+        "401": { $ref: "#/components/responses/LocalSessionError" }
+        "403": { $ref: "#/components/responses/LocalSessionError" }
+        "405": { $ref: "#/components/responses/LocalSessionError" }
+    post:
+      summary: Authenticate the configured local operator and set the browser cookie
+      operationId: createLocalSession
+      security: []
+      requestBody:
+        required: true
+        description: >-
+          At most 2048 bytes of JSON with exactly one token member; unknown, duplicate and
+          case-variant members, malformed or noncanonical tokens and ambiguous headers fail closed.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [token]
+              properties:
+                token: { type: string, minLength: 43, maxLength: 43, pattern: "^[A-Za-z0-9_-]{43}$", writeOnly: true }
+      responses:
+        "200":
+          description: Authenticated; Set-Cookie is the sole credential response channel.
+          headers:
+            Set-Cookie:
+              description: __Host-hai_session with Secure, HttpOnly, SameSite=Strict, Path=/ and no Domain.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocalSession"
+        "400": { $ref: "#/components/responses/LocalSessionError" }
+        "401": { $ref: "#/components/responses/LocalSessionError" }
+        "403": { $ref: "#/components/responses/LocalSessionError" }
+        "405": { $ref: "#/components/responses/LocalSessionError" }
+        "413": { $ref: "#/components/responses/LocalSessionError" }
+    delete:
+      summary: Clear the authenticated browser cookie
+      operationId: deleteLocalSession
+      responses:
+        "200":
+          description: Browser cookie expired with the same Secure, HttpOnly, Strict and Path attributes.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocalSession"
+        "400": { $ref: "#/components/responses/LocalSessionError" }
+        "401": { $ref: "#/components/responses/LocalSessionError" }
+        "403": { $ref: "#/components/responses/LocalSessionError" }
+        "405": { $ref: "#/components/responses/LocalSessionError" }
   /projects:
     get:
       summary: List project projections
@@ -174,6 +244,55 @@ paths:
         "409": { $ref: "#/components/responses/Error" }
         "422": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/proposals/{proposal_digest}/initial-acceptance:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - name: proposal_digest
+        in: path
+        required: true
+        schema: { $ref: "#/components/schemas/SHA256" }
+    get:
+      summary: Prepare an explicit first specification acceptance
+      operationId: getInitialAcceptance
+      x-hai-permission: project.read
+      description: >-
+        Read-only authenticated snapshot of verified proposal mapping and current headless
+        Draft versions. No Git reads, mutation, reservation, approval or AC content inference.
+        The command revalidates the complete subject and versions. Unavailable, revoked or
+        ineligible proposals return 404 without private repository details.
+      responses:
+        "200":
+          description: Exact public subject digest and complete sorted read-set.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InitialAcceptanceDescription" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/repository-bindings/{binding_id}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - name: binding_id
+        in: path
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 120 }
+    get:
+      summary: Read the currently approved public repository binding
+      operationId: getRepositoryBinding
+      x-hai-permission: project.read
+      description: >-
+        Authenticated project-scoped configuration query. No Git reads or mutation.
+        Unset or revoked local repository authority is unavailable. Private paths,
+        executables, scratch directories and Readers are never returned.
+      responses:
+        "200":
+          description: Canonical approved binding and its SHA-256 identity.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RepositoryBindingDescription" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
   /projects/{project_id}/commands/{command_id}:
     parameters:
       - $ref: "#/components/parameters/ProjectID"
@@ -293,12 +412,29 @@ components:
       required: true
       schema: { $ref: "#/components/schemas/CommandID" }
   responses:
+    LocalSessionError:
+      description: Bounded local session rejection; no credential or request data is reflected.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [status]
+            properties:
+              status: { type: string, enum: [invalid_request, unauthenticated, forbidden, method_not_allowed] }
     Error:
       description: Authorized structured error; details never contain artifact/log contents.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/APIError" }
   schemas:
+    LocalSession:
+      type: object
+      additionalProperties: false
+      required: [status, actor]
+      properties:
+        status: { type: string, enum: [authenticated, logged_out] }
+        actor: { type: string, minLength: 1, maxLength: 120 }
     ProjectID:
       type: string
       pattern: "^prj_[0-9A-HJKMNP-TV-Z]{10,26}$"
@@ -338,7 +474,7 @@ components:
           additionalProperties: false
           required: [binding_id, root_hint, approved_ref]
           properties:
-            binding_id: { type: string, minLength: 1, maxLength: 80 }
+            binding_id: { type: "null", description: "Display metadata does not infer an approved repository binding." }
             root_hint: { type: string, minLength: 1, maxLength: 512 }
             approved_ref: { type: string, minLength: 1, maxLength: 200 }
         cursor: { $ref: "#/components/schemas/StreamCursor" }
@@ -350,6 +486,7 @@ components:
         api_version: { const: v1 }
         items:
           type: array
+          maxItems: 1000
           items: { $ref: "#/components/schemas/Project" }
         cursor: { $ref: "#/components/schemas/StreamCursor" }
     Phase:
@@ -591,6 +728,8 @@ components:
         created_at: { $ref: "#/components/schemas/Timestamp" }
         artifact_manifest:
           type: array
+          minItems: 1
+          maxItems: 1024
           items: { $ref: "#/components/schemas/ArtifactLocator" }
     Review:
       type: object
@@ -714,7 +853,7 @@ components:
       properties:
         project_id: { $ref: "#/components/schemas/ProjectID" }
         work_item_id: { $ref: "#/components/schemas/WorkItemID" }
-        work_item_version: { type: integer, minimum: 1 }
+        work_item_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }
         candidate_id: { type: string, minLength: 1, maxLength: 80 }
         candidate_digest: { $ref: "#/components/schemas/SHA256" }
         run_id: { $ref: "#/components/schemas/RunID" }
@@ -722,12 +861,12 @@ components:
         required_ac_revisions:
           type: array
           minItems: 1
-          items: { $ref: "#/components/schemas/ACRevisionRef" }
+          maxItems: 1024
+          items: { $ref: "#/components/schemas/InitialACRevisionRef" }
         accepted_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
         policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
         completion_recipe_digest: { $ref: "#/components/schemas/SHA256" }
-        integration_base_digest:
-          oneOf: [{ $ref: "#/components/schemas/SHA256" }, { type: "null" }]
+        integration_base_digest: { $ref: "#/components/schemas/SHA256" }
     CreateProjectRequest:
       type: object
       additionalProperties: false
@@ -760,11 +899,21 @@ components:
              RequestQA, RequestRework, CompleteWorkItem, ReopenWorkItem, RequestCancellation,
              FinalizeCancellation, AddBlocker, ResolveBlocker, AcceptSpecificationRevision,
              PreviewImpactPlan, ActivateImpactPlan, ReconcileRun, PublishFixtureObservation,
-             PublishFixtureReview, PublishFixtureEvidence, ApproveSubject]
+             PublishFixtureReview, PublishFixtureEvidence, ApproveSubject, ProposeSpecification, AcceptInitialSpecification]
         expected_version: { type: integer, minimum: 0 }
         issued_at: { $ref: "#/components/schemas/Timestamp" }
         payload: { type: object }
       allOf:
+        - if: { properties: { operation: { const: AcceptInitialSpecification } } }
+          then:
+            properties:
+              expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }
+              payload: { $ref: "#/components/schemas/AcceptInitialSpecificationPayload" }
+        - if: { properties: { operation: { const: ProposeSpecification } } }
+          then:
+            properties:
+              expected_version: { type: integer, minimum: 1 }
+              payload: { $ref: "#/components/schemas/ProposeSpecificationPayload" }
         - if: { properties: { operation: { const: CreateWorkItem } } }
           then: { properties: { payload: { $ref: "#/components/schemas/CreateWorkItemPayload" } } }
         - if: { properties: { operation: { const: UpdateWorkItemMetadata } } }
@@ -774,9 +923,9 @@ components:
         - if: { properties: { operation: { const: DispatchRun } } }
           then: { properties: { payload: { $ref: "#/components/schemas/DispatchRunPayload" } } }
         - if: { properties: { operation: { const: SubmitCandidate } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/SubmitCandidatePayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/SubmitCandidatePayload" } } }
         - if: { properties: { operation: { const: RequestQA } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/RequestQAPayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/RequestQAPayload" } } }
         - if: { properties: { operation: { const: RequestRework } } }
           then: { properties: { payload: { $ref: "#/components/schemas/RequestReworkPayload" } } }
         - if: { properties: { operation: { const: CompleteWorkItem } } }
@@ -784,7 +933,7 @@ components:
         - if: { properties: { operation: { const: ReopenWorkItem } } }
           then: { properties: { payload: { $ref: "#/components/schemas/ReopenWorkItemPayload" } } }
         - if: { properties: { operation: { const: RequestCancellation } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/RequestCancellationPayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/RequestCancellationPayload" } } }
         - if: { properties: { operation: { const: FinalizeCancellation } } }
           then: { properties: { payload: { $ref: "#/components/schemas/FinalizeCancellationPayload" } } }
         - if: { properties: { operation: { const: AddBlocker } } }
@@ -802,11 +951,161 @@ components:
         - if: { properties: { operation: { const: PublishFixtureObservation } } }
           then: { properties: { payload: { $ref: "#/components/schemas/PublishFixtureObservationPayload" } } }
         - if: { properties: { operation: { const: PublishFixtureReview } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/PublishFixtureReviewPayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/PublishFixtureReviewPayload" } } }
         - if: { properties: { operation: { const: PublishFixtureEvidence } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/PublishFixtureEvidencePayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/PublishFixtureEvidencePayload" } } }
         - if: { properties: { operation: { const: ApproveSubject } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/ApproveSubjectPayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/ApproveSubjectPayload" } } }
+    InitialACID:
+      type: string
+      minLength: 1
+      maxLength: 120
+      description: Proposal AC identifier, at most 120 UTF-8 bytes; no whitespace, controls, slash or backslash.
+    InitialACRevisionRef:
+      type: object
+      additionalProperties: false
+      required: [ac_id, revision_digest]
+      properties:
+        ac_id: { $ref: "#/components/schemas/InitialACID" }
+        revision_digest: { $ref: "#/components/schemas/SHA256" }
+    InitialWorkItemVersion:
+      type: object
+      additionalProperties: false
+      required: [work_item_id, expected_version]
+      properties:
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }
+    InitialAcceptanceDescription:
+      type: object
+      additionalProperties: false
+      required: [proposal_digest, policy_revision_digest, acceptance_subject_digest, expected_version, work_items, ac_revisions]
+      properties:
+        proposal_digest: { $ref: "#/components/schemas/SHA256" }
+        policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        acceptance_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }
+        work_items:
+          type: array
+          minItems: 1
+          maxItems: 256
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/InitialWorkItemVersion" }
+        ac_revisions:
+          type: array
+          minItems: 1
+          maxItems: 256
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/InitialACRevisionRef" }
+    AcceptInitialSpecificationPayload:
+      type: object
+      additionalProperties: false
+      required: [proposal_digest, policy_revision_digest, acceptance_subject_digest, work_items, ac_contents]
+      description: >-
+        Explicit operator intent and exact AC bytes. Unique WorkItem and AC IDs; complete
+        proposal mapping/content coverage is revalidated by the service. Standard padded
+        canonical base64 only, at most 64 KiB decoded per AC and 512 KiB total decoded.
+        Empty content is valid when its digest matches. Request body limit is 1 MiB.
+      properties:
+        proposal_digest: { $ref: "#/components/schemas/SHA256" }
+        policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        acceptance_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        work_items:
+          type: array
+          minItems: 1
+          maxItems: 256
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/InitialWorkItemVersion" }
+        ac_contents:
+          type: array
+          minItems: 1
+          maxItems: 256
+          uniqueItems: true
+          items:
+            type: object
+            additionalProperties: false
+            required: [ac_id, content]
+            properties:
+              ac_id: { $ref: "#/components/schemas/InitialACID" }
+              content:
+                type: string
+                contentEncoding: base64
+                maxLength: 87384
+                pattern: "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/][AQgw]==|[A-Za-z0-9+/]{2}[AEIMQUYcgkosw048]=)?$"
+    InitialSpecificationAcceptedResult:
+      type: object
+      additionalProperties: false
+      required: [type, project_id, version, proposal_digest, graph_revision_digest, accepted_revision_digest, acceptance_subject_digest]
+      properties:
+        type: { const: InitialSpecificationAccepted }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        version: { type: integer, minimum: 2, maximum: 9223372036854775807 }
+        proposal_digest: { $ref: "#/components/schemas/SHA256" }
+        graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        accepted_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        acceptance_subject_digest: { $ref: "#/components/schemas/SHA256" }
+    ProposeSpecificationPayload:
+      type: object
+      additionalProperties: false
+      required: [repository_binding_id, binding_version, binding_digest, ref, manifest_path]
+      properties:
+        repository_binding_id: { type: string, minLength: 1, maxLength: 120 }
+        binding_version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        binding_digest: { $ref: "#/components/schemas/SHA256" }
+        ref: { type: string, minLength: 1, maxLength: 200 }
+        manifest_path: { type: string, minLength: 1, maxLength: 512 }
+      description: >-
+        Exact approved binding and exact allowlisted ref/manifest path. Ordinary command
+        metadata and expected project version remain required. This creates only a durable
+        proposal; it does not accept a specification, move a head, mark Ready or dispatch.
+        No local path, executable, Reader or approval is accepted from HTTP.
+    RepositoryBindingDescription:
+      type: object
+      additionalProperties: false
+      required: [binding, binding_digest]
+      properties:
+        binding_digest: { $ref: "#/components/schemas/SHA256" }
+        binding:
+          type: object
+          additionalProperties: false
+          required: [schema_version, project_id, id, version, object_format, configuration_id,
+                     refs, manifest_paths, approved_by_actor]
+          properties:
+            schema_version: { const: 1 }
+            project_id: { $ref: "#/components/schemas/ProjectID" }
+            id: { type: string, minLength: 1, maxLength: 120 }
+            version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+            object_format: { type: string, enum: [sha1, sha256] }
+            configuration_id: { type: string, minLength: 1, maxLength: 120 }
+            approved_by_actor: { type: string, minLength: 1, maxLength: 120 }
+            refs:
+              type: array
+              minItems: 1
+              maxItems: 256
+              uniqueItems: true
+              items: { type: string, minLength: 1, maxLength: 200 }
+            manifest_paths:
+              type: array
+              minItems: 1
+              maxItems: 256
+              uniqueItems: true
+              items: { type: string, minLength: 1, maxLength: 512 }
+    SpecificationProposedResult:
+      type: object
+      additionalProperties: false
+      required: [type, project_id, version, proposal_digest, graph_revision_digest, object_format, commit_oid]
+      properties:
+        type: { const: SpecificationProposed }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        version: { type: integer, minimum: 1 }
+        proposal_digest: { $ref: "#/components/schemas/SHA256" }
+        graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        object_format: { type: string, enum: [sha1, sha256] }
+        commit_oid: { type: string }
+      allOf:
+        - if: { properties: { object_format: { const: sha1 } } }
+          then: { properties: { commit_oid: { pattern: "^(?!0+$)[0-9a-f]{40}$" } } }
+        - if: { properties: { object_format: { const: sha256 } } }
+          then: { properties: { commit_oid: { pattern: "^(?!0+$)[0-9a-f]{64}$" } } }
     CreateWorkItemPayload:
       type: object
       additionalProperties: false
@@ -818,7 +1117,7 @@ components:
         owner_id: { type: string, minLength: 1, maxLength: 120 }
         required_ac_revisions:
           type: array
-          minItems: 1
+          minItems: 0
           items: { $ref: "#/components/schemas/ACRevisionRef" }
     UpdateWorkItemMetadataPayload:
       type: object
@@ -973,8 +1272,8 @@ components:
       required: [run_id, lease_epoch, restore_generation, review]
       properties:
         run_id: { $ref: "#/components/schemas/RunID" }
-        lease_epoch: { type: integer, minimum: 1 }
-        restore_generation: { type: integer, minimum: 1 }
+        lease_epoch: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        restore_generation: { type: integer, minimum: 1, maximum: 9223372036854775807 }
         review: { $ref: "#/components/schemas/Review" }
     PublishFixtureEvidencePayload:
       type: object
@@ -982,8 +1281,8 @@ components:
       required: [run_id, lease_epoch, restore_generation, evidence]
       properties:
         run_id: { $ref: "#/components/schemas/RunID" }
-        lease_epoch: { type: integer, minimum: 1 }
-        restore_generation: { type: integer, minimum: 1 }
+        lease_epoch: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        restore_generation: { type: integer, minimum: 1, maximum: 9223372036854775807 }
         evidence: { $ref: "#/components/schemas/Evidence" }
     ApproveSubjectPayload:
       type: object
@@ -1023,6 +1322,32 @@ components:
           properties: { sequence: { type: integer, minimum: 1 } }
         projection_cursor: { $ref: "#/components/schemas/StreamCursor" }
         correlation_id: { type: string, minLength: 1, maxLength: 80 }
+      allOf:
+        - if:
+            properties:
+              command:
+                properties: { operation: { const: ProposeSpecification } }
+          then:
+            properties:
+              result: { $ref: "#/components/schemas/SpecificationProposedResult" }
+          else:
+            if:
+              properties:
+                command:
+                  properties: { operation: { const: AcceptInitialSpecification } }
+            then:
+              properties:
+                result: { $ref: "#/components/schemas/InitialSpecificationAcceptedResult" }
+            else:
+              properties:
+                result:
+                  properties:
+                    proposal_digest: false
+                    graph_revision_digest: false
+                    accepted_revision_digest: false
+                    acceptance_subject_digest: false
+                    object_format: false
+                    commit_oid: false
     CommandFailure:
       type: object
       additionalProperties: false

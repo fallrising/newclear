@@ -277,3 +277,16 @@ func (run Run) WorkItemID() WorkItemID { return run.workItemID }
 func (run Run) InputDigest() Digest    { return run.inputDigest }
 func (run Run) State() RunState        { return run.state }
 func (run Run) Attempt() uint64        { return run.attempt }
+
+// AdvanceDraftSpecificationVersion preserves the Draft aggregate and its blockers.
+func (item WorkItem) AdvanceDraftSpecificationVersion(expected uint64) (WorkItem, error) {
+	if item.version != expected {
+		return item, Rejection{Code: CodeVersionConflict}
+	}
+	if item.phase != PhaseDraft || expected == 0 || expected >= 1<<63-1 {
+		return item, Rejection{Code: CodeInvalidTransition}
+	}
+	next := item.clone()
+	next.version++
+	return next, nil
+}

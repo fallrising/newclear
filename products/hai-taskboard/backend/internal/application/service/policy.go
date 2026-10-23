@@ -37,8 +37,9 @@ func (policy CompletionPolicy) clone() CompletionPolicy {
 }
 
 type Config struct {
-	Operator       domain.ActorID
-	IdempotencyTTL time.Duration
-	Specification  SpecificationPolicy
-	Completion     CompletionPolicy
+	RepositoryAuthority port.RepositoryAuthority
+	Operator            domain.ActorID
+	IdempotencyTTL      time.Duration
+	Specification       SpecificationPolicy
+	Completion          CompletionPolicy
 }

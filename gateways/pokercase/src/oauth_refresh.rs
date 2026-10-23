@@ -1,5 +1,8 @@
 //! Refresh OAuth / session tokens for personal subscription providers.
 
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, OnceLock};
+
 use chrono::{Duration, Utc};
 use serde::Deserialize;
 use tracing::{info, warn};
@@ -45,7 +48,32 @@ pub fn needs_refresh(conn: &ConnectionRow, lead_secs: i64) -> bool {
     true
 }
 
+/// One refresh at a time per connection: refresh tokens rotate, so two concurrent
+/// refreshes with the same token would invalidate the session.
+fn refresh_lock(connection_id: &str) -> Arc<tokio::sync::Mutex<()>> {
+    static LOCKS: OnceLock<Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>> = OnceLock::new();
+    LOCKS
+        .get_or_init(Default::default)
+        .lock()
+        .unwrap()
+        .entry(connection_id.to_string())
+        .or_default()
+        .clone()
+}
+
 pub async fn refresh_connection(store: &Store, conn: &ConnectionRow) -> AppResult<ConnectionRow> {
+    let lock = refresh_lock(&conn.id);
+    let _guard = lock.lock().await;
+    // Re-read under the lock: if another task already rotated the token, use its result.
+    let current = store
+        .get_connection(&conn.id)
+        .map_err(AppError::Internal)?
+        .ok_or_else(|| AppError::NotFound("connection not found".into()))?;
+    let stale = |c: &ConnectionRow| c.oauth.as_ref().and_then(|o| o.refresh_token.clone());
+    if stale(&current) != stale(conn) {
+        return Ok(current);
+    }
+    let conn = &current;
     let oauth = conn
         .oauth
         .as_ref()
@@ -62,6 +90,32 @@ pub async fn refresh_connection(store: &Store, conn: &ConnectionRow) -> AppResul
     let tokens = match provider {
         "claude" | "anthropic" | "cc" => refresh_claude(refresh).await?,
         "codex" | "cx" | "openai_codex" => refresh_codex(refresh).await?,
+        "siwc" => {
+            let client_id = oauth
+                .meta
+                .as_deref()
+                .and_then(|m| serde_json::from_str::<serde_json::Value>(m).ok())
+                .and_then(|m| {
+                    m.get("client_id")
+                        .and_then(|c| c.as_str())
+                        .map(str::to_string)
+                })
+                .ok_or_else(|| {
+                    AppError::BadRequest("siwc connection has no client_id; run login-siwc".into())
+                })?;
+            let http = crate::http_client::build_http_client().map_err(AppError::Internal)?;
+            let t = crate::siwc::refresh(&http, crate::siwc::AUTH_BASE, &client_id, refresh)
+                .await
+                .map_err(|e| AppError::Upstream {
+                    status: 401,
+                    body: e.to_string(),
+                })?;
+            RefreshedTokens {
+                expires_at: t.expires_at(),
+                access_token: t.access_token,
+                refresh_token: t.refresh_token,
+            }
+        }
         "grok" | "xai" | "grok_cli" => refresh_xai(refresh).await?,
         "agy" | "ag" | "antigravity" => refresh_google_antigravity(refresh).await?,
         "cursor" | "cu" => refresh_cursor(refresh).await?,
@@ -344,4 +398,39 @@ fn urlencoding_minimal(s: &str) -> String {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn stale_caller_gets_already_rotated_tokens_without_refreshing() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("t.db"), None).unwrap();
+        let stale = store
+            .upsert_oauth_connection(
+                None,
+                "s",
+                crate::siwc::API_BASE,
+                "siwc",
+                "at-old",
+                Some("rt-old"),
+                None,
+                Some(r#"{"client_id":"oaiapp_1"}"#),
+                None,
+                100,
+                true,
+            )
+            .unwrap();
+        // Another task rotated the token in the meantime.
+        store
+            .update_oauth_tokens(&stale.id, "at-new", Some("rt-new"), None)
+            .unwrap();
+        // No network is reachable from this test; a real refresh would fail.
+        let got = refresh_connection(&store, &stale).await.unwrap();
+        let o = got.oauth.unwrap();
+        assert_eq!(o.access_token, "at-new");
+        assert_eq!(o.refresh_token.as_deref(), Some("rt-new"));
+    }
 }

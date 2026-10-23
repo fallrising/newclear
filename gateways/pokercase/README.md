@@ -20,10 +20,19 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 **In scope:** `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, routes + fallback/RR, **OAuth/session token import** (personal subscriptions), optional token-saver, web admin, TUI, SQLite.
 
 **Architecture:** Layer A = this gateway; Layer B = your multi-agent “team” apps calling only Layer A. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).  
-**Providers:** codex · claude · cursor · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)  
+**Providers:** siwc (recommended for OpenAI models) · codex · claude · cursor · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)  
 **Claude 订阅原理：** [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md)
 
 **Out of scope (for now):** MITM, cloud sync, 9router.db compatibility, media APIs.
+
+> [!WARNING]
+> **`claude` provider: high account-ban risk.** It sends your Claude subscription OAuth token
+> straight to `api.anthropic.com` while impersonating Claude Code (`claude-cli` User-Agent,
+> `X-App: cli`, Claude Code beta headers) and forwards the caller's own `system` prompt.
+> Using subscription credentials outside the official Claude Code client can violate
+> Anthropic's terms and get the account restricted or banned. Do not enable it on an
+> account you cannot afford to lose; whether to replace it (run real `claude -p`) or remove
+> it is still an open owner decision.
 
 ## Quick start
 
@@ -39,7 +48,7 @@ cargo run -- serve
 1. Log in at `/admin/login` with the admin token. Without `--admin-token`, the first
    start writes a random one to `~/.thinrouter/admin-token` (mode 0600); the log shows
    only the path.
-2. Open **Connections** → either:
+2. For OpenAI models, run `thinrouter login-siwc` (official Sign in with ChatGPT plan sharing; creates connection `siwc` + route `rt-siwc`). Otherwise open **Connections** → either:
    - **Import OAuth / session token** (personal subscription; no API key), or  
    - Add OpenAI-compatible `base_url` + API key (optional path).
 3. Open **Routes** → map a public model name to one or more targets.
@@ -75,6 +84,8 @@ thinrouter tui
 # Import personal subscription tokens from local agent CLIs + refresh:
 thinrouter import-local --routes --refresh
 thinrouter refresh
+# Official ChatGPT plan sharing (browser sign-in, loopback 127.0.0.1:1455):
+thinrouter login-siwc [--name siwc] [--model <slug>]
 ```
 
 | Flag / env | Purpose |

@@ -6,8 +6,9 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 
 | ID | Aliases | Status | Format | Default base |
 |----|---------|--------|--------|--------------|
+| `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `codex` | `cx` | **active** | OpenAI Responses | `https://chatgpt.com/backend-api/codex/responses` |
-| `claude` | `cc`, `anthropic` | **active** | Anthropic Messages | `https://api.anthropic.com/v1/messages` （订阅原理见 [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md)） |
+| `claude` | `cc`, `anthropic` | **active — high ban risk** (see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md)) | Anthropic Messages | `https://api.anthropic.com/v1/messages` |
 | `cursor` | `cu` | **active** | AgentService HTTP/2 Connect+proto (text) | `https://agent.api5.cursor.sh` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
@@ -24,6 +25,7 @@ Admin UI → Connections → **Import OAuth**, or:
 
 ```bash
 curl -s http://127.0.0.1:20128/admin/api/connections/oauth/import \
+  -H "x-admin-token: $(cat ~/.thinrouter/admin-token)" \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "my-codex",
@@ -34,6 +36,43 @@ curl -s http://127.0.0.1:20128/admin/api/connections/oauth/import \
 ```
 
 List registry: `GET /admin/api/providers`
+
+### siwc — Sign in with ChatGPT (recommended over codex)
+
+OpenAI's official plan sharing for open-source / local apps
+([docs](https://developers.openai.com/siwc/token-sharing-open-source)): your ChatGPT plan
+pays for `https://api.openai.com/v1/responses` calls made with a token issued to this app.
+Prefer it to `codex`, which reuses the Codex CLI's credentials on ChatGPT's private
+`backend-api` and imitates the Codex client.
+
+```bash
+thinrouter login-siwc            # prints an auth.openai.com URL; open it on this machine
+```
+
+- Sign-in: dynamic client registration (`client_id=dynamic_agent_client`, app name
+  `thinrouter`), PKCE S256, state + nonce, loopback `http://127.0.0.1:1455/auth/callback`,
+  scope `... chatgpt.tokens.use.direct`, resource `https://api.openai.com/v1`. The issued
+  `oaiapp_…` client id, the host id (`<data_dir>/siwc-host-id`, `urn:uuid:…`) and the
+  account `sub` are kept in the connection meta; tokens are stored encrypted. Re-running
+  reauthorizes with the saved client id and refuses a different account.
+- The ID token's issuer, audience, nonce and expiry are checked; its signature is not
+  (it comes straight from the token endpoint over TLS, OIDC Core 3.1.3.7).
+- Refresh: `grant_type=refresh_token` with the issued client id and `resource`; refresh
+  tokens rotate, so refreshes of one connection are serialized and the new pair is stored
+  together.
+- Requests: `store:false` and `stream:true` always; `background`, `conversation`,
+  `max_output_tokens`, `max_tool_calls`, `metadata`, `moderation`, `multi_agent`,
+  `prompt`, `prompt_cache_retention`, `safety_identifier`, `temperature`, `top_logprobs`,
+  `top_p`, `truncation`, `user` are dropped; `role: system` items become `developer`;
+  function/custom tools are grouped in one `namespace` tool (`client_tools`).
+  `previous_response_id` and hosted tools (image generation, file search, code
+  interpreter, computer use, MCP, `tool_search`) are rejected with 400 before any upstream
+  call. `prompt_cache_key` + `session-id`/`thread-id` are sent as for codex.
+- `response.failed` with `subscription_sharing_usage_limit_exceeded` /
+  `subscription_sharing_usage_unavailable` becomes HTTP 429 (non-stream) or an error
+  record before `[DONE]` (stream).
+- Not yet verified against a real account: the namespace tool shape and whether
+  function calls inside it come back with plain names.
 
 ---
 

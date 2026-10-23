@@ -1,5 +1,14 @@
 # Claude 订阅如何接到 thinrouter
 
+> [!WARNING]
+> **`claude` provider: high account-ban risk.** It sends your Claude subscription OAuth token
+> straight to `api.anthropic.com` while impersonating Claude Code (`claude-cli` User-Agent,
+> `X-App: cli`, Claude Code beta headers) and forwards the caller's own `system` prompt.
+> Using subscription credentials outside the official Claude Code client can violate
+> Anthropic's terms and get the account restricted or banned. Do not enable it on an
+> account you cannot afford to lose; whether to replace it (run real `claude -p`) or remove
+> it is still an open owner decision.
+
 ## 原理（两条账本）
 
 Anthropic 侧大致有两套「付钱方式」：

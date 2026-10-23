@@ -118,6 +118,20 @@ pub const ACTIVE: &[ProviderProfile] = &[
         notes: "Codex requires stream=true. Prefer gpt-5.6-sol (not *-codex). Token: ~/.codex/auth.json",
     },
     ProviderProfile {
+        id: "siwc",
+        aliases: &["chatgpt_siwc", "openai_siwc", "sign_in_with_chatgpt"],
+        display_name: "OpenAI API via Sign in with ChatGPT (official plan sharing)",
+        category: "oauth",
+        status: ProviderStatus::Active,
+        default_base_url: "https://api.openai.com/v1",
+        format: UpstreamFormat::OpenAiResponses,
+        default_model: None,
+        auth: AuthScheme::Bearer,
+        extra_headers: &[],
+        force_stream: true,
+        notes: "Preferred over codex. Sign in with `thinrouter login-siwc`; store:false + stream:true enforced, unsupported fields dropped.",
+    },
+    ProviderProfile {
         id: "claude",
         aliases: &["cc", "anthropic", "claude_code"],
         display_name: "Claude Code (Anthropic subscription)",
@@ -270,6 +284,7 @@ pub fn list_public() -> serde_json::Value {
 fn official_hosts(provider_id: &str) -> &'static [&'static str] {
     match provider_id {
         "codex" => &["chatgpt.com"],
+        "siwc" => &["api.openai.com"],
         "claude" => &["api.anthropic.com"],
         "cursor" => &["agent.api5.cursor.sh", "api2.cursor.sh"],
         "grok" => &["cli-chat-proxy.grok.com"],

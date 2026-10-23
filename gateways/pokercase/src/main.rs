@@ -18,6 +18,7 @@ mod resolve;
 mod responses;
 mod secrets;
 mod server;
+mod siwc;
 mod store;
 mod templates;
 mod token_saver;
@@ -113,6 +114,22 @@ enum Commands {
         /// After import, try OAuth refresh for each connection
         #[arg(long, default_value_t = true)]
         refresh: bool,
+    },
+    /// Sign in with ChatGPT (official plan sharing) and store an `siwc` connection
+    LoginSiwc {
+        #[arg(long, env = "THINROUTER_DATA_DIR")]
+        data_dir: Option<std::path::PathBuf>,
+        #[arg(long, env = "THINROUTER_SECRETS_KEY")]
+        secrets_key: Option<String>,
+        /// Connection name (re-running with the same name re-authorizes it)
+        #[arg(long, default_value = "siwc")]
+        name: String,
+        /// Loopback callback port (redirect http://127.0.0.1:<port>/auth/callback)
+        #[arg(long, default_value_t = 1455)]
+        port: u16,
+        /// Default model; otherwise the first model listed for the account
+        #[arg(long)]
+        model: Option<String>,
     },
     /// Refresh OAuth tokens for imported connections
     Refresh {
@@ -216,6 +233,25 @@ async fn main() -> Result<()> {
             )?;
             import_local_cmd(&cfg, routes, refresh).await
         }
+        Commands::LoginSiwc {
+            data_dir,
+            secrets_key,
+            name,
+            port,
+            model,
+        } => {
+            let cfg = AppConfig::new(
+                "127.0.0.1".into(),
+                20128,
+                data_dir,
+                None,
+                secrets_key,
+                None,
+                None,
+                None,
+            )?;
+            login_siwc_cmd(&cfg, &name, port, model).await
+        }
         Commands::Refresh {
             data_dir,
             secrets_key,
@@ -261,6 +297,89 @@ async fn import_local_cmd(cfg: &AppConfig, routes: bool, refresh: bool) -> Resul
         }
     }
     println!("ok");
+    Ok(())
+}
+
+async fn login_siwc_cmd(
+    cfg: &AppConfig,
+    name: &str,
+    port: u16,
+    model: Option<String>,
+) -> Result<()> {
+    let store = store::Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
+    let http = http_client::build_http_client()?;
+    let existing = store.get_connection_by_name(name)?;
+    anyhow::ensure!(
+        existing
+            .as_ref()
+            .is_none_or(|c| c.oauth.as_ref().is_some_and(|o| o.provider == "siwc")),
+        "connection '{name}' exists for another provider; pass a different --name"
+    );
+    let meta: serde_json::Value = existing
+        .as_ref()
+        .and_then(|c| c.oauth.as_ref()?.meta.as_deref())
+        .and_then(|m| serde_json::from_str(m).ok())
+        .unwrap_or_default();
+    let client_id = meta.get("client_id").and_then(|v| v.as_str());
+    let host_id = siwc::host_id(&cfg.data_dir)?;
+
+    let signed = siwc::sign_in(
+        &http,
+        siwc::AUTH_BASE,
+        &host_id,
+        client_id,
+        port,
+        std::time::Duration::from_secs(300),
+        |url| {
+            println!(
+                "Open this URL in a browser on this machine to sign in with ChatGPT:\n\n  {url}\n"
+            );
+            println!("Waiting for the redirect to 127.0.0.1:{port} (5 minutes)...");
+        },
+    )
+    .await?;
+    if let Some(prev) = meta.get("subject").and_then(|v| v.as_str()) {
+        anyhow::ensure!(
+            prev == signed.subject,
+            "signed in as a different ChatGPT account than connection '{name}'; use another --name"
+        );
+    }
+    let models = siwc::list_models(&http, siwc::API_BASE, &signed.tokens.access_token)
+        .await
+        .unwrap_or_else(|e| {
+            println!("  (model list unavailable: {e})");
+            Vec::new()
+        });
+    let default_model = model
+        .or_else(|| existing.as_ref().and_then(|c| c.default_model.clone()))
+        .or_else(|| models.first().cloned());
+    let new_meta = serde_json::json!({
+        "client_id": signed.client_id,
+        "ext_agent_host_id": signed.host_id,
+        "subject": signed.subject,
+    });
+    let row = store.upsert_oauth_connection(
+        existing.as_ref().map(|c| c.id.clone()),
+        name,
+        siwc::API_BASE,
+        "siwc",
+        &signed.tokens.access_token,
+        signed.tokens.refresh_token.as_deref(),
+        signed.tokens.expires_at().as_deref(),
+        Some(&new_meta.to_string()),
+        default_model.as_deref(),
+        existing.as_ref().map(|c| c.priority).unwrap_or(100),
+        true,
+    )?;
+    store.upsert_route(None, "rt-siwc", "fallback", &[(row.id.clone(), None)])?;
+    println!(
+        "Signed in as {} — connection '{name}', route rt-siwc, default model {}",
+        signed.email.as_deref().unwrap_or(&signed.subject),
+        default_model.as_deref().unwrap_or("(none; pass --model)")
+    );
+    if !models.is_empty() {
+        println!("  models: {}", models.join(", "));
+    }
     Ok(())
 }
 

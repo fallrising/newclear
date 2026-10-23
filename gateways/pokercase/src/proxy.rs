@@ -206,6 +206,10 @@ async fn forward_chat_completions_inner(
                         ),
                         None => responses::chat_to_responses_request(&prepared),
                     };
+                    let converted = match converted {
+                        Ok(b) if p.id == "siwc" => crate::siwc::sanitize_request(&b),
+                        other => other,
+                    };
                     match converted {
                         Ok(b) => {
                             let b = if force {
@@ -213,7 +217,7 @@ async fn forward_chat_completions_inner(
                             } else {
                                 b
                             };
-                            let b = if p.id == "codex" {
+                            let b = if matches!(p.id, "codex" | "siwc") {
                                 let (b, key) = codex::ensure_prompt_cache_key(&b);
                                 cache_key = key;
                                 b
@@ -343,10 +347,10 @@ async fn forward_chat_completions_inner(
     }
     if profile.is_some_and(|p| p.id == "codex") {
         req = req.header("User-Agent", &state.codex_user_agent);
-        if let Some(key) = &cache_key {
-            for (k, v) in codex::session_headers(key) {
-                req = req.header(k, v);
-            }
+    }
+    if let Some(key) = &cache_key {
+        for (k, v) in codex::session_headers(key) {
+            req = req.header(k, v);
         }
     }
     // Codex ChatGPT accounts often need chatgpt-account-id header from import meta.
@@ -991,12 +995,26 @@ async fn read_forward_body(fwd: ForwardOk, cancel: &CancellationToken) -> AppRes
     let reassemble = fwd.reassemble_stream;
     let kind = fwd.body_kind;
     let bytes = read_bytes_cancel(fwd.response, cancel).await?;
-    Ok(match kind {
-        UpstreamBodyKind::OpenAiResponses if reassemble => {
-            responses::reassemble_sse(&String::from_utf8_lossy(&bytes))
-        }
-        _ => bytes,
-    })
+    if !matches!(kind, UpstreamBodyKind::OpenAiResponses) || !reassemble {
+        return Ok(bytes);
+    }
+    let body = responses::reassemble_sse(&String::from_utf8_lossy(&bytes));
+    // A stream that ended in response.failed is an error, not an empty answer.
+    let v: Value = serde_json::from_slice(&body).unwrap_or(Value::Null);
+    if v.get("status").and_then(|s| s.as_str()) == Some("failed") {
+        let err = v.get("error").cloned().unwrap_or(Value::Null);
+        let code = err.get("code").and_then(|c| c.as_str()).unwrap_or("");
+        let status = if crate::siwc::is_usage_limit_code(code) {
+            429
+        } else {
+            502
+        };
+        return Err(AppError::Upstream {
+            status,
+            body: json!({"error": err}).to_string(),
+        });
+    }
+    Ok(body)
 }
 
 /// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.

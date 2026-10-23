@@ -118,6 +118,10 @@ struct Env {
 
 impl Env {
     async fn start() -> Self {
+        Self::start_with("siwc", json!({"client_id": "oaiapp_test"})).await
+    }
+
+    async fn start_with(provider: &str, meta: Value) -> Self {
         let seen: Seen = Arc::default();
         let app = Router::new()
             .fallback(responses_mock)
@@ -139,7 +143,7 @@ impl Env {
             "--data-dir",
             dir.path().to_str().unwrap(),
             "--provider-base-override",
-            &format!("siwc={upstream}"),
+            &format!("siwc={upstream},grok={upstream}"),
         ]);
         for name in [
             "THINROUTER_ADMIN_TOKEN",
@@ -188,9 +192,9 @@ impl Env {
         let r = post_admin(
             "/admin/api/connections/oauth/import",
             json!({
-                "name": "cx", "provider": "siwc", "access_token": "test-access",
+                "name": "cx", "provider": provider, "access_token": "test-access",
                 "base_url": format!("{upstream}/v1"),
-                "default_model": "gpt-mock", "meta": "{\"client_id\":\"oaiapp_test\"}"
+                "default_model": "gpt-mock", "meta": meta.to_string()
             }),
         )
         .await
@@ -750,4 +754,57 @@ async fn siwc_provider_applies_preview_limits() {
         .iter()
         .any(|c| c["error"]["code"] == "subscription_sharing_usage_limit_exceeded"));
     assert_eq!(chunks.last().unwrap(), "[DONE]");
+}
+
+#[tokio::test]
+async fn borrowed_grok_login_is_reread_and_never_refreshed() {
+    let home = tempfile::tempdir().unwrap();
+    let grok_dir = home.path().join(".grok");
+    std::fs::create_dir(&grok_dir).unwrap();
+    let auth = grok_dir.join("auth.json");
+    let write = |token: &str| {
+        std::fs::write(
+            &auth,
+            json!({"https://auth.x.ai": {"key": token, "refresh_token": "rt-owned-by-cli"}})
+                .to_string(),
+        )
+        .unwrap()
+    };
+    write("fresh-1");
+    let env = Env::start_with("grok", json!({"source": auth.to_str().unwrap()})).await;
+    // Grok is not force-streamed and the mock always answers SSE, so ask for a stream.
+    let chat =
+        json!({"model": "cx", "stream": true, "messages": [{"role": "user", "content": "hi"}]});
+
+    let r = env.post("/v1/chat/completions", chat.clone()).await;
+    assert!(r.text().await.unwrap().contains("[DONE]"));
+    assert_eq!(
+        env.upstream_header("authorization").as_deref(),
+        Some("Bearer fresh-1")
+    );
+
+    // The Grok CLI refreshed its file: picked up without a restart.
+    write("fresh-2");
+    env.post("/v1/chat/completions", chat.clone()).await;
+    assert_eq!(
+        env.upstream_header("authorization").as_deref(),
+        Some("Bearer fresh-2")
+    );
+
+    // Expired and not refreshed by the CLI: 401 with the hint, no refresh attempt
+    // (a refresh would go to auth.x.ai, unreachable from this test).
+    write("expired");
+    let r = env
+        .client
+        .post(format!("{}/v1/chat/completions", env.base))
+        .json(&chat)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(r.status(), 401);
+    assert!(r.text().await.unwrap().contains("Grok CLI"));
+    // The file is only read: the CLI's rotating refresh token is untouched.
+    assert!(std::fs::read_to_string(&auth)
+        .unwrap()
+        .contains("rt-owned-by-cli"));
 }

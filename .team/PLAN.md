@@ -1965,6 +1965,10 @@ Prior evidence: T997/T998 collector review; T970/T971 unified sources; T972/T973
 T975 root acceptance: independent ACCEPT, reviewed runtime hashes unchanged, root84+35tests and42contracts pass. Authorize scoped commit/push/PR under current user instruction; no bypass of final-head CI, no tag/deploy. Public evidence is deidentified; original dirty worktree untouched.
 
 
+## OpenMMO authorized publication / 2026-10-23
+
+Owner explicitly requested commit, PR and merge before reboot. Publish only labs/openmmo-lab from an isolated worktree based on main 2c596d43; preserve the original shared dirty tree and index. Bounded OAuth change has RED/GREEN and independent ACCEPT review. Recheck native tests, project-success and diff on this candidate, then require GitHub checks before merge. AC01 verified; AC02 partial and AC03/04 pending; no usable tag or deployment. Private source/runtime/terrain/evidence are disk-backed and retained. Existing component task board remains the progress authority.
+
 ## Browser Fingerprint / authorized integration / 2026-10-23T12:44:35Z
 
 Owner explicitly requested commit, PR and merge before reboot. Branch agent/browser-fingerprint-mainline-20261023 from main 2c596d43372b32dee07320cbcd39a8154d2ed1f5 uses an isolated worktree; unrelated dirty source/index preserved. Scope: lab, component CI, T-884 task/report and this ledger block only. All 16 candidate file hashes match prior evidence, including 11 browser-verified product files. Independent review T-884 accepted local implementation after hidden-search correction; subsequent GCC14.2.0 race run passed. No new product behavior changes or helper calls.
@@ -1974,3 +1978,5 @@ Plan: rerun race/vet/build, 12 JS tests, whole-repo success contracts and diff/m
 Browser Fingerprint evidence-gate accepts the isolated PR candidate: all16 candidate hashes match, prior T884 independent local acceptance applies, root pr-candidate race/vet/build/8 analyzer/4 tutorial/project-success/diff checks pass. Current user authorization covers commit/push/PR/normal merge. Hosted CI still pending; no completion/tag/deployment claim.
 
 Browser Fingerprint PR533 product commit 2ce7200f7eb55cfaf623121182d7bd14e10fc66d passed hosted local-contracts run39955826984 and project-success run39955826623. Root evidence-gate accepts local lab mainline AC01–04; update SUCCESS/index to complete, retain usable none and no deployment. This documentation-only follow-up retains all reviewed product hashes. Final head CI must pass before normal merge; board completion recorded only after actual merge.
+
+PR533 integrated main1618d4f2 after concurrent OpenMMO/Pokercase merges; only PLAN append conflict required resolution, both program records preserved. All16 Browser Fingerprint candidate hashes remain unchanged.

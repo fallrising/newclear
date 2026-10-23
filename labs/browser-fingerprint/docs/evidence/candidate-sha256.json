@@ -1,0 +1,18 @@
+{
+  "labs/browser-fingerprint/go.mod": "0e070c27be325eb5e0abbf18a6c0a733ff636cb8efc8170926df748c1bbdc272",
+  "labs/browser-fingerprint/main.go": "491e5b76c56977ee3c6500bde7b3f0f5ee7575c46b0d6dd4344476919fb55159",
+  "labs/browser-fingerprint/fingerprint.go": "bcda9eea30db98b8f94b044126f184aeba4464fd59d252ca482a8b6374a472bf",
+  "labs/browser-fingerprint/fingerprint_schema.go": "35d9c11cdd39a5424d6e280a46e2f48ddb8bb78196a1ebe78c0de3661d2404e1",
+  "labs/browser-fingerprint/analyze-observations.cjs": "f91baeaebaacac5b61ca4d057cb7aa1a530f0de2d1b63011362031c711bd1aa0",
+  "labs/browser-fingerprint/public/app.js": "982609e5da33931ca1d2a9db43b56a80b6660ddcb582a1ff50d464382f6059b7",
+  "labs/browser-fingerprint/public/experiment.css": "68655cb7d97e2cbe1034dcf7a81a3f971de05aceef805b0f714857776f44e14c",
+  "labs/browser-fingerprint/public/favicon.svg": "9ea83a558e7ca1015f36928bf5e848ccfcc2a836a99586e009e770c3e17e4d9d",
+  "labs/browser-fingerprint/public/fingerprint.js": "9961f18b3ff420956b0a2578c78fa9d88c8b1b72d70dfb1ed03ce8012738ab1d",
+  "labs/browser-fingerprint/public/index.html": "49c599aa82c69b210c1401ae27547365619c2a94a066746ae079e4ea984bc1a8",
+  "labs/browser-fingerprint/public/styles.css": "89d1d6afe292195986568a796e55b52a512380f24298b48c2e0aa2795267d587",
+  "labs/browser-fingerprint/main_test.go": "e012372acd5daf8ecb0b0cb6ae3815f29bbfb4543e481c6f22965f4f2dd855f6",
+  "labs/browser-fingerprint/tests/analyzer.test.cjs": "b0751580e820556e8704a8d3449ad63f702609b92d4c9384b548d54fcce823c4",
+  "labs/browser-fingerprint/tests/tutorial.test.cjs": "ee48733ce9b5c3e29e8aea2e6849ded0ee25c38111ccdf163464e91bc4e5c104",
+  "labs/browser-fingerprint/scripts/verify-browser.cjs": "3e5ae7fff5589ddcc69346f5a39880365e7313e21e5c5a7455b8fb8f24d694d3",
+  ".github/workflows/browser-fingerprint-ci.yml": "5fcd3dbe4fa133dab8b74d35fa4b65d6f376352480fa7cef55ce8043300f90c2"
+}

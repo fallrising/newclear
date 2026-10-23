@@ -259,7 +259,11 @@ func (app *application) captureFingerprint(w http.ResponseWriter, r *http.Reques
 		if json.Unmarshal(raw, &object) != nil || object == nil {
 			return fail(400, name+" 必須為 JSON 物件。")
 		}
-		payload[name] = raw
+		filtered, err := filterFingerprintSection(name, raw)
+		if err != nil {
+			return fail(400, name+" 觀測欄位型別不正確。")
+		}
+		payload[name] = filtered
 	}
 	if len(payload) == 1 {
 		return fail(400, "請提供瀏覽器或設備觀察資料。")

@@ -407,3 +407,75 @@ func TestConcurrentTaskCreatesAndLogLines(t *testing.T) {
 		t.Fatalf("lost/interleaved request logs: %d", len(records))
 	}
 }
+
+func TestFingerprintNestedAllowlist(t *testing.T) {
+	app, dir := testApplication(t)
+	body := `{"schemaVersion":1,"browser":{"userAgent":"fixture","secret":"DoNotStore","highEntropy":{"available":true,"architecture":"x86","fullVersionList":[{"brand":"Chromium","version":"141","secret":"DoNotStore"}]},"plugins":[{"name":"PDF","mimeTypes":[{"type":"application/pdf","secret":"DoNotStore"}],"secret":"DoNotStore"}]},"device":{"hardwareConcurrency":8,"account":"DoNotStore"},"rendering":{"canvas":{"available":true,"hash":"abc","secret":"DoNotStore"}},"context":{"sampleLabel":"unit","cookie":"DoNotStore"}}`
+	response := perform(app, "POST", "/api/fingerprint", body, nil)
+	if response.Code != 201 {
+		t.Fatalf("capture: %d %s", response.Code, response.Body.String())
+	}
+	rows := readRecords(t, dir, "fingerprints")
+	encoded, _ := json.Marshal(rows)
+	if strings.Contains(string(encoded), "DoNotStore") {
+		t.Fatal("nested non-allowlisted data retained")
+	}
+	client := rows[0]["client"].(map[string]any)
+	browser := client["browser"].(map[string]any)
+	if browser["userAgent"] != "fixture" || client["device"].(map[string]any)["hardwareConcurrency"] != float64(8) {
+		t.Fatal("allowed observations lost")
+	}
+	clean := strings.ReplaceAll(body, `,"secret":"DoNotStore"`, "")
+	clean = strings.ReplaceAll(clean, `,"account":"DoNotStore"`, "")
+	clean = strings.ReplaceAll(clean, `,"cookie":"DoNotStore"`, "")
+	second := perform(app, "POST", "/api/fingerprint", clean, nil)
+	if string(decodeResponse(t, response)["fingerprintId"]) != string(decodeResponse(t, second)["fingerprintId"]) {
+		t.Fatal("unknown fields influenced fingerprint")
+	}
+}
+
+func TestFingerprintRejectsNestedWrongTypes(t *testing.T) {
+	for _, section := range []string{
+		`"browser":{"userAgent":{"secret":"hidden"}}`,
+		`"browser":{"plugins":[{"name":{"secret":"hidden"}}]}`,
+		`"browser":{"highEntropy":{"fullVersionList":["hidden"]}}`,
+		`"locale":{"languages":[{"secret":"hidden"}]}`,
+		`"device":{"hardwareConcurrency":"eight"}`,
+		`"rendering":{"canvas":{"available":"yes"}}`,
+	} {
+		t.Run(section, func(t *testing.T) {
+			app, dir := testApplication(t)
+			response := perform(app, "POST", "/api/fingerprint", `{"schemaVersion":1,`+section+`}`, nil)
+			if response.Code != 400 {
+				t.Fatalf("wrong type accepted: %d", response.Code)
+			}
+			if len(readRecords(t, dir, "fingerprints")) != 0 {
+				t.Fatal("invalid capture persisted")
+			}
+		})
+	}
+}
+
+func TestStaticOnlyKnownAssets(t *testing.T) {
+	app, _ := testApplication(t)
+	if err := os.WriteFile(filepath.Join(app.publicDir, "private.jsonl"), []byte("private"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if response := perform(app, "GET", "/private.jsonl", "", nil); response.Code != 404 {
+		t.Fatalf("unlisted static asset exposed: %d", response.Code)
+	}
+}
+
+func TestObservationFailureDoesNotRollbackCRUD(t *testing.T) {
+	app, _ := testApplication(t)
+	if err := app.logs.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if response := perform(app, "POST", "/api/events", `{"type":"task_create"}`, nil); response.Code != 500 {
+		t.Fatalf("event failure: %d", response.Code)
+	}
+	response := perform(app, "POST", "/api/tasks", `{"title":"still saved"}`, nil)
+	if response.Code != 201 || len(app.tasks) != 7 {
+		t.Fatalf("CRUD lost after log failure: %d", response.Code)
+	}
+}

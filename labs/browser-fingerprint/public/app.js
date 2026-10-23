@@ -220,7 +220,8 @@ $('#search').addEventListener('input', event => {
   searchTimer = setTimeout(async () => {
     await record('search', { queryLength: state.query.length, action: 'search' }, event, tutorialGeneration);
     const task = state.tasks.find(item => item.id === tutorial.taskId);
-    if (task && state.query.length >= 2 && task.title.toLocaleLowerCase().includes(state.query.toLocaleLowerCase())) await advanceTutorial('search', task, event, tutorialGeneration);
+    const visible = task && (state.filter === 'all' || task.completed === (state.filter === 'completed')) && (state.project === 'all' || task.project === state.project);
+    if (visible && state.query.length >= 2 && task.title.toLocaleLowerCase().includes(state.query.toLocaleLowerCase())) await advanceTutorial('search', task, event, tutorialGeneration);
   }, 350);
 });
 function selectProject(project, event = null) { state.project = project; $('#project-filter').value = project; if (state.loaded) render(); if (event) record('filter_change', { action: 'project', project }, event); }

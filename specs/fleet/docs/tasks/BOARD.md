@@ -40,8 +40,14 @@ Owner removes the retired network mode; retain public/access, with Access web as
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-1001-1 | Remove retired mode from contracts, runtime, persistence and current docs; preserve public compatibility | AC-01 | in_progress | 2026-10-23T06:59:40Z | | 2026-10-23T07:15:41Z |
-| T-1001-2 | Access-first examples and lifecycle/recovery verification, safe database upgrade | AC-02, AC-04 | in_progress | 2026-10-23T06:59:40Z | | 2026-10-23T07:15:41Z |
-| T-1001-3 | Access allowlist and policy-before-entry regressions; real web login still awaits CF configuration | AC-03 | in_progress | 2026-10-23T06:59:40Z | | 2026-10-23T07:15:41Z |
+| T-1001-1 | Remove retired mode from contracts, runtime, persistence and current docs; preserve public compatibility | AC-01 | done | 2026-10-23T06:59:40Z | 2026-10-23T07:21:51Z | 2026-10-23T07:22:26Z |
+| T-1001-2 | Access-first examples and lifecycle/recovery verification, safe database upgrade | AC-02, AC-04 | done | 2026-10-23T06:59:40Z | 2026-10-23T07:21:51Z | 2026-10-23T07:22:26Z |
+| T-1001-3 | Access allowlist and policy-before-entry regressions; real web login still awaits CF configuration | AC-03 | done | 2026-10-23T06:59:40Z | 2026-10-23T07:21:51Z | 2026-10-23T07:22:26Z |
 
-T-1001 candidate evidence: [Access web record](../evidence/2026-10-23-access-web.md). Native suite, actual Docker ten-check lifecycle/recovery plus cleanup, legacy DB upgrade/rollback, source/binary identity and 41 project contracts passed. Initial independent review requested one SDD example correction, fixed and accepted in the focused follow-up. Remote CI and merge remain pending. The AC-03 row here covers the code guard regressions only; real browser login remains an external acceptance gap in SUCCESS.
+T-1001 candidate evidence: [Access web record](../evidence/2026-10-23-access-web.md). Native suite, actual Docker ten-check lifecycle/recovery plus cleanup, legacy DB upgrade/rollback, source/binary identity and 41 project contracts passed. Initial independent review requested one SDD example correction, fixed and accepted in the focused follow-up. Delivery results follow below. The AC-03 row here covers the code guard regressions only; real browser login remains an external acceptance gap in SUCCESS.
+
+### T-1001 delivery
+
+Implementation PR [#522](https://github.com/fallrising/newclear/pull/522) merged **2026-10-23T07:21:51Z**, commit `1496049d37b4bc3d372dec1c94f919f87c07f28d`. Final head `648500d49cfbd74e8e8e51067719fa7af63039c5` passed [Fleet CI](https://github.com/fallrising/newclear/actions/runs/39916671479) (`make test vet validate-schema build`, declared Go1.23) and [Project success contracts](https://github.com/fallrising/newclear/actions/runs/39916671571). PR summary lagged the workflow; direct commit check-run API confirmed both completed successfully and REST mergeability was clean before normal squash merge. Merged status/time/SHA were read back.
+
+Root evidence gate accepts this owner-requested removal and Access web implementation milestone. The three T-1001 rows are closed using the actual merge time; this follow-up changes only the task board. Runtime source remains the independently reviewed and real-Docker-tested fingerprint recorded above. Public is retained but unused; the current examples use Access web. Real Access browser denial/allowed-email OTP success remains pending under AC-03/T-0993-3, so full mainline and usable qualification remain incomplete. No production deployment or external Cloudflare-resource cleanup occurred.

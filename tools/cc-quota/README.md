@@ -10,7 +10,7 @@
 
 Claude Code 額度的 pacing 監控。每小時在本機採集一次額度快照並寫入 SQLite，另有只讀資料庫的報表指令；消耗速度偏離時間進度時才發 macOS 通知。目的是讓人自己決定下一步派什麼任務，而不是替人決定。
 
-**Status:** 2026-10-23 本次離線驗證已完成（28 項測試及 CLI→SQLite→report fixture流程）；見[驗證紀錄](docs/tasks/verification-20261023.md)。CI 執行同一套測試；本輪PR／CI結果見驗證紀錄。**真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器上驗證**，見 [quickstart](docs/quickstart.md)。
+**Status:** M1離線可靠性已合併（28項測試及CLI→SQLite→report流程）；[M1證據](docs/tasks/verification-20261023.md)。M2新增憑證邊界回歸，Python3.11 Linux／macOS各35項測試及3項原生Mac邊界測試通過；結果見[M2證據](docs/tasks/macos-boundaries-20261023.md)。**真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器上驗證**，見 [quickstart](docs/quickstart.md)。
 
 ## 設計
 
@@ -62,7 +62,8 @@ cc_quota.py report ──► 只讀 SQLite ──► 最新狀態 + 趨勢
 
 - `/api/oauth/usage` 是 Claude Code 內部使用的端點，**沒有公開文件**，欄位可能改變。每次的原始 JSON 都存在 `raw` 表以便回溯。
 - 本機 token 加總只含這台電腦的 Claude Code，不含 claude.ai、行動裝置或雲端 session。帳號層級的真實值以 `utilization` 為準。
-- access token 過期時採集會失敗並記入 `errors` 表，開一次 `claude` 讓它自動刷新即可。本工具不自行刷新憑證。
+- macOS僅讀 `/usr/bin/security` 的 `Claude Code-credentials` Keychain項目；拒絕、逾時或格式錯誤都會失敗，不改讀credential檔。Linux仍讀 `$CLAUDE_CONFIG_DIR/.credentials.json`。token須為非空、無空白／控制字元的ASCII字串，格式錯誤在HTTP前停止。
+- access token 過期時採集會失敗並記入 `errors` 表，開一次 `claude` 讓它自動刷新即可。本工具不自行刷新憑證。憑證錯誤只記固定代碼與提示，不保存token、Keychain原始輸出或憑證檔內容。
 - 電腦睡眠時不採集，趨勢會有缺口；GAP／STALE 表示缺觀測，不推斷缺口一定由睡眠造成。
 - 本機 token 以 `(message.id, requestId)` 去重；缺 requestId 時使用 message.id，缺 message.id 則逐筆計數，無法保證匿名重複記錄去重。加總沿用 input/output/cache_creation，未加 cache_read；畸形資料略過、超出SQLite整數範圍的加總標未知。
 - DB以秒為主鍵；同秒成功重採會取代該秒完整快照，不保留每次呼叫的獨立歷史。

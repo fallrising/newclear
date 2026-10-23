@@ -35,3 +35,5 @@ CI維持10分鐘job timeout，使用標準`ubuntu-latest`／`macos-15`及repo既
 ## 審查、交付與剩餘缺口
 
 獨立審查與PR CI尚待完成，結果由本紀錄及[任務板](BOARD.md)更新。AC03真人登入／Keychain成功取用／usage對照，以及AC04真launchd hourly、可見通知與睡眠恢復仍blocked；CI上的合成輸入不能替代。無部署／release／usable tag。
+
+首次[CI run 39886075939](https://github.com/fallrising/newclear/actions/runs/39886075939)在工作流程載入時失敗、jobs為空，未執行測試。job-level env不能引用runner context；依[官方context範圍](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)移到兩個Python測試step，保留runner.temp隔離。

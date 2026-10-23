@@ -28,9 +28,6 @@ jobs:
         os: [ubuntu-latest, macos-15]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
-    env:
-      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/cc-quota-pycache
-      TMPDIR: ${{ runner.temp }}
     defaults:
       run:
         working-directory: tools/cc-quota
@@ -42,9 +39,15 @@ jobs:
         with:
           python-version: '3.11'
       - name: Offline unit tests
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/cc-quota-pycache
+          TMPDIR: ${{ runner.temp }}
         run: python3 -m unittest discover -s tests -v
       - name: Check installer syntax
         run: bash -n install.sh
       - name: Native macOS boundaries (synthetic inputs)
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/cc-quota-pycache
+          TMPDIR: ${{ runner.temp }}
         if: matrix.os == 'macos-15'
         run: python3 -m unittest discover -s tests_macos -v

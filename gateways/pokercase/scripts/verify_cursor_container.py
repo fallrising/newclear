@@ -38,9 +38,18 @@ try:
     host_write = True
 except OSError:
     host_write = False
-pathlib.Path("/workspace/probe").write_text("allowed")
+try:
+    pathlib.Path("/workspace/probe").write_text("allowed")
+    workspace_write = True
+except OSError:
+    workspace_write = False
+try:
+    pathlib.Path("/rootfs-write-canary").write_text("bad")
+    root_write = True
+except OSError:
+    root_write = False
 root_ro = any(parts[1] == "/" and "ro" in parts[3].split(",") for parts in (line.split() for line in pathlib.Path("/proc/mounts").read_text().splitlines()))
-checks = {"uid":os.getuid(),"host_read":host_read,"host_write":host_write,"host_env": "HOST_SECRET_CANARY" in os.environ,"docker_socket":pathlib.Path("/var/run/docker.sock").exists(),"root_readonly":root_ro,"workspace_write":True}
+checks = {"uid":os.getuid(),"host_read":host_read,"host_write":host_write,"host_env": "HOST_SECRET_CANARY" in os.environ,"docker_socket":pathlib.Path("/var/run/docker.sock").exists(),"root_readonly":root_ro,"workspace_write":workspace_write,"root_write":root_write}
 out({"type":"result","result":json.dumps(checks),"usage":{"inputTokens":1,"outputTokens":1}})
 '''
 
@@ -133,7 +142,7 @@ def main():
                 checks = json.loads(json.load(response)["choices"][0]["message"]["content"])
             expected = {"uid":1000,"host_read":False,"host_write":False,
                         "host_env":False,"docker_socket":False,
-                        "root_readonly":True,"workspace_write":True}
+                        "root_readonly":True,"workspace_write":True,"root_write":False}
             assert checks == expected, checks
             assert not Path(str(canary) + "-write").exists()
             cleaned()

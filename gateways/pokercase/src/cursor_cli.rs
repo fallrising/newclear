@@ -131,7 +131,7 @@ impl CursorCli {
             "--tmpfs",
             "/tmp:rw,noexec,nosuid,size=64m",
             "--tmpfs",
-            "/workspace:rw,noexec,nosuid,size=64m",
+            "/workspace:rw,noexec,nosuid,size=64m,mode=1777",
             "--workdir",
             "/workspace",
             "--env",
@@ -537,6 +537,7 @@ mod tests {
             "--init",
             "no-new-privileges",
             "1000:1000",
+            "/workspace:rw,noexec,nosuid,size=64m,mode=1777",
         ] {
             assert!(args.iter().any(|a| a == required));
         }

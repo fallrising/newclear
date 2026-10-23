@@ -59,3 +59,7 @@ Docker's operator-configured proxy variables may still enter the container. The 
 The recipe and live Cursor authentication are not established by a fake CLI canary. Verify the chosen bundle/image/account separately before enabling a real route; account plugins and arbitrary network access remain explicit limitations.
 
 Cleanup is bounded: daemon creation that finishes after the final reconciliation attempt can still leave a container. Operators must reconcile such leftovers; neither this change nor its helper test proves unconditional cleanup.
+
+## Verification record
+
+The credential-free actual Docker runner canary and native Rust checks passed on 2026-10-23 after explicitly setting the ephemeral workspace tmpfs to mode1777. See [commands, previous failures and scope limits](tasks/T-0377-handoff.md). Image recipe/login validation and whole-product acceptance remain separate.

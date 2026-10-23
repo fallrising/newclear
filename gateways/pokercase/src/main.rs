@@ -43,83 +43,86 @@ struct Cli {
     command: Commands,
 }
 
+#[derive(clap::Args, Debug)]
+struct ServeArgs {
+    #[arg(long, env = "THINROUTER_HOST", default_value = "127.0.0.1")]
+    host: String,
+    #[arg(long, env = "THINROUTER_PORT", default_value_t = 20128)]
+    port: u16,
+    #[arg(long, env = "THINROUTER_DATA_DIR")]
+    data_dir: Option<std::path::PathBuf>,
+    #[arg(long, env = "THINROUTER_ADMIN_TOKEN")]
+    admin_token: Option<String>,
+    /// Allow keyless inference only on loopback, before any gateway key exists.
+    #[arg(
+        long,
+        env = "THINROUTER_ALLOW_KEYLESS_BOOTSTRAP",
+        default_value_t = false
+    )]
+    allow_keyless_bootstrap: bool,
+    #[arg(long, env = "THINROUTER_SECRETS_KEY")]
+    secrets_key: Option<String>,
+    #[arg(long, env = "THINROUTER_SSE_STALL_SECS", default_value_t = 90)]
+    sse_stall_secs: u64,
+    /// Enable token-saver (truncate tool / huge message content)
+    #[arg(long, env = "THINROUTER_TOKEN_SAVER", default_value_t = false)]
+    token_saver: bool,
+    #[arg(long, env = "THINROUTER_TOKEN_SAVER_MAX_CHARS", default_value_t = 2000)]
+    token_saver_max_chars: usize,
+    /// Extra Host names to accept (e.g. your Tailscale Serve name); IP literals
+    /// and localhost are always accepted. Comma-separated in the env var.
+    #[arg(
+        long = "allowed-host",
+        env = "THINROUTER_ALLOWED_HOSTS",
+        value_delimiter = ','
+    )]
+    allowed_hosts: Vec<String>,
+    /// Operator-only upstream base override, `provider=url` (repeatable). Admin UI/API
+    /// can then also point that provider's connections at this base.
+    #[arg(
+        long = "provider-base-override",
+        env = "THINROUTER_PROVIDER_BASE_OVERRIDES",
+        value_delimiter = ','
+    )]
+    provider_base_overrides: Vec<String>,
+    /// Claude Code CLI used by the `claude` provider (default: `claude` on PATH)
+    #[arg(long, env = "THINROUTER_CLAUDE_BIN")]
+    claude_bin: Option<String>,
+    /// Concurrent Claude Code processes
+    #[arg(long, env = "THINROUTER_CLAUDE_MAX_RUNS", default_value_t = 2)]
+    claude_max_runs: usize,
+    /// Seconds a Claude Code run waits for the client's tool results
+    #[arg(long, env = "THINROUTER_CLAUDE_IDLE_SECS", default_value_t = 600)]
+    claude_idle_secs: u64,
+    /// Cursor Agent CLI command inside the container image (default: cursor-agent)
+    #[arg(long, env = "THINROUTER_CURSOR_BIN")]
+    cursor_bin: Option<String>,
+    /// Pinned local Docker image (sha256 ID or repository@sha256 digest)
+    #[arg(long, env = "THINROUTER_CURSOR_IMAGE")]
+    cursor_image: Option<String>,
+    /// Dedicated Docker profile volume, prefixed thinrouter-cursor-
+    #[arg(long, env = "THINROUTER_CURSOR_PROFILE_VOLUME")]
+    cursor_profile_volume: Option<String>,
+    /// Operator-controlled Docker executable (default: docker)
+    #[arg(long, env = "THINROUTER_CURSOR_RUNTIME_BIN")]
+    cursor_runtime_bin: Option<String>,
+    /// Concurrent Cursor Agent processes
+    #[arg(long, env = "THINROUTER_CURSOR_MAX_RUNS", default_value_t = 2)]
+    cursor_max_runs: usize,
+    /// Enable the cursor provider, accepting that cursor-agent can use the account's
+    /// Cursor plugins (e.g. Gmail) for any client prompt.
+    #[arg(
+        long,
+        env = "THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS",
+        default_value_t = false
+    )]
+    cursor_accept_account_plugins: bool,
+}
+
 #[derive(Subcommand, Debug)]
 enum Commands {
     /// Start HTTP proxy + web admin
-    Serve {
-        #[arg(long, env = "THINROUTER_HOST", default_value = "127.0.0.1")]
-        host: String,
-        #[arg(long, env = "THINROUTER_PORT", default_value_t = 20128)]
-        port: u16,
-        #[arg(long, env = "THINROUTER_DATA_DIR")]
-        data_dir: Option<std::path::PathBuf>,
-        #[arg(long, env = "THINROUTER_ADMIN_TOKEN")]
-        admin_token: Option<String>,
-        /// Allow keyless inference only on loopback, before any gateway key exists.
-        #[arg(
-            long,
-            env = "THINROUTER_ALLOW_KEYLESS_BOOTSTRAP",
-            default_value_t = false
-        )]
-        allow_keyless_bootstrap: bool,
-        #[arg(long, env = "THINROUTER_SECRETS_KEY")]
-        secrets_key: Option<String>,
-        #[arg(long, env = "THINROUTER_SSE_STALL_SECS", default_value_t = 90)]
-        sse_stall_secs: u64,
-        /// Enable token-saver (truncate tool / huge message content)
-        #[arg(long, env = "THINROUTER_TOKEN_SAVER", default_value_t = false)]
-        token_saver: bool,
-        #[arg(long, env = "THINROUTER_TOKEN_SAVER_MAX_CHARS", default_value_t = 2000)]
-        token_saver_max_chars: usize,
-        /// Extra Host names to accept (e.g. your Tailscale Serve name); IP literals
-        /// and localhost are always accepted. Comma-separated in the env var.
-        #[arg(
-            long = "allowed-host",
-            env = "THINROUTER_ALLOWED_HOSTS",
-            value_delimiter = ','
-        )]
-        allowed_hosts: Vec<String>,
-        /// Operator-only upstream base override, `provider=url` (repeatable). Admin UI/API
-        /// can then also point that provider's connections at this base.
-        #[arg(
-            long = "provider-base-override",
-            env = "THINROUTER_PROVIDER_BASE_OVERRIDES",
-            value_delimiter = ','
-        )]
-        provider_base_overrides: Vec<String>,
-        /// Claude Code CLI used by the `claude` provider (default: `claude` on PATH)
-        #[arg(long, env = "THINROUTER_CLAUDE_BIN")]
-        claude_bin: Option<String>,
-        /// Concurrent Claude Code processes
-        #[arg(long, env = "THINROUTER_CLAUDE_MAX_RUNS", default_value_t = 2)]
-        claude_max_runs: usize,
-        /// Seconds a Claude Code run waits for the client's tool results
-        #[arg(long, env = "THINROUTER_CLAUDE_IDLE_SECS", default_value_t = 600)]
-        claude_idle_secs: u64,
-        /// Cursor Agent CLI command inside the container image (default: cursor-agent)
-        #[arg(long, env = "THINROUTER_CURSOR_BIN")]
-        cursor_bin: Option<String>,
-        /// Pinned local Docker image (sha256 ID or repository@sha256 digest)
-        #[arg(long, env = "THINROUTER_CURSOR_IMAGE")]
-        cursor_image: Option<String>,
-        /// Dedicated Docker profile volume, prefixed thinrouter-cursor-
-        #[arg(long, env = "THINROUTER_CURSOR_PROFILE_VOLUME")]
-        cursor_profile_volume: Option<String>,
-        /// Operator-controlled Docker executable (default: docker)
-        #[arg(long, env = "THINROUTER_CURSOR_RUNTIME_BIN")]
-        cursor_runtime_bin: Option<String>,
-        /// Concurrent Cursor Agent processes
-        #[arg(long, env = "THINROUTER_CURSOR_MAX_RUNS", default_value_t = 2)]
-        cursor_max_runs: usize,
-        /// Enable the cursor provider, accepting that cursor-agent can use the account's
-        /// Cursor plugins (e.g. Gmail) for any client prompt.
-        #[arg(
-            long,
-            env = "THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS",
-            default_value_t = false
-        )]
-        cursor_accept_account_plugins: bool,
-    },
+    Serve(Box<ServeArgs>),
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
         data_dir: Option<std::path::PathBuf>,
@@ -196,28 +199,29 @@ async fn main() -> Result<()> {
 
     let cli = Cli::parse();
     match cli.command {
-        Commands::Serve {
-            host,
-            port,
-            data_dir,
-            admin_token,
-            allow_keyless_bootstrap,
-            secrets_key,
-            sse_stall_secs,
-            token_saver,
-            token_saver_max_chars,
-            allowed_hosts,
-            provider_base_overrides,
-            claude_bin,
-            claude_max_runs,
-            claude_idle_secs,
-            cursor_bin,
-            cursor_image,
-            cursor_profile_volume,
-            cursor_runtime_bin,
-            cursor_max_runs,
-            cursor_accept_account_plugins,
-        } => {
+        Commands::Serve(args) => {
+            let ServeArgs {
+                host,
+                port,
+                data_dir,
+                admin_token,
+                allow_keyless_bootstrap,
+                secrets_key,
+                sse_stall_secs,
+                token_saver,
+                token_saver_max_chars,
+                allowed_hosts,
+                provider_base_overrides,
+                claude_bin,
+                claude_max_runs,
+                claude_idle_secs,
+                cursor_bin,
+                cursor_image,
+                cursor_profile_volume,
+                cursor_runtime_bin,
+                cursor_max_runs,
+                cursor_accept_account_plugins,
+            } = *args;
             let mut cfg = AppConfig::new(
                 host,
                 port,

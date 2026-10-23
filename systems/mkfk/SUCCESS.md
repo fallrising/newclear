@@ -61,3 +61,9 @@ make demo
 ## 可用版本
 
 `usable/mkfk/v0.1.0`（2026-10-23，指向 `8e9b2397`）已發布，但隨即被上述 CI 失敗推翻，**撤回推薦**；tag 依規範保留不刪。修復並重新驗收後發布新版本。
+
+## #413 看板與 triage 維護
+
+本次只對齊 #400 已合併 ADR 與 #401 明確暫緩狀態，不改 runtime 或 M0–M7 驗收。
+AC-T1：看板保留 PR/owner 決定來源、時間與 issue 開啟界線；AC-T2：其他任務列保持不變。
+驗證計畫：對照 GitHub PR/issue，scoped links、42項project contracts、whitespace、獨立審查與 CI；結果見 [本次報告](tasks/413-triage-closeout/report.md)。

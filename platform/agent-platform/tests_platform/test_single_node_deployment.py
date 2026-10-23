@@ -166,7 +166,8 @@ class RehearsalBoundaryTests(unittest.TestCase):
             root = Path(temporary)
             fixture = root / "runner.py"
             fixture.write_text(
-                "import pathlib, sys, time\n"
+                "import pathlib, signal, sys, time\n"
+                "signal.signal(signal.SIGINT, signal.default_int_handler)\n"
                 "root = pathlib.Path(sys.argv[1])\n"
                 "try:\n"
                 "    (root / 'ready').write_text('ready')\n"

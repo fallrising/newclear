@@ -33,16 +33,27 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 | AC-03 | Given 已封存成果與資料庫，When 隔離備份還原並重新登入，Then 成果 hash 保持一致且舊 session 失效 | historical | [單節點證據](docs/evidence/single-node.json) |
 | AC-04 | Given 真實自然語言工作，When 由支援的模型完成任務並經正常操作收尾，Then 全部 M3/M4 與 MVP gate 有同版證據 | pending | [交接](docs/HANDOFF.md)：真實 coding、實際 runtime 部署、stale VM cleanup 與整體 gate 未完成 |
 
+## 本次範圍：#379 owned-runner SIGINT cleanup
+
+本次只修離線演練的 owned-runner 信號契約，不驗收完整 M4。
+
+| AC ID | Given / When / Then | 狀態 | 驗證計畫 |
+| --- | --- | --- | --- |
+| SIG-01 | Given 一般或繼承 ignored SIGINT 的 owned runner，When wrapper 中斷，Then 啟動前建立合作式 SIGINT 契約並執行 ownership-checked finally | passed (offline) | [本次報告](tasks/379-owned-runner-signals/report.md)：原 fixture 45 秒 RED；真 runner + owned fake Docker 普通／ignored 回歸通過 |
+| SIG-02 | Given 不合作子程序，When 45 秒 cleanup deadline 到期，Then bounded SIGKILL 並回報 cleanup incomplete | passed (offline) | [本次報告](tasks/379-owned-runner-signals/report.md)：production 45 秒不變，真 subprocess 的受控 wait seam 驗證 SIGKILL／incomplete |
+
+不操作真 Docker、資料庫、VM、provider；完整 M4／live qualification 與 AC-04 仍 pending。
+
 ## 現況與缺口
 
-2026-10-21 [最終 CI attempt 1](https://github.com/fallrising/newclear/actions/runs/39631545716/attempts/1) 的 673 項測試有一項 error：`test_runner_interrupt_preserves_python_cleanup` 回報 `rehearsal_cleanup_incomplete`。本次沒有修 runtime；需釐清停止與清理邊界，重跑通過也不代表根因已修復。
+2026-10-21 [最終 CI attempt 1](https://github.com/fallrising/newclear/actions/runs/39631545716/attempts/1) 的 673 項測試有一項 error：`test_runner_interrupt_preserves_python_cleanup` 回報 `rehearsal_cleanup_incomplete`。2026-10-23 在原 fixture 控制繼承 ignored SIGINT，可重現同一 45 秒錯誤；本次只在 owned test runner／fixture 的資源配置前明確建立 SIGINT 合作契約，8 項離線 boundary／signal 測試通過。歷史 CI 未記錄 signal disposition，故不能斷言該次根因；完整演練與 live gate 未重跑。詳見[本次報告](tasks/379-owned-runner-signals/report.md)。
 
 M0–M2 已驗收，M3/M4 僅有多個已接受切片；不可把其合計稱作完整平台。
 2026-10-06 單節點演練涵蓋真 TCP API、CLI worker、PostgreSQL 與 Web，模型仍是 local mock。
 真 provider、live GitHub export、release 前長任務與主機 service-manager/TLS 尚缺對應證據。
 歷史報告中較早失敗與停止指令有後續修正，應以交接頂端與逐切片結果判斷。
 
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
+2026-10-21 的盤點僅新增驗收入口；本次 SIGINT 修正只限 test runner 與 fixture，保留原有驗收 assertions、ownership checks 與 45 秒停止界線。
 歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
 
 ## 啟動與驗證

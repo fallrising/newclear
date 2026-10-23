@@ -6,7 +6,7 @@ Authority: [START_DEVELOPMENT_PROMPT](../../START_DEVELOPMENT_PROMPT.md). Source
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| F01 | Repair N00 build/launch paths, CI entry and reproducibility checks | AC-01 | in_progress | 2026-10-22T18:05:10Z | | 2026-10-23T02:49:16Z |
+| F01 | Repair N00 build/launch paths, CI entry and reproducibility checks | AC-01 | in_progress | 2026-10-22T18:05:10Z | | 2026-10-23T02:57:19Z |
 | F02 | Target Mac launch: awaiting accessible controlled Mac; preserve <1500 ms | AC-02 | in_progress | 2026-10-22T18:05:10Z | | 2026-10-23T01:35:15Z |
 | F03 | Reading → annotation → restart → reanchor; gated by N00/M0 | AC-03 | todo | | | 2026-10-23T01:35:15Z |
 | F04 | Search, tags, links, Mermaid and export; follow graph/milestone gates | AC-04 | todo | | | 2026-10-23T01:35:15Z |
@@ -35,7 +35,7 @@ Direct owner instruction: change documents first, continue implementation, commi
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| D01 | Separate development/release gates and complete real Linux native verification | AC-01, AC-02 | in_progress | 2026-10-23T02:01:51Z | | 2026-10-23T02:49:16Z |
-| D02 | N01 SQLite schema, migrations, typed repositories and M0 acceptance | AC-03 | in_progress | 2026-10-23T02:10:00Z | | 2026-10-23T02:49:16Z |
+| D01 | Separate development/release gates and complete real Linux native verification | AC-01, AC-02 | in_progress | 2026-10-23T02:01:51Z | | 2026-10-23T02:57:19Z |
+| D02 | N01 SQLite schema, migrations, typed repositories and M0 acceptance | AC-03 | in_progress | 2026-10-23T02:10:00Z | | 2026-10-23T02:57:19Z |
 
 N00 development is now done with [native verification](../verification/N00.md) and independent ACCEPT. D01 implementation is complete, awaiting milestone merge. D02 development acceptance is complete with [N01/M0 evidence](../verification/N01.md), full root native rerun and independent ACCEPT; both rows await the milestone PR merge. Controlled Mac remains a release gate; no usable tag.

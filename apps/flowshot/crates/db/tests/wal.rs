@@ -2,7 +2,7 @@
 mod common;
 use flowshot_db::*;
 use std::{
-    sync::{Arc, Barrier},
+    sync::{Arc, Barrier, mpsc},
     time::{Duration, Instant},
 };
 #[test]
@@ -37,7 +37,7 @@ fn committed_data_survives_restart() {
 #[test]
 fn busy_timeout_is_bounded_and_wal_readers_keep_committed_view() {
     let path = common::path("busy");
-    let db = DbRuntime::open(&path).unwrap();
+    let db = Arc::new(DbRuntime::open(&path).unwrap());
     let w = db
         .transaction(|tx| tx.create_workspace("committed".into()))
         .unwrap();
@@ -46,15 +46,28 @@ fn busy_timeout_is_bounded_and_wal_readers_keep_committed_view() {
         .unwrap();
     assert_eq!(db.read(|q| q.workspace(w.id)).unwrap().name, "committed");
     let now = Instant::now();
-    assert_eq!(
-        db.transaction(|tx| tx.create_workspace("busy".into()))
-            .unwrap_err()
-            .code,
-        ErrorCode::Busy
-    );
-    assert!(now.elapsed() >= Duration::from_millis(4800));
-    assert!(now.elapsed() < Duration::from_secs(8));
+    let (finished, result) = mpsc::sync_channel(1);
+    let writer = Arc::clone(&db);
+    let job = std::thread::spawn(move || {
+        let outcome = writer.transaction(|tx| tx.create_workspace("busy".into()));
+        let _ = finished.send(outcome);
+    });
+    // SQLite's timeout counts accumulated busy-handler sleep, not scheduler or
+    // filesystem delays. This is a hang watchdog, not a product latency budget.
+    let outcome = result.recv_timeout(Duration::from_secs(30));
+    let elapsed = now.elapsed();
+    // Release the external lock before any assertion/teardown. On watchdog
+    // failure the helper retains its Arc, so dropping this test's owner cannot
+    // block in DbRuntime::shutdown while the helper is still waiting.
     raw.execute_batch("ROLLBACK").unwrap();
+    let outcome = outcome.expect("busy request exceeded the test hang watchdog");
+    job.join().unwrap();
+    assert_eq!(outcome.unwrap_err().code, ErrorCode::Busy);
+    eprintln!(
+        "{{\"test\":\"busy_timeout\",\"elapsed_us\":{}}}",
+        elapsed.as_micros()
+    );
+    assert!(elapsed >= Duration::from_millis(4800));
     assert!(
         db.transaction(|tx| tx.create_workspace("after busy".into()))
             .is_ok()

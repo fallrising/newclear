@@ -187,7 +187,7 @@
     },
     {
       "path": "docs/tasks/BOARD.md",
-      "sha256": "2f724b8bb011dcd5c5f81c10bac76eed6dd68e7dd191d4c2b40b589903d845f3",
+      "sha256": "e8e8f6c7fc5f5446680970f5385ab35f1d12d1f467ef579dbb7b92f43a4a930e",
       "bytes": 4012
     },
     {
@@ -302,42 +302,42 @@
     },
     {
       "path": "docs/tasks/N01/01-test-plan.md",
-      "sha256": "4f76ee9a4f5edfb38949f92f6a775682370ac11d9d60b38a5abce4f9f16f8c09",
-      "bytes": 12232
+      "sha256": "10f0262ca61257d2a4730676d86eeb6f94d6356f752a158a5162e1509b7643a8",
+      "bytes": 12619
     },
     {
       "path": "docs/tasks/N01/T01-migration-runner.md",
-      "sha256": "1a27e05137f2a3344632c5df5241c371d6597237cce297ead0b61f523950a964",
+      "sha256": "9a5fa18ed11ef91ed08232418a424c517506642414d44dd5bfc0f3128cafff25",
       "bytes": 2884
     },
     {
       "path": "docs/tasks/N01/T02-base-schema.md",
-      "sha256": "5d58477ccff52ee6454ed79aba3279b45ff5cc3469498461ebdf7346cc569acd",
+      "sha256": "97aedf7957a8159dbf9cbf9086d5cbedad36b3a244f01c03572af5b3f1facc6f",
       "bytes": 2326
     },
     {
       "path": "docs/tasks/N01/T03-integrity-triggers.md",
-      "sha256": "97934a2370bc4177815e758e4514bbe3d5e6357f00885e743c3387512dbf2509",
+      "sha256": "f2fd358bb0a7e1ad71a4fffc1f458037a62bc27097b72b7bf1451ba834a8515c",
       "bytes": 2333
     },
     {
       "path": "docs/tasks/N01/T04-repository-interfaces.md",
-      "sha256": "59357caab8a54207c60e1d53df2abfc8b63e9b0eda2d85d8b2bd20dc4496d201",
+      "sha256": "5566c229a6d67aeea0c6503fe18dd7204ffb168374e1376c8ed30e7224138e26",
       "bytes": 2575
     },
     {
       "path": "docs/tasks/N01/T05-soft-delete-semantics.md",
-      "sha256": "76b478ac49bab6cc90356ed33bbe349033d8f22954eda3b91b48eddd7c1e74dc",
+      "sha256": "5c3acf1be2fac4602d962b068b4f95467cac81c7e996e30fd0e058603586d383",
       "bytes": 2589
     },
     {
       "path": "docs/tasks/N01/T06-db-executor-concurrency-and-row-version.md",
-      "sha256": "13f4fd555e6e82003b37a5807f7027715c7e657d9a783038109a4cfd5dbec2eb",
+      "sha256": "480eca13d51b57a213b79713f61014f7f3eb97d26c4eb6af111dfbbd9df9ec67",
       "bytes": 2814
     },
     {
       "path": "docs/tasks/N01/T07-schema-benchmarks.md",
-      "sha256": "3435a523e9b8ac29cdeb556c0bb15f8f7d655d2455b30af10056c26edb6480ed",
+      "sha256": "5f0128e389e15e25dd3df02c76fd5ec53ec1edaa2c8c6156bc6cf3758e99acf1",
       "bytes": 3274
     },
     {
@@ -387,8 +387,8 @@
     },
     {
       "path": "docs/verification/N01.md",
-      "sha256": "838339d5781585dfacf09f0069080c458a1aba6efd208dd39b3a9c4d9cbdf070",
-      "bytes": 6152
+      "sha256": "0573a56a412d06a8724ea94c7d0800b9770f5184685ee98f408f242713e30e1b",
+      "bytes": 7120
     },
     {
       "path": "docs/verification/README.md",

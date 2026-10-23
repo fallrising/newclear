@@ -11,17 +11,17 @@
 - **元件路徑：** `systems/ojbquay/`
 - **一句話：** Kafka messaging control/data plane 的管理主控台：React 19 + Vite 8 + Ant Design 5 + ECharts 的 SPA（`console-web/`），後端是 JVM（Gradle）。
 - **技術棧：** React 19、Vite 8、Ant Design 5、ECharts、Zustand、React Router 8、TanStack Query；pnpm
-- **UI 入口：** `systems/ojbquay/console-web/`（dev 5173，preview 4173；`e2e/serve.mjs` 可提供 e2e 用的本機服務）
+- **UI 入口：** `systems/ojbquay/console-web/`（dev 5173，preview 4173；Compose stack 內為 `console-web:8080`）。UI 只有 light 主題、英文文案。
 
 ## 啟動線索（未驗證）
 
-- `pnpm install`，`pnpm dev --host 127.0.0.1`；無後端時先看 `e2e/serve.mjs` 與 `playwright.config.ts` 如何提供假資料。
+- 第 3 輪先滿足 [DESIGN.md](DESIGN.md) M1 的隔離與所有權契約；現有預設 Compose stack 不符合此 FE harness 的 loopback／獨立資源要求，不能直接啟動或清理。`pnpm dev` 沒有後端，`e2e/serve.mjs` 只是靜態伺服器；新 seed／login／states harness 尚待 D1 確認與實作。
 
 ## 主要流程
 
 至少走通以下流程各一次，並對每一步截圖：
 
-- 登入 → Dashboard → Topics 列表與詳情 → Groups → Subscriptions → Delay 設定 → Admin
+- 登入 → Dashboard → Topics 列表與詳情 drawer → Groups → Subscriptions（建立精靈與 DLQ drawer）→ Delay 查詢 → Admin（clusters、audit、users）
 
 ## 專案特有檢查重點
 
@@ -33,11 +33,12 @@
 
 ## 可重用的既有資產
 
-- `console-web/e2e/golden-path.spec.ts`。
+- `console-web/e2e-stack/golden-path.stack.spec.ts`：真 stack 旅程（`pnpm e2e:stack`），可沿用其選擇器。
+- `console-web/e2e/golden-path.spec.ts`：`page.route` mock 旅程，示範如何覆寫 API 回應。
 
 ## 待補的頁面
 
-`/topics/*`、`/groups/*`、`/admin/:section`：從假資料取值補齊。
+Topics、Groups、Subscriptions 的詳情與建立流程是 Drawer，沒有獨立路由，以互動腳本擷取（DESIGN M2）。`/admin/:section` 只有 `clusters`、`audit`、`users`，已列入 `targets.json`。
 
 ## 執行步驟
 

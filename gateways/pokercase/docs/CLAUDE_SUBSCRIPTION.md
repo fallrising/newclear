@@ -48,10 +48,17 @@ client
 - 参数加 `--mcp-config <run>/mcp.json --allowedTools <这些工具>`；Claude Code 自己的工具仍是
   `--tools ""`，不用 `--dangerously-skip-permissions`。
 - 模型呼叫工具时，`tool_use` 已在串流里：thinrouter 把名字换回客户端的名字转给客户端
-  （chat 的 `tool_calls`、Anthropic 的 `tool_use`、Responses 的 `function_call`），然后立刻
-  结束这个 run（不等 MCP 回应，也不让 Claude Code 继续下一个 API 请求）。
-- 下一个带工具结果的请求开新 run，整段对话以文字告诉它：
+  （chat 的 `tool_calls`、Anthropic 的 `tool_use`、Responses 的 `function_call`），这次回应
+  结束，但 **run 不结束**：它登记为「等这些 tool id 的结果」。
+- helper 的 `tools/call` 打 gateway 的 `POST /_thinrouter/claude-mcp`，带该 run 的随机
+  token（`x-thinrouter-run-token` 标头；token 只写在 run 目录的 0600 `callback.json`，
+  不在命令列或 URL 上；带转发标头的请求一律拒绝），一直等到结果到来。
+- 下一个请求若正好以这些 tool id 的结果结尾，结果交给那个 run 的 MCP 呼叫，同一个
+  Claude Code 进程接着回答，对话不再重送。对不上（别的 id、结果后还有新的使用者文字、run
+  已结束）就开新 run，整段对话以文字告诉它：
   `[tool call mcp__thinrouter__<name> id=… args=…]`、`[tool result id=…]`。
+- 等结果最多 `--claude-idle-secs`（预设 600 秒）；名额（`--claude-max-runs`）不够时，最早开始
+  等待的 run 先被结束。
 - `tool_choice: required` 或指定工具时，在 `<external_system_instructions>` 里用文字说明
   （Claude Code 没有对应参数）。
 
@@ -68,7 +75,7 @@ thinrouter serve --claude-bin /path/to/claude   # 不在 PATH 时
 
 ## 目前限制
 
-- 每个请求（含每次工具往返）启动一个新进程、把整段对话重送；没有 magpie 那种跨请求保留
-  run 或 history 分块的 cache 标记，长对话的 prompt cache 命中较差；启动约需 1–2 秒。
+- 工具往返留在同一个进程；但一般的下一轮使用者讯息（回答以 `end_turn` 结束后）仍开新进程
+  并重送整段对话，也还没有 history 分块的 cache 标记。
 - thinking 区块不回传；`temperature`、`max_tokens` 等取样参数不传给 Claude Code。
 - 旧版存过的 Claude token 会在开启资料库时清掉（不再使用）。

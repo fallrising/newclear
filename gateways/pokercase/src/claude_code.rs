@@ -9,37 +9,81 @@
 //! yetone/magpie's Claude subscription bridge.
 //!
 //! Client tools are offered through an MCP helper (`claude_mcp.rs`) as
-//! `mcp__thinrouter__<name>`. A run that calls one is ended right after the call is
-//! streamed to the client; the request carrying the tool result starts a new run that
-//! is told the whole conversation. Runs are not kept across requests.
+//! `mcp__thinrouter__<name>`. A run that calls one hands the `tool_use` to the client
+//! and stays alive, waiting in `waiting` by tool id; the helper's `tools/call` blocks on
+//! the gateway callback. The request that brings exactly those tool results answers the
+//! calls and reads the same process's next message, so the conversation is not sent
+//! again. Anything else (other results, extra user text, an expired or evicted run)
+//! starts a new run told the whole conversation.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use std::sync::Arc;
-use std::time::Duration;
+use std::sync::{Arc, Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 use bytes::Bytes;
 use futures_util::Stream;
 use serde_json::{json, Value};
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{Child, Command};
-use tokio::sync::{mpsc, OwnedSemaphorePermit, Semaphore};
+use tokio::sync::{mpsc, oneshot, OwnedSemaphorePermit, Semaphore};
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, warn};
 
 use crate::error::AppError;
 use crate::proxy::UpstreamAttemptError;
 
-/// Process settings shared by every run.
+/// Process settings and live runs shared by every request.
 #[derive(Clone)]
 pub struct ClaudeCode {
     /// `claude` executable (PATH lookup when bare).
     pub bin: String,
     /// Empty folder runs start in, so no project CLAUDE.md or settings are picked up.
     pub work_dir: PathBuf,
-    /// Bounds concurrent Claude Code processes.
+    /// Bounds concurrent Claude Code processes (waiting runs hold a slot).
     pub runs: Arc<Semaphore>,
+    /// How long a run waits for the client's tool results.
+    pub idle: Duration,
+    /// `http://<listen>:<port>` for the MCP helper's callback; set once listening.
+    pub callback_base: Arc<OnceLock<String>>,
+    live: Arc<Mutex<Live>>,
+}
+
+/// Runs that outlive a request.
+#[derive(Default)]
+struct Live {
+    /// Every live run by callback token.
+    by_token: HashMap<String, Arc<LiveRun>>,
+    /// Runs waiting for tool results, by pending tool_use id.
+    waiting: HashMap<String, Arc<LiveRun>>,
+    /// Waiting runs, oldest first (evicted when slots run out).
+    order: VecDeque<Arc<LiveRun>>,
+}
+
+/// A client tool result for an MCP call.
+#[derive(Clone, Debug)]
+struct ToolResult {
+    text: String,
+    is_error: bool,
+}
+
+/// One Claude Code process that may answer several requests.
+struct LiveRun {
+    token: String,
+    /// Where the current request's records go; None between requests.
+    sink: Mutex<Option<mpsc::Sender<Item>>>,
+    /// tool_use blocks streamed and not yet matched to an MCP call: (id, bridged name, input).
+    announced: Mutex<VecDeque<(String, String, Value)>>,
+    /// Ids of the last message's tool calls, awaiting the client's results.
+    pending: Mutex<Vec<String>>,
+    /// Results delivered before Claude Code asked for them.
+    results: Mutex<HashMap<String, ToolResult>>,
+    /// MCP calls waiting for a result.
+    calls: Mutex<HashMap<String, oneshot::Sender<ToolResult>>>,
+    /// Ends the process.
+    stop: CancellationToken,
+    waiting_since: Mutex<Option<Instant>>,
 }
 
 impl ClaudeCode {
@@ -50,8 +94,150 @@ impl ClaudeCode {
                 .unwrap_or_else(|| "claude".into()),
             work_dir: data_dir.join("claude-work"),
             runs: Arc::new(Semaphore::new(max_runs.max(1))),
+            idle: Duration::from_secs(600),
+            callback_base: Arc::new(OnceLock::new()),
+            live: Arc::new(Mutex::new(Live::default())),
         }
     }
+
+    pub fn with_idle(mut self, idle: Duration) -> Self {
+        self.idle = idle;
+        self
+    }
+
+    fn forget(&self, run: &Arc<LiveRun>) {
+        let mut live = self.live.lock().unwrap();
+        live.by_token.remove(&run.token);
+        live.waiting.retain(|_, r| !Arc::ptr_eq(r, run));
+        live.order.retain(|r| !Arc::ptr_eq(r, run));
+    }
+
+    /// A slot for a new run; when none is free, the oldest waiting run is ended.
+    async fn slot(&self, cancel: &CancellationToken) -> Option<OwnedSemaphorePermit> {
+        if let Ok(p) = self.runs.clone().try_acquire_owned() {
+            return Some(p);
+        }
+        let oldest = self.live.lock().unwrap().order.pop_front();
+        if let Some(run) = oldest {
+            debug!("ending the oldest waiting Claude Code run for a new one");
+            run.stop.cancel();
+        }
+        tokio::select! {
+            _ = cancel.cancelled() => None,
+            p = self.runs.clone().acquire_owned() => p.ok(),
+        }
+    }
+
+    /// The helper's `tools/call` for run `token`: answered with the client's result for
+    /// the matching streamed tool_use (waits for it up to `idle`).
+    pub async fn mcp_call(&self, token: &str, params: &Value) -> Option<Value> {
+        let run = {
+            let live = self.live.lock().unwrap();
+            live.by_token
+                .iter()
+                .find(|(t, _)| crate::guard::ct_eq(t, token))
+                .map(|(_, r)| r.clone())?
+        };
+        let name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
+        let args = params.get("arguments").cloned().unwrap_or(Value::Null);
+        let id = {
+            let mut ann = run.announced.lock().unwrap();
+            let bridged = format!("{}{name}", crate::claude_mcp::PREFIX);
+            let pos = ann
+                .iter()
+                .position(|(_, n, input)| *n == bridged && *input == args)
+                .or_else(|| ann.iter().position(|(_, n, _)| *n == bridged));
+            match pos {
+                Some(p) => ann.remove(p).map(|(id, _, _)| id)?,
+                None => {
+                    return Some(crate::claude_mcp::call_result(
+                        "no matching tool call is pending",
+                        true,
+                    ))
+                }
+            }
+        };
+        let ready = run.results.lock().unwrap().remove(&id);
+        let result = match ready {
+            Some(r) => r,
+            None => {
+                let (tx, rx) = oneshot::channel();
+                run.calls.lock().unwrap().insert(id.clone(), tx);
+                tokio::select! {
+                    r = rx => r.ok()?,
+                    _ = run.stop.cancelled() => return None,
+                    _ = tokio::time::sleep(self.idle) => return Some(crate::claude_mcp::call_result(
+                        "the client did not return a tool result in time", true)),
+                }
+            }
+        };
+        Some(crate::claude_mcp::call_result(
+            &result.text,
+            result.is_error,
+        ))
+    }
+
+    /// If `chat` ends with exactly the results a waiting run asked for, hand them over
+    /// and return a new sink's receiver for that run's next message.
+    fn continue_run(&self, chat: &Value) -> Option<mpsc::Receiver<Item>> {
+        let results = trailing_tool_results(chat)?;
+        let run = {
+            let mut live = self.live.lock().unwrap();
+            let run = live.waiting.get(&results[0].0)?.clone();
+            let pending = run.pending.lock().unwrap().clone();
+            let mut want: Vec<&String> = pending.iter().collect();
+            let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
+            want.sort();
+            got.sort();
+            if want != got {
+                return None;
+            }
+            for id in &pending {
+                live.waiting.remove(id);
+            }
+            live.order.retain(|r| !Arc::ptr_eq(r, &run));
+            run
+        };
+        let (tx, rx) = mpsc::channel::<Item>(64);
+        *run.sink.lock().unwrap() = Some(tx);
+        *run.waiting_since.lock().unwrap() = None;
+        run.pending.lock().unwrap().clear();
+        for (id, result) in results {
+            match run.calls.lock().unwrap().remove(&id) {
+                Some(tx) => {
+                    let _ = tx.send(result);
+                }
+                None => {
+                    run.results.lock().unwrap().insert(id, result);
+                }
+            }
+        }
+        Some(rx)
+    }
+}
+
+/// `(tool_call_id, result)` for the tool messages after the last assistant tool call,
+/// when nothing else follows them.
+fn trailing_tool_results(chat: &Value) -> Option<Vec<(String, ToolResult)>> {
+    let msgs = chat.get("messages")?.as_array()?;
+    let mut out = Vec::new();
+    for m in msgs.iter().rev() {
+        match m.get("role").and_then(|r| r.as_str()) {
+            Some("tool") => {
+                let id = m.get("tool_call_id")?.as_str()?.to_string();
+                let text = content_text(m.get("content").unwrap_or(&Value::Null));
+                let is_error = text.starts_with("[tool error]");
+                out.push((id, ToolResult { text, is_error }));
+            }
+            Some("assistant") if is_tool_call(m) => break,
+            _ => return None,
+        }
+    }
+    if out.is_empty() {
+        return None;
+    }
+    out.reverse();
+    Some(out)
 }
 
 /// Arguments as magpie's `claudeCLIArgs`. With client tools, the MCP helper's config
@@ -382,27 +568,66 @@ async fn stop(mut child: Child) {
     }
 }
 
-/// Start `claude -p` for one request and wait for its first reply event, so failures
-/// before any output can still fall back to another target.
+/// Wait for a run's first record for this request.
+async fn first_record(mut rx: mpsc::Receiver<Item>) -> Result<ClaudeRun, UpstreamAttemptError> {
+    match rx.recv().await {
+        Some(Item::Record(first)) => Ok(ClaudeRun {
+            first: Some(first),
+            rx,
+        }),
+        Some(Item::Failed { status, message }) => Err(UpstreamAttemptError {
+            status,
+            body: message,
+            retryable: matches!(status, 429 | 401 | 502 | 503),
+        }),
+        None => Err(UpstreamAttemptError {
+            status: 502,
+            body: "Claude Code ended without a reply".into(),
+            retryable: true,
+        }),
+    }
+}
+
+fn write_private(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
+    use std::io::Write;
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        opts.mode(0o600);
+    }
+    opts.open(path)?.write_all(bytes)
+}
+
+/// Answer a request with Claude Code: hand tool results to the run waiting for them, or
+/// start `claude -p`. Waits for the first reply event, so failures before any output can
+/// still fall back to another target.
 pub async fn start(
     cc: &ClaudeCode,
     model: &str,
     chat: &Value,
     cancel: &CancellationToken,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
+    if let Some(rx) = cc.continue_run(chat) {
+        debug!("tool results go on in the waiting Claude Code run");
+        return first_record(rx).await;
+    }
     let fail = |status: u16, body: String, retryable: bool| UpstreamAttemptError {
         status,
         body,
         retryable,
     };
-    let permit: OwnedSemaphorePermit = tokio::select! {
-        _ = cancel.cancelled() => return Err(fail(499, "client disconnected".into(), false)),
-        p = cc.runs.clone().acquire_owned() => p.map_err(|_| fail(503, "claude runs closed".into(), true))?,
-    };
+    let permit = cc
+        .slot(cancel)
+        .await
+        .ok_or_else(|| fail(499, "client disconnected".into(), false))?;
     std::fs::create_dir_all(&cc.work_dir)
         .map_err(|e| fail(500, format!("claude work dir: {e}"), false))?;
+    let token = crate::guard::random_hex(24);
 
-    // Client tools: a per-run folder with the helper's tool list and MCP config.
+    // Client tools: a per-run folder (0600 files) with the helper's tool list, MCP config
+    // and callback URL (which holds the run token, so it is never on a command line).
     let mut names: HashMap<String, String> = HashMap::new();
     let mut run_dir: Option<PathBuf> = None;
     let mut mcp_config: Option<PathBuf> = None;
@@ -416,18 +641,31 @@ pub async fn start(
             .work_dir
             .join("runs")
             .join(uuid::Uuid::new_v4().to_string());
+        let callback = cc.callback_base.get().map(|base| {
+            json!({"url": format!("{base}{}", crate::claude_mcp::CALLBACK_PATH), "token": token})
+        });
         let setup = || -> std::io::Result<PathBuf> {
             std::fs::create_dir_all(&dir)?;
             let tools_file = dir.join("tools.json");
-            std::fs::write(&tools_file, serde_json::to_vec(&list)?)?;
-            let exe = std::env::current_exe()?;
+            write_private(&tools_file, &serde_json::to_vec(&list)?)?;
+            let mut args = vec![
+                json!("claude-mcp-helper"),
+                json!("--tools-file"),
+                json!(tools_file),
+            ];
+            if let Some(cb_json) = &callback {
+                let cb = dir.join("callback.json");
+                write_private(&cb, &serde_json::to_vec(cb_json)?)?;
+                args.push(json!("--callback-file"));
+                args.push(json!(cb));
+            }
             let cfg = json!({"mcpServers": {crate::claude_mcp::SERVER: {
                 "type": "stdio",
-                "command": exe,
-                "args": ["claude-mcp-helper", "--tools-file", tools_file],
+                "command": std::env::current_exe()?,
+                "args": args,
             }}});
             let cfg_file = dir.join("mcp.json");
-            std::fs::write(&cfg_file, serde_json::to_vec(&cfg)?)?;
+            write_private(&cfg_file, &serde_json::to_vec(&cfg)?)?;
             Ok(cfg_file)
         };
         let cfg_file = setup().map_err(|e| fail(500, format!("claude tool bridge: {e}"), false))?;
@@ -469,23 +707,38 @@ pub async fn start(
         stop(child).await;
         return Err(fail(502, format!("Claude Code input: {e}"), true));
     }
-    // EOF after the one message: Claude Code answers it and exits.
-    drop(stdin);
 
-    let (tx, mut rx) = mpsc::channel::<Item>(64);
-    let cancel = cancel.clone();
+    let (tx, rx) = mpsc::channel::<Item>(64);
+    let run = Arc::new(LiveRun {
+        token: token.clone(),
+        sink: Mutex::new(Some(tx)),
+        announced: Mutex::new(VecDeque::new()),
+        pending: Mutex::new(Vec::new()),
+        results: Mutex::new(HashMap::new()),
+        calls: Mutex::new(HashMap::new()),
+        stop: CancellationToken::new(),
+        waiting_since: Mutex::new(None),
+    });
+    cc.live.lock().unwrap().by_token.insert(token, run.clone());
+
+    // The first request's disconnect ends the run while it is still answering it.
+    let first_cancel = cancel.clone();
+    let cc = cc.clone();
     tokio::spawn(async move {
         let _permit = permit;
+        // stdin stays open while the run lives (closing it would end Claude Code).
+        let _stdin = stdin;
         let mut lines = BufReader::new(stdout).lines();
         let mut sent = false;
-        let mut finished = false;
-        let mut translator = EventFilter {
+        let mut filter = EventFilter {
             names,
             ..Default::default()
         };
-        loop {
+        let sink = |run: &LiveRun| run.sink.lock().unwrap().clone();
+        'read: loop {
             let next = tokio::select! {
-                _ = cancel.cancelled() => break,
+                _ = run.stop.cancelled() => break,
+                _ = first_cancel.cancelled(), if !sent => break,
                 l = lines.next_line() => l,
             };
             let Ok(Some(l)) = next else { break };
@@ -495,17 +748,51 @@ pub async fn start(
             match env.get("type").and_then(|t| t.as_str()) {
                 Some("stream_event") => {
                     let Some(ev) = env.get("event") else { continue };
-                    for rec in translator.on_event(ev) {
+                    let records = filter.on_event(ev);
+                    // Calls Claude Code is about to make through the helper.
+                    run.announced
+                        .lock()
+                        .unwrap()
+                        .extend(filter.finished_tools.drain(..));
+                    let waits = filter.done && filter.stop_reason.as_deref() == Some("tool_use");
+                    if waits {
+                        // Registered before the client sees message_stop, so its next
+                        // request (the results) finds this run.
+                        let ids = std::mem::take(&mut filter.tool_ids);
+                        *run.pending.lock().unwrap() = ids.clone();
+                        *run.waiting_since.lock().unwrap() = Some(Instant::now());
+                        let mut live = cc.live.lock().unwrap();
+                        for id in ids {
+                            live.waiting.insert(id, run.clone());
+                        }
+                        live.order.push_back(run.clone());
+                    }
+                    let Some(tx) = sink(&run) else { continue };
+                    for rec in records {
                         sent = true;
                         if tx.send(Item::Record(rec)).await.is_err() {
-                            finished = true;
-                            break;
+                            break 'read; // the client went away mid-reply
                         }
                     }
-                    // The reply is complete. A tool call waits on the client, so the run
-                    // is ended now (the next request starts a new one with the result).
-                    if translator.done {
-                        finished = true;
+                    if filter.done {
+                        *run.sink.lock().unwrap() = None;
+                        if !waits {
+                            break; // reply complete
+                        }
+                        filter.reset();
+                        let (run2, idle) = (run.clone(), cc.idle);
+                        tokio::spawn(async move {
+                            tokio::time::sleep(idle).await;
+                            let still = run2
+                                .waiting_since
+                                .lock()
+                                .unwrap()
+                                .is_some_and(|t| t.elapsed() >= idle);
+                            if still {
+                                debug!("Claude Code run waited too long for tool results");
+                                run2.stop.cancel();
+                            }
+                        });
                     }
                 }
                 Some("result") => {
@@ -519,46 +806,51 @@ pub async fn start(
                             .chars()
                             .take(500)
                             .collect::<String>();
-                        let _ = tx
-                            .send(Item::Failed {
-                                status: status_for(&msg),
-                                message: format!("Claude Code: {msg}"),
-                            })
-                            .await;
+                        if let Some(tx) = sink(&run) {
+                            sent = true;
+                            let _ = tx
+                                .send(Item::Failed {
+                                    status: status_for(&msg),
+                                    message: format!("Claude Code: {msg}"),
+                                })
+                                .await;
+                        }
                     }
-                    finished = true;
+                    break;
                 }
                 _ => {}
             }
-            if finished {
-                break;
+        }
+        if let Some(tx) = sink(&run) {
+            if !sent && !run.stop.is_cancelled() && !first_cancel.is_cancelled() {
+                let mut err = String::new();
+                let _ = tokio::time::timeout(
+                    Duration::from_secs(2),
+                    (&mut stderr).take(4096).read_to_string(&mut err),
+                )
+                .await;
+                let tail: String = err
+                    .trim()
+                    .chars()
+                    .rev()
+                    .take(300)
+                    .collect::<Vec<_>>()
+                    .into_iter()
+                    .rev()
+                    .collect();
+                let msg = format!("Claude Code ended without a reply: {tail}");
+                warn!("{msg}");
+                let _ = tx
+                    .send(Item::Failed {
+                        status: status_for(&tail),
+                        message: msg,
+                    })
+                    .await;
             }
         }
-        if !finished && !sent && !cancel.is_cancelled() {
-            let mut err = String::new();
-            let _ = tokio::time::timeout(
-                Duration::from_secs(2),
-                (&mut stderr).take(4096).read_to_string(&mut err),
-            )
-            .await;
-            let tail: String = err
-                .trim()
-                .chars()
-                .rev()
-                .take(300)
-                .collect::<Vec<_>>()
-                .into_iter()
-                .rev()
-                .collect();
-            let msg = format!("Claude Code ended without a reply: {tail}");
-            warn!("{msg}");
-            let _ = tx
-                .send(Item::Failed {
-                    status: status_for(&tail),
-                    message: msg,
-                })
-                .await;
-        }
+        cc.forget(&run);
+        run.stop.cancel();
+        *run.sink.lock().unwrap() = None;
         stop(child).await;
         if let Some(dir) = run_dir {
             let _ = std::fs::remove_dir_all(dir);
@@ -566,18 +858,7 @@ pub async fn start(
         debug!("claude code run finished");
     });
 
-    match rx.recv().await {
-        Some(Item::Record(first)) => Ok(ClaudeRun {
-            first: Some(first),
-            rx,
-        }),
-        Some(Item::Failed { status, message }) => Err(fail(
-            status,
-            message,
-            matches!(status, 429 | 401 | 502 | 503),
-        )),
-        None => Err(fail(502, "Claude Code ended without a reply".into(), true)),
-    }
+    first_record(rx).await
 }
 
 /// Re-emits the first message's stream events as client SSE records: text blocks and
@@ -589,12 +870,27 @@ struct EventFilter {
     names: HashMap<String, String>,
     started: bool,
     done: bool,
+    stop_reason: Option<String>,
+    /// upstream index → (tool_use id, bridged name, input JSON so far)
+    tools: HashMap<i64, (String, String, String)>,
+    /// Client tool calls of this message, complete: (id, bridged name, input).
+    finished_tools: Vec<(String, String, Value)>,
+    /// Ids of this message's client tool calls.
+    tool_ids: Vec<String>,
     /// upstream block index → client index (None = dropped)
     map: std::collections::HashMap<i64, Option<i64>>,
     next: i64,
 }
 
 impl EventFilter {
+    /// Ready for the next message of the same run.
+    fn reset(&mut self) {
+        *self = EventFilter {
+            names: std::mem::take(&mut self.names),
+            ..Default::default()
+        };
+    }
+
     fn record(ev: &Value) -> String {
         let name = ev.get("type").and_then(|t| t.as_str()).unwrap_or("message");
         format!("event: {name}\ndata: {ev}")
@@ -637,12 +933,35 @@ impl EventFilter {
                 let mut ev = ev.clone();
                 ev["index"] = json!(out);
                 if let Some(name) = client_tool {
+                    let id = ev
+                        .pointer("/content_block/id")
+                        .and_then(|i| i.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    let bridged = ev
+                        .pointer("/content_block/name")
+                        .and_then(|n| n.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    self.tool_ids.push(id.clone());
+                    self.tools.insert(idx, (id, bridged, String::new()));
                     ev["content_block"]["name"] = json!(name);
                 }
                 vec![Self::record(&ev)]
             }
             "content_block_delta" | "content_block_stop" => {
                 let idx = ev.get("index").and_then(|i| i.as_i64()).unwrap_or(0);
+                if let Some(j) = ev.pointer("/delta/partial_json").and_then(|j| j.as_str()) {
+                    if let Some(t) = self.tools.get_mut(&idx) {
+                        t.2.push_str(j);
+                    }
+                }
+                if ty == "content_block_stop" {
+                    if let Some((id, bridged, input)) = self.tools.remove(&idx) {
+                        let input = serde_json::from_str(&input).unwrap_or_else(|_| json!({}));
+                        self.finished_tools.push((id, bridged, input));
+                    }
+                }
                 match self.map.get(&idx).copied().flatten() {
                     Some(out) => {
                         let mut ev = ev.clone();
@@ -652,7 +971,12 @@ impl EventFilter {
                     None => Vec::new(),
                 }
             }
-            "message_delta" => vec![Self::record(ev)],
+            "message_delta" => {
+                if let Some(r) = ev.pointer("/delta/stop_reason").and_then(|r| r.as_str()) {
+                    self.stop_reason = Some(r.to_string());
+                }
+                vec![Self::record(ev)]
+            }
             "message_stop" => {
                 self.done = true;
                 vec![Self::record(ev)]

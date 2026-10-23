@@ -98,6 +98,7 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_PROVIDER_BASE_OVERRIDES` / `--provider-base-override` | Operator-only `provider=url` upstream base (mocks, egress proxies) |
 | `THINROUTER_CLAUDE_BIN` / `--claude-bin` | Claude Code CLI for the `claude` provider (default `claude` on PATH) |
 | `THINROUTER_CLAUDE_MAX_RUNS` / `--claude-max-runs` | Concurrent Claude Code processes (default 2) |
+| `THINROUTER_CLAUDE_IDLE_SECS` / `--claude-idle-secs` | How long a Claude Code run waits for the client's tool results (default 600) |
 | `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
 | `THINROUTER_TOKEN_SAVER` / `--token-saver` | Truncate tool / huge message content |
 | `THINROUTER_TOKEN_SAVER_MAX_CHARS` | Max chars kept per tool-like block (default 2000) |

@@ -93,6 +93,9 @@ enum Commands {
         /// Concurrent Claude Code processes
         #[arg(long, env = "THINROUTER_CLAUDE_MAX_RUNS", default_value_t = 2)]
         claude_max_runs: usize,
+        /// Seconds a Claude Code run waits for the client's tool results
+        #[arg(long, env = "THINROUTER_CLAUDE_IDLE_SECS", default_value_t = 600)]
+        claude_idle_secs: u64,
     },
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -143,6 +146,8 @@ enum Commands {
     ClaudeMcpHelper {
         #[arg(long)]
         tools_file: std::path::PathBuf,
+        #[arg(long)]
+        callback_file: Option<std::path::PathBuf>,
     },
     /// Refresh OAuth tokens for imported connections
     Refresh {
@@ -158,7 +163,9 @@ async fn main() -> Result<()> {
     // Required when multiple rustls crypto backends are linked (reqwest + tokio-rustls).
     let _ = rustls::crypto::ring::default_provider().install_default();
 
+    // stderr: stdout is a protocol channel for claude-mcp-helper.
     tracing_subscriber::fmt()
+        .with_writer(std::io::stderr)
         .with_env_filter(
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
         )
@@ -180,6 +187,7 @@ async fn main() -> Result<()> {
             provider_base_overrides,
             claude_bin,
             claude_max_runs,
+            claude_idle_secs,
         } => {
             let mut cfg = AppConfig::new(
                 host,
@@ -196,6 +204,7 @@ async fn main() -> Result<()> {
             cfg.set_provider_base_overrides(&provider_base_overrides)?;
             cfg.claude_bin = claude_bin;
             cfg.claude_max_runs = claude_max_runs;
+            cfg.claude_idle_secs = claude_idle_secs;
             server::run(cfg).await
         }
         Commands::Doctor {
@@ -268,7 +277,10 @@ async fn main() -> Result<()> {
             )?;
             login_siwc_cmd(&cfg, &name, port, model).await
         }
-        Commands::ClaudeMcpHelper { tools_file } => claude_mcp::run(&tools_file),
+        Commands::ClaudeMcpHelper {
+            tools_file,
+            callback_file,
+        } => claude_mcp::run(&tools_file, callback_file.as_deref()).await,
         Commands::Refresh {
             data_dir,
             secrets_key,

@@ -51,6 +51,8 @@ pub fn build_app(state: AppState) -> Router {
 
     Router::new()
         .route("/health", get(health))
+        // Claude Code MCP helper callback: authorized by the run's own token only.
+        .route(crate::claude_mcp::CALLBACK_PATH, post(claude_mcp_callback))
         .nest("/v1", inference.clone())
         .merge(inference)
         .merge(admin::router())
@@ -88,11 +90,13 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
                 cfg.claude_bin.clone(),
                 &cfg.data_dir,
                 cfg.claude_max_runs,
-            ),
+            )
+            .with_idle(std::time::Duration::from_secs(cfg.claude_idle_secs.max(1))),
         },
         sessions: Sessions::default(),
     };
 
+    let state_callback_base = state.proxy.claude_code.callback_base.clone();
     let app = build_app(state);
 
     info!(%addr, data_dir = %cfg.data_dir.display(), "thinrouter listening");
@@ -105,6 +109,16 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     }
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
+    let bound = listener.local_addr()?;
+    let host = if bound.ip().is_unspecified() {
+        "127.0.0.1".to_string()
+    } else {
+        match bound.ip() {
+            std::net::IpAddr::V6(ip) => format!("[{ip}]"),
+            ip => ip.to_string(),
+        }
+    };
+    let _ = state_callback_base.set(format!("http://{host}:{}", bound.port()));
     axum::serve(
         listener,
         app.into_make_service_with_connect_info::<SocketAddr>(),
@@ -117,6 +131,27 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
 async fn shutdown_signal() {
     let _ = tokio::signal::ctrl_c().await;
     info!("shutdown signal received");
+}
+
+/// The MCP helper of a live Claude Code run asks for a client tool result. The run's
+/// secret token comes in a header (never the URL, which request logs may show);
+/// proxied requests are refused.
+async fn claude_mcp_callback(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(params): Json<Value>,
+) -> Response {
+    let token = headers
+        .get(crate::claude_mcp::TOKEN_HEADER)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    if guard::has_forwarding_headers(&headers) || token.is_empty() {
+        return AppError::Unauthorized.into_response();
+    }
+    match state.proxy.claude_code.mcp_call(token, &params).await {
+        Some(result) => Json(result).into_response(),
+        None => AppError::NotFound("no such Claude Code run".into()).into_response(),
+    }
 }
 
 async fn health() -> impl IntoResponse {

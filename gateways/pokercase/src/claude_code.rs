@@ -864,7 +864,7 @@ pub fn has_tools(chat: &Value) -> bool {
 }
 
 /// One item from a run: an Anthropic SSE record, or a failure.
-enum Item {
+pub(crate) enum Item {
     Record(String),
     Failed { status: u16, message: String },
 }
@@ -916,7 +916,7 @@ impl ClaudeRun {
 }
 
 /// Map a Claude Code failure text to an HTTP status (no secrets in these texts).
-fn status_for(message: &str) -> u16 {
+pub(crate) fn status_for(message: &str) -> u16 {
     let m = message.to_ascii_lowercase();
     if m.contains("rate limit") || m.contains("usage limit") || m.contains("limit reached") {
         429
@@ -932,7 +932,7 @@ fn status_for(message: &str) -> u16 {
 
 /// Ask Claude Code to stop with SIGTERM (it then removes its OAuth refresh lock), and
 /// kill it only after a grace period.
-async fn stop(mut child: Child) {
+pub(crate) async fn stop(mut child: Child) {
     #[cfg(unix)]
     if let Some(pid) = child.id() {
         // SAFETY: plain kill(2) on our own child's pid.
@@ -949,7 +949,9 @@ async fn stop(mut child: Child) {
 }
 
 /// Wait for a run's first record for this request.
-async fn first_record(mut rx: mpsc::Receiver<Item>) -> Result<ClaudeRun, UpstreamAttemptError> {
+pub(crate) async fn first_record(
+    mut rx: mpsc::Receiver<Item>,
+) -> Result<ClaudeRun, UpstreamAttemptError> {
     match rx.recv().await {
         Some(Item::Record(first)) => Ok(ClaudeRun {
             first: Some(first),

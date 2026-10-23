@@ -22,8 +22,6 @@ clap = { version = "4", features = ["derive", "env"] }
 crossterm = "0.28"
 dirs = "6"
 futures-util = "0.3"
-flate2 = "1"
-h2 = "0.4"
 hex = "0.4"
 http = "1"
 minijinja = { version = "2", features = ["loader"] }
@@ -38,7 +36,6 @@ sha2 = "0.10"
 subtle = "2"
 thiserror = "2"
 tokio = { version = "1", features = ["full"] }
-tokio-rustls = "0.26"
 tokio-stream = "0.1"
 tokio-util = "0.7"
 tower = "0.5"
@@ -46,7 +43,6 @@ tower-http = { version = "0.6", features = ["cors", "trace", "limit"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1", features = ["v4", "v5", "serde"] }
-webpki-roots = "0.26"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

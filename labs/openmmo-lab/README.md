@@ -9,13 +9,14 @@
 
 以固定版本的 [Julian-adv/OpenMMO](https://github.com/Julian-adv/OpenMMO) 建立個人 MMORPG 試驗入口：先跑通一個小世界，再做可獨立驗證的遊戲改動與上游貢獻。newclear 只保存本 lab 的工具、設計及驗收方法；上游源碼留在獨立 Git checkout，保留日後 fork／PR 的歷史。
 
-**Status:** P0 啟動準備完成；Python 防呆測試與真實固定 checkout 的設定產生已驗證。Docker build、地形生成、Google 登入、雙人戰鬥／交易／重啟持久化尚未驗證。不是已可玩的遊戲發行版。
+**Status（2026-10-23）:** 已恢復 P0 主線。10 個工具 tests、固定 checkout render、283 個資產 checksum、server/client Docker builds 與 4,096 tiles/manifests 地形初始化／重入通過。完整啟動仍缺真 Google Web OAuth 設定，另有指定資產來源資料待核對。Google 登入、雙人戰鬥／交易、角色保存與隔離還原尚未驗收，`usable_tag: none`。
 
 ## 入口
 
 - [Quickstart](docs/quickstart.md)：分批操作、環境檢查、停機與資料保留。
 - [SDD](docs/SDD.md)：架構、邊界、驗收與後續階段。
 - [驗收紀錄](docs/acceptance.md)：已執行與待執行項目。
+- [任務板](docs/tasks/BOARD.md)：本次主線狀態與具體缺項。
 - [版本鎖](upstream.lock.json)：上游 commit、資產 revision 與 lock checksum。
 - [收藏索引](../../refs/OpenMMO/README.md)。
 

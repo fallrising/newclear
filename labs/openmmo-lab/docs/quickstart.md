@@ -4,7 +4,9 @@
 
 需要 Python 3.10+、Git、Bash、curl、sha256sum、本機 Docker engine + Compose v2、可用的 Docker build 網路，以及支援上游 WebGPU client 的瀏覽器。主機須能長時間編譯 Rust/WASM 並生成地形；資源下限尚未量測。小範圍地形預估約 1 GB，另需資產、image、build cache 和 state 空間；不要把它當作總磁碟需求。
 
-以下 `check`、測試、固定 checkout 的 `render` 與缺依賴 `doctor` 路徑已驗證。**其餘下載資產、Docker build/up、Google 登入、雙人驗收與備份命令為 skipped：本次環境沒有 Docker／使用者 OAuth 設定。** 完整紀錄見 [acceptance.md](acceptance.md)。
+2026-10-23 已恢復 P0 主線；Docker 不再是缺項。歷史 2026-10-04 結果與本次資產、image build、terrain 實測分列在 [acceptance.md](acceptance.md)。Google 登入、Compose up、雙人玩法及角色備份復原仍須真實設定與真人驗收，不由工具測試或單獨 build 推定通過。
+
+在共用 agent 環境，`AGENT_WORKSPACE_LAUNCHER` 指向既有 `agent-workspace/workspace.py`，`AGENT_WORKSPACE_DATA` 指向其 data 根目錄；建置與測試從既有 source cwd 經 `python3 $AGENT_WORKSPACE_LAUNCHER run openmmo <unique-task-id> -- <command>` 執行；保存 stdout/stderr 到 `AGENT_EVIDENCE_DIR`。外部 source、runtime、Docker named volumes 是需保留的來源／狀態，不能當作 launcher disposable cache。Docker image/build cache 由既有 daemon 管理，launcher 不會搬動它們；禁止全域 prune。
 
 所有命令由 `newclear/labs/openmmo-lab` 開始，同一 shell 逐批執行。兩個外部目錄必須是新的專用目錄，不可放進 newclear。先修改路徑，避免覆蓋已有 checkout。
 
@@ -26,9 +28,9 @@ python3 lab.py render --source "$OPENMMO_SOURCE" --workspace "$OPENMMO_RUNTIME"
 
 `render` 只寫外部 workspace 的 `compose.json`、`lab-state.json`、`.env`，不啟動服務。重跑保留 `.env`；不同 pin／路徑／已修改 Compose 檔會拒絕覆寫。更換埠可在首次 render 加 `--port`。
 
-## 2. 資產與 Google 登入（skipped）
+## 2. 資產與 Google 登入
 
-先閱讀固定版本的資產下載腳本與 `assets.lock`，確認下載來源／條款。腳本會取得鎖定的 Hugging Face dataset；下載和 checksum 檢查可能耗時。
+先閱讀固定版本的資產下載腳本、`assets.lock`、`doc/ASSETS.md` 與各 `doc/assets/*.md`，確認下載來源／條款。腳本會取得鎖定的 Hugging Face dataset；下載和 checksum 檢查可能耗時。checksum 只證明 bytes 與 lock 相符，不是授權證明；本次已辨識的來源文件缺口見 [acceptance.md](acceptance.md)。保留上游 attribution，不將素材轉授權為 MIT。
 
 ```sh
 less "$OPENMMO_SOURCE/tools/fetch-assets.sh"
@@ -38,7 +40,9 @@ less "$OPENMMO_SOURCE/assets.lock"
 
 在自己的 Google Cloud 專案建立 **Web application OAuth client**，將實際使用的本機 origin 設定為 Authorized JavaScript origin，例如 `http://localhost:18080`。所有瀏覽器使用相同 origin；本機連線由 loopback port 接收。若 OAuth 要求測試使用者，加入兩個測試帳號。把 client ID 填到外部 workspace `.env` 的 `GOOGLE_CLIENT_ID`；client 和 server 共用此值。此流程不需要 client secret；不要把帳號 token、`.env` 或 state 提交到 Git。
 
-`ADMIN_EMAILS` 預設空白。P0 用普通玩家測試，不必開管理員。遠端主機後續可經 SSH local port forward 在本機瀏覽器使用，但本輪沒有配置遠端主機或公開入口。
+`GOOGLE_CLIENT_ID` 只接受單行值，可不加引號或使用成對單／雙引號；不要用 shell 變數展開或行尾註解。doctor 檢查 Web client ID 的字元格式，無法證明 ID 存在、類型或 authorized origin 正確；須由 Google 登入實測證明。隔離還原若用 `18081`，先把 `http://localhost:18081` 加入同一 Web client 的 authorized origins。
+
+`ADMIN_EMAILS` 預設空白。P0 用普通玩家測試，不必開管理員。遠端主機後續可經 SSH local port forward 在本機瀏覽器使用；本次使用既有本機 Docker，沒有配置遠端主機或公開入口。
 
 ## 3. 檢查與啟動（skipped）
 

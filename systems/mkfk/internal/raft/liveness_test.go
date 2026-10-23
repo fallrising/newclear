@@ -178,3 +178,37 @@ func TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader(t *testing
 type sourceOf struct{ random *rand.Rand }
 
 func (source sourceOf) Uint64() (uint64, error) { return source.random.Uint64(), nil }
+
+// A follower that fell behind while isolated rejects the leader's appends
+// with a conflict hint. With more than one append in flight to it (a
+// heartbeat plus a retry), every reply belongs to an older RPC; the leader
+// must still back off, or the follower never catches up.
+func TestM7LaggingFollowerCatchesUpWithSeveralAppendsInFlight(t *testing.T) {
+	t.Parallel()
+	cluster := newMemoryCluster(t)
+	cluster.isolate(3)
+	cluster.enqueueReady(t, 1, cluster.campaign(t, 1))
+	cluster.drain(t, 100)
+	for index := 0; index < 5; index++ {
+		frame := fenceFrame(0, 0, "behind")
+		_, ready, err := cluster.nodes[1].ProposeFrame(frame.Kind, frame.Payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cluster.enqueueReady(t, 1, ready)
+		cluster.drain(t, 100)
+	}
+	// A new leader starts every peer at its own log end, past node 3's.
+	cluster.enqueueReady(t, 2, cluster.campaign(t, 2))
+	cluster.drain(t, 100)
+	cluster.blocked = map[[2]uint32]bool{}
+	for heartbeats := 0; heartbeats < 2; heartbeats++ {
+		cluster.tick(t, 2)
+		cluster.enqueueReady(t, 2, cluster.tick(t, 2))
+	}
+	cluster.drain(t, 200)
+	leader, follower := cluster.nodes[2].Snapshot(), cluster.nodes[3].Snapshot()
+	if follower.LastLogIndex != leader.LastLogIndex || follower.CommitIndex != leader.CommitIndex {
+		t.Fatalf("follower did not catch up: leader %#v follower %#v", leader, follower)
+	}
+}

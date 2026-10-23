@@ -223,7 +223,12 @@ func (node *Node) stepAppendResponse(message Message) (Ready, error) {
 	response := message.AppendResp
 	ready := Ready{LeaderReady: node.leaderReady}
 	if !response.Success {
-		if message.RPCID == progress.latestRPC && response.ConflictIndex > 0 && response.ConflictIndex < progress.nextIndex {
+		// Any current-term rejection may lower nextIndex, not only the reply
+		// to the latest RPC: with heartbeats and retries in flight every
+		// reply is to an older RPC, and the peer would never catch up.
+		// Backing off is always safe because the follower skips entries it
+		// already holds; a hint at or below matchIndex is stale.
+		if response.ConflictIndex > progress.matchIndex && response.ConflictIndex < progress.nextIndex {
 			progress.nextIndex = response.ConflictIndex
 		}
 		appendMessage, err := node.makeAppend(message.From, sent.readContext)
@@ -357,7 +362,6 @@ func (node *Node) makeAppend(peer uint32, readContext string) (Message, error) {
 		peer: peer, term: node.term, prevIndex: prevIndex, lastIndex: sentLast,
 		readContext: readContext, readIndex: readIndex,
 	}
-	progress.latestRPC = rpcID
 	progress.unanswered++
 	progress.inflight = append(progress.inflight, rpcID)
 	if len(progress.inflight) > MaxInflightAppends {

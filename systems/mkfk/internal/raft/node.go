@@ -12,7 +12,6 @@ import (
 type peerProgress struct {
 	nextIndex  uint64
 	matchIndex uint64
-	latestRPC  uint64
 	// inflight lists unanswered AppendEntries RPC IDs, oldest first. A lost
 	// message is forgotten once MaxInflightAppends newer ones are out, so the
 	// leader's sent-RPC table stays bounded while peers drop messages.

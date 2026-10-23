@@ -258,6 +258,14 @@ impl Store {
                AND (access_token != '' OR refresh_token IS NOT NULL)",
             [],
         )?;
+        // Grok logins imported from ~/.grok/auth.json are borrowed (borrowed.rs): their
+        // rotating refresh token belongs to the Grok CLI, so no copy is kept.
+        conn.execute(
+            "UPDATE oauth_credentials SET refresh_token = NULL
+             WHERE provider = 'grok' AND refresh_token IS NOT NULL
+               AND meta LIKE '%.grok/auth.json%'",
+            [],
+        )?;
         if retired > 0 {
             tracing::warn!(
                 retired,

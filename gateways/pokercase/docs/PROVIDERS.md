@@ -124,7 +124,16 @@ key; that only shares a cache prefix they already have in common.
 
 ### Token refresh
 
-Automated for **siwc / grok**, and **agy** when Google OAuth client env is set:
+**grok imported by `import-local` is borrowed, never refreshed.** xAI refresh tokens
+rotate: a refresh by thinrouter would invalidate the Grok CLI's stored token and log it
+out. So `import-local` keeps no Grok refresh token and records `~/.grok/auth.json` as the
+source; every upstream attempt re-reads the access token from that file. On a 401 it
+re-reads once (the CLI may have refreshed) and otherwise returns 401 asking you to run
+`grok`. `refresh`, refresh-all and the admin refresh endpoint skip or refuse it; the file
+is only read, never written. agy (Google) refresh tokens do not rotate, so agy is
+refreshed normally.
+
+Automated for **siwc**, grok connections imported by hand with a refresh token, and **agy** when Google OAuth client env is set:
 
 - On request: refresh if `expires_at` is within 5 minutes  
 - On upstream **401**: one refresh + retry  

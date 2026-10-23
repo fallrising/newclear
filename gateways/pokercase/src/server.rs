@@ -98,6 +98,11 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
                 &cfg.data_dir,
                 cfg.cursor_max_runs,
             )
+            .with_container(
+                cfg.cursor_image.clone(),
+                cfg.cursor_profile_volume.clone(),
+                cfg.cursor_runtime_bin.clone(),
+            )
             .accept_account_plugins(cfg.cursor_accept_account_plugins),
         },
         sessions: Sessions::default(),

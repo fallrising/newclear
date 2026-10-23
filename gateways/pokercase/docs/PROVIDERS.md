@@ -8,7 +8,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `claude` | `cc`, `anthropic`, `claude_code` | **active** (text, images, client tools via MCP) | local Claude Code CLI (`claude -p`), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
-| `cursor` | `cu`, `cursor_agent` | **opt-in** (`--cursor-accept-account-plugins`; text only) | local Cursor Agent CLI (`cursor-agent -p`, read-only) | `local://cursor-agent` |
+| `cursor` | `cu`, `cursor_agent` | **opt-in** (`--cursor-accept-account-plugins`; text only) | containerized Cursor Agent CLI (`cursor-agent -p`) | `local://cursor-agent` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
 | `agy` | `ag`, `antigravity` | **active** | Antigravity generateContent | `https://cloudcode-pa.googleapis.com` |
@@ -181,3 +181,5 @@ Reads:
 | agy | `~/.gemini/antigravity-cli/antigravity-oauth-token` |
 
 Creates connections `local-*` and routes `rt-*`.
+
+Cursor requires a pinned local Docker image and dedicated profile volume. Ask/sandbox flags are not isolation guarantees. See [Cursor isolation](cursor-isolation.md) for setup and filesystem/process boundaries; network access and account plugins remain available.

@@ -96,9 +96,18 @@ enum Commands {
         /// Seconds a Claude Code run waits for the client's tool results
         #[arg(long, env = "THINROUTER_CLAUDE_IDLE_SECS", default_value_t = 600)]
         claude_idle_secs: u64,
-        /// Cursor Agent CLI used by the `cursor` provider (default: `cursor-agent` on PATH)
+        /// Cursor Agent CLI command inside the container image (default: cursor-agent)
         #[arg(long, env = "THINROUTER_CURSOR_BIN")]
         cursor_bin: Option<String>,
+        /// Pinned local Docker image (sha256 ID or repository@sha256 digest)
+        #[arg(long, env = "THINROUTER_CURSOR_IMAGE")]
+        cursor_image: Option<String>,
+        /// Dedicated Docker profile volume, prefixed thinrouter-cursor-
+        #[arg(long, env = "THINROUTER_CURSOR_PROFILE_VOLUME")]
+        cursor_profile_volume: Option<String>,
+        /// Operator-controlled Docker executable (default: docker)
+        #[arg(long, env = "THINROUTER_CURSOR_RUNTIME_BIN")]
+        cursor_runtime_bin: Option<String>,
         /// Concurrent Cursor Agent processes
         #[arg(long, env = "THINROUTER_CURSOR_MAX_RUNS", default_value_t = 2)]
         cursor_max_runs: usize,
@@ -203,6 +212,9 @@ async fn main() -> Result<()> {
             claude_max_runs,
             claude_idle_secs,
             cursor_bin,
+            cursor_image,
+            cursor_profile_volume,
+            cursor_runtime_bin,
             cursor_max_runs,
             cursor_accept_account_plugins,
         } => {
@@ -223,6 +235,9 @@ async fn main() -> Result<()> {
             cfg.claude_max_runs = claude_max_runs;
             cfg.claude_idle_secs = claude_idle_secs;
             cfg.cursor_bin = cursor_bin;
+            cfg.cursor_image = cursor_image;
+            cfg.cursor_profile_volume = cursor_profile_volume;
+            cfg.cursor_runtime_bin = cursor_runtime_bin;
             cfg.cursor_max_runs = cursor_max_runs;
             cfg.cursor_accept_account_plugins = cursor_accept_account_plugins;
             server::run(cfg).await

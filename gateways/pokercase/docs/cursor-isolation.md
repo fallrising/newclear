@@ -30,3 +30,32 @@ Docker 是此 opt-in provider 的執行前提（本機已安裝），不新增 R
 - https://docs.docker.com/engine/network/drivers/bridge/ — bridge 允許出網及同網路互通，不能當外連 allowlist。
 
 原始真 CLI 探測只保留既有證據，不重新呼叫付費模型或讀取真實憑證。此里程碑不宣稱整體 SUCCESS 主線完成。
+
+## Operator setup
+
+Build a trusted image from a reviewed official Cursor Agent executable bundle, not from a home directory. `containers/Cursor.Dockerfile` expects only that version's installed files as `cursor-agent/` in the build context. Pin `BASE_IMAGE` to your approved digest when building. No account data belongs in the image.
+
+```sh
+# In a fresh build context containing only cursor-agent/ and Cursor.Dockerfile:
+docker build -f Cursor.Dockerfile -t thinrouter-cursor:local .
+docker image inspect thinrouter-cursor:local --format '{{.Id}}'
+```
+
+Use the resulting `sha256:...` image ID as `--cursor-image`. Provision a dedicated named volume beginning `thinrouter-cursor-`, and log in using the same image and a volume mounted at `/home/cursor`, as UID 1000. Do not import or mount your host home, gateway data, Docker socket or existing unrelated volumes. Login and refresh stay inside that profile. A fresh Docker named volume inherits the image's `/home/cursor` ownership. No login is performed by thinrouter itself.
+
+```sh
+docker run --rm -it --user 1000:1000 \
+  --mount type=volume,src=thinrouter-cursor-profile,dst=/home/cursor \
+  --entrypoint cursor-agent sha256:YOUR_REVIEWED_IMAGE_ID login
+thinrouter serve --cursor-accept-account-plugins \
+  --cursor-image sha256:YOUR_REVIEWED_IMAGE_ID \
+  --cursor-profile-volume thinrouter-cursor-profile
+```
+
+`--cursor-bin` now names the executable **inside** the image; `--cursor-runtime-bin` selects the trusted operator's Docker executable (normally `docker`). Images are never automatically pulled by inference. The default local Docker socket is used; no privileged container or host network is requested.
+
+Docker's operator-configured proxy variables may still enter the container. The runner does not forward the gateway's application environment, but does not claim Docker configuration is secret-free. Hard-killing the gateway or losing the daemon can prevent cleanup; reconcile only containers with the generated `thinrouter-cursor-` names before restarting. Normal completion, errors and client cancellation perform bounded cleanup.
+
+The recipe and live Cursor authentication are not established by a fake CLI canary. Verify the chosen bundle/image/account separately before enabling a real route; account plugins and arbitrary network access remain explicit limitations.
+
+Cleanup is bounded: daemon creation that finishes after the final reconciliation attempt can still leave a container. Operators must reconcile such leftovers; neither this change nor its helper test proves unconditional cleanup.

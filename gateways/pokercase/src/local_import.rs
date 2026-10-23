@@ -159,16 +159,17 @@ fn import_grok(store: &Store, make_routes: bool) -> ImportResult {
         };
     };
     let access = entry.get("key").and_then(|k| k.as_str()).unwrap_or("");
-    let refresh = entry.get("refresh_token").and_then(|t| t.as_str());
     let exp = entry.get("expires_at").and_then(|t| t.as_str());
+    let meta = serde_json::json!({"source": path.display().to_string()});
     upsert(
         store,
         "local-grok",
         "grok",
         access,
-        refresh,
+        // xAI refresh tokens rotate; the Grok CLI owns them (see borrowed.rs).
+        None,
         exp,
-        Some(r#"{"source":"~/.grok/auth.json"}"#),
+        Some(&meta.to_string()),
         Some("grok-build"),
         make_routes,
     )
@@ -306,6 +307,10 @@ pub async fn refresh_all_oauth(store: &Store) -> Result<Vec<(String, bool, Strin
             .and_then(|o| o.refresh_token.as_ref())
             .is_none()
         {
+            continue;
+        }
+        if crate::borrowed::source(&c).is_some() {
+            out.push((c.name, true, "skipped: borrowed from the Grok CLI".into()));
             continue;
         }
         match oauth_refresh::refresh_connection(store, &c).await {

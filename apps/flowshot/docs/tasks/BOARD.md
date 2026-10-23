@@ -6,7 +6,7 @@ Authority: [START_DEVELOPMENT_PROMPT](../../START_DEVELOPMENT_PROMPT.md). Source
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| F01 | Repair N00 build/launch paths, CI entry and reproducibility checks | AC-01 | in_progress | 2026-10-22T18:05:10Z | | 2026-10-23T02:57:19Z |
+| F01 | Repair N00 build/launch paths, CI entry and reproducibility checks | AC-01 | done | 2026-10-22T18:05:10Z | 2026-10-23T03:24:25Z | 2026-10-23T03:26:42Z |
 | F02 | Target Mac launch: awaiting accessible controlled Mac; preserve <1500 ms | AC-02 | in_progress | 2026-10-22T18:05:10Z | | 2026-10-23T01:35:15Z |
 | F03 | Reading → annotation → restart → reanchor; gated by N00/M0 | AC-03 | todo | | | 2026-10-23T01:35:15Z |
 | F04 | Search, tags, links, Mermaid and export; follow graph/milestone gates | AC-04 | todo | | | 2026-10-23T01:35:15Z |
@@ -25,7 +25,7 @@ N00 Linux Docker native/window/IPC development acceptance → N01 migrations (M0
 
 ## Earlier 2026-10-23 portable delivery evidence
 
-F01 implementation and available Linux verification complete; independent review accepts the bounded foundation repair. [Executed results](N00/evidence/T10-foundation-resumption.md). Board remains in_progress because repository task completion requires merge; owner now explicitly authorizes milestone commit/push/PR/merge after checks and review. F02 remains a separate release gate awaiting controlled target-Mac access. F03/F04 follow development dependencies and retain all missing product implementation.
+F01 implementation and available Linux verification complete; independent review accepts the bounded foundation repair. [Executed results](N00/evidence/T10-foundation-resumption.md). Merged in [PR #512](https://github.com/fallrising/newclear/pull/512) at `2026-10-23T03:24:25Z`, commit `f7d7c6a146b663cebbebe26aee2c42f78ed12653`. F02 remains a separate release gate awaiting controlled target-Mac access. F03/F04 follow development dependencies and retain all missing product implementation.
 
 No target-Mac result, dogfood result, node done outcome or usable release was inferred from the portable pass.
 
@@ -35,7 +35,7 @@ Direct owner instruction: change documents first, continue implementation, commi
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| D01 | Separate development/release gates and complete real Linux native verification | AC-01, AC-02 | in_progress | 2026-10-23T02:01:51Z | | 2026-10-23T02:57:19Z |
-| D02 | N01 SQLite schema, migrations, typed repositories and M0 acceptance | AC-03 | in_progress | 2026-10-23T02:10:00Z | | 2026-10-23T02:57:19Z |
+| D01 | Separate development/release gates and complete real Linux native verification | AC-01, AC-02 | done | 2026-10-23T02:01:51Z | 2026-10-23T03:24:25Z | 2026-10-23T03:26:42Z |
+| D02 | N01 SQLite schema, migrations, typed repositories and M0 acceptance | AC-03 | done | 2026-10-23T02:10:00Z | 2026-10-23T03:24:25Z | 2026-10-23T03:26:42Z |
 
-N00 development is now done with [native verification](../verification/N00.md) and independent ACCEPT. D01 implementation is complete, awaiting milestone merge. D02 development acceptance is complete with [N01/M0 evidence](../verification/N01.md), full root native rerun and independent ACCEPT; both rows await the milestone PR merge. Controlled Mac remains a release gate; no usable tag.
+N00 development is now done with [native verification](../verification/N00.md) and independent ACCEPT. D01 and D02 are merged in [PR #512](https://github.com/fallrising/newclear/pull/512), with [N01/M0 evidence](../verification/N01.md), full root native rerun and independent ACCEPT. Ubuntu 24.04, macOS 15 Apple Silicon, macOS 15 Intel and project-success CI all passed on reviewed head `8cd27fc9b16c54fbf6f9626978159b279dfa2cbc` before merge. Hosted Mac CI does not establish the separate controlled-Mac launch oracle. Controlled Mac remains a release gate; no usable tag.

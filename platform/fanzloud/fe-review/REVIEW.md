@@ -4,7 +4,7 @@
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
+- **第 1 輪：草稿待確認** — [DESIGN.md](DESIGN.md) 已草擬；D1 與 AC-15 仍待確認，沒有啟動 UI／Cloud 或執行擷取。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -16,7 +16,15 @@
 
 ### C1 control-plane 啟動需要雲端 runner 設定
 
-`main.rs` 要求多個環境變數（含雲端 scope）；UI 無法在沒有這些設定時載入，屬耦合。
+`apps/control-plane/src/main.rs:42–85` 要求 validated runner／私有目錄／Cloud scope／HTTPS origin／bootstrap；留空不是 fake 模式。`p0-client.js:573–588` 要求 HTTPS，:1314 建立 WSS，原 targets 的 HTTP URL 無法走正常 operator 流程。既有 T007 的 fake CLI 組合驗證不是現成的 screenshot server；專用 harness 見 DESIGN M1，目前未實作。
+
+### C2 既有響應式與 dark 樣式待實測
+
+`p0.css:75–78,123–136,157–164` 已有 shell/grid/wrap 與事件/diff 捲動；沒有 light theme。長資料、鍵盤、對比與狀態播報須實測，不能先宣稱已破版或 axe 失敗。
+
+### C3 主要流程有明確 mutation 與秘密邊界
+
+`p0-app.js:118–144` 的 authenticate、device login、submit、cancel、diff、logout 不是頁面切換。DESIGN M3 使用有限 mock、合成內容及本次 browser state；不允許真 runner、憑證或 Cloud 呼叫，亦不把 mock 視作 production auth 驗收。
 
 ## 需要放開或決定的點
 
@@ -35,3 +43,4 @@
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+- issue [#159](https://github.com/fallrising/newclear/issues/159)：本次草稿；PR 由 parent 另行建立，D1／AC-15 仍 pending。

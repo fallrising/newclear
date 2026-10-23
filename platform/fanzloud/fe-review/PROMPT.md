@@ -15,14 +15,14 @@
 
 ## 啟動線索（未驗證）
 
-- control-plane 需要 `CODEBOX_LISTEN_ADDRESS` 等環境變數（見 `apps/control-plane/src/main.rs`）；設為 `127.0.0.1:<port>`，雲端 runner 相關設定一律指向假實作或留空，不連真實雲端。
-- 若無法完整啟動，可用 `web/` 的靜態檔加上最小假 API 做版面擷取，並在報告註明。
+- 先依 [DESIGN.md](DESIGN.md) M1 完成新的 HTTPS/WSS 靜態／mock harness；目前不存在，D1 仍待確認。production main 的 runner／Cloud／私有目錄不可留空當 fake 模式，也不能沿用真實設定啟動。
+- 原生 client 明確要求 HTTPS，HTTP targets 只會 unsupported。先建立同 namespace 的 loopback TLS、當次 CA/browser trust、合成 state 及有限 API/WS 契約；禁止真 executable、device login、Cloud 或外網 fallback。targets 無 start、仍 unverified，不直接用 --start 或本機既有 listener。
 
 ## 主要流程
 
 至少走通以下流程各一次，並對每一步截圖：
 
-- 開啟 operator 頁 → 建立或檢視 session → WebSocket 事件更新
+- 開啟 operator 頁 → Authenticate → 檢視 login/session → 明確提交合成 turn → 順序事件／斷線 → Show diff → refresh／cancel 負向場景 → logout；全程只走專用 mock，不建立任意 session 或增加 recovery 控制項。
 
 ## 專案特有檢查重點
 
@@ -34,24 +34,20 @@
 
 ## 可重用的既有資產
 
-- `apps/control-plane/web/p0-client.test.mjs`、`tests/p0_subscription_e2e.rs`。
+- `apps/control-plane/web/p0-client.test.mjs`：controller／DOM 契約。
+- `apps/control-plane/tests/p0_subscription_e2e.rs`：fake CLI＋loopback HTTP/WS 組合；不是現成真瀏覽器 screenshot harness。兩者只能作 contract 依據，不能當本輪 browser PASS。
 
 ## 待補的頁面
 
-無。
+產品只有 `/`；Authenticated、busy、device、diff、錯誤等是互動狀態，不能用不存在的路由補清單。現行固定 dark、英文 UI，targets 只保留 dark／en-US。
 
 ## 執行步驟
 
 先讀 [REVIEW.md](REVIEW.md) 確認目前輪次，只做該輪允許的事（PROTOCOL.md「三輪節奏」）：
 
 1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
-2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 從 repository root 執行
-   ```bash
-   node docs/fe-review/capture.mjs platform/fanzloud/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs platform/fanzloud/fe-review/targets.json
-   ```
-   需要互動才能看到的狀態，另寫 Playwright 腳本放在本目錄；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
+2. **第 2 輪（修改）：** 先確認 D1，按元件規則建立 Ready task/CU/規格與測試骨架；只實作已確認 DESIGN 範圍。隔離、契約與真正 browser 流程驗證後才可改 verified，不以缺少 runner 參數降低邊界。
+3. **第 3 輪（完整 e2e）：** M1 完成後，由專用流程設定當次 CA trust／port／合成狀態與 ephemeral targets，從 repository root 跑共用 capture 的 dry-run／capture，再用互動腳本走主要流程。共用腳本不會登入、mock WSS 或處理 CA。停用 trace/video/HAR 與秘密 body 留存，不提交 browser state、bearer 或 CA private key；在報告分開 mock、backend 整合及未驗證結果。
 
 ## 產出
 

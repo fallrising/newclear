@@ -1,0 +1,44 @@
+name: Browser Fingerprint local contracts
+
+on:
+  pull_request:
+    paths:
+      - 'labs/browser-fingerprint/**'
+      - '.github/workflows/browser-fingerprint-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'labs/browser-fingerprint/**'
+      - '.github/workflows/browser-fingerprint-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-fingerprint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: labs/browser-fingerprint
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: labs/browser-fingerprint/go.mod
+          cache: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24.14.0'
+      - run: go test -race ./...
+      - run: go vet ./...
+      - run: go build -o "$RUNNER_TEMP/daylight-server" .
+      - run: node tests/analyzer.test.cjs
+      - run: node tests/tutorial.test.cjs

@@ -373,6 +373,11 @@ func (app *application) serveStatic(w http.ResponseWriter, r *http.Request) erro
 	if path == "/" {
 		path = "/index.html"
 	}
+	switch path {
+	case "/index.html", "/app.js", "/fingerprint.js", "/styles.css", "/experiment.css", "/favicon.svg":
+	default:
+		return fail(404, "找不到此檔案。")
+	}
 	filePath := filepath.Join(app.publicDir, filepath.FromSlash(strings.TrimPrefix(path, "/")))
 	if !insideDirectory(app.publicDir, filePath) {
 		return fail(403, "無法存取此路徑。")

@@ -16,7 +16,7 @@
 | [gateways/pokercase](gateways/pokercase/SUCCESS.md) | gateways | 以 thinrouter 提供個人訂閱憑證的多協定 LLM gateway | 未完成／待驗收 | 尚無已核准標記 | 2026-10-11 |
 | [labs/aweshore](labs/aweshore/SUCCESS.md) | labs | 保存個人筆記與 avatar LLM 的早期 PKM 實驗 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |
 | [labs/bee-swarm](labs/bee-swarm/SUCCESS.md) | labs | 保存以 GitHub 角色協作及 SimPy 探索流程的概念框架 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
-| [labs/browser-fingerprint](labs/browser-fingerprint/SUCCESS.md) | labs | 觀測瀏覽器設備訊號與任務操作事件以比較測試環境 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
+| [labs/browser-fingerprint](labs/browser-fingerprint/SUCCESS.md) | labs | 觀測瀏覽器設備訊號與任務操作事件以比較測試環境 | 完成 | 尚無已核准標記 | 2026-10-03 |
 | [labs/eru-vps-mvp](labs/eru-vps-mvp/SUCCESS.md) | labs | 驗證四台 VPS 的 Eru 排程、受控重建與控制面恢復 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [labs/handwired-learning](labs/handwired-learning/SUCCESS.md) | labs | 用一頁溫度校正對照，讓初學者看懂固定數值圖與用梯度調整係數的差別 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-21 |
 | [labs/m4-seat](labs/m4-seat/SUCCESS.md) | labs | 保存 M4 Max 48GB 單人本機推論座位的有界規劃 | 參考／封存 | 尚無已核准標記 | 2026-10-17 |

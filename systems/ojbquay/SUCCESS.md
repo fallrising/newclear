@@ -64,3 +64,7 @@ AC-01 收斂時間與 AC-07 控制面中斷用 [extra.sh](../../docs/project-suc
 ## 可用版本
 
 預定 `usable/ojbquay/v1.0.0`，資格見 [qualification](../../docs/project-success/qualifications/ojbquay.md)。此 PR 合併、CI 綠燈且 owner 同意後建立 annotated tag；範圍是本機功能主線，不是正式部署或容量認證。
+
+## #445 歷史 WIP 處置（文件範圍）
+
+本次驗收是[固定 SHA 對照與失敗處置](tasks/445-wip-disposition/analysis.md)：逐項區分已納入、被現行規格取代及尚未驗證的候選；保留原始失敗，不把其他來源綠燈倒推為 WIP 通過。只補來源與處置紀錄；本頁既有資格、SDD、runtime 與 tag 不變。文件／來源對照、42 項目契約、獨立審查與 PR CI 是本次 gates，不重跑產品以製造新資格。

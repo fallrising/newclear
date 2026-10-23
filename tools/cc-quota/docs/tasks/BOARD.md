@@ -1,4 +1,7 @@
-# CC Quota 任務板
+# CC Quota 歷史任務板（已封存）
+
+Owner 於 2026-10-23 指示封存；以下任務狀態／時間保留歷史，不再排程推進，不把未驗項標 done。
+新工作只在 [Agent Usage 任務板](../../../codex-usage/docs/tasks/BOARD.md) 的 T-0972 管理。
 
 ## T-0993 — 主線恢復與驗收（2026-10-23）
 

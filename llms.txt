@@ -42,8 +42,8 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 
 ## Applications and tools
 
-- [tools/cc-quota](https://github.com/fallrising/newclear/blob/main/tools/cc-quota/README.md): **A** — Claude Code quota pacing monitor: hourly collection into SQLite, read-only reporting, notification only on deviation. Collection and presentation are decoupled; it never refreshes or stores credentials.
-- [tools/codex-usage](https://github.com/fallrising/newclear/blob/main/tools/codex-usage/README.md): **A** — read-only Codex subscription usage collector: one App Server snapshot, no model turn, fail-closed JSON. Not production-ready before live acceptance.
+- [tools/cc-quota](https://github.com/fallrising/newclear/blob/main/tools/cc-quota/README.md): **D — archived**. Frozen legacy source and compatibility paths; active development moved to Agent Usage. Existing data/installations stay in place; original live gaps remain.
+- [tools/codex-usage](https://github.com/fallrising/newclear/blob/main/tools/codex-usage/README.md): **A** — Agent Usage unified read-only entry: reuses Codex collection and Claude snapshots, separates subscription quota, local activity and API spend. Provider live acceptance remains explicit.
 - [apps/loom](https://github.com/fallrising/newclear/blob/main/apps/loom/README.md): **C** — AI-native canvas, terminal and document workspace. Tauri, Rust, React. Desktop; no documented external interface.
 - [apps/flowshot](https://github.com/fallrising/newclear/blob/main/apps/flowshot/README.md): **C** — local-first, strictly read-only Markdown annotation desktop app. Contracts in [contracts/](https://github.com/fallrising/newclear/blob/main/apps/flowshot/contracts/).
 - [apps/cms-scaffold](https://github.com/fallrising/newclear/blob/main/apps/cms-scaffold/README.md): **C** — reusable CMS kernel: Java API with front, back and admin surfaces. The contract source is a handwritten [openapi.yaml](https://github.com/fallrising/newclear/blob/main/apps/cms-scaffold/services/cms-api/src/main/resources/openapi/openapi.yaml).

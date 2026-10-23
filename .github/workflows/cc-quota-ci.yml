@@ -1,3 +1,4 @@
+# Archived compatibility checks only; active product development is Agent Usage.
 name: cc-quota CI
 
 on:

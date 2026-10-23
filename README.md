@@ -63,8 +63,7 @@
 | [`apps/flowshot`](apps/flowshot/) | Local-first 嚴格唯讀 Markdown annotation desktop app | Python, TS | C |
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
-| [`tools/cc-quota`](tools/cc-quota/) | Claude Code 額度 pacing 監控：每小時採集落庫、報表只讀、偏離才通知 | Python, SQLite, launchd | A |
-| [`tools/codex-usage`](tools/codex-usage/) | Codex ChatGPT 訂閱用量唯讀採集器：App Server 單次快照、無模型 turn、fail-closed JSON | Python, Codex App Server | A |
+| [`tools/codex-usage`](tools/codex-usage/) | Agent Usage 統一唯讀總覽：重用 Codex／Claude 來源，分清訂閱額度、本機統計與 API 支出 | Python, Codex App Server | A |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
 ### 契約、範例與實驗
@@ -85,6 +84,10 @@
 | [`labs/m4-seat`](labs/m4-seat/) | M4 Max 48GB MacBook Pro 的單人推論座位方案；無 runtime | 未分級 |
 | [`labs/retro-economy`](labs/retro-economy/) | 原創復古 RPG 的小鎮經濟、職業分工與交易玩法 SDD；未實作 | 未分級 |
 | [`labs/handwired-learning`](labs/handwired-learning/) | 普通 JS 與固定數值圖對照的入門實驗 SDD；未實作 | 未分級 |
+
+### 已封存工具
+
+[cc-quota](tools/cc-quota/) 已封存；既有資料由 Agent Usage 唯讀接入，歷史來源與相容入口保留。
 
 ### 外部參考
 

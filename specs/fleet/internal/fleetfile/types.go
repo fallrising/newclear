@@ -60,14 +60,12 @@ const (
 	APIVersionV1 = "fleet.catalog/v1"
 	KindService  = "Service"
 
-	ModePublic  = "public"
-	ModeAccess  = "access"
-	ModePrivate = "private"
+	ModePublic = "public"
+	ModeAccess = "access"
 
 	StateRunning = "running"
 	StateStopped = "stopped"
 	StateAbsent  = "absent"
 
 	LabelLargeOrigin = "fleet.catalog/large-origin"
-	PrivateSuffix    = ".fleet.internal"
 )

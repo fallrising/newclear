@@ -2,15 +2,15 @@ apiVersion: fleet.catalog/v1
 kind: Service
 metadata:
   name: files
-  description: File relay origin. Large blobs must not use public Tunnel hostnames.
+  description: Access-protected file relay UI. Store large blobs in object storage.
   labels:
     fleet.catalog/large-origin: "true"
 spec:
   node: vps-hel-1
   image: ghcr.io/fallrising/file-relay:REPLACE_SHA
   expose:
-    mode: private
-    hostname: files.fleet.internal
+    mode: access
+    hostname: files.example.com
     port: 8080
     healthPath: /healthz
   command: ["/file-relay"]

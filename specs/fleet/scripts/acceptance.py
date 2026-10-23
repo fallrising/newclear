@@ -154,7 +154,7 @@ def main():
         argv = ["true", "hello # world", "", "${DO_NOT_EXPAND}", "quote'\"", "one\ntwo"]
         doc = {"apiVersion": "fleet.catalog/v1", "kind": "Service", "metadata": {"name": run_id},
             "spec": {"node": "acceptance-node", "image": image, "args": argv, "env": literal_env,
-            "expose": {"mode": "public", "port": 8080}, "resources": {"memory": "64M", "cpus": "0.10"}}}
+            "expose": {"mode": "access", "port": 8080}, "resources": {"memory": "64M", "cpus": "0.10"}}}
         api("/api/v1/deploy", "POST", {"fleet": doc, "image": image, "git_sha": args.source_id}, (201,))
         workload_created = True
         view = wait_for("initial deploy", lambda: converged("running"))

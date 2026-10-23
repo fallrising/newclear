@@ -51,25 +51,3 @@ func TestGHAPinnedYQ(t *testing.T) {
 		}
 	}
 }
-
-func TestWARPBootstrapDoc(t *testing.T) {
-	_, this, _, _ := runtime.Caller(0)
-	root := filepath.Join(filepath.Dir(this), "..", "..")
-	b, err := os.ReadFile(filepath.Join(root, "docs", "bootstrap.md"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	s := string(b)
-	for _, want := range []string{
-		"100.64.0.0/10",
-		"100.80.0.0/16",
-		"Local Domain Fallback",
-		"fleet.internal",
-		"connect-private-hostname",
-		"FLEET_BOOTSTRAP_TUNNEL_ID",
-	} {
-		if !strings.Contains(s, want) {
-			t.Fatalf("bootstrap.md missing %q", want)
-		}
-	}
-}

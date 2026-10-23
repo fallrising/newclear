@@ -36,33 +36,32 @@ func (n Node) Status(now time.Time) string {
 }
 
 type Service struct {
-	Name              string
-	Description       string
-	LabelsJSON        string
-	NodeID            string
-	FleetJSON         string
-	Image             string
-	DesiredState      string
-	ExposeMode        string
-	Hostname          string
-	ContainerPort     int
-	HostPort          int
-	HealthPath        string
-	CurrentReleaseID  string
-	Generation        int64
-	ForceRecreate     bool
-	ComposeYAML       string
-	EnvFile           string
-	URL               string
-	CFDNSRecordID     string
-	CFAccessAppID     string
-	CFAccessPolicyID  string
-	CFHostnameRouteID string
-	IngressStatus     string
-	IngressError      string
-	PurgeVolumes      bool
-	CreatedAt         string
-	UpdatedAt         string
+	Name             string
+	Description      string
+	LabelsJSON       string
+	NodeID           string
+	FleetJSON        string
+	Image            string
+	DesiredState     string
+	ExposeMode       string
+	Hostname         string
+	ContainerPort    int
+	HostPort         int
+	HealthPath       string
+	CurrentReleaseID string
+	Generation       int64
+	ForceRecreate    bool
+	ComposeYAML      string
+	EnvFile          string
+	URL              string
+	CFDNSRecordID    string
+	CFAccessAppID    string
+	CFAccessPolicyID string
+	IngressStatus    string
+	IngressError     string
+	PurgeVolumes     bool
+	CreatedAt        string
+	UpdatedAt        string
 }
 
 type Tombstone struct {
@@ -91,18 +90,18 @@ type Release struct {
 }
 
 type Instance struct {
-	Service            string
-	NodeID             string
-	ReleaseID          string
-	ComposeProject     string
-	ContainerID        string
-	Image              string
-	ActualState        string
-	Health             string
-	HealthDetail       string
-	AppliedGeneration  int64
-	Error              string
-	ReportedAt         string
+	Service           string
+	NodeID            string
+	ReleaseID         string
+	ComposeProject    string
+	ContainerID       string
+	Image             string
+	ActualState       string
+	Health            string
+	HealthDetail      string
+	AppliedGeneration int64
+	Error             string
+	ReportedAt        string
 }
 
 type Token struct {
@@ -135,12 +134,10 @@ type CFState struct {
 }
 
 func ServiceURL(mode, hostname string) string {
-	switch mode {
-	case "private":
-		return "http://" + hostname
-	default:
-		return "https://" + hostname
+	if mode != "public" && mode != "access" {
+		return ""
 	}
+	return "https://" + hostname
 }
 
 func ComposeProject(name string) string { return "fleet-" + name }

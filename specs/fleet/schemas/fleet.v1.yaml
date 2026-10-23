@@ -19,7 +19,7 @@ spec:
   workingDir: string
   user: string
   expose:
-    mode: public|access|private
+    mode: public|access
     hostname: FQDN             # materialized; never empty after validate
     port: 1-65535
     healthPath: /...           # default /healthz

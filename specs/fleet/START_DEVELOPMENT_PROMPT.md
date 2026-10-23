@@ -10,7 +10,7 @@
 
 - 先讀 [SDD](docs/SDD.md)、[bootstrap](docs/bootstrap.md) 與 Makefile，梳理 fleet.yaml → 驗證／Compose 編譯 → fleetd → agent reconcile 的現有鏈路。
 - 優先補 AC-01 的同版驗證，再完成 AC-02 的一個隔離測試節點與單一工作負載 start/stop/redeploy 閉環，接著補 AC-04 重啟恢復。
-- AC-03 的 Cloudflare public/access/private 模式需真實邊界證據；未取得必要設定時保留待驗，不把本機模擬當成通過。
+- AC-03 的 Cloudflare Access web 模式（public 保留但目前不用）需真實邊界證據；未取得必要設定時保留待驗，不把本機模擬當成通過。
 - 重用現有實作，不建立第二個主機管理平台；不接管既有 OneVPS／OneFleet 的正式控制權。
 
 ## 執行方式

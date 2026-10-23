@@ -3,19 +3,34 @@ id: N02
 title: Workspace、PathGuard 與 Lazy File Tree
 kind: core
 milestone: M1
-status: todo
+status: implementing
 depends_on: 
   - N00
   - N01
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
 source_version: 1.0.2
 source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
-contract_status: draft
+contract_status: frozen
 legacy_reference: 
   - mdread workspace, mtime cache, large-directory guard
 allowed_paths: 
+  - scripts/n02-native-smoke.py
+  - Cargo.lock
+  - crates/db/**
+  - contracts/locks/N00.json
+  - contracts/locks/N01.json
+  - crates/core/src/contracts/mod.rs
+  - crates/xtask/src/contracts.rs
+  - crates/core/tests/**
+  - src/generated/contracts/**
+  - src-tauri/Cargo.toml
+  - src-tauri/src/lib.rs
+  - src-tauri/src/commands/mod.rs
+  - src-tauri/src/commands/workspace*
+  - src-tauri/capabilities/**
+  - src-tauri/tauri.conf.json
   - src-tauri/src/workspace/**
   - src-tauri/src/path_guard/**
   - crates/core/src/contracts/N02*
@@ -82,7 +97,7 @@ list_recent_documents({ workspace_id, cursor?, limit? })
 - 目錄列舉 deterministic：directory 先、file 後；同類按 Unicode display name 穩定排序。
 - `.mdx` 不執行 JSX。
 - root 內任何操作只讀。
-- 大目錄不得一次讀取/渲染全部 entry。
+- 大目錄不得一次 materialize 或渲染全部 entry；單層名稱可 bounded-memory streaming 掃描以提供全域排序，禁止讀取未展開子目錄或正文（ADR-003）。
 
 ## BDD 場景
 
@@ -183,3 +198,7 @@ list_recent_documents({ workspace_id, cursor?, limit? })
 - `docs/verification/N02.md` 已附可重現命令與結果。
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
+
+## Implementation decisions
+
+[ADR-003](../adr/ADR-003-workspace-boundaries.md) resolves T-007 path-handle, pagination, ignore, identity and binary transport questions. All original BDD/security/performance gates remain. Backward-compatible typed DB query/identity additions and multi-command generator/registration are owned by the N02 worker; immutable DDL and existing N00 public DTO behavior do not change. Root owns App composition and later N04 state commands.

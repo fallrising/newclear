@@ -40,7 +40,7 @@ nodes:
     - N00
     - N01
     size: M
-    status: todo
+    status: implementing
     spec: docs/nodes/N02-workspace-lazy-tree.md
     contract_lock: contracts/locks/N02.json
     verification: docs/verification/N02.md
@@ -51,7 +51,7 @@ nodes:
     depends_on:
     - N00
     size: M
-    status: todo
+    status: blocked
     spec: docs/nodes/N03-markdown-render-model.md
     contract_lock: contracts/locks/N03.json
     verification: docs/verification/N03.md

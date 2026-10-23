@@ -11,10 +11,10 @@
     "crates/core/src/contracts/build_info.rs"
   ],
   "source_hash_algorithm": "sha256(path + NUL + bytes + NUL, in source_files order)",
-  "source_sha256": "30738b4dda81b4980983894b6ab965194dc995fbbcd482c02670a2beaf809af8",
+  "source_sha256": "91c0a9e618a3f7221642e9785cbc3a39b755e7cda3a75e085199c64987339151",
   "commands": [
     "get_build_info"
   ],
-  "generator_version": "1.0.0",
-  "frozen_at": "2026-07-29T17:51:40+02:00"
+  "generator_version": "1.1.0",
+  "frozen_at": "2026-10-23T03:20:43Z"
 }

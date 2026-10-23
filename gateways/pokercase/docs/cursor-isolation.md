@@ -56,10 +56,16 @@ thinrouter serve --cursor-accept-account-plugins \
 
 Docker's operator-configured proxy variables may still enter the container. The runner does not forward the gateway's application environment, but does not claim Docker configuration is secret-free. Hard-killing the gateway or losing the daemon can prevent cleanup; reconcile only containers with the generated `thinrouter-cursor-` names before restarting. Normal completion, errors and client cancellation perform bounded cleanup.
 
-The recipe and live Cursor authentication are not established by a fake CLI canary. Verify the chosen bundle/image/account separately before enabling a real route; account plugins and arbitrary network access remain explicit limitations.
+The recipe was built from official bundle2026.10.22-27dcf5f and a pinned Debian base; `--version` and `--help` passed with network disabled, a fresh tmpfs HOME, UID1000 and read-only rootfs. This establishes image startup, not live authentication or inference. Verify the account journey separately before enabling a real route; account plugins and arbitrary network access remain explicit limitations.
 
 Cleanup is bounded: daemon creation that finishes after the final reconciliation attempt can still leave a container. Operators must reconcile such leftovers; neither this change nor its helper test proves unconditional cleanup.
 
 ## Verification record
 
-The credential-free actual Docker runner canary and native Rust checks passed on 2026-10-23 after explicitly setting the ephemeral workspace tmpfs to mode1777. See [commands, previous failures and scope limits](tasks/T-0377-handoff.md). Image recipe/login validation and whole-product acceptance remain separate.
+The credential-free actual Docker runner canary and native Rust checks passed on 2026-10-23 after explicitly setting the ephemeral workspace tmpfs to mode1777. See [commands, previous failures and scope limits](tasks/T-0377-handoff.md). Image startup verification is recorded below; login/inference and whole-product acceptance remain separate.
+
+## Official image startup evidence
+
+After PR #566 merged, the unmodified Dockerfile built successfully using an installed official software bundle only (no host account files). The base was `debian@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8`. The resulting local image ID was `sha256:3751cae4e8a7ec05b2728ff991fbd56370da79035ad7cd6da39dd849840bfaaf`; this local artifact was not pushed to a registry or deployed.
+
+`cursor-agent --version` returned `2026.10.22-27dcf5f`; `--help` included mode/sandbox options. Both used `--network none`, UID1000, read-only rootfs, dropped capabilities, no-new-privileges, CPU/memory/PID limits, and fresh tmpfs HOME/workspace/tmp. No login, token import or model request occurred. This does not establish that a complete inference run or the CLI's nested sandbox works inside the container.

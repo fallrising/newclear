@@ -1,6 +1,6 @@
 # T-0377 Cursor isolation verification — 2026-10-23
 
-The retained Cursor provider now runs only in a configured Docker container. PR #566 follows specification PR #563. Local implementation checks have passed; merge still requires independent review and current CI. The overall product remains incomplete in SUCCESS.md.
+The retained Cursor provider now runs only in a configured Docker container. PR #566 follows specification PR #563. Local checks, independent review and required CI passed; PR #566 merged as `cbf1021f4d67ff60683dbfdb47e7bd75101e07bd` at2026-10-23T18:01:20Z. Fetch/readback found no component differences from reviewed head8eac133f. The overall product remains incomplete in SUCCESS.md.
 
 ## Historical failures and corrections
 
@@ -27,9 +27,9 @@ CI-1: missing opt-in/image/profile returns503 before starting a process. CI-2/CI
 
 ## Limits and continuation
 
-These results establish the scoped filesystem/process runner boundary, not real Cursor login, real model behavior or network/account-plugin isolation. The image recipe and live Cursor account journey remain unverified. Bridge networking permits host/LAN/external access; plugins and profile credentials remain available inside the container. Gateway hard kill, daemon failure or creation delayed beyond reconciliation may leave containers.
+These results establish the scoped filesystem/process runner boundary, not real Cursor login, real model behavior or network/account-plugin isolation. The unchanged image recipe subsequently built and passed network-disabled version/help startup for official bundle2026.10.22-27dcf5f; the live account journey remains unverified. Bridge networking permits host/LAN/external access; plugins and profile credentials remain available inside the container. Gateway hard kill, daemon failure or creation delayed beyond reconciliation may leave containers.
 
-Next delivery gates: independent review, required CI and normal merge of PR #566; then record the merged revision in the task board and desk/journal. After that, resume the remaining SUCCESS.md product acceptance without claiming a usable release. No real credential reads, model calls, deploys or usable tags occurred.
+Delivery gates for PR #566 passed (component CI1m27s, contracts7s). The task board and desk/journal record this bounded delivery. Next is the remaining real-account/core-journey acceptance in SUCCESS.md, starting with dedicated Cursor profile provisioning and a scoped live roundtrip; credential use requires its own explicit authorization. Do not claim a usable release. No real credential reads, model calls, deploys or usable tags occurred.
 
 ## Execution boundaries
 

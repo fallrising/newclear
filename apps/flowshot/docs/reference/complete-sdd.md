@@ -1174,7 +1174,7 @@ nodes:
     - N00
     - N01
     size: M
-    status: todo
+    status: implementing
     spec: docs/nodes/N02-workspace-lazy-tree.md
     contract_lock: contracts/locks/N02.json
     verification: docs/verification/N02.md
@@ -1185,7 +1185,7 @@ nodes:
     depends_on:
     - N00
     size: M
-    status: todo
+    status: blocked
     spec: docs/nodes/N03-markdown-render-model.md
     contract_lock: contracts/locks/N03.json
     verification: docs/verification/N03.md
@@ -3157,19 +3157,34 @@ id: N02
 title: Workspace、PathGuard 與 Lazy File Tree
 kind: core
 milestone: M1
-status: todo
+status: implementing
 depends_on: 
   - N00
   - N01
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
 source_version: 1.0.2
 source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
-contract_status: draft
+contract_status: frozen
 legacy_reference: 
   - mdread workspace, mtime cache, large-directory guard
 allowed_paths: 
+  - scripts/n02-native-smoke.py
+  - Cargo.lock
+  - crates/db/**
+  - contracts/locks/N00.json
+  - contracts/locks/N01.json
+  - crates/core/src/contracts/mod.rs
+  - crates/xtask/src/contracts.rs
+  - crates/core/tests/**
+  - src/generated/contracts/**
+  - src-tauri/Cargo.toml
+  - src-tauri/src/lib.rs
+  - src-tauri/src/commands/mod.rs
+  - src-tauri/src/commands/workspace*
+  - src-tauri/capabilities/**
+  - src-tauri/tauri.conf.json
   - src-tauri/src/workspace/**
   - src-tauri/src/path_guard/**
   - crates/core/src/contracts/N02*
@@ -3236,7 +3251,7 @@ list_recent_documents({ workspace_id, cursor?, limit? })
 - 目錄列舉 deterministic：directory 先、file 後；同類按 Unicode display name 穩定排序。
 - `.mdx` 不執行 JSX。
 - root 內任何操作只讀。
-- 大目錄不得一次讀取/渲染全部 entry。
+- 大目錄不得一次 materialize 或渲染全部 entry；單層名稱可 bounded-memory streaming 掃描以提供全域排序，禁止讀取未展開子目錄或正文（ADR-003）。
 
 ## BDD 場景
 
@@ -3338,6 +3353,10 @@ list_recent_documents({ workspace_id, cursor?, limit? })
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+## Implementation decisions
+
+[ADR-003](../adr/ADR-003-workspace-boundaries.md) resolves T-007 path-handle, pagination, ignore, identity and binary transport questions. All original BDD/security/performance gates remain. Backward-compatible typed DB query/identity additions and multi-command generator/registration are owned by the N02 worker; immutable DDL and existing N00 public DTO behavior do not change. Root owns App composition and later N04 state commands.
+
 ---
 
 # FILE: `docs/nodes/N03-markdown-render-model.md`
@@ -3347,18 +3366,21 @@ id: N03
 title: Deterministic Markdown Render Model
 kind: core
 milestone: M1
-status: todo
+status: blocked
 depends_on: 
   - N00
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
 source_version: 1.0.2
 source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
-contract_status: draft
+contract_status: frozen
 legacy_reference: 
   - mdread GFM/TOC/highlight reader UI
 allowed_paths: 
+  - package.json
+  - package-lock.json
+  - docs/adr/ADR-002-document-model-v1.md
   - src/lib/document-model/**
   - src/features/reader/**
   - fixtures/markdown/**
@@ -3506,6 +3528,15 @@ buildDocumentModel(source: string): DocumentModel
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+
+## Initial v1 contract decisions
+
+Before implementation, follow [ADR-002](../adr/ADR-002-document-model-v1.md). This is the initial schemaVersion=1 freeze, not a change to a shipped canonicalizer. Root owns shared App/native composition; this node provides a pure model and an isolated reader with injected link/asset callbacks. All original BDD/performance/security gates remain mandatory.
+
+## Current execution blocker
+
+Functional candidate and initial public API are implemented, but repeated unchanged 1MiB benchmarks fail the <300ms gate. Actual WebKitGTK confirms the failure; source-map overhead is not the bottleneck. See [candidate evidence](../verification/N03.md) and the independent T-010 review. The orchestrator marks this node blocked under execution protocol §8; N04 is not unlocked. Next work requires a separately bounded parser/pipeline performance design task with the same fixture and complete semantic equivalence, or an explicitly reviewed specification decision. Neither asynchronous UI responsiveness nor an easier fixture establishes this synchronous full-model gate.
+
 ---
 
 # FILE: `docs/nodes/N04-tabs-state.md`
@@ -3520,7 +3551,7 @@ depends_on:
   - N02
   - N03
 size: S
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
 source_version: 1.0.2
 source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
@@ -3528,6 +3559,15 @@ contract_status: draft
 legacy_reference: 
   - mdread open_tabs persistence
 allowed_paths: 
+  - docs/adr/ADR-004-tab-session-persistence.md
+  - src/App.tsx
+  - src/App.test.tsx
+  - src/styles.css
+  - src-tauri/src/lib.rs
+  - src-tauri/src/commands/mod.rs
+  - crates/core/src/contracts/mod.rs
+  - crates/xtask/src/contracts.rs
+  - src/generated/contracts/**
   - src/features/tabs/**
   - src-tauri/src/commands/app_state*
   - crates/core/src/contracts/N04*
@@ -3653,6 +3693,11 @@ State JSON 必須帶 schema version；未知較新版本不得崩潰，回明確
 - `docs/verification/N04.md` 已附可重現命令與結果。
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
+
+
+## Initial session contract decisions
+
+Follow [ADR-004](../adr/ADR-004-tab-session-persistence.md) when deriving the initial N04 plan, DTOs, lock and tests. `expected_updated_at` is a per-key map with explicit null creation tokens; multi-entry saves are atomic. Native window-close and application-exit barriers acknowledge only after persistence, with explicit safe no-write cases. Root owns shared integration after N02/N03 acceptance. This specification preparation does not authorize implementation while either dependency remains incomplete. All original restart, lazy-read, scroll and <16ms gates remain.
 
 ---
 

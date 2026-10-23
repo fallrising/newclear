@@ -48,8 +48,13 @@ fn command_manifest_uses_the_frozen_name_and_types() {
     let commands = command_descriptors(&config);
 
     assert_eq!(GetBuildInfo::NAME, "get_build_info");
-    assert_eq!(commands.len(), 1);
-    assert_eq!(commands[0].name, "get_build_info");
-    assert_eq!(commands[0].request_type, "EmptyRequest");
-    assert_eq!(commands[0].response_type, "BuildInfoDto");
+    let command = commands
+        .iter()
+        .find(|command| command.name == GetBuildInfo::NAME)
+        .expect("the N00 command remains registered");
+    assert_eq!(commands.len(), 10);
+    assert_eq!(command.name, "get_build_info");
+    assert_eq!(command.request_type, "EmptyRequest");
+    assert_eq!(command.response_type, "BuildInfoDto");
+    assert_eq!(command.transport, "json");
 }

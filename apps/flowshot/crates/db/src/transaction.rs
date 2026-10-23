@@ -418,3 +418,27 @@ impl Transaction<'_> {
         self.repository().document(input.document_id)
     }
 }
+impl Transaction<'_> {
+    /// Ensure a discovered identity without touching committed hashes/model/revision.
+    pub fn ensure_document(&mut self, root: RootId, path: String) -> Result<Document> {
+        if let Some(document) = self.repository().document_by_path(root, &path)? {
+            return self.set_document_status(document.id, DocumentStatus::Present);
+        }
+        self.create_document(root, path)
+    }
+    /// Additive observation for unknown/pre-epoch filesystem modification times.
+    pub fn observe_document_optional(
+        &mut self,
+        id: DocumentId,
+        size: u64,
+        mtime: Option<Millis>,
+        opened: bool,
+    ) -> Result<Document> {
+        self.repository().document(id)?;
+        let size = i64::try_from(size).map_err(|_| invalid())?;
+        let mtime = mtime.map(Millis::checked).transpose()?;
+        let now = self.sources.now()?;
+        self.conn.execute("UPDATE documents SET size_bytes=?1,mtime_ms=?2,last_seen_at=?3,last_opened_at=CASE WHEN ?4 THEN ?3 ELSE last_opened_at END,updated_at=?3 WHERE id=?5",params![size,mtime,now,opened,id.to_string()])?;
+        self.repository().document(id)
+    }
+}

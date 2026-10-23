@@ -14,7 +14,7 @@ mod repository;
 mod transaction;
 mod types;
 pub use executor::{Completion, Config, DbRuntime};
-pub use repository::{Repository, normalize_tag};
+pub use repository::{Repository, WorkspaceRootRow, normalize_tag};
 pub use transaction::Transaction;
 pub use types::*;
 

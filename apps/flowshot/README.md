@@ -109,7 +109,7 @@ Run build/test commands through the common agent workspace launcher when availab
 
 For target-Mac acceptance, run `make macos-launch-smoke` through the launcher (or equivalent explicit output variables), on the controlled macOS 13+ target. Both a PID-owned visible window and frontend command completion must arrive strictly before 1500 ms. The 15-second observation window is diagnostic only. Hosted or Linux checks cannot close this requirement.
 
-Current executed results and remaining gaps: [N00 resumption evidence](docs/tasks/N00/evidence/T10-foundation-resumption.md). Reading, annotations, persistence and reanchoring remain unimplemented. N00 Linux native verification passed; N01 now continues without waiting for a Mac.
+M0 is merged in [PR #512](https://github.com/fallrising/newclear/pull/512), with board closure in [PR #513](https://github.com/fallrising/newclear/pull/513). N00 foundation and N01 SQLite persistence are verified. N02 workspace and N03 reader are partial implementations with passing integrated Linux checks; full reading/annotation/reanchor journeys remain incomplete. N03 performance is blocked; see [ADR-005](docs/adr/ADR-005-render-performance-decision.md). Controlled Mac acceptance remains a separate release gate.
 
 ## Linux Docker development gate
 

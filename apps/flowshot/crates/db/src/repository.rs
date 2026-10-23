@@ -219,3 +219,75 @@ impl Repository<'_> {
         self.many("SELECT trigger_source,outcome,method,score,old_anchor_json,new_anchor_json,reason_code FROM annotation_anchor_events WHERE annotation_id=?1 ORDER BY id DESC",[id.to_string()],|r|Ok(AnchorEvent{source:TriggerSource::parse(&r.get::<_,String>(0)?)?,outcome:EventOutcome::parse(&r.get::<_,String>(1)?)?,method:Resolution::parse(&r.get::<_,String>(2)?)?,score:r.get(3)?,old_anchor:opt_json(r.get(4)?)?,new_anchor:opt_json(r.get(5)?)?,reason:r.get(6)?}))
     }
 }
+
+/// A bounded listing row; consumers group repeated workspace IDs across pages.
+#[derive(Clone, Debug, PartialEq)]
+pub struct WorkspaceRootRow {
+    pub workspace: Workspace,
+    pub root: Option<Root>,
+}
+impl Repository<'_> {
+    pub fn workspace_page(
+        &self,
+        after: Option<(WorkspaceId, Option<RootId>)>,
+        limit: u32,
+    ) -> Result<Vec<WorkspaceRootRow>> {
+        if !(1..=1001).contains(&limit) {
+            return Err(invalid());
+        }
+        let (w, r) = after.map_or((String::new(), String::new()), |(w, r)| {
+            (w.to_string(), r.map_or_else(String::new, |r| r.to_string()))
+        });
+        let ids=self.many("SELECT w.id,r.id FROM workspaces w LEFT JOIN workspace_roots r ON r.workspace_id=w.id WHERE w.id>?1 OR (w.id=?1 AND COALESCE(r.id,'')>?2) ORDER BY w.id,COALESCE(r.id,'') LIMIT ?3",params![w,r,limit],|row|Ok((WorkspaceId::parse(&row.get::<_,String>(0)?)?,row.get::<_,Option<String>>(1)?.map(|s|RootId::parse(&s)).transpose()?)))?;
+        ids.into_iter()
+            .map(|(w, r)| {
+                Ok(WorkspaceRootRow {
+                    workspace: self.workspace(w)?,
+                    root: r.map(|id| self.root(id)).transpose()?,
+                })
+            })
+            .collect()
+    }
+    pub fn roots_page(
+        &self,
+        workspace: WorkspaceId,
+        after: Option<RootId>,
+        limit: u32,
+    ) -> Result<Vec<Root>> {
+        if !(1..=1001).contains(&limit) {
+            return Err(invalid());
+        }
+        self.many(
+            "SELECT * FROM workspace_roots WHERE workspace_id=?1 AND id>?2 ORDER BY id LIMIT ?3",
+            params![
+                workspace.to_string(),
+                after.map_or_else(String::new, |id| id.to_string()),
+                limit
+            ],
+            root,
+        )
+    }
+    pub fn document_by_path(&self, root: RootId, path: &str) -> Result<Option<Document>> {
+        match self.one(
+            "SELECT * FROM documents WHERE root_id=?1 AND rel_path=?2",
+            params![root.to_string(), path],
+            document,
+        ) {
+            Ok(d) => Ok(Some(d)),
+            Err(e) if e.code == ErrorCode::NotFound => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+    pub fn recent_documents(
+        &self,
+        workspace: WorkspaceId,
+        after: Option<(Millis, DocumentId)>,
+        limit: u32,
+    ) -> Result<Vec<Document>> {
+        if !(1..=1001).contains(&limit) {
+            return Err(invalid());
+        }
+        let (time, id) = after.map_or((i64::MAX, String::new()), |(t, id)| (t.0, id.to_string()));
+        self.many("SELECT d.* FROM documents d JOIN workspace_roots r ON r.id=d.root_id WHERE r.workspace_id=?1 AND d.last_opened_at IS NOT NULL AND (d.last_opened_at<?2 OR (d.last_opened_at=?2 AND d.id>?3)) ORDER BY d.last_opened_at DESC,d.id LIMIT ?4",params![workspace.to_string(),time,id,limit],document)
+    }
+}

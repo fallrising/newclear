@@ -47,7 +47,7 @@ Owner 已於 2026-10-23 啟用 [開發 prompt](START_DEVELOPMENT_PROMPT.md)，�
 目標 Mac 另跑 `make macos-launch-smoke` 並保存時間／視窗證據。
 舊 README 的 standalone clone 名稱不代表要另建新 clone。
 
-早期 portable-only 執行曾因缺少 host prerequisites 明示 native skip（T10 歷史證據）。後續 Docker 執行已通過完整 `make ci`、mandatory `make native-ci` 與真實視窗／IPC（N00 驗證報告）。目標 Mac 驗收、真實資料 dogfood、Git 發布與部署尚未發生。
+早期 portable-only 執行曾因缺少 host prerequisites 明示 native skip（T10 歷史證據）。後續 Docker 執行已通過完整 `make ci`、mandatory `make native-ci` 與真實視窗／IPC（N00 驗證報告）。目標 Mac 驗收與真實資料 dogfood 尚未完成；M0 已透過 PR #512 合併，未部署。
 
 ## 可用版本
 
@@ -73,10 +73,20 @@ Owner 已於 2026-10-23 啟用 [開發 prompt](START_DEVELOPMENT_PROMPT.md)，�
 
 N00 的 shared build／probe 路徑、非阻塞且有時限的 window probe、spawn failure／child cleanup、lock metadata 檢查、SDD revision validator 與 monorepo CI 入口已實作。獨立審查接受此 bounded repair；原始 Rust DTO、生成物、1.5 秒 oracle 與產品範圍維持原契約；lock 只同步 SPEC metadata，graph 依新開發驗收規則更新。
 
-N00 開發驗收已通過，不等於主線完成、合併或部署。`usable_tag: none` 保持。N01/M0 已完成開發驗收（[證據](docs/verification/N01.md)），本里程碑 PR 待遠端 CI 與合併；下一步是 N02/N03/N04 與 M1 真實 KB 三天試用；Mac release 視窗／IPC／硬體／時間／截圖證據仍為發行缺口。
+N00 開發驗收已通過，不等於主線完成、合併或部署。`usable_tag: none` 保持。N01/M0 已完成開發驗收（[證據](docs/verification/N01.md)），本里程碑已於 2026-10-23T03:24:25Z 合併 [PR #512](https://github.com/fallrising/newclear/pull/512)，三平台與專案契約 CI 全通過；下一步是 N02/N03/N04 與 M1 真實 KB 三天試用；Mac release 視窗／IPC／硬體／時間／截圖證據仍為發行缺口。
 
 ## 本次追加授權與 M0 驗證計畫
 
 Owner 要求先修訂文件，再持續開發，完成里程碑後提交程式碼並建立、合併 PR。依 SPEC §13.1，先完成 Linux Docker N00 驗證，再完成 N01 schema/migration/repository，交付 M0。必跑完整 native gate、真實 Linux 視窗／IPC、migration/invariant/concurrency/restart tests、10k release benchmark、SDD 與獨立審查。AC-02 仍 pending；沒有 Mac 證據不阻塞此開發里程碑，但仍禁止 usable／release。
 
 M0 執行結果：48 項 DB 檢查、完整 Linux native CI、真實視窗/IPC、app-data 初始化/重啟/損壞遷移拒絕均通過；root release migration+20k 寫入量測 203.374 ms，獨立審查 ACCEPT。尚未完成閱讀/註記 UI 或完整產品旅程；AC-03/04 保持 pending。
+
+## M1 continuation scope (2026-10-23)
+
+After M0 development acceptance, continue N02 workspace/PathGuard, N03 single deterministic safe Markdown model and N04 persistent lazy tabs. T-007 audits contract gaps; ADR-002 freezes the initial N03 canonical/model/security decisions before code. Root assigns shared/native integration separately. AC-03 remains pending until the actual reading/annotation journey exists. M1 requires the unchanged three-day real-KB trial; a local KB path has been requested and no trial is claimed.
+
+M1 current evidence: candidate N03 functional checks pass, but the unchanged 1MiB benchmark fails in actual WebKitGTK 2.50.6 (mapped runs 7975/9139ms versus <300ms). N03 is not accepted; N04 implementation remains gated. ADR-004 records the planned session/CAS/close barrier for later implementation. N02 work continues independently.
+
+M1 integration candidate verification: full Linux Docker CI/native build/tests, actual shell window/IPC and DB restart/corrupt-migration refusal passed on the integrated N02/N03 tree. This does not establish full reader UI, performance or dogfood acceptance. N02 remains implementing; N03 blocked; N04 todo. [ADR-005](docs/adr/ADR-005-render-performance-decision.md) records the renderer decision requested from the owner.
+
+Current owner delivery request: commit and merge the verified partial N02/N03 implementation. This is an incremental source delivery under AC-03, not AC-03/M1 acceptance. Keep the renderer blocked and tabs unimplemented; no usable/release tag. Before merge require independent final harness/publication review, current SDD/project-success checks and remote Ubuntu/Apple Silicon/Intel CI. Existing local native and real WebView evidence remains applicable to unchanged source.

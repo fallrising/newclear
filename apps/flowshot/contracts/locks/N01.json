@@ -16,7 +16,7 @@
     "crates/db/src/types.rs"
   ],
   "source_hash_algorithm": "sha256(path + NUL + bytes + NUL, in source_files order)",
-  "source_sha256": "de170ddf60b425b79507287c3f8afe94846e98ced79ff9bf89a96b60d6599809",
+  "source_sha256": "5c5b3e0e4c0cf5c029eaa6a88d22d3d0af3beeb2cd94fba805b19b1d6cc6e374",
   "commands": [],
   "generator_version": "n01-sha256-v1",
   "frozen_at": "2026-10-23T02:44:08Z"

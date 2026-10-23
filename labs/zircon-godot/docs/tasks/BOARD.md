@@ -28,6 +28,8 @@ Owner 已授權本階段 commit、push、PR、正常合併；完整主線 AC 不
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0401.1 | 固定來源、原生 build、headless import、host shutdown patch 審查及合併 | AC-01／AC-02／AC-04（局部） | in_progress | 2026-10-23T01:39:13Z | | 2026-10-23T01:42:27Z |
+| T-0401.1 | 固定來源、原生 build、headless import、host shutdown patch 審查及合併 | AC-01／AC-02／AC-04（局部） | in_progress | 2026-10-23T01:39:13Z | | 2026-10-23T01:45:26Z |
 
 T-0401：獨立 T-978 review ACCEPT；原生三目標 build、host2tests、headless editor import、validator15tests、41contracts、links／diff 均通過。等待 PR CI／合併回讀；不改 T-0400 gameplay 狀態。
+
+交付 PR：[507](https://github.com/fallrising/newclear/pull/507)。與同期 main 合併僅涉及 `.team/PLAN.md` append 衝突，已保留雙方紀錄；Zircon component 程式碼未變。合併後41contracts與 staged diff check 通過，等待 CI。

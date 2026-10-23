@@ -47,9 +47,9 @@ RSS可能重複共享頁、磁碟只計regular-file metadata，不提供完整�
 `make integration-resources`、`make integration-storage`、`make integration-crash`、
 `make integration-retry`、`make integration-trial`，各自遵循fresh非root runner條件。
 M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止採納既有scope。
-本次未下載release、建立帳號、啟動daemon或刪除任何runtime資料。
+2026-10-21 歷史 inventory 核對未下載release、建立帳號、啟動daemon或刪除任何runtime資料。
 
-本次只核對文件、程式入口與既有證據；未執行產品建置或外部整合。
+2026-10-21 歷史 inventory 只核對文件、程式入口與既有證據；未執行產品建置或外部整合。下方 Issue548 節另記錄本次 maintenance 的實際執行結果。
 歷史命令與結果保留原來源，不以文件盤點日期覆蓋實測日期。
 
 ## 可用版本
@@ -60,3 +60,26 @@ M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止
 
 標記前須核對已合併目標SHA、必要CI／審查與核心流程證據。
 沿用較早結果須比較其後程式及設定差異，相關變更必須補驗。
+
+## Issue548: bounded failure diagnostics (maintenance)
+
+This slice preserves existing M1–M7 behavior, report schemas, guards and exit codes.
+AC-D1: independent version1 diagnostic artifacts contain only rebuilt typed enums,
+source identity, bounded counts/exit status and separate original/cleanup/evidence
+failure facts; hostile or unavailable evidence cannot leak raw output or claim pass.
+AC-D2: CI always attempts fixed-file diagnostic publication, with30-day retention
+and no raw log/state/backup uploads. AC-D3: current four reported runtime profiles
+are attempted once each in fresh actual-passwd non-root network-disabled containers;
+any repeated profile needs a diagnosed condition/test and max2 attempts.
+Plan: strict projection/publication RED-GREEN, all existing276 offline tests,
+container preflight and verified original artifact, four bounded profiles, independent
+review/CI. Until actual results are recorded, original AC-05 remains failed and
+mainline incomplete. No usable/release/deployment claim is added.
+
+Maintenance evidence: AC-D1/D2 local implementation/static gates pass;290offline
+checks pass. AC-D3 is partial: one real fresh-container run each restore/crash/storage
+passed, retained-manual failed at first_owner (original bootstrap/child_missing,
+then cleanup shutdown). No profile repeated. See [548 report](tasks/548-failure-diagnostics/report.md)
+for exact source/evidence and ownership-proof follow-up. Historical M4 cause is not
+resolved by one pass. Mainline/AC-05/tag status remain unchanged; parent CI/review
+and publication still required.

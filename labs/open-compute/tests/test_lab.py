@@ -587,6 +587,34 @@ class DiagnosticsAndProcessTests(unittest.TestCase):
             self.assertEqual({item["pid"] for item in owner.live()}, {20, 30})
         self.assertEqual(len(owner.observed_identities()), 3)
 
+    def test_edge_diagnostics_preserve_unknown_refusal_without_adopting_child(self):
+        cases = ("parent_missing", "parent_zombie", "parent_reused", "child_missing",
+                 "child_reused", "child_reparented", "start_order")
+        for reason in cases:
+            with self.subTest(reason=reason):
+                owner = self.owner()
+                table = {10: owner.identity, 20: self.identity(20, 90 if reason == "start_order" else 110, 10)}
+                counts = {}
+                def read(pid):
+                    counts[pid] = counts.get(pid, 0) + 1
+                    value = table.get(pid)
+                    if counts[pid] > 1:
+                        if pid == 10 and reason == "parent_missing": return None
+                        if pid == 10 and reason == "parent_zombie": return dict(value, state="Z")
+                        if pid == 10 and reason == "parent_reused": return dict(value, start_ticks=105)
+                        if pid == 20 and reason == "child_missing": return None
+                        if pid == 20 and reason == "child_reused": return dict(value, start_ticks=120)
+                        if pid == 20 and reason == "child_reparented": return dict(value, ppid=999)
+                    return value
+                with self.proc_scan(table, read), patch("lab.os.kill") as kill:
+                    with self.assertRaisesRegex(lab.ProcessObservationError, "parent edge changed") as caught:
+                        owner.snapshot()
+                self.assertEqual(caught.exception.observation_reason, reason)
+                self.assertEqual(owner.observation_reason, reason)
+                self.assertEqual(len(owner.known), 1)
+                with self.assertRaises(lab.ProcessObservationError): owner.observed_identities()
+                kill.assert_not_called()
+
     def test_stale_parent_reuse_during_scan_fails_closed(self):
         owner = self.owner()
         table = {10: owner.identity, 20: self.identity(20, 110, 10)}

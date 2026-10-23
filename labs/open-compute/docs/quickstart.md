@@ -472,3 +472,43 @@ establish a long-term slope, reclaimability, storage quota or physical capacity.
 M5 adds only checkpoint SIGKILL evidence for observed authorized generations.
 Power loss, in-flight effects, portability, upgrades and isolation remain
 separate gates even when all M5 assertions pass.
+
+## Failure diagnostics and retention (issue548)
+
+The original runtime commands, success reports and exit codes are unchanged.
+Current lab.py and trial_integration.py best-effort write a separate version1
+`failure-diagnostics.json` into the newly admitted report directory. It keeps the
+first original failure separate from cleanup/evidence failures, using only fixed
+enums, source identity and bounded exit/report facts. It never contains raw logs,
+exception messages, paths, argv, configuration, credentials, nonces or secret hashes.
+If this sidecar cannot be written, its best-effort failure does not change the
+original runtime/report outcome. A missing sidecar is not evidence that cleanup
+or diagnostic publication passed.
+
+CI runs the standard-library collector with `if: always()` after the runtime steps:
+
+```sh
+python3 labs/open-compute/failure_diagnostics.py ci \
+  --directory "$RUNNER_TEMP" --profiles storage
+```
+
+This command is for the fixed CI report directory names from the workflow, not
+arbitrary local custom-output paths. It prefers a strict versioned sidecar; if it
+is absent it rebuilds known typed fields from the existing normal report, ignoring
+unrelated legacy fields (including free-form diagnostics). A versioned sidecar
+itself rejects extra keys. Missing/invalid evidence produces a minimal unknown
+artifact; it must never become a passing runtime result. Source identity is read
+independently from the checked-out Git source, not copied from untrusted report
+text. Duplicate keys, nonfinite/oversized/deep JSON, unsafe/symlink/multilink input
+and nonexclusive or unsafe publication fail closed. Collector failure cannot
+turn an earlier failing Actions runtime step green.
+
+Only explicit report.json and rebuilt diagnostic-profile.json paths are uploaded;
+no raw stdout/stderr, backup, private state or recursive directory glob is allowed.
+Retention is30days within repository policy, replacing the earlier7day artifacts.
+For local diagnosis, keep raw output privately under owned evidence with0600 files;
+never upload the raw evidence directory or include its credentials in a report.
+Historical logs named by548 were retrieved during investigation; a client terminal
+escape-sequence refusal was not log expiration. See STATUS for fixed-SHA symptoms
+and prior repairs. Neither longer retention nor one successful rerun proves an
+intermittent root cause or a production qualification.

@@ -316,3 +316,60 @@ async fn callback_needs_a_live_run_token() {
         .unwrap();
     assert_eq!(r.status(), 401);
 }
+
+#[tokio::test]
+async fn next_user_turn_goes_on_in_the_idle_run() {
+    let env = Env::start(&[]).await;
+    let turn1 = json!({"model": "cc", "messages": [
+        {"role": "system", "content": "be brief"},
+        {"role": "user", "content": "hi"}]});
+    let v = env.chat(turn1).await;
+    assert_eq!(v["choices"][0]["message"]["content"], "Hello there");
+
+    // Same conversation plus a new user message: written to the same process, alone.
+    let turn2 = json!({"model": "cc", "messages": [
+        {"role": "system", "content": "be brief"},
+        {"role": "user", "content": "hi"},
+        {"role": "assistant", "content": "Hello there"},
+        {"role": "user", "content": "and again"}]});
+    let v = env.chat(turn2).await;
+    assert_eq!(v["choices"][0]["message"]["content"], "Hello there");
+    assert_eq!(env.starts(), 1, "same process");
+    let turns: Vec<Value> = env
+        .file("turns.txt")
+        .lines()
+        .map(|l| serde_json::from_str(l).unwrap())
+        .collect();
+    assert_eq!(turns.len(), 2);
+    assert_eq!(turns[1]["message"]["content"][0]["text"], "and again");
+
+    // Edited history, or other instructions: a new run told the whole conversation.
+    let edited = json!({"model": "cc", "messages": [
+        {"role": "system", "content": "be brief"},
+        {"role": "user", "content": "hi"},
+        {"role": "assistant", "content": "something else"},
+        {"role": "user", "content": "and again"}]});
+    env.chat(edited).await;
+    assert_eq!(env.starts(), 2);
+    let other_system = json!({"model": "cc", "messages": [
+        {"role": "system", "content": "be verbose"},
+        {"role": "user", "content": "hi"},
+        {"role": "assistant", "content": "Hello there"},
+        {"role": "user", "content": "x"}]});
+    env.chat(other_system).await;
+    assert_eq!(env.starts(), 3);
+}
+
+#[tokio::test]
+async fn idle_runs_expire() {
+    let env = Env::start(&["--claude-idle-secs", "1"]).await;
+    env.chat(json!({"model": "cc", "messages": [{"role": "user", "content": "hi"}]}))
+        .await;
+    tokio::time::sleep(Duration::from_millis(2500)).await;
+    env.chat(json!({"model": "cc", "messages": [
+        {"role": "user", "content": "hi"},
+        {"role": "assistant", "content": "Hello there"},
+        {"role": "user", "content": "later"}]}))
+        .await;
+    assert_eq!(env.starts(), 2, "expired run is not reused");
+}

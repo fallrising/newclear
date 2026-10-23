@@ -59,6 +59,18 @@ client
   `[tool call mcp__thinrouter__<name> id=… args=…]`、`[tool result id=…]`。
 - 等结果最多 `--claude-idle-secs`（预设 600 秒）；名额（`--claude-max-runs`）不够时，最早开始
   等待的 run 先被结束。
+
+## 跨轮保留进程
+
+- 回答以 `end_turn` 结束后，run 不结束而是闲置，记住它已有的对话（正规化后的讯息与刚才的回答）
+  以及 model、system、工具清单。下一个请求若是同一组 model/system/工具、前面的讯息与它记住的完全
+  一致、后面只多了使用者讯息，就只把新讯息写进那个进程的 stdin（不加 `Human:` 标签），
+  Anthropic 从 cache 读其余部分。
+- 闲置同样受 `--claude-idle-secs` 限制；名额不够时最早闲置或等待的 run 先被结束。
+- 新进程的第一则讯息里，历史每 20 则一个区块，最后一个完整区块加 `cache_control`
+  （`ephemeral`、1h）；没有完整区块时标在呼叫方的 instructions 上。之后同一段对话即使开新进程，
+  也能读到之前写入的 cache。
+- gateway 关闭时先对所有存活的 Claude Code 送 SIGTERM，最多等 6 秒。
 - `tool_choice: required` 或指定工具时，在 `<external_system_instructions>` 里用文字说明
   （Claude Code 没有对应参数）。
 
@@ -75,7 +87,8 @@ thinrouter serve --claude-bin /path/to/claude   # 不在 PATH 时
 
 ## 目前限制
 
-- 工具往返留在同一个进程；但一般的下一轮使用者讯息（回答以 `end_turn` 结束后）仍开新进程
-  并重送整段对话，也还没有 history 分块的 cache 标记。
+- 只有「对话完全一致、只多了使用者讯息」才续用闲置进程；客户端改写或截短历史、换了
+  system/工具/模型，都会开新进程重送整段对话（由 history 分块的 cache 标记减少重写）。
+- thinrouter 重启后没有可续用的进程（不保存 session；magpie 的 `--resume` 搁置区未实作）。
 - thinking 区块不回传；`temperature`、`max_tokens` 等取样参数不传给 Claude Code。
 - 旧版存过的 Claude token 会在开启资料库时清掉（不再使用）。

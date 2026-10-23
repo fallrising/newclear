@@ -13,8 +13,11 @@
 //! and stays alive, waiting in `waiting` by tool id; the helper's `tools/call` blocks on
 //! the gateway callback. The request that brings exactly those tool results answers the
 //! calls and reads the same process's next message, so the conversation is not sent
-//! again. Anything else (other results, extra user text, an expired or evicted run)
-//! starts a new run told the whole conversation.
+//! again. A run whose reply ended (`end_turn`) parks idle with the conversation it
+//! knows; a request that only adds user messages to exactly that conversation (same
+//! model, instructions and tools) is written to its stdin. Anything else (other
+//! results, edited history, an expired or evicted run) starts a new run told the whole
+//! conversation, its history in cache-marked blocks.
 
 use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
@@ -48,6 +51,8 @@ pub struct ClaudeCode {
     /// `http://<listen>:<port>` for the MCP helper's callback; set once listening.
     pub callback_base: Arc<OnceLock<String>>,
     live: Arc<Mutex<Live>>,
+    /// Processes not yet exited (for shutdown).
+    alive: Arc<std::sync::atomic::AtomicUsize>,
 }
 
 /// Runs that outlive a request.
@@ -57,7 +62,9 @@ struct Live {
     by_token: HashMap<String, Arc<LiveRun>>,
     /// Runs waiting for tool results, by pending tool_use id.
     waiting: HashMap<String, Arc<LiveRun>>,
-    /// Waiting runs, oldest first (evicted when slots run out).
+    /// Idle runs whose reply ended, waiting for the next user turn.
+    idle: Vec<Arc<LiveRun>>,
+    /// Waiting and idle runs, oldest first (evicted when slots run out).
     order: VecDeque<Arc<LiveRun>>,
 }
 
@@ -83,7 +90,80 @@ struct LiveRun {
     calls: Mutex<HashMap<String, oneshot::Sender<ToolResult>>>,
     /// Ends the process.
     stop: CancellationToken,
+    /// When it started waiting for tool results or for the next turn.
     waiting_since: Mutex<Option<Instant>>,
+    /// Open while the run lives; later user turns are written here.
+    stdin: tokio::sync::Mutex<Option<tokio::process::ChildStdin>>,
+    /// Model, instructions and tools the run was started with.
+    signature: String,
+    /// The conversation it has (normalized messages, see `norm`).
+    known: Mutex<Vec<Value>>,
+}
+
+/// What must match for a message to count as "the same" in a known conversation.
+fn norm(m: &Value) -> Value {
+    let calls: Vec<Value> = m
+        .get("tool_calls")
+        .and_then(|t| t.as_array())
+        .into_iter()
+        .flatten()
+        .filter_map(|c| c.get("id").cloned())
+        .collect();
+    let images = m
+        .get("content")
+        .and_then(|c| c.as_array())
+        .map(|p| {
+            p.iter()
+                .filter(|x| x.get("type").and_then(|t| t.as_str()) == Some("image_url"))
+                .count()
+        })
+        .unwrap_or(0);
+    json!({
+        "role": m.get("role").cloned().unwrap_or(json!("user")),
+        "text": content_text(m.get("content").unwrap_or(&Value::Null)).trim(),
+        "calls": calls,
+        "call_id": m.get("tool_call_id").cloned().unwrap_or(Value::Null),
+        "images": images,
+    })
+}
+
+fn is_system(m: &Value) -> bool {
+    matches!(
+        m.get("role").and_then(|r| r.as_str()),
+        Some("system" | "developer")
+    )
+}
+
+/// The conversation part of a chat request (system/developer messages excluded).
+fn convo(chat: &Value) -> Vec<Value> {
+    chat.get("messages")
+        .and_then(|m| m.as_array())
+        .into_iter()
+        .flatten()
+        .filter(|m| !is_system(m))
+        .cloned()
+        .collect()
+}
+
+/// Model + instructions + tool names: a run only goes on under the same ones.
+fn signature(model: &str, chat: &Value) -> String {
+    let system: Vec<String> = chat
+        .get("messages")
+        .and_then(|m| m.as_array())
+        .into_iter()
+        .flatten()
+        .filter(|m| is_system(m))
+        .map(|m| content_text(m.get("content").unwrap_or(&Value::Null)))
+        .collect();
+    let mut tools: Vec<String> = chat
+        .get("tools")
+        .and_then(|t| t.as_array())
+        .into_iter()
+        .flatten()
+        .map(|t| t.get("function").unwrap_or(t).to_string())
+        .collect();
+    tools.sort();
+    json!([model, system, tools]).to_string()
 }
 
 impl ClaudeCode {
@@ -97,6 +177,7 @@ impl ClaudeCode {
             idle: Duration::from_secs(600),
             callback_base: Arc::new(OnceLock::new()),
             live: Arc::new(Mutex::new(Live::default())),
+            alive: Arc::new(std::sync::atomic::AtomicUsize::new(0)),
         }
     }
 
@@ -109,7 +190,87 @@ impl ClaudeCode {
         let mut live = self.live.lock().unwrap();
         live.by_token.remove(&run.token);
         live.waiting.retain(|_, r| !Arc::ptr_eq(r, run));
+        live.idle.retain(|r| !Arc::ptr_eq(r, run));
         live.order.retain(|r| !Arc::ptr_eq(r, run));
+    }
+
+    /// Stop every live run and wait (bounded) for them to exit.
+    pub async fn shutdown(&self) {
+        let runs: Vec<Arc<LiveRun>> = self
+            .live
+            .lock()
+            .unwrap()
+            .by_token
+            .values()
+            .cloned()
+            .collect();
+        for r in &runs {
+            r.stop.cancel();
+        }
+        let deadline = Instant::now() + Duration::from_secs(6);
+        while self.alive.load(std::sync::atomic::Ordering::SeqCst) > 0 && Instant::now() < deadline
+        {
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+    }
+
+    /// End the run after `idle` unless it was used again meanwhile.
+    fn expire_later(&self, run: &Arc<LiveRun>) {
+        let (run, idle) = (run.clone(), self.idle);
+        tokio::spawn(async move {
+            tokio::time::sleep(idle).await;
+            let still = run
+                .waiting_since
+                .lock()
+                .unwrap()
+                .is_some_and(|t| t.elapsed() >= idle);
+            if still {
+                debug!("Claude Code run idle too long; ending it");
+                run.stop.cancel();
+            }
+        });
+    }
+
+    /// If `chat` only adds user messages to the conversation an idle run has, write
+    /// them to it and return a sink for its reply.
+    async fn resume_run(&self, model: &str, chat: &Value) -> Option<mpsc::Receiver<Item>> {
+        let sig = signature(model, chat);
+        let msgs = convo(chat);
+        let normed: Vec<Value> = msgs.iter().map(norm).collect();
+        let run = {
+            let mut live = self.live.lock().unwrap();
+            let pos = live.idle.iter().position(|r| {
+                let known = r.known.lock().unwrap();
+                r.signature == sig
+                    && known.len() < normed.len()
+                    && normed[..known.len()] == known[..]
+                    && msgs[known.len()..]
+                        .iter()
+                        .all(|m| m.get("role").and_then(|r| r.as_str()) == Some("user"))
+            })?;
+            let run = live.idle.remove(pos);
+            live.order.retain(|r| !Arc::ptr_eq(r, &run));
+            run
+        };
+        let start = run.known.lock().unwrap().len();
+        let line = json!({"type": "user", "message": {"role": "user", "content": render_turn(&msgs[start..])}});
+        let (tx, rx) = mpsc::channel::<Item>(64);
+        *run.sink.lock().unwrap() = Some(tx);
+        *run.waiting_since.lock().unwrap() = None;
+        *run.known.lock().unwrap() = normed;
+        let written = match run.stdin.lock().await.as_mut() {
+            Some(stdin) => stdin
+                .write_all(format!("{line}\n").as_bytes())
+                .await
+                .is_ok(),
+            None => false,
+        };
+        if !written {
+            *run.sink.lock().unwrap() = None;
+            run.stop.cancel();
+            return None;
+        }
+        Some(rx)
     }
 
     /// A slot for a new run; when none is free, the oldest waiting run is ended.
@@ -201,6 +362,7 @@ impl ClaudeCode {
         let (tx, rx) = mpsc::channel::<Item>(64);
         *run.sink.lock().unwrap() = Some(tx);
         *run.waiting_since.lock().unwrap() = None;
+        *run.known.lock().unwrap() = convo(chat).iter().map(norm).collect();
         run.pending.lock().unwrap().clear();
         for (id, result) in results {
             match run.calls.lock().unwrap().remove(&id) {
@@ -299,6 +461,14 @@ const HISTORY_OPEN: &str = "<conversation_history>\nThe conversation so far, eac
 Images and files in it were sent with those earlier messages: none of them is new, and none needs answering again.\n\n";
 const HISTORY_CLOSE: &str =
     "</conversation_history>\n\n<current_turn>\nThe turn to answer now:\n\n";
+/// History messages per cached block of a new run's first message (magpie's
+/// `historyChunk`): a later new run of the same conversation reads the cached prefix up
+/// to the last whole block, within Anthropic's 20-block lookback.
+const HISTORY_CHUNK: usize = 20;
+
+fn cache_mark() -> Value {
+    json!({"type": "ephemeral", "ttl": "1h"})
+}
 
 fn is_tool_call(m: &Value) -> bool {
     m.get("tool_calls")
@@ -382,6 +552,8 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
         text.push_str("\n</external_system_instructions>\n\n");
         flush(&mut blocks, &mut text);
     }
+    let instructions_block = blocks.len().checked_sub(1);
+    let mut chunk_block: Option<usize> = None;
 
     let convo: Vec<Value> = convo.into_iter().cloned().collect();
     let offered: std::collections::HashSet<&str> = chat
@@ -453,9 +625,51 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
             ));
         }
         text.push_str("\n\n");
+        if split > 0 && i < split && (i + 1) % HISTORY_CHUNK == 0 {
+            flush(&mut blocks, &mut text);
+            chunk_block = blocks.len().checked_sub(1);
+        }
+    }
+    // One cache mark (Claude Code keeps three of Anthropic's four): on the last whole
+    // history block, else on the caller's instructions.
+    if let Some(i) = chunk_block.or(instructions_block) {
+        blocks[i]["cache_control"] = cache_mark();
     }
     if split > 0 {
         text.push_str("</current_turn>");
+    }
+    flush(&mut blocks, &mut text);
+    if blocks.is_empty() {
+        blocks.push(json!({"type": "text", "text": "[continue]"}));
+    }
+    blocks
+}
+
+/// New user messages for a run that already has the conversation: their own text and
+/// images, as Claude Code would be told them directly.
+pub fn render_turn(msgs: &[Value]) -> Vec<Value> {
+    let mut blocks: Vec<Value> = Vec::new();
+    let mut text = String::new();
+    for (i, m) in msgs.iter().enumerate() {
+        if i > 0 {
+            text.push_str("\n\n");
+        }
+        match m.get("content") {
+            Some(Value::Array(parts)) => {
+                for p in parts {
+                    if p.get("type").and_then(|t| t.as_str()) == Some("image_url") {
+                        if let Some(img) = image_block(p) {
+                            flush(&mut blocks, &mut text);
+                            blocks.push(img);
+                        }
+                    } else if let Some(t) = p.get("text").and_then(|t| t.as_str()) {
+                        text.push_str(t);
+                    }
+                }
+            }
+            Some(other) => text.push_str(&content_text(other)),
+            None => {}
+        }
     }
     flush(&mut blocks, &mut text);
     if blocks.is_empty() {
@@ -613,6 +827,10 @@ pub async fn start(
         debug!("tool results go on in the waiting Claude Code run");
         return first_record(rx).await;
     }
+    if let Some(rx) = cc.resume_run(model, chat).await {
+        debug!("the next turn goes on in the idle Claude Code run");
+        return first_record(rx).await;
+    }
     let fail = |status: u16, body: String, retryable: bool| UpstreamAttemptError {
         status,
         body,
@@ -718,16 +936,18 @@ pub async fn start(
         calls: Mutex::new(HashMap::new()),
         stop: CancellationToken::new(),
         waiting_since: Mutex::new(None),
+        stdin: tokio::sync::Mutex::new(Some(stdin)),
+        signature: signature(model, chat),
+        known: Mutex::new(convo(chat).iter().map(norm).collect()),
     });
     cc.live.lock().unwrap().by_token.insert(token, run.clone());
 
     // The first request's disconnect ends the run while it is still answering it.
     let first_cancel = cancel.clone();
+    cc.alive.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     let cc = cc.clone();
     tokio::spawn(async move {
         let _permit = permit;
-        // stdin stays open while the run lives (closing it would end Claude Code).
-        let _stdin = stdin;
         let mut lines = BufReader::new(stdout).lines();
         let mut sent = false;
         let mut filter = EventFilter {
@@ -755,9 +975,9 @@ pub async fn start(
                         .unwrap()
                         .extend(filter.finished_tools.drain(..));
                     let waits = filter.done && filter.stop_reason.as_deref() == Some("tool_use");
+                    // Registered before the client sees message_stop, so its next request
+                    // finds this run: by tool ids (results) or as idle (next turn).
                     if waits {
-                        // Registered before the client sees message_stop, so its next
-                        // request (the results) finds this run.
                         let ids = std::mem::take(&mut filter.tool_ids);
                         *run.pending.lock().unwrap() = ids.clone();
                         *run.waiting_since.lock().unwrap() = Some(Instant::now());
@@ -765,6 +985,18 @@ pub async fn start(
                         for id in ids {
                             live.waiting.insert(id, run.clone());
                         }
+                        live.order.push_back(run.clone());
+                    } else if filter.done {
+                        run.known.lock().unwrap().push(json!({
+                            "role": "assistant",
+                            "text": filter.reply_text.trim(),
+                            "calls": [],
+                            "call_id": null,
+                            "images": 0,
+                        }));
+                        *run.waiting_since.lock().unwrap() = Some(Instant::now());
+                        let mut live = cc.live.lock().unwrap();
+                        live.idle.push(run.clone());
                         live.order.push_back(run.clone());
                     }
                     let Some(tx) = sink(&run) else { continue };
@@ -775,30 +1007,20 @@ pub async fn start(
                         }
                     }
                     if filter.done {
+                        // This request is answered; the run waits for the next one.
                         *run.sink.lock().unwrap() = None;
-                        if !waits {
-                            break; // reply complete
-                        }
                         filter.reset();
-                        let (run2, idle) = (run.clone(), cc.idle);
-                        tokio::spawn(async move {
-                            tokio::time::sleep(idle).await;
-                            let still = run2
-                                .waiting_since
-                                .lock()
-                                .unwrap()
-                                .is_some_and(|t| t.elapsed() >= idle);
-                            if still {
-                                debug!("Claude Code run waited too long for tool results");
-                                run2.stop.cancel();
-                            }
-                        });
+                        cc.expire_later(&run);
                     }
                 }
                 Some("result") => {
                     let failed = env.get("is_error").and_then(|e| e.as_bool()) == Some(true)
                         || env.get("subtype").and_then(|s| s.as_str()) != Some("success");
-                    if failed {
+                    // A successful turn ends with a result; the run lives on.
+                    if !failed {
+                        continue;
+                    }
+                    {
                         let msg = env
                             .get("result")
                             .and_then(|r| r.as_str())
@@ -852,6 +1074,7 @@ pub async fn start(
         run.stop.cancel();
         *run.sink.lock().unwrap() = None;
         stop(child).await;
+        cc.alive.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
         if let Some(dir) = run_dir {
             let _ = std::fs::remove_dir_all(dir);
         }
@@ -877,6 +1100,8 @@ struct EventFilter {
     finished_tools: Vec<(String, String, Value)>,
     /// Ids of this message's client tool calls.
     tool_ids: Vec<String>,
+    /// Text the client was shown in this message.
+    reply_text: String,
     /// upstream block index → client index (None = dropped)
     map: std::collections::HashMap<i64, Option<i64>>,
     next: i64,
@@ -956,6 +1181,11 @@ impl EventFilter {
                         t.2.push_str(j);
                     }
                 }
+                if let Some(t) = ev.pointer("/delta/text").and_then(|t| t.as_str()) {
+                    if self.map.get(&idx).copied().flatten().is_some() {
+                        self.reply_text.push_str(t);
+                    }
+                }
                 if ty == "content_block_stop" {
                     if let Some((id, bridged, input)) = self.tools.remove(&idx) {
                         let input = serde_json::from_str(&input).unwrap_or_else(|_| json!({}));
@@ -1032,6 +1262,45 @@ mod tests {
             .as_str()
             .unwrap()
             .ends_with("</current_turn>"));
+    }
+
+    #[test]
+    fn long_history_is_cache_marked_by_block() {
+        let mut messages = vec![json!({"role": "system", "content": "sys"})];
+        for i in 0..25 {
+            messages.push(json!({"role": "user", "content": format!("q{i}")}));
+            messages.push(json!({"role": "assistant", "content": format!("a{i}")}));
+        }
+        messages.push(json!({"role": "user", "content": "now"}));
+        let blocks = render_prompt(&json!({"messages": messages}));
+        let marked: Vec<usize> = blocks
+            .iter()
+            .enumerate()
+            .filter(|(_, b)| b.get("cache_control").is_some())
+            .map(|(i, _)| i)
+            .collect();
+        assert_eq!(marked.len(), 1, "one mark");
+        // 50 history messages → blocks after 20 and 40; the mark is on the second.
+        assert_eq!(marked[0], 2);
+        assert!(blocks[2]["text"]
+            .as_str()
+            .unwrap()
+            .contains("Assistant: a19"));
+        assert_eq!(blocks[2]["cache_control"]["ttl"], "1h");
+        // Short conversation: the mark stays on the instructions.
+        let short = render_prompt(&json!({"messages": [
+            {"role": "system", "content": "sys"}, {"role": "user", "content": "hi"}]}));
+        assert!(short[0].get("cache_control").is_some());
+        assert!(short[1].get("cache_control").is_none());
+    }
+
+    #[test]
+    fn turn_rendering_is_the_users_own_words() {
+        let blocks = render_turn(&[json!({"role": "user", "content": [
+            {"type": "text", "text": "look"},
+            {"type": "image_url", "image_url": {"url": "https://x/y.png"}}]})]);
+        assert_eq!(blocks[0]["text"], "look");
+        assert_eq!(blocks[1]["source"]["url"], "https://x/y.png");
     }
 
     #[test]

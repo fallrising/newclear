@@ -4,7 +4,7 @@
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
+- **第 1 輪：文檔先行（進行中）** — [`DESIGN.md`](DESIGN.md) 已草擬，待擁有者在設計 PR 確認假設 A1、A2。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -16,18 +16,26 @@
 
 ### C1 `web/.env` 被 Git 追蹤
 
-public repository 中追蹤了 `.env`。內容應只有 API URL，但這與「不提交環境檔」的一般慣例衝突；本次未輸出其值。
+public repository 中追蹤了 `web/.env`。已確認只有 `VITE_API_URL`，值與 `src/services/api.ts:4` 的預設值相同，不是敏感值；仍與「不提交環境檔」的慣例衝突。
 
 ### C2 技術棧落後其他元件
 
 React 18、Vite 5、Tailwind 3；PROTOCOL 禁止未經提議升級 major 版本。
+
+### C3 卡片操作沒有可讀名稱，鍵盤 focus 時看不見
+
+`src/components/BookmarkCard.tsx:89-101` 的編輯、刪除按鈕只有圖示，沒有 `aria-label`；容器 `opacity-0 group-hover:opacity-100` 只在 hover 時顯示。
+
+### C4 API 失敗被當成空結果
+
+`src/store/bookmarkStore.ts:77-81` fetch 失敗只寫 console，`src/components/BookmarkGrid.tsx:64-68` 因此顯示「No bookmarks found」；新增、更新、刪除失敗沒有提示。
 
 ## 需要放開或決定的點
 
 ### D2 `web/.env` 的處理
 
 - 選項：(a) 改為 `.env.example` 並移出追蹤；(b) 確認無敏感值後維持。
-- 建議：(a)，並在 PR 中確認內容無敏感值。
+- 建議：(a)。內容已確認無敏感值。
 - 狀態：**待擁有者決定**。撰寫 `DESIGN.md` 時可先以建議作為「假設」，在設計 PR 中由擁有者確認。
 
 ### D3 是否升級技術棧
@@ -45,3 +53,4 @@ React 18、Vite 5、Tailwind 3；PROTOCOL 禁止未經提議升級 major 版本�
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+- 設計 PR（本次）：`DESIGN.md` 與本檔、`PROMPT.md`、`targets.json` 的修正。

@@ -2,10 +2,9 @@
   "project": "goku",
   "verified": false,
   "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
-  "locale": "zh-TW",
+  "locale": "en-US",
   "colorSchemes": [
-    "light",
-    "dark"
+    "light"
   ],
   "apps": [
     {

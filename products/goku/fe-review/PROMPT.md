@@ -16,7 +16,8 @@
 ## 啟動線索（未驗證）
 
 - 在 `web/` 執行 `npm ci`；一個 shell `npm run mock`，另一個 `npm run dev -- --host 127.0.0.1 --port 5173`。
-- `web/.env` 已存在，不要在報告或提交中複製其內容。
+- `web/.env` 只有 `VITE_API_URL`（與程式預設值相同）；第 2 輪 M1 後改為 `web/.env.example`。
+- `mock/db.json` 會被 json-server `--watch` 寫入，第 3 輪先複製到 `fe-review/runs/.state/` 再使用。
 
 ## 主要流程
 

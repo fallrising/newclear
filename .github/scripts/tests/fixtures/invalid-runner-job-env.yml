@@ -1,0 +1,9 @@
+name: Invalid job env
+on: push
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      BUILD_DIR: ${{ runner.temp }}/build
+    steps:
+      - run: echo invalid

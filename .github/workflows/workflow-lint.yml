@@ -1,0 +1,41 @@
+name: Workflow static validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/check_workflows.py'
+      - '.github/scripts/tests/**'
+      - '.github/actionlint.*'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/check_workflows.py'
+      - '.github/scripts/tests/**'
+      - '.github/actionlint.*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workflow-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check enabled root workflows
+        env:
+          ACTIONLINT_CACHE_DIR: ${{ runner.temp }}/workflow-lint
+        run: python3 .github/scripts/check_workflows.py
+      - name: Check regression workflows
+        env:
+          ACTIONLINT_ARCHIVE: ${{ runner.temp }}/workflow-lint/actionlint_1.7.12_linux_amd64.tar.gz
+        run: python3 -m unittest discover -s .github/scripts/tests -v

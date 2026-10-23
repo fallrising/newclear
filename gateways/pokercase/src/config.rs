@@ -31,6 +31,8 @@ pub struct AppConfig {
     pub claude_bin: Option<String>,
     /// Concurrent Claude Code processes.
     pub claude_max_runs: usize,
+    /// Seconds a Claude Code run waits for tool results.
+    pub claude_idle_secs: u64,
 }
 
 impl AppConfig {
@@ -72,6 +74,7 @@ impl AppConfig {
             provider_base_overrides: Vec::new(),
             claude_bin: None,
             claude_max_runs: 2,
+            claude_idle_secs: 600,
         })
     }
 

@@ -2,18 +2,23 @@
 //!
 //! Claude Code runs with `--tools ""` (no built-ins) and this helper as its only MCP
 //! server, so the model sees the caller's tools as `mcp__thinrouter__<name>`. When the
-//! model calls one, the gateway already has the `tool_use` from the stream: it hands it
-//! to the client and ends the run. `tools/call` is therefore never answered here; the
-//! next request (with the tool result) starts a new run told the whole conversation.
+//! model calls one, the gateway has already handed the streamed `tool_use` to the
+//! client. The helper forwards `tools/call` to the gateway callback
+//! (`POST /_thinrouter/claude-mcp` with the run's token header), which answers once the client's next
+//! request brings the tool result, and the same Claude Code process goes on.
 
 use std::collections::HashMap;
-use std::io::{BufRead, Write};
+use std::sync::Arc;
 
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
 pub const SERVER: &str = "thinrouter";
-const PREFIX: &str = "mcp__thinrouter__";
+/// Gateway route the helper posts `tools/call` params to.
+pub const CALLBACK_PATH: &str = "/_thinrouter/claude-mcp";
+/// Header carrying the run's secret token.
+pub const TOKEN_HEADER: &str = "x-thinrouter-run-token";
+pub const PREFIX: &str = "mcp__thinrouter__";
 /// Claude Code keeps MCP tool names at 64 characters including the prefix.
 const MAX_NAME: usize = 64 - PREFIX.len();
 
@@ -84,7 +89,7 @@ pub fn handle(msg: &Value, tools: &[Value]) -> Option<Value> {
         }),
         "tools/list" => json!({"tools": tools}),
         "ping" => json!({}),
-        // The gateway ends the run once the call is streamed to the client.
+        // Answered asynchronously through the gateway callback (see `run`).
         "tools/call" => return None,
         _ => {
             return Some(json!({
@@ -96,19 +101,62 @@ pub fn handle(msg: &Value, tools: &[Value]) -> Option<Value> {
     Some(json!({"jsonrpc": "2.0", "id": id, "result": result}))
 }
 
-/// `thinrouter claude-mcp-helper --tools-file <path>`: newline-delimited JSON-RPC on stdio.
-pub fn run(tools_file: &std::path::Path) -> anyhow::Result<()> {
+/// MCP `tools/call` result for a client tool result.
+pub fn call_result(text: &str, is_error: bool) -> Value {
+    json!({"content": [{"type": "text", "text": text}], "isError": is_error})
+}
+
+/// `thinrouter claude-mcp-helper --tools-file <path> [--callback-file <path>]`:
+/// newline-delimited JSON-RPC on stdio. Calls run concurrently (parallel tool use).
+pub async fn run(
+    tools_file: &std::path::Path,
+    callback_file: Option<&std::path::Path>,
+) -> anyhow::Result<()> {
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
     let tools: Vec<Value> = serde_json::from_str(&std::fs::read_to_string(tools_file)?)?;
-    let stdin = std::io::stdin();
-    let mut out = std::io::stdout().lock();
-    for line in stdin.lock().lines() {
-        let line = line?;
+    // `{"url", "token"}` from a 0600 file: the token is never on a command line.
+    let callback: Option<(String, String)> = match callback_file {
+        Some(p) => {
+            let v: Value = serde_json::from_str(&std::fs::read_to_string(p)?)?;
+            let s = |k: &str| v.get(k).and_then(|x| x.as_str()).unwrap_or("").to_string();
+            Some((s("url"), s("token")))
+        }
+        None => None,
+    };
+    let http = reqwest::Client::builder().no_proxy().build()?;
+    let out = Arc::new(tokio::sync::Mutex::new(tokio::io::stdout()));
+    let write = |out: Arc<tokio::sync::Mutex<tokio::io::Stdout>>, v: Value| async move {
+        let mut o = out.lock().await;
+        let _ = o.write_all(format!("{v}\n").as_bytes()).await;
+        let _ = o.flush().await;
+    };
+    let mut lines = BufReader::new(tokio::io::stdin()).lines();
+    while let Some(line) = lines.next_line().await? {
         let Ok(msg) = serde_json::from_str::<Value>(&line) else {
             continue;
         };
+        if msg.get("method").and_then(|m| m.as_str()) == Some("tools/call") {
+            let (Some(id), Some((url, token))) = (msg.get("id").cloned(), callback.clone()) else {
+                continue; // no callback: the gateway ends the run instead
+            };
+            let (http, out) = (http.clone(), out.clone());
+            let params = msg.get("params").cloned().unwrap_or(Value::Null);
+            tokio::spawn(async move {
+                let req = http.post(&url).header(TOKEN_HEADER, token).json(&params);
+                let result = match req.send().await {
+                    Ok(r) if r.status().is_success() => r
+                        .json::<Value>()
+                        .await
+                        .unwrap_or_else(|_| call_result("bad gateway reply", true)),
+                    Ok(r) => call_result(&format!("gateway returned {}", r.status()), true),
+                    Err(_) => call_result("gateway unreachable", true),
+                };
+                write(out, json!({"jsonrpc": "2.0", "id": id, "result": result})).await;
+            });
+            continue;
+        }
         if let Some(reply) = handle(&msg, &tools) {
-            writeln!(out, "{reply}")?;
-            out.flush()?;
+            write(out.clone(), reply).await;
         }
     }
     Ok(())

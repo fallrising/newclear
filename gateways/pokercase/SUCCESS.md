@@ -36,6 +36,7 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 | AC-09 | Given 舊版留下的 `codex` 連線，When 開啟資料庫，Then 連線被停用、token 清除，`codex` provider 不再存在；OpenAI 模型只走 `siwc`。 | passed | `store::secret_storage_tests::codex_rows_are_retired`、`providers` 單元測試；2026-10-23 本機全綠。 |
 | AC-10 | Given `claude` provider，When 三個端點送純文字或圖片（串流與非串流），Then 由本機 `claude -p`（magpie 參數、清理後環境）回答，呼叫方 system 只放在 `<external_system_instructions>`、不替換 Claude Code 的 system prompt，thinrouter 不持有或傳送 Claude token；thinking 不回傳，額度用盡 429、未登入 401；工具見 AC-11。 | passed | `tests/claude_code_e2e.rs`（假 `claude` 腳本記錄參數、環境與 stdin）、`claude_code` 單元測試；2026-10-22 本機全綠。未用真實帳號。 |
 | AC-11 | Given `claude` provider 與客戶端工具，When 三個端點送帶 tools 的請求與工具結果，Then 工具經 MCP helper 以 `mcp__thinrouter__<name>` 提供（只 allow 這些、不跳過權限），tool_use 換回原名轉給客戶端並立即結束 run，帶結果的下一輪以完整對話開新 run，id 對得上。 | passed | `tests/claude_code_e2e.rs::client_tools_are_bridged_through_mcp`、`mcp_helper_speaks_stdio_json_rpc`、`claude_mcp` 單元測試；2026-10-22 本機全綠。未用真實 Claude Code 驗證。 |
+| AC-12 | Given `claude` provider 的工具呼叫，When 客戶端下一個請求正好帶回這些 tool id 的結果，Then 結果經 MCP helper 回呼（run token 只在 0600 檔與標頭）交給同一個 Claude Code 進程繼續回答，不重送對話；對不上、逾時或名額被讓出時改開新 run。 | passed | `tests/claude_live_e2e.rs`（Python 假 Claude Code 真的啟動 helper 並呼叫 `tools/call`：同進程續答、串流、逾時、讓出名額、回呼需 token）；2026-10-23 本機全綠。未用真實 Claude Code 驗證。 |
 
 ## 現況與缺口
 

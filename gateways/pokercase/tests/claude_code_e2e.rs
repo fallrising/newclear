@@ -17,7 +17,8 @@ const FAKE_CLAUDE: &str = r#"#!/bin/sh
 dir="$(dirname "$0")"
 printf '%s\n' "$@" > "$dir/args.txt"
 env > "$dir/env.txt"
-cat > "$dir/stdin.txt"
+# one stream-json line; stdin stays open like a real session
+IFS= read -r line; printf '%s\n' "$line" > "$dir/stdin.txt"
 if grep -q CRASH "$dir/stdin.txt"; then echo "boom: not logged in" >&2; exit 1; fi
 echo '{"type":"system","subtype":"init","session_id":"s1"}'
 if grep -q LIMIT "$dir/stdin.txt"; then
@@ -299,7 +300,7 @@ async fn client_tools_are_bridged_through_mcp() {
     let env = Env::start().await;
 
     // Chat, stream: the bridged call comes back under the client's own name, and the
-    // run (which would wait for the MCP answer) is ended at once.
+    // reply ends with the call (the run waits for the result in the background).
     let started = std::time::Instant::now();
     let r = env
         .post(
@@ -369,28 +370,6 @@ async fn client_tools_are_bridged_through_mcp() {
         .unwrap();
     assert_eq!(tu["name"], "get_weather");
     assert_eq!(tu["input"]["city"], "Taipei");
-
-    // The tool result starts a new run told the whole conversation.
-    let r = env
-        .post(
-            "/v1/chat/completions",
-            json!({"model": "cc", "tools": weather_tools(), "messages": [
-                {"role": "user", "content": "weather?"},
-                {"role": "assistant", "content": null, "tool_calls": [{"id": "toolu_1", "type": "function",
-                    "function": {"name": "get_weather", "arguments": "{\"city\":\"Taipei\"}"}}]},
-                {"role": "tool", "tool_call_id": "toolu_1", "content": "sunny"}
-            ]}),
-        )
-        .await;
-    let v: Value = r.json().await.unwrap();
-    assert_eq!(v["choices"][0]["message"]["content"], "Hello there");
-    let stdin = env.file("stdin.txt");
-    assert!(
-        stdin.contains("[tool call mcp__thinrouter__get_weather id=toolu_1"),
-        "{stdin}"
-    );
-    assert!(stdin.contains("[tool result id=toolu_1]"));
-    assert!(stdin.contains("sunny"));
 }
 
 #[tokio::test]

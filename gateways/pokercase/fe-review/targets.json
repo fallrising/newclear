@@ -1,10 +1,9 @@
 {
   "project": "pokercase",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "第1輪來源核對；DESIGN M1 隔離/新資料/登入fixture尚未實作，不得宣稱受保護頁驗收。",
   "locale": "zh-TW",
   "colorSchemes": [
-    "light",
     "dark"
   ],
   "apps": [
@@ -13,7 +12,7 @@
       "kind": "server",
       "cwd": "gateways/pokercase",
       "install": "cargo build",
-      "start": "cargo run -- serve --host 127.0.0.1 --port 20128",
+      "start": "cargo run --locked -- serve --host 127.0.0.1 --port 20128 --data-dir \"${FE_POKER_DATA_DIR:?fresh task data required}\"",
       "env": {},
       "baseUrl": "http://127.0.0.1:20128",
       "ready": "/admin/login",
@@ -48,8 +47,8 @@
       "name": "tui",
       "kind": "terminal",
       "cwd": "gateways/pokercase",
-      "start": "cargo run -- tui",
-      "capture": "tmux capture-pane -p -e",
+      "start": "cargo run --locked -- tui --data-dir \"${FE_POKER_DATA_DIR:?fresh task data required}\"",
+      "capture": "See DESIGN.md M4: owned tmux socket/session/pane required; wrapper not implemented",
       "sizes": [
         "80x24",
         "120x40"

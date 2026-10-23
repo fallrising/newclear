@@ -1,0 +1,57 @@
+{
+  "source_id": "7416734bd434f50d901d6c421782aae6bae5728ac8d4c4037019ecd67af60245",
+  "ac03": "not_run",
+  "checks": [
+    {
+      "name": "node_registration_and_heartbeat",
+      "status": "passed"
+    },
+    {
+      "name": "deploy_healthy_literal_env_argv_loopback",
+      "status": "passed",
+      "generation": 2
+    },
+    {
+      "name": "steady_generation_does_not_recreate",
+      "status": "passed"
+    },
+    {
+      "name": "node_secret_merge_preserves_literal_values",
+      "status": "passed"
+    },
+    {
+      "name": "stop_retains_container",
+      "status": "passed"
+    },
+    {
+      "name": "start_and_same_image_redeploy_once",
+      "status": "passed"
+    },
+    {
+      "name": "agent_restart_identity_and_applied_state",
+      "status": "passed"
+    },
+    {
+      "name": "control_plane_outage_and_persisted_restart",
+      "status": "passed"
+    },
+    {
+      "name": "stopped_state_survives_outage_and_agent_restart",
+      "status": "passed"
+    },
+    {
+      "name": "uninstall_acknowledged_after_compose_file_loss",
+      "status": "passed"
+    }
+  ],
+  "binaries": {
+    "fleetd": "a13671853afbd8fe5a062fd4bbe6df65785244989c7968a0fa06754e5c6f742f",
+    "fleet-agent": "8abb30b6c15e1a718d8880381bf8eac5fe045eda547b2561517bc4d873ca49c7",
+    "hello-healthz": "d41c12deee812d67ce1d8653b9c9444af22e7acbf88059ed834f28b54788c0a2"
+  },
+  "docker_version": "29.8.1",
+  "compose_version": "5.5.1",
+  "status": "passed",
+  "cleanup_container_set_restored": true,
+  "cleanup_status": "passed"
+}

@@ -97,6 +97,7 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     };
 
     let state_callback_base = state.proxy.claude_code.callback_base.clone();
+    let claude_runs = state.proxy.claude_code.clone();
     let app = build_app(state);
 
     info!(%addr, data_dir = %cfg.data_dir.display(), "thinrouter listening");
@@ -125,6 +126,8 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     )
     .with_graceful_shutdown(shutdown_signal())
     .await?;
+    // SIGTERM every live Claude Code run and wait, so none is killed holding its lock.
+    claude_runs.shutdown().await;
     Ok(())
 }
 

@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -167,7 +168,7 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 				remotes[id] = b.peers[id]
 			}
 		}
-		if r.outbox, err = partition.NewOutbox(b.registry, remotes, 0, 0); err != nil {
+		if r.outbox, err = partition.NewOutbox(b.registry, remotes, 0, 0, b.sendFailureLogger(topic, spec.ID)); err != nil {
 			return err
 		}
 		sender = r.outbox
@@ -227,6 +228,29 @@ func (b *Broker) rejectLogger(topic string, id uint32) func(raft.Message, error)
 		b.logger.Warn("raft step rejected", "topic", topic, "partition", id, "kind", string(message.Kind),
 			"from", message.From, "term", message.Term, "skipped", skipped, "error", err.Error())
 		last, skipped = now, 0
+	}
+}
+
+// sendFailureLogger logs failed peer calls, at most once a second per peer
+// link with a count of the ones it skipped. Link workers for different
+// peers call it concurrently, so a mutex guards the per-peer state.
+func (b *Broker) sendFailureLogger(topic string, id uint32) func(uint32, raft.Message, error) {
+	var mu sync.Mutex
+	last := map[uint32]time.Time{}
+	skipped := map[uint32]int{}
+	return func(peer uint32, message raft.Message, err error) {
+		now := b.config.Clock.Now()
+		mu.Lock()
+		if now.Sub(last[peer]) < time.Second {
+			skipped[peer]++
+			mu.Unlock()
+			return
+		}
+		count := skipped[peer]
+		last[peer], skipped[peer] = now, 0
+		mu.Unlock()
+		b.logger.Warn("peer send failed", "topic", topic, "partition", id, "peer", peer, "kind", string(message.Kind),
+			"term", message.Term, "skipped", count, "error", err.Error())
 	}
 }
 

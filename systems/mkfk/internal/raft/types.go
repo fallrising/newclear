@@ -186,6 +186,17 @@ type Snapshot struct {
 	LastApplied  uint64
 	LeaderReady  bool
 	Quorum       int
+	// Peers is the leader's replication progress per peer, by peer ID;
+	// it is empty on followers and candidates.
+	Peers []PeerProgress
+}
+
+type PeerProgress struct {
+	PeerID     uint32
+	NextIndex  uint64
+	MatchIndex uint64
+	Unanswered int
+	Inflight   int
 }
 
 var (

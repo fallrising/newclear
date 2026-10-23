@@ -2,6 +2,10 @@
 
 研究日期：2026-10-04（Asia/Singapore）。來源 commit：`e383d4a020c46acce37a845eae5cc84a867ecffc`。
 
+## 後續實測（2026-10-23）
+
+本頁以下為 2026-10-04 歷史研究，保留原始缺工具／未跑狀態。本次已安裝隔離 SDK、完成原生 build 與 host RED/GREEN；結果、失敗及未驗收範圍見 [開發證據](development-20261023.md)。`sources.json` 仍是歷史研究 manifest，不改寫為全量 runtime audit。
+
 ## 證據如何解讀
 
 - **上游聲稱**：README 與專項審計描述的可玩能力／結果。

@@ -23,15 +23,20 @@ prompt = args[-1]
 if "FAIL" in prompt:
     sys.stderr.write("Error: not logged in. Run cursor-agent login\n"); sys.exit(1)
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
-sid = "c0ffee"
-out({"type": "system", "subtype": "init", "apiKeySource": "login", "cwd": os.getcwd(), "session_id": sid, "model": "x", "permissionMode": "default"})
+# Shape recorded from cursor-agent 2026.10.16 (`-p --output-format stream-json
+# --stream-partial-output --mode ask`): thinking deltas, streamed assistant deltas
+# (timestamp_ms, no model_call_id), a final unstamped flush, and usage on the result.
+sid = "345d87ff-d504-44d2-86e0-a530f774b8dc"
+out({"type": "system", "subtype": "init", "apiKeySource": "login", "cwd": os.getcwd(), "session_id": sid, "model": "Auto", "permissionMode": "default"})
 out({"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": prompt}]}, "session_id": sid})
-out({"type": "assistant", "timestamp_ms": 1, "message": {"role": "assistant", "content": [{"type": "text", "text": "Hello "}]}, "session_id": sid})
+out({"type": "thinking", "subtype": "delta", "text": "The user wants", "session_id": sid, "timestamp_ms": 1})
+out({"type": "thinking", "subtype": "completed", "session_id": sid, "timestamp_ms": 2})
+out({"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Hello "}]}, "session_id": sid, "timestamp_ms": 3})
 out({"type": "tool_call", "subtype": "started", "call_id": "t1", "tool_call": {"readToolCall": {"args": {"path": "README.md"}}}, "session_id": sid})
-out({"type": "assistant", "timestamp_ms": 2, "model_call_id": "m1", "message": {"role": "assistant", "content": [{"type": "text", "text": "Hello "}]}, "session_id": sid})
-out({"type": "assistant", "timestamp_ms": 3, "message": {"role": "assistant", "content": [{"type": "text", "text": "there"}]}, "session_id": sid})
+out({"type": "assistant", "timestamp_ms": 4, "model_call_id": "m1", "message": {"role": "assistant", "content": [{"type": "text", "text": "Hello "}]}, "session_id": sid})
+out({"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "there"}]}, "session_id": sid, "timestamp_ms": 5})
 out({"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Hello there"}]}, "session_id": sid})
-out({"type": "result", "subtype": "success", "duration_ms": 5, "duration_api_ms": 5, "is_error": False, "result": "Hello there", "session_id": sid})
+out({"type": "result", "subtype": "success", "duration_ms": 5, "duration_api_ms": 5, "is_error": False, "result": "Hello there", "session_id": sid, "request_id": "r1", "usage": {"inputTokens": 9359, "outputTokens": 33, "cacheReadTokens": 3328, "cacheWriteTokens": 0}})
 "#;
 
 struct Env {
@@ -159,6 +164,12 @@ async fn cursor_answers_through_the_official_cli_read_only() {
     assert_eq!(r.status(), 200);
     let v: Value = r.json().await.unwrap();
     assert_eq!(v["choices"][0]["message"]["content"], "Hello there");
+    assert_eq!(v["usage"]["prompt_tokens"], 9359);
+    assert_eq!(v["usage"]["completion_tokens"], 33);
+    assert!(
+        !v.to_string().contains("The user wants"),
+        "thinking is not passed on"
+    );
 
     let args = env.args();
     assert!(args.windows(2).any(|w| w[0] == "--mode" && w[1] == "ask"));

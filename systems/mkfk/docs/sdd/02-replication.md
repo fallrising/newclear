@@ -44,7 +44,7 @@ Follower 處理順序：
 4. sync WAL／hardstate 後才回 `success=true, matched_index`。
 5. follower commit 最多推到 `min(leader_commit, verified_match_index)`；verified_match_index 是本 RPC 證實與 leader 一致的 prefix 末端（prev + 本次 entries），不能拿未知一致性的 local extra tail 當作證據。
 
-Heartbeat 無新 entry 時也要驗證 prev；不能只靠較大 leader_commit 就提交可能衝突的 local 尾端。重複／亂序 replies 只能更新相同 term、正確 peer 的有效 progress，不能使 nextIndex/matchIndex 無根據前進。拒絕 reply 的 conflict hint 則可由任一本 term、本 leader 送出的 RPC 降低 nextIndex（不低於 matchIndex+1）：同時有 heartbeat 與重送在途時，每個 reply 都屬於較舊的 RPC，只接受最新 RPC 的 hint 會讓落後的 follower 永遠追不上；降低 nextIndex 只造成重送，follower 對已持有的 entries 冪等。Read barrier 與 proposal 一樣受 pipelining window 限制：某 peer 未回覆的 append 達 `MaxPipelinedAppends` 時不再對它送 read barrier（由其他 peer 確認或逾時重試），否則無法合併的 read barrier 會超過 leader 追蹤的 RPC 數，所有 reply 都對應已遺忘的 RPC，follower 永遠追不上；任一本 term reply 都重新開啟 window。詳見 [ADR-012](../adr/012-replication-flow-control-isr-catchup.md)。
+Heartbeat 無新 entry 時也要驗證 prev；不能只靠較大 leader_commit 就提交可能衝突的 local 尾端。重複／亂序 replies 只能更新相同 term、正確 peer 的有效 progress，不能使 nextIndex/matchIndex 無根據前進。拒絕 reply 的 conflict hint 則可由任一本 term、本 leader 送出的 RPC 降低 nextIndex（不低於 matchIndex+1）：同時有 heartbeat 與重送在途時，每個 reply 都屬於較舊的 RPC，只接受最新 RPC 的 hint 會讓落後的 follower 永遠追不上；降低 nextIndex 只造成重送，follower 對已持有的 entries 冪等。Read barrier 與 proposal 一樣受 pipelining window 限制：某 peer 未回覆的 append 達 `MaxPipelinedAppends` 時不再對它送 read barrier（由其他 peer 確認或逾時重試），否則無法合併的 read barrier 會超過 leader 追蹤的 RPC 數，所有 reply 都對應已遺忘的 RPC，follower 永遠追不上。只有對仍追蹤之 RPC 的 reply 重新開啟 window；對已遺忘 RPC 的 reply 若也重開，backlog 會被新的 read barrier 持續填滿。詳見 [ADR-012](../adr/012-replication-flow-control-isr-catchup.md)。
 
 ## 5. Commit 與 apply
 

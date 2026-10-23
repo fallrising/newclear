@@ -227,7 +227,7 @@ func TestM7ReadBarriersDoNotStarveALaggingFollower(t *testing.T) {
 	cluster.isolate(3)
 	// More than one AppendEntries batch behind, so node 3 only catches up if
 	// the leader learns its progress.
-	for index := 0; index < 3*MaxAppendEntries; index++ {
+	for index := 0; index < 20*MaxAppendEntries; index++ {
 		frame := fenceFrame(0, 0, "behind")
 		_, ready, err := cluster.nodes[1].ProposeFrame(frame.Kind, frame.Payload)
 		if err != nil {
@@ -253,8 +253,11 @@ func TestM7ReadBarriersDoNotStarveALaggingFollower(t *testing.T) {
 		read()
 	}
 	leader := cluster.nodes[1].Snapshot()
-	for step := 0; step < 4*MaxInflightAppends; step++ {
-		read()
+	for step := 0; step < 64*MaxInflightAppends; step++ {
+		// Reads arrive faster than node 3's link drains.
+		for range MaxPipelinedAppends {
+			read()
+		}
 		if step%10 == 0 {
 			cluster.enqueueReady(t, 1, cluster.tick(t, 1))
 		}
@@ -265,5 +268,5 @@ func TestM7ReadBarriersDoNotStarveALaggingFollower(t *testing.T) {
 			return
 		}
 	}
-	t.Fatalf("follower never caught up while reads continued: leader %#v follower %#v", leader, cluster.nodes[3].Snapshot())
+	t.Fatalf("follower never caught up while reads continued: leader %#v follower %#v", cluster.nodes[1].Snapshot(), cluster.nodes[3].Snapshot())
 }

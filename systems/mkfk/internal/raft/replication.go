@@ -213,15 +213,16 @@ func (node *Node) stepAppendResponse(message Message) (Ready, error) {
 	if !exists {
 		return Ready{}, errors.New("append response came from an untracked peer")
 	}
-	// Any current-term reply shows the peer is answering, even one for an
-	// RPC the leader no longer tracks, so it reopens the pipeline.
-	progress.unanswered = 0
+	// A reply to an RPC the leader no longer tracks proves nothing and must
+	// not reopen the pipeline: while a backlog holds only forgotten RPCs,
+	// reopening it would let new read barriers refill the backlog forever.
 	sent, exists := node.sent[message.RPCID]
 	if !exists || sent.peer != message.From || sent.term != node.term {
 		return Ready{LeaderReady: node.leaderReady}, nil
 	}
 	delete(node.sent, message.RPCID)
 	progress.forget(message.RPCID)
+	progress.unanswered = 0
 	response := message.AppendResp
 	ready := Ready{LeaderReady: node.leaderReady}
 	if !response.Success {

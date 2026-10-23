@@ -1,8 +1,8 @@
 # Agent Computer — Cocoon 可見桌面實驗
 
 - Revision：AC-design-0.3，2026-10-03。
-- Status：**Proposed / documentation only**。本次未建映像、未啟動 VM、未連接模型、未做實機驗收。
-- Scope：`fallrising/newclear/platform/agent-platform` 的獨立 AC 實驗；[SDD §2.4](../SDD.md#24-agent-computer-實驗acproposed) 是範圍入口。
+- Status：**需求與驗收來源 / Proposed design**。原文件交付未建映像、未啟動 VM、未連接模型、未做實機驗收；這是歷史紀錄，不是獨立實作項目的現況宣告。
+- Scope（2026-10-23，#395）：本文保留於 `platform/agent-platform` 作為需求與驗收來源；**AC-1～AC-4 已移交另一個獨立項目，不在本元件實作**。[SDD §2.4](../SDD.md#24-agent-computer-實驗acproposed) 是歸屬入口；目標項目名稱與公開程式碼位置未指定，不填入推測連結。
 - Goal：做出 CocoonBox 參考畫面的功能效果，不以「成功開 VM」或 headless browser smoke 代替 Agent Computer。
 
 ## 1. 目標畫面與完成定義
@@ -266,6 +266,8 @@ CDP、VNC、desktop input、sandboxd 不公開到 Internet；入口經受認證�
 
 ## 7. 分階段交付與停止點
 
+下表保留原需求分解；AC-0 是本目錄的文件成果，**AC-1～AC-4 由另一個獨立項目實作與驗收**，不是 Agent Platform 的後續工作佇列。實作項目自行固定版本、取得操作授權並記錄證據；此處不追蹤其進度，也不改變 coding 主線 M0–M6。
+
 | 階段 | 交付與依賴 | 階段邊界 |
 | --- | --- | --- |
 | AC-0 文件 | 本文＋README＋SDD 邊界；功能目標、資料／控制／生命週期與驗收 | **本次僅至 Draft PR**，實機測試全部 Not run |
@@ -302,7 +304,7 @@ AC-AT-05 先以可控制的 guest 影片 fixture 做穩定驗證；真實 YouTub
 
 原始錄影、頁面內容、對話與 checkpoint 預設私有。公開 evidence 只放已檢查的 synthetic 資料、摘要與 hash，不附 token、cookie、私人主機位置或帶帳號的畫面。缺少證據時不以模型自己的文字報告成功；保存檔案、播放狀態與 VM 清理各由獨立觀測核對。
 
-接手入口是先讀 [SDD](../SDD.md)、本文、[KVM 主機文件](KVM-HOST.md) 與 [HANDOFF 最新段落](HANDOFF.md)，再核對新任務所授權的階段。AC-1 開始前須具體確認目標 worker、pinned runtime 組合、viewer／MCP 工具版本、期限與外部 client 使用範圍。這些是實作輸入，不阻止本次文件交付，也不授權自動開始下一階段。
+實作接手應先從另一個獨立項目自己的任務／規格與授權入口開始，再將本文的需求及驗收 ID 對回其設計。此處的 [SDD](../SDD.md)、[KVM 主機文件](KVM-HOST.md) 與 [HANDOFF](HANDOFF.md) 是 Agent Platform 的歷史背景，不授權在本元件開始 AC-1～AC-4。AC-1 的實作輸入仍須具體確認目標 worker、pinned runtime 組合、viewer／MCP 工具版本、期限與外部 client 使用範圍；本文不替獨立項目填入實測或批准狀態。
 
 ## 10. 可追溯來源
 

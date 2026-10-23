@@ -102,6 +102,14 @@ enum Commands {
         /// Concurrent Cursor Agent processes
         #[arg(long, env = "THINROUTER_CURSOR_MAX_RUNS", default_value_t = 2)]
         cursor_max_runs: usize,
+        /// Enable the cursor provider, accepting that cursor-agent can use the account's
+        /// Cursor plugins (e.g. Gmail) for any client prompt.
+        #[arg(
+            long,
+            env = "THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS",
+            default_value_t = false
+        )]
+        cursor_accept_account_plugins: bool,
     },
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -196,6 +204,7 @@ async fn main() -> Result<()> {
             claude_idle_secs,
             cursor_bin,
             cursor_max_runs,
+            cursor_accept_account_plugins,
         } => {
             let mut cfg = AppConfig::new(
                 host,
@@ -215,6 +224,7 @@ async fn main() -> Result<()> {
             cfg.claude_idle_secs = claude_idle_secs;
             cfg.cursor_bin = cursor_bin;
             cfg.cursor_max_runs = cursor_max_runs;
+            cfg.cursor_accept_account_plugins = cursor_accept_account_plugins;
             server::run(cfg).await
         }
         Commands::Doctor {

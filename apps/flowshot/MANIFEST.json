@@ -217,7 +217,7 @@
     },
     {
       "path": "docs/tasks/BOARD.md",
-      "sha256": "7473fcf5f292898c7e2e71f34c83161d290d08d69e15959a55d5d44cfb72ad82",
+      "sha256": "94198baad6207e6bdedb3e9fd4f14243036eecf6b40431204a512aa0a5918000",
       "bytes": 5800
     },
     {
@@ -422,8 +422,8 @@
     },
     {
       "path": "docs/tasks/N02/T08-security-and-performance-verification.md",
-      "sha256": "71a77449822dd759b8565dedcdac949b1955a96c4fe2b6598ed34762ff4df9b0",
-      "bytes": 2261
+      "sha256": "e4052dcb7716ade628b32af576e465b67bf55e36cbc86b120a4767846d33b58b",
+      "bytes": 2727
     },
     {
       "path": "docs/tasks/N02/T09-real-webview-smoke.md",
@@ -577,8 +577,8 @@
     },
     {
       "path": "docs/verification/N02.md",
-      "sha256": "b6715cd6a75551d45d3e03147c70e681950c5d107c52bc81b112a329eeb27d84",
-      "bytes": 11604
+      "sha256": "6a8a86f189c886c021413b2aa0447ad083f6f1373d4a6a524aeb594ffcdffcb3",
+      "bytes": 12834
     },
     {
       "path": "docs/verification/N03.md",

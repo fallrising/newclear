@@ -374,11 +374,24 @@ fn symlinks_unsupported_names_and_identity_bypasses_fail_closed() {
     fs::write(path.join(".git/secret.md"), b"builtin").unwrap();
     symlink(&outside, path.join("escape")).unwrap();
     symlink(outside.join("secret.md"), path.join("link.md")).unwrap();
-    fs::write(
-        path.join(std::ffi::OsString::from_vec(vec![0xff, b'.', b'm', b'd'])),
-        b"invalid name",
-    )
-    .unwrap();
+    let invalid_name = std::ffi::OsString::from_vec(vec![0xff, b'.', b'm', b'd']);
+    let expected_unsupported = match fs::write(path.join(&invalid_name), b"invalid name") {
+        Ok(()) => 1,
+        Err(error)
+            if cfg!(target_os = "macos")
+                && error.raw_os_error() == Some(rustix::io::Errno::ILSEQ.raw_os_error()) =>
+        {
+            // APFS can reject this name before the application can enumerate it.
+            assert!(
+                fs::read_dir(&path)
+                    .unwrap()
+                    .all(|entry| entry.unwrap().file_name() != invalid_name)
+            );
+            eprintln!("filesystem rejected invalid UTF-8 fixture with EILSEQ");
+            0
+        }
+        Err(error) => panic!("failed to create invalid-name fixture: {error}"),
+    };
     let state = directory();
     let db = DbRuntime::open(&state.join("db.sqlite3")).unwrap();
     let service = WorkspaceService::new(&db);
@@ -391,7 +404,7 @@ fn symlinks_unsupported_names_and_identity_bypasses_fail_closed() {
             limit: None,
         })
         .unwrap();
-    assert_eq!(page.unsupported_name_count, 1);
+    assert_eq!(page.unsupported_name_count, expected_unsupported);
     assert!(
         !page
             .entries

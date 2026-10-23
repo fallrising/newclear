@@ -39,3 +39,5 @@ Partial-publication follow-up: reproduce a symlinked system temporary directory 
 Clean-CI evidence setup: retain the failing benchmark run with a configured but absent evidence directory, then create that directory before writing its JSON. Keep the timing oracle and source behavior unchanged; rerun the same case and native checks.
 
 Remote Mac compile follow-up: Flowshot CI run39914744562 Apple Silicon job120285995009 rejects the test-only rustix mkfifoat call because rustix1.1.5 excludes Apple targets. Use the platform mkfifo utility to create the same real FIFO fixture on Unix; retain the unchanged UnsupportedMediaType assertion. Linux native tests and remote Mac CI must pass before merge.
+
+Mac filesystem follow-up: job120288336536 rejects creating the invalid UTF-8 filename with EILSEQ before the security assertions run. Accept only the exact macOS/EILSEQ fixture-creation rejection as a distinct filesystem outcome, require zero nonexistent unsupported entries there, and still execute all symlink/ignored-document/asset bypass assertions. Linux must continue creating the invalid filename and requiring skip count1; all other setup errors must fail.

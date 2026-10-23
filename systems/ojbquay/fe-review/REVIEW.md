@@ -18,9 +18,9 @@
 
 `console-web/vite.config.ts:6-11` 把 `/api` proxy 到 `localhost:8080`，沒有後端時頁面只剩錯誤狀態。`console-web/e2e/serve.mjs` 只是 `dist/` 靜態伺服器；假資料寫在 `console-web/e2e/golden-path.spec.ts` 的 `page.route` 內，只供該測試使用。完整 stack（`KEEP_STACK=1 make e2e`，十一服務）與真 stack 旅程 `pnpm e2e:stack` 已在 2026-10-22 實跑通過。
 
-### C2 Drawer 在平板寬度溢出
+### C2 Drawer 的窄螢幕寬度需實測
 
-Drawer 固定寬 720–900 px（例如 `pages/SubscriptionsPage.tsx:131` 的 900），`styles.css:443-445` 的 `max-width: 100%` 只在 576 px 以下生效，834 px 平板時 900／800 寬的 Drawer 超出視窗。
+Drawer 設定寬 720–900px（例如 `pages/SubscriptionsPage.tsx:131` 的 900），專案 `styles.css:443-445` 的 max-width 規則只在 576px 以下。834px 小於 900 但大於 800；須實測元件 computed style，不能只靠設定值宣稱所有 Drawer 已溢出。驗證與修整範圍見 DESIGN M3。
 
 ### C3 Dashboard 圖表只跟隨視窗縮放
 
@@ -31,7 +31,7 @@ Drawer 固定寬 720–900 px（例如 `pages/SubscriptionsPage.tsx:131` 的 900
 ### D1 第 3 輪的後端
 
 - 選項：(a) 寫一個實作 console 所需 `/api/v1` 端點的 mock 伺服器；(b) 用既有 Compose stack，empty／error 狀態以互動腳本的 `page.route` 覆寫。
-- 建議：(b)。stack 已能一鍵啟動並有真 stack 旅程；(a) 要另外維護一份與後端同步的假 API。
+- 建議：(b) 保留作整合來源，但先確認 DESIGN M1 的隔離方案。現有預設 project、published ports 與保留 stack 不滿足此 harness 的 loopback／所有權契約；歷史旅程通過不代表新環境已就緒。若需 Compose／後端修改，另立範圍。
 - 狀態：**待擁有者決定**。`DESIGN.md` 以 (b) 作為假設 A1。
 
 ## 進入第 2 輪的條件
@@ -43,4 +43,4 @@ Drawer 固定寬 720–900 px（例如 `pages/SubscriptionsPage.tsx:131` 的 900
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- 設計 PR（本次）：`DESIGN.md` 與本檔、`PROMPT.md`、`targets.json` 的修正。
+- [#550](https://github.com/fallrising/newclear/pull/550)：本次設計與複核修正；D1／AC-15 仍待確認，沒有執行 UI 或 stack。

@@ -15,7 +15,7 @@
 
 ## 啟動線索（未驗證）
 
-- 第 3 輪依 [DESIGN.md](DESIGN.md)「啟動方式」：`KEEP_STACK=1 make e2e` 起完整 stack，再以合成資料 seed。`pnpm dev` 沒有後端，`e2e/serve.mjs` 只是靜態伺服器，都不能提供資料。
+- 第 3 輪先滿足 [DESIGN.md](DESIGN.md) M1 的隔離與所有權契約；現有預設 Compose stack 不符合此 FE harness 的 loopback／獨立資源要求，不能直接啟動或清理。`pnpm dev` 沒有後端，`e2e/serve.mjs` 只是靜態伺服器；新 seed／login／states harness 尚待 D1 確認與實作。
 
 ## 主要流程
 

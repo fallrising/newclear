@@ -4,13 +4,13 @@
 
 ## 目標
 
-第 2 輪結束時，console 能在隔離的 Compose 網路內以合成資料啟動，`capture.mjs` 與互動腳本能擷取所有頁面與主要 drawer／精靈步驟；平板寬度不再水平溢出，Dashboard 圖表跟隨內容寬度縮放；axe 無 critical／serious。
+第 2 輪結束時，console 在符合共用 loopback 隔離規範的環境以合成資料接受檢查，涵蓋所有頁面與主要 drawer／精靈步驟；驗證並修整平板 Drawer 與圖表縮放、鍵盤及 axe 缺口。現有 Compose 啟動程序尚不滿足此隔離條件，不能直接當作已就緒 harness。
 
 ## 依據
 
 - REVIEW.md 已決定：休眠元件可在第 2 輪於本檔範圍內修改前端（PORTFOLIO「休眠」fe-review 例外）。
 - 假設（待擁有者在本 PR 確認）：
-  - **A1（D1）**：第 3 輪後端用既有 Compose stack（`KEEP_STACK=1 make e2e`），不另寫 mock 伺服器；empty／error 狀態用互動腳本內的 Playwright `page.route` 覆寫個別 API 回應。
+  - **A1（D1）**：保留真 JVM／Kafka stack 作整合來源的建議，但須先確認符合 PROTOCOL 的獨立隔離方案；不能直接採用預設 `KEEP_STACK=1 make e2e`。empty／error 狀態仍用測試瀏覽器 `page.route`，不冒充真整合。若隔離需要後端／Compose 變更，須另提範圍；本設計不授權該變更。
 - 相關規範：
   - [AGENTS.md](../AGENTS.md)：不記錄 payload、credential；不改對外 API。
   - [SDD](../SDD.md) AC-10：console 核心操作；真 stack 旅程 `console-web/e2e-stack/golden-path.stack.spec.ts`，mock journey 不冒充真端到端。
@@ -30,13 +30,14 @@
 - 現況：
   - `targets.json` 指向 `pnpm dev`（5173）；`console-web/vite.config.ts:6-11` 把 `/api` proxy 到 `localhost:8080`，沒有後端時所有頁面只剩錯誤狀態。
   - `console-web/e2e/serve.mjs` 只是 `dist/` 靜態伺服器；假資料寫在 `console-web/e2e/golden-path.spec.ts` 的 `page.route` 內，`capture.mjs` 不能使用。
+  - `e2e/compose_full.sh:6` 預設共用 Compose project；`deploy/compose/docker-compose.yml:18,52,74,159` 的 published ports 未限制 host loopback。加入預設網路並用 `console-web:8080` 不等於 PROTOCOL 要求的同環境 loopback；保留的 stack 也可能含既有工作。
 - 修改（只在 `fe-review/` 內新增）：
-  - `fe-review/seed.sh`：對 `KEEP_STACK=1 make e2e` 留下的 stack 以 REST 建立合成資料：2 個 topic（含一個長名稱）、2 個 group、PUSH／PULL subscription、一筆指向不可達端點的 subscription 以產生 DLQ、一筆 delay。帳密只用 e2e 腳本的本機合成值。
-  - `fe-review/login.mjs`：以 admin 合成帳號登入，寫 `runs/<ts>/auth.storage.json`（git-ignored）。
-  - `targets.json`：`baseUrl` 改為 `http://console-web:8080`，`start` 移除（stack 由 `make e2e` 啟動），`storageState` 指向上述檔案。
-  - `capture.mjs` 在 `mcr.microsoft.com/playwright:v1.62.0-noble` 容器內執行，加入 Compose 網路 `ojbquay-e2e_default`；`npm i --no-save @axe-core/playwright` 於暫存目錄。
-- 驗證：`node docs/fe-review/capture.mjs systems/ojbquay/fe-review/targets.json --dry-run`；實跑一次，`capture.json` 每頁 HTTP 200、無 page error；完成後 `targets.json` 改 `verified: true`。
-- 風險與回滾：只新增 `fe-review/` 檔案與修改 `targets.json`，刪除即可回滾；stack 用完 `make e2e` 預設清理 volume。
+  - 先記錄並審閱隔離契約：每次新的 task 目錄、獨立 network namespace、無既有 volumes／帳號、唯一 project ID，瀏覽器與被測入口同環境且只用 loopback。啟動前核對解析後的 network／ports／mounts 與所有權；遇既存 project 或非 loopback 綁定即拒絕。無可行的現有注入方式時，回報耦合、另提必要部署修正，不在本任務直接改 Compose 或繞過規範。
+  - 隔離與 D1 確認後才實作 `fe-review/seed.sh`：對本次新建且已核對的 stack 用 REST 建立合成 topics、groups、PUSH／PULL subscription、delay；DLQ 使用本機受控失敗端點，不連外網。帳號、token 與 payload 當次產生，不沿用保留 stack。
+  - `fe-review/login.mjs` 只接受本次 loopback origin，用新合成帳號登入，狀態寫在本次忽略的 task 證據區。targets 的起動及 storageState 由已驗證 harness 設定，不先改成容器 DNS origin 或 verified。
+  - 擷取與互動腳本使用 repository 已鎖定的 Playwright；新建專用 `fe-review/playwright.config.ts` 指定此目錄的 states.spec.ts，不沿用只選 `console-web/e2e` 的設定。這些腳本和設定目前均不存在。
+- 驗證：先做 ownership／非 loopback／既有 project 的拒絕測試；實際隔離整合通過後，從 repository root 跑 `node docs/fe-review/capture.mjs systems/ojbquay/fe-review/targets.json --dry-run` 與擷取；HTTP、page error、真實登入／seed／主要流程都通過才更新 verified，不能只看頁面 200。
+- 風險與回滾：任何啟動失敗保留非秘密診斷。清理只處理本次記錄並重新核對 ID／label／volume 所有權的資源；禁止無條件對預設 project 執行 down／刪 volume。無法證明所有權就停止清理並記錄，不影響別人的保留 stack。文件／harness 可獨立回退，runtime 清理不能用刪檔冒充。
 
 ### M2 互動狀態擷取腳本
 - 對應：PROMPT「主要流程」、PROTOCOL 第 3 節「狀態」
@@ -45,11 +46,11 @@
 - 驗證：腳本在 M1 的環境內跑完，產生的截圖檔名列在 REPORT；`pnpm test`、`pnpm build` 不受影響（腳本不在 `src/`）。
 - 風險與回滾：只新增檔案；刪除即回滾。
 
-### M3 Drawer 在平板寬度溢出
+### M3 驗證並限制 Drawer 的窄螢幕寬度
 - 對應：C2
-- 現況：Drawer 寬度固定：DLQ `pages/SubscriptionsPage.tsx:131`（900）、Group `pages/GroupsPage.tsx:61`（800）、Topic `pages/TopicsPage.tsx:77` 與精靈 `pages/SubscriptionsPage.tsx:248`（720）。`styles.css:443-445` 的 `max-width: 100%` 只在 `max-width: 576px` 內，577–900 px（含 834 px 平板）時 900／800 寬的 Drawer 超出視窗。
+- 現況：Drawer 設定寬度為 DLQ `pages/SubscriptionsPage.tsx:131`（900）、Group `pages/GroupsPage.tsx:61`（800）、Topic `pages/TopicsPage.tsx:77` 與精靈 `pages/SubscriptionsPage.tsx:248`（720）。`styles.css:443-445` 的專案 max-width 規則只在 576px 以下；834px 小於 DLQ 的 900、但大於 Group 的 800。這是窄螢幕風險，Ant Design 最終 computed style 與實際溢出尚未驗證，不宣稱所有 Drawer 在平板都破版。
 - 修改：把 `.ant-drawer-content-wrapper { max-width: 100% !important; }` 移出 576 px media query，成為全域規則；Drawer 的 `width` 不變。
-- 驗證：`pnpm test`、`pnpm build`、`pnpm e2e`；M2 在 834 px 擷取 DLQ 與 group drawer 無水平溢出。
+- 驗證：先記錄原版 computed width、client/scroll width；只修確實違反上限的情況。`pnpm test`、`pnpm build`、`pnpm e2e`；M2 在 834px 及低於 800px 的中間寬度擷取 DLQ 與 group drawer，證明無水平溢出。
 - 風險與回滾：只放寬上限，桌面寬度行為不變；還原該段 CSS 即回滾。
 
 ### M4 Dashboard 圖表不跟隨內容寬度
@@ -61,26 +62,31 @@
 
 ## 啟動方式（第 2 輪要驗證的版本）
 
+**未執行、尚不具備一鍵啟動資格。** 先完成 M1 的隔離方案與 D1 確認；
+既有 `make e2e` 成功紀錄不能證明新 FE harness 的隔離／資源所有權。
+建置、快取與合成資料使用共用 launcher 的 task 目錄，不使用既有 stack 或資料庫。
+不得直接執行原先的預設 KEEP_STACK 程序，也不提供對預設 project 的清理命令。
+
+M1 完成後，在 repository root、同一受控瀏覽器環境中執行下列**後續候選**擷取程序：
+
 ```sh
-# systems/ojbquay（stack 在 Compose 自己的網路內）
-KEEP_STACK=1 make e2e
-fe-review/seed.sh
-# 在 playwright 容器內，加入 ojbquay-e2e_default 網路
-node fe-review/login.mjs
-node ../../docs/fe-review/capture.mjs systems/ojbquay/fe-review/targets.json
-npx playwright test fe-review/states.spec.ts
-# 結束
-docker compose -p ojbquay-e2e -f deploy/compose/docker-compose.yml --profile e2e down --volumes
+node docs/fe-review/capture.mjs systems/ojbquay/fe-review/targets.json --dry-run
+node docs/fe-review/capture.mjs systems/ojbquay/fe-review/targets.json
 ```
 
-帳號、topic token、payload 都是本次 stack 產生的合成資料；console-web 在網路內是 `console-web:8080`。第 2 輪驗證後同步到 `targets.json`。
+互動腳本則在 `systems/ojbquay/console-web` 使用已安裝且鎖定的依賴，
+候選命令為 `pnpm exec playwright test --config ../fe-review/playwright.config.ts`；
+專用 config／states.spec.ts 尚待實作，不可宣稱現有 e2e config 已包含它。
+targets ready 不代表後端、登入或合成資料就緒，這些須逐一證明。
+真 stack 旅程另記實際命令與同次來源；完成後的清理按 M1 的所有權收據執行。
 
 ## 第 3 輪驗收
 
 - 頁面與流程：`targets.json` 的 `/login`、`/dashboard`、`/topics`、`/groups`、`/subscriptions`、`/delay`、`/admin/clusters`、`/admin/audit`、`/admin/users`；M2 的 drawer、精靈與狀態；主要流程以 `pnpm e2e:stack` 走一次。
-- 通過條件：無 blocker／major；axe 無 critical／serious；desktop／tablet／mobile 無水平溢出；console 無 error；除登入錯誤密碼的預期 401 外無 4xx／5xx。
+- 通過條件：無 blocker／major；axe 無 critical／serious；desktop／tablet／mobile 無水平溢出；正常流程無非預期 console／request error。M2 注入的 401／500／查無 ID 必須逐項標示為負向測試，不能把正常流程的失敗列為例外。
 - 已知不在驗收範圍：dark mode（不存在）、Grafana／Prometheus 畫面、原生 Kafka 工具。
 
 ## 開放問題
 
-無。
+D1／A1 與 SDD AC-15 仍待 owner 確認。真 stack 的 loopback 隔離方案是進入第 2 輪的必要前提；
+若需部署注入，另外界定範圍，不把本次合併文件的授權當作後端修改或實機操作授權。

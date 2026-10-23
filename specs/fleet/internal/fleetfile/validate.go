@@ -164,7 +164,7 @@ func validateSpec(ve *Error, doc *Document, cfg Config) {
 
 func validateExpose(ve *Error, e *Expose) {
 	switch e.Mode {
-	case ModePublic, ModeAccess, ModePrivate:
+	case ModePublic, ModeAccess:
 	case "":
 		ve.add("spec.expose.mode", "required")
 	default:
@@ -249,15 +249,10 @@ func applyDefaults(doc *Document, cfg Config) {
 
 // DefaultHostname materializes a concrete FQDN.
 func DefaultHostname(name, mode string, cfg Config) string {
-	switch mode {
-	case ModePrivate:
-		return name + PrivateSuffix
-	default:
-		if cfg.BaseDomain == "" {
-			return ""
-		}
-		return name + "." + cfg.BaseDomain
+	if (mode != ModePublic && mode != ModeAccess) || cfg.BaseDomain == "" {
+		return ""
 	}
+	return name + "." + cfg.BaseDomain
 }
 
 func validateAfterDefaults(ve *Error, doc *Document, cfg Config) {
@@ -273,11 +268,6 @@ func validateAfterDefaults(ve *Error, doc *Document, cfg Config) {
 			ve.add("spec.expose.hostname", "hostname_required")
 		} else if !hostnameAllowed(host, cfg) {
 			ve.add("spec.expose.hostname", "hostname_not_allowed")
-		}
-	}
-	if mode == ModePrivate {
-		if host == "" || !strings.HasSuffix(strings.ToLower(host), PrivateSuffix) || inSuffixList(host, allowedSuffixes(cfg)) {
-			ve.add("spec.expose.hostname", "private_hostname_invalid")
 		}
 	}
 
@@ -308,20 +298,6 @@ func hostnameAllowed(host string, cfg Config) bool {
 	h := normalizeHostname(host)
 	for _, suf := range allowedSuffixes(cfg) {
 		s := strings.ToLower(strings.TrimPrefix(suf, "."))
-		if h == s || strings.HasSuffix(h, "."+s) {
-			return true
-		}
-	}
-	return false
-}
-
-func inSuffixList(host string, suffixes []string) bool {
-	h := normalizeHostname(host)
-	for _, suf := range suffixes {
-		s := strings.ToLower(strings.TrimPrefix(suf, "."))
-		if s == "" {
-			continue
-		}
 		if h == s || strings.HasSuffix(h, "."+s) {
 			return true
 		}

@@ -74,12 +74,12 @@ func (s *Store) InsertService(svc *model.Service) error {
 	_, err = tx.Exec(`INSERT INTO services(
 		name, description, labels_json, node_id, fleet_json, image, desired_state, expose_mode, hostname,
 		container_port, host_port, health_path, current_release_id, generation, force_recreate, compose_yaml, env_file, url,
-		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, cf_hostname_route_id, ingress_status, ingress_error, purge_volumes,
+		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, ingress_status, ingress_error, purge_volumes,
 		created_at, updated_at)
-	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+	VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		svc.Name, svc.Description, svc.LabelsJSON, svc.NodeID, svc.FleetJSON, svc.Image, svc.DesiredState, svc.ExposeMode, svc.Hostname,
 		svc.ContainerPort, svc.HostPort, svc.HealthPath, nullStr(svc.CurrentReleaseID), svc.Generation, boolToInt(svc.ForceRecreate),
-		svc.ComposeYAML, svc.EnvFile, svc.URL, svc.CFDNSRecordID, svc.CFAccessAppID, svc.CFAccessPolicyID, svc.CFHostnameRouteID,
+		svc.ComposeYAML, svc.EnvFile, svc.URL, svc.CFDNSRecordID, svc.CFAccessAppID, svc.CFAccessPolicyID,
 		svc.IngressStatus, svc.IngressError, boolToInt(svc.PurgeVolumes), svc.CreatedAt, svc.UpdatedAt)
 	if err != nil {
 		if isUnique(err) {
@@ -96,7 +96,7 @@ func (s *Store) InsertService(svc *model.Service) error {
 func (s *Store) GetService(name string) (*model.Service, error) {
 	row := s.DB.QueryRow(`SELECT name, description, labels_json, node_id, fleet_json, image, desired_state, expose_mode, hostname,
 		container_port, host_port, health_path, IFNULL(current_release_id,''), generation, force_recreate, compose_yaml, env_file, url,
-		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, cf_hostname_route_id, ingress_status, ingress_error, purge_volumes,
+		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, ingress_status, ingress_error, purge_volumes,
 		created_at, updated_at FROM services WHERE name = ?`, name)
 	return scanService(row)
 }
@@ -104,7 +104,7 @@ func (s *Store) GetService(name string) (*model.Service, error) {
 func (s *Store) ListServices() ([]model.Service, error) {
 	rows, err := s.DB.Query(`SELECT name, description, labels_json, node_id, fleet_json, image, desired_state, expose_mode, hostname,
 		container_port, host_port, health_path, IFNULL(current_release_id,''), generation, force_recreate, compose_yaml, env_file, url,
-		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, cf_hostname_route_id, ingress_status, ingress_error, purge_volumes,
+		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, ingress_status, ingress_error, purge_volumes,
 		created_at, updated_at FROM services ORDER BY name`)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func scanService(row scanner) (*model.Service, error) {
 	var fr, pv int
 	err := row.Scan(&svc.Name, &svc.Description, &svc.LabelsJSON, &svc.NodeID, &svc.FleetJSON, &svc.Image, &svc.DesiredState, &svc.ExposeMode, &svc.Hostname,
 		&svc.ContainerPort, &svc.HostPort, &svc.HealthPath, &svc.CurrentReleaseID, &svc.Generation, &fr, &svc.ComposeYAML, &svc.EnvFile, &svc.URL,
-		&svc.CFDNSRecordID, &svc.CFAccessAppID, &svc.CFAccessPolicyID, &svc.CFHostnameRouteID, &svc.IngressStatus, &svc.IngressError, &pv,
+		&svc.CFDNSRecordID, &svc.CFAccessAppID, &svc.CFAccessPolicyID, &svc.IngressStatus, &svc.IngressError, &pv,
 		&svc.CreatedAt, &svc.UpdatedAt)
 	if isNoRows(err) {
 		return nil, ErrNotFound
@@ -205,7 +205,7 @@ func (s *Store) MoveService(name, destNode string) error {
 	defer func() { _ = tx.Rollback() }()
 	svc, err := scanService(tx.QueryRow(`SELECT name, description, labels_json, node_id, fleet_json, image, desired_state, expose_mode, hostname,
 		container_port, host_port, health_path, IFNULL(current_release_id,''), generation, force_recreate, compose_yaml, env_file, url,
-		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, cf_hostname_route_id, ingress_status, ingress_error, purge_volumes,
+		cf_dns_record_id, cf_access_app_id, cf_access_policy_id, ingress_status, ingress_error, purge_volumes,
 		created_at, updated_at FROM services WHERE name = ?`, name))
 	if err != nil {
 		return err
@@ -340,9 +340,15 @@ func (s *Store) UpdateServiceSpec(svc *model.Service) error {
 	return s.BumpNodeGeneration(svc.NodeID)
 }
 
-func (s *Store) SetIngress(name, status, errMsg, dnsID, appID, polID, routeID string) error {
-	_, e := s.DB.Exec(`UPDATE services SET ingress_status = ?, ingress_error = ?, cf_dns_record_id = ?, cf_access_app_id = ?, cf_access_policy_id = ?, cf_hostname_route_id = ?, updated_at = ? WHERE name = ?`,
-		status, errMsg, dnsID, appID, polID, routeID, s.now(), name)
+// SetIngressStatus leaves IDs owned by the reconciler intact.
+func (s *Store) SetIngressStatus(name, status, errMsg string) error {
+	_, err := s.DB.Exec(`UPDATE services SET ingress_status = ?, ingress_error = ?, updated_at = ? WHERE name = ?`, status, errMsg, s.now(), name)
+	return err
+}
+
+func (s *Store) SetIngress(name, status, errMsg, dnsID, appID, polID string) error {
+	_, e := s.DB.Exec(`UPDATE services SET ingress_status = ?, ingress_error = ?, cf_dns_record_id = ?, cf_access_app_id = ?, cf_access_policy_id = ?, updated_at = ? WHERE name = ?`,
+		status, errMsg, dnsID, appID, polID, s.now(), name)
 	return e
 }
 

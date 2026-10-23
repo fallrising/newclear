@@ -13,7 +13,7 @@ import (
 
 func TestRenderFilesGolden(t *testing.T) {
 	_, this, _, _ := runtime.Caller(0)
-	p := filepath.Join(filepath.Dir(this), "..", "..", "examples", "private-files", "fleet.yaml")
+	p := filepath.Join(filepath.Dir(this), "..", "..", "examples", "access-files", "fleet.yaml")
 	doc, err := fleetfile.ParseFile(p)
 	if err != nil {
 		t.Fatal(err)

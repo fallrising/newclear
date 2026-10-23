@@ -4,18 +4,17 @@ import "context"
 
 // ServiceView is the catalog snapshot passed to Cloudflare reconcile.
 type ServiceView struct {
-	Name              string
-	NodeID            string
-	TunnelID          string
-	DesiredState      string
-	ExposeMode        string
-	Hostname          string
-	HostPort          int
-	ContainerPort     int
-	DNSRecordID       string
-	AccessAppID       string
-	AccessPolicyID    string
-	HostnameRouteID   string
+	Name           string
+	NodeID         string
+	TunnelID       string
+	DesiredState   string
+	ExposeMode     string
+	Hostname       string
+	HostPort       int
+	ContainerPort  int
+	DNSRecordID    string
+	AccessAppID    string
+	AccessPolicyID string
 }
 
 // Reconciler owns Cloudflare (or noop) mutations for tunnels and hostnames.

@@ -19,9 +19,6 @@ pub struct RefreshedTokens {
 
 /// True if access token should be refreshed (missing expiry, or within lead window).
 pub fn needs_refresh(conn: &ConnectionRow, lead_secs: i64) -> bool {
-    if crate::codex::borrowed_source(conn).is_some() {
-        return false;
-    }
     let Some(oauth) = &conn.oauth else {
         return false;
     };
@@ -65,12 +62,6 @@ fn refresh_lock(connection_id: &str) -> Arc<tokio::sync::Mutex<()>> {
 }
 
 pub async fn refresh_connection(store: &Store, conn: &ConnectionRow) -> AppResult<ConnectionRow> {
-    if crate::codex::borrowed_source(conn).is_some() {
-        return Err(AppError::BadRequest(format!(
-            "not refreshed: {}",
-            crate::codex::BORROWED_HINT
-        )));
-    }
     let lock = refresh_lock(&conn.id);
     let _guard = lock.lock().await;
     // Re-read under the lock: if another task already rotated the token, use its result.
@@ -97,7 +88,6 @@ pub async fn refresh_connection(store: &Store, conn: &ConnectionRow) -> AppResul
     info!(connection = %conn.name, provider, "refreshing oauth token");
 
     let tokens = match provider {
-        "codex" | "cx" | "openai_codex" => refresh_codex(refresh).await?,
         "siwc" => {
             let client_id = oauth
                 .meta
@@ -168,46 +158,6 @@ pub async fn ensure_fresh(store: &Store, conn: ConnectionRow) -> AppResult<Conne
             Ok(conn)
         }
     }
-}
-
-async fn refresh_codex(refresh_token: &str) -> AppResult<RefreshedTokens> {
-    #[derive(Deserialize)]
-    struct Tok {
-        access_token: String,
-        refresh_token: Option<String>,
-        expires_in: Option<i64>,
-    }
-    let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
-    let resp = client
-        .post("https://auth.openai.com/oauth/token")
-        .header("content-type", "application/json")
-        .header("accept", "application/json")
-        .json(&serde_json::json!({
-            "client_id": "app_EMoamEEZ73f0CkXaXp7hrann",
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-        }))
-        .send()
-        .await
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("codex refresh: {e}")))?;
-    if !resp.status().is_success() {
-        let t = resp.text().await.unwrap_or_default();
-        return Err(AppError::Upstream {
-            status: 401,
-            body: format!("codex refresh failed: {t}"),
-        });
-    }
-    let tok: Tok = resp
-        .json()
-        .await
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("codex refresh json: {e}")))?;
-    Ok(RefreshedTokens {
-        access_token: tok.access_token,
-        refresh_token: tok.refresh_token,
-        expires_at: tok
-            .expires_in
-            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
-    })
 }
 
 async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {

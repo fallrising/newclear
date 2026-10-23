@@ -73,12 +73,12 @@ Legend: ✅ done · 🟨 partial · ❌ not started · 🚫 deferred
 
 ### P0 — Unblock personal subscriptions
 
-1. [x] Registry: **codex, claude, cursor, grok, opencode, agy** (+ wishlist list in docs/PROVIDERS.md)
-2. [x] Active forward: codex / grok / opencode (format + headers); claude via the local Claude Code CLI
+1. [x] Registry: **siwc, claude, cursor, grok, opencode, agy** (+ wishlist list in docs/PROVIDERS.md)
+2. [x] Active forward: siwc / grok / opencode (format + headers); claude via the local Claude Code CLI
 3. [x] Partial: cursor / agy (import tokens; executor later)
-4. [x] Smoke: **codex / grok / opencode / agy OK**; claude depends on local credentials; cursor still 501
-5. [x] OAuth **refresh** for siwc / grok / agy (+ 401 retry); codex login borrowed from the Codex CLI, claude owned by Claude Code
-6. [x] `thinrouter import-local` (routes by default; `--refresh` opt-in, never for the borrowed Codex login)
+4. [x] Smoke: **grok / opencode / agy OK** (2026-07-28; codex since removed); claude depends on local credentials; cursor still 501
+5. [x] OAuth **refresh** for siwc / grok / agy (+ 401 retry); claude login owned by Claude Code
+6. [x] `thinrouter import-local` (routes by default; `--refresh` opt-in)
 7. [x] Antigravity `loadCodeAssist` + `generateContent` executor
 8. [x] Cursor OAuth **refresh** (`api2.cursor.sh/oauth/token`)
 9. [x] Claude subscription integration notes (`docs/CLAUDE_SUBSCRIPTION.md`)

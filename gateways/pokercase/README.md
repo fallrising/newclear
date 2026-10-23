@@ -20,7 +20,7 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 **In scope:** `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, routes + fallback/RR, **OAuth/session token import** (personal subscriptions), optional token-saver, web admin, TUI, SQLite.
 
 **Architecture:** Layer A = this gateway; Layer B = your multi-agent “team” apps calling only Layer A. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).  
-**Providers:** siwc (recommended for OpenAI models) · codex · claude · cursor · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)  
+**Providers:** siwc (OpenAI models) · claude · cursor · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)  
 **Claude 订阅原理：** [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md)
 
 **Out of scope (for now):** MITM, cloud sync, 9router.db compatibility, media APIs.
@@ -79,7 +79,7 @@ thinrouter serve --data-dir ./data --admin-token secret --secrets-key passphrase
 thinrouter doctor
 thinrouter tui
 # Import personal subscription tokens from local agent CLIs (creates rt-* routes;
-# add --refresh to refresh non-Codex tokens, --no-routes to skip routes):
+# add --refresh to refresh imported tokens, --no-routes to skip routes):
 thinrouter import-local
 thinrouter refresh
 # Official ChatGPT plan sharing (browser sign-in, loopback 127.0.0.1:1455):
@@ -96,7 +96,6 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_ALLOW_KEYLESS_BOOTSTRAP` / `--allow-keyless-bootstrap` | Explicit local bootstrap; default off, exact loopback listener, direct (non-forwarded) requests and zero total keys only |
 | `THINROUTER_SECRETS_KEY` / `--secrets-key` | Passphrase (Argon2id) for at-rest encryption; default: random `<data_dir>/secrets.key` |
 | `THINROUTER_PROVIDER_BASE_OVERRIDES` / `--provider-base-override` | Operator-only `provider=url` upstream base (mocks, egress proxies) |
-| `THINROUTER_CODEX_VERSION` / `--codex-version` | Codex CLI version in the upstream User-Agent; default: installed `codex --version`, else 0.136.0 |
 | `THINROUTER_CLAUDE_BIN` / `--claude-bin` | Claude Code CLI for the `claude` provider (default `claude` on PATH) |
 | `THINROUTER_CLAUDE_MAX_RUNS` / `--claude-max-runs` | Concurrent Claude Code processes (default 2) |
 | `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |

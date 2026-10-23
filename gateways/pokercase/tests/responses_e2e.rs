@@ -1,4 +1,4 @@
-//! Codex (Responses upstream) end-to-end tests through all three client surfaces.
+//! Responses-upstream (siwc) end-to-end tests through all three client surfaces.
 //! The upstream is a local scripted SSE server; no real credentials or providers.
 
 use std::sync::{Arc, Mutex};
@@ -23,9 +23,9 @@ fn sse(events: &[Value]) -> String {
         .collect()
 }
 
-/// Scripted Codex: tools + fresh turn → function call; tool output → answer using it;
+/// Scripted Responses upstream: tools + fresh turn → function call; tool output → answer using it;
 /// image → "saw image"; otherwise plain text. Always SSE, like the ChatGPT backend.
-async fn codex_mock(State(seen): State<Seen>, req: Request) -> Response {
+async fn responses_mock(State(seen): State<Seen>, req: Request) -> Response {
     let headers = req
         .headers()
         .iter()
@@ -97,7 +97,7 @@ async fn codex_mock(State(seen): State<Seen>, req: Request) -> Response {
     } else if has_image {
         events.extend(text_events("saw image"));
     } else {
-        events.extend(text_events("hello from codex"));
+        events.extend(text_events("hello from upstream"));
     }
     events.push(json!({"type": "response.completed", "response": {"id": "resp_abc", "model": "gpt-mock", "status": "completed", "output": [], "usage": usage}}));
 
@@ -118,16 +118,10 @@ struct Env {
 
 impl Env {
     async fn start() -> Self {
-        Self::start_with("codex").await
-    }
-
-    async fn start_with(provider: &str) -> Self {
-        Self::start_full(provider, json!({"account_id": "acct-1"})).await
-    }
-
-    async fn start_full(provider: &str, meta: Value) -> Self {
         let seen: Seen = Arc::default();
-        let app = Router::new().fallback(codex_mock).with_state(seen.clone());
+        let app = Router::new()
+            .fallback(responses_mock)
+            .with_state(seen.clone());
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let upstream = format!("http://{}", listener.local_addr().unwrap());
         tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
@@ -145,9 +139,7 @@ impl Env {
             "--data-dir",
             dir.path().to_str().unwrap(),
             "--provider-base-override",
-            &format!("codex={upstream},siwc={upstream}"),
-            "--codex-version",
-            "9.9.9-test",
+            &format!("siwc={upstream}"),
         ]);
         for name in [
             "THINROUTER_ADMIN_TOKEN",
@@ -159,7 +151,6 @@ impl Env {
             "http_proxy",
             "ALL_PROXY",
             "all_proxy",
-            "THINROUTER_CODEX_VERSION",
         ] {
             cmd.env_remove(name);
         }
@@ -197,13 +188,9 @@ impl Env {
         let r = post_admin(
             "/admin/api/connections/oauth/import",
             json!({
-                "name": "cx", "provider": provider, "access_token": "test-access",
-                "base_url": if provider == "siwc" {
-                    format!("{upstream}/v1")
-                } else {
-                    format!("{upstream}/backend-api/codex/responses")
-                },
-                "default_model": "gpt-mock", "meta": meta.to_string()
+                "name": "cx", "provider": "siwc", "access_token": "test-access",
+                "base_url": format!("{upstream}/v1"),
+                "default_model": "gpt-mock", "meta": "{\"client_id\":\"oaiapp_test\"}"
             }),
         )
         .await
@@ -297,7 +284,7 @@ fn weather_tool_chat() -> Value {
 }
 
 #[tokio::test]
-async fn chat_completions_over_codex() {
+async fn chat_completions_over_responses_upstream() {
     let env = Env::start().await;
 
     // Non-stream text: upstream forced to stream, then reassembled.
@@ -308,7 +295,7 @@ async fn chat_completions_over_codex() {
         )
         .await;
     let v: Value = r.json().await.unwrap();
-    assert_eq!(v["choices"][0]["message"]["content"], "hello from codex");
+    assert_eq!(v["choices"][0]["message"]["content"], "hello from upstream");
     assert_eq!(v["choices"][0]["finish_reason"], "stop");
     assert_eq!(v["usage"]["prompt_tokens"], 11);
     let up = env.upstream_body();
@@ -320,18 +307,13 @@ async fn chat_completions_over_codex() {
         env.upstream_header("authorization").as_deref(),
         Some("Bearer test-access")
     );
-    assert_eq!(
-        env.upstream_header("chatgpt-account-id").as_deref(),
-        Some("acct-1")
-    );
-    assert_eq!(
-        env.upstream_header("user-agent").as_deref(),
-        Some("codex_cli_rs/9.9.9-test")
-    );
-    assert_eq!(
-        env.upstream_header("originator").as_deref(),
-        Some("codex_cli_rs")
-    );
+    // No Codex client impersonation headers on the official API.
+    assert!(!env
+        .upstream_header("user-agent")
+        .unwrap_or_default()
+        .starts_with("codex_cli_rs"));
+    assert!(env.upstream_header("originator").is_none());
+    assert!(env.upstream_header("chatgpt-account-id").is_none());
     let first_key = up["prompt_cache_key"].as_str().unwrap().to_string();
     assert_eq!(
         env.upstream_header("session-id").as_deref(),
@@ -362,7 +344,7 @@ async fn chat_completions_over_codex() {
         .iter()
         .filter_map(|c| c["choices"][0]["delta"]["content"].as_str())
         .collect();
-    assert_eq!(text, "hello from codex");
+    assert_eq!(text, "hello from upstream");
     assert_eq!(objs.last().unwrap()["choices"][0]["finish_reason"], "stop");
     assert!(
         !chunks.iter().any(|c| c.get("type").is_some()),
@@ -379,8 +361,9 @@ async fn chat_completions_over_codex() {
         .await;
     let chunks = sse_data(&r.text().await.unwrap());
     let up = env.upstream_body();
-    assert_eq!(up["tools"][0]["name"], "get_weather");
-    assert_eq!(up["tools"][0]["type"], "function");
+    assert_eq!(up["tools"][0]["type"], "namespace");
+    assert_eq!(up["tools"][0]["tools"][0]["name"], "get_weather");
+    assert_eq!(up["tools"][0]["tools"][0]["type"], "function");
     let calls: Vec<&Value> = chunks
         .iter()
         .filter_map(|c| c.pointer("/choices/0/delta/tool_calls/0"))
@@ -479,7 +462,7 @@ async fn chat_completions_over_codex() {
 }
 
 #[tokio::test]
-async fn anthropic_messages_over_codex() {
+async fn anthropic_messages_over_responses_upstream() {
     let env = Env::start().await;
     let tools = json!([{"name": "get_weather", "description": "weather", "input_schema": {"type": "object", "properties": {"city": {"type": "string"}}}}]);
 
@@ -508,7 +491,7 @@ async fn anthropic_messages_over_codex() {
         .iter()
         .filter_map(|(_, d)| d.pointer("/delta/text").and_then(|t| t.as_str()))
         .collect();
-    assert_eq!(text, "hello from codex");
+    assert_eq!(text, "hello from upstream");
     assert_eq!(events[5].1["delta"]["stop_reason"], "end_turn");
 
     // Stream tool_use.
@@ -602,7 +585,7 @@ async fn anthropic_messages_over_codex() {
 }
 
 #[tokio::test]
-async fn responses_api_is_forwarded_natively_to_codex() {
+async fn responses_api_is_forwarded_natively() {
     let env = Env::start().await;
     let tools =
         json!([{"type": "function", "name": "get_weather", "parameters": {"type": "object"}}]);
@@ -620,7 +603,10 @@ async fn responses_api_is_forwarded_natively_to_codex() {
     assert!(types.contains(&"response.output_item.done"));
     assert_eq!(*types.last().unwrap(), "response.completed");
     let up = env.upstream_body();
-    assert_eq!(up["tools"], tools);
+    assert_eq!(
+        up["tools"][0]["tools"], tools,
+        "function tools grouped in a namespace"
+    );
     assert_eq!(up["store"], false);
     assert!(up.get("max_output_tokens").is_none());
     assert_eq!(up["input"][0]["content"][0]["text"], "weather?");
@@ -680,7 +666,7 @@ async fn responses_api_is_forwarded_natively_to_codex() {
 
 #[tokio::test]
 async fn siwc_provider_applies_preview_limits() {
-    let env = Env::start_with("siwc").await;
+    let env = Env::start().await;
 
     // Chat with tools: forced stream, store:false, fields dropped, tools in a namespace.
     let r = env
@@ -702,11 +688,6 @@ async fn siwc_provider_applies_preview_limits() {
     assert_eq!(up["instructions"], "be brief");
     assert_eq!(up["tools"][0]["type"], "namespace");
     assert_eq!(up["tools"][0]["tools"][0]["name"], "get_weather");
-    assert!(!env
-        .upstream_header("user-agent")
-        .unwrap_or_default()
-        .starts_with("codex_cli_rs"));
-    assert!(env.upstream_header("originator").is_none());
     let key = up["prompt_cache_key"].as_str().unwrap().to_string();
     assert_eq!(
         env.upstream_header("session-id").as_deref(),
@@ -769,50 +750,4 @@ async fn siwc_provider_applies_preview_limits() {
         .iter()
         .any(|c| c["error"]["code"] == "subscription_sharing_usage_limit_exceeded"));
     assert_eq!(chunks.last().unwrap(), "[DONE]");
-}
-
-#[tokio::test]
-async fn borrowed_codex_login_is_reread_and_never_refreshed() {
-    let auth_dir = tempfile::tempdir().unwrap();
-    let auth = auth_dir.path().join("auth.json");
-    let write = |token: &str| {
-        std::fs::write(
-            &auth,
-            json!({"tokens": {"access_token": token, "account_id": "acct-file"}}).to_string(),
-        )
-        .unwrap()
-    };
-    write("fresh-1");
-    let env = Env::start_full("codex", json!({"source": auth.to_str().unwrap()})).await;
-    let chat = json!({"model": "cx", "messages": [{"role": "user", "content": "hi"}]});
-
-    env.post("/v1/chat/completions", chat.clone()).await;
-    assert_eq!(
-        env.upstream_header("authorization").as_deref(),
-        Some("Bearer fresh-1")
-    );
-    assert_eq!(
-        env.upstream_header("chatgpt-account-id").as_deref(),
-        Some("acct-file")
-    );
-
-    // The Codex CLI refreshed its file: the next call picks it up without a restart.
-    write("fresh-2");
-    env.post("/v1/chat/completions", chat.clone()).await;
-    assert_eq!(
-        env.upstream_header("authorization").as_deref(),
-        Some("Bearer fresh-2")
-    );
-
-    // Expired and not refreshed by the CLI: clear 401, no refresh attempt.
-    write("expired");
-    let r = env
-        .client
-        .post(format!("{}/v1/chat/completions", env.base))
-        .json(&chat)
-        .send()
-        .await
-        .unwrap();
-    assert_eq!(r.status(), 401);
-    assert!(r.text().await.unwrap().contains("codex login"));
 }

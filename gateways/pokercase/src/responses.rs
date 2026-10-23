@@ -175,7 +175,7 @@ pub fn chat_to_responses_request(body: &Bytes) -> AppResult<Bytes> {
     if let Some(s) = obj.get("stream") {
         o.insert("stream".into(), s.clone());
     }
-    // ChatGPT Codex rejects max_output_tokens / temperature, so they are not forwarded.
+    // Sampling limits are not forwarded: subscription Responses upstreams reject them.
     if let Some(tools) = obj.get("tools").and_then(|t| t.as_array()) {
         o.insert("tools".into(), Value::Array(chat_tools_to_responses(tools)));
     }
@@ -201,7 +201,6 @@ pub fn prepare_native_request(
     body: &Bytes,
     upstream_model: &str,
     force_stream: bool,
-    codex: bool,
 ) -> AppResult<Bytes> {
     let mut obj = parse_object(body)?;
     obj.insert("model".into(), Value::String(upstream_model.to_string()));
@@ -214,13 +213,6 @@ pub fn prepare_native_request(
     }
     if force_stream {
         obj.insert("stream".into(), Value::Bool(true));
-    }
-    if codex {
-        // ChatGPT backend: stateless only, and these sampling fields are rejected.
-        obj.insert("store".into(), Value::Bool(false));
-        for k in ["max_output_tokens", "temperature", "top_p"] {
-            obj.remove(k);
-        }
     }
     Ok(Bytes::from(serde_json::to_vec(&obj)?))
 }

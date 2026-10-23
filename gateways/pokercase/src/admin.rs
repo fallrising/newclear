@@ -457,7 +457,7 @@ async fn usage_export_csv(
 #[derive(Debug, Deserialize)]
 pub struct OAuthImportInput {
     pub name: String,
-    /// Provider id: codex | claude | github_copilot | cursor | kiro | generic
+    /// Provider id: siwc | claude | grok | cursor | opencode | agy | generic
     pub provider: String,
     pub access_token: String,
     pub refresh_token: Option<String>,

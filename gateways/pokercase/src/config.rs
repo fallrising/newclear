@@ -37,6 +37,8 @@ pub struct AppConfig {
     pub cursor_bin: Option<String>,
     /// Concurrent Cursor Agent processes.
     pub cursor_max_runs: usize,
+    /// Operator accepted cursor-agent's access to the account's Cursor plugins.
+    pub cursor_accept_account_plugins: bool,
 }
 
 impl AppConfig {
@@ -81,6 +83,7 @@ impl AppConfig {
             claude_idle_secs: 600,
             cursor_bin: None,
             cursor_max_runs: 2,
+            cursor_accept_account_plugins: false,
         })
     }
 

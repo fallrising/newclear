@@ -49,6 +49,10 @@ struct Env {
 
 impl Env {
     async fn start() -> Self {
+        Self::start_with(&["--cursor-accept-account-plugins"]).await
+    }
+
+    async fn start_with(extra: &[&str]) -> Self {
         let bin_dir = tempfile::tempdir().unwrap();
         let bin = bin_dir.path().join("cursor-agent");
         std::fs::write(&bin, FAKE_CURSOR).unwrap();
@@ -68,6 +72,7 @@ impl Env {
                 "--cursor-bin",
                 bin.to_str().unwrap(),
             ])
+            .args(extra)
             .env_remove("THINROUTER_ADMIN_TOKEN")
             .env_remove("THINROUTER_SECRETS_KEY")
             .env("CURSOR_API_ENDPOINT", "http://evil.example")
@@ -267,4 +272,22 @@ async fn cursor_refuses_what_the_cli_cannot_take() {
         .await;
     assert_eq!(r.status(), 401);
     assert!(r.text().await.unwrap().contains("not logged in"));
+}
+
+#[tokio::test]
+async fn cursor_is_off_until_the_operator_accepts_account_plugins() {
+    let env = Env::start_with(&[]).await;
+    let r = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model": "cu", "messages": [{"role": "user", "content": "hi"}]}),
+        )
+        .await;
+    assert_eq!(r.status(), 503);
+    let body = r.text().await.unwrap();
+    assert!(body.contains("--cursor-accept-account-plugins"), "{body}");
+    assert!(
+        !env.bin_dir.path().join("args.json").exists(),
+        "cursor-agent never started"
+    );
 }

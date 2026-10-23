@@ -8,7 +8,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `claude` | `cc`, `anthropic`, `claude_code` | **active** (text, images, client tools via MCP) | local Claude Code CLI (`claude -p`), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
-| `cursor` | `cu`, `cursor_agent` | **active** (text only) | local Cursor Agent CLI (`cursor-agent -p`, read-only) | `local://cursor-agent` |
+| `cursor` | `cu`, `cursor_agent` | **opt-in** (`--cursor-accept-account-plugins`; text only) | local Cursor Agent CLI (`cursor-agent -p`, read-only) | `local://cursor-agent` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
 | `agy` | `ag`, `antigravity` | **active** | Antigravity generateContent | `https://cloudcode-pa.googleapis.com` |
@@ -147,6 +147,20 @@ Automated for **siwc**, grok connections imported by hand with a refresh token, 
 export THINROUTER_AGY_CLIENT_ID='…'
 export THINROUTER_AGY_CLIENT_SECRET='…'
 ```
+
+**cursor and account plugins.** Probed with cursor-agent 2026.10.16 (2026-10-23): in
+`-p --mode ask --sandbox enabled` the agent's tool catalog still lists the Cursor
+account's plugins (Gmail, X) and they need no approval, and `cursor-agent plugin` only
+manages marketplaces. A client prompt can therefore make the agent read plugin data, so
+the provider refuses requests (503) unless the operator passes
+`--cursor-accept-account-plugins`.
+
+**cursor and MCP (for client tools, not built yet).** A workspace `.cursor/mcp.json`
+server is "not loaded (needs approval)" without `--approve-mcps`; with it, the agent
+first looks up the schema (`getMcpToolsToolCall`), then calls `mcpToolCall` with
+`name: "<server>-<tool>"`, and the server receives a plain MCP `tools/call` with the
+original tool name and waits for its answer — the same shape as the Claude Code bridge.
+`--approve-mcps` approves every configured MCP server, not just one.
 
 **cursor** needs no refresh: `cursor-agent` keeps its own login (`cursor-agent login`); thinrouter holds no Cursor token and stored ones are cleared on database open.
 

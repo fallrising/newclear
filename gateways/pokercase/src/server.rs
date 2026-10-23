@@ -97,7 +97,8 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
                 cfg.cursor_bin.clone(),
                 &cfg.data_dir,
                 cfg.cursor_max_runs,
-            ),
+            )
+            .accept_account_plugins(cfg.cursor_accept_account_plugins),
         },
         sessions: Sessions::default(),
     };

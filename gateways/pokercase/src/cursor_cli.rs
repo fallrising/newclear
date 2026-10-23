@@ -7,6 +7,11 @@
 //! empty workspace, and never `--force` or `--approve-mcps`. The caller's system prompt
 //! goes into the prompt inside `<external_system_instructions>`, as for Claude Code.
 //!
+//! Cursor account plugins (for example Gmail) stay callable by the agent in ask mode and
+//! cannot be turned off from the CLI (verified with cursor-agent 2026.10.16): a client
+//! that can send a prompt can make the agent read them. The provider is therefore off
+//! unless the operator passes `--cursor-accept-account-plugins`.
+//!
 //! The CLI takes the prompt as a command-line argument (text only): requests with images
 //! or client tools are refused with a retryable 501 so a route can fall back.
 //! Output follows <https://cursor.com/docs/cli/reference/output-format> (stream-json with
@@ -40,7 +45,14 @@ pub struct CursorCli {
     /// Empty workspace runs are confined to.
     pub work_dir: PathBuf,
     runs: Arc<Semaphore>,
+    /// Operator accepted that the agent can use the account's Cursor plugins.
+    pub enabled: bool,
 }
+
+pub const DISABLED_MSG: &str = "the cursor provider is off: cursor-agent can use your Cursor \
+account plugins (e.g. Gmail) even in read-only ask mode, so any client could read that data \
+through a prompt. Start thinrouter with --cursor-accept-account-plugins to accept this, or \
+disconnect those plugins in Cursor first.";
 
 impl CursorCli {
     pub fn new(bin: Option<String>, data_dir: &std::path::Path, max_runs: usize) -> Self {
@@ -50,7 +62,13 @@ impl CursorCli {
                 .unwrap_or_else(|| "cursor-agent".into()),
             work_dir: data_dir.join("cursor-work"),
             runs: Arc::new(Semaphore::new(max_runs.max(1))),
+            enabled: false,
         }
+    }
+
+    pub fn accept_account_plugins(mut self, yes: bool) -> Self {
+        self.enabled = yes;
+        self
     }
 }
 
@@ -202,6 +220,9 @@ pub async fn start(
         body,
         retryable,
     };
+    if !cc.enabled {
+        return Err(fail(503, DISABLED_MSG.into(), true));
+    }
     let prompt = render(chat).map_err(|m| fail(501, m.into(), true))?;
     if prompt.len() > MAX_PROMPT_BYTES {
         return Err(fail(

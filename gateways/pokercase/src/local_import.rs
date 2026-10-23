@@ -175,48 +175,34 @@ fn import_grok(store: &Store, make_routes: bool) -> ImportResult {
     )
 }
 
+/// Cursor needs no token import: the local Cursor Agent CLI answers with its own login.
 fn import_cursor(store: &Store, make_routes: bool) -> ImportResult {
-    let path = home().join(".config/cursor/auth.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "cursor".into(),
-                name: "local-cursor".into(),
-                ok: false,
-                detail: format!("missing {}: {e}", path.display()),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "cursor".into(),
-                name: "local-cursor".into(),
-                ok: false,
-                detail: format!("parse: {e}"),
-            };
-        }
-    };
-    let access = v.get("accessToken").and_then(|t| t.as_str()).unwrap_or("");
-    let refresh = v.get("refreshToken").and_then(|t| t.as_str());
-    if access.is_empty() {
+    let bin = std::env::var("THINROUTER_CURSOR_BIN").unwrap_or_else(|_| "cursor-agent".into());
+    let found = std::process::Command::new(&bin)
+        .arg("--version")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success());
+    if !found {
         return ImportResult {
             provider: "cursor".into(),
             name: "local-cursor".into(),
             ok: false,
-            detail: "no accessToken".into(),
+            detail: format!(
+                "Cursor Agent CLI `{bin}` not found; install it and run `cursor-agent login`"
+            ),
         };
     }
     upsert(
         store,
         "local-cursor",
         "cursor",
-        access,
-        refresh,
+        "",
         None,
-        Some(r#"{"source":"~/.config/cursor/auth.json"}"#),
+        None,
+        Some(r#"{"source":"cursor-agent-cli"}"#),
         Some("default"),
         make_routes,
     )

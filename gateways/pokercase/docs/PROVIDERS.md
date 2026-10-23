@@ -8,7 +8,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `claude` | `cc`, `anthropic`, `claude_code` | **active** (text, images, client tools via MCP) | local Claude Code CLI (`claude -p`), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
-| `cursor` | `cu` | **active** | AgentService HTTP/2 Connect+proto (text) | `https://agent.api5.cursor.sh` |
+| `cursor` | `cu`, `cursor_agent` | **active** (text only) | local Cursor Agent CLI (`cursor-agent -p`, read-only) | `local://cursor-agent` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
 | `agy` | `ag`, `antigravity` | **active** | Antigravity generateContent | `https://cloudcode-pa.googleapis.com` |
@@ -16,7 +16,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 **Status meaning**
 
 - **active** — import tokens + forward with format conversion (chat ↔ responses / anthropic).
-- **partial** — store OAuth/session tokens; full wire protocol (Cursor protobuf, Antigravity Gemini envelope) is **not** built yet. Use when you need them as a *project* and we implement the executor.
+- **partial** — store OAuth/session tokens; full wire protocol is **not** built yet. Use when you need them as a *project* and we implement the executor.
 
 ### Import
 
@@ -111,7 +111,8 @@ When you need one of these: open an item, implement `ProviderProfile` + forward 
 | siwc / grok | `/v1/responses` → forwarded natively (all items kept; siwc applies its preview limits above). `/v1/chat/completions` and `/v1/messages` → converted to a **Responses** body (tools, `tool_calls` ↔ `function_call`, tool results ↔ `function_call_output`, images ↔ `input_image`); the Responses SSE is converted back to `chat.completion.chunk` or Anthropic events (text and tool calls) |
 | claude | Every client protocol → one prompt for the local `claude -p` (caller system in `<external_system_instructions>`); its stream events → client protocol |
 | opencode | Chat Completions passthrough (+ `x-opencode-client`); `/v1/responses` clients get a full Responses event stream (message and `function_call` items, usage) converted from the chat chunks |
-| cursor / agy | Import only until executors land |
+| cursor | Every client protocol → one text prompt (caller system in `<external_system_instructions>`) for `cursor-agent -p --output-format stream-json --stream-partial-output --mode ask --sandbox enabled --trust --workspace <empty dir>`; never `--force` / `--approve-mcps`. Only streaming deltas are used (duplicate flushes skipped); output is converted to the client protocol. Tools and images → 501 (retryable). The prompt is a command-line argument: at most 128 KiB, and visible to other local users in `ps`. |
+| agy | Antigravity `generateContent` envelope |
 
 ### siwc prompt cache
 
@@ -147,8 +148,7 @@ export THINROUTER_AGY_CLIENT_ID='…'
 export THINROUTER_AGY_CLIENT_SECRET='…'
 ```
 
-**cursor** refresh: `POST https://api2.cursor.sh/oauth/token`.  
-**cursor** chat: AgentService `/agent.v1.AgentService/Run` over HTTP/2 (text-only; tools not supported).
+**cursor** needs no refresh: `cursor-agent` keeps its own login (`cursor-agent login`); thinrouter holds no Cursor token and stored ones are cleared on database open.
 
 ### Local import
 
@@ -162,7 +162,7 @@ Reads:
 |----------|------|
 | claude | nothing read: creates the connection when the `claude` CLI is installed |
 | grok | `~/.grok/auth.json` |
-| cursor | `~/.config/cursor/auth.json` |
+| cursor | nothing read: creates the connection when the `cursor-agent` CLI is installed |
 | opencode | free (no file) |
 | agy | `~/.gemini/antigravity-cli/antigravity-oauth-token` |
 

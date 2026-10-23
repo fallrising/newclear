@@ -93,6 +93,11 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
             )
             .with_idle(std::time::Duration::from_secs(cfg.claude_idle_secs.max(1)))
             .with_store(store.clone()),
+            cursor_cli: crate::cursor_cli::CursorCli::new(
+                cfg.cursor_bin.clone(),
+                &cfg.data_dir,
+                cfg.cursor_max_runs,
+            ),
         },
         sessions: Sessions::default(),
     };

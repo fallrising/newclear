@@ -91,13 +91,24 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
                 &cfg.data_dir,
                 cfg.claude_max_runs,
             )
-            .with_idle(std::time::Duration::from_secs(cfg.claude_idle_secs.max(1))),
+            .with_idle(std::time::Duration::from_secs(cfg.claude_idle_secs.max(1)))
+            .with_store(store.clone()),
         },
         sessions: Sessions::default(),
     };
 
     let state_callback_base = state.proxy.claude_code.callback_base.clone();
     let claude_runs = state.proxy.claude_code.clone();
+    claude_runs.sweep_sessions(true);
+    {
+        let runs = claude_runs.clone();
+        tokio::spawn(async move {
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(600)).await;
+                runs.sweep_sessions(false);
+            }
+        });
+    }
     let app = build_app(state);
 
     info!(%addr, data_dir = %cfg.data_dir.display(), "thinrouter listening");
@@ -132,6 +143,22 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
 }
 
 async fn shutdown_signal() {
+    // Ctrl-C, or SIGTERM from systemd / docker stop.
+    #[cfg(unix)]
+    {
+        let mut term =
+            tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()).ok();
+        tokio::select! {
+            _ = tokio::signal::ctrl_c() => {}
+            _ = async {
+                match term.as_mut() {
+                    Some(t) => { t.recv().await; }
+                    None => std::future::pending::<()>().await,
+                }
+            } => {}
+        }
+    }
+    #[cfg(not(unix))]
     let _ = tokio::signal::ctrl_c().await;
     info!("shutdown signal received");
 }

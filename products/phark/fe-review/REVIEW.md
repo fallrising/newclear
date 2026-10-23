@@ -45,4 +45,4 @@
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- issue [#155](https://github.com/fallrising/newclear/issues/155)：本次設計工作；分支 `fe-review/design-phark`，PR 尚未建立，由 parent 處理，不虛構 PR 編號。
+- [#552](https://github.com/fallrising/newclear/pull/552)：本次 issue #155 設計草稿；D1 與 AC-15 仍待確認。

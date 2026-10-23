@@ -42,10 +42,10 @@ func TestAdmission_MigrationPreservesV1AndRejectsUnknownSchema(t *testing.T) {
 			case "unknown-newer":
 				// A newer binary may legitimately append history and advance state.
 				// No immutable row or trigger is modified to produce this Red.
-				migrationExec(t, db, "INSERT INTO schema_migrations VALUES (3,?,?)", domain.HashString("synthetic newer binary").String(), fixedClockTime.UnixNano()+1)
-				migrationExec(t, db, "UPDATE instance_state SET schema_version=3 WHERE id=1")
+				migrationExec(t, db, "INSERT INTO schema_migrations VALUES (5,?,?)", domain.HashString("synthetic newer binary").String(), fixedClockTime.UnixNano()+1)
+				migrationExec(t, db, "UPDATE instance_state SET schema_version=5 WHERE id=1")
 			case "state-mismatch":
-				migrationExec(t, db, "UPDATE instance_state SET schema_version=3 WHERE id=1")
+				migrationExec(t, db, "UPDATE instance_state SET schema_version=5 WHERE id=1")
 			case "state-missing":
 				migrationExec(t, db, "DELETE FROM instance_state WHERE id=1")
 			}
@@ -268,17 +268,17 @@ func TestMigrationRunner_AtomicUpgradeRollbackAndRestart(t *testing.T) {
 					}
 				}
 				before := migrationLogicalSnapshot(t, db)
-				registry := append(compiledMigrations(), migrationTestStep(3, "CREATE TABLE earlier_probe(value INTEGER); INSERT INTO earlier_probe VALUES(17)"))
+				registry := append(compiledMigrations(), migrationTestStep(5, "CREATE TABLE earlier_probe(value INTEGER); INSERT INTO earlier_probe VALUES(17)"))
 				statement := "CREATE TABLE later_probe(value INTEGER); "
 				switch failure {
 				case "sql":
 					statement += "INSERT INTO missing_table VALUES(1)"
 				case "history":
-					statement += "INSERT INTO schema_migrations VALUES(4,'synthetic conflicting history',43)"
+					statement += "INSERT INTO schema_migrations VALUES(6,'synthetic conflicting history',43)"
 				case "state":
 					statement += "DROP TABLE instance_state"
 				}
-				registry = append(registry, migrationTestStep(4, statement))
+				registry = append(registry, migrationTestStep(6, statement))
 				if err := migrationRun(t, db, t.Context(), registry, 43); err == nil {
 					t.Fatal("failing upgrade accepted")
 				}
@@ -293,7 +293,7 @@ func TestMigrationRunner_AtomicUpgradeRollbackAndRestart(t *testing.T) {
 					t.Fatal(err)
 				}
 				baseline := migrationLogicalSnapshot(t, db)
-				registry[3] = migrationTestStep(4, "CREATE TABLE later_probe(value INTEGER); INSERT INTO later_probe VALUES(23)")
+				registry[5] = migrationTestStep(6, "CREATE TABLE later_probe(value INTEGER); INSERT INTO later_probe VALUES(23)")
 				if err := migrationRun(t, db, t.Context(), registry, 44); err != nil {
 					t.Fatal(err)
 				}
@@ -311,7 +311,7 @@ func TestMigrationRunner_AtomicUpgradeRollbackAndRestart(t *testing.T) {
 				if err := db.QueryRowContext(t.Context(), "SELECT value FROM later_probe").Scan(&later); err != nil {
 					t.Fatal(err)
 				}
-				if count != 4 || version != 4 || earlier != 17 || later != 23 {
+				if count != 6 || version != 6 || earlier != 17 || later != 23 {
 					t.Fatalf("incomplete ordered batch: %d %d %d %d", count, version, earlier, later)
 				}
 				if err := db.QueryRowContext(t.Context(), "SELECT applied_at_ns FROM schema_migrations WHERE version=1").Scan(&v1Time); err != nil {
@@ -337,7 +337,7 @@ func TestMigrationRunner_AtomicUpgradeRollbackAndRestart(t *testing.T) {
 					}
 				}
 				if err == nil {
-					t.Fatal("production V2 accepted synthetic future schema")
+					t.Fatal("production V4 accepted synthetic future schema")
 				}
 				if migrationLogicalSnapshot(t, db) != after {
 					t.Fatal("production rejection mutated future database")
@@ -398,7 +398,7 @@ func TestMigrationRunner_ConcurrentStartup(t *testing.T) {
 			if err := db.QueryRowContext(t.Context(), "SELECT schema_version FROM instance_state WHERE id=1").Scan(&version); err != nil {
 				t.Fatal(err)
 			}
-			if count != 2 || version != 2 {
+			if count != 4 || version != 4 {
 				t.Fatalf("startup did not converge: %d %d", count, version)
 			}
 			store, err := migrationOpen(t.Context(), root, path)
@@ -439,7 +439,7 @@ func TestMigrationRunner_CancellationReleasesWriter(t *testing.T) {
 				}
 			}
 			before := migrationLogicalSnapshot(t, db)
-			registry := append(compiledMigrations(), migrationTestStep(3, "CREATE TABLE cancellation_probe(value INTEGER); INSERT INTO cancellation_probe VALUES(1); SELECT "+name+"(); INSERT INTO cancellation_probe VALUES(2)"))
+			registry := append(compiledMigrations(), migrationTestStep(5, "CREATE TABLE cancellation_probe(value INTEGER); INSERT INTO cancellation_probe VALUES(1); SELECT "+name+"(); INSERT INTO cancellation_probe VALUES(2)"))
 			err := migrationRun(t, db, ctx, registry, 43)
 			if !called.Load() || !errors.Is(err, context.Canceled) {
 				t.Fatalf("DDL cancellation not observed: called=%t err=%v", called.Load(), err)

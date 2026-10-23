@@ -4,8 +4,8 @@ purpose: 以可追溯工作圖與證據關卡控制人機軟體交付
 kind: application
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-21
-source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
+reviewed: 2026-10-23
+source_commit: b7f2a4311d1135977ba273efba8e77702b908036
 ---
 
 # HAI Taskboard 成功契約
@@ -23,12 +23,12 @@ Board/SSE 是 projection；WorkItem、Run、Candidate、Review、Evidence、Appr
 
 ## 驗收條件
 
-下表 `historical` 是既有報告的結果，沒有在 2026-10-21 重跑。
+歷史報告仍保留；下表的本次通過只涵蓋有新證據的條件。
 `pending` 保留缺少證據或尚未實作的條件；程式存在不等於通過。
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
 | --- | --- | --- | --- |
-| AC-01 | Given 有效 application command 與持久 SQLite，When response-loss/retry/restart，Then 同一命令結果可重放且不重複啟動 Fake | historical | [交接](docs/HANDOFF.md)、[traceability](docs/traceability.md)：有界 command/Fake/persistence 接受 |
+| AC-01 | Given 有效 application command 與持久 SQLite，When response-loss/retry/restart，Then 同一命令結果可重放且不重複啟動 Fake | passed | 2026-10-23 pinned full/race 重跑既有 Fake/replay oracles；新增 durable proposal 與真實雙 process replay 通過，T-982/T-985 獨立審查，詳見 [traceability](docs/traceability.md) |
 | AC-02 | Given exact candidate 與政策／AC revision，When 嘗試完成工作，Then 缺失、過期或不獨立的證據不能產生 Done | pending | [traceability](docs/traceability.md)：完整 HAI-DONE-001..004 仍 NotRun，部分 kernel 通過不等於總 gate |
 | AC-03 | Given operator 使用 board/detail/attention，When 遭遇斷線、拒絕與狀態變動，Then UI 可操作並從權威狀態恢復 | pending | [traceability](docs/traceability.md)：HAI-UX 全組及完整 UI acceptance 尚缺 |
 | AC-04 | Given 備份、proposal import 與依賴圖變更，When 還原並接續，Then accepted binding、reconciliation 與 ContextPack 可完整恢復 | pending | [traceability](docs/traceability.md)：backup/restore、durable activation 與 full ops group 未完 |
@@ -40,7 +40,16 @@ Domain kernel、SQLite、HTTP/SSE、Fake vertical 與 local bootstrap 有獨立�
 Runnable loopback runtime 不是完整圖形工作管理產品。
 真 agent integration 是刻意不在 P0-A，不列作本輪產品缺陷或要求開啟。
 
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
+Owner 已啟用 START_DEVELOPMENT_PROMPT；本次恢復 P0-A 主線實作，原 AC 不縮小。
+目前任務與依賴順序見 [BOARD](docs/tasks/BOARD.md)。Durable proposal、首次接受 HTTP、
+current-input 儲存、Ready／派工、current-subject／Done 服務層、Run 產出關聯儲存及
+專案列表 API 已局部驗收。Connected UI 的 reset/session 競態已修正並經獨立審查；
+登入、明確接受規格、派工 Fake、回應遺失復原與斷線重連已跑過真實 Chromium。
+Run 產出 consumer、六個完成／取消 HTTP 操作與 completion preparation 已局部驗收，
+整合 Go full/race/vet/build、API lint 與基礎瀏覽器流程重跑均通過。完整 candidate/review/evidence/QA/Done UI、detail/attention/impact
+與 activation/restore 尚未完成；局部通過不直接把整組 AC 改成通過。
+驗證計畫：具體行為 Red/Green、Go full/race/vet/build、既有 web gates、
+產品操作／重連／還原流程及獨立審查；命令及失敗原因保留於本次證據。
 歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
 
 ## 啟動與驗證

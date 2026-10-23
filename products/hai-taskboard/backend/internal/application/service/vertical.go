@@ -68,10 +68,55 @@ func (service *Service) ClaimDispatch(ctx context.Context, principal domain.Acto
 		return port.ExecutorEnvelope{}, errors.New("clock returned zero time")
 	}
 	var envelope port.ExecutorEnvelope
+	stale := false
+	var beforeInputDigest domain.Digest
 	var committed *port.CommittedProjection
 	err := service.unit.Within(ctx, func(tx port.Transaction) error {
 		authority, err := authorityTransaction(tx)
 		if err != nil {
+			return err
+		}
+		before, err := authority.LoadRunAuthority(ctx, request.ProjectID, request.RunID)
+		if err != nil {
+			return err
+		}
+		if before.RestoreGeneration != request.ExpectedRestoreGeneration {
+			return port.ErrFenceRejected
+		}
+		if before.Run.DispatchState != "Pending" || before.Run.DesiredAction != "Dispatch" || before.Run.ReconciliationState != "None" || before.Outbox.State != "Pending" {
+			return port.ErrNoPendingDispatch
+		}
+		inputTx, err := currentInputTransaction(tx)
+		if err != nil {
+			return err
+		}
+		stored, err := inputTx.LoadRunInput(ctx, request.ProjectID, request.RunID)
+		if errors.Is(err, port.ErrNotFound) {
+			return port.ErrNoPendingDispatch
+		} // Legacy history is not reclassified.
+		if err != nil {
+			return err
+		}
+		item, err := tx.LoadWorkItem(ctx, request.ProjectID, before.Run.WorkItemID)
+		if err != nil {
+			return err
+		}
+		current, err := service.currentRunInput(ctx, tx, item, before.Run.ScenarioID)
+		if err != nil && !isCurrentInputRejection(err) {
+			return err
+		}
+		if err != nil || !stored.Input.SupportsExecutor(service.executorDeclaration) || !stored.Input.SemanticallyEqual(current) {
+			pending, ok := tx.(port.PendingInputTransaction)
+			if !ok {
+				return errors.New("pending input transaction unavailable")
+			}
+			after, err := pending.MarkPendingInputStale(ctx, port.PendingInputStaleRequest{ProjectID: request.ProjectID, RunID: request.RunID, InputDigest: before.Run.InputDigest, RestoreGeneration: request.ExpectedRestoreGeneration})
+			if err != nil {
+				return err
+			}
+			committed, err = service.appendRuntimeAudit(ctx, tx, principal, before.Outbox.CommandID, "PendingInputStale", after, true, now)
+			stale = err == nil
+			beforeInputDigest = before.Run.InputDigest
 			return err
 		}
 		envelope, err = authority.ClaimPendingRun(ctx, port.RunClaimRequest{
@@ -97,6 +142,9 @@ func (service *Service) ClaimDispatch(ctx context.Context, principal domain.Acto
 		return port.ExecutorEnvelope{}, err
 	}
 	service.publishRuntimeProjection(ctx, committed)
+	if stale {
+		return port.ExecutorEnvelope{}, port.StaleRunInputError{ProjectID: request.ProjectID, RunID: request.RunID, InputDigest: beforeInputDigest}
+	}
 	return envelope.Clone(), nil
 }
 
@@ -173,6 +221,24 @@ func (service *Service) PublishRunObservation(ctx context.Context, principal dom
 			_, err = service.appendRuntimeAudit(ctx, tx, principal, before.Outbox.CommandID, "RejectRunPublication", before, false, now)
 			return err
 		}
+		// Exact terminal retries retain the original immutable association. A legacy
+		// terminal Run without that association cannot acquire one by inference.
+		if artifact != nil && before.Run.ObservedState == "Succeeded" && before.Run.ReconciliationState == "None" && before.Run.SideEffectOutcome == "Confirmed" {
+			outputTx, ok := tx.(port.RunOutputTransaction)
+			if !ok {
+				return errors.New("Run output transaction unavailable")
+			}
+			outputs, err := outputTx.LoadRunOutputs(ctx, before.Run.ProjectID, before.Run.ID)
+			if err != nil {
+				return err
+			}
+			exact := port.RunOutput{ProjectID: observation.Fence.ProjectID, RunID: observation.Fence.RunID, InputDigest: observation.Fence.InputDigest, ArtifactDigest: artifact.Digest, LeaseEpoch: observation.Fence.Epoch, RestoreGeneration: observation.Fence.RestoreGeneration, Artifact: *artifact}
+			if !slices.Contains(outputs, exact) {
+				return port.ErrRunLifecycle
+			}
+			result = before
+			return nil
+		}
 		publication, err := service.publicationFor(before, observation)
 		if err != nil {
 			rejected = err
@@ -181,11 +247,8 @@ func (service *Service) PublishRunObservation(ctx context.Context, principal dom
 		}
 		result, err = authorityTx.ApplyRunPublication(ctx, publication)
 		if err != nil {
-			if errors.Is(err, port.ErrFenceRejected) || errors.Is(err, port.ErrRunLifecycle) {
-				rejected = err
-				_, auditErr := service.appendRuntimeAudit(ctx, tx, principal, before.Outbox.CommandID, "RejectRunPublication", before, false, now)
-				return auditErr
-			}
+			// An adapter may fail after writing. Preserve rollback for every
+			// application error; the read-only guards above audit rejections.
 			return err
 		}
 		if artifact != nil {
@@ -199,6 +262,13 @@ func (service *Service) PublishRunObservation(ctx context.Context, principal dom
 				return loadErr
 			case stored != *artifact:
 				return domain.StorageCorruptionError{Reason: "artifact metadata conflicts with sealed object"}
+			}
+			outputs, ok := tx.(port.RunOutputTransaction)
+			if !ok {
+				return errors.New("Run output transaction unavailable")
+			}
+			if err := outputs.StoreRunOutput(ctx, port.RunOutputWrite{Fence: observation.Fence, ArtifactDigest: artifact.Digest, PublishedAtNS: now.UnixNano()}); err != nil {
+				return err
 			}
 		}
 		if observation.Kind == ObservationCancelAcknowledged {
@@ -332,9 +402,22 @@ func (service *Service) SubmitCandidate(ctx context.Context, principal domain.Ac
 	if replayed, found, err := service.replayBeforeExternalIO(ctx, principal, value.Metadata, command.SubmitCandidateOperation, value.ProjectID, digest); found {
 		return replayed, err
 	}
+	snapshot, err := service.candidateSnapshot(ctx, value.ProjectID, value.WorkItemID, value.RunID, value.Candidate.Artifacts)
+	if err != nil {
+		return service.commandFailure(value.Metadata, err)
+	}
+	if !slices.ContainsFunc(value.Candidate.Artifacts, func(a command.ArtifactLocator) bool { return a.Digest == value.Candidate.Digest }) {
+		return service.commandFailure(value.Metadata, port.ErrRunLifecycle)
+	}
 	verificationErr := service.verifyArtifacts(ctx, value.Candidate.Artifacts)
 	return service.execute(ctx, principal, value.Metadata, command.SubmitCandidateOperation, value.ProjectID, request, digest,
-		func(ctx context.Context, tx port.Transaction, now time.Time) (mutation, error) {
+		func(ctx context.Context, tx port.Transaction, now time.Time) (change mutation, applyErr error) {
+			mutated := false
+			defer func() {
+				if mutated && applyErr != nil {
+					applyErr = rollbackMutationError{applyErr}
+				}
+			}()
 			if verificationErr != nil {
 				return mutation{}, verificationErr
 			}
@@ -357,26 +440,31 @@ func (service *Service) SubmitCandidate(ctx context.Context, principal domain.Ac
 				run.Run.ReconciliationState != "None" || run.Run.SideEffectOutcome != "Confirmed" || value.Candidate.InputSubjectDigest != run.Run.InputDigest {
 				return mutation{}, port.ErrRunLifecycle
 			}
+			_, identity, err := service.verifyCurrentRunInput(ctx, tx, item, run.Run)
+			if err != nil {
+				return mutation{}, err
+			}
+			if identity != snapshot.Identity || item.Version() != snapshot.Version || item.Phase() != snapshot.Phase || run != snapshot.Run {
+				return mutation{}, staleCurrentInput(nil)
+			}
+			outputs, err := verifiedRunOutputs(ctx, tx, run, value.Candidate.Artifacts)
+			if errors.Is(err, port.ErrRunLifecycle) {
+				return mutation{}, staleCurrentInput(err)
+			}
+			if err != nil {
+				return mutation{}, err
+			}
+			if !slices.Equal(outputs, snapshot.Outputs) {
+				return mutation{}, staleCurrentInput(nil)
+			}
 			candidateArtifact := false
 			for _, artifact := range value.Candidate.Artifacts {
-				if artifact.Availability != "Present" {
-					return mutation{}, command.NewError(command.CodeLifecycleRejected, "candidate artifact is unavailable", false, nil, nil)
-				}
-				stored, err := authorityTx.LoadArtifact(ctx, artifact.Digest)
-				switch {
-				case errors.Is(err, port.ErrNotFound):
-					err = tx.StoreArtifact(ctx, port.Artifact{Digest: artifact.Digest, MediaType: artifact.MediaType, ByteLength: artifact.ByteLength, StorageKey: artifactStorageKey(artifact.Digest), Availability: artifact.Availability})
-				case err == nil && (stored.MediaType != artifact.MediaType || stored.ByteLength != artifact.ByteLength || stored.StorageKey != artifactStorageKey(artifact.Digest) || stored.Availability != artifact.Availability):
-					err = domain.StorageCorruptionError{Reason: "artifact metadata conflicts with immutable digest"}
-				}
-				if err != nil {
-					return mutation{}, err
-				}
 				candidateArtifact = candidateArtifact || artifact.Digest == value.Candidate.Digest
 			}
 			if !candidateArtifact {
 				return mutation{}, command.NewError(command.CodeLifecycleRejected, "candidate digest is not present in its artifact manifest", false, nil, nil)
 			}
+			mutated = true
 			if err := tx.StoreCandidate(ctx, port.Candidate{ID: value.Candidate.ID, ProjectID: value.ProjectID, RunID: value.RunID, Digest: value.Candidate.Digest, InputSubjectDigest: value.Candidate.InputSubjectDigest, CreatedAtNS: now.UnixNano()}); err != nil {
 				return mutation{}, err
 			}
@@ -389,6 +477,7 @@ func (service *Service) SubmitCandidate(ctx context.Context, principal domain.Ac
 			if err != nil {
 				return mutation{}, err
 			}
+			mutated = true
 			if err := tx.UpdateWorkItem(ctx, next, value.ExpectedVersion); err != nil {
 				return mutation{}, err
 			}
@@ -403,7 +492,13 @@ func (service *Service) PublishFixtureReview(ctx context.Context, principal doma
 		return failureOutcome(value.Metadata, invalidRequest(err))
 	}
 	return service.execute(ctx, principal, value.Metadata, command.PublishReviewOperation, value.ProjectID, request, digest,
-		func(ctx context.Context, tx port.Transaction, now time.Time) (mutation, error) {
+		func(ctx context.Context, tx port.Transaction, now time.Time) (change mutation, applyErr error) {
+			mutated := false
+			defer func() {
+				if mutated && applyErr != nil {
+					applyErr = rollbackMutationError{applyErr}
+				}
+			}()
 			authorityTx, err := authorityTransaction(tx)
 			if err != nil {
 				return mutation{}, err
@@ -425,6 +520,7 @@ func (service *Service) PublishFixtureReview(ctx context.Context, principal doma
 			if verdict == "ChangesRequested" {
 				verdict = "Rejected"
 			}
+			mutated = true
 			if err := tx.StoreReview(ctx, port.Review{ID: value.Review.ID, ProjectID: value.ProjectID, SubjectDigest: subject.Digest(), Verdict: verdict, Reviewer: principal, Independent: true, CreatedAtNS: now.UnixNano()}); err != nil {
 				return mutation{}, err
 			}
@@ -441,9 +537,19 @@ func (service *Service) PublishFixtureEvidence(ctx context.Context, principal do
 	if replayed, found, err := service.replayBeforeExternalIO(ctx, principal, value.Metadata, command.PublishEvidenceOperation, value.ProjectID, digest); found {
 		return replayed, err
 	}
+	snapshot, snapshotIdentity, snapshotArtifacts, err := service.evidenceSnapshot(ctx, value.ProjectID, value.RunID, value.Evidence.SubjectDigest, value.Evidence.Report)
+	if err != nil {
+		return service.commandFailure(value.Metadata, err)
+	}
 	verificationErr := service.verifyArtifacts(ctx, []command.ArtifactLocator{value.Evidence.Report})
 	return service.execute(ctx, principal, value.Metadata, command.PublishEvidenceOperation, value.ProjectID, request, digest,
-		func(ctx context.Context, tx port.Transaction, _ time.Time) (mutation, error) {
+		func(ctx context.Context, tx port.Transaction, _ time.Time) (change mutation, applyErr error) {
+			mutated := false
+			defer func() {
+				if mutated && applyErr != nil {
+					applyErr = rollbackMutationError{applyErr}
+				}
+			}()
 			if verificationErr != nil {
 				return mutation{}, verificationErr
 			}
@@ -461,6 +567,13 @@ func (service *Service) PublishFixtureEvidence(ctx context.Context, principal do
 			if value.LeaseEpoch != run.Lease.Fence.Epoch || value.RestoreGeneration != run.RestoreGeneration {
 				return mutation{}, port.FenceRejection{Reason: "fixture evidence fence is stale"}
 			}
+			_, identity, err := service.verifyCurrentRunInput(ctx, tx, material.WorkItem, run.Run)
+			if err != nil {
+				return mutation{}, err
+			}
+			if identity != snapshotIdentity || !sameCompletionMaterial(snapshot, material) {
+				return mutation{}, staleCurrentInput(nil)
+			}
 			rule, required := service.config.Completion.Checks[value.Evidence.ACID]
 			if !required || value.Evidence.VerifierID != principal || principal == run.Lease.Fence.Holder || value.Evidence.VerifierClass == "producer" ||
 				value.Evidence.VerifierClass != rule.VerifierClass || value.Evidence.RecipeDigest != service.config.Completion.RecipeDigest ||
@@ -475,8 +588,15 @@ func (service *Service) PublishFixtureEvidence(ctx context.Context, principal do
 				return mutation{}, command.NewError(command.CodeLifecycleRejected, "evidence does not satisfy the current subject", false, nil, nil)
 			}
 			stored, err := authorityTx.LoadArtifact(ctx, value.Evidence.Report.Digest)
+			if err != nil && !errors.Is(err, port.ErrNotFound) {
+				return mutation{}, err
+			}
+			if !samePublicationArtifact(snapshotArtifacts[0], stored, err) {
+				return mutation{}, staleCurrentInput(nil)
+			}
 			switch {
 			case errors.Is(err, port.ErrNotFound):
+				mutated = true
 				err = tx.StoreArtifact(ctx, port.Artifact{Digest: value.Evidence.Report.Digest, MediaType: value.Evidence.Report.MediaType, ByteLength: value.Evidence.Report.ByteLength, StorageKey: artifactStorageKey(value.Evidence.Report.Digest), Availability: "Present"})
 			case err == nil && (stored.MediaType != value.Evidence.Report.MediaType || stored.ByteLength != value.Evidence.Report.ByteLength || stored.StorageKey != artifactStorageKey(value.Evidence.Report.Digest) || stored.Availability != "Present"):
 				err = domain.StorageCorruptionError{Reason: "evidence artifact conflicts with immutable digest"}
@@ -484,6 +604,7 @@ func (service *Service) PublishFixtureEvidence(ctx context.Context, principal do
 			if err != nil {
 				return mutation{}, err
 			}
+			mutated = true
 			if err := tx.StoreEvidence(ctx, port.Evidence{ID: value.Evidence.ID, ProjectID: value.ProjectID, SubjectDigest: subject.Digest(), ACID: value.Evidence.ACID, ACRevisionDigest: value.Evidence.ACRevisionDigest, Verdict: "Passed", Applicability: "Current", Availability: "Present", VerifierClass: value.Evidence.VerifierClass, VerifierActor: principal, VerifierRole: value.Evidence.VerifierClass, RecipeDigest: value.Evidence.RecipeDigest, EnvironmentDigest: value.Evidence.EnvironmentDigest, ArtifactDigest: value.Evidence.Report.Digest}); err != nil {
 				return mutation{}, err
 			}
@@ -498,12 +619,18 @@ func (service *Service) ApproveSubject(ctx context.Context, principal domain.Act
 		return failureOutcome(value.Metadata, invalidRequest(err))
 	}
 	return service.execute(ctx, principal, value.Metadata, command.ApproveSubjectOperation, value.ProjectID, request, digest,
-		func(ctx context.Context, tx port.Transaction, now time.Time) (mutation, error) {
+		func(ctx context.Context, tx port.Transaction, now time.Time) (change mutation, applyErr error) {
+			mutated := false
+			defer func() {
+				if mutated && applyErr != nil {
+					applyErr = rollbackMutationError{applyErr}
+				}
+			}()
 			authorityTx, err := authorityTransaction(tx)
 			if err != nil {
 				return mutation{}, err
 			}
-			completionMaterial, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{
+			completionMaterial, _, err := service.currentCompletionMaterial(ctx, tx, port.CompletionMaterialQuery{
 				ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, CandidateID: value.CandidateID,
 				SubjectDigest: value.SubjectDigest,
 			})
@@ -531,6 +658,7 @@ func (service *Service) ApproveSubject(ctx context.Context, principal domain.Act
 			if !approvedReview || value.Decision != "Approved" {
 				return mutation{}, command.NewError(command.CodeLifecycleRejected, "subject is not approved for completion", false, nil, nil)
 			}
+			mutated = true
 			if err := tx.StoreApproval(ctx, port.Approval{ID: domain.ApprovalID(value.RequestID), ProjectID: value.ProjectID, SubjectDigest: value.SubjectDigest, CommandKind: string(domain.CommandCompleteWorkItem), Actor: principal, ExpiresAtNS: now.Add(service.config.IdempotencyTTL).UnixNano()}); err != nil {
 				return mutation{}, err
 			}
@@ -548,12 +676,18 @@ func (service *Service) RequestQA(ctx context.Context, principal domain.ActorID,
 		return failureOutcome(value.Metadata, invalidRequest(err))
 	}
 	return service.execute(ctx, principal, value.Metadata, command.RequestQAOperation, value.ProjectID, request, digest,
-		func(ctx context.Context, tx port.Transaction, _ time.Time) (mutation, error) {
+		func(ctx context.Context, tx port.Transaction, _ time.Time) (change mutation, applyErr error) {
+			mutated := false
+			defer func() {
+				if mutated && applyErr != nil {
+					applyErr = rollbackMutationError{applyErr}
+				}
+			}()
 			authorityTx, err := authorityTransaction(tx)
 			if err != nil {
 				return mutation{}, err
 			}
-			material, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, CandidateID: value.CandidateID, SubjectDigest: value.SubjectDigest})
+			material, _, err := service.currentCompletionMaterial(ctx, tx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, CandidateID: value.CandidateID, SubjectDigest: value.SubjectDigest})
 			if err != nil {
 				return mutation{}, err
 			}
@@ -573,6 +707,7 @@ func (service *Service) RequestQA(ctx context.Context, principal domain.ActorID,
 			if err != nil {
 				return mutation{}, err
 			}
+			mutated = true
 			if err := tx.UpdateWorkItem(ctx, next, value.ExpectedVersion); err != nil {
 				return mutation{}, err
 			}
@@ -766,7 +901,7 @@ func (service *Service) preparationForRun(ctx context.Context, tx port.Authority
 	if err != nil {
 		return port.RunAuthority{}, port.CompletionMaterial{}, domain.CompletionSubject{}, err
 	}
-	material, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{ProjectID: projectID, WorkItemID: run.Run.WorkItemID, RunID: runID, SubjectDigest: requested})
+	material, _, err := service.currentCompletionMaterial(ctx, tx, port.CompletionMaterialQuery{ProjectID: projectID, WorkItemID: run.Run.WorkItemID, RunID: runID, SubjectDigest: requested})
 	if err != nil {
 		return port.RunAuthority{}, port.CompletionMaterial{}, domain.CompletionSubject{}, err
 	}
@@ -778,6 +913,11 @@ func (service *Service) preparationForRun(ctx context.Context, tx port.Authority
 }
 
 func preparationSubject(material port.CompletionMaterial, policy CompletionPolicy) (domain.CompletionSubject, error) {
+	if !material.CandidatePresent || !material.RunPresent || material.ActiveOrUnknownRun ||
+		(material.WorkItem.Phase() != domain.PhaseReview && material.WorkItem.Phase() != domain.PhaseQA) ||
+		material.Run.ObservedState != "Succeeded" || material.Run.ReconciliationState != "None" || material.Run.SideEffectOutcome != "Confirmed" {
+		return domain.CompletionSubject{}, port.ErrRunLifecycle
+	}
 	version := material.WorkItem.Version()
 	if material.WorkItem.Phase() == domain.PhaseReview {
 		version++

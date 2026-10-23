@@ -61,10 +61,14 @@ func NewServer(commands CommandService, results CommandResultSource, projections
 	}
 	server := &Server{commands: commands, results: results, projections: projections, authority: authority, hub: hub, config: config}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/projects", server.getProjects)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}", server.getProject)
 	mux.HandleFunc("POST /api/v1/projects", server.createProject)
 	mux.HandleFunc("POST /api/v1/projects/{project_id}/commands", server.submitCommand)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/commands/{command_id}", server.getCommandResult)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/board", server.getBoard)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/repository-bindings/{binding_id}", server.getRepositoryBinding)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/proposals/{proposal_digest}/initial-acceptance", server.getInitialAcceptance)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/events", server.streamEvents)
 	mux.HandleFunc("/", server.notFound)
 	server.mux = mux
@@ -124,6 +128,18 @@ func (server *Server) submitCommand(response http.ResponseWriter, request *http.
 	var outcome command.Outcome
 	var err error
 	switch command.Operation(envelope.Operation) {
+	case command.AcceptInitialSpecificationOperation:
+		var handled bool
+		outcome, err, handled = server.acceptInitialSpecification(response, request, session, projectID, metadata, envelope.Payload)
+		if !handled {
+			return
+		}
+	case command.ProposeSpecificationOperation:
+		var handled bool
+		outcome, err, handled = server.proposeSpecification(response, request, session, projectID, metadata, envelope.Payload)
+		if !handled {
+			return
+		}
 	case command.CreateWorkItemOperation:
 		var payload createWorkItemPayload
 		if !decodePayload(response, envelope.Payload, &payload) {
@@ -134,6 +150,9 @@ func (server *Server) submitCommand(response http.ResponseWriter, request *http.
 			return
 		}
 		revisions, valid := decodeRevisions(payload.RequiredACRevisions)
+		if payload.RequiredACRevisions != nil && len(payload.RequiredACRevisions) == 0 {
+			revisions, valid = []command.ACRevision{}, true
+		}
 		if !valid {
 			writeAPIError(response, http.StatusBadRequest, command.CodeInvalidRequest, "request body is invalid")
 			return
@@ -159,6 +178,42 @@ func (server *Server) submitCommand(response http.ResponseWriter, request *http.
 			return
 		}
 		outcome, err = server.commands.DispatchRun(request.Context(), session.Principal, command.DispatchRun{Metadata: metadata, ProjectID: projectID, WorkItemID: domain.WorkItemID(payload.WorkItemID), AdapterID: payload.AdapterID, ScenarioID: payload.ScenarioID, RetryOfRunID: domain.RunID(payload.RetryOfRunID)})
+	case command.SubmitCandidateOperation:
+		var handled bool
+		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.SubmitCandidateOperation, envelope.Payload)
+		if !handled {
+			return
+		}
+	case command.PublishReviewOperation:
+		var handled bool
+		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.PublishReviewOperation, envelope.Payload)
+		if !handled {
+			return
+		}
+	case command.PublishEvidenceOperation:
+		var handled bool
+		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.PublishEvidenceOperation, envelope.Payload)
+		if !handled {
+			return
+		}
+	case command.ApproveSubjectOperation:
+		var handled bool
+		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.ApproveSubjectOperation, envelope.Payload)
+		if !handled {
+			return
+		}
+	case command.RequestQAOperation:
+		var handled bool
+		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.RequestQAOperation, envelope.Payload)
+		if !handled {
+			return
+		}
+	case command.RequestCancelOperation:
+		var handled bool
+		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.RequestCancelOperation, envelope.Payload)
+		if !handled {
+			return
+		}
 	case command.CompleteWorkItemOperation:
 		var payload completeWorkItemPayload
 		if !decodePayload(response, envelope.Payload, &payload) {
@@ -514,7 +569,7 @@ func decodeRevisions(source []acRevisionWire) ([]command.ACRevision, bool) {
 }
 
 func (wire completionSubjectWire) domainValue() (domain.CompletionSubject, error) {
-	if !projectPattern.MatchString(wire.ProjectID) || !workPattern.MatchString(wire.WorkItemID) || !runPattern.MatchString(wire.RunID) || wire.WorkItemVersion == 0 || !validWireText(wire.CandidateID, 1, 80) {
+	if !projectPattern.MatchString(wire.ProjectID) || !workPattern.MatchString(wire.WorkItemID) || !runPattern.MatchString(wire.RunID) || wire.WorkItemVersion == 0 || wire.WorkItemVersion >= 1<<63-1 || len(wire.RequiredACRevisions) == 0 || len(wire.RequiredACRevisions) > 1024 || !validWireText(wire.CandidateID, 1, 80) {
 		return domain.CompletionSubject{}, command.ErrInvalidCommand
 	}
 	candidate, err := DecodeSHA256(wire.CandidateDigest)
@@ -540,8 +595,8 @@ func (wire completionSubjectWire) domainValue() (domain.CompletionSubject, error
 	bindings := make([]domain.ACRevisionBinding, len(wire.RequiredACRevisions))
 	for index, revision := range wire.RequiredACRevisions {
 		digest, err := DecodeSHA256(revision.RevisionDigest)
-		if err != nil || !acPattern.MatchString(revision.ACID) {
-			return domain.CompletionSubject{}, err
+		if err != nil || !validInitialACID(revision.ACID) {
+			return domain.CompletionSubject{}, command.ErrInvalidCommand
 		}
 		bindings[index] = domain.ACRevisionBinding{ACID: domain.ACID(revision.ACID), RevisionDigest: digest}
 	}

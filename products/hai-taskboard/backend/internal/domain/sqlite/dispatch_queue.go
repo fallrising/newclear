@@ -27,7 +27,7 @@ func (store *Store) DispatchCandidates(ctx context.Context, now time.Time, limit
 			sql  string
 			args []any
 		}{
-			{`SELECT project_id,run_id FROM runs WHERE desired_action='Dispatch' AND dispatch_state='Pending' ORDER BY created_at_ns,project_id,run_id LIMIT ?`, []any{limit}},
+			{`SELECT r.project_id,r.run_id FROM runs r JOIN run_input_envelopes i ON i.project_id=r.project_id AND i.run_id=r.run_id WHERE r.desired_action='Dispatch' AND r.dispatch_state='Pending' AND r.reconciliation_state='None' ORDER BY r.created_at_ns,r.project_id,r.run_id LIMIT ?`, []any{limit}},
 			{`SELECT r.project_id,r.run_id FROM runs r JOIN run_leases l ON l.project_id=r.project_id AND l.run_id=r.run_id
 WHERE r.dispatch_state<>'Pending' AND r.observed_state NOT IN ('Succeeded','Failed','Canceled') AND r.reconciliation_state<>'NeedsReconcile' AND l.deadline_ns<?
 ORDER BY l.deadline_ns,r.project_id,r.run_id LIMIT ?`, []any{now.UnixNano(), limit}},

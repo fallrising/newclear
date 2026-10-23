@@ -278,3 +278,73 @@ code {
     display: none;
   }
 }
+
+.connected-shell main > h2 {
+  margin-top: 1rem;
+}
+.connected-shell .surface {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+.connected-shell form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+  margin: 1rem 0;
+}
+.connected-field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 14rem;
+}
+.connected-field input,
+.connected-field select,
+.connected-field textarea {
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  padding: 0.55rem;
+  background: var(--panel);
+  color: var(--text);
+  min-width: 0;
+  max-width: 100%;
+}
+.connected-field input[type='checkbox'] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.connected-field textarea {
+  min-height: 6rem;
+}
+.connected-field :focus-visible,
+.connected-shell .lane-grid:focus-visible,
+.connected-shell h2:focus {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.connected-shell code,
+.connected-shell .card,
+.connected-shell .surface {
+  overflow-wrap: anywhere;
+}
+.connected-shell .guard {
+  border: 1px solid var(--warning);
+  padding: 0.75rem;
+}
+@media (max-width: 640px) {
+  .connected-shell .lane-grid {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+  .connected-shell .lane {
+    min-height: 0;
+  }
+  .connected-shell form {
+    display: grid;
+  }
+}

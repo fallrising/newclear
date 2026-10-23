@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -45,8 +46,21 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 	if err := config.validate(); err != nil {
 		return nil, err
 	}
+	web, err := loadBrowserAssets(config.WebRoot, config.DataRoot)
+	if err != nil {
+		return nil, err
+	}
+	repositories, err := loadRepositoryRegistry(config.ApprovedRepositoriesFile, config.SessionActor, config.DataRoot)
+	if err != nil {
+		return nil, err
+	}
 	if err := ensurePrivateDirectory(config.DataRoot); err != nil {
 		return nil, err
+	}
+	if repositories != nil {
+		if err := ensurePrivateDirectory(filepath.Join(config.DataRoot, "repository-scratch")); err != nil {
+			return nil, errors.New("prepare repository scratch")
+		}
 	}
 	stateRoot := filepath.Join(config.DataRoot, "state")
 	artifactRoot := filepath.Join(config.DataRoot, "artifacts", "sha256")
@@ -86,8 +100,6 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 	if err != nil {
 		return nil, errors.New("construct local Fake adapter")
 	}
-	policyRevision := domain.HashString("local-policy-v1")
-	recipeRevision := domain.HashString("local-recipe-v1")
 	composed, err := Compose(Dependencies{
 		Store:       store,
 		Executor:    executor,
@@ -97,16 +109,11 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 		Projections: httpapi.PersistedProjections{Store: store},
 		Authority:   authority,
 		Application: service.Config{
-			Operator:       config.SessionActor,
-			IdempotencyTTL: 24 * time.Hour,
-			Specification:  unavailableSpecification{},
-			Completion: service.CompletionPolicy{
-				RevisionDigest: policyRevision,
-				RecipeDigest:   recipeRevision,
-				Checks: map[domain.ACID]service.VerificationRule{
-					"local": {VerifierClass: "local"},
-				},
-			},
+			Operator:            config.SessionActor,
+			RepositoryAuthority: repositories,
+			IdempotencyTTL:      24 * time.Hour,
+			Specification:       unavailableSpecification{},
+			Completion:          localCompletionPolicy(),
 		},
 		HTTP: httpapi.Config{Origin: config.Origin},
 	})
@@ -135,7 +142,7 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 	}()
 
 	runtimeContext, stopRuntime := context.WithCancel(ctx)
-	handlers := &runtimeHandlers{next: runtimeHTTPHandler{api: composed.Handler}}
+	handlers := &runtimeHandlers{next: runtimeHTTPHandler{api: composed.Handler, host: config.ListenAddress, origin: config.Origin, authority: authority, web: web}}
 	server := &http.Server{
 		Handler:           handlers,
 		BaseContext:       func(net.Listener) context.Context { return runtimeContext },
@@ -262,17 +269,36 @@ func (handlers *runtimeHandlers) stopAdmission() {
 }
 
 type runtimeHTTPHandler struct {
-	api http.Handler
+	api       http.Handler
+	host      string
+	origin    string
+	authority *localSessionAuthority
+	web       *browserAssets
 }
 
 func (handler runtimeHTTPHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	if request != nil && request.URL != nil && request.URL.Path == "/healthz" {
+	if request == nil || request.URL == nil || request.Host != handler.host || len(request.Header.Values("Host")) != 0 {
+		writeBrowserError(response, http.StatusForbidden, "forbidden")
+		return
+	}
+	if request.URL.Path == "/api/v1/session" {
+		handler.serveSession(response, request)
+		return
+	}
+	if request.URL.Path == "/healthz" {
 		if request.Method != http.MethodGet || request.URL.RawPath != "" ||
 			request.URL.EscapedPath() != "/healthz" || request.URL.RawQuery != "" {
 			writeRuntimeJSON(response, http.StatusMethodNotAllowed, methodPayload)
 			return
 		}
-		writeRuntimeJSON(response, http.StatusOK, healthPayload)
+		payload := strings.TrimSuffix(healthPayload, "}") + `,"ui":"unavailable"}`
+		if handler.web != nil {
+			payload = strings.TrimSuffix(healthPayload, "}") + `,"ui":"ready"}`
+		}
+		writeRuntimeJSON(response, http.StatusOK, payload)
+		return
+	}
+	if handler.web != nil && handler.web.serve(response, request) {
 		return
 	}
 	handler.api.ServeHTTP(response, request)
@@ -284,4 +310,14 @@ func writeRuntimeJSON(response http.ResponseWriter, status int, payload string) 
 	response.Header().Set("X-Content-Type-Options", "nosniff")
 	response.WriteHeader(status)
 	_, _ = response.Write([]byte(payload))
+}
+
+func localCompletionPolicy() service.CompletionPolicy {
+	return service.CompletionPolicy{
+		RevisionDigest: domain.HashString("local-policy-v2"),
+		RecipeDigest:   domain.HashString("local-recipe-v1"),
+		Checks: map[domain.ACID]service.VerificationRule{
+			"local": {VerifierClass: "human", Independent: true, ProhibitedVerifierRunRole: "producer", EnvironmentDigest: domain.HashString(port.FakeEnvironmentProfile)},
+		},
+	}
 }

@@ -102,20 +102,25 @@ fn provider_id_for(target: &ResolvedTarget) -> Option<String> {
         .filter(|s| !s.is_empty())
 }
 
+/// Forward a chat-shaped request. `native_responses` is the client's original
+/// Responses body; Responses upstreams receive it (items intact) instead of `body`.
 pub async fn forward_chat_completions(
     state: &ProxyState,
     target: &ResolvedTarget,
     body: Bytes,
+    native_responses: Option<&Bytes>,
     stream: bool,
     cancel: &CancellationToken,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
-    forward_chat_completions_inner(state, target, body, stream, cancel, true).await
+    forward_chat_completions_inner(state, target, body, native_responses, stream, cancel, true)
+        .await
 }
 
 async fn forward_chat_completions_inner(
     state: &ProxyState,
     target: &ResolvedTarget,
     body: Bytes,
+    native_responses: Option<&Bytes>,
     stream: bool,
     cancel: &CancellationToken,
     allow_401_refresh: bool,
@@ -188,7 +193,16 @@ async fn forward_chat_completions_inner(
             let (wire, kind) = match p.format {
                 UpstreamFormat::OpenAiChat => (prepared, UpstreamBodyKind::OpenAiChat),
                 UpstreamFormat::OpenAiResponses => {
-                    match responses::chat_to_responses_request(&prepared) {
+                    let converted = match native_responses {
+                        Some(native) => responses::prepare_native_request(
+                            native,
+                            &target.upstream_model,
+                            force,
+                            p.id == "codex",
+                        ),
+                        None => responses::chat_to_responses_request(&prepared),
+                    };
+                    match converted {
                         Ok(b) => {
                             let b = if force {
                                 force_json_stream_true(&b).unwrap_or(b)
@@ -378,6 +392,7 @@ async fn forward_chat_completions_inner(
                         state,
                         &retry_target,
                         body,
+                        native_responses,
                         stream,
                         cancel,
                         false,
@@ -456,57 +471,6 @@ async fn resolve_agy_project(state: &ProxyState, target: &ResolvedTarget) -> App
             .update_oauth_meta(&target.connection.id, &meta_v.to_string());
     }
     Ok(project)
-}
-
-/// Collect Responses SSE text deltas into a synthetic Responses JSON body.
-fn reassemble_responses_sse(raw: &str) -> Bytes {
-    let mut text = String::new();
-    let mut model = "unknown".to_string();
-    for line in raw.lines() {
-        let Some(data) = line.strip_prefix("data:") else {
-            continue;
-        };
-        let data = data.trim();
-        if data.is_empty() || data == "[DONE]" {
-            continue;
-        }
-        let Ok(v) = serde_json::from_str::<Value>(data) else {
-            continue;
-        };
-        if let Some(m) = v.pointer("/response/model").and_then(|m| m.as_str()) {
-            model = m.to_string();
-        }
-        if let Some(m) = v.get("model").and_then(|m| m.as_str()) {
-            model = m.to_string();
-        }
-        // response.output_text.delta
-        if let Some(d) = v.get("delta").and_then(|d| d.as_str()) {
-            text.push_str(d);
-        }
-        if let Some(d) = v.pointer("/delta/text").and_then(|d| d.as_str()) {
-            text.push_str(d);
-        }
-        // sometimes nested
-        if v.get("type").and_then(|t| t.as_str()) == Some("response.output_text.delta") {
-            if let Some(d) = v.get("delta").and_then(|d| d.as_str()) {
-                // already added
-                let _ = d;
-            }
-        }
-    }
-    let body = serde_json::json!({
-        "id": "resp_reassembled",
-        "object": "response",
-        "model": model,
-        "status": "completed",
-        "output": [{
-            "type": "message",
-            "role": "assistant",
-            "content": [{"type": "output_text", "text": text}]
-        }],
-        "usage": {"input_tokens": 0, "output_tokens": 0}
-    });
-    Bytes::from(serde_json::to_vec(&body).unwrap_or_default())
 }
 
 /// Order targets: skip cooled; apply round-robin rotation when strategy is round_robin.
@@ -655,7 +619,7 @@ pub async fn handle_chat_with_fallback(
             }
         }
 
-        match forward_chat_completions(state, target, body.clone(), stream, &cancel).await {
+        match forward_chat_completions(state, target, body.clone(), None, stream, &cancel).await {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
@@ -671,25 +635,17 @@ pub async fn handle_chat_with_fallback(
                         None,
                     );
                     cancel_guard.disarm();
-                    return stream_response(
-                        fwd.response,
-                        state.sse_stall_secs,
-                        StreamMode::Passthrough,
-                    )
-                    .await;
-                } else {
-                    let bytes = read_bytes_cancel(fwd.response, &cancel).await?;
-                    let bytes = if fwd.reassemble_stream {
-                        let raw = String::from_utf8_lossy(&bytes);
-                        match fwd.body_kind {
-                            UpstreamBodyKind::OpenAiResponses => reassemble_responses_sse(&raw),
-                            _ => bytes,
+                    let mode = match fwd.body_kind {
+                        UpstreamBodyKind::OpenAiResponses => {
+                            StreamMode::ResponsesToChat(public_model.to_string())
                         }
-                    } else {
-                        bytes
+                        _ => StreamMode::Passthrough,
                     };
-                    let bytes =
-                        convert_upstream_to_chat(bytes, fwd.body_kind, &target.upstream_model)?;
+                    return stream_response(fwd.response, state.sse_stall_secs, mode).await;
+                } else {
+                    let kind = fwd.body_kind;
+                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&bytes);
                     let cost = estimate_cost(
                         pt,
@@ -779,7 +735,8 @@ pub async fn handle_anthropic_messages(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
-        match forward_chat_completions(state, target, oai_body.clone(), stream, &cancel).await {
+        match forward_chat_completions(state, target, oai_body.clone(), None, stream, &cancel).await
+        {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
@@ -797,15 +754,19 @@ pub async fn handle_anthropic_messages(
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
                         UpstreamBodyKind::OpenAiChat => {
-                            StreamMode::Anthropic(public_model.to_string())
+                            StreamMode::ChatToAnthropic(public_model.to_string())
                         }
+                        UpstreamBodyKind::OpenAiResponses => {
+                            StreamMode::ResponsesToAnthropic(public_model.to_string())
+                        }
+                        // Anthropic upstream already speaks the client's protocol.
                         _ => StreamMode::Passthrough,
                     };
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
-                    let bytes = read_bytes_cancel(fwd.response, &cancel).await?;
-                    let chat =
-                        convert_upstream_to_chat(bytes, fwd.body_kind, &target.upstream_model)?;
+                    let kind = fwd.body_kind;
+                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let chat = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&chat);
                     let cost = estimate_cost(
                         pt,
@@ -890,7 +851,16 @@ pub async fn handle_responses(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
-        match forward_chat_completions(state, target, chat_body.clone(), stream, &cancel).await {
+        match forward_chat_completions(
+            state,
+            target,
+            chat_body.clone(),
+            Some(&body),
+            stream,
+            &cancel,
+        )
+        .await
+        {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
@@ -907,14 +877,16 @@ pub async fn handle_responses(
                     );
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
-                        UpstreamBodyKind::OpenAiChat => StreamMode::Responses,
+                        UpstreamBodyKind::OpenAiChat => StreamMode::ChatToResponses,
+                        // Responses upstream: native SSE goes through unchanged.
                         _ => StreamMode::Passthrough,
                     };
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
-                    let bytes = read_bytes_cancel(fwd.response, &cancel).await?;
+                    let kind = fwd.body_kind;
+                    let bytes = read_forward_body(fwd, &cancel).await?;
                     // If upstream already returned Responses, pass through; else wrap chat.
-                    let out = match fwd.body_kind {
+                    let out = match kind {
                         UpstreamBodyKind::OpenAiResponses => bytes,
                         other => {
                             let chat =
@@ -994,13 +966,32 @@ async fn read_bytes_cancel(
     }
 }
 
+/// Read a non-stream upstream body; a forced-stream Responses transcript is folded
+/// back into one Responses JSON body.
+async fn read_forward_body(fwd: ForwardOk, cancel: &CancellationToken) -> AppResult<Bytes> {
+    let reassemble = fwd.reassemble_stream;
+    let kind = fwd.body_kind;
+    let bytes = read_bytes_cancel(fwd.response, cancel).await?;
+    Ok(match kind {
+        UpstreamBodyKind::OpenAiResponses if reassemble => {
+            responses::reassemble_sse(&String::from_utf8_lossy(&bytes))
+        }
+        _ => bytes,
+    })
+}
+
+/// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.
 fn extract_usage_tokens(bytes: &Bytes) -> (Option<i64>, Option<i64>) {
     let Ok(v) = serde_json::from_slice::<Value>(bytes) else {
         return (None, None);
     };
-    let pt = v.pointer("/usage/prompt_tokens").and_then(|n| n.as_i64());
+    let pt = v
+        .pointer("/usage/prompt_tokens")
+        .or_else(|| v.pointer("/usage/input_tokens"))
+        .and_then(|n| n.as_i64());
     let ct = v
         .pointer("/usage/completion_tokens")
+        .or_else(|| v.pointer("/usage/output_tokens"))
         .and_then(|n| n.as_i64());
     (pt, ct)
 }
@@ -1032,8 +1023,91 @@ fn json_bytes_response(status: StatusCode, bytes: Bytes) -> Response {
 
 enum StreamMode {
     Passthrough,
-    Anthropic(String),
-    Responses,
+    /// Chat chunks → Anthropic events (model name for message_start).
+    ChatToAnthropic(String),
+    /// Chat chunks → Responses events.
+    ChatToResponses,
+    /// Responses events → chat chunks.
+    ResponsesToChat(String),
+    /// Responses events → chat chunks → Anthropic events.
+    ResponsesToAnthropic(String),
+}
+
+/// Re-encodes one upstream SSE `data:` payload at a time into client SSE records.
+trait SseConvert: Send {
+    fn on_data(&mut self, data: &str) -> Vec<String>;
+    /// Upstream ended (with or without a terminal event).
+    fn on_end(&mut self) -> Vec<String>;
+}
+
+struct ChatToAnthropic(StreamTranslateState);
+
+impl SseConvert for ChatToAnthropic {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        claude::openai_sse_chunk_to_anthropic(data, &mut self.0)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        claude::openai_sse_chunk_to_anthropic("[DONE]", &mut self.0)
+    }
+}
+
+struct ChatToResponses(bool);
+
+impl SseConvert for ChatToResponses {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        responses::chat_sse_to_responses_events(data, &mut self.0)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        Vec::new()
+    }
+}
+
+impl SseConvert for responses::ResponsesToChatStream {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        responses::ResponsesToChatStream::on_data(self, data)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        responses::ResponsesToChatStream::on_end(self)
+    }
+}
+
+/// Two converters in series; the first emits `data: ...` records.
+struct Chain<A, B>(A, B);
+
+impl<A: SseConvert, B: SseConvert> Chain<A, B> {
+    fn feed(&mut self, records: Vec<String>) -> Vec<String> {
+        records
+            .iter()
+            .filter_map(|r| r.strip_prefix("data: "))
+            .flat_map(|d| self.1.on_data(d))
+            .collect()
+    }
+}
+
+impl<A: SseConvert, B: SseConvert> SseConvert for Chain<A, B> {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        let mid = self.0.on_data(data);
+        self.feed(mid)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        let mid = self.0.on_end();
+        let mut out = self.feed(mid);
+        out.extend(self.1.on_end());
+        out
+    }
+}
+
+fn converter(mode: StreamMode) -> Option<Box<dyn SseConvert>> {
+    Some(match mode {
+        StreamMode::Passthrough => return None,
+        StreamMode::ChatToAnthropic(m) => Box::new(ChatToAnthropic(StreamTranslateState::new(m))),
+        StreamMode::ChatToResponses => Box::new(ChatToResponses(false)),
+        StreamMode::ResponsesToChat(m) => Box::new(responses::ResponsesToChatStream::new(m)),
+        StreamMode::ResponsesToAnthropic(m) => Box::new(Chain(
+            responses::ResponsesToChatStream::new(m.clone()),
+            ChatToAnthropic(StreamTranslateState::new(m)),
+        )),
+    })
 }
 
 /// Stream upstream SSE with stall timeout. Dropping the body stops polling upstream.
@@ -1045,86 +1119,62 @@ async fn stream_response(
     let status = StatusCode::from_u16(resp.status().as_u16()).unwrap_or(StatusCode::OK);
     let stall = Duration::from_secs(stall_secs.max(5));
     let mut upstream = resp.bytes_stream();
+    let mut conv = converter(mode);
 
     let byte_stream = async_stream::stream! {
-        match mode {
-            StreamMode::Anthropic(model) => {
-                let mut state = StreamTranslateState::new(model);
-                let mut buf = String::new();
-                loop {
-                    match timeout(stall, upstream.next()).await {
-                        Ok(Some(Ok(chunk))) => {
-                            buf.push_str(&String::from_utf8_lossy(&chunk));
-                            while let Some(pos) = buf.find('\n') {
-                                let mut line = buf[..pos].to_string();
-                                buf = buf[pos + 1..].to_string();
-                                if line.ends_with('\r') { line.pop(); }
-                                if let Some(data) = line.strip_prefix("data:") {
-                                    let data = data.trim_start().strip_prefix(' ').unwrap_or(data.trim_start());
-                                    for ev in claude::openai_sse_chunk_to_anthropic(data, &mut state) {
-                                        yield Ok::<Bytes, std::io::Error>(Bytes::from(format!("{ev}\n\n")));
-                                    }
-                                }
+        // Bytes until the last newline (SSE lines may split across chunks, even
+        // inside a UTF-8 sequence).
+        let mut buf: Vec<u8> = Vec::new();
+        loop {
+            match timeout(stall, upstream.next()).await {
+                Ok(Some(Ok(chunk))) => {
+                    let Some(conv) = conv.as_mut() else {
+                        yield Ok::<Bytes, std::io::Error>(chunk);
+                        continue;
+                    };
+                    buf.extend_from_slice(&chunk);
+                    let Some(last_nl) = buf.iter().rposition(|b| *b == b'\n') else {
+                        continue;
+                    };
+                    let rest = buf.split_off(last_nl + 1);
+                    let complete = std::mem::replace(&mut buf, rest);
+                    let mut out = String::new();
+                    for line in String::from_utf8_lossy(&complete).lines() {
+                        if let Some(data) = line.strip_prefix("data:") {
+                            for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                                out.push_str(&rec);
+                                out.push_str("\n\n");
                             }
                         }
-                        Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
-                        Ok(None) => {
-                            if !state.message_stop_sent {
-                                for ev in claude::openai_sse_chunk_to_anthropic("[DONE]", &mut state) {
-                                    yield Ok(Bytes::from(format!("{ev}\n\n")));
-                                }
-                            }
-                            break;
-                        }
-                        Err(_) => {
-                            warn!("SSE stall timeout");
-                            yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
-                            break;
-                        }
+                    }
+                    if !out.is_empty() {
+                        yield Ok(Bytes::from(out));
                     }
                 }
-            }
-            StreamMode::Responses => {
-                let mut started = false;
-                let mut buf = String::new();
-                loop {
-                    match timeout(stall, upstream.next()).await {
-                        Ok(Some(Ok(chunk))) => {
-                            buf.push_str(&String::from_utf8_lossy(&chunk));
-                            while let Some(pos) = buf.find('\n') {
-                                let mut line = buf[..pos].to_string();
-                                buf = buf[pos + 1..].to_string();
-                                if line.ends_with('\r') { line.pop(); }
-                                if let Some(data) = line.strip_prefix("data:") {
-                                    let data = data.trim_start().strip_prefix(' ').unwrap_or(data.trim_start());
-                                    for ev in responses::chat_sse_to_responses_events(data, &mut started) {
-                                        yield Ok::<Bytes, std::io::Error>(Bytes::from(format!("{ev}\n\n")));
-                                    }
-                                }
+                Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
+                Ok(None) => {
+                    if let Some(conv) = conv.as_mut() {
+                        let mut out = String::new();
+                        if let Some(data) = String::from_utf8_lossy(&buf).trim_end().strip_prefix("data:") {
+                            for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                                out.push_str(&rec);
+                                out.push_str("\n\n");
                             }
                         }
-                        Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
-                        Ok(None) => break,
-                        Err(_) => {
-                            warn!("SSE stall timeout");
-                            yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
-                            break;
+                        for rec in conv.on_end() {
+                            out.push_str(&rec);
+                            out.push_str("\n\n");
+                        }
+                        if !out.is_empty() {
+                            yield Ok(Bytes::from(out));
                         }
                     }
+                    break;
                 }
-            }
-            StreamMode::Passthrough => {
-                loop {
-                    match timeout(stall, upstream.next()).await {
-                        Ok(Some(Ok(chunk))) => { yield Ok::<Bytes, std::io::Error>(chunk); }
-                        Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
-                        Ok(None) => break,
-                        Err(_) => {
-                            warn!("SSE stall timeout");
-                            yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
-                            break;
-                        }
-                    }
+                Err(_) => {
+                    warn!("SSE stall timeout");
+                    yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
+                    break;
                 }
             }
         }

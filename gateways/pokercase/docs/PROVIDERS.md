@@ -69,7 +69,7 @@ When you need one of these: open an item, implement `ProviderProfile` + forward 
 
 | Provider | Client → Upstream |
 |----------|-------------------|
-| codex / grok | Chat Completions or Responses → **Responses** body |
+| codex / grok | `/v1/responses` → forwarded natively (all items kept; Codex: `store:false`, `stream:true`, sampling fields dropped). `/v1/chat/completions` and `/v1/messages` → converted to a **Responses** body (tools, `tool_calls` ↔ `function_call`, tool results ↔ `function_call_output`, images ↔ `input_image`); the Responses SSE is converted back to `chat.completion.chunk` or Anthropic events (text and tool calls) |
 | claude | Chat Completions → **Anthropic Messages**; native `/v1/messages` passes through |
 | opencode | Chat Completions passthrough (+ `x-opencode-client`) |
 | cursor / agy | Import only until executors land |

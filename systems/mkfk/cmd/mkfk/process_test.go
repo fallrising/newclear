@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"net"
 	"net/http"
 	"os"
@@ -150,20 +151,43 @@ func (c *testCluster) logBrokers() {
 	}
 }
 
+// Test brokers bind fixed ports long after they are chosen, and bind them
+// again after every restart. A port from the kernel's ephemeral range can
+// be handed to an outgoing connection in between, so ports come from below
+// it (Linux defaults to 32768-60999), and each is handed out once per
+// test process. Each process starts at a random point in the range, so two
+// concurrent test runs rarely probe the same ports.
+const (
+	testPortFirst = 20000
+	testPortLast  = 32767
+)
+
+var testPorts = struct {
+	sync.Mutex
+	next, handed int
+}{next: testPortFirst + rand.IntN(testPortLast-testPortFirst+1)}
+
 func freePorts(t *testing.T, count int) []string {
 	t.Helper()
-	var listeners []net.Listener
+	testPorts.Lock()
+	defer testPorts.Unlock()
 	var addresses []string
-	for range count {
-		listener, err := net.Listen("tcp", "127.0.0.1:0")
-		if err != nil {
-			t.Fatal(err)
+	for len(addresses) < count {
+		if testPorts.handed > testPortLast-testPortFirst {
+			t.Fatal("test port range exhausted")
 		}
-		listeners = append(listeners, listener)
-		addresses = append(addresses, listener.Addr().String())
-	}
-	for _, listener := range listeners {
+		port := testPorts.next
+		testPorts.next, testPorts.handed = port+1, testPorts.handed+1
+		if testPorts.next > testPortLast {
+			testPorts.next = testPortFirst
+		}
+		address := fmt.Sprintf("127.0.0.1:%d", port)
+		listener, err := net.Listen("tcp", address)
+		if err != nil {
+			continue // in use by something else on this host
+		}
 		_ = listener.Close()
+		addresses = append(addresses, address)
 	}
 	return addresses
 }

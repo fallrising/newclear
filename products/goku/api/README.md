@@ -69,11 +69,15 @@ You have two options for running Goku API as a Docker container:
 
 ## API Endpoints
 
-- `POST /upload`: Upload new bookmarks
-- `GET /bookmarks`: Retrieve all bookmarks
-- `GET /bookmark?url=...`: Retrieve a specific bookmark by URL
-- `PUT /bookmark`: Update an existing bookmark
-- `DELETE /bookmark/:id`: Delete a bookmark by ID
+The [server entry](cmd/api/main.go) mounts the [route group](api/v1/router.go)
+under `/api/v1`, including the health check:
+
+- `GET /api/v1/health`: Health check; returns `{"status":"ok"}`
+- `POST /api/v1/upload`: Upload new bookmarks
+- `GET /api/v1/bookmarks`: Retrieve all bookmarks
+- `GET /api/v1/bookmark?url=...`: Retrieve a specific bookmark by URL
+- `PUT /api/v1/bookmark`: Update an existing bookmark
+- `DELETE /api/v1/bookmark/:id`: Delete a bookmark by ID
 
 ## Configuration
 

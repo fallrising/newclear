@@ -9,32 +9,33 @@
 ## 專案概況
 
 - **元件路徑：** `products/goku/`
-- **一句話：** 書籤 ingestion 與管理：React 18 + Vite 5 + Tailwind 3 + Tiptap 的 SPA（`web/`），後端是 Go API，另可用 json-server mock。
-- **技術棧：** React 18、Vite 5、Tailwind 3、Tiptap、Zustand；後端 Go（API、CLI、MQTT consumer）
+- **一句話：** 書籤 ingestion 與管理：React 18 + Vite 5 + Tailwind 3 的 SPA（`web/`），後端是 Go API，另可用 json-server mock。
+- **技術棧：** React 18、Vite 5、Tailwind 3、Zustand；Tiptap 是未接線的依賴。後端 Go（API、CLI、MQTT consumer）。
 - **UI 入口：** `products/goku/web/`（API base 由 `VITE_API_URL` 決定，預設 `http://localhost:3001/api`；`npm run mock` 以 json-server 在 3001 提供假資料）
 
 ## 啟動線索（未驗證）
 
-- 在 `web/` 執行 `npm ci`；一個 shell `npm run mock`，另一個 `npm run dev -- --host 127.0.0.1 --port 5173`。
-- `web/.env` 已存在，不要在報告或提交中複製其內容。
+- 第 2 輪候選程序見 [DESIGN.md](DESIGN.md)：mock 使用 task 目錄的一次性合成資料、明確 loopback 與 API URL。現有 `npm run mock` 會寫來源樹且沒有明確 loopback，不直接作為隔離驗收程序。
+- `web/.env` 只有 `VITE_API_URL`（與程式預設值相同）；第 2 輪 M1 後改為 `web/.env.example`。
+- 第 2／3 輪依 DESIGN 在 launcher task 目錄產生新的合成資料，明確使用本機 URL／favicon；不沿用或修改來源樹 `mock/db.json`。
 
 ## 主要流程
 
 至少走通以下流程各一次，並對每一步截圖：
 
-- 書籤列表 → 搜尋 → 開啟編輯器（Tiptap）→ 儲存 → 側欄分類切換
+- 書籤列表 → 搜尋 → 開啟原生編輯表單 → 儲存 → 側欄分類切換；目前 Tiptap 僅為依賴，未接線到 BookmarkEditor，篩選行為也仍須實測。
 
 ## 專案特有檢查重點
 
 在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
 
 - BookmarkGrid 在三種寬度的欄數與卡片高度一致性。
-- Tiptap 編輯器的 toolbar、focus、長內容。
+- 原生編輯表單的 focus、長內容、notes 與儲存狀態，不擷取不存在的 Tiptap toolbar。
 - 搜尋無結果與 API 失敗狀態。
 
 ## 可重用的既有資產
 
-- `web/mock/db.json`：假資料來源。
+- `web/mock/routes.json`：現有 mock 路徑契約。資料另行產生；不能把現有資料檔未經確認視作安全合成 fixture。
 
 ## 待補的頁面
 

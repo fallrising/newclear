@@ -1,6 +1,6 @@
 # 起步與驗收路線
 
-**執行狀態：skipped。** 本研究環境沒有 `dotnet`、`godot`、`godot-mono`，也沒有使用者提供的遊戲執行資源。以下是下一階段的人工操作入口，不是已跑通安裝指南。先讀 [SDD 契約](sdd/README.md)。
+**2026-10-23：build 與 headless editor import 已通過；遊戲啟動仍 blocked。** 工具版本、命令與限制見 [本次證據](development-20261023.md)。合法素材與圖形環境仍未提供，以下遊戲操作不能標為已跑通。先讀 [SDD 契約](sdd/README.md)。
 
 ## P0：先準備四樣東西
 
@@ -9,7 +9,7 @@
 3. 有來源與使用依據的測試資料：System.db、必要地圖、圖庫、聲音及 client JSON。將原件與可寫實驗副本分開，確認 client/server 使用同一套定義。
 4. 一份 runtime path 表：server binary directory、Server.ini、Database、MapPath、client Data、ClientData。根據消費它們的讀取器核對，見[來源表](evidence.md)。
 
-下列每段都未在本輪執行。使用者自行選一個 newclear 以外的工作目錄；不將 checkout 或素材提交到此目錄。
+固定來源取得與工具版本已實測；以下以可移植路徑示範重跑方式。上游 checkout 與素材保持 newclear 外置。
 
 ```bash
 git clone https://github.com/iamcheyan/Zircon-Godot.git
@@ -29,29 +29,75 @@ godot-mono --version
 
 ## P1：先建置，再配資料，最後啟動
 
-從上游 repo root 建置指定專案，避免直接建置整個含 Windows 工具的 solution。命令狀態皆為 `skipped`。
+從 newclear root 使用本次新增工具。先將 `WORKSPACE` 指向共用 `workspace.py`，`SOURCE` 指向外置固定 checkout，`DOTNET` 指向 .NET 10 可執行檔；`LAB` 指向本目錄的絕對路徑。每次使用新 task ID。以下 build entrypoint 已實測；它檢查 41 個來源 blob，拒絕錯誤 SHA、staged／未知 tracked 改動及未被 Git ignore 的未追蹤輸入，只容許已知 shutdown patch。ignored 檔案及工具鏈設定仍可能影響建置；此檢查不是 hermetic build 或完整輸入封存保證。
 
 ```bash
-dotnet restore ServerCore/ServerCore.csproj
-dotnet build ServerCore/ServerCore.csproj -c Release -o "$PWD/.local-runtime/server"
-dotnet build GodotClient/ZirconClient.csproj -c Debug
+python3 "$WORKSPACE" run zircon-godot local-build -- \
+  python3 labs/zircon-godot/scripts/build.py --source "$SOURCE" --dotnet "$DOTNET"
 ```
 
-期望每個 build 0 errors，warnings 原樣記錄。這個 `.local-runtime` 是未追蹤的實驗目錄；勿加入 git。正式執行前，將具來源的資料副本按 P0 的 path 表放好，確認 server 的設定解析與 MirDB binary-relative root。**不能因為 build 輸出成功就直接啟動空白資料庫並當成基線。**
+建置 ServerCore、GodotClient 與 legacy GroundLootChecks；stdout 指向 evidence log。輸出、NuGet cache 及 Godot intermediate 均在 task workspace，沒有改全域 SDK 或 repo 的 package manager。`build-results.json` 記錄來源／SDK／patch／binary hashes。build 通過不會自動啟動 server。
+
+### Host shutdown 修補與 RED/GREEN
+
+原始 host 的 Ctrl-C 未設定 `e.Cancel`，而主迴圈阻塞於 `Console.ReadLine`。本次 [patch](../patches/0001-graceful-console-stop.patch) 改成等待世界退出，讓既有 save／commit 有機會完成。用獨立 .NET process、真實 SIGINT 與保持開啟的 stdin 驗證；world 是 test double，不是 MirDB 驗收。
+
+```bash
+# 在乾淨固定 checkout 上先跑：預期兩項 FAIL（RED）。
+python3 "$WORKSPACE" run zircon-godot host-red -- \
+  env DOTNET="$DOTNET" ZIRCON_SOURCE="$SOURCE" \
+  python3 -m unittest discover -s labs/zircon-godot/tests -v
+
+git -C "$SOURCE" apply --check "$LAB/patches/0001-graceful-console-stop.patch"
+git -C "$SOURCE" apply "$LAB/patches/0001-graceful-console-stop.patch"
+
+# 同一測試預期兩項 PASS（GREEN），再重跑 build。
+python3 "$WORKSPACE" run zircon-godot host-green -- \
+  env DOTNET="$DOTNET" ZIRCON_SOURCE="$SOURCE" \
+  python3 -m unittest discover -s labs/zircon-godot/tests -v
+```
+
+撤回使用 `git apply --reverse --check` 後 `git apply --reverse` 同一 patch，保留其他修改。這是 host 修補回退，不是 AC-04 的 gameplay 規則修改／revert。該 patch 已經 T-978 獨立 static review；只測試已 ready 的 host，未證明啟動中途 Ctrl-C 或 SIGTERM 可正常保存。
+
+### Editor 載入
+
+`GODOT` 為官方 4.6.3 .NET executable，`DOTNET_ROOT` 為其 .NET 安裝目錄，`CLIENT_BIN` 為 build task 的 `build/ZirconClient`。工具複製 project 至 task build dir、使用隔離 editor settings，任何 `ERROR:` 即視為失敗；不啟動遊戲場景，不算 desktop 驗收。
+
+```bash
+python3 "$WORKSPACE" run zircon-godot editor-check -- \
+  python3 labs/zircon-godot/scripts/check_editor.py --source "$SOURCE" \
+  --binaries "$CLIENT_BIN" --godot "$GODOT" --dotnet-root "$DOTNET_ROOT"
+```
+
+### 素材 consumer 路徑（依固定來源重新核對）
+
+| Consumer | 實際解析規則／需補內容 |
+| --- | --- |
+| ConfigReader | `Server.ini` 相對 server cwd；不要沿用上游作者設定 |
+| MirDB Session | server binary directory 下 `Database/System.db`、`Database/Users.db`；後者僅隔離實驗副本 |
+| Server Map | `Config.MapPath` 相對 cwd 或絕對路徑，再加 `<MapInfo.FileName>.map` |
+| DatabaseLoader | `MIR3_EI_ROOT/Data/System.db`，其次 home mirror，再上游 `Debug/Client/Data`；須看實際載入 log，不能接受意外 fallback |
+| MirSkin/LibraryCache | `ZIRCON_UI_DATA_PATH` 優先，否則 `MIR3_EI_ROOT/Data`；另有歷史 fallback |
+| 預設 legacy UI | `ZIRCON_LEGACY_UI_DATA_PATH`，或 EI/LegacyEI Data 候選；與 world 圖庫分開 |
+| GameScene/MapView | **固定**上游 `Debug/Client/Map/<name>.map`，不受 `MIR3_EI_ROOT` 控制 |
+| GameScene sound | **固定**上游 `Debug/Client/Sound/`，不受 `MIR3_EI_ROOT` 控制 |
+| DataLayer | `ZIRCON_CLIENT_DATA`、project `ClientData`、上游 `ClientData`、cwd fallback；需要 frame-formulas、magic-effects、sounds 三個 JSON |
+
+路徑規則已核對；資產實際路徑、來源／使用依據、hash、角色／map 身份尚缺。取得後先填私人 run record（repo 外），核對 client/server System.db 同一內容，才建立可寫資料副本及必要資源連結。不啟動空白 DB 當基線。
 
 server 設定至少核對 `IPAddress=127.0.0.1`、game port、user-count port、`MapPath`、WebServer disabled；不把上游作者的 config 或帳密原樣使用。不啟用 `--singleplayer-dev` 作為普通資料驗證。server 的 `MapPath` 預設並非任意 runtime 目錄都適用。
 
-資料齊備後，在選定的 server runtime 目錄人工啟動（`skipped`）：
+資料齊備後，將 `SERVER_RUNTIME` 設為 build task 的 `build/ServerCore`（確認不重複運行同一資料副本），人工啟動（`skipped`）：
 
 ```bash
-cd .local-runtime/server
-dotnet ServerCore.dll
+cd "$SERVER_RUNTIME"
+"$DOTNET" ServerCore.dll
 ```
 
-另一終端回到上游 repo root，顯式連向測試 server，避免 auto launcher 啟動額外程序（`skipped`）：
+client 實際啟動前，需把 client binaries 配至 Godot 的 `.godot/mono/temp/bin/Debug`，並按上表配置 resources（editor staging 不包含外置 assets）。以下入口尚未驗證；顯式 endpoint 避免 auto launcher 啟動額外程序（`skipped`）：
 
 ```bash
-godot-mono --path "$PWD/GodotClient" -- --server 127.0.0.1 --port 7000 --window
+"$GODOT" --path "$SOURCE/GodotClient" -- --server 127.0.0.1 --port 7000 --window
 ```
 
 `MIR3_EI_ROOT` 可影響 client database 候選路徑，但不保證覆蓋所有素材 resolver。啟動前按 P0 設定 client 路徑，觀察 DB 實際載入位置。帳號從 UI 建立／登入，避免在命令列、截圖或公開 log 放密碼。
@@ -66,7 +112,7 @@ godot-mono --path "$PWD/GodotClient" -- --server 127.0.0.1 --port 7000 --window
 | 4 | 一次戰鬥、掉落、拾取 | HP／物品數量在 server 與 client 的一致性 |
 | 5 | 修改單一既有規則，重跑前四項，再 revert | 相同輸入下的預期差異與恢復基線 |
 
-停止 server 時用正常 Ctrl-C 路徑，等待結束並檢查保存結果。上游 auto launcher 會 kill 它所建立的 server／bot，不能拿那條路徑證明正常保存。
+套用已測 host patch 後，server ready 才用 Ctrl-C，等待結束並檢查真實保存結果。未修補原始 host 的 Ctrl-C 已證實會提前退出；本次不宣稱 SIGTERM 或啟動途中的訊號安全。上游 auto launcher 會 kill 它所建立的 server／bot，不能拿那條路徑證明正常保存。
 
 ## 失敗時先分類
 

@@ -27,6 +27,8 @@ pub struct AppConfig {
     /// Operator-only upstream base overrides `provider=url`, accepted in addition to
     /// the provider's official hosts (local mocks, egress proxies). CLI/env only.
     pub provider_base_overrides: Vec<(String, String)>,
+    /// Explicit Codex CLI version for the User-Agent (`--codex-version`).
+    pub codex_version: Option<String>,
 }
 
 impl AppConfig {
@@ -66,6 +68,7 @@ impl AppConfig {
             token_saver_max_chars: token_saver_max_chars.unwrap_or(2_000),
             allowed_hosts: Vec::new(),
             provider_base_overrides: Vec::new(),
+            codex_version: None,
         })
     }
 

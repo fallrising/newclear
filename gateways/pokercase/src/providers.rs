@@ -110,8 +110,8 @@ pub const ACTIVE: &[ProviderProfile] = &[
         default_model: Some("gpt-5.6-sol"),
         auth: AuthScheme::Bearer,
         extra_headers: &[
+            // User-Agent carries the detected/configured CLI version; see codex.rs.
             ("originator", "codex_cli_rs"),
-            ("User-Agent", "codex_cli_rs/0.136.0"),
             ("OpenAI-Beta", "responses=experimental"),
         ],
         force_stream: true,

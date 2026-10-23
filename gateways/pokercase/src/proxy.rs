@@ -14,6 +14,7 @@ use tokio_util::sync::CancellationToken;
 use tracing::{debug, warn};
 
 use crate::claude::{self, StreamTranslateState};
+use crate::codex;
 use crate::cooldown::{cooldown_secs_for_status, CooldownMap};
 use crate::error::{AppError, AppResult};
 use crate::providers::{self, UpstreamFormat};
@@ -34,6 +35,8 @@ pub struct ProxyState {
     pub token_saver_max_chars: usize,
     /// Operator-only `provider=url` upstream overrides (see `providers::base_url_allowed`).
     pub provider_base_overrides: Vec<(String, String)>,
+    /// `codex_cli_rs/<version>` sent to the Codex upstream.
+    pub codex_user_agent: String,
 }
 
 #[derive(Debug)]
@@ -171,6 +174,7 @@ async fn forward_chat_completions_inner(
     }
 
     let client_stream = stream;
+    let mut cache_key: Option<String> = None;
     let (url, wire_body, body_kind, extra_headers, auth, upstream_stream, reassemble) =
         if let Some(p) = profile {
             let url = providers::build_upstream_url(p, &target.connection.base_url);
@@ -206,6 +210,13 @@ async fn forward_chat_completions_inner(
                         Ok(b) => {
                             let b = if force {
                                 force_json_stream_true(&b).unwrap_or(b)
+                            } else {
+                                b
+                            };
+                            let b = if p.id == "codex" {
+                                let (b, key) = codex::ensure_prompt_cache_key(&b);
+                                cache_key = key;
+                                b
                             } else {
                                 b
                             };
@@ -329,6 +340,14 @@ async fn forward_chat_completions_inner(
             continue;
         }
         req = req.header(*k, *v);
+    }
+    if profile.is_some_and(|p| p.id == "codex") {
+        req = req.header("User-Agent", &state.codex_user_agent);
+        if let Some(key) = &cache_key {
+            for (k, v) in codex::session_headers(key) {
+                req = req.header(k, v);
+            }
+        }
     }
     // Codex ChatGPT accounts often need chatgpt-account-id header from import meta.
     if let Some(meta) = target

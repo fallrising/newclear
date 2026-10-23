@@ -188,6 +188,9 @@ pub fn chat_to_responses_request(body: &Bytes) -> AppResult<Bytes> {
     if let Some(effort) = obj.get("reasoning_effort") {
         o.insert("reasoning".into(), json!({"effort": effort}));
     }
+    if let Some(k) = obj.get("prompt_cache_key") {
+        o.insert("prompt_cache_key".into(), k.clone());
+    }
 
     Ok(Bytes::from(serde_json::to_vec(&out)?))
 }

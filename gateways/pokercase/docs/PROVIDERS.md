@@ -74,6 +74,17 @@ When you need one of these: open an item, implement `ProviderProfile` + forward 
 | opencode | Chat Completions passthrough (+ `x-opencode-client`) |
 | cursor / agy | Import only until executors land |
 
+### Codex prompt cache
+
+Every Codex request carries a `prompt_cache_key`: the client's own (Responses or Chat
+Completions body field), otherwise a UUIDv5 of model + instructions + the first input
+item, which stays the same across a conversation's turns. The same value goes out as
+`session-id` and `thread-id` headers so the ChatGPT backend routes turns to the
+machine holding the cached prefix. Two conversations that start identically share a
+key; that only shares a cache prefix they already have in common. The User-Agent is
+`codex_cli_rs/<version>` with the version from `--codex-version`, the installed
+`codex --version`, or the fallback (logged at startup).
+
 ### Token refresh
 
 Automated for **codex / claude / grok**, and **agy** when Google OAuth client env is set:

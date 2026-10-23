@@ -2,6 +2,7 @@ mod admin;
 mod agy;
 mod cancel;
 mod claude;
+mod codex;
 mod config;
 mod cooldown;
 mod cursor_agent;
@@ -83,6 +84,10 @@ enum Commands {
             value_delimiter = ','
         )]
         provider_base_overrides: Vec<String>,
+        /// Codex CLI version for the upstream User-Agent. Default: installed
+        /// `codex --version`, else a built-in fallback.
+        #[arg(long, env = "THINROUTER_CODEX_VERSION")]
+        codex_version: Option<String>,
     },
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -143,6 +148,7 @@ async fn main() -> Result<()> {
             token_saver_max_chars,
             allowed_hosts,
             provider_base_overrides,
+            codex_version,
         } => {
             let mut cfg = AppConfig::new(
                 host,
@@ -157,6 +163,7 @@ async fn main() -> Result<()> {
             cfg.allow_keyless_bootstrap = allow_keyless_bootstrap;
             cfg.allowed_hosts = allowed_hosts;
             cfg.set_provider_base_overrides(&provider_base_overrides)?;
+            cfg.codex_version = codex_version;
             server::run(cfg).await
         }
         Commands::Doctor {

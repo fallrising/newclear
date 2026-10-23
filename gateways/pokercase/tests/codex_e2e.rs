@@ -113,6 +113,8 @@ impl Env {
             dir.path().to_str().unwrap(),
             "--provider-base-override",
             &format!("codex={upstream}"),
+            "--codex-version",
+            "9.9.9-test",
         ]);
         for name in [
             "THINROUTER_ADMIN_TOKEN",
@@ -285,6 +287,23 @@ async fn chat_completions_over_codex() {
         env.upstream_header("chatgpt-account-id").as_deref(),
         Some("acct-1")
     );
+    assert_eq!(
+        env.upstream_header("user-agent").as_deref(),
+        Some("codex_cli_rs/9.9.9-test")
+    );
+    assert_eq!(
+        env.upstream_header("originator").as_deref(),
+        Some("codex_cli_rs")
+    );
+    let first_key = up["prompt_cache_key"].as_str().unwrap().to_string();
+    assert_eq!(
+        env.upstream_header("session-id").as_deref(),
+        Some(first_key.as_str())
+    );
+    assert_eq!(
+        env.upstream_header("thread-id").as_deref(),
+        Some(first_key.as_str())
+    );
 
     // Stream text → chat.completion.chunk + [DONE].
     let r = env
@@ -337,6 +356,7 @@ async fn chat_completions_over_codex() {
         .collect();
     assert_eq!(args, "{\"city\":\"Taipei\"}");
     assert!(calls.iter().all(|c| c["index"] == 0));
+    let tool_turn_key = env.upstream_body()["prompt_cache_key"].clone();
     let finish: Vec<&Value> = chunks
         .iter()
         .filter_map(|c| c.pointer("/choices/0/finish_reason"))
@@ -389,6 +409,20 @@ async fn chat_completions_over_codex() {
     assert_eq!(input[2]["call_id"], "call_xyz");
     assert_eq!(input[3]["type"], "function_call_output");
     assert_eq!(input[3]["call_id"], "call_xyz");
+    // Same conversation start → same cache key on the follow-up turn.
+    assert_eq!(env.upstream_body()["prompt_cache_key"], tool_turn_key);
+
+    // A client-supplied key is kept and drives the session headers.
+    env.post(
+        "/v1/chat/completions",
+        json!({"model": "cx", "prompt_cache_key": "client-key-1", "messages": [{"role": "user", "content": "hi"}]}),
+    )
+    .await;
+    assert_eq!(env.upstream_body()["prompt_cache_key"], "client-key-1");
+    assert_eq!(
+        env.upstream_header("session-id").as_deref(),
+        Some("client-key-1")
+    );
 
     // Image input survives.
     let r = env

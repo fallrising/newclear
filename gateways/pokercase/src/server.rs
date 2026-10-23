@@ -18,6 +18,7 @@ use tracing::info;
 use crate::admin;
 use crate::cancel::CancelOnDrop;
 use crate::claude;
+use crate::codex;
 use crate::config::AppConfig;
 use crate::cooldown::CooldownMap;
 use crate::error::{AppError, AppResult};
@@ -71,6 +72,8 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     }
     let store = Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
     let http = http_client::build_http_client()?;
+    let (codex_version, source) = codex::resolve_version(cfg.codex_version.as_deref()).await;
+    info!(version = %codex_version, source, "codex client version for upstream User-Agent");
 
     let state = AppState {
         cfg: cfg.clone(),
@@ -84,6 +87,7 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
             token_saver: cfg.token_saver,
             token_saver_max_chars: cfg.token_saver_max_chars,
             provider_base_overrides: cfg.provider_base_overrides.clone(),
+            codex_user_agent: codex::user_agent(&codex_version),
         },
         sessions: Sessions::default(),
     };

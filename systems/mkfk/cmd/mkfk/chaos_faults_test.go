@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand/v2"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -115,9 +116,25 @@ func (c *testCluster) drain(t *testing.T, h *history, transport *client.ClusterT
 	deadline := time.Now().Add(90 * time.Second)
 	for !caughtUp() {
 		if time.Now().After(deadline) {
+			c.recordReplicaState(h)
 			return final, []string{"consumers or replicas did not catch up within 90s after healing"}
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
 	return final, nil
+}
+
+// recordReplicaState adds every broker's per-partition Raft and replication
+// gauges to the timeline while the brokers still run, so a run that does
+// not converge shows which replica is behind and whether it is refusing
+// messages.
+func (c *testCluster) recordReplicaState(h *history) {
+	for id := uint32(1); id <= 3; id++ {
+		_, text := c.admin(id, "/metrics")
+		for _, line := range strings.Split(text, "\n") {
+			if strings.Contains(line, `topic="events"`) && !strings.Contains(line, "fetch") {
+				h.event("broker %d %s", id, line)
+			}
+		}
+	}
 }

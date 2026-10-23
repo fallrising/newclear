@@ -172,11 +172,11 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 		}
 		sender = r.outbox
 	}
-	onRole, onStall := b.roleLogger(topic, spec.ID), b.stallLogger(topic, spec.ID)
+	onRole, onStall, onReject := b.roleLogger(topic, spec.ID), b.stallLogger(topic, spec.ID), b.rejectLogger(topic, spec.ID)
 	if topic == groupsTopic {
 		b.groups, err = group.NewService(group.ServiceConfig{
 			Node: node, Proofs: proofSource{b}, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
-			OnStall: onStall, StorageFailed: log.RecoveryRequired,
+			OnStall: onStall, OnStepRejected: onReject, StorageFailed: log.RecoveryRequired,
 			Coordinator: group.CoordinatorConfig{State: group.Config{Partitions: b.userPartitionCount}},
 		})
 		if err != nil {
@@ -186,7 +186,7 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 	} else {
 		r.data, err = partition.NewData(partition.DataConfig{
 			Topic: topic, Partition: spec.ID, Node: node, Log: log, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
-			OnStall: onStall, StorageFailed: log.RecoveryRequired, OnISRShrink: b.isrLogger(topic, spec.ID),
+			OnStall: onStall, OnStepRejected: onReject, StorageFailed: log.RecoveryRequired, OnISRShrink: b.isrLogger(topic, spec.ID),
 			Replication: replicationConfig(b.self.ID, spec),
 		})
 		if err != nil {
@@ -209,6 +209,24 @@ func (b *Broker) stallLogger(topic string, id uint32) func(string, time.Duration
 	return func(kind string, held time.Duration) {
 		b.logger.Warn("actor stall", "topic", topic, "partition", id, "kind", kind,
 			"held_ms", held.Milliseconds(), "threshold_ms", partition.StallThreshold.Milliseconds())
+	}
+}
+
+// rejectLogger logs peer messages Raft refused to step, at most once a
+// second per replica with a count of the ones it skipped. It runs on the
+// replica's actor goroutine, so its state needs no lock.
+func (b *Broker) rejectLogger(topic string, id uint32) func(raft.Message, error) {
+	var last time.Time
+	skipped := 0
+	return func(message raft.Message, err error) {
+		now := b.config.Clock.Now()
+		if now.Sub(last) < time.Second {
+			skipped++
+			return
+		}
+		b.logger.Warn("raft step rejected", "topic", topic, "partition", id, "kind", string(message.Kind),
+			"from", message.From, "term", message.Term, "skipped", skipped, "error", err.Error())
+		last, skipped = now, 0
 	}
 }
 

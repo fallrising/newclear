@@ -60,6 +60,9 @@ type Config struct {
 	// OnStall, when set, observes each call, step, or tick that held the
 	// actor for at least StallThreshold, on the actor goroutine.
 	OnStall func(kind string, held time.Duration)
+	// OnStepRejected, when set, observes each peer message Raft refused to
+	// step, on the actor goroutine; the refusal is otherwise only counted.
+	OnStepRejected func(message raft.Message, err error)
 	// StorageFailed, when set, reports a quarantined log. The actor then
 	// stops serving instead of retrying writes against it.
 	StorageFailed func() bool
@@ -75,6 +78,7 @@ type Actor struct {
 	maxReads int
 	onRole   func(raft.RoleChange)
 	onStall  func(string, time.Duration)
+	onReject func(raft.Message, error)
 	storage  func() bool
 	calls    chan func()
 	inbox    chan raft.Message
@@ -118,7 +122,7 @@ func New(config Config, handler Handler) (*Actor, error) {
 	}
 	return &Actor{
 		node: config.Node, handler: handler, clock: config.Clock, ticks: config.TickClock, sender: config.Sender,
-		tick: config.TickInterval, maxReads: config.MaxPendingReads, onRole: config.OnRoleChange, onStall: config.OnStall, storage: config.StorageFailed,
+		tick: config.TickInterval, maxReads: config.MaxPendingReads, onRole: config.OnRoleChange, onStall: config.OnStall, onReject: config.OnStepRejected, storage: config.StorageFailed,
 		calls: make(chan func()), inbox: make(chan raft.Message, config.InboxSize),
 		stop: make(chan struct{}), done: make(chan struct{}), reads: make(map[string]func(error)),
 	}, nil

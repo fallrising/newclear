@@ -1,46 +1,24 @@
 package secretfile
 
 import (
-	"bufio"
-	"fmt"
 	"os"
 	"strings"
 )
 
-// Merge spec env_file contents with optional secrets.env (KEY=VALUE lines).
+// Merge preserves dotenv quoting and multiline values. Compose resolves duplicate
+// keys in order, so node-local secrets appended last retain override semantics.
 func Merge(envFile, secretsPath string) (string, error) {
-	out := map[string]string{}
-	parseInto(envFile, out)
-	if secretsPath != "" {
-		b, err := os.ReadFile(secretsPath)
-		if err != nil {
-			if os.IsNotExist(err) {
-				return "", err
-			}
-			return "", err
-		}
-		parseInto(string(b), out)
+	if secretsPath == "" {
+		return envFile, nil
 	}
-	var b strings.Builder
-	for k, v := range out {
-		fmt.Fprintf(&b, "%s=%s\n", k, v)
+	b, err := os.ReadFile(secretsPath)
+	if err != nil {
+		return "", err
 	}
-	return b.String(), nil
-}
-
-func parseInto(s string, out map[string]string) {
-	sc := bufio.NewScanner(strings.NewReader(s))
-	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		k, v, ok := strings.Cut(line, "=")
-		if !ok {
-			continue
-		}
-		out[k] = v
+	if envFile != "" && !strings.HasSuffix(envFile, "\n") {
+		envFile += "\n"
 	}
+	return envFile + string(b), nil
 }
 
 func Exists(path string) bool {

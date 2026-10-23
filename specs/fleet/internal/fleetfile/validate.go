@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
 // Config supplies host/domain policy used after JSON-Schema-shaped checks.
@@ -29,15 +30,15 @@ func TestConfig() Config {
 }
 
 var (
-	reName          = regexp.MustCompile(`^[a-z][a-z0-9-]{0,46}[a-z0-9]$`)
-	reVolumeName    = regexp.MustCompile(`^[a-z][a-z0-9-]{0,30}[a-z0-9]$`)
-	reEnvKey        = regexp.MustCompile(`^[A-Z_][A-Z0-9_]*$`)
-	reLabelKey      = regexp.MustCompile(`^[a-z0-9][a-z0-9./-]{0,62}$`)
-	reHealthPath    = regexp.MustCompile(`^/.*$`)
-	reMemory        = regexp.MustCompile(`^[0-9]+[kKmMgG][iI]?[bB]?$`)
-	reCPUs          = regexp.MustCompile(`^[0-9]+([.][0-9]+)?$`)
-	reSecretInEnv   = regexp.MustCompile(`(?i)(-----BEGIN|sk_live|ghp_|github_pat_|cfut_[A-Za-z0-9]{20,})`)
-	reMount         = regexp.MustCompile(`^/.*$`)
+	reName        = regexp.MustCompile(`^[a-z][a-z0-9-]{0,46}[a-z0-9]$`)
+	reVolumeName  = regexp.MustCompile(`^[a-z][a-z0-9-]{0,30}[a-z0-9]$`)
+	reEnvKey      = regexp.MustCompile(`^[A-Z_][A-Z0-9_]*$`)
+	reLabelKey    = regexp.MustCompile(`^[a-z0-9][a-z0-9./-]{0,62}$`)
+	reHealthPath  = regexp.MustCompile(`^/.*$`)
+	reMemory      = regexp.MustCompile(`^[0-9]+[kKmMgG][iI]?[bB]?$`)
+	reCPUs        = regexp.MustCompile(`^[0-9]+([.][0-9]+)?$`)
+	reSecretInEnv = regexp.MustCompile(`(?i)(-----BEGIN|sk_live|ghp_|github_pat_|cfut_[A-Za-z0-9]{20,})`)
+	reMount       = regexp.MustCompile(`^/.*$`)
 )
 
 const (
@@ -88,21 +89,21 @@ func validateMetadata(ve *Error, m *Metadata) {
 	if m.Name == "" {
 		ve.add("metadata.name", "required")
 	} else {
-		if len(m.Name) < minName || len(m.Name) > maxName || !reName.MatchString(m.Name) {
+		if utf8.RuneCountInString(m.Name) < minName || utf8.RuneCountInString(m.Name) > maxName || !reName.MatchString(m.Name) {
 			ve.add("metadata.name", "invalid_name")
 		}
 		if _, reserved := ReservedNames[m.Name]; reserved {
 			ve.add("metadata.name", "name_reserved")
 		}
 	}
-	if len(m.Description) > maxDescription {
+	if utf8.RuneCountInString(m.Description) > maxDescription {
 		ve.add("metadata.description", "too_long")
 	}
 	for k, v := range m.Labels {
 		if !reLabelKey.MatchString(k) {
 			ve.add("metadata.labels."+k, "invalid_label_key")
 		}
-		if len(v) > maxLabelVal {
+		if utf8.RuneCountInString(v) > maxLabelVal {
 			ve.add("metadata.labels."+k, "too_long")
 		}
 	}
@@ -118,7 +119,7 @@ func validateSpec(ve *Error, doc *Document, cfg Config) {
 		ve.add("spec.node", "node_not_found")
 	}
 
-	if s.Image != "" && (len(s.Image) > maxImage) {
+	if s.Image != "" && (utf8.RuneCountInString(s.Image) > maxImage) {
 		ve.add("spec.image", "too_long")
 	}
 	if cfg.RequireImage && strings.TrimSpace(s.Image) == "" {
@@ -137,10 +138,10 @@ func validateSpec(ve *Error, doc *Document, cfg Config) {
 	if len(s.Args) > maxArgs {
 		ve.add("spec.args", "too_many")
 	}
-	if len(s.WorkingDir) > maxWorkingDir {
+	if utf8.RuneCountInString(s.WorkingDir) > maxWorkingDir {
 		ve.add("spec.workingDir", "too_long")
 	}
-	if len(s.User) > maxUser {
+	if utf8.RuneCountInString(s.User) > maxUser {
 		ve.add("spec.user", "too_long")
 	}
 
@@ -173,11 +174,11 @@ func validateExpose(ve *Error, e *Expose) {
 		ve.add("spec.expose.port", "invalid_port")
 	}
 	if e.HealthPath != "" {
-		if len(e.HealthPath) > maxHealthPath || !reHealthPath.MatchString(e.HealthPath) {
+		if utf8.RuneCountInString(e.HealthPath) > maxHealthPath || !reHealthPath.MatchString(e.HealthPath) {
 			ve.add("spec.expose.healthPath", "invalid_health_path")
 		}
 	}
-	if len(e.Hostname) > maxHostname {
+	if utf8.RuneCountInString(e.Hostname) > maxHostname {
 		ve.add("spec.expose.hostname", "too_long")
 	}
 }
@@ -202,7 +203,7 @@ func validateEnvSecrets(ve *Error, s *Spec) {
 		if !reEnvKey.MatchString(k) {
 			ve.add("spec.env."+k, "invalid_env_key")
 		}
-		if len(v) > maxEnvVal {
+		if utf8.RuneCountInString(v) > maxEnvVal {
 			ve.add("spec.env."+k, "too_long")
 		}
 		if _, overlap := secretSet[k]; overlap {
@@ -228,7 +229,7 @@ func validateVolumes(ve *Error, vols []Volume) {
 			ve.add(p+".name", "volume_name_dup")
 		}
 		seen[v.Name] = struct{}{}
-		if len(v.Mount) > maxMount || !reMount.MatchString(v.Mount) {
+		if utf8.RuneCountInString(v.Mount) > maxMount || !reMount.MatchString(v.Mount) {
 			ve.add(p+".mount", "invalid_mount")
 		}
 	}
@@ -260,7 +261,11 @@ func DefaultHostname(name, mode string, cfg Config) string {
 }
 
 func validateAfterDefaults(ve *Error, doc *Document, cfg Config) {
-	host := doc.Spec.Expose.Hostname
+	host := normalizeHostname(doc.Spec.Expose.Hostname)
+	doc.Spec.Expose.Hostname = host
+	if host != "" && !validHostname(host) {
+		ve.add("spec.expose.hostname", "invalid_hostname")
+	}
 	mode := doc.Spec.Expose.Mode
 
 	if mode == ModePublic || mode == ModeAccess {
@@ -300,7 +305,7 @@ func allowedSuffixes(cfg Config) []string {
 }
 
 func hostnameAllowed(host string, cfg Config) bool {
-	h := strings.ToLower(strings.TrimSuffix(host, "."))
+	h := normalizeHostname(host)
 	for _, suf := range allowedSuffixes(cfg) {
 		s := strings.ToLower(strings.TrimPrefix(suf, "."))
 		if h == s || strings.HasSuffix(h, "."+s) {
@@ -311,7 +316,7 @@ func hostnameAllowed(host string, cfg Config) bool {
 }
 
 func inSuffixList(host string, suffixes []string) bool {
-	h := strings.ToLower(strings.TrimSuffix(host, "."))
+	h := normalizeHostname(host)
 	for _, suf := range suffixes {
 		s := strings.ToLower(strings.TrimPrefix(suf, "."))
 		if s == "" {
@@ -325,9 +330,9 @@ func inSuffixList(host string, suffixes []string) bool {
 }
 
 func isProtectedHostname(host string, cfg Config) bool {
-	h := strings.ToLower(host)
+	h := normalizeHostname(host)
 	check := func(p string) bool {
-		return p != "" && strings.ToLower(p) == h
+		return p != "" && normalizeHostname(p) == h
 	}
 	if check(cfg.UIHostname) || check(cfg.APIHostname) {
 		return true
@@ -348,4 +353,28 @@ func MaterializedHostname(doc *Document, cfg Config) string {
 	return DefaultHostname(doc.Metadata.Name, doc.Spec.Expose.Mode, cfg)
 }
 
+// Normalize absolute DNS names before policy comparisons and persistence.
+func normalizeHostname(host string) string {
+	return strings.ToLower(strings.TrimSuffix(host, "."))
+}
 
+func validHostname(host string) bool {
+	if len(host) > 253 {
+		return false
+	}
+	for _, label := range strings.Split(host, ".") {
+		if len(label) == 0 || len(label) > 63 {
+			return false
+		}
+		for i, c := range label {
+			if c >= 'a' && c <= 'z' || c >= '0' && c <= '9' {
+				continue
+			}
+			if c == '-' && i > 0 && i < len(label)-1 {
+				continue
+			}
+			return false
+		}
+	}
+	return true
+}

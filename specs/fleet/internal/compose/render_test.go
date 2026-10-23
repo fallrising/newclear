@@ -68,7 +68,7 @@ func TestRenderHelloGolden(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertYAMLEq(t, string(g), out)
-	if env != "LOG_LEVEL=info\n" {
+	if env != "LOG_LEVEL='info'\n" {
 		t.Fatalf("env %q", env)
 	}
 }

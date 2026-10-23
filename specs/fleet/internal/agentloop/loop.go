@@ -24,13 +24,13 @@ import (
 )
 
 type Loop struct {
-	Cfg      config.Agent
-	API      FleetAPI
-	Compose  composeclient.ComposeClient
-	Log      *slog.Logger
-	Probe    func(ctx context.Context, url string) (int, time.Duration, error)
-	Now      func() time.Time
-	Exit     func(int)
+	Cfg     config.Agent
+	API     FleetAPI
+	Compose composeclient.ComposeClient
+	Log     *slog.Logger
+	Probe   func(ctx context.Context, url string) (int, time.Duration, error)
+	Now     func() time.Time
+	Exit    func(int)
 
 	applyMu sync.Mutex
 	fails   map[string]int
@@ -171,13 +171,11 @@ func (l *Loop) Run(ctx context.Context) error {
 		return err
 	}
 	l.loadApplied()
-	if b, err := os.ReadFile(filepath.Join(l.StateDir(), "desired.json")); err == nil {
-		var d agentclient.Desired
-		if json.Unmarshal(b, &d) == nil {
-			_, _ = l.Apply(ctx, &d)
-		}
-	}
+	// Cached recovery can pull an image; heartbeat must already be independent.
 	go l.heartbeatLoop(ctx)
+	if d, err := l.cachedDesired(); err == nil {
+		_, _ = l.Apply(ctx, d)
+	}
 	t := time.NewTicker(l.interval())
 	defer t.Stop()
 	l.tickApply(ctx)
@@ -246,10 +244,27 @@ func (l *Loop) tickApply(ctx context.Context) {
 	d, err := l.API.GetDesired(ctx, tok, l.Cfg.NodeID)
 	if err != nil {
 		l.Log.Warn("control_plane_unreachable", "err", err.Error())
+		d, err = l.cachedDesired()
+		if err != nil {
+			return
+		}
+	} else {
+		if d == nil || d.NodeID != l.Cfg.NodeID {
+			l.Log.Error("desired_node_mismatch")
+			return
+		}
+		b, err := json.Marshal(d)
+		if err == nil {
+			err = writeFile(filepath.Join(l.StateDir(), "desired.json"), b, 0o600)
+		}
+		if err != nil {
+			l.Log.Error("desired_cache", "err", err.Error())
+			return
+		}
+	}
+	if ctx.Err() != nil {
 		return
 	}
-	b, _ := json.Marshal(d)
-	_ = writeFile(filepath.Join(l.StateDir(), "desired.json"), b, 0o600)
 	act, err := l.Apply(ctx, d)
 	if err != nil {
 		l.Log.Error("apply", "err", err.Error())
@@ -262,6 +277,22 @@ func (l *Loop) tickApply(ctx context.Context) {
 	} else {
 		l.Log.Info("desired_applied", "node_id", l.Cfg.NodeID, "generation", d.Generation)
 	}
+}
+
+// cachedDesired is also used on every failed fetch, not just at process start.
+func (l *Loop) cachedDesired() (*agentclient.Desired, error) {
+	b, err := os.ReadFile(filepath.Join(l.StateDir(), "desired.json"))
+	if err != nil {
+		return nil, err
+	}
+	var d agentclient.Desired
+	if err := json.Unmarshal(b, &d); err != nil {
+		return nil, err
+	}
+	if d.NodeID != l.Cfg.NodeID {
+		return nil, fmt.Errorf("cached desired belongs to another node")
+	}
+	return &d, nil
 }
 
 func (l *Loop) ServeHealthz(ctx context.Context, addr string) error {

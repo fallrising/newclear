@@ -1929,6 +1929,11 @@ Owner explicitly requests commit and PR merge after offline development. Isolate
 
 CC Quota delivery evidence gate: reviewed runtime/test SHA256 unchanged from T994 independent ACCEPT. Isolated candidate passes28 tests, installer syntax,41 project-success contracts/index,all task/report contracts,component links,diffcheck. The prior concurrent codex-usage document failure is resolved by isolation and retained historically. Authorize scoped commit/PR under explicit owner instruction; final-head CI/merge/readback still required. AC03/04 remain blocked, no usable tag.
 
+## Program: fleet-mainline / milestone delivery 2026-10-23
+
+Owner explicitly authorized milestone commit/push/PR/merge. Root delivers the previously reviewed AC-01/02/04 candidate in an isolated branch; AC-03 remains pending actual Cloudflare/WARP input. Source fingerprint `7416734bd434f50d901d6c421782aae6bae5728ac8d4c4037019ecd67af60245`. Prior bounded audit T993, isolated implementation T994 and independent read-only review T995 accepted final round03 after correcting the missing-file oracle. Root rechecks native gates, diff and public boundaries before commit, requires remote CI before merge, and records merge time in a subsequent board-only PR. No further worker launch or runtime changes are needed for delivery. Historical worker contracts/reports and private raw evidence remain preserved in the original workspaces. Public evidence and progress: [Fleet board](../specs/fleet/docs/tasks/BOARD.md), [acceptance](../specs/fleet/docs/evidence/2026-10-23-acceptance.md). Full-mainline result remains PARTIAL; no usable tag or deployment.
+
+Fleet delivery evidence gate: root inspected the scoped diff; full native runner, 41 project contracts, local links, source-manifest identity and diff whitespace passed. Original real-Docker round03 and independent ACCEPT remain applicable to unchanged runtime source. Rebuilt VCS metadata differs with the new base and is explicitly documented; do not claim binary equality. Sandbox socket failure is retained separately. Root accepts this bounded milestone for authorized commit/PR, pending final-head remote CI and merge readback. AC-03/full-mainline remain PARTIAL.
 
 ## Zircon T-0400 publication / 2026-10-23
 

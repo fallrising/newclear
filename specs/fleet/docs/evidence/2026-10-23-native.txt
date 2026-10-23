@@ -1,0 +1,41 @@
+test
+["go", "test", "-count=1", "./..."]
+?   	github.com/fallrising/newclear/specs/fleet/cmd/fleet-agent	[no test files]
+?   	github.com/fallrising/newclear/specs/fleet/cmd/fleetd	[no test files]
+?   	github.com/fallrising/newclear/specs/fleet/internal/agentclient	[no test files]
+ok  	github.com/fallrising/newclear/specs/fleet/internal/agentloop	0.382s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/api	0.040s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/cf	1.019s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/compose	0.004s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/composeclient	0.003s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/config	0.002s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/db	0.004s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/fleetfile	0.007s
+?   	github.com/fallrising/newclear/specs/fleet/internal/ingress	[no test files]
+?   	github.com/fallrising/newclear/specs/fleet/internal/model	[no test files]
+ok  	github.com/fallrising/newclear/specs/fleet/internal/secretfile	0.003s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/store	0.032s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/token	0.012s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/ui	0.023s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/version	0.012s
+
+example-test
+["go", "-C", "examples/hello-healthz", "test", "-count=1", "./..."]
+ok  	github.com/fallrising/newclear/specs/fleet/examples/hello-healthz	0.002s
+
+vet
+["go", "vet", "./..."]
+
+validate-schema
+["go", "test", "-count=1", "./internal/fleetfile", "./internal/compose"]
+ok  	github.com/fallrising/newclear/specs/fleet/internal/fleetfile	0.005s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/compose	0.004s
+
+fleetd
+["go", "build", "-trimpath", "-ldflags=-s -w -X github.com/fallrising/newclear/specs/fleet/internal/version.Version=acceptance -X github.com/fallrising/newclear/specs/fleet/internal/version.Commit=7416734bd434f50d901d6c421782aae6bae5728ac8d4c4037019ecd67af60245", "-o", "<artifact-bin>/fleetd", "./cmd/fleetd"]
+
+fleet-agent
+["go", "build", "-trimpath", "-ldflags=-s -w -X github.com/fallrising/newclear/specs/fleet/internal/version.Version=acceptance -X github.com/fallrising/newclear/specs/fleet/internal/version.Commit=7416734bd434f50d901d6c421782aae6bae5728ac8d4c4037019ecd67af60245", "-o", "<artifact-bin>/fleet-agent", "./cmd/fleet-agent"]
+
+hello-healthz
+["go", "-C", "examples/hello-healthz", "build", "-trimpath", "-o", "<artifact-bin>/hello-healthz", "."]

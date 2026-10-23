@@ -166,13 +166,24 @@ impl Translate {
                     Self::text(&mut out, t);
                 }
                 out.push(record(&json!({"type": "content_block_stop", "index": 0})));
+                // cursor-agent reports usage on the result (camelCase, not in its docs).
+                let n = |k: &str| {
+                    v.pointer(&format!("/usage/{k}"))
+                        .and_then(|x| x.as_i64())
+                        .unwrap_or(0)
+                };
                 out.push(record(&json!({"type": "message_delta",
-                    "delta": {"stop_reason": "end_turn", "stop_sequence": null},
-                    "usage": {"output_tokens": 0}})));
+                "delta": {"stop_reason": "end_turn", "stop_sequence": null},
+                "usage": {
+                    "input_tokens": n("inputTokens"),
+                    "output_tokens": n("outputTokens"),
+                    "cache_read_input_tokens": n("cacheReadTokens"),
+                    "cache_creation_input_tokens": n("cacheWriteTokens"),
+                }})));
                 out.push(record(&json!({"type": "message_stop"})));
                 self.done = true;
             }
-            _ => {} // system/init, user echo, flushes, the agent's own tool calls
+            _ => {} // system/init, user echo, thinking, flushes, the agent's own tool calls
         }
         out
     }
@@ -348,6 +359,19 @@ mod tests {
             .collect();
         assert_eq!(text, "Hello");
         assert!(out.last().unwrap().starts_with("event: message_stop"));
+        // Usage from the result (as cursor-agent 2026.10.16 prints it).
+        let mut t = Translate::default();
+        let out = t.on_line(
+            &json!({"type": "result", "subtype": "success", "result": "x",
+                "usage": {"inputTokens": 9359, "outputTokens": 33, "cacheReadTokens": 3328, "cacheWriteTokens": 0}}),
+            "m",
+        );
+        let delta = out
+            .iter()
+            .find(|r| r.starts_with("event: message_delta"))
+            .unwrap();
+        assert!(delta.contains("\"input_tokens\":9359") && delta.contains("\"output_tokens\":33"));
+        assert!(delta.contains("\"cache_read_input_tokens\":3328"));
         // Without --stream-partial-output deltas, the result text is used.
         let mut t = Translate::default();
         let out = t.on_line(

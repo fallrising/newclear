@@ -56,6 +56,7 @@ fn large_workspace_is_lazy_and_fast() {
     let record = serde_json::json!({"files":5000,"page_size":500,"duration_us":elapsed.as_micros(),"budget_us":500_000,"trace":trace,"profile":"debug","arch":std::env::consts::ARCH,"os":std::env::consts::OS});
     eprintln!("{record}");
     if let Ok(directory) = std::env::var("AGENT_EVIDENCE_DIR") {
+        fs::create_dir_all(&directory).unwrap();
         fs::write(
             std::path::Path::new(&directory).join("directory-benchmark.json"),
             format!("{record}\n"),

@@ -90,7 +90,14 @@ fn instability_retries_only_twice_and_growth_is_bounded() {
 fn nonregular_fifo_rejected_without_blocking() {
     let root = temp();
     let guard = Guard::open(&root).unwrap();
-    rustix::fs::mkfifoat(&guard.root, "pipe", Mode::RUSR | Mode::WUSR).unwrap();
+    assert!(
+        std::process::Command::new("mkfifo")
+            .args(["-m", "600"])
+            .arg(root.join("pipe"))
+            .status()
+            .unwrap()
+            .success()
+    );
     assert_eq!(
         guard
             .read("pipe", 100, AppErrorCode::DocumentTooLarge)

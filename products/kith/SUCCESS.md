@@ -99,3 +99,7 @@ npm run e2e:validate
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須核對歷史驗收後的 source/config 差異，補選定真 provider 與 native runner 對話、撤權及成本邊界證據；本次不因已部署或 fake E2E 建立全項目標記。
+
+## #397 歷史 E2E 失敗處置（文件範圍）
+
+本次先核對兩個原始 job、固定來源與既有修正，再交付[處置報告](tasks/397-e2e-disposition/analysis.md)。驗收是來源／日誌可追溯、原斷言保留、CI 政策與測試修復分開；不改產品或恢復已由 owner 移除的 hosted E2E。文件連結、項目契約、獨立審查與 PR CI 是本次 gates，主線資格與真 provider 驗收不變。

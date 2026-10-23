@@ -1,6 +1,7 @@
 # FE Review — pokercase — DESIGN
 
-> 狀態：**草稿，D1 與 AC-15 待擁有者確認**。本輪只交付文件；合併不代表已啟動、截圖或完成產品驗收。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 保留 ANSI 快照與純文字報告；合成登入、禁止真 provider。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -10,8 +11,8 @@ Web admin 與只讀 TUI 使用同一受控環境、本次產生的合成資料�
 
 - 來源：d8ca3c4089a9fbe852459da3d9602329224230e7；[README](../README.md)、[AGENTS](../AGENTS.md)、[SUCCESS](../SUCCESS.md)、[安全契約](../docs/security.md)、[費用 admission](../docs/cost-safety.md)。
 - [REVIEW](REVIEW.md) 允許 dormant 元件在設計範圍內修前端，不恢復新功能開發。
-- **D1 假設，待確認：** TUI 保留 ANSI 原檔與純文字報告，分別保存；不當成瀏覽器頁面。
-- [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[DESIGN-PROMPT](../../../docs/fe-review/DESIGN-PROMPT.md)、[SDD](../../../docs/fe-review/SDD.md)；本設計對應 AC-12，擁有者確認 AC-15 仍 pending。
+- **D1 已確認：** TUI 保留 ANSI 原檔與純文字報告，分別保存；不當成瀏覽器頁面。
+- [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[DESIGN-PROMPT](../../../docs/fe-review/DESIGN-PROMPT.md)、[SDD](../../../docs/fe-review/SDD.md)；本設計對應 AC-12，owner 已明確確認本設計方向。
 
 ## 不做的事
 
@@ -75,6 +76,6 @@ M1 完成後，從 **repository root** 使用本次 ephemeral targets（填本�
 
 ## 開放問題
 
-1. D1 ANSI 原檔＋純文字報告仍待擁有者確認。
-2. AC-15 需擁有者接受假設；本次代理合併權限不等於設計決策已確認。
+1. D1 ANSI 原檔＋純文字報告已由 owner 確認。
+- Owner 已明確確認本設計方向；原產品缺口與未執行驗證不因此通過。
 3. M1 fixture／登入／mask／tmux wrapper 尚未實作；完成前沒有受保護頁／Usage 的完整 capture harness。超出前端範圍的後端接線另案提議。

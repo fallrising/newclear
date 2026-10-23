@@ -1,6 +1,7 @@
 # FE Review Prompt — loom
 
-先讀 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[REVIEW](REVIEW.md)、[DESIGN](DESIGN.md) 與 [SUCCESS](../SUCCESS.md)。本工作包是 **第 1 輪 draft，待 owner D1 與 AC-15 確認**；不啟動、不修改程式碼、不跑 capture。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 review-only IPC/event preload；保留 callback 生命週期與未知 invoke 拒絕，不改 production adapter。 第 2／3 輪仍未由本次文件回寫執行。
+先讀 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[REVIEW](REVIEW.md)、[DESIGN](DESIGN.md) 與 [SUCCESS](../SUCCESS.md)。本工作包是 **第 1 輪設計方向已由 owner 確認**；不啟動、不修改程式碼、不跑 capture。
 
 ## 專案與目前入口
 
@@ -12,7 +13,7 @@
 
 目前 **未 capture-ready**。`targets.json` 只描述 dev server 與 `/`，`verified: false`；它不會裝 IPC mock。共用 capture.mjs 沒有 addInitScript hook，不能單獨執行就聲稱完成下列流程。DESIGN 的本元件 review fixture/driver 仍須第 2 輪實作與自測；實際 CLI 待交付後填回。
 
-隔離 namespace 內讓 server/browser 同處、只綁127.0.0.1；不用 host network、不與另一元件共用1420。用全新 browser context/profile、合成資料與 allowlist 環境，不繼承真 token、vault/workspace/app-data。cache/build/temp 經 shared launcher；唯一 artifacts/evidence 保留。OS network 邊界和 browser request allowlist 都要驗證。不得用真 native runtime 補 mock 缺口。
+隔離 namespace 內讓 server/browser 同處、只綁127.0.0.1；不用 host network、不與另一元件共用1420。用全新 browser context/profile、合成資料與 allowlist 環境，不繼承真 token、vault/workspace/app-data。cache 沿用共用設定，build/temp 經 shared launcher；唯一 artifacts/evidence 保留。OS network 邊界和 browser request allowlist 都要驗證。不得用真 native runtime 補 mock 缺口。
 
 以下是既有 scripts 的**未驗證線索**，不是可直接完成 review 的 harness：
 

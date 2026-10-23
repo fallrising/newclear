@@ -1,6 +1,7 @@
 # FE Review — fanzloud / Codebox operator — DESIGN
 
-> 狀態：**第 1 輪草稿，D1／AC-15 待確認**。只交付設計文件；沒有啟動 UI、執行 capture、連接 Cloud runner 或修改產品程式。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採靜態資產＋有限假 API/WS，不新增 production fake-runner 或連真 Cloud。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -10,7 +11,7 @@
 
 - 來源基準 `d8ca3c4089a9fbe852459da3d9602329224230e7`；2026-10-23 UTC 回讀 main `65a22ac15ec8d334d4c0e7c778b690b1076358de`，八份相關 FE／main 來源與基準一致。[README](../README.md)、[SUCCESS](../SUCCESS.md) 的 dormant 與未完成主線保留。
 - 已決定：issue [#159](https://github.com/fallrising/newclear/issues/159) 允許第 2 輪在 DESIGN 範圍修前端，不新增功能或 major 升級。
-- **D1 假設，待擁有者確認：** 採 [REVIEW](REVIEW.md) 建議 (b)，新增本元件 `fe-review/` 專用的靜態檔＋最小假 API／WS 擷取 harness；不新增 production fake-runner 模式，也不使用真實 runner 設定。
+- **D1 已確認：** 採 [REVIEW](REVIEW.md) 建議 (b)，新增本元件 `fe-review/` 專用的靜態檔＋最小假 API／WS 擷取 harness；不新增 production fake-runner 模式，也不使用真實 runner 設定。
 - 規範：[AGENTS](../AGENTS.md)、[TD](../docs/TD.md) §1.6–1.7／9.3、[ADR-0002](../docs/adr/ADR-0002-personal-byos-codex-p0.md)、[ADR-0004](../docs/adr/ADR-0004-p0-session-api-and-stream.md)、[T006](../docs/specs/SPEC-T006-private-operator-web.md)、[T007](../docs/specs/SPEC-T007-p0-subscription-e2e.md)、共用 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md) 與 [SDD](../../../docs/fe-review/SDD.md) AC-14／AC-15。
 - 第 2 輪 production 修改前，仍須依元件規則建立 Ready task、對應 CU／規格與測試骨架、取得 fresh-context acceptance。FE 例外不授權跳過規格或改動已接受的 API／安全語意；必要規範修正另案處理。
 
@@ -64,6 +65,6 @@ M1 的 wrapper 須先完成：新 task state、namespace／egress／loopback 確
 
 ## 開放問題
 
-1. **D1 待擁有者確認**：是否採 (b) 靜態資產＋有限假 API/WS 先行？(a) production fake-runner mode 是不同後端範圍，本設計不授權。
+1. D1 已確認採靜態資產＋有限假 API/WS；production fake-runner mode 仍是範圍外後端變更。
 2. M1 的 HTTPS/WSS、fixture、trust、process/state ownership 與擷取 wrapper 尚未實作。若任何 security／atomicity／retry／recovery 契約無法從現有 T005/T006 規格確定，按 AGENTS 記 `[TD-GAP]` 並先補規範，不猜測。
-3. AC-15 的 owner 假設確認仍 pending；代理交付／合併授權不代替人類接受，dormant 與產品主線缺口不變。
+- Owner 已明確確認本設計方向；原產品缺口與未執行驗證不因此通過。

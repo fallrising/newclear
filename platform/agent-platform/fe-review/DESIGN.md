@@ -1,6 +1,7 @@
 # FE Review — agent-platform — DESIGN
 
-> 活文件：描述第 2 輪要做的修改與驗收方式。狀態：**草稿**（待擁有者在設計 PR 確認假設）。每次修改都走 PR。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：隔離 PostgreSQL＋真 FastAPI＋fake backend；補拍覆寫不冒充真整合。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -8,8 +9,8 @@
 
 ## 依據
 
-- REVIEW.md 已決定：無。
-- 假設（待擁有者在本 PR 確認）：
+- REVIEW.md 已決定：採用上述 owner 確認的方案。
+- 已確認的設計依據（2026-10-23）：
   - **A1（D1）第 3 輪的後端形態採 (a)**：容器內起 PostgreSQL＋真實 FastAPI＋fake backend，以既有的 `scripts/browser-fixture.py serve` 作為啟動與 seed 入口；fake backend 產生不了的狀態，以 Playwright `page.route` 在同一個真實伺服器上覆寫對應 API 回應補拍（M1）。
   - **A2** `pausing` 狀態的顯示文字用「正在暫停」（M2），與既有的「正在恢復」「正在取消」一致。
   - **A3** 審批面板的「有效至」時間改用與任務列表相同的 `zh-TW` 短格式（M3）。

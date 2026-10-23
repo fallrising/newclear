@@ -1,6 +1,7 @@
 # FE Review — fleet — DESIGN
 
-> 活文件：描述第 2 輪要做的修改與驗收方式。狀態：**草稿**（待擁有者在設計 PR 確認）。每次修改都走 PR。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 保留樣式／a11y 與契約限制；D2 採 (a) 模板修正 swap、Rollback JSON、錯誤提示，不改後端 API。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -8,8 +9,8 @@ fleet 的 UI 是 `fleetd` 內建的 Go `html/template` + htmx 伺服器渲染頁
 
 ## 依據
 
-- REVIEW.md 已決定：無。
-- 假設（待擁有者在本 PR 確認）：
+- REVIEW.md 已決定：採用上述 owner 確認的方案。
+- 已確認的設計依據（2026-10-23）：
   - **D1 採 (a)**：第 2 輪只做樣式與 a11y 修正。本設計對 (a) 的解讀是：可以改 `internal/ui/static/app.css`；可以在模板加上不影響行為的屬性與標記（`aria-*`、`scope`、`id`、`<caption>`、`<meta name="viewport">`、純呈現用的外層 `<div>`）與空狀態列；可以在 `internal/ui/pages.go` 傳入只影響呈現的模板資料。不改路由、表單欄位名、cookie、`id="row-<name>"` 片段、`hx-post` 的目標路徑、API 回應格式。
   - **D2 採 (a)**：服務頁動作按鈕與 Rollback 的修正只在模板內完成（見 M6、M7），不改後端 handler。
 - 相關規範：

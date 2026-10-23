@@ -1,6 +1,7 @@
 # FE Review Prompt — flowshot
 
-先讀 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[REVIEW](REVIEW.md)、[DESIGN](DESIGN.md) 與 [SUCCESS](../SUCCESS.md)。本工作包是 **第 1 輪 draft，待 owner D1/D2 與 AC-15 確認**；不啟動、不修改程式碼、不跑 capture。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 review-only preload；D2 本 FE 切片做現有 shell 的 Web 截圖，原生／Mac 產品 gate 不變。 第 2／3 輪仍未由本次文件回寫執行。
+先讀 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[REVIEW](REVIEW.md)、[DESIGN](DESIGN.md) 與 [SUCCESS](../SUCCESS.md)。本工作包是 **第 1 輪設計方向已由 owner 確認**；不啟動、不修改程式碼、不跑 capture。
 
 ## 專案與目前入口
 
@@ -12,7 +13,7 @@
 
 目前 **未 capture-ready**。`targets.json` 只描述 dev server 與 `/`，`verified: false`；它不會裝 IPC mock。共用 capture.mjs 沒有 addInitScript hook，不能單獨執行就聲稱完成下列流程。DESIGN 的本元件 review fixture/driver 仍須第 2 輪實作與自測；實際 CLI 待交付後填回。
 
-隔離 namespace 內讓 server/browser 同處、只綁127.0.0.1；不用 host network、不與另一元件共用1420。用全新 browser context/profile、合成資料與 allowlist 環境，不繼承真 token、vault/workspace/app-data。cache/build/temp 經 shared launcher；唯一 artifacts/evidence 保留。OS network 邊界和 browser request allowlist 都要驗證。不得用真 native runtime 補 mock 缺口。
+隔離 namespace 內讓 server/browser 同處、只綁127.0.0.1；不用 host network、不與另一元件共用1420。用全新 browser context/profile、合成資料與 allowlist 環境，不繼承真 token、vault/workspace/app-data。cache 沿用共用設定，build/temp 經 shared launcher；唯一 artifacts/evidence 保留。OS network 邊界和 browser request allowlist 都要驗證。不得用真 native runtime 補 mock 缺口。
 
 以下是既有 scripts 的**未驗證線索**，不是可直接完成 review 的 harness：
 
@@ -32,7 +33,7 @@ npm run dev -- --host 127.0.0.1 --port 1420 --strictPort
 - `/`：pending→Connecting to the desktop core；resolve→Foundation ready／Version/Revision/Profile；typed reject→Build information unavailable／alert。
 - 三場景各用合成短字串／長 metadata，desktop/tablet/mobile 檢查字體、窄螢幕堆疊、截斷與狀態可讀性。
 - Markdown 開啟／閱讀／annotation/list 還不是此主入口可走通的旅程，保留主線缺口；不得用 mock 生造產品畫面。
-- 原生 screenshot D2 待決定，browser 證據不取代 Mac `<1500ms` 或真 IPC gate。
+- 原生 screenshot D2 已確認本 FE 切片僅 Web 層，browser 證據不取代 Mac `<1500ms` 或真 IPC gate。
 
 ## 檢查與證據
 

@@ -1,10 +1,11 @@
 # FE Review — ojbquay console — REVIEW
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1/A1 保留真 Compose 整合來源；先交付有所有權與 loopback 證據的隔離方案，額外後端變更另定範圍。 第 2／3 輪仍未由本次文件回寫執行。
 > 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — [`DESIGN.md`](DESIGN.md) 已草擬，待擁有者在設計 PR 確認假設 A1。
+- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -26,13 +27,13 @@ Drawer 設定寬 720–900px（例如 `pages/SubscriptionsPage.tsx:131` 的 900�
 
 `pages/DashboardPage.tsx:47-50` 只監聽 `window` resize；收合側欄改變內容寬度時圖表不重算。
 
-## 需要放開或決定的點
+## 本次確認的決定
 
 ### D1 第 3 輪的後端
 
 - 選項：(a) 寫一個實作 console 所需 `/api/v1` 端點的 mock 伺服器；(b) 用既有 Compose stack，empty／error 狀態以互動腳本的 `page.route` 覆寫。
 - 建議：(b) 保留作整合來源，但先確認 DESIGN M1 的隔離方案。現有預設 project、published ports 與保留 stack 不滿足此 harness 的 loopback／所有權契約；歷史旅程通過不代表新環境已就緒。若需 Compose／後端修改，另立範圍。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以 (b) 作為假設 A1。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ## 進入第 2 輪的條件
 
@@ -43,4 +44,4 @@ Drawer 設定寬 720–900px（例如 `pages/SubscriptionsPage.tsx:131` 的 900�
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- [#550](https://github.com/fallrising/newclear/pull/550)：本次設計與複核修正；D1／AC-15 仍待確認，沒有執行 UI 或 stack。
+- [#550](https://github.com/fallrising/newclear/pull/550)：本次設計與複核修正；D1 已由 owner 確認，沒有執行 UI 或 stack。

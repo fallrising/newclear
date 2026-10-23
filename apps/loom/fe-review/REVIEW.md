@@ -1,10 +1,11 @@
 # FE Review — loom — REVIEW
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 review-only IPC/event preload；保留 callback 生命週期與未知 invoke 拒絕，不改 production adapter。 第 2／3 輪仍未由本次文件回寫執行。
 > 活文件：記目前狀態，每次變更走 PR；依 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)。
 
 ## 目前輪次
 
-- **第 1 輪：DESIGN 已草擬，待 owner 確認**，見 [DESIGN](DESIGN.md)。AC-11 是 paired 交付，AC-15 人工確認尚未完成。
+- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
 - 第 2 輪修改、fixture/driver 實作與第 3 輪 capture 均未開始；`targets.json` 仍 `verified: false`。
 
 ## 修改權限
@@ -24,15 +25,15 @@
 ## 已決定
 
 - #156 允許 paired、design-only 交付；本輪不啟動 UI、不改 product code/tests/dependencies/CI。
-- 尚無 D1 的 owner 確認；不因 draft 存在或靜態檢查通過而移為已決定。
+- D1 已獲 owner 明確確認；依據是決策紀錄，不是 draft 或靜態檢查。
 
-## 需要放開或決定的點
+## 本次確認的決定
 
 ### D1 IPC 解耦方式
 
 - 選項：(a) production frontend IPC adapter；(b) review-only `addInitScript` preload。
 - 建議／本 DESIGN 假設：(b) 先行。需完整 invoke/listen/callback 與事件生命週期；不是只設 window.invoke。
-- 狀態：**待擁有者決定**；若 (b) 不可行，先修 DESIGN 再確認，不自行改為 (a)。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ## 進入第 2 輪的條件
 
@@ -44,4 +45,4 @@
 
 - fallrising/newclear#141：建立工作包與三輪節奏。
 - fallrising/newclear#144：既有決定與設計文件入口。
-- 本次 paired 設計：Refs [#156](https://github.com/fallrising/newclear/issues/156)；PR 尚待 orchestrator 建立並回填，不捏造編號，不自動關 issue。
+- 本次 paired 設計：Refs [#156](https://github.com/fallrising/newclear/issues/156)；設計 PR [#555](https://github.com/fallrising/newclear/pull/555) 已合併，確認依據見本頁決策紀錄。

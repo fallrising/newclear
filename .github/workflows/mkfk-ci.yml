@@ -27,7 +27,7 @@ jobs:
   gates:
     name: Format, vet, unit, race, model, integration
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -45,7 +45,7 @@ jobs:
   chaos:
     name: Chaos profile (short)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -68,7 +68,7 @@ jobs:
   demo:
     name: Three-broker Compose demo (local image, no registry)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

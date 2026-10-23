@@ -37,6 +37,7 @@ a complete APM service.
 
 ## Start here
 
+- [Current status](docs/STATUS.md): dated phase summary and links to the acceptance contract and task evidence.
 - [Development quickstart](docs/quickstart.md): tests and authenticated local ingestion and Prometheus queries.
 - [Phase 1 deployment](deploy/README.md): pinned local Compose stack and owned E2E prerequisites.
 - [Code and documentation inventory](docs/inventory.md): implementation evidence,

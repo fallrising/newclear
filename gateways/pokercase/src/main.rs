@@ -1,13 +1,13 @@
 mod admin;
 mod agy;
+mod borrowed;
 mod cancel;
 mod claude;
 mod claude_code;
 mod claude_mcp;
 mod config;
 mod cooldown;
-mod cursor_agent;
-mod cursor_proto;
+mod cursor_cli;
 mod error;
 mod guard;
 mod http_client;
@@ -96,6 +96,20 @@ enum Commands {
         /// Seconds a Claude Code run waits for the client's tool results
         #[arg(long, env = "THINROUTER_CLAUDE_IDLE_SECS", default_value_t = 600)]
         claude_idle_secs: u64,
+        /// Cursor Agent CLI used by the `cursor` provider (default: `cursor-agent` on PATH)
+        #[arg(long, env = "THINROUTER_CURSOR_BIN")]
+        cursor_bin: Option<String>,
+        /// Concurrent Cursor Agent processes
+        #[arg(long, env = "THINROUTER_CURSOR_MAX_RUNS", default_value_t = 2)]
+        cursor_max_runs: usize,
+        /// Enable the cursor provider, accepting that cursor-agent can use the account's
+        /// Cursor plugins (e.g. Gmail) for any client prompt.
+        #[arg(
+            long,
+            env = "THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS",
+            default_value_t = false
+        )]
+        cursor_accept_account_plugins: bool,
     },
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -188,6 +202,9 @@ async fn main() -> Result<()> {
             claude_bin,
             claude_max_runs,
             claude_idle_secs,
+            cursor_bin,
+            cursor_max_runs,
+            cursor_accept_account_plugins,
         } => {
             let mut cfg = AppConfig::new(
                 host,
@@ -205,6 +222,9 @@ async fn main() -> Result<()> {
             cfg.claude_bin = claude_bin;
             cfg.claude_max_runs = claude_max_runs;
             cfg.claude_idle_secs = claude_idle_secs;
+            cfg.cursor_bin = cursor_bin;
+            cfg.cursor_max_runs = cursor_max_runs;
+            cfg.cursor_accept_account_plugins = cursor_accept_account_plugins;
             server::run(cfg).await
         }
         Commands::Doctor {

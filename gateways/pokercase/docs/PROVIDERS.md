@@ -8,7 +8,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `claude` | `cc`, `anthropic`, `claude_code` | **active** (text, images, client tools via MCP) | local Claude Code CLI (`claude -p`), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
-| `cursor` | `cu` | **active** | AgentService HTTP/2 Connect+proto (text) | `https://agent.api5.cursor.sh` |
+| `cursor` | `cu`, `cursor_agent` | **opt-in** (`--cursor-accept-account-plugins`; text only) | local Cursor Agent CLI (`cursor-agent -p`, read-only) | `local://cursor-agent` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
 | `agy` | `ag`, `antigravity` | **active** | Antigravity generateContent | `https://cloudcode-pa.googleapis.com` |
@@ -16,7 +16,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 **Status meaning**
 
 - **active** — import tokens + forward with format conversion (chat ↔ responses / anthropic).
-- **partial** — store OAuth/session tokens; full wire protocol (Cursor protobuf, Antigravity Gemini envelope) is **not** built yet. Use when you need them as a *project* and we implement the executor.
+- **partial** — store OAuth/session tokens; full wire protocol is **not** built yet. Use when you need them as a *project* and we implement the executor.
 
 ### Import
 
@@ -111,7 +111,8 @@ When you need one of these: open an item, implement `ProviderProfile` + forward 
 | siwc / grok | `/v1/responses` → forwarded natively (all items kept; siwc applies its preview limits above). `/v1/chat/completions` and `/v1/messages` → converted to a **Responses** body (tools, `tool_calls` ↔ `function_call`, tool results ↔ `function_call_output`, images ↔ `input_image`); the Responses SSE is converted back to `chat.completion.chunk` or Anthropic events (text and tool calls) |
 | claude | Every client protocol → one prompt for the local `claude -p` (caller system in `<external_system_instructions>`); its stream events → client protocol |
 | opencode | Chat Completions passthrough (+ `x-opencode-client`); `/v1/responses` clients get a full Responses event stream (message and `function_call` items, usage) converted from the chat chunks |
-| cursor / agy | Import only until executors land |
+| cursor | Every client protocol → one text prompt (caller system in `<external_system_instructions>`) for `cursor-agent -p --output-format stream-json --stream-partial-output --mode ask --sandbox enabled --trust --workspace <empty dir>`; never `--force` / `--approve-mcps`. Only streaming deltas are used (duplicate flushes and `thinking` events skipped); usage comes from the `result` line (`inputTokens`, `outputTokens`, `cacheReadTokens`); output is converted to the client protocol. Tools and images → 501 (retryable). The prompt is a command-line argument: at most 128 KiB, and visible to other local users in `ps`. |
+| agy | Antigravity `generateContent` envelope |
 
 ### siwc prompt cache
 
@@ -124,7 +125,16 @@ key; that only shares a cache prefix they already have in common.
 
 ### Token refresh
 
-Automated for **siwc / grok**, and **agy** when Google OAuth client env is set:
+**grok imported by `import-local` is borrowed, never refreshed.** xAI refresh tokens
+rotate: a refresh by thinrouter would invalidate the Grok CLI's stored token and log it
+out. So `import-local` keeps no Grok refresh token and records `~/.grok/auth.json` as the
+source; every upstream attempt re-reads the access token from that file. On a 401 it
+re-reads once (the CLI may have refreshed) and otherwise returns 401 asking you to run
+`grok`. `refresh`, refresh-all and the admin refresh endpoint skip or refuse it; the file
+is only read, never written. agy (Google) refresh tokens do not rotate, so agy is
+refreshed normally.
+
+Automated for **siwc**, grok connections imported by hand with a refresh token, and **agy** when Google OAuth client env is set:
 
 - On request: refresh if `expires_at` is within 5 minutes  
 - On upstream **401**: one refresh + retry  
@@ -138,8 +148,21 @@ export THINROUTER_AGY_CLIENT_ID='…'
 export THINROUTER_AGY_CLIENT_SECRET='…'
 ```
 
-**cursor** refresh: `POST https://api2.cursor.sh/oauth/token`.  
-**cursor** chat: AgentService `/agent.v1.AgentService/Run` over HTTP/2 (text-only; tools not supported).
+**cursor and account plugins.** Probed with cursor-agent 2026.10.16 (2026-10-23): in
+`-p --mode ask --sandbox enabled` the agent's tool catalog still lists the Cursor
+account's plugins (Gmail, X) and they need no approval, and `cursor-agent plugin` only
+manages marketplaces. A client prompt can therefore make the agent read plugin data, so
+the provider refuses requests (503) unless the operator passes
+`--cursor-accept-account-plugins`.
+
+**cursor and MCP (for client tools, not built yet).** A workspace `.cursor/mcp.json`
+server is "not loaded (needs approval)" without `--approve-mcps`; with it, the agent
+first looks up the schema (`getMcpToolsToolCall`), then calls `mcpToolCall` with
+`name: "<server>-<tool>"`, and the server receives a plain MCP `tools/call` with the
+original tool name and waits for its answer — the same shape as the Claude Code bridge.
+`--approve-mcps` approves every configured MCP server, not just one.
+
+**cursor** needs no refresh: `cursor-agent` keeps its own login (`cursor-agent login`); thinrouter holds no Cursor token and stored ones are cleared on database open.
 
 ### Local import
 
@@ -153,7 +176,7 @@ Reads:
 |----------|------|
 | claude | nothing read: creates the connection when the `claude` CLI is installed |
 | grok | `~/.grok/auth.json` |
-| cursor | `~/.config/cursor/auth.json` |
+| cursor | nothing read: creates the connection when the `cursor-agent` CLI is installed |
 | opencode | free (no file) |
 | agy | `~/.gemini/antigravity-cli/antigravity-oauth-token` |
 

@@ -1,0 +1,60 @@
+{
+  "source_commit": "8ba09cf662bcc1b9d4ccebc0a7a1fba85cc47dc5",
+  "asset_revision": "0b1797ef92f58caa73697aaa1f3bd4d88eda1d08",
+  "asset_lock_sha256": "83908ca0f1383e4b35ae239de555645bbc553133f33d7ce4dc4124e8372c3201",
+  "upstream_clean": true,
+  "verified_public_assets": 283,
+  "public_asset_bytes": 492425923,
+  "docker_engine": "29.8.1",
+  "compose": "5.5.1",
+  "images": {
+    "server": {
+      "id": "sha256:f40acc6d5217917a4609e3104726237ce70b3e061081464987a9d7aa7b9e66d5",
+      "architecture": "amd64",
+      "os": "linux",
+      "size": 217251888
+    },
+    "client": {
+      "id": "sha256:c2edb80cff5334a7fdf353c60c9290e47f2a14e413b39f8b46d0804639eef948",
+      "architecture": "amd64",
+      "os": "linux",
+      "size": 2137803025
+    }
+  },
+  "terrain": {
+    "regions": 16,
+    "height_tiles": 4096,
+    "manifests": 4096,
+    "bytes": 229845390,
+    "worldgen_sha256": "6ec268ee5b44b6fb2ad5d86be0a127f0a0fcde988b35e051a8bf8963dcf0dcc9",
+    "reentry_skipped_bake": true
+  },
+  "active_openmmo_containers": 0,
+  "compose_runtime_verified": false,
+  "google_login_verified": false,
+  "two_player_gameplay_verified": false,
+  "character_persistence_restore_verified": false,
+  "asset_rights_evidence_complete": false,
+  "evidence_log_sha256": {
+    "oauth-red-20261023/tests.log": "ced84c65c4d8250d4aa50aafedd2d58d76fb293eb18f8ea7fe623659cf1ebcb6",
+    "oauth-red-quotes-20261023/tests.log": "ebea6a6eb45f6b68c95f6596df2cb6607be15d3d656622daa73abc4f14f45e0d",
+    "oauth-green-20261023/tests.log": "7853e778d8e40c99408c387f44cf81b4bde017b1ada989151dc704bc3b293f82",
+    "server-build-20261023/server-build.log": "b093eed4ef678ba95e0c3cc54ba9a9a75939691cebacb771506b743990e2bac2",
+    "client-build-20261023/client-build.log": "9f9544fd94a87980fb00523f756cac4330b6f13261f30ea82f289fe6cf544564",
+    "assets-20261023/asset-fetch.log": "0060c1ea3d0174860917f2bef496c8f3bc28376bec10ad6b0ce2ec35a7fe97cf",
+    "terrain-20261023/terrain.log": "77b8bed84e23f58ff7f531bd80e5872a96414322c698e225ba28448e193131b5",
+    "terrain-inspect-20261023/terrain-inspect.log": "4eb6b94623fc7883dbb5bf4dd85fef28fcd4d5c0604b0032948b31892e4e1751",
+    "terrain-reentry-20261023/terrain-reentry.log": "2740d762af6bd56b206d29e7f47dd2fef7904ed3c5b3d128319e1da2d66ca4cf",
+    "doctor-assets-20261023/doctor.log": "a790633ea100c6d1eb0b87a67e3686d7b9875f834d38c3948632e1da93b670ef",
+    "compose-schema-20261023/compose-schema.log": "de616ecc21a3df1f2915071e734d104f812f7053742b7e8783ab25da82f91d36",
+    "docs-gate-20261023/project-success.log": "a7530ca8f66d9cac8fa868cd1bceb184cd0f1129c3f147f5da5fff7790d2dc1a",
+    "final-contracts-20261023/contracts.log": "2f8cc545326c347e988129af7fe791acbe32127b867bdb8a131e7e5ff54ef274",
+    "final-contracts-recheck-20261023/contracts.log": "a7530ca8f66d9cac8fa868cd1bceb184cd0f1129c3f147f5da5fff7790d2dc1a",
+    "handoff-links-20261023/links.log": "44dae73f0a7a4949876a98debf05cce4dcfbd6c343dbfe39bde870e895e7b27a"
+  },
+  "document_gate": {
+    "intermediate": "failed: concurrent Zircon AC table",
+    "final": "passed: 41 contracts",
+    "links": "passed: 13 Markdown files"
+  }
+}

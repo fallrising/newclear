@@ -1,0 +1,9 @@
+name: Valid step env
+on: push
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          BUILD_DIR: ${{ runner.temp }}/build
+        run: echo "$BUILD_DIR"

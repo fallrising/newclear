@@ -16,17 +16,19 @@
 
 ## Agent Computer 實驗（2026-10-03，僅文件）
 
-新增 [Agent Computer 實驗計劃](docs/AGENT-COMPUTER.md)，以 CocoonBox 參考畫面的**功能效果**為目標：外部 Claude Code／MCP client 控制 Cocoon VM 內的可見桌面與 Chromium，operator 同時觀看同一個桌面，並可受控接管、保存、休眠、恢復與銷毀環境。
+[Agent Computer 文件](docs/AGENT-COMPUTER.md)保留為**需求與驗收來源**，以 CocoonBox 參考畫面的**功能效果**為目標：外部 Claude Code／MCP client 控制 Cocoon VM 內的可見桌面與 Chromium，operator 同時觀看同一個桌面，並可受控接管、保存、休眠、恢復與銷毀環境。
+
+**實作歸屬（2026-10-23，#395）：AC-1～AC-4 已移交另一個獨立項目，不在 `platform/agent-platform` 實作。** 本次沒有可公開確認的目標項目名稱或程式碼位置，因此不填入推測連結。此處不追蹤該項目的實作進度，也不以移交推導其驗收已通過；coding 主線 M0–M6 的範圍與狀態維持不變。
 
 AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌面、右側歷史工具紀錄、瀏覽器元素與桌面操作、外部／guest agent 選項，以及 End 與 VM 生命週期的區別。§3.1 比較 Cua Driver、Rivet Sandbox Agent、E2B Desktop 與 AIO Sandbox 的可重用部分；第一輪維持 Web、單 computer、單 writer、一種外部 client，未承諾所有選單選項或 4K 效能。
 
-**目前是 Proposed 設計，不是已可啟動的功能。** Headless browser／CDP smoke 只是前置能力，不能取代完整桌面與真實 Agent 操作驗收。實驗使用獨立的 AC 階段與驗收 ID，不更改既有 M0–M4 的狀態；不在本次啟動 VM、接入真實模型、變更主機或部署。下一階段須另行授權。
+**本文保留 Proposed 設計與歷史未執行驗收，不是本元件可啟動的功能。** Headless browser／CDP smoke 只是前置能力，不能取代完整桌面與真實 Agent 操作驗收。AC 階段與驗收 ID 供獨立實作項目對照；本元件不開啟後續 AC 實作，也不在本次啟動 VM、接入真實模型、變更主機或部署。
 
 ## 文件入口
 
 - [單節點操作手冊](docs/SINGLE-NODE.md)：安裝、啟停、觀測、備份還原、升級回滾與隔離演練。
 
-- [Agent Computer 實驗](docs/AGENT-COMPUTER.md)：目標效果、能力缺口、控制／觀看契約、分階段計劃與最終驗收。
+- [Agent Computer 需求與驗收來源](docs/AGENT-COMPUTER.md)：目標效果、控制／觀看契約及供另一項目實作的 AC 驗收；不屬本元件交付里程碑。
 - [GitHub 匯出](docs/GITHUB-EXPORT.md)：檢視固定成果後授權新分支／Draft PR；獨立 worker、故障查核與設定。
 - [成果封存](docs/RESULT-ARCHIVE.md)：固定 run 的來源、diff 與驗證紀錄，VM 清理後仍可下載。
 - [最新交接](docs/HANDOFF.md)：停止點、升級方式、測試資產與下一步。
@@ -62,7 +64,7 @@ AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌
 
 ## 專案邊界
 
-本目錄擁有新平台的設計與實作。`platform/fanzloud` 保留既有 personal BYOS／Codex Cloud 邊界；`products/kith` 保留人機群聊邊界；`gateways/pokercase` 不承載任務排程。這些元件都不是第一版啟動依賴。
+本目錄擁有 coding 平台的設計與實作；Agent Computer 文件僅保留需求／驗收來源，其 AC-1～AC-4 實作屬另一個項目。`platform/fanzloud` 保留既有 personal BYOS／Codex Cloud 邊界；`products/kith` 保留人機群聊邊界；`gateways/pokercase` 不承載任務排程。這些元件都不是第一版啟動依賴。
 
 採用 OpenHands 的使用體驗與 SDK 邊界作為參考，自行實作控制面與 UI；Cocoon／sandbox 作為獨立執行服務，沒有把上游程式碼複製進本項目。新寫文件沿用 repository 根目錄 MIT；第三方元件保留各自授權。
 

@@ -17,6 +17,7 @@ import (
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/command"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/port"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/testfixture"
 )
 
 var errInjected = errors.New("injected transaction failure")
@@ -451,6 +452,7 @@ func TestMarkReady_DerivesTrustedSpecificationFacts(t *testing.T) {
 		t.Fatal("recorded specification failure did not replay byte-exactly")
 	}
 	service.config.Specification = specificationPolicy(true)
+	store.state.current[itemKey(projectID, workItemID)] = testfixture.View(projectID, workItemID, "AC-1", domain.HashString("ac"), domain.HashString("graph"), domain.HashString("policy"), domain.HashString("recipe"))
 	retry := markReadyCommand()
 	retry.CommandID = "cmd_01HABCDEFGN"
 	retry.IdempotencyKey = "00000000-0000-4000-8000-000000000004"
@@ -764,6 +766,7 @@ func readyFixture(t *testing.T) (*Service, *memoryUnit) {
 	store.state.projects[projectID] = port.Project{ID: projectID, Name: "project", Repository: "repo", Ref: "main", Version: 1}
 	store.state.workItems[itemKey(projectID, workItemID)] = item
 	store.state.requirements[itemKey(projectID, workItemID)] = []port.ACRequirement{{ProjectID: projectID, WorkItemID: workItemID, ACID: "AC-1", RevisionDigest: domain.HashString("ac")}}
+	store.state.current[itemKey(projectID, workItemID)] = testfixture.View(projectID, workItemID, "AC-1", domain.HashString("ac"), domain.HashString("graph"), domain.HashString("policy"), domain.HashString("recipe"))
 	return testService(t, store, true), store
 }
 
@@ -776,6 +779,9 @@ func draftFixture(t *testing.T, specification specificationPolicy) (*Service, *m
 	}
 	store.state.workItems[itemKey(projectID, workItemID)] = item
 	service.config.Specification = specification
+	if !specification {
+		delete(store.state.current, itemKey(projectID, workItemID))
+	}
 	return service, store
 }
 
@@ -786,11 +792,17 @@ func completionFixture(t *testing.T) (*Service, *memoryUnit, domain.CompletionSu
 	if err != nil {
 		t.Fatal(err)
 	}
+	application := testService(t, store, true)
+	view := testfixture.View(projectID, workItemID, "AC-1", domain.HashString("ac"), domain.HashString("graph"), domain.HashString("policy"), domain.HashString("recipe"))
+	input, err := application.runInputFromCurrent(item, "success", view)
+	if err != nil {
+		t.Fatal(err)
+	}
 	requirement := port.ACRequirement{ProjectID: projectID, WorkItemID: workItemID, ACID: "AC-1", RevisionDigest: domain.HashString("ac")}
 	subject, err := domain.NewCompletionSubject(domain.CompletionSubjectConfig{
 		ProjectID: projectID, WorkItemID: workItemID, WorkItemVersion: 5,
 		CandidateID: "candidate-1", CandidateDigest: domain.HashString("candidate"),
-		RunID: "run_01HABCDEFGH", RunInputDigest: domain.HashString("run-input"),
+		RunID: "run_01HABCDEFGH", RunInputDigest: input.Digest(),
 		RequiredACRevisions:         []domain.ACRevisionBinding{{ACID: requirement.ACID, RevisionDigest: requirement.RevisionDigest}},
 		AcceptedGraphRevisionDigest: domain.HashString("graph"), PolicyRevisionDigest: domain.HashString("policy"),
 		CompletionRecipeDigest: domain.HashString("recipe"),
@@ -800,7 +812,7 @@ func completionFixture(t *testing.T) (*Service, *memoryUnit, domain.CompletionSu
 	}
 	material := port.CompletionMaterial{
 		WorkItem:         item,
-		Candidate:        port.Candidate{ID: subject.CandidateID(), ProjectID: projectID, RunID: subject.RunID(), Digest: subject.CandidateDigest(), InputSubjectDigest: domain.HashString("input-subject"), CreatedAtNS: 1},
+		Candidate:        port.Candidate{ID: subject.CandidateID(), ProjectID: projectID, RunID: subject.RunID(), Digest: subject.CandidateDigest(), InputSubjectDigest: input.Digest(), CreatedAtNS: 1},
 		Run:              port.Run{ID: subject.RunID(), ProjectID: projectID, WorkItemID: workItemID, InputDigest: subject.RunInputDigest(), AdapterID: "fake/v1", AdapterVersion: "1", ScenarioID: "success", Attempt: 1, DesiredAction: "Dispatch", DispatchState: "Acknowledged", ObservedState: "Succeeded", ReconciliationState: "None", SideEffectOutcome: "Confirmed", CreatedAtNS: 1},
 		CandidatePresent: true, CandidateAvailable: true, RunPresent: true,
 		RequiredACRevisions: []port.ACRequirement{requirement}, GraphRevisionDigest: subject.GraphRevisionDigest(),
@@ -814,7 +826,10 @@ func completionFixture(t *testing.T) (*Service, *memoryUnit, domain.CompletionSu
 	store.state.workItems[itemKey(projectID, workItemID)] = item
 	store.state.requirements[itemKey(projectID, workItemID)] = []port.ACRequirement{requirement}
 	store.state.materials[itemKey(projectID, workItemID)] = material
-	return testService(t, store, true), store, subject
+	// Explicit modeled verified heads/envelope for isolated completion predicates.
+	store.state.current[itemKey(projectID, workItemID)] = view
+	store.state.inputs[subject.RunID()] = port.RunInputEnvelope{RunID: subject.RunID(), Input: input}
+	return application, store, subject
 }
 
 type memoryUnit struct {
@@ -829,6 +844,8 @@ type memoryUnit struct {
 }
 
 type memoryState struct {
+	current      map[string]port.CurrentSpecification
+	inputs       map[domain.RunID]port.RunInputEnvelope
 	projects     map[domain.ProjectID]port.Project
 	workItems    map[string]domain.WorkItem
 	requirements map[string][]port.ACRequirement
@@ -847,6 +864,7 @@ type memoryState struct {
 
 func newMemoryUnit() *memoryUnit {
 	return &memoryUnit{state: memoryState{
+		current: map[string]port.CurrentSpecification{}, inputs: map[domain.RunID]port.RunInputEnvelope{},
 		projects: map[domain.ProjectID]port.Project{}, workItems: map[string]domain.WorkItem{}, requirements: map[string][]port.ACRequirement{},
 		materials: map[string]port.CompletionMaterial{}, runs: map[string]port.Run{}, results: map[string]port.CommandResult{}, idempotency: map[string]port.Idempotency{},
 	}, projection: &projectionStub{}}
@@ -880,6 +898,8 @@ func (unit *memoryUnit) operationIndex(name string) int { return slices.Index(un
 
 func (state memoryState) clone() memoryState {
 	result := state
+	result.current = maps.Clone(state.current)
+	result.inputs = maps.Clone(state.inputs)
 	result.projects = maps.Clone(state.projects)
 	result.workItems = maps.Clone(state.workItems)
 	result.requirements = make(map[string][]port.ACRequirement, len(state.requirements))
@@ -1196,3 +1216,26 @@ func idempotencyKey(principal domain.ActorID, projectID domain.ProjectID, operat
 }
 
 var _ port.Transaction = (*memoryTransaction)(nil)
+
+// Explicit modeled verified input seam for isolated command unit tests.
+func (tx *memoryTransaction) LoadCurrentSpecification(_ context.Context, p domain.ProjectID, w domain.WorkItemID) (port.CurrentSpecification, error) {
+	v, ok := tx.state.current[itemKey(p, w)]
+	if !ok {
+		return port.CurrentSpecification{}, port.ErrNotFound
+	}
+	return v.Clone(), nil
+}
+func (tx *memoryTransaction) StoreRunInput(_ context.Context, v port.RunInputEnvelope) error {
+	if err := tx.step("StoreRunInput"); err != nil {
+		return err
+	}
+	tx.state.inputs[v.RunID] = v
+	return nil
+}
+func (tx *memoryTransaction) LoadRunInput(_ context.Context, p domain.ProjectID, r domain.RunID) (port.RunInputEnvelope, error) {
+	v, ok := tx.state.inputs[r]
+	if !ok || v.Input.Material().ProjectID != p {
+		return port.RunInputEnvelope{}, port.ErrNotFound
+	}
+	return v, nil
+}

@@ -19,7 +19,7 @@ import (
 )
 
 func TestRuntime_RejectsUnsupportedScenarioBeforeDispatch(t *testing.T) {
-	fixture := newWorkerFixture(t)
+	fixture := newWorkerFixtureWithItems(t, "wi_0000000002", "wi_0000000003")
 	app := fixture.worker.commands
 	makeMetadata := func(number int, version uint64) command.Metadata {
 		return command.Metadata{
@@ -31,16 +31,8 @@ func TestRuntime_RejectsUnsupportedScenarioBeforeDispatch(t *testing.T) {
 		}
 	}
 	for index, itemID := range []domain.WorkItemID{"wi_0000000002", "wi_0000000003"} {
-		outcome, err := app.CreateWorkItem(t.Context(), "operator", command.CreateWorkItem{
-			Metadata: makeMetadata(5+index*2, 0), ProjectID: testProjectID, WorkItemID: itemID,
-			Title: "Scenario admission fixture", Goal: "Exercise the public dispatch path", OwnerID: "operator",
-			RequiredACRevisions: []command.ACRevision{{ACID: "AC-1", RevisionDigest: domain.HashString("worker AC")}},
-		})
-		if err != nil || len(outcome.Payload) == 0 {
-			t.Fatalf("create ready fixture %s: outcome=%+v err=%v", itemID, outcome, err)
-		}
-		outcome, err = app.MarkReady(t.Context(), "operator", command.MarkReady{
-			Metadata: makeMetadata(6+index*2, 1), ProjectID: testProjectID, WorkItemID: itemID,
+		outcome, err := app.MarkReady(t.Context(), "operator", command.MarkReady{
+			Metadata: makeMetadata(6+index*2, 2), ProjectID: testProjectID, WorkItemID: itemID,
 		})
 		if err != nil || len(outcome.Payload) == 0 {
 			t.Fatalf("mark fixture %s Ready: outcome=%+v err=%v", itemID, outcome, err)
@@ -130,7 +122,7 @@ func TestRuntime_RejectsUnsupportedScenarioBeforeDispatch(t *testing.T) {
 	}
 
 	unsupportedStatus, unsupportedBody, unsupportedErr := postDispatch("cmd_0000000009", "00000000-0000-4000-8000-000000000009", "wi_0000000002", "unregistered-scenario", unsupportedBefore)
-	positiveStatus, _, positiveErr := postDispatch("cmd_0000000010", "00000000-0000-4000-8000-000000000010", "wi_0000000003", "local-success", 2)
+	positiveStatus, _, positiveErr := postDispatch("cmd_0000000010", "00000000-0000-4000-8000-000000000010", "wi_0000000003", "local-success", 3)
 	positiveContext, stopPositive := context.WithTimeout(t.Context(), 5*time.Second)
 	positiveSucceeded := waitForRunState(positiveContext, "wi_0000000003", "Succeeded")
 	stopPositive()

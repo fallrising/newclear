@@ -269,3 +269,178 @@ T-153 confirms inventory without making a semantic acceptance claim. Pinned shar
 vet/build and fresh web gates passed. Failed fixture/setup/intermediate cancellation evidence is
 retained, and the original positive Red assertions were preserved. PR CI remains a separate
 exact-head delivery gate; this local coverage does not advance the broader durable admission status.
+
+## 2026-10-23 resumed durable proposal command
+
+| Clause | Named oracle and retained evidence | Status |
+| --- | --- | --- |
+| HAI-PROPOSE-001..004 | `TestAdmission_ProposalProvenanceAndCrashIsolation`, `TestAdmission_PostwriteRejectionAndCancellationRollback`; T-981 lawful Red/Green, T-982 independent review/adversarial storage checks, root pinned full/race/vet/build | Passing bounded service/storage slice |
+| HAI-PROPOSE-005..008 | `TestAdmission_HTTPCommand`, `TestRepositoryConfiguration_RejectsUnsafeInput`, `TestRepositoryDescription_PublicOnly`, `TestAdmission_HTTPReplayAndRestart`; T-983 Red/Green, T-985 review/closure, root full/race gate plus two fresh OS processes | Passing bounded HTTP/runtime slice |
+
+The current work board is `docs/tasks/BOARD.md`; historical class A records remain unchanged.
+This checkpoint supersedes only the earlier statement that durable proposal commands are wholly
+unimplemented. Approved binding identity, immutable proposal/graph persistence, exact replay,
+transaction rollback and existing SSE event shape now have fresh evidence. SQL write-fault and
+cancellation rollback tests do not establish process-kill or COMMIT-I/O crash behavior.
+At that proposal checkpoint, first acceptance and all successor slices remained unaccepted;
+the subsequent first-acceptance evidence is recorded below.
+
+T-985 initially requested rework because the Go runtime restart test stays within one OS process
+and the proposal OpenAPI condition allowed expected_version=0. That history remains in its report.
+Root corrected the new schema (including nonzero OIDs, scoped permission response and lint warnings)
+and ran task `proposal-process-gate-20261023`: the pinned built binary ran as two fresh processes,
+with graceful SIGTERM between them, source removal and registry revocation before restart, exact
+POST/result-lookup replay, unchanged durable row counts, clean FKs and no heads/requirements/Runs.
+Its receipt binds binary/result hashes, both process exits, counts and source inventory; fixture
+state is retained in preserve/artifacts with a separate SHA-256 inventory. This is graceful restart
+evidence, not process-kill or restore. T-985 independently verified those artifacts and accepted
+HAI-PROPOSE-005..008 after rework.
+
+`runtime-backend-gate-20261023` passed the final unmodified full/race/vet/build gate on frozen Go
+bytes. `runtime-owner-gate-20261023` actually executed the wrong-owner branch as UID0 inside an
+offline bounded container; the native unprivileged branch is not counted as exercised.
+`runtime-api-final-20261023` passed pinned Redocly 2.51.2 with no warnings; the initial four-warning
+lint output remains in `runtime-api-gate-20261023`. No Git publication was performed.
+
+Root executed the unmodified backend gate in its pinned Go container through common workspace
+task `proposal-backend-gate-20261023`; `preserve/evidence/inputs.json` binds source bytes and
+`backend.log` records format/vet/full/race/build success. The pinned Node gate in task
+`web-baseline-20261023` passed format/lint, eight fixture tests, typecheck and build; it supplies
+no live browser evidence. T-981's local full test failure on sandbox-denied listeners remains
+in its original PARTIAL report; the separate root container gate passed those runtime tests.
+
+## 2026-10-23 explicit first acceptance
+
+HAI-FIRST001..006 are accepted locally after T-986, T-989 independent review and T-999 correction.
+The durable `TestAdmission_FirstAcceptAtomicAndSingleWinner` and rollback/corruption controls
+cover service-created empty Drafts, full mapping/AC bytes, exact subjects, concurrency, immutable
+heads/requirements, versions and response replay. Initial acceptance preserves Draft and creates
+no Run. It supplies no current-head readiness, dispatch or whole Done acceptance by itself.
+
+T-989's retained independent probe found QueryRow could ignore a conflicting deterministic AC
+identity when an exact legacy tuple also existed. `root999-red` reproduces it with the permanent
+`TestAdmission_InitialAcceptanceImmutableDedupKeys`; `root999-green` and the unchanged independent
+`review989-closure` overlay pass after bounded verification of both unique keys. The review's
+original REWORK remains alongside its ACCEPT closure.
+
+Root inspected all eleven original files and the correction, then ran the unmodified pinned
+backend gate in `initial-backend-final-20261023`: full/race/vet/build and module/pin checks passed.
+Its `inputs.json` binds 105 backend source inputs, verified unchanged after the gate. Final log
+SHA-256 is `7c1567ad3595ecbed0fcf5023f88cf507772e25c83a23a676f2ce6529b6358bd`.
+The earlier sandbox Docker access failure and original pre-fix passing full gate remain separate
+evidence, never substitutes for correction verification.
+
+The isolated `browser-cookie-chromium-20261023` probe passed native Secure __Host cookie set/send
+on Chromium151.0.7922.34 HTTP loopback. This is protocol feasibility, not application login/UI
+acceptance. The earlier multi-browser probe timed out after recording Chromium's result; other
+browser results are unverified. No matching probe container remained when inspected.
+
+### Current input storage and browser transport — 2026-10-23
+
+T-988 HAI-INPUT001..004 is accepted locally after full eight-file inspection, compiling Red,
+HAI-local T-004 independent review (eleven additional adversarial probes) and root pinned
+`input-browser-backend-20261023` full/race/vet/build with all113 backend hashes stable.
+HAI-INPUT005..007 consumers remain separate, pending work.
+
+HAI-local T-003 session/static transport is accepted locally after retained T-005 REWORK
+identified file/root FIFO startup blocking races. T-003 permanent Red/Green and fresh T-006
+independent existing-regression review close both on pinned Linux/Go1.27.1. Seven source
+hashes match `worker-hai003-fifo-green/preserve/evidence/rework-source-manifest-final.json`.
+Final root `input-browser-final-20261023` passes unmodified pinned full tests/race/vet/build
+with all114 backend inputs stable. `browser-api-integrated-20261023` pinned OpenAPI lint
+passes without warnings. `browser-runtime-final-20261023` builds/runs the actual Go binary
+and Chromium151.0.7922.34: anonymous denial, explicit static entry, login, Secure host cookie,
+authenticated read, Origin/Host/ambiguous-cookie denials, no API fallback and logout all pass;
+runtime exits0 on SIGTERM. This fixture-shell probe explicitly records productUIAcceptance=false.
+
+Evidence lives under common workspace `hai-taskboard/tasks/<task>/preserve/evidence/`;
+backend inputs/log and browser inputs/images/receipt/logs are retained. Earlier sandbox
+socket denials and the first harness wrong-Host failure remain: Node fetch rewrote Host;
+an isolated echo diagnosis justified using http.get for the final negative request. No
+Firefox/WebKit, connected React, candidate/Done, activation or restore acceptance is claimed.
+
+### Current-head Ready/dispatch — 2026-10-23
+
+HAI-local T001 is accepted locally for HAI-INPUT005 and its007 readiness/dispatch oracle.
+Root inspected all16 frozen source files and guarded every integration against the prior
+baseline. Independent T008 ACCEPT reran service/SQLite/integration and focused poller tests.
+Root `ready-dispatch-integrated-20261023` unmodified pinned full/race/vet/build passes, including
+listener tests denied in the worker sandbox, with all120 backend paths/hashes stable.
+Worker historical fixture failures and nine sandbox socket denials remain in T001 report.
+Real service empty-Draft/proposal/first-accept/Ready/dispatch is the authority proof; modeled
+old fixture views and storage fixture setup remain explicitly distinct. Stale Pending input
+gets only a committed NeedsReconcile mark/audit/event and typed nonfatal outcome, without a
+lease or retry; corruption stays fatal. Publication/Done is separately pending T002.
+
+### Connected first acceptance — 2026-10-23
+
+HAI-FIRST007..009 accepted locally: root inspected/integrated six T007 files against exact
+baseline, independent T010 ACCEPT with maximum-capacity/strict nested-field probes, root
+initial-http-api-final-20261023 zero-warning pinned lint, and initial-output-integrated-20261023
+unmodified pinned full/race/vet/build with all128 backend inputs unchanged. The latter also
+contains an unaccepted V4 candidate; T011 SQL text/byte-bound REWORK still blocks output storage.
+Root added the preparation GET global Host403 response after the review without changing Go.
+
+Actual initial-http-process-20261023 built binary SHA256
+6614a1b75b5b1bf619731eb8f1e6cb7a029f779f83ad9deb89c4ae281db5e41d and ran two OS processes:
+read-only preparation, explicit acceptance, Ready, one Fake execution, then source loss and
+registry revocation. Exact acceptance/result lookup replay survived restart. Both SIGTERM exits0;
+heads/requirements/proposal/input envelope/Run each1, command/idempotency6, audit/event10 stable
+after restart, FKs clean. WorkItem remained Developing and CompletionRecord count0. Receipt,
+inputs, logs and retained generated fixture/binary are in the common task evidence/artifacts.
+This is actual API/process evidence, not connected React or Done acceptance.
+
+## 2026-10-23 current consumers, output correction and directory checkpoint
+
+Root accepted bounded HAI-local T002/T009/T015 after full diff inspections, guarded exact
+source integration and independent T016/T013/T017 ACCEPT. Common launcher task
+current-output-directory-integrated-20261023 ran unmodified pinned check-backend.sh:
+module verification, formatting, vet, full tests, race tests and build all exit0 on 134
+unchanged inputs. Evidence backend.log SHA256 `fe8c21bec493d6a6d857f6f79ec40755651b0df054c022aade2103fdbc2f8817`; inputs.json retained.
+Directory OpenAPI lint task directory-api-integrated-20261023 passed0warnings.
+T009 original NUL/text length defect, worker failed instrumentation attempt and corrected
+regressions remain in T011/T009 reports. T015 Red is root transcript receipt session98153
+chunkf01cce (compiled404), not an independently retained log; initial duplicate-name fixture
+failure and corrected scoped2 are explicit in T015/T017. T002 historical socket denials are
+superseded for integration by this listener-enabled pinned gate, not deleted.
+
+Root connected-web-integrated-20261023 passed19tests/type/lint/format/build in pinned
+Node24.20 with offline RO modules and retained build assets. This does not accept T014:
+T018 independently reproduced stream reset retaining command authority and stale login
+response overwriting newer session authority. T019 rework is pending; browser foundation
+gate diagnostics and all full UI/Done/activation/restore requirements remain separate.
+
+## 2026-10-23 interrupted-work recovery and completion prerequisites
+
+Root inspected all T012 eight-file and T020 five-file diffs, checked baseline/frozen hashes and
+integrated the independently reviewed candidates. T027 ACCEPT covers complete scoped Run outputs,
+atomic fenced publication and explicit local-policy-v2 human independence. T026 ACCEPT covers
+strict existing completion/cancel HTTP adapters. T023 ACCEPT covers two new exact completion
+preparation service files. Root accepts these bounded slices after `completion-integrated-20261023`
+ran unmodified pinned Go1.27.1 check-backend.sh: full/race/vet/build, format/modules/pins exit0;
+all141 source inputs unchanged. backend.log SHA256 `e80fad7c2fe16b1b6e4be6f507a18fd7997acaa4f3da3dfd985da5de3282972a`.
+`completion-api-integrated-20261023` pinned Redocly lint exit0, zero warnings.
+
+T018 reset/session REWORK remains retained; T019 correction passed independent T022. Actual browser
+found percent-encoded digest paths and intermittent noncanonical issued_at fractional zeros;
+the path fix and root T024 timestamp Red/Green are retained. T025 independently checked all1000
+millisecond values and captured intent. Actual axe then exposed a keyboard-inaccessible horizontal
+board after Fake completion; T028 tabIndex/visible-focus correction retains the original Red.
+T029 independently verified Tab entry and ArrowRight scroll0→280 with a3px focus outline.
+Its source-equality diagnostic and socket denial remain in PARTIAL report, final bounded ACCEPT.
+
+`root-hai028-green` passed pinned Node24.20 thirty tests/nine files, typecheck/lint/format/build.
+`connected-browser-accessible-20261023` passed the original corrected frontend foundation;
+`completion-connected-browser-20261023` rebuilt the integrated current backend and reran actual
+Chromium151.0.7922.34: login/cookie, project/Draft creation, headlessReady rejection/focus, durable
+project restart, explicit binding/proposal/preparation/acceptance, lost Ready response recovered by
+original-result GET without repost, actual Fake/SSE Succeeded stays Developing, disconnect/reconnect,
+board keyboard focus, axe light/dark no violations,320px dark,640px at200percent CSS zoom and logout.
+Each uses two fresh processes, exits0 and records fullProductAcceptance=false/doneAcceptance=false.
+Artifacts, exact inputs, logs and screenshots remain in common workspace preserve directories.
+CSS zoom is not native browser zoom; full keyboard/coarse-pointer acceptance remains pending.
+
+Whole HAI-DONE/UX/ops acceptance remains pending: completion/artifact/report reads and UI,
+current-policy detail/coverage, full attention/impact, durable activation, verified restore and
+ContextPack fresh-context resume. No Git publication, tag or deployment. Historical failures,
+worker socket-denied tests and private-harness errors were not rewritten as first-run successes.

@@ -122,6 +122,36 @@ class LabTest(unittest.TestCase):
             self.assertEqual(lab.main(["up", "--workspace", str(self.workspace)]), 2)
             compose.assert_not_called()
 
+    def test_malformed_oauth_id_blocks_up_before_build(self):
+        self.render()
+        for value in [".apps.googleusercontent.com", "test.apps.googleusercontent.com",
+                      "${MISSING}.apps.googleusercontent.com", "123-abc/def.apps.googleusercontent.com",
+                      "123-abc&def.apps.googleusercontent.com", "123-abc def.apps.googleusercontent.com",
+                      "'123-abc.apps.googleusercontent.com", '"123-abc.apps.googleusercontent.com\'']:
+            with self.subTest(value=value):
+                (self.workspace / ".env").write_text(f"GOOGLE_CLIENT_ID={value}\n")
+                with patch.object(lab, "load_lock", return_value=self.lock), \
+                     patch.object(lab.shutil, "which", return_value="docker"), \
+                     patch.object(lab, "run") as runner, \
+                     patch.object(lab, "verify_source"), \
+                     patch.object(lab, "compose_command") as compose:
+                    self.assertEqual(lab.main(["up", "--workspace", str(self.workspace)]), 2)
+                    compose.assert_not_called()
+                    self.assertEqual(runner.call_count, 2)
+
+    def test_oauth_id_valid_shape_is_only_build_readiness(self):
+        self.render()
+        for value in ["1234567890-test_ABC-123.apps.googleusercontent.com",
+                      '"1234567890-test_ABC-123.apps.googleusercontent.com"',
+                      "'1234567890-test_ABC-123.apps.googleusercontent.com'"]:
+            with self.subTest(value=value):
+                (self.workspace / ".env").write_text(f"GOOGLE_CLIENT_ID={value}\n")
+                with patch.object(lab.shutil, "which", return_value="docker"), \
+                     patch.object(lab, "run"), patch.object(lab, "verify_source"):
+                    result = lab.doctor(self.workspace, self.lock)
+                self.assertEqual(result["status"], "ready-to-build")
+                self.assertFalse(result["runtime_verified"])
+
     def test_shell_cannot_override_workspace_settings(self):
         with patch.dict(os.environ, {"COMPOSE_PROJECT_NAME": "production", "GOOGLE_CLIENT_ID": "wrong"}), \
              patch.object(subprocess, "run") as runner:

@@ -43,8 +43,13 @@ scripts; see README / docs handoff.
 
 ## Status note
 
-Automatic Run execution and board/SSE projections remain intentionally
-unavailable in the Fake-core slice.
+Automatic Pending Fake execution and persisted board/SSE reads are implemented.
+The authenticated API now supports explicit initial acceptance followed by current-head
+Ready/dispatch. The connected browser supports login, project/draft creation, explicit specification
+acceptance, Fake dispatch, original-result recovery and reconnection. Serve the built frontend
+through the same runtime using the [browser setup](local-development.md#connected-browser-foundation).
+Full detail/attention/impact, evidence-to-Done operation and backup/restore remain unfinished.
+See [current work](tasks/BOARD.md) and [SUCCESS](../SUCCESS.md).
 
 ## Authoritative longer docs
 

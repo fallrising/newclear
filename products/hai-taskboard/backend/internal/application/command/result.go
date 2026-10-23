@@ -6,9 +6,11 @@ import (
 	"errors"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/port"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/specification"
 )
 
 const (
@@ -64,12 +66,18 @@ type successCommand struct {
 }
 
 type successResult struct {
-	Type       string            `json:"type"`
-	ProjectID  domain.ProjectID  `json:"project_id,omitempty"`
-	WorkItemID domain.WorkItemID `json:"work_item_id,omitempty"`
-	RunID      domain.RunID      `json:"run_id,omitempty"`
-	Version    uint64            `json:"version,omitzero"`
-	Phase      domain.Phase      `json:"phase,omitempty"`
+	AcceptedRevisionDigest  string            `json:"accepted_revision_digest,omitempty"`
+	AcceptanceSubjectDigest string            `json:"acceptance_subject_digest,omitempty"`
+	ProposalDigest          string            `json:"proposal_digest,omitempty"`
+	GraphDigest             string            `json:"graph_revision_digest,omitempty"`
+	ObjectFormat            string            `json:"object_format,omitempty"`
+	CommitOID               string            `json:"commit_oid,omitempty"`
+	Type                    string            `json:"type"`
+	ProjectID               domain.ProjectID  `json:"project_id,omitempty"`
+	WorkItemID              domain.WorkItemID `json:"work_item_id,omitempty"`
+	RunID                   domain.RunID      `json:"run_id,omitempty"`
+	Version                 uint64            `json:"version,omitzero"`
+	Phase                   domain.Phase      `json:"phase,omitempty"`
 }
 
 type successAudit struct {
@@ -103,15 +111,15 @@ type failureDetails struct {
 func CanonicalSuccess(metadata Metadata, operation Operation, result Result, auditSequence uint64, cursor port.Cursor) ([]byte, error) {
 	if !commandIDPattern.MatchString(metadata.CommandID) || !validText(metadata.CorrelationID, 80) ||
 		!validSuccessResult(operation, successResult{
-			Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID,
-			RunID: result.RunID, Version: result.Version, Phase: result.Phase,
+			AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID,
+			RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID,
 		}) || auditSequence == 0 || cursor.Epoch == 0 || cursor.Sequence == 0 {
 		return nil, ErrInvalidCommand
 	}
 	return json.Marshal(successEnvelope{
 		APIVersion: "v1", OK: true,
 		Command:          successCommand{CommandID: metadata.CommandID, Operation: operation, Status: "recorded", Replayed: false},
-		Result:           successResult{Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase},
+		Result:           successResult{AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID},
 		Audit:            successAudit{Sequence: auditSequence},
 		ProjectionCursor: successCursor{StreamEpoch: cursor.Epoch, EventSequence: cursor.Sequence},
 		CorrelationID:    metadata.CorrelationID,
@@ -182,7 +190,7 @@ func canonicalBytes(payload []byte, value any) bool {
 
 func validOperation(operation Operation) bool {
 	switch operation {
-	case CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
+	case AcceptInitialSpecificationOperation, ProposeSpecificationOperation, CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
 		SubmitCandidateOperation, PublishReviewOperation, PublishEvidenceOperation, ApproveSubjectOperation,
 		RequestQAOperation, RequestCancelOperation, CompleteWorkItemOperation:
 		return true
@@ -192,9 +200,26 @@ func validOperation(operation Operation) bool {
 }
 
 func validSuccessResult(operation Operation, result successResult) bool {
+	if operation != AcceptInitialSpecificationOperation && (result.AcceptedRevisionDigest != "" || result.AcceptanceSubjectDigest != "") {
+		return false
+	}
+	if operation != ProposeSpecificationOperation && operation != AcceptInitialSpecificationOperation && (result.ProposalDigest != "" || result.GraphDigest != "" || result.ObjectFormat != "" || result.CommitOID != "") {
+		return false
+	}
 	projectValid := projectIDPattern.MatchString(string(result.ProjectID))
 	workItemValid := workItemIDPattern.MatchString(string(result.WorkItemID))
 	switch operation {
+	case AcceptInitialSpecificationOperation:
+		validDigest := func(s string) bool {
+			d, e := domain.ParseDigest(strings.TrimPrefix(s, "sha256:"))
+			return e == nil && !d.IsZero() && canonicalSHA256(d) == s
+		}
+		return result.Type == "InitialSpecificationAccepted" && projectValid && result.WorkItemID == "" && result.RunID == "" && result.Phase == "" && result.Version > 0 && result.ObjectFormat == "" && result.CommitOID == "" && validDigest(result.ProposalDigest) && validDigest(result.GraphDigest) && validDigest(result.AcceptedRevisionDigest) && validDigest(result.AcceptanceSubjectDigest)
+	case ProposeSpecificationOperation:
+		_, oidErr := specification.ParseObjectID(specification.ObjectFormat(result.ObjectFormat), result.CommitOID)
+		pd, pe := domain.ParseDigest(strings.TrimPrefix(result.ProposalDigest, "sha256:"))
+		gd, ge := domain.ParseDigest(strings.TrimPrefix(result.GraphDigest, "sha256:"))
+		return result.Type == "SpecificationProposed" && projectValid && result.WorkItemID == "" && result.RunID == "" && result.Phase == "" && result.Version > 0 && pe == nil && ge == nil && !pd.IsZero() && !gd.IsZero() && canonicalSHA256(pd) == result.ProposalDigest && canonicalSHA256(gd) == result.GraphDigest && oidErr == nil
 	case CreateProjectOperation:
 		return result.Type == "ProjectCreated" && projectValid && result.WorkItemID == "" && result.RunID == "" &&
 			result.Version > 0 && result.Phase == ""

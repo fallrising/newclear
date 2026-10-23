@@ -52,13 +52,16 @@ OAuth tokens are only sent to the provider's official hosts (https, default port
 
 | Provider | Hosts |
 | --- | --- |
-| cursor | `agent.api5.cursor.sh`, `api2.cursor.sh` |
 | grok | `cli-chat-proxy.grok.com` |
 | opencode | `opencode.ai` |
 | agy | `cloudcode-pa.googleapis.com` |
 
-The `claude` provider sends no token at all (it runs the local Claude Code CLI) and
-ignores its base URL. The admin UI/API rejects other base URLs for the providers above, and the proxy re-checks
+The `claude` and `cursor` providers send no token at all (they run the local Claude Code
+and Cursor Agent CLIs) and ignore their base URL. `cursor-agent` is a coding agent with
+built-in tools; it always runs in `--mode ask` (read-only) with `--sandbox enabled` in an
+empty workspace, never with `--force` or `--approve-mcps`. It can still use the Cursor account's plugins
+(e.g. Gmail), which the CLI cannot disable, so the provider stays off unless
+`--cursor-accept-account-plugins` is given. The admin UI/API rejects other base URLs for the providers above, and the proxy re-checks
 stored rows before every call. An operator can add a base with
 `--provider-base-override siwc=http://127.0.0.1:8080` (CLI/env only; used by tests and
 egress proxies). An imported OAuth connection of an unknown provider cannot change its

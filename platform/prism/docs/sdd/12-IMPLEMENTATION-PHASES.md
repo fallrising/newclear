@@ -12,7 +12,7 @@
 
 | ID | 任務 | 依賴 | 允許路徑 | 驗收 |
 |---|---|---|---|---|
-| P0-01 | Repo 初始化：`go.mod`、`Makefile`、`.golangci.yml`、`.github/workflows/ci.yml`、`AGENTS.md`、目錄骨架 | — | 全域（僅新建） | `make lint test` 通過（空測試） |
+| P0-01 | Repo 初始化：`go.mod`、`Makefile`、`.golangci.yml`、monorepo 根目錄的 [`.github/workflows/prism-ci.yml`](../../../../.github/workflows/prism-ci.yml)、`AGENTS.md`、目錄骨架 | — | 全域（僅新建） | `make lint test` 通過（空測試） |
 | P0-02 | `pkg/utm`：全部型別 + `time.go` 轉換函式 + 單元測試。**逐字規格見 `14-SPI-GO-REFERENCE.md` §1–§3** | P0-01 | `pkg/utm/**` | 時間轉換與 `FormatPromValue` 的 table-driven 測試全綠；`go vet` 乾淨 |
 | P0-03 | `pkg/spi`：`Driver`/`Backend`/三個 Store/`Capabilities`/IR/迭代器/錯誤。**逐字規格見 `14-SPI-GO-REFERENCE.md` §4–§9** | P0-02 | `pkg/spi/**` | 編譯通過；`Register`/`Open`/`Capabilities.Validate` 有測試 |
 | P0-04 | `drivers/memory`：完整實作三種 Store（用 map + slice，不求效能） | P0-03 | `drivers/memory/**` | 自身單元測試通過 |

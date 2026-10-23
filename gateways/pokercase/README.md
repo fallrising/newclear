@@ -31,6 +31,12 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 > Claude Code's. Automated use of a subscription is still subject to Anthropic's terms —
 > see [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md).
 
+> [!WARNING]
+> **`cursor` provider is off by default.** `cursor-agent` can use your Cursor account's
+> plugins (for example Gmail) even in read-only ask mode, and the CLI cannot turn them off,
+> so any client holding a gateway key could make it read that data. Enable it only with
+> `--cursor-accept-account-plugins` after disconnecting plugins you do not want exposed.
+
 ## Quick start
 
 ```bash
@@ -99,6 +105,9 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_CLAUDE_BIN` / `--claude-bin` | Claude Code CLI for the `claude` provider (default `claude` on PATH) |
 | `THINROUTER_CLAUDE_MAX_RUNS` / `--claude-max-runs` | Concurrent Claude Code processes (default 2) |
 | `THINROUTER_CLAUDE_IDLE_SECS` / `--claude-idle-secs` | How long a Claude Code run waits for the client's tool results (default 600) |
+| `THINROUTER_CURSOR_BIN` / `--cursor-bin` | Cursor Agent CLI for the `cursor` provider (default `cursor-agent` on PATH) |
+| `THINROUTER_CURSOR_MAX_RUNS` / `--cursor-max-runs` | Concurrent Cursor Agent processes (default 2) |
+| `THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS` / `--cursor-accept-account-plugins` | Turn the cursor provider on, accepting that `cursor-agent` can use the account's Cursor plugins (default off) |
 | `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
 | `THINROUTER_TOKEN_SAVER` / `--token-saver` | Truncate tool / huge message content |
 | `THINROUTER_TOKEN_SAVER_MAX_CHARS` | Max chars kept per tool-like block (default 2000) |

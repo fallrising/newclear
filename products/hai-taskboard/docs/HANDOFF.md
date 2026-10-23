@@ -2,10 +2,83 @@
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
-Updated: 2026-10-06
+Updated: 2026-10-23 (resumption); historical checkpoints below retain their original dates.
 Authority: the class A ledger is archived at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/` (source tag `team-archive-20261018`). The in-repo copy is removed. Historical bootstrap authority was that ledger until the explicit dogfood migration.
 
 ## Current checkpoint
+
+The owner invoked START_DEVELOPMENT_PROMPT on 2026-10-23, superseding the old
+stop-after-proposal-core instruction below. Actual starting source is
+`b7f2a4311d1135977ba273efba8e77702b908036` on the existing documentation branch;
+unrelated uncommitted changes are preserved. Current status authority is
+[`tasks/BOARD.md`](tasks/BOARD.md), as required by the current root task contract and
+owner prompt. The archived ledger remains immutable history; no dogfood authority
+has been migrated to SQLite. Current scope continues the same P0-A AC without
+real providers, external chat or Git publication authority.
+
+Fresh common-workspace gates passed pinned full Go tests/race/vet/build, pinned fixture-web
+tests/build and the updated OpenAPI lint. T-981/T-982 accepted durable proposal service/storage;
+T-983/T-985 accepted authenticated HTTP and explicit private repository configuration after
+retaining the initial review's schema/restart findings. A separate pinned binary probe passed
+two fresh OS processes, graceful shutdown, source loss/revoked binding and byte-exact replay,
+with unchanged row counts and no accepted heads/Runs. UID0 ownership rejection also passed
+inside an isolated offline container. Exact tasks and evidence are in [traceability](traceability.md).
+Earlier module/socket/SSE/schema/fixture diagnostics and PARTIAL reports remain retained.
+T-986 first acceptance is accepted locally after T-989 found a two-key AC identity conflict,
+T-999 preserved Red/Green and fixed it, and independent closure plus root pinned final
+full/race/vet/build passed. T-988 current-input storage/verified reads are accepted locally
+after HAI-local T-004 review and the integrated pinned full/race/vet/build gate.
+HAI-local T-003 browser session/static transport is accepted locally after the T-005 FIFO
+findings were corrected, T-006 independently accepted the correction, and root final pinned
+backend plus actual Chromium gates passed. This used a public fixture shell, not connected
+React acceptance. HAI-local T-001 current-head Ready/dispatch and T-007 initial-acceptance HTTP are now
+accepted locally with independent reviews and pinned gates. An actual two-process HTTP
+probe accepts, dispatches one Fake Run, retains Developing (not Done), and replays exact
+acceptance after restart/source loss/revocation. T-002 current-subject publication/Done, corrected T-009 output storage and T-015 project
+directory are accepted locally after T016/T013/T017 independent reviews and root pinned
+current-output-directory-integrated-20261023 full/race/vet/build. T011 original SQL text/byte
+findings remain retained. T012 output consumer, T020 completion/cancel HTTP and T021 exact
+completion preparation passed independent T027/T026/T023 reviews and are accepted locally after
+root completion-integrated-20261023 full/race/vet/build on141 unchanged inputs and zero-warning API lint. Connected T019 closed T018 reset/session races, T024 fixed canonical
+timestamps and T028 fixed keyboard board focus. Pinned30 frontend tests/build and real Chromium
+login→explicit acceptance→Fake dispatch/reconnect pass, including the newly integrated backend;
+Fake success remains Developing. Full UI and ops remain pending. New HAI-local contracts
+use the namespaced root `.team/hai-20261023/` task/report directory to avoid other products' IDs.
+
+## Reboot publication checkpoint — 2026-10-23
+
+Owner explicitly authorized commit, PR and merge for the current bounded implementation.
+The publication branch contains only this product, based on current main, with code matching
+141 backend and36 frontend inputs from the successful integrated checks. Public source and
+this handoff are saved through the PR; task-local raw evidence and original mixed working
+files remain preserved locally. See [the publication evidence](evidence/2026-10-23-checkpoint.md).
+Earlier statements about absent Git authorization describe the preceding implementation turn.
+Mainline remains incomplete; no usable tag or deployment is implied by this checkpoint.
+
+## Next executable mainline slice
+
+Expose the reviewed `DescribeCompletion` service through a bounded authenticated HTTP read,
+and add explicitly scoped Run-output/artifact access plus the human report storage boundary.
+Then connect candidate selection, explicit independent review/evidence, QA and Done in the detail
+UI. Reuse the existing strict command path and exact-result recovery; do not synthesize artifact
+locators, subjects, passing evidence or phase changes in the browser. Preserve Red/Green and
+current-source process/browser evidence with negative Done guards.
+
+The board read still reports conservative `effective_satisfied=false` / `covered_ac_count=0`;
+current-policy evidence/detail projection is a missing implementation, not a failed verification
+verdict. The legacy command-level evidence AC ID limit is80 bytes while accepted specification
+and completion-subject AC IDs permit UTF8<=120; reconcile this in a separately tested boundary
+change before claiming general accepted-AC evidence support. The local `local` AC is unaffected.
+
+After that: full detail/attention/impact interactions; durable ImpactPlan activation/invalidation;
+backup material verification, restore generation/stream epoch fencing and projection recovery;
+bounded ContextPack fresh-context resume; complete HAI-DONE/UX/ops and independent product gate.
+Full keyboard-only flows, native browser zoom and coarse-pointer acceptance are still unverified.
+The earlier implementation turn performed no Git publication or deployment. The subsequent owner
+authorization covers this checkpoint commit/PR/merge; `mainline: incomplete` and `usable_tag: none`
+remain. Deployment and usable certification are outside this checkpoint.
+
+## Historical pre-resumption checkpoint
 
 - Branch: `agent/hai-taskboard/proposal-import`
 - Worktree: task-scoped checkout; verify actual Git state.
@@ -195,6 +268,10 @@ cases and web gates. Seven author groups ran 212 tests/subtests and independent 
 with no final required skip. PLAN and T-0197-gate bind the hashes and retained diagnostics.
 
 ## Safe next action
+
+The following is the historical 2026-10-06 delivery instruction. Current development
+continues under the owner-invoked prompt and task board above; Git publication still
+requires explicit authorization.
 
 The delivery stop is a Draft PR with successful checks for its exact pushed head and review
 publication. PR metadata and the delivery record carry the actual commit/check result; local

@@ -33,6 +33,12 @@ pub struct AppConfig {
     pub claude_max_runs: usize,
     /// Seconds a Claude Code run waits for tool results.
     pub claude_idle_secs: u64,
+    /// Cursor Agent CLI binary for the `cursor` provider (`--cursor-bin`).
+    pub cursor_bin: Option<String>,
+    /// Concurrent Cursor Agent processes.
+    pub cursor_max_runs: usize,
+    /// Operator accepted cursor-agent's access to the account's Cursor plugins.
+    pub cursor_accept_account_plugins: bool,
 }
 
 impl AppConfig {
@@ -75,6 +81,9 @@ impl AppConfig {
             claude_bin: None,
             claude_max_runs: 2,
             claude_idle_secs: 600,
+            cursor_bin: None,
+            cursor_max_runs: 2,
+            cursor_accept_account_plugins: false,
         })
     }
 

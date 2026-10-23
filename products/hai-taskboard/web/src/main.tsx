@@ -1,10 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from './app';
+import { ConnectedApp } from './connected/app';
 import './styles.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ConnectedApp />
   </StrictMode>,
 );

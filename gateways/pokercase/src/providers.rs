@@ -31,8 +31,8 @@ pub enum UpstreamFormat {
     ClaudeCode,
     /// Google Antigravity cloudcode-pa generateContent
     Antigravity,
-    /// Cursor AgentService (HTTP/2 Connect+proto)
-    CursorAgent,
+    /// Local Cursor Agent CLI (`cursor-agent -p`), see cursor_cli.rs
+    CursorCli,
     /// Not yet implemented — refuse generic chat forward
     Stub,
 }
@@ -127,20 +127,17 @@ pub const ACTIVE: &[ProviderProfile] = &[
     },
     ProviderProfile {
         id: "cursor",
-        aliases: &["cu"],
-        display_name: "Cursor IDE",
+        aliases: &["cu", "cursor_agent"],
+        display_name: "Cursor subscription via the local Cursor Agent CLI",
         category: "oauth",
         status: ProviderStatus::Active,
-        default_base_url: "https://agent.api5.cursor.sh",
-        format: UpstreamFormat::CursorAgent,
+        default_base_url: "local://cursor-agent",
+        format: UpstreamFormat::CursorCli,
         default_model: Some("default"),
-        auth: AuthScheme::Bearer,
-        extra_headers: &[
-            ("User-Agent", "connect-es/1.6.1"),
-            ("connect-protocol-version", "1"),
-        ],
+        auth: AuthScheme::None,
+        extra_headers: &[],
         force_stream: false,
-        notes: "AgentService HTTP/2 text chat. Token: ~/.config/cursor/auth.json. Tools not supported yet.",
+        notes: "Runs the signed-in `cursor-agent -p` read-only (ask mode, sandbox); thinrouter holds no Cursor token. Text only; no client tools or images yet.",
     },
     ProviderProfile {
         id: "grok",
@@ -255,7 +252,6 @@ pub fn list_public() -> serde_json::Value {
 fn official_hosts(provider_id: &str) -> &'static [&'static str] {
     match provider_id {
         "siwc" => &["api.openai.com"],
-        "cursor" => &["agent.api5.cursor.sh", "api2.cursor.sh"],
         "grok" => &["cli-chat-proxy.grok.com"],
         "opencode" => &["opencode.ai"],
         "agy" => &["cloudcode-pa.googleapis.com"],
@@ -269,7 +265,10 @@ pub fn base_url_allowed(
     base_url: &str,
     overrides: &[(String, String)],
 ) -> bool {
-    if profile.format == UpstreamFormat::ClaudeCode {
+    if matches!(
+        profile.format,
+        UpstreamFormat::ClaudeCode | UpstreamFormat::CursorCli
+    ) {
         return true; // no credential leaves the machine; base_url is not used
     }
     let base = base_url.trim().trim_end_matches('/');
@@ -334,9 +333,7 @@ pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
             // Full URL used by agy module; base kept for connection display.
             "https://cloudcode-pa.googleapis.com/v1internal:generateContent".into()
         }
-        UpstreamFormat::CursorAgent => {
-            "https://agent.api5.cursor.sh/agent.v1.AgentService/Run".into()
-        }
+        UpstreamFormat::CursorCli => base.to_string(),
         UpstreamFormat::Stub => base.to_string(),
     }
 }

@@ -37,6 +37,8 @@ pub struct ProxyState {
     pub provider_base_overrides: Vec<(String, String)>,
     /// Local Claude Code CLI runs for the `claude` provider.
     pub claude_code: crate::claude_code::ClaudeCode,
+    /// Local Cursor Agent CLI runs for the `cursor` provider.
+    pub cursor_cli: crate::cursor_cli::CursorCli,
 }
 
 /// Which protocol the client speaks (for converting Claude Code output).
@@ -52,11 +54,17 @@ enum ClaudeOutcome {
     Done(Response),
 }
 
-fn is_claude_code(target: &ResolvedTarget) -> bool {
+/// Targets answered by a local CLI (Claude Code, Cursor Agent) instead of HTTP.
+fn is_cli_target(target: &ResolvedTarget) -> bool {
+    cli_format(target).is_some()
+}
+
+fn cli_format(target: &ResolvedTarget) -> Option<UpstreamFormat> {
     provider_id_for(target)
         .as_deref()
         .and_then(providers::resolve)
-        .is_some_and(|p| p.format == UpstreamFormat::ClaudeCode)
+        .map(|p| p.format)
+        .filter(|f| matches!(f, UpstreamFormat::ClaudeCode | UpstreamFormat::CursorCli))
 }
 
 /// Mark cooldown and log a failed attempt.
@@ -83,13 +91,13 @@ fn record_failure(
     );
 }
 
-/// One target answered by the local Claude Code CLI. `chat_body` is the request in
+/// One target answered by a local CLI (Claude Code or Cursor Agent). `chat_body` is the request in
 /// chat-completions form (every client protocol is converted to it first).
 #[allow(
     clippy::too_many_arguments,
     reason = "Mirrors the HTTP forward path's explicit request context"
 )]
-async fn claude_code_attempt(
+async fn cli_attempt(
     state: &ProxyState,
     target: &ResolvedTarget,
     chat_body: &Bytes,
@@ -104,8 +112,16 @@ async fn claude_code_attempt(
         body: format!("invalid JSON body: {e}"),
         retryable: false,
     })?;
-    let run = crate::claude_code::start(&state.claude_code, &target.upstream_model, &chat, cancel)
-        .await?;
+    let run = match cli_format(target) {
+        Some(UpstreamFormat::CursorCli) => {
+            crate::cursor_cli::start(&state.cursor_cli, &target.upstream_model, &chat, cancel)
+                .await?
+        }
+        _ => {
+            crate::claude_code::start(&state.claude_code, &target.upstream_model, &chat, cancel)
+                .await?
+        }
+    };
     state.cooldown.clear(&target.connection.id);
     let latency = start.elapsed().as_millis() as i64;
     if stream {
@@ -248,9 +264,19 @@ async fn forward_chat_completions_inner(
     allow_401_refresh: bool,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
     // Refresh OAuth if near expiry (best-effort).
+    let borrowed = crate::borrowed::source(&target.connection);
     let target = {
         let mut t = target.clone();
-        if allow_401_refresh && t.connection.auth_type == "oauth_import" {
+        if let Some(path) = &borrowed {
+            // Re-read the CLI's file on every attempt; never refresh it ourselves.
+            if let Err(e) = crate::borrowed::apply(&mut t.connection, path) {
+                return Err(UpstreamAttemptError {
+                    status: 401,
+                    body: e.to_string(),
+                    retryable: true,
+                });
+            }
+        } else if allow_401_refresh && t.connection.auth_type == "oauth_import" {
             if let Ok(fresh) =
                 crate::oauth_refresh::ensure_fresh(&state.store, t.connection.clone()).await
             {
@@ -375,7 +401,7 @@ async fn forward_chat_completions_inner(
                         }
                     }
                 }
-                UpstreamFormat::CursorAgent | UpstreamFormat::ClaudeCode => {
+                UpstreamFormat::CursorCli | UpstreamFormat::ClaudeCode => {
                     return Err(UpstreamAttemptError {
                         status: 500,
                         body: "cursor / claude code paths are handled before the HTTP forward"
@@ -486,6 +512,33 @@ async fn forward_chat_completions_inner(
                     response: resp,
                     body_kind,
                     reassemble_stream: reassemble,
+                })
+            } else if status == 401 && borrowed.is_some() {
+                let body_txt = resp.text().await.unwrap_or_default();
+                let mut reread = target.clone();
+                let changed = borrowed
+                    .as_deref()
+                    .and_then(|p| crate::borrowed::apply(&mut reread.connection, p).ok())
+                    .is_some_and(|_| {
+                        reread.connection.bearer_token() != target.connection.bearer_token()
+                    });
+                if changed && allow_401_refresh {
+                    // The CLI refreshed its file since we read it: retry once.
+                    return Box::pin(forward_chat_completions_inner(
+                        state,
+                        target,
+                        body,
+                        native_responses,
+                        stream,
+                        cancel,
+                        false,
+                    ))
+                    .await;
+                }
+                Err(UpstreamAttemptError {
+                    status,
+                    body: format!("{body_txt} ({})", crate::borrowed::GROK_HINT),
+                    retryable: true,
                 })
             } else if status == 401
                 && allow_401_refresh
@@ -639,96 +692,8 @@ pub async fn handle_chat_with_fallback(
         }
         let start = Instant::now();
 
-        // Cursor AgentService (HTTP/2) — dedicated path, not reqwest.
-        if let Some(p) = target
-            .connection
-            .oauth
-            .as_ref()
-            .and_then(|o| providers::resolve(&o.provider))
-        {
-            if p.format == UpstreamFormat::CursorAgent {
-                let mut t = target.clone();
-                if let Ok(fresh) =
-                    crate::oauth_refresh::ensure_fresh(&state.store, t.connection.clone()).await
-                {
-                    t.connection = fresh;
-                }
-                let machine_id = t
-                    .connection
-                    .oauth
-                    .as_ref()
-                    .and_then(|o| o.meta.as_deref())
-                    .and_then(|m| serde_json::from_str::<Value>(m).ok())
-                    .and_then(|v| {
-                        v.get("machine_id")
-                            .and_then(|x| x.as_str())
-                            .map(|s| s.to_string())
-                    });
-                let msgs = match crate::cursor_agent::parse_chat_messages(&body) {
-                    Ok(m) => m,
-                    Err(e) => {
-                        return Err(e);
-                    }
-                };
-                match crate::cursor_agent::agent_chat_completions(
-                    t.connection.bearer_token(),
-                    machine_id.as_deref(),
-                    &t.upstream_model,
-                    &msgs,
-                )
-                .await
-                {
-                    Ok(bytes) => {
-                        let latency = start.elapsed().as_millis() as i64;
-                        state.cooldown.clear(&t.connection.id);
-                        let (pt, ct) = extract_usage_tokens(&bytes);
-                        let _ = state.store.log_usage(
-                            Some(public_model),
-                            Some(&t.connection.id),
-                            Some(200),
-                            Some(latency),
-                            None,
-                            pt,
-                            ct,
-                            None,
-                        );
-                        let _ = cancel_guard;
-                        return Ok(json_bytes_response(StatusCode::OK, bytes));
-                    }
-                    Err(AppError::Upstream { status, body }) => {
-                        let secs = cooldown_secs_for_status(status);
-                        if secs > 0 {
-                            state.cooldown.mark(&t.connection.id, secs);
-                        }
-                        let _ = state.store.log_usage(
-                            Some(public_model),
-                            Some(&t.connection.id),
-                            Some(status as i64),
-                            Some(start.elapsed().as_millis() as i64),
-                            Some(&body.chars().take(500).collect::<String>()),
-                            None,
-                            None,
-                            None,
-                        );
-                        if is_retryable_status(status) && idx + 1 < targets.len() {
-                            last_err = Some(UpstreamAttemptError {
-                                status,
-                                body,
-                                retryable: true,
-                            });
-                            continue;
-                        }
-                        return Err(AppError::Upstream { status, body });
-                    }
-                    Err(e) => {
-                        return Err(e);
-                    }
-                }
-            }
-        }
-
-        if is_claude_code(target) {
-            match claude_code_attempt(
+        if is_cli_target(target) {
+            match cli_attempt(
                 state,
                 target,
                 &body,
@@ -874,8 +839,8 @@ pub async fn handle_anthropic_messages(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
-        if is_claude_code(target) {
-            match claude_code_attempt(
+        if is_cli_target(target) {
+            match cli_attempt(
                 state,
                 target,
                 &oai_body,
@@ -1020,8 +985,8 @@ pub async fn handle_responses(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
-        if is_claude_code(target) {
-            match claude_code_attempt(
+        if is_cli_target(target) {
+            match cli_attempt(
                 state,
                 target,
                 &chat_body,

@@ -229,18 +229,18 @@ impl Store {
             }
         }
         migrate_secrets(&conn, &secrets)?;
-        // The claude provider now runs the local Claude Code CLI; stored Claude tokens
-        // are never used again, so they are not kept.
+        // The claude and cursor providers run their local CLIs; stored Claude / Cursor
+        // tokens are never used again, so they are not kept.
         let cleared = conn.execute(
             "UPDATE oauth_credentials SET access_token = '', refresh_token = NULL, expires_at = NULL
-             WHERE provider IN ('claude', 'cc', 'anthropic', 'claude_code')
+             WHERE provider IN ('claude', 'cc', 'anthropic', 'claude_code', 'cursor', 'cu')
                AND (access_token != '' OR refresh_token IS NOT NULL)",
             [],
         )?;
         if cleared > 0 {
             tracing::info!(
                 cleared,
-                "removed stored Claude tokens (claude now runs Claude Code)"
+                "removed stored Claude/Cursor tokens (now answered by their CLIs)"
             );
         }
         // The codex (ChatGPT backend-api) provider was removed in favour of siwc. Its rows
@@ -256,6 +256,14 @@ impl Store {
             "UPDATE oauth_credentials SET access_token = '', refresh_token = NULL, expires_at = NULL
              WHERE provider IN ('codex', 'cx', 'openai_codex', 'chatgpt_codex')
                AND (access_token != '' OR refresh_token IS NOT NULL)",
+            [],
+        )?;
+        // Grok logins imported from ~/.grok/auth.json are borrowed (borrowed.rs): their
+        // rotating refresh token belongs to the Grok CLI, so no copy is kept.
+        conn.execute(
+            "UPDATE oauth_credentials SET refresh_token = NULL
+             WHERE provider = 'grok' AND refresh_token IS NOT NULL
+               AND meta LIKE '%.grok/auth.json%'",
             [],
         )?;
         if retired > 0 {

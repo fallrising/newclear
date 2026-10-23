@@ -49,6 +49,12 @@ Scenario: mkfk source changes
   Then `.github/workflows/mkfk-ci.yml` is eligible
   And it runs the Go gates, the short seeded chaos profile, and the Compose demo with its teardown, with `contents: read` and no secrets, image publish, or deploy
 
+Scenario: Edge Ops source changes
+  Given a change under `platform/edge-ops/**` or `.github/workflows/edge-ops-ci.yml`
+  When its root workflow runs
+  Then backend TS contracts, the mock-Agent demo chain, local workerd/D1 smoke, Go agent contracts, and React build/Playwright acceptance run
+  And the checks use synthetic local resources without Cloudflare credentials, remote resource creation, or deploy
+
 ## Constraints
 
 - Workflows are in `.github/workflows/`, use `contents: read`, explicit job timeouts, cancellation concurrency, and root-relative path filters including their own files.
@@ -74,7 +80,7 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | CMS Scaffold | `cms-scaffold-ci.yml` | `apps/cms-scaffold/**`, `.github/workflows/cms-scaffold-ci.yml` | Java 25 `./gradlew test`; Node 24 `npm ci`, test, lint, typecheck, and build |
 | Dim Gate | `dim-gate-ci.yml` | `platform/dim-gate/**`, `.github/workflows/dim-gate-ci.yml` | Component-native lint/test with `contents: read` |
 | Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `npm ci`, `npm run build` in `products/kith/web`, then immutable synthetic article bundle from exact checkout commit; Node/Git crash-recovery tests in `npm test`; `contents: read`; no private content, secrets or deploy |
-| Edge Ops | `edge-ops-ci.yml` | `platform/edge-ops/**`, `.github/workflows/edge-ops-ci.yml` | Node 24.18.0 `npm ci`, `npm run typecheck`, `npm test` in `platform/edge-ops/backend`; Go 1.24.7 `gofmt` check, `go vet`, `go test` in `platform/edge-ops/agent`; offline contract vectors only, no Cloudflare credentials or deploy |
+| Edge Ops | `edge-ops-ci.yml` | `platform/edge-ops/**`, `.github/workflows/edge-ops-ci.yml` | Node 24.18.0 backend `npm ci`, `npm run typecheck`, `npm test`; root demo-chain `npm run check`; backend `npm run test:workerd` for local workerd/D1 HTTP smoke; Go 1.24.7 agent `gofmt` check, `go vet`, `go test -count=1 ./...`; web `npm ci`, React `npm run build`, Chromium installation and Playwright `npm run test:e2e`, with browser evidence retained; synthetic local resources, no Cloudflare credentials or deploy |
 | cc-quota | `cc-quota-ci.yml` | `tools/cc-quota/**`, `.github/workflows/cc-quota-ci.yml` | Python 3 stdlib `unittest` offline suite (no network or credentials); `bash -n install.sh` |
 | mkfk | `mkfk-ci.yml` | `systems/mkfk/**`, `.github/workflows/mkfk-ci.yml` | Go from `go.mod`: `make fmt-check vet test test-race test-model test-integration`; `make test-chaos CHAOS_PROFILE=short` with its output uploaded as an artifact; `make demo` (three-broker Compose on a locally built `FROM scratch` image, no registry pull, loopback-only ports) followed by `make demo-down DELETE_DATA=1` |
 
@@ -85,6 +91,54 @@ OpenViking context lab adds `.github/workflows/openviking-context-ci.yml`, scope
 `make -C labs/openviking-context check`: stdlib offline contracts and a synthetic demo.
 It does not install OpenViking, call models, or validate live-server behavior.
 
+## Shared workflow static validation
+
+`python3 .github/scripts/check_workflows.py` is the local and CI entrypoint.
+It checks only enabled root `.github/workflows/*.yml` and `*.yaml` files;
+component-local imported workflows remain dormant. Explicit file arguments can
+check a regression fixture before a commit:
+
+```sh
+python3 .github/scripts/check_workflows.py --cache-dir /path/to/task/build/actionlint
+python3 .github/scripts/check_workflows.py --cache-dir /path/to/task/build/actionlint .github/scripts/tests/fixtures/invalid-runner-job-env.yml
+ACTIONLINT_ARCHIVE=/path/to/task/build/actionlint/actionlint_1.7.12_linux_amd64.tar.gz python3 -m unittest discover -s .github/scripts/tests -v
+```
+
+Use the shared build-workspace launcher where available: its `AGENT_BUILD_DIR`
+supplies the cache location automatically. Otherwise give `--cache-dir` or
+`ACTIONLINT_CACHE_DIR` explicitly, outside the checkout. No global install or
+source-tree binary is created. The first check downloads an official release
+archive; subsequent checks reuse that archive, verify its SHA256 every time and
+extract a fresh private executable for the invocation. `--archive PATH` provides
+an offline archive subject to the same digest check. Download/digest/platform
+failures return 2; workflow diagnostics return 1, with file, line and column;
+success returns 0. The checker never runs a workflow or changes its YAML.
+
+[The pin manifest](../../.github/actionlint.json) records the exact
+[official actionlint 1.7.12 release](https://github.com/rhysd/actionlint/releases/tag/v1.7.12),
+download source and SHA256 values from its published checksum list for Linux and
+macOS amd64/arm64. Version 1.7.7 was evaluated but rejects the valid
+`macos-15-intel` matrix label in Flowshot; 1.7.12 accepts it without an exception.
+Upgrades require reviewing the release/checksum source and rerunning fixtures
+and all root workflows, rather than following a moving latest download.
+
+The real negative fixture places `runner.temp` in job-level `env` and must fail.
+Separate positive fixtures cover step-level runner context, writing through
+`GITHUB_ENV`, and matrix/expression evaluation including the hosted Intel Mac
+label. No workflow-specific ignores or custom runner exceptions are configured.
+Actionlint validates expression availability and statically inferable matrix
+types; generated runtime values are not executed or proven by this gate.
+The optional ShellCheck/Pyflakes integrations are disabled explicitly with
+`-shellcheck= -pyflakes=` to make the Actions validity check deterministic without
+extra linters; YAML, context, expression, runner and action checks remain enabled
+([upstream usage](https://github.com/rhysd/actionlint/blob/v1.7.12/docs/usage.md)).
+
+`workflow-lint.yml` runs the entrypoint and real fixture suite only when root
+workflows, the checker, its tests or actionlint configuration change (plus manual
+dispatch). It uses a read-only checkout, contents-read permissions, cancellation
+concurrency and a five-minute timeout. Existing component filters, product tests,
+release behavior and workflow permissions/concurrency/timeouts are unchanged.
+
 ## Steps
 
 1. Add this specification and make the root README identify root workflows as canonical.
@@ -93,7 +147,8 @@ It does not install OpenViking, call models, or validate live-server behavior.
 
 ## Verification
 
-- Pinned actionlint container against `.github/workflows/*.yml`
+- Shared `python3 .github/scripts/check_workflows.py` against enabled root workflows
+- `ACTIONLINT_ARCHIVE=<verified-archive> python3 -m unittest discover -s .github/scripts/tests -v`
 - Static assertions for triggers, path filters, permissions, concurrency, timeouts, and forbidden release/deploy/publish or credential use
 - Representative native gates: shell syntax; clean web install/lint/build where dependencies are available; component build/test commands where runtime prerequisites are available
 - `git diff --check`

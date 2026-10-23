@@ -159,63 +159,50 @@ fn import_grok(store: &Store, make_routes: bool) -> ImportResult {
         };
     };
     let access = entry.get("key").and_then(|k| k.as_str()).unwrap_or("");
-    let refresh = entry.get("refresh_token").and_then(|t| t.as_str());
     let exp = entry.get("expires_at").and_then(|t| t.as_str());
+    let meta = serde_json::json!({"source": path.display().to_string()});
     upsert(
         store,
         "local-grok",
         "grok",
         access,
-        refresh,
+        // xAI refresh tokens rotate; the Grok CLI owns them (see borrowed.rs).
+        None,
         exp,
-        Some(r#"{"source":"~/.grok/auth.json"}"#),
+        Some(&meta.to_string()),
         Some("grok-build"),
         make_routes,
     )
 }
 
+/// Cursor needs no token import: the local Cursor Agent CLI answers with its own login.
 fn import_cursor(store: &Store, make_routes: bool) -> ImportResult {
-    let path = home().join(".config/cursor/auth.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "cursor".into(),
-                name: "local-cursor".into(),
-                ok: false,
-                detail: format!("missing {}: {e}", path.display()),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "cursor".into(),
-                name: "local-cursor".into(),
-                ok: false,
-                detail: format!("parse: {e}"),
-            };
-        }
-    };
-    let access = v.get("accessToken").and_then(|t| t.as_str()).unwrap_or("");
-    let refresh = v.get("refreshToken").and_then(|t| t.as_str());
-    if access.is_empty() {
+    let bin = std::env::var("THINROUTER_CURSOR_BIN").unwrap_or_else(|_| "cursor-agent".into());
+    let found = std::process::Command::new(&bin)
+        .arg("--version")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success());
+    if !found {
         return ImportResult {
             provider: "cursor".into(),
             name: "local-cursor".into(),
             ok: false,
-            detail: "no accessToken".into(),
+            detail: format!(
+                "Cursor Agent CLI `{bin}` not found; install it and run `cursor-agent login`"
+            ),
         };
     }
     upsert(
         store,
         "local-cursor",
         "cursor",
-        access,
-        refresh,
+        "",
         None,
-        Some(r#"{"source":"~/.config/cursor/auth.json"}"#),
+        None,
+        Some(r#"{"source":"cursor-agent-cli"}"#),
         Some("default"),
         make_routes,
     )
@@ -306,6 +293,10 @@ pub async fn refresh_all_oauth(store: &Store) -> Result<Vec<(String, bool, Strin
             .and_then(|o| o.refresh_token.as_ref())
             .is_none()
         {
+            continue;
+        }
+        if crate::borrowed::source(&c).is_some() {
+            out.push((c.name, true, "skipped: borrowed from the Grok CLI".into()));
             continue;
         }
         match oauth_refresh::refresh_connection(store, &c).await {

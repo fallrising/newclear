@@ -2,10 +2,10 @@
 project: labs/browser-fingerprint
 purpose: 觀測瀏覽器設備訊號與任務操作事件以比較測試環境
 kind: lab
-mainline: incomplete
+mainline: complete
 usable_tag: none
 reviewed: 2026-10-23
-source_commit: b7f2a4311d1135977ba273efba8e77702b908036
+source_commit: 2ce7200f7eb55cfaf623121182d7bd14e10fc66d
 ---
 
 # browser-fingerprint 成功契約
@@ -26,7 +26,7 @@ Owner 已啟用 START_DEVELOPMENT_PROMPT；沿用 Go + browser-native 技術棧�
 
 ## 驗收條件
 
-passed 表示下列同版本地實測或明列的文件核對；historical 才是舊結果。來源是上述 base 加 [candidate 雜湊](docs/evidence/candidate-sha256.json) 綁定的未提交差異，不把 base commit 本身當成修正版本。完整證據與失敗歷史見 [本次驗證](docs/evidence/2026-10-23-local.md)。
+passed 表示下列同版本地實測或明列的文件核對；historical 才是舊結果。來源為上述已提交產品版本，並由 [candidate 雜湊](docs/evidence/candidate-sha256.json) 綁定既有瀏覽器與本地驗證。完整證據與失敗歷史見 [本次驗證](docs/evidence/2026-10-23-local.md)。
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
 | --- | --- | --- | --- |
@@ -37,7 +37,7 @@ passed 表示下列同版本地實測或明列的文件核對；historical 才�
 
 ## 現況與缺口
 
-實作與本地 AC-01–04 驗證完成，獨立 T-884 review 接受本地實作。主線交付暫保留 incomplete，因 hosted CI 與合併尚未完成；沒有 commit/push/PR/tag/deploy。UI 隱藏搜尋不得前進，觀測／事件失敗不撤銷成功 CRUD。
+本地 lab 主線 AC-01–04、獨立 T-884 審查及 hosted component/project-success CI 已通過，mainline 標記 complete。程式已提交並開 [PR #533](https://github.com/fallrising/newclear/pull/533)；整合狀態以該 PR 為準，任務板只在實際合併後填 done/end。未建立 usable tag 或部署。UI 隱藏搜尋不得前進，觀測／事件失敗不撤銷成功 CRUD。
 
 原生 test/vet/build、Node analyzer/tutorial、三個真 Chromium 旅程已同版重跑。2026-10-23 owner 安裝 GCC 14.2.0 後，已以 CGO_ENABLED=1 補跑 `go test -race -v ./...` 並通過；先前缺 compiler 的啟動失敗保留為歷史。新增 component CI 仍保留該檢查。歷史 RED 與環境失敗詳見證據，未刪除或當成通過。私人 tunnel/PIN 是額外未驗證路徑，不由本地結果推論。
 
@@ -56,10 +56,10 @@ passed 表示下列同版本地實測或明列的文件核對；historical 才�
 ## 可用版本
 
 目前 `usable_tag: none`。
-本地 native 檢查、指定 Chromium 五步旅程、JSONL 對照與錯誤路徑已補足；仍待 hosted CI 與 PR/merge。
+本地 native/race、指定 Chromium 五步旅程、JSONL 對照、錯誤路徑及 hosted CI 已補足。[Component CI](https://github.com/fallrising/newclear/actions/runs/39955826984) 與 [project-success CI](https://github.com/fallrising/newclear/actions/runs/39955826623) 對應已提交產品版本；合併紀錄見 PR #533。
 限定local lab即可驗收，不強加身份鑑別能力；若宣稱私人tunnel可用，另補PIN正負向實測。
 
 後續標記須綁已合併的目標 SHA、必要 CI／審查及該範圍核心流程證據。
 沿用歷史結果前須比較其後程式與設定差異，相關改動要補驗。
 
-2026-10-23 發布授權更新：owner 明確要求提交本項目、發起 PR 並在必要檢查通過後合併。已從最新 main 建立獨立分支，產品檔案與既有驗收 hash 一致；此授權不含 tag、release 或部署。
+2026-10-23 發布授權更新：owner 明確要求提交本項目、發起 PR 並在必要檢查通過後合併。已從最新 main 建立獨立分支並通過 hosted CI，產品檔案與既有驗收 hash 一致；此授權不含 tag、release 或部署。

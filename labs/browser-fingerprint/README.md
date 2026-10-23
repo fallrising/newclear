@@ -1,6 +1,6 @@
 # Daylight · 瀏覽器設備觀測實驗
 
-> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。2026-10-23 本地 Chromium 五步與記錄失敗旅程已驗證，compiler 安裝後 race 檢查亦通過；未合併／未部署。詳見 [本次證據](docs/evidence/2026-10-23-local.md)。
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。2026-10-23 本地 Chromium 五步與記錄失敗旅程已驗證，compiler 安裝後 race 與 hosted CI 亦通過；程式整合見 [PR #533](https://github.com/fallrising/newclear/pull/533)，未部署。詳見 [本次證據](docs/evidence/2026-10-23-local.md)。
 
 
 > 有界測試 lab；投入與文件檔位尚未分級。見 [Portfolio](../../PORTFOLIO.md) 與[文件政策](../../docs/portfolio-doc-tiers.md)。

@@ -72,6 +72,9 @@ func (a *Actor) step(message raft.Message, isReply func(raft.Message) bool) ([]r
 	ready, err := a.node.Step(message)
 	if err != nil {
 		a.rejected.Add(1)
+		if a.onReject != nil {
+			a.onReject(message, err)
+		}
 		if a.storageFailed() {
 			a.fail(err)
 		}

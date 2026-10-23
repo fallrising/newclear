@@ -1,6 +1,7 @@
 package raft
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 )
@@ -211,4 +212,61 @@ func TestM7LaggingFollowerCatchesUpWithSeveralAppendsInFlight(t *testing.T) {
 	if follower.LastLogIndex != leader.LastLogIndex || follower.CommitIndex != leader.CommitIndex {
 		t.Fatalf("follower did not catch up: leader %#v follower %#v", leader, follower)
 	}
+}
+
+// Read barriers carry a read context, so a peer link cannot coalesce them.
+// If a follower's link holds more of them than the leader tracks
+// (MaxInflightAppends) and reads keep arriving, every reply answers an RPC
+// the leader already forgot, and the follower never catches up. The leader
+// must stop adding read barriers to a peer whose appends go unanswered.
+func TestM7ReadBarriersDoNotStarveALaggingFollower(t *testing.T) {
+	t.Parallel()
+	cluster := newMemoryCluster(t)
+	cluster.enqueueReady(t, 1, cluster.campaign(t, 1))
+	cluster.drain(t, 100)
+	cluster.isolate(3)
+	// More than one AppendEntries batch behind, so node 3 only catches up if
+	// the leader learns its progress.
+	for index := 0; index < 20*MaxAppendEntries; index++ {
+		frame := fenceFrame(0, 0, "behind")
+		_, ready, err := cluster.nodes[1].ProposeFrame(frame.Kind, frame.Payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cluster.enqueueReady(t, 1, ready)
+		cluster.drain(t, 100)
+	}
+	cluster.blocked = map[[2]uint32]bool{}
+	reads := 0
+	read := func() {
+		reads++
+		ready, err := cluster.nodes[1].RequestRead(fmt.Sprintf("read-%d", reads))
+		if err != nil {
+			t.Fatal(err)
+		}
+		cluster.enqueueReady(t, 1, ready)
+		for cluster.deliverMatching(t, func(message Message) bool { return message.To == 2 || message.From == 2 }) {
+		}
+	}
+	// The link to node 3 backs up while reads keep coming.
+	for index := 0; index < 2*MaxInflightAppends; index++ {
+		read()
+	}
+	leader := cluster.nodes[1].Snapshot()
+	for step := 0; step < 64*MaxInflightAppends; step++ {
+		// Reads arrive faster than node 3's link drains.
+		for range MaxPipelinedAppends {
+			read()
+		}
+		if step%10 == 0 {
+			cluster.enqueueReady(t, 1, cluster.tick(t, 1))
+		}
+		// Node 3's link sends its oldest message; the reply comes straight back.
+		cluster.deliverMatching(t, func(message Message) bool { return message.To == 3 })
+		cluster.deliverMatching(t, func(message Message) bool { return message.From == 3 })
+		if follower := cluster.nodes[3].Snapshot(); follower.LastLogIndex == leader.LastLogIndex && follower.CommitIndex == leader.CommitIndex {
+			return
+		}
+	}
+	t.Fatalf("follower never caught up while reads continued: leader %#v follower %#v", cluster.nodes[1].Snapshot(), cluster.nodes[3].Snapshot())
 }

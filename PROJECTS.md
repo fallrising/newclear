@@ -43,7 +43,7 @@
 | [products/phark](products/phark/SUCCESS.md) | products | 以同源網頁提供多欄時間線與基本社交互動 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [specs/fleet](specs/fleet/SUCCESS.md) | specs | 以期望狀態協調個人 VPS 的 Compose 工作負載與入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-28 |
 | [systems/clarkq](systems/clarkq/SUCCESS.md) | systems | 以簡單 HTTP 介面提供可持久化的單機訊息佇列 | 完成 | [usable/clarkq/v1.5.1](https://github.com/fallrising/newclear/tree/usable/clarkq/v1.5.1/systems/clarkq) | 2026-10-10 |
-| [systems/mkfk](systems/mkfk/SUCCESS.md) | systems | 以可重播故障驗證分區日誌、複製與生產消費語義 | 完成 | [usable/mkfk/v0.1.0](https://github.com/fallrising/newclear/tree/usable/mkfk/v0.1.0/systems/mkfk) | 2026-10-19 |
+| [systems/mkfk](systems/mkfk/SUCCESS.md) | systems | 以可重播故障驗證分區日誌、複製與生產消費語義 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-19 |
 | [systems/ojbquay](systems/ojbquay/SUCCESS.md) | systems | 在 Kafka 與 PostgreSQL 上提供自助訊息發布、消費及故障處理 | 完成 | [usable/ojbquay/v1.0.0](https://github.com/fallrising/newclear/tree/usable/ojbquay/v1.0.0/systems/ojbquay) | 2026-09-27 |
 | [systems/snail](systems/snail/SUCCESS.md) | systems | 以 Rust 提供多核心純記憶體 RESP2 鍵值服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-10 |
 | [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 完成 | [usable/wotar/v0.1.0](https://github.com/fallrising/newclear/tree/usable/wotar/v0.1.0/systems/wotar) | 2026-09-24 |

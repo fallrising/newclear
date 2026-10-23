@@ -213,6 +213,9 @@ func (node *Node) stepAppendResponse(message Message) (Ready, error) {
 	if !exists {
 		return Ready{}, errors.New("append response came from an untracked peer")
 	}
+	// A reply to an RPC the leader no longer tracks proves nothing and must
+	// not reopen the pipeline: while a backlog holds only forgotten RPCs,
+	// reopening it would let new read barriers refill the backlog forever.
 	sent, exists := node.sent[message.RPCID]
 	if !exists || sent.peer != message.From || sent.term != node.term {
 		return Ready{LeaderReady: node.leaderReady}, nil
@@ -308,10 +311,19 @@ func (node *Node) pipelineAppend() ([]Message, error) {
 	return messages, nil
 }
 
+// broadcastAppend sends a heartbeat, or with a read context a read barrier,
+// to every peer. Heartbeats always go out. A read barrier skips a peer whose
+// pipeline is full: links cannot coalesce read barriers, and once more of
+// them are queued than the leader tracks (MaxInflightAppends), every reply
+// would answer a forgotten RPC and the peer could never catch up. The read
+// is confirmed by the other peers or times out and is retried.
 func (node *Node) broadcastAppend(readContext string) ([]Message, error) {
 	messages := make([]Message, 0, len(node.progress))
 	for _, voter := range node.config.Voters {
 		if voter == node.config.NodeID {
+			continue
+		}
+		if progress := node.progress[voter]; readContext != "" && progress != nil && progress.unanswered >= MaxPipelinedAppends {
 			continue
 		}
 		message, err := node.makeAppend(voter, readContext)

@@ -72,9 +72,13 @@ type Outbox struct {
 	wg      sync.WaitGroup
 	dropped atomic.Uint64
 	failed  atomic.Uint64
+	// onFailure, when set, observes each failed peer call on that peer's
+	// link worker.
+	onFailure func(peer uint32, message raft.Message, err error)
 }
 
-func NewOutbox(local *Registry, remotes map[uint32]Remote, queue int, timeout time.Duration) (*Outbox, error) {
+// onFailure may be nil; it runs on the failing peer's link worker.
+func NewOutbox(local *Registry, remotes map[uint32]Remote, queue int, timeout time.Duration, onFailure func(peer uint32, message raft.Message, err error)) (*Outbox, error) {
 	if local == nil || len(remotes) == 0 {
 		return nil, errors.New("local registry and remotes are required")
 	}
@@ -89,7 +93,7 @@ func NewOutbox(local *Registry, remotes map[uint32]Remote, queue int, timeout ti
 	}
 	outbox := &Outbox{
 		local: local, links: make(map[uint32]*link), remotes: make(map[uint32]Remote),
-		timeout: timeout,
+		timeout: timeout, onFailure: onFailure,
 	}
 	outbox.ctx, outbox.cancel = context.WithCancel(context.Background())
 	for peer, remote := range remotes {
@@ -138,17 +142,20 @@ func (o *Outbox) run(peer uint32) {
 			if !ok || o.ctx.Err() != nil {
 				break
 			}
-			o.call(remote, message)
+			o.call(peer, remote, message)
 		}
 	}
 }
 
-func (o *Outbox) call(remote Remote, message raft.Message) {
+func (o *Outbox) call(peer uint32, remote Remote, message raft.Message) {
 	ctx, cancel := context.WithTimeout(o.ctx, o.timeout)
 	defer cancel()
 	replies, err := remote.Step(ctx, message)
 	if err != nil {
 		o.failed.Add(1)
+		if o.onFailure != nil {
+			o.onFailure(peer, message, err)
+		}
 		return
 	}
 	for _, reply := range replies {

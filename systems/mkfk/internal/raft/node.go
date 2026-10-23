@@ -92,7 +92,19 @@ func NewNode(config Config, log DurableLog) (*Node, error) {
 }
 
 func (node *Node) Snapshot() Snapshot {
+	var peers []PeerProgress
+	if node.role == Leader {
+		for _, voter := range node.config.Voters {
+			if progress := node.progress[voter]; progress != nil && voter != node.config.NodeID {
+				peers = append(peers, PeerProgress{
+					PeerID: voter, NextIndex: progress.nextIndex, MatchIndex: progress.matchIndex,
+					Unanswered: progress.unanswered, Inflight: len(progress.inflight),
+				})
+			}
+		}
+	}
 	return Snapshot{
+		Peers:        peers,
 		NodeID:       node.config.NodeID,
 		Role:         node.role,
 		Term:         node.term,

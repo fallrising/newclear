@@ -43,11 +43,15 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 | AC-16 | Given `import-local` 匯入的 grok 連線（借用 `~/.grok/auth.json`；xAI refresh token 會輪換），When 呼叫上游、檔案被 Grok CLI 更新或 token 過期，Then 每次重讀檔案、從不自行 refresh 或寫檔，401 時重讀一次後回明確提示；舊資料的 grok refresh token 在開庫時清除。agy（Google，不輪換）照常 refresh。 | passed | `tests/responses_e2e.rs::borrowed_grok_login_is_reread_and_never_refreshed`、`borrowed` 單元測試；2026-10-23 本機全綠。 |
 | AC-17 | Given `cursor` provider，When 三個端點送純文字（串流與非串流），Then 僅在 operator 加 `--cursor-accept-account-plugins` 時（否則 503，不啟動 CLI）由本機官方 `cursor-agent -p --output-format stream-json --stream-partial-output` 回答，限定 `--mode ask`、`--sandbox enabled`、空工作目錄，不加 `--force`／`--approve-mcps`；只採用串流 delta（略過重複 flush），呼叫方 system 放在 `<external_system_instructions>`；thinrouter 不持有 Cursor token、不再使用私有協定；帶 tools 或圖片回 501，未登入回 401。 | passed | `tests/cursor_cli_e2e.rs`（Python 假 `cursor-agent` 照官方 output-format 文件輸出）、`cursor_cli` 單元測試；2026-10-23 本機全綠。2026-10-23 owner 以真實 `cursor-agent` 2026.10.16 跑 `-p --output-format stream-json --stream-partial-output --mode ask --sandbox enabled --trust --workspace /tmp "say hi"`：參數均被接受、delta／flush 判斷與實作一致，另有文件未載的 `thinking` 事件（忽略）與 result 上的 usage（已對應）；假程式依此輸出更新。同日探測：ask 模式下 agent 仍可用帳號的 Cursor plugin（Gmail 等）且 CLI 無法停用，故改為 opt-in；workspace MCP 需 `--approve-mcps` 才載入。未經 thinrouter 端到端實跑。 |
 
+## 本次里程碑：T-0377 Cursor 外部隔離
+
+Owner 決定保留 Cursor。目標／範圍／固定 AC 與驗證計畫見 [隔離規格](docs/cursor-isolation.md)，進度見 [任務板](docs/tasks/BOARD.md)。原 ask＋sandbox 的主機隔離假設已被實測否定；AC-17 的假 CLI 協定測試不能當成隔離 PASS。本次尚未完成，真帳號與網路／plugin 隔離未驗證。
+
 ## 現況與缺口
 
 舊進度表的 auto refresh／executor「未開始」已被同檔後半部與實際 source 超越。
 已知四個 provider 有歷史 smoke；不能降格成全部 mock，也不能擴為全 provider 完成。
-Cursor 改由官方 `cursor-agent` CLI 回答（唯讀 ask 模式），目前僅文字；tools 與圖片仍是後續能力。
+Cursor 改由官方 `cursor-agent` CLI 回答（ask 模式不保證唯讀／主機隔離），目前僅文字；tools 與圖片仍是後續能力。
 完整個人多工具客戶端、深層工具串流與 token lifecycle 驗收未齊。
 成本 admission 有邊界；disabled keys 不會取消已送出的 provider 請求。
 

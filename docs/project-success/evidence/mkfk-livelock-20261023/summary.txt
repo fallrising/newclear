@@ -1,0 +1,18 @@
+source fdc534bca955fb30cc21d87b2d849b8c4aa05d77 dirty=0
+== fmt-vet-test 2026-10-23T07:02:40Z
+PASS fmt-vet-test
+== race 2026-10-23T07:02:54Z
+PASS race
+== model 2026-10-23T07:03:56Z
+PASS model
+== integration 2026-10-23T07:03:58Z
+PASS integration
+== chaos-short 2026-10-23T07:04:09Z
+PASS chaos-short
+== chaos-full 2026-10-23T07:04:33Z
+PASS chaos-full
+== demo 2026-10-23T07:06:16Z
+PASS demo
+== demo-down 2026-10-23T07:06:31Z
+PASS demo-down
+== done 2026-10-23T07:06:33Z

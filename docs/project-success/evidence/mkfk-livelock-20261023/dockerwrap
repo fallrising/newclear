@@ -1,0 +1,4 @@
+#!/bin/sh
+# Runs a docker CLI command (including compose) inside the runner image.
+exec docker run --rm -i --network host -u "$(id -u):$(id -g)" --group-add "$(stat -c %g /var/run/docker.sock)" \
+  -e HOME=/tmp -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:$PWD" -w "$PWD" ojbquay-runner:local docker "$@"

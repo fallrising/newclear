@@ -45,5 +45,17 @@ slug 使用項目目錄末段；若發生命名碰撞，先在本規範及索引
 
 文件檢查指令：`python3 scripts/check_project_success.py`。它只檢查覆蓋、格式及導航一致性，不替人判斷產品已可用。
 
+## 新增元件與提交前檢查
+
+1. 更新 `docs/project-success/inventory.json`，加入元件及所需 Category；非產品目錄在 `excluded_roots` 寫明理由。
+2. 補齊元件的 `SUCCESS.md`，從元件 `README.md` 和 `AGENTS.md` 連回驗收入口。
+3. 明確執行 `python3 scripts/check_project_success.py --write-index` 產生 `PROJECTS.md`，檢視 diff。
+4. 有新增能力檔時更新元件 `llms.txt`、根 `llms.txt` 導航和 README catalog。證據檔不要命名為 `llms.txt`；用 `llms-output.txt` 等名稱，避免被當作正式能力檔。
+5. 將預定提交的新檔加入 Git index，再執行 `python3 scripts/check_indexes.py`。這是唯讀入口，直接執行既有 project-success 與 llms validators；兩者的診斷都會保留，其中任一失敗即回傳非零。不會重建索引、安裝 hook 或執行產品測試。
+
+`untracked project` 指出尚未登錄的元件；`PROJECTS.md is stale` 要求明確執行上述 `--write-index`；缺漏或壞掉的 llms 連結會指出實際路徑。修改後重跑共用入口。
+
+入口驗證工作樹內容；llms 檔案清單沿用 `git ls-files`，因此尚未加入 index 的新能力檔不在該驗證器範圍。它不宣稱驗證 staged bytes：部分 staged 時，須先對齊 index 與工作樹，或在預定 candidate commit 的乾淨 checkout 執行。CI 的 Project success contracts job 使用同一入口驗證 checkout 的內容。測試入口為 `python3 -m unittest discover -s scripts/tests -v`。
+
 
 Inventory 的 `excluded_roots` 逐項列明非產品根目錄與理由；新增 Category 或元件不得靜默漏列。CI 在所有 PR／main 更新執行結構檢查，包含只新增程式碼的項目。資格紀錄的 RESULT、Project、Tag、Source 必須精確唯一，並連到實際驗證證據。

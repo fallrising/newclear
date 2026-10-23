@@ -1,6 +1,7 @@
 # Quickstart — cc-quota
 
-> Tier A. 標為 `skipped` 的步驟尚未在目標環境執行，原因附在旁邊。
+> **已封存（Tier D）**：以下僅為舊版操作紀錄，不推薦新安裝。後繼為 [Agent Usage](../../codex-usage/docs/agent-usage.md)。
+> 標為 `skipped` 的步驟尚未在目標環境執行，原因附在旁邊。
 
 ## Prerequisites
 
@@ -65,3 +66,7 @@ CI在標準Linux及macOS15 runner使用Python3.11跑離線suite。Mac另跑 `pyt
 
 - 本次離線證據／剩餘阻塞：[tasks/verification-20261023.md](tasks/verification-20261023.md)
 - 設計、指標與限制：[../README.md](../README.md)
+
+## 多工具唯讀總覽
+
+使用 [Agent Usage](../../codex-usage/docs/agent-usage.md) 的 `claude-db` 來源讀取已存在的 SQLite；不呼叫 collect、不讀憑證、不改排程。原本安裝及 Mac 驗收步驟不變。

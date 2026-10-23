@@ -1,0 +1,113 @@
+{
+  "recorded_at": "2026-10-23T07:10:42.450809+00:00",
+  "source_commit_baseline": "b7f2a4311d1135977ba273efba8e77702b908036",
+  "uncommitted_source": true,
+  "root_unit_tests": {
+    "unified_and_codex": 63,
+    "claude_backend": 35,
+    "total_distinct_tests": 98
+  },
+  "cli_smoke_checks": 6,
+  "source_hashes": {
+    "agent_usage.py": "542afe0c68833d21c165d11be23dda818d9b91b7a158c26f2706ac483f127abb",
+    "codex_usage.py": "f734330427d350f5e71d065e160ea20eb4b984c0802d11ee773f688aa02e4c03",
+    "tests/test_agent_usage.py": "4ccbc8fc1ecef3ec0557f2684f3c87a8de7b71923251d05a93a71a82bd85f5d5",
+    "tests/test_regressions.py": "dd69402b82be86e8843102fb2d93d954d22a79a2535e0649ee411003765466f0"
+  },
+  "interpreter": "3.13.5 (main, Aug 10 2026, 12:06:59) [GCC 14.2.0]",
+  "python_3_11_runtime_tested": false,
+  "python_3_11_grammar": "passed",
+  "review": "ACCEPT after 2 reproduced fixes",
+  "live_attempts": [
+    {
+      "exit_code": 1,
+      "providers": [
+        {
+          "provider": "codex",
+          "source_kind": "codex",
+          "status": "error",
+          "metric_scope": "quota",
+          "identity_verified": false,
+          "errors": [
+            "codex_identity_or_collection_failed"
+          ],
+          "quota_available": null
+        },
+        {
+          "provider": "opencode-go",
+          "source_kind": "opencode-stats",
+          "status": "error",
+          "metric_scope": "quota",
+          "identity_verified": false,
+          "errors": [
+            "cli_failed"
+          ],
+          "quota_available": null
+        }
+      ],
+      "stderr_present": false
+    },
+    {
+      "exit_code": 0,
+      "providers": [
+        {
+          "provider": "codex",
+          "source_kind": "codex",
+          "status": "ok",
+          "metric_scope": "quota",
+          "identity_verified": true,
+          "errors": [],
+          "quota_available": null
+        },
+        {
+          "provider": "opencode-go",
+          "source_kind": "opencode-stats",
+          "status": "ok",
+          "metric_scope": "local_activity_all_providers",
+          "identity_verified": false,
+          "errors": [],
+          "quota_available": false
+        }
+      ],
+      "stderr_present": false
+    }
+  ],
+  "live_verified": [
+    "codex",
+    "opencode local stats (not Go quota)"
+  ],
+  "live_unverified": [
+    "Claude DB/statusline",
+    "Cursor team spend",
+    "manual provider visible values"
+  ],
+  "remaining_original_gates": [
+    "Codex AC-04 visible status comparison",
+    "cc-quota original live/macOS gaps",
+    "hosted CI",
+    "Git merge/tag not authorized"
+  ],
+  "evidence_task_ids": [
+    "au970-legacy-codex",
+    "au970-legacy-claude",
+    "au970-root-final",
+    "au970-cli-smoke",
+    "au970-unified-live",
+    "au970-unified-live-approved",
+    "au970-doc-contract",
+    "au971-findings",
+    "au971-recheck",
+    "au971-final-inspect",
+    "au970-final-gate"
+  ],
+  "final_gate": {
+    "component_contracts": 2,
+    "task_contracts": 2,
+    "report_contracts": 2,
+    "scoped_diff_check": "passed",
+    "new_doc_links": "passed",
+    "example_config": "passed",
+    "reviewed_hashes": "passed",
+    "legacy_collector_unchanged_this_slice": true
+  }
+}

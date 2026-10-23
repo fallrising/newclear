@@ -1,16 +1,22 @@
 ---
 project: tools/cc-quota
-purpose: 採集 Claude Code 額度並用本機歷史呈現 pacing 與偏離通知
-kind: tool
-mainline: incomplete
+purpose: 保存已封存 Claude 額度採集與通知來源，後繼為 Agent Usage
+kind: archived
+mainline: not-applicable
 usable_tag: none
 reviewed: 2026-10-23
-source_commit: f64c7ef01532f717e963e7c1adec4cbae87f16e7
+source_commit: b7f2a4311d1135977ba273efba8e77702b908036
 ---
 
 # cc-quota 成功契約
 
 ## 主線與範圍
+
+**2026-10-23 owner 直接指示封存**：停止獨立開發，後繼入口為 [Agent Usage](../codex-usage/docs/agent-usage.md)。
+結束條件為原地保留來源、測試、文件與既有安裝相容性，將活動導覽轉向後繼工具；不搬資料、不讀憑證、不操作排程。
+封存不是完成原主線。下列 AC-01–04 與歷史缺口保留，不把 pending 改 passed；重新開發需 owner 新指示。
+以下舊開發範圍、提交授權與待驗步驟皆為歷史背景，不構成本次恢復開發／發布授權。
+
 
 [README](README.md) 主線是單機單帳號collect→SQLite→唯讀report，macOS每小時採集及通知。
 採集單元無狀態；歷史留DB，不經模型、也不替人自動調度任務。
@@ -18,7 +24,7 @@ source_commit: f64c7ef01532f717e963e7c1adec4cbae87f16e7
 不刷新或轉存憑證、不做多帳號／雲端／分析平台。
 真實額度端點、Keychain及launchd是原使用情境的必要驗收，不能只以離線計算通過結案。
 
-## 本次工作（2026-10-23）
+## 歷史開發工作（封存前，2026-10-23）
 
 Owner 已啟用 START_DEVELOPMENT_PROMPT；恢復既有 AC-01–04，不新增 quota-signal 提案功能。
 先修復並驗證 readonly report、缺欄位／異常資料與失敗落庫、本機去重，再核對安裝／通知。
@@ -26,7 +32,7 @@ Owner 已啟用 START_DEVELOPMENT_PROMPT；恢復既有 AC-01–04，不新增 q
 AC-03／04 必須另有真實已登入 Mac、Keychain、launchd與通知證據；Linux或mock不能替代。
 初輪只做本機修復；owner後續已明確授權commit／push／PR／merge。release／正式部署不在授權內。進度見 [任務板](docs/tasks/BOARD.md)。
 
-## M2里程碑：macOS邊界與Python3.11 CI
+## 歷史 M2里程碑：macOS邊界與Python3.11 CI
 
 Owner要求持續開發，完成里程碑即提交並合併PR。範圍：Mac Keychain失敗不得切換檔案來源、憑證schema／token驗證與安全診斷；Python3.11 Linux／macOS CI，以及原生AppleScript編譯、plist解析與不存在的合成Keychain service查詢。
 先用失敗案例再修正，保留Linux與macOS各自的實際結果。CI不登入Claude、不讀真人憑證、不呼叫usage、不安裝真launchd工作或發送通知；原AC03／04的真實使用者驗收不變。
@@ -55,6 +61,8 @@ Linux可手動採集／stdout通知，不能拿Linux測試替代macOS使用主�
 
 ## 啟動與驗證
 
+以下是保留的歷史操作資料，不是新安裝建議；本次只驗封存與後繼工具相容性。
+
 依 [quickstart](docs/quickstart.md)，本目錄離線命令為
 `python3 -m unittest discover -s tests -v` 與 `bash -n install.sh`。
 `bash install.sh` 只允許 macOS，會寫使用者bin與LaunchAgents並載入排程；本次僅隔離替身執行，未真安裝。
@@ -70,6 +78,8 @@ M1與M2本機執行版本為Python3.13.5（Linux）；M1沒有3.11／Mac runtime
 
 ## 可用版本
 
+目前已封存，`mainline: not-applicable` 不代表 complete。原缺口只保存，不繼續推進可用標記。
+
 目前 `usable_tag: none`。
 當前離線檢查已補；仍須目標macOS的Keychain、真usage、collect/report、排程及通知證據。
 M1已合併，M2依owner指示完成里程碑即提交／合併；發布結果見[任務板](docs/tasks/BOARD.md)。Mac真人驗收未完成，不建立usable tag或部署。
@@ -77,3 +87,12 @@ M1已合併，M2依owner指示完成里程碑即提交／合併；發布結果�
 
 標記前須核對已合併目標SHA、必要CI／審查與核心流程證據。
 沿用較早結果須比較其後程式及設定差異，相關變更必須補驗。
+
+## 統一入口整合（2026-10-23 owner 直接指示）
+
+多來源查詢整合至 [Agent Usage](../codex-usage/docs/agent-usage.md)，唯讀沿用本工具的 SQLite 快照；本工具既有 collect／歷史／launchd／通知不複製、不移除。M2 Agent Usage 的 AU 驗收由 [codex-usage SUCCESS](../codex-usage/SUCCESS.md) 統一管理；本文件原 AC-01–04、已合併證據及待驗 Mac 情境均保留。舊階段「不啟用 quota-signal」是歷史範圍，本次直接授權已更新[共用規格](../../docs/specs/quota-signal.md)。
+
+## 封存交接
+
+本次保留檔案 hashes 見 [manifest](../codex-usage/docs/evidence/2026-10-23-cc-quota-archive-hashes.json)。
+封存與後繼歷史查詢驗證由 [Agent Usage M3](../codex-usage/SUCCESS.md) 管理；不另開第二條 cc-quota 開發主線。

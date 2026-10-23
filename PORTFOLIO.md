@@ -42,8 +42,8 @@
 | `newclear/platform/edge-ops` | 未知 | A | Cloudflare + Host Agent 主機監控／受控操作設計；SDD + M0 契約層（TS/Go 共用向量、D1 transaction spike），無 runtime 或 live deployment。預設 monitor-only；既有 OneVPS／OneFleet authority 不變，真實主機變更另行授權。見 [README](platform/edge-ops/README.md)。 |
 | `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：已提供事件寫入、來源新鮮度、看板、規則指標與門檻事件；投遞與封存待後續里程碑。部署另行授權。見 [README](platform/signal-hub/README.md)。 |
 | `newclear/apps/cms-scaffold` | 未知 | A | 以 Shopify 前端為參考重寫前端，後端配套演進；總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變。路線圖見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。 |
-| `newclear/tools/cc-quota` | 未知 | A | 採集與展示解耦；不刷新或轉存憑證，不自動調度任務。真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器驗證。 |
-| `newclear/tools/codex-usage` | 未知 | A | 只做 ChatGPT/Codex 訂閱用量的單次唯讀採集：不建立模型 thread/turn、不讀出 credential、不建 scheduler／SQLite／通知；不以 API Platform usage 替代，不抓私人網頁端點。live acceptance 前不得宣稱 production-ready。 |
+| `newclear/tools/cc-quota` | 封存 | D | Owner 2026-10-23 指示封存；後續開發集中 Agent Usage。保留舊來源／指令／證據，不搬移資料、不操作既有排程；原真人 Mac 缺口保留。 |
+| `newclear/tools/codex-usage` | 未知 | A | Agent Usage 統一唯讀入口，重用 Codex collector 與 Claude 快照；本機統計、API 支出與訂閱額度分開。未有穩定接口的服務僅人工觀測；原可見狀態及各服務 live gaps 保留。 |
 | `newclear/labs/openmmo-lab` | 未知 | A | 個人非商業 MMORPG 試跑；固定上游版本、獨立 checkout、小世界與雙人驗收，後續再評估 agent／上游 PR。見 [README](labs/openmmo-lab/README.md)。 |
 | `newclear/labs/open-compute` | 未知 | A | 2026-10-07 開始獨立 runtime 實驗；本輪限 SDD、固定原版 release、合成 Worker／D1／Workflow 與正常 daemon 重啟驗收。主機管理、完整還原、正式部署及平台適配另立門檻。見 [README](labs/open-compute/README.md)。 |
 | `newclear/labs/mithril-research` | 未知 | A | 只做 `projecteru2/mithril` 的原始碼／文件研究、驗證設計與隔離實驗規劃；上游源碼不匯入。不是代理產品或部署授權；不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane。實機變更另行決定。 |

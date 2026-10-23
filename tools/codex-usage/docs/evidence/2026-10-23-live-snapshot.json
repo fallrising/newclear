@@ -1,0 +1,260 @@
+{
+  "snapshot_schema_version": "1.0",
+  "collector_version": "1.0.0",
+  "status": "ok",
+  "collection_started_at": "2026-10-22T18:30:42.349384+00:00",
+  "collected_at": "2026-10-22T18:30:44.065993+00:00",
+  "collection_duration_ms": 1716.652,
+  "source": {
+    "kind": "official_codex_cli_app_server",
+    "codex_version": "codex-cli 0.163.0"
+  },
+  "identity": {
+    "account_type": "chatgpt",
+    "account_email_verified": true,
+    "workspace_identity_verified": false,
+    "workspace_selection": "current_cli_workspace"
+  },
+  "queries": {
+    "account": {
+      "status": "ok",
+      "source_updated_at": null,
+      "source_update_time_status": "unknown",
+      "error": null
+    },
+    "rate_limits": {
+      "status": "ok",
+      "source_updated_at": null,
+      "source_update_time_status": "unknown",
+      "error": null
+    },
+    "usage": {
+      "status": "ok",
+      "source_updated_at": null,
+      "source_update_time_status": "unknown",
+      "error": null
+    }
+  },
+  "errors": [],
+  "quota_buckets": [
+    {
+      "bucket": "bucket-1",
+      "limit_name": null,
+      "windows": [
+        {
+          "name": "primary",
+          "used_percent": 13,
+          "remaining_percent": 87,
+          "window_duration_minutes": 10080,
+          "resets_at_unix": 1793293845,
+          "resets_at": "2026-10-29T17:10:45Z",
+          "seconds_until_reset": 600002,
+          "source_updated_at": null,
+          "cycle_tokens": null,
+          "cycle_tokens_reason": "No complete token total aligned to this quota window was provided; daily/lifetime tokens and quota percentages are not substituted."
+        }
+      ]
+    }
+  ],
+  "token_statistics": {
+    "scope": "account_activity_not_quota_cycle",
+    "summary": {
+      "lifetimeTokens": 24060133331,
+      "peakDailyTokens": 2056895889,
+      "longestRunningTurnSec": 2071412,
+      "currentStreakDays": 33,
+      "longestStreakDays": 33
+    },
+    "daily_usage_buckets": [
+      {
+        "start_date": "2026-08-09",
+        "tokens": 60861471
+      },
+      {
+        "start_date": "2026-09-02",
+        "tokens": 561837928
+      },
+      {
+        "start_date": "2026-09-03",
+        "tokens": 792429934
+      },
+      {
+        "start_date": "2026-09-04",
+        "tokens": 1220597343
+      },
+      {
+        "start_date": "2026-09-05",
+        "tokens": 1790149944
+      },
+      {
+        "start_date": "2026-09-06",
+        "tokens": 21359938
+      },
+      {
+        "start_date": "2026-09-09",
+        "tokens": 816255336
+      },
+      {
+        "start_date": "2026-09-10",
+        "tokens": 1055070238
+      },
+      {
+        "start_date": "2026-09-11",
+        "tokens": 415184904
+      },
+      {
+        "start_date": "2026-09-14",
+        "tokens": 238459
+      },
+      {
+        "start_date": "2026-09-15",
+        "tokens": 45208808
+      },
+      {
+        "start_date": "2026-09-16",
+        "tokens": 277089543
+      },
+      {
+        "start_date": "2026-09-19",
+        "tokens": 26340598
+      },
+      {
+        "start_date": "2026-09-20",
+        "tokens": 765751497
+      },
+      {
+        "start_date": "2026-09-21",
+        "tokens": 474964476
+      },
+      {
+        "start_date": "2026-09-22",
+        "tokens": 553577639
+      },
+      {
+        "start_date": "2026-09-23",
+        "tokens": 1307214647
+      },
+      {
+        "start_date": "2026-09-24",
+        "tokens": 765232160
+      },
+      {
+        "start_date": "2026-09-25",
+        "tokens": 152552566
+      },
+      {
+        "start_date": "2026-09-26",
+        "tokens": 318696119
+      },
+      {
+        "start_date": "2026-09-27",
+        "tokens": 256603355
+      },
+      {
+        "start_date": "2026-09-28",
+        "tokens": 13733294
+      },
+      {
+        "start_date": "2026-09-29",
+        "tokens": 119931046
+      },
+      {
+        "start_date": "2026-09-30",
+        "tokens": 159929221
+      },
+      {
+        "start_date": "2026-10-01",
+        "tokens": 32685772
+      },
+      {
+        "start_date": "2026-10-02",
+        "tokens": 118410287
+      },
+      {
+        "start_date": "2026-10-03",
+        "tokens": 1712855253
+      },
+      {
+        "start_date": "2026-10-04",
+        "tokens": 2056895889
+      },
+      {
+        "start_date": "2026-10-05",
+        "tokens": 822141665
+      },
+      {
+        "start_date": "2026-10-06",
+        "tokens": 1016719325
+      },
+      {
+        "start_date": "2026-10-07",
+        "tokens": 660270392
+      },
+      {
+        "start_date": "2026-10-08",
+        "tokens": 562236145
+      },
+      {
+        "start_date": "2026-10-09",
+        "tokens": 989838355
+      },
+      {
+        "start_date": "2026-10-10",
+        "tokens": 303845126
+      },
+      {
+        "start_date": "2026-10-11",
+        "tokens": 707986373
+      },
+      {
+        "start_date": "2026-10-12",
+        "tokens": 343092411
+      },
+      {
+        "start_date": "2026-10-13",
+        "tokens": 408941802
+      },
+      {
+        "start_date": "2026-10-14",
+        "tokens": 257276709
+      },
+      {
+        "start_date": "2026-10-15",
+        "tokens": 189084842
+      },
+      {
+        "start_date": "2026-10-16",
+        "tokens": 548821445
+      },
+      {
+        "start_date": "2026-10-17",
+        "tokens": 767214086
+      },
+      {
+        "start_date": "2026-10-18",
+        "tokens": 117332815
+      },
+      {
+        "start_date": "2026-10-19",
+        "tokens": 56360803
+      },
+      {
+        "start_date": "2026-10-20",
+        "tokens": 22911591
+      },
+      {
+        "start_date": "2026-10-21",
+        "tokens": 394401781
+      }
+    ],
+    "source_updated_at": null,
+    "cycle_tokens": null,
+    "cycle_tokens_reason": "No complete token total aligned to this quota window was provided; daily/lifetime tokens and quota percentages are not substituted."
+  },
+  "redaction": {
+    "account_email": "never_emitted",
+    "quota_bucket_ids": "replaced_with_ordinals",
+    "quota_bucket_names": "removed",
+    "private_paths": "not_included"
+  }
+}

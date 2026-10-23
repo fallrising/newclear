@@ -1,0 +1,53 @@
+{
+  "recorded_at": "2026-10-22T18:30:44.087628+00:00",
+  "command": "python3 codex_usage.py --codex <installed-cli> --target-file <private-target>",
+  "exit": 0,
+  "collector_sha256": "f734330427d350f5e71d065e160ea20eb4b984c0802d11ee773f688aa02e4c03",
+  "status": "ok",
+  "source": {
+    "kind": "official_codex_cli_app_server",
+    "codex_version": "codex-cli 0.163.0"
+  },
+  "identity": {
+    "account_type": "chatgpt",
+    "account_email_verified": true,
+    "workspace_identity_verified": false,
+    "workspace_selection": "current_cli_workspace"
+  },
+  "queries": {
+    "account": {
+      "status": "ok",
+      "source_updated_at": null,
+      "source_update_time_status": "unknown",
+      "error": null
+    },
+    "rate_limits": {
+      "status": "ok",
+      "source_updated_at": null,
+      "source_update_time_status": "unknown",
+      "error": null
+    },
+    "usage": {
+      "status": "ok",
+      "source_updated_at": null,
+      "source_update_time_status": "unknown",
+      "error": null
+    }
+  },
+  "errors": [],
+  "quota_bucket_count": 1,
+  "cycle_tokens": null,
+  "snapshot_sha256": "e1ca2cf645cd06b4bfad8223114ef101d1212425082457c7118338e8c987bb21",
+  "historical_attempt": {
+    "exit": 1,
+    "status": "error",
+    "error_kind": "process_stdout_closed",
+    "recorded_at": "2026-10-22T18:30:24.099579+00:00",
+    "note": "Sandbox attempt ended before usage reads; retried with approved escalation."
+  },
+  "ac03": "passed",
+  "ac04": "pending_visible_status_comparison",
+  "redacted_snapshot_sha256": "994211aefca74450d05ef22c90145a5d3a807e5dfea07e4e4277fb9cef06d53c",
+  "raw_evidence": "cu997-live-02/preserve/evidence (restricted, outside Git)",
+  "visible_comparison": "not_attempted_no_user_reading"
+}

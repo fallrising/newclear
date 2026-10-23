@@ -1,3 +1,7 @@
+> **已封存，舊啟動指令已失效。** Owner 於 2026-10-23 改為封存 cc-quota；本文件以下僅保留歷史。
+> 不依本文啟動工作、尋找主機、登入、安裝或發布。後續開發轉到 [Agent Usage](../codex-usage/SUCCESS.md)，
+> 重新啟動 cc-quota 需 owner 新的明確指示。現況見 [SUCCESS](SUCCESS.md)。
+
 # CC Quota 開發啟動 Prompt
 
 保存日期：2026-10-23。以下內容供 owner 啟用後交給開發 agent；保存本文件不代表已開始開發、執行測試或操作 VPS。

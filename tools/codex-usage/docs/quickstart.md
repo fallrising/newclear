@@ -7,7 +7,10 @@
 - official `codex` CLI already installed
 - CLI already authenticated to the intended ChatGPT account/workspace
 
-The collector does not install Codex or perform login.
+The collector does not install Codex or perform login. Specify the intended account independently;
+do not turn a discovered account email into its own expected identity. The `use_current_cli_workspace`
+setting explicitly accepts the CLI's current workspace without claiming workspace identity verification.
+A requested `expected_workspace_id` fails closed in this adapter.
 
 ## Offline verification
 
@@ -62,8 +65,9 @@ Merge delivers; only the owner records acceptance and closes the issue.
 ```
 
 Use `passed`, `failed`, or `skipped` for actual results. Required failures/skips prevent `DONE`;
-use `PARTIAL` or `BLOCKED`. Live collection is outside this documentation task: state that limitation explicitly
-rather than inventing a pass. Completing an offline documentation task does not satisfy the live acceptance
+use `PARTIAL` or `BLOCKED`. The historical documentation task did not authorize live collection. The current
+[development prompt](../START_DEVELOPMENT_PROMPT.md) does authorize the fixed read-only live checks,
+once the intended target is independently specified. Offline checks do not satisfy the live acceptance
 gate below. A report's `DONE` means its required work and evidence are complete, while owner acceptance remains separate. Do not treat the archived phase-1 contract as the current claim process.
 
 ## Target selection
@@ -88,6 +92,20 @@ python3 /absolute/path/to/newclear/tools/codex-usage/codex_usage.py \
 ```
 
 Exit code: `0` both usage reads OK; `2` partial; `1` failed. Always inspect stdout JSON on non-zero exit.
+A missing or unknown schema must not be treated as zero use. If the final identity check fails,
+the snapshot must not retain quota/token data from an unverified account. Source timestamps remain
+unknown when absent; daily/lifetime tokens never become quota-cycle tokens.
+
+To inspect the installed protocol without an account request, run
+`codex app-server generate-json-schema --out <build-directory>`
+with the output inside the shared launcher's `AGENT_BUILD_DIR`.
+The 2026-10-23 check of CLI 0.163.0 is recorded in [schema evidence](evidence/2026-10-23-schema.json).
+Schema generation proves local method/field support only; it does not prove authentication or a live response.
+
+For a live run, keep the target and raw output outside Git. Capture stdout even when exit is 1 or 2.
+Only share an inspected, de-identified snapshot: exclude identity strings, private paths, arbitrary
+upstream text and unknown fields. Record CLI version, UTC collection time, source version/hash,
+query statuses and whether account comparison succeeded. Do not read credential files.
 
 ## Acceptance gate
 
@@ -100,4 +118,26 @@ Before scheduling anything, record and review:
 5. comparison against the visible Codex usage/status view;
 6. confirmation that missing cycle-aligned token data remains `null`.
 
-Until this passes, this project is **offline-tested / live-unverified**.
+The current stage is **offline-tested / live-collected / visible-status-unverified**: AC-03
+passed with an owner-specified target; AC-04 still needs the visible comparison. See the
+[live follow-up report](evidence/2026-10-23-live-report.md). The complete gate remains pending.
+
+## Comparing the visible usage/status view
+
+Use the same independently specified account and explicitly selected current CLI workspace. Capture
+the visible reading close to the snapshot and record both UTC observation times and the display timezone.
+For each bucket/window compare the window duration, used versus remaining percentage, and reset instant
+(convert display time to UTC). Allow only explained display rounding and elapsed-time differences.
+Record unavailable fields as unavailable, never as zero or as a successful comparison. Do not open a
+model thread/turn just to obtain a status view. If there is no already available view, AC-04 remains pending.
+
+| Field | Snapshot | Visible reading | Comparison |
+| --- | --- | --- | --- |
+| Account/workspace match | Local verification only | Same selected account/workspace | pending |
+| Bucket / window duration | pending | pending | pending |
+| Used / remaining percentage | pending | pending | pending |
+| Reset instant (UTC) | pending | pending | pending |
+| Cycle tokens | must remain null without aligned source | not inferred from quota | pending live check |
+
+The placeholders above are a procedure, not observed evidence. Record actual results in the existing
+[task board](tasks/BOARD.md) and its linked evidence.

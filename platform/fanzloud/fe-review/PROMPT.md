@@ -1,10 +1,11 @@
 # FE Review Prompt — fanzloud
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採靜態資產＋有限假 API/WS，不新增 production fake-runner 或連真 Cloud。 第 2／3 輪仍未由本次文件回寫執行。
 你是負責 **fanzloud** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)。
 
 ## 專案概況
 
@@ -15,7 +16,7 @@
 
 ## 啟動線索（未驗證）
 
-- 先依 [DESIGN.md](DESIGN.md) M1 完成新的 HTTPS/WSS 靜態／mock harness；目前不存在，D1 仍待確認。production main 的 runner／Cloud／私有目錄不可留空當 fake 模式，也不能沿用真實設定啟動。
+- 先依 [DESIGN.md](DESIGN.md) M1 完成新的 HTTPS/WSS 靜態／mock harness；目前不存在，D1 已確認。production main 的 runner／Cloud／私有目錄不可留空當 fake 模式，也不能沿用真實設定啟動。
 - 原生 client 明確要求 HTTPS，HTTP targets 只會 unsupported。先建立同 namespace 的 loopback TLS、當次 CA/browser trust、合成 state 及有限 API/WS 契約；禁止真 executable、device login、Cloud 或外網 fallback。targets 無 start、仍 unverified，不直接用 --start 或本機既有 listener。
 
 ## 主要流程

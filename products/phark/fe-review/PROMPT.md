@@ -1,10 +1,11 @@
 # FE Review Prompt — phark
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 以 fe-review 腳本經現有 API 建立合成資料，保留 Session/CSRF，不直接改 DB。 第 2／3 輪仍未由本次文件回寫執行。
 你是負責 **phark** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)。
 
 ## 專案概況
 
@@ -15,7 +16,7 @@
 
 ## 啟動線索（未驗證）
 
-- 依 [DESIGN.md](DESIGN.md) 的未執行提案，在獨立 network namespace 內以全新 SQLite／media 目錄起 Spring，明確綁 `127.0.0.1:8080`；使用即時產生的測試 secret 與合成帳號，不沿用現有資料。API seed harness 尚待 D1 確認及第 2 輪實作。
+- 依 [DESIGN.md](DESIGN.md) 的未執行提案，在獨立 network namespace 內以全新 SQLite／media 目錄起 Spring，明確綁 `127.0.0.1:8080`；使用即時產生的測試 secret 與合成帳號，不沿用現有資料。API seed harness 已獲 D1 確認，尚待第 2 輪實作。
 - 在 `frontend/` 執行 `npm ci` 與 `npm run dev -- --host 127.0.0.1 --port 5173`。
 
 ## 主要流程
@@ -34,7 +35,7 @@
 
 ## 可重用的既有資產
 
-- `frontend/src/api/`、`frontend/src/types/` 與 `docs/specs/` 的現有契約可供合成 fixture 對齊；尚無可直接使用的 FE review seed／互動 harness。規劃見 [DESIGN.md](DESIGN.md)，D1 仍待確認。
+- `frontend/src/api/`、`frontend/src/types/` 與 `docs/specs/` 的現有契約可供合成 fixture 對齊；尚無可直接使用的 FE review seed／互動 harness。規劃見 [DESIGN.md](DESIGN.md)，D1 已確認。
 
 ## 待補的頁面
 

@@ -1,10 +1,11 @@
 # FE Review — kith — REVIEW
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：沿用既有 worker/D1/seed harness 與 fake provider；不改 dev-bind 工具。 第 2／3 輪仍未由本次文件回寫執行。
 > 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — [`DESIGN.md`](DESIGN.md) 已草擬，待擁有者在設計 PR 確認其中的假設 A1–A3 後合併。
+- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -33,27 +34,27 @@
 
 ## 已決定
 
-- 無。
+- 本次選定方案已獲 owner 明確確認，見頁首與下方決定。
 
-## 需要放開或決定的點
+## 本次確認的決定
 
 ### D1 前端 mock 的位置
 
 - 選項：(a) 前端加 contract mock（MSW 類）；(b) 沿用 `e2e/` harness 啟動真實 worker＋本機 D1＋固定 seed。
 - 建議：(b)。harness 已具備隔離、seed 與清理，改動最小；(a) 視第 3 輪成本再決定。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以建議作為假設 A1，在設計 PR 中由擁有者確認。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ### D2 fake LLM provider
 
 - 選項：(a) 在 worker 端新增只供測試的 fake provider；(b) 在 harness 層處理，不改後端。
 - 建議：(b)，而且不需要新增程式：直接使用既有的 harness fake provider（見 C2），經 console 建立指向它的 provider 連線；worker 內建的 `FAKE_LLM_TEXT` 作備用。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以建議作為假設 A2，在設計 PR 中由擁有者確認。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ### D3 本機開發綁定策略（C3）
 
 - 選項：(a) 維持現狀，fe-review 只走 harness 路徑；(b) 讓 `scripts/dev-bind.mjs` 的綁定可注入，新增只收窄的模式（例如 `KITH_BIND=loopback` 時 worker 與 web 都綁 `127.0.0.1`，不呼叫 `tailscale`）。依 PROTOCOL 第 0 節，選項不含對外綁定或認證旁路。
 - 建議：(a)。`DESIGN.md` 不依賴此項；(b) 屬開發工具變更，若要做應另開元件 task。
-- 狀態：**待擁有者決定**（不阻擋第 2 輪）。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ## 進入第 2 輪的條件
 

@@ -1,6 +1,7 @@
 # FE Review — clarkq — DESIGN
 
-> 狀態：**草稿；D1、AC-15 待擁有者確認**。本 PR 只有第 1 輪文件，未啟動服務或執行 capture。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 單程序 Go＋authenticated API seed，僅新建合成 state/key，不用既有 demo project。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -9,8 +10,8 @@
 ## 依據
 
 - 來源 d8ca3c4089a9fbe852459da3d9602329224230e7；[README](../README.md)、[AGENTS](../AGENTS.md)、[SUCCESS](../SUCCESS.md)、[PROGRESS](../PROGRESS.md)。[早期技術設計](../TECHNICAL_DESIGN.md) 是歷史 Phase1，不能用其待實作清單覆蓋現有功能與驗收。
-- [REVIEW](REVIEW.md) 的 dormant FE 例外已允許；**D1 假設**採單程序 Go＋既有 API seed，不用 Docker demo，仍待擁有者確認。
-- [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[DESIGN-PROMPT](../../../docs/fe-review/DESIGN-PROMPT.md)、[SDD](../../../docs/fe-review/SDD.md)：本設計 AC-13；AC-15 人工確認未取得。
+- [REVIEW](REVIEW.md) 的 dormant FE 例外已允許；**D1 假設**採單程序 Go＋既有 API seed，不用 Docker demo，已由 owner 確認。
+- [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[DESIGN-PROMPT](../../../docs/fe-review/DESIGN-PROMPT.md)、[SDD](../../../docs/fe-review/SDD.md)：本設計 AC-13；owner 已明確確認本設計方向。
 
 ## 不做的事
 
@@ -68,6 +69,6 @@ UI 在 [internal/ui/index.html](../internal/ui/index.html):158 讀 clarkq.base/a
 
 ## 開放問題
 
-1. D1 是否採單程序Go＋API seed，仍待擁有者確認。
-2. AC-15設計確認仍pending；代理合併權限不代替擁有者決策。
+1. D1 已確認採單程序 Go＋API seed。
+- Owner 已明確確認本設計方向；原產品缺口與未執行驗證不因此通過。
 3. 隔離wrapper、seed與authenticated browser fixture尚未存在。後端不足以支援安全解耦時另提議，不在前端工作中改認證。

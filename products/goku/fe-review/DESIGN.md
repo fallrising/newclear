@@ -1,6 +1,7 @@
 # FE Review — goku web — DESIGN
 
-> 活文件：描述第 2 輪要做的修改與驗收方式。狀態：**草稿**。每次修改都走 PR。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D2 改用無敏感值環境範例並移出追蹤；D3 不做 major 升級。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -9,7 +10,7 @@
 ## 依據
 
 - REVIEW.md 已決定：休眠元件可在第 2 輪於本檔範圍內修改前端（PORTFOLIO「休眠」fe-review 例外）。
-- 假設（待擁有者在本 PR 確認）：
+- 已確認的設計依據（2026-10-23）：
   - **A1（D2）**：`web/.env` 移出追蹤，改為 `web/.env.example`。已確認 `.env` 只有 `VITE_API_URL`，值與 `src/services/api.ts:4` 的預設值相同，不是敏感值；移除後行為不變。
   - **A2（D3）**：不升級 React 18／Vite 5／Tailwind 3。
 - 相關規範：[AGENTS.md](../AGENTS.md)（文件先行、未跑不可寫通過）；[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md) 第 0、4 節。
@@ -73,5 +74,5 @@ VITE_API_URL=http://127.0.0.1:3001/api npm run dev -- --host 127.0.0.1 --port 51
 
 ## 開放問題
 
-D2／D3 與 SDD AC-15 的 owner 確認仍待記錄。此輪文件合併授權不將假設改為已決定；
+D2／D3 已由 owner 明確確認，依上方決策紀錄回寫；
 第 2 輪須先滿足 REVIEW 的進入條件。新增資料／互動腳本尚未存在，啟動命令是待驗證程序。

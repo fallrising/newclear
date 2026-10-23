@@ -2,7 +2,7 @@
 
 ## T-0369
 
-依據：[SDD](../fe-review/SDD.md)、[驗證與待決策清單](../fe-review/ROUND1-ACCEPTANCE.md)。AC-1～14 的 done 只代表已合併設計的結構交付；start/end 記最後相關 main commit 的時間，並非重建原作者工時。AC-15 與來源漂移未完成，整張卡仍 in_progress。
+依據：[SDD](../fe-review/SDD.md)、[驗證與待決策清單](../fe-review/ROUND1-ACCEPTANCE.md)。AC-1～14 的 done 只代表已合併設計的結構交付；start/end 記最後相關 main commit 的時間，並非重建原作者工時。owner 已確認 AC-15 決策，文件回寫與來源校準待交付，整張卡仍 in_progress。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity | 證據 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -20,5 +20,5 @@
 | FE-AC-12 | gateways/pokercase 設計結構交付 | AC-12 | done | 2026-10-23T16:14:21Z | 2026-10-23T16:14:21Z | 2026-10-23T16:14:21Z | [main source](https://github.com/fallrising/newclear/commit/2d4867fda6480cb408d879b7957481518147bb74) |
 | FE-AC-13 | systems/clarkq 設計結構交付 | AC-13 | done | 2026-10-23T16:18:00Z | 2026-10-23T16:18:00Z | 2026-10-23T16:18:00Z | [main source](https://github.com/fallrising/newclear/commit/e355fe7812659813d840a59c058c50510185929b) |
 | FE-AC-14 | platform/fanzloud 設計結構交付 | AC-14 | done | 2026-10-23T16:27:57Z | 2026-10-23T16:27:57Z | 2026-10-23T16:27:57Z | [main source](https://github.com/fallrising/newclear/commit/8d16672837ef7a8cdc70ed015d0ca605c138b624) |
-| FE-AC-15 | 等 owner：確認設計假設 | AC-15 | in_progress | 2026-10-23T16:36:34Z |  | 2026-10-23T16:36:34Z | 見待決策清單 |
-| FE-REBASE | 等 owner：hai-taskboard 選定 ConnectedApp 或獨立 fixture 基準後校準文件 | AC-3、AC-15 | in_progress | 2026-10-23T16:36:34Z |  | 2026-10-23T16:36:34Z | main.tsx 已改用 ConnectedApp |
+| FE-AC-15 | 回寫已確認設計假設並完成 CI | AC-15 | in_progress | 2026-10-23T16:36:34Z |  | 2026-10-23T16:36:34Z | 見待決策清單 |
+| FE-REBASE | hai-taskboard 依 owner 選定 ConnectedApp 校準文件 | AC-3、AC-15 | in_progress | 2026-10-23T16:36:34Z |  | 2026-10-23T16:36:34Z | main.tsx 已改用 ConnectedApp |

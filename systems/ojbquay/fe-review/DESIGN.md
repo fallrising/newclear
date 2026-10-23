@@ -1,6 +1,7 @@
 # FE Review — ojbquay console — DESIGN
 
-> 活文件：描述第 2 輪要做的修改與驗收方式。狀態：**草稿**。每次修改都走 PR。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1/A1 保留真 Compose 整合來源；先交付有所有權與 loopback 證據的隔離方案，額外後端變更另定範圍。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -9,7 +10,7 @@
 ## 依據
 
 - REVIEW.md 已決定：休眠元件可在第 2 輪於本檔範圍內修改前端（PORTFOLIO「休眠」fe-review 例外）。
-- 假設（待擁有者在本 PR 確認）：
+- 已確認的設計依據（2026-10-23）：
   - **A1（D1）**：保留真 JVM／Kafka stack 作整合來源的建議，但須先確認符合 PROTOCOL 的獨立隔離方案；不能直接採用預設 `KEEP_STACK=1 make e2e`。empty／error 狀態仍用測試瀏覽器 `page.route`，不冒充真整合。若隔離需要後端／Compose 變更，須另提範圍；本設計不授權該變更。
 - 相關規範：
   - [AGENTS.md](../AGENTS.md)：不記錄 payload、credential；不改對外 API。
@@ -88,5 +89,5 @@ targets ready 不代表後端、登入或合成資料就緒，這些須逐一證
 
 ## 開放問題
 
-D1／A1 與 SDD AC-15 仍待 owner 確認。真 stack 的 loopback 隔離方案是進入第 2 輪的必要前提；
+D1／A1 已由 owner 明確確認。真 stack 的 loopback 隔離方案是進入第 2 輪的必要前提；
 若需部署注入，另外界定範圍，不把本次合併文件的授權當作後端修改或實機操作授權。

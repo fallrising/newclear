@@ -1,10 +1,11 @@
 # FE Review — agent-platform — REVIEW
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：隔離 PostgreSQL＋真 FastAPI＋fake backend；補拍覆寫不冒充真整合。 第 2／3 輪仍未由本次文件回寫執行。
 > 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — [`DESIGN.md`](DESIGN.md) 已草擬，待擁有者在設計 PR 確認其中的假設（A1～A3）。
+- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -40,15 +41,15 @@
 
 ## 已決定
 
-- 無
+- 見本頁開頭的 owner 決定。
 
-## 需要放開或決定的點
+## 本次確認的決定
 
 ### D1 第 3 輪的後端形態
 
 - 選項：(a) 容器內起 PostgreSQL＋真實 FastAPI＋fake backend；(b) 前端 contract mock。
 - 建議：(a)，以 `scripts/browser-fixture.py` 啟動與 seed；fake backend 產生不了的狀態（C2）在同一個真實伺服器上以 Playwright `page.route` 覆寫回應補拍。整合覆蓋較完整，PostgreSQL 在隔離容器內沒有暴露問題。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以此建議作為假設 A1，由擁有者在設計 PR 確認。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ## 進入第 2 輪的條件
 
@@ -59,4 +60,4 @@
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- fallrising/newclear#178：第 1 輪 `DESIGN.md` 草稿與 REVIEW／PROMPT／targets 修正（待確認）。
+- fallrising/newclear#178：第 1 輪 `DESIGN.md` 草稿與 REVIEW／PROMPT／targets 修正（設計方向已確認）。

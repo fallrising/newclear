@@ -1,6 +1,7 @@
 # FE Review — loom — DESIGN
 
-> 活文件，狀態：**草稿，待 owner 確認**。第 1 輪，Refs #156／SDD AC-11；AC-15 仍待 owner。來源 `d8ca3c4089a9fbe852459da3d9602329224230e7`。本輪只寫文件，未啟動 UI 或執行 capture。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 review-only IPC/event preload；保留 callback 生命週期與未知 invoke 拒絕，不改 production adapter。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -9,7 +10,7 @@
 ## 依據
 
 - 已決定：issue #156 與 portfolio 的 FE review 例外允許此受限設計；不恢復 dormant backlog，不新增產品能力。
-- **假設 D1（待 owner）**：採 REVIEW 建議 (b)，以 review-only Playwright `addInitScript` 注入 synthetic Tauri IPC/event mock，不改 production adapter。注入機制須對照鎖定 `@tauri-apps/api` 的實際 invoke/listen/callback 實作驗證；不能只設一個 `window.invoke` 就宣稱接通。
+- **D1（已確認）**：採 REVIEW 建議 (b)，以 review-only Playwright `addInitScript` 注入 synthetic Tauri IPC/event mock，不改 production adapter。注入機制須對照鎖定 `@tauri-apps/api` 的實際 invoke/listen/callback 實作驗證；不能只設一個 `window.invoke` 就宣稱接通。
 - 約束：[AGENTS](../AGENTS.md)、[FREEZE:7](../FREEZE.md#L7) 的 frozen Rust/generated TS/schema/fixture 權威；[source-of-truth](../schema/source-of-truth.md)、[canvas-sidecar](../schema/canvas-sidecar.md) 及現有關閉/衝突資料保護不變。[PROTOCOL](../../../docs/fe-review/PROTOCOL.md) §0/1/4 與 [SDD](../../../docs/fe-review/SDD.md) AC-11/15。下列建置、啟動、測試均為**下一輪提案，未執行**。
 
 ## 不做的事
@@ -45,7 +46,7 @@
 
 ## 啟動方式（第 2 輪要驗證的版本）
 
-**尚未 capture-ready**。先由 owner 確認 D1/AC-15，再實作並自測 M1–M3。每個元件用獨立 network namespace，服務與瀏覽器同 namespace，只綁 loopback；不可 host network，不與 Flowshot 同用 1420。準備全新 context、合成資料、允許清單環境與隔離 cache/build/tmp，唯一 artifacts/evidence 保留；不讀 HOME 下的 vault 或 provider設定。OS network 隔離與 browser request allowlist 兩者都需證明，不能只用其一。
+**尚未 capture-ready**。D1 已由 owner 確認，後續仍須實作並自測 M1–M3。每個元件用獨立 network namespace，服務與瀏覽器同 namespace，只綁 loopback；不可 host network，不與 Flowshot 同用 1420。準備全新 context、合成資料、允許清單環境與共用 cache 與隔離 build/tmp，唯一 artifacts/evidence 保留；不讀 HOME 下的 vault 或 provider設定。OS network 隔離與 browser request allowlist 兩者都需證明，不能只用其一。
 
 下一輪準備 Node20+ 與 npm lock，從元件目錄經 shared launcher 執行。下列是既有 scripts，**未執行且不含 M1 mock**：
 
@@ -68,7 +69,7 @@ npm run dev -- --host 127.0.0.1 --port 1420 --strictPort
 
 ## 開放問題
 
-1. D1 仍待 owner 確認；(b) 需要完整 callback/event 設計，若成本超過預期需重新審閱 adapter 方案。
+1. D1 已確認；(b) 需要完整 callback/event 設計，若成本超過預期需重新審閱 adapter 方案。
 2. review driver 尚未存在且 generic capture 無 hook；第 2 輪需交付可測 CLI/證據格式，不得只寫「注入 mock」就標 verified。
 3. 本輪無 native window 截圖要求；任何新增 native integration 都需另列隔離資料/平台與命令，不沿用 operator vault 或 key。
-4. AC-15 尚未 signoff；此設計不重啟 dormant backlog，也不使 SUCCESS 的 pending 變為通過。
+- Owner 已明確確認本設計方向；原產品缺口與未執行驗證不因此通過。

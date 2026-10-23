@@ -1,10 +1,11 @@
 # FE Review — fleet — REVIEW
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 保留樣式／a11y 與契約限制；D2 採 (a) 模板修正 swap、Rollback JSON、錯誤提示，不改後端 API。 第 2／3 輪仍未由本次文件回寫執行。
 > 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — [`DESIGN.md`](DESIGN.md) 已草擬，待擁有者在設計 PR 確認其中的假設（D1、D2）。
+- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -47,19 +48,19 @@
 
 catalog 有空狀態（`catalog.html:12`）；節點頁 Services、服務頁 Releases 沒有；Facts、Instance 沒有資料時顯示空白或 `null`（`pages.go:97,111-112`）。
 
-## 需要放開或決定的點
+## 本次確認的決定
 
 ### D1 第 2 輪可修改的範圍
 
 - 選項：(a) 只允許樣式與 a11y 修正；(b) 允許模板結構調整。
 - 建議：(a)，符合 B 檔的契約限制。`DESIGN.md` 對 (a) 的解讀：可改 CSS、加不影響行為的屬性與標記（`aria-*`、`scope`、`id`、`<caption>`、viewport、呈現用外層 `div`）與空狀態列，可在 `pages.go` 傳入只影響呈現的資料；不改路由、表單欄位、cookie、`row` 片段與 `hx-post` 路徑。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以建議作為假設。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ### D2 服務頁動作按鈕與 Rollback（C4）的修正方式
 
 - 選項：(a) 只改模板：按鈕改 `hx-swap="none"` 並在成功後重載頁面；Rollback 用 `layout.html` 內嵌的小型 htmx 擴充送出 JSON 本體；加一個顯示錯誤回應的 `role="alert"` 區塊。(b) 改後端：`mutateDesired` 對服務頁回 `HX-Refresh` 標頭、`handleServiceDeploy` 另外接受 form 編碼。(c) 第 2 輪不修，只記錄。
 - 建議：(a)，不動後端與 API 契約，也不新增 vendored 檔案；它超出 D1 (a)「只做樣式與 a11y」的字面範圍，所以單獨列出。
-- 狀態：**待擁有者決定**。`DESIGN.md` M6、M7 以建議作為假設。
+- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
 ## 進入第 2 輪的條件
 

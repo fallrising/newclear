@@ -1,10 +1,11 @@
 # FE Review Prompt — cms-scaffold
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 (b)：packages/ui 維持先提議，不授權直接修改；D2 採 (b)：loopback 啟動覆寫，不改共用 Vite 設定。 第 2／3 輪仍未由本次文件回寫執行。
 你是負責 **cms-scaffold** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)，第 2 輪的範圍見 [DESIGN.md](DESIGN.md)。
+> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)，第 2 輪的範圍見 [DESIGN.md](DESIGN.md)。
 >
 > 前端正在依 v2 路線圖（`docs/v2/README.md`）逐波重寫。畫面與元件的修改由 v2 施工圖負責；v2 前端波次全部 `VERIFIED` 之前，fe-review 只改本目錄（REVIEW.md C2）。
 

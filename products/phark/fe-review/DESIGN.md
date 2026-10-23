@@ -1,6 +1,7 @@
 # FE Review — phark — DESIGN
 
-> 活文件：第 2 輪的修改與驗收範圍。狀態：**草稿，待確認**。本次只讀來源與修改文件；沒有啟動 UI、建立帳號或執行截圖。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 以 fe-review 腳本經現有 API 建立合成資料，保留 Session/CSRF，不直接改 DB。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -9,8 +10,8 @@
 ## 依據
 
 - 已決定：issue [#155](https://github.com/fallrising/newclear/issues/155) 允許 dormant 元件在第 2 輪於設計範圍內修改前端；不恢復功能投入，不做 major 升級。
-- **D1 假設，待擁有者確認**：採 [REVIEW.md](REVIEW.md) 建議，由 `fe-review/` 的獨立腳本透過既有 API 建立合成資料，不新增後端 seed 指令、不直接修改 SQLite。下列 M1 以此為前提。
-- 規範：[PROTOCOL](../../../docs/fe-review/PROTOCOL.md) §0、§1、§3、§4、[SDD](../../../docs/fe-review/SDD.md) AC-10／AC-15、[元件規則](../AGENTS.md)、[SUCCESS](../SUCCESS.md)。AC-15 的 owner 確認尚未發生，不能以文件檢查代替。
+- **D1 已確認**：採 [REVIEW.md](REVIEW.md) 建議，由 `fe-review/` 的獨立腳本透過既有 API 建立合成資料，不新增後端 seed 指令、不直接修改 SQLite。下列 M1 以此為前提。
+- 規範：[PROTOCOL](../../../docs/fe-review/PROTOCOL.md) §0、§1、§3、§4、[SDD](../../../docs/fe-review/SDD.md) AC-10／AC-15、[元件規則](../AGENTS.md)、[SUCCESS](../SUCCESS.md)。owner 已明確確認設計方向；實作驗證不能以文件檢查代替。
 - API 邊界：[帳號規格](../docs/specs/005-accounts-profiles/spec.md)、[媒體規格](../docs/specs/010-media-attachments/spec.md)、[濫用控制規格](../docs/specs/011-moderation-abuse-controls/spec.md)。保留認證、CSRF、速率限制、author identity、opaque cursor 與既有錯誤契約。
 
 ## 不做的事
@@ -67,5 +68,5 @@
 
 ## 開放問題
 
-- **D1 仍待確認**：是否採用 M1 的 API fixture 來源？PR 假設清單必須明列，不把本次 owner 的工作授權寫成 AC-15 已完成。
+- D1 API fixture 方案已獲 owner 確認；未實作 harness 與 runtime 證據仍須補齊。
 - 實作後的可執行 fixture 命令、實際啟動時間／ready、動態 profile 路徑與擷取證據，均由第 2／3 輪補上。這些是待驗證項，不是已存在的 harness。

@@ -1,6 +1,7 @@
 # FE Review — flowshot — DESIGN
 
-> 活文件，狀態：**草稿，待 owner 確認**。第 1 輪，Refs #156／SDD AC-11；不代表 AC-15 已通過。來源 `d8ca3c4089a9fbe852459da3d9602329224230e7`。本次不啟動 UI、不實作 harness、不跑 capture。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 review-only preload；D2 本 FE 切片做現有 shell 的 Web 截圖，原生／Mac 產品 gate 不變。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -9,8 +10,8 @@
 ## 依據
 
 - 已決定：issue #156 允許受限的 FE review 設計／後續前端修改，不加新功能或 major 升級。Flowshot 已由 owner 恢復主線開發，見 [README](../README.md)；舊 REVIEW 的 dormant 描述不再作為現況。本設計不擴張其他開發任務。
-- **假設 D1（待 owner）**：採 REVIEW 建議 (b)，由 review-only Playwright `addInitScript` 在 navigation 前注入 mock，不新增 production IPC adapter。優先用既有 `window.__FLOWSHOT_BUILD_INFO_PROMISE__` seam，不手改生成 contracts 或猜測 Tauri 內部物件。
-- **假設 D2（待 owner）**：本輪只要求 Web 層截圖；原生視窗截圖另列未驗。這不豁免原有 Linux native／Mac release 驗收。
+- **D1（已確認）**：採 REVIEW 建議 (b)，由 review-only Playwright `addInitScript` 在 navigation 前注入 mock，不新增 production IPC adapter。優先用既有 `window.__FLOWSHOT_BUILD_INFO_PROMISE__` seam，不手改生成 contracts 或猜測 Tauri 內部物件。
+- **D2（已確認）**：本輪只要求 Web 層截圖；原生視窗截圖另列未驗。這不豁免原有 Linux native／Mac release 驗收。
 - 約束：[AGENTS](../AGENTS.md)、[SPEC](../SPEC.md) §3/10/13 的唯讀來源、無網路、Rust contract 權威與平台 gate；[PROTOCOL](../../../docs/fe-review/PROTOCOL.md) §0/1/4、[SDD](../../../docs/fe-review/SDD.md) AC-11/15。所有下一輪命令均為**提案，未執行**。
 
 ## 不做的事
@@ -39,7 +40,7 @@
 
 以下**未執行且未 capture-ready**。D1/D2 與 AC-15 確認後，先實作／測試 M1/M2，再由下一輪 worker 在獨立 network namespace 執行。服務和瀏覽器必須同 namespace、只綁 loopback；Flowshot/Loom 分別啟動，兩者不可共用 1420。拒絕 `--network host`、既有 app-data、browser profile、storageState 與任何真資料；環境採 allowlist，不繼承 cloud/provider tokens。只用本輪新建合成資料；不需要 login/token。不能僅靠 browser route block 宣稱 OS network 隔離。
 
-從元件目錄準備 Node 24.18.0、鎖定 npm dependencies，依 shared workspace 政策將 cache/build/temp 放 launcher task 目錄，唯一 screenshots/reports 保留在 evidence/artifacts；如需 `runs/` manifest 必須明確連到 preserved 證據，不把唯一成果放 disposable cache。下列既有命令只提供 dev server／靜態檢查，**沒有** IPC fixture 或瀏覽器 runner：
+從元件目錄準備 Node 24.18.0、鎖定 npm dependencies，依 shared workspace 政策沿用 shared caches，將 build/temp 放 launcher task 目錄，唯一 screenshots/reports 保留在 evidence/artifacts；如需 `runs/` manifest 必須明確連到 preserved 證據，不把唯一成果放 disposable cache。下列既有命令只提供 dev server／靜態檢查，**沒有** IPC fixture 或瀏覽器 runner：
 
 ```sh
 npm ci
@@ -59,7 +60,7 @@ npm run dev -- --host 127.0.0.1 --port 1420 --strictPort
 
 ## 開放問題
 
-1. D1 是否確認使用 review-only preload，或改選 production adapter？目前只是 (b) 假設。
-2. D2 是否接受本輪僅 Web 層，原生 screenshot 不作本 FE 切片 gate？不得推論 Mac release gate 已豁免。
+1. D1 已確認採 review-only preload；若不可行，改 production adapter 仍需另提方案。
+2. D2 已確認此 FE 切片僅 Web 層；原生／Mac gate 不變。
 3. M1/M2 尚未實作，generic capture 無 hook；需下一輪明確交付可測 driver 後才啟動/驗證 targets。
-4. AC-15 由 owner 確認，尚無 signoff；此文件合入或格式檢查通過不等於產品可用。
+- Owner 已明確確認本設計方向；原產品缺口與未執行驗證不因此通過。

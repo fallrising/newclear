@@ -68,3 +68,13 @@ Do **not** allocate `10.42.0.0/16` / teamnet CIDR routes in Phase 1. SSH port-fo
 ## Hygiene footgun
 
 `vps-hygiene` `clean-docker.sh --aggressive` runs `docker system prune -af --volumes` and will delete named volumes of **stopped** `fleet-*` stacks. Prefer `compose stop` only when you will not prune.
+
+## Isolated lifecycle and recovery acceptance
+
+The repeatable non-Cloudflare acceptance entrypoints are `scripts/verify.py` and `scripts/acceptance.py` (Python standard library tooling). Run both through the common agent workspace launcher. The verifier executes the Makefile-equivalent native commands and writes three binaries under `AGENT_ARTIFACTS_DIR/bin`, plus source hashes and logs under `AGENT_EVIDENCE_DIR`.
+
+On an authorized test host, first inspect current processes, services, containers, storage and active tasks. The acceptance runner requires real Docker/Compose, the `registry:2` image already present, and free loopback ports 15001, 18765, 19600 and 20000. It refuses reused state. Transfer the exact built binaries and runner, then invoke `scripts/acceptance.py --bin-dir <artifact-bin-dir> --source-id <source-manifest-id>` through the launcher. These arguments are operator inputs, not a claim that a particular host has been approved.
+
+It creates a dedicated local registry, one synthetic node and one hello-healthz workload; checks literal env/argv, lifecycle, stable generations, secret merge, fresh restart reporting, outage reconciliation and uninstall after generated-file loss. It then stops its own processes, removes only its own containers/network, and verifies the original container inventory. State databases, logs and test image artifacts remain available for inspection; there is no prune or automatic data cleanup. A daemon/host reboot is not part of this runner.
+
+Cloudflare credentials are deliberately absent in this test. To finish AC-03, supply a dedicated account/zone and API token configuration, base/allowed domains, protected bootstrap tunnel/hostnames, Access allowlist, and an enrolled WARP client. Verify public HTTP success, unauthenticated Access denial plus authenticated success, and private success only from WARP with no public DNS exposure. Local origin success cannot satisfy these checks. Actual results: [2026-10-23 acceptance](evidence/2026-10-23-acceptance.md).

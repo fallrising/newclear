@@ -4,65 +4,50 @@ purpose: 以期望狀態協調個人 VPS 的 Compose 工作負載與入口
 kind: service
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-21
-source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
+reviewed: 2026-10-23
+source_commit: b7f2a4311d1135977ba273efba8e77702b908036
 ---
 
 # Fleet Catalog 成功契約
 
 ## 主線與範圍
 
-雖位於 specs/，仍是實際 Go 控制面；[SDD](docs/SDD.md)以 fleet.yaml、fleetd 與 outbound fleet-agent 定義 Phase 1 MVP。
-主線是註冊工作負載、編譯 Compose、節點 reconcile，並顯示 URL、版本、health 與 public/access/private expose mode。
+[SDD](docs/SDD.md)定義既有 Go/SQLite 控制面：fleet.yaml → 驗證／Compose 編譯 → fleetd desired state → outbound agent reconcile → catalog URL、版本、health 與 public/access/private 模式。
+針對單 owner、2–10 台 pet VPS、5–40 個服務；不新增第二套平台、不接管正式 OneVPS/OneFleet，不使用 ClarkQ 當控制匯流排。
 
-針對單 owner、2–10 台 pet VPS 與 5–40 個服務；不做 Kubernetes。
-不執行相鄰主機 hygiene script，也不使用 ClarkQ 當 control bus。
-
-本契約核對的是上述來源版本中的文件與程式。
-`complete` 只適用明列的主線範圍；沒有延伸為部署或生產保證。
+Owner 於 2026-10-23 明示執行 [開發啟動 prompt](START_DEVELOPMENT_PROMPT.md)。本次先完成 AC-01 同版驗證，再完成隔離真 Docker 的 AC-02 與 AC-04；AC-03 保留真實外部邊界要求。原定 AC 未縮小。
 
 ## 驗收條件
 
-下表 `historical` 是既有報告的結果，沒有在 2026-10-21 重跑。
-`pending` 保留缺少證據或尚未實作的條件；程式存在不等於通過。
+結果對應下列內容指紋；本里程碑的 PR、CI 與合併狀態以 [BOARD](docs/tasks/BOARD.md) 的交付紀錄為準，不代表完整主線已驗收或已部署。[驗收紀錄](docs/evidence/2026-10-23-acceptance.md)含來源／binary hashes、實際命令、歷史失敗、審查及環境限制。
 
-| AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
+| AC ID | Given / When / Then | 狀態 | 證據或缺口 |
 | --- | --- | --- | --- |
-| AC-01 | Given 合法或非法 fleet.yaml，When schema 驗證與 Compose 編譯，Then 只產生符合契約的 runtime 設定 | pending | [Makefile](Makefile)有 validate-schema/test，缺固定候選的完整驗收輸出 |
-| AC-02 | Given fleetd 與節點設定，When agent 拉取 desired state 並 start/stop/redeploy，Then 真實工作負載與 catalog 狀態收斂 | pending | [agent main](cmd/fleet-agent/main.go)存在；缺實際 VPS reconcile 證據 |
-| AC-03 | Given public/access/private 三模式，When 執行 Cloudflare Tunnel/Access bootstrap，Then 路由與存取政策符合契約且私人服務不可公開 | pending | [bootstrap](docs/bootstrap.md)仍為 operator-side 操作，未找到對應 live 驗收 |
-| AC-04 | Given 節點或控制面重啟，When 恢復 desired state 與 health 上報，Then 不錯置 workload 或遺失控制狀態 | pending | [SDD](docs/SDD.md)與程式存在，缺版本化故障／恢復 acceptance record |
+| AC-01 | Given 合法或非法 fleet.yaml，When schema 驗證與 Compose 編譯，Then 只產生符合契約的 runtime 設定 | passed | 原生 schema/compiler/全套 tests、vet/build；新增 raw types/null、YAML 注入、hostname 保護及 Unicode 長度回歸；真容器 argv/env 保真 |
+| AC-02 | Given fleetd 與節點設定，When agent 拉取 desired state 並 start/stop/redeploy，Then 真實工作負載與 catalog 狀態收斂 | passed | 同一隔離 VPS 的真實 fleetd/agent/SQLite/Docker/Compose/local registry；單 workload start/stop/redeploy、generation、health、container identity 閉環；無 CF 替身通過聲明 |
+| AC-03 | Given public/access/private 三模式，When 執行 Cloudflare Tunnel/Access bootstrap，Then 路由與存取政策符合契約且私人服務不可公開 | pending | session 未設必要 CF credentials/account/zone/bootstrap 設定，未提供 WARP client；沒有執行真實入口驗收 |
+| AC-04 | Given 節點或控制面重啟，When 恢復 desired state 與 health 上報，Then 不錯置 workload 或遺失控制狀態 | passed | agent 與 fleetd process restart、控制面 outage 下 running/stopped 收斂、fresh actual report、持久 identity/release/generation/port，以及缺 Compose/env/cache 的 uninstall；未測 host/Docker-daemon reboot |
 
 ## 現況與缺口
 
-README 記錄 Phase 1 code 已在 main、unit tests 由 CI 執行；這不是 live VPS/Cloudflare 驗收。
-目錄名稱不能將可執行服務改標為 reference 或 not-applicable。
-實際兩個 binary 的配置載入、HTTP 與 reconcile 入口已存在。
-不因本次文件工作登入 Cloudflare、建立 Tunnel、註冊真節點或執行部署。
+本次修正：schema raw types/presence、保護 hostname 正規化、Unicode 長度、安全 Compose/環境值編譯、CI image overlay 順序、secrets 合併，以及 generation 冪等、斷線快取 reconcile、缺檔與重啟 heartbeat 恢復。全部行為修正保留 RED → GREEN 證據，沿用既有依賴。
 
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
-歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
+最終內容指紋：`7416734bd434f50d901d6c421782aae6bae5728ac8d4c4037019ecd67af60245`；實測基底為上述 source_commit，交付分支基於 `f64c7ef01532f717e963e7c1adec4cbae87f16e7`，元件內容未改。[原生輸出](docs/evidence/2026-10-23-native.txt)、[來源清單](docs/evidence/2026-10-23-source.json)、[真 Docker 結果](docs/evidence/2026-10-23-docker.json)對應同一候選。
+
+獨立審查 ACCEPT 修正及最終測試 oracle。測試建立的程序與容器均已停止／移除，原容器清單恢復；既有服務無須停止。state、logs、images/artifacts 保留，真實主機／帳號／IP 與私有原始證據留在 repo 外。
+
+仍需真 Cloudflare public/access/private 邊界驗證。Owner 已明示授權本里程碑提交、push、PR 與通過門檻後合併。新增 [root Fleet CI](../../.github/workflows/fleet-ci.yml)修正 nested workflow 不會在 monorepo 啟動的入口；遠端 CI 與合併結果記錄於任務板的交付紀錄。任務狀態在 [BOARD](docs/tasks/BOARD.md)。
 
 ## 啟動與驗證
 
-[bootstrap](docs/bootstrap.md)列出第一節點、WARP 與本機配置；先於目標環境確認授權再照 runbook 操作。
+本次實際透過共用 workspace launcher 執行 `scripts/verify.py`，使用已安裝 Go 1.27.1；原生 test、hello-healthz test、vet、schema tests、兩個主程式與範例 build 均 PASS。命令與輸出見[紀錄](docs/evidence/2026-10-23-acceptance.md#executed-verification)。本機缺 make，沒有把未執行的 Makefile targets 寫成通過；runner 執行其等價 Go 命令並將輸出導向 workspace。
 
-已核對入口：[fleetd](cmd/fleetd/main.go)、[fleet-agent](cmd/fleet-agent/main.go)與 [Makefile](Makefile)。
-下列是該入口既有的啟動或驗證命令，並非本次執行紀錄；
-需先完成連結文件中的依賴、設定及適用環境準備。
+`scripts/acceptance.py` 於授權隔離 VPS 透過 launcher 執行，Docker 29.8.1 / Compose 5.5.1，最終十項檢查及 cleanup PASS。Cloudflare 是 `not_run`，未用 loopback 結果替代。重跑前置條件及正式 bootstrap 在 [bootstrap](docs/bootstrap.md)。
 
-```sh
-make test
-make build
-make validate-schema
-```
-
-執行後應保留來源 SHA、必要設定的非秘密摘要、命令與結果，
-並將 runtime 證據逐項對回 AC；不得只用 health 或 exit 0 宣告全部完成。
+歷史失敗保留：sandbox socket/DNS 限制、make 不存在、測試最初 cwd 錯誤、行為 RED，以及第二輪 uninstall oracle 的審查 REWORK；第三輪已用正確前置狀態驗證。Go 1.23 最低版本由 root CI 驗證；實際 run 結果見任務板。
 
 ## 可用版本
 
-目前 `usable_tag: none`；本次沒有建立或發布任何 tag。
-既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
+`mainline: incomplete`、`usable_tag: none`。文件／程式完成的本次修正、候選實測通過、遠端 CI、已合併與正式部署分開記錄；owner 已授權按里程碑提交及合併 PR；未執行 tag、release 或正式部署。
 
-須記錄固定版本的 schema/contract checks，再完成真節點 desired-state 與三種 ingress 的閉環及恢復驗收；目前尚無可用標記。
+下一個最小步驟：取得專用 Cloudflare test configuration 與已註冊 WARP device，依 bootstrap 完成 AC-03 的未登入拒絕／登入與 WARP 成功／私人服務無公開 DNS 證據。AC-01/02/04 的修正可獨立交付；只有 AC-03 也通過後，才核對完整主線的可用版本資格。

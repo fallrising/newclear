@@ -22,13 +22,17 @@ This tree lives under `specs/fleet` for historical migration reasons, but it is 
 
 ## Status
 
-Phase 1 code is on `main`. Unit tests run in GitHub Actions. Live VPS / Cloudflare bootstrap is operator-side — see [docs/bootstrap.md](docs/bootstrap.md).
+The 2026-10-23 candidate fixes schema/Compose compilation and agent recovery. Native checks and an isolated real-Docker VPS lifecycle run have passed; see [the acceptance record](docs/evidence/2026-10-23-acceptance.md) and [task board](docs/tasks/BOARD.md). Cloudflare public/access/private acceptance remains pending, so this is not a fully accepted usable release.
+
+[Root Fleet CI](../../.github/workflows/fleet-ci.yml) now defines the monorepo check entrypoint; the historical nested workflow does not run as a root workflow. The [task board](docs/tasks/BOARD.md) records PR, CI and merge status for this milestone. Cloudflare bootstrap remains operator-side — see [docs/bootstrap.md](docs/bootstrap.md).
 
 ```bash
 make test
 make build
 make validate-schema
 ```
+
+In the shared agent workspace, use `scripts/verify.py` through the common launcher. It runs the same Go test/vet/schema/build gates, adds the hello-healthz binary for acceptance, and places logs and binaries in the launcher's evidence/artifact directories. `scripts/acceptance.py` runs only on a preflighted isolated Docker host and preserves state/evidence; it does not test Cloudflare. See [bootstrap](docs/bootstrap.md#isolated-lifecycle-and-recovery-acceptance).
 
 Binaries: `bin/fleetd`, `bin/fleet-agent` (`CGO_ENABLED=0`). Images: `make image-fleetd` / `make image-agent`.
 

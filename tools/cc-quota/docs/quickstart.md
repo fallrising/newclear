@@ -31,6 +31,23 @@ bash -n install.sh
 
 在目標機器上，`launchctl print gui/$(id -u)/io.github.fallrising.cc-quota` 可以確認排程已載入（skipped: 需要 macOS）；`~/.local/share/cc-quota/collect.err` 是 launchd 的錯誤輸出。
 
+## 憑證錯誤
+
+Mac只讀Keychain，失敗不切換到Linux憑證檔。錯誤後用`report`查看`errors`中的安全代碼；不要用`security ... -w`輸出真token來收集驗收證據。
+
+| 代碼 | 下一步 |
+| --- | --- |
+| `keychain_unavailable` | 確認Claude已登入、Keychain已解鎖且允許目前Python程序存取；再重試collect。 |
+| `keychain_timeout` | 在Mac處理Keychain授權提示後重試；程式10秒逾時，不自動刷新或切換來源。 |
+| `file_unavailable` | Linux確認Claude登入與CLAUDE_CONFIG_DIR路徑／權限。 |
+| `invalid_credentials` | 確認Claude登入產生完整憑證；不要手動把缺值補成token。 |
+
+## 平台CI與真人驗收邊界
+
+CI在標準Linux及macOS15 runner使用Python3.11跑離線suite。Mac另跑 `python3 -m unittest discover -s tests_macos -v`：以原生osacompile編譯通知腳本、plutil解析測試安裝產生的plist，以及查詢隨機且不存在的合成Keychain service，確認失敗不改讀檔案。Linux不執行這組原生測試。
+
+測試不查詢真的Claude Keychain項目、不建立或改動keychain、不登入／呼叫usage、不註冊launchd工作，也不實際發送通知。它驗證平台工具邊界，不驗證登入帳號、每小時觸發或通知可見性。實際CI結果見[M2證據](tasks/macos-boundaries-20261023.md)。
+
 ## 目標 Mac 驗收（尚未執行）
 
 本輪只有Linux；8個SSH候選條目均為Linux。以下是待執行步驟，不是本次通過證據：

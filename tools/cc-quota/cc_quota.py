@@ -25,22 +25,47 @@ MIN_ELAPSED_PCT = 10.0  # 視窗剛開始時 pace 噪音太大，不計算
 
 
 # ---------- 資料源 ----------
+CREDENTIAL_MESSAGES = {
+    "keychain_unavailable": "Keychain未提供憑證；請確認claude登入及Keychain授權",
+    "keychain_timeout": "Keychain讀取逾時；請在Mac完成授權後重試",
+    "file_unavailable": "無法讀取Claude Code憑證檔；請先在本機登入claude",
+    "invalid_credentials": "Claude Code憑證格式無效；請確認claude登入",
+}
+
+
+class CredentialError(RuntimeError):
+    """Only fixed codes/messages can reach logs; never include source contents."""
+    def __init__(self, code):
+        self.code = code if code in CREDENTIAL_MESSAGES else "invalid_credentials"
+        super().__init__(CREDENTIAL_MESSAGES[self.code])
+
+
 def read_token():
-    """macOS 從 Keychain 讀；Linux 從 ~/.claude/.credentials.json 讀。"""
-    raw = None
+    """Read one platform's source, fail closed, and never refresh credentials."""
     if sys.platform == "darwin":
-        r = subprocess.run(["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
-                           capture_output=True, text=True, timeout=10)
-        if r.returncode == 0:
-            raw = r.stdout.strip()
-    if raw is None:
-        p = os.path.join(CLAUDE_DIR, ".credentials.json")
-        if os.path.exists(p):
-            with open(p) as f:
+        try:
+            r = subprocess.run(["/usr/bin/security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
+                               capture_output=True, text=True, timeout=10)
+        except subprocess.TimeoutExpired:
+            raise CredentialError("keychain_timeout") from None
+        except (OSError, UnicodeError):
+            raise CredentialError("keychain_unavailable") from None
+        if r.returncode != 0:
+            raise CredentialError("keychain_unavailable")
+        raw = r.stdout
+    else:
+        try:
+            with open(os.path.join(CLAUDE_DIR, ".credentials.json"), encoding="utf-8") as f:
                 raw = f.read()
-    if not raw:
-        raise RuntimeError("找不到 Claude Code 憑證（請先在這台電腦登入 claude）")
-    return json.loads(raw)["claudeAiOauth"]["accessToken"]
+        except (OSError, UnicodeError):
+            raise CredentialError("file_unavailable") from None
+    try:
+        token = json.loads(raw)["claudeAiOauth"]["accessToken"]
+    except (ValueError, TypeError, KeyError):
+        raise CredentialError("invalid_credentials") from None
+    if not isinstance(token, str) or not token or any(not 33 <= ord(c) <= 126 for c in token):
+        raise CredentialError("invalid_credentials")
+    return token
 
 
 def fetch_usage():
@@ -199,6 +224,8 @@ def notify(title, body):
 # ---------- 指令 ----------
 def safe_error(stage, exc):
     """Never persist exception text: it may contain credentials or HTTP bodies."""
+    if isinstance(exc, CredentialError):
+        return f"{stage}: {exc.code}，{CREDENTIAL_MESSAGES[exc.code]}"
     if isinstance(exc, urllib.error.HTTPError):
         if exc.code == 401:
             return f"{stage}: HTTP 401，憑證過期：開一次 claude 讓它自動刷新即可"

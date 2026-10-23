@@ -21,8 +21,16 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: test (${{ matrix.os }}, Python 3.11)
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
+    env:
+      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/cc-quota-pycache
+      TMPDIR: ${{ runner.temp }}
     defaults:
       run:
         working-directory: tools/cc-quota
@@ -30,7 +38,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
       - name: Offline unit tests
         run: python3 -m unittest discover -s tests -v
       - name: Check installer syntax
         run: bash -n install.sh
+      - name: Native macOS boundaries (synthetic inputs)
+        if: matrix.os == 'macos-15'
+        run: python3 -m unittest discover -s tests_macos -v

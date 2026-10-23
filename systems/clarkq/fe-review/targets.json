@@ -1,10 +1,9 @@
 {
   "project": "clarkq",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "第1輪來源核對，DESIGN M1隔離/乾淨config/合成seed/browser key前置尚未實作。",
   "locale": "zh-TW",
   "colorSchemes": [
-    "light",
     "dark"
   ],
   "apps": [
@@ -13,7 +12,7 @@
       "kind": "server",
       "cwd": "systems/clarkq",
       "install": "go mod download",
-      "start": "go run ./cmd/clarkq",
+      "start": ": \"${CLARKQ_API_KEY:?fresh task key required}\" && CLARKQ_ADDR=127.0.0.1:8080 go run ./cmd/clarkq",
       "env": {},
       "baseUrl": "http://127.0.0.1:8080",
       "ready": "/ui/",

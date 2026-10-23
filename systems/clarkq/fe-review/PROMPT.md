@@ -15,13 +15,14 @@
 
 ## 啟動線索（未驗證）
 
-- `go build -o bin/clarkq ./cmd/clarkq` 後以本機設定啟動；或 `./run-demo.sh --keep`（Docker，會跑六個情境並保留 UI）。
+- 先按 [DESIGN.md](DESIGN.md) M1 建立受控隔離、乾淨 config/env、loopback listener、新 API key 與合成 seed。專用 wrapper 尚未實作；裸 go run／既有 demo 不是可直接使用的 FE harness。
+- 全新 browser context 必須在首個頁面 script 前具備本次 localStorage／storageState；原始 targets 無登入 key，不能把 /ui/ 200 或 API401 當主要流程成功。
 
 ## 主要流程
 
 至少走通以下流程各一次，並對每一步截圖：
 
-- 開啟 Admin UI → 查看 queue 列表 → 查看訊息／統計
+- 本次 key 初始化 → 開啟 UI → Enqueue → Queue Use → Peek（深度不變）→ Consume（減一）→ Clear取消／確認 → Refresh all 查看 Metrics/Cluster；只用本次合成 queue。
 
 ## 專案特有檢查重點
 
@@ -32,7 +33,7 @@
 
 ## 可重用的既有資產
 
-- `run-demo.sh`：可產生有資料的畫面。
+- `demo/run-demo.sh` 只供 API 情境參考，不執行其共用 compose up/down；本次採用的單程序 wrapper 尚待實作。
 
 ## 待補的頁面
 
@@ -44,12 +45,7 @@
 
 1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
 2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 從 repository root 執行
-   ```bash
-   node docs/fe-review/capture.mjs systems/clarkq/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs systems/clarkq/fe-review/targets.json
-   ```
-   需要互動才能看到的狀態，另寫 Playwright 腳本放在本目錄；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
+3. **第 3 輪（完整 e2e）：** 先完成 DESIGN M1 的隔離、seed、新 key 與專用 browser 前置。產生本次 ephemeral targets，提供私有 storageState；從 repository root 執行共用 capture.mjs dry-run 再 capture，互動狀態用專用腳本。不要將 key/state/trace/headers/DOM dump 提交；原始 targets 不具上述前置，不能據此宣稱主要流程已驗收。報告依 DESIGN 列預期錯誤、未驗證項及來源 SHA。
 
 ## 產出
 

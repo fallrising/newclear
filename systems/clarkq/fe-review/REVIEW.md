@@ -4,7 +4,7 @@
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
+- **第 1 輪：文檔先行（進行中）** — 已撰寫 [DESIGN.md](DESIGN.md)，待獨立審查與擁有者確認（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -16,7 +16,19 @@
 
 ### C1 啟動方式有兩種
 
-`go run` 與 `run-demo.sh`（Docker）；後者會產生有資料的畫面，但在容器內再跑 Docker 需要額外權限。
+單程序 Go 與 `demo/run-demo.sh`（Docker）兩路；DESIGN M1 建議單程序加 API seed。Demo 有預設 compose project 與清理行為，不作本次 FE 隔離 wrapper。
+
+### C2 啟動與 browser state 尚未隔離
+
+預設 listener 是 :8080，config/env 可載入既有 auth、cluster、WAL。UI localStorage 持有 base/key；DESIGN M1 要求乾淨設定、loopback、新 key、全新 browser context。專用 wrapper 尚未實作。
+
+### C3 主題及版面需實測
+
+現行固定深色；長 queue/JSON 的 grid/table 行為待測，不能先宣稱已破版。
+
+### C4 操作與刷新範圍
+
+UI 支援 enqueue、peek、consume、確認 clear；只有 queues 每五秒自動刷新，Metrics/Cluster 需 Refresh all。DESIGN M3 保留這些既有語意。
 
 ## 需要放開或決定的點
 

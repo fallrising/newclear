@@ -15,9 +15,9 @@
 
 ## 啟動線索（未驗證）
 
-- `cargo build`，以暫存目錄啟動：`THINROUTER_DATA_DIR=<tmp> cargo run -- serve --host 127.0.0.1 --port 20128`；admin token 用本機產生的隨機值，只放環境變數，不寫入檔案。
-- **不要**執行 `import-local` 或匯入任何真實 OAuth／session token；只用假 connection 資料。
-- TUI：在 `tmux` 中執行 `cargo run -- tui --data-dir <tmp>`，以 `tmux capture-pane -p -e` 取得文字快照存到 `runs/<ts>/tui/`。
+先依 [DESIGN.md](DESIGN.md) M1 建立隔離、唯一空白 data-dir、新 admin token、假資料及專用登入／擷取流程。wrapper 尚未實作；targets 不是完整 harness。serve/tui 必須顯式帶 data-dir，禁止退回既有資料。
+
+不執行 import-local、login-siwc、refresh，不讀 CLI token 或呼叫真 provider。服務、瀏覽器與假上游同獨立 namespace、僅 loopback、runtime 阻外網。TUI 使用本次專用 tmux socket/session/pane，不擷取既有 terminal。
 
 ## 主要流程
 
@@ -30,7 +30,7 @@
 在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
 
 - 後台表單的伺服器端驗證訊息、CSRF 與錯誤頁。
-- Keys 頁面：key 只顯示一次、遮罩，截圖中不得出現可用的 key。
+- Keys 建立回應顯示一次完整 key，並非已遮罩；依 DESIGN M3 先離開秘密回應，或由待實作專用流程 mask；共用 capture 不支援 mask。
 - TUI 在 80×24 與 120×40 的版面。
 
 ## 可重用的既有資產
@@ -47,12 +47,7 @@
 
 1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
 2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 從 repository root 執行
-   ```bash
-   node docs/fe-review/capture.mjs gateways/pokercase/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs gateways/pokercase/fe-review/targets.json
-   ```
-   TUI 依「啟動線索」以 tmux 擷取文字快照；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
+3. **第 3 輪（完整 e2e）：** 先完成 DESIGN M1 的 fixture／登入／專用遮罩前置；由本次 ephemeral targets 填入真實 ID 與私有 storageState，登入頁分開無 session app。從 repository root 執行共用 capture.mjs dry-run，再 capture；不得以原始 targets 的登入重導宣稱受保護頁已驗收。TUI 按 DESIGN M4 用本次專用 socket/pane 擷取兩格式。報告保留失敗與未驗證項目，狀態不會因文件合併自動變更。
 
 ## 產出
 

@@ -4,7 +4,7 @@
 
 ## 目前輪次
 
-- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
+- **第 1 輪：文檔先行（進行中）** — 已撰寫 [DESIGN.md](DESIGN.md)，待獨立審查與擁有者確認（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
 - 第 2 輪：修改（未開始）
 - 第 3 輪：完整 e2e（未開始）
 
@@ -16,11 +16,19 @@
 
 ### C1 TUI 不在 `capture.mjs` 的能力範圍
 
-需要 tmux 文字快照；格式與比較方式尚未定義。
+DESIGN M4 提出本次專用 tmux socket/pane、ANSI 原檔及純文字報告；D1 未確認，尚未實作。
 
 ### C2 資料目錄內含憑證類資料
 
-gateway 儲存 OAuth／session token；只能用暫存目錄與假 connection。
+預設資料目錄會讀既有憑證。DESIGN M1 要求新 task data、明確 --data-dir、無憑證隔離；M3 規範一次性 API key 的保護。
+
+### C3 版面與主題需實測
+
+已有 720px breakpoint；長表格／TUI 裁切仍待測。現行固定深色，targets 只保留 dark。
+
+### C4 Keys 文案落後於 admission
+
+`templates/keys.html` 的「無 keys 開放」落後於預設拒絕契約。DESIGN M3 限定未來模板文案修正，本輪未改程式。
 
 ## 需要放開或決定的點
 

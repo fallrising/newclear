@@ -511,3 +511,33 @@ async fn unresumable_session_falls_back_to_the_whole_conversation() {
     assert!(told.contains("conversation_history"), "{told}");
     assert!(told.contains("zebra-quokka"));
 }
+
+#[tokio::test]
+async fn responses_stream_from_claude_code_carries_the_tool_call() {
+    let env = Env::start(&[]).await;
+    let r = env
+        .client
+        .post(format!("{}/v1/responses", env.base))
+        .json(&json!({"model": "cc", "stream": true, "input": "weather?",
+            "tools": [{"type": "function", "name": "get_weather", "parameters": {"type": "object"}}]}))
+        .send()
+        .await
+        .unwrap();
+    let text = r.text().await.unwrap();
+    let events: Vec<Value> = text
+        .lines()
+        .filter_map(|l| l.strip_prefix("data: "))
+        .map(|d| serde_json::from_str(d).unwrap())
+        .collect();
+    let done = &events.last().unwrap()["response"];
+    assert_eq!(events.last().unwrap()["type"], "response.completed");
+    let call = done["output"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|o| o["type"] == "function_call")
+        .unwrap();
+    assert_eq!(call["name"], "get_weather");
+    assert_eq!(call["arguments"], "{\"city\": \"Taipei\"}");
+    assert!(call["call_id"].as_str().unwrap().starts_with("toolu_"));
+}

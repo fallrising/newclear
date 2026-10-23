@@ -1077,7 +1077,9 @@ pub async fn handle_responses(
                     );
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
-                        UpstreamBodyKind::OpenAiChat => StreamMode::ChatToResponses,
+                        UpstreamBodyKind::OpenAiChat => {
+                            StreamMode::ChatToResponses(public_model.to_string())
+                        }
                         // Responses upstream: native SSE goes through unchanged.
                         _ => StreamMode::Passthrough,
                     };
@@ -1240,7 +1242,7 @@ enum StreamMode {
     /// Chat chunks → Anthropic events (model name for message_start).
     ChatToAnthropic(String),
     /// Chat chunks → Responses events.
-    ChatToResponses,
+    ChatToResponses(String),
     /// Responses events → chat chunks.
     ResponsesToChat(String),
     /// Responses events → chat chunks → Anthropic events.
@@ -1269,14 +1271,12 @@ impl SseConvert for ChatToAnthropic {
     }
 }
 
-struct ChatToResponses(bool);
-
-impl SseConvert for ChatToResponses {
+impl SseConvert for responses::ChatToResponsesStream {
     fn on_data(&mut self, data: &str) -> Vec<String> {
-        responses::chat_sse_to_responses_events(data, &mut self.0)
+        responses::ChatToResponsesStream::on_data(self, data)
     }
     fn on_end(&mut self) -> Vec<String> {
-        Vec::new()
+        responses::ChatToResponsesStream::on_end(self)
     }
 }
 
@@ -1328,7 +1328,7 @@ fn converter(mode: StreamMode) -> Option<Box<dyn SseConvert>> {
     Some(match mode {
         StreamMode::Passthrough => return None,
         StreamMode::ChatToAnthropic(m) => Box::new(ChatToAnthropic(StreamTranslateState::new(m))),
-        StreamMode::ChatToResponses => Box::new(ChatToResponses(false)),
+        StreamMode::ChatToResponses(m) => Box::new(responses::ChatToResponsesStream::new(m)),
         StreamMode::ResponsesToChat(m) => Box::new(responses::ResponsesToChatStream::new(m)),
         StreamMode::ResponsesToAnthropic(m) => Box::new(Chain(
             responses::ResponsesToChatStream::new(m.clone()),
@@ -1336,8 +1336,8 @@ fn converter(mode: StreamMode) -> Option<Box<dyn SseConvert>> {
         )),
         StreamMode::AnthropicToChat(m) => Box::new(claude::AnthropicToChatStream::new(m)),
         StreamMode::AnthropicToResponses(m) => Box::new(Chain(
-            claude::AnthropicToChatStream::new(m),
-            ChatToResponses(false),
+            claude::AnthropicToChatStream::new(m.clone()),
+            responses::ChatToResponsesStream::new(m),
         )),
     })
 }

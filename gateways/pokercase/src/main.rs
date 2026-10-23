@@ -2,20 +2,25 @@ mod admin;
 mod agy;
 mod cancel;
 mod claude;
+mod claude_code;
+mod claude_mcp;
 mod config;
 mod cooldown;
 mod cursor_agent;
 mod cursor_proto;
 mod error;
+mod guard;
 mod http_client;
 mod local_import;
 mod oauth_refresh;
+mod prompt_cache;
 mod providers;
 mod proxy;
 mod resolve;
 mod responses;
 mod secrets;
 mod server;
+mod siwc;
 mod store;
 mod templates;
 mod token_saver;
@@ -66,6 +71,28 @@ enum Commands {
         token_saver: bool,
         #[arg(long, env = "THINROUTER_TOKEN_SAVER_MAX_CHARS", default_value_t = 2000)]
         token_saver_max_chars: usize,
+        /// Extra Host names to accept (e.g. your Tailscale Serve name); IP literals
+        /// and localhost are always accepted. Comma-separated in the env var.
+        #[arg(
+            long = "allowed-host",
+            env = "THINROUTER_ALLOWED_HOSTS",
+            value_delimiter = ','
+        )]
+        allowed_hosts: Vec<String>,
+        /// Operator-only upstream base override, `provider=url` (repeatable). Admin UI/API
+        /// can then also point that provider's connections at this base.
+        #[arg(
+            long = "provider-base-override",
+            env = "THINROUTER_PROVIDER_BASE_OVERRIDES",
+            value_delimiter = ','
+        )]
+        provider_base_overrides: Vec<String>,
+        /// Claude Code CLI used by the `claude` provider (default: `claude` on PATH)
+        #[arg(long, env = "THINROUTER_CLAUDE_BIN")]
+        claude_bin: Option<String>,
+        /// Concurrent Claude Code processes
+        #[arg(long, env = "THINROUTER_CLAUDE_MAX_RUNS", default_value_t = 2)]
+        claude_max_runs: usize,
     },
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -79,18 +106,43 @@ enum Commands {
         #[arg(long, env = "THINROUTER_SECRETS_KEY")]
         secrets_key: Option<String>,
     },
-    /// Import tokens from local agent CLIs (codex/claude/grok/cursor/opencode/agy)
+    /// Import tokens from local agent CLIs (claude/grok/cursor/opencode/agy)
     ImportLocal {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
         data_dir: Option<std::path::PathBuf>,
         #[arg(long, env = "THINROUTER_SECRETS_KEY")]
         secrets_key: Option<String>,
-        /// Also create routes rt-<provider> for each import
-        #[arg(long, default_value_t = true)]
+        /// Do not create routes rt-<provider> for each import
+        #[arg(long)]
+        no_routes: bool,
+        /// Routes are created by default; kept so `--routes` still parses
+        #[arg(long, hide = true)]
         routes: bool,
-        /// After import, try OAuth refresh for each connection
-        #[arg(long, default_value_t = true)]
+        /// After import, refresh OAuth tokens (never the Codex CLI's borrowed login)
+        #[arg(long)]
         refresh: bool,
+    },
+    /// Sign in with ChatGPT (official plan sharing) and store an `siwc` connection
+    LoginSiwc {
+        #[arg(long, env = "THINROUTER_DATA_DIR")]
+        data_dir: Option<std::path::PathBuf>,
+        #[arg(long, env = "THINROUTER_SECRETS_KEY")]
+        secrets_key: Option<String>,
+        /// Connection name (re-running with the same name re-authorizes it)
+        #[arg(long, default_value = "siwc")]
+        name: String,
+        /// Loopback callback port (redirect http://127.0.0.1:<port>/auth/callback)
+        #[arg(long, default_value_t = 1455)]
+        port: u16,
+        /// Default model; otherwise the first model listed for the account
+        #[arg(long)]
+        model: Option<String>,
+    },
+    /// Internal: MCP server offering a client's tools to a Claude Code run
+    #[command(hide = true)]
+    ClaudeMcpHelper {
+        #[arg(long)]
+        tools_file: std::path::PathBuf,
     },
     /// Refresh OAuth tokens for imported connections
     Refresh {
@@ -124,6 +176,10 @@ async fn main() -> Result<()> {
             sse_stall_secs,
             token_saver,
             token_saver_max_chars,
+            allowed_hosts,
+            provider_base_overrides,
+            claude_bin,
+            claude_max_runs,
         } => {
             let mut cfg = AppConfig::new(
                 host,
@@ -136,6 +192,10 @@ async fn main() -> Result<()> {
                 Some(token_saver_max_chars),
             )?;
             cfg.allow_keyless_bootstrap = allow_keyless_bootstrap;
+            cfg.allowed_hosts = allowed_hosts;
+            cfg.set_provider_base_overrides(&provider_base_overrides)?;
+            cfg.claude_bin = claude_bin;
+            cfg.claude_max_runs = claude_max_runs;
             server::run(cfg).await
         }
         Commands::Doctor {
@@ -173,7 +233,8 @@ async fn main() -> Result<()> {
         Commands::ImportLocal {
             data_dir,
             secrets_key,
-            routes,
+            no_routes,
+            routes: _,
             refresh,
         } => {
             let cfg = AppConfig::new(
@@ -186,8 +247,28 @@ async fn main() -> Result<()> {
                 None,
                 None,
             )?;
-            import_local_cmd(&cfg, routes, refresh).await
+            import_local_cmd(&cfg, !no_routes, refresh).await
         }
+        Commands::LoginSiwc {
+            data_dir,
+            secrets_key,
+            name,
+            port,
+            model,
+        } => {
+            let cfg = AppConfig::new(
+                "127.0.0.1".into(),
+                20128,
+                data_dir,
+                None,
+                secrets_key,
+                None,
+                None,
+                None,
+            )?;
+            login_siwc_cmd(&cfg, &name, port, model).await
+        }
+        Commands::ClaudeMcpHelper { tools_file } => claude_mcp::run(&tools_file),
         Commands::Refresh {
             data_dir,
             secrets_key,
@@ -236,6 +317,89 @@ async fn import_local_cmd(cfg: &AppConfig, routes: bool, refresh: bool) -> Resul
     Ok(())
 }
 
+async fn login_siwc_cmd(
+    cfg: &AppConfig,
+    name: &str,
+    port: u16,
+    model: Option<String>,
+) -> Result<()> {
+    let store = store::Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
+    let http = http_client::build_http_client()?;
+    let existing = store.get_connection_by_name(name)?;
+    anyhow::ensure!(
+        existing
+            .as_ref()
+            .is_none_or(|c| c.oauth.as_ref().is_some_and(|o| o.provider == "siwc")),
+        "connection '{name}' exists for another provider; pass a different --name"
+    );
+    let meta: serde_json::Value = existing
+        .as_ref()
+        .and_then(|c| c.oauth.as_ref()?.meta.as_deref())
+        .and_then(|m| serde_json::from_str(m).ok())
+        .unwrap_or_default();
+    let client_id = meta.get("client_id").and_then(|v| v.as_str());
+    let host_id = siwc::host_id(&cfg.data_dir)?;
+
+    let signed = siwc::sign_in(
+        &http,
+        siwc::AUTH_BASE,
+        &host_id,
+        client_id,
+        port,
+        std::time::Duration::from_secs(300),
+        |url| {
+            println!(
+                "Open this URL in a browser on this machine to sign in with ChatGPT:\n\n  {url}\n"
+            );
+            println!("Waiting for the redirect to 127.0.0.1:{port} (5 minutes)...");
+        },
+    )
+    .await?;
+    if let Some(prev) = meta.get("subject").and_then(|v| v.as_str()) {
+        anyhow::ensure!(
+            prev == signed.subject,
+            "signed in as a different ChatGPT account than connection '{name}'; use another --name"
+        );
+    }
+    let models = siwc::list_models(&http, siwc::API_BASE, &signed.tokens.access_token)
+        .await
+        .unwrap_or_else(|e| {
+            println!("  (model list unavailable: {e})");
+            Vec::new()
+        });
+    let default_model = model
+        .or_else(|| existing.as_ref().and_then(|c| c.default_model.clone()))
+        .or_else(|| models.first().cloned());
+    let new_meta = serde_json::json!({
+        "client_id": signed.client_id,
+        "ext_agent_host_id": signed.host_id,
+        "subject": signed.subject,
+    });
+    let row = store.upsert_oauth_connection(
+        existing.as_ref().map(|c| c.id.clone()),
+        name,
+        siwc::API_BASE,
+        "siwc",
+        &signed.tokens.access_token,
+        signed.tokens.refresh_token.as_deref(),
+        signed.tokens.expires_at().as_deref(),
+        Some(&new_meta.to_string()),
+        default_model.as_deref(),
+        existing.as_ref().map(|c| c.priority).unwrap_or(100),
+        true,
+    )?;
+    store.upsert_route(None, "rt-siwc", "fallback", &[(row.id.clone(), None)])?;
+    println!(
+        "Signed in as {} — connection '{name}', route rt-siwc, default model {}",
+        signed.email.as_deref().unwrap_or(&signed.subject),
+        default_model.as_deref().unwrap_or("(none; pass --model)")
+    );
+    if !models.is_empty() {
+        println!("  models: {}", models.join(", "));
+    }
+    Ok(())
+}
+
 async fn refresh_cmd(cfg: &AppConfig) -> Result<()> {
     let store = store::Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
     println!("thinrouter refresh");
@@ -260,9 +424,12 @@ fn doctor(cfg: &AppConfig) -> Result<()> {
     println!(
         "  secrets  : {}",
         if cfg.secrets_key.is_some() {
-            "encryption enabled"
+            "encrypted (argon2id passphrase)".to_string()
         } else {
-            "plaintext secrets"
+            format!(
+                "encrypted (key file {})",
+                cfg.data_dir.join("secrets.key").display()
+            )
         }
     );
     let store = store::Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;

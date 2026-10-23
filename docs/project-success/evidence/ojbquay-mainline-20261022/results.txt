@@ -1,0 +1,40 @@
+## gradle-build
+BUILD SUCCESSFUL in 1m 53s
+
+## go-test
+ok  	github.com/fallrising/newclear/systems/ojbquay/sdk/go	0.010s
+
+## validate-deploy
+validated OJBK namespace
+validated 3 Grafana dashboards
+
+## compose-e2e
+#25 63.45 BUILD SUCCESSFUL in 1m 3s
+[PASS] 11 Compose services are running
+[PASS] 7 public readiness and health endpoints responded
+[PASS] Session and CSRF-protected administrator login succeeded
+[PASS] Topic, group, and PUSH subscription were provisioned
+[PASS] gRPC producer returned partition=0 offset=0
+[PASS] HTTP PUSH sink received the exact expected payload
+[PASS] Consumer success metric is non-zero
+[PASS] 5 expected Prometheus jobs are healthy
+COMPOSE_E2E_OK topic=e2e.orders.1792692058-15 group=e2e-fulfilment-1792692058-15 subscription=1 partition=0 offset=0
+
+## ac01-ac07
+loaded version before update: 1
+[PASS] AC-01 runtime loaded version 2 561ms after update
+[PASS] AC-07 with console-api stopped: gRPC ACK and exact sink payload {"event":"ac07"}
+
+## console-stack
+  1 passed (21.2s)
+
+## console-mock
+ Test Files  4 passed (4)
+      Tests  5 passed (5)
+  1 passed (6.6s)
+
+## pull-interop
+GO_INTEROP_OK
+INTEROP_OK
+BUILD SUCCESSFUL in 16s
+

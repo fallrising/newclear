@@ -131,8 +131,28 @@ at-least-once and may duplicate work.
 Confirm whether the subscription is classic ordered. Inspect partition skew,
 endpoint latency, worker count, and retry behavior. Scale carefully. Offset
 reset is a last resort: the control plane pauses and publishes the
-subscription, waits up to 60 seconds for an empty group, alters offsets, then
-restores the prior state. A failed quiet gate does not alter offsets.
+subscription, waits up to 60 seconds for every runtime to confirm the pause and
+for an empty group, alters offsets, reads them back, then restores the prior
+state. A failed gate (`RUNTIME_PAUSE_UNCONFIRMED`, `GROUP_NOT_QUIET`) does not
+alter offsets and restores the prior state.
+
+### Offset reset outcome unknown
+
+`GROUP_RESET_OUTCOME_UNKNOWN` means the alter was submitted but not verified.
+The subscription stays paused and its `group_maintenance_lease` row has
+`expires_at = infinity`, so resume and further resets are rejected.
+
+1. Restart the console-api instance that ran the reset, so its Kafka admin
+   client can no longer write.
+2. Read the actual offsets:
+   `kafka-consumer-groups.sh --bootstrap-server <kafka> --describe --group <group>`.
+3. If they are not what you want, set them while the group is still empty:
+   `kafka-consumer-groups.sh --bootstrap-server <kafka> --group <group> --topic <topic> --reset-offsets --to-offset <n> --execute`
+   (or `--to-datetime`).
+4. Release the fence:
+   `DELETE FROM group_maintenance_lease WHERE group_id = <consume_group.id>;`
+5. Resume the subscription in the console and record the incident in the audit
+   notes.
 
 ### Delay fire lag high
 

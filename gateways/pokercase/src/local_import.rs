@@ -23,7 +23,6 @@ fn home() -> PathBuf {
 /// Scan known agent credential paths and upsert oauth connections + simple routes.
 pub fn import_all_local(store: &Store, make_routes: bool) -> Result<Vec<ImportResult>> {
     Ok(vec![
-        import_codex(store, make_routes),
         import_claude(store, make_routes),
         import_grok(store, make_routes),
         import_cursor(store, make_routes),
@@ -90,161 +89,35 @@ fn upsert(
     }
 }
 
-fn import_codex(store: &Store, make_routes: bool) -> ImportResult {
-    let path = home().join(".codex/auth.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "codex".into(),
-                name: "local-codex".into(),
-                ok: false,
-                detail: format!("missing {}: {e}", path.display()),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "codex".into(),
-                name: "local-codex".into(),
-                ok: false,
-                detail: format!("parse error: {e}"),
-            };
-        }
-    };
-    let access = v
-        .pointer("/tokens/access_token")
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    let refresh = v.pointer("/tokens/refresh_token").and_then(|t| t.as_str());
-    let account_id = v
-        .pointer("/tokens/account_id")
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    if access.is_empty() {
-        return ImportResult {
-            provider: "codex".into(),
-            name: "local-codex".into(),
-            ok: false,
-            detail: "no access_token".into(),
-        };
-    }
-    let meta = serde_json::json!({"account_id": account_id, "source": path.display().to_string()});
-    // Prefer model from config.toml if present
-    let model = read_codex_model().or(Some("gpt-5.6-sol".into()));
-    upsert(
-        store,
-        "local-codex",
-        "codex",
-        access,
-        refresh,
-        None,
-        Some(&meta.to_string()),
-        model.as_deref(),
-        make_routes,
-    )
-}
-
-fn read_codex_model() -> Option<String> {
-    let p = home().join(".codex/config.toml");
-    let s = std::fs::read_to_string(p).ok()?;
-    for line in s.lines() {
-        let line = line.trim();
-        if let Some(rest) = line.strip_prefix("model") {
-            let rest = rest.trim().trim_start_matches('=').trim();
-            let m = rest.trim_matches('"').trim_matches('\'').to_string();
-            if !m.is_empty() {
-                return Some(m);
-            }
-        }
-    }
-    None
-}
-
+/// Claude needs no token import: the local Claude Code CLI answers with its own login.
 fn import_claude(store: &Store, make_routes: bool) -> ImportResult {
-    // 1) Official long-lived token for CI / headless (subscription-backed)
-    if let Ok(tok) = std::env::var("CLAUDE_CODE_OAUTH_TOKEN") {
-        let tok = tok.trim();
-        if !tok.is_empty() {
-            return upsert(
-                store,
-                "local-claude",
-                "claude",
-                tok,
-                None,
-                None,
-                Some(r#"{"source":"CLAUDE_CODE_OAUTH_TOKEN"}"#),
-                Some("claude-sonnet-4-5-20250929"),
-                make_routes,
-            );
-        }
-    }
-
-    let path = home().join(".claude/.credentials.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "claude".into(),
-                name: "local-claude".into(),
-                ok: false,
-                detail: format!(
-                    "missing {} ({e}); run `claude` /login or `claude setup-token` then set CLAUDE_CODE_OAUTH_TOKEN — see docs/CLAUDE_SUBSCRIPTION.md",
-                    path.display()
-                ),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "claude".into(),
-                name: "local-claude".into(),
-                ok: false,
-                detail: format!("parse: {e}"),
-            };
-        }
-    };
-    let oauth = &v["claudeAiOauth"];
-    let access = oauth
-        .get("accessToken")
-        .or_else(|| oauth.get("access_token"))
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    let refresh = oauth
-        .get("refreshToken")
-        .or_else(|| oauth.get("refresh_token"))
-        .and_then(|t| t.as_str())
-        .filter(|s| !s.is_empty());
-    let exp = oauth
-        .get("expiresAt")
-        .or_else(|| oauth.get("expires_at"))
-        .map(|e| match e {
-            Value::Number(n) => n.to_string(),
-            Value::String(s) => s.clone(),
-            _ => String::new(),
-        })
-        .filter(|s| !s.is_empty() && s != "0");
-    if access.is_empty() {
+    let bin = std::env::var("THINROUTER_CLAUDE_BIN").unwrap_or_else(|_| "claude".into());
+    let found = std::process::Command::new(&bin)
+        .arg("--version")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success());
+    if !found {
         return ImportResult {
             provider: "claude".into(),
             name: "local-claude".into(),
             ok: false,
-            detail: "credentials present but accessToken empty (OAuth session expired). Run `claude` then /login, or `claude setup-token` + CLAUDE_CODE_OAUTH_TOKEN. See docs/CLAUDE_SUBSCRIPTION.md".into(),
+            detail: format!(
+                "Claude Code CLI `{bin}` not found; install it and run `claude` once to sign in"
+            ),
         };
     }
     upsert(
         store,
         "local-claude",
         "claude",
-        access,
-        refresh,
-        exp.as_deref(),
-        Some(r#"{"source":"~/.claude/.credentials.json"}"#),
-        Some("claude-sonnet-4-5-20250929"),
+        "",
+        None,
+        None,
+        Some(r#"{"source":"claude-code-cli"}"#),
+        Some("sonnet"),
         make_routes,
     )
 }

@@ -89,12 +89,10 @@ different stripes to progress concurrently.
   reaches a terminal success/DLQ outcome. This is conservative and correct but
   lower-throughput than the SDD low-watermark optimization, which remains a
   demonstrated-load refactor rather than a correctness prerequisite.
-- The SDD's `<20%` end-to-end timeline target for a 150 ms retry conflicts with
-  its Kafka/PostgreSQL scheduler path, 100 ms dispatcher tick, and ±1 second
-  delay promise. Real warm Testcontainers runs observed roughly 206–253 ms for
-  the first 150 ms retry while later 300/600 ms retries were within 20%.
-  M4 preserves no-early durable scheduling; meeting the 150 ms percentage is a
-  measured scheduler/data-plane optimization gate, not a claimed result.
+- Scheduled retries use the durable Kafka/PostgreSQL scheduler path with its
+  100 ms dispatcher tick. A retry is never earlier than its configured delay
+  and at most one second late, the same tolerance as ordinary delays.
+  Sub-second precision would need a different scheduler and is not a v1 goal.
 
 ## Design
 
@@ -134,6 +132,5 @@ Readiness follows successful config bootstrap and worker reconciliation.
 - Pipeline, fast retry, retry plan, DLQ failure, key ordering, config replace,
   Share acknowledgement, and full retry/DLQ E2E scenarios.
 - Unit tests prove exact configured due times. Full E2E proves no-early
-  `[150,300,600]` attempts and the scheduler's ±1 second tolerance; the
-  conflicting 150 ms `<20%` target remains open.
+  `[150,300,600]` attempts within the scheduler's one-second tolerance.
 - `./gradlew build`

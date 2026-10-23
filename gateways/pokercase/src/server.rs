@@ -1,10 +1,11 @@
+use std::net::SocketAddr;
 use std::sync::atomic::AtomicU64;
 use std::sync::Arc;
 
 use anyhow::Result;
 use axum::body::Bytes;
 use axum::extract::{Request, State};
-use axum::http::{header, HeaderMap, StatusCode};
+use axum::http::{header, HeaderMap};
 use axum::middleware::{self, Next};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
@@ -20,6 +21,7 @@ use crate::claude;
 use crate::config::AppConfig;
 use crate::cooldown::CooldownMap;
 use crate::error::{AppError, AppResult};
+use crate::guard::{self, Sessions};
 use crate::http_client;
 use crate::proxy::{self, ProxyState};
 use crate::resolve;
@@ -32,35 +34,41 @@ pub struct AppState {
     pub cfg: AppConfig,
     pub store: Store,
     pub proxy: ProxyState,
+    pub sessions: Sessions,
 }
 
 pub fn build_app(state: AppState) -> Router {
-    let v1 = Router::new()
+    // One gateway-key gate for both the /v1 and the bare path families.
+    let inference = Router::new()
         .route("/chat/completions", post(chat_completions))
         .route("/messages", post(anthropic_messages))
         .route("/responses", post(openai_responses))
         .route("/models", get(list_models))
-        .layer(middleware::from_fn_with_state(
+        .route_layer(middleware::from_fn_with_state(
             state.clone(),
             require_api_key,
         ));
 
     Router::new()
         .route("/health", get(health))
-        .nest("/v1", v1)
-        .route("/chat/completions", post(chat_completions))
-        .route("/messages", post(anthropic_messages))
-        .route("/responses", post(openai_responses))
-        .route("/models", get(list_models))
+        .nest("/v1", inference.clone())
+        .merge(inference)
         .merge(admin::router())
         .merge(web::router())
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            guard::request_guard,
+        ))
         .layer(RequestBodyLimitLayer::new(10 * 1024 * 1024))
         .layer(TraceLayer::new_for_http())
         .with_state(state)
 }
 
-pub async fn run(cfg: AppConfig) -> Result<()> {
+pub async fn run(mut cfg: AppConfig) -> Result<()> {
     let addr = cfg.validate_listener()?;
+    if let Some(path) = cfg.ensure_admin_token()? {
+        info!(path = %path.display(), "admin token file (read it to log in; never logged)");
+    }
     let store = Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
     let http = http_client::build_http_client()?;
 
@@ -75,7 +83,14 @@ pub async fn run(cfg: AppConfig) -> Result<()> {
             sse_stall_secs: cfg.sse_stall_secs,
             token_saver: cfg.token_saver,
             token_saver_max_chars: cfg.token_saver_max_chars,
+            provider_base_overrides: cfg.provider_base_overrides.clone(),
+            claude_code: crate::claude_code::ClaudeCode::new(
+                cfg.claude_bin.clone(),
+                &cfg.data_dir,
+                cfg.claude_max_runs,
+            ),
         },
+        sessions: Sessions::default(),
     };
 
     let app = build_app(state);
@@ -90,9 +105,12 @@ pub async fn run(cfg: AppConfig) -> Result<()> {
     }
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await?;
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await?;
     Ok(())
 }
 
@@ -110,7 +128,8 @@ async fn require_api_key(
     request: Request,
     next: Next,
 ) -> Result<Response, AppError> {
-    ensure_api_key(&state, request.headers())?;
+    let remote = guard::is_remote(guard::peer_addr(&request), request.headers());
+    ensure_api_key(&state, request.headers(), remote)?;
     Ok(next.run(request).await)
 }
 
@@ -134,12 +153,7 @@ fn extract_api_key(headers: &HeaderMap) -> Option<String> {
     None
 }
 
-async fn chat_completions(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    body: Bytes,
-) -> AppResult<Response> {
-    ensure_api_key(&state, &headers)?;
+async fn chat_completions(State(state): State<AppState>, body: Bytes) -> AppResult<Response> {
     let (guard, cancel) = CancelOnDrop::new();
 
     let (public_model, stream) = proxy::extract_model_and_stream(&body)?;
@@ -157,12 +171,7 @@ async fn chat_completions(
     .await
 }
 
-async fn anthropic_messages(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    body: Bytes,
-) -> AppResult<Response> {
-    ensure_api_key(&state, &headers)?;
+async fn anthropic_messages(State(state): State<AppState>, body: Bytes) -> AppResult<Response> {
     let (guard, cancel) = CancelOnDrop::new();
 
     let (public_model, stream) = claude::extract_anthropic_model_stream(&body)?;
@@ -180,12 +189,7 @@ async fn anthropic_messages(
     .await
 }
 
-async fn openai_responses(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    body: Bytes,
-) -> AppResult<Response> {
-    ensure_api_key(&state, &headers)?;
+async fn openai_responses(State(state): State<AppState>, body: Bytes) -> AppResult<Response> {
     let (guard, cancel) = CancelOnDrop::new();
 
     let (public_model, stream) = responses::extract_responses_model_stream(&body)?;
@@ -203,7 +207,8 @@ async fn openai_responses(
     .await
 }
 
-fn ensure_api_key(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
+/// `remote`: the request came through a proxy/tunnel or from a non-loopback peer.
+fn ensure_api_key(state: &AppState, headers: &HeaderMap, remote: bool) -> AppResult<()> {
     let key = extract_api_key(headers);
     match key {
         Some(k) if state.store.verify_api_key(&k)? => Ok(()),
@@ -213,6 +218,7 @@ fn ensure_api_key(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
                 && !headers.contains_key("x-api-key")
                 && state.cfg.allow_keyless_bootstrap
                 && state.cfg.loopback_listener()
+                && !remote
                 && !state.store.has_api_keys()?
             {
                 Ok(())
@@ -223,8 +229,7 @@ fn ensure_api_key(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
     }
 }
 
-async fn list_models(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
-    ensure_api_key(&state, &headers)?;
+async fn list_models(State(state): State<AppState>) -> AppResult<Json<Value>> {
     let mut data = Vec::new();
     for route in state.store.list_routes()? {
         data.push(json!({
@@ -257,9 +262,4 @@ async fn list_models(State(state): State<AppState>, headers: HeaderMap) -> AppRe
         "object": "list",
         "data": data,
     })))
-}
-
-#[allow(dead_code)]
-fn _status_ok() -> StatusCode {
-    StatusCode::OK
 }

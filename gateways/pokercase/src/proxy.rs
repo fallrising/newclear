@@ -16,6 +16,7 @@ use tracing::{debug, warn};
 use crate::claude::{self, StreamTranslateState};
 use crate::cooldown::{cooldown_secs_for_status, CooldownMap};
 use crate::error::{AppError, AppResult};
+use crate::prompt_cache;
 use crate::providers::{self, UpstreamFormat};
 use crate::responses;
 use crate::store::{ResolvedTarget, Store};
@@ -32,6 +33,131 @@ pub struct ProxyState {
     pub sse_stall_secs: u64,
     pub token_saver: bool,
     pub token_saver_max_chars: usize,
+    /// Operator-only `provider=url` upstream overrides (see `providers::base_url_allowed`).
+    pub provider_base_overrides: Vec<(String, String)>,
+    /// Local Claude Code CLI runs for the `claude` provider.
+    pub claude_code: crate::claude_code::ClaudeCode,
+}
+
+/// Which protocol the client speaks (for converting Claude Code output).
+#[derive(Clone, Copy)]
+enum ClientProto {
+    Chat,
+    Anthropic,
+    Responses,
+}
+
+enum ClaudeOutcome {
+    Stream(crate::claude_code::ClaudeRun, StreamMode),
+    Done(Response),
+}
+
+fn is_claude_code(target: &ResolvedTarget) -> bool {
+    provider_id_for(target)
+        .as_deref()
+        .and_then(providers::resolve)
+        .is_some_and(|p| p.format == UpstreamFormat::ClaudeCode)
+}
+
+/// Mark cooldown and log a failed attempt.
+fn record_failure(
+    state: &ProxyState,
+    public_model: &str,
+    target: &ResolvedTarget,
+    e: &UpstreamAttemptError,
+    start: Instant,
+) {
+    let secs = cooldown_secs_for_status(e.status);
+    if secs > 0 {
+        state.cooldown.mark(&target.connection.id, secs);
+    }
+    let _ = state.store.log_usage(
+        Some(public_model),
+        Some(&target.connection.id),
+        Some(e.status as i64),
+        Some(start.elapsed().as_millis() as i64),
+        Some(&e.body.chars().take(500).collect::<String>()),
+        None,
+        None,
+        None,
+    );
+}
+
+/// One target answered by the local Claude Code CLI. `chat_body` is the request in
+/// chat-completions form (every client protocol is converted to it first).
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Mirrors the HTTP forward path's explicit request context"
+)]
+async fn claude_code_attempt(
+    state: &ProxyState,
+    target: &ResolvedTarget,
+    chat_body: &Bytes,
+    public_model: &str,
+    stream: bool,
+    proto: ClientProto,
+    cancel: &CancellationToken,
+    start: Instant,
+) -> Result<ClaudeOutcome, UpstreamAttemptError> {
+    let chat: Value = serde_json::from_slice(chat_body).map_err(|e| UpstreamAttemptError {
+        status: 400,
+        body: format!("invalid JSON body: {e}"),
+        retryable: false,
+    })?;
+    let run = crate::claude_code::start(&state.claude_code, &target.upstream_model, &chat, cancel)
+        .await?;
+    state.cooldown.clear(&target.connection.id);
+    let latency = start.elapsed().as_millis() as i64;
+    if stream {
+        let _ = state.store.log_usage(
+            Some(public_model),
+            Some(&target.connection.id),
+            Some(200),
+            Some(latency),
+            None,
+            None,
+            None,
+            None,
+        );
+        let mode = match proto {
+            ClientProto::Anthropic => StreamMode::Passthrough,
+            ClientProto::Chat => StreamMode::AnthropicToChat(public_model.to_string()),
+            ClientProto::Responses => StreamMode::AnthropicToResponses(public_model.to_string()),
+        };
+        return Ok(ClaudeOutcome::Stream(run, mode));
+    }
+    let to_attempt = |e: AppError| UpstreamAttemptError {
+        status: e.status_code().as_u16(),
+        body: match e {
+            AppError::Upstream { body, .. } => body,
+            other => other.to_string(),
+        },
+        retryable: false,
+    };
+    let anthropic = run.collect(public_model).await.map_err(to_attempt)?;
+    let chat_out = claude::anthropic_to_openai_response(&anthropic).map_err(to_attempt)?;
+    let (pt, ct) = extract_usage_tokens(&chat_out);
+    let _ = state.store.log_usage(
+        Some(public_model),
+        Some(&target.connection.id),
+        Some(200),
+        Some(latency),
+        None,
+        pt,
+        ct,
+        None,
+    );
+    let body = match proto {
+        ClientProto::Anthropic => anthropic,
+        ClientProto::Chat => chat_out,
+        ClientProto::Responses => {
+            responses::chat_to_responses(&chat_out, public_model).map_err(to_attempt)?
+        }
+    };
+    Ok(ClaudeOutcome::Done(json_bytes_response(
+        StatusCode::OK,
+        body,
+    )))
 }
 
 #[derive(Debug)]
@@ -78,8 +204,6 @@ pub enum UpstreamBodyKind {
     OpenAiChat,
     /// Upstream spoke Responses; convert to chat for chat clients.
     OpenAiResponses,
-    /// Upstream spoke Anthropic; convert to chat for chat clients.
-    Anthropic,
     /// Antigravity generateContent envelope.
     Antigravity,
 }
@@ -100,20 +224,25 @@ fn provider_id_for(target: &ResolvedTarget) -> Option<String> {
         .filter(|s| !s.is_empty())
 }
 
+/// Forward a chat-shaped request. `native_responses` is the client's original
+/// Responses body; Responses upstreams receive it (items intact) instead of `body`.
 pub async fn forward_chat_completions(
     state: &ProxyState,
     target: &ResolvedTarget,
     body: Bytes,
+    native_responses: Option<&Bytes>,
     stream: bool,
     cancel: &CancellationToken,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
-    forward_chat_completions_inner(state, target, body, stream, cancel, true).await
+    forward_chat_completions_inner(state, target, body, native_responses, stream, cancel, true)
+        .await
 }
 
 async fn forward_chat_completions_inner(
     state: &ProxyState,
     target: &ResolvedTarget,
     body: Bytes,
+    native_responses: Option<&Bytes>,
     stream: bool,
     cancel: &CancellationToken,
     allow_401_refresh: bool,
@@ -136,6 +265,21 @@ async fn forward_chat_completions_inner(
     let profile = provider_key.as_deref().and_then(providers::resolve);
 
     if let Some(p) = profile {
+        // Rows written before the allowlist existed are checked again here.
+        if !providers::base_url_allowed(
+            p,
+            &target.connection.base_url,
+            &state.provider_base_overrides,
+        ) {
+            return Err(UpstreamAttemptError {
+                status: 500,
+                body: format!(
+                    "connection '{}' has a base_url not allowed for provider '{}'; fix it in the admin UI",
+                    target.connection.name, p.id
+                ),
+                retryable: false,
+            });
+        }
         if p.format == UpstreamFormat::Stub {
             return Err(UpstreamAttemptError {
                 status: 501,
@@ -149,6 +293,7 @@ async fn forward_chat_completions_inner(
     }
 
     let client_stream = stream;
+    let mut cache_key: Option<String> = None;
     let (url, wire_body, body_kind, extra_headers, auth, upstream_stream, reassemble) =
         if let Some(p) = profile {
             let url = providers::build_upstream_url(p, &target.connection.base_url);
@@ -171,27 +316,32 @@ async fn forward_chat_completions_inner(
             let (wire, kind) = match p.format {
                 UpstreamFormat::OpenAiChat => (prepared, UpstreamBodyKind::OpenAiChat),
                 UpstreamFormat::OpenAiResponses => {
-                    match responses::chat_to_responses_request(&prepared) {
+                    let converted = match native_responses {
+                        Some(native) => {
+                            responses::prepare_native_request(native, &target.upstream_model, force)
+                        }
+                        None => responses::chat_to_responses_request(&prepared),
+                    };
+                    let converted = match converted {
+                        Ok(b) if p.id == "siwc" => crate::siwc::sanitize_request(&b),
+                        other => other,
+                    };
+                    match converted {
                         Ok(b) => {
                             let b = if force {
                                 force_json_stream_true(&b).unwrap_or(b)
                             } else {
                                 b
                             };
+                            let b = if p.id == "siwc" {
+                                let (b, key) = prompt_cache::ensure_prompt_cache_key(&b);
+                                cache_key = key;
+                                b
+                            } else {
+                                b
+                            };
                             (b, UpstreamBodyKind::OpenAiResponses)
                         }
-                        Err(e) => {
-                            return Err(UpstreamAttemptError {
-                                status: 400,
-                                body: e.to_string(),
-                                retryable: false,
-                            });
-                        }
-                    }
-                }
-                UpstreamFormat::AnthropicMessages => {
-                    match claude::openai_to_anthropic_request(&prepared) {
-                        Ok(b) => (b, UpstreamBodyKind::Anthropic),
                         Err(e) => {
                             return Err(UpstreamAttemptError {
                                 status: 400,
@@ -225,10 +375,11 @@ async fn forward_chat_completions_inner(
                         }
                     }
                 }
-                UpstreamFormat::CursorAgent => {
+                UpstreamFormat::CursorAgent | UpstreamFormat::ClaudeCode => {
                     return Err(UpstreamAttemptError {
                         status: 500,
-                        body: "cursor agent path should be handled before generic forward".into(),
+                        body: "cursor / claude code paths are handled before the HTTP forward"
+                            .into(),
                         retryable: false,
                     });
                 }
@@ -293,25 +444,14 @@ async fn forward_chat_completions_inner(
         req = req.header("authorization", a);
     }
     for (k, v) in extra_headers {
-        // Skip empty placeholders (e.g. chatgpt-account-id filled from meta below).
         if v.is_empty() {
             continue;
         }
         req = req.header(*k, *v);
     }
-    // Codex ChatGPT accounts often need chatgpt-account-id header from import meta.
-    if let Some(meta) = target
-        .connection
-        .oauth
-        .as_ref()
-        .and_then(|o| o.meta.as_deref())
-    {
-        if let Ok(m) = serde_json::from_str::<serde_json::Value>(meta) {
-            if let Some(aid) = m.get("account_id").and_then(|a| a.as_str()) {
-                if !aid.is_empty() {
-                    req = req.header("ChatGPT-Account-Id", aid);
-                }
-            }
+    if let Some(key) = &cache_key {
+        for (k, v) in prompt_cache::session_headers(key) {
+            req = req.header(k, v);
         }
     }
     // OpenCode Go requires x-opencode-session for routing (see opencode.ai/docs/go).
@@ -361,6 +501,7 @@ async fn forward_chat_completions_inner(
                         state,
                         &retry_target,
                         body,
+                        native_responses,
                         stream,
                         cancel,
                         false,
@@ -402,7 +543,6 @@ fn convert_upstream_to_chat(bytes: Bytes, kind: UpstreamBodyKind, model: &str) -
     match kind {
         UpstreamBodyKind::OpenAiChat => Ok(bytes),
         UpstreamBodyKind::OpenAiResponses => responses::responses_body_to_chat(&bytes),
-        UpstreamBodyKind::Anthropic => claude::anthropic_to_openai_response(&bytes),
         UpstreamBodyKind::Antigravity => crate::agy::agy_to_chat_response(&bytes, model),
     }
 }
@@ -439,57 +579,6 @@ async fn resolve_agy_project(state: &ProxyState, target: &ResolvedTarget) -> App
             .update_oauth_meta(&target.connection.id, &meta_v.to_string());
     }
     Ok(project)
-}
-
-/// Collect Responses SSE text deltas into a synthetic Responses JSON body.
-fn reassemble_responses_sse(raw: &str) -> Bytes {
-    let mut text = String::new();
-    let mut model = "unknown".to_string();
-    for line in raw.lines() {
-        let Some(data) = line.strip_prefix("data:") else {
-            continue;
-        };
-        let data = data.trim();
-        if data.is_empty() || data == "[DONE]" {
-            continue;
-        }
-        let Ok(v) = serde_json::from_str::<Value>(data) else {
-            continue;
-        };
-        if let Some(m) = v.pointer("/response/model").and_then(|m| m.as_str()) {
-            model = m.to_string();
-        }
-        if let Some(m) = v.get("model").and_then(|m| m.as_str()) {
-            model = m.to_string();
-        }
-        // response.output_text.delta
-        if let Some(d) = v.get("delta").and_then(|d| d.as_str()) {
-            text.push_str(d);
-        }
-        if let Some(d) = v.pointer("/delta/text").and_then(|d| d.as_str()) {
-            text.push_str(d);
-        }
-        // sometimes nested
-        if v.get("type").and_then(|t| t.as_str()) == Some("response.output_text.delta") {
-            if let Some(d) = v.get("delta").and_then(|d| d.as_str()) {
-                // already added
-                let _ = d;
-            }
-        }
-    }
-    let body = serde_json::json!({
-        "id": "resp_reassembled",
-        "object": "response",
-        "model": model,
-        "status": "completed",
-        "output": [{
-            "type": "message",
-            "role": "assistant",
-            "content": [{"type": "output_text", "text": text}]
-        }],
-        "usage": {"input_tokens": 0, "output_tokens": 0}
-    });
-    Bytes::from(serde_json::to_vec(&body).unwrap_or_default())
 }
 
 /// Order targets: skip cooled; apply round-robin rotation when strategy is round_robin.
@@ -638,7 +727,38 @@ pub async fn handle_chat_with_fallback(
             }
         }
 
-        match forward_chat_completions(state, target, body.clone(), stream, &cancel).await {
+        if is_claude_code(target) {
+            match claude_code_attempt(
+                state,
+                target,
+                &body,
+                public_model,
+                stream,
+                ClientProto::Chat,
+                &cancel,
+                start,
+            )
+            .await
+            {
+                Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
+                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                    cancel_guard.disarm();
+                    return stream_body(run.into_stream(), state.sse_stall_secs, mode).await;
+                }
+                Err(e) => {
+                    record_failure(state, public_model, target, &e, start);
+                    if e.retryable && idx + 1 < targets.len() {
+                        last_err = Some(e);
+                        continue;
+                    }
+                    return Err(AppError::Upstream {
+                        status: e.status,
+                        body: e.body,
+                    });
+                }
+            }
+        }
+        match forward_chat_completions(state, target, body.clone(), None, stream, &cancel).await {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
@@ -654,25 +774,17 @@ pub async fn handle_chat_with_fallback(
                         None,
                     );
                     cancel_guard.disarm();
-                    return stream_response(
-                        fwd.response,
-                        state.sse_stall_secs,
-                        StreamMode::Passthrough,
-                    )
-                    .await;
-                } else {
-                    let bytes = read_bytes_cancel(fwd.response, &cancel).await?;
-                    let bytes = if fwd.reassemble_stream {
-                        let raw = String::from_utf8_lossy(&bytes);
-                        match fwd.body_kind {
-                            UpstreamBodyKind::OpenAiResponses => reassemble_responses_sse(&raw),
-                            _ => bytes,
+                    let mode = match fwd.body_kind {
+                        UpstreamBodyKind::OpenAiResponses => {
+                            StreamMode::ResponsesToChat(public_model.to_string())
                         }
-                    } else {
-                        bytes
+                        _ => StreamMode::Passthrough,
                     };
-                    let bytes =
-                        convert_upstream_to_chat(bytes, fwd.body_kind, &target.upstream_model)?;
+                    return stream_response(fwd.response, state.sse_stall_secs, mode).await;
+                } else {
+                    let kind = fwd.body_kind;
+                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&bytes);
                     let cost = estimate_cost(
                         pt,
@@ -762,7 +874,39 @@ pub async fn handle_anthropic_messages(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
-        match forward_chat_completions(state, target, oai_body.clone(), stream, &cancel).await {
+        if is_claude_code(target) {
+            match claude_code_attempt(
+                state,
+                target,
+                &oai_body,
+                public_model,
+                stream,
+                ClientProto::Anthropic,
+                &cancel,
+                start,
+            )
+            .await
+            {
+                Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
+                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                    cancel_guard.disarm();
+                    return stream_body(run.into_stream(), state.sse_stall_secs, mode).await;
+                }
+                Err(e) => {
+                    record_failure(state, public_model, target, &e, start);
+                    if e.retryable && idx + 1 < targets.len() {
+                        last_err = Some(e);
+                        continue;
+                    }
+                    return Err(AppError::Upstream {
+                        status: e.status,
+                        body: e.body,
+                    });
+                }
+            }
+        }
+        match forward_chat_completions(state, target, oai_body.clone(), None, stream, &cancel).await
+        {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
@@ -780,15 +924,18 @@ pub async fn handle_anthropic_messages(
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
                         UpstreamBodyKind::OpenAiChat => {
-                            StreamMode::Anthropic(public_model.to_string())
+                            StreamMode::ChatToAnthropic(public_model.to_string())
+                        }
+                        UpstreamBodyKind::OpenAiResponses => {
+                            StreamMode::ResponsesToAnthropic(public_model.to_string())
                         }
                         _ => StreamMode::Passthrough,
                     };
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
-                    let bytes = read_bytes_cancel(fwd.response, &cancel).await?;
-                    let chat =
-                        convert_upstream_to_chat(bytes, fwd.body_kind, &target.upstream_model)?;
+                    let kind = fwd.body_kind;
+                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let chat = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&chat);
                     let cost = estimate_cost(
                         pt,
@@ -873,7 +1020,47 @@ pub async fn handle_responses(
             return Err(AppError::BadRequest("client disconnected".into()));
         }
         let start = Instant::now();
-        match forward_chat_completions(state, target, chat_body.clone(), stream, &cancel).await {
+        if is_claude_code(target) {
+            match claude_code_attempt(
+                state,
+                target,
+                &chat_body,
+                public_model,
+                stream,
+                ClientProto::Responses,
+                &cancel,
+                start,
+            )
+            .await
+            {
+                Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
+                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                    cancel_guard.disarm();
+                    return stream_body(run.into_stream(), state.sse_stall_secs, mode).await;
+                }
+                Err(e) => {
+                    record_failure(state, public_model, target, &e, start);
+                    if e.retryable && idx + 1 < targets.len() {
+                        last_err = Some(e);
+                        continue;
+                    }
+                    return Err(AppError::Upstream {
+                        status: e.status,
+                        body: e.body,
+                    });
+                }
+            }
+        }
+        match forward_chat_completions(
+            state,
+            target,
+            chat_body.clone(),
+            Some(&body),
+            stream,
+            &cancel,
+        )
+        .await
+        {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
@@ -890,14 +1077,16 @@ pub async fn handle_responses(
                     );
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
-                        UpstreamBodyKind::OpenAiChat => StreamMode::Responses,
+                        UpstreamBodyKind::OpenAiChat => StreamMode::ChatToResponses,
+                        // Responses upstream: native SSE goes through unchanged.
                         _ => StreamMode::Passthrough,
                     };
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
-                    let bytes = read_bytes_cancel(fwd.response, &cancel).await?;
+                    let kind = fwd.body_kind;
+                    let bytes = read_forward_body(fwd, &cancel).await?;
                     // If upstream already returned Responses, pass through; else wrap chat.
-                    let out = match fwd.body_kind {
+                    let out = match kind {
                         UpstreamBodyKind::OpenAiResponses => bytes,
                         other => {
                             let chat =
@@ -977,13 +1166,46 @@ async fn read_bytes_cancel(
     }
 }
 
+/// Read a non-stream upstream body; a forced-stream Responses transcript is folded
+/// back into one Responses JSON body.
+async fn read_forward_body(fwd: ForwardOk, cancel: &CancellationToken) -> AppResult<Bytes> {
+    let reassemble = fwd.reassemble_stream;
+    let kind = fwd.body_kind;
+    let bytes = read_bytes_cancel(fwd.response, cancel).await?;
+    if !matches!(kind, UpstreamBodyKind::OpenAiResponses) || !reassemble {
+        return Ok(bytes);
+    }
+    let body = responses::reassemble_sse(&String::from_utf8_lossy(&bytes));
+    // A stream that ended in response.failed is an error, not an empty answer.
+    let v: Value = serde_json::from_slice(&body).unwrap_or(Value::Null);
+    if v.get("status").and_then(|s| s.as_str()) == Some("failed") {
+        let err = v.get("error").cloned().unwrap_or(Value::Null);
+        let code = err.get("code").and_then(|c| c.as_str()).unwrap_or("");
+        let status = if crate::siwc::is_usage_limit_code(code) {
+            429
+        } else {
+            502
+        };
+        return Err(AppError::Upstream {
+            status,
+            body: json!({"error": err}).to_string(),
+        });
+    }
+    Ok(body)
+}
+
+/// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.
 fn extract_usage_tokens(bytes: &Bytes) -> (Option<i64>, Option<i64>) {
     let Ok(v) = serde_json::from_slice::<Value>(bytes) else {
         return (None, None);
     };
-    let pt = v.pointer("/usage/prompt_tokens").and_then(|n| n.as_i64());
+    let pt = v
+        .pointer("/usage/prompt_tokens")
+        .or_else(|| v.pointer("/usage/input_tokens"))
+        .and_then(|n| n.as_i64());
     let ct = v
         .pointer("/usage/completion_tokens")
+        .or_else(|| v.pointer("/usage/output_tokens"))
         .and_then(|n| n.as_i64());
     (pt, ct)
 }
@@ -1015,8 +1237,109 @@ fn json_bytes_response(status: StatusCode, bytes: Bytes) -> Response {
 
 enum StreamMode {
     Passthrough,
-    Anthropic(String),
-    Responses,
+    /// Chat chunks → Anthropic events (model name for message_start).
+    ChatToAnthropic(String),
+    /// Chat chunks → Responses events.
+    ChatToResponses,
+    /// Responses events → chat chunks.
+    ResponsesToChat(String),
+    /// Responses events → chat chunks → Anthropic events.
+    ResponsesToAnthropic(String),
+    /// Anthropic events → chat chunks.
+    AnthropicToChat(String),
+    /// Anthropic events → chat chunks → Responses events.
+    AnthropicToResponses(String),
+}
+
+/// Re-encodes one upstream SSE `data:` payload at a time into client SSE records.
+trait SseConvert: Send {
+    fn on_data(&mut self, data: &str) -> Vec<String>;
+    /// Upstream ended (with or without a terminal event).
+    fn on_end(&mut self) -> Vec<String>;
+}
+
+struct ChatToAnthropic(StreamTranslateState);
+
+impl SseConvert for ChatToAnthropic {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        claude::openai_sse_chunk_to_anthropic(data, &mut self.0)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        claude::openai_sse_chunk_to_anthropic("[DONE]", &mut self.0)
+    }
+}
+
+struct ChatToResponses(bool);
+
+impl SseConvert for ChatToResponses {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        responses::chat_sse_to_responses_events(data, &mut self.0)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        Vec::new()
+    }
+}
+
+impl SseConvert for responses::ResponsesToChatStream {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        responses::ResponsesToChatStream::on_data(self, data)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        responses::ResponsesToChatStream::on_end(self)
+    }
+}
+
+impl SseConvert for claude::AnthropicToChatStream {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        claude::AnthropicToChatStream::on_data(self, data)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        claude::AnthropicToChatStream::on_end(self)
+    }
+}
+
+/// Two converters in series; the first emits `data: ...` records.
+struct Chain<A, B>(A, B);
+
+impl<A: SseConvert, B: SseConvert> Chain<A, B> {
+    fn feed(&mut self, records: Vec<String>) -> Vec<String> {
+        records
+            .iter()
+            .filter_map(|r| r.strip_prefix("data: "))
+            .flat_map(|d| self.1.on_data(d))
+            .collect()
+    }
+}
+
+impl<A: SseConvert, B: SseConvert> SseConvert for Chain<A, B> {
+    fn on_data(&mut self, data: &str) -> Vec<String> {
+        let mid = self.0.on_data(data);
+        self.feed(mid)
+    }
+    fn on_end(&mut self) -> Vec<String> {
+        let mid = self.0.on_end();
+        let mut out = self.feed(mid);
+        out.extend(self.1.on_end());
+        out
+    }
+}
+
+fn converter(mode: StreamMode) -> Option<Box<dyn SseConvert>> {
+    Some(match mode {
+        StreamMode::Passthrough => return None,
+        StreamMode::ChatToAnthropic(m) => Box::new(ChatToAnthropic(StreamTranslateState::new(m))),
+        StreamMode::ChatToResponses => Box::new(ChatToResponses(false)),
+        StreamMode::ResponsesToChat(m) => Box::new(responses::ResponsesToChatStream::new(m)),
+        StreamMode::ResponsesToAnthropic(m) => Box::new(Chain(
+            responses::ResponsesToChatStream::new(m.clone()),
+            ChatToAnthropic(StreamTranslateState::new(m)),
+        )),
+        StreamMode::AnthropicToChat(m) => Box::new(claude::AnthropicToChatStream::new(m)),
+        StreamMode::AnthropicToResponses(m) => Box::new(Chain(
+            claude::AnthropicToChatStream::new(m),
+            ChatToResponses(false),
+        )),
+    })
 }
 
 /// Stream upstream SSE with stall timeout. Dropping the body stops polling upstream.
@@ -1025,89 +1348,74 @@ async fn stream_response(
     stall_secs: u64,
     mode: StreamMode,
 ) -> AppResult<Response> {
-    let status = StatusCode::from_u16(resp.status().as_u16()).unwrap_or(StatusCode::OK);
+    stream_body(resp.bytes_stream(), stall_secs, mode).await
+}
+
+/// SSE body from any byte stream (HTTP upstream or a Claude Code run).
+async fn stream_body<S, E>(upstream: S, stall_secs: u64, mode: StreamMode) -> AppResult<Response>
+where
+    S: futures_util::Stream<Item = Result<Bytes, E>> + Send + 'static,
+    E: std::fmt::Display + Send + 'static,
+{
+    let status = StatusCode::OK;
     let stall = Duration::from_secs(stall_secs.max(5));
-    let mut upstream = resp.bytes_stream();
+    let mut upstream = Box::pin(upstream);
+    let mut conv = converter(mode);
 
     let byte_stream = async_stream::stream! {
-        match mode {
-            StreamMode::Anthropic(model) => {
-                let mut state = StreamTranslateState::new(model);
-                let mut buf = String::new();
-                loop {
-                    match timeout(stall, upstream.next()).await {
-                        Ok(Some(Ok(chunk))) => {
-                            buf.push_str(&String::from_utf8_lossy(&chunk));
-                            while let Some(pos) = buf.find('\n') {
-                                let mut line = buf[..pos].to_string();
-                                buf = buf[pos + 1..].to_string();
-                                if line.ends_with('\r') { line.pop(); }
-                                if let Some(data) = line.strip_prefix("data:") {
-                                    let data = data.trim_start().strip_prefix(' ').unwrap_or(data.trim_start());
-                                    for ev in claude::openai_sse_chunk_to_anthropic(data, &mut state) {
-                                        yield Ok::<Bytes, std::io::Error>(Bytes::from(format!("{ev}\n\n")));
-                                    }
-                                }
+        // Bytes until the last newline (SSE lines may split across chunks, even
+        // inside a UTF-8 sequence).
+        let mut buf: Vec<u8> = Vec::new();
+        loop {
+            match timeout(stall, upstream.next()).await {
+                Ok(Some(Ok(chunk))) => {
+                    let Some(conv) = conv.as_mut() else {
+                        yield Ok::<Bytes, std::io::Error>(chunk);
+                        continue;
+                    };
+                    buf.extend_from_slice(&chunk);
+                    let Some(last_nl) = buf.iter().rposition(|b| *b == b'\n') else {
+                        continue;
+                    };
+                    let rest = buf.split_off(last_nl + 1);
+                    let complete = std::mem::replace(&mut buf, rest);
+                    let mut out = String::new();
+                    for line in String::from_utf8_lossy(&complete).lines() {
+                        if let Some(data) = line.strip_prefix("data:") {
+                            for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                                out.push_str(&rec);
+                                out.push_str("\n\n");
                             }
                         }
-                        Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
-                        Ok(None) => {
-                            if !state.message_stop_sent {
-                                for ev in claude::openai_sse_chunk_to_anthropic("[DONE]", &mut state) {
-                                    yield Ok(Bytes::from(format!("{ev}\n\n")));
-                                }
-                            }
-                            break;
-                        }
-                        Err(_) => {
-                            warn!("SSE stall timeout");
-                            yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
-                            break;
-                        }
+                    }
+                    if !out.is_empty() {
+                        yield Ok(Bytes::from(out));
                     }
                 }
-            }
-            StreamMode::Responses => {
-                let mut started = false;
-                let mut buf = String::new();
-                loop {
-                    match timeout(stall, upstream.next()).await {
-                        Ok(Some(Ok(chunk))) => {
-                            buf.push_str(&String::from_utf8_lossy(&chunk));
-                            while let Some(pos) = buf.find('\n') {
-                                let mut line = buf[..pos].to_string();
-                                buf = buf[pos + 1..].to_string();
-                                if line.ends_with('\r') { line.pop(); }
-                                if let Some(data) = line.strip_prefix("data:") {
-                                    let data = data.trim_start().strip_prefix(' ').unwrap_or(data.trim_start());
-                                    for ev in responses::chat_sse_to_responses_events(data, &mut started) {
-                                        yield Ok::<Bytes, std::io::Error>(Bytes::from(format!("{ev}\n\n")));
-                                    }
-                                }
+                Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
+                Ok(None) => {
+                    if let Some(conv) = conv.as_mut() {
+                        let mut out = String::new();
+                        if let Some(data) = String::from_utf8_lossy(&buf).trim_end().strip_prefix("data:") {
+                            for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                                out.push_str(&rec);
+                                out.push_str("\n\n");
                             }
                         }
-                        Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
-                        Ok(None) => break,
-                        Err(_) => {
-                            warn!("SSE stall timeout");
-                            yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
-                            break;
+                        for rec in conv.on_end() {
+                            out.push_str(&rec);
+                            out.push_str("\n\n");
+                        }
+                        if !out.is_empty() {
+                            yield Ok(Bytes::from(out));
                         }
                     }
+                    break;
                 }
-            }
-            StreamMode::Passthrough => {
-                loop {
-                    match timeout(stall, upstream.next()).await {
-                        Ok(Some(Ok(chunk))) => { yield Ok::<Bytes, std::io::Error>(chunk); }
-                        Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
-                        Ok(None) => break,
-                        Err(_) => {
-                            warn!("SSE stall timeout");
-                            yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
-                            break;
-                        }
-                    }
+                Err(_) => {
+                    warn!("SSE stall timeout");
+                    yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
+                    break;
                 }
             }
         }

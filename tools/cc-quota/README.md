@@ -10,7 +10,7 @@
 
 Claude Code 額度的 pacing 監控。每小時在本機採集一次額度快照並寫入 SQLite，另有只讀資料庫的報表指令；消耗速度偏離時間進度時才發 macOS 通知。目的是讓人自己決定下一步派什麼任務，而不是替人決定。
 
-**Status:** M1離線可靠性已合併（28項測試及CLI→SQLite→report流程）；[M1證據](docs/tasks/verification-20261023.md)。M2新增憑證邊界回歸，本機35項測試通過；Python3.11雙平台CI與3項原生Mac邊界結果見[M2證據](docs/tasks/macos-boundaries-20261023.md)。**真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器上驗證**，見 [quickstart](docs/quickstart.md)。
+**Status:** M1離線可靠性已合併（28項測試及CLI→SQLite→report流程）；[M1證據](docs/tasks/verification-20261023.md)。M2新增憑證邊界回歸，Python3.11 Linux／macOS各35項測試及3項原生Mac邊界測試通過；結果見[M2證據](docs/tasks/macos-boundaries-20261023.md)。**真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器上驗證**，見 [quickstart](docs/quickstart.md)。
 
 ## 設計
 

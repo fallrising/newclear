@@ -30,10 +30,25 @@ CI維持10分鐘job timeout，使用標準`ubuntu-latest`／`macos-15`及repo既
 2. 使用隔離HOME與假的launchctl執行真install.sh，再由`/usr/bin/plutil`解析產出的plist，不註冊工作。
 3. 攔截查詢參數，只將service換成不可預測的不存在名稱，使用真`/usr/bin/security`驗證查詢失敗及不fallback。絕不查詢真的Claude service、修改search list或建立keychain。
 
-本機Linux未執行原生Mac測試；GitHub CI結果待PR後回填。不可把未跑寫成通過。
+本機Linux未執行原生Mac測試；GitHub macOS runner已實際執行通過，詳如下表。
 
 ## 審查、交付與剩餘缺口
 
-獨立審查與PR CI尚待完成，結果由本紀錄及[任務板](BOARD.md)更新。AC03真人登入／Keychain成功取用／usage對照，以及AC04真launchd hourly、可見通知與睡眠恢復仍blocked；CI上的合成輸入不能替代。無部署／release／usable tag。
+獨立T995審查對修正後程式／測試範圍ACCEPT，報告保留PARTIAL及首次CI失敗；root已讀取實際CI日誌補足平台證據。發布狀態由[任務板](BOARD.md)記錄。AC03真人登入／Keychain成功取用／usage對照，以及AC04真launchd hourly、可見通知與睡眠恢復仍blocked；CI上的合成輸入不能替代。無部署／release／usable tag。
 
 首次[CI run 39886075939](https://github.com/fallrising/newclear/actions/runs/39886075939)在工作流程載入時失敗、jobs為空，未執行測試。job-level env不能引用runner context；依[官方context範圍](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)移到兩個Python測試step，保留runner.temp隔離。
+
+## CI與整合證據
+
+測試head `22fcd708937f2ba59f0a151cb74aafbdfb3e7127`；已整合main `77d8262265dd88e8db1b01c7995a70e9b357dd04`，僅PLAN附加紀錄衝突，保留兩方內容。後續文件提交不改以下runtime/tests/workflow，SHA256見 [M2 manifest](../../../../.team/cc-quota/evidence/m2-manifest.json)。合併仍須最終head的CI通過。
+
+| 環境／檢查 | 實際結果 | 證據 |
+| --- | --- | --- |
+| Ubuntu CPython3.11.17 | 35 offline tests、bash syntax PASS | [CI](https://github.com/fallrising/newclear/actions/runs/39886434932/job/120195578861) |
+| macOS15 CPython3.11.9 | 35 offline tests、bash syntax、3 native tests PASS | [CI](https://github.com/fallrising/newclear/actions/runs/39886434932/job/120195578463) |
+| Repo契約 | 41 contracts/index PASS | [CI](https://github.com/fallrising/newclear/actions/runs/39886434864) |
+| 本地main整合後 | 35 tests、syntax、41 contracts/index、diff PASS | workspace `m2-integrated/preserve/evidence/` |
+
+Root使用 `gh run view --json` 與 `gh run view --log` 實際回讀；完整日誌保留於workspace `m2-ci-evidence-retry/preserve/evidence/`。首次sandbox讀取失敗後正常授權路徑重試成功，沒有把失敗當作通過。Reviewer報告：[T995](../../../../.team/cc-quota/reports/T-995.md)。
+
+Root evidence gate：接受本次憑證／平台邊界里程碑；初始workflow錯誤已修正並原生實測，AC03／04真人主線仍pending。PR [#510](https://github.com/fallrising/newclear/pull/510)完成最終CI及合併後才在下一個board-only PR關閉T0995列。

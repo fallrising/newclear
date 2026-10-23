@@ -26,7 +26,7 @@ Owner 已啟用 START_DEVELOPMENT_PROMPT；恢復既有 AC-01–04，不新增 q
 AC-03／04 必須另有真實已登入 Mac、Keychain、launchd與通知證據；Linux或mock不能替代。
 初輪只做本機修復；owner後續已明確授權commit／push／PR／merge。release／正式部署不在授權內。進度見 [任務板](docs/tasks/BOARD.md)。
 
-## 下一里程碑：macOS邊界與Python3.11 CI
+## M2里程碑：macOS邊界與Python3.11 CI
 
 Owner要求持續開發，完成里程碑即提交並合併PR。範圍：Mac Keychain失敗不得切換檔案來源、憑證schema／token驗證與安全診斷；Python3.11 Linux／macOS CI，以及原生AppleScript編譯、plist解析與不存在的合成Keychain service查詢。
 先用失敗案例再修正，保留Linux與macOS各自的實際結果。CI不登入Claude、不讀真人憑證、不呼叫usage、不安裝真launchd工作或發送通知；原AC03／04的真實使用者驗收不變。
@@ -63,7 +63,7 @@ DB預設 `~/.local/share/cc-quota/quota.db`，可由CC_QUOTA_DB指定。
 真憑證與raw資料不應放入公開驗收證據。
 
 M1由7項baseline擴充至28項離線測試，已合併PR502／503；另跑CLI fixture、bash syntax與repo契約。
-M2本機35項測試通過；Python3.11 Linux／macOS與原生邊界結果見[M2證據](docs/tasks/macos-boundaries-20261023.md)。
+M2本機及Python3.11 Linux／macOS各35項測試通過，Mac另3項原生邊界通過；結果見[M2證據](docs/tasks/macos-boundaries-20261023.md)。
 M1與M2本機執行版本為Python3.13.5（Linux）；M1沒有3.11／Mac runtime證據。M2的CI證據另列，不能把平台工具測試當成真人主線驗收。
 [本次證據](docs/tasks/verification-20261023.md)列出 RED／GREEN、命令與未跑原因；獨立審查結果同處更新。
 歷史命令與結果保留原來源，不以文件盤點日期覆蓋實測日期。

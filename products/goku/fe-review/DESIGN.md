@@ -46,22 +46,32 @@
 
 ## 啟動方式（第 2 輪要驗證的版本）
 
-在 PROTOCOL 第 0 節的隔離環境內（`products/goku/web`）：
+以下程序尚未執行。在 PROTOCOL 第 0 節的獨立 network namespace 內，
+瀏覽器與服務同處、只綁 loopback；建置與資料放共用 launcher 的 task 目錄。
+從 `products/goku/web` 操作；先在 `AGENT_BUILD_DIR/goku-review/db.json` 建立一次性合成資料，
+使用固定 ID／時間、本機 favicon fixture，不能讀取真實書籤或覆寫來源樹資料。
+`getFaviconUrl` 使用 hostname 而不保留自訂 port；fixture 須明確提供本機圖片 URL，
+更新書籤 URL 時產生的本機 `/favicon.ico` 由測試瀏覽器回傳固定圖片，禁止外網 fallback，
+不可假設書籤的 dev port 會保留。未攔截的 request 仍是待修正的驗收失敗。
 
 ```sh
 npm ci
-npm run mock          # json-server 於 3001，資料取自 mock/db.json（合成資料）
-npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
+./node_modules/.bin/json-server --watch "$AGENT_BUILD_DIR/goku-review/db.json" --routes mock/routes.json --host 127.0.0.1 --port 3001
+VITE_API_URL=http://127.0.0.1:3001/api npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-`mock/db.json` 被 json-server `--watch` 寫入；第 3 輪先複製到 `fe-review/runs/.state/` 再指向該副本，避免改動提交的 fixture。第 2 輪驗證後同步到 `targets.json`。
+`npm run mock` 沒有明確 loopback 且會寫來源樹 `mock/db.json`，不直接用作驗收啟動程序。
+`targets.json` 的 start 只啟動 Vite，不管理 mock；須先確認 mock 就緒與合成資料，
+實際跑通後才更新 verified。`web/mock/routes.json:2` 的 `/api/bookmarks` 與
+`api/cmd/api/main.go:30` 的 `/api/v1` 不同，mock 成功不代表真 API path／schema 已修復。
 
 ## 第 3 輪驗收
 
-- 頁面與流程：`/`（唯一路由）；以互動腳本擷取：搜尋有結果／無結果、側欄切換分類、開啟 Tiptap 編輯器並儲存、卡片選單、API 失敗狀態（M3）。
+- 頁面與流程：`/`（唯一路由）；以互動腳本擷取：搜尋有結果／無結果、側欄切換分類、開啟原生編輯表單並儲存、卡片選單、API 失敗狀態（M3）。`BookmarkEditor.tsx:11` 使用 input／textarea，未接線 Tiptap；`bookmarkStore.ts:60` 目前未套用篩選，不能把控制項存在當作流程通過。實測發現依 REVIEW 記錄，未通過不得宣告本輪完成。
 - 通過條件：無 blocker／major；axe 無 critical／serious；desktop／tablet／mobile 無水平溢出；console 除 M3 刻意觸發的失敗外無 error。
-- 已知不在驗收範圍：Go API 與 MQTT consumer 的真實整合。書籤 favicon 直接取自各網站（`src/lib/utils.ts:26`、`mock/db.json`），隔離環境離線時這些請求失敗屬預期，REPORT 註明而不計入失敗 request。
+- 已知不在驗收範圍：Go API 與 MQTT consumer 的真實整合。`src/lib/utils.ts:26` 會從書籤 URL 產生 favicon；fixture URL 與圖片必須指向本機，禁止把外網 request 當作可忽略的驗收例外。
 
 ## 開放問題
 
-無。
+D2／D3 與 SDD AC-15 的 owner 確認仍待記錄。此輪文件合併授權不將假設改為已決定；
+第 2 輪須先滿足 REVIEW 的進入條件。新增資料／互動腳本尚未存在，啟動命令是待驗證程序。

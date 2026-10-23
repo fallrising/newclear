@@ -53,4 +53,4 @@ React 18、Vite 5、Tailwind 3；PROTOCOL 禁止未經提議升級 major 版本�
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- 設計 PR（本次）：`DESIGN.md` 與本檔、`PROMPT.md`、`targets.json` 的修正。
+- [#551](https://github.com/fallrising/newclear/pull/551)：`DESIGN.md` 與本檔、`PROMPT.md`、`targets.json` 的修正；D2／D3 與 AC-15 仍待確認。

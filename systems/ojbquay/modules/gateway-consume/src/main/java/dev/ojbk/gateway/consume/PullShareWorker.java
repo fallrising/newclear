@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,8 +35,8 @@ public final class PullShareWorker implements PullWorker {
     private final Clock clock;
     private final ConsumeMetrics metrics;
     private final LinkedBlockingDeque<PullDelivery> available;
-    private final ConcurrentLinkedQueue<AckCommand> commands =
-            new ConcurrentLinkedQueue<>();
+    private final LinkedBlockingQueue<AckCommand> commands =
+            new LinkedBlockingQueue<>(PullSubscriptionSpec.MAX_INFLIGHT);
     private final Map<PullRecordId, ActiveDelivery> byRecord = new HashMap<>();
     private final Map<String, ActiveDelivery> byToken = new HashMap<>();
     private final Map<PullRecordId, PullDisposition> automatic = new HashMap<>();
@@ -142,13 +142,17 @@ public final class PullShareWorker implements PullWorker {
         }
 
         AckCommand command = new AckCommand(ack, nack);
-        commands.add(command);
+        if (!commands.offer(command)) {
+            return PullAckResult.unavailable();
+        }
         try {
             return command.result().get(timeout.toNanos(), TimeUnit.NANOSECONDS);
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
+            commands.remove(command);
             return PullAckResult.unavailable();
         } catch (java.util.concurrent.ExecutionException | TimeoutException failure) {
+            commands.remove(command);
             return PullAckResult.unavailable();
         }
     }
@@ -185,6 +189,10 @@ public final class PullShareWorker implements PullWorker {
 
     public int inflightCount() {
         return inflight.get();
+    }
+
+    int queuedAckCommands() {
+        return commands.size();
     }
 
     private void run() {

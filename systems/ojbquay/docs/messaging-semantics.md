@@ -4,8 +4,10 @@
 
 A successful synchronous send means the producer gateway received a successful
 Kafka acknowledgement. It does not mean a consumer processed the message.
-Gateway retries are bounded by the client deadline and only cover classified
-transient broker failures.
+The gateway waits for the Kafka acknowledgement up to the producer delivery
+timeout (120 s); it does not shorten that wait to the client's RPC deadline.
+A client that times out must treat the outcome as unknown; retrying may
+duplicate the message, which the at-least-once contract already allows.
 
 ## Delivery
 
@@ -81,7 +83,10 @@ explicitly accepts the same amount of possible early delivery.
 
 ## Offset Reset
 
-The broker offset is the source of truth. Reset requires the subscription to be
-paused, all runtimes to confirm fetch has stopped, inflight work to drain or be
-explicitly abandoned, the target to be previewed, authorization, execution,
-verification, and an audited resume. The pause confirmation is a hard gate.
+The broker offset is the source of truth. Reset requires authorization, the
+subscription to be paused, all runtimes to confirm fetch has stopped and
+inflight work has settled, an empty broker group, and the maintenance fence.
+The control plane then computes the target, alters, reads every partition back,
+audits, and resumes; the response is the verified offsets. The pause
+confirmation is a hard gate. If the alter outcome is unknown, the subscription
+stays paused and fenced until an operator resolves it (see operations).

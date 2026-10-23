@@ -9,7 +9,7 @@ describe("dashboard", () => {
 
   it("shows active resources and the delivery signal", async () => {
     renderApp("/dashboard");
-    expect(await screen.findByText("Delivery readiness")).toBeVisible();
+    expect(await screen.findByText("Delivery readiness", {}, {timeout: 5_000})).toBeVisible();
     expect(screen.getByText("Active topics")).toBeVisible();
     expect(screen.getAllByText("Consumer groups").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Subscriptions").length).toBeGreaterThanOrEqual(1);

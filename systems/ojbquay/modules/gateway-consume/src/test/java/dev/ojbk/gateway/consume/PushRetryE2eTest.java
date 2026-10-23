@@ -96,7 +96,7 @@ final class PushRetryE2eTest {
     }
 
     @Test
-    void schedulesThreeRetriesThenWritesFourthFailureToDlq() throws Exception {
+    void AC_05_schedulesThreeRetriesThenWritesFourthFailureToDlq() throws Exception {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         String source = "retry-e2e-" + suffix;
         String group = "push-" + suffix;
@@ -157,12 +157,13 @@ final class PushRetryE2eTest {
             assertThat(attempts).hasSize(4);
             assertThat(bodies).allMatch(body -> body.contains("\"uid\":\"u42\""));
             assertThat(traces).containsOnly("00-e2e-trace");
+            // AC-05: never earlier than the configured delay, at most one second late.
             assertThat(Duration.between(attempts.get(0), attempts.get(1)).toMillis())
-                    .isBetween(140L, 1_150L);
+                    .isGreaterThanOrEqualTo(150L).isLessThan(1_150L);
             assertThat(Duration.between(attempts.get(1), attempts.get(2)).toMillis())
-                    .isBetween(290L, 1_300L);
+                    .isGreaterThanOrEqualTo(300L).isLessThan(1_300L);
             assertThat(Duration.between(attempts.get(2), attempts.get(3)).toMillis())
-                    .isBetween(590L, 1_600L);
+                    .isGreaterThanOrEqualTo(600L).isLessThan(1_600L);
             assertThat(deadLetter.key()).isEqualTo("order-42");
             assertThat(new String(deadLetter.value(), StandardCharsets.UTF_8))
                     .isEqualTo("{\"id\":42,\"user\":{\"id\":\"u42\"}}");

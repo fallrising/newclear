@@ -1,7 +1,7 @@
 {
   "project": "flowshot",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "第1輪draft；只核對dev server與/，未啟動。DESIGN所需review-only IPC preload/互動driver尚未實作；generic capture無init hook，不能直接完成review。D1/D2與AC-15待owner確認。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light",
@@ -20,7 +20,8 @@
       "pages": [
         {
           "id": "home",
-          "path": "/"
+          "path": "/",
+          "waitFor": "#flowshot-title"
         }
       ]
     }

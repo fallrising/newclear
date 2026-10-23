@@ -1,60 +1,42 @@
 # FE Review Prompt — loom
 
-你是負責 **loom** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
+先讀 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)、[REVIEW](REVIEW.md)、[DESIGN](DESIGN.md) 與 [SUCCESS](../SUCCESS.md)。本工作包是 **第 1 輪 draft，待 owner D1 與 AC-15 確認**；不啟動、不修改程式碼、不跑 capture。
 
-先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
+## 專案與目前入口
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+- `apps/loom`；React18/Vite5/Tauri2，Node20+。Loom 維持 dormant，不重啟產品 backlog。
+- 目前 App 是 canvas +terminal/+document、document/terminal nodes 與 history。src/ipc.ts 之外還有 doc/AI/canvas/window-close native 邊界，見 DESIGN M1。
+- 唯一頁面 `/`，Vite loopback1420。terminal/doc/content/history 狀態靠 IPC/events，首頁出現不代表全流程已接通。
 
-## 專案概況
+## 啟動先備（提案，全部未執行）
 
-- **元件路徑：** `apps/loom/`
-- **一句話：** AI-native canvas / terminal / document 工作區桌面 App：Tauri 2（Rust）包 React 18 + Vite 5 + React Flow 前端。
-- **技術棧：** Tauri 2（Rust）、React 18、Vite 5、React Flow（`@xyflow/react`）
-- **UI 入口：** `apps/loom/`（Vite dev port 1420，HMR 1421）
+目前 **未 capture-ready**。`targets.json` 只描述 dev server 與 `/`，`verified: false`；它不會裝 IPC mock。共用 capture.mjs 沒有 addInitScript hook，不能單獨執行就聲稱完成下列流程。DESIGN 的本元件 review fixture/driver 仍須第 2 輪實作與自測；實際 CLI 待交付後填回。
 
-## 啟動線索（未驗證）
+隔離 namespace 內讓 server/browser 同處、只綁127.0.0.1；不用 host network、不與另一元件共用1420。用全新 browser context/profile、合成資料與 allowlist 環境，不繼承真 token、vault/workspace/app-data。cache/build/temp 經 shared launcher；唯一 artifacts/evidence 保留。OS network 邊界和 browser request allowlist 都要驗證。不得用真 native runtime 補 mock 缺口。
 
-- headless 只擷取 Web 層：`npm ci` 後 `npm run dev -- --host 127.0.0.1`。
-- `src/ipc.ts` 依賴 Tauri；以 `addInitScript` 注入 IPC mock，並在報告註明無法在瀏覽器驗證的部分（終端、檔案系統）。
+以下是既有 scripts 的**未驗證線索**，不是可直接完成 review 的 harness：
 
-## 主要流程
+```sh
+npm ci
+npm run typecheck:contracts
+npm run typecheck:app
+npm test
+npm run build
+npm run dev -- --host 127.0.0.1 --port 1420 --strictPort
+```
 
-至少走通以下流程各一次，並對每一步截圖：
+mock 須含 command/event/callback 註冊、unlisten/reset 與狀態變化，未知命令拒絕；native DTO/Origin/close guards 不得為截圖放寬。
 
-- canvas 新增節點與連線 → 開啟 document surface → terminal surface
+## 主要流程（第 3 輪；需先完成 DESIGN harness）
 
-## 專案特有檢查重點
+- `/` 空 canvas→+terminal→+document/open notes.md→縮放、節點選取、畫線與 focus。
+- 合成 document 編輯→Cancel/Discard/Save/error/conflict；dirty Cancel/失敗 Save 不關閉或刪 incident edges。
+- history loading/empty/error/in-memory warning→明確 Restart/Forget；初載入不重跑命令，關閉/disposal 釋放 listeners。
+- 已有 Run/Pin 只走 fake stdin/output；畫 feeds_output_to 不應被誤報為驅動 Run/Pin。AI預設無key；任何 stream/cancel 都只能是明確synthetic fixture。
+- 真 PTY/filesystem/SQLite/watcher/provider/原生視窗與跨平台不在 browser mock 驗收內。
 
-在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
+## 檢查與證據
 
-- React Flow 畫布的縮放、節點文字截斷、選取狀態對比。
-- Terminal 元件的字型、捲動與 resize。
-- 多 surface 切換的 focus 管理。
+對三 viewport1440×900、834×1112、390×844 及兩種 color preference，依 PROTOCOL 全項記 pass/issue/n/a；無 blocker/major、axe critical/serious、非預期 console/pageerror/外部 request 或頁面 overflow。鍵盤/focus/長內容與 loading/error 需可核對，不能只有首頁截圖。
 
-## 可重用的既有資產
-
-- `npm run verify`：contracts 與 app typecheck、測試。
-
-## 待補的頁面
-
-無路由。
-
-## 執行步驟
-
-先讀 [REVIEW.md](REVIEW.md) 確認目前輪次，只做該輪允許的事（PROTOCOL.md「三輪節奏」）：
-
-1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
-2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 從 repository root 執行
-   ```bash
-   node docs/fe-review/capture.mjs apps/loom/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs apps/loom/fe-review/targets.json
-   ```
-   需要互動才能看到的狀態，另寫 Playwright 腳本放在本目錄；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
-
-## 產出
-
-- 第 1 輪：`PROMPT.md`、`targets.json`、`REVIEW.md` 的修訂（每次一個 PR）
-- 第 2 輪：前端修正與已決定事項的實作，每個問題一個 commit，附驗證指令
-- 第 3 輪：`runs/<ts>/capture.json`、`runs/<ts>/REPORT.md`（提交）；`runs/<ts>/screenshots/`（不提交）
+每次結果記 source SHA、fixture hash、browser version、已執行命令、隔離證據與未驗範圍；`runs/<timestamp>/capture.json`/REPORT 提交，PNG/storageState 不提交。未知 mock command 或未就緒 harness 必須失敗，回寫 REVIEW，不 fallback 真服務。未執行的命令／流程不可標 pass 或 targets verified。

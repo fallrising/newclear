@@ -85,6 +85,54 @@ OpenViking context lab adds `.github/workflows/openviking-context-ci.yml`, scope
 `make -C labs/openviking-context check`: stdlib offline contracts and a synthetic demo.
 It does not install OpenViking, call models, or validate live-server behavior.
 
+## Shared workflow static validation
+
+`python3 .github/scripts/check_workflows.py` is the local and CI entrypoint.
+It checks only enabled root `.github/workflows/*.yml` and `*.yaml` files;
+component-local imported workflows remain dormant. Explicit file arguments can
+check a regression fixture before a commit:
+
+```sh
+python3 .github/scripts/check_workflows.py --cache-dir /path/to/task/build/actionlint
+python3 .github/scripts/check_workflows.py --cache-dir /path/to/task/build/actionlint .github/scripts/tests/fixtures/invalid-runner-job-env.yml
+ACTIONLINT_ARCHIVE=/path/to/task/build/actionlint/actionlint_1.7.12_linux_amd64.tar.gz python3 -m unittest discover -s .github/scripts/tests -v
+```
+
+Use the shared build-workspace launcher where available: its `AGENT_BUILD_DIR`
+supplies the cache location automatically. Otherwise give `--cache-dir` or
+`ACTIONLINT_CACHE_DIR` explicitly, outside the checkout. No global install or
+source-tree binary is created. The first check downloads an official release
+archive; subsequent checks reuse that archive, verify its SHA256 every time and
+extract a fresh private executable for the invocation. `--archive PATH` provides
+an offline archive subject to the same digest check. Download/digest/platform
+failures return 2; workflow diagnostics return 1, with file, line and column;
+success returns 0. The checker never runs a workflow or changes its YAML.
+
+[The pin manifest](../../.github/actionlint.json) records the exact
+[official actionlint 1.7.12 release](https://github.com/rhysd/actionlint/releases/tag/v1.7.12),
+download source and SHA256 values from its published checksum list for Linux and
+macOS amd64/arm64. Version 1.7.7 was evaluated but rejects the valid
+`macos-15-intel` matrix label in Flowshot; 1.7.12 accepts it without an exception.
+Upgrades require reviewing the release/checksum source and rerunning fixtures
+and all root workflows, rather than following a moving latest download.
+
+The real negative fixture places `runner.temp` in job-level `env` and must fail.
+Separate positive fixtures cover step-level runner context, writing through
+`GITHUB_ENV`, and matrix/expression evaluation including the hosted Intel Mac
+label. No workflow-specific ignores or custom runner exceptions are configured.
+Actionlint validates expression availability and statically inferable matrix
+types; generated runtime values are not executed or proven by this gate.
+The optional ShellCheck/Pyflakes integrations are disabled explicitly with
+`-shellcheck= -pyflakes=` to make the Actions validity check deterministic without
+extra linters; YAML, context, expression, runner and action checks remain enabled
+([upstream usage](https://github.com/rhysd/actionlint/blob/v1.7.12/docs/usage.md)).
+
+`workflow-lint.yml` runs the entrypoint and real fixture suite only when root
+workflows, the checker, its tests or actionlint configuration change (plus manual
+dispatch). It uses a read-only checkout, contents-read permissions, cancellation
+concurrency and a five-minute timeout. Existing component filters, product tests,
+release behavior and workflow permissions/concurrency/timeouts are unchanged.
+
 ## Steps
 
 1. Add this specification and make the root README identify root workflows as canonical.
@@ -93,7 +141,8 @@ It does not install OpenViking, call models, or validate live-server behavior.
 
 ## Verification
 
-- Pinned actionlint container against `.github/workflows/*.yml`
+- Shared `python3 .github/scripts/check_workflows.py` against enabled root workflows
+- `ACTIONLINT_ARCHIVE=<verified-archive> python3 -m unittest discover -s .github/scripts/tests -v`
 - Static assertions for triggers, path filters, permissions, concurrency, timeouts, and forbidden release/deploy/publish or credential use
 - Representative native gates: shell syntax; clean web install/lint/build where dependencies are available; component build/test commands where runtime prerequisites are available
 - `git diff --check`

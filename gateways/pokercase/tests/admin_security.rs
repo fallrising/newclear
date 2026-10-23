@@ -248,14 +248,14 @@ async fn connection_base_url_cannot_redirect_credentials() {
     // OAuth import: provider allowlist.
     let r = post(
         "/admin/api/connections/oauth/import",
-        json!({"name": "cx", "provider": "codex", "access_token": "at", "base_url": "https://evil.example/codex/responses"}),
+        json!({"name": "cx", "provider": "siwc", "access_token": "at", "base_url": "https://evil.example/v1"}),
     )
     .await
     .unwrap();
     assert_eq!(r.status(), 400);
     let r = post(
         "/admin/api/connections/oauth/import",
-        json!({"name": "cx", "provider": "codex", "access_token": "at", "refresh_token": "rt"}),
+        json!({"name": "cx", "provider": "siwc", "access_token": "at", "refresh_token": "rt"}),
     )
     .await
     .unwrap();
@@ -267,9 +267,9 @@ async fn connection_base_url_cannot_redirect_credentials() {
 
     // Admin API PUT and web form cannot move it.
     for evil in [
-        "https://evil.example/backend-api/codex/responses",
-        "http://chatgpt.com/backend-api/codex/responses",
-        "https://chatgpt.com.evil.example/x",
+        "https://evil.example/v1",
+        "http://api.openai.com/v1",
+        "https://api.openai.com.evil.example/v1",
     ] {
         let r = gw
             .admin(
@@ -314,11 +314,8 @@ async fn connection_base_url_cannot_redirect_credentials() {
         .await
         .unwrap();
     let row: Value = r.json().await.unwrap();
-    assert_eq!(
-        row["base_url"],
-        "https://chatgpt.com/backend-api/codex/responses"
-    );
-    assert_eq!(row["provider"], "codex");
+    assert_eq!(row["base_url"], "https://api.openai.com/v1");
+    assert_eq!(row["provider"], "siwc");
 
     // API-key connection: moving base_url requires re-entering the key.
     let r = post(

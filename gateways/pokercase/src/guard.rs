@@ -152,11 +152,7 @@ pub fn host_allowed(cfg: &AppConfig, host_header: &str) -> bool {
     if bare.parse::<IpAddr>().is_ok() || host == "localhost" {
         return true;
     }
-    host == host_only(&cfg.host)
-        || cfg
-            .allowed_hosts
-            .iter()
-            .any(|h| host_only(h) == host || h.trim() == "*")
+    host == host_only(&cfg.host) || cfg.allowed_hosts.iter().any(|h| host_only(h) == host)
 }
 
 fn origin_matches_host(origin: &str, host_header: &str) -> bool {
@@ -328,6 +324,9 @@ mod tests {
         ] {
             assert!(!host_allowed(&c, bad), "{bad}");
         }
+        // A wildcard is just a name that never matches; the check cannot be turned off.
+        let wild = cfg("127.0.0.1", &["*"]);
+        assert!(!host_allowed(&wild, "evil.example"));
     }
 
     #[test]

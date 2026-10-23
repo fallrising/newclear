@@ -31,7 +31,7 @@ keys and redirect traffic, so these rules hold on every listener, loopback inclu
 - Every route checks `Host` against DNS rebinding: IP literals and `localhost` are
   accepted, plus `--host` and each `--allowed-host` / `THINROUTER_ALLOWED_HOSTS`
   (comma-separated). Other names get 421. Add the Tailscale Serve or tunnel hostname
-  here.
+  here. There is no wildcard; the check cannot be turned off.
 
 ## Remote requests and keyless bootstrap
 
@@ -52,7 +52,6 @@ OAuth tokens are only sent to the provider's official hosts (https, default port
 
 | Provider | Hosts |
 | --- | --- |
-| codex | `chatgpt.com` |
 | cursor | `agent.api5.cursor.sh`, `api2.cursor.sh` |
 | grok | `cli-chat-proxy.grok.com` |
 | opencode | `opencode.ai` |
@@ -61,7 +60,7 @@ OAuth tokens are only sent to the provider's official hosts (https, default port
 The `claude` provider sends no token at all (it runs the local Claude Code CLI) and
 ignores its base URL. The admin UI/API rejects other base URLs for the providers above, and the proxy re-checks
 stored rows before every call. An operator can add a base with
-`--provider-base-override codex=http://127.0.0.1:8080` (CLI/env only; used by tests and
+`--provider-base-override siwc=http://127.0.0.1:8080` (CLI/env only; used by tests and
 egress proxies). An imported OAuth connection of an unknown provider cannot change its
 base URL; re-import it with its token. API-key connections may use any base URL, but
 changing it requires entering the API key again. Re-importing under an existing name

@@ -83,8 +83,6 @@ impl Env {
             dir.path().to_str().unwrap(),
             "--claude-bin",
             bin.to_str().unwrap(),
-            "--codex-version",
-            "0.0.0",
         ]);
         for name in ["THINROUTER_ADMIN_TOKEN", "THINROUTER_SECRETS_KEY"] {
             cmd.env_remove(name);

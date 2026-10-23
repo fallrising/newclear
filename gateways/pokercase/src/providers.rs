@@ -1,6 +1,6 @@
 //! Subscription / free provider registry for personal use.
 //!
-//! **Active** providers: codex, claude, cursor, grok, opencode, agy (antigravity).
+//! **Active** providers: siwc, claude, cursor, grok, opencode, agy (antigravity).
 //! Full protocol executors for Cursor protobuf / Antigravity Gemini envelope
 //! are staged — tokens can be imported now; wire format completes as needed.
 //!
@@ -98,24 +98,6 @@ impl ProviderProfile {
 /// Providers you asked to support first.
 pub const ACTIVE: &[ProviderProfile] = &[
     ProviderProfile {
-        id: "codex",
-        aliases: &["cx", "openai_codex", "chatgpt_codex"],
-        display_name: "OpenAI Codex (ChatGPT subscription)",
-        category: "oauth",
-        status: ProviderStatus::Active,
-        default_base_url: "https://chatgpt.com/backend-api/codex/responses",
-        format: UpstreamFormat::OpenAiResponses,
-        default_model: Some("gpt-5.6-sol"),
-        auth: AuthScheme::Bearer,
-        extra_headers: &[
-            // User-Agent carries the detected/configured CLI version; see codex.rs.
-            ("originator", "codex_cli_rs"),
-            ("OpenAI-Beta", "responses=experimental"),
-        ],
-        force_stream: true,
-        notes: "Codex requires stream=true. Prefer gpt-5.6-sol (not *-codex). Token: ~/.codex/auth.json",
-    },
-    ProviderProfile {
         id: "siwc",
         aliases: &["chatgpt_siwc", "openai_siwc", "sign_in_with_chatgpt"],
         display_name: "OpenAI API via Sign in with ChatGPT (official plan sharing)",
@@ -127,7 +109,7 @@ pub const ACTIVE: &[ProviderProfile] = &[
         auth: AuthScheme::Bearer,
         extra_headers: &[],
         force_stream: true,
-        notes: "Preferred over codex. Sign in with `thinrouter login-siwc`; store:false + stream:true enforced, unsupported fields dropped.",
+        notes: "Default for OpenAI models. Sign in with `thinrouter login-siwc`; store:false + stream:true enforced, unsupported fields dropped.",
     },
     ProviderProfile {
         id: "claude",
@@ -272,7 +254,6 @@ pub fn list_public() -> serde_json::Value {
 /// (https, default port) or to an operator-supplied `--provider-base-override`.
 fn official_hosts(provider_id: &str) -> &'static [&'static str] {
     match provider_id {
-        "codex" => &["chatgpt.com"],
         "siwc" => &["api.openai.com"],
         "cursor" => &["agent.api5.cursor.sh", "api2.cursor.sh"],
         "grok" => &["cli-chat-proxy.grok.com"],
@@ -345,7 +326,6 @@ pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
             if base.ends_with("/responses") {
                 base.to_string()
             } else {
-                // codex stores full …/codex/responses
                 format!("{base}/responses")
             }
         }
@@ -389,45 +369,46 @@ mod tests {
 
     #[test]
     fn resolve_aliases() {
-        assert_eq!(resolve("cx").unwrap().id, "codex");
+        assert_eq!(resolve("openai_siwc").unwrap().id, "siwc");
         assert_eq!(resolve("claude").unwrap().id, "claude");
         assert_eq!(resolve("ag").unwrap().id, "agy");
         assert_eq!(resolve("antigravity").unwrap().id, "agy");
         assert_eq!(resolve("oc").unwrap().id, "opencode");
+        assert!(resolve("codex").is_none(), "codex provider removed");
         assert!(resolve("nope").is_none());
     }
 
     #[test]
     fn base_url_allowlist_rejects_foreign_hosts() {
-        let codex = resolve("codex").unwrap();
-        assert!(base_url_allowed(codex, codex.default_base_url, &[]));
+        let siwc = resolve("siwc").unwrap();
+        assert!(base_url_allowed(siwc, siwc.default_base_url, &[]));
         for bad in [
-            "https://evil.example/backend-api/codex/responses",
-            "http://chatgpt.com/backend-api/codex/responses",
-            "https://chatgpt.com:8443/backend-api/codex/responses",
-            "https://chatgpt.com.evil.example/x",
-            "https://user:pw@chatgpt.com/x",
+            "https://evil.example/v1",
+            "http://api.openai.com/v1",
+            "https://api.openai.com:8443/v1",
+            "https://api.openai.com.evil.example/v1",
+            "https://user:pw@api.openai.com/v1",
+            "https://chatgpt.com/backend-api/codex/responses",
             "not a url",
         ] {
-            assert!(!base_url_allowed(codex, bad, &[]), "{bad}");
+            assert!(!base_url_allowed(siwc, bad, &[]), "{bad}");
         }
-        let ov = vec![("codex".to_string(), "http://127.0.0.1:9999".to_string())];
-        assert!(base_url_allowed(codex, "http://127.0.0.1:9999/codex", &ov));
-        assert!(!base_url_allowed(
-            codex,
-            "http://127.0.0.1:99990/codex",
-            &ov
-        ));
+        let ov = vec![("siwc".to_string(), "http://127.0.0.1:9999".to_string())];
+        assert!(base_url_allowed(siwc, "http://127.0.0.1:9999/v1", &ov));
+        assert!(!base_url_allowed(siwc, "http://127.0.0.1:99990/v1", &ov));
         let grok = resolve("grok").unwrap();
-        assert!(!base_url_allowed(grok, "http://127.0.0.1:9999/codex", &ov));
+        assert!(!base_url_allowed(grok, "http://127.0.0.1:9999/v1", &ov));
         for p in ACTIVE {
             assert!(base_url_allowed(p, p.default_base_url, &[]), "{}", p.id);
         }
     }
 
     #[test]
-    fn codex_url() {
-        let p = resolve("codex").unwrap();
-        assert!(build_upstream_url(p, p.default_base_url).contains("responses"));
+    fn siwc_url() {
+        let p = resolve("siwc").unwrap();
+        assert_eq!(
+            build_upstream_url(p, p.default_base_url),
+            "https://api.openai.com/v1/responses"
+        );
     }
 }

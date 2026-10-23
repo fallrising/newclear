@@ -243,6 +243,27 @@ impl Store {
                 "removed stored Claude tokens (claude now runs Claude Code)"
             );
         }
+        // The codex (ChatGPT backend-api) provider was removed in favour of siwc. Its rows
+        // would otherwise be forwarded as an unknown provider with the old token, so they
+        // are disabled and their tokens dropped; sign in with `login-siwc` instead.
+        let retired = conn.execute(
+            "UPDATE connections SET enabled = 0 WHERE enabled = 1 AND id IN (
+                 SELECT connection_id FROM oauth_credentials
+                 WHERE provider IN ('codex', 'cx', 'openai_codex', 'chatgpt_codex'))",
+            [],
+        )?;
+        conn.execute(
+            "UPDATE oauth_credentials SET access_token = '', refresh_token = NULL, expires_at = NULL
+             WHERE provider IN ('codex', 'cx', 'openai_codex', 'chatgpt_codex')
+               AND (access_token != '' OR refresh_token IS NOT NULL)",
+            [],
+        )?;
+        if retired > 0 {
+            tracing::warn!(
+                retired,
+                "disabled codex connections (provider removed; use login-siwc)"
+            );
+        }
         if meta_get(&conn, "key_check")?.is_none() {
             meta_set(&conn, "key_check", &secrets.encrypt(KEY_CHECK_PLAINTEXT))?;
             meta_set(&conn, "key_source", source)?;
@@ -1233,8 +1254,8 @@ mod secret_storage_tests {
                 .upsert_oauth_connection(
                     None,
                     "o",
-                    "https://chatgpt.com/backend-api/codex/responses",
-                    "codex",
+                    "https://api.openai.com/v1",
+                    "siwc",
                     "at-456",
                     Some("rt-789"),
                     None,
@@ -1282,5 +1303,40 @@ mod secret_storage_tests {
             .to_string();
         assert!(err.contains("does not match"), "{err}");
         assert!(!err.contains("sk-123") && !err.contains("at-456"));
+    }
+
+    #[test]
+    fn codex_rows_are_retired() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = dir.path().join("t.db");
+        {
+            let store = Store::open(&db, None).unwrap();
+            store
+                .upsert_oauth_connection(
+                    None,
+                    "old",
+                    "https://chatgpt.com/backend-api/codex/responses",
+                    "siwc",
+                    "at",
+                    Some("rt"),
+                    None,
+                    None,
+                    None,
+                    100,
+                    true,
+                )
+                .unwrap();
+        }
+        // Rows written by an older build that still had the codex provider.
+        Connection::open(&db)
+            .unwrap()
+            .execute("UPDATE oauth_credentials SET provider = 'codex'", [])
+            .unwrap();
+        let store = Store::open(&db, None).unwrap();
+        let c = store.get_connection_by_name("old").unwrap().unwrap();
+        assert!(!c.enabled);
+        let o = c.oauth.unwrap();
+        assert_eq!(o.access_token, "");
+        assert!(o.refresh_token.is_none());
     }
 }

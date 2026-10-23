@@ -4,7 +4,6 @@ mod cancel;
 mod claude;
 mod claude_code;
 mod claude_mcp;
-mod codex;
 mod config;
 mod cooldown;
 mod cursor_agent;
@@ -14,6 +13,7 @@ mod guard;
 mod http_client;
 mod local_import;
 mod oauth_refresh;
+mod prompt_cache;
 mod providers;
 mod proxy;
 mod resolve;
@@ -87,10 +87,6 @@ enum Commands {
             value_delimiter = ','
         )]
         provider_base_overrides: Vec<String>,
-        /// Codex CLI version for the upstream User-Agent. Default: installed
-        /// `codex --version`, else a built-in fallback.
-        #[arg(long, env = "THINROUTER_CODEX_VERSION")]
-        codex_version: Option<String>,
         /// Claude Code CLI used by the `claude` provider (default: `claude` on PATH)
         #[arg(long, env = "THINROUTER_CLAUDE_BIN")]
         claude_bin: Option<String>,
@@ -110,7 +106,7 @@ enum Commands {
         #[arg(long, env = "THINROUTER_SECRETS_KEY")]
         secrets_key: Option<String>,
     },
-    /// Import tokens from local agent CLIs (codex/claude/grok/cursor/opencode/agy)
+    /// Import tokens from local agent CLIs (claude/grok/cursor/opencode/agy)
     ImportLocal {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
         data_dir: Option<std::path::PathBuf>,
@@ -182,7 +178,6 @@ async fn main() -> Result<()> {
             token_saver_max_chars,
             allowed_hosts,
             provider_base_overrides,
-            codex_version,
             claude_bin,
             claude_max_runs,
         } => {
@@ -199,7 +194,6 @@ async fn main() -> Result<()> {
             cfg.allow_keyless_bootstrap = allow_keyless_bootstrap;
             cfg.allowed_hosts = allowed_hosts;
             cfg.set_provider_base_overrides(&provider_base_overrides)?;
-            cfg.codex_version = codex_version;
             cfg.claude_bin = claude_bin;
             cfg.claude_max_runs = claude_max_runs;
             server::run(cfg).await

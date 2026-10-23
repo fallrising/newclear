@@ -14,9 +14,9 @@ use tokio_util::sync::CancellationToken;
 use tracing::{debug, warn};
 
 use crate::claude::{self, StreamTranslateState};
-use crate::codex;
 use crate::cooldown::{cooldown_secs_for_status, CooldownMap};
 use crate::error::{AppError, AppResult};
+use crate::prompt_cache;
 use crate::providers::{self, UpstreamFormat};
 use crate::responses;
 use crate::store::{ResolvedTarget, Store};
@@ -35,8 +35,6 @@ pub struct ProxyState {
     pub token_saver_max_chars: usize,
     /// Operator-only `provider=url` upstream overrides (see `providers::base_url_allowed`).
     pub provider_base_overrides: Vec<(String, String)>,
-    /// `codex_cli_rs/<version>` sent to the Codex upstream.
-    pub codex_user_agent: String,
     /// Local Claude Code CLI runs for the `claude` provider.
     pub claude_code: crate::claude_code::ClaudeCode,
 }
@@ -250,19 +248,9 @@ async fn forward_chat_completions_inner(
     allow_401_refresh: bool,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
     // Refresh OAuth if near expiry (best-effort).
-    let borrowed = codex::borrowed_source(&target.connection);
     let target = {
         let mut t = target.clone();
-        if let Some(path) = &borrowed {
-            // Re-read the Codex CLI's file on every attempt; never refresh it ourselves.
-            if let Err(e) = codex::apply_borrowed(&mut t.connection, path) {
-                return Err(UpstreamAttemptError {
-                    status: 401,
-                    body: e.to_string(),
-                    retryable: true,
-                });
-            }
-        } else if allow_401_refresh && t.connection.auth_type == "oauth_import" {
+        if allow_401_refresh && t.connection.auth_type == "oauth_import" {
             if let Ok(fresh) =
                 crate::oauth_refresh::ensure_fresh(&state.store, t.connection.clone()).await
             {
@@ -329,12 +317,9 @@ async fn forward_chat_completions_inner(
                 UpstreamFormat::OpenAiChat => (prepared, UpstreamBodyKind::OpenAiChat),
                 UpstreamFormat::OpenAiResponses => {
                     let converted = match native_responses {
-                        Some(native) => responses::prepare_native_request(
-                            native,
-                            &target.upstream_model,
-                            force,
-                            p.id == "codex",
-                        ),
+                        Some(native) => {
+                            responses::prepare_native_request(native, &target.upstream_model, force)
+                        }
                         None => responses::chat_to_responses_request(&prepared),
                     };
                     let converted = match converted {
@@ -348,8 +333,8 @@ async fn forward_chat_completions_inner(
                             } else {
                                 b
                             };
-                            let b = if matches!(p.id, "codex" | "siwc") {
-                                let (b, key) = codex::ensure_prompt_cache_key(&b);
+                            let b = if p.id == "siwc" {
+                                let (b, key) = prompt_cache::ensure_prompt_cache_key(&b);
                                 cache_key = key;
                                 b
                             } else {
@@ -459,33 +444,14 @@ async fn forward_chat_completions_inner(
         req = req.header("authorization", a);
     }
     for (k, v) in extra_headers {
-        // Skip empty placeholders (e.g. chatgpt-account-id filled from meta below).
         if v.is_empty() {
             continue;
         }
         req = req.header(*k, *v);
     }
-    if profile.is_some_and(|p| p.id == "codex") {
-        req = req.header("User-Agent", &state.codex_user_agent);
-    }
     if let Some(key) = &cache_key {
-        for (k, v) in codex::session_headers(key) {
+        for (k, v) in prompt_cache::session_headers(key) {
             req = req.header(k, v);
-        }
-    }
-    // Codex ChatGPT accounts often need chatgpt-account-id header from import meta.
-    if let Some(meta) = target
-        .connection
-        .oauth
-        .as_ref()
-        .and_then(|o| o.meta.as_deref())
-    {
-        if let Ok(m) = serde_json::from_str::<serde_json::Value>(meta) {
-            if let Some(aid) = m.get("account_id").and_then(|a| a.as_str()) {
-                if !aid.is_empty() {
-                    req = req.header("ChatGPT-Account-Id", aid);
-                }
-            }
         }
     }
     // OpenCode Go requires x-opencode-session for routing (see opencode.ai/docs/go).
@@ -520,33 +486,6 @@ async fn forward_chat_completions_inner(
                     response: resp,
                     body_kind,
                     reassemble_stream: reassemble,
-                })
-            } else if status == 401 && borrowed.is_some() {
-                let body_txt = resp.text().await.unwrap_or_default();
-                let mut reread = target.clone();
-                let changed = borrowed
-                    .as_deref()
-                    .and_then(|p| codex::apply_borrowed(&mut reread.connection, p).ok())
-                    .is_some_and(|_| {
-                        reread.connection.bearer_token() != target.connection.bearer_token()
-                    });
-                if changed && allow_401_refresh {
-                    // The CLI refreshed the file since we read it: retry once.
-                    return Box::pin(forward_chat_completions_inner(
-                        state,
-                        target,
-                        body,
-                        native_responses,
-                        stream,
-                        cancel,
-                        false,
-                    ))
-                    .await;
-                }
-                Err(UpstreamAttemptError {
-                    status,
-                    body: format!("{body_txt} ({})", codex::BORROWED_HINT),
-                    retryable: true,
                 })
             } else if status == 401
                 && allow_401_refresh

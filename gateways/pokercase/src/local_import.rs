@@ -23,7 +23,6 @@ fn home() -> PathBuf {
 /// Scan known agent credential paths and upsert oauth connections + simple routes.
 pub fn import_all_local(store: &Store, make_routes: bool) -> Result<Vec<ImportResult>> {
     Ok(vec![
-        import_codex(store, make_routes),
         import_claude(store, make_routes),
         import_grok(store, make_routes),
         import_cursor(store, make_routes),
@@ -88,90 +87,6 @@ fn upsert(
             detail: e.to_string(),
         },
     }
-}
-
-fn import_codex(store: &Store, make_routes: bool) -> ImportResult {
-    let path = home().join(".codex/auth.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "codex".into(),
-                name: "local-codex".into(),
-                ok: false,
-                detail: format!("missing {}: {e}", path.display()),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "codex".into(),
-                name: "local-codex".into(),
-                ok: false,
-                detail: format!("parse error: {e}"),
-            };
-        }
-    };
-    let access = v
-        .pointer("/tokens/access_token")
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    let account_id = v
-        .pointer("/tokens/account_id")
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    if access.is_empty() {
-        return ImportResult {
-            provider: "codex".into(),
-            name: "local-codex".into(),
-            ok: false,
-            detail: "no access_token".into(),
-        };
-    }
-    let meta = serde_json::json!({"account_id": account_id, "source": path.display().to_string()});
-    // Prefer model from config.toml if present
-    let model = read_codex_model().or(Some("gpt-5.6-sol".into()));
-    upsert(
-        store,
-        "local-codex",
-        "codex",
-        access,
-        // The Codex CLI owns the rotating refresh token; see codex::borrowed_source.
-        None,
-        None,
-        Some(&meta.to_string()),
-        model.as_deref(),
-        make_routes,
-    )
-}
-
-fn read_codex_model() -> Option<String> {
-    let s = std::fs::read_to_string(home().join(".codex/config.toml")).ok()?;
-    parse_codex_model(&s)
-}
-
-/// Top-level `model = "..."` of a Codex `config.toml` (not `model_*` keys or tables).
-fn parse_codex_model(toml: &str) -> Option<String> {
-    for line in toml.lines() {
-        let line = line.trim();
-        if line.starts_with('[') {
-            break;
-        }
-        let Some((key, value)) = line.split_once('=') else {
-            continue;
-        };
-        if key.trim() != "model" {
-            continue;
-        }
-        let value = value.split('#').next().unwrap_or("").trim();
-        let m = value.trim_matches('"').trim_matches('\'');
-        if !m.is_empty() {
-            return Some(m.to_string());
-        }
-    }
-    None
 }
 
 /// Claude needs no token import: the local Claude Code CLI answers with its own login.
@@ -393,29 +308,10 @@ pub async fn refresh_all_oauth(store: &Store) -> Result<Vec<(String, bool, Strin
         {
             continue;
         }
-        if crate::codex::borrowed_source(&c).is_some() {
-            out.push((c.name, true, "skipped: borrowed from the Codex CLI".into()));
-            continue;
-        }
         match oauth_refresh::refresh_connection(store, &c).await {
             Ok(_) => out.push((c.name, true, "refreshed".into())),
             Err(e) => out.push((c.name, false, e.to_string())),
         }
     }
     Ok(out)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::parse_codex_model;
-
-    #[test]
-    fn codex_model_is_the_top_level_model_key() {
-        let toml = "model_reasoning_effort = \"high\"\nmodel = \"gpt-x\" # main\n[profiles.a]\nmodel = \"other\"\n";
-        assert_eq!(parse_codex_model(toml).as_deref(), Some("gpt-x"));
-        assert_eq!(
-            parse_codex_model("model_provider = \"x\"\n[a]\nmodel = \"y\""),
-            None
-        );
-    }
 }

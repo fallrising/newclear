@@ -1,7 +1,7 @@
 {
   "project": "hai-taskboard",
   "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verifiedNote": "ConnectedApp 同源 runtime 基準；尚未於本輪啟動或驗證。先依 DESIGN.md 完成 prebuilt WEB_ROOT、私有合成 state、session 與 admission harness；healthz 不代表登入或 seed 成功。未登入 capture 僅覆蓋登入頁。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light"
@@ -11,14 +11,13 @@
       "name": "web",
       "kind": "spa",
       "cwd": "products/hai-taskboard/web",
-      "install": "corepack pnpm install --frozen-lockfile",
-      "start": "corepack pnpm exec vite --host 127.0.0.1 --port 5173 --strictPort",
+      "install": "corepack pnpm install --frozen-lockfile --ignore-scripts",
       "env": {},
-      "baseUrl": "http://127.0.0.1:5173",
-      "ready": "/",
+      "baseUrl": "http://127.0.0.1:8080",
+      "ready": "/healthz",
       "pages": [
         {
-          "id": "board",
+          "id": "login",
           "path": "/"
         }
       ]

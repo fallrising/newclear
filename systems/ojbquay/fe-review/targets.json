@@ -2,10 +2,9 @@
   "project": "ojbquay console",
   "verified": false,
   "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
-  "locale": "zh-TW",
+  "locale": "en-US",
   "colorSchemes": [
-    "light",
-    "dark"
+    "light"
   ],
   "apps": [
     {
@@ -41,6 +40,18 @@
         {
           "id": "delay",
           "path": "/delay"
+        },
+        {
+          "id": "admin-clusters",
+          "path": "/admin/clusters"
+        },
+        {
+          "id": "admin-audit",
+          "path": "/admin/audit"
+        },
+        {
+          "id": "admin-users",
+          "path": "/admin/users"
         }
       ]
     }

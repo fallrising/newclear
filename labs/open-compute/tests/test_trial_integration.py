@@ -130,4 +130,22 @@ class PublicationTests(unittest.TestCase):
             self.assertTrue((Path(tmp)/'report.json').is_file())
 
 
+class SeparateDiagnosticTests(unittest.TestCase):
+    def test_bootstrap_child_failure_is_preserved_without_changing_original_report(self):
+        import failure_diagnostics
+        child=Mock(); child.process.poll.return_value=1; child.observation_error=None
+        child.text.return_value='{"schema_version":1,"command":"serve","result":"failed","error":"ownership","data":{}}\n'
+        record=failure_diagnostics.Recorder("trial")
+        with self.assertRaises(trial.TrialFailure) as caught:
+            trial.observe_ready(child,[])
+        record.capture("original","first_owner",caught.exception)
+        record.capture("cleanup","first_owner",trial.TrialFailure("shutdown"))
+        report=trial.initial_report(); report['phase']='first_owner'
+        value=record.finish(report,1)
+        self.assertEqual(value['failures']['original']['category'],'ownership')
+        self.assertEqual(value['failures']['cleanup']['category'],'shutdown')
+        self.assertEqual(set(report),set(trial.initial_report()))
+        self.assertEqual(trial.project_report(report),report)
+
+
 if __name__ == '__main__': unittest.main()

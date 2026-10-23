@@ -23,6 +23,8 @@ import time
 import urllib.request
 from urllib.parse import urlsplit
 
+import failure_diagnostics
+
 
 HERE = Path(__file__).resolve().parent
 BODY_LIMIT = 1024 * 1024
@@ -47,6 +49,10 @@ class LabError(Exception):
 
 class ProcessObservationError(LabError):
     """Process ownership/exits cannot be established from the available evidence."""
+    def __init__(self, message, observation_reason="unknown"):
+        super().__init__(message)
+        self.observation_reason = (observation_reason if observation_reason in
+                                   failure_diagnostics.OBSERVATIONS else "unknown")
 
 
 def require(condition, message):
@@ -402,6 +408,7 @@ class Process:
         self.scan_lock = threading.Lock()
         self.done = threading.Event()
         self.observation_error = None
+        self.observation_reason = None
         self.reader = threading.Thread(target=self._read, daemon=True)
         self.monitor = threading.Thread(target=self._monitor, daemon=True)
         self.reader.start()
@@ -424,7 +431,8 @@ class Process:
             except (ProcessObservationError, OSError) as exc:
                 with self.lock:
                     self.observation_error = str(exc)
-                raise ProcessObservationError(str(exc)) from exc
+                    self.observation_reason = getattr(exc, "observation_reason", "unknown")
+                raise ProcessObservationError(str(exc), self.observation_reason) from exc
 
     def _snapshot(self):
         with self.lock:
@@ -469,13 +477,23 @@ class Process:
                 for _ in range(2):
                     current_parent = process_info(parent["pid"])
                     current_child = process_info(pid)
-                    if (current_parent is None or current_parent["state"] == "Z" or
-                            current_parent["start_ticks"] != parent["start_ticks"] or
-                            current_child is None or
-                            any(current_child[field] != candidate[field]
-                                for field in ("pid", "start_ticks", "ppid")) or
-                            current_child["start_ticks"] < current_parent["start_ticks"]):
-                        raise ProcessObservationError("process parent edge changed during observation")
+                    reason = None
+                    if current_parent is None:
+                        reason = "parent_missing"
+                    elif current_parent["state"] == "Z":
+                        reason = "parent_zombie"
+                    elif current_parent["start_ticks"] != parent["start_ticks"]:
+                        reason = "parent_reused"
+                    elif current_child is None:
+                        reason = "child_missing"
+                    elif any(current_child[field] != candidate[field] for field in ("pid", "start_ticks")):
+                        reason = "child_reused"
+                    elif current_child["ppid"] != candidate["ppid"]:
+                        reason = "child_reparented"
+                    elif current_child["start_ticks"] < current_parent["start_ticks"]:
+                        reason = "start_order"
+                    if reason is not None:
+                        raise ProcessObservationError("process parent edge changed during observation", reason)
                 with self.lock:
                     self.known[key] = current_child
                 known[key] = current_child
@@ -998,6 +1016,9 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
                               "euid": os.geteuid(), "python": platform.python_version()},
               "acceptance": ({f"M2-{n:02}": "not_run" for n in range(1, 10)} if restore else
                              {f"AC-{n:02}": "not_run" for n in range(1, 9)})}
+    profile = ("restore" if restore else "resources" if resources else "storage" if storage
+               else "crash" if crash else "restart")
+    diagnostic_record = failure_diagnostics.Recorder(profile, report["harness_commit"])
     functional_acceptance = report["acceptance"]
     phases = {}
     snapshots = {}
@@ -1054,7 +1075,8 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
                     require({key: projected["targets"][0][key] for key in ("pid", "pgid", "start_ticks")} ==
                             report.get("daemon_before"), "identity")
                 report[name] = projected
-            except Exception:
+            except Exception as exc:
+                diagnostic_record.capture("evidence", report["phase"], exc)
                 report[name] = initial()
                 report["result"] = "failed"
                 report["error"] = "schema"
@@ -1558,6 +1580,9 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
         report["phase"] = "cleanup"
         report["result"] = "passed"
     except Exception as exc:
+        diagnostic_record.capture("original", report["phase"], exc)
+        if daemon is not None:
+            diagnostic_record.observe("original", getattr(daemon, "observation_reason", None))
         report["error"] = scenario_error(exc)
         cleanup_unknown = isinstance(exc, ProcessObservationError)
     finally:
@@ -1565,6 +1590,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
             scenario_budget.close()
         except Exception as exc:
             # Expiry must not bypass the separately bounded final cleanup.
+            diagnostic_record.capture("cleanup", report["phase"], exc)
             report["result"] = "failed"
             report["error"] = scenario_error(exc)
         try:
@@ -1615,6 +1641,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
                         report["acceptance"]["M4-04"] = "passed"
                     report["phase"] = "complete"
         except Exception as exc:
+            diagnostic_record.capture("cleanup", report["phase"], exc)
             report["result"] = "failed"
             report["cleanup_error"] = scenario_error(exc)
         for sig, handler in old_handlers.items():
@@ -1654,6 +1681,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
                 encoded = redactor.check_report(report)
                 exclusive_file(output / "report.json", encoded.encode())
         except Exception as exc:
+            diagnostic_record.capture("evidence", report["phase"], exc)
             if report["result"] == "passed":
                 report["phase"] = "evidence"
             report["result"] = "failed"
@@ -1670,6 +1698,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
     try:
         project_storage_observations()
     except Exception as exc:
+        diagnostic_record.capture("evidence", report["phase"], exc)
         report["result"] = "failed"
         report["error"] = storage_error(exc)
         report["acceptance"]["M4-05"] = "not_run"
@@ -1689,9 +1718,18 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
             report["storage_partial"] = storage_tools.partial_extension({}, storage_tools.initial_workload())
     project_observations()
     project_crash_observations()
-    encoded = redactor.check_report(report)
+    exit_code = 0 if report["result"] == "passed" else 1
+    try:
+        encoded = redactor.check_report(report)
+    except Exception as exc:
+        diagnostic_record.capture("evidence", report["phase"], exc)
+        if output_allowed:
+            failure_diagnostics.write_record(output, diagnostic_record, dict(report, result="failed"), 1)
+        raise
+    if output_allowed:
+        failure_diagnostics.write_record(output, diagnostic_record, report, exit_code)
     print(encoded, end="", flush=True)
-    return 0 if report["result"] == "passed" else 1
+    return exit_code
 
 
 def main():

@@ -1,5 +1,32 @@
 # Status and evidence
 
+## Issue548 historical failure reconciliation (2026-10-23)
+
+The five reported Actions job logs were retrieved, rather than expired: an initial
+CLI terminal-escape refusal was resolved by explicitly saving the response privately.
+Only fixed report facts were extracted; raw logs remain private and are not artifacts.
+Seven-day artifact expiry and Actions log access are distinct. The new diagnostic
+artifact/30-day retention maintenance does not by itself repair runtime behavior.
+
+| Historical run / job | Recorded checkout and symptom | Existing subsequent source change |
+| --- | --- | --- |
+|39048597519 /117442274247 |35d899827f2c12a67eb3a03ee2329b32f7045d20: cold_after_writes ownership, cleanup schema; final shutdown reports parent-edge observation change | M4 remains unresolved; keep the current ownership refusal and original AC-05 failed until new causal evidence. |
+|39027518316 /117381325258 |bf0187bd20a526380ad5badf3956d5179eeda900: first_owner/bootstrap | c4ddd3852865a2241ff47a50b30161c88627523a waits for the retained instance before connecting, with three regression cases. This chain does not prove every bootstrap failure is the same race. |
+|38687989780 /116267162297 |f6b09f0141bd28e10f79f9b31508b947e1ae85d3: checkpoint_crash identity, cleanup schema | cff9b8cce948fdaa001e8080cf1a40e3a5b897f0 waits within the existing deadline for direct-child reaping after /proc becomes nonlive; preserves required SIGKILL/-9 with three regressions. |
+|37726578369 /113146007761 and37725768008 /113143448784 |9bb0f5534fb9ea7e2000e3ac6f68cfeb35838dca and2ee27650d672efac686a46c4d6c1070984e21539: cold_locked hard-link refusal, after M1 passed | e8c60d71154e99ce766d6a1ffe81cc0dbf311700 excludes only the reproducible binary-derived OCR subtree, preserving persistent hard-link refusal and adding real roundtrip/negative regressions. The old reports do not identify the actual hard-linked path; attribution remains source-derived. |
+
+Run head_sha is not necessarily the PR merge checkout recorded by the harness.
+Current offline290-test pass covers the existing regressions and new projection/
+ownership-refusal tests; it does not replace the required real profiles or explain
+M4. Current one-shot fresh-container outcomes: restore9/9 PASS, checkpoint-crash5/5 PASS,
+retained-manual FAIL at first_owner (original bootstrap/child_missing, later cleanup
+shutdown), storage5/5 PASS. No profile repeated, all owned containers stopped; exact
+source manifests and private/public evidence boundaries are in
+[tasks/548-failure-diagnostics/report.md](../tasks/548-failure-diagnostics/report.md).
+The current trial failure and historical M4 cause remain unresolved; diagnostic
+improvement and a single M4 pass do not mark548 or mainline complete.
+
+
 Updated: 2026-10-17 (operator date; CI timestamps below use UTC).
 
 ## M7 result

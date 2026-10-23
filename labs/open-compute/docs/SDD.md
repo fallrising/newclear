@@ -231,3 +231,42 @@ the pinned source where possible. Read source is not an executed test result.
 - [Security policy and network boundary](https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/SECURITY.md)
 - [Backup boundaries](https://open-compute.dev/docs/ocd/backup/)
 - [Cloudflare workerd security boundary](https://github.com/cloudflare/workerd)
+
+## Issue548 maintenance: diagnostic artifact contract v1
+
+This contract precedes the diagnostic implementation. Existing runtime/ownership
+refusals, original report shapes, workload, deadlines and command exit remain unchanged.
+A separate `failure-diagnostics.json` records no raw exceptions or runtime text.
+It has exactly schema_version1, profile (restart/restore/resources/storage/crash/retry/trial),
+source_commit (40 lowercase hex or null), result (passed/failed/unknown), phase
+(fixed harness phase enum or unknown), exit_code (integer-255..255 or null),
+report_written (boolean), evidence (record/report/missing/invalid), and failures.
+Failures has exactly original/cleanup/evidence; each is null or exactly phase,
+category (fixed public error enum or unknown) and observation (fixed process-edge
+reason enum or null). Record the first failure in each slot before later cleanup
+or report projection; never replace the original with a generic later error.
+
+Only independently validated, rebuilt fields may be serialized. A private normal
+report is input data, not a trusted diagnostic object: extract only bounded known
+facts, ignore unrelated raw diagnostics, map unknown free strings to unknown, and
+never copy paths/argv/hostnames/config/nonces/credentials or their hashes. Direct
+versioned records reject extra keys, duplicates, nonfinite values, booleans-as-numbers,
+invalid enums and oversized data. Input is a no-follow, bounded regular current-UID
+file; symlink/multilink/unsafe files are invalid. Publication uses an owned safe
+parent, exclusive no-follow0600 file and finite bounds. Failed publication never
+changes the runtime's original exit or rewrites its report. CI's separate always-run
+collector supplies a minimal unknown record if evidence is missing/invalid and
+publishes only its explicit allowlisted profile basename, never raw logs.
+
+A ProcessObservationError may carry a fixed reason to distinguish parent disappearance,
+parent reuse/zombie, child disappearance/reuse/reparenting or inconsistent start order;
+recording must preserve the existing combined fail-closed condition and message.
+No new generation is admitted after refusal and unknown is not cleanup success.
+
+CI keeps approved report artifacts and strict diagnostics for30days (subject to
+repository policy). Four-profile real qualification uses the unchanged original
+locked artifact in separate fresh non-root containers with real passwd homes,
+loopback ingress, no external runtime network and bounded owned cleanup. A new
+failure remains evidence, not permission to relax the gate. Historical logs for
+issue548 were retrievable; docs must distinguish them from ephemeral artifact
+retention, prior repairs and unproved current root cause.

@@ -17,6 +17,7 @@ import tempfile
 import time
 
 import lab
+import failure_diagnostics
 
 ACCEPTANCE = tuple(f'M7-0{i}' for i in range(1, 6))
 RETAINED = ('after_first_stop', 'after_second_stop', 'after_third_stop',
@@ -222,7 +223,7 @@ class Capture(lab.Process):
             self.observation_error = 'command output read failed'
 
 
-def execute(args, report):
+def execute(args, report, recorder=None):
     from trial_state import decode_message
     cache = Path(args.cache)
     scope = Path(pwd.getpwuid(os.getuid()).pw_dir)/'.open-compute'
@@ -365,10 +366,21 @@ def execute(args, report):
             report['scope_removed']=True
             report['retained']['state_after_destroy']=(state/'manifest.json').is_file()
             need(report['retained']['state_after_destroy'],'ownership')
+    except Exception as exc:
+        if recorder is not None:
+            recorder.capture("original", report['phase'], exc)
+            if current is not None:
+                recorder.observe("original", getattr(current, "observation_reason", None))
+        raise
     finally:
         # Failure cleanup never calls destroy or clears the child's dirty marker.
-        with lab.m3_deadline(150,'M7 cleanup') as deadline:
-            finalize_children(children,deadline)
+        try:
+            with lab.m3_deadline(150,'M7 cleanup') as deadline:
+                finalize_children(children,deadline)
+        except Exception as exc:
+            if recorder is not None:
+                recorder.capture("cleanup", report['phase'], exc)
+            raise
 
 
 def main(argv=None):
@@ -378,6 +390,7 @@ def main(argv=None):
     parser.add_argument('--port',type=int,default=8787)
     args=parser.parse_args(argv)
     report=initial_report()
+    diagnostic_record=failure_diagnostics.Recorder("trial",report['harness_commit'])
     output=None
     def interrupted(signum,frame):
         raise TrialFailure('interrupted')
@@ -387,11 +400,15 @@ def main(argv=None):
         _,output=lab.validate_artifact_paths(scope,Path(args.cache),Path(args.output))
         # validate_artifact_paths owns exclusive output admission only; mkdir below.
         output.mkdir(mode=0o700,parents=True,exist_ok=False)
-        execute(args,report)
+        execute(args,report,recorder=diagnostic_record)
         report.update(result='passed',phase='complete',error=None,evidence_file_written=True)
         report['acceptance']['M7-05']='passed'
         write_report(output,report)
     except Exception as exc:
+        if isinstance(exc,TrialFailure) and str(exc)=='evidence':
+            diagnostic_record.capture("evidence",report['phase'],exc)
+        elif diagnostic_record.value['failures']['cleanup'] is None:
+            diagnostic_record.capture("original",report['phase'],exc)
         reason=str(exc) if isinstance(exc,TrialFailure) and str(exc) in ERRORS else 'runtime'
         if report['evidence_file_written']:
             reason='evidence'
@@ -401,8 +418,8 @@ def main(argv=None):
         if output is not None and output.is_dir() and not os.path.lexists(output/'report.json'):
             try:
                 write_report(output,report)
-            except TrialFailure:
-                pass
+            except TrialFailure as exc:
+                diagnostic_record.capture("evidence",report['phase'],exc)
     finally:
         for s,h in old.items(): signal.signal(s,h)
     try:
@@ -410,10 +427,16 @@ def main(argv=None):
         encoded=json.dumps(value,indent=2,sort_keys=True,allow_nan=False)+'\n'
         need(len(encoded.encode())<=128*1024,'evidence')
         print(encoded,end='')
-    except Exception:
+    except Exception as exc:
+        diagnostic_record.capture("evidence",report['phase'],exc)
+        if output is not None:
+            failure_diagnostics.write_record(output,diagnostic_record,dict(report,result='failed'),1)
         print('{"result":"failed","error":"evidence"}')
         return 1
-    return 0 if report['result']=='passed' else 1
+    exit_code=0 if report['result']=='passed' else 1
+    if output is not None:
+        failure_diagnostics.write_record(output,diagnostic_record,report,exit_code)
+    return exit_code
 
 if __name__=='__main__':
     raise SystemExit(main())

@@ -10,15 +10,19 @@ already admitted or sent to a provider may still consume paid resources.
 Keyless local bootstrap is an explicit exception: `--allow-keyless-bootstrap`
 or `THINROUTER_ALLOW_KEYLESS_BOOTSTRAP=true`, default false. It authorizes only
 requests without either credential header, while the listener's configured IP is
-an exact loopback address and the database contains zero total gateway keys.
-Creating the first key closes this exception; disabling keys never reopens it.
-A public/wildcard listener cannot enable this exception. Hostnames, forwarded
-headers and client-supplied origin information cannot establish loopback safety.
+an exact loopback address, the request is not remote, and the database contains
+zero total gateway keys. A request is remote when its TCP peer is not loopback or
+it carries a proxy header (`Forwarded`, `X-Forwarded-*`, `X-Real-IP`,
+`CF-Connecting-IP`, `Tailscale-User-Login`, ...; full list in
+[security](security.md)), so traffic through Tailscale Serve or cloudflared never
+gets bootstrap. Creating the first key closes this exception; disabling keys
+never reopens it. A public/wildcard listener cannot enable this exception.
 
-The admin UI and API may remain keyless on an exact loopback listener for local
-setup. Non-loopback listeners require a nonempty admin token at startup and deny
-admin authorization without that token. This prevents creating gateway keys as
-an unauthenticated alternative to inference authorization.
+The admin UI and API always require the admin token, on loopback too; without
+`--admin-token` it is generated into `<data_dir>/admin-token`. Non-loopback
+listeners require an explicit nonempty admin token at startup. This prevents
+creating gateway keys as an unauthenticated alternative to inference
+authorization.
 
 Normal opt-in is to create a gateway API key using the local admin UI/API and
 send it as `Authorization: Bearer <key>` or `x-api-key: <key>`. Public operation
@@ -36,8 +40,8 @@ inferred from this source contract.
 
 Verification uses local fake upstreams only. Store and HTTP integration tests
 must cover empty/disabled stores, valid/invalid credentials, both endpoint path
-families, explicit loopback bootstrap, public bootstrap refusal, and unauthorized
-public admin key creation. Rejected inference requests must produce zero
+families, explicit loopback bootstrap, forwarded-header bootstrap refusal, public
+bootstrap refusal, and unauthorized admin key creation on any listener. Rejected inference requests must produce zero
 upstream calls; valid requests must still succeed.
 
 The component CI checks formatting, the complete test suite and Clippy with

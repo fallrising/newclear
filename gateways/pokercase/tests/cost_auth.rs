@@ -99,6 +99,8 @@ fn command(
 struct Gateway {
     base: String,
     client: reqwest::Client,
+    /// Explicit `--admin-token`, or the generated `<data_dir>/admin-token`.
+    admin: String,
     child: tokio::process::Child,
     _dir: TempDir,
 }
@@ -125,9 +127,17 @@ impl Gateway {
             );
             if let Ok(resp) = client.get(format!("{base}/health")).send().await {
                 if resp.status().is_success() {
+                    let admin = match admin {
+                        Some(t) => t.to_string(),
+                        None => std::fs::read_to_string(dir.path().join("admin-token"))
+                            .unwrap()
+                            .trim()
+                            .to_string(),
+                    };
                     return Self {
                         base,
                         client,
+                        admin,
                         child,
                         _dir: dir,
                     };
@@ -138,24 +148,23 @@ impl Gateway {
         panic!("gateway did not become healthy");
     }
 
-    async fn add_upstream(&self, fake: &FakeUpstream, admin: Option<&str>) {
-        let mut req = self.client.post(format!("{}/admin/api/connections", self.base)).json(&json!({
+    fn admin_post(&self, path: &str) -> reqwest::RequestBuilder {
+        self.client
+            .post(format!("{}{path}", self.base))
+            .header("x-admin-token", &self.admin)
+    }
+
+    async fn add_upstream(&self, fake: &FakeUpstream) {
+        let req = self.admin_post("/admin/api/connections").json(&json!({
             "name": "mock", "base_url": fake.url, "api_key": "local-placeholder", "default_model": "mock",
         }));
-        if let Some(token) = admin {
-            req = req.header("x-admin-token", token);
-        }
         assert_eq!(req.send().await.unwrap().status(), 201);
     }
 
-    async fn create_key(&self, admin: Option<&str>) -> Value {
-        let mut req = self
-            .client
-            .post(format!("{}/admin/api/keys", self.base))
+    async fn create_key(&self) -> Value {
+        let req = self
+            .admin_post("/admin/api/keys")
             .json(&json!({"name": "client"}));
-        if let Some(token) = admin {
-            req = req.header("x-admin-token", token);
-        }
         let resp = req.send().await.unwrap();
         assert_eq!(resp.status(), 201);
         resp.json().await.unwrap()
@@ -203,7 +212,7 @@ impl Gateway {
 async fn empty_and_disabled_keys_reject_before_all_upstream_surfaces() {
     let fake = fake_upstream().await;
     let mut gateway = Gateway::start("127.0.0.1", false, None).await;
-    gateway.add_upstream(&fake, None).await;
+    gateway.add_upstream(&fake).await;
     gateway.assert_inference(401, None).await;
     gateway
         .assert_inference(401, Some(("authorization", "Bearer invalid")))
@@ -214,7 +223,7 @@ async fn empty_and_disabled_keys_reject_before_all_upstream_surfaces() {
     gateway.assert_models(401).await;
     assert_eq!(fake.calls.load(Ordering::SeqCst), 0);
 
-    let key = gateway.create_key(None).await;
+    let key = gateway.create_key().await;
     let secret = key["secret"].as_str().unwrap();
     let bearer = format!("Bearer {secret}");
     gateway
@@ -226,10 +235,8 @@ async fn empty_and_disabled_keys_reject_before_all_upstream_surfaces() {
     assert_eq!(fake.calls.load(Ordering::SeqCst), 12);
 
     let resp = gateway
-        .client
-        .post(format!(
-            "{}/admin/api/keys/{}/disable",
-            gateway.base,
+        .admin_post(&format!(
+            "/admin/api/keys/{}/disable",
             key["key"]["id"].as_str().unwrap()
         ))
         .send()
@@ -251,7 +258,7 @@ async fn empty_and_disabled_keys_reject_before_all_upstream_surfaces() {
 async fn explicit_loopback_bootstrap_only_accepts_absent_credentials_and_zero_total_keys() {
     let fake = fake_upstream().await;
     let mut gateway = Gateway::start("127.0.0.1", true, None).await;
-    gateway.add_upstream(&fake, None).await;
+    gateway.add_upstream(&fake).await;
     for credential in ["Basic invalid", "Bearer ", "Bearer invalid"] {
         gateway
             .assert_inference(401, Some(("authorization", credential)))
@@ -263,13 +270,12 @@ async fn explicit_loopback_bootstrap_only_accepts_absent_credentials_and_zero_to
     gateway.assert_models(200).await;
     assert_eq!(fake.calls.load(Ordering::SeqCst), 6);
 
-    let key = gateway.create_key(None).await;
+    let key = gateway.create_key().await;
     gateway.assert_inference(401, None).await;
     let id = key["key"]["id"].as_str().unwrap();
     assert_eq!(
         gateway
-            .client
-            .post(format!("{}/admin/api/keys/{id}/disable", gateway.base))
+            .admin_post(&format!("/admin/api/keys/{id}/disable"))
             .send()
             .await
             .unwrap()
@@ -285,7 +291,7 @@ async fn explicit_loopback_bootstrap_only_accepts_absent_credentials_and_zero_to
 async fn public_listener_requires_admin_auth_and_gateway_auth() {
     let fake = fake_upstream().await;
     let mut gateway = Gateway::start("0.0.0.0", false, Some("local-admin-test")).await;
-    gateway.add_upstream(&fake, Some("local-admin-test")).await;
+    gateway.add_upstream(&fake).await;
     for path in ["/admin/api/keys", "/admin/api/connections/mock/test"] {
         assert_eq!(
             gateway
@@ -301,7 +307,7 @@ async fn public_listener_requires_admin_auth_and_gateway_auth() {
     }
     gateway.assert_inference(401, None).await;
     assert_eq!(fake.calls.load(Ordering::SeqCst), 0);
-    let key = gateway.create_key(Some("local-admin-test")).await;
+    let key = gateway.create_key().await;
     gateway
         .assert_inference(200, Some(("x-api-key", key["secret"].as_str().unwrap())))
         .await;

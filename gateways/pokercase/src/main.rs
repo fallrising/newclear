@@ -7,6 +7,7 @@ mod cooldown;
 mod cursor_agent;
 mod cursor_proto;
 mod error;
+mod guard;
 mod http_client;
 mod local_import;
 mod oauth_refresh;
@@ -66,6 +67,22 @@ enum Commands {
         token_saver: bool,
         #[arg(long, env = "THINROUTER_TOKEN_SAVER_MAX_CHARS", default_value_t = 2000)]
         token_saver_max_chars: usize,
+        /// Extra Host names to accept (e.g. your Tailscale Serve name); IP literals
+        /// and localhost are always accepted. Comma-separated in the env var.
+        #[arg(
+            long = "allowed-host",
+            env = "THINROUTER_ALLOWED_HOSTS",
+            value_delimiter = ','
+        )]
+        allowed_hosts: Vec<String>,
+        /// Operator-only upstream base override, `provider=url` (repeatable). Admin UI/API
+        /// can then also point that provider's connections at this base.
+        #[arg(
+            long = "provider-base-override",
+            env = "THINROUTER_PROVIDER_BASE_OVERRIDES",
+            value_delimiter = ','
+        )]
+        provider_base_overrides: Vec<String>,
     },
     Doctor {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -124,6 +141,8 @@ async fn main() -> Result<()> {
             sse_stall_secs,
             token_saver,
             token_saver_max_chars,
+            allowed_hosts,
+            provider_base_overrides,
         } => {
             let mut cfg = AppConfig::new(
                 host,
@@ -136,6 +155,8 @@ async fn main() -> Result<()> {
                 Some(token_saver_max_chars),
             )?;
             cfg.allow_keyless_bootstrap = allow_keyless_bootstrap;
+            cfg.allowed_hosts = allowed_hosts;
+            cfg.set_provider_base_overrides(&provider_base_overrides)?;
             server::run(cfg).await
         }
         Commands::Doctor {
@@ -260,9 +281,12 @@ fn doctor(cfg: &AppConfig) -> Result<()> {
     println!(
         "  secrets  : {}",
         if cfg.secrets_key.is_some() {
-            "encryption enabled"
+            "encrypted (argon2id passphrase)".to_string()
         } else {
-            "plaintext secrets"
+            format!(
+                "encrypted (key file {})",
+                cfg.data_dir.join("secrets.key").display()
+            )
         }
     );
     let store = store::Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;

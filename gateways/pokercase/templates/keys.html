@@ -18,7 +18,7 @@
         <a href="/admin/usage">Usage</a>
       </nav>
       {% if admin_protected %}
-      <form method="post" action="/admin/logout" class="logout"><button type="submit" class="ghost">Logout</button></form>
+      <form method="post" action="/admin/logout" class="logout"><input type="hidden" name="csrf" value="{{ csrf }}" /><button type="submit" class="ghost">Logout</button></form>
       {% endif %}
     </aside>
     <main class="content">
@@ -34,7 +34,7 @@
 
       <section class="panel">
         <h2>Create key</h2>
-        <form method="post" action="/admin/keys/new" class="form-grid">
+        <form method="post" action="/admin/keys/new" class="form-grid"><input type="hidden" name="csrf" value="{{ csrf }}" />
           <label>Name <input name="name" placeholder="local" /></label>
           <button type="submit">Create</button>
         </form>
@@ -61,7 +61,7 @@
               <td>{% if k.enabled %}yes{% else %}no{% endif %}</td>
               <td class="mono">{{ k.created_at }}</td>
               <td>
-                <form method="post" action="/admin/keys/{{ k.id }}/delete" onsubmit="return confirm('Delete key?')">
+                <form method="post" action="/admin/keys/{{ k.id }}/delete" onsubmit="return confirm('Delete key?')"><input type="hidden" name="csrf" value="{{ csrf }}" />
                   <button type="submit" class="danger">Delete</button>
                 </form>
               </td>

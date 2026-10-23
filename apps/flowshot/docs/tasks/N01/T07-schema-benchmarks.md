@@ -3,19 +3,19 @@ document_type: task
 id: T07
 node_id: N01
 title: Verify and close the SQLite foundation
-status: todo
+status: done
 depends_on:
   - T05
   - T06
 derived_from:
   - 00-implementation-plan.md
   - 01-test-plan.md
-source_version: 1.0.1
+source_version: 1.0.2
 source_sha256:
-  SPEC.md: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-  N01: 13de68ca196fd1d302ca4df0bff5d4633cfee1a106656a43e220967f0cc660fc
-  plan: d1e72feb1a8aab1d80873c1890b6e9761cb85463eabf2c19c385bd8100585372
-  test_plan: 6129ff514d939f8971527e9b215eeaedfa3f6e932b153cd3fead8c5814cb7ccd
+  SPEC.md: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+  N01: b50452419cf658893fb76bbb28b891cd5377eeb79971e2933f61150a6a430fd4
+  plan: bb0b2dd670cd5e088357aa0b8226c318e2c316d50317f03f47a3aff03a6bad5f
+  test_plan: 4f76ee9a4f5edfb38949f92f6a775682370ac11d9d60b38a5abce4f9f16f8c09
 owner: codex
 allowed_paths:
   - crates/db/Cargo.toml
@@ -24,12 +24,17 @@ allowed_paths:
   - crates/db/src/test_support/**
   - crates/db/tests/query_plans.rs
   - src-tauri/src/db*
+  - src-tauri/src/lib.rs
+  - src-tauri/tauri.conf.json
+  - scripts/linux-db-smoke.py
+  - src-tauri/Cargo.toml
+  - docs/graph.yaml
+  - docs/metrics/node-outcomes.jsonl
   - docs/tasks/N01/**
   - docs/verification/N01.md
   - contracts/locks/N01.json
 forbidden_paths:
   - SPEC.md
-  - graph/outcome files until SD-N01-006 is resolved
   - UI or unrelated product features
 expected_duration: 120m
 ---
@@ -44,8 +49,7 @@ governance state is updated atomically.
 
 ## Start Gate
 
-Resolve SD-N01-006 before closure so graph status and append-only G2 outcome
-can be updated without exceeding node ownership.
+SD-N01-006 resolved in node revision 2: orchestrator may update graph/outcome after independent acceptance.
 
 ## 執行步驟
 
@@ -68,7 +72,7 @@ can be updated without exceeding node ownership.
 ## 完成驗證
 
 - `make ci` and every N01 test target pass.
-- Release seed is under 1 second with hardware/SQLite dataset record.
+- Release migration plus seed is under 1 second with hardware/SQLite dataset record.
 - Query plans use the specified indexes.
 - Production DB path is under platform app-data.
 - Lock drift is zero; verification, graph and append-only outcome agree.
@@ -77,3 +81,7 @@ can be updated without exceeding node ownership.
 
 N01 unlocks the remainder of M0 and makes N02 persistence work eligible only
 according to graph and milestone rules.
+
+Startup barrier implementation: set the configured main window `create:false`, resolve the DB path using Tauri `app_data_dir`, initialize/migrate via DbRuntime, then construct the configured WebView. Real Linux smoke verifies app-data creation, restart preservation and corrupted migration rejection before any visible window/IPC. No raw SQL enters the native production adapter.
+
+Development acceptance: [N01/M0 verification](../../verification/N01.md), final complete Docker gate and independent T-006 ACCEPT. Historical RED/rework remains in the evidence; task-board merge closure is separate.

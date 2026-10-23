@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "create": false,
         "title": "Flowshot",
         "width": 1100,
         "height": 760,

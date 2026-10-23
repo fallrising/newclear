@@ -260,8 +260,8 @@ def validate_graph(
             raise VerificationError(f"{path.relative_to(ROOT)}: stale source_version")
         if node.get("source_sha256") != spec_hash:
             raise VerificationError(f"{path.relative_to(ROOT)}: stale source_sha256")
-        if node.get("revision") != "1":
-            raise VerificationError(f"{path.relative_to(ROOT)}: missing revision")
+        if not re.fullmatch(r"[1-9][0-9]*", str(node.get("revision", ""))):
+            raise VerificationError(f"{path.relative_to(ROOT)}: revision must be a positive integer")
         file_nodes[node_id] = {"path": path, **node}
 
     if set(file_nodes) != set(graph_nodes):

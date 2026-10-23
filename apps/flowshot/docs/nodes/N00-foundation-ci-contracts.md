@@ -3,14 +3,14 @@ id: N00
 title: 專案骨架、CI 與 Contract Pipeline
 kind: core
 milestone: M0
-status: blocked
+status: done
 depends_on: []
 size: M
-revision: 1
+revision: 3
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-contract_status: draft
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+contract_status: frozen
 legacy_reference: 
   - mdread repository layout
   - loom contract-first CI pattern
@@ -23,6 +23,8 @@ allowed_paths:
   - src-tauri/**
   - src/**
   - Makefile
+  - scripts/**
+  - ../../.github/workflows/flowshot-ci.yml
   - README.md
   - .gitignore
   - index.html
@@ -136,7 +138,8 @@ pub trait CommandContract {
 
 ## 性能與觀測
 
-- 空應用 release build 冷啟動到可互動 `< 1.5 s`，記錄基準硬體。
+- 開發驗收：Linux Docker 完整 native gate 與 Xvfb 可見視窗／真實 frontend IPC smoke。
+- 發行驗收：受控 Mac 空應用 release build 冷啟動到可互動 `< 1.5 s`，記錄基準硬體；獨立於開發 `done`，依 SPEC §13.1 追蹤 SUCCESS AC-02。
 - CI 每個階段輸出可辨識名稱與耗時。
 - build info 與 command correlation ID 可在本地日誌確認。
 

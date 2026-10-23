@@ -2,8 +2,8 @@
   "schema_version": 1,
   "node_id": "N00",
   "status": "frozen",
-  "spec_version": "1.0.1",
-  "spec_sha256": "dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e",
+  "spec_version": "1.0.2",
+  "spec_sha256": "b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0",
   "source_files": [
     "crates/core/src/contracts/mod.rs",
     "crates/core/src/contracts/common.rs",

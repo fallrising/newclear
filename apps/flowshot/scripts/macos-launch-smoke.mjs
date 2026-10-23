@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  execFile,
   execFileSync,
   spawn,
   spawnSync,
@@ -17,7 +18,10 @@ import {
 export const acceptanceBudgetMs = 1_500;
 const defaultObservationWindowMs = 15_000;
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const appBinary = resolve(repositoryRoot, "target/release/flowshot-tauri");
+export function releaseBinary(environment = process.env) {
+  const target = resolve(repositoryRoot, environment.CARGO_TARGET_DIR || "target");
+  return join(target, environment.CARGO_BUILD_TARGET || "", "release", "flowshot-tauri");
+}
 const windowSource = resolve(
   repositoryRoot,
   "scripts/macos-window-check.swift",
@@ -54,6 +58,8 @@ export function assessLaunchSignals(
       failures.push(
         `${name} signal was not observed: ${signal.missingReason}`,
       );
+    } else if (!Number.isFinite(signal.observedAtMs) || signal.observedAtMs < 0) {
+      failures.push(`${name} signal has an invalid observation timestamp`);
     } else if (signal.observedAtMs >= budgetMs) {
       failures.push(
         `${name} signal arrived at ${signal.observedAtMs} ms; budget is under ${budgetMs} ms`,
@@ -74,10 +80,16 @@ function delay(milliseconds) {
   });
 }
 
-function stopProcess(child) {
-  if (child.exitCode === null && child.signalCode === null) {
+export async function stopProcess(child, graceMs = 1_000) {
+  if (child.pid === undefined || child.exitCode !== null || child.signalCode !== null) return;
+  await new Promise((resolveStopped) => {
+    const timer = setTimeout(() => child.kill("SIGKILL"), graceMs);
+    child.once("exit", () => {
+      clearTimeout(timer);
+      resolveStopped();
+    });
     child.kill("SIGTERM");
-  }
+  });
 }
 
 function parseCompletionLine(line) {
@@ -98,7 +110,7 @@ function parseCompletionLine(line) {
   return undefined;
 }
 
-function waitForCommand(child, output, deadline, startedAt) {
+export function waitForCommand(child, output, deadline, startedAt) {
   return new Promise((resolveCommand) => {
     let buffer = "";
     let timer;
@@ -106,6 +118,7 @@ function waitForCommand(child, output, deadline, startedAt) {
     const finish = (outcome) => {
       clearTimeout(timer);
       child.off("exit", onExit);
+      child.off("error", onError);
       child.stdout.off("data", onData);
       resolveCommand(outcome);
     };
@@ -120,7 +133,7 @@ function waitForCommand(child, output, deadline, startedAt) {
         const completion = parseCompletionLine(line);
         if (completion !== undefined) {
           finish({
-            observedAtMs: Math.round(performance.now() - startedAt),
+            observedAtMs: performance.now() - startedAt,
             value: completion,
           });
           return;
@@ -136,6 +149,8 @@ function waitForCommand(child, output, deadline, startedAt) {
       });
     };
 
+    const onError = (error) => finish({ missingReason: `Flowshot spawn failed: ${error.message}` });
+    child.once("error", onError);
     child.once("exit", onExit);
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", onData);
@@ -150,39 +165,40 @@ function waitForCommand(child, output, deadline, startedAt) {
   });
 }
 
-async function waitForVisibleWindow(
-  pid,
-  deadline,
-  startedAt,
-  windowProbe,
-) {
+export async function waitForVisibleWindow(pid, deadline, startedAt, windowProbe) {
   let lastDiagnostic = "";
-
   while (performance.now() < deadline) {
-    const result = spawnSync(windowProbe, [String(pid)], {
-      encoding: "utf8",
+    const remaining = Math.max(1, Math.ceil(deadline - performance.now()));
+    const result = await new Promise((resolveProbe) => {
+      execFile(windowProbe, [String(pid)], {
+        encoding: "utf8", timeout: remaining, killSignal: "SIGKILL", maxBuffer: 64 * 1024,
+      }, (error, stdout, stderr) => resolveProbe({ error, stdout, stderr }));
     });
-    if (result.status === 0) {
-      return {
-        observedAtMs: Math.round(performance.now() - startedAt),
-        value: JSON.parse(result.stdout),
-      };
+    if (result.error === null) {
+      try {
+        const value = JSON.parse(result.stdout);
+        if (value.pid !== pid || !Number.isInteger(value.windowId) || value.windowId <= 0) {
+          throw new Error("probe returned a window for an invalid PID or window ID");
+        }
+        return { observedAtMs: performance.now() - startedAt, value };
+      } catch (error) {
+        lastDiagnostic = error.message;
+      }
+    } else {
+      lastDiagnostic = result.stderr.trim() || result.error.message;
     }
-    lastDiagnostic = result.stderr.trim();
-    const elapsedMs = performance.now() - startedAt;
-    await delay(elapsedMs < acceptanceBudgetMs ? 20 : 100);
+    const remainingDelay = deadline - performance.now();
+    if (remainingDelay > 0) {
+      await delay(Math.min(remainingDelay, performance.now() - startedAt < acceptanceBudgetMs ? 20 : 100));
+    }
   }
-
-  return {
-    missingReason:
-      `timed out waiting for an on-screen Flowshot window: ` +
-      lastDiagnostic,
-  };
+  return { missingReason: `timed out waiting for an on-screen Flowshot window: ${lastDiagnostic}` };
 }
 
-function artifactDirectory(environment) {
+export function artifactDirectory(environment) {
   const directory = environment.FLOWSHOT_LAUNCH_ARTIFACT_DIR?.trim();
-  return directory ? resolve(directory) : undefined;
+  return directory ? resolve(directory) : environment.AGENT_EVIDENCE_DIR
+    ? resolve(environment.AGENT_EVIDENCE_DIR, "macos-launch") : undefined;
 }
 
 function captureScreenshot(directory, windowOutcome) {
@@ -196,7 +212,7 @@ function captureScreenshot(directory, windowOutcome) {
       ? ["-x", "-l", String(windowId), screenshotPath]
       : ["-x", screenshotPath];
   const result = spawnSync("screencapture", args, {
-    encoding: "utf8",
+    encoding: "utf8", timeout: 5_000,
   });
 
   return {
@@ -224,6 +240,7 @@ async function run() {
     throw new Error("macos-launch-smoke requires macOS");
   }
 
+  const appBinary = releaseBinary();
   if (!existsSync(appBinary)) {
     throw new Error(`release application does not exist: ${appBinary}`);
   }
@@ -237,7 +254,7 @@ async function run() {
     execFileSync(
       "xcrun",
       ["swiftc", windowSource, "-o", windowProbe],
-      { stdio: "inherit" },
+      { stdio: "inherit", timeout: 60_000 },
     );
 
     const output = { stdout: "", stderr: "" };
@@ -257,7 +274,7 @@ async function run() {
     try {
       const [commandOutcome, windowOutcome] = await Promise.all([
         waitForCommand(child, output, deadline, startedAt),
-        waitForVisibleWindow(
+        child.pid === undefined ? Promise.resolve({ missingReason: "Flowshot did not spawn" }) : waitForVisibleWindow(
           child.pid,
           deadline,
           startedAt,
@@ -268,6 +285,9 @@ async function run() {
         command: commandOutcome,
         window: windowOutcome,
       });
+      if (child.exitCode !== null || child.signalCode !== null) {
+        failures.push("Flowshot exited during launch observation");
+      }
       const report = {
         event: "macos_launch_smoke",
         result: failures.length === 0 ? "pass" : "fail",
@@ -309,7 +329,7 @@ async function run() {
 
       console.log(serializedReport);
     } finally {
-      stopProcess(child);
+      await stopProcess(child);
     }
   } finally {
     rmSync(temporaryDirectory, { recursive: true, force: true });

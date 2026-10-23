@@ -2,9 +2,9 @@
 document_id: SPEC-ROOT
 title: Markdown Annotator 技術規格
 project_slug: flowshot
-version: 1.0.1
+version: 1.0.2
 status: approved-for-m0
-date: 2026-07-29
+date: 2026-10-23
 authority: product-architecture-security
 language: zh-TW
 ---
@@ -474,7 +474,12 @@ PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
 PRAGMA synchronous = NORMAL;
 PRAGMA busy_timeout = 5000;
+PRAGMA recursive_triggers = ON;
 ```
+
+`recursive_triggers` 確保 `INSERT OR REPLACE` 的隱含 DELETE 也受 hard-delete/system-tag triggers 保護。
+
+僅測試用 in-memory connection 的 journal mode 為 SQLite `memory`（不支援 WAL）；其餘 PRAGMA 不豁免。並行、busy 與重啟證據必須使用 tempfile WAL。
 
 migration 只提供 `up`，必須可重跑檢查、不可跳版。破壞性 migration 前必須先建立 DB backup；v1 不允許破壞性 migration。
 
@@ -916,13 +921,19 @@ Machine-readable DAG：[`docs/graph.yaml`](docs/graph.yaml)。
 
 | 里程碑 | 節點 | Gate |
 |---|---|---|
-| M0 地基 | N00, N01 | `make ci` 全綠；migration/invariant test 全綠；G2 記錄檔可寫入 |
+| M0 地基 | N00, N01 | Linux Docker `make ci`、`make native-ci` 與原生啟動 smoke 全綠；migration/invariant test 全綠；G2 記錄檔可寫入 |
 | M1 能讀 | N02, N03, N04 | 連續 3 天用真實 KB 閱讀；性能預算達標 |
 | M2 能標 | N05, N06, N07 | 至少 30 條真批注、10 條留言；重開皆可見 |
 | M3 標不死 | N09, N10, A02 | 真實 git 變更回放；attached 比例 ≥ 90%；零遺失；所有 orphan 可恢復 |
 | M4 能檢索 | N08, A01, A03, A04 | 標籤搜尋至少 3 次真實命中；原始核心需求閉環 |
 | M4+ 收尾 | A05, A06, A07 | 各節點獨立驗收 |
 | Bonus | 非目標候選 | 連續 14 天 dogfood 與全部核心 gate 通過 |
+
+### 13.1 開發驗收與 macOS 發行驗收
+
+依 owner 2026-10-23 指示，Linux Docker 是正式開發驗證環境。N00 開發驗收必須實際通過完整 Rust/frontend/contract gate、Linux Tauri native build/test 與 Xvfb 視窗及真實 frontend IPC smoke；不得用 native skip 或 mock 代替。通過後可將 N00 標為 `done` 並依 DAG 啟動 N01 等下游；`done` 表示節點開發驗收，不表示 macOS 發行驗收。
+
+macOS 13+ Apple Silicon／Intel 仍為 v1 發行目標。受控目標 Mac 的可見視窗與 frontend command completion 都必須 `< 1500 ms`，原 oracle、硬體紀錄及歷史失敗證據不變。此項獨立追蹤於 SUCCESS AC-02；未通過禁止 usable tag／發行，但不阻塞 Linux 開發、里程碑提交與 PR 合併。CI 中 macOS native build/test 仍需通過，hosted timing 仍只作診斷。其他產品安全、性能、BDD 與 dogfood gate 不變。
 
 關鍵路徑：`N00 → N03 → N05 → N06 → N09 → N10 → A02`。
 
@@ -1001,7 +1012,7 @@ todo
 - Node BDD 全過。
 - Node TDD/contract/invariant test 全綠。
 - `make ci` 全綠。
-- 性能與安全驗收有證據。
+- 性能與安全驗收有證據；§13.1 的受控 Mac 發行驗收另於 SUCCESS 追蹤，不以 Linux 結果代替。
 - verification report 已完成。
 - contract drift 為零。
 - node outcome 已追加到 JSONL。

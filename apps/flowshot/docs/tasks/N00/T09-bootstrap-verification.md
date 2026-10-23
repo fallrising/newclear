@@ -3,18 +3,18 @@ document_type: task
 id: T09
 node_id: N00
 title: Verify and close N00
-status: todo
+status: done
 depends_on:
-  - T08
+  - T10
 derived_from:
   - 00-implementation-plan.md
   - 01-test-plan.md
-source_version: 1.0.1
+source_version: 1.0.2
 source_sha256:
-  SPEC.md: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-  N00: df7ce22a67b3262bc0324b04025fc11723065c03dd8345748f601083a60622be
-  plan: bb4a5bdc4a1a100739c266cd342127a5e5dbac93675fae0a2490e65e2a8c5422
-  test_plan: 15c20c961703b928ba3b0e5170f58f7004a5eb8eb0307fe9332bee09bca8246c
+  SPEC.md: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+  N00: 47754e767664fc4dd86cb2abcaa512317af42663f49546520838f5a7ce691d1a
+  plan: 1502abf90d2cdcf0ee9081043241c95243f9d8919c73e4d13dc2d8ea2b68608d
+  test_plan: d869268f6a67de3c4303a14b3e2aa34486ec50a3c7f85179dc187742befc5c63
 owner: codex
 allowed_paths:
   - README.md
@@ -34,17 +34,15 @@ expected_duration: 90m
 ## 單一交付結果
 
 Independent evidence shows every N00 requirement and BDD passes, including a
-target-macOS minimal-window launch, and governance state is updated atomically.
+Linux Docker native-window and real frontend IPC smoke (SPEC §13.1), and governance state is updated atomically.
 
 ## 前置事實與證據
 
-T08 reports a real target-Mac window launch, cold-start timing, structured
-command metadata, and a frozen N00 contract.
+T10 provides the repaired foundation; Linux Docker must pass complete native gates and real window/IPC smoke. T08 controlled-Mac launch remains a separate release requirement.
 
 ## 輸入
 
-N00 test plan, completed task evidence, GitHub Actions results, and target-Mac
-launch/performance evidence.
+N00 test plan, completed task evidence, GitHub Actions results, and Linux native evidence; separately record the pending target-Mac release evidence.
 
 ## 修改範圍
 
@@ -60,7 +58,7 @@ addition, or overwrite of append-only history.
 
 1. Re-run all BDD and negative tests from clean state.
 2. Inspect architecture, capability, generated files, and contract lock.
-3. Capture macOS build/launch and cold-start evidence.
+3. Capture Linux Docker native build/test and window/IPC smoke evidence; retain Mac launch as pending release acceptance.
 4. Write `docs/verification/N00.md`.
 5. Append the G2 outcome.
 6. Mark N00 done only if every gate passes and evaluate downstream readiness.
@@ -68,7 +66,7 @@ addition, or overwrite of append-only history.
 ## 首個失敗測試
 
 - Command: verification checklist before evidence collection.
-- Expected failure: N00 lacks a verification report and target-Mac launch proof.
+- Expected failure: N00 lacks a verification report and Linux native launch proof.
 - Requirement: node DoD and independent verification.
 
 ## 完成驗證
@@ -80,6 +78,8 @@ addition, or overwrite of append-only history.
 ## Handoff
 
 - Changed files: verification/governance artifacts only.
-- Evidence: commands, Actions URLs, macOS hardware/OS/timing record.
-- Risks: any unmet dogfood or platform gate keeps N00 in verifying/blocked state.
+- Evidence: commands, Actions URLs, Linux container/toolchain/window/IPC record, with Mac release evidence pending.
+- Risks: any unmet development gate keeps N00 in verifying/blocked; the Mac release gate remains tracked in SUCCESS AC-02.
 - Next task: N01 and N03 become candidates only after graph/gate rules allow.
+
+Development acceptance: [N01/M0 verification](../../verification/N01.md), final complete Docker gate and independent T-006 ACCEPT. Historical RED/rework remains in the evidence; task-board merge closure is separate.

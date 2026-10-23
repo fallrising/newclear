@@ -7,10 +7,10 @@
     "node": ">=24.18.0 <25"
   },
   "scripts": {
-    "build": "tsc -b && vite build",
+    "build": "node scripts/build-frontend.mjs",
     "dev": "vite",
     "lint": "eslint .",
-    "tauri": "tauri",
+    "tauri": "node scripts/tauri.mjs",
     "test": "vitest run"
   },
   "dependencies": {

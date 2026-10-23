@@ -1,16 +1,16 @@
 ---
 document_type: test-plan
 node_id: N01
-status: blocked
+status: done
 derived_from:
   - ../../../SPEC.md
   - ../../nodes/N01-sqlite-schema-migrations.md
   - 00-implementation-plan.md
-source_version: 1.0.1
+source_version: 1.0.2
 source_sha256:
-  SPEC.md: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-  N01: 13de68ca196fd1d302ca4df0bff5d4633cfee1a106656a43e220967f0cc660fc
-  plan: d1e72feb1a8aab1d80873c1890b6e9761cb85463eabf2c19c385bd8100585372
+  SPEC.md: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+  N01: b50452419cf658893fb76bbb28b891cd5377eeb79971e2933f61150a6a430fd4
+  plan: bb0b2dd670cd5e088357aa0b8226c318e2c316d50317f03f47a3aff03a6bad5f
 generated_at: 2026-07-30T18:26:45+02:00
 owner: codex
 ---
@@ -25,29 +25,28 @@ N01 tests may be authored as RED only after:
 2. SD-N01-001 permits the generated root `Cargo.lock` change;
 3. exact new production dependencies are reviewed and pinned.
 
-This plan does not change N01 from `todo` or claim that a planned lock is
-frozen.
+These start gates were satisfied before implementation. Actual executed command/results and review repairs are recorded in ../../verification/N01.md; selectors below map the original plan to current test locations.
 
 ## 2. BDD and Acceptance Mapping
 
-| ID | Scenario | Level | Fixture | Oracle | Planned command |
+| ID | Scenario | Level | Fixture | Oracle | Current selector / harness |
 |---|---|---|---|---|---|
-| N01-BDD-01 | blank DB upgrades to latest | integration | in-memory blank DB + fixed clock | every migration recorded once with checksum/time; catalog matches v1 | `cargo test -p flowshot-db --test migrations blank_database_upgrades_to_latest` |
-| N01-BDD-02 | latest DB starts idempotently | integration | already migrated DB | no DDL/data/timestamp change | `cargo test -p flowshot-db --test migrations latest_database_is_idempotent` |
-| N01-BDD-03 | hard delete is forbidden | invariant | document + annotation + comments | each raw delete fails and rows remain | `cargo test -p flowshot-db --test invariants hard_delete_is_rejected` |
-| N01-BDD-04 | comment replies are one level | invariant | root comment A, reply B | reply-to-B and cross-annotation parent fail atomically | `cargo test -p flowshot-db --test invariants comment_parent_is_one_level` |
-| N01-MIG-01 | migration registry rejects drift | negative integration | gap, duplicate, tampered, database-ahead variants | typed migration error; no pending version partially applies | `cargo test -p flowshot-db --test migrations migration_registry_rejects_drift` |
-| N01-CON-01 | every connection is configured | component | writer + every read-pool connection | FK ON, WAL, NORMAL, busy timeout 5000 | `cargo test -p flowshot-db --test connections required_pragmas_apply_to_every_connection` |
-| N01-INV-01 | canonical row checks hold | invariant | invalid annotation/tag/document/root rows | SQLite rejects every invalid matrix case | `cargo test -p flowshot-db --test invariants canonical_checks_reject_invalid_rows` |
-| N01-INV-02 | system pin is protected | invariant | system `pin`, user tag, bindings | pin rename/delete and annotation binding fail; document binding succeeds | `cargo test -p flowshot-db --test invariants system_pin_is_protected` |
+| N01-BDD-01 | blank DB upgrades to latest | integration | in-memory blank DB + fixed clock | every migration recorded once with checksum/time; catalog matches v1 | `cargo test -p flowshot-db --lib migrations::tests::blank_database_upgrades_to_latest` |
+| N01-BDD-02 | latest DB starts idempotently | integration | already migrated DB | no DDL/data/timestamp change | `cargo test -p flowshot-db --lib migrations::tests::latest_database_is_idempotent` |
+| N01-BDD-03 | hard delete is forbidden | invariant | document + annotation + comments | each raw delete fails and rows remain | `cargo test -p flowshot-db --lib migrations::tests::hard_delete_is_rejected` |
+| N01-BDD-04 | comment replies are one level | invariant | root comment A, reply B | reply-to-B and cross-annotation parent fail atomically | `cargo test -p flowshot-db --lib migrations::tests::comment_parent_is_one_level` |
+| N01-MIG-01 | migration registry rejects drift | negative integration | gap, duplicate, tampered, database-ahead variants | typed migration error; no pending version partially applies | `cargo test -p flowshot-db --lib migrations::tests::migration_registry_rejects_drift` |
+| N01-CON-01 | every connection is configured | component | writer + every read-pool connection | FK/recursive triggers ON, WAL, NORMAL, busy timeout 5000 | `cargo test -p flowshot-db --lib executor::tests::required_pragmas_apply_to_every_connection` |
+| N01-INV-01 | canonical row checks hold | invariant | invalid annotation/tag/document/root rows | SQLite rejects every invalid matrix case | `cargo test -p flowshot-db --lib migrations::tests::canonical_checks_reject_invalid_rows` |
+| N01-INV-02 | system pin is protected | invariant | system `pin`, user tag, bindings | pin rename/delete and annotation binding fail; document binding succeeds | `cargo test -p flowshot-db --lib migrations::tests::system_pin_is_protected` |
 | N01-SOFT-01 | annotation tombstones its thread | repository integration | annotation with root/reply comments | one timestamp on all rows; no hard delete | `cargo test -p flowshot-db --test soft_delete annotation_delete_tombstones_thread` |
 | N01-SOFT-02 | comment tombstone preserves replies | repository integration | root comment with reply | only target is tombstoned; reply remains readable | `cargo test -p flowshot-db --test soft_delete comment_delete_preserves_replies` |
 | N01-CONC-01 | stale row version conflicts | repository integration | two writers from same version | first commits; second returns conflict without mutation | `cargo test -p flowshot-db --test concurrency stale_row_version_conflicts` |
 | N01-CONC-02 | stale document revision rolls back batch | transaction integration | document + multiple annotations/events | zero partial hashes, annotations or events | `cargo test -p flowshot-db --test concurrency stale_document_revision_rolls_back` |
 | N01-WAL-01 | tempfile WAL survives restart | integration | tempfile DB + multiple connections | journal is WAL; committed rows survive reopen | `cargo test -p flowshot-db --test wal committed_data_survives_restart` |
 | N01-BND-01 | raw SQL stays in DB crate | architecture/negative | workspace source/metadata inspection | non-DB crate with `rusqlite` or SQL macro/string is named and rejected | `cargo test -p flowshot-db --test boundaries` |
-| N01-TAU-01 | app DB uses platform path | adapter integration | injected test app-data directory | resolved DB is inside app-data; no home path constant | `cargo test -p flowshot-tauri db_path` |
-| N01-PERF-01 | 10k seed meets budget | release benchmark | 10k annotations + 10k bindings | `< 1 s`, count/integrity correct, hardware JSON emitted | release benchmark command defined in T07 |
+| N01-TAU-01 | app DB uses platform path | adapter integration | injected test app-data directory | resolved DB is inside app-data; no home path constant | `python3 scripts/linux-db-smoke.py` |
+| N01-PERF-01 | 10k seed meets budget | release benchmark | 10k annotations + 10k bindings | `< 1 s`, count/integrity correct, hardware JSON emitted | `cargo bench --locked -p flowshot-db --bench seed` |
 
 ## 3. RED Evidence
 
@@ -109,7 +108,7 @@ Every rejection test also verifies pre-existing rows remain unchanged.
 - idempotent desired-set produces no token/timestamp change;
 - annotation delete uses one timestamp for its comments;
 - comment delete preserves descendants;
-- tag merge and binding are transactional;
+- tag merge (deferred to N08; not N01 acceptance) and binding are transactional;
 - not-found and stale-version errors are distinguishable;
 - DB errors exposed above the adapter contain no body or complete anchor exact.
 
@@ -139,7 +138,7 @@ Property coverage is added only where it proves rules better than a table:
 - tag normalization is idempotent and never returns untrimmed output;
 - generated UUIDv7 IDs remain unique and timestamp ordered for deterministic
   sequences;
-- non-negative `u64` row versions round-trip SQLite without signed overflow;
+- row versions in `0..=i64::MAX` round-trip SQLite; larger values and increment overflow are rejected;
 - migration registry accepts only exactly contiguous positive versions.
 
 Random values use fixed seeds in reproducible CI failures.
@@ -149,7 +148,7 @@ Random values use fixed seeds in reproducible CI failures.
 The release harness:
 
 1. opens a tempfile WAL database;
-2. applies migrations outside the timed seed interval but reports both times;
+2. applies migrations and reports migration, seed and combined time; the combined interval must be <1s;
 3. inserts deterministic 10k annotation and 10k binding data through the
    intended transaction/repository path;
 4. validates counts, foreign keys and tombstone/version defaults;
@@ -205,3 +204,9 @@ Before N01 closure:
 - Raw SQL boundary test passes.
 - 10k release acceptance passes on recorded hardware.
 - Full CI, N01 verification report and G2 outcome pass.
+
+Use the N01 2026-10-23 clarifications for actor-owned closures, memory journal exception, fixed-clock CAS, overflow and trigger UPDATE/self-parent cases. Include rollback on failed closure and stale batch commit.
+
+T-006 adversarial requirements: REPLACE implicit deletes and NULL pin identity are rejected; unrelated schema with empty metadata is rejected; callbacks cannot reenter their runtime and self-deadlock; shutdown drains admitted readers/writers and closes connections. Batch commits preserve orphan original anchors and annotation kind, include all live ranges once, and audit exact original/result anchors. Native checksum-failure smoke must prove expected DB initialization failure and unchanged persisted fixture/metadata.
+
+Development acceptance: [N01/M0 verification](../../verification/N01.md), final complete Docker gate and independent T-006 ACCEPT. Historical RED/rework remains in the evidence; task-board merge closure is separate.

@@ -275,7 +275,7 @@ class CancellationControllerTests(unittest.TestCase):
 
     def test_plan_execute_preserves_core_revision_source_failure_and_services(self):
         envelope = self.plan()
-        self.assertEqual(envelope['plan']['mutation_hosts'], ['ckc-disposable-01'])
+        self.assertEqual(envelope['plan']['mutation_hosts'], ['lab-host-01'])
         self.assertEqual(envelope['plan']['operation'], 'core-recovery')
         self.assertEqual(self.execute(envelope)['status'], 'complete')
         self.assertEqual(self.op.cancel_calls, 1)

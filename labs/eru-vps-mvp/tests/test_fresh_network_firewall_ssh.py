@@ -14,7 +14,8 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import fresh_network_access as access
 import fresh_network_firewall as policy
-from fresh_observation import ALIASES, public_key
+from fresh_observation import public_key
+from fixture_inventory import ALIASES
 
 
 def key(number):
@@ -65,6 +66,17 @@ class SSHFirewallTests(unittest.TestCase):
         self.action = action()
         self.transport = Mock(return_value=json.dumps(observation(self.action)).encode())
         self.adapter = ssh.SSHNetworkFirewallAdapter(self.keys, transport=self.transport)
+
+    def test_copied_program_imports_in_clean_isolated_interpreter(self):
+        import subprocess
+        program = self.ssh.build_program({'schema_version': 1, 'operation': 'observe', 'action': action()})
+        tree = ast.parse(program)
+        # Compile every actual bundled support/helper statement; omit host dispatch.
+        tree.body.pop()
+        result = subprocess.run([sys.executable, '-I', '-c',
+                                 "exec(compile(__import__('sys').stdin.read(), '<isolated-bundle>', 'exec'))"],
+                                input=ast.unparse(tree), capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_key_digest_mismatch_never_calls_transport(self):
         self.action['host']['host_key_sha256'] = 'f' * 64
@@ -126,7 +138,7 @@ class SSHFirewallTests(unittest.TestCase):
                  if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call)
                  and isinstance(node.value.func, ast.Attribute)
                  and node.value.func.attr == 'ModuleType']
-        self.assertEqual(names, ['app_desired', 'fresh_rebuild', 'fresh_execution',
+        self.assertEqual(names, ['operator_inventory', 'app_desired', 'fresh_rebuild', 'fresh_execution',
             'fresh_observation', 'fresh_network_access', 'fresh_network_staging_host',
             'fresh_network_staging', 'fresh_network_firewall'])
         for field in ('root', 'owner_uid', 'owner_gid', 'now', 'runner', 'command', 'module', 'source'):

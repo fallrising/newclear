@@ -119,7 +119,8 @@ def _timing(files, acceptance, input_ref, now=None):
     if type(queues) is not list or len(queues) != 4:
         raise ValueError('generation timing requires four exact console observations')
     intervals = []; used = set(); console_ids = set()
-    from fresh_rebuild import TOPOLOGY
+    from operator_inventory import topology
+    TOPOLOGY = topology(acceptance['context']['review']['plan']['scope']['hosts'])
     for queue_ref,(alias,node,role) in zip(queues,TOPOLOGY):
         queue = files.binding(queue_ref)
         exact(queue, {'schema_version','operation','binding','alias','node','action','receipt',

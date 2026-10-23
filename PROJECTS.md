@@ -38,6 +38,7 @@
 | [platform/signal-hub](platform/signal-hub/SUCCESS.md) | platform | 將個人來源事件持久化、聚合並可靠投遞至訂閱者 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [products/goku](products/goku/SUCCESS.md) | products | 以命令列、訊息消費者與網頁管理書籤 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-10 |
 | [products/hai-taskboard](products/hai-taskboard/SUCCESS.md) | products | 以可追溯工作圖與證據關卡控制人機軟體交付 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
+| [products/history-atlas](products/history-atlas/SUCCESS.md) | products | 以繁體中文互動地圖探索歷史年代、地點、人物與事件 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-23 |
 | [products/kith](products/kith/SUCCESS.md) | products | 讓人類與受控代理在同一私有房間協作對話 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [products/phark](products/phark/SUCCESS.md) | products | 以同源網頁提供多欄時間線與基本社交互動 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [specs/fleet](specs/fleet/SUCCESS.md) | specs | 以期望狀態協調個人 VPS 的 Compose 工作負載與入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-28 |

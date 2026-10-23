@@ -1,10 +1,10 @@
 //! Cursor subscription through the official Cursor Agent CLI (`cursor-agent -p`).
 //!
 //! thinrouter holds no Cursor token and speaks no private Cursor protocol: every request
-//! is answered by the locally signed-in `cursor-agent` in print mode, so Cursor sees its
-//! own client. `cursor-agent` is a coding agent with built-in tools and no switch to turn
-//! them off, so runs are confined: `--mode ask` (read-only), `--sandbox enabled`, an
-//! empty workspace, and never `--force` or `--approve-mcps`. The caller's system prompt
+//! is answered by `cursor-agent` inside a resource-bounded Docker container. A pinned
+//! local image and dedicated named profile volume are required; there is no host CLI
+//! fallback. Ask/sandbox flags are preferences, not the isolation boundary.
+//! The caller's system prompt
 //! goes into the prompt inside `<external_system_instructions>`, as for Claude Code.
 //!
 //! Cursor account plugins (for example Gmail) stay callable by the agent in ask mode and
@@ -29,21 +29,30 @@ use tokio::sync::{mpsc, Semaphore};
 use tokio_util::sync::CancellationToken;
 use tracing::warn;
 
-use crate::claude_code::{first_record, status_for, stop, ClaudeRun, Item};
+use crate::claude_code::{first_record, status_for, ClaudeRun, Item};
 use crate::proxy::UpstreamAttemptError;
 
 /// Linux refuses a single argument longer than this (MAX_ARG_STRLEN).
 const MAX_PROMPT_BYTES: usize = 128 * 1024 - 1;
 
 /// Environment a run must not inherit (it would point the CLI at another endpoint).
-const BLOCKED_ENV: &[&str] = &["CURSOR_API_ENDPOINT"];
+const BLOCKED_ENV: &[&str] = &[
+    "CURSOR_API_ENDPOINT",
+    "DOCKER_HOST",
+    "DOCKER_CONTEXT",
+    "DOCKER_TLS_VERIFY",
+    "DOCKER_CERT_PATH",
+];
 
 #[derive(Clone)]
 pub struct CursorCli {
-    /// `cursor-agent` executable (PATH lookup when bare).
+    /// Executable inside the pinned container image.
     pub bin: String,
-    /// Empty workspace runs are confined to.
+    /// Ephemeral container workspace.
     pub work_dir: PathBuf,
+    image: Option<String>,
+    profile_volume: Option<String>,
+    runtime_bin: String,
     runs: Arc<Semaphore>,
     /// Operator accepted that the agent can use the account's Cursor plugins.
     pub enabled: bool,
@@ -55,20 +64,158 @@ through a prompt. Start thinrouter with --cursor-accept-account-plugins to accep
 disconnect those plugins in Cursor first.";
 
 impl CursorCli {
-    pub fn new(bin: Option<String>, data_dir: &std::path::Path, max_runs: usize) -> Self {
+    pub fn new(bin: Option<String>, _data_dir: &std::path::Path, max_runs: usize) -> Self {
         Self {
             bin: bin
                 .filter(|b| !b.trim().is_empty())
                 .unwrap_or_else(|| "cursor-agent".into()),
-            work_dir: data_dir.join("cursor-work"),
+            work_dir: PathBuf::from("/workspace"),
+            image: None,
+            profile_volume: None,
+            runtime_bin: "docker".into(),
             runs: Arc::new(Semaphore::new(max_runs.max(1))),
             enabled: false,
         }
     }
 
+    pub fn with_container(
+        mut self,
+        image: Option<String>,
+        profile_volume: Option<String>,
+        runtime_bin: Option<String>,
+    ) -> Self {
+        self.image = image;
+        self.profile_volume = profile_volume;
+        self.runtime_bin = runtime_bin.unwrap_or_else(|| "docker".into());
+        self
+    }
+
+    fn container_args(&self, name: &str) -> Result<Vec<String>, &'static str> {
+        let image = self
+            .image
+            .as_deref()
+            .filter(|s| valid_image(s))
+            .ok_or("cursor requires --cursor-image with a pinned local sha256 image")?;
+        let volume = self
+            .profile_volume
+            .as_deref()
+            .filter(|s| valid_profile(s))
+            .ok_or(
+                "cursor requires a dedicated --cursor-profile-volume named thinrouter-cursor-...",
+            )?;
+        if self.runtime_bin.trim().is_empty() || self.bin.trim().is_empty() {
+            return Err("cursor container runtime and command must not be empty");
+        }
+        let mut args: Vec<String> = [
+            "run",
+            "--rm",
+            "--pull=never",
+            "--init",
+            "--name",
+            name,
+            "--user",
+            "1000:1000",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges",
+            "--pids-limit",
+            "128",
+            "--memory",
+            "1g",
+            "--cpus",
+            "1",
+            "--network",
+            "bridge",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=64m",
+            "--tmpfs",
+            "/workspace:rw,noexec,nosuid,size=64m,mode=1777",
+            "--workdir",
+            "/workspace",
+            "--env",
+            "HOME=/home/cursor",
+            "--mount",
+        ]
+        .into_iter()
+        .map(str::to_owned)
+        .collect();
+        args.push(format!("type=volume,src={volume},dst=/home/cursor"));
+        args.extend(["--entrypoint".into(), self.bin.clone(), image.into()]);
+        Ok(args)
+    }
+
     pub fn accept_account_plugins(mut self, yes: bool) -> Self {
         self.enabled = yes;
         self
+    }
+}
+
+fn valid_image(image: &str) -> bool {
+    let digest = if let Some(digest) = image.strip_prefix("sha256:") {
+        digest
+    } else if let Some((repo, digest)) = image.split_once("@sha256:") {
+        if repo.is_empty()
+            || repo.starts_with('-')
+            || !repo
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b"._/:-".contains(&b))
+        {
+            return false;
+        }
+        digest
+    } else {
+        return false;
+    };
+    digest.len() == 64 && digest.bytes().all(|b| b.is_ascii_hexdigit())
+}
+
+fn valid_profile(volume: &str) -> bool {
+    volume
+        .strip_prefix("thinrouter-cursor-")
+        .is_some_and(|suffix| {
+            !suffix.is_empty()
+                && suffix
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b))
+        })
+}
+
+fn runtime_command(runtime: &str) -> Command {
+    let mut cmd = Command::new(runtime);
+    cmd.arg("--host=unix:///var/run/docker.sock");
+    for key in BLOCKED_ENV {
+        cmd.env_remove(key);
+    }
+    cmd.kill_on_drop(true);
+    cmd
+}
+
+async fn remove_container(runtime: &str, name: &str) {
+    let result = tokio::time::timeout(
+        Duration::from_secs(3),
+        runtime_command(runtime)
+            .args(["rm", "-f", name])
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status(),
+    )
+    .await;
+    if !matches!(result, Ok(Ok(status)) if status.success()) {
+        warn!("Cursor container cleanup did not confirm removal");
+    }
+}
+
+// Docker may already have accepted create when its client is killed. Repeat removal
+// after the client is reaped, including after an initial "not found" response.
+async fn reconcile_container(runtime: &str, name: &str) {
+    for attempt in 0..3 {
+        if attempt != 0 {
+            tokio::time::sleep(Duration::from_millis(250)).await;
+        }
+        remove_container(runtime, name).await;
     }
 }
 
@@ -223,6 +370,10 @@ pub async fn start(
     if !cc.enabled {
         return Err(fail(503, DISABLED_MSG.into(), true));
     }
+    let name = format!("thinrouter-cursor-{}", uuid::Uuid::new_v4());
+    let mut args = cc
+        .container_args(&name)
+        .map_err(|m| fail(503, m.into(), true))?;
     let prompt = render(chat).map_err(|m| fail(501, m.into(), true))?;
     if prompt.len() > MAX_PROMPT_BYTES {
         return Err(fail(
@@ -235,30 +386,33 @@ pub async fn start(
         _ = cancel.cancelled() => return Err(fail(499, "client disconnected".into(), false)),
         p = cc.runs.clone().acquire_owned() => p.map_err(|_| fail(503, "cursor runs closed".into(), true))?,
     };
-    std::fs::create_dir_all(&cc.work_dir)
-        .map_err(|e| fail(500, format!("cursor work dir: {e}"), false))?;
-    let mut cmd = Command::new(&cc.bin);
-    cmd.args(cli_args(model, &cc.work_dir, &prompt))
-        .current_dir(&cc.work_dir)
+    args.extend(cli_args(model, &cc.work_dir, &prompt));
+    let runtime = cc.runtime_bin.clone();
+    let mut cmd = runtime_command(&runtime);
+    cmd.args(args)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .kill_on_drop(true);
-    for k in BLOCKED_ENV {
-        cmd.env_remove(k);
-    }
-    let mut child = cmd.spawn().map_err(|e| {
-        fail(
-            503,
-            format!(
-                "cannot start Cursor Agent CLI ({}): {e}; install it and run `cursor-agent login`",
-                cc.bin
-            ),
-            true,
-        )
-    })?;
+        .stderr(Stdio::piped());
+    let mut child = match cmd.spawn() {
+        Ok(child) => child,
+        Err(_) => {
+            reconcile_container(&runtime, &name).await;
+            return Err(fail(
+                503,
+                "cannot start Cursor container runtime".into(),
+                true,
+            ));
+        }
+    };
     let stdout = child.stdout.take().expect("piped stdout");
     let mut stderr = child.stderr.take().expect("piped stderr");
+    // Drain concurrently so diagnostics cannot fill a pipe and stall the CLI.
+    let mut diagnostics = tokio::spawn(async move {
+        let mut bytes = Vec::new();
+        let _ = (&mut stderr).take(4096).read_to_end(&mut bytes).await;
+        let _ = tokio::io::copy(&mut stderr, &mut tokio::io::sink()).await;
+        String::from_utf8_lossy(&bytes).into_owned()
+    });
     let (tx, rx) = mpsc::channel::<Item>(64);
     let cancel = cancel.clone();
     let model = model.to_string();
@@ -266,10 +420,10 @@ pub async fn start(
         let _permit = permit;
         let mut lines = BufReader::new(stdout).lines();
         let mut tr = Translate::default();
-        let mut sent = false;
         'read: loop {
             let next = tokio::select! {
-                _ = cancel.cancelled(), if !sent => break,
+                _ = cancel.cancelled() => break,
+                _ = tx.closed() => break,
                 l = lines.next_line() => l,
             };
             let Ok(Some(l)) = next else { break };
@@ -277,33 +431,41 @@ pub async fn start(
                 continue;
             };
             for rec in tr.on_line(&v, &model) {
-                sent = true;
-                if tx.send(Item::Record(rec)).await.is_err() {
-                    break 'read; // client went away
+                tokio::select! {
+                    _ = cancel.cancelled() => break 'read,
+                    result = tx.send(Item::Record(rec)) => if result.is_err() { break 'read; },
                 }
             }
             if tr.done {
                 break;
             }
         }
-        if !tr.done && !cancel.is_cancelled() {
-            let mut err = String::new();
-            let _ = tokio::time::timeout(
-                Duration::from_secs(2),
-                (&mut stderr).take(4096).read_to_string(&mut err),
-            )
-            .await;
-            let tail: String = err.trim().chars().take(300).collect();
-            let msg = format!("Cursor Agent CLI ended without a complete reply: {tail}");
-            warn!("{msg}");
-            let _ = tx
-                .send(Item::Failed {
-                    status: status_for(&tail),
-                    message: msg,
-                })
-                .await;
+        let failed = !tr.done && !cancel.is_cancelled() && !tx.is_closed();
+        let mut status = 502;
+        if failed {
+            if let Ok(Ok(err)) =
+                tokio::time::timeout(Duration::from_secs(2), &mut diagnostics).await
+            {
+                status = status_for(&err);
+            }
         }
-        stop(child).await;
+        let _ = child.start_kill();
+        let _ = tokio::time::timeout(Duration::from_secs(2), child.wait()).await;
+        reconcile_container(&runtime, &name).await;
+        diagnostics.abort();
+        if failed {
+            let message = match status {
+                401 => "Cursor container profile is not logged in",
+                429 => "Cursor account quota or rate limit reached",
+                _ => "Cursor container ended without a complete reply",
+            }
+            .to_owned();
+            warn!(status, "Cursor container request failed");
+            tokio::select! {
+                _ = cancel.cancelled() => {},
+                _ = tx.send(Item::Failed { status, message }) => {},
+            }
+        }
     });
     first_record(rx).await
 }
@@ -312,8 +474,93 @@ pub async fn start(
 mod tests {
     use super::*;
 
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn removal_reconciles_late_container_creation() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = std::env::temp_dir().join(format!("cursor-cleanup-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir(&dir).unwrap();
+        let runtime = dir.join("runtime");
+        let pending = dir.join("pending");
+        let container = dir.join("container");
+        // The first removal sees no container; model the daemon completing create
+        // independently after the killed docker run client has already exited.
+        std::fs::write(&pending, "pending").unwrap();
+        std::fs::write(&runtime, format!("#!/bin/sh\nif [ -e '{}' ]; then\n rm '{}'\n (sleep 0.1; touch '{}') >/dev/null 2>&1 &\n exit 1\nfi\nrm -f '{}'\n", pending.display(), pending.display(), container.display(), container.display())).unwrap();
+        std::fs::set_permissions(&runtime, std::fs::Permissions::from_mode(0o700)).unwrap();
+        reconcile_container(runtime.to_str().unwrap(), "thinrouter-cursor-test").await;
+        assert!(
+            !container.exists(),
+            "late-created container escaped removal"
+        );
+        assert!(!pending.exists(), "fake runtime did not run");
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+
     #[test]
-    fn runs_are_confined_and_read_only() {
+    fn container_configuration_and_arguments_are_restricted() {
+        let digest = format!("sha256:{}", "a".repeat(64));
+        assert!(valid_image(&digest));
+        assert!(valid_image(&format!("registry.test/repo@{digest}")));
+        for bad in [
+            "latest",
+            "repo:latest",
+            "sha256:abc",
+            "--privileged",
+            "repo@sha256:xyz",
+        ] {
+            assert!(!valid_image(bad));
+        }
+        for bad in [
+            "",
+            "thinrouter-cursor-",
+            "other-profile",
+            "thinrouter-cursor-/host",
+            "thinrouter-cursor-a,dst=/etc",
+            "thinrouter-cursor-a b",
+        ] {
+            assert!(!valid_profile(bad));
+        }
+        assert!(valid_profile("thinrouter-cursor-test_1"));
+        let cc = CursorCli::new(None, std::path::Path::new("/host"), 1);
+        assert!(cc.container_args("test").is_err());
+        let cc = cc.with_container(
+            Some(digest.clone()),
+            Some("thinrouter-cursor-test".into()),
+            None,
+        );
+        let args = cc.container_args("thinrouter-cursor-request").unwrap();
+        for required in [
+            "--read-only",
+            "--pull=never",
+            "--rm",
+            "--init",
+            "no-new-privileges",
+            "1000:1000",
+            "/workspace:rw,noexec,nosuid,size=64m,mode=1777",
+        ] {
+            assert!(args.iter().any(|a| a == required));
+        }
+        assert_eq!(args.last(), Some(&digest));
+        assert!(args
+            .windows(2)
+            .any(|w| w == ["--entrypoint", "cursor-agent"]));
+        assert!(args
+            .iter()
+            .any(|a| a == "type=volume,src=thinrouter-cursor-test,dst=/home/cursor"));
+        assert!(!args
+            .iter()
+            .any(|a| a.contains("type=bind") || a == "--privileged" || a.contains("docker.sock")));
+        assert_eq!(cc.work_dir, PathBuf::from("/workspace"));
+        let command = runtime_command("docker");
+        assert_eq!(
+            command.as_std().get_args().next().unwrap(),
+            "--host=unix:///var/run/docker.sock"
+        );
+    }
+
+    #[test]
+    fn cli_preferences_do_not_enable_extra_tools() {
         let args = cli_args("gpt-5", std::path::Path::new("/w"), "hi");
         for want in ["-p", "--stream-partial-output", "--trust"] {
             assert!(args.iter().any(|a| a == want), "{want}");

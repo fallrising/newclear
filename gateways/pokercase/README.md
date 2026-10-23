@@ -33,9 +33,11 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 
 > [!WARNING]
 > **`cursor` provider is off by default.** `cursor-agent` can use your Cursor account's
-> plugins (for example Gmail) even in read-only ask mode, and the CLI cannot turn them off,
+> plugins (for example Gmail) even in ask mode, and the CLI cannot turn them off,
 > so any client holding a gateway key could make it read that data. Enable it only with
 > `--cursor-accept-account-plugins` after disconnecting plugins you do not want exposed.
+> A pinned local container image and dedicated profile volume are also required; see
+> [Cursor isolation and setup](docs/cursor-isolation.md). Ask mode is not a security boundary.
 
 ## Quick start
 
@@ -105,7 +107,7 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_CLAUDE_BIN` / `--claude-bin` | Claude Code CLI for the `claude` provider (default `claude` on PATH) |
 | `THINROUTER_CLAUDE_MAX_RUNS` / `--claude-max-runs` | Concurrent Claude Code processes (default 2) |
 | `THINROUTER_CLAUDE_IDLE_SECS` / `--claude-idle-secs` | How long a Claude Code run waits for the client's tool results (default 600) |
-| `THINROUTER_CURSOR_BIN` / `--cursor-bin` | Cursor Agent CLI for the `cursor` provider (default `cursor-agent` on PATH) |
+| `THINROUTER_CURSOR_BIN` / `--cursor-bin` | Cursor command inside the pinned image (default `cursor-agent`) |
 | `THINROUTER_CURSOR_MAX_RUNS` / `--cursor-max-runs` | Concurrent Cursor Agent processes (default 2) |
 | `THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS` / `--cursor-accept-account-plugins` | Turn the cursor provider on, accepting that `cursor-agent` can use the account's Cursor plugins (default off) |
 | `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
@@ -177,3 +179,5 @@ Set `THINROUTER_ADMIN_TOKEN` through your environment or secret configuration be
 ## License
 
 MIT. Inspired by upstream MIT projects; not affiliated with 9Router.
+
+Cursor container settings: `--cursor-image` / `THINROUTER_CURSOR_IMAGE` (pinned local digest), `--cursor-profile-volume` / `THINROUTER_CURSOR_PROFILE_VOLUME` (dedicated `thinrouter-cursor-*` named volume), and `--cursor-runtime-bin` / `THINROUTER_CURSOR_RUNTIME_BIN` (Docker executable, default `docker`). Missing settings return 503; there is no host CLI fallback.

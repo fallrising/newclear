@@ -25,7 +25,7 @@ source_commit: a384d77a7e32f1dc35902eb94e7cf78daf68e367
 | AC-01 | Given 固定上游 SHA 與可定位的程式／文件，When 完成功能與技術分析，Then 每項主要能力都有來源、限制與採用決策，歷史測試不冒充本輪重跑。 | passed | 文件審查及本輪 scoped／索引／AC 檢查通過；見驗證紀錄。 |
 | AC-02 | Given owner 要求相同技術棧獨立重作，When 閱讀 SDD，Then 可依模組、資料、時間、搜尋、網址及 API 契約拆工，且文件、v1 主線、後續擴充範圍清楚分開。 | passed | 文件審查及本輪 scoped／索引／AC 檢查通過；見驗證紀錄。 |
 | AC-03 | Given 新產品目錄，When 檢查 README、AGENTS、SUCCESS、任務板與根索引，Then 入口一致、AC 編號一致，mainline 為 incomplete、usable_tag 為 none。 | passed | 文件審查及本輪 scoped／索引／AC 檢查通過；見驗證紀錄。 |
-| AC-04 | Given 本輪候選文件，When 執行官方 scoped checker、精確索引、連結、AC 對照與 staged whitespace 檢查並提交，Then 保留真實結果與未跑項，交付可回讀的 commit 和 Draft PR。 | pending | M0 文件已編寫，待本輪檢查／遠端交付結果。 |
+| AC-04 | Given 本輪候選文件，When 執行官方 scoped checker、精確索引、連結、AC 對照與 staged whitespace 檢查並提交，Then 保留真實結果與未跑項，交付可回讀的 commit 和 Draft PR。 | passed | 官方文件檢查、staged gate 與 11 檔遠端回讀通過；Draft PR #516，見驗證紀錄。 |
 | AC-05 | Given v1 靜態成品與資料包，When 在網站根及 /atlas/ 子路徑以 HTTP 開啟，Then 無需建置、登入、外部 API 或資料庫即可完成核心流程，主站無未宣告跨網域請求。 | pending | 尚未實作／未跑；規格見 SDD，不能以上游或合成測試替代產品驗收。 |
 | AC-06 | Given 有明確覆蓋與不連續年份的資料包，When 選年、前後步進或播放，Then 依 yearOrdinal 與半開區間選快照，-1 下一年為 1，缺口顯示未收錄且不偷用最近疆域。 | pending | 尚未實作／未跑；規格見 SDD，不能以上游或合成測試替代產品驗收。 |
 | AC-07 | Given 合法 Polygon／MultiPolygon、孔洞、點位與邊界案例，When 投影、反投影、縮放、命中與切換年份，Then 幾何及選取一致、孔洞不誤判、邊界回傳候選而不捏造唯一歸屬。 | pending | 尚未實作／未跑；規格見 SDD，不能以上游或合成測試替代產品驗收。 |
@@ -43,7 +43,7 @@ source_commit: a384d77a7e32f1dc35902eb94e7cf78daf68e367
 
 ## 現況與缺口
 
-M0 新增分析與設計文件，等待驗證及 owner 審閱。沒有 index.html、應用程式、正式史料包或瀏覽器 runtime 證據。v1 內容來源和具體時段仍需資料工作確認；18 個歷史時期等上游內容規模不算本案已取得資料。
+M0 分析、設計、文件驗證與 Draft PR 交付完成，等待 owner 審閱；遠端 CI 另依 PR checks。沒有 index.html、應用程式、正式史料包或瀏覽器 runtime 證據。v1 內容來源和具體時段仍需資料工作確認；18 個歷史時期等上游內容規模不算本案已取得資料。
 
 ## 啟動與驗證
 

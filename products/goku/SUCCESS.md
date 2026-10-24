@@ -64,3 +64,8 @@ go build -o goku-api ./cmd/api
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須先獲明確復工範圍，修正 API/Web 契約並完成 CLI/consumer/API/Web 整合與持久性驗證；沒有可用版本資格。
+
+
+## FE round2 — 2026-10-24T10:05:22Z
+
+T-0380 R2-AC-9/E approved M1–M3 only: environment example, accessible icon actions and visible API errors/retry. [Task](fe-review/tasks/round2/task.md) defines regression/native/isolated synthetic browser checks. Work in progress; dormant exception only, existing API path mismatch and CLI/MQTT/mainline gaps unchanged. No dependencies, full R3, release or deployment.

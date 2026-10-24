@@ -94,6 +94,8 @@ Demand/contract: [task](T-0404-disconnect.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| DC-01 | Cancel silent active Claude turns on client disconnect | DC-1 | in_progress | 2026-10-24T16:28:52Z | | 2026-10-24T16:39:27Z |
-| DC-02 | Preserve completed session reuse and track renewed sinks | DC-2 | in_progress | 2026-10-24T16:28:52Z | | 2026-10-24T16:39:27Z |
-| DC-03 | Verify HTTP and fake Cursor release | DC-3 | in_progress | 2026-10-24T16:28:52Z | | 2026-10-24T16:39:27Z |
+| DC-01 | Cancel silent active Claude turns on client disconnect | DC-1 | done | 2026-10-24T16:28:52Z | 2026-10-24T16:42:18Z | 2026-10-24T16:42:18Z |
+| DC-02 | Preserve completed session reuse and track renewed sinks | DC-2 | done | 2026-10-24T16:28:52Z | 2026-10-24T16:42:18Z | 2026-10-24T16:42:18Z |
+| DC-03 | Verify HTTP and fake Cursor release | DC-3 | done | 2026-10-24T16:28:52Z | 2026-10-24T16:42:18Z | 2026-10-24T16:42:18Z |
+
+DC-1–DC-3 delivered in [PR #617](https://github.com/fallrising/newclear/pull/617), merge `2b64971c0bc209a67f9e37e76785b7009f746847` at `2026-10-24T16:42:18Z`. Independent source review PASS; required component CI109s and project-contract CI9s passed. Fetched main contains reviewed HEAD `a2b3bfb9e0bbe333f4507caa9e70d8bd1802e8fe` and scoped component contents match. Evidence covers134Linux tests and44local disconnect scenarios; actual Docker/provider cancellation and whole-product acceptance remain unverified.

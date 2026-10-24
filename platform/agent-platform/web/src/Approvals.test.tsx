@@ -58,6 +58,7 @@ afterEach(() => {
   cleanup();
   client.clear();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 function mount() {
   render(
@@ -102,4 +103,51 @@ it('denies a pending batch through the cancellation decision', async () => {
   await user.click(await screen.findByRole('button', { name: '拒絕並取消' }));
   expect(await screen.findByText('已拒絕，正在停止環境')).toBeVisible();
   expect(calls[0].payload).toMatchObject({ decision: 'deny' });
+});
+
+it('formats approval expiry with the workspace zh-TW short date options', async () => {
+  const formatter = vi.spyOn(Date.prototype, 'toLocaleString');
+  mount();
+  await screen.findByText(/有效至/);
+  expect(formatter).toHaveBeenCalledWith('zh-TW', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  expect(screen.getByText(/有效至/).textContent).toContain(
+    new Date('2099-01-01T00:00:00Z').toLocaleString('zh-TW', {
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+  );
+  formatter.mockRestore();
+});
+
+it('styles approval loading errors consistently with other workspace errors', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue(Response.json({ error: 'unavailable' }, { status: 503 })),
+  );
+  mount();
+  expect(await screen.findByRole('alert')).toHaveClass('error');
+});
+
+it('styles uncertain decision errors and accepted decision notices', async () => {
+  lost = true;
+  mount();
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: '核准這批操作' }));
+  expect(await screen.findByRole('alert')).toHaveClass('error');
+  await user.click(screen.getByRole('button', { name: '重試原決定' }));
+  expect(await screen.findByRole('status')).toHaveClass('notice');
+});
+
+it('styles an accepted decision as a notice', async () => {
+  mount();
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: '核准這批操作' }));
+  expect(await screen.findByRole('status')).toHaveClass('notice');
 });

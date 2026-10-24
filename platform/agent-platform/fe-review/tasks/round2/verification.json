@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "sourceCommit": "427dec01e78e66d4c06f4032bddfb3efaba44954",
+  "status": "original-R2-local-candidate; independent-review-and-current-head-CI-pending",
+  "attempts": [
+    {
+      "id": "20261024T084926Z-2b4187ae",
+      "capture": "../../runs/20261024T084926Z-2b4187ae/capture.json",
+      "captureSha256": "39f08bab8b60ca735aad0f4091e701d12f5002cf99c675bea7f90297de46e2ec",
+      "isolation": "../../runs/20261024T084926Z-2b4187ae/isolation.json",
+      "isolationSha256": "7d9af2cbe93a5ef481eb80fe78ba00db82d0bafe623234165d5cc5a855eb8372",
+      "status": "failed",
+      "captureCount": 8,
+      "driverSha256": "66598232d98af63c646c53302214d4989bb0fc82e20ac6a35c8910d817040e1c",
+      "cleanupFailures": [
+        "cleanup_2_failed"
+      ],
+      "ownedContainersRemoved": true,
+      "runnerSha256": "7ddf03074a98618854045817071ed46bbd635fd7e10a752a294000a48cea4d6d"
+    },
+    {
+      "id": "20261024T085139Z-117ca0e8",
+      "capture": "../../runs/20261024T085139Z-117ca0e8/capture.json",
+      "captureSha256": "ee9dde7fc0c3624c9073f614691b77ebea8073a881f264e7411192e537327f16",
+      "isolation": "../../runs/20261024T085139Z-117ca0e8/isolation.json",
+      "isolationSha256": "e252ca911b1114ee83162352f2bc72c8ffce9d75e94d9afab4028c6500239c97",
+      "status": "failed",
+      "captureCount": 30,
+      "driverSha256": "c2302d50c4b386de556a7260e4b0510dd89a29ad24f58eef70ab282f8b585fb3",
+      "cleanupFailures": [],
+      "ownedContainersRemoved": true,
+      "runnerSha256": "7ddf03074a98618854045817071ed46bbd635fd7e10a752a294000a48cea4d6d"
+    },
+    {
+      "id": "20261024T085406Z-9bb2af5e",
+      "capture": "../../runs/20261024T085406Z-9bb2af5e/capture.json",
+      "captureSha256": "6dd90d45f4d494135265a054ea2340dc9be97e02555f61151dae0693c8506f60",
+      "isolation": "../../runs/20261024T085406Z-9bb2af5e/isolation.json",
+      "isolationSha256": "15756eaf11d1ed54c8a32701cd64ba59b9ce1873e77f11115d9e7368ae2e3b36",
+      "status": "passed",
+      "captureCount": 38,
+      "driverSha256": "ac87a98d58261d5f01ed0d6f6ad32d147bbeb0eca3a0dcd9e90bbe62a4313cc9",
+      "cleanupFailures": [],
+      "ownedContainersRemoved": true,
+      "runnerSha256": "7ddf03074a98618854045817071ed46bbd635fd7e10a752a294000a48cea4d6d"
+    },
+    {
+      "id": "20261024T085518Z-2671cf53",
+      "capture": "../../runs/20261024T085518Z-2671cf53/capture.json",
+      "captureSha256": "502647a923303c7821aa1791bd83e61eecc4f4dff94b4c01d7dae88fbd47e86d",
+      "isolation": "../../runs/20261024T085518Z-2671cf53/isolation.json",
+      "isolationSha256": "2afa38bf0787c0a945b9e2632696895422a1b6b6d464d17e470208f0fabf1f85",
+      "status": "passed",
+      "captureCount": 38,
+      "driverSha256": "ac87a98d58261d5f01ed0d6f6ad32d147bbeb0eca3a0dcd9e90bbe62a4313cc9",
+      "cleanupFailures": [],
+      "ownedContainersRemoved": true,
+      "runnerSha256": "bda3e0d42b9ef7b26aec7feafbb693e48e64d1c8fa490d2e94dec332c5c257b4"
+    }
+  ],
+  "completeRunCount": 2,
+  "rawCaptureCount": 114,
+  "completeCaptureCount": 76,
+  "uniqueSemanticKeysPerCompleteRun": 38,
+  "matchingSemanticSteps": 14,
+  "currentSourceHashes": {
+    "fe-review/flows.spec.ts": "ac87a98d58261d5f01ed0d6f6ad32d147bbeb0eca3a0dcd9e90bbe62a4313cc9",
+    "fe-review/runtime.ts": "f284b2143ffb3b2e97c97521e3592e6c3063b5aff5bd5e10b343830d0aa55603",
+    "fe-review/playwright.config.ts": "8f2569af1a4396c4dac9cbc009eb14aa4aea7b93af82e69287659155bb614666",
+    "web/src/Approvals.tsx": "a470af256e0726cb8aca5f9ba90653623a1a1ba91f5135a997e5d0251813c99c",
+    "web/src/taskLocation.ts": "12568a17e0f000899f0036fdbfaa4064e74cb020d05b326765c383c27ee66a79",
+    "scripts/browser-fixture.py": "9ffc4e3ecb24d582384989a876c1be34cb8c026f7b2ad9afab67cb4926b17366"
+  },
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "allPngHashesVerified": true,
+  "separateFreshDatabases": true,
+  "health": {
+    "pageErrors": 0,
+    "documentOverflowCompleteRuns": 0,
+    "expectedHTTP503": "two explicit approval error supplements per complete run",
+    "requestFailures": "offline transition and stream teardown; retained in raw manifest",
+    "axe": "not run; no zero-violation claim"
+  },
+  "native": {
+    "web": {
+      "status": "passed",
+      "tests": 85,
+      "files": 7,
+      "typecheck": true,
+      "format": true,
+      "build": true,
+      "receipt": "evidence/native-web.json",
+      "sha256": "ba8e38a9f9efe2b88980433403e337defd029880938bd61b5252d4451fb873df"
+    },
+    "python": {
+      "receipt": "evidence/native-python.json",
+      "sha256": "3e3062b12b128f846e696610e0e6a2009485ba40e80b69b080cf849372dd2ea5",
+      "unitTestsPassed": 45,
+      "platformOriginal": "641 tests / FAILED(errors=4), environment prerequisites",
+      "focusedTestsPassed": 35,
+      "compositeCoverage": "passed; original failure retained"
+    },
+    "fullCurrentHeadCI": "pending"
+  },
+  "limits": [
+    "No real VM/provider/approval integration",
+    "No complete Round3 campaign",
+    "Earlier failed capture attempts remain visible",
+    "Public JSON only; PNG/auth/raw logs ignored"
+  ],
+  "outerSignalProbe": {
+    "receipt": "../../runs/20261024T085614Z-a85d941e/isolation.json",
+    "outcome": "inconclusive: normal exit0/cleanup observed, handler signal delivery not positively observed",
+    "mustNotClaimOuterTERMVerified": true
+  },
+  "innerSignalContract": "SIGTERM accepted only with both graceful completion log markers; SIGKILL/markerless/error rejected",
+  "evidenceSourceNote": "Runtime driver/helper/product hashes observed per attempt. Wrapper runtime delta removes unused native mode; final post-runtime imports/UTC-equivalent alias/formatting/constant-string splitting only, no capture or cleanup logic change. Final offline4tests/Ruff2files pass; old hashes not rewritten.",
+  "supportingEvidence": [
+    {
+      "path": "evidence/compiler-diagnostic.json",
+      "sha256": "4b5cf2155e8ea8ecb74a52c33fa5aa88d34e492440617ba2a87d42c205e46341"
+    },
+    {
+      "path": "evidence/native-python.json",
+      "sha256": "3e3062b12b128f846e696610e0e6a2009485ba40e80b69b080cf849372dd2ea5"
+    },
+    {
+      "path": "evidence/native-web.json",
+      "sha256": "ba8e38a9f9efe2b88980433403e337defd029880938bd61b5252d4451fb873df"
+    },
+    {
+      "path": "evidence/outer-signal-attempt.json",
+      "sha256": "7e9cac834d35bf41aab5ec4c4d6759ee4f5c6334d71125fa3594a4f63555a364"
+    }
+  ],
+  "currentAdditionalSourceHashes": {
+    "web/src/App.test.tsx": "cbc9be11da44ba638a41e9ebddf04084123f1519d3d3ad6ffc793f76559f7026",
+    "web/src/Approvals.test.tsx": "c6bc8a4c69d01fed90ef51f6ad4d111c091af6c530bfbc7b522fde8e549ad9a2",
+    "fe-review/runtime.test.ts": "700e6421469baf4e0d24c9eceabbc680b5b92e011afe3155319906a6bc3a94f3",
+    "fe-review/tsconfig.json": "ea34c7b8359c3a0b33eb27e99e02e846b073b7e7b808b378295bb96b2825ceb6",
+    "fe-review/run-isolated.py": "e4d7cdf39a0ad5d6d3bb55be401676d382c674946cc97f12a7baedbc538d85e6",
+    "fe-review/test_isolation.py": "7b3452daded07d6246a7eb42e69a0ec8a933599fb48700cdbb1e1db2261937c3"
+  },
+  "ignoredWorkerLogHashes": {
+    "runs/.state/20261024T084926Z-2b4187ae-produce.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/.state/20261024T084926Z-2b4187ae-serve.log": "a9d028a9143fcd2f322af3f0d9a525e7440632651e2733b4e8f8fd209e06bf20",
+    "runs/.state/20261024T085139Z-117ca0e8-produce.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/.state/20261024T085139Z-117ca0e8-serve.log": "e1e42e3a831d9b22de000a43c8b5148a247242689f0089c0f19b53c171852f07",
+    "runs/.state/20261024T085406Z-9bb2af5e-produce.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/.state/20261024T085406Z-9bb2af5e-serve.log": "dbf59c47580739fd13a0def62dcbf793a9c108a3955e3b997c47255375eb7761",
+    "runs/.state/20261024T085518Z-2671cf53-produce.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/.state/20261024T085518Z-2671cf53-serve.log": "e1e42e3a831d9b22de000a43c8b5148a247242689f0089c0f19b53c171852f07",
+    "runs/.state/driver-static.log": "aa98a0a9267448e5d251e0a652fecbad57ea6f744bea7cfc0ab7edefe77f656c",
+    "runs/.state/focused-corrected.log": "3e3deedced75538f64b61336ade13df4798bb1ca82fd829a6ae08e543cba0f92",
+    "runs/.state/focused-green.log": "77caaad48738c12cde67d07cf4a7d58b1d9bf317bea59e8e300bbe700688b449",
+    "runs/.state/m3-notice-red.log": "51497bcdeb00bb9b63602d52bb75fbbf0b99250bbad025423ddab5bc96cdbdc0",
+    "runs/.state/m3-red.log": "2fd597b0ecd0847edd9cdfd1d5391f0ce937ae25d28b26373cb1fe7032e7efc2",
+    "runs/.state/runtime-correction1.log": "c15f91ae4b334645373b9f054187bb78cc849b0af211ba5c10801511950698f5",
+    "runs/.state/runtime-correction2.log": "8e23376f07b23fa9027060443c74156047c368edafb997f99af897aa1750fd43"
+  },
+  "publicAudit": {
+    "relativeLinksChecked": 55,
+    "brokenLinks": 0,
+    "scopedPublicFiles": 30,
+    "privateHostPaths": 0,
+    "credentialLiteralFindings": [
+      {
+        "path": "fe-review/runtime.test.ts",
+        "classification": "inert guard-test fixture, never used as runtime credentials",
+        "literal": "postgresql://synthetic:random@"
+      }
+    ],
+    "screenshotsAndStorageState": "ignored; source inspection confirms .gitignore rules; parent verifies staged payload"
+  },
+  "rootFinalStatic": {
+    "initialRuffFindings": 24,
+    "afterAutoFormatFindings": 3,
+    "finalRuffFindings": 0,
+    "pythonFormattedFiles": 2,
+    "isolationTestsPassed": 4,
+    "projectContractsPassed": 42
+  }
+}

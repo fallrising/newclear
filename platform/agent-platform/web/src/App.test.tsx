@@ -1007,3 +1007,16 @@ it('refreshes archive availability after an expired download without creating a 
   expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
   expect(create).not.toHaveBeenCalled();
 });
+
+it('renders the existing pausing Chinese label in task badge and run selector', async () => {
+  runState = 'pausing';
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await screen.findByRole('heading', { name: 'Verify login' });
+  expect(document.querySelector('.state-pausing')).toHaveTextContent('正在暫停');
+  expect(
+    within(screen.getByLabelText('執行紀錄')).getByRole('option', { name: /正在暫停/ }),
+  ).toBeInTheDocument();
+});

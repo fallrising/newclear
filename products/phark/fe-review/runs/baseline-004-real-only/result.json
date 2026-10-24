@@ -1,0 +1,800 @@
+{
+  "schema": 1,
+  "id": "baseline-004-real-only",
+  "phase": "baseline-only",
+  "status": "passed",
+  "startedAt": "2026-10-24T11:13:45.462Z",
+  "controlledMockBeforeSpring": false,
+  "api": [
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "8c3884a6-cbcc-42ea-906a-fa4daa86a7f1",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "62876ea7-5b5d-49b0-8361-0ae3fa0e875a",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "23833463-fa38-417c-9440-e6133a5834f9",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "dcfaf4bb-6b91-4303-9801-75acdf49b6a3",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "be0e6d2d-ef29-4721-8a28-b27a4961bc7b",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "812b94b3-ed33-4c1b-8a6d-3ffd8eeee961",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "e1e288e8-9857-4167-821d-f09d262b7566",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "3f1042e1-fd99-4828-a3fe-68c832b774a2",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "275c7ace-7d0c-4ec0-9489-0e320cb49661",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "456f58c3-5c1b-4230-87ff-7871b83b45bc",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "da505537-38bc-4660-8e65-a410a31d62be",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "6bed8388-133b-4916-828d-36e9961d1a5d",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "63c1060b-02c0-4ce3-8cf7-2be176874f87",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "ebdb1167-f867-47d4-a45f-12ddafd0321a",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "1e22859a-c1d1-48cc-9d9e-48e00b5c1804",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "0490170c-c328-43a1-b8c0-71335c17ce8d",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "1b48f664-6320-4a42-9ed1-94676498a7be",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "c36505c8-a6c0-4698-a9f0-758554be924c",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/replies",
+      "status": 201,
+      "requestId": "3a5867f3-ff19-4867-be4f-689bca1e3ab3",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/10/like",
+      "status": 200,
+      "requestId": "941fd332-7351-4ae7-981d-1238838289ff",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/11/repost",
+      "status": 200,
+      "requestId": "ecb92778-a5e3-4312-82db-93e04aa0d999",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200,
+      "requestId": "0e5406f0-f906-449d-9821-0d7c22425321",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "a7445415-ffa1-4df6-834b-916b16f743c3",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "1a0d4431-5aea-4df7-a6be-dd9dc4c01f1b",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/profiles/rdfe7574c05",
+      "status": 200,
+      "requestId": "0466d035-47b1-4397-9753-0af938a32d5e",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/search",
+      "status": 200,
+      "requestId": "39f786ee-aa43-4110-a166-bbfb1d1d73ce",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/reports",
+      "status": 201,
+      "requestId": "99f4ce6f-fa3b-4f49-8d89-15c68c97e70a",
+      "controlled": false
+    }
+  ],
+  "steps": [
+    {
+      "name": "real-register-login-csrf",
+      "actor": "A",
+      "handle": "rdfe7574c05",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-register-login-csrf",
+      "actor": "B",
+      "handle": "r374ba8ce63",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-api-seed",
+      "posts": {
+        "home": 10,
+        "tech": 11,
+        "ops": 12,
+        "second": 13
+      },
+      "replyId": 1,
+      "channels": [
+        "home",
+        "tech",
+        "ops"
+      ],
+      "image": {
+        "id": 1,
+        "bytes": 79,
+        "sha256": "af9d971dc1f45fc5e79c98c2bbaade8ac05d71c7e41e188d6a065ab4cba558ce"
+      },
+      "notifications": 3,
+      "opaqueCursorPaging": true,
+      "reportId": 1,
+      "controlled": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "spring",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [],
+  "baseline": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 642,
+          "clientWidth": 390
+        },
+        "deck": {
+          "width": 358,
+          "height": 572,
+          "scrollWidth": 872,
+          "clientWidth": 358,
+          "scrollHeight": 572,
+          "clientHeight": 572
+        },
+        "columns": [
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          },
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          },
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          }
+        ],
+        "overflowingText": [
+          {
+            "tag": "P",
+            "width": 186,
+            "scrollWidth": 1337,
+            "textLength": 196
+          },
+          {
+            "tag": "P",
+            "width": 212,
+            "scrollWidth": 5735,
+            "textLength": 500
+          },
+          {
+            "tag": "P",
+            "width": 212,
+            "scrollWidth": 5735,
+            "textLength": 500
+          }
+        ]
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "count": 5,
+            "targets": [
+              [
+                ".gap-3.flex.items-center > div:nth-child(2)"
+              ],
+              [
+                "label[for=\"channel\"]"
+              ],
+              [
+                "#channel > span"
+              ],
+              [
+                ".md\\:col-span-2.space-y-2:nth-child(3)"
+              ],
+              [
+                ".md\\:col-span-2.space-y-2:nth-child(4)"
+              ]
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 95
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 834,
+          "clientWidth": 834
+        },
+        "deck": {
+          "width": 786,
+          "height": 840,
+          "scrollWidth": 786,
+          "clientWidth": 786,
+          "scrollHeight": 3534,
+          "clientHeight": 840
+        },
+        "columns": [
+          {
+            "width": 251.328125,
+            "height": 3533.765625,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 3532,
+            "clientHeight": 3532
+          },
+          {
+            "width": 251.328125,
+            "height": 3533.765625,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 3532,
+            "clientHeight": 3532
+          },
+          {
+            "width": 251.328125,
+            "height": 3533.765625,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 3532,
+            "clientHeight": 3532
+          }
+        ],
+        "overflowingText": [
+          {
+            "tag": "P",
+            "width": 157,
+            "scrollWidth": 1337,
+            "textLength": 196
+          },
+          {
+            "tag": "P",
+            "width": 183,
+            "scrollWidth": 5735,
+            "textLength": 500
+          },
+          {
+            "tag": "P",
+            "width": 183,
+            "scrollWidth": 5735,
+            "textLength": 500
+          }
+        ]
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "count": 5,
+            "targets": [
+              [
+                ".gap-3.flex.items-center > div:nth-child(2)"
+              ],
+              [
+                "label[for=\"channel\"]"
+              ],
+              [
+                "#channel > span"
+              ],
+              [
+                ".md\\:col-span-2.space-y-2:nth-child(3)"
+              ],
+              [
+                ".md\\:col-span-2.space-y-2:nth-child(4)"
+              ]
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 16
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        },
+        "deck": {
+          "width": 1232,
+          "height": 628,
+          "scrollWidth": 1232,
+          "clientWidth": 1232,
+          "scrollHeight": 2592,
+          "clientHeight": 628
+        },
+        "columns": [
+          {
+            "width": 400,
+            "height": 2591.9375,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 2590,
+            "clientHeight": 2590
+          },
+          {
+            "width": 400,
+            "height": 2591.9375,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 2590,
+            "clientHeight": 2590
+          },
+          {
+            "width": 400,
+            "height": 2591.9375,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 2590,
+            "clientHeight": 2590
+          }
+        ],
+        "overflowingText": [
+          {
+            "tag": "P",
+            "width": 306,
+            "scrollWidth": 1337,
+            "textLength": 196
+          },
+          {
+            "tag": "P",
+            "width": 332,
+            "scrollWidth": 5735,
+            "textLength": 500
+          },
+          {
+            "tag": "P",
+            "width": 332,
+            "scrollWidth": 5735,
+            "textLength": 500
+          }
+        ]
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "count": 5,
+            "targets": [
+              [
+                ".gap-3.flex.items-center > div:nth-child(2)"
+              ],
+              [
+                "label[for=\"channel\"]"
+              ],
+              [
+                "#channel > span"
+              ],
+              [
+                ".md\\:col-span-2.space-y-2:nth-child(3)"
+              ],
+              [
+                ".md\\:col-span-2.space-y-2:nth-child(4)"
+              ]
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 12
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    }
+  ],
+  "captures": [
+    {
+      "name": "baseline-home-390",
+      "path": "screenshots/baseline-home-390.png",
+      "sha256": "f822ee1259362da3c9299d99483fbf06ff5fd3824bcbbee4078de2fa6bbcdbfb",
+      "bytes": 107276,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "controlled": false
+    },
+    {
+      "name": "baseline-home-834",
+      "path": "screenshots/baseline-home-834.png",
+      "sha256": "1478a5c64f0f158c403aba8c3a95cd9c60323b33badc3fab19cc09b3b9991a07",
+      "bytes": 390827,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "controlled": false
+    },
+    {
+      "name": "baseline-home-1440",
+      "path": "screenshots/baseline-home-1440.png",
+      "sha256": "f3005983791ae3fe58944d84e5f8f53e9193ebc3d9c41e7a428ace1789ec4763",
+      "bytes": 361173,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "controlled": false
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "49fff9fc7d8e79c2f081b37a4d3e07031cbd674d3638a2ce17507af96f6be90d",
+    "frontend/src/components/Column.tsx": "be0ea0f358cf3f58b25c58c04953029a04dce5de126efe5ba44b378639942543",
+    "frontend/src/components/PostCard.tsx": "0982cd05338a74fcd991dcac7b470e8b8611445408a4a620b592ce2783547e46",
+    "frontend/src/components/ReplyThread.tsx": "b1142d6ae516dab5357cc94fccc18af0825b3a8319e92b8c02420c3a892f6e8f",
+    "frontend/src/components/Composer.tsx": "d1181bbd87bec92a49147a85264a18f2716d6e4d312180c363113d6d21cbd6a1",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "211f97bff1fdb78a7a930644a472e843bed60d38d721a4be6b901030499b9d6c",
+    "fe-review/api-fixture.mjs": "d482368dafa8f06df8a8714c519e835222bb1525acfb60e6652ac0e79135e465",
+    "fe-review/guards.mjs": "72f215327fd6b91a066769ee19d194937171c73eee79e020f08c3a87f74b4f7e",
+    "fe-review/mock-baseline.mjs": "4db5dbebae8d994c5732f0fb80158a12e675de59fcf1633cfdbdadf9bae66b4c",
+    "fe-review/baseline.mjs": "86576d74d51f57d35d380b5f840c251393c836119a0a9e6b2b8228285f5a7325",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "spring",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "real-responsive-baseline",
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "mockPrerequisite": {
+    "run": "baseline-003",
+    "sha256": "4dd13e2958a6fc002ceaa9a56611578dc178a65c5eae4e2e84459700f97ad4c7",
+    "passed": 6,
+    "rerun": false
+  },
+  "lastAPI": {
+    "actor": "B",
+    "method": "POST",
+    "path": "/api/posts/10/reports",
+    "status": 201,
+    "expected": 201
+  },
+  "seedBudget": {
+    "registrations": 2,
+    "logins": 2,
+    "posts": 4,
+    "replies": 1,
+    "socialWrites": 2,
+    "reports": 1,
+    "rateLimitDisabled": false
+  },
+  "baselineProgress": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "step": "axe",
+    "techCopies": 2,
+    "measurement": {
+      "page": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "deck": {
+        "width": 1232,
+        "height": 628,
+        "scrollWidth": 1232,
+        "clientWidth": 1232,
+        "scrollHeight": 2592,
+        "clientHeight": 628
+      },
+      "columns": [
+        {
+          "width": 400,
+          "height": 2591.9375,
+          "scrollWidth": 398,
+          "clientWidth": 398,
+          "scrollHeight": 2590,
+          "clientHeight": 2590
+        },
+        {
+          "width": 400,
+          "height": 2591.9375,
+          "scrollWidth": 398,
+          "clientWidth": 398,
+          "scrollHeight": 2590,
+          "clientHeight": 2590
+        },
+        {
+          "width": 400,
+          "height": 2591.9375,
+          "scrollWidth": 398,
+          "clientWidth": 398,
+          "scrollHeight": 2590,
+          "clientHeight": 2590
+        }
+      ],
+      "overflowingText": [
+        {
+          "tag": "P",
+          "width": 306,
+          "scrollWidth": 1337,
+          "textLength": 196
+        },
+        {
+          "tag": "P",
+          "width": 332,
+          "scrollWidth": 5735,
+          "textLength": 500
+        },
+        {
+          "tag": "P",
+          "width": 332,
+          "scrollWidth": 5735,
+          "textLength": 500
+        }
+      ]
+    }
+  },
+  "endedAt": "2026-10-24T11:13:59.388Z"
+}

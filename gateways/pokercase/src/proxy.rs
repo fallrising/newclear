@@ -1045,7 +1045,8 @@ pub async fn handle_responses(
                         UpstreamBodyKind::OpenAiChat => {
                             StreamMode::ChatToResponses(public_model.to_string())
                         }
-                        // Responses upstream: native SSE goes through unchanged.
+                        // Preserve native frames, while requiring a valid terminal.
+                        UpstreamBodyKind::OpenAiResponses => StreamMode::NativeResponses,
                         _ => StreamMode::Passthrough,
                     };
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
@@ -1142,23 +1143,7 @@ async fn read_forward_body(fwd: ForwardOk, cancel: &CancellationToken) -> AppRes
     if !matches!(kind, UpstreamBodyKind::OpenAiResponses) || !reassemble {
         return Ok(bytes);
     }
-    let body = responses::reassemble_sse(&String::from_utf8_lossy(&bytes));
-    // A stream that ended in response.failed is an error, not an empty answer.
-    let v: Value = serde_json::from_slice(&body).unwrap_or(Value::Null);
-    if v.get("status").and_then(|s| s.as_str()) == Some("failed") {
-        let err = v.get("error").cloned().unwrap_or(Value::Null);
-        let code = err.get("code").and_then(|c| c.as_str()).unwrap_or("");
-        let status = if crate::siwc::is_usage_limit_code(code) {
-            429
-        } else {
-            502
-        };
-        return Err(AppError::Upstream {
-            status,
-            body: json!({"error": err}).to_string(),
-        });
-    }
-    Ok(body)
+    responses::reassemble_sse(&String::from_utf8_lossy(&bytes))
 }
 
 /// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.
@@ -1204,6 +1189,7 @@ fn json_bytes_response(status: StatusCode, bytes: Bytes) -> Response {
 
 enum StreamMode {
     Passthrough,
+    NativeResponses,
     /// Chat chunks → Anthropic events (model name for message_start).
     ChatToAnthropic(String),
     /// Chat chunks → Responses events.
@@ -1291,7 +1277,7 @@ impl<A: SseConvert, B: SseConvert> SseConvert for Chain<A, B> {
 
 fn converter(mode: StreamMode) -> Option<Box<dyn SseConvert>> {
     Some(match mode {
-        StreamMode::Passthrough => return None,
+        StreamMode::Passthrough | StreamMode::NativeResponses => return None,
         StreamMode::ChatToAnthropic(m) => Box::new(ChatToAnthropic(StreamTranslateState::new(m))),
         StreamMode::ChatToResponses(m) => Box::new(responses::ChatToResponsesStream::new(m)),
         StreamMode::ResponsesToChat(m) => Box::new(responses::ResponsesToChatStream::new(m)),
@@ -1325,6 +1311,8 @@ where
     let status = StatusCode::OK;
     let stall = Duration::from_secs(stall_secs.max(5));
     let mut upstream = Box::pin(upstream);
+    let mut native = matches!(mode, StreamMode::NativeResponses)
+        .then(crate::native_responses::NativeResponses::default);
     let mut conv = converter(mode);
 
     let byte_stream = async_stream::stream! {
@@ -1334,6 +1322,12 @@ where
         loop {
             match timeout(stall, upstream.next()).await {
                 Ok(Some(Ok(chunk))) => {
+                    if let Some(native) = native.as_mut() {
+                        let out = native.push(&chunk);
+                        if !out.is_empty() { yield Ok::<Bytes, std::io::Error>(Bytes::from(out)); }
+                        if native.done { break; }
+                        continue;
+                    }
                     let Some(conv) = conv.as_mut() else {
                         yield Ok::<Bytes, std::io::Error>(chunk);
                         continue;
@@ -1359,6 +1353,10 @@ where
                 }
                 Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
                 Ok(None) => {
+                    if let Some(native) = native.as_mut() {
+                        let out = native.end();
+                        if !out.is_empty() { yield Ok(Bytes::from(out)); }
+                    }
                     if let Some(conv) = conv.as_mut() {
                         let mut out = String::new();
                         if let Some(data) = String::from_utf8_lossy(&buf).trim_end().strip_prefix("data:") {
@@ -1378,6 +1376,10 @@ where
                     break;
                 }
                 Err(_) => {
+                    if let Some(out) = native.as_mut().and_then(|n| n.finish_cr_terminal()) {
+                        yield Ok(Bytes::from(out));
+                        break;
+                    }
                     warn!("SSE stall timeout");
                     yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
                     break;
@@ -1463,6 +1465,76 @@ mod stream_completion_tests {
             .await
             .unwrap();
         String::from_utf8(bytes.to_vec()).unwrap()
+    }
+
+    #[tokio::test]
+    async fn nr2_native_terminal_closes_without_waiting_for_upstream_eof() {
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        struct OnDrop(Arc<AtomicBool>);
+        impl Drop for OnDrop {
+            fn drop(&mut self) {
+                self.0.store(true, Ordering::SeqCst);
+            }
+        }
+        let dropped = Arc::new(AtomicBool::new(false));
+        let marker = OnDrop(dropped.clone());
+        let terminal =
+            "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\"}}\n\n";
+        let upstream = async_stream::stream! {
+            let _marker = marker;
+            yield Ok::<Bytes, std::io::Error>(Bytes::from_static(terminal.as_bytes()));
+            std::future::pending::<()>().await;
+        };
+        let response = stream_body(upstream, 5, StreamMode::NativeResponses)
+            .await
+            .unwrap();
+        let bytes = tokio::time::timeout(
+            Duration::from_secs(1),
+            axum::body::to_bytes(response.into_body(), 4096),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+        assert_eq!(bytes.as_ref(), terminal.as_bytes());
+        assert!(dropped.load(Ordering::SeqCst));
+    }
+
+    #[tokio::test]
+    async fn nr3_cr_terminal_survives_idle_upstream() {
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        struct OnDrop(Arc<AtomicBool>);
+        impl Drop for OnDrop {
+            fn drop(&mut self) {
+                self.0.store(true, Ordering::SeqCst);
+            }
+        }
+        let dropped = Arc::new(AtomicBool::new(false));
+        let marker = OnDrop(dropped.clone());
+        let terminal =
+            "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\"}}\r\r";
+        let upstream = async_stream::stream! {
+            let _marker = marker;
+            yield Ok::<Bytes, std::io::Error>(Bytes::from_static(terminal.as_bytes()));
+            std::future::pending::<()>().await;
+        };
+        let response = stream_body(upstream, 5, StreamMode::NativeResponses)
+            .await
+            .unwrap();
+        let bytes = tokio::time::timeout(
+            Duration::from_secs(6),
+            axum::body::to_bytes(response.into_body(), 4096),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+        assert_eq!(bytes.as_ref(), terminal.as_bytes());
+        assert!(dropped.load(Ordering::SeqCst));
     }
 
     #[tokio::test]

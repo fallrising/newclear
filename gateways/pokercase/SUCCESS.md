@@ -119,3 +119,29 @@ Goal: enforce existing AC-04/AC-06/AC-15 error semantics when an upstream stream
 Native protocol passthrough, buffered HTTP collection, transport-error/stall behavior, retry/accounting, credentials, new tools/images support and release/deploy are outside this bounded slice. No real provider calls. Evidence/progress: [T-0386 task](docs/tasks/T-0386-stream-completion.md).
 
 T-0386 local result: SC-1–SC-3 passed (107Rust tests,14HTTP journeys, fmt/clippy,42contracts/index). Independent review passed; historical RED and old EOF-success assertion failure retained in the task record. Required remoteCI/merge/readback remain separate publication gates.
+
+## T-0389 — Buffered Responses completion
+
+Goal: enforce completion evidence while collecting forced-stream Responses for non-stream Chat Completions, Messages and Responses requests. The collector must no longer default an unfinished response to completed.
+
+- BR-1: Given an empty/partial/item-only transcript, bareDONE or malformed/conflicting terminal, when collecting a single response, then return502 and expose neither partial output nor raw upstream errors as a successful answer.
+- BR-2: Given `error` or `response.failed`, then fail with a fixed redacted message; preserve429 and only recognized subscription-sharing quota codes. The first terminal event is final: failure cannot be rescued by a later success, and later events do not mutate an accepted success.
+- BR-3: Given `response.completed` or `response.incomplete` with matching response status, then preserve output items/text, model, usage and incomplete details/length mapping across all three buffered APIs. Nonempty terminal output is authoritative; only empty/missing final output falls back to intermediate items/text. Existing tool reconstruction remains compatible.
+
+Plan: RED→GREEN localHTTP regression, collector edge cases, fullRust/fmt/clippy/project/index gates, independent review, requiredCI and normalmerge/readback. Native streaming passthrough, directJSON responses, generalSSEframing, retry/timeout/accounting, realproviders/login and release/deploy are excluded. No runtime dependencies or permissions change. Evidence: [T-0389 task](docs/tasks/T-0389-buffered-responses.md).
+
+T-0389 local result: BR-1–BR-3 passed with113Rust tests,45localHTTPjourneys, fmt/clippy and42project/index gates; independent review passed after the terminal-output precedence fix. Prior RED failures retained. Required remoteCI/merge/readback tracked by the task/desk record.
+
+## T-0401 — Native Responses completion
+
+Scope: HTTP `/v1/responses` streaming from a Responses upstream. This completes the native path following T-0389; other passthrough APIs and conversion/collection paths retain their contracts.
+
+- NR-1: Given empty, partial text/tool output, bare `[DONE]`, malformed terminal or an unterminated frame, when native upstream ends without a valid terminal, then emit one fixed `error` SSE event (HTTP headers may already be 200), never synthetic success. Discard incomplete or invalid terminal frames. Transport errors/stalls retain existing body-error behavior.
+- NR-2: Given complete `response.completed` / `response.incomplete` / `response.failed` with a response object and matching status, or `error` with a string message, then preserve accepted frames byte-for-byte including output, usage and unknown fields; the first terminal closes this HTTP stream. Completed/incomplete may not contain non-null response.error. An explicit SSE event name must match a terminal JSON type. This is terminal validation, not full schema validation; omitted sequence numbers remain compatible.
+- NR-3: Given arbitrary byte boundaries, UTF-8, LF/CRLF/CR line endings, comments and multiline data, then recognize complete SSE events only. One pending event is limited to 16 MiB (including framing); excess produces a fixed error and releases upstream. Generated errors use the next observed sequence number (start 0); supplied sequence numbers must be nonnegative integers below i64::MAX so a successor can be represented. No unbounded pending-event allocation.
+
+Official event shapes: [OpenAI streaming events](https://developers.openai.com/api/reference/resources/responses/streaming-events), checked 2026-10-24. Scope excludes WebSocket successor responses. Validation plan: focused RED/GREEN, byte-fragment and boundary tests, local HTTP native journeys, existing converted/buffered regressions, full Rust/fmt/clippy/docs/index, independent review and CI. Evidence recorded below; no real provider calls or usable-version claim.
+
+Local NR-1–NR-3 evidence: [task and commands](docs/tasks/T-0401-native-responses.md), 122 tests including 11 new native HTTP cases, fmt/clippy and 42 project contracts/index pass. Independent review PASS after R1 correction; remote CI/publication pending.
+
+CR lookahead: retain a pending CR until the next byte or EOF to preserve split CRLF. If the existing idle deadline arrives with a complete valid CR-only terminal, emit that original frame and close rather than returning a stall error. CR-only terminal delivery may therefore wait up to the configured stall window (minimum five seconds); other stalls retain the existing body error. Reviewer R1 reproduced the lost terminal with an upstream that stays pending, then the same body/drop regression passed after this fix.

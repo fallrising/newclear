@@ -1,0 +1,12 @@
+✔ measured geometry 390 (0.793316ms)
+✔ measured geometry 834 (0.13916ms)
+✔ measured geometry 1440 (0.073761ms)
+✔ observed loading/errors expose status and alert semantics (0.13963ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 56.278323

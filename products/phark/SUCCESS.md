@@ -65,3 +65,8 @@ curl -fsS http://localhost:8080/actuator/health
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須先取得復工決定並完成 SDD-012，將 runtime/瀏覽器/資料恢復證據對齊目前 commit；普通歷史版本不等於 usable qualification。
+
+
+## FE round2 — 2026-10-24T10:18:22Z
+
+T-0380 R2-AC-10/E: approved M1–M3 API-only synthetic fixture, measured deck and existing form/accessibility improvements. [Task](fe-review/tasks/round2/task.md) fixes scope and validation. Original M1–M3 implementation and bounded local verification completed: real Session/CSRF API fixture, strict12-key shared capture selection,9route guards, keyboard/paging and exact logout proof. See [report](fe-review/tasks/round2/report.md) and [evidence index](fe-review/tasks/round2/result.json). Parent independent review/current-head CI/publication remain separate. Contrast incomplete, Search moderate landmark and historical unknown/FAIL are retained; no full R3 claim. Session/CSRF/quotas preserved, no backend/dependency/deployment or durability work. Mainline/AC-04/usable qualification unchanged.

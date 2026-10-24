@@ -1,0 +1,14 @@
+✔ loopback origin excludes credentials, other origins, ports and URL suffixes (9.335263ms)
+✔ fresh private state rejects repeat and symlink but independent fresh run is accepted (12.22209ms)
+✔ CSRF and response identities are actual validated values (1.110816ms)
+✔ cleanup continues after rejected close and failure categories redact payloads (0.589277ms)
+✔ cancelled launch acquired later remains owned and is closed during cleanup (2.352611ms)
+✔ stalled close times out and later cleanup still executes; late reject is handled (7.139492ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 94.58318

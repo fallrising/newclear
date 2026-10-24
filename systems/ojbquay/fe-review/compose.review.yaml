@@ -1,0 +1,71 @@
+# Review-only overlay; production deployment stays unchanged.
+x-review-labels: &review-labels
+  fe.review.run: ${FE_REVIEW_RUN_ID:?required}
+  fe.review.source: ${FE_REVIEW_SOURCE:?required}
+services:
+  kafka:
+    ports: !reset []
+    labels: *review-labels
+  postgres:
+    ports: !reset []
+    labels: *review-labels
+    environment:
+      POSTGRES_USER: ${FE_REVIEW_DB_USER:?required}
+      POSTGRES_PASSWORD: ${FE_REVIEW_DB_PASSWORD:?required}
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d ojbquay']
+  console-api:
+    ports: !reset []
+    labels: *review-labels
+    image: fe-review-ojb/console-api:${FE_REVIEW_RUN_ID:?required}
+    environment:
+      OJBQUAY_DATABASE_USER: ${FE_REVIEW_DB_USER:?required}
+      OJBQUAY_DATABASE_PASSWORD: ${FE_REVIEW_DB_PASSWORD:?required}
+      OJBQUAY_ADMIN_USERNAME: ${FE_REVIEW_ADMIN_USER:?required}
+      OJBQUAY_ADMIN_PASSWORD: ${FE_REVIEW_ADMIN_PASSWORD:?required}
+  gateway-produce:
+    ports: !reset []
+    labels: *review-labels
+    image: fe-review-ojb/gateway-produce:${FE_REVIEW_RUN_ID:?required}
+  gateway-consume:
+    ports: !reset []
+    labels: *review-labels
+    image: fe-review-ojb/gateway-consume:${FE_REVIEW_RUN_ID:?required}
+  scheduler:
+    ports: !reset []
+    labels: *review-labels
+    image: fe-review-ojb/scheduler:${FE_REVIEW_RUN_ID:?required}
+    environment:
+      OJBQUAY_DATABASE_USER: ${FE_REVIEW_DB_USER:?required}
+      OJBQUAY_DATABASE_PASSWORD: ${FE_REVIEW_DB_PASSWORD:?required}
+  console-web:
+    ports: !reset []
+    labels: *review-labels
+    image: fe-review-ojb/console-web:${FE_REVIEW_RUN_ID:?required}
+  prometheus:
+    ports: !reset []
+    labels: *review-labels
+  alertmanager:
+    ports: !reset []
+    labels: *review-labels
+  grafana:
+    ports: !reset []
+    labels: *review-labels
+    environment:
+      GF_SECURITY_ADMIN_USER: ${FE_REVIEW_GRAFANA_USER:?required}
+      GF_SECURITY_ADMIN_PASSWORD: ${FE_REVIEW_GRAFANA_PASSWORD:?required}
+  push-sink:
+    ports: !reset []
+    labels: *review-labels
+volumes:
+  kafka-data:
+    labels: *review-labels
+  postgres-data:
+    labels: *review-labels
+  prometheus-data:
+    labels: *review-labels
+  grafana-data:
+    labels: *review-labels
+networks:
+  default:
+    labels: *review-labels

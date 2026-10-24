@@ -39,3 +39,11 @@ A narrow gateway correction now maps the two known sandbox-unavailable startup s
 Validation: the new focused E2E first failed with actual502/expected503; after the correction, `cargo +1.99.0 test --locked` passed99tests, `clippy --locked --all-targets -- -D warnings` and `fmt --check` passed. Independent source review passed. Diagnostic-helper fixtures verified identity/short-token exclusion and fake-Docker exec/cleanup behavior. These checks validate error handling, **not a successful live reply after the correction**; no further live call was made.
 
 Next: determine a sandbox-compatible runtime configuration. Any choice to disable the CLI sandbox or loosen Docker permissions requires a separately reviewed safety decision; this change does neither. The dedicated authenticated profile is retained, and both authorized one-request attempts are consumed. Do not request the completed login authorization again or silently send more inference.
+
+## Compatibility decision2026-10-24 (current next step)
+
+The owner supplied a direct-CLI comparison using the same image/profile: normal Docker flags reject `unshare -Ur`; relaxing seccomp allows that probe; keeping Docker restrictions and using `--sandbox disabled` returns OK. These are owner-reported observations, not tests rerun by this gateway work. They support a local seccomp conflict; the additional AppArmor/UID-map observations do not prove a second blocker.
+
+The [reviewable decision](cursor-isolation.md#2026-10-24-container-compatibility-decision) changes only the fixed CLI preference inside mandatory Docker to `--sandbox disabled`. Default Docker seccomp and every outer restriction stay intact. No silent fallback or automatic retry is added; fixed503 redaction remains for a CLI that still reports the known error. Earlier failed gateway attempts remain failed.
+
+Current next step: one newly authorized gateway text acceptance using the corrected runner and retained profile; both previous one-request allowances are consumed. The owner-reported direct-CLI OK does not verify thinrouter end to end. No new live request was made by this compatibility implementation.

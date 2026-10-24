@@ -3,7 +3,8 @@
 //! thinrouter holds no Cursor token and speaks no private Cursor protocol: every request
 //! is answered by `cursor-agent` inside a resource-bounded Docker container. A pinned
 //! local image and dedicated named profile volume are required; there is no host CLI
-//! fallback. Ask/sandbox flags are preferences, not the isolation boundary.
+//! fallback. Docker supplies isolation; the nested CLI sandbox is disabled for
+//! compatibility with Docker's default seccomp policy. Ask remains a preference.
 //! The caller's system prompt
 //! goes into the prompt inside `<external_system_instructions>`, as for Claude Code.
 //!
@@ -230,7 +231,7 @@ pub fn cli_args(model: &str, workspace: &std::path::Path, prompt: &str) -> Vec<S
         "--mode",
         "ask",
         "--sandbox",
-        "enabled",
+        "disabled",
         "--trust",
         "--workspace",
     ]
@@ -556,6 +557,13 @@ mod tests {
         ] {
             assert!(args.iter().any(|a| a == required));
         }
+        assert!(args.windows(2).any(|w| w == ["--cap-drop", "ALL"]));
+        assert!(args.windows(2).any(|w| w == ["--network", "bridge"]));
+        assert!(!args.iter().any(|a| a.contains("seccomp=")
+            || a.contains("apparmor=")
+            || a == "--cap-add"
+            || a == "--pid"
+            || a.starts_with("--pid=")));
         assert_eq!(args.last(), Some(&digest));
         assert!(args
             .windows(2)
@@ -583,7 +591,7 @@ mod tests {
         assert!(args.windows(2).any(|w| w[0] == "--mode" && w[1] == "ask"));
         assert!(args
             .windows(2)
-            .any(|w| w[0] == "--sandbox" && w[1] == "enabled"));
+            .any(|w| w[0] == "--sandbox" && w[1] == "disabled"));
         assert!(args
             .windows(2)
             .any(|w| w[0] == "--workspace" && w[1] == "/w"));

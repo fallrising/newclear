@@ -14,6 +14,14 @@ Owner 已決定保留 Cursor provider，授權以外部隔離取代不可靠的�
 
 Docker 是此 opt-in provider 的執行前提（本機已安裝），不新增 Rust runtime dependency。其他 provider 不依賴 Docker。網路限制、獨立帳號及 client tools/images 是後續範圍，不在本次偷偷開啟。
 
+## 2026-10-24 container compatibility decision
+
+The owner supplied a same-image/profile comparison: the default Docker restrictions rejected user-namespace creation; disabling only the CLI sandbox returned OK. This is owner-reported evidence, not a new gateway observation. Docker documents namespace syscall restrictions in its [default seccomp profile](https://docs.docker.com/engine/security/seccomp/); Cursor documents [enabled/disabled CLI sandbox modes](https://cursor.com/docs/cli/overview).
+
+Use `--mode ask --sandbox disabled` **only inside the mandatory Docker runner**. Docker remains the filesystem/process boundary. Keep the existing default seccomp policy, dropped capabilities, no-new-privileges, non-root UID, read-only rootfs, resource limits, mounts and cleanup. Do not add `seccomp=unconfined`, privileged mode, host fallback or an automatic retry with weaker settings. The inner CLI sandbox no longer provides an additional boundary; profile credentials, bridge networking and account plugins remain accessible as described above.
+
+Acceptance retains CI-1–CI-5 and AC-17 protocol coverage. Verify the fixed CLI argument, unchanged Docker restrictions, fail-closed setup, fixed error redaction, and credential-free real Docker canary. Previous failed gateway requests remain failed; the owner's direct-CLI OK does not establish gateway end-to-end acceptance. No additional live model request is included in this compatibility change.
+
 ## 驗收
 
 | AC | Given / When / Then | 驗證 |

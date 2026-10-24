@@ -42,3 +42,10 @@ Owner 於 2026-10-23 明示移除私人網路入口，產品僅保留 `public` �
 ## 可用版本
 
 `mainline: incomplete`、`usable_tag: none`。本次刪除／修正可獨立提交合併；AC-03 仍需真實 Access web 未登入拒絕及授權郵箱登入成功的證據。需要 CF 設定位置及可收驗證碼的允許郵箱；不需要裝置註冊或網路客戶端。公開模式保留，但目前不啟用、不執行公開上線。
+
+
+## FE round2 — 2026-10-24T09:51:27Z
+
+T-0380 R2-AC-7/E approved DESIGN M1–M9 實作與限定檢查通過，見 [task](fe-review/tasks/round2/task.md)、[report](fe-review/tasks/round2/report.md)。原生 make test/vet/schema/build、真表單登入/cookie、htmx鍵盤與15秒poll/focus、disabled與不搶焦點、service reload/JSON rollback202/安全404提示、空狀態均有實測。12選定PNG保留11原圖＋1mobile精確replacement，12 finalURL/loaded/overflow與4 desktop axe在最終CSSbinary執行；source/hash/失敗及清理界線均保留。
+
+`targets.verified=true` 只代表批准R2，不代表完整R3。axe保留3 serious頁首contrast＋2 critical node/service meta-refresh，incomplete0；後者依DESIGN M4明訂保留，完整R3未通過。獨立最終審查／CI／發布由root收尾；AC-03 Cloudflare email OTP仍pending，mainline incomplete／usable_tag none不變，無deploy/產品可用或owner完成聲明。

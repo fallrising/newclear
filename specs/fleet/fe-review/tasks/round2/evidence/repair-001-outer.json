@@ -1,0 +1,8 @@
+{
+  "command": "owned docker networknone Fleet repair",
+  "exitCode": 0,
+  "error": null,
+  "elapsedSeconds": 5.11,
+  "containerRemoved": true,
+  "scriptSha256": "3812f14f9ac3aaf4df68e1f21c83c212131f01a95e6d11af424364c0ce51c791"
+}

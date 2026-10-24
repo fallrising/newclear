@@ -63,7 +63,7 @@ func (p *Pages) Catalog(w http.ResponseWriter, r *http.Request) {
 	for i := range list {
 		rows = append(rows, p.rowOf(&list[i]))
 	}
-	p.render(w, "catalog", map[string]any{"Title": "Catalog", "Services": rows})
+	p.render(w, "catalog", map[string]any{"Title": "Catalog", "Services": rows, "LivePoll": true})
 }
 
 func (p *Pages) ServiceRow(w http.ResponseWriter, r *http.Request, name string) {

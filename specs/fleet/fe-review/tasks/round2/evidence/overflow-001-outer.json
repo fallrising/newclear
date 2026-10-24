@@ -1,0 +1,8 @@
+{
+  "command": "owned docker networknone Fleet overflow",
+  "exitCode": 0,
+  "error": null,
+  "elapsedSeconds": 1.252,
+  "containerRemoved": true,
+  "scriptSha256": "8539046b2247464c751698bcae2f938fc211571f29b10c9fefce21d9a045f1af"
+}

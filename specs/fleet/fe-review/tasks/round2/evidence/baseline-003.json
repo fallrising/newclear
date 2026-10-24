@@ -1,0 +1,59 @@
+{
+  "mode": "baseline",
+  "startedAt": "2026-10-24T09:59:53.573Z",
+  "passed": true,
+  "node": "v24.18.0",
+  "playwright": "1.63.0",
+  "binarySha256": "4301e12dbda0b87816cfcf8be800788e7fa5d606c25d20e8f5461e65a880f0d1",
+  "steps": [
+    {
+      "stage": "SERVER_START",
+      "passed": true
+    },
+    {
+      "stage": "SEED",
+      "passed": true
+    },
+    {
+      "stage": "LOGIN",
+      "passed": true,
+      "status": 303,
+      "secure": true,
+      "httpOnly": true,
+      "sameSite": "Lax"
+    },
+    {
+      "stage": "BASELINE_ROLLBACK_RESPONSE",
+      "passed": true,
+      "status": 400,
+      "declaredJSON": false,
+      "actualFormBody": true,
+      "invalidJSON": true,
+      "currentReleaseUnchanged": true
+    }
+  ],
+  "cleanup": {
+    "heartbeatStopped": true,
+    "browserClosed": true,
+    "serverExited": true,
+    "listenerAbsent": true,
+    "privateStateRemoved": true
+  },
+  "chromium": "153.0.8010.12",
+  "pageErrors": 0,
+  "cookieObservation": {
+    "name": "fleet_op",
+    "domain": "127.0.0.1",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "Lax",
+    "valueEqualsExpected": true,
+    "authenticatedCatalogStatus": 200
+  },
+  "releaseRowCount": 3,
+  "rollbackButtonCount": 2,
+  "rollbackCandidateCount": 1,
+  "cleanupPassed": true,
+  "finishedAt": "2026-10-24T09:59:54.402Z"
+}

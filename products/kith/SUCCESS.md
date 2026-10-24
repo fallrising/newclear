@@ -116,3 +116,11 @@ npm run e2e:validate
 ## #397 歷史 E2E 失敗處置（文件範圍）
 
 本次先核對兩個原始 job、固定來源與既有修正，再交付[處置報告](tasks/397-e2e-disposition/analysis.md)。驗收是來源／日誌可追溯、原斷言保留、CI 政策與測試修復分開；不改產品或恢復已由 owner 移除的 hosted E2E。文件連結、項目契約、獨立審查與 PR CI 是本次 gates，主線資格與真 provider 驗收不變。
+
+### FE review 第 2 輪（T-0380，IN_PROGRESS）
+
+目標／範圍：依已批准 ROUND2-SDD 的 R2-AC-1／R2-AC-E，實作 fe-review DESIGN M1–M4 的隔離 launcher、合成主要流程、匿名／已登入 targets 與文件。只重用真本機 worker／D1／既有 seed 及 fake provider；不修改 web、worker、e2e、開發綁定或依賴。
+
+驗收計畫：先驗證新工具拒絕不安全環境、重用 state、非 loopback 與缺依賴，再驗證 owned-process cleanup、seed/login、訊息／串流／thread／console／歷史流程。跑既有相應靜態／web／e2e gates；只有在隔離 namespace 實跑、去敏證據及必要 gates 完整通過後才改 targets.verified。結果見 [本輪報告](fe-review/tasks/round2/report.md)。AC-04 與產品主線仍 pending／incomplete，不以此 FE 工具代替真 provider 資格。
+
+本輪本地 checkpoint：隔離 launcher／登入／清理、96 個互動畫面與90個靜態targets已實跑；必要原生與e2e證據、先前環境失敗及一次外部private-state診斷見上述報告。15route最終URL／實頁面與lock失敗清理已補證；targets僅按本輪M1–M4實測true。browser-health／axe屬尚未執行的第3輪；PR578交付收尾仍須獨立補審、CI與合併回讀。

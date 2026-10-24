@@ -44,10 +44,10 @@ function DeliveryChart({
         itemStyle: {color: "#087f8c", borderRadius: [6, 6, 0, 0]},
       }],
     });
-    const resize = () => chart.resize();
-    window.addEventListener("resize", resize);
+    const observer = new ResizeObserver(() => chart.resize());
+    observer.observe(ref.current);
     return () => {
-      window.removeEventListener("resize", resize);
+      observer.disconnect();
       chart.dispose();
     };
   }, [groups, subscriptions, topics]);

@@ -1,0 +1,11 @@
+{
+  "command": "owned review-only Compose up --no-build --wait",
+  "exitCode": 0,
+  "elapsedSeconds": 41.595,
+  "project": "fe-ojb-0afcb7f018b20564",
+  "resources": 16,
+  "record": {
+    "recorded": 16,
+    "run": "fe-ojb-0afcb7f018b20564"
+  }
+}

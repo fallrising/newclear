@@ -2030,6 +2030,10 @@ Goku original R2 M1–M3 accepted by R25 independent source/artifact review; roo
 
 Fleet591 merged2d65b6528ef8425fe17bfb127f79c016dabe3380 at2026-10-24T11:13:28Z after R24/all3CI/scopedreadback; actualFleet root/component done carried here. Ojb review-only overlay/isolation/gRPC proposal subsequently explicitly approved by owner, replacing earlier pending snapshot; execution remains bounded and separately claimed.
 
+## Ojbquay R2-AC-8/E / T-0380 claim 2026-10-24T11:18:59Z
+
+Ownerexplicitlyapprovedfiniteoverlay/isolation/gRPCproposal; DESIGN addendumrecords exactscope. T015 boundednativeauthor/reviewer withrootenvironment/Git/acceptance. Estimate45–75active+coldwait20–45unknown,25checkpoint/max2diagnostics/20minnotdeadline. FullGradle/native/trueAPI/browser/ownership checksrequired; no productbackend/deps/CIchanges. Goku592merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at11:17:09Z,R25/all6CI/scopedreadbackPASS;actualboarddonecarriedhere.
+
 
 ## Phark FE round2 / T-0380 R2-AC-10 / 2026-10-24T10:18:22Z
 
@@ -2039,3 +2043,7 @@ T017 preflight source-backed no new scope decision; claim starts environment pre
 Phark T017 checkpoint 2026-10-24T11:57:46Z: source-specific shared12 captures and9 route guards pass, final003/004 preserve12 keyboard workflows and3paging; final005 exact same-Request logout204 plus authenticated-session-null/UI evidence classifies browser abort without calling raw healthzero. R26 late-browser-ownership issue fixed with explicit30s launch/boundedclose and focused6PASS. Backend610 native tests/package and finalfrontendlint/build passed; root42contracts passed. Contrast incomplete/Search moderate remain explicit, no fullRound3/mainline claim. Independent final documentation review/current-head CI/normalmerge/readback remain required. Private evidence archive19,984,004bytes SHAe7932386f060827ba0e0d92fef60c624e521fc4a49931778cdea433d9175c45a retained locally, not uploaded.
 
 Goku592 merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at2026-10-24T11:17:09Z; R25/all6CI/scopedreadback passed. Carry actualGoku closure. Phark R26 FINAL ACCEPT and final source-specific native/runtime evidence complete; merge integrates already-accepted main without Phark runtime changes.
+
+Ojbquay final localR2M1–M4 acceptedbyR28:72selectedcaptures(42states/27routes/3chart), native153Java inclcache/frontend6/mock1/deployvalidation, root7Python+20Node focusedPASS. All8immutableattempts preserved; final6secretretakes100%mask andexactowned16resourceabsenceverified. Existing12axeviolations/9preloadlimits/mobilelogout remainfutureR3, no fullR3/ownercompletion claim. Privatearchive56,249,050bytes SHA99d1e2e0988bc86db834fabf2194b88b8ae532e0c6286064e14685d60b8597a5. CurrentCI/normalmerge/readback remain required.
+
+Phark593 normallymergedab17a1d25f428937b3c1f24113611789fd60748b at2026-10-24T12:07:47Z afterR26/all7CI/scopedremoteequality; actualboardclosure carriedhere.

@@ -1,0 +1,124 @@
+{
+  "scope": "root observed native/build receipts; original failures and cache distinction retained; no runtime state/config/credentials",
+  "files": [
+    {
+      "file": "gradle-build.json",
+      "originalSha256": "2aae5c9218db66a0cc317fa79ea183f3bc26d802068bfbe610189f3976c99855",
+      "publishedSha256": "2aae5c9218db66a0cc317fa79ea183f3bc26d802068bfbe610189f3976c99855",
+      "bytes": 276,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "gradle-test-summary.json",
+      "originalSha256": "044aab406706d284041ec26276106b567d93ebc7706068d57dfe440182002289",
+      "publishedSha256": "044aab406706d284041ec26276106b567d93ebc7706068d57dfe440182002289",
+      "bytes": 215,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "web-test-deploy.json",
+      "originalSha256": "512a96fe4025d89cdac2048436dfd7ccd6da21597c230b0ac04b488790949238",
+      "publishedSha256": "95b7c1986f0290870e885ed9d58c84d54af731937c5d327605f6347981b9697d",
+      "bytes": 245,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "mock-native.json",
+      "originalSha256": "1dfb1f8a80450019f3b0a4ca453f41b725b5a2501e53a614604c9c16b6fae45e",
+      "publishedSha256": "1dfb1f8a80450019f3b0a4ca453f41b725b5a2501e53a614604c9c16b6fae45e",
+      "bytes": 173,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "image-build-001.json",
+      "originalSha256": "30bcd4a08a701bff6d216dbf329e4c18bd706edac9fcf1e0c77fece7a5e25bb8",
+      "publishedSha256": "30bcd4a08a701bff6d216dbf329e4c18bd706edac9fcf1e0c77fece7a5e25bb8",
+      "bytes": 199,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "image-build.json",
+      "originalSha256": "ca23a5eafc85053103d8f02495d996b49045c95d45aeffde8f94cc644910004a",
+      "publishedSha256": "ca23a5eafc85053103d8f02495d996b49045c95d45aeffde8f94cc644910004a",
+      "bytes": 677,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "stack-up.json",
+      "originalSha256": "69be6c6e2198179f661e61a7d6156d8edc2851e8d07c00b0bcdddf26150aa3a5",
+      "publishedSha256": "69be6c6e2198179f661e61a7d6156d8edc2851e8d07c00b0bcdddf26150aa3a5",
+      "bytes": 246,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "tooling.json",
+      "originalSha256": "8b9a31958d1d80a8eea3dcbfac1f2c6dd5decfb0225cbe134ac280c58f6eada8",
+      "publishedSha256": "8b9a31958d1d80a8eea3dcbfac1f2c6dd5decfb0225cbe134ac280c58f6eada8",
+      "bytes": 1160,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "gradle-build.log",
+      "originalSha256": "05c613a4f02850bacce2febfd303a4c7bf6e84be4be1f838076e3d8a489db6f6",
+      "publishedSha256": "8f4651361ffde78d255f13365548636243b723b597808e01c00162bf76aeffe8",
+      "bytes": 4744,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "web-test.log",
+      "originalSha256": "26aa73a6e1e0c88096cabb89fa0917406211625276b9db901f73f7d80cad394b",
+      "publishedSha256": "e8ff89ba08bb9b3e5375f079bb6fa071bd94dbb34264785cea4bfb29d19902e7",
+      "bytes": 315,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "validate-deploy.log",
+      "originalSha256": "249b0262b7c6e62a49a0390d77a762b19e28d9926dca275f04071e4146dc0b79",
+      "publishedSha256": "03089ff07b46e51e10bc47a19542e8a2d56798771bdd46adb4ea009bc1ff5cbc",
+      "bytes": 4002,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "mock-native.log",
+      "originalSha256": "6a178fe96f5b1cc75108a7322ac19fef52da0e5163a36d69e20d91bedab49940",
+      "publishedSha256": "6a178fe96f5b1cc75108a7322ac19fef52da0e5163a36d69e20d91bedab49940",
+      "bytes": 164,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "image-build-001.log",
+      "originalSha256": "276efbce3bbe5d0f62d1dda3040c804f77763fd04e2f7b46779675fa15598533",
+      "publishedSha256": "276efbce3bbe5d0f62d1dda3040c804f77763fd04e2f7b46779675fa15598533",
+      "bytes": 11139,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "image-build.log",
+      "originalSha256": "9939aeb6bfbbf7ca816566a39bc3247c86d9dd1e3caa2dd7d58c05c00c0e0528",
+      "publishedSha256": "a5f718a87f7aae8873c5356d6e3d1a019992bbddab71bd074e3c9c85f8eed5f7",
+      "bytes": 10469,
+      "normalization": "trailing whitespace; local tool/worktree/user-home path placeholders only"
+    },
+    {
+      "file": "root-final-checks.json",
+      "originalSha256": "bfd443c26f878b915fd2a9ca05bdd5eca2eada0c2719498a7031a7cb42cce581",
+      "publishedSha256": "bfd443c26f878b915fd2a9ca05bdd5eca2eada0c2719498a7031a7cb42cce581",
+      "bytes": 831,
+      "normalization": "trailing whitespace; local path placeholders only"
+    },
+    {
+      "file": "root-final-python.log",
+      "originalSha256": "4914c60d6227dff52288580b98ecd0fed2d8ecd5775905908ed5c8c45b8740ef",
+      "publishedSha256": "4914c60d6227dff52288580b98ecd0fed2d8ecd5775905908ed5c8c45b8740ef",
+      "bytes": 105,
+      "normalization": "trailing whitespace; local path placeholders only"
+    },
+    {
+      "file": "root-final-node.log",
+      "originalSha256": "0b005f26aa6bf348fa6aec5cf565240ecdbacca03b7d4b3d8905cce2e149fa46",
+      "publishedSha256": "0b005f26aa6bf348fa6aec5cf565240ecdbacca03b7d4b3d8905cce2e149fa46",
+      "bytes": 1851,
+      "normalization": "trailing whitespace; local path placeholders only"
+    }
+  ]
+}

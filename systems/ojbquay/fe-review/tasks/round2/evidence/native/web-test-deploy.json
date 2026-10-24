@@ -1,0 +1,12 @@
+[
+  {
+    "command": "pnpm test",
+    "exitCode": 0,
+    "elapsedSeconds": 11.304
+  },
+  {
+    "command": "make validate-deploy COMPOSE=<compose-binary> -f deploy/compose/docker-compose.yml",
+    "exitCode": 0,
+    "elapsedSeconds": 6.519
+  }
+]

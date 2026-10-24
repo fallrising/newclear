@@ -1,0 +1,25 @@
+{
+  "project": "fe-ojb-0afcb7f018b20564",
+  "services": [
+    "alertmanager",
+    "console-api",
+    "console-web",
+    "gateway-consume",
+    "gateway-produce",
+    "grafana",
+    "kafka",
+    "postgres",
+    "prometheus",
+    "push-sink",
+    "scheduler"
+  ],
+  "publishedPorts": 0,
+  "volumes": [
+    "grafana-data",
+    "kafka-data",
+    "postgres-data",
+    "prometheus-data"
+  ],
+  "network": "fe-ojb-0afcb7f018b20564_default",
+  "source": "8cabc475d5dd56ff2d34f94fd3b29fe0476dca1c"
+}

@@ -4,7 +4,7 @@
 
 **狀態：** T-0369 的 14 個設計單位已合併，結構檢查 AC-1～AC-14 全部通過；AC-15 的 owner 確認已回寫並合併；hai-taskboard 已完成 ConnectedApp 文件校準。第 1 輪設計交付完成，結案紀錄由任務板與帳本保存。詳見 [第 1 輪交付與確認紀錄](ROUND1-ACCEPTANCE.md)。本輪未修改程式碼、啟動 UI 或產生截圖；不把文件交付當成第 2／3 輪完成。退役元件維持暫緩。
 
-第 2 輪已按 owner 指示進入準備：[固定範圍與驗收提案](ROUND2-SDD.md)、[未實跑基線](ROUND2-BASELINE.json)。新 SDD 待批准，這不代表第 2 輪實作或 targets 已驗證。
+第 2 輪規格已獲 owner 明確批准，實作進行中：[固定範圍與驗收](ROUND2-SDD.md)、[未實跑基線](ROUND2-BASELINE.json)。第一個實作單位已啟動；尚未完成的 targets 保持未驗證。
 
 ## 共用檔案
 

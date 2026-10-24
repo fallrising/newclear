@@ -5,7 +5,7 @@
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)，第 2 輪的範圍見 [DESIGN.md](DESIGN.md)（方向已確認）。
+> 狀態：**第 2 輪 M1–M4 已實作及實跑，交付收尾中**。launch.mjs／flows.mjs／route-smoke.mjs 已加入，targets 已按實測 verified=true；實際驗證結果與未完成項見 [本輪報告](tasks/round2/report.md)。不把工具存在當成 runtime 通過。
 
 ## 專案概況
 
@@ -14,12 +14,29 @@
 - **技術棧：** React 19、Vite 6、Tailwind 4、Radix、TanStack Query／Virtual、Zustand、React Router 7；後端 Hono on Cloudflare Workers（wrangler）、D1
 - **UI 入口：** `products/kith/web/`（SPA，dev port 5174，`/api`、`/mcp` 代理到 `KITH_API_ORIGIN`，預設 `http://127.0.0.1:8787`）
 
-## 啟動線索（未驗證）
+## 啟動與驗證入口
 
 - **不要**用根目錄的 `npm run dev`／`npm run dev:web`：它們經 `scripts/dev-bind.mjs` 綁 `0.0.0.0` 與 Tailscale 位址、需要 `tailscale`，並載入開發者的 `.dev.vars`（見 [REVIEW.md](REVIEW.md) C3）。
-- 符合 PROTOCOL 第 0 節的路徑是 `e2e/` harness：`e2e/harness/server.ts` 以 `127.0.0.1`、隨機 port、隔離狀態目錄啟動 `wrangler dev --local` 與 fake LLM provider；`e2e/global-setup.ts` 套用 migrations 與固定 seed `base-v1`（`e2e/fixtures/seed.ts`）。第 2 輪會把它包成本目錄的 `launch.mjs`（[DESIGN.md](DESIGN.md) M1）；在那之前沒有已驗證的單獨啟動指令。
+- 符合 PROTOCOL 第 0 節的路徑是 `e2e/` harness：`e2e/harness/server.ts` 以 `127.0.0.1`、隨機 port、隔離狀態目錄啟動 `wrangler dev --local` 與 fake LLM provider；`e2e/global-setup.ts` 套用 migrations 與固定 seed `base-v1`（`e2e/fixtures/seed.ts`）。本目錄的 `launch.mjs` 重用這些 helpers／seed；它要求獨立、僅 lo 網卡的 network namespace（例如 Docker --network none），拒絕 web 的 ambient .env，子程序使用 allowlist 環境。實際版本／驗證限制見本輪報告。
 - web 的 Vite 預設就綁 `127.0.0.1:5174`（`web/vite.config.ts`），以 `KITH_API_ORIGIN` 指向上述 worker。
 - 需要 LLM 的畫面使用 harness 的 fake provider（canary key），不要填真實 API key。
+
+
+前置：安裝既有三份 lockfile（元件、web、e2e），使用 Node 24.18.0 與 e2e pinned Chromium；共享 caches／browser cache 不複製到任務目錄。容器需有 browser libraries、可解析的執行 uid、乾淨容器 home；不可掛 host HOME、憑證、Docker socket 或開 host network。服務與瀏覽器必須同一 namespace。
+
+在該隔離環境的 repository root 執行：
+
+```sh
+node products/kith/fe-review/launch.mjs
+# 同容器另一程序，待 launcher 印出非機密 ready JSON 後：
+node products/kith/fe-review/route-smoke.mjs # 15路由：finalURL與實際內容
+node products/kith/fe-review/flows.mjs
+node docs/fe-review/capture.mjs products/kith/fe-review/targets.json --dry-run
+```
+
+launcher 每次產生唯一 0700 state、0600 env/session，成功登入後才更新 runs/.state/current。只啟動一次 launcher；兩個 targets app 共用它，不要逐 app --start 建兩個stack。SIGINT／SIGTERM 清理本程序持有的 process groups 和 fake provider；不終止其他服務。若非正常終止遺留 lock，先核對沒有 owned process 存活，不能自動搶鎖。
+
+通用 capture 只覆蓋 targets 靜態路徑，完整互動由 flows.mjs 執行；它不改共用 capture。flows.json 與截圖在本次 runs/<id>，raw env/session 只在 git-ignored .state。不得提交 PNG、storageState、token 或未審閱 log；公開報告只保留去敏結果。缺 axe 安裝要記未驗證，不宣稱 a11y PASS。
 
 ## 主要流程
 
@@ -44,7 +61,7 @@
 
 ## 待補的頁面
 
-seed `base-v1` 的固定路由已加入 [`targets.json`](targets.json)：`/r/lobby`、`/r/long-history`、`/r/quiet`、`/r/ada-private`、`/console/agents/m-grok`，以及 `/console/agents/new`、`/console/providers/new`。seed 沒有 thread 與 provider，`/r/:slug/t/:threadId`、`/console/providers/:id` 的 id 在執行時產生，由第 2 輪的 `flows.mjs`（[DESIGN.md](DESIGN.md) M2）建立後擷取。除 `/login` 外所有頁面都需要登入（`storageState`，第 2 輪由啟動器產生）。
+seed `base-v1` 的固定路由已加入 [`targets.json`](targets.json)：`/r/lobby`、`/r/long-history`、`/r/quiet`、`/r/ada-private`、`/console/agents/m-grok`，以及 `/console/agents/new`、`/console/providers/new`。seed 沒有 thread 與 provider，`/r/:slug/t/:threadId`、`/console/providers/:id` 的 id 在執行時產生，由本目錄的 `flows.mjs`（[DESIGN.md](DESIGN.md) M2）建立後擷取。除 `/login` 外所有頁面都需要登入（`storageState`，第 2 輪由啟動器產生）。
 
 ## 執行步驟
 
@@ -64,3 +81,5 @@ seed `base-v1` 的固定路由已加入 [`targets.json`](targets.json)：`/r/lob
 - 第 1 輪：`PROMPT.md`、`targets.json`、`REVIEW.md` 的修訂（每次一個 PR）
 - 第 2 輪：前端修正與已決定事項的實作，每個問題一個 commit，附驗證指令
 - 第 3 輪：`runs/<ts>/capture.json`、`runs/<ts>/REPORT.md`（提交）；`runs/<ts>/screenshots/`（不提交）
+
+R4 focused gate：在相同 loopback-only namespace 執行 `node products/kith/fe-review/review.test.mjs` 時請使用 Node test runner（`node --test products/kith/fe-review/review.test.mjs`）；其中 import-failure 案例以沒有 e2e 模組的臨時 fixture 證明鎖會釋放。route-smoke 每次只寫本次新證據，不覆蓋既有檔案；通用 capture 的 requested URL 不是 final URL 證據。

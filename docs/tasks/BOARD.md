@@ -28,22 +28,22 @@
 
 ## T-0380
 
-依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。所有列等 owner 批准新 SDD；尚未開始產品實作。
+依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。Owner 已明確批准新 SDD（PR577）；先執行 FE2-1，其餘依序推進，必要前置仍有效。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FE2-1 | 等 owner：products/kith 第2輪實作 | R2-AC-1 | todo | — | — | — |
-| FE2-2 | 等 owner：platform/dim-gate 第2輪實作 | R2-AC-2 | todo | — | — | — |
-| FE2-3 | 等 owner：products/hai-taskboard 第2輪實作 | R2-AC-3 | todo | — | — | — |
-| FE2-4 | 等 owner：platform/agent-platform 第2輪實作 | R2-AC-4 | todo | — | — | — |
-| FE2-5 | 等 owner：apps/cms-scaffold 第2輪實作 | R2-AC-5 | todo | — | — | — |
-| FE2-6 | 等 owner：platform/ice-maker 第2輪實作 | R2-AC-6 | todo | — | — | — |
-| FE2-7 | 等 owner：specs/fleet 第2輪實作 | R2-AC-7 | todo | — | — | — |
-| FE2-8 | 等 owner：systems/ojbquay 第2輪實作 | R2-AC-8 | todo | — | — | — |
-| FE2-9 | 等 owner：products/goku 第2輪實作 | R2-AC-9 | todo | — | — | — |
-| FE2-10 | 等 owner：products/phark 第2輪實作 | R2-AC-10 | todo | — | — | — |
-| FE2-11 | 等 owner：apps/flowshot＋apps/loom 第2輪實作 | R2-AC-11 | todo | — | — | — |
-| FE2-12 | 等 owner：gateways/pokercase 第2輪實作 | R2-AC-12 | todo | — | — | — |
-| FE2-13 | 等 owner：systems/clarkq 第2輪實作 | R2-AC-13 | todo | — | — | — |
-| FE2-14 | 等 owner：platform/fanzloud 第2輪實作 | R2-AC-14 | todo | — | — | — |
-| FE2-E | 等 owner：交付證據／整合核對 | R2-AC-E | todo | — | — | — |
+| FE2-1 | products/kith 第2輪實作 | R2-AC-1 | in_progress | 2026-10-24T05:50:21Z | — | 2026-10-24T06:27:38Z |
+| FE2-2 | platform/dim-gate 第2輪實作 | R2-AC-2 | todo | — | — | — |
+| FE2-3 | products/hai-taskboard 第2輪實作 | R2-AC-3 | todo | — | — | — |
+| FE2-4 | platform/agent-platform 第2輪實作 | R2-AC-4 | todo | — | — | — |
+| FE2-5 | apps/cms-scaffold 第2輪實作 | R2-AC-5 | todo | — | — | — |
+| FE2-6 | platform/ice-maker 第2輪實作 | R2-AC-6 | todo | — | — | — |
+| FE2-7 | specs/fleet 第2輪實作 | R2-AC-7 | todo | — | — | — |
+| FE2-8 | systems/ojbquay 第2輪實作 | R2-AC-8 | todo | — | — | — |
+| FE2-9 | products/goku 第2輪實作 | R2-AC-9 | todo | — | — | — |
+| FE2-10 | products/phark 第2輪實作 | R2-AC-10 | todo | — | — | — |
+| FE2-11 | apps/flowshot＋apps/loom 第2輪實作 | R2-AC-11 | todo | — | — | — |
+| FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | todo | — | — | — |
+| FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | todo | — | — | — |
+| FE2-14 | platform/fanzloud 第2輪實作 | R2-AC-14 | todo | — | — | — |
+| FE2-E | 交付證據／整合核對 | R2-AC-E | todo | — | — | — |

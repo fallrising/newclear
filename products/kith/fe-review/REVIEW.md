@@ -6,7 +6,7 @@
 ## 目前輪次
 
 - **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
-- 第 2 輪：修改（未開始）
+- 第 2 輪：修改（IN_PROGRESS）；launch／flows／targets 已加入，完整 runtime 驗證仍待本輪報告核對。
 - 第 3 輪：完整 e2e（未開始）
 
 ## 修改權限
@@ -17,7 +17,7 @@
 
 ### C1 前端需要本機 worker 與 D1 才有資料
 
-`web/` 的 `/api`、`/mcp` 代理到 `KITH_API_ORIGIN`（`web/vite.config.ts:5-16`），沒有獨立的 mock 模式，UI 無法脫離後端擷取。依 PROTOCOL 第 0 節屬測試耦合。符合第 0 節的啟動路徑已存在，但只在 Playwright global setup 內：`e2e/harness/server.ts:71-124` 以 `127.0.0.1`、隨機 port、隔離的 `--persist-to` 與 `--env-file` 啟動 worker，`e2e/global-setup.ts:54-73` 套用 migrations 與固定 seed `base-v1`。`DESIGN.md` M1 把它包成 `fe-review/` 的啟動器。
+`web/` 的 `/api`、`/mcp` 代理到 `KITH_API_ORIGIN`（`web/vite.config.ts:5-16`），沒有獨立的 mock 模式，UI 無法脫離後端擷取。依 PROTOCOL 第 0 節屬測試耦合。原符合第 0 節的啟動路徑位於 Playwright global setup：`e2e/harness/server.ts:71-124` 以 `127.0.0.1`、隨機 port、隔離的 `--persist-to` 與 `--env-file` 啟動 worker，`e2e/global-setup.ts:54-73` 套用 migrations 與固定 seed `base-v1`。`launch.mjs` 已重用 helpers／seed 完成隔離接線，實測 worker/D1/fake/Vite/UI 登入及 owned cleanup 通過；完整驗收仍依本輪報告，不以可啟動宣告全部完成。
 
 ### C2 LLM provider 已有假實作，但不在 fe-review 的啟動路徑上
 
@@ -26,7 +26,7 @@
 - e2e harness 的外部 fake provider（`e2e/harness/fake-provider.ts`）：支援 `openai_chat`、`openai_responses`、`anthropic_messages`、`gemini` 四種格式，只接受每次執行的 canary key，prompt 內的 `[[fake:…]]` directive 可控制文字、延遲、錯誤碼與串流分段。它由 `e2e/harness/server.ts:83` 啟動。
 - worker 內建 fake：沒有 `XAI_API_KEY` 但設定了 `FAKE_LLM_TEXT` 時啟用（`worker/hosted/llm.ts:27-51`、`worker/env.ts:17-18`、`worker/providers/runtime.ts:64`）。
 
-缺的是接線：seed 沒有 provider，也沒有已設定 runtime 的 hosted agent（`e2e/fixtures/seed.ts:60-73`）。要覆蓋 agent 回覆與串流畫面，必須在執行時建立指向 fake provider 的連線。
+seed 本身沒有 provider，也沒有已設定 runtime 的 hosted agent（`e2e/fixtures/seed.ts:60-73`）。`flows.mjs` 已透過既有 API 建立指向本輪 fake provider 的連線並設定 grok，實跑串流／完成／thread；不改 seed 或後端。
 
 ### C3 README 的本機開發路徑不符合第 0 節
 
@@ -56,13 +56,26 @@
 - 建議：(a)。`DESIGN.md` 不依賴此項；(b) 屬開發工具變更，若要做應另開元件 task。
 - 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
 
-## 進入第 2 輪的條件
+## 第 2 輪剩餘條件
 
-- `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
-- `PROMPT.md` 與 `targets.json` 已依設計更新。
+- 原設計與具體 ROUND2-SDD 已批准；M1–M4 的實作與必要驗證分開記錄。
+- 完成報告中既有 e2e 路徑前置診斷、browser-health 分類及獨立審查／CI，才判定 targets 是否可改 verified。不得省略失敗或用旗標代替行為證據。
 
 ## 相關 PR
 
 - fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
 - fallrising/newclear#144：記錄擁有者決定與設計文件入口。
 - 設計 PR（`fe-review/design-kith`，Closes #146）：新增 `DESIGN.md`，改寫 C1／C2，新增 C3／D3，修正 `PROMPT.md` 與 `targets.json`。
+
+## 2026-10-24 實作 checkpoint
+
+M1–M4 已實作並有必要本地實跑證據；[`tasks/round2/report.md`](tasks/round2/report.md) 記實際命令與證據。targets 已按本輪實測 true；沒有修改產品 web、worker、e2e 或 dev-bind。D3 已採不改 dev-bind，DESIGN 開放問題中的舊疑問不構成再求批准。新的安全邊界契約與原生 gates 分別列證，不以靜態測試冒充完整啟動／流程驗證。
+
+R4 focused correction：import失敗的lock生命週期已RED/GREEN（4tests）；新增15route finalURL＋loaded-content smoke，quiet/private/settings/not-found均實跑通過，正常cleanup再驗證。原R3 browser-health與axe缺口保持，整體仍依本輪報告及父層審查。
+
+
+### 第2輪證據範圍
+
+15個靜態路由另以 route-smoke.mjs 確認最終URL與實際內容；原90capture不單獨當作未重導證據。啟動依賴載入失敗的owned-lock清理已RED/GREEN修正。原生/e2e失敗與補跑分列於報告；完整e2e原exit1不改寫為PASS。
+
+第3輪仍未執行：未登入探測401及刻意offline的WebSocket錯誤有來源解釋；ERR_ABORTED仍保留，不統一當作無害。axe未跑，未宣稱零違規。這些限制不授權修改產品web，也不更改M1–M4驗收。必要CI／合併與遠端回讀由PR578記錄，產品主線完成度不變。

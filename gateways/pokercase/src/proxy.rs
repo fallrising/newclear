@@ -1232,7 +1232,7 @@ impl SseConvert for ChatToAnthropic {
         claude::openai_sse_chunk_to_anthropic(data, &mut self.0)
     }
     fn on_end(&mut self) -> Vec<String> {
-        claude::openai_sse_chunk_to_anthropic("[DONE]", &mut self.0)
+        self.0.on_end()
     }
 }
 
@@ -1401,4 +1401,225 @@ where
         HeaderValue::from_static("keep-alive"),
     );
     Ok((status, headers, body).into_response())
+}
+
+#[cfg(test)]
+mod stream_completion_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn modes() -> Vec<(StreamMode, &'static str, &'static str)> {
+        vec![
+            (StreamMode::ChatToResponses("m".into()), "chat", "responses"),
+            (StreamMode::ChatToAnthropic("m".into()), "chat", "messages"),
+            (StreamMode::ResponsesToChat("m".into()), "responses", "chat"),
+            (
+                StreamMode::ResponsesToAnthropic("m".into()),
+                "responses",
+                "messages",
+            ),
+            (StreamMode::AnthropicToChat("m".into()), "messages", "chat"),
+            (
+                StreamMode::AnthropicToResponses("m".into()),
+                "messages",
+                "responses",
+            ),
+        ]
+    }
+
+    fn partial(source: &str) -> Vec<Value> {
+        match source {
+            "chat" => vec![
+                json!({"choices":[{"delta":{"content":"片段"}}]}),
+                json!({"choices":[{"delta":{"tool_calls":[{"index":0,"id":"c1","function":{"name":"lookup","arguments":"{"}}]}}]}),
+            ],
+            "responses" => vec![
+                json!({"type":"response.output_text.delta","delta":"片段"}),
+                json!({"type":"response.output_item.added","output_index":1,"item":{"type":"function_call","id":"fc1","call_id":"c1","name":"lookup"}}),
+                json!({"type":"response.function_call_arguments.delta","item_id":"fc1","delta":"{"}),
+            ],
+            _ => vec![
+                json!({"type":"message_start","message":{"id":"msg1","usage":{"input_tokens":3}}}),
+                json!({"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"片段"}}),
+                json!({"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"c1","name":"lookup"}}),
+                json!({"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{"}}),
+            ],
+        }
+    }
+
+    async fn converted(mode: StreamMode, values: &[Value]) -> String {
+        let text: String = values.iter().map(|v| format!("data: {v}\n\n")).collect();
+        // Exercise the actual body adapter with arbitrary boundaries, including UTF-8 splits.
+        let chunks: Vec<Result<Bytes, std::io::Error>> = text
+            .as_bytes()
+            .chunks(7)
+            .map(|b| Ok(Bytes::copy_from_slice(b)))
+            .collect();
+        let response = stream_body(futures_util::stream::iter(chunks), 5, mode)
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let bytes = axum::body::to_bytes(response.into_body(), 1 << 20)
+            .await
+            .unwrap();
+        String::from_utf8(bytes.to_vec()).unwrap()
+    }
+
+    #[tokio::test]
+    async fn sc1_premature_eof_in_all_converters_and_chains_is_failure() {
+        for empty in [false, true] {
+            for (mode, source, target) in modes() {
+                let values = if empty { Vec::new() } else { partial(source) };
+                let text = converted(mode, &values).await;
+                let events: Vec<Value> = text
+                    .lines()
+                    .filter_map(|l| l.strip_prefix("data: "))
+                    .filter_map(|d| serde_json::from_str(d).ok())
+                    .collect();
+                assert!(
+                    events
+                        .iter()
+                        .any(|v| v.get("error").is_some() || v["type"] == "error"),
+                    "{source}->{target}, empty={empty}: {text}"
+                );
+                assert!(!text.contains("response.completed"), "{text}");
+                assert!(!text.contains("message_stop"), "{text}");
+                assert!(
+                    !text.contains("response.function_call_arguments.done"),
+                    "{text}"
+                );
+                assert!(
+                    !events.iter().any(|v| v
+                        .pointer("/choices/0/finish_reason")
+                        .is_some_and(|f| !f.is_null())),
+                    "{text}"
+                );
+                if target == "responses" {
+                    assert_eq!(events.last().unwrap()["type"], "response.failed", "{text}");
+                }
+                if !empty {
+                    assert!(text.contains("片段"), "partial UTF-8 text lost: {text}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn sc2_completed_and_limited_streams_remain_terminal() {
+        for limited in [false, true] {
+            for (mode, source, target) in modes() {
+                let mut conv = converter(mode).unwrap();
+                let mut out = Vec::new();
+                let values = partial(source);
+                let count = if source == "messages" { 2 } else { 1 };
+                for value in values.iter().take(count) {
+                    out.extend(conv.on_data(&value.to_string()));
+                }
+                let terminals = match source {
+                    "chat" => vec![
+                        json!({"choices":[{"delta":{},"finish_reason":if limited {"length"} else {"stop"}}],"usage":{"prompt_tokens":3,"completion_tokens":2}}),
+                    ],
+                    "responses" => vec![
+                        json!({"type":if limited {"response.incomplete"} else {"response.completed"},"response":{"status":if limited {"incomplete"} else {"completed"},"incomplete_details":if limited {json!({"reason":"max_output_tokens"})} else {Value::Null},"usage":{"input_tokens":3,"output_tokens":2}}}),
+                    ],
+                    _ => vec![
+                        json!({"type":"message_delta","delta":{"stop_reason":if limited {"max_tokens"} else {"end_turn"}},"usage":{"input_tokens":3,"output_tokens":2}}),
+                        json!({"type":"message_stop"}),
+                    ],
+                };
+                for value in terminals {
+                    out.extend(conv.on_data(&value.to_string()));
+                }
+                // Chat intentionally omits [DONE]: a finish_reason is sufficient.
+                out.extend(conv.on_end());
+                assert!(
+                    conv.on_end().is_empty(),
+                    "duplicate EOF: {source}->{target}"
+                );
+                let text = out.join("\n\n");
+                assert!(!text.contains("before completion"), "{text}");
+                let events: Vec<Value> = text
+                    .lines()
+                    .filter_map(|l| l.strip_prefix("data: "))
+                    .filter_map(|d| serde_json::from_str(d).ok())
+                    .collect();
+                let last = events.last().unwrap();
+                match target {
+                    "responses" => {
+                        assert_eq!(
+                            last["type"],
+                            if limited {
+                                "response.incomplete"
+                            } else {
+                                "response.completed"
+                            },
+                            "{text}"
+                        );
+                        assert_eq!(last["response"]["usage"]["total_tokens"], 5, "{text}");
+                    }
+                    "messages" => {
+                        assert_eq!(last["type"], "message_stop", "{text}");
+                        let delta = events
+                            .iter()
+                            .find(|v| v["type"] == "message_delta")
+                            .unwrap();
+                        assert_eq!(
+                            delta["delta"]["stop_reason"],
+                            if limited { "max_tokens" } else { "end_turn" },
+                            "{text}"
+                        );
+                        assert_eq!(delta["usage"]["output_tokens"], 2, "{text}");
+                    }
+                    _ => {
+                        assert_eq!(
+                            last["choices"][0]["finish_reason"],
+                            if limited { "length" } else { "stop" },
+                            "{text}"
+                        );
+                        assert_eq!(last["usage"]["total_tokens"], 5, "{text}");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn sc2_explicit_errors_and_responses_done_are_not_success() {
+        for (mode, source, target) in modes() {
+            let mut conv = converter(mode).unwrap();
+            let error = match source {
+                "responses" => {
+                    json!({"type":"response.failed","response":{"error":{"message":"fixture failure"}}})
+                }
+                "messages" => json!({"type":"error","error":{"message":"fixture failure"}}),
+                _ => json!({"error":{"message":"fixture failure"}}),
+            };
+            let out = conv.on_data(&error.to_string()).join("\n");
+            assert!(out.contains("fixture failure"), "{source}->{target}: {out}");
+            assert!(
+                conv.on_end().is_empty(),
+                "error must stay terminal: {source}->{target}"
+            );
+            assert!(
+                !out.contains("response.completed") && !out.contains("message_stop"),
+                "{out}"
+            );
+        }
+        for mode in [
+            StreamMode::ResponsesToChat("m".into()),
+            StreamMode::ResponsesToAnthropic("m".into()),
+        ] {
+            let mut conv = converter(mode).unwrap();
+            let out = conv.on_data("[DONE]").join("\n");
+            assert!(
+                out.contains(crate::error::INCOMPLETE_STREAM_MESSAGE),
+                "{out}"
+            );
+            assert!(!out.contains("message_stop"), "{out}");
+            assert!(conv
+                .on_data(r#"{"type":"response.completed","response":{}}"#)
+                .is_empty());
+            assert!(conv.on_end().is_empty());
+        }
+    }
 }

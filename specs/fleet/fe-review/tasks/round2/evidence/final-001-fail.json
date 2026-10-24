@@ -1,0 +1,74 @@
+{
+  "mode": "final",
+  "startedAt": "2026-10-24T10:07:04.275Z",
+  "passed": false,
+  "node": "v24.18.0",
+  "playwright": "1.63.0",
+  "binarySha256": "bb8e6af693ac1a951e6f87e1e19594c8a18da1d6c847bfbb7400d21645de8f41",
+  "steps": [
+    {
+      "stage": "SERVER_START",
+      "passed": true
+    },
+    {
+      "stage": "LOGIN",
+      "passed": true,
+      "status": 303,
+      "secure": true,
+      "httpOnly": true,
+      "sameSite": "Lax"
+    },
+    {
+      "stage": "EMPTY_CATALOG",
+      "passed": true
+    },
+    {
+      "stage": "SEED",
+      "passed": true
+    }
+  ],
+  "cleanup": {
+    "captureExited": true,
+    "heartbeatStopped": true,
+    "browserClosed": true,
+    "serverExited": true,
+    "listenerAbsent": true,
+    "privateStateRemoved": true
+  },
+  "sourceHashes": {
+    "internal/ui/static/app.css": "a300c3df7c9ea08934985f9210ef09a17e60b9006f0592bc6b5f7e9c8b2f5543",
+    "internal/ui/templates/layout.html": "f0fe84461aa875e54b9caf86f76b32e70d4ec9fa4aa05418a4c0662247094dc2",
+    "internal/ui/templates/login.html": "929c920e01eec14cf49329584b278f138d8192d17b128b1a952c09778b4fe87c",
+    "internal/ui/templates/catalog.html": "1dfcd26aade8c39a7f9af488be1b820a9382daa603aef04333376c1e1a38a960",
+    "internal/ui/templates/node.html": "d01c9a616f56b535812116b4cf15a3503faf26acae54cf46bbb0b656487442b8",
+    "internal/ui/templates/service.html": "ab781b87bb53c0ff903cc84e1fca4f7ce95f2edc5f8a1f6ea80e9dff4dbe8fe5",
+    "internal/ui/pages.go": "87f6b0a8a691db2112dc3f8cb2942171f2550cd886d9e809bb42ac566ddd1636",
+    "internal/ui/pages_test.go": "064edd050e71c3451ee3c6897c156fe334b2a149ddacb21a2f632bf6f2c85a37",
+    "internal/api/server_test.go": "a56a03eb81b0cc5e584ad7cb3a90d6f5bffc61e3a8ff90943fd6c684b2eba906",
+    "fe-review/run-review.mjs": "2add1a6fd50450f1296a4e5a99ab9942448788906f6d8d6765ca1e7f4cef7131",
+    "fe-review/flow.mjs": "d0228eb1b2977c790aa173b6378d872f6e1406dbdb17994768290362847f9a9b",
+    "fe-review/pending.mjs": "5ad6cb30c713cbcd759b0706b6eaa671d843c0d2ebe0a4082290c29391df0f56",
+    "fe-review/targets.json": "63dd73f5643b896b5a39e2301025114e956a03a8ba8472baac68495df860fb2d"
+  },
+  "chromium": "153.0.8010.12",
+  "pageErrors": 0,
+  "cookieObservation": {
+    "name": "fleet_op",
+    "domain": "127.0.0.1",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "Lax",
+    "valueEqualsExpected": true,
+    "authenticatedCatalogStatus": 200
+  },
+  "error": "REVIEW_STOP_FOCUS",
+  "failedStage": "CATALOG_KEYBOARD",
+  "serverExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false
+  },
+  "cleanupPassed": true,
+  "finishedAt": "2026-10-24T10:07:20.433Z"
+}

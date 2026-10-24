@@ -1,5 +1,16 @@
 # Status and evidence
 
+## Issue548 diagnostic continuation — 2026-10-24
+
+Repeated reads of a latched process-edge refusal could erase its specific reason
+before M4 recorded the failure. The five rethrows now preserve the existing
+allowlisted reason. Regression42 failing subcases before correction becomes
+25 focused passes;319 full offline tests pass on Python3.11.17 with source hashes
+stable and verified child collection. See [scope and evidence](../tasks/548-observation-reason/report.md).
+Independent review accepts the repair after25 focused tests and a real-process
+GREEN: child_missing survives stop/projection while cleanup still refuses success.
+Exact-head CI/publication remain required. No new local original-runtime result is claimed; historical M4/AC-05 and whole-mainline acceptance remain open.
+
 ## CI fixture portability follow-up: T071 (2026-10-24)
 
 The first PR585 hosted offline check failed7 assertions/14errors because generated

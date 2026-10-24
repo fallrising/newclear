@@ -1,52 +1,51 @@
 # FE Review — fleet — REVIEW
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 保留樣式／a11y 與契約限制；D2 採 (a) 模板修正 swap、Rollback JSON、錯誤提示，不改後端 API。 第 2／3 輪仍未由本次文件回寫執行。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 保留樣式／a11y 與契約限制；D2 採 (a) 模板修正 swap、Rollback JSON、錯誤提示，不改後端 API。 第 2 輪執行情況見下文；完整第 3 輪未驗收。
 > 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
 
 ## 目前輪次
 
 - **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
-- 第 2 輪：修改（未開始）
+- 第 2 輪：M1–M9 實作與限定 runtime/native gate 通過；targets verified 僅限 R2，獨立最終審查／CI／發布由 root 收尾。
 - 第 3 輪：完整 e2e（未開始）
 
 ## 修改權限
 
 文檔檔位 **B（maintain / public contract）**：第 2 輪修改不得改變對外契約；不新增 tutorial 系列。對外契約的具體範圍列在 `DESIGN.md`「依據 → 對外契約」。
 
-## 矛盾點
+## 本輪目前結論與保留限制
 
-### C1 啟動需要的設定與測試憑證
+### C1 已驗證的私有啟動與真登入
 
-不構成耦合：所需設定都能以環境變數注入，且預設只綁 `127.0.0.1:18765`（`internal/config/config.go:11`）。`FLEET_UI_HOSTNAME`、`FLEET_API_HOSTNAME` 是必填，缺少時 `fleetd` 直接結束（`config.go:76-78`）；`FLEETD_DB` 預設 `/var/lib/fleetd/fleet.db`，要指到 `fe-review/runs/.state/`，且 `db.Open` 不建目錄。操作員登入是在 `/login` 貼上 `flt_op_` token；測試用 token 以 `FLEETD_BOOTSTRAP_OPERATOR_TOKEN` 在啟動時寫入（`cmd/fleetd/main.go:36`），節點以 `FLEETD_BOOTSTRAP_NODE_TOKEN`（`flt_bs_`）註冊。`targets.json` 已依此修正，種子腳本與實際驗證見 `DESIGN.md` M9。待驗證：`fleet_op` cookie 帶 `Secure`（`internal/api/login.go:60`），預期 Chromium 對 `http://127.0.0.1` 可以設定。
+[run-review.mjs](run-review.mjs) 擁有新 SQLite、隨機合成 token、既有 API seed、heartbeat 與 browser/server 清理。基線003真表單 POST/login303，受保護 catalog200，cookie Secure／HttpOnly／SameSite=Lax 均成立。001 的 URL-filtered cookie assertion 失敗與002未產生 inner receipt 均保留；不能用003覆寫歷史。
 
-### C2 模板與 htmx 屬性屬於公開契約的一部分
+公開 targets 是四頁路由 inventory，runner 產生分離匿名登入／受保護頁面的私有 targets 與 storageState。原設計 seed.sh 候選由 runner inline API seed 實現，不直接 go run、不安裝新 runtime dependency、不掛 Docker socket、不啟動真 agent/CF/workload。最終12選定截圖（11原圖＋1精確replacement）、12 loaded guards與4 desktop axe已完成；五項axe finding保留，非完整R3。
 
-`/static/htmx.min.js`（htmx 2.0.4）與模板一起以 `embed.FS` 打包（`internal/ui/embed.go`）。模板中的路由、表單欄位 `token`、`<tr id="row-<name>">` 片段與 `hx-post` 路徑都是 SDD「UI」一節與 `internal/ui/pages_test.go` 約束的契約，B 檔要求不改。
+### C2 公開契約維持
 
-### C3 自動更新同時用兩種方式，htmx 更新後焦點丟失
+原路由／方法、表單欄位 token、Secure/HttpOnly/Lax cookie、八欄 catalog、tr row-ID、hx-post 目標與原 API JSON 契約均保留。vendored htmx2.0.4、後端 handlers/store/providers 未改。catalog table 仍為第一個 table，仍以 hx-select=table 輪詢。
 
-`internal/ui/templates/layout.html:6` 對所有頁面加 15 秒 meta refresh，catalog 另有 15 秒的 htmx 輪詢（`catalog.html:4`），SDD 規定二擇一。整頁重載讓焦點與捲動位置每 15 秒重置；動作按鈕沒有 `id`，局部更新後焦點也無法還原；請求進行中沒有 loading 提示。
+### C3 M4/M5 聚焦問題已實測修正
 
-### C4 服務頁的動作按鈕與 Rollback 無法正常運作（由原始碼推斷，未執行）
+catalog-only LivePoll 移除重複 meta refresh，node/service 保留15秒。穩定按鈕 ID 與 disabled 樣式已加入。首 final001 真失敗後，focus001時間線證明 table selector 繼承會排除 row fragment，且 disabled 後在 swap 前焦點已落BODY。Root 明確核准同一 M5 根因修正：row exact hx-select 覆寫，catalog-only WeakMap 在原先聚焦、目前BODY、目標仍存在且enabled時還原，使用者焦點已移往別處則不搶回。Native/VM RED→GREEN，focus002實測 immediate row、請求後焦點與真15秒poll全部通過；final003已通過完整限定互動，包括真Tab移到header後不搶焦點。
 
-- `service.html:8-12,28-31` 使用的 `hx-refresh="true"` 不是 htmx 屬性，按鈕也沒有 `hx-target`；後端對 htmx 請求回傳 catalog 的 `<tr>` 片段（`internal/api/services.go:246-248`），會被換進按鈕本身。
-- Rollback 以 `hx-headers` 把 `Content-Type` 改成 JSON，但本體仍是 form 編碼；`handleServiceDeploy` 以 JSON 解析（`services.go:319-322`），推斷回 400。htmx 對錯誤回應不做任何呈現。
+### C4 M6/M7 已實作並實測
 
-### C5 後端錯誤回應的呈現
+服務動作保留原 hx-post、改 hx-swap=none 並只在 successful 時 reload；Rollback 使用小型 json-body encoder；錯誤用 role=alert、textContent 顯示 status/error.message。基線003已真實觀測 form body→400 invalid_json、current release不變；實際 declaredJSON=false，不能把舊模板試圖設定JSON header寫成真實header。JSON+cookie202與錯body400原生契約通過，final003真瀏覽器JSON202/current release/reload以及真controlled404 text-only/no reload全通過。
 
-`POST /login` 失敗時回 JSON（`internal/api/login.go:50-53`），瀏覽器表單看到原始 JSON；不存在的節點或服務回純文字 `not found`（`internal/ui/pages.go:72,87,107`）。屬後端回應，依 D1 不在第 2 輪範圍；只記錄，未提出為待決定事項。
+### C5 保留的後端呈現限制
 
-### C6 窄螢幕版面
+登入失敗仍回 JSON；不存在的 node/service HTML 路由仍純文字404。不在批准模板範圍，未修改。Cloudflare OTP 與真實工作負載未驗證，AC-03 pending、mainline incomplete、usable_tag none。
 
-頁面沒有 `<meta name="viewport">`（`layout.html`、`login.html`）；catalog 8 欄的表格在 mobile 寬度必然水平溢出（`app.css:6`）。
+### C6/M1 與 C7/M2/M3
 
-### C7 狀態對比與表格語意
+viewport/table-scroll/wrapping、表格caption/scope、物件名稱、focus-visible已實作。healthy #067a55 與 progressing #8a5a00 已依 WCAG 公式在白底／頁面底色驗算≥4.5:1，保留文字與非色彩符號，node health class一致。最終12 loaded/overflow全通過。service/mobile先測到hidden Actions越出BODY，再以table-scroll相對定位最小修復並補單張截圖；全部PNG混合來源界線見報告。4 desktop axe保留3 serious頁首contrast與2 critical node/service meta-refresh，incomplete0。Root依原DESIGN M2只改Health、M4明訂保留refresh接受R2，不改完整R3零critical/serious條件；完整R3未通過。深色模式仍不支援，未加入。
 
-`health-healthy`（`#0a7`，白底 2.99:1）與 `health-progressing`（`#b80`，3.17:1）低於 WCAG AA 4.5:1（`app.css:9,11`）；狀態有文字，不只靠顏色。`<th>` 沒有 `scope`、表格沒有 `<caption>`，每列同名的 Stop／Redeploy／Rollback 按鈕沒有可分辨的名稱；沒有 `:focus-visible` 樣式。深色模式不支援（`app.css` 沒有 `prefers-color-scheme`），不列為缺陷。
+### C8/M8
 
-### C8 空狀態
+明確呈現無services/releases/facts/instance/audit，focused native rendering PASS；真空catalog已在final001驗證。node/releases/instance空狀態已真瀏覽器取證；no-audit用native rendering，不虛稱runtime無audit。
 
-catalog 有空狀態（`catalog.html:12`）；節點頁 Services、服務頁 Releases 沒有；Facts、Instance 沒有資料時顯示空白或 `null`（`pages.go:97,111-112`）。
+詳細 receipts、失敗與本輪精確限制見 [report](tasks/round2/report.md)。完整R3、所有axe結果、互動console/request觀測與12張matrix必須分開記錄。
 
 ## 本次確認的決定
 

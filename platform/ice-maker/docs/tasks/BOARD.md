@@ -18,4 +18,4 @@ Approved [task](../../fe-review/tasks/round2/task.md), R2-AC-6/E.
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| ICE-FE2-1 | M1–M4 syntheticfixture andinlineUI | R2-AC-6/E | in_progress | 2026-10-24T09:17:52Z | — | 2026-10-24T09:17:52Z |
+| ICE-FE2-1 | M1–M4 syntheticfixture andinlineUI (PR590 merged) | R2-AC-6/E | done | 2026-10-24T09:17:52Z | 2026-10-24T09:49:41Z | 2026-10-24T09:51:27Z |

@@ -4,6 +4,8 @@ use axum::Json;
 use serde_json::json;
 use thiserror::Error;
 
+pub(crate) const INCOMPLETE_STREAM_MESSAGE: &str = "upstream stream ended before completion";
+
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("unauthorized")]

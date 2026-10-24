@@ -51,3 +51,12 @@ T-1001 candidate evidence: [Access web record](../evidence/2026-10-23-access-web
 Implementation PR [#522](https://github.com/fallrising/newclear/pull/522) merged **2026-10-23T07:21:51Z**, commit `1496049d37b4bc3d372dec1c94f919f87c07f28d`. Final head `648500d49cfbd74e8e8e51067719fa7af63039c5` passed [Fleet CI](https://github.com/fallrising/newclear/actions/runs/39916671479) (`make test vet validate-schema build`, declared Go1.23) and [Project success contracts](https://github.com/fallrising/newclear/actions/runs/39916671571). PR summary lagged the workflow; direct commit check-run API confirmed both completed successfully and REST mergeability was clean before normal squash merge. Merged status/time/SHA were read back.
 
 Root evidence gate accepts this owner-requested removal and Access web implementation milestone. The three T-1001 rows are closed using the actual merge time; this follow-up changes only the task board. Runtime source remains the independently reviewed and real-Docker-tested fingerprint recorded above. Public is retained but unused; the current examples use Access web. Real Access browser denial/allowed-email OTP success remains pending under AC-03/T-0993-3, so full mainline and usable qualification remain incomplete. No production deployment or external Cloudflare-resource cleanup occurred.
+
+
+## T-0380
+
+Approved [task](../../fe-review/tasks/round2/task.md), R2-AC-7/E.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FLEET-FE2-1 | Approved M1–M9 presentation and synthetic runtime | R2-AC-7/E | done | 2026-10-24T09:51:27Z | 2026-10-24T11:13:28Z | 2026-10-24T11:13:28Z |

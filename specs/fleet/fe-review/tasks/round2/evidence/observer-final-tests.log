@@ -1,0 +1,16 @@
+✔ both approved status colors meet 4.5:1 on table and page backgrounds (1.336483ms)
+✔ restore originally focused catalog action once after disabled row replacement (2.25325ms)
+✔ never steal focus from another element or restore unrelated/missing/disabled action (3.578934ms)
+✔ enabled receipt requires the positive intended button and row identity (1.145535ms)
+✔ route classification requires exact origin and no query or fragment (0.933116ms)
+✔ console summary never emits raw unknown message or URL (0.336909ms)
+✔ pending browser rejection is handled immediately when the action fails first (4.452631ms)
+✔ pending success and unknown errors retain no raw payload (0.38232ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 123.810172

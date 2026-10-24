@@ -728,6 +728,10 @@ pub struct AnthropicToChatStream {
 }
 
 impl AnthropicToChatStream {
+    pub(crate) fn is_done(&self) -> bool {
+        self.done
+    }
+
     pub fn new(model: impl Into<String>) -> Self {
         Self {
             id: "chatcmpl-thinrouter".into(),

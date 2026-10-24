@@ -123,3 +123,13 @@ Demand/contract: [task](T-0407-sse-io.md).
 | IO-03 | Preserve known terminals and verify broken HTTP streams | IO-3 | done | 2026-10-24T17:43:24Z | 2026-10-24T17:51:19Z | 2026-10-24T17:51:19Z |
 
 IO-1–IO-3 delivered in [PR #623](https://github.com/fallrising/newclear/pull/623), merge `d7c7a24c580c20d0f8de3b83a4b649804af46e9a` at `2026-10-24T17:51:19Z`. Reviewed HEAD `7cabfc781e1543667d1116b7067686d0c53120c2` is an ancestor of fetched main; scoped component contents match. Independent source/final-doc review PASS;143tests/96new scenarios and required component CI131s/project-contract CI8s passed. Generated transport diagnostics are redacted; forwarded payloads remain unchanged. Provider/Docker and whole-product acceptance remain incomplete.
+
+## T-0408 — Terminal release
+
+Demand/contract: [task](T-0408-terminal-release.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| TR-01 | Release recognized terminal sources before final frame | TR-1 | in_progress | 2026-10-24T19:39:38Z | | 2026-10-24T19:43:30Z |
+| TR-02 | Release observed EOF sources before finalization output | TR-2 | in_progress | 2026-10-24T19:39:38Z | | 2026-10-24T19:43:30Z |
+| TR-03 | Preserve usage tails and session reuse; verify HTTP close | TR-3 | in_progress | 2026-10-24T19:39:38Z | | 2026-10-24T19:43:30Z |

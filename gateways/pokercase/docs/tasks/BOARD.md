@@ -106,6 +106,8 @@ Demand/contract: [task](T-0405-sse-stall.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| ST-01 | Return protocol failures for stalled converted/native SSE | ST-1 | in_progress | 2026-10-24T17:02:57Z | | 2026-10-24T17:09:34Z |
-| ST-02 | Release upstream before failure delivery, preserve idle policy | ST-2 | in_progress | 2026-10-24T17:02:57Z | | 2026-10-24T17:09:34Z |
-| ST-03 | Preserve known terminals and verify HTTP wiring | ST-3 | in_progress | 2026-10-24T17:02:57Z | | 2026-10-24T17:09:34Z |
+| ST-01 | Return protocol failures for stalled converted/native SSE | ST-1 | done | 2026-10-24T17:02:57Z | 2026-10-24T17:13:51Z | 2026-10-24T17:13:51Z |
+| ST-02 | Release upstream before failure delivery, preserve idle policy | ST-2 | done | 2026-10-24T17:02:57Z | 2026-10-24T17:13:51Z | 2026-10-24T17:13:51Z |
+| ST-03 | Preserve known terminals and verify HTTP wiring | ST-3 | done | 2026-10-24T17:02:57Z | 2026-10-24T17:13:51Z | 2026-10-24T17:13:51Z |
+
+ST-1–ST-3 delivered in [PR #619](https://github.com/fallrising/newclear/pull/619), merge `08e97cb6748d64853464f415cab6931b289af30b` at `2026-10-24T17:13:51Z`. Reviewed HEAD `984fa3c92f43ac58c9da3f459cf66e414550a1af` is an ancestor of fetched main; scoped component contents match. Independent source review PASS;138tests/77new scenarios and required component CI129s/project-contract CI9s passed. Opaque passthrough remains a transport failure; real-provider/Docker and whole-product acceptance remain incomplete.

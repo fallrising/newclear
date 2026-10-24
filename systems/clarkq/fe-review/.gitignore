@@ -1,5 +1,3 @@
-# 截圖、登入狀態與暫存資料不提交；REPORT.md 與 capture.json 需提交。
-runs/*/screenshots/
-runs/*/tui/
-runs/*/*.storage.json
-runs/.state/
+# Runtime originals, images and private state stay local. Reviewed JSON/log copies
+# and their provenance are published under tasks/round2/evidence/.
+runs/

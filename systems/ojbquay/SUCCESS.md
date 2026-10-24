@@ -68,3 +68,16 @@ AC-01 收斂時間與 AC-07 控制面中斷用 [extra.sh](../../docs/project-suc
 ## #445 歷史 WIP 處置（文件範圍）
 
 本次驗收是[固定 SHA 對照與失敗處置](tasks/445-wip-disposition/analysis.md)：逐項區分已納入、被現行規格取代及尚未驗證的候選；保留原始失敗，不把其他來源綠燈倒推為 WIP 通過。只補來源與處置紀錄；本頁既有資格、SDD、runtime 與 tag 不變。文件／來源對照、42 項目契約、獨立審查與 PR CI 是本次 gates，不重跑產品以製造新資格。
+
+## T-0380 FE Round2 slice — local evidence ready
+
+Approved DESIGN M1–M4 and explicit review-only isolation/gRPC scope have required
+local implementation/evidence: true owned-stack auth/fixtures,42 states,27 route
+checks/captures, unchanged valid drawer bounds and chart ResizeObserver663→780→663.
+See [report](fe-review/tasks/round2/report.md), [result](fe-review/tasks/round2/result.json)
+and [verification](fe-review/tasks/round2/evidence/verification.json). Full Gradle,
+frontend test/build, deployment validation and original mock journey passed;
+cache distinctions and initial failures remain. Exact owned stack cleanup/absence
+is positive. Independent final acceptance and current CI/publication remain
+root-owned gates. Full Round3/axe-zero and new mainline/usable qualification are
+not claimed; existing historical qualification above is unchanged.

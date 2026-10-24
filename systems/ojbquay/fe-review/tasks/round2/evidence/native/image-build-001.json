@@ -1,0 +1,8 @@
+{
+  "command": "review-only unique-project Compose build (no up)",
+  "exitCode": 1,
+  "elapsedSeconds": 3.376,
+  "project": "fe-ojb-0afcb7f018b20564",
+  "configPublishedPorts": 0,
+  "imageIds": {}
+}

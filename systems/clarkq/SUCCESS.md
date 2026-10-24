@@ -70,4 +70,4 @@ cd demo
 
 ## FE 第 2 輪（2026-10-24T11:45:41Z）
 
-T-0380 / R2-AC-13，依已批准 DESIGN M1–M3 與 [T019](fe-review/tasks/round2/T019.md) 開始隔離 API/瀏覽器驗證、合成資料與必要的前端呈現修正。原生 go test/build、三 viewport、鍵盤與真實操作證據仍待執行；不修改既有主線、usable tag、後端或部署。
+T-0380 / R2-AC-13 原 DESIGN M1–M3 候選完成，見[T019報告](fe-review/tasks/round2/report.md)與[證據索引](fe-review/tasks/round2/result.json)。已量測並修正手機queue溢出、鍵盤捲動／對比與刷新焦點；共用3keys幾何、最後3view axe violations/incomplete均0、14真實鍵盤/API步驟與清理通過。預設favicon404及原final-001 FAIL明列保留，不稱零health。原生8測試packages通過，最後嵌入HTML build通過；獨立審查、必要CI及發布仍由主代理完成。不改既有主線、usable tag、後端、部署，也不代表完整R3或新cluster/production資格。

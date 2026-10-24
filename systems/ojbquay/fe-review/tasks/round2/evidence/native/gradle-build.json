@@ -1,0 +1,8 @@
+{
+  "command": "./gradlew build --no-daemon --no-parallel",
+  "exitCode": 0,
+  "elapsedSeconds": 102.356,
+  "java": "Temurin25.0.4.1+1",
+  "sourceHead": "8cabc475d5dd56ff2d34f94fd3b29fe0476dca1c",
+  "scope": "actual Java build; frontend M4 dirty but Java sources unchanged"
+}

@@ -1,14 +1,11 @@
-# fe-review — clarkq
+# FE review — ClarkQ
 
-這個目錄是給 LLM agent 用的前端 review 工作包：定義如何檢查 clarkq 的 UI、如何產生 headless 截圖，以及報告放在哪裡。它不是給人的操作教學，也不改變元件的文檔檔位。
+原 R2（DESIGN M1–M3）候選驗證完成。手機長 queue 折行、捲動區鍵盤操作、主要按鈕對比及五秒刷新焦點已修正。獨立審查、必要 CI 與發布由主代理收尾；不代表完整 R3 或新 production／cluster 驗收。
 
-**狀態：** 第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動或截圖。
+- [報告](tasks/round2/report.md)與[證據索引](tasks/round2/result.json)：三次執行、原始失敗、13份 source hashes、23張私有 PNG。
+- [RUNNER](RUNNER.md)：隔離容器、全新 key/state、原始共用 capture 與續跑規則。
+- [PROMPT](PROMPT.md)、[REVIEW](REVIEW.md)、[DESIGN](DESIGN.md)、[targets](targets.json)。
 
-| 檔案 | 用途 |
-| --- | --- |
-| [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
-| [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
-| [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
-| `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
+共用 capture 三個深色尺寸幾何通過；最後三個長資料頁面 axe violations/incomplete 均0，14項鍵盤/API步驟通過。仍保留預設瀏覽器 `/favicon.ico` 404（一筆 console error），不是零錯誤宣告。受控401／400／斷線另有精確證據。
 
-共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)；截圖腳本：`docs/fe-review/capture.mjs`。
+`targets.verified=true` 僅指已執行的原 R2。需依 RUNNER 提供臨時私有 storageState；受版控 targets 沒有 key，不可裸跑當已登入。PNG、session/state、服務原始日誌均不提交。

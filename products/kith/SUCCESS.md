@@ -35,6 +35,19 @@ source_commit: 893351dfb09be12adbd7979f1b6d53b781066e16
 
 ## 現況與缺口
 
+### #387 像素回歸 oracle（本地 gate VERIFIED）
+
+W7 VERIFIED 後實作本地獨立 gate：三個既有合成桌面／light 場景（登入、首頁空態、控制台成員），固定 Node 24.18.0、Playwright 1.56.1 / Chromium 1194、1280×800、DPR 1、zh-TW、Asia/Taipei 與 bundled Figtree。`threshold:0/maxDiffPixels:0` 原生比較（Pixelmatch AA 分類例外見 [oracle](docs/v2/11-visual-oracle.md)）；等待狀態與字型就緒，不以 sleep 或遮住主體規避差異。
+
+| AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
+| --- | --- | --- | --- |
+| AC-VIS01 | Given 固定環境及三張獨立審查後採用的 baseline，When 三次全新隔離 seed 執行，Then 三個場景原生比較計入的差異為零且 baseline hash 不變 | passed | [本地報告](tasks/387-visual-oracle/report.md)：獨立工程檢圖、三次 fresh GREEN、baseline hashes 不變；不沿用 W7 為像素批准 |
+| AC-VIS02 | Given 受控可見 CSS 變異，When 執行同一 oracle，Then 明確 pixel mismatch RED 並保留 expected/actual/diff 及 hash | passed | [最終 RED](tasks/387-visual-oracle/report.md)：49,344 counted pixels 不同，完整 expected/actual/diff；不是 setup／缺 baseline 失敗 |
+| AC-VIS03 | Given evidence/schema，When 未知 VIS ID 或遺失證據，Then fail closed；正常及 mismatch 圖可驗證 | passed | [最終完整 gate](tasks/387-visual-oracle/report.md)：59passed＋1既有 desktop skip；unknown ID、缺檔、越界、partial bundle、native offline 及 nested capability 保持 fail closed |
+
+驗證計畫：先補故障反例，再實作 evidence、schema 與獨立 visual config；產生 protected 候選供獨立視覺審查、可見變異 RED、三次 fresh GREEN、types/schema/manifest 檢查。僅本地 gate，根 CI 仍只有 test/web；不新增 production/provider 行為，不改 AC-04 資格。
+
+
 ### AC-04 執行輸入表（文件交付）
 
 Owner 已批准 AC-04 開發、提交及達驗收／CI／獨立審查門檻後合併。所需模型、私有設定位置、呼叫／費用預算及 reviewer 路由集中在[執行輸入填寫表](docs/plans/ac04-owner-inputs.md)；公開庫只保存空白範本，填妥副本置於 repo 外私有目錄。

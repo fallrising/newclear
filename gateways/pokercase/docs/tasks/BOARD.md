@@ -43,6 +43,8 @@ Demand and contract: [task](T-0401-native-responses.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| NR-01 | Reject missing or invalid native terminal | NR-1 | in_progress | 2026-10-24T11:42:47Z | | 2026-10-24T11:50:33Z |
-| NR-02 | Preserve accepted frames and first-terminal finality | NR-2 | in_progress | 2026-10-24T11:42:47Z | | 2026-10-24T11:50:33Z |
-| NR-03 | Bound and verify SSE framing | NR-3 | in_progress | 2026-10-24T11:42:47Z | | 2026-10-24T11:50:33Z |
+| NR-01 | Reject missing or invalid native terminal | NR-1 | done | 2026-10-24T11:42:47Z | 2026-10-24T11:53:33Z | 2026-10-24T11:53:33Z |
+| NR-02 | Preserve accepted frames and first-terminal finality | NR-2 | done | 2026-10-24T11:42:47Z | 2026-10-24T11:53:33Z | 2026-10-24T11:53:33Z |
+| NR-03 | Bound and verify SSE framing | NR-3 | done | 2026-10-24T11:42:47Z | 2026-10-24T11:53:33Z | 2026-10-24T11:53:33Z |
+
+NR-1–NR-3 merged in [PR #601](https://github.com/fallrising/newclear/pull/601) at `2026-10-24T11:53:33Z` as `0e99542ec10213524bacffed73699556edfebb8e`. Required CI (component 111s, project contracts 8s) and independent review passed; fetched main contains the reviewed HEAD and the component matches it. SUCCESS/task local verification entries were written before publication; this board records the subsequent publication result. Whole-product acceptance remains incomplete.

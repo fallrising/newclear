@@ -66,3 +66,21 @@ cargo run -p codebox-control-plane
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須取得明確復工範圍、真 Cloud 主線驗證並補齊承諾的 runtime/persistence 整合；現有接受的函式庫切片不能作全平台可用標記。
+
+
+## FE round2 plan — 2026-10-24
+
+T-0380 R2-AC-14/E follows the existing approved [DESIGN](fe-review/DESIGN.md) M1–M3
+and [T006R Ready task](docs/tasks/T006R.task.md)/[review specification](docs/specs/SPEC-T006R-fe-review.md).
+Current work is documentation only; harness, measured presentation changes and runtime
+are NOT_RUN. A separate root environment-only TLS trust probe passed; it served no
+product assets/API/provider and does not satisfy those pending gates. Plan: finite synthetic HTTPS/WSS at loopback with private per-run TLS trust,
+exact inherited contracts, three dark viewports/27 canonical states, focused no-resend/
+secret/cleanup journeys, then required native gates and fresh independent acceptance.
+Only baseline-proven index.html/p0.css/p0-app.js presentation changes may follow the
+root document gate. Existing p0-client/backend/API/security/provider semantics stay
+outside this change. Original offline native fake executables are allowed only as
+retained regression tests; no production CLI/control-plane or newbackendbrowser run.
+Targets remainsfalse until the scoped acceptance is evidenced. Existing product ACs,
+mainline incomplete, usable_tag:none, dormant status and liveCloud/P1 gaps are unchanged;
+no fullR3, deploy, release or ownercompletion is claimed.

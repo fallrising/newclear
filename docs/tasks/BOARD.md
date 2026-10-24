@@ -36,7 +36,7 @@
 | FE2-2 | platform/dim-gate 第2輪實作（PR583 已合併） | R2-AC-2 | done | 2026-10-24T06:32:44Z | 2026-10-24T07:32:17Z | 2026-10-24T07:35:27Z |
 | FE2-3 | products/hai-taskboard 第2輪實作 | R2-AC-3 | in_progress | 2026-10-24T07:35:27Z | — | 2026-10-24T07:35:27Z |
 | FE2-4 | platform/agent-platform 第2輪實作 | R2-AC-4 | todo | — | — | — |
-| FE2-5 | apps/cms-scaffold 第2輪實作 | R2-AC-5 | todo | — | — | — |
+| FE2-5 | apps/cms-scaffold 第2輪實作 | R2-AC-5 | in_progress | 2026-10-24T09:00:28Z | — | 2026-10-24T09:00:28Z |
 | FE2-6 | platform/ice-maker 第2輪實作 | R2-AC-6 | todo | — | — | — |
 | FE2-7 | specs/fleet 第2輪實作 | R2-AC-7 | todo | — | — | — |
 | FE2-8 | systems/ojbquay 第2輪實作 | R2-AC-8 | todo | — | — | — |

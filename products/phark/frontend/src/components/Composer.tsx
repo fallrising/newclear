@@ -141,14 +141,14 @@ export function Composer({
   }
 
   return (
-    <section className="border-b border-border/70 bg-card/80 backdrop-blur">
+    <section aria-labelledby="composer-heading" className="border-b border-border/70 bg-card/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-5 sm:px-6">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <LayoutGrid className="size-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">Stream Deck</h1>
+            <h1 id="composer-heading" className="text-xl font-semibold tracking-tight">Stream Deck</h1>
             <p className="text-sm text-muted-foreground">
               Three columns. One composer. No bird logos.
             </p>
@@ -210,9 +210,12 @@ export function Composer({
                 maxLength={500}
                 rows={3}
                 disabled={submitting}
+                aria-describedby="content-feedback"
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{error ?? "Posts refresh all columns after publishing."}</span>
+                <span id="content-feedback" role={error ? "alert" : undefined}>
+                  {error ?? "Posts refresh all columns after publishing."}
+                </span>
                 <span>{content.length}/500</span>
               </div>
             </div>

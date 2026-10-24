@@ -12,6 +12,7 @@ mod error;
 mod guard;
 mod http_client;
 mod local_import;
+mod native_responses;
 mod oauth_refresh;
 mod prompt_cache;
 mod providers;

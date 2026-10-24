@@ -2034,3 +2034,14 @@ Fleet591 merged2d65b6528ef8425fe17bfb127f79c016dabe3380 at2026-10-24T11:13:28Z a
 ## ClarkQ FE round2 / T-0380 R2-AC-13 / 2026-10-24T11:45:41Z
 
 T019 approved M1–M3 only, docs-first claim. Root owns environment/native/Git/boards; independent native author and author-other review.35–55active estimate plus bounded waits,20min checkpoints not deadlines,max2source-backed diagnostics. Existing13/19 delivered; Phark/Ojb/Flowshot+Loom disjoint current units. No Go/backend/dependency/release expansion. New ClarkQ work starts after bounded worker available.
+
+## Phark FE round2 / T-0380 R2-AC-10 / 2026-10-24T10:18:22Z
+
+T017 preflight source-backed no new scope decision; claim starts environment preparation, no product edits/runtime yet. Fleet591/Goku592 active in disjoint worktrees; Ojbquay scope question remains pending and no dependent work begins. Approved M1–M3 only, rootowns environment/native/Git/boards/acceptance, nativeboundedauthor-otherreview. Estimate50–75active plus setup/build/CIwait,25minfirstcheckpoint/max2targeteddiagnostics. Session/CSRF/quotas/dynamicIDs and baseline-before-style gates explicit in task. No backend/deps/durability expansion.
+
+
+Phark T017 checkpoint 2026-10-24T11:57:46Z: source-specific shared12 captures and9 route guards pass, final003/004 preserve12 keyboard workflows and3paging; final005 exact same-Request logout204 plus authenticated-session-null/UI evidence classifies browser abort without calling raw healthzero. R26 late-browser-ownership issue fixed with explicit30s launch/boundedclose and focused6PASS. Backend610 native tests/package and finalfrontendlint/build passed; root42contracts passed. Contrast incomplete/Search moderate remain explicit, no fullRound3/mainline claim. Independent final documentation review/current-head CI/normalmerge/readback remain required. Private evidence archive19,984,004bytes SHAe7932386f060827ba0e0d92fef60c624e521fc4a49931778cdea433d9175c45a retained locally, not uploaded.
+
+Goku592 merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at2026-10-24T11:17:09Z; R25/all6CI/scopedreadback passed. Carry actualGoku closure. Phark R26 FINAL ACCEPT and final source-specific native/runtime evidence complete; merge integrates already-accepted main without Phark runtime changes.
+
+Phark593 normally merged ab17a1d25f428937b3c1f24113611789fd60748b at2026-10-24T12:07:47Z afterR26/all7CI/scopedremoteequality; actualroot/componentboard closure carried inClarkQ. ClarkQfinal002 PASS36.669s:3strictsizes nooverflow/axeviolations0/incomplete0/focuspreserved,14keyboard/APIjourneys, precise existingfavicon404 diagnostic(nozeroerrorsclaim), allcleanup. Independentreview/currentCI/normalmerge stillpending.

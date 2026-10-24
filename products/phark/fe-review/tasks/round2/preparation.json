@@ -1,0 +1,20 @@
+{
+  "phase": "baseline-preparation",
+  "productChanged": false,
+  "guards": {
+    "command": "node --test products/phark/fe-review/guards.test.mjs",
+    "node": "24.18.0",
+    "passed": 4,
+    "failed": 0,
+    "durationMs": 67.584703,
+    "scope": "offline loopback, fresh-state, CSRF/ID, independent cleanup and fixed failure categories",
+    "commandNote": "Node24.18.0 externally provided executable; exact host location stays in local handoff"
+  },
+  "syntax": {
+    "modules": 7,
+    "passed": true
+  },
+  "runtime": "not-run",
+  "native": "parent-owned; final source gates pending",
+  "verified": false
+}

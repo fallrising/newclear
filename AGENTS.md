@@ -8,6 +8,10 @@
 - 只有不可逆或危險操作（刪除、發布、花錢、force push、繞過 CI、改授權、改本檔）才問 owner。
 - 本檔以外的 repo 專屬規則（建置、測試、風格）寫在下方，不要複製看板規則。
 
+## 交付與對人回報
+
+已授權里程碑的 Git 交付與向 owner 收尾，依[共用規則](https://github.com/fallrising/desk/blob/main/docs/delivery-and-handoff.md)。本 repo 與元件入口沿用此規則；專案另有的必要檢查、審查與當次明確停止條件仍保留。內部 worker／驗證報告遵守各自格式，不作為對人回覆的固定格式。
+
 ## 技術任務合約
 
 - **輸入**：desk 卡 id 與它的 SDD（§0 N3）裡的 AC 編號，SDD 預設放 `<項目目錄>/SDD.md`；或 owner 的直接指示；或本 repo 的 issue。

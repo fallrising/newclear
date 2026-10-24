@@ -111,3 +111,13 @@ Demand/contract: [task](T-0405-sse-stall.md).
 | ST-03 | Preserve known terminals and verify HTTP wiring | ST-3 | done | 2026-10-24T17:02:57Z | 2026-10-24T17:13:51Z | 2026-10-24T17:13:51Z |
 
 ST-1–ST-3 delivered in [PR #619](https://github.com/fallrising/newclear/pull/619), merge `08e97cb6748d64853464f415cab6931b289af30b` at `2026-10-24T17:13:51Z`. Reviewed HEAD `984fa3c92f43ac58c9da3f459cf66e414550a1af` is an ancestor of fetched main; scoped component contents match. Independent source review PASS;138tests/77new scenarios and required component CI129s/project-contract CI9s passed. Opaque passthrough remains a transport failure; real-provider/Docker and whole-product acceptance remain incomplete.
+
+## T-0407 — SSE read errors
+
+Demand/contract: [task](T-0407-sse-io.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| IO-01 | Report fixed protocol errors without source diagnostics | IO-1 | in_progress | 2026-10-24T17:43:24Z | | 2026-10-24T17:47:37Z |
+| IO-02 | Release source/error before final output | IO-2 | in_progress | 2026-10-24T17:43:24Z | | 2026-10-24T17:47:37Z |
+| IO-03 | Preserve known terminals and verify broken HTTP streams | IO-3 | in_progress | 2026-10-24T17:43:24Z | | 2026-10-24T17:47:37Z |

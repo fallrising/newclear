@@ -1220,6 +1220,8 @@ trait SseConvert: Send {
     fn on_end(&mut self) -> Vec<String>;
     /// Idle deadline elapsed; preserve any already parsed terminal.
     fn on_stall(&mut self) -> Vec<String>;
+    /// Read failed; never render arbitrary source errors.
+    fn on_read_error(&mut self) -> Vec<String>;
 }
 
 struct ChatToAnthropic(StreamTranslateState);
@@ -1234,6 +1236,9 @@ impl SseConvert for ChatToAnthropic {
     fn on_stall(&mut self) -> Vec<String> {
         self.0.on_stall()
     }
+    fn on_read_error(&mut self) -> Vec<String> {
+        self.0.on_read_error()
+    }
 }
 
 impl SseConvert for responses::ChatToResponsesStream {
@@ -1245,6 +1250,9 @@ impl SseConvert for responses::ChatToResponsesStream {
     }
     fn on_stall(&mut self) -> Vec<String> {
         responses::ChatToResponsesStream::on_stall(self)
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        responses::ChatToResponsesStream::on_read_error(self)
     }
 }
 
@@ -1258,6 +1266,9 @@ impl SseConvert for responses::ResponsesToChatStream {
     fn on_stall(&mut self) -> Vec<String> {
         responses::ResponsesToChatStream::on_stall(self)
     }
+    fn on_read_error(&mut self) -> Vec<String> {
+        responses::ResponsesToChatStream::on_read_error(self)
+    }
 }
 
 impl SseConvert for claude::AnthropicToChatStream {
@@ -1269,6 +1280,9 @@ impl SseConvert for claude::AnthropicToChatStream {
     }
     fn on_stall(&mut self) -> Vec<String> {
         claude::AnthropicToChatStream::on_stall(self)
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        claude::AnthropicToChatStream::on_read_error(self)
     }
 }
 
@@ -1298,6 +1312,12 @@ impl<A: SseConvert, B: SseConvert> SseConvert for Chain<A, B> {
     }
     fn on_stall(&mut self) -> Vec<String> {
         let mid = self.0.on_stall();
+        let mut out = self.feed(mid);
+        out.extend(self.1.on_end());
+        out
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        let mid = self.0.on_read_error();
         let mut out = self.feed(mid);
         out.extend(self.1.on_end());
         out
@@ -1380,7 +1400,24 @@ where
                         yield Ok(Bytes::from(out));
                     }
                 }
-                Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
+                Ok(Some(Err(error))) => {
+                    // Error values can contain URLs/credentials and own resources.
+                    drop(error);
+                    let out = if let Some(native) = native.as_mut() {
+                        Some(native.read_error())
+                    } else {
+                        conv.as_mut().map(|conv| {
+                            conv.on_read_error().into_iter().map(|r| r + "\n\n").collect::<String>().into_bytes()
+                        })
+                    };
+                    drop(upstream);
+                    match out {
+                        Some(out) if !out.is_empty() => yield Ok(Bytes::from(out)),
+                        Some(_) => {},
+                        None => yield Err(std::io::Error::other(crate::error::READ_FAILED_STREAM_MESSAGE)),
+                    }
+                    break;
+                }
                 Ok(None) => {
                     if let Some(native) = native.as_mut() {
                         let out = native.end();
@@ -1518,6 +1555,120 @@ mod stream_completion_tests {
         }
     }
 
+    const READ_ERROR_SENTINEL: &str = "https://private.invalid/?token=SENSITIVE_READ_SENTINEL";
+
+    struct ReadErrorWitness {
+        formatted: std::sync::Arc<std::sync::atomic::AtomicBool>,
+        _dropped: DropWitness,
+    }
+    impl std::fmt::Display for ReadErrorWitness {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            self.formatted
+                .store(true, std::sync::atomic::Ordering::SeqCst);
+            f.write_str(READ_ERROR_SENTINEL)
+        }
+    }
+    async fn read_error_cases(passthrough: bool) {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for phase in 0..3 {
+            let cases = if passthrough {
+                vec![(StreamMode::Passthrough, "chat", "opaque")]
+            } else {
+                let mut cases = modes();
+                cases.push((StreamMode::NativeResponses, "responses", "responses"));
+                cases
+            };
+            for (mode, source, target) in cases {
+                let source_dropped = Arc::new(AtomicBool::new(false));
+                let error_dropped = Arc::new(AtomicBool::new(false));
+                let formatted = Arc::new(AtomicBool::new(false));
+                let source_guard = DropWitness(source_dropped.clone());
+                let error = ReadErrorWitness {
+                    formatted: formatted.clone(),
+                    _dropped: DropWitness(error_dropped.clone()),
+                };
+                let mut text: String = if phase == 0 {
+                    String::new()
+                } else {
+                    partial(source)
+                        .iter()
+                        .map(|v| format!("data: {v}\n\n"))
+                        .collect()
+                };
+                if phase == 2 {
+                    text.push_str("data: {\"secret\":\"UNFINISHED_SENTINEL");
+                }
+                let input = async_stream::stream! {
+                    let _guard = source_guard;
+                    if !text.is_empty() { yield Ok(Bytes::from(text)); }
+                    yield Err(error);
+                    std::future::pending::<()>().await;
+                };
+                let mut body = stream_body(input, 5, mode).await.unwrap().into_body();
+                let mut all = String::new();
+                let mut failed = false;
+                while let Some(frame) = body.frame().await {
+                    match frame {
+                        Ok(frame) => {
+                            if let Ok(bytes) = frame.into_data() {
+                                let text = String::from_utf8(bytes.to_vec()).unwrap();
+                                if text.contains("upstream stream read failed") {
+                                    assert!(
+                                        source_dropped.load(Ordering::SeqCst),
+                                        "source before final frame"
+                                    );
+                                    assert!(
+                                        error_dropped.load(Ordering::SeqCst),
+                                        "error before final frame"
+                                    );
+                                    failed = true;
+                                }
+                                all.push_str(&text);
+                            }
+                        }
+                        Err(error) => {
+                            assert!(
+                                passthrough,
+                                "{source}->{target}: protocol error expected, got {error}"
+                            );
+                            assert!(error.to_string().contains("upstream stream read failed"));
+                            assert!(!error.to_string().contains(READ_ERROR_SENTINEL));
+                            assert!(source_dropped.load(Ordering::SeqCst));
+                            assert!(error_dropped.load(Ordering::SeqCst));
+                            failed = true;
+                        }
+                    }
+                }
+                assert!(failed);
+                assert!(
+                    !formatted.load(Ordering::SeqCst),
+                    "source error must not be formatted"
+                );
+                assert!(!all.contains(READ_ERROR_SENTINEL));
+                if !passthrough {
+                    assert!(!all.contains("UNFINISHED_SENTINEL"));
+                    assert!(!all.contains("response.completed"));
+                    assert!(!all.contains("message_stop"));
+                    assert!(!all.contains("\"finish_reason\":\"stop\""));
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn io1_io2_read_errors_are_protocol_failures_and_release_before_yield() {
+        read_error_cases(false).await;
+    }
+
+    #[tokio::test]
+    async fn io2_passthrough_read_errors_are_redacted_and_release_before_yield() {
+        read_error_cases(true).await;
+    }
+
     #[tokio::test(start_paused = true)]
     async fn st1_st2_stalls_emit_errors_and_release_before_final_frame() {
         use http_body_util::BodyExt;
@@ -1611,8 +1762,7 @@ mod stream_completion_tests {
         }
     }
 
-    #[tokio::test(start_paused = true)]
-    async fn st3_known_terminals_survive_idle_upstream_without_timeout_error() {
+    async fn known_terminals_survive_interruption(read_error: bool) {
         use std::sync::{
             atomic::{AtomicBool, Ordering},
             Arc,
@@ -1654,6 +1804,7 @@ mod stream_completion_tests {
                     let input = async_stream::stream! {
                         let _witness = witness;
                         yield Ok::<_, std::io::Error>(Bytes::from(text));
+                        if read_error { yield Err(std::io::Error::other(READ_ERROR_SENTINEL)); }
                         std::future::pending::<()>().await;
                     };
                     let response = stream_body(input, 5, mode).await.unwrap();
@@ -1668,6 +1819,8 @@ mod stream_completion_tests {
                         !text.contains("upstream stream stalled"),
                         "{source}->{target}/{outcome}: {text}"
                     );
+                    assert!(!text.contains("upstream stream read failed"));
+                    assert!(!text.contains(READ_ERROR_SENTINEL));
                     if outcome == "failure" {
                         assert!(text.contains("fixture failure"));
                     } else {
@@ -1691,6 +1844,53 @@ mod stream_completion_tests {
                     }
                     assert!(dropped.load(Ordering::SeqCst));
                 }
+            }
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn st3_known_terminals_survive_idle_upstream_without_timeout_error() {
+        known_terminals_survive_interruption(false).await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn io3_known_terminals_survive_read_errors() {
+        known_terminals_survive_interruption(true).await;
+    }
+
+    #[tokio::test]
+    async fn io3_native_delimited_cr_terminals_survive_but_fragments_fail() {
+        for status in ["completed", "incomplete", "failed"] {
+            for ending in ["\n\n", "\r\n\r\n", "\r\r", "\n", "\r\n", "\r"] {
+                let terminal = format!("data: {{\"type\":\"response.{status}\",\"response\":{{\"status\":\"{status}\"}}}}{ending}");
+                let expected = terminal.clone();
+                let dropped = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+                let witness = DropWitness(dropped.clone());
+                let input = async_stream::stream! {
+                    let _witness = witness;
+                    yield Ok::<_, std::io::Error>(Bytes::from(terminal));
+                    yield Err(std::io::Error::other(READ_ERROR_SENTINEL));
+                    std::future::pending::<()>().await;
+                };
+                let response = stream_body(input, 5, StreamMode::NativeResponses)
+                    .await
+                    .unwrap();
+                let text = String::from_utf8(
+                    axum::body::to_bytes(response.into_body(), 4096)
+                        .await
+                        .unwrap()
+                        .to_vec(),
+                )
+                .unwrap();
+                if ["\n\n", "\r\n\r\n", "\r\r"].contains(&ending) {
+                    assert_eq!(text, expected);
+                } else {
+                    assert!(text.contains("upstream_stream_read_error"));
+                    assert!(text.contains("upstream stream read failed"));
+                    assert!(!text.contains(&format!("response.{status}")));
+                }
+                assert!(!text.contains(READ_ERROR_SENTINEL));
+                assert!(dropped.load(std::sync::atomic::Ordering::SeqCst));
             }
         }
     }

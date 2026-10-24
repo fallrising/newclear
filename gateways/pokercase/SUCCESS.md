@@ -204,3 +204,15 @@ Scope: six translated SSE paths plus native Responses, using the existing per-by
 Validation: RED/GREEN with controlled virtual time and drop witnesses; loopback HTTP read and upstream lifecycle evidence; existing full Rust/fmt/clippy/docs/index checks, independent review and required CI. No provider/Docker acceptance or whole-product completion claim. Evidence: [task](docs/tasks/T-0405-sse-stall.md).
 
 Local ST-1–ST-3 evidence:138tests/12groups pass, including77new scenarios;fmt/clippy,43project contracts and6llms navigation files pass. Original RED and initial test-fixture expectation failure retained; terminal semantics preserved. Independent review/publication follow in the task and board.
+
+## T-0407 — SSE read errors
+
+Scope: shared SSE body read-I/O failures across six conversion paths, native Responses and opaque passthrough. No change to idle/header/total deadlines, collectors, general framing, accounting or retries.
+
+- IO-1: Given no known terminal and an upstream read error, translated/native Responses streams emit a fixed protocol diagnostic instead of breaking the HTTP body or inventing successful completion. Do not render the source error or copy unfinished buffered records into that diagnostic.
+- IO-2: Given a read error, drop both the owned upstream stream and error before yielding final output, even if the consumer does not poll again. Opaque passthrough retains transport failure with a fixed redacted message; already forwarded opaque bytes remain unchanged.
+- IO-3: Given an already parsed terminal, preserve its success/incomplete/failure semantics without replacing it with a read error. Preserve a fully delimited native CR-only terminal awaiting lookahead; an unfinished terminal fragment must not become success. Validate protocol wiring through actual loopback HTTP body failure and preserve existing EOF/stall/disconnect coverage.
+
+Verification: RED/GREEN adapter tests with error-format/source/error-drop witnesses, text/tool terminal matrix, CR boundary cases and loopback broken HTTP streams; full native tests/fmt/clippy/docs/index, independent source review and required CI. No live-provider/Docker acceptance or whole-product completion claim. [Task](docs/tasks/T-0407-sse-io.md).
+
+Local IO-1–IO-3 evidence:143tests/13groups including96new scenarios pass;fmt/clippy,43project contracts and6llms navigation files pass. Original RED retained. Source review and publication follow in the task/board; whole-product/provider acceptance remains separate.

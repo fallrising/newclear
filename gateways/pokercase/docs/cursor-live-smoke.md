@@ -28,7 +28,7 @@ Owner asked to retry, authorizing one additional brief real request using the ex
 
 ### Follow-up outcome and fixed diagnostic
 
-The authorized retry sent exactly one further gateway request and launched one container. It again returned502 after1.938seconds; no expected reply, no automatic retry, and automatic cleanup succeeded with0remaining containers. Provider-internal requests/tokens/cost remainunknown. Live source and binary were unchanged from the first attempt; the old request marker was preserved and a new independent marker recorded this authorization.
+The authorized retry sent exactly one further gateway request and launched one container. It again returned502 after1.938seconds; no expected reply, no automatic retry, and automatic cleanup succeeded with0remaining containers. Provider-internal requests/tokens/cost remainunknown. The checkout SHA changed from `ac220e06` to `db3da9a2`; runtime source/dependencies were unchanged and the binary hash matched the first attempt; the old request marker was preserved and a new independent marker recorded this authorization.
 
 The new diagnostic helper persisted **only fixed categories/codes and byte counts**, not arbitrary stderr, account identities or tokens. It recorded259stderr bytes with `sandbox` and `not available`; no RPC/HTTP code was detected. Inspection of the installed official bundle located the startup rejection for “Sandbox mode is enabled but not available on this system.” This identifies the rejected CLI prerequisite, not the exact kernel/feature-gate reason behind it. It does not establish that the earlier UID observation caused the failure.
 

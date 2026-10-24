@@ -1,0 +1,440 @@
+{
+  "scope": "actual geometry and loading/error semantics only; not final route/journey acceptance",
+  "baseline": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 390,
+          "clientWidth": 390
+        },
+        "deck": {
+          "width": 358,
+          "height": 572,
+          "scrollWidth": 872,
+          "clientWidth": 358,
+          "scrollHeight": 572,
+          "clientHeight": 572
+        },
+        "columns": [
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          },
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          },
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          }
+        ],
+        "overflowingText": []
+      },
+      "axe": {
+        "skipped": "geometry-only; baseline-005 retains actual axe",
+        "violations": [],
+        "incomplete": []
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 834,
+          "clientWidth": 834
+        },
+        "deck": {
+          "width": 786,
+          "height": 840,
+          "scrollWidth": 786,
+          "clientWidth": 786,
+          "scrollHeight": 840,
+          "clientHeight": 840
+        },
+        "columns": [
+          {
+            "width": 251.328125,
+            "height": 824,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 822,
+            "clientHeight": 822
+          },
+          {
+            "width": 251.328125,
+            "height": 824,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 822,
+            "clientHeight": 822
+          },
+          {
+            "width": 251.328125,
+            "height": 824,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 822,
+            "clientHeight": 822
+          }
+        ],
+        "overflowingText": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 95
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        },
+        "deck": {
+          "width": 1232,
+          "height": 628,
+          "scrollWidth": 1232,
+          "clientWidth": 1232,
+          "scrollHeight": 628,
+          "clientHeight": 628
+        },
+        "columns": [
+          {
+            "width": 400,
+            "height": 612,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 610,
+            "clientHeight": 610
+          },
+          {
+            "width": 400,
+            "height": 612,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 610,
+            "clientHeight": 610
+          },
+          {
+            "width": 400,
+            "height": 612,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 610,
+            "clientHeight": 610
+          }
+        ],
+        "overflowingText": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 95
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    }
+  ],
+  "mocks": [
+    {
+      "state": "loading",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "status",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "empty",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "401",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "403",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 403,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "429",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "500",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        }
+      ]
+    }
+  ],
+  "provenance": [
+    {
+      "run": "baseline-005",
+      "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb"
+    },
+    {
+      "run": "mobile-003",
+      "sha256": "3794ecc1f8331ee93b25740f704db319200e17979e0b547f044ebb9c6087ccad"
+    }
+  ],
+  "sourceDelta": "PostCard relative after baseline-005; mobile-003 verifies root cause, later route coverage remains required",
+  "axeNote": "mobile-003 skipped axe for focused geometry; baseline-005 retains 95 color-contrast incomplete nodes per viewport"
+}

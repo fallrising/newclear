@@ -41,7 +41,7 @@
 | FE2-7 | specs/fleet 第2輪實作 | R2-AC-7 | todo | — | — | — |
 | FE2-8 | systems/ojbquay 第2輪實作 | R2-AC-8 | todo | — | — | — |
 | FE2-9 | products/goku 第2輪實作 | R2-AC-9 | todo | — | — | — |
-| FE2-10 | products/phark 第2輪實作 | R2-AC-10 | in_progress | 2026-10-24T10:18:22Z | — | 2026-10-24T10:18:22Z |
+| FE2-10 | products/phark 第2輪實作 | R2-AC-10 | in_progress | 2026-10-24T10:18:22Z | — | 2026-10-24T11:57:46Z |
 | FE2-11 | apps/flowshot＋apps/loom 第2輪實作 | R2-AC-11 | todo | — | — | — |
 | FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | todo | — | — | — |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | todo | — | — | — |

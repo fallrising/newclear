@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "id": "baseline-002",
+  "phase": "baseline-only",
+  "status": "failed",
+  "startedAt": "2026-10-24T11:09:51.550Z",
+  "controlledMockBeforeSpring": true,
+  "api": [],
+  "steps": [
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [
+    {
+      "state": "loading",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "empty",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "401",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        }
+      ]
+    }
+  ],
+  "baseline": [],
+  "captures": [
+    {
+      "name": "mock-loading",
+      "path": "screenshots/mock-loading.png",
+      "sha256": "a1412f391f952e406d1e10efac25621491ac99cd1e3ba6ba8c3148515cacd58d",
+      "bytes": 49407,
+      "controlled": true
+    },
+    {
+      "name": "mock-empty",
+      "path": "screenshots/mock-empty.png",
+      "sha256": "fb63ae118ac4e1aeaa236326121eb47660b849bf81b5bc55bd3fb5cbe6e0c36b",
+      "bytes": 74170,
+      "controlled": true
+    },
+    {
+      "name": "mock-401",
+      "path": "screenshots/mock-401.png",
+      "sha256": "565d0f4d528c1abd607f1c905654bb68ab79e0e37a42bc0fb080b8cc884e541b",
+      "bytes": 52716,
+      "controlled": true
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "49fff9fc7d8e79c2f081b37a4d3e07031cbd674d3638a2ce17507af96f6be90d",
+    "frontend/src/components/Column.tsx": "be0ea0f358cf3f58b25c58c04953029a04dce5de126efe5ba44b378639942543",
+    "frontend/src/components/PostCard.tsx": "0982cd05338a74fcd991dcac7b470e8b8611445408a4a620b592ce2783547e46",
+    "frontend/src/components/ReplyThread.tsx": "b1142d6ae516dab5357cc94fccc18af0825b3a8319e92b8c02420c3a892f6e8f",
+    "frontend/src/components/Composer.tsx": "d1181bbd87bec92a49147a85264a18f2716d6e4d312180c363113d6d21cbd6a1",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "aafe03a27aa574bf0e6d06c6eb6b4c00cb1240b5b1f91fb732a12288509578cf",
+    "fe-review/api-fixture.mjs": "d482368dafa8f06df8a8714c519e835222bb1525acfb60e6652ac0e79135e465",
+    "fe-review/guards.mjs": "72f215327fd6b91a066769ee19d194937171c73eee79e020f08c3a87f74b4f7e",
+    "fe-review/mock-baseline.mjs": "7641b26a5a37294a8613bd3aa1b429e17ae86e2351f6f46ac2377e98881ed0ed",
+    "fe-review/baseline.mjs": "568038621cd98dc4dbf450ac38243f4ed49bf6e0eece885b1e57e4735ed672b7",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "mock-baseline",
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "failure": "REVIEW_BROWSER_TIMEOUT",
+  "endedAt": "2026-10-24T11:10:03.310Z"
+}

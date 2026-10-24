@@ -18,7 +18,7 @@
 - 設計文件目錄：`products/kith/docs/v2/`（本機 clone 通常在 `/home/user/newclear/products/kith/docs/v2/`）。
 - 你只寫文件，路徑限定：`products/kith/docs/v2/**`、`products/kith/contracts/v2/**`（JSON Schema）、必要時 `products/kith/docs/adr/**`。
 - 不改任何程式、設定、migration、測試、workflow。
-- 在工作階段指定的分支上開發；每個里程碑完成後開一個 **Draft PR** 到 `main`。不要直接推 `main`，不要合併自己的 PR。
+- 在工作階段指定的分支上開發；每個已授權文件里程碑完成後，依[根規則](../../../../AGENTS.md#交付與對人回報)完成 PR、必要檢查／審查、正常合併與回讀，並向 owner 簡短回報。不要直接推 `main`；當次明確 Draft-only／不合併指示及尚未批准的設計決策仍優先。
 
 ## 2. 開工前必讀（依序，全部讀完才動筆）
 

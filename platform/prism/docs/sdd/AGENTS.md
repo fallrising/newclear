@@ -79,6 +79,6 @@
 
 ## Completion response
 
-輸出：完成內容、changed files、實際執行的 commands 與輸出、acceptance mapping、未完成項與理由、風險與 open questions。
+已授權里程碑的交付與向 owner 收尾依[根規則](../../../../AGENTS.md#交付與對人回報)。詳細工作紀錄保存完成內容、changed files、實際執行的 commands 與輸出、acceptance mapping、未完成項與理由、風險與 open questions；內部 worker 報告仍依指定契約。
 
 **不得宣稱未實際執行過的驗證。** 測試沒跑就說沒跑；跑了失敗就貼失敗輸出。

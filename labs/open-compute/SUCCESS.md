@@ -63,6 +63,31 @@ M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止
 
 ## Issue548: bounded failure diagnostics (maintenance)
 
+### M4 kernel closure continuation (contract baseline, T077)
+
+This proposed implementation replaces M4's sampled descendant ownership with a
+fresh same-PID exec runner, checked subreaper and single-use kernel-owned epochs.
+It does not change generic Process/command, M1–M3/M5–M7, storage measurement,
+upstream, workload or existing historical reports. Exact contract/schema/constants:
+[SDD-M4 kernel closure amendment](docs/SDD-M4.md#m4-kernel-closure-amendment-t077).
+
+AC-K1: every M4 subprocess, including source identity/version/setup, belongs to a
+bounded main-thread registry; three cold boundaries require closed launches,
+completed waits/drains, checked policy and actual ECHILD before snapshots.
+AC-K2: immutable single-use receipts govern snapshot/epoch progression and fresh
+final cleanup; authority/cancel/identity/policy/live-child uncertainty forbids
+snapshot/removal. Ordinary workload/metadata failure never becomes success and
+permits removal only after fresh verified closure and unchanged scope authority.
+AC-K3: strict additive lifecycle evidence separates incomplete sampled liveness
+from whole-tree kernel closure, preserves actual daemon identities/status and
+rejects forged counts/types/private fields. AC-K4: causal/adversarial focused
+tests, independent review, one full offline gate and one authorized original M4
+qualification bind the resulting behavior to exact source/artifact evidence.
+
+All AC-K checks start not_run. Review and commit this contract before code;
+root must explicitly release implementation. Historical AC-05 stays failed,
+mainline incomplete and usable_tag none pending actual reviewed qualification.
+
 ### Observation reason retention (2026-10-24 continuation)
 
 Scope: preserve the fixed observation reason already recorded by Process when

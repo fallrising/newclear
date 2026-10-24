@@ -3,6 +3,15 @@
 Status: M1 implemented; executed results and their limits are recorded in
 [STATUS.md](STATUS.md). Created: 2026-10-07. Scope: `labs/open-compute`.
 
+## Proposed M4 kernel closure contract (T077)
+
+[SDD-M4's amendment](SDD-M4.md#m4-kernel-closure-amendment-t077) defines a separate
+M4-only same-PID fresh exec runner, explicit lifecycle APIs and additive strict
+evidence. It replaces sampled ownership authority with closed launch epochs and
+actual kernel ECHILD; sampled liveness remains explicitly incomplete evidence.
+No generic Process/command or M1–M3/M5–M7 behavior changes. This is a contract
+baseline, not implementation or runtime evidence; historical AC-05 stays failed.
+
 ## Current M7 lifecycle admission contract (T066, 2026-10-24)
 
 The accepted repair is implemented only in explicit integration supervision mode.

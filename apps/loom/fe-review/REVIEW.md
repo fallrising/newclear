@@ -1,48 +1,18 @@
-# FE Review — loom — REVIEW
+# Loom FE review — current R2 evidence
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 review-only IPC/event preload；保留 callback 生命週期與未知 invoke 拒絕，不改 production adapter。 第 2／3 輪仍未由本次文件回寫執行。
-> 活文件：記目前狀態，每次變更走 PR；依 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)。
+Approved [DESIGN](DESIGN.md) M1–M3 review-only preload/driver is implemented. Retained12matrixkeys plus loom006remaining9captures/12steps establish the scoped syntheticWebflow; [report](tasks/round2/report.md) records exactsource/nativeevidence and failures. Finalindependentreview/current-headCI/normalmerge/readback remainpending under [PR598](https://github.com/fallrising/newclear/pull/598). No fullRound3/product/native acceptance.
 
-## 目前輪次
+The previous missingnativeIPC andgenericcapture contradictions are resolved only through the component-ownedpreload/driver. The stateful fixture covers actualinvoke/listen/callback/nativeboundaries, rejectsunknowncommands, and records disposal. Genericcapture still cannot install it. No productionadapter/nativecontracts/schema/dependencies changed; dormantbacklog remainsclosed.
 
-- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
-- 第 2 輪修改、fixture/driver 實作與第 3 輪 capture 均未開始；`targets.json` 仍 `verified: false`。
+## Retained findings
 
-## 修改權限
+- Populated/documentstates report serious aria-input-field-name andcolor-contrast violations; empty/history states reportmoderate region. Allacceptedstates retain aria-prohibited-attr/color-contrast incomplete. Exactcounts remain in [audit](tasks/round2/evidence/final-docs/audit.json).
+- All21acceptedcaptures haveclean normalbrowserhealth/no pagehorizontaloverflow. This is not a fullpixel/overlap audit; canvas canpan.
+- Matrixcreation recordedvisiblekeyboardfocus. Actual006closeCancel activation hadactive=true butfocusVisible=false/outlineStyle=none; visiblefocus remains anissue.
+- Realvault/PTY/SQLite/filesystemwatcher/AI/nativewindow/crossplatform andcrashdurability areunproven bysyntheticWeb. Existing productmainline gaps remain.
 
-文檔檔位 **C（dormant）**，依 [PORTFOLIO](../../../PORTFOLIO.md) 的 FE review 例外，第 2 輪只做已確認 DESIGN 範圍，不恢復 backlog、新功能或 major 升級。
+## Resolved harness blocker and history
 
-## 矛盾點
+Previousdrag attempts failed;005mistakenlyusedlibrarydefault1px despiteactualcomponentoverride4px. Afterseparateownerapproval,006source-derived5pxactivation+1pxtranslationwitness passed, thenactualDOMedge1/sidecar1 andremainingworkflow passed. Puretests didnot overrideearlierfailures; originalreceipts remainunchanged. No newretrypermission follows fromthissuccess.
 
-### C1 Browser 缺 native IPC，且 generic capture 沒有 preload hook
-
-原始碼仍需 Tauri invoke/listen；browser dev server 不等於已解耦。[capture.mjs:114](../../../docs/fe-review/capture.mjs#L114) 建立自己的 context/page，未載入 `addInitScript` fixture。DESIGN 的 review-only driver 是未來交付，不是已存在的啟動入口。
-
-### C2 Native 邊界不只在 src/ipc.ts
-
-[doc_ipc.ts:24](../src/surfaces/document/doc_ipc.ts#L24)、[ai_ipc.ts:37](../src/surfaces/document/ai_ipc.ts#L37)、[persistence.ts:78](../src/surfaces/canvas/persistence.ts#L78) 與 [window_close_ipc.ts:5](../src/surfaces/canvas/window_close_ipc.ts#L5) 都直接 invoke/listen。僅 mock PTY 不足以跑 document、canvas/history 或 close 保護；需要完整 command/event registry 與 reset/disposal。
-
-## 已決定
-
-- #156 允許 paired、design-only 交付；本輪不啟動 UI、不改 product code/tests/dependencies/CI。
-- D1 已獲 owner 明確確認；依據是決策紀錄，不是 draft 或靜態檢查。
-
-## 本次確認的決定
-
-### D1 IPC 解耦方式
-
-- 選項：(a) production frontend IPC adapter；(b) review-only `addInitScript` preload。
-- 建議／本 DESIGN 假設：(b) 先行。需完整 invoke/listen/callback 與事件生命週期；不是只設 window.invoke。
-- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
-
-## 進入第 2 輪的條件
-
-- Owner 明確確認每個 D 假設並完成 AC-15；不得單憑任意 agent merge 推定 signoff。
-- [DESIGN](DESIGN.md) 範圍已確認；依其 M 項完成 fixture/driver、隔離先備與測試後，才可真正啟動 capture 並更新 targets。
-- PROMPT 的 proposed/unrun 線索需回填真實 CLI、環境、source SHA 和結果，不能先改 verified true。
-
-## 相關 PR
-
-- fallrising/newclear#141：建立工作包與三輪節奏。
-- fallrising/newclear#144：既有決定與設計文件入口。
-- 本次 paired 設計：Refs [#156](https://github.com/fallrising/newclear/issues/156)；設計 PR [#555](https://github.com/fallrising/newclear/pull/555) 已合併，確認依據見本頁決策紀錄。
+Next: rootfinalreview/CI/delivery fororiginalR2. NewfullRound3work orproducta11yfixes needtheir ownapprovedscope; no release/deploy/usabletag. Originaldesignapproval remains in [DESIGN](DESIGN.md) andcentral [acceptance](../../../docs/fe-review/ROUND1-ACCEPTANCE.md).

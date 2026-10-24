@@ -1,0 +1,46 @@
+{
+  "status": "FROZEN_FOR_INDEPENDENT_REVIEW_ONE_RUNTIME",
+  "configuration": {
+    "source": "src/surfaces/canvas/CanvasSurface.tsx",
+    "sha256": "54ef8c2d3820ae74da624cee9ed1fb11936813f739625f3c3c43963538392378",
+    "attributeLine": 1019,
+    "threshold": 4,
+    "activationPixels": 5,
+    "witnessPixels": 1
+  },
+  "sourceBefore": {
+    "ui-steps.mjs": "74140222c555b9f7998160d2fa6c930bed6835a0fcb822927427c0b489ae445f",
+    "ui-steps.node.mjs": "19ba033ec2093be06d08cfee01313aaecc8be982f3a019dee6e1456ebac0522d",
+    "run-review.mjs": "238caab8383d525fc0ab45361ded3954785e264b9bca77dc6f36188b4a611673",
+    "geometry.mjs": "bb39c8231278adc7047a92d9881c36a74ef9e8ea384bfb033d9ae46bd2eae12b"
+  },
+  "sourceAfter": {
+    "drag-configuration.mjs": "f02bd225ee611813b23e853cdf03bd4166024206c9fddc327c7422aa39e2bfd0",
+    "ui-steps.mjs": "6462d5b6daa4ac5c7ecd7c44448de4e9c8be488ca0e7cc425690c756ed588dd1",
+    "ui-steps.node.mjs": "c88508cc5cf68b26cccf300f2f5c8480c47219658c2ea178b3808c15c5665741",
+    "run-review.mjs": "efaf73dbbbb2b755fa7ba869f57ab4dc55185beb60bf3a7873643fb66340afa9",
+    "geometry.mjs": "bb39c8231278adc7047a92d9881c36a74ef9e8ea384bfb033d9ae46bd2eae12b"
+  },
+  "checks": {
+    "red": "source-derived4px reproduces original2px sequence failure; red.log",
+    "green": "14 pass / 0 fail / 0 skip; green-import.log",
+    "syntax": "node --check drag-configuration.mjs, ui-steps.mjs, run-review.mjs passed",
+    "diff": "git diff --check -- apps/loom/fe-review passed"
+  },
+  "runtime": "NOT_RUN_BY_WORKER",
+  "preserved": {
+    "geometryUnchanged": true,
+    "loom005ReceiptSha256": "e4eeabbbbd52ea64fe47bb6c93e8a38223702f47d1bc72fc48d9e1b9b133463a"
+  },
+  "preparationFailure": "First archival command used a duplicated worktree-relative prefix and failed before writes/tests; corrected working path. No browser attempt.",
+  "usage": {
+    "visibleThisAssignmentExecCalls": 6,
+    "agentMessages": 1,
+    "agentStarts": 0,
+    "browserRuns": 0,
+    "providerRequests": null,
+    "tokens": null,
+    "cost": null,
+    "activeSeconds": null
+  }
+}

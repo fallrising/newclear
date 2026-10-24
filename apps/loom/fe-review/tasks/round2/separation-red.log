@@ -1,0 +1,42 @@
+Path-redacted derivative; only canonical worktree path replaced. Raw SHA256 450f6126f4a02e35baf8b1420bc2e20de0913efc5adffddb5c651393aece54ee
+✔ review locators use the actual locked React Flow accessible control names (1.102436ms)
+✖ node separation derives the real mouse delta from observed overlap and keeps a visible gap (1.372213ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 114.141241
+
+✖ failing tests:
+
+test at wt/newclear/fe2-flowshot-loom-20261024/apps/loom/fe-review/ui-steps.node.mjs:13:1
+✖ node separation derives the real mouse delta from observed overlap and keeps a visible gap (1.372213ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    [
+      {
+        x: 710,
+        y: 110
+      },
+      {
+  +     x: 1310,
+  +     y: 120
+  -     x: 833,
+  -     y: 110
+      }
+    ]
+
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/ui-steps.node.mjs:19:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { x: 710, y: 110 }, { x: 1310, y: 120 } ],
+    expected: [ { x: 710, y: 110 }, { x: 833, y: 110 } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

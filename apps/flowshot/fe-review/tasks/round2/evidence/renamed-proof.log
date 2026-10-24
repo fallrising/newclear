@@ -1,0 +1,25 @@
+✔ real eager launch consumes preload pending promise, then exact synthetic DTO (31.171413ms)
+✔ typed error is controlled after loading and is the existing eager promise rejection (3.921363ms)
+✔ resolve before observed loading, duplicate settle, late/colliding installation fail closed (1.586934ms)
+✔ fresh contexts do not reuse resolved state and long metadata remains synthetic (1.280655ms)
+✔ unknown native invoke refuses with safe code and records no supplied payload (0.758036ms)
+✔ HTTP/WS accept only exact namespace loopback origin; credentials and other ports/protocols refuse (1.003806ms)
+✔ safe failure classification never emits arbitrary error, URL or path content (0.309599ms)
+✔ browser rejection and hanging close still attempt every owned resource and fail closed (13.846678ms)
+✔ signal during async creation retains late resource ownership for final cleanup (1.075615ms)
+✔ normal scenarios reject every unexpected health category without raw diagnostic data (0.557267ms)
+✔ locked SDK invoke + listen callback delivers synchronous replay only after registration (2.37085ms)
+✔ listener id is distinct from callback id; SDK unlisten releases both and late unlisten is safe (0.347589ms)
+✔ unknown invoke/invalid Origin/unsafe path do not mutate state or expose request values (0.489398ms)
+✔ runtime document DTO validates expectedHash; conflict/error do not write; doc close releases state (0.763166ms)
+✔ history reads never restart or write stdin; restart and forget are explicit; reset is isolated (0.687028ms)
+✔ sidecar is exact JSON string boundary and explicit export/reseed is separate from reset (0.856597ms)
+✔ no-key AI cannot issue a request; disposal settles pending history and forbids native fallback (1.164325ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 323.496626

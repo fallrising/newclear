@@ -1,0 +1,124 @@
+--- ui-steps.node.mjs.before
++++ ui-steps.node.mjs
+@@ -1,42 +1,48 @@
+ import test from 'node:test';
+ import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
+ import { defaultAriaLabelConfig } from '@xyflow/system';
+ import { controls, fit, separateNodes } from './ui-steps.mjs';
+-test('review locators use the actual locked React Flow accessible control names', async () => {
++import { actualDragConfiguration, parseDragConfiguration } from './drag-configuration.mjs';
++const source = readFileSync(new URL('../src/surfaces/canvas/CanvasSurface.tsx', import.meta.url), 'utf8');
++test('review locators use locked React Flow accessible control names', async () => {
+   assert.equal(controls.fit, 'Fit View'); assert.equal(controls.zoomOut, 'Zoom Out');
+-  assert.equal(controls.zoomOut, defaultAriaLabelConfig['controls.zoomOut.ariaLabel']);
+   let clicked = false;
+   await fit({ getByRole(role, options) { assert.equal(role, 'button'); assert.deepEqual(options, { name: defaultAriaLabelConfig['controls.fitView.ariaLabel'], exact: true }); return { async click() { clicked = true; } }; } });
+   assert.equal(clicked, true);
+ });
+-
+-test('node separation derives the real mouse delta from observed overlap and keeps a visible gap', async () => {
+-  const before = { stable: true, last: { document: { x: 66, width: 646 }, terminal: { x: 637, width: 739 }, source: { centerHit: false }, target: { centerHit: true } } };
+-  const after = { stable: true, last: { document: { x: 30, width: 400 }, terminal: { x: 460, width: 450 }, source: { centerHit: true }, target: { centerHit: true } } };
+-  const samples = [before, before, after], moves = [], receipt = {};
+-  const page = { async evaluate() { return samples.shift(); }, locator() { return { async boundingBox() { return { x: 660, y: 100, width: 100, height: 20 }; } }; }, mouse: { async move(x, y) { moves.push({ x, y }); }, async down() {}, async up() {} }, getByRole() { return { async click() {} }; } };
+-  await separateNodes(page, receipt);
+-  assert.deepEqual(moves, [{ x: 710, y: 110 }, { x: 712, y: 110 }, { x: 835, y: 110 }]);
+-  assert.equal(receipt.nodeSeparation.before.last.source.centerHit, false);
+-  assert.equal(receipt.nodeSeparation.after.last.source.centerHit, true);
+-  assert.equal(receipt.nodeSeparation.screenDelta, 123);
++test('configuration uses actual component override and hashes that exact source', () => {
++  assert.equal(actualDragConfiguration.threshold, 4);
++  assert.deepEqual(parseDragConfiguration(source), actualDragConfiguration);
++  const larger = parseDragConfiguration(source.replace('nodeDragThreshold={4}', 'nodeDragThreshold={8}'));
++  assert.equal(larger.threshold, 8); assert.notEqual(larger.sourceSha256, actualDragConfiguration.sourceSha256);
+ });
+-
+-// Model the locked XYDrag input contract: startDrag anchors at the first
+-// threshold-crossing event, and that event does not move the node. This catches
+-// the observed loom004 loss of 688/12 CSS px; it is not a browser PASS claim.
+-function thresholdDragPage({ shiftAtObservation = false, unstableActivation = false } = {}) {
++test('import association rejects other components and accepts the actual imported alias', () => {
++  assert.throws(() => parseDragConfiguration('const view = <ReactFlow nodeDragThreshold={4}/>;'), /REVIEW_DRAG_CONFIG_IMPORT/);
++  assert.throws(() => parseDragConfiguration("import { ReactFlow } from 'another-package'; const view = <ReactFlow nodeDragThreshold={4}/>;"), /REVIEW_DRAG_CONFIG_IMPORT/);
++  assert.throws(() => parseDragConfiguration("import type { ReactFlow } from '@xyflow/react'; const view = <ReactFlow nodeDragThreshold={4}/>;"), /REVIEW_DRAG_CONFIG_IMPORT/);
++  assert.equal(parseDragConfiguration("import { ReactFlow as Canvas } from '@xyflow/react'; const view = <Canvas nodeDragThreshold={4}/>;").threshold, 4);
++});
++test('ambiguous, missing, dynamic and out-of-range configuration is refused', () => {
++  for (const invalid of ['<ReactFlow />', '<Other nodeDragThreshold={4} />', '<><ReactFlow nodeDragThreshold={4}/><ReactFlow nodeDragThreshold={4}/></>', '<ReactFlow nodeDragThreshold={4} nodeDragThreshold={5}/>', '<ReactFlow nodeDragThreshold={value}/>', '<ReactFlow nodeDragThreshold="4"/>', '<ReactFlow nodeDragThreshold={4} {...props}/>', ...[0,17,1.5,-1].map((v)=>`<ReactFlow nodeDragThreshold={${v}}/>`)]) {
++    assert.throws(() => parseDragConfiguration("import { ReactFlow } from '@xyflow/react'; const view = " + invalid), /REVIEW_DRAG_CONFIG_/);
++  }
++});
++// External input contract models the locked XYDrag threshold-consuming first event.
++function thresholdDragPage({ threshold = actualDragConfiguration.threshold, fault, shiftAfterActivation = false } = {}) {
+   let docX = 140, nodeX = 60, pointerX = 0, pressX = 0, anchorX = 0;
+   let pressed = false, active = false, evaluations = 0, fits = 0, released = 0;
+-  const snapshot = () => ({ stable: !(unstableActivation && pressed), last: {
+-    document: { x: docX, width: 560 }, terminal: { x: nodeX, width: 640 },
+-    source: { centerHit: nodeX > docX + 560 }, target: { centerHit: true },
+-  } });
+   return {
+     async evaluate() {
+       evaluations++;
+-      if (shiftAtObservation && pressed) { docX += 20; nodeX += 8; }
+-      return snapshot();
++      if (shiftAfterActivation && evaluations === 2) { docX += 20; nodeX += 8; }
++      const witness = evaluations === 3;
++      return { stable: !(fault === 'unstable' && pressed), last: {
++        transform: witness && fault === 'viewport' ? 'changed' : 'scale(1)',
++        document: { x: docX + (witness && fault === 'document' ? 1 : 0), y: 181, width: 560, height: 420 },
++        terminal: { x: nodeX, y: 101, width: 640, height: witness && fault === 'shape' ? 361 : 360 },
++        source: { centerHit: nodeX > docX + 560 }, target: { centerHit: true },
++      } };
+     },
+     locator() { return { async boundingBox() { return { x: nodeX + 20, y: 100, width: 100, height: 20 }; } }; },
+     mouse: {
+@@ -45,8 +51,8 @@
+         for (let i = 1; i <= steps; i++) {
+           const next = from + (x - from) * i / steps;
+           if (pressed) {
+-            if (!active && Math.abs(next - pressX) > 1) { active = true; anchorX = next; }
+-            if (active) { nodeX += next - anchorX; anchorX = next; }
++            if (!active && Math.abs(next - pressX) > threshold) { active = true; anchorX = next; }
++            if (active) { if (fault !== 'no-movement') nodeX += next - anchorX; anchorX = next; }
+           }
+           pointerX = next;
+         }
+@@ -58,23 +64,21 @@
+     result() { return { gap: nodeX - docX - 560, evaluations, fits, released, pressed }; },
+   };
+ }
+-test('threshold-consuming drag preserves the measured gap after activation instead of losing its first increment', async () => {
+-  const page = thresholdDragPage(), receipt = {};
+-  await separateNodes(page, receipt);
+-  assert.equal(page.result().gap, 48);
+-  assert.equal(page.result().released, 1);
+-  assert.equal(page.result().fits, 1);
++for (const threshold of [actualDragConfiguration.threshold, 8]) test(`source-derived ${threshold}px threshold gets a real1px witness and full measured gap`, async () => {
++  const configuration = parseDragConfiguration(source.replace('nodeDragThreshold={4}', `nodeDragThreshold={${threshold}}`));
++  const page = thresholdDragPage({ threshold }), receipt = {};
++  await separateNodes(page, receipt, configuration);
++  assert.equal(page.result().gap, 48); assert.equal(page.result().released, 1); assert.equal(page.result().fits, 1);
++  assert.equal(receipt.nodeSeparation.activation.witnessDelta, 1);
++  assert.equal(receipt.nodeSeparation.activation.pixels, threshold + 1);
+ });
+-test('remaining displacement is recomputed from post-activation geometry', async () => {
+-  const page = thresholdDragPage({ shiftAtObservation: true });
++test('remaining distance uses witnessed geometry rather than pre-activation boxes', async () => {
++  const page = thresholdDragPage({ shiftAfterActivation: true });
+   await separateNodes(page, {});
+-  assert.equal(page.result().gap, 48);
+-  assert.equal(page.result().evaluations, 3);
++  assert.equal(page.result().gap, 48); assert.equal(page.result().evaluations, 4);
+ });
+-test('unstable activation geometry fails and releases the pointer without performing a full drag', async () => {
+-  const page = thresholdDragPage({ unstableActivation: true });
+-  await assert.rejects(separateNodes(page, {}), /REVIEW_GEOMETRY_UNSTABLE/);
+-  assert.equal(page.result().released, 1);
+-  assert.equal(page.result().fits, 0);
+-  assert.equal(page.result().pressed, false);
++for (const [fault, error] of [['unstable','GEOMETRY_UNSTABLE'], ['no-movement','DRAG_WITNESS_TRANSLATION'], ['document','DRAG_WITNESS_DOCUMENT'], ['viewport','DRAG_WITNESS_VIEWPORT'], ['shape','DRAG_WITNESS_SHAPE']]) test(`${fault} cannot qualify activation and always releases pointer`, async () => {
++  const page = thresholdDragPage({ fault });
++  await assert.rejects(separateNodes(page, {}), new RegExp(`REVIEW_${error}`));
++  assert.equal(page.result().released, 1); assert.equal(page.result().fits, 0); assert.equal(page.result().pressed, false);
+ });

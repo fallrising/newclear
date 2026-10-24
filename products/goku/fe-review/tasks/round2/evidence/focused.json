@@ -1,0 +1,78 @@
+{
+  "store": [
+    {
+      "phase": "store-red",
+      "sourceSha256": "568e186c810c415cf83c1aa4587775dbb26b6691230ee65f8263df104de6eb2a",
+      "tests": [
+        {
+          "name": "fetch-failure-data-retention-and-recovery",
+          "status": "failed",
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'Unable to load bookmarks. Please try again.'\n"
+        },
+        {
+          "name": "add-failure-data-retention-and-recovery",
+          "status": "failed",
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'Unable to add bookmark. Please try again.'\n"
+        },
+        {
+          "name": "update-failure-data-retention-and-recovery",
+          "status": "failed",
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'Unable to save bookmark. Please try again.'\n"
+        },
+        {
+          "name": "delete-failure-data-retention-and-recovery",
+          "status": "failed",
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'Unable to delete bookmark. Please try again.'\n"
+        },
+        {
+          "name": "successful-empty-is-not-error",
+          "status": "failed",
+          "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- null\n"
+        }
+      ],
+      "rawLogSha256": "1e06762abe02e9502f05cc03e56d1f0afb6981aa655776fb8f0a54b42849f860",
+      "command": "node fe-review/test-store.mjs",
+      "environment": "Node24.18.0 / existing Vite5.4.8 in owned network-none container"
+    },
+    {
+      "phase": "store-green",
+      "sourceSha256": "b473b497e1af243ba21887f60485737748da728a054c6de28a8f56b81a3ca1c7",
+      "tests": [
+        {
+          "name": "fetch-failure-data-retention-and-recovery",
+          "status": "passed"
+        },
+        {
+          "name": "add-failure-data-retention-and-recovery",
+          "status": "passed"
+        },
+        {
+          "name": "update-failure-data-retention-and-recovery",
+          "status": "passed"
+        },
+        {
+          "name": "delete-failure-data-retention-and-recovery",
+          "status": "passed"
+        },
+        {
+          "name": "successful-empty-is-not-error",
+          "status": "passed"
+        }
+      ],
+      "rawLogSha256": "b4c98b408df318894ff9289ce106dab9808797ef2f61e3966a784e7390bc4ea3",
+      "command": "node fe-review/test-store.mjs",
+      "environment": "Node24.18.0 / existing Vite5.4.8 in owned network-none container"
+    }
+  ],
+  "isolation": {
+    "command": "node fe-review/test-isolation.mjs",
+    "passed": 9,
+    "failed": 0
+  },
+  "syntax": {
+    "initialServeWeb": "failed: missing object-closing brace, before any runtime",
+    "correctedServeWeb": "passed",
+    "driver": "passed"
+  },
+  "newDependencies": false
+}

@@ -1,7 +1,7 @@
 {
   "project": "goku",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verified": true,
+  "verifiedNote": "2026-10-24: original R2 M1\u2013M3 isolated entry verified via owned synthetic json-server, three light viewports, real CRUD/outage/Retry and focused URL-edit image proof. See tasks/round2/report.md and result.json for failures, source deltas, unresolved layout/axe findings and pending parent acceptance/CI. Not full R3 or Go integration. Fresh private state and both RUNNER modes are required.",
   "locale": "en-US",
   "colorSchemes": [
     "light"
@@ -12,8 +12,10 @@
       "kind": "spa",
       "cwd": "products/goku/web",
       "install": "npm ci",
-      "start": "npm run dev -- --host 127.0.0.1 --port 5173 --strictPort",
-      "env": {},
+      "start": "node ../fe-review/serve-web.mjs",
+      "env": {
+        "VITE_API_URL": "http://127.0.0.1:3001/api"
+      },
       "baseUrl": "http://127.0.0.1:5173",
       "ready": "/",
       "pages": [

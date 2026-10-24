@@ -1,0 +1,21 @@
+✔ geometry observer requires successive actual frames and reports occlusion without changing DOM (3.435034ms)
+✔ continually moving geometry reaches its bounded failure rather than claiming stable coordinates (3.113356ms)
+✔ review locators use locked React Flow accessible control names (1.547864ms)
+✔ configuration uses actual component override and hashes that exact source (28.424194ms)
+✔ ambiguous, missing, dynamic and out-of-range configuration is refused (3.118454ms)
+✔ source-derived 4px threshold gets a real1px witness and full measured gap (11.911764ms)
+✔ source-derived 8px threshold gets a real1px witness and full measured gap (8.726368ms)
+✔ remaining distance uses witnessed geometry rather than pre-activation boxes (0.950736ms)
+✔ unstable cannot qualify activation and always releases pointer (0.445288ms)
+✔ no-movement cannot qualify activation and always releases pointer (0.227868ms)
+✔ document cannot qualify activation and always releases pointer (0.690955ms)
+✔ viewport cannot qualify activation and always releases pointer (0.579678ms)
+✔ shape cannot qualify activation and always releases pointer (0.335248ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 405.991023

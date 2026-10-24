@@ -1,0 +1,13 @@
+Path-redacted derivative; only canonical worktree path replaced. Raw SHA256 a9f35ba300f90127e96cc6402e6b51e98604ae6affd1179ea0dc2b0a5b82e726
+✔ geometry observer requires successive actual frames and reports occlusion without changing DOM (3.478246ms)
+✔ continually moving geometry reaches its bounded failure rather than claiming stable coordinates (4.499661ms)
+✔ review locators use the actual locked React Flow accessible control names (1.090926ms)
+✔ node separation derives the real mouse delta from observed overlap and keeps a visible gap (0.387948ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 120.844293

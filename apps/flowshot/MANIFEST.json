@@ -217,8 +217,8 @@
     },
     {
       "path": "docs/tasks/BOARD.md",
-      "sha256": "94198baad6207e6bdedb3e9fd4f14243036eecf6b40431204a512aa0a5918000",
-      "bytes": 5800
+      "sha256": "ee690ed67d27a5213b3e76c592f22972aafa134f768c5ce09868e4950ededb02",
+      "bytes": 6081
     },
     {
       "path": "docs/tasks/N00/00-implementation-plan.md",

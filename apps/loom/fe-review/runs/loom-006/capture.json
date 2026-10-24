@@ -1,0 +1,1845 @@
+{
+  "schema": 1,
+  "unit": "loom",
+  "synthetic": true,
+  "status": "passed",
+  "stage": "HISTORY_memory",
+  "started": "2026-10-24T16:52:50.567Z",
+  "sourceHashes": {
+    "fe-review/preload.mjs": "fdaa370f4ec8aa8180eea17482f94e5fa665ee2c17d878fe7a58a331eab27c1a",
+    "fe-review/preload.node.mjs": "df919610272d9da0a1c894da3c96aadf68d2e4669a06aff2e654138c3a228015",
+    "fe-review/run-review.mjs": "efaf73dbbbb2b755fa7ba869f57ab4dc55185beb60bf3a7873643fb66340afa9",
+    "fe-review/ui-steps.mjs": "6462d5b6daa4ac5c7ecd7c44448de4e9c8be488ca0e7cc425690c756ed588dd1",
+    "fe-review/drag-configuration.mjs": "f02bd225ee611813b23e853cdf03bd4166024206c9fddc327c7422aa39e2bfd0",
+    "fe-review/geometry.mjs": "bb39c8231278adc7047a92d9881c36a74ef9e8ea384bfb033d9ae46bd2eae12b",
+    "fe-review/vite-review-config.mjs": "e509aa929a58701c425b6fe0e9aac39a26585ad5ea99b9c6c09430b6d2d18d48",
+    "vite.config.ts": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+    "../flowshot/fe-review/browser-runtime.mjs": "23adc88ebc6466a7f5616b43149ebab3d059fd7a47394c00a277047988c4ca3c",
+    "../flowshot/fe-review/runtime-guards.mjs": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+    "src/ipc.ts": "3c56b0c5b60309e50758c90bcfde277a54787fc4a4049647dd0b0bc617aa1e18",
+    "src/App.tsx": "dc2c8c8885fde55955b0988755c90aae385222ce42f6efed420f0b53be47fc26",
+    "src/main.tsx": "7cf38f34838d009ef718093a1686b55bedd34b732d4a9bd1a07e4a37037b095c",
+    "src/Terminal.tsx": "5723ca6004f1af87d345f4a54f70436a0bf15a3e9e48628ad413f49f84da0513",
+    "src/surfaces/canvas/CanvasSurface.tsx": "54ef8c2d3820ae74da624cee9ed1fb11936813f739625f3c3c43963538392378",
+    "src/surfaces/canvas/persistence.ts": "f180099aff2b590d917d7c79f3965fac59c5e5d065dd8f6fc55a3ee98ae65549",
+    "src/surfaces/canvas/history.ts": "7c2ef08e69bd6cac87e17c4a35d4577e2b770623656962f08b31fff1c83e0acf",
+    "src/surfaces/canvas/window_close_ipc.ts": "1429cc472105b6811cb27c76215896324e9a826538fb958ae016d066b17d397f",
+    "src/surfaces/document/DocumentSurface.tsx": "06dcde9765cb0ffbf43f8a57054b91bab5e1479d2c9737b232ea22586abc430c",
+    "src/surfaces/document/doc_ipc.ts": "bd19031e6655a31343b86e23019ea24fddc453dc3990acf44611851c3f23219b",
+    "src/surfaces/document/ai_ipc.ts": "a73fae88a9ec2149a1f765ebdb55c6c2db70e670cb0f81d4a568bc3e316299a6",
+    "package-lock.json": "79e87f1819728b06bb45091404661964e5560486c5d094db597b54a516f3aad6"
+  },
+  "tools": {
+    "node": "v24.18.0",
+    "playwright": "1.63.0",
+    "browser": "153.0.8010.12"
+  },
+  "captures": [
+    {
+      "id": "edge-run-pin",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "aria-input-field-name",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 2
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 8
+          }
+        ]
+      },
+      "screenshot": "screenshots/edge-run-pin.png",
+      "sha256": "4a80df93790cfc53303451289c5ef3f537fedf05dc68161d302ec2d1f679d3cf",
+      "bytes": 69877,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 14,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 7,
+          "session_history": 2,
+          "home_dir": 1,
+          "pty_spawn": 1,
+          "pty_session_meta": 1,
+          "pty_detach": 1,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 1,
+          "doc_open": 1,
+          "doc_mark_clean": 1,
+          "canvas_write": 1,
+          "pty_write_stdin": 1,
+          "doc_mark_dirty": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 7,
+        "callbacks": 7,
+        "listenerIdsDistinct": true,
+        "subscriptions": 1,
+        "sessions": 1,
+        "openDocuments": 1,
+        "dirtyDocuments": 1,
+        "pending": 0,
+        "detached": 1,
+        "closedDocuments": 1,
+        "closeApproved": 0,
+        "exactRunPayloads": 1
+      }
+    },
+    {
+      "id": "dirty-cancel",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "aria-input-field-name",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 8
+          }
+        ]
+      },
+      "screenshot": "screenshots/dirty-cancel.png",
+      "sha256": "977a8ae21d9ea3fa86bd508d7209a72686381f48f8a69b583bd5fd5c1155db2a",
+      "bytes": 70454,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 14,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 7,
+          "session_history": 2,
+          "home_dir": 1,
+          "pty_spawn": 1,
+          "pty_session_meta": 1,
+          "pty_detach": 1,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 1,
+          "doc_open": 1,
+          "doc_mark_clean": 1,
+          "canvas_write": 2,
+          "pty_write_stdin": 1,
+          "doc_mark_dirty": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 7,
+        "callbacks": 7,
+        "listenerIdsDistinct": true,
+        "subscriptions": 1,
+        "sessions": 1,
+        "openDocuments": 1,
+        "dirtyDocuments": 1,
+        "pending": 0,
+        "detached": 1,
+        "closedDocuments": 1,
+        "closeApproved": 0,
+        "exactRunPayloads": 1
+      }
+    },
+    {
+      "id": "close-save-error",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "aria-input-field-name",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 8
+          }
+        ]
+      },
+      "screenshot": "screenshots/close-save-error.png",
+      "sha256": "a00440d156c66ef9d24166ae7f0830f6c7faa06b153768c360d7b0d89dd080c0",
+      "bytes": 80289,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 14,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 7,
+          "session_history": 2,
+          "home_dir": 1,
+          "pty_spawn": 1,
+          "pty_session_meta": 1,
+          "pty_detach": 1,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 1,
+          "doc_open": 1,
+          "doc_mark_clean": 1,
+          "canvas_write": 2,
+          "pty_write_stdin": 1,
+          "doc_mark_dirty": 1,
+          "doc_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 7,
+        "callbacks": 7,
+        "listenerIdsDistinct": true,
+        "subscriptions": 1,
+        "sessions": 1,
+        "openDocuments": 1,
+        "dirtyDocuments": 1,
+        "pending": 0,
+        "detached": 1,
+        "closedDocuments": 1,
+        "closeApproved": 0,
+        "exactRunPayloads": 1
+      }
+    },
+    {
+      "id": "close-save-conflict",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "aria-input-field-name",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 8
+          }
+        ]
+      },
+      "screenshot": "screenshots/close-save-conflict.png",
+      "sha256": "db45219217856b492710707288ac7975165afb1586e4d3a531db07e38fd67b3d",
+      "bytes": 84333,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 14,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 7,
+          "session_history": 2,
+          "home_dir": 1,
+          "pty_spawn": 1,
+          "pty_session_meta": 1,
+          "pty_detach": 1,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 1,
+          "doc_open": 1,
+          "doc_mark_clean": 1,
+          "canvas_write": 2,
+          "pty_write_stdin": 1,
+          "doc_mark_dirty": 1,
+          "doc_write": 2
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 7,
+        "callbacks": 7,
+        "listenerIdsDistinct": true,
+        "subscriptions": 1,
+        "sessions": 1,
+        "openDocuments": 1,
+        "dirtyDocuments": 1,
+        "pending": 0,
+        "detached": 1,
+        "closedDocuments": 1,
+        "closeApproved": 0,
+        "exactRunPayloads": 1
+      }
+    },
+    {
+      "id": "sidecar-reloaded",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "aria-input-field-name",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 22
+          }
+        ]
+      },
+      "screenshot": "screenshots/sidecar-reloaded.png",
+      "sha256": "195d3c376edfca11f0c5dd96b2e7463e7fac7960aa6921b6283c4fae0183f262",
+      "bytes": 68163,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 12,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 6,
+          "session_history": 1,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 1,
+          "doc_open": 1,
+          "doc_mark_clean": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 6,
+        "callbacks": 6,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 1,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 1,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "history-loading",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      },
+      "screenshot": "screenshots/history-loading.png",
+      "sha256": "67453949ec2f10e91f023f4ac9c479dd55e088818aa3ecafc2bdd4db9298bee5",
+      "bytes": 35039,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 1,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "history-error",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      },
+      "screenshot": "screenshots/history-error.png",
+      "sha256": "d2fb046cee7af3719f990164940b3466739cb4d6410d24c4cc5194333949b73a",
+      "bytes": 40787,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "history-empty",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      },
+      "screenshot": "screenshots/history-empty.png",
+      "sha256": "90dd7c2591f0b9579aa63c50a2df09ccec384912a7b656968e9ef4bf5b9f7099",
+      "bytes": 37640,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "history-memory",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      },
+      "screenshot": "screenshots/history-memory.png",
+      "sha256": "1f421e15c09ec08e71ae0a22b4850205630cb6535849405dfcf22802bca47ac3",
+      "bytes": 51242,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 1,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "edge-run-pin",
+      "passed": true,
+      "beforeRun": 0,
+      "exactPayloadCount": 1,
+      "edgeCount": 1
+    },
+    {
+      "id": "close-cancel-keeps-node-edges",
+      "passed": true,
+      "keyboard": {
+        "tabs": 0,
+        "active": true,
+        "focusVisible": false,
+        "outlineStyle": "none",
+        "outlineWidth": "3px"
+      }
+    },
+    {
+      "id": "explicit-sidecar-export",
+      "passed": true,
+      "nodeIds": [
+        "d-notes.md-1792860772541",
+        "t-synthetic-session-1"
+      ],
+      "edgeIds": [
+        "e-d-notes.md-1792860772541-t-synthetic-session-1-triggers-1792860773473"
+      ],
+      "terminalPersistedAsTombstone": true
+    },
+    {
+      "id": "sidecar-fixture-disposal",
+      "passed": true,
+      "beforeForcedDispose": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 12,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 6,
+          "session_history": 1,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 1,
+          "doc_open": 1,
+          "doc_mark_clean": 1,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 6,
+        "callbacks": 6,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 1,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 1,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      },
+      "afterForcedDispose": {
+        "synthetic": true,
+        "disposed": true,
+        "counts": {
+          "plugin:event|listen": 12,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 6,
+          "session_history": 1,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 1,
+          "doc_open": 1,
+          "doc_mark_clean": 1,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 0,
+        "callbacks": 0,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 1,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "actual-node-disposal",
+      "passed": true,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 14,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 11,
+          "session_history": 3,
+          "home_dir": 1,
+          "pty_spawn": 1,
+          "pty_session_meta": 2,
+          "pty_detach": 2,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 2,
+          "doc_open": 2,
+          "doc_mark_clean": 2,
+          "canvas_write": 2,
+          "pty_write_stdin": 1,
+          "doc_mark_dirty": 2,
+          "doc_write": 3,
+          "pty_kill": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 1,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 2,
+        "closedDocuments": 2,
+        "closeApproved": 0,
+        "exactRunPayloads": 1
+      }
+    },
+    {
+      "id": "focused-lifecycle-fixture-disposal",
+      "passed": true,
+      "beforeForcedDispose": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 14,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 11,
+          "session_history": 3,
+          "home_dir": 1,
+          "pty_spawn": 1,
+          "pty_session_meta": 2,
+          "pty_detach": 2,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 2,
+          "doc_open": 2,
+          "doc_mark_clean": 2,
+          "canvas_write": 2,
+          "pty_write_stdin": 1,
+          "doc_mark_dirty": 2,
+          "doc_write": 3,
+          "pty_kill": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 1,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 2,
+        "closedDocuments": 2,
+        "closeApproved": 0,
+        "exactRunPayloads": 1
+      },
+      "afterForcedDispose": {
+        "synthetic": true,
+        "disposed": true,
+        "counts": {
+          "plugin:event|listen": 14,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 11,
+          "session_history": 3,
+          "home_dir": 1,
+          "pty_spawn": 1,
+          "pty_session_meta": 2,
+          "pty_detach": 2,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "ai_status": 2,
+          "doc_read": 2,
+          "doc_close": 2,
+          "doc_open": 2,
+          "doc_mark_clean": 2,
+          "canvas_write": 2,
+          "pty_write_stdin": 1,
+          "doc_mark_dirty": 2,
+          "doc_write": 3,
+          "pty_kill": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 0,
+        "callbacks": 0,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 1,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 2,
+        "closedDocuments": 2,
+        "closeApproved": 0,
+        "exactRunPayloads": 1
+      }
+    },
+    {
+      "id": "history-loading-fixture-disposal",
+      "passed": true,
+      "beforeForcedDispose": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 2,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      },
+      "afterForcedDispose": {
+        "synthetic": true,
+        "disposed": true,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 2,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 0,
+        "callbacks": 0,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "history-error-fixture-disposal",
+      "passed": true,
+      "beforeForcedDispose": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      },
+      "afterForcedDispose": {
+        "synthetic": true,
+        "disposed": true,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 0,
+        "callbacks": 0,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "history-empty-fixture-disposal",
+      "passed": true,
+      "beforeForcedDispose": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      },
+      "afterForcedDispose": {
+        "synthetic": true,
+        "disposed": true,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1,
+          "canvas_write": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 0,
+        "callbacks": 0,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "explicit-history-restart-forget",
+      "passed": true,
+      "counts": {
+        "plugin:event|listen": 8,
+        "canvas_read": 2,
+        "vault_root": 2,
+        "plugin:event|unlisten": 4,
+        "session_history": 5,
+        "canvas_write": 1,
+        "session_restart": 1,
+        "pty_session_meta": 1,
+        "pty_detach": 1,
+        "pty_subscribe": 1,
+        "pty_resize": 4,
+        "session_forget": 1
+      }
+    },
+    {
+      "id": "history-memory-fixture-disposal",
+      "passed": true,
+      "beforeForcedDispose": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 8,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 4,
+          "session_history": 5,
+          "canvas_write": 1,
+          "session_restart": 1,
+          "pty_session_meta": 1,
+          "pty_detach": 1,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "session_forget": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 4,
+        "callbacks": 4,
+        "listenerIdsDistinct": true,
+        "subscriptions": 1,
+        "sessions": 1,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 1,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      },
+      "afterForcedDispose": {
+        "synthetic": true,
+        "disposed": true,
+        "counts": {
+          "plugin:event|listen": 8,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 4,
+          "session_history": 5,
+          "canvas_write": 1,
+          "session_restart": 1,
+          "pty_session_meta": 1,
+          "pty_detach": 1,
+          "pty_subscribe": 1,
+          "pty_resize": 4,
+          "session_forget": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 0,
+        "callbacks": 0,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 1,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 1,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    },
+    {
+      "id": "approved-synthetic-ui-scenarios",
+      "passed": true
+    }
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "serverClosed": true,
+    "listenerAbsent": true
+  },
+  "limits": [
+    "Web simulation only",
+    "Native/real vault/PTY/AI/Mac not verified",
+    "Full Round3 not accepted"
+  ],
+  "viteOriginalConfigSha256": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+  "matrixPrerequisite": {
+    "run": "loom-002",
+    "sha256": "09906953c7b8ee8a9c24859bcd10fcfffecf9f2a7d2f59d746c7dc07ca1c9058",
+    "uniqueCaptures": 12,
+    "rerun": false,
+    "healthAndLoadedIdentity": true
+  },
+  "networkPrerequisite": {
+    "run": "loom-001",
+    "sha256": "f542c65fbb337db0b5feb0eed08adf1de01f1bea29b38d5e24aca15eb3b59aa2",
+    "passed": true,
+    "rerun": false
+  },
+  "nodeSeparation": {
+    "before": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 55,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 60,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 55,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 60,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    },
+    "configuration": {
+      "threshold": 4,
+      "sourceSha256": "54ef8c2d3820ae74da624cee9ed1fb11936813f739625f3c3c43963538392378"
+    },
+    "screenDelta": 688,
+    "activated": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 55,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 60,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 55,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 60,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    },
+    "witnessed": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": false,
+          "hitTag": "DIV",
+          "hitHandle": null,
+          "hitNode": "t-synthetic-session-1"
+        },
+        "target": {
+          "box": {
+            "x": 56,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 61,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": false,
+          "hitTag": "DIV",
+          "hitHandle": null,
+          "hitNode": "t-synthetic-session-1"
+        },
+        "target": {
+          "box": {
+            "x": 56,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 61,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    },
+    "activation": {
+      "pixels": 5,
+      "witnessPixels": 1,
+      "witnessDelta": 1,
+      "remainingDelta": 687
+    },
+    "after": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(-80.9551px, 104.099px) scale(1.04968);",
+        "source": {
+          "box": {
+            "x": 648.5721435546875,
+            "y": 507.2388000488281,
+            "width": 10.49676513671875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 698.9567260742188,
+            "y": 391.7740478515625,
+            "width": 10.496826171875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 66.00000762939453,
+          "y": 292.05450439453125,
+          "width": 587.8204956054688,
+          "height": 440.86541748046875
+        },
+        "terminal": {
+          "x": 704.2051391601562,
+          "y": 208.0801239013672,
+          "width": 671.7949829101562,
+          "height": 377.88458251953125
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(-80.9551px, 104.099px) scale(1.04968);",
+        "source": {
+          "box": {
+            "x": 648.5721435546875,
+            "y": 507.2388000488281,
+            "width": 10.49676513671875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 698.9567260742188,
+            "y": 391.7740478515625,
+            "width": 10.496826171875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 66.00000762939453,
+          "y": 292.05450439453125,
+          "width": 587.8204956054688,
+          "height": 440.86541748046875
+        },
+        "terminal": {
+          "x": 704.2051391601562,
+          "y": 208.0801239013672,
+          "width": 671.7949829101562,
+          "height": 377.88458251953125
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    }
+  },
+  "edgeGeometry": {
+    "before": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(-80.9551px, 104.099px) scale(1.04968);",
+        "source": {
+          "box": {
+            "x": 648.5721435546875,
+            "y": 507.2388000488281,
+            "width": 10.49676513671875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 698.9567260742188,
+            "y": 391.7740478515625,
+            "width": 10.496826171875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 66.00000762939453,
+          "y": 292.05450439453125,
+          "width": 587.8204956054688,
+          "height": 440.86541748046875
+        },
+        "terminal": {
+          "x": 704.2051391601562,
+          "y": 208.0801239013672,
+          "width": 671.7949829101562,
+          "height": 377.88458251953125
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(-80.9551px, 104.099px) scale(1.04968);",
+        "source": {
+          "box": {
+            "x": 648.5721435546875,
+            "y": 507.2388000488281,
+            "width": 10.49676513671875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 698.9567260742188,
+            "y": 391.7740478515625,
+            "width": 10.496826171875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 66.00000762939453,
+          "y": 292.05450439453125,
+          "width": 587.8204956054688,
+          "height": 440.86541748046875
+        },
+        "terminal": {
+          "x": 704.2051391601562,
+          "y": 208.0801239013672,
+          "width": 671.7949829101562,
+          "height": 377.88458251953125
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    },
+    "afterDrag": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(-80.9551px, 104.099px) scale(1.04968);",
+        "source": {
+          "box": {
+            "x": 648.5721435546875,
+            "y": 507.2388000488281,
+            "width": 10.49676513671875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 698.9567260742188,
+            "y": 391.7740478515625,
+            "width": 10.496826171875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 66.00000762939453,
+          "y": 292.05450439453125,
+          "width": 587.8204956054688,
+          "height": 440.86541748046875
+        },
+        "terminal": {
+          "x": 704.2051391601562,
+          "y": 208.0801239013672,
+          "width": 671.7949829101562,
+          "height": 377.88458251953125
+        },
+        "domEdges": 1,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(-80.9551px, 104.099px) scale(1.04968);",
+        "source": {
+          "box": {
+            "x": 648.5721435546875,
+            "y": 507.2388000488281,
+            "width": 10.49676513671875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792860772541"
+        },
+        "target": {
+          "box": {
+            "x": 698.9567260742188,
+            "y": 391.7740478515625,
+            "width": 10.496826171875,
+            "height": 10.496795654296875
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 66.00000762939453,
+          "y": 292.05450439453125,
+          "width": 587.8204956054688,
+          "height": 440.86541748046875
+        },
+        "terminal": {
+          "x": 704.2051391601562,
+          "y": 208.0801239013672,
+          "width": 671.7949829101562,
+          "height": 377.88458251953125
+        },
+        "domEdges": 1,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    },
+    "persisted": {
+      "domEdges": 1,
+      "persistedEdges": 1,
+      "canvasWrites": 1
+    }
+  },
+  "ended": "2026-10-24T16:53:02.467Z"
+}

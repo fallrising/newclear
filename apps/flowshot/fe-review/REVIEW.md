@@ -1,58 +1,18 @@
-# FE Review — flowshot — REVIEW
+# Flowshot FE review — current R2 evidence
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 review-only preload；D2 本 FE 切片做現有 shell 的 Web 截圖，原生／Mac 產品 gate 不變。 第 2／3 輪仍未由本次文件回寫執行。
-> 活文件：記目前狀態，每次變更走 PR；依 [PROTOCOL](../../../docs/fe-review/PROTOCOL.md)。
+Approved [DESIGN](DESIGN.md) M1–M2 is implemented as review-only preload and owned browser driver. [flowshot-001](runs/flowshot-001/capture.json) actually passed 19 state/viewport/preference captures, exact loaded `/` identity, synthetic metadata/alert checks, external HTTP/WS refusal and owned browser/server/listener cleanup. Root controls namespace and container removal. Pair native/CI/publication closeout remains in [report](tasks/round2/report.md); targets promotion must match those actual gates.
 
-## 目前輪次
+The source uses the existing `__FLOWSHOT_BUILD_INFO_PROMISE__` before eager import; pending resolves/rejects only after loading is observed. No production adapter, renderer/workspace wiring, Rust/generated contract or launch timing changed. Real launch-module source and actual locked SDK paths are covered by focused review tests. Missing/late/colliding fixture or unknown native use fails closed.
 
-- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
-- 第 2 輪修改、fixture/driver 實作與第 3 輪 capture 均未開始；`targets.json` 仍 `verified: false`。
+## Retained findings and limits
 
-## 修改權限
+- All 19 axe scans report color-contrast incomplete: loading/error 5 nodes each, ready and long-ready 10 each. Zero violations does not close these checks or establish full Round3 accessibility.
+- No measured horizontal overflow in the 19 captures. Manual spot review inspected long-ready mobile and error tablet; it is not a claim every pixel/state received a full Round3 audit. Long metadata is ellipsized as designed and remains complete in DOM.
+- Both preferences render the existing fixed palette; no theme feature was added.
+- Native window/WebView IPC, filesystem/DB persistence, reader/annotation journeys and target Mac <1500ms remain outside this Web evidence. SUCCESS stays mainline incomplete/usable none; original native/Mac gaps remain.
 
-Flowshot 已由 owner 於 2026-10-23 恢復主線開發，見 [README](../README.md)。本 paired FE 設計仍只依 #156 做受限 frontend review，不加新功能、不做 major 升級，也不介入其他主線任務。
+## Historical evidence
 
-## 矛盾點
+Initial fixture tests intentionally failed before implementation, then passed. Root's first native npm test encountered review node:test/Vitest discovery collision despite original tests passing; review files were renamed *.node.mjs without changing product tests/config. Runtime was already green before that filename-only manifest update, whose exact hash reconstruction is in [artifact audit](tasks/round2/evidence/flowshot-artifact-audit.json). Do not overwrite either failed logs or the runtime manifest. Original first-round design approvals are retained in DESIGN and central acceptance, not inferred from runtime success.
 
-### C1 Browser 缺 native IPC，且 generic capture 沒有 preload hook
-
-原始碼仍需 Tauri invoke；browser dev server 不等於已解耦。[capture.mjs:114](../../../docs/fe-review/capture.mjs#L114) 建立自己的 context/page，未載入 `addInitScript` fixture。DESIGN 的 review-only driver 是未來交付，不是已存在的啟動入口。
-
-### C2 產品旅程描述超前主畫面
-
-[App.tsx:55](../src/App.tsx#L55) 仍為 build-info shell，[render.tsx:15](../src/render.tsx#L15) 只 mount App。workspace/reader 模組已部分存在，但不是此入口的完整閱讀／annotation 產品旅程。PROMPT 改為 foundation 三狀態；保留產品主線缺口，不以 mock 新造 annotation UI。
-
-### C3 Web capture 與原生驗收不同
-
-Linux native/Xvfb 已有其他驗證，不應再寫成 headless 必然無法擷取。browser-only 截圖仍無法證明真 IPC、資料持久、原生視窗或 Mac 時限；D2 只決定本 FE 切片是否要求 native screenshot，不取消產品 gate。
-
-## 已決定
-
-- #156 允許 paired、design-only 交付；本輪不啟動 UI、不改 product code/tests/dependencies/CI。
-- D1／D2 已獲 owner 明確確認；依據是決策紀錄，不是 draft 或靜態檢查。
-
-## 本次確認的決定
-
-### D1 IPC 解耦方式
-
-- 選項：(a) production frontend IPC adapter；(b) review-only `addInitScript` preload。
-- 建議／本 DESIGN 假設：(b) 先行。優先用現有 build-info window promise seam，不改生成 contracts。
-- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
-
-### D2 是否要求原生視窗截圖
-
-- 選項：(a) 本 FE 切片加受控 native screenshot；(b) 本輪只 Web 層並列限制。
-- 建議／本 DESIGN 假設：(b)。原有 Mac/原生產品驗收不因此豁免。
-- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
-
-## 進入第 2 輪的條件
-
-- Owner 明確確認每個 D 假設並完成 AC-15；不得單憑任意 agent merge 推定 signoff。
-- [DESIGN](DESIGN.md) 範圍已確認；依其 M 項完成 fixture/driver、隔離先備與測試後，才可真正啟動 capture 並更新 targets。
-- PROMPT 的 proposed/unrun 線索需回填真實 CLI、環境、source SHA 和結果，不能先改 verified true。
-
-## 相關 PR
-
-- fallrising/newclear#141：建立工作包與三輪節奏。
-- fallrising/newclear#144：既有決定與設計文件入口。
-- 本次 paired 設計：Refs [#156](https://github.com/fallrising/newclear/issues/156)；設計 PR [#555](https://github.com/fallrising/newclear/pull/555) 已合併，確認依據見本頁決策紀錄。
+Post-runtime source note: after the filename rename, the paired runtime gained a `unit === 'loom'`-only Vite5 hash-pinned config loader. Flowshot options/behavior are unchanged. [Exact delta](tasks/round2/evidence/post-runtime-loom-loader-delta.json) and the artifact audit reconstruct the original runtime hash; green Flowshot browser evidence was not rerun.

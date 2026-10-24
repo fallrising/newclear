@@ -53,3 +53,9 @@ Direct owner continuation instruction; M0 development evidence accepted, PR #512
 M1 current blocker: N03 is blocked by the unchanged 1MiB/<300ms gate (actual WebKit 7975/9139ms on the measured optimized candidate). Functional review corrections passed root frontend checks; T012 profiles the parser without changing the fixture/oracle. N02 targeted repairs passed independent review and integrated Linux checks; the real picker/tree/open/asset WebView journey passed at179ms for500 rendered rows from5000 files. Product composition and Mac-specific checks remain. N04 remains gated; no three-day KB trial or M1 merge is claimed.
 
 Owner-authorized partial-code checkpoint: publish and merge the current N02/N03 implementation with passing regression checks. This checkpoint does not complete R01/R02, unlock N04, revise the300ms contract or satisfy M1. The original performance failure and missing real-KB/platform evidence remain explicit.
+
+## T-0380
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FLOWSHOT-FE2-1 | Paired synthetic runtime verified; PR598 required CI/merge pending | R2-AC-11/E | in_progress | 2026-10-24T11:22:03Z | — | 2026-10-24T17:03:24Z |

@@ -1,0 +1,45 @@
+✔ review locators use the actual locked React Flow accessible control names (1.170545ms)
+✔ node separation derives the real mouse delta from observed overlap and keeps a visible gap (0.422858ms)
+✖ threshold-consuming drag preserves the measured gap after activation instead of losing its first increment (0.794247ms)
+✖ remaining displacement is recomputed from post-activation geometry (0.216278ms)
+✔ unstable activation geometry fails and releases the pointer without performing a full drag (0.725307ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 3
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 356.71202
+
+✖ failing tests:
+
+test at apps/loom/fe-review/ui-steps.node.mjs:73:1
+✖ threshold-consuming drag preserves the measured gap after activation instead of losing its first increment (0.794247ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_NODE_SEPARATION
+      at separateNodes (file://<worktree>/apps/loom/fe-review/ui-steps.mjs:91:10)
+      at async TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/ui-steps.node.mjs:75:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at apps/loom/fe-review/ui-steps.node.mjs:80:1
+✖ remaining displacement is recomputed from post-activation geometry (0.216278ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_NODE_SEPARATION
+      at separateNodes (file://<worktree>/apps/loom/fe-review/ui-steps.mjs:91:10)
+      at async TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/ui-steps.node.mjs:82:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

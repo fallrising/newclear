@@ -1,0 +1,50 @@
+{
+  "status": "runtime-verified-awaiting-delivery",
+  "scope": "T-0380 R2-AC-11/E review-only synthetic Web",
+  "unit": "flowshot",
+  "runtime": {
+    "acceptedCaptureCount": 19,
+    "runs": [
+      "flowshot-001"
+    ],
+    "allAcceptedCaptureHealthAndOverflowPassed": true,
+    "allRecordedPngHashesVerified": true,
+    "ownedCleanupPassed": true
+  },
+  "provenance": "evidence/final-docs/audit.json",
+  "nativeChecks": [
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "elapsedSeconds": 3.878
+    },
+    {
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.434
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.207
+    }
+  ],
+  "fullRound3Accepted": false,
+  "productMainlineAccepted": false,
+  "delivery": {
+    "pr": 598,
+    "requiredCi": "pending",
+    "independentFinalReview": "pending",
+    "merged": false,
+    "remoteReadback": "pending"
+  },
+  "historicalPreloadCheckpoint": "evidence/final-docs/preload-result.before.json",
+  "aggregateUsage": null
+}

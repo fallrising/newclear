@@ -66,3 +66,7 @@ scripts/document-ingestion-doctor.sh --json
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須將本機結果與完整 runner/provider 運作驗收分開，補齊原規格外部 gate 並核對目標版本；尚不能以單份 PDF 成果宣稱全項目可用。
+
+## T-0383 Grok review-boundary documentation
+
+Goal/scope: clarify the existing AC-04 external gate and actual Grok review invocation; no runtime changes or new capability claim. The artifact is supplied review input, not a filesystem boundary. Verify the runbook against `ClaudeGrokReviewAdapter.build_argv` and `execute_argv`, official Grok docs and independently reviewed source. Run project/index/link checks; no new model call or test asserting an unchanged implementation. See [task board](docs/tasks/BOARD.md). AC-04 remains pending.

@@ -63,6 +63,29 @@ M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止
 
 ## Issue548: bounded failure diagnostics (maintenance)
 
+### M5 kernel owner continuation (Phase A, T081)
+
+Required CI40109462879 failed M5 at durable_wait/observer/child_missing before
+any frozen target or SIGKILL. Exact vanished generation/role remains unknown.
+The proposed M5-only owner contract is frozen in
+[SDD-M5](docs/SDD-M5.md#m5-kernel-owner-amendment-t081-phase-a): explicit fresh
+kernel owner, incomplete liveness versus strict target admission, unchanged
+per-generation actual root-first SIGKILL/root-9 and GET-only original readback,
+additional ECHILD restart barrier, final normal root0 and fresh deletion seal.
+M4/generic owners and historical evidence remain unchanged.
+
+AC-M5K1: every subprocess is registered before source identity/preflight and
+sole-waiter closed launches plus kernel ECHILD govern restart/final cleanup.
+AC-M5K2: incomplete samples grant no authority; strict freeze and every original
+M5 crash/readback guard remain mandatory with immutable single-use capabilities.
+AC-M5K3: strict additive typed evidence separates sampled, crash, closure,
+containment and cleanup facts and fails safely on malformed output.
+AC-M5K4: synchronized causal/adversarial RED/GREEN, independent design/source
+review, exact source freeze/full offline and original-artifact M5 qualification.
+All four are not_run: Phase A is a proposed reviewable design only. Independent
+review and committed contract must precede explicit root implementation release;
+runtime requires a separate release. No passing M4 result qualifies this M5 fix.
+
 ### M4 kernel closure continuation (contract baseline, T077)
 
 This proposed implementation replaces M4's sampled descendant ownership with a

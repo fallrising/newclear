@@ -15,3 +15,17 @@ Scope and acceptance: [SUCCESS](../../SUCCESS.md).
 Implementation, independent review,332 offline tests and one original M4
 qualification have passed. Exact-head hosted CI and normal merge remain pending.
 Historical exact attribution and whole-mainline acceptance remain incomplete.
+
+## T-0081 — Issue #548 M5 kernel closure
+
+PR613 required checkpoint-crash failed before any SIGKILL at durable_wait.
+Contract: [SDD-M5](../SDD-M5.md); acceptance: [SUCCESS](../../SUCCESS.md).
+Design/review and committed contract precede implementation; M4 accepted evidence
+remains separate. Historical attribution and whole-mainline acceptance stay open.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0081.1 | Design and independently review M5 lifecycle authority | M5-01, M5-02 | in_progress | 2026-10-24T16:15:57Z | — | 2026-10-24T16:15:57Z |
+| T-0081.2 | Preserve strict crash stimulus and GET-only original readback | M5-02, M5-03 | todo | — | — | 2026-10-24T16:15:57Z |
+| T-0081.3 | Prove normal final closure and exact cleanup | M5-04 | todo | — | — | 2026-10-24T16:15:57Z |
+| T-0081.4 | Verify bounded evidence, original runtime and required CI | M5-05 | todo | — | — | 2026-10-24T16:15:57Z |

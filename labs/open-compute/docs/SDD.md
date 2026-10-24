@@ -3,6 +3,17 @@
 Status: M1 implemented; executed results and their limits are recorded in
 [STATUS.md](STATUS.md). Created: 2026-10-07. Scope: `labs/open-compute`.
 
+## Proposed M5 kernel owner contract (T081)
+
+[SDD-M5's amendment](SDD-M5.md#m5-kernel-owner-amendment-t081-phase-a)
+defines an M5-only fresh same-PID kernel owner, exact crash/restart/cleanup APIs,
+strict additive evidence and immutable capabilities. Incomplete pre-checkpoint
+liveness never grants crash authority; strict target freeze, every generation's
+actual root-first SIGKILL/root-9, full-history nonlive and GET-only original
+readback remain mandatory. Actual ECHILD adds a restart barrier. M4 and generic
+Process/command remain frozen. Design review and root contract commit precede
+any implementation release; this proposal claims no runtime or historical fix.
+
 ## Proposed M4 kernel closure contract (T077)
 
 [SDD-M4's amendment](SDD-M4.md#m4-kernel-closure-amendment-t077) defines a separate

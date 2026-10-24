@@ -1,11 +1,11 @@
 # FE Review Prompt — goku
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D2 改用無敏感值環境範例並移出追蹤；D3 不做 major 升級。 第 2／3 輪仍未由本次文件回寫執行。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D2 改用無敏感值環境範例並移出追蹤；D3 不做 major 升級。 第2輪 M1–M3 已實作且必要本機實測已結清；第3輪未啟動。
 你是負責 **goku** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)。
+> 狀態：**第2輪 M1–M3 local candidate; independent acceptance / current CI pending**。原生 lint/build、store 回歸與分段 synthetic runtime 已通過；原失敗、版本差異與最後補證見 [報告](tasks/round2/report.md)。入口改用 [RUNNER.md](RUNNER.md) 的 owned harness，不能使用來源樹 mock DB。
 
 ## 專案概況
 
@@ -14,10 +14,10 @@
 - **技術棧：** React 18、Vite 5、Tailwind 3、Zustand；Tiptap 是未接線的依賴。後端 Go（API、CLI、MQTT consumer）。
 - **UI 入口：** `products/goku/web/`（API base 由 `VITE_API_URL` 決定，預設 `http://localhost:3001/api`；`npm run mock` 以 json-server 在 3001 提供假資料）
 
-## 啟動線索（未驗證）
+## 隔離啟動介面
 
-- 第 2 輪候選程序見 [DESIGN.md](DESIGN.md)：mock 使用 task 目錄的一次性合成資料、明確 loopback 與 API URL。現有 `npm run mock` 會寫來源樹且沒有明確 loopback，不直接作為隔離驗收程序。
-- `web/.env` 只有 `VITE_API_URL`（與程式預設值相同）；第 2 輪 M1 後改為 `web/.env.example`。
+- 第2輪原始介面見 [DESIGN.md](DESIGN.md)：mock 使用 task 目錄的一次性合成資料、明確 loopback 與 API URL。現有 `npm run mock` 會寫來源樹且沒有明確 loopback，不直接作為隔離驗收程序。
+- `web/.env` 已從工作樹刪除；`web/.env.example` 保留同值 `VITE_API_URL`。parent 已核對 staged 移出追蹤，見 [M1 證據](tasks/round2/evidence/env-staging.json)。
 - 第 2／3 輪依 DESIGN 在 launcher task 目錄產生新的合成資料，明確使用本機 URL／favicon；不沿用或修改來源樹 `mock/db.json`。
 
 ## 主要流程

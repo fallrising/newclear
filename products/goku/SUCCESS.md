@@ -64,3 +64,15 @@ go build -o goku-api ./cmd/api
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須先獲明確復工範圍，修正 API/Web 契約並完成 CLI/consumer/API/Web 整合與持久性驗證；沒有可用版本資格。
+
+
+## FE round2 — 2026-10-24T10:05:22Z
+
+T-0380 R2-AC-9/E approved M1–M3 only: environment example, accessible icon actions and visible API errors/retry. [Task](fe-review/tasks/round2/task.md) defines regression/native/isolated synthetic browser checks. Local R2 candidate verified; M1 staged tracking passed; independent acceptance and current CI remain pending; dormant exception only, existing API path mismatch and CLI/MQTT/mainline gaps unchanged. No dependencies, full R3, release or deployment.
+
+| R2 item | Status | Required evidence |
+| --- | --- | --- |
+| M1 | passed (scoped) | Same nonsensitive env example, native build and parent staged `.env` absence passed; [evidence](fe-review/tasks/round2/evidence/env-staging.json) |
+| M2 | passed (scoped) | Named icon actions, retained form semantics, real keyboard focus visibility |
+| M3 | passed (scoped) | Actual store failure/recovery tests for four operations; visible alert/Retry vs empty; real owned mock outage/restart and controlled mutation errors |
+| Evidence | partial | Native lint/build, scoped three-size capture, all-local requests and owned cleanup passed; [report](fe-review/tasks/round2/report.md) retains failures/limits; independent review/current CI pending |

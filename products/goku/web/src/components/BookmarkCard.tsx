@@ -86,16 +86,20 @@ export function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
         </div>
       </div>
 
-      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
         <button
+          type="button"
+          aria-label="Edit bookmark"
           onClick={() => onEdit(bookmark)}
-          className="p-1 text-gray-400 hover:text-gray-600"
+          className="p-1 text-gray-400 hover:text-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           <Edit className="w-4 h-4" />
         </button>
         <button
+          type="button"
+          aria-label="Delete bookmark"
           onClick={() => removeBookmark(bookmark.id)}
-          className="p-1 text-gray-400 hover:text-red-600"
+          className="p-1 text-gray-400 hover:text-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           <Trash2 className="w-4 h-4" />
         </button>

@@ -8,7 +8,7 @@ import { type Bookmark } from '../types/bookmark';
 import { useState } from 'react';
 
 export function BookmarkGrid() {
-  const { bookmarks } = useBookmarkStore();
+  const { bookmarks, error, fetchBookmarks } = useBookmarkStore();
   const { loadMore, pagination } = useBookmarkPagination();
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
   
@@ -23,6 +23,19 @@ export function BookmarkGrid() {
 
   return (
     <div className="space-y-8">
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => fetchBookmarks(1)}
+            disabled={pagination.isLoading}
+            className="mt-2 rounded px-3 py-1 border border-red-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {bookmarks.map((bookmark) => (
           <BookmarkCard 
@@ -61,7 +74,7 @@ export function BookmarkGrid() {
       )}
 
       {/* Empty state */}
-      {bookmarks.length === 0 && !pagination.isLoading && (
+      {bookmarks.length === 0 && !pagination.isLoading && !error && (
         <div className="text-center text-gray-500 py-16">
           No bookmarks found
         </div>

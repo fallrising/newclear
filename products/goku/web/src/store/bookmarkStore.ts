@@ -5,6 +5,7 @@ import { getFaviconUrl } from '../lib/utils';
 
 interface BookmarkStore {
   bookmarks: Bookmark[];
+  error: string | null;
   categories: Category[];
   tags: Tag[];
   searchQuery: string;
@@ -26,6 +27,7 @@ interface BookmarkStore {
 
 export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   bookmarks: [],
+  error: null,
   categories: [
     { id: '1', name: 'Work', icon: 'briefcase' },
     { id: '2', name: 'Personal', icon: 'home' },
@@ -67,6 +69,7 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
 
       set({
         bookmarks,
+        error: null,
         pagination: {
           page,
           limit: get().pagination.limit,
@@ -77,6 +80,7 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
     } catch (error) {
       console.error('Failed to fetch bookmarks:', error);
       set((state) => ({
+        error: 'Unable to load bookmarks. Please try again.',
         pagination: { ...state.pagination, isLoading: false },
       }));
     }
@@ -94,9 +98,11 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
       const created = await bookmarkApi.create(newBookmark);
       set((state) => ({
         bookmarks: [...state.bookmarks, created],
+        error: null,
       }));
     } catch (error) {
       console.error('Failed to add bookmark:', error);
+      set({ error: 'Unable to add bookmark. Please try again.' });
     }
   },
 
@@ -105,9 +111,11 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
       await bookmarkApi.delete(id);
       set((state) => ({
         bookmarks: state.bookmarks.filter((b) => b.id !== id),
+        error: null,
       }));
     } catch (error) {
       console.error('Failed to remove bookmark:', error);
+      set({ error: 'Unable to delete bookmark. Please try again.' });
     }
   },
 
@@ -131,9 +139,11 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
         bookmarks: state.bookmarks.map((bookmark) =>
           bookmark.id === id ? { ...bookmark, ...updatedData } : bookmark
         ),
+        error: null,
       }));
     } catch (error) {
       console.error('Failed to update bookmark:', error);
+      set({ error: 'Unable to save bookmark. Please try again.' });
     }
   },
 

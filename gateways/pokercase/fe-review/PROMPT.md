@@ -1,6 +1,6 @@
 # FE Review Prompt — pokercase
 
-Read [AGENTS](../AGENTS.md), [SUCCESS](../SUCCESS.md), approved [DESIGN](DESIGN.md), current [REVIEW](REVIEW.md), [RUNNER](RUNNER.md) and [report](tasks/round2/report.md) first. Original Round2 M1–M4 local implementation/evidence are complete; final independent review/CI/publication are pending. Full Round3 remains separate. Do not treat historical design-stage “not implemented” wording as the current execution status.
+Read [AGENTS](../AGENTS.md), [SUCCESS](../SUCCESS.md), approved [DESIGN](DESIGN.md), current [REVIEW](REVIEW.md), [RUNNER](RUNNER.md) and [report](tasks/round2/report.md) first. Original Round2 M1–M4 are delivered in PR603 after R31 ACCEPT, required CI and normal merge/readback. Full Round3 remains separate. Do not treat historical design-stage “not implemented” wording as the current execution status.
 
 Only approved presentation scope applies: existing Web templates/styles and measured read-only TUI width/help/empty rendering. Do not change backend/API/auth/CSRF/provider/DB-error/dependency/CI behavior, run import-local/login-siwc/refresh, read credentials or contact real providers. Use new isolated state, exact loopback binary/mock, real session+CSRF API seed, controlled one-time key handling and private artifact storage. No trace/HAR/video/DOM/body/header dumps.
 

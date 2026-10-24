@@ -1,6 +1,6 @@
 # fe-review — pokercase
 
-Original Round2 M1–M4 implementation and local evidence are complete; independent final review, current CI, merge/readback and ledger closure remain pending. This is scoped frontend evidence, not full Round3 or gateway mainline acceptance.
+Original Round2 M1–M4 are delivered via [PR603](https://github.com/fallrising/newclear/pull/603), with R31 ACCEPT, both required CI checks passed and fetched scoped equality confirmed. This is scoped frontend evidence, not full Round3 or gateway mainline acceptance.
 
 - [Report](tasks/round2/report.md): exact results, failures, limits and source-specific coverage.
 - [Machine result](tasks/round2/result.json), [source hashes](tasks/round2/source-manifest.json), [private artifact inventory](tasks/round2/artifact-manifest.json), [publication provenance](tasks/round2/publication-provenance.json).

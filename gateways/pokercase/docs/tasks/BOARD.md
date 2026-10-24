@@ -53,4 +53,6 @@ NR-1–NR-3 merged in [PR #601](https://github.com/fallrising/newclear/pull/601)
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FE2-12 | Approved M1–M4 presentation and isolated evidence | R2-AC-12/E | in_progress | 2026-10-24T12:21:48Z | — | 2026-10-24T12:21:48Z |
+| FE2-12 | Approved M1–M4 presentation and isolated evidence | R2-AC-12/E | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
+
+Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.

@@ -491,11 +491,19 @@ impl StreamTranslateState {
 
     /// EOF may complete Chat streams only after an explicit finish reason.
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.message_stop_sent || self.stop_reason.is_some() {
             return self.stop();
         }
         openai_sse_chunk_to_anthropic(
-            &json!({"error": {"type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE}}).to_string(),
+            &json!({"error": {"type": "api_error", "message": message}}).to_string(),
             self,
         )
     }
@@ -833,12 +841,20 @@ impl AnthropicToChatStream {
     }
 
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.done {
             return Vec::new();
         }
         self.on_data(
             &json!({"type": "error", "error": {
-                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+                "type": "api_error", "message": message
             }})
             .to_string(),
         )

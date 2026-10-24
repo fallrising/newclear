@@ -651,12 +651,20 @@ impl ResponsesToChatStream {
 
     /// Responses must supply a typed terminal event; EOF is not completion.
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.finished {
             return Vec::new();
         }
         self.on_data(
             &json!({"type": "error", "error": {
-                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+                "type": "api_error", "message": message
             }})
             .to_string(),
         )
@@ -1142,12 +1150,20 @@ impl ChatToResponsesStream {
 
     /// Preserve finish_reason-only Chat upstreams without inventing completion.
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.done || self.finish.is_some() {
             return self.finish();
         }
         self.on_data(
             &json!({"error": {
-                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+                "type": "api_error", "message": message
             }})
             .to_string(),
         )

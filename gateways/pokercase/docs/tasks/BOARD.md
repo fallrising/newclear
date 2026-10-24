@@ -99,3 +99,13 @@ Demand/contract: [task](T-0404-disconnect.md).
 | DC-03 | Verify HTTP and fake Cursor release | DC-3 | done | 2026-10-24T16:28:52Z | 2026-10-24T16:42:18Z | 2026-10-24T16:42:18Z |
 
 DC-1–DC-3 delivered in [PR #617](https://github.com/fallrising/newclear/pull/617), merge `2b64971c0bc209a67f9e37e76785b7009f746847` at `2026-10-24T16:42:18Z`. Independent source review PASS; required component CI109s and project-contract CI9s passed. Fetched main contains reviewed HEAD `a2b3bfb9e0bbe333f4507caa9e70d8bd1802e8fe` and scoped component contents match. Evidence covers134Linux tests and44local disconnect scenarios; actual Docker/provider cancellation and whole-product acceptance remain unverified.
+
+## T-0405 — SSE stall
+
+Demand/contract: [task](T-0405-sse-stall.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| ST-01 | Return protocol failures for stalled converted/native SSE | ST-1 | in_progress | 2026-10-24T17:02:57Z | | 2026-10-24T17:09:34Z |
+| ST-02 | Release upstream before failure delivery, preserve idle policy | ST-2 | in_progress | 2026-10-24T17:02:57Z | | 2026-10-24T17:09:34Z |
+| ST-03 | Preserve known terminals and verify HTTP wiring | ST-3 | in_progress | 2026-10-24T17:02:57Z | | 2026-10-24T17:09:34Z |

@@ -192,3 +192,15 @@ Scope: active client requests and their owned HTTP/CLI resources; completed Clau
 Validation: reproduce the silent Claude leak RED, fix the underlying receiver-close notification, focused release tests and existing session/reuse regressions, full Rust/fmt/clippy/docs/index, independent review and necessary CI. Fake runtime evidence does not establish actual Docker/provider cancellation; no change to those runtime policies or complete product readiness claim.
 
 Local DC-1–DC-3 evidence: [task and commands](docs/tasks/T-0404-disconnect.md),134tests on Linux including44new disconnect scenarios;fmt/clippy and43project contracts/index pass. Independent review PASS; publication recorded in the board after merge.
+
+## T-0405 — SSE stall
+
+Scope: six translated SSE paths plus native Responses, using the existing per-byte-chunk idle timeout with a five-second minimum. Opaque Chat/Messages passthrough retains transport-error behavior; non-stream collectors, header waits and total execution deadlines are excluded.
+
+- ST-1: Given an empty, partially emitted or unfinished SSE response without a known terminal, when the idle deadline expires, then translated/native Responses streams emit a fixed protocol error instead of breaking the HTTP body or synthesizing successful completion. Drop any unfinished input record; never include buffered upstream fragments in the generated diagnostic.
+- ST-2: Given a stalled source, release its owned stream before yielding the final failure frame (or passthrough transport error), even if the consumer does not poll again. Keep the existing minimum timeout and reset on each received byte chunk; heartbeat bytes remain activity, not a total deadline.
+- ST-3: Given an already parsed finish/terminal, preserve its existing success/incomplete/failure meaning at idle expiry without a second timeout failure. Preserve native Responses CR-only terminal lookahead behavior. Observe translated/native behavior and source release through loopback HTTP as well as deterministic adapter tests.
+
+Validation: RED/GREEN with controlled virtual time and drop witnesses; loopback HTTP read and upstream lifecycle evidence; existing full Rust/fmt/clippy/docs/index checks, independent review and required CI. No provider/Docker acceptance or whole-product completion claim. Evidence: [task](docs/tasks/T-0405-sse-stall.md).
+
+Local ST-1–ST-3 evidence:138tests/12groups pass, including77new scenarios;fmt/clippy,43project contracts and6llms navigation files pass. Original RED and initial test-fixture expectation failure retained; terminal semantics preserved. Independent review/publication follow in the task and board.

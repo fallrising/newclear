@@ -1,7 +1,7 @@
 {
   "project": "dim-gate",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷（src/app/routes/AppRoutes.tsx、vite.config.ts base /dim-gate/、.env.demo），尚未實際啟動；第 2 輪驗證並修正後改為 true。每頁都是新 context，因此一律是預設身分 user-rd-commerce（僅 RD 中心）；Ops／Admin 與深色主題由 DESIGN.md M2 的 capture-personas.mjs 擷取。",
+  "verified": true,
+  "verifiedNote": "2026-10-24 僅原批准R2 M1–M3本機驗證通過：exact pnpm --start 42/42 HTTP200、0 pageErrors；三身分×兩主題×三viewport 216完整驗證唯一頁（94+122+1=217raw含1筆被補證取代的null-theme）；原生426tests與既有100E2E通過。M3空列表適用性已獨立確認；最終差異複審／CI／交付另行追蹤。未解決axe findings保留，不代表Round3或產品主線驗收。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light"
@@ -19,57 +19,76 @@
       "pages": [
         {
           "id": "home",
-          "path": "/dim-gate/"
+          "path": "/dim-gate/",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "guide",
-          "path": "/dim-gate/guide"
+          "path": "/dim-gate/guide",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd",
-          "path": "/dim-gate/rd"
+          "path": "/dim-gate/rd",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd-apps",
-          "path": "/dim-gate/rd/apps"
+          "path": "/dim-gate/rd/apps",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd-app-detail",
-          "path": "/dim-gate/rd/apps/app-checkout"
+          "path": "/dim-gate/rd/apps/app-checkout",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd-environment-detail",
-          "path": "/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod"
+          "path": "/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd-catalog",
-          "path": "/dim-gate/rd/catalog"
+          "path": "/dim-gate/rd/catalog",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd-requests",
-          "path": "/dim-gate/rd/requests"
+          "path": "/dim-gate/rd/requests",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd-pipelines",
-          "path": "/dim-gate/rd/pipelines"
+          "path": "/dim-gate/rd/pipelines",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "rd-observability",
-          "path": "/dim-gate/rd/observability"
+          "path": "/dim-gate/rd/observability",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "ops-forbidden",
-          "path": "/dim-gate/ops"
+          "path": "/dim-gate/ops",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "admin-forbidden",
-          "path": "/dim-gate/admin"
+          "path": "/dim-gate/admin",
+          "waitFor": "#main-content h1"
         },
         {
           "id": "unknown-route",
-          "path": "/dim-gate/does-not-exist"
+          "path": "/dim-gate/does-not-exist",
+          "waitFor": "#main-content h1"
+        },
+        {
+          "id": "rd-catalog-request",
+          "path": "/dim-gate/rd/catalog/w2-catalog-redis/resource-request",
+          "waitFor": "#main-content h1"
         }
       ]
     }
-  ]
+  ],
+  "verifiedAt": "2026-10-24"
 }

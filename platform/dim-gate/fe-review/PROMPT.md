@@ -1,11 +1,11 @@
 # FE Review Prompt — dim-gate
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：fe-review 做視覺／a11y 擷取；流程正確性交由既有 e2e，不改共用 capture。 第 2／3 輪仍未由本次文件回寫執行。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：fe-review 做視覺／a11y 擷取；流程正確性交由既有 e2e，不改共用 capture。 第 2 輪實跑證據見本輪報告；第 3 輪尚未驗收。
 你是負責 **dim-gate** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)。
+> 狀態：**第2輪 M1–M3 本機驗證通過（PR583，待最終複審／CI／交付）**。只新增 review 導航擷取工具；必要實跑結果見 [本輪報告](tasks/round2/report.md)，不代表第3輪或產品主線驗收。
 
 ## 專案概況
 
@@ -15,7 +15,7 @@
 - **UI 入口：** `platform/dim-gate/`（純前端 SPA，Vite base `/dim-gate/`；demo 資料在 `src/demo/seed/`，由 MSW Service Worker 提供；模式只從 `.env.demo` 的 `VITE_DATA_MODE=demo` 載入，需要 `--mode demo`）
 - **設計：** 第 2 輪的範圍見 [DESIGN.md](DESIGN.md)。
 
-## 啟動線索（未驗證）
+## 啟動方式（第2輪實跑）
 
 - `pnpm install --frozen-lockfile`，然後 `pnpm dev --mode demo --port 5173 --strictPort`（`dev` 已綁 127.0.0.1）。開 `http://127.0.0.1:5173/dim-gate/`。
 - 沒帶 `--mode demo` 時會顯示 `DATA_MODE_REQUIRED` 啟動錯誤頁，而不是 demo 資料。
@@ -50,10 +50,10 @@
 - `platform/dim-gate/e2e/`：大量既有 Playwright spec 與 `browser-health.ts`。流程正確性、跨瀏覽器（`pnpm test:smoke`）與部分頁面的 axe／viewport 檢查（例如 `m2-admin.spec.ts`、`w5-identity.spec.ts`）已在這裡；fe-review 不重複斷言。
 - `pnpm check:docs`、`pnpm check:architecture`：修改後必跑。
 
-## 待補的頁面
+## 參數頁面與擷取契約
 
-- `/rd/apps/:appId/*`（resources、delivery、configuration、traffic、monitoring、alerts）：id 用 seed 的 `app-checkout`。
-- `/ops/caches`、`/ops/messaging`、`/ops/clusters` 及其 `:ciId` 詳情：id 從 `src/demo/seed/resources.ts` 取。
+- `personas.json` 已列 `/rd/apps/:appId/*`（resources、delivery、configuration、traffic、monitoring、alerts），id 用 seed 的 `app-checkout`。
+- `personas.json` 已列 `/ops/caches`、`/ops/messaging`、`/ops/clusters` 及 seed 內的詳情ID。
 - 事件、發布、pipeline、工作單等執行時才產生的 id：由 `capture-personas.mjs` 從列表頁點進第一筆取得，不寫死（DESIGN.md M3）。
 
 ## 執行步驟
@@ -74,3 +74,18 @@
 - 第 1 輪：`PROMPT.md`、`targets.json`、`REVIEW.md` 的修訂（每次一個 PR）
 - 第 2 輪：前端修正與已決定事項的實作，每個問題一個 commit，附驗證指令
 - 第 3 輪：`runs/<ts>/capture.json`、`runs/<ts>/REPORT.md`（提交）；`runs/<ts>/screenshots/`（不提交）
+
+## 第2輪專用命令
+
+同一隔離 loopback-only namespace、repository root：
+
+```sh
+node --test platform/dim-gate/fe-review/capture.test.mjs
+node platform/dim-gate/fe-review/capture-personas.mjs --dry-run
+# 先依 targets 啟動 demo，再在同一 namespace 執行：
+node platform/dim-gate/fe-review/capture-personas.mjs
+```
+
+實際 persona 由頁首「示範身分」combobox 切換，主題使用既有 localStorage UI preference 並核對 html[data-theme]；每組在同一分頁導航，不注入身分或改 mock。只斷言頁面成功載入／授權／主題，不重複產品流程測試。runtime detail 只點列表第一筆實際連結；fresh seed 空清單記 not_available，不建立業務狀態來湊圖。輸出 capture.json 與 ignored screenshots；不保存 storageState、session資料或cookie。
+
+若 axe 掃描本身拋出例外，capture.json 保留 `axe.error`，不視為零違規；導航／身分／主題斷言仍照常執行。中斷後可用 `--resume RUN_ID` 只續跑該 manifest 中尚未成功的頁面，原 manifest 不覆寫；每次新 run 記錄 driver SHA256，合併驗收需核對唯一頁面鍵與來源。

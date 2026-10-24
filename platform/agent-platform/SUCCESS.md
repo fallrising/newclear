@@ -80,3 +80,16 @@ make deployment-rehearsal
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須補齊完整 MVP 的真實工作與恢復證據，核對 KVM／成果／維護流程對應合併 commit；尚不能建立全項目可用標記。
+
+## 本次範圍：T-0380 FE 第 2 輪 R2-AC-4/E
+
+僅實作已批准 [DESIGN M1–M3](fe-review/DESIGN.md)：隔離真 PostgreSQL／FastAPI 與 fake backend 的 review driver；現行 pausing 中文渲染回歸；審批錯誤／受理樣式與 zh-TW 短時間。不改後端、API、原 fixture、依賴、CI；不驗收完整平台或第 3 輪。
+
+| AC | 狀態 | 驗證計畫 |
+| --- | --- | --- |
+| FE-M1 | passed (R2 local) | 兩次 fresh DB／新合成憑證，真登入／100 事件／結果／重連／設定／原生驗證；受控狀態覆寫分開標示；owned cleanup 與無秘密公開證據 |
+| FE-M2 | passed (R2 local) | 共用 taskStateNames 已含 pausing 中文；補 App 實際渲染測試及補拍，不重複修改既有產品實作 |
+| FE-M3 | passed (R2 local) | Approvals 錯誤 error、受理 notice、zh-TW 短時間的 RED/GREEN 測試及補拍 |
+| FE-gates | local composite passed; CI/review pending | 原生 web check/build、Python check/platform-test、獨立 driver 型別／格式、安全邊界、獨立審查與 CI |
+
+兩次完整 fresh captures 共 76 張（含早期 partial 為 114 raw）；web85 與 focused55、安全4通過。Python 原 641 tests/4環境 errors 保留，35 focused 原生補驗通過；exact-head CI 與獨立審查／合併待 parent。詳見 [本次報告](fe-review/tasks/round2/report.md)。上述平台主線 AC-04、usable_tag 與 live gate 維持原狀。

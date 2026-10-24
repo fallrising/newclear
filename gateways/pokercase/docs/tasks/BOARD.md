@@ -49,14 +49,26 @@ Demand and contract: [task](T-0401-native-responses.md).
 
 NR-1–NR-3 merged in [PR #601](https://github.com/fallrising/newclear/pull/601) at `2026-10-24T11:53:33Z` as `0e99542ec10213524bacffed73699556edfebb8e`. Required CI (component 111s, project contracts 8s) and independent review passed; fetched main contains the reviewed HEAD and the component matches it. SUCCESS/task local verification entries were written before publication; this board records the subsequent publication result. Whole-product acceptance remains incomplete.
 
+## T-0380 FE round2
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FE2-12 | Approved M1–M4 presentation and isolated evidence | R2-AC-12/E | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
+
+Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
+
 ## T-1102 — LLM 用量正確性修正文件先行
 
 需求來源：owner 於 2026-10-24 直接要求將 Langfuse 比較後續拆成開發與修正兩個文件 PR。
-承接者：Codex 主導；範圍限本文件里程碑。規格路徑：`docs/specs/llm-usage-correctness.md`。
+承接者：Codex 主導；範圍限本文件里程碑。規格路徑：[修正規格](../../../../docs/specs/llm-usage-correctness.md)。
 本次建立 Draft PR，runtime 實作、真帳號驗收、部署與合併不在本次交付內；不變更既有產品驗收狀態。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| UC-D01 | 以固定來源分類已確認缺陷、待重現問題與實機驗收缺口 | UC-D01 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T14:17:37Z |
-| UC-D02 | 定義串流計量、缺值彙總與相關修正的重現及驗收矩陣 | UC-D02 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T14:17:37Z |
-| UC-D03 | 定義修正順序、相容性、獨立審查與後續交接 | UC-D03 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T14:17:37Z |
+| UC-D01 | 以固定來源分類已確認缺陷、待重現問題與實機驗收缺口 | UC-D01 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T15:26:41Z |
+| UC-D02 | 定義串流計量、缺值彙總與相關修正的重現及驗收矩陣 | UC-D02 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T15:26:41Z |
+| UC-D03 | 定義修正順序、相容性、獨立審查與後續交接 | UC-D03 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T15:26:41Z |
+
+文件內容與本地檢查已通過；獨立 agent 文件審查 ACCEPT，命令與結果見 [T-1102 文件驗收](../../SUCCESS.md#t-1102--llm-用量正確性修正文件先行)。
+任務維持 `in_progress` 等待 Draft PR 審閱；未合併不填 `end`，未實作 runtime 不關閉產品缺口。
+最終 head、CI 與遠端回讀以本分支 `docs/t1102-usage-corrections-20261024` 的 PR 描述及 Checks 為交付證據。

@@ -146,14 +146,27 @@ Local NR-1–NR-3 evidence: [task and commands](docs/tasks/T-0401-native-respons
 
 CR lookahead: retain a pending CR until the next byte or EOF to preserve split CRLF. If the existing idle deadline arrives with a complete valid CR-only terminal, emit that original frame and close rather than returning a stall error. CR-only terminal delivery may therefore wait up to the configured stall window (minimum five seconds); other stalls retain the existing body error. Reviewer R1 reproduced the lost terminal with an upstream that stays pending, then the same body/drop regression passed after this fix.
 
+## T-0380 FE round2: approved M1–M4
+
+Scope and machine verification plan: [T021](fe-review/tasks/round2/T021.md), based on the unchanged approved [DESIGN](fe-review/DESIGN.md). First measure isolated true admin UI/loopback synthetic upstream and read-only TUI; correct only measured presentation defects and obsolete keyless copy. Native offline Rust gates, bounded browser/terminal evidence, independent review and current CI remain required. No real provider/login/CLI credentials, backend/auth changes, full Round3, usable tag or mainline acceptance. Status: original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603) after R31 ACCEPT, both CI checks and normal merge/readback; scoped board item done. [Report](fe-review/tasks/round2/report.md) and [machine result](fe-review/tasks/round2/result.json): native127tests/focused5renderer subset; current18affected Web views plus6source-qualified shared views,14real journeys,12source-qualified TUI captures;13contrast-incomplete sets retained with520computed pairs including one separately corrected desktop observation. Original shared404/login timing/TUI/table regression histories remain explicit. This does not complete gateway mainline, fullRound3, usable tag or owner acceptance.
+
 ## T-1102 — LLM 用量正確性修正文件先行
 
 本輪只交付開發／修正規格與兩條獨立文件 PR 中的本條；固定核對來源為 `6b444b00457591996db135e4ec6ab65b1d01ad4c`。
-規格路徑：`docs/specs/llm-usage-correctness.md`；進度沿用 [任務板](docs/tasks/BOARD.md)。
+文件整合基準為 `4fc5d9a7b49139115518379bf05e1cfec4fe1bce`；保留其新增交付紀錄，相關計量核心與固定分析來源一致。
+規格路徑：[修正規格](../../docs/specs/llm-usage-correctness.md)；進度沿用 [任務板](docs/tasks/BOARD.md)。
 保留既有 mainline、usable_tag 與所有未驗 runtime AC；文件通過不代表功能實作或缺陷修復。
 
 | 文件 AC | Given／When／Then | 狀態 | 驗證計畫／證據 |
 | --- | --- | --- | --- |
-| UC-D01 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 以固定來源分類已確認缺陷、待重現問題與實機驗收缺口。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
-| UC-D02 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義串流計量、缺值彙總與相關修正的重現及驗收矩陣。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
-| UC-D03 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義修正順序、相容性、獨立審查與後續交接。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
+| UC-D01 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 以固定來源分類已確認缺陷、待重現問題與實機驗收缺口。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+| UC-D02 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義串流計量、缺值彙總與相關修正的重現及驗收矩陣。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+| UC-D03 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義修正順序、相容性、獨立審查與後續交接。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+
+文件驗證紀錄（2026-10-24；僅文件範圍）：
+
+- `python3 scripts/check_indexes.py`：PASS，42 個 project success contracts／navigation/index；5 個 llms.txt、0 errors。
+- 四個變更 Markdown 的本地連結與 code-fence 檢查、`git diff --check`、`git diff --cached --check`：PASS。
+- 獨立 agent 文件審查 `usage_verify`：ACCEPT；最終回讀確認固定來源、既有 terminal 契約、UC-R01–08、隱私／有界 observer 及未決資料語意一致。
+- 已審規格 SHA256：`ff8fbdb4b298f12da379740e4b7a237a173e01e821835455c547fb16655357b1`。
+- 本地未重跑產品 runtime suites，未執行本規格的 RED／GREEN 或 live 驗收；最終 commit、Draft PR、head CI 與遠端回讀由該 PR 描述及 Checks 保存。

@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-24T14:00:53.314258+00:00",
+  "reviewer": "root actual image inspection",
+  "runtimeReceiptSHA256": "9e2d93c9ed6250fb906d4d4ee1619de5670c97b3429bc0141a6dade299633d46",
+  "runtimeStatus": "passed",
+  "strictCaptureCount": 18,
+  "journeyCount": 14,
+  "maxSyntheticRowHeight": 128.984375,
+  "viewedImages": {
+    "journey-offscreen-actions-keyboard.png": "8d2832dc62360b025fd4f217e089459830477b868c34d75262cbb38cd235545f",
+    "connections-mobile.png": "d9fd7f0ae16255450cac1fa04392590b3e5b9dfc41cac266f949f8a7fb64e130",
+    "usage-mobile.png": "f26f2948bdcfcf6ed31da9ca30137ff14df494b3f52e49f98924026eb741c640",
+    "routes-mobile.png": "eb4c9606fb9c1405c414565ca292afdf443dc4ceb0aec289730a795a0f176d9d",
+    "keys-mobile.png": "750e3dd332671c47c229d2496829c7ed1c94aa052629e010cb4774288d4cd2ed",
+    "connections-desktop.png": "5647ceea8a514b35a2181d4e385b043b86a828eb524d35e67b213cd5e2edc85f",
+    "usage-desktop.png": "30dbe06627128459466ad52fdbca07cb2e429d4443290806eb954fe67a171f74",
+    "connection-edit-tablet.png": "0053dc105f83dc80e08b3f5591fc05cdb5f12009a3e078f2bed00522abccb867"
+  },
+  "finding": "Measured table regression fixed: full long names/URLs wrap across readable columns; no >1000px near-blank row; named local scrolling and visible focused Edit button confirmed. Mobile full page remains long because existing forms precede table, not collapsed one-character columns. No product redesign or full a11y claim.",
+  "contrast": "All18 axe serious/critical violations0,13 incompletecontrast sets retained; computed pair output includes usage desktop incorrectly measured390, excluded pending one1440x900 supplement. Other12sets use correct declared tablet/mobile sizes.",
+  "remaining": "Desktop contrast supplement, final docs, independentreview, currentCI, normalmerge/readback"
+}

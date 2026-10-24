@@ -1,0 +1,9 @@
+{
+  "testedTargets": 10,
+  "passed": 127,
+  "failed": 0,
+  "ignored": 0,
+  "binarySHA256": "21fce3fab360ad66f97179bf54d391c83702f62d55cd09a118c693fd349516cd",
+  "tuiSourceSHA256": "c33c495bd8f799a00d8633a323e7eaef0fcea9ac1cb08310eb7fddc7dc6d6693",
+  "cssSHA256": "66ac524ba5844cf62caf2cec425afc5075a80c710898259e88ff064b57e2cd98"
+}

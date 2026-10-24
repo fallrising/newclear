@@ -107,3 +107,15 @@ Goal: enforce the existing AC-04/AC-17 error contract without changing supported
 Plan: focused RED→GREEN gateway regression, unit malformed-result cases, full Rust tests/fmt/clippy, document gates, independent review and required CI. Only local fake CLI/runtime; no live provider request, login, new dependency, permissions change or release. This slice does not accept the full mainline or Cursor tools/images. Progress/evidence: [task record](docs/tasks/T-0385-cursor-errors.md).
 
 T-0385 local outcome: CE-1–CE-3 regression evidence passed (103tests, fmt/clippy, document gates and credential-free Docker canary). Original RED and the corrected Responses-test assertion are preserved in the task record. Independent review passed; required remote CI/merge/readback are publication gates, tracked by the linked task/desk record.
+
+## T-0386 — Converted stream completion
+
+Goal: enforce existing AC-04/AC-06/AC-15 error semantics when an upstream stream ends before completion. Scope: four converters and the Responses→Chat→Messages / Messages→Chat→Responses chains. EOF alone is not proof of successful text or tool generation. Existing Chat `finish_reason` followed by EOF remains accepted even without `[DONE]`; explicit Chat `[DONE]` remains a terminal marker. Responses requires `response.completed`/`response.incomplete` (or error), and Messages requires `message_stop` (or error).
+
+- SC-1: Given an empty or partial text/tool stream without completion, when converted at EOF, then emit a fixed protocol error, no synthetic success finish or completed tool arguments. Responses `[DONE]` without its typed terminal is treated as premature end.
+- SC-2: Given valid completion, length limit or explicit error, when EOF follows, then preserve the original outcome/usage and emit no duplicate terminal. Preserve Chat finish_reason-only compatibility.
+- SC-3: Given local HTTP Chat upstream and actual gateway Messages/Responses clients, when text/tool/empty truncation or valid finish-only occurs, then results match SC-1/SC-2. Full Rust/fmt/clippy, document gates, independent review and required CI must pass.
+
+Native protocol passthrough, buffered HTTP collection, transport-error/stall behavior, retry/accounting, credentials, new tools/images support and release/deploy are outside this bounded slice. No real provider calls. Evidence/progress: [T-0386 task](docs/tasks/T-0386-stream-completion.md).
+
+T-0386 local result: SC-1–SC-3 passed (107Rust tests,14HTTP journeys, fmt/clippy,42contracts/index). Independent review passed; historical RED and old EOF-success assertion failure retained in the task record. Required remoteCI/merge/readback remain separate publication gates.

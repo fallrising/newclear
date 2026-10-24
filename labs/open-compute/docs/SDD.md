@@ -329,6 +329,14 @@ parent reuse/zombie, child disappearance/reuse/reparenting or inconsistent start
 recording must preserve the existing combined fail-closed condition and message.
 No new generation is admitted after refusal and unknown is not cleanup success.
 
+An already recorded fixed observation reason must survive subsequent fail-closed
+snapshot, identity, live and children reads, including shutdown's repeated scan
+and command cleanup refusal. Rethrowing a known refusal must not replace that
+reason with unknown before diagnostic capture. Missing/unrecognized reasons
+still normalize to unknown; no raw exception text becomes a public reason. This
+changes evidence propagation only, not admission, signals, cleanup authority,
+success criteria or the attribution of historical failures.
+
 CI keeps approved report artifacts and strict diagnostics for30days (subject to
 repository policy). Four-profile real qualification uses the unchanged original
 locked artifact in separate fresh non-root containers with real passwd homes,

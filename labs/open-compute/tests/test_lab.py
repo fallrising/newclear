@@ -613,8 +613,57 @@ class DiagnosticsAndProcessTests(unittest.TestCase):
                 self.assertEqual(caught.exception.observation_reason, reason)
                 self.assertEqual(owner.observation_reason, reason)
                 self.assertEqual(len(owner.known), 1)
-                with self.assertRaises(lab.ProcessObservationError): owner.observed_identities()
+                # The cold checkpoint calls stop (and thus snapshot) before it
+                # records the original failure. Every sticky read must retain
+                # the first edge reason, without trying admission again.
+                import failure_diagnostics
+                owner.process.poll.return_value = 0
+                owner.process.returncode = 0
+                owner.finish_threads = Mock()
+                with patch("lab.process_info", return_value=None), \
+                     patch("lab.os.scandir") as scan, patch("lab.os.kill") as later_kill:
+                    for name in ("snapshot", "observed_identities", "live", "children"):
+                        with self.subTest(reason=reason, read=name):
+                            with self.assertRaises(lab.ProcessObservationError) as repeated:
+                                getattr(owner, name)()
+                            self.assertEqual(repeated.exception.observation_reason, reason)
+                    with self.subTest(reason=reason, read="stop"):
+                        stopped = owner.stop(grace=0)
+                        self.assertFalse(stopped["all_owned_exited"])
+                        self.assertFalse(stopped["forced"])
+                        self.assertEqual(owner.observation_reason, reason)
+                        record = failure_diagnostics.Recorder("storage")
+                        record.capture("original", "cold_after_writes", lab.LabError("ownership"))
+                        record.observe("original", owner.observation_reason)
+                        projected = record.finish({"result": "failed", "phase": "cold_after_writes"}, 1)
+                        self.assertEqual(projected["failures"]["original"],
+                                         {"phase": "cold_after_writes", "category": "ownership",
+                                          "observation": reason})
+                    with self.subTest(reason=reason, read="command"), \
+                         patch("lab.Process", return_value=owner):
+                        with self.assertRaises(lab.ProcessObservationError) as command_error:
+                            lab.command(["never-executed"])
+                        self.assertEqual(command_error.exception.observation_reason, reason)
+                    scan.assert_not_called()
+                    later_kill.assert_not_called()
+                self.assertEqual(len(owner.known), 1)
                 kill.assert_not_called()
+
+    def test_sticky_observation_without_public_reason_stays_unknown(self):
+        import failure_diagnostics
+        for reason in (None, "private-reason-SECRET"):
+            owner = self.owner()
+            owner.observation_error = "private-error-SECRET"
+            owner.observation_reason = reason
+            with self.subTest(reason=reason), patch("lab.os.scandir") as scan:
+                with self.assertRaises(lab.ProcessObservationError) as caught:
+                    owner.snapshot()
+                record = failure_diagnostics.Recorder("storage")
+                record.capture("original", "cold_after_writes", caught.exception)
+                result = record.finish({"result": "failed"}, 1)
+                self.assertEqual(result["failures"]["original"]["observation"], "unknown")
+                self.assertNotIn("SECRET", json.dumps(result))
+                scan.assert_not_called()
 
     def test_stale_parent_reuse_during_scan_fails_closed(self):
         owner = self.owner()

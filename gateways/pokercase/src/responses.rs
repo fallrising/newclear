@@ -477,7 +477,7 @@ impl ResponsesToChatStream {
             return Vec::new();
         }
         if data.trim() == "[DONE]" {
-            return self.finish(None);
+            return self.on_end();
         }
         let Ok(ev) = serde_json::from_str::<Value>(data) else {
             return Vec::new();
@@ -576,9 +576,17 @@ impl ResponsesToChatStream {
         out
     }
 
-    /// Upstream closed: make sure the client still gets a finish chunk and [DONE].
+    /// Responses must supply a typed terminal event; EOF is not completion.
     pub fn on_end(&mut self) -> Vec<String> {
-        self.finish(None)
+        if self.finished {
+            return Vec::new();
+        }
+        self.on_data(
+            &json!({"type": "error", "error": {
+                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+            }})
+            .to_string(),
+        )
     }
 }
 
@@ -1059,9 +1067,17 @@ impl ChatToResponsesStream {
         out
     }
 
-    /// Upstream closed without [DONE]: still close the items and complete the response.
+    /// Preserve finish_reason-only Chat upstreams without inventing completion.
     pub fn on_end(&mut self) -> Vec<String> {
-        self.finish()
+        if self.done || self.finish.is_some() {
+            return self.finish();
+        }
+        self.on_data(
+            &json!({"error": {
+                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+            }})
+            .to_string(),
+        )
     }
 }
 
@@ -1261,14 +1277,24 @@ mod tests {
     }
 
     #[test]
-    fn stream_without_completed_still_finishes() {
+    fn sc1_stream_without_completed_reports_failure() {
         let mut conv = ResponsesToChatStream::new("m");
         let out = feed(
             &mut conv,
             &[json!({"type": "response.output_text.delta", "delta": "x"})],
         );
         assert_eq!(out.last().unwrap(), &json!("[DONE]"));
-        assert_eq!(out[out.len() - 2]["choices"][0]["finish_reason"], "stop");
+        assert_eq!(
+            out[out.len() - 2]["error"]["message"],
+            crate::error::INCOMPLETE_STREAM_MESSAGE
+        );
+        assert!(out
+            .iter()
+            .any(|v| v.pointer("/choices/0/delta/content") == Some(&json!("x"))));
+        assert!(!out.iter().any(|v| v
+            .pointer("/choices/0/finish_reason")
+            .is_some_and(|f| !f.is_null())));
+        assert!(conv.on_end().is_empty());
     }
 
     fn events_of(records: &[String]) -> Vec<(String, Value)> {

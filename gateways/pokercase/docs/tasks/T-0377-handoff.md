@@ -38,3 +38,20 @@ First round16:57:52Z–17:17:52Z; follow-up starts17:53:34Z, deadline18:13:34Z, 
 ## Subsequent authorized live attempt
 
 Owner separately authorized dedicated-profile login and one text request. Login succeeded; the single gateway request returned502 and cleanup passed. No retry was made. See [the live result and diagnostic continuation](../cursor-live-smoke.md); the one-request allowance is consumed, and the root cause remains unconfirmed.
+
+## 2026-10-24 compatibility follow-up
+
+The current CLI preference is `--sandbox disabled` inside the mandatory Docker boundary; see the [decision](../cursor-isolation.md#2026-10-24-container-compatibility-decision). Default seccomp, no-new-privileges, cap-drop ALL, non-root, read-only rootfs, mounts and limits remain unchanged. No host fallback or new live inference. Owner-reported direct CLI success is distinct from the still-pending gateway journey.
+
+Verification commands from repository root (shared CARGO_TARGET_DIR is an operator setting):
+
+```sh
+cargo +1.99.0 test --locked --manifest-path gateways/pokercase/Cargo.toml
+cargo +1.99.0 clippy --locked --manifest-path gateways/pokercase/Cargo.toml --all-targets -- -D warnings
+cargo +1.99.0 fmt --manifest-path gateways/pokercase/Cargo.toml --check
+python3 scripts/check_project_success.py
+python3 scripts/check_indexes.py
+python3 gateways/pokercase/scripts/verify_cursor_container.py --binary "$CARGO_TARGET_DIR/debug/thinrouter" --base-image python:3.14-alpine
+```
+
+The new CLI argument unit test first failed against the old enabled argument; after changing only that production argument,99Rust tests,clippy,fmt and both document checks passed. The real Docker fake-CLI canary passed host read/write/env/socket denial, read-only rootfs,UID1000,writable workspace and success/error/cancellation cleanup. Independent review/CI results are recorded on the PR and private ledger before acceptance. Existing sandbox-error503 and privacy regression remains covered.

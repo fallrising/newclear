@@ -211,7 +211,7 @@ async fn cursor_answers_through_the_container_runtime() {
     assert!(args.windows(2).any(|w| w[0] == "--mode" && w[1] == "ask"));
     assert!(args
         .windows(2)
-        .any(|w| w[0] == "--sandbox" && w[1] == "enabled"));
+        .any(|w| w[0] == "--sandbox" && w[1] == "disabled"));
     assert!(args
         .windows(2)
         .any(|w| w[0] == "--model" && w[1] == "gpt-5"));
@@ -392,5 +392,7 @@ async fn unavailable_cursor_sandbox_is_an_actionable_redacted_error() {
         &std::fs::read_to_string(env.bin_dir.path().join("args.json")).unwrap(),
     )
     .unwrap();
-    assert!(args.windows(2).any(|pair| pair == ["--sandbox", "enabled"]));
+    assert!(args
+        .windows(2)
+        .any(|pair| pair == ["--sandbox", "disabled"]));
 }

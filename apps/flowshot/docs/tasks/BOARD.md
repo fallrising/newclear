@@ -58,4 +58,4 @@ Owner-authorized partial-code checkpoint: publish and merge the current N02/N03 
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FLOWSHOT-FE2-1 | Approved paired review-only browser fixtures | R2-AC-11/E | in_progress | 2026-10-24T11:22:03Z | — | 2026-10-24T11:22:03Z |
+| FLOWSHOT-FE2-1 | Paired synthetic runtime verified; PR598 required CI/merge pending | R2-AC-11/E | in_progress | 2026-10-24T11:22:03Z | — | 2026-10-24T17:03:24Z |

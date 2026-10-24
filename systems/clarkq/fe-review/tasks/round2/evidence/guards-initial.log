@@ -1,0 +1,12 @@
+✔ child environment cannot inherit config, persistence, credentials, exporters or peers (1.379014ms)
+✔ state refuses reuse, unknown files and symlink boundary without deleting them (11.986039ms)
+✔ cleanup refuses foreign process even when its PID looks valid (0.443459ms)
+✔ receipt refuses secret values and route rejects external, credential and query variants (0.497167ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.616484

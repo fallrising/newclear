@@ -1,0 +1,62 @@
+[
+  {
+    "file": "browser-008-outer.json",
+    "originalSha256": "6b66fc0702e5e048d289c9cf6cfaf555148ea600fedc90cc6e409f93c1aba5d6",
+    "publishedSha256": "f8174411bf1c086e98b1bf0f19b2775e25fc38c8cede6b2b1ecc1370b4863a40",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "browser-006-outer.json",
+    "originalSha256": "e9d30a289b0d1c092140a424688c700dc4c67e13d372cd8eae74e1ec53536f94",
+    "publishedSha256": "5d7ffa36797e96e511ff1cf463aa101006e862b6f221bb5713f1df03acee96a0",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "browser-001-outer.json",
+    "originalSha256": "c306ac0d52dbcf85ad64902636d4211d3d943bf17bae658553531b473deb6cfa",
+    "publishedSha256": "a6d4fcd21a39e6035787d25dc2769590eef0aa95a53b10bf1b50ad4124e16665",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "browser-007-outer.json",
+    "originalSha256": "edba68a635928aaaa808345deaa64043ca0eafdeaa329d1634cb32db061a1b2c",
+    "publishedSha256": "5d64f8590a96a8df14bd9747a7aa17a800330fa7c93a3904e5df7d62c28b9778",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "browser-004-outer.json",
+    "originalSha256": "eefa211770bbb0895e69f34ac7df86e900beb15753b13fa6ea9c4803bdb6265e",
+    "publishedSha256": "43a5cd21a6a41008d823e205b94a06491e2b24bb9d46acaf13a9b32053fb7d48",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "browser-005-outer.json",
+    "originalSha256": "49192988890a2200b070bf49aa21bb3da486eb65693cb9bb54c6b6dc41d7ffaa",
+    "publishedSha256": "3fc12fb6ad3e97fb2891fcf41ac7d900135f98867a6ee3c361ed825d354d1c4f",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "browser-002-outer.json",
+    "originalSha256": "1cbbb2dfe267eca355ce3cccd062e8af47a70bc6a07cfb49239204abd3c0bcbc",
+    "publishedSha256": "b48e255d59d08691cfc366d7bce23dddc078ec25056d09496214441f1fdac0a8",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "browser-003-outer.json",
+    "originalSha256": "ee53bf08117f664518da209bc596671bbd0cae61f836faa6033e59533aa0d824",
+    "publishedSha256": "ee7776a0fcf0d2e2fcb335b0663fcd6ab4a87910195a3edb478dad45f0440484",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "config-checked.json",
+    "originalSha256": "68fbe17c59886f576318176e9d730f428262b38bb6ad17dcbb959b17f219588a",
+    "publishedSha256": "68fbe17c59886f576318176e9d730f428262b38bb6ad17dcbb959b17f219588a",
+    "normalization": "JSON indentation only"
+  },
+  {
+    "file": "stack-cleanup.json",
+    "originalSha256": "f5c7d5ece8ee94bb56f7cdb3f1a1dbe2137b9dc15a5b648ac1c35c821de59206",
+    "publishedSha256": "f5c7d5ece8ee94bb56f7cdb3f1a1dbe2137b9dc15a5b648ac1c35c821de59206",
+    "normalization": "JSON indentation only"
+  }
+]

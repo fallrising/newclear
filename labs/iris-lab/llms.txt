@@ -1,0 +1,24 @@
+# iris-lab
+
+> A pinned-version local image-generation experiment around antirez/iris.c. Research and design are present; the wrapper and runtime acceptance are pending.
+
+Tier: ungraded
+Status: spec-only
+Interfaces: spec
+Entrypoint: https://github.com/fallrising/newclear/blob/main/labs/iris-lab/SDD.md
+Auth: none
+Spec: none — machine-readable invocation schemas are planned for M1; the current SDD is prose.
+
+The planned first runtime path is Apple Silicon Metal with FLUX.2 Klein 4B distilled, one local txt2img job at a time. No callable iris-lab CLI, service, GPU benchmark or usable release is provided yet. Long-term investment remains unassigned. The engine and model revisions are pinned separately; model bytes have not been downloaded or verified.
+
+## Interface reference
+
+- [SDD](https://github.com/fallrising/newclear/blob/main/labs/iris-lab/SDD.md): proposed request, result, error and reproducibility contracts; commands are not implemented.
+- [SUCCESS](https://github.com/fallrising/newclear/blob/main/labs/iris-lab/SUCCESS.md): document milestone evidence and pending runtime acceptance.
+
+## Optional
+
+- [Platforms and models](https://github.com/fallrising/newclear/blob/main/labs/iris-lab/docs/platform-models.md): supported upstream architectures, backend dependencies and unverified lab paths.
+- [Sources](https://github.com/fallrising/newclear/blob/main/labs/iris-lab/docs/sources.md): official documentation and supplementary tutorials, with dates and limitations.
+- [Verification plan](https://github.com/fallrising/newclear/blob/main/labs/iris-lab/docs/verification-plan.md): future real-hardware checks and required evidence.
+- [Lock metadata](https://github.com/fallrising/newclear/blob/main/labs/iris-lab/upstream.lock.json): researched revisions, not a verified model download manifest.

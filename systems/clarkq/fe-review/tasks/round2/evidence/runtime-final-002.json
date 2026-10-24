@@ -1,0 +1,912 @@
+{
+  "id": "final-002",
+  "mode": "continue",
+  "status": "passed",
+  "startedAt": "2026-10-24T12:30:43.658Z",
+  "sourceHashes": {
+    "fe-review/api-fixture.mjs": "5e34c94437f8b8088b7b558239386eb4b95061610ced24f9fa36fc912bfcdbb0",
+    "fe-review/baseline.mjs": "05de3dcc256371c199dd9684c837679fde89ae4e86f946c54d00bc0c0755a090",
+    "fe-review/desktop-health.mjs": "d23e92c345923c8bc2906c0cc4a4658b3ea9e6baae25237d51d6506a3d86b813",
+    "fe-review/desktop-health.test.mjs": "fe1bf28f1a4cd754a6e4c9fcc8a4cdbe2666854193e2a3c946e60bab624a7f0d",
+    "fe-review/guards.mjs": "297fa73a790f1bbbf8b27cf907ad0a43c0b66873a98b3a252e1a6d3d52da760b",
+    "fe-review/guards.test.mjs": "45e2bd6601b782caf54dc1a0cf3183e60966ea768447c1a033b9d99318087473",
+    "fe-review/journey-health.mjs": "82a2e50062f7c0e25bc316a10d263e5627dba927381d8a2b54265c69d0859081",
+    "fe-review/journey-health.test.mjs": "4c2d69b67ad9d8d2c61c486703c45c3e172215d58272026a60afaafc051e75e4",
+    "fe-review/journey.mjs": "a58def19d8f9ca416c3dfd02969a866ff7caec44fb5579785db1557da5b99598",
+    "fe-review/run-review.mjs": "bb7f9072607c543396df3fc5267f44d2b71abb835356461d883e242e952be1a1",
+    "fe-review/shared-capture.mjs": "cde2da99148a85095326fcc78566d85262af6391e447eeb04a537d498691eb0e",
+    "fe-review/ui.test.mjs": "0316c5655bc87acf907a13bc8dacf9d6261870a99986e7d263850ec46726051f",
+    "internal/ui/index.html": "c99ad4916caee4757a14e5b6ceca2074bdab3a57f8636ddcedc51a36ff0e3bc3"
+  },
+  "cleanup": [
+    {
+      "name": "settle",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "capture-processes",
+      "passed": true
+    },
+    {
+      "name": "service",
+      "passed": true
+    },
+    {
+      "name": "listener",
+      "passed": true
+    },
+    {
+      "name": "log",
+      "passed": true
+    }
+  ],
+  "binarySHA256": "7a4c942dc143fbf5128a72ee531da1523ee85a63d8b81607751d6f3845005856",
+  "loopbackListener": true,
+  "fixture": {
+    "publicUI": 200,
+    "missingKey": 401,
+    "invalidKey": 401,
+    "authenticated": 200,
+    "queues": [
+      {
+        "name": "review_00",
+        "depth": 1
+      },
+      {
+        "name": "review_01",
+        "depth": 2
+      },
+      {
+        "name": "review_02",
+        "depth": 3
+      },
+      {
+        "name": "review_03",
+        "depth": 1
+      },
+      {
+        "name": "review_04",
+        "depth": 2
+      },
+      {
+        "name": "review_05",
+        "depth": 3
+      },
+      {
+        "name": "review_06",
+        "depth": 1
+      },
+      {
+        "name": "review_07",
+        "depth": 2
+      },
+      {
+        "name": "review_08",
+        "depth": 3
+      },
+      {
+        "name": "review_09",
+        "depth": 1
+      },
+      {
+        "name": "review_10",
+        "depth": 2
+      },
+      {
+        "name": "review_11",
+        "depth": 3
+      },
+      {
+        "name": "review_empty",
+        "depth": 0
+      },
+      {
+        "name": "review_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+        "depth": 3
+      }
+    ],
+    "syntheticBody": true
+  },
+  "reusedShared": {
+    "attempt": "final-001",
+    "receiptSHA256": "7ad06de47958e1650f103de2794e8b016dc17ed7ef6d9a438d0be703ea9261f4",
+    "manifestSHA256": "a40bb7b56af2332cb8d8659c038504c3d24457923279397a5fcb3597dbc21b4f",
+    "sourceFixtureBinaryEqual": true,
+    "geometryKeys": [
+      {
+        "key": "admin/ui/desktop/dark",
+        "status": 200,
+        "horizontalOverflow": false,
+        "consoleEvents": 1,
+        "screenshot": {
+          "file": "../final-001/shared/screenshots/admin__ui__desktop__dark.png",
+          "sha256": "f874ca61c14ea8cc19cc7437d7da202c0a04fcf90ad3594d1f936bd7cc21bbc4",
+          "width": 1440,
+          "height": 1717
+        }
+      },
+      {
+        "key": "admin/ui/tablet/dark",
+        "status": 200,
+        "horizontalOverflow": false,
+        "consoleEvents": 0,
+        "screenshot": {
+          "file": "../final-001/shared/screenshots/admin__ui__tablet__dark.png",
+          "sha256": "43477d71d9ab58a6d2989e0bb8f1cb59f3dda834b71ce2ccd85eae9f3c7252d5",
+          "width": 834,
+          "height": 1717
+        }
+      },
+      {
+        "key": "admin/ui/mobile/dark",
+        "status": 200,
+        "horizontalOverflow": false,
+        "consoleEvents": 0,
+        "screenshot": {
+          "file": "../final-001/shared/screenshots/admin__ui__mobile__dark.png",
+          "sha256": "3fc0b2265974243cbd602ea58841ca7761c0fb5bfdf8d11597b38e318c080982",
+          "width": 390,
+          "height": 3205
+        }
+      }
+    ],
+    "originalHealth": "failed; unchanged; fresh desktop diagnostic required",
+    "newSharedCaptureRun": false
+  },
+  "chromium": "153.0.8010.12",
+  "desktopHealth": {
+    "conditions": "fresh context; no route interception, matching original shared capture",
+    "requests": [
+      {
+        "id": "request-1",
+        "path": "/ui/",
+        "exactURL": false,
+        "method": "GET",
+        "initiator": "other",
+        "status": 200,
+        "headers": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false
+        },
+        "failed": false,
+        "responsePath": "/ui/"
+      },
+      {
+        "id": "request-2",
+        "path": "/health",
+        "exactURL": false,
+        "method": "GET",
+        "initiator": "script",
+        "status": 200,
+        "headers": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "failed": false,
+        "responsePath": "/health"
+      },
+      {
+        "id": "request-3",
+        "path": "/favicon.ico",
+        "exactURL": true,
+        "method": "GET",
+        "initiator": "other",
+        "status": 404,
+        "headers": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false
+        },
+        "failed": false,
+        "responsePath": "/favicon.ico"
+      },
+      {
+        "id": "request-4",
+        "path": "/api/v1/queues",
+        "exactURL": false,
+        "method": "GET",
+        "initiator": "script",
+        "status": 200,
+        "headers": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "failed": false,
+        "responsePath": "/api/v1/queues"
+      },
+      {
+        "id": "request-5",
+        "path": "/api/v1/metrics",
+        "exactURL": false,
+        "method": "GET",
+        "initiator": "script",
+        "status": 200,
+        "headers": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "failed": false,
+        "responsePath": "/api/v1/metrics"
+      },
+      {
+        "id": "request-6",
+        "path": "/api/v1/cluster",
+        "exactURL": false,
+        "method": "GET",
+        "initiator": "script",
+        "status": 200,
+        "headers": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": true,
+          "cookie": false,
+          "authorization": false
+        },
+        "failed": false,
+        "responsePath": "/api/v1/cluster"
+      }
+    ],
+    "console": [
+      {
+        "type": "error",
+        "path": "/favicon.ico",
+        "code": "HTTP_404"
+      }
+    ],
+    "networkLog": [
+      {
+        "source": "network",
+        "level": "error",
+        "path": "/favicon.ico",
+        "code": "HTTP_404",
+        "request": "request-3"
+      }
+    ],
+    "pageErrors": 0,
+    "finalPath": "/ui/",
+    "loadedRows": 14,
+    "classification": {
+      "favicon404": 1,
+      "consoleEvents": 1,
+      "networkLogEvents": 1,
+      "unknownRequests": 0,
+      "unknownConsole": 0,
+      "unknownNetworkLogs": 0,
+      "pageErrors": 0,
+      "classification": "existing-browser-favicon-404",
+      "passed": true
+    }
+  },
+  "baseline": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "finalPath": "/ui/",
+      "status": 200,
+      "loadedRows": 14,
+      "longQueueDepth": 3,
+      "literalBody": true,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "panels": [
+          {
+            "index": 0,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 140,
+            "right": 516
+          },
+          {
+            "index": 1,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 532,
+            "right": 908
+          },
+          {
+            "index": 2,
+            "clientWidth": 1158,
+            "scrollWidth": 1158,
+            "left": 140,
+            "right": 1300
+          },
+          {
+            "index": 3,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 140,
+            "right": 516
+          },
+          {
+            "index": 4,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 532,
+            "right": 908
+          },
+          {
+            "index": 5,
+            "clientWidth": 1158,
+            "scrollWidth": 1158,
+            "left": 140,
+            "right": 1300
+          }
+        ],
+        "table": {
+          "clientWidth": 1126,
+          "scrollWidth": 1126
+        },
+        "pre": [
+          {
+            "id": "metrics",
+            "clientWidth": 342,
+            "scrollWidth": 475
+          },
+          {
+            "id": "cluster",
+            "clientWidth": 342,
+            "scrollWidth": 342
+          },
+          {
+            "id": "log",
+            "clientWidth": 1126,
+            "scrollWidth": 10494
+          }
+        ]
+      },
+      "focus": {
+        "before": true,
+        "afterFiveSecondRefresh": true
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "externalRequests": 0,
+        "websockets": 0,
+        "httpErrors": [],
+        "requestFailures": []
+      },
+      "screenshot": {
+        "file": "baseline-desktop.png",
+        "sha256": "d0c750fab8dfbac4a13cca9bcd1c594978bc8d3225d5cac2b743936a98bdf3bc",
+        "width": 1440,
+        "height": 1753
+      }
+    },
+    {
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "finalPath": "/ui/",
+      "status": 200,
+      "loadedRows": 14,
+      "longQueueDepth": 3,
+      "literalBody": true,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834,
+        "panels": [
+          {
+            "index": 0,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 20,
+            "right": 409
+          },
+          {
+            "index": 1,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 425,
+            "right": 814
+          },
+          {
+            "index": 2,
+            "clientWidth": 792,
+            "scrollWidth": 792,
+            "left": 20,
+            "right": 814
+          },
+          {
+            "index": 3,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 20,
+            "right": 409
+          },
+          {
+            "index": 4,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 425,
+            "right": 814
+          },
+          {
+            "index": 5,
+            "clientWidth": 792,
+            "scrollWidth": 792,
+            "left": 20,
+            "right": 814
+          }
+        ],
+        "table": {
+          "clientWidth": 760,
+          "scrollWidth": 760
+        },
+        "pre": [
+          {
+            "id": "metrics",
+            "clientWidth": 355,
+            "scrollWidth": 475
+          },
+          {
+            "id": "cluster",
+            "clientWidth": 355,
+            "scrollWidth": 355
+          },
+          {
+            "id": "log",
+            "clientWidth": 760,
+            "scrollWidth": 10494
+          }
+        ]
+      },
+      "focus": {
+        "before": true,
+        "afterFiveSecondRefresh": true
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "externalRequests": 0,
+        "websockets": 0,
+        "httpErrors": [],
+        "requestFailures": []
+      },
+      "screenshot": {
+        "file": "baseline-tablet.png",
+        "sha256": "70b3e88377706fb70681f446f98354ecef7fc56a2b30bb55a37124e4f07b6a63",
+        "width": 834,
+        "height": 1753
+      }
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "finalPath": "/ui/",
+      "status": 200,
+      "loadedRows": 14,
+      "longQueueDepth": 3,
+      "literalBody": true,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "panels": [
+          {
+            "index": 0,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 1,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 2,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 3,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 4,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 5,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          }
+        ],
+        "table": {
+          "clientWidth": 316,
+          "scrollWidth": 316
+        },
+        "pre": [
+          {
+            "id": "metrics",
+            "clientWidth": 316,
+            "scrollWidth": 475
+          },
+          {
+            "id": "cluster",
+            "clientWidth": 316,
+            "scrollWidth": 316
+          },
+          {
+            "id": "log",
+            "clientWidth": 316,
+            "scrollWidth": 10494
+          }
+        ]
+      },
+      "focus": {
+        "before": true,
+        "afterFiveSecondRefresh": true
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "externalRequests": 0,
+        "websockets": 0,
+        "httpErrors": [],
+        "requestFailures": []
+      },
+      "screenshot": {
+        "file": "baseline-mobile.png",
+        "sha256": "251585267898ebb2866c3d1ffa68f9525e5208453b2104ca414f577d49652764",
+        "width": 390,
+        "height": 3241
+      }
+    }
+  ],
+  "journey": [
+    {
+      "name": "missing-key",
+      "apiStatus": 401,
+      "screenshot": {
+        "file": "journey-missing-key.png",
+        "sha256": "652e56f74438b3e7500ecad9d806476f2a0c626cf90894511027225ba163c35d",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "name": "invalid-key",
+      "apiStatus": 401,
+      "screenshot": {
+        "file": "journey-invalid-key.png",
+        "sha256": "5a66bd1a20c9af3dff0c48c758b4ecd5c6191c4414fc89b3e962fad66c87fb31",
+        "width": 1440,
+        "height": 940
+      }
+    },
+    {
+      "name": "save-refresh",
+      "authenticated": true,
+      "clusterEnabled": false,
+      "screenshot": {
+        "file": "journey-save-refresh.png",
+        "sha256": "1d5aaba6208df3070b444f8113914d612986aaf1081a82f8ae4604a5306ccf7c",
+        "width": 1440,
+        "height": 1821
+      }
+    },
+    {
+      "name": "enqueue",
+      "status": 201,
+      "depth": 1,
+      "screenshot": {
+        "file": "journey-enqueue.png",
+        "sha256": "8245fd5fd00a7d3bc1c6540fedf54974871dec6fc0078718cd0d84c5fb5c2e88",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "use",
+      "queueSelected": true,
+      "screenshot": {
+        "file": "journey-use.png",
+        "sha256": "4f5ba27eb96afd5a2d42edb4c52b5afc6628163247e18b14a0b0f1224a2272b1",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "peek",
+      "status": 200,
+      "depth": 1,
+      "literalBody": true,
+      "screenshot": {
+        "file": "journey-peek.png",
+        "sha256": "0f4380343f3fe30a288a72f9ce97c20f640e48205cc69cdfb25846c3e3107690",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "consume",
+      "status": 200,
+      "depth": 0,
+      "sameMessage": true,
+      "screenshot": {
+        "file": "journey-consume.png",
+        "sha256": "9d4d32212be1209a7d320a0a674c99c848264558d5f57b5b875c0da3121f6772",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "empty",
+      "status": 204,
+      "depth": 0,
+      "screenshot": {
+        "file": "journey-empty.png",
+        "sha256": "56d1a1c2b3cc53b2d170091d5f4639b9d594ab72853f959eff811d3e6674d5e9",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "clear-cancel",
+      "depth": 2,
+      "screenshot": {
+        "file": "journey-clear-cancel.png",
+        "sha256": "7675c3445c538be50a992c871758538f0625abacdd93a83b506702e9aeda2fda",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "clear-confirm",
+      "cleared": 2,
+      "depth": 0,
+      "screenshot": {
+        "file": "journey-clear-confirm.png",
+        "sha256": "043e5503a3d5ff68d6b836abafb9e41589d44b5709facd2939b070be9c8529bc",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "illegal-name",
+      "status": 400,
+      "screenshot": {
+        "file": "journey-illegal-name.png",
+        "sha256": "ee4a2a0b0eaa1c3bd3d4986c29c7e4c41ae8e46c127e6e0b7b706b458bc86cd6",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "controlled-network-failure",
+      "controlled": true,
+      "visibleError": true,
+      "screenshot": {
+        "file": "journey-controlled-network-failure.png",
+        "sha256": "66005903bc6c7daaf00d6df36af972725ba7286adf2ece83b293840b2ff4ae37",
+        "width": 1440,
+        "height": 1661
+      }
+    },
+    {
+      "name": "recovered-refresh",
+      "recovered": true,
+      "screenshot": {
+        "file": "journey-recovered-refresh.png",
+        "sha256": "e35197a13a6e385a89670b2068b4e5e84b99f1812507f741db5ebb0d456435a0",
+        "width": 1440,
+        "height": 1867
+      }
+    },
+    {
+      "name": "five-second-focus",
+      "replaced": true,
+      "focusPreserved": true,
+      "depth": 0,
+      "screenshot": {
+        "file": "journey-five-second-focus.png",
+        "sha256": "11e2843bc9f4ca021d1ac8ac4e3de7c8f4d5288a5e339a5c7c63a7c9457e1500",
+        "width": 1440,
+        "height": 1867
+      }
+    }
+  ],
+  "journeyHealth": {
+    "http": [
+      {
+        "path": "/api/v1/queues",
+        "status": 401,
+        "method": "GET",
+        "stage": "missing-key",
+        "expected": true
+      },
+      {
+        "path": "/api/v1/metrics",
+        "status": 401,
+        "method": "GET",
+        "stage": "missing-key",
+        "expected": true
+      },
+      {
+        "path": "/api/v1/cluster",
+        "status": 401,
+        "method": "GET",
+        "stage": "missing-key",
+        "expected": true
+      },
+      {
+        "path": "/api/v1/queues",
+        "status": 401,
+        "method": "GET",
+        "stage": "invalid-key",
+        "expected": true
+      },
+      {
+        "path": "/api/v1/metrics",
+        "status": 401,
+        "method": "GET",
+        "stage": "invalid-key",
+        "expected": true
+      },
+      {
+        "path": "/api/v1/cluster",
+        "status": 401,
+        "method": "GET",
+        "stage": "invalid-key",
+        "expected": true
+      },
+      {
+        "path": "/api/v1/queue/review.invalid",
+        "status": 400,
+        "method": "POST",
+        "stage": "illegal-name",
+        "expected": true
+      }
+    ],
+    "requestFailures": [
+      {
+        "path": "/api/v1/metrics",
+        "method": "GET",
+        "stage": "controlled-network-failure",
+        "code": "net::ERR_FAILED",
+        "expected": true
+      }
+    ],
+    "console": [
+      {
+        "type": "error",
+        "stage": "missing-key",
+        "expected": true
+      },
+      {
+        "type": "error",
+        "stage": "missing-key",
+        "expected": true
+      },
+      {
+        "type": "error",
+        "stage": "missing-key",
+        "expected": true
+      },
+      {
+        "type": "error",
+        "stage": "invalid-key",
+        "expected": true
+      },
+      {
+        "type": "error",
+        "stage": "invalid-key",
+        "expected": true
+      },
+      {
+        "type": "error",
+        "stage": "invalid-key",
+        "expected": true
+      },
+      {
+        "type": "error",
+        "stage": "illegal-name",
+        "expected": true
+      },
+      {
+        "type": "error",
+        "stage": "controlled-network-failure",
+        "expected": true
+      }
+    ],
+    "blocked": 0,
+    "pageErrors": 0
+  },
+  "journeyObserved": {
+    "httpErrors": 7,
+    "requestFailures": 1,
+    "consoleEvents": 8,
+    "blocked": 0,
+    "pageErrors": 0,
+    "lastStage": "five-second-focus"
+  },
+  "scope": "original R2 M1–M3 candidate only; independent review, native gates and publication remain separate",
+  "serviceExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false,
+    "groupAbsent": true
+  },
+  "receivedSignal": null,
+  "endedAt": "2026-10-24T12:31:19.954Z"
+}

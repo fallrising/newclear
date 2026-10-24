@@ -114,6 +114,8 @@ struct LiveRun {
     token: String,
     /// Where the current request's records go; None between requests.
     sink: Mutex<Option<mpsc::Sender<Item>>>,
+    /// Wake the reader when an idle run gets a new request receiver.
+    sink_changed: tokio::sync::Notify,
     /// tool_use blocks streamed and not yet matched to an MCP call: (id, bridged name, input).
     announced: Mutex<VecDeque<(String, String, Value)>>,
     /// Ids of the last message's tool calls, awaiting the client's results.
@@ -412,6 +414,7 @@ impl ClaudeCode {
         let line = json!({"type": "user", "message": {"role": "user", "content": render_turn(&msgs[start..])}});
         let (tx, rx) = mpsc::channel::<Item>(64);
         *run.sink.lock().unwrap() = Some(tx);
+        run.sink_changed.notify_one();
         *run.waiting_since.lock().unwrap() = None;
         *run.known.lock().unwrap() = normed;
         let written = match run.stdin.lock().await.as_mut() {
@@ -517,6 +520,7 @@ impl ClaudeCode {
         };
         let (tx, rx) = mpsc::channel::<Item>(64);
         *run.sink.lock().unwrap() = Some(tx);
+        run.sink_changed.notify_one();
         *run.waiting_since.lock().unwrap() = None;
         *run.known.lock().unwrap() = convo(chat).iter().map(norm).collect();
         run.pending.lock().unwrap().clear();
@@ -1134,6 +1138,7 @@ async fn spawn_run(
     let run = Arc::new(LiveRun {
         token: token.clone(),
         sink: Mutex::new(Some(tx)),
+        sink_changed: tokio::sync::Notify::new(),
         announced: Mutex::new(VecDeque::new()),
         pending: Mutex::new(Vec::new()),
         results: Mutex::new(HashMap::new()),
@@ -1162,7 +1167,18 @@ async fn spawn_run(
         };
         let sink = |run: &LiveRun| run.sink.lock().unwrap().clone();
         'read: loop {
+            // An active receiver can disappear while stdout stays silent. Between
+            // completed turns there is no sink; retain the reusable process then.
+            let active_sink = sink(&run);
+            let disconnected = async {
+                match active_sink.as_ref() {
+                    Some(tx) => tx.closed().await,
+                    None => std::future::pending::<()>().await,
+                }
+            };
             let next = tokio::select! {
+                _ = run.sink_changed.notified() => continue,
+                _ = disconnected => break,
                 _ = run.stop.cancelled() => break,
                 _ = first_cancel.cancelled(), if !sent => break,
                 l = lines.next_line() => l,

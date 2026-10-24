@@ -2,6 +2,8 @@
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
+> 文件規劃：[LLM 用量正確性修正規格](../../docs/specs/llm-usage-correctness.md)（T-1102）。整理已確認缺陷、待重現問題與後續修正驗收；修正尚未實作。
+
 
 > **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
 

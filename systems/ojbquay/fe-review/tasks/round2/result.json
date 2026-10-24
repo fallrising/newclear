@@ -1,0 +1,72 @@
+{
+  "status": "R2_LOCAL_EVIDENCE_READY_PENDING_FINAL_REVIEW_CI_PUBLICATION",
+  "scope": "Approved original M1-M4 and explicit review-only isolation/gRPC addendum",
+  "sourceCommit": "8cabc475d5dd56ff2d34f94fd3b29fe0476dca1c",
+  "dirtyScopedChanges": true,
+  "m1": {
+    "realStack": true,
+    "realUiSessionCsrf": true,
+    "freshSyntheticResources": true,
+    "actualOwnedCleanupAbsent": true,
+    "attempts": 8,
+    "sameOwnedStackContinuations": 7
+  },
+  "m2": {
+    "states": 42,
+    "routes": 27,
+    "selectedPngs": 72,
+    "rawPrivatePngs": 84,
+    "stateUnion": "006:41 - superseded6 + 008:6 + 007:1",
+    "realNegative401AndMissingDelay": true,
+    "empty500AreControlledSupplements": true
+  },
+  "m3": {
+    "measuredDrawerBoundsPassed": true,
+    "stylesChanged": false
+  },
+  "m4": {
+    "focusedObserverRedGreen": true,
+    "fixedViewportCollapseExpandPassed": true,
+    "chartWidths": [
+      663,
+      780,
+      663
+    ]
+  },
+  "nativePassedWithHistoricalFailuresAndCacheExplicit": true,
+  "originalBrowserFailuresPreserved": true,
+  "browser007DerivedHealthOnly": true,
+  "redaction": {
+    "replacedDrawerPngs": 6,
+    "actualCoverage": 1.0,
+    "originalPrivatePrivacyFailureRetained": true,
+    "auditDesktop4RectanglesCoverage": 1.0,
+    "narrowAuditNoCurrentVisibleTokenRects": true
+  },
+  "fullRound3Passed": false,
+  "axeZeroClaim": false,
+  "axe": {
+    "seriousColorContrastEntries": 9,
+    "moderateMissingH1Entries": 1,
+    "minorEmptyHeaderEntries": 2,
+    "preloadIncompleteDesktopRows": 9
+  },
+  "unresolved": [
+    "mobile Logout accessible name",
+    "external Google Fonts source dependency",
+    "React/AntD compatibility warning",
+    "Modal deprecated prop warning",
+    "axe findings/preload limitation"
+  ],
+  "mainlineQualificationChanged": false,
+  "publication": "root pending independent final acceptance and required exact-head CI",
+  "evidence": "evidence/verification.json",
+  "report": "report.md",
+  "metrics": {
+    "observedBrowserAttempts": 8,
+    "activeSeconds": null,
+    "providerRequests": null,
+    "toolCalls": null,
+    "unknownReason": "No reliable complete cross-context counter; do not substitute task budgets or orchestration calls."
+  }
+}

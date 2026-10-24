@@ -1,0 +1,28 @@
+{
+  "attempt": "continuation-001",
+  "exitCode": 1,
+  "error": null,
+  "elapsedSeconds": 8.513,
+  "containerRemoved": true,
+  "image": "sha256:f659591ff6a2df30b6d644236056a7f1b185a4161852f5b6639f45f042427884",
+  "binarySHA256": "0309ce72287dfbca23f5a650bc9b893403e4b1b2e171c7705d9c83dceca43a90",
+  "sourceHashes": {
+    "tui-capture.test.mjs": "e7a9f40fdf042e88bcb47d9acfef4ce922f035d219a84d26b34dbb20ea791c7d",
+    "guards.test.mjs": "55818d9ef16c9e7f45f9575d80fcba0b7fb03496b2b03d755dfb26e83bc05ee0",
+    "browser-baseline.mjs": "8b430716f167c499e26959276bf920bd3e07f6d63b2991e8277f8318a8f684af",
+    "shared-capture.mjs": "a190f3e46d02a26fdec4828fd18e6746e9db6b9c3412a5f8ed0da705aa60e454",
+    "journeys.mjs": "3bab74e64e4fce77b345322365d21c05c7630d2680ff6de42cbd509b9df9aa90",
+    "fixture.test.mjs": "f47fa47fd5aee5d7a7c231b243cc26e3bc70922b972babbec376b3da169ca836",
+    "desktop-health.mjs": "2ed04aaecb1747719547665e0b3d13b8fd5fb1f97a1fea2ef7f86a999315885b",
+    "fixture.mjs": "1093d6c6dc127a7730bd8cb512cdbb693e040a4669be3a6d9b84e7bcbec9980a",
+    "mock-upstream.mjs": "7ee372736faa597ae9a3c1cfa61f5dd95d6d50c044b5e0d9e4f38aa8e8fe7755",
+    "tui-capture.mjs": "070722cc073533724e9169c0d213ab42976373cca8a67137ce0935ec68ea3003",
+    "reuse-web.mjs": "d6583ae0ebfe859c0c26273a8cfe8b8c006fc654a52bd61bf392df5b4b7331a3",
+    "run-review.mjs": "29b0e80912288c1d31640c93e2a0601da82dab07e13f23957f1280dc76e1380a",
+    "desktop-health.test.mjs": "3fbfc3c166dc326e51b05b770f710d5e98e0eabcba6d38fdf3f6b06dbdd94ba3",
+    "guards.mjs": "f5ad2bae0b5379937dbce7a6de8fd3bf743848f9d81599677649566a6e3ca560",
+    "contrast-review.mjs": "3637196852699106344be00568d90c34ab8df10ef3f68177a5ba0dbe8aa8ee13",
+    "journeys.test.mjs": "88b9338b46e043a5014b0d2741fe91ea78389c746535885273a1d2d6f4ba80ec",
+    "presentation.test.mjs": "a1a890c847c0a21c01fc1a920019202c292a42c75910f3b85a792139aebf9148"
+  }
+}

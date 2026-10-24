@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-24T11:25:46.762481+00:00",
+  "node": "24.18.0",
+  "pnpm": "11.18.0",
+  "install": {
+    "command": "pnpm install --frozen-lockfile",
+    "exitCode": 0,
+    "packages": 247,
+    "reused": 247,
+    "downloaded": 0,
+    "reportedMs": 874
+  },
+  "compose": {
+    "version": "2.39.1",
+    "officialRelease": "docker/compose v2.39.1",
+    "sha256": "a5ea28722d5da628b59226626f7d6c33c89a7ed19e39f750645925242044c9d2",
+    "publishedChecksumMatched": true
+  },
+  "playwright": {
+    "version": "1.62.0",
+    "chromiumRevision": "1234",
+    "browserVersion": "151.0.7922.34",
+    "installExitCode": 0
+  },
+  "sharedCacheIncident": {
+    "cause": "Playwright install without SKIP_BROWSER_GC automatically removed existing1194/1243 browsers",
+    "recovery": "Restored exact1.63.0 revision1243 and1.56.0 revision1194 incl headless shells with PLAYWRIGHT_SKIP_BROWSER_GC=1; both install exit0; Phark mobile003 successfully used1243 afterwards",
+    "future": "Set PLAYWRIGHT_SKIP_BROWSER_GC=1 for every browser install",
+    "hostWarning": "Host lacks browser libs; runtime uses previously verified image libs, no host packages installed"
+  }
+}

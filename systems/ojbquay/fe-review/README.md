@@ -1,14 +1,22 @@
 # fe-review — ojbquay console
 
-這個目錄是給 LLM agent 用的前端 review 工作包：定義如何檢查 ojbquay console 的 UI、如何產生 headless 截圖，以及報告放在哪裡。它不是給人的操作教學，也不改變元件的文檔檔位。
+2026-10-24: approved R2 M1–M4 implementation and required local evidence are ready
+for independent final review and exact-head CI. One fresh owned real stack was
+used with bounded continuations and then fully removed. `targets.verified` covers
+the approved loopback harness/route mappings only; plain `pnpm dev` has no backend.
+Full Round3, axe-zero, new mainline qualification and deployment are not claimed.
 
-**狀態：** 第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動或截圖。
-
-| 檔案 | 用途 |
+| File | Purpose |
 | --- | --- |
-| [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
-| [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
-| [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
-| `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
+| [Report](tasks/round2/report.md) | Results, original failures, corrections and remaining findings |
+| [Result](tasks/round2/result.json) | Machine-readable scoped status |
+| [Verification](tasks/round2/evidence/verification.json) | Source/manifest hashes and accepted evidence counts |
+| [RUNNER](RUNNER.md) / [isolation](ISOLATION.md) | Reproducible interfaces and exact-owned lifecycle |
+| [PROMPT](PROMPT.md) / [REVIEW](REVIEW.md) | Current scope and unresolved findings |
+| [targets](targets.json) | Nine verified route mappings; harness provides authenticated storageState |
 
-共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)；截圖腳本：`docs/fe-review/capture.mjs`。
+42 unique state images,27 route images and three chart images are indexed; all
+PNGs and sensitive raw evidence remain ignored/private. Six unsafe/unverified
+original drawer images were superseded by pixel-verified replacements. Existing
+mobile Logout naming, Google Fonts/AntD warnings and actual axe findings remain
+visible in the report. Shared [protocol](../../../docs/fe-review/PROTOCOL.md).

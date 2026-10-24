@@ -126,7 +126,7 @@ export function ReplyThread({
   }
 
   return (
-    <div className="border-t border-border/70 pt-3">
+    <div className="min-w-0 border-t border-border/70 pt-3 [overflow-wrap:anywhere]">
       <Button
         type="button"
         variant="outline"

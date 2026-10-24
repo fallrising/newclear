@@ -59,6 +59,11 @@
       "source_commit": "222c1a8a736dbb3ac89f34345a7bc73fa887aba8"
     },
     {
+      "path": "labs/iris-lab",
+      "last_source_update": "2026-10-24T15:21:05Z",
+      "source_commit": "4fc5d9a7b49139115518379bf05e1cfec4fe1bce"
+    },
+    {
       "path": "labs/m4-seat",
       "last_source_update": "2026-10-17T18:53:31+08:00",
       "source_commit": "8526b6411bd11967b98b91a7c2cacadeafe5ef71"

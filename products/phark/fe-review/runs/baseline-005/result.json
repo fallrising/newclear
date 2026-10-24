@@ -1,0 +1,899 @@
+{
+  "schema": 1,
+  "id": "baseline-005",
+  "phase": "baseline-only",
+  "status": "passed",
+  "startedAt": "2026-10-24T11:16:58.299Z",
+  "controlledMockBeforeSpring": true,
+  "api": [
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "2023387e-cd07-42f5-8a01-98fb574710a6",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "f1f4ffb7-7de5-4269-a146-aeaf0ae0cf43",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "538c9881-3aa4-44d1-9dac-081b843411b9",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "2480f255-ce2f-458d-b2fa-caa4bcf84bf2",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "ed1e51e6-5742-404c-bd4d-bed95f75a6c9",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "71417d51-d768-49fb-90f7-b7956aee106b",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "23ac5f12-993a-4150-be81-d25836bbb616",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "d0cc46b1-4ffb-4d67-9f07-8a3be632d750",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "2f09d058-18aa-40c9-ae31-2d439858e261",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "9d79cfed-d17f-4db9-a6e5-e788c6543f8a",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "67e91896-65df-4376-9276-7677777d9477",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "a47c76a9-44b7-4de4-a798-fef2fcd5cb02",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "9994c9f3-57bc-43be-b998-e9a6b9438907",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "592c6960-4cb7-4678-8d5e-0737ef681db5",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "9973bbce-0541-4dac-9e4f-1de91299e5f6",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "22362a18-2340-44d8-ad17-04418caab086",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "bdcd4404-e986-438e-a382-dfd491df624d",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "bb94a5ec-eda8-4407-8541-88ff3cf1475d",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/replies",
+      "status": 201,
+      "requestId": "94f5fe49-d8d9-46e1-85ee-ea4dc08d215b",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/10/like",
+      "status": 200,
+      "requestId": "aa6f43cc-eb6a-4533-bc9a-a28c5024426f",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/11/repost",
+      "status": 200,
+      "requestId": "e2eff42a-5c23-4eea-b58e-b3245c77cca6",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200,
+      "requestId": "14d0bd9f-e2e9-49c9-a3fe-b8336ce6f52e",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "017fba4b-2af2-4dc4-91cd-bed2bb149623",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "50bfaa30-2083-498f-8380-b16ddb5ba762",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/profiles/r6ad81ca4f0",
+      "status": 200,
+      "requestId": "b19fb7d4-7901-477a-a779-716eac28c70d",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/search",
+      "status": 200,
+      "requestId": "1d10cc1a-7509-4c93-862b-12fe3e8773da",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/reports",
+      "status": 201,
+      "requestId": "7ceef71d-ca30-461e-95b2-a3f61ce1be93",
+      "controlled": false
+    }
+  ],
+  "steps": [
+    {
+      "name": "real-register-login-csrf",
+      "actor": "A",
+      "handle": "r6ad81ca4f0",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-register-login-csrf",
+      "actor": "B",
+      "handle": "r809556e6fd",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-api-seed",
+      "posts": {
+        "home": 10,
+        "tech": 11,
+        "ops": 12,
+        "second": 13
+      },
+      "replyId": 1,
+      "channels": [
+        "home",
+        "tech",
+        "ops"
+      ],
+      "image": {
+        "id": 1,
+        "bytes": 79,
+        "sha256": "af9d971dc1f45fc5e79c98c2bbaade8ac05d71c7e41e188d6a065ab4cba558ce"
+      },
+      "notifications": 3,
+      "opaqueCursorPaging": true,
+      "reportId": 1,
+      "controlled": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "spring",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [
+    {
+      "state": "loading",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "status",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "empty",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "401",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "403",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 403,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "429",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "500",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 642,
+          "clientWidth": 390
+        },
+        "deck": {
+          "width": 358,
+          "height": 572,
+          "scrollWidth": 872,
+          "clientWidth": 358,
+          "scrollHeight": 572,
+          "clientHeight": 572
+        },
+        "columns": [
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          },
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          },
+          {
+            "width": 280,
+            "height": 556,
+            "scrollWidth": 278,
+            "clientWidth": 278,
+            "scrollHeight": 554,
+            "clientHeight": 554
+          }
+        ],
+        "overflowingText": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 95
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 834,
+          "clientWidth": 834
+        },
+        "deck": {
+          "width": 786,
+          "height": 840,
+          "scrollWidth": 786,
+          "clientWidth": 786,
+          "scrollHeight": 840,
+          "clientHeight": 840
+        },
+        "columns": [
+          {
+            "width": 251.328125,
+            "height": 824,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 822,
+            "clientHeight": 822
+          },
+          {
+            "width": 251.328125,
+            "height": 824,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 822,
+            "clientHeight": 822
+          },
+          {
+            "width": 251.328125,
+            "height": 824,
+            "scrollWidth": 249,
+            "clientWidth": 249,
+            "scrollHeight": 822,
+            "clientHeight": 822
+          }
+        ],
+        "overflowingText": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 95
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "loaded": {
+        "channels": 3,
+        "chineseLength": 500,
+        "unbrokenLength": 500,
+        "authorLength": 50,
+        "imageDecoded": true,
+        "replyLoaded": true
+      },
+      "measurement": {
+        "page": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        },
+        "deck": {
+          "width": 1232,
+          "height": 628,
+          "scrollWidth": 1232,
+          "clientWidth": 1232,
+          "scrollHeight": 628,
+          "clientHeight": 628
+        },
+        "columns": [
+          {
+            "width": 400,
+            "height": 612,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 610,
+            "clientHeight": 610
+          },
+          {
+            "width": 400,
+            "height": 612,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 610,
+            "clientHeight": 610
+          },
+          {
+            "width": 400,
+            "height": 612,
+            "scrollWidth": 398,
+            "clientWidth": 398,
+            "scrollHeight": 610,
+            "clientHeight": 610
+          }
+        ],
+        "overflowingText": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 95
+          }
+        ]
+      },
+      "health": {
+        "externalRequests": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "httpErrors": [],
+        "requestFailures": 0
+      },
+      "passed": true
+    }
+  ],
+  "captures": [
+    {
+      "name": "mock-loading",
+      "path": "screenshots/mock-loading.png",
+      "sha256": "a1412f391f952e406d1e10efac25621491ac99cd1e3ba6ba8c3148515cacd58d",
+      "bytes": 49407,
+      "controlled": true
+    },
+    {
+      "name": "mock-empty",
+      "path": "screenshots/mock-empty.png",
+      "sha256": "760f7d54e633f1f7e3473f2dda288cc7fd19a2ae5364c9ed87b112155918dbc1",
+      "bytes": 74171,
+      "controlled": true
+    },
+    {
+      "name": "mock-401",
+      "path": "screenshots/mock-401.png",
+      "sha256": "565d0f4d528c1abd607f1c905654bb68ab79e0e37a42bc0fb080b8cc884e541b",
+      "bytes": 52716,
+      "controlled": true
+    },
+    {
+      "name": "mock-403",
+      "path": "screenshots/mock-403.png",
+      "sha256": "cf3127e282d574fc624c8ab008456674bd4dc4a0bcf01c3c2037e246d5eb816b",
+      "bytes": 74167,
+      "controlled": true
+    },
+    {
+      "name": "mock-429",
+      "path": "screenshots/mock-429.png",
+      "sha256": "e8ea45aecaf9eadd1af3ef9b53242fa23b72223cffd78d4dd360b555e3fdc397",
+      "bytes": 52802,
+      "controlled": true
+    },
+    {
+      "name": "mock-500",
+      "path": "screenshots/mock-500.png",
+      "sha256": "cf64ddbac0a0f46fea547700d81b9fe24434deef2f819998eade5ecdac8c49ca",
+      "bytes": 52800,
+      "controlled": true
+    },
+    {
+      "name": "baseline-home-390",
+      "path": "screenshots/baseline-home-390.png",
+      "sha256": "f3accb9c8d4800b8115917022a002bc1c5776a56df8cfd46af708a6108d6ab9f",
+      "bytes": 109313,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "controlled": false
+    },
+    {
+      "name": "baseline-home-834",
+      "path": "screenshots/baseline-home-834.png",
+      "sha256": "ac7dc9d58ce30415c6e9a778c8321197f600a60f2657dfb018cb5bf406536c5a",
+      "bytes": 191325,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "controlled": false
+    },
+    {
+      "name": "baseline-home-1440",
+      "path": "screenshots/baseline-home-1440.png",
+      "sha256": "f86e5f4a9ca4a5b253589c4a67bf305cb94557431dede92041a591b884794114",
+      "bytes": 161349,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "controlled": false
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "ebefeb43099f0e6ccd1202005f1db4106f4bd7fc07a07249f243c93585cc3117",
+    "frontend/src/components/Column.tsx": "79098b1540de8c2f9c3445a59e14367c5b2079a67497e24c3107d90be2ed3a41",
+    "frontend/src/components/PostCard.tsx": "b7f414d1b62d89f44af9f1b2f890a7573e0ce10fa08c1c38995a00477357a8c8",
+    "frontend/src/components/ReplyThread.tsx": "f11ed54a9d8ffb5e6695bb15e49de7ce16b353b0c4b0004f2b010d288436c325",
+    "frontend/src/components/Composer.tsx": "116d03dd08e1a6d45d4aebbd4b0697a0b68efb279009789f11fac6421a1f416d",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "211f97bff1fdb78a7a930644a472e843bed60d38d721a4be6b901030499b9d6c",
+    "fe-review/api-fixture.mjs": "d482368dafa8f06df8a8714c519e835222bb1525acfb60e6652ac0e79135e465",
+    "fe-review/guards.mjs": "72f215327fd6b91a066769ee19d194937171c73eee79e020f08c3a87f74b4f7e",
+    "fe-review/mock-baseline.mjs": "4db5dbebae8d994c5732f0fb80158a12e675de59fcf1633cfdbdadf9bae66b4c",
+    "fe-review/baseline.mjs": "86576d74d51f57d35d380b5f840c251393c836119a0a9e6b2b8228285f5a7325",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "spring",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "real-responsive-baseline",
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "lastAPI": {
+    "actor": "B",
+    "method": "POST",
+    "path": "/api/posts/10/reports",
+    "status": 201,
+    "expected": 201
+  },
+  "seedBudget": {
+    "registrations": 2,
+    "logins": 2,
+    "posts": 4,
+    "replies": 1,
+    "socialWrites": 2,
+    "reports": 1,
+    "rateLimitDisabled": false
+  },
+  "baselineProgress": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "step": "axe",
+    "techCopies": 2,
+    "measurement": {
+      "page": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "deck": {
+        "width": 1232,
+        "height": 628,
+        "scrollWidth": 1232,
+        "clientWidth": 1232,
+        "scrollHeight": 628,
+        "clientHeight": 628
+      },
+      "columns": [
+        {
+          "width": 400,
+          "height": 612,
+          "scrollWidth": 398,
+          "clientWidth": 398,
+          "scrollHeight": 610,
+          "clientHeight": 610
+        },
+        {
+          "width": 400,
+          "height": 612,
+          "scrollWidth": 398,
+          "clientWidth": 398,
+          "scrollHeight": 610,
+          "clientHeight": 610
+        },
+        {
+          "width": 400,
+          "height": 612,
+          "scrollWidth": 398,
+          "clientWidth": 398,
+          "scrollHeight": 610,
+          "clientHeight": 610
+        }
+      ],
+      "overflowingText": []
+    }
+  },
+  "endedAt": "2026-10-24T11:17:16.139Z"
+}

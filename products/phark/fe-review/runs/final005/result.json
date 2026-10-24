@@ -1,0 +1,313 @@
+{
+  "schema": 1,
+  "id": "final005",
+  "phase": "remaining-routes-and-journeys",
+  "status": "passed",
+  "startedAt": "2026-10-24T11:52:27.171Z",
+  "controlledMockBeforeSpring": false,
+  "api": [
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "06c8c3f4-aea3-48c3-8ed1-68976d050b7e",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "a1c19915-57be-486e-beb3-637b0454641c",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "f6f96294-dbcf-46de-ae57-94687cc47b0e",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "514526b2-fe7d-431f-8c0f-5581a1784397",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "9dd4c9c6-7893-4298-98a9-e7c47b77d2f6",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "80767ef5-5fac-45fb-954f-22d6f244bd18",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "38ff24a5-ccb1-4076-ab43-79b84d00fefe",
+      "controlled": false
+    }
+  ],
+  "steps": [
+    {
+      "name": "real-register-login-csrf",
+      "actor": "A",
+      "handle": "r07ddfad1db",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "spring",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [],
+  "baseline": [],
+  "captures": [
+    {
+      "name": "flow-logged-out-notifications",
+      "path": "screenshots/flow-logged-out-notifications.png",
+      "sha256": "757d646bbe2bf4476c37b291fb1b129162ef94dbb52c309a8ea18beef5e71398",
+      "bytes": 51974,
+      "controlled": false
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "7b3cf366f10d30c4e7134d2336cfae033ec78e449858f72fd31df204911eb810",
+    "frontend/src/components/Column.tsx": "79098b1540de8c2f9c3445a59e14367c5b2079a67497e24c3107d90be2ed3a41",
+    "frontend/src/components/PostCard.tsx": "10029f5ebad596f5c48f9a3205834f638c1922799f1ee6407948f1216627e49a",
+    "frontend/src/components/ReplyThread.tsx": "f11ed54a9d8ffb5e6695bb15e49de7ce16b353b0c4b0004f2b010d288436c325",
+    "frontend/src/components/Composer.tsx": "116d03dd08e1a6d45d4aebbd4b0697a0b68efb279009789f11fac6421a1f416d",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "7e0aae4dc3e392776ec0a58bbb7947fe9a031fb26efaa50b8e5dc7b2ed142d3f",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "b9e5c31d0532909b6e7ca85da7b75a1726d3f3ca47c62959e6c4e593448b7cbd",
+    "fe-review/api-fixture.mjs": "f5a19255b590e694f832e9c75c6641f41439eba4e97a326460d82b104c3a8db6",
+    "fe-review/guards.mjs": "ea0246bdf2575da3e8bb1604031dddf2754bf7512203890d156195eb7909df42",
+    "fe-review/mock-baseline.mjs": "4db5dbebae8d994c5732f0fb80158a12e675de59fcf1633cfdbdadf9bae66b4c",
+    "fe-review/baseline.mjs": "2df48b8f662367413b63d0fedea88e5e0a7fde3021d90db29eb87f87bba80024",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484",
+    "fe-review/routes.mjs": "1fccf1664acfb04e4448f6912d67c666b0a967ba48cbf8f763e92ce5f2617c41",
+    "fe-review/journey.mjs": "f6585e64c0c1522a05bedeeb2a1bf57dbf2e55bf256e624f4aefacd0ea176e3a",
+    "fe-review/keyboard.mjs": "7e5932b5a0665154409ba5a6b70988cf02c6fc483ed859044f532b788bb7ef38",
+    "fe-review/load-more.mjs": "0a16f7b4ca8720b8157e9dc03145b03032d9ae260a4b888b017c1803b7192425",
+    "fe-review/layout-contract.mjs": "ae75f88f3b8c6b4bc29ff143743681476c1ecacfb01c51b1ce42fd5c733c736c",
+    "fe-review/shared-capture.mjs": "6051172007794a9ff4f51256b95d5f6252ad08861ece32ffe3b9ba6fa5def418",
+    "fe-review/capture-selection.mjs": "aa35944feb89362157e69550f89ed8ee4ca6167abbeae9454def0d1b357af218",
+    "fe-review/health.mjs": "b0b21825e584a4de31197c92bb0e2ec69b4b87d08b2ffc7f803012c26e96b4b8"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "spring",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "real-keyboard-journey",
+  "exactNotificationStyleDelta": {
+    "appAttribute": "data-view={route.kind}",
+    "cssSelector": "[data-view=\"notifications\"] main .whitespace-pre-wrap",
+    "appBeforeSHA256": "ebefeb43099f0e6ccd1202005f1db4106f4bd7fc07a07249f243c93585cc3117",
+    "cssBeforeSHA256": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b"
+  },
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "mockPrerequisite": {
+    "run": "baseline-005",
+    "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+    "passed": 6,
+    "rerun": false
+  },
+  "homePrerequisites": {
+    "mobile": {
+      "run": "mobile-003",
+      "sha256": "3794ecc1f8331ee93b25740f704db319200e17979e0b547f044ebb9c6087ccad",
+      "viewport": 390
+    },
+    "tabletDesktop": {
+      "run": "baseline-005",
+      "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+      "viewports": [
+        834,
+        1440
+      ],
+      "laterDelta": "PostCard relative containing block; covered by mobile-003 and new route captures"
+    },
+    "rerun": false
+  },
+  "capturePrerequisite": {
+    "run": "final-002",
+    "sha256": "9c5a31e84597ebbac5410279fe06505260c9ab02555ead2376a809a9a88c5820",
+    "sharedUnique": 12,
+    "supplementalRoutes": 9,
+    "rerun": false
+  },
+  "workflowPrerequisite": {
+    "journey": {
+      "run": "final004",
+      "sha256": "fad374fe96ff98dac21497e9de0b37d5969e68b8c314efc23e5e2ed72969bfc0",
+      "completedSteps": 12,
+      "originalHealthFailureRetained": true
+    },
+    "paging": {
+      "run": "final003",
+      "sha256": "c0b00cbbe1c6695d397452ef2a25425965125d4863c719c1563bca5e86e04084",
+      "channels": 3
+    },
+    "rerun": false
+  },
+  "lastAPI": {
+    "actor": "A",
+    "method": "GET",
+    "path": "/api/auth/session",
+    "status": 200,
+    "expected": 200
+  },
+  "seedBudget": {
+    "registrations": 1,
+    "logins": 1,
+    "posts": 0,
+    "replies": 0,
+    "socialWrites": 0,
+    "reports": 0,
+    "rateLimitDisabled": false
+  },
+  "journey": [
+    {
+      "name": "keyboard-login",
+      "focus": {
+        "tabs": 1,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "keyboard-logout-anonymous",
+      "focus": {
+        "tabs": 3,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true,
+      "proof": {
+        "status204": true,
+        "session200": true,
+        "accountNull": true,
+        "signedOutUI": true
+      }
+    }
+  ],
+  "journeyProgress": "logout",
+  "journeyHealth": {
+    "external": 0,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "requestFailures": 1,
+    "controlledFailures": [],
+    "unexpectedHTTP": [],
+    "consoleEvents": [],
+    "failedRequestEvents": [
+      {
+        "sameOrigin": true,
+        "path": "/api/auth/logout",
+        "method": "POST",
+        "errorCode": "net::ERR_ABORTED",
+        "stage": "logout",
+        "timeMs": 1933,
+        "navigationId": null,
+        "teardown": false,
+        "logoutProof": {
+          "status204": true,
+          "session200": true,
+          "accountNull": true,
+          "signedOutUI": true,
+          "sameRequest": true
+        },
+        "classification": "completed-logout-204-browser-abort"
+      }
+    ],
+    "navigations": [
+      {
+        "id": 1,
+        "kind": "initial-document",
+        "startedMs": 4,
+        "endedMs": 526,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/"
+        }
+      },
+      {
+        "id": 2,
+        "kind": "anonymous-notifications-document",
+        "startedMs": 2039,
+        "endedMs": 2502,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/notifications"
+        }
+      }
+    ]
+  },
+  "endedAt": "2026-10-24T11:52:40.209Z"
+}

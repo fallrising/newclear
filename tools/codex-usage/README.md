@@ -2,6 +2,8 @@
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
+> 文件規劃：[Langfuse 整合規格](../../docs/specs/llm-observability-langfuse.md)（T-1101）。定義用量與執行觀測的整合邊界、資料契約及分階段驗收；功能尚未實作。
+
 
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md).  
 > Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).  

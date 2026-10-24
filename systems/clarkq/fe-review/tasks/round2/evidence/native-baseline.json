@@ -1,0 +1,25 @@
+{
+  "checks": [
+    {
+      "command": [
+        "go",
+        "test",
+        "./..."
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 18.254
+    },
+    {
+      "command": [
+        "go",
+        "build",
+        "-o",
+        "<build>/clarkq",
+        "./cmd/clarkq"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.769
+    }
+  ],
+  "binarySha256": "b837ce36e0c5d0faf63a9e4f1d89e205b630415e66cb5675ed7c2265ce28eb6d"
+}

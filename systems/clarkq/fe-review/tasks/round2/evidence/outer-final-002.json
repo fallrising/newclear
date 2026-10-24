@@ -1,0 +1,22 @@
+{
+  "attempt": "final-002",
+  "exitCode": 0,
+  "error": null,
+  "elapsedSeconds": 36.669,
+  "containerRemoved": true,
+  "image": "sha256:47317f37e2082ffb77d8f37a24a0ff80a097c41b82500b6b19c4b784e90cc3fd",
+  "sourceHashes": {
+    "guards.test.mjs": "45e2bd6601b782caf54dc1a0cf3183e60966ea768447c1a033b9d99318087473",
+    "shared-capture.mjs": "cde2da99148a85095326fcc78566d85262af6391e447eeb04a537d498691eb0e",
+    "desktop-health.mjs": "d23e92c345923c8bc2906c0cc4a4658b3ea9e6baae25237d51d6506a3d86b813",
+    "api-fixture.mjs": "5e34c94437f8b8088b7b558239386eb4b95061610ced24f9fa36fc912bfcdbb0",
+    "baseline.mjs": "05de3dcc256371c199dd9684c837679fde89ae4e86f946c54d00bc0c0755a090",
+    "ui.test.mjs": "0316c5655bc87acf907a13bc8dacf9d6261870a99986e7d263850ec46726051f",
+    "journey.mjs": "a58def19d8f9ca416c3dfd02969a866ff7caec44fb5579785db1557da5b99598",
+    "run-review.mjs": "bb7f9072607c543396df3fc5267f44d2b71abb835356461d883e242e952be1a1",
+    "journey-health.mjs": "82a2e50062f7c0e25bc316a10d263e5627dba927381d8a2b54265c69d0859081",
+    "desktop-health.test.mjs": "fe1bf28f1a4cd754a6e4c9fcc8a4cdbe2666854193e2a3c946e60bab624a7f0d",
+    "guards.mjs": "297fa73a790f1bbbf8b27cf907ad0a43c0b66873a98b3a252e1a6d3d52da760b",
+    "journey-health.test.mjs": "4c2d69b67ad9d8d2c61c486703c45c3e172215d58272026a60afaafc051e75e4"
+  }
+}

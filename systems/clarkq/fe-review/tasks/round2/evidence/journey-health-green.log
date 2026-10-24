@@ -1,0 +1,12 @@
+✔ 401 requires the explicit negative phase, exact origin/path and GET (1.017426ms)
+✔ controlled network failure requires the same intercepted Request, path, phase and code (0.704158ms)
+✔ console requires actual matching response or controlled request evidence, never generic suppression (0.727447ms)
+✔ unknown URLs/text are omitted from public summaries while remaining failing evidence (0.217119ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 74.258333

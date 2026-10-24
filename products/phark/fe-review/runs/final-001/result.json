@@ -1,0 +1,682 @@
+{
+  "schema": 1,
+  "id": "final-001",
+  "phase": "remaining-routes-and-journeys",
+  "status": "failed",
+  "startedAt": "2026-10-24T11:29:04.054Z",
+  "controlledMockBeforeSpring": false,
+  "api": [
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "6553973b-aa2b-4e99-ac8e-c098c7ddf090",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "60927fe8-bccf-4030-a9a5-9777d0f0b2b6",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "a57572af-2771-4abd-bff6-3a4aee7f7d9a",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "1d4db821-d49e-4014-81a7-aedd3c41db92",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "355d5edf-ee77-447b-ad19-1a2806935f6b",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "94242992-b50e-4025-af2f-0b4231db6bc3",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "359c517a-11a9-4bb6-b02d-90791471eb2c",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "79cfb75c-beed-492c-b6fc-8d4b4955a908",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "9e708b70-2a98-4505-827d-e29966d5776b",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "7c3a6db2-fc59-4ee2-855a-e131179a9543",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "50267712-6deb-44fd-a442-2d14c6dcb39a",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "395f48f9-e413-46c5-a474-f8713528d522",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "93261879-f07b-4e49-8916-2b6cfbebe648",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "30340038-74d2-4c3d-801e-97360fc30db9",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "3da0f532-3f54-4f87-881e-c10e599166e8",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "49d8c4f6-312d-486e-b5b9-2fedd56ed7b4",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "db6660c5-ef2d-4e57-a86d-d21a3ef64f6b",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "864e4198-759f-41f3-bba9-a1adfdb64af8",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/replies",
+      "status": 201,
+      "requestId": "795cfe2c-6b46-4a82-8db0-28a41dd34b07",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/10/like",
+      "status": 200,
+      "requestId": "7400ec25-9a11-4aeb-821c-e35f6c884d9e",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/11/repost",
+      "status": 200,
+      "requestId": "bc7bad90-9624-4ca2-a1d8-e651db48e712",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200,
+      "requestId": "64a42500-38e7-40f6-9a23-3c0c5a12e135",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "516d4661-f7ba-4121-a121-c1486eaaaf58",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "d5fb7e87-dbd1-43a4-bc98-55e82692f305",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/profiles/rf40eaa7fc7",
+      "status": 200,
+      "requestId": "2f469f41-c2af-4f1d-8a2d-e54b154feb62",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/search",
+      "status": 200,
+      "requestId": "f33bc252-c469-4da7-9f33-ad5a9a5f358a",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/reports",
+      "status": 201,
+      "requestId": "1f81e8fd-1b73-4bd9-8df8-cca2eaf46aee",
+      "controlled": false
+    }
+  ],
+  "steps": [
+    {
+      "name": "real-register-login-csrf",
+      "actor": "A",
+      "handle": "rf40eaa7fc7",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-register-login-csrf",
+      "actor": "B",
+      "handle": "rb26bceb556",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-api-seed",
+      "posts": {
+        "home": 10,
+        "tech": 11,
+        "ops": 12,
+        "second": 13
+      },
+      "replyId": 1,
+      "channels": [
+        "home",
+        "tech",
+        "ops"
+      ],
+      "image": {
+        "id": 1,
+        "bytes": 79,
+        "sha256": "af9d971dc1f45fc5e79c98c2bbaade8ac05d71c7e41e188d6a065ab4cba558ce"
+      },
+      "notifications": 3,
+      "opaqueCursorPaging": true,
+      "reportId": 1,
+      "controlled": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "shared-capture",
+      "code": 0,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "spring",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [],
+  "baseline": [],
+  "captures": [
+    {
+      "name": "shared-home-mobile",
+      "path": "screenshots/shared-home-mobile.png",
+      "sha256": "4ecf6367607d10e6333e9e9094197c92c342d52f5cb250c330476edd323d2699",
+      "bytes": 84578,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-home-tablet",
+      "path": "screenshots/shared-home-tablet.png",
+      "sha256": "a07f7d899b7fd5d6cab430b980a503d5396695155ce35d16d0f79a28e65b14fd",
+      "bytes": 174463,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-home-desktop",
+      "path": "screenshots/shared-home-desktop.png",
+      "sha256": "4cc01d2687d6eb62ff1d0aacb27415145bfc2b11bd8fac3cd8f0df01274ca70a",
+      "bytes": 141907,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-notifications-mobile",
+      "path": "screenshots/shared-notifications-mobile.png",
+      "sha256": "7b44b11d7c60ff9c82f8552bc87b734b87d40fb410a260f2a9d12152a99ad345",
+      "bytes": 169627,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-notifications-tablet",
+      "path": "screenshots/shared-notifications-tablet.png",
+      "sha256": "c16db7894863fabfdbc519c05e5ada0fdd3a2e4dd340545fcfc8f49652728b66",
+      "bytes": 134514,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-notifications-desktop",
+      "path": "screenshots/shared-notifications-desktop.png",
+      "sha256": "038775eb8323654a45b1e931b14c0b10d3a74f94cf47c667cd94347d32d4c825",
+      "bytes": 138685,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-search-mobile",
+      "path": "screenshots/shared-search-mobile.png",
+      "sha256": "7b26e4f9c8bb7aba9f4fc64a946d0cdc0370228eee782c2672cee5cb0e8aec0e",
+      "bytes": 98930,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-search-tablet",
+      "path": "screenshots/shared-search-tablet.png",
+      "sha256": "f536fcb66c8dd21b224ff6fc27407ef87b409b9f76f1194e62c537af1edf458a",
+      "bytes": 106230,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-search-desktop",
+      "path": "screenshots/shared-search-desktop.png",
+      "sha256": "32630f9bf8e7b8c5d4bc7e810978635f39904c63587b3b9bcb0215d3a9907fee",
+      "bytes": 124444,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-profile-mobile",
+      "path": "screenshots/shared-profile-mobile.png",
+      "sha256": "3a5608e47b72365b182f53bcb50b8b9987c26186765a019a6f1903d52c7aa01d",
+      "bytes": 167298,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-profile-tablet",
+      "path": "screenshots/shared-profile-tablet.png",
+      "sha256": "c8137fe701a9c937bfe6d6a1cabc552cb941d72bb76b78e0e7c2138c07ec856c",
+      "bytes": 179757,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-profile-desktop",
+      "path": "screenshots/shared-profile-desktop.png",
+      "sha256": "832474f4b80ea8059a046142d8ac4a3e3059ecdc073becef8fc0b6bf86b3d3b8",
+      "bytes": 209965,
+      "controlled": false,
+      "shared": true
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "ebefeb43099f0e6ccd1202005f1db4106f4bd7fc07a07249f243c93585cc3117",
+    "frontend/src/components/Column.tsx": "79098b1540de8c2f9c3445a59e14367c5b2079a67497e24c3107d90be2ed3a41",
+    "frontend/src/components/PostCard.tsx": "10029f5ebad596f5c48f9a3205834f638c1922799f1ee6407948f1216627e49a",
+    "frontend/src/components/ReplyThread.tsx": "f11ed54a9d8ffb5e6695bb15e49de7ce16b353b0c4b0004f2b010d288436c325",
+    "frontend/src/components/Composer.tsx": "116d03dd08e1a6d45d4aebbd4b0697a0b68efb279009789f11fac6421a1f416d",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "b596ba60d2bfaa24ce74721956b9871e8b0986273288177ebebad8486211e0bb",
+    "fe-review/api-fixture.mjs": "d482368dafa8f06df8a8714c519e835222bb1525acfb60e6652ac0e79135e465",
+    "fe-review/guards.mjs": "72f215327fd6b91a066769ee19d194937171c73eee79e020f08c3a87f74b4f7e",
+    "fe-review/mock-baseline.mjs": "4db5dbebae8d994c5732f0fb80158a12e675de59fcf1633cfdbdadf9bae66b4c",
+    "fe-review/baseline.mjs": "2df48b8f662367413b63d0fedea88e5e0a7fde3021d90db29eb87f87bba80024",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484",
+    "fe-review/routes.mjs": "1fccf1664acfb04e4448f6912d67c666b0a967ba48cbf8f763e92ce5f2617c41",
+    "fe-review/journey.mjs": "9ef25ac8c8e1f136af54cef473991c44c1a255547aec833ca9f3f42d96533354",
+    "fe-review/keyboard.mjs": "3bdf2c54ebcbf982073f57be24c02b960fd835a775d5093ded9f22c23d6968cf",
+    "fe-review/load-more.mjs": "0a16f7b4ca8720b8157e9dc03145b03032d9ae260a4b888b017c1803b7192425",
+    "fe-review/layout-contract.mjs": "ae75f88f3b8c6b4bc29ff143743681476c1ecacfb01c51b1ce42fd5c733c736c",
+    "fe-review/shared-capture.mjs": "d44d4a2d1ea1e0c65d5dc9f94cf9c7b4cd3d03366e3b623b93c47bda13c9c87e"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "shared-capture",
+      "passed": true
+    },
+    {
+      "name": "spring",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "shared-four-route-captures",
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "mockPrerequisite": {
+    "run": "baseline-005",
+    "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+    "passed": 6,
+    "rerun": false
+  },
+  "homePrerequisites": {
+    "mobile": {
+      "run": "mobile-003",
+      "sha256": "3794ecc1f8331ee93b25740f704db319200e17979e0b547f044ebb9c6087ccad",
+      "viewport": 390
+    },
+    "tabletDesktop": {
+      "run": "baseline-005",
+      "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+      "viewports": [
+        834,
+        1440
+      ],
+      "laterDelta": "PostCard relative containing block; covered by mobile-003 and new route captures"
+    },
+    "rerun": false
+  },
+  "lastAPI": {
+    "actor": "B",
+    "method": "POST",
+    "path": "/api/posts/10/reports",
+    "status": 201,
+    "expected": 201
+  },
+  "seedBudget": {
+    "registrations": 2,
+    "logins": 2,
+    "posts": 4,
+    "replies": 1,
+    "socialWrites": 2,
+    "reports": 1,
+    "rateLimitDisabled": false
+  },
+  "sharedCapture": {
+    "tool": "docs/fe-review/capture.mjs",
+    "toolSHA256": "d00b6bf71cc68a7a540d0d832b58c9f971905848107d34f970530fe5fe2ba2ee",
+    "rawManifestSHA256": "ce896173785c1b6aa44c3ca2fd7936aa4ea2588f3506c61595e23bc4169ced09",
+    "ownedServersAlreadyRunning": true,
+    "startFlagUsed": false,
+    "storageStatePrivate": true,
+    "records": [
+      {
+        "page": "home",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-home-mobile.png",
+        "sha256": "4ecf6367607d10e6333e9e9094197c92c342d52f5cb250c330476edd323d2699",
+        "bytes": 84578
+      },
+      {
+        "page": "home",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-home-tablet.png",
+        "sha256": "a07f7d899b7fd5d6cab430b980a503d5396695155ce35d16d0f79a28e65b14fd",
+        "bytes": 174463
+      },
+      {
+        "page": "home",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-home-desktop.png",
+        "sha256": "4cc01d2687d6eb62ff1d0aacb27415145bfc2b11bd8fac3cd8f0df01274ca70a",
+        "bytes": 141907
+      },
+      {
+        "page": "notifications",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-mobile.png",
+        "sha256": "7b44b11d7c60ff9c82f8552bc87b734b87d40fb410a260f2a9d12152a99ad345",
+        "bytes": 169627
+      },
+      {
+        "page": "notifications",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-tablet.png",
+        "sha256": "c16db7894863fabfdbc519c05e5ada0fdd3a2e4dd340545fcfc8f49652728b66",
+        "bytes": 134514
+      },
+      {
+        "page": "notifications",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-desktop.png",
+        "sha256": "038775eb8323654a45b1e931b14c0b10d3a74f94cf47c667cd94347d32d4c825",
+        "bytes": 138685
+      },
+      {
+        "page": "search",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [
+          {
+            "id": "landmark-unique",
+            "impact": "moderate",
+            "nodes": 1
+          }
+        ],
+        "screenshot": "screenshots/shared-search-mobile.png",
+        "sha256": "7b26e4f9c8bb7aba9f4fc64a946d0cdc0370228eee782c2672cee5cb0e8aec0e",
+        "bytes": 98930
+      },
+      {
+        "page": "search",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-search-tablet.png",
+        "sha256": "f536fcb66c8dd21b224ff6fc27407ef87b409b9f76f1194e62c537af1edf458a",
+        "bytes": 106230
+      },
+      {
+        "page": "search",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-search-desktop.png",
+        "sha256": "32630f9bf8e7b8c5d4bc7e810978635f39904c63587b3b9bcb0215d3a9907fee",
+        "bytes": 124444
+      },
+      {
+        "page": "profile",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-profile-mobile.png",
+        "sha256": "3a5608e47b72365b182f53bcb50b8b9987c26186765a019a6f1903d52c7aa01d",
+        "bytes": 167298
+      },
+      {
+        "page": "profile",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-profile-tablet.png",
+        "sha256": "c8137fe701a9c937bfe6d6a1cabc552cb941d72bb76b78e0e7c2138c07ec856c",
+        "bytes": 179757
+      },
+      {
+        "page": "profile",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-profile-desktop.png",
+        "sha256": "832474f4b80ea8059a046142d8ac4a3e3059ecdc073becef8fc0b6bf86b3d3b8",
+        "bytes": 209965
+      }
+    ]
+  },
+  "failure": "REVIEW_SHARED_OVERFLOW",
+  "failureSite": "shared-capture.mjs:57:3",
+  "endedAt": "2026-10-24T11:29:30.871Z"
+}

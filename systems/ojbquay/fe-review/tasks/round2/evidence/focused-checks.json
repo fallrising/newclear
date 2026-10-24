@@ -1,0 +1,85 @@
+{
+  "notOneAggregateRun": true,
+  "checks": [
+    {
+      "check": "ownership/private CLI",
+      "outcome": "7 passed",
+      "privateLog": "fe-review/runs/.state/guards-current.log",
+      "sha256": "a5a0cf5840da0102ce1fc3a5a81a0e0255cde35f815ce4aa66c7e5271f0b1048",
+      "reproductionCommand": "python3 -B -m unittest discover -s fe-review -p test_*.py",
+      "originalArgv": null,
+      "note": "Raw log confirms the seven-test outcome; full original argv is not embedded in that log."
+    },
+    {
+      "check": "actual M4 RED",
+      "command": "pnpm test -- src/test/dashboard.test.tsx",
+      "outcome": "4 passed / 2 failed: observer RED and existing preview timeout",
+      "privateLog": "fe-review/runs/.state/dashboard-red.log",
+      "sha256": "49409069b6a9299aad826e358706d05b6df74e8bda2d4aa1bd035b80af1466de"
+    },
+    {
+      "check": "M4 GREEN",
+      "command": "pnpm exec vitest run src/test/dashboard.test.tsx",
+      "outcome": "2 passed",
+      "privateLog": "fe-review/runs/.state/dashboard-green.log",
+      "sha256": "d0a0ef8b47535864be52b2f56d04e6ef4901eb1f4b6b738611436ee59b7288a6"
+    },
+    {
+      "check": "typed M4 GREEN",
+      "command": "pnpm exec vitest run src/test/dashboard.test.tsx",
+      "outcome": "2 passed",
+      "privateLog": "fe-review/runs/.state/dashboard-typed-green.log",
+      "sha256": "161fa9dfb2ef1a634897485b5573ca7b68660ab5b7e9c38dcb161d1832f0dadd"
+    },
+    {
+      "check": "web build",
+      "command": "pnpm build",
+      "outcome": "tsc -b and Vite passed",
+      "privateLog": "fe-review/runs/.state/web-build-after-types.log",
+      "sha256": "bc38498e46ff4c236d520652a748e93b82ef2e17095c9c7bfc555b9c58d23e3b"
+    },
+    {
+      "check": "lifecycle",
+      "command": "node --test fe-review/lifecycle.test.mjs",
+      "outcome": "4 passed",
+      "privateLog": "fe-review/runs/.state/lifecycle-tests-final.log",
+      "sha256": "0e324acb6ea50780cc8e0be41fc7c6ef4963ddb418633805fe803c213572f5aa"
+    },
+    {
+      "check": "health",
+      "command": "node --test fe-review/health.test.mjs",
+      "outcome": "5 passed",
+      "privateLog": "fe-review/runs/.state/axe-preload-classification-test.log",
+      "sha256": "d02dcdbdee826cb32eb146075cf6c3aebec03ffb2f9561f322f61fec9d062508"
+    },
+    {
+      "check": "resume/read-only",
+      "command": "node --test fe-review/readonly-api.test.mjs fe-review/resume-plan.test.mjs",
+      "outcome": "3 passed",
+      "privateLog": "fe-review/runs/.state/readonly-resume-tests.log",
+      "sha256": "11aece26340bb27f7dfa17c0d37c04165b6057dcc35c0c9b8ebbe5987e7bf5f9"
+    },
+    {
+      "check": "child/read-only",
+      "command": "node --test fe-review/child-outcome.test.mjs fe-review/readonly-api.test.mjs",
+      "outcome": "2 passed",
+      "privateLog": "fe-review/runs/.state/finish-focused-tests.log",
+      "sha256": "78ea996506d02474fbbea92c3bc0a6143c1f71a36df56f2a23cf0ef08ed88e1c"
+    },
+    {
+      "check": "negative-state naming",
+      "command": "node --test fe-review/negative-state.test.mjs",
+      "outcome": "1 passed",
+      "privateLog": "fe-review/runs/.state/negative-state-test.log",
+      "sha256": "b740bd4be4042f5a0c9255451b5624b82464a4e906bc3a8e71e06a4f2c481e30"
+    },
+    {
+      "check": "redaction observers",
+      "command": "node --test fe-review/browser-policy.test.mjs fe-review/png-mask.test.mjs",
+      "outcome": "3 passed",
+      "privateLog": "fe-review/runs/.state/redaction-guards.log",
+      "sha256": "0d7c75064c3dee6aededd0a60a0ef1d5ee5c8b25b999b44c9920e5c10fa1b64d"
+    }
+  ],
+  "proxyInitial3PassEvidence": "Original worker tool output; no standalone raw log was captured for that initial invocation."
+}

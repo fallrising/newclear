@@ -119,3 +119,76 @@ Goal: enforce existing AC-04/AC-06/AC-15 error semantics when an upstream stream
 Native protocol passthrough, buffered HTTP collection, transport-error/stall behavior, retry/accounting, credentials, new tools/images support and release/deploy are outside this bounded slice. No real provider calls. Evidence/progress: [T-0386 task](docs/tasks/T-0386-stream-completion.md).
 
 T-0386 local result: SC-1–SC-3 passed (107Rust tests,14HTTP journeys, fmt/clippy,42contracts/index). Independent review passed; historical RED and old EOF-success assertion failure retained in the task record. Required remoteCI/merge/readback remain separate publication gates.
+
+## T-0389 — Buffered Responses completion
+
+Goal: enforce completion evidence while collecting forced-stream Responses for non-stream Chat Completions, Messages and Responses requests. The collector must no longer default an unfinished response to completed.
+
+- BR-1: Given an empty/partial/item-only transcript, bareDONE or malformed/conflicting terminal, when collecting a single response, then return502 and expose neither partial output nor raw upstream errors as a successful answer.
+- BR-2: Given `error` or `response.failed`, then fail with a fixed redacted message; preserve429 and only recognized subscription-sharing quota codes. The first terminal event is final: failure cannot be rescued by a later success, and later events do not mutate an accepted success.
+- BR-3: Given `response.completed` or `response.incomplete` with matching response status, then preserve output items/text, model, usage and incomplete details/length mapping across all three buffered APIs. Nonempty terminal output is authoritative; only empty/missing final output falls back to intermediate items/text. Existing tool reconstruction remains compatible.
+
+Plan: RED→GREEN localHTTP regression, collector edge cases, fullRust/fmt/clippy/project/index gates, independent review, requiredCI and normalmerge/readback. Native streaming passthrough, directJSON responses, generalSSEframing, retry/timeout/accounting, realproviders/login and release/deploy are excluded. No runtime dependencies or permissions change. Evidence: [T-0389 task](docs/tasks/T-0389-buffered-responses.md).
+
+T-0389 local result: BR-1–BR-3 passed with113Rust tests,45localHTTPjourneys, fmt/clippy and42project/index gates; independent review passed after the terminal-output precedence fix. Prior RED failures retained. Required remoteCI/merge/readback tracked by the task/desk record.
+
+## T-0401 — Native Responses completion
+
+Scope: HTTP `/v1/responses` streaming from a Responses upstream. This completes the native path following T-0389; other passthrough APIs and conversion/collection paths retain their contracts.
+
+- NR-1: Given empty, partial text/tool output, bare `[DONE]`, malformed terminal or an unterminated frame, when native upstream ends without a valid terminal, then emit one fixed `error` SSE event (HTTP headers may already be 200), never synthetic success. Discard incomplete or invalid terminal frames. Transport errors/stalls retain existing body-error behavior.
+- NR-2: Given complete `response.completed` / `response.incomplete` / `response.failed` with a response object and matching status, or `error` with a string message, then preserve accepted frames byte-for-byte including output, usage and unknown fields; the first terminal closes this HTTP stream. Completed/incomplete may not contain non-null response.error. An explicit SSE event name must match a terminal JSON type. This is terminal validation, not full schema validation; omitted sequence numbers remain compatible.
+- NR-3: Given arbitrary byte boundaries, UTF-8, LF/CRLF/CR line endings, comments and multiline data, then recognize complete SSE events only. One pending event is limited to 16 MiB (including framing); excess produces a fixed error and releases upstream. Generated errors use the next observed sequence number (start 0); supplied sequence numbers must be nonnegative integers below i64::MAX so a successor can be represented. No unbounded pending-event allocation.
+
+Official event shapes: [OpenAI streaming events](https://developers.openai.com/api/reference/resources/responses/streaming-events), checked 2026-10-24. Scope excludes WebSocket successor responses. Validation plan: focused RED/GREEN, byte-fragment and boundary tests, local HTTP native journeys, existing converted/buffered regressions, full Rust/fmt/clippy/docs/index, independent review and CI. Evidence recorded below; no real provider calls or usable-version claim.
+
+Local NR-1–NR-3 evidence: [task and commands](docs/tasks/T-0401-native-responses.md), 122 tests including 11 new native HTTP cases, fmt/clippy and 42 project contracts/index pass. Independent review PASS after R1 correction; remote CI/publication pending.
+
+CR lookahead: retain a pending CR until the next byte or EOF to preserve split CRLF. If the existing idle deadline arrives with a complete valid CR-only terminal, emit that original frame and close rather than returning a stall error. CR-only terminal delivery may therefore wait up to the configured stall window (minimum five seconds); other stalls retain the existing body error. Reviewer R1 reproduced the lost terminal with an upstream that stays pending, then the same body/drop regression passed after this fix.
+
+## T-0380 FE round2: approved M1–M4
+
+Scope and machine verification plan: [T021](fe-review/tasks/round2/T021.md), based on the unchanged approved [DESIGN](fe-review/DESIGN.md). First measure isolated true admin UI/loopback synthetic upstream and read-only TUI; correct only measured presentation defects and obsolete keyless copy. Native offline Rust gates, bounded browser/terminal evidence, independent review and current CI remain required. No real provider/login/CLI credentials, backend/auth changes, full Round3, usable tag or mainline acceptance. Status: original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603) after R31 ACCEPT, both CI checks and normal merge/readback; scoped board item done. [Report](fe-review/tasks/round2/report.md) and [machine result](fe-review/tasks/round2/result.json): native127tests/focused5renderer subset; current18affected Web views plus6source-qualified shared views,14real journeys,12source-qualified TUI captures;13contrast-incomplete sets retained with520computed pairs including one separately corrected desktop observation. Original shared404/login timing/TUI/table regression histories remain explicit. This does not complete gateway mainline, fullRound3, usable tag or owner acceptance.
+
+## T-1102 — LLM 用量正確性修正文件先行
+
+本輪只交付開發／修正規格與兩條獨立文件 PR 中的本條；固定核對來源為 `6b444b00457591996db135e4ec6ab65b1d01ad4c`。
+文件整合基準為 `4fc5d9a7b49139115518379bf05e1cfec4fe1bce`；保留其新增交付紀錄，相關計量核心與固定分析來源一致。
+規格路徑：[修正規格](../../docs/specs/llm-usage-correctness.md)；進度沿用 [任務板](docs/tasks/BOARD.md)。
+保留既有 mainline、usable_tag 與所有未驗 runtime AC；文件通過不代表功能實作或缺陷修復。
+
+| 文件 AC | Given／When／Then | 狀態 | 驗證計畫／證據 |
+| --- | --- | --- | --- |
+| UC-D01 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 以固定來源分類已確認缺陷、待重現問題與實機驗收缺口。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+| UC-D02 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義串流計量、缺值彙總與相關修正的重現及驗收矩陣。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+| UC-D03 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義修正順序、相容性、獨立審查與後續交接。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+
+文件驗證紀錄（2026-10-24；僅文件範圍）：
+
+- `python3 scripts/check_indexes.py`：PASS，42 個 project success contracts／navigation/index；5 個 llms.txt、0 errors。
+- 四個變更 Markdown 的本地連結與 code-fence 檢查、`git diff --check`、`git diff --cached --check`：PASS。
+- 獨立 agent 文件審查 `usage_verify`：ACCEPT；最終回讀確認固定來源、既有 terminal 契約、UC-R01–08、隱私／有界 observer 及未決資料語意一致。
+- 已審規格 SHA256：`ff8fbdb4b298f12da379740e4b7a237a173e01e821835455c547fb16655357b1`。
+- 本地未重跑產品 runtime suites，未執行本規格的 RED／GREEN 或 live 驗收；最終 commit、Draft PR、head CI 與遠端回讀由該 PR 描述及 Checks 保存。
+
+## T-0403 — Direct JSON Responses
+
+Scope: non-stream Responses JSON read by the three client APIs, including non-force-stream provider profiles. No changes to forced SSE collection, streaming, accounting or request retry.
+
+- JR-1: Given HTTP-success upstream JSON with failed/cancelled, a non-null error, malformed JSON/object/status/output, unknown/missing status or unexpected pending status, then do not return successful Chat/Messages/Responses output. Return a fixed 502 diagnostic, retaining only recognized subscription usage-limit codes as429 for failed/error-only envelopes. Contradictory success+error is502 even if the error carries a quota code. No arbitrary upstream text or JSON parser detail in generated errors.
+- JR-2: Given completed/incomplete with array output and absent/null error, preserve the original native bytes and existing Chat/Messages text/tool/usage/finish conversion. This validates the envelope, not the full nested Responses schema.
+- JR-3: Given a native Responses request with literal background:true and an upstream queued/in_progress response with background:true and array output, preserve its original JSON. Chat/Messages and native synchronous requests cannot represent this pending result as completed output and return502. No polling, cancellation endpoint or provider background support is added or claimed.
+
+Background status semantics checked against [OpenAI background mode](https://developers.openai.com/api/docs/guides/background), 2026-10-24. Validation: RED/GREEN HTTP matrix via loopback fake Grok-profile upstream (synthetic stored token, no local credential file), full Rust/fmt/clippy/docs/index, independent review and CI. Local evidence: [task](docs/tasks/T-0403-json-responses.md),130 tests including74new direct JSON HTTP cases, fmt/clippy and43project contracts/index pass. Independent source review PASS; publication follows in the task board. Original whole-product and real-provider gaps remain.
+
+## T-0404 — Client disconnect
+
+Scope: active client requests and their owned HTTP/CLI resources; completed Claude idle/tool sessions retain the existing reuse and expiry policy.
+
+- DC-1: Given a Claude active turn (fresh or resumed via user/tool result), when its client request disappears while the CLI is silent, then observe closure without waiting for another CLI output, stop/reap the process and release its concurrency slot. Cover streamed partial output and collection before downstream headers; a replacement request succeeds with a one-run limit.
+- DC-2: Given a normally completed Claude reply/tool call, when that HTTP request ends, then keep the existing idle/waiting run and reuse it for matching follow-up. Monitoring must track the current request sink, including a new sink installed while the reader waits between turns.
+- DC-3: Given local HTTP streaming/collection or a fake Cursor runtime, when the downstream request is cancelled, then observe upstream body/process release and (Cursor) container reconciliation/slot reuse within a bounded test deadline. Tests use signals/markers and live loopback connections, not real credentials or model calls.
+
+Validation: reproduce the silent Claude leak RED, fix the underlying receiver-close notification, focused release tests and existing session/reuse regressions, full Rust/fmt/clippy/docs/index, independent review and necessary CI. Fake runtime evidence does not establish actual Docker/provider cancellation; no change to those runtime policies or complete product readiness claim.
+
+Local DC-1–DC-3 evidence: [task and commands](docs/tasks/T-0404-disconnect.md),134tests on Linux including44new disconnect scenarios;fmt/clippy and43project contracts/index pass. Independent review PASS; publication recorded in the board after merge.

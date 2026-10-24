@@ -66,3 +66,11 @@ cargo run -p codebox-control-plane
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須取得明確復工範圍、真 Cloud 主線驗證並補齊承諾的 runtime/persistence 整合；現有接受的函式庫切片不能作全平台可用標記。
+
+## T-0380 approved native security prerequisite — 2026-10-24
+
+Owner approved only Tokio1.53.1→1.53.3 lock version/checksum. Affected deny,306Rust
+tests,clippy and build passed; unchanged earlier Node/fmt evidence retained. See
+[exact commands and remaining FE blockers](../../docs/fe-review/ROUND2-RETRY-CHECKPOINT.md).
+This closes the advisory prerequisite only; PR604 FE acceptance, full conformance,
+mainline and usable qualification remain incomplete. Original failures are retained.

@@ -27,6 +27,14 @@ if "LEAK" in prompt:
 if "FAIL" in prompt:
     sys.stderr.write("Error: not logged in. Run cursor-agent login\n"); sys.exit(1)
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
+if "BAD_RESULT" in prompt or "EARLY_EOF" in prompt:
+    if "PARTIAL" in prompt:
+        out({"type": "assistant", "timestamp_ms": 1, "message": {"content": [{"type": "text", "text": "partial answer"}]}})
+    if "BAD_RESULT" in prompt:
+        out({"type": "result", "subtype": "error", "is_error": True, "result": "PRIVATE-RESULT-CANARY"})
+        # A subsequent success must not rescue a failed terminal event.
+        out({"type": "result", "subtype": "success", "is_error": False, "result": "PRIVATE-RESULT-CANARY"})
+    sys.exit(0)
 # Shape recorded from cursor-agent 2026.10.16 (`-p --output-format stream-json
 # --stream-partial-output --mode ask`): thinking deltas, streamed assistant deltas
 # (timestamp_ms, no model_call_id), a final unstamped flush, and usage on the result.
@@ -395,4 +403,98 @@ async fn unavailable_cursor_sandbox_is_an_actionable_redacted_error() {
     assert!(args
         .windows(2)
         .any(|pair| pair == ["--sandbox", "disabled"]));
+}
+
+async fn check_cursor_failure(prompt: &str, stream: bool, partial: bool) {
+    for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+        let env = Env::start().await;
+        let body = if path == "/v1/responses" {
+            json!({"model": "cu", "stream": stream, "input": prompt})
+        } else {
+            json!({"model": "cu", "stream": stream, "max_tokens": 50,
+                "messages": [{"role": "user", "content": prompt}]})
+        };
+        let response = env.post(path, body).await;
+        let status = response.status();
+        let text = response.text().await.unwrap();
+        assert!(
+            !text.contains("PRIVATE-RESULT-CANARY"),
+            "{path}: leaked result: {text}"
+        );
+        if !stream || !partial {
+            assert_eq!(status, 502, "{path}: {text}");
+            let body: Value = serde_json::from_str(&text).unwrap();
+            assert!(body.get("error").is_some(), "{path}: {text}");
+            assert!(!text.contains("partial answer"), "{path}: {text}");
+        } else {
+            assert_eq!(status, 200, "{path}: already-started SSE status");
+            assert!(text.contains("partial answer"), "{path}: {text}");
+            let events: Vec<Value> = text
+                .lines()
+                .filter_map(|l| l.strip_prefix("data: "))
+                .filter_map(|d| serde_json::from_str(d).ok())
+                .collect();
+            if path == "/v1/responses" {
+                assert!(
+                    events
+                        .iter()
+                        .any(|v| v["type"] == "error" && v["message"].as_str().is_some()),
+                    "{path}: {text}"
+                );
+                assert!(
+                    events
+                        .last()
+                        .unwrap()
+                        .pointer("/response/error/message")
+                        .and_then(Value::as_str)
+                        .is_some(),
+                    "{path}: {text}"
+                );
+            } else {
+                assert!(
+                    events.iter().any(|v| v
+                        .pointer("/error/message")
+                        .and_then(Value::as_str)
+                        .is_some()),
+                    "{path}: {text}"
+                );
+            }
+            assert!(!text.contains("message_stop"), "{path}: {text}");
+            assert!(!text.contains("response.completed"), "{path}: {text}");
+            assert!(
+                !events
+                    .iter()
+                    .any(|v| v.pointer("/choices/0/finish_reason") == Some(&json!("stop"))),
+                "{path}: {text}"
+            );
+            if path == "/v1/responses" {
+                assert_eq!(events.last().unwrap()["type"], "response.failed", "{text}");
+            }
+        }
+        let args: Vec<String> = serde_json::from_str(
+            &std::fs::read_to_string(env.bin_dir.path().join("docker-args.json")).unwrap(),
+        )
+        .unwrap();
+        let name = &args[args.iter().position(|a| a == "--name").unwrap() + 1];
+        let cleanup = std::fs::read_to_string(env.bin_dir.path().join("cleanup.jsonl")).unwrap();
+        assert!(cleanup.contains(name), "request container cleanup missing");
+    }
+}
+
+#[tokio::test]
+async fn ce1_failed_cursor_result_before_output_is_redacted() {
+    check_cursor_failure("BAD_RESULT", false, false).await;
+    check_cursor_failure("BAD_RESULT", true, false).await;
+}
+
+#[tokio::test]
+async fn ce2_failed_cursor_result_after_output_is_not_success() {
+    check_cursor_failure("PARTIAL BAD_RESULT", false, true).await;
+    check_cursor_failure("PARTIAL BAD_RESULT", true, true).await;
+}
+
+#[tokio::test]
+async fn ce2_cursor_eof_after_output_is_not_success() {
+    check_cursor_failure("PARTIAL EARLY_EOF", false, true).await;
+    check_cursor_failure("PARTIAL EARLY_EOF", true, true).await;
 }

@@ -95,3 +95,15 @@ Goal: remove the nested CLI sandbox startup conflict while retaining the existin
 2026-10-24 owner continuation permits the pending AC-17 single text journey using the corrected runner and retained profile. Verify exact expected marker, one request container and cleanup; no automatic retry or new login. Full protocol/tool/image/lifecycle acceptance remains outside this single request. See [live result](docs/cursor-live-smoke.md).
 
 Corrected-runner result: the newly authorized one-request ChatCompletions journey passedHTTP200,expected marker,5.897seconds,one container and0remaining. See source/binary/probe evidence in the live record. This supersedes the latest text-failure status without rewriting either historical502; mainline remains incomplete.
+
+## T-0385 — Cursor terminal failure handling
+
+Goal: enforce the existing AC-04/AC-17 error contract without changing supported capabilities. A terminal Cursor result is successful only when `subtype: success`, `is_error: false` and a string `result` are present, matching the [official output contract](https://cursor.com/docs/cli/reference/output-format). Unknown fields remain compatible. Error-shaped/malformed result events are defensive fixtures, not claimed observations of the official CLI.
+
+- CE-1: Given a non-success or malformed terminal result, when translated before output, then all three APIs return a fixed redacted upstream error; no result payload is emitted as assistant text.
+- CE-2: Given partial text followed by a failed result or EOF without a result, then non-stream requests fail and streams emit their protocol's failure event without a success finish (`message_stop`, Chat `finish_reason: stop`, or `response.completed`). Chat may still send its transport `[DONE]` after the error.
+- CE-3: Given a documented successful result, then existing text/usage/deduplication behavior remains; normal cleanup and isolation arguments remain unchanged.
+
+Plan: focused RED→GREEN gateway regression, unit malformed-result cases, full Rust tests/fmt/clippy, document gates, independent review and required CI. Only local fake CLI/runtime; no live provider request, login, new dependency, permissions change or release. This slice does not accept the full mainline or Cursor tools/images. Progress/evidence: [task record](docs/tasks/T-0385-cursor-errors.md).
+
+T-0385 local outcome: CE-1–CE-3 regression evidence passed (103tests, fmt/clippy, document gates and credential-free Docker canary). Original RED and the corrected Responses-test assertion are preserved in the task record. Independent review passed; required remote CI/merge/readback are publication gates, tracked by the linked task/desk record.

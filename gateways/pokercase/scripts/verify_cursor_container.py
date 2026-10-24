@@ -50,7 +50,7 @@ except OSError:
     root_write = False
 root_ro = any(parts[1] == "/" and "ro" in parts[3].split(",") for parts in (line.split() for line in pathlib.Path("/proc/mounts").read_text().splitlines()))
 checks = {"uid":os.getuid(),"host_read":host_read,"host_write":host_write,"host_env": "HOST_SECRET_CANARY" in os.environ,"docker_socket":pathlib.Path("/var/run/docker.sock").exists(),"root_readonly":root_ro,"workspace_write":workspace_write,"root_write":root_write}
-out({"type":"result","result":json.dumps(checks),"usage":{"inputTokens":1,"outputTokens":1}})
+out({"type":"result","subtype":"success","is_error":False,"result":json.dumps(checks),"usage":{"inputTokens":1,"outputTokens":1}})
 '''
 
 

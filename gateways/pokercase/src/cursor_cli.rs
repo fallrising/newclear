@@ -274,6 +274,7 @@ struct Translate {
     started: bool,
     streamed: bool,
     done: bool,
+    failed: bool,
 }
 
 impl Translate {
@@ -299,7 +300,7 @@ impl Translate {
 
     fn on_line(&mut self, v: &Value, model: &str) -> Vec<String> {
         let mut out = Vec::new();
-        if self.done {
+        if self.done || self.failed {
             return out;
         }
         let session = v
@@ -325,6 +326,15 @@ impl Translate {
                 }
             }
             Some("result") => {
+                // Only the documented success shape can complete a reply. Never
+                // expose error payloads as assistant text, even after deltas.
+                if v.get("subtype").and_then(Value::as_str) != Some("success")
+                    || v.get("is_error").and_then(Value::as_bool) != Some(false)
+                    || !v.get("result").is_some_and(Value::is_string)
+                {
+                    self.failed = true;
+                    return out;
+                }
                 self.begin(&mut out, session, model);
                 if !self.streamed {
                     // No deltas seen: the result holds all assistant text.
@@ -437,7 +447,7 @@ pub async fn start(
                     result = tx.send(Item::Record(rec)) => if result.is_err() { break 'read; },
                 }
             }
-            if tr.done {
+            if tr.done || tr.failed {
                 break;
             }
         }
@@ -653,7 +663,7 @@ mod tests {
         // Usage from the result (as cursor-agent 2026.10.16 prints it).
         let mut t = Translate::default();
         let out = t.on_line(
-            &json!({"type": "result", "subtype": "success", "result": "x",
+            &json!({"type": "result", "subtype": "success", "is_error": false, "result": "x",
                 "usage": {"inputTokens": 9359, "outputTokens": 33, "cacheReadTokens": 3328, "cacheWriteTokens": 0}}),
             "m",
         );
@@ -666,9 +676,54 @@ mod tests {
         // Without --stream-partial-output deltas, the result text is used.
         let mut t = Translate::default();
         let out = t.on_line(
-            &json!({"type": "result", "subtype": "success", "result": "Hi"}),
+            &json!({"type": "result", "subtype": "success", "is_error": false, "result": "Hi"}),
             "m",
         );
         assert!(out.iter().any(|r| r.contains("\"text\":\"Hi\"")));
+    }
+
+    #[test]
+    fn ce1_only_a_documented_success_result_can_complete() {
+        let invalid = [
+            json!({"type": "result", "subtype": "error", "is_error": true, "result": "PRIVATE"}),
+            json!({"type": "result", "subtype": "success", "is_error": true, "result": "PRIVATE"}),
+            json!({"type": "result", "subtype": "error", "is_error": false, "result": "PRIVATE"}),
+            json!({"type": "result", "subtype": "success", "result": "PRIVATE"}),
+            json!({"type": "result", "is_error": false, "result": "PRIVATE"}),
+            json!({"type": "result", "subtype": "success", "is_error": "false", "result": "PRIVATE"}),
+            json!({"type": "result", "subtype": "success", "is_error": false}),
+            json!({"type": "result", "subtype": "success", "is_error": false, "result": {"error": "PRIVATE"}}),
+        ];
+        let success = json!({"type": "result", "subtype": "success", "is_error": false,
+            "result": "", "future_field": true});
+        for value in invalid {
+            for partial in [false, true] {
+                let mut tr = Translate::default();
+                if partial {
+                    assert!(!tr
+                        .on_line(
+                            &json!({"type": "assistant", "timestamp_ms": 1,
+                        "message": {"content": [{"text": "partial"}]}}),
+                            "m"
+                        )
+                        .is_empty());
+                }
+                assert!(tr.on_line(&value, "m").is_empty(), "{value}");
+                assert!(tr.failed && !tr.done, "{value}");
+                assert!(
+                    tr.on_line(&success, "m").is_empty(),
+                    "terminal failure cannot recover"
+                );
+            }
+        }
+        let mut tr = Translate::default();
+        assert!(tr
+            .on_line(&success, "m")
+            .iter()
+            .any(|e| e.starts_with("event: message_stop")));
+        assert!(
+            tr.done && !tr.failed,
+            "empty successful result and unknown fields remain valid"
+        );
     }
 }

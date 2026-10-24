@@ -955,3 +955,85 @@ async fn br3_buffered_completed_and_incomplete_preserve_output() {
         }
     }
 }
+
+#[tokio::test]
+async fn nr1_native_eof_emits_error() {
+    let env = Env::start().await;
+    for fixture in [
+        "br_empty",
+        "br_partial",
+        "br_done",
+        "br_item",
+        "br_malformed",
+        "br_conflict",
+    ] {
+        let r = env
+            .post(
+                "/v1/responses",
+                json!({"model":"cx", "stream":true, "input":fixture}),
+            )
+            .await;
+        assert_eq!(r.status(), StatusCode::OK);
+        let raw = r.text().await.unwrap();
+        let events = sse_data(&raw);
+        assert_eq!(
+            events.last().map(|v| &v["type"]),
+            Some(&json!("error")),
+            "{fixture}: {raw}"
+        );
+        assert_eq!(
+            events.last().unwrap()["message"],
+            "upstream stream ended before completion"
+        );
+        assert!(!raw.contains("data: [DONE]"));
+        assert!(!events.iter().any(|v| v["type"] == "response.completed"));
+    }
+}
+
+#[tokio::test]
+async fn nr2_native_terminals_preserve_output_and_finality() {
+    let env = Env::start().await;
+    for (fixture, terminal) in [
+        ("br_completed", "response.completed"),
+        ("br_incomplete", "response.incomplete"),
+        ("br_completed_late_error", "response.completed"),
+        ("br_error_then_completed", "error"),
+        ("br_failed_then_completed", "response.failed"),
+    ] {
+        let r = env
+            .post(
+                "/v1/responses",
+                json!({"model":"cx", "stream":true, "input":fixture}),
+            )
+            .await;
+        assert_eq!(r.status(), StatusCode::OK);
+        let raw = r.text().await.unwrap();
+        let events = sse_data(&raw);
+        assert_eq!(events.last().unwrap()["type"], terminal, "{fixture}: {raw}");
+        assert_eq!(
+            events
+                .iter()
+                .filter(|e| matches!(
+                    e["type"].as_str(),
+                    Some(
+                        "error" | "response.failed" | "response.completed" | "response.incomplete"
+                    )
+                ))
+                .count(),
+            1
+        );
+        assert!(!raw.contains("upstream_stream_incomplete"));
+        if terminal == "response.completed" || terminal == "response.incomplete" {
+            assert_eq!(
+                events.last().unwrap()["response"]["usage"]["input_tokens"],
+                11
+            );
+            assert!(raw.contains("buffered success"));
+        } else {
+            assert!(
+                raw.contains("PRIVATE-ERROR-CANARY"),
+                "native upstream errors remain unchanged"
+            );
+        }
+    }
+}

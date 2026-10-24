@@ -36,3 +36,13 @@ Demand/BR-1–BR-3: [task](T-0389-buffered-responses.md). End means localimpleme
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | BR-01 | Validate buffered Responses terminal evidence across three APIs | BR-1–BR-3 | done | 2026-10-24T11:08:00Z | 2026-10-24T11:22:00Z | 2026-10-24T11:22:00Z |
+
+## T-0401 — Native Responses completion
+
+Demand and contract: [task](T-0401-native-responses.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| NR-01 | Reject missing or invalid native terminal | NR-1 | in_progress | 2026-10-24T11:42:47Z | | 2026-10-24T11:50:33Z |
+| NR-02 | Preserve accepted frames and first-terminal finality | NR-2 | in_progress | 2026-10-24T11:42:47Z | | 2026-10-24T11:50:33Z |
+| NR-03 | Bound and verify SSE framing | NR-3 | in_progress | 2026-10-24T11:42:47Z | | 2026-10-24T11:50:33Z |

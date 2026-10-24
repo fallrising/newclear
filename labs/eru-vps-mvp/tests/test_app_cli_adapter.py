@@ -30,10 +30,10 @@ def spec(node='worker-2'):
 
 
 def inventory(workers=('worker-2', 'worker-3', 'worker-4')):
-    rows = [{'alias': 'ckc-disposable-01', 'node': None, 'role': 'core',
+    rows = [{'alias': 'lab-host-01', 'node': 'worker-1', 'role': 'core',
              'ip': '192.0.2.1'}]
     for index, node in enumerate(workers, 2):
-        rows.append({'alias': 'ckc-disposable-' + str(index).zfill(2),
+        rows.append({'alias': 'lab-host-' + str(index).zfill(2),
                      'node': node, 'role': 'worker', 'ip': '192.0.2.' + str(index)})
     return rows
 
@@ -129,7 +129,7 @@ class EruCLIAdapterTests(unittest.TestCase):
 
     def test_runtime_metadata_mismatch_blocks_prepared_plan(self):
         operator = FakeOperator()
-        operator.hosts['ckc-disposable-02']['containers'] = 'orphan-container'
+        operator.hosts['lab-host-02']['containers'] = 'orphan-container'
         operator.live['hosts'] = copy.deepcopy(operator.hosts)
         plan = EruCLIAdapter(operator).prepare_plan(spec(), '20260925T123000Z-mismatch')
         self.assertFalse(plan['executable'])
@@ -140,12 +140,12 @@ class EruCLIAdapterTests(unittest.TestCase):
         self.adapter.deploy(plan)
         image_cache = next(command for command in self.operator.commands
                            if 'image' in command['argv'] and 'cache' in command['argv'])
-        self.assertEqual(image_cache['host'], 'ckc-disposable-01')
+        self.assertEqual(image_cache['host'], 'lab-host-01')
         self.assertEqual(image_cache['argv'][-5:],
                          ['image', 'cache', '--node', 'worker-2', spec()['image']])
         deployment = next(command for command in self.operator.commands
                           if 'workload' in command['argv'] and 'deploy' in command['argv'])
-        self.assertEqual(deployment['host'], 'ckc-disposable-01')
+        self.assertEqual(deployment['host'], 'lab-host-01')
         self.assertEqual(deployment['timeout'], 180)
         argv = deployment['argv']
         self.assertIn('--node', argv)
@@ -190,7 +190,7 @@ class EruCLIAdapterTests(unittest.TestCase):
         self.assertEqual(self.adapter.get_workload(workload_id), {'id': workload_id})
         self.adapter.remove_exact(workload_id)
         removal = self.operator.commands[-1]
-        self.assertEqual(removal['host'], 'ckc-disposable-01')
+        self.assertEqual(removal['host'], 'lab-host-01')
         self.assertEqual(removal['argv'][-4:], ['workload', 'remove', '--force', workload_id])
         before = len(self.operator.commands)
         for bad_id in ('foreign-app_web_one', appname + '_; rm -rf /'):
@@ -208,7 +208,7 @@ class EruCLIAdapterTests(unittest.TestCase):
         result = self.adapter.probe(row, desired)
         self.assertEqual(result, {'status': 200, 'body_match': True})
         command = self.operator.commands[-1]
-        self.assertEqual(command['host'], 'ckc-disposable-02')
+        self.assertEqual(command['host'], 'lab-host-02')
         self.assertEqual(command['argv'], ['sudo', '-n', 'python3', '-'])
         self.assertIn('body_contains', command['stdin'])
         self.assertNotIn('response body', json.dumps(result))
@@ -221,7 +221,7 @@ class EruCLIAdapterTests(unittest.TestCase):
         row = {'id': appname + '_web_one', 'nodename': desired['node'],
                'labels': {'owner': OWNER, 'logical_app': desired['name'],
                           'spec_sha256': digest}}
-        with self.assertRaisesRegex(ValueError, 'reviewed worker alias'):
+        with self.assertRaisesRegex(ValueError, 'reviewed worker alias|logical topology'):
             adapter.probe(row, desired)
         operator = FakeOperator()
         operator.probe_reply = {'status': 200, 'body_match': True, 'body': 'response body'}

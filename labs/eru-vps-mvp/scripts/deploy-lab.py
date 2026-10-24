@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare/apply this four-node Debian lab via ckc-disposable SSH aliases.
+"""Prepare/apply this four-node Debian lab via explicit private SSH inventory.
 
 The plan uses existing Docker containerd, a ckc-only socket proxy, and a
 source-restricted core key with sudo forced commands. sshd/sudoers are unchanged.
@@ -14,9 +14,9 @@ import sys
 
 from labops import ClusterLock, lock_fds
 from worker_payload import build_worker_payload
+from operator_inventory import load_inventory_file, evidence_name
 
 PROJECT = Path(__file__).resolve().parent.parent
-ALIASES = [f'ckc-disposable-{i:02d}' for i in range(1, 5)]
 
 
 def ssh(host, command, stdin=None):
@@ -37,6 +37,7 @@ def file(path, content, mode=0o644):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--inventory', type=Path, required=True, help='private operator inventory JSON')
     parser.add_argument('--apply', action='store_true')
     parser.add_argument('--core-artifact', help='Preserve the explicitly verified installed core patch')
     args = parser.parse_args()
@@ -47,14 +48,20 @@ def main():
     os.umask(0o077)
     private = PROJECT / 'private'
     lock = json.loads((PROJECT / 'artifacts.amd64.lock.json').read_text())
+    if not args.inventory.resolve().is_relative_to(private.resolve()):
+        raise ValueError('operator inventory must be in project private/')
+    reviewed = load_inventory_file(args.inventory)
     hosts = []
-    for i, alias in enumerate(ALIASES, 1):
-        records = sorted((private / 'preflight').glob(f'*-disposable-{i:02d}-*.json'))
+    for i, row in enumerate(reviewed, 1):
+        alias = row['alias']
+        records = sorted((private / 'preflight').glob('*-' + evidence_name(alias) + '-*.json'))
         if not records:
             raise RuntimeError('missing preflight evidence')
         facts = json.loads(records[-1].read_text())['checks']
         addr = next(ip for ip in facts['tailscale']['TailscaleIPs'] if ':' not in ip)
-        hosts.append({'alias': alias, 'ip': addr, 'node': f'worker-{i}', 'index': i})
+        if addr != row['ip']:
+            raise ValueError('preflight endpoint differs from private inventory')
+        hosts.append({**row, 'index': i})
     core = hosts[0]['ip']
     # Use the already trusted alias host keys, re-keyed by their private address.
     known_hosts = ''
@@ -75,7 +82,7 @@ def main():
     for host in hosts:
         is_core = host == hosts[0]
         if not is_core:
-            plans.append(build_worker_payload(host, core, lock))
+            plans.append(build_worker_payload(host, core, lock, inventory=hosts))
             continue
         targets = {
             'projecteru2/core': {'eru-core': '/usr/local/bin/eru-core'},
@@ -195,6 +202,7 @@ WantedBy=multi-user.target
                 'verify_units': ['/etc/systemd/system/' + name for name in definitions]}
         plans.append(plan)
 
+    ALIASES = tuple(host['alias'] for host in hosts)
     (private / 'deployment-plan.json').write_text(json.dumps(plans, indent=2) + '\n')
     print(json.dumps({'plan': str(private / 'deployment-plan.json'), 'hosts': ALIASES,
         'apply': args.apply, 'preserves': ['root SSH prohibition', 'g1ops sudo allowlist', 'Docker/containerd units and socket permissions']}), flush=True)

@@ -9,7 +9,9 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from labops import atomic_json
-from soak_evidence import HOSTS, collect
+from soak_evidence import collect
+import fixture_inventory
+HOSTS = fixture_inventory.ALIASES[:3]
 from soak_remote import config_hash, copy_prefix
 from soak_report import io_window, report
 from soak_runner import Summary
@@ -74,7 +76,7 @@ class EvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); fixture(root)
             with patch('subprocess.run', side_effect=AssertionError('offline report must not invoke SSH')):
-                result = report(root)
+                result = report(root, inventory=fixture_inventory.inventory())
             self.assertEqual(result['assessment'], 'complete_needs_review')
             self.assertEqual(result['common_coverage_seconds'], 30)
             self.assertTrue(all(r['samples'] == 3 for r in result['hosts'].values()))
@@ -82,20 +84,20 @@ class EvidenceTests(unittest.TestCase):
     def test_running_prefix_never_becomes_completed_acceptance(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); fixture(root, (0, 15), 'running')
-            result = report(root)
+            result = report(root, inventory=fixture_inventory.inventory())
             self.assertEqual(result['assessment'], 'in_progress')
             self.assertEqual(result['common_coverage_seconds'], 15)
 
     def test_complete_status_cannot_hide_short_duration(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); fixture(root, (0, 15))
-            self.assertEqual(report(root)['assessment'], 'invalid_evidence')
+            self.assertEqual(report(root, inventory=fixture_inventory.inventory())['assessment'], 'invalid_evidence')
 
     def test_missing_host_cannot_reuse_older_success(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); fixture(root)
             (root / (HOSTS[2] + '.samples.jsonl')).unlink()
-            self.assertEqual(report(root)['assessment'], 'invalid_evidence')
+            self.assertEqual(report(root, inventory=fixture_inventory.inventory())['assessment'], 'invalid_evidence')
 
     def test_truncated_or_modified_evidence_rejected(self):
         for mode in ('truncated', 'checksum', 'count', 'source'):
@@ -111,7 +113,7 @@ class EvidenceTests(unittest.TestCase):
                 else:
                     record['hosts'][HOSTS[0]]['snapshot']['source_sha256'] = {}
                 atomic_json(root / 'collection.json', record)
-                self.assertEqual(report(root)['assessment'], 'invalid_evidence')
+                self.assertEqual(report(root, inventory=fixture_inventory.inventory())['assessment'], 'invalid_evidence')
 
     def test_raw_http_failure_survives_later_success(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -119,7 +121,7 @@ class EvidenceTests(unittest.TestCase):
             def mutate(alias, rows):
                 if alias == HOSTS[1]: rows[0]['ok'] = False
             fixture(root, mutate=mutate)
-            result = report(root)
+            result = report(root, inventory=fixture_inventory.inventory())
             self.assertEqual(result['assessment'], 'observed_failures')
             self.assertEqual(result['hosts'][HOSTS[1]]['summary']['failures']['http_failed'], 1)
 
@@ -132,7 +134,7 @@ class EvidenceTests(unittest.TestCase):
                         if mode == 'gap': del rows[1]
                         else: rows[0], rows[1] = rows[1], rows[0]
                 fixture(root, mutate=mutate)
-                self.assertEqual(report(root)['assessment'], 'invalid_evidence')
+                self.assertEqual(report(root, inventory=fixture_inventory.inventory())['assessment'], 'invalid_evidence')
 
     def test_runtime_restart_is_detected_from_raw_services(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -140,7 +142,7 @@ class EvidenceTests(unittest.TestCase):
             def mutate(alias, rows):
                 rows[1]['commands']['services']['stdout'] = rows[1]['commands']['services']['stdout'].replace('old', 'new')
             fixture(root, mutate=mutate)
-            self.assertEqual(report(root)['assessment'], 'observed_failures')
+            self.assertEqual(report(root, inventory=fixture_inventory.inventory())['assessment'], 'observed_failures')
 
     def test_reboot_or_stale_running_capture_is_incomplete(self):
         for mode in ('reboot', 'stale'):
@@ -150,7 +152,7 @@ class EvidenceTests(unittest.TestCase):
                 if mode == 'reboot': info['current_boot_id'] = 'boot2'
                 else: info['observed_at_epoch'] = 1200
                 atomic_json(root / 'collection.json', record)
-                self.assertEqual(report(root)['assessment'], 'incomplete')
+                self.assertEqual(report(root, inventory=fixture_inventory.inventory())['assessment'], 'incomplete')
 
     def test_guest_metrics_use_deltas_and_do_not_double_count_guest_cpu(self):
         window = io_window(make_sample('control', 0), make_sample('control', 15))
@@ -175,7 +177,7 @@ class EvidenceTests(unittest.TestCase):
             def mutate(alias, rows):
                 if alias == HOSTS[0]: rows[1]['commands']['journal']['stdout'] = 'slow fdatasync'
             fixture(root, mutate=mutate)
-            event = report(root)['hosts'][HOSTS[0]]['events'][0]
+            event = report(root, inventory=fixture_inventory.inventory())['hosts'][HOSTS[0]]['events'][0]
             self.assertEqual(event['warnings_by_sample']['slow_fdatasync'], 1)
             self.assertEqual(event['guest_interval']['seconds'], 15)
             self.assertIn('steal_percent', event['guest_interval'])
@@ -188,7 +190,7 @@ class EvidenceTests(unittest.TestCase):
             (project / 'scripts').mkdir()
             (project / 'scripts/soak_remote.py').write_text('# fixture')
             class Fake:
-                def __init__(self): self.project = project
+                def __init__(self): self.project = project; self.inventory = fixture_inventory.inventory()
                 def command(self, alias, argv, stdin):
                     self_test.assertEqual(argv, ['sudo', '-n', 'python3', '-'])
                     return json.dumps(record['hosts'][alias]['snapshot'])
@@ -200,7 +202,7 @@ class EvidenceTests(unittest.TestCase):
                 directory = collect(Fake(), RUN)
             self.assertEqual(json.loads((directory / 'collection.json').read_text())['state'], 'partial')
             self.assertEqual(len(list(directory.glob('*.partial'))), 3)
-            self.assertEqual(report(directory)['assessment'], 'invalid_evidence')
+            self.assertEqual(report(directory, inventory=fixture_inventory.inventory())['assessment'], 'invalid_evidence')
 
 
 if __name__ == '__main__':

@@ -11,8 +11,9 @@ import uuid
 
 from labctl import PROJECT, code_inputs, consistency_issues, identifier, membership, now, read
 from labops import ClusterLock, atomic_json, digest
-from core_patch import PatchOperator, ALIAS as CORE
-from component_reinstall import ComponentReinstall, TARGET, WORKERS, UNITS, empty_target
+from core_patch import PatchOperator
+from component_reinstall import ComponentReinstall, TARGET, UNITS, empty_target
+from operator_inventory import WORKER_NODES as WORKERS, workers
 from canaries import HTTPGuards
 
 CORE_ACTIONS = ['core-rollback', 'core-cancel']
@@ -28,11 +29,11 @@ def count_field(output):
     return int(values[0])
 
 
-def selected_worker(source):
+def selected_worker(source, inventory):
     target = source['plan'].get('node')
     if target not in WORKERS:
         raise ValueError('worker source has an unreviewed target')
-    return target, WORKERS[target]
+    return target, workers(inventory)[target]
 
 def worker_issues(snapshot, inventory, target=TARGET):
     copy = deepcopy(snapshot)
@@ -92,7 +93,7 @@ class RecoveryOperator(PatchOperator):
     def etcd_ready(self):
         if self.health()['exit_code']:
             raise ValueError('etcd is unhealthy; recovery cannot repair etcd')
-        alarms = json.loads(self.command(CORE, ['sudo', '-n', '/usr/local/bin/etcdctl',
+        alarms = json.loads(self.command(self.core['alias'], ['sudo', '-n', '/usr/local/bin/etcdctl',
             '--endpoints=http://127.0.0.1:2379', '--command-timeout=5s', 'alarm', 'list', '-w', 'json']))
         if alarms.get('alarms'):
             raise ValueError('etcd alarms block recovery')
@@ -102,7 +103,7 @@ class RecoveryOperator(PatchOperator):
         # Count-only reads avoid retrieving workload configuration/credentials.
         counts = {}
         for prefix in ['/eru/workloads/', '/eru/deploy/', '/eru/processing/']:
-            result = self.command(CORE, ['sudo', '-n', '/usr/local/bin/etcdctl',
+            result = self.command(self.core['alias'], ['sudo', '-n', '/usr/local/bin/etcdctl',
                 '--endpoints=http://127.0.0.1:2379', '--command-timeout=5s', 'get', prefix,
                 '--prefix', '--count-only', '-w', 'fields'])
             counts[prefix] = count_field(result)
@@ -120,7 +121,7 @@ class RecoveryOperator(PatchOperator):
         self.etcd_ready()
         counts = self.offline_workloads()
         footprint = self.remote({'action': 'inspect-recovery', 'source_run': source['plan']['id'],
-                                 'machine_id': hosts[CORE]['machine_id']})
+                                 'machine_id': hosts[self.core['alias']]['machine_id']})
         if footprint['before'] != source['plan']['footprint'] or footprint['new_sha256'] != source['plan']['sha256']:
             raise ValueError('remote update journal does not match source plan')
         return {'hosts': hosts, 'metadata_counts': counts, 'recovery': footprint,
@@ -133,7 +134,7 @@ class RecoveryOperator(PatchOperator):
             if identity(host) != identity(original['snapshot']['hosts'][alias]):
                 raise ValueError('source host/boot/runtime identity changed: ' + alias)
         footprint = self.remote({'action': 'inspect-cancellation', 'source_run': original['id'],
-            'machine_id': hosts[CORE]['machine_id'], 'source': {
+            'machine_id': hosts[self.core['alias']]['machine_id'], 'source': {
                 'before': original['footprint'], 'new_sha256': original['sha256'],
                 'plan_sha256': source['plan_sha256']}})
         runtime = self.core_runtime()
@@ -144,15 +145,15 @@ class RecoveryOperator(PatchOperator):
                 'protected_services': self.protected_services()}
 
     def worker_state(self, source):
-        target, _ = selected_worker(source)
+        target, _ = selected_worker(source, self.inventory)
         return ComponentReinstall(self, target=target).remote('inspect-recovery', source['plan'])
 
     def worker_services(self, source):
-        _, alias = selected_worker(source)
+        _, alias = selected_worker(source, self.inventory)
         return self.command(alias, ['sudo', '-n', 'systemctl', 'show', '--property=Id,ActiveState', *UNITS])
 
     def observe_worker(self, source, action, health_file, canary_run):
-        target, alias = selected_worker(source)
+        target, alias = selected_worker(source, self.inventory)
         snapshot = self.snapshot()
         issues = worker_issues(snapshot, self.inventory, target)
         if issues: raise ValueError('; '.join(issues))
@@ -207,12 +208,12 @@ class RecoveryOperator(PatchOperator):
         if action in CORE_ACTIONS and (health_file or canary_run):
             raise ValueError('offline core recovery uses direct SSH/etcd evidence, not worker health/canaries')
         observed = self.observe(source, action, health_file, canary_run)
-        target, alias = selected_worker(source) if action not in CORE_ACTIONS else (None, None)
+        target, alias = selected_worker(source, self.inventory) if action not in CORE_ACTIONS else (None, None)
         plan = {'id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:8],
                 'operation': 'core-recovery' if action in CORE_ACTIONS else 'worker-recovery',
                 'action': action, 'created_at': now(), 'source_run': run, 'source': source,
                 'health_file': health_file, 'canary_run': canary_run, 'observed': observed,
-                'bindings': self.bindings(), 'executable': True, 'mutation_hosts': [CORE] if action in CORE_ACTIONS else [CORE, alias],
+                'bindings': self.bindings(), 'executable': True, 'mutation_hosts': [self.core['alias']] if action in CORE_ACTIONS else [self.core['alias'], alias],
                 'steps': (['Verify SSH identity, empty runtime/metadata, etcd and backup hashes without core API',
                            'Restore only the recorded binary/manifest if needed; restart core at most once',
                            'Verify running checksum, API, zero workloads/usage and preserved services'] if action == 'core-rollback' else
@@ -274,7 +275,7 @@ class RecoveryOperator(PatchOperator):
         self.stage('cancelling-core-update')
         if before['recovery']['stage'] != 'cancelled':
             self.journal['remote_cancellation'] = self.remote({'action': 'cancel', 'id': plan['id'],
-                'source_run': plan['source_run'], 'machine_id': before['hosts'][CORE]['machine_id'],
+                'source_run': plan['source_run'], 'machine_id': before['hosts'][self.core['alias']]['machine_id'],
                 'expected_cancellation': before['recovery']})
             self.save_journal()
         self.stage('verifying-core-cancellation')
@@ -296,13 +297,13 @@ class RecoveryOperator(PatchOperator):
         if before['recovery']['stage'] != 'rolled-back':
             self.stage('restoring-core-binary')
             self.journal['remote_restore'] = self.remote({'action': 'rollback', 'id': plan['id'],
-                'source_run': plan['source_run'], 'machine_id': before['hosts'][CORE]['machine_id'],
+                'source_run': plan['source_run'], 'machine_id': before['hosts'][self.core['alias']]['machine_id'],
                 'expected_recovery': before['recovery']})
             self.save_journal()
         needs_restart = before['runtime'].get('ActiveState') != 'active' or before['runtime']['sha256'] != checksum
         if needs_restart:
             self.stage('restarting-core-only')
-            self.command(CORE, ['sudo', '-n', 'systemctl', 'restart', 'eru-core.service'])
+            self.command(self.core['alias'], ['sudo', '-n', 'systemctl', 'restart', 'eru-core.service'])
         self.stage('verifying-core-recovery')
         for _ in range(60):
             try:
@@ -333,7 +334,7 @@ class RecoveryOperator(PatchOperator):
 
     def recover_worker(self, plan):
         before = plan['observed']
-        target, alias = selected_worker(plan['source'])
+        target, alias = selected_worker(plan['source'], self.inventory)
         component = ComponentReinstall(self, target=target)
         guards = HTTPGuards(self.project, plan['id'], before['readiness']['canaries'])
         try:
@@ -362,7 +363,7 @@ class RecoveryOperator(PatchOperator):
                 component.check_isolation(before['snapshot'], before['protected_services'])
                 component.stage('resuming-recovered-' + target)
                 component.resume_attempted = True
-                component.command(CORE, ['sudo', '-n', '/usr/local/bin/eru-cli', '--eru', self.core['ip'] + ':5001', 'node', 'up', target])
+                component.command(self.core['alias'], ['sudo', '-n', '/usr/local/bin/eru-cli', '--eru', self.core['ip'] + ':5001', 'node', 'up', target])
                 after = component.check_isolation(before['snapshot'], before['protected_services'])
                 node = empty_target(after, target, alias)
                 original = empty_target(before['snapshot'], target, alias)

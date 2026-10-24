@@ -1,3 +1,4 @@
+from operator_inventory import key_aliases
 """Fixed copied-source pinned firewall transport; authority stays with controller."""
 import base64
 import copy
@@ -6,13 +7,13 @@ from pathlib import Path
 
 from fresh_execution import sha256, timestamp
 import fresh_network_firewall as firewall
-from fresh_observation import ALIASES, decode, public_key
+from fresh_observation import decode, public_key
 from fresh_observation_ops import SSHReader
 
 WIRE_LIMIT = 256 * 1024
 ERROR = 'network firewall adapter rejected'
 # This reviewed dependency list is code, never a path or module selected by wire data.
-_BUNDLE = ('app_desired', 'fresh_rebuild', 'fresh_execution', 'fresh_observation',
+_BUNDLE = ('operator_inventory', 'app_desired', 'fresh_rebuild', 'fresh_execution', 'fresh_observation',
            'fresh_network_access', 'fresh_network_staging_host',
            'fresh_network_staging', 'fresh_network_firewall')
 
@@ -83,15 +84,15 @@ class SSHNetworkFirewallAdapter:
     """One fixed SSHReader call per operation; pinned OOB Ed25519 trust."""
     def __init__(self, host_keys, *, transport=None):
         try:
-            if type(host_keys) is not dict or set(host_keys) != set(ALIASES):
+            if type(host_keys) is not dict or set(host_keys) != set(key_aliases(host_keys)):
                 raise ValueError(ERROR)
             keys = copy.deepcopy(host_keys)
-            if len({public_key(keys[alias]) for alias in ALIASES}) != 4:
+            if len({public_key(keys[alias]) for alias in key_aliases(host_keys)}) != 4:
                 raise ValueError(ERROR)
             if transport is not None and not callable(transport):
                 raise ValueError(ERROR)
             self._keys = keys
-            self._transport = SSHReader() if transport is None else transport
+            self._transport = SSHReader(aliases=host_keys) if transport is None else transport
         except Exception:
             raise ValueError(ERROR) from None
 

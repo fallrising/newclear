@@ -37,6 +37,17 @@ class ReplaySSHTests(unittest.TestCase):
             with redirect_stdout(out): exec(compile(ast.Module(body=[tree.body[-1]],type_ignores=[]),'<copied-request>','exec'),namespace)
         return out.getvalue().encode()
 
+    def test_copied_program_imports_in_clean_isolated_interpreter(self):
+        import subprocess
+        program = ssh.build_program({'schema_version': 1, 'operation': 'capture', 'action': self.h.action(0), 'capture_index': 0})
+        tree = ast.parse(program)
+        # Compile every actual bundled support/helper statement; omit host dispatch.
+        tree.body.pop()
+        result = subprocess.run([sys.executable, '-I', '-c',
+                                 "exec(compile(__import__('sys').stdin.read(), '<isolated-bundle>', 'exec'))"],
+                                input=ast.unparse(tree), capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_copied_bundle_pinned_four_host_probe_and_one_writer(self):
         adapter=ssh.SSHReplayAdapter(self.h.keys,transport=self.transport)
         first=adapter.observe(self.h.action(0))
@@ -47,7 +58,7 @@ class ReplaySSHTests(unittest.TestCase):
         self.assertEqual(observed['provenance']['intent_sha256'],'b'*64)
 
     def test_wrong_pinned_key_and_wire_mutation_have_zero_dispatches(self):
-        keys=copy.deepcopy(self.h.keys); keys['ckc-disposable-01']=keys['ckc-disposable-02']
+        keys=copy.deepcopy(self.h.keys); keys['lab-host-01']=keys['lab-host-02']
         with self.assertRaises(ValueError): ssh.SSHReplayAdapter(keys,transport=self.transport)
         action=self.h.action(1); action['step']='canary-cache'
         with self.assertRaises(ValueError): ssh.build_program({'schema_version':1,'operation':'dispatch','action':action,'intent_sha256':'b'*64})

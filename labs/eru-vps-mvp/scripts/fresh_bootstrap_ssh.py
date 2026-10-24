@@ -1,3 +1,4 @@
+from operator_inventory import key_aliases
 """Fixed copied-source bootstrap transport using existing pinned Ed25519 SSH trust."""
 import base64
 import copy
@@ -6,11 +7,11 @@ from pathlib import Path
 
 import fresh_bootstrap_host as helper
 import fresh_bootstrap_render as render
-from fresh_observation import ALIASES, public_key
+from fresh_observation import public_key
 from fresh_observation_ops import SSHReader
 
 ERROR = 'fresh bootstrap adapter rejected'
-_BUNDLE = ('app_desired', 'fresh_rebuild', 'fresh_execution', 'fresh_observation',
+_BUNDLE = ('operator_inventory', 'app_desired', 'fresh_rebuild', 'fresh_execution', 'fresh_observation',
            'fresh_network_access', 'fresh_network_staging_host', 'fresh_network_staging',
            'fresh_network_firewall', 'fresh_network_firewall_host', 'worker_payload',
            'fresh_bootstrap_render')
@@ -79,14 +80,14 @@ class SSHBootstrapAdapter:
     """One fixed SSHReader dispatch; recovery calls observe and cannot replay writers."""
     def __init__(self, host_keys, *, transport=None):
         try:
-            if type(host_keys) is not dict or set(host_keys) != set(ALIASES):
+            if type(host_keys) is not dict or set(host_keys) != set(key_aliases(host_keys)):
                 raise ValueError(ERROR)
-            if len({public_key(host_keys[a]) for a in ALIASES}) != 4:
+            if len({public_key(host_keys[a]) for a in key_aliases(host_keys)}) != 4:
                 raise ValueError(ERROR)
             if transport is not None and not callable(transport):
                 raise ValueError(ERROR)
             self._keys = copy.deepcopy(host_keys)
-            self._transport = SSHReader() if transport is None else transport
+            self._transport = SSHReader(aliases=host_keys) if transport is None else transport
         except Exception:
             raise ValueError(ERROR) from None
 

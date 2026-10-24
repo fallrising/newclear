@@ -41,7 +41,7 @@ class Fixture:
         self.now = datetime(2026, 10, 4, 12, tzinfo=timezone.utc)
         self.activation = 'e' * 64
         self.stage_intent = 'd' * 64
-        self.keys = {'ckc-disposable-%02d' % (i + 1): key(i) for i in range(4)}
+        self.keys = {'lab-host-%02d' % (i + 1): key(i) for i in range(4)}
         self.ips = ['10.31.0.%d' % i for i in range(1, 5)]
         self.controller = '10.31.0.10'
         for name in ('etc/eru', 'etc/ssh', 'proc/sys/kernel/random'):
@@ -67,7 +67,7 @@ class Fixture:
         self.staged_action = {'schema_version': 1, 'operation': staging.OPERATION,
             'plan_id': 'plan-1', 'plan_sha256': 'a' * 64, 'run_id': 'run-1',
             'execution_sha256': 'b' * 64, 'pending_sha256': 'c' * 64,
-            'host_index': 0, 'host': {'alias': 'ckc-disposable-01', 'node': 'worker-1',
+            'host_index': 0, 'host': {'alias': 'lab-host-01', 'node': 'worker-1',
                 'ip': self.ips[0], 'machine_id': self.machine, 'boot_id': self.boot,
                 'host_key_sha256': digest(base64.b64decode(key(0).split()[1])),
                 'files': files}}
@@ -444,7 +444,7 @@ class SSHIndependentReview(unittest.TestCase):
         kernel = Kernel(self, self.f)
         requests = []
         def transport(host, source, trusted):
-            self.assertEqual(host['alias'], 'ckc-disposable-01')
+            self.assertEqual(host['alias'], 'lab-host-01')
             self.assertEqual(trusted, self.f.keys[host['alias']])
             requests.append(source)
             operation = 'activate' if len(requests) == 2 else 'observe'

@@ -1,3 +1,4 @@
+import fixture_inventory
 """A clean controller fixture and missing-input checks; no VPS connection."""
 import hashlib
 import json
@@ -34,17 +35,15 @@ class PreflightTests(unittest.TestCase):
         patch.write_bytes(b'patch-bytes')
         self.write('patches/core-v0.1.5-lock-context.validation.json',
                    {'artifact_sha256': core_sha, 'patch_sha256': hashlib.sha256(patch.read_bytes()).hexdigest()})
-        inventory = [{'alias': cp.ALIASES[0], 'node': 'worker-1', 'role': 'core'}] + [
-            {'alias': alias, 'node': f'worker-{i}', 'role': 'worker'}
-            for i, alias in enumerate(cp.ALIASES[1:], 2)]
+        inventory = fixture_inventory.inventory()
         self.write('private/deployment-plan.json', inventory)
-        self.write('private/verified-host-public-keys.json', {alias: [self.secret] for alias in cp.ALIASES[1:]})
+        self.write('private/verified-host-public-keys.json', {alias: [self.secret] for alias in fixture_inventory.ALIASES[1:]})
         self.write('private/operations/cluster.json', {'cluster_id': 'eru-vps-mvp', 'generation': 1})
         self.write('private/operations/core-revision.json', {'artifact_sha256': core_sha})
         self.write('private/operations/worker-component-revisions.json', {'worker-4': {'revision': 3}})
         for dirname in ('runs', 'plans'):
             (self.private / 'operations' / dirname).mkdir()
-        for alias in cp.ALIASES:
+        for alias in fixture_inventory.ALIASES:
             (self.private / 'preflight').mkdir(exist_ok=True)
             (self.private / 'preflight' / ('20260923T000000Z-' + alias.removeprefix('ckc-') + '-fixture.json')).write_text('{}')
             (self.ssh_home / alias.removeprefix('ckc-')).write_text(self.secret)
@@ -79,15 +78,15 @@ class PreflightTests(unittest.TestCase):
     def test_clean_external_inputs_are_review_ready_without_secret_content(self):
         result = self.assess()
         self.assertTrue(result['ready_for_review'], result['blockers'])
-        self.assertEqual(set(result['ssh_aliases']), set(cp.ALIASES))
+        self.assertEqual(set(result['ssh_aliases']), set(fixture_inventory.ALIASES))
         self.assertEqual(len(result['locks']['artifacts']), 6)
         self.assertNotIn(self.secret, json.dumps(result))
 
     def test_optional_reviewed_core_key_preserves_legacy_worker_requirement(self):
         self.write('private/verified-host-public-keys.json',
-                   {alias: [self.secret] for alias in cp.ALIASES})
+                   {alias: [self.secret] for alias in fixture_inventory.ALIASES})
         self.assertTrue(self.assess()['ready_for_review'])
-        for aliases in (cp.ALIASES[:-1], [*cp.ALIASES, 'foreign-host']):
+        for aliases in (fixture_inventory.ALIASES[:-1], [*fixture_inventory.ALIASES, 'foreign-host']):
             self.write('private/verified-host-public-keys.json',
                        {alias: [self.secret] for alias in aliases})
             self.assertFalse(self.assess()['ready_for_review'])
@@ -101,7 +100,7 @@ class PreflightTests(unittest.TestCase):
         self.assertTrue(any('cluster.json missing' in item for item in result['blockers']))
 
     def test_wrong_alias_and_dirty_source_fail_closed(self):
-        self.bad_alias = cp.ALIASES[1]
+        self.bad_alias = fixture_inventory.ALIASES[1]
         self.dirty = True
         result = self.assess()
         self.assertFalse(result['ready_for_review'])
@@ -117,7 +116,7 @@ class PreflightTests(unittest.TestCase):
         self.assertNotIn(self.secret, json.dumps(result))
 
     def test_inventory_topology_mismatch_is_rejected(self):
-        self.write('private/deployment-plan.json', [{'alias': cp.ALIASES[0], 'node': 'worker-1', 'role': 'core'}])
+        self.write('private/deployment-plan.json', [{'alias': fixture_inventory.ALIASES[0], 'node': 'worker-1', 'role': 'core'}])
         result = self.assess()
         self.assertFalse(result['ready_for_review'])
         self.assertTrue(any('topology' in item for item in result['blockers']))

@@ -1,3 +1,4 @@
+import fixture_inventory
 """Offline tests for the post-reimage, read-only SSH identity gate."""
 import base64
 import hashlib
@@ -12,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from reimage_host import REMOTE_FACTS, inspect_replacement_host
 
 
-ALIAS = 'ckc-disposable-04'
+ALIAS = 'lab-host-04'
 KEY_BLOB = b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00 ' + b'\x01' * 32
 FINGERPRINT = 'SHA256:' + base64.b64encode(hashlib.sha256(KEY_BLOB).digest()).decode().rstrip('=')
 EXPECTED = {
@@ -62,12 +63,12 @@ class ReimageHostTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.trusted = Path(self.temp.name)
-        (self.trusted / 'disposable-04').write_text(
+        (self.trusted / 'lab-host-04').write_text(
             ALIAS + ' ssh-ed25519 ' + base64.b64encode(KEY_BLOB).decode() + '\n')
 
     def test_read_only_gate_uses_only_strict_fixed_alias_and_existing_key(self):
         runner = Runner(facts())
-        result = inspect_replacement_host(ALIAS, EXPECTED, self.trusted, runner=runner)
+        result = inspect_replacement_host(ALIAS, EXPECTED, self.trusted, runner=runner, inventory=fixture_inventory.inventory())
         self.assertEqual(result['machine_id'], EXPECTED['machine_id'])
         self.assertEqual(result['boot_id'], EXPECTED['boot_id'])
         self.assertEqual(result['host_key_file_check']['host_key_fingerprints'],
@@ -79,26 +80,26 @@ class ReimageHostTests(unittest.TestCase):
         self.assertIn('StrictHostKeyChecking=yes', argv)
         self.assertIn('UpdateHostKeys=no', argv)
         self.assertIn('GlobalKnownHostsFile=/dev/null', argv)
-        self.assertIn('UserKnownHostsFile=' + str(self.trusted / 'disposable-04'), argv)
+        self.assertIn('UserKnownHostsFile=' + str(self.trusted / 'lab-host-04'), argv)
         self.assertEqual(stdin, REMOTE_FACTS)
         self.assertEqual(timeout, 90)
         self.assertNotIn('--apply', argv)
 
     def test_gate_rejects_unreviewed_alias_or_mismatched_local_key_before_ssh(self):
         runner = Runner(facts())
-        with self.assertRaisesRegex(ValueError, 'must use ckc-disposable'):
-            inspect_replacement_host('root@192.0.2.4', EXPECTED, self.trusted, runner=runner)
+        with self.assertRaisesRegex(ValueError, 'reviewed inventory worker alias'):
+            inspect_replacement_host('root@192.0.2.4', EXPECTED, self.trusted, runner=runner, inventory=fixture_inventory.inventory())
         wrong_fingerprint = 'SHA256:' + base64.b64encode(hashlib.sha256(b'wrong key').digest()).decode().rstrip('=')
         wrong = dict(EXPECTED, host_key_fingerprints={'ssh-ed25519': wrong_fingerprint})
         with self.assertRaisesRegex(ValueError, 'differ from the owner receipt'):
-            inspect_replacement_host(ALIAS, wrong, self.trusted, runner=runner)
+            inspect_replacement_host(ALIAS, wrong, self.trusted, runner=runner, inventory=fixture_inventory.inventory())
         self.assertEqual(runner.calls, [])
 
     def test_gate_rejects_unsafe_ssh_alias_config_without_remote_command(self):
         runner = Runner(facts(), config='user root\nhostname 100.64.0.4\nport 22\n'
                                       'proxycommand /tmp/side-effect\nproxyjump none\n')
         with self.assertRaisesRegex(ValueError, 'SSH alias configuration'):
-            inspect_replacement_host(ALIAS, EXPECTED, self.trusted, runner=runner)
+            inspect_replacement_host(ALIAS, EXPECTED, self.trusted, runner=runner, inventory=fixture_inventory.inventory())
         self.assertEqual(len(runner.calls), 1)
 
     def test_gate_rejects_identity_state_and_readiness_drift(self):
@@ -119,7 +120,7 @@ class ReimageHostTests(unittest.TestCase):
                 report = facts()
                 report.update(changes)
                 with self.assertRaisesRegex(ValueError, message):
-                    inspect_replacement_host(ALIAS, EXPECTED, self.trusted, runner=Runner(report))
+                    inspect_replacement_host(ALIAS, EXPECTED, self.trusted, runner=Runner(report), inventory=fixture_inventory.inventory())
 
 
 if __name__ == '__main__':

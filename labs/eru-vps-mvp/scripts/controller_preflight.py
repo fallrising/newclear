@@ -1,3 +1,4 @@
+from operator_inventory import evidence_name
 #!/usr/bin/env python3
 """Local-only controller handoff audit. Never contacts a VPS or prints private inputs."""
 import hashlib
@@ -12,9 +13,9 @@ from datetime import datetime, timezone
 import uuid
 
 from labops import atomic_json
+from operator_inventory import validate_inventory
 
 PROJECT = Path(__file__).resolve().parent.parent
-ALIASES = tuple(f'ckc-disposable-{i:02d}' for i in range(1, 5))
 STATE_FILES = ('cluster.json', 'core-revision.json', 'worker-component-revisions.json')
 PACKAGES = ('python3', 'openssh-client', 'git')
 ARTIFACT_REPOS = {'projecteru2/core', 'projecteru2/cli', 'projecteru2/agent',
@@ -115,12 +116,14 @@ def assess(project=PROJECT, ssh_home=None, run=command):
         if not report['private_inputs']['patched_core_matches_validation']:
             blockers.append('validated patched core artifact missing or mismatched')
 
+    ALIASES = ()
     inventory = json_input(private / 'deployment-plan.json', blockers, 'deployment-plan.json')
     report['private_inputs']['deployment-plan.json'] = inventory is not None
-    if inventory is not None and (not isinstance(inventory, list) or len(inventory) != 4 or
-            [(row.get('alias'), row.get('node'), row.get('role')) for row in inventory if isinstance(row, dict)] !=
-            [(ALIASES[0], 'worker-1', 'core')] + [(alias, f'worker-{i}', 'worker') for i, alias in enumerate(ALIASES[1:], 2)]):
-        blockers.append('private inventory topology differs from reviewed four hosts')
+    if inventory is not None:
+        try:
+            ALIASES = tuple(row['alias'] for row in validate_inventory(inventory))
+        except ValueError:
+            blockers.append('private inventory topology differs from reviewed four hosts')
     host_keys = json_input(private / 'verified-host-public-keys.json', blockers, 'verified-host-public-keys.json')
     report['private_inputs']['verified-host-public-keys.json'] = host_keys is not None
     if host_keys is not None and (not isinstance(host_keys, dict) or set(host_keys) not in (set(ALIASES[1:]), set(ALIASES))):
@@ -139,12 +142,11 @@ def assess(project=PROJECT, ssh_home=None, run=command):
         if not exists:
             blockers.append('operations/' + directory + ' missing')
     for alias in ALIASES:
-        number = alias[-2:]
-        records = list((private / 'preflight').glob('*-disposable-' + number + '-*.json'))
+        records = list((private / 'preflight').glob('*-' + evidence_name(alias) + '-*.json'))
         report['private_inputs']['preflight/' + alias] = bool(records)
         if not records:
             blockers.append('private preflight evidence missing: ' + alias)
-        key = ssh_home / alias.removeprefix('ckc-')
+        key = ssh_home / evidence_name(alias)
         code, out, _ = run(['ssh', '-G', alias])
         options = dict(line.split(' ', 1) for line in out.splitlines() if ' ' in line) if code == 0 else {}
         ready = (code == 0 and options.get('user') == 'ckc'

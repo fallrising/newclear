@@ -10,8 +10,9 @@ import re
 import subprocess
 import uuid
 
-from fresh_rebuild import ALIASES, IDENTIFIER, TOP_FIELDS, build_plan, plan_digest
+from fresh_rebuild import IDENTIFIER, TOP_FIELDS, build_plan, plan_digest
 from labctl import code_inputs, load_inventory
+from operator_inventory import topology
 from labops import atomic_json, digest
 from reimage_review import load_intent
 
@@ -246,9 +247,7 @@ def save_review_plan(project, input_file, plan_id=None, *, now=None,
     if not isinstance(refs, list) or len(refs) != 4:
         raise ValueError('host_intents must enumerate exactly four hosts')
     host_intents = []
-    for expected_alias, expected_node, _role in (
-            (alias, f'worker-{index}', 'core' if index == 1 else 'worker')
-            for index, alias in enumerate(ALIASES, 1)):
+    for expected_alias, expected_node, _role in topology(inventory):
         ref = refs[len(host_intents)]
         if not isinstance(ref, dict) or set(ref) != {'alias', 'node', 'path', 'sha256'}:
             raise ValueError('host intent reference must contain exact identity, path and SHA-256')

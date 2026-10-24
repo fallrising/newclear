@@ -19,7 +19,8 @@ import hashlib
 import json
 import re
 
-from fresh_rebuild import ALIASES, TOPOLOGY, plan_digest
+from fresh_rebuild import plan_digest
+from operator_inventory import topology
 from fresh_simulation_store import RecordStore, record_digest
 
 STAGES = (
@@ -66,6 +67,8 @@ def _validate_review(envelope):
             'executable', 'execution_implemented', 'remote_mutation_performed')))
         before, after = plan['generation_before'], plan['generation_after']
         _require(type(before) is int and before > 0 and type(after) is int and after == before + 1)
+        TOPOLOGY = topology(plan['scope']['hosts'])
+        ALIASES = tuple(row[0] for row in TOPOLOGY)
         stages = plan['stages']
         _require(isinstance(stages, list) and len(stages) == len(STAGES))
         for ordinal, (stage, name) in enumerate(zip(stages, STAGES)):

@@ -32,7 +32,7 @@ class OriginalWorkerBoundaryReviewTests(unittest.TestCase):
 
     def test_original_local_trust_validator_still_rejects_core_alias(self):
         with self.assertRaisesRegex(ValueError, 'reviewed worker SSH alias'):
-            reimage_receipt.verify_local_hostkeys('ckc-disposable-01', {}, Path('.'))
+            reimage_receipt.verify_local_hostkeys('lab-host-01', {}, Path('.'))
 
 
 class FreshReceiptEvidenceReviewTests(unittest.TestCase):

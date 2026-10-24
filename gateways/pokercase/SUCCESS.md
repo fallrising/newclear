@@ -89,3 +89,9 @@ Owner authorized one further attempt. Preserve sandbox enforcement and Docker re
 ## 2026-10-24 outer-container compatibility
 
 Goal: remove the nested CLI sandbox startup conflict while retaining the existing Docker boundary. Scope/decision and unchanged CI-1–CI-5: [isolation decision](docs/cursor-isolation.md#2026-10-24-container-compatibility-decision). AC-17 now expects `--sandbox disabled` inside mandatory Docker; no host fallback, outer permission widening or model retry. Plan: focused RED→GREEN argument regression, full Rust tests/clippy/fmt, real Docker fake-CLI canary and independent review. User-reported direct CLI success remains separate from gateway live acceptance. Results: focused regression failed against the old argument, then99tests/clippy/fmt/document checks and credential-free real Docker canary passed. Independent review and required CI remain merge gates.
+
+## Corrected-runner live acceptance
+
+2026-10-24 owner continuation permits the pending AC-17 single text journey using the corrected runner and retained profile. Verify exact expected marker, one request container and cleanup; no automatic retry or new login. Full protocol/tool/image/lifecycle acceptance remains outside this single request. See [live result](docs/cursor-live-smoke.md).
+
+Corrected-runner result: the newly authorized one-request ChatCompletions journey passedHTTP200,expected marker,5.897seconds,one container and0remaining. See source/binary/probe evidence in the live record. This supersedes the latest text-failure status without rewriting either historical502; mainline remains incomplete.

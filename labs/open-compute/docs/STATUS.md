@@ -1,5 +1,19 @@
 # Status and evidence
 
+## CI fixture portability follow-up: T071 (2026-10-24)
+
+The first PR585 hosted offline check failed7 assertions/14errors because generated
+temporary scripts relied on caller PYTHONPATH. The fixture scripts/coordinators
+now explicitly load the trusted checkout; both new test classes remove ambient
+PYTHONPATH. Full318 tests then passed in39.238s under Python3.11.17 with no
+PYTHONPATH, stable hashes, final ECHILD and no unexpected descendants. Final freeze:
+`aa7c3c86935ee78ce04ed1542aa68469760cc30a400a43f59733c3ba47944fe2`.
+Only test_lab.py/test_trial_supervision.py changed after the runtime freeze below;
+the [source binding](evidence/2026-10-24-m7-supervision-source.json) records both
+identities. Product/runtime bytes and assertions remain unchanged. The first CI's
+M7/crash/retry/storage jobs passed; its offline failure remains failed. Fresh
+exact-head CI is required for publication acceptance.
+
 ## Reviewed M7 runtime repair: T069 (2026-10-24)
 
 T067 independently accepted the frozen implementation; root independently reran

@@ -831,6 +831,12 @@ class DiagnosticsAndProcessTests(unittest.TestCase):
 class NestedObserverReapTests(unittest.TestCase):
     """Synthetic causal probes; a refusal is evidence, never runtime acceptance."""
 
+    def setUp(self):
+        environment = patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
+        os.environ.pop('PYTHONPATH', None)
+
     FIXTURE = r'''
 import ctypes, errno, json, os, signal, subprocess, sys, time
 from pathlib import Path
@@ -939,7 +945,7 @@ else:
         self.addCleanup(directory.cleanup)
         root = Path(directory.name)
         source = root / 'fixture.py'
-        source.write_text(self.FIXTURE)
+        source.write_text('import sys\nsys.path.insert(0, ' + repr(str(lab.HERE)) + ')\n' + self.FIXTURE)
         process = subprocess.Popen(
             [sys.executable, str(source), str(root), mode, str(source)],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)

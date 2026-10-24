@@ -19,6 +19,7 @@ its two original causal probes remain unchanged.
 - T067 independent implementation review and final source/document binding — passed
 - T068-m7-trial1: one fresh original-artifact M7 trial/80.892s, all five acceptance checks,20 expected commands, three generations/normal shutdowns, retained state and explicit scope removal; unchanged source/no remaining owned container — passed
 - T069-runtime-audit: strict report/diagnostic projection, all30 source hashes, runtime subset and sanitized public report/source binding — passed
+- T071-offline-nosyspath:318tests/39.238s, Python3.11.17 with PYTHONPATH absent, exact final freeze and ECHILD/no unexpected children — passed
 
 Frozen code/workload/build digest:
 `71a4040e996cc06f6c8b6390d95d7e437b488f98b54fa3436ba95ac8d8c07b55`.
@@ -34,6 +35,14 @@ on system3.13 and verified CI3.11, including an escalated/native pair. Measured
 successful helpers exceeded that margin. Root approved only four full test
 intervals plus scheduled_slots==4; production bounds were not changed.
 The old untraced exited child was not retrospectively identified.
+
+First PR585 CI ran318tests but failed7 assertions/14errors because temporary
+synthetic scripts could not import component modules without caller PYTHONPATH.
+T071 makes those scripts/coordinators load the trusted path and clears ambient
+PYTHONPATH in the two new test classes. No assertion or production byte changed.
+Final freezeaa7c3c86935ee78ce04ed1542aa68469760cc30a400a43f59733c3ba47944fe2
+changes only those two test hashes from the original runtime's71a404 freeze;
+the public source binding records the exact bridge. Earlier CI remains failed.
 
 ## Documentation
 

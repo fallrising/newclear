@@ -17,6 +17,11 @@ import lab
 import trial_supervision as supervision
 
 
+def fixture_source(code):
+    """Temporary scripts load this checkout without ambient PYTHONPATH."""
+    return 'import sys\nsys.path.insert(0, ' + repr(str(lab.HERE)) + ')\n' + code
+
+
 class FrameTests(unittest.TestCase):
     def frame(self):
         return dict(version=1, kind='READY', seq=0, pid=12, start=34, deadline_ns=123456)
@@ -55,6 +60,12 @@ class FrameTests(unittest.TestCase):
 
 
 class ActualDelegationTests(unittest.TestCase):
+    def setUp(self):
+        environment = patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
+        os.environ.pop('PYTHONPATH', None)
+
     FIXTURE = r'''
 import argparse, json, os, signal, subprocess, sys, threading, time
 import lab
@@ -181,7 +192,7 @@ raise SystemExit(code)
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
         source = Path(temp.name)/'synthetic_trial.py'
-        source.write_text(self.FIXTURE)
+        source.write_text(fixture_source(self.FIXTURE))
         state = state or temp.name
         with patch.object(supervision, 'TRIAL_PATH', source):
             captured = supervision.SupervisedCapture(
@@ -255,7 +266,7 @@ raise SystemExit(code)
     def test_ack_while_collecting_live_orphan_is_rejected_and_fixture_reaps_it(self):
         temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
         root=Path(temp.name)
-        source=root/'owner.py';source.write_text(self.FIXTURE)
+        source=root/'owner.py';source.write_text(fixture_source(self.FIXTURE))
         coordinator=r'''
 import json,os,sys,time
 from pathlib import Path
@@ -284,7 +295,7 @@ while True:
         time.sleep(.005)
 print(json.dumps({'refused':refused,'reaped':reaped,'closed':True}))
 '''
-        result=subprocess.run([sys.executable,'-c',coordinator,str(source),str(root)],
+        result=subprocess.run([sys.executable,'-c',fixture_source(coordinator),str(source),str(root)],
                               capture_output=True,text=True,timeout=10)
         self.assertEqual(result.returncode,0,result.stderr)
         self.assertEqual(json.loads(result.stdout),{'refused':True,'reaped':1,'closed':True})
@@ -486,9 +497,9 @@ print(json.dumps({'parent_exit':code,'adopted':adopted,'kernel_closed':True}))
                 path,_=self.private_state()
                 temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
                 root=Path(temp.name)
-                owner=root/'owner.py';owner.write_text(self.FIXTURE)
-                parent=root/'parent.py';parent.write_text(parent_source)
-                result=subprocess.run([sys.executable,'-c',coordinator_source,str(parent),
+                owner=root/'owner.py';owner.write_text(fixture_source(self.FIXTURE))
+                parent=root/'parent.py';parent.write_text(fixture_source(parent_source))
+                result=subprocess.run([sys.executable,'-c',fixture_source(coordinator_source),str(parent),
                                        str(owner),str(path),stage],capture_output=True,text=True,timeout=10)
                 self.assertEqual(result.returncode,0,result.stderr)
                 self.assertEqual(json.loads(result.stdout),

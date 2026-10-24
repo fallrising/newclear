@@ -127,3 +127,12 @@ was absent afterward. See [actual report](docs/evidence/2026-10-24-m7-supervisio
 and [source binding](docs/evidence/2026-10-24-m7-supervision-source.json).
 The recorded harness commit is the working-tree base; the source hashes bind the
 reviewed repair. This M7 pass does not resolve historical M4/AC-05 attribution.
+
+T071 CI follow-up changes only two test fixtures: generated temporary scripts
+load the trusted component path explicitly, and their test classes clear ambient
+PYTHONPATH. The first hosted offline run failed7 assertions/14errors from missing
+imports; those failures are retained. The corrected full318 tests pass in39.238s
+with PYTHONPATH absent. Final test/source digest is
+`aa7c3c86935ee78ce04ed1542aa68469760cc30a400a43f59733c3ba47944fe2`.
+All actual-runtime production bytes remain identical to the80.892s trial; the
+source-binding artifact records this test-only delta without rewriting that run.

@@ -144,6 +144,30 @@
     "source_commit": "27a5dde13be6c7fcc057d3777558f61b1d06fa1f"
   },
   "image": "mcr.microsoft.com/playwright@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
+  "later_test_only_verification": {
+    "ambient_pythonpath": false,
+    "changes": [
+      {
+        "after": "6dc55bc2f02b4d882688f82a50f70f822e44d95e43f50efca5760ca908bcfc24",
+        "before": "b56a198df24df928245e3739c3fc2266a7134e1abd0c221f8549e009ac63a4d0",
+        "path": "tests/test_lab.py"
+      },
+      {
+        "after": "4a75cc4b05b8d35b519d2e2b7a2e38e6732066bc68bf8d61c4e42b0daaee2210",
+        "before": "727a639b4a23f90372d9054508befefbc1abd1280acbd09a1008a51c9e9d6441",
+        "path": "tests/test_trial_supervision.py"
+      }
+    ],
+    "errors": 0,
+    "failures": 0,
+    "final_code_freeze": "aa7c3c86935ee78ce04ed1542aa68469760cc30a400a43f59733c3ba47944fe2",
+    "python": "3.11.17",
+    "reason": "Generated synthetic scripts now explicitly load the trusted component path. The classes remove ambient PYTHONPATH. Production/runtime bytes and original runtime evidence are unchanged.",
+    "runtime_source_subset_unchanged": true,
+    "seconds": 39.238,
+    "skips": 0,
+    "tests": 318
+  },
   "limits": "One fresh local M7 trial; no historical M4 attribution, long-running reliability or live/mainline qualification.",
   "report_sha256": "6ceedcd972c2878425242606bbb713e9806409e12f2f8cfd9b6dea8da8b67213",
   "runtime": {

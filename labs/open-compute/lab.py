@@ -1005,18 +1005,19 @@ def m3_deadline(seconds, phase):
                 signal.setitimer(signal.ITIMER_REAL, max(.000001, remaining), interval)
 
 
-def integration(args, restore=False, resources=False, storage=False, crash=False):
+def integration(args, restore=False, resources=False, storage=False, crash=False, lifecycle=None):
     require(sum((restore, resources, storage, crash)) <= 1, "M3 resources and M2 restore are separate scenarios")
     if resources:
         import resources as resource_tools
     if storage:
         import storage as storage_tools
+        require(lifecycle is not None, "M4 requires its isolated kernel owner")
     if crash:
         import crash as crash_tools
     run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + secrets.token_hex(4)
     command_name = "make integration-crash" if crash else "make integration-storage" if storage else ("make integration-resources" if resources else ("make integration-restore" if restore else "make integration"))
     report = {"schema_version": 1, "run_id": run_id, "command": command_name,
-              "harness_commit": source_commit(), "result": "failed", "phase": "preflight",
+              "harness_commit": None if storage else source_commit(), "result": "failed", "phase": "preflight",
               "environment": {"os": platform.system(), "architecture": platform.machine(),
                               "euid": os.geteuid(), "python": platform.python_version()},
               "acceptance": ({f"M2-{n:02}": "not_run" for n in range(1, 10)} if restore else
@@ -1100,30 +1101,72 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
             return
         report.pop("storage", None)
         report.pop("storage_partial", None)
-        if report["result"] == "passed":
-            value = storage_tools.storage_extension(snapshots, workload)
-            report["storage"] = storage_tools.project_storage(value)
-        else:
-            report["storage_partial"] = storage_tools.partial_extension(snapshots, workload)
+        try:
+            if report["result"] == "passed":
+                value = storage_tools.storage_extension(snapshots, workload)
+                report["storage"] = storage_tools.project_storage(value)
+            else:
+                report["storage_partial"] = storage_tools.partial_extension(snapshots, workload)
+        finally:
+            project_lifecycle_observations()
+
+    def project_lifecycle_observations():
+        if not storage:
+            return
+        try:
+            report["storage_lifecycle"] = lifecycle.evidence(complete=report["result"] == "passed")
+        except Exception as exc:
+            from storage_lifecycle import initial
+            lifecycle.latch("schema")
+            report["result"] = "failed"
+            report["error"] = "schema"
+            report["acceptance"]["M4-05"] = "not_run"
+            diagnostic_record.capture("evidence", report["phase"], exc)
+            value = initial()
+            value.update(failure="schema", cleanup={"status": "refused", "reason": "schema", "kernel_echild": False})
+            report["storage_lifecycle"] = value
 
     def cold_checkpoint(name):
         report["phase"] = name
-        stopped = daemon.stop()
+        receipt = lifecycle.close_epoch(daemon, scenario_deadline)
+        stopped = lifecycle.shutdown(daemon)
         report.setdefault("storage_shutdowns", {})[name] = stopped
         require(stopped["was_running"] and not stopped["forced"] and stopped["all_owned_exited"] and
-                stopped["exit_code"] == 0 and not daemon.observation_error and not daemon.live(),
+                stopped["exit_code"] == 0,
                 "ownership")
         graceful_stops.add(id(daemon))
         if name == "cold_after_completion":
             report["final_shutdown"] = stopped
-        with m3_deadline(10, "M4 snapshot"):
-            scope.check_owner()
-            deadline = min(time.monotonic() + 10, scenario_deadline)
-            value = storage_tools.cold_snapshot(scope, name, deadline=deadline)
-            value = storage_tools.project_snapshot(value)
-            require(value["phase"] == name, "schema")
-            scope.check_owner()
-            snapshots[name] = value
+        lifecycle.consume_snapshot(receipt, name)
+        released = False
+        try:
+            with m3_deadline(10, "M4 snapshot"):
+                try:
+                    scope.check_owner()
+                except Exception:
+                    lifecycle.latch("identity")
+                    raise
+                deadline = min(time.monotonic() + 10, scenario_deadline)
+                value = storage_tools.cold_snapshot(scope, name, deadline=deadline)
+                # Normal scanner return proves its ExitStack released locks.
+                released = True
+                value = storage_tools.project_snapshot(value)
+                require(value["phase"] == name, "schema")
+                try:
+                    scope.check_owner()
+                except Exception:
+                    lifecycle.latch("identity")
+                    raise
+                snapshots[name] = value
+                lifecycle.snapshot_finished(receipt, success=True, locks_released=True)
+        except BaseException:
+            # The unchanged scanner does not expose a release receipt on error.
+            # Do not infer release from the original exception's class.
+            if not released:
+                lifecycle.latch("locks")
+            elif lifecycle.failure is None:
+                lifecycle.snapshot_finished(receipt, success=False, locks_released=True)
+            raise
 
     def validate_batch(value, job_id):
         expected = {"id": job_id, "payload": "x" * 128, "callback_count": 0,
@@ -1201,10 +1244,15 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
     scope_hint = None
     old_handlers = {}
     def interrupted(signum, _frame):
+        if storage:
+            lifecycle.cancel()
         raise LabError("harness interrupted by signal " + str(signum))
     for sig in (signal.SIGINT, signal.SIGTERM):
         old_handlers[sig] = signal.signal(sig, interrupted)
     try:
+        if storage:
+            report["harness_commit"] = lifecycle.source_commit()
+            diagnostic_record.value["source_commit"] = report["harness_commit"]
         scope_hint = Path(pwd.getpwuid(os.getuid()).pw_dir) / ".open-compute"
         cache, output = validate_artifact_paths(scope_hint, cache, output)
         output_allowed = True
@@ -1216,26 +1264,32 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
         validate_lock(lock)
         report["upstream"] = lock
         binary = download_binary(cache, lock["artifact"], run_id)
-        version = command([str(binary), "--version"]).strip()
+        version = (lifecycle.command if storage else command)([str(binary), "--version"]).strip()
         require(version == "ocd " + lock["release"].removeprefix("v"), "runtime --version disagrees with lock")
         report["runtime"] = {"version_text": version, "artifact_sha256": sha256_file(binary)}
         functional_acceptance["M2-01" if restore else "AC-01"] = "passed"
         scope = OwnedScope(scope_path, args.port, bounded_owner=True) if storage or crash else OwnedScope(scope_path, args.port)
         redactor.secrets.append(scope.create())
+        if storage:
+            lifecycle.bind_scope(scope)
         original_scope_identity = dict(scope.identity)
         config = scope_path / "instances" / INSTANCE / "compute.toml"
         data = config.parent / "data"
 
         def cli(*arguments, timeout=30):
-            return command([str(binary), "--no-update-check", *arguments], timeout)
+            return (lifecycle.command if storage else command)([str(binary), "--no-update-check", *arguments], timeout)
 
         def start():
-            process = Process([str(binary), "--no-update-check", "run"])
+            if storage and lifecycle.epoch["closed"]:
+                lifecycle.next_epoch()
+            process = (lifecycle.start_daemon if storage else Process)([str(binary), "--no-update-check", "run"])
             daemons.append(process)
             unauthenticated = LocalHTTP(args.port)
             if storage or crash:
                 unauthenticated.scenario_deadline = scenario_deadline
             def ready():
+                if storage:
+                    lifecycle.root_check(process)
                 require(process.process.poll() is None, "daemon exited during startup: " + process.text())
                 if not (scope_path / "run/control.sock").is_socket():
                     return False
@@ -1355,8 +1409,11 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
         state_before = state_identity(scope_path, data, config)
         if crash:
             state_before = crash_state_identity(state_before)
-        daemon.children()  # Refresh the descendant graph before proving liveness.
-        live_children = [public_process(child, strict=crash) for child in daemon.live() if child["pid"] != daemon.process.pid]
+        if storage:
+            live_children = lifecycle.sample_liveness(daemon)
+        else:
+            daemon.children()  # Refresh the descendant graph before proving liveness.
+            live_children = [public_process(child, strict=crash) for child in daemon.live() if child["pid"] != daemon.process.pid]
         require(live_children, "no live supervised runtime child was observed")
         report["live_children_before_restart"] = live_children
         if resources:
@@ -1599,37 +1656,44 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
             report["result"] = "failed"
             report["error"] = scenario_error(exc)
         try:
-            with m3_deadline(150, "M5 final cleanup" if crash else "M4 final cleanup" if storage else "M3 final cleanup") if resources or storage or crash else nullcontext():
-                clean = not cleanup_unknown
-                for item in daemons:
-                    if crash and item is intentional_crash:
-                        require(not item.observation_error and not item.live() and
-                                item.process.poll() == -9, "ownership")
-                        # The helper already verified retained exits and closed
-                        # observers. This exact owner alone has intentional -9.
-                        continue
-                    if item.live(strict=False) or item.observation_error:
-                        shutdown = item.stop()
-                        if item is daemon:
-                            report["final_shutdown"] = shutdown
-                        clean = clean and shutdown["all_owned_exited"] and not shutdown["forced"] and shutdown["exit_code"] == 0
-                        if crash:
-                            clean = clean and shutdown["was_running"] is True and shutdown.get("signal") == "SIGTERM"
-                        if storage and clean and not item.observation_error:
-                            graceful_stops.add(id(item))
-                    else:
-                        item.process.poll()
-                        item.finish_threads()
-                        if item is daemon and report["result"] == "passed" and not (storage and id(item) in graceful_stops):
-                            clean = False
-                    if storage or crash:
-                        clean = clean and not item.observation_error and (item.process.poll() == 0)
-                        if storage and id(item) not in graceful_stops:
-                            clean = False
-                    if item.text() and report["result"] != "passed":
-                        report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
-                require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed or could not be verified")
-                report.update(cleanup_scope(scope, restore, original_scope_identity, restored_scope_identity, resources=resources, storage=storage, crash=crash))
+            with m3_deadline(150, "M5 final cleanup" if crash else "M4 final cleanup" if storage else "M3 final cleanup") if resources or storage or crash else nullcontext() as cleanup_deadline:
+                if storage:
+                    seal = lifecycle.finalize(cleanup_deadline)
+                    if daemon is not None and daemon.epoch["closed"]:
+                        report["final_shutdown"] = lifecycle.shutdown(daemon)
+                    report.update(lifecycle.consume_deletion(seal, lambda: cleanup_scope(
+                        scope, False, original_scope_identity, None, storage=True)))
+                else:
+                    clean = not cleanup_unknown
+                    for item in daemons:
+                        if crash and item is intentional_crash:
+                            require(not item.observation_error and not item.live() and
+                                    item.process.poll() == -9, "ownership")
+                            # The helper already verified retained exits and closed
+                            # observers. This exact owner alone has intentional -9.
+                            continue
+                        if item.live(strict=False) or item.observation_error:
+                            shutdown = item.stop()
+                            if item is daemon:
+                                report["final_shutdown"] = shutdown
+                            clean = clean and shutdown["all_owned_exited"] and not shutdown["forced"] and shutdown["exit_code"] == 0
+                            if crash:
+                                clean = clean and shutdown["was_running"] is True and shutdown.get("signal") == "SIGTERM"
+                            if storage and clean and not item.observation_error:
+                                graceful_stops.add(id(item))
+                        else:
+                            item.process.poll()
+                            item.finish_threads()
+                            if item is daemon and report["result"] == "passed" and not (storage and id(item) in graceful_stops):
+                                clean = False
+                        if storage or crash:
+                            clean = clean and not item.observation_error and (item.process.poll() == 0)
+                            if storage and id(item) not in graceful_stops:
+                                clean = False
+                        if item.text() and report["result"] != "passed":
+                            report.setdefault("diagnostics", []).append(redactor.clean(item.text()))
+                    require(clean and not any(item.live() for item in daemons), "owned runtime cleanup failed or could not be verified")
+                    report.update(cleanup_scope(scope, restore, original_scope_identity, restored_scope_identity, resources=resources, storage=storage, crash=crash))
                 if cold_restore is not None:
                     report["cold_restore"].update(public_backup_summary(cold_restore.cleanup(processes_stopped=True)))
                     require(report["cold_restore"].get("private_removed") is True and
@@ -1752,6 +1816,9 @@ def main():
         except (LabError, OSError) as exc:
             print(json.dumps({"result": "failed", "runtime_started": False, "error": str(exc)}))
             return 1
+    if args.command == "integration-storage":
+        from storage_lifecycle import dispatch
+        return dispatch(args)
     return integration(args, restore=args.command == "integration-restore", resources=args.command == "integration-resources",
                        storage=args.command == "integration-storage", crash=args.command == "integration-crash")
 

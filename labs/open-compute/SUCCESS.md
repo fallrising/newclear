@@ -84,9 +84,28 @@ rejects forged counts/types/private fields. AC-K4: causal/adversarial focused
 tests, independent review, one full offline gate and one authorized original M4
 qualification bind the resulting behavior to exact source/artifact evidence.
 
-All AC-K checks start not_run. Review and commit this contract before code;
-root must explicitly release implementation. Historical AC-05 stays failed,
-mainline incomplete and usable_tag none pending actual reviewed qualification.
+The committed baseline began with all AC-K checks not_run; root reviewed and
+committed it before releasing implementation. The evidence below supersedes that
+initial state. Historical AC-05 attribution and whole-mainline acceptance remain
+separate from this bounded current-source qualification.
+
+Phase B candidate evidence: root committed the contract baseline before release.
+AC-K1–K3 have51 focused offline passes on Python3.11.17, including actual
+three-generation kernel closure, unchanged generic refusal under the same causal
+fixture, stable-child/transient-helper sampling, live orphan blocking and typed
+authority failures. Production/test source digest:
+`57be515883f0933712f89517a2ac7526d1b82eff79544c48d839e9603247a566`.
+The earlier893611 source had331 root offline passes but was superseded after
+review reproduced expired receipt/seal authorization. Two actual RED/GREEN cases
+now verify immutable original deadlines; CLI output retains the original bounded
+tail-ring semantics. Root reports332 full offline passes and T078 independent
+ACCEPT on the corrected source. One original-artifact M4 qualification passed in61.007s: all five M4 and eight
+functional checks, three closed epochs/snapshots and verified owned removal.
+AC-K1–K4 local implementation/qualification checks are passed; hosted CI and normal
+PR merge remain delivery gates. See [actual report](docs/evidence/2026-10-24-m4-kernel-closure.json),
+[source binding](docs/evidence/2026-10-24-m4-kernel-closure-source.json) and
+[implementation report](tasks/548-m4-kernel-closure/report.md). This does not
+reconstruct the historical exact generation/edge or grant whole-mainline acceptance.
 
 ### Observation reason retention (2026-10-24 continuation)
 

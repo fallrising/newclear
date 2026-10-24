@@ -1,5 +1,43 @@
 # Status and evidence
 
+## M4 kernel closure qualification — 2026-10-24
+
+The contract baseline was committed before implementation. A new M4-only same-PID
+exec runner now uses a checked subreaper, bounded launch/wait/reader registry,
+closed epochs and actual ECHILD before cold snapshots; deletion requires a
+distinct fresh single-use terminal seal. Generic Process/command, storage.py,
+M5/M7 and all other production inputs remain unchanged. Ambiguous sampled edges
+are reported separately from kernel closure; no historical vanished role is inferred.
+
+Worker focused51 tests pass in5.881s on Python3.11.17 with source stable.40 actual
+owned-process case receipts include coordinator ECHILD, three real generations,
+generic refusal versus kernel closure, live orphan, foreign/stolen wait, launch/
+thread policy, root status/identity, bounded output, timeout and receipt failures.
+An earlier source893611 had331 root offline passes in35.773s, unchanged source,
+actual ECHILD and no unexpected children. Review then reproduced two expired
+capability authorization defects; their RED evidence remains retained. Current
+receipts/seals retain immutable original absolute deadlines and reject late
+consumption; deletion also enforces the remaining original bound. Large CLI
+output uses the existing bounded tail ring and can complete normally.
+Current frozen source digest:
+`57be515883f0933712f89517a2ac7526d1b82eff79544c48d839e9603247a566`.
+See [implementation report](../tasks/548-m4-kernel-closure/report.md).
+Root reports332 full offline passes on the corrected source and T078 independent
+ACCEPT, including expiry/overrun/tail-ring probes. The separately authorized original M4 run passed in61.007s in a fresh non-root,
+network-disabled container, with unchanged16 runtime/workload inputs and the
+original pinned artifact. All five M4 and eight functional checks passed;
+three epochs waited for5/13/13 registered launches, closed with actual ECHILD,
+completed all cold snapshots and released locks. Final fresh kernel proof
+authorized owned scope removal; the container is absent. The first sample
+contained one stable child and zero ambiguous edges; synthetic tests separately
+exercise transient ambiguity and live-orphan refusal.
+
+[Actual sanitized report](evidence/2026-10-24-m4-kernel-closure.json) and
+[exact source/artifact binding](evidence/2026-10-24-m4-kernel-closure-source.json)
+retain the working-tree/base distinction. Necessary hosted CI and normal merge
+remain delivery gates. Historical failures and unknown exact attribution remain;
+whole-mainline acceptance and usable_tag remain incomplete/none.
+
 ## Issue548 diagnostic continuation — 2026-10-24
 
 Repeated reads of a latched process-edge refusal could erase its specific reason

@@ -223,6 +223,18 @@ The separate strict storage report uses M4-01 through M4-05. Partial failed
 reports include only completed snapshots and observed operation counts, with
 no forged deltas. Real executed results and their exact source are in STATUS.
 
+The M4 command freshly execs its first-party kernel owner under the same PID;
+reported daemon identities still name the actual upstream processes. Supported
+Linux x86_64/glibc subreaper and signal policy must pass before upstream starts.
+Each cold boundary closes launches, waits/drains its owned processes and requires
+actual ECHILD. The additive storage_lifecycle evidence distinguishes sampled
+child liveness from whole-tree closure. Unknown/live children, policy changes,
+force or cancellation prevent snapshots and removal. A scanner exception also
+preserves the scope because lock release is unproven; do not automatically retry
+or adopt that scope. An entry-policy refusal emits a bounded fixed stdout report
+before the output directory is validated, so no report file/sidecar is promised
+for that preflight failure. Current qualification limits remain in STATUS.
+
 ## 7. SIGKILL at the committed wait (M5)
 
 After the previous invocation has removed its scope, run:

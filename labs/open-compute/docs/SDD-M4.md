@@ -149,7 +149,9 @@ cannot restore authority. Signals may contain an exact direct child but never
 grant a passing receipt or deletion after force.
 
 A private immutable receipt binds run identity, epoch/token, registered roots and
-actual statuses, completed waits/drains and ECHILD. It is not reconstructed from
+actual statuses, completed waits/drains, original absolute deadline and ECHILD.
+Snapshot consumption/completion and next-epoch creation check that unchanged
+deadline; no receipt use renews it. It is not reconstructed from
 public JSON. Consume it once immediately before that epoch's cold snapshot.
 No next epoch until snapshot success, verified lock release and receipt consumed;
 old tokens never reopen. Snapshot/lock failure cannot resume workload or approve
@@ -160,10 +162,12 @@ this fresh check; consume it once at deletion, including failure cleanup before
 daemon creation or after an already consumed snapshot receipt. It never reopens
 an epoch or converts a failed run to success. The owner-owned
 consume_deletion(seal,remove) verifies exact seal/run identity, unspent state,
-closed epochs, current cancellation/authority/policy and scope binding, then marks
+closed epochs, current cancellation/authority/policy, scope binding and the seal's
+immutable original absolute deadline, then marks
 the seal spent at the deletion authorization linearization point. It immediately
 invokes the existing bounded owned removal callback, with no intervening work or
-new launch. Cancellation or uncertainty before that point forbids removal;
+new launch, under the original remaining bound. An expired seal never invokes the
+callback. Cancellation or uncertainty before that point forbids removal;
 interruption during removal fails the operation and preserves unfinished state
 without claiming rollback of already completed filesystem changes. No subprocess
 or new thread may launch after final close,
@@ -178,6 +182,13 @@ daemon may close for failure cleanup without claiming a normal daemon shutdown.
 Scope-not-created failure needs no deletion authority; failed-start after scope
 creation must register/reap the exact direct child and otherwise preserve scope.
 An intentionally closed final daemon is not an unexpected early exit.
+
+The unchanged scanner exposes no lock-release receipt on an exception. The
+implementation therefore preserves scope after scanner exceptions; it does not
+infer release merely from StorageError(metadata/deadline). Normal scanner return
+establishes release, and all later snapshot projection/phase/owner checks must
+also pass before snapshot_complete becomes true. Ordinary workload failures
+outside scanning may still clean under a fresh terminal seal.
 
 Keep300s scenario budget before daemon1, original Workflow cutoff, existing CLI
 and HTTP deadlines,10s snapshots,150s final cleanup and30s removal. Registry setup,

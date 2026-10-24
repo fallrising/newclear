@@ -13,4 +13,4 @@
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| OJB-FE2-1 | Approved M1–M4 and review-only isolation/gRPC | R2-AC-8/E | in_progress | 2026-10-24T11:18:59Z | — | 2026-10-24T12:44:21Z |
+| OJB-FE2-1 | Approved M1–M4 and review-only isolation/gRPC | R2-AC-8/E | done | 2026-10-24T11:18:59Z | 2026-10-24T12:50:56Z | 2026-10-24T12:50:56Z |

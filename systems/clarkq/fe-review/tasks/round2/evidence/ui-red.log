@@ -1,0 +1,67 @@
+✖ five-second list replacement preserves the focused queue/action after depth changes (2.335541ms)
+✔ refresh never steals focus moved outside the table while API was pending (1.477355ms)
+✖ normal primary button text contrast is at least 4.5:1 (0.526778ms)
+✖ JSON/log scroll regions can be reached and identified by keyboard (0.425297ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 65.202889
+
+✖ failing tests:
+
+test at systems/clarkq/fe-review/ui.test.mjs:26:1
+✖ five-second list replacement preserves the focused queue/action after depth changes (2.335541ms)
+  AssertionError [ERR_ASSERTION]: focused control must belong to refreshed table
+      at TestContext.<anonymous> (file://<worktree>/systems/clarkq/fe-review/ui.test.mjs:29:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at systems/clarkq/fe-review/ui.test.mjs:42:1
+✖ normal primary button text contrast is at least 4.5:1 (0.526778ms)
+  AssertionError [ERR_ASSERTION]: primary button text contrast below AA
+      at TestContext.<anonymous> (file://<worktree>/systems/clarkq/fe-review/ui.test.mjs:48:3)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at systems/clarkq/fe-review/ui.test.mjs:50:1
+✖ JSON/log scroll regions can be reached and identified by keyboard (0.425297ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /tabindex="0"/. Input:
+
+  '<pre id="metrics">'
+
+      at TestContext.<anonymous> (file://<worktree>/systems/clarkq/fe-review/ui.test.mjs:53:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<pre id="metrics">',
+    expected: /tabindex="0"/,
+    operator: 'match',
+    diff: 'simple'
+  }

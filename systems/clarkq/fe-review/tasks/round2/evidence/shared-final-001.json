@@ -1,0 +1,56 @@
+{
+  "project": "clarkq",
+  "targets": "../state/capture-targets.json",
+  "startedAt": "2026-10-24T12:23:11.003Z",
+  "axe": false,
+  "results": [
+    {
+      "app": "admin",
+      "page": "ui",
+      "url": "http://127.0.0.1:8080/ui/",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/admin__ui__desktop__dark.png",
+      "status": 200,
+      "loadMs": 605,
+      "title": "clarkQ Admin",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "app": "admin",
+      "page": "ui",
+      "url": "http://127.0.0.1:8080/ui/",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/admin__ui__tablet__dark.png",
+      "status": 200,
+      "loadMs": 638,
+      "title": "clarkQ Admin",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "app": "admin",
+      "page": "ui",
+      "url": "http://127.0.0.1:8080/ui/",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/admin__ui__mobile__dark.png",
+      "status": 200,
+      "loadMs": 636,
+      "title": "clarkQ Admin",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    }
+  ],
+  "finishedAt": "2026-10-24T12:23:14.300Z"
+}

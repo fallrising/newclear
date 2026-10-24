@@ -180,3 +180,15 @@ Scope: non-stream Responses JSON read by the three client APIs, including non-fo
 - JR-3: Given a native Responses request with literal background:true and an upstream queued/in_progress response with background:true and array output, preserve its original JSON. Chat/Messages and native synchronous requests cannot represent this pending result as completed output and return502. No polling, cancellation endpoint or provider background support is added or claimed.
 
 Background status semantics checked against [OpenAI background mode](https://developers.openai.com/api/docs/guides/background), 2026-10-24. Validation: RED/GREEN HTTP matrix via loopback fake Grok-profile upstream (synthetic stored token, no local credential file), full Rust/fmt/clippy/docs/index, independent review and CI. Local evidence: [task](docs/tasks/T-0403-json-responses.md),130 tests including74new direct JSON HTTP cases, fmt/clippy and43project contracts/index pass. Independent source review PASS; publication follows in the task board. Original whole-product and real-provider gaps remain.
+
+## T-0404 — Client disconnect
+
+Scope: active client requests and their owned HTTP/CLI resources; completed Claude idle/tool sessions retain the existing reuse and expiry policy.
+
+- DC-1: Given a Claude active turn (fresh or resumed via user/tool result), when its client request disappears while the CLI is silent, then observe closure without waiting for another CLI output, stop/reap the process and release its concurrency slot. Cover streamed partial output and collection before downstream headers; a replacement request succeeds with a one-run limit.
+- DC-2: Given a normally completed Claude reply/tool call, when that HTTP request ends, then keep the existing idle/waiting run and reuse it for matching follow-up. Monitoring must track the current request sink, including a new sink installed while the reader waits between turns.
+- DC-3: Given local HTTP streaming/collection or a fake Cursor runtime, when the downstream request is cancelled, then observe upstream body/process release and (Cursor) container reconciliation/slot reuse within a bounded test deadline. Tests use signals/markers and live loopback connections, not real credentials or model calls.
+
+Validation: reproduce the silent Claude leak RED, fix the underlying receiver-close notification, focused release tests and existing session/reuse regressions, full Rust/fmt/clippy/docs/index, independent review and necessary CI. Fake runtime evidence does not establish actual Docker/provider cancellation; no change to those runtime policies or complete product readiness claim.
+
+Local DC-1–DC-3 evidence: [task and commands](docs/tasks/T-0404-disconnect.md),134tests on Linux including44new disconnect scenarios;fmt/clippy and43project contracts/index pass. Independent review PASS; publication recorded in the board after merge.

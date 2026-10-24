@@ -14,7 +14,7 @@ use tokio::net::TcpListener;
 /// Answers "Hello there" (two deltas plus the duplicate flushes); "FAIL" in the prompt →
 /// not-logged-in error on stderr with exit 1.
 const FAKE_CURSOR: &str = r#"#!/usr/bin/env python3
-import json, os, sys
+import json, os, sys, time
 d = os.path.dirname(os.path.abspath(__file__))
 args = sys.argv[1:]
 with open(os.path.join(d, "args.json"), "w") as f: json.dump(args, f)
@@ -27,6 +27,12 @@ if "LEAK" in prompt:
 if "FAIL" in prompt:
     sys.stderr.write("Error: not logged in. Run cursor-agent login\n"); sys.exit(1)
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
+if "HANG_" in prompt:
+    with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
+    if "HANG_AFTER" in prompt:
+        out({"type":"assistant","timestamp_ms":1,"message":{"content":[{"type":"text","text":"partial"}]}})
+    while True: time.sleep(60)
+
 if "BAD_RESULT" in prompt or "EARLY_EOF" in prompt:
     if "PARTIAL" in prompt:
         out({"type": "assistant", "timestamp_ms": 1, "message": {"content": [{"type": "text", "text": "partial answer"}]}})
@@ -62,6 +68,9 @@ assert "run" in a, a
 with open(os.path.join(d, "docker-args.json"), "w") as f: json.dump(a, f)
 i = next(i for i, x in enumerate(a) if x.startswith("sha256:"))
 entry = a[a.index("--entrypoint") + 1]
+# For hanging fixtures the runtime owns the exact executable PID; no orphan child.
+if "HANG_" in a[-1]:
+    os.execvpe(entry, [entry] + a[i+1:], {"PATH": os.environ.get("PATH", "/usr/bin:/bin")})
 sys.exit(subprocess.call([entry] + a[i+1:], env={"PATH": os.environ.get("PATH", "/usr/bin:/bin")}))
 "#;
 
@@ -497,4 +506,118 @@ async fn ce2_failed_cursor_result_after_output_is_not_success() {
 async fn ce2_cursor_eof_after_output_is_not_success() {
     check_cursor_failure("PARTIAL EARLY_EOF", false, true).await;
     check_cursor_failure("PARTIAL EARLY_EOF", true, true).await;
+}
+
+// Process-reaping evidence uses Linux procfs; other platforms retain the existing tests.
+#[cfg(target_os = "linux")]
+mod disconnect_tests {
+    use super::*;
+    struct HangingCursor {
+        pid: i32,
+        bin: std::path::PathBuf,
+    }
+    impl Drop for HangingCursor {
+        fn drop(&mut self) {
+            let cmd = std::fs::read(format!("/proc/{}/cmdline", self.pid)).unwrap_or_default();
+            if cmd
+                .split(|b| *b == 0)
+                .any(|arg| arg == self.bin.as_os_str().as_encoded_bytes())
+            {
+                unsafe {
+                    libc::kill(self.pid, libc::SIGKILL);
+                }
+            }
+        }
+    }
+    #[tokio::test]
+    async fn dc3_cursor_disconnect_reaps_runtime_reconciles_and_releases_slot() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            for stream in [true, false] {
+                for phase in ["HANG_BEFORE", "HANG_AFTER"] {
+                    let env = Env::start_with(&[
+                        "--cursor-accept-account-plugins",
+                        "--cursor-image",
+                        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "--cursor-profile-volume",
+                        "thinrouter-cursor-tests",
+                        "--cursor-max-runs",
+                        "1",
+                    ])
+                    .await;
+                    let body = if path == "/v1/responses" {
+                        json!({"model":"cu","stream":stream,"input":phase})
+                    } else {
+                        json!({"model":"cu","stream":stream,"max_tokens":30,"messages":[{"role":"user","content":phase}]})
+                    };
+                    let request = env.client.post(format!("{}{path}", env.base)).json(&body);
+                    let pending = tokio::spawn(async move { request.send().await });
+                    let pid = tokio::time::timeout(Duration::from_secs(3), async {
+                        loop {
+                            if let Ok(raw) =
+                                std::fs::read_to_string(env.bin_dir.path().join("hanging.pid"))
+                            {
+                                if let Ok(pid) = raw.parse::<i32>() {
+                                    break pid;
+                                }
+                            }
+                            tokio::time::sleep(Duration::from_millis(10)).await;
+                        }
+                    })
+                    .await
+                    .expect("fake runtime reached silent phase");
+                    let _fixture = HangingCursor {
+                        pid,
+                        bin: env.bin_dir.path().join("cursor-agent"),
+                    };
+                    let args: Vec<String> = serde_json::from_str(
+                        &std::fs::read_to_string(env.bin_dir.path().join("docker-args.json"))
+                            .unwrap(),
+                    )
+                    .unwrap();
+                    let name = args[args.iter().position(|a| a == "--name").unwrap() + 1].clone();
+                    if stream && phase == "HANG_AFTER" {
+                        let mut response = pending.await.unwrap().unwrap();
+                        assert_eq!(response.status(), 200);
+                        assert!(response.chunk().await.unwrap().is_some());
+                        drop(response);
+                    } else {
+                        pending.abort();
+                        let _ = pending.await;
+                    }
+                    tokio::time::timeout(Duration::from_secs(3), async {
+                        loop {
+                            let reaped = !std::path::Path::new(&format!("/proc/{pid}")).exists();
+                            let reconciled =
+                                std::fs::read_to_string(env.bin_dir.path().join("cleanup.jsonl"))
+                                    .unwrap_or_default()
+                                    .lines()
+                                    .any(|l| {
+                                        serde_json::from_str::<Vec<String>>(l)
+                                            .unwrap()
+                                            .contains(&name)
+                                    });
+                            if reaped && reconciled {
+                                break;
+                            }
+                            tokio::time::sleep(Duration::from_millis(10)).await;
+                        }
+                    })
+                    .await
+                    .expect("runtime reaped and named container reconciliation requested");
+                    let response = tokio::time::timeout(
+                    Duration::from_secs(3),
+                    env.post(
+                        "/v1/chat/completions",
+                        json!({"model":"cu","messages":[{"role":"user","content":"replacement"}]}),
+                    ),
+                )
+                .await
+                .expect("single slot is released");
+                    assert_eq!(response.status(), 200);
+                    let value: Value = response.json().await.unwrap();
+                    assert_eq!(value["choices"][0]["message"]["content"], "Hello there");
+                }
+            }
+        }
+    }
 }

@@ -20,6 +20,8 @@ args = sys.argv[1:]
 with open(os.path.join(d, "args.json"), "w") as f: json.dump(args, f)
 with open(os.path.join(d, "env.txt"), "w") as f: f.write("\n".join(k + "=" + v for k, v in os.environ.items()))
 prompt = args[-1]
+if "NO_SANDBOX" in prompt:
+    sys.stderr.write("Error: Sandbox mode is enabled but not available on this system. PRIVATE-STDERR-CANARY\n"); sys.exit(1)
 if "LEAK" in prompt:
     sys.stderr.write("not logged in PRIVATE-STDERR-CANARY\n"); sys.exit(1)
 if "FAIL" in prompt:
@@ -369,4 +371,26 @@ async fn cursor_does_not_return_raw_runtime_stderr() {
         .await;
     assert_eq!(r.status(), 401);
     assert!(!r.text().await.unwrap().contains("PRIVATE-STDERR-CANARY"));
+}
+
+#[tokio::test]
+async fn unavailable_cursor_sandbox_is_an_actionable_redacted_error() {
+    let env = Env::start().await;
+    let response = env
+        .post(
+            "/v1/chat/completions",
+            json!({
+                "model":"cu", "messages":[{"role":"user","content":"NO_SANDBOX"}]
+            }),
+        )
+        .await;
+    assert_eq!(response.status(), 503);
+    let body = response.text().await.unwrap();
+    assert!(body.contains("Cursor sandbox is unavailable"), "{body}");
+    assert!(!body.contains("PRIVATE-STDERR-CANARY"), "{body}");
+    let args: Vec<String> = serde_json::from_str(
+        &std::fs::read_to_string(env.bin_dir.path().join("args.json")).unwrap(),
+    )
+    .unwrap();
+    assert!(args.windows(2).any(|pair| pair == ["--sandbox", "enabled"]));
 }

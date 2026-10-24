@@ -43,7 +43,7 @@
 | FE2-9 | products/goku 第2輪實作（PR592 已合併） | R2-AC-9 | done | 2026-10-24T10:05:22Z | 2026-10-24T11:17:09Z | 2026-10-24T11:17:09Z |
 | FE2-10 | products/phark 第2輪實作 | R2-AC-10 | in_progress | 2026-10-24T10:18:22Z | — | 2026-10-24T11:57:46Z |
 | FE2-11 | apps/flowshot＋apps/loom 第2輪實作 | R2-AC-11 | todo | — | — | — |
-| FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | todo | — | — | — |
+| FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | in_progress | 2026-10-24T12:21:48Z | — | 2026-10-24T12:21:48Z |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | todo | — | — | — |
 | FE2-14 | platform/fanzloud 第2輪實作 | R2-AC-14 | todo | — | — | — |
 | FE2-E | 交付證據／整合核對 | R2-AC-E | todo | — | — | — |

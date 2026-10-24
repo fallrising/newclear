@@ -141,11 +141,20 @@ WAL歷史、跨服務持久歷史與新排程／通知屬選配後續，不計�
 ## T-1101 — Langfuse 整合文件先行
 
 本輪只交付開發／修正規格與兩條獨立文件 PR 中的本條；固定核對來源為 `6b444b00457591996db135e4ec6ab65b1d01ad4c`。
-規格路徑：`docs/specs/llm-observability-langfuse.md`；進度沿用 [任務板](docs/tasks/BOARD.md)。
+文件整合基準為 `4fc5d9a7b49139115518379bf05e1cfec4fe1bce`；保留其新增交付紀錄，相關計量核心與固定分析來源一致。
+規格路徑：[整合規格](../../docs/specs/llm-observability-langfuse.md)；進度沿用 [任務板](docs/tasks/BOARD.md)。
 保留既有 mainline、usable_tag 與所有未驗 runtime AC；文件通過不代表功能實作或缺陷修復。
 
 | 文件 AC | Given／When／Then | 狀態 | 驗證計畫／證據 |
 | --- | --- | --- | --- |
-| LD-D01 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義訂閱額度、執行觀測與控制責任的整合範圍。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
-| LD-D02 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義來源、關聯 ID、計量、去重、隱私與失敗契約。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
-| LD-D03 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義分階段實作依賴、驗收矩陣與文件交付證據。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
+| LD-D01 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義訂閱額度、執行觀測與控制責任的整合範圍。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+| LD-D02 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義來源、關聯 ID、計量、去重、隱私與失敗契約。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+| LD-D03 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義分階段實作依賴、驗收矩陣與文件交付證據。 | passed | 文件內容與本地檢查通過；獨立文件審查 ACCEPT，詳見本節紀錄。 |
+
+文件驗證紀錄（2026-10-24；僅文件範圍）：
+
+- `python3 scripts/check_indexes.py`：PASS，42 個 project success contracts／navigation/index；5 個 llms.txt、0 errors。
+- 四個變更 Markdown 的本地連結與 code-fence 檢查、`git diff --check`、`git diff --cached --check`：PASS。
+- 獨立 agent 文件審查 `usage_verify`：ACCEPT；初審提出的 trace／parent 歸屬及本地／後端去重驗收邊界已修正後回讀。
+- 已審規格 SHA256：`ee5ddd28d1d12b886198827599f6b351717f088b766bcf0f5345f5e1f6cf3df4`。
+- 本地未重跑產品 runtime suites；新增 runtime AC 全部待實作／驗收。最終 commit、Draft PR、head CI 與遠端回讀由該 PR 描述及 Checks 保存。

@@ -1,0 +1,180 @@
+{
+  "id": "contrast-desktop-001",
+  "mode": "contrast-desktop",
+  "status": "passed",
+  "startedAt": "2026-10-24T14:03:02.406Z",
+  "endedAt": "2026-10-24T14:03:05.092Z",
+  "sourceHashes": {
+    "fe-review/browser-baseline.mjs": "71607500c46472db75d7d1ff3210da685e86d38ec1d2fdc3fdf03acdae5f4cb3",
+    "fe-review/contrast-review.mjs": "5f93dbdfc2250c1189ab581ddd6a6361df549feb642e40d0dd9498102ba69056",
+    "fe-review/contrast-review.test.mjs": "62dbe37dcece2e0c6ad985700077a45d3118f7f48a7ab3e7c0f29187d9a87afc",
+    "fe-review/desktop-health.mjs": "2ed04aaecb1747719547665e0b3d13b8fd5fb1f97a1fea2ef7f86a999315885b",
+    "fe-review/desktop-health.test.mjs": "3fbfc3c166dc326e51b05b770f710d5e98e0eabcba6d38fdf3f6b06dbdd94ba3",
+    "fe-review/fixture.mjs": "1093d6c6dc127a7730bd8cb512cdbb693e040a4669be3a6d9b84e7bcbec9980a",
+    "fe-review/fixture.test.mjs": "f47fa47fd5aee5d7a7c231b243cc26e3bc70922b972babbec376b3da169ca836",
+    "fe-review/guards.mjs": "f5ad2bae0b5379937dbce7a6de8fd3bf743848f9d81599677649566a6e3ca560",
+    "fe-review/guards.test.mjs": "55818d9ef16c9e7f45f9575d80fcba0b7fb03496b2b03d755dfb26e83bc05ee0",
+    "fe-review/journeys.mjs": "a63e8073a08e26d786e3d19c768d7401755e746c2ccb06bc32f4656e081258d5",
+    "fe-review/journeys.test.mjs": "88b9338b46e043a5014b0d2741fe91ea78389c746535885273a1d2d6f4ba80ec",
+    "fe-review/mock-upstream.mjs": "7ee372736faa597ae9a3c1cfa61f5dd95d6d50c044b5e0d9e4f38aa8e8fe7755",
+    "fe-review/navigation.mjs": "edaf9f41d0a880966620cf3e75f4c8783acfd30f30fbeb656571fc0ddc9572e1",
+    "fe-review/navigation.test.mjs": "0e686e2563881c4b4d8d3a2fc9c05b57c25b68cbc4d849044524d0e353ac852f",
+    "fe-review/presentation.test.mjs": "a1a890c847c0a21c01fc1a920019202c292a42c75910f3b85a792139aebf9148",
+    "fe-review/reuse-continuation.mjs": "b1a6551ad92dcd0920c8eee04c2d07602d1209c5d94d01570d6613d099de84d2",
+    "fe-review/reuse-web.mjs": "514d9dd97ae7d17ddb3e4686ddd84e9c4bc83507f3179f894c2747db8fd94dcb",
+    "fe-review/run-review.mjs": "efb37de7a7ac3e6bbbcfb3ef9eecea4a630a78ccef95f6a90747756f938de752",
+    "fe-review/shared-capture.mjs": "a190f3e46d02a26fdec4828fd18e6746e9db6b9c3412a5f8ed0da705aa60e454",
+    "fe-review/tui-capture.mjs": "1acfe5348a7551e9bfdf3423b95010d1ba60ded33cb201b817927c459b296a8c",
+    "fe-review/tui-capture.test.mjs": "e7a9f40fdf042e88bcb47d9acfef4ce922f035d219a84d26b34dbb20ea791c7d",
+    "fe-review/visual-provenance.mjs": "d9c6a25e1bce7ebca70079e2a35c38c8328affe022b1dcd8537245d66010b2ee",
+    "templates/connections.html": "79d14efa6f6becf5aeabed29f3e898453134944dbb1dc3d30f840ec410e6e469",
+    "templates/dashboard.html": "877969cdcce6b84b9da1b2215add1e747387eeb32a4a912b5d523c02db9adecc",
+    "templates/keys.html": "64825d33903b6f1dd7057f4dc5b5043fc13b348efa6ffdbb881b965651b014a0",
+    "templates/layout.html": "9374edc297a60c34346305e64f5ad1733700ab34c2ce11cd77f89d286e4b2d0c",
+    "templates/login.html": "c5647f7decffe7cb588343fda364a32512130eaafd7b10a7f39569079b731540",
+    "templates/routes.html": "21fb408bfcc3ec8e37d414f08370f3252ce83460f0d487816f2b2ada56eeea84",
+    "templates/style.css": "66ac524ba5844cf62caf2cec425afc5075a80c710898259e88ff064b57e2cd98",
+    "templates/usage.html": "99a0c30ee0e7b59c794f1eda693200235f87f613c682b921b0c6006e28da1a4d",
+    "src/tui_app.rs": "c33c495bd8f799a00d8633a323e7eaef0fcea9ac1cb08310eb7fddc7dc6d6693"
+  },
+  "binarySHA256": "21fce3fab360ad66f97179bf54d391c83702f62d55cd09a118c693fd349516cd",
+  "chromium": "153.0.8010.12",
+  "listeners": {
+    "gatewayLoopback": true,
+    "mockLoopback": true
+  },
+  "defaultDeny": {
+    "adminAPI": 401,
+    "inferenceModels": 401,
+    "upstreamRequests": 0,
+    "bootstrap": false
+  },
+  "adminSession": {
+    "httpOnly": true,
+    "sameSite": "Strict",
+    "secure": false,
+    "loopbackHTTP": true
+  },
+  "mock": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0,
+    "kind": "local OpenAI-compatible synthetic API-key upstream; configured SIWC override unused; no provider integration claim"
+  },
+  "mockFinalCounters": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0
+  },
+  "cleanup": [
+    {
+      "name": "settle",
+      "passed": true
+    },
+    {
+      "name": "auth-context",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "capture-processes",
+      "passed": true
+    },
+    {
+      "name": "tui",
+      "passed": true
+    },
+    {
+      "name": "gateway",
+      "passed": true
+    },
+    {
+      "name": "mock",
+      "passed": true
+    },
+    {
+      "name": "listeners",
+      "passed": true
+    },
+    {
+      "name": "log",
+      "passed": true
+    }
+  ],
+  "serviceExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false,
+    "groupAbsent": true
+  },
+  "receivedSignal": null,
+  "contrastSource": {
+    "run": "visual-001",
+    "scope": "one desktop viewport correction; original computed pair retained with invalid scope"
+  },
+  "contrastReview": [
+    {
+      "page": "usage",
+      "viewport": "desktop",
+      "actualViewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "observations": [
+        {
+          "selector": "tr:nth-child(1) > .error-cell",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 50,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        }
+      ],
+      "scope": "Computed opaque text/background pairs only; source-specific axe incomplete retained. No claim that this calculation alone replaces visual review of clipped or overlaid content."
+    }
+  ],
+  "desktopContrastProvenance": {
+    "run": "visual-001",
+    "receiptSHA256": "9e2d93c9ed6250fb906d4d4ee1619de5670c97b3429bc0141a6dade299633d46",
+    "originalStatus": "passed",
+    "retainedMatrix": 18,
+    "retainedJourneys": 14,
+    "retainedContrastSets": 12,
+    "invalidOriginalComputedPair": {
+      "page": "usage",
+      "labeledViewport": "desktop",
+      "actualWidth": 390,
+      "actualHeight": 844,
+      "reason": "old helper treated non-tablet names as mobile"
+    },
+    "correction": "Only this one computed contrast set is repeated at1440x900; original receipt remains unchanged."
+  },
+  "scope": "Only the explicitly recorded continuation phases; immutable prior Web matrix retains original binary and failure. Final independent review remains pending",
+  "fixtureSummary": {
+    "keyCount": 1,
+    "keyListPrefixOnly": true,
+    "usageStatuses": [
+      200,
+      500
+    ],
+    "syntheticOnly": true,
+    "seedVia": "real session cookie + CSRF admin API",
+    "providerCLI": false,
+    "connectionCount": 10,
+    "routeCount": 10
+  }
+}

@@ -42,3 +42,8 @@ Owner 於 2026-10-23 明示移除私人網路入口，產品僅保留 `public` �
 ## 可用版本
 
 `mainline: incomplete`、`usable_tag: none`。本次刪除／修正可獨立提交合併；AC-03 仍需真實 Access web 未登入拒絕及授權郵箱登入成功的證據。需要 CF 設定位置及可收驗證碼的允許郵箱；不需要裝置註冊或網路客戶端。公開模式保留，但目前不啟用、不執行公開上線。
+
+
+## FE round2 — 2026-10-24T09:51:27Z
+
+T-0380 R2-AC-7/E: approved DESIGN M1–M9 only; [task](fe-review/tasks/round2/task.md) fixes scope, original native checks, actual synthetic login/htmx/capture evidence and independent review. Work in progress; AC-03 Cloudflare email OTP and mainline/usable status unchanged. No deployment or full R3 claim.

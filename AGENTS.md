@@ -21,7 +21,7 @@
   2. 開工時把那一列改成 `in_progress` 並填 `start`；進行中每次 push 刷新 `last_activity`。
   3. 照該項目的 `SUCCESS.md` 與最近的元件 `AGENTS.md` 做，PR 內文寫對應的 AC 與證據。
 - **結束條件**：PR 合併後，把那一列改成 `done`，`end` 填合併時間（在下一個 PR 一起補；最後一張用一個只改任務板的 PR）。關閉後留在板上，可以重開。
-- **依賴**：元件 CI、`python3 scripts/check_project_success.py`，以及公開邊界：不寫私人內容、主機名、帳號。
+- **依賴**：元件 CI、`python3 scripts/check_indexes.py`（含 project-success 與 llms 導航檢查），以及公開邊界：不寫私人內容、主機名、帳號。
 - **合併門檻**：PR 無衝突、必要 CI 通過（desk 最低線）。元件 `AGENTS.md` 可以再加嚴。
 - **進度與卡住**：一張 desk 卡在本 repo 的任務位置就是該任務板。沒有 `end`，而且 `last_activity` 早於 90 分鐘（預期 30 分鐘的 3 倍），就算卡住；任務欄註明「等 owner」的列不算。
 
@@ -29,6 +29,27 @@
 
 Component-specific engineering rules live in that component's own `AGENTS.md`
 (for example `platform/edge-ops/AGENTS.md`, `products/kith/AGENTS.md`); follow the nearest one.
+
+## 工程執行與驗證
+
+- **來源與適用範圍**：先讀根 README 與修改路徑適用的 AGENTS；涉及元件時再讀其 README、SUCCESS、相關 SDD／contract 與必要引用。連結不等於已讀；必要內容須讀至末尾，截斷就分段續讀。在既有任務紀錄或 PR 記下來源 repo／路徑、完整 commit SHA（非 Git 來源記查核時間）；來源缺口依共用契約處理，不以摘要冒充全文。
+- **有界協作**：先確定修改路徑；只處理本任務必要變更。並行寫入各用獨立分支與 worktree／checkout；API／App 通道也使用獨立分支並核對預期 head。保留他人未提交內容，共用檔案由主導整合；局部下載或單一 worker 的證據不得宣稱覆蓋整個 repo。
+- **架構與生成物**：遵守元件既有依賴方向、API／schema 與錯誤契約；改契約時核對實作、消費端與驗收的相容性。標示為生成的檔案須依該元件的產生器重建並檢視 diff，不手改輸出，也不順帶重構其他元件。
+- **風格與錯誤邊界**：沿用元件既有風格與格式工具，抽象須有清楚概念或實際重用需求。未知資料在入口驗證，新的信任邊界再驗證；保留必要錯誤處理，不用空 catch 或靜默 fallback 把失敗變成成功。
+- **測試邊界**：由 AC 與可觀察行為設計測試，執行實際被測程式，不在測試內重寫實作。外部 API、時鐘等邊界可用 fake／mock，但須標明替代範圍；替身通過不能代替 SUCCESS 要求的真實整合證據。
+
+驗證入口以[Monorepo CI](docs/specs/monorepo-ci.md)、根 `.github/workflows/` 和元件現行規範為準；元件內保留的舊 workflow 不視為已接線 CI。執行前核對命令、工作目錄、runtime／依賴版本與適用條件。
+
+| 適用條件 | 工作目錄 | 命令／入口 |
+| --- | --- | --- |
+| 每次提交前；完整 checkout，新檔已加入 Git index | repo 根目錄 | `python3 scripts/check_indexes.py`；唯讀檢查工作樹的契約、索引及導航 |
+| 修改共享索引／契約檢查器或其測試 | repo 根目錄 | `python3 -m unittest discover -s scripts/tests -v` |
+| 修改元件程式、設定或契約 | 元件規範與根 CI 指定的目錄 | 執行對應 lint／typecheck／test／build 與 AC 驗證，不猜測通用根命令 |
+| 每次提交前，包含新增檔案 | repo 根目錄 | `git diff --cached --check` |
+
+`check_indexes.py` 不驗證 staged bytes；部分 staged 時先對齊 index／工作樹，或驗證預定 candidate commit 的乾淨 checkout。依 [project-success](docs/project-success.md) 需要重建索引時才執行 `python3 scripts/check_project_success.py --write-index` 並審查差異，不能把修補動作當作唯讀檢查。
+
+在既有任務紀錄或 PR 分開記錄本地檢查、CI、獨立審查及 runtime 驗收，附命令、cwd、版本與結果。失敗、未跑及環境限制如實保留；只有部分檔案或測試資料時不宣稱全量通過，交由完整 checkout／CI 補足必要證據。
 
 ## Writing Go
 

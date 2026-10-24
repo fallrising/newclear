@@ -489,6 +489,17 @@ impl StreamTranslateState {
         events
     }
 
+    /// EOF may complete Chat streams only after an explicit finish reason.
+    pub fn on_end(&mut self) -> Vec<String> {
+        if self.message_stop_sent || self.stop_reason.is_some() {
+            return self.stop();
+        }
+        openai_sse_chunk_to_anthropic(
+            &json!({"error": {"type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE}}).to_string(),
+            self,
+        )
+    }
+
     fn start(&mut self, id: Option<&str>, model: Option<&str>) -> Vec<String> {
         self.message_start_sent = true;
         vec![sse_event(
@@ -822,7 +833,15 @@ impl AnthropicToChatStream {
     }
 
     pub fn on_end(&mut self) -> Vec<String> {
-        self.finish()
+        if self.done {
+            return Vec::new();
+        }
+        self.on_data(
+            &json!({"type": "error", "error": {
+                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+            }})
+            .to_string(),
+        )
     }
 }
 

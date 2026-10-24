@@ -1,5 +1,66 @@
 # Status and evidence
 
+## CI fixture portability follow-up: T071 (2026-10-24)
+
+The first PR585 hosted offline check failed7 assertions/14errors because generated
+temporary scripts relied on caller PYTHONPATH. The fixture scripts/coordinators
+now explicitly load the trusted checkout; both new test classes remove ambient
+PYTHONPATH. Full318 tests then passed in39.238s under Python3.11.17 with no
+PYTHONPATH, stable hashes, final ECHILD and no unexpected descendants. Final freeze:
+`aa7c3c86935ee78ce04ed1542aa68469760cc30a400a43f59733c3ba47944fe2`.
+Only test_lab.py/test_trial_supervision.py changed after the runtime freeze below;
+the [source binding](evidence/2026-10-24-m7-supervision-source.json) records both
+identities. Product/runtime bytes and assertions remain unchanged. The first CI's
+M7/crash/retry/storage jobs passed; its offline failure remains failed. Fresh
+exact-head CI is required for publication acceptance.
+
+## Reviewed M7 runtime repair: T069 (2026-10-24)
+
+T067 independently accepted the frozen implementation; root independently reran
+318tests/39.283s with matching hashes and final ECHILD/no unexpected children.
+One fresh original v0.2.4 M7 trial then passed in80.892s: M7-01–05 all passed,
+20 expected command results, three daemon generations and three nonforced
+SIGTERM/exit0 cleanup receipts. Retained data, explicit scope removal and evidence
+publication passed. Actual environment was UID1001/Linux x86_64/Python3.12.3 in
+the pinned network-disabled container; no timeout, source drift or remaining
+owned container occurred. [Report](evidence/2026-10-24-m7-supervision.json) and
+[exact source/environment binding](evidence/2026-10-24-m7-supervision-source.json)
+are sanitized public evidence. Their harness commit records the working-tree base;
+the reviewed30-file hashes identify the tested repair. Exact publication/CI is
+separate. The old trial FAIL remains historical; M4/AC-05 remains unresolved.
+
+## Current lifecycle implementation: T066 (2026-10-24)
+
+The M7-only same-PID delegated owner is implemented. The final frozen offline
+gate passes318tests in39.636s on Python3.11.17; all30 code/workload/build hashes
+match before/after. Final ECHILD follows collection of only the exact known M5
+SIGKILL fixture orphan; no unexpected child remains. Source digest:
+`71a4040e996cc06f6c8b6390d95d7e437b488f98b54fa3436ba95ac8d8c07b55`.
+The [current SDD](SDD.md) defines READY/ADMIT/CLOSED/ACK with closure nonce,
+absolute cleanup bounds, typed clean_pending and parent-after-exit clean commit.
+
+Earlier317/oneERROR and failed baseline/candidate resource timing pairs remain
+retained. The reviewed fixture correction gives all four scheduled resource
+samples a full interval; production timing/guards and prior assertions remain.
+This local result supersedes T063's production-unchanged checkpoint below.
+Final independent review, original-runtime verification, CI and publication remain
+separate. T066 ran no actual upstream runtime. The previous retained trial FAIL
+and historical M4 uncertainty are not erased; AC-05/mainline/tag status is unchanged.
+
+## Historical lifecycle causal/design checkpoint (T063)
+
+On base `27a5dde13be6c7fcc057d3777558f61b1d06fa1f`, two bounded synthetic
+process probes pass: controlled inner `lab.command` reap deterministically
+causes an outer `child_missing` refusal, and an intermediate's exit can leave a
+different-process-group descendant alive outside the observed owner. A separate
+fixture-only subreaper collected that descendant. Private numeric correlation
+receipts are preserved by the shared launcher; no production module or original
+runtime was changed/run. This establishes a possible mechanism, not the exact
+historical vanished role or a repaired trial. The [proposed acceptance contract](SDD.md)
+requires kernel descendant-completion proof, stable owner identity and fail-closed
+cancellation/unknown handling before implementation review. Mainline and AC-05
+remain incomplete/failed. See [checkpoint report](../tasks/548-lifecycle-admission/report.md).
+
 ## Issue548 historical failure reconciliation (2026-10-23)
 
 The five reported Actions job logs were retrieved, rather than expired: an initial

@@ -11,6 +11,7 @@ import signal
 from pathlib import Path
 import socket
 import socketserver
+import subprocess
 import sys
 import tempfile
 import threading
@@ -825,6 +826,220 @@ class DiagnosticsAndProcessTests(unittest.TestCase):
         finally:
             if process.live():
                 process.stop(grace=1)
+
+
+class NestedObserverReapTests(unittest.TestCase):
+    """Synthetic causal probes; a refusal is evidence, never runtime acceptance."""
+
+    def setUp(self):
+        environment = patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
+        os.environ.pop('PYTHONPATH', None)
+
+    FIXTURE = r'''
+import ctypes, errno, json, os, signal, subprocess, sys, time
+from pathlib import Path
+import lab
+root = Path(sys.argv[1])
+mode = sys.argv[2]
+def publish(name, value):
+    path = root / name
+    temporary = path.with_suffix('.tmp')
+    temporary.write_text(json.dumps(value))
+    temporary.replace(path)
+def await_file(name, seconds=12):
+    end = time.monotonic() + seconds
+    while not (root / name).exists():
+        if time.monotonic() >= end:
+            raise RuntimeError('synthetic gate expired')
+        time.sleep(.005)
+def record(role, pid):
+    value = lab.process_info(pid)
+    if value is None:
+        raise RuntimeError('synthetic identity missing')
+    return dict(role=role, **value)
+if mode.startswith('owner-'):
+    mode = mode.removeprefix('owner-')
+    real_wait = subprocess.Popen.wait
+    def before_reap(child, timeout=None):
+        # WNOWAIT observes exit while keeping this exact direct-child generation.
+        os.waitid(os.P_PID, child.pid, os.WEXITED | os.WNOWAIT)
+        publish('command.json', record('command', child.pid))
+        await_file('allow-reap')
+        result = real_wait(child, timeout=timeout)
+        publish('reaped.json', {'pid': child.pid, 'exit': result})
+        return result
+    if mode == 'command':
+        subprocess.Popen.wait = before_reap
+        lab.command([sys.executable, '-c', 'pass'], timeout=12)
+    else:
+        child_code = r"""
+import json, os, sys, time
+from pathlib import Path
+import lab
+root = Path(sys.argv[1])
+child = os.fork()
+if child == 0:
+    os.setsid()
+    path = root / 'orphan.json'
+    tmp = path.with_suffix('.tmp')
+    tmp.write_text(json.dumps(dict(role='orphan', **lab.process_info(os.getpid()))))
+    tmp.replace(path)
+    end = time.monotonic() + 15
+    while not (root / 'finish').exists() and time.monotonic() < end:
+        time.sleep(.005)
+    os._exit(0)
+end = time.monotonic() + 12
+while not (root / 'allow-parent-exit').exists():
+    if time.monotonic() >= end:
+        os._exit(9)
+    time.sleep(.005)
+os._exit(0)
+"""
+        child = subprocess.Popen([sys.executable, '-c', child_code, str(root)],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        publish('launch.json', record('command', child.pid))
+        before_reap(child, timeout=12)
+    publish('complete.json', {'complete': True})
+    await_file('finish')
+else:
+    # Only this new fixture process becomes a subreaper. Disconnected children
+    # are reaped here, outside the observed owner's tree, never left to PID 1.
+    if ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) != 0:
+        raise OSError(ctypes.get_errno(), 'synthetic subreaper unavailable')
+    owner = subprocess.Popen([sys.executable, '-c', Path(sys.argv[3]).read_text(),
+                              str(root), 'owner-' + mode],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    publish('owner.json', record('owner', owner.pid))
+    try:
+        await_file('finish')
+    finally:
+        for name in ('allow-parent-exit', 'allow-reap', 'finish'):
+            (root / name).touch()
+        owner.wait(timeout=5)
+        orphan_path = root / 'orphan.json'
+        if orphan_path.exists():
+            orphan = json.loads(orphan_path.read_text())
+            end = time.monotonic() + 5
+            while True:
+                pid, status = os.waitpid(orphan['pid'], os.WNOHANG)
+                if pid:
+                    publish('orphan-reaped.json', {'pid': pid, 'status': status})
+                    break
+                if time.monotonic() >= end:
+                    raise RuntimeError('synthetic descendant did not exit')
+                time.sleep(.005)
+        try:
+            os.waitid(os.P_ALL, 0, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+        except ChildProcessError as exc:
+            if exc.errno != errno.ECHILD:
+                raise
+            publish('kernel.json', {'no_children': True})
+        else:
+            raise RuntimeError('synthetic ownership not closed')
+'''
+
+    def start_fixture(self, mode):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        source = root / 'fixture.py'
+        source.write_text('import sys\nsys.path.insert(0, ' + repr(str(lab.HERE)) + ')\n' + self.FIXTURE)
+        process = subprocess.Popen(
+            [sys.executable, str(source), str(root), mode, str(source)],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        def finish():
+            for name in ('allow-parent-exit', 'allow-reap', 'finish'):
+                (root / name).touch()
+            stdout, stderr = process.communicate(timeout=8)
+            self.assertEqual(process.returncode, 0, (stdout + stderr).decode())
+            self.assertEqual(self.fixture_record(root, 'kernel.json'), {'no_children': True})
+            if os.environ.get('AGENT_EVIDENCE_DIR'):
+                records = {p.name: json.loads(p.read_text()) for p in root.glob('*.json')}
+                destination = Path(os.environ['AGENT_EVIDENCE_DIR']) / ('synthetic-' + mode + '.json')
+                destination.write_text(json.dumps(records, indent=2, sort_keys=True))
+        self.addCleanup(finish)
+        return root, process
+
+    def fixture_record(self, root, name):
+        end = time.monotonic() + 5
+        path = root / name
+        while not path.exists():
+            self.assertLess(time.monotonic(), end, 'synthetic fixture gate expired: ' + name)
+            time.sleep(.005)
+        raw = path.read_bytes()
+        self.assertLessEqual(len(raw), 4096)
+        return json.loads(raw)
+
+    def identity_record(self, root, name, role):
+        record = self.fixture_record(root, name)
+        self.assertEqual(set(record), {'role', 'pid', 'ppid', 'pgid', 'start_ticks', 'state'})
+        self.assertEqual(record.pop('role'), role)
+        self.assertTrue(all(type(record[k]) is int and record[k] > 0
+                            for k in ('pid', 'ppid', 'pgid', 'start_ticks')))
+        self.assertIn(record['state'], ('R', 'S', 'D', 'Z'))
+        return record
+
+    def observe_reap_interleaving(self, root, owner, command):
+        outer = lab.Process.__new__(lab.Process)
+        outer.identity = owner
+        outer.known = {(owner['pid'], owner['start_ticks']): owner}
+        outer.lock = threading.Lock()
+        outer.scan_lock = threading.Lock()
+        outer.observation_error = None
+        outer.observation_reason = None
+        actual = lab.process_info
+        reads = 0
+        def read(pid):
+            nonlocal reads
+            if pid == command['pid']:
+                reads += 1
+                if reads == 2:
+                    (root / 'allow-reap').touch()
+                    reaped = self.fixture_record(root, 'reaped.json')
+                    self.assertEqual(reaped, {'pid': pid, 'exit': 0})
+            return actual(pid)
+        with patch('lab.process_info', side_effect=read), patch('lab.os.kill') as kill:
+            with self.assertRaises(lab.ProcessObservationError) as caught:
+                outer.snapshot()
+            self.assertEqual(caught.exception.observation_reason, 'child_missing')
+            kill.assert_not_called()
+        self.assertEqual(reads, 2)
+        self.assertEqual(len(outer.known), 1)
+        self.assertEqual(outer.observation_reason, 'child_missing')
+        return outer
+
+    def test_nested_command_reap_deterministically_breaks_outer_admission(self):
+        root, coordinator = self.start_fixture('command')
+        owner = self.identity_record(root, 'owner.json', 'owner')
+        command = self.identity_record(root, 'command.json', 'command')
+        self.assertEqual(owner['ppid'], coordinator.pid)
+        self.assertEqual(command['ppid'], owner['pid'])
+        self.assertEqual(command['state'], 'Z')
+        self.observe_reap_interleaving(root, owner, command)
+        self.assertEqual(self.fixture_record(root, 'complete.json'), {'complete': True})
+
+    def test_double_fork_disappearance_is_not_descendant_completion_proof(self):
+        root, coordinator = self.start_fixture('orphan')
+        owner = self.identity_record(root, 'owner.json', 'owner')
+        launched = self.identity_record(root, 'launch.json', 'command')
+        orphan = self.identity_record(root, 'orphan.json', 'orphan')
+        self.assertEqual(launched['ppid'], owner['pid'])
+        self.assertEqual(orphan['ppid'], launched['pid'])
+        (root / 'allow-parent-exit').touch()
+        command = self.identity_record(root, 'command.json', 'command')
+        self.assertEqual(command['start_ticks'], launched['start_ticks'])
+        outer = self.observe_reap_interleaving(root, owner, command)
+        surviving = lab.process_info(orphan['pid'])
+        self.assertIsNotNone(surviving)
+        self.assertEqual(surviving['start_ticks'], orphan['start_ticks'])
+        self.assertEqual(surviving['ppid'], coordinator.pid)
+        self.assertNotEqual(surviving['state'], 'Z')
+        self.assertNotIn((orphan['pid'], orphan['start_ticks']), outer.known)
+        (root / 'finish').touch()
+        self.assertEqual(self.fixture_record(root, 'orphan-reaped.json'),
+                         {'pid': orphan['pid'], 'status': 0})
 
 
 if __name__ == "__main__":

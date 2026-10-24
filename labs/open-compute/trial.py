@@ -244,8 +244,9 @@ class BudgetHTTP:
 
 
 class TrialOwner:
-    def __init__(self,state,manifest,scope):
+    def __init__(self,state,manifest,scope,supervision=None):
         self.state,self.manifest,self.scope=state,manifest,scope
+        self.supervision=supervision
         self.process=None;self.api=None;self.worker=None;self.host=None
         self.poisoned=False;self.gets=0;self.deadline=float('inf');self.submissions=0
 
@@ -467,11 +468,13 @@ class TrialOwner:
         self.scope.check_owner()
         require(not self.poisoned and self.manifest['identity'] is not None and
             (self.manifest['workflow'] is None or self.manifest['workflow']['phase']!='reserved'),'dirty')
-        self.manifest['clean']=True
+        self.manifest['clean']=self.supervision is None
         try:self.save()
         except BaseException:
             self.manifest['clean']=False
             raise
+        if self.supervision is not None:
+            self.supervision.prepare_clean(self.state)
         return {k:shutdown[k] for k in ('was_running','signal','forced','exit_code','all_owned_exited')}
 
 
@@ -554,7 +557,7 @@ def run_init(args):
                     binary=dict(path=str(binary),sha256=lock['artifact']['sha256']),
                     fixture_sha256=fixture_hash(),identity=None,clean=False,workflow=None)
                 state.save(manifest)
-                owner=TrialOwner(state,manifest,scope)
+                owner=TrialOwner(state,manifest,scope,getattr(args,'supervision',None))
                 with owner.operation(300):
                     require(not interrupted,'interrupted')
                     owner.start(binary);require(not interrupted,'interrupted')
@@ -565,7 +568,9 @@ def run_init(args):
         finally:
             if owner is not None and owner.process is not None:
                 try:
-                    with lab.m3_deadline(150,'M7 final cleanup'):owner.shutdown()
+                    with lab.m3_deadline(150,'M7 final cleanup') as cleanup_end:
+                        if owner.supervision is not None:owner.supervision.begin_cleanup(cleanup_end)
+                        owner.shutdown()
                 except BaseException as exc:
                     if problem is None:problem=exc
         if problem is not None:raise problem
@@ -620,7 +625,7 @@ def run_serve(args):
         binary=verified_binary(manifest['binary']['path'])
         with lab.m3_deadline(10,'M7 cold locks'):
             with cold_locks(scope):pass
-        owner=TrialOwner(state,manifest,scope)
+        owner=TrialOwner(state,manifest,scope,getattr(args,'supervision',None))
         server=None;socket_identity=None;stop_client=None;stop_response=None;problem=None
         lease=None
         try:
@@ -665,7 +670,8 @@ def run_serve(args):
         finally:
             try:
                 if owner.process is not None:
-                    with lab.m3_deadline(150,'M7 final cleanup'):
+                    with lab.m3_deadline(150,'M7 final cleanup') as cleanup_end:
+                        if owner.supervision is not None:owner.supervision.begin_cleanup(cleanup_end)
                         stop_response=owner.shutdown()
                 else:raise TrialError('shutdown')
             except BaseException as exc:
@@ -727,6 +733,8 @@ def main(argv=None):
     sub=parser.add_subparsers(dest='command',required=True)
     for name in ('init','serve','status','submit','read','workflow','approve','stop','destroy'):
         item=sub.add_parser(name);item.add_argument('--state',required=True)
+        item.add_argument('--supervision-fd',type=int,help=argparse.SUPPRESS)
+        item.add_argument('--supervision-deadline-ns',type=int,help=argparse.SUPPRESS)
         if name=='init':
             item.add_argument('--port',type=int,default=8787)
             item.add_argument('--cache',default=str(HERE/'.lab-cache'))
@@ -735,15 +743,34 @@ def main(argv=None):
         if name=='submit':item.add_argument('--payload',required=True)
         if name=='workflow':item.add_argument('--job-id',required=True)
     args=parser.parse_args(argv)
+    supervision=None
     try:
+        if args.supervision_fd is not None or args.supervision_deadline_ns is not None:
+            from trial_supervision import OwnerControl
+            supervision=OwnerControl(args.supervision_fd,args.supervision_deadline_ns)
+            args.supervision=supervision
         operation=dict(init=run_init,serve=run_serve,destroy=run_destroy).get(args.command,run_client)
         response=operation(args)
     except BaseException as exc:
         if isinstance(exc,(KeyboardInterrupt,SystemExit)):exc=TrialError('interrupted')
         response=failure(args.command,exc)
-    try:emit(response)
-    except Exception:return 1
-    return 0 if response['result']=='passed' else 1
+    try:
+        if supervision is not None:
+            # Validate the ordinary result before constructing the private
+            # terminal clean_pending variant. It is never emitted as clean=true.
+            encode_message(response)
+            response=supervision.finish(response)
+            raw=(json.dumps(response,separators=(',',':'),allow_nan=False)+'\n').encode()
+            require(len(raw)<=16384,'protocol')
+            sys.stdout.buffer.write(raw);sys.stdout.buffer.flush()
+        else:
+            emit(response)
+        return 0 if response['result']=='passed' else 1
+    except BaseException as exc:
+        if supervision is not None:supervision.abort(getattr(exc,'reason','command'))
+        return 1
+    finally:
+        if supervision is not None:supervision.close()
 
 
 if __name__=='__main__':sys.exit(main())

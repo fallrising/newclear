@@ -224,10 +224,14 @@ class AcquisitionTests(unittest.TestCase):
             identity = resources.parse_stat(Path(f"/proc/{child.pid}/stat").read_bytes())
             view = [{"pid": child.pid, "start_ticks": identity["start_ticks"], "ignored": "/private"}]
             before = signal.getsignal(signal.SIGALRM), signal.getitimer(signal.ITIMER_REAL)
-            output = resources.observe_phase("source_idle", lambda: view, duration_seconds=.8)
+            # Four scheduled samples each get a full interval; a .8s phase
+            # left the fourth fresh helper only .05s to start and round-trip.
+            output = resources.observe_phase("source_idle", lambda: view,
+                                             duration_seconds=4 * resources.INTERVAL_SECONDS)
             after = signal.getsignal(signal.SIGALRM), signal.getitimer(signal.ITIMER_REAL)
             self.assertEqual(before, after)
             self.assertEqual(output["status"], "observed")
+            self.assertEqual(output["scheduled_slots"], 4)
             self.assertGreaterEqual(output["samples_valid"], 2)
             self.assertGreater(output["peak_sampled_rss_bytes"], 0)
         finally:

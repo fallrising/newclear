@@ -89,6 +89,15 @@ class OwnerTests(unittest.TestCase):
         self.assertEqual(caught.exception.reason,'conflict')
         owner.worker.request.assert_called_once_with('GET','/jobs/job-1',host=owner.host,expected_status=404)
 
+    def test_supervised_shutdown_defers_clean_to_parent_after_exit(self):
+        owner = self.owner()
+        owner.supervision = Mock()
+        receipt = owner.shutdown()
+        self.assertTrue(receipt['all_owned_exited'])
+        self.assertFalse(owner.manifest['clean'])
+        owner.state.save.assert_called_once()
+        owner.supervision.prepare_clean.assert_called_once_with(owner.state)
+
     def test_projected_row_hashes_nonce_and_rejects_bool_count(self):
         result=trial.project_row(row(1))
         self.assertNotIn('step_nonce',result['job'])

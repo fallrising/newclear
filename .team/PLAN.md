@@ -2001,3 +2001,7 @@ Variant fe-round2/protocol1, bounded task T008. Approved current ConnectedApp DE
 ## Agent Platform FE round2 / T-0380 R2-AC-4 / 2026-10-24T08:34:14Z
 
 HAI586 merged8df40fa0 at08:31:49Z with allrequiredCI/R12/remoteequality; boardactualendcarriedhere. T010 independentworker scopeM1–M3 only: existingM2Chinesealreadyimplemented, addrender/captureproof; M3styles/time; unchangedtruePG/FastAPI/fakefixture pluslabelledoverrides. Rootownsboards/Git/environment/acceptance, nativeauthor-otherreviewexplicit. Estimate45–60activepluswait, first30bounded/max2diagnosis,20minutecheckpoint nothardstop. Taskfe-review/tasks/round2/task.md fixesAC/tooling/stop. No dependencies/backend/fixture/CI/release/VM/providerexpansion.
+
+## Ice Maker FE round2 / T-0380 R2-AC-6 / 2026-10-24T09:17:52Z
+
+T013 approvedM1–M4 only; rootboardrecords actualAP588merge09:14:44/allCI/remoteequality. CMS589 disjointcomponentalreadyclaimed/inprogresswhileitsruntimefinishes; currentmainCMSrootrowispriorpublication snapshot, rootintegratesboardsatcloseout. Nativeboundedworker/reviewer, noexternalCLI/provider. ScopeinlinePAGE/renderenvelope+reviewfixture,30minuteUIpollcap expresslydelegatedDESIGNchoice, nobackend/deps. OriginalR2goalincludesboundedaxe/overflow; do notdiscardasR3. RootnativehostGit/venv/extras andexternalreviewtooling; noarchive .team recreation.45–60activeestimatepluswait/worker30/max2diagnostics/checkpoint20notdeadline. Taskfiledefinesexactallowlist/gates.

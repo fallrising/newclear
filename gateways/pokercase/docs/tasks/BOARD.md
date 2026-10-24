@@ -130,6 +130,8 @@ Demand/contract: [task](T-0408-terminal-release.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TR-01 | Release recognized terminal sources before final frame | TR-1 | in_progress | 2026-10-24T19:39:38Z | | 2026-10-24T19:43:30Z |
-| TR-02 | Release observed EOF sources before finalization output | TR-2 | in_progress | 2026-10-24T19:39:38Z | | 2026-10-24T19:43:30Z |
-| TR-03 | Preserve usage tails and session reuse; verify HTTP close | TR-3 | in_progress | 2026-10-24T19:39:38Z | | 2026-10-24T19:43:30Z |
+| TR-01 | Release recognized terminal sources before final frame | TR-1 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-10-24T19:46:58Z |
+| TR-02 | Release observed EOF sources before finalization output | TR-2 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-10-24T19:46:58Z |
+| TR-03 | Preserve usage tails and session reuse; verify HTTP close | TR-3 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-10-24T19:46:58Z |
+
+TR-1–TR-3 delivered in [PR #625](https://github.com/fallrising/newclear/pull/625), merge `343ecae1f90d2bbcd4d8bd7a3a9eee6565c66882` at `2026-10-24T19:46:58Z`. Reviewed HEAD `e89c7bbebbd1d0ca7b66440594f4d5660735d172` is an ancestor of fetched main; scoped contents match. Independent source/final-document review PASS;148tests/85new scenarios and required component CI112s/contracts CI8s passed. Opaque byte behavior, finish_reason usage tails and reusable Claude sessions remain intact. Provider/Docker and whole-product acceptance remain incomplete.

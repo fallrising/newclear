@@ -119,3 +119,15 @@ Goal: enforce existing AC-04/AC-06/AC-15 error semantics when an upstream stream
 Native protocol passthrough, buffered HTTP collection, transport-error/stall behavior, retry/accounting, credentials, new tools/images support and release/deploy are outside this bounded slice. No real provider calls. Evidence/progress: [T-0386 task](docs/tasks/T-0386-stream-completion.md).
 
 T-0386 local result: SC-1–SC-3 passed (107Rust tests,14HTTP journeys, fmt/clippy,42contracts/index). Independent review passed; historical RED and old EOF-success assertion failure retained in the task record. Required remoteCI/merge/readback remain separate publication gates.
+
+## T-0389 — Buffered Responses completion
+
+Goal: enforce completion evidence while collecting forced-stream Responses for non-stream Chat Completions, Messages and Responses requests. The collector must no longer default an unfinished response to completed.
+
+- BR-1: Given an empty/partial/item-only transcript, bareDONE or malformed/conflicting terminal, when collecting a single response, then return502 and expose neither partial output nor raw upstream errors as a successful answer.
+- BR-2: Given `error` or `response.failed`, then fail with a fixed redacted message; preserve429 and only recognized subscription-sharing quota codes. The first terminal event is final: failure cannot be rescued by a later success, and later events do not mutate an accepted success.
+- BR-3: Given `response.completed` or `response.incomplete` with matching response status, then preserve output items/text, model, usage and incomplete details/length mapping across all three buffered APIs. Nonempty terminal output is authoritative; only empty/missing final output falls back to intermediate items/text. Existing tool reconstruction remains compatible.
+
+Plan: RED→GREEN localHTTP regression, collector edge cases, fullRust/fmt/clippy/project/index gates, independent review, requiredCI and normalmerge/readback. Native streaming passthrough, directJSON responses, generalSSEframing, retry/timeout/accounting, realproviders/login and release/deploy are excluded. No runtime dependencies or permissions change. Evidence: [T-0389 task](docs/tasks/T-0389-buffered-responses.md).
+
+T-0389 local result: BR-1–BR-3 passed with113Rust tests,45localHTTPjourneys, fmt/clippy and42project/index gates; independent review passed after the terminal-output precedence fix. Prior RED failures retained. Required remoteCI/merge/readback tracked by the task/desk record.

@@ -145,3 +145,15 @@ Official event shapes: [OpenAI streaming events](https://developers.openai.com/a
 Local NR-1–NR-3 evidence: [task and commands](docs/tasks/T-0401-native-responses.md), 122 tests including 11 new native HTTP cases, fmt/clippy and 42 project contracts/index pass. Independent review PASS after R1 correction; remote CI/publication pending.
 
 CR lookahead: retain a pending CR until the next byte or EOF to preserve split CRLF. If the existing idle deadline arrives with a complete valid CR-only terminal, emit that original frame and close rather than returning a stall error. CR-only terminal delivery may therefore wait up to the configured stall window (minimum five seconds); other stalls retain the existing body error. Reviewer R1 reproduced the lost terminal with an upstream that stays pending, then the same body/drop regression passed after this fix.
+
+## T-1102 — LLM 用量正確性修正文件先行
+
+本輪只交付開發／修正規格與兩條獨立文件 PR 中的本條；固定核對來源為 `6b444b00457591996db135e4ec6ab65b1d01ad4c`。
+規格路徑：`docs/specs/llm-usage-correctness.md`；進度沿用 [任務板](docs/tasks/BOARD.md)。
+保留既有 mainline、usable_tag 與所有未驗 runtime AC；文件通過不代表功能實作或缺陷修復。
+
+| 文件 AC | Given／When／Then | 狀態 | 驗證計畫／證據 |
+| --- | --- | --- | --- |
+| UC-D01 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 以固定來源分類已確認缺陷、待重現問題與實機驗收缺口。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
+| UC-D02 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義串流計量、缺值彙總與相關修正的重現及驗收矩陣。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
+| UC-D03 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義修正順序、相容性、獨立審查與後續交接。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |

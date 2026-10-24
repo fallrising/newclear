@@ -48,3 +48,15 @@ Demand and contract: [task](T-0401-native-responses.md).
 | NR-03 | Bound and verify SSE framing | NR-3 | done | 2026-10-24T11:42:47Z | 2026-10-24T11:53:33Z | 2026-10-24T11:53:33Z |
 
 NR-1–NR-3 merged in [PR #601](https://github.com/fallrising/newclear/pull/601) at `2026-10-24T11:53:33Z` as `0e99542ec10213524bacffed73699556edfebb8e`. Required CI (component 111s, project contracts 8s) and independent review passed; fetched main contains the reviewed HEAD and the component matches it. SUCCESS/task local verification entries were written before publication; this board records the subsequent publication result. Whole-product acceptance remains incomplete.
+
+## T-1102 — LLM 用量正確性修正文件先行
+
+需求來源：owner 於 2026-10-24 直接要求將 Langfuse 比較後續拆成開發與修正兩個文件 PR。
+承接者：Codex 主導；範圍限本文件里程碑。規格路徑：`docs/specs/llm-usage-correctness.md`。
+本次建立 Draft PR，runtime 實作、真帳號驗收、部署與合併不在本次交付內；不變更既有產品驗收狀態。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| UC-D01 | 以固定來源分類已確認缺陷、待重現問題與實機驗收缺口 | UC-D01 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T14:17:37Z |
+| UC-D02 | 定義串流計量、缺值彙總與相關修正的重現及驗收矩陣 | UC-D02 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T14:17:37Z |
+| UC-D03 | 定義修正順序、相容性、獨立審查與後續交接 | UC-D03 | in_progress | 2026-10-24T14:17:37Z | — | 2026-10-24T14:17:37Z |

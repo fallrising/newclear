@@ -1,5 +1,11 @@
 # Status and evidence
 
+## Current acceptance reconciliation — 2026-10-25
+
+[AC01–05 matrix](ACCEPTANCE-548.md) binds seven preserved reports from existing CI40114998185 to current source2c4abddf. Component production, workloads, frozen35 inputs and CI configuration match actual checkouteb48a57b; only BOARD differs. Independent review accepts the bounded M1–M7 mainline. No runtime was rerun. Tag/release remain unauthorized and exact historical generation/role/first-failure time remain unknown.
+
+Sections below retain dated historical results, including their then-pending delivery/status statements; the current matrix supersedes those statuses without erasing failures.
+
 ## M4 kernel closure qualification — 2026-10-24
 
 The contract baseline was committed before implementation. A new M4-only same-PID

@@ -1,0 +1,236 @@
+{
+  "acceptance": {
+    "M6-01": "passed",
+    "M6-02": "passed",
+    "M6-03": "passed",
+    "M6-04": "passed",
+    "M6-05": "passed"
+  },
+  "command": "make integration-retry",
+  "daemon": {
+    "pgid": 2180,
+    "pid": 2180,
+    "start_ticks": 3098
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.11.17"
+  },
+  "evidence_file_written": true,
+  "final_shutdown": {
+    "all_owned_exited": true,
+    "exit_code": 0,
+    "forced": false,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "fixture_sha256": "6802f38703ff91d28138b0eae2f80b31abe446dbbfb1fbe490a9043a40d8f1b9",
+  "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+  "instance": {
+    "account_id": "01a16ee5b2e977cd874a4aa004ada248",
+    "database_id": "5f4c4b740d1fac33338828c5623dd6d2",
+    "instance_id": "01a16ee5b2e977cd874a4aa004ada248",
+    "name": "lab"
+  },
+  "phase": "complete",
+  "result": "passed",
+  "retries": {
+    "cases": [
+      {
+        "completed": 1,
+        "effect_count": 2,
+        "entries": [
+          {
+            "attempt": 1,
+            "backoff": "constant",
+            "delay_ms": 100,
+            "effect_acknowledged": 1,
+            "outcome_marker": "throw",
+            "retry_limit": 1,
+            "timeout_ms": 5000
+          },
+          {
+            "attempt": 2,
+            "backoff": "constant",
+            "delay_ms": 100,
+            "effect_acknowledged": 1,
+            "outcome_marker": "return",
+            "retry_limit": 1,
+            "timeout_ms": 5000
+          }
+        ],
+        "entry_count": 2,
+        "initial": {
+          "completed": 0,
+          "effect_count": 0,
+          "entry_count": 0,
+          "job_count": 1
+        },
+        "job_id": "unguarded-20261024t171143z-1d0b188b",
+        "name": "unguarded",
+        "stable_readback": true,
+        "terminal": {
+          "error": null,
+          "output": {
+            "attempt": 2,
+            "caseName": "unguarded",
+            "jobId": "unguarded-20261024t171143z-1d0b188b"
+          },
+          "status": "complete",
+          "step_name": "controlled-effect",
+          "step_success": true,
+          "step_type": "step",
+          "success": true
+        },
+        "workflow_id": "flow-unguarded-20261024t171143z-1d0b188b"
+      },
+      {
+        "completed": 1,
+        "effect_count": 1,
+        "entries": [
+          {
+            "attempt": 1,
+            "backoff": "constant",
+            "delay_ms": 100,
+            "effect_acknowledged": 1,
+            "outcome_marker": "throw",
+            "retry_limit": 1,
+            "timeout_ms": 5000
+          },
+          {
+            "attempt": 2,
+            "backoff": "constant",
+            "delay_ms": 100,
+            "effect_acknowledged": 1,
+            "outcome_marker": "return",
+            "retry_limit": 1,
+            "timeout_ms": 5000
+          }
+        ],
+        "entry_count": 2,
+        "initial": {
+          "completed": 0,
+          "effect_count": 0,
+          "entry_count": 0,
+          "job_count": 1
+        },
+        "job_id": "idempotent-20261024t171143z-1d0b188b",
+        "name": "idempotent",
+        "stable_readback": true,
+        "terminal": {
+          "error": null,
+          "output": {
+            "attempt": 2,
+            "caseName": "idempotent",
+            "jobId": "idempotent-20261024t171143z-1d0b188b"
+          },
+          "status": "complete",
+          "step_name": "controlled-effect",
+          "step_success": true,
+          "step_type": "step",
+          "success": true
+        },
+        "workflow_id": "flow-idempotent-20261024t171143z-1d0b188b"
+      },
+      {
+        "completed": 0,
+        "effect_count": 2,
+        "entries": [
+          {
+            "attempt": 1,
+            "backoff": "constant",
+            "delay_ms": 100,
+            "effect_acknowledged": 1,
+            "outcome_marker": "throw",
+            "retry_limit": 1,
+            "timeout_ms": 5000
+          },
+          {
+            "attempt": 2,
+            "backoff": "constant",
+            "delay_ms": 100,
+            "effect_acknowledged": 1,
+            "outcome_marker": "throw",
+            "retry_limit": 1,
+            "timeout_ms": 5000
+          }
+        ],
+        "entry_count": 2,
+        "initial": {
+          "completed": 0,
+          "effect_count": 0,
+          "entry_count": 0,
+          "job_count": 1
+        },
+        "job_id": "exhausted-20261024t171143z-1d0b188b",
+        "name": "exhausted",
+        "stable_readback": true,
+        "terminal": {
+          "error": {
+            "message": "Workflow execution failed",
+            "name": "Error"
+          },
+          "output": null,
+          "status": "errored",
+          "step_name": "controlled-effect",
+          "step_success": false,
+          "step_type": "step",
+          "success": false
+        },
+        "workflow_id": "flow-exhausted-20261024t171143z-1d0b188b"
+      }
+    ],
+    "get_requests": 23,
+    "limitations": {
+      "controlled_callback_errors": true,
+      "crash_tested": false,
+      "external_exactly_once_tested": false,
+      "future_execution_unobserved": true,
+      "power_loss_tested": false,
+      "public_attempt_history_used": false,
+      "synthetic_d1_only": true
+    },
+    "limits": {
+      "case_seconds": 60,
+      "cases": 3,
+      "max_gets": 256,
+      "scenario_seconds": 300
+    },
+    "policy": {
+      "backoff": "constant",
+      "delay_ms": 100,
+      "retry_limit": 1,
+      "timeout_ms": 5000
+    },
+    "schema_version": 1
+  },
+  "run_id": "20261024T171143Z-1d0b188b",
+  "runtime": {
+    "artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+    "version_text": "ocd 0.2.4"
+  },
+  "scenario": "controlled-workflow-retries",
+  "schema_version": 1,
+  "scope_removed": true,
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  }
+}

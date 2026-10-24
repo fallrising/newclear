@@ -44,3 +44,16 @@ and [Project success contracts](https://github.com/fallrising/newclear/actions/r
 2026-10-24T17:16:38Z, merge `0793458167a7e63dbb263b8c7de95ab1efe581fb`.
 The bounded M4/M5 tasks are done; #548 historical attribution and whole-mainline
 acceptance remain open. This board closeout does not change their scope.
+
+## T-0084 — Issue #548 acceptance reconciliation
+
+Contract and evidence: [AC matrix](../ACCEPTANCE-548.md). Existing seven CI reports
+and exact checkout/source bridge; no new runtime or changed acceptance criteria.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0084.1 | Reconcile source-bound evidence | AC-01 | in_progress | 2026-10-24T19:41:51Z | | 2026-10-24T19:41:51Z |
+| T-0084.2 | Reconcile source-bound evidence | AC-02 | in_progress | 2026-10-24T19:41:51Z | | 2026-10-24T19:41:51Z |
+| T-0084.3 | Reconcile source-bound evidence | AC-03 | in_progress | 2026-10-24T19:41:51Z | | 2026-10-24T19:41:51Z |
+| T-0084.4 | Reconcile source-bound evidence | AC-04 | in_progress | 2026-10-24T19:41:51Z | | 2026-10-24T19:41:51Z |
+| T-0084.5 | Reconcile source-bound evidence | AC-05 | in_progress | 2026-10-24T19:41:51Z | | 2026-10-24T19:41:51Z |

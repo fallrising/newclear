@@ -22,7 +22,7 @@
 | [labs/iris-lab](labs/iris-lab/SUCCESS.md) | labs | 以固定 Iris 與模型版本驗證可重現的本機原生生圖流程 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-24 |
 | [labs/m4-seat](labs/m4-seat/SUCCESS.md) | labs | 保存 M4 Max 48GB 單人本機推論座位的有界規劃 | 參考／封存 | 尚無已核准標記 | 2026-10-17 |
 | [labs/mithril-research](labs/mithril-research/SUCCESS.md) | labs | 以固定 Mithril 來源驗證 Redis Cluster 代理的適配與操作邊界 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-17 |
-| [labs/open-compute](labs/open-compute/SUCCESS.md) | labs | 驗證固定 open-compute release 的有界持久狀態與人工操作生命週期 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-17 |
+| [labs/open-compute](labs/open-compute/SUCCESS.md) | labs | 驗證固定 open-compute release 的有界持久狀態與人工操作生命週期 | 完成 | 尚無已核准標記 | 2026-10-17 |
 | [labs/openmmo-lab](labs/openmmo-lab/SUCCESS.md) | labs | 建立固定 OpenMMO 的本機雙人世界與持久化試驗入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/openviking-context](labs/openviking-context/SUCCESS.md) | labs | 以來源校驗與 byte 預算驗證共享 context 投影服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/pg-jev-router](labs/pg-jev-router/SUCCESS.md) | labs | 以真 PostgreSQL 擴充套件和合成 provider 驗證輸入路由政策接線 | 完成 | [usable/pg-jev-router/v0.1.0](https://github.com/fallrising/newclear/tree/usable/pg-jev-router/v0.1.0/labs/pg-jev-router) | 2026-10-04 |

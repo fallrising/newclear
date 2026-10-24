@@ -1,6 +1,7 @@
 # open-compute runtime lab
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+> M1–M7 限定 lab 主線的[同源驗收核對](docs/ACCEPTANCE-548.md)已完成；未發布 usable tag，歷史精確失敗歸因仍未知。
 
 
 > **Portfolio: A — active experiment.** [Documentation policy](../../docs/portfolio-doc-tiers.md).

@@ -1,0 +1,293 @@
+{
+  "acceptance": {
+    "M5-01": "passed",
+    "M5-02": "passed",
+    "M5-03": "passed",
+    "M5-04": "passed",
+    "M5-05": "passed"
+  },
+  "command": "make integration-crash",
+  "crash": {
+    "all_owned_exited": true,
+    "attempted": 2,
+    "elapsed_seconds": 0.016742508000021417,
+    "limitations": {
+      "external_exactly_once_tested": false,
+      "in_flight_step_tested": false,
+      "kernel_filesystem_alive": true,
+      "observed_generations_only": true,
+      "power_loss_tested": false,
+      "public_committed_wait": true,
+      "same_path": true,
+      "same_runner": true,
+      "same_uid": true,
+      "sequential_signals": true,
+      "unobserved_descendants": "unknown"
+    },
+    "limits": {
+      "extension_bytes": 49152,
+      "max_targets": 64,
+      "shutdown_seconds": 10
+    },
+    "observers_closed": true,
+    "reason": null,
+    "root_exit_code": -9,
+    "schema_version": 1,
+    "signal": "SIGKILL",
+    "signaled": 2,
+    "status": "verified",
+    "targets": [
+      {
+        "exit_observed": true,
+        "pgid": 2400,
+        "pid": 2400,
+        "signal_sent": true,
+        "start_ticks": 16303
+      },
+      {
+        "exit_observed": true,
+        "pgid": 2433,
+        "pid": 2433,
+        "signal_sent": true,
+        "start_ticks": 16765
+      }
+    ]
+  },
+  "crash_lifecycle": {
+    "cleanup": {
+      "kernel_echild": true,
+      "reason": null,
+      "status": "removed"
+    },
+    "containment": {
+      "attempted": false,
+      "complete": false,
+      "reason": null
+    },
+    "failure": null,
+    "generations": [
+      {
+        "adopted_reaped": 1,
+        "closed": true,
+        "closure_kind": "crash",
+        "drains_closed": true,
+        "failure": null,
+        "history_nonlive": true,
+        "index": 1,
+        "kernel_echild": true,
+        "launches": 5,
+        "launches_closed": true,
+        "pipes_open": 0,
+        "root": {
+          "pgid": 2400,
+          "pid": 2400,
+          "start_ticks": 16303
+        },
+        "root_exit_code": -9,
+        "threads_open": 0,
+        "waited": 5
+      },
+      {
+        "adopted_reaped": 0,
+        "closed": true,
+        "closure_kind": "normal",
+        "drains_closed": true,
+        "failure": null,
+        "history_nonlive": true,
+        "index": 2,
+        "kernel_echild": true,
+        "launches": 10,
+        "launches_closed": true,
+        "pipes_open": 0,
+        "root": {
+          "pgid": 2465,
+          "pid": 2465,
+          "start_ticks": 16849
+        },
+        "root_exit_code": 0,
+        "threads_open": 0,
+        "waited": 10
+      }
+    ],
+    "limits": {
+      "adopted_reaped": 1024,
+      "edge_events": 1024,
+      "extension_bytes": 16384,
+      "history": 1024,
+      "launches": 1024,
+      "proc_entries": 8192,
+      "tail_bytes": 32768,
+      "targets": 64,
+      "threads": 16
+    },
+    "mode": "m5-kernel-owner",
+    "restart": {
+      "reason": null,
+      "status": "consumed"
+    },
+    "sampling": {
+      "ambiguous_edges": 0,
+      "attempted": 1,
+      "reasons": {
+        "child_missing": 0,
+        "child_reparented": 0,
+        "child_reused": 0,
+        "child_zombie": 0,
+        "parent_missing": 0,
+        "parent_reused": 0,
+        "parent_zombie": 0,
+        "start_order": 0
+      },
+      "stable_children": 1
+    },
+    "schema_version": 1
+  },
+  "daemon_after": {
+    "pgid": 2465,
+    "pid": 2465,
+    "start_ticks": 16849
+  },
+  "daemon_before": {
+    "pgid": 2400,
+    "pid": 2400,
+    "start_ticks": 16303
+  },
+  "deployment": {
+    "code_runtime_bindings_unchanged": true,
+    "deployment_id": "01a16ee5-c607-76f8-9ebb-85bc99dc5e48",
+    "script_etag": "3928d5d5298e8e9669c1cd8c5b62a1b7d1ef022a4c63dcdb8ced2e0bf17634d4",
+    "version_id": "01a16ee5-c5da-71e9-ada6-77ab0a803958"
+  },
+  "duplicate_submission": {
+    "requests": 2,
+    "row_count": 1
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.11.17"
+  },
+  "evidence_file_written": true,
+  "final_shutdown": {
+    "all_owned_exited": true,
+    "children": [],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "functional_acceptance": {
+    "AC-01": "passed",
+    "AC-02": "passed",
+    "AC-03": "passed",
+    "AC-04": "passed",
+    "AC-05": "passed",
+    "AC-07": "passed",
+    "AC-08": "passed"
+  },
+  "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+  "instance": {
+    "account_id": "01a16ee5b9b6756f9bb56883afdc24ec",
+    "instance_id": "01a16ee5b9b6756f9bb56883afdc24ec",
+    "name": "lab"
+  },
+  "live_children_before_restart": [
+    {
+      "pgid": 2433,
+      "pid": 2433,
+      "start_ticks": 16765
+    }
+  ],
+  "phase": "complete",
+  "readback": {
+    "d1_row_unchanged": true,
+    "instance_account_database_unchanged": true,
+    "original_workflow_waiting": true,
+    "read_only_http_enforced": true,
+    "read_requests": 6,
+    "state_identity_unchanged": true
+  },
+  "result": "passed",
+  "run_id": "20261024T171146Z-57115b61",
+  "runtime": {
+    "artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+    "version_text": "ocd 0.2.4"
+  },
+  "scenario": "checkpoint-sigkill",
+  "schema_version": 1,
+  "scope_removed": true,
+  "state_identity": {
+    "after": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 2049,
+        "inode": 9185702
+      },
+      "data": {
+        "device": 2049,
+        "inode": 9185682
+      },
+      "scheduler_db": {
+        "device": 2049,
+        "inode": 9185705
+      },
+      "scope": {
+        "device": 2049,
+        "inode": 9185533
+      }
+    },
+    "before": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 2049,
+        "inode": 9185702
+      },
+      "data": {
+        "device": 2049,
+        "inode": 9185682
+      },
+      "scheduler_db": {
+        "device": 2049,
+        "inode": 9185705
+      },
+      "scope": {
+        "device": 2049,
+        "inode": 9185533
+      }
+    },
+    "same": true
+  },
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  },
+  "workflow": {
+    "after_callback_count": 1,
+    "after_nonce_sha256": "548e0a1f43ac96826f97c8e203ad7cb4f0d1e0a53e03c19d4157104bf0d80df2",
+    "after_status": "complete",
+    "before_callback_count": 1,
+    "before_nonce_sha256": "548e0a1f43ac96826f97c8e203ad7cb4f0d1e0a53e03c19d4157104bf0d80df2",
+    "before_status": "waiting",
+    "completed": 1,
+    "id": "flow-20261024t171146z-57115b61",
+    "nonce_unchanged": true,
+    "same_id": true
+  }
+}

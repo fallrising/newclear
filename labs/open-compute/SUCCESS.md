@@ -2,10 +2,10 @@
 project: labs/open-compute
 purpose: 驗證固定 open-compute release 的有界持久狀態與人工操作生命週期
 kind: lab
-mainline: incomplete
+mainline: complete
 usable_tag: none
-reviewed: 2026-10-21
-source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
+reviewed: 2026-10-25
+source_commit: 2c4abddf4ce69105d1b4ee8c894e8ef1835aa92f
 ---
 
 # open-compute 成功契約
@@ -20,25 +20,27 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 ## 驗收條件
 
-passed 僅表示本次已核對的靜態條件；historical 是已有紀錄，並非本次重跑。
-產品未驗項與後續失敗均保留；文件格式通過不能代替runtime驗收。
+`passed` 表示已核對既有原始 runtime 報告與現行來源一致；本次沒有重跑。
+較早的失敗及不可回溯資訊保留於 [逐條矩陣](docs/ACCEPTANCE-548.md)。
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
 | --- | --- | --- | --- |
-| AC-01 | Given 新建owned scope與等待Workflow，When 正常restart及完整備份後刪來源再還原，Then 原D1／R2／Workflow與nonce保持。 | historical | [M1報告](docs/evidence/2026-10-07-m1-ci.json)、[M2報告](docs/evidence/2026-10-08-m2-ci.json)。 |
-| AC-02 | Given 固定idle/read workload與冷磁碟狀態，When 採樣程序及三次cold endpoint，Then 輸出有單位與coverage限制的觀測。 | historical | [M3](docs/evidence/2026-10-13-m3-ci.json)、[M4](docs/evidence/2026-10-13-m4-ci.json)；不推導容量。 |
-| AC-03 | Given 公開checkpoint與受控callback失敗，When SIGKILL／retry，Then 原狀態可核對且效果計數符合限定oracle。 | historical | [M5](docs/evidence/2026-10-16-m5-ci.json)、[M6](docs/evidence/2026-10-17-m6-ci.json)；非斷電或外部副作用exactly-once。 |
-| AC-04 | Given retained trial，When 三個foreground owner跨stop/start操作後顯式cold destroy，Then 保留狀態、單一D1效果及精確清理成立。 | historical | [M7報告](docs/evidence/2026-10-17-m7-ci.json)、[STATUS](docs/STATUS.md)：20回覆、3個daemon generation。 |
-| AC-05 | Given 整合後主線版本，When M4 cold_after_writes關閉觀測，Then 所有owned generations退出且cold證據完整。 | failed | [STATUS M7後續驗證](docs/STATUS.md)：2026-10-17紀錄run39048597519遇parent-edge change，cold observation／cleanup被拒；根因未定。 |
+| AC-01 | Given 新建owned scope與等待Workflow，When 正常restart及完整備份後刪來源再還原，Then 原D1／R2／Workflow與nonce保持。 | passed | [M1](docs/evidence/2026-10-25-ci613-m1.json)、[M2](docs/evidence/2026-10-25-ci613-m2.json)；原狀態與清理通過。 |
+| AC-02 | Given 固定idle/read workload與冷磁碟狀態，When 採樣程序及三次cold endpoint，Then 輸出有單位與coverage限制的觀測。 | passed | [M3](docs/evidence/2026-10-25-ci613-m3.json)、[M4](docs/evidence/2026-10-25-ci613-m4.json)；不推導容量。 |
+| AC-03 | Given 公開checkpoint與受控callback失敗，When SIGKILL／retry，Then 原狀態可核對且效果計數符合限定oracle。 | passed | [M5](docs/evidence/2026-10-25-ci613-m5.json)、[M6](docs/evidence/2026-10-25-ci613-m6.json)；非斷電或外部exactly-once。 |
+| AC-04 | Given retained trial，When 三個foreground owner跨stop/start操作後顯式cold destroy，Then 保留狀態、單一D1效果及精確清理成立。 | passed | [M7](docs/evidence/2026-10-25-ci613-m7.json)：20預期回覆、3代與3次正常停止。 |
+| AC-05 | Given 整合後主線版本，When M4 cold_after_writes關閉觀測，Then 所有owned generations退出且cold證據完整。 | passed | [M4](docs/evidence/2026-10-25-ci613-m4.json)：cold_after_writes10／10回收、正常root0、完整snapshot／locks、最終ECHILD與清理；[來源綁定](docs/evidence/2026-10-25-ci613-source-binding.json)。 |
 
 ## 現況與缺口
 
-M1–M7確實有原始runtime的bounded CI結果，並非只有mock harness。
-M7當輪276tests、五個CI jobs成功，仍不能掩蓋其後integrated-main的M4失敗。
-退出碼0與無force不足以證明整棵程序樹已停止；既有拒絕guard保留。
-因此主線目前incomplete，需先解釋／修復後續失敗並對目標版本補驗。
-retained trial不是daemon服務；lease上限不是soak，Workflow仍有270秒同boot操作限制。
-RSS可能重複共享頁、磁碟只計regular-file metadata，不提供完整容量或每row成本。
+既有CI40114998185的七份原始runtime報告來自同一checkout `eb48a57b`；
+與現行來源比較只有任務板不同，35份凍結輸入相同，所有workflow相同。
+作者外審查逐項接受此[同源證據矩陣](docs/ACCEPTANCE-548.md)，M1–M7限定lab主線條件已滿足。
+這不是靠PR合併或一次exit0推定成功；AC-05直接核對kernel閉合、三次cold snapshot及清理。
+
+歷史失敗的精確generation／role／首次背景失敗時間仍未知，不能以新成功補造。
+原失敗和RED紀錄保留；未授權usable tag、部署或release，issue處置與owner驗收分開。
+retained trial不是daemon服務，270秒同boot操作限制、coverage／metadata限制均保留。
 
 ## 啟動與驗證
 
@@ -54,12 +56,12 @@ M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止
 
 ## 可用版本
 
-目前 `usable_tag: none`。
-先調查integrated-main M4 parent-edge failure，保留失敗artifact，再完成目標版本對應必要gate。
-未來最多可標記M1–M7限定lab能力；不能擴為通用生產平台、長期可靠性或host部署資格。
+目前 `usable_tag: none`；本輪未授權release，因此不建立usable tag。
+限定主線完成與版本標記分開。未來若獲tag授權，仍須核對目標SHA、必要CI／審查、
+本文來源綁定及後續差異；有相關變更才補對應驗證，不把既有結果套用到未知來源。
 
-標記前須核對已合併目標SHA、必要CI／審查與核心流程證據。
-沿用較早結果須比較其後程式及設定差異，相關變更必須補驗。
+以下maintenance段落是各次交付的歷史快照，其中當時的AC-05 failed／mainline incomplete
+或CI pending，由上方2026-10-25逐條核對取代；原測試失敗與未知歸因不改寫。
 
 ## Issue548: bounded failure diagnostics (maintenance)
 

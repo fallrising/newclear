@@ -1,0 +1,202 @@
+{
+  "result": "passed",
+  "ci_run": 40114998185,
+  "ci_checkout": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+  "current_target": "2c4abddf4ce69105d1b4ee8c894e8ef1835aa92f",
+  "component_and_ci_delta": [
+    "labs/open-compute/docs/tasks/BOARD.md"
+  ],
+  "frozen_inputs_matched": 35,
+  "reports": [
+    {
+      "artifact": "open-compute-crash-evidence-40114998185-1",
+      "sha256": "cbe425e21552bd627e84b5220d9818d2b3c6f84a929a559e0ae1a41bee1f4012",
+      "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+      "acceptance": {
+        "M5-01": "passed",
+        "M5-02": "passed",
+        "M5-03": "passed",
+        "M5-04": "passed",
+        "M5-05": "passed"
+      },
+      "environment": {
+        "architecture": "x86_64",
+        "euid": 1001,
+        "os": "Linux",
+        "python": "3.11.17"
+      },
+      "scope_removed": true,
+      "preserved_report": "2026-10-25-ci613-m5.json"
+    },
+    {
+      "artifact": "open-compute-evidence-40114998185-1",
+      "sha256": "b58bf6a0112bea8f5e8b0100cafa604492227cee87ef5006f1daf4d5123e620e",
+      "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+      "acceptance": {
+        "AC-01": "passed",
+        "AC-02": "passed",
+        "AC-03": "passed",
+        "AC-04": "passed",
+        "AC-05": "passed",
+        "AC-06": "passed",
+        "AC-07": "passed",
+        "AC-08": "passed"
+      },
+      "environment": {
+        "architecture": "x86_64",
+        "euid": 1001,
+        "os": "Linux",
+        "python": "3.11.17"
+      },
+      "scope_removed": true,
+      "preserved_report": "2026-10-25-ci613-m1.json"
+    },
+    {
+      "artifact": "open-compute-resource-evidence-40114998185-1",
+      "sha256": "a2b9e470136a471f9e0a1ae3e170ec8041b1943690ae50ddb407b3beee918beb",
+      "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+      "acceptance": {
+        "M3-01": "passed",
+        "M3-02": "passed",
+        "M3-03": "passed",
+        "M3-04": "passed",
+        "M3-05": "passed"
+      },
+      "environment": {
+        "architecture": "x86_64",
+        "euid": 1001,
+        "os": "Linux",
+        "python": "3.11.17"
+      },
+      "scope_removed": true,
+      "preserved_report": "2026-10-25-ci613-m3.json"
+    },
+    {
+      "artifact": "open-compute-restore-evidence-40114998185-1",
+      "sha256": "9ac5491bef0a291eece92829ea7ad7b51d4ffca063a65180d83110728f52330b",
+      "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+      "acceptance": {
+        "M2-01": "passed",
+        "M2-02": "passed",
+        "M2-03": "passed",
+        "M2-04": "passed",
+        "M2-05": "passed",
+        "M2-06": "passed",
+        "M2-07": "passed",
+        "M2-08": "passed",
+        "M2-09": "passed"
+      },
+      "environment": {
+        "architecture": "x86_64",
+        "euid": 1001,
+        "os": "Linux",
+        "python": "3.11.17"
+      },
+      "scope_removed": true,
+      "preserved_report": "2026-10-25-ci613-m2.json"
+    },
+    {
+      "artifact": "open-compute-retry-evidence-40114998185-1",
+      "sha256": "ed7d1640f57e63066825c243e733d528e38e62e6ce49cabd7e46f7d8e61f02ac",
+      "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+      "acceptance": {
+        "M6-01": "passed",
+        "M6-02": "passed",
+        "M6-03": "passed",
+        "M6-04": "passed",
+        "M6-05": "passed"
+      },
+      "environment": {
+        "architecture": "x86_64",
+        "euid": 1001,
+        "os": "Linux",
+        "python": "3.11.17"
+      },
+      "scope_removed": true,
+      "preserved_report": "2026-10-25-ci613-m6.json"
+    },
+    {
+      "artifact": "open-compute-storage-evidence-40114998185-1",
+      "sha256": "b052cf3532c8b82e50d8a58afc2cba097f7ec33af0920af6f99fcc80c2eaf1dc",
+      "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+      "acceptance": {
+        "M4-01": "passed",
+        "M4-02": "passed",
+        "M4-03": "passed",
+        "M4-04": "passed",
+        "M4-05": "passed"
+      },
+      "environment": {
+        "architecture": "x86_64",
+        "euid": 1001,
+        "os": "Linux",
+        "python": "3.11.17"
+      },
+      "scope_removed": true,
+      "preserved_report": "2026-10-25-ci613-m4.json"
+    },
+    {
+      "artifact": "open-compute-trial-evidence-40114998185-1",
+      "sha256": "a340e438433bd077b80296be44bc14c64ac21a2d8e36745061987167f7ddacf3",
+      "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+      "acceptance": {
+        "M7-01": "passed",
+        "M7-02": "passed",
+        "M7-03": "passed",
+        "M7-04": "passed",
+        "M7-05": "passed"
+      },
+      "environment": {
+        "architecture": "x86_64",
+        "euid": 1001,
+        "os": "Linux",
+        "python": "3.11.17"
+      },
+      "scope_removed": true,
+      "preserved_report": "2026-10-25-ci613-m7.json"
+    }
+  ],
+  "cold_after_writes": {
+    "adopted_reaped": 0,
+    "closed": true,
+    "failure": null,
+    "forced": false,
+    "index": 2,
+    "launches": 10,
+    "locks_released": true,
+    "phase": "cold_after_writes",
+    "pipes_open": 0,
+    "root": {
+      "pgid": 2480,
+      "pid": 2480,
+      "start_ticks": 6278
+    },
+    "root_exit_code": 0,
+    "sampling": {
+      "ambiguous_edges": 0,
+      "attempted": 0,
+      "reasons": {
+        "child_missing": 0,
+        "child_reparented": 0,
+        "child_reused": 0,
+        "parent_missing": 0,
+        "parent_reused": 0,
+        "parent_zombie": 0,
+        "start_order": 0
+      },
+      "stable_children": 0
+    },
+    "snapshot_complete": true,
+    "snapshot_consumed": true,
+    "threads_open": 0,
+    "waited": 10,
+    "was_running": true
+  },
+  "historical_unknown": [
+    "exact vanished generation",
+    "role",
+    "first background failure time"
+  ],
+  "protected_m4_head_index_unchanged": true,
+  "new_runtime_tests": 0
+}

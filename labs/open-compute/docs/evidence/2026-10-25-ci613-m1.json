@@ -1,0 +1,173 @@
+{
+  "acceptance": {
+    "AC-01": "passed",
+    "AC-02": "passed",
+    "AC-03": "passed",
+    "AC-04": "passed",
+    "AC-05": "passed",
+    "AC-06": "passed",
+    "AC-07": "passed",
+    "AC-08": "passed"
+  },
+  "command": "make integration",
+  "daemon_after": {
+    "pgid": 2930,
+    "pid": 2930,
+    "start_ticks": 16995
+  },
+  "daemon_before": {
+    "pgid": 2863,
+    "pid": 2863,
+    "start_ticks": 15016
+  },
+  "duplicate_submission": {
+    "requests": 2,
+    "row_count": 1
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.11.17"
+  },
+  "evidence_file_written": true,
+  "final_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 2989,
+        "pid": 2989,
+        "start_ticks": 17146
+      },
+      {
+        "pgid": 2994,
+        "pid": 2994,
+        "start_ticks": 17151
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "first_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 2885,
+        "pid": 2885,
+        "start_ticks": 15381
+      },
+      {
+        "pgid": 2892,
+        "pid": 2892,
+        "start_ticks": 15415
+      },
+      {
+        "pgid": 2897,
+        "pid": 2897,
+        "start_ticks": 15420
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+  "instance": {
+    "account_id": "01a16ee6478a76c8a1e2d79a19fc869e",
+    "instance_id": "01a16ee6478a76c8a1e2d79a19fc869e",
+    "name": "lab"
+  },
+  "live_children_before_restart": [
+    {
+      "pgid": 2897,
+      "pid": 2897,
+      "start_ticks": 15420
+    }
+  ],
+  "phase": "complete",
+  "result": "passed",
+  "run_id": "20261024T171224Z-c261ba57",
+  "runtime": {
+    "artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+    "version_text": "ocd 0.2.4"
+  },
+  "schema_version": 1,
+  "scope_removed": true,
+  "state_identity": {
+    "after": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 66305,
+        "inode": 9208839
+      },
+      "data": {
+        "device": 66305,
+        "inode": 9208819
+      },
+      "scheduler_db": {
+        "device": 66305,
+        "inode": 9208842
+      },
+      "scope": {
+        "device": 66305,
+        "inode": 9208670
+      }
+    },
+    "before": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 66305,
+        "inode": 9208839
+      },
+      "data": {
+        "device": 66305,
+        "inode": 9208819
+      },
+      "scheduler_db": {
+        "device": 66305,
+        "inode": 9208842
+      },
+      "scope": {
+        "device": 66305,
+        "inode": 9208670
+      }
+    },
+    "same": true
+  },
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  },
+  "workflow": {
+    "after_callback_count": 1,
+    "after_nonce_sha256": "29bbea62dc3d83c3abe09a2da0528e57ebda76b74c39dc9792ee0869b61f6ca7",
+    "after_status": "complete",
+    "before_callback_count": 1,
+    "before_nonce_sha256": "29bbea62dc3d83c3abe09a2da0528e57ebda76b74c39dc9792ee0869b61f6ca7",
+    "before_status": "waiting",
+    "completed": 1,
+    "id": "flow-20261024t171224z-c261ba57",
+    "nonce_unchanged": true,
+    "same_id": true
+  }
+}

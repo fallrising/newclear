@@ -1,0 +1,307 @@
+{
+  "acceptance": {
+    "M3-01": "passed",
+    "M3-02": "passed",
+    "M3-03": "passed",
+    "M3-04": "passed",
+    "M3-05": "passed"
+  },
+  "command": "make integration-resources",
+  "daemon_after": {
+    "pgid": 3388,
+    "pid": 3388,
+    "start_ticks": 25306
+  },
+  "daemon_before": {
+    "pgid": 3282,
+    "pid": 3282,
+    "start_ticks": 22644
+  },
+  "duplicate_submission": {
+    "requests": 2,
+    "row_count": 1
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.11.17"
+  },
+  "evidence_file_written": true,
+  "final_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 3448,
+        "pid": 3448,
+        "start_ticks": 25457
+      },
+      {
+        "pgid": 3453,
+        "pid": 3453,
+        "start_ticks": 25461
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "first_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 3310,
+        "pid": 3310,
+        "start_ticks": 23024
+      },
+      {
+        "pgid": 3315,
+        "pid": 3315,
+        "start_ticks": 23029
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "functional_acceptance": {
+    "AC-01": "passed",
+    "AC-02": "passed",
+    "AC-03": "passed",
+    "AC-04": "passed",
+    "AC-05": "passed",
+    "AC-06": "passed",
+    "AC-07": "passed",
+    "AC-08": "passed"
+  },
+  "harness_commit": "eb48a57b7c00b1e1ffa36df28466af1a9dfcdf58",
+  "instance": {
+    "account_id": "01a16ee77084732795f12c342873b8b0",
+    "instance_id": "01a16ee77084732795f12c342873b8b0",
+    "name": "lab"
+  },
+  "live_children_before_restart": [
+    {
+      "pgid": 3315,
+      "pid": 3315,
+      "start_ticks": 23029
+    }
+  ],
+  "phase": "complete",
+  "resources": {
+    "limitations": {
+      "between_sample_coverage": "unknown",
+      "excluded": [
+        "harness",
+        "sibling_cli_helpers",
+        "cold_backup",
+        "startup",
+        "shutdown",
+        "resume"
+      ],
+      "full_tree_coverage": "unknown",
+      "non_atomic_scan": true,
+      "observer_helper_overhead": true,
+      "rss": "approximate_shared_pages",
+      "scope": "observed_descendants",
+      "short_lived_processes_may_be_missed": true
+    },
+    "limits": {
+      "extension_bytes": 49152,
+      "helper_acquisition_seconds": 1.0,
+      "helper_kill_seconds": 1.0,
+      "helper_terminate_seconds": 0.5,
+      "identities_per_sample": 512,
+      "interval_seconds": 0.25,
+      "observer_join_seconds": 3.0,
+      "phase_summaries": 8,
+      "protocol_bytes": 65536,
+      "samples_per_phase": 64,
+      "stat_bytes": 4096
+    },
+    "phases": {
+      "restarted_idle": {
+        "cpu_pairs_observed": 22,
+        "cpu_unpaired_observations": 14,
+        "elapsed_seconds": 3.000084472999987,
+        "max_sample_gap_seconds": 0.2500130159999969,
+        "max_scan_seconds": 0.023197584000001825,
+        "missing_observations": 12,
+        "observed_cpu_seconds": 0.01,
+        "observed_cpu_ticks": 1,
+        "peak_live_process_count": 2,
+        "peak_sampled_rss_bytes": 145178624,
+        "phase": "restarted_idle",
+        "probe_attempted": 0,
+        "probe_completed": 0,
+        "reason": null,
+        "reused_observations": 0,
+        "samples_attempted": 12,
+        "samples_valid": 12,
+        "scheduled_slots": 12,
+        "skipped_slots": 0,
+        "status": "observed",
+        "zombie_observations": 0
+      },
+      "restarted_read_probe": {
+        "cpu_pairs_observed": 30,
+        "cpu_unpaired_observations": 18,
+        "elapsed_seconds": 4.000082249000002,
+        "max_sample_gap_seconds": 0.2500097070000038,
+        "max_scan_seconds": 0.023892525000007936,
+        "missing_observations": 16,
+        "observed_cpu_seconds": 0.1,
+        "observed_cpu_ticks": 10,
+        "peak_live_process_count": 2,
+        "peak_sampled_rss_bytes": 151605248,
+        "phase": "restarted_read_probe",
+        "probe_attempted": 8,
+        "probe_completed": 8,
+        "reason": null,
+        "reused_observations": 0,
+        "samples_attempted": 16,
+        "samples_valid": 16,
+        "scheduled_slots": 16,
+        "skipped_slots": 0,
+        "status": "observed",
+        "zombie_observations": 0
+      },
+      "source_idle": {
+        "cpu_pairs_observed": 22,
+        "cpu_unpaired_observations": 14,
+        "elapsed_seconds": 3.0000825739999755,
+        "max_sample_gap_seconds": 0.25000785700001416,
+        "max_scan_seconds": 0.023311951000010822,
+        "missing_observations": 12,
+        "observed_cpu_seconds": 0.02,
+        "observed_cpu_ticks": 2,
+        "peak_live_process_count": 2,
+        "peak_sampled_rss_bytes": 276553728,
+        "phase": "source_idle",
+        "probe_attempted": 0,
+        "probe_completed": 0,
+        "reason": null,
+        "reused_observations": 0,
+        "samples_attempted": 12,
+        "samples_valid": 12,
+        "scheduled_slots": 12,
+        "skipped_slots": 0,
+        "status": "observed",
+        "zombie_observations": 0
+      },
+      "source_read_probe": {
+        "cpu_pairs_observed": 30,
+        "cpu_unpaired_observations": 18,
+        "elapsed_seconds": 4.00008032400001,
+        "max_sample_gap_seconds": 0.2500118370000166,
+        "max_scan_seconds": 0.024991303999996717,
+        "missing_observations": 16,
+        "observed_cpu_seconds": 0.07,
+        "observed_cpu_ticks": 7,
+        "peak_live_process_count": 2,
+        "peak_sampled_rss_bytes": 278913024,
+        "phase": "source_read_probe",
+        "probe_attempted": 8,
+        "probe_completed": 8,
+        "reason": null,
+        "reused_observations": 0,
+        "samples_attempted": 16,
+        "samples_valid": 16,
+        "scheduled_slots": 16,
+        "skipped_slots": 0,
+        "status": "observed",
+        "zombie_observations": 0
+      }
+    },
+    "schema_version": 1,
+    "units": {
+      "clock_ticks_per_second": 100,
+      "page_size_bytes": 4096
+    }
+  },
+  "result": "passed",
+  "run_id": "20261024T171341Z-3708a49b",
+  "runtime": {
+    "artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+    "version_text": "ocd 0.2.4"
+  },
+  "scenario": "observed-process-tree-resources",
+  "schema_version": 1,
+  "scope_removed": true,
+  "state_identity": {
+    "after": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 66305,
+        "inode": 9437347
+      },
+      "data": {
+        "device": 66305,
+        "inode": 9437327
+      },
+      "scheduler_db": {
+        "device": 66305,
+        "inode": 9437350
+      },
+      "scope": {
+        "device": 66305,
+        "inode": 9437188
+      }
+    },
+    "before": {
+      "config_sha256": "1c273ffa8f76fc6ac0df19b331364aedf8819f992c0b9871c7c7ad71749c9eb6",
+      "control_db": {
+        "device": 66305,
+        "inode": 9437347
+      },
+      "data": {
+        "device": 66305,
+        "inode": 9437327
+      },
+      "scheduler_db": {
+        "device": 66305,
+        "inode": 9437350
+      },
+      "scope": {
+        "device": 66305,
+        "inode": 9437188
+      }
+    },
+    "same": true
+  },
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  },
+  "workflow": {
+    "after_callback_count": 1,
+    "after_nonce_sha256": "4407de3885f89aad264525e794150570b1ecc87c71adf308971a39ace2675768",
+    "after_status": "complete",
+    "before_callback_count": 1,
+    "before_nonce_sha256": "4407de3885f89aad264525e794150570b1ecc87c71adf308971a39ace2675768",
+    "before_status": "waiting",
+    "completed": 1,
+    "id": "flow-20261024t171341z-3708a49b",
+    "nonce_unchanged": true,
+    "same_id": true
+  }
+}

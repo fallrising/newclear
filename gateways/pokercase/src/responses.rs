@@ -477,6 +477,10 @@ pub struct ResponsesToChatStream {
 }
 
 impl ResponsesToChatStream {
+    pub(crate) fn is_done(&self) -> bool {
+        self.finished
+    }
+
     pub fn new(model: impl Into<String>) -> Self {
         Self {
             id: "chatcmpl-thinrouter".into(),
@@ -926,6 +930,10 @@ pub struct ChatToResponsesStream {
 }
 
 impl ChatToResponsesStream {
+    pub(crate) fn is_done(&self) -> bool {
+        self.done
+    }
+
     pub fn new(model: impl Into<String>) -> Self {
         Self {
             id: "resp_thinrouter".into(),

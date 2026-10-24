@@ -216,3 +216,15 @@ Scope: shared SSE body read-I/O failures across six conversion paths, native Res
 Verification: RED/GREEN adapter tests with error-format/source/error-drop witnesses, text/tool terminal matrix, CR boundary cases and loopback broken HTTP streams; full native tests/fmt/clippy/docs/index, independent source review and required CI. No live-provider/Docker acceptance or whole-product completion claim. [Task](docs/tasks/T-0407-sse-io.md).
 
 Local IO-1–IO-3 evidence:143tests/13groups including96new scenarios pass;fmt/clippy,43project contracts and6llms navigation files pass. Original RED retained. Source review and publication follow in the task/board; whole-product/provider acceptance remains separate.
+
+## T-0408 — Terminal release
+
+Scope: ownership at recognized translated/native Responses terminals and observed EOF. Keep opaque passthrough byte behavior, existing framing, timeout/error/collector policy and reusable Claude sessions.
+
+- TR-1: Given a converter or native Responses guard emits a final success/incomplete/failure, release the upstream before yielding its final frame and stop reading subsequent bytes. Cover intact/fragmented input and a source which remains open; receiving a final frame must not require one more consumer poll to release ownership.
+- TR-2: Given EOF is observed while the source object still owns resources, release it before yielding EOF-generated final output (including existing incomplete-stream errors and buffered final records). Do not change EOF classification or native CR-only lookahead behavior.
+- TR-3: Given only Chat finish_reason, continue accepting the usage tail before [DONE]/EOF, and retain existing terminal mappings and idle/tool session reuse. Opaque streams retain their existing byte/EOF behavior. Verify early close through loopback HTTP with a permanently open source, without real providers.
+
+Validation: RED/GREEN with source-drop witnesses and an explicit stream retaining its resource after returning None; fragmented/terminal/EOF and usage-tail tests; real loopback HTTP; existing native/session/disconnect/error/stall regressions; full Rust/fmt/clippy/docs/index, independent review and required CI. [Task](docs/tasks/T-0408-terminal-release.md). No whole-product/provider/Docker acceptance claim.
+
+Local TR-1–TR-3 evidence:148tests/14groups including85new scenarios pass;fmt/clippy,43contracts/6llms indexes pass. Original RED retained; existing Claude session/disconnect and CR/error/stall regressions pass. Independent review/publication follow in task/board; whole-product/provider acceptance remains separate.

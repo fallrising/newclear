@@ -59,3 +59,7 @@ Linux 原型可描述為有限已驗切片，完整產品主線仍未完成。
 
 任何未來可用標記都須對應已合併的目標 SHA、必要 CI／審查與核心流程證據。
 較早證據須先比對其後程式與設定差異；有關變更補驗後才能沿用。
+
+## T-0380 FE Round2 paired review — in progress
+
+[Approved bounded task](fe-review/tasks/round2/task.md): existing Flowshot shell preload and Loom complete review-only IPC/event fixtures; no product/native/dependency changes. Browser evidence cannot qualify native/Mac/real-vault/AI/mainline. Required frontend/native CI, actual isolated scenarios/cleanup and independent review remain pending.

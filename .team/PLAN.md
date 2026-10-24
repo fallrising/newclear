@@ -2029,3 +2029,7 @@ Goku original R2 M1–M3 accepted by R25 independent source/artifact review; roo
 
 
 Fleet591 merged2d65b6528ef8425fe17bfb127f79c016dabe3380 at2026-10-24T11:13:28Z after R24/all3CI/scopedreadback; actualFleet root/component done carried here. Ojb review-only overlay/isolation/gRPC proposal subsequently explicitly approved by owner, replacing earlier pending snapshot; execution remains bounded and separately claimed.
+
+## Flowshot+Loom R2-AC-11/E claim 2026-10-24T11:22:03Z
+
+T018 approvedreviewonlypair; first25–30minFlowshotshellpreload/LoomlockedSDKcallbackproof, thenboundedscenarioexpansion. Planning105–165activepluswaitunknown,20mincheckpointnotdeadline/max2diagnostics. Rootenvironment/fullnative/Git/acceptance, nativeauthor-otherreview. No product/native/contract/deps/CIchanges; actualbrowserfixturecannotqualifynative/mainline. IndependentOjbPR596/PharkPR593 continue separately, rootintegratesboardclaims.

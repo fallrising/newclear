@@ -1,0 +1,174 @@
+{
+  "code_freeze": {
+    "base": "27a5dde13be6c7fcc057d3777558f61b1d06fa1f",
+    "files": [
+      {
+        "path": "Makefile",
+        "sha256": "d1577e804a5e7fb3bae1694342a6aaeadcb79a00613a7d659e3f9c53fd2035e2"
+      },
+      {
+        "path": "cold_backup.py",
+        "sha256": "ec436faf1043fb061b9ef5abdcc182b1a5dce3cd7e7a3907af40bb3d2a648ab0"
+      },
+      {
+        "path": "crash.py",
+        "sha256": "86f9b8b188e7f0737d102d5938c6e638dc9a4da8df78ffa83ff65761890c9221"
+      },
+      {
+        "path": "failure_diagnostics.py",
+        "sha256": "a6bf01498816fbd41b5f638410056663db5293629cfa1658619c79458339dd55"
+      },
+      {
+        "path": "fixtures/worker.js",
+        "sha256": "4618b185c706f1895856a881cd5b7426229931328f7725db7adbbda5fe7c0a37"
+      },
+      {
+        "path": "lab.py",
+        "sha256": "2fc2a85b9628503889fc7ecf25dbc7a1ff0881ce2233681fd5db655f2f8d0495"
+      },
+      {
+        "path": "resources.py",
+        "sha256": "6b543baacfc51c6fe457c2b6b2878f33de6c6d8643264a82d8fbfb54e85f23eb"
+      },
+      {
+        "path": "retry.py",
+        "sha256": "bc21e10e2bab568c17bd5e74c7faee77a670de67f6464e0cd6ec2d4c94fcc47c"
+      },
+      {
+        "path": "retry_contract.py",
+        "sha256": "44e229c53f4a330bd61267135eb01e262f82880f50e5023211a5a8bcc4dbcd7b"
+      },
+      {
+        "path": "storage.py",
+        "sha256": "a579a39c91eb26419d42736031d5ebe9bc7cdafc3e54418205f1f5e053520bc6"
+      },
+      {
+        "path": "tests/test_cold_backup.py",
+        "sha256": "780937fc3855866dd6cb703861ceb7833f3e4d8b2d1ec735102da59023bef8f6"
+      },
+      {
+        "path": "tests/test_crash.py",
+        "sha256": "10c6ac726053864f39dab0823dbb07e04defca5b4685ee48d1f8967024e2746d"
+      },
+      {
+        "path": "tests/test_crash_integration.py",
+        "sha256": "f6994d6098bc43e0ef0bb45b044f5d9a7af0d1813226ab79a3e5773cb961bbf9"
+      },
+      {
+        "path": "tests/test_failure_diagnostics.py",
+        "sha256": "6609ebc0ae967c8ad29bb353bfb6d8fb25296332397abf04b6ad5ccfe02b34e6"
+      },
+      {
+        "path": "tests/test_lab.py",
+        "sha256": "b56a198df24df928245e3739c3fc2266a7134e1abd0c221f8549e009ac63a4d0"
+      },
+      {
+        "path": "tests/test_resources.py",
+        "sha256": "71da7f6f9c6e2030aabb3ad5f68c6338a5ff48722f175a367fc273c4d1642c5d"
+      },
+      {
+        "path": "tests/test_resources_integration.py",
+        "sha256": "d9dcfdddc0d7a6765741f6546ffba47c6eb702dbe1eb32c114472dfd132768f4"
+      },
+      {
+        "path": "tests/test_retry_contract.py",
+        "sha256": "aa928def8f682cd725a2a2dad0419094f5e72de0a7c176cc770bf25567469fc2"
+      },
+      {
+        "path": "tests/test_retry_integration.py",
+        "sha256": "777d2f4160388cd046d92afdf9af99690b61a7b33e86aa08f93bfdfdae8bf21d"
+      },
+      {
+        "path": "tests/test_storage.py",
+        "sha256": "3273ab3f91cce134a0a5272a19e43988e2d473f2fd2004de20f863db69fd9147"
+      },
+      {
+        "path": "tests/test_storage_integration.py",
+        "sha256": "0379d57d2b28dd8eab2fce6bc2dd4b0958809226c0561db9b826de568c3184af"
+      },
+      {
+        "path": "tests/test_trial.py",
+        "sha256": "427c3933a81e8b18acb462d9a59a632bfcbf66749f4193eaeda660ac37851cfe"
+      },
+      {
+        "path": "tests/test_trial_integration.py",
+        "sha256": "dd253109089aa355acaa871390e7e92d1bc4017712d680ca30f40277181eaa93"
+      },
+      {
+        "path": "tests/test_trial_state.py",
+        "sha256": "0b26be58f2199f096fbb0d425a34dca32ae2bdcbc2c0ee99f6dbd1fcc1f413f1"
+      },
+      {
+        "path": "tests/test_trial_supervision.py",
+        "sha256": "727a639b4a23f90372d9054508befefbc1abd1280acbd09a1008a51c9e9d6441"
+      },
+      {
+        "path": "trial.py",
+        "sha256": "e89014214398f08139b18df9b7a3640712ccb2beb8b520adecd88a72142fdb18"
+      },
+      {
+        "path": "trial_integration.py",
+        "sha256": "4c53878b831aa8d37217edfd8f4f326837b11a667b5986184da8a5d0f121a011"
+      },
+      {
+        "path": "trial_state.py",
+        "sha256": "752c87a526a3e3018517821c5b585ed1c2aa9240e4c3f602cdefa7a9bdf7a61d"
+      },
+      {
+        "path": "trial_supervision.py",
+        "sha256": "1768ef78ed97d5831d89438de6dd5d7a02f72e8dee698162278a9e07a14c572e"
+      },
+      {
+        "path": "upstream.lock.json",
+        "sha256": "9ebb4759157a32c0a2c807f51d2a8613527c3a24d303a5598b60684f6088375c"
+      }
+    ],
+    "frozen_causal_tests_unchanged": true,
+    "generic_Capture_unchanged": true,
+    "sha256": "71a4040e996cc06f6c8b6390d95d7e437b488f98b54fa3436ba95ac8d8c07b55"
+  },
+  "description": "Source hashes bind this working-tree runtime to the reviewed code; harness_commit is its recorded base, not a claim that the base includes the repair.",
+  "diagnostic": {
+    "evidence": "record",
+    "exit_code": 0,
+    "failures": {
+      "cleanup": null,
+      "evidence": null,
+      "original": null
+    },
+    "phase": "complete",
+    "profile": "trial",
+    "report_written": true,
+    "result": "passed",
+    "schema_version": 1,
+    "source_commit": "27a5dde13be6c7fcc057d3777558f61b1d06fa1f"
+  },
+  "image": "mcr.microsoft.com/playwright@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
+  "limits": "One fresh local M7 trial; no historical M4 attribution, long-running reliability or live/mainline qualification.",
+  "report_sha256": "6ceedcd972c2878425242606bbb713e9806409e12f2f8cfd9b6dea8da8b67213",
+  "runtime": {
+    "elapsed_seconds": 80.892,
+    "exit_code": 0,
+    "owned_container_absent_after": true,
+    "profile": "integration-trial",
+    "source_unchanged": true,
+    "timeout": false
+  },
+  "runtime_source_hashes": {
+    "Makefile": "d1577e804a5e7fb3bae1694342a6aaeadcb79a00613a7d659e3f9c53fd2035e2",
+    "cold_backup.py": "ec436faf1043fb061b9ef5abdcc182b1a5dce3cd7e7a3907af40bb3d2a648ab0",
+    "crash.py": "86f9b8b188e7f0737d102d5938c6e638dc9a4da8df78ffa83ff65761890c9221",
+    "failure_diagnostics.py": "a6bf01498816fbd41b5f638410056663db5293629cfa1658619c79458339dd55",
+    "fixtures/worker.js": "4618b185c706f1895856a881cd5b7426229931328f7725db7adbbda5fe7c0a37",
+    "lab.py": "2fc2a85b9628503889fc7ecf25dbc7a1ff0881ce2233681fd5db655f2f8d0495",
+    "resources.py": "6b543baacfc51c6fe457c2b6b2878f33de6c6d8643264a82d8fbfb54e85f23eb",
+    "retry.py": "bc21e10e2bab568c17bd5e74c7faee77a670de67f6464e0cd6ec2d4c94fcc47c",
+    "retry_contract.py": "44e229c53f4a330bd61267135eb01e262f82880f50e5023211a5a8bcc4dbcd7b",
+    "storage.py": "a579a39c91eb26419d42736031d5ebe9bc7cdafc3e54418205f1f5e053520bc6",
+    "trial.py": "e89014214398f08139b18df9b7a3640712ccb2beb8b520adecd88a72142fdb18",
+    "trial_integration.py": "4c53878b831aa8d37217edfd8f4f326837b11a667b5986184da8a5d0f121a011",
+    "trial_state.py": "752c87a526a3e3018517821c5b585ed1c2aa9240e4c3f602cdefa7a9bdf7a61d",
+    "trial_supervision.py": "1768ef78ed97d5831d89438de6dd5d7a02f72e8dee698162278a9e07a14c572e",
+    "upstream.lock.json": "9ebb4759157a32c0a2c807f51d2a8613527c3a24d303a5598b60684f6088375c"
+  }
+}

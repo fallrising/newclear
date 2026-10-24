@@ -18,6 +18,7 @@ import time
 
 import lab
 import failure_diagnostics
+from trial_supervision import SupervisedCapture
 
 ACCEPTANCE = tuple(f'M7-0{i}' for i in range(1, 6))
 RETAINED = ('after_first_stop', 'after_second_stop', 'after_third_stop',
@@ -169,6 +170,11 @@ def finalize_children(children, deadline=None):
     for child in reversed(children):
         need(deadline is None or time.monotonic()<deadline,'deadline')
         try:
+            if isinstance(child,SupervisedCapture):
+                if not child.finished:
+                    child.cancel(deadline or time.monotonic()+30)
+                    raise TrialFailure('shutdown')
+                continue
             if child.process.poll() is None or child.live(strict=False):
                 receipt=child.stop(grace=30)
                 need(receipt['forced'] is False and receipt['all_owned_exited'] is True and
@@ -183,10 +189,12 @@ def finalize_children(children, deadline=None):
     need(not failed,'shutdown')
 
 
-def observe_ready(child,commands):
+def observe_ready(child,commands,deadline=None):
     from trial_state import decode_message
+    if isinstance(child,SupervisedCapture):child.ready(deadline)
     exited=child.process.poll() is not None
     if exited:
+        if isinstance(child,SupervisedCapture):raise TrialFailure('bootstrap')
         child.finish_threads()
     need(not child.observation_error,'bootstrap')
     output=child.text()
@@ -242,16 +250,19 @@ def execute(args, report, recorder=None):
 
     def spawn(command, *options):
         with lab.defer_owner_signals():
-            child = Capture([sys.executable, str(lab.HERE/'trial.py'), command,
-                             '--state', str(state), *map(str, options)])
+            child = SupervisedCapture([sys.executable, str(lab.HERE/'trial.py'), command,
+                             '--state', str(state), *map(str, options)],deadline=end,state=state)
             children.append(child)
         return child
 
     def response(child, command, expected='passed'):
-        child.process.wait(timeout=max(0.01, min(160 if command=='stop' else 100, end-time.monotonic())))
-        child.finish_threads()
-        need(not child.observation_error and not child.live(), 'runtime')
-        value = decode_message(child.text().encode())
+        if isinstance(child,SupervisedCapture):
+            value=child.completion(expected,deadline=min(end,time.monotonic()+(160 if command=='stop' else 100)))
+        else:
+            child.process.wait(timeout=max(0.01, min(160 if command=='stop' else 100, end-time.monotonic())))
+            child.finish_threads()
+            need(not child.observation_error and not child.live(), 'runtime')
+            value = decode_message(child.text().encode())
         need(value['command']==command and value['result']==expected, 'workload')
         need((child.process.returncode==0)==(expected=='passed'), 'runtime')
         report['commands'].append(dict(command=command, result=value['result']))
@@ -266,7 +277,7 @@ def execute(args, report, recorder=None):
         current = spawn('serve','--seconds','600')
         cutoff = min(end,time.monotonic()+120)
         while time.monotonic()<cutoff:
-            if observe_ready(current,report['commands']):
+            if observe_ready(current,report['commands'],cutoff):
                 return
             time.sleep(.05)
         raise TrialFailure('deadline')
@@ -274,6 +285,16 @@ def execute(args, report, recorder=None):
     def stop():
         nonlocal current
         value = call('stop')
+        if isinstance(current,SupervisedCapture):
+            current.completion(deadline=min(end,time.monotonic()+20))
+            need(current.clean_committed,'shutdown')
+            receipt=value['data']
+            need(receipt==dict(was_running=True,signal='SIGTERM',forced=False,
+                              exit_code=0,all_owned_exited=True),'shutdown')
+            report['shutdowns'].append(receipt)
+            current=None
+            need(scope.is_dir() and (state/'manifest.json').is_file(),'ownership')
+            return
         current.process.wait(timeout=max(.01,min(20,end-time.monotonic())))
         current.finish_threads()
         need(current.process.returncode==0 and not current.live() and

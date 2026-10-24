@@ -83,3 +83,47 @@ then cleanup shutdown). No profile repeated. See [548 report](tasks/548-failure-
 for exact source/evidence and ownership-proof follow-up. Historical M4 cause is not
 resolved by one pass. Mainline/AC-05/tag status remain unchanged; parent CI/review
 and publication still required.
+
+## Issue548: lifecycle admission (T066, 2026-10-24)
+
+The M7-only same-PID owner/private SupervisedCapture repair is implemented and has
+offline evidence. Generic Process/Capture, M1–M6, upstream pin/workload, public
+schemas and normal manual mode remain unchanged. Closed launches, checked
+subreaper/SIGCHLD, quiesced waits/threads and actual ECHILD establish closure.
+Opted init/serve leave clean=false; only the integration parent after validated
+closure, actual exit0, complete expected output and locked identity/hash checks
+may commit clean=true. Stop clients cannot commit a serving owner's state.
+
+| Maintenance AC | Current evidence and limit |
+| --- | --- |
+| AC-L1 | T063 actual causal/double-fork probes and preserved generic refusal; exact earlier vanished role remains unknown. |
+| AC-L2 | T067 independent ACCEPT; author318 and root318 offline tests pass on the same frozen source. |
+| AC-L3 | One fresh original-runtime M7 trial passes all five acceptance checks in80.892s; exact publication/CI remains a separate gate. |
+
+Final local gate:318tests/39.636s on verified official Python3.11.17, all30 frozen
+source/workload/build hashes unchanged before/after, no unexpected descendants,
+final ECHILD. The auditor collected one exact known M5 SIGKILL fixture orphan
+after matching its actual verified PID/start receipt; M5 source/oracle is unchanged.
+Frozen digest: `71a4040e996cc06f6c8b6390d95d7e437b488f98b54fa3436ba95ac8d8c07b55`.
+
+The earlier317-test run failed one unchanged resource fixture. Baseline and
+candidate timing pairs reproduced its truncated last50ms helper budget on system
+Python and the CI SDK. The reviewed test-only correction retains four scheduled
+samples with four full intervals and adds scheduled_slots==4; every production
+deadline/interval and existing assertion remains. Original failures are retained.
+
+See [current contract](docs/SDD.md), [status](docs/STATUS.md) and
+[maintenance report](tasks/548-lifecycle-admission/report.md).
+T063's production-unchanged checkpoint is historical and superseded by this
+implementation; its two causal tests remain unchanged. The old real trial failure,
+historical M4 attribution gap, AC-05 failed/mainline incomplete and usable_tag none
+remain until separately supported. No actual runtime was run by T066.
+
+Root T069 subsequently ran the separately released original-artifact trial:
+actual UID1001/Linux x86_64/Python3.12.3,20 expected command results, three distinct
+daemon generations, three nonforced SIGTERM/exit0 receipts, retained data and
+explicit scope removal all pass. Source remained unchanged and the owned container
+was absent afterward. See [actual report](docs/evidence/2026-10-24-m7-supervision.json)
+and [source binding](docs/evidence/2026-10-24-m7-supervision-source.json).
+The recorded harness commit is the working-tree base; the source hashes bind the
+reviewed repair. This M7 pass does not resolve historical M4/AC-05 attribution.

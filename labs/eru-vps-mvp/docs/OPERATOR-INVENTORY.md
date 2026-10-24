@@ -23,8 +23,17 @@ node. Missing, duplicate, unsafe or mismatched configuration stops before host
 operations. Existing rendered deployment-plan fields may coexist with these fields.
 
 `labctl` and project-based helpers capture `private/deployment-plan.json` from the
-selected project. Initial deployment requires an explicit source inventory file
-inside that project's `private/` directory:
+selected project.
+
+The project loader preserves the existing trusted `private/` root symlink convention.
+It resolves only that directory boundary; `deployment-plan.json` must remain a
+regular file, and project/ancestor symlinks are rejected. Standalone explicit-file
+loading rejects symlinks in the file or any ancestor, including `private/`. This
+does not allow symlinks in review inputs, record directories or record files below
+the trusted private root; their existing guards remain in force.
+
+Initial deployment requires an explicit source inventory file inside that project's
+`private/` directory:
 
 ```sh
 # Local plan rendering only; existing trusted preflight and key inputs are required.

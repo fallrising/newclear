@@ -78,7 +78,19 @@ def _unique(pairs):
 
 
 def load_inventory(project):
-    return load_inventory_file(Path(project) / "private/deployment-plan.json")
+    """Honor the established trusted private root, never links below that root."""
+    root = Path(project).absolute()
+    if any(part.is_symlink() for part in (root, *root.parents)):
+        raise ValueError("private inventory is missing or unsafe")
+    try:
+        private = (root / "private").resolve(strict=True)
+    except (OSError, RuntimeError) as exc:
+        raise ValueError("private inventory is missing or unsafe") from exc
+    if not private.is_dir():
+        raise ValueError("private inventory is missing or unsafe")
+    # Only the private directory is resolved. The final file must still pass the
+    # strict loader, so an inventory symlink cannot cross this trusted boundary.
+    return load_inventory_file(private / "deployment-plan.json")
 
 
 def load_inventory_file(path):

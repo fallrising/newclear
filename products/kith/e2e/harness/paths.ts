@@ -8,7 +8,7 @@ export const KITH_DIR: string = join(E2E_DIR, "..");
 /** products/kith/web */
 export const WEB_DIR: string = join(KITH_DIR, "web");
 /** products/kith/web/dist */
-export const WEB_DIST_DIR: string = join(WEB_DIR, "dist");
+export const WEB_DIST_DIR: string = process.env.KITH_E2E_WEB_DIST_DIR ?? join(WEB_DIR, "dist");
 /** products/kith/contracts/v2 */
 export const CONTRACTS_DIR: string = join(KITH_DIR, "contracts", "v2");
 /** products/kith/node_modules/.bin/wrangler */

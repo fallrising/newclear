@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from labctl import Operator, load_inventory
+from operator_inventory import load_inventory_file
 
 
 def inventory(prefix="lab-host-"):
@@ -108,8 +109,50 @@ class InventoryInjectionTests(unittest.TestCase):
         (actual_private / self.path.name).write_text(json.dumps(inventory()))
         self.path.parent.symlink_to(actual_private, target_is_directory=True)
         with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
-            Operator(self.project)
+            load_inventory_file(self.path)
         self.assertFalse((actual_private / 'operations').exists())
+
+    def test_project_loader_supports_only_the_trusted_private_root_boundary(self):
+        rows = inventory()
+        self.write(rows)
+        backing = self.project / 'private-backing'
+        self.path.parent.rename(backing)
+        self.path.parent.symlink_to(backing, target_is_directory=True)
+        with patch('subprocess.run', side_effect=AssertionError('no remote command')):
+            self.assertEqual(rows, load_inventory(self.project))
+            self.assertEqual(rows, Operator(self.project).inventory)
+        actual = backing / self.path.name
+        actual.unlink()
+        target = self.project / 'inventory.json'
+        target.write_text(json.dumps(rows))
+        actual.symlink_to(target)
+        with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
+            load_inventory(self.project)
+
+    def test_project_symlink_and_ancestor_are_not_trusted_private_roots(self):
+        self.write(inventory())
+        child = self.project / 'child'
+        (child / 'private').mkdir(parents=True)
+        (child / 'private/deployment-plan.json').write_text(json.dumps(inventory()))
+        with tempfile.TemporaryDirectory() as links_dir:
+            linked = Path(links_dir) / 'linked-project'
+            linked.symlink_to(self.project, target_is_directory=True)
+            for project in (linked, linked / 'child/..', linked / 'child'):
+                with self.subTest(project=project):
+                    with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
+                        load_inventory(project)
+        self.assertFalse((self.project / 'private/operations').exists())
+        self.assertFalse((child / 'private/operations').exists())
+
+    def test_oversized_and_missing_inventory_remain_rejected(self):
+        with self.path.open('wb') as stream:
+            stream.truncate(16 * 1024 * 1024 + 1)
+        with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
+            load_inventory(self.project)
+        self.path.unlink()
+        with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
+            load_inventory(self.project)
+        self.assertFalse((self.project / 'private/operations').exists())
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ test("PROBE-W0-01 login and canary traffic", { tag: ["@probe", "@probe-good"] },
   await page.getByTestId("login-submit").click();
   await expect(page.getByTestId("app-shell")).toBeVisible();
   await shot(page, info, "after-login");
+  note(info, "probe online signal=" + String(await page.evaluate(() => navigator.onLine)));
 
   const status = await page.evaluate(
     async (token) => (await fetch("/api/me", { headers: { Authorization: "Bearer " + token } })).status,

@@ -1,0 +1,340 @@
+{
+  "scope": "original R2 ConnectedApp local evidence only",
+  "fullProductAcceptance": false,
+  "doneAcceptance": false,
+  "runId": "20261024T075149072Z",
+  "driverSha256": "f6f2287554e8f7be2258bd33177df10461003843b1559a900a91a0af0b91bfb5",
+  "node": "v24.20.0",
+  "steps": [
+    {
+      "name": "actual static shell and wrong-token visible feedback",
+      "status": "passed"
+    },
+    {
+      "name": "same-origin login and cookie attributes",
+      "status": "passed"
+    },
+    {
+      "name": "real project creation and board open",
+      "status": "passed"
+    },
+    {
+      "name": "empty Draft and headless Ready rejection preserve focus and lane",
+      "status": "passed"
+    },
+    {
+      "name": "graceful lifecycle and explicit synthetic immutable repository approval",
+      "status": "passed"
+    }
+  ],
+  "captures": [
+    {
+      "state": "login-rejected",
+      "viewport": "desktop",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/login-rejected__desktop__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "login-rejected",
+      "viewport": "desktop",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/login-rejected__desktop__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "login-rejected",
+      "viewport": "tablet",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/login-rejected__tablet__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "login-rejected",
+      "viewport": "tablet",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/login-rejected__tablet__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "login-rejected",
+      "viewport": "mobile",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/login-rejected__mobile__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "login-rejected",
+      "viewport": "mobile",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/login-rejected__mobile__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "projects",
+      "viewport": "desktop",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/projects__desktop__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "projects",
+      "viewport": "desktop",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/projects__desktop__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "projects",
+      "viewport": "tablet",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/projects__tablet__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "projects",
+      "viewport": "tablet",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/projects__tablet__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "projects",
+      "viewport": "mobile",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/projects__mobile__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "projects",
+      "viewport": "mobile",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Projects",
+      "screenshot": "screenshots/projects__mobile__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "draft-rejected",
+      "viewport": "desktop",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/draft-rejected__desktop__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "draft-rejected",
+      "viewport": "desktop",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/draft-rejected__desktop__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "draft-rejected",
+      "viewport": "tablet",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/draft-rejected__tablet__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "draft-rejected",
+      "viewport": "tablet",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/draft-rejected__tablet__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "draft-rejected",
+      "viewport": "mobile",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/draft-rejected__mobile__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "draft-rejected",
+      "viewport": "mobile",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/draft-rejected__mobile__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    }
+  ],
+  "health": [
+    {
+      "type": "http",
+      "step": "actual static shell and wrong-token visible feedback",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "actual static shell and wrong-token visible feedback",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "http",
+      "step": "actual static shell and wrong-token visible feedback",
+      "method": "POST",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "actual static shell and wrong-token visible feedback",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "requestfailed",
+      "step": "empty Draft and headless Ready rejection preserve focus and lane",
+      "path": "/api/v1/projects/prj_4Z6PT0JK5Z405N6EJNF2/events",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "http",
+      "step": "empty Draft and headless Ready rejection preserve focus and lane",
+      "method": "POST",
+      "path": "/api/v1/projects/prj_4Z6PT0JK5Z405N6EJNF2/commands",
+      "status": 422
+    },
+    {
+      "type": "consoleerror",
+      "step": "empty Draft and headless Ready rejection preserve focus and lane",
+      "message": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)"
+    },
+    {
+      "type": "http",
+      "step": "graceful lifecycle and explicit synthetic immutable repository approval",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "graceful lifecycle and explicit synthetic immutable repository approval",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    }
+  ],
+  "commands": [
+    {
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "commandID": "cmd_XHJHRF3FR10S2QG7ZKD2",
+      "operation": "CreateProject"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_4Z6PT0JK5Z405N6EJNF2/commands",
+      "commandID": "cmd_A4SHM0PEM82HDXYGZTEP",
+      "operation": "CreateWorkItem"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_4Z6PT0JK5Z405N6EJNF2/commands",
+      "commandID": "cmd_DYEW13E02772VPS6SMJA",
+      "operation": "MarkReady"
+    }
+  ],
+  "shutdown": [
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    },
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    }
+  ],
+  "browser": "151.0.7922.34",
+  "syntheticCommit": "d3db52c2cc125984303b6f725ebd2768fddd0c23",
+  "status": "failed",
+  "error": "locator.selectOption: Timeout 15000ms exceeded.\nCall log:\n  - waiting for getByLabel('Allowlisted ref', { exact: true })\n",
+  "runtimeLogSha256": "4e1f6530f7eac3523d0a6c4b731054bb860594dcf544f72196fe3f0d995d6bc7",
+  "runtimeLogLines": 2
+}

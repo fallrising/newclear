@@ -1,0 +1,178 @@
+{
+  "scope": "original R2 ConnectedApp local evidence only",
+  "fullProductAcceptance": false,
+  "doneAcceptance": false,
+  "runId": "20261024T081315374Z",
+  "reusedCaptureFrom": null,
+  "resumedSyntheticStateFrom": "20261024T075447787Z",
+  "remainingFaultsOnly": true,
+  "driverSha256": "fcfc0cea0c49d4a9b51ba97bab312a8abdb7c143fdee7fd97304f4336a38679c",
+  "node": "v24.20.0",
+  "steps": [
+    {
+      "name": "resume stopped synthetic admission via real login and exact original result",
+      "status": "passed"
+    },
+    {
+      "name": "keyboard Tab entry, visible focus and horizontal board scroll",
+      "status": "passed"
+    },
+    {
+      "name": "owned runtime stop withdraws authority and restart restores actual snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "controlled reset event removes authority until real snapshot revalidation",
+      "status": "passed"
+    },
+    {
+      "name": "browser session loss withdraws authority and explicit login restores it",
+      "status": "passed"
+    },
+    {
+      "name": "logout revokes this browser session and clears private UI",
+      "status": "passed"
+    }
+  ],
+  "captures": [],
+  "health": [
+    {
+      "type": "http",
+      "step": "resume stopped synthetic admission via real login and exact original result",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "resume stopped synthetic admission via real login and exact original result",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "requestfailed",
+      "step": "controlled reset event removes authority until real snapshot revalidation",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "step": "browser session loss withdraws authority and explicit login restores it",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "http",
+      "step": "browser session loss withdraws authority and explicit login restores it",
+      "method": "GET",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "browser session loss withdraws authority and explicit login restores it",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "http",
+      "step": "browser session loss withdraws authority and explicit login restores it",
+      "method": "GET",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/board",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "browser session loss withdraws authority and explicit login restores it",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "requestfailed",
+      "step": "logout revokes this browser session and clears private UI",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "http",
+      "step": "logout revokes this browser session and clears private UI",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "logout revokes this browser session and clears private UI",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    }
+  ],
+  "commands": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands/cmd_PR3ZMD0NE0YJGQTPS4S4"
+    }
+  ],
+  "shutdown": [
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    },
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    }
+  ],
+  "browser": "151.0.7922.34",
+  "admission": {
+    "originalCommandID": "cmd_PR3ZMD0NE0YJGQTPS4S4",
+    "result": {
+      "accepted_revision_digest": "sha256:534ba23808f1563f288a046bd3cdcbd1ac20e95dee49bbc73b78d795e6c4f302",
+      "acceptance_subject_digest": "sha256:c060a4a58f2e36c0624a58dc6af05d8aa49254d081bbdc77741ca206c39eadca",
+      "proposal_digest": "sha256:b1ff48beafe868d804c7a4ec809a4c3d8aeae15caea258426bc4365b4e048642",
+      "graph_revision_digest": "sha256:e25d141320d423c4ff68c89ac94f9e8b09a9d5909a28efaf529b7263edbcdb65",
+      "type": "InitialSpecificationAccepted",
+      "project_id": "prj_WBX1HSW519EAN7BS1D2H",
+      "version": 2
+    },
+    "phase": "Developing",
+    "projectedLegacyRequiredACCount": 0
+  },
+  "comboboxes": [
+    {
+      "name": "ref",
+      "ariaSnapshot": "- combobox \"Allowlisted ref\":\n  - option \"Choose a ref\" [disabled] [selected]\n  - option \"refs/heads/main\"",
+      "labels": [
+        "Allowlisted refChoose a refrefs/heads/main"
+      ]
+    },
+    {
+      "name": "manifest",
+      "ariaSnapshot": "- combobox \"Allowlisted manifest\":\n  - option \"Choose a manifest\" [disabled] [selected]\n  - option \"specification.json\"",
+      "labels": [
+        "Allowlisted manifestChoose a manifestspecification.json"
+      ]
+    }
+  ],
+  "keyboard": {
+    "tabEntry": true,
+    "outline": {
+      "width": "3px",
+      "style": "solid",
+      "color": "rgb(13, 110, 253)"
+    },
+    "scrollBefore": 0,
+    "scrollAfter": 33
+  },
+  "disconnect": {
+    "method": "owned runtime SIGTERM/wait then same-state restart",
+    "disconnected": "Disconnected · Last applied cursor: 1:10 · Project version 2",
+    "statusAfter": "Connected · Last applied cursor: 1:10 · Project version 2",
+    "commandsDisabledWhileDisconnected": true
+  },
+  "resetFault": {
+    "injection": "browser EventSource reset_required event",
+    "snapshot": "real backend read",
+    "authorityDisabledWhileHeld": true
+  },
+  "sessionLoss": "cookie removed in owned browser; no global secret rotation claimed",
+  "status": "passed",
+  "runtimeLogSha256": "4e1f6530f7eac3523d0a6c4b731054bb860594dcf544f72196fe3f0d995d6bc7",
+  "runtimeLogLines": 2
+}

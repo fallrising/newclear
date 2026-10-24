@@ -1,0 +1,221 @@
+{
+  "scope": "original R2 ConnectedApp local evidence only",
+  "fullProductAcceptance": false,
+  "doneAcceptance": false,
+  "runId": "20261024T075447787Z",
+  "reusedCaptureFrom": "20261024T075149072Z",
+  "driverSha256": "949d1a053e69be7f42eadbf080b5debd0bd4c6a679b068f69f2df006bb52422b",
+  "node": "v24.20.0",
+  "steps": [
+    {
+      "name": "actual static shell and wrong-token visible feedback",
+      "status": "passed"
+    },
+    {
+      "name": "same-origin login and cookie attributes",
+      "status": "passed"
+    },
+    {
+      "name": "real project creation and board open",
+      "status": "passed"
+    },
+    {
+      "name": "empty Draft and headless Ready rejection preserve focus and lane",
+      "status": "passed"
+    },
+    {
+      "name": "graceful lifecycle and explicit synthetic immutable repository approval",
+      "status": "passed"
+    }
+  ],
+  "captures": [
+    {
+      "state": "prepared-admission",
+      "viewport": "desktop",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/prepared-admission__desktop__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "prepared-admission",
+      "viewport": "desktop",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/prepared-admission__desktop__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "prepared-admission",
+      "viewport": "tablet",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/prepared-admission__tablet__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "prepared-admission",
+      "viewport": "tablet",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/prepared-admission__tablet__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "prepared-admission",
+      "viewport": "mobile",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/prepared-admission__mobile__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "prepared-admission",
+      "viewport": "mobile",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/prepared-admission__mobile__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    }
+  ],
+  "health": [
+    {
+      "type": "http",
+      "step": "actual static shell and wrong-token visible feedback",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "actual static shell and wrong-token visible feedback",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "http",
+      "step": "actual static shell and wrong-token visible feedback",
+      "method": "POST",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "actual static shell and wrong-token visible feedback",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "requestfailed",
+      "step": "empty Draft and headless Ready rejection preserve focus and lane",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "http",
+      "step": "empty Draft and headless Ready rejection preserve focus and lane",
+      "method": "POST",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "status": 422
+    },
+    {
+      "type": "consoleerror",
+      "step": "empty Draft and headless Ready rejection preserve focus and lane",
+      "message": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)"
+    },
+    {
+      "type": "http",
+      "step": "graceful lifecycle and explicit synthetic immutable repository approval",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "graceful lifecycle and explicit synthetic immutable repository approval",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "requestfailed",
+      "step": "binding proposal preparation and explicit exact-AC acceptance",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "step": "binding proposal preparation and explicit exact-AC acceptance",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "commands": [
+    {
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "commandID": "cmd_KSC5E31SXG50FS62ZJV5",
+      "operation": "CreateProject"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "commandID": "cmd_2GMBEH26A2BPKVNS7MHB",
+      "operation": "CreateWorkItem"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "commandID": "cmd_S68P22CEVD1BTT5B7CFZ",
+      "operation": "MarkReady"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "commandID": "cmd_FSVHCJZ66F6RGT4SZ2Z9",
+      "operation": "ProposeSpecification"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "commandID": "cmd_PR3ZMD0NE0YJGQTPS4S4",
+      "operation": "AcceptInitialSpecification"
+    }
+  ],
+  "shutdown": [
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    },
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    }
+  ],
+  "browser": "151.0.7922.34",
+  "syntheticCommit": "2b6dd0ddcb647799144b393f8a6af94de2bde78b",
+  "status": "failed",
+  "error": "acceptance stays Draft with exact required AC",
+  "runtimeLogSha256": "4e1f6530f7eac3523d0a6c4b731054bb860594dcf544f72196fe3f0d995d6bc7",
+  "runtimeLogLines": 2
+}

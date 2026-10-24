@@ -1,6 +1,6 @@
 # HAI Taskboard FE review
 
-狀態：2026-10-23 首輪設計已按 owner 確認的 ConnectedApp 基準更新；本次僅文件審查，尚未啟動 runtime 或執行瀏覽器驗收。`targets.verified=false`。
+狀態：2026-10-24 原批准R2本機驗證通過；真實同源ConnectedApp／session／admission／Fake與30唯一畫面已實跑，targets.verified=true僅原R2。最終獨立複審／CI／交付分開追蹤，詳見 [本輪報告](tasks/round2/report.md)。
 
 | 項目 | 目前事實與處置 |
 | --- | --- |
@@ -11,8 +11,16 @@
 | C5 權威與命令 | snapshot 是權威，事件只觸發 revalidation；pending／uncertain 不移動 lane。遺失回應允許一次原命令結果 GET，不能再次 POST。 |
 | C6 安全啟動 | 同源 127.0.0.1:8080、prebuilt WEB_ROOT、全新合成私有 state、新 session token、精確 Host／Origin、原 cookie 屬性；規格接納另需明確合成 repository approval。詳見 [DESIGN](DESIGN.md)。 |
 
-Owner 已確認的 ConnectedApp 基準及無新路由方向已納入，不再列成待批准。尚未完成的是安全 harness／合成資料／實際 capture 與故障驗收；本輪不執行，也不將歷史 browser evidence 計為本輪通過。
+Owner 已確認的 ConnectedApp 基準及無新路由方向已納入，不再列成待批准。安全harness／合成資料／實際capture與有界故障驗證已有本輪新證據；既有歷史browser evidence沒有被冒作本輪通過。
 
 產品仍依 [SUCCESS](../SUCCESS.md) 保持未完成；完整 detail／attention／impact、QA／Done、restore 缺口未由本次文件消除。Fake 成功最多沿現有流程維持 Developing。
 
 後續修改依 [DESIGN](DESIGN.md) 的既有表單、狀態、focus、換行與對比範圍，以觀察到的缺陷為依據；執行後把命令、來源 revision、結果及去敏 artifacts 回填此處。不得透過降低驗證、放寬 cookie 或重送 uncertain mutation 取得成功畫面。
+
+
+## 本輪已觀測、未修正的限制
+
+- 已接納的current requirement/head為1，但board讀legacy表仍顯示AC0；不得以該計數宣稱正確覆蓋，見 [唯讀狀態證據](tasks/round2/admission-state-check.json)。
+- Prepared／Developing畫面有較早command refresh的「Projection refresh unavailable」提示，同時後續SSE snapshot已恢復Connected。這是不同時間的結果並列造成的既有回饋限制；本次不改backend／commands／stream，也不隱藏提示。
+- 30張actualtheme／三尺寸畫面axe0／overflow0，不等於零UI缺陷。真Tab／3pxfocus／ArrowRight、真runtime斷線與恢復、controlledreset／sessionloss／logout均通過；完整zoom／coarse-pointer／產品UX驗收仍不在本輪完成宣告內。
+- 既有D3 status／alert已驗證拒絕與uncertain回饋，未增加重複alert。下拉選單實際accessible names與label關聯正常；原exactlabel timeout是harness對包含option文字的labeltext假設，保留於歷史FAIL。

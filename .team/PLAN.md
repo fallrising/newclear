@@ -2030,6 +2030,14 @@ Goku original R2 M1–M3 accepted by R25 independent source/artifact review; roo
 
 Fleet591 merged2d65b6528ef8425fe17bfb127f79c016dabe3380 at2026-10-24T11:13:28Z after R24/all3CI/scopedreadback; actualFleet root/component done carried here. Ojb review-only overlay/isolation/gRPC proposal subsequently explicitly approved by owner, replacing earlier pending snapshot; execution remains bounded and separately claimed.
 
+## Ojbquay R2-AC-8/E / T-0380 claim 2026-10-24T11:18:59Z
+
+Ownerexplicitlyapprovedfiniteoverlay/isolation/gRPCproposal; DESIGN addendumrecords exactscope. T015 boundednativeauthor/reviewer withrootenvironment/Git/acceptance. Estimate45–75active+coldwait20–45unknown,25checkpoint/max2diagnostics/20minnotdeadline. FullGradle/native/trueAPI/browser/ownership checksrequired; no productbackend/deps/CIchanges. Goku592merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at11:17:09Z,R25/all6CI/scopedreadbackPASS;actualboarddonecarriedhere.
+
+
+## ClarkQ FE round2 / T-0380 R2-AC-13 / 2026-10-24T11:45:41Z
+
+T019 approved M1–M3 only, docs-first claim. Root owns environment/native/Git/boards; independent native author and author-other review.35–55active estimate plus bounded waits,20min checkpoints not deadlines,max2source-backed diagnostics. Existing13/19 delivered; Phark/Ojb/Flowshot+Loom disjoint current units. No Go/backend/dependency/release expansion. New ClarkQ work starts after bounded worker available.
 
 ## Phark FE round2 / T-0380 R2-AC-10 / 2026-10-24T10:18:22Z
 
@@ -2043,3 +2051,15 @@ Goku592 merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at2026-10-24T11:17:09Z; R
 ## Pokercase T021 / T-0380 R2-AC-12 / 2026-10-24T12:21:48Z
 
 Docs-first claim for already approved M1–M4; root owns environment/Git/native/acceptance, bounded author and independent review. Estimate90–150active +15–40wait;20mincheckpoint notdeadline,max2source-backed diagnostics. Preserve concurrent accepted backend changes. Productallowlist templates/style and measuredTUIlayout only; no provider/backend/credentials/newdependency/deploy. First25minfixture gate, no runtime before root sourcefreeze review.
+Phark593 normally merged ab17a1d25f428937b3c1f24113611789fd60748b at2026-10-24T12:07:47Z afterR26/all7CI/scopedremoteequality; actualroot/componentboard closure carried inClarkQ. ClarkQfinal002 PASS36.669s:3strictsizes nooverflow/axeviolations0/incomplete0/focuspreserved,14keyboard/APIjourneys, precise existingfavicon404 diagnostic(nozeroerrorsclaim), allcleanup. Independentreview/currentCI/normalmerge stillpending.
+Ojbquay final localR2M1–M4 acceptedbyR28:72selectedcaptures(42states/27routes/3chart), native153Java inclcache/frontend6/mock1/deployvalidation, root7Python+20Node focusedPASS. All8immutableattempts preserved; final6secretretakes100%mask andexactowned16resourceabsenceverified. Existing12axeviolations/9preloadlimits/mobilelogout remainfutureR3, no fullR3/ownercompletion claim. Privatearchive56,249,050bytes SHA99d1e2e0988bc86db834fabf2194b88b8ae532e0c6286064e14685d60b8597a5. CurrentCI/normalmerge/readback remain required.
+
+Phark593 normallymergedab17a1d25f428937b3c1f24113611789fd60748b at2026-10-24T12:07:47Z afterR26/all7CI/scopedremoteequality; actualboardclosure carriedhere.
+
+Ojbquay PR596 normally merged 5e06ef22b6a374967e445702e6f2d0515757731a at2026-10-24T12:50:56Z; all6 currentCI SUCCESS/R28 ACCEPT and actual systems/ojbquay remote scoped equality passed. ClarkQ R29 independent ACCEPT, noP1/P2; root18focusedPASS, native8testedpackages+6withouttests, actual final00214journeys/3viewports and cleanup supported. Carry actual Ojbquay board closure; ClarkQ remains in_progress until normalmerge/readback.
+
+ClarkQ PR600 normally merged6b444b00457591996db135e4ec6ab65b1d01ad4c at2026-10-24T12:55:49Z afterR29/all4CI/scopedreadback; actualroot/componentclosure carriedhere. Journal66 merged dc2741cee884ddaa0a382b5b04db1f269e92f98f afterR30/34runchecks/30tests/CI/readback,16of19 delivered. Pokercase actualbaseline28 revealedoverflow;6presentationfilesfixed/rootnative122passed; presentation001 retained overallFAIL50.240s onlysharedanonymousdesktopone404,24geometry/22strictnooverflow+axe0 and12originalTUI/qEsc/cleanup passed. MeasuredTUIlongChinese hidesURL/model/footer,4actualrendererRED→4GREEN; finalnative126/fmt/clippy/buildPASS. Finaljourney/CDP/newTUIruntime andindependentreview/currentCI/merge pending. Threeownerquestions remainunanswered(Loomextraattempt/Fanzlockpatch/Fanzoneabortobserver), no dependentretry implied.
+
+Pokercase visual checkpoint 2026-10-24T14:01:24+00:00: final2 native127 passed and repair001 passed12 current TUI/4terminal restoration+ownedabsence/14 keyboard journeys. Root actual screenshot review caught introduced narrow-column/very-tall-row regression despite old geometry success; scoped table/column minima fixed it. New CSS66ac524b/current binary21fce3fa: fmt/full127/clippy/build passed; visual00150.369s passed18 current table captures,14 journeys,all cleanup and outer container absence. Root inspected8 actual images, maximum synthetic row128.984375px. Existing24 shared captures remain immutable;6 unaffected login/dashboard captures and unchangedTUI have explicit hash/source provenance.13 current contrast-incomplete sets retained; one desktop usage computed-pair observation used incorrect390 viewport and is excluded pending targeted1440x900 supplement. Historical original404/sharedFAIL,login-settlementFAIL,rendererRED and visual regression are not erased. Final docs/R31/currentCI/normalmerge/readback remain pending; no fullR3 or wholecard completion claim.
+
+Pokercase prepublication 2026-10-24T14:14:40+00:00: R31 independent final ACCEPT, no unresolvedP1/P2; root42contracts/index, staged diff check and70-file822796-byte UTF8 payload/privacy scan passed before review-report addition. No raw runtime/private payload staged. One initial git-add wrong-cwd pathspec error caused no mutation/commit; corrected explicitworktree staging passed. Native127/current18Web+14journeys/12source-qualifiedTUI and corrected520computedpairs support originalM1–M4 only. CurrentCI/normalmerge/readback pending; no broadercompletionclaim.

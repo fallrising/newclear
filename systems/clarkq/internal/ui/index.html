@@ -51,18 +51,21 @@
   }
   textarea { min-height: 80px; resize: vertical; font-family: var(--mono); font-size: 0.85rem; }
   button {
-    cursor: pointer; background: var(--accent); border-color: transparent;
+    cursor: pointer; background: #245fb5; border-color: transparent;
     font-weight: 600; width: auto; padding: 8px 14px;
   }
   button.secondary { background: transparent; border-color: var(--border); color: var(--text); }
   button.danger { background: #8b1e3d; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid #8bbcff; outline-offset: 2px; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 10px; }
   .row > div { flex: 1 1 120px; }
   .row > button { flex: 0 0 auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
   th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
   th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+  td:first-child code { overflow-wrap: anywhere; }
+  #queuesWrap { max-width: 100%; overflow-x: auto; }
   tr:hover td { background: rgba(61,139,253,0.06); }
   pre {
     margin: 0; padding: 10px; background: #0c121a; border-radius: 8px;
@@ -132,22 +135,22 @@
 
     <section class="panel full">
       <h2>Queues</h2>
-      <div id="queuesWrap" class="muted">Load to see queues…</div>
+      <div id="queuesWrap" class="muted" tabindex="0" role="region" aria-label="Queues">Load to see queues…</div>
     </section>
 
     <section class="panel">
       <h2>Metrics (JSON)</h2>
-      <pre id="metrics">—</pre>
+      <pre id="metrics" tabindex="0" role="region" aria-label="Metrics JSON">—</pre>
     </section>
 
     <section class="panel">
       <h2>Cluster</h2>
-      <pre id="cluster">—</pre>
+      <pre id="cluster" tabindex="0" role="region" aria-label="Cluster JSON">—</pre>
     </section>
 
     <section class="panel full">
       <h2>Activity log</h2>
-      <pre id="log" class="log"></pre>
+      <pre id="log" class="log" tabindex="0" role="region" aria-label="Activity log"></pre>
     </section>
   </div>
 </main>
@@ -229,7 +232,7 @@
         return;
       }
       list.sort((a, b) => a.name.localeCompare(b.name));
-      let html = "<table><thead><tr><th>Name</th><th>Depth</th><th></th></tr></thead><tbody>";
+      let html = "<table><thead><tr><th>Name</th><th>Depth</th><th>Actions</th></tr></thead><tbody>";
       for (const q of list) {
         html += `<tr>
           <td><code>${esc(q.name)}</code></td>
@@ -242,6 +245,10 @@
         </tr>`;
       }
       html += "</tbody></table>";
+      // Capture immediately before replacement: a user may have moved focus while fetch awaited.
+      const active = document.activeElement;
+      const focusQueue = wrap.contains(active) && active.getAttribute("data-q");
+      const focusAction = wrap.contains(active) && active.getAttribute("data-act");
       wrap.innerHTML = html;
       wrap.querySelectorAll("button[data-act]").forEach((btn) => {
         btn.addEventListener("click", async () => {
@@ -252,6 +259,11 @@
           if (act === "clr") { $("qName").value = q; await doClr(); await refreshQueues(); }
         });
       });
+      if (focusQueue && focusAction) {
+        const replacement = Array.from(wrap.querySelectorAll("button[data-act]")).find((btn) =>
+          btn.getAttribute("data-q") === focusQueue && btn.getAttribute("data-act") === focusAction);
+        if (replacement) replacement.focus({ preventScroll: true });
+      }
     } catch (e) {
       wrap.innerHTML = `<p class="muted">Failed to list queues (${esc(e.message)}). Check API key if auth is enabled.</p>`;
       log("list queues failed: " + e.message);

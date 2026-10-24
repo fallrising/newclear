@@ -460,3 +460,22 @@ Validation2026-10-22T16:20Z: final `./gradlew build --no-daemon --no-parallel` P
 ## T-0374 specification/source/test map (2026-10-22)
 
 Owner requested consolidation against code. [Specification map](specification-map.md) records existing product/ADR/M2–M6/semantics, AC01–11 source/test links and explicit discrepancies at 6c611778. This is documentation only; approved requirements and historical failures remain unchanged. README/product-spec/SUCCESS/BOARD approval notes are reconciled to PR472/477; M2's value-vs-encoded-request wording is clarified from existing M3/MessageLimits. [Current evidence](test-reports/specification-map-20261022.md) separates cached native build, static review, CI and unrun qualification.
+
+## T-0380 FE Round2 claim
+
+Approved M1–M4 and bounded review-only overlay/gRPC addendum; [task](../fe-review/tasks/round2/task.md). Docs-only claim, no implementation/build/runtime success claimed. Before implementation commit record full Gradle/frontend/native/runtime/ownership evidence and independent acceptance.
+
+## T-0380 FE Round2 implementation evidence (2026-10-24)
+
+Approved M1–M4 implemented within the explicit review-only isolation/gRPC scope.
+Production delta is Dashboard ResizeObserver and its focused regression only;
+measured drawer bounds needed no CSS change. Full Gradle build passed102.356s,
+153 reported cases including cache (28 executed/16 cached tasks); web6tests/build,
+deploy validation and original mock browser1test passed. One fresh exact-owned
+stack plus approved bounded continuations produced42 state/27 route/3chart images;
+six original drawer images were superseded by100% pixel-mask coverage retakes.
+Original failures, axe/preload/mobileLogout limitations and tested-source deltas
+remain in [report](../fe-review/tasks/round2/report.md) and [verification](../fe-review/tasks/round2/evidence/verification.json).
+All exact owned resources were removed with positive absence. Independent final
+acceptance and current CI/publication remain pending; no full Round3 or changed
+mainline/usable qualification.

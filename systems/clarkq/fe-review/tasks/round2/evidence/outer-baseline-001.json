@@ -1,0 +1,15 @@
+{
+  "attempt": "baseline-001",
+  "exitCode": 0,
+  "error": null,
+  "elapsedSeconds": 22.463,
+  "containerRemoved": true,
+  "image": "sha256:47317f37e2082ffb77d8f37a24a0ff80a097c41b82500b6b19c4b784e90cc3fd",
+  "sourceHashes": {
+    "guards.test.mjs": "45e2bd6601b782caf54dc1a0cf3183e60966ea768447c1a033b9d99318087473",
+    "api-fixture.mjs": "5e34c94437f8b8088b7b558239386eb4b95061610ced24f9fa36fc912bfcdbb0",
+    "baseline.mjs": "8431314dec0544a2e18bfc57bc9ed41e05d7442cfb8dd615541684d4c9c32166",
+    "run-review.mjs": "c60a24de0eea960042a5b9835170cab4741938bdcef444eef6386e7cb247b89d",
+    "guards.mjs": "297fa73a790f1bbbf8b27cf907ad0a43c0b66873a98b3a252e1a6d3d52da760b"
+  }
+}

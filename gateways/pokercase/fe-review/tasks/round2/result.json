@@ -1,0 +1,128 @@
+{
+  "task": "T-0380 / T021 / R2-AC-12/E",
+  "status": "local approved M1\u2013M4 scope passed; R31 independent review ACCEPT; current CI/publication pending",
+  "originalRound2Only": true,
+  "ownerCompletionClaim": false,
+  "fullRound3Claim": false,
+  "mainline": "incomplete",
+  "usableTag": "none",
+  "coverage": {
+    "currentWebViews": 24,
+    "unaffectedSharedViews": 6,
+    "newAffectedStrictViews": 18,
+    "currentJourneySteps": 14,
+    "currentTerminalCaptures": 12,
+    "currentTerminalArtifacts": 24,
+    "originalSharedHistory": 24,
+    "originalStrictHistory": 22,
+    "currentAxeViolationCountOn18AffectedViews": 0,
+    "currentContrastIncompleteSets": 13,
+    "computedContrastPairs": 520,
+    "desktopCorrectionPairs": 1,
+    "maxSyntheticRowHeight": 128.984375
+  },
+  "provenance": {
+    "unaffectedShared": "presentation-001 login/dashboard six source-qualified images; only scoped table selectors appended later",
+    "currentAffectedWeb": "visual-001 18 custom capturePages screenshots, geometry/axe/health",
+    "currentJourney": "visual-001 14 steps and13 exact document-settled submissions",
+    "currentTerminal": "repair-001 12 captures at both sizes/datasets; identical terminal/backend/fixture source, original binary retained",
+    "contrast": "visual-001 12 correctly sized sets/519nodes plus contrast-desktop-001 one1440x900 node; original mislabeled computedpair excluded",
+    "originalSharedConsole404": "remains unlocated in raw shared event; separate anonymous same-source CDP probe corroborates favicon404 but does not establish same event identity"
+  },
+  "binarySHA256": "21fce3fab360ad66f97179bf54d391c83702f62d55cd09a118c693fd349516cd",
+  "native": {
+    "passed": 127,
+    "failed": 0,
+    "ignored": 0,
+    "testedTargets": 10,
+    "focusedRendererPassed": 5,
+    "focusedRendererSubsetOfFull": true,
+    "receipt": "evidence/visual-native.json",
+    "summary": "evidence/visual-summary.json"
+  },
+  "offline": {
+    "observedPassingCasesAcrossSeparateCommands": 19,
+    "singleAggregateRun": false,
+    "receipt": "evidence/offline-checks.json"
+  },
+  "attempts": [
+    {
+      "id": "baseline-001",
+      "status": "passed",
+      "failure": null,
+      "publicReceipt": "evidence/baseline-001.json",
+      "outerReceipt": "evidence/baseline-001-outer.json"
+    },
+    {
+      "id": "presentation-001",
+      "status": "failed",
+      "failure": {
+        "stage": "shared-capture",
+        "code": "REVIEW_SHARED_HEALTH",
+        "site": "run-review.mjs:75:56"
+      },
+      "publicReceipt": "evidence/presentation-001.json",
+      "outerReceipt": "evidence/presentation-001-outer.json"
+    },
+    {
+      "id": "continuation-001",
+      "status": "failed",
+      "failure": {
+        "stage": "journey-invalid-login",
+        "code": "REVIEW_LOGIN_ERROR",
+        "site": "journeys.mjs:47:5"
+      },
+      "publicReceipt": "evidence/continuation-001.json",
+      "outerReceipt": "evidence/continuation-001-outer.json"
+    },
+    {
+      "id": "repair-001",
+      "status": "passed",
+      "failure": null,
+      "publicReceipt": "evidence/repair-001.json",
+      "outerReceipt": "evidence/repair-001-outer.json"
+    },
+    {
+      "id": "visual-001",
+      "status": "passed",
+      "failure": null,
+      "publicReceipt": "evidence/visual-001.json",
+      "outerReceipt": "evidence/visual-001-outer.json"
+    },
+    {
+      "id": "contrast-desktop-001",
+      "status": "passed",
+      "failure": null,
+      "publicReceipt": "evidence/contrast-desktop-001.json",
+      "outerReceipt": "evidence/contrast-desktop-001-outer.json"
+    }
+  ],
+  "health": {
+    "currentTableViews": "18:0 console warnings/errors/page errors/blocked/http errors/request failures",
+    "currentJourneys": "only exact controlled POST400/403 and two matching console errors; failedRequests/pageErrors/blocked0",
+    "sharedHistory": "one unlocated login/desktop404 retained; no zero-total-health claim"
+  },
+  "limitations": [
+    "13 axe contrast incomplete sets retained;520 computed opaque pairs and representative image inspection do not prove all offscreen pixels manually inspected",
+    "Local horizontal scrolling is intentional; very long values may wrap or have explicit TUI ellipsis",
+    "Original >1000px near-blank table row and TUI normal-name regression retained as superseded measured failures",
+    "No light theme, real provider/OAuth/import/account credentials, full Round3, deployment or mainline acceptance",
+    "Required current CI, merge/readback and ledger closure remain parent-owned pending"
+  ],
+  "artifactManifest": "artifact-manifest.json",
+  "sourceManifest": "source-manifest.json",
+  "publicationProvenance": "publication-provenance.json",
+  "aggregateUsage": {
+    "providerRequests": null,
+    "tokens": null,
+    "cost": null,
+    "reason": "Unknown aggregate model/tool accounting; synthetic owned mock requests are separately recorded, not model-provider usage"
+  },
+  "independentReview": {
+    "verdict": "ACCEPT",
+    "report": "evidence/independent-review.md",
+    "unresolvedP1P2": 0,
+    "reviewedAuthorReportSHA256": "820bf26176f8dc462f70ae3f2381bcff291e3100c03a79257381ef0e0718b1c7",
+    "rootFollowup": "Only factual acceptance/gate status updated after author freeze; product and runtime evidence unchanged."
+  }
+}

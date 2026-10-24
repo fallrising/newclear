@@ -1,0 +1,12 @@
+✔ five-second list replacement preserves the focused queue/action after depth changes (2.154ms)
+✔ refresh never steals focus moved outside the table while API was pending (4.364022ms)
+✔ normal primary button text contrast is at least 4.5:1 (0.408639ms)
+✔ JSON/log scroll regions can be reached and identified by keyboard (0.283369ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.995591

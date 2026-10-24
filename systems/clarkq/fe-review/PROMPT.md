@@ -1,55 +1,11 @@
-# FE Review Prompt — clarkq
+# FE Review Prompt — ClarkQ
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 單程序 Go＋authenticated API seed，僅新建合成 state/key，不用既有 demo project。 第 2／3 輪仍未由本次文件回寫執行。
-你是負責 **clarkq** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
+目前為已批准 DESIGN M1–M3 的 R2候選收尾；實作及實際證據見[報告](tasks/round2/report.md)。完整 R3另行進行。遵循[共用規範](../../../docs/fe-review/PROTOCOL.md)、[DESIGN](DESIGN.md)與[RUNNER](RUNNER.md)。
 
-先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
+只用本次專有 network-none/nonroot環境、loopback Go binary、全新空白 state/key；不得執行既有 demo Compose、讀取既有 config/CLI憑證、放寬 auth 或操作真 queues。HTML嵌入 binary；更改後須重建再驗證。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)。
+原 R2已實測：三個深色viewport1440×900／834×1112／390×844、合法64字queue/中文長body/14queues、真Save/Refresh/enqueue/Use/Peek/Consume/Clear取消與確認、missing/invalid key、empty、非法名、受控網路失敗與恢復、五秒刷新焦點與depth。實際鍵盤使用Tab及Enter；baseline的programmatic focus僅是原問題觀察，不能替代鍵盤旅程。
 
-## 專案概況
+共用capture使用私有ephemeral targets/storageState，dry-run及actual皆有證據；不使用假start。不要公開DOM/localStorage/header/trace/key或PNG。保留全部歷史失敗，不把favicon404分類當作已修或health全零；其餘未知事件仍失敗。
 
-- **元件路徑：** `systems/clarkq/`
-- **一句話：** HTTP FIFO queue：Go 服務以 `embed` 內嵌單檔 HTML 管理介面（`/ui/`）。
-- **技術棧：** Go、`embed`、單檔 HTML
-- **UI 入口：** `/ui/`（`internal/ui/index.html`，預設 http://localhost:8080/ui/）
-
-## 啟動線索（未驗證）
-
-- 先按 [DESIGN.md](DESIGN.md) M1 建立受控隔離、乾淨 config/env、loopback listener、新 API key 與合成 seed。專用 wrapper 尚未實作；裸 go run／既有 demo 不是可直接使用的 FE harness。
-- 全新 browser context 必須在首個頁面 script 前具備本次 localStorage／storageState；原始 targets 無登入 key，不能把 /ui/ 200 或 API401 當主要流程成功。
-
-## 主要流程
-
-至少走通以下流程各一次，並對每一步截圖：
-
-- 本次 key 初始化 → 開啟 UI → Enqueue → Queue Use → Peek（深度不變）→ Consume（減一）→ Clear取消／確認 → Refresh all 查看 Metrics/Cluster；只用本次合成 queue。
-
-## 專案特有檢查重點
-
-在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
-
-- 單檔 HTML 的 RWD 與 a11y 基礎（語意標籤、label）。
-- 大量 queue 或訊息時的表格與自動刷新。
-
-## 可重用的既有資產
-
-- `demo/run-demo.sh` 只供 API 情境參考，不執行其共用 compose up/down；本次採用的單程序 wrapper 尚待實作。
-
-## 待補的頁面
-
-無。
-
-## 執行步驟
-
-先讀 [REVIEW.md](REVIEW.md) 確認目前輪次，只做該輪允許的事（PROTOCOL.md「三輪節奏」）：
-
-1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
-2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 先完成 DESIGN M1 的隔離、seed、新 key 與專用 browser 前置。產生本次 ephemeral targets，提供私有 storageState；從 repository root 執行共用 capture.mjs dry-run 再 capture，互動狀態用專用腳本。不要將 key/state/trace/headers/DOM dump 提交；原始 targets 不具上述前置，不能據此宣稱主要流程已驗收。報告依 DESIGN 列預期錯誤、未驗證項及來源 SHA。
-
-## 產出
-
-- 第 1 輪：`PROMPT.md`、`targets.json`、`REVIEW.md` 的修訂（每次一個 PR）
-- 第 2 輪：前端修正與已決定事項的實作，每個問題一個 commit，附驗證指令
-- 第 3 輪：`runs/<ts>/capture.json`、`runs/<ts>/REPORT.md`（提交）；`runs/<ts>/screenshots/`（不提交）
+原單機可用資格、dormant狀態、後端／queue語意與部署範圍不變。新功能、主題、cluster或production不在此範圍。

@@ -1,0 +1,33 @@
+[
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "systems/ojbquay/fe-review",
+      "-p",
+      "test_*.py"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.364
+  },
+  {
+    "command": [
+      "node",
+      "--test",
+      "systems/ojbquay/fe-review/browser-policy.test.mjs",
+      "systems/ojbquay/fe-review/child-outcome.test.mjs",
+      "systems/ojbquay/fe-review/health.test.mjs",
+      "systems/ojbquay/fe-review/lifecycle.test.mjs",
+      "systems/ojbquay/fe-review/negative-state.test.mjs",
+      "systems/ojbquay/fe-review/png-mask.test.mjs",
+      "systems/ojbquay/fe-review/proxy.test.mjs",
+      "systems/ojbquay/fe-review/readonly-api.test.mjs",
+      "systems/ojbquay/fe-review/resume-plan.test.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.466
+  }
+]

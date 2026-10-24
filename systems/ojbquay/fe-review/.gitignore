@@ -3,3 +3,11 @@ runs/*/screenshots/
 runs/*/tui/
 runs/*/*.storage.json
 runs/.state/
+
+# Private R2 state, raw diagnostics and screenshots.
+runs/round2-*/
+
+# Shared capture nests screenshots below matrix/; keep all runtime PNGs private.
+runs/**/*.png
+runs/**/screenshots/
+runs/browser-*/

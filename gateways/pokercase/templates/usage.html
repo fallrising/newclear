@@ -31,6 +31,7 @@
       <section class="panel">
         <h2>By day (last 14)</h2>
         {% if daily %}
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Usage by day table">
         <table>
           <thead>
             <tr>
@@ -57,6 +58,7 @@
             {% endfor %}
           </tbody>
         </table>
+        </div>
         {% else %}
         <p class="muted">No daily data yet.</p>
         {% endif %}
@@ -65,6 +67,7 @@
       <section class="panel">
         <h2>Recent events</h2>
         {% if events %}
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Recent usage table">
         <table>
           <thead>
             <tr>
@@ -93,6 +96,7 @@
             {% endfor %}
           </tbody>
         </table>
+        </div>
         {% else %}
         <p class="muted">No requests yet.</p>
         {% endif %}

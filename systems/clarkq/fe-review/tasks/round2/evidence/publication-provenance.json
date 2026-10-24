@@ -1,0 +1,110 @@
+[
+  {
+    "file": "runtime-baseline-001.json",
+    "originalSHA256": "2a863bbf686f5f0702195f927b57a282f041be351465de4d40744435800ebd7c",
+    "publishedSHA256": "2a863bbf686f5f0702195f927b57a282f041be351465de4d40744435800ebd7c",
+    "normalization": "none"
+  },
+  {
+    "file": "outer-baseline-001.json",
+    "originalSHA256": "819c9dc8db0fe56c0b9dbda1d42ed4f6d8cc0cb89c59bc76896d55bbcc5cd9c4",
+    "publishedSHA256": "819c9dc8db0fe56c0b9dbda1d42ed4f6d8cc0cb89c59bc76896d55bbcc5cd9c4",
+    "normalization": "none"
+  },
+  {
+    "file": "runtime-final-001.json",
+    "originalSHA256": "7ad06de47958e1650f103de2794e8b016dc17ed7ef6d9a438d0be703ea9261f4",
+    "publishedSHA256": "7ad06de47958e1650f103de2794e8b016dc17ed7ef6d9a438d0be703ea9261f4",
+    "normalization": "none"
+  },
+  {
+    "file": "outer-final-001.json",
+    "originalSHA256": "5340dfa681965a63f38bf810d9a6538037987c9dd8a0074b312502348449acd7",
+    "publishedSHA256": "5340dfa681965a63f38bf810d9a6538037987c9dd8a0074b312502348449acd7",
+    "normalization": "none"
+  },
+  {
+    "file": "runtime-final-002.json",
+    "originalSHA256": "d807e9281f43681926bea1a095de1efb94a7092bed1e2457d1688aa3e1f163c7",
+    "publishedSHA256": "d807e9281f43681926bea1a095de1efb94a7092bed1e2457d1688aa3e1f163c7",
+    "normalization": "none"
+  },
+  {
+    "file": "outer-final-002.json",
+    "originalSHA256": "e78425a7e7d716c32ef07f486fcc301c0a1ddbc01fa1a22156421fd28aa5b1a4",
+    "publishedSHA256": "e78425a7e7d716c32ef07f486fcc301c0a1ddbc01fa1a22156421fd28aa5b1a4",
+    "normalization": "none"
+  },
+  {
+    "file": "shared-final-001.json",
+    "originalSHA256": "a40bb7b56af2332cb8d8659c038504c3d24457923279397a5fcb3597dbc21b4f",
+    "publishedSHA256": "a40bb7b56af2332cb8d8659c038504c3d24457923279397a5fcb3597dbc21b4f",
+    "normalization": "none"
+  },
+  {
+    "file": "native-baseline.json",
+    "originalSHA256": "149ab101f62aa23e3cc2d946adb65bdd69f5a7dceac2bdd684558df665937e03",
+    "publishedSHA256": "c07c35c3d90e6391660552f8cd31f750746b76a53f80ee36cabd928e5a93e316",
+    "normalization": "exact worktree/build path substitution only"
+  },
+  {
+    "file": "native-final-build.json",
+    "originalSHA256": "5d8f1fb29b128617f4599d20a127537e9203c700410e0b84625318c05d88e19d",
+    "publishedSHA256": "5d8f1fb29b128617f4599d20a127537e9203c700410e0b84625318c05d88e19d",
+    "normalization": "none"
+  },
+  {
+    "file": "native-test.log",
+    "originalSHA256": "0b5ed61d9818a4eac9ecec64e839135599edad8ad968fef4ba9f5b48fed14c38",
+    "publishedSHA256": "0b5ed61d9818a4eac9ecec64e839135599edad8ad968fef4ba9f5b48fed14c38",
+    "normalization": "none"
+  },
+  {
+    "file": "guards-initial.log",
+    "originalSHA256": "ad37927686168a2871bf430cded39b2af50af5a6e280f52e960e37ea447088b2",
+    "publishedSHA256": "ad37927686168a2871bf430cded39b2af50af5a6e280f52e960e37ea447088b2",
+    "normalization": "none"
+  },
+  {
+    "file": "lifecycle-red.log",
+    "originalSHA256": "57725bd93a39ae14884a53fa387cb2b1fcc32d24381676d03a604c8b4d046fe2",
+    "publishedSHA256": "2dce6c3a0cfb44afa2726f1eab864774fbfa5bfef1778c562d27baa798d4dfe9",
+    "normalization": "exact worktree/build path substitution only"
+  },
+  {
+    "file": "lifecycle-green.log",
+    "originalSHA256": "f180c9052f68621d75fa66b1386e27578264a80f6ae76a3952ac3815146699f8",
+    "publishedSHA256": "f180c9052f68621d75fa66b1386e27578264a80f6ae76a3952ac3815146699f8",
+    "normalization": "none"
+  },
+  {
+    "file": "ui-red.log",
+    "originalSHA256": "43ac2f3d8c5cfcafa80d19c61be1599cc0bf080e1dfe2af90f5c03e81ed44ad4",
+    "publishedSHA256": "c5c711107470543a404feb57c4713cb1aa8ff5df349ec5e965b9b567fe80e0fb",
+    "normalization": "exact worktree/build path substitution and trailing whitespace only; original private log retained"
+  },
+  {
+    "file": "ui-green.log",
+    "originalSHA256": "6f4dfac90a7514df69112eff4a3c1cf31327ba4ad8c2b0a9c314ac01e517f256",
+    "publishedSHA256": "6f4dfac90a7514df69112eff4a3c1cf31327ba4ad8c2b0a9c314ac01e517f256",
+    "normalization": "none"
+  },
+  {
+    "file": "journey-health-green.log",
+    "originalSHA256": "682ad736208b7bbcdbb8b6dbd02e5427c07aa9d7ccf5d063741ada3c39082c15",
+    "publishedSHA256": "682ad736208b7bbcdbb8b6dbd02e5427c07aa9d7ccf5d063741ada3c39082c15",
+    "normalization": "none"
+  },
+  {
+    "file": "desktop-health-green.log",
+    "originalSHA256": "5b81253f83e0be232692208381eb07cbeb33d4eb4f5afde22acef9d8908eafea",
+    "publishedSHA256": "5b81253f83e0be232692208381eb07cbeb33d4eb4f5afde22acef9d8908eafea",
+    "normalization": "none"
+  },
+  {
+    "file": "reuse-check.log",
+    "originalSHA256": "8bd907b7508607420fa91d74d3f858293d477f8b03934ae299746a52cb5cc634",
+    "publishedSHA256": "8bd907b7508607420fa91d74d3f858293d477f8b03934ae299746a52cb5cc634",
+    "normalization": "none"
+  }
+]

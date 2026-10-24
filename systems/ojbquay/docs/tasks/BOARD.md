@@ -8,3 +8,9 @@
 | OJB-SDD-STACK | `make validate-deploy`、`make e2e`、`e2e/pull_share.sh`、loaded version 收斂、停 console 後發送 | AC-01/02/03/07/11 | done（71ac5f77） |
 | OJB-SDD-CONSOLE | 真 stack console 旅程 `pnpm e2e:stack` | AC-10 | done（71ac5f77） |
 | OJB-SDD-RELEASE | PR CI 綠燈、owner 同意合併、建立 `usable/ojbquay/v1.0.0` 並回讀遠端 | 全部 | 待 owner |
+
+## T-0380
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| OJB-FE2-1 | Approved M1–M4 and review-only isolation/gRPC | R2-AC-8/E | done | 2026-10-24T11:18:59Z | 2026-10-24T12:50:56Z | 2026-10-24T12:50:56Z |

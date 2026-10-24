@@ -1,0 +1,15 @@
+{
+  "command": [
+    "cargo",
+    "+1.99.0",
+    "test",
+    "--locked",
+    "tui_app::tests::review_",
+    "--",
+    "--nocapture"
+  ],
+  "sourceSHA256": "e43bb4a6c2edcc2999e08c275aebca19f628b61c7f38d2d9199971221250e74e",
+  "exitCode": 101,
+  "elapsedSeconds": 9.509,
+  "timeoutSeconds": 600
+}

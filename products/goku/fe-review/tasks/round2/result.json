@@ -1,0 +1,281 @@
+{
+  "schema": 1,
+  "scope": "original approved Goku R2 M1\u2013M3; local candidate, independent acceptance/current CI pending",
+  "sourceCommit": "1233a7be1ec91930f8f47be2822fc0c177c55bf2",
+  "dirtyScopedChanges": true,
+  "versions": {
+    "node": "24.18.0",
+    "npm": "11.16.0",
+    "playwright": "1.63.0",
+    "activeNestedPlaywrightCore": "1.63.0",
+    "chromium": "153.0.8010.12",
+    "chromiumRevision": "1243",
+    "axe": "4.13.0",
+    "vite": "5.4.8",
+    "json-server": "0.17.4"
+  },
+  "runs": [
+    {
+      "attempt": "runtime-001",
+      "runId": "20261024T101403006Z-2e554e65",
+      "status": "failed",
+      "steps": 3,
+      "result": "runs/20261024T101403006Z-2e554e65/result.json",
+      "outer": {
+        "command": "owned networknone Goku review",
+        "exitCode": 1,
+        "error": null,
+        "elapsedSeconds": 16.362,
+        "containerRemoved": true,
+        "sourceHashes": {
+          "verify-browser.mjs": "ca53dc8124f3cd686e2a2dff8313b0a4375294885fb9a5ea3a67589e0cb70187",
+          "serve-web.mjs": "08897b5426d09d6e5b22a81f2c675792a3f549d9d99e7fbef535bd4e2189beba",
+          "isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476"
+        }
+      }
+    },
+    {
+      "attempt": "runtime-002",
+      "runId": "20261024T101650485Z-28561c70",
+      "status": "passed",
+      "steps": 13,
+      "result": "runs/20261024T101650485Z-28561c70/result.json",
+      "outer": {
+        "command": "owned networknone Goku review",
+        "exitCode": 0,
+        "error": null,
+        "elapsedSeconds": 21.733,
+        "containerRemoved": true,
+        "sourceHashes": {
+          "verify-browser.mjs": "19ea2ddf615271df9871ce71b80839800a4e482a0333c379dea669fe8d7ad5db",
+          "serve-web.mjs": "9befd54528e4c27e99a80fadd7a57e436f299b91c5a3fa2fad02c2bcef09286a",
+          "isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476"
+        }
+      }
+    },
+    {
+      "attempt": "edit-001",
+      "runId": "20261024T102243844Z-b4b441d3",
+      "status": "failed",
+      "steps": 2,
+      "result": "runs/20261024T102243844Z-b4b441d3/diagnostic-summary.json",
+      "outer": {
+        "command": "owned networknone Goku review",
+        "exitCode": 1,
+        "error": null,
+        "elapsedSeconds": 4.619,
+        "containerRemoved": true,
+        "sourceHashes": {
+          "verify-browser.mjs": "af773e8a0d3a59b54bca6172aed2670aeb5a3378b23d0c160b57aac78457f3c6",
+          "serve-web.mjs": "9befd54528e4c27e99a80fadd7a57e436f299b91c5a3fa2fad02c2bcef09286a",
+          "isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476"
+        }
+      }
+    },
+    {
+      "attempt": "edit-002",
+      "runId": "20261024T102810937Z-3bb243ab",
+      "status": "passed",
+      "steps": 4,
+      "result": "runs/20261024T102810937Z-3bb243ab/result.json",
+      "outer": {
+        "command": "owned networknone Goku review",
+        "exitCode": 0,
+        "error": null,
+        "elapsedSeconds": 4.468,
+        "containerRemoved": true,
+        "sourceHashes": {
+          "verify-browser.mjs": "47d228c9d4950867116d0882775817fa902a4879a72581fd26ad3af7b7499ced",
+          "serve-web.mjs": "9befd54528e4c27e99a80fadd7a57e436f299b91c5a3fa2fad02c2bcef09286a",
+          "isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476"
+        }
+      }
+    }
+  ],
+  "manifests": [
+    {
+      "path": "runs/20261024T101403006Z-2e554e65/capture.json",
+      "sha256": "2f68d70ba9b749efdb04f2545564695ca21260299019f604157648ecc6722e69"
+    },
+    {
+      "path": "runs/20261024T101403006Z-2e554e65/result.json",
+      "sha256": "2092857dd9af49fbb087acd12e6c8608a8a9f5a7fffdbfe09f7b36d0f2b17964"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/capture.json",
+      "sha256": "5a4c71107305dbd240ef2d2d8805f11bb04781d3a767b13a51137316c68af25e"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/result.json",
+      "sha256": "916d77716ebb4e990d5ee6248ebf16752038a78f327362b0c25a4736497bfa1a"
+    },
+    {
+      "path": "runs/20261024T102243844Z-b4b441d3/diagnostic-summary.json",
+      "sha256": "22a12760cbc9999dfdbff1cf6cf48b1d4bae97f050d2dda7892b79953b4e44e3"
+    },
+    {
+      "path": "runs/20261024T102810937Z-3bb243ab/result.json",
+      "sha256": "6fd406e91a5d57959c5f05d52afbd8f19b94590a1d6373d3d2e5d377b51aad19"
+    }
+  ],
+  "privateScreenshots": [
+    {
+      "path": "runs/20261024T101403006Z-2e554e65/screenshots/web__home__desktop__light.png",
+      "sha256": "d881c6bfa3958b6438faa0764c21af8eef3f23dcb29092c37538885f008c7210",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101403006Z-2e554e65/screenshots/web__home__mobile__light.png",
+      "sha256": "7b57dff82f8963ecc2146bc3cf182b1700f10875eccfbb7608db85d3c5a9befa",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101403006Z-2e554e65/screenshots/web__home__tablet__light.png",
+      "sha256": "63be6eca25476fac0f6164b403146b67f8278bd8a2b8dc24ce0078d8f1520bee",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/actual-api-outage.png",
+      "sha256": "02b90abd7b0f71c527853b8209b08e257b253a513136018b03b6527a0bd560a7",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/actual-retry-recovery.png",
+      "sha256": "43b7626ec4e96db1ba7bc8fd9fac1c64a2e16363c2f40271c9dd855c52c946ee",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/card-keyboard-focus.png",
+      "sha256": "dc56fe7850dcbe2b9d92032805c25a6770f46851af3f880aa8b8d5111153eb00",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/controlled-delete-error.png",
+      "sha256": "5e08d84dbea73c52d80c6734c1bc3d97f422115445cae29a38bb34dc8561276a",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/controlled-update-error.png",
+      "sha256": "8f28577266d0d0baf98db9d2e9a5b046d0c83196b0ce6b3a51ebd6a14864829d",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/delete-keyboard-focus.png",
+      "sha256": "4db3a31ddab0874a216255dc89845f06e97cffd8d2ed25a97b6e60c2e42ad98a",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/real-edited.png",
+      "sha256": "e1f69061ed430bdbb27194eb2670a30649c595dc5250513aa7e9b869668acbc4",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/real-empty.png",
+      "sha256": "ffb6f7056df7c806ec484cfbbcfc3cc856e6552af1c94cc0de1ba9478ee56bd2",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/sidebar-keyboard-focus.png",
+      "sha256": "7a8acb025b95b11383bc7b9a5a2dbde32e7c640d951ba47ea9c4b079fbd365be",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/web__home__desktop__light.png",
+      "sha256": "cccdecb77d30e650a5b713054f2dbe4538e5799fa604b61f67a2e5688fde2489",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/web__home__mobile__light.png",
+      "sha256": "1d74e42312620c00961477761809ca7d8f00830327f20347e67de90882501557",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T101650485Z-28561c70/screenshots/web__home__tablet__light.png",
+      "sha256": "92dc079ff5dc08b31b98f863ca28d685d87f0c8725e37d700a7cb6957c31efaa",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T102243844Z-b4b441d3/screenshots/card-keyboard-focus.png",
+      "sha256": "dc56fe7850dcbe2b9d92032805c25a6770f46851af3f880aa8b8d5111153eb00",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T102243844Z-b4b441d3/screenshots/real-edited.png",
+      "sha256": "618f1ca603f6e57dc614c4b8b419c703dae5e6834c955f38cb46c5c406a34add",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T102810937Z-3bb243ab/screenshots/card-keyboard-focus.png",
+      "sha256": "a5fd380fe66c744f6732c876c8602241ab030680ef8110ada876b7e5a65edca5",
+      "publication": "ignored local artifact"
+    },
+    {
+      "path": "runs/20261024T102810937Z-3bb243ab/screenshots/real-edited.png",
+      "sha256": "f4469a338f0a8909c68cf668faf252cce2e52c734bdfa3862d4c81094a4343cd",
+      "publication": "ignored local artifact"
+    }
+  ],
+  "screenshotCount": 19,
+  "currentSourceHashes": {
+    "web/src/store/bookmarkStore.ts": "b473b497e1af243ba21887f60485737748da728a054c6de28a8f56b81a3ca1c7",
+    "web/src/components/BookmarkCard.tsx": "874333d14c2a57d0905fa413c2af4cb6a02265a6b2cc18db061011d6cbb21222",
+    "web/src/components/BookmarkGrid.tsx": "9255c012680b99a9eb8ce75cc8d6182d887757c69d36c4868a7dd40d36947d4c",
+    "web/src/components/Sidebar.tsx": "a2315ccbc6a4b55e2b26035de288c7f4766c115a461a1251408a722030c36b4d",
+    "web/.env.example": "8bea23286bbb19b8daecc4e9d9d7ae5d4e5f1d4dbbf15d9f02dc1767ca3ca9ab",
+    "web/.gitignore": "4f8e3a05067f635f9c9e0e8e0bcdab26708067bec1593f47304c81d036e31c4a",
+    "fe-review/verify-browser.mjs": "ad70acafb347c8c1ec93df673e11727c0df9efe61f19a0f583756454e891878f",
+    "fe-review/serve-web.mjs": "9befd54528e4c27e99a80fadd7a57e436f299b91c5a3fa2fad02c2bcef09286a",
+    "fe-review/isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476",
+    "fe-review/test-store.mjs": "ac9fa0151f21c1b617a352fc3eb98ce46c9b0b9f25732ff1313e4cb281bf88ac",
+    "fe-review/test-isolation.mjs": "834f2d3ef8124d86514b390a659771b86b62abd128f6069e67392402cef43d67",
+    "fe-review/targets.json": "4c56a2cab3c779b356652adf067ded0845263a2018180d14e50d773e3d1a9051"
+  },
+  "evidence": [
+    {
+      "path": "tasks/round2/evidence/env-staging.json",
+      "sha256": "8abc86942298c913f99d31aca211a7386a549322266e1dd06cedd29eb3f0e053"
+    },
+    {
+      "path": "tasks/round2/evidence/favicon-tool-diagnosis.json",
+      "sha256": "cc0069d4781621c37f44e42580063540388307cfe8735122651798b1cffc936f"
+    },
+    {
+      "path": "tasks/round2/evidence/focused.json",
+      "sha256": "10ad6057ce6f67cbb2a4125249d16dd15bfe0b8aa62088c9c5c2b2ec5e68036e"
+    },
+    {
+      "path": "tasks/round2/evidence/native.json",
+      "sha256": "a6c5890a35a36fd1285a973420003cb307629c894122b8b7707cc8a0963ef85c"
+    }
+  ],
+  "postRuntimeDelta": {
+    "measuredDriverSha256": "47d228c9d4950867116d0882775817fa902a4879a72581fd26ad3af7b7499ced",
+    "finalDriverSha256": "ad70acafb347c8c1ec93df673e11727c0df9efe61f19a0f583756454e891878f",
+    "onlyChanges": "Default mode retains original URL/local image; EDIT_ONLY still changes actual URL. Three hunks alter input/URL/favicon expectations only. Targets verified/note metadata updated; apps/launch settings unchanged.",
+    "offlineExactDeltaCheck": "passed",
+    "nodeSyntaxCheck": "passed",
+    "finalDefaultModeRerun": false,
+    "measuredFlowEvidence": "runtime002 actual URL edit/CRUD/error/retry preserved, including broken edited image; edit002 separately proves actual URL change/CDP image decoding."
+  },
+  "healthClassification": {
+    "runtime001": "Three ORB image failures retained; three axe heading-order moderate findings, button-name zero. Initial response body/header unobserved.",
+    "runtime002": "Three loaded shared captures repaired. Controlled PUT/DELETE 500 and real outage request failures expected. Manual edited-image defect not covered by original assertions.",
+    "edit001": "Explicit naturalWidth 0 failure; raw verbose requests remain private/hash-linked.",
+    "edit002": "CDP exact local image response 200 SVG, naturalWidth16, no health findings.",
+    "finalAxeRerun": false
+  },
+  "limits": [
+    "Existing mobile fixed sidebar compresses card text despite no horizontal overflow.",
+    "Existing moderate heading-order remains; no final full-page axe-zero claim.",
+    "Search/category/tag filtering and Add Bookmark wiring not implemented.",
+    "No Go API integration, mainline/tag/release/deploy or full R3 claim.",
+    "Vite build does not imply tsc.",
+    "M1 staged tracking passed; independent acceptance and exact-head required CI pending."
+  ],
+  "cost": {
+    "aggregateProviderCalls": null,
+    "aggregateToolCalls": null,
+    "activeSeconds": null,
+    "reason": "not reconstructable across compactions; observed individual durations retained in receipts"
+  }
+}

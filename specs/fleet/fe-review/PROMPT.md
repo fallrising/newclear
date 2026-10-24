@@ -1,11 +1,11 @@
 # FE Review Prompt — fleet
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 保留樣式／a11y 與契約限制；D2 採 (a) 模板修正 swap、Rollback JSON、錯誤提示，不改後端 API。 第 2／3 輪仍未由本次文件回寫執行。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 保留樣式／a11y 與契約限制；D2 採 (a) 模板修正 swap、Rollback JSON、錯誤提示，不改後端 API。 此為第1輪設計確認紀錄；第2輪實作證據見下方目前狀態，完整第3輪仍未通過。
 你是負責 **fleet** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚待實作或驗證的事項見 [REVIEW.md](REVIEW.md)，第 2 輪的範圍與對外契約見 [DESIGN.md](DESIGN.md)。
+> 狀態：**已批准第2輪 M1–M9 實作與限定驗證通過**。12張選定PNG、12 loaded guards、真實互動與原生gate可核對；4 desktop axe保留3 serious header contrast與2 critical meta-refresh，incomplete0。完整第3輪未通過，Cloudflare OTP/mainline不在本次完成聲明。見 [本輪報告](tasks/round2/report.md)。
 
 ## 專案概況
 
@@ -14,12 +14,13 @@
 - **技術棧：** Go、`html/template`、htmx、`embed.FS`
 - **UI 入口：** `fleetd`（預設 `FLEETD_LISTEN=127.0.0.1:18765`）：`/login`、`/`（catalog）、`/nodes/{id}`、`/services/{name}`
 
-## 啟動線索（未驗證）
+## 本輪隔離啟動
 
-- 在 `specs/fleet` 執行 `mkdir -p fe-review/runs/.state && go run ./cmd/fleetd`，環境變數見 `targets.json`。`FLEET_UI_HOSTNAME`、`FLEET_API_HOSTNAME` 必填（缺少時直接結束，`internal/config/config.go:76-78`）；`FLEETD_DB` 指到 `fe-review/runs/.state/`。未設定 `CF_API_TOKEN` 時 ingress 是 `Noop`，不對外連線。
-- 操作員登入：在環境內即時產生 `FLEETD_BOOTSTRAP_OPERATOR_TOKEN=flt_op_<隨機>`，以環境變數傳入（不寫進 `targets.json`），在 `/login` 貼上。以 `127.0.0.1` 連線時會提供 HTML（`Host` 不等於 API hostname）。
-- 節點與服務：以 `FLEETD_BOOTSTRAP_NODE_TOKEN=flt_bs_<隨機>` 透過 API 註冊假節點 `vps-fe-1`、建立服務 `hello` 與兩個 release，不連真實主機、不跑 `fleet-agent`（第 2 輪寫成 `seed.sh`，見 DESIGN.md M9）。節點 60 秒沒有 heartbeat 會轉為 `offline`。
-- 只有淺色主題（`app.css` 沒有深色模式），`colorSchemes` 只擷取 `light`；UI 文字是英文。
+由 root 在 network-none、無 host port/socket、非 root、cap-drop ALL 容器執行 [README](README.md) 的 owned runner。其私有 state 使用新 SQLite；即時生成 operator/bootstrap token，既有 API 註冊節點、heartbeat、建立服務與兩個額外 releases，再以實際 generation 回報 actual。建立服務本身也產生 release，因此正常 seed 為三個 releases，不能把所有同名 Rollback 視為唯一按鈕。
+
+runner 真正填入 `/login` 表單，觀測 303 與受保護 catalog 200，並用完整 cookie jar 驗 Secure／HttpOnly／SameSite=Lax；不注入或放寬 cookie。它每 10 秒更新 heartbeat 與 actual，無 CF token、fleet-agent 或 workload。原設計的 `seed.sh` 功能由此 runner 的 inline API seed 實現。
+
+shared `capture.mjs` 不修改。runner 產生私有 targets，把 `/login` 放匿名 app、其餘三頁使用剛取得的 storageState；先 `--dry-run`，再 normal capture `--no-axe`。服務已由 supervisor 啟動，不傳沒有啟動效果的 `--start`。另外只做四頁 desktop scoped axe 與十二個 finalURL／loaded identity／overflow guards；不是十二次 axe，也不是完整 R3。
 
 ## 主要流程
 
@@ -53,10 +54,11 @@
 2. **第 2 輪（修改）：** 只做 `DESIGN.md` 的修改項目，不改變其中列出的對外契約；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
 3. **第 3 輪（完整 e2e）：** 從 repository root 執行
    ```bash
-   node docs/fe-review/capture.mjs specs/fleet/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs specs/fleet/fe-review/targets.json
+   # runner 生成 /state/<owned>/targets.json 後，在同一隔離容器執行：
+   node /work/docs/fe-review/capture.mjs /state/<owned>/targets.json --dry-run --out /evidence/<run>/matrix
+   node /work/docs/fe-review/capture.mjs /state/<owned>/targets.json --no-axe --out /evidence/<run>/matrix
    ```
-   需要互動才能看到的狀態，另寫 Playwright 腳本放在本目錄；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
+   上述是本輪 runner 實際使用的共用擷取介面（私有路徑每次生成，不可直接執行含尖括號的示意命令）；完整第3輪仍未驗收。需要互動才能看到的狀態，以本目錄的 flow observer 取證；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
 
 ## 產出
 

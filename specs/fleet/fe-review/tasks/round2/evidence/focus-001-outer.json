@@ -1,0 +1,8 @@
+{
+  "command": "owned docker networknone Fleet focus",
+  "exitCode": 1,
+  "error": null,
+  "elapsedSeconds": 17.283,
+  "containerRemoved": true,
+  "scriptSha256": "ff0fc2d2d17b65c6baeec5fa5efa6b2e73155da81cd81499c3972ff002194a1c"
+}

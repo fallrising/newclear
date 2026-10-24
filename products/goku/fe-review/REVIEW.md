@@ -1,57 +1,24 @@
 # FE Review — goku — REVIEW
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D2 改用無敏感值環境範例並移出追蹤；D3 不做 major 升級。 第 2／3 輪仍未由本次文件回寫執行。
-> 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
+Owner 已於2026-10-23確認 D2 環境範例及 D3 不做 major 升級；[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)。本次只執行原批准 R2 M1–M3 的 dormant 前端例外。
 
-## 目前輪次
+## 目前狀態
 
-- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
-- 第 2 輪：修改（未開始）
-- 第 3 輪：完整 e2e（未開始）
+M1–M3 source 與原生 lint/build、store RED/GREEN 已完成。主要 synthetic runtime 流程及最後 real URL edit／圖片解碼補證通過；targets verified 僅指原 R2 隔離入口，不代表完整第3輪。獨立 acceptance、current CI／merge 由 root 收尾。完整第3輪未啟動。
 
-## 修改權限
+## 已實作事項
 
-文檔檔位 **C（dormant）**：依 [`PORTFOLIO.md`](../../../PORTFOLIO.md)「休眠」一節的 fe-review 例外，第 2 輪可在 `DESIGN.md` 範圍內修改前端與做最小解耦。這不恢復投入，不做新功能或 major 依賴升級。
+- C1：工作樹 `.env` 刪除、同值 `.env.example` 與 ignore 新增；內容無敏感值。parent staged tracking 已確認。
+- C2：保留 React18／Vite5／Tailwind3 和原 npm lock，沒有新增框架或依賴。
+- C3：Card Edit/Delete、Sidebar icon actions 有名稱與 focus-visible；group-focus-within 令操作可由鍵盤看見。原 submit 類型保留；未接線 BookmarkMenu 不新增入口。
+- C4：store 四類失敗有固定錯誤訊息、成功清除；grid 顯示 alert／Retry，失敗不冒充空結果。實際停止 owned json-server 後可見錯誤，重啟同一合成 DB 後 Retry 恢復；受控 mutation500 與真故障分開。
 
-## 矛盾點
+## 原失敗與未解決發現
 
-### C1 `web/.env` 被 Git 追蹤
+[完整證據](tasks/round2/report.md) 保留首次3張截圖 favicon ORB。改同源 review-only SVG 後，3張首頁與圖片解碼通過；不是修改產品 assets。後續目視發現編輯後 portless favicon 破圖；edit001 保留 naturalWidth 0 的失敗，實際 Playwright 1.63 原碼確認 user route 前的 favicon abort。edit002 改用 exact local CDP image fixture，證實 response 200／SVG／naturalWidth 16，沒有產品或瀏覽器安全設定變更。
 
-public repository 中追蹤了 `web/.env`。已確認只有 `VITE_API_URL`，值與 `src/services/api.ts:4` 的預設值相同，不是敏感值；仍與「不提交環境檔」的慣例衝突。
+初次 axe 的 button-name 為0，但有 moderate heading-order；不宣稱最終全頁 axe 為0。390px 實圖沒有水平溢出，固定sidebar仍把卡片文字壓得不可讀；這是現有布局限制，M1–M3 不授權重新設計。
 
-### C2 技術棧落後其他元件
+搜尋／category／tags 尚未真正篩選；Add Bookmark 沒有handler；BookmarkMenu／CoreLayout 未接線；原生 editor 未使用Tiptap。這些既有功能／第3輪限制保持可見，不把控制項存在當流程成功，也不為本次修復它們。Go API 的 `/api/v1` 與前端 `/api/bookmarks` 差異及產品 SUCCESS 未完成狀態保留。
 
-React 18、Vite 5、Tailwind 3；PROTOCOL 禁止未經提議升級 major 版本。
-
-### C3 卡片操作沒有可讀名稱，鍵盤 focus 時看不見
-
-`src/components/BookmarkCard.tsx:89-101` 的編輯、刪除按鈕只有圖示，沒有 `aria-label`；容器 `opacity-0 group-hover:opacity-100` 只在 hover 時顯示。
-
-### C4 API 失敗被當成空結果
-
-`src/store/bookmarkStore.ts:77-81` fetch 失敗只寫 console，`src/components/BookmarkGrid.tsx:64-68` 因此顯示「No bookmarks found」；新增、更新、刪除失敗沒有提示。
-
-## 本次確認的決定
-
-### D2 `web/.env` 的處理
-
-- 選項：(a) 改為 `.env.example` 並移出追蹤；(b) 確認無敏感值後維持。
-- 建議：(a)。內容已確認無敏感值。
-- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
-
-### D3 是否升級技術棧
-
-- 屬 major 升級，不在 fe-review 休眠例外的範圍內。
-- 建議：建議不升級；若要升級，需另行決定恢復投入。
-- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
-
-## 進入第 2 輪的條件
-
-- `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
-- `PROMPT.md` 與 `targets.json` 已依設計更新。
-
-## 相關 PR
-
-- fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- [#551](https://github.com/fallrising/newclear/pull/551)：`DESIGN.md` 與本檔、`PROMPT.md`、`targets.json` 的修正；D2／D3 已由 owner 確認。
+所有圖像/API fixture 僅使用當次loopback合成資料，不讀真書籤；任何非預期外網request不能當例外忽略。PNG、raw logs、DB不公開。verified 僅涵蓋已實測的原 R2 入口；parent staged tracking 已通過，獨立 acceptance／current CI 仍另行追蹤；不新增產品功能、mainline/tag/release/deploy聲明。

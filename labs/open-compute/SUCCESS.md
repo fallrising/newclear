@@ -63,6 +63,20 @@ M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止
 
 ## Issue548: bounded failure diagnostics (maintenance)
 
+### Observation reason retention (2026-10-24 continuation)
+
+Scope: preserve the fixed observation reason already recorded by Process when
+later reads or shutdown rethrow its latched refusal. AC-D4 requires repeated
+snapshot/identity/live/children reads and command cleanup to retain that reason
+in strict diagnostic projection, without admitting a child or claiming clean
+shutdown after an observation error. Plan: deterministic RED/GREEN coverage,
+focused and full offline regression, independent review and exact-head CI.
+AC-D4 local evidence:319 whole offline tests and25 independent focused tests pass;
+independent real-process RED/GREEN proves reason retention while cleanup still
+refuses success. Independent review accepts; exact-head CI/publication are separate.
+Historical M4/AC-05 attribution remains unresolved; no new local real-runtime pass
+is claimed by this maintenance correction.
+
 This slice preserves existing M1–M7 behavior, report schemas, guards and exit codes.
 AC-D1: independent version1 diagnostic artifacts contain only rebuilt typed enums,
 source identity, bounded counts/exit status and separate original/cleanup/evidence

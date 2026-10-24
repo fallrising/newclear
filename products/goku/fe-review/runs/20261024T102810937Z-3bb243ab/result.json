@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "runId": "20261024T102810937Z-3bb243ab",
+  "status": "passed",
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "steps": [
+    {
+      "name": "local-image-response",
+      "status": 200,
+      "contentType": "image/svg+xml",
+      "sha256": "a651b999860b0cca72532e8ea6a49ed4f1dc0afce19d46147d92f2ec07dff12d"
+    },
+    {
+      "name": "Edit bookmark",
+      "type": "button",
+      "outline": "solid",
+      "focusVisible": true
+    },
+    {
+      "name": "exact-local-favicon-cdp-fixture",
+      "status": 200,
+      "sha256": "a651b999860b0cca72532e8ea6a49ed4f1dc0afce19d46147d92f2ec07dff12d"
+    },
+    {
+      "name": "real-update-readback",
+      "id": "review-1",
+      "title": "Edited synthetic Alpha"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "card-keyboard-focus",
+      "file": "screenshots/card-keyboard-focus.png",
+      "sha256": "a5fd380fe66c744f6732c876c8602241ab030680ef8110ada876b7e5a65edca5",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "real-edited",
+      "file": "screenshots/real-edited.png",
+      "sha256": "f4469a338f0a8909c68cf668faf252cce2e52c734bdfa3862d4c81094a4343cd",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    }
+  ],
+  "axe": [],
+  "health": [],
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "http://127.0.0.1:3001",
+      "path": "/api/bookmarks",
+      "phase": "normal"
+    },
+    {
+      "method": "GET",
+      "origin": "http://127.0.0.1:3001",
+      "path": "/api/bookmarks",
+      "phase": "normal"
+    },
+    {
+      "method": "GET",
+      "origin": "http://127.0.0.1:5173",
+      "path": "/review.svg",
+      "phase": "normal"
+    },
+    {
+      "method": "PUT",
+      "origin": "http://127.0.0.1:3001",
+      "path": "/api/bookmarks/review-1",
+      "phase": "normal"
+    }
+  ],
+  "imageObservations": [
+    {
+      "phase": "after-real-url-edit",
+      "apiFavicon": "http://127.0.0.1/favicon.ico",
+      "images": [
+        {
+          "src": "http://127.0.0.1/favicon.ico",
+          "currentSrc": "http://127.0.0.1/favicon.ico",
+          "complete": true,
+          "naturalWidth": 16
+        },
+        {
+          "src": "http://127.0.0.1:5173/review.svg",
+          "currentSrc": "http://127.0.0.1:5173/review.svg",
+          "complete": true,
+          "naturalWidth": 16
+        }
+      ]
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "vite",
+      "code": 0,
+      "signal": null,
+      "listenerAbsent": true
+    },
+    {
+      "name": "mock-initial",
+      "code": null,
+      "signal": "SIGTERM",
+      "listenerAbsent": true
+    }
+  ],
+  "sourceHashes": {
+    "web/src/store/bookmarkStore.ts": "b473b497e1af243ba21887f60485737748da728a054c6de28a8f56b81a3ca1c7",
+    "web/src/components/BookmarkCard.tsx": "874333d14c2a57d0905fa413c2af4cb6a02265a6b2cc18db061011d6cbb21222",
+    "web/src/components/BookmarkGrid.tsx": "9255c012680b99a9eb8ce75cc8d6182d887757c69d36c4868a7dd40d36947d4c",
+    "web/src/components/Sidebar.tsx": "a2315ccbc6a4b55e2b26035de288c7f4766c115a461a1251408a722030c36b4d",
+    "fe-review/serve-web.mjs": "9befd54528e4c27e99a80fadd7a57e436f299b91c5a3fa2fad02c2bcef09286a",
+    "fe-review/verify-browser.mjs": "47d228c9d4950867116d0882775817fa902a4879a72581fd26ad3af7b7499ced",
+    "fe-review/isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476",
+    "fe-review/targets.json": "c94022ce0b7211c72e9867ba536576bbf400bcba0891a789680136dd1daede27"
+  },
+  "faviconCdp": [
+    {
+      "event": "request",
+      "url": "http://127.0.0.1/favicon.ico",
+      "type": "Image"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "mimeType": "image/svg+xml",
+      "type": "Image"
+    }
+  ],
+  "requestSummary": {
+    "total": 1469,
+    "publicRelevant": 4,
+    "rawSha256": "a3ce025f86b5c149bafb7f40401a1ada35c1cee417e868f1d698b16fc7830cff"
+  }
+}

@@ -323,14 +323,35 @@ pub fn responses_body_to_chat(body: &Bytes) -> AppResult<Bytes> {
     Ok(Bytes::from(serde_json::to_vec(&out)?))
 }
 
+/// Keep recognized quota codes, but never expose arbitrary upstream error text.
+fn buffered_failure(error: &Value) -> AppError {
+    let code = error.get("code").and_then(Value::as_str).unwrap_or("");
+    if crate::siwc::is_usage_limit_code(code) {
+        AppError::Upstream {
+            status: 429,
+            body: json!({"error": {"code": code, "message": "subscription sharing usage limit reached"}}).to_string(),
+        }
+    } else {
+        AppError::Upstream {
+            status: 502,
+            body: "Responses upstream reported failure".into(),
+        }
+    }
+}
+
 /// Rebuild a Responses JSON body from a Responses SSE transcript (upstream forced
 /// streaming while the client asked for a single body).
-pub fn reassemble_sse(raw: &str) -> Bytes {
+pub fn reassemble_sse(raw: &str) -> AppResult<Bytes> {
+    let unfinished = || AppError::Upstream {
+        status: 502,
+        body: crate::error::INCOMPLETE_STREAM_MESSAGE.into(),
+    };
+    let mut terminal = false;
     let mut response: Value = json!({
         "id": "resp_reassembled",
         "object": "response",
         "model": "unknown",
-        "status": "completed",
+        "status": "in_progress",
     });
     let mut items: Vec<(i64, Value)> = Vec::new();
     let mut text = String::new();
@@ -360,31 +381,56 @@ pub fn reassemble_sse(raw: &str) -> Bytes {
                     items.push((idx, item.clone()));
                 }
             }
-            Some("response.completed" | "response.incomplete" | "response.failed") => {
-                if let Some(r) = ev.get("response").and_then(|r| r.as_object()) {
-                    for (k, v) in r {
-                        response[k] = v.clone();
-                    }
+            Some("error") => return Err(buffered_failure(ev.get("error").unwrap_or(&ev))),
+            Some("response.failed") => {
+                return Err(buffered_failure(
+                    ev.pointer("/response/error").unwrap_or(&Value::Null),
+                ));
+            }
+            Some(kind @ ("response.completed" | "response.incomplete")) => {
+                let expected = if kind == "response.completed" {
+                    "completed"
+                } else {
+                    "incomplete"
+                };
+                let r = ev
+                    .get("response")
+                    .and_then(Value::as_object)
+                    .filter(|r| r.get("status").and_then(Value::as_str) == Some(expected))
+                    .ok_or_else(unfinished)?;
+                if r.get("error").is_some_and(|e| !e.is_null()) {
+                    return Err(unfinished());
                 }
+                for (k, v) in r {
+                    response[k] = v.clone();
+                }
+                terminal = true;
+                break;
             }
             _ => {}
         }
+    }
+    if !terminal {
+        return Err(unfinished());
     }
     let has_output = response
         .get("output")
         .and_then(|o| o.as_array())
         .is_some_and(|a| !a.is_empty());
-    if !items.is_empty() {
-        items.sort_by_key(|(i, _)| *i);
-        response["output"] = Value::Array(items.into_iter().map(|(_, v)| v).collect());
-    } else if !has_output {
-        response["output"] = json!([{
-            "type": "message",
-            "role": "assistant",
-            "content": [{"type": "output_text", "text": text}]
-        }]);
+    if !has_output {
+        // Some upstreams omit final output; only then reconstruct from events.
+        if !items.is_empty() {
+            items.sort_by_key(|(i, _)| *i);
+            response["output"] = Value::Array(items.into_iter().map(|(_, v)| v).collect());
+        } else {
+            response["output"] = json!([{
+                "type": "message",
+                "role": "assistant",
+                "content": [{"type": "output_text", "text": text}]
+            }]);
+        }
     }
-    Bytes::from(serde_json::to_vec(&response).unwrap_or_default())
+    Ok(Bytes::from(serde_json::to_vec(&response)?))
 }
 
 /// Responses SSE → `chat.completion.chunk` SSE, one upstream `data:` payload at a time.
@@ -477,7 +523,7 @@ impl ResponsesToChatStream {
             return Vec::new();
         }
         if data.trim() == "[DONE]" {
-            return self.finish(None);
+            return self.on_end();
         }
         let Ok(ev) = serde_json::from_str::<Value>(data) else {
             return Vec::new();
@@ -576,9 +622,17 @@ impl ResponsesToChatStream {
         out
     }
 
-    /// Upstream closed: make sure the client still gets a finish chunk and [DONE].
+    /// Responses must supply a typed terminal event; EOF is not completion.
     pub fn on_end(&mut self) -> Vec<String> {
-        self.finish(None)
+        if self.finished {
+            return Vec::new();
+        }
+        self.on_data(
+            &json!({"type": "error", "error": {
+                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+            }})
+            .to_string(),
+        )
     }
 }
 
@@ -1059,9 +1113,17 @@ impl ChatToResponsesStream {
         out
     }
 
-    /// Upstream closed without [DONE]: still close the items and complete the response.
+    /// Preserve finish_reason-only Chat upstreams without inventing completion.
     pub fn on_end(&mut self) -> Vec<String> {
-        self.finish()
+        if self.done || self.finish.is_some() {
+            return self.finish();
+        }
+        self.on_data(
+            &json!({"error": {
+                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+            }})
+            .to_string(),
+        )
     }
 }
 
@@ -1261,14 +1323,24 @@ mod tests {
     }
 
     #[test]
-    fn stream_without_completed_still_finishes() {
+    fn sc1_stream_without_completed_reports_failure() {
         let mut conv = ResponsesToChatStream::new("m");
         let out = feed(
             &mut conv,
             &[json!({"type": "response.output_text.delta", "delta": "x"})],
         );
         assert_eq!(out.last().unwrap(), &json!("[DONE]"));
-        assert_eq!(out[out.len() - 2]["choices"][0]["finish_reason"], "stop");
+        assert_eq!(
+            out[out.len() - 2]["error"]["message"],
+            crate::error::INCOMPLETE_STREAM_MESSAGE
+        );
+        assert!(out
+            .iter()
+            .any(|v| v.pointer("/choices/0/delta/content") == Some(&json!("x"))));
+        assert!(!out.iter().any(|v| v
+            .pointer("/choices/0/finish_reason")
+            .is_some_and(|f| !f.is_null())));
+        assert!(conv.on_end().is_empty());
     }
 
     fn events_of(records: &[String]) -> Vec<(String, Value)> {
@@ -1367,12 +1439,104 @@ mod tests {
         .iter()
         .map(|e| format!("event: x\ndata: {e}\n\n"))
         .collect::<String>();
-        let v = js(&reassemble_sse(&raw));
+        let v = js(&reassemble_sse(&raw).unwrap());
         assert_eq!(v["model"], "gpt-x");
         assert_eq!(v["output"].as_array().unwrap().len(), 2);
         assert_eq!(v["usage"]["input_tokens"], 1);
-        let chat = js(&responses_body_to_chat(&reassemble_sse(&raw)).unwrap());
+        let chat = js(&responses_body_to_chat(&reassemble_sse(&raw).unwrap()).unwrap());
         assert_eq!(chat["choices"][0]["message"]["content"], "ok");
         assert_eq!(chat["choices"][0]["finish_reason"], "tool_calls");
+    }
+
+    fn transcript(events: &[Value]) -> String {
+        events.iter().map(|v| format!("data: {v}\n\n")).collect()
+    }
+
+    #[test]
+    fn br1_collector_requires_a_consistent_terminal() {
+        for raw in ["", "data: [DONE]\n\n", "data: {broken\n\n"] {
+            assert_eq!(reassemble_sse(raw).unwrap_err().status_code(), 502);
+        }
+        for event in [
+            json!({"type":"response.output_text.delta","delta":"PRIVATE"}),
+            json!({"type":"response.output_item.done","item":{"type":"function_call","arguments":"{}"}}),
+            json!({"type":"response.completed"}),
+            json!({"type":"response.completed","response":[]}),
+            json!({"type":"response.completed","response":{"status":"incomplete"}}),
+            json!({"type":"response.incomplete","response":{"status":"completed"}}),
+            json!({"type":"response.completed","response":{"status":"completed","error":{"message":"PRIVATE"}}}),
+            json!({"type":"response.completed","response":{"status":"completed","error":{"code":"subscription_sharing_usage_limit_exceeded","message":"PRIVATE"}}}),
+        ] {
+            let err = reassemble_sse(&transcript(&[event])).unwrap_err();
+            assert_eq!(err.status_code(), 502);
+            assert!(!err.to_string().contains("PRIVATE"));
+        }
+    }
+
+    #[test]
+    fn br2_first_terminal_controls_collection_and_errors_are_redacted() {
+        let success = json!({"type":"response.completed","response":{"status":"completed","output":[],"usage":{"input_tokens":3,"output_tokens":2}}});
+        for error in [
+            json!({"type":"error","message":"PRIVATE"}),
+            json!({"type":"error","error":{"code":"PRIVATE","message":"PRIVATE"}}),
+            json!({"type":"response.failed","response":{"error":{"code":"PRIVATE","message":"PRIVATE"}}}),
+            json!({"type":"response.completed","response":null}),
+        ] {
+            let err = reassemble_sse(&transcript(&[error.clone(), success.clone()])).unwrap_err();
+            assert_eq!(err.status_code(), 502);
+            assert!(!err.to_string().contains("PRIVATE"));
+            let accepted = js(&reassemble_sse(&transcript(&[success.clone(), error])).unwrap());
+            assert_eq!(accepted["status"], "completed");
+            assert!(!accepted.to_string().contains("PRIVATE"));
+        }
+        for code in [
+            "subscription_sharing_usage_limit_exceeded",
+            "subscription_sharing_usage_unavailable",
+        ] {
+            for error in [
+                json!({"type":"error","code":code,"message":"PRIVATE"}),
+                json!({"type":"error","error":{"code":code,"message":"PRIVATE"}}),
+                json!({"type":"response.failed","response":{"status":"failed","error":{"code":code,"message":"PRIVATE"}}}),
+            ] {
+                let err = reassemble_sse(&transcript(&[error])).unwrap_err();
+                assert_eq!(err.status_code(), 429);
+                assert!(err.to_string().contains(code));
+                assert!(!err.to_string().contains("PRIVATE"));
+            }
+        }
+    }
+
+    #[test]
+    fn br3_collector_preserves_terminal_output_and_incomplete_details() {
+        for status in ["completed", "incomplete"] {
+            let terminal = json!({"type":format!("response.{status}"),"response":{"id":"resp1","status":status,
+                "output":[{"type":"message","content":[{"type":"output_text","text":"terminal text"}]}],
+                "usage":{"input_tokens":3,"output_tokens":2},"incomplete_details":{"reason":"content_filter"}}});
+            let v = js(&reassemble_sse(&transcript(&[terminal])).unwrap());
+            assert_eq!(v["status"], status);
+            assert_eq!(v["output"][0]["content"][0]["text"], "terminal text");
+            assert_eq!(v["usage"]["input_tokens"], 3);
+            assert_eq!(v["incomplete_details"]["reason"], "content_filter");
+        }
+    }
+
+    #[test]
+    fn br3_terminal_output_is_authoritative_over_intermediate_items() {
+        for status in ["completed", "incomplete"] {
+            let output = json!([
+                {"type":"message","id":"msg1","content":[{"type":"output_text","text":"final text"}]},
+                {"type":"function_call","call_id":"c1","name":"lookup","arguments":"{}"}
+            ]);
+            let events = [
+                json!({"type":"response.output_item.done","output_index":0,"item":{"type":"message","id":"msg1","content":[{"type":"output_text","text":"stale partial"}]}}),
+                json!({"type":format!("response.{status}"),"response":{"status":status,"output":output,"usage":{"input_tokens":3,"output_tokens":2}}}),
+            ];
+            let value = js(&reassemble_sse(&transcript(&events)).unwrap());
+            assert_eq!(
+                value["output"], output,
+                "terminal output must not lose items or use stale content"
+            );
+            assert_eq!(value["status"], status);
+        }
     }
 }

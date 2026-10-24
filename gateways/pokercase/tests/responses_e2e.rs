@@ -66,6 +66,43 @@ async fn responses_mock(State(seen): State<Seen>, req: Request) -> Response {
 
     let mut events = vec![created];
     let last_text = last["content"][0]["text"].as_str().unwrap_or("");
+    if last_text.starts_with("br_") {
+        let completed = json!({"type":"response.completed","response":{"id":"resp_abc","status":"completed","output":[],"usage":usage}});
+        let error =
+            json!({"type":"error","code":"unknown_fixture_code","message":"PRIVATE-ERROR-CANARY"});
+        match last_text {
+            "br_empty" => events.clear(),
+            "br_partial" | "br_done" => events.push(json!({"type":"response.output_text.delta","delta":"PRIVATE-PARTIAL-CANARY"})),
+            "br_item" => events.extend(text_events("PRIVATE-PARTIAL-CANARY")),
+            "br_error" | "br_error_then_completed" => {
+                events.push(error.clone());
+                if last_text.ends_with("then_completed") { events.push(completed.clone()); }
+            }
+            "br_failed" | "br_failed_then_completed" | "br_quota" => {
+                events.push(json!({"type":"response.failed","response":{"status":"failed","error":{"code":if last_text == "br_quota" {"subscription_sharing_usage_limit_exceeded"} else {"unknown_fixture_code"},"message":"PRIVATE-ERROR-CANARY"}}}));
+                if last_text.ends_with("then_completed") { events.push(completed.clone()); }
+            }
+            "br_top_quota" => events.push(json!({"type":"error","code":"subscription_sharing_usage_unavailable","message":"PRIVATE-ERROR-CANARY"})),
+            "br_malformed" => events.push(json!({"type":"response.completed","response":[]})),
+            "br_conflict" => events.push(json!({"type":"response.completed","response":{"status":"in_progress"}})),
+            "br_completed" | "br_incomplete" | "br_completed_late_error" => {
+                events.extend(text_events("buffered success"));
+                if last_text == "br_incomplete" {
+                    events.push(json!({"type":"response.incomplete","response":{"status":"incomplete","output":[],"incomplete_details":{"reason":"max_output_tokens"},"usage":usage}}));
+                } else { events.push(completed.clone()); }
+                if last_text.ends_with("late_error") { events.push(error.clone()); }
+            }
+            _ => panic!("unknown fixture {last_text}"),
+        }
+        let mut raw = sse(&events);
+        if last_text == "br_done" {
+            raw.push_str("data: [DONE]\n\n");
+        }
+        return Response::builder()
+            .header(header::CONTENT_TYPE, "text/event-stream")
+            .body(Body::from(raw))
+            .unwrap();
+    }
     if last_text == "quota" {
         events.push(json!({"type": "response.failed", "response": {"id": "resp_abc", "status": "failed",
             "error": {"code": "subscription_sharing_usage_limit_exceeded", "message": "plan limit reached"}}}));
@@ -807,4 +844,196 @@ async fn borrowed_grok_login_is_reread_and_never_refreshed() {
     assert!(std::fs::read_to_string(&auth)
         .unwrap()
         .contains("rt-owned-by-cli"));
+}
+
+fn buffered_request(path: &str, scenario: &str) -> Value {
+    if path == "/v1/responses" {
+        json!({"model":"cx","stream":false,"input":[{"role":"user","content":[{"type":"input_text","text":scenario}]}]})
+    } else {
+        json!({"model":"cx","stream":false,"max_tokens":50,"messages":[{"role":"user","content":scenario}]})
+    }
+}
+
+#[tokio::test]
+async fn br1_br2_buffered_failures_never_become_success() {
+    let env = Env::start().await;
+    for scenario in [
+        "br_partial",
+        "br_empty",
+        "br_item",
+        "br_done",
+        "br_error",
+        "br_error_then_completed",
+        "br_failed",
+        "br_failed_then_completed",
+        "br_malformed",
+        "br_conflict",
+        "br_quota",
+        "br_top_quota",
+    ] {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            let before = env.seen.lock().unwrap().len();
+            let r = env
+                .client
+                .post(format!("{}{path}", env.base))
+                .json(&buffered_request(path, scenario))
+                .send()
+                .await
+                .unwrap();
+            let status = r.status();
+            let text = r.text().await.unwrap();
+            assert_eq!(
+                status,
+                if scenario.ends_with("quota") {
+                    429
+                } else {
+                    502
+                },
+                "{scenario} {path}: {text}"
+            );
+            assert!(
+                !text.contains("PRIVATE-"),
+                "leaked upstream payload: {text}"
+            );
+            let v: Value = serde_json::from_str(&text).unwrap();
+            assert!(
+                v.get("error").is_some() && v.get("output").is_none() && v.get("choices").is_none(),
+                "{text}"
+            );
+            if scenario.ends_with("quota") {
+                assert!(text.contains("subscription_sharing_usage_"), "{text}");
+            }
+            assert_eq!(
+                env.seen.lock().unwrap().len(),
+                before + 1,
+                "no hidden retry"
+            );
+        }
+    }
+}
+
+#[tokio::test]
+async fn br3_buffered_completed_and_incomplete_preserve_output() {
+    let env = Env::start().await;
+    for scenario in ["br_completed", "br_incomplete", "br_completed_late_error"] {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            let r = env.post(path, buffered_request(path, scenario)).await;
+            let v: Value = r.json().await.unwrap();
+            assert!(v.to_string().contains("buffered success"), "{path}: {v}");
+            assert!(!v.to_string().contains("PRIVATE-"), "{v}");
+            let incomplete = scenario == "br_incomplete";
+            match path {
+                "/v1/responses" => {
+                    assert_eq!(
+                        v["status"],
+                        if incomplete {
+                            "incomplete"
+                        } else {
+                            "completed"
+                        }
+                    );
+                    assert_eq!(v["usage"]["total_tokens"], 18);
+                    if incomplete {
+                        assert_eq!(v["incomplete_details"]["reason"], "max_output_tokens");
+                    }
+                }
+                "/v1/messages" => {
+                    assert_eq!(
+                        v["stop_reason"],
+                        if incomplete { "max_tokens" } else { "end_turn" }
+                    );
+                    assert_eq!(v["usage"]["output_tokens"], 7);
+                }
+                _ => {
+                    assert_eq!(
+                        v["choices"][0]["finish_reason"],
+                        if incomplete { "length" } else { "stop" }
+                    );
+                    assert_eq!(v["usage"]["total_tokens"], 18);
+                }
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn nr1_native_eof_emits_error() {
+    let env = Env::start().await;
+    for fixture in [
+        "br_empty",
+        "br_partial",
+        "br_done",
+        "br_item",
+        "br_malformed",
+        "br_conflict",
+    ] {
+        let r = env
+            .post(
+                "/v1/responses",
+                json!({"model":"cx", "stream":true, "input":fixture}),
+            )
+            .await;
+        assert_eq!(r.status(), StatusCode::OK);
+        let raw = r.text().await.unwrap();
+        let events = sse_data(&raw);
+        assert_eq!(
+            events.last().map(|v| &v["type"]),
+            Some(&json!("error")),
+            "{fixture}: {raw}"
+        );
+        assert_eq!(
+            events.last().unwrap()["message"],
+            "upstream stream ended before completion"
+        );
+        assert!(!raw.contains("data: [DONE]"));
+        assert!(!events.iter().any(|v| v["type"] == "response.completed"));
+    }
+}
+
+#[tokio::test]
+async fn nr2_native_terminals_preserve_output_and_finality() {
+    let env = Env::start().await;
+    for (fixture, terminal) in [
+        ("br_completed", "response.completed"),
+        ("br_incomplete", "response.incomplete"),
+        ("br_completed_late_error", "response.completed"),
+        ("br_error_then_completed", "error"),
+        ("br_failed_then_completed", "response.failed"),
+    ] {
+        let r = env
+            .post(
+                "/v1/responses",
+                json!({"model":"cx", "stream":true, "input":fixture}),
+            )
+            .await;
+        assert_eq!(r.status(), StatusCode::OK);
+        let raw = r.text().await.unwrap();
+        let events = sse_data(&raw);
+        assert_eq!(events.last().unwrap()["type"], terminal, "{fixture}: {raw}");
+        assert_eq!(
+            events
+                .iter()
+                .filter(|e| matches!(
+                    e["type"].as_str(),
+                    Some(
+                        "error" | "response.failed" | "response.completed" | "response.incomplete"
+                    )
+                ))
+                .count(),
+            1
+        );
+        assert!(!raw.contains("upstream_stream_incomplete"));
+        if terminal == "response.completed" || terminal == "response.incomplete" {
+            assert_eq!(
+                events.last().unwrap()["response"]["usage"]["input_tokens"],
+                11
+            );
+            assert!(raw.contains("buffered success"));
+        } else {
+            assert!(
+                raw.contains("PRIVATE-ERROR-CANARY"),
+                "native upstream errors remain unchanged"
+            );
+        }
+    }
 }

@@ -1,0 +1,68 @@
+{
+  "project": "goku",
+  "targets": "products/goku/fe-review/targets.json",
+  "startedAt": "2026-10-24T10:14:12.679Z",
+  "axe": true,
+  "results": [
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5173/",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__desktop__light.png",
+      "status": 200,
+      "loadMs": 1841,
+      "title": "Glance",
+      "horizontalOverflow": false,
+      "axeViolations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Heading levels should only increase by one"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3001/review.svg net::ERR_BLOCKED_BY_ORB"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5173/",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__tablet__light.png",
+      "status": 200,
+      "loadMs": 1755,
+      "title": "Glance",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3001/review.svg net::ERR_BLOCKED_BY_ORB"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5173/",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__mobile__light.png",
+      "status": 200,
+      "loadMs": 1776,
+      "title": "Glance",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:3001/review.svg net::ERR_BLOCKED_BY_ORB"
+      ]
+    }
+  ],
+  "finishedAt": "2026-10-24T10:14:18.886Z"
+}

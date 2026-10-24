@@ -1,0 +1,10 @@
+✔ pending browser rejection is handled immediately when the action fails first (3.041637ms)
+✔ pending success and unknown errors retain no raw payload (0.284329ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52.34467

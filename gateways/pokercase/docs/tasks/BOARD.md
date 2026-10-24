@@ -7,7 +7,7 @@
 | ID | 任務 | AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | CUR-01 | 外部容器 runner、回歸與 canary | CI-1–CI-5 | done | 2026-10-23T16:57:52Z | 2026-10-23T18:01:20Z | 2026-10-23T18:05:45Z |
-| CUR-02 | [專用profile登入與一次真實文字驗收](../cursor-live-smoke.md)；登入成功；重試確認sandbox不可用，已補固定503診斷；正在驗證外層容器與內層sandbox停用配置 | AC-17（單次文字） | in_progress | 2026-10-23T18:13:50Z | — | 2026-10-24T05:49:36Z |
+| CUR-02 | [專用profile登入與一次真實文字驗收](../cursor-live-smoke.md)；登入成功；重試確認sandbox不可用，已補固定503診斷；修正後單次gateway驗收HTTP200與清理通過，待證據PR合併 | AC-17（單次文字） | in_progress | 2026-10-23T18:13:50Z | — | 2026-10-24T06:09:57Z |
 
 原 Claude session 的其餘未驗證產品旅程仍保留 SUCCESS.md，不納入此隔離切片的完成聲明。
 

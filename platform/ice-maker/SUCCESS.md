@@ -70,3 +70,19 @@ scripts/document-ingestion-doctor.sh --json
 ## T-0383 Grok review-boundary documentation
 
 Goal/scope: clarify the existing AC-04 external gate and actual Grok review invocation; no runtime changes or new capability claim. The artifact is supplied review input, not a filesystem boundary. Verify the runbook against `ClaudeGrokReviewAdapter.build_argv` and `execute_argv`, official Grok docs and independently reviewed source. Run project/index/link checks; no new model call or test asserting an unchanged implementation. See [task board](docs/tasks/BOARD.md). AC-04 remains pending.
+
+## T-0380 FE 第 2 輪 R2-AC-6/E
+
+本次僅依已批准 [DESIGN M1–M4](fe-review/DESIGN.md) 實作 review-only 合成 extractor 啟動器、內嵌上傳頁的外殼／狀態與錯誤處理、固定結果頁換行／導覽。API、批次狀態、SQLite、正式 CLI／OCR／Docker／relay、依賴與 CI 不改。
+
+| AC | 狀態 | 驗證計畫 |
+| --- | --- | --- |
+| FE-M1 | passed (local) | 真 synthetic upload／結果、固定 seed 重啟身份、health200、shared capture --dry-run／--start 3頁×3尺寸×2偏好；明確 owned cleanup |
+| FE-M2 | passed (local) | lang／viewport／main／system colors／focus／stacked fields；三尺寸無 overflow、axe critical/serious 0（coverage/incomplete 如實記錄） |
+| FE-M3 | passed (local) | 上傳及poll錯誤可見、停止poll、busy恢復、語言trim、counts／下載；30分鐘 UI poll cap，真流程＋受控故障與clock證據分開 |
+| FE-M4 | passed (local) | 固定escaped Markdown外殼／換行／導覽；XSS與末端MAX_HTML_BYTES保留，新增bytes及near-cap回歸 |
+| FE-gates | review/CI pending | 帶extras的make check、focused RED/GREEN、browser證據、獨立review與CI／merge |
+
+結果記入 [本次報告](fe-review/tasks/round2/report.md) 與 result.json。完整產品 AC-04、usable_tag 與第3輪仍未驗收。
+
+實際證據：18 shared captures／18 axe scans 通過；原 runtime race FAIL保留，focused flow及completed-only補證通過。原生320 tests有1環境FAIL→原test focused PASS；不冒稱單次全綠，exact-head CI仍必要。

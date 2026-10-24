@@ -2007,3 +2007,9 @@ HAI586 merged8df40fa0 at08:31:49Z with allrequiredCI/R12/remoteequality; boardac
 Sixfrontendwaves publication prerequisites independently verified (sixmergedPRs,25SUCCESSchecks). T012 component-only reviewconfiguration/currentroute evidence; rootownsboards/Git/environment/acceptance. AgentPlatform disjointunit in finalreview, no dependentproductchange. Estimate35–50activepluswait, firstworker25min/max2diagnosis/checkpoints20min. No frontendproduct/shared/backend/PP1/R3expansion; nativeauthor-otherreview andcurrentCI/normaldeliveryrequired.
 
 Agent Platform588 subsequently merged8c0b7e3a474516d9f88b35bfff46e948266f2d95 at09:14:44; all6requiredCI SUCCESS including actual45unit/675platformtests, R15FINALACCEPT andscopedremoteequality. CMS closeout carries actualAProot/componentboard done. Local merge integrates alreadyacceptedorigin/main withoutrewritinghistory; CMSsourceunchangedbyintegration.
+
+## Ice Maker FE round2 / T-0380 R2-AC-6 / 2026-10-24T09:17:52Z
+
+T013 approvedM1–M4 only; rootboardrecords actualAP588merge09:14:44/allCI/remoteequality. CMS589 disjointcomponentalreadyclaimed/inprogresswhileitsruntimefinishes; currentmainCMSrootrowispriorpublication snapshot, rootintegratesboardsatcloseout. Nativeboundedworker/reviewer, noexternalCLI/provider. ScopeinlinePAGE/renderenvelope+reviewfixture,30minuteUIpollcap expresslydelegatedDESIGNchoice, nobackend/deps. OriginalR2goalincludesboundedaxe/overflow; do notdiscardasR3. RootnativehostGit/venv/extras andexternalreviewtooling; noarchive .team recreation.45–60activeestimatepluswait/worker30/max2diagnostics/checkpoint20notdeadline. Taskfiledefinesexactallowlist/gates.
+
+CMS589 merged ded336ad89f6afe250d7752646487a39dec33eff at09:36:50Z, all7CI/R19/scopedremoteequality. Icecloseout carries actualCMSdone; localnormalmerge integratesacceptedmain, no productrework orhistoryrewrite.

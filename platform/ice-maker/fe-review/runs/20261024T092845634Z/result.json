@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "runId": "20261024T092845634Z",
+  "status": "failed",
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "steps": [
+    {
+      "name": "shared-dryrun-start",
+      "records": 18,
+      "pages": 3,
+      "serviceClosed": true
+    },
+    {
+      "name": "repeat-start-identities",
+      "batch_id": "b6be0bf0ca4722722f7686f83e6dc386286a53d309aba8f38d9c233d0adef2dc",
+      "source_sha256": [
+        "90b9bf248cc722e4841ad158082592475e8b4b35ae7cf6ebafe042659801cbab",
+        "352b52b23c3a895bcb48d0acbb4431c0704cad5f2149cb8d6d6728a0f9dd786d"
+      ]
+    }
+  ],
+  "axe": [
+    {
+      "page": "upload",
+      "viewport": "desktop",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "short-result",
+      "viewport": "desktop",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "long-result",
+      "viewport": "desktop",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "upload",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "short-result",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "long-result",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "upload",
+      "viewport": "tablet",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "short-result",
+      "viewport": "tablet",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "long-result",
+      "viewport": "tablet",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "upload",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "short-result",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "long-result",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "upload",
+      "viewport": "mobile",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "short-result",
+      "viewport": "mobile",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "long-result",
+      "viewport": "mobile",
+      "scheme": "light",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "upload",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "short-result",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "long-result",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "violations": [],
+      "incomplete": []
+    }
+  ],
+  "captures": [
+    {
+      "name": "real-running-busy",
+      "path": "screenshots/real-running-busy.png",
+      "sha256": "1237b4cc17baaf4725720c1a290eada2ce4fca419242f577d8f958d7172683ab",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    }
+  ],
+  "health": [],
+  "cleanup": [
+    {
+      "name": "shared-fixture",
+      "serviceClosed": true,
+      "listenerAbsent": true
+    },
+    {
+      "name": "fixture",
+      "code": null,
+      "signal": "SIGTERM",
+      "serviceClosed": true,
+      "listenerAbsent": true
+    }
+  ],
+  "sourceHashes": {
+    "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+    "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+    "fe-review/serve_fixture.py": "e44092e2b5ab06db37b488470adcc0ecaa143f7b029decfa18386ae365577a18",
+    "fe-review/verify-browser.mjs": "eed0d0b88a2ac77ecc656cb39e361ee272d8ae47b8b4c68f162cd7a2c34e3250",
+    "fe-review/targets.json": "fcc26dc2c421cb9b22d85e876a27bdc5a8c0bb1273e19f30c1fe9f657f745b63"
+  },
+  "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(await button().isEnabled())\n"
+}

@@ -93,6 +93,11 @@ class ReadableResultTests(unittest.TestCase):
         self.assertNotIn(b"<img src=x", page)
         self.assertIn(b"&lt;img src=x onerror=alert&gt;", page)
         self.assertIn(b"Download Markdown", page)
+        self.assertIn(b'lang="en"', page)
+        self.assertIn(b'name="viewport"', page)
+        self.assertIn(b"pre-wrap", page)
+        self.assertIn(b"Readable document", page)
+        self.assertIn(b'href="/"', page)
 
     def test_source_chunk_and_encoded_output_bounds_fail_before_publication(self):
         chunks = (
@@ -106,6 +111,12 @@ class ReadableResultTests(unittest.TestCase):
             with self.assertRaises(ReadableResultTooLarge):
                 render_markdown(chunks[:1], self.source)
         markdown = render_markdown(chunks, self.source)
+        page = render_html(markdown, "b" * 64, self.source)
+        with mock.patch("ice_maker.readable_results.MAX_HTML_BYTES", len(page)):
+            self.assertEqual(render_html(markdown, "b" * 64, self.source), page)
+        with mock.patch("ice_maker.readable_results.MAX_HTML_BYTES", len(page) - 1):
+            with self.assertRaises(ReadableResultTooLarge):
+                render_html(markdown, "b" * 64, self.source)
         with mock.patch("ice_maker.readable_results.MAX_HTML_BYTES", len(markdown)):
             with self.assertRaises(ReadableResultTooLarge):
                 render_html(markdown, "b" * 64, self.source)

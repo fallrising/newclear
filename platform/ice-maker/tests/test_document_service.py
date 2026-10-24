@@ -546,6 +546,14 @@ class DocumentServiceHttpTests(unittest.TestCase):
         self.assertIn(b'method="post"', body)
         self.assertIn(b'name="files"', body)
         self.assertIn(b"rights", body)
+        self.assertIn(b'lang="en"', body)
+        self.assertIn(b'name="viewport"', body)
+        self.assertIn(b'name="color-scheme"', body)
+        self.assertIn(b"<main>", body)
+        self.assertIn(b"response.ok", body)
+        self.assertIn(b".trim()", body)
+        self.assertIn(b"Status unavailable:", body)
+        self.assertIn(b"aria-busy", body)
         boundary = "ice-maker-boundary"
         rows = [(Upload("a.pdf", PDF), PDF), (Upload("b.png", PNG), PNG)]
         fields = []

@@ -73,7 +73,7 @@ ice-maker 的 UI 只有兩個伺服器產生的頁面：`document-service` 的�
   5. 輪詢期間只顯示 `Processing <batch id>`，看不到 `queued`／`running` 與 `counts`（`status` 已回傳，`:891`）。
 - 修改：只改 `_PAGE` 內的 script，行為範圍如下：
   - 上傳失敗顯示 `Upload failed: <detail>`；`detail` 以 `textContent` 寫入，不用 `innerHTML`。
-  - 輪詢遇到非 2xx 或例外時停止輪詢，顯示 `Status unavailable: <detail 或 HTTP 狀態>`。輪詢加上上限（例如 30 分鐘，或依 `config` 的 `timeout_seconds` × 檔案數推算，第 2 輪決定具體值並寫回本檔），逾時顯示訊息而不是無限重試。
+  - 輪詢遇到非 2xx 或例外時停止輪詢，顯示 `Status unavailable: <detail 或 HTTP 狀態>`。輪詢加上上限（本次第 2 輪決定：從批次被接受起計 30 分鐘；只停止 UI 輪詢，不取消後端工作，顯示批次 ID 與重新整理／查詢指引），逾時顯示訊息而不是無限重試。
   - 送出後停用按鈕，並設 `aria-busy="true"`；完成、失敗或停止輪詢時恢復。
   - `languages` 每一項 `trim()` 後再過濾空字串與排序。
   - 輪詢期間顯示 `Batch <id>: <status>` 與 `counts` 的數字（純文字）。

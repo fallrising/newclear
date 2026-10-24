@@ -36,8 +36,8 @@
 | FE2-2 | platform/dim-gate 第2輪實作（PR583 已合併） | R2-AC-2 | done | 2026-10-24T06:32:44Z | 2026-10-24T07:32:17Z | 2026-10-24T07:35:27Z |
 | FE2-3 | products/hai-taskboard 第2輪實作（PR586 已合併） | R2-AC-3 | done | 2026-10-24T07:35:27Z | 2026-10-24T08:31:49Z | 2026-10-24T08:34:14Z |
 | FE2-4 | platform/agent-platform 第2輪實作（PR588 已合併） | R2-AC-4 | done | 2026-10-24T08:34:14Z | 2026-10-24T09:14:44Z | 2026-10-24T09:22:46Z |
-| FE2-5 | apps/cms-scaffold 第2輪實作 | R2-AC-5 | in_progress | 2026-10-24T09:00:28Z | — | 2026-10-24T09:00:28Z |
-| FE2-6 | platform/ice-maker 第2輪實作 | R2-AC-6 | todo | — | — | — |
+| FE2-5 | apps/cms-scaffold 第2輪實作（PR589 已合併） | R2-AC-5 | done | 2026-10-24T09:00:28Z | 2026-10-24T09:36:50Z | 2026-10-24T09:38:37Z |
+| FE2-6 | platform/ice-maker 第2輪實作 | R2-AC-6 | in_progress | 2026-10-24T09:17:52Z | — | 2026-10-24T09:17:52Z |
 | FE2-7 | specs/fleet 第2輪實作 | R2-AC-7 | todo | — | — | — |
 | FE2-8 | systems/ojbquay 第2輪實作 | R2-AC-8 | todo | — | — | — |
 | FE2-9 | products/goku 第2輪實作 | R2-AC-9 | todo | — | — | — |

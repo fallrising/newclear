@@ -1,0 +1,21 @@
+Tool stdout retained; repository absolute paths normalized to <repo> for publication.
+✔ targets map to actual current routes with explicit loaded and final URL contracts (9.48696ms)
+✔ concrete public and member fixture IDs remain present (3.432095ms)
+✔ loaded authorized page accepted (1.289115ms)
+✔ reject loginRedirect without disclosing URL (0.517457ms)
+✔ reject otherOrigin without disclosing URL (1.972762ms)
+✔ reject wrongQuery without disclosing URL (0.17479ms)
+✔ reject fragment without disclosing URL (0.147239ms)
+✔ reject staleIdentity without disclosing URL (0.153009ms)
+✔ reject skeleton without disclosing URL (0.12963ms)
+✔ reject httpError without disclosing URL (0.110091ms)
+✔ reject pageError without disclosing URL (0.793376ms)
+✔ intentional logout only accepts exact anonymous selector (0.363088ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110.949367

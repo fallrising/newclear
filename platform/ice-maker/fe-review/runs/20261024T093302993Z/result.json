@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "runId": "20261024T093302993Z",
+  "status": "passed",
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "steps": [
+    {
+      "name": "fresh-flow-only-fixture",
+      "batch_id": "b6be0bf0ca4722722f7686f83e6dc386286a53d309aba8f38d9c233d0adef2dc",
+      "source_sha256": [
+        "90b9bf248cc722e4841ad158082592475e8b4b35ae7cf6ebafe042659801cbab",
+        "352b52b23c3a895bcb48d0acbb4431c0704cad5f2149cb8d6d6728a0f9dd786d"
+      ]
+    },
+    {
+      "name": "completed-stays-idle",
+      "pollsBefore": 2,
+      "pollsAfter": 2,
+      "observationMs": 1200,
+      "counts": {
+        "processed": 1,
+        "duplicate": 0,
+        "failed": 0,
+        "rejected": 0
+      }
+    },
+    {
+      "name": "real-upload-normalized-language-busy-preview-download",
+      "batch": "15415e8533f2d5472e1fc8688eaa96d96d2717779316b416cadbcb51ff7add52",
+      "source": "0df8ee05a72963c9b81ab8bec9314f9aae0172a757511294aa046ccd90ea8b8d",
+      "markdownSha256": "55a4ab2a1d39756937e670d228ff326a6e9e9d591146595acadb68a1bf5de1b5",
+      "markdownBytes": 231
+    }
+  ],
+  "axe": [],
+  "captures": [
+    {
+      "name": "real-running-busy",
+      "path": "screenshots/real-running-busy.png",
+      "sha256": "1237b4cc17baaf4725720c1a290eada2ce4fca419242f577d8f958d7172683ab",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "real-completed",
+      "path": "screenshots/real-completed.png",
+      "sha256": "3b3dbed84ab2f78d0c8178036a01e53b0b75303101729edabde07f27779d0711",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "real-result",
+      "path": "screenshots/real-result.png",
+      "sha256": "80d126f5e7a019d62ccb1cb9ec151e575ddac8ae4ba1f16490fc470deccea130",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    }
+  ],
+  "health": [],
+  "cleanup": [
+    {
+      "name": "fixture",
+      "code": null,
+      "signal": "SIGTERM",
+      "serviceClosed": true,
+      "listenerAbsent": true
+    }
+  ],
+  "sourceHashes": {
+    "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+    "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+    "fe-review/serve_fixture.py": "e44092e2b5ab06db37b488470adcc0ecaa143f7b029decfa18386ae365577a18",
+    "fe-review/verify-browser.mjs": "50d5f889f8e9ef07d0c8ccc2f0dcb26521f7a477f234bf8e83efaa168e8b58b9",
+    "fe-review/targets.json": "fcc26dc2c421cb9b22d85e876a27bdc5a8c0bb1273e19f30c1fe9f657f745b63"
+  }
+}

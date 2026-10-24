@@ -1,0 +1,281 @@
+{
+  "schema": 1,
+  "status": "r2-local-candidate",
+  "scope": "approved R2 M1-M4 only",
+  "snapshot": "2026-10-24T09:34:36.346145+00:00",
+  "requiredRemaining": [
+    "independent author-other acceptance",
+    "exact-head CI",
+    "normal merge/readback"
+  ],
+  "matrix": {
+    "pages": 3,
+    "viewports": 3,
+    "schemes": 2,
+    "records": 18,
+    "http200": 18,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "failedRequests": 0,
+    "horizontalOverflow": 0
+  },
+  "axe": {
+    "scans": 18,
+    "violations": 0,
+    "incomplete": 0
+  },
+  "pngRawCount": 32,
+  "pngPublication": "ignored local only",
+  "manifests": [
+    {
+      "path": "runs/20261024T092845634Z/result.json",
+      "sha256": "a01006517dfb8e10db9a2660acf81ff443ce26a9509a2ab1e1f564eb981892ee",
+      "status": "failed",
+      "sourceHashes": {
+        "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+        "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+        "fe-review/serve_fixture.py": "e44092e2b5ab06db37b488470adcc0ecaa143f7b029decfa18386ae365577a18",
+        "fe-review/verify-browser.mjs": "eed0d0b88a2ac77ecc656cb39e361ee272d8ae47b8b4c68f162cd7a2c34e3250",
+        "fe-review/targets.json": "fcc26dc2c421cb9b22d85e876a27bdc5a8c0bb1273e19f30c1fe9f657f745b63"
+      }
+    },
+    {
+      "path": "runs/20261024T093013489Z/result.json",
+      "sha256": "1108faf897f4431a4c0afec71966c77ea882e78c7cec21e0fce5deb668e59ff8",
+      "status": "passed",
+      "sourceHashes": {
+        "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+        "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+        "fe-review/serve_fixture.py": "e44092e2b5ab06db37b488470adcc0ecaa143f7b029decfa18386ae365577a18",
+        "fe-review/verify-browser.mjs": "d2036b7b4e410220550516871372b3d32d3a57ac878ac62098a995a54489a112",
+        "fe-review/targets.json": "fcc26dc2c421cb9b22d85e876a27bdc5a8c0bb1273e19f30c1fe9f657f745b63"
+      }
+    },
+    {
+      "path": "runs/20261024T093302993Z/result.json",
+      "sha256": "65304348eddd6558192f496df6ede8ac47ff2701b35e0bf435b48efe1ef9bb45",
+      "status": "passed",
+      "sourceHashes": {
+        "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+        "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+        "fe-review/serve_fixture.py": "e44092e2b5ab06db37b488470adcc0ecaa143f7b029decfa18386ae365577a18",
+        "fe-review/verify-browser.mjs": "50d5f889f8e9ef07d0c8ccc2f0dcb26521f7a477f234bf8e83efaa168e8b58b9",
+        "fe-review/targets.json": "fcc26dc2c421cb9b22d85e876a27bdc5a8c0bb1273e19f30c1fe9f657f745b63"
+      }
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/capture.json",
+      "sha256": "78091b84981741c850b5f6d0b061208a3e6f0e0165b6b9791d4d9cb034778921"
+    }
+  ],
+  "pngHashes": [
+    {
+      "path": "runs/20261024T092845634Z/screenshots/real-running-busy.png",
+      "sha256": "1237b4cc17baaf4725720c1a290eada2ce4fca419242f577d8f958d7172683ab"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__long-result__desktop__dark.png",
+      "sha256": "b4e82e8c9c579d3e0a1dd1d0a1134c039dfdaa510ce6b1583907ffb8c0d5a842"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__long-result__desktop__light.png",
+      "sha256": "a57c959ae842ceed5045d70fe4759d30eb853e13c76c49e25444b0e2b46c16e0"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__long-result__mobile__dark.png",
+      "sha256": "e4fd10fa807b6a88169e1a48becfbd40b1f9bbf23ff9db5eb889752366d4cdc9"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__long-result__mobile__light.png",
+      "sha256": "1619435556acc9572bd9d6aa55a4226391220517ca37d5ec0adea1f0bf5731f9"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__long-result__tablet__dark.png",
+      "sha256": "a7b6a5767abab8358eed52d596632d424432c5116178e16805816b8185a40b2a"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__long-result__tablet__light.png",
+      "sha256": "4d5469fb0ef90f82898dee29ab102a67011d55d01384ef2fe2836251312c77e6"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__short-result__desktop__dark.png",
+      "sha256": "a1212c587df66f8449c6fee533ddf52900ea0895652d62572d1834347997efcb"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__short-result__desktop__light.png",
+      "sha256": "8af0735772c5f5df8b2c67e3ca828e2c6b20d6697875a101b630c9dc1aba4bda"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__short-result__mobile__dark.png",
+      "sha256": "74e9704b1af577c283197217129e5743e8a2cf6658fd12a8f6b37dcf5c0b3657"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__short-result__mobile__light.png",
+      "sha256": "db7325889bd976c1cfc786a192df381a15aafa174278ddfac3f50b92bc62cb6b"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__short-result__tablet__dark.png",
+      "sha256": "50f7ad8dde55322ee092768d26e59fbb3c76088982d9caeaf7d4e12b22ef458c"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__short-result__tablet__light.png",
+      "sha256": "1464119820c5aa0b44ed01441747c7cf22667ea7871a10ba2f3329d18913b7a5"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__upload__desktop__dark.png",
+      "sha256": "ab9474ad4c9296ac219aa3ad729acffe47f06c3f85081966091312d6dc16db08"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__upload__desktop__light.png",
+      "sha256": "12b629d160c665f7aa36e5ee2b8bcc99924bfea95574175125bee14bf26b99eb"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__upload__mobile__dark.png",
+      "sha256": "d61cfa580acc621b4d28e3fbe9a8fe2b4e92727c9c17320945b4967e230a19ec"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__upload__mobile__light.png",
+      "sha256": "7fdd9781b23b239bc6a3506799c5d55aad1c976e64c370308f5ad28bd7f2539c"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__upload__tablet__dark.png",
+      "sha256": "7e419080667fa0fef8f70ca1850f8c49f7ccab369b48bfba17dbcd1b122cb68e"
+    },
+    {
+      "path": "runs/20261024T092845634Z/shared/screenshots/document-service__upload__tablet__light.png",
+      "sha256": "a055fbf1f844ab5ea381d65dc6c17077d6ca3f5afe5303afca36d3cc45864438"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/controlled-timeout.png",
+      "sha256": "60cc9076c5d39a537b65f8db8d01c5d84d29fac536935e58bd9dde4abe2324c6"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/poll-404.png",
+      "sha256": "4a00ba6c6ce728d9777a77783668da39fe4b9ff4ecb763ece0ac9808733dd0f4"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/poll-409.png",
+      "sha256": "943e3c308de9c0a0724e13606f954a915d02cd3d852f7e0d58e834460cba8a6a"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/poll-invalid.png",
+      "sha256": "abc9020621621681dbebb166705feb4afc0fe25fe3a63619a43ba98aab858710"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/poll-network.png",
+      "sha256": "b57e3ddd90187f1bd076087351172f32381569aac66973ca2f00f0b2b08c3e7b"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/real-failed-batch.png",
+      "sha256": "a8f374c2775ff4b864eed44077e0d2e21cd5c20d83ff775c3074f2b82864557e"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/real-result.png",
+      "sha256": "80d126f5e7a019d62ccb1cb9ec151e575ddac8ae4ba1f16490fc470deccea130"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/real-running-busy.png",
+      "sha256": "1237b4cc17baaf4725720c1a290eada2ce4fca419242f577d8f958d7172683ab"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/real-upload-400.png",
+      "sha256": "f46fd64f9fba43c76b7b28736632e948b2d125a9ef14a1058c2d0ea9b942ee88"
+    },
+    {
+      "path": "runs/20261024T093013489Z/screenshots/upload-detail-literal.png",
+      "sha256": "ddcec7c0a4d43f1e71154da5ac718e1c9f91d4545f315cfdb65485f3eeb76e97"
+    },
+    {
+      "path": "runs/20261024T093302993Z/screenshots/real-completed.png",
+      "sha256": "3b3dbed84ab2f78d0c8178036a01e53b0b75303101729edabde07f27779d0711"
+    },
+    {
+      "path": "runs/20261024T093302993Z/screenshots/real-result.png",
+      "sha256": "80d126f5e7a019d62ccb1cb9ec151e575ddac8ae4ba1f16490fc470deccea130"
+    },
+    {
+      "path": "runs/20261024T093302993Z/screenshots/real-running-busy.png",
+      "sha256": "1237b4cc17baaf4725720c1a290eada2ce4fca419242f577d8f958d7172683ab"
+    }
+  ],
+  "currentSourceHashes": {
+    "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+    "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+    "tests/test_document_service.py": "5f55dafd9d3449b742817f588903f69965bb0a0997891737acdae9b6ca79276c",
+    "tests/test_readable_results.py": "07d5facaec4b3bb5719a79abc1ea2f7c85e745b1eb16341298e9365c79269e93",
+    "fe-review/serve_fixture.py": "e44092e2b5ab06db37b488470adcc0ecaa143f7b029decfa18386ae365577a18",
+    "fe-review/test_fixture.py": "5cfb28440abc71236a0f99d928c241d198fa45c0b2ce964e6b213a1fd22e4b1a",
+    "fe-review/verify-browser.mjs": "50d5f889f8e9ef07d0c8ccc2f0dcb26521f7a477f234bf8e83efaa168e8b58b9",
+    "fe-review/targets.json": "3040b7dd659f85bb3169a366ba966fb0b20a4bbfc8535ed2d7b8009df427c66e"
+  },
+  "rawLogs": [
+    {
+      "name": "focused-red.log",
+      "sha256": "6396a4bd5831e848b412647859aac718a247cbe27386ac206d08652ae90351c8",
+      "publication": "ignored local only"
+    },
+    {
+      "name": "focused-green.log",
+      "sha256": "e3c5672ec8824b0990fcfebe5e867c28e2adde79955281611c7e463c5e141c56",
+      "publication": "ignored local only"
+    },
+    {
+      "name": "cap-green.log",
+      "sha256": "4d1027832df4ebc88f910c635ff22a5fffd72e6f9a8d3b93b58c4366c328b26d",
+      "publication": "ignored local only"
+    },
+    {
+      "name": "fixture-tests.log",
+      "sha256": "11779e7fb102bcbb64688c4f75dbbbfc4537cca356e705f5f38e2e55622a6ff2",
+      "publication": "ignored local only"
+    }
+  ],
+  "outerReceipts": [
+    {
+      "attempt": "runtime01-20261024T092845Z",
+      "exitCode": 1,
+      "elapsedSeconds": 21.429,
+      "containerRemoved": true,
+      "stateExternal": true,
+      "network": "none"
+    },
+    {
+      "attempt": "runtime02-20261024T093013Z",
+      "exitCode": 0,
+      "elapsedSeconds": 11.458,
+      "containerRemoved": true,
+      "stateExternal": true,
+      "network": "none",
+      "mode": "flow-only"
+    },
+    {
+      "attempt": "runtime03-20261024T093302Z",
+      "exitCode": 0,
+      "elapsedSeconds": 3.343,
+      "containerRemoved": true,
+      "stateExternal": true,
+      "network": "none",
+      "mode": "completed-only"
+    }
+  ],
+  "native": "evidence/native.json",
+  "envelope": {
+    "beforeBytes": 378,
+    "afterBytes": 913,
+    "addedBytes": 535,
+    "maxHtmlBytes": 262144
+  },
+  "postRuntimeDelta": "targets verified/note metadata only; apps/runtime configuration unchanged. No product changes after first runtime. Driver race correction and targeted completed proof have distinct per-run hashes.",
+  "limitations": [
+    "synthetic extraction only",
+    "controlled faults/clock distinguished from actual backend flow",
+    "no full R3 or product AC-04 claim",
+    "original native and harness failures retained"
+  ],
+  "cost": {
+    "aggregateActiveSeconds": null,
+    "providerRequests": null,
+    "preCompactionToolCalls": null
+  },
+  "nativeSha256": "cd40cf917eadc67b943bd414e16c3e97edd71a0d8a356c8a29631ebbd6d8169f"
+}

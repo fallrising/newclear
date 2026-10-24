@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-09T15:10:04.510769+00:00",
+  "runId": "0f18b0c13cf7492fbcaf20ae4fb18a64",
+  "reason": "owner VPS maintenance checkpoint",
+  "containers": [
+    {
+      "service": "ingress",
+      "id": "804f01d1c6b4dced42ec260be1313f76667b3efef75c7c4a134ad30cc07eda39",
+      "stopped": true
+    },
+    {
+      "service": "cms-api",
+      "id": "1d5ffe07bf0f60e2f03c2a710b1d5347dcb43cfa17aca01577d411f8140f75cf",
+      "stopped": true
+    },
+    {
+      "service": "postgres",
+      "id": "46ef3e3a1822ea49b49156268afc03c7af92365a357612c409f70808fb069ae8",
+      "stopped": true
+    }
+  ],
+  "initializationAttempted": false,
+  "volumesRemoved": false
+}

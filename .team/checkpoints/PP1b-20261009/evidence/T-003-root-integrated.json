@@ -1,0 +1,8 @@
+{
+  "scripts/local/maintenance.mjs": "699d235d51b2b9bb4f073691bb6bd6e0bac12fce4f45c2fab1a81ec7d2de581a",
+  "scripts/local/maintenance.test.mjs": "4175625721a847713cf5fe33d6b2616833bfac47a33e841cd62969498ab051d1",
+  "services/cms-api/src/main/java/com/fallrising/cms/identity/maintenance/LocalMaintenanceGuard.java": "f821690bfb9fe85e58d38f8484dd0a775a7ba1fdcf0e04bd60f00a4430fdca1b",
+  "services/cms-api/src/main/java/com/fallrising/cms/identity/maintenance/IdentityMaintenanceCommand.java": "a2a5d3d1266782da8f989c40bfe61144a7f4227f3e9b21b4c536ef3ebe868807",
+  "services/cms-api/src/main/java/com/fallrising/cms/identity/maintenance/IdentityMaintenanceConfiguration.java": "b29196c7dd095a2d0ad2ab21166038d11889af5bceb578da9ad9af0d466f2e3d",
+  "services/cms-api/src/test/java/com/fallrising/cms/identity/maintenance/IdentityMaintenanceCommandTests.java": "c86f6e4b6eee78a34b0a234fda73bcfa2b682290d401a4b5ece94da014c08f88"
+}

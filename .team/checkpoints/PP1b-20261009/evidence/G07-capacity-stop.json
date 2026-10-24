@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-09T15:06:10.877316+00:00",
+  "containers": [
+    {
+      "runId": "29bfd87b59ab4250bebbd9ce9049182e",
+      "service": "postgres",
+      "id": "2187d9c420058b3c13bd19aeeb4ea76e627080608027b54f3316d5a3c07a67d7",
+      "wasRunning": false,
+      "stopped": true
+    },
+    {
+      "runId": "29bfd87b59ab4250bebbd9ce9049182e",
+      "service": "cms-api",
+      "id": "f5cc4cfd3c25d125335baf6c12f8401ce9bb66e75913aeca16d95252f03d4310",
+      "wasRunning": false,
+      "stopped": true
+    },
+    {
+      "runId": "29bfd87b59ab4250bebbd9ce9049182e",
+      "service": "ingress",
+      "id": "6347c1bb2bdbe3ed38fb375c8011201b278b456da77c252d3fa6a28221b5ebfc",
+      "wasRunning": false,
+      "stopped": true
+    },
+    {
+      "runId": "86499b7576d447e5afd7c20d1324cb5b",
+      "service": "postgres",
+      "id": "01cf56c4f2bfe3479cadbbf43f80e8b5effe84ef1a6dcaa00e4218157e6b03d7",
+      "wasRunning": false,
+      "stopped": true
+    },
+    {
+      "runId": "86499b7576d447e5afd7c20d1324cb5b",
+      "service": "cms-api",
+      "id": "6ef88832fec835a4e0d3293587c652fe5716e0d642b5d4bd8f670607ee330d13",
+      "wasRunning": false,
+      "stopped": true
+    },
+    {
+      "runId": "86499b7576d447e5afd7c20d1324cb5b",
+      "service": "ingress",
+      "id": "1e09d265ad9b9725e516e9409c57931f709c4d6335cfeb260817f0cabe900d3f",
+      "wasRunning": false,
+      "stopped": true
+    }
+  ],
+  "volumesRemoved": false
+}

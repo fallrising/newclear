@@ -131,6 +131,7 @@ export const adminHandlers = [
       return bad("email is already used");
     }
     const status = body.status ?? principal.status;
+    if (status === "disabled" && principal.id === user.principal.id) return apiError(403, "SELF_DISABLE_FORBIDDEN", "Cannot disable your own account");
     if (activeAdminsAfter(principal.id, status, db.principalRoles[principal.id] ?? []) === 0) return lastAdmin();
     if (body.displayName != null) principal.displayName = body.displayName;
     if (body.email != null) principal.email = body.email;
@@ -143,6 +144,7 @@ export const adminHandlers = [
     if (user instanceof Response) return user;
     const principal = principalOf(String(params.id));
     if (!principal) return missingPrincipal();
+    if (principal.id === user.principal.id) return apiError(403, "SELF_DISABLE_FORBIDDEN", "Cannot disable your own account");
     if (activeAdminsAfter(principal.id, "disabled", db.principalRoles[principal.id] ?? []) === 0) return lastAdmin();
     principal.status = "disabled";
     return HttpResponse.json<Principal>(principal);
@@ -173,6 +175,8 @@ export const adminHandlers = [
     if (next.some((r) => (r.code === "editor" || r.code === "operator") && r.contentTypeCodes.length === 0)) {
       return bad("editor and operator need contentTypeCodes");
     }
+    if (principal.id === user.principal.id && (db.principalRoles[principal.id] ?? []).some((role) => role.code === "admin")
+        && !next.some((role) => role.code === "admin")) return apiError(403, "SELF_DEMOTION_FORBIDDEN", "Cannot remove your own admin role");
     if (activeAdminsAfter(principal.id, principal.status, next) === 0) return lastAdmin();
     db.principalRoles[principal.id] = next;
     return new HttpResponse(null, { status: 204 });
@@ -267,11 +271,19 @@ export const adminHandlers = [
     }),
   ),
 
-  http.post("*/api/v1/admin/entries/:id/purge", ({ params }) => {
+  http.post("*/api/v1/admin/entries/:id/purge", async ({ params, request }) => {
     const user = requireAdmin();
     if (user instanceof Response) return user;
     const id = String(params.id);
-    if (!db.workEntries.some((e) => e.id === id)) return apiError(404, "ENTRY_NOT_FOUND", "Entry not found");
+    const entry = db.workEntries.find((e) => e.id === id);
+    if (!entry) return apiError(404, "ENTRY_NOT_FOUND", "Entry not found");
+    const text = await request.text();
+    let body: { confirmPhrase?: unknown; confirmId?: unknown } | null;
+    try { body = text ? JSON.parse(text) : null; }
+    catch { return bad("Malformed request"); }
+    if (body?.confirmPhrase !== "DELETE" || (body.confirmId !== id && !(entry.slug && body.confirmId === entry.slug))) {
+      return apiError(400, "CONFIRMATION_REQUIRED", "Explicit deletion confirmation is required");
+    }
     const referenced = db.workEntries.some((e) => e.id !== id && Object.values(e.payload).some((v) => v === id));
     if (referenced) return apiError(409, "REF_CONSTRAINT", "Another entry still references this entry");
     db.workEntries = db.workEntries.filter((e) => e.id !== id);

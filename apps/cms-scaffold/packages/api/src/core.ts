@@ -2,6 +2,8 @@ import createClient, { type Middleware } from "openapi-fetch";
 import { ApiError, errorFromBody } from "./errors";
 import type { paths } from "./schema";
 
+export interface CallOptions { retryCsrf?: boolean }
+
 export type Transport = ReturnType<typeof createTransport>;
 
 export interface TransportOptions {
@@ -70,14 +72,16 @@ export function createTransport(options: TransportOptions) {
 
   /**
    * Runs one openapi-fetch call. Every failure becomes ApiError; AbortError is rethrown unchanged (C-16).
-   * A 403 CSRF_FAILED clears the token, fetches a new one and retries exactly once (S-03).
+   * A 403 CSRF_FAILED clears the token; default calls refresh and retry once (S-03).
+   * Irreversible operations opt out and require a new manual request.
    */
-  async function call<T>(run: () => Promise<FetchResult<T>>): Promise<T> {
+  async function call<T>(run: () => Promise<FetchResult<T>>, options?: CallOptions): Promise<T> {
     try {
       return await once(run);
     } catch (error) {
       if (error instanceof ApiError && error.status === 403 && error.code === "CSRF_FAILED") {
         csrfToken = null;
+        if (options?.retryCsrf === false) throw error;
         await fetchCsrf();
         return once(run);
       }

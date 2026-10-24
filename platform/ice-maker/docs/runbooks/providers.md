@@ -31,3 +31,30 @@ Real provider authentication, model configuration, rate-limit headers,
 invoice-backed usage reconciliation, and production enforcement of read-only
 review access remain operator-owned external gates. This repository performs no
 provider mutation, merge, deployment, or `main` update.
+
+## Grok review input and execution boundary
+
+The current [Grok review adapter](../../src/ice_maker/adapters.py) sends one
+bounded artifact with `--single`, explicit `--model`, `--output-format json`,
+`--disable-web-search`, `--no-subagents`, `--permission-mode plan` and `--tools=`.
+It does not select `--sandbox` or `--cwd`; the
+[executor](../../src/ice_maker/execution.py) inherits the caller's working
+directory. Artifact-only describes what the adapter supplies as review input.
+It does not make that artifact the only file the CLI process can access.
+
+Plan mode and an empty tool selection are CLI policy settings, not proof of an
+OS filesystem or network boundary. Grok's
+[sandbox profiles](https://docs.x.ai/build/features/sandbox) are separate from
+[permissions](https://docs.x.ai/build/features/permissions). This adapter does
+not itself establish the production read-only isolation gate above. Before
+live use with untrusted input, the operator must qualify an approved execution
+profile and actual access-denial behavior in the selected parent environment.
+Do not automatically weaken a failed sandbox or copy Cursor's container-specific
+`--sandbox disabled` setting to Grok.
+
+The official executable is `grok` (Grok Build), not an assumed `grok-agent`
+alias. Grok's native streaming format is `streaming-json`; this adapter chooses
+single-result `json`. For maintained worker invocation and Linux prerequisite
+checks, follow the [canonical Grok worker card](https://github.com/fallrising/kernel/blob/main/agents/cli-workers/providers/grok.md)
+and the [official CLI reference](https://docs.x.ai/build/cli/reference). No Grok
+model, authentication, or sandbox qualification was performed by this documentation update.

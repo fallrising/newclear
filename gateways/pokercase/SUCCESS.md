@@ -81,3 +81,7 @@ AC-05 只以本機假上游驗證；未對真實 provider 發出請求，未讀�
 
 任何未來可用標記都須對應已合併的目標 SHA、必要 CI／審查與核心流程證據。
 較早證據須先比對其後程式與設定差異；有關變更補驗後才能沿用。
+
+## 2026-10-24 diagnostic follow-up
+
+Owner authorized one further attempt. Preserve sandbox enforcement and Docker restrictions. When the CLI reports its known sandbox-unavailable startup error, return503 with a fixed operator message and log a fixed reason code; never emit arbitrary stderr or disable sandbox automatically. Verify red→green integration coverage, existing privacy/status regressions and native gates. RED→GREEN regression,99tests,clippy,fmt and independent review passed. The authorized retry still failed with sandbox-unavailable diagnostics; this improvement cannot establish live inference success.

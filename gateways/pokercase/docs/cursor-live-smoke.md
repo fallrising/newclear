@@ -21,3 +21,21 @@ No-network Node diagnostic inside the same image returned `ERR_SYSTEM_ERROR` for
 Next: add bounded, redacted operator diagnostics for the container startup/error path and reproduce local preconditions without provider calls. Establish a concrete correction before requesting an additional live request; the originally authorized one-request allowance is consumed. Existing login authorization/profile can be reused and should not be requested again. Live text remains pending/failed; other protocols, client tools/images and token lifecycle remain unverified.
 
 Preflight independent review found and corrected an operator-script cleanup ownership bug: refusing an occupied profile must not remove an existing login container. The fixed script records and cleans only its generated request name; a fake-docker test and focused independent review passed. The script is operational evidence, not a product implementation change.
+
+## Authorized follow-up2026-10-24
+
+Owner asked to retry, authorizing one additional brief real request using the existing dedicated profile. Original failed attempt and marker remain immutable. This round starts05:13:48Z, ends05:33:48Z with final3minutes closeout. First diagnose container startup offline; capture only bounded redacted diagnostics. No host auth copy, privilege widening, deployment or automatic repeated inference.
+
+### Follow-up outcome and fixed diagnostic
+
+The authorized retry sent exactly one further gateway request and launched one container. It again returned502 after1.938seconds; no expected reply, no automatic retry, and automatic cleanup succeeded with0remaining containers. Provider-internal requests/tokens/cost remainunknown. Live source and binary were unchanged from the first attempt; the old request marker was preserved and a new independent marker recorded this authorization.
+
+The new diagnostic helper persisted **only fixed categories/codes and byte counts**, not arbitrary stderr, account identities or tokens. It recorded259stderr bytes with `sandbox` and `not available`; no RPC/HTTP code was detected. Inspection of the installed official bundle located the startup rejection for “Sandbox mode is enabled but not available on this system.” This identifies the rejected CLI prerequisite, not the exact kernel/feature-gate reason behind it. It does not establish that the earlier UID observation caused the failure.
+
+No-network startup returned `unavailable`/`EAI_AGAIN` as expected with networking disabled; a separate bridge DNS-only check resolved the official API host. Neither probe proves inference works. Direct helper preflight attempts lacked required command/policy inputs and are inconclusive; they are not a successful kernel compatibility test. No privileges or flags were relaxed to obtain a pass.
+
+A narrow gateway correction now maps the two known sandbox-unavailable startup sentences to503 and a fixed operator message. The log carries static `reason=sandbox_unavailable`; the API retains its existing error schema and does not expose arbitrary stderr. `--mode ask`, `--sandbox enabled` and every Docker restriction remain unchanged. Other failures retain existing status handling and no new retry is introduced.
+
+Validation: the new focused E2E first failed with actual502/expected503; after the correction, `cargo +1.99.0 test --locked` passed99tests, `clippy --locked --all-targets -- -D warnings` and `fmt --check` passed. Independent source review passed. Diagnostic-helper fixtures verified identity/short-token exclusion and fake-Docker exec/cleanup behavior. These checks validate error handling, **not a successful live reply after the correction**; no further live call was made.
+
+Next: determine a sandbox-compatible runtime configuration. Any choice to disable the CLI sandbox or loosen Docker permissions requires a separately reviewed safety decision; this change does neither. The dedicated authenticated profile is retained, and both authorized one-request attempts are consumed. Do not request the completed login authorization again or silently send more inference.

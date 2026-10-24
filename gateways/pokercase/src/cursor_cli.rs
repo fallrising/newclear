@@ -442,11 +442,20 @@ pub async fn start(
         }
         let failed = !tr.done && !cancel.is_cancelled() && !tx.is_closed();
         let mut status = 502;
+        let mut sandbox_unavailable = false;
         if failed {
             if let Ok(Ok(err)) =
                 tokio::time::timeout(Duration::from_secs(2), &mut diagnostics).await
             {
-                status = status_for(&err);
+                let diagnostic = err.to_ascii_lowercase();
+                sandbox_unavailable = diagnostic
+                    .contains("sandbox mode is enabled but not available on this system")
+                    || diagnostic.contains("sandbox is not available on this system");
+                status = if sandbox_unavailable {
+                    503
+                } else {
+                    status_for(&err)
+                };
             }
         }
         let _ = child.start_kill();
@@ -457,10 +466,16 @@ pub async fn start(
             let message = match status {
                 401 => "Cursor container profile is not logged in",
                 429 => "Cursor account quota or rate limit reached",
+                503 if sandbox_unavailable => "Cursor sandbox is unavailable inside the configured container; review the container runtime requirements",
                 _ => "Cursor container ended without a complete reply",
             }
             .to_owned();
-            warn!(status, "Cursor container request failed");
+            let reason = if sandbox_unavailable {
+                "sandbox_unavailable"
+            } else {
+                "cli_error"
+            };
+            warn!(status, reason, "Cursor container request failed");
             tokio::select! {
                 _ = cancel.cancelled() => {},
                 _ = tx.send(Item::Failed { status, message }) => {},

@@ -658,6 +658,10 @@ impl ResponsesToChatStream {
         self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
     }
 
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
+    }
+
     fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.finished {
             return Vec::new();
@@ -1155,6 +1159,10 @@ impl ChatToResponsesStream {
 
     pub(crate) fn on_stall(&mut self) -> Vec<String> {
         self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
     }
 
     fn end_with_error(&mut self, message: &str) -> Vec<String> {

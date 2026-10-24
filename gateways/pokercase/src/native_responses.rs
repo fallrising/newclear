@@ -159,6 +159,21 @@ impl NativeResponses {
         out
     }
 
+    pub(crate) fn read_error(&mut self) -> Vec<u8> {
+        if let Some(out) = self.finish_cr_terminal() {
+            return out;
+        }
+        let mut out = Vec::new();
+        if !self.done {
+            self.fail_with(
+                &mut out,
+                "upstream_stream_read_error",
+                crate::error::READ_FAILED_STREAM_MESSAGE,
+            );
+        }
+        out
+    }
+
     fn fail_with(&mut self, out: &mut Vec<u8>, code: &str, message: &str) {
         self.frame.clear();
         self.line_start = 0;

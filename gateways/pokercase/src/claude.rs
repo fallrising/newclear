@@ -498,6 +498,10 @@ impl StreamTranslateState {
         self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
     }
 
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
+    }
+
     fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.message_stop_sent || self.stop_reason.is_some() {
             return self.stop();
@@ -846,6 +850,10 @@ impl AnthropicToChatStream {
 
     pub(crate) fn on_stall(&mut self) -> Vec<String> {
         self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
     }
 
     fn end_with_error(&mut self, message: &str) -> Vec<String> {

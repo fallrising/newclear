@@ -175,6 +175,7 @@ Set `THINROUTER_ADMIN_TOKEN` through your environment or secret configuration be
 
 - Single process: proxy + web UI + SQLite (+ optional TUI).
 - Hot path: API key auth → resolve model → ordered fallback / RR **before** SSE headers committed → byte passthrough (or Anthropic translate).
+- SSE read-I/O failures use fixed diagnostics: converted streams and native Responses emit protocol errors, while opaque passthrough retains a redacted transport error. Known terminals are preserved, and owned source/error objects are released before final read-error output. This redacts generated transport diagnostics; already forwarded SSE payloads remain unchanged.
 - Cooldown after 429 / auth / 5xx; SSE stall timeout. Translated streams and native Responses emit a fixed protocol error on an unfinished idle timeout; already parsed terminal outcomes are preserved. Opaque Chat/Messages passthrough keeps transport-error behavior. The upstream stream is released before the final timeout output. This is a per-chunk idle limit, not a total request deadline.
 - Own schema (`~/.thinrouter`), not 9router.db compatible.
 

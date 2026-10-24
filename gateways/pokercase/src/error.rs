@@ -4,6 +4,8 @@ use axum::Json;
 use serde_json::json;
 use thiserror::Error;
 
+pub(crate) const READ_FAILED_STREAM_MESSAGE: &str = "upstream stream read failed";
+
 pub(crate) const STALLED_STREAM_MESSAGE: &str = "upstream stream stalled";
 
 pub(crate) const INCOMPLETE_STREAM_MESSAGE: &str = "upstream stream ended before completion";

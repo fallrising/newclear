@@ -1,0 +1,1261 @@
+{
+  "id": "baseline-001",
+  "mode": "baseline",
+  "status": "passed",
+  "startedAt": "2026-10-24T12:51:21.190Z",
+  "endedAt": "2026-10-24T12:51:59.410Z",
+  "sourceHashes": {
+    "fe-review/browser-baseline.mjs": "4c12046d96a22553fad6196ca6f0a7d8aab99f68adf8189a420a796b9d28e330",
+    "fe-review/fixture.mjs": "1093d6c6dc127a7730bd8cb512cdbb693e040a4669be3a6d9b84e7bcbec9980a",
+    "fe-review/fixture.test.mjs": "f47fa47fd5aee5d7a7c231b243cc26e3bc70922b972babbec376b3da169ca836",
+    "fe-review/guards.mjs": "f5ad2bae0b5379937dbce7a6de8fd3bf743848f9d81599677649566a6e3ca560",
+    "fe-review/guards.test.mjs": "55818d9ef16c9e7f45f9575d80fcba0b7fb03496b2b03d755dfb26e83bc05ee0",
+    "fe-review/mock-upstream.mjs": "7ee372736faa597ae9a3c1cfa61f5dd95d6d50c044b5e0d9e4f38aa8e8fe7755",
+    "fe-review/run-review.mjs": "9341049ea1e78716a1d57f859cff1c5b303068e82affc8a4f237eb5b5420d063",
+    "templates/connections.html": "3c6df77512cabf71019168496ae96227729a2931232b5f73adb53e381d605aac",
+    "templates/dashboard.html": "fdecd4ce4e00ed83059e2f72f8354c63ea7ccdee686fe2ff7fc6f656f0301039",
+    "templates/keys.html": "1dbca647ab77d9f5907070deb9d4249fbc5ab19d431e8c6c322555d10dd7f66a",
+    "templates/layout.html": "9374edc297a60c34346305e64f5ad1733700ab34c2ce11cd77f89d286e4b2d0c",
+    "templates/login.html": "c5647f7decffe7cb588343fda364a32512130eaafd7b10a7f39569079b731540",
+    "templates/routes.html": "7590b44b2215d3c88df36eec61c95e8cb78b2fea1df4f0ef87445b491e3f4cfb",
+    "templates/style.css": "9e2d00c0d219e2e4b5ab98916af745d881644aa25b185a96bc8df83e50f9ef9a",
+    "templates/usage.html": "d0b1db5edd856a1707350d0e76e6a5d9f93965d060e572020b2962afc1dbfddc",
+    "src/tui_app.rs": "fb900f8600ebb17785f1a9e93747a1e562fa97973e2def7b6c0eafc530fb9876"
+  },
+  "binarySHA256": "d37d8c3b6a214447c7086e4360f6c44b67cdc74891eed7e0ab481393ecd3bbfe",
+  "chromium": "153.0.8010.12",
+  "listeners": {
+    "gatewayLoopback": true,
+    "mockLoopback": true
+  },
+  "defaultDeny": {
+    "adminAPI": 401,
+    "inferenceModels": 401,
+    "upstreamRequests": 0,
+    "bootstrap": false
+  },
+  "adminSession": {
+    "httpOnly": true,
+    "sameSite": "Strict",
+    "secure": false,
+    "loopbackHTTP": true
+  },
+  "mock": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0,
+    "kind": "local OpenAI-compatible synthetic API-key upstream; configured SIWC override unused; no provider integration claim"
+  },
+  "mockFinalCounters": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0
+  },
+  "cleanup": [
+    {
+      "name": "settle",
+      "passed": true
+    },
+    {
+      "name": "auth-context",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "gateway",
+      "passed": true
+    },
+    {
+      "name": "mock",
+      "passed": true
+    },
+    {
+      "name": "listeners",
+      "passed": true
+    },
+    {
+      "name": "log",
+      "passed": true
+    }
+  ],
+  "serviceExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false,
+    "groupAbsent": true
+  },
+  "receivedSignal": null,
+  "scope": "baseline measurements only; no layout/accessibility acceptance; final shared capture, keyboard/error journeys and read-only TUI pending",
+  "fixtureSummary": {
+    "keyCount": 1,
+    "keyListPrefixOnly": true,
+    "usageStatuses": [
+      200,
+      500
+    ],
+    "syntheticOnly": true,
+    "seedVia": "real session cookie + CSRF admin API",
+    "providerCLI": false,
+    "connectionCount": 10,
+    "routeCount": 10
+  },
+  "captures": [
+    {
+      "page": "login",
+      "path": "/admin/login",
+      "heading": "Admin login",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "login-desktop.png",
+        "sha256": "9ebd267cb64749cbcc85909afb610432fc520dde9e214f992d32cbe7b67b5e72",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "login",
+      "path": "/admin/login",
+      "heading": "Admin login",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "login-tablet.png",
+        "sha256": "fb0a8c1e18209c75ae84430e919a55ad54cd1fbd95da40dc3d9734a42367f7cd",
+        "width": 834,
+        "height": 1112
+      },
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "login",
+      "path": "/admin/login",
+      "heading": "Admin login",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "login-mobile.png",
+        "sha256": "27ff3fdc2b5952f011f27046e2409081d236ba6eb5f04fe410a7b28fe7e87742",
+        "width": 390,
+        "height": 844
+      },
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "empty-connections",
+      "path": "/admin/connections",
+      "heading": "Connections",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "empty-connections-desktop.png",
+        "sha256": "e94452d453c5e9d22750618356d6904a58dbfaca3d367cdcf23bb257bc502dd7",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "empty-routes",
+      "path": "/admin/routes",
+      "heading": "Routes",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "empty-routes-desktop.png",
+        "sha256": "f644076ca7a1521a2917cef6eb9c95664ac0e2df124f820977a97046a8f0d4ec",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "empty-usage",
+      "path": "/admin/usage",
+      "heading": "Usage",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "empty-usage-desktop.png",
+        "sha256": "3c8c389b688ad76c1531dd64e251e4312df52832054faacd05d7694a69a2cb9f",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "empty-keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "empty-keys-desktop.png",
+        "sha256": "87a4313704550436484ed96a913f8d086a15381f6c78356ec7325ab980871a5c",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "dashboard",
+      "path": "/admin",
+      "heading": "Dashboard",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "link-in-text-block",
+            "impact": "serious",
+            "nodes": 3,
+            "targets": [
+              "li:nth-child(1) > a[href$=\"connections\"]",
+              "li:nth-child(2) > a[href$=\"routes\"]",
+              "li:nth-child(3) > a[href$=\"keys\"]"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "dashboard-desktop.png",
+        "sha256": "c60df3873d00da3f6c454e61f6deb950365ec1c0098b303b5fab42028de6dc78",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "connections",
+      "path": "/admin/connections",
+      "heading": "Connections",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(8)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "connections-desktop.png",
+        "sha256": "280647a5d1a8bfa62305c87adc08e5daa9274997b79496ee4a55fc876238a923",
+        "width": 1440,
+        "height": 2123
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "routes",
+      "path": "/admin/routes",
+      "heading": "Routes",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(4)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "routes-desktop.png",
+        "sha256": "2e60a55155d75904449e96576b950201e60043e59afdc85411d1c193f824d8cc",
+        "width": 1440,
+        "height": 1928
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(5)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "keys-desktop.png",
+        "sha256": "21bda8e7990e1082d5b254966d2377f0e902205d40b26fcd5d01dc76c62c1895",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "usage",
+      "path": "/admin/usage",
+      "heading": "Usage",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "usage-desktop.png",
+        "sha256": "76e14034749655df8684b6d6fd995a9be986791f17d9c95078ddb25e3bdc8c24",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "connection-edit",
+      "path": "/admin/connections/496c1d3a-35f9-488e-a46a-4cc30fa89581/edit",
+      "heading": "Edit connection",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(8)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "connection-edit-desktop.png",
+        "sha256": "5255745896167db52d0934f59a56d948dd745282e3255098d6bcba72b2b8f23e",
+        "width": 1440,
+        "height": 2123
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "route-edit",
+      "path": "/admin/routes/a59fa998-109c-46b0-bbfb-030c167e42f1/edit",
+      "heading": "Edit route",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(4)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "route-edit-desktop.png",
+        "sha256": "82923b60c30c6f872f6579a4a351ee3b3b00339894a9f331564b1f53c6b89a75",
+        "width": 1440,
+        "height": 1928
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "dashboard",
+      "path": "/admin",
+      "heading": "Dashboard",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "link-in-text-block",
+            "impact": "serious",
+            "nodes": 3,
+            "targets": [
+              "li:nth-child(1) > a[href$=\"connections\"]",
+              "li:nth-child(2) > a[href$=\"routes\"]",
+              "li:nth-child(3) > a[href$=\"keys\"]"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "dashboard-tablet.png",
+        "sha256": "83df166aaec8c9c1fddc9da27496d3487765c92b5b64e5470982d3cac0733198",
+        "width": 834,
+        "height": 1112
+      },
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "connections",
+      "path": "/admin/connections",
+      "heading": "Connections",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(8)"
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 2,
+            "targets": [
+              "main > p > code",
+              ".small:nth-child(2)"
+            ]
+          }
+        ]
+      },
+      "screenshot": {
+        "file": "connections-tablet.png",
+        "sha256": "acff225e4663e912bd3cde0a28c84210b2f630290cc77acc8de94939429e1731",
+        "width": 1037,
+        "height": 2353
+      },
+      "geometry": {
+        "documentWidth": 1037,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "routes",
+      "path": "/admin/routes",
+      "heading": "Routes",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(4)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "routes-tablet.png",
+        "sha256": "4d25449df57aebe2c8385a3a0c5e9a1c43ed3f3d751b84d662e9bc9e863316a4",
+        "width": 834,
+        "height": 2151
+      },
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(5)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "keys-tablet.png",
+        "sha256": "4a51c54d2cdb59806016cd3cc8cf4ac7da1941ea589e68f5ae6c89d0b57d7fd2",
+        "width": 834,
+        "height": 1112
+      },
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "usage",
+      "path": "/admin/usage",
+      "heading": "Usage",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "usage-tablet.png",
+        "sha256": "68aee4e7dfb0ca6605d494030d8a73fc8be379da1ce573df74b54980df9a64a1",
+        "width": 1187,
+        "height": 1112
+      },
+      "geometry": {
+        "documentWidth": 1187,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "connection-edit",
+      "path": "/admin/connections/496c1d3a-35f9-488e-a46a-4cc30fa89581/edit",
+      "heading": "Edit connection",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(8)"
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 2,
+            "targets": [
+              "main > p > code",
+              ".small:nth-child(2)"
+            ]
+          }
+        ]
+      },
+      "screenshot": {
+        "file": "connection-edit-tablet.png",
+        "sha256": "f1c4762fa0986e35f6c25af9d2f208bf67397a4ca15e380ed5caf041cfdf6f0f",
+        "width": 1037,
+        "height": 2395
+      },
+      "geometry": {
+        "documentWidth": 1037,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "route-edit",
+      "path": "/admin/routes/a59fa998-109c-46b0-bbfb-030c167e42f1/edit",
+      "heading": "Edit route",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(4)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "route-edit-tablet.png",
+        "sha256": "51187fb8b5b429c4bcfea592673c519b319dc2735038a861aaac3893a99d1885",
+        "width": 834,
+        "height": 2151
+      },
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "dashboard",
+      "path": "/admin",
+      "heading": "Dashboard",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "link-in-text-block",
+            "impact": "serious",
+            "nodes": 3,
+            "targets": [
+              "li:nth-child(1) > a[href$=\"connections\"]",
+              "li:nth-child(2) > a[href$=\"routes\"]",
+              "li:nth-child(3) > a[href$=\"keys\"]"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "dashboard-mobile.png",
+        "sha256": "24e294325c10eae89ff2392291a41c6065e8406bc5c4e92a7c92160058808380",
+        "width": 390,
+        "height": 1287
+      },
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "connections",
+      "path": "/admin/connections",
+      "heading": "Connections",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(8)"
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1,
+            "targets": [
+              "tr:nth-child(2) > .mono:nth-child(3)"
+            ]
+          }
+        ]
+      },
+      "screenshot": {
+        "file": "connections-mobile.png",
+        "sha256": "348491279f254fa15e0ae11873fd946c423f5681dff1219a3e4db302c5724588",
+        "width": 749,
+        "height": 3392
+      },
+      "geometry": {
+        "documentWidth": 749,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "routes",
+      "path": "/admin/routes",
+      "heading": "Routes",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(4)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "routes-mobile.png",
+        "sha256": "fa67e2c712f3818ea36ec0606c19b53147f514f32ade1b350b2e7a3b92946e51",
+        "width": 390,
+        "height": 3151
+      },
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(5)"
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1,
+            "targets": [
+              ".mono:nth-child(4)"
+            ]
+          }
+        ]
+      },
+      "screenshot": {
+        "file": "keys-mobile.png",
+        "sha256": "052dd708faeca9d234e2e0c403fa4b54095f84cb93e21edc2c67ac55bbcdabfd",
+        "width": 505,
+        "height": 844
+      },
+      "geometry": {
+        "documentWidth": 505,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "usage",
+      "path": "/admin/usage",
+      "heading": "Usage",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5,
+            "targets": [
+              "section:nth-child(3) > table > thead > tr > th:nth-child(7)",
+              "section:nth-child(3) > table > tbody > tr > td:nth-child(7)",
+              "section:nth-child(4) > table > thead > tr > th:nth-child(3)",
+              "tr:nth-child(1) > .mono:nth-child(3)",
+              "tr:nth-child(2) > .mono:nth-child(3)"
+            ]
+          }
+        ]
+      },
+      "screenshot": {
+        "file": "usage-mobile.png",
+        "sha256": "0e025b8d70b03fd9842827299e61d796676fdd7b3a4aae682dfcdafb7ed4b224",
+        "width": 900,
+        "height": 885
+      },
+      "geometry": {
+        "documentWidth": 900,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "connection-edit",
+      "path": "/admin/connections/496c1d3a-35f9-488e-a46a-4cc30fa89581/edit",
+      "heading": "Edit connection",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(8)"
+            ]
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1,
+            "targets": [
+              "tr:nth-child(2) > .mono:nth-child(3)"
+            ]
+          }
+        ]
+      },
+      "screenshot": {
+        "file": "connection-edit-mobile.png",
+        "sha256": "4d4a8f0f2fdf5fe6c09ebab7a73d1dc9a72b9b5788ec003be3d222b8c5d9e378",
+        "width": 749,
+        "height": 3434
+      },
+      "geometry": {
+        "documentWidth": 749,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "route-edit",
+      "path": "/admin/routes/a59fa998-109c-46b0-bbfb-030c167e42f1/edit",
+      "heading": "Edit route",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1,
+            "targets": [
+              "th:nth-child(4)"
+            ]
+          }
+        ],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "route-edit-mobile.png",
+        "sha256": "e1aa23291b9c725e56cc966692e3e3d6bdb6221f7523092d1057768d9c752849",
+        "width": 390,
+        "height": 3151
+      },
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    }
+  ]
+}

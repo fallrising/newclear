@@ -48,3 +48,9 @@ Demand and contract: [task](T-0401-native-responses.md).
 | NR-03 | Bound and verify SSE framing | NR-3 | done | 2026-10-24T11:42:47Z | 2026-10-24T11:53:33Z | 2026-10-24T11:53:33Z |
 
 NR-1–NR-3 merged in [PR #601](https://github.com/fallrising/newclear/pull/601) at `2026-10-24T11:53:33Z` as `0e99542ec10213524bacffed73699556edfebb8e`. Required CI (component 111s, project contracts 8s) and independent review passed; fetched main contains the reviewed HEAD and the component matches it. SUCCESS/task local verification entries were written before publication; this board records the subsequent publication result. Whole-product acceptance remains incomplete.
+
+## T-0380 FE round2
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FE2-12 | Approved M1–M4 presentation and isolated evidence | R2-AC-12/E | in_progress | 2026-10-24T12:21:48Z | — | 2026-10-24T12:21:48Z |

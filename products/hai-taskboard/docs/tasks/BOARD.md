@@ -73,3 +73,11 @@ required checks. Delivery is isolated on a branch from current main; only HAI Ta
 are included. The PR preserves the current incomplete product status. H01..H04 remain
 in_progress/todo until their full AC are fulfilled; merging this checkpoint does not close them.
 The next implementation remains the completion/artifact/report API and connected completion flow.
+
+## T-0380 — approved FE round2 slice
+
+This bounded review slice does not complete or change the P0-A product rows above. Authority: approved root ROUND2-SDD R2-AC-3/E and current ConnectedApp DESIGN items1–4. Detailed scope: [task](../../fe-review/tasks/round2/task.md). Root campaign board links this same slice; no new product acceptance.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HFE2-1 | True same-origin ConnectedApp review harness and observed presentation corrections only | R2-AC-3/E | in_progress | 2026-10-24T07:35:27Z | — | 2026-10-24T07:35:27Z |

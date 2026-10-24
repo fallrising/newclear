@@ -22,7 +22,7 @@ function push(info: TestInfo, entry: EvidenceEntry): void {
 }
 
 export function acceptanceId(info: TestInfo): string | null {
-  return /^((?:E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-7]|E2E-PT-01) /.exec(info.title)?.[1] ?? null;
+  return /^((?:E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-7]|E2E-PT-01|E2E-VIS-0[1-3]) /.exec(info.title)?.[1] ?? null;
 }
 
 export async function shot(page: Page, info: TestInfo, step: string): Promise<string> {

@@ -46,7 +46,7 @@ export default async function globalSetup(): Promise<void> {
           throw new Error("KITH_E2E_SKIP_WEB_BUILD=1 but web/dist/index.html is missing");
         }
       } else {
-        const b = spawnSync("npm", ["run", "build"], { cwd: WEB_DIR, encoding: "utf8" });
+        const b = spawnSync("npm", ["run", "build", "--", "--outDir", WEB_DIST_DIR], { cwd: WEB_DIR, encoding: "utf8" });
         writeFileSync(join(runDir, "web-build.log"), redactText((b.stdout ?? "") + (b.stderr ?? "")));
         if (b.status !== 0) throw new Error("web build failed; see web-build.log");
       }

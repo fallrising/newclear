@@ -1,0 +1,156 @@
+{
+  "user-rd-commerce": [
+    {
+      "id": "rd",
+      "path": "/rd"
+    },
+    {
+      "id": "guide",
+      "path": "/guide"
+    },
+    {
+      "id": "apps",
+      "path": "/rd/apps"
+    },
+    {
+      "id": "app",
+      "path": "/rd/apps/app-checkout"
+    },
+    {
+      "id": "environment",
+      "path": "/rd/apps/app-checkout/environments/env-checkout-prod"
+    },
+    {
+      "id": "catalog",
+      "path": "/rd/catalog"
+    },
+    {
+      "id": "catalog-request",
+      "path": "/rd/catalog/w2-catalog-redis/resource-request"
+    },
+    {
+      "id": "requests",
+      "path": "/rd/requests",
+      "discoverPrefix": "/rd/requests/"
+    },
+    {
+      "id": "pipelines",
+      "path": "/rd/pipelines",
+      "discoverPrefix": "/rd/pipelines/"
+    },
+    {
+      "id": "observability",
+      "path": "/rd/observability"
+    },
+    {
+      "id": "resources",
+      "path": "/rd/apps/app-checkout/resources"
+    },
+    {
+      "id": "delivery",
+      "path": "/rd/apps/app-checkout/delivery"
+    },
+    {
+      "id": "configuration",
+      "path": "/rd/apps/app-checkout/configuration"
+    },
+    {
+      "id": "traffic",
+      "path": "/rd/apps/app-checkout/traffic"
+    },
+    {
+      "id": "monitoring",
+      "path": "/rd/apps/app-checkout/monitoring"
+    },
+    {
+      "id": "alerts",
+      "path": "/rd/apps/app-checkout/alerts"
+    }
+  ],
+  "user-ops": [
+    {
+      "id": "ops",
+      "path": "/ops"
+    },
+    {
+      "id": "cmdb",
+      "path": "/ops/cmdb"
+    },
+    {
+      "id": "ci",
+      "path": "/ops/cmdb/ci-aws-checkout-01"
+    },
+    {
+      "id": "topology",
+      "path": "/ops/topology"
+    },
+    {
+      "id": "incidents",
+      "path": "/ops/incidents",
+      "discoverPrefix": "/ops/incidents/"
+    },
+    {
+      "id": "releases",
+      "path": "/ops/releases",
+      "discoverPrefix": "/ops/releases/"
+    },
+    {
+      "id": "alerting",
+      "path": "/ops/alerting"
+    },
+    {
+      "id": "capacity",
+      "path": "/ops/capacity"
+    },
+    {
+      "id": "caches",
+      "path": "/ops/caches"
+    },
+    {
+      "id": "messaging",
+      "path": "/ops/messaging"
+    },
+    {
+      "id": "clusters",
+      "path": "/ops/clusters"
+    },
+    {
+      "id": "cache-detail",
+      "path": "/ops/caches/ci-idc-redis-01"
+    },
+    {
+      "id": "messaging-detail",
+      "path": "/ops/messaging/w2-ci-kafka-idc"
+    },
+    {
+      "id": "cluster-detail",
+      "path": "/ops/clusters/w2-ci-k8s-aws"
+    }
+  ],
+  "user-admin": [
+    {
+      "id": "admin",
+      "path": "/admin"
+    },
+    {
+      "id": "access",
+      "path": "/admin/access"
+    },
+    {
+      "id": "users",
+      "path": "/admin/users"
+    },
+    {
+      "id": "features",
+      "path": "/admin/features"
+    },
+    {
+      "id": "audit",
+      "path": "/admin/audit"
+    },
+    {
+      "id": "catalog",
+      "path": "/admin/catalog"
+    }
+  ]
+}

@@ -67,3 +67,10 @@ pnpm test:e2e
 
 本次資格通過，預定標記 `usable/dim-gate/v0.1.0`，範圍與逐命令證據見[資格紀錄](../../docs/project-success/qualifications/dim-gate.md)。
 必要 PR CI／獨立審查通過並合併後才發布；不外推 production 或原範圍以外能力。
+
+
+## FE review Round2 — T-0380 FE2-2 / PR583 (LOCAL_VERIFIED; REVIEW/CI/DELIVERY_PENDING)
+
+Approved DESIGN M1–M3 only: correct demo/base-path capture configuration, add same-tab persona/theme capture and read-only runtime-detail discovery, synchronize review documentation. Product, demo/API, existing e2e, dependencies and CI remain unchanged. Existing workflow correctness stays with native e2e; this unit adds no duplicate workflow assertions.
+
+Acceptance: focused navigation-plan contracts, actual network-none loopback demo launch/capture, three personas × two actual UI themes × three viewports, loaded-page/session preservation and owned cleanup; native lint/typecheck/unit/docs/contracts/CI/demo-build/e2e gates. Preserve browser-health/axe findings as observations without claiming Round3 or product-mainline acceptance. targets is true for the passed original R2 local evidence; final independent review/CI/delivery remain pending.

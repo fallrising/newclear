@@ -1,0 +1,2470 @@
+{
+  "project": "dim-gate",
+  "scope": "R2 navigation capture; not workflow or full Round3 acceptance",
+  "browser": "153.0.8010.12",
+  "node": "v24.18.0",
+  "axe": true,
+  "results": [
+    {
+      "persona": "user-rd-commerce",
+      "page": "rd",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__rd__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "研發中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "guide",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/guide",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__guide__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "示範導覽",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "apps",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__apps__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用與環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "app",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__app__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "environment",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__environment__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "prod 環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "服務目錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog-request",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog/w2-catalog-redis/resource-request",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog-request__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "資源申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/requests",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__requests__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "環境申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests-detail",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/requests"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/pipelines",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__pipelines__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "Pipeline 執行紀錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines-detail",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/pipelines"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "observability",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/observability",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__observability__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用觀測",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "resources",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/resources",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__resources__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 資源",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "delivery",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/delivery",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__delivery__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 交付定義",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "configuration",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/configuration",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__configuration__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 服務配置",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "traffic",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/traffic",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__traffic__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 流量策略",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "monitoring",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/monitoring",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__monitoring__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 監控設定",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "alerts",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/alerts",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__alerts__desktop__light.png",
+      "theme": null,
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 告警規則",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "rd",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__rd__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "研發中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "guide",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/guide",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__guide__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "示範導覽",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "apps",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__apps__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用與環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "app",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__app__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "environment",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__environment__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "prod 環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "服務目錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog-request",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog/w2-catalog-redis/resource-request",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog-request__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "資源申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/requests",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__requests__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "環境申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests-detail",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/requests"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/pipelines",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__pipelines__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "Pipeline 執行紀錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines-detail",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/pipelines"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "observability",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/observability",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__observability__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用觀測",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "resources",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/resources",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__resources__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 資源",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "delivery",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/delivery",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__delivery__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 交付定義",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "configuration",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/configuration",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__configuration__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 服務配置",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "traffic",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/traffic",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__traffic__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 流量策略",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "monitoring",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/monitoring",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__monitoring__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 監控設定",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "alerts",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/alerts",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__alerts__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 告警規則",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "rd",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__rd__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "研發中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "guide",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/guide",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__guide__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "示範導覽",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "apps",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__apps__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用與環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "app",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__app__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "environment",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__environment__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "prod 環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "服務目錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog-request",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog/w2-catalog-redis/resource-request",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog-request__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "資源申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/requests",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__requests__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "環境申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests-detail",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/requests"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/pipelines",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__pipelines__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "Pipeline 執行紀錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines-detail",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/pipelines"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "observability",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/observability",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__observability__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用觀測",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "resources",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/resources",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__resources__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 資源",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "delivery",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/delivery",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__delivery__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 交付定義",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "configuration",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/configuration",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__configuration__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 服務配置",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "traffic",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/traffic",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__traffic__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 流量策略",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "monitoring",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/monitoring",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__monitoring__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 監控設定",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "alerts",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/alerts",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__alerts__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 告警規則",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "rd",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__rd__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "研發中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "guide",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/guide",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__guide__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "示範導覽",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "apps",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__apps__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用與環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "app",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__app__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "environment",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__environment__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "prod 環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "服務目錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog-request",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog/w2-catalog-redis/resource-request",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog-request__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "資源申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/requests",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__requests__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "環境申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests-detail",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/requests"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/pipelines",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__pipelines__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "Pipeline 執行紀錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines-detail",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/pipelines"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "observability",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/observability",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__observability__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用觀測",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "resources",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/resources",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__resources__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 資源",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "delivery",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/delivery",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__delivery__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 交付定義",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "configuration",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/configuration",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__configuration__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 服務配置",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "traffic",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/traffic",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__traffic__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 流量策略",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "monitoring",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/monitoring",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__monitoring__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 監控設定",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "alerts",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/alerts",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__alerts__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 告警規則",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "rd",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__rd__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "研發中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "guide",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/guide",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__guide__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "示範導覽",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "apps",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__apps__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用與環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "app",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__app__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "environment",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__environment__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "prod 環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "服務目錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog-request",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog/w2-catalog-redis/resource-request",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog-request__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "資源申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/requests",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__requests__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "環境申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests-detail",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/requests"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/pipelines",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__pipelines__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "Pipeline 執行紀錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines-detail",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/pipelines"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "observability",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/observability",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__observability__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用觀測",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "resources",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/resources",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__resources__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 資源",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "delivery",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/delivery",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__delivery__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 交付定義",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "configuration",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/configuration",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__configuration__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 服務配置",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "traffic",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/traffic",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__traffic__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 流量策略",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "monitoring",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/monitoring",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__monitoring__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 監控設定",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "alerts",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/alerts",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__alerts__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 告警規則",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "rd",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__rd__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "研發中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "guide",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/guide",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__guide__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "示範導覽",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "apps",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__apps__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用與環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "app",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__app__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "environment",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/environments/env-checkout-prod",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__environment__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "prod 環境",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "服務目錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "catalog-request",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/catalog/w2-catalog-redis/resource-request",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__catalog-request__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "資源申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/requests",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__requests__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "環境申請",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "requests-detail",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/requests"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/pipelines",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__pipelines__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "Pipeline 執行紀錄",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "pipelines-detail",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/rd/pipelines"
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "observability",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/observability",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__observability__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "應用觀測",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "resources",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/resources",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__resources__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 資源",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "delivery",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/delivery",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__delivery__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 交付定義",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "configuration",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/configuration",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__configuration__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 服務配置",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "traffic",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/traffic",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__traffic__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 流量策略",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "error": "frame.evaluate: Execution context was destroyed, most likely because of a navigation"
+    }
+  ]
+}

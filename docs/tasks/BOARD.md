@@ -32,8 +32,8 @@
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FE2-1 | products/kith 第2輪實作 | R2-AC-1 | in_progress | 2026-10-24T05:50:21Z | — | 2026-10-24T06:27:38Z |
-| FE2-2 | platform/dim-gate 第2輪實作 | R2-AC-2 | todo | — | — | — |
+| FE2-1 | products/kith 第2輪實作（PR578 已合併） | R2-AC-1 | done | 2026-10-24T05:50:21Z | 2026-10-24T06:31:21Z | 2026-10-24T06:32:44Z |
+| FE2-2 | platform/dim-gate 第2輪實作 | R2-AC-2 | in_progress | 2026-10-24T06:32:44Z | — | 2026-10-24T07:26:35Z |
 | FE2-3 | products/hai-taskboard 第2輪實作 | R2-AC-3 | todo | — | — | — |
 | FE2-4 | platform/agent-platform 第2輪實作 | R2-AC-4 | todo | — | — | — |
 | FE2-5 | apps/cms-scaffold 第2輪實作 | R2-AC-5 | todo | — | — | — |

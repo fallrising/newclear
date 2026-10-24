@@ -437,7 +437,8 @@ class Process:
     def _snapshot(self):
         with self.lock:
             if self.observation_error:
-                raise ProcessObservationError(self.observation_error)
+                raise ProcessObservationError(self.observation_error,
+                                              getattr(self, "observation_reason", None))
             known = dict(self.known)
         if len(known) > 1024:
             raise ProcessObservationError("process generation history exceeds limit")
@@ -507,7 +508,8 @@ class Process:
         """Copy retained authorized generations for a read-only observer."""
         with self.lock:
             if self.observation_error:
-                raise ProcessObservationError(self.observation_error)
+                raise ProcessObservationError(self.observation_error,
+                                              getattr(self, "observation_reason", None))
             root = (self.identity["pid"], self.identity["start_ticks"])
             identities = [self.identity] + [item for key, item in self.known.items() if key != root]
             return [{"pid": item["pid"], "start_ticks": item["start_ticks"]} for item in identities]
@@ -525,7 +527,8 @@ class Process:
 
     def live(self, strict=True):
         if strict and self.observation_error:
-            raise ProcessObservationError(self.observation_error)
+            raise ProcessObservationError(self.observation_error,
+                                              getattr(self, "observation_reason", None))
         with self.lock:
             identities = [identity.copy() for identity in self.known.values()]
         found = []
@@ -543,7 +546,8 @@ class Process:
     def children(self, refresh=True):
         if refresh:
             if self.observation_error:
-                raise ProcessObservationError(self.observation_error)
+                raise ProcessObservationError(self.observation_error,
+                                              getattr(self, "observation_reason", None))
             self.snapshot()
         with self.lock:
             root = (self.identity["pid"], self.identity["start_ticks"])
@@ -615,7 +619,8 @@ def command(argv, timeout=30):
         if child.live(strict=False) or child.observation_error:
             stopped = child.stop(grace=2)
             if not stopped["all_owned_exited"]:
-                raise ProcessObservationError("CLI process cleanup cannot be verified")
+                raise ProcessObservationError("CLI process cleanup cannot be verified",
+                                              getattr(child, "observation_reason", None))
         else:
             child.finish_threads()
 

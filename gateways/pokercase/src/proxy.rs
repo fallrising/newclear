@@ -1142,23 +1142,7 @@ async fn read_forward_body(fwd: ForwardOk, cancel: &CancellationToken) -> AppRes
     if !matches!(kind, UpstreamBodyKind::OpenAiResponses) || !reassemble {
         return Ok(bytes);
     }
-    let body = responses::reassemble_sse(&String::from_utf8_lossy(&bytes));
-    // A stream that ended in response.failed is an error, not an empty answer.
-    let v: Value = serde_json::from_slice(&body).unwrap_or(Value::Null);
-    if v.get("status").and_then(|s| s.as_str()) == Some("failed") {
-        let err = v.get("error").cloned().unwrap_or(Value::Null);
-        let code = err.get("code").and_then(|c| c.as_str()).unwrap_or("");
-        let status = if crate::siwc::is_usage_limit_code(code) {
-            429
-        } else {
-            502
-        };
-        return Err(AppError::Upstream {
-            status,
-            body: json!({"error": err}).to_string(),
-        });
-    }
-    Ok(body)
+    responses::reassemble_sse(&String::from_utf8_lossy(&bytes))
 }
 
 /// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.

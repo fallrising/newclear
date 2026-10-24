@@ -2029,3 +2029,7 @@ Goku original R2 M1–M3 accepted by R25 independent source/artifact review; roo
 
 
 Fleet591 merged2d65b6528ef8425fe17bfb127f79c016dabe3380 at2026-10-24T11:13:28Z after R24/all3CI/scopedreadback; actualFleet root/component done carried here. Ojb review-only overlay/isolation/gRPC proposal subsequently explicitly approved by owner, replacing earlier pending snapshot; execution remains bounded and separately claimed.
+
+## Ojbquay R2-AC-8/E / T-0380 claim 2026-10-24T11:18:59Z
+
+Ownerexplicitlyapprovedfiniteoverlay/isolation/gRPCproposal; DESIGN addendumrecords exactscope. T015 boundednativeauthor/reviewer withrootenvironment/Git/acceptance. Estimate45–75active+coldwait20–45unknown,25checkpoint/max2diagnostics/20minnotdeadline. FullGradle/native/trueAPI/browser/ownership checksrequired; no productbackend/deps/CIchanges. Goku592merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at11:17:09Z,R25/all6CI/scopedreadbackPASS;actualboarddonecarriedhere.

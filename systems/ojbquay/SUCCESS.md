@@ -68,3 +68,7 @@ AC-01 收斂時間與 AC-07 控制面中斷用 [extra.sh](../../docs/project-suc
 ## #445 歷史 WIP 處置（文件範圍）
 
 本次驗收是[固定 SHA 對照與失敗處置](tasks/445-wip-disposition/analysis.md)：逐項區分已納入、被現行規格取代及尚未驗證的候選；保留原始失敗，不把其他來源綠燈倒推為 WIP 通過。只補來源與處置紀錄；本頁既有資格、SDD、runtime 與 tag 不變。文件／來源對照、42 項目契約、獨立審查與 PR CI 是本次 gates，不重跑產品以製造新資格。
+
+## T-0380 FE Round2 slice — in progress
+
+Approved DESIGN M1–M4 plus explicit review-only isolation/gRPC addendum; [task](fe-review/tasks/round2/task.md) fixes scope and native/real-stack/browser/ownership gates. Existing mainline/usable qualification remains historical and unchanged. No new R2 runtime evidence yet. Full Gradle build, frontend test/build, deployment validation, independent review and current CI required before implementation delivery.

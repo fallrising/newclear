@@ -460,3 +460,7 @@ Validation2026-10-22T16:20Z: final `./gradlew build --no-daemon --no-parallel` P
 ## T-0374 specification/source/test map (2026-10-22)
 
 Owner requested consolidation against code. [Specification map](specification-map.md) records existing product/ADR/M2–M6/semantics, AC01–11 source/test links and explicit discrepancies at 6c611778. This is documentation only; approved requirements and historical failures remain unchanged. README/product-spec/SUCCESS/BOARD approval notes are reconciled to PR472/477; M2's value-vs-encoded-request wording is clarified from existing M3/MessageLimits. [Current evidence](test-reports/specification-map-20261022.md) separates cached native build, static review, CI and unrun qualification.
+
+## T-0380 FE Round2 claim
+
+Approved M1–M4 and bounded review-only overlay/gRPC addendum; [task](../fe-review/tasks/round2/task.md). Docs-only claim, no implementation/build/runtime success claimed. Before implementation commit record full Gradle/frontend/native/runtime/ownership evidence and independent acceptance.

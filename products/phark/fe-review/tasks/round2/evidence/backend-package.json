@@ -1,0 +1,9 @@
+{
+  "command": "mvn --batch-mode -Dmaven.repo.local=<shared repository> -DskipTests package",
+  "note": "610tests already passed unchanged backend; package skips redundant test execution",
+  "exitCode": 0,
+  "elapsedSeconds": 5.368,
+  "containerRemoved": true,
+  "jarSha256": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+  "bytes": 43108802
+}

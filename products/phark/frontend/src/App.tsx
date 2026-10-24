@@ -704,7 +704,7 @@ export default function App() {
   }, [route])
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background to-muted/40">
+    <div data-view={route.kind} className="flex min-h-screen flex-col bg-gradient-to-b from-background to-muted/40">
       <header
         ref={accountControlsRef}
         className="border-b border-border/70 bg-background/95 px-4 py-3 backdrop-blur sm:px-6"
@@ -830,11 +830,11 @@ export default function App() {
       ) : (
         <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-5 sm:px-6">
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading columns...</p>
+            <p role="status" className="text-sm text-muted-foreground">Loading columns...</p>
           ) : error ? (
-            <p className="text-sm text-destructive">{error}</p>
+            <p role="alert" className="text-sm text-destructive">{error}</p>
           ) : (
-            <div className="flex h-[calc(100vh-17rem)] gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-3 md:overflow-x-visible">
+            <div className="flex h-[calc(100vh-17rem)] min-h-0 gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-3 md:grid-rows-[minmax(0,1fr)] md:overflow-x-visible">
               {CHANNELS.map((channel) => {
                 const feed = feeds[channel]
                 return (

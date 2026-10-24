@@ -1,0 +1,706 @@
+{
+  "schema": 1,
+  "id": "final004",
+  "phase": "remaining-routes-and-journeys",
+  "status": "failed",
+  "startedAt": "2026-10-24T11:48:09.281Z",
+  "controlledMockBeforeSpring": false,
+  "api": [
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "2ffa7d14-bbc9-42ef-a86c-1b60212a1bd2",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "cf43d2ca-799f-481d-ab7c-21a3dab41c19",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "2016f50f-f081-4f88-ba7b-9da885d37dc1",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "f31f7bf3-e4c6-48a4-8075-2c944c73ea28",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "a4564b36-3522-45d3-ae74-f3fca30e3957",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "4fcf6cd2-abe2-4cd0-9400-bbb0fb39e022",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "fcc275c9-895f-4735-9c88-6767982c4798",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "28db1f46-912f-4197-9928-c380c6aea2b5",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "5d54e7d3-404c-4ba8-8b2c-8b523e66a0fa",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "4ad702d9-a1f8-48a4-a650-00f1d2280041",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "b526866b-1aa9-4117-9052-37be72aac9ba",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "b7660389-ed12-4d1b-8606-6c72a8ace1a7",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "c69ec383-862c-4f35-a87e-5afffdd3b37d",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "ce9379ca-d92c-4fd3-b93c-2a955c1261d4",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "78570055-798d-43c0-a7d4-fed55c3444b9",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "510fee5b-d121-4449-854d-2cbd4923bc21",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "f190472f-dd97-455c-9340-078fff5b1b8e",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "5b7aae09-2967-4314-abff-3e38f0fdb9c5",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/replies",
+      "status": 201,
+      "requestId": "975dce52-bc1c-4a55-b7ab-e14df090fdf6",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/10/like",
+      "status": 200,
+      "requestId": "d65115aa-fb6c-4e5b-b0e2-20bab58b86c8",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/11/repost",
+      "status": 200,
+      "requestId": "9fedbb27-13a7-4696-94fa-d6f6aaf10fef",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200,
+      "requestId": "5bb816e9-9ec0-406a-9063-bc50f1e5770c",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "58efbbe4-de76-41cf-a502-4505f154dfc9",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "0197342b-357f-4bf7-a14f-595000a5a91b",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/profiles/r7e3d43bd03",
+      "status": 200,
+      "requestId": "f8afbc46-8ea5-43ed-be82-9d2b52cb15ee",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/search",
+      "status": 200,
+      "requestId": "43b8313b-4fce-4816-851c-50fdd6fa5554",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/reports",
+      "status": 201,
+      "requestId": "68bb286b-f3e1-483c-b709-63da7513ce2b",
+      "controlled": false
+    }
+  ],
+  "steps": [
+    {
+      "name": "real-register-login-csrf",
+      "actor": "A",
+      "handle": "r7e3d43bd03",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-register-login-csrf",
+      "actor": "B",
+      "handle": "rf9b4bd1e8f",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-api-seed",
+      "posts": {
+        "home": 10,
+        "tech": 11,
+        "ops": 12,
+        "second": 13
+      },
+      "replyId": 1,
+      "channels": [
+        "home",
+        "tech",
+        "ops"
+      ],
+      "image": {
+        "id": 1,
+        "bytes": 79,
+        "sha256": "af9d971dc1f45fc5e79c98c2bbaade8ac05d71c7e41e188d6a065ab4cba558ce"
+      },
+      "notifications": 3,
+      "opaqueCursorPaging": true,
+      "reportId": 1,
+      "controlled": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "spring",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [],
+  "baseline": [],
+  "captures": [
+    {
+      "name": "flow-composer-pending",
+      "path": "screenshots/flow-composer-pending.png",
+      "sha256": "dcfcb461072e727b91836549825f7c379ca9fd362b9648d3845fe460f3927c6b",
+      "bytes": 143338,
+      "controlled": true
+    },
+    {
+      "name": "flow-composer-error",
+      "path": "screenshots/flow-composer-error.png",
+      "sha256": "9c79f3fd4c3c87fa88615cb1d47afdeca15f849c6c9e14c74fc2ef6d2e0268ac",
+      "bytes": 146083,
+      "controlled": true
+    },
+    {
+      "name": "flow-logged-out-notifications",
+      "path": "screenshots/flow-logged-out-notifications.png",
+      "sha256": "757d646bbe2bf4476c37b291fb1b129162ef94dbb52c309a8ea18beef5e71398",
+      "bytes": 51974,
+      "controlled": false
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "7b3cf366f10d30c4e7134d2336cfae033ec78e449858f72fd31df204911eb810",
+    "frontend/src/components/Column.tsx": "79098b1540de8c2f9c3445a59e14367c5b2079a67497e24c3107d90be2ed3a41",
+    "frontend/src/components/PostCard.tsx": "10029f5ebad596f5c48f9a3205834f638c1922799f1ee6407948f1216627e49a",
+    "frontend/src/components/ReplyThread.tsx": "f11ed54a9d8ffb5e6695bb15e49de7ce16b353b0c4b0004f2b010d288436c325",
+    "frontend/src/components/Composer.tsx": "116d03dd08e1a6d45d4aebbd4b0697a0b68efb279009789f11fac6421a1f416d",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "7e0aae4dc3e392776ec0a58bbb7947fe9a031fb26efaa50b8e5dc7b2ed142d3f",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "bd93eaece2136f80e24a40622605c9dd687f96dc56801951900570f896e0fd00",
+    "fe-review/api-fixture.mjs": "d482368dafa8f06df8a8714c519e835222bb1525acfb60e6652ac0e79135e465",
+    "fe-review/guards.mjs": "ea0246bdf2575da3e8bb1604031dddf2754bf7512203890d156195eb7909df42",
+    "fe-review/mock-baseline.mjs": "4db5dbebae8d994c5732f0fb80158a12e675de59fcf1633cfdbdadf9bae66b4c",
+    "fe-review/baseline.mjs": "2df48b8f662367413b63d0fedea88e5e0a7fde3021d90db29eb87f87bba80024",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484",
+    "fe-review/routes.mjs": "1fccf1664acfb04e4448f6912d67c666b0a967ba48cbf8f763e92ce5f2617c41",
+    "fe-review/journey.mjs": "4a249472f83474cb121702a2f4e0eed4ee35c110e571de5af5e74f6634b0f863",
+    "fe-review/keyboard.mjs": "3bdf2c54ebcbf982073f57be24c02b960fd835a775d5093ded9f22c23d6968cf",
+    "fe-review/load-more.mjs": "0a16f7b4ca8720b8157e9dc03145b03032d9ae260a4b888b017c1803b7192425",
+    "fe-review/layout-contract.mjs": "ae75f88f3b8c6b4bc29ff143743681476c1ecacfb01c51b1ce42fd5c733c736c",
+    "fe-review/shared-capture.mjs": "6051172007794a9ff4f51256b95d5f6252ad08861ece32ffe3b9ba6fa5def418",
+    "fe-review/capture-selection.mjs": "aa35944feb89362157e69550f89ed8ee4ca6167abbeae9454def0d1b357af218",
+    "fe-review/health.mjs": "4407a1a7fb60b9676529fa7a970654ce8f52a677a9377aeddbc9e81ba07f4468"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "spring",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "real-keyboard-journey",
+  "exactNotificationStyleDelta": {
+    "appAttribute": "data-view={route.kind}",
+    "cssSelector": "[data-view=\"notifications\"] main .whitespace-pre-wrap",
+    "appBeforeSHA256": "ebefeb43099f0e6ccd1202005f1db4106f4bd7fc07a07249f243c93585cc3117",
+    "cssBeforeSHA256": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b"
+  },
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "mockPrerequisite": {
+    "run": "baseline-005",
+    "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+    "passed": 6,
+    "rerun": false
+  },
+  "homePrerequisites": {
+    "mobile": {
+      "run": "mobile-003",
+      "sha256": "3794ecc1f8331ee93b25740f704db319200e17979e0b547f044ebb9c6087ccad",
+      "viewport": 390
+    },
+    "tabletDesktop": {
+      "run": "baseline-005",
+      "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+      "viewports": [
+        834,
+        1440
+      ],
+      "laterDelta": "PostCard relative containing block; covered by mobile-003 and new route captures"
+    },
+    "rerun": false
+  },
+  "capturePrerequisite": {
+    "run": "final-002",
+    "sha256": "9c5a31e84597ebbac5410279fe06505260c9ab02555ead2376a809a9a88c5820",
+    "sharedUnique": 12,
+    "supplementalRoutes": 9,
+    "rerun": false
+  },
+  "lastAPI": {
+    "actor": "B",
+    "method": "POST",
+    "path": "/api/posts/10/reports",
+    "status": 201,
+    "expected": 201
+  },
+  "seedBudget": {
+    "registrations": 2,
+    "logins": 2,
+    "posts": 4,
+    "replies": 1,
+    "socialWrites": 2,
+    "reports": 1,
+    "rateLimitDisabled": false
+  },
+  "journey": [
+    {
+      "name": "keyboard-login",
+      "focus": {
+        "tabs": 1,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "composer-pending-error-no-resend",
+      "focus": {
+        "tabs": 1,
+        "direction": "Shift+Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "count": 1,
+      "retainedInput": true,
+      "controlled": true
+    },
+    {
+      "name": "keyboard-composer",
+      "id": 14,
+      "focus": {
+        "tabs": 87,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "keyboard-reply",
+      "postId": 14,
+      "replyId": 2,
+      "focus": {
+        "tabs": 1,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "like-optimistic-rollback-no-resend",
+      "count": 1,
+      "controlled": true
+    },
+    {
+      "name": "keyboard-like",
+      "id": 14,
+      "focus": {
+        "tabs": 98,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "keyboard-report",
+      "reportId": 2,
+      "targetId": 14,
+      "focus": {
+        "tabs": 3,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "keyboard-repost",
+      "id": 14,
+      "focus": {
+        "tabs": 96,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "keyboard-notifications-read",
+      "focus": {
+        "tabs": 3,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "keyboard-profile-back-forward",
+      "real": true
+    },
+    {
+      "name": "keyboard-search",
+      "query": "fe-review",
+      "real": true
+    },
+    {
+      "name": "keyboard-logout-anonymous",
+      "focus": {
+        "tabs": 4,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    }
+  ],
+  "journeyProgress": "logout",
+  "journeyHealth": {
+    "external": 0,
+    "pageErrors": 0,
+    "consoleErrors": 2,
+    "requestFailures": 1,
+    "controlledFailures": [
+      {
+        "method": "POST",
+        "sameOrigin": true,
+        "path": "/api/posts",
+        "status": 500
+      },
+      {
+        "method": "PUT",
+        "sameOrigin": true,
+        "path": "/api/posts/14/like",
+        "status": 500
+      }
+    ],
+    "unexpectedHTTP": [],
+    "consoleEvents": [
+      {
+        "sameOrigin": true,
+        "path": "/api/posts",
+        "status": 500,
+        "stage": "composer-pending-error",
+        "timeMs": 7141,
+        "classification": "controlled-500-response"
+      },
+      {
+        "sameOrigin": true,
+        "path": "/api/posts/14/like",
+        "status": 500,
+        "stage": "like-optimistic-rollback",
+        "timeMs": 11332,
+        "classification": "controlled-500-response"
+      }
+    ],
+    "failedRequestEvents": [
+      {
+        "sameOrigin": true,
+        "path": "/api/auth/logout",
+        "method": "POST",
+        "errorCode": "net::ERR_ABORTED",
+        "stage": "logout",
+        "timeMs": 19284,
+        "navigationId": null,
+        "teardown": false,
+        "classification": "unclassified"
+      }
+    ],
+    "navigations": [
+      {
+        "id": 1,
+        "kind": "initial-document",
+        "startedMs": 20,
+        "endedMs": 2065,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/"
+        }
+      },
+      {
+        "id": 2,
+        "kind": "notifications",
+        "startedMs": 15724,
+        "endedMs": 17380,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/notifications"
+        }
+      },
+      {
+        "id": 3,
+        "kind": "profile",
+        "startedMs": 17630,
+        "endedMs": 18119,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/profiles/r7e3d43bd03"
+        }
+      },
+      {
+        "id": 4,
+        "kind": "history-back",
+        "startedMs": 18119,
+        "endedMs": 18147,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/notifications"
+        }
+      },
+      {
+        "id": 5,
+        "kind": "history-forward",
+        "startedMs": 18147,
+        "endedMs": 18440,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/profiles/r7e3d43bd03"
+        }
+      },
+      {
+        "id": 6,
+        "kind": "search",
+        "startedMs": 18991,
+        "endedMs": 19043,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/search"
+        }
+      },
+      {
+        "id": 7,
+        "kind": "anonymous-notifications-document",
+        "startedMs": 19369,
+        "endedMs": 19878,
+        "observed": true,
+        "destination": {
+          "sameOrigin": true,
+          "path": "/notifications"
+        }
+      }
+    ]
+  },
+  "failure": "REVIEW_UNCLASSIFIED_REQUEST",
+  "failureSite": "journey.mjs:170:7",
+  "endedAt": "2026-10-24T11:48:43.971Z"
+}

@@ -1,0 +1,598 @@
+{
+  "schema": 1,
+  "id": "baseline-003",
+  "phase": "baseline-only",
+  "status": "failed",
+  "startedAt": "2026-10-24T11:11:02.688Z",
+  "controlledMockBeforeSpring": true,
+  "api": [
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "ff7e32ef-90e5-42d6-8791-49978a69a51e",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "ebb75ef4-d506-4dc3-83af-9224a3dadcec",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "c7175be0-6cc7-47a6-9d09-71d9c5436cbb",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "4988b899-650f-4d19-b94c-713b2613d374",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "a7158bdd-7c41-43ad-beaf-7be9a53d991b",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "f627f0f7-4b39-4f19-8e30-c36d5ae569ad",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "b14b7015-93fd-462b-a98a-a4d1ddd1f7f8",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "74f6bb4c-fca4-490a-bbe4-c9480869a621",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "897540f6-e980-4136-8441-eeb25f3fade2",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "4efb97d4-48ed-4d35-8643-b2d28afef1f8",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "2a474326-fc36-4b22-bc7a-b280fd321edf",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "8377d97e-bf3c-4a44-9aa1-099723e0abde",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "c4e72d36-ed3d-45fa-b27e-a6501636183c",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "e86982fd-4450-4799-8c43-6db82166e5e1",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "0653aa61-995e-407e-a87b-a59425ee9c0d",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "b37d27db-02c3-4227-84c5-92777977a7a1",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "d95cd780-bb84-493b-be70-b5e2e1ea5b0f",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "6e1ec052-4eaf-4704-b817-1e091dbb6f8b",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/replies",
+      "status": 201,
+      "requestId": "1c64bd8e-fef1-4de5-86ec-300890f72c46",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/10/like",
+      "status": 200,
+      "requestId": "c8452d89-1719-44f4-97f9-e0591bbad25b",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/11/repost",
+      "status": 200,
+      "requestId": "51c0ec99-ee05-481e-b022-e911182e80d3",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200,
+      "requestId": "bfddbda5-0feb-4289-90d5-84b6e5c8d79f",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "84a5c4e6-6c6c-489a-af7a-52d84ffbb55a",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "adad1e1a-9062-4a74-a825-34552eaf52c9",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/profiles/r3ff42cee3f",
+      "status": 200,
+      "requestId": "6f30b929-43c6-4a61-967f-39a1e6d846a6",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/search",
+      "status": 200,
+      "requestId": "ebd98e43-b2fa-49b7-9621-fbe996f46442",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/reports",
+      "status": 201,
+      "requestId": "fefa8ca0-c1b3-4287-b4fb-3c6682310ba0",
+      "controlled": false
+    }
+  ],
+  "steps": [
+    {
+      "name": "real-register-login-csrf",
+      "actor": "A",
+      "handle": "r3ff42cee3f",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-register-login-csrf",
+      "actor": "B",
+      "handle": "ra0cb9d7112",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-api-seed",
+      "posts": {
+        "home": 10,
+        "tech": 11,
+        "ops": 12,
+        "second": 13
+      },
+      "replyId": 1,
+      "channels": [
+        "home",
+        "tech",
+        "ops"
+      ],
+      "image": {
+        "id": 1,
+        "bytes": 79,
+        "sha256": "af9d971dc1f45fc5e79c98c2bbaade8ac05d71c7e41e188d6a065ab4cba558ce"
+      },
+      "notifications": 3,
+      "opaqueCursorPaging": true,
+      "reportId": 1,
+      "controlled": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "spring",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [
+    {
+      "state": "loading",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "empty",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "401",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 401,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "403",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": "alert",
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 403,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 200,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "429",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 429,
+          "controlled": true
+        }
+      ]
+    },
+    {
+      "state": "500",
+      "passed": true,
+      "controlled": true,
+      "semantics": {
+        "role": null,
+        "live": null,
+        "textPresent": true
+      },
+      "exchanges": [
+        {
+          "path": "/api/auth/csrf",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        },
+        {
+          "path": "/api/posts",
+          "status": 500,
+          "controlled": true
+        }
+      ]
+    }
+  ],
+  "baseline": [],
+  "captures": [
+    {
+      "name": "mock-loading",
+      "path": "screenshots/mock-loading.png",
+      "sha256": "a1412f391f952e406d1e10efac25621491ac99cd1e3ba6ba8c3148515cacd58d",
+      "bytes": 49407,
+      "controlled": true
+    },
+    {
+      "name": "mock-empty",
+      "path": "screenshots/mock-empty.png",
+      "sha256": "fb63ae118ac4e1aeaa236326121eb47660b849bf81b5bc55bd3fb5cbe6e0c36b",
+      "bytes": 74170,
+      "controlled": true
+    },
+    {
+      "name": "mock-401",
+      "path": "screenshots/mock-401.png",
+      "sha256": "565d0f4d528c1abd607f1c905654bb68ab79e0e37a42bc0fb080b8cc884e541b",
+      "bytes": 52716,
+      "controlled": true
+    },
+    {
+      "name": "mock-403",
+      "path": "screenshots/mock-403.png",
+      "sha256": "cf3127e282d574fc624c8ab008456674bd4dc4a0bcf01c3c2037e246d5eb816b",
+      "bytes": 74167,
+      "controlled": true
+    },
+    {
+      "name": "mock-429",
+      "path": "screenshots/mock-429.png",
+      "sha256": "e8ea45aecaf9eadd1af3ef9b53242fa23b72223cffd78d4dd360b555e3fdc397",
+      "bytes": 52802,
+      "controlled": true
+    },
+    {
+      "name": "mock-500",
+      "path": "screenshots/mock-500.png",
+      "sha256": "cf64ddbac0a0f46fea547700d81b9fe24434deef2f819998eade5ecdac8c49ca",
+      "bytes": 52800,
+      "controlled": true
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "49fff9fc7d8e79c2f081b37a4d3e07031cbd674d3638a2ce17507af96f6be90d",
+    "frontend/src/components/Column.tsx": "be0ea0f358cf3f58b25c58c04953029a04dce5de126efe5ba44b378639942543",
+    "frontend/src/components/PostCard.tsx": "0982cd05338a74fcd991dcac7b470e8b8611445408a4a620b592ce2783547e46",
+    "frontend/src/components/ReplyThread.tsx": "b1142d6ae516dab5357cc94fccc18af0825b3a8319e92b8c02420c3a892f6e8f",
+    "frontend/src/components/Composer.tsx": "d1181bbd87bec92a49147a85264a18f2716d6e4d312180c363113d6d21cbd6a1",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "aafe03a27aa574bf0e6d06c6eb6b4c00cb1240b5b1f91fb732a12288509578cf",
+    "fe-review/api-fixture.mjs": "d482368dafa8f06df8a8714c519e835222bb1525acfb60e6652ac0e79135e465",
+    "fe-review/guards.mjs": "72f215327fd6b91a066769ee19d194937171c73eee79e020f08c3a87f74b4f7e",
+    "fe-review/mock-baseline.mjs": "4db5dbebae8d994c5732f0fb80158a12e675de59fcf1633cfdbdadf9bae66b4c",
+    "fe-review/baseline.mjs": "568038621cd98dc4dbf450ac38243f4ed49bf6e0eece885b1e57e4735ed672b7",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "spring",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "real-responsive-baseline",
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "lastAPI": {
+    "actor": "B",
+    "method": "POST",
+    "path": "/api/posts/10/reports",
+    "status": 201,
+    "expected": 201
+  },
+  "seedBudget": {
+    "registrations": 2,
+    "logins": 2,
+    "posts": 4,
+    "replies": 1,
+    "socialWrites": 2,
+    "reports": 1,
+    "rateLimitDisabled": false
+  },
+  "failure": "REVIEW_ASSERTION",
+  "endedAt": "2026-10-24T11:11:13.179Z"
+}

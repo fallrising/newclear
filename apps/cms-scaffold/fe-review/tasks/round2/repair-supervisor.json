@@ -1,0 +1,15 @@
+{
+  "run": "round2-repair-59327059",
+  "startedAt": "2026-10-24T09:18:30Z",
+  "network": "none",
+  "publishedPorts": false,
+  "capDrop": "ALL",
+  "readOnlyRoot": true,
+  "uid": 1000,
+  "scope": "9 affected PNGs only, then immutable 153 union audit and 51 supplemental routes",
+  "exitCode": 0,
+  "removeExitCode": 0,
+  "inventoryExitCode": 0,
+  "ownedContainerAbsent": true,
+  "finishedAt": "2026-10-24T09:19:48Z"
+}

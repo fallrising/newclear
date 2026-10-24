@@ -80,4 +80,4 @@ This bounded review slice does not complete or change the P0-A product rows abov
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HFE2-1 | True same-origin ConnectedApp review harness and observed presentation corrections only | R2-AC-3/E | in_progress | 2026-10-24T07:35:27Z | — | 2026-10-24T07:35:27Z |
+| HFE2-1 | True same-origin ConnectedApp review harness and observed presentation corrections only | R2-AC-3/E | done | 2026-10-24T07:35:27Z | 2026-10-24T08:31:49Z | 2026-10-24T08:34:14Z |

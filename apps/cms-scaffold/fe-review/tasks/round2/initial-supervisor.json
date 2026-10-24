@@ -1,0 +1,14 @@
+{
+  "run": "round2-79fb3e28b3",
+  "startedAt": "2026-10-24T09:08:47Z",
+  "network": "none",
+  "publishedPorts": false,
+  "capDrop": "ALL",
+  "readOnlyRoot": true,
+  "uid": 1000,
+  "exitCode": 1,
+  "removeExitCode": 0,
+  "inventoryExitCode": 0,
+  "ownedContainerAbsent": true,
+  "finishedAt": "2026-10-24T09:16:26Z"
+}

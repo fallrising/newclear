@@ -1,0 +1,58 @@
+{
+  "checkedAtDate": "2026-10-24",
+  "sourceCommit": "8df40fa0a0258c4037e159892721df8aa40a4b78",
+  "source": "Current docs/v2/README.md, six retained delivery reports and readonly gh pr view merge/statusCheckRollup observations. No historical product checks rerun.",
+  "listedChecks": 25,
+  "allListedChecksSuccess": true,
+  "waves": [
+    {
+      "wave": "W1",
+      "pr": "https://github.com/fallrising/newclear/pull/229",
+      "state": "MERGED",
+      "mergeCommit": "48a303bfcc65efab682ed584061d44a96e8dc930",
+      "cmsCI": "https://github.com/fallrising/newclear/actions/runs/37142836406",
+      "deliveryReport": "../../../.team/reports/W1-DELIVERY.md"
+    },
+    {
+      "wave": "W2",
+      "pr": "https://github.com/fallrising/newclear/pull/245",
+      "state": "MERGED",
+      "mergeCommit": "06a07864d6e7ff021cf1afe1eccc7e5205f9f896",
+      "cmsCI": "https://github.com/fallrising/newclear/actions/runs/37149694986",
+      "deliveryReport": "../../../.team/reports/W2-DELIVERY.md"
+    },
+    {
+      "wave": "W3",
+      "pr": "https://github.com/fallrising/newclear/pull/273",
+      "state": "MERGED",
+      "mergeCommit": "a85d4fd9a046676d9b8cec379cdf6be4cf54a5cc",
+      "cmsCI": "https://github.com/fallrising/newclear/actions/runs/37209048238",
+      "deliveryReport": "../../../.team/reports/W3-DELIVERY.md"
+    },
+    {
+      "wave": "W3b",
+      "pr": "https://github.com/fallrising/newclear/pull/281",
+      "state": "MERGED",
+      "mergeCommit": "a0de08a41eaf3fdc7c56e4ae86b819b705b0ce87",
+      "cmsCI": "https://github.com/fallrising/newclear/actions/runs/37214618965",
+      "deliveryReport": "../../../.team/reports/W3b-DELIVERY.md"
+    },
+    {
+      "wave": "W4",
+      "pr": "https://github.com/fallrising/newclear/pull/289",
+      "state": "MERGED",
+      "mergeCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+      "cmsCI": "https://github.com/fallrising/newclear/actions/runs/37218009535",
+      "deliveryReport": "../../../.team/reports/W4-DELIVERY.md"
+    },
+    {
+      "wave": "W5",
+      "pr": "https://github.com/fallrising/newclear/pull/300",
+      "state": "MERGED",
+      "mergeCommit": "147f3cde4a5dad653a46ebc0dbfa89fd8ccefefb",
+      "cmsCI": "https://github.com/fallrising/newclear/actions/runs/37465900694",
+      "deliveryReport": "../../../.team/reports/W5-DELIVERY.md"
+    }
+  ],
+  "w5QualityCI": "https://github.com/fallrising/newclear/actions/runs/37465900719"
+}

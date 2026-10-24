@@ -1998,6 +1998,12 @@ Dim-gate candidate checkpoint 2026-10-24T07:26:35Z: approved M1–M3 review-only
 
 Variant fe-round2/protocol1, bounded task T008. Approved current ConnectedApp DESIGN1–4; root/component boards record this separate slice, oldproductrows and immutablearchivedledger unchanged. Root owns Git/plan/acceptance/tooling; nativeworker plusnativeauthor-other reviewexplicit, no unavailableexternalproviderclaim. Scope true runtime/session/admission/Fake review harness and observed presentation fixes only; no backend/API/security/dependency/realprovider expansion. Pinnedgates and actual isolatedevidence beforemetadata, independentreview/CI/normalmerge/readback. Estimate45–60activepluswait, worker30firstassignment/10minupdates/max2diagnostics;20mincheckpoint nothardstop. Taskfe-review/tasks/round2/task.md defineschecks. Dim583 doneboard reflectsactual07:32:17Z merge andscopedremoteequality.
 
+## Agent Platform FE round2 / T-0380 R2-AC-4 / 2026-10-24T08:34:14Z
+
+HAI586 merged8df40fa0 at08:31:49Z with allrequiredCI/R12/remoteequality; boardactualendcarriedhere. T010 independentworker scopeM1–M3 only: existingM2Chinesealreadyimplemented, addrender/captureproof; M3styles/time; unchangedtruePG/FastAPI/fakefixture pluslabelledoverrides. Rootownsboards/Git/environment/acceptance, nativeauthor-otherreviewexplicit. Estimate45–60activepluswait, first30bounded/max2diagnosis,20minutecheckpoint nothardstop. Taskfe-review/tasks/round2/task.md fixesAC/tooling/stop. No dependencies/backend/fixture/CI/release/VM/providerexpansion.
+
 ## CMS FE round2 / T-0380 R2-AC-5 / 2026-10-24T09:00:28Z
 
 Sixfrontendwaves publication prerequisites independently verified (sixmergedPRs,25SUCCESSchecks). T012 component-only reviewconfiguration/currentroute evidence; rootownsboards/Git/environment/acceptance. AgentPlatform disjointunit in finalreview, no dependentproductchange. Estimate35–50activepluswait, firstworker25min/max2diagnosis/checkpoints20min. No frontendproduct/shared/backend/PP1/R3expansion; nativeauthor-otherreview andcurrentCI/normaldeliveryrequired.
+
+Agent Platform588 subsequently merged8c0b7e3a474516d9f88b35bfff46e948266f2d95 at09:14:44; all6requiredCI SUCCESS including actual45unit/675platformtests, R15FINALACCEPT andscopedremoteequality. CMS closeout carries actualAProot/componentboard done. Local merge integrates alreadyacceptedorigin/main withoutrewritinghistory; CMSsourceunchangedbyintegration.

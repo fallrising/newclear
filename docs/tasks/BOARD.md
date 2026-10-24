@@ -34,8 +34,8 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | FE2-1 | products/kith 第2輪實作（PR578 已合併） | R2-AC-1 | done | 2026-10-24T05:50:21Z | 2026-10-24T06:31:21Z | 2026-10-24T06:32:44Z |
 | FE2-2 | platform/dim-gate 第2輪實作（PR583 已合併） | R2-AC-2 | done | 2026-10-24T06:32:44Z | 2026-10-24T07:32:17Z | 2026-10-24T07:35:27Z |
-| FE2-3 | products/hai-taskboard 第2輪實作 | R2-AC-3 | in_progress | 2026-10-24T07:35:27Z | — | 2026-10-24T07:35:27Z |
-| FE2-4 | platform/agent-platform 第2輪實作 | R2-AC-4 | todo | — | — | — |
+| FE2-3 | products/hai-taskboard 第2輪實作（PR586 已合併） | R2-AC-3 | done | 2026-10-24T07:35:27Z | 2026-10-24T08:31:49Z | 2026-10-24T08:34:14Z |
+| FE2-4 | platform/agent-platform 第2輪實作 | R2-AC-4 | in_progress | 2026-10-24T08:34:14Z | — | 2026-10-24T08:34:14Z |
 | FE2-5 | apps/cms-scaffold 第2輪實作 | R2-AC-5 | todo | — | — | — |
 | FE2-6 | platform/ice-maker 第2輪實作 | R2-AC-6 | todo | — | — | — |
 | FE2-7 | specs/fleet 第2輪實作 | R2-AC-7 | todo | — | — | — |

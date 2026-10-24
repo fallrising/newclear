@@ -63,28 +63,39 @@ M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止
 
 ## Issue548: bounded failure diagnostics (maintenance)
 
-### M5 kernel owner continuation (Phase A, T081)
+### M5 kernel owner continuation (T081, 2026-10-25)
 
-Required CI40109462879 failed M5 at durable_wait/observer/child_missing before
-any frozen target or SIGKILL. Exact vanished generation/role remains unknown.
-The proposed M5-only owner contract is frozen in
-[SDD-M5](docs/SDD-M5.md#m5-kernel-owner-amendment-t081-phase-a): explicit fresh
-kernel owner, incomplete liveness versus strict target admission, unchanged
-per-generation actual root-first SIGKILL/root-9 and GET-only original readback,
-additional ECHILD restart barrier, final normal root0 and fresh deletion seal.
-M4/generic owners and historical evidence remain unchanged.
+Required CI40109462879 failed at durable_wait/observer/child_missing before any
+frozen target or SIGKILL. Exact vanished generation/role remains unknown.
+The independently reviewed [M5 contract](docs/SDD-M5.md#m5-kernel-owner-amendment-t081-phase-a)
+was committed as00d3881249d24e933c40b8e21806244cf81b75a0 before implementation.
+The M5-private runner registers source/version/setup/CLI and daemon launches,
+separates incomplete liveness from strict target admission, and adds actual
+kernel ECHILD to the unchanged per-generation root-first SIGKILL/root-9 and
+GET-only original readback obligations. Generic owner/crash helper and M4 inputs
+remain unchanged. Final normal0 and single-use original-deadline deletion remain.
 
-AC-M5K1: every subprocess is registered before source identity/preflight and
-sole-waiter closed launches plus kernel ECHILD govern restart/final cleanup.
-AC-M5K2: incomplete samples grant no authority; strict freeze and every original
-M5 crash/readback guard remain mandatory with immutable single-use capabilities.
-AC-M5K3: strict additive typed evidence separates sampled, crash, closure,
-containment and cleanup facts and fails safely on malformed output.
-AC-M5K4: synchronized causal/adversarial RED/GREEN, independent design/source
-review, exact source freeze/full offline and original-artifact M5 qualification.
-All four are not_run: Phase A is a proposed reviewable design only. Independent
-review and committed contract must precede explicit root implementation release;
-runtime requires a separate release. No passing M4 result qualifies this M5 fix.
+AC-M5K1: registered launches/sole waits/closed gates/ECHILD.
+AC-M5K2: strict complete retained-live/newly admitted target union, immutable
+restart/deletion authority and every original crash/readback guard.
+AC-M5K3: bounded typed lifecycle evidence and honest failed partial observations.
+AC-M5K4: causal/adversarial tests, independent review, full offline and original M5.
+All four local implementation/qualification gates pass on source freeze
+`d27e1207a388a8d691b0632a46ee896250a8e4d0bf509042cf4ff28ff3f27913`:
+57 focused,353 full Python3.11.17/PYTHONPATH-absent tests, independent21 focused
+plus actual deadline/retained-union probes, stable hashes and actual ECHILD.
+One original-artifact M5 run passes26.747s: all five M5/seven functional controls,
+two actual root-first SIGKILL targets/root-9, six GET-only original readbacks,
+5+14 direct waits, both kernel closures, final root0 and exact owned removal.
+
+The superseded640b source passed351 tests but failed independent actual collector
+cutoff review. Both delayed-wait REDs, shutdown-schema RED and initial fixture
+shape failures are preserved; their passes do not qualify the corrected source.
+See [actual report](docs/evidence/2026-10-25-m5-kernel-closure.json),
+[source binding](docs/evidence/2026-10-25-m5-kernel-closure-source.json) and
+[implementation report](tasks/548-m5-kernel-closure/report.md).
+Required exact-head CI and normal merge remain separate delivery gates. Historical
+AC-05 attribution, whole-mainline acceptance and usable_tag:none remain open.
 
 ### M4 kernel closure continuation (contract baseline, T077)
 

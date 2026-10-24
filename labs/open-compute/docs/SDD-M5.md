@@ -57,6 +57,14 @@ are never capabilities. Objects bind owner identity, exact Daemon, generation,
 scope path/marker/root identity and an immutable original monotonic deadline.
 They have no public serialization, constructor admission or deadline renewal.
 
+Implementation detail within the accepted removal contract: the M5 integration
+callback calls private `_record_removal()` only after bounded OwnedScope.remove
+returns and validated absence is observed, before later fallible checks. This
+caches a historical fact without I/O or capability issuance. An interruption
+before that observation leaves removal unknown. `_failure_evidence()` revalidates
+cached owner facts independently if an external projection hook is malformed.
+Neither notification changes generic cleanup_scope or the accepted gates.
+
 | API | Preconditions and result |
 | --- | --- |
 | `Runner()` | Fresh single-thread runner, checked policy and initial ECHILD; installs guarded registry before any child launch. |

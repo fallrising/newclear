@@ -1014,10 +1014,12 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
         require(lifecycle is not None, "M4 requires its isolated kernel owner")
     if crash:
         import crash as crash_tools
+        import crash_lifecycle as crash_owner
+        require(isinstance(lifecycle, crash_owner.Runner), "M5 requires its isolated kernel owner")
     run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + secrets.token_hex(4)
     command_name = "make integration-crash" if crash else "make integration-storage" if storage else ("make integration-resources" if resources else ("make integration-restore" if restore else "make integration"))
     report = {"schema_version": 1, "run_id": run_id, "command": command_name,
-              "harness_commit": None if storage else source_commit(), "result": "failed", "phase": "preflight",
+              "harness_commit": None if storage or crash else source_commit(), "result": "failed", "phase": "preflight",
               "environment": {"os": platform.system(), "architecture": platform.machine(),
                               "euid": os.geteuid(), "python": platform.python_version()},
               "acceptance": ({f"M2-{n:02}": "not_run" for n in range(1, 10)} if restore else
@@ -1031,6 +1033,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
     workload = storage_tools.initial_workload() if storage else None
     graceful_stops = set()
     intentional_crash = None
+    restart_receipt = None
     read_counter = [0]
     scenario_deadline = None
     scenario_budget = ExitStack()
@@ -1089,6 +1092,31 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
                 report["evidence_file_written"] = False
                 report["acceptance"][gate] = "not_run"
                 report["acceptance"]["M5-05"] = "not_run"
+
+        if getattr(lifecycle, "removal_observed", False) is True:
+            report["scope_removed"] = True
+        try:
+            report["crash_lifecycle"] = crash_owner.project_report(
+                lifecycle.evidence(complete=report["result"] == "passed"),
+                crash_receipt=report["crash"], daemon_before=report.get("daemon_before"),
+                daemon_after=report.get("daemon_after"), final_shutdown=report.get("final_shutdown"),
+                scope_removed=report.get("scope_removed"), complete=report["result"] == "passed")
+        except Exception as exc:
+            diagnostic_record.capture("evidence", report["phase"], exc)
+            lifecycle.latch("schema")
+            report["result"] = "failed"
+            report["error"] = "schema"
+            report["evidence_file_written"] = False
+            report["acceptance"]["M5-05"] = "not_run"
+            try:
+                report["crash_lifecycle"] = crash_owner.project_report(
+                    lifecycle._failure_evidence(), crash_receipt=report["crash"],
+                    daemon_before=report.get("daemon_before"), daemon_after=report.get("daemon_after"),
+                    final_shutdown=report.get("final_shutdown"), scope_removed=report.get("scope_removed"))
+            except Exception:
+                value = crash_owner.initial()
+                value["failure"] = "schema"
+                report["crash_lifecycle"] = value
 
     def storage_error(exc):
         if isinstance(exc, storage_tools.StorageError):
@@ -1244,13 +1272,13 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
     scope_hint = None
     old_handlers = {}
     def interrupted(signum, _frame):
-        if storage:
+        if storage or crash:
             lifecycle.cancel()
         raise LabError("harness interrupted by signal " + str(signum))
     for sig in (signal.SIGINT, signal.SIGTERM):
         old_handlers[sig] = signal.signal(sig, interrupted)
     try:
-        if storage:
+        if storage or crash:
             report["harness_commit"] = lifecycle.source_commit()
             diagnostic_record.value["source_commit"] = report["harness_commit"]
         scope_hint = Path(pwd.getpwuid(os.getuid()).pw_dir) / ".open-compute"
@@ -1264,31 +1292,33 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
         validate_lock(lock)
         report["upstream"] = lock
         binary = download_binary(cache, lock["artifact"], run_id)
-        version = (lifecycle.command if storage else command)([str(binary), "--version"]).strip()
+        version = (lifecycle.command if storage or crash else command)([str(binary), "--version"]).strip()
         require(version == "ocd " + lock["release"].removeprefix("v"), "runtime --version disagrees with lock")
         report["runtime"] = {"version_text": version, "artifact_sha256": sha256_file(binary)}
         functional_acceptance["M2-01" if restore else "AC-01"] = "passed"
         scope = OwnedScope(scope_path, args.port, bounded_owner=True) if storage or crash else OwnedScope(scope_path, args.port)
         redactor.secrets.append(scope.create())
-        if storage:
+        if storage or crash:
             lifecycle.bind_scope(scope)
         original_scope_identity = dict(scope.identity)
         config = scope_path / "instances" / INSTANCE / "compute.toml"
         data = config.parent / "data"
 
         def cli(*arguments, timeout=30):
-            return (lifecycle.command if storage else command)([str(binary), "--no-update-check", *arguments], timeout)
+            return (lifecycle.command if storage or crash else command)([str(binary), "--no-update-check", *arguments], timeout)
 
         def start():
             if storage and lifecycle.epoch["closed"]:
                 lifecycle.next_epoch()
-            process = (lifecycle.start_daemon if storage else Process)([str(binary), "--no-update-check", "run"])
+            argv = [str(binary), "--no-update-check", "run"]
+            process = (lifecycle.consume_restart(restart_receipt, argv) if crash and restart_receipt is not None
+                       else (lifecycle.start_daemon if storage or crash else Process)(argv))
             daemons.append(process)
             unauthenticated = LocalHTTP(args.port)
             if storage or crash:
                 unauthenticated.scenario_deadline = scenario_deadline
             def ready():
-                if storage:
+                if storage or crash:
                     lifecycle.root_check(process)
                 require(process.process.poll() is None, "daemon exited during startup: " + process.text())
                 if not (scope_path / "run/control.sock").is_socket():
@@ -1409,7 +1439,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
         state_before = state_identity(scope_path, data, config)
         if crash:
             state_before = crash_state_identity(state_before)
-        if storage:
+        if storage or crash:
             live_children = lifecycle.sample_liveness(daemon)
         else:
             daemon.children()  # Refresh the descendant graph before proving liveness.
@@ -1423,7 +1453,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
         if storage:
             report["acceptance"]["M4-01"] = "passed"
         if crash:
-            require(not daemon.observation_error, "observer")
+            lifecycle.check()
             report["acceptance"]["M5-01"] = "passed"
         report["phase"] = "checkpoint_crash" if crash else "cold_shutdown" if restore else "daemon_restart"
         with recovery_deadline() if restore else nullcontext(None) as deadline:
@@ -1431,7 +1461,7 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
             if crash:
                 try:
                     with m3_deadline(min(10, scenario_deadline - time.monotonic()), "M5 crash") as crash_deadline:
-                        receipt = crash_tools.abrupt_shutdown(daemon, deadline=crash_deadline, read_identity=process_info)
+                        receipt, restart_receipt = lifecycle.abrupt_shutdown(daemon, deadline=crash_deadline)
                         report["crash"] = receipt
                         receipt = crash_tools.project_crash(receipt)
                         require(receipt["status"] == "verified" and receipt["targets"] and
@@ -1657,7 +1687,19 @@ def integration(args, restore=False, resources=False, storage=False, crash=False
             report["error"] = scenario_error(exc)
         try:
             with m3_deadline(150, "M5 final cleanup" if crash else "M4 final cleanup" if storage else "M3 final cleanup") if resources or storage or crash else nullcontext() as cleanup_deadline:
-                if storage:
+                if crash:
+                    seal, shutdown = lifecycle.finalize(deadline=cleanup_deadline)
+                    if shutdown is not None:
+                        report["final_shutdown"] = shutdown
+                    if scope is not None:
+                        def remove_crash_scope():
+                            with m3_deadline(30, "M5 scope cleanup"):
+                                scope.remove(processes_stopped=True)
+                                require(not os.path.lexists(scope.path), "owned scope cleanup did not finish")
+                                lifecycle._record_removal()
+                            return {"scope_removed": True}
+                        report.update(lifecycle.consume_deletion(seal, remove_crash_scope))
+                elif storage:
                     seal = lifecycle.finalize(cleanup_deadline)
                     if daemon is not None and daemon.epoch["closed"]:
                         report["final_shutdown"] = lifecycle.shutdown(daemon)
@@ -1816,6 +1858,9 @@ def main():
         except (LabError, OSError) as exc:
             print(json.dumps({"result": "failed", "runtime_started": False, "error": str(exc)}))
             return 1
+    if args.command == "integration-crash":
+        from crash_lifecycle import dispatch
+        return dispatch(args)
     if args.command == "integration-storage":
         from storage_lifecycle import dispatch
         return dispatch(args)

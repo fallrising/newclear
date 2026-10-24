@@ -524,3 +524,11 @@ Historical logs named by548 were retrieved during investigation; a client termin
 escape-sequence refusal was not log expiration. See STATUS for fixed-SHA symptoms
 and prior repairs. Neither longer retention nor one successful rerun proves an
 intermittent root cause or a production qualification.
+
+The M5 kernel owner keeps `make integration-crash` as its operator entry. The
+harness dispatches into a fresh same-PID owner before any subprocess and requires
+explicit crash/restart/final-cleanup authority. A verified SIGKILL receipt plus
+actual kernel closure authorizes restart; incomplete samples cannot do so.
+The corrected source has353 offline passes and one original M5 qualification;
+see [STATUS](STATUS.md#issue548-m5-kernel-owner-qualification-t081-2026-10-25)
+for exact sources, evidence and limits. M4 qualification remains separate.

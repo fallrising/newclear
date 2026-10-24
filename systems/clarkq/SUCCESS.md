@@ -66,3 +66,8 @@ cd demo
 
 本次資格通過，預定標記 `usable/clarkq/v1.5.1`，範圍與逐命令證據見[資格紀錄](../../docs/project-success/qualifications/clarkq.md)。
 必要 PR CI／獨立審查通過並合併後才發布；不外推 production 或原範圍以外能力。
+
+
+## FE 第 2 輪（2026-10-24T11:45:41Z）
+
+T-0380 / R2-AC-13，依已批准 DESIGN M1–M3 與 [T019](fe-review/tasks/round2/T019.md) 開始隔離 API/瀏覽器驗證、合成資料與必要的前端呈現修正。原生 go test/build、三 viewport、鍵盤與真實操作證據仍待執行；不修改既有主線、usable tag、後端或部署。

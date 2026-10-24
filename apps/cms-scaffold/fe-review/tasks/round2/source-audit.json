@@ -1,0 +1,31 @@
+{
+  "runtimeSourceHashes": {
+    "audit-captures.mjs": "3783838d23e900b3b92bece6d0c55b987cf4b5bd6d4bdc5daf4f8ff6b09c1a70",
+    "capture-selection.mjs": "851c58b2470c64560727b1d46e133fcc5a4a2650644aa4d4807604bb027516b6",
+    "capture-selection.test.mjs": "a77ed97cb7262a60c4169be41f2fbbe567b6c64092229cf58dfdf1623a98a1d2",
+    "inventory.test.mjs": "cd3844f6b7638f24bd1d4a3059a24a68a17046caa8074d2a3605d325cef5722d",
+    "route-guard.mjs": "c5ee8b528f3ec8162b529232dd117ab0f3e7ce405d54a6da6c0284593074df4b",
+    "route-guard.test.mjs": "3f394de7a9c948c377b9120ff224765b2504987e0c17abeacd73a0d68273c862",
+    "verify-routes.mjs": "944f225cb10c701e643327bfca7340b43a7f85d3b8273da10d6d2cdff7a0d1bf",
+    "targets.json": "ebed4db11c11ae5475934862018f2b535ab7615799e5e5a7230c5c777d07eb7e"
+  },
+  "finalSourceHashes": {
+    "audit-captures.mjs": "3783838d23e900b3b92bece6d0c55b987cf4b5bd6d4bdc5daf4f8ff6b09c1a70",
+    "capture-selection.mjs": "851c58b2470c64560727b1d46e133fcc5a4a2650644aa4d4807604bb027516b6",
+    "capture-selection.test.mjs": "a77ed97cb7262a60c4169be41f2fbbe567b6c64092229cf58dfdf1623a98a1d2",
+    "inventory.test.mjs": "cd3844f6b7638f24bd1d4a3059a24a68a17046caa8074d2a3605d325cef5722d",
+    "route-guard.mjs": "c5ee8b528f3ec8162b529232dd117ab0f3e7ce405d54a6da6c0284593074df4b",
+    "route-guard.test.mjs": "3f394de7a9c948c377b9120ff224765b2504987e0c17abeacd73a0d68273c862",
+    "verify-routes.mjs": "944f225cb10c701e643327bfca7340b43a7f85d3b8273da10d6d2cdff7a0d1bf",
+    "targets.json": "10fd51781b3722b98056602ff079a4fa48e99fc849548a6fde6ce4de4d7cc053"
+  },
+  "changedAfterRuntime": [
+    "targets.json"
+  ],
+  "metadataOnlyFields": [
+    "verified",
+    "verifiedNote"
+  ],
+  "allExecutableAndRouteContractsUnchanged": true,
+  "originalSnapshotAttribution": "Original source-before-correction snapshot was recorded during frozen run before any targeted edit; repair source-at-launch snapshot was recorded before execution."
+}

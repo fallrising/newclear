@@ -1,0 +1,185 @@
+Tool stdout retained; repository absolute paths normalized to <repo> for publication.
+✖ only explicit failed key is replaced, with source attempt provenance (1.351605ms)
+✖ reject duplicate original with fixed diagnostic (0.243119ms)
+✖ reject missing original with fixed diagnostic (0.165579ms)
+✖ reject duplicate repair with fixed diagnostic (0.920537ms)
+✖ reject missing repair with fixed diagnostic (0.09108ms)
+✖ reject unexpected repair with fixed diagnostic (0.10399ms)
+✖ reject replace green with fixed diagnostic (0.079479ms)
+✖ reject failed repair with fixed diagnostic (0.064791ms)
+✖ reject unrepaired failure with fixed diagnostic (0.088209ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 0
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 64.029104
+
+✖ failing tests:
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:9:1
+✖ only explicit failed key is replaced, with source attempt provenance (1.351605ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + undefined
+  - 'original'
+
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:12:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'original',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject duplicate original with fixed diagnostic (0.243119ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject missing original with fixed diagnostic (0.165579ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject duplicate repair with fixed diagnostic (0.920537ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject missing repair with fixed diagnostic (0.09108ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject unexpected repair with fixed diagnostic (0.10399ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject replace green with fixed diagnostic (0.079479ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject failed repair with fixed diagnostic (0.064791ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/capture-selection.test.mjs:25:4
+✖ reject unrepaired failure with fixed diagnostic (0.088209ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/capture-selection.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }

@@ -60,3 +60,11 @@ mock E2E 與 real API 驗收分別記錄；保留資料時不能使用刪除 vol
 
 任何未來可用標記都須對應已合併的目標 SHA、必要 CI／審查與核心流程證據。
 較早證據須先比對其後程式與設定差異；有關變更補驗後才能沿用。
+
+## FE review Round 2 — 2026-10-24（本機 M1/M2 gates 通過）
+
+本次僅實作 [DESIGN M1/M2](fe-review/DESIGN.md)：既有三 app 的 MSW 合成環境、loopback CLI 啟動覆寫、現行 §7 路由 targets 與逐頁 HTTP／final URL／已載入內容證據。六個前端波次 W1/W2/W3/W3b/W4/W5 已由 PR229/245/273/281/289/300 合併及必要 CI 成功滿足前置條件。
+
+驗收計畫：共用 capture 的 dry-run／--start、三尺寸 light 擷取、component-only final URL／fixture／身份與載入斷言、focused guard regression、原生前端 gates、獨立 review 和 owned cleanup。實跑前 targets 保持 false；只有全部 M2 gates 通過才改 true。本節不改 PP1 缺口、mainline incomplete 或 usable_tag none；完整 R3、real API 與正式操作驗收未執行。結果將記錄於 [Round 2 report](fe-review/tasks/round2/report.md)。
+
+本機結果：648 workspace＋66既有PP1 unit tests及lint/types/build/bundle通過；153有效擷取（原144＋明列補抓9）和51逐頁HTTP200／final URL／身份／載入檢查通過，所有owned listeners與容器清理有證據。原9次selector timeout保留，沒有重跑144綠圖。targets verified=true僅指本次R2；24console與27request/HTTP事件如實留存，axe/fullR3未跑。獨立review與當前PR的CI／合併由root收尾，並未代行owner acceptance。

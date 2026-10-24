@@ -1,0 +1,228 @@
+{
+  "scope": "original R2 ConnectedApp local evidence only",
+  "fullProductAcceptance": false,
+  "doneAcceptance": false,
+  "runId": "20261024T080157242Z",
+  "reusedCaptureFrom": null,
+  "resumedSyntheticStateFrom": "20261024T075447787Z",
+  "driverSha256": "1da6698b685cff3faef901405919b571b926acf7489ed95d76bf136ad0fe452b",
+  "node": "v24.20.0",
+  "steps": [
+    {
+      "name": "resume stopped synthetic admission via real login and exact original result",
+      "status": "passed"
+    },
+    {
+      "name": "lost Ready response once-only original-result lookup without repost",
+      "status": "passed"
+    },
+    {
+      "name": "actual Fake and SSE success stays Developing",
+      "status": "passed"
+    }
+  ],
+  "captures": [
+    {
+      "state": "developing-succeeded",
+      "viewport": "desktop",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/developing-succeeded__desktop__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "developing-succeeded",
+      "viewport": "desktop",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/developing-succeeded__desktop__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "developing-succeeded",
+      "viewport": "tablet",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/developing-succeeded__tablet__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "developing-succeeded",
+      "viewport": "tablet",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/developing-succeeded__tablet__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "developing-succeeded",
+      "viewport": "mobile",
+      "theme": "light",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/developing-succeeded__mobile__light.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    },
+    {
+      "state": "developing-succeeded",
+      "viewport": "mobile",
+      "theme": "dark",
+      "url": "http://127.0.0.1:8080/",
+      "heading": "Synthetic review project · Board",
+      "screenshot": "screenshots/developing-succeeded__mobile__dark.png",
+      "documentOverflow": false,
+      "axe": {
+        "violations": []
+      }
+    }
+  ],
+  "health": [
+    {
+      "type": "http",
+      "step": "resume stopped synthetic admission via real login and exact original result",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "resume stopped synthetic admission via real login and exact original result",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "type": "requestfailed",
+      "step": "lost Ready response once-only original-result lookup without repost",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "type": "consoleerror",
+      "step": "lost Ready response once-only original-result lookup without repost",
+      "message": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "requestfailed",
+      "step": "lost Ready response once-only original-result lookup without repost",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands/cmd_APMTJ4FX46A9RX6NPE9W",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "type": "consoleerror",
+      "step": "lost Ready response once-only original-result lookup without repost",
+      "message": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "requestfailed",
+      "step": "actual Fake and SSE success stays Developing",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "step": "actual Fake and SSE success stays Developing",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/events",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "commands": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands/cmd_PR3ZMD0NE0YJGQTPS4S4"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "commandID": "cmd_APMTJ4FX46A9RX6NPE9W",
+      "operation": "MarkReady"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands/cmd_APMTJ4FX46A9RX6NPE9W"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands/cmd_APMTJ4FX46A9RX6NPE9W"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands",
+      "commandID": "cmd_9BKFMQRNGY7D1D565K4X",
+      "operation": "DispatchRun"
+    }
+  ],
+  "shutdown": [
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    }
+  ],
+  "browser": "151.0.7922.34",
+  "admission": {
+    "originalCommandID": "cmd_PR3ZMD0NE0YJGQTPS4S4",
+    "result": {
+      "accepted_revision_digest": "sha256:534ba23808f1563f288a046bd3cdcbd1ac20e95dee49bbc73b78d795e6c4f302",
+      "acceptance_subject_digest": "sha256:c060a4a58f2e36c0624a58dc6af05d8aa49254d081bbdc77741ca206c39eadca",
+      "proposal_digest": "sha256:b1ff48beafe868d804c7a4ec809a4c3d8aeae15caea258426bc4365b4e048642",
+      "graph_revision_digest": "sha256:e25d141320d423c4ff68c89ac94f9e8b09a9d5909a28efaf529b7263edbcdb65",
+      "type": "InitialSpecificationAccepted",
+      "project_id": "prj_WBX1HSW519EAN7BS1D2H",
+      "version": 2
+    },
+    "phase": "Draft",
+    "projectedLegacyRequiredACCount": 0
+  },
+  "comboboxes": [
+    {
+      "name": "ref",
+      "ariaSnapshot": "- combobox \"Allowlisted ref\":\n  - option \"Choose a ref\" [disabled] [selected]\n  - option \"refs/heads/main\"",
+      "labels": [
+        "Allowlisted refChoose a refrefs/heads/main"
+      ]
+    },
+    {
+      "name": "manifest",
+      "ariaSnapshot": "- combobox \"Allowlisted manifest\":\n  - option \"Choose a manifest\" [disabled] [selected]\n  - option \"specification.json\"",
+      "labels": [
+        "Allowlisted manifestChoose a manifestspecification.json"
+      ]
+    }
+  ],
+  "recovery": {
+    "postCount": 1,
+    "automaticResultLookupCount": 1,
+    "totalSameIdentityResultGET": 2,
+    "commandID": "cmd_APMTJ4FX46A9RX6NPE9W"
+  },
+  "finalBoard": {
+    "phase": "Developing",
+    "runState": "Succeeded",
+    "cursor": {
+      "stream_epoch": 1,
+      "event_sequence": 10
+    },
+    "doneItems": 0
+  },
+  "status": "failed",
+  "error": "expect(locator).toContainText(expected) failed\n\nLocator: locator('.cursor')\nExpected substring: \"Disconnected\"\nReceived string:    \"Connected · Last applied cursor: 1:10 · Project version 2\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"to.have.text\" with timeout 5000ms\n  - waiting for locator('.cursor')\n    14 × locator resolved to <p class=\"cursor\">…</p>\n       - unexpected value \"Connected · Last applied cursor: 1:10 · Project version 2\"\n",
+  "runtimeLogSha256": "e64d8d3832b91656c4cd82958e00a53410e245b95a719f70b949781df7e64bcb",
+  "runtimeLogLines": 1
+}

@@ -75,3 +75,12 @@ go test ./...
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須先完成 P0-A 自己的 Done、UI、持久 import/reconciliation 與備份還原驗收；維持 Fake-only 也能完成此主線，但目前證據尚不足。
+
+
+## FE Round2 slice — T-0380 R2-AC-3/E / PR586 (LOCAL_VERIFIED; REVIEW/CI/DELIVERY_PENDING)
+
+Approved ConnectedApp DESIGN items1–4 only: review-owned same-origin runtime/session/admission harness, real UI observations and only measured presentation corrections. This slice does not complete AC-02/03/04 or add detail, QA/Done, impact or restore features. Backend/Go/API/commands/stream/security/business logic/dependencies/CI are read-only.
+
+Acceptance: current pinned web gate and root-owned backend gate; focused Red/Green review-harness safety tests; fresh private state outside checkout, owned graceful lifecycle, immutable synthetic repository admission and no token in argv/URLs/logs/storageState/traces/screenshots. Actual UI login/project/Draft/explicit exact-AC acceptance/Ready/Fake with successful Fake remaining Developing; same command identity for uncertain recovery, authoritative reconnect and existing status/alert feedback. Actual theme button, three viewport sizes, keyboard/focus/wrapping evidence and documented faults. Preserve failed/unrun observations and unresolved product-mainline gaps; targets verified only after original R2 evidence, no fullRound3 claim.
+
+Local R2 evidence: pinned native web30tests/backendfull+race, review safety8tests,30unique actual-theme captures and true session/admission/Ready/Fake/fault/cleanup checks passed; see [scoped report](fe-review/tasks/round2/report.md). Existing legacy AC count and earlier refresh-warning/later Connected feedback remain unresolved. No product AC-02/03/04 or fullRound3 completion follows.

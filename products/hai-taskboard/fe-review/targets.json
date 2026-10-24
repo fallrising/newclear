@@ -1,7 +1,7 @@
 {
   "project": "hai-taskboard",
-  "verified": false,
-  "verifiedNote": "ConnectedApp 同源 runtime 基準；尚未於本輪啟動或驗證。先依 DESIGN.md 完成 prebuilt WEB_ROOT、私有合成 state、session 與 admission harness；healthz 不代表登入或 seed 成功。未登入 capture 僅覆蓋登入頁。",
+  "verified": true,
+  "verifiedNote": "僅原批准R2本機驗證：真同源ConnectedApp session/project/Draft/explicit admission/Ready/Fake/SSE與有界faults通過，30唯一actualtheme/viewport畫面；native web30/backendfull+race及safety8通過。通用target仍只代表login，board證據來自capture-connected.mjs。legacyACcount0與較早refresh警告並列後續Connected未修；不代表完整產品／Round3，最終review/CI/交付另追蹤。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light"
@@ -22,5 +22,6 @@
         }
       ]
     }
-  ]
+  ],
+  "verifiedAt": "2026-10-24"
 }

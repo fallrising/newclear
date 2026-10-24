@@ -1,6 +1,6 @@
 {
   "task": "T-0380 / T021 / R2-AC-12/E",
-  "status": "local approved M1\u2013M4 scope passed; R31 independent review ACCEPT; current CI/publication pending",
+  "status": "delivered original M1\u2013M4 scope via PR603; R31 ACCEPT, required CI and normal merge/readback passed",
   "originalRound2Only": true,
   "ownerCompletionClaim": false,
   "fullRound3Claim": false,
@@ -107,7 +107,7 @@
     "Local horizontal scrolling is intentional; very long values may wrap or have explicit TUI ellipsis",
     "Original >1000px near-blank table row and TUI normal-name regression retained as superseded measured failures",
     "No light theme, real provider/OAuth/import/account credentials, full Round3, deployment or mainline acceptance",
-    "Required current CI, merge/readback and ledger closure remain parent-owned pending"
+    "Wider demand and owner acceptance are not completed by this scoped milestone"
   ],
   "artifactManifest": "artifact-manifest.json",
   "sourceManifest": "source-manifest.json",
@@ -124,5 +124,14 @@
     "unresolvedP1P2": 0,
     "reviewedAuthorReportSHA256": "820bf26176f8dc462f70ae3f2381bcff291e3100c03a79257381ef0e0718b1c7",
     "rootFollowup": "Only factual acceptance/gate status updated after author freeze; product and runtime evidence unchanged."
+  },
+  "delivery": {
+    "receipt": "evidence/delivery.json",
+    "pr": 603,
+    "merge": "05aeed43a3a49cc1b4a98f760e52fa2881c61064",
+    "mergedAt": "2026-10-24T14:18:11Z",
+    "reviewedHead": "0389438e353666e29b7cdc86eceb1cfc64cfc76c",
+    "currentCIChecks": 2,
+    "remoteScopeEqual": true
   }
 }

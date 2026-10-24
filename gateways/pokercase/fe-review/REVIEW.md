@@ -1,6 +1,6 @@
 # FE Review — pokercase — REVIEW
 
-Original Round2 M1–M4 implementation and local evidence are complete; independent final review, required current CI and publication remain pending. Boards remain in_progress. This is not full Round3 or gateway mainline acceptance. [Report](tasks/round2/report.md) · [machine result](tasks/round2/result.json) · [approved DESIGN](DESIGN.md).
+Original Round2 M1–M4 are delivered in PR603; R31 final review ACCEPT, both required CI checks passed and normal merge/readback confirmed. The scoped board item is done. This is not full Round3 or gateway mainline acceptance. [Report](tasks/round2/report.md) · [machine result](tasks/round2/result.json) · [approved DESIGN](DESIGN.md).
 
 ## Current conclusions
 
@@ -14,7 +14,7 @@ Original Round2 M1–M4 implementation and local evidence are complete; independ
 - Original shared desktop console404 has no location and remains an original FAIL. Separate exact anonymous CDP favicon proof is corroboration, not same-event attribution. Current journey errors are only controlled400/403 with matching console records.
 -13contrast-incomplete sets remain.519correctly-sized computed pairs plus the separately corrected desktop pair pass; this is not exhaustive manual pixel/accessibility review. Representative image inspection and local Actions keyboard access are recorded.
 - Mobile uses intentional local horizontal tables; long forms remain above them. TUI long fields use explicit ellipsis. No full Round3/light-theme/real-provider/usable-tag claim.
-- Historical failures, CSS/renderer corrections and the single viewport-helper mistake are retained in the report and immutable receipts. Required final review/CI/merge/readback are still pending.
+- Historical failures, CSS/renderer corrections and the single viewport-helper mistake are retained in the report and immutable receipts. Required final review/CI/merge/readback passed for PR603; historical failures remain preserved.
 
 ## Authority and references
 

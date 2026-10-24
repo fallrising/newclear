@@ -42,8 +42,12 @@
 | FE2-8 | systems/ojbquay 第2輪實作 | R2-AC-8 | done | 2026-10-24T11:18:59Z | 2026-10-24T12:50:56Z | 2026-10-24T12:50:56Z |
 | FE2-9 | products/goku 第2輪實作（PR592 已合併） | R2-AC-9 | done | 2026-10-24T10:05:22Z | 2026-10-24T11:17:09Z | 2026-10-24T11:17:09Z |
 | FE2-10 | products/phark 第2輪實作（PR593 已合併） | R2-AC-10 | done | 2026-10-24T10:18:22Z | 2026-10-24T12:07:47Z | 2026-10-24T12:07:47Z |
-| FE2-11 | apps/flowshot＋apps/loom 第2輪實作 | R2-AC-11 | todo | — | — | — |
-| FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | in_progress | 2026-10-24T12:21:48Z | — | 2026-10-24T12:21:48Z |
+| FE2-11 | apps/flowshot＋apps/loom 第2輪實作 | R2-AC-11 | in_progress | 2026-10-24T11:22:03Z | — | 2026-10-24T14:24:24Z |
+| FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
-| FE2-14 | platform/fanzloud 第2輪實作 | R2-AC-14 | todo | — | — | — |
+| FE2-14 | platform/fanzloud 第2輪實作 | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-24T14:24:24Z |
 | FE2-E | 交付證據／整合核對 | R2-AC-E | todo | — | — | — |
+
+Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
+
+Remaining R2 units are already claimed: [Flowshot/Loom PR598](https://github.com/fallrising/newclear/pull/598) and [Fanzloud PR604](https://github.com/fallrising/newclear/pull/604) remain in_progress, with end unset. Their three owner decisions are unanswered: one additional Loom edge-drag attempt, the limited Fanzloud Tokio lock patch, and one additional canceled-local observer attempt. No new retry or dependency edit is authorized by this status reconciliation; frozen worktrees/failed evidence are preserved. Delivery count is17of19 across newclear/kernel, not overall completion.

@@ -46,4 +46,4 @@ The owner supplied a direct-CLI comparison using the same image/profile: normal 
 
 The [reviewable decision](cursor-isolation.md#2026-10-24-container-compatibility-decision) changes only the fixed CLI preference inside mandatory Docker to `--sandbox disabled`. Default Docker seccomp and every outer restriction stay intact. No silent fallback or automatic retry is added; fixed503 redaction remains for a CLI that still reports the known error. Earlier failed gateway attempts remain failed.
 
-Current next step: one newly authorized gateway text acceptance using the corrected runner and retained profile; both previous one-request allowances are consumed. The owner-reported direct-CLI OK does not verify thinrouter end to end. No new live request was made by this compatibility implementation.
+Current next step: obtain fresh owner authorization for one gateway text acceptance using the corrected runner and retained profile; both previous one-request allowances are consumed. The owner-reported direct-CLI OK does not verify thinrouter end to end. No new live request was made by this compatibility implementation.

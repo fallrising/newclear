@@ -4,15 +4,20 @@
 <p>status <strong>{{.Status}}</strong> last seen {{.Node.LastSeenAt}}</p>
 <p>tunnel <code>{{.Node.TunnelID}}</code></p>
 <h2>Facts</h2>
-<pre>{{.FactsPretty}}</pre>
+{{if and .FactsPretty (ne .FactsPretty "null") (ne .FactsPretty "{}")}}<pre>{{.FactsPretty}}</pre>{{else}}<p class="muted">No facts reported yet.</p>{{end}}
 <h2>Services</h2>
+<div class="table-scroll">
 <table>
-  <thead><tr><th>Service</th><th>Health</th><th>Desired</th></tr></thead>
+  <caption class="visually-hidden">Services on this node</caption>
+  <thead><tr><th scope="col">Service</th><th scope="col">Health</th><th scope="col">Desired</th></tr></thead>
   <tbody>
     {{range .Services}}
-    <tr><td><a href="/services/{{.Name}}">{{.Name}}</a></td><td>{{.Health}}</td><td>{{.DesiredState}}</td></tr>
+    <tr><td><a href="/services/{{.Name}}">{{.Name}}</a></td><td class="health-{{.Health}}">{{.Health}}</td><td>{{.DesiredState}}</td></tr>
+    {{else}}
+    <tr><td colspan="3" class="muted">No services on this node.</td></tr>
     {{end}}
   </tbody>
 </table>
+</div>
 {{template "footer" .}}
 {{end}}

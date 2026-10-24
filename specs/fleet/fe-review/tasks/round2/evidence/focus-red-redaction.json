@@ -1,0 +1,7 @@
+{
+  "artifact": "focus-behavior-red.log",
+  "rawSha256": "052a08b26105d0ceb265cfa88ee0f23f4e2f7e122d6f8beea080a469fbdeed68",
+  "publicSha256": "1358a2da056dcb9dfe87c4671502ed44e08952779e34547124ecf1c429cf7be4",
+  "redaction": "Only private worktree path replaced with <worktree>; header added. All failure content and line numbers preserved.",
+  "rawRetained": "root task-local environment/fleet/focus-behavior-red.raw.log and ignored runs/round2-native/focus-behavior-red.log"
+}

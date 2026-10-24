@@ -59,4 +59,4 @@ Approved [task](../../fe-review/tasks/round2/task.md), R2-AC-7/E.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FLEET-FE2-1 | Approved M1–M9 presentation and synthetic runtime | R2-AC-7/E | in_progress | 2026-10-24T09:51:27Z | — | 2026-10-24T09:51:27Z |
+| FLEET-FE2-1 | Approved M1–M9 presentation and synthetic runtime | R2-AC-7/E | in_progress | 2026-10-24T09:51:27Z | — | 2026-10-24T11:11:02Z |

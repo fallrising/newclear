@@ -15,7 +15,7 @@ use tokio::net::TcpListener;
 /// answer with the result in a second message; told a `[tool result` (a new run told
 /// the whole conversation), answer "Hello there". Records starts and user messages.
 const FAKE_CLAUDE: &str = r#"#!/usr/bin/env python3
-import json, os, re, subprocess, sys, uuid
+import json, os, re, subprocess, sys, time, uuid
 d = os.path.dirname(os.path.abspath(__file__))
 args = sys.argv[1:]
 with open(os.path.join(d, "starts.txt"), "a") as f: f.write("start\n")
@@ -47,6 +47,14 @@ if "--mcp-config" in args:
     tools = rpc(2, "tools/list")["result"]["tools"]
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
 def ev(e): out({"type": "stream_event", "event": e})
+def hang(text):
+    if "HANG_" not in text: return
+    with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
+    if "HANG_AFTER" in text:
+        ev({"type":"message_start","message":{"id":"msg_hang","type":"message","role":"assistant","content":[],"usage":{"input_tokens":1}}})
+        ev({"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}})
+        ev({"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"partial"}})
+    while True: time.sleep(60)
 def message(mid, blocks, stop):
     ev({"type": "message_start", "message": {"id": mid, "type": "message", "role": "assistant", "model": "claude-x", "content": [], "usage": {"input_tokens": 10, "output_tokens": 0}}})
     for i, b in enumerate(blocks):
@@ -66,6 +74,7 @@ for line in sys.stdin:
     with open(os.path.join(d, "turns.txt"), "a") as f: f.write(line)
     with open(os.path.join(proj, sid + ".jsonl"), "a") as f: f.write(line)
     text = json.dumps(json.loads(line))
+    hang(text)
     if helper is None or "[tool result" in text:
         message("msg_t%d" % n, [("text", "Hello there")], "end_turn")
     else:
@@ -73,6 +82,7 @@ for line in sys.stdin:
         message("msg_a%d" % n, [("text", "Checking."), ("tool", tid, "mcp__thinrouter__get_weather", {"city": "Taipei"})], "tool_use")
         r = rpc(10 + n, "tools/call", {"name": "get_weather", "arguments": {"city": "Taipei"}})
         res = r["result"]["content"][0]["text"]
+        hang(res)
         message("msg_b%d" % n, [("text", "Result: " + res + (" (error)" if r["result"].get("isError") else ""))], "end_turn")
     out({"type": "result", "subtype": "success", "is_error": False, "result": "ok"})
 "#;
@@ -540,4 +550,129 @@ async fn responses_stream_from_claude_code_carries_the_tool_call() {
     assert_eq!(call["name"], "get_weather");
     assert_eq!(call["arguments"], "{\"city\": \"Taipei\"}");
     assert!(call["call_id"].as_str().unwrap().starts_with("toolu_"));
+}
+
+// Process-reaping evidence uses Linux procfs; other platforms retain the existing tests.
+#[cfg(target_os = "linux")]
+mod disconnect_tests {
+    use super::*;
+    // Kill only our exact fixture on a failing assertion, so RED does not orphan it.
+    struct HangingFixture {
+        pid: i32,
+        bin: std::path::PathBuf,
+    }
+    impl Drop for HangingFixture {
+        fn drop(&mut self) {
+            let cmd = std::fs::read(format!("/proc/{}/cmdline", self.pid)).unwrap_or_default();
+            if cmd
+                .split(|b| *b == 0)
+                .any(|arg| arg == self.bin.as_os_str().as_encoded_bytes())
+            {
+                unsafe {
+                    libc::kill(self.pid, libc::SIGKILL);
+                }
+            }
+        }
+    }
+    async fn hanging_fixture(env: &Env) -> HangingFixture {
+        let pid = tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if let Ok(raw) = std::fs::read_to_string(env.bin_dir.path().join("hanging.pid")) {
+                    if let Ok(pid) = raw.parse::<i32>() {
+                        break pid;
+                    }
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .expect("fixture reached its silent active turn");
+        HangingFixture {
+            pid,
+            bin: env.bin_dir.path().join("claude"),
+        }
+    }
+    async fn assert_reaped(fixture: &HangingFixture) {
+        tokio::time::timeout(Duration::from_secs(3), async {
+            while std::path::Path::new(&format!("/proc/{}", fixture.pid)).exists() {
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .expect("disconnected silent Claude process is reaped before stall/idle expiry");
+    }
+    fn hanging_request(path: &str, stream: bool) -> Value {
+        if path == "/v1/responses" {
+            json!({"model":"cc","stream":stream,"input":"HANG_AFTER"})
+        } else {
+            json!({"model":"cc","stream":stream,"max_tokens":50,"messages":[{"role":"user","content":"HANG_AFTER"}]})
+        }
+    }
+    #[tokio::test]
+    async fn dc1_silent_claude_disconnect_releases_process_and_slot() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            for stream in [true, false] {
+                let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+                let request = env
+                    .client
+                    .post(format!("{}{path}", env.base))
+                    .json(&hanging_request(path, stream));
+                let pending = tokio::spawn(async move { request.send().await });
+                let fixture = hanging_fixture(&env).await;
+                if stream {
+                    let mut response = pending.await.unwrap().unwrap();
+                    assert_eq!(response.status(), 200);
+                    assert!(response.chunk().await.unwrap().is_some());
+                    drop(response);
+                } else {
+                    pending.abort();
+                    let _ = pending.await;
+                }
+                assert_reaped(&fixture).await;
+                let next = tokio::time::timeout(
+                    Duration::from_secs(3),
+                    env.chat(
+                        json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]}),
+                    ),
+                )
+                .await
+                .expect("released run slot accepts next request");
+                assert_eq!(next["choices"][0]["message"]["content"], "Hello there");
+                assert_eq!(env.starts(), 2);
+            }
+        }
+    }
+    #[tokio::test]
+    async fn dc2_reused_claude_turn_disconnect_before_output_releases_run() {
+        for tool in [false, true] {
+            let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+            let next = if tool {
+                let first=env.chat(json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+                history(&first_call(&first), "HANG_BEFORE")
+            } else {
+                let (first, next) = two_turns("HANG_BEFORE");
+                env.chat(first).await;
+                next
+            };
+            let request = env
+                .client
+                .post(format!("{}/v1/chat/completions", env.base))
+                .json(&next);
+            let pending = tokio::spawn(async move { request.send().await });
+            let fixture = hanging_fixture(&env).await;
+            assert_eq!(env.starts(), 1, "same completed run was reused");
+            pending.abort();
+            let _ = pending.await;
+            assert_reaped(&fixture).await;
+            let next = tokio::time::timeout(
+                Duration::from_secs(3),
+                env.chat(
+                    json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]}),
+                ),
+            )
+            .await
+            .unwrap();
+            assert_eq!(next["choices"][0]["message"]["content"], "Hello there");
+        }
+    }
 }

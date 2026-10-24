@@ -87,3 +87,13 @@ Demand/contract: [task](T-0403-json-responses.md).
 | JR-03 | Preserve explicit native background pending replies | JR-3 | done | 2026-10-24T16:03:44Z | 2026-10-24T16:11:59Z | 2026-10-24T16:11:59Z |
 
 JR-1–JR-3 delivered in [PR #614](https://github.com/fallrising/newclear/pull/614), merge `e7262bd5d131ac174651cc4ab4c7e1c024aac27c` at `2026-10-24T16:11:59Z`. Independent source review PASS; required component CI106s and project-contract CI6s passed. Fetched main contains the reviewed HEAD and scoped component contents match. This records the publication result following the source task evidence; whole-product and real-provider acceptance remain incomplete.
+
+## T-0404 — Client disconnect
+
+Demand/contract: [task](T-0404-disconnect.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| DC-01 | Cancel silent active Claude turns on client disconnect | DC-1 | in_progress | 2026-10-24T16:28:52Z | | 2026-10-24T16:39:27Z |
+| DC-02 | Preserve completed session reuse and track renewed sinks | DC-2 | in_progress | 2026-10-24T16:28:52Z | | 2026-10-24T16:39:27Z |
+| DC-03 | Verify HTTP and fake Cursor release | DC-3 | in_progress | 2026-10-24T16:28:52Z | | 2026-10-24T16:39:27Z |

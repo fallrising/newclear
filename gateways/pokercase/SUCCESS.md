@@ -170,3 +170,13 @@ Scope and machine verification plan: [T021](fe-review/tasks/round2/T021.md), bas
 - 獨立 agent 文件審查 `usage_verify`：ACCEPT；最終回讀確認固定來源、既有 terminal 契約、UC-R01–08、隱私／有界 observer 及未決資料語意一致。
 - 已審規格 SHA256：`ff8fbdb4b298f12da379740e4b7a237a173e01e821835455c547fb16655357b1`。
 - 本地未重跑產品 runtime suites，未執行本規格的 RED／GREEN 或 live 驗收；最終 commit、Draft PR、head CI 與遠端回讀由該 PR 描述及 Checks 保存。
+
+## T-0403 — Direct JSON Responses
+
+Scope: non-stream Responses JSON read by the three client APIs, including non-force-stream provider profiles. No changes to forced SSE collection, streaming, accounting or request retry.
+
+- JR-1: Given HTTP-success upstream JSON with failed/cancelled, a non-null error, malformed JSON/object/status/output, unknown/missing status or unexpected pending status, then do not return successful Chat/Messages/Responses output. Return a fixed 502 diagnostic, retaining only recognized subscription usage-limit codes as429 for failed/error-only envelopes. Contradictory success+error is502 even if the error carries a quota code. No arbitrary upstream text or JSON parser detail in generated errors.
+- JR-2: Given completed/incomplete with array output and absent/null error, preserve the original native bytes and existing Chat/Messages text/tool/usage/finish conversion. This validates the envelope, not the full nested Responses schema.
+- JR-3: Given a native Responses request with literal background:true and an upstream queued/in_progress response with background:true and array output, preserve its original JSON. Chat/Messages and native synchronous requests cannot represent this pending result as completed output and return502. No polling, cancellation endpoint or provider background support is added or claimed.
+
+Background status semantics checked against [OpenAI background mode](https://developers.openai.com/api/docs/guides/background), 2026-10-24. Validation: RED/GREEN HTTP matrix via loopback fake Grok-profile upstream (synthetic stored token, no local credential file), full Rust/fmt/clippy/docs/index, independent review and CI. Local evidence: [task](docs/tasks/T-0403-json-responses.md),130 tests including74new direct JSON HTTP cases, fmt/clippy and43project contracts/index pass. Independent source review PASS; publication follows in the task board. Original whole-product and real-provider gaps remain.

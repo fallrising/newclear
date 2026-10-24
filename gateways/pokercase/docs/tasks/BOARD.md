@@ -75,3 +75,13 @@ Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallri
 合併證據：[PR #609](https://github.com/fallrising/newclear/pull/609)，`2026-10-24T15:50:53Z`，merge SHA `23f2b7f2435f5f805d95c84ec3d112363867108f`；已從 GitHub 回讀 `merged=true`。
 已驗證文件 head：`d7838fe3358e32ca7e78bd95cd60f75a29b61303`；獨立文件審查 ACCEPT。
 該 head 的必要 CI 全部通過：[Pokercase CI](https://github.com/fallrising/newclear/actions/runs/40107039186)、[Project success contracts](https://github.com/fallrising/newclear/actions/runs/40107039191)；文件及 CI 通過不代表後續功能已實作。
+
+## T-0403 — Direct JSON Responses
+
+Demand/contract: [task](T-0403-json-responses.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| JR-01 | Reject failed or malformed direct JSON envelopes | JR-1 | in_progress | 2026-10-24T16:03:44Z | | 2026-10-24T16:09:02Z |
+| JR-02 | Preserve completed/incomplete bodies and conversions | JR-2 | in_progress | 2026-10-24T16:03:44Z | | 2026-10-24T16:09:02Z |
+| JR-03 | Preserve explicit native background pending replies | JR-3 | in_progress | 2026-10-24T16:03:44Z | | 2026-10-24T16:09:02Z |

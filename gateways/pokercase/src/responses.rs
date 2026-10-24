@@ -339,6 +339,33 @@ fn buffered_failure(error: &Value) -> AppError {
     }
 }
 
+/// Validate a direct JSON envelope before passthrough or protocol conversion.
+/// Native callers may preserve explicitly requested background pending responses.
+/// Keep the original bytes: this is not a full nested-output schema validator.
+pub fn validate_json_response(body: &Bytes, allow_background: bool) -> AppResult<()> {
+    let invalid = || AppError::Upstream {
+        status: 502,
+        body: "Responses upstream returned an invalid response".into(),
+    };
+    let value: Value = serde_json::from_slice(body).map_err(|_| invalid())?;
+    let object = value.as_object().ok_or_else(invalid)?;
+    let status = object.get("status").and_then(Value::as_str);
+    let error = object.get("error").filter(|v| !v.is_null());
+    // Error-only envelopes and explicit failures may preserve known quota codes.
+    // A conflicting success/status must not be relabeled as a quota failure.
+    if status == Some("failed") || (!object.contains_key("status") && error.is_some()) {
+        return Err(buffered_failure(error.unwrap_or(&Value::Null)));
+    }
+    if error.is_some() || !value["output"].is_array() {
+        return Err(invalid());
+    }
+    match status {
+        Some("completed" | "incomplete") => Ok(()),
+        Some("queued" | "in_progress") if allow_background && value["background"] == true => Ok(()),
+        _ => Err(invalid()),
+    }
+}
+
 /// Rebuild a Responses JSON body from a Responses SSE transcript (upstream forced
 /// streaming while the client asked for a single body).
 pub fn reassemble_sse(raw: &str) -> AppResult<Bytes> {

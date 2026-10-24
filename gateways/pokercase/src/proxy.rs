@@ -748,7 +748,7 @@ pub async fn handle_chat_with_fallback(
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = read_forward_body(fwd, &cancel, false).await?;
                     let bytes = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&bytes);
                     let cost = estimate_cost(
@@ -899,7 +899,7 @@ pub async fn handle_anthropic_messages(
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = read_forward_body(fwd, &cancel, false).await?;
                     let chat = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&chat);
                     let cost = estimate_cost(
@@ -977,6 +977,7 @@ pub async fn handle_responses(
 ) -> AppResult<Response> {
     let body = prepare_body(state, body)?;
     let chat_body = responses::responses_to_chat(&body)?;
+    let allow_background = serde_json::from_slice::<Value>(&body)?["background"] == true;
     let targets = order_targets(targets, strategy, &state.cooldown, &state.rr_counter);
     let mut last_err: Option<UpstreamAttemptError> = None;
 
@@ -1052,7 +1053,7 @@ pub async fn handle_responses(
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = read_forward_body(fwd, &cancel, allow_background).await?;
                     // If upstream already returned Responses, pass through; else wrap chat.
                     let out = match kind {
                         UpstreamBodyKind::OpenAiResponses => bytes,
@@ -1136,14 +1137,22 @@ async fn read_bytes_cancel(
 
 /// Read a non-stream upstream body; a forced-stream Responses transcript is folded
 /// back into one Responses JSON body.
-async fn read_forward_body(fwd: ForwardOk, cancel: &CancellationToken) -> AppResult<Bytes> {
+async fn read_forward_body(
+    fwd: ForwardOk,
+    cancel: &CancellationToken,
+    allow_background: bool,
+) -> AppResult<Bytes> {
     let reassemble = fwd.reassemble_stream;
     let kind = fwd.body_kind;
     let bytes = read_bytes_cancel(fwd.response, cancel).await?;
-    if !matches!(kind, UpstreamBodyKind::OpenAiResponses) || !reassemble {
+    if !matches!(kind, UpstreamBodyKind::OpenAiResponses) {
         return Ok(bytes);
     }
-    responses::reassemble_sse(&String::from_utf8_lossy(&bytes))
+    if reassemble {
+        return responses::reassemble_sse(&String::from_utf8_lossy(&bytes));
+    }
+    responses::validate_json_response(&bytes, allow_background)?;
+    Ok(bytes)
 }
 
 /// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.

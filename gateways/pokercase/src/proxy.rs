@@ -1218,6 +1218,8 @@ trait SseConvert: Send {
     fn on_data(&mut self, data: &str) -> Vec<String>;
     /// Upstream ended (with or without a terminal event).
     fn on_end(&mut self) -> Vec<String>;
+    /// Idle deadline elapsed; preserve any already parsed terminal.
+    fn on_stall(&mut self) -> Vec<String>;
 }
 
 struct ChatToAnthropic(StreamTranslateState);
@@ -1229,6 +1231,9 @@ impl SseConvert for ChatToAnthropic {
     fn on_end(&mut self) -> Vec<String> {
         self.0.on_end()
     }
+    fn on_stall(&mut self) -> Vec<String> {
+        self.0.on_stall()
+    }
 }
 
 impl SseConvert for responses::ChatToResponsesStream {
@@ -1237,6 +1242,9 @@ impl SseConvert for responses::ChatToResponsesStream {
     }
     fn on_end(&mut self) -> Vec<String> {
         responses::ChatToResponsesStream::on_end(self)
+    }
+    fn on_stall(&mut self) -> Vec<String> {
+        responses::ChatToResponsesStream::on_stall(self)
     }
 }
 
@@ -1247,6 +1255,9 @@ impl SseConvert for responses::ResponsesToChatStream {
     fn on_end(&mut self) -> Vec<String> {
         responses::ResponsesToChatStream::on_end(self)
     }
+    fn on_stall(&mut self) -> Vec<String> {
+        responses::ResponsesToChatStream::on_stall(self)
+    }
 }
 
 impl SseConvert for claude::AnthropicToChatStream {
@@ -1255,6 +1266,9 @@ impl SseConvert for claude::AnthropicToChatStream {
     }
     fn on_end(&mut self) -> Vec<String> {
         claude::AnthropicToChatStream::on_end(self)
+    }
+    fn on_stall(&mut self) -> Vec<String> {
+        claude::AnthropicToChatStream::on_stall(self)
     }
 }
 
@@ -1278,6 +1292,12 @@ impl<A: SseConvert, B: SseConvert> SseConvert for Chain<A, B> {
     }
     fn on_end(&mut self) -> Vec<String> {
         let mid = self.0.on_end();
+        let mut out = self.feed(mid);
+        out.extend(self.1.on_end());
+        out
+    }
+    fn on_stall(&mut self) -> Vec<String> {
+        let mid = self.0.on_stall();
         let mut out = self.feed(mid);
         out.extend(self.1.on_end());
         out
@@ -1386,11 +1406,26 @@ where
                 }
                 Err(_) => {
                     if let Some(out) = native.as_mut().and_then(|n| n.finish_cr_terminal()) {
+                        drop(upstream);
                         yield Ok(Bytes::from(out));
                         break;
                     }
                     warn!("SSE stall timeout");
-                    yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
+                    let out = if let Some(native) = native.as_mut() {
+                        Some(native.stall())
+                    } else {
+                        conv.as_mut().map(|conv| {
+                            conv.on_stall().into_iter().map(|r| r + "\n\n").collect::<String>().into_bytes()
+                        })
+                    };
+                    // Release the source before yielding: the client may never poll again.
+                    drop(upstream);
+                    match out {
+                        Some(out) if !out.is_empty() => yield Ok(Bytes::from(out)),
+                        Some(_) => {},
+                        None => yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut,
+                            format!("SSE stall: no data for {}s", stall.as_secs()))),
+                    }
                     break;
                 }
             }
@@ -1474,6 +1509,190 @@ mod stream_completion_tests {
             .await
             .unwrap();
         String::from_utf8(bytes.to_vec()).unwrap()
+    }
+
+    struct DropWitness(std::sync::Arc<std::sync::atomic::AtomicBool>);
+    impl Drop for DropWitness {
+        fn drop(&mut self) {
+            self.0.store(true, std::sync::atomic::Ordering::SeqCst);
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn st1_st2_stalls_emit_errors_and_release_before_final_frame() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for phase in 0..3 {
+            let mut cases = modes();
+            cases.push((StreamMode::NativeResponses, "responses", "responses"));
+            for (mode, source, target) in cases {
+                let dropped = Arc::new(AtomicBool::new(false));
+                let witness = DropWitness(dropped.clone());
+                let mut text = if phase == 0 {
+                    String::new()
+                } else {
+                    partial(source)
+                        .iter()
+                        .map(|v| format!("data: {v}\n\n"))
+                        .collect()
+                };
+                if phase == 2 {
+                    text.push_str("data: {\"secret\":\"unfinished");
+                }
+                let input = async_stream::stream! {
+                    let _witness = witness;
+                    if !text.is_empty() { yield Ok::<_, std::io::Error>(Bytes::from(text)); }
+                    std::future::pending::<()>().await;
+                };
+                let mut body = stream_body(input, 1, mode).await.unwrap().into_body();
+                let mut all = String::new();
+                let mut saw_error = false;
+                while let Some(frame) = body.frame().await {
+                    let frame = frame.expect("stall is a protocol error, not a broken HTTP body");
+                    if let Ok(bytes) = frame.into_data() {
+                        let chunk = String::from_utf8(bytes.to_vec()).unwrap();
+                        if chunk.contains("upstream stream stalled") {
+                            assert!(dropped.load(Ordering::SeqCst), "release before final yield");
+                            saw_error = true;
+                        }
+                        all.push_str(&chunk);
+                    }
+                }
+                assert!(saw_error, "{source}->{target},phase{phase}: {all}");
+                assert!(!all.contains("unfinished"));
+                assert!(!all.contains("response.completed"));
+                assert!(!all.contains("message_stop"));
+                assert!(!all.contains("\"finish_reason\":\"stop\""));
+            }
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn st2_idle_timeout_clamps_and_resets_on_each_chunk() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for configured in [1, 7] {
+            let dropped = Arc::new(AtomicBool::new(false));
+            let witness = DropWitness(dropped.clone());
+            let input = async_stream::stream! {
+                let _witness = witness;
+                for _ in 0..2 {
+                    tokio::time::sleep(Duration::from_secs(4)).await;
+                    yield Ok::<_, std::io::Error>(Bytes::from_static(b": heartbeat\n\n"));
+                }
+                std::future::pending::<()>().await;
+            };
+            let start = tokio::time::Instant::now();
+            let mut body = stream_body(input, configured, StreamMode::Passthrough)
+                .await
+                .unwrap()
+                .into_body();
+            for seconds in [4, 8] {
+                assert!(body.frame().await.unwrap().unwrap().is_data());
+                assert_eq!(start.elapsed(), Duration::from_secs(seconds));
+                assert!(!dropped.load(Ordering::SeqCst));
+            }
+            let error = body.frame().await.unwrap().unwrap_err();
+            assert!(error
+                .to_string()
+                .contains(&format!("no data for {}s", configured.max(5))));
+            assert_eq!(start.elapsed(), Duration::from_secs(8 + configured.max(5)));
+            assert!(
+                dropped.load(Ordering::SeqCst),
+                "source dropped before yielding error"
+            );
+            assert!(body.frame().await.is_none());
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn st3_known_terminals_survive_idle_upstream_without_timeout_error() {
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for with_tools in [false, true] {
+            for outcome in ["success", "incomplete", "failure"] {
+                let mut cases = modes();
+                cases.push((StreamMode::NativeResponses, "responses", "responses"));
+                for (mode, source, target) in cases {
+                    let mut values = partial(source);
+                    if !with_tools {
+                        values.truncate(if source == "messages" { 2 } else { 1 });
+                    }
+                    match source {
+                    "chat" => values.push(if outcome == "failure" {
+                        json!({"error":{"type":"api_error","message":"fixture failure"}})
+                    } else {
+                        json!({"choices":[{"delta":{},"finish_reason":if outcome=="incomplete" {"length"} else {"stop"}}]})
+                    }),
+                    "responses" => {
+                        let status = match outcome { "failure"=>"failed", "incomplete"=>"incomplete", _=>"completed" };
+                        let mut terminal = json!({"type":format!("response.{status}"),"response":{"status":status,"output":[]}});
+                        if outcome == "failure" { terminal["response"]["error"] = json!({"message":"fixture failure"}); }
+                        if outcome == "incomplete" { terminal["response"]["incomplete_details"] = json!({"reason":"max_output_tokens"}); }
+                        values.push(terminal);
+                    },
+                    _ => {
+                        if outcome == "failure" {
+                            values.push(json!({"type":"error","error":{"type":"api_error","message":"fixture failure"}}));
+                        } else {
+                            values.push(json!({"type":"message_delta","delta":{"stop_reason":if outcome=="incomplete" {"max_tokens"} else {"end_turn"}}}));
+                            values.push(json!({"type":"message_stop"}));
+                        }
+                    }
+                }
+                    let text: String = values.iter().map(|v| format!("data: {v}\n\n")).collect();
+                    let dropped = Arc::new(AtomicBool::new(false));
+                    let witness = DropWitness(dropped.clone());
+                    let input = async_stream::stream! {
+                        let _witness = witness;
+                        yield Ok::<_, std::io::Error>(Bytes::from(text));
+                        std::future::pending::<()>().await;
+                    };
+                    let response = stream_body(input, 5, mode).await.unwrap();
+                    let text = String::from_utf8(
+                        axum::body::to_bytes(response.into_body(), 1 << 20)
+                            .await
+                            .unwrap()
+                            .to_vec(),
+                    )
+                    .unwrap();
+                    assert!(
+                        !text.contains("upstream stream stalled"),
+                        "{source}->{target}/{outcome}: {text}"
+                    );
+                    if outcome == "failure" {
+                        assert!(text.contains("fixture failure"));
+                    } else {
+                        let terminal = match (target, outcome) {
+                            ("chat", _) if with_tools && source == "responses" => {
+                                "\"finish_reason\":\"tool_calls\""
+                            }
+                            ("messages", _) if with_tools && source == "responses" => "tool_use",
+                            ("chat", "success") if with_tools => "\"finish_reason\":\"tool_calls\"",
+                            ("responses", "incomplete") => "response.incomplete",
+                            ("responses", _) => "response.completed",
+                            ("messages", "incomplete") => "max_tokens",
+                            ("messages", _) => "end_turn",
+                            (_, "incomplete") => "\"finish_reason\":\"length\"",
+                            _ => "\"finish_reason\":\"stop\"",
+                        };
+                        assert!(
+                            text.contains(terminal),
+                            "{source}->{target}/{outcome}: {text}"
+                        );
+                    }
+                    assert!(dropped.load(Ordering::SeqCst));
+                }
+            }
+        }
     }
 
     #[tokio::test]

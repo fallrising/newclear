@@ -112,7 +112,7 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_CURSOR_BIN` / `--cursor-bin` | Cursor command inside the pinned image (default `cursor-agent`) |
 | `THINROUTER_CURSOR_MAX_RUNS` / `--cursor-max-runs` | Concurrent Cursor Agent processes (default 2) |
 | `THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS` / `--cursor-accept-account-plugins` | Turn the cursor provider on, accepting that `cursor-agent` can use the account's Cursor plugins (default off) |
-| `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
+| `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | SSE idle timeout between chunks in seconds (default 90, minimum 5) |
 | `THINROUTER_TOKEN_SAVER` / `--token-saver` | Truncate tool / huge message content |
 | `THINROUTER_TOKEN_SAVER_MAX_CHARS` | Max chars kept per tool-like block (default 2000) |
 | `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` | Upstream egress proxy |
@@ -175,7 +175,7 @@ Set `THINROUTER_ADMIN_TOKEN` through your environment or secret configuration be
 
 - Single process: proxy + web UI + SQLite (+ optional TUI).
 - Hot path: API key auth → resolve model → ordered fallback / RR **before** SSE headers committed → byte passthrough (or Anthropic translate).
-- Cooldown after 429 / auth / 5xx; SSE stall timeout.
+- Cooldown after 429 / auth / 5xx; SSE stall timeout. Translated streams and native Responses emit a fixed protocol error on an unfinished idle timeout; already parsed terminal outcomes are preserved. Opaque Chat/Messages passthrough keeps transport-error behavior. The upstream stream is released before the final timeout output. This is a per-chunk idle limit, not a total request deadline.
 - Own schema (`~/.thinrouter`), not 9router.db compatible.
 
 ## License

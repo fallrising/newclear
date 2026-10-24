@@ -140,12 +140,32 @@ impl NativeResponses {
     }
 
     fn fail(&mut self, out: &mut Vec<u8>) {
+        self.fail_with(
+            out,
+            "upstream_stream_incomplete",
+            crate::error::INCOMPLETE_STREAM_MESSAGE,
+        );
+    }
+
+    pub(crate) fn stall(&mut self) -> Vec<u8> {
+        let mut out = Vec::new();
+        if !self.done {
+            self.fail_with(
+                &mut out,
+                "upstream_stream_timeout",
+                crate::error::STALLED_STREAM_MESSAGE,
+            );
+        }
+        out
+    }
+
+    fn fail_with(&mut self, out: &mut Vec<u8>, code: &str, message: &str) {
         self.frame.clear();
         self.line_start = 0;
         self.pending_cr = false;
         self.done = true;
-        let error = json!({"type":"error", "code":"upstream_stream_incomplete",
-            "message":crate::error::INCOMPLETE_STREAM_MESSAGE, "param":null,
+        let error = json!({"type":"error", "code":code,
+            "message":message, "param":null,
             "sequence_number": self.next_sequence});
         out.extend_from_slice(format!("event: error\ndata: {error}\n\n").as_bytes());
     }

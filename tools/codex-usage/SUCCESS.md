@@ -137,3 +137,15 @@ WAL歷史、跨服務持久歷史與新排程／通知屬選配後續，不計�
 
 本次交付準備：從最新origin/main建立隔離候選，只納入本工具、cc-quota封存及相關文件；
 其他專案未提交工作保留原處。最終HEAD CI／合併結果將寫入 [交付證據](docs/evidence/2026-10-23-delivery.md)。
+
+## T-1101 — Langfuse 整合文件先行
+
+本輪只交付開發／修正規格與兩條獨立文件 PR 中的本條；固定核對來源為 `6b444b00457591996db135e4ec6ab65b1d01ad4c`。
+規格路徑：`docs/specs/llm-observability-langfuse.md`；進度沿用 [任務板](docs/tasks/BOARD.md)。
+保留既有 mainline、usable_tag 與所有未驗 runtime AC；文件通過不代表功能實作或缺陷修復。
+
+| 文件 AC | Given／When／Then | 狀態 | 驗證計畫／證據 |
+| --- | --- | --- | --- |
+| LD-D01 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義訂閱額度、執行觀測與控制責任的整合範圍。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
+| LD-D02 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義來源、關聯 ID、計量、去重、隱私與失敗契約。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |
+| LD-D03 | Given 本次固定來源與 owner 範圍，When 完成文件審查，Then 定義分階段實作依賴、驗收矩陣與文件交付證據。 | pending | 索引／連結／範圍檢查與獨立文件審查待完成。 |

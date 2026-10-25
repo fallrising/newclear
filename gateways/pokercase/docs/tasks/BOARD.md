@@ -239,6 +239,8 @@ Delivered in [PR646](https://github.com/fallrising/newclear/pull/646), source `4
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| SC-1 | Own run directory across setup and startup failures | SC-1 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
-| SC-2 | Clean a dropped startup future | SC-2 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
-| SC-3 | Preserve live tool files and remove at run end | SC-3 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
+| SC-1 | Own run directory across setup and startup failures | SC-1 | done | 2026-10-25T16:30:59Z | 2026-10-25T16:43:21Z | 2026-10-25T16:43:21Z |
+| SC-2 | Clean a dropped startup future | SC-2 | done | 2026-10-25T16:30:59Z | 2026-10-25T16:43:21Z | 2026-10-25T16:43:21Z |
+| SC-3 | Preserve live tool files and remove at run end | SC-3 | done | 2026-10-25T16:30:59Z | 2026-10-25T16:43:21Z | 2026-10-25T16:43:21Z |
+
+Delivered in [PR650](https://github.com/fallrising/newclear/pull/650), source `e8abdd089caaa03b93bf33d9be03e39d0b616e38`, merge `c19f5ebe56502634990e8d9266e0ea395eda732e`. SC-1–SC-3:208tests/18groups,10newscenario sequences/5tests;fmt/clippy,43contracts/6indexes,independent source/finaldocs review and requiredCI PASS. Remote scoped content readback PASS. Future-drop coverage is direct abort/join; blocked-stdin HTTP disconnect is not claimed fixed. Whole-product/owner acceptance remains separate.

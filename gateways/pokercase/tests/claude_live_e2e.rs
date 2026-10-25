@@ -50,6 +50,11 @@ def ev(e): out({"type": "stream_event", "event": e})
 def hang(text):
     if "HANG_" not in text: return
     with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
+    if "HANG_COLLECT" in text:
+        ev({"type":"message_start","message":{"id":"msg_collect","type":"message","role":"assistant","content":[],"usage":{"input_tokens":1}}})
+        ev({"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}})
+        for _ in range(17):
+            ev({"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"x" * (1024 * 1024)}})
     if "HANG_AFTER" in text:
         ev({"type":"message_start","message":{"id":"msg_hang","type":"message","role":"assistant","content":[],"usage":{"input_tokens":1}}})
         ev({"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}})
@@ -606,6 +611,40 @@ mod disconnect_tests {
             json!({"model":"cc","stream":stream,"input":"HANG_AFTER"})
         } else {
             json!({"model":"cc","stream":stream,"max_tokens":50,"messages":[{"role":"user","content":"HANG_AFTER"}]})
+        }
+    }
+    #[tokio::test]
+    async fn bc2_bc3_collection_limit_reaps_active_cli_and_releases_slot() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+            let body = if path == "/v1/responses" {
+                json!({"model":"cc","input":"HANG_COLLECT"})
+            } else {
+                json!({"model":"cc","max_tokens":30,"messages":[{"role":"user","content":"HANG_COLLECT"}]})
+            };
+            let request = env.client.post(format!("{}{path}", env.base)).json(&body);
+            let pending = tokio::spawn(async move { request.send().await });
+            let fixture = hanging_fixture(&env).await;
+            let response = tokio::time::timeout(Duration::from_secs(10), pending)
+                .await
+                .unwrap()
+                .unwrap()
+                .unwrap();
+            assert_eq!(response.status(), 502);
+            let text = response.text().await.unwrap();
+            assert!(text.contains("upstream response collection limit exceeded"));
+            assert!(!text.contains("xxxxx"));
+            assert_reaped(&fixture).await;
+            let next = tokio::time::timeout(
+                Duration::from_secs(3),
+                env.chat(
+                    json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]}),
+                ),
+            )
+            .await
+            .unwrap();
+            assert_eq!(next["choices"][0]["message"]["content"], "Hello there");
+            assert_eq!(env.starts(), 2);
         }
     }
     #[tokio::test]

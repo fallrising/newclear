@@ -1128,11 +1128,7 @@ async fn read_bytes_cancel(
     resp: reqwest::Response,
     cancel: &CancellationToken,
 ) -> AppResult<Bytes> {
-    tokio::select! {
-        biased;
-        _ = cancel.cancelled() => Err(AppError::BadRequest("client disconnected".into())),
-        r = resp.bytes() => r.map_err(|e| AppError::Internal(anyhow::anyhow!("read upstream body: {e}"))),
-    }
+    crate::collection::body(resp.bytes_stream(), cancel).await
 }
 
 /// Read a non-stream upstream body; a forced-stream Responses transcript is folded

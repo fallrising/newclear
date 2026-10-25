@@ -252,3 +252,16 @@ Scope: variable-size state retained between events in ChatToResponses, Responses
 Validation: focused RED/GREEN, exact/over byte and entry boundaries, metadata/alias/duplicate/empty-tool cases, chain failure and compatibility matrices, loopback HTTP, full Rust/fmt/clippy/docs/index, independent review and required CI. No collector/general framing/deadline/session/accounting/retry change, new runtime dependency/permission, realprovider/Docker/login, release or whole-product acceptance. [Task](docs/tasks/T-0411-state-bound.md).
 
 Local RS-1–RS-3 evidence:165tests/16groups pass,including43newscenario iterations across11tests. Default payload/entry limits and chain ownership, exact reduced-budget boundaries, aliases/metadata/move semantics, streaming-only compatibility and4loopbackHTTP cases pass. OriginalRED retained;fmt/clippy,43contracts/6llms indexes pass. Independent review and required publication gates follow in task/board.
+
+
+## T-0412 — Bounded response collection
+
+Scope: successful HTTP bodies collected for non-stream Chat/Messages/Responses (JSON or forced SSE), and the shared Claude/Cursor non-stream record collector. HTTP counts actual received bytes before copying, with a16MiB maximum regardless of Content-Length. CLI counts UTF-8 record bytes plus two separator bytes per record, including the first and empty records, with16MiB and65536record maxima. Exact limits are accepted.
+
+- BC-1: Given an HTTP successful body exceeding16MiB, including trailing bytes after a typed terminal in a forced-SSE body, return fixed502 `upstream response collection limit exceeded`, discard partial collection and release the owned source before returning. Whole-body collection remains whole-body; no early-terminal optimization.
+- BC-2: Given Claude/Cursor records exceeding either limit, reject before retaining the offending record, return the same fixed502 and close the receiver before returning. Active producer cancellation follows existing policy; completed idle/tool sessions retain their reuse policy. Count the first record, UTF-8 bytes and empty records.
+- BC-3: Preserve exact-limit and smaller JSON/SSE text/tool/usage behavior, client cancellation, body read errors and explicit CLI failures. Verify source release with deterministic witnesses, all three client APIs through loopback HTTP, and active fakeCLI process reaping/slot reuse.
+
+Validation: RED/GREEN boundary tests, actual HTTP and fakeCLI checks, full Rust/fmt/clippy/contracts/index, independent review and required CI. Excludes non-success diagnostic/refresh bodies, producer stdout/queues, parsing/output expansion, allocator/RSS, framing/completion policy, deadlines/retries/accounting, dependencies/permissions and live-provider/Docker/release acceptance. [Task](docs/tasks/T-0412-collect-bound.md).
+
+Local BC-1–BC-3 evidence:172tests/17groups,54newscenario iterations across7tests pass;fmt/clippy and43contracts/6llms indexes pass. Original RED retained; exact/over bounds, UTF-8/entry counts, cancellation/readerror/CLI failure,27HTTP and3active fakeCLI reaping/slot reuse cases pass. Independent review/publication follow in task and board. No total-RSS or real-provider/Docker acceptance claim.

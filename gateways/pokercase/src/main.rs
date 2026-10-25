@@ -6,6 +6,7 @@ mod claude;
 mod claude_code;
 mod claude_mcp;
 mod cli_lines;
+mod cli_stderr;
 mod collection;
 mod config;
 mod cooldown;

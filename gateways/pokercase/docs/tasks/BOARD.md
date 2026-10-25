@@ -152,8 +152,10 @@ Delivered in [PR627](https://github.com/fallrising/newclear/pull/627), source `a
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| RS-1 | Bound retained output text, tools and metadata | RS-1 | in_progress | 2026-10-25T09:36:16Z | — | 2026-10-25T09:46:35Z |
-| RS-2 | Bound tool maps and argument aliases | RS-2 | in_progress | 2026-10-25T09:36:16Z | — | 2026-10-25T09:46:35Z |
-| RS-3 | Chain failure, source release and HTTP verification | RS-3 | in_progress | 2026-10-25T09:36:16Z | — | 2026-10-25T09:46:35Z |
+| RS-1 | Bound retained output text, tools and metadata | RS-1 | done | 2026-10-25T09:36:16Z | 2026-10-25T09:50:07Z | 2026-10-25T09:50:07Z |
+| RS-2 | Bound tool maps and argument aliases | RS-2 | done | 2026-10-25T09:36:16Z | 2026-10-25T09:50:07Z | 2026-10-25T09:50:07Z |
+| RS-3 | Chain failure, source release and HTTP verification | RS-3 | done | 2026-10-25T09:36:16Z | 2026-10-25T09:50:07Z | 2026-10-25T09:50:07Z |
 
 [Contract](../../SUCCESS.md#t-0411--retained-converter-state) · [Task](T-0411-state-bound.md).
+
+Delivered in [PR632](https://github.com/fallrising/newclear/pull/632), source `0bf108a9ca0f6a3adcf514c7944baef4b5168f4a`, merge `9470b0597503e348c25e482928904eb10e72c35e` at `2026-10-25T09:50:07Z`. Necessary component/contracts CI passed171s/10s; remote ancestry and scoped component readback PASS.165tests/16groups,43newscenarios;fmt/clippy/docs/index and independent source/final-document review PASS. See task for logical-budget and chain ownership limits; no total-RSS, real-provider/Docker or whole-product acceptance.

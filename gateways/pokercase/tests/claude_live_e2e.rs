@@ -681,6 +681,117 @@ mod disconnect_tests {
         }
     }
 
+    fn owned_run_dirs(env: &Env) -> Vec<std::path::PathBuf> {
+        std::fs::read_dir(env.dir.path().join("claude-work/runs"))
+            .into_iter()
+            .flatten()
+            .map(|entry| entry.unwrap().path())
+            .filter(|path| path.file_name().unwrap() != "keep")
+            .collect()
+    }
+
+    async fn assert_no_run_dirs(env: &Env) {
+        tokio::time::timeout(Duration::from_secs(3), async {
+            while !owned_run_dirs(env).is_empty() {
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .expect("owned run directory removed");
+    }
+
+    #[tokio::test]
+    async fn sc1_initial_input_failure_removes_tool_files() {
+        let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+        let sibling = env.dir.path().join("claude-work/runs/keep");
+        std::fs::create_dir_all(&sibling).unwrap();
+        std::fs::write(sibling.join("sentinel"), b"keep").unwrap();
+        let marker = env.bin_dir.path().join("stderr-start");
+        std::fs::write(&marker, "fail-input").unwrap();
+        let request = env.client.post(format!("{}/v1/chat/completions", env.base)).json(
+            &json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"q".repeat(1024*1024)}]}));
+        let pending = tokio::spawn(async move { request.send().await });
+        let fixture = hanging_fixture(&env).await;
+        let response = tokio::time::timeout(Duration::from_secs(4), pending)
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        assert_eq!(response.status(), 502);
+        assert!(response.text().await.unwrap().contains("Claude Code input"));
+        assert!(
+            owned_run_dirs(&env).is_empty(),
+            "write failure cleans before return"
+        );
+        assert_reaped(&fixture).await;
+        assert_eq!(std::fs::read(sibling.join("sentinel")).unwrap(), b"keep");
+        std::fs::remove_file(marker).unwrap();
+        let reply = tokio::time::timeout(
+            Duration::from_secs(3),
+            env.chat(json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]})),
+        )
+        .await
+        .unwrap();
+        assert_eq!(reply["choices"][0]["message"]["content"], "Hello there");
+        assert_eq!(env.starts(), 2);
+        assert!(
+            owned_run_dirs(&env).is_empty(),
+            "no-tools replacement creates no bridge directory"
+        );
+    }
+
+    #[tokio::test]
+    async fn sc3_tool_files_survive_continuation_then_expire() {
+        let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "2"]).await;
+        let first = env.chat(json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+        let dirs = owned_run_dirs(&env);
+        assert_eq!(dirs.len(), 1);
+        for file in ["tools.json", "callback.json", "mcp.json"] {
+            let path = dirs[0].join(file);
+            assert!(path.is_file());
+            assert_eq!(
+                std::fs::metadata(path).unwrap().permissions().mode() & 0o777,
+                0o600
+            );
+        }
+        let next = history(&first_call(&first), "sunny");
+        let second = env.chat(next.clone()).await;
+        assert!(second["choices"][0]["message"]["content"]
+            .as_str()
+            .unwrap()
+            .contains("sunny"));
+        let mut third = next;
+        third["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(second["choices"][0]["message"].clone());
+        third["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"user","content":"thanks"}));
+        let reply = env.chat(third.clone()).await;
+        assert_eq!(reply["choices"][0]["message"]["content"], "Checking.");
+        assert!(!first_call(&reply).is_empty());
+        assert_eq!(env.starts(), 1, "tool and idle continuation share process");
+        assert_eq!(owned_run_dirs(&env), dirs);
+        third["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(reply["choices"][0]["message"].clone());
+        third["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"tool","tool_call_id":first_call(&reply),"content":"done"}));
+        let completed = env.chat(third).await;
+        assert!(completed["choices"][0]["message"]["content"]
+            .as_str()
+            .unwrap()
+            .contains("done"));
+        assert_eq!(env.starts(), 1);
+        assert_eq!(owned_run_dirs(&env), dirs);
+        assert_no_run_dirs(&env).await;
+    }
+
     #[tokio::test]
     async fn sd3_failed_initial_input_reaps_process_and_releases_slot() {
         let env = Env::start(&["--claude-max-runs", "1"]).await;

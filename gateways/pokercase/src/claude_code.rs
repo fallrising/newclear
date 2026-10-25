@@ -1027,6 +1027,26 @@ pub async fn start(
     spawn_run(cc, model, chat, cancel, None).await
 }
 
+/// Own only a directory created by this run, including during startup errors or
+/// cancellation before the reader task exists. Never adopt an existing path.
+struct RunDir(PathBuf);
+
+impl RunDir {
+    fn create(path: PathBuf) -> std::io::Result<Self> {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        std::fs::create_dir(&path)?;
+        Ok(Self(path))
+    }
+}
+
+impl Drop for RunDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
 /// Start `claude -p`: told the whole conversation, or (`resume` = saved session and how
 /// many messages it has) only the messages after it.
 async fn spawn_run(
@@ -1052,7 +1072,7 @@ async fn spawn_run(
     // Client tools: a per-run folder (0600 files) with the helper's tool list, MCP config
     // and callback URL (which holds the run token, so it is never on a command line).
     let mut names: HashMap<String, String> = HashMap::new();
-    let mut run_dir: Option<PathBuf> = None;
+    let mut run_dir: Option<RunDir> = None;
     let mut mcp_config: Option<PathBuf> = None;
     if let Some(tools) = chat
         .get("tools")
@@ -1067,8 +1087,8 @@ async fn spawn_run(
         let callback = cc.callback_base.get().map(|base| {
             json!({"url": format!("{base}{}", crate::claude_mcp::CALLBACK_PATH), "token": token})
         });
-        let setup = || -> std::io::Result<PathBuf> {
-            std::fs::create_dir_all(&dir)?;
+        let setup = || -> std::io::Result<(PathBuf, RunDir)> {
+            let owned_dir = RunDir::create(dir.clone())?;
             let tools_file = dir.join("tools.json");
             write_private(&tools_file, &serde_json::to_vec(&list)?)?;
             let mut args = vec![
@@ -1089,11 +1109,12 @@ async fn spawn_run(
             }}});
             let cfg_file = dir.join("mcp.json");
             write_private(&cfg_file, &serde_json::to_vec(&cfg)?)?;
-            Ok(cfg_file)
+            Ok((cfg_file, owned_dir))
         };
-        let cfg_file = setup().map_err(|e| fail(500, format!("claude tool bridge: {e}"), false))?;
+        let (cfg_file, owned_dir) =
+            setup().map_err(|e| fail(500, format!("claude tool bridge: {e}"), false))?;
         mcp_config = Some(cfg_file);
-        run_dir = Some(dir);
+        run_dir = Some(owned_dir);
         names = map;
     }
     let allowed: Vec<String> = names.keys().cloned().collect();
@@ -1340,9 +1361,7 @@ async fn spawn_run(
             }
         }
         cc.alive.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
-        if let Some(dir) = run_dir {
-            let _ = std::fs::remove_dir_all(dir);
-        }
+        drop(run_dir);
         drop(_permit);
         if let Some((tx, message)) = failure_sink {
             let _ = tx
@@ -1553,6 +1572,124 @@ impl EventFilter {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn sc2_dropped_startup_future_cleans_directory_child_and_slot() {
+        use super::*;
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let bin = dir.path().join("fake-claude");
+        std::fs::write(&bin, "#!/usr/bin/env python3\nimport os, time\nopen('pid', 'w').write(str(os.getpid()))\nwhile True: time.sleep(60)\n").unwrap();
+        std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let cc = ClaudeCode::new(Some(bin.to_string_lossy().into()), dir.path(), 1);
+        let runner = cc.clone();
+        let pending = tokio::spawn(async move {
+            start(&runner, "sonnet", &json!({"tools":[{"type":"function","function":{"name":"probe","parameters":{"type":"object"}}}],"messages":[{"role":"user","content":"q".repeat(1024*1024)}]}), &CancellationToken::new()).await
+        });
+        let pid = tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if let Ok(raw) = std::fs::read_to_string(cc.work_dir.join("pid")) {
+                    if let Ok(pid) = raw.parse::<u32>() {
+                        break pid;
+                    }
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await;
+        if pid.is_err() {
+            pending.abort();
+            let _ = pending.await;
+            panic!("fake child did not start");
+        }
+        let pid = pid.unwrap();
+        assert!(!pending.is_finished());
+        assert_eq!(cc.runs.available_permits(), 0);
+        // No reader has taken ownership: the initial write exceeds pipe capacity.
+        assert_eq!(cc.alive.load(std::sync::atomic::Ordering::SeqCst), 0);
+        assert_eq!(
+            std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+            1
+        );
+        pending.abort();
+        assert!(pending.await.err().unwrap().is_cancelled());
+        assert_eq!(
+            std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+            0
+        );
+        assert_eq!(cc.runs.available_permits(), 1);
+        tokio::time::timeout(Duration::from_secs(3), async {
+            while std::path::Path::new(&format!("/proc/{pid}")).exists() {
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .expect("owned child reaped after future drop");
+        let permit = cc.slot(&CancellationToken::new()).await.unwrap();
+        assert_eq!(cc.runs.available_permits(), 0);
+        drop(permit);
+    }
+
+    #[test]
+    fn sc1_partial_setup_and_existing_paths_keep_ownership_separate() {
+        use super::*;
+        let root = tempfile::tempdir().unwrap();
+        let existing = root.path().join("runs/existing");
+        std::fs::create_dir_all(&existing).unwrap();
+        std::fs::write(existing.join("keep"), b"existing").unwrap();
+        assert!(RunDir::create(existing.clone()).is_err());
+        assert_eq!(std::fs::read(existing.join("keep")).unwrap(), b"existing");
+        for partial in ["tools.json", "callback.json", "mcp.json"] {
+            let path = root.path().join("runs/partial");
+            let result = (|| -> std::io::Result<()> {
+                let _owned = RunDir::create(path.clone())?;
+                write_private(&path.join(partial), b"synthetic")?;
+                // A deterministic setup error after a private file was created.
+                write_private(&path.join("missing-parent/file"), b"failure")
+            })();
+            assert!(result.is_err());
+            assert!(!path.exists());
+            assert!(existing.join("keep").exists());
+        }
+        assert_eq!(
+            std::fs::read_dir(root.path().join("runs")).unwrap().count(),
+            1
+        );
+    }
+
+    #[tokio::test]
+    async fn sc1_spawn_failure_removes_only_its_tool_directory() {
+        use super::*;
+        let dir = tempfile::tempdir().unwrap();
+        let cc = ClaudeCode::new(
+            Some(dir.path().join("missing-cli").to_string_lossy().into()),
+            dir.path(),
+            1,
+        );
+        let sibling = cc.work_dir.join("runs/keep");
+        std::fs::create_dir_all(&sibling).unwrap();
+        std::fs::write(sibling.join("sentinel"), b"keep").unwrap();
+        for tool in [true, true, false] {
+            let mut chat = json!({"messages":[{"role":"user","content":"hello"}]});
+            if tool {
+                chat["tools"] = json!([{"type":"function","function":{"name":"probe","parameters":{"type":"object"}}}]);
+            }
+            let error = match start(&cc, "sonnet", &chat, &CancellationToken::new()).await {
+                Err(error) => error,
+                Ok(_) => panic!("missing CLI must fail"),
+            };
+            assert_eq!(error.status, 503);
+            assert!(error.retryable);
+            assert_eq!(cc.runs.available_permits(), 1);
+            assert_eq!(
+                std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+                1,
+                "startup failure leaked a tool directory"
+            );
+            assert_eq!(std::fs::read(sibling.join("sentinel")).unwrap(), b"keep");
+        }
+    }
+
     #[tokio::test]
     async fn bc2_bc3_later_records_entries_boundaries_and_failures() {
         use super::{ClaudeRun, Item};

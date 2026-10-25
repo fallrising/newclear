@@ -233,3 +233,12 @@ Delivered in [PR644](https://github.com/fallrising/newclear/pull/644), source `b
 | CF-3 | Release abnormal runs and preserve healthy sessions | CF-3 | done | 2026-10-25T16:03:04Z | 2026-10-25T16:14:22Z | 2026-10-25T16:14:22Z |
 
 Delivered in [PR646](https://github.com/fallrising/newclear/pull/646), source `4c9bb202f62f4a08cdbf4d273bde25d3e403923c`, merge `cd124339caa71c7f1d5f86cabdd765f36761f6e7`. CF-1–CF-3: 203 tests / 18 groups, 48 new scenarios / 7 tests, fmt/clippy, contracts/index, independent review and required CI passed. Remote content readback passed; live-provider and whole-product acceptance remain separate.
+
+
+## T-0418 — Claude startup directory cleanup
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| SC-1 | Own run directory across setup and startup failures | SC-1 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
+| SC-2 | Clean a dropped startup future | SC-2 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
+| SC-3 | Preserve live tool files and remove at run end | SC-3 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |

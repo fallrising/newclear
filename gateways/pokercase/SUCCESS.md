@@ -330,3 +330,16 @@ Scope: the Claude EventFilter's state within one message, independent of the exi
 Validation: focused pre-fix RED, unit boundary/compatibility matrices, actual HTTP with a still-open fakeCLI source before/after partial output, exact compatibility and reuse/cleanup cases;full locked Rust/fmt/clippy/contracts/index, bounded independent review and requiredCI. No queue/session total bound, general protocol validation, new deadline/retry/provider capability, dependencies/permissions, realprovider/login/Docker, release/deploy or whole-product acceptance. [Task](docs/tasks/T-0417-claude-state.md).
 
 Local CF-1–CF-3 evidence:203tests/18groups,48newscenario iterations/7tests;fmt/clippy,43contracts/6navigation indexes PASS. Original over-limit forwarded-delta RED retained.24unit cases cover charged payload/start boundaries,metadata,moves/reset/ignored data;24fakeCLI HTTP/lifecycle cases cover all APIs,active/reused/completed failure,PIDreaping andslot reuse. Independent review/publication follow in task/board.
+
+
+## T-0418 — Claude startup directory cleanup
+
+Scope: ownership of each newly created Claude MCP run directory from setup through background reader cleanup. Use an owned directory guard installed immediately after exclusive directory creation and transferred to the reader. Remove only that owned directory on setup/spawn/initial-input failure or dropped startup future. Do not adopt or delete an existing path. Cleanup remains best effort under filesystem errors, matching the existing runtime policy.
+
+- SC-1: Given a tool request whose setup, process spawn or initial stdin write fails, remove its newly created run directory, including partial tool/config/callback files. Preserve existing status/retry/fallback behavior, parent and sibling paths, and release the slot. A request with no tools creates no run directory.
+- SC-2: Given a startup future dropped while a fake child keeps stdin open without reading, remove the owned directory; retain existing child kill-on-drop and stderr-drain ownership. Verify fake process reaping and one-slot replacement. This does not add a stdin timeout or change explicit cancellation-token semantics.
+- SC-3: Given healthy tool activity and continuation, retain MCP files while the run owns them, preserve same-process tool reply and idle reuse, and remove the directory at the existing cleanup point after process/stderr stop. Do not change session shelving/deletion or scan historical run directories.
+
+Validation: focused spawn-failure RED, owned-directory collision/partial-setup tests, direct startup-future drop plus fakeCLI HTTP initial-write failure and healthy tool continuation/expiry with direct filesystem assertions and Linux PID witnesses; full locked Rust/fmt/clippy/contracts/index, independent review and required CI. No new dependency/permission, live provider/model/login/Docker, release/deploy or whole-product acceptance. [Task](docs/tasks/T-0418-claude-startup.md).
+
+Local SC-1–SC-3 evidence: 208tests/18groups,10newscenario iterations/5tests;fmt/clippy,43contracts/6indexes PASS. Original RED and initial test-method failures retained. Direct startup-future drop is verified; HTTP client abort did not establish server-future drop and is not claimed fixed. Partial setup coverage is guard/write_private unit injection. See task for scope and publication gates.

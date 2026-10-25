@@ -36,12 +36,14 @@ PR [#474](https://github.com/fallrising/newclear/pull/474) merged at `2026-10-22
 
 ## T-0629
 
-Owner direct instruction；issue [#629](https://github.com/fallrising/newclear/issues/629)，無 desk 卡。承接者：ChatGPT 主導（`kith-activity-docs-20261025`）；其餘 agent 僅作來源查核與獨立文件審查。工作範圍與授權見[task](../../tasks/629-agent-activity-design/task.md)，證據見[report](../../tasks/629-agent-activity-design/report.md)。AV-0 文件位於 [PR #630](https://github.com/fallrising/newclear/pull/630)；owner 於 2026-10-25 追加更新文件並合併的明確授權，依最終候選通過必要檢查／審查後完成合併與收尾。
+Owner direct instruction；issue [#629](https://github.com/fallrising/newclear/issues/629)，無 desk 卡。承接者：ChatGPT 主導（`kith-activity-docs-20261025`）；其餘 agent 僅作來源查核與獨立文件審查。工作範圍與授權見[task](../../tasks/629-agent-activity-design/task.md)，證據見[report](../../tasks/629-agent-activity-design/report.md)。AV-0 文件已由 [PR #630](https://github.com/fallrising/newclear/pull/630) 於 `2026-10-25T09:10:46Z` 合併，merge commit 為 [`8429179be18bdcf2c7efd51b65b90a1beb5fc5f3`](https://github.com/fallrising/newclear/commit/8429179be18bdcf2c7efd51b65b90a1beb5fc5f3)。
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0629-DOC1 | 固定來源與重用／差異核對 | AC-AVDOC-01 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T09:07:49Z |
-| T-0629-DOC2 | 活動、提及、展示與程式驗收計畫 | AC-AVDOC-02 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T09:07:49Z |
-| T-0629-DOC3 | 文件導航、檢查、審查、PR 合併與收尾 | AC-AVDOC-03 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T09:07:49Z |
+| T-0629-DOC1 | 固定來源與重用／差異核對 | AC-AVDOC-01 | done | 2026-10-25T08:20:05Z | 2026-10-25T09:10:46Z | 2026-10-25T09:11:52Z |
+| T-0629-DOC2 | 活動、提及、展示與程式驗收計畫 | AC-AVDOC-02 | done | 2026-10-25T08:20:05Z | 2026-10-25T09:10:46Z | 2026-10-25T09:11:52Z |
+| T-0629-DOC3 | 文件導航、檢查、審查、PR 合併與收尾 | AC-AVDOC-03 | done | 2026-10-25T08:20:05Z | 2026-10-25T09:10:46Z | 2026-10-25T09:11:52Z |
 
-板上 `done`／`end` 依根合約於實際合併後，以只改任務板的 PR 補記；合併前不預填完成。文件驗證狀態與程式 `NOT_STARTED` 由 report／SUCCESS 分別記錄。
+最終受審 head `cce2f765ffcd52339b3c30ee8b342abb36a0abf5` 的 [Kith CI](https://github.com/fallrising/newclear/actions/runs/40179429636)（test／web）與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/40179429638)（validate）均成功；文件／來源／合併授權獨立審查 ACCEPT，167 個相對連結目標、8 檔白名單與 SUCCESS 檢查通過。合併後已回讀 PR 的 merged_at／merge SHA、main ref、commit tree 及計畫／報告／任務板，與受審內容一致。
+
+本次只補記 AV-0 文件任務的實際完成狀態與合併時間。AV-1／2／3 仍 NOT_STARTED；聊天室 AC-04、mainline 與 usable tag 資格不變，未實作動畫、啟動 provider、部署或付費。

@@ -108,3 +108,16 @@ make deployment-rehearsal
 此切片不實作 audit retention、stale VM cleanup、排程或部署，不改 adapter source ID/replay 或 lifecycle。AT-13/M4、AC-04 與 usable_tag 維持原狀。先前 socket／private-path／namespace 環境失敗保留於交付證據；未放寬安全 guard 或修改主機權限。
 
 額外 regression 的3項 tool-process recovery 失敗伴隨 root driver 缺少 multiprocessing `__main__` guard／子程序重跑 selection 的 fixture 污染；driver 已修正。另1項 export-lock 失敗雖在 targeted rerun 通過，仍為 intermittent／原因未歸因，不能斷言由 driver 造成。
+
+## Proposed scope：T-089 manual audit retention（Phase A only）
+
+SDD §12 的 audit90天仍為實作缺口。本階段僅先行[設計契約](docs/AUDIT-RETENTION.md)：明確 manual preview/apply、至少90天嚴格 cutoff、受限 row/full-encoding、exact approval/expiry/DB identity；刪除 raw audit history，保留無 actor/action/target/decision 的最小 UUID/hash/size/time operation evidence。Audit target 非 typed run FK，不另發明 terminal/cleanup/export hold；approval/recovery/command/model/tool/export authoritative state 全保留。設計待獨立/root ACCEPT 與 baseline commit 才可釋出 Phase B。
+
+| AC | 狀態 | 驗證計畫 |
+| --- | --- | --- |
+| AUD-01 | pending | 真 PostgreSQL missing-product RED/GREEN；90天 equality、exact issued plan/expiry/UUID、nullable/unbounded metadata、固定 inspected-row/no-refill 及 encoded byte caps |
+| AUD-02 | pending | 原子 receipt/tombstone/delete/new audit、current/prior transaction/wrong-ID/time guard、no UUID resurrection、bounded replay、fault rollback；無 raw audit 欄位永久複製 |
+| AUD-03 | pending | 所有 writer family 可繼續寫；auth／command replay／approval／recovery／model/tool unknown state／export state 保留並可運作；實際 writer/GC barriers、sanitized private CLI |
+| AUD-04 | pending | Freeze018後獨立 PostgreSQL18 catalog pin，原 parser/private-path/quiescence guards 不改；native empty-target restore 保留 surviving raw rows／最小證據／control state，舊 plan UUID 失效 |
+
+Phase A 無 code/migration/test/runtime；上述僅 proposed AC，尚無可執行功能或通過宣稱。原有 event/archive 已交付證據不在此重跑或撤回；完整 AT-13/M4、AC-04、stale cleanup、live qualification 與 usable_tag 維持原狀。

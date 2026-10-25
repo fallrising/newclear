@@ -87,3 +87,8 @@ M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修
 ### Bounded cross-flow acceptance
 
 [COMP01/02 contract](tasks/379-fake-composite/task.md) and [local delivery snapshot](tasks/379-fake-composite/report.md) join stale recovery, explicitly approved synthetic HTTP export and native restore in one scenario. Production behavior is unchanged; complete fake E2E/live/M4 acceptance remains open.
+
+[BGC01/02 browser/GC/export integration](tasks/379-browser-retention/report.md) adds one
+real Chromium/API/SQL retention scenario on synthetic historical data. It verifies
+export protection, expired-cursor reconnect and stale archive controls, while full
+fake/live/M4 scope remains open. Original failure history is retained.

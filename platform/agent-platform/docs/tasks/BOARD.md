@@ -103,5 +103,35 @@ The [contract](../../tasks/379-fake-composite/task.md) preserves full M4/live sc
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0096.1 | Compose stale recovery and explicit fake HTTP export | COMP-01 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:29:36Z |
-| T-0096.2 | Preserve cross-flow authority through native restore | COMP-02 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:29:36Z |
+| T-0096.1 | Compose stale recovery and explicit fake HTTP export | COMP-01 | done | 2026-10-25T17:22:16Z | 2026-10-25T17:37:36Z | 2026-10-25T17:38:25Z |
+| T-0096.2 | Preserve cross-flow authority through native restore | COMP-02 | done | 2026-10-25T17:22:16Z | 2026-10-25T17:37:36Z | 2026-10-25T17:38:25Z |
+
+T0096 delivery: [PR653](https://github.com/fallrising/newclear/pull/653) normally merged
+`ada118988b909c6aa826a76da8939e1ec7451432` at 2026-10-25T17:37:36Z;
+head `fdbc3624260abb1004e98b20e2c2c2d08aeadf71` passed all four required checks:
+[Agent Platform40216767283](https://github.com/fallrising/newclear/actions/runs/40216767283)
+check/control-plane/web and [contracts40216767243](https://github.com/fallrising/newclear/actions/runs/40216767243)
+validate. Hosted45 base/756 platform tests passed, including the new composition.
+The entire merged component matches the reviewed candidate. T097 independently
+accepted COMP01/02; T098-composite1 ran one new local scenario/2.234s with real
+native dump/restore, and static177/43contracts/6indexes passed. Product code is unchanged.
+
+The same DB joins terminal result/release fault, approved stale cleanup, independent
+recovery, authenticated in-process API export, fake GitHub loopback HTTP reply loss
+and GET-only reconciliation, then native restore. Restored completed intents stay
+idle; durable rows, private journal/fences and external effect counts are preserved.
+The original test-only unreachable SQL scheduling shortcut was rejected before runtime
+and retained as review evidence. Prior failure history remains unchanged.
+T0092 stale done rows were delivered by PR653; its standalone candidate needs no
+separate PR. This supersedes pre-merge status in the dated delivery snapshot.
+Full GC-operation composition/browser/fake E2E, live VM/sandboxd/provider,
+unknown host residue/deployment and whole M4 remain open under #379.
+
+## T-0100 — Issue #379 browser retention/export composition
+
+Test-only BGC01/02 integration; [contract](../../tasks/379-browser-retention/task.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0100.1 | Browser-approved export survives actual event/archive GC | BGC-01 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T18:03:01Z |
+| T-0100.2 | Stale browser archive controls refuse expired payload | BGC-02 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T18:03:01Z |

@@ -1,3 +1,16 @@
+# 最新接續 — PR653已合併，browser／GC／export整合本機通過（2026-10-26）
+
+PR653正常合併ada118988b909c6aa826a76da8939e1ec7451432；四項必要CI成功、hosted45+756，
+COMPdone板隨本次真正測試來源變更補入，原本機a36候選保留。下方pending屬歷史快照。
+
+[BGC01/02契約](../tasks/379-browser-retention/task.md)與[本機快照](../tasks/379-browser-retention/report.md)
+串接兩個已登入Chromium頁面、合成歷史首次INSERT、真實event/archive GC、export引用保護、
+410重連及過期控制拒絕。T102-browser3單一新情境9.8s通過；前兩次45s本文讀取逾時及初次lint失敗保留。
+產品來源未改；不重跑舊長測試。獨立審查、必要CI與正常合併仍為交付門檻。
+完整fake/live AT09/12/13、未知host residue、VM recovery／實際部署及M4仍未完成。
+
+---
+
 # 最新接續 — PR649 已合併，跨流程 fake 驗收本機通過（2026-10-26）
 
 [PR649](https://github.com/fallrising/newclear/pull/649) 已於2026-10-25T17:00:58Z正常合併，

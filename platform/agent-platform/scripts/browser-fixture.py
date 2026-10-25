@@ -105,6 +105,10 @@ def main():
                 port=18600,
                 access_log=False,
             )
+        elif action.startswith("m4-retention-"):
+            from browser_m4_retention_fixture import retention_action
+
+            retention_action(action, db, output)
         elif action.startswith("export"):
             from browser_export_fixture import export_action
 

@@ -31,7 +31,7 @@ use std::time::{Duration, Instant};
 use bytes::Bytes;
 use futures_util::Stream;
 use serde_json::{json, Value};
-use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncWriteExt, BufReader};
 use tokio::process::{Child, Command};
 use tokio::sync::{mpsc, oneshot, OwnedSemaphorePermit, Semaphore};
 use tokio_util::sync::CancellationToken;
@@ -1134,9 +1134,10 @@ async fn spawn_run(
     let line = json!({"type": "user", "message": {"role": "user", "content": content}});
     let mut stdin = child.stdin.take().expect("piped stdin");
     let stdout = child.stdout.take().expect("piped stdout");
-    let mut stderr = child.stderr.take().expect("piped stderr");
+    let mut diagnostics = crate::cli_stderr::Drain::new(child.stderr.take().expect("piped stderr"));
     if let Err(e) = stdin.write_all(format!("{line}\n").as_bytes()).await {
         stop(child).await;
+        diagnostics.stop().await;
         return Err(fail(502, format!("Claude Code input: {e}"), true));
     }
 
@@ -1295,12 +1296,7 @@ async fn spawn_run(
         let overflow_sink = if line_overflow { sink(&run) } else { None };
         if let Some(tx) = sink(&run) {
             if !line_overflow && !sent && !run.stop.is_cancelled() && !first_cancel.is_cancelled() {
-                let mut err = String::new();
-                let _ = tokio::time::timeout(
-                    Duration::from_secs(2),
-                    (&mut stderr).take(4096).read_to_string(&mut err),
-                )
-                .await;
+                let err = diagnostics.diagnostic().await;
                 let tail: String = err
                     .trim()
                     .chars()
@@ -1324,6 +1320,7 @@ async fn spawn_run(
         run.stop.cancel();
         *run.sink.lock().unwrap() = None;
         stop(child).await;
+        diagnostics.stop().await;
         // An idle run's session is kept for its next turn; any other run's is removed.
         let idle = run.idle_now.load(std::sync::atomic::Ordering::SeqCst);
         if !(idle && cc.shelve(&run)) {

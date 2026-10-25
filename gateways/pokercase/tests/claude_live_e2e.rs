@@ -31,6 +31,13 @@ if "--resume" in args:
     with open(os.path.join(d, "resumes.txt"), "a") as f: f.write(sid + "\n")
 else:
     sid = str(uuid.uuid4())
+# Saturate stderr before reading stdin to expose mutual pipe backpressure.
+if os.path.exists(os.path.join(d, "stderr-start")):
+    with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
+    sys.stderr.buffer.write(b"START_DIAGNOSTIC" + b"x" * (1024 * 1024)); sys.stderr.flush()
+    if open(os.path.join(d, "stderr-start")).read() == "fail-input":
+        os.close(0)
+        while True: time.sleep(60)
 helper = None
 if "--mcp-config" in args:
     cfg = json.load(open(args[args.index("--mcp-config") + 1]))["mcpServers"]["thinrouter"]
@@ -48,6 +55,18 @@ if "--mcp-config" in args:
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
 def ev(e): out({"type": "stream_event", "event": e})
 def hang(text):
+    if "SD_FLOOD" in text:
+        with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
+        if "SD_PARTIAL" in text:
+            ev({"type":"message_start","message":{"id":"msg_sd","type":"message","role":"assistant","content":[],"usage":{"input_tokens":1}}})
+            ev({"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}})
+            ev({"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"partial"}})
+        prefix = b"z" * (4096 - len(b"not logged in")) + b"not logged in"
+        sys.stderr.buffer.write(prefix + b"UNRETAINED_SECRET" + b"x" * (1024 * 1024)); sys.stderr.flush()
+        if "SD_EXIT" in text: sys.exit(1)
+        if "SD_RESULT" in text:
+            out({"type":"result","subtype":"error","is_error":True,"result":"explicit failure"})
+            sys.exit(1)
     if "LINE_EXACT" in text:
         sys.stdout.write('{"type":"ignored"}'.ljust(16 * 1024 * 1024) + "\n"); sys.stdout.flush()
         return
@@ -622,6 +641,137 @@ mod disconnect_tests {
             json!({"model":"cc","stream":stream,"max_tokens":50,"messages":[{"role":"user","content":"HANG_AFTER"}]})
         }
     }
+    #[tokio::test]
+    async fn sd1_stderr_before_stdin_does_not_block_any_client_api() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            for stream in [false, true] {
+                let env = Env::start(&["--claude-max-runs", "1"]).await;
+                std::fs::write(env.bin_dir.path().join("stderr-start"), "").unwrap();
+                let text = "q".repeat(1024 * 1024);
+                let body = if path == "/v1/responses" {
+                    json!({"model":"cc","stream":stream,"input":text})
+                } else {
+                    json!({"model":"cc","stream":stream,"max_tokens":30,"messages":[{"role":"user","content":text}]})
+                };
+                let request = env.client.post(format!("{}{path}", env.base)).json(&body);
+                let pending = tokio::spawn(async move {
+                    let r = request.send().await.unwrap();
+                    (r.status(), r.text().await.unwrap())
+                });
+                let _fixture = hanging_fixture(&env).await;
+                let (status, text) = tokio::time::timeout(Duration::from_secs(4), pending)
+                    .await
+                    .expect("stderr must drain before stdin can complete")
+                    .unwrap();
+                assert_eq!(status, 200, "{path}/{stream}: {text}");
+                assert!(text.contains("Hello"));
+                assert!(!text.contains("START_DIAGNOSTIC"));
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn sd3_failed_initial_input_reaps_process_and_releases_slot() {
+        let env = Env::start(&["--claude-max-runs", "1"]).await;
+        std::fs::write(env.bin_dir.path().join("stderr-start"), "fail-input").unwrap();
+        let request = env
+            .client
+            .post(format!("{}/v1/chat/completions", env.base))
+            .json(
+                &json!({"model":"cc","messages":[{"role":"user","content":"q".repeat(1024*1024)}]}),
+            );
+        let pending = tokio::spawn(async move { request.send().await.unwrap() });
+        let fixture = hanging_fixture(&env).await;
+        let response = tokio::time::timeout(Duration::from_secs(4), pending)
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(response.status(), 502);
+        assert!(response.text().await.unwrap().contains("Claude Code input"));
+        assert_reaped(&fixture).await;
+        std::fs::remove_file(env.bin_dir.path().join("stderr-start")).unwrap();
+        let reply = tokio::time::timeout(
+            Duration::from_secs(3),
+            env.chat(json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]})),
+        )
+        .await
+        .unwrap();
+        assert_eq!(reply["choices"][0]["message"]["content"], "Hello there");
+        assert_eq!(env.starts(), 2);
+    }
+
+    #[tokio::test]
+    async fn sd1_sd3_stderr_drain_survives_idle_and_tool_reuse() {
+        for tool in [false, true] {
+            let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+            let next = if tool {
+                let first=env.chat(json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+                history(&first_call(&first), "SD_FLOOD")
+            } else {
+                let (first, next) = two_turns("SD_FLOOD");
+                env.chat(first).await;
+                next
+            };
+            let reply = tokio::time::timeout(Duration::from_secs(4), env.chat(next))
+                .await
+                .unwrap();
+            assert!(reply["choices"][0]["message"]["content"]
+                .as_str()
+                .unwrap()
+                .contains(if tool { "Result:" } else { "Hello" }));
+            assert_eq!(env.starts(), 1, "stderr drain belongs to reusable process");
+        }
+    }
+
+    #[tokio::test]
+    async fn sd2_sd3_stderr_failure_precedence_and_cancel_cleanup() {
+        for (phase, status, needle) in [
+            ("SD_FLOOD SD_EXIT", 401, "not logged in"),
+            ("SD_FLOOD SD_RESULT", 502, "explicit failure"),
+            ("SD_FLOOD SD_PARTIAL SD_EXIT", 200, "partial"),
+            (
+                "SD_FLOOD HANG_LINE",
+                502,
+                "CLI stdout record exceeds 16 MiB",
+            ),
+            ("SD_FLOOD HANG_BEFORE", 0, ""),
+        ] {
+            let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+            let request=env.client.post(format!("{}/v1/chat/completions",env.base)).json(&json!({"model":"cc","stream":true,"messages":[{"role":"user","content":phase}]}));
+            let pending = tokio::spawn(async move {
+                let r = request.send().await.unwrap();
+                (r.status(), r.text().await.unwrap())
+            });
+            let fixture = hanging_fixture(&env).await;
+            if status == 0 {
+                pending.abort();
+                let _ = pending.await;
+            } else {
+                let (actual, text) = tokio::time::timeout(Duration::from_secs(4), pending)
+                    .await
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(actual.as_u16(), status, "{phase}: {text}");
+                assert!(text.contains(needle), "{phase}: {text}");
+                assert!(!text.contains("UNRETAINED_SECRET"));
+                if phase.contains("SD_PARTIAL") {
+                    assert!(!text.contains("\"finish_reason\":\"stop\""));
+                }
+            }
+            assert_reaped(&fixture).await;
+            let reply = tokio::time::timeout(
+                Duration::from_secs(3),
+                env.chat(
+                    json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]}),
+                ),
+            )
+            .await
+            .unwrap();
+            assert_eq!(reply["choices"][0]["message"]["content"], "Hello there");
+            assert_eq!(env.starts(), 2);
+        }
+    }
+
     #[tokio::test]
     async fn lb3_claude_reused_and_completed_run_overflow_is_not_shelved() {
         for phase in ["idle-turn", "tool-turn", "completed"] {

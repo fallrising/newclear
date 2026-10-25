@@ -23,6 +23,7 @@ mod secrets;
 mod server;
 mod siwc;
 mod store;
+mod stream_budget;
 mod templates;
 mod token_saver;
 mod tui_app;

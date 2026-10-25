@@ -147,3 +147,13 @@ TR-1–TR-3 delivered in [PR #625](https://github.com/fallrising/newclear/pull/6
 [Contract](../../SUCCESS.md#t-0410--converted-input-bound) · [Task](T-0410-input-bound.md).
 
 Delivered in [PR627](https://github.com/fallrising/newclear/pull/627), source `a383cc529aa5280508e1effc2c35c530ff93bb23`, merge `18993aa6abc7d968e55f8c2f0c567fef84e06c05` at `2026-10-25T06:53:35Z`. Necessary component/contracts CI passed161s/9s; remote ancestry and component readback PASS.154tests/15groups,125newscenarios;fmt/clippy/docs/index and independent source/final-document review PASS. Exact evidence/limits in the task record; no real-provider/Docker or whole-product acceptance.
+
+## T-0411 — Retained converter state
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| RS-1 | Bound retained output text, tools and metadata | RS-1 | in_progress | 2026-10-25T09:36:16Z | — | 2026-10-25T09:46:35Z |
+| RS-2 | Bound tool maps and argument aliases | RS-2 | in_progress | 2026-10-25T09:36:16Z | — | 2026-10-25T09:46:35Z |
+| RS-3 | Chain failure, source release and HTTP verification | RS-3 | in_progress | 2026-10-25T09:36:16Z | — | 2026-10-25T09:46:35Z |
+
+[Contract](../../SUCCESS.md#t-0411--retained-converter-state) · [Task](T-0411-state-bound.md).

@@ -1,10 +1,13 @@
 # Manual stale binding cleanup — T-092 Phase A
 
-Proposed contract against `234daf32cad60af231abf35fb44cfdd75bbe2a6c`.
-This document is a design for independent/root review, not an implementation or
-permission to operate a node. Phase B requires an accepted, committed contract
-and an actual missing-behavior RED. SDD §13.2, INV-12 and AT-13 remain broader
-than this slice. Event/audit retention delivered through PR641 is independent.
+Contract recorded before implementation against
+`234daf32cad60af231abf35fb44cfdd75bbe2a6c`; accepted baseline
+`1b47738b08738978d53f2c551c1f5fabbf9325ba` preceded actual RED and implementation.
+The protocol below is the accepted contract. Local results and delivery gates
+are recorded in the [dated report](../tasks/379-stale-cleanup/report.md).
+SDD §13.2, INV-12 and AT-13 remain broader than this slice; event/audit retention
+already delivered through PR641 is independent. This document does not authorize
+operation on a deployed node.
 
 ## Actual gap and smallest effect
 
@@ -333,3 +336,35 @@ backup tests; no new UI means no invented browser gate. Root chooses focused
 commands and required CI after implementation freeze. All new jobs use the
 shared launcher, distinct task IDs and protected raw evidence. Phase A runs only
 static reads/hash/diff and task/report validators; no DB, Docker, VM or live API.
+
+## Operator interface
+
+Use the configured private control-plane database and connector via DATABASE_URL,
+CONNECTOR_ORIGIN and CONNECTOR_TOKEN_FILE. Keep the connector journal/fences and
+its original node credentials available. The caller selects one run; there is no
+candidate sweep or automatic schedule. A live worker lease must expire normally
+or be reconciled by existing recovery; never edit production generations or
+lease clocks to make a plan eligible.
+
+```sh
+umask 077
+agent-platform stale-cleanup-preview --run-id 'RUN_UUID' > /private/maintenance/stale-plan.json
+agent-platform stale-cleanup-apply --plan /private/maintenance/stale-plan.json --approve 'REVIEWED_APPROVAL_DIGEST'
+```
+
+Keep the directory private/owned and the plan mode0600. Inspect the exact run,
+binding, generation, action and expiry before copying its digest. Approval
+permits one new request for that attempt, not arbitrary retries. A changed or
+expired plan needs a new preview and explicit review.
+
+`stop_observed; reconciliation_pending` records the connector's observation;
+the existing worker must still independently reconcile before capacity is free.
+`unknown` retains the attempt and capacity; preserve its evidence and inspect the
+original resource. Same-attempt apply never resends release. Absent-claim host
+residue cannot be removed by this command. Only a fresh eligible preview can
+support approval of another attempt against the same proven capability.
+
+Keep the whole private journal envelope, original operations and fences in
+separately managed backups. DB backup still excludes them. Restoring a database
+changes maintenance identity, invalidating previous plans, and leaves nodes
+drained; it does not recreate private authority, reset generations or start work.

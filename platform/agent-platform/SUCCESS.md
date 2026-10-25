@@ -122,21 +122,23 @@ SDD §12 的 audit90天保留已依[先行契約](docs/AUDIT-RETENTION.md)實作
 
 此為有日期的本機證據快照；新增反例、獨立最終審查、hosted CI 與合併狀態見[交付報告](tasks/379-audit-retention/report.md)及其 PR。原有 event/archive 證據與初次失敗保留。完整 AT-13/M4、AC-04、stale cleanup、live qualification 與 usable_tag 維持原狀。
 
-## Proposed scope: T-092 manual stale binding cleanup (Phase A only)
+## Bounded scope: T-092 manual stale binding cleanup
 
-The proposed [contract](docs/STALE-CLEANUP.md) addresses a reachable terminal
-result whose journaled release started but left its exact owned VM live. Existing
-recovery already finalizes complete removal after a lost reply; this proposal
-adds one separately approved release attempt, with observation-only replay and
-retained reservations until full stop proof. No age policy, lifecycle reset,
-unknown VM deletion, host residue removal, retention pruning or live operation.
+The [contract](docs/STALE-CLEANUP.md) addresses a reachable terminal result whose
+journaled release started but left its exact owned VM live. Baseline
+`1b47738b08738978d53f2c551c1f5fabbf9325ba` preceded actual PostgreSQL/HTTP RED and
+implementation. One separately approved request targets the original capability;
+same-attempt replay only observes. Existing recovery alone releases capacity.
 
-| AC | Status | Planned evidence |
+| AC | Local status | Evidence |
 | --- | --- | --- |
-| STALE-01 | proposed; not implemented | Actual result-before-release fault RED; exact one-binding preview/approval/expiry and all ownership/active-state negatives |
-| STALE-02 | proposed; not implemented | One release per approved attempt, pinned server exact-target safety, current-generation fencing, concurrent recovery and all crash/partial-effect boundaries |
-| STALE-03 | proposed; not implemented | Full stop proof before reservation release; unchanged result/original release/recovery ledgers; private CLI and native backup/restore invalidation |
+| STALE-01 | passed | T094-stale-green1: real lifecycle fault, atomic legacy enrollment, exact one-binding approval/expiry, ownership and active-state refusal |
+| STALE-02 | passed |28 focused tests include real SIGKILL/lease races; T094-inflight1 adds two real HTTP overlap winning orders with one physical effect and original intent preserved |
+| STALE-03 | passed | T094-stale-native1: actual native roundtrip preserves ten authority tables and private journal facts, invalidates old approval, keeps drains; T094-affected1:12 existing guard/CLI regressions |
 
-Phase B remains withheld until independent/root acceptance and contract commit,
-including the precise pinned-server safety evidence identified in the contract.
-AT-13/M4, AC-04, live qualification and usable_tag remain open.
+See the [dated delivery snapshot](tasks/379-stale-cleanup/report.md) for exact
+commands/results and retained failures. Independent R2 review requested the HTTP
+overlap fixture; its two cases passed without changing production. Hosted CI and
+normal merge are separate delivery gates, tracked in the PR and task board.
+This is not arbitrary orphan/host-residue cleanup or live VM qualification.
+Complete AT-13/M4, AC-04, deployment and usable_tag remain open.

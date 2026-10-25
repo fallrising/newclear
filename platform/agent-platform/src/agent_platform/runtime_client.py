@@ -77,6 +77,48 @@ class RuntimeClient:
     def cancel(self, run):
         return self.call("POST", f"/v1/runs/{run['id']}/cancel", {"generation": run["generation"]})
 
+    def cleanup_preview(self, run_id, context):
+        return self.call("POST", f"/v1/runs/{run_id}/cleanup-preview", context)
+
+    def cleanup_lookup(self, plan, *, generation, lease_until, resume):
+        return self.call(
+            "POST",
+            f"/v1/runs/{plan['run_id']}/cleanup-lookup",
+            {
+                "plan": plan,
+                "generation": generation,
+                "lease_until": lease_until,
+                "resume": resume,
+            },
+        )
+
+    def cleanup_fence(self, plan, run):
+        if run["generation"] != plan["next_generation"]:
+            raise Problem(409, "stale_cleanup_generation_changed")
+        try:
+            self.lease_http.expect(
+                "PUT",
+                f"/v1/runs/{plan['run_id']}/cleanup-lease",
+                {
+                    "plan": plan,
+                    "lease_until": run["lease_until"].isoformat(),
+                },
+            )
+        except ProbeError:
+            raise Problem(409, "stale_cleanup_lease_unconfirmed") from None
+
+    def cleanup_apply(self, plan, generation, db_digest, *, observe_only=False):
+        return self.call(
+            "POST",
+            f"/v1/runs/{plan['run_id']}/cleanup-apply",
+            {
+                "plan": plan,
+                "generation": generation,
+                "db_digest": db_digest,
+                "observe_only": observe_only,
+            },
+        )
+
     def inspect(self, run):
         return self.call("GET", f"/v1/runs/{run['id']}?generation={run['generation']}")
 

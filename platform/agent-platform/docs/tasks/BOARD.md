@@ -62,13 +62,15 @@ were also delivered by PR641; its standalone board candidate needs no duplicate 
 Only the bounded audit/event slices are delivered. Stale runtime cleanup, integrated
 fake/live acceptance and whole AT13/M4 remain open under#379; no usable tag, release or deployment.
 
-## T-0092 — Issue #379 stale runtime cleanup contract
+## T-0092 — Issue #379 manual stale binding cleanup
 
-Source/ownership contract first; implementation awaits independent/root acceptance.
+Contract baseline `1b47738b` preceded actual RED. Independent T093 accepted local
+STALE01–03 after the required HTTP overlap fixture; required CI/normal merge pending.
+See the [dated delivery snapshot](../../tasks/379-stale-cleanup/report.md).
 SDD13.2, INV-12 and AT-13 preserve unknown resources and active recovery state.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0092.1 | Trace owned stale resources and define safe cleanup | STALE-01 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T15:39:34Z |
-| T-0092.2 | Specify durable effects, fencing and replay | STALE-02 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T15:39:34Z |
-| T-0092.3 | Verify protected states and native compatibility | STALE-03 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T15:39:34Z |
+| T-0092.1 | Bound exact owned resource and explicit approval | STALE-01 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T16:38:13Z |
+| T-0092.2 | Fence one release attempt and preserve replay | STALE-02 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T16:38:13Z |
+| T-0092.3 | Reconcile capacity and preserve native backup | STALE-03 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T16:38:13Z |

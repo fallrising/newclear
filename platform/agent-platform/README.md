@@ -83,3 +83,7 @@ M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修
 2026-10-25 [手動 audit 保留](docs/AUDIT-RETENTION.md)提供 `audit-gc-preview`／`audit-gc-apply`，至少90天、明確批准且有界地刪除歷史 audit，保留最小 operation evidence 與獨立控制狀態。本機 focused22 與三項 native roundtrip 通過，另有 pause fixture 修正19項通過；[PR641](https://github.com/fallrising/newclear/pull/641) 必要 CI（45 base／724 platform）成功並合併。初次 hosted722pass／1pause-helper failure 與先前本機失敗仍保留；最新交付紀錄見[任務板](docs/tasks/BOARD.md)，[交付快照](tasks/379-audit-retention/report.md)保留當時狀態。不代表完整 M4 或 live 驗收。
 
 2026-10-25 [手動 stale binding 清理](docs/STALE-CLEANUP.md)提供 `stale-cleanup-preview`／`stale-cleanup-apply`：只對一個有完整原始身分證據的終態 run 批准一次新的 release，保留原本未確認的 intent；既有 recovery 重新證明停止後才釋放容量。本機28 focused、2 HTTP overlap、1 native roundtrip及12相關回歸通過。精確邊界、失敗歷史與必要 CI／交付入口見[本機快照](tasks/379-stale-cleanup/report.md)；不包含未知資源刪除或 live VM 驗收。
+
+### Bounded cross-flow acceptance
+
+[COMP01/02 contract](tasks/379-fake-composite/task.md) and [local delivery snapshot](tasks/379-fake-composite/report.md) join stale recovery, explicitly approved synthetic HTTP export and native restore in one scenario. Production behavior is unchanged; complete fake E2E/live/M4 acceptance remains open.

@@ -1,3 +1,18 @@
+# 最新接續 — PR649 已合併，跨流程 fake 驗收本機通過（2026-10-26）
+
+[PR649](https://github.com/fallrising/newclear/pull/649) 已於2026-10-25T17:00:58Z正常合併，
+merge `ce5b5e6848884bf92ea0bca4c72f4acc877057f5`；四項必要CI全成功，hosted45+755通過。
+T0092done列隨本次真正測試來源變更補入，原本機候選保留；下方 pending 是歷史快照。
+
+新增 COMP01/02 串接同一DB的真實 terminal lifecycle→stale cleanup→recovery→
+明確批准的合成GitHub HTTP export→PR回覆斷線／只讀reconcile→native restore。
+T098-composite1：1項/2.234s通過；不改產品程式、不重跑舊長套件。
+[契約](../tasks/379-fake-composite/task.md)／[本機報告](../tasks/379-fake-composite/report.md)
+保留精確來源、前置審查修正及real/synthetic界線；T097已獨立接受，必要CI與合併仍是後續門檻。
+這不涵蓋GC操作整合、browser/full fake E2E、live VM/sandboxd/provider／部署或完整M4。
+
+---
+
 # 最新接續 — audit 已合併，stale cleanup 本機驗證完成（2026-10-25）
 
 手動 event retention 已由 PR633 合併；audit retention 已由 [PR641](https://github.com/fallrising/newclear/pull/641) 合併，必要 CI45 base／724 platform 通過。初次 hosted723測試中的 pause helper 失敗、實際 row-lock RED 與後續修正證據仍保留，見[任務板](tasks/BOARD.md)。下方舊交付段落的待 CI 狀態是歷史快照。

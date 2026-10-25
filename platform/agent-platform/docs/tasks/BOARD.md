@@ -103,5 +103,5 @@ The [contract](../../tasks/379-fake-composite/task.md) preserves full M4/live sc
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0096.1 | Compose stale recovery and explicit fake HTTP export | COMP-01 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:22:16Z |
-| T-0096.2 | Preserve cross-flow authority through native restore | COMP-02 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:22:16Z |
+| T-0096.1 | Compose stale recovery and explicit fake HTTP export | COMP-01 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:29:36Z |
+| T-0096.2 | Preserve cross-flow authority through native restore | COMP-02 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:29:36Z |

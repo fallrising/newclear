@@ -65,12 +65,43 @@ fake/live acceptance and whole AT13/M4 remain open under#379; no usable tag, rel
 ## T-0092 — Issue #379 manual stale binding cleanup
 
 Contract baseline `1b47738b` preceded actual RED. Independent T093 accepted local
-STALE01–03 after the required HTTP overlap fixture; required CI/normal merge pending.
+STALE01–03 after the required HTTP overlap fixture; PR649 has normally merged.
 See the [dated delivery snapshot](../../tasks/379-stale-cleanup/report.md).
 SDD13.2, INV-12 and AT-13 preserve unknown resources and active recovery state.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0092.1 | Bound exact owned resource and explicit approval | STALE-01 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T16:38:13Z |
-| T-0092.2 | Fence one release attempt and preserve replay | STALE-02 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T16:38:13Z |
-| T-0092.3 | Reconcile capacity and preserve native backup | STALE-03 | in_progress | 2026-10-25T15:39:34Z | | 2026-10-25T16:38:13Z |
+| T-0092.1 | Bound exact owned resource and explicit approval | STALE-01 | done | 2026-10-25T15:39:34Z | 2026-10-25T17:00:58Z | 2026-10-25T17:09:17Z |
+| T-0092.2 | Fence one release attempt and preserve replay | STALE-02 | done | 2026-10-25T15:39:34Z | 2026-10-25T17:00:58Z | 2026-10-25T17:09:17Z |
+| T-0092.3 | Reconcile capacity and preserve native backup | STALE-03 | done | 2026-10-25T15:39:34Z | 2026-10-25T17:00:58Z | 2026-10-25T17:09:17Z |
+
+T0092 delivery: [PR649](https://github.com/fallrising/newclear/pull/649) normally merged
+`ce5b5e6848884bf92ea0bca4c72f4acc877057f5` at 2026-10-25T17:00:58Z;
+head `9635e645f1e7eebb7f8ae32d4078af33e1ac3585` passed all four required checks:
+[Agent Platform CI40212776640](https://github.com/fallrising/newclear/actions/runs/40212776640)
+check/control-plane/web and [contracts40212776776](https://github.com/fallrising/newclear/actions/runs/40212776776)
+validate. Hosted 45 base and 755 platform tests passed. The entire merged component
+matches the reviewed head. T093 independently accepted STALE01–03; local evidence
+is 28 focused + 2 real HTTP overlap + 1 native pg_dump/restore + 12 related cases.
+The HTTP upstream is synthetic; no live VM or sandboxd qualification is claimed.
+Original expected RED, initial author lint failures, and earlier event/audit failures
+remain preserved in the dated reports and raw evidence, not rewritten as first-green.
+
+Cleanup covers one explicitly approved terminal owned binding, its original capability,
+current lease/fence and at most one release request per attempt. Original uncertain
+intent and permanent tombstone remain; existing recovery alone releases capacity after
+independently confirming complete stop proof. No SQL migration or backup pin changed.
+T0089 audit done rows were delivered with PR649; its preserved standalone candidate
+needs no duplicate PR. This record supersedes stale pre-merge status in the dated snapshot.
+Unknown host residue, complete same-version fake/live AT09/12/13, VM recovery,
+actual deployment and whole M4 remain open under #379; no usable tag or release.
+
+## T-0096 — Issue #379 fake cross-flow acceptance
+
+Test-only integration from delivered PR649; no product defect established.
+The [contract](../../tasks/379-fake-composite/task.md) preserves full M4/live scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0096.1 | Compose stale recovery and explicit fake HTTP export | COMP-01 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:22:16Z |
+| T-0096.2 | Preserve cross-flow authority through native restore | COMP-02 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:22:16Z |

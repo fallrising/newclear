@@ -134,8 +134,34 @@ for line in sys.stdin:
         message("msg_t%d" % n, [("text", "Hello there")], "end_turn")
     else:
         tid = "toolu_%d_%d" % (os.getpid(), n)
-        message("msg_a%d" % n, [("text", "Checking."), ("tool", tid, "mcp__thinrouter__get_weather", {"city": "Taipei"})], "tool_use")
-        r = rpc(10 + n, "tools/call", {"name": "get_weather", "arguments": {"city": "Taipei"}})
+        blocks = [("text", "Checking."), ("tool", tid, "mcp__thinrouter__get_weather", {"city": "Taipei"})]
+        if n == 2 and os.path.exists(os.path.join(d, "late-completion")):
+            message("msg_a%d" % n, blocks, "tool_use")
+            r = {"result":{"content":[{"text":"synthetic expired tool phase"}],"isError":True}}
+        elif n == 2 and os.path.exists(os.path.join(d, "early-callback")):
+            import threading
+            logfile = os.path.join(d, "gateway.log")
+            offset = os.path.getsize(logfile)
+            replies = []
+            pending = threading.Thread(target=lambda: replies.append(rpc(10 + n, "tools/call", {"name": "get_weather", "arguments": {"city": "Taipei"}})), daemon=True)
+            pending.start()
+            deadline = time.monotonic() + 3
+            while True:
+                with open(logfile) as f:
+                    f.seek(offset)
+                    observed = f.read()
+                # Coordinate at callback admission, before publishing the matching event.
+                if "mcp_not_registered" in observed or "mcp_wait_announcement" in observed: break
+                if time.monotonic() >= deadline: raise RuntimeError("callback admission barrier timed out")
+                time.sleep(0.001)
+            trace("early-callback-admitted-before-announcement")
+            message("msg_a%d" % n, blocks, "tool_use")
+            pending.join(3)
+            if not replies: raise RuntimeError("callback did not resolve after announcement")
+            r = replies[0]
+        else:
+            message("msg_a%d" % n, blocks, "tool_use")
+            r = rpc(10 + n, "tools/call", {"name": "get_weather", "arguments": {"city": "Taipei"}})
         res = r["result"]["content"][0]["text"]
         hang(res)
         message("msg_b%d" % n, [("text", "Result: " + res + (" (error)" if r["result"].get("isError") else ""))], "end_turn")
@@ -183,12 +209,15 @@ async fn gateway(
         bin.to_str().unwrap(),
     ])
     .args(extra)
+    .env("RUST_LOG", "thinrouter::claude_lifecycle=debug")
     .env_remove("THINROUTER_ADMIN_TOKEN")
     .env_remove("THINROUTER_SECRETS_KEY")
     .env("CLAUDE_CONFIG_DIR", config_dir.path())
     .kill_on_drop(true)
     .stdout(std::process::Stdio::null())
-    .stderr(std::process::Stdio::null());
+    .stderr(std::process::Stdio::from(
+        std::fs::File::create(bin_dir.path().join("gateway.log")).unwrap(),
+    ));
     let child = cmd.spawn().unwrap();
     let base = format!("http://127.0.0.1:{port}");
     let plain = reqwest::Client::builder().no_proxy().build().unwrap();
@@ -311,8 +340,9 @@ impl Env {
             .await;
         let response = result.unwrap_or_else(|error| {
             panic!(
-                "SC-3 {stage}: {error:?}; fixture stages:\n{}",
-                self.file("stages.txt")
+                "SC-3 {stage}: {error:?}; fixture stages:\n{}\ngateway:\n{}",
+                self.file("stages.txt"),
+                self.file("gateway.log")
             )
         });
         assert_eq!(
@@ -796,8 +826,68 @@ mod disconnect_tests {
 
     #[tokio::test]
     async fn sc3_tool_files_survive_continuation_then_expire() {
+        tool_files_sequence(false).await;
+    }
+
+    #[tokio::test]
+    async fn tc1_callback_before_stdout_registration_keeps_tool_continuation() {
+        tool_files_sequence(true).await;
+    }
+
+    #[tokio::test]
+    async fn tc4_late_tool_result_uses_replacement_after_completed_phase() {
+        let mut env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+        std::fs::write(env.bin_dir.path().join("trace-stages"), "").unwrap();
+        std::fs::write(env.bin_dir.path().join("late-completion"), "").unwrap();
+        let first=env.chat_stage("first-tool",json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+        let mut next = history(&first_call(&first), "sunny");
+        let second = env.chat_stage("first-result", next.clone()).await;
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(second["choices"][0]["message"].clone());
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"user","content":"thanks"}));
+        let third = env.chat_stage("next-user", next.clone()).await;
+        let old_dirs = owned_run_dirs(&env);
+        assert_eq!(old_dirs.len(), 1);
+        tokio::time::timeout(Duration::from_secs(3), async {
+            while env.file("gateway.log").matches("reader_end_turn").count() < 2 {
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("unsolicited completion processed");
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(third["choices"][0]["message"].clone());
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"tool","tool_call_id":first_call(&third),"content":"late"}));
+        let reply =
+            tokio::time::timeout(Duration::from_secs(3), env.chat_stage("late-result", next))
+                .await
+                .expect("late result cannot attach to a producerless receiver");
+        assert_eq!(reply["choices"][0]["message"]["content"], "Hello there");
+        assert_eq!(env.starts(), 2);
+        assert!(
+            !old_dirs[0].exists(),
+            "one-slot replacement cleans previous run"
+        );
+        env.restart().await;
+        assert_no_run_dirs(&env).await;
+    }
+
+    async fn tool_files_sequence(early_callback: bool) {
         let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "2"]).await;
         std::fs::write(env.bin_dir.path().join("trace-stages"), "").unwrap();
+        if early_callback {
+            std::fs::write(env.bin_dir.path().join("early-callback"), "").unwrap();
+        }
         let first = env.chat_stage("first-tool", json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
         let dirs = owned_run_dirs(&env);
         assert_eq!(dirs.len(), 1);

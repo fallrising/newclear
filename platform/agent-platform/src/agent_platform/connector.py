@@ -173,7 +173,10 @@ class Connector:
         return row
 
     def guard(self, row, *, stopping=False, controlling=False):
+        from .connector_cleanup import check_admission
+
         self.fences.require(row["run_id"], row["generation"])
+        check_admission(row, stopping=stopping)
         if row.get("pause", {}).get("hold") and not (stopping or controlling):
             raise Problem(409, "sandbox_pause_requested")
         if row.get("cancel_requested") and not stopping:
@@ -775,6 +778,12 @@ def create_connector(config, service=None):
                 from .connector_tool import validate_wire
 
                 validate_wire(request._body)
+            if request.url.path.endswith(
+                ("/cleanup-preview", "/cleanup-lookup", "/cleanup-apply", "/cleanup-lease")
+            ):
+                from .stale_cleanup_contract import loads
+
+                loads(request._body)
         except Problem as exc:
             return JSONResponse({"error": exc.code}, status_code=exc.status)
         except (ValueError, RecursionError, TimeoutError):
@@ -841,6 +850,62 @@ def create_connector(config, service=None):
     @app.post("/v1/runs/{run_id}/operations")
     def mutate(run_id: UUID, data: Mutation, _=auth):
         return service.mutate(run_id, data)
+
+    @app.post("/v1/runs/{run_id}/cleanup-preview")
+    def cleanup_preview(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import preview
+
+        return preview(service, run_id, data)
+
+    @app.post("/v1/runs/{run_id}/cleanup-lookup")
+    def cleanup_lookup(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import lookup
+        from .stale_cleanup_contract import fail
+
+        if (
+            set(data) != {"plan", "generation", "lease_until", "resume"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+            or type(data["resume"]) is not bool
+        ):
+            fail()
+        return lookup(
+            service, data["plan"], data["generation"], data["lease_until"], data["resume"]
+        )
+
+    @app.put("/v1/runs/{run_id}/cleanup-lease")
+    def cleanup_lease(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import grant
+        from .stale_cleanup_contract import fail
+
+        if (
+            set(data) != {"plan", "lease_until"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+        ):
+            fail()
+        return grant(service, data["plan"], data["lease_until"])
+
+    @app.post("/v1/runs/{run_id}/cleanup-apply")
+    def cleanup_apply(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import apply
+        from .stale_cleanup_contract import fail, hash_text
+
+        if (
+            set(data) != {"plan", "generation", "db_digest", "observe_only"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+            or type(data["observe_only"]) is not bool
+        ):
+            fail()
+        hash_text(data["db_digest"])
+        return apply(
+            service,
+            data["plan"],
+            data["generation"],
+            data["db_digest"],
+            observe_only=data["observe_only"],
+        )
 
     @app.get("/v1/runs/{run_id}/events")
     def events(run_id: UUID, generation: int, cursor: str | None = None, _=auth):

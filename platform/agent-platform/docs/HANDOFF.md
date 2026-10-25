@@ -1,3 +1,11 @@
+# 最新接續 — audit 已合併，stale cleanup 本機驗證完成（2026-10-25）
+
+手動 event retention 已由 PR633 合併；audit retention 已由 [PR641](https://github.com/fallrising/newclear/pull/641) 合併，必要 CI45 base／724 platform 通過。初次 hosted723測試中的 pause helper 失敗、實際 row-lock RED 與後續修正證據仍保留，見[任務板](tasks/BOARD.md)。下方舊交付段落的待 CI 狀態是歷史快照。
+
+下一片是[單一終態 binding 的明確批准清理](STALE-CLEANUP.md)，契約已獨立審查，實際 PostgreSQL／HTTP fault-before-release RED 已取得，本機28 focused、2 HTTP overlap、1 native roundtrip與12相關回歸已通過；原始 RED 與獨立審查要求的補測均保留。必要 CI／正常合併仍是後續交付門檻，見[本機快照](../tasks/379-stale-cleanup/report.md)。此處不表示 stale cleanup、AT-13/M4、實際部署或 live qualification 已完成。
+
+---
+
 # 本次 bounded event-retention 切片 — 2026-10-25
 
 T-087 在先行契約／獨立審查後，新增手動 `event-gc-preview`／`event-gc-apply`、migration017 永久 replay identity、原子前綴／floor 清理及保守 ownership 保護。Root-run 真 PostgreSQL focused24、native backup26、browser1 本機檢查通過；production freeze 未因環境 private-path 失敗而放寬 guard 或修改主機權限。T088 已接受 focused EVT-01–04；額外 regression 為初次644pass/4fail、targeted4pass，並非 clean full suite，export-lock 仍為 intermittent／原因未歸因；必要 CI／最終交付仍待完成，不能以本機切片稱作完整 AT-13/M4 或 AC-04。詳見 [契約／操作](EVENT-RETENTION.md)及[交付報告](../tasks/379-event-retention/report.md)。

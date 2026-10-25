@@ -121,3 +121,24 @@ SDD §12 的 audit90天保留已依[先行契約](docs/AUDIT-RETENTION.md)實作
 | AUD-04 | passed (local) | T091-schema1 獨立018 catalog pin；T091-audit-native1：audit、archive/history、event replay identity 三項真 native roundtrip 通過，舊 plan UUID 失效 |
 
 此為有日期的本機證據快照；新增反例、獨立最終審查、hosted CI 與合併狀態見[交付報告](tasks/379-audit-retention/report.md)及其 PR。原有 event/archive 證據與初次失敗保留。完整 AT-13/M4、AC-04、stale cleanup、live qualification 與 usable_tag 維持原狀。
+
+## Bounded scope: T-092 manual stale binding cleanup
+
+The [contract](docs/STALE-CLEANUP.md) addresses a reachable terminal result whose
+journaled release started but left its exact owned VM live. Baseline
+`1b47738b08738978d53f2c551c1f5fabbf9325ba` preceded actual PostgreSQL/HTTP RED and
+implementation. One separately approved request targets the original capability;
+same-attempt replay only observes. Existing recovery alone releases capacity.
+
+| AC | Local status | Evidence |
+| --- | --- | --- |
+| STALE-01 | passed | T094-stale-green1: real lifecycle fault, atomic legacy enrollment, exact one-binding approval/expiry, ownership and active-state refusal |
+| STALE-02 | passed |28 focused tests include real SIGKILL/lease races; T094-inflight1 adds two real HTTP overlap winning orders with one physical effect and original intent preserved |
+| STALE-03 | passed | T094-stale-native1: actual native roundtrip preserves ten authority tables and private journal facts, invalidates old approval, keeps drains; T094-affected1:12 existing guard/CLI regressions |
+
+See the [dated delivery snapshot](tasks/379-stale-cleanup/report.md) for exact
+commands/results and retained failures. Independent R2 review requested the HTTP
+overlap fixture; its two cases passed without changing production. Hosted CI and
+normal merge are separate delivery gates, tracked in the PR and task board.
+This is not arbitrary orphan/host-residue cleanup or live VM qualification.
+Complete AT-13/M4, AC-04, deployment and usable_tag remain open.

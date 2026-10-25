@@ -177,3 +177,15 @@ No guard bypass or production changes. Full fake/live AT09/12/13, deployment and
 
 T102-browser3 passed one new scenario (9.8s); [snapshot](tasks/379-browser-retention/report.md)
 retains both initial harness timeouts, exact source and boundaries. Normal CI/merge remain delivery gates.
+
+## Bounded scope: T-104 expired export availability
+
+[Prior contract](tasks/379-expired-export/task.md) corrects a UI gap observed in BGC01/02.
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| EUX-01 | planned | Exact preview/approval410 expires only the original artifact immediately; refresh failure preserves known expiry and metadata |
+| EUX-02 | planned | Auth/transient/non-expiry/lost-response behavior and command keys remain correct; real BGC browser flow updates without another failed download |
+
+Root obtains behavioral RED before product edits. This does not change backend authority
+or complete full M4/live acceptance.

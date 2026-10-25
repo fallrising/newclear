@@ -133,5 +133,34 @@ Test-only BGC01/02 integration; [contract](../../tasks/379-browser-retention/tas
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0100.1 | Browser-approved export survives actual event/archive GC | BGC-01 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T18:03:01Z |
-| T-0100.2 | Stale browser archive controls refuse expired payload | BGC-02 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T18:03:01Z |
+| T-0100.1 | Browser-approved export survives actual event/archive GC | BGC-01 | done | 2026-10-25T17:51:39Z | 2026-10-25T18:11:09Z | 2026-10-25T18:11:45Z |
+| T-0100.2 | Stale browser archive controls refuse expired payload | BGC-02 | done | 2026-10-25T17:51:39Z | 2026-10-25T18:11:09Z | 2026-10-25T18:11:45Z |
+
+T0100 delivery: [PR655](https://github.com/fallrising/newclear/pull/655) normally merged
+`0b4e42d9cd27e4d4ede935f0a09c992c42fa58a7` at 2026-10-25T18:11:09Z; exact reviewed head
+`499bc7b1a989b5e2abacffb2e991fd4365793689` passed all four required checks:
+[Agent Platform40219513690](https://github.com/fallrising/newclear/actions/runs/40219513690)
+check/control-plane/web and [contracts40219513705](https://github.com/fallrising/newclear/actions/runs/40219513705)
+validate. Hosted45 base+756 platform passed; merged component equals reviewed head.
+T101 independently accepted BGC01/02; one new local Chromium/SQL/API/GC/fakeHTTP
+scenario passed9.8s, scopedTS/Prettier/Ruff178/43contracts/6indexes passed.
+Initial9E501 lint and two45s browser body-collection timeouts remain preserved;
+final test separates real browser410/UI/no-file from independent API410JSON, without
+production edits, timeout increase or behavior assertion removal.
+
+A fresh browser approval protects its historical archive through actual GC; event
+prefix expires and UI reconnects; unreferenced B expires and stale controls refuse.
+History is explicitly synthetic first INSERTs, GitHub upstream synthetic HTTP.
+No observed31day lifecycle, fullfake/liveAT09/12/13, hostresidue cleanup, VMrecovery,
+deployment or fullM4 acceptance. Issue379 staysOPEN; no release/tag.
+T0096 COMPdone rows delivered with PR655; originala36 candidate preserved/no duplicatePR.
+This record supersedes pre-merge wording in the dated local delivery snapshot.
+
+## T-0104 — Issue #379 expired export availability
+
+[Contract](../../tasks/379-expired-export/task.md); bounded workbench correction.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0104.1 | Reflect exact preview/approval archive expiry immediately | EUX-01 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:19:18Z |
+| T-0104.2 | Preserve auth/replay and verify real browser GC flow | EUX-02 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:19:18Z |

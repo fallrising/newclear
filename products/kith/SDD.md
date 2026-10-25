@@ -254,6 +254,8 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 
 ## 13. 章節索引
 
+後續呈現層提案：[Agent 活動視圖與辦公室動畫](docs/plans/agent-activity-office.md)（AV-0 文件；AV-1 起尚未實作）。重用現有房間、成員與訊號，不修訂 INV-01–19、attention、quota 或執行權限。
+
 - [00 — 目的與邊界](docs/sdd/00-purpose.md)
 - [01 — 使用者故事](docs/sdd/01-user-stories.md)
 - [02 — 不變量](docs/sdd/02-invariants.md)

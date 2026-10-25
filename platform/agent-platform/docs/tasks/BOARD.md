@@ -40,7 +40,7 @@ Whole AT13/M4 remains incomplete.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0089.1 | Bound explicit90-day approvals | AUD-01 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T11:55:18Z |
-| T-0089.2 | Preserve authoritative control state | AUD-02 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T11:55:18Z |
-| T-0089.3 | Guard atomic audit removal and replay | AUD-03 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T11:55:18Z |
-| T-0089.4 | Verify native backup and compatibility | AUD-04 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T11:55:18Z |
+| T-0089.1 | Bound explicit90-day approvals | AUD-01 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T12:54:56Z |
+| T-0089.2 | Guard atomic audit removal and replay | AUD-02 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T12:54:56Z |
+| T-0089.3 | Preserve authoritative control state | AUD-03 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T12:54:56Z |
+| T-0089.4 | Verify native backup and compatibility | AUD-04 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T12:54:56Z |

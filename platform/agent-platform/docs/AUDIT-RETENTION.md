@@ -1,6 +1,6 @@
-# Manual audit retention — T-089 Phase A contract
+# Manual audit retention — T-089
 
-Design only, 2026-10-25, at merged event-retention baseline `ce81af8aef6e0faa4ef10d64d17b8d438c5d69a4`. Implementation, migrations and runtime acceptance are not released. This specifies the existing SDD §12 audit90-day requirement as a bounded manual operation. No deployment, scheduler, live data operation, dependency or broader AT-13/M4 completion is included.
+Contract accepted and committed as `11ac278fa4c4ad28cd9d69dd2a38ce2e2656ae19` before implementation, 2026-10-25. The local implementation/evidence snapshot is in the [delivery report](../tasks/379-audit-retention/report.md); final hosted CI and merge status belong to its linked PR and task board. This implements the existing SDD §12 audit90-day requirement as a bounded manual operation. No deployment, scheduler, live data operation, dependency or broader AT-13/M4 completion is included.
 
 ## Policy decision and source trace
 
@@ -26,7 +26,7 @@ All25 production write call sites are covered by these families (paths under src
 
 Scoped source/scripts/Web reads found no production SELECT/UPDATE/DELETE audit-row consumer and no audit-list API/Web route. Tests assert audit counts/content; backup snapshots include the table dynamically using the shipped schema contract. Export approval/reconciliation goes through Store.command and uses github_exports, immutable archives and command replay, not audit_rows. Audit expiry therefore does not authorize a tool, apply an approval, refund accounting, release a reservation, replay an export, advance an event floor or change lifecycle state.
 
-## Proposed Python/CLI boundary
+## Python/CLI boundary
 
 `audit_retention.preview(db, *, retention_days=90, limit=100)` and `audit_retention.apply(db, plan, *, approval_digest)` return bounded JSON-serializable plan/receipt. CLI `audit-gc-preview --retention-days 90 --limit 100` and `audit-gc-apply --plan PATH --approve DIGEST`, using the existing private DATABASE_URL environment and maintenance dispatcher. No new HTTP mutation/list route or browser feature. Use existing `agent_platform.cli` entrypoint; do not invent a package __main__ to make a test pass.
 
@@ -62,7 +62,7 @@ Use existing advisory77310401 then77310402, followed by one fixed `LOCK TABLE ma
 
 Independently derive/review the pristine PostgreSQL18 migration018 catalog fingerprint after the SQL is frozen and before updating backup.SCHEMA_SHA256. Existing migration017 pin is not valid for018. Keep backup schema parser, quiescence/private-path guards and EXCLUDED unchanged; native dump automatically includes remaining audit rows plus plans/receipts/tombstones. Restore to an empty target preserves them, regenerates maintenance identity and keeps runtime drained. Native restore must prove deleted raw rows stay absent, surviving rows/control state match, tombstones/receipt replay metadata persist and old approvals are refused. Restore017 bundles with matching017 application before explicit migration; current018 exact-version verification must reject old manifests.
 
-## Proposed RED/GREEN and acceptance evidence (not executed)
+## Contracted RED/GREEN verification plan (recorded before implementation)
 
 Phase B requires independent/root ACCEPT and committed contract first. Root owns Docker/private namespace and independent fingerprint; workers do not retry unavailable Docker escalation. Use explicit isolated audit-src PYTHONPATH, existing exact pinned dependencies and fresh owned PostgreSQL only. All jobs use the common workspace launcher with unique T089 IDs and raw logs under AGENT_EVIDENCE_DIR; task-backed private namespace must satisfy unmodified path guards. Multiprocessing test drivers require __main__ protection. Do not repeat the old700-test suite in Phase A or call selected reruns a clean aggregate suite.
 
@@ -71,3 +71,19 @@ First RED must reach the missing audit_retention.preview/apply product API after
 Snapshot all authoritative tables and compare after expiry, then exercise command idempotency, session authorization/revocation, pending/applied approval handling, interrupted/unknown recovery generation, model/tool replay/unknown accounting and export replay using retained source-of-truth state. Add actual concurrent audit writer/GC barriers, changed candidate/time/hash/identity, unrecognized/forged plans, whole-batch failure after each receipt/tombstone/delete/audit step, double apply and missing/malformed receipt/tombstone. Direct SQL probes require a correctly shaped current-transaction receipt positive control, wrong ID/range/created time, prior-transaction unconsumed receipt, expired approval and UUID resurrection refusal; never weaken guards for fixtures.
 
 Proposed native selection: new audit roundtrip plus existing affected `test_backup.py` cases on actual pg_dump/pg_restore; derive pin independently first. Prove new audit inserts/auth/command/recovery still work after restore, old plans fail by maintenance UUID, matching tombstones and raw-row absence persist and control tables stay byte-equivalent. No audit UI exists, so no invented browser feature or mandatory new browser test; root selects affected existing API/CLI/control/native gates and final CI after the frozen implementation. Report failures/environment skips explicitly. Audit90-day slice does not close event/archive/stale-VM/live/whole-M4 acceptance by association.
+
+## Operator procedure
+
+Supply DATABASE_URL through the existing private environment configuration. Choose an existing operator-owned private parent directory (0700, with trusted ancestors); use a new private file (0600). Preview writes an immutable issued plan but removes no audit rows. Review its cutoff, exact UUIDs, encoded sizes and hashes, then copy the digest from that reviewed plan:
+
+```sh
+umask 077
+agent-platform audit-gc-preview --retention-days 90 --limit 100 > /private/maintenance/audit-plan.json
+agent-platform audit-gc-apply --plan /private/maintenance/audit-plan.json --approve 'COPY_REVIEWED_APPROVAL_DIGEST'
+```
+
+The plan expires after one hour and is tied to its database identity. A restore invalidates old approvals, including replay. Busy writers may cause a sanitized refusal; retry deliberately after checking the result, without editing a saved plan. A successful apply returns the exact receipt; replay within validity returns the same receipt without another deletion or audit action.
+
+Expiration removes readable historical actor/action/target/decision values. Preserve any needed evidence separately before approving deletion. Minimal plans, receipts and tombstones remain permanently and grow; this is neither complete content erasure nor guaranteed net disk reduction. No scheduler or production data operation is implied.
+
+Migration018 requires the independently derived PostgreSQL18 catalog pin `456bad6ac3e99751dd9df8c1aa77afa6fdc30f7e164598e1b1151e41f4a55f9e` (37 tables,14 functions,19 triggers). Backup parser, private-path, quiescence and exclusion rules are unchanged. Restore an older bundle with its matching application before an explicit upgrade; this version rejects older manifests.

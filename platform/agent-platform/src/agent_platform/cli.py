@@ -28,6 +28,8 @@ MAINTENANCE_COMMANDS = {
     "archive-gc-apply",
     "event-gc-preview",
     "event-gc-apply",
+    "audit-gc-preview",
+    "audit-gc-apply",
 }
 
 
@@ -72,12 +74,8 @@ def maintenance_command(args):
 
     try:
         plan = None
-        if args.command in {"archive-gc-apply", "event-gc-apply"}:
-            code = (
-                "event_gc_plan_invalid"
-                if args.command == "event-gc-apply"
-                else "archive_gc_plan_invalid"
-            )
+        if args.command in {"archive-gc-apply", "event-gc-apply", "audit-gc-apply"}:
+            code = args.command.split("-", 1)[0] + "_gc_plan_invalid"
             plan = read_gc_plan(args.plan, code=code)
         if args.command == "backup-verify":
             from .backup import verify_backup
@@ -101,7 +99,9 @@ def maintenance_command(args):
                     confirm_database=args.confirm_database,
                 )
             else:
-                if args.command.startswith("event-gc-"):
+                if args.command.startswith("audit-gc-"):
+                    from .audit_retention import apply, preview
+                elif args.command.startswith("event-gc-"):
                     from .event_retention import apply, preview
                 else:
                     from .archive_retention import apply, preview
@@ -110,7 +110,7 @@ def maintenance_command(args):
                 pool_logger.addFilter(hide_pool_details)
                 db = Database(url)
                 db.open()
-                if args.command in {"archive-gc-preview", "event-gc-preview"}:
+                if args.command in {"archive-gc-preview", "event-gc-preview", "audit-gc-preview"}:
                     options = {"retention_days": args.retention_days, "limit": args.limit}
                     if args.command == "event-gc-preview":
                         options["event_limit"] = args.event_limit
@@ -158,6 +158,12 @@ def main():
     event_pruning = commands.add_parser("event-gc-apply")
     event_pruning.add_argument("--plan", type=Path, required=True)
     event_pruning.add_argument("--approve", required=True)
+    audit_preview = commands.add_parser("audit-gc-preview")
+    audit_preview.add_argument("--retention-days", type=int, default=90)
+    audit_preview.add_argument("--limit", type=int, default=100)
+    audit_pruning = commands.add_parser("audit-gc-apply")
+    audit_pruning.add_argument("--plan", type=Path, required=True)
+    audit_pruning.add_argument("--approve", required=True)
     connector = commands.add_parser("connector")
     connector.add_argument("--config", type=Path, required=True)
     connector.add_argument("--port", type=int, default=17800)

@@ -206,6 +206,8 @@ Delivered in [PR639](https://github.com/fallrising/newclear/pull/639), source `6
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| LB-1 | Bound CLI stdout records and release failed runs | LB-1 | in_progress | 2026-10-25T12:50:07Z | — | 2026-10-25T13:02:41Z |
-| LB-2 | Bound CLI stdout records and release failed runs | LB-2 | in_progress | 2026-10-25T12:50:07Z | — | 2026-10-25T13:02:41Z |
-| LB-3 | Bound CLI stdout records and release failed runs | LB-3 | in_progress | 2026-10-25T12:50:07Z | — | 2026-10-25T13:02:41Z |
+| LB-1 | Bound CLI stdout records and release failed runs | LB-1 | done | 2026-10-25T12:50:07Z | 2026-10-25T13:07:20Z | 2026-10-25T13:07:20Z |
+| LB-2 | Bound CLI stdout records and release failed runs | LB-2 | done | 2026-10-25T12:50:07Z | 2026-10-25T13:07:20Z | 2026-10-25T13:07:20Z |
+| LB-3 | Bound CLI stdout records and release failed runs | LB-3 | done | 2026-10-25T12:50:07Z | 2026-10-25T13:07:20Z | 2026-10-25T13:07:20Z |
+
+Delivered in [PR642](https://github.com/fallrising/newclear/pull/642),source`12e0dcda85cb0ce44a9caa30d0b4504f926b5d5f`,merge`1aed62a92dad203fedc4cb8735fd7c3b9440dabd` at`2026-10-25T13:07:20Z`. Required component/contractsCI and independent source/finaldoc reviewPASS;remote ancestry/scopedcontentPASS.189tests/18groups,75newscenarios/6tests,fmt/clippy/43contracts/6indexesPASS. Original no-newlineRED retained.39fakeCLI/runtime process cases and36reader scenarios;no realDocker/provider/RSS acceptance.

@@ -133,5 +133,5 @@ Test-only BGC01/02 integration; [contract](../../tasks/379-browser-retention/tas
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0100.1 | Browser-approved export survives actual event/archive GC | BGC-01 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T17:51:39Z |
-| T-0100.2 | Stale browser archive controls refuse expired payload | BGC-02 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T17:51:39Z |
+| T-0100.1 | Browser-approved export survives actual event/archive GC | BGC-01 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T18:03:01Z |
+| T-0100.2 | Stale browser archive controls refuse expired payload | BGC-02 | in_progress | 2026-10-25T17:51:39Z | | 2026-10-25T18:03:01Z |

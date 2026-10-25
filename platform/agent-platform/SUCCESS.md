@@ -169,8 +169,11 @@ Test-only integration follows PR653. [Contract](tasks/379-browser-retention/task
 
 | AC | Status | Verification plan |
 | --- | --- | --- |
-| BGC-01 | planned | Browser-approved A export, actual event/archive GC, real expired cursor reconnect and one fake HTTP export; same owned cohort |
-| BGC-02 | planned | Unreferenced B archive expires; stale browser approval/download refuse410, result/diff/hash remain |
+| BGC-01 | passed (local) | Browser-approved A export, actual event/archive GC, real expired cursor reconnect and one fake HTTP export; same owned cohort |
+| BGC-02 | passed (local) | Unreferenced B archive expires; stale browser approval/download refuse410, result/diff/hash remain |
 
 Explicit synthetic historical INSERTs do not represent observed worker chronology.
 No guard bypass or production changes. Full fake/live AT09/12/13, deployment and M4 remain open.
+
+T102-browser3 passed one new scenario (9.8s); [snapshot](tasks/379-browser-retention/report.md)
+retains both initial harness timeouts, exact source and boundaries. Normal CI/merge remain delivery gates.

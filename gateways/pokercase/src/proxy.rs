@@ -1213,11 +1213,24 @@ enum StreamMode {
     AnthropicToResponses(String),
 }
 
+// Includes the field prefix and optional CR, but excludes the LF delimiter.
+const MAX_CONVERTED_LINE_BYTES: usize = 16 * 1024 * 1024;
+
 /// Re-encodes one upstream SSE `data:` payload at a time into client SSE records.
 trait SseConvert: Send {
     /// A final output was produced, not merely a finish reason received.
     fn is_done(&self) -> bool;
     fn on_data(&mut self, data: &str) -> Vec<String>;
+    /// Every supported source format accepts this fixed error envelope.
+    /// Unlike EOF/stall, an input-limit violation cannot finalize a finish reason.
+    fn on_input_limit(&mut self) -> Vec<String> {
+        self.on_data(
+            &serde_json::json!({"type": "error", "error": {
+                "type": "api_error", "message": crate::error::INPUT_LIMIT_STREAM_MESSAGE
+            }})
+            .to_string(),
+        )
+    }
     /// Upstream ended (with or without a terminal event).
     fn on_end(&mut self) -> Vec<String>;
     /// Idle deadline elapsed; preserve any already parsed terminal.
@@ -1407,19 +1420,36 @@ where
                         yield Ok::<Bytes, std::io::Error>(chunk);
                         continue;
                     };
-                    buf.extend_from_slice(&chunk);
-                    let Some(last_nl) = buf.iter().rposition(|b| *b == b'\n') else {
-                        continue;
-                    };
-                    let rest = buf.split_off(last_nl + 1);
-                    let complete = std::mem::replace(&mut buf, rest);
                     let mut out = String::new();
-                    for line in String::from_utf8_lossy(&complete).lines() {
-                        if let Some(data) = line.strip_prefix("data:") {
-                            for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                    for part in chunk.split_inclusive(|b| *b == b'\n') {
+                        let line = part.strip_suffix(b"\n");
+                        let content = line.unwrap_or(part);
+                        if content.len() > MAX_CONVERTED_LINE_BYTES - buf.len() {
+                            // Discard retained input, never decode or echo the offending line.
+                            buf = Vec::new();
+                            for rec in conv.on_input_limit() {
                                 out.push_str(&rec);
                                 out.push_str("\n\n");
                             }
+                            break;
+                        }
+                        // Avoid geometric growth beyond the specified retained-line bound.
+                        if buf.capacity() - buf.len() < content.len() {
+                            let capacity = (buf.capacity().saturating_mul(2))
+                                .max(buf.len() + content.len()).min(MAX_CONVERTED_LINE_BYTES);
+                            buf.reserve_exact(capacity - buf.len());
+                        }
+                        buf.extend_from_slice(content);
+                        if line.is_some() {
+                            let decoded = String::from_utf8_lossy(&buf);
+                            let decoded = decoded.strip_suffix('\r').unwrap_or(&decoded);
+                            if let Some(data) = decoded.strip_prefix("data:") {
+                                for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                                    out.push_str(&rec);
+                                    out.push_str("\n\n");
+                                }
+                            }
+                            buf.clear();
                         }
                         if conv.is_done() { break; }
                     }
@@ -1673,6 +1703,195 @@ mod stream_completion_tests {
                     )
                 )
             })
+    }
+
+    const INPUT_LIMIT: usize = 16 * 1024 * 1024;
+    const LIMIT_MESSAGE: &str = "upstream stream line exceeds 16 MiB";
+
+    #[tokio::test]
+    async fn ib1_oversized_lines_fail_and_release_before_final_output() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for phase in ["empty", "partial", "finish", "comment"] {
+            for shape in ["whole", "fragmented", "newline"] {
+                for (mode, source, target) in modes() {
+                    if phase == "finish" && source != "chat" {
+                        continue;
+                    }
+                    let mut prefix = if phase == "empty" || phase == "comment" {
+                        String::new()
+                    } else {
+                        partial(source)
+                            .iter()
+                            .map(|v| format!("data: {v}\n\n"))
+                            .collect()
+                    };
+                    if phase == "finish" {
+                        prefix.push_str(
+                            "data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n",
+                        );
+                    }
+                    let mut oversized = if phase == "comment" {
+                        b": PRIVATE_INPUT".to_vec()
+                    } else {
+                        b"data: PRIVATE_INPUT".to_vec()
+                    };
+                    oversized.resize(INPUT_LIMIT + 1, b'x');
+                    if shape == "newline" {
+                        oversized.push(b'\n');
+                    }
+                    let mut chunks = std::collections::VecDeque::new();
+                    chunks.push_back(Bytes::from(prefix));
+                    chunks.extend(
+                        oversized
+                            .chunks(if shape == "fragmented" {
+                                65537
+                            } else {
+                                oversized.len()
+                            })
+                            .map(Bytes::copy_from_slice),
+                    );
+                    let dropped = Arc::new(AtomicBool::new(false));
+                    let input = RetainedSource {
+                        chunks,
+                        eof: false,
+                        _witness: DropWitness(dropped.clone()),
+                    };
+                    let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+                    let mut all = String::new();
+                    tokio::time::timeout(Duration::from_secs(2), async {
+                        loop {
+                            let frame = body
+                                .frame()
+                                .await
+                                .expect("failure frame")
+                                .unwrap()
+                                .into_data()
+                                .unwrap();
+                            let text = String::from_utf8(frame.to_vec()).unwrap();
+                            let failed = text.contains(LIMIT_MESSAGE);
+                            all.push_str(&text);
+                            if failed {
+                                assert!(
+                                    dropped.load(Ordering::SeqCst),
+                                    "source held at failure: {source}/{target}/{phase}/{shape}"
+                                );
+                                break;
+                            }
+                        }
+                    })
+                    .await
+                    .expect("oversized line must fail without waiting for source EOF or stall");
+                    assert!(!all.contains("PRIVATE_INPUT"));
+                    assert!(!all.contains("response.completed"));
+                    assert!(!all.contains("message_stop"));
+                    assert!(!all.contains("\"finish_reason\":\"stop\""));
+                    assert!(body.frame().await.is_none());
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn ib2_exact_boundary_lines_keep_lf_crlf_and_eof_semantics() {
+        for (ending, fragmented, below) in [
+            ("\n", false, true),
+            ("\n", false, false),
+            ("\n", true, false),
+            ("\r\n", false, false),
+            ("\r\n", true, false),
+            ("", false, false),
+            ("", true, false),
+        ] {
+            for (mode, source, target) in modes() {
+                let terminal = match source {
+                    "chat" => "data: [DONE]",
+                    "responses" => "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"output\":[]}}",
+                    _ => "data: {\"type\":\"message_stop\"}",
+                };
+                let mut raw = terminal.as_bytes().to_vec();
+                // CR is content for the byte bound, LF is only a delimiter.
+                raw.resize(
+                    INPUT_LIMIT - usize::from(below) - usize::from(ending == "\r\n"),
+                    b' ',
+                );
+                raw.extend_from_slice(ending.as_bytes());
+                let chunks: Vec<_> = raw
+                    .chunks(if fragmented { 65537 } else { raw.len() })
+                    .map(|b| Ok::<_, std::io::Error>(Bytes::copy_from_slice(b)))
+                    .collect();
+                let body = stream_body(futures_util::stream::iter(chunks), 60, mode)
+                    .await
+                    .unwrap()
+                    .into_body();
+                let out = axum::body::to_bytes(body, 1 << 20).await.unwrap();
+                let text = std::str::from_utf8(&out).unwrap();
+                assert!(final_frame(text, target), "{source}/{target}/{ending:?}");
+                assert!(!text.contains(LIMIT_MESSAGE));
+                assert!(!text.contains("api_error"));
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn ib2_large_chunks_are_processed_per_line_and_terminal_wins() {
+        for (mode, source, target) in modes() {
+            let mut raw = Vec::new();
+            // Two individually bounded comments already exceed the chunk-size limit.
+            for _ in 0..2 {
+                raw.push(b':');
+                raw.extend(std::iter::repeat_n(b'c', INPUT_LIMIT / 2));
+                raw.push(b'\n');
+            }
+            raw.extend_from_slice(terminal_records(source, "success").as_bytes());
+            raw.extend(std::iter::repeat_n(b'x', INPUT_LIMIT + 1));
+            let input = futures_util::stream::iter([Ok::<_, std::io::Error>(Bytes::from(raw))]);
+            let body = stream_body(input, 60, mode).await.unwrap().into_body();
+            let out = axum::body::to_bytes(body, 1 << 20).await.unwrap();
+            let text = std::str::from_utf8(&out).unwrap();
+            assert!(text.contains("片段"));
+            assert!(final_frame(text, target));
+            assert!(!text.contains(LIMIT_MESSAGE));
+            assert!(!text.contains("api_error"));
+        }
+    }
+
+    #[tokio::test]
+    async fn ib2_utf8_and_crlf_may_split_at_every_byte() {
+        for (mode, source, target) in modes() {
+            let raw = terminal_records(source, "success").replace('\n', "\r\n");
+            let chunks: Vec<_> = raw
+                .bytes()
+                .map(|b| Ok::<_, std::io::Error>(Bytes::from(vec![b])))
+                .collect();
+            let body = stream_body(futures_util::stream::iter(chunks), 60, mode)
+                .await
+                .unwrap()
+                .into_body();
+            let out = axum::body::to_bytes(body, 1 << 20).await.unwrap();
+            let text = std::str::from_utf8(&out).unwrap();
+            assert!(text.contains("片段"));
+            assert!(!text.contains('�'));
+            assert!(final_frame(text, target));
+            assert!(!text.contains("api_error"));
+        }
+    }
+
+    #[tokio::test]
+    async fn ib3_opaque_large_line_stays_byte_exact() {
+        let raw = Bytes::from(vec![b'x'; INPUT_LIMIT + 1]);
+        let input = futures_util::stream::iter([Ok::<_, std::io::Error>(raw.clone())]);
+        let body = stream_body(input, 60, StreamMode::Passthrough)
+            .await
+            .unwrap()
+            .into_body();
+        assert_eq!(
+            axum::body::to_bytes(body, INPUT_LIMIT + 2).await.unwrap(),
+            raw
+        );
     }
 
     #[tokio::test]

@@ -135,3 +135,13 @@ Demand/contract: [task](T-0408-terminal-release.md).
 | TR-03 | Preserve usage tails and session reuse; verify HTTP close | TR-3 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-10-24T19:46:58Z |
 
 TR-1–TR-3 delivered in [PR #625](https://github.com/fallrising/newclear/pull/625), merge `343ecae1f90d2bbcd4d8bd7a3a9eee6565c66882` at `2026-10-24T19:46:58Z`. Reviewed HEAD `e89c7bbebbd1d0ca7b66440594f4d5660735d172` is an ancestor of fetched main; scoped contents match. Independent source/final-document review PASS;148tests/85new scenarios and required component CI112s/contracts CI8s passed. Opaque byte behavior, finish_reason usage tails and reusable Claude sessions remain intact. Provider/Docker and whole-product acceptance remain incomplete.
+
+## T-0410 — Converted input bound
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| IB-1 | Bound converted input lines and fail/release on excess | IB-1 | in_progress | 2026-10-25T06:44:00Z | — | 2026-10-25T06:50:13Z |
+| IB-2 | Preserve boundary, framing and terminal compatibility | IB-2 | in_progress | 2026-10-25T06:44:00Z | — | 2026-10-25T06:50:13Z |
+| IB-3 | HTTP evidence, native gates and independent review | IB-3 | in_progress | 2026-10-25T06:44:00Z | — | 2026-10-25T06:50:13Z |
+
+[Contract](../../SUCCESS.md#t-0410--converted-input-bound) · [Task](T-0410-input-bound.md).

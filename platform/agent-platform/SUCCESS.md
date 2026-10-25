@@ -121,3 +121,22 @@ SDD §12 的 audit90天保留已依[先行契約](docs/AUDIT-RETENTION.md)實作
 | AUD-04 | passed (local) | T091-schema1 獨立018 catalog pin；T091-audit-native1：audit、archive/history、event replay identity 三項真 native roundtrip 通過，舊 plan UUID 失效 |
 
 此為有日期的本機證據快照；新增反例、獨立最終審查、hosted CI 與合併狀態見[交付報告](tasks/379-audit-retention/report.md)及其 PR。原有 event/archive 證據與初次失敗保留。完整 AT-13/M4、AC-04、stale cleanup、live qualification 與 usable_tag 維持原狀。
+
+## Proposed scope: T-092 manual stale binding cleanup (Phase A only)
+
+The proposed [contract](docs/STALE-CLEANUP.md) addresses a reachable terminal
+result whose journaled release started but left its exact owned VM live. Existing
+recovery already finalizes complete removal after a lost reply; this proposal
+adds one separately approved release attempt, with observation-only replay and
+retained reservations until full stop proof. No age policy, lifecycle reset,
+unknown VM deletion, host residue removal, retention pruning or live operation.
+
+| AC | Status | Planned evidence |
+| --- | --- | --- |
+| STALE-01 | proposed; not implemented | Actual result-before-release fault RED; exact one-binding preview/approval/expiry and all ownership/active-state negatives |
+| STALE-02 | proposed; not implemented | One release per approved attempt, pinned server exact-target safety, current-generation fencing, concurrent recovery and all crash/partial-effect boundaries |
+| STALE-03 | proposed; not implemented | Full stop proof before reservation release; unchanged result/original release/recovery ledgers; private CLI and native backup/restore invalidation |
+
+Phase B remains withheld until independent/root acceptance and contract commit,
+including the precise pinned-server safety evidence identified in the contract.
+AT-13/M4, AC-04, live qualification and usable_tag remain open.

@@ -717,6 +717,7 @@ pub fn anthropic_sse_to_message(records: &[String], model: &str) -> Bytes {
 
 /// Anthropic Messages SSE → `chat.completion.chunk` records (text and tool_use).
 pub struct AnthropicToChatStream {
+    budget: crate::stream_budget::RetainedBudget,
     id: String,
     model: String,
     created: i64,
@@ -734,6 +735,7 @@ impl AnthropicToChatStream {
 
     pub fn new(model: impl Into<String>) -> Self {
         Self {
+            budget: Default::default(),
             id: "chatcmpl-thinrouter".into(),
             model: model.into(),
             created: chrono::Utc::now().timestamp(),
@@ -799,6 +801,10 @@ impl AnthropicToChatStream {
             "content_block_start" => {
                 if ev.pointer("/content_block/type").and_then(|t| t.as_str()) == Some("tool_use") {
                     let idx = ev.get("index").and_then(|i| i.as_i64()).unwrap_or(0);
+                    if !self.tools.contains_key(&idx) && !self.budget.charge(0, 1) {
+                        self.tools = Default::default();
+                        return self.on_data(&json!({"type":"error","error":{"type":"api_error","message":crate::error::STATE_LIMIT_STREAM_MESSAGE}}).to_string());
+                    }
                     let n = self.tools.len();
                     self.tools.insert(idx, n);
                     out.push(self.chunk(
@@ -895,6 +901,34 @@ pub fn extract_anthropic_model_stream(body: &Bytes) -> AppResult<(String, bool)>
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn rs2_anthropic_tool_map_limits_new_indexes_but_not_streamed_text() {
+        let mut stream = AnthropicToChatStream::new("m");
+        stream.budget = crate::stream_budget::RetainedBudget::limited(0, 2);
+        let tool = |i| {
+            json!({"type":"content_block_start","index":i,"content_block":{"type":"tool_use","id":"c","name":"f"}}).to_string()
+        };
+        for i in [0, 1, 0, 1] {
+            assert!(!stream
+                .on_data(&tool(i))
+                .join("")
+                .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        }
+        for _ in 0..3 {
+            let out = stream
+                .on_data(
+                    &json!({"type":"content_block_delta","delta":{"text":"unretained text"}})
+                        .to_string(),
+                )
+                .join("");
+            assert!(out.contains("unretained text"));
+            assert!(!out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        }
+        let out = stream.on_data(&tool(2)).join("\n");
+        assert!(out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        assert!(stream.tools.is_empty() && stream.is_done());
+        assert!(stream.on_end().is_empty());
+    }
 
     #[test]
     fn convert_basic_request() {

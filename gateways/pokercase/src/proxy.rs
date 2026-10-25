@@ -1322,17 +1322,23 @@ struct Chain<A, B>(A, B);
 
 impl<A: SseConvert, B: SseConvert> Chain<A, B> {
     fn feed(&mut self, records: Vec<String>) -> Vec<String> {
-        records
-            .iter()
-            .filter_map(|r| r.strip_prefix("data: "))
-            .flat_map(|d| self.1.on_data(d))
-            .collect()
+        let mut out = Vec::new();
+        for record in records {
+            if self.1.is_done() {
+                break;
+            }
+            if let Some(data) = record.strip_prefix("data: ") {
+                out.extend(self.1.on_data(data));
+            }
+        }
+        out
     }
 }
 
 impl<A: SseConvert, B: SseConvert> SseConvert for Chain<A, B> {
     fn is_done(&self) -> bool {
-        self.0.is_done() && self.1.is_done()
+        // The final stage can fail on its own budget before the source stage finishes.
+        self.1.is_done()
     }
 
     fn on_data(&mut self, data: &str) -> Vec<String> {
@@ -1703,6 +1709,148 @@ mod stream_completion_tests {
                     )
                 )
             })
+    }
+
+    #[tokio::test]
+    async fn rs3_retained_text_limit_closes_direct_and_downstream_chain() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for mode in [
+            StreamMode::ChatToResponses("m".into()),
+            StreamMode::AnthropicToResponses("m".into()),
+        ] {
+            let chat = matches!(mode, StreamMode::ChatToResponses(_));
+            let mut chunks = std::collections::VecDeque::new();
+            for _ in 0..17 {
+                let text = "x".repeat(1024 * 1024);
+                let value = if chat {
+                    json!({"choices":[{"delta":{"content":text}}]})
+                } else {
+                    json!({"type":"content_block_delta","delta":{"text":text}})
+                };
+                chunks.push_back(Bytes::from(format!("data: {value}\n\n")));
+            }
+            let dropped = Arc::new(AtomicBool::new(false));
+            let input = RetainedSource {
+                chunks,
+                eof: false,
+                _witness: DropWitness(dropped.clone()),
+            };
+            let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+            tokio::time::timeout(Duration::from_secs(5), async {
+                loop {
+                    let frame = body
+                        .frame()
+                        .await
+                        .expect("state limit failure")
+                        .unwrap()
+                        .into_data()
+                        .unwrap();
+                    let text = std::str::from_utf8(&frame).unwrap();
+                    assert!(!text.contains("response.completed"));
+                    if text.contains("upstream converter state limit exceeded") {
+                        assert!(
+                            dropped.load(Ordering::SeqCst),
+                            "source retained after downstream failure"
+                        );
+                        assert!(
+                            !text.contains(&"x".repeat(100)),
+                            "failure replays retained payload"
+                        );
+                        break;
+                    }
+                }
+            })
+            .await
+            .expect("limit failure without upstream EOF or idle timeout");
+            assert!(body.frame().await.is_none());
+        }
+    }
+
+    #[tokio::test]
+    async fn rs3_default_entry_limits_release_all_retaining_routes() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for (mode, source, _) in modes() {
+            if matches!(mode, StreamMode::ChatToAnthropic(_)) {
+                continue;
+            }
+            let dropped = Arc::new(AtomicBool::new(false));
+            let mut chunks = std::collections::VecDeque::new();
+            for i in 0..4097 {
+                let value = match source {
+                    "chat" => json!({"choices":[{"delta":{"tool_calls":[{"index":i}]}}]}),
+                    "responses" => {
+                        json!({"type":"response.output_item.added","output_index":i,"item":{"type":"function_call","id":format!("i{i}")}})
+                    }
+                    _ => {
+                        json!({"type":"content_block_start","index":i,"content_block":{"type":"tool_use","id":"c","name":"f"}})
+                    }
+                };
+                chunks.push_back(Bytes::from(format!("data: {value}\n\n")));
+            }
+            let input = RetainedSource {
+                chunks,
+                eof: false,
+                _witness: DropWitness(dropped.clone()),
+            };
+            let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+            tokio::time::timeout(Duration::from_secs(5), async {
+                loop {
+                    let frame = body.frame().await.unwrap().unwrap().into_data().unwrap();
+                    let text = std::str::from_utf8(&frame).unwrap();
+                    if text.contains("upstream converter state limit exceeded") {
+                        assert!(dropped.load(Ordering::SeqCst));
+                        assert!(!text.contains("response.completed"));
+                        assert!(!text.contains("message_stop"));
+                        break;
+                    }
+                }
+            })
+            .await
+            .expect("entry limits terminate without EOF");
+            assert!(body.frame().await.is_none());
+        }
+    }
+
+    #[tokio::test]
+    async fn rs2_nonretaining_text_routes_allow_more_than_payload_budget() {
+        for (mode, source, target) in modes() {
+            if matches!(
+                mode,
+                StreamMode::ChatToResponses(_) | StreamMode::AnthropicToResponses(_)
+            ) {
+                continue;
+            }
+            let mut chunks = Vec::new();
+            for _ in 0..17 {
+                let text = "x".repeat(1024 * 1024);
+                let value = match source {
+                    "chat" => json!({"choices":[{"delta":{"content":text}}]}),
+                    "responses" => json!({"type":"response.output_text.delta","delta":text}),
+                    _ => json!({"type":"content_block_delta","delta":{"text":text}}),
+                };
+                chunks.push(Ok::<_, std::io::Error>(Bytes::from(format!(
+                    "data: {value}\n\n"
+                ))));
+            }
+            chunks.push(Ok(Bytes::from(terminal_records(source, "success"))));
+            let body = stream_body(futures_util::stream::iter(chunks), 60, mode)
+                .await
+                .unwrap()
+                .into_body();
+            let out = axum::body::to_bytes(body, 24 * 1024 * 1024).await.unwrap();
+            let text = std::str::from_utf8(&out).unwrap();
+            assert!(!text.contains("upstream converter state limit exceeded"));
+            assert!(final_frame(text, target));
+            assert!(text.len() > 16 * 1024 * 1024);
+        }
     }
 
     const INPUT_LIMIT: usize = 16 * 1024 * 1024;

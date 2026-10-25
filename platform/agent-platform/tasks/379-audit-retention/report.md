@@ -4,7 +4,7 @@
 
 Manual `audit-gc-preview` / `audit-gc-apply` implement the existing minimum90-day policy with bounded inspected rows/full canonical encodings, exact database-issued one-hour approval, atomic deletion and immutable minimal receipts/tombstones. Independent authorization, command/approval/recovery/model/tool/export state remains authoritative. This is a scoped [#379](https://github.com/fallrising/newclear/issues/379) AT-13 slice, not whole M4, deployment or usable-version acceptance.
 
-The independently accepted contract baseline `11ac278fa4c4ad28cd9d69dd2a38ce2e2656ae19` preceded actual RED and implementation. This dated snapshot reports local evidence only. Hosted checks and final merge are recorded in the [audit branch PR](https://github.com/fallrising/newclear/pulls?q=is%3Apr+head%3Afeat%2F379-bounded-audit-retention), issue delivery comment and task board; no later CI outcome is inferred here.
+The independently accepted contract baseline `11ac278fa4c4ad28cd9d69dd2a38ce2e2656ae19` preceded actual RED and implementation. This dated snapshot reports local evidence only. Hosted checks and final merge are recorded in the [audit branch PR](https://github.com/fallrising/newclear/pull/641), issue delivery comment and task board; no later CI outcome is inferred here.
 
 ## Verification
 
@@ -54,3 +54,11 @@ e0118daffa8b5181503883ebcda2cb1ba91a2309acb3843a4d7e66a0989ce869  T091-audit-gre
 ## Risks and Follow-ups
 
 Permanent minimal evidence grows; expiry is not complete content erasure or guaranteed disk reclamation. Trusted local operator/database-owner access is not a new authenticated security boundary. Busy writers may produce a deliberate NOWAIT refusal. Full AT-13/M4, stale runtime cleanup, integrated fake/live acceptance and usable-tag readiness remain open. Final required CI/normal merge and post-merge board recording are delivery obligations, separately tracked; no release/deployment/VPS/ERU operation is included.
+
+## Initial hosted CI and bounded fixture correction
+
+[PR641 first Agent Platform run40195306232](https://github.com/fallrising/newclear/actions/runs/40195306232), candidate83c779d8, ran723 platform tests in284.748s:722 passed and one existing pause test failed because its `step` helper required the first `claim_control()` to return a claim. All22 audit tests passed. The other three required checks passed. This failed CI remains part of the record; the original lock owner/interleaving was not captured and is not retrospectively attributed.
+
+Root added a deterministic real PostgreSQL row-lock probe. T091-pause-red1 reproduced the same helper `unexpectedly None` failure in1.142s: production `FOR UPDATE SKIP LOCKED` legitimately skipped the held job. The test helper now uses its existing bounded `wait_for` deadline to acquire the claim, retaining all observed-state/policy/capacity assertions. No production pause, recovery, audit, migration or backup code changed. This corrects a demonstrated fixture synchronization assumption; it does not establish the original CI's exact scheduler history.
+
+T091-pause-green1 ran the affected `test_pause.py` selection:19 passed in16.096s, including the new row-lock probe and originally failing lease-expiry case; owned PostgreSQL removed. Unchanged audit22/native3 evidence remains separately bound to the six-file freeze above. Final required CI is evaluated at the subsequent PR head, not inferred from this local pass.

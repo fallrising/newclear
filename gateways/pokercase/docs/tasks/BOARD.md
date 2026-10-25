@@ -239,6 +239,14 @@ Delivered in [PR646](https://github.com/fallrising/newclear/pull/646), source `4
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| SC-1 | Own run directory across setup and startup failures | SC-1 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
-| SC-2 | Clean a dropped startup future | SC-2 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
-| SC-3 | Preserve live tool files and remove at run end | SC-3 | in_progress | 2026-10-25T16:30:59Z | — | 2026-10-25T16:39:21Z |
+| SC-1 | Own run directory across setup and startup failures | SC-1 | done | 2026-10-25T16:30:59Z | 2026-10-25T16:43:21Z | 2026-10-25T17:46:53Z |
+| SC-2 | Clean a dropped startup future | SC-2 | done | 2026-10-25T16:30:59Z | 2026-10-25T16:43:21Z | 2026-10-25T17:46:53Z |
+| SC-3 | Preserve live tool files and remove at run end | SC-3 | done | 2026-10-25T16:30:59Z | 2026-10-25T17:46:53Z | 2026-10-25T17:46:53Z |
+
+Startup ownership guard: [PR650](https://github.com/fallrising/newclear/pull/650), source `e8abdd089caaa03b93bf33d9be03e39d0b616e38`, merge `c19f5ebe56502634990e8d9266e0ea395eda732e`. Its 208 tests / 18 groups and required CI passed, but original [PR651 CI](https://github.com/fallrising/newclear/actions/runs/40213245378) subsequently failed the SC-3 final-result HTTP request at 20 seconds. That failure and the diagnostic-only [PR652](https://github.com/fallrising/newclear/pull/652) remain historical evidence.
+
+Continuation repair: [PR654](https://github.com/fallrising/newclear/pull/654), source `3144debf49b6462035ad9a080ba09bd64cc2edef`, merge `b7c268adf3c631ea82ff306ca86af91ff589cc30` at 2026-10-25T17:46:53Z. Controlled callback-before-stdout ordering reproduced callback rejection, unsolicited completion and stale tool waiting state; the same ordering now completes without changing client20s/idle2s/cleanup3s thresholds. One shared idle deadline covers announcement/result waits; atomic waiter registration and turn/sink handoff prevent lost delivery; completion clears stale state even without a sink. Late results use the existing fallback. Numeric run ID and fixed lifecycle stages provide opt-in tracing without auth/session/body/tool content.
+
+Final local validation: 214 tests / 18 groups, six new tests / nine controlled scenarios, fmt/Clippy, 43 contracts / six indexes and independent source/final-document review passed. PR654 required CI and fetched source ancestry/scoped content/trailer readback passed. Original PR651 is refreshed through a normal merge of origin/main and must pass fresh CI before board publication. The original CI schedule was not observed internally; the deterministic reproduction establishes a causal defect matching its symptom.
+
+Future-drop coverage remains direct abort/join; blocked-stdin HTTP disconnect is not claimed fixed. No live provider/model/login, dependency/permission, release/deploy or whole-product acceptance. Owner decides desk done. [Task and detailed evidence](T-0418-claude-startup.md).

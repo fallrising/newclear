@@ -18,6 +18,11 @@ const FAKE_CLAUDE: &str = r#"#!/usr/bin/env python3
 import json, os, re, subprocess, sys, time, uuid
 d = os.path.dirname(os.path.abspath(__file__))
 args = sys.argv[1:]
+trace_enabled = os.path.exists(os.path.join(d, "trace-stages"))
+def trace(stage):
+    if not trace_enabled: return
+    with open(os.path.join(d, "stages.txt"), "a") as f: f.write(str(time.time_ns()) + " " + str(os.getpid()) + " " + stage + "\n")
+trace("process-start")
 with open(os.path.join(d, "starts.txt"), "a") as f: f.write("start\n")
 with open(os.path.join(d, "args.txt"), "w") as f: f.write("\n".join(args))
 # Sessions are saved like Claude Code: <config>/projects/<cwd with non-alnum as ->/<id>.jsonl
@@ -43,12 +48,24 @@ if "--mcp-config" in args:
     cfg = json.load(open(args[args.index("--mcp-config") + 1]))["mcpServers"]["thinrouter"]
     helper = subprocess.Popen([cfg["command"]] + cfg["args"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
     def rpc(i, method, params=None):
+        trace("rpc-send-" + method)
         msg = {"jsonrpc": "2.0", "id": i, "method": method}
         if params is not None: msg["params"] = params
         helper.stdin.write(json.dumps(msg) + "\n"); helper.stdin.flush()
         while True:
             r = json.loads(helper.stdout.readline())
-            if r.get("id") == i: return r
+            if r.get("id") == i:
+                trace("rpc-reply-" + method)
+                if method == "tools/call":
+                    result = r.get("result", {})
+                    text = " ".join(c.get("text", "") for c in result.get("content", []))
+                    category = "success"
+                    if result.get("isError"):
+                        category = "other-error"
+                        if text == "no matching tool call is pending": category = "not-registered"
+                        if text == "the client did not return a tool result in time": category = "tool-timeout"
+                    trace("rpc-outcome-" + category)
+                return r
     rpc(1, "initialize", {"protocolVersion": "2025-06-18"})
     helper.stdin.write(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n"); helper.stdin.flush()
     tools = rpc(2, "tools/list")["result"]["tools"]
@@ -92,6 +109,7 @@ def hang(text):
         sys.stdout.write('{"PRIVATE_STDOUT":"' + 'x' * (16 * 1024 * 1024)); sys.stdout.flush()
     while True: time.sleep(60)
 def message(mid, blocks, stop):
+    trace("message-" + mid + "-" + stop)
     ev({"type": "message_start", "message": {"id": mid, "type": "message", "role": "assistant", "model": "claude-x", "content": [], "usage": {"input_tokens": 10, "output_tokens": 0}}})
     for i, b in enumerate(blocks):
         if b[0] == "text":
@@ -107,6 +125,7 @@ out({"type": "system", "subtype": "init", "session_id": sid})
 n = 0
 for line in sys.stdin:
     n += 1
+    trace("input-" + str(n))
     with open(os.path.join(d, "turns.txt"), "a") as f: f.write(line)
     with open(os.path.join(proj, sid + ".jsonl"), "a") as f: f.write(line)
     text = json.dumps(json.loads(line))
@@ -279,6 +298,41 @@ impl Env {
 
     fn starts(&self) -> usize {
         self.file("starts.txt").lines().count()
+    }
+
+    async fn chat_stage(&self, stage: &str, body: Value) -> Value {
+        let started = Instant::now();
+        eprintln!("SC-3 begin {stage}");
+        let result = self
+            .client
+            .post(format!("{}/v1/chat/completions", self.base))
+            .json(&body)
+            .send()
+            .await;
+        let response = result.unwrap_or_else(|error| {
+            panic!(
+                "SC-3 {stage}: {error:?}; fixture stages:\n{}",
+                self.file("stages.txt")
+            )
+        });
+        assert_eq!(
+            response.status(),
+            200,
+            "SC-3 {stage}; fixture stages:\n{}",
+            self.file("stages.txt")
+        );
+        let body = response.json().await.unwrap_or_else(|error| {
+            panic!(
+                "SC-3 {stage} body: {error:?}; fixture stages:\n{}",
+                self.file("stages.txt")
+            )
+        });
+        eprintln!(
+            "SC-3 done {stage} after {:?}; fixture stages:\n{}",
+            started.elapsed(),
+            self.file("stages.txt")
+        );
+        body
     }
 
     async fn chat(&self, body: Value) -> Value {
@@ -743,7 +797,8 @@ mod disconnect_tests {
     #[tokio::test]
     async fn sc3_tool_files_survive_continuation_then_expire() {
         let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "2"]).await;
-        let first = env.chat(json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+        std::fs::write(env.bin_dir.path().join("trace-stages"), "").unwrap();
+        let first = env.chat_stage("first-tool", json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
         let dirs = owned_run_dirs(&env);
         assert_eq!(dirs.len(), 1);
         for file in ["tools.json", "callback.json", "mcp.json"] {
@@ -755,7 +810,7 @@ mod disconnect_tests {
             );
         }
         let next = history(&first_call(&first), "sunny");
-        let second = env.chat(next.clone()).await;
+        let second = env.chat_stage("first-result", next.clone()).await;
         assert!(second["choices"][0]["message"]["content"]
             .as_str()
             .unwrap()
@@ -769,7 +824,7 @@ mod disconnect_tests {
             .as_array_mut()
             .unwrap()
             .push(json!({"role":"user","content":"thanks"}));
-        let reply = env.chat(third.clone()).await;
+        let reply = env.chat_stage("next-user", third.clone()).await;
         assert_eq!(reply["choices"][0]["message"]["content"], "Checking.");
         assert!(!first_call(&reply).is_empty());
         assert_eq!(env.starts(), 1, "tool and idle continuation share process");
@@ -782,7 +837,7 @@ mod disconnect_tests {
             .as_array_mut()
             .unwrap()
             .push(json!({"role":"tool","tool_call_id":first_call(&reply),"content":"done"}));
-        let completed = env.chat(third).await;
+        let completed = env.chat_stage("final-result", third).await;
         assert!(completed["choices"][0]["message"]["content"]
             .as_str()
             .unwrap()

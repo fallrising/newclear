@@ -178,8 +178,10 @@ Delivered in [PR635](https://github.com/fallrising/newclear/pull/635), source `2
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| DG-1 | Bound and release diagnostic input | DG-1 | in_progress | 2026-10-25T11:45:34Z | — | 2026-10-25T11:55:00Z |
-| DG-2 | Preserve forwarding recovery and cancellation | DG-2 | in_progress | 2026-10-25T11:45:34Z | — | 2026-10-25T11:55:00Z |
-| DG-3 | Bound token errors and verify compatibility | DG-3 | in_progress | 2026-10-25T11:45:34Z | — | 2026-10-25T11:55:00Z |
+| DG-1 | Bound and release diagnostic input | DG-1 | done | 2026-10-25T11:45:34Z | 2026-10-25T11:58:44Z | 2026-10-25T11:58:44Z |
+| DG-2 | Preserve forwarding recovery and cancellation | DG-2 | done | 2026-10-25T11:45:34Z | 2026-10-25T11:58:44Z | 2026-10-25T11:58:44Z |
+| DG-3 | Bound token errors and verify compatibility | DG-3 | done | 2026-10-25T11:45:34Z | 2026-10-25T11:58:44Z | 2026-10-25T11:58:44Z |
 
 [Contract](../../SUCCESS.md#t-0413--bounded-http-diagnostics) · [Task](T-0413-diagnostic-bound.md).
+
+Delivered in [PR637](https://github.com/fallrising/newclear/pull/637), source `47f473e9d6f808f33d8e2ea3b96ea20e542b3e43`, merge `388e33e9cf0f6cb63d9b795247ff182295696510` at `2026-10-25T11:58:44Z`. Required component/contracts CI and independent source/final-document review PASS; remote ancestry and scoped component readback PASS.177tests/18groups,285newscenarios/5tests;fmt/clippy/43contracts/6llms PASS. Original RED, fixture-path and initial lint failures retained with passing corrections. See task for raw-input limits, within-bound diagnostic content and token-success exclusions; no live-provider/RSS acceptance.

@@ -172,7 +172,9 @@ test('owned historical export survives real GC while stale archive controls refu
     expect(fixture('m4-retention-dispatch').processed).toBe(false);
     console.info('[BGC] completed: A approval replay, exact export effects and idle redispatch');
 
-    // Approval failure alone keeps the stale preview; download failure refetches.
+    // Definitive approval expiry retires stale actions without another download.
+    const downloads: string[] = [];
+    b.on('download', (file) => downloads.push(file.suggestedFilename()));
     const refusedApproval = b.waitForResponse(
       (response) =>
         response.request().method() === 'POST' &&
@@ -184,19 +186,7 @@ test('owned historical export survives real GC while stale archive controls refu
     const refusal = await stage('B stale approval API response', () => refusedApproval);
     expect(refusal.status()).toBe(410);
     expect(await refusal.json()).toEqual({ error: 'artifact_expired' });
-    await stage('B stale download remains enabled after approval refusal', () =>
-      expect(bDownload).toBeEnabled(),
-    );
-    const downloads: string[] = [];
-    b.on('download', (file) => downloads.push(file.suggestedFilename()));
-    const refusedDownload = b.waitForResponse(
-      (response) =>
-        response.url().endsWith(`/artifacts/${saved.b.artifact_id}`) && response.status() === 410,
-    );
-    await stage('B stale download button click', () => bDownload.click());
-    const expiredDownload = await stage('B stale download API response', () => refusedDownload);
-    expect(expiredDownload.status()).toBe(410);
-    await stage('B download-error refetch removes controls and renders expiry', async () => {
+    await stage('B approval expiry immediately removes controls and renders expiry', async () => {
       await expect(b.getByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。')).toBeVisible();
       await expect(bDownload).toHaveCount(0);
       await expect(bExport).toHaveCount(0);

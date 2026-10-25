@@ -162,3 +162,15 @@ smoke or whole AT09/12/13/M4. No deployment, release or usable tag.
 T098-composite1 passed one new scenario in 2.234s on the frozen test source.
 Actual command, source binding and limits: [delivery snapshot](tasks/379-fake-composite/report.md).
 T097 independently accepted this bounded evidence; required changed-source CI and normal merge remain delivery gates.
+
+## Bounded scope: T-100 browser retention/export composition
+
+Test-only integration follows PR653. [Contract](tasks/379-browser-retention/task.md).
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| BGC-01 | planned | Browser-approved A export, actual event/archive GC, real expired cursor reconnect and one fake HTTP export; same owned cohort |
+| BGC-02 | planned | Unreferenced B archive expires; stale browser approval/download refuse410, result/diff/hash remain |
+
+Explicit synthetic historical INSERTs do not represent observed worker chronology.
+No guard bypass or production changes. Full fake/live AT09/12/13, deployment and M4 remain open.

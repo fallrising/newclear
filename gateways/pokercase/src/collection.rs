@@ -50,6 +50,43 @@ where
     }
 }
 
+// Credential/metadata envelope, independent of model output and diagnostics.
+pub(crate) const MAX_TOKEN_BYTES: usize = 1024 * 1024;
+pub(crate) const TOKEN_LIMIT_MESSAGE: &str = "token response body exceeds 1 MiB";
+
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum TokenBodyError {
+    #[error("{TOKEN_LIMIT_MESSAGE}")]
+    TooLarge,
+    #[error("token response body read failed")]
+    Read,
+}
+
+/// Own the source and partial buffer, including while pending. Never parse a
+/// prefix or use Content-Length; dropping this future also drops its source.
+pub(crate) async fn token_body<S, E>(source: S) -> Result<Bytes, TokenBodyError>
+where
+    S: Stream<Item = Result<Bytes, E>>,
+{
+    let mut source = Box::pin(source);
+    let mut out = Vec::new();
+    while let Some(chunk) = source.next().await {
+        let chunk = chunk.map_err(|_| TokenBodyError::Read)?;
+        if chunk.len() > MAX_TOKEN_BYTES - out.len() {
+            return Err(TokenBodyError::TooLarge);
+        }
+        let required = out.len() + chunk.len();
+        if required > out.capacity() {
+            let capacity = required
+                .max(out.capacity().saturating_mul(2))
+                .min(MAX_TOKEN_BYTES);
+            out.reserve_exact(capacity - out.len());
+        }
+        out.extend_from_slice(&chunk);
+    }
+    Ok(Bytes::from(out))
+}
+
 pub(crate) const MAX_DIAGNOSTIC_BYTES: usize = 64 * 1024;
 pub(crate) const DIAGNOSTIC_LIMIT_MESSAGE: &str = "upstream error body exceeds 64 KiB";
 
@@ -165,6 +202,71 @@ mod tests {
             dropped,
         )
     }
+    #[tokio::test]
+    async fn tk1_token_boundaries_release_and_errors() {
+        for size in [
+            0,
+            1,
+            MAX_TOKEN_BYTES - 1,
+            MAX_TOKEN_BYTES,
+            MAX_TOKEN_BYTES + 1,
+        ] {
+            for fragmented in [false, true] {
+                let bytes = Bytes::from(vec![b'x'; size]);
+                let chunks = if fragmented {
+                    bytes
+                        .chunks(4093)
+                        .map(|b| Ok(Bytes::copy_from_slice(b)))
+                        .collect()
+                } else {
+                    vec![Ok(bytes.clone())]
+                };
+                let (source, dropped) = source(chunks, size > MAX_TOKEN_BYTES);
+                let result =
+                    tokio::time::timeout(std::time::Duration::from_secs(1), token_body(source))
+                        .await
+                        .unwrap();
+                assert!(dropped.load(Ordering::SeqCst));
+                if size > MAX_TOKEN_BYTES {
+                    assert!(matches!(result, Err(TokenBodyError::TooLarge)));
+                } else {
+                    assert_eq!(result.unwrap(), bytes);
+                }
+            }
+        }
+        let (source, dropped) = source(
+            vec![
+                Ok(Bytes::from_static(b"partial-secret")),
+                Err(std::io::Error::other("PRIVATE_READ")),
+            ],
+            false,
+        );
+        let error = token_body(source).await.unwrap_err();
+        assert_eq!(error.to_string(), "token response body read failed");
+        assert!(dropped.load(Ordering::SeqCst));
+        let text = "令牌".as_bytes();
+        let (source, dropped) = self::source(
+            text.iter()
+                .map(|b| Ok(Bytes::copy_from_slice(&[*b])))
+                .collect(),
+            false,
+        );
+        assert_eq!(token_body(source).await.unwrap().as_ref(), text);
+        assert!(dropped.load(Ordering::SeqCst));
+    }
+
+    #[tokio::test]
+    async fn tk1_token_pending_future_drop_releases_source() {
+        for size in [0, MAX_TOKEN_BYTES] {
+            let (source, dropped) = source(vec![Ok(Bytes::from(vec![b' '; size]))], true);
+            let mut read = Box::pin(token_body(source));
+            assert!(futures_util::poll!(&mut read).is_pending());
+            assert!(!dropped.load(Ordering::SeqCst));
+            drop(read);
+            assert!(dropped.load(Ordering::SeqCst));
+        }
+    }
+
     fn assert_limit(e: AppError) {
         match e {
             AppError::Upstream { status: 502, body } => assert_eq!(body, LIMIT_MESSAGE),

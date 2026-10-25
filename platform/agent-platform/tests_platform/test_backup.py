@@ -19,7 +19,7 @@ from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from test_control_plane import URL, PlatformFixture
 
-from agent_platform import archive_retention, backup, event_retention
+from agent_platform import archive_retention, audit_retention, backup, event_retention
 from agent_platform.api import create_app
 from agent_platform.db import Database
 from agent_platform.domain import Problem
@@ -140,6 +140,69 @@ class BackupTests(PlatformFixture):
         self.assertEqual(Store(target).run(run_id)["last_event_seq"], before["last_event_seq"])
         with self.assertRaisesRegex(ValueError, "identity_changed"):
             event_retention.apply(target, plan, approval_digest=plan["approval_digest"])
+
+    def test_real_native_roundtrip_preserves_expired_audit_evidence_and_control(self):
+        run_id = self.completed()
+        audit_id = uuid4()
+        with self.db.transaction() as conn:
+            command = conn.execute(
+                "SELECT id,idempotency_key FROM commands WHERE route='tasks.create'"
+            ).fetchone()
+            conn.execute(
+                "INSERT INTO audit_events(id,actor,action,target,decision,created_at) "
+                "VALUES (%s,%s,'tasks.create',%s,'allow',now()-interval '91 days')",
+                (audit_id, self.operator, str(command["id"])),
+            )
+        plan = audit_retention.preview(self.db)
+        receipt = audit_retention.apply(self.db, plan, approval_digest=plan["approval_digest"])
+        self.assertEqual(receipt["count"], 1)
+        before = self.snapshot(URL)
+        self.make_backup()
+        self.restore()
+        target = Database(self.target_url)
+        target.open()
+        self.addCleanup(target.close)
+        # Full row JSON for every durable table, not column/catalog metadata.
+        self.assertEqual(self.snapshot(self.target_url), before)
+        self.assertEqual(Store(target).run(run_id), Store(self.db).run(run_id))
+        with target.transaction() as conn:
+            self.assertIsNone(
+                conn.execute("SELECT id FROM audit_events WHERE id=%s", (audit_id,)).fetchone()
+            )
+            saved = conn.execute(
+                "SELECT plan,receipt FROM audit_gc_receipts WHERE approval_digest=%s",
+                (plan["approval_digest"],),
+            ).fetchone()
+            self.assertEqual(audit_retention._replay(conn, plan, saved), receipt)
+        with self.assertRaisesRegex(ValueError, "identity_changed"):
+            audit_retention.apply(target, plan, approval_digest=plan["approval_digest"])
+        with self.assertRaises(psycopg.Error):
+            with target.transaction() as conn:
+                conn.execute(
+                    "INSERT INTO audit_events(id,action,decision) VALUES (%s,'reuse','allow')",
+                    (audit_id,),
+                )
+        client = self.restored_client(target, run_id)
+        session = client.get("/api/v1/session").json()
+        replay = client.post(
+            "/api/v1/tasks",
+            json=self.payload,
+            headers={
+                "Origin": self.settings.origin,
+                "X-CSRF-Token": session["csrf_token"],
+                "Idempotency-Key": command["idempotency_key"],
+            },
+        )
+        self.assertEqual(replay.status_code, 202, replay.text)
+        self.assertEqual(replay.json()["run"]["id"], run_id)
+        with target.transaction() as conn:
+            self.assertEqual(conn.execute("SELECT count(*) AS n FROM runs").fetchone()["n"], 1)
+            self.assertGreater(
+                conn.execute(
+                    "SELECT count(*) AS n FROM audit_events WHERE action='session.created'"
+                ).fetchone()["n"],
+                0,
+            )
 
     def test_real_native_roundtrip_preserves_archive_and_all_history(self):
         run_id = self.completed()

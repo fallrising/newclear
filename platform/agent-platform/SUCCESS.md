@@ -108,3 +108,16 @@ make deployment-rehearsal
 此切片不實作 audit retention、stale VM cleanup、排程或部署，不改 adapter source ID/replay 或 lifecycle。AT-13/M4、AC-04 與 usable_tag 維持原狀。先前 socket／private-path／namespace 環境失敗保留於交付證據；未放寬安全 guard 或修改主機權限。
 
 額外 regression 的3項 tool-process recovery 失敗伴隨 root driver 缺少 multiprocessing `__main__` guard／子程序重跑 selection 的 fixture 污染；driver 已修正。另1項 export-lock 失敗雖在 targeted rerun 通過，仍為 intermittent／原因未歸因，不能斷言由 driver 造成。
+
+## 本次範圍：T-089 manual audit retention（2026-10-25 local snapshot）
+
+SDD §12 的 audit90天保留已依[先行契約](docs/AUDIT-RETENTION.md)實作。契約先經 T090 獨立審查並提交11ac278f，再由 root 取得真 PostgreSQL RED 才釋出程式。Manual preview/apply 採至少90天嚴格 cutoff、固定 inspected-row/full-encoding caps、exact approval/expiry/DB identity；刪除 raw audit history，永久保留無 actor/action/target/decision 的最小 UUID/hash/size/time evidence。Audit target 非 typed run FK，不另發明 terminal/cleanup/export hold；獨立 operational authority 全保留。
+
+| AC | 狀態 | 實際證據與範圍 |
+| --- | --- | --- |
+| AUD-01 | passed (local) | T091-audit-green3：22 focused GREEN，包含90天 equality、exact issued plan/expiry/UUID、nullable/unbounded metadata、fixed inspected-row/no-refill 及 encoded caps |
+| AUD-02 | passed (local) | 同次驗證原子 receipt/tombstone/delete/new audit、current/prior transaction/wrong-ID、no resurrection、strict replay 與各步驟 rollback；最小永久證據無 raw audit 欄位 |
+| AUD-03 | passed (local) | Full-row authority snapshots，加上實際 auth／command／worker／approval／recovery／model/tool unknown／export replay、writer/GC barriers 及 private CLI |
+| AUD-04 | passed (local) | T091-schema1 獨立018 catalog pin；T091-audit-native1：audit、archive/history、event replay identity 三項真 native roundtrip 通過，舊 plan UUID 失效 |
+
+此為有日期的本機證據快照；新增反例、獨立最終審查、hosted CI 與合併狀態見[交付報告](tasks/379-audit-retention/report.md)及其 PR。原有 event/archive 證據與初次失敗保留。完整 AT-13/M4、AC-04、stale cleanup、live qualification 與 usable_tag 維持原狀。

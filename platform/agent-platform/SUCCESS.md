@@ -142,3 +142,23 @@ overlap fixture; its two cases passed without changing production. Hosted CI and
 normal merge are separate delivery gates, tracked in the PR and task board.
 This is not arbitrary orphan/host-residue cleanup or live VM qualification.
 Complete AT-13/M4, AC-04, deployment and usable_tag remain open.
+
+## Bounded scope: T-096 fake cross-flow acceptance
+
+Add one same-version integration scenario to the delivered stale cleanup, export and
+backup slices. No new production behavior is proposed. Existing independent tests
+remain applicable; this targets their previously untested composition on one DB.
+[Contract and verification plan](tasks/379-fake-composite/task.md).
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| COMP-01 | passed (local) | Real worker terminal result/release fault, exact approved cleanup, independent recovery, API-approved valid patch export via synthetic HTTP GitHub, PR-success/disconnect followed by read-only reconciliation |
+| COMP-02 | passed (local) | Same scenario native dump/empty DB restore, durable result/export/control facts, private journal preservation, fresh maintenance identity and drained nodes; old approval refused with no repeat external mutation |
+
+VM/model/GitHub remain synthetic. No existing suite rerun is itself new acceptance.
+This is API/native integration, not browser qualification, complete fake E2E, live
+smoke or whole AT09/12/13/M4. No deployment, release or usable tag.
+
+T098-composite1 passed one new scenario in 2.234s on the frozen test source.
+Actual command, source binding and limits: [delivery snapshot](tasks/379-fake-composite/report.md).
+T097 independently accepted this bounded evidence; required changed-source CI and normal merge remain delivery gates.

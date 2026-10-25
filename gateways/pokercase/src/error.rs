@@ -4,6 +4,8 @@ use axum::Json;
 use serde_json::json;
 use thiserror::Error;
 
+pub(crate) const INPUT_LIMIT_STREAM_MESSAGE: &str = "upstream stream line exceeds 16 MiB";
+
 pub(crate) const READ_FAILED_STREAM_MESSAGE: &str = "upstream stream read failed";
 
 pub(crate) const STALLED_STREAM_MESSAGE: &str = "upstream stream stalled";

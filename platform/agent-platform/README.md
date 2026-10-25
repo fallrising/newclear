@@ -92,3 +92,6 @@ M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修
 real Chromium/API/SQL retention scenario on synthetic historical data. It verifies
 export protection, expired-cursor reconnect and stale archive controls, while full
 fake/live/M4 scope remains open. Original failure history is retained.
+
+封存過期的匯出預覽／授權現在會立即更新下載與匯出控制，重新查詢失敗也會保留
+已確認的過期狀態與成果摘要。詳見 [EUX01/02修正與驗證](tasks/379-expired-export/report.md)。

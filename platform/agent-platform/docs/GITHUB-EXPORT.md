@@ -51,3 +51,12 @@ Give only the independent export worker access to a private directory owned by i
 Start `agent-platform export-worker --config /private/export/config.json`, or add `--once` for one bounded pass. The token needs repository contents and pull-request write permissions for only the allowlisted repository. Do not give it to the API or ordinary run worker; do not use ambient gh credentials. A future live smoke requires an explicitly designated test repository and its credential through this private channel. No such setup or live smoke was executed for this slice.
 
 One approved tuple stays one operation, including failed/uncertain outcomes. The UI can ask for read-only reconciliation; it cannot reset dispatch state or authorize a replacement under a fresh command key. An unresolved partial export therefore requires operator inspection before a later separately designed recovery action. Saved artifacts remain downloadable throughout. Approving a patch is also an approval to submit those contents to the selected repository; repository-side automation remains governed by that repository.
+
+## Expired archive availability
+
+A definitive artifact_expired response from preview or approval immediately retires
+the selected archive's download and new-export controls and refreshes its run's
+archive list. Result/diff/hash/size remain visible. A failed refresh offers retry
+without restoring actions already known unavailable; other errors preserve existing
+approval retry behavior. This does not change remote authorization or reconciliation.
+[Correction and evidence](../tasks/379-expired-export/report.md).

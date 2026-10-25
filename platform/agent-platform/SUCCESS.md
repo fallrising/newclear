@@ -184,8 +184,12 @@ retains both initial harness timeouts, exact source and boundaries. Normal CI/me
 
 | AC | Status | Verification plan |
 | --- | --- | --- |
-| EUX-01 | planned | Exact preview/approval410 expires only the original artifact immediately; refresh failure preserves known expiry and metadata |
-| EUX-02 | planned | Auth/transient/non-expiry/lost-response behavior and command keys remain correct; real BGC browser flow updates without another failed download |
+| EUX-01 | passed (local) | Exact preview/approval410 expires only the original artifact immediately; refresh failure preserves known expiry and metadata |
+| EUX-02 | passed (local) | Auth/transient/non-expiry/lost-response behavior and command keys remain correct; real BGC browser flow updates without another failed download |
 
 Root obtains behavioral RED before product edits. This does not change backend authority
 or complete full M4/live acceptance.
+
+T106:30 distinct focused web cases and rebuilt-assets browser1/9.6s passed.
+[Snapshot](tasks/379-expired-export/report.md) retains actual RED and two test corrections.
+Independent review and required CI/normal merge remain delivery gates.

@@ -162,5 +162,5 @@ This record supersedes pre-merge wording in the dated local delivery snapshot.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0104.1 | Reflect exact preview/approval archive expiry immediately | EUX-01 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:19:18Z |
-| T-0104.2 | Preserve auth/replay and verify real browser GC flow | EUX-02 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:19:18Z |
+| T-0104.1 | Reflect exact preview/approval archive expiry immediately | EUX-01 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:29:14Z |
+| T-0104.2 | Preserve auth/replay and verify real browser GC flow | EUX-02 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:29:14Z |

@@ -1,3 +1,16 @@
+# 最新接續 — PR655已合併，過期匯出 UI 修正本機通過（2026-10-26）
+
+PR655已正常合併0b4e42d9，四項必要CI成功、45+756通過，BGCdone列隨本次真正產品變更補入；
+原ecd66b08本機候選保留。本次[EUX契約](../tasks/379-expired-export/task.md)先提交7ae9d2d9，
+取得真實RED6fail/12pass後，才修正預覽／授權410留下失效控制的UI問題。
+[本機快照](../tasks/379-expired-export/report.md)記錄30項focusedweb及重建資產後browser1/9.6s通過。
+TypeScript測試選項錯誤與A/Bfixture錯誤均已修正且原始證據保留；不改寫首次全綠。
+只改App/ExportPanel產品來源，後端授權／冪等／GC／schema／dependencies／CI不變。
+本次行為取代下方歷史BGC快照中的「先授權失敗，再點下載才更新」；不必再操作已失效下載。
+獨立最終審查與必要CI／正常合併仍為交付門檻；全M4／live／部署未完成。
+
+---
+
 # 最新接續 — PR653已合併，browser／GC／export整合本機通過（2026-10-26）
 
 PR653正常合併ada118988b909c6aa826a76da8939e1ec7451432；四項必要CI成功、hosted45+756，

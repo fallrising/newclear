@@ -140,8 +140,10 @@ TR-1–TR-3 delivered in [PR #625](https://github.com/fallrising/newclear/pull/6
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| IB-1 | Bound converted input lines and fail/release on excess | IB-1 | in_progress | 2026-10-25T06:44:00Z | — | 2026-10-25T06:50:13Z |
-| IB-2 | Preserve boundary, framing and terminal compatibility | IB-2 | in_progress | 2026-10-25T06:44:00Z | — | 2026-10-25T06:50:13Z |
-| IB-3 | HTTP evidence, native gates and independent review | IB-3 | in_progress | 2026-10-25T06:44:00Z | — | 2026-10-25T06:50:13Z |
+| IB-1 | Bound converted input lines and fail/release on excess | IB-1 | done | 2026-10-25T06:44:00Z | 2026-10-25T06:53:35Z | 2026-10-25T06:53:35Z |
+| IB-2 | Preserve boundary, framing and terminal compatibility | IB-2 | done | 2026-10-25T06:44:00Z | 2026-10-25T06:53:35Z | 2026-10-25T06:53:35Z |
+| IB-3 | HTTP evidence, native gates and independent review | IB-3 | done | 2026-10-25T06:44:00Z | 2026-10-25T06:53:35Z | 2026-10-25T06:53:35Z |
 
 [Contract](../../SUCCESS.md#t-0410--converted-input-bound) · [Task](T-0410-input-bound.md).
+
+Delivered in [PR627](https://github.com/fallrising/newclear/pull/627), source `a383cc529aa5280508e1effc2c35c530ff93bb23`, merge `18993aa6abc7d968e55f8c2f0c567fef84e06c05` at `2026-10-25T06:53:35Z`. Necessary component/contracts CI passed161s/9s; remote ancestry and component readback PASS.154tests/15groups,125newscenarios;fmt/clippy/docs/index and independent source/final-document review PASS. Exact evidence/limits in the task record; no real-provider/Docker or whole-product acceptance.

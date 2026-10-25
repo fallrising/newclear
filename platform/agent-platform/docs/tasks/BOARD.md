@@ -40,7 +40,68 @@ Whole AT13/M4 remains incomplete.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0089.1 | Bound explicit90-day approvals | AUD-01 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T13:13:11Z |
-| T-0089.2 | Guard atomic audit removal and replay | AUD-02 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T13:13:11Z |
-| T-0089.3 | Preserve authoritative control state | AUD-03 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T13:13:11Z |
-| T-0089.4 | Verify native backup and compatibility | AUD-04 | in_progress | 2026-10-25T11:55:18Z | | 2026-10-25T13:13:11Z |
+| T-0089.1 | Bound explicit90-day approvals | AUD-01 | done | 2026-10-25T11:55:18Z | 2026-10-25T13:19:39Z | 2026-10-25T15:31:47Z |
+| T-0089.2 | Guard atomic audit removal and replay | AUD-02 | done | 2026-10-25T11:55:18Z | 2026-10-25T13:19:39Z | 2026-10-25T15:31:47Z |
+| T-0089.3 | Preserve authoritative control state | AUD-03 | done | 2026-10-25T11:55:18Z | 2026-10-25T13:19:39Z | 2026-10-25T15:31:47Z |
+| T-0089.4 | Verify native backup and compatibility | AUD-04 | done | 2026-10-25T11:55:18Z | 2026-10-25T13:19:39Z | 2026-10-25T15:31:47Z |
+
+T0089 delivery: [PR641](https://github.com/fallrising/newclear/pull/641) merged
+`234daf32cad60af231abf35fb44cfdd75bbe2a6c` at2026-10-25T13:19:39Z;
+head `9e052ff6935b7121c108be5e5c230f4fd14d6165` passed all four required checks.
+[Agent Platform CI40196623154](https://github.com/fallrising/newclear/actions/runs/40196623154)
+passed45 base tests and724 platform tests; [contract CI40196623122](https://github.com/fallrising/newclear/actions/runs/40196623122) passed.
+Merged component bytes match the reviewed candidate. T090 independently accepted
+AUD01–04 focused22/native3 and the additional pause fixture correction19 tests.
+The initial hosted723 run had722pass/1pause-helper failure. A deterministic real
+row-lock RED demonstrated that helper's immediate-claim assumption; bounded waiting
+fixed the fixture without changing production or outcome assertions. The original
+CI lock owner/interleaving remains unrecorded. Earlier focused21pass/1fail and
+older event-regression failures remain preserved in the [dated report](../../tasks/379-audit-retention/report.md).
+This delivery record supersedes that snapshot's pending-CI status. T0087 done rows
+were also delivered by PR641; its standalone board candidate needs no duplicate PR.
+Only the bounded audit/event slices are delivered. Stale runtime cleanup, integrated
+fake/live acceptance and whole AT13/M4 remain open under#379; no usable tag, release or deployment.
+
+## T-0092 — Issue #379 manual stale binding cleanup
+
+Contract baseline `1b47738b` preceded actual RED. Independent T093 accepted local
+STALE01–03 after the required HTTP overlap fixture; PR649 has normally merged.
+See the [dated delivery snapshot](../../tasks/379-stale-cleanup/report.md).
+SDD13.2, INV-12 and AT-13 preserve unknown resources and active recovery state.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0092.1 | Bound exact owned resource and explicit approval | STALE-01 | done | 2026-10-25T15:39:34Z | 2026-10-25T17:00:58Z | 2026-10-25T17:09:17Z |
+| T-0092.2 | Fence one release attempt and preserve replay | STALE-02 | done | 2026-10-25T15:39:34Z | 2026-10-25T17:00:58Z | 2026-10-25T17:09:17Z |
+| T-0092.3 | Reconcile capacity and preserve native backup | STALE-03 | done | 2026-10-25T15:39:34Z | 2026-10-25T17:00:58Z | 2026-10-25T17:09:17Z |
+
+T0092 delivery: [PR649](https://github.com/fallrising/newclear/pull/649) normally merged
+`ce5b5e6848884bf92ea0bca4c72f4acc877057f5` at 2026-10-25T17:00:58Z;
+head `9635e645f1e7eebb7f8ae32d4078af33e1ac3585` passed all four required checks:
+[Agent Platform CI40212776640](https://github.com/fallrising/newclear/actions/runs/40212776640)
+check/control-plane/web and [contracts40212776776](https://github.com/fallrising/newclear/actions/runs/40212776776)
+validate. Hosted 45 base and 755 platform tests passed. The entire merged component
+matches the reviewed head. T093 independently accepted STALE01–03; local evidence
+is 28 focused + 2 real HTTP overlap + 1 native pg_dump/restore + 12 related cases.
+The HTTP upstream is synthetic; no live VM or sandboxd qualification is claimed.
+Original expected RED, initial author lint failures, and earlier event/audit failures
+remain preserved in the dated reports and raw evidence, not rewritten as first-green.
+
+Cleanup covers one explicitly approved terminal owned binding, its original capability,
+current lease/fence and at most one release request per attempt. Original uncertain
+intent and permanent tombstone remain; existing recovery alone releases capacity after
+independently confirming complete stop proof. No SQL migration or backup pin changed.
+T0089 audit done rows were delivered with PR649; its preserved standalone candidate
+needs no duplicate PR. This record supersedes stale pre-merge status in the dated snapshot.
+Unknown host residue, complete same-version fake/live AT09/12/13, VM recovery,
+actual deployment and whole M4 remain open under #379; no usable tag or release.
+
+## T-0096 — Issue #379 fake cross-flow acceptance
+
+Test-only integration from delivered PR649; no product defect established.
+The [contract](../../tasks/379-fake-composite/task.md) preserves full M4/live scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0096.1 | Compose stale recovery and explicit fake HTTP export | COMP-01 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:29:36Z |
+| T-0096.2 | Preserve cross-flow authority through native restore | COMP-02 | in_progress | 2026-10-25T17:22:16Z | | 2026-10-25T17:29:36Z |

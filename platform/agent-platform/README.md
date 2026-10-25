@@ -8,7 +8,7 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態（2026-10-25）：M0–M2 已驗收，M3/M4 整體仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存、明確授權 GitHub export（預設停用、fake GitHub 驗收）、離線 DB 備份／空庫還原與手動封存清理；單節點手冊與隔離演練已有歷史證據。手動事件 GC 已於 PR633 通過必要 CI 並合併；audit90天保留已有 focused/native 本機證據，詳見本次交付快照；VM state、stale cleanup、實際主機部署與整體 MVP gate 仍未完成。**
+**目前狀態（2026-10-25）：M0–M2 已驗收，M3/M4 整體仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存、明確授權 GitHub export（預設停用、fake GitHub 驗收）、離線 DB 備份／空庫還原與手動封存清理；單節點手冊與隔離演練已有歷史證據。手動事件 GC 已於 PR633 通過必要 CI 並合併；audit90天保留已於 PR641 通過必要 CI 並合併；單一終態 binding 的手動 stale cleanup 已有 focused／native 本機證據，交付狀態見下方；VM state、未知 host residue、實際主機部署與整體 MVP gate 仍未完成。**
 
 模型開發仍用本機 mock，現在不需要 API key。單人版本延後真實計費與硬金額上限，用量金額保持 unknown。已納入 [M3 跨切片 mock 驗收](docs/M3-INTEGRATED-ACCEPTANCE.md)；真實模型自然語言 coding、完整 M3 與 release 前長任務驗收仍未完成。詳見 [GitHub 匯出](docs/GITHUB-EXPORT.md)、[成果封存](docs/RESULT-ARCHIVE.md) 與 [最新交接](docs/HANDOFF.md)。
 
@@ -80,4 +80,10 @@ M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修
 
 2026-10-25 [手動事件保留](docs/EVENT-RETENTION.md)新增 `event-gc-preview`／`event-gc-apply`，只清理獲明確批准且符合終態／cleanup 證明的連續事件前綴，保留 source dedupe、sequence 與結果。[PR633](https://github.com/fallrising/newclear/pull/633) 已通過必要 CI（45 base／700 platform）並合併，詳見[任務板](docs/tasks/BOARD.md)。[本機交付快照](tasks/379-event-retention/report.md)中的初次644pass/4fail、targeted4pass與未歸因 export-lock 失敗仍保留；後續 CI 成功不改寫歷史。
 
-2026-10-25 [手動 audit 保留](docs/AUDIT-RETENTION.md)提供 `audit-gc-preview`／`audit-gc-apply`，至少90天、明確批准且有界地刪除歷史 audit，保留最小 operation evidence 與獨立控制狀態。本機最終 focused22 與三項 native roundtrip 通過；最終審查／CI／合併狀態見[交付快照與 PR](tasks/379-audit-retention/report.md)。不代表完整 M4 或 live 驗收。
+2026-10-25 [手動 audit 保留](docs/AUDIT-RETENTION.md)提供 `audit-gc-preview`／`audit-gc-apply`，至少90天、明確批准且有界地刪除歷史 audit，保留最小 operation evidence 與獨立控制狀態。本機 focused22 與三項 native roundtrip 通過，另有 pause fixture 修正19項通過；[PR641](https://github.com/fallrising/newclear/pull/641) 必要 CI（45 base／724 platform）成功並合併。初次 hosted722pass／1pause-helper failure 與先前本機失敗仍保留；最新交付紀錄見[任務板](docs/tasks/BOARD.md)，[交付快照](tasks/379-audit-retention/report.md)保留當時狀態。不代表完整 M4 或 live 驗收。
+
+2026-10-25 [手動 stale binding 清理](docs/STALE-CLEANUP.md)提供 `stale-cleanup-preview`／`stale-cleanup-apply`：只對一個有完整原始身分證據的終態 run 批准一次新的 release，保留原本未確認的 intent；既有 recovery 重新證明停止後才釋放容量。本機28 focused、2 HTTP overlap、1 native roundtrip及12相關回歸通過。精確邊界、失敗歷史與必要 CI／交付入口見[本機快照](tasks/379-stale-cleanup/report.md)；不包含未知資源刪除或 live VM 驗收。
+
+### Bounded cross-flow acceptance
+
+[COMP01/02 contract](tasks/379-fake-composite/task.md) and [local delivery snapshot](tasks/379-fake-composite/report.md) join stale recovery, explicitly approved synthetic HTTP export and native restore in one scenario. Production behavior is unchanged; complete fake E2E/live/M4 acceptance remains open.

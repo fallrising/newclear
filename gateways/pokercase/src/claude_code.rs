@@ -111,6 +111,7 @@ struct ToolResult {
 
 /// One Claude Code process that may answer several requests.
 struct LiveRun {
+    trace_id: u64,
     token: String,
     /// Where the current request's records go; None between requests.
     sink: Mutex<Option<mpsc::Sender<Item>>>,
@@ -118,6 +119,7 @@ struct LiveRun {
     sink_changed: tokio::sync::Notify,
     /// tool_use blocks streamed and not yet matched to an MCP call: (id, bridged name, input).
     announced: Mutex<VecDeque<(String, String, Value)>>,
+    announcement_changed: tokio::sync::Notify,
     /// Ids of the last message's tool calls, awaiting the client's results.
     pending: Mutex<Vec<String>>,
     /// Results delivered before Claude Code asked for them.
@@ -393,7 +395,7 @@ impl ClaudeCode {
         let sig = signature(model, chat);
         let msgs = convo(chat);
         let normed: Vec<Value> = msgs.iter().map(norm).collect();
-        let run = {
+        let (run, start, rx) = {
             let mut live = self.live.lock().unwrap();
             let pos = live.idle.iter().position(|r| {
                 let known = r.known.lock().unwrap();
@@ -406,17 +408,18 @@ impl ClaudeCode {
             })?;
             let run = live.idle.remove(pos);
             live.order.retain(|r| !Arc::ptr_eq(r, &run));
-            run
+            let start = run.known.lock().unwrap().len();
+            run.idle_now
+                .store(false, std::sync::atomic::Ordering::SeqCst);
+            let (tx, rx) = mpsc::channel::<Item>(64);
+            *run.sink.lock().unwrap() = Some(tx);
+            *run.waiting_since.lock().unwrap() = None;
+            *run.known.lock().unwrap() = normed;
+            run.sink_changed.notify_one();
+            debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "resume_user_sink");
+            (run, start, rx)
         };
-        run.idle_now
-            .store(false, std::sync::atomic::Ordering::SeqCst);
-        let start = run.known.lock().unwrap().len();
         let line = json!({"type": "user", "message": {"role": "user", "content": render_turn(&msgs[start..])}});
-        let (tx, rx) = mpsc::channel::<Item>(64);
-        *run.sink.lock().unwrap() = Some(tx);
-        run.sink_changed.notify_one();
-        *run.waiting_since.lock().unwrap() = None;
-        *run.known.lock().unwrap() = normed;
         let written = match run.stdin.lock().await.as_mut() {
             Some(stdin) => stdin
                 .write_all(format!("{line}\n").as_bytes())
@@ -458,39 +461,67 @@ impl ClaudeCode {
                 .find(|(t, _)| crate::guard::ct_eq(t, token))
                 .map(|(_, r)| r.clone())?
         };
+        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "mcp_received");
         let name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
         let args = params.get("arguments").cloned().unwrap_or(Value::Null);
-        let id = {
-            let mut ann = run.announced.lock().unwrap();
-            let bridged = format!("{}{name}", crate::claude_mcp::PREFIX);
-            let pos = ann
-                .iter()
-                .position(|(_, n, input)| *n == bridged && *input == args)
-                .or_else(|| ann.iter().position(|(_, n, _)| *n == bridged));
-            match pos {
-                Some(p) => ann.remove(p).map(|(id, _, _)| id)?,
-                None => {
-                    return Some(crate::claude_mcp::call_result(
-                        "no matching tool call is pending",
-                        true,
-                    ))
-                }
+        let bridged = format!("{}{name}", crate::claude_mcp::PREFIX);
+        // HTTP callback and stdout are independent I/O paths. Keep the original
+        // idle allowance as one deadline covering announcement and result waits.
+        let deadline = tokio::time::Instant::now() + self.idle;
+        let id = loop {
+            // notify_waiters also wakes a Notified created but not yet polled.
+            let changed = run.announcement_changed.notified();
+            let found = {
+                let mut ann = run.announced.lock().unwrap();
+                let pos = ann
+                    .iter()
+                    .position(|(_, n, input)| *n == bridged && *input == args)
+                    .or_else(|| ann.iter().position(|(_, n, _)| *n == bridged));
+                pos.and_then(|p| ann.remove(p).map(|(id, _, _)| id))
+            };
+            if let Some(id) = found {
+                break id;
+            }
+            if run.idle_now.load(std::sync::atomic::Ordering::SeqCst) {
+                return Some(crate::claude_mcp::call_result(
+                    "no matching tool call is pending",
+                    true,
+                ));
+            }
+            debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "mcp_wait_announcement");
+            tokio::select! {
+                _ = changed => {},
+                _ = run.stop.cancelled() => return None,
+                _ = tokio::time::sleep_until(deadline) => {
+                    debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "mcp_announcement_timeout");
+                    return Some(crate::claude_mcp::call_result("no matching tool call is pending", true));
+                },
             }
         };
-        let ready = run.results.lock().unwrap().remove(&id);
-        let result = match ready {
-            Some(r) => r,
-            None => {
-                let (tx, rx) = oneshot::channel();
-                run.calls.lock().unwrap().insert(id.clone(), tx);
-                tokio::select! {
-                    r = rx => r.ok()?,
-                    _ = run.stop.cancelled() => return None,
-                    _ = tokio::time::sleep(self.idle) => return Some(crate::claude_mcp::call_result(
-                        "the client did not return a tool result in time", true)),
-                }
+        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "mcp_matched");
+        let rx = {
+            // Same lock order as continue_run: no gap between inspecting buffered
+            // results and registering the waiter that a concurrent result uses.
+            let mut calls = run.calls.lock().unwrap();
+            let (tx, rx) = oneshot::channel();
+            if let Some(result) = run.results.lock().unwrap().remove(&id) {
+                let _ = tx.send(result);
+            } else {
+                calls.insert(id.clone(), tx);
             }
+            rx
         };
+        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "mcp_wait_result");
+        let result = tokio::select! {
+            r = rx => r.ok()?,
+            _ = run.stop.cancelled() => return None,
+            _ = tokio::time::sleep_until(deadline) => {
+                run.calls.lock().unwrap().remove(&id);
+                debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "mcp_result_timeout");
+                return Some(crate::claude_mcp::call_result("the client did not return a tool result in time", true));
+            },
+        };
+        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "mcp_result_reply");
         Some(crate::claude_mcp::call_result(
             &result.text,
             result.is_error,
@@ -501,40 +532,85 @@ impl ClaudeCode {
     /// and return a new sink's receiver for that run's next message.
     fn continue_run(&self, chat: &Value) -> Option<mpsc::Receiver<Item>> {
         let results = trailing_tool_results(chat)?;
-        let run = {
-            let mut live = self.live.lock().unwrap();
-            let run = live.waiting.get(&results[0].0)?.clone();
-            let pending = run.pending.lock().unwrap().clone();
-            let mut want: Vec<&String> = pending.iter().collect();
-            let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
-            want.sort();
-            got.sort();
-            if want != got {
-                return None;
-            }
-            for id in &pending {
-                live.waiting.remove(id);
-            }
-            live.order.retain(|r| !Arc::ptr_eq(r, &run));
-            run
-        };
+        let known = convo(chat).iter().map(norm).collect();
+        let mut live = self.live.lock().unwrap();
+        let run = live.waiting.get(&results[0].0)?.clone();
+        let pending = run.pending.lock().unwrap().clone();
+        let mut want: Vec<&String> = pending.iter().collect();
+        let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
+        want.sort();
+        got.sort();
+        if want != got {
+            return None;
+        }
+        for id in &pending {
+            live.waiting.remove(id);
+        }
+        live.order.retain(|r| !Arc::ptr_eq(r, &run));
+        // Completion and new-sink installation share the live lock. A completed
+        // phase cannot publish stale waiting entries or overwrite this receiver.
         let (tx, rx) = mpsc::channel::<Item>(64);
         *run.sink.lock().unwrap() = Some(tx);
-        run.sink_changed.notify_one();
         *run.waiting_since.lock().unwrap() = None;
-        *run.known.lock().unwrap() = convo(chat).iter().map(norm).collect();
+        *run.known.lock().unwrap() = known;
         run.pending.lock().unwrap().clear();
+        run.sink_changed.notify_one();
+        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "continue_tool_sink");
         for (id, result) in results {
             match run.calls.lock().unwrap().remove(&id) {
                 Some(tx) => {
+                    debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "tool_result_deliver");
                     let _ = tx.send(result);
                 }
                 None => {
+                    debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "tool_result_buffer");
                     run.results.lock().unwrap().insert(id, result);
                 }
             }
         }
         Some(rx)
+    }
+
+    /// Detach this message's sender before making the run reusable. Retire a
+    /// completed tool phase even if its client has already gone away.
+    fn finish_turn(
+        &self,
+        run: &Arc<LiveRun>,
+        filter: &mut EventFilter,
+    ) -> Option<mpsc::Sender<Item>> {
+        let mut live = self.live.lock().unwrap();
+        let tx = run.sink.lock().unwrap().take();
+        let waits = filter.stop_reason.as_deref() == Some("tool_use");
+        live.order.retain(|r| !Arc::ptr_eq(r, run));
+        live.idle.retain(|r| !Arc::ptr_eq(r, run));
+        if waits {
+            debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_tool_waiting");
+            let ids = std::mem::take(&mut filter.tool_ids);
+            *run.pending.lock().unwrap() = ids.clone();
+            run.idle_now
+                .store(false, std::sync::atomic::Ordering::SeqCst);
+            for id in ids {
+                live.waiting.insert(id, run.clone());
+            }
+        } else {
+            debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_end_turn");
+            live.waiting.retain(|_, r| !Arc::ptr_eq(r, run));
+            run.pending.lock().unwrap().clear();
+            run.announced.lock().unwrap().clear();
+            run.calls.lock().unwrap().clear();
+            run.results.lock().unwrap().clear();
+            run.known.lock().unwrap().push(json!({
+                "role":"assistant", "text":filter.reply_text.trim(), "calls":[], "call_id":null, "images":0,
+            }));
+            run.idle_now
+                .store(true, std::sync::atomic::Ordering::SeqCst);
+            run.announcement_changed.notify_waiters();
+            live.idle.push(run.clone());
+        }
+        *run.waiting_since.lock().unwrap() = Some(Instant::now());
+        live.order.push_back(run.clone());
+        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_retire_sink");
+        tx
     }
 }
 
@@ -1163,11 +1239,14 @@ async fn spawn_run(
     }
 
     let (tx, rx) = mpsc::channel::<Item>(64);
+    static NEXT_TRACE_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     let run = Arc::new(LiveRun {
+        trace_id: NEXT_TRACE_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
         token: token.clone(),
         sink: Mutex::new(Some(tx)),
         sink_changed: tokio::sync::Notify::new(),
         announced: Mutex::new(VecDeque::new()),
+        announcement_changed: tokio::sync::Notify::new(),
         pending: Mutex::new(Vec::new()),
         results: Mutex::new(HashMap::new()),
         calls: Mutex::new(HashMap::new()),
@@ -1236,48 +1315,32 @@ async fn spawn_run(
                             .store(false, std::sync::atomic::Ordering::SeqCst);
                         break;
                     }
-                    // Calls Claude Code is about to make through the helper.
-                    run.announced
-                        .lock()
-                        .unwrap()
-                        .extend(filter.finished_tools.drain(..));
-                    let waits = filter.done && filter.stop_reason.as_deref() == Some("tool_use");
-                    // Registered before the client sees message_stop, so its next request
-                    // finds this run: by tool ids (results) or as idle (next turn).
-                    if waits {
-                        let ids = std::mem::take(&mut filter.tool_ids);
-                        *run.pending.lock().unwrap() = ids.clone();
-                        *run.waiting_since.lock().unwrap() = Some(Instant::now());
-                        let mut live = cc.live.lock().unwrap();
-                        for id in ids {
-                            live.waiting.insert(id, run.clone());
-                        }
-                        live.order.push_back(run.clone());
-                    } else if filter.done {
-                        run.known.lock().unwrap().push(json!({
-                            "role": "assistant",
-                            "text": filter.reply_text.trim(),
-                            "calls": [],
-                            "call_id": null,
-                            "images": 0,
-                        }));
-                        *run.waiting_since.lock().unwrap() = Some(Instant::now());
-                        run.idle_now
-                            .store(true, std::sync::atomic::Ordering::SeqCst);
-                        let mut live = cc.live.lock().unwrap();
-                        live.idle.push(run.clone());
-                        live.order.push_back(run.clone());
+                    // A callback may already be waiting for this stdout announcement.
+                    if !filter.finished_tools.is_empty() {
+                        run.announced
+                            .lock()
+                            .unwrap()
+                            .extend(filter.finished_tools.drain(..));
+                        run.announcement_changed.notify_waiters();
                     }
-                    let Some(tx) = sink(&run) else { continue };
-                    for rec in records {
-                        sent = true;
-                        if tx.send(Item::Record(rec)).await.is_err() {
-                            break 'read; // the client went away mid-reply
+                    let tx = if filter.done {
+                        cc.finish_turn(&run, &mut filter)
+                    } else {
+                        sink(&run)
+                    };
+                    if let Some(tx) = tx {
+                        for rec in records {
+                            sent = true;
+                            if tx.send(Item::Record(rec)).await.is_err() {
+                                break 'read;
+                            }
                         }
+                    } else {
+                        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_no_sink", done = filter.done);
                     }
                     if filter.done {
-                        // This request is answered; the run waits for the next one.
-                        *run.sink.lock().unwrap() = None;
+                        // Reset and expire even an unsolicited completion. Do not
+                        // clear the next request's sender after publishing reuse.
                         filter.reset();
                         cc.expire_later(&run);
                     }
@@ -1348,6 +1411,7 @@ async fn spawn_run(
                     .await;
             }
         }
+        debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_cleanup");
         cc.forget(&run);
         run.stop.cancel();
         *run.sink.lock().unwrap() = None;
@@ -1572,6 +1636,204 @@ impl EventFilter {
 
 #[cfg(test)]
 mod tests {
+    fn continuation_fixture() -> (
+        tempfile::TempDir,
+        super::ClaudeCode,
+        std::sync::Arc<super::LiveRun>,
+    ) {
+        use super::*;
+        let dir = tempfile::tempdir().unwrap();
+        let cc = ClaudeCode::new(Some("unused-test-cli".into()), dir.path(), 1)
+            .with_idle(Duration::from_secs(2));
+        let run = Arc::new(LiveRun {
+            trace_id: 0,
+            token: "synthetic".into(),
+            sink: Mutex::new(None),
+            sink_changed: tokio::sync::Notify::new(),
+            announced: Mutex::new(VecDeque::new()),
+            announcement_changed: tokio::sync::Notify::new(),
+            pending: Mutex::new(Vec::new()),
+            results: Mutex::new(HashMap::new()),
+            calls: Mutex::new(HashMap::new()),
+            stop: CancellationToken::new(),
+            waiting_since: Mutex::new(None),
+            stdin: tokio::sync::Mutex::new(None),
+            signature: String::new(),
+            known: Mutex::new(Vec::new()),
+            session_id: Mutex::new(None),
+            idle_now: std::sync::atomic::AtomicBool::new(false),
+        });
+        cc.live
+            .lock()
+            .unwrap()
+            .by_token
+            .insert(run.token.clone(), run.clone());
+        (dir, cc, run)
+    }
+
+    fn synthetic_tool_result() -> serde_json::Value {
+        serde_json::json!({"messages":[
+            {"role":"assistant","tool_calls":[{"id":"tool_1","type":"function","function":{"name":"probe","arguments":"{}"}}]},
+            {"role":"tool","tool_call_id":"tool_1","content":"synthetic-result"}
+        ]})
+    }
+
+    #[tokio::test]
+    async fn tc2_early_callback_and_both_result_delivery_orders() {
+        use super::*;
+        for buffered in [false, true] {
+            let (_dir, cc, run) = continuation_fixture();
+            let params = json!({"name":"probe","arguments":{}});
+            let callback = cc.mcp_call("synthetic", &params);
+            tokio::pin!(callback);
+            assert!(
+                futures_util::poll!(&mut callback).is_pending(),
+                "callback waits for stdout announcement"
+            );
+            let mut filter = EventFilter {
+                done: true,
+                stop_reason: Some("tool_use".into()),
+                tool_ids: vec!["tool_1".into()],
+                ..Default::default()
+            };
+            cc.finish_turn(&run, &mut filter);
+            let early_receiver =
+                buffered.then(|| cc.continue_run(&synthetic_tool_result()).unwrap());
+            run.announced.lock().unwrap().push_back((
+                "tool_1".into(),
+                "mcp__thinrouter__probe".into(),
+                json!({}),
+            ));
+            run.announcement_changed.notify_waiters();
+            let late_receiver = if !buffered {
+                assert!(
+                    futures_util::poll!(&mut callback).is_pending(),
+                    "matched callback now awaits result"
+                );
+                Some(cc.continue_run(&synthetic_tool_result()).unwrap())
+            } else {
+                None
+            };
+            let reply = tokio::time::timeout(Duration::from_secs(1), callback)
+                .await
+                .unwrap()
+                .unwrap();
+            assert_eq!(reply["isError"], false);
+            assert_eq!(reply["content"][0]["text"], "synthetic-result");
+            assert!(run.calls.lock().unwrap().is_empty());
+            assert!(run.results.lock().unwrap().is_empty());
+            drop((early_receiver, late_receiver));
+        }
+    }
+
+    #[tokio::test]
+    async fn tc2_missing_announcement_is_bounded_or_cancelled() {
+        use super::*;
+        for cancelled in [false, true] {
+            let (_dir, cc, run) = continuation_fixture();
+            let cc = cc.with_idle(Duration::from_millis(20));
+            let params = json!({"name":"probe","arguments":{}});
+            let callback = cc.mcp_call("synthetic", &params);
+            tokio::pin!(callback);
+            assert!(futures_util::poll!(&mut callback).is_pending());
+            if cancelled {
+                run.stop.cancel();
+            }
+            let reply = tokio::time::timeout(Duration::from_secs(1), callback)
+                .await
+                .unwrap();
+            if cancelled {
+                assert!(reply.is_none());
+            } else {
+                let reply = reply.unwrap();
+                assert_eq!(reply["isError"], true);
+                assert_eq!(
+                    reply["content"][0]["text"],
+                    "no matching tool call is pending"
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn tc3_completion_does_not_retire_the_next_requests_sink() {
+        use super::*;
+        let (_dir, cc, run) = continuation_fixture();
+        let (old_tx, mut old_rx) = mpsc::channel(4);
+        *run.sink.lock().unwrap() = Some(old_tx);
+        let mut filter = EventFilter {
+            done: true,
+            stop_reason: Some("tool_use".into()),
+            tool_ids: vec!["tool_1".into()],
+            ..Default::default()
+        };
+        let retiring = cc.finish_turn(&run, &mut filter).unwrap();
+        let mut next_rx = cc.continue_run(&synthetic_tool_result()).unwrap();
+        retiring
+            .send(Item::Record("old-terminal".into()))
+            .await
+            .unwrap();
+        filter.reset();
+        drop(retiring);
+        assert!(matches!(old_rx.recv().await, Some(Item::Record(s)) if s == "old-terminal"));
+        assert!(old_rx.recv().await.is_none());
+        let next = run.sink.lock().unwrap().clone().unwrap();
+        next.send(Item::Record("new-turn".into())).await.unwrap();
+        assert!(matches!(next_rx.recv().await, Some(Item::Record(s)) if s == "new-turn"));
+    }
+
+    #[test]
+    fn tc3_unsolicited_completion_retires_all_waiting_tool_state() {
+        use super::*;
+        for with_sink in [false, true] {
+            let (_dir, cc, run) = continuation_fixture();
+            let old_receiver = if with_sink {
+                let (tx, rx) = mpsc::channel(4);
+                *run.sink.lock().unwrap() = Some(tx);
+                Some(rx)
+            } else {
+                None
+            };
+            *run.pending.lock().unwrap() = vec!["tool_1".into()];
+            run.announced.lock().unwrap().push_back((
+                "tool_1".into(),
+                "mcp__thinrouter__probe".into(),
+                json!({}),
+            ));
+            run.results.lock().unwrap().insert(
+                "tool_1".into(),
+                ToolResult {
+                    text: "unused".into(),
+                    is_error: false,
+                },
+            );
+            let (tx, _rx) = oneshot::channel();
+            run.calls.lock().unwrap().insert("tool_1".into(), tx);
+            cc.live
+                .lock()
+                .unwrap()
+                .waiting
+                .insert("tool_1".into(), run.clone());
+            let mut filter = EventFilter {
+                done: true,
+                stop_reason: Some("end_turn".into()),
+                ..Default::default()
+            };
+            assert_eq!(cc.finish_turn(&run, &mut filter).is_some(), with_sink);
+            assert!(
+                cc.continue_run(&synthetic_tool_result()).is_none(),
+                "late result must use existing fallback instead of attaching to an ended phase"
+            );
+            assert!(run.pending.lock().unwrap().is_empty());
+            assert!(run.announced.lock().unwrap().is_empty());
+            assert!(run.results.lock().unwrap().is_empty());
+            assert!(run.calls.lock().unwrap().is_empty());
+            assert!(run.sink.lock().unwrap().is_none());
+            assert!(run.idle_now.load(std::sync::atomic::Ordering::SeqCst));
+            drop(old_receiver);
+        }
+    }
+
     #[cfg(target_os = "linux")]
     #[tokio::test]
     async fn sc2_dropped_startup_future_cleans_directory_child_and_slot() {

@@ -18,6 +18,11 @@ const FAKE_CLAUDE: &str = r#"#!/usr/bin/env python3
 import json, os, re, subprocess, sys, time, uuid
 d = os.path.dirname(os.path.abspath(__file__))
 args = sys.argv[1:]
+trace_enabled = os.path.exists(os.path.join(d, "trace-stages"))
+def trace(stage):
+    if not trace_enabled: return
+    with open(os.path.join(d, "stages.txt"), "a") as f: f.write(str(time.time_ns()) + " " + str(os.getpid()) + " " + stage + "\n")
+trace("process-start")
 with open(os.path.join(d, "starts.txt"), "a") as f: f.write("start\n")
 with open(os.path.join(d, "args.txt"), "w") as f: f.write("\n".join(args))
 # Sessions are saved like Claude Code: <config>/projects/<cwd with non-alnum as ->/<id>.jsonl
@@ -43,12 +48,24 @@ if "--mcp-config" in args:
     cfg = json.load(open(args[args.index("--mcp-config") + 1]))["mcpServers"]["thinrouter"]
     helper = subprocess.Popen([cfg["command"]] + cfg["args"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
     def rpc(i, method, params=None):
+        trace("rpc-send-" + method)
         msg = {"jsonrpc": "2.0", "id": i, "method": method}
         if params is not None: msg["params"] = params
         helper.stdin.write(json.dumps(msg) + "\n"); helper.stdin.flush()
         while True:
             r = json.loads(helper.stdout.readline())
-            if r.get("id") == i: return r
+            if r.get("id") == i:
+                trace("rpc-reply-" + method)
+                if method == "tools/call":
+                    result = r.get("result", {})
+                    text = " ".join(c.get("text", "") for c in result.get("content", []))
+                    category = "success"
+                    if result.get("isError"):
+                        category = "other-error"
+                        if text == "no matching tool call is pending": category = "not-registered"
+                        if text == "the client did not return a tool result in time": category = "tool-timeout"
+                    trace("rpc-outcome-" + category)
+                return r
     rpc(1, "initialize", {"protocolVersion": "2025-06-18"})
     helper.stdin.write(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n"); helper.stdin.flush()
     tools = rpc(2, "tools/list")["result"]["tools"]
@@ -92,6 +109,7 @@ def hang(text):
         sys.stdout.write('{"PRIVATE_STDOUT":"' + 'x' * (16 * 1024 * 1024)); sys.stdout.flush()
     while True: time.sleep(60)
 def message(mid, blocks, stop):
+    trace("message-" + mid + "-" + stop)
     ev({"type": "message_start", "message": {"id": mid, "type": "message", "role": "assistant", "model": "claude-x", "content": [], "usage": {"input_tokens": 10, "output_tokens": 0}}})
     for i, b in enumerate(blocks):
         if b[0] == "text":
@@ -107,6 +125,7 @@ out({"type": "system", "subtype": "init", "session_id": sid})
 n = 0
 for line in sys.stdin:
     n += 1
+    trace("input-" + str(n))
     with open(os.path.join(d, "turns.txt"), "a") as f: f.write(line)
     with open(os.path.join(proj, sid + ".jsonl"), "a") as f: f.write(line)
     text = json.dumps(json.loads(line))
@@ -115,8 +134,34 @@ for line in sys.stdin:
         message("msg_t%d" % n, [("text", "Hello there")], "end_turn")
     else:
         tid = "toolu_%d_%d" % (os.getpid(), n)
-        message("msg_a%d" % n, [("text", "Checking."), ("tool", tid, "mcp__thinrouter__get_weather", {"city": "Taipei"})], "tool_use")
-        r = rpc(10 + n, "tools/call", {"name": "get_weather", "arguments": {"city": "Taipei"}})
+        blocks = [("text", "Checking."), ("tool", tid, "mcp__thinrouter__get_weather", {"city": "Taipei"})]
+        if n == 2 and os.path.exists(os.path.join(d, "late-completion")):
+            message("msg_a%d" % n, blocks, "tool_use")
+            r = {"result":{"content":[{"text":"synthetic expired tool phase"}],"isError":True}}
+        elif n == 2 and os.path.exists(os.path.join(d, "early-callback")):
+            import threading
+            logfile = os.path.join(d, "gateway.log")
+            offset = os.path.getsize(logfile)
+            replies = []
+            pending = threading.Thread(target=lambda: replies.append(rpc(10 + n, "tools/call", {"name": "get_weather", "arguments": {"city": "Taipei"}})), daemon=True)
+            pending.start()
+            deadline = time.monotonic() + 3
+            while True:
+                with open(logfile) as f:
+                    f.seek(offset)
+                    observed = f.read()
+                # Coordinate at callback admission, before publishing the matching event.
+                if "mcp_not_registered" in observed or "mcp_wait_announcement" in observed: break
+                if time.monotonic() >= deadline: raise RuntimeError("callback admission barrier timed out")
+                time.sleep(0.001)
+            trace("early-callback-admitted-before-announcement")
+            message("msg_a%d" % n, blocks, "tool_use")
+            pending.join(3)
+            if not replies: raise RuntimeError("callback did not resolve after announcement")
+            r = replies[0]
+        else:
+            message("msg_a%d" % n, blocks, "tool_use")
+            r = rpc(10 + n, "tools/call", {"name": "get_weather", "arguments": {"city": "Taipei"}})
         res = r["result"]["content"][0]["text"]
         hang(res)
         message("msg_b%d" % n, [("text", "Result: " + res + (" (error)" if r["result"].get("isError") else ""))], "end_turn")
@@ -164,12 +209,15 @@ async fn gateway(
         bin.to_str().unwrap(),
     ])
     .args(extra)
+    .env("RUST_LOG", "thinrouter::claude_lifecycle=debug")
     .env_remove("THINROUTER_ADMIN_TOKEN")
     .env_remove("THINROUTER_SECRETS_KEY")
     .env("CLAUDE_CONFIG_DIR", config_dir.path())
     .kill_on_drop(true)
     .stdout(std::process::Stdio::null())
-    .stderr(std::process::Stdio::null());
+    .stderr(std::process::Stdio::from(
+        std::fs::File::create(bin_dir.path().join("gateway.log")).unwrap(),
+    ));
     let child = cmd.spawn().unwrap();
     let base = format!("http://127.0.0.1:{port}");
     let plain = reqwest::Client::builder().no_proxy().build().unwrap();
@@ -279,6 +327,42 @@ impl Env {
 
     fn starts(&self) -> usize {
         self.file("starts.txt").lines().count()
+    }
+
+    async fn chat_stage(&self, stage: &str, body: Value) -> Value {
+        let started = Instant::now();
+        eprintln!("SC-3 begin {stage}");
+        let result = self
+            .client
+            .post(format!("{}/v1/chat/completions", self.base))
+            .json(&body)
+            .send()
+            .await;
+        let response = result.unwrap_or_else(|error| {
+            panic!(
+                "SC-3 {stage}: {error:?}; fixture stages:\n{}\ngateway:\n{}",
+                self.file("stages.txt"),
+                self.file("gateway.log")
+            )
+        });
+        assert_eq!(
+            response.status(),
+            200,
+            "SC-3 {stage}; fixture stages:\n{}",
+            self.file("stages.txt")
+        );
+        let body = response.json().await.unwrap_or_else(|error| {
+            panic!(
+                "SC-3 {stage} body: {error:?}; fixture stages:\n{}",
+                self.file("stages.txt")
+            )
+        });
+        eprintln!(
+            "SC-3 done {stage} after {:?}; fixture stages:\n{}",
+            started.elapsed(),
+            self.file("stages.txt")
+        );
+        body
     }
 
     async fn chat(&self, body: Value) -> Value {
@@ -742,8 +826,69 @@ mod disconnect_tests {
 
     #[tokio::test]
     async fn sc3_tool_files_survive_continuation_then_expire() {
+        tool_files_sequence(false).await;
+    }
+
+    #[tokio::test]
+    async fn tc1_callback_before_stdout_registration_keeps_tool_continuation() {
+        tool_files_sequence(true).await;
+    }
+
+    #[tokio::test]
+    async fn tc4_late_tool_result_uses_replacement_after_completed_phase() {
+        let mut env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+        std::fs::write(env.bin_dir.path().join("trace-stages"), "").unwrap();
+        std::fs::write(env.bin_dir.path().join("late-completion"), "").unwrap();
+        let first=env.chat_stage("first-tool",json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+        let mut next = history(&first_call(&first), "sunny");
+        let second = env.chat_stage("first-result", next.clone()).await;
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(second["choices"][0]["message"].clone());
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"user","content":"thanks"}));
+        let third = env.chat_stage("next-user", next.clone()).await;
+        let old_dirs = owned_run_dirs(&env);
+        assert_eq!(old_dirs.len(), 1);
+        tokio::time::timeout(Duration::from_secs(3), async {
+            while env.file("gateway.log").matches("reader_end_turn").count() < 2 {
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("unsolicited completion processed");
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(third["choices"][0]["message"].clone());
+        next["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"tool","tool_call_id":first_call(&third),"content":"late"}));
+        let reply =
+            tokio::time::timeout(Duration::from_secs(3), env.chat_stage("late-result", next))
+                .await
+                .expect("late result cannot attach to a producerless receiver");
+        assert_eq!(reply["choices"][0]["message"]["content"], "Hello there");
+        assert_eq!(env.starts(), 2);
+        assert!(
+            !old_dirs[0].exists(),
+            "one-slot replacement cleans previous run"
+        );
+        env.restart().await;
+        assert_no_run_dirs(&env).await;
+    }
+
+    async fn tool_files_sequence(early_callback: bool) {
         let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "2"]).await;
-        let first = env.chat(json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+        std::fs::write(env.bin_dir.path().join("trace-stages"), "").unwrap();
+        if early_callback {
+            std::fs::write(env.bin_dir.path().join("early-callback"), "").unwrap();
+        }
+        let first = env.chat_stage("first-tool", json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
         let dirs = owned_run_dirs(&env);
         assert_eq!(dirs.len(), 1);
         for file in ["tools.json", "callback.json", "mcp.json"] {
@@ -755,7 +900,7 @@ mod disconnect_tests {
             );
         }
         let next = history(&first_call(&first), "sunny");
-        let second = env.chat(next.clone()).await;
+        let second = env.chat_stage("first-result", next.clone()).await;
         assert!(second["choices"][0]["message"]["content"]
             .as_str()
             .unwrap()
@@ -769,7 +914,7 @@ mod disconnect_tests {
             .as_array_mut()
             .unwrap()
             .push(json!({"role":"user","content":"thanks"}));
-        let reply = env.chat(third.clone()).await;
+        let reply = env.chat_stage("next-user", third.clone()).await;
         assert_eq!(reply["choices"][0]["message"]["content"], "Checking.");
         assert!(!first_call(&reply).is_empty());
         assert_eq!(env.starts(), 1, "tool and idle continuation share process");
@@ -782,7 +927,7 @@ mod disconnect_tests {
             .as_array_mut()
             .unwrap()
             .push(json!({"role":"tool","tool_call_id":first_call(&reply),"content":"done"}));
-        let completed = env.chat(third).await;
+        let completed = env.chat_stage("final-result", third).await;
         assert!(completed["choices"][0]["message"]["content"]
             .as_str()
             .unwrap()

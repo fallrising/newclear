@@ -66,3 +66,11 @@ The separate [manual event retention slice](EVENT-RETENTION.md) adds explicit ap
 ## Protocol sources
 
 PostgreSQL 18 official docs checked 2026-10-05: [pg_dump](https://www.postgresql.org/docs/18/app-pgdump.html), [pg_restore](https://www.postgresql.org/docs/18/app-pgrestore.html), [table locks](https://www.postgresql.org/docs/18/explicit-locking.html). Native logical backup is a database snapshot, not running-VM recovery; pg_restore executes trusted database definitions.
+
+The [manual stale binding cleanup](STALE-CLEANUP.md) slice adds permanent per-run
+cleanup enrollment, issued plans, attempt intents/receipts and a stop tombstone
+to the private connector journal. Preserve that entire journal and its fences
+separately; none of these facts enter the DB bundle. No migration or catalog pin
+changes for this slice. Pending cleanup continues to prevent backup until the
+existing recovery path independently confirms stop and releases capacity. Native
+roundtrip evidence for the new path is in its [delivery snapshot](../tasks/379-stale-cleanup/report.md).

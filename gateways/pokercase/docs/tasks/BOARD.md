@@ -198,3 +198,14 @@ Delivered in [PR637](https://github.com/fallrising/newclear/pull/637), source `4
 | TK-3 | Bound successful token collection and preserve refresh semantics | TK-3 | done | 2026-10-25T12:17:19Z | 2026-10-25T12:29:59Z | 2026-10-25T12:29:59Z |
 
 Delivered in [PR639](https://github.com/fallrising/newclear/pull/639), source `6203c6e5206fe77e31fcc5bc38f340bfc4dd9660`, merge `08e40f797c6d9979eb36531ae51c704a15c1373e` at `2026-10-25T12:29:59Z`. Required component/contractsCI and independent source/final-document review PASS;remote ancestry and scoped content readback PASS.183tests/18groups,48newscenario iterations/6tests;fmt/clippy/43contracts/6indexes PASS. Original RED and corrected setup/compile/read-fixture failures retained. See task for exact helper/HTTP/store evidence and remote rotation limits;no liveprovider/RSS acceptance.
+
+
+## T-0415 — Bounded CLI stdout records
+
+[Contract](../../SUCCESS.md#t-0415--bounded-cli-stdout-records) · [Evidence](T-0415-cli-line-bound.md)
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| LB-1 | Bound CLI stdout records and release failed runs | LB-1 | in_progress | 2026-10-25T12:50:07Z | — | 2026-10-25T13:02:41Z |
+| LB-2 | Bound CLI stdout records and release failed runs | LB-2 | in_progress | 2026-10-25T12:50:07Z | — | 2026-10-25T13:02:41Z |
+| LB-3 | Bound CLI stdout records and release failed runs | LB-3 | in_progress | 2026-10-25T12:50:07Z | — | 2026-10-25T13:02:41Z |

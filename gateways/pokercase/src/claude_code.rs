@@ -31,7 +31,7 @@ use std::time::{Duration, Instant};
 use bytes::Bytes;
 use futures_util::Stream;
 use serde_json::{json, Value};
-use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{Child, Command};
 use tokio::sync::{mpsc, oneshot, OwnedSemaphorePermit, Semaphore};
 use tokio_util::sync::CancellationToken;
@@ -1165,7 +1165,8 @@ async fn spawn_run(
     let cc = cc.clone();
     tokio::spawn(async move {
         let _permit = permit;
-        let mut lines = BufReader::new(stdout).lines();
+        let mut lines = crate::cli_lines::Lines::new(BufReader::new(stdout));
+        let mut line_overflow = false;
         let mut sent = false;
         let mut filter = EventFilter {
             names,
@@ -1189,7 +1190,17 @@ async fn spawn_run(
                 _ = first_cancel.cancelled(), if !sent => break,
                 l = lines.next_line() => l,
             };
-            let Ok(Some(l)) = next else { break };
+            let l = match next {
+                Ok(Some(line)) => line,
+                Err(crate::cli_lines::LineError::TooLarge) => {
+                    line_overflow = true;
+                    // A corrupted process must not become a resumable idle run.
+                    run.idle_now
+                        .store(false, std::sync::atomic::Ordering::SeqCst);
+                    break;
+                }
+                _ => break,
+            };
             let Ok(env) = serde_json::from_str::<Value>(&l) else {
                 continue;
             };
@@ -1278,8 +1289,12 @@ async fn spawn_run(
                 _ => {}
             }
         }
+        drop(lines);
+        // Hold the active sender across cleanup so the client cannot observe EOF
+        // as success, and deliver overflow only after the process/slot are freed.
+        let overflow_sink = if line_overflow { sink(&run) } else { None };
         if let Some(tx) = sink(&run) {
-            if !sent && !run.stop.is_cancelled() && !first_cancel.is_cancelled() {
+            if !line_overflow && !sent && !run.stop.is_cancelled() && !first_cancel.is_cancelled() {
                 let mut err = String::new();
                 let _ = tokio::time::timeout(
                     Duration::from_secs(2),
@@ -1319,6 +1334,15 @@ async fn spawn_run(
         cc.alive.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
         if let Some(dir) = run_dir {
             let _ = std::fs::remove_dir_all(dir);
+        }
+        drop(_permit);
+        if let Some(tx) = overflow_sink {
+            let _ = tx
+                .send(Item::Failed {
+                    status: 502,
+                    message: crate::cli_lines::LIMIT_MESSAGE.into(),
+                })
+                .await;
         }
         debug!("claude code run finished");
     });

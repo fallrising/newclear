@@ -27,10 +27,14 @@ if "LEAK" in prompt:
 if "FAIL" in prompt:
     sys.stderr.write("Error: not logged in. Run cursor-agent login\n"); sys.exit(1)
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
+if "LINE_EXACT" in prompt:
+    sys.stdout.write('{"type":"ignored"}'.ljust(16 * 1024 * 1024) + "\n"); sys.stdout.flush()
 if "HANG_" in prompt:
     with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
     if "HANG_AFTER" in prompt:
         out({"type":"assistant","timestamp_ms":1,"message":{"content":[{"type":"text","text":"partial"}]}})
+    if "HANG_LINE" in prompt:
+        sys.stdout.write('{"PRIVATE_STDOUT":"' + 'x' * (16 * 1024 * 1024)); sys.stdout.flush()
     while True: time.sleep(60)
 
 if "BAD_RESULT" in prompt or "EARLY_EOF" in prompt:
@@ -529,6 +533,110 @@ mod disconnect_tests {
             }
         }
     }
+    #[tokio::test]
+    async fn lb1_lb3_cursor_stdout_bound_http_and_cleanup() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            for stream in [false, true] {
+                for phase in ["HANG_LINE", "HANG_AFTER HANG_LINE", "LINE_EXACT"] {
+                    let env = Env::start_with(&[
+                        "--cursor-accept-account-plugins",
+                        "--cursor-image",
+                        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "--cursor-profile-volume",
+                        "thinrouter-cursor-tests",
+                        "--cursor-max-runs",
+                        "1",
+                    ])
+                    .await;
+                    let body = if path == "/v1/responses" {
+                        json!({"model":"cu","stream":stream,"input":phase})
+                    } else {
+                        json!({"model":"cu","stream":stream,"max_tokens":30,"messages":[{"role":"user","content":phase}]})
+                    };
+                    let request = env.client.post(format!("{}{path}", env.base)).json(&body);
+                    let pending = tokio::spawn(async move {
+                        let response = request.send().await.unwrap();
+                        let status = response.status();
+                        (status, response.text().await.unwrap())
+                    });
+                    let fixture = if phase == "LINE_EXACT" {
+                        None
+                    } else {
+                        let pid = tokio::time::timeout(Duration::from_secs(3), async {
+                            loop {
+                                if let Ok(raw) =
+                                    std::fs::read_to_string(env.bin_dir.path().join("hanging.pid"))
+                                {
+                                    if let Ok(pid) = raw.parse::<i32>() {
+                                        break pid;
+                                    }
+                                }
+                                tokio::time::sleep(Duration::from_millis(10)).await;
+                            }
+                        })
+                        .await
+                        .unwrap();
+                        Some(HangingCursor {
+                            pid,
+                            bin: env.bin_dir.path().join("cursor-agent"),
+                        })
+                    };
+                    let (status, text) = tokio::time::timeout(Duration::from_secs(4), pending)
+                        .await
+                        .expect("Cursor stdout overflow must fail without newline/EOF")
+                        .unwrap();
+                    if phase == "LINE_EXACT" {
+                        assert_eq!(status, 200);
+                        assert!(text.contains("Hello"));
+                        assert!(!text.contains("CLI stdout record exceeds"));
+                        continue;
+                    }
+                    assert_eq!(
+                        status,
+                        if stream && phase.contains("HANG_AFTER") {
+                            200
+                        } else {
+                            502
+                        },
+                        "{path}/{stream}/{phase}: {text}"
+                    );
+                    assert!(text.contains("CLI stdout record exceeds 16 MiB"), "{text}");
+                    assert!(!text.contains("PRIVATE_STDOUT"));
+                    assert!(!text.contains("xxxxx"));
+                    assert!(!text.contains("message_stop"));
+                    assert!(!text.contains("response.completed"));
+                    for v in text
+                        .lines()
+                        .filter_map(|l| l.strip_prefix("data: "))
+                        .filter_map(|l| serde_json::from_str::<Value>(l).ok())
+                    {
+                        assert_ne!(v.pointer("/choices/0/finish_reason"), Some(&json!("stop")));
+                    }
+                    let args: Vec<String> = serde_json::from_str(
+                        &std::fs::read_to_string(env.bin_dir.path().join("docker-args.json"))
+                            .unwrap(),
+                    )
+                    .unwrap();
+                    let name = &args[args.iter().position(|a| a == "--name").unwrap() + 1];
+                    assert!(
+                        std::fs::read_to_string(env.bin_dir.path().join("cleanup.jsonl"))
+                            .unwrap()
+                            .contains(name)
+                    );
+                    assert!(
+                        !std::path::Path::new(&format!("/proc/{}", fixture.as_ref().unwrap().pid))
+                            .exists(),
+                        "runtime reaped before failure delivered"
+                    );
+                    let next=tokio::time::timeout(Duration::from_secs(3),env.post("/v1/chat/completions",json!({"model":"cu","messages":[{"role":"user","content":"replacement"}]}))).await.unwrap();
+                    assert_eq!(next.status(), 200);
+                    let value: Value = next.json().await.unwrap();
+                    assert_eq!(value["choices"][0]["message"]["content"], "Hello there");
+                }
+            }
+        }
+    }
+
     #[tokio::test]
     async fn dc3_cursor_disconnect_reaps_runtime_reconciles_and_releases_slot() {
         for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {

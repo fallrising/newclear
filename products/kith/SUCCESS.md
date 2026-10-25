@@ -35,6 +35,18 @@ source_commit: 893351dfb09be12adbd7979f1b6d53b781066e16
 
 ## 現況與缺口
 
+### Agent 活動視圖與辦公室動畫（AV-0，文件）
+
+2026-10-25 owner 指示先保存開發文件，後續再補動畫展示。範圍為[開發計畫](docs/plans/agent-activity-office.md)、來源核對、活動 projection／提及對話／展示權限、程式切片與驗收，以及必要導航和工作紀錄。此節以 `cfc68b97e0ee77a185807cbaf9695a29fcbcc48e` 為文件查核基準；不改前述歷史主線資格。
+
+| AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
+| --- | --- | --- | --- |
+| AC-AVDOC-01 | Given 固定上游與 Kith 來源 When 對照能力與程式 Then 本機 viewer、對話入口、狀態限制及素材來源可追溯 | passed | [#629 報告](tasks/629-agent-activity-design/report.md)：固定版本、來源核對與上游獨立審查通過 |
+| AC-AVDOC-02 | Given 展示與提及需求 When 閱讀計畫 Then 有觀測／權限／失敗案例／分階段 Given/When/Then，且現況與未實作提案分開 | passed | [開發計畫](docs/plans/agent-activity-office.md)：Kith 契約獨立審查通過；程式驗收仍未執行 |
+| AC-AVDOC-03 | Given 只修改文件 When 執行導航、SUCCESS、差異與公開邊界檢查 Then 證據完整且不提升 runtime 資格 | passed | [#629 報告](tasks/629-agent-activity-design/report.md)：文件檢查、獨立審查及遠端回讀通過；[PR #630](https://github.com/fallrising/newclear/pull/630) 保存各 head CI |
+
+驗證：來源版本、167 個相對連結目標、8 檔白名單、project-success 契約、獨立文件審查及首個文件 commit 的遠端回讀／CI 均通過；各次 head 的完整交付證據見 report 與 PR Checks。AV-1 活動卡、AV-2 動畫及 AV-3 來源 adapter 全部 `NOT_STARTED`。聊天室 AC-04 仍 pending，`mainline: incomplete`／`usable_tag: none` 保持原意。
+
 ### #387 像素回歸 oracle（本地 gate VERIFIED）
 
 W7 VERIFIED 後實作本地獨立 gate：三個既有合成桌面／light 場景（登入、首頁空態、控制台成員），固定 Node 24.18.0、Playwright 1.56.1 / Chromium 1194、1280×800、DPR 1、zh-TW、Asia/Taipei 與 bundled Figtree。`threshold:0/maxDiffPixels:0` 原生比較（Pixelmatch AA 分類例外見 [oracle](docs/v2/11-visual-oracle.md)）；等待狀態與字型就緒，不以 sleep 或遮住主體規避差異。

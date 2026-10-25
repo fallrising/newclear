@@ -36,12 +36,12 @@ PR [#474](https://github.com/fallrising/newclear/pull/474) merged at `2026-10-22
 
 ## T-0629
 
-Owner direct instruction；issue [#629](https://github.com/fallrising/newclear/issues/629)，無 desk 卡。承接者：ChatGPT 主導（`kith-activity-docs-20261025`）；其餘 agent 僅作來源查核與獨立文件審查。工作範圍與授權見[task](../../tasks/629-agent-activity-design/task.md)，證據見[report](../../tasks/629-agent-activity-design/report.md)。只交付 AV-0 文件與 Draft PR。
+Owner direct instruction；issue [#629](https://github.com/fallrising/newclear/issues/629)，無 desk 卡。承接者：ChatGPT 主導（`kith-activity-docs-20261025`）；其餘 agent 僅作來源查核與獨立文件審查。工作範圍與授權見[task](../../tasks/629-agent-activity-design/task.md)，證據見[report](../../tasks/629-agent-activity-design/report.md)。已交付 AV-0 文件至 [Draft PR #630](https://github.com/fallrising/newclear/pull/630)；驗證結果見 report，尚未合併。
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0629-DOC1 | 固定來源與重用／差異核對 | AC-AVDOC-01 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T08:32:41Z |
-| T-0629-DOC2 | 活動、提及、展示與程式驗收計畫 | AC-AVDOC-02 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T08:32:41Z |
-| T-0629-DOC3 | 文件導航、檢查、審查與 Draft PR | AC-AVDOC-03 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T08:32:41Z |
+| T-0629-DOC1 | 固定來源與重用／差異核對 | AC-AVDOC-01 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T08:36:37Z |
+| T-0629-DOC2 | 活動、提及、展示與程式驗收計畫 | AC-AVDOC-02 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T08:36:37Z |
+| T-0629-DOC3 | 文件導航、檢查、審查與 Draft PR | AC-AVDOC-03 | in_progress | 2026-10-25T08:20:05Z | — | 2026-10-25T08:36:37Z |
 
 板上 `done`／`end` 依根合約於合併後補記；本輪不合併。文件驗證狀態與程式 `NOT_STARTED` 由 report／SUCCESS 分別記錄。

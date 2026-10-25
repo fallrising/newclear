@@ -43,9 +43,9 @@ source_commit: 893351dfb09be12adbd7979f1b6d53b781066e16
 | --- | --- | --- | --- |
 | AC-AVDOC-01 | Given 固定上游與 Kith 來源 When 對照能力與程式 Then 本機 viewer、對話入口、狀態限制及素材來源可追溯 | passed | [#629 報告](tasks/629-agent-activity-design/report.md)：固定版本、來源核對與上游獨立審查通過 |
 | AC-AVDOC-02 | Given 展示與提及需求 When 閱讀計畫 Then 有觀測／權限／失敗案例／分階段 Given/When/Then，且現況與未實作提案分開 | passed | [開發計畫](docs/plans/agent-activity-office.md)：Kith 契約獨立審查通過；程式驗收仍未執行 |
-| AC-AVDOC-03 | Given 只修改文件 When 執行導航、SUCCESS、差異與公開邊界檢查 Then 證據完整且不提升 runtime 資格 | pending | [#629 報告](tasks/629-agent-activity-design/report.md)：待檢查與 PR 回讀 |
+| AC-AVDOC-03 | Given 只修改文件 When 執行導航、SUCCESS、差異與公開邊界檢查 Then 證據完整且不提升 runtime 資格 | passed | [#629 報告](tasks/629-agent-activity-design/report.md)：文件檢查、獨立審查及遠端回讀通過；[PR #630](https://github.com/fallrising/newclear/pull/630) 保存各 head CI |
 
-驗證計畫：固定來源版本；驗證相對連結與變更白名單；執行 project-success 契約檢查及獨立文件審查；記錄 PR CI 與遠端回讀。AV-1 活動卡、AV-2 動畫及 AV-3 來源 adapter 全部 `NOT_STARTED`。聊天室 AC-04 仍 pending，`mainline: incomplete`／`usable_tag: none` 保持原意。
+驗證：來源版本、167 個相對連結目標、8 檔白名單、project-success 契約、獨立文件審查及首個文件 commit 的遠端回讀／CI 均通過；各次 head 的完整交付證據見 report 與 PR Checks。AV-1 活動卡、AV-2 動畫及 AV-3 來源 adapter 全部 `NOT_STARTED`。聊天室 AC-04 仍 pending，`mainline: incomplete`／`usable_tag: none` 保持原意。
 
 ### #387 像素回歸 oracle（本地 gate VERIFIED）
 

@@ -1,9 +1,10 @@
-STATUS: PARTIAL — AV-0 文件驗證通過；遠端交付待回讀
+STATUS: VERIFIED — AV-0 文件與 Draft PR 交付；未合併
 
 Issue: https://github.com/fallrising/newclear/issues/629
 Component: products/kith
 Task: [task.md](task.md)
 Branch: `docs/kith-agent-activity-629`
+PR: https://github.com/fallrising/newclear/pull/630
 
 ## 變更與範圍
 
@@ -23,17 +24,27 @@ Branch: `docs/kith-agent-activity-629`
 | --- | --- | --- |
 | `python3 scripts/check_project_success.py --projects products/kith` | PASS，exit 0 | `PASS: 1 project success contracts and navigation/index`；只聲稱 Kith 目標檢查，不取代 PR 全域契約 CI |
 | `git diff --check` | PASS，exit 0 | 無空白錯誤；差異基準為上述固定 main |
-| 變更白名單與相對連結 | PASS | 8 個指定 Markdown；以完整遠端 tree 與新增檔案解析連結目標，不以空白 placeholder 充當來源；UTF-8／尾端換行正常 |
+| 變更白名單與相對連結 | PASS | 8 個指定 Markdown、167 個相對連結目標；以完整遠端 tree 與新增檔案解析連結目標，不以空白 placeholder 充當來源；UTF-8／尾端換行正常 |
 | SUCCESS metadata | PASS | 與基準前置 metadata 完全一致；沒有提升主線或 usable tag 資格 |
 | 公開資料邊界 | PASS | 未納入私人來源 URL／內容、原始 session、憑證、帳號或主機設定；本輪未取得真實執行資料 |
 | 上游／展示權限獨立審查 | ACCEPT | 確認 localhost viewer、複製 resume 指令、靜默推測限制、private payload 不等於公開安全及素材邊界；demo 規劃與正式登入 origin 分離 |
 | Kith 契約獨立審查 | ACCEPT | 確認有界 status ingress／unknown fallback、已知 runtime epoch 失效、無 heartbeat 與 trace 時序限制、提及不自動送出及既有成本／權限邊界；必要修正已回讀 |
+| 範圍／公開資料獨立審查 | ACCEPT | 恰好 8 個 Kith Markdown，未加入私人來源、未另起平台、未把程式里程碑寫成完成；發布時另核對遠端 tree 範圍 |
 
 上述獨立審查為文件與原始碼契約查核，沒有執行 runtime 或 E2E。計畫中的 E2E-AV IDs 是未來驗收案例，不是已存在或已通過的測試。本輪未使用付費模型、未啟動真實 provider／原生 CLI，也未部署。
 
 ## 遠端交付
 
-待以原子 Git tree／commit 更新工作分支、建立 Draft PR，回讀 commit parent、PR head、8 個變更路徑及原始內容，並查看既有 PR Checks。最終結果會在本報告與 issue 保存；CI 未結束前不宣稱通過。Issue 使用 `Refs #629`，不自動關閉。
+已建立 [Draft PR #630](https://github.com/fallrising/newclear/pull/630)，base 為 `main`，保留 draft／open／未合併。首個文件 commit 為 [`db0097f35a0134a5125528467242ba66a5fc7127`](https://github.com/fallrising/newclear/commit/db0097f35a0134a5125528467242ba66a5fc7127)，parent 為上述固定 main。已透過 GitHub App 回讀分支與 PR head、commit parent／tree、完整 8 檔內容與 compare 路徑；內容與候選逐檔一致，沒有把本地來源快照的其他檔案發布為新增。
+
+首個文件 commit 的 CI 已完成並確認 run 的 head SHA：
+
+| Workflow／job | 結果 | 執行紀錄 |
+| --- | --- | --- |
+| Kith CI／test、web | SUCCESS | [run 40177140228](https://github.com/fallrising/newclear/actions/runs/40177140228)：既有 lint／npm test、web build 與合成閱讀 bundle build 均通過 |
+| Project success contracts／validate | SUCCESS | [run 40177140217](https://github.com/fallrising/newclear/actions/runs/40177140217)：全域文件契約 workflow 通過 |
+
+本次補記 report／SUCCESS／任務板會產生後續 commit；上表只證明列出的來源 commit，不代替後續 head 的 CI。最終 head、其自身 CI、最終遠端回讀結果保存在 [PR Checks](https://github.com/fallrising/newclear/pull/630/checks) 與 PR／issue 的交付摘要，須對照同一 SHA，不從上一輪成功外推。Issue 使用 `Refs #629`，維持 open。
 
 ## 限制與交接
 

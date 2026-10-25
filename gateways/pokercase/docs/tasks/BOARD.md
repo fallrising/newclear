@@ -185,3 +185,14 @@ Delivered in [PR635](https://github.com/fallrising/newclear/pull/635), source `2
 [Contract](../../SUCCESS.md#t-0413--bounded-http-diagnostics) · [Task](T-0413-diagnostic-bound.md).
 
 Delivered in [PR637](https://github.com/fallrising/newclear/pull/637), source `47f473e9d6f808f33d8e2ea3b96ea20e542b3e43`, merge `388e33e9cf0f6cb63d9b795247ff182295696510` at `2026-10-25T11:58:44Z`. Required component/contracts CI and independent source/final-document review PASS; remote ancestry and scoped component readback PASS.177tests/18groups,285newscenarios/5tests;fmt/clippy/43contracts/6llms PASS. Original RED, fixture-path and initial lint failures retained with passing corrections. See task for raw-input limits, within-bound diagnostic content and token-success exclusions; no live-provider/RSS acceptance.
+
+
+## T-0414 — Successful token response bounds
+
+[Contract](../../SUCCESS.md#t-0414--bounded-successful-token-responses) · [Evidence](T-0414-token-bound.md)
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| TK-1 | Bound successful token collection and preserve refresh semantics | TK-1 | in_progress | 2026-10-25T12:17:19Z | — | 2026-10-25T12:17:19Z |
+| TK-2 | Bound successful token collection and preserve refresh semantics | TK-2 | in_progress | 2026-10-25T12:17:19Z | — | 2026-10-25T12:17:19Z |
+| TK-3 | Bound successful token collection and preserve refresh semantics | TK-3 | in_progress | 2026-10-25T12:17:19Z | — | 2026-10-25T12:17:19Z |

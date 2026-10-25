@@ -222,3 +222,12 @@ Delivered in [PR642](https://github.com/fallrising/newclear/pull/642),source`12e
 | SD-3 | Own drain cancellation, pipe release and process lifecycle | SD-3 | done | 2026-10-25T15:35:36Z | 2026-10-25T15:47:12Z | 2026-10-25T15:47:12Z |
 
 Delivered in [PR644](https://github.com/fallrising/newclear/pull/644), source `b5a851fd964868a451c779b6f2b0e8534cf2fcdb`, merge `c6e255ec16659e0654552faea1696e7a68f91bf0`. SD-1–SD-3: 196 tests / 18 groups, 27 new scenarios / 7 tests, fmt/clippy, contracts/index and independent review passed. Required CI and remote readback passed; live-provider and whole-product acceptance remain separate.
+
+
+## T-0417 — Claude event state bounds
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CF-1 | Bound retained event payload and block starts before mutation | CF-1 | in_progress | 2026-10-25T16:03:04Z | — | 2026-10-25T16:10:35Z |
+| CF-2 | Preserve exact limits, tool mapping and message reset | CF-2 | in_progress | 2026-10-25T16:03:04Z | — | 2026-10-25T16:10:35Z |
+| CF-3 | Release abnormal runs and preserve healthy sessions | CF-3 | in_progress | 2026-10-25T16:03:04Z | — | 2026-10-25T16:10:35Z |

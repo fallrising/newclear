@@ -55,6 +55,9 @@ if "--mcp-config" in args:
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
 def ev(e): out({"type": "stream_event", "event": e})
 def hang(text):
+    if "STATE_EXACT" in text:
+        for index in range(4095): ev({"type":"content_block_start","index":index,"content_block":{"type":"thinking"}})
+        return
     if "SD_FLOOD" in text:
         with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
         if "SD_PARTIAL" in text:
@@ -81,6 +84,10 @@ def hang(text):
         ev({"type":"message_start","message":{"id":"msg_hang","type":"message","role":"assistant","content":[],"usage":{"input_tokens":1}}})
         ev({"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}})
         ev({"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"partial"}})
+    if "HANG_STATE_TEXT" in text:
+        for _ in range(16): ev({"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"x" * (1024 * 1024)}})
+    elif "HANG_STATE" in text:
+        for index in range(4097): ev({"type":"content_block_start","index":index,"content_block":{"type":"thinking"}})
     if "HANG_LINE" in text:
         sys.stdout.write('{"PRIVATE_STDOUT":"' + 'x' * (16 * 1024 * 1024)); sys.stdout.flush()
     while True: time.sleep(60)
@@ -114,6 +121,10 @@ for line in sys.stdin:
         hang(res)
         message("msg_b%d" % n, [("text", "Result: " + res + (" (error)" if r["result"].get("isError") else ""))], "end_turn")
     out({"type": "result", "subtype": "success", "is_error": False, "result": "ok"})
+    if "STATE_AFTER_DONE" in text:
+        with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
+        for index in range(4097): ev({"type":"content_block_start","index":index,"content_block":{"type":"thinking"}})
+        while True: time.sleep(60)
     if "LINE_AFTER_DONE" in text:
         with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
         sys.stdout.write('{"PRIVATE_STDOUT":"' + 'x' * (16 * 1024 * 1024)); sys.stdout.flush()
@@ -769,6 +780,161 @@ mod disconnect_tests {
             .unwrap();
             assert_eq!(reply["choices"][0]["message"]["content"], "Hello there");
             assert_eq!(env.starts(), 2);
+        }
+    }
+
+    #[tokio::test]
+    async fn cf1_cf3_streamed_text_state_overflow_all_apis() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+            let phase = "HANG_AFTER HANG_STATE_TEXT";
+            let body = if path == "/v1/responses" {
+                json!({"model":"cc","stream":true,"input":phase})
+            } else {
+                json!({"model":"cc","stream":true,"max_tokens":30,"messages":[{"role":"user","content":phase}]})
+            };
+            let request = env.client.post(format!("{}{path}", env.base)).json(&body);
+            let pending = tokio::spawn(async move {
+                let r = request.send().await.unwrap();
+                (r.status(), r.text().await.unwrap())
+            });
+            let fixture = hanging_fixture(&env).await;
+            let (status, text) = tokio::time::timeout(Duration::from_secs(10), pending)
+                .await
+                .unwrap()
+                .unwrap();
+            assert_eq!(status, 200);
+            assert!(text.contains("Claude event state limit exceeded"), "{path}");
+            assert!(!text.contains("response.completed") && !text.contains("message_stop"));
+            assert_reaped(&fixture).await;
+            let replacement = tokio::time::timeout(
+                Duration::from_secs(3),
+                env.chat(
+                    json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]}),
+                ),
+            )
+            .await
+            .unwrap();
+            assert_eq!(
+                replacement["choices"][0]["message"]["content"],
+                "Hello there"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn cf3_claude_reused_and_completed_state_failure_is_not_shelved() {
+        for phase in ["idle-turn", "tool-turn", "completed"] {
+            let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+            let replacement = if phase == "completed" {
+                let first=env.chat(json!({"model":"cc","messages":[{"role":"user","content":"STATE_AFTER_DONE"}]})).await;
+                assert_eq!(first["choices"][0]["message"]["content"], "Hello there");
+                json!({"model":"cc","messages":[{"role":"user","content":"STATE_AFTER_DONE"},{"role":"assistant","content":"Hello there"},{"role":"user","content":"replacement"}]})
+            } else {
+                let next = if phase == "tool-turn" {
+                    let first=env.chat(json!({"model":"cc","tools":tools(),"messages":[{"role":"user","content":"weather?"}]})).await;
+                    history(&first_call(&first), "HANG_STATE")
+                } else {
+                    let (first, next) = two_turns("HANG_STATE");
+                    env.chat(first).await;
+                    next
+                };
+                let request = env
+                    .client
+                    .post(format!("{}/v1/chat/completions", env.base))
+                    .json(&next);
+                let pending = tokio::spawn(async move { request.send().await.unwrap() });
+                let fixture = hanging_fixture(&env).await;
+                let response = tokio::time::timeout(Duration::from_secs(4), pending)
+                    .await
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(response.status(), 502);
+                assert!(response
+                    .text()
+                    .await
+                    .unwrap()
+                    .contains("Claude event state limit exceeded"));
+                assert_reaped(&fixture).await;
+                json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]})
+            };
+            let fixture = hanging_fixture(&env).await;
+            assert_reaped(&fixture).await;
+            assert_eq!(
+                env.starts(),
+                1,
+                "overflow belongs to the reused or completed run"
+            );
+            let next = tokio::time::timeout(Duration::from_secs(3), env.chat(replacement))
+                .await
+                .unwrap();
+            assert_eq!(next["choices"][0]["message"]["content"], "Hello there");
+            assert_eq!(
+                env.starts(),
+                2,
+                "overflow session must not be resumed then retried"
+            );
+            assert!(!env.bin_dir.path().join("resumes.txt").exists());
+        }
+    }
+
+    #[tokio::test]
+    async fn cf1_cf3_claude_event_state_http_and_cleanup() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            for stream in [false, true] {
+                for phase in ["HANG_STATE", "HANG_AFTER HANG_STATE", "STATE_EXACT"] {
+                    let env =
+                        Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+                    let body = if path == "/v1/responses" {
+                        json!({"model":"cc","stream":stream,"input":phase})
+                    } else {
+                        json!({"model":"cc","stream":stream,"max_tokens":30,"messages":[{"role":"user","content":phase}]})
+                    };
+                    let request = env.client.post(format!("{}{path}", env.base)).json(&body);
+                    let pending = tokio::spawn(async move {
+                        let response = request.send().await.unwrap();
+                        let status = response.status();
+                        (status, response.text().await.unwrap())
+                    });
+                    let fixture = if phase == "STATE_EXACT" {
+                        None
+                    } else {
+                        Some(hanging_fixture(&env).await)
+                    };
+                    let (status, text) = tokio::time::timeout(Duration::from_secs(4), pending)
+                        .await
+                        .expect("Event state overflow must fail without EOF")
+                        .unwrap();
+                    let after = phase.contains("HANG_AFTER");
+                    if phase == "STATE_EXACT" {
+                        assert_eq!(status, 200);
+                        assert!(text.contains("Hello"));
+                        assert!(!text.contains("Claude event state limit"));
+                        continue;
+                    }
+                    assert_eq!(
+                        status,
+                        if stream && after { 200 } else { 502 },
+                        "{path}/{stream}/{phase}: {text}"
+                    );
+                    assert!(text.contains("Claude event state limit exceeded"), "{text}");
+                    assert!(!text.contains("PRIVATE_STDOUT"));
+                    assert!(!text.contains("xxxxx"));
+                    assert!(!text.contains("message_stop"));
+                    assert!(!text.contains("response.completed"));
+                    for v in text
+                        .lines()
+                        .filter_map(|l| l.strip_prefix("data: "))
+                        .filter_map(|l| serde_json::from_str::<Value>(l).ok())
+                    {
+                        assert_ne!(v.pointer("/choices/0/finish_reason"), Some(&json!("stop")));
+                    }
+                    assert_reaped(fixture.as_ref().unwrap()).await;
+                    let next=tokio::time::timeout(Duration::from_secs(3),env.chat(json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]}))).await.unwrap();
+                    assert_eq!(next["choices"][0]["message"]["content"], "Hello there");
+                    assert_eq!(env.starts(), 2);
+                }
+            }
         }
     }
 

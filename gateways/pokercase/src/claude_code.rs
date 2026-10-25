@@ -1167,7 +1167,7 @@ async fn spawn_run(
     tokio::spawn(async move {
         let _permit = permit;
         let mut lines = crate::cli_lines::Lines::new(BufReader::new(stdout));
-        let mut line_overflow = false;
+        let mut limit_failure = None;
         let mut sent = false;
         let mut filter = EventFilter {
             names,
@@ -1194,7 +1194,7 @@ async fn spawn_run(
             let l = match next {
                 Ok(Some(line)) => line,
                 Err(crate::cli_lines::LineError::TooLarge) => {
-                    line_overflow = true;
+                    limit_failure = Some(crate::cli_lines::LIMIT_MESSAGE);
                     // A corrupted process must not become a resumable idle run.
                     run.idle_now
                         .store(false, std::sync::atomic::Ordering::SeqCst);
@@ -1209,6 +1209,12 @@ async fn spawn_run(
                 Some("stream_event") => {
                     let Some(ev) = env.get("event") else { continue };
                     let records = filter.on_event(ev);
+                    if filter.failed {
+                        limit_failure = Some(EVENT_STATE_LIMIT_MESSAGE);
+                        run.idle_now
+                            .store(false, std::sync::atomic::Ordering::SeqCst);
+                        break;
+                    }
                     // Calls Claude Code is about to make through the helper.
                     run.announced
                         .lock()
@@ -1291,11 +1297,16 @@ async fn spawn_run(
             }
         }
         drop(lines);
+        drop(filter);
         // Hold the active sender across cleanup so the client cannot observe EOF
-        // as success, and deliver overflow only after the process/slot are freed.
-        let overflow_sink = if line_overflow { sink(&run) } else { None };
+        // as success, and deliver limit failures only after the process/slot are freed.
+        let failure_sink = limit_failure.and_then(|message| sink(&run).map(|tx| (tx, message)));
         if let Some(tx) = sink(&run) {
-            if !line_overflow && !sent && !run.stop.is_cancelled() && !first_cancel.is_cancelled() {
+            if limit_failure.is_none()
+                && !sent
+                && !run.stop.is_cancelled()
+                && !first_cancel.is_cancelled()
+            {
                 let err = diagnostics.diagnostic().await;
                 let tail: String = err
                     .trim()
@@ -1333,11 +1344,11 @@ async fn spawn_run(
             let _ = std::fs::remove_dir_all(dir);
         }
         drop(_permit);
-        if let Some(tx) = overflow_sink {
+        if let Some((tx, message)) = failure_sink {
             let _ = tx
                 .send(Item::Failed {
                     status: 502,
-                    message: crate::cli_lines::LIMIT_MESSAGE.into(),
+                    message: message.into(),
                 })
                 .await;
         }
@@ -1347,11 +1358,15 @@ async fn spawn_run(
     first_record(rx).await
 }
 
+const EVENT_STATE_LIMIT_MESSAGE: &str = "Claude event state limit exceeded";
+
 /// Re-emits the first message's stream events as client SSE records: text blocks and
 /// calls of the client's own tools (renamed back); thinking and anything else dropped,
 /// indexes renumbered.
 #[derive(Default)]
 struct EventFilter {
+    budget: crate::stream_budget::RetainedBudget,
+    failed: bool,
     /// bridged MCP name → client tool name
     names: HashMap<String, String>,
     started: bool,
@@ -1384,8 +1399,65 @@ impl EventFilter {
         format!("event: {name}\ndata: {ev}")
     }
 
+    /// Charge exactly the payload retained below, plus every block start. Starts
+    /// count even on ignored/replaced indexes, bounding all block collections.
+    fn charge_event(&mut self, ev: &Value) -> bool {
+        let idx = ev.get("index").and_then(|i| i.as_i64()).unwrap_or(0);
+        let (bytes, starts) = match ev.get("type").and_then(|t| t.as_str()).unwrap_or("") {
+            "content_block_start" => {
+                let name = ev
+                    .pointer("/content_block/name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                let client_tool = ev.pointer("/content_block/type").and_then(|v| v.as_str())
+                    == Some("tool_use")
+                    && self.names.contains_key(name);
+                let bytes = if client_tool {
+                    let id = ev
+                        .pointer("/content_block/id")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("");
+                    id.len().saturating_mul(2).saturating_add(name.len())
+                } else {
+                    0
+                };
+                (bytes, 1)
+            }
+            "content_block_delta" | "content_block_stop" => {
+                let arguments = if self.tools.contains_key(&idx) {
+                    ev.pointer("/delta/partial_json")
+                        .and_then(|v| v.as_str())
+                        .map_or(0, str::len)
+                } else {
+                    0
+                };
+                let text = if self.map.get(&idx).copied().flatten().is_some() {
+                    ev.pointer("/delta/text")
+                        .and_then(|v| v.as_str())
+                        .map_or(0, str::len)
+                } else {
+                    0
+                };
+                (arguments.saturating_add(text), 0)
+            }
+            "message_delta" => (
+                ev.pointer("/delta/stop_reason")
+                    .and_then(|v| v.as_str())
+                    .map_or(0, str::len),
+                0,
+            ),
+            _ => (0, 0),
+        };
+        self.budget.charge(bytes, starts)
+    }
+
     fn on_event(&mut self, ev: &Value) -> Vec<String> {
-        if self.done {
+        if self.done || self.failed {
+            return Vec::new();
+        }
+        if !self.charge_event(ev) {
+            self.reset(); // release owned payload, preserving only request tool names
+            self.failed = true;
             return Vec::new();
         }
         let ty = ev.get("type").and_then(|t| t.as_str()).unwrap_or("");
@@ -1642,6 +1714,159 @@ mod tests {
             {"type": "image_url", "image_url": {"url": "https://x/y.png"}}]})]);
         assert_eq!(blocks[0]["text"], "look");
         assert_eq!(blocks[1]["source"]["url"], "https://x/y.png");
+    }
+
+    #[test]
+    fn cf1_text_overflow_is_not_forwarded() {
+        let mut f = EventFilter::default();
+        f.on_event(
+            &json!({"type":"content_block_start","index":0,"content_block":{"type":"text"}}),
+        );
+        let delta =
+            json!({"type":"content_block_delta","index":0,"delta":{"text":"x".repeat(1024*1024)}});
+        for _ in 0..16 {
+            assert_eq!(f.on_event(&delta).len(), 1);
+        }
+        let overflow = json!({"type":"content_block_delta","index":0,"delta":{"text":"!"}});
+        assert!(
+            f.on_event(&overflow).is_empty(),
+            "over-limit retained text must not be emitted"
+        );
+        assert!(
+            f.reply_text.is_empty(),
+            "failed filter releases retained text"
+        );
+    }
+
+    #[test]
+    fn cf1_cf2_payload_boundaries_and_sticky_failure() {
+        for kind in ["text", "arguments", "metadata", "reason"] {
+            for offset in 0..3 {
+                let mut f = EventFilter {
+                    names: [("bb".into(), "client".into())].into(),
+                    budget: crate::stream_budget::RetainedBudget::limited(16, 10),
+                    ..Default::default()
+                };
+                let event = match kind {
+                    "text" => {
+                        f.on_event(&json!({"type":"content_block_start","index":0,"content_block":{"type":"text"}}));
+                        json!({"type":"content_block_delta","index":0,"delta":{"text":"é".repeat(7+offset)}})
+                    }
+                    "arguments" => {
+                        f.on_event(&json!({"type":"content_block_start","index":0,"content_block":{"type":"tool_use","name":"bb","id":"i"}}));
+                        json!({"type":"content_block_delta","index":0,"delta":{"partial_json":" ".repeat(11+offset)}})
+                    }
+                    "metadata" => {
+                        json!({"type":"content_block_start","index":0,"content_block":{"type":"tool_use","name":"bb","id":"i".repeat(6+offset)}})
+                    }
+                    _ => {
+                        json!({"type":"message_delta","delta":{"stop_reason":"r".repeat(15+offset)}})
+                    }
+                };
+                let output = f.on_event(&event);
+                assert_eq!(f.failed, offset == 2, "{kind}/{offset}");
+                if offset == 2 {
+                    assert!(output.is_empty());
+                    assert!(
+                        f.reply_text.is_empty()
+                            && f.tools.is_empty()
+                            && f.tool_ids.is_empty()
+                            && f.map.is_empty()
+                            && f.finished_tools.is_empty()
+                            && f.stop_reason.is_none()
+                    );
+                    assert!(f.on_event(&json!({"type":"message_stop"})).is_empty());
+                    assert_eq!(f.names["bb"], "client");
+                } else {
+                    assert_eq!(output.len(), 1);
+                    assert_eq!(f.on_event(&json!({"type":"message_stop"})).len(), 1);
+                    assert!(f.done);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn cf1_cf2_block_starts_include_ignored_and_replaced_indexes() {
+        for kind in ["thinking", "text", "tool_use"] {
+            for repeated in [false, true] {
+                let mut f = EventFilter {
+                    names: [("bb".into(), "client".into())].into(),
+                    budget: crate::stream_budget::RetainedBudget::limited(100, 2),
+                    ..Default::default()
+                };
+                for n in 0..3 {
+                    let out=f.on_event(&json!({"type":"content_block_start","index":if repeated {0} else {n},"content_block":{"type":kind,"id":"i","name":"bb"}}));
+                    assert_eq!(f.failed, n == 2);
+                    assert_eq!(out.len(), usize::from(n < 2 && kind != "thinking"));
+                }
+                assert!(f.map.is_empty() && f.tools.is_empty() && f.tool_ids.is_empty());
+            }
+        }
+        // Exercise the production block cap and reset across two healthy messages.
+        let mut f = EventFilter::default();
+        for _ in 0..2 {
+            for index in 0..4096 {
+                f.on_event(&json!({"type":"content_block_start","index":index,"content_block":{"type":"thinking"}}));
+                assert!(!f.failed);
+            }
+            assert_eq!(f.on_event(&json!({"type":"message_stop"})).len(), 1);
+            assert!(f
+                .on_event(&json!({"type":"content_block_start"}))
+                .is_empty());
+            f.reset();
+        }
+        for index in 0..4097 {
+            f.on_event(&json!({"type":"content_block_start","index":index,"content_block":{"type":"thinking"}}));
+        }
+        assert!(f.failed && f.map.is_empty());
+    }
+
+    #[test]
+    fn cf2_interleaved_tools_moves_and_unretained_payload() {
+        let mut f = EventFilter {
+            names: [("bb".into(), "client".into())].into(),
+            budget: crate::stream_budget::RetainedBudget::limited(16, 3),
+            ..Default::default()
+        };
+        for (index, id) in [(0, "a"), (1, "b")] {
+            let output=f.on_event(&json!({"type":"content_block_start","index":index,"content_block":{"type":"tool_use","id":id,"name":"bb"}}));
+            assert!(output[0].contains("client"));
+        }
+        for index in [1, 0] {
+            for fragment in ["{", "}"] {
+                f.on_event(&json!({"type":"content_block_delta","index":index,"delta":{"partial_json":fragment}}));
+            }
+            f.on_event(&json!({"type":"content_block_stop","index":index}));
+        }
+        f.on_event(
+            &json!({"type":"content_block_start","index":2,"content_block":{"type":"text"}}),
+        );
+        f.on_event(&json!({"type":"content_block_delta","index":2,"delta":{"text":"é"}}));
+        f.on_event(&json!({"type":"message_delta","delta":{"stop_reason":"ok"}}));
+        assert!(!f.failed);
+        assert_eq!(f.finished_tools.len(), 2);
+        assert_eq!(f.finished_tools[0], ("b".into(), "bb".into(), json!({})));
+        assert_eq!(f.tool_ids, vec!["a", "b"]);
+        assert_eq!(f.reply_text, "é");
+        // Moving completed tools out does not refund their charge.
+        f.finished_tools.clear();
+        assert!(f
+            .on_event(&json!({"type":"message_delta","delta":{"stop_reason":"!"}}))
+            .is_empty());
+        assert!(f.failed);
+        f.reset();
+        assert_eq!(f.names["bb"], "client");
+        assert!(!f.failed);
+        f.budget = crate::stream_budget::RetainedBudget::limited(0, 1);
+        f.on_event(
+            &json!({"type":"content_block_start","index":0,"content_block":{"type":"thinking"}}),
+        );
+        f.on_event(&json!({"type":"content_block_delta","index":0,"delta":{"text":"ignored","partial_json":"ignored"}}));
+        f.on_event(
+            &json!({"type":"content_block_delta","index":99,"delta":{"partial_json":"unmatched"}}),
+        );
+        assert!(!f.failed && f.reply_text.is_empty() && f.tools.is_empty());
     }
 
     #[test]

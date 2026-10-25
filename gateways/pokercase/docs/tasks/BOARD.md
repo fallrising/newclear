@@ -250,3 +250,14 @@ Continuation repair: [PR654](https://github.com/fallrising/newclear/pull/654), s
 Final local validation: 214 tests / 18 groups, six new tests / nine controlled scenarios, fmt/Clippy, 43 contracts / six indexes and independent source/final-document review passed. PR654 required CI and fetched source ancestry/scoped content/trailer readback passed. Original PR651 is refreshed through a normal merge of origin/main and must pass fresh CI before board publication. The original CI schedule was not observed internally; the deterministic reproduction establishes a causal defect matching its symptom.
 
 Future-drop coverage remains direct abort/join; blocked-stdin HTTP disconnect is not claimed fixed. No live provider/model/login, dependency/permission, release/deploy or whole-product acceptance. Owner decides desk done. [Task and detailed evidence](T-0418-claude-startup.md).
+
+
+## T-0419 — Claude startup input cancellation
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| IC-1 | Reject pre-cancelled admission without side effects | IC-1 | in_progress | 2026-10-25T18:01:29Z | — | 2026-10-25T18:01:29Z |
+| IC-2 | Cancel blocked initial input and release resources | IC-2 | in_progress | 2026-10-25T18:01:29Z | — | 2026-10-25T18:01:29Z |
+| IC-3 | Preserve healthy startup and existing error behavior | IC-3 | in_progress | 2026-10-25T18:01:29Z | — | 2026-10-25T18:01:29Z |
+
+[Task and acceptance](T-0419-claude-input-cancel.md). Explicit initial-input token cancellation only; HTTP disconnect detection and idle-resume writes remain outside scope.

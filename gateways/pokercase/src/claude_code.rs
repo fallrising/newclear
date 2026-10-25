@@ -437,6 +437,9 @@ impl ClaudeCode {
 
     /// A slot for a new run; when none is free, the oldest waiting run is ended.
     async fn slot(&self, cancel: &CancellationToken) -> Option<OwnedSemaphorePermit> {
+        if cancel.is_cancelled() {
+            return None;
+        }
         if let Ok(p) = self.runs.clone().try_acquire_owned() {
             return Some(p);
         }
@@ -1077,6 +1080,14 @@ pub async fn start(
     chat: &Value,
     cancel: &CancellationToken,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
+    // Reject before consuming a pending tool result or taking an idle process.
+    if cancel.is_cancelled() {
+        return Err(UpstreamAttemptError {
+            status: 499,
+            body: "client disconnected".into(),
+            retryable: false,
+        });
+    }
     if let Some(rx) = cc.continue_run(chat) {
         debug!("tool results go on in the waiting Claude Code run");
         return first_record(rx).await;
@@ -1232,7 +1243,20 @@ async fn spawn_run(
     let mut stdin = child.stdin.take().expect("piped stdin");
     let stdout = child.stdout.take().expect("piped stdout");
     let mut diagnostics = crate::cli_stderr::Drain::new(child.stderr.take().expect("piped stderr"));
-    if let Err(e) = stdin.write_all(format!("{line}\n").as_bytes()).await {
+    let input = format!("{line}\n");
+    let written = tokio::select! {
+        biased;
+        _ = cancel.cancelled() => {
+            debug!(target: "thinrouter::claude_lifecycle", stage = "startup_input_cancelled");
+            // A partial write cannot be replayed safely. Retire this new child
+            // with the existing grace period before returning a non-retryable error.
+            stop(child).await;
+            diagnostics.stop().await;
+            return Err(fail(499, "client disconnected".into(), false));
+        },
+        result = stdin.write_all(input.as_bytes()) => result,
+    };
+    if let Err(e) = written {
         stop(child).await;
         diagnostics.stop().await;
         return Err(fail(502, format!("Claude Code input: {e}"), true));
@@ -1831,6 +1855,205 @@ mod tests {
             assert!(run.sink.lock().unwrap().is_none());
             assert!(run.idle_now.load(std::sync::atomic::Ordering::SeqCst));
             drop(old_receiver);
+        }
+    }
+
+    #[tokio::test]
+    async fn ic1_precancelled_slot_preserves_capacity_and_waiting_run() {
+        for busy in [false, true] {
+            let (_dir, cc, run) = continuation_fixture();
+            let held = if busy {
+                Some(cc.runs.clone().acquire_owned().await.unwrap())
+            } else {
+                None
+            };
+            cc.live.lock().unwrap().order.push_back(run.clone());
+            let cancel = CancellationToken::new();
+            cancel.cancel();
+            assert!(cc.slot(&cancel).await.is_none());
+            assert!(!run.stop.is_cancelled());
+            assert_eq!(cc.live.lock().unwrap().order.len(), 1);
+            assert_eq!(cc.runs.available_permits(), usize::from(!busy));
+            drop(held);
+        }
+    }
+
+    #[tokio::test]
+    async fn ic1_precancelled_start_preserves_pending_tool_result() {
+        let (_dir, cc, run) = continuation_fixture();
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        let cancel = CancellationToken::new();
+        cancel.cancel();
+        let result = tokio::time::timeout(
+            Duration::from_secs(1),
+            start(&cc, "sonnet", &synthetic_tool_result(), &cancel),
+        )
+        .await
+        .unwrap();
+        let error = match result {
+            Err(e) => e,
+            Ok(_) => panic!("cancelled request was admitted"),
+        };
+        assert_eq!(
+            (error.status, error.body.as_str(), error.retryable),
+            (499, "client disconnected", false)
+        );
+        assert_eq!(*run.pending.lock().unwrap(), ["tool_1"]);
+        assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+        assert!(run.sink.lock().unwrap().is_none());
+        assert!(run.results.lock().unwrap().is_empty());
+        assert!(!run.stop.is_cancelled());
+    }
+
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn ic1_precancelled_start_does_not_spawn_or_create_tool_files() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let bin = dir.path().join("fake-claude");
+        std::fs::write(&bin, "#!/bin/sh\nprintf started > started\n").unwrap();
+        std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let cc = ClaudeCode::new(Some(bin.to_string_lossy().into()), dir.path(), 1);
+        let cancel = CancellationToken::new();
+        cancel.cancel();
+        let chat = json!({"tools":[{"type":"function","function":{"name":"probe","parameters":{"type":"object"}}}],"messages":[{"role":"user","content":"hello"}]});
+        let error = match start(&cc, "sonnet", &chat, &cancel).await {
+            Err(e) => e,
+            Ok(_) => panic!("cancelled request started"),
+        };
+        assert_eq!(
+            (error.status, error.body.as_str(), error.retryable),
+            (499, "client disconnected", false)
+        );
+        assert!(!cc.work_dir.join("started").exists());
+        assert!(!cc.work_dir.join("runs").exists());
+        assert_eq!(cc.runs.available_permits(), 1);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ic2_cancel_blocked_initial_input_reaps_child_and_releases_resources() {
+        use std::os::unix::fs::PermissionsExt;
+        for (tools, ignore_term) in [(true, false), (false, false), (true, true)] {
+            let dir = tempfile::tempdir().unwrap();
+            let bin = dir.path().join("fake-claude");
+            // Readiness follows a pipe-sized stderr burst, so the real drain must
+            // be running. The child never reads stdin; 1MiB cannot fit its pipe.
+            let script = format!("#!/usr/bin/env python3\nimport os, signal, sys, time\n{}\nsys.stderr.write('diagnostic' * 32768)\nsys.stderr.flush()\nopen('pid', 'w').write(str(os.getpid()))\nwhile True: time.sleep(60)\n", if ignore_term { "signal.signal(signal.SIGTERM, signal.SIG_IGN)" } else { "pass" });
+            std::fs::write(&bin, script).unwrap();
+            std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+            let cc = ClaudeCode::new(Some(bin.to_string_lossy().into()), dir.path(), 1);
+            let sibling = cc.work_dir.join("runs/keep");
+            std::fs::create_dir_all(&sibling).unwrap();
+            std::fs::write(sibling.join("sentinel"), b"keep").unwrap();
+            let cancel = CancellationToken::new();
+            let token = cancel.clone();
+            let runner = cc.clone();
+            let mut chat = json!({"messages":[{"role":"user","content":"q".repeat(1024*1024)}]});
+            if tools {
+                chat["tools"] = json!([{"type":"function","function":{"name":"probe","parameters":{"type":"object"}}}]);
+            }
+            let mut pending =
+                tokio::spawn(async move { start(&runner, "sonnet", &chat, &token).await });
+            let ready = tokio::time::timeout(Duration::from_secs(3), async {
+                loop {
+                    if let Ok(raw) = std::fs::read_to_string(cc.work_dir.join("pid")) {
+                        if let Ok(pid) = raw.parse::<u32>() {
+                            break pid;
+                        }
+                    }
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                }
+            })
+            .await;
+            if ready.is_err() {
+                pending.abort();
+                let _ = pending.await;
+                panic!("blocked-input child did not become ready");
+            }
+            let pid = ready.unwrap();
+            assert!(!pending.is_finished());
+            assert_eq!(
+                cc.alive.load(std::sync::atomic::Ordering::SeqCst),
+                0,
+                "reader must not own startup yet"
+            );
+            assert_eq!(cc.runs.available_permits(), 0);
+            assert_eq!(
+                std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+                1 + usize::from(tools)
+            );
+            cancel.cancel();
+            // Existing stop() allows five seconds for a SIGTERM-resistant child.
+            let done = tokio::time::timeout(Duration::from_secs(7), &mut pending).await;
+            if done.is_err() {
+                pending.abort();
+                let _ = pending.await;
+            }
+            let result = done
+                .expect("explicit cancellation did not interrupt initial stdin write")
+                .unwrap();
+            let error = match result {
+                Err(e) => e,
+                Ok(_) => panic!("cancelled write succeeded"),
+            };
+            assert_eq!(
+                (error.status, error.body.as_str(), error.retryable),
+                (499, "client disconnected", false)
+            );
+            assert!(
+                !std::path::Path::new(&format!("/proc/{pid}")).exists(),
+                "child must be reaped before returning"
+            );
+            assert_eq!(cc.runs.available_permits(), 1);
+            assert_eq!(
+                std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+                1
+            );
+            assert_eq!(std::fs::read(sibling.join("sentinel")).unwrap(), b"keep");
+            assert!(cc.live.lock().unwrap().by_token.is_empty());
+
+            // Prove that the released slot can run a real healthy replacement.
+            std::fs::write(
+                &bin,
+                r#"#!/usr/bin/env python3
+import json, sys, time
+sys.stdin.readline()
+for event in [
+ {"type":"message_start","message":{"id":"replacement","usage":{"input_tokens":1}}},
+ {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}},
+ {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"replacement"}},
+ {"type":"content_block_stop","index":0},
+ {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":1}},
+ {"type":"message_stop"}
+]: print(json.dumps({"type":"stream_event","event":event}), flush=True)
+while True: time.sleep(60)
+"#,
+            )
+            .unwrap();
+            let healthy = tokio::time::timeout(Duration::from_secs(3), async {
+                start(
+                    &cc,
+                    "sonnet",
+                    &json!({"messages":[{"role":"user","content":"hello"}]}),
+                    &CancellationToken::new(),
+                )
+                .await
+                .unwrap()
+                .collect("sonnet")
+                .await
+                .unwrap()
+            })
+            .await;
+            cc.shutdown().await;
+            let response: Value = serde_json::from_slice(&healthy.unwrap()).unwrap();
+            assert_eq!(response["content"][0]["text"], "replacement");
+            assert_eq!(cc.runs.available_permits(), 1);
         }
     }
 

@@ -74,3 +74,20 @@ tests,clippy and build passed; unchanged earlier Node/fmt evidence retained. See
 [exact commands and remaining FE blockers](../../docs/fe-review/ROUND2-RETRY-CHECKPOINT.md).
 This closes the advisory prerequisite only; PR604 FE acceptance, full conformance,
 mainline and usable qualification remain incomplete. Original failures are retained.
+
+
+## T-0380 approved HTTP limit clarification — 2026-10-25
+
+Goal and scope: clarify only SPEC-T005B's existing header/body limit classification,
+as approved by the owner. An overlong header value is 422 `invalid_request`; an
+oversized request body is 413. Runtime behavior, validation precedence, source and
+tests remain unchanged.
+
+Acceptance: apply the exact approved sentence, verify it against existing
+`validate_headers` and `p0_http_bounds_content_type_and_error_schema_fail_closed`,
+then pass the scoped project-success documentation check and diff check before
+independent review. Existing FE/runtime gaps, mainline incomplete and usable_tag:none
+remain unchanged; this documentation clarification grants no new runtime authority.
+
+Validation: scoped project-success documentation and diff checks passed. Independent
+review and normal publication remain pending; executable tests were not rerun.

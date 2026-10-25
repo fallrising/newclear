@@ -514,7 +514,7 @@ async fn forward_chat_completions_inner(
                     reassemble_stream: reassemble,
                 })
             } else if status == 401 && borrowed.is_some() {
-                let body_txt = resp.text().await.unwrap_or_default();
+                let body_txt = read_diagnostic_cancel(resp, cancel).await?;
                 let mut reread = target.clone();
                 let changed = borrowed
                     .as_deref()
@@ -544,7 +544,7 @@ async fn forward_chat_completions_inner(
                 && allow_401_refresh
                 && target.connection.auth_type == "oauth_import"
             {
-                let body_txt = resp.text().await.unwrap_or_default();
+                let body_txt = read_diagnostic_cancel(resp, cancel).await?;
                 if let Ok(fresh) =
                     crate::oauth_refresh::refresh_connection(&state.store, &target.connection).await
                 {
@@ -567,7 +567,7 @@ async fn forward_chat_completions_inner(
                     retryable: is_retryable_status(status),
                 })
             } else {
-                let body = resp.text().await.unwrap_or_default();
+                let body = read_diagnostic_cancel(resp, cancel).await?;
                 Err(UpstreamAttemptError {
                     status,
                     body,
@@ -1122,6 +1122,21 @@ pub async fn handle_responses(
         status: e.status,
         body: e.body,
     })
+}
+
+async fn read_diagnostic_cancel(
+    resp: reqwest::Response,
+    cancel: &CancellationToken,
+) -> Result<String, UpstreamAttemptError> {
+    tokio::select! {
+        biased;
+        _ = cancel.cancelled() => Err(UpstreamAttemptError {
+            status: 499,
+            body: "client disconnected".into(),
+            retryable: false,
+        }),
+        body = crate::collection::diagnostic_text(resp) => Ok(body),
+    }
 }
 
 async fn read_bytes_cancel(
@@ -2798,6 +2813,47 @@ mod stream_completion_tests {
                 .on_data(r#"{"type":"response.completed","response":{}}"#)
                 .is_empty());
             assert!(conv.on_end().is_empty());
+        }
+    }
+}
+
+#[cfg(test)]
+mod diagnostic_tests {
+    use super::*;
+    use std::sync::atomic::AtomicBool;
+    struct Witness(Arc<AtomicBool>);
+    impl Drop for Witness {
+        fn drop(&mut self) {
+            self.0.store(true, Ordering::SeqCst);
+        }
+    }
+    #[tokio::test]
+    async fn dg2_diagnostic_cancellation_is_non_retryable_and_drops_source() {
+        for pre_cancel in [true, false] {
+            let dropped = Arc::new(AtomicBool::new(false));
+            let witness = Witness(dropped.clone());
+            let source = async_stream::stream! {let _witness=witness;yield Ok::<_,std::io::Error>(Bytes::from_static(b"partial"));std::future::pending::<()>().await;};
+            let resp = reqwest::Response::from(
+                axum::http::Response::builder()
+                    .status(401)
+                    .body(reqwest::Body::wrap_stream(source))
+                    .unwrap(),
+            );
+            let cancel = CancellationToken::new();
+            if pre_cancel {
+                cancel.cancel();
+            }
+            let future = read_diagnostic_cancel(resp, &cancel);
+            tokio::pin!(future);
+            if !pre_cancel {
+                assert!(futures_util::poll!(&mut future).is_pending());
+                cancel.cancel();
+            }
+            let e = future.await.expect_err("cancellation");
+            assert_eq!(e.status, 499);
+            assert!(!e.retryable);
+            assert_eq!(e.body, "client disconnected");
+            assert!(dropped.load(Ordering::SeqCst));
         }
     }
 }

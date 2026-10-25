@@ -25,20 +25,33 @@ def event(conn, run_id, kind, payload, *, source="platform", source_id=None):
     source_id = source_id or str(uuid4())
     # Row locking serializes producers; duplicate replay never consumes another seq.
     conn.execute("SELECT id FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
-    old = conn.execute(
-        "SELECT * FROM run_events WHERE run_id=%s AND source=%s AND source_event_id=%s",
+    identity = conn.execute(
+        "SELECT * FROM run_event_identities WHERE run_id=%s AND source=%s AND source_event_id=%s",
         (run_id, source, source_id),
     ).fetchone()
-    if old:
-        return old
+    if identity:
+        old = conn.execute(
+            "SELECT * FROM run_events WHERE run_id=%s AND seq=%s", (run_id, identity["seq"])
+        ).fetchone()
+        return old if old is not None else {**identity, "payload": None}
     seq = conn.execute(
         "UPDATE runs SET last_event_seq=last_event_seq+1 WHERE id=%s RETURNING last_event_seq",
         (run_id,),
     ).fetchone()["last_event_seq"]
+    event_id = uuid4()
+    created_at = conn.execute("SELECT clock_timestamp() AS now").fetchone()["now"]
+    metadata = (run_id, seq, event_id, source, source_id, kind, created_at)
+    conn.execute(
+        "INSERT INTO run_event_identities(run_id,seq,event_id,source,source_event_id,"
+        "type,created_at) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s)",
+        metadata,
+    )
     return conn.execute(
-        "INSERT INTO run_events(run_id,seq,event_id,source,source_event_id,type,payload) "
-        "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING *",
-        (run_id, seq, uuid4(), source, source_id, kind, Jsonb(json_value(payload))),
+        "INSERT INTO run_events(run_id,seq,event_id,source,source_event_id,type,"
+        "created_at,payload) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *",
+        (*metadata, Jsonb(json_value(payload))),
     ).fetchone()
 
 
@@ -356,6 +369,7 @@ class Store:
 
     def events(self, run_id, after):
         with self.db.transaction() as conn:
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
             run = require_row(
                 conn.execute(
                     "SELECT event_floor,last_event_seq FROM runs WHERE id=%s", (run_id,)

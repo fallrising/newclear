@@ -26,10 +26,12 @@ MAINTENANCE_COMMANDS = {
     "backup-restore",
     "archive-gc-preview",
     "archive-gc-apply",
+    "event-gc-preview",
+    "event-gc-apply",
 }
 
 
-def read_gc_plan(path):
+def read_gc_plan(path, *, code="archive_gc_plan_invalid"):
     from .private_config import read_private_text
 
     def unique(pairs):
@@ -53,7 +55,7 @@ def read_gc_plan(path):
             raise ValueError()
         return value
     except (ValueError, OSError, RecursionError):
-        raise ValueError("archive_gc_plan_invalid") from None
+        raise ValueError(code) from None
 
 
 def maintenance_command(args):
@@ -69,7 +71,14 @@ def maintenance_command(args):
         return False
 
     try:
-        plan = read_gc_plan(args.plan) if args.command == "archive-gc-apply" else None
+        plan = None
+        if args.command in {"archive-gc-apply", "event-gc-apply"}:
+            code = (
+                "event_gc_plan_invalid"
+                if args.command == "event-gc-apply"
+                else "archive_gc_plan_invalid"
+            )
+            plan = read_gc_plan(args.plan, code=code)
         if args.command == "backup-verify":
             from .backup import verify_backup
 
@@ -92,14 +101,20 @@ def maintenance_command(args):
                     confirm_database=args.confirm_database,
                 )
             else:
-                from .archive_retention import apply, preview
+                if args.command.startswith("event-gc-"):
+                    from .event_retention import apply, preview
+                else:
+                    from .archive_retention import apply, preview
 
                 conninfo_to_dict(url)
                 pool_logger.addFilter(hide_pool_details)
                 db = Database(url)
                 db.open()
-                if args.command == "archive-gc-preview":
-                    result = preview(db, retention_days=args.retention_days, limit=args.limit)
+                if args.command in {"archive-gc-preview", "event-gc-preview"}:
+                    options = {"retention_days": args.retention_days, "limit": args.limit}
+                    if args.command == "event-gc-preview":
+                        options["event_limit"] = args.event_limit
+                    result = preview(db, **options)
                 else:
                     result = apply(db, plan, approval_digest=args.approve)
         print(json.dumps(result, ensure_ascii=False, allow_nan=False, sort_keys=True))
@@ -136,6 +151,13 @@ def main():
     pruning = commands.add_parser("archive-gc-apply")
     pruning.add_argument("--plan", type=Path, required=True)
     pruning.add_argument("--approve", required=True)
+    event_preview = commands.add_parser("event-gc-preview")
+    event_preview.add_argument("--retention-days", type=int, default=30)
+    event_preview.add_argument("--limit", type=int, default=100)
+    event_preview.add_argument("--event-limit", type=int, default=1000)
+    event_pruning = commands.add_parser("event-gc-apply")
+    event_pruning.add_argument("--plan", type=Path, required=True)
+    event_pruning.add_argument("--approve", required=True)
     connector = commands.add_parser("connector")
     connector.add_argument("--config", type=Path, required=True)
     connector.add_argument("--port", type=int, default=17800)

@@ -1,4 +1,12 @@
-# 現行停止點 — 2026-10-06
+# 本次 bounded event-retention 切片 — 2026-10-25
+
+T-087 在先行契約／獨立審查後，新增手動 `event-gc-preview`／`event-gc-apply`、migration017 永久 replay identity、原子前綴／floor 清理及保守 ownership 保護。Root-run 真 PostgreSQL focused24、native backup26、browser1 本機檢查通過；production freeze 未因環境 private-path 失敗而放寬 guard 或修改主機權限。T088 已接受 focused EVT-01–04；額外 regression 為初次644pass/4fail、targeted4pass，並非 clean full suite，export-lock 仍為 intermittent／原因未歸因；必要 CI／最終交付仍待完成，不能以本機切片稱作完整 AT-13/M4 或 AC-04。詳見 [契約／操作](EVENT-RETENTION.md)及[交付報告](../tasks/379-event-retention/report.md)。
+
+以下保留先前已交付切片與歷史停止點；不取代本次範圍和仍未完成的 live／整體 gate。
+
+---
+
+# 歷史停止點 — 2026-10-06
 
 本輪完成單節點操作手冊與隔離 control-plane 演練，範圍與重跑入口見 [SINGLE-NODE.md](SINGLE-NODE.md)。涵蓋同版 API／獨立 worker／Web build、初次設定、觀測、停寫/drain、native backup／空 DB restore、升級／回滾與故障排查。模型維持 local mock，billing 延後、金額 unknown；沒有實際主機部署或真 provider／GitHub export／KVM 操作。
 

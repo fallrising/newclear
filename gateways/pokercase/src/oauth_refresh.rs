@@ -168,6 +168,14 @@ pub async fn ensure_fresh(store: &Store, conn: ConnectionRow) -> AppResult<Conne
     }
 }
 
+async fn refresh_failure(resp: reqwest::Response, provider: &str) -> AppError {
+    let text = crate::collection::diagnostic_text(resp).await;
+    AppError::Upstream {
+        status: 401,
+        body: format!("{provider} refresh failed: {text}"),
+    }
+}
+
 async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
     #[derive(Deserialize)]
     struct Tok {
@@ -189,11 +197,7 @@ async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
         .await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("xai refresh: {e}")))?;
     if !resp.status().is_success() {
-        let t = resp.text().await.unwrap_or_default();
-        return Err(AppError::Upstream {
-            status: 401,
-            body: format!("xai/grok refresh failed: {t}"),
-        });
+        return Err(refresh_failure(resp, "xai/grok").await);
     }
     let tok: Tok = resp
         .json()
@@ -243,11 +247,7 @@ async fn refresh_google_antigravity(refresh_token: &str) -> AppResult<RefreshedT
         .await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("google refresh: {e}")))?;
     if !resp.status().is_success() {
-        let t = resp.text().await.unwrap_or_default();
-        return Err(AppError::Upstream {
-            status: 401,
-            body: format!("antigravity/google refresh failed: {t}"),
-        });
+        return Err(refresh_failure(resp, "antigravity/google").await);
     }
     let tok: Tok = resp
         .json()
@@ -278,6 +278,48 @@ fn urlencoding_minimal(s: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[tokio::test]
+    async fn dg3_refresh_failure_preserves_prefix_and_status() {
+        use crate::collection::{DIAGNOSTIC_LIMIT_MESSAGE, MAX_DIAGNOSTIC_BYTES};
+        for label in ["xai/grok", "antigravity/google"] {
+            for bytes in [
+                b"denied".to_vec(),
+                vec![b'x'; MAX_DIAGNOSTIC_BYTES],
+                vec![b'x'; MAX_DIAGNOSTIC_BYTES + 1],
+                vec![0xff],
+            ] {
+                let expected = if bytes.len() > MAX_DIAGNOSTIC_BYTES {
+                    DIAGNOSTIC_LIMIT_MESSAGE.into()
+                } else {
+                    String::from_utf8_lossy(&bytes).into_owned()
+                };
+                let resp = reqwest::Response::from(
+                    axum::http::Response::builder()
+                        .status(503)
+                        .body(bytes)
+                        .unwrap(),
+                );
+                let e = super::refresh_failure(resp, label).await;
+                assert!(
+                    matches!(e,crate::error::AppError::Upstream{status:401,body} if body==format!("{label} refresh failed: {expected}"))
+                );
+            }
+            let source = futures_util::stream::iter(vec![
+                Ok(bytes::Bytes::from_static(b"partial")),
+                Err(std::io::Error::other("PRIVATE_READ")),
+            ]);
+            let resp = reqwest::Response::from(
+                axum::http::Response::builder()
+                    .status(400)
+                    .body(reqwest::Body::wrap_stream(source))
+                    .unwrap(),
+            );
+            assert!(
+                matches!(super::refresh_failure(resp,label).await,crate::error::AppError::Upstream{status:401,body} if body==format!("{label} refresh failed: "))
+            );
+        }
+    }
+
     use super::*;
 
     #[tokio::test]

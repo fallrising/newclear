@@ -50,6 +50,53 @@ where
     }
 }
 
+pub(crate) const MAX_DIAGNOSTIC_BYTES: usize = 64 * 1024;
+pub(crate) const DIAGNOSTIC_LIMIT_MESSAGE: &str = "upstream error body exceeds 64 KiB";
+
+pub(crate) enum DiagnosticBody {
+    Complete(Bytes),
+    TooLarge,
+}
+impl DiagnosticBody {
+    pub(crate) fn into_text(self) -> String {
+        match self {
+            Self::Complete(bytes) => String::from_utf8_lossy(&bytes).into_owned(),
+            Self::TooLarge => DIAGNOSTIC_LIMIT_MESSAGE.into(),
+        }
+    }
+}
+
+/// Bound raw diagnostics before decoding/parsing. Read failures keep the old
+/// empty-body fallback; an oversize body is replaced in full, never truncated.
+pub(crate) async fn diagnostic<S, E>(source: S) -> DiagnosticBody
+where
+    S: Stream<Item = Result<Bytes, E>>,
+{
+    let mut source = Box::pin(source);
+    let mut out = Vec::new();
+    while let Some(chunk) = source.next().await {
+        let Ok(chunk) = chunk else {
+            return DiagnosticBody::Complete(Bytes::new());
+        };
+        if chunk.len() > MAX_DIAGNOSTIC_BYTES - out.len() {
+            return DiagnosticBody::TooLarge;
+        }
+        let required = out.len() + chunk.len();
+        if required > out.capacity() {
+            let capacity = required
+                .max(out.capacity().saturating_mul(2))
+                .min(MAX_DIAGNOSTIC_BYTES);
+            out.reserve_exact(capacity - out.len());
+        }
+        out.extend_from_slice(&chunk);
+    }
+    DiagnosticBody::Complete(Bytes::from(out))
+}
+
+pub(crate) async fn diagnostic_text(resp: reqwest::Response) -> String {
+    diagnostic(resp.bytes_stream()).await.into_text()
+}
+
 #[derive(Default)]
 pub(crate) struct Records {
     bytes: usize,
@@ -124,6 +171,67 @@ mod tests {
             other => panic!("{other:?}"),
         }
     }
+    #[tokio::test]
+    async fn dg1_diagnostic_boundaries_drop_and_decoding() {
+        for size in [
+            0,
+            1,
+            MAX_DIAGNOSTIC_BYTES - 1,
+            MAX_DIAGNOSTIC_BYTES,
+            MAX_DIAGNOSTIC_BYTES + 1,
+        ] {
+            for fragmented in [false, true] {
+                let bytes = Bytes::from(vec![b'x'; size]);
+                let chunks = if fragmented {
+                    bytes
+                        .chunks(4093)
+                        .map(|b| Ok(Bytes::copy_from_slice(b)))
+                        .collect()
+                } else {
+                    vec![Ok(bytes)]
+                };
+                let (source, dropped) = source(chunks, size > MAX_DIAGNOSTIC_BYTES);
+                let result =
+                    tokio::time::timeout(std::time::Duration::from_secs(1), diagnostic(source))
+                        .await
+                        .unwrap();
+                assert!(dropped.load(Ordering::SeqCst));
+                if size > MAX_DIAGNOSTIC_BYTES {
+                    assert_eq!(result.into_text(), DIAGNOSTIC_LIMIT_MESSAGE);
+                } else {
+                    assert_eq!(result.into_text(), "x".repeat(size));
+                }
+            }
+        }
+        for chunks in [
+            vec![
+                Ok(Bytes::from_static(&[0xc3])),
+                Ok(Bytes::from_static(&[0xa9])),
+            ],
+            vec![Ok(Bytes::from_static(&[0xff]))],
+        ] {
+            let bytes: Vec<_> = chunks
+                .iter()
+                .flat_map(|r| r.as_ref().unwrap().iter().copied())
+                .collect();
+            let (source, dropped) = source(chunks, false);
+            assert_eq!(
+                diagnostic(source).await.into_text(),
+                String::from_utf8_lossy(&bytes)
+            );
+            assert!(dropped.load(Ordering::SeqCst));
+        }
+        let (source, dropped) = source(
+            vec![
+                Ok(Bytes::from_static(b"PRIVATE_PARTIAL")),
+                Err(std::io::Error::other("PRIVATE_READ")),
+            ],
+            true,
+        );
+        assert_eq!(diagnostic(source).await.into_text(), "");
+        assert!(dropped.load(Ordering::SeqCst));
+    }
+
     #[tokio::test]
     async fn bc1_http_actual_byte_boundaries_release_source() {
         for size in [0, 7, MAX_BYTES - 1, MAX_BYTES, MAX_BYTES + 1] {

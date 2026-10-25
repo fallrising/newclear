@@ -172,3 +172,14 @@ Delivered in [PR632](https://github.com/fallrising/newclear/pull/632), source `0
 [Contract](../../SUCCESS.md#t-0412--bounded-response-collection) · [Task](T-0412-collect-bound.md).
 
 Delivered in [PR635](https://github.com/fallrising/newclear/pull/635), source `2f3c1a9292270d02b744c20cf090aa89a66e6387`, merge `5bf5430fbd415da70ba7768c3291b2d680e2fe44` at `2026-10-25T10:20:37Z`. Necessary component/contracts CI passed; exact checks are linked in PR635. Remote source ancestry and scoped component readback PASS.172tests/17groups,54newscenarios/7tests;fmt/clippy/docs/index and independent source/final-document review PASS. See task for retained-input boundaries and exclusions; no total-RSS or real-provider/Docker acceptance.
+
+
+## T-0413 — Bounded HTTP diagnostics
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| DG-1 | Bound and release diagnostic input | DG-1 | in_progress | 2026-10-25T11:45:34Z | — | 2026-10-25T11:55:00Z |
+| DG-2 | Preserve forwarding recovery and cancellation | DG-2 | in_progress | 2026-10-25T11:45:34Z | — | 2026-10-25T11:55:00Z |
+| DG-3 | Bound token errors and verify compatibility | DG-3 | in_progress | 2026-10-25T11:45:34Z | — | 2026-10-25T11:55:00Z |
+
+[Contract](../../SUCCESS.md#t-0413--bounded-http-diagnostics) · [Task](T-0413-diagnostic-bound.md).

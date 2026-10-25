@@ -1,8 +1,8 @@
-# Manual event retention — T-087 Phase A contract
+# Manual event retention — T-087
 
-Proposed contract, revised after T088 REWORK on 2026-10-25; implementation and acceptance pending independent review/root release. Original documents/report are preserved in the orchestration journal `.team/evidence/T087-phaseA-original/`. This is the event-history part of SDD §12/AT-13, not full AT-13/M4. Existing archive retention, audit90-day retention, runtime cleanup and lifecycle semantics are unchanged. No deployed data operation, automatic scheduling, dependency addition or VM/provider call belongs to this slice.
+Contract recorded before implementation, revised after T088 REWORK and accepted for Phase B at baseline `6ea13ad2` on 2026-10-25. Focused PostgreSQL, native backup/restore and browser evidence has passed locally and received T088 ACCEPT for EVT-01–04. The additional regression record is initial644pass/4fail, then targeted4pass; it is not a clean full-suite run. Required CI and final delivery gates remain pending. Original documents/report are preserved in the orchestration journal `.team/evidence/T087-phaseA-original/`. This is the event-history part of SDD §12/AT-13, not full AT-13/M4. Existing archive retention, audit90-day retention, runtime cleanup and lifecycle semantics are unchanged. No deployed data operation, automatic scheduling, dependency addition or VM/provider call belongs to this slice.
 
-## Source call trace and distinct hazards
+## Pre-implementation source call trace and distinct hazards
 
 Paths below are component-relative, inspected at baseline `2c4abddf4ce69105d1b4ee8c894e8ef1835aa92f` (root must confirm the frozen source before release).
 
@@ -30,6 +30,20 @@ Two-stage bounded inspection, shared by preview and first-apply recheck:
 2. Visit only that fixed list, sharing a total `event_limit+1` row-inspection budget across all runs. For each run select seq-ordered rows from its floor with `LIMIT remaining_inspections`, initially projecting only UUID/seq/timestamp and `octet_length(convert_to(source,'UTF8'))`, likewise source_event_id/type and payload::text. Each projected row consumes budget even when rejected; never refund or seek replacement runs. Check expected seq and strict cutoff before fetching text. Emit at most event_limit events; the extra inspected row is only lookahead. A gap in an inspected run rejects that run's whole proposed prefix; a recent row ends its prefix. No lookahead or budget permits jumping a gap.
 3. Before materializing text, compute conservative canonical bound `6*(payload_utf8_bytes+2*(source_utf8_bytes+source_id_utf8_bytes+type_utf8_bytes))+2048` for both record encodings, plus array bracket/comma overhead. The fixed2048 covers both records' keys, UUIDs, canonical timestamp and signed-bigint sequence fields. Six bytes per UTF-8 byte safely covers JSON escaping including supplementary Unicode. Refuse materialization unless this upper bound fits the remaining shared8MiB inspection budget; do not refund budget after rejecting a run. If its first record cannot fit, skip that run; otherwise end its prefix before that record. This deliberately conservative policy can leave eligible data for a fresh preview.
 4. Fetch unrestricted fields only as `substring(convert_to(field,'UTF8') FROM 1 FOR bound)` bytea, with a bound no larger than the prechecked length/remaining budget, never character-count substring. Require the returned byte lengths to equal the prechecked lengths, decode UTF-8 strictly, then canonical-encode one full and one identity record. Check actual encoded lengths including separators before hashing/retaining the candidate. Keep only one bounded record pair and fixed-size candidate metadata in memory. On first apply an exact approved range which no longer fits or matches any bound aborts the entire batch rather than shortening it. Receipt replay applies the same byte/row inspection discipline to identity-only records (bounded by their originally approved encoding).
+
+## Operator procedure
+
+These are usage examples, not deployed-data execution records. Run migration017 with the existing offline upgrade procedure and matching application before using event GC. Keep DATABASE_URL in the existing private environment. Use an operator-owned0700 directory whose complete ancestor chain satisfies the existing private-file policy; keep the plan0600. Inspect the exact ranges/counts/hashes/cutoff and copy the reviewed approval digest:
+
+```sh
+umask 077
+agent-platform event-gc-preview --retention-days 30 --limit 100 --event-limit 1000 > /private/maintenance/events.json
+agent-platform event-gc-apply --plan /private/maintenance/events.json --approve 'COPY_REVIEWED_APPROVAL_DIGEST'
+```
+
+Preview issues an immutable plan and does not remove events. Apply prints the exact durable receipt. A new preview is a new review; changing the plan, restoring the database or waiting one hour invalidates old approval. Concurrent writers may produce `event_gc_database_unavailable` through NOWAIT, while changed state/history yields `event_gc_candidates_changed`; inspect the cause and deliberately retry or preview again. Do not rewrite lifecycle facts, lower retention or change directory permissions broadly to make a refusal pass. Ordinary readers remain available under the approved lock protocol.
+
+The current result, messages, commands, archives, audit/export history and recovery state remain. Source dedupe metadata is permanent. This is payload-history retention, not complete content erasure or bounded total database growth. If old activity is needed, create and verify an appropriate trusted backup first; this command neither requires a backup receipt nor deletes backups. Current exact-version backup code accepts migration017; restore older bundles with their matching application before an explicit migration.
 
 ## Eligibility and contiguous prefix
 
@@ -64,7 +78,9 @@ Producer that already holds a conflicting write lock makes GC fail closed. If GC
 
 Independently derive migration017 PostgreSQL18 fingerprint on a pristine pinned-image fixture, inspect its catalog and record derivation evidence before changing SCHEMA_SHA256. Do not learn the accepted fingerprint from a backup source. Keep all new tables in parser-supported simple CREATE TABLE forms with the explicit uuid/text/bigint/timestamptz/jsonb columns above; all public functions must use exactly `CREATE FUNCTION name() RETURNS trigger LANGUAGE plpgsql AS $$ ... $$`, zero arguments, security invoker, no function configuration. Use row triggers and ordinary UNIQUE/FK/CHECK constraints only. Add no public SQL digest helper, extension, view, sequence, enum or other parser-unsupported object, and do not change the backup parser in this slice. New constraints/triggers still change the independently reviewed catalog fingerprint. Native dump includes identities, plans and receipts by default; EXCLUDED stays unchanged. Restore keeps event_floor/last_event_seq, remaining payloads, dedupe and receipts, regenerates maintenance identity and keeps nodes drained. Native restore must prove both approved identity hash and receipt/floor persist, payload range stays absent, duplicate-source replay consumes no seq and the fresh UUID rejects old plans. Old001..016 backups must be restored using matching old application then explicitly migrated; current exact-version verification must reject their manifests, not silently accept them. No backward-compatible restore claim or real restore operation is made here.
 
-## Phase B RED/GREEN and acceptance plan (not executed)
+## Phase B RED/GREEN and acceptance plan
+
+The plan below was recorded before implementation. Actual executed selections, exact source/log hashes and local results are in the [delivery report](../tasks/379-event-retention/report.md); the report distinguishes earlier failed attempts and pending review/CI.
 
 First RED must call missing `event_retention.preview/apply` with real PostgreSQL fixtures, not assert a text symbol. Prove: strict cutoff equality; nonmonotone timestamps; gaps; partial/all prefix and empty plan; run/event/byte caps; every protected state and ownership mutation above; archive/export/commands/messages/audit/result/bindings/reservations unchanged except one new GC audit; changed content/sequence/floor/eligibility/identity; unrecognized, forged, duplicate-key, oversized and expired plans; exact replay and later floor advance; rollback fault after receipt/delete/floor/audit. Test same-source concurrent replay before/after prune retains original event_id/seq and last_event_seq, plus new-source continuation. Controlled concurrent writer/GC and reader/GC barriers must prove NOWAIT rollback and old/new coherent reads, not timing-only sleeps.
 
@@ -78,4 +94,13 @@ Focused proposed commands, all from this source component through launcher with 
 - New browser `event-retention.spec.ts` uses real API/PostgreSQL and product GC on aged synthetic terminal history, reconnects stale cursor, observes notice/current state/retained suffix, and checks preserved result. Run `workspace.py run issue-sweep T087-browser -- python scripts/test-postgres.py npm --prefix web run test:e2e -- event-retention.spec.ts`.
 - Root then selects required nonduplicated component/CI gates and independently reviews the frozen diff; no unchanged long suite is authorized in Phase A. Full M4, audit retention and stale cleanup stay open.
 
-No runtime/tests were executed in Phase A. Source contract and negative test plan require ACCEPT before implementation. Root's supplied preflight does not release Phase B or grant socket escalation; report actual tool failures at release without installing or bypassing blindly.
+No runtime/tests were executed in Phase A; independent/root acceptance preceded Phase B. Later root-run verification used fresh owned databases, existing dependencies and an isolated task-backed private filesystem; it did not weaken guards or change host permissions. Root's preflight did not itself grant socket escalation; failed and interrupted attempts remain in the process evidence.
+
+## Local evidence — 2026-10-25
+
+- T084-retention-red1 reached missing product API after real PostgreSQL/API setup; expected RED.
+- T084-retention-private-green3 passed24 focused tests in5.883s, including exact receipt authority, mixed and near-cap batch replay, actual Store.events interleaving and mid-stream201-event expiry.
+- T084-retention-private-backup2 passed26 tests in13.522s, including native pruned-history restore with unchanged floor/identity hash/receipt/dedupe and fresh-UUID old-plan refusal.
+- T084-retention-browser1 passed1 real Chromium/API/PostgreSQL case in4.5s: actual GC, initial410, snapshot refresh, retained suffix/result.
+
+Owned fixtures were cleaned by their runners. T088 accepted focused EVT-01–04 evidence. An extra648-case regression produced644pass/4fail, followed by targeted4pass after root corrected its multiprocessing driver. The earlier export-lock failure remains intermittent and unattributed; no clean aggregate outcome or export root cause is claimed. Hosted CI/final delivery and full AT-13/M4 remain separate acceptance obligations.

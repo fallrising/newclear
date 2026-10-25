@@ -19,11 +19,12 @@ from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from test_control_plane import URL, PlatformFixture
 
-from agent_platform import archive_retention, backup
+from agent_platform import archive_retention, backup, event_retention
 from agent_platform.api import create_app
 from agent_platform.db import Database
 from agent_platform.domain import Problem
 from agent_platform.result_archive import read_archive
+from agent_platform.store import Store, event
 from agent_platform.worker import Worker
 
 
@@ -71,6 +72,74 @@ class BackupTests(PlatformFixture):
         return backup.restore_backup(
             self.target_url, self.bundle, offline=True, confirm_database=self.target_name
         )
+
+    def test_real_native_roundtrip_preserves_pruned_event_replay_identity(self):
+        original = self.completed()
+        run_id = uuid4()
+        with self.db.transaction() as conn:
+            conn.execute(
+                "INSERT INTO runs(id,task_id,attempt_no,base_sha,profile_revision,goal,"
+                "state,deadline,last_event_seq,result) SELECT %s,task_id,2,base_sha,"
+                "profile_revision,goal,'succeeded',deadline,last_event_seq,result "
+                "FROM runs WHERE id=%s",
+                (run_id, original),
+            )
+            conn.execute(
+                "INSERT INTO run_event_identities SELECT %s,seq,gen_random_uuid(),source,"
+                "source_event_id,type,created_at-interval '31 days' FROM run_events "
+                "WHERE run_id=%s",
+                (run_id, original),
+            )
+            conn.execute(
+                "INSERT INTO run_events SELECT i.run_id,i.seq,i.event_id,i.source,"
+                "i.source_event_id,i.type,e.payload,i.created_at FROM run_event_identities i "
+                "JOIN run_events e ON e.run_id=%s AND e.seq=i.seq WHERE i.run_id=%s",
+                (original, run_id),
+            )
+            identity = conn.execute(
+                "SELECT * FROM run_event_identities WHERE run_id=%s ORDER BY seq LIMIT 1",
+                (run_id,),
+            ).fetchone()
+        plan = event_retention.preview(self.db)
+        receipt = event_retention.apply(self.db, plan, approval_digest=plan["approval_digest"])
+        before = Store(self.db).run(run_id)
+        self.make_backup()
+        self.restore()
+        target = Database(self.target_url)
+        target.open()
+        self.addCleanup(target.close)
+        restored = Store(target).run(run_id)
+        self.assertEqual(restored, before)
+        self.assertEqual(restored["event_floor"], restored["last_event_seq"] + 1)
+        with target.transaction() as conn:
+            saved = conn.execute(
+                "SELECT plan,receipt FROM event_gc_receipts WHERE approval_digest=%s",
+                (plan["approval_digest"],),
+            ).fetchone()
+            # Internal receipt integrity remains verifiable after restore; apply still
+            # refuses the old database's approval before considering receipt replay.
+            self.assertEqual(event_retention._replay(conn, plan, saved), receipt)
+            self.assertEqual(
+                conn.execute(
+                    "SELECT count(*) AS n FROM run_events WHERE run_id=%s", (run_id,)
+                ).fetchone()["n"],
+                0,
+            )
+            duplicate = event(
+                conn,
+                run_id,
+                "different",
+                {},
+                source=identity["source"],
+                source_id=identity["source_event_id"],
+            )
+        self.assertEqual(
+            (duplicate["event_id"], duplicate["seq"]), (identity["event_id"], identity["seq"])
+        )
+        self.assertIsNone(duplicate["payload"])
+        self.assertEqual(Store(target).run(run_id)["last_event_seq"], before["last_event_seq"])
+        with self.assertRaisesRegex(ValueError, "identity_changed"):
+            event_retention.apply(target, plan, approval_digest=plan["approval_digest"])
 
     def test_real_native_roundtrip_preserves_archive_and_all_history(self):
         run_id = self.completed()

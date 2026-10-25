@@ -8,7 +8,7 @@
 
 可自行託管的 agent 工作平台：在伺服器上同時執行多個隔離的 agent 任務，以同一個 Web UI 管理對話、執行狀態、工作檔案、審批與成果。
 
-**目前狀態（2026-10-06）：M0–M2 已驗收，M3 仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存與下載，以及需明確授權的 GitHub export（預設停用、fake GitHub 驗收）；離線 DB 備份／空庫還原與手動封存保留清理也已合併；本輪補齊單節點操作手冊與隔離 control-plane 演練；事件／審計 retention、VM state、實際主機部署與整體 MVP gate 仍未完成。**
+**目前狀態（2026-10-25）：M0–M2 已驗收，M3/M4 整體仍進行中。工作台已有任務搜尋、篩選連結、修改目標後重跑與安全 diff 下載；正常 Worker 的 mock 工具流程與故障清理已通過真實 KVM 切片驗收。M4 已加入不可變成果封存、明確授權 GitHub export（預設停用、fake GitHub 驗收）、離線 DB 備份／空庫還原與手動封存清理；單節點手冊與隔離演練已有歷史證據。手動事件 GC 新增 focused/native/browser 本機證據，focused T088 已接受，CI 待驗收；audit retention、VM state、stale cleanup、實際主機部署與整體 MVP gate 仍未完成。**
 
 模型開發仍用本機 mock，現在不需要 API key。單人版本延後真實計費與硬金額上限，用量金額保持 unknown。已納入 [M3 跨切片 mock 驗收](docs/M3-INTEGRATED-ACCEPTANCE.md)；真實模型自然語言 coding、完整 M3 與 release 前長任務驗收仍未完成。詳見 [GitHub 匯出](docs/GITHUB-EXPORT.md)、[成果封存](docs/RESULT-ARCHIVE.md) 與 [最新交接](docs/HANDOFF.md)。
 
@@ -77,3 +77,5 @@ AC-design-0.3 補充兩張參考截圖的證據與操作流程：中央唯讀桌
 M2 的 OpenHands profile 會在真實 VM 中執行固定模擬模型的檔案修改驗收，並顯示事件與 diff。它尚不解讀自然語言工作目標、不呼叫付費 provider；專案測試未設定。啟動與能力限制見 [M2](docs/M2.md)。
 
 離線維護工具及操作邊界見 [備份與封存保留](docs/BACKUP-RETENTION.md)。它只在 operator 明確執行時動作；封存清理先預覽、再以 digest 確認，不清理 active/recovery 或 export 引用的成果。
+
+2026-10-25 [手動事件保留](docs/EVENT-RETENTION.md)新增 `event-gc-preview`／`event-gc-apply`，只清理獲明確批准且符合終態／cleanup 證明的連續事件前綴，保留 source dedupe、sequence 與結果。Focused24／native backup26／browser1 本機檢查通過；focused T088 已接受；額外 regression 初次644pass/4fail、targeted4pass，未宣稱 clean full suite；CI 與完整 M4 仍待完成，詳見[交付報告](tasks/379-event-retention/report.md)。

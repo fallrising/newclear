@@ -94,15 +94,17 @@ make deployment-rehearsal
 
 兩次完整 fresh captures 共 76 張（含早期 partial 為 114 raw）；web85 與 focused55、安全4通過。Python 原 641 tests/4環境 errors 保留，35 focused 原生補驗通過；exact-head CI 與獨立審查／合併待 parent。詳見 [本次報告](fe-review/tasks/round2/report.md)。上述平台主線 AC-04、usable_tag 與 live gate 維持原狀。
 
-## 本次範圍：T-087 manual event retention（Phase A）
+## 本次範圍：T-087 manual event retention
 
-本次目標是 SDD §12/AT-13 的手動事件 retention：至少30天、明確 preview/apply approval、受限連續前綴、保留來源 dedupe 與 sequence、保護未完成或 cleanup 不明狀態，並可一致備份還原。實作前契約見 [EVENT-RETENTION](docs/EVENT-RETENTION.md)。Phase A 僅靜態設計，待獨立審查／root ACCEPT 與 baseline commit 後才進入 Phase B；不代表已提供可執行功能。
+本次目標是 SDD §12/AT-13 的手動事件 retention：至少30天、明確 preview/apply approval、受限連續前綴、保留來源 dedupe 與 sequence、保護未完成或 cleanup 不明狀態，並可一致備份還原。實作前契約見 [EVENT-RETENTION](docs/EVENT-RETENTION.md)，Phase A 經獨立審查及 root ACCEPT 後於 `6ea13ad2` 固定並釋出 Phase B。下表真 PostgreSQL／native restore／browser 本機證據已由 T088 接受；初次額外648項 regression 為644pass/4fail，僅重跑4項後全通過，不宣稱 clean full suite。必要 CI／最終交付 gate 仍待完成，詳見[交付報告](tasks/379-event-retention/report.md)。
 
 | AC | 狀態 | 驗證計畫 |
 | --- | --- | --- |
-| EVT-01 | pending | 真 PostgreSQL RED/GREEN：嚴格30天 cutoff、兩階段 inspected-run/event/full-encoding byte limits（含 escaped/multibyte metadata）、exact approval/expiry/DB identity、eligibility、atomic rollback 與 replay |
-| EVT-02 | pending | 同 source replay 在刪除前後仍是同 event_id/seq；signed identity_sha256 在刪除／後續 floor 推進後可驗；EXCLUSIVE NOWAIT 與 FOR UPDATE barriers；reader snapshot 不污染 pool defaults |
-| EVT-03 | pending | 真 API/CLI/browser 的410／重新取得 snapshot／保留 suffix 與 result；非事件 history、archive/export 與 recovery facts 不刪除 |
-| EVT-04 | pending | 固定 run_id/seq FK＋七欄 metadata equality trigger、不新增 type 索引／長度限制，驗證 old-valid long incompressible type backfill/insert 與 mismatch 拒絕；同交易 delete guard／parser-supported triggers、獨立 fingerprint review 與 native restore 保留 hash/floor/receipt/dedupe 並使舊 plan 失效 |
+| EVT-01 | passed | T084-retention-private-green3：24 項涵蓋30天 cutoff、mixed gap/recent/oversize 及 near-cap 多 run、exact approval/expiry/DB identity、eligibility、atomic rollback/replay |
+| EVT-02 | passed | 同 source identity/seq、後續 floor 的 identity hash replay、兩種 producer/GC lock order、實際 Store.events floor/payload barrier、201-event follow SSE 與 pool default 均有 focused GREEN |
+| EVT-03 | passed | 真 API/CLI focused GREEN；T084-retention-browser1 的真 GC→410→snapshot/suffix/result 1 項通過；保留非事件及 recovery facts |
+| EVT-04 | passed | 原 key shapes＋七欄 equality guard／long-type backfill 與逐欄 mismatch 通過；T084-schema1 獨立 pin、T084-retention-private-backup2 共26項含真 native pruned-history restore、dedupe/hash/floor/receipt 與舊 plan 失效 |
 
-此切片不實作 audit retention、stale VM cleanup、排程或部署，不改 adapter source ID/replay 或 lifecycle。AT-13/M4、AC-04 與 usable_tag 維持原狀；Phase A 未執行測試／runtime。
+此切片不實作 audit retention、stale VM cleanup、排程或部署，不改 adapter source ID/replay 或 lifecycle。AT-13/M4、AC-04 與 usable_tag 維持原狀。先前 socket／private-path／namespace 環境失敗保留於交付證據；未放寬安全 guard 或修改主機權限。
+
+額外 regression 的3項 tool-process recovery 失敗伴隨 root driver 缺少 multiprocessing `__main__` guard／子程序重跑 selection 的 fixture 污染；driver 已修正。另1項 export-lock 失敗雖在 targeted rerun 通過，仍為 intermittent／原因未歸因，不能斷言由 driver 造成。

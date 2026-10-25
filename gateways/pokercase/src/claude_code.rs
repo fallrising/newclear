@@ -903,10 +903,13 @@ impl ClaudeRun {
     /// Collect the whole reply as an Anthropic Messages JSON body.
     pub async fn collect(self, model: &str) -> Result<Bytes, AppError> {
         let ClaudeRun { first, mut rx } = self;
-        let mut records: Vec<String> = first.into_iter().collect();
+        let mut records = crate::collection::Records::default();
+        if let Some(first) = first {
+            records.push(first)?;
+        }
         while let Some(item) = rx.recv().await {
             match item {
-                Item::Record(r) => records.push(r),
+                Item::Record(r) => records.push(r)?,
                 Item::Failed { status, message } => {
                     return Err(AppError::Upstream {
                         status,
@@ -915,7 +918,10 @@ impl ClaudeRun {
                 }
             }
         }
-        Ok(crate::claude::anthropic_sse_to_message(&records, model))
+        Ok(crate::claude::anthropic_sse_to_message(
+            records.as_slice(),
+            model,
+        ))
     }
 }
 
@@ -1454,6 +1460,84 @@ impl EventFilter {
 
 #[cfg(test)]
 mod tests {
+    #[tokio::test]
+    async fn bc2_bc3_later_records_entries_boundaries_and_failures() {
+        use super::{ClaudeRun, Item};
+        use crate::{
+            collection::{LIMIT_MESSAGE, MAX_BYTES, MAX_RECORDS},
+            error::AppError,
+        };
+        for (first, count, record, overflow) in [
+            (Some(String::new()), 1, "x".repeat(MAX_BYTES - 4), false),
+            (Some(String::new()), 1, "x".repeat(MAX_BYTES - 3), true),
+            (None, 1, "é".repeat((MAX_BYTES - 2) / 2), false),
+            (Some(String::new()), MAX_RECORDS - 1, String::new(), false),
+            (Some(String::new()), MAX_RECORDS, String::new(), true),
+        ] {
+            let (tx, rx) = tokio::sync::mpsc::channel(4);
+            let observe = tx.downgrade();
+            let producer = tokio::spawn(async move {
+                for _ in 0..count {
+                    if tx.send(Item::Record(record.clone())).await.is_err() {
+                        break;
+                    }
+                }
+                if overflow {
+                    tx.closed().await;
+                }
+            });
+            let result = tokio::time::timeout(
+                std::time::Duration::from_secs(3),
+                ClaudeRun { first, rx }.collect("m"),
+            )
+            .await
+            .unwrap();
+            if overflow {
+                assert!(
+                    matches!(result,Err(AppError::Upstream{status:502,body}) if body == LIMIT_MESSAGE)
+                );
+            } else {
+                assert!(result.is_ok());
+            }
+            if let Some(tx) = observe.upgrade() {
+                assert!(tx.is_closed());
+            }
+            producer.await.unwrap();
+        }
+        for status in [401, 429, 502] {
+            let (tx, rx) = tokio::sync::mpsc::channel(1);
+            tx.send(Item::Failed {
+                status,
+                message: "explicit CLI failure".into(),
+            })
+            .await
+            .unwrap();
+            assert!(
+                matches!(ClaudeRun{first:Some(String::new()),rx}.collect("m").await,Err(AppError::Upstream{status:s,body}) if s == status && body == "explicit CLI failure")
+            );
+            assert!(tx.is_closed());
+        }
+    }
+
+    #[tokio::test]
+    async fn bc2_oversized_first_record_closes_receiver() {
+        let (tx, rx) = tokio::sync::mpsc::channel(1);
+        let run = super::ClaudeRun {
+            first: Some("x".repeat(16 * 1024 * 1024 - 1)),
+            rx,
+        };
+        let result = tokio::time::timeout(std::time::Duration::from_secs(1), run.collect("m"))
+            .await
+            .expect("over-limit first record must fail without waiting for EOF");
+        match result {
+            Err(crate::error::AppError::Upstream { status: 502, body }) => {
+                assert_eq!(body, "upstream response collection limit exceeded")
+            }
+            other => panic!("unexpected {other:?}"),
+        }
+        assert!(tx.is_closed());
+    }
+
     use super::*;
 
     #[test]

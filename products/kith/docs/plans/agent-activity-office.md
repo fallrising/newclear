@@ -3,7 +3,7 @@
 - 日期：2026-10-25；版本：0.1。
 - 文件工作：[Issue #629](https://github.com/fallrising/newclear/issues/629)。本次為 AV-0 文件里程碑；程式里程碑均為 `NOT_STARTED`。
 - 定位：Kith 現有房間的活動呈現與提及入口。沿用 [SDD](../../SDD.md)、[v2 契約](../v2/README.md)、[成本控制](../cost-safety.md)；本計畫不改 INV-01–19。
-- 授權：本輪交付開發文件與 Draft PR。以下程式切片是後續規劃，沒有因文件合併而自動取得實作、付費或部署授權。
+- 授權：2026-10-25 owner 明確追加更新文件、開 PR 並合併；本輪完成 AV-0 文件、必要檢查／審查、PR 合併及遠端回讀。以下程式切片是後續規劃，沒有因文件合併而自動取得實作、付費或部署授權。
 
 ## 1. 目標與設計決定
 
@@ -163,7 +163,7 @@ flowchart TD
 
 | 階段 | 交付範圍 | 依賴與停止條件 | 目前狀態 |
 | --- | --- | --- | --- |
-| AV-0 | 本文件、來源、導航、SUCCESS、task／report | 文件 AC 通過後交付 Draft PR；不啟動程式階段 | 文件已撰寫；驗證與交付狀態見 report |
+| AV-0 | 本文件、來源、導航、SUCCESS、task／report | 文件 AC、必要 CI／審查通過後合併 PR，回讀遠端並收尾；不啟動程式階段 | 文件驗證通過；合併與收尾紀錄見 report／任務板 |
 | AV-1 | 本房活動清單／卡片、projection、詳情、提及草稿入口 | 只用現有資料；現有欄位不足就顯示 unknown，不擴充後端或發明狀態 | NOT_STARTED |
 | AV-2 | 同一 projection 的 2D／靜態 renderer、合成公開 demo | AV-1 驗收；先決定性 fixture，再加動畫。3D／公開真實資料不在此片 | NOT_STARTED |
 | AV-3 | 精細活動的 ADR、版本化事件及一種明確來源 adapter | 另立工作，固定來源與相容矩陣；以真實來源證據驗收，先保留缺口 | NOT_STARTED |

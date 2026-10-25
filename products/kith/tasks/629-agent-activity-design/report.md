@@ -1,4 +1,4 @@
-STATUS: VERIFIED — AV-0 文件與 Draft PR 交付；未合併
+STATUS: VERIFIED — AV-0 文件驗證通過；Git 交付狀態見下方紀錄
 
 Issue: https://github.com/fallrising/newclear/issues/629
 Component: products/kith
@@ -35,7 +35,7 @@ PR: https://github.com/fallrising/newclear/pull/630
 
 ## 遠端交付
 
-已建立 [Draft PR #630](https://github.com/fallrising/newclear/pull/630)，base 為 `main`，保留 draft／open／未合併。首個文件 commit 為 [`db0097f35a0134a5125528467242ba66a5fc7127`](https://github.com/fallrising/newclear/commit/db0097f35a0134a5125528467242ba66a5fc7127)，parent 為上述固定 main。已透過 GitHub App 回讀分支與 PR head、commit parent／tree、完整 8 檔內容與 compare 路徑；內容與候選逐檔一致，沒有把本地來源快照的其他檔案發布為新增。
+首次以 Draft 建立 [PR #630](https://github.com/fallrising/newclear/pull/630)，base 為 `main`。2026-10-25 owner 已追加更新文件並合併的明確授權；本輪依最終候選完成必要檢查／審查後正常合併。最終合併 SHA／時間以 PR 與[任務板](https://github.com/fallrising/newclear/blob/main/products/kith/docs/tasks/BOARD.md) 的實際收尾紀錄為準。首個文件 commit 為 [`db0097f35a0134a5125528467242ba66a5fc7127`](https://github.com/fallrising/newclear/commit/db0097f35a0134a5125528467242ba66a5fc7127)，parent 為上述固定 main。已透過 GitHub App 回讀分支與 PR head、commit parent／tree、完整 8 檔內容與 compare 路徑；內容與候選逐檔一致，沒有把本地來源快照的其他檔案發布為新增。
 
 首個文件 commit 的 CI 已完成並確認 run 的 head SHA：
 
@@ -44,10 +44,10 @@ PR: https://github.com/fallrising/newclear/pull/630
 | Kith CI／test、web | SUCCESS | [run 40177140228](https://github.com/fallrising/newclear/actions/runs/40177140228)：既有 lint／npm test、web build 與合成閱讀 bundle build 均通過 |
 | Project success contracts／validate | SUCCESS | [run 40177140217](https://github.com/fallrising/newclear/actions/runs/40177140217)：全域文件契約 workflow 通過 |
 
-本次補記 report／SUCCESS／任務板會產生後續 commit；上表只證明列出的來源 commit，不代替後續 head 的 CI。最終 head、其自身 CI、最終遠端回讀結果保存在 [PR Checks](https://github.com/fallrising/newclear/pull/630/checks) 與 PR／issue 的交付摘要，須對照同一 SHA，不從上一輪成功外推。Issue 使用 `Refs #629`，維持 open。
+上表只證明列出的來源 commit，不代替後續 head 的 CI。上一輪 Draft 交付 head `0be2d7b1a0f75cb58df50810c7da961fb069bdfd` 的 [Kith CI](https://github.com/fallrising/newclear/actions/runs/40177349501) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/40177349443) 亦已通過；本輪只更新 plan／task／report／BOARD 的授權與交付說明，提交後仍按新 head 核對。最終 head、其自身 CI、最終遠端回讀結果保存在 [PR Checks](https://github.com/fallrising/newclear/pull/630/checks) 與 PR／issue 的交付摘要，須對照同一 SHA，不從上一輪成功外推。Issue 使用 `Refs #629`，在 AV-0 合併、遠端回讀與任務板收尾完成後才關閉。
 
 ## 限制與交接
 
 終端 clone 因 HTTPS proxy 連線不可用而 exit 128；GitHub App 的 repo 讀寫已獨立確認成功。此次透過 App 固定來源、原子 Git 物件、帶 expected head 的非 force 分支更新與遠端回讀交付，沒有把終端網路問題誤判為 repo 權限不足。
 
-下一步為審閱 AV-0 計畫；程式工作另立 AV-1，先驗證資料語意與明確提及，再進 AV-2 的 2D／靜態展示。Draft PR 不自動合併，不啟動下一個程式里程碑。任務板保持 in_progress／無 end，待實際合併才按根合約收尾。
+本輪完成 AV-0 PR 合併、遠端回讀與任務板收尾；合併前任務列保持 in_progress／無 end，合併後以只改任務板的 PR 記錄實際 merged_at。程式工作另立 AV-1，先驗證資料語意與明確提及，再進 AV-2 的 2D／靜態展示；本輪不啟動下一個程式里程碑。

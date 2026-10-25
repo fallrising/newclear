@@ -27,8 +27,8 @@ Owner: ChatGPT 主導，工作識別 `kith-activity-docs-20261025`；單一 writ
 
 ## 操作授權
 
-- Commit／push 工作分支／Draft PR：是，依本輪文件交付與既有工作流程。
-- Merge／release／deploy／付費呼叫／權限變更：本工作不執行。
+- Commit／push 工作分支／PR／merge：是；2026-10-25 owner 明確追加「更新文檔，開 PR，然後合併」。沿用 PR #630，必要檢查／獨立審查通過後正常合併並回讀遠端。
+- Release／deploy／付費呼叫／權限變更：本工作不執行。
 - Issue／board／本 task 與 report：本工作追蹤與交接。
 
-PR 使用 `Refs #629`，不自動關閉 issue。交付後下一步是審閱此計畫，再另立 AV-1 的實作工作。主導 agent 整合子工作與驗證，子工作不取得遠端寫入或擴張範圍權限。
+PR 使用 `Refs #629`；實際合併後依根合約另以只改任務板的 PR 補 done／end，收尾完成再關閉本文件 issue。下一個程式工作另立 AV-1，本輪不啟動。主導 agent 整合子工作、驗證、合併及交接，子工作不取得遠端寫入或擴張範圍權限。

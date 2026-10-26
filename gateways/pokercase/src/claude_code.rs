@@ -130,7 +130,7 @@ struct LiveRun {
     stop: CancellationToken,
     /// Latched only after the reader has released all owned resources.
     cleaned: CancellationToken,
-    /// A partially written resumed turn must never become reusable or shelved.
+    /// An interrupted input or first-reply wait must never become reusable or shelved.
     interrupted_input: std::sync::atomic::AtomicBool,
     /// When it started waiting for tool results or for the next turn.
     waiting_since: Mutex<Option<Instant>>,
@@ -146,7 +146,7 @@ struct LiveRun {
     idle_now: std::sync::atomic::AtomicBool,
 }
 
-/// Retire selected input ownership if its write fails or its future is dropped.
+/// Retire the selected run when input or first-reply ownership is interrupted.
 struct ResumeInputGuard(Option<Arc<LiveRun>>);
 
 impl Drop for ResumeInputGuard {
@@ -415,7 +415,7 @@ impl ClaudeCode {
         model: &str,
         chat: &Value,
         cancel: &CancellationToken,
-    ) -> Result<Option<mpsc::Receiver<Item>>, UpstreamAttemptError> {
+    ) -> Result<Option<(Arc<LiveRun>, mpsc::Receiver<Item>)>, UpstreamAttemptError> {
         let sig = signature(model, chat);
         let msgs = convo(chat);
         let normed: Vec<Value> = msgs.iter().map(norm).collect();
@@ -480,7 +480,7 @@ impl ClaudeCode {
             }
             Some(true) => {
                 guard.0 = None;
-                Ok(Some(rx))
+                Ok(Some((run, rx)))
             }
         }
     }
@@ -583,7 +583,7 @@ impl ClaudeCode {
 
     /// If `chat` ends with exactly the results a waiting run asked for, hand them over
     /// and return a new sink's receiver for that run's next message.
-    fn continue_run(&self, chat: &Value) -> Option<mpsc::Receiver<Item>> {
+    fn continue_run(&self, chat: &Value) -> Option<(Arc<LiveRun>, mpsc::Receiver<Item>)> {
         let results = trailing_tool_results(chat)?;
         let known = convo(chat).iter().map(norm).collect();
         let mut live = self.live.lock().unwrap();
@@ -621,7 +621,7 @@ impl ClaudeCode {
                 }
             }
         }
-        Some(rx)
+        Some((run, rx))
     }
 
     /// Detach this message's sender before making the run reusable. Retire a
@@ -1115,6 +1115,38 @@ pub(crate) async fn first_record(
     }
 }
 
+/// Own this request's selected run until the first record is handed off. Cursor
+/// still uses `first_record` directly; its cancellation policy is independent.
+async fn first_reply(
+    run: Arc<LiveRun>,
+    rx: mpsc::Receiver<Item>,
+    cancel: &CancellationToken,
+) -> Result<ClaudeRun, UpstreamAttemptError> {
+    let mut guard = ResumeInputGuard(Some(run.clone()));
+    let result = tokio::select! {
+        biased;
+        _ = cancel.cancelled() => None,
+        result = first_record(rx) => Some(result),
+    };
+    match result {
+        None => {
+            // The receiver has been dropped before waiting for latched cleanup.
+            drop(guard);
+            run.cleaned.cancelled().await;
+            Err(UpstreamAttemptError {
+                status: 499,
+                body: "client disconnected".into(),
+                retryable: false,
+            })
+        }
+        Some(result) => {
+            // Preserve ordinary errors and their existing cleanup/fallback timing.
+            guard.0 = None;
+            result
+        }
+    }
+}
+
 fn write_private(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
     use std::io::Write;
     let mut opts = std::fs::OpenOptions::new();
@@ -1144,13 +1176,13 @@ pub async fn start(
             retryable: false,
         });
     }
-    if let Some(rx) = cc.continue_run(chat) {
+    if let Some((run, rx)) = cc.continue_run(chat) {
         debug!("tool results go on in the waiting Claude Code run");
-        return first_record(rx).await;
+        return first_reply(run, rx, cancel).await;
     }
-    if let Some(rx) = cc.resume_run(model, chat, cancel).await? {
+    if let Some((run, rx)) = cc.resume_run(model, chat, cancel).await? {
         debug!("the next turn goes on in the idle Claude Code run");
-        return first_record(rx).await;
+        return first_reply(run, rx, cancel).await;
     }
     if let Some(saved) = cc.unshelve(model, chat) {
         match spawn_run(cc, model, chat, cancel, Some(saved)).await {
@@ -1342,8 +1374,8 @@ async fn spawn_run(
     });
     cc.live.lock().unwrap().by_token.insert(token, run.clone());
 
-    // The first request's disconnect ends the run while it is still answering it.
-    let first_cancel = cancel.clone();
+    // The request owns cancellation until its first record is handed off.
+    let first_run = run.clone();
     cc.alive.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     let cc = cc.clone();
     tokio::spawn(async move {
@@ -1370,7 +1402,6 @@ async fn spawn_run(
                 _ = run.sink_changed.notified() => continue,
                 _ = disconnected => break,
                 _ = run.stop.cancelled() => break,
-                _ = first_cancel.cancelled(), if !sent => break,
                 l = lines.next_line() => l,
             };
             let l = match next {
@@ -1468,11 +1499,7 @@ async fn spawn_run(
         // as success, and deliver limit failures only after the process/slot are freed.
         let failure_sink = limit_failure.and_then(|message| sink(&run).map(|tx| (tx, message)));
         if let Some(tx) = sink(&run) {
-            if limit_failure.is_none()
-                && !sent
-                && !run.stop.is_cancelled()
-                && !first_cancel.is_cancelled()
-            {
+            if limit_failure.is_none() && !sent && !run.stop.is_cancelled() {
                 let err = diagnostics.diagnostic().await;
                 let tail: String = err
                     .trim()
@@ -1526,7 +1553,7 @@ async fn spawn_run(
         debug!("claude code run finished");
     });
 
-    first_record(rx).await
+    first_reply(first_run, rx, cancel).await
 }
 
 const EVENT_STATE_LIMIT_MESSAGE: &str = "Claude event state limit exceeded";
@@ -1858,7 +1885,7 @@ mod tests {
             ..Default::default()
         };
         let retiring = cc.finish_turn(&run, &mut filter).unwrap();
-        let mut next_rx = cc.continue_run(&synthetic_tool_result()).unwrap();
+        let (_, mut next_rx) = cc.continue_run(&synthetic_tool_result()).unwrap();
         retiring
             .send(Item::Record("old-terminal".into()))
             .await
@@ -2120,6 +2147,461 @@ while True: time.sleep(60)
             let response: Value = serde_json::from_slice(&healthy.unwrap()).unwrap();
             assert_eq!(response["content"][0]["text"], "replacement");
             assert_eq!(cc.runs.available_permits(), 1);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn fr1_cancel_silent_fresh_reply_cleans_before_499() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let bin = dir.path().join("fake-claude");
+        std::fs::write(&bin, "#!/usr/bin/env python3\nimport os, sys, time\nsys.stdin.readline()\nopen('admitted', 'w').write(str(os.getpid()))\nwhile True: time.sleep(60)\n").unwrap();
+        std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let cc = ClaudeCode::new(Some(bin.to_string_lossy().into()), dir.path(), 1);
+        let token = CancellationToken::new();
+        let runner = cc.clone();
+        let request_token = token.clone();
+        let mut pending = tokio::spawn(async move {
+            start(
+                &runner,
+                "sonnet",
+                &json!({"messages":[{"role":"user","content":"hello"}]}),
+                &request_token,
+            )
+            .await
+        });
+        let admitted = tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if let Ok(raw) = std::fs::read_to_string(cc.work_dir.join("admitted")) {
+                    if let Ok(pid) = raw.parse::<u32>() {
+                        break pid;
+                    }
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await;
+        if admitted.is_err() {
+            pending.abort();
+            cc.shutdown().await;
+        }
+        let pid = admitted.unwrap();
+        assert!(!pending.is_finished());
+        token.cancel();
+        let result = tokio::time::timeout(Duration::from_secs(7), &mut pending).await;
+        if result.is_err() {
+            pending.abort();
+        }
+        cc.shutdown().await;
+        let error = match result.expect("first reply cancellation hung").unwrap() {
+            Err(e) => e,
+            Ok(_) => panic!("silent process returned a reply"),
+        };
+        assert_eq!(
+            (error.status, error.body.as_str(), error.retryable),
+            (499, "client disconnected", false)
+        );
+        assert!(!Path::new(&format!("/proc/{pid}")).exists());
+        assert_eq!(cc.runs.available_permits(), 1);
+    }
+
+    /// The process really reads each user turn and emits tool announcements.
+    /// Tool results use the native mcp_call boundary, not an HTTP/helper process.
+    #[cfg(target_os = "linux")]
+    async fn first_reply_fixture(
+        mode: &str,
+        ignore_term: bool,
+    ) -> (tempfile::TempDir, ClaudeCode, Value, CancellationToken) {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let bin = dir.path().join("fake-claude");
+        let script = r#"#!/usr/bin/env python3
+import json, os, signal, sys, time
+mode = MODE
+if IGNORE_TERM: signal.signal(signal.SIGTERM, signal.SIG_IGN)
+resumed = '--resume' in sys.argv
+open('starts', 'a').write('resume\n' if resumed else 'fresh\n')
+open('pid', 'w').write(str(os.getpid()))
+sys.stdin.readline()
+sys.stderr.write('diagnostic' * 32768)
+sys.stderr.flush()
+print(json.dumps({'type':'system','subtype':'init','session_id':'first-reply-test'}), flush=True)
+if mode == 'saved_error' and resumed or mode == 'error':
+ print(json.dumps({'type':'result','is_error':True,'result':'auth failed' if resumed else 'usage limit'}), flush=True)
+ sys.exit(1)
+def reply(tool=False):
+ block = {'type':'tool_use','id':'tool_1','name':'mcp__thinrouter__probe','input':{}} if tool else {'type':'text','text':''}
+ events = [
+  {'type':'message_start','message':{'id':'reply','usage':{'input_tokens':1}}},
+  {'type':'content_block_start','index':0,'content_block':block},
+  {'type':'content_block_delta','index':0,'delta':{'type':'input_json_delta','partial_json':'{}'} if tool else {'type':'text_delta','text':'hello'}},
+  {'type':'content_block_stop','index':0},
+  {'type':'message_delta','delta':{'stop_reason':'tool_use' if tool else 'end_turn'},'usage':{'output_tokens':1}},
+  {'type':'message_stop'}]
+ for event in events: print(json.dumps({'type':'stream_event','event':event}), flush=True)
+if mode in ['idle', 'tool', 'healthy', 'saved_error']:
+ reply(mode == 'tool')
+ if mode == 'idle': sys.stdin.readline()
+ if mode in ['healthy', 'saved_error']:
+  while sys.stdin.readline(): reply()
+open('admitted', 'w').write(str(os.getpid()))
+while True: time.sleep(60)
+"#.replace("MODE", &format!("{mode:?}")).replace("IGNORE_TERM", if ignore_term { "True" } else { "False" });
+        std::fs::write(&bin, script).unwrap();
+        std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let mut cc = ClaudeCode::new(Some(bin.to_string_lossy().into()), dir.path(), 1)
+            .with_idle(Duration::from_secs(60))
+            .with_store(crate::store::Store::open(&dir.path().join("shelf.db"), None).unwrap());
+        cc.config_dir = dir.path().join("config");
+        let sibling = cc.work_dir.join("runs/keep");
+        std::fs::create_dir_all(&sibling).unwrap();
+        std::fs::write(sibling.join("sentinel"), b"keep").unwrap();
+        let session_dir = cc.session_dirs().remove(0);
+        std::fs::create_dir_all(&session_dir).unwrap();
+        std::fs::write(
+            session_dir.join("first-reply-test.jsonl"),
+            b"synthetic session",
+        )
+        .unwrap();
+        let mut chat = json!({"tools":[{"type":"function","function":{"name":"probe","parameters":{"type":"object"}}}],"messages":[{"role":"user","content":"first"}]});
+        let old = CancellationToken::new();
+        if mode == "idle" || mode == "tool" {
+            let first = tokio::time::timeout(Duration::from_secs(3), async {
+                start(&cc, "sonnet", &chat, &old)
+                    .await
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+            })
+            .await;
+            if first.is_err() {
+                cc.shutdown().await;
+            }
+            let response: Value = serde_json::from_slice(&first.unwrap()).unwrap();
+            if mode == "idle" {
+                assert_eq!(response["content"][0]["text"], "hello");
+            } else {
+                assert_eq!(response["stop_reason"], "tool_use");
+            }
+        }
+        if mode == "tool" {
+            chat["messages"]
+                .as_array_mut()
+                .unwrap()
+                .extend(convo(&synthetic_tool_result()));
+        } else if mode == "idle" || mode.starts_with("saved") {
+            chat["messages"].as_array_mut().unwrap().extend([
+                json!({"role":"assistant","content":"hello"}),
+                json!({"role":"user","content":"second"}),
+            ]);
+        }
+        if mode.starts_with("saved") {
+            let hashes: Vec<String> = convo(&chat)[..2]
+                .iter()
+                .map(|m| sha(&norm(m).to_string()))
+                .collect();
+            cc.store
+                .as_ref()
+                .unwrap()
+                .shelf_put(
+                    "first-reply-test",
+                    &sha(&signature("sonnet", &chat)),
+                    &hashes,
+                    SHELF_MOST,
+                )
+                .unwrap();
+        }
+        (dir, cc, chat, old)
+    }
+
+    #[cfg(target_os = "linux")]
+    async fn first_reply_admitted(cc: &ClaudeCode) -> u32 {
+        tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                if let Ok(raw) = std::fs::read_to_string(cc.work_dir.join("admitted")) {
+                    if let Ok(pid) = raw.parse::<u32>() {
+                        let initialized = cc
+                            .live
+                            .lock()
+                            .unwrap()
+                            .by_token
+                            .values()
+                            .any(|run| run.session_id.lock().unwrap().is_some());
+                        if initialized {
+                            break pid;
+                        }
+                    }
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .expect("fake process did not accept input")
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn fr1_fr2_current_cancel_and_drop_first_reply_matrix() {
+        for (mode, dropped, ignore_term) in [
+            ("fresh", false, false),
+            ("saved", false, false),
+            ("idle", false, false),
+            ("tool", false, false),
+            ("fresh", true, false),
+            ("saved", true, false),
+            ("idle", true, false),
+            ("tool", true, false),
+            ("fresh", false, true),
+            ("idle", true, true),
+        ] {
+            let (_dir, cc, chat, old) = first_reply_fixture(mode, ignore_term).await;
+            let token = CancellationToken::new();
+            let runner = cc.clone();
+            let current = token.clone();
+            let mut pending =
+                tokio::spawn(async move { start(&runner, "sonnet", &chat, &current).await });
+            if mode == "tool" {
+                let run = cc
+                    .live
+                    .lock()
+                    .unwrap()
+                    .by_token
+                    .values()
+                    .next()
+                    .unwrap()
+                    .clone();
+                let reply = tokio::time::timeout(
+                    Duration::from_secs(3),
+                    cc.mcp_call(&run.token, &json!({"name":"probe","arguments":{}})),
+                )
+                .await
+                .unwrap()
+                .unwrap();
+                assert_eq!(reply["content"][0]["text"], "synthetic-result");
+                assert!(
+                    run.pending.lock().unwrap().is_empty(),
+                    "tool continuation was admitted"
+                );
+            }
+            let pid = first_reply_admitted(&cc).await;
+            let run = cc
+                .live
+                .lock()
+                .unwrap()
+                .by_token
+                .values()
+                .next()
+                .unwrap()
+                .clone();
+            assert!(
+                !pending.is_finished(),
+                "stdout remains open without a new reply"
+            );
+            assert_eq!(
+                std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+                2
+            );
+            old.cancel();
+            tokio::task::yield_now().await;
+            assert!(
+                !run.stop.is_cancelled(),
+                "old request token must not own this wait"
+            );
+            assert!(!pending.is_finished());
+            if dropped {
+                pending.abort();
+                assert!(matches!(pending.await, Err(e) if e.is_cancelled()));
+                let cleaned =
+                    tokio::time::timeout(Duration::from_secs(7), run.cleaned.cancelled()).await;
+                if cleaned.is_err() {
+                    cc.shutdown().await;
+                }
+                cleaned.expect("dropped first reply did not finish cleanup");
+            } else {
+                token.cancel();
+                let done = tokio::time::timeout(Duration::from_secs(7), &mut pending).await;
+                if done.is_err() {
+                    pending.abort();
+                    cc.shutdown().await;
+                }
+                let error = match done
+                    .expect("current first reply cancellation hung")
+                    .unwrap()
+                {
+                    Err(e) => e,
+                    Ok(_) => panic!("cancelled reply succeeded"),
+                };
+                assert_eq!(
+                    (error.status, error.body.as_str(), error.retryable),
+                    (499, "client disconnected", false)
+                );
+                assert!(run.cleaned.is_cancelled(), "499 must follow cleanup");
+            }
+            assert!(!Path::new(&format!("/proc/{pid}")).exists());
+            assert_eq!(cc.runs.available_permits(), 1);
+            assert_eq!(cc.alive.load(std::sync::atomic::Ordering::SeqCst), 0);
+            assert!(cc.live.lock().unwrap().by_token.is_empty());
+            assert!(cc.live.lock().unwrap().idle.is_empty());
+            assert!(cc.store.as_ref().unwrap().shelf_ids().unwrap().is_empty());
+            assert!(!cc.session_saved("first-reply-test"));
+            assert_eq!(
+                std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+                1
+            );
+            assert_eq!(
+                std::fs::read(cc.work_dir.join("runs/keep/sentinel")).unwrap(),
+                b"keep"
+            );
+            assert_eq!(
+                std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+                if mode == "saved" {
+                    "resume\n"
+                } else {
+                    "fresh\n"
+                }
+            );
+            // Exercise the released slot with a healthy actual replacement.
+            let script = std::fs::read_to_string(&cc.bin)
+                .unwrap()
+                .replace(&format!("mode = {mode:?}"), "mode = \"healthy\"")
+                .replace("if True: signal.signal", "if False: signal.signal");
+            std::fs::write(&cc.bin, script).unwrap();
+            let replacement = tokio::time::timeout(Duration::from_secs(3), async {
+                start(
+                    &cc,
+                    "sonnet",
+                    &json!({"messages":[{"role":"user","content":"replacement"}]}),
+                    &CancellationToken::new(),
+                )
+                .await
+                .unwrap()
+                .collect("sonnet")
+                .await
+                .unwrap()
+            })
+            .await;
+            cc.shutdown().await;
+            let response: Value = serde_json::from_slice(&replacement.unwrap()).unwrap();
+            assert_eq!(response["content"][0]["text"], "hello");
+            assert_eq!(cc.runs.available_permits(), 1);
+        }
+    }
+
+    #[tokio::test]
+    async fn fr3_ready_cancellation_wins_and_cleanup_latch_is_retained() {
+        for item in [
+            Item::Record("queued".into()),
+            Item::Failed {
+                status: 401,
+                message: "ordinary".into(),
+            },
+        ] {
+            let (_dir, _cc, run) = continuation_fixture();
+            // State-boundary injection: cleanup completed before this waiter starts.
+            run.cleaned.cancel();
+            let (tx, rx) = mpsc::channel(1);
+            tx.send(item).await.unwrap();
+            let cancel = CancellationToken::new();
+            cancel.cancel();
+            let error = match first_reply(run.clone(), rx, &cancel).await {
+                Err(e) => e,
+                Ok(_) => panic!("queued record defeated ready cancellation"),
+            };
+            assert_eq!(
+                (error.status, error.body.as_str(), error.retryable),
+                (499, "client disconnected", false)
+            );
+            assert!(run.stop.is_cancelled());
+            assert!(tx.is_closed());
+        }
+        for failure in [false, true] {
+            let (_dir, _cc, run) = continuation_fixture();
+            let (tx, rx) = mpsc::channel(1);
+            if failure {
+                tx.send(Item::Failed {
+                    status: 401,
+                    message: "ordinary".into(),
+                })
+                .await
+                .unwrap();
+            }
+            drop(tx);
+            let error = match first_reply(run.clone(), rx, &CancellationToken::new()).await {
+                Err(e) => e,
+                Ok(_) => panic!("expected ordinary failure"),
+            };
+            assert_eq!(
+                (error.status, error.retryable),
+                (if failure { 401 } else { 502 }, true)
+            );
+            assert!(
+                !run.stop.is_cancelled(),
+                "ordinary classification keeps existing ownership"
+            );
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn fr3_healthy_handoff_and_saved_failure_fallback() {
+        for mode in ["healthy", "saved_error", "error"] {
+            let (_dir, cc, mut chat, token) = first_reply_fixture(mode, false).await;
+            let first =
+                tokio::time::timeout(Duration::from_secs(3), start(&cc, "sonnet", &chat, &token))
+                    .await;
+            if first.is_err() {
+                cc.shutdown().await;
+            }
+            if mode == "error" {
+                let error = match first.unwrap() {
+                    Err(e) => e,
+                    Ok(_) => panic!("expected failure"),
+                };
+                assert_eq!((error.status, error.retryable), (429, true));
+                cc.shutdown().await;
+                continue;
+            }
+            let first = first.unwrap().unwrap();
+            token.cancel(); // The first-record handoff has already disarmed ownership.
+            let response = tokio::time::timeout(Duration::from_secs(3), first.collect("sonnet"))
+                .await
+                .unwrap()
+                .unwrap();
+            assert_eq!(
+                serde_json::from_slice::<Value>(&response).unwrap()["content"][0]["text"],
+                "hello"
+            );
+            let run = cc.live.lock().unwrap().idle[0].clone();
+            assert!(!run.stop.is_cancelled());
+            chat["messages"].as_array_mut().unwrap().extend([
+                json!({"role":"assistant","content":"hello"}),
+                json!({"role":"user","content":"next"}),
+            ]);
+            let next = tokio::time::timeout(Duration::from_secs(3), async {
+                start(&cc, "sonnet", &chat, &CancellationToken::new())
+                    .await
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+            })
+            .await;
+            assert!(Arc::ptr_eq(&cc.live.lock().unwrap().idle[0], &run));
+            cc.shutdown().await;
+            assert_eq!(
+                serde_json::from_slice::<Value>(&next.unwrap()).unwrap()["content"][0]["text"],
+                "hello"
+            );
+            assert_eq!(
+                std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+                if mode == "saved_error" {
+                    "resume\nfresh\n"
+                } else {
+                    "fresh\n"
+                }
+            );
         }
     }
 

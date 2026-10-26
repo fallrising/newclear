@@ -30,6 +30,7 @@
 | [labs/zircon-godot](labs/zircon-godot/SUCCESS.md) | labs | 研究並規劃 Zircon C# 伺服器與 Godot 客戶端的有界遊戲實驗 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [platform/agent-platform](platform/agent-platform/SUCCESS.md) | platform | 以網頁派送、監看與介入隔離的程式代理任務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/agent-workforce](platform/agent-workforce/SUCCESS.md) | platform | 持久協調不同代理產品的身份、授權、會話與工作交付 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-20 |
+| [platform/cloud-lab](platform/cloud-lab/SUCCESS.md) | platform | 以共同契約與知識樹組合個人 Cloudflare 工具、遠端運維及代理能力 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-26 |
 | [platform/dim-gate](platform/dim-gate/SUCCESS.md) | platform | 以有狀態模擬資料展示跨角色資源申請、發布與故障恢復 | 完成 | [usable/dim-gate/v0.1.0](https://github.com/fallrising/newclear/tree/usable/dim-gate/v0.1.0/platform/dim-gate) | 2026-10-18 |
 | [platform/edge-ops](platform/edge-ops/SUCCESS.md) | platform | 以非特權代理收集主機狀態並提供受控運維流程 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-28 |
 | [platform/fanzloud](platform/fanzloud/SUCCESS.md) | platform | 提供單人 Codex Cloud 任務控制與可追溯事件儲存 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |

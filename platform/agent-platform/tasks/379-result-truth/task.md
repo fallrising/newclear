@@ -42,3 +42,13 @@ Existing backend/long/native/OC/BGC/expiry suites remain valid and are not repla
 Required hosted CI and normal merge precede scoped delivery. Runtime/model/verification
 execution are scripted: no VM/provider/actual profile command execution, complete fake
 E2E, liveAT09/12/13, deployment, M4 or usable-tag claim.
+
+### Reviewed fixture lifetime
+
+One owned Python child keeps the same scripted Runtime alive across failed,unknown
+and fault-last Worker outcomes and browser observations. It emits bounded JSON-only
+readiness and accepts only bounded stdin observe/close commands; observe uses SELECTs
+and snapshots, never worker claims or writes. Unknown/oversize input fails closed.
+Suppress ambient MODEL_PROXY_CONFIG and leave mock_tools disabled. Browser finally
+closes the exact child with bounded wait/termination fallback while preserving primary
+failures; closing a synthetic process is not VM stop proof or capacity release.

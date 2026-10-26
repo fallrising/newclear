@@ -269,8 +269,10 @@ Delivered in [PR656](https://github.com/fallrising/newclear/pull/656), source `3
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| RI-1 | Cancel resumed stdin acquisition/write without replay | RI-1 | in_progress | 2026-10-26T07:02:16Z | — | 2026-10-26T07:02:16Z |
-| RI-2 | Retire interrupted runs and release resources | RI-2 | in_progress | 2026-10-26T07:02:16Z | — | 2026-10-26T07:02:16Z |
-| RI-3 | Preserve healthy continuation and ordinary-error fallback | RI-3 | in_progress | 2026-10-26T07:02:16Z | — | 2026-10-26T07:02:16Z |
+| RI-1 | Cancel resumed stdin acquisition/write without replay | RI-1 | done | 2026-10-26T07:02:16Z | 2026-10-26T07:24:14Z | 2026-10-26T07:24:14Z |
+| RI-2 | Retire interrupted runs and release resources | RI-2 | done | 2026-10-26T07:02:16Z | 2026-10-26T07:24:14Z | 2026-10-26T07:24:14Z |
+| RI-3 | Preserve healthy continuation and ordinary-error fallback | RI-3 | done | 2026-10-26T07:02:16Z | 2026-10-26T07:24:14Z | 2026-10-26T07:24:14Z |
 
 [Task and acceptance](T-0420-claude-resume-cancel.md). Explicit resumed-input cancellation only; no HTTP-disconnect or general response-wait claim.
+
+Delivered in [Product PR660](https://github.com/fallrising/newclear/pull/660), source `9d9948374846dea442685c65769314cca130ead2`, merge `ea6962db2149450c2deea168e63c6d8cfc717e87` at 2026-10-26T07:24:14Z. RI-1–RI-3:222tests/18groups,4newtests/8scenarios,fmt/Clippy,43contracts/six indexes, independent source/final-document review and requiredCI passed. Source/merge ancestry, trailers and scoped remote readback PASS. Cancelled resumed stdin lock/write returns499 only after selected-run cleanup, without fallback/replay; dropped input retires the run. Healthy continuation and ordinary missing-input fallback covered; actual BrokenPipe maps to same branch by inspection. Original RED7.10s retained. Existing5second stop grace/best-effort OS cleanup preserved; HTTP-disconnect detection/general response-wait outside scope. No live provider or whole-product acceptance; owner decides desk done.

@@ -99,3 +99,7 @@ fake/live/M4 scope remains open. Original failure history is retained.
 下載封存遇到明確 `410 artifact_expired` 時也立即停用該封存的下載／新匯出；
 metadata 重新讀取失敗或暫時回傳舊資料時仍保留過期狀態與原始摘要、diff、hash、size。
 其他錯誤可明確重試，不推定過期。詳見 [DUX01/02](tasks/379-download-expiry/report.md)。
+
+[Worker 成果真實性驗收](tasks/379-result-truth/report.md)補充 AT09 的瀏覽器層證據：
+驗證失敗／未設定驗證及成果封存失敗，各自對應 Worker 寫入的實際狀態；
+合成 runtime 的完成宣稱不等於驗證通過。

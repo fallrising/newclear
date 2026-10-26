@@ -19,3 +19,14 @@ Archive integrity failures return 409 without serving payload bytes. Download re
 ## Validation and remaining scope
 
 Required checks cover PostgreSQL atomicity, immutable/idempotent writes, missing/expired sessions and cross-run object IDs, corruption and bounds, real Worker integration through existing deterministic connector boundaries, cleanup/retry stability, plus Chromium download from the selected historical run. No fresh KVM/live provider is needed for this database/download slice. Full M3 safety integration, arbitrary artifacts, independent object-store retry, GitHub export, backup/restore/GC, production deployment and the overall M4 MVP gate remain unfinished.
+
+## Worker-to-browser truthfulness qualification
+
+The [RTF01/02 contract](../tasks/379-result-truth/task.md) adds a bounded browser
+observation of real Worker writes through a scripted runtime HTTP boundary: failed
+verification, unknown/no-checks despite an untrusted completion claim, and an injected
+archive-persistence exception. The latter must remain interrupted with no saved result
+or archive and with capacity held. Existing backend causal verification/atomicity
+evidence is reused; this test does not execute profile commands or establish a new
+SQL-outage, real connector-verifier, VM/provider or whole-M4 proof.
+[Actual commands, results and limitations](../tasks/379-result-truth/report.md).

@@ -213,7 +213,7 @@ after actual Worker outcomes; existing backend behavior is unchanged.
 
 | AC | Status | Verification plan |
 | --- | --- | --- |
-| RTF-01 | planned | RealWorker/scriptedHTTP failed and unknown/no-checks results match API/archive/browser, no invented verification success or side effects |
-| RTF-02 | planned | Injected archive persistence exception produces actual interrupted/resultless/held-capacity state reflected by browser |
+| RTF-01 | passed (local) | T114-browser1 realWorker/scriptedHTTP failed and unknown/no-checks match API/archive/browser; actual download bytes/hash and live no-side-effect observations |
+| RTF-02 | passed (local) | Same single scenario4.0s includes persist exception→interrupted/resultless/noarchive/held1/no release; reload/live observations unchanged; freshbuild/type/format/Ruff passed |
 
 No SQL-state rewrite/trigger bypass or new product RED claim. Fullfake/live/M4 remains open.

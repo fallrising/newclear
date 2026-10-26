@@ -216,5 +216,5 @@ This post-merge record supersedes pre-merge wording in the dated local snapshot.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- |
-| T-0112.1 | Present actual failed and unverified Worker outcomes without false verification success | RTF-01 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:15:28Z |
-| T-0112.2 | Preserve interrupted/resultless archive-failure UI and held capacity | RTF-02 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:15:28Z |
+| T-0112.1 | Present actual failed and unverified Worker outcomes without false verification success | RTF-01 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |
+| T-0112.2 | Preserve interrupted/resultless archive-failure UI and held capacity | RTF-02 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |

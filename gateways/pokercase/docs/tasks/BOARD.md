@@ -294,8 +294,10 @@ Delivered in [Product PR662](https://github.com/fallrising/newclear/pull/662), s
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| OC-1 | Cancel active output without partial success or replay | OC-1 | in_progress | 2026-10-26T10:32:34Z | — | 2026-10-26T10:48:34Z |
-| OC-2 | Release interrupted output resources before reporting | OC-2 | in_progress | 2026-10-26T10:32:34Z | — | 2026-10-26T10:48:34Z |
-| OC-3 | Preserve completed-turn ownership and reuse | OC-3 | in_progress | 2026-10-26T10:32:34Z | — | 2026-10-26T10:48:34Z |
+| OC-1 | Cancel active output without partial success or replay | OC-1 | done | 2026-10-26T10:32:34Z | 2026-10-26T10:55:28Z | 2026-10-26T10:55:28Z |
+| OC-2 | Release interrupted output resources before reporting | OC-2 | done | 2026-10-26T10:32:34Z | 2026-10-26T10:55:28Z | 2026-10-26T10:55:28Z |
+| OC-3 | Preserve completed-turn ownership and reuse | OC-3 | done | 2026-10-26T10:32:34Z | 2026-10-26T10:55:28Z | 2026-10-26T10:55:28Z |
 
 [Task and acceptance](T-0422-claude-output-cancel.md). Explicit active-output cancellation; HTTP-disconnect propagation excluded.
+
+Delivered in [Product PR665](https://github.com/fallrising/newclear/pull/665), source `398c2e1521a3a33c5a77eb1239f409a4c666f98f`, merge `3300da0fccf3b0f573fa8692684491939a67bfa6` at2026-10-26T10:55:28Z. OC-1–OC-3:232tests/18groups,6newtests/19primaryscenarios (16actual-process/3state),37Claude-focusedtests,fmt/Clippy,43contracts/six indexes, independent source/final-document review and requiredCI passed. Source/merge ancestry, trailers and scoped remote content PASS. Explicit active-output cancellation waits for selected-run cleanup; original channel identity protects later sinks, and dropping a completed backpressured terminal preserves continuation. Two behavioral REDs and corrected test-only E0382 retained. HTTP disconnect propagation and never-polled response autonomous cancellation excluded; existing five-second grace/best-effort cleanup retained. No live-provider or whole-product acceptance; owner decides desk done.

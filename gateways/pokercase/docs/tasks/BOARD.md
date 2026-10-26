@@ -322,6 +322,6 @@ Delivered in [Product PR667](https://github.com/fallrising/newclear/pull/667), s
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| BP-01 | Stop a continuation behind a retained completed reply | BP-1 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T15:47:22Z |
-| BP-02 | Release run resources under reply backpressure | BP-2 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T15:47:22Z |
-| BP-03 | Preserve healthy delivery and completed-request ownership | BP-3 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T15:47:22Z |
+| BP-01 | Stop a continuation behind a retained completed reply | BP-1 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T16:09:01Z |
+| BP-02 | Release run resources under reply backpressure | BP-2 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T16:09:01Z |
+| BP-03 | Preserve healthy delivery and completed-request ownership | BP-3 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T16:09:01Z |

@@ -391,17 +391,15 @@ impl ClaudeCode {
         }
     }
 
-    /// End the run after `idle` unless it was used again meanwhile.
-    fn expire_later(&self, run: &Arc<LiveRun>) {
-        let (run, idle) = (run.clone(), self.idle);
+    /// End this completed phase at its idle deadline unless it was used again.
+    fn expire_later(&self, run: &Arc<LiveRun>, since: Instant) {
+        let (run, idle, live) = (run.clone(), self.idle, self.live.clone());
         tokio::spawn(async move {
-            tokio::time::sleep(idle).await;
-            let still = run
-                .waiting_since
-                .lock()
-                .unwrap()
-                .is_some_and(|t| t.elapsed() >= idle);
-            if still {
+            tokio::time::sleep_until(tokio::time::Instant::from_std(since + idle)).await;
+            // Serialize the expiry decision with both kinds of new-sink admission.
+            // The captured phase cannot expire a later completed or active turn.
+            let _live = live.lock().unwrap();
+            if *run.waiting_since.lock().unwrap() == Some(since) {
                 debug!("Claude Code run idle too long; ending it");
                 run.stop.cancel();
             }
@@ -588,6 +586,13 @@ impl ClaudeCode {
         let known = convo(chat).iter().map(norm).collect();
         let mut live = self.live.lock().unwrap();
         let run = live.waiting.get(&results[0].0)?.clone();
+        if run.stop.is_cancelled()
+            || run
+                .interrupted_input
+                .load(std::sync::atomic::Ordering::SeqCst)
+        {
+            return None;
+        }
         let pending = run.pending.lock().unwrap().clone();
         let mut want: Vec<&String> = pending.iter().collect();
         let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
@@ -666,8 +671,11 @@ impl ClaudeCode {
             run.announcement_changed.notify_waiters();
             live.idle.push(run.clone());
         }
-        *run.waiting_since.lock().unwrap() = Some(Instant::now());
+        let since = Instant::now();
+        *run.waiting_since.lock().unwrap() = Some(since);
         live.order.push_back(run.clone());
+        // Delivery of the detached terminal may remain backpressured indefinitely.
+        self.expire_later(run, since);
         debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_retire_sink");
         tx
     }
@@ -1560,7 +1568,14 @@ async fn spawn_run(
                     if let Some(tx) = tx {
                         for rec in records {
                             sent = true;
-                            if tx.send(Item::Record(rec)).await.is_err() {
+                            // Run stop also owns a send blocked by backpressure,
+                            // including a completed sender detached for reuse.
+                            let delivered = tokio::select! {
+                                biased;
+                                _ = run.stop.cancelled() => break 'read,
+                                delivered = tx.send(Item::Record(rec)) => delivered,
+                            };
+                            if delivered.is_err() {
                                 // A completed turn detached before publishing reuse.
                                 // Dropping its queued terminal cannot own a later turn.
                                 if !filter.done {
@@ -1573,10 +1588,9 @@ async fn spawn_run(
                         debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_no_sink", done = filter.done);
                     }
                     if filter.done {
-                        // Reset and expire even an unsolicited completion. Do not
-                        // clear the next request's sender after publishing reuse.
+                        // Reset even an unsolicited completion. Do not clear the
+                        // next request's sender or reschedule its idle deadline.
                         filter.reset();
-                        cc.expire_later(&run);
                     }
                 }
                 Some("result") => {
@@ -1596,12 +1610,14 @@ async fn spawn_run(
                             .collect::<String>();
                         if let Some(tx) = sink(&run) {
                             sent = true;
-                            let _ = tx
-                                .send(Item::Failed {
+                            tokio::select! {
+                                biased;
+                                _ = run.stop.cancelled() => {},
+                                _ = tx.send(Item::Failed {
                                     status: status_for(&msg),
                                     message: format!("Claude Code: {msg}"),
-                                })
-                                .await;
+                                }) => {},
+                            }
                         }
                     }
                     break;
@@ -1633,12 +1649,14 @@ async fn spawn_run(
                     .collect();
                 let msg = format!("Claude Code ended without a reply: {tail}");
                 warn!("{msg}");
-                let _ = tx
-                    .send(Item::Failed {
+                tokio::select! {
+                    biased;
+                    _ = run.stop.cancelled() => {},
+                    _ = tx.send(Item::Failed {
                         status: status_for(&tail),
                         message: msg,
-                    })
-                    .await;
+                    }) => {},
+                }
             }
         }
         debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_cleanup");
@@ -2020,8 +2038,8 @@ mod tests {
         assert!(matches!(next_rx.rx.recv().await, Some(Item::Record(s)) if s == "new-turn"));
     }
 
-    #[test]
-    fn tc3_unsolicited_completion_retires_all_waiting_tool_state() {
+    #[tokio::test]
+    async fn tc3_unsolicited_completion_retires_all_waiting_tool_state() {
         use super::*;
         for with_sink in [false, true] {
             let (_dir, cc, run) = continuation_fixture();
@@ -2734,6 +2752,664 @@ while True: time.sleep(60)
             std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
             "fresh\n"
         );
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn bp1_cancel_next_request_while_old_terminal_is_backpressured() {
+        let (_dir, cc, mut chat, _) = first_reply_fixture("healthy", false).await;
+        let script = std::fs::read_to_string(&cc.bin).unwrap().replace(
+            "for event in events: print(json.dumps({'type':'stream_event','event':event}), flush=True)",
+            "events[3:3] = [events[2]] * 60\n for event in events: print(json.dumps({'type':'stream_event','event':event}), flush=True)",
+        );
+        std::fs::write(&cc.bin, script).unwrap();
+        let old = start(&cc, "sonnet", &chat, &CancellationToken::new())
+            .await
+            .unwrap();
+        let run = cc
+            .live
+            .lock()
+            .unwrap()
+            .by_token
+            .values()
+            .next()
+            .unwrap()
+            .clone();
+        let completed = tokio::time::timeout(Duration::from_secs(3), async {
+            while cc.live.lock().unwrap().idle.is_empty() {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await;
+        if completed.is_err() {
+            drop(old);
+            cc.shutdown().await;
+            panic!("old turn did not detach before terminal backpressure");
+        }
+        assert_eq!(old.rx.capacity(), 0);
+        assert!(run.sink.lock().unwrap().is_none());
+        let pid: u32 = std::fs::read_to_string(cc.work_dir.join("pid"))
+            .unwrap()
+            .parse()
+            .unwrap();
+        chat["messages"].as_array_mut().unwrap().extend([
+            json!({"role":"assistant","content":"hello".repeat(61)}),
+            json!({"role":"user","content":"next"}),
+        ]);
+        let token = CancellationToken::new();
+        let current = token.clone();
+        let runner = cc.clone();
+        let mut next = tokio::spawn(async move { start(&runner, "sonnet", &chat, &current).await });
+        let admitted = tokio::time::timeout(Duration::from_secs(3), async {
+            while run.sink.lock().unwrap().is_none() {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await;
+        if admitted.is_err() {
+            next.abort();
+            drop(old);
+            cc.shutdown().await;
+            panic!("new continuation sink not installed");
+        }
+        assert!(!next.is_finished());
+        token.cancel();
+        let cancelled = tokio::time::timeout(Duration::from_secs(3), &mut next).await;
+        let clean_before_old_drop = run.cleaned.is_cancelled();
+        let alive_before_old_drop = Path::new(&format!("/proc/{pid}")).exists();
+        let permits_before_old_drop = cc.runs.available_permits();
+        eprintln!(
+            "BP-1 before old receiver drop: stop={}, cleaned={}, process_exists={}, free_slots={}",
+            run.stop.is_cancelled(),
+            clean_before_old_drop,
+            alive_before_old_drop,
+            permits_before_old_drop
+        );
+        if cancelled.is_err() {
+            next.abort();
+        }
+        drop(old);
+        cc.shutdown().await;
+        let error = match cancelled
+            .expect("cancelled next request remained blocked behind retained old terminal")
+            .unwrap()
+        {
+            Err(error) => error,
+            Ok(_) => panic!("cancelled continuation succeeded"),
+        };
+        assert_eq!(
+            (error.status, error.body.as_str(), error.retryable),
+            (499, "client disconnected", false)
+        );
+        assert!(clean_before_old_drop);
+        assert!(!alive_before_old_drop);
+        assert_eq!(permits_before_old_drop, 1);
+    }
+
+    #[cfg(target_os = "linux")]
+    struct BackpressuredReply {
+        _dir: tempfile::TempDir,
+        cc: ClaudeCode,
+        chat: Value,
+        response: ClaudeRun,
+        run: Arc<LiveRun>,
+        pid: u32,
+        token: CancellationToken,
+    }
+
+    #[cfg(target_os = "linux")]
+    async fn backpressured_reply(kind: &str, ignore_term: bool) -> BackpressuredReply {
+        backpressured_reply_with_idle(kind, ignore_term, Duration::from_secs(60)).await
+    }
+
+    #[cfg(target_os = "linux")]
+    async fn backpressured_reply_with_idle(
+        kind: &str,
+        ignore_term: bool,
+        idle: Duration,
+    ) -> BackpressuredReply {
+        let (dir, cc, chat, _) = reply_fixture("fresh", ignore_term, true).await;
+        let cc = cc.with_idle(idle);
+        let mut script = std::fs::read_to_string(&cc.bin).unwrap();
+        if kind == "terminal" || kind == "tool" {
+            script = script.replace(
+                "mode = \"fresh\"",
+                if kind == "tool" { "mode = \"tool\"" } else { "mode = \"healthy\"" },
+            ).replacen(
+                "for event in events: print(json.dumps({'type':'stream_event','event':event}), flush=True)",
+                "extra = {'type':'content_block_delta','index':0,'delta':{'type':'input_json_delta','partial_json':''}} if tool else events[2]\n events[3:3] = [extra] * 60\n for event in events: print(json.dumps({'type':'stream_event','event':event}), flush=True)",
+                1,
+            );
+            // Tool result admission is exercised through mcp_call. A separate gate
+            // lets a healthy control emit the next text reply, without claiming
+            // the fake process itself runs an HTTP MCP helper.
+            script = script.replace(
+                "if True:\n if mode == 'tool':",
+                "if mode == 'tool':\n while not os.path.exists('healthy-tool-reply'): time.sleep(0.01)\n reply()\nif False:\n if mode == 'tool':",
+            );
+        } else {
+            let tail = if kind == "failure" {
+                "for i in range(62): print(json.dumps({'type':'stream_event','event':events[-1]}), flush=True)\n print(json.dumps({'type':'result','is_error':True,'result':'usage limit'}), flush=True)\n open('output-emitted', 'w').write('failure')"
+            } else {
+                "for i in range(64): print(json.dumps({'type':'stream_event','event':events[-1]}), flush=True)\n open('output-emitted', 'w').write('record')"
+            };
+            script = script.replace(
+                "if mode == 'flood':\n  for i in range(1000): print(json.dumps({'type':'stream_event','event':events[-1]}), flush=True)",
+                tail,
+            );
+        }
+        std::fs::write(&cc.bin, script).unwrap();
+        let token = CancellationToken::new();
+        let response = start(&cc, "sonnet", &chat, &token).await.unwrap();
+        let run = cc
+            .live
+            .lock()
+            .unwrap()
+            .by_token
+            .values()
+            .next()
+            .unwrap()
+            .clone();
+        let ready = tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                let terminal = kind == "terminal" || kind == "tool";
+                let phase_ready = if terminal {
+                    let live = cc.live.lock().unwrap();
+                    !live.idle.is_empty() || !live.waiting.is_empty()
+                } else {
+                    cc.work_dir.join("output-emitted").exists()
+                };
+                if response.rx.capacity() == 0 && phase_ready {
+                    break;
+                }
+                tokio::task::yield_now().await;
+            }
+        })
+        .await;
+        if ready.is_err() {
+            drop(response);
+            cc.shutdown().await;
+            panic!("fake {kind} reply did not reach bounded channel backpressure");
+        }
+        assert_eq!(
+            run.sink.lock().unwrap().is_none(),
+            kind == "terminal" || kind == "tool"
+        );
+        let pid = std::fs::read_to_string(cc.work_dir.join("pid"))
+            .unwrap()
+            .parse()
+            .unwrap();
+        assert_eq!(
+            std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+            2
+        );
+        BackpressuredReply {
+            _dir: dir,
+            cc,
+            chat,
+            response,
+            run,
+            pid,
+            token,
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    fn assert_backpressure_resources_released(
+        cc: &ClaudeCode,
+        run: &LiveRun,
+        pid: u32,
+        shelved: bool,
+    ) {
+        assert!(run.cleaned.is_cancelled());
+        assert!(!Path::new(&format!("/proc/{pid}")).exists());
+        assert_eq!(cc.runs.available_permits(), 1);
+        assert_eq!(cc.alive.load(std::sync::atomic::Ordering::SeqCst), 0);
+        let live = cc.live.lock().unwrap();
+        assert!(live.by_token.is_empty());
+        assert!(live.idle.is_empty());
+        assert!(live.waiting.is_empty());
+        drop(live);
+        assert_eq!(cc.session_saved("first-reply-test"), shelved);
+        assert_eq!(
+            cc.store.as_ref().unwrap().shelf_ids().unwrap().len(),
+            usize::from(shelved)
+        );
+        assert_eq!(
+            std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+            1
+        );
+        assert_eq!(
+            std::fs::read(cc.work_dir.join("runs/keep/sentinel")).unwrap(),
+            b"keep"
+        );
+    }
+
+    #[cfg(target_os = "linux")]
+    fn next_backpressured_chat(chat: &Value, tool: bool) -> Value {
+        let mut next = chat.clone();
+        if tool {
+            next["messages"]
+                .as_array_mut()
+                .unwrap()
+                .extend(convo(&synthetic_tool_result()));
+        } else {
+            next["messages"].as_array_mut().unwrap().extend([
+                json!({"role":"assistant","content":"hello".repeat(61)}),
+                json!({"role":"user","content":"next"}),
+            ]);
+        }
+        next
+    }
+
+    #[cfg(target_os = "linux")]
+    async fn install_backpressured_continuation(
+        fixture: &BackpressuredReply,
+        tool: bool,
+        token: &CancellationToken,
+    ) -> tokio::task::JoinHandle<Result<ClaudeRun, UpstreamAttemptError>> {
+        let runner = fixture.cc.clone();
+        let next = next_backpressured_chat(&fixture.chat, tool);
+        let current = token.clone();
+        let pending = tokio::spawn(async move { start(&runner, "sonnet", &next, &current).await });
+        tokio::time::timeout(Duration::from_secs(3), async {
+            while fixture.run.sink.lock().unwrap().is_none() {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .expect("continuation installed its new sink");
+        if tool {
+            let result = fixture
+                .cc
+                .mcp_call(&fixture.run.token, &json!({"name":"probe","arguments":{}}))
+                .await
+                .unwrap();
+            assert_eq!(result["content"][0]["text"], "synthetic-result");
+        }
+        assert!(!pending.is_finished());
+        pending
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ie1_idle_expiry_releases_retained_completed_terminal() {
+        for (kind, ignore_term) in [("terminal", false), ("tool", false), ("terminal", true)] {
+            let idle = Duration::from_millis(150);
+            let fixture = backpressured_reply_with_idle(kind, ignore_term, idle).await;
+            assert_eq!(fixture.response.rx.capacity(), 0);
+            assert!(fixture.run.sink.lock().unwrap().is_none());
+            let since = fixture.run.waiting_since.lock().unwrap().unwrap();
+            let bound = if ignore_term { 7 } else { 3 };
+            let result =
+                tokio::time::timeout(Duration::from_secs(bound), fixture.run.cleaned.cancelled())
+                    .await;
+            let stopped = fixture.run.stop.is_cancelled();
+            let cleaned = fixture.run.cleaned.is_cancelled();
+            let process_exists = Path::new(&format!("/proc/{}", fixture.pid)).exists();
+            let slots = fixture.cc.runs.available_permits();
+            if result.is_err() {
+                drop(fixture.response);
+                fixture.cc.shutdown().await;
+                panic!("idle expiry behind retained {kind}: stop={stopped}, cleaned={cleaned}, process_exists={process_exists}, free_slots={slots}");
+            }
+            assert!(since.elapsed() >= idle);
+            assert_backpressure_resources_released(
+                &fixture.cc,
+                &fixture.run,
+                fixture.pid,
+                kind == "terminal",
+            );
+            assert_eq!(
+                fixture.response.rx.capacity(),
+                0,
+                "old receiver was never drained"
+            );
+            if kind == "terminal" && !ignore_term {
+                let replacement = tokio::time::timeout(Duration::from_secs(3), async {
+                    start(
+                        &fixture.cc,
+                        "sonnet",
+                        &json!({"messages":[{"role":"user","content":"replacement"}]}),
+                        &CancellationToken::new(),
+                    )
+                    .await
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+                })
+                .await;
+                fixture.cc.shutdown().await;
+                let reply: Value = serde_json::from_slice(&replacement.unwrap()).unwrap();
+                assert_eq!(reply["content"][0]["text"], "hello".repeat(61));
+                assert_eq!(
+                    std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+                    "fresh\nfresh\n",
+                );
+            }
+            drop(fixture.response);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ie2_continuation_outlives_old_deadline_and_gets_its_own() {
+        for tool in [false, true] {
+            let idle = Duration::from_millis(300);
+            let fixture =
+                backpressured_reply_with_idle(if tool { "tool" } else { "terminal" }, false, idle)
+                    .await;
+            let first_since = fixture.run.waiting_since.lock().unwrap().unwrap();
+            let token = CancellationToken::new();
+            let mut next = install_backpressured_continuation(&fixture, tool, &token).await;
+            assert!(fixture.run.waiting_since.lock().unwrap().is_none());
+            tokio::time::sleep_until(tokio::time::Instant::from_std(
+                first_since + idle + Duration::from_millis(40),
+            ))
+            .await;
+            let active_after_old_deadline = !fixture.run.stop.is_cancelled()
+                && !fixture.run.cleaned.is_cancelled()
+                && fixture.run.waiting_since.lock().unwrap().is_none()
+                && fixture.run.sink.lock().unwrap().is_some()
+                && fixture.response.rx.capacity() == 0
+                && Path::new(&format!("/proc/{}", fixture.pid)).exists();
+            if !active_after_old_deadline {
+                next.abort();
+                drop(fixture.response);
+                fixture.cc.shutdown().await;
+                panic!(
+                    "old idle deadline ended healthy continuation while old terminal was retained"
+                );
+            }
+            fixture.token.cancel(); // A completed old response no longer owns this run.
+            let old = fixture.response.collect("sonnet").await.unwrap();
+            let old: Value = serde_json::from_slice(&old).unwrap();
+            if tool {
+                assert_eq!(old["stop_reason"], "tool_use");
+                std::fs::write(fixture.cc.work_dir.join("healthy-tool-reply"), b"go").unwrap();
+            } else {
+                assert_eq!(old["content"][0]["text"], "hello".repeat(61));
+            }
+            let reply = tokio::time::timeout(Duration::from_secs(3), async {
+                (&mut next)
+                    .await
+                    .unwrap()
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+            })
+            .await;
+            if reply.is_err() {
+                next.abort();
+                fixture.cc.shutdown().await;
+            }
+            let reply: Value = serde_json::from_slice(&reply.unwrap()).unwrap();
+            assert_eq!(reply["content"][0]["text"], "hello".repeat(61));
+            let second_since = fixture.run.waiting_since.lock().unwrap().unwrap();
+            assert!(second_since >= first_since + idle);
+            let expiry =
+                tokio::time::timeout(Duration::from_secs(3), fixture.run.stop.cancelled()).await;
+            let elapsed_at_stop = second_since.elapsed();
+            if expiry.is_err() {
+                fixture.cc.shutdown().await;
+            }
+            expiry.unwrap();
+            assert!(
+                elapsed_at_stop >= idle,
+                "later phase lost part of its idle duration"
+            );
+            tokio::time::timeout(Duration::from_secs(3), fixture.run.cleaned.cancelled())
+                .await
+                .unwrap();
+            assert_backpressure_resources_released(&fixture.cc, &fixture.run, fixture.pid, true);
+            assert_eq!(
+                std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+                "fresh\n"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn ie2_old_epoch_cannot_expire_a_later_completed_phase() {
+        let (_dir, cc, run) = continuation_fixture();
+        let idle = Duration::from_millis(400);
+        let cc = cc.with_idle(idle);
+        let mut first = EventFilter {
+            done: true,
+            stop_reason: Some("tool_use".into()),
+            tool_ids: vec!["tool_1".into()],
+            ..Default::default()
+        };
+        drop(cc.finish_turn(&run, &mut first));
+        let first_since = run.waiting_since.lock().unwrap().unwrap();
+        let (_run, _receiver) = cc.continue_run(&synthetic_tool_result()).unwrap();
+        tokio::time::sleep(Duration::from_millis(200)).await;
+        let mut second = EventFilter {
+            done: true,
+            ..Default::default()
+        };
+        drop(cc.finish_turn(&run, &mut second));
+        let second_since = run.waiting_since.lock().unwrap().unwrap();
+        tokio::time::sleep_until(tokio::time::Instant::from_std(
+            first_since + idle + Duration::from_millis(40),
+        ))
+        .await;
+        assert!(
+            !run.stop.is_cancelled(),
+            "old phase timer stopped a newer completed phase"
+        );
+        tokio::time::timeout(Duration::from_secs(3), run.stop.cancelled())
+            .await
+            .unwrap();
+        assert!(second_since.elapsed() >= idle);
+    }
+
+    #[tokio::test]
+    async fn ie2_expired_or_interrupted_tool_phase_rejects_admission() {
+        for interrupted in [false, true] {
+            let (_dir, cc, run) = continuation_fixture();
+            let cc = cc.with_idle(Duration::from_millis(20));
+            let mut filter = EventFilter {
+                done: true,
+                stop_reason: Some("tool_use".into()),
+                tool_ids: vec!["tool_1".into()],
+                ..Default::default()
+            };
+            drop(cc.finish_turn(&run, &mut filter));
+            if interrupted {
+                run.interrupted_input
+                    .store(true, std::sync::atomic::Ordering::SeqCst);
+            } else {
+                tokio::time::timeout(Duration::from_secs(3), run.stop.cancelled())
+                    .await
+                    .unwrap();
+            }
+            assert!(cc.continue_run(&synthetic_tool_result()).is_none());
+            assert!(run.sink.lock().unwrap().is_none());
+            assert_eq!(run.pending.lock().unwrap().as_slice(), ["tool_1"]);
+            assert!(run.results.lock().unwrap().is_empty());
+            assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn bp1_user_and_tool_cancel_drop_retire_behind_retained_terminal() {
+        for (tool, dropped) in [(false, true), (true, false), (true, true)] {
+            let fixture = backpressured_reply(if tool { "tool" } else { "terminal" }, false).await;
+            let token = CancellationToken::new();
+            let mut pending = install_backpressured_continuation(&fixture, tool, &token).await;
+            // A completed old request's token does not stop this newer sink.
+            fixture.token.cancel();
+            assert!(!fixture.run.stop.is_cancelled());
+            if dropped {
+                pending.abort();
+                assert!(matches!((&mut pending).await, Err(error) if error.is_cancelled()));
+            } else {
+                token.cancel();
+            }
+            let clean =
+                tokio::time::timeout(Duration::from_secs(3), fixture.run.cleaned.cancelled()).await;
+            let clean_before_old_drop = clean.is_ok();
+            if !clean_before_old_drop {
+                if !dropped {
+                    pending.abort();
+                }
+                drop(fixture.response);
+                fixture.cc.shutdown().await;
+                panic!("continuation cancellation did not clean up with old receiver retained");
+            }
+            if !dropped {
+                let result = pending.await.unwrap();
+                let error = match result {
+                    Err(e) => e,
+                    Ok(_) => panic!("cancelled continuation succeeded"),
+                };
+                assert_eq!(
+                    (error.status, error.body.as_str(), error.retryable),
+                    (499, "client disconnected", false)
+                );
+            }
+            assert_backpressure_resources_released(&fixture.cc, &fixture.run, fixture.pid, false);
+            assert_eq!(
+                std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+                "fresh\n"
+            );
+            drop(fixture.response);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn bp2_shutdown_releases_full_record_failure_and_terminal_channels() {
+        for (kind, ignore_term) in [
+            ("record", false),
+            ("failure", false),
+            ("terminal", false),
+            ("record", true),
+        ] {
+            let fixture = backpressured_reply(kind, ignore_term).await;
+            let bound = if ignore_term { 7 } else { 3 };
+            let result =
+                tokio::time::timeout(Duration::from_secs(bound), fixture.cc.shutdown()).await;
+            let clean_before_old_drop = fixture.run.cleaned.is_cancelled();
+            if result.is_err() || !clean_before_old_drop {
+                drop(fixture.response);
+                fixture.cc.shutdown().await;
+                panic!("shutdown of backpressured {kind} did not release resources in {bound}s");
+            }
+            assert_backpressure_resources_released(
+                &fixture.cc,
+                &fixture.run,
+                fixture.pid,
+                kind == "terminal",
+            );
+            assert_eq!(
+                std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+                "fresh\n"
+            );
+            drop(fixture.response);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn bp2_one_slot_eviction_releases_retained_terminal_and_admits_replacement() {
+        let fixture = backpressured_reply("terminal", false).await;
+        let next = tokio::time::timeout(Duration::from_secs(3), async {
+            start(
+                &fixture.cc,
+                "sonnet",
+                &json!({"messages":[{"role":"user","content":"unrelated replacement"}]}),
+                &CancellationToken::new(),
+            )
+            .await
+            .unwrap()
+            .collect("sonnet")
+            .await
+            .unwrap()
+        })
+        .await;
+        let cleaned_before_old_drop = fixture.run.cleaned.is_cancelled();
+        if next.is_err() {
+            drop(fixture.response);
+            fixture.cc.shutdown().await;
+            panic!("one-slot eviction stayed blocked by retained terminal");
+        }
+        assert!(cleaned_before_old_drop);
+        assert!(!Path::new(&format!("/proc/{}", fixture.pid)).exists());
+        let reply: Value = serde_json::from_slice(&next.unwrap()).unwrap();
+        assert_eq!(reply["content"][0]["text"], "hello".repeat(61));
+        assert_eq!(
+            std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+            "fresh\nfresh\n"
+        );
+        assert_eq!(
+            std::fs::read(fixture.cc.work_dir.join("runs/keep/sentinel")).unwrap(),
+            b"keep"
+        );
+        assert_eq!(
+            std::fs::read_dir(fixture.cc.work_dir.join("runs"))
+                .unwrap()
+                .count(),
+            1
+        );
+        drop(fixture.response);
+        fixture.cc.shutdown().await;
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn bp3_healthy_full_queues_deliver_records_failure_and_same_process_reuse() {
+        for tool in [false, true] {
+            let fixture = backpressured_reply(if tool { "tool" } else { "terminal" }, false).await;
+            let token = CancellationToken::new();
+            let mut next = install_backpressured_continuation(&fixture, tool, &token).await;
+            fixture.token.cancel();
+            let old = fixture.response.collect("sonnet").await.unwrap();
+            let old: Value = serde_json::from_slice(&old).unwrap();
+            if tool {
+                assert_eq!(old["stop_reason"], "tool_use");
+                std::fs::write(fixture.cc.work_dir.join("healthy-tool-reply"), b"go").unwrap();
+            } else {
+                assert_eq!(old["content"][0]["text"], "hello".repeat(61));
+            }
+            let result = tokio::time::timeout(Duration::from_secs(3), async {
+                (&mut next)
+                    .await
+                    .unwrap()
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+            })
+            .await;
+            if result.is_err() {
+                next.abort();
+            }
+            let stopped = fixture.run.stop.is_cancelled();
+            fixture.cc.shutdown().await;
+            let result: Value = serde_json::from_slice(&result.unwrap()).unwrap();
+            assert_eq!(result["content"][0]["text"], "hello".repeat(61));
+            assert!(!stopped);
+            assert_eq!(
+                std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+                "fresh\n"
+            );
+        }
+        let fixture = backpressured_reply("failure", false).await;
+        let error =
+            tokio::time::timeout(Duration::from_secs(3), fixture.response.collect("sonnet"))
+                .await
+                .unwrap()
+                .unwrap_err();
+        fixture.cc.shutdown().await;
+        assert!(
+            matches!(error, AppError::Upstream {status:429, body} if body == "Claude Code: usage limit")
+        );
+        assert_backpressure_resources_released(&fixture.cc, &fixture.run, fixture.pid, false);
     }
 
     #[tokio::test]

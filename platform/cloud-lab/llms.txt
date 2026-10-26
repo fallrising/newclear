@@ -1,0 +1,25 @@
+# cloud-lab
+
+> A documentation-first personal Cloudflare lab framework: capability knowledge tree, proposed interfaces, authority boundaries and staged migration of existing tools.
+
+Tier: ungraded
+Status: partial
+Interfaces: http, cli, spec
+Entrypoint: https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/SDD.md
+Auth: Access JWT and per-principal HMAC + server-side scoped grants; local tested, not deployed
+Spec: https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/contracts/m1.openapi.json
+
+M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS collector and native dashboard. No deployment or migrated application exists. Existing product authorities and runtime boundaries remain unchanged. Document verification does not establish a usable product.
+
+## Interface reference
+
+- [Contracts](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/contracts/README.md): proposed identity, commands, external runs, events, artifacts and recipes.
+- [Knowledge tree](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/knowledge-tree.md): capabilities, responsibilities, source implementations and evidence gaps.
+- [SUCCESS](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/SUCCESS.md): document milestone and pending product acceptance.
+
+## Optional
+
+- [Architecture](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/architecture.md): state ownership, independent deployment and CF mapping.
+- [Migration](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/migration.md): candidate destinations, cutover, rollback and retirement gates.
+- [Verification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/verification.md): M0 document checks and future runtime acceptance.
+- [Sources](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/sources.md): pinned public sources and official documentation.

@@ -314,3 +314,25 @@ Delivered in [Product PR665](https://github.com/fallrising/newclear/pull/665), s
 [Task and acceptance](T-0423-http-disconnect.md). Local HTTP/1 and fake-process boundary only.
 
 Delivered in [Product PR667](https://github.com/fallrising/newclear/pull/667), source `04908a3107d5094956b012956b006788fe90ce69`, merge `2d89c37960367bc00b930733f2d3862831d84c7a` at 2026-10-26T13:55:00Z; required CI, independent source/final-document review and remote ancestry/trailers/scoped content PASS. 236 tests / 18 groups, four new tests / 20 primary scenarios, 37 existing Claude-focused tests, fmt/Clippy, 20 validator tests, 43 project contracts and six indexes PASS. Initial-write HTTP close already dropped startup ownership; the repair explicitly reaps the killed child to avoid a zombie. Raw RED/transport/state diagnostics and corrected test-only E0061/warning retained. Runtime teardown and filesystem removal remain best effort; no direct token-select, HTTP/2/proxy-wide or whole-product guarantee. Owner decides desk done.
+
+
+## T-0424 — Claude reply backpressure
+
+[Scope and evidence](T-0424-reply-backpressure.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| BP-01 | Stop a continuation behind a retained completed reply | BP-1 | done | 2026-10-26T15:47:22Z | 2026-10-26T16:14:21Z | 2026-10-26T16:15:26Z |
+| BP-02 | Release run resources under reply backpressure | BP-2 | done | 2026-10-26T15:47:22Z | 2026-10-26T16:14:21Z | 2026-10-26T16:15:26Z |
+| BP-03 | Preserve healthy delivery and completed-request ownership | BP-3 | done | 2026-10-26T15:47:22Z | 2026-10-26T16:14:21Z | 2026-10-26T16:15:26Z |
+
+Product [PR671](https://github.com/fallrising/newclear/pull/671) merged `9905b731189f5756c8584251eb01cc183bcd0daf` at 2026-10-26T16:14:21Z; required CI, independent source review and remote content/ancestry/trailers passed. BP-1–BP-3 close at that observed product merge. Linux fake-process backpressure evidence; unchanged idle-timer, graceful-shutdown and runtime boundaries remain in the task.
+
+## T-0425 — Claude idle expiry
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| IE-1 | 完成階段背壓下既有 idle 期限與資源回收 | IE-1 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
+| IE-2 | 健康續輪及後續階段期限所有權 | IE-2 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
+| IE-3 | 完整交付、既有取消回歸與交接 | IE-3 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
+T-0425 delivered by [PR675](https://github.com/fallrising/newclear/pull/675), source `2922bcd0821d04ea2319e6ec884527a60902aa2d`, merge `f522b53b0787c4d88827513fc78a0a2f22268913` at 2026-10-26T17:08:03Z. IE-1–IE-3:245 Rust tests/18groups,46 Claude-focused,4 new tests/8primarycases plus1healthyreplacement; fmt/Clippy,20validators,44contracts/7indexes and independent source/final-document review passed. Required check/validate, normal merge and remote source+merge trailer/ancestry/scoped-content readback passed. Original idle-expiry RED and corrected missing-reactor test-harness failure retained; Linux fake-process/finite-clock evidence and runtime/transport boundaries remain as documented in SUCCESS/task. This row closure is the separate board publication; desk remains in_progress for owner disposition.

@@ -128,6 +128,10 @@ struct LiveRun {
     calls: Mutex<HashMap<String, oneshot::Sender<ToolResult>>>,
     /// Ends the process.
     stop: CancellationToken,
+    /// Latched only after the reader has released all owned resources.
+    cleaned: CancellationToken,
+    /// A partially written resumed turn must never become reusable or shelved.
+    interrupted_input: std::sync::atomic::AtomicBool,
     /// When it started waiting for tool results or for the next turn.
     waiting_since: Mutex<Option<Instant>>,
     /// Open while the run lives; later user turns are written here.
@@ -140,6 +144,21 @@ struct LiveRun {
     session_id: Mutex<Option<String>>,
     /// Parked after a complete reply (so its session can be shelved when it ends).
     idle_now: std::sync::atomic::AtomicBool,
+}
+
+/// Retire selected input ownership if its write fails or its future is dropped.
+struct ResumeInputGuard(Option<Arc<LiveRun>>);
+
+impl Drop for ResumeInputGuard {
+    fn drop(&mut self) {
+        if let Some(run) = &self.0 {
+            run.interrupted_input
+                .store(true, std::sync::atomic::Ordering::SeqCst);
+            run.idle_now
+                .store(false, std::sync::atomic::Ordering::SeqCst);
+            run.stop.cancel();
+        }
+    }
 }
 
 /// What must match for a message to count as "the same" in a known conversation.
@@ -391,21 +410,32 @@ impl ClaudeCode {
 
     /// If `chat` only adds user messages to the conversation an idle run has, write
     /// them to it and return a sink for its reply.
-    async fn resume_run(&self, model: &str, chat: &Value) -> Option<mpsc::Receiver<Item>> {
+    async fn resume_run(
+        &self,
+        model: &str,
+        chat: &Value,
+        cancel: &CancellationToken,
+    ) -> Result<Option<mpsc::Receiver<Item>>, UpstreamAttemptError> {
         let sig = signature(model, chat);
         let msgs = convo(chat);
         let normed: Vec<Value> = msgs.iter().map(norm).collect();
         let (run, start, rx) = {
             let mut live = self.live.lock().unwrap();
-            let pos = live.idle.iter().position(|r| {
+            let Some(pos) = live.idle.iter().position(|r| {
                 let known = r.known.lock().unwrap();
-                r.signature == sig
+                !r.stop.is_cancelled()
+                    && !r
+                        .interrupted_input
+                        .load(std::sync::atomic::Ordering::SeqCst)
+                    && r.signature == sig
                     && known.len() < normed.len()
                     && normed[..known.len()] == known[..]
                     && msgs[known.len()..]
                         .iter()
                         .all(|m| m.get("role").and_then(|r| r.as_str()) == Some("user"))
-            })?;
+            }) else {
+                return Ok(None);
+            };
             let run = live.idle.remove(pos);
             live.order.retain(|r| !Arc::ptr_eq(r, &run));
             let start = run.known.lock().unwrap().len();
@@ -419,20 +449,40 @@ impl ClaudeCode {
             debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "resume_user_sink");
             (run, start, rx)
         };
+        let mut guard = ResumeInputGuard(Some(run.clone()));
         let line = json!({"type": "user", "message": {"role": "user", "content": render_turn(&msgs[start..])}});
-        let written = match run.stdin.lock().await.as_mut() {
-            Some(stdin) => stdin
-                .write_all(format!("{line}\n").as_bytes())
-                .await
-                .is_ok(),
-            None => false,
+        let input = format!("{line}\n");
+        let written = tokio::select! {
+            biased;
+            _ = cancel.cancelled() => None,
+            written = async {
+                match run.stdin.lock().await.as_mut() {
+                    Some(stdin) => stdin.write_all(input.as_bytes()).await.is_ok(),
+                    None => false,
+                }
+            } => Some(written),
         };
-        if !written {
-            *run.sink.lock().unwrap() = None;
-            run.stop.cancel();
-            return None;
+        match written {
+            None => {
+                // The select's write future (and mutex guard) is gone before cleanup.
+                drop(guard);
+                drop(rx);
+                run.cleaned.cancelled().await;
+                Err(UpstreamAttemptError {
+                    status: 499,
+                    body: "client disconnected".into(),
+                    retryable: false,
+                })
+            }
+            Some(false) => {
+                *run.sink.lock().unwrap() = None;
+                Ok(None)
+            }
+            Some(true) => {
+                guard.0 = None;
+                Ok(Some(rx))
+            }
         }
-        Some(rx)
     }
 
     /// A slot for a new run; when none is free, the oldest waiting run is ended.
@@ -583,6 +633,12 @@ impl ClaudeCode {
     ) -> Option<mpsc::Sender<Item>> {
         let mut live = self.live.lock().unwrap();
         let tx = run.sink.lock().unwrap().take();
+        if run
+            .interrupted_input
+            .load(std::sync::atomic::Ordering::SeqCst)
+        {
+            return tx;
+        }
         let waits = filter.stop_reason.as_deref() == Some("tool_use");
         live.order.retain(|r| !Arc::ptr_eq(r, run));
         live.idle.retain(|r| !Arc::ptr_eq(r, run));
@@ -1092,7 +1148,7 @@ pub async fn start(
         debug!("tool results go on in the waiting Claude Code run");
         return first_record(rx).await;
     }
-    if let Some(rx) = cc.resume_run(model, chat).await {
+    if let Some(rx) = cc.resume_run(model, chat, cancel).await? {
         debug!("the next turn goes on in the idle Claude Code run");
         return first_record(rx).await;
     }
@@ -1275,6 +1331,8 @@ async fn spawn_run(
         results: Mutex::new(HashMap::new()),
         calls: Mutex::new(HashMap::new()),
         stop: CancellationToken::new(),
+        cleaned: CancellationToken::new(),
+        interrupted_input: std::sync::atomic::AtomicBool::new(false),
         waiting_since: Mutex::new(None),
         stdin: tokio::sync::Mutex::new(Some(stdin)),
         signature: signature(model, chat),
@@ -1443,7 +1501,12 @@ async fn spawn_run(
         diagnostics.stop().await;
         // An idle run's session is kept for its next turn; any other run's is removed.
         let idle = run.idle_now.load(std::sync::atomic::Ordering::SeqCst);
-        if !(idle && cc.shelve(&run)) {
+        if !(idle
+            && !run
+                .interrupted_input
+                .load(std::sync::atomic::Ordering::SeqCst)
+            && cc.shelve(&run))
+        {
             if let Some(sid) = run.session_id.lock().unwrap().clone() {
                 cc.remove_session(&sid);
             }
@@ -1451,6 +1514,7 @@ async fn spawn_run(
         cc.alive.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
         drop(run_dir);
         drop(_permit);
+        run.cleaned.cancel();
         if let Some((tx, message)) = failure_sink {
             let _ = tx
                 .send(Item::Failed {
@@ -1680,6 +1744,8 @@ mod tests {
             results: Mutex::new(HashMap::new()),
             calls: Mutex::new(HashMap::new()),
             stop: CancellationToken::new(),
+            cleaned: CancellationToken::new(),
+            interrupted_input: std::sync::atomic::AtomicBool::new(false),
             waiting_since: Mutex::new(None),
             stdin: tokio::sync::Mutex::new(None),
             signature: String::new(),
@@ -2053,6 +2119,288 @@ while True: time.sleep(60)
             cc.shutdown().await;
             let response: Value = serde_json::from_slice(&healthy.unwrap()).unwrap();
             assert_eq!(response["content"][0]["text"], "replacement");
+            assert_eq!(cc.runs.available_permits(), 1);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    async fn resumed_fixture(
+        tools: bool,
+        ignore_term: bool,
+        healthy: bool,
+    ) -> (tempfile::TempDir, ClaudeCode, Value, Arc<LiveRun>, u32) {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let bin = dir.path().join("fake-claude");
+        let script = format!(
+            r#"#!/usr/bin/env python3
+import json, os, signal, sys, time
+if {ignore_term}: signal.signal(signal.SIGTERM, signal.SIG_IGN)
+open('starts', 'a').write('start\n')
+open('pid', 'w').write(str(os.getpid()))
+sys.stdin.readline()
+sys.stderr.write('diagnostic' * 32768)
+sys.stderr.flush()
+print(json.dumps({{"type":"system","subtype":"init","session_id":"resume-test"}}), flush=True)
+while True:
+ for event in [
+  {{"type":"message_start","message":{{"id":"resume","usage":{{"input_tokens":1}}}}}},
+  {{"type":"content_block_start","index":0,"content_block":{{"type":"text","text":""}}}},
+  {{"type":"content_block_delta","index":0,"delta":{{"type":"text_delta","text":"hello"}}}},
+  {{"type":"content_block_stop","index":0}},
+  {{"type":"message_delta","delta":{{"stop_reason":"end_turn"}},"usage":{{"output_tokens":1}}}},
+  {{"type":"message_stop"}}
+ ]: print(json.dumps({{"type":"stream_event","event":event}}), flush=True)
+ if {healthy}:
+  if not sys.stdin.readline(): break
+ else:
+  while True: time.sleep(60)
+"#,
+            ignore_term = if ignore_term { "True" } else { "False" },
+            healthy = if healthy { "True" } else { "False" }
+        );
+        std::fs::write(&bin, script).unwrap();
+        std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let mut cc = ClaudeCode::new(Some(bin.to_string_lossy().into()), dir.path(), 1)
+            .with_idle(Duration::from_secs(60))
+            .with_store(crate::store::Store::open(&dir.path().join("shelf.db"), None).unwrap());
+        cc.config_dir = dir.path().join("config");
+        let mut chat = json!({"messages":[{"role":"user","content":"first"}]});
+        if tools {
+            chat["tools"] = json!([{"type":"function","function":{"name":"probe","parameters":{"type":"object"}}}]);
+        }
+        let first = tokio::time::timeout(Duration::from_secs(3), async {
+            start(&cc, "sonnet", &chat, &CancellationToken::new())
+                .await
+                .unwrap()
+                .collect("sonnet")
+                .await
+                .unwrap()
+        })
+        .await;
+        if first.is_err() {
+            cc.shutdown().await;
+        }
+        let response: Value = serde_json::from_slice(&first.unwrap()).unwrap();
+        assert_eq!(response["content"][0]["text"], "hello");
+        let run = cc.live.lock().unwrap().idle[0].clone();
+        let session_dir = cc.session_dirs().remove(0);
+        std::fs::create_dir_all(&session_dir).unwrap();
+        std::fs::write(session_dir.join("resume-test.jsonl"), b"synthetic session").unwrap();
+        let pid = std::fs::read_to_string(cc.work_dir.join("pid"))
+            .unwrap()
+            .parse()
+            .unwrap();
+        chat["messages"].as_array_mut().unwrap().extend([
+            json!({"role":"assistant","content":"hello"}),
+            json!({"role":"user","content":"q".repeat(1024 * 1024)}),
+        ]);
+        (dir, cc, chat, run, pid)
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ri1_cancel_blocked_resumed_input_cleans_before_499() {
+        for (tools, ignore_term) in [(true, false), (false, false), (true, true)] {
+            let (_dir, cc, chat, run, pid) = resumed_fixture(tools, ignore_term, false).await;
+            let sibling = cc.work_dir.join("runs/keep");
+            std::fs::create_dir_all(&sibling).unwrap();
+            std::fs::write(sibling.join("sentinel"), b"keep").unwrap();
+            let token = CancellationToken::new();
+            let mut pending = Box::pin(start(&cc, "sonnet", &chat, &token));
+            assert!(futures_util::poll!(&mut pending).is_pending());
+            assert!(!run.idle_now.load(std::sync::atomic::Ordering::SeqCst));
+            assert!(
+                run.stdin.try_lock().is_err(),
+                "resume owns the blocked stdin write"
+            );
+            token.cancel();
+            let done = tokio::time::timeout(Duration::from_secs(7), &mut pending).await;
+            drop(pending);
+            if done.is_err() {
+                cc.shutdown().await;
+            }
+            let error =
+                match done.expect("explicit cancellation did not interrupt resumed stdin write") {
+                    Err(e) => e,
+                    Ok(_) => panic!("cancelled resume succeeded"),
+                };
+            assert_eq!(
+                (error.status, error.body.as_str(), error.retryable),
+                (499, "client disconnected", false)
+            );
+            assert!(!std::path::Path::new(&format!("/proc/{pid}")).exists());
+            assert_eq!(cc.runs.available_permits(), 1);
+            assert_eq!(cc.alive.load(std::sync::atomic::Ordering::SeqCst), 0);
+            assert!(cc.live.lock().unwrap().by_token.is_empty());
+            assert!(cc.store.as_ref().unwrap().shelf_ids().unwrap().is_empty());
+            assert!(!cc.session_saved("resume-test"));
+            assert!(!run.idle_now.load(std::sync::atomic::Ordering::SeqCst));
+            assert_eq!(
+                std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+                "start\n"
+            );
+            assert_eq!(
+                std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+                1
+            );
+            assert_eq!(std::fs::read(sibling.join("sentinel")).unwrap(), b"keep");
+            // The released one-slot limit admits a healthy new process.
+            let replacement = tokio::time::timeout(Duration::from_secs(3), async {
+                start(
+                    &cc,
+                    "sonnet",
+                    &json!({"messages":[{"role":"user","content":"replacement"}]}),
+                    &CancellationToken::new(),
+                )
+                .await
+                .unwrap()
+                .collect("sonnet")
+                .await
+                .unwrap()
+            })
+            .await;
+            cc.shutdown().await;
+            let replacement: Value = serde_json::from_slice(&replacement.unwrap()).unwrap();
+            assert_eq!(replacement["content"][0]["text"], "hello");
+            assert_eq!(cc.runs.available_permits(), 1);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ri1_cancel_waiting_for_resumed_stdin_lock() {
+        let (_dir, cc, chat, run, pid) = resumed_fixture(true, false, false).await;
+        let held = run.stdin.lock().await;
+        let token = CancellationToken::new();
+        let mut pending = Box::pin(start(&cc, "sonnet", &chat, &token));
+        assert!(futures_util::poll!(&mut pending).is_pending());
+        assert!(!run.idle_now.load(std::sync::atomic::Ordering::SeqCst));
+        token.cancel();
+        let done = tokio::time::timeout(Duration::from_secs(3), &mut pending).await;
+        drop(pending);
+        // Keep the mutex held until cancellation and cleanup have returned.
+        drop(held);
+        if done.is_err() {
+            cc.shutdown().await;
+        }
+        let error = match done.expect("cancellation waited for stdin mutex") {
+            Err(e) => e,
+            Ok(_) => panic!("cancelled lock acquisition succeeded"),
+        };
+        assert_eq!(
+            (error.status, error.body.as_str(), error.retryable),
+            (499, "client disconnected", false)
+        );
+        assert!(!std::path::Path::new(&format!("/proc/{pid}")).exists());
+        assert_eq!(cc.runs.available_permits(), 1);
+        assert_eq!(
+            std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+            "start\n"
+        );
+        assert_eq!(
+            std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+            0
+        );
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ri2_dropped_resumed_input_retires_run() {
+        for ignore_term in [false, true] {
+            let (_dir, cc, chat, run, pid) = resumed_fixture(true, ignore_term, false).await;
+            let sibling = cc.work_dir.join("runs/keep");
+            std::fs::create_dir_all(&sibling).unwrap();
+            std::fs::write(sibling.join("sentinel"), b"keep").unwrap();
+            let token = CancellationToken::new();
+            let mut pending = Box::pin(start(&cc, "sonnet", &chat, &token));
+            assert!(futures_util::poll!(&mut pending).is_pending());
+            assert!(run.stdin.try_lock().is_err());
+            drop(pending);
+            assert!(run.stop.is_cancelled());
+            // Even a terminal record observed after interruption cannot republish idle.
+            let mut terminal = EventFilter {
+                done: true,
+                ..Default::default()
+            };
+            drop(cc.finish_turn(&run, &mut terminal));
+            assert!(cc.live.lock().unwrap().idle.is_empty());
+            let cleaned =
+                tokio::time::timeout(Duration::from_secs(7), run.cleaned.cancelled()).await;
+            if cleaned.is_err() {
+                cc.shutdown().await;
+            }
+            cleaned.expect("dropped resumed input did not finish cleanup");
+            assert!(cc.store.as_ref().unwrap().shelf_ids().unwrap().is_empty());
+            assert!(!cc.session_saved("resume-test"));
+            assert!(!std::path::Path::new(&format!("/proc/{pid}")).exists());
+            assert_eq!(cc.runs.available_permits(), 1);
+            assert!(!run.idle_now.load(std::sync::atomic::Ordering::SeqCst));
+            assert_eq!(
+                std::fs::read_dir(cc.work_dir.join("runs")).unwrap().count(),
+                1
+            );
+            assert_eq!(std::fs::read(sibling.join("sentinel")).unwrap(), b"keep");
+            assert_eq!(
+                std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+                "start\n"
+            );
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ri3_healthy_resume_and_ordinary_write_error_fallback() {
+        for tools in [false, true] {
+            let (_dir, cc, mut chat, run, pid) = resumed_fixture(tools, false, true).await;
+            chat["messages"][2]["content"] = json!("second");
+            let resumed = tokio::time::timeout(Duration::from_secs(3), async {
+                start(&cc, "sonnet", &chat, &CancellationToken::new())
+                    .await
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+            })
+            .await;
+            if resumed.is_err() {
+                cc.shutdown().await;
+            }
+            let response: Value = serde_json::from_slice(&resumed.unwrap()).unwrap();
+            assert_eq!(response["content"][0]["text"], "hello");
+            assert_eq!(
+                std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+                "start\n"
+            );
+            assert!(Arc::ptr_eq(&cc.live.lock().unwrap().idle[0], &run));
+            assert_eq!(
+                run.session_id.lock().unwrap().as_deref(),
+                Some("resume-test")
+            );
+            // Close the real input pipe, then submit the matching next turn. The
+            // ordinary None/write failure must still start a full-conversation run.
+            run.stdin.lock().await.take();
+            chat["messages"].as_array_mut().unwrap().extend([
+                json!({"role":"assistant","content":"hello"}),
+                json!({"role":"user","content":"third"}),
+            ]);
+            let fallback = tokio::time::timeout(Duration::from_secs(3), async {
+                start(&cc, "sonnet", &chat, &CancellationToken::new())
+                    .await
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+            })
+            .await;
+            cc.shutdown().await;
+            let response: Value = serde_json::from_slice(&fallback.unwrap()).unwrap();
+            assert_eq!(response["content"][0]["text"], "hello");
+            assert_eq!(
+                std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+                "start\nstart\n"
+            );
+            assert!(!std::path::Path::new(&format!("/proc/{pid}")).exists());
             assert_eq!(cc.runs.available_permits(), 1);
         }
     }

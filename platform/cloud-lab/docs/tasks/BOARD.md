@@ -50,7 +50,18 @@ Owner 指示「好，繼續吧。」。先完成可審閱的部署 bundle、入�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0003-1 | 私人設定／grant／部署 bundle 產生器 | AC-06、AC-08 | in_progress | 2026-10-26T16:43:03Z | — | 2026-10-26T17:05:44Z |
-| T-0003-2 | 有界入口及 API 驗收工具 | AC-06、AC-07 | in_progress | 2026-10-26T16:43:03Z | — | 2026-10-26T17:05:44Z |
-| T-0003-3 | 獨立審查與部署前證據 | AC-08 | in_progress | 2026-10-26T16:43:03Z | — | 2026-10-26T17:05:44Z |
+| T-0003-1 | 私人設定／grant／部署 bundle 產生器 | AC-06、AC-08 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
+| T-0003-2 | 有界入口及 API 驗收工具 | AC-06、AC-07 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
+| T-0003-3 | 獨立審查與部署前證據 | AC-08 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
 | T-0003-4 | 真實 CF／指定 runner／恢復驗收；等 owner 補 D1／Workers Scripts scopes 與目標 | AC-06～08 | todo | — | — | 2026-10-26T17:05:44Z |
+
+## M1 接入準備交付與回讀
+
+[PR #676](https://github.com/fallrising/newclear/pull/676) 已於 **2026-10-26T17:07:24Z** 正常合併，merge SHA `57515ce4a2676150c383af8a6d58cd2781f20f35`；已驗證 head `47d419ff726e089920a1fa9920b4582eb7d96017`。
+
+- [Cloud Lab local implementation](https://github.com/fallrising/newclear/actions/runs/40365508313) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/40365508668) 均 SUCCESS；合併前 CLEAN／無衝突、head未變，未繞過檢查。
+- 主導及[獨立審查T-816](../../../../.team/reports/T-816.md)均跑過31 Node＋58 Python＝89 tests；三項P2已修正，原始失敗／RED證據保留。44專案契約、7 llms、25文件／191連結／12固定來源、task/report及scope／diff檢查通過，詳見[readiness evidence](../evidence/m1-live-readiness.md)。
+- 合併後fetch main，逐一比對17個交付路徑與已驗證head，Git內容相同；PR API回讀merged=true，SHA與時間相符。
+- T-0003-1～3準備工作完成；T-0003-4、M1-LIVE與AC-06～08保持pending。尚需D1／Workers Scripts連線scopes、私人網域／runner目標，以及真實Access、D1、手機／bot、恢復與成本驗收。沒有Cloudflare寫入、部署、排程啟用、封存或usable tag。
+
+此收尾只更新任務板，end為實際準備PR合併時間，不代表完整M1已驗收。

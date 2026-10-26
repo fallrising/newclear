@@ -1,0 +1,597 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cloud Lab M1 local implementation profile",
+    "version": "0.1.0",
+    "description": "Not deployed. Exact protocol/limits and narrowed M0 semantics in docs/m1-implementation.md. No arbitrary shell, generic callback events or admin APIs. Unknown fields/duplicate JSON keys/floats/non-UTF8 rejected. HMAC message includes audience,key ID,generation,method,path,time,nonce,raw-body SHA256; see profile."
+  },
+  "security": [
+    {
+      "AccessJWT": []
+    },
+    {
+      "MachineHMAC": []
+    }
+  ],
+  "paths": {
+    "/api/bootstrap": {
+      "get": {
+        "summary": "Scope, recipe, capabilities and server time",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        }
+      }
+    },
+    "/api/commands": {
+      "get": {
+        "summary": "At most20 recent authorized records within32KiB",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        }
+      },
+      "post": {
+        "summary": "Admit byte-idempotent command",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          },
+          "202": {
+            "description": "Durably accepted or existing byte-identical command, not execution success"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Command"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/commands/{id}": {
+      "get": {
+        "summary": "Read authorized command",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,128}$"
+            }
+          }
+        ]
+      }
+    },
+    "/api/commands/{id}/cancel": {
+      "post": {
+        "summary": "Record cancel intent; never claims native stop",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,128}$"
+            }
+          }
+        ]
+      }
+    },
+    "/api/commands/{id}/artifact": {
+      "get": {
+        "summary": "Read bounded artifact with independent artifact:read grant",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,128}$"
+            }
+          }
+        ]
+      }
+    },
+    "/api/runner/claim": {
+      "post": {
+        "summary": "Claim dispatch or reconcile-only snapshot coordination lease",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runner/report": {
+      "post": {
+        "summary": "Report current fenced authoritative journal snapshot",
+        "responses": {
+          "200": {
+            "description": "Authorized durable response; request_id included except artifact bytes."
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Report"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "AccessJWT": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Cf-Access-Jwt-Assertion",
+        "description": "Cloudflare Access validated JWT, subject mapped server-side; browser writes additionally require same Origin and X-Cloud-Lab:1."
+      },
+      "MachineHMAC": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Lab-Signature",
+        "description": "HMAC-SHA256 with X-Lab-Key-Id, X-Lab-Time, X-Lab-Nonce. Separate outer Access service credentials if required."
+      }
+    },
+    "schemas": {
+      "Command": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "schema_minor",
+          "workspace_id",
+          "resource_ref",
+          "recipe_ref",
+          "parameters",
+          "idempotency_key",
+          "not_before",
+          "dispatch_deadline",
+          "execution_deadline",
+          "timeout_seconds",
+          "output_budget_bytes"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": "cloudlab.command.v1"
+          },
+          "schema_minor": {
+            "const": 0
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,128}$"
+          },
+          "resource_ref": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "resource_id",
+              "generation"
+            ],
+            "properties": {
+              "resource_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,128}$"
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              }
+            }
+          },
+          "recipe_ref": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "recipe_id",
+              "version",
+              "digest"
+            ],
+            "properties": {
+              "recipe_id": {
+                "const": "node-health"
+              },
+              "version": {
+                "const": "1.0.0"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              }
+            }
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "max_sample_age_seconds"
+            ],
+            "properties": {
+              "max_sample_age_seconds": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 60
+              }
+            }
+          },
+          "idempotency_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,128}$"
+          },
+          "not_before": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$"
+          },
+          "dispatch_deadline": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$"
+          },
+          "execution_deadline": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$"
+          },
+          "timeout_seconds": {
+            "const": 10
+          },
+          "output_budget_bytes": {
+            "const": 16384
+          }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "command_id",
+          "attempt_id",
+          "fence",
+          "owner_outcome",
+          "started_at",
+          "finished_at",
+          "artifact"
+        ],
+        "properties": {
+          "command_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,128}$"
+          },
+          "attempt_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,128}$"
+          },
+          "fence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "owner_outcome": {
+            "enum": [
+              "succeeded",
+              "unknown"
+            ]
+          },
+          "started_at": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "finished_at": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "artifact": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Exact UTF-8 health JSON bytes encoded as a string; <=16384 bytes. Unknown requires null for all evidence fields."
+          }
+        }
+      },
+      "HealthArtifact": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "sample_age_seconds",
+          "checks",
+          "metrics"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "healthy",
+              "unhealthy"
+            ]
+          },
+          "sample_age_seconds": {
+            "const": 0
+          },
+          "checks": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "collector"
+            ],
+            "properties": {
+              "collector": {
+                "const": "ok"
+              }
+            }
+          },
+          "metrics": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "load_1m_milli",
+              "cpu_count",
+              "disk_free_percent"
+            ],
+            "properties": {
+              "load_1m_milli": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000
+              },
+              "cpu_count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65536
+              },
+              "disk_free_percent": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

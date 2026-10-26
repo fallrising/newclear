@@ -1,5 +1,6 @@
 # 架構、責任與部署邊界
 
+> 下文保留 M0 設計基線。已授權 M1 開發的實作範圍、協定差異與限制見 [M1 實作契約](m1-implementation.md)；M0 提案不代表所有 operation 已實作。
 M0 proposal；所有 Cloud Lab 模組未實作。命令欄位與狀態以[契約](../contracts/README.md)為準，本文定義跨元件責任。
 
 ## 唯一責任者

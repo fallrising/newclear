@@ -2,8 +2,13 @@
 from pathlib import Path
 from urllib.parse import unquote
 import json
+import argparse
 import re
 import subprocess
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--milestone', choices=['M0', 'M1'], default='M0')
+args = parser.parse_args()
 
 root = Path(__file__).resolve().parents[1]
 component = root / 'platform/cloud-lab'
@@ -42,11 +47,13 @@ allowed = {
     '.team/reports/T-810.md', '.team/reports/T-811.md',
     '.team/cloud-lab-audit.py',
 }
+if args.milestone == 'M1':
+    allowed.update({'.github/workflows/cloud-lab.yml', '.team/tasks/T-812.md', '.team/tasks/T-813.md', '.team/tasks/T-814.md', '.team/reports/T-812.md', '.team/reports/T-813.md', '.team/reports/T-814.md'})
 for path in sorted(changed):
     if path not in allowed and not path.startswith('platform/cloud-lab/'):
         errors.append(f'out-of-scope change: {path}')
 for path in component.rglob('*'):
-    if path.is_file() and path.suffix != '.md' and path.name != 'llms.txt':
+    if args.milestone == 'M0' and path.is_file() and path.suffix != '.md' and path.name != 'llms.txt':
         errors.append(f'non-document component file: {path.relative_to(root)}')
 print(json.dumps({'document_files': len(files), 'links_inspected': links,
                   'pinned_sources_checked': len(pinned), 'changed_files': len(changed),

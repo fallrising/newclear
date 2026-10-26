@@ -1,5 +1,6 @@
 # Events、artifacts 與結果驗證
 
+> 下文保留 M0 設計基線。已授權 M1 開發的實作範圍、協定差異與限制見 [M1 實作契約](../docs/m1-implementation.md)；M0 提案不代表所有 operation 已實作。
 狀態：**Proposed／spec-only**。本合約沒有事件串流、上傳或下載端點；[commands-runs](commands-runs.md) 定義權威與對帳。
 
 ## 事件 envelope 與順序

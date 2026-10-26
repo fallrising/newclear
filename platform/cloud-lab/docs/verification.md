@@ -14,7 +14,7 @@ Cloud Lab 產品主線未完成。M0 文件檢查與未來執行驗收分列；�
 
 M0 不需要變更 runtime，因此沒有為文件增加產品行為測試或安裝套件。介面是 prose proposal；機器可讀 schema、OpenAPI 與 executable fixtures 在 M1 開始時依相同契約落地並做 Red-Green-Refactor。
 
-## M1：一台節點的唯讀閉環（未授權執行）
+## M1：一台節點的唯讀閉環（已授權開發；live gate 尚待驗收）
 
 目標：同一種固定 health-check Recipe 可由人／授權 bot 與固定 UTC 排程提交；非 root runner 向外領取；看板呈現來源、時刻、進度、驗證與成果。先實作一個具名 executor，不要求所有現有產品接通。
 
@@ -55,3 +55,9 @@ git diff --check
 ```
 
 新增能力檔必須進 Git index 才會被 llms validator 發現；staging 不等於 commit。實際結果與候選範圍見[本次證據](evidence/m0-review.md)，未執行的命令不能填 passed。
+
+## M1 本機實作檢查
+
+從 repository 根目錄用共用 launcher 執行 `python3 platform/cloud-lab/tools/check.py`。Node 24.14.0 built-in test／SQLite、Python 標準庫涵蓋 domain、SQL、HMAC/JWT、原生 UI 模型、真實 loopback HTTP 與 OS collector。這不是 workerd／D1／Access live 測試。
+
+本輪 [M1-I1～I4](m1-implementation.md) 與證據見 [M1 evidence](evidence/m1-implementation.md)；AC-06～08 的 live 整合與備份門檻仍 pending。

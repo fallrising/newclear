@@ -1,5 +1,6 @@
 # Commands、外部 runs 與對帳
 
+> 下文保留 M0 設計基線。已授權 M1 開發的實作範圍、協定差異與限制見 [M1 實作契約](../docs/m1-implementation.md)；M0 提案不代表所有 operation 已實作。
 狀態：**Proposed／spec-only**；operation 名稱只描述語義，沒有可呼叫端點。身份見 [identity](identity.md)，結果見 [events-artifacts](events-artifacts.md)。
 
 ## 擬定 operation signatures

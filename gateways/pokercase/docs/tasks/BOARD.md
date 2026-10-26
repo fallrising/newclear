@@ -327,3 +327,11 @@ Delivered in [Product PR667](https://github.com/fallrising/newclear/pull/667), s
 | BP-03 | Preserve healthy delivery and completed-request ownership | BP-3 | done | 2026-10-26T15:47:22Z | 2026-10-26T16:14:21Z | 2026-10-26T16:15:26Z |
 
 Product [PR671](https://github.com/fallrising/newclear/pull/671) merged `9905b731189f5756c8584251eb01cc183bcd0daf` at 2026-10-26T16:14:21Z; required CI, independent source review and remote content/ancestry/trailers passed. BP-1–BP-3 close at that observed product merge. Linux fake-process backpressure evidence; unchanged idle-timer, graceful-shutdown and runtime boundaries remain in the task.
+
+## T-0425 — Claude idle expiry
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| IE-1 | 完成階段背壓下既有 idle 期限與資源回收 | IE-1 | in_progress | 2026-10-26T16:48:56Z | | 2026-10-26T17:01:14Z |
+| IE-2 | 健康續輪及後續階段期限所有權 | IE-2 | in_progress | 2026-10-26T16:48:56Z | | 2026-10-26T17:01:14Z |
+| IE-3 | 完整交付、既有取消回歸與交接 | IE-3 | in_progress | 2026-10-26T16:48:56Z | | 2026-10-26T17:01:14Z |

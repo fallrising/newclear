@@ -391,17 +391,15 @@ impl ClaudeCode {
         }
     }
 
-    /// End the run after `idle` unless it was used again meanwhile.
-    fn expire_later(&self, run: &Arc<LiveRun>) {
-        let (run, idle) = (run.clone(), self.idle);
+    /// End this completed phase at its idle deadline unless it was used again.
+    fn expire_later(&self, run: &Arc<LiveRun>, since: Instant) {
+        let (run, idle, live) = (run.clone(), self.idle, self.live.clone());
         tokio::spawn(async move {
-            tokio::time::sleep(idle).await;
-            let still = run
-                .waiting_since
-                .lock()
-                .unwrap()
-                .is_some_and(|t| t.elapsed() >= idle);
-            if still {
+            tokio::time::sleep_until(tokio::time::Instant::from_std(since + idle)).await;
+            // Serialize the expiry decision with both kinds of new-sink admission.
+            // The captured phase cannot expire a later completed or active turn.
+            let _live = live.lock().unwrap();
+            if *run.waiting_since.lock().unwrap() == Some(since) {
                 debug!("Claude Code run idle too long; ending it");
                 run.stop.cancel();
             }
@@ -588,6 +586,13 @@ impl ClaudeCode {
         let known = convo(chat).iter().map(norm).collect();
         let mut live = self.live.lock().unwrap();
         let run = live.waiting.get(&results[0].0)?.clone();
+        if run.stop.is_cancelled()
+            || run
+                .interrupted_input
+                .load(std::sync::atomic::Ordering::SeqCst)
+        {
+            return None;
+        }
         let pending = run.pending.lock().unwrap().clone();
         let mut want: Vec<&String> = pending.iter().collect();
         let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
@@ -666,8 +671,11 @@ impl ClaudeCode {
             run.announcement_changed.notify_waiters();
             live.idle.push(run.clone());
         }
-        *run.waiting_since.lock().unwrap() = Some(Instant::now());
+        let since = Instant::now();
+        *run.waiting_since.lock().unwrap() = Some(since);
         live.order.push_back(run.clone());
+        // Delivery of the detached terminal may remain backpressured indefinitely.
+        self.expire_later(run, since);
         debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_retire_sink");
         tx
     }
@@ -1580,10 +1588,9 @@ async fn spawn_run(
                         debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_no_sink", done = filter.done);
                     }
                     if filter.done {
-                        // Reset and expire even an unsolicited completion. Do not
-                        // clear the next request's sender after publishing reuse.
+                        // Reset even an unsolicited completion. Do not clear the
+                        // next request's sender or reschedule its idle deadline.
                         filter.reset();
-                        cc.expire_later(&run);
                     }
                 }
                 Some("result") => {
@@ -2031,8 +2038,8 @@ mod tests {
         assert!(matches!(next_rx.rx.recv().await, Some(Item::Record(s)) if s == "new-turn"));
     }
 
-    #[test]
-    fn tc3_unsolicited_completion_retires_all_waiting_tool_state() {
+    #[tokio::test]
+    async fn tc3_unsolicited_completion_retires_all_waiting_tool_state() {
         use super::*;
         for with_sink in [false, true] {
             let (_dir, cc, run) = continuation_fixture();
@@ -2852,7 +2859,17 @@ while True: time.sleep(60)
 
     #[cfg(target_os = "linux")]
     async fn backpressured_reply(kind: &str, ignore_term: bool) -> BackpressuredReply {
+        backpressured_reply_with_idle(kind, ignore_term, Duration::from_secs(60)).await
+    }
+
+    #[cfg(target_os = "linux")]
+    async fn backpressured_reply_with_idle(
+        kind: &str,
+        ignore_term: bool,
+        idle: Duration,
+    ) -> BackpressuredReply {
         let (dir, cc, chat, _) = reply_fixture("fresh", ignore_term, true).await;
+        let cc = cc.with_idle(idle);
         let mut script = std::fs::read_to_string(&cc.bin).unwrap();
         if kind == "terminal" || kind == "tool" {
             script = script.replace(
@@ -3012,6 +3029,209 @@ while True: time.sleep(60)
         }
         assert!(!pending.is_finished());
         pending
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ie1_idle_expiry_releases_retained_completed_terminal() {
+        for (kind, ignore_term) in [("terminal", false), ("tool", false), ("terminal", true)] {
+            let idle = Duration::from_millis(150);
+            let fixture = backpressured_reply_with_idle(kind, ignore_term, idle).await;
+            assert_eq!(fixture.response.rx.capacity(), 0);
+            assert!(fixture.run.sink.lock().unwrap().is_none());
+            let since = fixture.run.waiting_since.lock().unwrap().unwrap();
+            let bound = if ignore_term { 7 } else { 3 };
+            let result =
+                tokio::time::timeout(Duration::from_secs(bound), fixture.run.cleaned.cancelled())
+                    .await;
+            let stopped = fixture.run.stop.is_cancelled();
+            let cleaned = fixture.run.cleaned.is_cancelled();
+            let process_exists = Path::new(&format!("/proc/{}", fixture.pid)).exists();
+            let slots = fixture.cc.runs.available_permits();
+            if result.is_err() {
+                drop(fixture.response);
+                fixture.cc.shutdown().await;
+                panic!("idle expiry behind retained {kind}: stop={stopped}, cleaned={cleaned}, process_exists={process_exists}, free_slots={slots}");
+            }
+            assert!(since.elapsed() >= idle);
+            assert_backpressure_resources_released(
+                &fixture.cc,
+                &fixture.run,
+                fixture.pid,
+                kind == "terminal",
+            );
+            assert_eq!(
+                fixture.response.rx.capacity(),
+                0,
+                "old receiver was never drained"
+            );
+            if kind == "terminal" && !ignore_term {
+                let replacement = tokio::time::timeout(Duration::from_secs(3), async {
+                    start(
+                        &fixture.cc,
+                        "sonnet",
+                        &json!({"messages":[{"role":"user","content":"replacement"}]}),
+                        &CancellationToken::new(),
+                    )
+                    .await
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+                })
+                .await;
+                fixture.cc.shutdown().await;
+                let reply: Value = serde_json::from_slice(&replacement.unwrap()).unwrap();
+                assert_eq!(reply["content"][0]["text"], "hello".repeat(61));
+                assert_eq!(
+                    std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+                    "fresh\nfresh\n",
+                );
+            }
+            drop(fixture.response);
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn ie2_continuation_outlives_old_deadline_and_gets_its_own() {
+        for tool in [false, true] {
+            let idle = Duration::from_millis(300);
+            let fixture =
+                backpressured_reply_with_idle(if tool { "tool" } else { "terminal" }, false, idle)
+                    .await;
+            let first_since = fixture.run.waiting_since.lock().unwrap().unwrap();
+            let token = CancellationToken::new();
+            let mut next = install_backpressured_continuation(&fixture, tool, &token).await;
+            assert!(fixture.run.waiting_since.lock().unwrap().is_none());
+            tokio::time::sleep_until(tokio::time::Instant::from_std(
+                first_since + idle + Duration::from_millis(40),
+            ))
+            .await;
+            let active_after_old_deadline = !fixture.run.stop.is_cancelled()
+                && !fixture.run.cleaned.is_cancelled()
+                && fixture.run.waiting_since.lock().unwrap().is_none()
+                && fixture.run.sink.lock().unwrap().is_some()
+                && fixture.response.rx.capacity() == 0
+                && Path::new(&format!("/proc/{}", fixture.pid)).exists();
+            if !active_after_old_deadline {
+                next.abort();
+                drop(fixture.response);
+                fixture.cc.shutdown().await;
+                panic!(
+                    "old idle deadline ended healthy continuation while old terminal was retained"
+                );
+            }
+            fixture.token.cancel(); // A completed old response no longer owns this run.
+            let old = fixture.response.collect("sonnet").await.unwrap();
+            let old: Value = serde_json::from_slice(&old).unwrap();
+            if tool {
+                assert_eq!(old["stop_reason"], "tool_use");
+                std::fs::write(fixture.cc.work_dir.join("healthy-tool-reply"), b"go").unwrap();
+            } else {
+                assert_eq!(old["content"][0]["text"], "hello".repeat(61));
+            }
+            let reply = tokio::time::timeout(Duration::from_secs(3), async {
+                (&mut next)
+                    .await
+                    .unwrap()
+                    .unwrap()
+                    .collect("sonnet")
+                    .await
+                    .unwrap()
+            })
+            .await;
+            if reply.is_err() {
+                next.abort();
+                fixture.cc.shutdown().await;
+            }
+            let reply: Value = serde_json::from_slice(&reply.unwrap()).unwrap();
+            assert_eq!(reply["content"][0]["text"], "hello".repeat(61));
+            let second_since = fixture.run.waiting_since.lock().unwrap().unwrap();
+            assert!(second_since >= first_since + idle);
+            let expiry =
+                tokio::time::timeout(Duration::from_secs(3), fixture.run.stop.cancelled()).await;
+            let elapsed_at_stop = second_since.elapsed();
+            if expiry.is_err() {
+                fixture.cc.shutdown().await;
+            }
+            expiry.unwrap();
+            assert!(
+                elapsed_at_stop >= idle,
+                "later phase lost part of its idle duration"
+            );
+            tokio::time::timeout(Duration::from_secs(3), fixture.run.cleaned.cancelled())
+                .await
+                .unwrap();
+            assert_backpressure_resources_released(&fixture.cc, &fixture.run, fixture.pid, true);
+            assert_eq!(
+                std::fs::read_to_string(fixture.cc.work_dir.join("starts")).unwrap(),
+                "fresh\n"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn ie2_old_epoch_cannot_expire_a_later_completed_phase() {
+        let (_dir, cc, run) = continuation_fixture();
+        let idle = Duration::from_millis(400);
+        let cc = cc.with_idle(idle);
+        let mut first = EventFilter {
+            done: true,
+            stop_reason: Some("tool_use".into()),
+            tool_ids: vec!["tool_1".into()],
+            ..Default::default()
+        };
+        drop(cc.finish_turn(&run, &mut first));
+        let first_since = run.waiting_since.lock().unwrap().unwrap();
+        let (_run, _receiver) = cc.continue_run(&synthetic_tool_result()).unwrap();
+        tokio::time::sleep(Duration::from_millis(200)).await;
+        let mut second = EventFilter {
+            done: true,
+            ..Default::default()
+        };
+        drop(cc.finish_turn(&run, &mut second));
+        let second_since = run.waiting_since.lock().unwrap().unwrap();
+        tokio::time::sleep_until(tokio::time::Instant::from_std(
+            first_since + idle + Duration::from_millis(40),
+        ))
+        .await;
+        assert!(
+            !run.stop.is_cancelled(),
+            "old phase timer stopped a newer completed phase"
+        );
+        tokio::time::timeout(Duration::from_secs(3), run.stop.cancelled())
+            .await
+            .unwrap();
+        assert!(second_since.elapsed() >= idle);
+    }
+
+    #[tokio::test]
+    async fn ie2_expired_or_interrupted_tool_phase_rejects_admission() {
+        for interrupted in [false, true] {
+            let (_dir, cc, run) = continuation_fixture();
+            let cc = cc.with_idle(Duration::from_millis(20));
+            let mut filter = EventFilter {
+                done: true,
+                stop_reason: Some("tool_use".into()),
+                tool_ids: vec!["tool_1".into()],
+                ..Default::default()
+            };
+            drop(cc.finish_turn(&run, &mut filter));
+            if interrupted {
+                run.interrupted_input
+                    .store(true, std::sync::atomic::Ordering::SeqCst);
+            } else {
+                tokio::time::timeout(Duration::from_secs(3), run.stop.cancelled())
+                    .await
+                    .unwrap();
+            }
+            assert!(cc.continue_run(&synthetic_tool_result()).is_none());
+            assert!(run.sink.lock().unwrap().is_none());
+            assert_eq!(run.pending.lock().unwrap().as_slice(), ["tool_1"]);
+            assert!(run.results.lock().unwrap().is_empty());
+            assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+        }
     }
 
     #[cfg(target_os = "linux")]

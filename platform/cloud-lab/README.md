@@ -29,4 +29,4 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 - [控制面](apps/control/worker/index.mjs)／[runner](adapters/node-health/README.md)／[看板](apps/control/public/index.html)
 - [本機啟動與測試](docs/quickstart.md)／[部署前設定與 gate](docs/deployment.md)／[實作證據](docs/evidence/m1-implementation.md)
 
-接入真實環境前可使用 [private bundle產生器](docs/deployment-bundle.md) 與 [live probe](docs/live-probe.md)。目前 [連線前檢查](docs/evidence/m1-live-readiness.md) 尚有權限／target缺口，沒有因工具完成而宣稱已部署。
+接入真實環境前可使用 [private bundle產生器](docs/deployment-bundle.md) 與 [live probe](docs/live-probe.md)。目前 [連線前檢查](docs/evidence/m1-live-readiness.md) 已選定首組目標，仍有Access權限／方案缺口，沒有因工具完成而宣稱已部署。

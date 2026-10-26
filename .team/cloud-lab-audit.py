@@ -48,7 +48,7 @@ allowed = {
     '.team/cloud-lab-audit.py',
 }
 if args.milestone == 'M1':
-    allowed.update({'.github/workflows/cloud-lab.yml', '.team/tasks/T-812.md', '.team/tasks/T-813.md', '.team/tasks/T-814.md', '.team/reports/T-812.md', '.team/reports/T-813.md', '.team/reports/T-814.md'})
+    allowed.update({'.github/workflows/cloud-lab.yml', '.team/tasks/T-812.md', '.team/tasks/T-813.md', '.team/tasks/T-814.md', '.team/reports/T-812.md', '.team/reports/T-813.md', '.team/reports/T-814.md', '.team/tasks/T-815.md', '.team/tasks/T-816.md', '.team/reports/T-815.md', '.team/reports/T-816.md'})
 for path in sorted(changed):
     if path not in allowed and not path.startswith('platform/cloud-lab/'):
         errors.append(f'out-of-scope change: {path}')

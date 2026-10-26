@@ -28,8 +28,15 @@ Root obtains actual rendered-App RED on unchanged product before PhaseB. New foc
 tests cover pending/failed/stale refresh, late source-run response and error boundaries.
 Existing affected archive and PR658 expiry regressions only; strictTS/scopedformat.
 Rebuild changed frontend assets; update one existing archive-retention Chromium test
-to inject metadata-network failure after actual SQL GC/download410, then explicit retry
+using a guard-safe synthetic historical first-INSERT fixture (no immutable-trigger
+bypass or timestamp rewrite), to inject metadata-network failure after actual SQL
+GC/download410, then explicit retry
 against real API. Clearly label browser network fault as injected. No duplicate BGC,
 old Python/native/OC/longsuite replay. Independent review, source/protection gate,
 43 project contracts/6indexes, required CI and normal merge.
 Fullsameversionfake/liveAT09/12/13/VMrecovery/deployment/M4 remain open.
+
+Prereview T109 found legacy archive-prune disables the immutable trigger. This slice
+replaces only this browser scenario entry with a new owned test helper that reuses
+existing historical seed and verifies exact preview/apply IDs plus unchanged
+run/event/authority facts. Original legacy helper and its evidence remain unchanged.

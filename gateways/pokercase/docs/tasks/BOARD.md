@@ -263,3 +263,14 @@ Future-drop coverage remains direct abort/join; blocked-stdin HTTP disconnect is
 [Task and acceptance](T-0419-claude-input-cancel.md). Explicit initial-input token cancellation only; HTTP disconnect detection and idle-resume writes remain outside scope.
 
 Delivered in [PR656](https://github.com/fallrising/newclear/pull/656), source `36aced67caaa172a24294f0f4374f9e0c05f7a53`, merge `13e9dfeb12d966cc3f2ace9b2030bec588ba128a` at 2026-10-25T18:15:43Z. IC-1–IC-3:218tests/18groups,4newtests/7scenarios,fmt/Clippy,43contracts/six indexes,independent source/final-document review and requiredCI passed. Source/merge ancestry, trailers and scoped remote content readback passed. Explicit token cancellation ends blocked initial input using existing stop/reap/drain before499/non-retryable; pre-cancelled requests preserve capacity and reusable state. Original RED7.04s and two fixture corrections retained. HTTP-disconnect detection and idle-resume input cancellation are not claimed. No live provider/model/login or whole-product acceptance; owner decides desk done.
+
+
+## T-0420 — Claude resumed input cancellation
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| RI-1 | Cancel resumed stdin acquisition/write without replay | RI-1 | in_progress | 2026-10-26T07:02:16Z | — | 2026-10-26T07:02:16Z |
+| RI-2 | Retire interrupted runs and release resources | RI-2 | in_progress | 2026-10-26T07:02:16Z | — | 2026-10-26T07:02:16Z |
+| RI-3 | Preserve healthy continuation and ordinary-error fallback | RI-3 | in_progress | 2026-10-26T07:02:16Z | — | 2026-10-26T07:02:16Z |
+
+[Task and acceptance](T-0420-claude-resume-cancel.md). Explicit resumed-input cancellation only; no HTTP-disconnect or general response-wait claim.

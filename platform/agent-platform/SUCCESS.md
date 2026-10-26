@@ -193,3 +193,15 @@ or complete full M4/live acceptance.
 T106:30 distinct focused web cases and rebuilt-assets browser1/9.6s passed.
 [Snapshot](tasks/379-expired-export/report.md) retains actual RED and two test corrections.
 Independent review and required CI/normal merge remain delivery gates.
+
+## Bounded scope: T-108 download expiry availability
+
+[Prior contract](tasks/379-download-expiry/task.md) addresses the download path left
+separate from PR658 export preview/approval. No backend or schema change.
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| DUX-01 | passed (local) | T110-unit1:15new+18EUX+5archive; exact410 pending/failed/stale metadata, identity/late-run/auth/error/success boundaries |
+| DUX-02 | passed (local) | T110-browser1:freshbuild one real Chromium/API/SQLGC case3.5s; synthetic firstINSERT history, injected metadata network failure, explicit retry; scoped TS/format and test-helper Ruff |
+
+No fullM4/live/deployment acceptance or usable tag.

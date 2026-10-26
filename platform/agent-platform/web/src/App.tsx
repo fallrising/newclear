@@ -836,18 +836,32 @@ function ResultArchive({ run }: { run: Run }) {
   }
   const items = archives.data?.items ?? [];
   const hasKnownExpiry = items.some((item) => unavailable.includes(identity(item)));
+  const isExpiredDownload = (error: unknown) =>
+    error instanceof ApiError && error.status === 410 && error.message === 'artifact_expired';
   const download = useMutation({
-    mutationFn: async (artifactId: string) => {
+    mutationFn: async (source: Pick<Artifact, 'run_id' | 'id' | 'sha256'>) => {
       const response = await fetch(
-        `/api/v1/runs/${encodeURIComponent(run.id)}/artifacts/${encodeURIComponent(artifactId)}`,
+        `/api/v1/runs/${encodeURIComponent(source.run_id)}/artifacts/${encodeURIComponent(source.id)}`,
         { credentials: 'same-origin' },
       );
-      if (response.status === 410) throw new Error('artifact_expired');
-      if (!response.ok) throw new Error('archive_download_failed');
+      if (!response.ok) {
+        if (response.status === 401) throw new ApiError(401, 'authentication_required');
+        const body: unknown = await response.json().catch(() => null);
+        if (
+          response.status === 410 &&
+          body !== null &&
+          typeof body === 'object' &&
+          !Array.isArray(body) &&
+          'error' in body &&
+          body.error === 'artifact_expired'
+        )
+          throw new ApiError(410, 'artifact_expired');
+        throw new Error('archive_download_failed');
+      }
       const url = URL.createObjectURL(await response.blob());
       const link = document.createElement('a');
       link.href = url;
-      link.download = `run-${run.id}-result.json`;
+      link.download = `run-${source.run_id}-result.json`;
       document.body.append(link);
       try {
         link.click();
@@ -856,8 +870,10 @@ function ResultArchive({ run }: { run: Run }) {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
     },
-    onError: (error) => {
-      if (error.message === 'artifact_expired') void archives.refetch();
+    onError: (error, source) => {
+      if (isExpiredDownload(error)) expire(source);
+      if (error instanceof ApiError && error.status === 401)
+        void cache.invalidateQueries({ queryKey: ['session'] });
     },
   });
   return (
@@ -884,7 +900,7 @@ function ResultArchive({ run }: { run: Run }) {
             {artifact.pruned_at || unavailable.includes(identity(artifact)) ? (
               <p className="muted">此封存已依保留期限清理；摘要與原始 diff 仍保留。</p>
             ) : (
-              <button onClick={() => download.mutate(artifact.id)} disabled={download.isPending}>
+              <button onClick={() => download.mutate(artifact)} disabled={download.isPending}>
                 {download.isPending ? '封存下載中…' : '下載封存結果'}
               </button>
             )}
@@ -903,7 +919,7 @@ function ResultArchive({ run }: { run: Run }) {
       )}
       {download.isError && (
         <p className="error" role="alert">
-          {download.error.message === 'artifact_expired'
+          {isExpiredDownload(download.error)
             ? '封存已到期，已更新可用狀態。'
             : '封存下載失敗，請確認登入狀態後重試。'}
         </p>

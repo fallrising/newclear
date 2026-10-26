@@ -74,3 +74,14 @@ separately; none of these facts enter the DB bundle. No migration or catalog pin
 changes for this slice. Pending cleanup continues to prevent backup until the
 existing recovery path independently confirms stop and releases capacity. Native
 roundtrip evidence for the new path is in its [delivery snapshot](../tasks/379-stale-cleanup/report.md).
+
+### Download expiry while metadata is unavailable
+
+A download response with exact HTTP410 and JSON `error: artifact_expired` is
+definitive for the requested immutable artifact. The workbench immediately removes
+its download/new-export controls and retains result/diff/hash/size, even while the
+metadata refresh fails or returns stale available data. Explicit metadata retry
+remains available; no server pruning timestamp is invented. Other410/error bodies,
+transient failures and network errors do not establish expiry. Download401 refreshes
+the session. Late responses are scoped to the original run/artifact identity.
+[Bounded verification and synthetic fixture limits](../tasks/379-download-expiry/report.md).

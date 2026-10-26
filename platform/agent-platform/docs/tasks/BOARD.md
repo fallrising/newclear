@@ -162,5 +162,33 @@ This record supersedes pre-merge wording in the dated local delivery snapshot.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0104.1 | Reflect exact preview/approval archive expiry immediately | EUX-01 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:29:14Z |
-| T-0104.2 | Preserve auth/replay and verify real browser GC flow | EUX-02 | in_progress | 2026-10-25T18:19:18Z | | 2026-10-25T18:29:14Z |
+| T-0104.1 | Reflect exact preview/approval archive expiry immediately | EUX-01 | done | 2026-10-25T18:19:18Z | 2026-10-25T18:37:47Z | 2026-10-25T18:38:12Z |
+| T-0104.2 | Preserve auth/replay and verify real browser GC flow | EUX-02 | done | 2026-10-25T18:19:18Z | 2026-10-25T18:37:47Z | 2026-10-25T18:38:12Z |
+
+T0104 delivery: [PR658](https://github.com/fallrising/newclear/pull/658) normally merged
+`d81a7d91415d4e4733a58c61fa9b72f32412b1e0` at 2026-10-25T18:37:47Z; exact reviewed head
+`7568503df96e5e6e565a7d695990d64f71957e11` passed all four required checks:
+[Agent Platform40221618082](https://github.com/fallrising/newclear/actions/runs/40221618082)
+check/control-plane/web and [contracts40221617968](https://github.com/fallrising/newclear/actions/runs/40221617968)
+validate. Hosted45 base+756 platform and103 web tests passed; merged component equals reviewed head.
+T105 independently accepted EUX01/02 after genuine rendered-App RED6fail/12pass.
+Thirty distinct focused web cases passed (18new,7ExportPanel,5archive); type/format
+and freshVitebuild passed, updated real Chromium/SQL/API/GC/fakeHTTP browser1/9.6s.
+Original RED, test-type mistake and A/B fixture mistake remain preserved; corrections
+were independently reviewed. Product change is limited to App and ExportPanel.
+
+Exact preview/approval410 artifact_expired immediately retires affected controls,
+retains result/diff/hash/size and refreshes source-run archives. Failed/stale refetch
+cannot resurrect actions; no fabricated pruned_at. Late responses stay scoped;
+auth/transient/lost-key/reconcile behavior remains correct. Backend unchanged.
+Historical browser cohort and GitHub HTTP upstream are synthetic; no fullfake/live
+AT09/12/13/VMrecovery/deployment/M4 acceptance. Issue379 staysOPEN; no release/tag.
+T0100 BGCdone rows delivered with PR658; originalecd66b08 preserved/no duplicatePR.
+This record supersedes pre-merge wording in the dated local delivery snapshot.
+
+## T-0108 — download expiry availability
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0108.1 | Retain definitive download expiry across failed/stale metadata refresh | DUX-01 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:14:16Z |
+| T-0108.2 | Preserve error boundaries, source-run isolation and real download GC flow | DUX-02 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:14:16Z |

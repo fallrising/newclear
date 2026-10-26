@@ -28,7 +28,18 @@ Owner 直接指示「好，繼續開發。」。範圍見 [M1 實作契約](../m
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0002-1 | 控制面、准入與恢復 | M1-I1 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |
-| T-0002-2 | 固定 collector runner 與 journal | M1-I2 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |
-| T-0002-3 | 看板與人機入口 | M1-I3 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |
-| T-0002-4 | 整合、故障驗證與獨立審查 | M1-I4 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |
+| T-0002-1 | 控制面、准入與恢復 | M1-I1 | done | 2026-10-26T15:52:01Z | 2026-10-26T16:21:19Z | 2026-10-26T16:22:13Z |
+| T-0002-2 | 固定 collector runner 與 journal | M1-I2 | done | 2026-10-26T15:52:01Z | 2026-10-26T16:21:19Z | 2026-10-26T16:22:13Z |
+| T-0002-3 | 看板與人機入口 | M1-I3 | done | 2026-10-26T15:52:01Z | 2026-10-26T16:21:19Z | 2026-10-26T16:22:13Z |
+| T-0002-4 | 整合、故障驗證與獨立審查 | M1-I4 | done | 2026-10-26T15:52:01Z | 2026-10-26T16:21:19Z | 2026-10-26T16:22:13Z |
+
+## M1 本機實作交付與回讀
+
+[PR #673](https://github.com/fallrising/newclear/pull/673) 已於 **2026-10-26T16:21:19Z** 正常合併，merge SHA `1c2e66f6ee17064e59813e9d08f76066ac7695fe`；已驗證 head `99bb1818dcbd0f505e761e743c40ab4de41ca84a`。
+
+- [Cloud Lab local implementation](https://github.com/fallrising/newclear/actions/runs/40358151064)、[Project success contracts](https://github.com/fallrising/newclear/actions/runs/40358150707)、[Workflow static validation](https://github.com/fallrising/newclear/actions/runs/40358150819)、[llms.txt CI](https://github.com/fallrising/newclear/actions/runs/40358150733) 全數 SUCCESS；合併前 CLEAN／無衝突，head 未改變，未繞過檢查。
+- 本機 31 Node＋31 Python 測試、44 專案契約、7 llms、22 文件／173連結／12固定來源及scope／diff檢查通過；[獨立審查 T-814](../../../../.team/reports/T-814.md) ACCEPT，原 REWORK／修正歷史保留。
+- 合併後 fetch main，逐一比對49個交付路徑與已驗證head，Git內容無差異；PR API回讀 merged=true、SHA與時間相符。
+- M1-I1～I4 本機實作完成。完整M1-LIVE與產品AC-06～08仍pending：真實CF／target runner／手機／bot、入口撤權、備份與預算；沒有部署、封存、既有程式搬移或usable tag。
+
+此收尾PR只改任務板，end使用上述實際合併時間。

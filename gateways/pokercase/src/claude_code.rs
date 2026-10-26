@@ -1304,6 +1304,38 @@ impl Drop for RunDir {
     }
 }
 
+/// Own a new child until the reader takes over. Tokio's kill-on-drop kills
+/// promptly but only reaps orphaned children on a best-effort basis. A dropped
+/// HTTP handler must retain a waiter as well, even while its first write blocks.
+struct StartupChild(Option<Child>);
+
+impl StartupChild {
+    fn get_mut(&mut self) -> &mut Child {
+        self.0.as_mut().expect("startup child not yet handed off")
+    }
+
+    fn take(&mut self) -> Child {
+        self.0.take().expect("startup child handed off once")
+    }
+}
+
+impl Drop for StartupChild {
+    fn drop(&mut self) {
+        if let Some(mut child) = self.0.take() {
+            // Preserve the existing immediate kill on abandoned startup. Keep
+            // ownership through wait so a quiet gateway does not retain zombies.
+            let _ = child.start_kill();
+            if let Ok(runtime) = tokio::runtime::Handle::try_current() {
+                runtime.spawn(async move {
+                    let _ = child.wait().await;
+                });
+            }
+            // Without a running runtime, Child's kill_on_drop remains the
+            // teardown fallback; Drop must not panic trying to spawn a task.
+        }
+    }
+}
+
 /// Start `claude -p`: told the whole conversation, or (`resume` = saved session and how
 /// many messages it has) only the messages after it.
 async fn spawn_run(
@@ -1394,7 +1426,7 @@ async fn spawn_run(
     for (k, v) in EXTRA_ENV {
         cmd.env(k, v);
     }
-    let mut child = cmd.spawn().map_err(|e| {
+    let mut child = StartupChild(Some(cmd.spawn().map_err(|e| {
         fail(
             503,
             format!(
@@ -1403,16 +1435,17 @@ async fn spawn_run(
             ),
             true,
         )
-    })?;
+    })?));
 
     let content = match &resume {
         Some((_, n)) => render_turn(&convo(chat)[*n..]),
         None => render_prompt(chat),
     };
     let line = json!({"type": "user", "message": {"role": "user", "content": content}});
-    let mut stdin = child.stdin.take().expect("piped stdin");
-    let stdout = child.stdout.take().expect("piped stdout");
-    let mut diagnostics = crate::cli_stderr::Drain::new(child.stderr.take().expect("piped stderr"));
+    let mut stdin = child.get_mut().stdin.take().expect("piped stdin");
+    let stdout = child.get_mut().stdout.take().expect("piped stdout");
+    let mut diagnostics =
+        crate::cli_stderr::Drain::new(child.get_mut().stderr.take().expect("piped stderr"));
     let input = format!("{line}\n");
     let written = tokio::select! {
         biased;
@@ -1420,18 +1453,19 @@ async fn spawn_run(
             debug!(target: "thinrouter::claude_lifecycle", stage = "startup_input_cancelled");
             // A partial write cannot be replayed safely. Retire this new child
             // with the existing grace period before returning a non-retryable error.
-            stop(child).await;
+            stop(child.take()).await;
             diagnostics.stop().await;
             return Err(fail(499, "client disconnected".into(), false));
         },
         result = stdin.write_all(input.as_bytes()) => result,
     };
     if let Err(e) = written {
-        stop(child).await;
+        stop(child.take()).await;
         diagnostics.stop().await;
         return Err(fail(502, format!("Claude Code input: {e}"), true));
     }
 
+    let child = child.take();
     let (tx, rx) = reply_channel();
     static NEXT_TRACE_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     let run = Arc::new(LiveRun {

@@ -114,6 +114,11 @@
       "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0"
     },
     {
+      "path": "platform/cloud-lab",
+      "last_source_update": "2026-10-26T13:53:40Z",
+      "source_commit": "65bbadb7659437e8a14f029015313c6f5277ce35"
+    },
+    {
       "path": "platform/dim-gate",
       "last_source_update": "2026-10-18T20:47:07+08:00",
       "source_commit": "e703fa1d07f0da605e6bad214baf31b74e90b270"

@@ -2073,3 +2073,21 @@ T018 approvedreviewonlypair; first25–30minFlowshotshellpreload/LoomlockedSDKca
 
 
 Paired runtime now verified: Flowshot19 + retained Loom12 + approved0069captures, independent T028/T029 audit. Native green evidence reused; original failures and accessibility findings preserved. Current-head CI and normal PR598 merge/readback remain pending. Fanz bootstrap001-only passed; no canonical continuation authorized.
+
+
+## Cloud Lab M0 — 2026-10-26
+
+Authority: owner directly approved documentation-first framework, knowledge tree, interfaces and migration planning. No runtime moves, archive, deployment or account changes.
+Base: 65bbadb7659437e8a14f029015313c6f5277ce35. Product mainline stays incomplete; document milestone is separate.
+Lead owns architecture, capability tree, source/migration mapping, acceptance, indexes and review decisions. T-810 writes proposed contracts in an isolated worktree; T-811 is read-only independent review after integration. Both native helpers use gpt-6.1-sol/high with fresh context, one call plus at most one bounded rework each; no nested delegation. Unknown quota/cost remains unknown.
+Journal integration not opted in; local task/report/evidence retains execution facts.
+Git authority: current session explicitly requires user authorization for commit/push/publication; prepare reviewable local artifacts and checks before resolving delivery authorization. No external Git mutation in M0 preparation.
+Required checks: project-success/index/llms validators, relative links and public boundary, synthetic contract walkthrough, independent review, git diff --check, evidence gate. Runtime/Cloudflare qualification belongs to later milestones.
+Status: in progress; contracts assigned; no acceptance decision yet.
+
+Cloud Lab M0 checkpoint: T-810 five contract documents integrated after one bounded rework (operation signatures, ScheduleSpec, transition guards). First integrated repo preflight passed 44 project contracts, 7 llms files, 132 links and 12 source pins. Initial index generation before contract integration correctly failed on the missing contracts/README link; after integration it passed without weakening checks.
+T-811 independent review reproduced checks and requested rework on reconciliation-only authority/fence acquisition plus receiver-derived late metadata. Lead accepted both findings, added query-only ClaimReconcile independent of original submit expiry, mode-aware lease renewal, immutable original submission mapping, and clarified native-vs-coordination attempts. Runtime tests remain out of scope. Focused follow-up review pending.
+
+Cloud Lab M0 decision: ACCEPT local documentation candidate after T-811 focused follow-up closed P2 (reconciliation authority/fence) and P3 (late metadata). Lead inspected all authored documentation and integration diffs; source histories and runtime boundaries remain intact. AC-01–05 may be passed for local documents; product AC-06–08 remain pending, no usable tag. Final bookkeeping/evidence/index checks run after status reconciliation. Git delivery remains unperformed pending current-session explicit authorization; do not represent local ACCEPT as merged delivery.
+
+Cloud Lab M0 Git authorization 2026-10-26T15:39:48Z: owner explicitly approved the proposed commit, push, PR review and normal merge. Prior pending-authorization entries above describe the earlier checkpoint only. Proceed with the reviewed documentation, required CI, remote content verification and board closeout; no runtime migration or deployment.

@@ -56,4 +56,4 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 
 ## 真實環境接入準備（T-0003）
 
-新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。目前D1／Worker domain查詢缺必要scopes，網域／runner尚待owner選定；AC-06～08維持pending，不由本機工具通過改為passed。
+新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。D1／Workers授權已更新並通過只讀查詢；網域／runner採已提出的第一組目標。私人部署計畫已準備，仍待Access建立／service-token／身分查詢scopes及方案確認；AC-06～08維持pending，不由本機工具通過改為passed。

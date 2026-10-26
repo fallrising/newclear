@@ -332,6 +332,7 @@ Product [PR671](https://github.com/fallrising/newclear/pull/671) merged `9905b73
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| IE-1 | 完成階段背壓下既有 idle 期限與資源回收 | IE-1 | in_progress | 2026-10-26T16:48:56Z | | 2026-10-26T17:01:14Z |
-| IE-2 | 健康續輪及後續階段期限所有權 | IE-2 | in_progress | 2026-10-26T16:48:56Z | | 2026-10-26T17:01:14Z |
-| IE-3 | 完整交付、既有取消回歸與交接 | IE-3 | in_progress | 2026-10-26T16:48:56Z | | 2026-10-26T17:01:14Z |
+| IE-1 | 完成階段背壓下既有 idle 期限與資源回收 | IE-1 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
+| IE-2 | 健康續輪及後續階段期限所有權 | IE-2 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
+| IE-3 | 完整交付、既有取消回歸與交接 | IE-3 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
+T-0425 delivered by [PR675](https://github.com/fallrising/newclear/pull/675), source `2922bcd0821d04ea2319e6ec884527a60902aa2d`, merge `f522b53b0787c4d88827513fc78a0a2f22268913` at 2026-10-26T17:08:03Z. IE-1–IE-3:245 Rust tests/18groups,46 Claude-focused,4 new tests/8primarycases plus1healthyreplacement; fmt/Clippy,20validators,44contracts/7indexes and independent source/final-document review passed. Required check/validate, normal merge and remote source+merge trailer/ancestry/scoped-content readback passed. Original idle-expiry RED and corrected missing-reactor test-harness failure retained; Linux fake-process/finite-clock evidence and runtime/transport boundaries remain as documented in SUCCESS/task. This row closure is the separate board publication; desk remains in_progress for owner disposition.

@@ -322,6 +322,8 @@ Delivered in [Product PR667](https://github.com/fallrising/newclear/pull/667), s
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| BP-01 | Stop a continuation behind a retained completed reply | BP-1 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T16:09:01Z |
-| BP-02 | Release run resources under reply backpressure | BP-2 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T16:09:01Z |
-| BP-03 | Preserve healthy delivery and completed-request ownership | BP-3 | in_progress | 2026-10-26T15:47:22Z | — | 2026-10-26T16:09:01Z |
+| BP-01 | Stop a continuation behind a retained completed reply | BP-1 | done | 2026-10-26T15:47:22Z | 2026-10-26T16:14:21Z | 2026-10-26T16:15:26Z |
+| BP-02 | Release run resources under reply backpressure | BP-2 | done | 2026-10-26T15:47:22Z | 2026-10-26T16:14:21Z | 2026-10-26T16:15:26Z |
+| BP-03 | Preserve healthy delivery and completed-request ownership | BP-3 | done | 2026-10-26T15:47:22Z | 2026-10-26T16:14:21Z | 2026-10-26T16:15:26Z |
+
+Product [PR671](https://github.com/fallrising/newclear/pull/671) merged `9905b731189f5756c8584251eb01cc183bcd0daf` at 2026-10-26T16:14:21Z; required CI, independent source review and remote content/ancestry/trailers passed. BP-1–BP-3 close at that observed product merge. Linux fake-process backpressure evidence; unchanged idle-timer, graceful-shutdown and runtime boundaries remain in the task.

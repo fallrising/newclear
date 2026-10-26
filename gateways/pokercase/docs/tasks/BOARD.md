@@ -281,8 +281,10 @@ Delivered in [Product PR660](https://github.com/fallrising/newclear/pull/660), s
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-1 | Cancel first-reply waits without fallback/replay | FR-1 | in_progress | 2026-10-26T08:11:27Z | — | 2026-10-26T08:11:27Z |
-| FR-2 | Release selected-run ownership on cancel/drop | FR-2 | in_progress | 2026-10-26T08:11:27Z | — | 2026-10-26T08:11:27Z |
-| FR-3 | Preserve healthy first reply and ordinary failures | FR-3 | in_progress | 2026-10-26T08:11:27Z | — | 2026-10-26T08:11:27Z |
+| FR-1 | Cancel first-reply waits without fallback/replay | FR-1 | done | 2026-10-26T08:11:27Z | 2026-10-26T08:29:50Z | 2026-10-26T08:29:50Z |
+| FR-2 | Release selected-run ownership on cancel/drop | FR-2 | done | 2026-10-26T08:11:27Z | 2026-10-26T08:29:50Z | 2026-10-26T08:29:50Z |
+| FR-3 | Preserve healthy first reply and ordinary failures | FR-3 | done | 2026-10-26T08:11:27Z | 2026-10-26T08:29:50Z | 2026-10-26T08:29:50Z |
 
 [Task and acceptance](T-0421-claude-first-cancel.md). Current token before first reply only; HTTP-disconnect and post-first-record behavior excluded.
+
+Delivered in [Product PR662](https://github.com/fallrising/newclear/pull/662), source `5e1fa68d5ab18e18135bca27cc5df2aa1af1f978`, merge `c82260114659fc2978b56bf159a6efd5b561af45` at 2026-10-26T08:29:50Z. FR-1–FR-3:226tests/18groups,4newtests/18scenarios,fmt/Clippy,43contracts/six indexes, independent source/final-document review and requiredCI passed. Source/merge ancestry, trailers and scoped remote readback PASS. Current-token first-reply cancellation returns499 after selected-run cleanup without fallback/replay; drop retires the run. See task for exact markers, fixture limits and retained RED. Existing five-second grace/best-effort cleanup preserved; HTTP-disconnect and post-first-record cancellation outside scope. No live-provider or whole-product acceptance; owner decides desk done.

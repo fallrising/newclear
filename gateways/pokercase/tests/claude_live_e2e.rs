@@ -43,6 +43,21 @@ if os.path.exists(os.path.join(d, "stderr-start")):
     if open(os.path.join(d, "stderr-start")).read() == "fail-input":
         os.close(0)
         while True: time.sleep(60)
+# T-0423 gates the first read before helper startup or any stdout. Only byte
+# counts are recorded; the parent verifies the admitted input exceeds capacity.
+if os.path.exists(os.path.join(d, "input-gate")):
+    import array, fcntl, termios
+    capacity = fcntl.fcntl(0, fcntl.F_GETPIPE_SZ)
+    queued = array.array("i", [0])
+    deadline = time.monotonic() + 3
+    while queued[0] == 0:
+        fcntl.ioctl(0, termios.FIONREAD, queued, True)
+        if time.monotonic() >= deadline: raise RuntimeError("initial input not queued")
+        time.sleep(0.001)
+    with open(os.path.join(d, "input-ready.json"), "w") as f:
+        json.dump({"capacity": capacity, "queued": queued[0]}, f)
+    with open(os.path.join(d, "hanging.pid"), "w") as f: f.write(str(os.getpid()))
+    while os.path.exists(os.path.join(d, "input-gate")): time.sleep(0.001)
 helper = None
 if "--mcp-config" in args:
     cfg = json.load(open(args[args.index("--mcp-config") + 1]))["mcpServers"]["thinrouter"]
@@ -184,6 +199,7 @@ struct Env {
     dir: TempDir,
     config_dir: TempDir,
     extra: Vec<String>,
+    key: String,
 }
 
 /// Start the gateway on an existing data dir and Claude config dir.
@@ -288,6 +304,7 @@ impl Env {
             dir,
             config_dir,
             extra,
+            key: key["secret"].as_str().unwrap().to_owned(),
         }
     }
 
@@ -782,6 +799,218 @@ mod disconnect_tests {
         })
         .await
         .expect("owned run directory removed");
+    }
+
+    fn startup_body(path: &str, stream: bool, with_tools: bool) -> Value {
+        let text = "q".repeat(1024 * 1024);
+        let mut body = if path == "/v1/responses" {
+            json!({"model":"cc","stream":stream,"input":text})
+        } else {
+            json!({"model":"cc","stream":stream,"max_tokens":50,"messages":[{"role":"user","content":text}]})
+        };
+        if with_tools {
+            body["tools"] = match path {
+                "/v1/messages" => {
+                    json!([{"name":"get_weather","input_schema":{"type":"object","properties":{}}}])
+                }
+                "/v1/responses" => {
+                    json!([{"type":"function","name":"get_weather","parameters":{"type":"object","properties":{}}}])
+                }
+                _ => tools(),
+            };
+        }
+        body
+    }
+
+    async fn raw_startup_request(
+        env: &Env,
+        path: &str,
+        body: &Value,
+        connection_close: bool,
+    ) -> tokio::net::TcpStream {
+        use tokio::io::AsyncWriteExt;
+        let address = env.base.strip_prefix("http://").unwrap();
+        let mut socket = tokio::time::timeout(
+            Duration::from_secs(3),
+            tokio::net::TcpStream::connect(address),
+        )
+        .await
+        .expect("loopback connection established")
+        .unwrap();
+        let body = serde_json::to_vec(body).unwrap();
+        let connection = if connection_close {
+            "Connection: close\r\n"
+        } else {
+            ""
+        };
+        let headers = format!(
+            "POST {path} HTTP/1.1\r\nHost: {address}\r\nAuthorization: Bearer {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\n{connection}\r\n",
+            env.key, body.len()
+        );
+        tokio::time::timeout(Duration::from_secs(3), async {
+            socket.write_all(headers.as_bytes()).await.unwrap();
+            socket.write_all(&body).await.unwrap();
+        })
+        .await
+        .expect("complete HTTP request delivered");
+        socket
+    }
+
+    async fn blocked_startup(env: &Env, with_tools: bool) -> HangingFixture {
+        let fixture = hanging_fixture(env).await;
+        let marker: Value = serde_json::from_str(&env.file("input-ready.json")).unwrap();
+        assert!(marker["queued"].as_u64().unwrap() > 0);
+        assert!(marker["capacity"].as_u64().unwrap() < 1024 * 1024);
+        assert!(marker["queued"].as_u64().unwrap() <= marker["capacity"].as_u64().unwrap());
+        assert!(
+            env.file("turns.txt").is_empty(),
+            "no complete initial line was consumed"
+        );
+        assert_eq!(
+            env.starts(),
+            1,
+            "one admitted process, not an HTTP body-limit rejection"
+        );
+        assert_eq!(owned_run_dirs(env).len(), usize::from(with_tools));
+        fixture
+    }
+
+    async fn assert_startup_reaped(env: &Env, fixture: &HangingFixture) {
+        let reaped = tokio::time::timeout(Duration::from_secs(3), async {
+            while std::path::Path::new(&format!("/proc/{}", fixture.pid)).exists() {
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await;
+        if reaped.is_err() {
+            let stat =
+                std::fs::read_to_string(format!("/proc/{}/stat", fixture.pid)).unwrap_or_default();
+            let state = stat
+                .rsplit_once(')')
+                .and_then(|(_, rest)| rest.split_whitespace().next())
+                .unwrap_or("absent");
+            panic!("initial-write disconnect not reaped in 3s: state={state}, owned_dirs={}, starts={}, startup_cancel_stage={}, reader_cleanup_stage={}", owned_run_dirs(env).len(), env.starts(), env.file("gateway.log").contains("startup_input_cancelled"), env.file("gateway.log").contains("reader_cleanup"));
+        }
+    }
+
+    async fn startup_replacement(env: &Env) {
+        let reply = tokio::time::timeout(
+            Duration::from_secs(3),
+            env.chat(json!({"model":"cc","messages":[{"role":"user","content":"replacement"}]})),
+        )
+        .await
+        .expect("released one-slot capacity admits replacement");
+        assert_eq!(reply["choices"][0]["message"]["content"], "Hello there");
+        assert_eq!(env.starts(), 2, "cancelled input was never replayed");
+        assert_eq!(env.file("turns.txt").lines().count(), 1);
+    }
+
+    #[tokio::test]
+    async fn hd1_http_connection_close_during_initial_write_releases_resources() {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            for stream in [false, true] {
+                for with_tools in [false, true] {
+                    eprintln!("HD-1 {path} stream={stream} tools={with_tools}");
+                    let env =
+                        Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+                    let sibling = env.dir.path().join("claude-work/runs/keep");
+                    std::fs::create_dir_all(&sibling).unwrap();
+                    std::fs::write(sibling.join("sentinel"), b"keep").unwrap();
+                    let gate = env.bin_dir.path().join("input-gate");
+                    std::fs::write(&gate, "").unwrap();
+                    let socket = raw_startup_request(
+                        &env,
+                        path,
+                        &startup_body(path, stream, with_tools),
+                        true,
+                    )
+                    .await;
+                    let fixture = blocked_startup(&env, with_tools).await;
+                    // Own and close the entire socket. No write-half shutdown or
+                    // client task abort is used; no TCP RST is claimed.
+                    drop(socket);
+                    assert_startup_reaped(&env, &fixture).await;
+                    assert_no_run_dirs(&env).await;
+                    assert_eq!(std::fs::read(sibling.join("sentinel")).unwrap(), b"keep");
+                    std::fs::remove_file(gate).unwrap();
+                    startup_replacement(&env).await;
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn hd2_keep_alive_close_initial_write() {
+        let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+        std::fs::write(env.bin_dir.path().join("input-gate"), "").unwrap();
+        let socket = raw_startup_request(
+            &env,
+            "/v1/chat/completions",
+            &startup_body("/v1/chat/completions", false, true),
+            false,
+        )
+        .await;
+        let fixture = blocked_startup(&env, true).await;
+        drop(socket);
+        assert_startup_reaped(&env, &fixture).await;
+        assert_no_run_dirs(&env).await;
+    }
+
+    #[tokio::test]
+    async fn hd2_reqwest_abort_initial_write() {
+        let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+        std::fs::write(env.bin_dir.path().join("input-gate"), "").unwrap();
+        let request = env
+            .client
+            .post(format!("{}/v1/chat/completions", env.base))
+            .json(&startup_body("/v1/chat/completions", false, true));
+        let pending = tokio::spawn(async move { request.send().await });
+        let fixture = blocked_startup(&env, true).await;
+        pending.abort();
+        let _ = pending.await;
+        assert_startup_reaped(&env, &fixture).await;
+        assert_no_run_dirs(&env).await;
+    }
+
+    #[tokio::test]
+    async fn hd3_gated_large_input_and_completed_response_preserve_reuse() {
+        use tokio::io::AsyncReadExt;
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            for stream in [false, true] {
+                eprintln!("HD-3 {path} stream={stream}");
+                let env = Env::start(&["--claude-max-runs", "1", "--claude-idle-secs", "60"]).await;
+                let gate = env.bin_dir.path().join("input-gate");
+                std::fs::write(&gate, "").unwrap();
+                let mut socket =
+                    raw_startup_request(&env, path, &startup_body(path, stream, false), true).await;
+                let _fixture = blocked_startup(&env, false).await;
+                std::fs::remove_file(gate).unwrap();
+                let mut response = Vec::new();
+                tokio::time::timeout(Duration::from_secs(3), socket.read_to_end(&mut response))
+                    .await
+                    .expect("gated input and response complete")
+                    .unwrap();
+                let response = String::from_utf8(response).unwrap();
+                assert!(response.starts_with("HTTP/1.1 200"));
+                assert!(response.contains("Hello there"));
+                assert_eq!(env.file("turns.txt").lines().count(), 1);
+                let next = env
+                    .chat(json!({"model":"cc","messages":[
+                        {"role":"user","content":"q".repeat(1024*1024)},
+                        {"role":"assistant","content":"Hello there"},
+                        {"role":"user","content":"thanks"}
+                    ]}))
+                    .await;
+                assert_eq!(next["choices"][0]["message"]["content"], "Hello there");
+                assert_eq!(
+                    env.starts(),
+                    1,
+                    "completed response keeps same process reusable"
+                );
+                assert_eq!(env.file("turns.txt").lines().count(), 2);
+                assert!(owned_run_dirs(&env).is_empty());
+            }
+        }
     }
 
     #[tokio::test]

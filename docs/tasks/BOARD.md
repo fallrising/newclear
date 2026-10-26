@@ -45,7 +45,7 @@
 | FE2-11 | Paired synthetic Web R2 delivered in PR598 | R2-AC-11 | done | 2026-10-24T11:22:03Z | 2026-10-24T17:33:41Z | 2026-10-24T17:34:24Z |
 | FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
-| FE2-14 | platform/fanzloud 第2輪實作（診斷原因與整合中；PR604 Draft） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-26T14:13:10.980406Z |
+| FE2-14 | platform/fanzloud 第2輪實作（v3 時序觀測修正；PR604 Draft） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-26T17:46:36.051146+00:00 |
 | FE2-E | 交付證據／整合核對 | R2-AC-E | todo | — | — | — |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.

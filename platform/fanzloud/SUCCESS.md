@@ -142,3 +142,8 @@ initial v1 missing-reason regression failed as intended and is retained. The run
 restores byte-exactly to v1 after the documented diagnostic substitutions; all five
 v1 file hashes remain unchanged. Scoped project-success and staged whitespace checks
 passed. Independent exact-source acceptance is recorded separately in PR604.
+
+
+## T-0380 v3 clock correction — 2026-10-26
+
+Scope and AC: [v3 diagnostic specification](docs/specs/SPEC-T006R-initial-trace-v3.md) C01–C05. Correct only successful CDP completion versus response sampling; retain request lower bound, failed-terminal/host/page checks and original product health. Separate v3 sources preserve v1/v2 and006FAIL. Planned verification: meaningful v2 RED, v3 targeted pure suite, four syntax checks, inverse/source hashes, scoped project-success, independent document/source review and current-head CI. Source implementation now has meaningful v2 RED (exact006 triple rejected,13events), then48/48 v3 pure tests with0failed/skipped and four syntax checks on Node24.18.0. All nine v1/v2 reference hashes, v3 page equality and baseline inverse equivalence passed. T107 accepted the specification after explicit missing-anchor refusal. Exact-source independent acceptance and current-head CI are publication gates, recorded in PR604. Actual browser evidence for v3 remains NOT_RUN; no new runtime grant. Canonical8/27, delivery18/19 and DraftPR604 remain.

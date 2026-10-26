@@ -1,5 +1,6 @@
 # Typed recipes 與唯讀健康檢查
 
+> 下文保留 M0 設計基線。已授權 M1 開發的實作範圍、協定差異與限制見 [M1 實作契約](../docs/m1-implementation.md)；M0 提案不代表所有 operation 已實作。
 狀態：**Proposed／spec-only**。這是待審 recipe 資料契約，不是任意程式執行介面，也沒有已安裝或已部署 recipe。
 
 ## RecipeVersion

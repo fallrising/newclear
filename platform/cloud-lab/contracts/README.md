@@ -1,5 +1,6 @@
 # Cloud Lab — M0 合約索引
 
+> 下文保留 M0 設計基線。已授權 M1 開發的實作範圍、協定差異與限制見 [M1 實作契約](../docs/m1-implementation.md)；M0 提案不代表所有 operation 已實作。
 狀態：**Proposed／spec-only**，2026-10-26。本文及四份合約是待審設計，沒有可呼叫端點、已部署服務、通過的 runtime 驗收或正式授權機制。
 
 Cloud Lab 提供共用 Cloudflare 控制介面與契約；各元件維持獨立部署、資料及既有 authority。Cloud Lab D1 只擁有本層 command admission、冪等紀錄、outbox 與收到的結果證據。原生 job／程序／session 生命週期由執行器擁有，不複製第二套 job authority。

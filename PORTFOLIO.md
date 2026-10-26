@@ -112,7 +112,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 
 | 元件 | 使用 | 檔位 | 範圍與限制 |
 | --- | --- | --- | --- |
-| `newclear/platform/cloud-lab` | 未知 | 未分級 | Owner 2026-10-26 指示文件先行：知識樹、共同介面、責任與遷移／封存 gate；本輪不搬程式、接管現有 authority 或部署。長期投入與實作另按里程碑決定。見 [README](platform/cloud-lab/README.md)。 |
+| `newclear/platform/cloud-lab` | 未知 | 未分級 | Owner 2026-10-26 指示文件先行後繼續 M1 開發：知識樹、共同介面、Workers/D1、唯讀 runner 與看板已本機驗證；不搬程式、接管現有 authority 或部署。長期投入另按里程碑決定。見 [README](platform/cloud-lab/README.md)。 |
 | `newclear/labs/browser-fingerprint` | 未知 | 未分級 | 有界的瀏覽器設備／操作觀測實驗：Go mock CRUD、既有五步操作教學、分析工具與公開／私人 Quick Tunnel 啟動方式；未決定長期投入。見 [README](labs/browser-fingerprint/README.md)。 |
 | `newclear/labs/iris-lab` | 未知 | 未分級 | 本輪限固定 Iris／模型版本研究、SDD 與驗收設計；尚無 runtime 或實機出圖，長期投入待決。見 [README](labs/iris-lab/README.md)。 |
 | `newclear/labs/m4-seat` | 未知 | 未分級 | 只收錄 M4 Max 48GB 單人座位的運行方案與驗收清單。沒有 runtime，沒有在目標機器計時，不授權部署或 24/7 服務。見 [README](labs/m4-seat/README.md)。 |

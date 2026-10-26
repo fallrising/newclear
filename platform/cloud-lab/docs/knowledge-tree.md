@@ -1,6 +1,6 @@
 # 知識樹與能力目錄
 
-本樹是 Cloud Lab 的產品知識導航。它描述責任與關係，不保存私人知識庫或覆寫來源元件的主線狀態。全部 Cloud Lab 能力目前為 **proposed**；表內「已有」只指來源實作或文件。
+本樹是 Cloud Lab 的產品知識導航。它描述責任與關係，不保存私人知識庫或覆寫來源元件的主線狀態。M0 表保留來源映射；M1 局部能力已有 **locally_verified** 實作，見下方實作對照，沒有 live_verified 宣告。
 
 ## 知識樹
 
@@ -46,3 +46,14 @@ CL Cloud Lab
 新增能力先指定唯一責任及既有來源；沒有實作就填 proposed 和缺口。抽取／遷移後更新實作 link，舊路徑保留 successor 指向，歷史來源及證據保留固定版本。一次部署的狀態不寫成整個元件已驗收。
 
 未來機器可讀 catalog 可由這個欄位集合設計 schema；M0 不提供可自動派工的 registry，文件中的 capability ID 也不授權任何操作。
+
+## M1 實作對照
+
+| 能力 | 本次位置與範圍 | 狀態／證據 |
+| --- | --- | --- |
+| ID-01 | [Worker auth](../apps/control/worker/auth.mjs)：Access JWT、HMAC、D1 grant | locally_verified；真實 Access 未驗 |
+| AU-01／AU-02 | [控制面](../apps/control/worker/index.mjs)、[D1 schema](../apps/control/migrations/0001.sql)：准入、outbox、固定分鐘 schedule | locally_verified；沒有啟用排程 |
+| EX-01 | [Python OS collector](../adapters/node-health/README.md)：單節點負載與根目錄空間、durable journal | locally_verified；未接指定遠端節點 |
+| OB-01／OB-02 | [看板](../apps/control/public/index.html)、snapshot／有界 health artifact | locally_verified 的 UI 模型／HTTP；互動瀏覽器與 live gate 待驗 |
+
+共同證據：[M1 evidence](evidence/m1-implementation.md)。其餘能力保持 proposed／後續計畫，不因本次實作自動升級。

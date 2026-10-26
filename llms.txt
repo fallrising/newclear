@@ -6,7 +6,7 @@ This file is the single-fetch index. Each entry links to the component's own `ll
 
 Tiers are the owner's investment and documentation decision, defined in [docs/portfolio-doc-tiers.md](https://github.com/fallrising/newclear/blob/main/docs/portfolio-doc-tiers.md): **A** active, **B** maintained public contract, **C** dormant, **D** retired, and **ungraded** where the owner has not assigned one yet. Most of this portfolio is C or D. A dormant component may still run perfectly, and may even receive fixes — tier says the owner is not investing in it, not that it is broken or frozen — and a tier-A component may be a specification with no code yet. Read both the tier and the status before calling anything.
 
-Capability files exist for `systems/clarkq`, `products/kith`, `systems/snail`, `products/goku` and the spec-only `labs/iris-lab` and `platform/cloud-lab`. Adoption is deliberately incomplete; the remaining entries link to a README that may or may not describe the interface.
+Capability files exist for `systems/clarkq`, `products/kith`, `systems/snail`, `products/goku` the spec-only `labs/iris-lab`, and the partial `platform/cloud-lab`. Adoption is deliberately incomplete; the remaining entries link to a README that may or may not describe the interface.
 
 Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/fallrising/newclear/blob/main/PORTFOLIO.md), including which components deliberately do not absorb each other's scope. Private work lives in a separate repository, `kernel`, and is not indexed here.
 
@@ -30,7 +30,7 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 
 ## Platform
 
-- [platform/cloud-lab](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/llms.txt) — ungraded; spec-only personal Cloudflare lab knowledge tree, proposed contracts and migration plan; no runtime or deployment.
+- [platform/cloud-lab](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/llms.txt) — ungraded; partial personal Cloudflare lab: locally tested Worker/D1 control plane, Python OS collector, durable journal and dashboard; not deployed.
 - [platform/agent-platform](https://github.com/fallrising/newclear/blob/main/platform/agent-platform/README.md): **A** — self-hosted multi-agent web workbench modelled on OpenHands Agent Canvas, with Cocoon sandboxing. Not a deployment claim; deliberately separate from `fanzloud` and `kith`.
 - [platform/agent-workforce](https://github.com/fallrising/newclear/blob/main/platform/agent-workforce/README.md): **A** — implemented offline M1 core and bounded native M2 adapter slices for digital workers, with durable messaging and session bindings. Full M2, cross-product integration and deployment remain unverified; see the component's dated evidence. Preserves Kith's quota gates and external work acceptance authority.
 - [platform/dim-gate](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/README.md): **A** — CMDB-centred enterprise operations self-service front end, as a demo. Specification baseline, not implemented; [docs/openapi.json](https://github.com/fallrising/newclear/blob/main/platform/dim-gate/docs/openapi.json) is generated from Zod and verified in CI.

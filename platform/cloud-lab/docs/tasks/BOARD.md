@@ -21,3 +21,14 @@ M1／M2／M3 是[後續計畫](../verification.md)，沒有因本次文件工作
 - 本機交付前：44 個專案契約、7 份 llms.txt、18 份 Cloud Lab 文件、135 個連結、12 個固定來源、scope／diff 檢查通過。原始輸出保存在 shared-workspace project `cloud-lab`／task `M0-publish-check-20261026` 的 `preserve/evidence/`。
 - 合併後 fetch main，逐一比較本次 29 個交付路徑的 Git 內容與已驗證 head，無差異；PR API 回讀 merged=true、合併 SHA 與上述時間相符。
 - 本次收尾只更新任務板。M0 文件交付完成；產品主線仍 incomplete、沒有 usable tag；尚無 runtime／Cloudflare live 驗收，未搬程式、封存或部署。
+
+## T-0002 — M1 唯讀閉環實作
+
+Owner 直接指示「好，繼續開發。」。範圍見 [M1 實作契約](../m1-implementation.md)；live gate 獨立保留。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0002-1 | 控制面、准入與恢復 | M1-I1 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |
+| T-0002-2 | 固定 collector runner 與 journal | M1-I2 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |
+| T-0002-3 | 看板與人機入口 | M1-I3 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |
+| T-0002-4 | 整合、故障驗證與獨立審查 | M1-I4 | in_progress | 2026-10-26T15:52:01Z | — | 2026-10-26T16:19:33Z |

@@ -307,8 +307,10 @@ Delivered in [Product PR665](https://github.com/fallrising/newclear/pull/665), s
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HD-1 | Verify connection-close cleanup during initial stdin | HD-1 | in_progress | 2026-10-26T13:27:23Z | — | 2026-10-26T13:51:07Z |
-| HD-2 | Establish transport and blocked-input evidence | HD-2 | in_progress | 2026-10-26T13:27:23Z | — | 2026-10-26T13:51:07Z |
-| HD-3 | Preserve healthy input/reuse and cancellation | HD-3 | in_progress | 2026-10-26T13:27:23Z | — | 2026-10-26T13:51:07Z |
+| HD-1 | Verify connection-close cleanup during initial stdin | HD-1 | done | 2026-10-26T13:27:23Z | 2026-10-26T13:55:00Z | 2026-10-26T13:56:22Z |
+| HD-2 | Establish transport and blocked-input evidence | HD-2 | done | 2026-10-26T13:27:23Z | 2026-10-26T13:55:00Z | 2026-10-26T13:56:22Z |
+| HD-3 | Preserve healthy input/reuse and cancellation | HD-3 | done | 2026-10-26T13:27:23Z | 2026-10-26T13:55:00Z | 2026-10-26T13:56:22Z |
 
 [Task and acceptance](T-0423-http-disconnect.md). Local HTTP/1 and fake-process boundary only.
+
+Delivered in [Product PR667](https://github.com/fallrising/newclear/pull/667), source `04908a3107d5094956b012956b006788fe90ce69`, merge `2d89c37960367bc00b930733f2d3862831d84c7a` at 2026-10-26T13:55:00Z; required CI, independent source/final-document review and remote ancestry/trailers/scoped content PASS. 236 tests / 18 groups, four new tests / 20 primary scenarios, 37 existing Claude-focused tests, fmt/Clippy, 20 validator tests, 43 project contracts and six indexes PASS. Initial-write HTTP close already dropped startup ownership; the repair explicitly reaps the killed child to avoid a zombie. Raw RED/transport/state diagnostics and corrected test-only E0061/warning retained. Runtime teardown and filesystem removal remain best effort; no direct token-select, HTTP/2/proxy-wide or whole-product guarantee. Owner decides desk done.

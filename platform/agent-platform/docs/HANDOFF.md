@@ -1,3 +1,16 @@
+# 最新接續 — PR659已合併，Worker成果真實性 browser本機驗收通過
+
+PR659正常合併760fffab，四項CI成功，45+756Python與118web通過。DUXdone板隨本次
+真正測試來源變更補入，原e4d4a11b候選保留；下方pending為歷史快照。
+[RTF契約](../tasks/379-result-truth/task.md)／[本機快照](../tasks/379-result-truth/report.md)
+補直接AT09UI證據，不聲稱新產品缺陷；scriptedruntime經實際Worker寫入failed／unknown／
+注入封存失敗的interrupted狀態，再由真實API與Chromium觀察。既有backend因果證據沿用。
+T114-browser1單一新情境含三種Worker結果4.0s通過，Ruff/format/strictTS/Prettier/重建資產通過；
+來源前後一致，owned helper與PostgreSQL已結束。子程序清理審查修正發生在runtime前，舊spec保留。
+獨立最終審查／必要CI／正常合併仍為門檻；全fake/live/M4/部署仍未完成。
+
+---
+
 # 最新接續 — PR658已合併，下載過期修正本機通過
 
 PR658正常合併d81a7d91，四項必要CI成功，45+756Python與103web通過。

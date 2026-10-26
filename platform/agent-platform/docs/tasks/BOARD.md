@@ -190,5 +190,31 @@ This record supersedes pre-merge wording in the dated local delivery snapshot.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0108.1 | Retain definitive download expiry across failed/stale metadata refresh | DUX-01 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:14:16Z |
-| T-0108.2 | Preserve error boundaries, source-run isolation and real download GC flow | DUX-02 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:14:16Z |
+| T-0108.1 | Retain definitive download expiry across failed/stale metadata refresh | DUX-01 | done | 2026-10-26T07:03:53Z | 2026-10-26T07:23:34Z | 2026-10-26T07:23:52Z |
+| T-0108.2 | Preserve error boundaries, source-run isolation and real download GC flow | DUX-02 | done | 2026-10-26T07:03:53Z | 2026-10-26T07:23:34Z | 2026-10-26T07:23:52Z |
+
+T0108 delivery: [PR659](https://github.com/fallrising/newclear/pull/659) normally merged
+`760fffab68d4da3cbb779fc5f5743f41ecab0585` at 2026-10-26T07:23:34Z; reviewed head `5b3e630dcb2e699866d11d0c51cb26d6e630c558`.
+Four required checks passed: [Agent Platform40284753845](https://github.com/fallrising/newclear/actions/runs/40284753845)
+check/control-plane/web and [contracts40284753927](https://github.com/fallrising/newclear/actions/runs/40284753927)
+validate. Raw hosted45 base+756 platform and118 web tests passed; merged component equals reviewed head.
+T109 independent review ACCEPT; root delivery gate passed43contracts/6indexes/source protection.
+Actual rendered-App RED11fail/4pass retained; frozen tests then38focusedweb PASS,
+strictTS/scopedformat, two test-helper Ruff/format, freshVitebuild and one browser3.5s PASS.
+
+Download exact410 artifact_expired immediately retires affected controls while preserving
+result/diff/hash/size through failed/stale metadata refresh. Other410/malformed/network
+errors remain retryable;401 refreshes session; source-run identity and successful bytes/
+fixedfilename/URLcleanup preserved. Only App product source changed; backend unchanged.
+Browser uses synthetic historical firstINSERTs, exacttwo ownedarchiveGC with unchanged
+authority/events and explicit metadata-network fault. Legacy trigger-disabling helper was
+not executed. No fullfake/live/VMrecovery/deployment/M4 acceptance; issue379 staysOPEN.
+T0104 EUXdone board delivered with659; original59a33fc8 preserved without duplicatePR.
+This post-merge record supersedes pre-merge wording in the dated local snapshot.
+
+## T-0112 — Worker result truth in browser
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- |
+| T-0112.1 | Present actual failed and unverified Worker outcomes without false verification success | RTF-01 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |
+| T-0112.2 | Preserve interrupted/resultless archive-failure UI and held capacity | RTF-02 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |

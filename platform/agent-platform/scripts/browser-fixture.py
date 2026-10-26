@@ -105,6 +105,10 @@ def main():
                 port=18600,
                 access_log=False,
             )
+        elif action == "result-truth-hold":
+            from browser_result_truth_fixture import hold_result_truth
+
+            hold_result_truth(db, output)
         elif action.startswith("download-retention-"):
             from browser_download_retention_fixture import download_retention_action
 

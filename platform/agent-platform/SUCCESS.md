@@ -205,3 +205,15 @@ separate from PR658 export preview/approval. No backend or schema change.
 | DUX-02 | passed (local) | T110-browser1:freshbuild one real Chromium/API/SQLGC case3.5s; synthetic firstINSERT history, injected metadata network failure, explicit retry; scoped TS/format and test-helper Ruff |
 
 No fullM4/live/deployment acceptance or usable tag.
+
+## Bounded scope: T-112 Worker result truth in browser
+
+[Test-only contract](tasks/379-result-truth/task.md) targets direct AT09 UI truth
+after actual Worker outcomes; existing backend behavior is unchanged.
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| RTF-01 | passed (local) | T114-browser1 realWorker/scriptedHTTP failed and unknown/no-checks match API/archive/browser; actual download bytes/hash and live no-side-effect observations |
+| RTF-02 | passed (local) | Same single scenario4.0s includes persist exception→interrupted/resultless/noarchive/held1/no release; reload/live observations unchanged; freshbuild/type/format/Ruff passed |
+
+No SQL-state rewrite/trigger bypass or new product RED claim. Fullfake/live/M4 remains open.

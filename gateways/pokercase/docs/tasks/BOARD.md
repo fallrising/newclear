@@ -341,6 +341,8 @@ T-0425 delivered by [PR675](https://github.com/fallrising/newclear/pull/675), so
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| MC-1 | 核對AC-03來源與當前離線驗收 | MC-1 | in_progress | 2026-10-26T17:59:19Z | | 2026-10-26T18:15:27Z |
-| MC-2 | 固定主線剩餘驗收與既有依賴 | MC-2 | in_progress | 2026-10-26T17:59:19Z | | 2026-10-26T18:15:27Z |
-| MC-3 | 完整驗證、獨立審查與交接 | MC-3 | in_progress | 2026-10-26T17:59:19Z | | 2026-10-26T18:15:27Z |
+| MC-1 | 核對AC-03來源與當前離線驗收 | MC-1 | done | 2026-10-26T17:59:19Z | 2026-10-26T18:23:28Z | 2026-10-26T18:23:32Z |
+| MC-2 | 固定主線剩餘驗收與既有依賴 | MC-2 | done | 2026-10-26T17:59:19Z | 2026-10-26T18:23:28Z | 2026-10-26T18:23:32Z |
+| MC-3 | 完整驗證、獨立審查與交接 | MC-3 | done | 2026-10-26T17:59:19Z | 2026-10-26T18:23:28Z | 2026-10-26T18:23:32Z |
+
+T-0426 delivered by [PR680](https://github.com/fallrising/newclear/pull/680), source `cec93f9f9d12f77b2a1ce3817612e9f42bd0f4c7`, merge `e09af2d0ca8815ae6b51dc9b61bb030460c7ec0e` at 2026-10-26T18:23:28Z. MC-1–MC-3 documentation/evidence scope: all17 original core requirements preserved; AC-03 local admission acceptance reconciled, three live acceptance groups and existing T-1102 runtime dependency remain. No runtime/tests/Cargo changes. Full245 Rust tests/18groups, fmt/Clippy,20validators,44contracts/7indexes and independent source/content review passed. Original focused startup failure (8/9, gateway exited before health) retained with unknown cause; unchanged exact retry and subsequent full suite passed. Necessary check/validate, normal merge, source/merge trailers, ancestry and scoped-content readback passed. Whole product remains incomplete/no usable tag; desk remains in_progress for owner disposition.

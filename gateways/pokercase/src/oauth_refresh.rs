@@ -168,13 +168,15 @@ pub async fn ensure_fresh(store: &Store, conn: ConnectionRow) -> AppResult<Conne
     }
 }
 
-async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
-    #[derive(Deserialize)]
-    struct Tok {
-        access_token: String,
-        refresh_token: Option<String>,
-        expires_in: Option<i64>,
+async fn refresh_failure(resp: reqwest::Response, provider: &str) -> AppError {
+    let text = crate::collection::diagnostic_text(resp).await;
+    AppError::Upstream {
+        status: 401,
+        body: format!("{provider} refresh failed: {text}"),
     }
+}
+
+async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
     let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
     let resp = client
         .post("https://auth.x.ai/oauth2/token")
@@ -189,32 +191,12 @@ async fn refresh_xai(refresh_token: &str) -> AppResult<RefreshedTokens> {
         .await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("xai refresh: {e}")))?;
     if !resp.status().is_success() {
-        let t = resp.text().await.unwrap_or_default();
-        return Err(AppError::Upstream {
-            status: 401,
-            body: format!("xai/grok refresh failed: {t}"),
-        });
+        return Err(refresh_failure(resp, "xai/grok").await);
     }
-    let tok: Tok = resp
-        .json()
-        .await
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("xai refresh json: {e}")))?;
-    Ok(RefreshedTokens {
-        access_token: tok.access_token,
-        refresh_token: tok.refresh_token,
-        expires_at: tok
-            .expires_in
-            .map(|s| (Utc::now() + Duration::seconds(s)).to_rfc3339()),
-    })
+    refresh_success(resp, "xai").await
 }
 
 async fn refresh_google_antigravity(refresh_token: &str) -> AppResult<RefreshedTokens> {
-    #[derive(Deserialize)]
-    struct Tok {
-        access_token: String,
-        refresh_token: Option<String>,
-        expires_in: Option<i64>,
-    }
     // Do not hardcode Google OAuth client secrets in source (GitHub push protection).
     // Set THINROUTER_AGY_CLIENT_ID + THINROUTER_AGY_CLIENT_SECRET (Antigravity IDE public client).
     let client_id = std::env::var("THINROUTER_AGY_CLIENT_ID").map_err(|_| {
@@ -243,16 +225,27 @@ async fn refresh_google_antigravity(refresh_token: &str) -> AppResult<RefreshedT
         .await
         .map_err(|e| AppError::Internal(anyhow::anyhow!("google refresh: {e}")))?;
     if !resp.status().is_success() {
-        let t = resp.text().await.unwrap_or_default();
-        return Err(AppError::Upstream {
-            status: 401,
-            body: format!("antigravity/google refresh failed: {t}"),
-        });
+        return Err(refresh_failure(resp, "antigravity/google").await);
     }
-    let tok: Tok = resp
-        .json()
+    refresh_success(resp, "google").await
+}
+
+/// Parsing completes before refresh_connection can persist any token fields.
+async fn refresh_success(resp: reqwest::Response, provider: &str) -> AppResult<RefreshedTokens> {
+    #[derive(Deserialize)]
+    struct Tok {
+        access_token: String,
+        refresh_token: Option<String>,
+        expires_in: Option<i64>,
+    }
+    let bytes = crate::collection::token_body(resp.bytes_stream())
         .await
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("google refresh json: {e}")))?;
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("{provider} refresh json: {e}")))?;
+    let tok: Tok = serde_json::from_slice(&bytes).map_err(|_| {
+        AppError::Internal(anyhow::anyhow!(
+            "{provider} refresh json: invalid token response"
+        ))
+    })?;
     Ok(RefreshedTokens {
         access_token: tok.access_token,
         refresh_token: tok.refresh_token,
@@ -278,6 +271,175 @@ fn urlencoding_minimal(s: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[tokio::test]
+    async fn dg3_refresh_failure_preserves_prefix_and_status() {
+        use crate::collection::{DIAGNOSTIC_LIMIT_MESSAGE, MAX_DIAGNOSTIC_BYTES};
+        for label in ["xai/grok", "antigravity/google"] {
+            for bytes in [
+                b"denied".to_vec(),
+                vec![b'x'; MAX_DIAGNOSTIC_BYTES],
+                vec![b'x'; MAX_DIAGNOSTIC_BYTES + 1],
+                vec![0xff],
+            ] {
+                let expected = if bytes.len() > MAX_DIAGNOSTIC_BYTES {
+                    DIAGNOSTIC_LIMIT_MESSAGE.into()
+                } else {
+                    String::from_utf8_lossy(&bytes).into_owned()
+                };
+                let resp = reqwest::Response::from(
+                    axum::http::Response::builder()
+                        .status(503)
+                        .body(bytes)
+                        .unwrap(),
+                );
+                let e = super::refresh_failure(resp, label).await;
+                assert!(
+                    matches!(e,crate::error::AppError::Upstream{status:401,body} if body==format!("{label} refresh failed: {expected}"))
+                );
+            }
+            let source = futures_util::stream::iter(vec![
+                Ok(bytes::Bytes::from_static(b"partial")),
+                Err(std::io::Error::other("PRIVATE_READ")),
+            ]);
+            let resp = reqwest::Response::from(
+                axum::http::Response::builder()
+                    .status(400)
+                    .body(reqwest::Body::wrap_stream(source))
+                    .unwrap(),
+            );
+            assert!(
+                matches!(super::refresh_failure(resp,label).await,crate::error::AppError::Upstream{status:401,body} if body==format!("{label} refresh failed: "))
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn tk2_refresh_success_bounds_fields_and_errors() {
+        use crate::collection::{MAX_TOKEN_BYTES, TOKEN_LIMIT_MESSAGE};
+        use bytes::Bytes;
+        use futures_util::StreamExt;
+        for provider in ["xai", "google"] {
+            for case in [
+                "small", "exact", "over", "optional", "invalid", "utf8", "missing", "read",
+            ] {
+                let mut bytes=match case {
+                    "optional" => br#"{"access_token":"fake-access"}"#.to_vec(),
+                    "invalid" => br#"{"access_token":["PRIVATE_TOKEN"]}"#.to_vec(),
+                    "utf8" => vec![0xff],
+                    "missing" => b"{}".to_vec(),
+                    _ => r#"{"access_token":"fake-access","refresh_token":"fake-rotated","expires_in":3600,"extra":"令牌"}"#.as_bytes().to_vec(),
+                };
+                if case == "exact" || case == "over" {
+                    bytes.resize(MAX_TOKEN_BYTES + usize::from(case == "over"), b' ');
+                }
+                let mut chunks: Vec<Result<Bytes, std::io::Error>> = bytes
+                    .chunks(4093)
+                    .map(|b| Ok(Bytes::copy_from_slice(b)))
+                    .collect();
+                if case == "read" {
+                    chunks.push(Err(std::io::Error::other("PRIVATE_READ")));
+                }
+                let source = futures_util::stream::iter(chunks).chain(
+                    futures_util::stream::poll_fn(move |_| {
+                        if case == "over" {
+                            std::task::Poll::Pending
+                        } else {
+                            std::task::Poll::Ready(None)
+                        }
+                    }),
+                );
+                let resp = reqwest::Response::from(
+                    axum::http::Response::builder()
+                        .status(200)
+                        .header("content-length", "1")
+                        .body(reqwest::Body::wrap_stream(source))
+                        .unwrap(),
+                );
+                let before = Utc::now();
+                let result = tokio::time::timeout(
+                    std::time::Duration::from_secs(1),
+                    super::refresh_success(resp, provider),
+                )
+                .await
+                .unwrap();
+                if matches!(case, "small" | "exact" | "optional") {
+                    let tokens = result.unwrap();
+                    assert_eq!(tokens.access_token, "fake-access");
+                    if case == "optional" {
+                        assert!(tokens.refresh_token.is_none());
+                        assert!(tokens.expires_at.is_none());
+                    } else {
+                        assert_eq!(tokens.refresh_token.as_deref(), Some("fake-rotated"));
+                        let expiry = chrono::DateTime::parse_from_rfc3339(
+                            tokens.expires_at.as_ref().unwrap(),
+                        )
+                        .unwrap();
+                        assert!(expiry >= before + chrono::Duration::seconds(3600));
+                        assert!(expiry <= Utc::now() + chrono::Duration::seconds(3600));
+                    }
+                } else {
+                    let e = result.unwrap_err();
+                    assert!(matches!(e, crate::error::AppError::Internal(_)));
+                    let reason = match case {
+                        "over" => TOKEN_LIMIT_MESSAGE,
+                        "read" => "token response body read failed",
+                        _ => "invalid token response",
+                    };
+                    assert_eq!(e.to_string(), format!("{provider} refresh json: {reason}"));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn tk3_store_preserves_optional_tokens_and_rotates_together() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("t.db"), None).unwrap();
+        let conn = store
+            .upsert_oauth_connection(
+                None,
+                "fixture",
+                "https://example.invalid",
+                "siwc",
+                "old-access",
+                Some("old-refresh"),
+                Some("old-expiry"),
+                None,
+                None,
+                100,
+                true,
+            )
+            .unwrap();
+        for (refresh, expiry) in [
+            (None, None),
+            (Some(""), None),
+            (Some("new-refresh"), Some("new-expiry")),
+        ] {
+            store
+                .update_oauth_tokens(&conn.id, "new-access", refresh, expiry)
+                .unwrap();
+            let oauth = store
+                .get_connection(&conn.id)
+                .unwrap()
+                .unwrap()
+                .oauth
+                .unwrap();
+            assert_eq!(oauth.access_token, "new-access");
+            assert_eq!(
+                oauth.refresh_token.as_deref(),
+                Some(if refresh == Some("new-refresh") {
+                    "new-refresh"
+                } else {
+                    "old-refresh"
+                })
+            );
+            assert_eq!(
+                oauth.expires_at.as_deref(),
+                Some(expiry.unwrap_or("old-expiry"))
+            );
+        }
+    }
+
     use super::*;
 
     #[tokio::test]

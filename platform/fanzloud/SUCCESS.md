@@ -68,7 +68,7 @@ cargo run -p codebox-control-plane
 須取得明確復工範圍、真 Cloud 主線驗證並補齊承諾的 runtime/persistence 整合；現有接受的函式庫切片不能作全平台可用標記。
 
 
-## FE round2 plan — 2026-10-24
+## FE round2 plan — 2026-10-24 (historical pre-implementation scope)
 
 T-0380 R2-AC-14/E follows the existing approved [DESIGN](fe-review/DESIGN.md) M1–M3
 and [T006R Ready task](docs/tasks/T006R.task.md)/[review specification](docs/specs/SPEC-T006R-fe-review.md).
@@ -84,3 +84,61 @@ retained regression tests; no production CLI/control-plane or newbackendbrowser 
 Targets remainsfalse until the scoped acceptance is evidenced. Existing product ACs,
 mainline incomplete, usable_tag:none, dormant status and liveCloud/P1 gaps are unchanged;
 no fullR3, deploy, release or ownercompletion is claimed.
+
+## T-0380 approved native security prerequisite — 2026-10-24
+
+Owner approved only Tokio1.53.1→1.53.3 lock version/checksum. Affected deny,306Rust
+tests,clippy and build passed; unchanged earlier Node/fmt evidence retained. See
+[exact commands and remaining FE blockers](../../docs/fe-review/ROUND2-RETRY-CHECKPOINT.md).
+This closes the advisory prerequisite only; PR604 FE acceptance, full conformance,
+mainline and usable qualification remain incomplete. Original failures are retained.
+
+
+## T-0380 approved HTTP limit clarification — 2026-10-25
+
+Goal and scope: clarify only SPEC-T005B's existing header/body limit classification,
+as approved by the owner. An overlong header value is 422 `invalid_request`; an
+oversized request body is 413. Runtime behavior, validation precedence, source and
+tests remain unchanged.
+
+Acceptance: apply the exact approved sentence, verify it against existing
+`validate_headers` and `p0_http_bounds_content_type_and_error_schema_fail_closed`,
+then pass the scoped project-success documentation check and diff check before
+independent review. Existing FE/runtime gaps, mainline incomplete and usable_tag:none
+remain unchanged; this documentation clarification grants no new runtime authority.
+
+Validation: scoped project-success documentation and diff checks passed. Independent
+review and normal publication remain pending; executable tests were not rerun.
+
+
+## T-0380 diagnostic reason development — 2026-10-26
+
+Goal: retain a bounded, safe reason when the initial lifecycle observer rejects an
+event or cannot obtain a required phase. The single approved desktop recovery 005
+ended before Authenticate with `REVIEW_INITIAL_TRACE_INCOMPLETE`; its initial 401
+body, Playwright completion and original health gate passed. The stored trace is
+invalid and lacks an accepted CDP terminal. Its unique cause remains unproven.
+
+Scope: add separately named v2 observer/page/driver modules and focused pure tests;
+preserve the v1 source checkpoint and all original failed evidence. Integrate current
+main by a normal merge while retaining the approved HTTP limit clarification and
+Tokio lock update. No product, protocol, dependencies or runtime authority changes.
+
+Acceptance: meaningful RED then GREEN for missing reasons; finite reason/stage/event/
+domain enums, strict clocks, safe immutable snapshots and a combined 128-record bound;
+unchanged original request/body-read/health/assertion/cleanup behavior; changed-file
+syntax, scoped documentation checks and independent source review. Required current
+PR CI remains a publication gate. Previously green unchanged tests are retained.
+
+Real-browser verification of v2 is NOT_RUN. Recovery 005 is consumed; no retry or
+tablet/mobile continuation is included. FE acceptance remains 8/27 canonical states,
+18/19 overall deliveries and PR604 Draft. M2 measured presentation, conformance and
+final integration remain open; targets stays false, mainline incomplete and
+usable_tag:none. This source work cannot establish the historical runtime cause.
+
+Validation observed: Node24.18.0 `node --test fe-review/initial-lifecycle-v2.node.mjs`
+passed35/35 with0failed/skipped; `node --check` passed for all four new files. The
+initial v1 missing-reason regression failed as intended and is retained. The runner
+restores byte-exactly to v1 after the documented diagnostic substitutions; all five
+v1 file hashes remain unchanged. Scoped project-success and staged whitespace checks
+passed. Independent exact-source acceptance is recorded separately in PR604.

@@ -91,3 +91,11 @@ targets ready 不代表後端、登入或合成資料就緒，這些須逐一證
 
 D1／A1 已由 owner 明確確認。真 stack 的 loopback 隔離方案是進入第 2 輪的必要前提；
 若需部署注入，另外界定範圍，不把本次合併文件的授權當作後端修改或實機操作授權。
+
+## 2026-10-24 owner 批准的第2輪執行補充
+
+Owner 在具體隔離/gRPC提案後回覆「批准，代碼完成每個里程碑就提交，然後合併 PR」。上方原始M1部署注入待決條件由本次限定批准滿足，不回寫為歷史已測。允許僅在 fe-review 內提供 review-only Compose overlay：移除所有host published ports、當次新建PG/admin/Grafana憑證、唯一image tags及run/source ownership labels；保留現有11service/internalbridge拓撲及production Compose原檔。專用browser/Vite/transparentproxy namespace加入該次新bridge，前端/proxy僅loopback，backend既有bridge listener獲允許；無hostnetwork、Docker socket或API替身。
+
+M1種子方法更正：現有REST建topics/groups/PUSH/PULL subscriptions；delay走現有 ojbk.v1.ProducerService/ProduceDelay gRPC，token/payload用memory或protectedstdin，再以現有REST delay inspector回讀。DLQ使用該次owned既有push-sink未監聽port9，無外網失敗端點。所有權/ports/mounts負向檢查先於啟動，精確ownedresource清理與私有證據保留均必要。
+
+實作、驗收與邊界見 [本輪task](tasks/round2/task.md)。此補充不是實跑通過，不授權backend/API/auth/dependency/CI/productiontopology變更、release或deploy；原M2–M4與完整第3輪條件不改。

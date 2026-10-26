@@ -24,7 +24,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use serde_json::{json, Value};
-use tokio::io::{AsyncBufReadExt, AsyncReadExt, BufReader};
+use tokio::io::{AsyncReadExt, BufReader};
 use tokio::process::Command;
 use tokio::sync::{mpsc, Semaphore};
 use tokio_util::sync::CancellationToken;
@@ -429,7 +429,8 @@ pub async fn start(
     let model = model.to_string();
     tokio::spawn(async move {
         let _permit = permit;
-        let mut lines = BufReader::new(stdout).lines();
+        let mut lines = crate::cli_lines::Lines::new(BufReader::new(stdout));
+        let mut line_overflow = false;
         let mut tr = Translate::default();
         'read: loop {
             let next = tokio::select! {
@@ -437,7 +438,14 @@ pub async fn start(
                 _ = tx.closed() => break,
                 l = lines.next_line() => l,
             };
-            let Ok(Some(l)) = next else { break };
+            let l = match next {
+                Ok(Some(line)) => line,
+                Err(crate::cli_lines::LineError::TooLarge) => {
+                    line_overflow = true;
+                    break;
+                }
+                _ => break,
+            };
             let Ok(v) = serde_json::from_str::<Value>(&l) else {
                 continue;
             };
@@ -451,10 +459,11 @@ pub async fn start(
                 break;
             }
         }
+        drop(lines);
         let failed = !tr.done && !cancel.is_cancelled() && !tx.is_closed();
         let mut status = 502;
         let mut sandbox_unavailable = false;
-        if failed {
+        if failed && !line_overflow {
             if let Ok(Ok(err)) =
                 tokio::time::timeout(Duration::from_secs(2), &mut diagnostics).await
             {
@@ -473,15 +482,18 @@ pub async fn start(
         let _ = tokio::time::timeout(Duration::from_secs(2), child.wait()).await;
         reconcile_container(&runtime, &name).await;
         diagnostics.abort();
+        drop(_permit);
         if failed {
-            let message = match status {
+            let message = if line_overflow { crate::cli_lines::LIMIT_MESSAGE } else { match status {
                 401 => "Cursor container profile is not logged in",
                 429 => "Cursor account quota or rate limit reached",
                 503 if sandbox_unavailable => "Cursor sandbox is unavailable inside the configured container; review the container runtime requirements",
                 _ => "Cursor container ended without a complete reply",
-            }
+            }}
             .to_owned();
-            let reason = if sandbox_unavailable {
+            let reason = if line_overflow {
+                "stdout_record_limit"
+            } else if sandbox_unavailable {
                 "sandbox_unavailable"
             } else {
                 "cli_error"

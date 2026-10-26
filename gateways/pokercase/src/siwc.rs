@@ -274,8 +274,16 @@ async fn token_request(
         .await
         .map_err(|e| anyhow!("siwc token endpoint unreachable: {}", e.without_url()))?;
     let status = resp.status();
-    let body: Value = resp.json().await.unwrap_or(Value::Null);
     if !status.is_success() {
+        let body = match crate::collection::diagnostic(resp.bytes_stream()).await {
+            crate::collection::DiagnosticBody::Complete(bytes) => {
+                serde_json::from_slice::<Value>(&bytes).unwrap_or(Value::Null)
+            }
+            crate::collection::DiagnosticBody::TooLarge => bail!(
+                "siwc token endpoint returned {status}: {}",
+                crate::collection::DIAGNOSTIC_LIMIT_MESSAGE
+            ),
+        };
         let code = body
             .get("error")
             .and_then(|e| {
@@ -285,6 +293,22 @@ async fn token_request(
             .unwrap_or("unknown_error");
         bail!("siwc token endpoint returned {status}: {code}");
     }
+    token_success(resp).await
+}
+
+async fn token_success(resp: reqwest::Response) -> Result<TokenResponse> {
+    let bytes = match crate::collection::token_body(resp.bytes_stream()).await {
+        Ok(bytes) => bytes,
+        Err(crate::collection::TokenBodyError::TooLarge) => {
+            bail!(
+                "siwc token response: {}",
+                crate::collection::TOKEN_LIMIT_MESSAGE
+            );
+        }
+        // Preserve the previous read-failure -> Null -> token-response error.
+        Err(crate::collection::TokenBodyError::Read) => Bytes::new(),
+    };
+    let body: Value = serde_json::from_slice(&bytes).unwrap_or(Value::Null);
     serde_json::from_value(body).context("siwc token response")
 }
 
@@ -502,6 +526,203 @@ pub async fn list_models(
 
 #[cfg(test)]
 mod tests {
+    #[tokio::test]
+    async fn dg3_token_endpoint_bounds_errors_before_json_parsing() {
+        use axum::{body::Body, response::Response, Router};
+        use bytes::Bytes;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        struct Witness(Arc<AtomicBool>);
+        impl Drop for Witness {
+            fn drop(&mut self) {
+                self.0.store(true, Ordering::SeqCst);
+            }
+        }
+        struct Server(tokio::task::JoinHandle<()>);
+        impl Drop for Server {
+            fn drop(&mut self) {
+                self.0.abort();
+            }
+        }
+        for status in [400, 429] {
+            for case in [
+                "string", "nested", "exact", "over", "invalid", "utf8", "success",
+            ] {
+                let mut bytes = match case {
+                    "string" | "exact" | "over" => br#"{"error":"invalid_grant"}"#.to_vec(),
+                    "nested" => {
+                        br#"{"error":{"code":"denied","message":"PRIVATE_ERROR"}}"#.to_vec()
+                    }
+                    "invalid" => b"{PRIVATE_ERROR".to_vec(),
+                    "utf8" => vec![0xff],
+                    _ => br#"{"access_token":"fake-success","refresh_token":"fake-rotated"}"#
+                        .to_vec(),
+                };
+                if case == "exact" || case == "over" {
+                    bytes.resize(65536 + usize::from(case == "over"), b' ');
+                }
+                let status = if case == "success" { 200 } else { status };
+                let dropped = Arc::new(AtomicBool::new(false));
+                let observed = dropped.clone();
+                let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+                let base = format!("http://{}", listener.local_addr().unwrap());
+                let server = Server(tokio::spawn(async move {
+                    axum::serve(listener,Router::new().fallback(move || {
+                        let bytes=bytes.clone();let witness=Witness(observed.clone());
+                        async move {
+                            let source=async_stream::stream!{let _witness=witness;for b in bytes.chunks(4093){yield Ok::<_,std::io::Error>(Bytes::copy_from_slice(b));}if case=="over"{std::future::pending::<()>().await;}};
+                            Response::builder().status(status).body(Body::from_stream(source)).unwrap()
+                        }
+                    })).await.unwrap();
+                }));
+                let http = reqwest::Client::builder()
+                    .no_proxy()
+                    .timeout(std::time::Duration::from_secs(2))
+                    .build()
+                    .unwrap();
+                let result =
+                    super::refresh(&http, &base, "fixture-client", "fixture-refresh").await;
+                if case == "success" {
+                    assert_eq!(result.unwrap().access_token, "fake-success");
+                } else {
+                    let error = result.err().unwrap().to_string();
+                    let code = match case {
+                        "string" | "exact" => "invalid_grant",
+                        "nested" => "denied",
+                        "over" => crate::collection::DIAGNOSTIC_LIMIT_MESSAGE,
+                        _ => "unknown_error",
+                    };
+                    assert_eq!(
+                        error,
+                        format!(
+                            "siwc token endpoint returned {}: {code}",
+                            axum::http::StatusCode::from_u16(status).unwrap()
+                        )
+                    );
+                    assert!(!error.contains("PRIVATE_ERROR"));
+                }
+                tokio::time::timeout(std::time::Duration::from_secs(2), async {
+                    while !dropped.load(Ordering::SeqCst) {
+                        tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+                    }
+                })
+                .await
+                .unwrap();
+                drop(server);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn tk1_tk2_successful_token_http_bound() {
+        use axum::{body::Body, http::Response, Router};
+        use bytes::Bytes;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        struct Witness(Arc<AtomicBool>);
+        impl Drop for Witness {
+            fn drop(&mut self) {
+                self.0.store(true, Ordering::SeqCst);
+            }
+        }
+        struct Server(tokio::task::JoinHandle<()>);
+        impl Drop for Server {
+            fn drop(&mut self) {
+                self.0.abort();
+            }
+        }
+        for grant in ["refresh_token", "authorization_code"] {
+            for case in [
+                "over", "exact", "small", "optional", "invalid", "utf8", "missing",
+            ] {
+                let mut bytes = match case {
+                    "optional" => br#"{"access_token":"fake-access"}"#.to_vec(),
+                    "invalid" => b"{PRIVATE_TOKEN".to_vec(),
+                    "utf8" => vec![0xff],
+                    "missing" => b"{}".to_vec(),
+                    _ => br#"{"access_token":"fake-access","refresh_token":"fake-rotated","id_token":"fake-id","scope":"test scope","expires_in":3600}"#.to_vec(),
+                };
+                if case == "over" || case == "exact" {
+                    bytes.resize(1024 * 1024 + usize::from(case == "over"), b' ');
+                }
+                let dropped = Arc::new(AtomicBool::new(false));
+                let observed = dropped.clone();
+                let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+                let base = format!("http://{}", listener.local_addr().unwrap());
+                let server = Server(tokio::spawn(async move {
+                    axum::serve(listener,Router::new().fallback(move || {
+                        let bytes=bytes.clone(); let witness=Witness(observed.clone());
+                        async move {
+                            let source=async_stream::stream! { let _witness=witness; for b in bytes.chunks(4093) { yield Ok::<_,std::io::Error>(Bytes::copy_from_slice(b)); } if case=="over" { std::future::pending::<()>().await; } };
+                            Response::builder().status(200).body(Body::from_stream(source)).unwrap()
+                        }
+                    })).await.unwrap();
+                }));
+                let http = reqwest::Client::builder().no_proxy().build().unwrap();
+                let result = tokio::time::timeout(
+                    std::time::Duration::from_secs(2),
+                    super::token_request(&http, &base, &[("grant_type", grant)]),
+                )
+                .await
+                .expect("token body must reject overflow without EOF");
+                match case {
+                    "over" => assert_eq!(
+                        result.unwrap_err().to_string(),
+                        "siwc token response: token response body exceeds 1 MiB"
+                    ),
+                    "invalid" | "utf8" | "missing" => {
+                        assert_eq!(result.unwrap_err().to_string(), "siwc token response")
+                    }
+                    _ => {
+                        let tokens = result.unwrap();
+                        assert_eq!(tokens.access_token, "fake-access");
+                        if case == "optional" {
+                            assert!(tokens.refresh_token.is_none());
+                            assert!(tokens.expires_at().is_none());
+                        } else {
+                            assert_eq!(tokens.refresh_token.as_deref(), Some("fake-rotated"));
+                            assert_eq!(tokens.id_token.as_deref(), Some("fake-id"));
+                            assert_eq!(tokens.scope.as_deref(), Some("test scope"));
+                            assert_eq!(tokens.expires_in, Some(3600));
+                        }
+                    }
+                }
+                tokio::time::timeout(std::time::Duration::from_secs(2), async {
+                    while !dropped.load(Ordering::SeqCst) {
+                        tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+                    }
+                })
+                .await
+                .unwrap();
+                drop(server);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn tk2_siwc_read_error_discards_valid_partial_json() {
+        let chunks = futures_util::stream::iter(vec![
+            Ok(bytes::Bytes::from_static(
+                br#"{"access_token":"partial-secret"}"#,
+            )),
+            Err(std::io::Error::other("PRIVATE_READ")),
+        ]);
+        let resp = reqwest::Response::from(
+            axum::http::Response::builder()
+                .status(200)
+                .body(reqwest::Body::wrap_stream(chunks))
+                .unwrap(),
+        );
+        let error = super::token_success(resp).await.unwrap_err();
+        assert_eq!(error.to_string(), "siwc token response");
+        assert!(!format!("{error:#}").contains("partial-secret"));
+        assert!(!format!("{error:#}").contains("PRIVATE_READ"));
+    }
+
     use super::*;
 
     fn js(b: &Bytes) -> Value {

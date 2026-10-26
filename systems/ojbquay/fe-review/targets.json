@@ -1,7 +1,7 @@
 {
   "project": "ojbquay console",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verified": true,
+  "verifiedNote": "2026-10-24 approved R2 M1–M4 only: nine routes verified through the exact-owned real-stack loopback harness, 27 loaded/capture rows and42 state union. Original failures, derived health/axe limitations and bounded continuations remain in tasks/round2/report.md. Harness supplies authenticated storageState; plain pnpm dev is insufficient. Full Round3/mainline/deployment not claimed.",
   "locale": "en-US",
   "colorSchemes": [
     "light"

@@ -39,11 +39,23 @@
 | FE2-5 | apps/cms-scaffold 第2輪實作（PR589 已合併） | R2-AC-5 | done | 2026-10-24T09:00:28Z | 2026-10-24T09:36:50Z | 2026-10-24T09:38:37Z |
 | FE2-6 | platform/ice-maker 第2輪實作（PR590 已合併） | R2-AC-6 | done | 2026-10-24T09:17:52Z | 2026-10-24T09:49:41Z | 2026-10-24T09:51:27Z |
 | FE2-7 | specs/fleet 第2輪實作 | R2-AC-7 | done | 2026-10-24T09:51:27Z | 2026-10-24T11:13:28Z | 2026-10-24T11:13:28Z |
-| FE2-8 | systems/ojbquay 第2輪實作 | R2-AC-8 | todo | — | — | — |
+| FE2-8 | systems/ojbquay 第2輪實作 | R2-AC-8 | done | 2026-10-24T11:18:59Z | 2026-10-24T12:50:56Z | 2026-10-24T12:50:56Z |
 | FE2-9 | products/goku 第2輪實作（PR592 已合併） | R2-AC-9 | done | 2026-10-24T10:05:22Z | 2026-10-24T11:17:09Z | 2026-10-24T11:17:09Z |
-| FE2-10 | products/phark 第2輪實作 | R2-AC-10 | in_progress | 2026-10-24T10:18:22Z | — | 2026-10-24T11:57:46Z |
-| FE2-11 | apps/flowshot＋apps/loom 第2輪實作 | R2-AC-11 | todo | — | — | — |
-| FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | todo | — | — | — |
-| FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | todo | — | — | — |
-| FE2-14 | platform/fanzloud 第2輪實作 | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-24T12:23:53Z |
+| FE2-10 | products/phark 第2輪實作（PR593 已合併） | R2-AC-10 | done | 2026-10-24T10:18:22Z | 2026-10-24T12:07:47Z | 2026-10-24T12:07:47Z |
+| FE2-11 | Paired synthetic Web R2 delivered in PR598 | R2-AC-11 | done | 2026-10-24T11:22:03Z | 2026-10-24T17:33:41Z | 2026-10-24T17:34:24Z |
+| FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
+| FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
+| FE2-14 | platform/fanzloud 第2輪實作（診斷原因與整合中；PR604 Draft） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-26T14:13:10.980406Z |
 | FE2-E | 交付證據／整合核對 | R2-AC-E | todo | — | — | — |
+
+Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
+
+Historical checkpoint 2026-10-24T16:20Z (superseded below): remaining R2 units [Flowshot/Loom PR598](https://github.com/fallrising/newclear/pull/598) and [Fanzloud PR604](https://github.com/fallrising/newclear/pull/604) remain in_progress with end unset. The owner approved all three prior proposals. Tokio1.53.3 passed the affected native/security checks; the two single extra browser attempts both failed and their allowances are consumed. [Current evidence, review correction and pending decisions](../fe-review/ROUND2-RETRY-CHECKPOINT.md). Both units now wait for owner decision; no new retry is authorized. Delivery remains17of19; original dirty worktrees and failures remain preserved.
+
+Historical pre-merge checkpoint 2026-10-24T17:03Z: owner separately approved the source-derived Loom attempt and bootstrap-only Fanz observation. Loom006 passed12.57s with all cleanup; paired Flowshot19/Loom21 captures and retained local gates are independently accepted for scoped synthetic R2 runtime. PR598 still needs current CI/normal merge/readback. Fanz bootstrap001 passed1.787s but does not accept canceled-local or authorize continuation; PR604 still waits owner. Delivery remains17of19 until actual paired merge. Original failures and private artifacts remain preserved.
+
+Final paired delivery: [PR598](https://github.com/fallrising/newclear/pull/598) reviewed head `679e91e58d4a9a0c93e0c963d4e925118ca59e29` normally merged `3169fbb48bc1b79e4d4865471c27c6df2d76ac56` at 2026-10-24T17:33:41Z. Independent T028 accepted the integrated candidate; all five current CI checks passed and fetched component/plan/board content matched. Component reports/results retain the pre-merge evidence snapshot; this ledger records final publication. Scoped synthetic Web R2 only; full Round3/native product acceptance remains separate.
+
+Overall delivery is18of19. Fanz PR604 remains incomplete: bootstrap001-only PASS does not accept canceled-local or the remaining matrix. A single combined201+202 canceled-local-only proposal awaits explicit owner approval; no dependent source/test/runtime has started. Original failures and private evidence are retained.
+
+Fanzloud continuation 2026-10-26: the source checkpoint is preserved in PR604. Recovery005 failed before Authenticate and its one-shot authority is consumed. A separately named v2 observer is under pure-test/source review to retain safe invalidation reasons; no new browser run or canonical promotion. Delivery remains18of19; currentmain integration preserves other units and approved prerequisites.

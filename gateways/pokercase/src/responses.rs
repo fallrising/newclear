@@ -339,6 +339,33 @@ fn buffered_failure(error: &Value) -> AppError {
     }
 }
 
+/// Validate a direct JSON envelope before passthrough or protocol conversion.
+/// Native callers may preserve explicitly requested background pending responses.
+/// Keep the original bytes: this is not a full nested-output schema validator.
+pub fn validate_json_response(body: &Bytes, allow_background: bool) -> AppResult<()> {
+    let invalid = || AppError::Upstream {
+        status: 502,
+        body: "Responses upstream returned an invalid response".into(),
+    };
+    let value: Value = serde_json::from_slice(body).map_err(|_| invalid())?;
+    let object = value.as_object().ok_or_else(invalid)?;
+    let status = object.get("status").and_then(Value::as_str);
+    let error = object.get("error").filter(|v| !v.is_null());
+    // Error-only envelopes and explicit failures may preserve known quota codes.
+    // A conflicting success/status must not be relabeled as a quota failure.
+    if status == Some("failed") || (!object.contains_key("status") && error.is_some()) {
+        return Err(buffered_failure(error.unwrap_or(&Value::Null)));
+    }
+    if error.is_some() || !value["output"].is_array() {
+        return Err(invalid());
+    }
+    match status {
+        Some("completed" | "incomplete") => Ok(()),
+        Some("queued" | "in_progress") if allow_background && value["background"] == true => Ok(()),
+        _ => Err(invalid()),
+    }
+}
+
 /// Rebuild a Responses JSON body from a Responses SSE transcript (upstream forced
 /// streaming while the client asked for a single body).
 pub fn reassemble_sse(raw: &str) -> AppResult<Bytes> {
@@ -436,6 +463,7 @@ pub fn reassemble_sse(raw: &str) -> AppResult<Bytes> {
 /// Responses SSE → `chat.completion.chunk` SSE, one upstream `data:` payload at a time.
 /// Output lines are complete `data: ...` records without the blank-line separator.
 pub struct ResponsesToChatStream {
+    budget: crate::stream_budget::RetainedBudget,
     id: String,
     model: String,
     created: i64,
@@ -450,8 +478,13 @@ pub struct ResponsesToChatStream {
 }
 
 impl ResponsesToChatStream {
+    pub(crate) fn is_done(&self) -> bool {
+        self.finished
+    }
+
     pub fn new(model: impl Into<String>) -> Self {
         Self {
+            budget: Default::default(),
             id: "chatcmpl-thinrouter".into(),
             model: model.into(),
             created: chrono::Utc::now().timestamp(),
@@ -552,6 +585,17 @@ impl ResponsesToChatStream {
                 let item = ev.get("item").cloned().unwrap_or(Value::Null);
                 if item.get("type").and_then(|t| t.as_str()) == Some("function_call") {
                     self.ensure_role(&mut out);
+                    let id = item.get("id").and_then(Value::as_str);
+                    let oi = ev.get("output_index").and_then(Value::as_i64);
+                    let new_id = id.filter(|id| !self.tool_index_by_item.contains_key(*id));
+                    let new_output =
+                        oi.is_some_and(|oi| !self.tool_index_by_output.contains_key(&oi));
+                    if !self.budget.charge(
+                        new_id.map_or(0, str::len),
+                        usize::from(new_id.is_some()) + usize::from(new_output),
+                    ) {
+                        return self.state_limit();
+                    }
                     let idx = self.next_tool;
                     self.next_tool += 1;
                     if let Some(id) = item.get("id").and_then(|i| i.as_str()) {
@@ -575,6 +619,9 @@ impl ResponsesToChatStream {
             "response.function_call_arguments.delta" => {
                 if let Some(idx) = self.tool_index(&ev) {
                     if let Some(id) = ev.get("item_id").and_then(|i| i.as_str()) {
+                        if !self.args_streamed.contains(id) && !self.budget.charge(id.len(), 1) {
+                            return self.state_limit();
+                        }
                         self.args_streamed.insert(id.to_string());
                     }
                     let d = ev.get("delta").and_then(|d| d.as_str()).unwrap_or("");
@@ -622,14 +669,33 @@ impl ResponsesToChatStream {
         out
     }
 
+    fn state_limit(&mut self) -> Vec<String> {
+        self.tool_index_by_item = HashMap::new();
+        self.tool_index_by_output = HashMap::new();
+        self.args_streamed = HashSet::new();
+        self.on_data(&json!({"type":"error","error":{"type":"api_error","message":crate::error::STATE_LIMIT_STREAM_MESSAGE}}).to_string())
+    }
+
     /// Responses must supply a typed terminal event; EOF is not completion.
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.finished {
             return Vec::new();
         }
         self.on_data(
             &json!({"type": "error", "error": {
-                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+                "type": "api_error", "message": message
             }})
             .to_string(),
         )
@@ -870,6 +936,7 @@ pub fn extract_responses_model_stream(body: &Bytes) -> AppResult<(String, bool)>
 /// `response.completed` carrying the full output and usage. Records are
 /// `event: ...\ndata: ...`; Responses streams end without `[DONE]`.
 pub struct ChatToResponsesStream {
+    budget: crate::stream_budget::RetainedBudget,
     id: String,
     model: String,
     created: i64,
@@ -887,8 +954,13 @@ pub struct ChatToResponsesStream {
 }
 
 impl ChatToResponsesStream {
+    pub(crate) fn is_done(&self) -> bool {
+        self.done
+    }
+
     pub fn new(model: impl Into<String>) -> Self {
         Self {
+            budget: Default::default(),
             id: "resp_thinrouter".into(),
             model: model.into(),
             created: chrono::Utc::now().timestamp(),
@@ -1038,6 +1110,12 @@ impl ChatToResponsesStream {
             .and_then(|c| c.as_str())
             .filter(|t| !t.is_empty())
         {
+            if !self
+                .budget
+                .charge(t.len(), usize::from(self.text.is_none()))
+            {
+                return self.state_limit();
+            }
             if self.text.is_none() {
                 let idx = self.output.len();
                 let item = json!({"type": "message", "id": format!("msg_{idx}"), "role": "assistant",
@@ -1072,6 +1150,11 @@ impl ChatToResponsesStream {
         {
             let k = call.get("index").and_then(|i| i.as_i64()).unwrap_or(0);
             if !self.tools.contains_key(&k) {
+                let metadata = crate::stream_budget::metadata_bytes(call.get("id"))
+                    + crate::stream_budget::metadata_bytes(call.pointer("/function/name"));
+                if !self.budget.charge(metadata, 2) {
+                    return self.state_limit();
+                }
                 self.close_text(&mut out);
                 let idx = self.output.len();
                 let item = json!({
@@ -1092,6 +1175,9 @@ impl ChatToResponsesStream {
                 .and_then(|a| a.as_str())
                 .filter(|a| !a.is_empty())
             {
+                if !self.budget.charge(a.len(), 0) {
+                    return self.state_limit();
+                }
                 let idx = self.tools.get(&k).map(|(i, _)| *i).unwrap_or(0);
                 if let Some((_, acc)) = self.tools.get_mut(&k) {
                     acc.push_str(a);
@@ -1113,14 +1199,34 @@ impl ChatToResponsesStream {
         out
     }
 
+    fn state_limit(&mut self) -> Vec<String> {
+        // Do not replay retained partial output or close tools as successfully done.
+        self.output = Vec::new();
+        self.text = None;
+        self.tools = HashMap::new();
+        self.on_data(&json!({"error":{"type":"api_error","message":crate::error::STATE_LIMIT_STREAM_MESSAGE}}).to_string())
+    }
+
     /// Preserve finish_reason-only Chat upstreams without inventing completion.
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.done || self.finish.is_some() {
             return self.finish();
         }
         self.on_data(
             &json!({"error": {
-                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+                "type": "api_error", "message": message
             }})
             .to_string(),
         )
@@ -1134,6 +1240,202 @@ fn sse(event: &str, data: &Value) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn rs_seed(kind: &str) -> ChatToResponsesStream {
+        let mut stream = ChatToResponsesStream::new("m");
+        stream.budget = crate::stream_budget::RetainedBudget::limited(12, 10);
+        let values = match kind {
+            "text" => vec![json!({"choices":[{"delta":{"content":"界界界界"}}]})],
+            "arguments" => vec![
+                json!({"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"éééé"}}]}}]}),
+            ],
+            _ => vec![
+                json!({"choices":[{"delta":{"content":"界","tool_calls":[{"index":0,"function":{"arguments":"abcde"}}]}}]}),
+            ],
+        };
+        for value in values {
+            assert!(!stream
+                .on_data(&value.to_string())
+                .join("")
+                .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        }
+        stream
+    }
+
+    fn rs_assert_cleared_failure(stream: &mut ChatToResponsesStream, out: Vec<String>) {
+        let text = out.join("\n");
+        assert!(text.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        assert!(text.contains("response.failed"));
+        assert!(!text.contains("response.completed"));
+        assert!(!text.contains("arguments.done"));
+        assert!(!text.contains("output_text.done"));
+        assert!(!text.contains("DO_NOT_FORWARD"));
+        assert!(stream.output.is_empty() && stream.tools.is_empty() && stream.text.is_none());
+        assert!(stream.is_done());
+        assert!(stream.on_data("[DONE]").is_empty());
+        assert!(stream.on_end().is_empty());
+    }
+
+    #[test]
+    fn rs1_text_and_tool_arguments_share_budget_and_fail_before_delta() {
+        for kind in ["text", "arguments", "mixed"] {
+            for finish in [false, true] {
+                let mut stream = rs_seed(kind);
+                if finish {
+                    stream.on_data(
+                        &json!({"choices":[{"delta":{},"finish_reason":"stop"}]}).to_string(),
+                    );
+                }
+                let delta = if kind == "text" {
+                    json!({"content":"DO_NOT_FORWARD"})
+                } else {
+                    json!({"tool_calls":[{"index":0,"function":{"arguments":"DO_NOT_FORWARD"}}]})
+                };
+                let out = stream.on_data(&json!({"choices":[{"delta":delta}]}).to_string());
+                rs_assert_cleared_failure(&mut stream, out);
+            }
+        }
+    }
+
+    #[test]
+    fn rs1_exact_payload_finalizes_without_charging_moved_data_twice() {
+        for kind in ["text", "arguments", "mixed"] {
+            for reason in ["stop", "length"] {
+                for eof in [false, true] {
+                    let mut stream = rs_seed(kind);
+                    stream.on_data(
+                        &json!({"choices":[{"delta":{},"finish_reason":reason}]}).to_string(),
+                    );
+                    stream.on_data(
+                        &json!({"choices":[],"usage":{"prompt_tokens":2,"completion_tokens":3}})
+                            .to_string(),
+                    );
+                    let out = if eof {
+                        stream.on_end()
+                    } else {
+                        stream.on_data("[DONE]")
+                    }
+                    .join("\n");
+                    assert!(!out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+                    assert!(out.contains(if reason == "length" {
+                        "response.incomplete"
+                    } else {
+                        "response.completed"
+                    }));
+                    assert!(out.contains("\"input_tokens\":2"));
+                    assert!(out.contains("\"output_tokens\":3"));
+                    assert!(out.contains(if kind == "text" {
+                        "界界界界"
+                    } else if kind == "arguments" {
+                        "éééé"
+                    } else {
+                        "abcde"
+                    }));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn rs1_output_and_tool_map_entries_include_empty_items_and_text_switches() {
+        for text_switch in [false, true] {
+            let mut stream = ChatToResponsesStream::new("m");
+            stream.budget = crate::stream_budget::RetainedBudget::limited(1000, 4);
+            let text = json!({"choices":[{"delta":{"content":"a"}}]}).to_string();
+            if text_switch {
+                stream.on_data(&text);
+            }
+            let tool = |i| json!({"choices":[{"delta":{"tool_calls":[{"index":i}]}}]}).to_string();
+            stream.on_data(&tool(0));
+            if text_switch {
+                stream.on_data(&text);
+            } else {
+                stream.on_data(&tool(1));
+            }
+            // Reusing an existing tool must not charge another output/map entry.
+            assert!(!stream
+                .on_data(&tool(0))
+                .join("")
+                .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+            let out = stream.on_data(&tool(2));
+            rs_assert_cleared_failure(&mut stream, out);
+        }
+    }
+
+    #[test]
+    fn rs1_retained_metadata_counts_serialized_json_including_non_strings() {
+        for value in [json!("é"), json!({"n":["雪",1,true]}), Value::Null] {
+            let bytes = serde_json::to_vec(&value).unwrap().len();
+            assert_eq!(crate::stream_budget::metadata_bytes(Some(&value)), bytes);
+            let mut stream = ChatToResponsesStream::new("m");
+            stream.budget = crate::stream_budget::RetainedBudget::limited(bytes * 2, 2);
+            let first = json!({"choices":[{"delta":{"tool_calls":[{"index":0,"id":value,"function":{"name":value}}]}}]});
+            assert!(!stream
+                .on_data(&first.to_string())
+                .join("")
+                .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+            let out = stream.on_data(&json!({"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"DO_NOT_FORWARD"}}]}}]}).to_string());
+            rs_assert_cleared_failure(&mut stream, out);
+        }
+    }
+
+    #[test]
+    fn rs2_response_tool_maps_and_output_index_aliases_are_bounded() {
+        for by_bytes in [false, true] {
+            let mut stream = ResponsesToChatStream::new("m");
+            stream.budget = crate::stream_budget::RetainedBudget::limited(
+                if by_bytes { 4 } else { 100 },
+                if by_bytes { 100 } else { 4 },
+            );
+            let added = json!({"type":"response.output_item.added","output_index":0,"item":{"type":"function_call","id":"a"}}).to_string();
+            // Same id/output_index keys must remain free on repetition.
+            for _ in 0..3 {
+                assert!(!stream
+                    .on_data(&added)
+                    .join("")
+                    .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+            }
+            let arg = |id| {
+                json!({"type":"response.function_call_arguments.delta","output_index":0,"item_id":id,"delta":"d"}).to_string()
+            };
+            for id in ["a", "bc", "bc"] {
+                assert!(!stream
+                    .on_data(&arg(id))
+                    .join("")
+                    .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+            }
+            let out = stream.on_data(&arg("z")).join("\n");
+            assert!(out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+            assert!(!out.contains("\"arguments\":\"d\""));
+            assert!(stream.is_done());
+            assert!(
+                stream.tool_index_by_item.is_empty()
+                    && stream.tool_index_by_output.is_empty()
+                    && stream.args_streamed.is_empty()
+            );
+        }
+    }
+
+    #[test]
+    fn rs2_response_map_bytes_and_slots_fail_before_new_registration() {
+        for by_bytes in [false, true] {
+            let mut stream = ResponsesToChatStream::new("m");
+            stream.budget = crate::stream_budget::RetainedBudget::limited(
+                if by_bytes { 3 } else { 100 },
+                if by_bytes { 100 } else { 2 },
+            );
+            let added = |id, index| {
+                json!({"type":"response.output_item.added","output_index":index,"item":{"type":"function_call","id":id,"call_id":"DO_NOT_FORWARD"}}).to_string()
+            };
+            assert!(!stream
+                .on_data(&added("雪", 0))
+                .join("")
+                .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+            let out = stream.on_data(&added("x", 1)).join("\n");
+            assert!(out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+            assert!(!out.contains("DO_NOT_FORWARD"));
+            assert!(stream.is_done());
+        }
+    }
 
     fn js(b: &Bytes) -> Value {
         serde_json::from_slice(b).unwrap()

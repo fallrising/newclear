@@ -2,7 +2,7 @@
 
 `fallrising` 的公開技術作品集。這裡是這些專案的 canonical 位置——先前散落在數十個獨立 repository 的內容,已收斂至此。
 
-給 LLM agent 的入口是 [`llms.txt`](llms.txt)：一次 fetch 取得全部專案索引，各專案自己的 `llms.txt` 再宣告 status、介面型態、entrypoint、auth 與機器可讀契約的位置。格式與必填欄位見 [agent-facing capability files](docs/specs/llms-txt.md)。目前已有 capability file 的是 `systems/clarkq`、`products/kith`、`systems/snail`、`products/goku`，其餘專案仍只有 README。
+給 LLM agent 的入口是 [`llms.txt`](llms.txt)：一次 fetch 取得全部專案索引，各專案自己的 `llms.txt` 再宣告 status、介面型態、entrypoint、auth 與機器可讀契約的位置。格式與必填欄位見 [agent-facing capability files](docs/specs/llms-txt.md)。目前已有 capability file 的是 `systems/clarkq`、`products/kith`、`systems/snail`、`products/goku`、`labs/iris-lab`；iris-lab 為 spec-only，其餘專案仍只有 README。
 
 根目錄的 [GitHub Actions workflows](.github/workflows/) 是 monorepo 的 canonical CI entry points；component 目錄中保留的 workflow 是原始 repository 歷史，GitHub 不會將其當作 monorepo CI 執行。已接線 component 的範圍與驗證規則見 [Monorepo CI specification](docs/specs/monorepo-ci.md)。
 
@@ -81,6 +81,7 @@
 | [`labs/zircon-godot`](labs/zircon-godot/) | 傳奇 3 Godot/C# fork 的固定版本研究、SDD 與分階段學習實驗（runtime 未驗證） | A |
 | [`labs/pg-jev-router`](labs/pg-jev-router/) | pg-jev 輸入判斷、攔截與模型分流實驗；真 extension + 合成 provider | A |
 | [`labs/browser-fingerprint`](labs/browser-fingerprint/) | Go mock CRUD 與瀏覽器設備／操作觀測，支援私人 Quick Tunnel | 未分級 |
+| [`labs/iris-lab`](labs/iris-lab/) | 固定 Iris／模型版本的原生生圖實驗 SDD、教學與平台研究；runtime 未實作 | 未分級 |
 | [`labs/m4-seat`](labs/m4-seat/) | M4 Max 48GB MacBook Pro 的單人推論座位方案；無 runtime | 未分級 |
 | [`labs/retro-economy`](labs/retro-economy/) | 原創復古 RPG 的小鎮經濟、職業分工與交易玩法 SDD；未實作 | 未分級 |
 | [`labs/handwired-learning`](labs/handwired-learning/) | 普通 JS 與固定數值圖對照的入門實驗 SDD；未實作 | 未分級 |

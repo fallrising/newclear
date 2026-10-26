@@ -1,0 +1,121 @@
+[
+  {
+    "source": "baseline-001/result.json",
+    "originalSHA256": "8afdef11b547b38ff4a5106b1d7605c0fce8bf9d64777e06a800926e8acbff54",
+    "published": "baseline-001.json",
+    "publishedSHA256": "e9e687803cc7ad40c6dfaa783a15aca46780b36f45473243973f322149c5be38",
+    "transformation": "Explicit safe field selection; fixture count summary; geometry reduced to exact document widths and observed row/column extrema. Original events/status/failure and source hashes retained; original bytes private and unchanged."
+  },
+  {
+    "source": "parent/baseline-001-outer.json",
+    "originalSHA256": "0cd8b6d06dd7abd5b3ac556b2b272ce84ac7bc66041bf56e5621fdbe4d013dc8",
+    "published": "baseline-001-outer.json",
+    "publishedSHA256": "0cd8b6d06dd7abd5b3ac556b2b272ce84ac7bc66041bf56e5621fdbe4d013dc8",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "presentation-001/result.json",
+    "originalSHA256": "5bf029dccd3118d796aafa34070194c2508393bebcae5c6df5f421c2ae544814",
+    "published": "presentation-001.json",
+    "publishedSHA256": "2444bd1449b079f66619ef3880ce3671926b39ef18374bc524ca0e0f4f18a7c5",
+    "transformation": "Explicit safe field selection; fixture count summary; geometry reduced to exact document widths and observed row/column extrema. Original events/status/failure and source hashes retained; original bytes private and unchanged."
+  },
+  {
+    "source": "parent/presentation-001-outer.json",
+    "originalSHA256": "12eafa68aa789188f7166a2bcaeec028c721cb62ae66d87caa2420004ab30ac5",
+    "published": "presentation-001-outer.json",
+    "publishedSHA256": "12eafa68aa789188f7166a2bcaeec028c721cb62ae66d87caa2420004ab30ac5",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "continuation-001/result.json",
+    "originalSHA256": "d904a79b493bae644ca593036586036743ee83b2ff55ce5300b109d5646bd2d9",
+    "published": "continuation-001.json",
+    "publishedSHA256": "f8dceadabbe53832a1b679ca08aabf5af069aedcab173c252654b6401c1b154c",
+    "transformation": "Explicit safe field selection; fixture count summary; geometry reduced to exact document widths and observed row/column extrema. Original events/status/failure and source hashes retained; original bytes private and unchanged."
+  },
+  {
+    "source": "parent/continuation-001-outer.json",
+    "originalSHA256": "077206011bacddc4920ad86b5072448a99dd92e66b57d935719708b13e9d1dc3",
+    "published": "continuation-001-outer.json",
+    "publishedSHA256": "077206011bacddc4920ad86b5072448a99dd92e66b57d935719708b13e9d1dc3",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "repair-001/result.json",
+    "originalSHA256": "388640075e6b6385a8b35e3d6d32e4b3b1fd63898b74906b0d0c99ccde6a52ab",
+    "published": "repair-001.json",
+    "publishedSHA256": "49d69e2038ffce5dc804519ffbc73bf3a22bfe59c194b01cc365cecd1ffa1921",
+    "transformation": "Explicit safe field selection; fixture count summary; geometry reduced to exact document widths and observed row/column extrema. Original events/status/failure and source hashes retained; original bytes private and unchanged."
+  },
+  {
+    "source": "parent/repair-001-outer.json",
+    "originalSHA256": "fbc1f7b1a5b9447df1bb72be16040838b0a735c8171e9cb856be0e6e16237a8d",
+    "published": "repair-001-outer.json",
+    "publishedSHA256": "fbc1f7b1a5b9447df1bb72be16040838b0a735c8171e9cb856be0e6e16237a8d",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "visual-001/result.json",
+    "originalSHA256": "9e2d93c9ed6250fb906d4d4ee1619de5670c97b3429bc0141a6dade299633d46",
+    "published": "visual-001.json",
+    "publishedSHA256": "fdbc4c5a7ed195204ebe8b9d7b80dbf9eeb2907743e53bb0cba77ea51066854e",
+    "transformation": "Explicit safe field selection; fixture count summary; geometry reduced to exact document widths and observed row/column extrema. Original events/status/failure and source hashes retained; original bytes private and unchanged."
+  },
+  {
+    "source": "parent/visual-001-outer.json",
+    "originalSHA256": "5888926e9cbecad212b13292cf2a887a1d5eaca0fb121783f3ab19abe9aa9b89",
+    "published": "visual-001-outer.json",
+    "publishedSHA256": "5888926e9cbecad212b13292cf2a887a1d5eaca0fb121783f3ab19abe9aa9b89",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "contrast-desktop-001/result.json",
+    "originalSHA256": "2dfe1ef6d6e205e2ce44a2f4a9f9cc1ca022e99ef6a82af2ec006fdbc99d64dc",
+    "published": "contrast-desktop-001.json",
+    "publishedSHA256": "afe4f43aa3990210f28fc50c36d3ef21264cc41466599f2ec7a69bdab5cfdaa9",
+    "transformation": "Explicit safe field selection; fixture count summary; geometry reduced to exact document widths and observed row/column extrema. Original events/status/failure and source hashes retained; original bytes private and unchanged."
+  },
+  {
+    "source": "parent/contrast-desktop-001-outer.json",
+    "originalSHA256": "26bf6b78d93ba1755cac00a00929ec30902ecba795b849667429ded80c5638f5",
+    "published": "contrast-desktop-001-outer.json",
+    "publishedSHA256": "26bf6b78d93ba1755cac00a00929ec30902ecba795b849667429ded80c5638f5",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "parent/native.json",
+    "originalSHA256": "a955e9c9f64b6513232df85a30ea5baf28fcc3d13e10f05088a73aa4441561e4",
+    "published": "native.json",
+    "publishedSHA256": "a955e9c9f64b6513232df85a30ea5baf28fcc3d13e10f05088a73aa4441561e4",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "parent/test-summary.json",
+    "originalSHA256": "7102db5a4de976a7d18f99e0dcaa0f376f378d687311e49da219fd4455aff4e6",
+    "published": "test-summary.json",
+    "publishedSHA256": "7102db5a4de976a7d18f99e0dcaa0f376f378d687311e49da219fd4455aff4e6",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "parent/tui-renderer-red.json",
+    "originalSHA256": "9fdad59595fffa375986df0d63bd321db8bf0691bb1941b13db2bd4c5f84cb54",
+    "published": "tui-renderer-red.json",
+    "publishedSHA256": "9fdad59595fffa375986df0d63bd321db8bf0691bb1941b13db2bd4c5f84cb54",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "parent/tui-normal-name-red.json",
+    "originalSHA256": "749f0cd4c7060e322c45e92e6b786c86e84fbd30975777ba54108290ecfc4cbd",
+    "published": "tui-normal-name-red.json",
+    "publishedSHA256": "749f0cd4c7060e322c45e92e6b786c86e84fbd30975777ba54108290ecfc4cbd",
+    "transformation": "byte-identical safe structured receipt"
+  },
+  {
+    "source": "parent/visual-image-review.json",
+    "originalSHA256": "875d0b7f79eedf4453f412588a846631fdddf4fc08d12db7292d92ccb5322317",
+    "published": "visual-image-review.json",
+    "publishedSHA256": "875d0b7f79eedf4453f412588a846631fdddf4fc08d12db7292d92ccb5322317",
+    "transformation": "byte-identical visual inspection receipt; its pending desktop note is superseded only by separate supplement"
+  }
+]

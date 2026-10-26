@@ -2,6 +2,8 @@
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
+> 文件規劃：[LLM 用量正確性修正規格](../../docs/specs/llm-usage-correctness.md)（T-1102）。整理已確認缺陷、待重現問題與後續修正驗收；修正尚未實作。
+
 
 > **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
 
@@ -110,7 +112,7 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_CURSOR_BIN` / `--cursor-bin` | Cursor command inside the pinned image (default `cursor-agent`) |
 | `THINROUTER_CURSOR_MAX_RUNS` / `--cursor-max-runs` | Concurrent Cursor Agent processes (default 2) |
 | `THINROUTER_CURSOR_ACCEPT_ACCOUNT_PLUGINS` / `--cursor-accept-account-plugins` | Turn the cursor provider on, accepting that `cursor-agent` can use the account's Cursor plugins (default off) |
-| `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | Abort SSE if no chunk (default 90) |
+| `THINROUTER_SSE_STALL_SECS` / `--sse-stall-secs` | SSE idle timeout between chunks in seconds (default 90, minimum 5) |
 | `THINROUTER_TOKEN_SAVER` / `--token-saver` | Truncate tool / huge message content |
 | `THINROUTER_TOKEN_SAVER_MAX_CHARS` | Max chars kept per tool-like block (default 2000) |
 | `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` | Upstream egress proxy |
@@ -173,7 +175,11 @@ Set `THINROUTER_ADMIN_TOKEN` through your environment or secret configuration be
 
 - Single process: proxy + web UI + SQLite (+ optional TUI).
 - Hot path: API key auth → resolve model → ordered fallback / RR **before** SSE headers committed → byte passthrough (or Anthropic translate).
-- Cooldown after 429 / auth / 5xx; SSE stall timeout.
+- Recognized final events in converted/native Responses streams release their upstream before final output, without waiting for provider EOF. Chat finish_reason alone still permits usage tails until [DONE]/EOF or the existing idle finalization. Observed EOF releases the source before generated completion/error output. Opaque passthrough keeps byte/EOF behavior; completed Claude sessions retain their reuse policy.
+- Retained converter state has a16MiB payload allowance and4096collection entries per converter. Text/arguments use UTF-8 bytes; retained tool metadata uses serialized JSON size, and each output item or new map/set key consumes an entry. Exceeding either limit clears the failing converter and produces a fixed protocol error; a chain also ends when its final stage fails first. These are logical retained-state limits, not a total wire-traffic or RSS ceiling.
+- Translated SSE input lines are limited to16MiB (field prefix and CR included, LF excluded). Oversized lines produce a fixed protocol error and release the source before final output, including after a Chat finish_reason-only record. Large chunks of bounded lines remain valid; a recognized terminal takes precedence over trailing bytes. This limits retained input lines, not total output/tool state or transport-owned chunks.
+- SSE read-I/O failures use fixed diagnostics: converted streams and native Responses emit protocol errors, while opaque passthrough retains a redacted transport error. Known terminals are preserved, and owned source/error objects are released before final read-error output. This redacts generated transport diagnostics; already forwarded SSE payloads remain unchanged.
+- Cooldown after 429 / auth / 5xx; SSE stall timeout. Translated streams and native Responses emit a fixed protocol error on an unfinished idle timeout; already parsed terminal outcomes are preserved. Opaque Chat/Messages passthrough keeps transport-error behavior. The upstream stream is released before the final timeout output. This is a per-chunk idle limit, not a total request deadline.
 - Own schema (`~/.thinrouter`), not 9router.db compatible.
 
 ## License

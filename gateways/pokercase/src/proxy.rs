@@ -514,7 +514,7 @@ async fn forward_chat_completions_inner(
                     reassemble_stream: reassemble,
                 })
             } else if status == 401 && borrowed.is_some() {
-                let body_txt = resp.text().await.unwrap_or_default();
+                let body_txt = read_diagnostic_cancel(resp, cancel).await?;
                 let mut reread = target.clone();
                 let changed = borrowed
                     .as_deref()
@@ -544,7 +544,7 @@ async fn forward_chat_completions_inner(
                 && allow_401_refresh
                 && target.connection.auth_type == "oauth_import"
             {
-                let body_txt = resp.text().await.unwrap_or_default();
+                let body_txt = read_diagnostic_cancel(resp, cancel).await?;
                 if let Ok(fresh) =
                     crate::oauth_refresh::refresh_connection(&state.store, &target.connection).await
                 {
@@ -567,7 +567,7 @@ async fn forward_chat_completions_inner(
                     retryable: is_retryable_status(status),
                 })
             } else {
-                let body = resp.text().await.unwrap_or_default();
+                let body = read_diagnostic_cancel(resp, cancel).await?;
                 Err(UpstreamAttemptError {
                     status,
                     body,
@@ -748,7 +748,7 @@ pub async fn handle_chat_with_fallback(
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = read_forward_body(fwd, &cancel, false).await?;
                     let bytes = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&bytes);
                     let cost = estimate_cost(
@@ -899,7 +899,7 @@ pub async fn handle_anthropic_messages(
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = read_forward_body(fwd, &cancel, false).await?;
                     let chat = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let (pt, ct) = extract_usage_tokens(&chat);
                     let cost = estimate_cost(
@@ -977,6 +977,7 @@ pub async fn handle_responses(
 ) -> AppResult<Response> {
     let body = prepare_body(state, body)?;
     let chat_body = responses::responses_to_chat(&body)?;
+    let allow_background = serde_json::from_slice::<Value>(&body)?["background"] == true;
     let targets = order_targets(targets, strategy, &state.cooldown, &state.rr_counter);
     let mut last_err: Option<UpstreamAttemptError> = None;
 
@@ -1052,7 +1053,7 @@ pub async fn handle_responses(
                     return stream_response(fwd.response, state.sse_stall_secs, mode).await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel).await?;
+                    let bytes = read_forward_body(fwd, &cancel, allow_background).await?;
                     // If upstream already returned Responses, pass through; else wrap chat.
                     let out = match kind {
                         UpstreamBodyKind::OpenAiResponses => bytes,
@@ -1123,27 +1124,46 @@ pub async fn handle_responses(
     })
 }
 
+async fn read_diagnostic_cancel(
+    resp: reqwest::Response,
+    cancel: &CancellationToken,
+) -> Result<String, UpstreamAttemptError> {
+    tokio::select! {
+        biased;
+        _ = cancel.cancelled() => Err(UpstreamAttemptError {
+            status: 499,
+            body: "client disconnected".into(),
+            retryable: false,
+        }),
+        body = crate::collection::diagnostic_text(resp) => Ok(body),
+    }
+}
+
 async fn read_bytes_cancel(
     resp: reqwest::Response,
     cancel: &CancellationToken,
 ) -> AppResult<Bytes> {
-    tokio::select! {
-        biased;
-        _ = cancel.cancelled() => Err(AppError::BadRequest("client disconnected".into())),
-        r = resp.bytes() => r.map_err(|e| AppError::Internal(anyhow::anyhow!("read upstream body: {e}"))),
-    }
+    crate::collection::body(resp.bytes_stream(), cancel).await
 }
 
 /// Read a non-stream upstream body; a forced-stream Responses transcript is folded
 /// back into one Responses JSON body.
-async fn read_forward_body(fwd: ForwardOk, cancel: &CancellationToken) -> AppResult<Bytes> {
+async fn read_forward_body(
+    fwd: ForwardOk,
+    cancel: &CancellationToken,
+    allow_background: bool,
+) -> AppResult<Bytes> {
     let reassemble = fwd.reassemble_stream;
     let kind = fwd.body_kind;
     let bytes = read_bytes_cancel(fwd.response, cancel).await?;
-    if !matches!(kind, UpstreamBodyKind::OpenAiResponses) || !reassemble {
+    if !matches!(kind, UpstreamBodyKind::OpenAiResponses) {
         return Ok(bytes);
     }
-    responses::reassemble_sse(&String::from_utf8_lossy(&bytes))
+    if reassemble {
+        return responses::reassemble_sse(&String::from_utf8_lossy(&bytes));
+    }
+    responses::validate_json_response(&bytes, allow_background)?;
+    Ok(bytes)
 }
 
 /// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.
@@ -1204,48 +1224,107 @@ enum StreamMode {
     AnthropicToResponses(String),
 }
 
+// Includes the field prefix and optional CR, but excludes the LF delimiter.
+const MAX_CONVERTED_LINE_BYTES: usize = 16 * 1024 * 1024;
+
 /// Re-encodes one upstream SSE `data:` payload at a time into client SSE records.
 trait SseConvert: Send {
+    /// A final output was produced, not merely a finish reason received.
+    fn is_done(&self) -> bool;
     fn on_data(&mut self, data: &str) -> Vec<String>;
+    /// Every supported source format accepts this fixed error envelope.
+    /// Unlike EOF/stall, an input-limit violation cannot finalize a finish reason.
+    fn on_input_limit(&mut self) -> Vec<String> {
+        self.on_data(
+            &serde_json::json!({"type": "error", "error": {
+                "type": "api_error", "message": crate::error::INPUT_LIMIT_STREAM_MESSAGE
+            }})
+            .to_string(),
+        )
+    }
     /// Upstream ended (with or without a terminal event).
     fn on_end(&mut self) -> Vec<String>;
+    /// Idle deadline elapsed; preserve any already parsed terminal.
+    fn on_stall(&mut self) -> Vec<String>;
+    /// Read failed; never render arbitrary source errors.
+    fn on_read_error(&mut self) -> Vec<String>;
 }
 
 struct ChatToAnthropic(StreamTranslateState);
 
 impl SseConvert for ChatToAnthropic {
+    fn is_done(&self) -> bool {
+        self.0.message_stop_sent
+    }
+
     fn on_data(&mut self, data: &str) -> Vec<String> {
         claude::openai_sse_chunk_to_anthropic(data, &mut self.0)
     }
     fn on_end(&mut self) -> Vec<String> {
         self.0.on_end()
     }
+    fn on_stall(&mut self) -> Vec<String> {
+        self.0.on_stall()
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        self.0.on_read_error()
+    }
 }
 
 impl SseConvert for responses::ChatToResponsesStream {
+    fn is_done(&self) -> bool {
+        responses::ChatToResponsesStream::is_done(self)
+    }
+
     fn on_data(&mut self, data: &str) -> Vec<String> {
         responses::ChatToResponsesStream::on_data(self, data)
     }
     fn on_end(&mut self) -> Vec<String> {
         responses::ChatToResponsesStream::on_end(self)
     }
+    fn on_stall(&mut self) -> Vec<String> {
+        responses::ChatToResponsesStream::on_stall(self)
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        responses::ChatToResponsesStream::on_read_error(self)
+    }
 }
 
 impl SseConvert for responses::ResponsesToChatStream {
+    fn is_done(&self) -> bool {
+        responses::ResponsesToChatStream::is_done(self)
+    }
+
     fn on_data(&mut self, data: &str) -> Vec<String> {
         responses::ResponsesToChatStream::on_data(self, data)
     }
     fn on_end(&mut self) -> Vec<String> {
         responses::ResponsesToChatStream::on_end(self)
     }
+    fn on_stall(&mut self) -> Vec<String> {
+        responses::ResponsesToChatStream::on_stall(self)
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        responses::ResponsesToChatStream::on_read_error(self)
+    }
 }
 
 impl SseConvert for claude::AnthropicToChatStream {
+    fn is_done(&self) -> bool {
+        claude::AnthropicToChatStream::is_done(self)
+    }
+
     fn on_data(&mut self, data: &str) -> Vec<String> {
         claude::AnthropicToChatStream::on_data(self, data)
     }
     fn on_end(&mut self) -> Vec<String> {
         claude::AnthropicToChatStream::on_end(self)
+    }
+    fn on_stall(&mut self) -> Vec<String> {
+        claude::AnthropicToChatStream::on_stall(self)
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        claude::AnthropicToChatStream::on_read_error(self)
     }
 }
 
@@ -1254,21 +1333,43 @@ struct Chain<A, B>(A, B);
 
 impl<A: SseConvert, B: SseConvert> Chain<A, B> {
     fn feed(&mut self, records: Vec<String>) -> Vec<String> {
-        records
-            .iter()
-            .filter_map(|r| r.strip_prefix("data: "))
-            .flat_map(|d| self.1.on_data(d))
-            .collect()
+        let mut out = Vec::new();
+        for record in records {
+            if self.1.is_done() {
+                break;
+            }
+            if let Some(data) = record.strip_prefix("data: ") {
+                out.extend(self.1.on_data(data));
+            }
+        }
+        out
     }
 }
 
 impl<A: SseConvert, B: SseConvert> SseConvert for Chain<A, B> {
+    fn is_done(&self) -> bool {
+        // The final stage can fail on its own budget before the source stage finishes.
+        self.1.is_done()
+    }
+
     fn on_data(&mut self, data: &str) -> Vec<String> {
         let mid = self.0.on_data(data);
         self.feed(mid)
     }
     fn on_end(&mut self) -> Vec<String> {
         let mid = self.0.on_end();
+        let mut out = self.feed(mid);
+        out.extend(self.1.on_end());
+        out
+    }
+    fn on_stall(&mut self) -> Vec<String> {
+        let mid = self.0.on_stall();
+        let mut out = self.feed(mid);
+        out.extend(self.1.on_end());
+        out
+    }
+    fn on_read_error(&mut self) -> Vec<String> {
+        let mid = self.0.on_read_error();
         let mut out = self.feed(mid);
         out.extend(self.1.on_end());
         out
@@ -1324,35 +1425,80 @@ where
                 Ok(Some(Ok(chunk))) => {
                     if let Some(native) = native.as_mut() {
                         let out = native.push(&chunk);
+                        if native.done {
+                            drop(upstream);
+                            if !out.is_empty() { yield Ok::<Bytes, std::io::Error>(Bytes::from(out)); }
+                            break;
+                        }
                         if !out.is_empty() { yield Ok::<Bytes, std::io::Error>(Bytes::from(out)); }
-                        if native.done { break; }
                         continue;
                     }
                     let Some(conv) = conv.as_mut() else {
                         yield Ok::<Bytes, std::io::Error>(chunk);
                         continue;
                     };
-                    buf.extend_from_slice(&chunk);
-                    let Some(last_nl) = buf.iter().rposition(|b| *b == b'\n') else {
-                        continue;
-                    };
-                    let rest = buf.split_off(last_nl + 1);
-                    let complete = std::mem::replace(&mut buf, rest);
                     let mut out = String::new();
-                    for line in String::from_utf8_lossy(&complete).lines() {
-                        if let Some(data) = line.strip_prefix("data:") {
-                            for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                    for part in chunk.split_inclusive(|b| *b == b'\n') {
+                        let line = part.strip_suffix(b"\n");
+                        let content = line.unwrap_or(part);
+                        if content.len() > MAX_CONVERTED_LINE_BYTES - buf.len() {
+                            // Discard retained input, never decode or echo the offending line.
+                            buf = Vec::new();
+                            for rec in conv.on_input_limit() {
                                 out.push_str(&rec);
                                 out.push_str("\n\n");
                             }
+                            break;
                         }
+                        // Avoid geometric growth beyond the specified retained-line bound.
+                        if buf.capacity() - buf.len() < content.len() {
+                            let capacity = (buf.capacity().saturating_mul(2))
+                                .max(buf.len() + content.len()).min(MAX_CONVERTED_LINE_BYTES);
+                            buf.reserve_exact(capacity - buf.len());
+                        }
+                        buf.extend_from_slice(content);
+                        if line.is_some() {
+                            let decoded = String::from_utf8_lossy(&buf);
+                            let decoded = decoded.strip_suffix('\r').unwrap_or(&decoded);
+                            if let Some(data) = decoded.strip_prefix("data:") {
+                                for rec in conv.on_data(data.strip_prefix(' ').unwrap_or(data)) {
+                                    out.push_str(&rec);
+                                    out.push_str("\n\n");
+                                }
+                            }
+                            buf.clear();
+                        }
+                        if conv.is_done() { break; }
+                    }
+                    if conv.is_done() {
+                        drop(upstream);
+                        if !out.is_empty() { yield Ok(Bytes::from(out)); }
+                        break;
                     }
                     if !out.is_empty() {
                         yield Ok(Bytes::from(out));
                     }
                 }
-                Ok(Some(Err(e))) => { yield Err(std::io::Error::other(e.to_string())); break; }
+                Ok(Some(Err(error))) => {
+                    // Error values can contain URLs/credentials and own resources.
+                    drop(error);
+                    let out = if let Some(native) = native.as_mut() {
+                        Some(native.read_error())
+                    } else {
+                        conv.as_mut().map(|conv| {
+                            conv.on_read_error().into_iter().map(|r| r + "\n\n").collect::<String>().into_bytes()
+                        })
+                    };
+                    drop(upstream);
+                    match out {
+                        Some(out) if !out.is_empty() => yield Ok(Bytes::from(out)),
+                        Some(_) => {},
+                        None => yield Err(std::io::Error::other(crate::error::READ_FAILED_STREAM_MESSAGE)),
+                    }
+                    break;
+                }
                 Ok(None) => {
+                    drop(upstream);
                     if let Some(native) = native.as_mut() {
                         let out = native.end();
                         if !out.is_empty() { yield Ok(Bytes::from(out)); }
@@ -1377,11 +1523,26 @@ where
                 }
                 Err(_) => {
                     if let Some(out) = native.as_mut().and_then(|n| n.finish_cr_terminal()) {
+                        drop(upstream);
                         yield Ok(Bytes::from(out));
                         break;
                     }
                     warn!("SSE stall timeout");
-                    yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut, format!("SSE stall: no data for {stall_secs}s")));
+                    let out = if let Some(native) = native.as_mut() {
+                        Some(native.stall())
+                    } else {
+                        conv.as_mut().map(|conv| {
+                            conv.on_stall().into_iter().map(|r| r + "\n\n").collect::<String>().into_bytes()
+                        })
+                    };
+                    // Release the source before yielding: the client may never poll again.
+                    drop(upstream);
+                    match out {
+                        Some(out) if !out.is_empty() => yield Ok(Bytes::from(out)),
+                        Some(_) => {},
+                        None => yield Err(std::io::Error::new(std::io::ErrorKind::TimedOut,
+                            format!("SSE stall: no data for {}s", stall.as_secs()))),
+                    }
                     break;
                 }
             }
@@ -1465,6 +1626,966 @@ mod stream_completion_tests {
             .await
             .unwrap();
         String::from_utf8(bytes.to_vec()).unwrap()
+    }
+
+    struct DropWitness(std::sync::Arc<std::sync::atomic::AtomicBool>);
+    impl Drop for DropWitness {
+        fn drop(&mut self) {
+            self.0.store(true, std::sync::atomic::Ordering::SeqCst);
+        }
+    }
+
+    struct RetainedSource {
+        chunks: std::collections::VecDeque<Bytes>,
+        eof: bool,
+        _witness: DropWitness,
+    }
+    impl futures_util::Stream for RetainedSource {
+        type Item = Result<Bytes, std::io::Error>;
+        fn poll_next(
+            mut self: std::pin::Pin<&mut Self>,
+            _: &mut std::task::Context<'_>,
+        ) -> std::task::Poll<Option<Self::Item>> {
+            if let Some(chunk) = self.chunks.pop_front() {
+                std::task::Poll::Ready(Some(Ok(chunk)))
+            } else if self.eof {
+                // Deliberately retain the owned resource after returning EOF.
+                std::task::Poll::Ready(None)
+            } else {
+                std::task::Poll::Pending
+            }
+        }
+    }
+
+    fn terminal_records(source: &str, outcome: &str) -> String {
+        let mut values = partial(source);
+        match source {
+            "chat" => {
+                if outcome == "failure" {
+                    values.push(json!({"error":{"type":"api_error","message":"fixture failure"}}));
+                } else {
+                    values.push(json!({"choices":[{"delta":{},"finish_reason":if outcome=="incomplete" {"length"} else {"stop"}}]}));
+                    values.push(json!({"choices":[],"usage":{"prompt_tokens":17,"completion_tokens":23,"total_tokens":40}}));
+                }
+            }
+            "responses" => {
+                let status = match outcome {
+                    "failure" => "failed",
+                    "incomplete" => "incomplete",
+                    _ => "completed",
+                };
+                let mut v = json!({"type":format!("response.{status}"),"response":{"status":status,"output":[],"usage":{"input_tokens":17,"output_tokens":23}}});
+                if outcome == "failure" {
+                    v["response"]["error"] = json!({"message":"fixture failure"});
+                }
+                if outcome == "incomplete" {
+                    v["response"]["incomplete_details"] = json!({"reason":"max_output_tokens"});
+                }
+                values.push(v);
+            }
+            _ => {
+                if outcome == "failure" {
+                    values.push(json!({"type":"error","error":{"type":"api_error","message":"fixture failure"}}));
+                } else {
+                    values.push(json!({"type":"message_delta","delta":{"stop_reason":if outcome=="incomplete" {"max_tokens"} else {"end_turn"}},"usage":{"input_tokens":17,"output_tokens":23}}));
+                    values.push(json!({"type":"message_stop"}));
+                }
+            }
+        }
+        let mut text: String = values.iter().map(|v| format!("data: {v}\n\n")).collect();
+        if source == "chat" && outcome != "failure" {
+            text.push_str("data: [DONE]\n\n");
+        }
+        text
+    }
+
+    fn final_frame(text: &str, target: &str) -> bool {
+        text.lines()
+            .filter_map(|line| line.strip_prefix("data: "))
+            .any(|data| {
+                if data == "[DONE]" {
+                    return target == "chat";
+                }
+                let Ok(v) = serde_json::from_str::<Value>(data) else {
+                    return false;
+                };
+                matches!(
+                    v["type"].as_str(),
+                    Some(
+                        "message_stop"
+                            | "response.completed"
+                            | "response.incomplete"
+                            | "response.failed"
+                            | "error"
+                    )
+                )
+            })
+    }
+
+    #[tokio::test]
+    async fn rs3_retained_text_limit_closes_direct_and_downstream_chain() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for mode in [
+            StreamMode::ChatToResponses("m".into()),
+            StreamMode::AnthropicToResponses("m".into()),
+        ] {
+            let chat = matches!(mode, StreamMode::ChatToResponses(_));
+            let mut chunks = std::collections::VecDeque::new();
+            for _ in 0..17 {
+                let text = "x".repeat(1024 * 1024);
+                let value = if chat {
+                    json!({"choices":[{"delta":{"content":text}}]})
+                } else {
+                    json!({"type":"content_block_delta","delta":{"text":text}})
+                };
+                chunks.push_back(Bytes::from(format!("data: {value}\n\n")));
+            }
+            let dropped = Arc::new(AtomicBool::new(false));
+            let input = RetainedSource {
+                chunks,
+                eof: false,
+                _witness: DropWitness(dropped.clone()),
+            };
+            let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+            tokio::time::timeout(Duration::from_secs(5), async {
+                loop {
+                    let frame = body
+                        .frame()
+                        .await
+                        .expect("state limit failure")
+                        .unwrap()
+                        .into_data()
+                        .unwrap();
+                    let text = std::str::from_utf8(&frame).unwrap();
+                    assert!(!text.contains("response.completed"));
+                    if text.contains("upstream converter state limit exceeded") {
+                        assert!(
+                            dropped.load(Ordering::SeqCst),
+                            "source retained after downstream failure"
+                        );
+                        assert!(
+                            !text.contains(&"x".repeat(100)),
+                            "failure replays retained payload"
+                        );
+                        break;
+                    }
+                }
+            })
+            .await
+            .expect("limit failure without upstream EOF or idle timeout");
+            assert!(body.frame().await.is_none());
+        }
+    }
+
+    #[tokio::test]
+    async fn rs3_default_entry_limits_release_all_retaining_routes() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for (mode, source, _) in modes() {
+            if matches!(mode, StreamMode::ChatToAnthropic(_)) {
+                continue;
+            }
+            let dropped = Arc::new(AtomicBool::new(false));
+            let mut chunks = std::collections::VecDeque::new();
+            for i in 0..4097 {
+                let value = match source {
+                    "chat" => json!({"choices":[{"delta":{"tool_calls":[{"index":i}]}}]}),
+                    "responses" => {
+                        json!({"type":"response.output_item.added","output_index":i,"item":{"type":"function_call","id":format!("i{i}")}})
+                    }
+                    _ => {
+                        json!({"type":"content_block_start","index":i,"content_block":{"type":"tool_use","id":"c","name":"f"}})
+                    }
+                };
+                chunks.push_back(Bytes::from(format!("data: {value}\n\n")));
+            }
+            let input = RetainedSource {
+                chunks,
+                eof: false,
+                _witness: DropWitness(dropped.clone()),
+            };
+            let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+            tokio::time::timeout(Duration::from_secs(5), async {
+                loop {
+                    let frame = body.frame().await.unwrap().unwrap().into_data().unwrap();
+                    let text = std::str::from_utf8(&frame).unwrap();
+                    if text.contains("upstream converter state limit exceeded") {
+                        assert!(dropped.load(Ordering::SeqCst));
+                        assert!(!text.contains("response.completed"));
+                        assert!(!text.contains("message_stop"));
+                        break;
+                    }
+                }
+            })
+            .await
+            .expect("entry limits terminate without EOF");
+            assert!(body.frame().await.is_none());
+        }
+    }
+
+    #[tokio::test]
+    async fn rs2_nonretaining_text_routes_allow_more_than_payload_budget() {
+        for (mode, source, target) in modes() {
+            if matches!(
+                mode,
+                StreamMode::ChatToResponses(_) | StreamMode::AnthropicToResponses(_)
+            ) {
+                continue;
+            }
+            let mut chunks = Vec::new();
+            for _ in 0..17 {
+                let text = "x".repeat(1024 * 1024);
+                let value = match source {
+                    "chat" => json!({"choices":[{"delta":{"content":text}}]}),
+                    "responses" => json!({"type":"response.output_text.delta","delta":text}),
+                    _ => json!({"type":"content_block_delta","delta":{"text":text}}),
+                };
+                chunks.push(Ok::<_, std::io::Error>(Bytes::from(format!(
+                    "data: {value}\n\n"
+                ))));
+            }
+            chunks.push(Ok(Bytes::from(terminal_records(source, "success"))));
+            let body = stream_body(futures_util::stream::iter(chunks), 60, mode)
+                .await
+                .unwrap()
+                .into_body();
+            let out = axum::body::to_bytes(body, 24 * 1024 * 1024).await.unwrap();
+            let text = std::str::from_utf8(&out).unwrap();
+            assert!(!text.contains("upstream converter state limit exceeded"));
+            assert!(final_frame(text, target));
+            assert!(text.len() > 16 * 1024 * 1024);
+        }
+    }
+
+    const INPUT_LIMIT: usize = 16 * 1024 * 1024;
+    const LIMIT_MESSAGE: &str = "upstream stream line exceeds 16 MiB";
+
+    #[tokio::test]
+    async fn ib1_oversized_lines_fail_and_release_before_final_output() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for phase in ["empty", "partial", "finish", "comment"] {
+            for shape in ["whole", "fragmented", "newline"] {
+                for (mode, source, target) in modes() {
+                    if phase == "finish" && source != "chat" {
+                        continue;
+                    }
+                    let mut prefix = if phase == "empty" || phase == "comment" {
+                        String::new()
+                    } else {
+                        partial(source)
+                            .iter()
+                            .map(|v| format!("data: {v}\n\n"))
+                            .collect()
+                    };
+                    if phase == "finish" {
+                        prefix.push_str(
+                            "data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n",
+                        );
+                    }
+                    let mut oversized = if phase == "comment" {
+                        b": PRIVATE_INPUT".to_vec()
+                    } else {
+                        b"data: PRIVATE_INPUT".to_vec()
+                    };
+                    oversized.resize(INPUT_LIMIT + 1, b'x');
+                    if shape == "newline" {
+                        oversized.push(b'\n');
+                    }
+                    let mut chunks = std::collections::VecDeque::new();
+                    chunks.push_back(Bytes::from(prefix));
+                    chunks.extend(
+                        oversized
+                            .chunks(if shape == "fragmented" {
+                                65537
+                            } else {
+                                oversized.len()
+                            })
+                            .map(Bytes::copy_from_slice),
+                    );
+                    let dropped = Arc::new(AtomicBool::new(false));
+                    let input = RetainedSource {
+                        chunks,
+                        eof: false,
+                        _witness: DropWitness(dropped.clone()),
+                    };
+                    let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+                    let mut all = String::new();
+                    tokio::time::timeout(Duration::from_secs(2), async {
+                        loop {
+                            let frame = body
+                                .frame()
+                                .await
+                                .expect("failure frame")
+                                .unwrap()
+                                .into_data()
+                                .unwrap();
+                            let text = String::from_utf8(frame.to_vec()).unwrap();
+                            let failed = text.contains(LIMIT_MESSAGE);
+                            all.push_str(&text);
+                            if failed {
+                                assert!(
+                                    dropped.load(Ordering::SeqCst),
+                                    "source held at failure: {source}/{target}/{phase}/{shape}"
+                                );
+                                break;
+                            }
+                        }
+                    })
+                    .await
+                    .expect("oversized line must fail without waiting for source EOF or stall");
+                    assert!(!all.contains("PRIVATE_INPUT"));
+                    assert!(!all.contains("response.completed"));
+                    assert!(!all.contains("message_stop"));
+                    assert!(!all.contains("\"finish_reason\":\"stop\""));
+                    assert!(body.frame().await.is_none());
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn ib2_exact_boundary_lines_keep_lf_crlf_and_eof_semantics() {
+        for (ending, fragmented, below) in [
+            ("\n", false, true),
+            ("\n", false, false),
+            ("\n", true, false),
+            ("\r\n", false, false),
+            ("\r\n", true, false),
+            ("", false, false),
+            ("", true, false),
+        ] {
+            for (mode, source, target) in modes() {
+                let terminal = match source {
+                    "chat" => "data: [DONE]",
+                    "responses" => "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"output\":[]}}",
+                    _ => "data: {\"type\":\"message_stop\"}",
+                };
+                let mut raw = terminal.as_bytes().to_vec();
+                // CR is content for the byte bound, LF is only a delimiter.
+                raw.resize(
+                    INPUT_LIMIT - usize::from(below) - usize::from(ending == "\r\n"),
+                    b' ',
+                );
+                raw.extend_from_slice(ending.as_bytes());
+                let chunks: Vec<_> = raw
+                    .chunks(if fragmented { 65537 } else { raw.len() })
+                    .map(|b| Ok::<_, std::io::Error>(Bytes::copy_from_slice(b)))
+                    .collect();
+                let body = stream_body(futures_util::stream::iter(chunks), 60, mode)
+                    .await
+                    .unwrap()
+                    .into_body();
+                let out = axum::body::to_bytes(body, 1 << 20).await.unwrap();
+                let text = std::str::from_utf8(&out).unwrap();
+                assert!(final_frame(text, target), "{source}/{target}/{ending:?}");
+                assert!(!text.contains(LIMIT_MESSAGE));
+                assert!(!text.contains("api_error"));
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn ib2_large_chunks_are_processed_per_line_and_terminal_wins() {
+        for (mode, source, target) in modes() {
+            let mut raw = Vec::new();
+            // Two individually bounded comments already exceed the chunk-size limit.
+            for _ in 0..2 {
+                raw.push(b':');
+                raw.extend(std::iter::repeat_n(b'c', INPUT_LIMIT / 2));
+                raw.push(b'\n');
+            }
+            raw.extend_from_slice(terminal_records(source, "success").as_bytes());
+            raw.extend(std::iter::repeat_n(b'x', INPUT_LIMIT + 1));
+            let input = futures_util::stream::iter([Ok::<_, std::io::Error>(Bytes::from(raw))]);
+            let body = stream_body(input, 60, mode).await.unwrap().into_body();
+            let out = axum::body::to_bytes(body, 1 << 20).await.unwrap();
+            let text = std::str::from_utf8(&out).unwrap();
+            assert!(text.contains("片段"));
+            assert!(final_frame(text, target));
+            assert!(!text.contains(LIMIT_MESSAGE));
+            assert!(!text.contains("api_error"));
+        }
+    }
+
+    #[tokio::test]
+    async fn ib2_utf8_and_crlf_may_split_at_every_byte() {
+        for (mode, source, target) in modes() {
+            let raw = terminal_records(source, "success").replace('\n', "\r\n");
+            let chunks: Vec<_> = raw
+                .bytes()
+                .map(|b| Ok::<_, std::io::Error>(Bytes::from(vec![b])))
+                .collect();
+            let body = stream_body(futures_util::stream::iter(chunks), 60, mode)
+                .await
+                .unwrap()
+                .into_body();
+            let out = axum::body::to_bytes(body, 1 << 20).await.unwrap();
+            let text = std::str::from_utf8(&out).unwrap();
+            assert!(text.contains("片段"));
+            assert!(!text.contains('�'));
+            assert!(final_frame(text, target));
+            assert!(!text.contains("api_error"));
+        }
+    }
+
+    #[tokio::test]
+    async fn ib3_opaque_large_line_stays_byte_exact() {
+        let raw = Bytes::from(vec![b'x'; INPUT_LIMIT + 1]);
+        let input = futures_util::stream::iter([Ok::<_, std::io::Error>(raw.clone())]);
+        let body = stream_body(input, 60, StreamMode::Passthrough)
+            .await
+            .unwrap()
+            .into_body();
+        assert_eq!(
+            axum::body::to_bytes(body, INPUT_LIMIT + 2).await.unwrap(),
+            raw
+        );
+    }
+
+    #[tokio::test]
+    async fn tr1_terminal_releases_source_before_final_frame_without_next_poll() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for outcome in ["success", "incomplete", "failure"] {
+            for fragmented in [false, true] {
+                let mut cases = vec![(StreamMode::NativeResponses, "responses", "responses")];
+                cases.extend(modes());
+                for (mode, source, target) in cases {
+                    let dropped = Arc::new(AtomicBool::new(false));
+                    let raw=terminal_records(source,outcome)+"data: {\"type\":\"response.output_text.delta\",\"delta\":\"AFTER_TERMINAL\"}\n\n";
+                    let chunks = raw
+                        .as_bytes()
+                        .chunks(if fragmented { 1 } else { raw.len() })
+                        .map(Bytes::copy_from_slice)
+                        .collect();
+                    let input = RetainedSource {
+                        chunks,
+                        eof: false,
+                        _witness: DropWitness(dropped.clone()),
+                    };
+                    let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+                    let mut all = String::new();
+                    tokio::time::timeout(Duration::from_secs(1), async {
+                        loop {
+                            let bytes = body
+                                .frame()
+                                .await
+                                .expect("final frame")
+                                .unwrap()
+                                .into_data()
+                                .unwrap();
+                            let chunk = String::from_utf8(bytes.to_vec()).unwrap();
+                            let final_seen = final_frame(&chunk, target);
+                            all.push_str(&chunk);
+                            if final_seen {
+                                assert!(
+                                    dropped.load(Ordering::SeqCst),
+                                    "{source}->{target}/{outcome}: source still held at terminal"
+                                );
+                                break;
+                            }
+                        }
+                    })
+                    .await
+                    .expect("terminal does not wait for idle timeout or EOF");
+                    assert!(!all.contains("AFTER_TERMINAL"));
+                    assert!(body.frame().await.is_none());
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn tr2_eof_releases_retained_source_before_final_output() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for phase in 0..3 {
+            let mut cases = modes();
+            cases.push((StreamMode::NativeResponses, "responses", "responses"));
+            for (mode, source, target) in cases {
+                let dropped = Arc::new(AtomicBool::new(false));
+                let mut text = if phase == 0 {
+                    String::new()
+                } else {
+                    partial(source)
+                        .iter()
+                        .map(|v| format!("data: {v}\n\n"))
+                        .collect()
+                };
+                if phase == 2 {
+                    let terminal = match source {
+                        "chat" => json!({"choices":[{"delta":{},"finish_reason":"stop"}]}),
+                        "responses" => {
+                            json!({"type":"response.completed","response":{"status":"completed","output":[]}})
+                        }
+                        _ => json!({"type":"message_stop"}),
+                    };
+                    text.push_str(&format!("data: {terminal}"));
+                }
+                let chunks = if text.is_empty() {
+                    Default::default()
+                } else {
+                    [Bytes::from(text)].into()
+                };
+                let input = RetainedSource {
+                    chunks,
+                    eof: true,
+                    _witness: DropWitness(dropped.clone()),
+                };
+                let mut body = stream_body(input, 60, mode).await.unwrap().into_body();
+                let mut final_seen = false;
+                while let Some(frame) = body.frame().await {
+                    let chunk =
+                        String::from_utf8(frame.unwrap().into_data().unwrap().to_vec()).unwrap();
+                    if final_frame(&chunk, target) {
+                        assert!(
+                            dropped.load(Ordering::SeqCst),
+                            "{source}->{target}/phase{phase}: EOF source still held"
+                        );
+                        final_seen = true;
+                    }
+                }
+                assert!(final_seen);
+                assert!(dropped.load(Ordering::SeqCst));
+            }
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn tr3_finish_reason_preserves_usage_tail_until_done_eof_or_stall() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for end in ["done", "eof", "stall"] {
+            for (mode, target) in [
+                (StreamMode::ChatToAnthropic("m".into()), "messages"),
+                (StreamMode::ChatToResponses("m".into()), "responses"),
+            ] {
+                let dropped = Arc::new(AtomicBool::new(false));
+                let first = format!(
+                    "data: {}\n\ndata: {}\n\n",
+                    json!({"choices":[{"delta":{"content":"piece"}}]}),
+                    json!({"choices":[{"delta":{},"finish_reason":"stop"}]})
+                );
+                let mut tail = format!(
+                    "data: {}\n\n",
+                    json!({"choices":[],"usage":{"prompt_tokens":17,"completion_tokens":23,"total_tokens":40}})
+                );
+                if end == "done" {
+                    tail.push_str("data: [DONE]\n\n");
+                }
+                let input = RetainedSource {
+                    chunks: [Bytes::from(first), Bytes::from(tail)].into(),
+                    eof: end == "eof",
+                    _witness: DropWitness(dropped.clone()),
+                };
+                let mut body = stream_body(input, 5, mode).await.unwrap().into_body();
+                let first = body.frame().await.unwrap().unwrap().into_data().unwrap();
+                assert!(String::from_utf8_lossy(&first).contains("piece"));
+                assert!(
+                    !dropped.load(Ordering::SeqCst),
+                    "finish_reason alone must retain source for usage"
+                );
+                let mut all = String::from_utf8(first.to_vec()).unwrap();
+                while let Some(frame) = body.frame().await {
+                    let text =
+                        String::from_utf8(frame.unwrap().into_data().unwrap().to_vec()).unwrap();
+                    if final_frame(&text, target) {
+                        assert!(dropped.load(Ordering::SeqCst));
+                    }
+                    all.push_str(&text);
+                }
+                assert!(all.contains("\"input_tokens\":17"));
+                assert!(all.contains("\"output_tokens\":23"));
+                assert!(!all.contains("upstream stream stalled"));
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn tr3_opaque_terminal_bytes_remain_passthrough_until_eof() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        let dropped = Arc::new(AtomicBool::new(false));
+        let raw = Bytes::from_static(b"data: [DONE]\n\ndata: opaque-tail\n\n");
+        let input = RetainedSource {
+            chunks: [raw.clone()].into(),
+            eof: true,
+            _witness: DropWitness(dropped.clone()),
+        };
+        let mut body = stream_body(input, 5, StreamMode::Passthrough)
+            .await
+            .unwrap()
+            .into_body();
+        assert_eq!(
+            body.frame().await.unwrap().unwrap().into_data().unwrap(),
+            raw
+        );
+        assert!(!dropped.load(Ordering::SeqCst));
+        assert!(body.frame().await.is_none());
+        assert!(dropped.load(Ordering::SeqCst));
+    }
+
+    const READ_ERROR_SENTINEL: &str = "https://private.invalid/?token=SENSITIVE_READ_SENTINEL";
+
+    struct ReadErrorWitness {
+        formatted: std::sync::Arc<std::sync::atomic::AtomicBool>,
+        _dropped: DropWitness,
+    }
+    impl std::fmt::Display for ReadErrorWitness {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            self.formatted
+                .store(true, std::sync::atomic::Ordering::SeqCst);
+            f.write_str(READ_ERROR_SENTINEL)
+        }
+    }
+    async fn read_error_cases(passthrough: bool) {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for phase in 0..3 {
+            let cases = if passthrough {
+                vec![(StreamMode::Passthrough, "chat", "opaque")]
+            } else {
+                let mut cases = modes();
+                cases.push((StreamMode::NativeResponses, "responses", "responses"));
+                cases
+            };
+            for (mode, source, target) in cases {
+                let source_dropped = Arc::new(AtomicBool::new(false));
+                let error_dropped = Arc::new(AtomicBool::new(false));
+                let formatted = Arc::new(AtomicBool::new(false));
+                let source_guard = DropWitness(source_dropped.clone());
+                let error = ReadErrorWitness {
+                    formatted: formatted.clone(),
+                    _dropped: DropWitness(error_dropped.clone()),
+                };
+                let mut text: String = if phase == 0 {
+                    String::new()
+                } else {
+                    partial(source)
+                        .iter()
+                        .map(|v| format!("data: {v}\n\n"))
+                        .collect()
+                };
+                if phase == 2 {
+                    text.push_str("data: {\"secret\":\"UNFINISHED_SENTINEL");
+                }
+                let input = async_stream::stream! {
+                    let _guard = source_guard;
+                    if !text.is_empty() { yield Ok(Bytes::from(text)); }
+                    yield Err(error);
+                    std::future::pending::<()>().await;
+                };
+                let mut body = stream_body(input, 5, mode).await.unwrap().into_body();
+                let mut all = String::new();
+                let mut failed = false;
+                while let Some(frame) = body.frame().await {
+                    match frame {
+                        Ok(frame) => {
+                            if let Ok(bytes) = frame.into_data() {
+                                let text = String::from_utf8(bytes.to_vec()).unwrap();
+                                if text.contains("upstream stream read failed") {
+                                    assert!(
+                                        source_dropped.load(Ordering::SeqCst),
+                                        "source before final frame"
+                                    );
+                                    assert!(
+                                        error_dropped.load(Ordering::SeqCst),
+                                        "error before final frame"
+                                    );
+                                    failed = true;
+                                }
+                                all.push_str(&text);
+                            }
+                        }
+                        Err(error) => {
+                            assert!(
+                                passthrough,
+                                "{source}->{target}: protocol error expected, got {error}"
+                            );
+                            assert!(error.to_string().contains("upstream stream read failed"));
+                            assert!(!error.to_string().contains(READ_ERROR_SENTINEL));
+                            assert!(source_dropped.load(Ordering::SeqCst));
+                            assert!(error_dropped.load(Ordering::SeqCst));
+                            failed = true;
+                        }
+                    }
+                }
+                assert!(failed);
+                assert!(
+                    !formatted.load(Ordering::SeqCst),
+                    "source error must not be formatted"
+                );
+                assert!(!all.contains(READ_ERROR_SENTINEL));
+                if !passthrough {
+                    assert!(!all.contains("UNFINISHED_SENTINEL"));
+                    assert!(!all.contains("response.completed"));
+                    assert!(!all.contains("message_stop"));
+                    assert!(!all.contains("\"finish_reason\":\"stop\""));
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn io1_io2_read_errors_are_protocol_failures_and_release_before_yield() {
+        read_error_cases(false).await;
+    }
+
+    #[tokio::test]
+    async fn io2_passthrough_read_errors_are_redacted_and_release_before_yield() {
+        read_error_cases(true).await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn st1_st2_stalls_emit_errors_and_release_before_final_frame() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for phase in 0..3 {
+            let mut cases = modes();
+            cases.push((StreamMode::NativeResponses, "responses", "responses"));
+            for (mode, source, target) in cases {
+                let dropped = Arc::new(AtomicBool::new(false));
+                let witness = DropWitness(dropped.clone());
+                let mut text = if phase == 0 {
+                    String::new()
+                } else {
+                    partial(source)
+                        .iter()
+                        .map(|v| format!("data: {v}\n\n"))
+                        .collect()
+                };
+                if phase == 2 {
+                    text.push_str("data: {\"secret\":\"unfinished");
+                }
+                let input = async_stream::stream! {
+                    let _witness = witness;
+                    if !text.is_empty() { yield Ok::<_, std::io::Error>(Bytes::from(text)); }
+                    std::future::pending::<()>().await;
+                };
+                let mut body = stream_body(input, 1, mode).await.unwrap().into_body();
+                let mut all = String::new();
+                let mut saw_error = false;
+                while let Some(frame) = body.frame().await {
+                    let frame = frame.expect("stall is a protocol error, not a broken HTTP body");
+                    if let Ok(bytes) = frame.into_data() {
+                        let chunk = String::from_utf8(bytes.to_vec()).unwrap();
+                        if chunk.contains("upstream stream stalled") {
+                            assert!(dropped.load(Ordering::SeqCst), "release before final yield");
+                            saw_error = true;
+                        }
+                        all.push_str(&chunk);
+                    }
+                }
+                assert!(saw_error, "{source}->{target},phase{phase}: {all}");
+                assert!(!all.contains("unfinished"));
+                assert!(!all.contains("response.completed"));
+                assert!(!all.contains("message_stop"));
+                assert!(!all.contains("\"finish_reason\":\"stop\""));
+            }
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn st2_idle_timeout_clamps_and_resets_on_each_chunk() {
+        use http_body_util::BodyExt;
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for configured in [1, 7] {
+            let dropped = Arc::new(AtomicBool::new(false));
+            let witness = DropWitness(dropped.clone());
+            let input = async_stream::stream! {
+                let _witness = witness;
+                for _ in 0..2 {
+                    tokio::time::sleep(Duration::from_secs(4)).await;
+                    yield Ok::<_, std::io::Error>(Bytes::from_static(b": heartbeat\n\n"));
+                }
+                std::future::pending::<()>().await;
+            };
+            let start = tokio::time::Instant::now();
+            let mut body = stream_body(input, configured, StreamMode::Passthrough)
+                .await
+                .unwrap()
+                .into_body();
+            for seconds in [4, 8] {
+                assert!(body.frame().await.unwrap().unwrap().is_data());
+                assert_eq!(start.elapsed(), Duration::from_secs(seconds));
+                assert!(!dropped.load(Ordering::SeqCst));
+            }
+            let error = body.frame().await.unwrap().unwrap_err();
+            assert!(error
+                .to_string()
+                .contains(&format!("no data for {}s", configured.max(5))));
+            assert_eq!(start.elapsed(), Duration::from_secs(8 + configured.max(5)));
+            assert!(
+                dropped.load(Ordering::SeqCst),
+                "source dropped before yielding error"
+            );
+            assert!(body.frame().await.is_none());
+        }
+    }
+
+    async fn known_terminals_survive_interruption(read_error: bool) {
+        use std::sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        };
+        for with_tools in [false, true] {
+            for outcome in ["success", "incomplete", "failure"] {
+                let mut cases = modes();
+                cases.push((StreamMode::NativeResponses, "responses", "responses"));
+                for (mode, source, target) in cases {
+                    let mut values = partial(source);
+                    if !with_tools {
+                        values.truncate(if source == "messages" { 2 } else { 1 });
+                    }
+                    match source {
+                    "chat" => values.push(if outcome == "failure" {
+                        json!({"error":{"type":"api_error","message":"fixture failure"}})
+                    } else {
+                        json!({"choices":[{"delta":{},"finish_reason":if outcome=="incomplete" {"length"} else {"stop"}}]})
+                    }),
+                    "responses" => {
+                        let status = match outcome { "failure"=>"failed", "incomplete"=>"incomplete", _=>"completed" };
+                        let mut terminal = json!({"type":format!("response.{status}"),"response":{"status":status,"output":[]}});
+                        if outcome == "failure" { terminal["response"]["error"] = json!({"message":"fixture failure"}); }
+                        if outcome == "incomplete" { terminal["response"]["incomplete_details"] = json!({"reason":"max_output_tokens"}); }
+                        values.push(terminal);
+                    },
+                    _ => {
+                        if outcome == "failure" {
+                            values.push(json!({"type":"error","error":{"type":"api_error","message":"fixture failure"}}));
+                        } else {
+                            values.push(json!({"type":"message_delta","delta":{"stop_reason":if outcome=="incomplete" {"max_tokens"} else {"end_turn"}}}));
+                            values.push(json!({"type":"message_stop"}));
+                        }
+                    }
+                }
+                    let text: String = values.iter().map(|v| format!("data: {v}\n\n")).collect();
+                    let dropped = Arc::new(AtomicBool::new(false));
+                    let witness = DropWitness(dropped.clone());
+                    let input = async_stream::stream! {
+                        let _witness = witness;
+                        yield Ok::<_, std::io::Error>(Bytes::from(text));
+                        if read_error { yield Err(std::io::Error::other(READ_ERROR_SENTINEL)); }
+                        std::future::pending::<()>().await;
+                    };
+                    let response = stream_body(input, 5, mode).await.unwrap();
+                    let text = String::from_utf8(
+                        axum::body::to_bytes(response.into_body(), 1 << 20)
+                            .await
+                            .unwrap()
+                            .to_vec(),
+                    )
+                    .unwrap();
+                    assert!(
+                        !text.contains("upstream stream stalled"),
+                        "{source}->{target}/{outcome}: {text}"
+                    );
+                    assert!(!text.contains("upstream stream read failed"));
+                    assert!(!text.contains(READ_ERROR_SENTINEL));
+                    if outcome == "failure" {
+                        assert!(text.contains("fixture failure"));
+                    } else {
+                        let terminal = match (target, outcome) {
+                            ("chat", _) if with_tools && source == "responses" => {
+                                "\"finish_reason\":\"tool_calls\""
+                            }
+                            ("messages", _) if with_tools && source == "responses" => "tool_use",
+                            ("chat", "success") if with_tools => "\"finish_reason\":\"tool_calls\"",
+                            ("responses", "incomplete") => "response.incomplete",
+                            ("responses", _) => "response.completed",
+                            ("messages", "incomplete") => "max_tokens",
+                            ("messages", _) => "end_turn",
+                            (_, "incomplete") => "\"finish_reason\":\"length\"",
+                            _ => "\"finish_reason\":\"stop\"",
+                        };
+                        assert!(
+                            text.contains(terminal),
+                            "{source}->{target}/{outcome}: {text}"
+                        );
+                    }
+                    assert!(dropped.load(Ordering::SeqCst));
+                }
+            }
+        }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn st3_known_terminals_survive_idle_upstream_without_timeout_error() {
+        known_terminals_survive_interruption(false).await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn io3_known_terminals_survive_read_errors() {
+        known_terminals_survive_interruption(true).await;
+    }
+
+    #[tokio::test]
+    async fn io3_native_delimited_cr_terminals_survive_but_fragments_fail() {
+        for status in ["completed", "incomplete", "failed"] {
+            for ending in ["\n\n", "\r\n\r\n", "\r\r", "\n", "\r\n", "\r"] {
+                let terminal = format!("data: {{\"type\":\"response.{status}\",\"response\":{{\"status\":\"{status}\"}}}}{ending}");
+                let expected = terminal.clone();
+                let dropped = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+                let witness = DropWitness(dropped.clone());
+                let input = async_stream::stream! {
+                    let _witness = witness;
+                    yield Ok::<_, std::io::Error>(Bytes::from(terminal));
+                    yield Err(std::io::Error::other(READ_ERROR_SENTINEL));
+                    std::future::pending::<()>().await;
+                };
+                let response = stream_body(input, 5, StreamMode::NativeResponses)
+                    .await
+                    .unwrap();
+                let text = String::from_utf8(
+                    axum::body::to_bytes(response.into_body(), 4096)
+                        .await
+                        .unwrap()
+                        .to_vec(),
+                )
+                .unwrap();
+                if ["\n\n", "\r\n\r\n", "\r\r"].contains(&ending) {
+                    assert_eq!(text, expected);
+                } else {
+                    assert!(text.contains("upstream_stream_read_error"));
+                    assert!(text.contains("upstream stream read failed"));
+                    assert!(!text.contains(&format!("response.{status}")));
+                }
+                assert!(!text.contains(READ_ERROR_SENTINEL));
+                assert!(dropped.load(std::sync::atomic::Ordering::SeqCst));
+            }
+        }
     }
 
     #[tokio::test]
@@ -1692,6 +2813,47 @@ mod stream_completion_tests {
                 .on_data(r#"{"type":"response.completed","response":{}}"#)
                 .is_empty());
             assert!(conv.on_end().is_empty());
+        }
+    }
+}
+
+#[cfg(test)]
+mod diagnostic_tests {
+    use super::*;
+    use std::sync::atomic::AtomicBool;
+    struct Witness(Arc<AtomicBool>);
+    impl Drop for Witness {
+        fn drop(&mut self) {
+            self.0.store(true, Ordering::SeqCst);
+        }
+    }
+    #[tokio::test]
+    async fn dg2_diagnostic_cancellation_is_non_retryable_and_drops_source() {
+        for pre_cancel in [true, false] {
+            let dropped = Arc::new(AtomicBool::new(false));
+            let witness = Witness(dropped.clone());
+            let source = async_stream::stream! {let _witness=witness;yield Ok::<_,std::io::Error>(Bytes::from_static(b"partial"));std::future::pending::<()>().await;};
+            let resp = reqwest::Response::from(
+                axum::http::Response::builder()
+                    .status(401)
+                    .body(reqwest::Body::wrap_stream(source))
+                    .unwrap(),
+            );
+            let cancel = CancellationToken::new();
+            if pre_cancel {
+                cancel.cancel();
+            }
+            let future = read_diagnostic_cancel(resp, &cancel);
+            tokio::pin!(future);
+            if !pre_cancel {
+                assert!(futures_util::poll!(&mut future).is_pending());
+                cancel.cancel();
+            }
+            let e = future.await.expect_err("cancellation");
+            assert_eq!(e.status, 499);
+            assert!(!e.retryable);
+            assert_eq!(e.body, "client disconnected");
+            assert!(dropped.load(Ordering::SeqCst));
         }
     }
 }

@@ -1,0 +1,15 @@
+✔ geometry observer requires successive actual frames and reports occlusion without changing DOM (2.672847ms)
+✔ continually moving geometry reaches its bounded failure rather than claiming stable coordinates (2.574489ms)
+✔ review locators use the actual locked React Flow accessible control names (1.268134ms)
+✔ node separation derives the real mouse delta from observed overlap and keeps a visible gap (0.572827ms)
+✔ threshold-consuming drag preserves the measured gap after activation instead of losing its first increment (0.431719ms)
+✔ remaining displacement is recomputed from post-activation geometry (0.222029ms)
+✔ unstable activation geometry fails and releases the pointer without performing a full drag (1.255924ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 106.493113

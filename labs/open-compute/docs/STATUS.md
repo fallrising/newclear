@@ -1,5 +1,43 @@
 # Status and evidence
 
+## M4 kernel closure qualification — 2026-10-24
+
+The contract baseline was committed before implementation. A new M4-only same-PID
+exec runner now uses a checked subreaper, bounded launch/wait/reader registry,
+closed epochs and actual ECHILD before cold snapshots; deletion requires a
+distinct fresh single-use terminal seal. Generic Process/command, storage.py,
+M5/M7 and all other production inputs remain unchanged. Ambiguous sampled edges
+are reported separately from kernel closure; no historical vanished role is inferred.
+
+Worker focused51 tests pass in5.881s on Python3.11.17 with source stable.40 actual
+owned-process case receipts include coordinator ECHILD, three real generations,
+generic refusal versus kernel closure, live orphan, foreign/stolen wait, launch/
+thread policy, root status/identity, bounded output, timeout and receipt failures.
+An earlier source893611 had331 root offline passes in35.773s, unchanged source,
+actual ECHILD and no unexpected children. Review then reproduced two expired
+capability authorization defects; their RED evidence remains retained. Current
+receipts/seals retain immutable original absolute deadlines and reject late
+consumption; deletion also enforces the remaining original bound. Large CLI
+output uses the existing bounded tail ring and can complete normally.
+Current frozen source digest:
+`57be515883f0933712f89517a2ac7526d1b82eff79544c48d839e9603247a566`.
+See [implementation report](../tasks/548-m4-kernel-closure/report.md).
+Root reports332 full offline passes on the corrected source and T078 independent
+ACCEPT, including expiry/overrun/tail-ring probes. The separately authorized original M4 run passed in61.007s in a fresh non-root,
+network-disabled container, with unchanged16 runtime/workload inputs and the
+original pinned artifact. All five M4 and eight functional checks passed;
+three epochs waited for5/13/13 registered launches, closed with actual ECHILD,
+completed all cold snapshots and released locks. Final fresh kernel proof
+authorized owned scope removal; the container is absent. The first sample
+contained one stable child and zero ambiguous edges; synthetic tests separately
+exercise transient ambiguity and live-orphan refusal.
+
+[Actual sanitized report](evidence/2026-10-24-m4-kernel-closure.json) and
+[exact source/artifact binding](evidence/2026-10-24-m4-kernel-closure-source.json)
+retain the working-tree/base distinction. Necessary hosted CI and normal merge
+remain delivery gates. Historical failures and unknown exact attribution remain;
+whole-mainline acceptance and usable_tag remain incomplete/none.
+
 ## Issue548 diagnostic continuation — 2026-10-24
 
 Repeated reads of a latched process-edge refusal could erase its specific reason
@@ -739,3 +777,36 @@ restart does not imply exactly-once external side effects.
 M2 takes up the complete cold-backup question through its separately committed
 SDD and evidence gate above. It does not retroactively change the scope of this
 completed M1 run or establish a host adapter.
+
+## Issue548 M5 kernel owner qualification (T081, 2026-10-25)
+
+PR613's original required M5 job failed at durable_wait/observer/child_missing,
+before targets or SIGKILL. That original failure remains preserved. Contract
+00d3881249d24e933c40b8e21806244cf81b75a0 preceded the M5-only implementation;
+generic Process/command/source_commit, crash.py and M4 behavior remain unchanged.
+
+Final35-input freeze `d27e1207a388a8d691b0632a46ee896250a8e4d0bf509042cf4ff28ff3f27913`
+passes57 focused and353 full offline tests/40.346s on Python3.11.17 with PYTHONPATH
+absent, stable source and actual ECHILD/no unexpected test children. Independent
+review accepts21 focused cases and actual deadline/retained-reparented-union
+probes. The earlier640b/351 pass was superseded after a real waitid return crossed
+the immutable cutoff and allowed post-cutoff waitpid. Corrected guards refuse
+that probe before any late waitpid. Delayed waitpid/count and shutdown-error
+schema REDs, plus two initial fixture-shape failures, are also retained.
+
+One original pinned-artifact M5 qualification passes in26.747s on fresh real
+non-root Linux x86_64/Python3.12.3: all M5-01–05 and seven functional controls;
+two frozen exact generations each actually receive root-first SIGKILL, root
+actual-9, full retained history/drains and ECHILD; six GET-only original state
+readbacks precede approval; final SIGTERM/root0, fresh ECHILD and exact removal.
+The two generations record5/14 direct waits and1/0 adopted reaps. All17 runtime
+inputs remain identical; the owned container is absent afterward. No runtime
+retry was needed. [Original report](evidence/2026-10-25-m5-kernel-closure.json)
+and [source binding](evidence/2026-10-25-m5-kernel-closure-source.json) retain the
+actual contract-base harness_commit and bind the working implementation by hashes.
+
+[Implementation report](../tasks/548-m5-kernel-closure/report.md) records the
+bounded repair. Exact-head required CI and normal merge remain delivery gates.
+#548 stays open for historical exact attribution/whole-mainline acceptance;
+AC-05 remains failed, mainline incomplete and usable_tag none. This is neither
+power loss nor production/deployment/release qualification.

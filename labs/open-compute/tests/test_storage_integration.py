@@ -6,6 +6,7 @@ from types import SimpleNamespace, ModuleType
 from unittest.mock import Mock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import lab
+import storage_lifecycle as lifecycle
 PHASES = ('cold_baseline', 'cold_after_writes', 'cold_after_completion')
 
 class IntegrationTests(unittest.TestCase):
@@ -138,7 +139,7 @@ class IntegrationTests(unittest.TestCase):
 
             def snapshot(owner, phase, *, deadline):
                 events.append(phase)
-                self.assertFalse(processes[-1].live())
+                self.assertEqual(processes[-1].process.poll(), 0)
                 self.assertGreater(deadline, time.monotonic())
                 owner.check_owner()
                 if failure == phase or failure == 'partial_projection':
@@ -173,6 +174,53 @@ class IntegrationTests(unittest.TestCase):
                 return dict(snapshots=dict(snapshots), workload=dict(workload))
             module.partial_extension = partial
             patches = {'pwd.getpwuid': lambda uid: SimpleNamespace(pw_dir=str(root)), 'preflight': lambda port: scope, 'source_commit': lambda: 'a' * 40, 'download_binary': lambda *args: root / 'ocd', 'sha256_file': lambda path: 'b' * 64, 'command': command, 'Process': process, 'LocalHTTP': HTTP, 'poll': poll, 'wait_workflow': wait, 'worker_host': lambda *args: 'worker.local:8787', 'state_identity': lambda *args: {'fixture': 1}}
+            class FakeRunner:
+                def __init__(self):
+                    self.value=lifecycle.initial();self.value['epochs'].append(lifecycle.epoch_record(1))
+                    self.failure=None;self.current=None
+                @property
+                def epoch(self):return self.value['epochs'][-1]
+                def source_commit(self):return 'a'*40
+                def bind_scope(self,scope):pass
+                def command(self,argv,timeout=30):return command(argv,timeout)
+                def start_daemon(self,argv):
+                    item=process(argv);item.epoch=self.epoch;self.current=item
+                    self.epoch['root']=lab.public_process(item.identity);self.epoch['launches']=1
+                    return item
+                def root_check(self,item):return True
+                def sample_liveness(self,item):
+                    self.epoch['sampling'].update(attempted=1,stable_children=1)
+                    return [dict(pid=20,start_ticks=200,pgid=20)]
+                def latch(self,reason):
+                    if self.failure is None:self.failure=reason;self.value['failure']=reason
+                    if not self.epoch['closed']:self.epoch['failure']=self.failure
+                def cancel(self):self.latch('cancelled')
+                def close_epoch(self,item,deadline):
+                    if self.failure:raise lifecycle.LifecycleError(self.failure)
+                    stopped=item.stop() if item is not None else None
+                    if stopped and (stopped['forced'] or not stopped['all_owned_exited']):
+                        self.latch('forced' if stopped['forced'] else 'identity')
+                        raise lifecycle.LifecycleError(self.failure)
+                    self.epoch.update(waited=self.epoch['launches'],closed=True)
+                    if item is not None:self.epoch.update(root_exit_code=0,was_running=True)
+                    return object()
+                def shutdown(self,item):
+                    return dict(was_running=True,signal='SIGTERM',forced=False,exit_code=0,
+                                all_owned_exited=True,observation_error=None,children=[])
+                def consume_snapshot(self,receipt,phase):self.epoch['snapshot_consumed']=True
+                def snapshot_finished(self,receipt,*,success,locks_released):
+                    self.epoch.update(snapshot_complete=success,locks_released=locks_released)
+                def next_epoch(self):self.value['epochs'].append(lifecycle.epoch_record(len(self.value['epochs'])+1))
+                def finalize(self,deadline):
+                    if self.failure:
+                        self.value['cleanup']=dict(status='refused',reason=self.failure,kernel_echild=False)
+                        raise lifecycle.LifecycleError(self.failure)
+                    if not self.epoch['closed']:self.close_epoch(self.current,deadline)
+                    self.value['cleanup']=dict(status='verified',reason=None,kernel_echild=True)
+                    return object()
+                def consume_deletion(self,seal,remove):return remove()
+                def evidence(self,*,complete=False):return lifecycle.project(self.value,complete=complete)
+            owner=FakeRunner()
             for name, value in patches.items():
                 stack.enter_context(patch('lab.' + name, value))
             stack.enter_context(patch.dict(sys.modules, {'storage': module}))
@@ -201,7 +249,7 @@ class IntegrationTests(unittest.TestCase):
                 stack.enter_context(patch.object(lab.OwnedScope, 'remove', removing))
             stream = io.StringIO()
             with redirect_stdout(stream):
-                code = lab.integration(SimpleNamespace(port=8787, cache=str(root / 'cache'), output=str(output)), storage=True)
+                code = lab.integration(SimpleNamespace(port=8787, cache=str(root / 'cache'), output=str(output)), storage=True, lifecycle=owner)
             return (code, json.loads(stream.getvalue()), events, scope.exists())
 
     def test_three_cold_checkpoints_exact_batch_and_final_stopped_cleanup(self):
@@ -224,7 +272,7 @@ class IntegrationTests(unittest.TestCase):
                 self.assertNotIn('approval', events)
                 self.assertIn('storage_partial', report)
                 self.assertNotIn('storage', report)
-                self.assertFalse(exists)
+                self.assertEqual(exists, failure in PHASES[:2])
 
     def test_final_failure_projection_rebuilds_bounded_failure_report(self):
         code, report, events, exists = self.run_case('partial_projection')
@@ -232,7 +280,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertIn('storage_partial', report)
         self.assertNotIn('storage', report)
         self.assertNotIn('approval', events)
-        self.assertFalse(exists)
+        self.assertTrue(exists)
 
     def test_cleanup_and_removal_deadlines_preserve_unfinished_scope(self):
         for failure, seconds in [('cleanup_timeout', 150), ('remove_timeout', 30)]:
@@ -249,7 +297,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn('approval', events)
         self.assertEqual(len(report['storage_partial']['snapshots']), 2)
-        self.assertFalse(exists)
+        self.assertTrue(exists)
 
     def test_unknown_forced_or_changed_marker_preserves_scope(self):
         for failure in ('forced', 'unknown', 'marker'):
@@ -274,7 +322,7 @@ class IntegrationTests(unittest.TestCase):
                 code, report, events, exists = self.run_case(failure, {300: 0.03} if failure == 'scenario_timeout' else {10: 0.03})
                 self.assertEqual(code, 1)
                 self.assertIn('budget:150', events)
-                self.assertFalse(exists)
+                self.assertEqual(exists, failure in ('snapshot_timeout', 'scenario_timeout'))
 
 class OwnerTests(unittest.TestCase):
 
@@ -395,10 +443,8 @@ class HTTPTests(unittest.TestCase):
         connect.assert_not_called()
 
     def test_cli_routes_storage_without_other_scenario_flags(self):
-        with patch('sys.argv', ['lab.py', 'integration-storage']), patch('lab.integration', return_value=0) as integration:
+        with patch('sys.argv', ['lab.py', 'integration-storage']), patch('storage_lifecycle.dispatch', return_value=0) as dispatch:
             self.assertEqual(lab.main(), 0)
-        self.assertTrue(integration.call_args.kwargs['storage'])
-        self.assertFalse(integration.call_args.kwargs['restore'])
-        self.assertFalse(integration.call_args.kwargs['resources'])
+        self.assertEqual(dispatch.call_args.args[0].command, 'integration-storage')
 if __name__ == '__main__':
     unittest.main()

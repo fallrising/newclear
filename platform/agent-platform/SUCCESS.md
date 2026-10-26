@@ -93,3 +93,127 @@ make deployment-rehearsal
 | FE-gates | local composite passed; CI/review pending | 原生 web check/build、Python check/platform-test、獨立 driver 型別／格式、安全邊界、獨立審查與 CI |
 
 兩次完整 fresh captures 共 76 張（含早期 partial 為 114 raw）；web85 與 focused55、安全4通過。Python 原 641 tests/4環境 errors 保留，35 focused 原生補驗通過；exact-head CI 與獨立審查／合併待 parent。詳見 [本次報告](fe-review/tasks/round2/report.md)。上述平台主線 AC-04、usable_tag 與 live gate 維持原狀。
+
+## 本次範圍：T-087 manual event retention
+
+本次目標是 SDD §12/AT-13 的手動事件 retention：至少30天、明確 preview/apply approval、受限連續前綴、保留來源 dedupe 與 sequence、保護未完成或 cleanup 不明狀態，並可一致備份還原。實作前契約見 [EVENT-RETENTION](docs/EVENT-RETENTION.md)，Phase A 經獨立審查及 root ACCEPT 後於 `6ea13ad2` 固定並釋出 Phase B。下表真 PostgreSQL／native restore／browser 本機證據已由 T088 接受；初次額外648項 regression 為644pass/4fail，僅重跑4項後全通過，不宣稱 clean full suite。必要 CI／最終交付 gate 仍待完成，詳見[交付報告](tasks/379-event-retention/report.md)。
+
+| AC | 狀態 | 驗證計畫 |
+| --- | --- | --- |
+| EVT-01 | passed | T084-retention-private-green3：24 項涵蓋30天 cutoff、mixed gap/recent/oversize 及 near-cap 多 run、exact approval/expiry/DB identity、eligibility、atomic rollback/replay |
+| EVT-02 | passed | 同 source identity/seq、後續 floor 的 identity hash replay、兩種 producer/GC lock order、實際 Store.events floor/payload barrier、201-event follow SSE 與 pool default 均有 focused GREEN |
+| EVT-03 | passed | 真 API/CLI focused GREEN；T084-retention-browser1 的真 GC→410→snapshot/suffix/result 1 項通過；保留非事件及 recovery facts |
+| EVT-04 | passed | 原 key shapes＋七欄 equality guard／long-type backfill 與逐欄 mismatch 通過；T084-schema1 獨立 pin、T084-retention-private-backup2 共26項含真 native pruned-history restore、dedupe/hash/floor/receipt 與舊 plan 失效 |
+
+此切片不實作 audit retention、stale VM cleanup、排程或部署，不改 adapter source ID/replay 或 lifecycle。AT-13/M4、AC-04 與 usable_tag 維持原狀。先前 socket／private-path／namespace 環境失敗保留於交付證據；未放寬安全 guard 或修改主機權限。
+
+額外 regression 的3項 tool-process recovery 失敗伴隨 root driver 缺少 multiprocessing `__main__` guard／子程序重跑 selection 的 fixture 污染；driver 已修正。另1項 export-lock 失敗雖在 targeted rerun 通過，仍為 intermittent／原因未歸因，不能斷言由 driver 造成。
+
+## 本次範圍：T-089 manual audit retention（2026-10-25 local snapshot）
+
+SDD §12 的 audit90天保留已依[先行契約](docs/AUDIT-RETENTION.md)實作。契約先經 T090 獨立審查並提交11ac278f，再由 root 取得真 PostgreSQL RED 才釋出程式。Manual preview/apply 採至少90天嚴格 cutoff、固定 inspected-row/full-encoding caps、exact approval/expiry/DB identity；刪除 raw audit history，永久保留無 actor/action/target/decision 的最小 UUID/hash/size/time evidence。Audit target 非 typed run FK，不另發明 terminal/cleanup/export hold；獨立 operational authority 全保留。
+
+| AC | 狀態 | 實際證據與範圍 |
+| --- | --- | --- |
+| AUD-01 | passed (local) | T091-audit-green3：22 focused GREEN，包含90天 equality、exact issued plan/expiry/UUID、nullable/unbounded metadata、fixed inspected-row/no-refill 及 encoded caps |
+| AUD-02 | passed (local) | 同次驗證原子 receipt/tombstone/delete/new audit、current/prior transaction/wrong-ID、no resurrection、strict replay 與各步驟 rollback；最小永久證據無 raw audit 欄位 |
+| AUD-03 | passed (local) | Full-row authority snapshots，加上實際 auth／command／worker／approval／recovery／model/tool unknown／export replay、writer/GC barriers 及 private CLI |
+| AUD-04 | passed (local) | T091-schema1 獨立018 catalog pin；T091-audit-native1：audit、archive/history、event replay identity 三項真 native roundtrip 通過，舊 plan UUID 失效 |
+
+此為有日期的本機證據快照；新增反例、獨立最終審查、hosted CI 與合併狀態見[交付報告](tasks/379-audit-retention/report.md)及其 PR。原有 event/archive 證據與初次失敗保留。完整 AT-13/M4、AC-04、stale cleanup、live qualification 與 usable_tag 維持原狀。
+
+## Bounded scope: T-092 manual stale binding cleanup
+
+The [contract](docs/STALE-CLEANUP.md) addresses a reachable terminal result whose
+journaled release started but left its exact owned VM live. Baseline
+`1b47738b08738978d53f2c551c1f5fabbf9325ba` preceded actual PostgreSQL/HTTP RED and
+implementation. One separately approved request targets the original capability;
+same-attempt replay only observes. Existing recovery alone releases capacity.
+
+| AC | Local status | Evidence |
+| --- | --- | --- |
+| STALE-01 | passed | T094-stale-green1: real lifecycle fault, atomic legacy enrollment, exact one-binding approval/expiry, ownership and active-state refusal |
+| STALE-02 | passed |28 focused tests include real SIGKILL/lease races; T094-inflight1 adds two real HTTP overlap winning orders with one physical effect and original intent preserved |
+| STALE-03 | passed | T094-stale-native1: actual native roundtrip preserves ten authority tables and private journal facts, invalidates old approval, keeps drains; T094-affected1:12 existing guard/CLI regressions |
+
+See the [dated delivery snapshot](tasks/379-stale-cleanup/report.md) for exact
+commands/results and retained failures. Independent R2 review requested the HTTP
+overlap fixture; its two cases passed without changing production. Hosted CI and
+normal merge are separate delivery gates, tracked in the PR and task board.
+This is not arbitrary orphan/host-residue cleanup or live VM qualification.
+Complete AT-13/M4, AC-04, deployment and usable_tag remain open.
+
+## Bounded scope: T-096 fake cross-flow acceptance
+
+Add one same-version integration scenario to the delivered stale cleanup, export and
+backup slices. No new production behavior is proposed. Existing independent tests
+remain applicable; this targets their previously untested composition on one DB.
+[Contract and verification plan](tasks/379-fake-composite/task.md).
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| COMP-01 | passed (local) | Real worker terminal result/release fault, exact approved cleanup, independent recovery, API-approved valid patch export via synthetic HTTP GitHub, PR-success/disconnect followed by read-only reconciliation |
+| COMP-02 | passed (local) | Same scenario native dump/empty DB restore, durable result/export/control facts, private journal preservation, fresh maintenance identity and drained nodes; old approval refused with no repeat external mutation |
+
+VM/model/GitHub remain synthetic. No existing suite rerun is itself new acceptance.
+This is API/native integration, not browser qualification, complete fake E2E, live
+smoke or whole AT09/12/13/M4. No deployment, release or usable tag.
+
+T098-composite1 passed one new scenario in 2.234s on the frozen test source.
+Actual command, source binding and limits: [delivery snapshot](tasks/379-fake-composite/report.md).
+T097 independently accepted this bounded evidence; required changed-source CI and normal merge remain delivery gates.
+
+## Bounded scope: T-100 browser retention/export composition
+
+Test-only integration follows PR653. [Contract](tasks/379-browser-retention/task.md).
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| BGC-01 | passed (local) | Browser-approved A export, actual event/archive GC, real expired cursor reconnect and one fake HTTP export; same owned cohort |
+| BGC-02 | passed (local) | Unreferenced B archive expires; stale browser approval/download refuse410, result/diff/hash remain |
+
+Explicit synthetic historical INSERTs do not represent observed worker chronology.
+No guard bypass or production changes. Full fake/live AT09/12/13, deployment and M4 remain open.
+
+T102-browser3 passed one new scenario (9.8s); [snapshot](tasks/379-browser-retention/report.md)
+retains both initial harness timeouts, exact source and boundaries. Normal CI/merge remain delivery gates.
+
+## Bounded scope: T-104 expired export availability
+
+[Prior contract](tasks/379-expired-export/task.md) corrects a UI gap observed in BGC01/02.
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| EUX-01 | passed (local) | Exact preview/approval410 expires only the original artifact immediately; refresh failure preserves known expiry and metadata |
+| EUX-02 | passed (local) | Auth/transient/non-expiry/lost-response behavior and command keys remain correct; real BGC browser flow updates without another failed download |
+
+Root obtains behavioral RED before product edits. This does not change backend authority
+or complete full M4/live acceptance.
+
+T106:30 distinct focused web cases and rebuilt-assets browser1/9.6s passed.
+[Snapshot](tasks/379-expired-export/report.md) retains actual RED and two test corrections.
+Independent review and required CI/normal merge remain delivery gates.
+
+## Bounded scope: T-108 download expiry availability
+
+[Prior contract](tasks/379-download-expiry/task.md) addresses the download path left
+separate from PR658 export preview/approval. No backend or schema change.
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| DUX-01 | passed (local) | T110-unit1:15new+18EUX+5archive; exact410 pending/failed/stale metadata, identity/late-run/auth/error/success boundaries |
+| DUX-02 | passed (local) | T110-browser1:freshbuild one real Chromium/API/SQLGC case3.5s; synthetic firstINSERT history, injected metadata network failure, explicit retry; scoped TS/format and test-helper Ruff |
+
+No fullM4/live/deployment acceptance or usable tag.
+
+## Bounded scope: T-112 Worker result truth in browser
+
+[Test-only contract](tasks/379-result-truth/task.md) targets direct AT09 UI truth
+after actual Worker outcomes; existing backend behavior is unchanged.
+
+| AC | Status | Verification plan |
+| --- | --- | --- |
+| RTF-01 | passed (local) | T114-browser1 realWorker/scriptedHTTP failed and unknown/no-checks match API/archive/browser; actual download bytes/hash and live no-side-effect observations |
+| RTF-02 | passed (local) | Same single scenario4.0s includes persist exception→interrupted/resultless/noarchive/held1/no release; reload/live observations unchanged; freshbuild/type/format/Ruff passed |
+
+No SQL-state rewrite/trigger bypass or new product RED claim. Fullfake/live/M4 remains open.

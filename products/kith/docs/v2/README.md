@@ -63,6 +63,10 @@ Phase 2 執行者請用 [PHASE2-PROMPT.md](PHASE2-PROMPT.md)：可直接交給�
 - [ADR-0005 — v2 web 前端](../adr/0005-v2-web-frontend.md)（accepted，v2 W7）
 - [ADR-0006 — 多格式 LLM provider](../adr/0006-llm-provider-formats.md)（accepted，v2 W7；部分取代 ADR-0002 的 hosted 預設）
 
+## 後續活動視圖
+
+[Agent 活動視圖與辦公室動畫計畫](../plans/agent-activity-office.md) 是 W0–W7 之後的獨立呈現層提案：先本房活動卡與提及草稿，再加入同一 projection 的 2D renderer。此次只交付 AV-0 文件，不重開 W0–W7、不宣稱新畫面已存在；後續程式依 AV 里程碑另行驗收。
+
 ## 文件優先級
 
 1. v1 [SDD.md](../../SDD.md) 的安全不變量 INV-01–INV-19，**除非** v2 在 [10](10-decisions.md) 的「對 v1 的修訂」表逐條列出並有 ADR。

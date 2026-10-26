@@ -1,0 +1,33 @@
+{
+  "attempt": "visual-001",
+  "requestedMode": "visual",
+  "exitCode": 0,
+  "error": null,
+  "elapsedSeconds": 50.369,
+  "containerRemoved": true,
+  "image": "sha256:f659591ff6a2df30b6d644236056a7f1b185a4161852f5b6639f45f042427884",
+  "binarySHA256": "21fce3fab360ad66f97179bf54d391c83702f62d55cd09a118c693fd349516cd",
+  "sourceHashes": {
+    "tui-capture.test.mjs": "e7a9f40fdf042e88bcb47d9acfef4ce922f035d219a84d26b34dbb20ea791c7d",
+    "guards.test.mjs": "55818d9ef16c9e7f45f9575d80fcba0b7fb03496b2b03d755dfb26e83bc05ee0",
+    "browser-baseline.mjs": "71607500c46472db75d7d1ff3210da685e86d38ec1d2fdc3fdf03acdae5f4cb3",
+    "shared-capture.mjs": "a190f3e46d02a26fdec4828fd18e6746e9db6b9c3412a5f8ed0da705aa60e454",
+    "navigation.test.mjs": "0e686e2563881c4b4d8d3a2fc9c05b57c25b68cbc4d849044524d0e353ac852f",
+    "journeys.mjs": "a63e8073a08e26d786e3d19c768d7401755e746c2ccb06bc32f4656e081258d5",
+    "fixture.test.mjs": "f47fa47fd5aee5d7a7c231b243cc26e3bc70922b972babbec376b3da169ca836",
+    "desktop-health.mjs": "2ed04aaecb1747719547665e0b3d13b8fd5fb1f97a1fea2ef7f86a999315885b",
+    "fixture.mjs": "1093d6c6dc127a7730bd8cb512cdbb693e040a4669be3a6d9b84e7bcbec9980a",
+    "mock-upstream.mjs": "7ee372736faa597ae9a3c1cfa61f5dd95d6d50c044b5e0d9e4f38aa8e8fe7755",
+    "tui-capture.mjs": "1acfe5348a7551e9bfdf3423b95010d1ba60ded33cb201b817927c459b296a8c",
+    "reuse-web.mjs": "514d9dd97ae7d17ddb3e4686ddd84e9c4bc83507f3179f894c2747db8fd94dcb",
+    "reuse-continuation.mjs": "b1a6551ad92dcd0920c8eee04c2d07602d1209c5d94d01570d6613d099de84d2",
+    "run-review.mjs": "3c48d468215fbdecf66ff095f99b60f201db79e9fc2d42db2af61031add17ac4",
+    "visual-provenance.mjs": "14020d419a78f1d1abbdfbccd4ecaa918af34c852ec0dab7713e112bccca48f7",
+    "desktop-health.test.mjs": "3fbfc3c166dc326e51b05b770f710d5e98e0eabcba6d38fdf3f6b06dbdd94ba3",
+    "guards.mjs": "f5ad2bae0b5379937dbce7a6de8fd3bf743848f9d81599677649566a6e3ca560",
+    "contrast-review.mjs": "eaba3504a0e5d5b6231521e39491a1dc26928d2cace70340d0bf5a8976579ba0",
+    "journeys.test.mjs": "88b9338b46e043a5014b0d2741fe91ea78389c746535885273a1d2d6f4ba80ec",
+    "navigation.mjs": "edaf9f41d0a880966620cf3e75f4c8783acfd30f30fbeb656571fc0ddc9572e1",
+    "presentation.test.mjs": "a1a890c847c0a21c01fc1a920019202c292a42c75910f3b85a792139aebf9148"
+  }
+}

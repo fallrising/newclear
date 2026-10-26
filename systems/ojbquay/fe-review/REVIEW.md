@@ -1,47 +1,42 @@
-# FE Review — ojbquay console — REVIEW
+# FE Review — ojbquay console
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1/A1 保留真 Compose 整合來源；先交付有所有權與 loopback 證據的隔離方案，額外後端變更另定範圍。 第 2／3 輪仍未由本次文件回寫執行。
-> 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
+## Current scope
 
-## 目前輪次
+Approved R2 M1–M4 and the owner-approved2026-10-24 isolation/gRPC addendum have
+required local evidence. Independent acceptance and current CI/publication are
+pending root completion. [Report](tasks/round2/report.md), [result](tasks/round2/result.json).
+Historical mainline/usable qualification and dormant status are unchanged.
+Complete Round3 was not run or accepted.
 
-- **第 1 輪：設計方向已由 owner 確認**；見上方決策紀錄。文件回寫／必要 CI 與後續實作驗證分開追蹤。
-- 第 2 輪：修改（未開始）
-- 第 3 輪：完整 e2e（未開始）
+## Resolved within R2
 
-## 修改權限
+- C1/D1: the unchanged eleven-service real stack now has a review-only overlay,
+  unique ownership and credentials, no host publications, real session/CSRF,
+  REST/gRPC fixtures and transparent loopback proxy. No mock API substituted.
+  Exact owned cleanup and absence are recorded; the stack is no longer running.
+- C2: measured unchanged AntD drawer bounds at834px DLQ and768px group were within
+  the viewport/document. No CSS change was justified.
+- C3: Dashboard now observes its actual chart container and releases its observer.
+  Focused RED/GREEN plus same-document1440px663→780→663 browser evidence passed.
+- M2:42 unique state images and27 actual route/content checks are indexed, with
+  controlled empty/500 supplements separated from real401/missing-delay results.
 
-文檔檔位 **C（dormant）**：依 [`PORTFOLIO.md`](../../../PORTFOLIO.md)「休眠」一節的 fe-review 例外，第 2 輪可在 `DESIGN.md` 範圍內修改前端與做最小解耦。這不恢復投入，不做新功能或 major 依賴升級。
+## Findings retained for later scope
 
-## 矛盾點
+- Mobile header CSS hides Logout text/icon spans; it lacks an accessible name.
+  Required mobile wrong-password evidence uses a true anonymous context/401;
+  this does not claim mobile logout passed.
+- Source Google Fonts requires external assets; the observer blocks them.
+  Existing React/AntD compatibility and Modal deprecation warnings remain visible.
+- Nine desktop axe runs had font-preload limitations and actual findings:
+  nine serious color-contrast, one moderate missing-h1, two minor empty-header
+  entries. Complete Round3/axe-zero is not claimed; no permission to broaden
+  product changes is inferred from these findings.
+- Original token-bearing drawer PNGs had animation/mask problems. All remain
+  private; six replacement PNGs have stable geometry and100% measured pixel-mask
+  coverage. Audit desktop four regions also have100% coverage; narrow audit token
+  columns are outside the current viewport. Historical image claims remain exact.
 
-### C1 沒有可供 `capture.mjs` 使用的假後端
-
-`console-web/vite.config.ts:6-11` 把 `/api` proxy 到 `localhost:8080`，沒有後端時頁面只剩錯誤狀態。`console-web/e2e/serve.mjs` 只是 `dist/` 靜態伺服器；假資料寫在 `console-web/e2e/golden-path.spec.ts` 的 `page.route` 內，只供該測試使用。完整 stack（`KEEP_STACK=1 make e2e`，十一服務）與真 stack 旅程 `pnpm e2e:stack` 已在 2026-10-22 實跑通過。
-
-### C2 Drawer 的窄螢幕寬度需實測
-
-Drawer 設定寬 720–900px（例如 `pages/SubscriptionsPage.tsx:131` 的 900），專案 `styles.css:443-445` 的 max-width 規則只在 576px 以下。834px 小於 900 但大於 800；須實測元件 computed style，不能只靠設定值宣稱所有 Drawer 已溢出。驗證與修整範圍見 DESIGN M3。
-
-### C3 Dashboard 圖表只跟隨視窗縮放
-
-`pages/DashboardPage.tsx:47-50` 只監聽 `window` resize；收合側欄改變內容寬度時圖表不重算。
-
-## 本次確認的決定
-
-### D1 第 3 輪的後端
-
-- 選項：(a) 寫一個實作 console 所需 `/api/v1` 端點的 mock 伺服器；(b) 用既有 Compose stack，empty／error 狀態以互動腳本的 `page.route` 覆寫。
-- 建議：(b) 保留作整合來源，但先確認 DESIGN M1 的隔離方案。現有預設 project、published ports 與保留 stack 不滿足此 harness 的 loopback／所有權契約；歷史旅程通過不代表新環境已就緒。若需 Compose／後端修改，另立範圍。
-- 狀態：**2026-10-23 owner 已確認上述選定方案**；未選方案不在授權內。
-
-## 進入第 2 輪的條件
-
-- `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
-- `PROMPT.md` 與 `targets.json` 已依設計更新。
-
-## 相關 PR
-
-- fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- fallrising/newclear#144：記錄擁有者決定與設計文件入口。
-- [#550](https://github.com/fallrising/newclear/pull/550)：本次設計與複核修正；D1 已由 owner 確認，沒有執行 UI 或 stack。
+Original configuration/build/browser failures and explicit bounded continuations
+are in the report. Only approved production files changed; backend/API/auth/
+production Compose/dependencies/CI/styles remain untouched.

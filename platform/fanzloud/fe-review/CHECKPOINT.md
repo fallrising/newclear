@@ -11,3 +11,27 @@ The factual record is merged in [journal PR122](https://github.com/fallrising/jo
 Canonical coverage remains8/27 and overall FE delivery18/19. Remaining work includes accepted desktop recovery, tablet/mobile, M2 actual UI/keyboard/contrast/integration, and full HTTP/WebSocket/boundary conformance. Those acceptance gaps prevent merging this PR as completed implementation.
 
 Historical failed and accepted runtime artifacts, original private launcher/state boundaries and backups stay in their retained evidence locations. They are not included in this source-only checkpoint. The runners use isolated container mounts and prior evidence; this commit is not a standalone browser launch recipe. Additional SUCCESS/task documents and the separate M2/contract worktrees remain uncommitted and preserved. No release, deployment, new runtime grant or whole-round completion is implied.
+
+
+## Source continuation: safe trace reasons
+
+The owner continued source development after the checkpoint above. New separately
+named `initial-lifecycle-v2-*` modules retain finite, safe failure reasons where the
+v1 observer only recorded `invalid`. This makes a future observation diagnosable;
+it does not identify the cause of recovery005 or prove a browser fix. Existing v1
+modules and prior result hashes remain unchanged.
+
+The correction preserves strict clock validity and per-domain ordering, original
+request/body-read/health gates, cleanup ownership and the 128-record bound. Records
+exclude raw exceptions, identifiers, URLs, headers, bodies and credentials. Focused
+pure RED/GREEN evidence and an independent exact-source review are required before
+source acceptance. Real-browser verification of v2 remains NOT_RUN. No runtime grant
+was renewed; no canonical state is added by this source-only work.
+
+Current main is integrated normally with approved prerequisite changes intact. The
+remaining acceptance gaps above continue to prohibit final implementation merge.
+
+Observed source validation: Node24.18.0 new v2 suite35/35 PASS, four syntax checks
+PASS; intended missing-reason RED retained. The baseline inverse and five original
+v1 hashes pass. The PR records independent review and current-head CI separately.
+No real-browser or additional canonical PASS follows from these source checks.

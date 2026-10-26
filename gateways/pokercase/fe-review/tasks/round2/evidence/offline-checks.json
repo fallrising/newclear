@@ -1,0 +1,111 @@
+[
+  {
+    "id": "preparation-tests.log",
+    "command": "node --test guards.test.mjs fixture.test.mjs",
+    "originalLogSHA256": "303d18c794be28f0911e8a83b6c293a2f6d89441d374ade4733423c8a5215dfe",
+    "tests": 7,
+    "passed": 7,
+    "failed": 0,
+    "durationMs": 84.388295
+  },
+  {
+    "id": "presentation-red.log",
+    "command": "node --test presentation.test.mjs (pre-fix)",
+    "originalLogSHA256": "88bb7ba975307bf5d6eae6f9f1ee62e2886583659399c6aa5c8d70ec45545226",
+    "tests": 4,
+    "passed": 0,
+    "failed": 4,
+    "durationMs": 62.79103
+  },
+  {
+    "id": "presentation-green.log",
+    "command": "node --test presentation.test.mjs",
+    "originalLogSHA256": "fe1f13b8d41c3b9c2eab13886f6aaed152c621beaf79f8d50d0b62fa12f6577d",
+    "tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "durationMs": 57.734583
+  },
+  {
+    "id": "tui-preparation.log",
+    "command": "node --test tui-capture.test.mjs",
+    "originalLogSHA256": "700996f87dafc7430b0d236c9ea3fb5a485be5114b4f901ebbf4e5bb560fb9b7",
+    "tests": 2,
+    "passed": 2,
+    "failed": 0,
+    "durationMs": 57.239468
+  },
+  {
+    "id": "continuation-guards.log",
+    "command": "node --test desktop-health.test.mjs journeys.test.mjs",
+    "originalLogSHA256": "42652c114c119f2990b2951c0ee8ae23f777194a684d69d6beace2c516442946",
+    "tests": 3,
+    "passed": 3,
+    "failed": 0,
+    "durationMs": 72.938104
+  },
+  {
+    "id": "navigation-tests.log",
+    "command": "node --test navigation.test.mjs",
+    "originalLogSHA256": "a605dd9ff37e9ec0371af5df16e35f5b604268b31fd1b141be099d5e4358571f",
+    "tests": 2,
+    "passed": 2,
+    "failed": 0,
+    "durationMs": 58.617699
+  },
+  {
+    "id": "contrast-viewport-test.log",
+    "command": "node --test contrast-review.test.mjs",
+    "originalLogSHA256": "e08f80bdc692d7a2dcc2bdd2ee18135dac0eeadcbb7060965e2e219535a660f1",
+    "tests": 1,
+    "passed": 1,
+    "failed": 0,
+    "durationMs": 56.758671
+  },
+  {
+    "id": "tui-renderer-red.log",
+    "originalLogSHA256": "ffd21a0814f39687dc38911061adb4ebfb279071d5143bee38bbcc2da92e462b",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "tui-normal-name-red.log",
+    "originalLogSHA256": "04344528ff2b9af4047e6fcff82c0b0841023437c5d0b746fd6f918fad2e355b",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "tui-green-final.log",
+    "originalLogSHA256": "d5c195ed4edb29d29085d94fd368e34953032a1e6af76b416a15370cc8710bc1",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "tui-green-final2.log",
+    "originalLogSHA256": "884eae5620ffa786959fd07a3eb363f2d8e5e24c15ff117207f36b162dc7cf2d",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "test-visual.log",
+    "originalLogSHA256": "43bc1bb49f560ccb90d9ce1a0b4369345bd022db5604ce0aa4bbae5dc1d7d913",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "fmt-visual.log",
+    "originalLogSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "clippy-visual.log",
+    "originalLogSHA256": "e39884211bd8bc7f87f659b4942c52262cb8099b42b6c33fdfd609859a61163a",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "build-visual.log",
+    "originalLogSHA256": "25459913a8ced00e374ebe97725b3620d38fa2b91d33de88aa69b1f22466fc24",
+    "publication": "raw native log private; exact commands/results in immutable structured native receipts"
+  },
+  {
+    "id": "table-width-red.log",
+    "originalLogSHA256": "ec537b9361874e6a1665631bf2c9ab41fac5039638c32e0656ed48058829cd91",
+    "excludedFromAcceptance": true,
+    "reason": "Temporary CSS-declaration-mirroring test removed; actual screenshot/geometry is behavior RED and actual visual matrix is GREEN."
+  }
+]

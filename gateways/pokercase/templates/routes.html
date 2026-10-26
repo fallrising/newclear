@@ -109,13 +109,14 @@
       <section class="panel">
         <h2>Existing</h2>
         {% if routes %}
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Routes table">
         <table>
           <thead>
             <tr>
               <th>Public model</th>
               <th>Strategy</th>
               <th>Targets</th>
-              <th></th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -143,6 +144,7 @@
             {% endfor %}
           </tbody>
         </table>
+        </div>
         {% else %}
         <p class="muted">No routes yet.</p>
         {% endif %}

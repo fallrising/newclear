@@ -1,0 +1,481 @@
+{
+  "id": "baseline-001",
+  "mode": "baseline",
+  "status": "passed",
+  "startedAt": "2026-10-24T12:13:25.507Z",
+  "sourceHashes": {
+    "fe-review/api-fixture.mjs": "5e34c94437f8b8088b7b558239386eb4b95061610ced24f9fa36fc912bfcdbb0",
+    "fe-review/baseline.mjs": "8431314dec0544a2e18bfc57bc9ed41e05d7442cfb8dd615541684d4c9c32166",
+    "fe-review/guards.mjs": "297fa73a790f1bbbf8b27cf907ad0a43c0b66873a98b3a252e1a6d3d52da760b",
+    "fe-review/guards.test.mjs": "45e2bd6601b782caf54dc1a0cf3183e60966ea768447c1a033b9d99318087473",
+    "fe-review/run-review.mjs": "c60a24de0eea960042a5b9835170cab4741938bdcef444eef6386e7cb247b89d",
+    "internal/ui/index.html": "e730e6c8d9d3443473923552fcd9ec2869305040c85d4af965c718a1308b11a2"
+  },
+  "cleanup": [
+    {
+      "name": "settle",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "service",
+      "passed": true
+    },
+    {
+      "name": "listener",
+      "passed": true
+    },
+    {
+      "name": "log",
+      "passed": true
+    }
+  ],
+  "binarySHA256": "b837ce36e0c5d0faf63a9e4f1d89e205b630415e66cb5675ed7c2265ce28eb6d",
+  "loopbackListener": true,
+  "fixture": {
+    "publicUI": 200,
+    "missingKey": 401,
+    "invalidKey": 401,
+    "authenticated": 200,
+    "queues": [
+      {
+        "name": "review_00",
+        "depth": 1
+      },
+      {
+        "name": "review_01",
+        "depth": 2
+      },
+      {
+        "name": "review_02",
+        "depth": 3
+      },
+      {
+        "name": "review_03",
+        "depth": 1
+      },
+      {
+        "name": "review_04",
+        "depth": 2
+      },
+      {
+        "name": "review_05",
+        "depth": 3
+      },
+      {
+        "name": "review_06",
+        "depth": 1
+      },
+      {
+        "name": "review_07",
+        "depth": 2
+      },
+      {
+        "name": "review_08",
+        "depth": 3
+      },
+      {
+        "name": "review_09",
+        "depth": 1
+      },
+      {
+        "name": "review_10",
+        "depth": 2
+      },
+      {
+        "name": "review_11",
+        "depth": 3
+      },
+      {
+        "name": "review_empty",
+        "depth": 0
+      },
+      {
+        "name": "review_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+        "depth": 3
+      }
+    ],
+    "syntheticBody": true
+  },
+  "chromium": "153.0.8010.12",
+  "baseline": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "finalPath": "/ui/",
+      "status": 200,
+      "loadedRows": 14,
+      "longQueueDepth": 3,
+      "literalBody": true,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440,
+        "panels": [
+          {
+            "index": 0,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 140,
+            "right": 516
+          },
+          {
+            "index": 1,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 532,
+            "right": 908
+          },
+          {
+            "index": 2,
+            "clientWidth": 1158,
+            "scrollWidth": 1158,
+            "left": 140,
+            "right": 1300
+          },
+          {
+            "index": 3,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 140,
+            "right": 516
+          },
+          {
+            "index": 4,
+            "clientWidth": 374,
+            "scrollWidth": 374,
+            "left": 532,
+            "right": 908
+          },
+          {
+            "index": 5,
+            "clientWidth": 1158,
+            "scrollWidth": 1158,
+            "left": 140,
+            "right": 1300
+          }
+        ],
+        "table": {
+          "clientWidth": 1126,
+          "scrollWidth": 1126
+        },
+        "pre": [
+          {
+            "id": "metrics",
+            "clientWidth": 342,
+            "scrollWidth": 475
+          },
+          {
+            "id": "cluster",
+            "clientWidth": 342,
+            "scrollWidth": 342
+          },
+          {
+            "id": "log",
+            "clientWidth": 1126,
+            "scrollWidth": 10494
+          }
+        ]
+      },
+      "focus": {
+        "before": true,
+        "afterFiveSecondRefresh": false
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 2
+          },
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "impact": "serious",
+            "nodes": 2
+          }
+        ],
+        "incomplete": []
+      },
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "externalRequests": 0,
+        "websockets": 0,
+        "httpErrors": [],
+        "requestFailures": []
+      },
+      "screenshot": {
+        "file": "baseline-desktop.png",
+        "sha256": "a1f071f316ec084861aa5fa1e79a378eccdbba2792170b18aafa857251b171d1",
+        "width": 1440,
+        "height": 1753
+      }
+    },
+    {
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "finalPath": "/ui/",
+      "status": 200,
+      "loadedRows": 14,
+      "longQueueDepth": 3,
+      "literalBody": true,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834,
+        "panels": [
+          {
+            "index": 0,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 20,
+            "right": 409
+          },
+          {
+            "index": 1,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 425,
+            "right": 814
+          },
+          {
+            "index": 2,
+            "clientWidth": 792,
+            "scrollWidth": 792,
+            "left": 20,
+            "right": 814
+          },
+          {
+            "index": 3,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 20,
+            "right": 409
+          },
+          {
+            "index": 4,
+            "clientWidth": 387,
+            "scrollWidth": 387,
+            "left": 425,
+            "right": 814
+          },
+          {
+            "index": 5,
+            "clientWidth": 792,
+            "scrollWidth": 792,
+            "left": 20,
+            "right": 814
+          }
+        ],
+        "table": {
+          "clientWidth": 760,
+          "scrollWidth": 760
+        },
+        "pre": [
+          {
+            "id": "metrics",
+            "clientWidth": 355,
+            "scrollWidth": 475
+          },
+          {
+            "id": "cluster",
+            "clientWidth": 355,
+            "scrollWidth": 355
+          },
+          {
+            "id": "log",
+            "clientWidth": 760,
+            "scrollWidth": 10494
+          }
+        ]
+      },
+      "focus": {
+        "before": true,
+        "afterFiveSecondRefresh": false
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 2
+          },
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "impact": "serious",
+            "nodes": 2
+          }
+        ],
+        "incomplete": []
+      },
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "externalRequests": 0,
+        "websockets": 0,
+        "httpErrors": [],
+        "requestFailures": []
+      },
+      "screenshot": {
+        "file": "baseline-tablet.png",
+        "sha256": "11675206bf8916df8dab6713d29b327bdd80741f202a3b3a48871a7f54a3ee0a",
+        "width": 834,
+        "height": 1753
+      }
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "finalPath": "/ui/",
+      "status": 200,
+      "loadedRows": 14,
+      "longQueueDepth": 3,
+      "literalBody": true,
+      "geometry": {
+        "documentWidth": 643,
+        "viewportWidth": 390,
+        "panels": [
+          {
+            "index": 0,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 1,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 2,
+            "clientWidth": 348,
+            "scrollWidth": 622,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 3,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 4,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          },
+          {
+            "index": 5,
+            "clientWidth": 348,
+            "scrollWidth": 348,
+            "left": 20,
+            "right": 370
+          }
+        ],
+        "table": {
+          "clientWidth": 606,
+          "scrollWidth": 606
+        },
+        "pre": [
+          {
+            "id": "metrics",
+            "clientWidth": 316,
+            "scrollWidth": 475
+          },
+          {
+            "id": "cluster",
+            "clientWidth": 316,
+            "scrollWidth": 316
+          },
+          {
+            "id": "log",
+            "clientWidth": 316,
+            "scrollWidth": 10494
+          }
+        ]
+      },
+      "focus": {
+        "before": true,
+        "afterFiveSecondRefresh": false
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 2
+          },
+          {
+            "id": "empty-table-header",
+            "impact": "minor",
+            "nodes": 1
+          },
+          {
+            "id": "scrollable-region-focusable",
+            "impact": "serious",
+            "nodes": 2
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      },
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "externalRequests": 0,
+        "websockets": 0,
+        "httpErrors": [],
+        "requestFailures": []
+      },
+      "screenshot": {
+        "file": "baseline-mobile.png",
+        "sha256": "880b60fb0d327d75af78b979863691c2967ecabcfb19be3f750dc55c0f745efd",
+        "width": 643,
+        "height": 3241
+      }
+    }
+  ],
+  "scope": "baseline measurements only; layout and focus findings are not acceptance",
+  "serviceExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false,
+    "groupAbsent": true
+  },
+  "receivedSignal": null,
+  "endedAt": "2026-10-24T12:13:47.666Z"
+}

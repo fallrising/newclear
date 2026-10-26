@@ -6,7 +6,7 @@ Contract recorded before implementation, 2026-10-05. Depends on immutable archiv
 
 Operator stops API, ordinary/export workers and related control-plane writers, drains every runtime node, and completes/cancels work with confirmed cleanup. An explicit offline acknowledgement is required. Backup refuses nonterminal runs (including interrupted), unfinished jobs, unconfirmed bindings/unreleased reservations, queued/exporting exports or requested reconciliation. No lifecycle states are rewritten to make backup possible. Unknown accounting and uncertain remote outcomes are preserved, not refunded or replayed.
 
-This version supports PostgreSQL18 only, using installed native pg_dump/pg_restore matching that server major. The known catalog fingerprint for shipped migration016 is derived from a fresh database on the pinned test image, not from the source being backed up; extra or drifted types, defaults, constraints, indexes and trigger definitions are rejected. Later migrations/catalog versions require an explicit reviewed fingerprint update. No Python/browser dependencies are added. Create a custom-format full logical database dump with a consistent exported snapshot held under SHARE table locks and the migration advisory lock. Validate exact migration names/checksums, private dedicated schema and bounds before success. Retain DB-resident archive bytes, metadata, tombstones, commands, audit and export history. Ephemeral sessions/login limits/model and tool tokens and the maintenance identity are intentionally excluded; private credential files, connector journal/fences, roles/tablespaces, running VMs, guest state and future external object stores are outside this bundle. Those operational assets need separately managed copies and recovery procedures; this CLI must never reset generations or resume jobs.
+This version supports PostgreSQL18 only, using installed native pg_dump/pg_restore matching that server major. The known catalog fingerprint for shipped migration018 is independently derived from a fresh database on the pinned test image, not from the source being backed up; extra or drifted types, defaults, constraints, indexes and trigger definitions are rejected. T089 retains the existing backup parser and guards; migration018 adds minimal audit plans/receipts/tombstones alongside migration017 event replay identities, all included in dumps. The independently approved fingerprint is `456bad6ac3e99751dd9df8c1aa77afa6fdc30f7e164598e1b1151e41f4a55f9e`. Later migrations/catalog versions require an explicit reviewed fingerprint update. No Python/browser dependencies are added. Create a custom-format full logical database dump with a consistent exported snapshot held under SHARE table locks and the migration advisory lock. Validate exact migration names/checksums, private dedicated schema and bounds before success. Retain DB-resident archive bytes, metadata, tombstones, commands, audit and export history. Ephemeral sessions/login limits/model and tool tokens and the maintenance identity are intentionally excluded; private credential files, connector journal/fences, roles/tablespaces, running VMs, guest state and future external object stores are outside this bundle. Those operational assets need separately managed copies and recovery procedures; this CLI must never reset generations or resume jobs.
 
 A new 0700 directory contains database.dump and manifest.json (0600). Existing destinations are never overwritten. Reject symlinks/hardlinks, unsafe ownership/permissions and malformed or unsupported manifests. Manifest records version, exact migration checksums, PostgreSQL major, dump bytes and SHA-256. Stream hashing (dump maximum8GiB), manifest maximum64KiB, explicit300s native process timeouts and sanitized errors; no connection URL/password in stdout/stderr/argv. A failed attempt is never a valid completed bundle. Hashes detect corruption, not authenticity: native restore executes trusted database definitions. Restore only backups from an operator-trusted source; do not accept arbitrary downloaded dumps.
 
@@ -61,8 +61,27 @@ agent-platform archive-gc-apply --plan /private/maintenance/plan.json --approve 
 
 Meaningful Red/Green native PostgreSQL tests cover real pg_dump/pg_restore into a second empty DB, exact archived bytes/hash/download, tombstones and retained export/audit/idempotency data; corrupted/mismatched/unsafe bundles; active/unknown source and nonempty/wrong target rejection; subprocess/transaction failures and safe partial state. Retention tests cover strict plans/expiry/wrong DB/hash, minimum retention, protected recovery/ownership/export cases, concurrency, no resurrection and atomic failure. Root runs platform-check, web-check and complete real Chromium suite including expired archive UX; independent review and hosted CI precede Draft PR delivery.
 
-Full event/audit retention, stale runtime cleanup, external artifacts, encrypted/offsite schedules, live deployment/restore, connector/VM recovery and complete AT-13/M4 acceptance remain separate work. Billing is deferred and costs remain unknown.
+The separate [manual event retention slice](EVENT-RETENTION.md) adds explicit approved prefix pruning with permanent replay identities; its current acceptance evidence is recorded there. The separate [manual audit retention slice](AUDIT-RETENTION.md) expires approved history while preserving minimal operation evidence and independent control state. Stale runtime cleanup, external artifacts, encrypted/offsite schedules, live deployment/restore, connector/VM recovery and complete AT-13/M4 acceptance remain separate work. Billing is deferred and costs remain unknown. Migration016/017 bundles must be restored with their matching application before explicitly upgrading to018; current exact-version verification refuses old manifests.
 
 ## Protocol sources
 
 PostgreSQL 18 official docs checked 2026-10-05: [pg_dump](https://www.postgresql.org/docs/18/app-pgdump.html), [pg_restore](https://www.postgresql.org/docs/18/app-pgrestore.html), [table locks](https://www.postgresql.org/docs/18/explicit-locking.html). Native logical backup is a database snapshot, not running-VM recovery; pg_restore executes trusted database definitions.
+
+The [manual stale binding cleanup](STALE-CLEANUP.md) slice adds permanent per-run
+cleanup enrollment, issued plans, attempt intents/receipts and a stop tombstone
+to the private connector journal. Preserve that entire journal and its fences
+separately; none of these facts enter the DB bundle. No migration or catalog pin
+changes for this slice. Pending cleanup continues to prevent backup until the
+existing recovery path independently confirms stop and releases capacity. Native
+roundtrip evidence for the new path is in its [delivery snapshot](../tasks/379-stale-cleanup/report.md).
+
+### Download expiry while metadata is unavailable
+
+A download response with exact HTTP410 and JSON `error: artifact_expired` is
+definitive for the requested immutable artifact. The workbench immediately removes
+its download/new-export controls and retains result/diff/hash/size, even while the
+metadata refresh fails or returns stale available data. Explicit metadata retry
+remains available; no server pruning timestamp is invented. Other410/error bodies,
+transient failures and network errors do not establish expiry. Download401 refreshes
+the session. Late responses are scoped to the original run/artifact identity.
+[Bounded verification and synthetic fixture limits](../tasks/379-download-expiry/report.md).

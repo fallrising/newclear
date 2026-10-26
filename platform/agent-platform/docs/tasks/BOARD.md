@@ -190,5 +190,5 @@ This record supersedes pre-merge wording in the dated local delivery snapshot.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0108.1 | Retain definitive download expiry across failed/stale metadata refresh | DUX-01 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:03:53Z |
-| T-0108.2 | Preserve error boundaries, source-run isolation and real download GC flow | DUX-02 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:03:53Z |
+| T-0108.1 | Retain definitive download expiry across failed/stale metadata refresh | DUX-01 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:14:16Z |
+| T-0108.2 | Preserve error boundaries, source-run isolation and real download GC flow | DUX-02 | in_progress | 2026-10-26T07:03:53Z | | 2026-10-26T07:14:16Z |

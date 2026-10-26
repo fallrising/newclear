@@ -201,7 +201,7 @@ separate from PR658 export preview/approval. No backend or schema change.
 
 | AC | Status | Verification plan |
 | --- | --- | --- |
-| DUX-01 | planned | Actual rendered download410 plus pending/failed/stale metadata, immutable identity and late source-run isolation |
-| DUX-02 | planned | Exact error/auth/success boundaries; existing archive regression and one fresh-build real GC browser with injected metadata network failure |
+| DUX-01 | passed (local) | T110-unit1:15new+18EUX+5archive; exact410 pending/failed/stale metadata, identity/late-run/auth/error/success boundaries |
+| DUX-02 | passed (local) | T110-browser1:freshbuild one real Chromium/API/SQLGC case3.5s; synthetic firstINSERT history, injected metadata network failure, explicit retry; scoped TS/format and test-helper Ruff |
 
 No fullM4/live/deployment acceptance or usable tag.

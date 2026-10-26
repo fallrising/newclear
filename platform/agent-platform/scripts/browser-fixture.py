@@ -105,6 +105,10 @@ def main():
                 port=18600,
                 access_log=False,
             )
+        elif action.startswith("download-retention-"):
+            from browser_download_retention_fixture import download_retention_action
+
+            download_retention_action(action, db, output)
         elif action.startswith("m4-retention-"):
             from browser_m4_retention_fixture import retention_action
 

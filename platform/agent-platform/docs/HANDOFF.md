@@ -1,3 +1,15 @@
+# 最新接續 — PR658已合併，下載過期修正本機通過
+
+PR658正常合併d81a7d91，四項必要CI成功，45+756Python與103web通過。
+EUXdone任務板隨本次產品變更補入，原59a33fc8候選保留。下方pending為歷史快照。
+[DUX契約](../tasks/379-download-expiry/task.md)與[本機報告](../tasks/379-download-expiry/report.md)
+針對下載410僅refetch而未保留過期狀態的缺陷；已取得11fail/4pass真實RED。
+新browser helper使用合成歷史首次INSERT，保留immutable guard；舊archive-prune不執行。
+38項focusedweb、strictTS/format及重建資產後單一browser3.5s通過；兩個test-helper Ruff通過。
+來源凍結與前後一致、ownedruntime清理證據保留。獨立最終審查／必要CI／正常合併仍為門檻；全M4/live/部署未完成。
+
+---
+
 # 最新接續 — PR655已合併，過期匯出 UI 修正本機通過（2026-10-26）
 
 PR655已正常合併0b4e42d9，四項必要CI成功、45+756通過，BGCdone列隨本次真正產品變更補入；

@@ -95,3 +95,7 @@ fake/live/M4 scope remains open. Original failure history is retained.
 
 封存過期的匯出預覽／授權現在會立即更新下載與匯出控制，重新查詢失敗也會保留
 已確認的過期狀態與成果摘要。詳見 [EUX01/02修正與驗證](tasks/379-expired-export/report.md)。
+
+下載封存遇到明確 `410 artifact_expired` 時也立即停用該封存的下載／新匯出；
+metadata 重新讀取失敗或暫時回傳舊資料時仍保留過期狀態與原始摘要、diff、hash、size。
+其他錯誤可明確重試，不推定過期。詳見 [DUX01/02](tasks/379-download-expiry/report.md)。

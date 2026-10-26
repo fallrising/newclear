@@ -53,3 +53,7 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | M1-I2 | 真實 OS 唯讀 collector、journal、HMAC、重送 | passed | [M1 evidence](docs/evidence/m1-implementation.md)：31 Python 測試及 HTTP 整合、獨立 ACCEPT |
 | M1-I3 | 看板、freshness、取消意圖與權限 | passed | UI 模型及 HTTP 資產驗證通過；本地 AC 不含瀏覽器互動／mobile live 驗收 |
 | M1-I4 | 整合、負向案例、索引、獨立 review | passed | [M1 evidence](docs/evidence/m1-implementation.md)：62 tests、validators、獨立 ACCEPT |
+
+## 真實環境接入準備（T-0003）
+
+新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。目前D1／Worker domain查詢缺必要scopes，網域／runner尚待owner選定；AC-06～08維持pending，不由本機工具通過改為passed。

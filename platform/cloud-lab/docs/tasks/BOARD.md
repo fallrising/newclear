@@ -43,3 +43,14 @@ Owner 直接指示「好，繼續開發。」。範圍見 [M1 實作契約](../m
 - M1-I1～I4 本機實作完成。完整M1-LIVE與產品AC-06～08仍pending：真實CF／target runner／手機／bot、入口撤權、備份與預算；沒有部署、封存、既有程式搬移或usable tag。
 
 此收尾PR只改任務板，end使用上述實際合併時間。
+
+## T-0003 — M1 真實環境接入與驗收
+
+Owner 指示「好，繼續吧。」。先完成可審閱的部署 bundle、入口／API 驗收工具；真實環境目前等 owner 補足 D1／Workers Scripts OAuth scopes、選定私人網域與 runner。缺權限是實際 API401／連線403，不以本機測試取代 live。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0003-1 | 私人設定／grant／部署 bundle 產生器 | AC-06、AC-08 | in_progress | 2026-10-26T16:43:03Z | — | 2026-10-26T17:05:44Z |
+| T-0003-2 | 有界入口及 API 驗收工具 | AC-06、AC-07 | in_progress | 2026-10-26T16:43:03Z | — | 2026-10-26T17:05:44Z |
+| T-0003-3 | 獨立審查與部署前證據 | AC-08 | in_progress | 2026-10-26T16:43:03Z | — | 2026-10-26T17:05:44Z |
+| T-0003-4 | 真實 CF／指定 runner／恢復驗收；等 owner 補 D1／Workers Scripts scopes 與目標 | AC-06～08 | todo | — | — | 2026-10-26T17:05:44Z |

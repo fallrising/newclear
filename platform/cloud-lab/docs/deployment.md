@@ -43,3 +43,7 @@ runner journal 是唯一執行證據：先保存 started，再採樣，完成先
 4. 斷線／重啟／晚到、排程關閉、配額與 unknown；備份、隔離還原及觀測窗口。
 
 以上是完整 M1/產品 AC-06～08 的剩餘門檻；本機測試與 PR 合併不會把它們自動改成通過。
+
+## 接入前工具
+
+[離線private bundle](deployment-bundle.md)產生精確source、分離的credentials/grants與停用schedule；[live probe](live-probe.md)預設只讀，明確flag才提交一次固定檢查。[本輪前檢查與限制](evidence/m1-live-readiness.md)記錄缺少的連線scopes與target輸入；工具通過不等於部署通過。

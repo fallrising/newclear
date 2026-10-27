@@ -32,3 +32,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 接入真實環境前可使用 [private bundle產生器](docs/deployment-bundle.md) 與 [live probe](docs/live-probe.md)。目前 [連線前檢查](docs/evidence/m1-live-readiness.md) 已選定首組目標，Access scopes 已補齊，owner 確認 Workers Free／零新增付費；[首輪真實閉環](docs/evidence/m1-first-live.md)已通過，後續驗收仍進行中。無桌面登入與故障分流見 [OAuth 操作紀錄](docs/headless-oauth.md)，部署／接手順序見 [操作紀錄](docs/live-operations.md)。
 
 [首次隔離還原](docs/evidence/m1-isolated-restore.md)已核對六張應用表及journal；未派送命令完整保留，沒有切換正式DB或重跑工作。
+
+[常駐runner](docs/resident-runner.md)提供有界輪詢、單一實例、期限與停止／重啟契約；[自動拾取與重啟對帳](docs/evidence/m1-resident.md)已通過，完整故障恢復及手機驗收仍待完成。

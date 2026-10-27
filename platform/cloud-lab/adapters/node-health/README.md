@@ -8,7 +8,7 @@ Run under a dedicated non-root OS user, with an operator-owned persistent direct
 python3 platform/cloud-lab/adapters/node-health/runner.py --config /private/cloud-lab/runner.json --once
 ```
 
-Omit `--once` for outbound polling. Each cycle makes one claim and at most one report, with at least five seconds between cycles and a five-second network timeout. HTTPS uses Python's default certificate verification. Redirects and ambient HTTP proxies are disabled. `--allow-loopback-http` permits only numeric loopback addresses for explicit local tests; other HTTP URLs are rejected.
+For outbound polling, replace `--once` with `--stop-at` using the earliest verified grant expiry (UTC). Default interval is 30 seconds; `--poll-seconds` accepts 5–60. Each cycle makes one claim and at most one report, with a five-second network timeout per request. Temporary failures back off to 120 seconds; rejected authority or invalid protocol/journal stops the process. See the [resident contract](../../docs/resident-runner.md) for service setup, lifetime journal lock, signal handling and restart limits. HTTPS uses Python's default certificate verification. Redirects and ambient HTTP proxies are disabled. `--allow-loopback-http` permits only numeric loopback addresses for explicit local tests; other HTTP URLs are rejected.
 
 Configuration fields (all required; this is a synthetic example):
 

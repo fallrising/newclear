@@ -57,3 +57,5 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 ## 真實環境接入準備（T-0003）
 
 新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。D1／Workers授權已更新並通過只讀查詢；網域／runner採已提出的第一組目標。私人部署計畫已準備，Access建立／service-token／身分查詢scopes已補齊，owner確認Workers Free／零新增付費；已完成actual workerd及首筆真實API→runner→validated閉環；首次D1隔離還原與已完成／未派送命令對帳已通過；human/mobile與完整故障／恢復驗收仍待完成；AC-06～08維持pending，不由本機工具通過改為passed。
+
+本輪常駐 runner 範圍及 RR-01～05 見[resident runner](docs/resident-runner.md)，本輪[98項測試與常駐實機子集](docs/evidence/m1-resident.md)通過，原主線 AC 保持 pending。

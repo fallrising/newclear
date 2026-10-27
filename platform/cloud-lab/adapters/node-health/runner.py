@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Bounded cloudlab.m1 node collector. Python 3.11 standard library only."""
 import argparse
+import fcntl
 import hashlib
+import http.client
 import hmac
 import ipaddress
 import json
@@ -10,8 +12,11 @@ import os
 from pathlib import Path
 import re
 import secrets
+import signal
 import sqlite3
+import stat
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -23,6 +28,40 @@ MAX_JSON = 32768
 
 class ProtocolError(ValueError):
     """Safe diagnostic without request bodies, URLs or credentials."""
+
+
+class AuthenticationError(ProtocolError):
+    """An operator must inspect the existing grant; do not retry forever."""
+
+
+class RetryableError(ProtocolError):
+    """A temporary transport or server failure; journal remains authoritative."""
+
+
+class InstanceLock:
+    """Lifetime advisory lock for CLI users of one canonical journal. Never unlink."""
+    def __init__(self, journal_path):
+        self.path = str(Path(journal_path).resolve()) + '.lock'
+        self.fd = None
+
+    def __enter__(self):
+        fd = os.open(self.path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+        try:
+            info = os.fstat(fd)
+            if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
+                    or info.st_nlink != 1 or stat.S_IMODE(info.st_mode) != 0o600):
+                raise ProtocolError('invalid runner lock')
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BaseException:
+            os.close(fd)
+            raise
+        self.fd = fd
+        return self
+
+    def __exit__(self, *args):
+        if self.fd is not None:
+            os.close(self.fd)
+            self.fd = None
 
 
 def encode(value):
@@ -178,9 +217,15 @@ class HttpClient:
                     raise ProtocolError('invalid control-plane response')
                 raw = response.read(MAX_JSON + 1)
         except urllib.error.HTTPError as exc:
+            exc.close()
+            if exc.code in (401, 403):
+                raise AuthenticationError('control-plane authorization rejected') from exc
+            if exc.code in (408, 409, 429) or 500 <= exc.code <= 599:
+                raise RetryableError('control-plane temporarily unavailable') from exc
             raise ProtocolError('control-plane request rejected') from exc
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            raise ProtocolError('control-plane request unavailable') from exc
+        except (urllib.error.URLError, TimeoutError, OSError, http.client.IncompleteRead,
+                http.client.RemoteDisconnected) as exc:
+            raise RetryableError('control-plane request unavailable') from exc
         return strict_json(raw)
 
 
@@ -359,16 +404,55 @@ class Runner:
         return True
 
 
+def log_event(**event):
+    print(encode(dict(event, at=utc(time.time()))).decode(), flush=True)
+
+
+def resident_loop(runner, stop, *, stop_at, poll_seconds=30, clock=time.time,
+                  monotonic=time.monotonic, emit=log_event):
+    integer(poll_seconds, 5, 60)
+    deadline = monotonic() + max(0, stop_at - clock())
+    backoff = poll_seconds
+    while not stop.is_set():
+        if clock() >= stop_at or monotonic() >= deadline:
+            emit(event='stopped', reason='deadline')
+            return 0
+        delay = poll_seconds
+        try:
+            worked = runner.run_once()
+            emit(event='reported' if worked else 'idle')
+            backoff = poll_seconds
+        except RetryableError:
+            delay = backoff
+            backoff = min(120, backoff * 2)
+            emit(event='retry', delay_seconds=delay)
+        except (ProtocolError, OSError, sqlite3.Error) as exc:
+            emit(event='fatal', reason='authorization' if isinstance(exc, AuthenticationError) else 'protocol_or_journal')
+            return 1
+        if not stop.is_set():
+            stop.wait(max(0, min(delay, stop_at - clock(), deadline - monotonic())))
+    emit(event='stopped', reason='signal')
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', required=True, help='private JSON configuration file')
     parser.add_argument('--once', action='store_true', help='one claim and at most one report')
+    parser.add_argument('--stop-at', help='required for resident mode: earliest grant expiry as UTC YYYY-MM-DDTHH:MM:SSZ')
+    parser.add_argument('--poll-seconds', type=int, default=30, help='resident poll interval, 5 to 60 seconds')
     parser.add_argument('--allow-loopback-http', action='store_true', help='explicit local-test transport only')
     args = parser.parse_args(argv)
     journal = None
+    lock = None
+    handlers = {}
     try:
         if not hasattr(os, 'geteuid') or os.geteuid() == 0:
             raise ProtocolError('runner requires a non-root operating-system user')
+        integer(args.poll_seconds, 5, 60)
+        stop_at = timestamp(args.stop_at) if args.stop_at else None
+        if not args.once and stop_at is None:
+            raise ProtocolError('resident mode requires an explicit stop-at')
         path = Path(args.config)
         if path.stat().st_mode & 0o077:
             raise ProtocolError('configuration must be private to its owner (mode 0600)')
@@ -377,20 +461,22 @@ def main(argv=None):
         journal_path = Path(config.journal_path)
         if not journal_path.is_absolute():
             config.journal_path = str(path.resolve().parent / journal_path)
+        lock = InstanceLock(config.journal_path)
+        lock.__enter__()
+        stop = threading.Event()
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            handlers[sig] = signal.signal(sig, lambda *_: stop.set())
         journal = Journal(config.journal_path)
         runner = Runner(config, journal)
-        while True:
-            cycle_start = time.monotonic()
-            try:
+        if args.once:
+            if stop_at is not None and time.time() >= stop_at:
+                log_event(event='stopped', reason='deadline')
+                return 0
+            if not stop.is_set():
                 runner.run_once()
                 print('runner cycle complete', flush=True)
-                code = 0
-            except (ProtocolError, OSError, sqlite3.Error):
-                print('runner cycle failed; durable evidence retained', file=sys.stderr, flush=True)
-                code = 1
-            if args.once:
-                return code
-            time.sleep(max(5, 5 - (time.monotonic() - cycle_start)))
+            return 0
+        return resident_loop(runner, stop, stop_at=stop_at, poll_seconds=args.poll_seconds)
     except (ProtocolError, OSError, sqlite3.Error, ValueError):
         print('runner configuration or journal unavailable', file=sys.stderr)
         return 1
@@ -399,6 +485,10 @@ def main(argv=None):
     finally:
         if journal is not None:
             journal.close()
+        if lock is not None:
+            lock.__exit__()
+        for sig, handler in handlers.items():
+            signal.signal(sig, handler)
 
 
 if __name__ == '__main__':

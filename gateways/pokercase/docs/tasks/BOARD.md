@@ -355,3 +355,11 @@ T-0426 delivered by [PR680](https://github.com/fallrising/newclear/pull/680), so
 | EP-2 | fallback／CLI／協定及資料語意回歸 | EP-2 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
 | EP-3 | 完整驗證、審查、發布與交接 | EP-3 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
 Delivered by [PR683](https://github.com/fallrising/newclear/pull/683), source `6411a7c8ef1bdca2e0f2aa7b01e6345a6d458e8b`, merge `19b7296d5142e0fe5c6d682ce0ab5c65255a0f67` at 2026-10-27T12:41:18Z. D-06 synthetic privacy RED→GREEN;247 Rust tests/19groups,fmt/Clippy,20validators,44contracts/7indexes and independent source/evidence review passed. Required check/validate and source/merge trailer/ancestry/scoped-content readback passed. Original cached compiler-query failure retained; fresh metadata query kept shared sccache/target. Historical rows/caller errors unchanged; D-01–D-05, broaderUC-R05/M-15 and live gates remain open. This closes only the bounded product rows; desk stays in_progress for owner disposition.
+
+## T-0428 — Buffered cost completeness
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CE-1 | 缺值持久化 RED 與來源觀測 | CE-1 | in_progress | 2026-10-27T16:48:22Z | — | 2026-10-27T16:55:55Z |
+| CE-2 | 完整雙價格估算與既有語意 | CE-2 | in_progress | 2026-10-27T16:48:22Z | — | 2026-10-27T16:55:55Z |
+| CE-3 | 完整驗證審查及交付 | CE-3 | in_progress | 2026-10-27T16:48:22Z | — | 2026-10-27T16:55:55Z |

@@ -750,8 +750,8 @@ pub async fn handle_chat_with_fallback(
                 } else {
                     let kind = fwd.body_kind;
                     let bytes = read_forward_body(fwd, &cancel, false).await?;
+                    let (pt, ct) = extract_upstream_usage(&bytes, kind);
                     let bytes = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
-                    let (pt, ct) = extract_usage_tokens(&bytes);
                     let cost = estimate_cost(
                         pt,
                         ct,
@@ -888,8 +888,8 @@ pub async fn handle_anthropic_messages(
                 } else {
                     let kind = fwd.body_kind;
                     let bytes = read_forward_body(fwd, &cancel, false).await?;
+                    let (pt, ct) = extract_upstream_usage(&bytes, kind);
                     let chat = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
-                    let (pt, ct) = extract_usage_tokens(&chat);
                     let cost = estimate_cost(
                         pt,
                         ct,
@@ -1029,6 +1029,7 @@ pub async fn handle_responses(
                 } else {
                     let kind = fwd.body_kind;
                     let bytes = read_forward_body(fwd, &cancel, allow_background).await?;
+                    let (pt, ct) = extract_upstream_usage(&bytes, kind);
                     // If upstream already returned Responses, pass through; else wrap chat.
                     let out = match kind {
                         UpstreamBodyKind::OpenAiResponses => bytes,
@@ -1038,10 +1039,6 @@ pub async fn handle_responses(
                             responses::chat_to_responses(&chat, public_model)?
                         }
                     };
-                    let (pt, ct) = extract_usage_tokens(
-                        // usage may be responses-shaped; best-effort from chat conversion
-                        &out,
-                    );
                     let cost = estimate_cost(
                         pt,
                         ct,
@@ -1144,20 +1141,46 @@ fn extract_usage_tokens(bytes: &Bytes) -> (Option<i64>, Option<i64>) {
     (pt, ct)
 }
 
+/// Read accounting from the upstream representation before client converters can
+/// synthesize zero defaults. Counts are observations, not inferred from totals.
+fn extract_upstream_usage(bytes: &Bytes, kind: UpstreamBodyKind) -> (Option<i64>, Option<i64>) {
+    let Ok(v) = serde_json::from_slice::<Value>(bytes) else {
+        return (None, None);
+    };
+    let (usage, input, output) = match kind {
+        UpstreamBodyKind::OpenAiChat => (v.get("usage"), "prompt_tokens", "completion_tokens"),
+        UpstreamBodyKind::OpenAiResponses => (v.get("usage"), "input_tokens", "output_tokens"),
+        UpstreamBodyKind::Antigravity => (
+            v.pointer("/response/usageMetadata")
+                .or_else(|| v.get("usageMetadata")),
+            "promptTokenCount",
+            "candidatesTokenCount",
+        ),
+    };
+    let count = |field| {
+        usage
+            .and_then(|u| u.get(field))
+            .and_then(Value::as_i64)
+            .filter(|n| *n >= 0)
+    };
+    (count(input), count(output))
+}
+
 pub fn estimate_cost(
     prompt_tokens: Option<i64>,
     completion_tokens: Option<i64>,
     input_price_per_m: Option<f64>,
     output_price_per_m: Option<f64>,
 ) -> Option<f64> {
-    let pt = prompt_tokens? as f64;
-    let ct = completion_tokens.unwrap_or(0) as f64;
-    let ip = input_price_per_m.unwrap_or(0.0);
-    let op = output_price_per_m.unwrap_or(0.0);
-    if ip == 0.0 && op == 0.0 {
+    let pt = prompt_tokens?;
+    let ct = completion_tokens?;
+    let ip = input_price_per_m?;
+    let op = output_price_per_m?;
+    if pt < 0 || ct < 0 || !ip.is_finite() || !op.is_finite() || ip < 0.0 || op < 0.0 {
         return None;
     }
-    Some((pt * ip + ct * op) / 1_000_000.0)
+    let cost = (pt as f64 * ip + ct as f64 * op) / 1_000_000.0;
+    cost.is_finite().then_some(cost)
 }
 
 fn json_bytes_response(status: StatusCode, bytes: Bytes) -> Response {
@@ -2816,6 +2839,107 @@ mod diagnostic_tests {
             assert!(!e.retryable);
             assert_eq!(e.body, "client disconnected");
             assert!(dropped.load(Ordering::SeqCst));
+        }
+    }
+}
+
+#[cfg(test)]
+mod cost_completeness_tests {
+    use super::*;
+
+    #[test]
+    fn ce2_invalid_or_missing_cost_inputs_never_become_estimates() {
+        for tokens in [None, Some(-1)] {
+            assert_eq!(estimate_cost(tokens, Some(3), Some(1.0), Some(2.0)), None);
+            assert_eq!(estimate_cost(Some(2), tokens, Some(1.0), Some(2.0)), None);
+        }
+        for price in [
+            None,
+            Some(-1.0),
+            Some(f64::NAN),
+            Some(f64::INFINITY),
+            Some(f64::NEG_INFINITY),
+        ] {
+            assert_eq!(estimate_cost(Some(2), Some(3), price, Some(2.0)), None);
+            assert_eq!(estimate_cost(Some(2), Some(3), Some(1.0), price), None);
+        }
+        assert_eq!(
+            estimate_cost(Some(2), Some(3), Some(f64::MAX), Some(1.0)),
+            None
+        );
+        assert_eq!(
+            estimate_cost(Some(2), Some(3), Some(0.0), Some(0.0)),
+            Some(0.0)
+        );
+    }
+
+    #[test]
+    fn ce1_raw_usage_preserves_absent_and_invalid_counts_in_all_body_kinds() {
+        for (kind, field, pk, ck) in [
+            (
+                UpstreamBodyKind::OpenAiChat,
+                "usage",
+                "prompt_tokens",
+                "completion_tokens",
+            ),
+            (
+                UpstreamBodyKind::OpenAiResponses,
+                "usage",
+                "input_tokens",
+                "output_tokens",
+            ),
+            (
+                UpstreamBodyKind::Antigravity,
+                "usageMetadata",
+                "promptTokenCount",
+                "candidatesTokenCount",
+            ),
+        ] {
+            for wrapped in [false, true] {
+                if wrapped && !matches!(kind, UpstreamBodyKind::Antigravity) {
+                    continue;
+                }
+                for (value, expected) in [
+                    (Value::Null, None),
+                    (json!(-1), None),
+                    (json!(1.5), None),
+                    (json!("2"), None),
+                    (json!(u64::MAX), None),
+                    (json!(0), Some(0)),
+                    (json!(2), Some(2)),
+                ] {
+                    for missing in [pk, ck] {
+                        let mut v = json!({field: {pk: 3, ck: 3}});
+                        v[field][missing] = value.clone();
+                        if wrapped {
+                            v = json!({"response":v});
+                        }
+                        let bytes = Bytes::from(serde_json::to_vec(&v).unwrap());
+                        let want = if missing == pk {
+                            (expected, Some(3))
+                        } else {
+                            (Some(3), expected)
+                        };
+                        assert_eq!(extract_upstream_usage(&bytes, kind), want);
+                    }
+                }
+                let mut v = json!({field: {pk: 3}});
+                if wrapped {
+                    v = json!({"response":v});
+                }
+                assert_eq!(
+                    extract_upstream_usage(&Bytes::from(v.to_string()), kind),
+                    (Some(3), None)
+                );
+                assert_eq!(
+                    extract_upstream_usage(&Bytes::from_static(b"{}"), kind),
+                    (None, None)
+                );
+                assert_eq!(
+                    extract_upstream_usage(&Bytes::from_static(b"invalid"), kind),
+                    (None, None)
+                );
+            }
         }
     }
 }

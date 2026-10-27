@@ -27,3 +27,4 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Headless OAuth](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/headless-oauth.md): callback paste workflow and evidence-based troubleshooting.
 - [Live operations](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/live-operations.md): private receipts, provisioning order and bounded verification.
 - [First live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-first-live.md): actual runtime, one machine loop and remaining gaps.
+- [Isolated restore](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-isolated-restore.md): real D1 snapshot equality, journal reconciliation and preserved pending work; no production failover.

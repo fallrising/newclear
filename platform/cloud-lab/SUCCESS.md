@@ -29,7 +29,7 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | AC-05 | Given 完整文件候選，When 跑既有索引驗證與獨立審查，Then 導航一致、沒有 runtime 成功冒稱，所有未實作事項保留 | passed | [M0 文件證據](docs/evidence/m0-review.md)：本機 validators 及獨立 ACCEPT；Git 交付狀態見[任務板](docs/tasks/BOARD.md) |
 | AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | pending | 真實 CF＋獨立 bot API＋non-root runner 一筆閉環已通過；手機、排程與 Grok 整合仍待驗收 |
 | AC-07 | Given 重複投遞、失聯、取消及恢復，When 執行與回報競爭，Then 不重做未知副作用且停止／未知／驗證狀態誠實可見 | pending | 待 [M1 故障矩陣](docs/verification.md)的真實邊界驗收 |
-| AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；撤權、配額、D1隔離還原仍待驗收 |
+| AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；[首次D1隔離還原與journal對帳](docs/evidence/m1-isolated-restore.md)已通過；撤權、配額、執行中／unknown恢復仍待驗收 |
 
 ## 現況與缺口
 
@@ -56,4 +56,4 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 
 ## 真實環境接入準備（T-0003）
 
-新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。D1／Workers授權已更新並通過只讀查詢；網域／runner採已提出的第一組目標。私人部署計畫已準備，Access建立／service-token／身分查詢scopes已補齊，owner確認Workers Free／零新增付費；已完成actual workerd及首筆真實API→runner→validated閉環；human/mobile與完整故障／恢復驗收仍待完成；AC-06～08維持pending，不由本機工具通過改為passed。
+新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。D1／Workers授權已更新並通過只讀查詢；網域／runner採已提出的第一組目標。私人部署計畫已準備，Access建立／service-token／身分查詢scopes已補齊，owner確認Workers Free／零新增付費；已完成actual workerd及首筆真實API→runner→validated閉環；首次D1隔離還原與已完成／未派送命令對帳已通過；human/mobile與完整故障／恢復驗收仍待完成；AC-06～08維持pending，不由本機工具通過改為passed。

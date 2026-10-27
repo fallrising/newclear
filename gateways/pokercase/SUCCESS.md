@@ -4,8 +4,8 @@ purpose: 以 thinrouter 提供個人訂閱憑證的多協定 LLM gateway
 kind: service
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-26
-source_commit: 567b9fc90b90885bdd6901603b3abdd65e313e60
+reviewed: 2026-10-27
+source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 ---
 
 # pokercase 成功契約
@@ -457,3 +457,15 @@ Scope: reconcile current core acceptance evidence and make the remaining closure
 - MC-3: Given the final evidence-only diff, when complete locked Rust1.99.0 tests/fmt/Clippy, project validators/indexes, independent content/evidence and ledger reviews, required CI and normal merge/readback pass, then publish the current evidence, remaining gates and one next action without claiming whole-product acceptance. Preserve original failures, exact commands/source provenance, nullable full usage and owner-controlled desk status; backup before own worktree cleanup.
 
 Verification plan: source/test mapping plus focused AC-03 baseline, full native gates, scoped documentation diff review and all publication/ledger checks. No real credentials/provider/model, login, Docker, new dependencies/permissions, release/deploy, unrelated products or changes to another milestone's tracked plan. [Convergence record](docs/tasks/T-0426-mainline-acceptance.md).
+
+## T-0427 — D-06 error persistence
+
+Scope: implement only the thinrouter error-persistence slice of [T-1102](../../docs/specs/llm-usage-correctness.md) §4.2 / M-15 / UC-R05. Original T-1102 specification and AC-01–AC-17 remain unchanged. D-01–D-05, terminal accounting, historical-row cleanup and real-provider acceptance remain separate work.
+
+- EP-1: Given isolated fake HTTP upstreams with synthetic sensitive markers in arbitrary JSON/plain-text/Unicode/long error bodies and headers, when Chat, Messages and Responses fail in stream-requested or buffered mode, then newly persisted usage errors contain only a fixed classification code, no upstream body or marker. Prove actual baseline persistence before choosing the smallest correction; verify SQLite, authenticated usage JSON, CSV and rendered usage page. Existing historical rows are not rewritten.
+- EP-2: Given retryable and non-retryable errors, when fallback runs, then preserve HTTP status, caller-facing error contract, dispatch counts, cooldown and target order. Failed and successful attempts keep their existing separate rows, failure token/cost nulls and success values. Exercise CLI record_failure with an isolated fake CLI; do not change protocol terminal or cancellation behavior.
+- EP-3: Given the final bounded diff, then focused RED→GREEN, full locked Rust 1.99.0 suite, fmt, Clippy, project validators/indexes, independent source/evidence and ledger review, required CI, normal merge/readback and ledger/backup/cleanup must pass. Test diagnostics and runtime logs must not contain the synthetic markers. Preserve original failures and unexecuted boundaries without claiming real credential disclosure or whole-product completion.
+
+Verification uses only fake upstream/CLI and disposable synthetic databases. No real credential/private DB/provider/model, login, Docker, dependency/permission change, release/deploy. Mainline incomplete and usable_tag none. [Design and evidence](docs/tasks/T-0427-error-persistence.md).
+
+EP-1–EP-3 local evidence: synthetic HTTP/CLI RED exposed canaries in SQLite/JSON/CSV/HTML; minimal fixed-code persistence GREEN passed, including fallback/cooldown/status/cost/null witnesses. Full247 Rust tests/19groups, fmt/Clippy,20validators,44contracts/7indexes passed. Original cached compiler-query EPERM and actual privacy RED are retained separately; original environment cause unknown. Historical rows and caller error contracts are unchanged, D-01–D-05 and broader UC-R05/M-15 remain open. Independent review/CI/merge/ledger gates are recorded separately in the task.

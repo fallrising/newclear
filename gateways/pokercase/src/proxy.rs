@@ -67,7 +67,8 @@ fn cli_format(target: &ResolvedTarget) -> Option<UpstreamFormat> {
         .filter(|f| matches!(f, UpstreamFormat::ClaudeCode | UpstreamFormat::CursorCli))
 }
 
-/// Mark cooldown and log a failed attempt.
+/// Mark cooldown and log a failed attempt. Diagnostic text belongs to the caller response,
+/// never the usage ledger: upstream/CLI bodies may contain credentials or request content.
 fn record_failure(
     state: &ProxyState,
     public_model: &str,
@@ -84,7 +85,7 @@ fn record_failure(
         Some(&target.connection.id),
         Some(e.status as i64),
         Some(start.elapsed().as_millis() as i64),
-        Some(&e.body.chars().take(500).collect::<String>()),
+        Some("upstream_attempt_failed"),
         None,
         None,
         None,
@@ -777,20 +778,7 @@ pub async fn handle_chat_with_fallback(
                     retryable = e.retryable,
                     "upstream attempt failed"
                 );
-                let secs = cooldown_secs_for_status(e.status);
-                if secs > 0 {
-                    state.cooldown.mark(&target.connection.id, secs);
-                }
-                let _ = state.store.log_usage(
-                    Some(public_model),
-                    Some(&target.connection.id),
-                    Some(e.status as i64),
-                    Some(start.elapsed().as_millis() as i64),
-                    Some(&e.body.chars().take(500).collect::<String>()),
-                    None,
-                    None,
-                    None,
-                );
+                record_failure(state, public_model, target, &e, start);
                 if e.retryable && idx + 1 < targets.len() {
                     last_err = Some(e);
                     continue;
@@ -923,20 +911,7 @@ pub async fn handle_anthropic_messages(
                 }
             }
             Err(e) => {
-                let secs = cooldown_secs_for_status(e.status);
-                if secs > 0 {
-                    state.cooldown.mark(&target.connection.id, secs);
-                }
-                let _ = state.store.log_usage(
-                    Some(public_model),
-                    Some(&target.connection.id),
-                    Some(e.status as i64),
-                    Some(start.elapsed().as_millis() as i64),
-                    Some(&e.body.chars().take(500).collect::<String>()),
-                    None,
-                    None,
-                    None,
-                );
+                record_failure(state, public_model, target, &e, start);
                 if e.retryable && idx + 1 < targets.len() {
                     last_err = Some(e);
                     continue;
@@ -1087,20 +1062,7 @@ pub async fn handle_responses(
                 }
             }
             Err(e) => {
-                let secs = cooldown_secs_for_status(e.status);
-                if secs > 0 {
-                    state.cooldown.mark(&target.connection.id, secs);
-                }
-                let _ = state.store.log_usage(
-                    Some(public_model),
-                    Some(&target.connection.id),
-                    Some(e.status as i64),
-                    Some(start.elapsed().as_millis() as i64),
-                    Some(&e.body.chars().take(500).collect::<String>()),
-                    None,
-                    None,
-                    None,
-                );
+                record_failure(state, public_model, target, &e, start);
                 if e.retryable && idx + 1 < targets.len() {
                     last_err = Some(e);
                     continue;

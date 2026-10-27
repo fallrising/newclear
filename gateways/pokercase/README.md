@@ -4,7 +4,7 @@
 
 > 當前收斂：[核心驗收對帳與剩餘工作入口](docs/tasks/T-0426-mainline-acceptance.md)（T-0426）。AC-03 本機驗證通過；真實旅程及既有用量修正仍待完成，主線未結案。
 
-> 文件規劃：[LLM 用量正確性修正規格](../../docs/specs/llm-usage-correctness.md)（T-1102）。整理已確認缺陷、待重現問題與後續修正驗收；修正尚未實作。
+> 文件規劃：[LLM 用量正確性修正規格](../../docs/specs/llm-usage-correctness.md)（T-1102）。整理已確認缺陷、待重現問題與後續修正驗收；[D-06 錯誤保存切片](docs/tasks/T-0427-error-persistence.md) 已取得本機合成 RED→GREEN，其他 runtime 工作仍未完成。
 
 
 > **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).

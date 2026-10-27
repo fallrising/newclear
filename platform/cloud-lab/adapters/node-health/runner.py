@@ -164,6 +164,7 @@ class HttpClient:
         self.config = config
         # Do not send machine credentials through ambient proxy settings.
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+        self.opener.addheaders = [("User-Agent", "cloud-lab-m1/1.0")]
 
     def post(self, path, body):
         headers = signed_headers(self.config, path, body)

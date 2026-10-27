@@ -117,6 +117,8 @@ class TransportTests(unittest.TestCase):
         class Handler(http.server.BaseHTTPRequestHandler):
             def log_message(self,*args):pass
             def do_GET(self):
+                if self.headers.get('User-Agent') != 'cloud-lab-m1/1.0':
+                    self.send_response(403);self.send_header('Content-Type','application/json');self.end_headers();self.wfile.write(b'{}');return
                 if self.path=='/leak':test.fail('redirect followed')
                 if self.headers.get('X-Lab-Signature'):
                     message='\n'.join(['CLOUDLAB-M1','probe-test','bot','1','GET',self.path,self.headers['X-Lab-Time'],self.headers['X-Lab-Nonce'],hashlib.sha256(b'').hexdigest()]).encode()

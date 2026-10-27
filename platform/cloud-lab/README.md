@@ -2,7 +2,7 @@
 
 個人 Cloudflare 工具與遠端運維的共同框架：以知識樹導航能力，以版本化契約連接 API、排程、bot、執行器及看板。
 
-**M1 已有 Workers/D1 控制面、Python OS 健康檢查 runner 與看板的本機實作候選；尚未部署或通過真實 Cloudflare 驗收。** [成功契約](SUCCESS.md)區分文件里程碑與產品主線；既有專案仍在原路徑、沿用原資料及權限。
+**M1 已部署受 Access 保護的 Workers/D1 與看板，並完成一筆真實 non-root runner 健康檢查閉環；完整人機操作、故障與恢復驗收仍未完成。** [成功契約](SUCCESS.md)區分文件里程碑與產品主線；既有專案仍在原路徑、沿用原資料及權限。
 
 文檔檔位：**未分級**。本次 owner 指示授權繼續開發 M1；長期投入及實作節奏另按里程碑決定。[文件政策](../../docs/portfolio-doc-tiers.md)／[Portfolio](../../PORTFOLIO.md)。
 
@@ -29,4 +29,4 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 - [控制面](apps/control/worker/index.mjs)／[runner](adapters/node-health/README.md)／[看板](apps/control/public/index.html)
 - [本機啟動與測試](docs/quickstart.md)／[部署前設定與 gate](docs/deployment.md)／[實作證據](docs/evidence/m1-implementation.md)
 
-接入真實環境前可使用 [private bundle產生器](docs/deployment-bundle.md) 與 [live probe](docs/live-probe.md)。目前 [連線前檢查](docs/evidence/m1-live-readiness.md) 已選定首組目標，仍有Access權限／方案缺口，沒有因工具完成而宣稱已部署。
+接入真實環境前可使用 [private bundle產生器](docs/deployment-bundle.md) 與 [live probe](docs/live-probe.md)。目前 [連線前檢查](docs/evidence/m1-live-readiness.md) 已選定首組目標，Access scopes 已補齊，owner 確認 Workers Free／零新增付費；[首輪真實閉環](docs/evidence/m1-first-live.md)已通過，後續驗收仍進行中。無桌面登入與故障分流見 [OAuth 操作紀錄](docs/headless-oauth.md)，部署／接手順序見 [操作紀錄](docs/live-operations.md)。

@@ -321,6 +321,7 @@ class HttpTests(unittest.TestCase):
         expected = r.signed_headers(self.cfg, path, body, int(headers['X-Lab-Time']), headers['X-Lab-Nonce'])
         self.assertEqual(headers['X-Lab-Signature'], expected['X-Lab-Signature'])
         self.assertEqual(body, b'{}')
+        self.assertEqual(headers['User-Agent'], 'cloud-lab-m1/1.0')
 
     def test_access_headers_separate_from_signed_payload(self):
         self.cfg = config('unused', cloudflare_access_client_id='synthetic-id.access',

@@ -1,6 +1,6 @@
 # 部署設定與 live gate
 
-本輪交付是已驗證的本機實作候選；此文件沒有啟用帳號資源、網域、排程或外部服務。下一步部署前要確定目標 CF account／domain／plan、單一非 root runner、容量／retention、Access 應用與批准的觀測窗口。費用未知，不承諾免費。
+此文件是部署設定與完整 live gate；已執行範圍見 [首輪證據](evidence/m1-first-live.md)／[操作紀錄](live-operations.md)。每次部署前要確定目標 CF account／domain／plan、單一非 root runner、容量／retention、Access 應用與批准的觀測窗口。本輪 owner 確認 Free／零新增付費；帳單未能透過此 OAuth 連線查證。
 
 ## 部署單位
 
@@ -37,9 +37,9 @@ runner journal 是唯一執行證據：先保存 started，再採樣，完成先
 
 ## 尚未通過的 live 驗收
 
-1. 使用選定 CF toolchain 的 workerd／本機 D1 bindings，再進真實 D1 的 CAS、batch rollback 與網路故障驗證。
-2. 真實 Access human／service token、撤權／金鑰輪替、所有入口與資產保護。
-3. 指定 runner、手機瀏覽器與獨立 bot caller 的實際使用；Grok bot 與 agent 平台 adapter 尚未接入。
+1. Actual workerd／本機 D1 bindings、真實 D1 CAS／batch rollback 已通過；網路故障矩陣仍待驗證。
+2. 真實 service-token＋HMAC 與入口拒絕已通過；human／撤權／金鑰輪替與所有替代入口仍待驗收。
+3. 指定 runner 與獨立 bot API 一筆實際使用已通過；手機瀏覽器、Grok bot 與 agent 平台 adapter 尚未完成。
 4. 斷線／重啟／晚到、排程關閉、配額與 unknown；備份、隔離還原及觀測窗口。
 
 以上是完整 M1/產品 AC-06～08 的剩餘門檻；本機測試與 PR 合併不會把它們自動改成通過。
@@ -47,3 +47,7 @@ runner journal 是唯一執行證據：先保存 started，再採樣，完成先
 ## 接入前工具
 
 [離線private bundle](deployment-bundle.md)產生精確source、分離的credentials/grants與停用schedule；[live probe](live-probe.md)預設只讀，明確flag才提交一次固定檢查。[本輪前檢查與限制](evidence/m1-live-readiness.md)記錄缺少的連線scopes與target輸入；工具通過不等於部署通過。
+
+## 無桌面授權
+
+連線補權與 callback 回貼流程見 [OAuth 操作紀錄](headless-oauth.md)。本輪 owner 確認 Workers Free／零新增付費；不開付費訂閱，也不將未知計費查詢寫成已驗證零帳單。

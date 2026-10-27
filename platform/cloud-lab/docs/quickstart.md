@@ -1,6 +1,6 @@
 # 本機啟動與驗證
 
-M1 已有實作候選，尚未部署 Cloudflare。下面的本機 harness 使用 Node 的 Web APIs 與 SQLite，測試用身分及金鑰由本機產生；不能當作 D1／Access 或公開入口的安全驗收。Python runner 是同一份實際程式。
+M1 首輪部署狀態見 [live evidence](evidence/m1-first-live.md)。下面的本機 harness 使用 Node 的 Web APIs 與 SQLite，測試用身分及金鑰由本機產生；不能當作 D1／Access 或公開入口的安全驗收。Python runner 是同一份實際程式。
 
 ## 一次驗證完整閉環
 

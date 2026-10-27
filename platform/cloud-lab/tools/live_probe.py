@@ -110,6 +110,7 @@ class HTTPSClient:
     def __init__(self, base_url):
         self.base_url = base_url
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+        self.opener.addheaders = [("User-Agent", "cloud-lab-m1/1.0")]
 
     def __call__(self, method, path, body, headers):
         # This client only accepts internal fixed paths, never a response-provided URL.

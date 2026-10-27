@@ -1,6 +1,6 @@
 # Offline private deployment bundle
 
-`tools/prepare_deployment.py` uses Python 3.11 standard library only. It prepares files locally; it does not contact Cloudflare, install a toolchain, provision a database, deploy, attach a hostname or enable scheduling. Live gates in [deployment.md](deployment.md) remain pending. Costs and plan eligibility are unknown.
+`tools/prepare_deployment.py` uses Python 3.11 standard library only. It prepares files locally; it does not contact Cloudflare, install a toolchain, provision a database, deploy, attach a hostname or enable scheduling. Remaining live gates and current target evidence are tracked in [deployment.md](deployment.md); this offline tool does not determine plan eligibility or costs.
 
 From the repository source directory:
 

@@ -351,6 +351,7 @@ T-0426 delivered by [PR680](https://github.com/fallrising/newclear/pull/680), so
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| EP-1 | 合成錯誤持久化重現及最小修正 | EP-1 | in_progress | 2026-10-27T11:12:44Z | | 2026-10-27T11:12:44Z |
-| EP-2 | fallback／CLI／協定及資料語意回歸 | EP-2 | in_progress | 2026-10-27T11:12:44Z | | 2026-10-27T11:12:44Z |
-| EP-3 | 完整驗證、審查、發布與交接 | EP-3 | in_progress | 2026-10-27T11:12:44Z | | 2026-10-27T11:12:44Z |
+| EP-1 | 合成錯誤持久化重現及最小修正 | EP-1 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
+| EP-2 | fallback／CLI／協定及資料語意回歸 | EP-2 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
+| EP-3 | 完整驗證、審查、發布與交接 | EP-3 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
+Delivered by [PR683](https://github.com/fallrising/newclear/pull/683), source `6411a7c8ef1bdca2e0f2aa7b01e6345a6d458e8b`, merge `19b7296d5142e0fe5c6d682ce0ab5c65255a0f67` at 2026-10-27T12:41:18Z. D-06 synthetic privacy RED→GREEN;247 Rust tests/19groups,fmt/Clippy,20validators,44contracts/7indexes and independent source/evidence review passed. Required check/validate and source/merge trailer/ancestry/scoped-content readback passed. Original cached compiler-query failure retained; fresh metadata query kept shared sccache/target. Historical rows/caller errors unchanged; D-01–D-05, broaderUC-R05/M-15 and live gates remain open. This closes only the bounded product rows; desk stays in_progress for owner disposition.

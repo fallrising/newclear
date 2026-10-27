@@ -43,3 +43,7 @@ runner journal用SQLite online backup或正確停止寫入後的整套檔案保�
 Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，再用同filename／etag呼叫ingest並有界poll。另保留SHA-256。還原後用該SQL載入的本機schema／rows比較六張應用表，不拿一個稍後變動中的source查詢當作快照oracle。D1的`_cf_KV`只作明示平台schema例外，不能查其內容；遠端用quick_check及foreign_key_check，本機SQLite才使用integrity_check。
 
 不能假設備份時active必為0。列出每個未完成命令的attempt／external reference與journal狀態；本次accepted、無attempt、無journal的命令被原樣保留，沒有派送。若是started／unknown或證據不一致，保留並停止恢復派送，另做對帳。全體Worker binding回讀確認restore無綁定，live仍用source；這證明隔離還原，不等於正式failover成功。
+
+## 常駐runner後續驗證
+
+[resident契約](resident-runner.md)與[實機證據](evidence/m1-resident.md)補充先前one-shot階段：現已驗證有期限的user service自動拾取一筆任務，以及正常重啟journal不變。繼續使用原私人config及journal，先停服務再人工once；不要重啟不持鎖的舊版並行執行。期限與續權仍由operator核實；不假設linger、開機恢復或完整故障矩陣已通過。

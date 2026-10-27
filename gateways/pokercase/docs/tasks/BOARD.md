@@ -360,6 +360,8 @@ Delivered by [PR683](https://github.com/fallrising/newclear/pull/683), source `6
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| CE-1 | 缺值持久化 RED 與來源觀測 | CE-1 | in_progress | 2026-10-27T16:48:22Z | — | 2026-10-27T16:55:55Z |
-| CE-2 | 完整雙價格估算與既有語意 | CE-2 | in_progress | 2026-10-27T16:48:22Z | — | 2026-10-27T16:55:55Z |
-| CE-3 | 完整驗證審查及交付 | CE-3 | in_progress | 2026-10-27T16:48:22Z | — | 2026-10-27T16:55:55Z |
+| CE-1 | 缺值持久化 RED 與來源觀測 | CE-1 | done | 2026-10-27T16:48:22Z | 2026-10-27T17:02:23Z | 2026-10-27T17:02:34Z |
+| CE-2 | 完整雙價格估算與既有語意 | CE-2 | done | 2026-10-27T16:48:22Z | 2026-10-27T17:02:23Z | 2026-10-27T17:02:34Z |
+| CE-3 | 完整驗證審查及交付 | CE-3 | done | 2026-10-27T16:48:22Z | 2026-10-27T17:02:23Z | 2026-10-27T17:02:34Z |
+
+Delivered by [PR689](https://github.com/fallrising/newclear/pull/689), source `39b210c53916bea7c2e9044fb9aac654cf2bba98`, merge `6362f75fb0d591fa17653cf67a8893f148055a18` at 2026-10-27T17:02:23Z. Scoped buffered completeness:126cases/3newRusttests, genuine82baseline mismatches per surface then identicalfixture GREEN; full250tests/20groups,fmt/Clippy,20validators,44contracts/7indexes and independent source review passed. Necessary CI, normal merge and remote source/merge trailer/ancestry/scoped-byte readback passed. Original fixture errors and unintended synthetic Antigravity request returning401 retained; final HTTP fixtures use a non-forwarding loopback fake proxy. Antigravity HTTP remains unverified, offline parser only; broaderD05/T1102 and real acceptance remain open. Only these bounded rows close; desk stays in_progress for owner disposition.

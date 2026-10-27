@@ -47,3 +47,5 @@ Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，�
 ## 常駐runner後續驗證
 
 [resident契約](resident-runner.md)與[實機證據](evidence/m1-resident.md)補充先前one-shot階段：現已驗證有期限的user service自動拾取一筆任務，以及正常重啟journal不變。繼續使用原私人config及journal，先停服務再人工once；不要重啟不持鎖的舊版並行執行。期限與續權仍由operator核實；不假設linger、開機恢復或完整故障矩陣已通過。
+
+[隔離恢復工具](recovery-qualification.md)使用synthetic身份及專用journal，不能指向live配置。遇到live unknown時先保留命令／external_ref／journal對帳；本機故障工具通過不授權清空unknown、刷新deadline或重跑原命令。

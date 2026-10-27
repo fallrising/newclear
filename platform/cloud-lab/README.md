@@ -34,3 +34,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [首次隔離還原](docs/evidence/m1-isolated-restore.md)已核對六張應用表及journal；未派送命令完整保留，沒有切換正式DB或重跑工作。
 
 [常駐runner](docs/resident-runner.md)提供有界輪詢、單一實例、期限與停止／重啟契約；[自動拾取與重啟對帳](docs/evidence/m1-resident.md)已通過，完整故障恢復及手機驗收仍待完成。
+
+[隔離中斷／回報遺失驗證](docs/recovery-qualification.md)涵蓋真實程序與實際workerd／D1 binding；[證據](docs/evidence/m1-recovery.md)保留unknown容量占用，未操作live服務。

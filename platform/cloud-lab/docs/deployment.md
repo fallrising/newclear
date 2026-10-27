@@ -33,7 +33,7 @@ Bot／runner 經 Access service-token policy 時，在 [runner private config](.
 
 runner journal 是唯一執行證據：先保存 started，再採樣，完成先保存 result，再回報。重啟的 started／missing reconcile 不重跑。不能刪 journal 解決 unknown；應保留並對帳。M1 不提供自動 reset／重派／native stop，也不把取消按鈕當成程序停止。
 
-備份時保留 D1 schema/version、資料與 runner journal，含 SQLite WAL／journal；不要只複製仍在寫入中的單一檔案。還原先停止新准入／停用排程與派送 grant，隔離驗證，再對帳所有未完成 command。此版尚未做真實 CF 還原演練，不能直接宣稱可安全接回既有主機。
+備份時保留 D1 schema/version、資料與 runner journal，含 SQLite WAL／journal；不要只複製仍在寫入中的單一檔案。還原先停止新准入／停用排程與派送 grant，隔離驗證，再對帳所有未完成 command。[首次真實D1隔離還原](evidence/m1-isolated-restore.md)已驗證snapshot與journal對帳；仍未做正式切換及執行中／unknown恢復，不能直接宣稱可安全接回既有主機。
 
 ## 尚未通過的 live 驗收
 

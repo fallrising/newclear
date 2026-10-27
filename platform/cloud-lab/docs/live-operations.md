@@ -35,3 +35,11 @@ runner journal用SQLite online backup或正確停止寫入後的整套檔案保�
 還原只進新建隔離DB，不綁Worker／hostname、不啟用schedule；比較schema／資料與journal，未完成工作先對帳。這項操作成功才可填還原證據，不能由備份檔存在推論可恢復。
 
 本輪沒有常駐runner。grant／Access token到期不會自動續期；下一輪先核對窗口和原有未完成命令，再由可信operator輪替／延長，不能重建journal清空unknown。排程、長期runner、Grok調度與agent adapter須通過各自後續gate。
+
+## 已實測的隔離還原細節
+
+[首次還原證據](evidence/m1-isolated-restore.md)保留成功與失敗。Export開始後立即以at_bookmark作current_bookmark有界poll，檢查內層success及complete才下載；不要隔很久才poll舊export。備份只寫入批准的private目的地，排他建立0600並fsync檔案及目錄。
+
+Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，再用同filename／etag呼叫ingest並有界poll。另保留SHA-256。還原後用該SQL載入的本機schema／rows比較六張應用表，不拿一個稍後變動中的source查詢當作快照oracle。D1的`_cf_KV`只作明示平台schema例外，不能查其內容；遠端用quick_check及foreign_key_check，本機SQLite才使用integrity_check。
+
+不能假設備份時active必為0。列出每個未完成命令的attempt／external reference與journal狀態；本次accepted、無attempt、無journal的命令被原樣保留，沒有派送。若是started／unknown或證據不一致，保留並停止恢復派送，另做對帳。全體Worker binding回讀確認restore無綁定，live仍用source；這證明隔離還原，不等於正式failover成功。

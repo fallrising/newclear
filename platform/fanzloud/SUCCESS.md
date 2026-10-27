@@ -91,3 +91,10 @@ remain unchanged; this documentation clarification grants no new runtime authori
 
 Validation: scoped project-success documentation and diff checks passed. Independent
 review and normal publication remain pending; executable tests were not rerun.
+
+
+## T-0380 Claude-reviewed completion plan — 2026-10-27
+
+Owner requested consultation on the current failure and plan, then documentation before further work. [The updated plan](../../docs/fe-review/FANZLOUD-COMPLETION-PLAN.md) separates verified conditional source behavior from unproven executed-build/007 attribution. It adds the error-to-cancel control and corrects abort, suspension, context-destruction and exception oracles. Scope is documentation only: no engine/application/dependency edit or new browser attempt.
+
+Document acceptance requires source-backed advice mapping, explicit NOT_RUN/SLICE/engine/product evidence levels, a bounded upstream-test-patch next task, scoped project-success and diff checks, independent review, required CI and remote readback. The next test patch is not implemented or executed by this document. Recovery007 remains FAIL/consumed; canonical8/27,delivery18/19 and PR604Draft remain. Existing product ACs, mainline incomplete, usable_tag:none and targetsfalse are unchanged.

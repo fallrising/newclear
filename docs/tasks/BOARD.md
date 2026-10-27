@@ -45,7 +45,7 @@
 | FE2-11 | Paired synthetic Web R2 delivered in PR598 | R2-AC-11 | done | 2026-10-24T11:22:03Z | 2026-10-24T17:33:41Z | 2026-10-24T17:34:24Z |
 | FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
-| FE2-14 | platform/fanzloud 第2輪實作（等 owner） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-24T16:20:15Z |
+| FE2-14 | platform/fanzloud 第2輪實作（[完成／取消後續計劃](../fe-review/FANZLOUD-COMPLETION-PLAN.md)；PR604 Draft） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-27T16:50:17.327262+00:00 |
 | FE2-E | 交付證據／整合核對 | R2-AC-E | todo | — | — | — |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
@@ -57,3 +57,5 @@ Historical pre-merge checkpoint 2026-10-24T17:03Z: owner separately approved the
 Final paired delivery: [PR598](https://github.com/fallrising/newclear/pull/598) reviewed head `679e91e58d4a9a0c93e0c963d4e925118ca59e29` normally merged `3169fbb48bc1b79e4d4865471c27c6df2d76ac56` at 2026-10-24T17:33:41Z. Independent T028 accepted the integrated candidate; all five current CI checks passed and fetched component/plan/board content matched. Component reports/results retain the pre-merge evidence snapshot; this ledger records final publication. Scoped synthetic Web R2 only; full Round3/native product acceptance remains separate.
 
 Overall delivery is18of19. Fanz PR604 remains incomplete: bootstrap001-only PASS does not accept canceled-local or the remaining matrix. A single combined201+202 canceled-local-only proposal awaits explicit owner approval; no dependent source/test/runtime has started. Original failures and private evidence are retained.
+
+2026-10-27 current Fanzloud checkpoint: recovery007 FAIL/consumed; source-only completion/cancellation path reviewed, actual binary/branch attribution unknown. Owner requested Claude plan review and documentation first. [Current plan](../fe-review/FANZLOUD-COMPLETION-PLAN.md) supersedes historical pending-attempt descriptions above. Next proposed artifact is an upstream-style test patch marked NOT_RUN; no new browser or engine/application change. Delivery18/19, canonical8/27, PR604Draft and end unset remain.

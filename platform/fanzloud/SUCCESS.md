@@ -249,3 +249,19 @@ Acceptance:
 - An independent source review accepts v6, and the required CI passes.
 - Attempt `baseline-tablet-001` then runs once (at most 300 seconds, no retry).
 - A PASS yields nine candidate cells that need independent actual review. A FAIL is preserved and stops.
+
+### Result — tablet 001 (2026-10-28)
+
+`baseline-tablet-001` ran once on source `c3dcab8f`.
+- PASS in 21.0 seconds: exit 0, cleanup complete, container removed. Chromium 153.0.8010.12, Playwright 1.63.0.
+- It chained on the pinned desktop evidence (`f942f5b8…`, `dea0e7dd…`).
+- All nine states passed with every health entry expected and zero `requestfailed`, including `recovery-required` on the generic path. axe reported 0 violations and the page has no horizontal overflow at 834.
+
+An independent actual review returned CANONICAL_ACCEPT for all nine tablet cells as baseline captures. Canonical is 18/27 on the T-0433 source.
+
+Open M2 gaps (recorded, not passed):
+- The diff and event lists never overflow at desktop or tablet, so R07/R10 local scrolling is not exercised.
+- The diff region has no accessible name and `tabIndex` -1.
+- axe marks color-contrast incomplete (serious) in every state; R07 treats incomplete as not passed.
+
+Remaining: mobile 9 (needs separate approval), the M2 actual UI including these gaps, and finite HTTP/WSS conformance. Delivery stays 18/19.

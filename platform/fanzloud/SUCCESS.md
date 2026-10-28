@@ -213,3 +213,13 @@ Acceptance:
 An independent actual review returned CANONICAL_CANDIDATE_ACCEPT. That makes `recovery-required__desktop__dark` the first canonical cell on the T-0433 source. The review also recorded one serious color-contrast item that axe marks incomplete (not a violation), for design follow-up.
 
 This is one run: it shows ERR_ABORTED did not occur here and does not measure a rate. The 8 earlier cells were accepted on the previous source and are not reusable. On the T-0433 source, canonical is 1/27, and the remaining desktop, tablet and mobile cells need separately approved recapture. Delivery stays 18/19.
+
+## T-0433 desktop remaining v5 runner — 2026-10-28
+
+The owner approved preparing a runner for the other eight desktop cells and running it once after review and CI. v4 cannot be reused here: its recovery-only gate rejects every non-recovery state by design. [SPEC-T006R desktop remaining v5](docs/specs/SPEC-T006R-desktop-remaining-v5.md) D01–D05 derives a byte-traceable v5 from the existing all-state `remaining-baseline.mjs`. v5 changes the selection, the two source pins, the previous-phase read and reuse; every other gate is unchanged.
+
+Acceptance:
+- The v5 pure test passes and the existing fe-review suites stay green.
+- An independent source review accepts v5, and the required CI passes.
+- Attempt `baseline-desktop-remaining-001` then runs once (at most 300 seconds, no retry).
+- A PASS yields eight candidate cells that need independent actual review. A FAIL is preserved and stops.

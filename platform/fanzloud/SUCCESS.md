@@ -282,3 +282,12 @@ Open M2 defects measured by the baseline (R07 final-state bar; repair per R10 as
 4. All cells: the event and diff regions are unnamed with `tabIndex` -1. Event local scrolling is never exercised, and diff local scrolling only on mobile.
 
 Remaining: M2 actual UI repairs for these, finite HTTP/WSS conformance, then integration review, CI and PR604 delivery. Delivery stays 18/19.
+
+## T-0433 M2 repair — 2026-10-28
+
+Milestone 1 (ERR_ABORTED fix and dark baseline 27/27) is merged: PR604, main `0111908492c32d0b01d561b24b6024737cb4f641`. The owner approved the M2 repair, documentation first, and asked to be consulted before any affected cell is recaptured. [SPEC-T006R M2 repair](docs/specs/SPEC-T006R-m2-repair.md) M2-01..03 fixes only measured defects:
+- mobile horizontal overflow from the unbreakable verification URL;
+- unfocusable, unnamed event and diff scroll regions;
+- bounded contrast evidence for axe's incomplete results.
+
+Acceptance: a focused RED, then GREEN, for M2-01 and M2-02; contrast lower bounds plus a PNG background cross-check for M2-03; existing suites green; independent review; required CI; merge. Browser recapture is a separate owner decision.

@@ -25,3 +25,5 @@ Owner 指示繼續開發；本輪將既有固定唯讀 node-health runner 交給
 停用／回退：停止user service，保留現有journal，回到已驗證的上一版程式；不得並行執行舊版未持鎖runner。啟用user service不等於登入前／登出後持續執行，必須另驗證user manager與linger；本輪不默認修改主機linger政策。
 
 RR-01～05已完成本輪有界驗證；詳見[98項測試、獨立審查與實機證據](evidence/m1-resident.md)。登入前／登出後持續運作、強制中斷與完整主線驗收仍待完成。
+
+後續[RO01–04程序觀測](resident-observation.md)新增opt-in私人socket，查詢目前程序與stop-at；沒有把此source更新安裝到原user service，也沒有延長期限。

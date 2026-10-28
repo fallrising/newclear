@@ -45,3 +45,7 @@ The importable API is `Config.from_dict(value, allow_loopback_http=False)`, `Jou
 ## 授權來源查詢
 
 `python3 runner.py --config /private/runner.json --authorization-status`只查自己的Worker HMAC／grant metadata，不建立journal或領取工作；不可與`--once`／`--stop-at`混用。新介面尚未部署，既有過期憑證仍拒絕，不自動續期。格式、來源限制與程序觀測規劃見[契約](../../docs/self-authorization.md)。
+
+## Resident即時觀測
+
+Resident可選`--observation-socket /private/resident.sock`；先備妥owner0700 parent。查詢使用`python3 runner.py --config /private/runner.json --observe-resident --observation-socket /private/resident.sock`，不取得journal鎖或領工作。不存在／殘留socket、設定漂移或缺少proc權限會拒絕。詳見[契約與限制](../../docs/resident-observation.md)。

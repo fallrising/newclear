@@ -28,3 +28,5 @@ Client嚴格驗證schema、credential id/generation、grant引用及scope與目�
 輪替前先完成這個程序觀測來源，再指定target、role、明確期限、新generation及回退值；採集新鮮D1／Access狀態、對帳在途工作、保存私人receipts，準備逐項可回讀的變更。已過期HMAC需operator在明確批准的維護窗口更新，不能靠本API自救或自動延長。此次沒有生成secret或可執行續期計畫；未選期限之前不產生虛構批准範圍。
 
 本輪只改source，部署後的新介面才可提供此來源；既有AS MCP採集器仍不會自動合併self response，AL snapshot不因新增CLI而變完整。接入需保留target／scope／identity、來源時間及部署版本證據。
+
+後續[RO01–04](resident-observation.md)已實作上述程序來源的私人socket／kernel身分與鎖驗證；仍限source／本機測試，未部署到原resident，也未自動合併到AS／AL snapshot。

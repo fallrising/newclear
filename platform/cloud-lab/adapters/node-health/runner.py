@@ -16,6 +16,7 @@ import signal
 import socket
 import sqlite3
 import stat
+import struct
 import sys
 import threading
 import time
@@ -351,7 +352,240 @@ def read_inspection_config(path, allow_loopback_http=False):
         after = os.fstat(handle.fileno())
         if (before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (after.st_size, after.st_mtime_ns, after.st_ctime_ns):
             raise ProtocolError('inspection configuration changed')
-    return Config.from_dict(strict_json(raw), allow_loopback_http)
+    value = strict_json(raw)
+    config = Config.from_dict(value, allow_loopback_http)
+    config._loaded_sha256 = hashlib.sha256(encode(value)).hexdigest()
+    return config
+
+
+def private_socket_parent(path):
+    path = Path(path)
+    if not path.is_absolute() or '..' in path.parts or path.name in ('', '.', '..'):
+        raise ProtocolError('invalid observation path')
+    fd = os.open('/', os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        for part in path.parent.parts[1:]:
+            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+            os.close(fd)
+            fd = child
+        info = os.fstat(fd)
+        if info.st_uid != os.geteuid() or stat.S_IMODE(info.st_mode) != 0o700:
+            raise ProtocolError('observation parent must be private')
+        return fd, path.name
+    except BaseException:
+        os.close(fd)
+        raise
+
+
+def proc_identity(pid):
+    integer(pid)
+    root = Path('/proc') / str(pid)
+    if root.stat().st_uid != os.geteuid():
+        raise ProtocolError('unexpected observation owner')
+    with (root / 'stat').open('rb') as handle:
+        raw = handle.read(4097)
+    if len(raw) > 4096:
+        raise ProtocolError('invalid process observation')
+    fields_after_comm = raw.decode().rsplit(')', 1)[1].split()
+    if fields_after_comm[0] not in ('R', 'S', 'D', 'I'):
+        raise ProtocolError('resident is not running')
+    with open('/proc/sys/kernel/random/boot_id') as handle:
+        boot = handle.read(37).strip()
+    if not re.fullmatch('[0-9a-f-]{36}', boot):
+        raise ProtocolError('invalid boot identity')
+    return {'pid': pid, 'boot_id': boot, 'start_ticks': int(fields_after_comm[19])}
+
+
+def verify_process_lock(pid, fd, expected):
+    integer(fd, 0, 1048576)
+    info = os.stat(f'/proc/{pid}/fd/{fd}')
+    if (info.st_dev, info.st_ino) != (expected.st_dev, expected.st_ino):
+        raise ProtocolError('resident lock changed')
+    with open(f'/proc/{pid}/fdinfo/{fd}') as handle:
+        raw = handle.read(65537)
+    if len(raw) > 65536:
+        raise ProtocolError('invalid lock observation')
+    entries = re.findall(r'lock:\s+\d+: FLOCK\s+ADVISORY\s+WRITE\s+(\d+)\s+([0-9a-f]+):([0-9a-f]+):(\d+)\s+0 EOF', raw)
+    required = (pid, os.major(expected.st_dev), os.minor(expected.st_dev), expected.st_ino)
+    if not any((int(p), int(major,16), int(minor,16), int(ino)) == required for p,major,minor,ino in entries):
+        raise ProtocolError('resident does not own journal lock')
+
+
+def peer_identity(connection):
+    pid, uid, _ = struct.unpack('3i', connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize('3i')))
+    if uid != os.geteuid():
+        raise ProtocolError('unexpected observation peer')
+    return pid
+
+
+def receive_observation(connection, deadline, limit=MAX_JSON):
+    raw = bytearray()
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise ProtocolError('observation deadline exceeded')
+        connection.settimeout(remaining)
+        chunk = connection.recv(min(4096, limit + 1 - len(raw)))
+        if not chunk:
+            raise ProtocolError('incomplete observation')
+        raw.extend(chunk)
+        if len(raw) > limit:
+            raise ProtocolError('observation exceeds byte limit')
+        if b'\n' in raw:
+            if not raw.endswith(b'\n') or raw.count(b'\n') != 1:
+                raise ProtocolError('invalid observation frame')
+            return strict_json(bytes(raw[:-1]))
+
+
+class ResidentObservation:
+    """Private, same-UID live query served by the process holding the journal lock."""
+    def __init__(self, path, config, lock, stop_at, deadline, stop):
+        self.path, self.config, self.lock = path, config, lock
+        self.stop_at, self.deadline, self.stop = stop_at, deadline, stop
+        self.instance = secrets.token_hex(16)
+        self.parent = self.listener = self.thread = self.inode = None
+        self.closed = threading.Event()
+
+    def snapshot(self, challenge):
+        if self.stop.is_set() or self.closed.is_set() or time.time() >= self.stop_at or time.monotonic() >= self.deadline:
+            raise ProtocolError('resident admission closed')
+        info = os.fstat(self.lock.fd)
+        verify_process_lock(os.getpid(), self.lock.fd, info)
+        return dict(proc_identity(os.getpid()), schema_version='cloudlab.resident-observation.v1',
+            challenge=challenge, instance=self.instance, observed_at=utc(time.time()),
+            config_sha256=self.config._loaded_sha256, stop_at=utc(self.stop_at),
+            remaining_ms=max(0, int((self.deadline-time.monotonic())*1000)),
+            lock={'fd': self.lock.fd, 'device': info.st_dev, 'inode': info.st_ino})
+
+    def __enter__(self):
+        try:
+            self.parent, self.name = private_socket_parent(self.path)
+            self.listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.listener.bind(f'/proc/self/fd/{self.parent}/{self.name}')
+            info = os.stat(self.name, dir_fd=self.parent, follow_symlinks=False)
+            self.inode = (info.st_dev, info.st_ino)
+            # Pin the filesystem socket inode without following a replacement link.
+            # chmod(follow_symlinks=False) is an optional platform feature.
+            inode_fd = os.open(self.name, os.O_PATH | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=self.parent)
+            try:
+                pinned = os.fstat(inode_fd)
+                if (pinned.st_dev, pinned.st_ino) != self.inode or not stat.S_ISSOCK(pinned.st_mode):
+                    raise ProtocolError('observation socket changed')
+                os.chmod(f'/proc/self/fd/{inode_fd}', 0o600)
+            finally:
+                os.close(inode_fd)
+            self.listener.listen(2)
+            self.listener.settimeout(.2)
+            self.thread = threading.Thread(target=self.serve, daemon=True)
+            self.thread.start()
+            return self
+        except BaseException:
+            self.__exit__()
+            raise
+
+    def serve(self):
+        while not self.closed.is_set():
+            try:
+                connection, _ = self.listener.accept()
+            except socket.timeout:
+                continue
+            except OSError:
+                return
+            with connection:
+                try:
+                    peer_identity(connection)
+                    deadline = time.monotonic() + .5
+                    request = receive_observation(connection, deadline, 256)
+                    fields(request, 'challenge')
+                    challenge = request['challenge']
+                    if not isinstance(challenge, str) or not re.fullmatch('[0-9a-f]{32}', challenge):
+                        raise ProtocolError('invalid observation challenge')
+                    result = encode(self.snapshot(challenge)) + b'\n'
+                    connection.settimeout(max(.001, deadline-time.monotonic()))
+                    connection.sendall(result)
+                except (ProtocolError, OSError, ValueError, TypeError):
+                    pass  # A failed query never exposes paths, configuration or provider data.
+
+    def __exit__(self, *args):
+        self.closed.set()
+        if self.listener is not None:
+            self.listener.close()
+        if self.thread is not None:
+            self.thread.join(timeout=1)
+        if self.parent is not None:
+            try:
+                if self.inode is not None:
+                    try:
+                        info = os.stat(self.name, dir_fd=self.parent, follow_symlinks=False)
+                        if (info.st_dev, info.st_ino) == self.inode and stat.S_ISSOCK(info.st_mode):
+                            os.unlink(self.name, dir_fd=self.parent)
+                    except FileNotFoundError:
+                        pass
+            finally:
+                os.close(self.parent)
+                self.parent = None
+
+
+def observe_resident(config_path, socket_path, allow_loopback_http=False):
+    config = read_inspection_config(config_path, allow_loopback_http)
+    journal = Path(config.journal_path)
+    if not journal.is_absolute():
+        journal = Path(config_path).resolve().parent / journal
+    lock_path = str(journal.resolve()) + '.lock'
+    parent, name = private_socket_parent(socket_path)
+    try:
+        before_socket = os.stat(name, dir_fd=parent, follow_symlinks=False)
+        if not stat.S_ISSOCK(before_socket.st_mode) or before_socket.st_uid != os.geteuid() or stat.S_IMODE(before_socket.st_mode) != 0o600:
+            raise ProtocolError('invalid observation socket')
+        lock_fd = os.open(lock_path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        try:
+            lock_info = os.fstat(lock_fd)
+            if not stat.S_ISREG(lock_info.st_mode) or lock_info.st_uid != os.geteuid() or lock_info.st_nlink != 1 or stat.S_IMODE(lock_info.st_mode) != 0o600:
+                raise ProtocolError('invalid observation lock')
+            started = time.time()
+            deadline = time.monotonic() + 2
+            challenge = secrets.token_hex(16)
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+                connection.settimeout(2)
+                connection.connect(f'/proc/self/fd/{parent}/{name}')
+                pid = peer_identity(connection)
+                before = proc_identity(pid)
+                connection.sendall(encode({'challenge': challenge}) + b'\n')
+                response = receive_observation(connection, deadline)
+                fields(response, 'schema_version challenge instance observed_at pid boot_id start_ticks config_sha256 stop_at remaining_ms lock')
+                if (response['schema_version'] != 'cloudlab.resident-observation.v1' or response['challenge'] != challenge
+                        or response['config_sha256'] != config._loaded_sha256
+                        or {key: response[key] for key in before} != before
+                        or not isinstance(response['instance'],str) or not re.fullmatch('[0-9a-f]{32}',response['instance'])):
+                    raise ProtocolError('resident identity changed')
+                integer(response['pid']); integer(response['start_ticks'],0)
+                integer(response['remaining_ms'],1)
+                observed = timestamp(response['observed_at'])
+                if not started-1 <= observed <= time.time()+1 or not 0 <= time.time()-started <= 2:
+                    raise ProtocolError('stale resident observation')
+                fields(response['lock'], 'fd device inode')
+                integer(response['lock']['device'],0); integer(response['lock']['inode'])
+                if (response['lock']['device'], response['lock']['inode']) != (lock_info.st_dev,lock_info.st_ino):
+                    raise ProtocolError('resident lock mismatch')
+                verify_process_lock(pid,response['lock']['fd'],lock_info)
+                current = read_inspection_config(config_path,allow_loopback_http)
+                after_lock = os.stat(lock_path,follow_symlinks=False)
+                after_socket = os.stat(name,dir_fd=parent,follow_symlinks=False)
+                if (current._loaded_sha256 != config._loaded_sha256 or proc_identity(pid) != before
+                        or peer_identity(connection) != pid
+                        or (after_lock.st_dev,after_lock.st_ino) != (lock_info.st_dev,lock_info.st_ino)
+                        or (after_socket.st_dev,after_socket.st_ino) != (before_socket.st_dev,before_socket.st_ino)):
+                    raise ProtocolError('resident observation drift')
+                verify_process_lock(pid,response['lock']['fd'],lock_info)
+                stop_at = min(timestamp(response['stop_at']), int(started + response['remaining_ms']/1000))
+                if time.monotonic() > deadline or stop_at <= time.time():
+                    raise ProtocolError('resident admission closed')
+                return {'source':'resident_process','observed_at':response['observed_at'],
+                        'configured_stop_at':response['stop_at'],'runner_stop_at':utc(stop_at),'deadline_complete':False}
+        finally:
+            os.close(lock_fd)
+    finally:
+        os.close(parent)
 
 
 def validate_assignment(a, config, now):
@@ -534,9 +768,20 @@ def log_event(**event):
 
 
 def resident_loop(runner, stop, *, stop_at, poll_seconds=30, clock=time.time,
-                  monotonic=time.monotonic, emit=log_event):
+                  monotonic=time.monotonic, emit=log_event, observation_socket=None, lock=None):
     integer(poll_seconds, 5, 60)
     deadline = monotonic() + max(0, stop_at - clock())
+    observer = ResidentObservation(observation_socket, runner.config, lock, stop_at, deadline, stop) if observation_socket else None
+    if observer is not None:
+        observer.__enter__()
+    try:
+        return _resident_cycles(runner, stop, stop_at, deadline, poll_seconds, clock, monotonic, emit)
+    finally:
+        if observer is not None:
+            observer.__exit__()
+
+
+def _resident_cycles(runner, stop, stop_at, deadline, poll_seconds, clock, monotonic, emit):
     backoff = poll_seconds
     while not stop.is_set():
         if clock() >= stop_at or monotonic() >= deadline:
@@ -563,6 +808,8 @@ def resident_loop(runner, stop, *, stop_at, poll_seconds=30, clock=time.time,
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', required=True, help='private JSON configuration file')
+    parser.add_argument('--observe-resident', action='store_true', help='query a live private resident socket without claiming work')
+    parser.add_argument('--observation-socket', help='absolute private Unix socket path; opt-in resident observation')
     parser.add_argument('--authorization-status', action='store_true', help='query own Worker metadata without claiming work or opening journal')
     parser.add_argument('--once', action='store_true', help='one claim and at most one report')
     parser.add_argument('--stop-at', help='required for resident mode: earliest grant expiry as UTC YYYY-MM-DDTHH:MM:SSZ')
@@ -575,8 +822,13 @@ def main(argv=None):
     try:
         if not hasattr(os, 'geteuid') or os.geteuid() == 0:
             raise ProtocolError('runner requires a non-root operating-system user')
+        if args.observe_resident:
+            if not args.observation_socket or args.once or args.authorization_status or args.stop_at is not None:
+                raise ProtocolError('invalid resident observation mode')
+            print(encode(observe_resident(args.config,args.observation_socket,args.allow_loopback_http)).decode(),flush=True)
+            return 0
         if args.authorization_status:
-            if args.once or args.stop_at is not None:
+            if args.once or args.stop_at is not None or args.observation_socket:
                 raise ProtocolError('inspection cannot run a resident or once cycle')
             config = read_inspection_config(args.config, args.allow_loopback_http)
             print(encode(inspect_authorization(config)).decode(), flush=True)
@@ -586,10 +838,15 @@ def main(argv=None):
         if not args.once and stop_at is None:
             raise ProtocolError('resident mode requires an explicit stop-at')
         path = Path(args.config)
-        if path.stat().st_mode & 0o077:
-            raise ProtocolError('configuration must be private to its owner (mode 0600)')
-        with path.open('rb') as handle:
-            config = Config.from_dict(strict_json(handle.read(MAX_JSON + 1)), args.allow_loopback_http)
+        if args.observation_socket:
+            if args.once:
+                raise ProtocolError('observation socket requires resident mode')
+            config = read_inspection_config(path,args.allow_loopback_http)
+        else:
+            if path.stat().st_mode & 0o077:
+                raise ProtocolError('configuration must be private to its owner (mode 0600)')
+            with path.open('rb') as handle:
+                config = Config.from_dict(strict_json(handle.read(MAX_JSON + 1)), args.allow_loopback_http)
         journal_path = Path(config.journal_path)
         if not journal_path.is_absolute():
             config.journal_path = str(path.resolve().parent / journal_path)
@@ -608,9 +865,9 @@ def main(argv=None):
                 runner.run_once()
                 print('runner cycle complete', flush=True)
             return 0
-        return resident_loop(runner, stop, stop_at=stop_at, poll_seconds=args.poll_seconds)
+        return resident_loop(runner, stop, stop_at=stop_at, poll_seconds=args.poll_seconds, observation_socket=args.observation_socket, lock=lock)
     except (ProtocolError, OSError, sqlite3.Error, ValueError):
-        print('authorization inspection unavailable' if args.authorization_status else 'runner configuration or journal unavailable', file=sys.stderr)
+        print('resident observation unavailable' if args.observe_resident else 'authorization inspection unavailable' if args.authorization_status else 'runner configuration or journal unavailable', file=sys.stderr)
         return 1
     except KeyboardInterrupt:
         return 0

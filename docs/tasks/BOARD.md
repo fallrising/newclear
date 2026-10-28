@@ -28,7 +28,7 @@
 
 ## T-0380
 
-> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). An app-free [layer ablation](../fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) reproduced the ERR_ABORTED signature on Chromium 153. The trigger is a no-store response consumed through a stream reader; `arrayBuffer()` gave 0/600 and Playwright interception is not necessary. The current unit fixes `p0-client.js` bounded reads and fixture framing. All 27 canonical cells, including the earlier 8, must be recaptured on the new source, and each runtime needs its own owner approval. recovery007 stays FAIL/consumed and PR604 stays Draft. Earlier closure text and "next" recommendations below are history.
+> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). Milestone 1, merged as PR604, fixed ERR_ABORTED ([layer ablation](../fe-review/fanzloud-completion-regression/LAYER-ABLATION.md)). Milestone 2, merged as PR725, repaired the M2 defects. The v7 recapture on the M2 source is canonical 27/27, with the R07 gates passing or passing on bounded evidence. Remaining: finite HTTP/WSS conformance and final integration. Earlier closure text below is history.
 
 
 依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；目前依上方結案決定停止推進Fanzloud。
@@ -63,6 +63,7 @@ Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud
 | T0433-2b | v5 desktop-remaining runner and one approved run of the other eight desktop cells (001: PASS, actual review ACCEPT; desktop 9/9, canonical 9/27) | R2-AC-14 | done | 2026-10-28T15:41:57Z | 2026-10-28T17:26:18Z | 2026-10-28T17:26:18Z |
 | T0433-2c | v6 tablet/mobile runner, tablet-001 and mobile-001 (both PASS, actual review ACCEPT; baseline 27/27) | R2-AC-14 | done | 2026-10-28T16:57:37Z | 2026-10-28T17:26:18Z | 2026-10-28T17:26:18Z |
 | T0433-2 | M2 actual UI repairs (mobile overflow, focusable diff/event regions, contrast evidence) and finite HTTP/WSS conformance | R2-AC-14 | in_progress | 2026-10-28T17:32:56Z | — | 2026-10-28T17:40:15Z |
+| T0433-2d | v7 runner and recapture of all 27 dark cells on the M2-repaired source (desktop, tablet, mobile once each; all CANONICAL_ACCEPT; 27/27) | R2-AC-14 | in_progress | 2026-10-28T17:58:58Z | — | 2026-10-28T18:15:09Z |
 | T0433-3 | Final integration evidence and delivery after recapture and conformance (milestone 1 merged as PR604) | R2-AC-E | todo | — | — | — |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.

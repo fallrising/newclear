@@ -52,3 +52,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [Resident程序觀測](docs/resident-observation.md)以私人Unix socket、kernel peer／process／FLOCK及已載入設定digest取得實際stop-at；限Linux及明確啟用。source／本機驗證，尚未安裝到原Lab，完整授權窗口仍不完整。
 
 [整合授權觀測](docs/integrated-authorization.md)將管理面、機器self與resident來源對齊；前後漂移或身份衝突拒絕，缺失來源保留未知。私人快照由manifest驗證完整性；[本機整合證據](docs/evidence/m1-integrated-authorization.md)區分實際HTTP／kernel驗證與合成管理資料，尚未部署。
+
+[觀測部署準備](docs/observation-rollout.md)固定程式候選、過期授權現況、短期接入與回退順序；方案完成不代表已部署。新機器窗口仍待批准。

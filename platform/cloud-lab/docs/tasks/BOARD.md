@@ -177,3 +177,14 @@ Owner明確批准推送後，[PR #722](https://github.com/fallrising/newclear/pu
 - 三項CI全過：Cloud Lab `40737097237`、Project success `40737097392`、llms `40737097540`；16個交付檔案與遠端逐檔相等，共用PLAN的IA段落相等。全檔PLAN比較因同期其他項目記錄而不同，已檢查並保留差異，沒有覆寫。
 - [214tests及T830複審ACCEPT](../evidence/m1-integrated-authorization.md)完成；初始stub、fixture HTTPS映射及未綁定Access層的RED保留。
 - 本輪只交付source與隔離本機驗證，未部署、續權、重啟原服務或新增付費；完整主線pending，無usable tag。此收尾PR只改任務板。
+
+## T-0009 — 觀測部署準備
+
+範圍：[RP01–04](../observation-rollout.md)，準備完成不表示部署完成。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0009-1 | 來源固定與候選完整性 | RP-01 | in_progress | 2026-10-28T17:49:23Z | — | 2026-10-28T17:55:44Z |
+| T-0009-2 | 唯讀部署／授權／服務盤點 | RP-02 | in_progress | 2026-10-28T17:49:23Z | — | 2026-10-28T17:55:44Z |
+| T-0009-3 | 有界更新與回退方案 | RP-03 | in_progress | 2026-10-28T17:49:23Z | — | 2026-10-28T17:55:44Z |
+| T-0009-4 | 文件／獨立審查與交付 | RP-04 | in_progress | 2026-10-28T17:49:23Z | — | 2026-10-28T17:55:44Z |

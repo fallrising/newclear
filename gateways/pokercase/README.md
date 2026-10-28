@@ -2,7 +2,11 @@
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
-> 文件規劃：[LLM 用量正確性修正規格](../../docs/specs/llm-usage-correctness.md)（T-1102）。整理已確認缺陷、待重現問題與後續修正驗收；修正尚未實作。
+> **先跑完整流程：** [離線演練](docs/OFFLINE-WALKTHROUGH.md)使用真正的 gateway 與本機假上游，一次跑過設定、三種 API、串流、工具、fallback、用量與重啟。`--serve` 可留下管理介面供操作，真實廠商接入留到最後。
+
+> 當前收斂：[核心驗收對帳與剩餘工作入口](docs/tasks/T-0426-mainline-acceptance.md)（T-0426）。AC-03 本機驗證通過；真實旅程及既有用量修正仍待完成，主線未結案。
+
+> 文件規劃：[LLM 用量正確性修正規格](../../docs/specs/llm-usage-correctness.md)（T-1102）。整理已確認缺陷、待重現問題與後續修正驗收；[D-06 錯誤保存切片](docs/tasks/T-0427-error-persistence.md) 已取得本機合成 RED→GREEN，[D-05 buffered 費用缺值切片](docs/tasks/T-0428-cost-completeness.md) 保留原始用量缺值，只有兩側 token 與價格明確有效才保存估算（含明確零）；[D-04 費用彙總切片](docs/tasks/T-0429-cost-coverage.md) 區分無資料、未知、部分小計及完整估算，附已知筆數覆蓋率。其餘 runtime 工作仍未完成。
 
 
 > **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
@@ -41,7 +45,13 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 > A pinned local container image and dedicated profile volume are also required; see
 > [Cursor isolation and setup](docs/cursor-isolation.md). Ask mode is not a security boundary.
 
+## Cost aggregate compatibility
+
+Admin stats and daily JSON expose `cost_summary` with `known_sum`, known/unknown/total row counts, nullable `coverage`, `status`, and `basis: "stored_estimate_usd"`. The legacy `estimated_cost_usd` aggregate is now null for empty, unknown or partial scopes; only a nonempty complete scope returns a number. A known zero remains zero. Web, TUI and `doctor` distinguish partial subtotals from complete estimates. Stats and the usage header are all-time; daily rows retain their existing bucket limits. Coverage measures non-null stored estimates, not billing accuracy. Event CSV values and stored rows are unchanged. See the [fixed acceptance and limits](docs/tasks/T-0429-cost-coverage.md).
+
 ## Quick start
+
+Generic API-key Chat streams now reserve an attempt before dispatch and settle observed tail usage once. Admin events expose `request_id`, `attempt_id`, `outcome`, `usage_status`, `usage_source`, `headers_ms`, `first_output_ms`, `total_observed_ms` and `finalized_at`; CSV appends these fields after the original columns. Daily `ok` means observed terminal success; use `headers_200` for the previous HTTP200 count. Historical and other protocol/provider paths have unknown terminal provenance. A missing token remains unknown and cost is estimated only with complete observed counters and prices. Server startup recovers pending attempts as interrupted, without replay, and rejects a concurrent server sharing its data directory. See [scope, timing and compatibility](docs/tasks/T-0432-stream-settlement.md); #698 remains open for the other paths.
 
 ```bash
 cargo run -- serve

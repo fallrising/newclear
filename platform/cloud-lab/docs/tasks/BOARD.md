@@ -46,14 +46,14 @@ Owner 直接指示「好，繼續開發。」。範圍見 [M1 實作契約](../m
 
 ## T-0003 — M1 真實環境接入與驗收
 
-Owner 指示「好，繼續吧。」。先完成可審閱的部署 bundle、入口／API 驗收工具；真實環境目前等 owner 補足 D1／Workers Scripts OAuth scopes、選定私人網域與 runner。缺權限是實際 API401／連線403，不以本機測試取代 live。
+Owner 指示「好，繼續吧。」。先完成可審閱的部署 bundle、入口／API 驗收工具；當時真實環境等待 D1／Workers Scripts OAuth scopes 與私人目標；現已補齊並完成[首輪真實閉環](../evidence/m1-first-live.md)。缺權限是實際 API401／連線403，不以本機測試取代 live。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | T-0003-1 | 私人設定／grant／部署 bundle 產生器 | AC-06、AC-08 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
 | T-0003-2 | 有界入口及 API 驗收工具 | AC-06、AC-07 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
 | T-0003-3 | 獨立審查與部署前證據 | AC-08 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
-| T-0003-4 | 真實 CF／指定 runner／恢復驗收；等 owner 補 D1／Workers Scripts scopes 與目標 | AC-06～08 | todo | — | — | 2026-10-26T17:05:44Z |
+| T-0003-4 | 真實 CF／指定 runner／恢復驗收；首輪真實閉環通過；D1隔離還原／journal對帳通過；遠端故障／撤權子集通過；真人瀏覽器及完整故障矩陣待驗收；實體手機選測 | AC-06～08 | in_progress | 2026-10-26T18:01:36Z | — | 2026-10-28T13:49:05Z |
 
 ## M1 接入準備交付與回讀
 
@@ -65,3 +65,34 @@ Owner 指示「好，繼續吧。」。先完成可審閱的部署 bundle、入�
 - T-0003-1～3準備工作完成；T-0003-4、M1-LIVE與AC-06～08保持pending。尚需D1／Workers Scripts連線scopes、私人網域／runner目標，以及真實Access、D1、手機／bot、恢復與成本驗收。沒有Cloudflare寫入、部署、排程啟用、封存或usable tag。
 
 此收尾只更新任務板，end為實際準備PR合併時間，不代表完整M1已驗收。
+
+T-0003-4 本輪子範圍：[RR-01～05常駐runner](../resident-runner.md)，本輪測試／審查／實機子集通過，完整列仍in_progress；不新增排程或延長grant。
+
+T-0003-4 下一子範圍：[FR-01～04隔離恢復驗證](../recovery-qualification.md)，101tests／實際workerd三案例／獨立審查通過，完整列仍in_progress；live服務維持既有版本與授權窗口。
+
+T-0003-4 本輪子範圍：[RF-01～04遠端隔離故障／撤權](../remote-recovery.md)，本輪[115tests／三個真實CF案例／grant及Access撤權](../evidence/m1-remote-recovery.md)通過；完整列仍in_progress。僅新建一組短期隔離資源，測試token已停用，原live服務保持不變。
+
+T-0003-4 本輪子範圍：[UI-01～04看板瀏覽器驗收](../dashboard-qualification.md)，本機121tests／十組瀏覽器情境／獨立審查通過；整列仍in_progress；新版資產部署已由後續DR範圍完成，真正Access及實體手機仍待接續。
+
+T-0003-4 本輪子範圍：[DR-01～04看板部署與手機驗收](../dashboard-rollout.md)，in_progress／真人瀏覽器待驗；實體手機已改選測；明確批准後已發布，新版本100%、原設定／D1相等、匿名302／機器200。human觀察與命令對帳待接續。
+
+2026-10-28 owner調整：取消實體手機必測，不再等待手機測試才開發；DR04可由一般桌面瀏覽器補驗，仍不宣稱已通過。原授權已過期，本次無續權／Cron／runner變更。下一步建議常態唯讀運維（授權生命週期、runner恢復、低頻排程與保留／配額），尚未新增雲端操作授權。
+
+## T-0004 — 授權生命週期離線管理
+
+Owner同意從授權生命週期開始。範圍見[AL01–04](../authorization-lifecycle.md)，不以取消手機測試推導真人Access已驗證。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0004-1 | 嚴格snapshot狀態／到期原因 | AL-01 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+| T-0004-2 | 有界續期與撤銷計畫／SQLite guards | AL-02 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+| T-0004-3 | 輪替runbook與私人輸入輸出 | AL-03 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+| T-0004-4 | 回歸、獨立審查與交付 | AL-04 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+
+## T-0004交付與遠端回讀
+
+[PR #713](https://github.com/fallrising/newclear/pull/713)於2026-10-28T14:19:50Z正常合併，head `686b3b75550a10aade451e3198158f74a2966efd`，merge `b8b58b34ffa717bc361e593075f0b830825c9dc6`。15個交付路徑與遠端merge逐檔相等，工作樹乾淨。
+
+- [Cloud Lab CI](https://github.com/fallrising/newclear/actions/runs/40704636916)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40704636968)、[llms CI](https://github.com/fallrising/newclear/actions/runs/40704636775)全數SUCCESS，未繞過檢查。
+- 本機37Node＋107Python＝144tests、真實合成CLI、45專案契約／7llms／40文件／300連結／12來源、task/report及公開邊界檢查通過；[T826複審](../../../../.team/reports/T-826.md)ACCEPT。初始失敗保留在[證據](../evidence/m1-authorization.md)。
+- AL01–04離線實作完成，實際Cloudflare續權、live採集、secret輪替、排程及完整mainline仍未完成；本輪沒有改雲端授權／憑證／服務。此PR僅按實際合併時間收尾任務板，不新增能力或usable tag。

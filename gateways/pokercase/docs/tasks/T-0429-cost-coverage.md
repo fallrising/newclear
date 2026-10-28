@@ -1,0 +1,39 @@
+# T-0429 — Cost aggregate coverage
+
+Demand: [desk T-0429](https://github.com/fallrising/desk/tree/main/tasks/T-0429-thinrouter-cost-coverage). Claim[PR258](https://github.com/fallrising/desk/pull/258) merged `995d1ea4d1aaae6de5801f742e3c4b5a6755c60b` before implementation. Baseline`1a49ecf0e1ae1a2089a0b94051dad8ae795446fc`; started2026-10-28T04:04:28Z.
+
+## Fixed acceptance
+
+- CC-1: Given an isolated synthetic usage table containing no rows, only unknown costs, a mix of known/unknown costs, complete positive costs or explicit zeros (including historical and current day buckets and failed rows), when all-time and daily cost aggregates are read, then no-known-value sums and incomplete legacy totals are null; summaries carry known_sum, known_count, unknown_count, total_count, row coverage, status and stored-estimate basis. Empty has no_data and null coverage; all-unknown has unknown and zero coverage; partial never reports a complete total. Explicit zero remains known. Establish actual baseline RED before the runtime correction.
+- CC-2: Given the same synthetic data, when authenticated stats/daily JSON, dashboard, usage totals/daily table and the TUI footer/doctor output render, then they distinguish no data, unknown, partial subtotal and complete estimate with row coverage, and label all-time scope separately from day buckets. Per-event CSV costs remain empty for unknown and retain explicit zero; count/sum checks agree with each matching scope. Reads must not rewrite usage rows, dispatch providers or change event/schema/admission/fallback/stream semantics. Existing token/latency and HTTP-status aggregates remain outside this cost-only slice.
+- CC-3: Given the bounded final diff, then focused RED→GREEN, full locked Rust1.99.0 tests/fmt/Clippy, validators/contracts/indexes, independent source/evidence and ledger review, required CI, normal merge/readback and board/journal/desk/verified backup/own-worktree cleanup pass. Preserve original failures and unverified boundaries; no whole-product or full D-04/T-1102 completion claim.
+
+## Ownership and design
+
+`usage_events.estimated_cost_usd` is nullable; D-05 buffered recording already preserves unknown. Store usage_cost_total, usage_by_day and stats independently SUM then coerce missing to0. Admin stats/daily serialize those results, web passes them to dashboard/usage templates, and TUI unwraps a numeric stats value to0 again. CSV is per-event and already exports empty nullable cells. No aggregate CSV endpoint exists; this slice does not invent one.
+
+Use a shared cost-summary constructor for the same SQL observations SUM(cost), COUNT(cost), COUNT(*). Known means non-null stored estimate, including0, irrespective of HTTP status. No new quality inference about historical or provider data. Summary fields: known_sum (null if no known rows), known_count, unknown_count, total_count, coverage (known_count/total_count, null when empty), status, basis=`stored_estimate_usd`. States: no_data(0rows), unknown(rows/0known), partial(someknown), complete(nonempty/allknown). Nonfinite aggregate sum is unavailable with null sum/total and unchanged row counts/coverage; this does not add decimal billing arithmetic or silently emit0.
+
+Legacy stats/daily estimated_cost_usd becomes nullable and contains a complete total only for nonempty complete scopes. cost_summary is additive, uniform at each scope. All-time usage_cost_total returns the same summary. Web and TUI show coverage and partial subtotal explicitly. Total is labelled all-time, distinct from existing14-day web/30-day API bucket limits. Existing count/token/latency fields, filters, status meaning and per-event CSV shape remain unchanged.
+
+Compatibility: clients assuming every aggregate cost scalar is numeric must handle null or use cost_summary. Stored data and per-event values are not migrated. Current f64 arithmetic/precision remains an existing limitation, with exact binary-fraction fixtures rather than tolerance-based money assertions.
+
+## Plan and limits
+
+Estimate60–90active minutes,20minute progress checkpoints; each initial failure≤2 justified diagnosis/correction attempts; commands/CI600s. Opus→oneSonnet planning240s supplied source only; lead accepted cost-only coherence and scope labels, rejected zero-valued empty/unknown sums because §5.3 explicitly requiresnull. Root owns edits/acceptance/publication. Full turn tools/provider/token/cost/activewait unknown/null.
+
+Tests use a disposable synthetic database and admin-only loopback process with no connections/routes. Seed empty/unknown/partial/complete/explicitzero and split-day/failed cases; assert API/HTML and unchanged event CSV/rows, plus TUI TestBackend rendering. No upstream/model/authentication/discovery call is needed. Prior T-0428 synthetic Antigravity401 remains historical; its hardcoded URL/HTTP coverage is not repaired or exercised here.
+
+Status: documentation fixed before tests/runtime edits. Local RED→GREEN and full gates passed; PR CI/merge and management delivery remain pending. Original T-1102 and other tracked plans remain untouched.
+
+Reader audit correction: initial GREEN compile caught the remaining web scalar formatter and CLI doctor cost reader. Both now consume the summary; doctor shares the TUI text formatter. This is required compatibility work for the same cost-only surface, not a new command or provider capability. The original six-scenario HTTP fixture is retained unchanged; a separate doctor test is appended and TUI/overflow unit tests add targeted coverage. Original E0277 evidence is preserved.
+
+## Observed verification — 2026-10-28
+
+- Baseline `timeout 600 cargo +1.99.0 test --locked --manifest-path gateways/pokercase/Cargo.toml --test cost_coverage -- --nocapture` exited101 with34 aggregate/presentation mismatches after all six synthetic scenarios completed; runtime source was unchanged. Event CSV and stored-row preservation checks passed. The original HTTP fixture is byte-identical in GREEN; only a separate doctor test was appended.
+- Focused `... test --locked --manifest-path gateways/pokercase/Cargo.toml cost_coverage -- --nocapture` passed after correcting the existing web/doctor scalar readers. Full `timeout 600 cargo +1.99.0 test --locked --manifest-path gateways/pokercase/Cargo.toml` ultimately passed254tests/21groups,0failed/ignored,101.579seconds command wall. Four new Rust tests cover six HTTP scenarios, five doctor scenarios, TUI statuses/80–118columns and nonfinite aggregate overflow. Scenario counts are not Rust test counts.
+- `cargo +1.99.0 fmt --manifest-path gateways/pokercase/Cargo.toml -- --check`; `timeout 600 cargo +1.99.0 clippy --locked --manifest-path gateways/pokercase/Cargo.toml --all-targets -- -D warnings`; `python3 -m unittest discover -s scripts/tests -v` (20tests); `python3 scripts/check_indexes.py` (44contracts/7indexes) all passed.
+- Preserved failures: initial GREEN E0277 in web/doctor formatters; first full suite exited101 at `tests/cursor_cli_e2e.rs:163:9`, fixture OAuth import returned401 unauthorized instead of201. One exact unchanged-source retry of `ce2_failed_cursor_result_after_output_is_not_success` passed; the final full suite after the TUI scope-label correction passed. The401 cause remains unknown; neither port collision nor a reliability fix is established.
+- Independent source review accepted the bounded change after finding and resolving the missing TUI all-time label, with a rendering assertion. Necessary CI/normal merge/readback and board/journal/desk/backup/cleanup are separate delivery gates.
+
+No provider routes/connections or inference are created by the new synthetic tests. Existing suite fixtures do not establish real provider/client acceptance. Cost coverage remains a count of non-null stored estimates; token/latency completeness, historical quality, price-basis/currency/provider grouping and exact billing arithmetic stay outside this slice.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { observation, commandView, makeSubmission, createClient, can, renderCommand } from '../apps/control/public/dashboard.mjs';
+import { observation, commandView, makeSubmission, createClient, can, renderCommand, mount } from '../apps/control/public/dashboard.mjs';
 
 const now = '2026-10-26T16:00:30Z';
 const record = (overrides = {}) => ({
@@ -102,4 +102,98 @@ test('non-JSON Access response and oversized responses are explicit errors', asy
   await assert.rejects(html.bootstrap(), /Access/);
   const huge = createClient(async () => new Response(JSON.stringify({ data: 'x'.repeat(32769) })));
   await assert.rejects(huge.commands(), /大小/);
+});
+
+test('Access HTML denial retains auth status before reading an oversized login page', async () => {
+  for (const status of [401, 403]) {
+    const client = createClient(async () => new Response('<html>' + 'x'.repeat(40000), { status, headers: { 'Content-Type': 'text/html' } }));
+    await assert.rejects(client.bootstrap(), error => error.status === status);
+  }
+});
+
+test('login HTML and redirects stop at the session boundary; server HTML errors stay transient', async () => {
+  const login = createClient(async () => new Response('<html>login</html>', { headers: { 'Content-Type': 'text/html' } }));
+  await assert.rejects(login.commands(), error => error.status === 401);
+  const redirect = createClient(async (_path, init) => {
+    assert.equal(init.redirect, 'manual');
+    return { type: 'opaqueredirect', status: 0, body: null };
+  });
+  await assert.rejects(redirect.bootstrap(), error => error.status === 401);
+  const unavailable = createClient(async () => new Response('<html>unavailable</html>', { status: 503, headers: { 'Content-Type': 'text/html' } }));
+  await assert.rejects(unavailable.commands(), error => error.status === 503);
+});
+
+test('oversized streamed response is cancelled before consuming the remaining body', async () => {
+  let pulls = 0, cancelled = false;
+  const stream = new ReadableStream({
+    pull(controller) { pulls++; controller.enqueue(new Uint8Array(16385)); if (pulls === 8) controller.close(); },
+    cancel() { cancelled = true; },
+  });
+  const client = createClient(async () => new Response(stream));
+  await assert.rejects(client.commands(), /大小/);
+  assert.equal(cancelled, true); assert(pulls < 8);
+});
+
+// Minimal DOM boundary for deterministic async ordering; actual Chromium covers rendering.
+function mounted(t, client) {
+  class Element {
+    constructor(tag = 'div') { this.tagName = tag; this.children = []; this.attributes = {}; this.dataset = {}; this.events = {}; this.hidden = false; this.disabled = false; this.className = ''; this.value = ''; }
+    set textContent(value) { this.value = String(value); this.children = []; }
+    get textContent() { return this.value + this.children.map(c => c.textContent).join(''); }
+    append(...items) { this.children.push(...items); }
+    replaceChildren(...items) { this.children = items; this.value = ''; }
+    setAttribute(k, v) { this.attributes[k] = v; }
+    getAttribute(k) { return this.attributes[k]; }
+    addEventListener(k, v) { this.events[k] = v; }
+    click() { return this.events.click?.(); }
+    querySelectorAll(selector) {
+      const all = this.children.flatMap(c => [c, ...c.querySelectorAll('*')]);
+      return all.filter(c => selector === '*' || (selector === 'button' && c.tagName === 'button') ||
+        (selector === '[data-command-id]' && c.attributes['data-command-id']) || (selector.startsWith('.') && c.className.split(' ').includes(selector.slice(1))));
+    }
+    querySelector(selector) { return this.querySelectorAll(selector)[0]; }
+  }
+  const nodes = new Map();
+  const doc = { hidden: false, createElement: tag => new Element(tag), getElementById: id => {
+    if (!nodes.has(id)) nodes.set(id, new Element()); return nodes.get(id);
+  } };
+  const original = globalThis.addEventListener;
+  globalThis.addEventListener = () => {};
+  t.after(() => { if (original) globalThis.addEventListener = original; else delete globalThis.addEventListener; });
+  t.mock.method(globalThis, 'setInterval', () => 0);
+  const stop = mount(doc, client); t.after(stop);
+  return { doc, node: doc.getElementById, settled: () => new Promise(resolve => setImmediate(resolve)) };
+}
+const bootstrapFixture = () => ({ now, workspace_id: 'test', resource_ref: { resource_id: 'node', generation: 1 },
+  recipe_ref: { recipe_id: 'node-health', version: '1.0.0', digest: 'sha256:' + 'a'.repeat(64) },
+  capabilities: ['commands:read', 'commands:submit', 'node:health:read', 'artifact:read'] });
+
+test('retry POST401/403 preserves uncertain bytes through explicit session recovery', async t => {
+  let denied = 0; const submissions = [];
+  const client = { bootstrap: async () => bootstrapFixture(), commands: async () => ({ commands: [] }), submit: async raw => {
+    submissions.push(raw); if (submissions.length === 1) throw new Error('lost ACK');
+    if (denied) throw Object.assign(new Error('denied'), { status: denied }); return {};
+  } };
+  const ui = mounted(t, client); await ui.settled(); await ui.node('submit').click();
+  for (const status of [401, 403]) {
+    denied = status; await ui.node('retry').click();
+    assert.equal(ui.node('retry').hidden, false); assert.equal(ui.node('retry').disabled, true);
+    denied = 0; await ui.node('refresh').click();
+  }
+  await ui.node('retry').click(); assert.equal(new Set(submissions).size, 1); assert.equal(ui.node('retry').hidden, true);
+});
+
+for (const lateStatus of [200, 403]) test(`obsolete artifact ${lateStatus} cannot invalidate recovered session or download`, async t => {
+  let denied = false, complete, reject;
+  const client = { bootstrap: async () => { if (denied) throw Object.assign(new Error('revoked'), { status: 403 }); return bootstrapFixture(); },
+    commands: async () => ({ commands: [record()] }), artifact: () => new Promise((resolve, fail) => { complete = resolve; reject = fail; }) };
+  let downloads = 0; t.mock.method(URL, 'createObjectURL', () => { downloads++; return 'blob:test'; });
+  const ui = mounted(t, client); await ui.settled();
+  const action = ui.node('commands').querySelector('button').click();
+  denied = true; await ui.node('refresh').click(); denied = false; await ui.node('refresh').click();
+  assert.equal(ui.node('submit').disabled, false);
+  if (lateStatus === 200) complete({ health: 'healthy' }); else reject(Object.assign(new Error('old denial'), { status: 403 }));
+  await action;
+  assert.equal(ui.node('submit').disabled, false); assert.equal(ui.node('total-count').textContent, '1');
+  assert.equal(ui.node('message').hidden, true); assert.equal(downloads, 0);
 });

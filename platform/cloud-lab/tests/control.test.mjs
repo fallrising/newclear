@@ -84,7 +84,7 @@ test('Access JWT origin, audience, expiry and signature guards include static as
  f.env.ASSETS={fetch:async()=>new Response('synthetic page')};
  const pair=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
  const jwk={...await crypto.subtle.exportKey('jwk',pair.publicKey),kid:'key'};
- const fetcher=async url=>{assert.equal(url,issuer+'/cdn-cgi/access/certs');return Response.json({keys:[jwk]});};
+ const fetcher=async (url,options)=>{assert.equal(url,issuer+'/cdn-cgi/access/certs');assert.equal(options.redirect,'manual');return Response.json({keys:[jwk]});};
  const b64=s=>Buffer.from(s).toString('base64url');
  async function token(extra={}){const prefix=b64(JSON.stringify({alg:'RS256',kid:'key'}))+'.'+b64(JSON.stringify({iss:issuer,aud:['access-aud'],sub:'human',iat:T/1000,exp:T/1000+60,...extra}));return prefix+'.'+b64(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',pair.privateKey,new TextEncoder().encode(prefix)));}
  async function req(tok,path='/',method='GET',origin){return handle(new Request('https://lab.example'+path,{method,headers:{'Cf-Access-Jwt-Assertion':tok,'Content-Type':'application/json','X-Cloud-Lab':'1',...(origin?{Origin:origin}:{})},...(method==='POST'?{body:JSON.stringify(f.command())}:{})}),f.env,T,fetcher);}

@@ -54,7 +54,7 @@
 | [`platform/agent-platform`](platform/agent-platform/) | 自託管多 agent 工作平台（OpenHands Agent Canvas 範本） | React, Python, PostgreSQL, Cocoon | A |
 | [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品數位工作者：M1 離線核心與有界 M2 原生 adapter；完整 M2／跨產品整合仍有缺口 | Python、SQLite；可替換 adapters | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
-| [`platform/cloud-lab`](platform/cloud-lab/) | 個人 CF 工具框架：知識樹、唯讀節點檢查、持久任務與看板（M1 本機驗證，尚未部署） | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
+| [`platform/cloud-lab`](platform/cloud-lab/) | 個人 CF 工具框架：知識樹、唯讀節點檢查、持久任務與看板（雲端閉環／恢復撤權與本機瀏覽器子集通過，新版已部署，具離線授權管理工具，真人瀏覽器流程待驗） | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（M3 runtime） | Go, SQLite, React | A |
 | [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器 | Python | A |
@@ -65,6 +65,7 @@
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
 | [`tools/codex-usage`](tools/codex-usage/) | Agent Usage 統一唯讀總覽：重用 Codex／Claude 來源，分清訂閱額度、本機統計與 API 支出 | Python, Codex App Server | A |
+| [`tools/motion-prompt`](tools/motion-prompt/) | 繁中／英文動態術語圖鑑：固定 120 項來源與驗收規格，網站待整合 | 原生 JavaScript, Canvas | 未分級 |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
 ### 契約、範例與實驗

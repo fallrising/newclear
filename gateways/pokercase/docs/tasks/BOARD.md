@@ -336,3 +336,69 @@ Product [PR671](https://github.com/fallrising/newclear/pull/671) merged `9905b73
 | IE-2 | 健康續輪及後續階段期限所有權 | IE-2 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
 | IE-3 | 完整交付、既有取消回歸與交接 | IE-3 | done | 2026-10-26T16:48:56Z | 2026-10-26T17:08:03Z | 2026-10-26T17:08:59Z |
 T-0425 delivered by [PR675](https://github.com/fallrising/newclear/pull/675), source `2922bcd0821d04ea2319e6ec884527a60902aa2d`, merge `f522b53b0787c4d88827513fc78a0a2f22268913` at 2026-10-26T17:08:03Z. IE-1–IE-3:245 Rust tests/18groups,46 Claude-focused,4 new tests/8primarycases plus1healthyreplacement; fmt/Clippy,20validators,44contracts/7indexes and independent source/final-document review passed. Required check/validate, normal merge and remote source+merge trailer/ancestry/scoped-content readback passed. Original idle-expiry RED and corrected missing-reactor test-harness failure retained; Linux fake-process/finite-clock evidence and runtime/transport boundaries remain as documented in SUCCESS/task. This row closure is the separate board publication; desk remains in_progress for owner disposition.
+
+## T-0426 — Mainline acceptance convergence
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| MC-1 | 核對AC-03來源與當前離線驗收 | MC-1 | done | 2026-10-26T17:59:19Z | 2026-10-26T18:23:28Z | 2026-10-26T18:23:32Z |
+| MC-2 | 固定主線剩餘驗收與既有依賴 | MC-2 | done | 2026-10-26T17:59:19Z | 2026-10-26T18:23:28Z | 2026-10-26T18:23:32Z |
+| MC-3 | 完整驗證、獨立審查與交接 | MC-3 | done | 2026-10-26T17:59:19Z | 2026-10-26T18:23:28Z | 2026-10-26T18:23:32Z |
+
+T-0426 delivered by [PR680](https://github.com/fallrising/newclear/pull/680), source `cec93f9f9d12f77b2a1ce3817612e9f42bd0f4c7`, merge `e09af2d0ca8815ae6b51dc9b61bb030460c7ec0e` at 2026-10-26T18:23:28Z. MC-1–MC-3 documentation/evidence scope: all17 original core requirements preserved; AC-03 local admission acceptance reconciled, three live acceptance groups and existing T-1102 runtime dependency remain. No runtime/tests/Cargo changes. Full245 Rust tests/18groups, fmt/Clippy,20validators,44contracts/7indexes and independent source/content review passed. Original focused startup failure (8/9, gateway exited before health) retained with unknown cause; unchanged exact retry and subsequent full suite passed. Necessary check/validate, normal merge, source/merge trailers, ancestry and scoped-content readback passed. Whole product remains incomplete/no usable tag; desk remains in_progress for owner disposition.
+
+## T-0427 — D-06 error persistence
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| EP-1 | 合成錯誤持久化重現及最小修正 | EP-1 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
+| EP-2 | fallback／CLI／協定及資料語意回歸 | EP-2 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
+| EP-3 | 完整驗證、審查、發布與交接 | EP-3 | done | 2026-10-27T11:12:44Z | 2026-10-27T12:41:18Z | 2026-10-27T12:41:24Z |
+Delivered by [PR683](https://github.com/fallrising/newclear/pull/683), source `6411a7c8ef1bdca2e0f2aa7b01e6345a6d458e8b`, merge `19b7296d5142e0fe5c6d682ce0ab5c65255a0f67` at 2026-10-27T12:41:18Z. D-06 synthetic privacy RED→GREEN;247 Rust tests/19groups,fmt/Clippy,20validators,44contracts/7indexes and independent source/evidence review passed. Required check/validate and source/merge trailer/ancestry/scoped-content readback passed. Original cached compiler-query failure retained; fresh metadata query kept shared sccache/target. Historical rows/caller errors unchanged; D-01–D-05, broaderUC-R05/M-15 and live gates remain open. This closes only the bounded product rows; desk stays in_progress for owner disposition.
+
+## T-0428 — Buffered cost completeness
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CE-1 | 缺值持久化 RED 與來源觀測 | CE-1 | done | 2026-10-27T16:48:22Z | 2026-10-27T17:02:23Z | 2026-10-27T17:02:34Z |
+| CE-2 | 完整雙價格估算與既有語意 | CE-2 | done | 2026-10-27T16:48:22Z | 2026-10-27T17:02:23Z | 2026-10-27T17:02:34Z |
+| CE-3 | 完整驗證審查及交付 | CE-3 | done | 2026-10-27T16:48:22Z | 2026-10-27T17:02:23Z | 2026-10-27T17:02:34Z |
+
+Delivered by [PR689](https://github.com/fallrising/newclear/pull/689), source `39b210c53916bea7c2e9044fb9aac654cf2bba98`, merge `6362f75fb0d591fa17653cf67a8893f148055a18` at 2026-10-27T17:02:23Z. Scoped buffered completeness:126cases/3newRusttests, genuine82baseline mismatches per surface then identicalfixture GREEN; full250tests/20groups,fmt/Clippy,20validators,44contracts/7indexes and independent source review passed. Necessary CI, normal merge and remote source/merge trailer/ancestry/scoped-byte readback passed. Original fixture errors and unintended synthetic Antigravity request returning401 retained; final HTTP fixtures use a non-forwarding loopback fake proxy. Antigravity HTTP remains unverified, offline parser only; broaderD05/T1102 and real acceptance remain open. Only these bounded rows close; desk stays in_progress for owner disposition.
+
+## T-0429 — Cost aggregate coverage
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CC-1 | 費用缺值與coverage RED→GREEN | CC-1 | done | 2026-10-28T04:04:28Z | 2026-10-28T04:25:47Z | 2026-10-28T04:26:25Z |
+| CC-2 | API/Web/TUI一致呈現與CSV回歸 | CC-2 | done | 2026-10-28T04:04:28Z | 2026-10-28T04:25:47Z | 2026-10-28T04:26:25Z |
+| CC-3 | 完整驗證審查與交付 | CC-3 | done | 2026-10-28T04:04:28Z | 2026-10-28T04:36:26Z | 2026-10-28T04:37:37Z |
+
+產品 [PR692](https://github.com/fallrising/newclear/pull/692) source `e45e392843c0f002563d96e09a94f5bac3e36a1a`、merge `fb03c5bd1d27e33c16b0c95dce7cb7b4803803e9` at 2026-10-28T04:25:47Z。完整 254 Rust tests／21 組、fmt、Clippy、20 validator tests、44 contracts／7 indexes 及獨立來源審查通過；必要 CI、正常合併與遠端 trailer／祖先／逐檔內容回讀通過。
+
+六種合成資料情境、4個新增 Rust tests；空資料／未知／部分小計／完整估算／明確零值在 API、Web、TUI 與 doctor 一致；事件 CSV 和 usage rows 未改寫。首次完整套件的 fixture401 與其原因未知保留；exact retry 和最終完整套件通過。本輪只處理既有 USD 儲存估算的費用彙總；coverage 是 non-null rows 比率，不保證歷史品質或帳單正確。原 f64 精度、token/latency 彙總、provider/currency/basis 分組、D-01–D-05 其他工作及真實驗收仍未完成。mainline incomplete、usable_tag none，desk 保留 in_progress，done 由 owner 決定。
+
+CC-3 整輪驗收已於 2026-10-28T04:37:37Z 核對：產品 PR692、看板 PR694、journal PR149 與 desk PR258／PR259 均已正常合併，必要 CI、來源／merge trailers、祖先與逐檔回讀通過；獨立來源及帳本審查、完整證據備份核對、五個原工作樹清理已完成，分支與共享快取保留。CC-3 end 欄記初次看板合併時間；本段為完成後的驗收紀錄，其發布亦須通過必要 CI／審查與合併回讀。歷史失敗及未完成產品邊界不變，desk 仍由 owner 決定 done。
+
+## T-0430 — Repeatable offline user journey
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| J-1 | 完整離線請求與工具旅程 | J-1 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+| J-2 | 真實觀測用量與缺口呈現 | J-2 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+| J-3 | 可操作入口與安全生命週期 | J-3 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+| J-4 | 完整本機驗證及產品交付 | J-4 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+
+產品 [PR703](https://github.com/fallrising/newclear/pull/703) source `479263c0be87d9cc608477812cef2be6722b111a`、merge `01ce1eb20e2c63a231265cc1be929f20a084e7e4` at 2026-10-28T05:40:25Z；完整254Rusttests/21groups、fmt、Clippy、20Python回歸、實際九階段check及serve停機、20validator tests、44contracts/7indexes、獨立來源審查、必要CI及正常合併／遠端回讀通過。
+
+可重跑入口與操作說明：[離線完整流程](../OFFLINE-WALKTHROUGH.md)。實際17筆usage中11筆已知、6筆未知；合成估價$22僅為fixture，不是真實花費。技術J1–J4已依產品合併回讀完成；後續管理帳本、備份與清理依最終handoff記錄，不由這個產品AC冒稱完成。主線仍incomplete、usable_tag none；17項原核心AC、原T-1102規格、Rust/Cargo及其他tracked plan不變。串流結算與終態/時間、其餘計量、client/version與真實AC01/04/08、既有fixture可靠性及Antigravity隔離仍分別記錄於newclear #698–702；不宣稱只剩三個任務或完成百分比。desk保留in_progress，done由owner決定。
+
+## T-0432 generic Chat stream settlement
+
+- Demand: [desk T-0432](https://github.com/fallrising/desk/tree/main/tasks/T-0432-thinrouter-stream-settlement); [fixed SS-1–SS-6/design](T-0432-stream-settlement.md).
+- Status: in_progress; started2026-10-28T13:24:29Z; claimPR270 merged. Source/design and actual RED→GREEN complete;279Rusttests/22groups,fmt/Clippy,Python20tests,nine-stage journey and repository gates passed. Independent review and productPR712/check+validate/normalmerge/readback passed; management ledger publication/backup/cleanup are recorded by the final handoff.
+- Scope: generic API-key HTTP Chat stream only; #698 remains open for other paths. Estimate2–3active hours;20minute checkpoints; no real providers.
+
+產品 [PR712](https://github.com/fallrising/newclear/pull/712) source `c3e9340024e50f95762f71174f57386e1f84bb0c`、merge `17e1ed121d35229471ff834ef5ea55b3d0d2cf94` at 2026-10-28T14:21:21Z；279Rusttests/22groups、fmt、Clippy、20Python回歸、實際九階段無桌面旅程、20validator tests、45contracts/7indexes、獨立來源審查、必要check/validate CI與正常合併／遠端回讀通過。
+
+SS-1–SS-5及SS-6產品驗證/交付通過；本輪管理帳本、備份與清理以finalhandoff記錄，不由產品合併預先冒稱完成。完整旅程17rows/12known/5unknown，合成$24小計仍partial，非真實花費。僅generic API-key HTTP Chat streaming；其他client protocol、CLI、named-provider/OAuth仍未接入本輪observer，完整#698保持open。#699完整token coverage／price provenance、#700具名client/version與真實AC01/04/08、#701既有fixture啟動/auth間歇失敗、#702Antigravity隔離仍未完成。mainline incomplete、usable_tag none，原17coreAC／T-1102規格／Cargo／其他trackedplan不變；desk維持in_progress，done由owner決定。沒有完成百分比。

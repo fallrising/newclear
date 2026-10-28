@@ -27,6 +27,7 @@ mod server;
 mod siwc;
 mod store;
 mod stream_budget;
+mod stream_usage;
 mod templates;
 mod token_saver;
 mod tui_app;
@@ -500,7 +501,7 @@ fn doctor(cfg: &AppConfig) -> Result<()> {
     println!("  connections: {} (oauth_import: {oauth_n})", conns.len());
     println!("  routes     : {}", routes.len());
     println!("  api_keys   : {}", keys.len());
-    println!("  est. cost  : ${cost:.6}");
+    println!("  all-time  : {cost}");
     println!("ok");
     Ok(())
 }

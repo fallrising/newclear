@@ -1,0 +1,47 @@
+{
+  "chromiumCommit": "971a7443b0c9b0a9b2860529b33331b76077ec62",
+  "sources": [
+    {
+      "path": "third_party/blink/renderer/platform/loader/fetch/response_body_loader_test.cc",
+      "ref": "971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "gitBlob": "dd27d7af2a9da786cfe45e8f73ed42763a1deac9",
+      "url": "https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/platform/loader/fetch/response_body_loader_test.cc",
+      "sha256": "dfe13e9899642a14262f7579bc9f3d8e9f221098d2ca7c9303ecea1096a6300a",
+      "bytes": 48225
+    },
+    {
+      "path": "third_party/blink/renderer/platform/loader/fetch/response_body_loader.cc",
+      "ref": "971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "gitBlob": "cbb63f155cf8da2b9060adeca736e4cfbe00d8b8",
+      "url": "https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/platform/loader/fetch/response_body_loader.cc",
+      "sha256": "667ec6672e478ce6841cfeacdd1c09d0d560463ae461b9109beae962f5d9a037",
+      "bytes": 21883
+    },
+    {
+      "path": "third_party/blink/renderer/core/fetch/body_stream_buffer_test.cc",
+      "ref": "971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "gitBlob": "242e9d6565252483d2508d4a32a5348c20b7665f",
+      "url": "https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/fetch/body_stream_buffer_test.cc",
+      "sha256": "5b80a88e7e8943863bf878e5050f937944bec8c6d93e01d05d3df0b01824167a",
+      "bytes": 35075
+    },
+    {
+      "path": "third_party/blink/renderer/core/fetch/body_stream_buffer.cc",
+      "ref": "971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "gitBlob": "32d04b09cd6d753b324c2fa5f3ea7298e6ae18d3",
+      "url": "https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/fetch/body_stream_buffer.cc",
+      "sha256": "8175288d7152bbad6ff57d56d1ab373b828dc8af7fa294b33c7b96b4b052052b",
+      "bytes": 23869
+    }
+  ],
+  "patchSha256": "4a92821174af77ecd0478b96be1c9e22bb4728de759629c18bf07cdb937469fd",
+  "patchedTestFileSha256": "a53f67e9b4cfaa22c3a4295a8f4cc73a353af733f3421168a6339239f975b69d",
+  "originalTestFileSha256": "dfe13e9899642a14262f7579bc9f3d8e9f221098d2ca7c9303ecea1096a6300a",
+  "onlyPatchedPath": "third_party/blink/renderer/platform/loader/fetch/response_body_loader_test.cc",
+  "newGtestCases": 9,
+  "status": "NOT_RUN",
+  "compiled": false,
+  "blinkTestsExecuted": false,
+  "engineChanged": false,
+  "emptyContextLinesNormalizedForWhitespaceCheck": 6
+}

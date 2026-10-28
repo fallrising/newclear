@@ -10,6 +10,9 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 # Codebox / Fanzloud 成功契約
 
+> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+
+
 ## 主線與範圍
 
 [TD](docs/TD.md)的長期目標是 provider-neutral coding platform；已接受的 P0 是私人單 operator BYOS Codex Cloud 控制面。
@@ -147,3 +150,24 @@ passed. Independent exact-source acceptance is recorded separately in PR604.
 ## T-0380 v3 clock correction — 2026-10-26
 
 Scope and AC: [v3 diagnostic specification](docs/specs/SPEC-T006R-initial-trace-v3.md) C01–C05. Correct only successful CDP completion versus response sampling; retain request lower bound, failed-terminal/host/page checks and original product health. Separate v3 sources preserve v1/v2 and006FAIL. Planned verification: meaningful v2 RED, v3 targeted pure suite, four syntax checks, inverse/source hashes, scoped project-success, independent document/source review and current-head CI. Source implementation now has meaningful v2 RED (exact006 triple rejected,13events), then48/48 v3 pure tests with0failed/skipped and four syntax checks on Node24.18.0. All nine v1/v2 reference hashes, v3 page equality and baseline inverse equivalence passed. T107 accepted the specification after explicit missing-anchor refusal. Exact-source independent acceptance and current-head CI are publication gates, recorded in PR604. Actual browser evidence for v3 remains NOT_RUN; no new runtime grant. Canonical8/27, delivery18/19 and DraftPR604 remain.
+
+
+## T-0380 Claude-reviewed completion plan — 2026-10-27
+
+Owner requested consultation on the current failure and plan, then documentation before further work. [The updated plan](../../docs/fe-review/FANZLOUD-COMPLETION-PLAN.md) separates verified conditional source behavior from unproven executed-build/007 attribution. It adds the error-to-cancel control and corrects abort, suspension, context-destruction and exception oracles. Scope is documentation only: no engine/application/dependency edit or new browser attempt.
+
+Document acceptance requires source-backed advice mapping, explicit NOT_RUN/SLICE/engine/product evidence levels, a bounded upstream-test-patch next task, scoped project-success and diff checks, independent review, required CI and remote readback. The next test patch is not implemented or executed by this document. Recovery007 remains FAIL/consumed; canonical8/27,delivery18/19 and PR604Draft remain. Existing product ACs, mainline incomplete, usable_tag:none and targetsfalse are unchanged.
+
+
+## T-0380 upstream regression test artifact — 2026-10-28
+
+Owner continued the merged plan. Goal/scope: prepare a pinned-source test-only patch, helper/API mapping, per-row predictions and explicit NOT_RUN/GAP status; no engine/application/dependency change or runtime. [The artifact](../../docs/fe-review/fanzloud-completion-regression/README.md) adds nine upstream gtest cases for terminal cleanup and controls, leaving actual V8/context cases as gaps. Acceptance is exact-source static applicability/reversal, externally visible callback/data/cancel oracles, independent artifact review and required repository checks/CI/readback. This is artifact acceptance only; no Chromium compilation or executed RED/GREEN is claimed.
+
+Static apply/reverse passed on exact source copies. Actual007 root cause/build correspondence remains unknown; original product ACs,18/19,canonical8/27,PR604Draft,targetsfalse/mainlineincomplete/usable_tag:none remain. The next recommendation is a bounded read-only feasibility check for an existing genuine Blink test route, not an implicit build/download/browser grant.
+
+
+## T-0380 existing Blink environment feasibility — 2026-10-28
+
+Owner continued with one bounded read-only check of existing source/build/test availability. [The result](../../docs/fe-review/fanzloud-completion-regression/ENVIRONMENT-FEASIBILITY.md) identifies no compatible route in the inspected scope; excluded/inaccessible paths, container contents and remote environments remain unknown. The nine-case patch stays NOT_COMPILED/NOT_RUN; no engine RED/GREEN, actual007 attribution or R9/R10 integration coverage is claimed.
+
+Acceptance for this factual checkpoint is traceable inventory with honest coverage/errors, preserved patch/product bytes, focused documentation checks, independent review, required CI and exact remote readback. No build/download/browser/model or product/dependency edit occurred. The next recommendation is one bounded upstream fix/history lookup. Original product ACs,18/19,canonical8/27,PR604Draft,targetsfalse/mainlineincomplete/usable_tag:none remain.

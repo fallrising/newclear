@@ -6,10 +6,10 @@ Tier: ungraded
 Status: partial
 Interfaces: http, cli, spec
 Entrypoint: https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/SDD.md
-Auth: Access JWT and per-principal HMAC + server-side scoped grants; local tested, not deployed
+Auth: Access JWT and per-principal HMAC + server-side scoped grants; first live machine loop verified; full acceptance pending
 Spec: https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/contracts/m1.openapi.json
 
-M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS collector and native dashboard. No deployment or migrated application exists. Existing product authorities and runtime boundaries remain unchanged. Document verification does not establish a usable product.
+M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS collector and native dashboard. An isolated Access-protected deployment has one validated real runner result; full human/mobile/fault/recovery qualification remains pending. No existing application has migrated. Existing product authorities and runtime boundaries remain unchanged. Document verification does not establish a usable product.
 
 ## Interface reference
 
@@ -23,3 +23,20 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Migration](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/migration.md): candidate destinations, cutover, rollback and retirement gates.
 - [Verification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/verification.md): M0 document checks and future runtime acceptance.
 - [Sources](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/sources.md): pinned public sources and official documentation.
+
+- [Headless OAuth](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/headless-oauth.md): callback paste workflow and evidence-based troubleshooting.
+- [Live operations](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/live-operations.md): private receipts, provisioning order and bounded verification.
+- [First live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-first-live.md): actual runtime, one machine loop and remaining gaps.
+- [Isolated restore](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-isolated-restore.md): real D1 snapshot equality, journal reconciliation and preserved pending work; no production failover.
+
+- [Resident runner](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/resident-runner.md): bounded user-service lifecycle; automatic command pickup and same-journal restart qualified, full recovery pending.
+- [Resident evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-resident.md): 98 tests, independent review and bounded live user-service qualification.
+- [Recovery qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/recovery-qualification.md): isolated real-process crash and lost-report harness, with actual local workerd/D1 evidence and explicit remote gaps.
+
+- [Remote recovery and revocation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-remote-recovery.md): three isolated real-CF fault cases, revoked grants, disabled test Access token and preserved unknown; original resources unchanged, full acceptance pending.
+
+- [Dashboard browser evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-dashboard.md): local Chromium/workerd/D1, auth expiry, uncertain retry identity, stale-response rejection and narrow layouts; subsequent reviewed asset rollout verified automatically, real human Access pending; physical-phone testing is optional.
+
+- [Dashboard rollout](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/dashboard-rollout.md): reviewed assets deployed, original settings and application rows retained, anonymous requests return302 and machine reads pass; human browser workflow pending; physical-phone testing waived as a required gate.
+
+- [Authorization lifecycle](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-lifecycle.md): strict offline metadata status and private same-scope grant renewal/revocation plans;144local tests and synthetic CLI verified, no live collector/apply/rotation.

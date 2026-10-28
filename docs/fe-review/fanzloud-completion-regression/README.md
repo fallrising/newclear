@@ -1,5 +1,7 @@
 # Chromium terminal-cleanup regression patch — NOT_RUN
 
+> Latest checkpoint: [the bounded environment check](ENVIRONMENT-FEASIBILITY.md) is complete; no compatible existing Blink test route was identified in the inspected scope. Compilation/execution remain NOT_RUN. Its single next recommendation supersedes the earlier environment-check proposal below.
+
 T-0380 / R2-AC-14 and R2-AC-E. This is the bounded test-patch artifact requested by the [completion plan](../FANZLOUD-COMPLETION-PLAN.md), following owner continuation on 2026-10-28. It is **not compiled or executed**. No Chromium checkout/build, source-slice model, browser attempt, application/engine fix or dependency change accompanies it.
 
 The [patch](response-body-loader-terminal-cleanup.patch) changes only `third_party/blink/renderer/platform/loader/fetch/response_body_loader_test.cc` at Chromium commit `971a7443b0c9b0a9b2860529b33331b76077ec62`. It adds nine gtest cases, three terminal-callback counters to the existing `TestClient`, and a `TerminalCleanupClient` that checks public state before reading and cancels on closed/error notification. It invokes the real delegate; it does not reimplement its state machine or instantiate a real BodyStreamBuffer/V8 context.

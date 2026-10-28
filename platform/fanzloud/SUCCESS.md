@@ -291,3 +291,9 @@ Milestone 1 (ERR_ABORTED fix and dark baseline 27/27) is merged: PR604, main `01
 - bounded contrast evidence for axe's incomplete results.
 
 Acceptance: a focused RED, then GREEN, for M2-01 and M2-02; contrast lower bounds plus a PNG background cross-check for M2-03; existing suites green; independent review; required CI; merge. Browser recapture is a separate owner decision.
+
+## T-0433 recapture v7 — 2026-10-28
+
+Milestone 2 (M2 repairs) is merged: PR725, main `ed063534c333e5350582131a10a14b12006754b5`. The owner approved updating the runner and recapturing all 27 cells, one run each for desktop, tablet and mobile.
+
+[SPEC-T006R recapture v7](docs/specs/SPEC-T006R-recapture-v7.md) R701–R705 derives one byte-traceable runner from `remaining-baseline.mjs` for all three phases. The source pins move to the M2-repaired source and reuse is removed; every state gate is unchanged. The phases run in order, and each needs an independent actual review that also judges the R07 M2 final-state gates before the next phase starts.

@@ -10,7 +10,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 # Codebox / Fanzloud 成功契約
 
-> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). An app-free [layer ablation](../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) reproduced the ERR_ABORTED signature on Chromium 153. The trigger is a no-store response consumed through a stream reader; `arrayBuffer()` gave 0/600 and Playwright interception is not necessary. The current unit fixes `p0-client.js` bounded reads and fixture framing. All 27 canonical cells, including the earlier 8, must be recaptured on the new source, and each runtime needs its own owner approval. recovery007 stays FAIL/consumed and PR604 stays Draft. Earlier closure text and "next" recommendations below are history.
 
 
 ## 主線與範圍
@@ -70,6 +70,24 @@ cargo run -p codebox-control-plane
 
 須取得明確復工範圍、真 Cloud 主線驗證並補齊承諾的 runtime/persistence 整合；現有接受的函式庫切片不能作全平台可用標記。
 
+
+## FE round2 plan — 2026-10-24 (historical pre-implementation scope)
+
+T-0380 R2-AC-14/E follows the existing approved [DESIGN](fe-review/DESIGN.md) M1–M3
+and [T006R Ready task](docs/tasks/T006R.task.md)/[review specification](docs/specs/SPEC-T006R-fe-review.md).
+Current work is documentation only; harness, measured presentation changes and runtime
+are NOT_RUN. A separate root environment-only TLS trust probe passed; it served no
+product assets/API/provider and does not satisfy those pending gates. Plan: finite synthetic HTTPS/WSS at loopback with private per-run TLS trust,
+exact inherited contracts, three dark viewports/27 canonical states, focused no-resend/
+secret/cleanup journeys, then required native gates and fresh independent acceptance.
+Only baseline-proven index.html/p0.css/p0-app.js presentation changes may follow the
+root document gate. Existing p0-client/backend/API/security/provider semantics stay
+outside this change. Original offline native fake executables are allowed only as
+retained regression tests; no production CLI/control-plane or newbackendbrowser run.
+Targets remainsfalse until the scoped acceptance is evidenced. Existing product ACs,
+mainline incomplete, usable_tag:none, dormant status and liveCloud/P1 gaps are unchanged;
+no fullR3, deploy, release or ownercompletion is claimed.
+
 ## T-0380 approved native security prerequisite — 2026-10-24
 
 Owner approved only Tokio1.53.1→1.53.3 lock version/checksum. Affected deny,306Rust
@@ -96,6 +114,44 @@ Validation: scoped project-success documentation and diff checks passed. Indepen
 review and normal publication remain pending; executable tests were not rerun.
 
 
+## T-0380 diagnostic reason development — 2026-10-26
+
+Goal: retain a bounded, safe reason when the initial lifecycle observer rejects an
+event or cannot obtain a required phase. The single approved desktop recovery 005
+ended before Authenticate with `REVIEW_INITIAL_TRACE_INCOMPLETE`; its initial 401
+body, Playwright completion and original health gate passed. The stored trace is
+invalid and lacks an accepted CDP terminal. Its unique cause remains unproven.
+
+Scope: add separately named v2 observer/page/driver modules and focused pure tests;
+preserve the v1 source checkpoint and all original failed evidence. Integrate current
+main by a normal merge while retaining the approved HTTP limit clarification and
+Tokio lock update. No product, protocol, dependencies or runtime authority changes.
+
+Acceptance: meaningful RED then GREEN for missing reasons; finite reason/stage/event/
+domain enums, strict clocks, safe immutable snapshots and a combined 128-record bound;
+unchanged original request/body-read/health/assertion/cleanup behavior; changed-file
+syntax, scoped documentation checks and independent source review. Required current
+PR CI remains a publication gate. Previously green unchanged tests are retained.
+
+Real-browser verification of v2 is NOT_RUN. Recovery 005 is consumed; no retry or
+tablet/mobile continuation is included. FE acceptance remains 8/27 canonical states,
+18/19 overall deliveries and PR604 Draft. M2 measured presentation, conformance and
+final integration remain open; targets stays false, mainline incomplete and
+usable_tag:none. This source work cannot establish the historical runtime cause.
+
+Validation observed: Node24.18.0 `node --test fe-review/initial-lifecycle-v2.node.mjs`
+passed35/35 with0failed/skipped; `node --check` passed for all four new files. The
+initial v1 missing-reason regression failed as intended and is retained. The runner
+restores byte-exactly to v1 after the documented diagnostic substitutions; all five
+v1 file hashes remain unchanged. Scoped project-success and staged whitespace checks
+passed. Independent exact-source acceptance is recorded separately in PR604.
+
+
+## T-0380 v3 clock correction — 2026-10-26
+
+Scope and AC: [v3 diagnostic specification](docs/specs/SPEC-T006R-initial-trace-v3.md) C01–C05. Correct only successful CDP completion versus response sampling; retain request lower bound, failed-terminal/host/page checks and original product health. Separate v3 sources preserve v1/v2 and006FAIL. Planned verification: meaningful v2 RED, v3 targeted pure suite, four syntax checks, inverse/source hashes, scoped project-success, independent document/source review and current-head CI. Source implementation now has meaningful v2 RED (exact006 triple rejected,13events), then48/48 v3 pure tests with0failed/skipped and four syntax checks on Node24.18.0. All nine v1/v2 reference hashes, v3 page equality and baseline inverse equivalence passed. T107 accepted the specification after explicit missing-anchor refusal. Exact-source independent acceptance and current-head CI are publication gates, recorded in PR604. Actual browser evidence for v3 remains NOT_RUN; no new runtime grant. Canonical8/27, delivery18/19 and DraftPR604 remain.
+
+
 ## T-0380 Claude-reviewed completion plan — 2026-10-27
 
 Owner requested consultation on the current failure and plan, then documentation before further work. [The updated plan](../../docs/fe-review/FANZLOUD-COMPLETION-PLAN.md) separates verified conditional source behavior from unproven executed-build/007 attribution. It adds the error-to-cancel control and corrects abort, suspension, context-destruction and exception oracles. Scope is documentation only: no engine/application/dependency edit or new browser attempt.
@@ -115,3 +171,114 @@ Static apply/reverse passed on exact source copies. Actual007 root cause/build c
 Owner continued with one bounded read-only check of existing source/build/test availability. [The result](../../docs/fe-review/fanzloud-completion-regression/ENVIRONMENT-FEASIBILITY.md) identifies no compatible route in the inspected scope; excluded/inaccessible paths, container contents and remote environments remain unknown. The nine-case patch stays NOT_COMPILED/NOT_RUN; no engine RED/GREEN, actual007 attribution or R9/R10 integration coverage is claimed.
 
 Acceptance for this factual checkpoint is traceable inventory with honest coverage/errors, preserved patch/product bytes, focused documentation checks, independent review, required CI and exact remote readback. No build/download/browser/model or product/dependency edit occurred. The next recommendation is one bounded upstream fix/history lookup. Original product ACs,18/19,canonical8/27,PR604Draft,targetsfalse/mainlineincomplete/usable_tag:none remain.
+
+
+## T-0433 ERR_ABORTED read-path fix — 2026-10-28
+
+Goal: remove the browser-side ERR_ABORTED that blocks desktop recovery (R2-AC-14), without relaxing any body, health, identity, cardinality or cleanup gate. Evidence: [layer ablation](../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md).
+
+Scope:
+- [SPEC-T006](docs/specs/SPEC-T006-private-operator-web.md) P-006-10: declared-length bodies are drained whole; chunked bodies keep the stream reader and its overflow cancellation.
+- Test 8 gains declared-length partitions.
+- The T007 loopback e2e samples `GET /session` (401 and 200) on a real server and asserts an exact `Content-Length` with no chunked framing. Other responses share the same `CachedResponse` constructor.
+- [SPEC-T006R](docs/specs/SPEC-T006R-fe-review.md) R03: fixture JSON responses declare `Content-Length`.
+- Excluded: browser runtime, recapture, tablet/mobile, M2 and merging PR604.
+
+Acceptance:
+- Test 8 fails first for the intended reason (a stream reader is used on a declared-length body), then passes.
+- All 12 named T006 tests (2 Rust route tests and 10 Node tests) and all fe-review node suites pass, except hash pins that intentionally refuse the changed sources; those failures are recorded.
+- The T007 e2e passes with the framing assertion.
+- The workspace Rust gates pass, as do `check_project_success.py` and the required PR CI.
+- An independent review accepts the change.
+
+Changing the client and fixture invalidates reuse of the 8 previously accepted cells, so all 27 canonical cells need recapture under a separately approved runtime. Canonical stays 8/27 until then, and delivery stays 18/19.
+
+## T-0433 desktop recovery v4 runner — 2026-10-28
+
+The owner approved one desktop recovery run on the fixed source and a recovery-only runner, documentation first. The v3 runner cannot run on the fixed source: it pins the old client and fixture hashes and reuses eight cells. [SPEC-T006R recovery v4](docs/specs/SPEC-T006R-recovery-v4.md) V01–V05 defines a byte-traceable v4 copy. It changes only the source pins and removes reuse; every v3 gate is unchanged.
+
+Acceptance:
+- The v4 pure test passes and the v1–v3 node suites stay green.
+- An independent source review accepts v4, and the required CI passes.
+- Attempt `baseline-desktop-recovery-008` then runs once (at most 300 seconds, no retry).
+- A PASS yields one candidate recovery cell that needs independent actual review. A FAIL is preserved and stops.
+
+### Result — recovery 008 (2026-10-28)
+
+`baseline-desktop-recovery-008` ran once on source `96d58678`.
+- PASS in 2.446 seconds: exit 0, cleanup complete, container removed. Chromium 153.0.8010.12, Playwright 1.63.0.
+- The post-authentication session GET and the login GET finished normally with exact bodies and a matching `Content-Length`. No `requestfailed` and no unexpected health entry occurred. 007 had hit ERR_ABORTED at this same step.
+- The initial trace is complete, axe reports 0 violations, the PNG is present, and there was 1 effect and 0 turn starts.
+
+An independent actual review returned CANONICAL_CANDIDATE_ACCEPT. That makes `recovery-required__desktop__dark` the first canonical cell on the T-0433 source. The review also recorded one serious color-contrast item that axe marks incomplete (not a violation), for design follow-up.
+
+This is one run: it shows ERR_ABORTED did not occur here and does not measure a rate. The 8 earlier cells were accepted on the previous source and are not reusable. On the T-0433 source, canonical is 1/27, and the remaining desktop, tablet and mobile cells need separately approved recapture. Delivery stays 18/19.
+
+## T-0433 desktop remaining v5 runner — 2026-10-28
+
+The owner approved preparing a runner for the other eight desktop cells and running it once after review and CI. v4 cannot be reused here: its recovery-only gate rejects every non-recovery state by design. [SPEC-T006R desktop remaining v5](docs/specs/SPEC-T006R-desktop-remaining-v5.md) D01–D05 derives a byte-traceable v5 from the existing all-state `remaining-baseline.mjs`. v5 makes only the D01 substitutions (header, selection, scope, two source pins, runner name, reuse block, previous-phase read and `fullViewportFresh`); every other gate is unchanged. Tablet and mobile (18 cells) still need their own runner: `remaining-baseline.mjs` pins the old source and requires a previous desktop phase.
+
+Acceptance:
+- The v5 pure test passes and the existing fe-review suites stay green.
+- An independent source review accepts v5, and the required CI passes.
+- Attempt `baseline-desktop-remaining-001` then runs once (at most 300 seconds, no retry).
+- A PASS yields eight candidate cells that need independent actual review. A FAIL is preserved and stops.
+
+### Result — desktop remaining 001 (2026-10-28)
+
+`baseline-desktop-remaining-001` ran once on source `e7bf285c`.
+- PASS in 21.0 seconds: exit 0, cleanup complete, container removed. Chromium 153.0.8010.12, Playwright 1.63.0.
+- All eight states passed with every health entry expected and zero `requestfailed`, including `disconnected`, where ERR_ABORTED appeared in earlier runs.
+- Per-state counts, the bootstrap, device, turn, rejection, cancel and reconnect diagnostics, storage, DOM, keyboard, axe (0 violations) and the PNGs all passed.
+
+An independent actual review returned CANONICAL_ACCEPT for all eight cells. With recovery 008, desktop is 9/9 on the T-0433 source and canonical is 9/27.
+
+Review notes:
+- The `disconnected` row does not store the stream status at capture time; the runner asserted it before the screenshot.
+- At desktop width the diff does not overflow, so local scrolling is not exercised there (same as the earlier accepted cell); tablet and mobile should show it.
+- axe marks color-contrast incomplete in every state.
+
+Remaining: tablet 9 and mobile 9 (they need a runner on the fixed source), the M2 actual UI and finite HTTP/WSS conformance. Delivery stays 18/19.
+
+## T-0433 tablet/mobile v6 runner — 2026-10-28
+
+The owner approved preparing a tablet/mobile runner and running tablet once after review and CI. Mobile needs a tablet PASS and a separate approval. [SPEC-T006R tablet/mobile v6](docs/specs/SPEC-T006R-tablet-mobile-v6.md) P01 and V601–V604 derive a byte-traceable v6 from `remaining-baseline.mjs`. Tablet's previous-phase check becomes `assertPreviousDesktop` over the two accepted desktop results; mobile keeps the original chain. Every state gate is unchanged.
+
+Acceptance:
+- Both pure suites pass and the existing suites stay green.
+- An independent source review accepts v6, and the required CI passes.
+- Attempt `baseline-tablet-001` then runs once (at most 300 seconds, no retry).
+- A PASS yields nine candidate cells that need independent actual review. A FAIL is preserved and stops.
+
+### Result — tablet 001 (2026-10-28)
+
+`baseline-tablet-001` ran once on source `c3dcab8f`.
+- PASS in 21.0 seconds: exit 0, cleanup complete, container removed. Chromium 153.0.8010.12, Playwright 1.63.0.
+- It chained on the pinned desktop evidence (`f942f5b8…`, `dea0e7dd…`).
+- All nine states passed with every health entry expected and zero `requestfailed`, including `recovery-required` on the generic path. axe reported 0 violations and the page has no horizontal overflow at 834.
+
+An independent actual review returned CANONICAL_ACCEPT for all nine tablet cells as baseline captures. Canonical is 18/27 on the T-0433 source.
+
+Open M2 gaps (recorded, not passed):
+- The diff and event lists never overflow at desktop or tablet, so R07/R10 local scrolling is not exercised.
+- The diff region has no accessible name and `tabIndex` -1.
+- axe marks color-contrast incomplete (serious) in every state; R07 treats incomplete as not passed.
+
+Remaining: mobile 9 (needs separate approval), the M2 actual UI including these gaps, and finite HTTP/WSS conformance. Delivery stays 18/19.
+
+### Result — mobile 001 (2026-10-28)
+
+`baseline-mobile-001` ran once on source `0655f0bd`.
+- PASS in 21.8 seconds: exit 0, cleanup complete, container removed.
+- It chained on the accepted tablet result (`500ce82d…`) through the original `assertPreviousPhase`.
+- All nine states passed with every health entry expected and zero `requestfailed`.
+
+An independent actual review returned CANONICAL_ACCEPT for all nine mobile cells as baseline captures. **The canonical three-size dark baseline is 27/27 on the T-0433 source.** M2 is still not accepted.
+
+Open M2 defects measured by the baseline (R07 final-state bar; repair per R10 as explicit key replacements after a focused RED):
+1. `device-pending__mobile__dark`: the page overflows horizontally (document 390 wide, scrolls to 399). The overflowing element is not yet identified.
+2. `success-diff__mobile__dark`: axe `scrollable-region-focusable` (serious). The diff scrolls locally on mobile but is not focusable (`tabIndex` -1, no name).
+3. All 27 cells: axe marks color-contrast incomplete (serious); manual rendered-color evidence is owed.
+4. All cells: the event and diff regions are unnamed with `tabIndex` -1. Event local scrolling is never exercised, and diff local scrolling only on mobile.
+
+Remaining: M2 actual UI repairs for these, finite HTTP/WSS conformance, then integration review, CI and PR604 delivery. Delivery stays 18/19.

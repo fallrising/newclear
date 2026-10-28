@@ -73,3 +73,20 @@ evidence; separate [runtime acceptance](acceptance/T040A.acceptance.md) accepts 
 Managed storage, lease/clock guarantees and external execution remain absent. Later full tasks/specifications
 must resolve their owned gaps before Ready. Project-wide automatic rustdoc/spec drift tooling
 remains a gap; this milestone's explicit document/source review does not claim that automation.
+
+
+## T006R — approved R2 operator review (documentation stage)
+
+Existing P0/P1 accepted rows remain unchanged. TD§15.0/§19 dependency extension for
+this review is accepted T006 + accepted T007 → [T006R](tasks/T006R.task.md), Ready
+for its documentation gate. Blocked T040 and its later seeds are not dependencies.
+
+| Requirement | CU / normative clauses | Planned machine evidence | Current state |
+|---|---|---|---|
+| Approved R2 M1 finite HTTPS/WSS fixture, ownership/TLS | CU-WEB-P0-01; [SPEC-T006R](specs/SPEC-T006R-fe-review.md) R01–R06/R09; consumed T005A/B/C | exactasset, containment, TLSpositive/negative, actualcontroller, sequence/no-resend, cleanup named oracles | Ready; NOT_RUN |
+| M2 measured presentation/keyboard/axe/contrast | CU-WEB-P0-01; R07/R10 | baseline + focusedRED/GREEN; exact27state/viewportkeys and focusedjourneys | Ready; NOT_RUN |
+| M3 no implicit actions/secrets/text-only diff | CU-WEB-P0-01; R05/R06/R08 | action/mutation counts, realrefresh/timeout/cancel, clearedfields/storage, inertdiff | Ready; NOT_RUN |
+| Evidence/native/published boundaries | R11/R12; original T006/T007 contracts | unchangednativegates, existingofflinefakefixtures only, clauseevidence/freshacceptance/rootCI | Pending; no runtime/Cloud/mainline claim |
+
+No new Rust public signature is planned; rustdoc projection remains unchanged and
+must receive explicit source review. This row is not an infrastructure-only CU exemption.

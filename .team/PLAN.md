@@ -2048,6 +2048,10 @@ Phark T017 checkpoint 2026-10-24T11:57:46Z: source-specific shared12 captures an
 
 Goku592 merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at2026-10-24T11:17:09Z; R25/all6CI/scopedreadback passed. Carry actualGoku closure. Phark R26 FINAL ACCEPT and final source-specific native/runtime evidence complete; merge integrates already-accepted main without Phark runtime changes.
 
+## Fanzloud T020/T006R / T-0380 R2-AC-14 / 2026-10-24T12:23:53Z
+
+Root reviewed derivedSPEC-T006R/ReadyexistingCUtask against approvedDESIGN; noSDD/productsemantic expansion. Documentation gate accepted for implementation, runtime stillNOT_RUN. Roottrust001onlyenvironmentPASS3.824s/HTTPS+WSS+2negativecerts/allcleanup; sameimage/browser/trustsource mayreuse negativeproof. First25–30minauthor fixture/controllercontractgate, native/rootruntime separately; estimate125–195active+20–50wait/checkpoint20notdeadline/max2source-backeddiagnostics. Rootownsboards/environment/fullnative/Git/acceptance; fresh-context document-drivenreview beforefinalacceptance. Originalofflinefakefixture native tests permitted, nonewbackendbrowser/realCLI/provider/deps/controllerchange.
+
 ## Pokercase T021 / T-0380 R2-AC-12 / 2026-10-24T12:21:48Z
 
 Docs-first claim for already approved M1–M4; root owns environment/Git/native/acceptance, bounded author and independent review. Estimate90–150active +15–40wait;20mincheckpoint notdeadline,max2source-backed diagnostics. Preserve concurrent accepted backend changes. Productallowlist templates/style and measuredTUIlayout only; no provider/backend/credentials/newdependency/deploy. First25minfixture gate, no runtime before root sourcefreeze review.
@@ -2074,6 +2078,10 @@ T018 approvedreviewonlypair; first25–30minFlowshotshellpreload/LoomlockedSDKca
 
 Paired runtime now verified: Flowshot19 + retained Loom12 + approved0069captures, independent T028/T029 audit. Native green evidence reused; original failures and accessibility findings preserved. Current-head CI and normal PR598 merge/readback remain pending. Fanz bootstrap001-only passed; no canonical continuation authorized.
 
+
+## Fanzloud source continuation — 2026-10-26
+
+T-0380 R2-AC-14/E continues on owner instruction. Root integrates currentmain without touching original dirty worktrees. Bounded author T097 adds separately named safe v2 invalidation reasons and meaningful pure RED/GREEN; independent T098 reviews exact source and merge resolution. Preserve v1/005 evidence, strict gates and all other delivered unit records. No runtime retry, target promotion, full-round completion or usable release. Estimated source15min plus review6min and publication;20min progress checkpoint, not a new hard cap. Required CI cannot be bypassed.
 
 ## Cloud Lab M0 — 2026-10-26
 

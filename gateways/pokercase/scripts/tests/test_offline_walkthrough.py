@@ -20,6 +20,94 @@ import offline_walkthrough as walk
 
 
 class WalkthroughTests(unittest.TestCase):
+    @staticmethod
+    def completed_stream_row():
+        return {"id": 1, "ts": "2026-10-28T00:00:00Z", "public_model": "chat-stream", "connection_id": 1,
+                "status": 200, "latency_ms": 2, "error": None,
+                "prompt_tokens": 5, "completion_tokens": 3, "estimated_cost_usd": 2.0,
+                "request_id": "synthetic-request", "attempt_id": "synthetic-attempt",
+                "finalized_at": "2026-10-28T00:00:01Z", "upstream_model": "demo-text",
+                "outcome": "succeeded", "usage_status": "complete", "usage_source": "openai_chat_v1",
+                "headers_ms": 2, "first_output_ms": 3, "total_observed_ms": 20}
+
+    def test_html_cost_summary_rejects_wrong_subtotal_with_correct_coverage(self):
+        summary = {"status": "partial", "known_sum": 28.0, "known_count": 14, "total_count": 17}
+        for amount in ("0", "280", "28.01"):
+            raw = f'<strong>Partial estimate ${amount} · 14/17 rows</strong>'.encode()
+            with self.subTest(amount=amount), self.assertRaisesRegex(
+                    walk.JourneyFailure, "html_cost_reconciliation"):
+                walk.require_html_cost_summary(raw, summary)
+        for amount in ("28", "28.0", "28.00"):
+            walk.require_html_cost_summary(
+                f'<strong>Partial estimate ${amount} · 14/17 rows</strong>'.encode(), summary)
+
+    def test_normal_stream_accounting_rejects_old_null_usage(self):
+        for protocol in walk.ENDPOINTS:
+            row = {"public_model": protocol + "-stream", "prompt_tokens": None,
+                   "completion_tokens": None, "estimated_cost_usd": None}
+            with self.subTest(protocol=protocol), self.assertRaisesRegex(
+                    walk.JourneyFailure, "stream_usage_false_value"):
+                walk.require_stream_accounting(row)
+
+    def test_normal_stream_accounting_accepts_observed_upstream_usage(self):
+        row = self.completed_stream_row()
+        observed = walk.require_stream_accounting(row)
+        self.assertEqual(observed["prompt_tokens"], 5)
+        self.assertEqual(observed["completion_tokens"], 3)
+        self.assertEqual(observed["estimated_cost_usd"], 2.0)
+        self.assertEqual(observed["usage_source"], "openai_chat_v1")
+        self.assertEqual(observed["attempt_id"], row["attempt_id"])
+        self.assertEqual(observed["total_observed_ms"], 20)
+
+    def test_normal_stream_accounting_accepts_submillisecond_observation(self):
+        row = {**self.completed_stream_row(), "headers_ms": 0,
+               "first_output_ms": 0, "total_observed_ms": 0}
+        observed = walk.require_stream_accounting(row)
+        self.assertEqual(observed["headers_ms"], 0)
+        self.assertEqual(observed["first_output_ms"], 0)
+        self.assertEqual(observed["total_observed_ms"], 0)
+
+    def test_normal_stream_accounting_rejects_incomplete_metadata(self):
+        for field, value, code in (
+            ("prompt_tokens", 0, "stream_usage_false_value"),
+            ("completion_tokens", 6, "stream_usage_false_value"),
+            ("estimated_cost_usd", 4.0, "stream_usage_false_value"),
+            ("outcome", "failed", "stream_accounting_terminal"),
+            ("usage_status", "missing", "stream_accounting_terminal"),
+            ("usage_source", "unknown", "stream_accounting_source"),
+            ("request_id", None, "stream_accounting_identity"),
+            ("attempt_id", "", "stream_accounting_identity"),
+            ("finalized_at", None, "stream_accounting_identity"),
+            ("headers_ms", -1, "stream_accounting_timing"),
+            ("first_output_ms", None, "stream_accounting_timing"),
+            ("first_output_ms", 21, "stream_accounting_timing"),
+            ("total_observed_ms", 0, "stream_accounting_timing"),
+        ):
+            row = self.completed_stream_row()
+            row[field] = value
+            with self.subTest(field=field, value=value), self.assertRaisesRegex(walk.JourneyFailure, code):
+                walk.require_stream_accounting(row)
+
+    def test_csv_accounting_preserves_usage_and_attempt_metadata(self):
+        original = self.completed_stream_row()
+        exported = {key: "" if value is None else str(value) for key, value in original.items()}
+        walk.require_csv_accounting(original, exported)
+        for field, value, code in (
+            ("prompt_tokens", "0", "csv_usage_reconciliation"),
+            ("first_output_ms", "0", "csv_usage_reconciliation"),
+            ("outcome", "unknown", "csv_metadata_reconciliation"),
+            ("usage_source", "unknown", "csv_metadata_reconciliation"),
+            ("attempt_id", "another-attempt", "csv_metadata_reconciliation"),
+            ("finalized_at", "", "csv_metadata_reconciliation"),
+        ):
+            with self.subTest(field=field), self.assertRaisesRegex(walk.JourneyFailure, code):
+                walk.require_csv_accounting(original, {**exported, field: value})
+        unknown = {**original, "prompt_tokens": None, "completion_tokens": None,
+                   "estimated_cost_usd": None, "first_output_ms": None,
+                   "outcome": "cancelled", "usage_status": "missing"}
+        walk.require_csv_accounting(unknown, {
+            key: "" if value is None else str(value) for key, value in unknown.items()})
+
     def test_continuous_stream_cannot_extend_request_deadline(self):
         with tempfile.TemporaryDirectory() as directory, walk.Fixture() as fixture:
             gateway = walk.Gateway(Path(sys.executable), fixture, Path(directory))

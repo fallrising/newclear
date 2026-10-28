@@ -243,27 +243,6 @@ fn provider_id_for(target: &ResolvedTarget) -> Option<String> {
 
 /// Forward a chat-shaped request. `native_responses` is the client's original
 /// Responses body; Responses upstreams receive it (items intact) instead of `body`.
-pub async fn forward_chat_completions(
-    state: &ProxyState,
-    target: &ResolvedTarget,
-    body: Bytes,
-    native_responses: Option<&Bytes>,
-    stream: bool,
-    cancel: &CancellationToken,
-) -> Result<ForwardOk, UpstreamAttemptError> {
-    forward_chat_completions_inner(
-        state,
-        target,
-        body,
-        native_responses,
-        stream,
-        cancel,
-        true,
-        None,
-    )
-    .await
-}
-
 #[allow(
     clippy::too_many_arguments,
     reason = "Optional accounting ownership follows the existing forwarding and OAuth retry boundary"
@@ -753,21 +732,8 @@ pub async fn handle_chat_with_fallback(
                 }
             }
         }
-        let mut attempt = if stream
-            && target.connection.auth_type == "api_key"
-            && provider_id_for(target).is_none()
-            && crate::borrowed::source(&target.connection).is_none()
-        {
-            Some(crate::stream_usage::StreamAttempt::begin(
-                &state.store,
-                &request_id,
-                public_model,
-                target,
-                &body,
-            )?)
-        } else {
-            None
-        };
+        let mut attempt =
+            begin_http_stream_attempt(state, &request_id, public_model, target, &body, stream)?;
         match forward_chat_completions_inner(
             state,
             target,
@@ -877,6 +843,32 @@ pub async fn handle_chat_with_fallback(
     })
 }
 
+fn begin_http_stream_attempt(
+    state: &ProxyState,
+    request_id: &str,
+    public_model: &str,
+    target: &ResolvedTarget,
+    body: &[u8],
+    stream: bool,
+) -> AppResult<Option<crate::stream_usage::StreamAttempt>> {
+    if stream
+        && target.connection.auth_type == "api_key"
+        && provider_id_for(target).is_none()
+        && crate::borrowed::source(&target.connection).is_none()
+    {
+        crate::stream_usage::StreamAttempt::begin(
+            &state.store,
+            request_id,
+            public_model,
+            target,
+            body,
+        )
+        .map(Some)
+    } else {
+        Ok(None)
+    }
+}
+
 /// Anthropic-native path: translate request → OpenAI forward → translate response.
 #[allow(
     clippy::too_many_arguments,
@@ -896,6 +888,7 @@ pub async fn handle_anthropic_messages(
     let oai_body = claude::anthropic_to_openai(&body)?;
     let targets = order_targets(targets, strategy, &state.cooldown, &state.rr_counter);
     let mut last_err: Option<UpstreamAttemptError> = None;
+    let request_id = uuid::Uuid::new_v4().to_string();
 
     for (idx, target) in targets.iter().enumerate() {
         if cancel.is_cancelled() {
@@ -933,22 +926,36 @@ pub async fn handle_anthropic_messages(
                 }
             }
         }
-        match forward_chat_completions(state, target, oai_body.clone(), None, stream, &cancel).await
+        let mut attempt =
+            begin_http_stream_attempt(state, &request_id, public_model, target, &oai_body, stream)?;
+        match forward_chat_completions_inner(
+            state,
+            target,
+            oai_body.clone(),
+            None,
+            stream,
+            &cancel,
+            true,
+            attempt.as_mut(),
+        )
+        .await
         {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
                 if stream {
-                    let _ = state.store.log_usage(
-                        Some(public_model),
-                        Some(&target.connection.id),
-                        Some(200),
-                        Some(latency),
-                        None,
-                        None,
-                        None,
-                        None,
-                    );
+                    if attempt.is_none() {
+                        let _ = state.store.log_usage(
+                            Some(public_model),
+                            Some(&target.connection.id),
+                            Some(200),
+                            Some(latency),
+                            None,
+                            None,
+                            None,
+                            None,
+                        );
+                    }
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
                         UpstreamBodyKind::OpenAiChat => {
@@ -959,7 +966,13 @@ pub async fn handle_anthropic_messages(
                         }
                         _ => StreamMode::Passthrough,
                     };
-                    return stream_response(fwd.response, state.sse_stall_secs, mode).await;
+                    return stream_body_observed(
+                        fwd.response.bytes_stream(),
+                        state.sse_stall_secs,
+                        mode,
+                        attempt,
+                    )
+                    .await;
                 } else {
                     let kind = fwd.body_kind;
                     let bytes = read_forward_body(fwd, &cancel, false).await?;
@@ -986,7 +999,19 @@ pub async fn handle_anthropic_messages(
                 }
             }
             Err(e) => {
-                record_failure(state, public_model, target, &e, start);
+                if let Some(a) = attempt.as_mut() {
+                    if e.status == 499 {
+                        a.stop("cancelled", "stream_cancelled");
+                    } else {
+                        a.stop("failed", "upstream_attempt_failed");
+                    }
+                    let secs = cooldown_secs_for_status(e.status);
+                    if secs > 0 {
+                        state.cooldown.mark(&target.connection.id, secs);
+                    }
+                } else {
+                    record_failure(state, public_model, target, &e, start);
+                }
                 if e.retryable && idx + 1 < targets.len() {
                     last_err = Some(e);
                     continue;
@@ -1030,6 +1055,7 @@ pub async fn handle_responses(
     let allow_background = serde_json::from_slice::<Value>(&body)?["background"] == true;
     let targets = order_targets(targets, strategy, &state.cooldown, &state.rr_counter);
     let mut last_err: Option<UpstreamAttemptError> = None;
+    let request_id = uuid::Uuid::new_v4().to_string();
 
     for (idx, target) in targets.iter().enumerate() {
         if cancel.is_cancelled() {
@@ -1067,13 +1093,23 @@ pub async fn handle_responses(
                 }
             }
         }
-        match forward_chat_completions(
+        let mut attempt = begin_http_stream_attempt(
+            state,
+            &request_id,
+            public_model,
+            target,
+            &chat_body,
+            stream,
+        )?;
+        match forward_chat_completions_inner(
             state,
             target,
             chat_body.clone(),
             Some(&body),
             stream,
             &cancel,
+            true,
+            attempt.as_mut(),
         )
         .await
         {
@@ -1081,16 +1117,18 @@ pub async fn handle_responses(
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
                 if stream {
-                    let _ = state.store.log_usage(
-                        Some(public_model),
-                        Some(&target.connection.id),
-                        Some(200),
-                        Some(latency),
-                        None,
-                        None,
-                        None,
-                        None,
-                    );
+                    if attempt.is_none() {
+                        let _ = state.store.log_usage(
+                            Some(public_model),
+                            Some(&target.connection.id),
+                            Some(200),
+                            Some(latency),
+                            None,
+                            None,
+                            None,
+                            None,
+                        );
+                    }
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
                         UpstreamBodyKind::OpenAiChat => {
@@ -1100,7 +1138,13 @@ pub async fn handle_responses(
                         UpstreamBodyKind::OpenAiResponses => StreamMode::NativeResponses,
                         _ => StreamMode::Passthrough,
                     };
-                    return stream_response(fwd.response, state.sse_stall_secs, mode).await;
+                    return stream_body_observed(
+                        fwd.response.bytes_stream(),
+                        state.sse_stall_secs,
+                        mode,
+                        attempt,
+                    )
+                    .await;
                 } else {
                     let kind = fwd.body_kind;
                     let bytes = read_forward_body(fwd, &cancel, allow_background).await?;
@@ -1134,7 +1178,19 @@ pub async fn handle_responses(
                 }
             }
             Err(e) => {
-                record_failure(state, public_model, target, &e, start);
+                if let Some(a) = attempt.as_mut() {
+                    if e.status == 499 {
+                        a.stop("cancelled", "stream_cancelled");
+                    } else {
+                        a.stop("failed", "upstream_attempt_failed");
+                    }
+                    let secs = cooldown_secs_for_status(e.status);
+                    if secs > 0 {
+                        state.cooldown.mark(&target.connection.id, secs);
+                    }
+                } else {
+                    record_failure(state, public_model, target, &e, start);
+                }
                 if e.retryable && idx + 1 < targets.len() {
                     last_err = Some(e);
                     continue;
@@ -1291,6 +1347,9 @@ const MAX_CONVERTED_LINE_BYTES: usize = 16 * 1024 * 1024;
 trait SseConvert: Send {
     /// A final output was produced, not merely a finish reason received.
     fn is_done(&self) -> bool;
+    fn is_failed(&self) -> bool {
+        false
+    }
     fn on_data(&mut self, data: &str) -> Vec<String>;
     /// Every supported source format accepts this fixed error envelope.
     /// Unlike EOF/stall, an input-limit violation cannot finalize a finish reason.
@@ -1313,6 +1372,9 @@ trait SseConvert: Send {
 struct ChatToAnthropic(StreamTranslateState);
 
 impl SseConvert for ChatToAnthropic {
+    fn is_failed(&self) -> bool {
+        self.0.is_failed()
+    }
     fn is_done(&self) -> bool {
         self.0.message_stop_sent
     }
@@ -1332,6 +1394,9 @@ impl SseConvert for ChatToAnthropic {
 }
 
 impl SseConvert for responses::ChatToResponsesStream {
+    fn is_failed(&self) -> bool {
+        self.is_failed()
+    }
     fn is_done(&self) -> bool {
         responses::ChatToResponsesStream::is_done(self)
     }
@@ -1454,15 +1519,6 @@ fn converter(mode: StreamMode) -> Option<Box<dyn SseConvert>> {
     })
 }
 
-/// Stream upstream SSE with stall timeout. Dropping the body stops polling upstream.
-async fn stream_response(
-    resp: reqwest::Response,
-    stall_secs: u64,
-    mode: StreamMode,
-) -> AppResult<Response> {
-    stream_body(resp.bytes_stream(), stall_secs, mode).await
-}
-
 /// SSE body from any byte stream (HTTP upstream or a Claude Code run).
 async fn stream_body<S, E>(upstream: S, stall_secs: u64, mode: StreamMode) -> AppResult<Response>
 where
@@ -1496,7 +1552,9 @@ where
         loop {
             match timeout(stall, upstream.next()).await {
                 Ok(Some(Ok(chunk))) => {
-                    if let Some(a) = attempt.as_mut() { a.push(&chunk); }
+                    if conv.is_none() {
+                        if let Some(a) = attempt.as_mut() { a.push(&chunk); }
+                    }
                     if let Some(native) = native.as_mut() {
                         let out = native.push(&chunk);
                         if native.done {
@@ -1531,6 +1589,7 @@ where
                             buf.reserve_exact(capacity - buf.len());
                         }
                         buf.extend_from_slice(content);
+                        if let Some(a) = attempt.as_mut() { a.observe_converted(part); }
                         if line.is_some() {
                             let decoded = String::from_utf8_lossy(&buf);
                             let decoded = decoded.strip_suffix('\r').unwrap_or(&decoded);
@@ -1545,6 +1604,7 @@ where
                         if conv.is_done() { break; }
                     }
                     if conv.is_done() {
+                        if let Some(a) = attempt.as_mut() { a.converted_terminal(conv.is_failed()); }
                         drop(upstream);
                         if !out.is_empty() { yield Ok(Bytes::from(out)); }
                         break;
@@ -1573,7 +1633,6 @@ where
                     break;
                 }
                 Ok(None) => {
-                    if let Some(a) = attempt.as_mut() { a.eof(); }
                     drop(upstream);
                     if let Some(native) = native.as_mut() {
                         let out = native.end();
@@ -1591,10 +1650,13 @@ where
                             out.push_str(&rec);
                             out.push_str("\n\n");
                         }
+                        if let Some(a) = attempt.as_mut() {
+                            if conv.is_failed() { a.converted_terminal(true); } else { a.eof(); }
+                        }
                         if !out.is_empty() {
                             yield Ok(Bytes::from(out));
                         }
-                    }
+                    } else if let Some(a) = attempt.as_mut() { a.eof(); }
                     break;
                 }
                 Err(_) => {
@@ -1667,6 +1729,266 @@ mod settlement_ownership_tests {
             b"{}",
         )
         .unwrap()
+    }
+
+    fn pc2_modes() -> Vec<StreamMode> {
+        vec![
+            StreamMode::ChatToAnthropic("m".into()),
+            StreamMode::ChatToResponses("m".into()),
+        ]
+    }
+
+    #[tokio::test]
+    async fn pc2_converter_failure_does_not_observe_later_success_in_same_chunk() {
+        for mode in pc2_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let mut a = attempt(&store);
+            a.headers(200);
+            let wire = b"data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"error\":{\"message\":\"synthetic\"}}\n\ndata: {\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8}}\n\ndata: [DONE]\n\n";
+            let source =
+                futures_util::stream::iter(vec![Ok::<_, std::io::Error>(Bytes::from_static(wire))]);
+            let response = stream_body_observed(source, 5, mode, Some(a))
+                .await
+                .unwrap();
+            let output = axum::body::to_bytes(response.into_body(), 1 << 20)
+                .await
+                .unwrap();
+            assert!(String::from_utf8_lossy(&output).contains("error"));
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(
+                row.outcome, "failed",
+                "converter rejected before later usage/DONE"
+            );
+            assert!(row.prompt_tokens.is_none() && row.completion_tokens.is_none());
+            assert!(row.estimated_cost_usd.is_none());
+            assert!(row.finalized_at.is_some());
+        }
+    }
+
+    #[tokio::test]
+    async fn pc2_terminal_line_settles_and_releases_before_final_output() {
+        struct Witness(Arc<std::sync::atomic::AtomicBool>);
+        impl Drop for Witness {
+            fn drop(&mut self) {
+                self.0.store(true, Ordering::SeqCst);
+            }
+        }
+        for mode in pc2_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let mut a = attempt(&store);
+            a.headers(200);
+            let released = Arc::new(std::sync::atomic::AtomicBool::new(false));
+            let witness = Witness(released.clone());
+            let source = async_stream::stream! {
+                let _witness = witness;
+                yield Ok::<_,std::io::Error>(Bytes::from_static(b"data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":3}}\n\ndata: [DONE]\n"));
+                std::future::pending::<()>().await;
+            };
+            let response = stream_body_observed(source, 5, mode, Some(a))
+                .await
+                .unwrap();
+            let mut body = response.into_body().into_data_stream();
+            assert!(body.next().await.unwrap().is_ok());
+            assert!(released.load(Ordering::SeqCst));
+            let before = serde_json::to_value(store.recent_usage(1).unwrap()).unwrap();
+            assert!(
+                before[0]["finalized_at"].is_string(),
+                "settle before final output without another poll"
+            );
+            assert_eq!(before[0]["outcome"], "succeeded");
+            assert_eq!(before[0]["usage_status"], "complete");
+            assert_eq!(before[0]["prompt_tokens"], 5);
+            drop(body);
+            assert_eq!(
+                serde_json::to_value(store.recent_usage(1).unwrap()).unwrap(),
+                before
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn pc2_conversion_and_observer_limits_stay_independent() {
+        let finish =
+            "data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n";
+        let tail =
+            "data: {\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8}}\n\ndata: [DONE]\n\n";
+        for mode in pc2_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = attempt(&store);
+            let wire = format!(
+                "data: {}\n\n{finish}{tail}",
+                json!({"choices":[{"index":0,"delta":{"content":"x".repeat(70*1024)}}]})
+            );
+            let source =
+                futures_util::stream::iter(vec![Ok::<_, std::io::Error>(Bytes::from(wire))]);
+            let response = stream_body_observed(source, 5, mode, Some(a))
+                .await
+                .unwrap();
+            let out = axum::body::to_bytes(response.into_body(), 1 << 20)
+                .await
+                .unwrap();
+            assert!(!String::from_utf8_lossy(&out).contains("event: error"));
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(row.outcome, "unknown");
+            assert_eq!(row.usage_status, "invalid");
+            assert_eq!(row.error.as_deref(), Some("stream_observer_limit"));
+        }
+        for mode in pc2_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = attempt(&store);
+            let wire = format!(
+                "{finish}data: {}\n\n{tail}",
+                "x".repeat(MAX_CONVERTED_LINE_BYTES)
+            );
+            let source =
+                futures_util::stream::iter(vec![Ok::<_, std::io::Error>(Bytes::from(wire))]);
+            let response = stream_body_observed(source, 5, mode, Some(a))
+                .await
+                .unwrap();
+            let out = axum::body::to_bytes(response.into_body(), 1 << 20)
+                .await
+                .unwrap();
+            assert!(
+                String::from_utf8_lossy(&out).contains(crate::error::INPUT_LIMIT_STREAM_MESSAGE)
+            );
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(row.outcome, "failed");
+            assert!(row.prompt_tokens.is_none());
+            assert_eq!(row.error.as_deref(), Some("stream_conversion_failed"));
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("db"), None).unwrap();
+        let a = attempt(&store);
+        let mut wire = finish.to_string();
+        for index in 0..2049 {
+            wire += &format!(
+                "data: {}\n\n",
+                json!({"choices":[{"index":0,"delta":{"tool_calls":[{"index":index,"id":"synthetic","function":{"name":"add","arguments":""}}]}}]})
+            );
+        }
+        wire += tail;
+        let source = futures_util::stream::iter(vec![Ok::<_, std::io::Error>(Bytes::from(wire))]);
+        let response =
+            stream_body_observed(source, 5, StreamMode::ChatToResponses("m".into()), Some(a))
+                .await
+                .unwrap();
+        let out = axum::body::to_bytes(response.into_body(), 4 << 20)
+            .await
+            .unwrap();
+        assert!(String::from_utf8_lossy(&out).contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.outcome, "failed");
+        assert!(row.prompt_tokens.is_none());
+        assert_eq!(row.error.as_deref(), Some("stream_conversion_failed"));
+    }
+
+    #[tokio::test]
+    async fn pc2_converted_terminal_uses_existing_trim_semantics() {
+        for ending in [" \t\r\n", "\u{2003}\n", " \t"] {
+            for mode in pc2_modes() {
+                let dir = tempfile::tempdir().unwrap();
+                let store = Store::open(&dir.path().join("db"), None).unwrap();
+                let a = attempt(&store);
+                let wire = format!("data: {{\"choices\":[{{\"index\":0,\"delta\":{{}},\"finish_reason\":\"stop\"}}]}}\n\ndata: {{\"usage\":{{\"prompt_tokens\":5,\"completion_tokens\":3}}}}\n\ndata: [DONE]{ending}");
+                let source =
+                    futures_util::stream::iter(vec![Ok::<_, std::io::Error>(Bytes::from(wire))]);
+                let response = stream_body_observed(source, 5, mode, Some(a))
+                    .await
+                    .unwrap();
+                let output = axum::body::to_bytes(response.into_body(), 1 << 20)
+                    .await
+                    .unwrap();
+                assert!(!String::from_utf8_lossy(&output).contains("error"));
+                let row = store.recent_usage(1).unwrap().remove(0);
+                assert_eq!(row.outcome, "succeeded");
+                assert_eq!(
+                    row.usage_status, "complete",
+                    "accepted converter terminal {ending:?}"
+                );
+                assert_eq!(row.prompt_tokens, Some(5));
+                assert_eq!(row.completion_tokens, Some(3));
+                assert!(row.error.is_none() && row.estimated_cost_usd.is_some());
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn pc2_consumed_finish_line_survives_read_error_before_blank_delimiter() {
+        for mode in pc2_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = attempt(&store);
+            let wire = b"data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"synthetic\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":3}}\n";
+            let source = futures_util::stream::iter(vec![
+                Ok(Bytes::from_static(wire)),
+                Err(std::io::Error::other("synthetic read error")),
+            ]);
+            let response = stream_body_observed(source, 5, mode, Some(a))
+                .await
+                .unwrap();
+            let output = axum::body::to_bytes(response.into_body(), 1 << 20)
+                .await
+                .unwrap();
+            assert!(!String::from_utf8_lossy(&output).contains("event: error"));
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(
+                row.outcome, "succeeded",
+                "converter consumed content finish before read error"
+            );
+            assert_eq!(row.usage_status, "partial", "transport did not finish");
+            assert_eq!(row.prompt_tokens, Some(5));
+            assert_eq!(row.completion_tokens, Some(3));
+            assert!(row.first_output_ms.is_some());
+            assert_eq!(row.error.as_deref(), Some("upstream_transport_error"));
+            assert!(row.estimated_cost_usd.is_none());
+        }
+    }
+
+    #[tokio::test]
+    async fn pc2_fragmented_and_eof_tails_and_pc3_never_polled_conversion() {
+        let wire="data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"synthetic\"},\"finish_reason\":\"stop\"}]}\n\ndata: {\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":3}}";
+        for mode in pc2_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = attempt(&store);
+            let chunks: Vec<_> = wire
+                .bytes()
+                .map(|b| Ok::<_, std::io::Error>(Bytes::from(vec![b])))
+                .collect();
+            let response =
+                stream_body_observed(futures_util::stream::iter(chunks), 5, mode, Some(a))
+                    .await
+                    .unwrap();
+            axum::body::to_bytes(response.into_body(), 1 << 20)
+                .await
+                .unwrap();
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(row.outcome, "succeeded");
+            assert_eq!(row.usage_status, "complete");
+            assert_eq!(row.prompt_tokens, Some(5));
+            assert_eq!(row.completion_tokens, Some(3));
+        }
+        for mode in pc2_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = attempt(&store);
+            let response = stream_body_observed(
+                futures_util::stream::pending::<Result<Bytes, std::io::Error>>(),
+                5,
+                mode,
+                Some(a),
+            )
+            .await
+            .unwrap();
+            drop(response);
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(row.outcome, "cancelled");
+            assert!(row.status.is_none() && row.finalized_at.is_some());
+        }
     }
 
     #[tokio::test]

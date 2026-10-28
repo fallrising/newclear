@@ -80,6 +80,37 @@ impl StreamAttempt {
         }
     }
 
+    /// Conversion consumes a prefix of each received chunk. Defer settlement until
+    /// that prefix has passed the converter, without observing bytes it discards.
+    pub fn observe_converted(&mut self, bytes: &[u8]) {
+        if !self.settled {
+            self.observation.converted_lines = true;
+            self.observation.push(bytes, self.elapsed());
+            // Existing converters consume each LF-terminated data line, before
+            // its SSE blank delimiter. Retain that observed finish/usage even
+            // if a subsequent read error, stall or cancellation ends the source.
+            if bytes.ends_with(b"\n") {
+                self.observation.end(self.elapsed());
+            }
+        }
+    }
+
+    /// The converter accepts its final data line before the SSE blank delimiter.
+    /// Flush only the consumed prefix; a conversion rejection wins content finish.
+    pub fn converted_terminal(&mut self, failed: bool) {
+        if self.settled {
+            return;
+        }
+        self.observation.end(self.elapsed());
+        if failed && self.observation.outcome != Some("failed") {
+            self.observation.outcome = Some("failed");
+            self.observation.error = Some("stream_conversion_failed");
+            self.observation.terminal_ms = None;
+        }
+        let ended = self.observation.transport_done;
+        self.settle("unknown", None, ended);
+    }
+
     pub fn eof(&mut self) {
         if self.settled {
             return;
@@ -147,6 +178,7 @@ impl Drop for StreamAttempt {
 }
 
 struct ChatObservation {
+    converted_lines: bool,
     line: Vec<u8>,
     data: Vec<u8>,
     cr: bool,
@@ -168,6 +200,7 @@ impl ChatObservation {
     fn new(choices: Option<usize>) -> Self {
         let supported = choices.is_some_and(|n| (1..=CHOICE_LIMIT).contains(&n));
         Self {
+            converted_lines: false,
             // Exact bounded capacities; no geometric growth on untrusted lines/events.
             line: Vec::with_capacity(EVENT_LIMIT),
             data: Vec::with_capacity(EVENT_LIMIT),
@@ -266,7 +299,10 @@ impl ChatObservation {
     }
 
     fn event(&mut self, elapsed: i64) {
-        if self.data == b"[DONE]" {
+        if self.data == b"[DONE]"
+            || (self.converted_lines
+                && std::str::from_utf8(&self.data).is_ok_and(|data| data.trim() == "[DONE]"))
+        {
             self.transport_done = true;
             self.terminal_ms = Some(elapsed);
             if self.outcome.is_none() {

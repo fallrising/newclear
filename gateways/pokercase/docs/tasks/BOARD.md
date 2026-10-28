@@ -402,3 +402,17 @@ CC-3 整輪驗收已於 2026-10-28T04:37:37Z 核對：產品 PR692、看板 PR69
 產品 [PR712](https://github.com/fallrising/newclear/pull/712) source `c3e9340024e50f95762f71174f57386e1f84bb0c`、merge `17e1ed121d35229471ff834ef5ea55b3d0d2cf94` at 2026-10-28T14:21:21Z；279Rusttests/22groups、fmt、Clippy、20Python回歸、實際九階段無桌面旅程、20validator tests、45contracts/7indexes、獨立來源審查、必要check/validate CI與正常合併／遠端回讀通過。
 
 SS-1–SS-5及SS-6產品驗證/交付通過；本輪管理帳本、備份與清理以finalhandoff記錄，不由產品合併預先冒稱完成。完整旅程17rows/12known/5unknown，合成$24小計仍partial，非真實花費。僅generic API-key HTTP Chat streaming；其他client protocol、CLI、named-provider/OAuth仍未接入本輪observer，完整#698保持open。#699完整token coverage／price provenance、#700具名client/version與真實AC01/04/08、#701既有fixture啟動/auth間歇失敗、#702Antigravity隔離仍未完成。mainline incomplete、usable_tag none，原17coreAC／T-1102規格／Cargo／其他trackedplan不變；desk維持in_progress，done由owner決定。沒有完成百分比。
+
+## T-0432 three-client settlement continuation
+
+Demand: [desk T-0432](https://github.com/fallrising/desk/tree/main/tasks/T-0432-thinrouter-stream-settlement); [PC-1–PC-5](T-0432-protocol-settlement.md). Claim PR273 merged before product edits.
+
+| ID | Task | AC | Status | Start | End | Last activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| PC-1 | Observed tail usage across clients | PC-1 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
+| PC-2 | Converter terminal ownership | PC-2 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
+| PC-3 | Fallback/cancel/storage/restart | PC-3 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
+| PC-4 | Headless journey reconciliation | PC-4 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
+| PC-5 | Verification and delivery | PC-5 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
+
+PC-1–PC-4 local verification passed: strict three-client journey17rows/14known/3unknown, synthetic$28partial; full locked Rust290/22groups,fmt/Clippy,Python26,validators20/contracts45/indexes7. Independent source review findings reproduced and corrected; product CI/merge and PC-5 closure remain pending. Full#698 and#699–702 remain open.

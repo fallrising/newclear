@@ -1,3 +1,4 @@
+{% from "cost_summary" import render_cost %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -28,7 +29,7 @@
         <div class="card"><div class="label">Routes</div><div class="value">{{ stats.routes }}</div></div>
         <div class="card"><div class="label">API Keys</div><div class="value">{{ stats.api_keys }}</div></div>
         <div class="card"><div class="label">Usage events</div><div class="value">{{ stats.usage_events }}</div></div>
-        <div class="card"><div class="label">Est. cost</div><div class="value small-val">${{ stats.estimated_cost_usd }}</div></div>
+        <div class="card"><div class="label">All-time recorded estimates (USD)</div><div class="value small-val">{{ render_cost(stats.cost_summary) }}</div></div>
       </div>
       <section class="panel">
         <h2>Endpoint</h2>

@@ -717,7 +717,7 @@ async fn usage_page(
             active => "usage",
             events => events,
             daily => daily,
-            cost_total => format!("{cost_total:.6}"),
+            cost_total => cost_total,
             admin_protected => state.cfg.admin_token.is_some(),
         },
     )

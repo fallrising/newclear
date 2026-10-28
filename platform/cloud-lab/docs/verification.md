@@ -32,10 +32,10 @@ M0 不需要變更 runtime，因此沒有為文件增加產品行為測試或安
 | artifact 太大、digest 不符、輸出 schema 錯誤 | 不標 validated success；錯誤及上限可見 |
 | 事件重複、亂序、漏 seq | 去重，不倒退投影，缺漏觸發查權威狀態 |
 | runner／控制面恢復，schedule 重送 | 原 command 與 due-time 去重仍有效；不自動補跑無界 backlog |
-| 手機查看離線節點 | 顯示最後觀測時間與 stale／unknown，不顯示健康零值 |
+| 一般瀏覽器查看離線節點；實體手機選測 | 顯示最後觀測時間與 stale／unknown，不顯示健康零值 |
 | 隔離備份還原 | 對齊 schema／artifact digest，未完成命令先對帳 |
 
-驗證順序：domain 正反例 → fake 邊界整合 → local CF 實際 bindings → 經批准的真實 CF＋runner → 手機／bot 使用流程與恢復演練。每層獨立標記版本與結果；fake 不代替後兩層。部署前固定 retention、資源限額、觀測窗口及成本預算；不在此假設已核准帳號。
+驗證順序：domain 正反例 → fake 邊界整合 → local CF 實際 bindings → 經批准的真實 CF＋runner → 一般瀏覽器真人／bot 使用流程與恢復演練（實體手機依owner指示改為選測）。每層獨立標記版本與結果；fake 不代替後兩層。部署前固定 retention、資源限額、觀測窗口及成本預算；不在此假設已核准帳號。
 
 ## M2/M3：後續工作
 
@@ -65,3 +65,5 @@ git diff --check
 [FR-01～04隔離故障工具](recovery-qualification.md)及[實際結果](evidence/m1-recovery.md)補上程序中斷、回報送達前遺失與保存後ACK遺失。此層已跑真正local workerd／D1 binding，但遠端Cloudflare、撤權、主機重開機與手機流程仍需各自驗收。
 
 [UI-01～04看板瀏覽器驗收](dashboard-qualification.md)及[本機證據](evidence/m1-dashboard.md)區分真實Chromium／workerd／D1、合成JWT與手機尺寸模擬；不取代真正Access登入、實體手機及遠端新版部署。
+
+2026-10-28 owner取消實體手機必測門檻，見[範圍調整](dashboard-rollout.md#owner調整客戶端驗收範圍)。歷史文件的手機pending描述保留作當時狀態；目前只要求一般瀏覽器真人Access流程，裝置相容性另列選測，不阻擋其他功能開發。

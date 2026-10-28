@@ -27,7 +27,7 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | AC-03 | Given CF 元件及既有平台，When 分配狀態與部署責任，Then 無雙重 run／host／workload／Done 權威 | passed | [M0 文件證據](docs/evidence/m0-review.md)：唯一權威與部署邊界審查通過 |
 | AC-04 | Given 每個候選來源，When 決定歸位／抽取／adapter／reference，Then 有目標與阻擋，封存必須通過接替及回退 gate | passed | [M0 文件證據](docs/evidence/m0-review.md)：來源處置、切換／回退與退役 gate 審查通過 |
 | AC-05 | Given 完整文件候選，When 跑既有索引驗證與獨立審查，Then 導航一致、沒有 runtime 成功冒稱，所有未實作事項保留 | passed | [M0 文件證據](docs/evidence/m0-review.md)：本機 validators 及獨立 ACCEPT；Git 交付狀態見[任務板](docs/tasks/BOARD.md) |
-| AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | pending | 真實 CF＋獨立 bot API＋non-root runner 一筆閉環已通過；手機、排程與 Grok 整合仍待驗收 |
+| AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | pending | 真實 CF＋獨立 bot API＋non-root runner 一筆閉環已通過；一般瀏覽器真人Access、排程與 Grok 整合仍待驗收；實體手機已改選測 |
 | AC-07 | Given 重複投遞、失聯、取消及恢復，When 執行與回報競爭，Then 不重做未知副作用且停止／未知／驗證狀態誠實可見 | pending | [遠端三種故障與撤權子集](docs/evidence/m1-remote-recovery.md)已通過；完整 [M1 故障矩陣](docs/verification.md)仍待驗收 |
 | AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；[首次D1隔離還原與journal對帳](docs/evidence/m1-isolated-restore.md)已通過；[獨立環境grant／Access撤權、執行中／unknown恢復](docs/evidence/m1-remote-recovery.md)已通過；配額耗盡與完整邊界仍待驗收 |
 
@@ -51,12 +51,12 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | --- | --- | --- | --- |
 | M1-I1 | 有界准入、SQL outbox、scope、CAS、對帳與結果 | passed | [M1 evidence](docs/evidence/m1-implementation.md)：控制面測試、獨立 ACCEPT |
 | M1-I2 | 真實 OS 唯讀 collector、journal、HMAC、重送 | passed | [M1 evidence](docs/evidence/m1-implementation.md)：31 Python 測試及 HTTP 整合、獨立 ACCEPT |
-| M1-I3 | 看板、freshness、取消意圖與權限 | passed | [本機真實瀏覽器與workerd／D1](docs/evidence/m1-dashboard.md)已通過；真實Access／實體mobile及新版資產部署仍pending |
+| M1-I3 | 看板、freshness、取消意圖與權限 | passed | [本機真實瀏覽器與workerd／D1](docs/evidence/m1-dashboard.md)已通過；新版資產已部署；真人Access仍pending，實體手機依owner指示改選測 |
 | M1-I4 | 整合、負向案例、索引、獨立 review | passed | [M1 evidence](docs/evidence/m1-implementation.md)：62 tests、validators、獨立 ACCEPT |
 
 ## 真實環境接入準備（T-0003）
 
-新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。D1／Workers授權已更新並通過只讀查詢；網域／runner採已提出的第一組目標。私人部署計畫已準備，Access建立／service-token／身分查詢scopes已補齊，owner確認Workers Free／零新增付費；已完成actual workerd及首筆真實API→runner→validated閉環；首次D1隔離還原與已完成／未派送命令對帳已通過；human/mobile與完整故障／恢復驗收仍待完成；AC-06～08維持pending，不由本機工具通過改為passed。
+新增離線部署bundle及有界probe，驗證與連線缺口見 [readiness evidence](docs/evidence/m1-live-readiness.md)。D1／Workers授權已更新並通過只讀查詢；網域／runner採已提出的第一組目標。私人部署計畫已準備，Access建立／service-token／身分查詢scopes已補齊，owner確認Workers Free／零新增付費；已完成actual workerd及首筆真實API→runner→validated閉環；首次D1隔離還原與已完成／未派送命令對帳已通過；真人瀏覽器與完整故障／恢復驗收仍待完成，實體手機改選測；AC-06～08維持pending，不由本機工具通過改為passed。
 
 本輪常駐 runner 範圍及 RR-01～05 見[resident runner](docs/resident-runner.md)，本輪[98項測試與常駐實機子集](docs/evidence/m1-resident.md)通過，原主線 AC 保持 pending。
 
@@ -64,6 +64,8 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 
 本輪[RF-01～04遠端隔離故障／撤權](docs/remote-recovery.md)已通過：[115項回歸、三個遠端案例、grant403及Access停用後401](docs/evidence/m1-remote-recovery.md)。原設定／排程相等，unknown保留；完整主線狀態不變。
 
-本輪[UI-01～04看板瀏覽器驗收](docs/dashboard-qualification.md)本機121tests及十組瀏覽器情境通過；獨立審查ACCEPT；後續新版已部署，真實Access／手機仍pending。
+本輪[UI-01～04看板瀏覽器驗收](docs/dashboard-qualification.md)本機121tests及十組瀏覽器情境通過；獨立審查ACCEPT；後續新版已部署，真人Access仍pending，實體手機改選測。
 
-本輪[DR-01～04看板部署與真實手機驗收](docs/dashboard-rollout.md)owner明確批准後已發布，新版本100%、原設定／D1資料相等、匿名302及機器200通過；等owner手機操作。原拒絕與domain排序檢查失敗均保留，維持原grant期限，不啟用排程或付費方案。
+本輪[DR-01～04看板部署與真實手機驗收](docs/dashboard-rollout.md)owner明確批准後已發布，新版本100%、原設定／D1資料相等、匿名302及機器200通過；一般瀏覽器真人流程待驗，實體手機已改選測。原拒絕與domain排序檢查失敗均保留，維持原grant期限，不啟用排程或付費方案。
+
+Owner於2026-10-28取消實體手機必測要求；[客戶端範圍調整](docs/dashboard-rollout.md#owner調整客戶端驗收範圍)不改身份／grant檢查，也不等於真人Access已驗證。後續開發不以手機測試為門檻。

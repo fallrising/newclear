@@ -2,6 +2,8 @@
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
+> **先跑完整流程：** [離線演練](docs/OFFLINE-WALKTHROUGH.md)使用真正的 gateway 與本機假上游，一次跑過設定、三種 API、串流、工具、fallback、用量與重啟。`--serve` 可留下管理介面供操作，真實廠商接入留到最後。
+
 > 當前收斂：[核心驗收對帳與剩餘工作入口](docs/tasks/T-0426-mainline-acceptance.md)（T-0426）。AC-03 本機驗證通過；真實旅程及既有用量修正仍待完成，主線未結案。
 
 > 文件規劃：[LLM 用量正確性修正規格](../../docs/specs/llm-usage-correctness.md)（T-1102）。整理已確認缺陷、待重現問題與後續修正驗收；[D-06 錯誤保存切片](docs/tasks/T-0427-error-persistence.md) 已取得本機合成 RED→GREEN，[D-05 buffered 費用缺值切片](docs/tasks/T-0428-cost-completeness.md) 保留原始用量缺值，只有兩側 token 與價格明確有效才保存估算（含明確零）；[D-04 費用彙總切片](docs/tasks/T-0429-cost-coverage.md) 區分無資料、未知、部分小計及完整估算，附已知筆數覆蓋率。其餘 runtime 工作仍未完成。

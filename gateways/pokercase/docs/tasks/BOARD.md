@@ -379,3 +379,12 @@ Delivered by [PR689](https://github.com/fallrising/newclear/pull/689), source `3
 六種合成資料情境、4個新增 Rust tests；空資料／未知／部分小計／完整估算／明確零值在 API、Web、TUI 與 doctor 一致；事件 CSV 和 usage rows 未改寫。首次完整套件的 fixture401 與其原因未知保留；exact retry 和最終完整套件通過。本輪只處理既有 USD 儲存估算的費用彙總；coverage 是 non-null rows 比率，不保證歷史品質或帳單正確。原 f64 精度、token/latency 彙總、provider/currency/basis 分組、D-01–D-05 其他工作及真實驗收仍未完成。mainline incomplete、usable_tag none，desk 保留 in_progress，done 由 owner 決定。
 
 CC-3 整輪驗收已於 2026-10-28T04:37:37Z 核對：產品 PR692、看板 PR694、journal PR149 與 desk PR258／PR259 均已正常合併，必要 CI、來源／merge trailers、祖先與逐檔回讀通過；獨立來源及帳本審查、完整證據備份核對、五個原工作樹清理已完成，分支與共享快取保留。CC-3 end 欄記初次看板合併時間；本段為完成後的驗收紀錄，其發布亦須通過必要 CI／審查與合併回讀。歷史失敗及未完成產品邊界不變，desk 仍由 owner 決定 done。
+
+## T-0430 — Repeatable offline user journey
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| J-1 | 完整離線請求與工具旅程 | J-1 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |
+| J-2 | 真實觀測用量與缺口呈現 | J-2 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |
+| J-3 | 可操作入口與安全生命週期 | J-3 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |
+| J-4 | 完整本機驗證及產品交付 | J-4 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |

@@ -1,5 +1,7 @@
 # Fanzloud：完成通知與取消問題的後續計劃
 
+> 2026-10-28 current checkpoint: owner continuation produced the [upstream test-patch artifact](fanzloud-completion-regression/README.md): nine cases, source/helper mapping and explicit gaps. Static apply/reverse passed; compilation and execution remain NOT_RUN. The preparation task below is now represented by that artifact; the next recommendation is its bounded read-only check for a compatible real Blink test environment. No browser or engine/application fix was started.
+
 需求：T-0380，R2-AC-14／R2-AC-E。2026-10-27 owner 要求先把計劃及問題交給 Claude，核對建議後更新文檔，再依文檔繼續。
 
 本次交付是諮詢與計劃文件。沒有實作引擎／產品修正、執行新測試案例或啟動瀏覽器。原 [Round2 SDD](ROUND2-SDD.md) 與驗收條件不變。[PR604](https://github.com/fallrising/newclear/pull/604) 保持 Draft，交付18/19、canonical矩陣8/27；recovery007為FAIL，單次授權已消耗。本文的後續步驟不是新瀏覽器授權。

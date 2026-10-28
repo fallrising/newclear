@@ -98,3 +98,10 @@ review and normal publication remain pending; executable tests were not rerun.
 Owner requested consultation on the current failure and plan, then documentation before further work. [The updated plan](../../docs/fe-review/FANZLOUD-COMPLETION-PLAN.md) separates verified conditional source behavior from unproven executed-build/007 attribution. It adds the error-to-cancel control and corrects abort, suspension, context-destruction and exception oracles. Scope is documentation only: no engine/application/dependency edit or new browser attempt.
 
 Document acceptance requires source-backed advice mapping, explicit NOT_RUN/SLICE/engine/product evidence levels, a bounded upstream-test-patch next task, scoped project-success and diff checks, independent review, required CI and remote readback. The next test patch is not implemented or executed by this document. Recovery007 remains FAIL/consumed; canonical8/27,delivery18/19 and PR604Draft remain. Existing product ACs, mainline incomplete, usable_tag:none and targetsfalse are unchanged.
+
+
+## T-0380 upstream regression test artifact — 2026-10-28
+
+Owner continued the merged plan. Goal/scope: prepare a pinned-source test-only patch, helper/API mapping, per-row predictions and explicit NOT_RUN/GAP status; no engine/application/dependency change or runtime. [The artifact](../../docs/fe-review/fanzloud-completion-regression/README.md) adds nine upstream gtest cases for terminal cleanup and controls, leaving actual V8/context cases as gaps. Acceptance is exact-source static applicability/reversal, externally visible callback/data/cancel oracles, independent artifact review and required repository checks/CI/readback. This is artifact acceptance only; no Chromium compilation or executed RED/GREEN is claimed.
+
+Static apply/reverse passed on exact source copies. Actual007 root cause/build correspondence remains unknown; original product ACs,18/19,canonical8/27,PR604Draft,targetsfalse/mainlineincomplete/usable_tag:none remain. The next recommendation is a bounded read-only feasibility check for an existing genuine Blink test route, not an implicit build/download/browser grant.

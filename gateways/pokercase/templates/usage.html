@@ -39,11 +39,15 @@
             <tr>
               <th>Day</th>
               <th>Requests</th>
-              <th>OK</th>
-              <th>Errors</th>
-              <th>Tokens in/out</th>
+              <th>Succeeded</th>
+              <th>Failed / cancelled / timeout / interrupted</th>
+              <th>Incomplete</th>
+              <th>Unknown (includes pending)</th>
+              <th>Pending</th>
+              <th>HTTP 200 headers</th>
+              <th>Known tokens in/out</th>
               <th>Cost</th>
-              <th>Avg latency</th>
+              <th>Avg recorded latency</th>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +57,10 @@
               <td>{{ d.requests }}</td>
               <td>{{ d.ok }}</td>
               <td>{{ d.errors }}</td>
+              <td>{{ d.incomplete }}</td>
+              <td>{{ d.unknown }}</td>
+              <td>{{ d.pending }}</td>
+              <td>{{ d.headers_200 }}</td>
               <td class="mono">{{ d.prompt_tokens }}/{{ d.completion_tokens }}</td>
               <td>{{ render_cost(d.cost_summary) }}</td>
               <td>{{ d.avg_latency_ms }} ms</td>
@@ -76,8 +84,10 @@
               <th>Time</th>
               <th>Model</th>
               <th>Connection</th>
-              <th>Status</th>
-              <th>Latency</th>
+              <th>HTTP headers</th>
+              <th>Outcome</th>
+              <th>Usage quality</th>
+              <th>Headers / first output / total observed</th>
               <th>Tokens</th>
               <th>Cost</th>
               <th>Error</th>
@@ -89,9 +99,11 @@
               <td class="mono">{{ e.ts }}</td>
               <td>{{ e.public_model or "—" }}</td>
               <td class="mono">{{ e.connection_id or "—" }}</td>
-              <td>{{ e.status or "—" }}</td>
-              <td>{% if e.latency_ms %}{{ e.latency_ms }} ms{% else %}—{% endif %}</td>
-              <td class="mono">{% if e.prompt_tokens or e.completion_tokens %}{{ e.prompt_tokens or 0 }}/{{ e.completion_tokens or 0 }}{% else %}—{% endif %}</td>
+              <td>{% if e.status is not none %}{{ e.status }}{% else %}—{% endif %}</td>
+              <td>{{ e.outcome }}{% if e.attempt_id and e.finalized_at is none %} (pending){% endif %}</td>
+              <td>{{ e.usage_status }}</td>
+              <td>{% if e.headers_ms is not none %}{{ e.headers_ms }} ms{% else %}—{% endif %} / {% if e.first_output_ms is not none %}{{ e.first_output_ms }} ms{% else %}—{% endif %} / {% if e.total_observed_ms is not none %}{{ e.total_observed_ms }} ms{% else %}—{% endif %}</td>
+              <td class="mono">{% if e.prompt_tokens is not none %}{{ e.prompt_tokens }}{% else %}—{% endif %}/{% if e.completion_tokens is not none %}{{ e.completion_tokens }}{% else %}—{% endif %}</td>
               <td>{% if e.estimated_cost_usd is not none %}${{ e.estimated_cost_usd }}{% else %}—{% endif %}</td>
               <td class="error-cell">{{ e.error or "" }}</td>
             </tr>

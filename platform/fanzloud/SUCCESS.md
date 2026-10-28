@@ -281,7 +281,7 @@ M2 defects measured by the baseline are handled in [SPEC-T006R M2 repair](docs/s
 3. All 27 cells: axe marks color-contrast incomplete (serious). There is now bounded evidence: every text color is at least 6.96:1 against the lightest composited background, cross-checked with baseline PNG pixels. axe may still report incomplete.
 4. Event local scrolling was not exercised by the baseline; diff local scrolling was exercised on mobile only.
 
-Remaining: recapture on the repaired source (needs an owner decision), finite HTTP/WSS conformance, then final integration review and CI. Milestone 1 merged as PR604; delivery stays 18/19 until Fanzloud completes.
+Remaining: finite HTTP/WSS conformance, then final integration review and CI. The v7 recapture (27/27) covers the repaired source. Milestone 1 merged as PR604; delivery stays 18/19 until Fanzloud completes.
 
 ## T-0433 M2 repair — 2026-10-28
 
@@ -296,4 +296,28 @@ Acceptance: a focused RED, then GREEN, for M2-01 and M2-02; contrast lower bound
 
 Milestone 2 (M2 repairs) is merged: PR725, main `ed063534c333e5350582131a10a14b12006754b5`. The owner approved updating the runner and recapturing all 27 cells, one run each for desktop, tablet and mobile.
 
-[SPEC-T006R recapture v7](docs/specs/SPEC-T006R-recapture-v7.md) R701–R705 derives one byte-traceable runner from `remaining-baseline.mjs` for all three phases. The source pins move to the M2-repaired source and reuse is removed; every state gate is unchanged. The phases run in order, and each needs an independent actual review that also judges the R07 M2 final-state gates before the next phase starts. Canonical on the M2 source is 0/27 until the v7 reviews; desktop mounts no previous result.
+[SPEC-T006R recapture v7](docs/specs/SPEC-T006R-recapture-v7.md) R701–R705 derives one byte-traceable runner from `remaining-baseline.mjs` for all three phases. The source pins move to the M2-repaired source and reuse is removed; every state gate is unchanged. The phases run in order, and each needs an independent actual review that also judges the R07 M2 final-state gates before the next phase starts. Desktop mounts no previous result.
+
+### Result — v7 recapture (2026-10-28)
+
+All three runs used source `fa614871`, ran once each and were independently actual-reviewed before the next phase started.
+
+| Run | Time | Cells | Review |
+| --- | --- | --- | --- |
+| `baseline-v7-desktop-001` | 22.6 s | 9 | CANONICAL_ACCEPT |
+| `baseline-v7-tablet-001` | 21.3 s | 9 | CANONICAL_ACCEPT |
+| `baseline-v7-mobile-001` | 21.6 s | 9 | CANONICAL_ACCEPT |
+
+Every cell had all health entries expected and zero `requestfailed`. **Canonical is 27/27 on the M2-repaired source.**
+
+R07 M2 final-state gates, judged in the reviews:
+- No page horizontal overflow: PASS. M2-01 is resolved; mobile `device-pending` is now 390/390, previously 399.
+- No axe critical or serious violations: PASS. M2-02 is resolved; the mobile `success-diff` focus violation is gone while the diff scrolls (831/448).
+- Event and diff regions named and keyboard-reachable: PASS_WITH_BOUNDED_EVIDENCE. `tabIndex` is 0, `role=region` and `aria-labelledby` are set.
+- Contrast: PASS_WITH_BOUNDED_EVIDENCE. M2-03 gives a minimum of 6.96:1, and the reviewers sampled v7 PNG corners within the bound. axe still marks it incomplete.
+
+Not exercised:
+- event-list local scrolling;
+- an actual scroll action in the diff;
+- keyboard traversal landing on the regions;
+- a measured accessible name.

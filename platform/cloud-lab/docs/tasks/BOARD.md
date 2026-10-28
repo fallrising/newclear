@@ -84,7 +84,15 @@ Owner同意從授權生命週期開始。範圍見[AL01–04](../authorization-l
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0004-1 | 嚴格snapshot狀態／到期原因 | AL-01 | in_progress | 2026-10-28T14:04:41Z | — | 2026-10-28T14:17:59Z |
-| T-0004-2 | 有界續期與撤銷計畫／SQLite guards | AL-02 | in_progress | 2026-10-28T14:04:41Z | — | 2026-10-28T14:17:59Z |
-| T-0004-3 | 輪替runbook與私人輸入輸出 | AL-03 | in_progress | 2026-10-28T14:04:41Z | — | 2026-10-28T14:17:59Z |
-| T-0004-4 | 回歸、獨立審查與交付 | AL-04 | in_progress | 2026-10-28T14:04:41Z | — | 2026-10-28T14:17:59Z |
+| T-0004-1 | 嚴格snapshot狀態／到期原因 | AL-01 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+| T-0004-2 | 有界續期與撤銷計畫／SQLite guards | AL-02 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+| T-0004-3 | 輪替runbook與私人輸入輸出 | AL-03 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+| T-0004-4 | 回歸、獨立審查與交付 | AL-04 | done | 2026-10-28T14:04:41Z | 2026-10-28T14:19:50Z | 2026-10-28T14:20:54Z |
+
+## T-0004交付與遠端回讀
+
+[PR #713](https://github.com/fallrising/newclear/pull/713)於2026-10-28T14:19:50Z正常合併，head `686b3b75550a10aade451e3198158f74a2966efd`，merge `b8b58b34ffa717bc361e593075f0b830825c9dc6`。15個交付路徑與遠端merge逐檔相等，工作樹乾淨。
+
+- [Cloud Lab CI](https://github.com/fallrising/newclear/actions/runs/40704636916)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40704636968)、[llms CI](https://github.com/fallrising/newclear/actions/runs/40704636775)全數SUCCESS，未繞過檢查。
+- 本機37Node＋107Python＝144tests、真實合成CLI、45專案契約／7llms／40文件／300連結／12來源、task/report及公開邊界檢查通過；[T826複審](../../../../.team/reports/T-826.md)ACCEPT。初始失敗保留在[證據](../evidence/m1-authorization.md)。
+- AL01–04離線實作完成，實際Cloudflare續權、live採集、secret輪替、排程及完整mainline仍未完成；本輪沒有改雲端授權／憑證／服務。此PR僅按實際合併時間收尾任務板，不新增能力或usable tag。

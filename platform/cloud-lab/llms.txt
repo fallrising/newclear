@@ -39,4 +39,7 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 
 - [Dashboard rollout](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/dashboard-rollout.md): reviewed assets deployed, original settings and application rows retained, anonymous requests return302 and machine reads pass; human browser workflow pending; physical-phone testing waived as a required gate.
 
-- [Authorization lifecycle](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-lifecycle.md): strict offline metadata status and private same-scope grant renewal/revocation plans;144local tests and synthetic CLI verified, no live collector/apply/rotation.
+- [Authorization lifecycle](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-lifecycle.md): strict offline metadata status and private same-scope grant renewal/revocation plans;144local tests and synthetic CLI verified, no automatic apply/rotation; source collection is documented separately.
+
+- [Authorization collection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-collection.md): fixed read-only Worker/D1/Access metadata with source provenance and drift checks;161tests and five original-Lab reads verified, HMAC/runner unknown, no renewal.
+- [Collection evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-authorization-collection.md): independent source review and lead-verified live metadata; all four grants and selected token expired, active0 and schedules off at observation.

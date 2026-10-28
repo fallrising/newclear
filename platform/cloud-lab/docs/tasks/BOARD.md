@@ -96,3 +96,14 @@ Owner同意從授權生命週期開始。範圍見[AL01–04](../authorization-l
 - [Cloud Lab CI](https://github.com/fallrising/newclear/actions/runs/40704636916)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40704636968)、[llms CI](https://github.com/fallrising/newclear/actions/runs/40704636775)全數SUCCESS，未繞過檢查。
 - 本機37Node＋107Python＝144tests、真實合成CLI、45專案契約／7llms／40文件／300連結／12來源、task/report及公開邊界檢查通過；[T826複審](../../../../.team/reports/T-826.md)ACCEPT。初始失敗保留在[證據](../evidence/m1-authorization.md)。
 - AL01–04離線實作完成，實際Cloudflare續權、live採集、secret輪替、排程及完整mainline仍未完成；本輪沒有改雲端授權／憑證／服務。此PR僅按實際合併時間收尾任務板，不新增能力或usable tag。
+
+## T-0005 — 授權來源唯讀採集
+
+範圍：[AS01–04](../authorization-collection.md)。Owner要求接續開發，不擴大為續權或輪替。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0005-1 | 固定唯讀請求與target綁定 | AS-01 | in_progress | 2026-10-28T14:39:47Z | — | 2026-10-28T14:59:21Z |
+| T-0005-2 | 來源時間與前後漂移檢查 | AS-02 | in_progress | 2026-10-28T14:39:47Z | — | 2026-10-28T14:59:21Z |
+| T-0005-3 | 私人snapshot／provenance與未知層 | AS-03 | in_progress | 2026-10-28T14:39:47Z | — | 2026-10-28T14:59:21Z |
+| T-0005-4 | 合成測試、獨立審查與真實唯讀證據 | AS-04 | in_progress | 2026-10-28T14:39:47Z | — | 2026-10-28T14:59:21Z |

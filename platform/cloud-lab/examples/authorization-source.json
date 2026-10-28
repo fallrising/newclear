@@ -1,0 +1,18 @@
+{
+  "schema_version": "cloudlab.authorization-source.v1",
+  "account_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "target": {
+    "worker_name": "cloud-lab-qualification",
+    "database_id": "12345678-1234-4234-8234-123456789abc"
+  },
+  "grant_ids": {
+    "human": "grant-human",
+    "bot": "grant-bot",
+    "runner": "grant-runner",
+    "scheduler": "grant-scheduler"
+  },
+  "service_token_ids": {
+    "bot": "12345678-1234-4234-8234-123456789abd",
+    "runner": "12345678-1234-4234-8234-123456789abd"
+  }
+}

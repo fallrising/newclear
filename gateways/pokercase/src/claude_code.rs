@@ -37,6 +37,7 @@ use tokio::sync::{mpsc, oneshot, OwnedSemaphorePermit, Semaphore};
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, warn};
 
+use crate::claude_usage::{Attempt, RequestContext};
 use crate::error::AppError;
 use crate::proxy::UpstreamAttemptError;
 
@@ -115,6 +116,8 @@ struct LiveRun {
     token: String,
     /// Where the current request's records go; None between requests.
     sink: Mutex<Option<mpsc::Sender<Item>>>,
+    /// Accounting is bound to the same channel as the current reply, never the process.
+    accounting: Mutex<Option<(mpsc::WeakSender<Item>, Attempt)>>,
     /// Wake the reader when an idle run gets a new request receiver.
     sink_changed: tokio::sync::Notify,
     /// tool_use blocks streamed and not yet matched to an MCP call: (id, bridged name, input).
@@ -148,6 +151,18 @@ struct LiveRun {
 
 /// Retire the selected run when input or first-reply ownership is interrupted.
 struct ResumeInputGuard(Option<Arc<LiveRun>>);
+
+/// Covers the interval before the reader owns the initial reply. Dropping a
+/// startup future must settle its reservation even when no LiveRun exists yet.
+struct StartupAccounting(Option<Attempt>);
+
+impl Drop for StartupAccounting {
+    fn drop(&mut self) {
+        if let Some(attempt) = &self.0 {
+            attempt.stop("cancelled", "stream_cancelled");
+        }
+    }
+}
 
 impl Drop for ResumeInputGuard {
     fn drop(&mut self) {
@@ -413,6 +428,7 @@ impl ClaudeCode {
         model: &str,
         chat: &Value,
         cancel: &CancellationToken,
+        context: Option<&RequestContext>,
     ) -> Result<Option<(Arc<LiveRun>, ReplyReceiver)>, UpstreamAttemptError> {
         let sig = signature(model, chat);
         let msgs = convo(chat);
@@ -434,13 +450,14 @@ impl ClaudeCode {
             }) else {
                 return Ok(None);
             };
+            let accounting = context.map(RequestContext::begin).transpose()?;
             let run = live.idle.remove(pos);
             live.order.retain(|r| !Arc::ptr_eq(r, &run));
             let start = run.known.lock().unwrap().len();
             run.idle_now
                 .store(false, std::sync::atomic::Ordering::SeqCst);
-            let (tx, rx) = reply_channel();
-            *run.sink.lock().unwrap() = Some(tx);
+            let (tx, rx) = reply_channel_observed(accounting);
+            install_reply(&run, tx, rx.accounting.clone());
             *run.waiting_since.lock().unwrap() = None;
             *run.known.lock().unwrap() = normed;
             run.sink_changed.notify_one();
@@ -448,6 +465,7 @@ impl ClaudeCode {
             (run, start, rx)
         };
         let mut guard = ResumeInputGuard(Some(run.clone()));
+        let accounting = rx.accounting.clone();
         let line = json!({"type": "user", "message": {"role": "user", "content": render_turn(&msgs[start..])}});
         let input = format!("{line}\n");
         let written = tokio::select! {
@@ -462,6 +480,9 @@ impl ClaudeCode {
         };
         match written {
             None => {
+                if let Some(attempt) = &accounting {
+                    attempt.stop("cancelled", "stream_cancelled");
+                }
                 // The select's write future (and mutex guard) is gone before cleanup.
                 drop(guard);
                 drop(rx);
@@ -473,7 +494,10 @@ impl ClaudeCode {
                 })
             }
             Some(false) => {
-                *run.sink.lock().unwrap() = None;
+                if let Some(attempt) = &accounting {
+                    attempt.stop("failed", "upstream_attempt_failed");
+                }
+                clear_reply(&run);
                 Ok(None)
             }
             Some(true) => {
@@ -581,17 +605,30 @@ impl ClaudeCode {
 
     /// If `chat` ends with exactly the results a waiting run asked for, hand them over
     /// and return a new sink's receiver for that run's next message.
+    #[cfg(test)]
     fn continue_run(&self, chat: &Value) -> Option<(Arc<LiveRun>, ReplyReceiver)> {
-        let results = trailing_tool_results(chat)?;
+        self.continue_run_observed(chat, None).unwrap()
+    }
+
+    fn continue_run_observed(
+        &self,
+        chat: &Value,
+        context: Option<&RequestContext>,
+    ) -> Result<Option<(Arc<LiveRun>, ReplyReceiver)>, UpstreamAttemptError> {
+        let Some(results) = trailing_tool_results(chat) else {
+            return Ok(None);
+        };
         let known = convo(chat).iter().map(norm).collect();
         let mut live = self.live.lock().unwrap();
-        let run = live.waiting.get(&results[0].0)?.clone();
+        let Some(run) = live.waiting.get(&results[0].0).cloned() else {
+            return Ok(None);
+        };
         if run.stop.is_cancelled()
             || run
                 .interrupted_input
                 .load(std::sync::atomic::Ordering::SeqCst)
         {
-            return None;
+            return Ok(None);
         }
         let pending = run.pending.lock().unwrap().clone();
         let mut want: Vec<&String> = pending.iter().collect();
@@ -599,16 +636,17 @@ impl ClaudeCode {
         want.sort();
         got.sort();
         if want != got {
-            return None;
+            return Ok(None);
         }
+        let accounting = context.map(RequestContext::begin).transpose()?;
         for id in &pending {
             live.waiting.remove(id);
         }
         live.order.retain(|r| !Arc::ptr_eq(r, &run));
         // Completion and new-sink installation share the live lock. A completed
         // phase cannot publish stale waiting entries or overwrite this receiver.
-        let (tx, rx) = reply_channel();
-        *run.sink.lock().unwrap() = Some(tx);
+        let (tx, rx) = reply_channel_observed(accounting);
+        install_reply(&run, tx, rx.accounting.clone());
         *run.waiting_since.lock().unwrap() = None;
         *run.known.lock().unwrap() = known;
         run.pending.lock().unwrap().clear();
@@ -626,7 +664,7 @@ impl ClaudeCode {
                 }
             }
         }
-        Some((run, rx))
+        Ok(Some((run, rx)))
     }
 
     /// Detach this message's sender before making the run reusable. Retire a
@@ -637,7 +675,7 @@ impl ClaudeCode {
         filter: &mut EventFilter,
     ) -> Option<mpsc::Sender<Item>> {
         let mut live = self.live.lock().unwrap();
-        let tx = run.sink.lock().unwrap().take();
+        let tx = clear_reply(run);
         if run
             .interrupted_input
             .load(std::sync::atomic::Ordering::SeqCst)
@@ -1021,12 +1059,55 @@ pub(crate) enum Item {
 struct ReplyReceiver {
     rx: mpsc::Receiver<Item>,
     sink: mpsc::WeakSender<Item>,
+    accounting: Option<Attempt>,
 }
 
+#[cfg(test)]
 fn reply_channel() -> (mpsc::Sender<Item>, ReplyReceiver) {
+    reply_channel_observed(None)
+}
+
+fn reply_channel_observed(accounting: Option<Attempt>) -> (mpsc::Sender<Item>, ReplyReceiver) {
     let (tx, rx) = mpsc::channel(64);
     let sink = tx.downgrade();
-    (tx, ReplyReceiver { rx, sink })
+    (
+        tx,
+        ReplyReceiver {
+            rx,
+            sink,
+            accounting,
+        },
+    )
+}
+
+fn install_reply(run: &LiveRun, tx: mpsc::Sender<Item>, accounting: Option<Attempt>) {
+    let mut sink = run.sink.lock().unwrap();
+    *run.accounting.lock().unwrap() = accounting.map(|attempt| (tx.downgrade(), attempt));
+    *sink = Some(tx);
+}
+
+fn clear_reply(run: &LiveRun) -> Option<mpsc::Sender<Item>> {
+    let mut sink = run.sink.lock().unwrap();
+    let tx = sink.take();
+    run.accounting.lock().unwrap().take();
+    tx
+}
+
+/// Snapshot both identities under the sink lock. A detached terminal retains its
+/// own clone and never consults a newer reply's accounting after publishing reuse.
+fn active_reply(run: &LiveRun) -> (Option<mpsc::Sender<Item>>, Option<Attempt>) {
+    let sink = run.sink.lock().unwrap();
+    let accounting = run.accounting.lock().unwrap();
+    let attempt = accounting.as_ref().and_then(|(owner, attempt)| {
+        owner
+            .upgrade()
+            .filter(|owner| {
+                sink.as_ref()
+                    .is_some_and(|current| current.same_channel(owner))
+            })
+            .map(|_| attempt.clone())
+    });
+    (sink.clone(), attempt)
 }
 
 /// Cancellation belongs to one request sink, not to the reusable process. A weak
@@ -1065,9 +1146,14 @@ pub struct ClaudeRun {
     first: Option<String>,
     rx: mpsc::Receiver<Item>,
     output: Option<OutputCancellation>,
+    accounting: Option<Attempt>,
 }
 
 impl ClaudeRun {
+    pub fn accounting(&self) -> Option<Attempt> {
+        self.accounting.clone()
+    }
+
     /// Observe cancellation while the response is being consumed, including a
     /// pending receive. Merely retaining an unpolled response is not a watcher.
     async fn next(&mut self) -> Option<Item> {
@@ -1084,6 +1170,9 @@ impl ClaudeRun {
             }
             let output = self.output.take().unwrap();
             if output.stop_if_active() {
+                if let Some(attempt) = &self.accounting {
+                    attempt.stop("cancelled", "stream_cancelled");
+                }
                 self.first = None;
                 // Closing before awaiting cleanup also wakes a producer blocked
                 // on a full channel; no cancellation waits behind backpressure.
@@ -1182,6 +1271,7 @@ pub(crate) async fn first_record(
             first: Some(first),
             rx,
             output: None,
+            accounting: None,
         }),
         Some(Item::Failed { status, message }) => Err(UpstreamAttemptError {
             status,
@@ -1203,7 +1293,11 @@ async fn first_reply(
     reply: ReplyReceiver,
     cancel: &CancellationToken,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
-    let ReplyReceiver { rx, sink } = reply;
+    let ReplyReceiver {
+        rx,
+        sink,
+        accounting,
+    } = reply;
     let mut guard = ResumeInputGuard(Some(run.clone()));
     let output = Some(OutputCancellation {
         run: run.clone(),
@@ -1217,6 +1311,9 @@ async fn first_reply(
     };
     match result {
         None => {
+            if let Some(attempt) = &accounting {
+                attempt.stop("cancelled", "stream_cancelled");
+            }
             // The receiver has been dropped before waiting for latched cleanup.
             drop(guard);
             run.cleaned.cancelled().await;
@@ -1229,10 +1326,19 @@ async fn first_reply(
         Some(result) => {
             // Preserve ordinary errors and their existing cleanup/fallback timing.
             guard.0 = None;
-            result.map(|mut response| {
-                response.output = output;
-                response
-            })
+            match result {
+                Ok(mut response) => {
+                    response.output = output;
+                    response.accounting = accounting;
+                    Ok(response)
+                }
+                Err(error) => {
+                    if let Some(attempt) = &accounting {
+                        attempt.stop("failed", "upstream_attempt_failed");
+                    }
+                    Err(error)
+                }
+            }
         }
     }
 }
@@ -1252,11 +1358,22 @@ fn write_private(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
 /// Answer a request with Claude Code: hand tool results to the run waiting for them, or
 /// start `claude -p`. Waits for the first reply event, so failures before any output can
 /// still fall back to another target.
+#[cfg(test)]
 pub async fn start(
     cc: &ClaudeCode,
     model: &str,
     chat: &Value,
     cancel: &CancellationToken,
+) -> Result<ClaudeRun, UpstreamAttemptError> {
+    start_observed(cc, model, chat, cancel, None).await
+}
+
+pub async fn start_observed(
+    cc: &ClaudeCode,
+    model: &str,
+    chat: &Value,
+    cancel: &CancellationToken,
+    context: Option<&RequestContext>,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
     // Reject before consuming a pending tool result or taking an idle process.
     if cancel.is_cancelled() {
@@ -1266,30 +1383,35 @@ pub async fn start(
             retryable: false,
         });
     }
-    if let Some((run, rx)) = cc.continue_run(chat) {
+    if let Some((run, rx)) = cc.continue_run_observed(chat, context)? {
         debug!("tool results go on in the waiting Claude Code run");
         return first_reply(run, rx, cancel).await;
     }
-    if let Some((run, rx)) = cc.resume_run(model, chat, cancel).await? {
+    if let Some((run, rx)) = cc.resume_run(model, chat, cancel, context).await? {
         debug!("the next turn goes on in the idle Claude Code run");
         return first_reply(run, rx, cancel).await;
     }
+    // A new process is now selected. Reserve before shelf_take removes a saved
+    // session entry, so a storage refusal cannot orphan that reusable session.
+    let accounting = context.map(RequestContext::begin).transpose()?;
     if let Some(saved) = cc.unshelve(model, chat) {
-        match spawn_run(cc, model, chat, cancel, Some(saved)).await {
+        return match spawn_run(cc, model, chat, cancel, Some(saved), accounting).await {
             Ok(run) => {
                 debug!("the next turn goes on from a saved Claude Code session");
-                return Ok(run);
+                Ok(run)
             }
-            Err(e) if !cancel.is_cancelled() => {
+            Err(e) if !cancel.is_cancelled() && e.body != "usage reservation failed" => {
                 debug!(
                     status = e.status,
                     "saved session not resumable; a new run is told the conversation"
                 );
+                let accounting = context.map(RequestContext::begin).transpose()?;
+                spawn_run(cc, model, chat, cancel, None, accounting).await
             }
-            Err(e) => return Err(e),
-        }
+            Err(e) => Err(e),
+        };
     }
-    spawn_run(cc, model, chat, cancel, None).await
+    spawn_run(cc, model, chat, cancel, None, accounting).await
 }
 
 /// Own only a directory created by this run, including during startup errors or
@@ -1352,11 +1474,24 @@ async fn spawn_run(
     chat: &Value,
     cancel: &CancellationToken,
     resume: Option<(String, usize)>,
+    accounting: Option<Attempt>,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
-    let fail = |status: u16, body: String, retryable: bool| UpstreamAttemptError {
-        status,
-        body,
-        retryable,
+    // Own the reservation before acquiring capacity (which may evict a waiting
+    // process), creating tool files, spawning a child, or writing any input.
+    let mut startup_accounting = StartupAccounting(accounting.clone());
+    let fail = |status: u16, body: String, retryable: bool| {
+        if let Some(attempt) = &accounting {
+            if status == 499 {
+                attempt.stop("cancelled", "stream_cancelled");
+            } else {
+                attempt.stop("failed", "upstream_attempt_failed");
+            }
+        }
+        UpstreamAttemptError {
+            status,
+            body,
+            retryable,
+        }
     };
     let permit = cc
         .slot(cancel)
@@ -1474,12 +1609,17 @@ async fn spawn_run(
     }
 
     let child = child.take();
-    let (tx, rx) = reply_channel();
+    let (tx, rx) = reply_channel_observed(accounting);
     static NEXT_TRACE_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     let run = Arc::new(LiveRun {
         trace_id: NEXT_TRACE_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
         token: token.clone(),
         sink: Mutex::new(Some(tx)),
+        accounting: Mutex::new(
+            rx.accounting
+                .clone()
+                .map(|attempt| (rx.sink.clone(), attempt)),
+        ),
         sink_changed: tokio::sync::Notify::new(),
         announced: Mutex::new(VecDeque::new()),
         announcement_changed: tokio::sync::Notify::new(),
@@ -1506,6 +1646,7 @@ async fn spawn_run(
         let _permit = permit;
         let mut lines = crate::cli_lines::Lines::new(BufReader::new(stdout));
         let mut limit_failure = None;
+        let mut cancelled = false;
         let mut sent = false;
         let mut filter = EventFilter {
             names,
@@ -1515,7 +1656,7 @@ async fn spawn_run(
         'read: loop {
             // An active receiver can disappear while stdout stays silent. Between
             // completed turns there is no sink; retain the reusable process then.
-            let active_sink = sink(&run);
+            let (active_sink, _) = active_reply(&run);
             let disconnected = async {
                 match active_sink.as_ref() {
                     Some(tx) => tx.closed().await,
@@ -1524,8 +1665,8 @@ async fn spawn_run(
             };
             let next = tokio::select! {
                 _ = run.sink_changed.notified() => continue,
-                _ = disconnected => break,
-                _ = run.stop.cancelled() => break,
+                _ = disconnected => { cancelled = true; break; },
+                _ = run.stop.cancelled() => { cancelled = true; break; },
                 l = lines.next_line() => l,
             };
             let l = match next {
@@ -1542,11 +1683,24 @@ async fn spawn_run(
             let Ok(env) = serde_json::from_str::<Value>(&l) else {
                 continue;
             };
+            let (_, active_accounting) = active_reply(&run);
             match env.get("type").and_then(|t| t.as_str()) {
                 Some("stream_event") => {
                     let Some(ev) = env.get("event") else { continue };
                     let records = filter.on_event(ev);
+                    if let Some(attempt) = &active_accounting {
+                        // Decide readiness using accepted records, then observe the
+                        // untouched source event before delivery or conversion. In
+                        // particular ready must precede an already-queued terminal.
+                        if !records.is_empty() {
+                            attempt.ready();
+                        }
+                        attempt.observe_filtered_event(ev, !records.is_empty());
+                    }
                     if filter.failed {
+                        if let Some(attempt) = &active_accounting {
+                            attempt.converted_terminal(true);
+                        }
                         limit_failure = Some(EVENT_STATE_LIMIT_MESSAGE);
                         run.idle_now
                             .store(false, std::sync::atomic::Ordering::SeqCst);
@@ -1579,6 +1733,7 @@ async fn spawn_run(
                                 // A completed turn detached before publishing reuse.
                                 // Dropping its queued terminal cannot own a later turn.
                                 if !filter.done {
+                                    cancelled = true;
                                     break 'read;
                                 }
                                 break;
@@ -1599,6 +1754,9 @@ async fn spawn_run(
                     // A successful turn ends with a result; the run lives on.
                     if !failed {
                         continue;
+                    }
+                    if let Some(attempt) = &active_accounting {
+                        attempt.stop("failed", "stream_error");
                     }
                     {
                         let msg = env
@@ -1632,6 +1790,18 @@ async fn spawn_run(
         }
         drop(lines);
         drop(filter);
+        // A process-wide `sent` bit does not describe a reused reply. Settle the
+        // current channel on every exit, even if an earlier request had output.
+        let (_, unfinished_accounting) = active_reply(&run);
+        if let Some(attempt) = &unfinished_accounting {
+            if limit_failure.is_some() {
+                attempt.stop("failed", "stream_observer_invalid");
+            } else if cancelled || run.stop.is_cancelled() {
+                attempt.stop("cancelled", "stream_cancelled");
+            } else {
+                attempt.eof();
+            }
+        }
         // Hold the active sender across cleanup so the client cannot observe EOF
         // as success, and deliver limit failures only after the process/slot are freed.
         let failure_sink = limit_failure.and_then(|message| sink(&run).map(|tx| (tx, message)));
@@ -1662,7 +1832,7 @@ async fn spawn_run(
         debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_cleanup");
         cc.forget(&run);
         run.stop.cancel();
-        *run.sink.lock().unwrap() = None;
+        clear_reply(&run);
         stop(child).await;
         diagnostics.stop().await;
         // An idle run's session is kept for its next turn; any other run's is removed.
@@ -1692,6 +1862,7 @@ async fn spawn_run(
         debug!("claude code run finished");
     });
 
+    startup_accounting.0 = None;
     first_reply(first_run, rx, cancel).await
 }
 
@@ -1890,6 +2061,203 @@ impl EventFilter {
 
 #[cfg(test)]
 mod tests {
+    fn usage_context(store: &crate::store::Store, request: &str) -> super::RequestContext {
+        let connection = serde_json::from_value(serde_json::json!({
+            "id":"synthetic","name":"synthetic","base_url":"http://127.0.0.1:1/v1",
+            "api_key":"synthetic","default_model":null,"priority":0,"enabled":true,
+            "input_price_per_m":null,"output_price_per_m":null,"auth_type":"api_key","oauth":null,
+            "created_at":"synthetic","updated_at":"synthetic"
+        }))
+        .unwrap();
+        super::RequestContext::new(
+            store,
+            request,
+            "public",
+            &crate::store::ResolvedTarget {
+                connection,
+                upstream_model: "sonnet".into(),
+            },
+        )
+    }
+
+    fn refuse_usage_reservations(path: &std::path::Path) {
+        rusqlite::Connection::open(path)
+            .unwrap()
+            .execute_batch(
+                "CREATE TRIGGER refuse_usage BEFORE INSERT ON usage_events
+             BEGIN SELECT RAISE(FAIL, 'synthetic reservation refusal'); END;",
+            )
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn cs1_reservation_failure_preserves_tool_results_and_capacity() {
+        let (dir, cc, run) = continuation_fixture();
+        let path = dir.path().join("usage.db");
+        let store = crate::store::Store::open(&path, None).unwrap();
+        let context = usage_context(&store, "request");
+        refuse_usage_reservations(&path);
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        cc.live.lock().unwrap().order.push_back(run.clone());
+        let permit = cc.runs.clone().acquire_owned().await.unwrap();
+        for chat in [
+            synthetic_tool_result(),
+            json!({"messages":[{"role":"user","content":"fresh"}]}),
+        ] {
+            let error = match start_observed(
+                &cc,
+                "sonnet",
+                &chat,
+                &CancellationToken::new(),
+                Some(&context),
+            )
+            .await
+            {
+                Err(error) => error,
+                Ok(_) => panic!("reservation refusal admitted a request"),
+            };
+            assert_eq!(
+                (error.status, error.body.as_str(), error.retryable),
+                (503, "usage reservation failed", false)
+            );
+            assert_eq!(*run.pending.lock().unwrap(), ["tool_1"]);
+            assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+            assert_eq!(cc.live.lock().unwrap().order.len(), 1);
+            assert!(run.sink.lock().unwrap().is_none());
+            assert!(run.results.lock().unwrap().is_empty());
+            assert!(
+                !run.stop.is_cancelled(),
+                "reservation failure must not evict the waiting run"
+            );
+            assert!(!cc.work_dir.exists());
+        }
+        assert!(store.recent_usage(10).unwrap().is_empty());
+        drop(permit);
+    }
+
+    #[tokio::test]
+    async fn cs3_detached_reply_accounting_does_not_adopt_next_sink() {
+        let (dir, cc, run) = continuation_fixture();
+        let store = crate::store::Store::open(&dir.path().join("usage.db"), None).unwrap();
+        let old = usage_context(&store, "old-request").begin().unwrap();
+        let (tx, old_reply) = reply_channel_observed(Some(old.clone()));
+        install_reply(&run, tx, Some(old.clone()));
+        old.ready();
+        old.observe_event(&json!({"type":"message_start","message":{"usage":{"input_tokens":12,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}}));
+        old.observe_event(&json!({"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":5}}));
+        old.observe_event(&json!({"type":"message_stop"}));
+        let mut filter = EventFilter {
+            done: true,
+            stop_reason: Some("tool_use".into()),
+            tool_ids: vec!["tool_1".into()],
+            ..Default::default()
+        };
+        let retiring = cc.finish_turn(&run, &mut filter).unwrap();
+        let next_context = usage_context(&store, "next-request");
+        let (_, next_reply) = cc
+            .continue_run_observed(&synthetic_tool_result(), Some(&next_context))
+            .unwrap()
+            .unwrap();
+        retiring
+            .send(Item::Record(
+                "event: message_stop\ndata: {\"type\":\"message_stop\"}".into(),
+            ))
+            .await
+            .unwrap();
+        drop(retiring);
+        let old_response = first_reply(run.clone(), old_reply, &CancellationToken::new())
+            .await
+            .unwrap();
+        old_response
+            .accounting()
+            .unwrap()
+            .stop("cancelled", "stream_cancelled");
+        let rows = store.recent_usage(10).unwrap();
+        assert_eq!(rows.len(), 2);
+        let old_row = rows
+            .iter()
+            .find(|row| row.request_id.as_deref() == Some("old-request"))
+            .unwrap();
+        assert_eq!(old_row.outcome, "succeeded");
+        assert_eq!(old_row.completion_tokens, Some(5));
+        let next_row = rows
+            .iter()
+            .find(|row| row.request_id.as_deref() == Some("next-request"))
+            .unwrap();
+        assert!(next_row.finalized_at.is_none());
+        assert!(!run.stop.is_cancelled());
+        next_reply
+            .accounting
+            .as_ref()
+            .unwrap()
+            .stop("cancelled", "stream_cancelled");
+        clear_reply(&run);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn cs1_saved_resume_and_existing_fallback_have_distinct_attempts() {
+        let (_dir, cc, chat, token) = first_reply_fixture("saved_error", false).await;
+        let store = cc.store.as_ref().unwrap();
+        let context = usage_context(store, "saved-request");
+        let response = tokio::time::timeout(
+            Duration::from_secs(3),
+            start_observed(&cc, "sonnet", &chat, &token, Some(&context)),
+        )
+        .await;
+        if response.is_err() {
+            cc.shutdown().await;
+        }
+        let response = response.unwrap().unwrap();
+        let accounting = response.accounting().unwrap();
+        response.collect("sonnet").await.unwrap();
+        accounting.eof();
+        cc.shutdown().await;
+        let rows = store.recent_usage(10).unwrap();
+        assert_eq!(rows.len(), 2);
+        assert!(rows
+            .iter()
+            .all(|row| row.request_id.as_deref() == Some("saved-request")));
+        assert_ne!(rows[0].attempt_id, rows[1].attempt_id);
+        assert_eq!(rows.iter().filter(|row| row.outcome == "failed").count(), 1);
+        assert_eq!(
+            rows.iter().filter(|row| row.outcome == "succeeded").count(),
+            1
+        );
+        assert_eq!(
+            std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+            "resume\nfresh\n"
+        );
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn cs1_reservation_failure_does_not_consume_saved_session() {
+        let (dir, cc, chat, token) = first_reply_fixture("saved_error", false).await;
+        let store = cc.store.as_ref().unwrap();
+        let before = store.shelf_ids().unwrap();
+        assert_eq!(before.len(), 1);
+        let context = usage_context(store, "saved-refused");
+        refuse_usage_reservations(&dir.path().join("shelf.db"));
+        let error = match start_observed(&cc, "sonnet", &chat, &token, Some(&context)).await {
+            Err(error) => error,
+            Ok(_) => panic!("reservation refusal dispatched a saved session"),
+        };
+        assert_eq!(
+            (error.status, error.body.as_str(), error.retryable),
+            (503, "usage reservation failed", false)
+        );
+        assert_eq!(store.shelf_ids().unwrap(), before);
+        assert!(!cc.work_dir.join("starts").exists());
+        assert_eq!(cc.runs.available_permits(), 1);
+        cc.shutdown().await;
+    }
+
     fn continuation_fixture() -> (
         tempfile::TempDir,
         super::ClaudeCode,
@@ -1903,6 +2271,7 @@ mod tests {
             trace_id: 0,
             token: "synthetic".into(),
             sink: Mutex::new(None),
+            accounting: Mutex::new(None),
             sink_changed: tokio::sync::Notify::new(),
             announced: Mutex::new(VecDeque::new()),
             announcement_changed: tokio::sync::Notify::new(),
@@ -3732,6 +4101,7 @@ while True: time.sleep(60)
             let (tx, rx) = mpsc::channel(1);
             let rx = ReplyReceiver {
                 sink: tx.downgrade(),
+                accounting: None,
                 rx,
             };
             tx.send(item).await.unwrap();
@@ -3753,6 +4123,7 @@ while True: time.sleep(60)
             let (tx, rx) = mpsc::channel(1);
             let rx = ReplyReceiver {
                 sink: tx.downgrade(),
+                accounting: None,
                 rx,
             };
             if failure {
@@ -4286,6 +4657,7 @@ while True:
                     first,
                     rx,
                     output: None,
+                    accounting: None,
                 }
                 .collect("m"),
             )
@@ -4312,7 +4684,7 @@ while True:
             .await
             .unwrap();
             assert!(
-                matches!(ClaudeRun{first:Some(String::new()),rx,output:None}.collect("m").await,Err(AppError::Upstream{status:s,body}) if s == status && body == "explicit CLI failure")
+                matches!(ClaudeRun{first:Some(String::new()),rx,output:None,accounting:None}.collect("m").await,Err(AppError::Upstream{status:s,body}) if s == status && body == "explicit CLI failure")
             );
             assert!(tx.is_closed());
         }
@@ -4325,6 +4697,7 @@ while True:
             first: Some("x".repeat(16 * 1024 * 1024 - 1)),
             rx,
             output: None,
+            accounting: None,
         };
         let result = tokio::time::timeout(std::time::Duration::from_secs(1), run.collect("m"))
             .await

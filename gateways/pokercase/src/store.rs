@@ -271,6 +271,47 @@ pub struct UsageEvent {
     pub outcome: String,
     pub usage_status: String,
     pub usage_source: String,
+    pub cli_ready_ms: Option<i64>,
+    pub reported_usage: Option<ClaudeReportedUsage>,
+}
+
+/// Fixed, disjoint CLI-reported buckets. Missing fields never imply zero.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClaudeReportedUsage {
+    pub input_tokens: Option<i64>,
+    pub output_tokens: Option<i64>,
+    pub cache_read_input_tokens: Option<i64>,
+    pub cache_creation_input_tokens: Option<i64>,
+}
+
+impl ClaudeReportedUsage {
+    pub fn is_empty(&self) -> bool {
+        self.input_tokens.is_none()
+            && self.output_tokens.is_none()
+            && self.cache_read_input_tokens.is_none()
+            && self.cache_creation_input_tokens.is_none()
+    }
+
+    pub fn prompt_total(&self) -> Option<i64> {
+        self.input_tokens?
+            .checked_add(self.cache_read_input_tokens?)?
+            .checked_add(self.cache_creation_input_tokens?)
+    }
+
+    fn validate(&self) -> Result<()> {
+        anyhow::ensure!(
+            [
+                self.input_tokens,
+                self.output_tokens,
+                self.cache_read_input_tokens,
+                self.cache_creation_input_tokens
+            ]
+            .into_iter()
+            .all(|v| v.is_none_or(|n| n >= 0)),
+            "invalid_claude_reported_usage"
+        );
+        Ok(())
+    }
 }
 
 /// Observations from one owned stream attempt; no upstream text is accepted.
@@ -303,6 +344,10 @@ impl Default for StreamFinalization {
 
 impl StreamFinalization {
     fn validate(&self) -> Result<()> {
+        self.validate_with_reported(false)
+    }
+
+    fn validate_with_reported(&self, reported: bool) -> Result<()> {
         let valid_outcome = matches!(
             self.outcome,
             "succeeded"
@@ -341,7 +386,7 @@ impl StreamFinalization {
         let quality_valid = match self.usage_status {
             "complete" => both_counts,
             // A cancelled tail can leave both counters observed but not complete.
-            "partial" => !no_counts,
+            "partial" => !no_counts || reported,
             "missing" | "unknown" => no_counts,
             _ => true,
         };
@@ -635,6 +680,11 @@ fn migrate_schema(conn: &Connection) -> Result<()> {
                 ("outcome", "TEXT NOT NULL DEFAULT 'unknown'"),
                 ("usage_status", "TEXT NOT NULL DEFAULT 'unknown'"),
                 ("usage_source", "TEXT NOT NULL DEFAULT 'unknown'"),
+                ("cli_ready_ms", "INTEGER"),
+                ("reported_input_tokens", "INTEGER"),
+                ("reported_output_tokens", "INTEGER"),
+                ("reported_cache_read_input_tokens", "INTEGER"),
+                ("reported_cache_creation_input_tokens", "INTEGER"),
             ][..],
         ),
     ] {
@@ -1328,11 +1378,36 @@ impl Store {
         connection_id: &str,
         upstream_model: &str,
     ) -> Result<String> {
+        self.begin_stream_attempt_with_source(
+            request_id,
+            public_model,
+            connection_id,
+            upstream_model,
+            "openai_chat_v1",
+        )
+    }
+
+    /// Only supported adapter revisions can create durable stream reservations.
+    pub fn begin_stream_attempt_with_source(
+        &self,
+        request_id: &str,
+        public_model: &str,
+        connection_id: &str,
+        upstream_model: &str,
+        usage_source: &str,
+    ) -> Result<String> {
+        anyhow::ensure!(
+            matches!(
+                usage_source,
+                "openai_chat_v1" | "claude_code_stream_event_v1"
+            ),
+            "invalid_stream_source"
+        );
         let attempt_id = Uuid::new_v4().to_string();
         self.conn.lock().unwrap().execute(
             "INSERT INTO usage_events (ts, request_id, attempt_id, public_model,
                                        connection_id, upstream_model, usage_status, usage_source)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'missing', 'openai_chat_v1')",
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'missing', ?7)",
             params![
                 Utc::now().to_rfc3339(),
                 request_id,
@@ -1340,6 +1415,7 @@ impl Store {
                 public_model,
                 connection_id,
                 upstream_model,
+                usage_source,
             ],
         )?;
         Ok(attempt_id)
@@ -1362,6 +1438,68 @@ impl Store {
             params![attempt_id, status, headers_ms],
         )?;
         Ok(())
+    }
+
+    /// The first accepted CLI record is distinct from upstream HTTP headers.
+    pub fn observe_cli_ready(&self, attempt_id: &str, cli_ready_ms: i64) -> Result<()> {
+        anyhow::ensure!(cli_ready_ms >= 0, "invalid_cli_ready");
+        self.conn.lock().unwrap().execute(
+            "UPDATE usage_events SET cli_ready_ms = ?2, latency_ms = ?2
+             WHERE attempt_id = ?1 AND finalized_at IS NULL AND cli_ready_ms IS NULL
+                   AND usage_source = 'claude_code_stream_event_v1'",
+            params![attempt_id, cli_ready_ms],
+        )?;
+        Ok(())
+    }
+
+    /// Atomically retain CLI counters and normalized values without applying prices.
+    pub fn finalize_claude_attempt(
+        &self,
+        attempt_id: &str,
+        finalization: &StreamFinalization,
+        reported: &ClaudeReportedUsage,
+    ) -> Result<bool> {
+        reported.validate()?;
+        finalization.validate_with_reported(!reported.is_empty())?;
+        anyhow::ensure!(
+            finalization.estimated_cost_usd.is_none()
+                && finalization.prompt_tokens == reported.prompt_total()
+                && finalization.completion_tokens == reported.output_tokens
+                && (!matches!(finalization.usage_status, "missing" | "unknown")
+                    || reported.is_empty())
+                && (!(reported.input_tokens.is_some()
+                    && reported.cache_read_input_tokens.is_some()
+                    && reported.cache_creation_input_tokens.is_some()
+                    && reported.prompt_total().is_none())
+                    || finalization.usage_status == "invalid"),
+            "invalid_claude_finalization"
+        );
+        let changed = self.conn.lock().unwrap().execute(
+            "UPDATE usage_events
+             SET finalized_at = ?2, outcome = ?3, usage_status = ?4, error = ?5,
+                 prompt_tokens = ?6, completion_tokens = ?7, estimated_cost_usd = NULL,
+                 first_output_ms = ?8, total_observed_ms = ?9,
+                 reported_input_tokens = ?10, reported_output_tokens = ?11,
+                 reported_cache_read_input_tokens = ?12, reported_cache_creation_input_tokens = ?13
+             WHERE attempt_id = ?1 AND finalized_at IS NULL
+                   AND usage_source = 'claude_code_stream_event_v1'",
+            params![
+                attempt_id,
+                Utc::now().to_rfc3339(),
+                finalization.outcome,
+                finalization.usage_status,
+                finalization.error,
+                finalization.prompt_tokens,
+                finalization.completion_tokens,
+                finalization.first_output_ms,
+                finalization.total_observed_ms,
+                reported.input_tokens,
+                reported.output_tokens,
+                reported.cache_read_input_tokens,
+                reported.cache_creation_input_tokens
+            ],
+        )?;
+        Ok(changed == 1)
     }
 
     /// The first terminal observation wins; later callbacks cannot alter totals.
@@ -1400,7 +1538,9 @@ impl Store {
             "UPDATE usage_events
              SET finalized_at = ?1, outcome = 'interrupted', usage_status = 'missing',
                  error = 'stream_interrupted', prompt_tokens = NULL, completion_tokens = NULL,
-                 estimated_cost_usd = NULL, first_output_ms = NULL, total_observed_ms = NULL
+                 estimated_cost_usd = NULL, first_output_ms = NULL, total_observed_ms = NULL,
+                 reported_input_tokens = NULL, reported_output_tokens = NULL,
+                 reported_cache_read_input_tokens = NULL, reported_cache_creation_input_tokens = NULL
              WHERE attempt_id IS NOT NULL AND finalized_at IS NULL",
             params![Utc::now().to_rfc3339()],
         )?)
@@ -1444,7 +1584,9 @@ impl Store {
             "SELECT id, ts, public_model, connection_id, status, latency_ms, error,
                     prompt_tokens, completion_tokens, estimated_cost_usd,
                     request_id, attempt_id, upstream_model, finalized_at, headers_ms,
-                    first_output_ms, total_observed_ms, outcome, usage_status, usage_source
+                    first_output_ms, total_observed_ms, outcome, usage_status, usage_source,
+                    cli_ready_ms, reported_input_tokens, reported_output_tokens,
+                    reported_cache_read_input_tokens, reported_cache_creation_input_tokens
              FROM usage_events ORDER BY id DESC LIMIT ?1",
         )?;
         let rows = stmt.query_map(params![limit], |row| {
@@ -1469,6 +1611,16 @@ impl Store {
                 outcome: row.get(17)?,
                 usage_status: row.get(18)?,
                 usage_source: row.get(19)?,
+                cli_ready_ms: row.get(20)?,
+                reported_usage: {
+                    let usage = ClaudeReportedUsage {
+                        input_tokens: row.get(21)?,
+                        output_tokens: row.get(22)?,
+                        cache_read_input_tokens: row.get(23)?,
+                        cache_creation_input_tokens: row.get(24)?,
+                    };
+                    (!usage.is_empty()).then_some(usage)
+                },
             })
         })?;
         let mut out = Vec::new();
@@ -1535,7 +1687,7 @@ impl Store {
     pub fn usage_csv(&self, limit: i64) -> Result<String> {
         let events = self.recent_usage(limit)?;
         let mut out = String::from(
-            "id,ts,public_model,connection_id,status,latency_ms,prompt_tokens,completion_tokens,estimated_cost_usd,error,request_id,attempt_id,upstream_model,finalized_at,headers_ms,first_output_ms,total_observed_ms,outcome,usage_status,usage_source\n",
+            "id,ts,public_model,connection_id,status,latency_ms,prompt_tokens,completion_tokens,estimated_cost_usd,error,request_id,attempt_id,upstream_model,finalized_at,headers_ms,first_output_ms,total_observed_ms,outcome,usage_status,usage_source,cli_ready_ms,reported_input_tokens,reported_output_tokens,reported_cache_read_input_tokens,reported_cache_creation_input_tokens\n",
         );
         for e in events {
             let err = e
@@ -1544,7 +1696,7 @@ impl Store {
                 .replace('"', "'")
                 .replace('\n', " ");
             out.push_str(&format!(
-                "{},{},{},{},{},{},{},{},{},\"{}\",{},{},{},{},{},{},{},{},{},{}\n",
+                "{},{},{},{},{},{},{},{},{},\"{}\",{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
                 e.id,
                 e.ts,
                 e.public_model.unwrap_or_default(),
@@ -1571,6 +1723,27 @@ impl Store {
                 e.outcome,
                 e.usage_status,
                 e.usage_source,
+                e.cli_ready_ms.map(|v| v.to_string()).unwrap_or_default(),
+                e.reported_usage
+                    .as_ref()
+                    .and_then(|u| u.input_tokens)
+                    .map(|v| v.to_string())
+                    .unwrap_or_default(),
+                e.reported_usage
+                    .as_ref()
+                    .and_then(|u| u.output_tokens)
+                    .map(|v| v.to_string())
+                    .unwrap_or_default(),
+                e.reported_usage
+                    .as_ref()
+                    .and_then(|u| u.cache_read_input_tokens)
+                    .map(|v| v.to_string())
+                    .unwrap_or_default(),
+                e.reported_usage
+                    .as_ref()
+                    .and_then(|u| u.cache_creation_input_tokens)
+                    .map(|v| v.to_string())
+                    .unwrap_or_default(),
             ));
         }
         Ok(out)
@@ -2076,17 +2249,19 @@ mod stream_store_tests {
         let lines: Vec<_> = csv.lines().collect();
         assert_eq!(lines.len(), 9);
         assert!(lines[0].starts_with("id,ts,public_model,connection_id,status,latency_ms,prompt_tokens,completion_tokens,estimated_cost_usd,error,"));
-        assert!(lines[0].ends_with("request_id,attempt_id,upstream_model,finalized_at,headers_ms,first_output_ms,total_observed_ms,outcome,usage_status,usage_source"));
+        assert!(lines[0].ends_with("request_id,attempt_id,upstream_model,finalized_at,headers_ms,first_output_ms,total_observed_ms,outcome,usage_status,usage_source,cli_ready_ms,reported_input_tokens,reported_output_tokens,reported_cache_read_input_tokens,reported_cache_creation_input_tokens"));
         let success: Vec<_> = lines[6].split(',').collect();
         assert_eq!(&success[4..10], &["200", "0", "0", "0", "0", "\"\""]);
         assert_eq!(
-            &success[14..],
+            &success[14..20],
             &["0", "0", "0", "succeeded", "complete", "openai_chat_v1"]
         );
         let legacy: Vec<_> = lines[8].split(',').collect();
         assert_eq!(&legacy[6..9], &["", "", ""]);
         assert_eq!(&legacy[10..17], &["", "", "", "", "", "", ""]);
-        assert_eq!(&legacy[17..], &["unknown", "unknown", "unknown"]);
+        assert_eq!(&legacy[17..20], &["unknown", "unknown", "unknown"]);
+        assert_eq!(&success[20..], &["", "", "", "", ""]);
+        assert_eq!(&legacy[20..], &["", "", "", "", ""]);
         assert_eq!(csv_field("model,\"quoted\""), "\"model,\"\"quoted\"\"\"");
     }
 
@@ -2312,8 +2487,8 @@ mod stream_store_tests {
         assert!(recent.contains("<td class=\"mono\">0/0</td>"));
         assert!(recent.contains("<td class=\"mono\">5/—</td>"));
         assert!(!recent.contains("<td class=\"mono\">5/0</td>"));
-        assert!(recent.contains("<td>0 ms / 0 ms / 0 ms</td>"));
-        assert!(recent.contains("<td>0 ms / — / 0 ms</td>"));
+        assert!(recent.contains("<td>0 ms / — / 0 ms / 0 ms</td>"));
+        assert!(recent.contains("<td>0 ms / — / — / 0 ms</td>"));
         assert!(html.contains("Unknown (includes pending)"));
         assert!(html.contains("HTTP 200 headers"));
     }

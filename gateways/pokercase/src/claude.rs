@@ -732,9 +732,14 @@ pub struct AnthropicToChatStream {
     finish: Option<String>,
     usage: (i64, i64),
     done: bool,
+    failed: bool,
 }
 
 impl AnthropicToChatStream {
+    pub(crate) fn is_failed(&self) -> bool {
+        self.failed
+    }
+
     pub(crate) fn is_done(&self) -> bool {
         self.done
     }
@@ -749,6 +754,7 @@ impl AnthropicToChatStream {
             finish: None,
             usage: (0, 0),
             done: false,
+            failed: false,
         }
     }
 
@@ -848,6 +854,7 @@ impl AnthropicToChatStream {
             }
             "message_stop" => out.extend(self.finish()),
             "error" => {
+                self.failed = true;
                 out.push(format!(
                     "data: {}",
                     json!({"error": ev.get("error").cloned().unwrap_or(Value::Null)})

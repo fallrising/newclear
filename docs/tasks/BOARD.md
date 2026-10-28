@@ -28,7 +28,10 @@
 
 ## T-0380
 
-依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。Owner 已明確批准新 SDD（PR577）；先執行 FE2-1，其餘依序推進，必要前置仍有效。
+> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+
+
+依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；目前依上方結案決定停止推進Fanzloud。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -45,8 +48,8 @@
 | FE2-11 | Paired synthetic Web R2 delivered in PR598 | R2-AC-11 | done | 2026-10-24T11:22:03Z | 2026-10-24T17:33:41Z | 2026-10-24T17:34:24Z |
 | FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
-| FE2-14 | platform/fanzloud 第2輪實作（[現有 Blink 環境未辨識可用路徑](../fe-review/fanzloud-completion-regression/ENVIRONMENT-FEASIBILITY.md)；PR604 Draft） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-28T04:41:34.638379+00:00 |
-| FE2-E | 交付證據／整合核對 | R2-AC-E | todo | — | — | — |
+| FE2-14 | platform/fanzloud 暫緩、未完成（[issue706](https://github.com/fallrising/newclear/issues/706)；PR604 Draft；owner停止持續調查） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-28T10:21:52.298548+00:00 |
+| FE2-E | 原全14項整合未完成；13項證據見結案表，Fanzloud部分留issue706 | R2-AC-E | todo | — | — | 2026-10-28T10:21:52.298548+00:00 |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
 

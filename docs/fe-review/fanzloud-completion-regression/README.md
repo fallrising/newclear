@@ -1,5 +1,7 @@
 # Chromium terminal-cleanup regression patch — NOT_RUN
 
+> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+
 > Latest checkpoint: [the bounded environment check](ENVIRONMENT-FEASIBILITY.md) is complete; no compatible existing Blink test route was identified in the inspected scope. Compilation/execution remain NOT_RUN. Its single next recommendation supersedes the earlier environment-check proposal below.
 
 T-0380 / R2-AC-14 and R2-AC-E. This is the bounded test-patch artifact requested by the [completion plan](../FANZLOUD-COMPLETION-PLAN.md), following owner continuation on 2026-10-28. It is **not compiled or executed**. No Chromium checkout/build, source-slice model, browser attempt, application/engine fix or dependency change accompanies it.

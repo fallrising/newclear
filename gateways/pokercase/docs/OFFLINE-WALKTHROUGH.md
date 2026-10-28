@@ -30,13 +30,15 @@ python3 scripts/offline_walkthrough.py --serve \
 
 它先完成相同驗證，再印出本機 admin URL 和 **臨時管理 token 檔案路徑**。在同一台機器讀取該檔，於管理登入頁貼上 token，即可查看 Connections、Routes、API Keys、Usage。token 不會印在報告中；按 Ctrl-C 後示範服務和臨時資料都會移除，報告保留。遠端環境可沿用你既有的本機連線方式開啟該 loopback URL；本指令不建立對外 listener。
 
-預設報告在 `offline-results/journey-*/report.json`；可用 `--output-dir <目錄>` 指定父目錄。報告只記錄階段、數量、摘要、binary SHA-256 和 checkout commit。checkout commit 不證明 binary 的建置來源，請先用上面的 locked build 建置。不要提交示範輸出。
+預設報告在 `offline-results/journey-*/report.json`；可用 `--output-dir <目錄>` 指定父目錄。報告記錄階段、數量、摘要、正常串流的合成用量與 attempt 結算資料、binary SHA-256 和 checkout commit。checkout commit 不證明 binary 的建置來源，請先用上面的 locked build 建置。不要提交示範輸出。
 
 ## 如何讀取結果
 
-這證明 gateway 的離線完整流程可跑通。用量來自上述真實 HTTP 請求，沒有直接塞資料庫。假上游每個完成的 buffered 回覆提供 5 個 input、3 個 output token；設定的價格刻意是合成測試值，每筆估價 $2，**不是廠商報價或真實花費**。
+通過代表這個限定範圍的 gateway 離線流程可跑通。用量來自上述真實 HTTP 請求，沒有直接塞資料庫。假上游每個完成的 buffered 回覆及正常串流提供 5 個 input、3 個 output token；設定的價格刻意是合成測試值，每筆估價 $2，**不是廠商報價或真實花費**。
 
-目前 streaming／cancel 的完整用量與終止狀態尚未全部落帳，報告會明確列出未知 token rows 和費用 coverage，不能把空值當 0，也不能把帳本 HTTP status 當成生成成功。演練驗證的串流終止事件與帳本狀態分開呈現。未完成項目已記錄：
+Chat、Messages、Responses 三種 client API 的正常串流必須各自只有一筆完整結算：原始 Chat 上游用量來源 `openai_chat_v1`、精確 5／3 token 與 $2、`succeeded`／`complete`、非空 request／attempt ID 與 finalized_at，以及有序的 headers／first-output／total-observed 毫秒時間。檢查不採信轉換器補出的零值；API 與 CSV 的用量、終態、識別與時間欄位必須一致，HTML 的已知費用小計及 coverage 也必須相符。重啟後再次核對同一歷史。
+
+報告的 `usage.normal_streams` 保留上述觀測值，正常串流缺失用量會直接失敗。失敗與取消仍可能沒有 token 或費用，buffered 的舊終態欄位仍可能 unknown；`unknown_token_rows` 與費用 coverage 保留這些差異，不能把空值當 0，也不能把 HTTP status 當成生成成功。剩餘項目已記錄：
 
 - [串流結算、終止結果與耗時定義 #698](https://github.com/fallrising/newclear/issues/698)
 - [其餘用量完整度、來源與價格依據 #699](https://github.com/fallrising/newclear/issues/699)
@@ -44,7 +46,7 @@ python3 scripts/offline_walkthrough.py --serve \
 - [既有測試啟動不穩定 #701](https://github.com/fallrising/newclear/issues/701)
 - [Antigravity 假上游隔離 #702](https://github.com/fallrising/newclear/issues/702)
 
-這個演練不啟動真實廠商 CLI 或模型，也不驗收 IDE 登入、帳號權限或廠商最新協定。它使用 generic OpenAI-compatible 假上游，三種 client API 都經過 gateway 的實際轉換。下一個真實接入階段需先確定 client/version 矩陣；主線仍為 incomplete、沒有 usable tag。
+這個演練不啟動真實廠商 CLI 或模型，也不驗收 IDE 登入、帳號權限或廠商最新協定。它使用 generic API-key OpenAI-compatible **Chat HTTP 假上游**，三種 client API 都走實際 gateway；Messages 與 Responses 由 Chat 轉換。CLI、OAuth／借用憑證、原生 Messages／Responses 上游的串流結算仍在此範圍之外，不能將本次通過擴為完整 #698 或全產品驗收。下一個真實接入階段需先確定 client/version 矩陣；主線仍為 incomplete、沒有 usable tag。
 
 ## 隔離與故障定位
 

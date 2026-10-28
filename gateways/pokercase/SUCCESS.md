@@ -50,7 +50,7 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 
 ## T-0432 — Three-client generic HTTP settlement continuation
 
-Owner approved the bounded continuation after current-state review. [Fixed PC-1–PC-5, design and evidence](docs/tasks/T-0432-protocol-settlement.md) extend the delivered generic Chat-upstream observer to Messages/Responses clients and verify all three protocols through the headless journey. Preserve original17AC, prior SS-1–SS-6 and T-1102; CLI/provider-profile/OAuth and native non-Chat upstreams remain outside this slice. Mainline incomplete, usable_tag none; full#698 and#699–702 remain open. Documentation-first actual RED→GREEN, full locked Rust/fmt/Clippy, Python and the strict nine-stage journey passed. Independent review findings were reproduced and corrected; product CI/merge and final ledger/backup/cleanup gates remain pending.
+Owner approved the bounded continuation after current-state review. [Fixed PC-1–PC-5, design and evidence](docs/tasks/T-0432-protocol-settlement.md) extend the delivered generic Chat-upstream observer to Messages/Responses clients and verify all three protocols through the headless journey. Preserve original17AC, prior SS-1–SS-6 and T-1102; CLI/provider-profile/OAuth and native non-Chat upstreams remain outside this slice. Mainline incomplete, usable_tag none; full#698 and#699–702 remain open. Documentation-first actual RED→GREEN, full locked Rust/fmt/Clippy, Python and the strict nine-stage journey passed. Independent review findings were reproduced and corrected; PR720 required CI/normal merge/remote readback passed; final ledger/backup/cleanup are recorded by this round’s handoff.
 
 ## 本次里程碑：T-0377 Cursor 外部隔離
 

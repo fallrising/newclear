@@ -20,7 +20,7 @@ The existing passthrough observer scans a received transport chunk and may settl
 
 ## Plan and evidence
 
-Documentation frozen before runtime edits. Actual Messages and Responses HTTP RED each persisted null instead of observed5/3. Converter regressions also reproduced lookahead past failure, missing settlement before final output and loss of a consumed finish line before a read error. All focused corrections and full local validation passed; independent source review accepted the two corrections below. Product CI/merge and final ledger/backup/cleanup remain pending. Independent bounded source analysis identified whole-chunk lookahead and terminal-line/blank-delimiter differences; design and PC-2 explicitly cover them. Root owns integration, verification and delivery. Estimate2–3activehours including review/delivery;20minute checkpoints; commands/CI600seconds; initial reproduction plus at most2 justified corrections per issue. Whole-round tools/provider/model/tokens/cost/active-wait unknown/null unless measured. No real credential/privateDB/login/provider/Docker/dependency/permission/release/deploy.
+Documentation frozen before runtime edits. Actual Messages and Responses HTTP RED each persisted null instead of observed5/3. Converter regressions also reproduced lookahead past failure, missing settlement before final output and loss of a consumed finish line before a read error. All focused corrections and full local validation passed; independent source review accepted the two corrections below. Product CI/merge/readback passed; final ledger/backup/cleanup remain recorded by the final handoff. Independent bounded source analysis identified whole-chunk lookahead and terminal-line/blank-delimiter differences; design and PC-2 explicitly cover them. Root owns integration, verification and delivery. Estimate2–3activehours including review/delivery;20minute checkpoints; commands/CI600seconds; initial reproduction plus at most2 justified corrections per issue. Whole-round tools/provider/model/tokens/cost/active-wait unknown/null unless measured. No real credential/privateDB/login/provider/Docker/dependency/permission/release/deploy.
 
 ## Local evidence and preserved failures
 
@@ -31,3 +31,13 @@ Documentation frozen before runtime edits. Actual Messages and Responses HTTP RE
 - Actual nine-stage journey passes with17usage rows:14known/3unknown, synthetic known subtotal$28 and partial coverage. All three normal streams retain exact5/3, unique request/attempt IDs, succeeded/complete, source/model and ordered timing. API/CSV fields, HTML numeric subtotal/coverage and restart/history agree. This is isolated fixture evidence, not provider billing or live-client acceptance.
 
 PC-1–PC-4 local verification is accepted. PC-5 downstream CI/normal merge, reviewed ledger publication, backup verification and cleanup are recorded separately after execution; no whole-product completion is implied.
+
+## Product delivery readback
+
+產品 [PR720](https://github.com/fallrising/newclear/pull/720) source `1babddfc593d721a5fcebd78fc8e445be5689b46`、merge `2cb50ea4623a51206ed47868c99bdb6d8a39b7db` at 2026-10-28T16:00:53Z；290Rusttests/22groups、fmt/Clippy/build、26Python回歸（含serve/cleanup）、實際九階段終端旅程、20validator tests、45contracts/7indexes及獨立來源審查通過；必要check/validate CI、正常合併與遠端內容／祖先／trailer回讀通過。
+
+實際九階段旅程17筆usage、14已知3未知，合成估價已知小計$28且coverage partial；三種正常串流皆原始上游5/3、succeeded/complete、唯一request/attempt與有序時間，API/CSV及HTML金額/coverage、重啟歷史一致。這是fixture估價，不是provider帳單或整輪開發實耗。
+
+本輪僅generic API-key Chat HTTP上游→Chat/Messages/Responses clients；CLI、named-provider/OAuth/借用憑證及原生非Chat上游仍未接入observer，完整#698仍open。#699token coverage/價格來源精度/歷史語義、#700具名client/version與真實AC01/04/08及AC04工具/AC17文字範圍決策、#701既有fixture啟動/auth間歇失敗、#702Antigravity HTTP隔離仍保留。mainline incomplete、usable_tag none、desk in_progress；owner決定done，沒有整體完成百分比。
+
+Execution record: [journal run](https://github.com/fallrising/journal/blob/main/runs/newclear/pokercase/2026/10/20261028T151456Z-0388462f-4736-4910-b95b-6dc571a21a62/run.md). PC-5 management publication/backup/cleanup are subsequent observed gates in the final local handoff; the product merge alone does not certify them. Stop after this authorized continuation.

@@ -161,3 +161,14 @@ Owner明確批准推送後，[PR #722](https://github.com/fallrising/newclear/pu
 - 初始SSH等待、PR422與自動批准拒絕均保留；批准後限時SSH推送成功，沒有改用替代寫入路徑或繞過CI。此前「待owner」為歷史，Git批准阻擋已解除。
 - RO01–04 source／本機程序驗證完成；[證據](../evidence/m1-resident-observation.md)保留RED、SQLite warnings與Python3.11未實測限制。未安裝到原Lab、未部署或續權，沒有新付費方案。完整mainline保持未完成，無usable tag。
 - 此PR僅按實際feature合併時間收尾任務板，不新增功能或雲端操作。
+
+## T-0008 — 授權來源整合
+
+範圍：[IA01–04](../integrated-authorization.md)，source與隔離本機驗證。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0008-1 | 前後AS與self grant關聯 | IA-01 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |
+| T-0008-2 | Worker／Access／resident來源綁定 | IA-02 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |
+| T-0008-3 | 新鮮度與未知／漂移處理 | IA-03 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |
+| T-0008-4 | 私人輸出、整合、審查與交付 | IA-04 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |

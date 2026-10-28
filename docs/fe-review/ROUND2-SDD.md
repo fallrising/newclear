@@ -1,5 +1,7 @@
 # SDD：fe-review 第 2 輪（newclear）
 
+> 2026-10-28 owner接受依13項newclear已交付範圍結案，Fanzloud另留issue706未完成。這是desk§3管理卡結案例外，不改原AC或把R2-AC-14／全範圍R2-AC-E改成PASS。見[結案決定及證據](ROUND2-CLOSEOUT.md)。下列狀態與批准文字保留原規格歷史。
+
 **狀態：owner 已於 2026-10-24 明確批准；實作進行中。** Desk T-0380（父卡 T-0379），承接已完成的第 1 輪。Owner 2026-10-24 指示「繼續第2輪。」；本提案把既有已確認 DESIGN 轉成固定驗收與執行順序，本次已完成 desk 運作方法 §4.3 的具體批准；owner 回覆「批准。」（本對話，首次觀測05:46:58Z，非訊息發送秒數）。第一輪的 [SDD](SDD.md) 與 [確認證據](ROUND1-ACCEPTANCE.md) 保持原樣。
 
 ## 目標與依據

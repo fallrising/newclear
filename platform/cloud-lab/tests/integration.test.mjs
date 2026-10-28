@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, access } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -45,5 +45,34 @@ test('self inspection CLI traverses real HTTP HMAC Worker and leaves journal and
   const keys=JSON.parse(lab.env.MACHINE_KEYS);keys['local-runner'].revoked=true;lab.env.MACHINE_KEYS=JSON.stringify(keys);
   const denied=await runPython(join(directory,'runner.json'),'--authorization-status');assert.equal(denied.code,1);assert.match(denied.output,/authorization inspection unavailable/);
   assert.ok(!denied.output.includes(cfg.secret_hex));assert.deepEqual(snapshot(),before);
+ }finally{await lab.close();}
+});
+
+test('integrated observation correlates real HTTP self, SQLite grants and kernel resident socket',async()=>{
+ assert.ok(process.env.AGENT_BUILD_DIR);const directory=await mkdtemp(join(process.env.AGENT_BUILD_DIR,'integrated-'));
+ const lab=await createLocalLab(directory);
+ try{
+  const cfg=JSON.parse(await readFile(join(directory,'runner.json'),'utf8'));
+  const common=JSON.parse(lab.DB.db.prepare('SELECT policy FROM grants WHERE id=?').get('local-runner').policy);
+  for(const role of ['human','bot','runner','scheduler']){
+   const policy={...common,principal_id:'local-'+role,max_timeout_seconds:10,
+    capabilities:role==='runner'?['dispatch:claim','runs:report']:role==='scheduler'?['commands:submit','node:health:read']:['commands:read']};
+   lab.DB.db.prepare('INSERT INTO grants VALUES(?,1,0,?) ON CONFLICT(id) DO UPDATE SET policy=excluded.policy').run('local-'+role,JSON.stringify(policy));
+  }
+  const keys=JSON.parse(lab.env.MACHINE_KEYS);keys['local-bot']={...keys['local-runner'],principal_id:'local-bot',grant_id:'local-bot'};lab.env.MACHINE_KEYS=JSON.stringify(keys);
+  // Management settings are synthetic for the loopback transport. The existing
+  // harness still presents HTTPS to the unchanged Worker authentication code.
+  for(const role of ['bot','runner'])await writeFile(join(directory,role+'.json'),JSON.stringify({...cfg,credential_id:'local-'+role,journal_path:join(directory,role+'.sqlite'),cloudflare_access_client_id:'synthetic-client',cloudflare_access_client_secret:'synthetic-secret'}),{mode:0o600});
+  const token='12345678-1234-4234-8234-123456789abd',database='12345678-1234-4234-8234-123456789abc';
+  await writeFile(join(directory,'profile.json'),JSON.stringify({schema_version:'cloudlab.authorization-source.v1',account_id:'a'.repeat(32),target:{worker_name:'cloud-lab',database_id:database},grant_ids:Object.fromEntries(['human','bot','runner','scheduler'].map(role=>[role,'local-'+role])),service_token_ids:{bot:token,runner:token}}),{mode:0o600});
+  await writeFile(join(directory,'integration.json'),JSON.stringify({bindings:[{name:'DB',type:'d1',id:database},{name:'PUBLIC_ORIGIN',type:'plain_text',text:lab.base_url},{name:'AUDIENCE',type:'plain_text',text:cfg.audience}],token:{id:token,client_id:'synthetic-client',enabled:true,expires_at:common.expires_at}}),{mode:0o600});
+  const business=()=>['grants','commands','schedules'].map(t=>lab.DB.db.prepare('SELECT * FROM '+t).all()),before=business();
+  const run=await new Promise((resolve,reject)=>{const p=spawn('python3',[fileURLToPath(new URL('./fixtures/integrated_observation.py',import.meta.url)),directory],{stdio:['ignore','pipe','pipe'],timeout:20000});let output='';p.stdout.on('data',b=>output+=b);p.stderr.on('data',b=>output+=b);p.once('error',reject);p.once('exit',code=>resolve({code,output}));});
+  assert.equal(run.code,0,run.output);const {report,management_requests}=JSON.parse(run.output);
+  assert.equal(management_requests,10);assert.deepEqual(report.source_outcomes,{bot:'verified',runner:'verified',resident:'verified'});
+  assert.equal(report.collection_integrity_verified,true);assert.equal(report.live_verified,false);
+  assert.equal(report.subjects.find(row=>row.role==='runner').deadline_complete,true);
+  assert.deepEqual(business(),before);assert.equal(lab.DB.db.prepare('SELECT count(*) n FROM nonces').get().n,2);
+  for(const value of [cfg.secret_hex,directory,lab.base_url,'synthetic-secret','synthetic-client','local-runner'])assert.ok(!run.output.includes(value));
  }finally{await lab.close();}
 });

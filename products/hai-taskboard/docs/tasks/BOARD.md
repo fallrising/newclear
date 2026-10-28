@@ -96,9 +96,9 @@ under docs/evidence/. Source baseline: `0111908492c32d0b01d561b24b6024737cb4f641
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| KD01 | Clarify the runnable Fake slice, remaining P0-A gates and future real-agent readiness | DOC-01 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:34:03Z |
-| KD02 | Specify selected Kanzo-inspired workflows, invariants, ordered follow-ups and measurable acceptance | DOC-02 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:34:03Z |
-| KD03 | Connect entry documents, validate scope/links/contracts and obtain independent document review | DOC-03 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:34:03Z |
+| KD01 | Clarify the runnable Fake slice, remaining P0-A gates and future real-agent readiness | DOC-01 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
+| KD02 | Specify selected Kanzo-inspired workflows, invariants, ordered follow-ups and measurable acceptance | DOC-02 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
+| KD03 | Connect entry documents, validate scope/links/contracts and obtain independent document review | DOC-03 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
 
 Acceptance: DOC-01 separates current observations from historical runtime evidence;
 DOC-02 marks every future capability and named oracle unimplemented/NotRun and preserves

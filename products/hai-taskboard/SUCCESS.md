@@ -35,6 +35,18 @@ Board/SSE 是 projection；WorkItem、Run、Candidate、Review、Evidence、Appr
 
 ## 現況與缺口
 
+### 目前能用到哪裡
+
+| 層次 | 現況 | 還需要什麼 |
+| --- | --- | --- |
+| 本機開發試用 | 已有 authenticated connected browser、project/Draft、明確接受規格、Ready/Fake、回應遺失查回與重連的局部歷史證據 | 依 quickstart/local-development 設定；Fake 成功仍停 Developing；本次文件工作未重跑 runtime |
+| 完整 P0-A | 尚未完成；AC-02/03/04 pending | 完整 Candidate/Review/Evidence/QA/Done UI、detail/attention/impact、activation、backup/restore、ContextPack 接續及整組驗收 |
+| 日常真實 agent 工作台 | 尚未啟用；目前不能派送真實 Codex/Claude 工作，也沒有已啟用的 MCP 取件流程 | 完整 P0-A 後，另行授權並驗收單一真實 adapter、agent 身分/權限、成果驗收與中斷接續 |
+
+因此目前適合試用已完成的 Fake 流程，尚不適合作為日常真實 agent 工作台。
+Fake-only 是 P0-A 的原定範圍；不以增加真 provider 作為補足本輪 AC 的捷徑。
+2026-10-29 的更新只核對文件與來源；下列原有通過紀錄保留各自日期與驗證範圍。
+
 Domain kernel、SQLite、HTTP/SSE、Fake vertical 與 local bootstrap 有獨立接受切片。
 [交接](docs/HANDOFF.md)保留 T-062、T-077/079、T-047/082 等歷史 FAIL 與後續修復，不能抹成首輪全過。
 Runnable loopback runtime 不是完整圖形工作管理產品。
@@ -99,4 +111,8 @@ future oracles without activating them; DOC-03 supplies navigation/contract chec
 independent review. Verification planned: exact upstream materialization, scoped diff,
 local-link/identifier checks, project-success/index preflight, independent document review,
 and applicable PR checks. No product tests or real providers are introduced by this task.
-Current task status and writable scope are in [BOARD](docs/tasks/BOARD.md).
+The proposed [Kanzo-inspired design](docs/sdd/kanzo-inspired-usability.md) records the follow-up
+contracts, dependencies and named future oracles. All HAI-KZ feature oracles remain Proposed/NotRun;
+they are not added to P0-A AC-01..04. Current task status and writable scope are in
+[BOARD](docs/tasks/BOARD.md); actual document verification and independent review are recorded in
+[the bounded report](docs/evidence/kanzo-usability-docs-20261029.md).

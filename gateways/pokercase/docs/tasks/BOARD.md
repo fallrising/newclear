@@ -396,5 +396,9 @@ CC-3 整輪驗收已於 2026-10-28T04:37:37Z 核對：產品 PR692、看板 PR69
 ## T-0432 generic Chat stream settlement
 
 - Demand: [desk T-0432](https://github.com/fallrising/desk/tree/main/tasks/T-0432-thinrouter-stream-settlement); [fixed SS-1–SS-6/design](T-0432-stream-settlement.md).
-- Status: in_progress; started2026-10-28T13:24:29Z; claimPR270 merged. Source/design and actual RED→GREEN complete;279Rusttests/22groups,fmt/Clippy,Python20tests,nine-stage journey and repository gates passed. Independent review/PR/CI/merge/ledgers/backup/cleanup pending.
+- Status: in_progress; started2026-10-28T13:24:29Z; claimPR270 merged. Source/design and actual RED→GREEN complete;279Rusttests/22groups,fmt/Clippy,Python20tests,nine-stage journey and repository gates passed. Independent review and productPR712/check+validate/normalmerge/readback passed; management ledger publication/backup/cleanup are recorded by the final handoff.
 - Scope: generic API-key HTTP Chat stream only; #698 remains open for other paths. Estimate2–3active hours;20minute checkpoints; no real providers.
+
+產品 [PR712](https://github.com/fallrising/newclear/pull/712) source `c3e9340024e50f95762f71174f57386e1f84bb0c`、merge `17e1ed121d35229471ff834ef5ea55b3d0d2cf94` at 2026-10-28T14:21:21Z；279Rusttests/22groups、fmt、Clippy、20Python回歸、實際九階段無桌面旅程、20validator tests、45contracts/7indexes、獨立來源審查、必要check/validate CI與正常合併／遠端回讀通過。
+
+SS-1–SS-5及SS-6產品驗證/交付通過；本輪管理帳本、備份與清理以finalhandoff記錄，不由產品合併預先冒稱完成。完整旅程17rows/12known/5unknown，合成$24小計仍partial，非真實花費。僅generic API-key HTTP Chat streaming；其他client protocol、CLI、named-provider/OAuth仍未接入本輪observer，完整#698保持open。#699完整token coverage／price provenance、#700具名client/version與真實AC01/04/08、#701既有fixture啟動/auth間歇失敗、#702Antigravity隔離仍未完成。mainline incomplete、usable_tag none，原17coreAC／T-1102規格／Cargo／其他trackedplan不變；desk維持in_progress，done由owner決定。沒有完成百分比。

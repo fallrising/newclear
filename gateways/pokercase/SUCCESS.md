@@ -46,7 +46,7 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 
 ## T-0432 — 本輪一般 Chat 串流結算
 
-目標、設計與固定 SS-1–SS-6 見 [任務](docs/tasks/T-0432-stream-settlement.md)。本輪僅 generic API-key HTTP Chat 串流，先 fake upstream RED，再完成送出前登記、一次結算、終態／usage／時間及管理面一致性；其他協定、CLI、OAuth 與完整 [#698](https://github.com/fallrising/newclear/issues/698) 留待後續。本機279Rusttests/22groups、fmt/Clippy、20Python回歸、九階段離線旅程及repository validators已通過；獨立審查、CI／合併與整輪交接為後續交付gate；不改原17項 AC、mainline incomplete 或 usable_tag none。
+目標、設計與固定 SS-1–SS-6 見 [任務](docs/tasks/T-0432-stream-settlement.md)。本輪僅 generic API-key HTTP Chat 串流，先 fake upstream RED，再完成送出前登記、一次結算、終態／usage／時間及管理面一致性；其他協定、CLI、OAuth 與完整 [#698](https://github.com/fallrising/newclear/issues/698) 留待後續。本機279Rusttests/22groups、fmt/Clippy、20Python回歸、九階段離線旅程及repository validators已通過；獨立審查及PR712必要CI／正常合併／遠端回讀已通過；管理帳本與備份清理見本輪handoff；不改原17項 AC、mainline incomplete 或 usable_tag none。
 
 ## 本次里程碑：T-0377 Cursor 外部隔離
 

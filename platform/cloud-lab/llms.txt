@@ -51,3 +51,7 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Resident process observation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/resident-observation.md): opt-in Linux private Unix socket, peer/start/boot identity, loaded config digest and actual FLOCK ownership; conservative stop deadline and crash/drift rejection. Source/local only, not installed on the original Lab.
 
 - [Resident observation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-resident-observation.md):192tests, real fixture resident/kernel-lock observations, signal/restart/crash and drift checks, independent review; no original-service rollout or authorization change.
+
+- [Integrated authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/integrated-authorization.md): correlates management, machine self and resident metadata with identity/config binding, before/after drift checks and conservative timestamps; private snapshot/provenance integrity status, no automatic deployment or renewal.
+
+- [Integration evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-integrated-authorization.md): real local HTTP/HMAC/SQLite and kernel socket integration with synthetic management envelopes; source-only acceptance and explicit unknown route/policy/live state.

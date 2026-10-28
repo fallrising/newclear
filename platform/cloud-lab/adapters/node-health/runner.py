@@ -301,7 +301,7 @@ class InspectionClient:
         return results[0]
 
 
-def inspect_authorization(config, client=None, *, clock=time.time):
+def authorization_observation(config, client=None, *, clock=time.time):
     """One self query; no journal, claim, retry or inferred resident deadline."""
     started = clock()
     response = (client or InspectionClient(config)).post('/api/authorization/self', b'{}')
@@ -309,7 +309,7 @@ def inspect_authorization(config, client=None, *, clock=time.time):
     if not (type(started) in (int, float) and type(finished) in (int, float)
             and math.isfinite(started) and math.isfinite(finished) and 0 <= started <= finished <= started + 10):
         raise ProtocolError('invalid authorization observation window')
-    strict_json(encode(response))
+    response = strict_json(encode(response))
     fields(response, 'schema_version observed_at credential grant scope request_id')
     if response['schema_version'] != 'cloudlab.authorization-self.v1':
         raise ProtocolError('unsupported authorization metadata')
@@ -333,8 +333,16 @@ def inspect_authorization(config, client=None, *, clock=time.time):
             or timestamp(credential['expires_at']) <= observed
             or not timestamp(grant['not_before']) <= observed < timestamp(grant['expires_at'])):
         raise ProtocolError('authorization identity or scope mismatch')
+    return {'response': response, 'started_at': utc(started), 'finished_at': utc(finished),
+            'config_sha256': getattr(config, '_loaded_sha256', None)}
+
+
+def inspect_authorization(config, client=None, *, clock=time.time):
+    evidence = authorization_observation(config, client, clock=clock)
+    response = evidence['response']
+    credential, grant = response['credential'], response['grant']
     return {'source': 'worker_self', 'observed_at': response['observed_at'],
-            'checked_at': utc(finished), 'credential_expires_at': credential['expires_at'],
+            'checked_at': evidence['finished_at'], 'credential_expires_at': credential['expires_at'],
             'grant_expires_at': grant['expires_at'], 'access_service_expires_at': None,
             'runner_stop_at': None, 'deadline_complete': False}
 
@@ -526,7 +534,7 @@ class ResidentObservation:
                 self.parent = None
 
 
-def observe_resident(config_path, socket_path, allow_loopback_http=False):
+def observe_resident_evidence(config_path, socket_path, allow_loopback_http=False):
     config = read_inspection_config(config_path, allow_loopback_http)
     journal = Path(config.journal_path)
     if not journal.is_absolute():
@@ -580,12 +588,19 @@ def observe_resident(config_path, socket_path, allow_loopback_http=False):
                 stop_at = min(timestamp(response['stop_at']), int(started + response['remaining_ms']/1000))
                 if time.monotonic() > deadline or stop_at <= time.time():
                     raise ProtocolError('resident admission closed')
-                return {'source':'resident_process','observed_at':response['observed_at'],
+                summary = {'source':'resident_process','observed_at':response['observed_at'],
                         'configured_stop_at':response['stop_at'],'runner_stop_at':utc(stop_at),'deadline_complete':False}
+                return {'summary':summary, 'started_at':utc(started), 'config_sha256':config._loaded_sha256,
+                        'process_identity_sha256':hashlib.sha256(encode(dict(before,instance=response['instance']))).hexdigest(),
+                        'response_sha256':hashlib.sha256(encode(response)).hexdigest()}
         finally:
             os.close(lock_fd)
     finally:
         os.close(parent)
+
+
+def observe_resident(config_path, socket_path, allow_loopback_http=False):
+    return observe_resident_evidence(config_path, socket_path, allow_loopback_http)['summary']
 
 
 def validate_assignment(a, config, now):

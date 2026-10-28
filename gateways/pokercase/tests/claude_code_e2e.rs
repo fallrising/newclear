@@ -26,6 +26,14 @@ if grep -q LIMIT "$dir/stdin.txt"; then
   exit 0
 fi
 ev() { printf '{"type":"stream_event","event":%s}\n' "$1"; }
+if grep -q CS_FILTERED "$dir/stdin.txt"; then
+  ev '{"type":"message_start","message":{"usage":{"input_tokens":12,"output_tokens":0}}}'
+  ev '{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"hidden","name":"mcp__thinrouter__unregistered","input":{}}}'
+  ev '{"type":"content_block_delta","index":99,"delta":{"type":"text_delta","text":"unmapped-private-text"}}'
+  ev '{"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":5}}'
+  ev '{"type":"message_stop"}'
+  exit 0
+fi
 cfg=""; prev=""
 for a in "$@"; do [ "$prev" = "--mcp-config" ] && cfg="$a"; prev="$a"; done
 if [ -n "$cfg" ] && ! grep -q '\[tool result' "$dir/stdin.txt"; then
@@ -433,4 +441,84 @@ async fn claude_cli_failures_map_to_statuses() {
         .await;
     assert_eq!(r.status(), 401);
     assert!(r.text().await.unwrap().contains("not logged in"));
+}
+
+#[tokio::test]
+async fn cs1_three_client_streams_have_durable_raw_usage() {
+    for (path, input) in [
+        (
+            "/v1/chat/completions",
+            json!({"messages":[{"role":"user","content":"hi"}]}),
+        ),
+        (
+            "/v1/messages",
+            json!({"max_tokens":100,"messages":[{"role":"user","content":"hi"}]}),
+        ),
+        ("/v1/responses", json!({"input":"hi"})),
+    ] {
+        let env = Env::start().await;
+        let mut body = input;
+        body["model"] = json!("cc");
+        body["stream"] = json!(true);
+        let response = env.post(path, body).await;
+        assert_eq!(response.status(), 200);
+        assert!(response.text().await.unwrap().contains("Hello"));
+        let admin = std::fs::read_to_string(env._dir.path().join("admin-token")).unwrap();
+        let rows: Value = reqwest::Client::builder()
+            .no_proxy()
+            .build()
+            .unwrap()
+            .get(format!("{}/admin/api/usage", env.base))
+            .header("x-admin-token", admin.trim())
+            .send()
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
+        let row = &rows["data"][0];
+        assert!(
+            row["attempt_id"].is_string(),
+            "actual Claude stream must reserve durable attempt: {rows}"
+        );
+        assert_eq!(row["usage_source"], "claude_code_stream_event_v1");
+        assert_eq!(row["outcome"], "succeeded");
+        assert_eq!(row["completion_tokens"], 5);
+        assert!(
+            row["prompt_tokens"].is_null(),
+            "missing cache buckets cannot imply zero"
+        );
+        assert!(row["status"].is_null() && row["headers_ms"].is_null());
+        assert!(row["cli_ready_ms"].is_number());
+        assert_eq!(row["reported_usage"]["input_tokens"], 12);
+        assert_eq!(row["usage_status"], "partial");
+        assert!(row["estimated_cost_usd"].is_null());
+    }
+}
+
+#[tokio::test]
+async fn cs3_filtered_source_events_do_not_claim_first_visible_output() {
+    let env = Env::start().await;
+    let r=env.post("/v1/messages",json!({"model":"cc","stream":true,"max_tokens":100,"messages":[{"role":"user","content":"CS_FILTERED"}]})).await;
+    assert_eq!(r.status(), 200);
+    let wire = r.text().await.unwrap();
+    assert!(!wire.contains("unmapped-private-text") && !wire.contains("unregistered"));
+    let admin = std::fs::read_to_string(env._dir.path().join("admin-token")).unwrap();
+    let rows: Value = env
+        .client
+        .get(format!("{}/admin/api/usage", env.base))
+        .header("x-admin-token", admin.trim())
+        .send()
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    let row = &rows["data"][0];
+    assert_eq!(row["outcome"], "succeeded");
+    assert!(row["cli_ready_ms"].is_number());
+    assert!(
+        row["first_output_ms"].is_null(),
+        "filtered source events are not caller-visible output: {row}"
+    );
 }

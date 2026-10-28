@@ -5,6 +5,7 @@ mod cancel;
 mod claude;
 mod claude_code;
 mod claude_mcp;
+mod claude_usage;
 mod cli_lines;
 mod cli_stderr;
 mod collection;

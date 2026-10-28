@@ -188,10 +188,10 @@ impl Gateway {
             rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
         )
         .unwrap();
-        let errors: Vec<String> = db
-            .prepare("SELECT error FROM usage_events WHERE error IS NOT NULL")
+        let errors: Vec<(String, String)> = db
+            .prepare("SELECT error, usage_source FROM usage_events WHERE error IS NOT NULL")
             .unwrap()
-            .query_map([], |r| r.get(0))
+            .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
             .unwrap()
             .map(Result::unwrap)
             .collect();
@@ -206,7 +206,14 @@ impl Gateway {
         assert_eq!(successes as usize, expected_successes);
         let wrong_nulls: i64 = db.query_row("SELECT COUNT(*) FROM usage_events WHERE status != 200 AND (prompt_tokens IS NOT NULL OR completion_tokens IS NOT NULL OR estimated_cost_usd IS NOT NULL OR latency_ms IS NULL)", [], |r|r.get(0)).unwrap();
         assert_eq!(wrong_nulls, 0);
-        let mut surfaces = vec![("sqlite", errors.join("\n"))];
+        let mut surfaces = vec![(
+            "sqlite",
+            errors
+                .iter()
+                .map(|(error, _)| error.as_str())
+                .collect::<Vec<_>>()
+                .join("\n"),
+        )];
         for (name, path) in [
             ("json", "/admin/api/usage"),
             ("csv", "/admin/api/usage/export.csv"),
@@ -232,7 +239,12 @@ impl Gateway {
             "EP-1 synthetic marker persisted/exposed in surfaces: {leaked:?}"
         );
         assert!(
-            errors.iter().all(|e| e == "upstream_attempt_failed"),
+            errors.iter().all(|(error, source)| error
+                == if source == "claude_code_stream_event_v1" {
+                    "stream_error"
+                } else {
+                    "upstream_attempt_failed"
+                }),
             "EP-1 errors must be fixed classification codes"
         );
     }

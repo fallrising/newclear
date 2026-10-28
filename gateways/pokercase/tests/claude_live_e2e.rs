@@ -87,6 +87,7 @@ if "--mcp-config" in args:
 def out(o): sys.stdout.write(json.dumps(o) + "\n"); sys.stdout.flush()
 def ev(e): out({"type": "stream_event", "event": e})
 def hang(text):
+    if "CS_EOF" in text: sys.exit(0)
     if "STATE_EXACT" in text:
         for index in range(4095): ev({"type":"content_block_start","index":index,"content_block":{"type":"thinking"}})
         return
@@ -1640,4 +1641,228 @@ mod disconnect_tests {
             assert_eq!(next["choices"][0]["message"]["content"], "Hello there");
         }
     }
+}
+
+// New accounting checks use the established live-process fixture so they also
+// exercise real stdin/tool/session ownership, rather than a second model of it.
+impl Env {
+    async fn cs_stream(&self, mut body: Value) -> reqwest::Response {
+        body["stream"] = json!(true);
+        self.client
+            .post(format!("{}/v1/chat/completions", self.base))
+            .json(&body)
+            .send()
+            .await
+            .unwrap()
+    }
+    async fn cs_rows(&self) -> Vec<Value> {
+        let token = std::fs::read_to_string(self.dir.path().join("admin-token")).unwrap();
+        let v: Value = self
+            .client
+            .get(format!("{}/admin/api/usage", self.base))
+            .header("x-admin-token", token.trim())
+            .send()
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
+        v["data"].as_array().unwrap().clone()
+    }
+    fn cs_db(&self) -> rusqlite::Connection {
+        rusqlite::Connection::open(self.dir.path().join("thinrouter.db")).unwrap()
+    }
+}
+
+#[tokio::test]
+async fn cs1_live_reuse_has_independent_attempts_and_eof_is_failed() {
+    let env = Env::start(&[]).await;
+    let (first, next) = two_turns("and again");
+    assert!(env
+        .cs_stream(first)
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    let old = env.cs_rows().await.remove(0);
+    assert!(env
+        .cs_stream(next.clone())
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    assert_eq!(env.starts(), 1);
+    let rows = env.cs_rows().await;
+    assert_eq!(rows.len(), 2);
+    assert_eq!(rows[1], old, "a later turn cannot rewrite old accounting");
+    assert_ne!(rows[0]["attempt_id"], old["attempt_id"]);
+    assert_ne!(rows[0]["request_id"], old["request_id"]);
+    for row in &rows {
+        assert_eq!(row["outcome"], "succeeded");
+        assert_eq!(row["completion_tokens"], 3);
+        assert_eq!(row["reported_usage"]["input_tokens"], 10);
+        assert!(row["prompt_tokens"].is_null());
+    }
+    let mut eof = next;
+    eof["messages"].as_array_mut().unwrap().extend([
+        json!({"role":"assistant","content":"Hello there"}),
+        json!({"role":"user","content":"CS_EOF"}),
+    ]);
+    let r = env.cs_stream(eof).await;
+    assert_eq!(r.status(), 502);
+    let rows = env.cs_rows().await;
+    assert_eq!(rows.len(), 3);
+    assert_eq!(
+        rows[0]["outcome"], "failed",
+        "process-wide sent flag must not hide a reused-turn EOF"
+    );
+    assert_eq!(rows[0]["usage_status"], "missing");
+    assert_eq!(env.starts(), 1);
+}
+
+#[tokio::test]
+async fn cs1_saved_resume_failure_reserves_each_dispatch_and_no_duplicate_legacy_row() {
+    let mut env = Env::start(&[]).await;
+    let (first, next) = two_turns("after restart");
+    assert!(env
+        .cs_stream(first)
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    let old = env.cs_rows().await.remove(0);
+    env.restart().await;
+    std::fs::write(env.bin_dir.path().join("refuse_resume"), "").unwrap();
+    assert!(env
+        .cs_stream(next)
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    assert_eq!(
+        env.starts(),
+        3,
+        "failed resume and fresh retry are actual distinct dispatches"
+    );
+    let rows = env.cs_rows().await;
+    assert_eq!(rows.len(), 3);
+    assert_eq!(rows[2], old);
+    assert_eq!(rows[0]["outcome"], "succeeded");
+    assert_eq!(rows[1]["outcome"], "failed");
+    assert_eq!(rows[0]["request_id"], rows[1]["request_id"]);
+    assert_ne!(rows[0]["attempt_id"], rows[1]["attempt_id"]);
+    assert!(rows.iter().all(|r| r["status"].is_null()));
+}
+
+#[tokio::test]
+async fn cs4_reservation_failure_does_not_spawn_or_consume_live_input_or_resume() {
+    let mut env = Env::start(&[]).await;
+    let db = env.cs_db();
+    let block="CREATE TRIGGER cs_insert_failure BEFORE INSERT ON usage_events BEGIN SELECT RAISE(FAIL, 'synthetic-private-diagnostic'); END;";
+    db.execute_batch(block).unwrap();
+    let (first, next) = two_turns("after failure");
+    let r = env.cs_stream(first.clone()).await;
+    assert_eq!(r.status(), 503);
+    assert!(!r
+        .text()
+        .await
+        .unwrap()
+        .contains("synthetic-private-diagnostic"));
+    assert_eq!(env.starts(), 0);
+    assert!(env.cs_rows().await.is_empty());
+    db.execute_batch("DROP TRIGGER cs_insert_failure;").unwrap();
+    assert!(env
+        .cs_stream(first)
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    db.execute_batch(block).unwrap();
+    let r = env.cs_stream(next.clone()).await;
+    assert_eq!(r.status(), 503);
+    assert_eq!(env.starts(), 1);
+    assert_eq!(
+        env.file("turns.txt").lines().count(),
+        1,
+        "failed reservation cannot write live stdin"
+    );
+    db.execute_batch("DROP TRIGGER cs_insert_failure;").unwrap();
+    assert!(env
+        .cs_stream(next.clone())
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    assert_eq!(
+        env.starts(),
+        1,
+        "idle run preserved after denied reservation"
+    );
+    let mut last = next;
+    last["messages"].as_array_mut().unwrap().extend([
+        json!({"role":"assistant","content":"Hello there"}),
+        json!({"role":"user","content":"after restart"}),
+    ]);
+    env.restart().await;
+    db.execute_batch(block).unwrap();
+    assert_eq!(env.cs_stream(last).await.status(), 503);
+    assert_eq!(
+        env.starts(),
+        1,
+        "saved resume reservation denial must not fall through to fresh spawn"
+    );
+    assert_eq!(env.cs_rows().await.len(), 2);
+}
+
+#[tokio::test]
+async fn cs4_finalization_failure_never_replays_and_restart_recovers_once() {
+    let mut env = Env::start(&[]).await;
+    let db = env.cs_db();
+    db.execute_batch("CREATE TRIGGER cs_finalize_failure BEFORE UPDATE OF finalized_at ON usage_events BEGIN SELECT RAISE(FAIL, 'synthetic-private-diagnostic'); END;").unwrap();
+    let (first, next) = two_turns("after restart");
+    assert!(env
+        .cs_stream(first)
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    assert_eq!(env.starts(), 1);
+    let rows = env.cs_rows().await;
+    assert_eq!(rows.len(), 1);
+    assert!(rows[0]["attempt_id"].is_string() && rows[0]["finalized_at"].is_null());
+    db.execute_batch("DROP TRIGGER cs_finalize_failure;")
+        .unwrap();
+    env.restart().await;
+    let recovered = env.cs_rows().await.remove(0);
+    assert_eq!(recovered["outcome"], "interrupted");
+    assert_eq!(recovered["usage_status"], "missing");
+    assert!(recovered["prompt_tokens"].is_null() && recovered["completion_tokens"].is_null());
+    assert!(recovered["total_observed_ms"].is_null());
+    assert!(env
+        .cs_stream(next)
+        .await
+        .text()
+        .await
+        .unwrap()
+        .contains("Hello there"));
+    assert_eq!(
+        env.starts(),
+        2,
+        "only the new user request resumes a process"
+    );
+    assert_eq!(env.file("resumes.txt").lines().count(), 1);
+    assert_eq!(env.cs_rows().await[1], recovered);
+    env.restart().await;
+    assert_eq!(
+        env.cs_rows().await[1],
+        recovered,
+        "startup recovery is idempotent"
+    );
 }

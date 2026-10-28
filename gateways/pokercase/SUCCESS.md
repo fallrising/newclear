@@ -52,6 +52,10 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 
 Owner approved the bounded continuation after current-state review. [Fixed PC-1–PC-5, design and evidence](docs/tasks/T-0432-protocol-settlement.md) extend the delivered generic Chat-upstream observer to Messages/Responses clients and verify all three protocols through the headless journey. Preserve original17AC, prior SS-1–SS-6 and T-1102; CLI/provider-profile/OAuth and native non-Chat upstreams remain outside this slice. Mainline incomplete, usable_tag none; full#698 and#699–702 remain open. Documentation-first actual RED→GREEN, full locked Rust/fmt/Clippy, Python and the strict nine-stage journey passed. Independent review findings were reproduced and corrected; PR720 required CI/normal merge/remote readback passed; final ledger/backup/cleanup are recorded by this round’s handoff.
 
+## T-0432 — Claude Code provider settlement continuation
+
+Owner approved the existing Claude Code provider accounting continuation. [Fixed CS-1–CS-5 and design](docs/tasks/T-0432-claude-settlement.md) cover per-dispatch reservation, raw source usage, terminal/time, tool/user/session reuse, three client protocols and a headless fake-CLI journey. Local implementation, full313Rust/22groups, fmt/Clippy/build,35Python,20validator tests/45contracts7indexes and nine-stage Claude+genericHTTP journeys passed. Independent review found two actual REDs (filtered first-output timing and rawerror persistence); both corrected with GREEN evidence. Required remote delivery gates remain pending here and will be recorded by the final handoff; no real CLI/provider validation or mainline completion claim. Original17AC, T1102, prior SS/PC deliveries and remaining#698–702 scope are preserved.
+
 ## 本次里程碑：T-0377 Cursor 外部隔離
 
 Owner 決定保留 Cursor。目標／範圍／固定 AC 與驗證計畫見 [隔離規格](docs/cursor-isolation.md)，進度見 [任務板](docs/tasks/BOARD.md)。原 ask＋sandbox 的主機隔離假設已被實測否定；AC-17 的假 CLI 協定測試不能當成隔離 PASS。2026-10-23 第二輪修正 PR #566 的 CLI enum lint 與 Docker workspace 權限，CI-1–CI-5 本機驗證已通過；[命令、歷史失敗及限制](docs/tasks/T-0377-handoff.md)。獨立審查與必要 CI 通過，PR #566 已於2026-10-23T18:01:20Z合併，回讀無差異；官方 CLI 映像的無網路 version/help 啟動亦通過。真帳號、完整推論與網路／plugin 隔離不在本次 PASS 範圍內。

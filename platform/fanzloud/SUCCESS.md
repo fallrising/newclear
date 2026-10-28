@@ -216,7 +216,7 @@ This is one run: it shows ERR_ABORTED did not occur here and does not measure a 
 
 ## T-0433 desktop remaining v5 runner — 2026-10-28
 
-The owner approved preparing a runner for the other eight desktop cells and running it once after review and CI. v4 cannot be reused here: its recovery-only gate rejects every non-recovery state by design. [SPEC-T006R desktop remaining v5](docs/specs/SPEC-T006R-desktop-remaining-v5.md) D01–D05 derives a byte-traceable v5 from the existing all-state `remaining-baseline.mjs`. v5 changes the selection, the two source pins, the previous-phase read and reuse; every other gate is unchanged.
+The owner approved preparing a runner for the other eight desktop cells and running it once after review and CI. v4 cannot be reused here: its recovery-only gate rejects every non-recovery state by design. [SPEC-T006R desktop remaining v5](docs/specs/SPEC-T006R-desktop-remaining-v5.md) D01–D05 derives a byte-traceable v5 from the existing all-state `remaining-baseline.mjs`. v5 makes only the D01 substitutions (header, selection, scope, two source pins, runner name, reuse block, previous-phase read and `fullViewportFresh`); every other gate is unchanged. Tablet and mobile (18 cells) still need their own runner: `remaining-baseline.mjs` pins the old source and requires a previous desktop phase.
 
 Acceptance:
 - The v5 pure test passes and the existing fe-review suites stay green.

@@ -30,7 +30,7 @@ D03 — Every remaining gate is unchanged:
 
 D04 — A v5 PASS produces eight candidate cells (`bootstrap-empty` through `disconnected`, `__desktop__dark`) on the T-0433 source. They become canonical only after an independent actual review. Together with the v4 recovery cell, they complete desktop 9/9. A FAIL is preserved and stops further runs: there is no automatic retry, and renaming an attempt does not reset its allowance.
 
-D05 — The pure test `fe-review/remaining-desktop-v5.node.mjs` proves four things:
+D05 — The pure test `fe-review/remaining-desktop-v5.node.mjs` proves:
 - forward and inverse application of the D01 substitutions to `remaining-baseline.mjs` is byte-exact, and only the two pins change;
 - every source pin matches the current file or embedded asset;
 - v5 contains no reuse or previous-run read;

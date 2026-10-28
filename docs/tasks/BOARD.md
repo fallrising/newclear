@@ -61,7 +61,7 @@ Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud
 | T0433-1 | p0-client bounded read and fixture framing fix for ERR_ABORTED | R2-AC-14 | in_progress | 2026-10-28T14:50:49Z | — | 2026-10-28T15:02:15Z |
 | T0433-2a | v4 recovery-only runner and one approved desktop recovery run (008: PASS, actual review ACCEPT; canonical 1/27 on new source) | R2-AC-14 | in_progress | 2026-10-28T15:13:39Z | — | 2026-10-28T15:25:12Z |
 | T0433-2b | v5 desktop-remaining runner and one approved run of the other eight desktop cells | R2-AC-14 | in_progress | 2026-10-28T15:41:57Z | — | 2026-10-28T15:43:11Z |
-| T0433-2 | Recapture remaining canonical cells, M2 and HTTP/WSS conformance (等 owner runtime 批准) | R2-AC-14 | todo | — | — | — |
+| T0433-2 | Recapture remaining canonical cells (tablet/mobile need a new runner on the fixed source), M2 and HTTP/WSS conformance (等 owner runtime 批准) | R2-AC-14 | todo | — | — | — |
 | T0433-3 | Integration evidence and PR604 delivery | R2-AC-E | todo | — | — | — |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.

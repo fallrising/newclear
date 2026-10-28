@@ -420,3 +420,21 @@ Demand: [desk T-0432](https://github.com/fallrising/desk/tree/main/tasks/T-0432-
 實際九階段旅程17筆usage、14已知3未知，合成估價已知小計$28且coverage partial；三種正常串流皆原始上游5/3、succeeded/complete、唯一request/attempt與有序時間，API/CSV及HTML金額/coverage、重啟歷史一致。這是fixture估價，不是provider帳單或整輪開發實耗。 本輪僅generic API-key Chat HTTP上游→Chat/Messages/Responses clients；CLI、named-provider/OAuth/借用憑證及原生非Chat上游仍未接入observer，完整#698仍open。#699token coverage/價格來源精度/歷史語義、#700具名client/version與真實AC01/04/08及AC04工具/AC17文字範圍決策、#701既有fixture啟動/auth間歇失敗、#702Antigravity HTTP隔離仍保留。mainline incomplete、usable_tag none、desk in_progress；owner決定done，沒有整體完成百分比。
 
 PC-1–PC-4依產品合併回讀完成。PC-5的產品驗證/交付部分已通過；本表是此時點快照，管理帳本發布、備份核對與工作樹清理的實際最終結果見本輪`.local/t0432-protocol-settlement/handoff.json`，不預先將尚未執行的步驟標成通過。
+
+## T-0432 — Claude Code provider settlement
+
+Fixed CS1–5: [task](T-0432-claude-settlement.md). These rows record the delivered product/source runtime gate; final administrative closure is in the handoff.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CS-01 | Per-dispatch reservation and independent reply identity | CS-1 | done | 2026-10-28T17:13:01Z | 2026-10-28T18:01:57Z | 2026-10-28T18:01:57Z |
+| CS-02 | Conservative raw counters, terminal/time and durable recovery | CS-2–CS-4 | done | 2026-10-28T17:13:01Z | 2026-10-28T18:01:57Z | 2026-10-28T18:01:57Z |
+| CS-03 | Three-client headless fakeCLI journey and independent source/runtime review | CS-5 product validation | done | 2026-10-28T17:13:01Z | 2026-10-28T18:01:57Z | 2026-10-28T18:01:57Z |
+
+產品 [PR729](https://github.com/fallrising/newclear/pull/729) source `d7e91159caf3699f17c8cfdc6e5e03f3d57c58d8`、merge `cef2b3f0f0f408171429fe4abb95f1a8b2799168` at 2026-10-28T18:01:57Z；最終313Rusttests/22groups、fmt/Clippy/lockedbuild、35Python、20validator tests、45contracts/7indexes、Claude及genericHTTP各九階段旅程、獨立來源/執行審查通過；必要check/validate CI、正常合併與遠端內容/祖先/Desk-Task trailer回讀通過。
+
+Claude實際隔離旅程17筆durableattempt，全17費用unknown/null；原始input/output/cache數值保留，缺cache不補零，沒有足夠資料的總輸入仍unknown。三協定工具續輪、fallback/error/cancel/stall、HTML/API/CSV一致與同進程/重啟resume皆核對。CLI版本/cache schema未經真實廠商驗證，成功result/session總數不記為單輪usage。genericHTTP回歸保留fixture$28partial估價，兩者均非provider帳單或開發實耗。
+
+僅既有Claude Code provider→Chat/Messages/Responses串流記帳；Cursor、其他named-provider/OAuth/借用憑證與原生非Chat上游observer仍未完成，完整#698保持open。#699完整token coverage/價格來源精度/歷史語義、#700具名client/version及真實AC01/04/08與AC04工具/AC17文字範圍決策、#701既有fixture啟動/auth間歇失敗未知原因、#702Antigravity HTTP隔離保留。mainline incomplete、usable_tag none、desk in_progress；owner決定done，不用任務數或完成百分比取代產品驗收。
+
+管理帳本發布、完整備份`/home/ckc/test/backup/t0432-claude-settlement-20261028`與本輪工作樹清理由最終`.local/t0432-claude-settlement/handoff.json`核實；這份產品merge時點快照不預先宣稱其後步驟完成。新`local-demo.py`預設check並驗source/binarydigest，先前入口及舊digest保留。此輪完成即停止，不開新里程碑。

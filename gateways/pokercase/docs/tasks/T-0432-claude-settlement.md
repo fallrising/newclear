@@ -16,7 +16,7 @@ A request context creates per-dispatch shared observations. Reply identity owns 
 
 Plan: document first → real persistence RED → bounded disjoint implementation + focused regressions → full locked Rust1.99.0/fmt/Clippy/native validators + prior generic HTTP journey and new CLI journey → independent source/ledger reviews → normal delivery. Estimate2–3activehours, checkpoint every20minutes, command/CI limit600s; each issue initial reproduction plus at most2 justified correction cycles; preserve all failures. Whole-round tools/providers/tokens/cost/active/wait unknown/null.
 
-Status: local implementation and checks passed; independent final evidence review and remote delivery gates are recorded below and in final handoff. Mainline remains incomplete.
+Status: product source/runtime delivery merged via PR729; requiredCI and remote readback passed. Administrative closure follows finalhandoff; mainline remains incomplete.
 
 Raw `stream_event` error accounting is durable immediately. Existing EventFilter wire behavior remains: a standalone raw error before the first accepted output may wait for a later CLI result/EOF or caller cancellation; this slice does not claim that pre-output wire wait is bounded. Real CLI/version behavior remains unverified.
 
@@ -30,3 +30,9 @@ Raw `stream_event` error accounting is durable immediately. Existing EventFilter
 - Local evidence directory: `/home/ckc/test/codex/.local/t0432-claude-settlement`; exact commands/results in `validation.txt`, original logs/reports, acceptance map, independent `review.md` and final `handoff.json`. Original17AC/T1102/Cargo/priorSS+PCtaskdocs/unrelatedtrackedplans unchanged.
 
 Final remote source/merge/CI/readback, ledger review, complete backup and cleanup are written after execution; no real provider/login/version/cache-schema validation, release or deploy claimed. Earlier fixture startup/auth intermittency remains unexplained (#701). No new milestone starts at closure.
+
+## Product delivery readback
+
+產品 [PR729](https://github.com/fallrising/newclear/pull/729) source `d7e91159caf3699f17c8cfdc6e5e03f3d57c58d8`、merge `cef2b3f0f0f408171429fe4abb95f1a8b2799168` at 2026-10-28T18:01:57Z；最終313Rusttests/22groups、fmt/Clippy/lockedbuild、35Python、20validator tests、45contracts/7indexes、Claude及genericHTTP各九階段旅程、獨立來源/執行審查通過；必要check/validate CI、正常合併與遠端內容/祖先/Desk-Task trailer回讀通過。
+
+管理帳本發布、完整備份`/home/ckc/test/backup/t0432-claude-settlement-20261028`與本輪工作樹清理由最終`.local/t0432-claude-settlement/handoff.json`核實；這份產品merge時點快照不預先宣稱其後步驟完成。新`local-demo.py`預設check並驗source/binarydigest，先前入口及舊digest保留。此輪完成即停止，不開新里程碑。

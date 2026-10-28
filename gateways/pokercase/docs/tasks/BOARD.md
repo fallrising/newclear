@@ -372,10 +372,10 @@ Delivered by [PR689](https://github.com/fallrising/newclear/pull/689), source `3
 | --- | --- | --- | --- | --- | --- | --- |
 | CC-1 | 費用缺值與coverage RED→GREEN | CC-1 | done | 2026-10-28T04:04:28Z | 2026-10-28T04:25:47Z | 2026-10-28T04:26:25Z |
 | CC-2 | API/Web/TUI一致呈現與CSV回歸 | CC-2 | done | 2026-10-28T04:04:28Z | 2026-10-28T04:25:47Z | 2026-10-28T04:26:25Z |
-| CC-3 | 完整驗證審查與交付 | CC-3 | in_progress | 2026-10-28T04:04:28Z | — | 2026-10-28T04:26:25Z |
+| CC-3 | 完整驗證審查與交付 | CC-3 | done | 2026-10-28T04:04:28Z | 2026-10-28T04:36:26Z | 2026-10-28T04:37:37Z |
 
 產品 [PR692](https://github.com/fallrising/newclear/pull/692) source `e45e392843c0f002563d96e09a94f5bac3e36a1a`、merge `fb03c5bd1d27e33c16b0c95dce7cb7b4803803e9` at 2026-10-28T04:25:47Z。完整 254 Rust tests／21 組、fmt、Clippy、20 validator tests、44 contracts／7 indexes 及獨立來源審查通過；必要 CI、正常合併與遠端 trailer／祖先／逐檔內容回讀通過。
 
 六種合成資料情境、4個新增 Rust tests；空資料／未知／部分小計／完整估算／明確零值在 API、Web、TUI 與 doctor 一致；事件 CSV 和 usage rows 未改寫。首次完整套件的 fixture401 與其原因未知保留；exact retry 和最終完整套件通過。本輪只處理既有 USD 儲存估算的費用彙總；coverage 是 non-null rows 比率，不保證歷史品質或帳單正確。原 f64 精度、token/latency 彙總、provider/currency/basis 分組、D-01–D-05 其他工作及真實驗收仍未完成。mainline incomplete、usable_tag none，desk 保留 in_progress，done 由 owner 決定。
 
-CC-3 整輪驗收仍進行中：產品來源／本機驗證／必要 CI 與合併回讀已通過；看板、journal、desk 發布、完整備份及本輪工作樹清理完成後，才以最終看板紀錄關閉 CC-3。
+CC-3 整輪驗收已於 2026-10-28T04:37:37Z 核對：產品 PR692、看板 PR694、journal PR149 與 desk PR258／PR259 均已正常合併，必要 CI、來源／merge trailers、祖先與逐檔回讀通過；獨立來源及帳本審查、完整證據備份核對、五個原工作樹清理已完成，分支與共享快取保留。CC-3 end 欄記初次看板合併時間；本段為完成後的驗收紀錄，其發布亦須通過必要 CI／審查與合併回讀。歷史失敗及未完成產品邊界不變，desk 仍由 owner 決定 done。

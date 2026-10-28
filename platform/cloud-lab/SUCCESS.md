@@ -4,7 +4,7 @@ purpose: 以共同契約與知識樹組合個人 Cloudflare 工具、遠端運�
 kind: application
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-27
+reviewed: 2026-10-28
 source_commit: 65bbadb7659437e8a14f029015313c6f5277ce35
 ---
 
@@ -28,8 +28,8 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | AC-04 | Given 每個候選來源，When 決定歸位／抽取／adapter／reference，Then 有目標與阻擋，封存必須通過接替及回退 gate | passed | [M0 文件證據](docs/evidence/m0-review.md)：來源處置、切換／回退與退役 gate 審查通過 |
 | AC-05 | Given 完整文件候選，When 跑既有索引驗證與獨立審查，Then 導航一致、沒有 runtime 成功冒稱，所有未實作事項保留 | passed | [M0 文件證據](docs/evidence/m0-review.md)：本機 validators 及獨立 ACCEPT；Git 交付狀態見[任務板](docs/tasks/BOARD.md) |
 | AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | pending | 真實 CF＋獨立 bot API＋non-root runner 一筆閉環已通過；手機、排程與 Grok 整合仍待驗收 |
-| AC-07 | Given 重複投遞、失聯、取消及恢復，When 執行與回報競爭，Then 不重做未知副作用且停止／未知／驗證狀態誠實可見 | pending | 待 [M1 故障矩陣](docs/verification.md)的真實邊界驗收 |
-| AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；[首次D1隔離還原與journal對帳](docs/evidence/m1-isolated-restore.md)已通過；撤權、配額、執行中／unknown恢復仍待驗收 |
+| AC-07 | Given 重複投遞、失聯、取消及恢復，When 執行與回報競爭，Then 不重做未知副作用且停止／未知／驗證狀態誠實可見 | pending | [遠端三種故障與撤權子集](docs/evidence/m1-remote-recovery.md)已通過；完整 [M1 故障矩陣](docs/verification.md)仍待驗收 |
+| AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；[首次D1隔離還原與journal對帳](docs/evidence/m1-isolated-restore.md)已通過；[獨立環境grant／Access撤權、執行中／unknown恢復](docs/evidence/m1-remote-recovery.md)已通過；配額耗盡與完整邊界仍待驗收 |
 
 ## 現況與缺口
 
@@ -61,3 +61,5 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 本輪常駐 runner 範圍及 RR-01～05 見[resident runner](docs/resident-runner.md)，本輪[98項測試與常駐實機子集](docs/evidence/m1-resident.md)通過，原主線 AC 保持 pending。
 
 下一子里程碑[FR-01～04](docs/recovery-qualification.md)驗證真實程序中斷／回報遺失，範圍限隔離環境；[101項回歸與三個workerd場景](docs/evidence/m1-recovery.md)通過，遠端故障與完整AC仍待驗收。
+
+本輪[RF-01～04遠端隔離故障／撤權](docs/remote-recovery.md)已通過：[115項回歸、三個遠端案例、grant403及Access停用後401](docs/evidence/m1-remote-recovery.md)。原設定／排程相等，unknown保留；完整主線狀態不變。

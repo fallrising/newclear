@@ -64,4 +64,6 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 
 本輪[RF-01～04遠端隔離故障／撤權](docs/remote-recovery.md)已通過：[115項回歸、三個遠端案例、grant403及Access停用後401](docs/evidence/m1-remote-recovery.md)。原設定／排程相等，unknown保留；完整主線狀態不變。
 
-本輪[UI-01～04看板瀏覽器驗收](docs/dashboard-qualification.md)本機121tests及十組瀏覽器情境通過；獨立審查ACCEPT，真實Access／手機與遠端新版部署仍pending。
+本輪[UI-01～04看板瀏覽器驗收](docs/dashboard-qualification.md)本機121tests及十組瀏覽器情境通過；獨立審查ACCEPT；後續新版已部署，真實Access／手機仍pending。
+
+本輪[DR-01～04看板部署與真實手機驗收](docs/dashboard-rollout.md)owner明確批准後已發布，新版本100%、原設定／D1資料相等、匿名302及機器200通過；等owner手機操作。原拒絕與domain排序檢查失敗均保留，維持原grant期限，不啟用排程或付費方案。

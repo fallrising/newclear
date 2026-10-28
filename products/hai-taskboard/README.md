@@ -10,8 +10,26 @@ HAI Taskboard is a human–AI software delivery control plane. Its Work Graph re
 execution attempts, immutable delivery candidates, reviews and evidence; Kanban, detail views and
 attention queues are projections over that state.
 
-Status: P0-A specification and deterministic Fake-core development. Real agent execution and channel
-integrations are intentionally disabled.
+Status: **P0-A implementation is incomplete; the local Fake workflow is available for development
+and bounded evaluation.** Real agent execution and channel integrations are intentionally disabled.
+
+## Current usability
+
+| Use | Current boundary |
+| --- | --- |
+| Try the local workflow | Authenticated browser, project/Draft creation, explicit specification acceptance, Ready/Fake dispatch and reconnect have bounded historical evidence. Start with [quickstart](docs/quickstart.md) and its connected-browser recipe. |
+| Use the complete Fake-only product | Not yet accepted: connected Candidate/Review/Evidence/QA/Done, full detail/attention/impact, activation, backup/restore and ContextPack resume still have gaps. |
+| Delegate everyday work to a real coding agent | Not available. There is no enabled real provider or MCP workflow; those require a later, separately authorized and verified integration. |
+
+The product remains `mainline: incomplete`, `usable_tag: none`. A runnable Fake slice and a passing
+health check do not establish full-product readiness. [SUCCESS](SUCCESS.md) owns the acceptance
+status; its historical evidence is not a new runtime verification by this documentation update.
+
+[Kanzo-inspired usability](docs/sdd/kanzo-inspired-usability.md) specifies later quick capture/search,
+progress notes, export and agent-facing workflow improvements with acceptance criteria. It is a
+proposed follow-up design, not an implemented feature list; the current P0-A scope stays Fake-only.
+
+## Implementation checkpoint
 
 The owner resumed P0-A mainline development on 2026-10-23. Current work is tracked in
 [the task board](docs/tasks/BOARD.md); [SUCCESS](SUCCESS.md) distinguishes current checks,

@@ -362,6 +362,9 @@ The G0 re-review was accepted by T-011 and the design adoption by T-010, as reco
 
 ## 15. References
 
+- [Kanzo-inspired usability follow-up](sdd/kanzo-inspired-usability.md) — proposed later
+  capture/search/notes/export and agent-facing workflow contracts. It does not expand P0-A,
+  enable MCP or a real executor, or supply missing G1/G2 acceptance evidence.
 - `hai-taskboard-brief.md`, SHA-256
   `74596865dcf073626d52548160b709e4506d155fa4e90cc07b6a6535d2c7d7c6`
 - `hai-taskboard-design-review-v0.2.md`, SHA-256

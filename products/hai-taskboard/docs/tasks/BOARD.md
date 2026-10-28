@@ -81,3 +81,28 @@ This bounded review slice does not complete or change the P0-A product rows abov
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | HFE2-1 | True same-origin ConnectedApp review harness and observed presentation corrections only | R2-AC-3/E | done | 2026-10-24T07:35:27Z | 2026-10-24T08:31:49Z | 2026-10-24T08:34:14Z |
+
+## T-1029 — Kanzo-inspired usability documentation
+
+Authority: direct owner request on 2026-10-29 (Asia/Singapore): document useful Kanzo
+capabilities for later HAI implementation and clarify whether HAI is usable today.
+This is one documentation-only task. Runtime, API, dependencies, CI, credentials and
+deployment are outside its writable scope. P0-A remains Fake-only; H01..H04 and all
+existing acceptance criteria retain their status.
+
+Writable scope: product README/SUCCESS, docs/quickstart.md, docs/SDD.md navigation,
+docs/sdd/kanzo-inspired-usability.md, this board, and a bounded document-review report
+under docs/evidence/. Source baseline: `0111908492c32d0b01d561b24b6024737cb4f641`.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| KD01 | Clarify the runnable Fake slice, remaining P0-A gates and future real-agent readiness | DOC-01 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
+| KD02 | Specify selected Kanzo-inspired workflows, invariants, ordered follow-ups and measurable acceptance | DOC-02 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
+| KD03 | Connect entry documents, validate scope/links/contracts and obtain independent document review | DOC-03 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
+
+Acceptance: DOC-01 separates current observations from historical runtime evidence;
+DOC-02 marks every future capability and named oracle unimplemented/NotRun and preserves
+commands, evidence/Done, authorization and unknown-outcome handling; DOC-03 records actual
+document checks and review with no product acceptance claim. Rows remain in_progress
+until the repository merge condition is met. This turn stops at a Draft PR; merge,
+release and deployment are not authorized.

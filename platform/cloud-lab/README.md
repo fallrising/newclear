@@ -42,3 +42,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [看板瀏覽器驗收](docs/dashboard-qualification.md)補上Access失效清除／停止輪詢、原提交身份保留與舊回應隔離；[本機證據](docs/evidence/m1-dashboard.md)涵蓋真正Chromium／workerd／D1及320／390px。新版資產已完成部署及自動核對，一般瀏覽器真人Access仍待驗收，實體手機依owner指示改為選測。
 
 [新版看板部署記錄](docs/dashboard-rollout.md)：owner明確批准後已發布；保留原設定與期限，記錄匿名302／機器200，一般瀏覽器真人流程待驗，實體手機選測。
+
+[授權生命週期工具](docs/authorization-lifecycle.md)提供離線期限盤點與保留scope的續期／撤銷計畫；[本機證據](docs/evidence/m1-authorization.md)涵蓋144tests、SQLite CAS及合成CLI。計畫不會自動續權或輪替憑證。

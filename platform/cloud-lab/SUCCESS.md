@@ -69,3 +69,5 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 本輪[DR-01～04看板部署與真實手機驗收](docs/dashboard-rollout.md)owner明確批准後已發布，新版本100%、原設定／D1資料相等、匿名302及機器200通過；一般瀏覽器真人流程待驗，實體手機已改選測。原拒絕與domain排序檢查失敗均保留，維持原grant期限，不啟用排程或付費方案。
 
 Owner於2026-10-28取消實體手機必測要求；[客戶端範圍調整](docs/dashboard-rollout.md#owner調整客戶端驗收範圍)不改身份／grant檢查，也不等於真人Access已驗證。後續開發不以手機測試為門檻。
+
+本輪開始[AL01–04授權生命週期](docs/authorization-lifecycle.md)：離線狀態與續期／撤銷計畫、CAS與私人資料邊界已完成；[144tests、真實CLI合成測試及獨立ACCEPT](docs/evidence/m1-authorization.md)通過。不執行雲端續權或憑證輪替，完整主線保持pending。

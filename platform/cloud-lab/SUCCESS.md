@@ -77,3 +77,5 @@ Owner於2026-10-28取消實體手機必測要求；[客戶端範圍調整](docs/
 本輪[SA01–04機器自身授權查詢](docs/self-authorization.md)source完成：[176tests、真實本機HTTP查詢與獨立複審](docs/evidence/m1-self-authorization.md)通過。具可取消總期限，無job副作用；尚未部署或續權，runner程序來源仍待實作，完整mainline不變。
 
 本輪[RO01–04 resident程序觀測](docs/resident-observation.md)source完成：[192tests、真實隔離resident／socket／FLOCK與獨立審查](docs/evidence/m1-resident-observation.md)通過。SIGTERM／SIGKILL、漂移與保守期限驗證通過；未部署或續權，完整主線保持pending。
+
+RO Git交付目前待明確push批准：本機source與192tests／審查完成，自動批准審查拒絕推送重試；尚無本輪PR合併／CI，詳見[證據](docs/evidence/m1-resident-observation.md)。

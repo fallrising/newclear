@@ -29,3 +29,6 @@ RO-red初始9tests以2failures／7errors失敗，原因是新CLI參數／API尚�
 
 
 Lead在初次ACCEPT後補查可選nofollow chmod平台支援，新增模擬該能力不存在的測試；RO-chmod-red以NotImplementedError失敗。改成O_PATH／O_NOFOLLOW固定socket inode後透過proc fd設定權限，RO-final-regression完整192GREEN。這是Python3.13上的可選功能缺失模擬；未執行Python3.11，沒有宣稱跨版本實測。最終文件與索引檢查使用新數字，原191GREEN仍保留為歷史紀錄。
+
+
+Git交付尚未完成：feature commit已在本機，第一次SSH推送未完成，過早建立PR返回422 invalid head且未建立PR。確認遠端分支尚不存在後，只停止本次SSH子程序；Git退出128。帶連線期限的重試在啟動前被自動批准審查拒絕，原因是審查要求明確批准此次Git push。沒有替代推送或繞過CI／批准；等owner批准具體分支交付，任務列仍in_progress，不宣稱已合併或CI通過。

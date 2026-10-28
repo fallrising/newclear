@@ -409,10 +409,14 @@ Demand: [desk T-0432](https://github.com/fallrising/desk/tree/main/tasks/T-0432-
 
 | ID | Task | AC | Status | Start | End | Last activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| PC-1 | Observed tail usage across clients | PC-1 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
-| PC-2 | Converter terminal ownership | PC-2 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
-| PC-3 | Fallback/cancel/storage/restart | PC-3 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
-| PC-4 | Headless journey reconciliation | PC-4 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
+| PC-1 | Observed tail usage across clients | PC-1 | done | 2026-10-28T15:21:44.837545Z | 2026-10-28T16:00:53Z | 2026-10-28T16:00:53Z |
+| PC-2 | Converter terminal ownership | PC-2 | done | 2026-10-28T15:21:44.837545Z | 2026-10-28T16:00:53Z | 2026-10-28T16:00:53Z |
+| PC-3 | Fallback/cancel/storage/restart | PC-3 | done | 2026-10-28T15:21:44.837545Z | 2026-10-28T16:00:53Z | 2026-10-28T16:00:53Z |
+| PC-4 | Headless journey reconciliation | PC-4 | done | 2026-10-28T15:21:44.837545Z | 2026-10-28T16:00:53Z | 2026-10-28T16:00:53Z |
 | PC-5 | Verification and delivery | PC-5 | in_progress | 2026-10-28T15:21:44.837545Z | — | 2026-10-28T15:21:44.837545Z |
 
-PC-1–PC-4 local verification passed: strict three-client journey17rows/14known/3unknown, synthetic$28partial; full locked Rust290/22groups,fmt/Clippy,Python26,validators20/contracts45/indexes7. Independent source review findings reproduced and corrected; product CI/merge and PC-5 closure remain pending. Full#698 and#699–702 remain open.
+產品 [PR720](https://github.com/fallrising/newclear/pull/720) source `1babddfc593d721a5fcebd78fc8e445be5689b46`、merge `2cb50ea4623a51206ed47868c99bdb6d8a39b7db` at 2026-10-28T16:00:53Z；290Rusttests/22groups、fmt/Clippy/build、26Python回歸（含serve/cleanup）、實際九階段終端旅程、20validator tests、45contracts/7indexes及獨立來源審查通過；必要check/validate CI、正常合併與遠端內容／祖先／trailer回讀通過。
+
+實際九階段旅程17筆usage、14已知3未知，合成估價已知小計$28且coverage partial；三種正常串流皆原始上游5/3、succeeded/complete、唯一request/attempt與有序時間，API/CSV及HTML金額/coverage、重啟歷史一致。這是fixture估價，不是provider帳單或整輪開發實耗。 本輪僅generic API-key Chat HTTP上游→Chat/Messages/Responses clients；CLI、named-provider/OAuth/借用憑證及原生非Chat上游仍未接入observer，完整#698仍open。#699token coverage/價格來源精度/歷史語義、#700具名client/version與真實AC01/04/08及AC04工具/AC17文字範圍決策、#701既有fixture啟動/auth間歇失敗、#702Antigravity HTTP隔離仍保留。mainline incomplete、usable_tag none、desk in_progress；owner決定done，沒有整體完成百分比。
+
+PC-1–PC-4依產品合併回讀完成。PC-5的產品驗證/交付部分已通過；本表是此時點快照，管理帳本發布、備份核對與工作樹清理的實際最終結果見本輪`.local/t0432-protocol-settlement/handoff.json`，不預先將尚未執行的步驟標成通過。

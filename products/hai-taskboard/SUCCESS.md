@@ -4,8 +4,8 @@ purpose: 以可追溯工作圖與證據關卡控制人機軟體交付
 kind: application
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-23
-source_commit: b7f2a4311d1135977ba273efba8e77702b908036
+reviewed: 2026-10-29
+source_commit: 0111908492c32d0b01d561b24b6024737cb4f641
 ---
 
 # HAI Taskboard 成功契約
@@ -84,3 +84,19 @@ Approved ConnectedApp DESIGN items1–4 only: review-owned same-origin runtime/s
 Acceptance: current pinned web gate and root-owned backend gate; focused Red/Green review-harness safety tests; fresh private state outside checkout, owned graceful lifecycle, immutable synthetic repository admission and no token in argv/URLs/logs/storageState/traces/screenshots. Actual UI login/project/Draft/explicit exact-AC acceptance/Ready/Fake with successful Fake remaining Developing; same command identity for uncertain recovery, authoritative reconnect and existing status/alert feedback. Actual theme button, three viewport sizes, keyboard/focus/wrapping evidence and documented faults. Preserve failed/unrun observations and unresolved product-mainline gaps; targets verified only after original R2 evidence, no fullRound3 claim.
 
 Local R2 evidence: pinned native web30tests/backendfull+race, review safety8tests,30unique actual-theme captures and true session/admission/Ready/Fake/fault/cleanup checks passed; see [scoped report](fe-review/tasks/round2/report.md). Existing legacy AC count and earlier refresh-warning/later Connected feedback remain unresolved. No product AC-02/03/04 or fullRound3 completion follows.
+
+## Kanzo usability documentation — T-1029
+
+2026-10-29 scope: clarify current usability and specify selected Kanzo-inspired follow-ups
+before implementation. Documentation baseline is `0111908492c32d0b01d561b24b6024737cb4f641`;
+this is a static documentation/source review, not a new runtime verification. Existing
+AC-01 evidence retains its original date; AC-02/03/04 stay pending, mainline incomplete,
+and usable_tag none. The Fake-only P0-A boundary and its full acceptance scope remain intact.
+
+Documentation acceptance: DOC-01 accurately separates the current runnable slice, complete
+P0-A and a future real-agent workspace; DOC-02 gives ordered feature contracts and named
+future oracles without activating them; DOC-03 supplies navigation/contract checks and
+independent review. Verification planned: exact upstream materialization, scoped diff,
+local-link/identifier checks, project-success/index preflight, independent document review,
+and applicable PR checks. No product tests or real providers are introduced by this task.
+Current task status and writable scope are in [BOARD](docs/tasks/BOARD.md).

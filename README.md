@@ -73,6 +73,7 @@
 | --- | --- | --- |
 | [`specs/fleet`](specs/fleet/) | **可執行**的 Fleet Catalog（`fleet.yaml`、Compose、agents、Cloudflare）。路徑在 `specs/`，但內容是系統元件／公開契約，**不是**根目錄文檔。見 [taxonomy](docs/taxonomy.md)。 | B |
 | [`examples/bite-pi`](examples/bite-pi/) | Pi agent 公開示範 | D |
+| [`labs/memvid-lab`](labs/memvid-lab/) | 固定 Memvid 的 11 類場景與文字／PDF／CLIP／Whisper 實跑（驗收中） | 未分級 |
 | [`labs/bee-swarm`](labs/bee-swarm/) | AI 角色協作 workflow 模擬（歷史） | D |
 | [`labs/aweshore`](labs/aweshore/) | 個人筆記／PKM 早期嘗試（已停止） | D |
 | [`labs/eru-vps-mvp`](labs/eru-vps-mvp/) | Project Eru 四機 VPS MVP 實驗 | A |

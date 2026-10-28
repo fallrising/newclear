@@ -71,3 +71,5 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 Owner於2026-10-28取消實體手機必測要求；[客戶端範圍調整](docs/dashboard-rollout.md#owner調整客戶端驗收範圍)不改身份／grant檢查，也不等於真人Access已驗證。後續開發不以手機測試為門檻。
 
 本輪開始[AL01–04授權生命週期](docs/authorization-lifecycle.md)：離線狀態與續期／撤銷計畫、CAS與私人資料邊界已完成；[144tests、真實CLI合成測試及獨立ACCEPT](docs/evidence/m1-authorization.md)通過。不執行雲端續權或憑證輪替，完整主線保持pending。
+
+本輪[AS01–04授權來源採集](docs/authorization-collection.md)完成：[161tests、獨立source審查與原Lab五次唯讀請求](docs/evidence/m1-authorization-collection.md)通過。四個grant及選定Access token期限已過，active0／排程off；HMAC及runner仍unknown。沒有續權或雲端變更，完整主線保持pending。

@@ -69,6 +69,11 @@
       "source_commit": "8526b6411bd11967b98b91a7c2cacadeafe5ef71"
     },
     {
+      "path": "labs/memvid-lab",
+      "last_source_update": "2026-10-28T11:50:42Z",
+      "source_commit": "7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2"
+    },
+    {
       "path": "labs/mithril-research",
       "last_source_update": "2026-10-17T20:28:21+08:00",
       "source_commit": "777e74483bef1fd011bb8a16c230ad293a238028"

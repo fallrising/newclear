@@ -153,6 +153,18 @@ release behavior and workflow permissions/concurrency/timeouts are unchanged.
 - Representative native gates: shell syntax; clean web install/lint/build where dependencies are available; component build/test commands where runtime prerequisites are available
 - `git diff --check`
 
+## Memvid memory lab
+
+`.github/workflows/memvid-lab-ci.yml` is scoped to `labs/memvid-lab/**` and itself.
+It installs hash-pinned Python dependencies, runs actual SDK/CLI boundary regressions,
+prepares fixed public model assets and a locked Rust 1.90.0 native Whisper helper,
+then executes all eleven memory scenarios plus PDF, local text embeddings, native
+CLIP and Whisper-to-memory under a process-local Linux seccomp network deny.
+Whisper uses an explicit, reviewed patch to select its prepared model cache; the
+patch does not alter inference. Downloads happen only during preparation. The job
+has read-only permissions, a 20-minute timeout and no secret, deployment or publish
+step. It retains only a compact JSON report for seven days.
+
 ## pg-jev router lab
 
 `.github/workflows/pg-jev-router-ci.yml` is scoped to `labs/pg-jev-router/**` and itself.

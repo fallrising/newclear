@@ -1,0 +1,11 @@
+--- a/src/whisper.rs
++++ b/src/whisper.rs
+@@ -478 +478 @@
+-    use hf_hub::{Repo, RepoType, api::sync::Api};
++    use hf_hub::{Repo, RepoType, api::sync::ApiBuilder};
+@@ -515 +515,4 @@
+-            let api = Api::new().map_err(|e| WhisperError::DownloadError {
++            let api = ApiBuilder::from_cache(hf_hub::Cache::new(config.models_dir.join("hub")))
++                .with_token(None)
++                .with_progress(false)
++                .build().map_err(|e| WhisperError::DownloadError {

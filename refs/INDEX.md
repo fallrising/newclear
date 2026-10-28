@@ -1,11 +1,13 @@
 # 外部參考 Repository 目錄
 
-盤點日期:2026-09-19 · 共 **67** 個條目
+歷史盤點日期:2026-09-19 · **67** 個條目；2026-10-28 新增 Memvid，現共 **68** 個條目。
 
 這裡收錄**別人寫的** repository 與 **preservation forks**。原本以 GitHub fork 形式存放,現改為只保留重點與 tag;
 需要時依各條目的 `取用` 指令重新取得。
 
 ## 摘要
+
+- **1** 個新研究參考：Memvid（2026-10-28）；以下移除／保留統計沿用歷史盤點，不涉及本次實驗的 repository 操作。
 
 - **63** 個可安全移除,內容從 upstream 隨時可重新取得
 - **1** 個含你自己的修改,已抽成 patch 保存
@@ -38,6 +40,7 @@
 
 | 名稱 | 分類 | 語言 | ★ | Upstream | 處置 |
 | --- | --- | --- | ---: | --- | --- |
+| [`memvid`](./memvid/) | ai-memory | Rust, Python | — | [memvid/memvid](https://github.com/memvid/memvid) | 📄 目錄；實跑於 labs/memvid-lab |
 | [`awesome-selfhosted`](./awesome-selfhosted/) | selfhost-cloud | n/a | 317054 | [awesome-selfhosted/awesome-selfhosted](https://github.com/awesome-selfhosted/awesome-selfhosted) | 📄 目錄 |
 | [`Python`](./Python/) | learning | Python | 224238 | [TheAlgorithms/Python](https://github.com/TheAlgorithms/Python) | 📄 目錄 |
 | [`CS-Notes`](./CS-Notes/) | learning | n/a | 185805 | [CyC2018/CS-Notes](https://github.com/CyC2018/CS-Notes) | 📄 目錄 |

@@ -1,0 +1,94 @@
+{
+  "status": "passed",
+  "scope": "native Whisper transcription with explicit local-cache patch; Memvid ingestion is performed by the parent runner",
+  "rust_toolchain": "1.90.0",
+  "core_version": "2.0.140",
+  "core_patch": "local-model-cache-v1",
+  "unmodified_baseline": {
+    "status": "failed",
+    "reason": "Api::new() ignored HF_HOME and attempted a config download; seccomp denied network"
+  },
+  "network_guard": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "connect"
+    ],
+    "ipv4_denied": true,
+    "ipv6_denied": true
+  },
+  "assets_manifest_sha256": "4046a523ce4a8548f398246f63a34785d50b4ba612b96cc8bd6a0dd96b8bcffb",
+  "native_source_sha256": "991af72dcc408bab7f2d03b133ccf9d6081ca80201148b8e429afd2489fc8ed8",
+  "binary_sha256": "edbae860cd5ec8467290ae84e3e683a46ca57f690abba9419928317d71fbe9c5",
+  "negative_cases": [
+    {
+      "case": "missing_argument",
+      "exit_code": 1,
+      "error": "usage: memvid-lab-whisper AUDIO_FILE (requires prepared HF_HOME)"
+    },
+    {
+      "case": "missing_audio",
+      "exit_code": 1,
+      "error": "audio fixture is missing"
+    },
+    {
+      "case": "missing_cache",
+      "exit_code": 1,
+      "error": "No such file or directory (os error 2)"
+    },
+    {
+      "case": "token_regular_file",
+      "exit_code": 1,
+      "error": "HF_HOME contains a token entry; use a credential-free model cache"
+    },
+    {
+      "case": "token_directory",
+      "exit_code": 1,
+      "error": "HF_HOME contains a token entry; use a credential-free model cache"
+    },
+    {
+      "case": "token_dangling_symlink",
+      "exit_code": 1,
+      "error": "HF_HOME contains a token entry; use a credential-free model cache"
+    }
+  ],
+  "transcription": {
+    "core_patch": "local-model-cache-v1",
+    "core_version": "2.0.140",
+    "duration_secs": 11.0,
+    "engine": "memvid-core::WhisperTranscriber",
+    "language": "en",
+    "model": "whisper-tiny-en",
+    "segments": [
+      {
+        "end": 11.0,
+        "start": 0.20000000298023224,
+        "text": "and so my fellow Americans ask not what your country can do for you ask what you can do for your country"
+      }
+    ],
+    "text": "and so my fellow Americans ask not what your country can do for you ask what you can do for your country"
+  },
+  "core_source": {
+    "kind": "official crates.io archive plus explicit local cache patch",
+    "url": "https://static.crates.io/crates/memvid-core/memvid-core-2.0.140.crate",
+    "archive_sha256": "c1d781d355751509b0a845a9203eb2db5a4e2b9750f193380439378a61080f85",
+    "cargo_vcs_info": {
+      "git": {
+        "sha1": "92b0ec8a9b5d964f0da5cf7704a67148fba1b5ed",
+        "dirty": true
+      },
+      "path_in_vcs": ""
+    },
+    "readme_reference_commit": "e6bd9f7b9c38cd8d5370fa0fc936ac1dcd751813",
+    "readme_reference_is_build_source": false
+  },
+  "token_guard": {
+    "method": "symlink_metadata before model/cache initialization",
+    "rejected_entries": [
+      "regular file",
+      "directory",
+      "dangling symlink"
+    ],
+    "read_contents": false
+  }
+}

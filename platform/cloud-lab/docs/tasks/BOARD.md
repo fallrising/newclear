@@ -136,3 +136,14 @@ Owner同意從授權生命週期開始。範圍見[AL01–04](../authorization-l
 - 本機41Node＋135Python＝176tests、45專案契約／7llms／44文件／333連結／12來源、task/report與公開邊界檢查通過；[T828複審](../../../../.team/reports/T-828.md)ACCEPT。[證據](../evidence/m1-self-authorization.md)保留初始RED、slow-stream修正與SQLite warnings。
 - SA01–04完成source／本機驗證；沒有雲端呼叫、部署、續權、token／secret產生、服務重啟或付費變更。新介面仍待部署，runner程序來源與AS整合仍待實作；完整mainline保持未完成，無usable tag。
 - 此PR僅更新任務板，end採用實際feature合併時間。
+
+## T-0007 — Resident程序觀測
+
+範圍：[RO01–04](../resident-observation.md)，僅source／隔離本機程序驗證，不更動原Lab。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0007-1 | 私人socket生命週期 | RO-01 | in_progress | 2026-10-28T15:40:48Z | — | 2026-10-28T15:57:10Z |
+| T-0007-2 | 程序／lock／config驗證 | RO-02 | in_progress | 2026-10-28T15:40:48Z | — | 2026-10-28T15:57:10Z |
+| T-0007-3 | 期限與退出／漂移負向測試 | RO-03 | in_progress | 2026-10-28T15:40:48Z | — | 2026-10-28T15:57:10Z |
+| T-0007-4 | 回歸、審查與交付 | RO-04 | in_progress | 2026-10-28T15:40:48Z | — | 2026-10-28T15:57:10Z |

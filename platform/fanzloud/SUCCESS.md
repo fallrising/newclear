@@ -265,3 +265,20 @@ Open M2 gaps (recorded, not passed):
 - axe marks color-contrast incomplete (serious) in every state; R07 treats incomplete as not passed.
 
 Remaining: mobile 9 (needs separate approval), the M2 actual UI including these gaps, and finite HTTP/WSS conformance. Delivery stays 18/19.
+
+### Result — mobile 001 (2026-10-28)
+
+`baseline-mobile-001` ran once on source `0655f0bd`.
+- PASS in 21.8 seconds: exit 0, cleanup complete, container removed.
+- It chained on the accepted tablet result (`500ce82d…`) through the original `assertPreviousPhase`.
+- All nine states passed with every health entry expected and zero `requestfailed`.
+
+An independent actual review returned CANONICAL_ACCEPT for all nine mobile cells as baseline captures. **The canonical three-size dark baseline is 27/27 on the T-0433 source.** M2 is still not accepted.
+
+Open M2 defects measured by the baseline (R07 final-state bar; repair per R10 as explicit key replacements after a focused RED):
+1. `device-pending__mobile__dark`: the page overflows horizontally (document 390 wide, scrolls to 399). The overflowing element is not yet identified.
+2. `success-diff__mobile__dark`: axe `scrollable-region-focusable` (serious). The diff scrolls locally on mobile but is not focusable (`tabIndex` -1, no name).
+3. All 27 cells: axe marks color-contrast incomplete (serious); manual rendered-color evidence is owed.
+4. All cells: the event and diff regions are unnamed with `tabIndex` -1. Event local scrolling is never exercised, and diff local scrolling only on mobile.
+
+Remaining: M2 actual UI repairs for these, finite HTTP/WSS conformance, then integration review, CI and PR604 delivery. Delivery stays 18/19.

@@ -27,6 +27,7 @@ mod server;
 mod siwc;
 mod store;
 mod stream_budget;
+mod stream_usage;
 mod templates;
 mod token_saver;
 mod tui_app;

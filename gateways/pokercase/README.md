@@ -51,6 +51,8 @@ Admin stats and daily JSON expose `cost_summary` with `known_sum`, known/unknown
 
 ## Quick start
 
+Generic API-key Chat streams now reserve an attempt before dispatch and settle observed tail usage once. Admin events expose `request_id`, `attempt_id`, `outcome`, `usage_status`, `usage_source`, `headers_ms`, `first_output_ms`, `total_observed_ms` and `finalized_at`; CSV appends these fields after the original columns. Daily `ok` means observed terminal success; use `headers_200` for the previous HTTP200 count. Historical and other protocol/provider paths have unknown terminal provenance. A missing token remains unknown and cost is estimated only with complete observed counters and prices. Server startup recovers pending attempts as interrupted, without replay, and rejects a concurrent server sharing its data directory. See [scope, timing and compatibility](docs/tasks/T-0432-stream-settlement.md); #698 remains open for the other paths.
+
 ```bash
 cargo run -- serve
 # admin:  http://127.0.0.1:20128/admin   (token: cat ~/.thinrouter/admin-token)

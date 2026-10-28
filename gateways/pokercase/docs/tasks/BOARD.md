@@ -392,3 +392,9 @@ CC-3 整輪驗收已於 2026-10-28T04:37:37Z 核對：產品 PR692、看板 PR69
 產品 [PR703](https://github.com/fallrising/newclear/pull/703) source `479263c0be87d9cc608477812cef2be6722b111a`、merge `01ce1eb20e2c63a231265cc1be929f20a084e7e4` at 2026-10-28T05:40:25Z；完整254Rusttests/21groups、fmt、Clippy、20Python回歸、實際九階段check及serve停機、20validator tests、44contracts/7indexes、獨立來源審查、必要CI及正常合併／遠端回讀通過。
 
 可重跑入口與操作說明：[離線完整流程](../OFFLINE-WALKTHROUGH.md)。實際17筆usage中11筆已知、6筆未知；合成估價$22僅為fixture，不是真實花費。技術J1–J4已依產品合併回讀完成；後續管理帳本、備份與清理依最終handoff記錄，不由這個產品AC冒稱完成。主線仍incomplete、usable_tag none；17項原核心AC、原T-1102規格、Rust/Cargo及其他tracked plan不變。串流結算與終態/時間、其餘計量、client/version與真實AC01/04/08、既有fixture可靠性及Antigravity隔離仍分別記錄於newclear #698–702；不宣稱只剩三個任務或完成百分比。desk保留in_progress，done由owner決定。
+
+## T-0432 generic Chat stream settlement
+
+- Demand: [desk T-0432](https://github.com/fallrising/desk/tree/main/tasks/T-0432-thinrouter-stream-settlement); [fixed SS-1–SS-6/design](T-0432-stream-settlement.md).
+- Status: in_progress; started2026-10-28T13:24:29Z; claimPR270 merged. Source/design and actual RED→GREEN complete;279Rusttests/22groups,fmt/Clippy,Python20tests,nine-stage journey and repository gates passed. Independent review/PR/CI/merge/ledgers/backup/cleanup pending.
+- Scope: generic API-key HTTP Chat stream only; #698 remains open for other paths. Estimate2–3active hours;20minute checkpoints; no real providers.

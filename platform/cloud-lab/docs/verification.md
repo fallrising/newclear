@@ -63,3 +63,5 @@ git diff --check
 本輪 [M1-I1～I4](m1-implementation.md) 與證據見 [M1 evidence](evidence/m1-implementation.md)；AC-06～08 的 live 整合與備份門檻仍 pending。
 
 [FR-01～04隔離故障工具](recovery-qualification.md)及[實際結果](evidence/m1-recovery.md)補上程序中斷、回報送達前遺失與保存後ACK遺失。此層已跑真正local workerd／D1 binding，但遠端Cloudflare、撤權、主機重開機與手機流程仍需各自驗收。
+
+[UI-01～04看板瀏覽器驗收](dashboard-qualification.md)及[本機證據](evidence/m1-dashboard.md)區分真實Chromium／workerd／D1、合成JWT與手機尺寸模擬；不取代真正Access登入、實體手機及遠端新版部署。

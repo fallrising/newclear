@@ -51,7 +51,7 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | --- | --- | --- | --- |
 | M1-I1 | 有界准入、SQL outbox、scope、CAS、對帳與結果 | passed | [M1 evidence](docs/evidence/m1-implementation.md)：控制面測試、獨立 ACCEPT |
 | M1-I2 | 真實 OS 唯讀 collector、journal、HMAC、重送 | passed | [M1 evidence](docs/evidence/m1-implementation.md)：31 Python 測試及 HTTP 整合、獨立 ACCEPT |
-| M1-I3 | 看板、freshness、取消意圖與權限 | passed | UI 模型及 HTTP 資產驗證通過；本地 AC 不含瀏覽器互動／mobile live 驗收 |
+| M1-I3 | 看板、freshness、取消意圖與權限 | passed | [本機真實瀏覽器與workerd／D1](docs/evidence/m1-dashboard.md)已通過；真實Access／實體mobile及新版資產部署仍pending |
 | M1-I4 | 整合、負向案例、索引、獨立 review | passed | [M1 evidence](docs/evidence/m1-implementation.md)：62 tests、validators、獨立 ACCEPT |
 
 ## 真實環境接入準備（T-0003）
@@ -63,3 +63,5 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 下一子里程碑[FR-01～04](docs/recovery-qualification.md)驗證真實程序中斷／回報遺失，範圍限隔離環境；[101項回歸與三個workerd場景](docs/evidence/m1-recovery.md)通過，遠端故障與完整AC仍待驗收。
 
 本輪[RF-01～04遠端隔離故障／撤權](docs/remote-recovery.md)已通過：[115項回歸、三個遠端案例、grant403及Access停用後401](docs/evidence/m1-remote-recovery.md)。原設定／排程相等，unknown保留；完整主線狀態不變。
+
+本輪[UI-01～04看板瀏覽器驗收](docs/dashboard-qualification.md)本機121tests及十組瀏覽器情境通過；獨立審查ACCEPT，真實Access／手機與遠端新版部署仍pending。

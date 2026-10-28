@@ -34,3 +34,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Recovery qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/recovery-qualification.md): isolated real-process crash and lost-report harness, with actual local workerd/D1 evidence and explicit remote gaps.
 
 - [Remote recovery and revocation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-remote-recovery.md): three isolated real-CF fault cases, revoked grants, disabled test Access token and preserved unknown; original resources unchanged, full acceptance pending.
+
+- [Dashboard browser evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-dashboard.md): local Chromium/workerd/D1, auth expiry, uncertain retry identity, stale-response rejection and narrow layouts; updated assets not remotely deployed, real Access/physical mobile pending.

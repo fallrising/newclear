@@ -56,14 +56,32 @@ export function createClient(fetcher = globalThis.fetch.bind(globalThis)) {
     const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetcher(path, {
-        method: body === undefined ? 'GET' : 'POST', credentials: 'same-origin', cache: 'no-store',
+        method: body === undefined ? 'GET' : 'POST', credentials: 'same-origin', cache: 'no-store', redirect: 'manual',
         headers: body === undefined ? { Accept: 'application/json' } : { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Cloud-Lab': '1' },
         ...(body === undefined ? {} : { body }), signal: controller.signal,
       });
-      const raw = await response.text();
-      if (new TextEncoder().encode(raw).byteLength > 32768) throw new Error('回應超過允許大小。');
+      const html = response.headers?.get('Content-Type')?.toLowerCase().includes('text/html');
+      if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400) || html) {
+        response.body?.cancel().catch(() => {});
+        throw Object.assign(new Error('回應不是 JSON；Access 工作階段可能已失效，請重新載入頁面。'), { status: html && response.status >= 400 ? response.status : 401 });
+      }
+      const reader = response.body?.getReader();
+      let raw = '', size = 0;
+      const decoder = new TextDecoder();
+      try {
+        if (reader) while (true) {
+          const { done, value } = await reader.read(); if (done) break;
+          size += value.byteLength;
+          if (size > 32768) throw new Error('回應超過允許大小。');
+          raw += decoder.decode(value, { stream: true });
+        }
+        raw += decoder.decode();
+      } catch (error) {
+        if (response.status === 401 || response.status === 403) error.status = response.status;
+        throw error;
+      } finally { if (reader) await reader.cancel().catch(() => {}); }
       let data;
-      try { data = JSON.parse(raw); } catch { throw new Error('回應不是 JSON；Access 工作階段可能已失效，請重新載入頁面。'); }
+      try { data = JSON.parse(raw); } catch { throw Object.assign(new Error('回應不是 JSON；Access 工作階段可能已失效，請重新載入頁面。'), { status: response.status >= 400 ? response.status : 401 }); }
       if (!response.ok) {
         const error = new Error(text(data.message || '請求未完成'));
         Object.assign(error, { status: response.status, code: data.code, requestId: data.request_id, retryable: data.retryable === true });
@@ -137,7 +155,7 @@ export function errorMessage(error) {
 
 export function mount(document, client = createClient()) {
   const byId = id => document.getElementById(id);
-  const state = { bootstrap: null, records: [], pending: null, busy: false, refreshing: false, synced: false, serverTime: NaN, measuredAt: 0, renderedSignature: '', refreshError: false };
+  const state = { bootstrap: null, records: [], pending: null, busy: false, refreshing: false, synced: false, serverTime: NaN, measuredAt: 0, renderedSignature: '', refreshError: false, authBlocked: false, authRevision: 0 };
   const now = () => new Date(state.serverTime + performance.now() - state.measuredAt).toISOString().replace(/\.\d{3}Z$/, 'Z');
   function message(content = '', error = false) {
     const box = byId('message'); box.textContent = content; box.hidden = !content;
@@ -145,28 +163,48 @@ export function mount(document, client = createClient()) {
   }
   function updateControls() {
     const caps = state.bootstrap?.capabilities;
-    byId('submit').disabled = state.busy || !state.synced || !!state.pending || !can(caps, 'commands:submit') || !can(caps, 'node:health:read');
-    byId('retry').hidden = !state.pending; byId('retry').disabled = state.busy || !state.synced;
+    byId('submit').disabled = state.busy || !state.synced || state.authBlocked || !!state.pending || !can(caps, 'commands:submit') || !can(caps, 'node:health:read');
+    byId('retry').hidden = !state.pending; byId('retry').disabled = state.busy || !state.synced || state.authBlocked || !can(caps, 'commands:submit') || !can(caps, 'node:health:read');
     byId('refresh').disabled = state.refreshing;
     byId('submit-note').textContent = state.pending ? '提交結果尚未確認。重試會傳送完全相同的命令與冪等鍵；重新載入會失去本頁保留的內容。' :
-      !state.synced ? '連線確認後即可檢查。' : !can(caps, 'commands:submit') || !can(caps, 'node:health:read') ? '目前授權無法提交節點檢查。' :
+      state.authBlocked ? '授權未確認，已暫停自動更新。登入後按重新整理確認。' : !state.synced ? '連線確認後即可檢查。' : !can(caps, 'commands:submit') || !can(caps, 'node:health:read') ? '目前授權無法提交節點檢查。' :
       '固定 Python collector · 最長 10 秒 · 30 秒觀測有效期';
+    for (const button of byId('commands').querySelectorAll('button')) button.disabled = !state.synced || button.dataset.busy === 'true';
   }
+  function failed(error) {
+    if (error.status !== 401 && error.status !== 403) return;
+    state.authRevision++; state.authBlocked = true; state.synced = false; state.refreshError = true;
+    state.records = []; state.bootstrap = null; state.serverTime = NaN; state.renderedSignature = '';
+    byId('commands').replaceChildren();
+    for (const id of ['total-count', 'active-count', 'unknown-count']) byId(id).textContent = '—';
+    for (const id of ['workspace', 'node-id', 'recipe']) byId(id).textContent = '授權未確認';
+    byId('clock').textContent = '伺服器時間尚未確認';
+    byId('health').textContent = '授權未確認'; byId('health').className = 'badge muted';
+    byId('observed').textContent = '登入並重新整理後才能讀取觀測';
+    byId('empty').hidden = false; byId('empty').textContent = '授權未確認，尚未載入命令。';
+    byId('connection').textContent = '授權未確認 · 自動更新已暫停';
+    updateControls();
+  }
+  const currentSession = revision => revision === state.authRevision;
   const actions = {
     async cancel(id, button) {
-      button.disabled = true;
-      try { await client.cancel(id); message('已記錄取消意圖。已派送工作仍須等待執行器結果，尚不代表停止。'); await refresh(); }
-      catch (error) { message(errorMessage(error), true); button.disabled = false; }
+      if (!state.synced || state.authBlocked) return;
+      const revision = state.authRevision; button.dataset.busy = 'true'; button.disabled = true;
+      try { await client.cancel(id); if (!currentSession(revision)) return; message('已記錄取消意圖。已派送工作仍須等待執行器結果，尚不代表停止。'); await refresh(); }
+      catch (error) { if (!currentSession(revision)) return; failed(error); message(errorMessage(error), true); }
+      finally { delete button.dataset.busy; updateControls(); }
     },
     async artifact(id, button) {
-      button.disabled = true;
+      if (!state.synced || state.authBlocked) return;
+      const revision = state.authRevision; button.dataset.busy = 'true'; button.disabled = true;
       try {
         const artifact = await client.artifact(id);
+        if (!currentSession(revision)) return;
         const url = URL.createObjectURL(new Blob([JSON.stringify(artifact, null, 2)], { type: 'application/json' }));
         const link = element(document, 'a'); link.href = url; link.download = 'node-health.json'; link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
-      } catch (error) { message(errorMessage(error), true); }
-      finally { button.disabled = false; }
+      } catch (error) { if (!currentSession(revision)) return; failed(error); message(errorMessage(error), true); }
+      finally { delete button.dataset.busy; updateControls(); }
     },
   };
   function render() {
@@ -200,50 +238,62 @@ export function mount(document, client = createClient()) {
     byId('empty').textContent = can(caps, 'commands:read') ? '尚無命令。提交第一次節點檢查後，結果將顯示於此。' : '目前授權沒有 commands:read，無法讀取歷史。';
     updateControls();
   }
-  async function bootstrap() {
+  async function bootstrap(revision = state.authRevision) {
     const data = await client.bootstrap();
+    if (!currentSession(revision)) return false;
     if (!Number.isFinite(utc(data.now))) throw new Error('伺服器時間無效。');
-    state.bootstrap = data; state.serverTime = utc(data.now); state.measuredAt = performance.now(); state.synced = true;
+    state.bootstrap = data; state.serverTime = utc(data.now); state.measuredAt = performance.now();
+    return true;
   }
-  async function refresh() {
-    if (state.refreshing) return;
+  async function refresh(manual = false) {
+    if (state.refreshing || (state.authBlocked && !manual)) return;
+    const revision = state.authRevision;
     state.refreshing = true; updateControls();
     try {
-      await bootstrap();
+      if (!await bootstrap(revision)) return;
       if (can(state.bootstrap.capabilities, 'commands:read')) {
         const data = await client.commands();
+        if (!currentSession(revision)) return;
         if (!Array.isArray(data.commands)) throw new Error('命令回應格式無效。');
         state.records = data.commands.slice(0, 100);
       } else state.records = [];
+      state.authBlocked = false; state.synced = true;
       byId('connection').textContent = '已連線 · 每 5 秒更新';
       if (state.refreshError) { message(); state.refreshError = false; }
       render();
     } catch (error) {
+      if (!currentSession(revision)) return;
       state.synced = false; byId('connection').textContent = '連線未確認 · 畫面保留上次資料';
       message(errorMessage(error), true); state.refreshError = true;
-      if (error.status === 401 || error.status === 403) { state.records = []; state.bootstrap = null; state.renderedSignature = ''; byId('commands').replaceChildren(); byId('health').textContent = '授權未確認'; byId('health').className = 'badge muted'; }
+      failed(error);
     } finally { state.refreshing = false; updateControls(); }
   }
   async function submit(retry = false) {
-    if (state.busy || (!retry && state.pending)) return;
+    if (state.busy || !state.synced || state.authBlocked || (!retry && state.pending) || (retry && !state.pending)) return;
+    if (!can(state.bootstrap?.capabilities, 'commands:submit') || !can(state.bootstrap?.capabilities, 'node:health:read')) return;
+    const revision = state.authRevision;
     state.busy = true; updateControls(); message();
     try {
       if (!retry) {
-        await bootstrap();
+        if (!await bootstrap(revision)) return;
         if (!can(state.bootstrap.capabilities, 'commands:submit') || !can(state.bootstrap.capabilities, 'node:health:read')) throw new Error('目前授權無法提交節點檢查。');
         state.pending = JSON.stringify(makeSubmission(state.bootstrap, state.bootstrap.now, crypto.randomUUID()));
       }
       await client.submit(state.pending);
+      if (!currentSession(revision)) return;
       state.pending = null; message('命令已接受。接受提交僅表示已保存，請等待執行結果。'); await refresh();
     } catch (error) {
-      if (error.status && error.status < 500 && error.status !== 429) state.pending = null;
+      if (!currentSession(revision)) return;
+      failed(error);
+      // A rejected retry says nothing about the original admission whose ACK was lost.
+      if (!retry && error.status && error.status < 500 && ![401, 403, 429].includes(error.status)) state.pending = null;
       message(`${errorMessage(error)}${state.pending ? ' 提交結果尚未確認；可用相同內容手動重試。' : ''}`, true);
     } finally { state.busy = false; updateControls(); }
   }
   byId('submit').addEventListener('click', () => submit());
   byId('retry').addEventListener('click', () => submit(true));
-  byId('refresh').addEventListener('click', refresh);
-  const poll = setInterval(() => { if (!document.hidden && !state.busy) refresh(); }, 5000);
+  byId('refresh').addEventListener('click', () => refresh(true));
+  const poll = setInterval(() => { if (!document.hidden && !state.busy && !state.authBlocked) refresh(); }, 5000);
   const age = setInterval(() => { if (!document.hidden) render(); }, 1000);
   globalThis.addEventListener('beforeunload', event => { if (state.pending) { event.preventDefault(); event.returnValue = ''; } });
   refresh();

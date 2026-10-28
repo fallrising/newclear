@@ -65,6 +65,7 @@
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
 | [`tools/codex-usage`](tools/codex-usage/) | Agent Usage 統一唯讀總覽：重用 Codex／Claude 來源，分清訂閱額度、本機統計與 API 支出 | Python, Codex App Server | A |
+| [`tools/motion-prompt`](tools/motion-prompt/) | 繁中／英文動態術語圖鑑：固定 120 項來源與驗收規格，網站待整合 | 原生 JavaScript, Canvas | 未分級 |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
 ### 契約、範例與實驗

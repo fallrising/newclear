@@ -219,6 +219,11 @@
       "source_commit": "63e2f3b3a47776e35865fcb28d368e8f4d32be22"
     },
     {
+      "path": "tools/motion-prompt",
+      "last_source_update": "2026-10-28T00:00:00Z",
+      "source_commit": "f16dc2bb825ab1c85e5a68416aa46e80c58902b4"
+    },
+    {
       "path": "tools/streaming-converter",
       "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"

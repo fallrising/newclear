@@ -10,6 +10,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import secrets
 import signal
 import socket
@@ -195,6 +196,15 @@ def require_stream_accounting(row):
         "prompt_tokens", "completion_tokens", "estimated_cost_usd", "outcome", "usage_status",
         "usage_source", "upstream_model", "request_id", "attempt_id", "finalized_at",
         "headers_ms", "first_output_ms", "total_observed_ms")}
+
+
+def require_html_cost_summary(raw, summary):
+    phrase = {"partial": "Partial estimate", "complete": "Estimated total"}[summary["status"]]
+    pattern = (re.escape(phrase) + r' \$([0-9]+(?:\.[0-9]+)?) · ' +
+               f'{summary["known_count"]}/{summary["total_count"]} rows')
+    match = re.search(pattern, raw.decode())
+    require(match is not None and float(match.group(1)) == summary["known_sum"],
+            "html_cost_reconciliation")
 
 
 def require_csv_accounting(original, exported):
@@ -418,8 +428,7 @@ def run_journey(gateway, fixture, report, update):
         for path in ("/admin", "/admin/usage"):
             status, raw = g.request("GET", path, admin=True)
             require(status == 200 and b"All-time" in raw, "admin_html")
-            phrase = {"partial": "Partial estimate", "complete": "Estimated total"}[summary["status"]]
-            require(phrase.encode() in raw and f'{summary["known_count"]}/{len(rows)} rows'.encode() in raw, "html_cost_reconciliation")
+            require_html_cost_summary(raw, summary)
             surfaces.append(raw.decode())
         status, raw = g.request("GET", "/admin/api/usage/export.csv", admin=True)
         require(status == 200, "csv_status")

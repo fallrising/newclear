@@ -30,6 +30,17 @@ class WalkthroughTests(unittest.TestCase):
                 "outcome": "succeeded", "usage_status": "complete", "usage_source": "openai_chat_v1",
                 "headers_ms": 2, "first_output_ms": 3, "total_observed_ms": 20}
 
+    def test_html_cost_summary_rejects_wrong_subtotal_with_correct_coverage(self):
+        summary = {"status": "partial", "known_sum": 28.0, "known_count": 14, "total_count": 17}
+        for amount in ("0", "280", "28.01"):
+            raw = f'<strong>Partial estimate ${amount} · 14/17 rows</strong>'.encode()
+            with self.subTest(amount=amount), self.assertRaisesRegex(
+                    walk.JourneyFailure, "html_cost_reconciliation"):
+                walk.require_html_cost_summary(raw, summary)
+        for amount in ("28", "28.0", "28.00"):
+            walk.require_html_cost_summary(
+                f'<strong>Partial estimate ${amount} · 14/17 rows</strong>'.encode(), summary)
+
     def test_normal_stream_accounting_rejects_old_null_usage(self):
         for protocol in walk.ENDPOINTS:
             row = {"public_model": protocol + "-stream", "prompt_tokens": None,

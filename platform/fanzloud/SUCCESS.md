@@ -273,7 +273,7 @@ Remaining: mobile 9 (needs separate approval), the M2 actual UI including these 
 - It chained on the accepted tablet result (`500ce82d…`) through the original `assertPreviousPhase`.
 - All nine states passed with every health entry expected and zero `requestfailed`.
 
-An independent actual review returned CANONICAL_ACCEPT for all nine mobile cells as baseline captures. **The canonical three-size dark baseline is 27/27 on the T-0433 source.** M2 is still not accepted.
+An independent actual review returned CANONICAL_ACCEPT for all nine mobile cells as baseline captures. **The canonical three-size dark baseline was 27/27 on the milestone-1 source.** M2 changed the served assets, so on the M2 source canonical is 0/27 until the v7 recapture below is reviewed. M2 is still not accepted.
 
 M2 defects measured by the baseline are handled in [SPEC-T006R M2 repair](docs/specs/SPEC-T006R-m2-repair.md):
 1. `device-pending__mobile__dark` overflows horizontally (390 wide, scrolls to 399). The computed cause is the unbreakable `#verification-url.mono` text. Repaired by wrapping `.mono`; to be confirmed at recapture.
@@ -296,4 +296,4 @@ Acceptance: a focused RED, then GREEN, for M2-01 and M2-02; contrast lower bound
 
 Milestone 2 (M2 repairs) is merged: PR725, main `ed063534c333e5350582131a10a14b12006754b5`. The owner approved updating the runner and recapturing all 27 cells, one run each for desktop, tablet and mobile.
 
-[SPEC-T006R recapture v7](docs/specs/SPEC-T006R-recapture-v7.md) R701–R705 derives one byte-traceable runner from `remaining-baseline.mjs` for all three phases. The source pins move to the M2-repaired source and reuse is removed; every state gate is unchanged. The phases run in order, and each needs an independent actual review that also judges the R07 M2 final-state gates before the next phase starts.
+[SPEC-T006R recapture v7](docs/specs/SPEC-T006R-recapture-v7.md) R701–R705 derives one byte-traceable runner from `remaining-baseline.mjs` for all three phases. The source pins move to the M2-repaired source and reuse is removed; every state gate is unchanged. The phases run in order, and each needs an independent actual review that also judges the R07 M2 final-state gates before the next phase starts. Canonical on the M2 source is 0/27 until the v7 reviews; desktop mounts no previous result.

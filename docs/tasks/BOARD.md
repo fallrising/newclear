@@ -28,7 +28,7 @@
 
 ## T-0380
 
-> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). An app-free [layer ablation](../fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) reproduced the ERR_ABORTED signature on Chromium 153. The trigger is a no-store response consumed through a stream reader; `arrayBuffer()` gave 0/600 and Playwright interception is not necessary. The current unit fixes `p0-client.js` bounded reads and fixture framing. All 27 canonical cells, including the earlier 8, must be recaptured on the new source, and each runtime needs its own owner approval. recovery007 stays FAIL/consumed and PR604 stays Draft. Earlier closure text and "next" recommendations below are history.
+> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). Milestone 1, merged as PR604, fixed ERR_ABORTED and produced dark baseline 27/27. Milestone 2, merged as PR725, repaired the M2 defects. Because the M2 source changed the served assets, canonical is 0/27 until the v7 recapture (one run each for desktop, tablet and mobile, owner-approved) is reviewed. Earlier closure text below is history.
 
 
 依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；目前依上方結案決定停止推進Fanzloud。

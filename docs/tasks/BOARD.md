@@ -59,7 +59,7 @@ Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | T0433-1 | p0-client bounded read and fixture framing fix for ERR_ABORTED | R2-AC-14 | in_progress | 2026-10-28T14:50:49Z | — | 2026-10-28T15:02:15Z |
-| T0433-2a | v4 recovery-only runner and one approved desktop recovery run (008) | R2-AC-14 | in_progress | 2026-10-28T15:13:39Z | — | 2026-10-28T15:14:41Z |
+| T0433-2a | v4 recovery-only runner and one approved desktop recovery run (008: PASS, actual review ACCEPT; canonical 1/27 on new source) | R2-AC-14 | in_progress | 2026-10-28T15:13:39Z | — | 2026-10-28T15:25:12Z |
 | T0433-2 | Recapture remaining canonical cells, M2 and HTTP/WSS conformance (等 owner runtime 批准) | R2-AC-14 | todo | — | — | — |
 | T0433-3 | Integration evidence and PR604 delivery | R2-AC-E | todo | — | — | — |
 

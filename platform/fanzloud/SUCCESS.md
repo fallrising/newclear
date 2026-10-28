@@ -202,3 +202,14 @@ Acceptance:
 - An independent source review accepts v4, and the required CI passes.
 - Attempt `baseline-desktop-recovery-008` then runs once (at most 300 seconds, no retry).
 - A PASS yields one candidate recovery cell that needs independent actual review. A FAIL is preserved and stops.
+
+### Result — recovery 008 (2026-10-28)
+
+`baseline-desktop-recovery-008` ran once on source `96d58678`.
+- PASS in 2.446 seconds: exit 0, cleanup complete, container removed. Chromium 153.0.8010.12, Playwright 1.63.0.
+- The post-authentication session GET and the login GET finished normally with exact bodies and a matching `Content-Length`. No `requestfailed` and no unexpected health entry occurred. 007 had hit ERR_ABORTED at this same step.
+- The initial trace is complete, axe reports 0 violations, the PNG is present, and there was 1 effect and 0 turn starts.
+
+An independent actual review returned CANONICAL_CANDIDATE_ACCEPT. That makes `recovery-required__desktop__dark` the first canonical cell on the T-0433 source. The review also recorded one serious color-contrast item that axe marks incomplete (not a violation), for design follow-up.
+
+This is one run: it shows ERR_ABORTED did not occur here and does not measure a rate. The 8 earlier cells were accepted on the previous source and are not reusable. On the T-0433 source, canonical is 1/27, and the remaining desktop, tablet and mobile cells need separately approved recapture. Delivery stays 18/19.

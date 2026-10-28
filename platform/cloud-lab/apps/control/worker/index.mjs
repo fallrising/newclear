@@ -74,6 +74,13 @@ export async function handle(request,env,now=Date.now(),fetcher=fetch){
  now=Math.floor(now/1000)*1000;const request_id=crypto.randomUUID();try{
   requireThat(['GET','POST'].includes(request.method),405,'METHOD_NOT_ALLOWED');const bytes=await readBody(request);if(request.method==='POST')requireThat(request.headers.get('content-type')?.split(';')[0]==='application/json',415,'CONTENT_TYPE_INVALID');const ctx=await authenticate(request,env,bytes,now,fetcher),url=new URL(request.url),db=env.DB;
   const b=request.method==='POST'?strictJSON(bytes):null;const send=(data,status)=>json({...data,request_id},status);
+  if(url.pathname==='/api/authorization/self'&&request.method==='POST'){
+   requireThat(!ctx.human,403,'SCOPE_DENIED');fields(b,[]);
+   const g=ctx.grant.policy;
+   return send({schema_version:'cloudlab.authorization-self.v1',observed_at:iso(now),credential:ctx.credential,
+    grant:{id:ctx.grant.id,revision:ctx.grant.revision,principal_id:g.principal_id,not_before:g.not_before,expires_at:g.expires_at},
+    scope:{workspace_id:g.workspace_id,resource_ref:{resource_id:g.resource_ref.resource_id,generation:g.resource_ref.generation},recipe_ref:{recipe_id:g.recipe_ref.recipe_id,version:g.recipe_ref.version,digest:g.recipe_ref.digest}}});
+  }
   if(url.pathname==='/api/bootstrap'&&request.method==='GET'){capability(ctx,'commands:read');return send({workspace_id:ctx.grant.policy.workspace_id,resource_ref:ctx.grant.policy.resource_ref,recipe_ref:await recipeRef(),capabilities:ctx.grant.policy.capabilities,now:iso(now)});}
   if(url.pathname==='/api/commands'){
    if(request.method==='POST')return send({command:publicRecord(await submit(db,ctx,b,new TextDecoder().decode(bytes),now))},202);

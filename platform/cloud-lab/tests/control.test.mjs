@@ -106,3 +106,39 @@ test('fixed collector profile rejects nonzero sample age instead of dropping fre
  const f=await fixture(),a=await f.start(),r=f.result(a),artifact=JSON.parse(r.artifact);artifact.sample_age_seconds=25;r.artifact=JSON.stringify(artifact);
  const response=await f.req('/api/runner/report',r,'runner',T+2000);assert.equal(response.status,200);assert.equal(response.data.command.result.validation.status,'failed');assert.equal(response.data.command.result.health,'unknown');
 });
+
+test('self authorization projects only the authenticating machine and leaves business rows unchanged',async()=>{
+ const f=await fixture();await f.req('/api/commands',f.command());
+ const snapshot=()=>['grants','commands','schedules'].map(t=>f.DB.db.prepare('SELECT * FROM '+t).all());const before=snapshot();
+ for(const who of ['bot','runner']){
+  const out=await f.req('/api/authorization/self',{},who);assert.equal(out.status,200);
+  assert.deepEqual(Object.keys(out.data).sort(),['credential','grant','observed_at','request_id','schema_version','scope']);
+  assert.equal(out.data.schema_version,'cloudlab.authorization-self.v1');assert.equal(out.data.observed_at,iso(T));
+  assert.deepEqual(out.data.credential,{id:who,generation:1,principal_id:who,grant_id:who==='bot'?'gb':'gr',revoked:false,expires_at:iso(T+3600000)});
+  assert.equal(out.data.grant.id,out.data.credential.grant_id);assert.equal(out.data.grant.revision,1);
+  assert.deepEqual(out.data.scope,{workspace_id:'ws_test',resource_ref:{resource_id:'node_test',generation:1},recipe_ref:await recipeRef()});
+  assert.ok(!JSON.stringify(out.data).includes('secret'));assert.ok(!JSON.stringify(out.data).includes(secret));
+ }
+ assert.deepEqual(snapshot(),before);assert.equal(f.DB.db.prepare('SELECT count(*) n FROM nonces').get().n,3);
+});
+test('self authorization cannot select other keys or bypass expiry and revocation',async()=>{
+ const f=await fixture();assert.equal((await f.req('/api/authorization/self',{id:'runner'})).status,422);
+ assert.equal((await f.req('/api/authorization/self')).status,404);
+ assert.equal((await f.req('/api/authorization/self?key=runner',{})).status,403);
+ for(const change of [{expires_at:iso(T)},{revoked:true}]){
+  const g=await fixture(),keys=JSON.parse(g.env.MACHINE_KEYS);Object.assign(keys.bot,change);g.env.MACHINE_KEYS=JSON.stringify(keys);
+  const out=await g.req('/api/authorization/self',{});assert.equal(out.status,401);assert.equal(out.data.credential,undefined);
+ }
+ for(const sql of ["UPDATE grants SET revoked=1 WHERE id='gb'", "UPDATE grants SET policy=json_set(policy,'$.expires_at',?) WHERE id='gb'"]){
+  const g=await fixture();if(sql.includes('?'))g.DB.db.prepare(sql).run(iso(T));else g.DB.db.exec(sql);
+  assert.equal((await g.req('/api/authorization/self',{})).status,403);
+ }
+});
+test('self authorization retains signature and nonce replay checks',async()=>{
+ const f=await fixture(),path='/api/authorization/self',time=String(T/1000),nonce='af'.repeat(16);
+ const signature=await sign(secret,'lab-test','bot',1,'POST',path,time,nonce,'{}');
+ const req=(sig=signature)=>new Request('https://lab.example'+path,{method:'POST',headers:{'content-type':'application/json','x-lab-key-id':'bot','x-lab-time':time,'x-lab-nonce':nonce,'x-lab-signature':sig},body:'{}'});
+ assert.equal((await handle(req('00'.repeat(32)),f.env,T)).status,401);
+ const ok=await handle(req(),f.env,T);assert.equal(ok.status,200);assert.equal(ok.headers.get('cache-control'),'no-store');
+ assert.equal((await handle(req(),f.env,T)).status,401);
+});

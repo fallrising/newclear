@@ -341,6 +341,54 @@
           }
         }
       }
+    },
+    "/api/authorization/self": {
+      "post": {
+        "summary": "Read only the authenticated machine credential and grant metadata",
+        "description": "Normal HMAC, expiry, grant and nonce checks apply. No command/grant changes; anti-replay nonce storage still mutates. Human JWTs denied. This source change is not a live deployment claim.",
+        "security": [
+          {
+            "MachineHMAC": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Own metadata from the current Worker authentication context; Cache-Control:no-store. No Access token or resident-process evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelfAuthorization"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid, expired, revoked or replayed machine credential"
+          },
+          "403": {
+            "description": "Human identity, expired/revoked grant or scope denied"
+          },
+          "422": {
+            "description": "Nonempty or invalid request"
+          },
+          "503": {
+            "description": "Configuration or storage unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -587,6 +635,135 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 100
+              }
+            }
+          }
+        }
+      },
+      "SelfAuthorization": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "observed_at",
+          "request_id",
+          "credential",
+          "grant",
+          "scope"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": "cloudlab.authorization-self.v1"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$"
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "credential": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "generation",
+              "principal_id",
+              "grant_id",
+              "revoked",
+              "expires_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "principal_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "grant_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "revoked": {
+                "const": false
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            }
+          },
+          "grant": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "revision",
+              "principal_id",
+              "not_before",
+              "expires_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "principal_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "not_before": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            }
+          },
+          "scope": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "workspace_id",
+              "resource_ref",
+              "recipe_ref"
+            ],
+            "properties": {
+              "workspace_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "resource_ref": {
+                "$ref": "#/components/schemas/Command/properties/resource_ref"
+              },
+              "recipe_ref": {
+                "$ref": "#/components/schemas/Command/properties/recipe_ref"
               }
             }
           }

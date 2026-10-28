@@ -116,3 +116,14 @@ Owner同意從授權生命週期開始。範圍見[AL01–04](../authorization-l
 - 本機37Node＋124Python＝161tests、45專案契約／7llms／42文件／317連結／12來源、task/report及公開邊界檢查通過；[T827 source複審](../../../../.team/reports/T-827.md)ACCEPT，原始RED保留。
 - [原Lab五次唯讀採集](../evidence/m1-authorization-collection.md)由lead核對：前後投影一致、四個grant及所選token過期、active0／排程off；HMAC與runner仍unknown。沒有續權、secret輪替、部署或服務變更。
 - AS01–04完成；真人Access、受控輪替、排程／配額及完整mainline保持未完成，無usable tag。此收尾僅更新任務板，end採用實際feature合併時間。
+
+## T-0006 — 機器自身授權查詢
+
+範圍：[SA01–04](../self-authorization.md)，不包含live部署、續權或runner程序觀測。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0006-1 | Worker自身metadata來源 | SA-01 | in_progress | 2026-10-28T15:15:10Z | — | 2026-10-28T15:25:44Z |
+| T-0006-2 | 獨立runner查詢CLI | SA-02 | in_progress | 2026-10-28T15:15:10Z | — | 2026-10-28T15:25:44Z |
+| T-0006-3 | 負向與本機HTTP整合 | SA-03 | in_progress | 2026-10-28T15:15:10Z | — | 2026-10-28T15:25:44Z |
+| T-0006-4 | 契約、審查與交付 | SA-04 | in_progress | 2026-10-28T15:15:10Z | — | 2026-10-28T15:25:44Z |

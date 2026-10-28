@@ -251,10 +251,23 @@ pub async fn forward_chat_completions(
     stream: bool,
     cancel: &CancellationToken,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
-    forward_chat_completions_inner(state, target, body, native_responses, stream, cancel, true)
-        .await
+    forward_chat_completions_inner(
+        state,
+        target,
+        body,
+        native_responses,
+        stream,
+        cancel,
+        true,
+        None,
+    )
+    .await
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Optional accounting ownership follows the existing forwarding and OAuth retry boundary"
+)]
 async fn forward_chat_completions_inner(
     state: &ProxyState,
     target: &ResolvedTarget,
@@ -263,6 +276,7 @@ async fn forward_chat_completions_inner(
     stream: bool,
     cancel: &CancellationToken,
     allow_401_refresh: bool,
+    mut attempt: Option<&mut crate::stream_usage::StreamAttempt>,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
     // Refresh OAuth if near expiry (best-effort).
     let borrowed = crate::borrowed::source(&target.connection);
@@ -508,6 +522,9 @@ async fn forward_chat_completions_inner(
     match result {
         Ok(resp) => {
             let status = resp.status().as_u16();
+            if let Some(a) = attempt.as_mut() {
+                a.headers(status);
+            }
             if status == 200 {
                 Ok(ForwardOk {
                     response: resp,
@@ -533,6 +550,7 @@ async fn forward_chat_completions_inner(
                         stream,
                         cancel,
                         false,
+                        None,
                     ))
                     .await;
                 }
@@ -559,6 +577,7 @@ async fn forward_chat_completions_inner(
                         stream,
                         cancel,
                         false,
+                        None,
                     ))
                     .await;
                 }
@@ -576,11 +595,20 @@ async fn forward_chat_completions_inner(
                 })
             }
         }
-        Err(e) => Err(UpstreamAttemptError {
-            status: 502,
-            body: format!("upstream request failed: {e}"),
-            retryable: true,
-        }),
+        Err(e) => {
+            if let Some(a) = attempt.as_mut() {
+                if e.is_timeout() {
+                    a.stop("timeout", "upstream_attempt_failed");
+                } else {
+                    a.stop("failed", "upstream_attempt_failed");
+                }
+            }
+            Err(UpstreamAttemptError {
+                status: 502,
+                body: format!("upstream request failed: {e}"),
+                retryable: true,
+            })
+        }
     }
 }
 
@@ -684,6 +712,7 @@ pub async fn handle_chat_with_fallback(
     cancel_guard: crate::cancel::CancelOnDrop,
 ) -> AppResult<Response> {
     let body = prepare_body(state, body)?;
+    let request_id = uuid::Uuid::new_v4().to_string();
     let targets = order_targets(targets, strategy, &state.cooldown, &state.rr_counter);
     let mut last_err: Option<UpstreamAttemptError> = None;
 
@@ -724,21 +753,49 @@ pub async fn handle_chat_with_fallback(
                 }
             }
         }
-        match forward_chat_completions(state, target, body.clone(), None, stream, &cancel).await {
+        let mut attempt = if stream
+            && target.connection.auth_type == "api_key"
+            && provider_id_for(target).is_none()
+            && crate::borrowed::source(&target.connection).is_none()
+        {
+            Some(crate::stream_usage::StreamAttempt::begin(
+                &state.store,
+                &request_id,
+                public_model,
+                target,
+                &body,
+            )?)
+        } else {
+            None
+        };
+        match forward_chat_completions_inner(
+            state,
+            target,
+            body.clone(),
+            None,
+            stream,
+            &cancel,
+            true,
+            attempt.as_mut(),
+        )
+        .await
+        {
             Ok(fwd) => {
                 let latency = start.elapsed().as_millis() as i64;
                 state.cooldown.clear(&target.connection.id);
                 if stream && !fwd.reassemble_stream {
-                    let _ = state.store.log_usage(
-                        Some(public_model),
-                        Some(&target.connection.id),
-                        Some(200),
-                        Some(latency),
-                        None,
-                        None,
-                        None,
-                        None,
-                    );
+                    if attempt.is_none() {
+                        let _ = state.store.log_usage(
+                            Some(public_model),
+                            Some(&target.connection.id),
+                            Some(200),
+                            Some(latency),
+                            None,
+                            None,
+                            None,
+                            None,
+                        );
+                    }
                     cancel_guard.disarm();
                     let mode = match fwd.body_kind {
                         UpstreamBodyKind::OpenAiResponses => {
@@ -746,7 +803,13 @@ pub async fn handle_chat_with_fallback(
                         }
                         _ => StreamMode::Passthrough,
                     };
-                    return stream_response(fwd.response, state.sse_stall_secs, mode).await;
+                    return stream_body_observed(
+                        fwd.response.bytes_stream(),
+                        state.sse_stall_secs,
+                        mode,
+                        attempt,
+                    )
+                    .await;
                 } else {
                     let kind = fwd.body_kind;
                     let bytes = read_forward_body(fwd, &cancel, false).await?;
@@ -778,7 +841,19 @@ pub async fn handle_chat_with_fallback(
                     retryable = e.retryable,
                     "upstream attempt failed"
                 );
-                record_failure(state, public_model, target, &e, start);
+                if let Some(a) = attempt.as_mut() {
+                    if e.status == 499 {
+                        a.stop("cancelled", "stream_cancelled");
+                    } else {
+                        a.stop("failed", "upstream_attempt_failed");
+                    }
+                    let secs = cooldown_secs_for_status(e.status);
+                    if secs > 0 {
+                        state.cooldown.mark(&target.connection.id, secs);
+                    }
+                } else {
+                    record_failure(state, public_model, target, &e, start);
+                }
                 if e.retryable && idx + 1 < targets.len() {
                     last_err = Some(e);
                     continue;
@@ -1394,6 +1469,19 @@ where
     S: futures_util::Stream<Item = Result<Bytes, E>> + Send + 'static,
     E: std::fmt::Display + Send + 'static,
 {
+    stream_body_observed(upstream, stall_secs, mode, None).await
+}
+
+async fn stream_body_observed<S, E>(
+    upstream: S,
+    stall_secs: u64,
+    mode: StreamMode,
+    mut attempt: Option<crate::stream_usage::StreamAttempt>,
+) -> AppResult<Response>
+where
+    S: futures_util::Stream<Item = Result<Bytes, E>> + Send + 'static,
+    E: std::fmt::Display + Send + 'static,
+{
     let status = StatusCode::OK;
     let stall = Duration::from_secs(stall_secs.max(5));
     let mut upstream = Box::pin(upstream);
@@ -1408,6 +1496,7 @@ where
         loop {
             match timeout(stall, upstream.next()).await {
                 Ok(Some(Ok(chunk))) => {
+                    if let Some(a) = attempt.as_mut() { a.push(&chunk); }
                     if let Some(native) = native.as_mut() {
                         let out = native.push(&chunk);
                         if native.done {
@@ -1465,6 +1554,7 @@ where
                     }
                 }
                 Ok(Some(Err(error))) => {
+                    if let Some(a) = attempt.as_mut() { a.stop("failed", "upstream_transport_error"); }
                     // Error values can contain URLs/credentials and own resources.
                     drop(error);
                     let out = if let Some(native) = native.as_mut() {
@@ -1483,6 +1573,7 @@ where
                     break;
                 }
                 Ok(None) => {
+                    if let Some(a) = attempt.as_mut() { a.eof(); }
                     drop(upstream);
                     if let Some(native) = native.as_mut() {
                         let out = native.end();
@@ -1512,6 +1603,7 @@ where
                         yield Ok(Bytes::from(out));
                         break;
                     }
+                    if let Some(a) = attempt.as_mut() { a.stop("timeout", "stream_timeout"); }
                     warn!("SSE stall timeout");
                     let out = if let Some(native) = native.as_mut() {
                         Some(native.stall())
@@ -1549,6 +1641,126 @@ where
         HeaderValue::from_static("keep-alive"),
     );
     Ok((status, headers, body).into_response())
+}
+
+#[cfg(test)]
+mod settlement_ownership_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn attempt(store: &Store) -> crate::stream_usage::StreamAttempt {
+        let connection = serde_json::from_value(json!({
+            "id":"synthetic","name":"synthetic","base_url":"http://127.0.0.1:1/v1",
+            "api_key":"synthetic","default_model":null,"priority":0,"enabled":true,
+            "input_price_per_m":1.0,"output_price_per_m":1.0,"auth_type":"api_key","oauth":null,
+            "created_at":"synthetic","updated_at":"synthetic"
+        }))
+        .unwrap();
+        crate::stream_usage::StreamAttempt::begin(
+            store,
+            "generated-test-request",
+            "synthetic",
+            &ResolvedTarget {
+                connection,
+                upstream_model: "synthetic".into(),
+            },
+            b"{}",
+        )
+        .unwrap()
+    }
+
+    #[tokio::test]
+    async fn ss3_never_polled_body_and_terminal_then_drop_finalize_once() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("db"), None).unwrap();
+        let a = attempt(&store);
+        let input = futures_util::stream::pending::<Result<Bytes, std::io::Error>>();
+        let response = stream_body_observed(input, 5, StreamMode::Passthrough, Some(a))
+            .await
+            .unwrap();
+        drop(response);
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.outcome, "cancelled");
+        assert!(row.status.is_none());
+        assert!(row.finalized_at.is_some());
+
+        let mut a = attempt(&store);
+        a.headers(200);
+        a.push(b"data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":3}}\n\ndata: [DONE]\n\n");
+        let before = serde_json::to_value(store.recent_usage(1).unwrap()).unwrap();
+        drop(a);
+        assert_eq!(
+            serde_json::to_value(store.recent_usage(1).unwrap()).unwrap(),
+            before
+        );
+        assert_eq!(before[0]["outcome"], "succeeded");
+        assert_eq!(before[0]["prompt_tokens"], 5);
+    }
+
+    #[tokio::test]
+    async fn ss2_limit_observation_preserves_all_wire_bytes() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("db"), None).unwrap();
+        let mut a = attempt(&store);
+        a.headers(200);
+        let wire = Bytes::from(vec![b'x'; 65538]);
+        let source = futures_util::stream::iter(vec![Ok::<_, std::io::Error>(wire.clone())]);
+        let response = stream_body_observed(source, 5, StreamMode::Passthrough, Some(a))
+            .await
+            .unwrap();
+        assert_eq!(
+            axum::body::to_bytes(response.into_body(), 1 << 20)
+                .await
+                .unwrap(),
+            wire
+        );
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.outcome, "unknown");
+        assert_eq!(row.usage_status, "invalid");
+        assert_eq!(row.error.as_deref(), Some("stream_observer_limit"));
+    }
+
+    #[tokio::test]
+    async fn ss3_read_error_and_content_finish_drop_keep_observed_truth() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("db"), None).unwrap();
+        let mut a = attempt(&store);
+        a.headers(200);
+        let source = futures_util::stream::iter(vec![Err::<Bytes, _>(std::io::Error::other(
+            "synthetic-canary-secret",
+        ))]);
+        let response = stream_body_observed(source, 5, StreamMode::Passthrough, Some(a))
+            .await
+            .unwrap();
+        assert!(axum::body::to_bytes(response.into_body(), 1 << 20)
+            .await
+            .is_err());
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.outcome, "failed");
+        assert_eq!(row.status, Some(200));
+        assert_eq!(row.error.as_deref(), Some("upstream_transport_error"));
+        let mut a = attempt(&store);
+        a.headers(200);
+        a.push(b"data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":3}}\n\n");
+        drop(a);
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.outcome, "succeeded");
+        assert_eq!(row.usage_status, "partial");
+        assert!(row.estimated_cost_usd.is_none());
+        assert_eq!(row.error.as_deref(), Some("stream_cancelled"));
+        let mut a = attempt(&store);
+        a.headers(200);
+        a.push(b"data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":-1}}\n\n");
+        drop(a);
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.outcome, "succeeded");
+        assert_eq!(row.usage_status, "invalid");
+        assert_eq!(
+            row.error.as_deref(),
+            Some("stream_cancelled"),
+            "local stop remains observable with invalid usage"
+        );
+    }
 }
 
 #[cfg(test)]

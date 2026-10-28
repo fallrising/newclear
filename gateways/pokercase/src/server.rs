@@ -71,7 +71,19 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     if let Some(path) = cfg.ensure_admin_token()? {
         info!(path = %path.display(), "admin token file (read it to log in; never logged)");
     }
+    // Only the serving process recovers pending attempts. Doctor/CLI Store::open
+    // calls must not interrupt a live request; a second server cannot own recovery.
+    let usage_owner = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(cfg.db_path().with_extension("usage-lock"))?;
+    usage_owner
+        .try_lock()
+        .map_err(|_| anyhow::anyhow!("usage_store_in_use"))?;
     let store = Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
+    store.recover_stream_attempts()?;
     let http = http_client::build_http_client()?;
 
     let state = AppState {

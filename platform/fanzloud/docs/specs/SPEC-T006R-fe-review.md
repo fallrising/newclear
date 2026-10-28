@@ -97,6 +97,8 @@ All response shapes deny unknown fields. Fixed safe errors use exact T005B envel
 and status table, including401authentication_required,403origin_forbidden,
 409instance_changed/idempotency_conflict; operation_id only for permitted codes.
 Do not claim production authentication conformance from this synthetic mirror.
+Fixture JSON and diff responses declare the exact `Content-Length` of their body, matching the product
+transport's full-body framing. Chunked framing is not product-faithful and is not used for fixture API responses.
 
 Snapshot exact identity/session/instance,state,current_turn,high_water_seq. Present
 turn is {turn_id,projection}; obey T006 reachable state/projection combinations.

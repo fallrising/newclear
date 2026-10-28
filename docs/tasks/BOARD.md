@@ -28,7 +28,7 @@
 
 ## T-0380
 
-> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). An app-free [layer ablation](../fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) reproduced the ERR_ABORTED signature on Chromium 153. The trigger is a no-store response consumed through a stream reader; `arrayBuffer()` gave 0/600 and Playwright interception is not necessary. The current unit fixes `p0-client.js` bounded reads and fixture framing. All 27 canonical cells, including the earlier 8, must be recaptured on the new source, and each runtime needs its own owner approval. recovery007 stays FAIL/consumed and PR604 stays Draft. Earlier closure text and "next" recommendations below are history.
 
 
 依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；目前依上方結案決定停止推進Fanzloud。
@@ -50,6 +50,17 @@
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
 | FE2-14 | platform/fanzloud 暫緩、未完成（[issue706](https://github.com/fallrising/newclear/issues/706)；PR604 Draft；owner停止持續調查） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-28T10:21:52.298548+00:00 |
 | FE2-E | 原全14項整合未完成；13項證據見結案表，Fanzloud部分留issue706 | R2-AC-E | todo | — | — | 2026-10-28T10:21:52.298548+00:00 |
+
+
+## T-0433
+
+Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud-fe2-completion/task.md) resumes the FE2-14 Fanzloud unit; the T-0380 closure scope is unchanged. Spec: [SPEC-T006](../../platform/fanzloud/docs/specs/SPEC-T006-private-operator-web.md) P-006-10 and [SPEC-T006R](../../platform/fanzloud/docs/specs/SPEC-T006R-fe-review.md) R03.
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T0433-1 | p0-client bounded read and fixture framing fix for ERR_ABORTED | R2-AC-14 | in_progress | 2026-10-28T15:05:00Z | — | 2026-10-28T15:01:55Z |
+| T0433-2 | Recapture 27 canonical cells, M2 and HTTP/WSS conformance (等 owner runtime 批准) | R2-AC-14 | todo | — | — | — |
+| T0433-3 | Integration evidence and PR604 delivery | R2-AC-E | todo | — | — | — |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
 

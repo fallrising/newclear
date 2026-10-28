@@ -224,6 +224,7 @@ async fn run_flow(
     layout: &FixtureLayout,
 ) -> TestResult<FlowEvidence> {
     let mut evidence = Vec::new();
+    require_full_body_framing(address, None, 401).await?;
 
     let page = send(
         router,
@@ -313,6 +314,7 @@ async fn run_flow(
         "T007 initial snapshot mismatch",
     )?;
     evidence.push(body_text(&initial_snapshot)?);
+    require_full_body_framing(address, Some(&cookie), 200).await?;
 
     let mut initial_socket = connect_loopback(address, &cookie).await?;
     initial_socket
@@ -614,6 +616,86 @@ async fn join_server(server: JoinHandle<Result<(), std::io::Error>>) -> TestResu
         .map_err(|_| "T007 loopback shutdown deadline exceeded")?
         .map_err(|_| "T007 loopback task failed")?
         .map_err(|_| "T007 loopback server failed")
+}
+
+/// Reads GET /session over a real loopback socket and requires the full-body framing the browser
+/// client depends on (SPEC-T006 P-006-10): an exact Content-Length and no chunked transfer coding.
+async fn require_full_body_framing(
+    address: std::net::SocketAddr,
+    cookie: Option<&str>,
+    status: u16,
+) -> TestResult<()> {
+    let stream = tokio::time::timeout(DEADLINE, TcpStream::connect(address))
+        .await
+        .map_err(|_| "T007 framing connect deadline exceeded")?
+        .map_err(|_| "T007 framing connect failed")?;
+    let cookie_line = cookie.map_or_else(String::new, |value| format!("Cookie: {value}\r\n"));
+    let request = format!(
+        "GET /api/p0/v1/session HTTP/1.1\r\nHost: {address}\r\n{cookie_line}Connection: close\r\n\r\n"
+    );
+    let mut sent = 0;
+    while sent < request.len() {
+        tokio::time::timeout(DEADLINE, stream.writable())
+            .await
+            .map_err(|_| "T007 framing write deadline exceeded")?
+            .map_err(|_| "T007 framing write failed")?;
+        match stream.try_write(&request.as_bytes()[sent..]) {
+            Ok(written) => sent += written,
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+            Err(_) => return Err("T007 framing write failed"),
+        }
+    }
+    let mut raw = Vec::new();
+    let mut buffer = [0_u8; 4096];
+    loop {
+        tokio::time::timeout(DEADLINE, stream.readable())
+            .await
+            .map_err(|_| "T007 framing read deadline exceeded")?
+            .map_err(|_| "T007 framing read failed")?;
+        match stream.try_read(&mut buffer) {
+            Ok(0) => break,
+            Ok(read) => raw.extend_from_slice(&buffer[..read]),
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+            Err(_) => return Err("T007 framing read failed"),
+        }
+        require(raw.len() <= 70_000, "T007 framing response exceeded bound")?;
+    }
+    let split = raw
+        .windows(4)
+        .position(|window| window == b"\r\n\r\n")
+        .ok_or("T007 framing header terminator missing")?;
+    let head = std::str::from_utf8(&raw[..split]).map_err(|_| "T007 framing header not UTF-8")?;
+    let body_length = raw.len() - split - 4;
+    let mut lines = head.split("\r\n");
+    let status_line = lines.next().ok_or("T007 framing status line missing")?;
+    require(
+        status_line.starts_with(&format!("HTTP/1.1 {status} ")),
+        "T007 framing status mismatch",
+    )?;
+    let mut content_length = None;
+    for line in lines {
+        let (name, value) = line
+            .split_once(':')
+            .ok_or("T007 framing header malformed")?;
+        let name = name.trim().to_ascii_lowercase();
+        require(
+            name != "transfer-encoding",
+            "T007 JSON response used transfer coding",
+        )?;
+        if name == "content-length" {
+            require(content_length.is_none(), "T007 duplicate Content-Length")?;
+            content_length = Some(
+                value
+                    .trim()
+                    .parse::<usize>()
+                    .map_err(|_| "T007 Content-Length invalid")?,
+            );
+        }
+    }
+    require(
+        content_length == Some(body_length) && body_length > 0,
+        "T007 JSON response lacks exact Content-Length",
+    )
 }
 
 async fn connect_loopback(address: std::net::SocketAddr, cookie: &str) -> TestResult<TestSocket> {

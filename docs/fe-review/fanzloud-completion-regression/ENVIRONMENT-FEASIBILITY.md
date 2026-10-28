@@ -1,6 +1,6 @@
 # Existing Blink environment check — no compatible route identified
 
-> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). An app-free [layer ablation](LAYER-ABLATION.md) reproduced the ERR_ABORTED signature on Chromium 153. The trigger is a no-store response consumed through a stream reader; `arrayBuffer()` gave 0/600 and Playwright interception is not necessary. The current unit fixes `p0-client.js` bounded reads and fixture framing. All 27 canonical cells, including the earlier 8, must be recaptured on the new source, and each runtime needs its own owner approval. recovery007 stays FAIL/consumed and PR604 stays Draft. Earlier closure text and "next" recommendations below are history.
 
 T-0380 / R2-AC-14 and R2-AC-E, 2026-10-28. The owner continued the [test-patch artifact](README.md) with one bounded read-only check for an existing compatible Blink test environment. The inventory finished in 230.572 seconds within its 600-second bound. No source download, build, engine/browser execution, container start, application/dependency change or external model call occurred.
 

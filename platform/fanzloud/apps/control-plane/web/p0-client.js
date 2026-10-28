@@ -790,6 +790,20 @@ export function createP0Controller(dependencies) {
         throw new Error("limit");
       }
     }
+    // An identity-coded declared length already bounds this body. Draining it whole
+    // avoids the stream-reader path that Chromium can report as aborted after a
+    // complete no-store read; chunked or content-coded bodies below keep mid-stream
+    // overflow cancellation.
+    if (length !== null && length !== undefined && !response.headers?.get("content-encoding")) {
+      if (typeof response.arrayBuffer !== "function") {
+        throw new Error("body");
+      }
+      const whole = new Uint8Array(await response.arrayBuffer());
+      if (whole.byteLength > limit) {
+        throw new Error("limit");
+      }
+      return decoder.decode(whole);
+    }
     if (!response.body || typeof response.body.getReader !== "function") {
       throw new Error("body");
     }

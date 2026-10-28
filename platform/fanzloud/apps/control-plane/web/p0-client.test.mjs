@@ -351,6 +351,33 @@ function bytesResponse(chunks, options = {}) {
   return { response, wasCanceled: () => canceled };
 }
 
+function declaredLengthResponse(bytes, declaredLength, options = {}) {
+  let readerCalls = 0;
+  let wholeBodyReads = 0;
+  const response = {
+    status: options.status ?? 200,
+    redirected: false,
+    headers: new Headers({
+      "content-type": options.contentType ?? DIFF_TYPE,
+      "content-length": String(declaredLength),
+    }),
+    body: {
+      getReader() {
+        readerCalls += 1;
+        return new Response(bytes).body.getReader();
+      },
+    },
+    async arrayBuffer() {
+      wholeBodyReads += 1;
+      if (options.failure) {
+        throw options.failure;
+      }
+      return bytes.slice().buffer;
+    },
+  };
+  return { response, readerCalls: () => readerCalls, wholeBodyReads: () => wholeBodyReads };
+}
+
 function errorResponse(
   code,
   message = "UNTRUSTED ERROR CANARY",
@@ -1198,6 +1225,57 @@ test("p0_web_diff_is_bounded_text_and_never_html", async () => {
   );
   assert.equal(await harness.controller.showDiff(), false);
   assert.equal(await harness.controller.showDiff(), false);
+
+  // A declared length is bounded before reading, so the body is drained whole:
+  // Chromium 153 can report a complete no-store stream-reader read as aborted.
+  const text = "diff --git a/x b/x\n";
+  const bytes = new TextEncoder().encode(text);
+  const declared = declaredLengthResponse(bytes, bytes.byteLength);
+  harness.queue.push(declared.response);
+  assert.equal(await harness.controller.showDiff(), true);
+  assert.equal(harness.state().diff, text);
+  assert.equal(declared.readerCalls(), 0);
+  assert.equal(declared.wholeBodyReads(), 1);
+
+  const overDeclared = declaredLengthResponse(new Uint8Array(DIFF_LIMIT + 1).fill(97), DIFF_LIMIT);
+  harness.queue.push(overDeclared.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().diff, "");
+  assert.equal(harness.state().error, FIXED.diffLimit);
+
+  const failedDrain = declaredLengthResponse(bytes, bytes.byteLength, {
+    failure: new Error("SECRET BODY CANARY"),
+  });
+  harness.queue.push(failedDrain.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().error, FIXED.request);
+
+  const invalidDeclared = declaredLengthResponse(new Uint8Array([0xff]), 1);
+  harness.queue.push(invalidDeclared.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().error, FIXED.request);
+  assert.equal(invalidDeclared.readerCalls(), 0);
+
+  const coded = declaredLengthResponse(bytes, bytes.byteLength);
+  coded.response.headers.set("content-encoding", "gzip");
+  harness.queue.push(coded.response);
+  assert.equal(await harness.controller.showDiff(), true);
+  assert.equal(harness.state().diff, text);
+  assert.equal(coded.readerCalls(), 1);
+  assert.equal(coded.wholeBodyReads(), 0);
+
+  const jsonBytes = new TextEncoder().encode(
+    JSON.stringify({ error: { code: "diff_not_ready", message: "not yet" } }),
+  );
+  const declaredJson = declaredLengthResponse(jsonBytes, jsonBytes.byteLength, {
+    status: 409,
+    contentType: JSON_TYPE,
+  });
+  harness.queue.push(declaredJson.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().error, FIXED.rejected);
+  assert.equal(declaredJson.readerCalls(), 0);
+  assert.equal(declaredJson.wholeBodyReads(), 1);
   assert.ok(!JSON.stringify(harness.states).includes("SECRET BODY CANARY"));
 });
 

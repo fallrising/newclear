@@ -10,7 +10,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 # Codebox / Fanzloud 成功契約
 
-> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). An app-free [layer ablation](../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) reproduced the ERR_ABORTED signature on Chromium 153. The trigger is a no-store response consumed through a stream reader; `arrayBuffer()` gave 0/600 and Playwright interception is not necessary. The current unit fixes `p0-client.js` bounded reads and fixture framing. All 27 canonical cells, including the earlier 8, must be recaptured on the new source, and each runtime needs its own owner approval. recovery007 stays FAIL/consumed and PR604 stays Draft. Earlier closure text and "next" recommendations below are history.
 
 
 ## 主線與範圍
@@ -171,3 +171,24 @@ Static apply/reverse passed on exact source copies. Actual007 root cause/build c
 Owner continued with one bounded read-only check of existing source/build/test availability. [The result](../../docs/fe-review/fanzloud-completion-regression/ENVIRONMENT-FEASIBILITY.md) identifies no compatible route in the inspected scope; excluded/inaccessible paths, container contents and remote environments remain unknown. The nine-case patch stays NOT_COMPILED/NOT_RUN; no engine RED/GREEN, actual007 attribution or R9/R10 integration coverage is claimed.
 
 Acceptance for this factual checkpoint is traceable inventory with honest coverage/errors, preserved patch/product bytes, focused documentation checks, independent review, required CI and exact remote readback. No build/download/browser/model or product/dependency edit occurred. The next recommendation is one bounded upstream fix/history lookup. Original product ACs,18/19,canonical8/27,PR604Draft,targetsfalse/mainlineincomplete/usable_tag:none remain.
+
+
+## T-0433 ERR_ABORTED read-path fix — 2026-10-28
+
+Goal: remove the browser-side ERR_ABORTED that blocks desktop recovery (R2-AC-14), without relaxing any body, health, identity, cardinality or cleanup gate. Evidence: [layer ablation](../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md).
+
+Scope:
+- [SPEC-T006](docs/specs/SPEC-T006-private-operator-web.md) P-006-10: declared-length bodies are drained whole; chunked bodies keep the stream reader and its overflow cancellation.
+- Test 8 gains declared-length partitions.
+- The T007 loopback e2e samples `GET /session` (401 and 200) on a real server and asserts an exact `Content-Length` with no chunked framing. Other responses share the same `CachedResponse` constructor.
+- [SPEC-T006R](docs/specs/SPEC-T006R-fe-review.md) R03: fixture JSON responses declare `Content-Length`.
+- Excluded: browser runtime, recapture, tablet/mobile, M2 and merging PR604.
+
+Acceptance:
+- Test 8 fails first for the intended reason (a stream reader is used on a declared-length body), then passes.
+- All 12 named T006 tests (2 Rust route tests and 10 Node tests) and all fe-review node suites pass, except hash pins that intentionally refuse the changed sources; those failures are recorded.
+- The T007 e2e passes with the framing assertion.
+- The workspace Rust gates pass, as do `check_project_success.py` and the required PR CI.
+- An independent review accepts the change.
+
+Changing the client and fixture invalidates reuse of the 8 previously accepted cells, so all 27 canonical cells need recapture under a separately approved runtime. Canonical stays 8/27 until then, and delivery stays 18/19.

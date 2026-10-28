@@ -37,9 +37,13 @@ test('v4 equals v3 with exactly the V01 substitutions',()=>{
  assert.deepEqual(Object.keys(newPins),Object.keys(oldPins));
 });
 
-test('every v4 source pin matches the current file or embedded asset',()=>{
+// SPEC-T006R-m2-repair: v4 is a historical runner accepted on the milestone-1 source; M2 changed only
+// the served '/' and '/assets/p0.css', which stay pinned to their milestone-1 bytes.
+test('every v4 source pin matches the current source except the two M2-changed assets',()=>{
+ const MILESTONE1_ASSETS={'/':'2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf','/assets/p0.css':'96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6'};
  const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
- for(const[name,hash]of Object.entries(pins(v4)))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
+ for(const[name,hash]of Object.entries(pins(v4)))assert.equal(Object.hasOwn(MILESTONE1_ASSETS,name)?MILESTONE1_ASSETS[name]:name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
+ for(const name of Object.keys(MILESTONE1_ASSETS))assert.notEqual(assets.get(name),MILESTONE1_ASSETS[name],name);
 });
 
 test('v4 reads no earlier run, accepted manifest or reuse approval',()=>{

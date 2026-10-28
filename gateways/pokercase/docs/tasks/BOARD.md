@@ -384,7 +384,11 @@ CC-3 整輪驗收已於 2026-10-28T04:37:37Z 核對：產品 PR692、看板 PR69
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| J-1 | 完整離線請求與工具旅程 | J-1 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |
-| J-2 | 真實觀測用量與缺口呈現 | J-2 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |
-| J-3 | 可操作入口與安全生命週期 | J-3 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |
-| J-4 | 完整本機驗證及產品交付 | J-4 | in_progress | 2026-10-28T05:14:23Z | — | 2026-10-28T05:34:20Z |
+| J-1 | 完整離線請求與工具旅程 | J-1 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+| J-2 | 真實觀測用量與缺口呈現 | J-2 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+| J-3 | 可操作入口與安全生命週期 | J-3 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+| J-4 | 完整本機驗證及產品交付 | J-4 | done | 2026-10-28T05:14:23Z | 2026-10-28T05:40:25Z | 2026-10-28T05:40:51Z |
+
+產品 [PR703](https://github.com/fallrising/newclear/pull/703) source `479263c0be87d9cc608477812cef2be6722b111a`、merge `01ce1eb20e2c63a231265cc1be929f20a084e7e4` at 2026-10-28T05:40:25Z；完整254Rusttests/21groups、fmt、Clippy、20Python回歸、實際九階段check及serve停機、20validator tests、44contracts/7indexes、獨立來源審查、必要CI及正常合併／遠端回讀通過。
+
+可重跑入口與操作說明：[離線完整流程](../OFFLINE-WALKTHROUGH.md)。實際17筆usage中11筆已知、6筆未知；合成估價$22僅為fixture，不是真實花費。技術J1–J4已依產品合併回讀完成；後續管理帳本、備份與清理依最終handoff記錄，不由這個產品AC冒稱完成。主線仍incomplete、usable_tag none；17項原核心AC、原T-1102規格、Rust/Cargo及其他tracked plan不變。串流結算與終態/時間、其餘計量、client/version與真實AC01/04/08、既有fixture可靠性及Antigravity隔離仍分別記錄於newclear #698–702；不宣稱只剩三個任務或完成百分比。desk保留in_progress，done由owner決定。

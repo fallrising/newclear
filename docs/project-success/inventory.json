@@ -70,8 +70,8 @@
     },
     {
       "path": "labs/memvid-lab",
-      "last_source_update": "2026-10-28T11:08:13Z",
-      "source_commit": "f16dc2bb825ab1c85e5a68416aa46e80c58902b4"
+      "last_source_update": "2026-10-28T11:50:42Z",
+      "source_commit": "7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2"
     },
     {
       "path": "labs/mithril-research",

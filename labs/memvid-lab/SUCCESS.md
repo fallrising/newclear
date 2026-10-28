@@ -5,7 +5,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-10-28
-source_commit: d2e02c37e74e102007280c3516f148da19e9bd00
+source_commit: 7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2
 ---
 
 # Memvid lab 成功契約

@@ -65,3 +65,11 @@
 
 所有觀察均為合成／公開 fixture。GitHub Actions 與遠端回讀狀態以 Draft PR 的最後 head 為準；
 本機通過不能冒充遠端 CI，Draft 也不等於已合併、release 或部署。
+
+## Git source qualification
+
+驗證 source commit：[`7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2`](https://github.com/fallrising/newclear/commit/7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2)。
+這個 commit 保留最初認領 `d2e02c37e74e102007280c3516f148da19e9bd00` 及最新 main `fb58656083231c282a64baf20602aa662caf4eee` 為 parents。
+GitHub app 建立的完整 tree `b0440255c81297399ed259c904e6a3da3813a381` 與本機已驗證 index 完全相同。
+終端 `git push` 缺少 HTTPS 認證（could not read Username），因此使用 GitHub app 的 create_tree → create_commit → update_ref，`force=false` 並核對 expected SHA；未直接更新 main。
+後續只補本段、SUCCESS／inventory source 及任務時間；runtime source hashes 不變。最終分支、Draft PR 與 CI 結果以該 PR 最後 head 為準。

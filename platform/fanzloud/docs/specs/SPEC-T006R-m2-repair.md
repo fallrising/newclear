@@ -5,7 +5,7 @@ Scope: desk T-0433 (issue 706), R2-AC-14, [DESIGN](../fe-review/DESIGN.md) M2 an
 ## Measured defects and repairs
 
 M2-01 — The `device-pending__mobile__dark` page overflows horizontally (document 390 wide, scrolls to 399).
-- Cause: `#verification-url.mono` holds the 36-character URL in an unbreakable monospace run, about 346 px. The card content box is about 284 px at 390, so the right edge lands near 399.
+- Cause (computed from the CSS box model, not a measured element box): `#verification-url.mono` holds the 36-character URL in an unbreakable monospace run, about 346 px. The card content box is about 284 px at 390, which matches the measured diff `clientWidth` of 284, so the right edge lands near 399. The recapture must confirm that no element overflows.
 - Repair: `.mono` gains `overflow-wrap: anywhere`, the same rule `.timeline` and `.diff` already use.
 
 M2-02 — `success-diff__mobile__dark` has axe `scrollable-region-focusable` (serious). On every cell, `#event-list` and `#diff-output` have `tabIndex` -1 and no name.
@@ -18,7 +18,11 @@ M2-03 — axe marks color-contrast as incomplete (serious) on all 27 cells. R07 
 - Button text is checked against its own solid button background.
 - Disabled controls (`opacity: 0.45`) are exempt under WCAG 1.4.3 and are listed as such.
 - The bound requires 4.5:1 for normal text and 3:1 for large text (h1 and h2).
-- The baseline PNGs give the rendered cross-check. Pixels sampled from a fixed empty body area (the top-left 12×12 corner) of each viewport's `authenticated-ready` capture must lie within the computed body background range, from the darkest stop `#07100d` up to the lightest bound.
+- The baseline PNGs give the rendered cross-check. Pixels sampled from two fixed empty 12×12 body corners of each viewport's `authenticated-ready` capture must lie within the computed body background range, from the darkest stop `#07100d` up to the lightest bound (17.9, 45.1, 34.8). The two corners are top-left (darkest) and top-right (where the radial overlay at 80% 0% is brightest).
+- The PNGs are private run evidence and are not committed, so CI skips this check. Setting `FE_REVIEW_RUNS` to the run directory enables it, and it then requires all three captures. One run against the accepted baseline runs passed with these sampled ranges:
+  - desktop: top-left 7–8, 16–17, 13–14; top-right 12–14, 30–32, 24–26
+  - tablet: top-left 7–8, 16–17, 13–14; top-right 13–15, 34–36, 26–28
+  - mobile: top-left 10–11, 26–28, 20–22; top-right 13–15, 37–39, 28–30
 - This is bounded evidence for contrast acceptance, not an axe pass. axe may still report incomplete, and the evidence is recorded beside it.
 
 ## Tests (focused RED first)
@@ -26,7 +30,7 @@ M2-03 — axe marks color-contrast as incomplete (serious) on all 27 cells. R07 
 `fe-review/m2-presentation.node.mjs`:
 - M2-01: `.mono` wraps.
 - M2-02: both regions are focusable, named by existing headings and not live.
-- M2-03: computed contrast lower bounds per text color, plus the PNG background cross-check when baseline PNGs are present.
+- M2-03: computed contrast lower bounds per text color (minimum 6.96:1, `.status` on the body), plus the PNG background cross-check when `FE_REVIEW_RUNS` points at the baseline PNGs.
 
 M2-01 and M2-02 fail on the baseline source for the intended reason and pass after the repair. M2-03 is evidence, not a change, so its first run must pass. Existing T006 and fe-review suites must stay green.
 

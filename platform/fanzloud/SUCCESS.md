@@ -275,13 +275,13 @@ Remaining: mobile 9 (needs separate approval), the M2 actual UI including these 
 
 An independent actual review returned CANONICAL_ACCEPT for all nine mobile cells as baseline captures. **The canonical three-size dark baseline is 27/27 on the T-0433 source.** M2 is still not accepted.
 
-Open M2 defects measured by the baseline (R07 final-state bar; repair per R10 as explicit key replacements after a focused RED):
-1. `device-pending__mobile__dark`: the page overflows horizontally (document 390 wide, scrolls to 399). The overflowing element is not yet identified.
-2. `success-diff__mobile__dark`: axe `scrollable-region-focusable` (serious). The diff scrolls locally on mobile but is not focusable (`tabIndex` -1, no name).
-3. All 27 cells: axe marks color-contrast incomplete (serious); manual rendered-color evidence is owed.
-4. All cells: the event and diff regions are unnamed with `tabIndex` -1. Event local scrolling is never exercised, and diff local scrolling only on mobile.
+M2 defects measured by the baseline are handled in [SPEC-T006R M2 repair](docs/specs/SPEC-T006R-m2-repair.md):
+1. `device-pending__mobile__dark` overflows horizontally (390 wide, scrolls to 399). The computed cause is the unbreakable `#verification-url.mono` text. Repaired by wrapping `.mono`; to be confirmed at recapture.
+2. `success-diff__mobile__dark` has axe `scrollable-region-focusable` (serious). Repaired: the event and diff regions are focusable (`tabindex` 0) and named by their headings. To be confirmed at recapture.
+3. All 27 cells: axe marks color-contrast incomplete (serious). There is now bounded evidence: every text color is at least 6.96:1 against the lightest composited background, cross-checked with baseline PNG pixels. axe may still report incomplete.
+4. Event local scrolling was not exercised by the baseline; diff local scrolling was exercised on mobile only.
 
-Remaining: M2 actual UI repairs for these, finite HTTP/WSS conformance, then integration review, CI and PR604 delivery. Delivery stays 18/19.
+Remaining: recapture on the repaired source (needs an owner decision), finite HTTP/WSS conformance, then final integration review and CI. Milestone 1 merged as PR604; delivery stays 18/19 until Fanzloud completes.
 
 ## T-0433 M2 repair — 2026-10-28
 

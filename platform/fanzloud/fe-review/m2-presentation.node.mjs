@@ -78,11 +78,15 @@ function readPNG(buf){
  return {width,height,pixel:(x,y)=>[...out.subarray(y*stride+x*bpp,y*stride+x*bpp+3)]};
 }
 
+// Baseline PNGs are private run evidence (not committed); set FE_REVIEW_RUNS to their directory to run this check.
 test('M2-03 rendered body pixels lie inside the computed background range',()=>{
+ const root=process.env.FE_REVIEW_RUNS?new URL('file://'+process.env.FE_REVIEW_RUNS.replace(/\/?$/,'/')):new URL('runs/',import.meta.url);
  const runs=[['baseline-desktop-remaining-001','desktop'],['baseline-tablet-001','tablet'],['baseline-mobile-001','mobile']];
  const dark=hex('#07100d');let sampled=0;
- for(const[run,size]of runs){const file=new URL(`runs/${run}/screenshots/authenticated-ready__${size}__dark.png`,import.meta.url);if(!existsSync(file))continue;
+ for(const[run,size]of runs){const file=new URL(`${run}/screenshots/authenticated-ready__${size}__dark.png`,root);if(!existsSync(file))continue;
   const png=readPNG(readFileSync(file));
-  for(let y=0;y<12;y++)for(let x=0;x<12;x++){const p=png.pixel(x,y);for(let i=0;i<3;i++)assert(p[i]>=dark[i]-2&&p[i]<=Math.ceil(bodyLight[i])+2,`${run} (${x},${y}) channel ${i}=${p[i]}`);sampled++;}}
- assert(sampled===0||sampled===3*144);
+  // Top-left is darkest; top-right is where the radial overlay (circle at 80% 0%) is brightest.
+  for(const x0 of [0,png.width-12])for(let y=0;y<12;y++)for(let x=x0;x<x0+12;x++){const p=png.pixel(x,y);for(let i=0;i<3;i++)assert(p[i]>=dark[i]-2&&p[i]<=Math.ceil(bodyLight[i])+2,`${run} (${x},${y}) channel ${i}=${p[i]}`);sampled++;}}
+ assert(sampled===0||sampled===3*288);
+ if(process.env.FE_REVIEW_RUNS)assert.equal(sampled,3*288,'FE_REVIEW_RUNS set but baseline PNGs missing');
 });

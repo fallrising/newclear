@@ -55,3 +55,7 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Integrated authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/integrated-authorization.md): correlates management, machine self and resident metadata with identity/config binding, before/after drift checks and conservative timestamps; private snapshot/provenance integrity status, no automatic deployment or renewal.
 
 - [Integration evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-integrated-authorization.md): real local HTTP/HMAC/SQLite and kernel socket integration with synthetic management envelopes; source-only acceptance and explicit unknown route/policy/live state.
+
+- [Observation rollout preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/observation-rollout.md): pinned source candidate, read-only baseline, bounded machine-only window proposal and compensating rollback; no deployment or renewal executed.
+
+- [Rollout preparation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-observation-rollout-plan.md): lead read-only metadata and private source checks, explicit failures and pending live gates.

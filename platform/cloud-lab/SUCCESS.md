@@ -81,3 +81,5 @@ Owner於2026-10-28取消實體手機必測要求；[客戶端範圍調整](docs/
 RO Git交付已獲owner明確push批准，恢復正常PR／CI／merge與任務板收尾；本機source與192tests／審查完成。先前自動批准審查拒絕保留於[證據](docs/evidence/m1-resident-observation.md)，實際交付結果以任務板為準。
 
 本輪[IA01–04授權來源整合](docs/integrated-authorization.md)source完成：[214tests與獨立複審](docs/evidence/m1-integrated-authorization.md)通過，串聯AS／SA／RO並保留缺失來源為未知。未部署、續權或進行原Lab整合採集，完整主線保持pending。
+
+本輪[RP01–04觀測部署準備](docs/observation-rollout.md)完成：[12份source候選／唯讀現況／獨立ACCEPT](docs/evidence/m1-observation-rollout-plan.md)已核對。最長兩小時的機器接入窗口及補償方案待明確批准；尚未部署、續權或啟停服務。

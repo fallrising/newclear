@@ -38,3 +38,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [隔離中斷／回報遺失驗證](docs/recovery-qualification.md)涵蓋真實程序與實際workerd／D1 binding；[證據](docs/evidence/m1-recovery.md)保留unknown容量占用，未操作live服務。
 
 [遠端隔離故障／撤權](docs/remote-recovery.md)已完成真實CF三個恢復案例、grant撤銷及Access token停用；[證據](docs/evidence/m1-remote-recovery.md)核對原資源設定不變，保留一筆unknown，完整主線仍未完成。
+
+[看板瀏覽器驗收](docs/dashboard-qualification.md)補上Access失效清除／停止輪詢、原提交身份保留與舊回應隔離；[本機證據](docs/evidence/m1-dashboard.md)涵蓋真正Chromium／workerd／D1及320／390px。新版資產尚未部署，真實Access／實體手機仍待驗收。

@@ -53,7 +53,7 @@ Owner 指示「好，繼續吧。」。先完成可審閱的部署 bundle、入�
 | T-0003-1 | 私人設定／grant／部署 bundle 產生器 | AC-06、AC-08 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
 | T-0003-2 | 有界入口及 API 驗收工具 | AC-06、AC-07 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
 | T-0003-3 | 獨立審查與部署前證據 | AC-08 | done | 2026-10-26T16:43:03Z | 2026-10-26T17:07:24Z | 2026-10-26T17:07:38Z |
-| T-0003-4 | 真實 CF／指定 runner／恢復驗收；首輪真實閉環通過；D1隔離還原／journal對帳通過；遠端故障／撤權子集通過；human/mobile及完整故障矩陣待驗收 | AC-06～08 | in_progress | 2026-10-26T18:01:36Z | — | 2026-10-28T04:31:17Z |
+| T-0003-4 | 真實 CF／指定 runner／恢復驗收；首輪真實閉環通過；D1隔離還原／journal對帳通過；遠端故障／撤權子集通過；human/mobile及完整故障矩陣待驗收 | AC-06～08 | in_progress | 2026-10-26T18:01:36Z | — | 2026-10-28T04:58:45Z |
 
 ## M1 接入準備交付與回讀
 
@@ -71,3 +71,5 @@ T-0003-4 本輪子範圍：[RR-01～05常駐runner](../resident-runner.md)，本
 T-0003-4 下一子範圍：[FR-01～04隔離恢復驗證](../recovery-qualification.md)，101tests／實際workerd三案例／獨立審查通過，完整列仍in_progress；live服務維持既有版本與授權窗口。
 
 T-0003-4 本輪子範圍：[RF-01～04遠端隔離故障／撤權](../remote-recovery.md)，本輪[115tests／三個真實CF案例／grant及Access撤權](../evidence/m1-remote-recovery.md)通過；完整列仍in_progress。僅新建一組短期隔離資源，測試token已停用，原live服務保持不變。
+
+T-0003-4 本輪子範圍：[UI-01～04看板瀏覽器驗收](../dashboard-qualification.md)，本機121tests／十組瀏覽器情境／獨立審查通過；整列仍in_progress，新版資產部署、真正Access及實體手機仍待接續。

@@ -96,13 +96,18 @@ under docs/evidence/. Source baseline: `0111908492c32d0b01d561b24b6024737cb4f641
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| KD01 | Clarify the runnable Fake slice, remaining P0-A gates and future real-agent readiness | DOC-01 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
-| KD02 | Specify selected Kanzo-inspired workflows, invariants, ordered follow-ups and measurable acceptance | DOC-02 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
-| KD03 | Connect entry documents, validate scope/links/contracts and obtain independent document review | DOC-03 | in_progress | 2026-10-28T17:34:03Z | — | 2026-10-28T17:46:14Z |
+| KD01 | Clarify the runnable Fake slice, remaining P0-A gates and future real-agent readiness | DOC-01 | done | 2026-10-28T17:34:03Z | 2026-10-28T18:00:58Z | 2026-10-28T18:02:00Z |
+| KD02 | Specify selected Kanzo-inspired workflows, invariants, ordered follow-ups and measurable acceptance | DOC-02 | done | 2026-10-28T17:34:03Z | 2026-10-28T18:00:58Z | 2026-10-28T18:02:00Z |
+| KD03 | Connect entry documents, validate scope/links/contracts and obtain independent document review | DOC-03 | done | 2026-10-28T17:34:03Z | 2026-10-28T18:00:58Z | 2026-10-28T18:02:00Z |
 
 Acceptance: DOC-01 separates current observations from historical runtime evidence;
 DOC-02 marks every future capability and named oracle unimplemented/NotRun and preserves
 commands, evidence/Done, authorization and unknown-outcome handling; DOC-03 records actual
-document checks and review with no product acceptance claim. Rows remain in_progress
-until the repository merge condition is met. This turn stops at a Draft PR; merge,
-release and deployment are not authorized.
+document checks and review with no product acceptance claim. The documentation turn initially
+stopped at Draft PR #727. The owner subsequently authorized its merge; [PR #727](https://github.com/fallrising/newclear/pull/727)
+merged at `2026-10-28T18:00:58Z` as `f15058bdc4fce552e90b186f88b573677b7ae834`, after the
+reviewed head `91ff6d964467552cebc4863f26a62c001a274fa2` passed HAI backend/web
+and project-success CI. Both independent document reviews were accepted after retained rework.
+KD01..KD03 are now done with that actual merge time; this board-only follow-up records the closure
+under the root technical-task contract. H01..H04 and all product AC/statuses remain unchanged.
+The merge does not enable any HAI-KZ feature, real agent, release or deployment.

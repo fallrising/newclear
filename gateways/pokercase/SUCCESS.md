@@ -48,6 +48,10 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 
 目標、設計與固定 SS-1–SS-6 見 [任務](docs/tasks/T-0432-stream-settlement.md)。本輪僅 generic API-key HTTP Chat 串流，先 fake upstream RED，再完成送出前登記、一次結算、終態／usage／時間及管理面一致性；其他協定、CLI、OAuth 與完整 [#698](https://github.com/fallrising/newclear/issues/698) 留待後續。本機279Rusttests/22groups、fmt/Clippy、20Python回歸、九階段離線旅程及repository validators已通過；獨立審查及PR712必要CI／正常合併／遠端回讀已通過；管理帳本與備份清理見本輪handoff；不改原17項 AC、mainline incomplete 或 usable_tag none。
 
+## T-0432 — Three-client generic HTTP settlement continuation
+
+Owner approved the bounded continuation after current-state review. [Fixed PC-1–PC-5, design and evidence](docs/tasks/T-0432-protocol-settlement.md) extend the delivered generic Chat-upstream observer to Messages/Responses clients and verify all three protocols through the headless journey. Preserve original17AC, prior SS-1–SS-6 and T-1102; CLI/provider-profile/OAuth and native non-Chat upstreams remain outside this slice. Mainline incomplete, usable_tag none; full#698 and#699–702 remain open. Documentation-first actual RED→GREEN, full locked Rust/fmt/Clippy, Python and the strict nine-stage journey passed. Independent review findings were reproduced and corrected; PR720 required CI/normal merge/remote readback passed; final ledger/backup/cleanup are recorded by this round’s handoff.
+
 ## 本次里程碑：T-0377 Cursor 外部隔離
 
 Owner 決定保留 Cursor。目標／範圍／固定 AC 與驗證計畫見 [隔離規格](docs/cursor-isolation.md)，進度見 [任務板](docs/tasks/BOARD.md)。原 ask＋sandbox 的主機隔離假設已被實測否定；AC-17 的假 CLI 協定測試不能當成隔離 PASS。2026-10-23 第二輪修正 PR #566 的 CLI enum lint 與 Docker workspace 權限，CI-1–CI-5 本機驗證已通過；[命令、歷史失敗及限制](docs/tasks/T-0377-handoff.md)。獨立審查與必要 CI 通過，PR #566 已於2026-10-23T18:01:20Z合併，回讀無差異；官方 CLI 映像的無網路 version/help 啟動亦通過。真帳號、完整推論與網路／plugin 隔離不在本次 PASS 範圍內。

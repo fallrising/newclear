@@ -71,3 +71,11 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 Owner於2026-10-28取消實體手機必測要求；[客戶端範圍調整](docs/dashboard-rollout.md#owner調整客戶端驗收範圍)不改身份／grant檢查，也不等於真人Access已驗證。後續開發不以手機測試為門檻。
 
 本輪開始[AL01–04授權生命週期](docs/authorization-lifecycle.md)：離線狀態與續期／撤銷計畫、CAS與私人資料邊界已完成；[144tests、真實CLI合成測試及獨立ACCEPT](docs/evidence/m1-authorization.md)通過。不執行雲端續權或憑證輪替，完整主線保持pending。
+
+本輪[AS01–04授權來源採集](docs/authorization-collection.md)完成：[161tests、獨立source審查與原Lab五次唯讀請求](docs/evidence/m1-authorization-collection.md)通過。四個grant及選定Access token期限已過，active0／排程off；HMAC及runner仍unknown。沒有續權或雲端變更，完整主線保持pending。
+
+本輪[SA01–04機器自身授權查詢](docs/self-authorization.md)source完成：[176tests、真實本機HTTP查詢與獨立複審](docs/evidence/m1-self-authorization.md)通過。具可取消總期限，無job副作用；尚未部署或續權，runner程序來源仍待實作，完整mainline不變。
+
+本輪[RO01–04 resident程序觀測](docs/resident-observation.md)source完成：[192tests、真實隔離resident／socket／FLOCK與獨立審查](docs/evidence/m1-resident-observation.md)通過。SIGTERM／SIGKILL、漂移與保守期限驗證通過；未部署或續權，完整主線保持pending。
+
+RO Git交付已獲owner明確push批准，恢復正常PR／CI／merge與任務板收尾；本機source與192tests／審查完成。先前自動批准審查拒絕保留於[證據](docs/evidence/m1-resident-observation.md)，實際交付結果以任務板為準。

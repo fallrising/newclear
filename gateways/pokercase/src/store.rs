@@ -331,6 +331,7 @@ impl StreamFinalization {
                     | "stream_observer_limit"
                     | "stream_observer_invalid"
                     | "stream_invalid_usage"
+                    | "stream_conversion_failed"
             )
         );
         let counts_valid = self.prompt_tokens.is_none_or(|v| v >= 0)

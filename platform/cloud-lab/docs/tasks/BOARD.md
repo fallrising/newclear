@@ -96,3 +96,68 @@ Owner同意從授權生命週期開始。範圍見[AL01–04](../authorization-l
 - [Cloud Lab CI](https://github.com/fallrising/newclear/actions/runs/40704636916)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40704636968)、[llms CI](https://github.com/fallrising/newclear/actions/runs/40704636775)全數SUCCESS，未繞過檢查。
 - 本機37Node＋107Python＝144tests、真實合成CLI、45專案契約／7llms／40文件／300連結／12來源、task/report及公開邊界檢查通過；[T826複審](../../../../.team/reports/T-826.md)ACCEPT。初始失敗保留在[證據](../evidence/m1-authorization.md)。
 - AL01–04離線實作完成，實際Cloudflare續權、live採集、secret輪替、排程及完整mainline仍未完成；本輪沒有改雲端授權／憑證／服務。此PR僅按實際合併時間收尾任務板，不新增能力或usable tag。
+
+## T-0005 — 授權來源唯讀採集
+
+範圍：[AS01–04](../authorization-collection.md)。Owner要求接續開發，不擴大為續權或輪替。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0005-1 | 固定唯讀請求與target綁定 | AS-01 | done | 2026-10-28T14:39:47Z | 2026-10-28T15:01:18Z | 2026-10-28T15:01:53Z |
+| T-0005-2 | 來源時間與前後漂移檢查 | AS-02 | done | 2026-10-28T14:39:47Z | 2026-10-28T15:01:18Z | 2026-10-28T15:01:53Z |
+| T-0005-3 | 私人snapshot／provenance與未知層 | AS-03 | done | 2026-10-28T14:39:47Z | 2026-10-28T15:01:18Z | 2026-10-28T15:01:53Z |
+| T-0005-4 | 合成測試、獨立審查與真實唯讀證據 | AS-04 | done | 2026-10-28T14:39:47Z | 2026-10-28T15:01:18Z | 2026-10-28T15:01:53Z |
+
+## T-0005交付與遠端回讀
+
+[PR #716](https://github.com/fallrising/newclear/pull/716)於2026-10-28T15:01:18Z合併；head `aa4c90477bd4d6748345e95961ec91fe2cbd47f9`，merge `58a383f859f2204b94a36dcf5e5a18760fd6c8a2`。15個交付路徑與遠端merge逐檔相等，工作樹乾淨。
+
+- [Cloud Lab CI](https://github.com/fallrising/newclear/actions/runs/40711530060)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40711530110)、[llms CI](https://github.com/fallrising/newclear/actions/runs/40711530080)全數SUCCESS，未繞過檢查。
+- 本機37Node＋124Python＝161tests、45專案契約／7llms／42文件／317連結／12來源、task/report及公開邊界檢查通過；[T827 source複審](../../../../.team/reports/T-827.md)ACCEPT，原始RED保留。
+- [原Lab五次唯讀採集](../evidence/m1-authorization-collection.md)由lead核對：前後投影一致、四個grant及所選token過期、active0／排程off；HMAC與runner仍unknown。沒有續權、secret輪替、部署或服務變更。
+- AS01–04完成；真人Access、受控輪替、排程／配額及完整mainline保持未完成，無usable tag。此收尾僅更新任務板，end採用實際feature合併時間。
+
+## T-0006 — 機器自身授權查詢
+
+範圍：[SA01–04](../self-authorization.md)，不包含live部署、續權或runner程序觀測。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0006-1 | Worker自身metadata來源 | SA-01 | done | 2026-10-28T15:15:10Z | 2026-10-28T15:27:04Z | 2026-10-28T15:27:43Z |
+| T-0006-2 | 獨立runner查詢CLI | SA-02 | done | 2026-10-28T15:15:10Z | 2026-10-28T15:27:04Z | 2026-10-28T15:27:43Z |
+| T-0006-3 | 負向與本機HTTP整合 | SA-03 | done | 2026-10-28T15:15:10Z | 2026-10-28T15:27:04Z | 2026-10-28T15:27:43Z |
+| T-0006-4 | 契約、審查與交付 | SA-04 | done | 2026-10-28T15:15:10Z | 2026-10-28T15:27:04Z | 2026-10-28T15:27:43Z |
+
+## T-0006交付與遠端回讀
+
+[PR #718](https://github.com/fallrising/newclear/pull/718)於2026-10-28T15:27:04Z合併；head `b9942bb08954ff2cc41fa7089cb0b5fa5c1fb3d2`，merge `2497b4637439d2f6d820927d393a9b2d075e7da0`。20個交付路徑與遠端merge逐檔相等，工作樹乾淨。
+
+- [Cloud Lab CI](https://github.com/fallrising/newclear/actions/runs/40715939770)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40715939744)、[llms CI](https://github.com/fallrising/newclear/actions/runs/40715939874)全數SUCCESS，未繞過檢查。
+- 本機41Node＋135Python＝176tests、45專案契約／7llms／44文件／333連結／12來源、task/report與公開邊界檢查通過；[T828複審](../../../../.team/reports/T-828.md)ACCEPT。[證據](../evidence/m1-self-authorization.md)保留初始RED、slow-stream修正與SQLite warnings。
+- SA01–04完成source／本機驗證；沒有雲端呼叫、部署、續權、token／secret產生、服務重啟或付費變更。新介面仍待部署，runner程序來源與AS整合仍待實作；完整mainline保持未完成，無usable tag。
+- 此PR僅更新任務板，end採用實際feature合併時間。
+
+## T-0007 — Resident程序觀測
+
+範圍：[RO01–04](../resident-observation.md)，僅source／隔離本機程序驗證，不更動原Lab。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0007-1 | 私人socket生命週期 | RO-01 | done | 2026-10-28T15:40:48Z | 2026-10-28T17:05:54Z | 2026-10-28T17:06:44Z |
+| T-0007-2 | 程序／lock／config驗證 | RO-02 | done | 2026-10-28T15:40:48Z | 2026-10-28T17:05:54Z | 2026-10-28T17:06:44Z |
+| T-0007-3 | 期限與退出／漂移負向測試 | RO-03 | done | 2026-10-28T15:40:48Z | 2026-10-28T17:05:54Z | 2026-10-28T17:06:44Z |
+| T-0007-4 | 回歸、審查與Git交付 | RO-04 | done | 2026-10-28T15:40:48Z | 2026-10-28T17:05:54Z | 2026-10-28T17:06:44Z |
+
+T-0007本機feature commit `f0f06bb96ce8d74715925e2a3dc89d1869838f97`完成192tests與T829獨立審查；SSH推送未完成且PR建立422，遠端分支未見。停止該次SSH子程序後，限時重試被自動批准審查拒絕；待owner明確批准此分支的正常push／PR／CI／merge與任務板收尾。未合併，因此各列維持in_progress，沒有end。未改原Lab。
+
+2026-10-28T17:04:03Z owner已明確批准推送，恢復本分支正常Git交付。原拒絕保留為歷史；合併前維持in_progress。
+
+## T-0007交付與遠端回讀
+
+Owner明確批准推送後，[PR #722](https://github.com/fallrising/newclear/pull/722)於2026-10-28T17:05:54Z合併；head `6a7ec5d0f9cfcd5a12d76522632d16aa50c87d8e`，merge `07ffe875f76a8b413004d0a1f693714e6533795b`。17個交付路徑與遠端merge逐檔相等，工作樹乾淨。
+
+- [Cloud Lab CI](https://github.com/fallrising/newclear/actions/runs/40732186001)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40732186020)、[llms CI](https://github.com/fallrising/newclear/actions/runs/40732186031)全數SUCCESS，未繞過檢查。
+- 本機41Node＋151Python＝192tests、45專案契約／7llms／46文件／353連結／12來源、task/report與公開邊界檢查通過；[T829初審及相容性複審](../../../../.team/reports/T-829.md)ACCEPT。批准恢復只改文件，已審查runtime／tests保持相同。
+- 初始SSH等待、PR422與自動批准拒絕均保留；批准後限時SSH推送成功，沒有改用替代寫入路徑或繞過CI。此前「待owner」為歷史，Git批准阻擋已解除。
+- RO01–04 source／本機程序驗證完成；[證據](../evidence/m1-resident-observation.md)保留RED、SQLite warnings與Python3.11未實測限制。未安裝到原Lab、未部署或續權，沒有新付費方案。完整mainline保持未完成，無usable tag。
+- 此PR僅按實際feature合併時間收尾任務板，不新增功能或雲端操作。

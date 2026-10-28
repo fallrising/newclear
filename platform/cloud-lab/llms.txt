@@ -39,4 +39,15 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 
 - [Dashboard rollout](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/dashboard-rollout.md): reviewed assets deployed, original settings and application rows retained, anonymous requests return302 and machine reads pass; human browser workflow pending; physical-phone testing waived as a required gate.
 
-- [Authorization lifecycle](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-lifecycle.md): strict offline metadata status and private same-scope grant renewal/revocation plans;144local tests and synthetic CLI verified, no live collector/apply/rotation.
+- [Authorization lifecycle](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-lifecycle.md): strict offline metadata status and private same-scope grant renewal/revocation plans;144local tests and synthetic CLI verified, no automatic apply/rotation; source collection is documented separately.
+
+- [Authorization collection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-collection.md): fixed read-only Worker/D1/Access metadata with source provenance and drift checks;161tests and five original-Lab reads verified, HMAC/runner unknown, no renewal.
+- [Collection evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-authorization-collection.md): independent source review and lead-verified live metadata; all four grants and selected token expired, active0 and schedules off at observation.
+
+- [Machine self authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/self-authorization.md): authenticated own-HMAC metadata and runner inspection CLI without job dispatch; source/local verification only, not deployed. Runner process and Access expiry remain unknown; nonce storage still writes.
+
+- [Self-authorization evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-self-authorization.md):176local tests, real loopback inspection and cancellable slow-stream boundary; initial failures retained, no live rollout or renewal.
+
+- [Resident process observation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/resident-observation.md): opt-in Linux private Unix socket, peer/start/boot identity, loaded config digest and actual FLOCK ownership; conservative stop deadline and crash/drift rejection. Source/local only, not installed on the original Lab.
+
+- [Resident observation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-resident-observation.md):192tests, real fixture resident/kernel-lock observations, signal/restart/crash and drift checks, independent review; no original-service rollout or authorization change.

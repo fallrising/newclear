@@ -420,6 +420,7 @@ pub struct StreamTranslateState {
     pub model: String,
     pub message_start_sent: bool,
     pub message_stop_sent: bool,
+    failed: bool,
     open: Option<OpenBlock>,
     next_block: usize,
     stop_reason: Option<String>,
@@ -428,11 +429,15 @@ pub struct StreamTranslateState {
 }
 
 impl StreamTranslateState {
+    pub(crate) fn is_failed(&self) -> bool {
+        self.failed
+    }
     pub fn new(model: impl Into<String>) -> Self {
         Self {
             model: model.into(),
             message_start_sent: false,
             message_stop_sent: false,
+            failed: false,
             open: None,
             next_block: 0,
             stop_reason: None,
@@ -553,6 +558,7 @@ pub fn openai_sse_chunk_to_anthropic(data: &str, state: &mut StreamTranslateStat
             &json!({"type": "error", "error": {"type": "api_error", "message": err.get("message").cloned().unwrap_or_else(|| err.clone())}}),
         ));
         state.message_stop_sent = true;
+        state.failed = true;
         return events;
     }
     if !state.message_start_sent {

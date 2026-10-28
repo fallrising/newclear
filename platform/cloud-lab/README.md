@@ -44,3 +44,9 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [新版看板部署記錄](docs/dashboard-rollout.md)：owner明確批准後已發布；保留原設定與期限，記錄匿名302／機器200，一般瀏覽器真人流程待驗，實體手機選測。
 
 [授權生命週期工具](docs/authorization-lifecycle.md)提供離線期限盤點與保留scope的續期／撤銷計畫；[本機證據](docs/evidence/m1-authorization.md)涵蓋144tests、SQLite CAS及合成CLI。計畫不會自動續權或輪替憑證。
+
+[授權來源採集](docs/authorization-collection.md)已接入既有Cloudflare MCP唯讀操作端；[161tests與原Lab實證](docs/evidence/m1-authorization-collection.md)記錄來源時間、前後漂移檢查與未知層。只採集metadata，不自動續權或輪替。
+
+[機器自身授權查詢](docs/self-authorization.md)提供Worker自身HMAC metadata來源與runner `--authorization-status`命令；目前僅source／本機驗證，尚未部署。查詢不啟動工作，runner程序與Access token期限仍明示未知。
+
+[Resident程序觀測](docs/resident-observation.md)以私人Unix socket、kernel peer／process／FLOCK及已載入設定digest取得實際stop-at；限Linux及明確啟用。source／本機驗證，尚未安裝到原Lab，完整授權窗口仍不完整。

@@ -168,6 +168,14 @@ impl Fixture {
         assert_eq!(r.status(), 200);
         r.text().await.unwrap()
     }
+    fn request_for(&self, path: &str) -> reqwest::RequestBuilder {
+        self.client
+            .post(format!("{}{path}", self.base))
+            .json(&json!({
+                "model":"synthetic", "stream":true, "max_tokens":64,
+                "messages":[{"role":"user","content":"synthetic"}], "input":"synthetic"
+            }))
+    }
     async fn rows(&self) -> Vec<Value> {
         let v: Value = serde_json::from_str(&self.surface("/admin/api/usage").await).unwrap();
         v["data"].as_array().unwrap().clone()
@@ -549,4 +557,289 @@ async fn ss3_preheaders_cancel_and_ss4_failed_finalize_remain_durable() {
     assert_eq!(f.calls.load(Ordering::SeqCst), 2);
     f.child.kill().await.unwrap();
     f.child.wait().await.unwrap();
+}
+
+async fn pc1_tail_usage(path: &str, terminal: &str) {
+    let mut f = Fixture::start().await;
+    f.setup().await;
+    let usage = event(json!({"choices":[],"usage":{"prompt_tokens":5,"completion_tokens":3}}));
+    *f.body.lock().unwrap() = event(
+        json!({"choices":[{"index":0,"delta":{"content":"synthetic"}}]}),
+    ) + &event(
+        json!({"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_pc1","type":"function","function":{"name":"add","arguments":"{\"a\":1}"}}]},"finish_reason":"tool_calls"}]}),
+    ) + &usage
+        + &usage
+        + "data: [DONE]\n\n";
+    let r = f.request_for(path).send().await.unwrap();
+    assert_eq!(r.status(), 200);
+    let output = r.text().await.unwrap();
+    assert!(output.contains(terminal));
+    assert!(output.contains("call_pc1") && output.contains("add"));
+    assert_eq!(f.calls.load(Ordering::SeqCst), 1);
+    let rows = f.rows().await;
+    assert_eq!(rows.len(), 1);
+    let row = &rows[0];
+    assert_eq!(
+        row["prompt_tokens"], 5,
+        "PC-1 {path} persisted original upstream tail"
+    );
+    assert_eq!(row["completion_tokens"], 3);
+    assert_eq!(row["outcome"], "succeeded");
+    assert_eq!(row["usage_status"], "complete");
+    assert!(row["attempt_id"].is_string() && row["request_id"].is_string());
+    assert!(row["first_output_ms"].is_number() && row["finalized_at"].is_string());
+    assert!((row["estimated_cost_usd"].as_f64().unwrap() - 0.000011).abs() < 1e-12);
+    f.child.kill().await.unwrap();
+    f.child.wait().await.unwrap();
+}
+
+#[tokio::test]
+async fn pc1_messages_tail_usage() {
+    pc1_tail_usage("/v1/messages", "message_stop").await;
+}
+
+#[tokio::test]
+async fn pc1_responses_tail_usage() {
+    pc1_tail_usage("/v1/responses", "response.completed").await;
+}
+
+#[tokio::test]
+async fn pc2_converted_outcomes_and_raw_missing_usage() {
+    for path in ["/v1/messages", "/v1/responses"] {
+        let mut f = Fixture::start().await;
+        f.setup().await;
+        let finish = event(json!({"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}));
+        let cases = [
+            (
+                finish.clone(),
+                "succeeded",
+                "missing",
+                Value::Null,
+                Value::Null,
+            ),
+            (
+                event(json!({"choices":[{"index":0,"delta":{"content":"synthetic"}}]})),
+                "failed",
+                "missing",
+                Value::Null,
+                Value::Null,
+            ),
+            (
+                event(json!({"error":{"message":"synthetic"},"usage":{"prompt_tokens":7}})),
+                "failed",
+                "partial",
+                json!(7),
+                Value::Null,
+            ),
+            (
+                finish.clone()
+                    + &event(json!({"usage":{"prompt_tokens":0,"completion_tokens":0}}))
+                    + "data: [DONE]\n\n",
+                "succeeded",
+                "complete",
+                json!(0),
+                json!(0),
+            ),
+            (
+                finish
+                    + &event(json!({"usage":{"prompt_tokens":-1,"completion_tokens":3}}))
+                    + "data: [DONE]\n\n",
+                "succeeded",
+                "invalid",
+                Value::Null,
+                json!(3),
+            ),
+            (
+                event(json!({"choices":[{"index":0,"delta":{},"finish_reason":"length"}]}))
+                    + "data: [DONE]\n\n",
+                "incomplete",
+                "missing",
+                Value::Null,
+                Value::Null,
+            ),
+        ];
+        for (wire, outcome, quality, pt, ct) in &cases {
+            *f.body.lock().unwrap() = wire.clone();
+            let response = f.request_for(path).send().await.unwrap();
+            assert_eq!(response.status(), 200);
+            let output = response.text().await.unwrap();
+            if *outcome == "failed" {
+                assert!(output.contains("error"));
+            }
+            let row = f.rows().await.remove(0);
+            assert_eq!(row["outcome"], *outcome, "{path}");
+            assert_eq!(row["usage_status"], *quality, "{path}");
+            assert_eq!(row["prompt_tokens"], *pt);
+            assert_eq!(row["completion_tokens"], *ct);
+            assert!(row["finalized_at"].is_string());
+            assert_eq!(row["status"], 200);
+            if *quality != "complete" {
+                assert!(row["estimated_cost_usd"].is_null());
+            }
+        }
+        let daily: Value =
+            serde_json::from_str(&f.surface("/admin/api/usage/daily").await).unwrap();
+        assert_eq!(daily["data"][0]["headers_200"], 6);
+        assert_eq!(daily["data"][0]["ok"], 3);
+        assert_eq!(daily["data"][0]["errors"], 2);
+        assert_eq!(daily["data"][0]["incomplete"], 1);
+        assert_eq!(f.calls.load(Ordering::SeqCst), 6);
+        for surface in ["/admin/usage", "/admin/api/usage/export.csv"] {
+            let text = f.surface(surface).await;
+            assert!(text.contains("failed") && text.contains("incomplete"));
+        }
+        f.child.kill().await.unwrap();
+        f.child.wait().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn pc3_converted_cancel_stall_and_preheaders_cancel() {
+    for path in ["/v1/messages", "/v1/responses"] {
+        let mut f = Fixture::start().await;
+        f.setup().await;
+        f.mode.store(1, Ordering::SeqCst);
+        *f.body.lock().unwrap() =
+            event(json!({"choices":[{"index":0,"delta":{"content":"synthetic"}}]}));
+        let mut response = f.request_for(path).send().await.unwrap();
+        assert!(response.chunk().await.unwrap().is_some());
+        drop(response);
+        let row = f.wait_outcome("cancelled").await;
+        assert_eq!(row["status"], 200);
+        assert!(row["first_output_ms"].is_number());
+        assert_eq!(row["error"], "stream_cancelled");
+        assert!(row["estimated_cost_usd"].is_null());
+        let output = f
+            .request_for(path)
+            .send()
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+        assert!(output.contains("error"));
+        let row = f.wait_outcome("timeout").await;
+        assert_eq!(row["status"], 200);
+        assert_eq!(row["error"], "stream_timeout");
+        assert!(row["total_observed_ms"].as_i64().unwrap() >= 5000);
+        f.mode.store(2, Ordering::SeqCst);
+        let request = f.request_for(path);
+        let task = tokio::spawn(async move { request.send().await });
+        for _ in 0..100 {
+            if f.calls.load(Ordering::SeqCst) == 3 {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(20)).await;
+        }
+        assert_eq!(f.calls.load(Ordering::SeqCst), 3);
+        let pending = f.rows().await.remove(0);
+        assert!(pending["attempt_id"].is_string() && pending["finalized_at"].is_null());
+        assert!(pending["status"].is_null());
+        task.abort();
+        let _ = task.await;
+        let row = f.wait_outcome("cancelled").await;
+        assert_eq!(row["attempt_id"], pending["attempt_id"]);
+        assert!(
+            row["status"].is_null()
+                && row["headers_ms"].is_null()
+                && row["first_output_ms"].is_null()
+        );
+        assert_eq!(f.rows().await.len(), 3);
+        f.child.kill().await.unwrap();
+        f.child.wait().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn pc3_converted_fallback_storage_failures_and_restart_no_replay() {
+    for path in ["/v1/messages", "/v1/responses"] {
+        let mut f = Fixture::start().await;
+        let mut ids = Vec::new();
+        for name in ["first", "second"] {
+            ids.push(f.post("/admin/api/connections",json!({"name":name,"base_url":format!("{}/v1",f.upstream),"api_key":"synthetic","input_price_per_m":1.0,"output_price_per_m":2.0})).await["id"].clone());
+        }
+        f.post("/admin/api/routes",json!({"public_model":"synthetic","strategy":"fallback","targets":[{"connection_id":ids[0],"model_override":"retry"},{"connection_id":ids[1],"model_override":"synthetic"}]})).await;
+        let complete = event(
+            json!({"choices":[{"index":0,"delta":{"content":"synthetic"},"finish_reason":"stop"}]}),
+        ) + &event(json!({"usage":{"prompt_tokens":5,"completion_tokens":3}}))
+            + "data: [DONE]\n\n";
+        *f.body.lock().unwrap() = complete.clone();
+        f.request_for(path)
+            .send()
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+        let rows = f.rows().await;
+        assert_eq!(rows.len(), 2);
+        assert_eq!(f.calls.load(Ordering::SeqCst), 2);
+        assert_eq!(rows[0]["outcome"], "succeeded");
+        assert_eq!(rows[1]["outcome"], "failed");
+        assert_eq!(rows[1]["status"], 429);
+        assert_eq!(rows[0]["request_id"], rows[1]["request_id"]);
+        assert_ne!(rows[0]["attempt_id"], rows[1]["attempt_id"]);
+        for row in &rows {
+            assert!(
+                row["headers_ms"].as_i64().unwrap() <= row["total_observed_ms"].as_i64().unwrap()
+            );
+        }
+        assert!(rows[1]["first_output_ms"].is_null() && rows[1]["estimated_cost_usd"].is_null());
+        // Use one healthy target for crash/storage scenarios, so cooldown expiry is irrelevant.
+        let routes: Value = serde_json::from_str(&f.surface("/admin/api/routes").await).unwrap();
+        let route = &routes["data"][0];
+        let changed=f.client.put(format!("{}/admin/api/routes/{}",f.base,route["id"].as_str().unwrap()))
+            .header("x-admin-token","synthetic-admin").json(&json!({"public_model":"synthetic","strategy":"fallback","targets":[{"connection_id":ids[1],"model_override":"synthetic"}]})).send().await.unwrap();
+        assert!(changed.status().is_success());
+        f.mode.store(1, Ordering::SeqCst);
+        *f.body.lock().unwrap() =
+            event(json!({"choices":[{"index":0,"delta":{"content":"synthetic"}}]}));
+        let mut response = f.request_for(path).send().await.unwrap();
+        assert!(response.chunk().await.unwrap().is_some());
+        let pending = f.rows().await.remove(0);
+        assert!(pending["finalized_at"].is_null());
+        f.restart().await;
+        drop(response);
+        let recovered = f.rows().await.remove(0);
+        assert_eq!(recovered["outcome"], "interrupted");
+        assert_eq!(recovered["attempt_id"], pending["attempt_id"]);
+        assert!(recovered["total_observed_ms"].is_null());
+        f.restart().await;
+        assert_eq!(f.rows().await.remove(0), recovered);
+        assert_eq!(f.calls.load(Ordering::SeqCst), 3);
+        let db = rusqlite::Connection::open(f.dir.path().join("thinrouter.db")).unwrap();
+        db.execute_batch("CREATE TRIGGER synthetic_insert_failure BEFORE INSERT ON usage_events BEGIN SELECT RAISE(FAIL, 'synthetic-private-diagnostic'); END;").unwrap();
+        let response = f.request_for(path).send().await.unwrap();
+        assert_eq!(response.status(), 503);
+        assert!(!response
+            .text()
+            .await
+            .unwrap()
+            .contains("synthetic-private-diagnostic"));
+        assert_eq!(f.calls.load(Ordering::SeqCst), 3);
+        db.execute_batch("DROP TRIGGER synthetic_insert_failure; CREATE TRIGGER synthetic_finalize_failure BEFORE UPDATE OF finalized_at ON usage_events BEGIN SELECT RAISE(FAIL, 'synthetic-private-diagnostic'); END;").unwrap();
+        f.mode.store(0, Ordering::SeqCst);
+        *f.body.lock().unwrap() = complete;
+        f.request_for(path)
+            .send()
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+        let row = f.rows().await.remove(0);
+        assert!(row["finalized_at"].is_null());
+        assert_eq!(row["status"], 200);
+        assert_eq!(f.calls.load(Ordering::SeqCst), 4);
+        db.execute_batch("DROP TRIGGER synthetic_finalize_failure;")
+            .unwrap();
+        f.restart().await;
+        assert_eq!(f.rows().await.remove(0)["outcome"], "interrupted");
+        assert_eq!(f.calls.load(Ordering::SeqCst), 4);
+        let stderr = std::fs::read_to_string(f.dir.path().join("stderr")).unwrap();
+        assert!(!stderr.contains("synthetic-private-diagnostic"));
+        assert_eq!(stderr.matches("usage_finalization_failed").count(), 1);
+        f.child.kill().await.unwrap();
+        f.child.wait().await.unwrap();
+    }
 }

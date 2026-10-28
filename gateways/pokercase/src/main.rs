@@ -500,7 +500,7 @@ fn doctor(cfg: &AppConfig) -> Result<()> {
     println!("  connections: {} (oauth_import: {oauth_n})", conns.len());
     println!("  routes     : {}", routes.len());
     println!("  api_keys   : {}", keys.len());
-    println!("  est. cost  : ${cost:.6}");
+    println!("  all-time  : {cost}");
     println!("ok");
     Ok(())
 }

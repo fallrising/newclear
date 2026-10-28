@@ -123,6 +123,88 @@ impl From<ConnectionRow> for ConnectionPublic {
     }
 }
 
+/// Coverage of non-null stored estimates, not a billing/provenance guarantee.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CostCoverageStatus {
+    NoData,
+    Unknown,
+    Partial,
+    Complete,
+    Unavailable,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsageCostSummary {
+    pub known_sum: Option<f64>,
+    pub known_count: i64,
+    pub unknown_count: i64,
+    pub total_count: i64,
+    pub coverage: Option<f64>,
+    pub status: CostCoverageStatus,
+    pub basis: String,
+}
+
+impl UsageCostSummary {
+    pub fn from_observations(sum: Option<f64>, known_count: i64, total_count: i64) -> Self {
+        let known_sum = sum.filter(|v| v.is_finite());
+        let status = if total_count == 0 {
+            CostCoverageStatus::NoData
+        } else if known_count == 0 {
+            CostCoverageStatus::Unknown
+        } else if known_sum.is_none() {
+            CostCoverageStatus::Unavailable
+        } else if known_count == total_count {
+            CostCoverageStatus::Complete
+        } else {
+            CostCoverageStatus::Partial
+        };
+        Self {
+            known_sum,
+            known_count,
+            unknown_count: total_count - known_count,
+            total_count,
+            coverage: (total_count > 0).then(|| known_count as f64 / total_count as f64),
+            status,
+            basis: "stored_estimate_usd".into(),
+        }
+    }
+
+    pub fn complete_total(&self) -> Option<f64> {
+        match self.status {
+            CostCoverageStatus::Complete => self.known_sum,
+            _ => None,
+        }
+    }
+}
+
+impl std::fmt::Display for UsageCostSummary {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let rows = format!("{}/{} rows", self.known_count, self.total_count);
+        match (&self.status, self.known_sum) {
+            (CostCoverageStatus::NoData, _) => write!(f, "est. cost: no data (0 rows)"),
+            (CostCoverageStatus::Unknown, _) => write!(f, "est. cost: unknown ({rows})"),
+            (CostCoverageStatus::Partial, Some(v)) => write!(f, "partial est. ${v:.6} ({rows})"),
+            (CostCoverageStatus::Complete, Some(v)) => write!(f, "est. total ${v:.6} ({rows})"),
+            _ => write!(f, "est. cost: unavailable ({rows})"),
+        }
+    }
+}
+
+fn query_cost_summary(conn: &Connection) -> Result<UsageCostSummary> {
+    Ok(conn.query_row(
+        "SELECT SUM(estimated_cost_usd), COUNT(estimated_cost_usd), COUNT(*) FROM usage_events",
+        [],
+        |r| {
+            Ok(UsageCostSummary::from_observations(
+                r.get(0)?,
+                r.get(1)?,
+                r.get(2)?,
+            ))
+        },
+    )?)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UsageDayRow {
     pub day: String,
@@ -131,7 +213,8 @@ pub struct UsageDayRow {
     pub errors: i64,
     pub prompt_tokens: i64,
     pub completion_tokens: i64,
-    pub estimated_cost_usd: f64,
+    pub estimated_cost_usd: Option<f64>,
+    pub cost_summary: UsageCostSummary,
     pub avg_latency_ms: f64,
 }
 
@@ -1165,14 +1248,8 @@ impl Store {
         Ok(out)
     }
 
-    pub fn usage_cost_total(&self) -> Result<f64> {
-        let conn = self.conn.lock().unwrap();
-        let total: Option<f64> = conn.query_row(
-            "SELECT SUM(estimated_cost_usd) FROM usage_events",
-            [],
-            |r| r.get(0),
-        )?;
-        Ok(total.unwrap_or(0.0))
+    pub fn usage_cost_total(&self) -> Result<UsageCostSummary> {
+        query_cost_summary(&self.conn.lock().unwrap())
     }
 
     /// Daily aggregates (most recent `days` day buckets by RFC3339 date prefix).
@@ -1186,14 +1263,17 @@ impl Store {
                     SUM(CASE WHEN status IS NULL OR status != 200 THEN 1 ELSE 0 END) AS errors,
                     COALESCE(SUM(prompt_tokens), 0),
                     COALESCE(SUM(completion_tokens), 0),
-                    COALESCE(SUM(estimated_cost_usd), 0),
-                    COALESCE(AVG(latency_ms), 0)
+                    SUM(estimated_cost_usd),
+                    COALESCE(AVG(latency_ms), 0),
+                    COUNT(estimated_cost_usd)
              FROM usage_events
              GROUP BY day
              ORDER BY day DESC
              LIMIT ?1",
         )?;
         let rows = stmt.query_map(params![days], |row| {
+            let cost_summary =
+                UsageCostSummary::from_observations(row.get(6)?, row.get(8)?, row.get(1)?);
             Ok(UsageDayRow {
                 day: row.get(0)?,
                 requests: row.get(1)?,
@@ -1201,7 +1281,8 @@ impl Store {
                 errors: row.get(3)?,
                 prompt_tokens: row.get(4)?,
                 completion_tokens: row.get(5)?,
-                estimated_cost_usd: row.get(6)?,
+                estimated_cost_usd: cost_summary.complete_total(),
+                cost_summary,
                 avg_latency_ms: row.get(7)?,
             })
         })?;
@@ -1251,18 +1332,14 @@ impl Store {
             conn.query_row("SELECT COUNT(*) FROM connections", [], |r| r.get(0))?;
         let routes: i64 = conn.query_row("SELECT COUNT(*) FROM routes", [], |r| r.get(0))?;
         let keys: i64 = conn.query_row("SELECT COUNT(*) FROM api_keys", [], |r| r.get(0))?;
-        let usage: i64 = conn.query_row("SELECT COUNT(*) FROM usage_events", [], |r| r.get(0))?;
-        let cost: Option<f64> = conn.query_row(
-            "SELECT SUM(estimated_cost_usd) FROM usage_events",
-            [],
-            |r| r.get(0),
-        )?;
+        let cost_summary = query_cost_summary(&conn)?;
         Ok(serde_json::json!({
             "connections": connections,
             "routes": routes,
             "api_keys": keys,
-            "usage_events": usage,
-            "estimated_cost_usd": cost.unwrap_or(0.0),
+            "usage_events": cost_summary.total_count,
+            "estimated_cost_usd": cost_summary.complete_total(),
+            "cost_summary": cost_summary,
         }))
     }
 }
@@ -1476,5 +1553,55 @@ mod secret_storage_tests {
         assert_eq!(out, vec!["s1".to_string()]);
         assert_eq!(store.shelf_expire(-1).unwrap(), vec!["s3".to_string()]);
         assert!(store.shelf_ids().unwrap().is_empty());
+    }
+}
+
+#[cfg(test)]
+mod cost_coverage_tests {
+    use super::*;
+    #[test]
+    fn cc1_nonfinite_aggregate_stays_unavailable_without_rewriting_rows() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        for _ in 0..2 {
+            store
+                .log_usage(
+                    None,
+                    None,
+                    Some(200),
+                    None,
+                    None,
+                    None,
+                    None,
+                    Some(f64::MAX),
+                )
+                .unwrap();
+        }
+        let s = store.usage_cost_total().unwrap();
+        assert!(matches!(s.status, CostCoverageStatus::Unavailable));
+        assert_eq!(
+            (
+                s.known_sum,
+                s.known_count,
+                s.unknown_count,
+                s.total_count,
+                s.coverage,
+                s.complete_total()
+            ),
+            (None, 2, 0, 2, Some(1.0), None)
+        );
+        let stats = store.stats().unwrap();
+        assert!(stats["estimated_cost_usd"].is_null());
+        assert_eq!(stats["cost_summary"]["status"], "unavailable");
+        let days = store.usage_by_day(1).unwrap();
+        assert_eq!(days.len(), 1);
+        assert!(days[0].estimated_cost_usd.is_none());
+        assert!(matches!(
+            days[0].cost_summary.status,
+            CostCoverageStatus::Unavailable
+        ));
+        let rows = store.recent_usage(10).unwrap();
+        assert_eq!(rows.len(), 2);
+        assert!(rows.iter().all(|r| r.estimated_cost_usd == Some(f64::MAX)));
     }
 }

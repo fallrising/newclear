@@ -1,0 +1,8 @@
+{% macro render_cost(s) -%}
+{% if s.status == "no_data" %}No data · 0 rows
+{% elif s.status == "unknown" %}Unknown · {{ s.known_count }}/{{ s.total_count }} rows
+{% elif s.status == "partial" %}Partial estimate ${{ s.known_sum }} · {{ s.known_count }}/{{ s.total_count }} rows
+{% elif s.status == "complete" %}Estimated total ${{ s.known_sum }} · {{ s.known_count }}/{{ s.total_count }} rows
+{% else %}Unavailable · {{ s.known_count }}/{{ s.total_count }} rows
+{% endif %}
+{%- endmacro %}

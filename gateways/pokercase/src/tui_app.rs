@@ -17,7 +17,7 @@ use ratatui::widgets::{Block, Borders, List, ListItem, Paragraph, Tabs};
 use ratatui::Terminal;
 
 use crate::config::AppConfig;
-use crate::store::Store;
+use crate::store::{Store, UsageCostSummary};
 
 enum Tab {
     Connections,
@@ -156,10 +156,13 @@ pub fn run_tui(cfg: &AppConfig) -> Result<()> {
             f.render_widget(list, chunks[1]);
 
             let cost = stats
-                .get("estimated_cost_usd")
-                .and_then(|v| v.as_f64())
-                .unwrap_or(0.0);
-            let help = footer(&cfg.db_path().display().to_string(), cost, chunks[2].width);
+                .get("cost_summary")
+                .and_then(|v| serde_json::from_value::<UsageCostSummary>(v.clone()).ok());
+            let help = footer(
+                &cfg.db_path().display().to_string(),
+                cost.as_ref(),
+                chunks[2].width,
+            );
             f.render_widget(help, chunks[2]);
         })?;
 
@@ -240,11 +243,12 @@ fn display_items(items: Vec<ListItem<'static>>) -> Vec<ListItem<'static>> {
         items
     }
 }
-fn footer(path: &str, cost: f64, width: u16) -> Paragraph<'static> {
+fn footer(path: &str, cost: Option<&UsageCostSummary>, width: u16) -> Paragraph<'static> {
+    let cost = cost
+        .map(ToString::to_string)
+        .unwrap_or_else(|| "est. cost: unavailable".into());
     Paragraph::new(vec![
-        Line::from(format!(
-            "←/→ or Tab: switch | q: quit / Esc | est. cost: ${cost:.6}"
-        )),
+        Line::from(format!("←/→/Tab: switch | q: quit / Esc | all-time {cost}")),
         Line::from(column(&format!("db: {path}"), usize::from(width))),
     ])
     .style(Style::default().fg(Color::DarkGray))
@@ -332,7 +336,11 @@ mod tests {
     #[test]
     fn review_footer_has_complete_quit_cost_and_database_lines() {
         let text = rendered(
-            footer("/state/synthetic-data/thinrouter.db", 0.0, 80),
+            footer(
+                "/state/synthetic-data/thinrouter.db",
+                Some(&UsageCostSummary::from_observations(Some(0.0), 1, 1)),
+                80,
+            ),
             80,
             2,
         );
@@ -347,5 +355,42 @@ mod tests {
     #[test]
     fn review_empty_list_explicit_without_success_claim() {
         assert!(rendered(List::new(display_items(vec![])), 78, 2).contains("No rows to display."));
+    }
+    #[test]
+    fn cc2_cost_coverage_footer_never_turns_missing_or_partial_cost_into_complete_zero() {
+        for (s, expected) in [
+            (
+                UsageCostSummary::from_observations(None, 0, 0),
+                "no data (0 rows)",
+            ),
+            (
+                UsageCostSummary::from_observations(None, 0, 2),
+                "unknown (0/2 rows)",
+            ),
+            (
+                UsageCostSummary::from_observations(Some(0.0), 1, 1),
+                "total $0.000000 (1/1 rows)",
+            ),
+            (
+                UsageCostSummary::from_observations(Some(0.25), 1, 2),
+                "partial est. $0.250000 (1/2 rows)",
+            ),
+            (
+                UsageCostSummary::from_observations(Some(4.0), 2, 2),
+                "total $4.000000 (2/2 rows)",
+            ),
+            (
+                UsageCostSummary::from_observations(Some(f64::INFINITY), 2, 2),
+                "unavailable (2/2 rows)",
+            ),
+        ] {
+            for width in [80, 118] {
+                let text = rendered(footer("/synthetic/db", Some(&s), width), width, 2);
+                assert!(text.contains(expected), "coverage text missing: {expected}");
+                assert!(text.contains("all-time"));
+                assert!(text.contains("q: quit") && text.contains("db: /synthetic/db"));
+            }
+        }
+        assert!(rendered(footer("/synthetic/db", None, 80), 80, 2).contains("unavailable"));
     }
 }

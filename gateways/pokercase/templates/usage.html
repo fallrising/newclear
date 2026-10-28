@@ -1,3 +1,4 @@
+{% from "cost_summary" import render_cost %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -24,7 +25,8 @@
     <main class="content">
       <h1>Usage</h1>
       <p class="muted">
-        Estimated total cost: <strong>${{ cost_total }}</strong>
+        All-time cost: <strong>{{ render_cost(cost_total) }}</strong>
+        · Recorded estimates (USD); coverage counts rows
         · <a href="/admin/api/usage/export.csv">Export CSV</a>
       </p>
 
@@ -52,7 +54,7 @@
               <td>{{ d.ok }}</td>
               <td>{{ d.errors }}</td>
               <td class="mono">{{ d.prompt_tokens }}/{{ d.completion_tokens }}</td>
-              <td>${{ d.estimated_cost_usd }}</td>
+              <td>{{ render_cost(d.cost_summary) }}</td>
               <td>{{ d.avg_latency_ms }} ms</td>
             </tr>
             {% endfor %}

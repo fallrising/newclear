@@ -39,6 +39,16 @@ README 的 11 類 use case 是不同應用情境。本實驗驗證它們的記�
 - 問答場景輸出附來源的檢索 context；本實驗沒有 LLM 生成器。上游效能、accuracy、任意 branch/time-travel 及合規宣稱均不因此得到驗證。
 - JSON 報告記錄版本、案例、預期、實得、計時、檔案雜湊和執行狀態；不能將檢查錯誤吞成 pass。
 
+### 實作探勘後的明示適配
+
+原始多筆寫入的 lexical 索引出現來源漏失／映射異常，單純 seal/reopen 未能穩定消除。
+本 lab 對自己新建的資料，於寫入階段使用官方 `doctor(rebuild_lex_index=True)` 準備索引，再檢查相同內容 oracle；唯讀 query 不自動修復。
+這是已知上游問題的明示適配，不改寫「原始行為失敗」的紀錄。
+
+Python wheel 未內建 Whisper，且其本地 BGE feature 不可用。BGE 採真 ONNX provider → Memvid index；
+Whisper 以固定官方 crate 的原生 `WhisperTranscriber` 加本地 cache 初始化補丁執行。
+補丁只讓模型從明確準備目錄載入，推論不變；實際 crate hash、VCS dirty 標記與 GitHub 閱讀基準分開記錄。
+
 ## 驗收與重現
 
 完整 AC 見 [SUCCESS.md](SUCCESS.md)。先跑 dependency/API probe，將文件與實際 SDK 差異記錄，再執行基本場景與模型場景。模型不可用或功能不在 SDK 時保留具體錯誤、可重試命令和 `blocked`，主線保持 incomplete。

@@ -52,4 +52,5 @@
 | [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 完成 | [usable/wotar/v0.1.0](https://github.com/fallrising/newclear/tree/usable/wotar/v0.1.0/systems/wotar) | 2026-09-24 |
 | [tools/cc-quota](tools/cc-quota/SUCCESS.md) | tools | 保存已封存 Claude 額度採集與通知來源，後繼為 Agent Usage | 參考／封存 | 尚無已核准標記 | 2026-09-27 |
 | [tools/codex-usage](tools/codex-usage/SUCCESS.md) | tools | 統一唯讀查詢多工具額度與使用狀態並保留 Codex 採集相容性 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
+| [tools/motion-prompt](tools/motion-prompt/SUCCESS.md) | tools | 以繁中與英文動態示範辨認術語並複製 AI 提示詞 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-28 |
 | [tools/streaming-converter](tools/streaming-converter/SUCCESS.md) | tools | 保留 FFmpeg 多畫質 HLS 轉檔與網頁播放的歷史工具 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |

@@ -1,0 +1,35 @@
+// Motion Prompt #052 · MIT License (c) 2026 Shohei Ohtaki · ./#052
+//
+// 手風琴式摺疊區塊（Accordion）
+// 分類組: ui (UI 元件) · element 04 · 分類: 展開與浮層
+// 示範內容: 點選三個標題中的第一個，內容展開並推開下方列；再次點選便收合。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。三個標題（寬 494、高 34、圓角半徑 8、間距 6），右側有向下箭頭。
+//   - 游標於 0.95 s 抵達第一個標題，於 1.0 s 與 3.3 s 點擊。
+//   - 展開量 ex：於 1.0–1.35 s 以 easeInOutCubic 從 0→1，再於 3.3–3.62 s 從 1→0。
+//   - 首列高度由 34 增至 92（+58·ex），推動下方列；兩行內容裁切於列內，以不透明度 ex 淡入。
+//   - 展開時，箭頭旋轉 180°·ex，邊框變淡藍，標題變藍。
+// 使用情境: 適合常見問題或較長說明，讓使用者掃視標題，只開啟所需內容。
+// 關鍵字: accordion, collapsible, expand, collapse, disclosure, faq, details
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#052
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 04
+
+CELLS[3] = ui((w, h, t) => {
+  const ex = eio(seg(t, 1.0, 1.35)) * (1 - eio(seg(t, 3.3, 3.62)));
+  let y = 12; const H0 = 34, EX = 58;
+  for (let i = 0; i < 3; i++) {
+    const extra = i === 0 ? EX * ex : 0;
+    strokeRR(24, y, 494, H0 + extra, 8, i === 0 && ex > .05 ? C.sb : C.line2, 1.5);
+    bar(42, y + 12, [180, 220, 150][i], i === 0 && ex > .05 ? C.blue : C.line2, 10);
+    chevron(494, y + 17, 6, i === 0 ? Math.PI * ex : 0, i === 0 && ex > .05 ? C.blue : '#9a9896');
+    if (i === 0 && ex > 0) { X.save(); rr(24, y, 494, H0 + extra, 8); X.clip(); X.globalAlpha = ex; bar(42, y + H0 + 6, 420); bar(42, y + H0 + 24, 320); X.restore(); }
+    y += H0 + extra + 6;
+  }
+  pointer([[.3, w + 30, h + 30], [.95, 300, 31], [1.6, 300, 31], [3.0, 300, 31], [3.55, 300, 31], [4.2, w + 30, h + 30]], [1.0, 3.3], t);
+});

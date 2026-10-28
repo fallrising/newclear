@@ -1,0 +1,28 @@
+// Motion Prompt #029 · MIT License (c) 2026 Shohei Ohtaki · ./#029
+//
+// 跟拍鏡頭（Tracking shot）
+// 分類組: camera (鏡頭運動與轉場) · element 05 · 分類: 鏡頭運動
+// 示範內容: 攝影機以人物步行速度橫移；人物維持置中，較近的柱子快速掠過。
+// 動作／視覺規格:
+//   - 攝影機：以固定 1.7 m/s 向右移動（4.7 s 內 x = -4.0 m→+4.0 m）；高度 1.3 m，朝正前方，無緩動。
+//   - 主體：人物與攝影機保持相同 x（距離 7.5 m），維持在畫面中央；手腳擺動為 sin(u×7)×0.42 rad。
+//   - 視差：深度 4 m、每隔 1.6 m 的柱子向左移最快，其次是樹、再是建築（48 m 外）；山幾乎不動。
+//   - 右上角顯示「→ 1.7m/s」。
+//   - 重複：每 4.7 s 跳回起點；柱子與地面網格在接縫處對齊，背景建築與樹會跳動。
+// 使用情境: 適合跟隨走路或跑步的主體，同時呈現動作與移動感。
+// 關鍵字: tracking, tracking shot, follow, truck, lateral, sideways, parallax, walk
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#029
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 05
+
+CELLS[4] = shot((k, w, h, u) => {
+  const x = (u - CYC / 2) * 1.7;
+  const fgp = []; for (let i = -12; i <= 12; i++) fgp.push([i * 1.6, 4]);
+  world(k, w, h, cam({ x, y: 1.3 }), { person: { x, z: 7.5, walk: u * 7 }, fg: fgp });
+  return '→ 1.7m/s';
+});

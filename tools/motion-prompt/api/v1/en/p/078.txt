@@ -1,0 +1,18 @@
+Please use "Scroll snap" from "Landing page & web effects".
+Motion Prompt #078 · lp/scroll-snap
+
+Meaning: Scrolling settles exactly on the next section
+Example request (adapt to your project): Add scroll snap per section, so a small scroll lands on the top of the next section.
+What this demo shows: After a small scroll, the page carries itself the rest of the way until the next section's top lines up with the top of the view.
+Demo specification (independent of the example request):
+- Each section is as tall as the viewport (168 px). The first is pale blue, the second navy.
+- One snap per 2.4 s. At 0.45–0.85 s the user scrolls only 34 px (cubic ease-out).
+- At 0.9–1.5 s the page moves the remaining 134 px by itself and lines up the next section's top (cubic ease-out).
+- The second 2.4 s does the same upward, back to the first section (the behaviour of scroll-snap-type: y mandatory).
+When to use it: Use it for a page that should read one full screen at a time, like slides.
+
+Local demo: ./?lang=en#078
+Local specification and code: ./api/v1/en/e/078.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

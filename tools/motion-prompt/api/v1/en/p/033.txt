@@ -1,0 +1,20 @@
+Please use "Rack focus" from "Camera moves & transitions".
+Motion Prompt #033 · camera/rack-focus
+
+Meaning: Shift focus between near and far
+Example request (adapt to your project): Rack focus from the cup in the foreground to the person behind it, in 1 second.
+What this demo shows: The camera does not move; focus shifts from a flower in the foreground to a person behind it, swapping which one is blurred.
+Demo specification (independent of the example request):
+- Camera: position, direction and focal length all fixed (height 1.1 m); only the blur amounts change
+- Blur: the foreground flower (0.75 m left, 2 m away) goes 0 px → 7 px; the person and background (person 0.9 m right, 9 m away) go 6 px → 0 px; the ground grid uses 0.6× the background blur
+- Timing: 1.0 s to 2.6 s (1.6 s), cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1))
+- Focus marker: blue corner brackets travel in a straight line from the flower to the person, half-width shrinking 46 px → 30 px
+- Subject: neither the flower nor the person moves
+- Return: hold 2.6–4.2 s, then cross-fade back over the last 0.5 s; top-right readout shows focus distance (◎ 2m → ◎ 9m)
+When to use it: To move attention from foreground to background (or back) without cutting.
+
+Local demo: ./?lang=en#033
+Local specification and code: ./api/v1/en/e/033.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

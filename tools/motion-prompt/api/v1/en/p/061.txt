@@ -1,0 +1,18 @@
+Please use "Filter chips" from "UI component names".
+Motion Prompt #061 · ui/filter-chips
+
+Meaning: Small pills you click to add or remove a filter
+Example request (adapt to your project): Add filter chips above the list: a clicked chip gets a check mark and turns blue, and the list filters within 0.15 s.
+What this demo shows: Clicking the "New" and "Free" chips adds a check mark and turns them blue, and cards that do not match fade out.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. Four chips ("All, New, Popular, Free" in the selected language): 34 tall, radius 17, width = text + 32, 10 px apart from the left.
+- Clicks: New on at 0.95 s, Free on at 1.75 s, New off at 3.0 s, Free off at 3.6 s.
+- Each change takes 0.15 s with easeOutCubic: the chip widens 18 px to make room for a check mark; fill light blue, border and text blue.
+- List below: four cards (242×54, two columns, two rows); cards that do not match drop from opacity 1 to 0.12.
+When to use it: Use it to let people narrow a list or search results by combining a few quick filters.
+
+Local demo: ./?lang=en#061
+Local specification and code: ./api/v1/en/e/061.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

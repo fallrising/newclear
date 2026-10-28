@@ -1,0 +1,35 @@
+// Motion Prompt #050 · MIT License (c) 2026 Shohei Ohtaki · ./#050
+//
+// 側邊抽屜（Drawer (Off-canvas)）
+// 分類組: ui (UI 元件) · element 02 · 分類: 展開與浮層
+// 示範內容: 點選選單後，高面板由左側滑入；點選外側便滑回。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。游標於 1.0 s 點選左上選單按鈕（110×34）。
+//   - 開啟量 a：於 1.0–1.38 s 以 easeOutCubic 從 0→1；全卡片 rgba(18,20,28) 遮罩的不透明度為 0.36·a。
+//   - 面板：白色、寬 210、與卡片同高，x = −210 + 210·a，從左邊緣滑入；陰影模糊 22、alpha 0.25。
+//   - 內容：頂部頭像（半徑 14）與名稱，下方四列選單相隔 32 px；首列以淡藍底表示已選取。
+//   - 關閉：3.3 s 點選面板外的 (420, 120)，a 乘上 (1 − 3.3–3.65 s 期間的 easeInOutCubic)，面板滑回。
+// 使用情境: 適合將導覽或篩選器收在畫面外，需要時才開啟，尤其適用手機。
+// 關鍵字: drawer, off-canvas, offcanvas, side-menu, navigation-drawer, sheet, sidebar, slide-in
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#050
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 02
+
+CELLS[1] = ui((w, h, t) => {
+  strokeRR(24, 14, 110, 34, 8, C.line2, 1.5); text("選單", 79, 31, 15, '#555', 600, 'center');
+  bar(160, 26, 140, C.line2, 11); pageLines(24, 70, 494); fillRR(24, 138, 494, 42, 8, C.block);
+  const a = eo(seg(t, 1.0, 1.38)) * (1 - eio(seg(t, 3.3, 3.65)));
+  if (a > 0) {
+    X.fillStyle = `rgba(18,20,28,${.36 * a})`; X.fillRect(0, 0, w, h);
+    const pw = 210, px = -pw + pw * a;
+    shadowed(() => { X.fillStyle = '#fff'; X.fillRect(px, 0, pw, h); }, 22, 0, .25);
+    circle(px + 34, 32, 14, C.mb); bar(px + 58, 27, 100, C.line2, 10);
+    for (let i = 0; i < 4; i++) { const y = 62 + i * 32; if (i === 0) fillRR(px + 12, y - 2, pw - 24, 28, 6, C.lb); fillRR(px + 22, y + 5, 14, 14, 3, i === 0 ? C.blue : C.line2); bar(px + 46, y + 7, 90 + (i % 2) * 30, i === 0 ? C.sb : C.line); }
+  }
+  pointer([[.3, w + 30, h + 30], [.95, 70, 34], [1.6, 70, 34], [3.0, 420, 120], [3.6, 420, 120], [4.2, w + 30, h + 30]], [1.0, 3.3], t);
+});

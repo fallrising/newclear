@@ -1,0 +1,32 @@
+// Motion Prompt #059 · MIT License (c) 2026 Shohei Ohtaki · ./#059
+//
+// 切換開關（Toggle switch）
+// 分類組: ui (UI 元件) · element 11 · 分類: 選取與切換
+// 示範內容: 三列設定中的前兩個開關依序開啟，再依序關閉。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。三列設定相隔 60 px 並有分隔線；x 450 處為 64×34 軌道（半徑 17）與白色圓鈕（半徑 13、帶陰影）。
+//   - 點擊：第 1 列於 1.0 s 開啟、第 2 列於 1.8 s 開啟、第 1 列於 3.0 s 關閉、第 2 列於 3.6 s 關閉；第 3 列維持關閉。
+//   - 每次切換以 easeOutCubic 持續 0.2 s；圓鈕滑動 30 px（17→47）。
+//   - 軌道顏色隨進度由灰色 #d9d7d5 混合至藍色 #1f5ae8。
+// 使用情境: 適合立即生效、只有兩種狀態的設定。
+// 關鍵字: toggle, switch, toggle-switch, on-off, boolean, settings
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#059
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 11
+
+CELLS[10] = ui((w, h, t) => {
+  const st = [eo(seg(t, 1.0, 1.2)) * (1 - eo(seg(t, 3.0, 3.2))), eo(seg(t, 1.8, 2.0)) * (1 - eo(seg(t, 3.6, 3.8))), 0];
+  for (let i = 0; i < 3; i++) {
+    const y = 14 + i * 60; bar(24, y + 10, [170, 140, 190][i], C.line2, 11); bar(24, y + 30, [260, 220, 240][i], C.line, 8);
+    if (i < 2) { X.fillStyle = C.line; X.fillRect(24, y + 52, 494, 1.5); }
+    const k = st[i], tx = 450, ty = y + 10;
+    fillRR(tx, ty, 64, 34, 17, k > .5 ? C.blue : '#d9d7d5'); if (k > 0 && k < 1) { X.globalAlpha = k; fillRR(tx, ty, 64, 34, 17, C.blue); X.globalAlpha = 1; }
+    shadowed(() => circle(tx + 17 + 30 * k, ty + 17, 13, '#fff'), 4, 1, .25);
+  }
+  pointer([[.3, w + 30, h + 30], [.95, 486, 30], [1.35, 486, 30], [1.75, 486, 90], [2.5, 486, 90], [2.95, 486, 30], [3.25, 486, 30], [3.55, 486, 90], [3.85, 486, 90], [4.3, w + 30, h + 30]], [1.0, 1.8, 3.0, 3.6], t);
+});

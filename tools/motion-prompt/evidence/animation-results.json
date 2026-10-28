@@ -1,0 +1,2898 @@
+{
+  "browser": "Chromium 153.0.8010.0",
+  "samplesPerElement": 8,
+  "extraChecks": [
+    "seam at 1/60 s",
+    "same-time purity",
+    "2x context scaling"
+  ],
+  "source": "770eefb7091cc725ab0eb6d4ef5cbf28b28e282c",
+  "results": {
+    "upstream": [
+      {
+        "status": "ok",
+        "id": "001",
+        "slug": "pop-in",
+        "seam": 0.0,
+        "step": 0.5,
+        "note": "(background only at 0.00s, 2.35s)"
+      },
+      {
+        "status": "ok",
+        "id": "002",
+        "slug": "stagger",
+        "seam": 0.0,
+        "step": 0.45,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "003",
+        "slug": "burst",
+        "seam": 0.0,
+        "step": 3.63,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "004",
+        "slug": "line-draw",
+        "seam": 0.0,
+        "step": 0.6,
+        "note": "(background only at 0.00s)"
+      },
+      {
+        "status": "ok",
+        "id": "005",
+        "slug": "mask-reveal",
+        "seam": 0.0,
+        "step": 2.94,
+        "note": "(background only at 0.00s, 2.35s)"
+      },
+      {
+        "status": "ok",
+        "id": "006",
+        "slug": "typewriter",
+        "seam": 4.71,
+        "step": 0.91,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "007",
+        "slug": "count-up",
+        "seam": 0.0,
+        "step": 8.09,
+        "note": "(background only at 0.00s)"
+      },
+      {
+        "status": "ok",
+        "id": "008",
+        "slug": "kinetic-typography",
+        "seam": 0.0,
+        "step": 1.82,
+        "note": "(background only at 0.00s, 1.18s, 2.35s, 3.53s)"
+      },
+      {
+        "status": "ok",
+        "id": "009",
+        "slug": "easing",
+        "seam": 0.0,
+        "step": 0.73,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "010",
+        "slug": "overshoot",
+        "seam": 0.0,
+        "step": 1.46,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "011",
+        "slug": "squash-and-stretch",
+        "seam": 0.46,
+        "step": 0.48,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "012",
+        "slug": "shape-morph",
+        "seam": 0.0,
+        "step": 0.77,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "013",
+        "slug": "liquid-motion",
+        "seam": 0.02,
+        "step": 2.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "014",
+        "slug": "motion-trail",
+        "seam": 0.94,
+        "step": 0.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "015",
+        "slug": "particles",
+        "seam": 3.98,
+        "step": 4.05,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "016",
+        "slug": "parallax",
+        "seam": 2.06,
+        "step": 2.06,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "017",
+        "slug": "mask-transition",
+        "seam": 0.0,
+        "step": 3.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "018",
+        "slug": "shape-transition",
+        "seam": 0.0,
+        "step": 3.32,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "019",
+        "slug": "liquid-transition",
+        "seam": 0.0,
+        "step": 5.47,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "020",
+        "slug": "zoom-through",
+        "seam": 1.9,
+        "step": 8.56,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "021",
+        "slug": "flip",
+        "seam": 0.0,
+        "step": 5.41,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "022",
+        "slug": "light-sweep",
+        "seam": 0.0,
+        "step": 0.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "023",
+        "slug": "glitch",
+        "seam": 0.0,
+        "step": 0.0,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "024",
+        "slug": "impact-shake",
+        "seam": 0.0,
+        "step": 25.17,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "025",
+        "slug": "pan",
+        "seam": 0.25,
+        "step": 1.62,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "026",
+        "slug": "tilt",
+        "seam": 0.01,
+        "step": 1.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "027",
+        "slug": "dolly-in",
+        "seam": 0.04,
+        "step": 0.51,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "028",
+        "slug": "zoom-in",
+        "seam": 0.04,
+        "step": 1.83,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "029",
+        "slug": "tracking-shot",
+        "seam": 5.19,
+        "step": 1.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "030",
+        "slug": "orbit-arc-shot",
+        "seam": 0.0,
+        "step": 3.59,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "031",
+        "slug": "crane-up",
+        "seam": 0.0,
+        "step": 1.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "032",
+        "slug": "dolly-zoom-vertigo",
+        "seam": 0.0,
+        "step": 0.41,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "033",
+        "slug": "rack-focus",
+        "seam": 0.0,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "034",
+        "slug": "handheld",
+        "seam": 1.42,
+        "step": 1.83,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "035",
+        "slug": "fpv-drone-shot",
+        "seam": 5.45,
+        "step": 2.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "036",
+        "slug": "dutch-angle",
+        "seam": 0.01,
+        "step": 1.72,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "037",
+        "slug": "slow-motion",
+        "seam": 0.03,
+        "step": 0.08,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "038",
+        "slug": "speed-ramp",
+        "seam": 0.01,
+        "step": 0.59,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "039",
+        "slug": "time-lapse",
+        "seam": 0.0,
+        "step": 1.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "040",
+        "slug": "freeze-frame",
+        "seam": 0.12,
+        "step": 0.12,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "041",
+        "slug": "jump-cut",
+        "seam": 2.43,
+        "step": 0.0,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "042",
+        "slug": "match-cut",
+        "seam": 4.84,
+        "step": 0.09,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "043",
+        "slug": "whip-pan",
+        "seam": 0.08,
+        "step": 2.34,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "044",
+        "slug": "cross-dissolve",
+        "seam": 0.08,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "045",
+        "slug": "wipe",
+        "seam": 0.08,
+        "step": 1.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "046",
+        "slug": "smash-cut",
+        "seam": 0.05,
+        "step": 4.94,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "047",
+        "slug": "j-cut",
+        "seam": 0.03,
+        "step": 0.4,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "048",
+        "slug": "l-cut",
+        "seam": 0.03,
+        "step": 0.4,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "049",
+        "slug": "modal-dialog",
+        "seam": 0.0,
+        "step": 5.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "050",
+        "slug": "drawer",
+        "seam": 0.0,
+        "step": 4.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "051",
+        "slug": "bottom-sheet",
+        "seam": 0.0,
+        "step": 13.11,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "052",
+        "slug": "accordion",
+        "seam": 0.0,
+        "step": 3.61,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "053",
+        "slug": "dropdown-menu",
+        "seam": 0.0,
+        "step": 0.86,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "054",
+        "slug": "tooltip",
+        "seam": 0.0,
+        "step": 1.31,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "055",
+        "slug": "popover",
+        "seam": 0.0,
+        "step": 1.75,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "056",
+        "slug": "toast",
+        "seam": 0.0,
+        "step": 3.13,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "057",
+        "slug": "tabs",
+        "seam": 0.0,
+        "step": 1.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "058",
+        "slug": "carousel",
+        "seam": 0.0,
+        "step": 7.5,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "059",
+        "slug": "toggle-switch",
+        "seam": 0.0,
+        "step": 0.53,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "060",
+        "slug": "segmented-control",
+        "seam": 0.0,
+        "step": 1.85,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "061",
+        "slug": "filter-chips",
+        "seam": 0.0,
+        "step": 0.98,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "062",
+        "slug": "range-slider",
+        "seam": 0.0,
+        "step": 1.69,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "063",
+        "slug": "stepper",
+        "seam": 0.0,
+        "step": 1.09,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "064",
+        "slug": "pagination",
+        "seam": 0.0,
+        "step": 1.63,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "065",
+        "slug": "hamburger-menu",
+        "seam": 0.0,
+        "step": 5.51,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "066",
+        "slug": "breadcrumbs",
+        "seam": 0.0,
+        "step": 2.5,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "067",
+        "slug": "mega-menu",
+        "seam": 0.0,
+        "step": 1.79,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "068",
+        "slug": "step-indicator",
+        "seam": 0.0,
+        "step": 0.31,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "069",
+        "slug": "skeleton-screen",
+        "seam": 0.0,
+        "step": 1.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "070",
+        "slug": "spinner",
+        "seam": 0.0,
+        "step": 0.77,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "071",
+        "slug": "badge",
+        "seam": 0.0,
+        "step": 0.13,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "072",
+        "slug": "empty-state",
+        "seam": 0.0,
+        "step": 2.35,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "073",
+        "slug": "parallax-scrolling",
+        "seam": 0.0,
+        "step": 6.74,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "074",
+        "slug": "fade-in-on-scroll",
+        "seam": 0.0,
+        "step": 10.82,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "075",
+        "slug": "sticky-header",
+        "seam": 0.0,
+        "step": 7.83,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "076",
+        "slug": "pinning",
+        "seam": 0.0,
+        "step": 14.8,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "077",
+        "slug": "horizontal-scroll",
+        "seam": 0.0,
+        "step": 5.37,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "078",
+        "slug": "scroll-snap",
+        "seam": 0.0,
+        "step": 4.89,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "079",
+        "slug": "scroll-progress-bar",
+        "seam": 0.0,
+        "step": 15.39,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "080",
+        "slug": "highlighter-animation",
+        "seam": 0.0,
+        "step": 12.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "081",
+        "slug": "hover-lift",
+        "seam": 0.0,
+        "step": 0.05,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "082",
+        "slug": "image-zoom-on-hover",
+        "seam": 0.0,
+        "step": 0.22,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "083",
+        "slug": "cursor-follower",
+        "seam": 0.36,
+        "step": 0.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "084",
+        "slug": "magnetic-button",
+        "seam": 0.0,
+        "step": 1.3,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "085",
+        "slug": "ripple-effect",
+        "seam": 0.0,
+        "step": 0.24,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "086",
+        "slug": "underline-animation",
+        "seam": 0.0,
+        "step": 0.18,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "087",
+        "slug": "before-after-slider",
+        "seam": 0.0,
+        "step": 1.06,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "088",
+        "slug": "exit-intent-popup",
+        "seam": 0.0,
+        "step": 4.31,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "089",
+        "slug": "preloader",
+        "seam": 0.0,
+        "step": 3.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "090",
+        "slug": "lazy-loading",
+        "seam": 0.0,
+        "step": 7.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "091",
+        "slug": "infinite-scroll",
+        "seam": 0.0,
+        "step": 7.54,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "092",
+        "slug": "page-transition",
+        "seam": 0.0,
+        "step": 1.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "093",
+        "slug": "smooth-scroll",
+        "seam": 0.0,
+        "step": 4.14,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "094",
+        "slug": "marquee",
+        "seam": 5.34,
+        "step": 5.48,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "095",
+        "slug": "animated-gradient",
+        "seam": 0.22,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "096",
+        "slug": "floating-animation",
+        "seam": 0.23,
+        "step": 0.29,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "097",
+        "slug": "backlighting",
+        "seam": 0.0,
+        "step": 1.17,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "098",
+        "slug": "rim-light",
+        "seam": 0.0,
+        "step": 6.5,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "099",
+        "slug": "silhouette",
+        "seam": 0.0,
+        "step": 3.33,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "100",
+        "slug": "split-lighting",
+        "seam": 0.0,
+        "step": 0.94,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "101",
+        "slug": "rembrandt-lighting",
+        "seam": 0.0,
+        "step": 0.79,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "102",
+        "slug": "butterfly-lighting",
+        "seam": 0.0,
+        "step": 0.99,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "103",
+        "slug": "golden-hour",
+        "seam": 0.0,
+        "step": 1.71,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "104",
+        "slug": "blue-hour",
+        "seam": 0.0,
+        "step": 5.92,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "105",
+        "slug": "bokeh",
+        "seam": 0.0,
+        "step": 1.14,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "106",
+        "slug": "tilt-shift",
+        "seam": 0.0,
+        "step": 0.27,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "107",
+        "slug": "long-exposure",
+        "seam": 0.0,
+        "step": 6.01,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "108",
+        "slug": "panning-shot",
+        "seam": 0.0,
+        "step": 1.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "109",
+        "slug": "lens-flare",
+        "seam": 0.0,
+        "step": 0.36,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "110",
+        "slug": "fisheye-lens",
+        "seam": 0.0,
+        "step": 4.49,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "111",
+        "slug": "chromatic-aberration",
+        "seam": 0.0,
+        "step": 0.19,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "112",
+        "slug": "vignette",
+        "seam": 0.0,
+        "step": 1.36,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "113",
+        "slug": "high-key",
+        "seam": 0.0,
+        "step": 0.57,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "114",
+        "slug": "low-key",
+        "seam": 0.0,
+        "step": 6.58,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "115",
+        "slug": "black-and-white",
+        "seam": 0.0,
+        "step": 0.29,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "116",
+        "slug": "duotone",
+        "seam": 0.0,
+        "step": 2.26,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "117",
+        "slug": "teal-and-orange",
+        "seam": 0.0,
+        "step": 2.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "118",
+        "slug": "film-grain",
+        "seam": 0.0,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "119",
+        "slug": "light-leak",
+        "seam": 0.0,
+        "step": 0.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "120",
+        "slug": "double-exposure",
+        "seam": 0.0,
+        "step": 0.45,
+        "note": ""
+      }
+    ],
+    "zh": [
+      {
+        "status": "ok",
+        "id": "001",
+        "slug": "pop-in",
+        "seam": 0.0,
+        "step": 0.5,
+        "note": "(background only at 0.00s, 2.35s)"
+      },
+      {
+        "status": "ok",
+        "id": "002",
+        "slug": "stagger",
+        "seam": 0.0,
+        "step": 0.45,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "003",
+        "slug": "burst",
+        "seam": 0.0,
+        "step": 3.63,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "004",
+        "slug": "line-draw",
+        "seam": 0.0,
+        "step": 0.6,
+        "note": "(background only at 0.00s)"
+      },
+      {
+        "status": "ok",
+        "id": "005",
+        "slug": "mask-reveal",
+        "seam": 0.0,
+        "step": 5.5,
+        "note": "(background only at 0.00s, 2.35s)"
+      },
+      {
+        "status": "ok",
+        "id": "006",
+        "slug": "typewriter",
+        "seam": 5.08,
+        "step": 0.88,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "007",
+        "slug": "count-up",
+        "seam": 0.0,
+        "step": 8.09,
+        "note": "(background only at 0.00s)"
+      },
+      {
+        "status": "ok",
+        "id": "008",
+        "slug": "kinetic-typography",
+        "seam": 0.0,
+        "step": 2.23,
+        "note": "(background only at 0.00s, 1.18s, 2.35s, 3.53s)"
+      },
+      {
+        "status": "ok",
+        "id": "009",
+        "slug": "easing",
+        "seam": 0.0,
+        "step": 0.73,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "010",
+        "slug": "overshoot",
+        "seam": 0.0,
+        "step": 1.46,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "011",
+        "slug": "squash-and-stretch",
+        "seam": 0.46,
+        "step": 0.48,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "012",
+        "slug": "shape-morph",
+        "seam": 0.0,
+        "step": 0.77,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "013",
+        "slug": "liquid-motion",
+        "seam": 0.02,
+        "step": 2.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "014",
+        "slug": "motion-trail",
+        "seam": 0.94,
+        "step": 0.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "015",
+        "slug": "particles",
+        "seam": 3.98,
+        "step": 4.05,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "016",
+        "slug": "parallax",
+        "seam": 2.06,
+        "step": 2.06,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "017",
+        "slug": "mask-transition",
+        "seam": 0.0,
+        "step": 3.42,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "018",
+        "slug": "shape-transition",
+        "seam": 0.0,
+        "step": 3.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "019",
+        "slug": "liquid-transition",
+        "seam": 0.0,
+        "step": 5.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "020",
+        "slug": "zoom-through",
+        "seam": 1.9,
+        "step": 8.56,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "021",
+        "slug": "flip",
+        "seam": 0.0,
+        "step": 5.41,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "022",
+        "slug": "light-sweep",
+        "seam": 0.0,
+        "step": 0.53,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "023",
+        "slug": "glitch",
+        "seam": 0.0,
+        "step": 0.0,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "024",
+        "slug": "impact-shake",
+        "seam": 0.0,
+        "step": 25.79,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "025",
+        "slug": "pan",
+        "seam": 0.25,
+        "step": 1.62,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "026",
+        "slug": "tilt",
+        "seam": 0.01,
+        "step": 1.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "027",
+        "slug": "dolly-in",
+        "seam": 0.04,
+        "step": 0.51,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "028",
+        "slug": "zoom-in",
+        "seam": 0.04,
+        "step": 1.83,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "029",
+        "slug": "tracking-shot",
+        "seam": 5.19,
+        "step": 1.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "030",
+        "slug": "orbit-arc-shot",
+        "seam": 0.0,
+        "step": 3.59,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "031",
+        "slug": "crane-up",
+        "seam": 0.0,
+        "step": 1.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "032",
+        "slug": "dolly-zoom-vertigo",
+        "seam": 0.0,
+        "step": 0.41,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "033",
+        "slug": "rack-focus",
+        "seam": 0.0,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "034",
+        "slug": "handheld",
+        "seam": 1.42,
+        "step": 1.83,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "035",
+        "slug": "fpv-drone-shot",
+        "seam": 5.45,
+        "step": 2.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "036",
+        "slug": "dutch-angle",
+        "seam": 0.01,
+        "step": 1.72,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "037",
+        "slug": "slow-motion",
+        "seam": 0.03,
+        "step": 0.08,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "038",
+        "slug": "speed-ramp",
+        "seam": 0.01,
+        "step": 0.59,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "039",
+        "slug": "time-lapse",
+        "seam": 0.0,
+        "step": 1.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "040",
+        "slug": "freeze-frame",
+        "seam": 0.12,
+        "step": 0.12,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "041",
+        "slug": "jump-cut",
+        "seam": 2.43,
+        "step": 0.0,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "042",
+        "slug": "match-cut",
+        "seam": 4.84,
+        "step": 0.09,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "043",
+        "slug": "whip-pan",
+        "seam": 0.08,
+        "step": 2.34,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "044",
+        "slug": "cross-dissolve",
+        "seam": 0.08,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "045",
+        "slug": "wipe",
+        "seam": 0.08,
+        "step": 1.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "046",
+        "slug": "smash-cut",
+        "seam": 0.05,
+        "step": 4.94,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "047",
+        "slug": "j-cut",
+        "seam": 0.03,
+        "step": 0.4,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "048",
+        "slug": "l-cut",
+        "seam": 0.03,
+        "step": 0.4,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "049",
+        "slug": "modal-dialog",
+        "seam": 0.0,
+        "step": 5.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "050",
+        "slug": "drawer",
+        "seam": 0.0,
+        "step": 4.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "051",
+        "slug": "bottom-sheet",
+        "seam": 0.0,
+        "step": 13.11,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "052",
+        "slug": "accordion",
+        "seam": 0.0,
+        "step": 3.61,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "053",
+        "slug": "dropdown-menu",
+        "seam": 0.0,
+        "step": 0.86,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "054",
+        "slug": "tooltip",
+        "seam": 0.0,
+        "step": 1.33,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "055",
+        "slug": "popover",
+        "seam": 0.0,
+        "step": 1.77,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "056",
+        "slug": "toast",
+        "seam": 0.0,
+        "step": 3.13,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "057",
+        "slug": "tabs",
+        "seam": 0.0,
+        "step": 1.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "058",
+        "slug": "carousel",
+        "seam": 0.0,
+        "step": 7.5,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "059",
+        "slug": "toggle-switch",
+        "seam": 0.0,
+        "step": 0.53,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "060",
+        "slug": "segmented-control",
+        "seam": 0.0,
+        "step": 1.85,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "061",
+        "slug": "filter-chips",
+        "seam": 0.0,
+        "step": 0.97,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "062",
+        "slug": "range-slider",
+        "seam": 0.0,
+        "step": 1.69,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "063",
+        "slug": "stepper",
+        "seam": 0.0,
+        "step": 1.09,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "064",
+        "slug": "pagination",
+        "seam": 0.0,
+        "step": 1.63,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "065",
+        "slug": "hamburger-menu",
+        "seam": 0.0,
+        "step": 5.51,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "066",
+        "slug": "breadcrumbs",
+        "seam": 0.0,
+        "step": 2.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "067",
+        "slug": "mega-menu",
+        "seam": 0.0,
+        "step": 1.79,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "068",
+        "slug": "step-indicator",
+        "seam": 0.0,
+        "step": 0.29,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "069",
+        "slug": "skeleton-screen",
+        "seam": 0.0,
+        "step": 1.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "070",
+        "slug": "spinner",
+        "seam": 0.0,
+        "step": 0.77,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "071",
+        "slug": "badge",
+        "seam": 0.0,
+        "step": 0.13,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "072",
+        "slug": "empty-state",
+        "seam": 0.0,
+        "step": 2.35,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "073",
+        "slug": "parallax-scrolling",
+        "seam": 0.0,
+        "step": 6.08,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "074",
+        "slug": "fade-in-on-scroll",
+        "seam": 0.0,
+        "step": 10.89,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "075",
+        "slug": "sticky-header",
+        "seam": 0.0,
+        "step": 7.49,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "076",
+        "slug": "pinning",
+        "seam": 0.0,
+        "step": 14.82,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "077",
+        "slug": "horizontal-scroll",
+        "seam": 0.0,
+        "step": 5.37,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "078",
+        "slug": "scroll-snap",
+        "seam": 0.0,
+        "step": 4.86,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "079",
+        "slug": "scroll-progress-bar",
+        "seam": 0.0,
+        "step": 15.39,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "080",
+        "slug": "highlighter-animation",
+        "seam": 0.0,
+        "step": 10.34,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "081",
+        "slug": "hover-lift",
+        "seam": 0.0,
+        "step": 0.05,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "082",
+        "slug": "image-zoom-on-hover",
+        "seam": 0.0,
+        "step": 0.22,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "083",
+        "slug": "cursor-follower",
+        "seam": 0.36,
+        "step": 0.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "084",
+        "slug": "magnetic-button",
+        "seam": 0.0,
+        "step": 1.08,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "085",
+        "slug": "ripple-effect",
+        "seam": 0.0,
+        "step": 0.25,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "086",
+        "slug": "underline-animation",
+        "seam": 0.0,
+        "step": 0.18,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "087",
+        "slug": "before-after-slider",
+        "seam": 0.0,
+        "step": 1.06,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "088",
+        "slug": "exit-intent-popup",
+        "seam": 0.0,
+        "step": 3.99,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "089",
+        "slug": "preloader",
+        "seam": 0.0,
+        "step": 3.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "090",
+        "slug": "lazy-loading",
+        "seam": 0.0,
+        "step": 6.17,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "091",
+        "slug": "infinite-scroll",
+        "seam": 0.0,
+        "step": 7.54,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "092",
+        "slug": "page-transition",
+        "seam": 0.0,
+        "step": 1.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "093",
+        "slug": "smooth-scroll",
+        "seam": 0.0,
+        "step": 4.27,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "094",
+        "slug": "marquee",
+        "seam": 5.34,
+        "step": 5.48,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "095",
+        "slug": "animated-gradient",
+        "seam": 0.22,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "096",
+        "slug": "floating-animation",
+        "seam": 0.23,
+        "step": 0.29,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "097",
+        "slug": "backlighting",
+        "seam": 0.0,
+        "step": 1.17,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "098",
+        "slug": "rim-light",
+        "seam": 0.0,
+        "step": 6.5,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "099",
+        "slug": "silhouette",
+        "seam": 0.0,
+        "step": 3.33,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "100",
+        "slug": "split-lighting",
+        "seam": 0.0,
+        "step": 0.94,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "101",
+        "slug": "rembrandt-lighting",
+        "seam": 0.0,
+        "step": 0.79,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "102",
+        "slug": "butterfly-lighting",
+        "seam": 0.0,
+        "step": 0.99,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "103",
+        "slug": "golden-hour",
+        "seam": 0.0,
+        "step": 1.71,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "104",
+        "slug": "blue-hour",
+        "seam": 0.0,
+        "step": 5.92,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "105",
+        "slug": "bokeh",
+        "seam": 0.0,
+        "step": 1.14,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "106",
+        "slug": "tilt-shift",
+        "seam": 0.0,
+        "step": 0.27,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "107",
+        "slug": "long-exposure",
+        "seam": 0.0,
+        "step": 6.01,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "108",
+        "slug": "panning-shot",
+        "seam": 0.0,
+        "step": 1.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "109",
+        "slug": "lens-flare",
+        "seam": 0.0,
+        "step": 0.36,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "110",
+        "slug": "fisheye-lens",
+        "seam": 0.0,
+        "step": 4.49,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "111",
+        "slug": "chromatic-aberration",
+        "seam": 0.0,
+        "step": 0.19,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "112",
+        "slug": "vignette",
+        "seam": 0.0,
+        "step": 1.36,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "113",
+        "slug": "high-key",
+        "seam": 0.0,
+        "step": 0.57,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "114",
+        "slug": "low-key",
+        "seam": 0.0,
+        "step": 6.58,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "115",
+        "slug": "black-and-white",
+        "seam": 0.0,
+        "step": 0.29,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "116",
+        "slug": "duotone",
+        "seam": 0.0,
+        "step": 2.26,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "117",
+        "slug": "teal-and-orange",
+        "seam": 0.0,
+        "step": 2.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "118",
+        "slug": "film-grain",
+        "seam": 0.0,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "119",
+        "slug": "light-leak",
+        "seam": 0.0,
+        "step": 0.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "120",
+        "slug": "double-exposure",
+        "seam": 0.0,
+        "step": 0.45,
+        "note": ""
+      }
+    ],
+    "en": [
+      {
+        "status": "ok",
+        "id": "001",
+        "slug": "pop-in",
+        "seam": 0.0,
+        "step": 0.5,
+        "note": "(background only at 0.00s, 2.35s)"
+      },
+      {
+        "status": "ok",
+        "id": "002",
+        "slug": "stagger",
+        "seam": 0.0,
+        "step": 0.45,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "003",
+        "slug": "burst",
+        "seam": 0.0,
+        "step": 3.63,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "004",
+        "slug": "line-draw",
+        "seam": 0.0,
+        "step": 0.6,
+        "note": "(background only at 0.00s)"
+      },
+      {
+        "status": "ok",
+        "id": "005",
+        "slug": "mask-reveal",
+        "seam": 0.0,
+        "step": 3.0,
+        "note": "(background only at 0.00s, 2.35s)"
+      },
+      {
+        "status": "ok",
+        "id": "006",
+        "slug": "typewriter",
+        "seam": 0.15,
+        "step": 1.1,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "007",
+        "slug": "count-up",
+        "seam": 0.0,
+        "step": 8.09,
+        "note": "(background only at 0.00s)"
+      },
+      {
+        "status": "ok",
+        "id": "008",
+        "slug": "kinetic-typography",
+        "seam": 0.0,
+        "step": 1.65,
+        "note": "(background only at 0.00s, 1.18s, 2.35s, 3.53s)"
+      },
+      {
+        "status": "ok",
+        "id": "009",
+        "slug": "easing",
+        "seam": 0.0,
+        "step": 0.73,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "010",
+        "slug": "overshoot",
+        "seam": 0.0,
+        "step": 1.46,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "011",
+        "slug": "squash-and-stretch",
+        "seam": 0.46,
+        "step": 0.48,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "012",
+        "slug": "shape-morph",
+        "seam": 0.0,
+        "step": 0.77,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "013",
+        "slug": "liquid-motion",
+        "seam": 0.02,
+        "step": 2.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "014",
+        "slug": "motion-trail",
+        "seam": 0.94,
+        "step": 0.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "015",
+        "slug": "particles",
+        "seam": 3.98,
+        "step": 4.05,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "016",
+        "slug": "parallax",
+        "seam": 2.06,
+        "step": 2.06,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "017",
+        "slug": "mask-transition",
+        "seam": 0.0,
+        "step": 3.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "018",
+        "slug": "shape-transition",
+        "seam": 0.0,
+        "step": 3.32,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "019",
+        "slug": "liquid-transition",
+        "seam": 0.0,
+        "step": 5.47,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "020",
+        "slug": "zoom-through",
+        "seam": 1.9,
+        "step": 8.56,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "021",
+        "slug": "flip",
+        "seam": 0.0,
+        "step": 5.41,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "022",
+        "slug": "light-sweep",
+        "seam": 0.0,
+        "step": 0.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "023",
+        "slug": "glitch",
+        "seam": 0.0,
+        "step": 0.0,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "024",
+        "slug": "impact-shake",
+        "seam": 0.0,
+        "step": 25.17,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "025",
+        "slug": "pan",
+        "seam": 0.25,
+        "step": 1.62,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "026",
+        "slug": "tilt",
+        "seam": 0.01,
+        "step": 1.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "027",
+        "slug": "dolly-in",
+        "seam": 0.04,
+        "step": 0.51,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "028",
+        "slug": "zoom-in",
+        "seam": 0.04,
+        "step": 1.83,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "029",
+        "slug": "tracking-shot",
+        "seam": 5.19,
+        "step": 1.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "030",
+        "slug": "orbit-arc-shot",
+        "seam": 0.0,
+        "step": 3.59,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "031",
+        "slug": "crane-up",
+        "seam": 0.0,
+        "step": 1.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "032",
+        "slug": "dolly-zoom-vertigo",
+        "seam": 0.0,
+        "step": 0.41,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "033",
+        "slug": "rack-focus",
+        "seam": 0.0,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "034",
+        "slug": "handheld",
+        "seam": 1.42,
+        "step": 1.83,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "035",
+        "slug": "fpv-drone-shot",
+        "seam": 5.45,
+        "step": 2.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "036",
+        "slug": "dutch-angle",
+        "seam": 0.01,
+        "step": 1.72,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "037",
+        "slug": "slow-motion",
+        "seam": 0.03,
+        "step": 0.08,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "038",
+        "slug": "speed-ramp",
+        "seam": 0.01,
+        "step": 0.59,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "039",
+        "slug": "time-lapse",
+        "seam": 0.0,
+        "step": 1.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "040",
+        "slug": "freeze-frame",
+        "seam": 0.12,
+        "step": 0.12,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "041",
+        "slug": "jump-cut",
+        "seam": 2.43,
+        "step": 0.0,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "042",
+        "slug": "match-cut",
+        "seam": 4.84,
+        "step": 0.09,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "043",
+        "slug": "whip-pan",
+        "seam": 0.08,
+        "step": 2.34,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "044",
+        "slug": "cross-dissolve",
+        "seam": 0.08,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "045",
+        "slug": "wipe",
+        "seam": 0.08,
+        "step": 1.44,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "046",
+        "slug": "smash-cut",
+        "seam": 0.05,
+        "step": 4.97,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "047",
+        "slug": "j-cut",
+        "seam": 0.03,
+        "step": 0.4,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "048",
+        "slug": "l-cut",
+        "seam": 0.03,
+        "step": 0.4,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "049",
+        "slug": "modal-dialog",
+        "seam": 0.0,
+        "step": 5.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "050",
+        "slug": "drawer",
+        "seam": 0.0,
+        "step": 4.16,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "051",
+        "slug": "bottom-sheet",
+        "seam": 0.0,
+        "step": 13.11,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "052",
+        "slug": "accordion",
+        "seam": 0.0,
+        "step": 3.61,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "053",
+        "slug": "dropdown-menu",
+        "seam": 0.0,
+        "step": 0.86,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "054",
+        "slug": "tooltip",
+        "seam": 0.0,
+        "step": 1.35,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "055",
+        "slug": "popover",
+        "seam": 0.0,
+        "step": 1.75,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "056",
+        "slug": "toast",
+        "seam": 0.0,
+        "step": 3.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "057",
+        "slug": "tabs",
+        "seam": 0.0,
+        "step": 1.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "058",
+        "slug": "carousel",
+        "seam": 0.0,
+        "step": 7.5,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "059",
+        "slug": "toggle-switch",
+        "seam": 0.0,
+        "step": 0.53,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "060",
+        "slug": "segmented-control",
+        "seam": 0.0,
+        "step": 2.0,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "061",
+        "slug": "filter-chips",
+        "seam": 0.0,
+        "step": 0.98,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "062",
+        "slug": "range-slider",
+        "seam": 0.0,
+        "step": 1.69,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "063",
+        "slug": "stepper",
+        "seam": 0.0,
+        "step": 1.09,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "064",
+        "slug": "pagination",
+        "seam": 0.0,
+        "step": 1.63,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "065",
+        "slug": "hamburger-menu",
+        "seam": 0.0,
+        "step": 5.51,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "066",
+        "slug": "breadcrumbs",
+        "seam": 0.0,
+        "step": 2.55,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "067",
+        "slug": "mega-menu",
+        "seam": 0.0,
+        "step": 1.79,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "068",
+        "slug": "step-indicator",
+        "seam": 0.0,
+        "step": 0.3,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "069",
+        "slug": "skeleton-screen",
+        "seam": 0.0,
+        "step": 1.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "070",
+        "slug": "spinner",
+        "seam": 0.0,
+        "step": 0.76,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "071",
+        "slug": "badge",
+        "seam": 0.0,
+        "step": 0.13,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "072",
+        "slug": "empty-state",
+        "seam": 0.0,
+        "step": 2.35,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "073",
+        "slug": "parallax-scrolling",
+        "seam": 0.0,
+        "step": 6.35,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "074",
+        "slug": "fade-in-on-scroll",
+        "seam": 0.0,
+        "step": 10.42,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "075",
+        "slug": "sticky-header",
+        "seam": 0.0,
+        "step": 7.54,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "076",
+        "slug": "pinning",
+        "seam": 0.0,
+        "step": 14.72,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "077",
+        "slug": "horizontal-scroll",
+        "seam": 0.0,
+        "step": 5.37,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "078",
+        "slug": "scroll-snap",
+        "seam": 0.0,
+        "step": 4.62,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "079",
+        "slug": "scroll-progress-bar",
+        "seam": 0.0,
+        "step": 15.39,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "080",
+        "slug": "highlighter-animation",
+        "seam": 0.0,
+        "step": 10.13,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "081",
+        "slug": "hover-lift",
+        "seam": 0.0,
+        "step": 0.05,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "082",
+        "slug": "image-zoom-on-hover",
+        "seam": 0.0,
+        "step": 0.22,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "083",
+        "slug": "cursor-follower",
+        "seam": 0.36,
+        "step": 0.38,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "084",
+        "slug": "magnetic-button",
+        "seam": 0.0,
+        "step": 0.91,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "085",
+        "slug": "ripple-effect",
+        "seam": 0.0,
+        "step": 0.24,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "086",
+        "slug": "underline-animation",
+        "seam": 0.0,
+        "step": 0.18,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "087",
+        "slug": "before-after-slider",
+        "seam": 0.0,
+        "step": 1.06,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "088",
+        "slug": "exit-intent-popup",
+        "seam": 0.0,
+        "step": 3.85,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "089",
+        "slug": "preloader",
+        "seam": 0.0,
+        "step": 3.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "090",
+        "slug": "lazy-loading",
+        "seam": 0.0,
+        "step": 6.18,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "091",
+        "slug": "infinite-scroll",
+        "seam": 0.0,
+        "step": 7.54,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "092",
+        "slug": "page-transition",
+        "seam": 0.0,
+        "step": 1.95,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "093",
+        "slug": "smooth-scroll",
+        "seam": 0.0,
+        "step": 3.35,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "094",
+        "slug": "marquee",
+        "seam": 5.34,
+        "step": 5.48,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "095",
+        "slug": "animated-gradient",
+        "seam": 0.22,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "096",
+        "slug": "floating-animation",
+        "seam": 0.23,
+        "step": 0.29,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "097",
+        "slug": "backlighting",
+        "seam": 0.0,
+        "step": 1.17,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "098",
+        "slug": "rim-light",
+        "seam": 0.0,
+        "step": 6.5,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "099",
+        "slug": "silhouette",
+        "seam": 0.0,
+        "step": 3.33,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "100",
+        "slug": "split-lighting",
+        "seam": 0.0,
+        "step": 0.94,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "101",
+        "slug": "rembrandt-lighting",
+        "seam": 0.0,
+        "step": 0.79,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "102",
+        "slug": "butterfly-lighting",
+        "seam": 0.0,
+        "step": 0.99,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "103",
+        "slug": "golden-hour",
+        "seam": 0.0,
+        "step": 1.71,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "104",
+        "slug": "blue-hour",
+        "seam": 0.0,
+        "step": 5.92,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "105",
+        "slug": "bokeh",
+        "seam": 0.0,
+        "step": 1.14,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "106",
+        "slug": "tilt-shift",
+        "seam": 0.0,
+        "step": 0.27,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "107",
+        "slug": "long-exposure",
+        "seam": 0.0,
+        "step": 6.01,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "108",
+        "slug": "panning-shot",
+        "seam": 0.0,
+        "step": 1.02,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "109",
+        "slug": "lens-flare",
+        "seam": 0.0,
+        "step": 0.36,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "110",
+        "slug": "fisheye-lens",
+        "seam": 0.0,
+        "step": 4.49,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "111",
+        "slug": "chromatic-aberration",
+        "seam": 0.0,
+        "step": 0.19,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "112",
+        "slug": "vignette",
+        "seam": 0.0,
+        "step": 1.36,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "113",
+        "slug": "high-key",
+        "seam": 0.0,
+        "step": 0.57,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "114",
+        "slug": "low-key",
+        "seam": 0.0,
+        "step": 6.58,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "115",
+        "slug": "black-and-white",
+        "seam": 0.0,
+        "step": 0.29,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "116",
+        "slug": "duotone",
+        "seam": 0.0,
+        "step": 2.26,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "117",
+        "slug": "teal-and-orange",
+        "seam": 0.0,
+        "step": 2.21,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "118",
+        "slug": "film-grain",
+        "seam": 0.0,
+        "step": 0.28,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "119",
+        "slug": "light-leak",
+        "seam": 0.0,
+        "step": 0.96,
+        "note": ""
+      },
+      {
+        "status": "ok",
+        "id": "120",
+        "slug": "double-exposure",
+        "seam": 0.0,
+        "step": 0.45,
+        "note": ""
+      }
+    ]
+  }
+}

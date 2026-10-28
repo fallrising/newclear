@@ -1,0 +1,18 @@
+Please use "Skeleton screen" from "UI component names".
+Motion Prompt #069 · ui/skeleton-screen
+
+Meaning: Grey shapes stand in for content while it loads
+Example request (adapt to your project): While the list loads, show a skeleton screen: grey blocks in the shape of the content, with a shine sweeping left to right every 0.9 s.
+What this demo shows: Clicking reload turns the list into grey blocks of the same shape with a sweeping shine; the content returns when loading ends.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. A two-row list (a 96×56 picture and three text lines each). The cursor clicks the reload icon at top right at 1.0 s.
+- Over 1.05–1.2 s (linear) the content switches to grey #e9e7e5 rounded blocks of the same size and position.
+- Shine: a white band 160 wide (transparent at the edges, opacity 0.75 in the middle) sweeps from x −200 to x 742 every 0.9 s, drawn only over the blocks.
+- The content returns over 3.0–3.3 s (linear).
+When to use it: Use it for lists or cards that take a moment to load, so the layout is visible while people wait.
+
+Local demo: ./?lang=en#069
+Local specification and code: ./api/v1/en/e/069.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

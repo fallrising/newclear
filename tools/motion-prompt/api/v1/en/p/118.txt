@@ -1,0 +1,19 @@
+Please use "Film grain" from "Photo looks, lighting & styles".
+Motion Prompt #118 · photo/film-grain
+
+Meaning: Fine, film-like grain over the image
+Example request (adapt to your project): Add film grain to the beach photo: fine grain all over, blacks slightly lifted and warm.
+What this demo shows: Fine grain appears over the whole of the same landscape and the colours lean slightly towards a warm cream.
+Demo specification (independent of the example request):
+- Scene 3: a bust on the left (head centre x 140, y 82, radius 28 px) and hills, a house, trees and the sun (x 432, y 54, radius 15 px) on the right.
+- Grain: 2,600 squares (fixed seed), 0.8–1.7 px; 55% dark #3A3530, 45% white
+- Grain opacity: 16–38% × the effect; the grain does not move (no flicker)
+- Colour: every colour moves 16% towards #F2DDBE
+- Timing: the effect comes in from 0.4 s to 1.4 s, holds until 4.0 s and is gone again by 4.8 s (one pass = 5 s, cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1)))
+When to use it: To remove the clean digital look and add an analogue film texture.
+
+Local demo: ./?lang=en#118
+Local specification and code: ./api/v1/en/e/118.txt
+Local helper code: ./api/v1/kit/en/photo.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

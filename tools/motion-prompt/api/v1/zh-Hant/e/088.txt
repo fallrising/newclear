@@ -1,0 +1,47 @@
+// Motion Prompt #088 · MIT License (c) 2026 Shohei Ohtaki · ./#088
+//
+// 離站意圖彈窗（Exit-intent popup）
+// 分類組: lp (網頁與登陸頁效果) · element 16 · 分類: 懸停與點擊互動
+// 示範內容: 游標移向頁面上方的分頁與關閉按鈕時，頁面變暗並開啟「等一下！」彈窗；按 × 關閉。
+// 動作／視覺規格:
+//   - 0.7–1.25 s 游標從頁面向瀏覽器網址列上升（cubic ease-in-out）。
+//   - 游標越過可視區域頂緣時觸發（y = 0，約 1.07 s），相當於 document 的 mouseleave 且 clientY ≤ 0。
+//   - 觸發後 0.05–0.45 s 開啟（cubic ease-out）：深藍背景遮罩不透明度 0→0.5；彈窗為 260 × 132、圓角半徑 12，不透明度 0→1、縮放 0.9→1。
+//   - 內含標題、橘色折扣文字、優惠券按鈕，以及右上角的 ×。
+//   - 2.9 s 點擊 ×，於 0.03–0.25 s 後線性消失。
+// 使用情境: 適合向尚未完成轉換、即將離開的訪客提供最後一次優惠。
+// 關鍵字: exit-intent, popup, mouseleave, coupon, conversion, retention, lp
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#088
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 16
+
+CELLS[15] = (k, w, h, u) => {
+  frame(k);
+  const OX = WIN.x, OY = WIN.y + WIN.bar;
+  const [cx, cy] = path([[0, 440, 150], [0.7, 300, 120], [1.25, 360, -18], [1.9, 372, -20], [2.6, 366, 38], [3.3, 366, 38], [4.4, 440, 150], [4.8, 440, 150]], u);
+  const CLOSE = 2.9;
+  let TRIG = 0.7; while (TRIG < 1.3 && path([[0.7, 300, 120], [1.25, 360, -18]], TRIG)[1] >= 0) TRIG += 1 / 240;
+  const m = eOut(P(u, TRIG + 0.05, TRIG + 0.45)) * (1 - P(u, CLOSE + 0.03, CLOSE + 0.25));
+  const D = { x: 125.5, y: 18, w: 260, h: 132 };
+  view(k, () => {
+    header(k, 0);
+    pic(k, 24, 46, 222, 110, 0, 8); txt(k, "新手指南", 264, 82, `800 19px ${JP}`, C.ink); bars(k, 264, 96, 210, 3); btn(k, 264, 132, 100, 24, "報名");
+    if (m > 0) {
+      k.fillStyle = `rgba(28,35,51,${0.5 * m})`; k.fillRect(0, 0, VW, VH);
+      k.save(); k.globalAlpha = m; k.translate(D.x + D.w / 2, D.y + D.h / 2); const s = 0.9 + 0.1 * m; k.scale(s, s); k.translate(-D.w / 2, -D.h / 2);
+      k.fillStyle = '#fff'; rr(k, 0, 0, D.w, D.h, 12); k.fill();
+      txt(k, "等一下！", D.w / 2, 34, `800 17px ${JP}`, C.ink, 'center');
+      txt(k, "首次享 10% 折扣", D.w / 2, 60, `800 15px ${JP}`, C.acc, 'center');
+      btn(k, D.w / 2 - 75, 80, 150, 30, "領取優惠券", C.acc, '#fff', 12);
+      k.strokeStyle = C.sub; k.lineWidth = 2; k.lineCap = 'round'; k.beginPath(); k.moveTo(D.w - 26, 14); k.lineTo(D.w - 14, 26); k.moveTo(D.w - 14, 14); k.lineTo(D.w - 26, 26); k.stroke();
+      k.restore();
+    }
+  });
+
+  k.save(); k.beginPath(); k.rect(0, 0, CW, CH); k.clip(); k.translate(OX, OY); click(k, cx, cy, u, [CLOSE]); k.restore();
+};

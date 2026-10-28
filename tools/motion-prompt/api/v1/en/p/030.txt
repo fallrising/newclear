@@ -1,0 +1,20 @@
+Please use "Orbit (Arc shot)" from "Camera moves & transitions".
+Motion Prompt #030 · camera/orbit-arc-shot
+
+Meaning: Circle around the subject
+Example request (adapt to your project): Half orbit around the standing person, keeping them in the center of the frame.
+What this demo shows: The camera travels on a circle around the subject; the person stays centred while the trees and buildings behind sweep sideways.
+Demo specification (independent of the example request):
+- Camera: travels on a circle of radius 6 m centred on the person (9 m ahead), from -0.95 rad → +0.95 rad (-54° → +54°, about 109° in total)
+- Direction: always faces the centre (yaw = -angle); height 1.7 m, pitch fixed at -0.07 rad (about 4° down)
+- Timing: 0.5 s to 3.6 s (3.1 s), cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1))
+- Subject: the person does not move; a white dot on the face shifts sideways with the angle; a dashed circle of radius 1.3 m marks the ground
+- Background: 12 trees evenly spaced on a 10 m radius cross behind the person as the camera moves round
+- Return: hold 3.6–4.2 s, then cross-fade back over the last 0.5 s; top-right readout shows the angle (-54° → +54°)
+When to use it: To show a person or product in three dimensions, or to emphasise an entrance or a key moment.
+
+Local demo: ./?lang=en#030
+Local specification and code: ./api/v1/en/e/030.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

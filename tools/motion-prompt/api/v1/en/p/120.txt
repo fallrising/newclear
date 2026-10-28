@@ -1,0 +1,20 @@
+Please use "Double exposure" from "Photo looks, lighting & styles".
+Motion Prompt #120 · photo/double-exposure
+
+Meaning: Two photos layered into one frame
+Example request (adapt to your project): Double exposure of a profile silhouette and a forest-and-mountain landscape on a white background, the landscape visible only inside the head.
+What this demo shows: The background turns white and the landscape of hills, house, trees and sun appears, scaled down, only inside the shape of the bust.
+Demo specification (independent of the example request):
+- Scene 3: a bust on the left (head centre x 140, y 82, radius 28 px) and hills, a house, trees and the sun (x 432, y 54, radius 15 px) on the right.
+- Background: white #FFFFFF outside the bust
+- Inside the bust: the same landscape at 0.7×, placed so the sun sits at the top right of the head and the ridge of the hills runs across the neck
+- Inside colours: sky #D3DBE6, hills #9AA8BD and #76869F, ground #55647E, trees #3F4C66
+- Transition: the double exposure is laid over the original picture at the effect amount
+- Timing: the effect comes in from 0.4 s to 1.4 s, holds until 4.0 s and is gone again by 4.8 s (one pass = 5 s, cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1)))
+When to use it: For posters and covers that tie a person to a place, a memory or an inner world.
+
+Local demo: ./?lang=en#120
+Local specification and code: ./api/v1/en/e/120.txt
+Local helper code: ./api/v1/kit/en/photo.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

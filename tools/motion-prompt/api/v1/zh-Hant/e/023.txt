@@ -1,0 +1,42 @@
+// Motion Prompt #023 · MIT License (c) 2026 Shohei Ohtaki · ./#023
+//
+// 故障干擾（Glitch）
+// 分類組: motion (動態圖像與動畫效果) · element 23 · 分類: 轉場與重點效果
+// 示範內容: 文字切片橫向錯位、色彩分離並出現小色條，但不做亮度閃爍。
+// 動作／視覺規格:
+//   - 白色粗體文字（104 px）。每 4.7 s 干擾兩次：0.55–1.25 s（5 個步進）與 2.9–3.74 s（6 個步進），其餘時間靜止。
+//   - 每步持續 0.14 s，呈現固定的干擾狀態，以跳格切換而非平滑動畫。
+//   - 色彩分離：珊瑚色副本左移 7–16 px、下移 2 px；青色（#22D3EE）副本右移相同距離、上移 2 px；白色文字疊在頂層。
+//   - 切片位移：2–4 條水平切片（高 10–35 px，y 40–150）向左或右移動 18–64 px。
+//   - 三條小色帶（珊瑚、青、黃；寬 30–120 × 高 5–12）出現在隨機位置。
+//   - 背景亮度始終不變，不做全畫面閃爍；亂數使用固定種子。
+// 使用情境: 適合為標題與轉場添加數位、錯誤或不安感。
+// 關鍵字: glitch, rgb-split, chromatic-aberration, distortion, digital, error, slice
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#023
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 23
+
+const TMP = mkCanvas(CW, CH), TK = TMP.getContext('2d');
+const GL = (() => { const R = rand(231), st = []; for (let s = 0; s < 12; s++) { const sl = [], n = 2 + Math.floor(R() * 3); for (let i = 0; i < n; i++) sl.push({ y: Math.floor(40 + R() * 110), h: 10 + Math.floor(R() * 26), dx: Math.round((R() < .5 ? -1 : 1) * (18 + R() * 46)) }); const bars = []; for (let i = 0; i < 3; i++) bars.push({ x: 30 + R() * 420, y: 30 + R() * 150, w: 30 + R() * 90, h: 5 + R() * 7, c: i }); st.push({ sl, bars, rgb: 7 + Math.round(R() * 9) }); } return st; })();
+const GLC = mkCanvas(CW, CH), GK = GLC.getContext('2d'), GLT = mkCanvas(CW, CH), GT = GLT.getContext('2d');
+CELLS[22] = (k, w, h, u) => {
+  const content = kk => { txt(kk, 'GLITCH', w / 2, h / 2 + 4, `800 104px ${DISP}`, '#fff', 'center', 'middle', '2px'); };
+  const step = 0.14; let si = -1;
+  if (u >= 0.55 && u < 0.55 + step * 5) si = Math.floor((u - 0.55) / step);
+  else if (u >= 2.9 && u < 2.9 + step * 6) si = 5 + Math.floor((u - 2.9) / step);
+  stage(k);
+  if (si < 0) { content(k); return; }
+  const S = GL[si];
+  TK.setTransform(1, 0, 0, 1, 0, 0); TK.clearRect(0, 0, w, h); content(TK);
+  const tint = col => { GT.setTransform(1, 0, 0, 1, 0, 0); GT.globalCompositeOperation = 'source-over'; GT.clearRect(0, 0, w, h); GT.drawImage(TMP, 0, 0); GT.globalCompositeOperation = 'source-in'; GT.fillStyle = col; GT.fillRect(0, 0, w, h); GT.globalCompositeOperation = 'source-over'; return GLT; };
+  GK.setTransform(1, 0, 0, 1, 0, 0); GK.fillStyle = C.navy; GK.fillRect(0, 0, w, h);
+  GK.drawImage(tint(C.coral), -S.rgb, 2); GK.drawImage(tint('#22D3EE'), S.rgb, -2); GK.drawImage(TMP, 0, 0);
+  k.drawImage(GLC, 0, 0);
+  for (const sl of S.sl) { k.fillStyle = C.navy; k.fillRect(0, sl.y, w, sl.h); k.drawImage(GLC, 0, sl.y, w, sl.h, sl.dx, sl.y, w, sl.h); }
+  for (const b of S.bars) { k.fillStyle = [C.coral, '#22D3EE', C.yel][b.c]; k.fillRect(b.x, b.y, b.w, b.h); }
+};

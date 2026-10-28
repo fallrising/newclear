@@ -1,0 +1,39 @@
+// Motion Prompt #078 · MIT License (c) 2026 Shohei Ohtaki · ./#078
+//
+// 捲動吸附（Scroll snap）
+// 分類組: lp (網頁與登陸頁效果) · element 06 · 分類: 捲動效果
+// 示範內容: 小幅捲動後，頁面自動完成剩餘位移，讓下一區塊的頂緣對齊可視區域頂部。
+// 動作／視覺規格:
+//   - 每個區塊與可視區域等高（168 px）；第一區為淡藍色，第二區為深藍色。
+//   - 每 2.4 s 吸附一次；0.45–0.85 s 使用者只捲動 34 px（cubic ease-out）。
+//   - 0.9–1.5 s 頁面自行移動剩餘的 134 px，讓下一區塊頂部對齊（cubic ease-out）。
+//   - 第二段 2.4 s 以相同方式向上返回第一區塊，對應 scroll-snap-type: y mandatory 的行為。
+// 使用情境: 適合像投影片一樣，每次閱讀完整一屏的頁面。
+// 關鍵字: scroll-snap, snap, full-page, sections, css, mandatory, scroll
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#078
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 06
+
+CELLS[5] = (k, w, h, u) => {
+  frame(k);
+  const T = CYC / 2, lu = mod(u, T), dir = u < T ? 1 : -1, from = u < T ? 0 : VH, DRIFT = 34;
+  const y = from + dir * (DRIFT * eOut(P(lu, 0.45, 0.85)) + (VH - DRIFT) * eOut(P(lu, 0.9, 1.5)));
+  view(k, () => {
+    k.save(); k.translate(0, -y);
+    for (let i = 0; i < 2; i++) {
+      const y0 = i * VH, dark = i === 1;
+      k.fillStyle = dark ? C.ink : C.blueL; k.fillRect(0, y0, VW, VH);
+      txt(k, '0' + (i + 1), 34, y0 + 70, `800 46px ${EN}`, C.acc);
+      txt(k, dark ? "試用" : "讓大家認識你", 34, y0 + 102, `800 18px ${JP}`, dark ? '#fff' : C.ink);
+      bars(k, 34, y0 + 118, 170, 2, dark ? 'rgba(255,255,255,.3)' : '#C3CDEA');
+      pic(k, 262, y0 + 24, 220, 120, dark ? 2 : 0, 8);
+    }
+    k.restore();
+    sbar(k, y / VH, 0.5);
+  });
+};

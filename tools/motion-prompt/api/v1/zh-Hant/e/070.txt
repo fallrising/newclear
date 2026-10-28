@@ -1,0 +1,35 @@
+// Motion Prompt #070 · MIT License (c) 2026 Shohei Ohtaki · ./#070
+//
+// 載入轉圈（Spinner）
+// 分類組: ui (UI 元件) · element 22 · 分類: 導覽與狀態
+// 示範內容: 點送出後，白色遮罩覆蓋卡片，中央藍弧旋轉；完成時變成勾號，再淡出。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。游標於 1.0 s 點擊底部中央送出按鈕（120×40）。
+//   - 於 1.05–1.2 s 線性淡入白色遮罩（不透明度 0.78）與轉圈，覆蓋整張卡片。
+//   - 轉圈位於 (271, 92)：淺色環半徑 26、粗 6，上疊 243°（1.35π）的藍色圓端弧，每秒旋轉 1.3 圈（468°/s）。
+//   - 轉圈於 2.95–3.05 s 淡出；帶白勾的藍圓（半徑 28）於 2.95–3.2 s 從縮放 0.7→1（easeOutCubic）。
+//   - 所有元素於 3.75–4.0 s 線性淡出。
+// 使用情境: 適合送出或儲存等長度不確定的短暫等待。
+// 關鍵字: spinner, loading, loader, activity-indicator, progress-circle, busy
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#070
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 22
+
+CELLS[21] = ui((w, h, t) => {
+  const load = seg(t, 1.05, 1.2) * (1 - seg(t, 2.95, 3.05));
+  const done = seg(t, 2.95, 3.15) * (1 - seg(t, 3.75, 4.0));
+  pageLines(24, 18, 494); strokeRR(24, 90, 494, 34, 7, C.line2, 1.5);
+  fillRR(w / 2 - 60, 140, 120, 40, 8, C.blue); text("送出", w / 2, 160, 16, '#fff', 600, 'center');
+  const ov = Math.max(load, done);
+  if (ov > 0) {
+    X.fillStyle = `rgba(255,255,255,${.78 * ov})`; X.fillRect(0, 0, w, h);
+    if (load > 0) { X.save(); X.globalAlpha = load; ring(w / 2, 92, 26, '#e3e8f5', 6); X.beginPath(); const a0 = t * Math.PI * 2 * 1.3; X.arc(w / 2, 92, 26, a0, a0 + Math.PI * 1.35); X.strokeStyle = C.blue; X.lineWidth = 6; X.lineCap = 'round'; X.stroke(); X.restore(); }
+    if (done > 0) { X.save(); X.globalAlpha = done; const s = .7 + .3 * eo(seg(t, 2.95, 3.2)); X.translate(w / 2, 92); X.scale(s, s); circle(0, 0, 28, C.blue); check(0, 0, 11, '#fff', 4); X.restore(); }
+  }
+  pointer([[.3, w + 30, h + 30], [.95, w / 2 + 6, 166], [1.5, w / 2 + 6, 166], [2.2, w + 30, h + 30]], [1.0], t);
+});

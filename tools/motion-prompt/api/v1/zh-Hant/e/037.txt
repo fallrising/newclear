@@ -1,0 +1,28 @@
+// Motion Prompt #037 · MIT License (c) 2026 Shohei Ohtaki · ./#037
+//
+// 慢動作（Slow motion）
+// 分類組: camera (鏡頭運動與轉場) · element 13 · 分類: 拍攝方式與時間效果
+// 示範內容: 固定鏡頭前，人物緩慢跳起、落下，葉片也緩慢飄落，整段動作被拉長。
+// 動作／視覺規格:
+//   - 攝影機：完全固定（高度 1.3 m），只有主體在動。
+//   - 主體：距離 7 m 的人物用 3.8 s 完成一次跳躍（0.5 s 至 4.3 s）；高度 = 4q(1-q)×1.1 m，拋物線最高 1.1 m，q 隨時間線性增加。
+//   - 滯空時雙手舉起；起跳前靜止 0.5 s，落地後靜止 0.4 s。
+//   - 葉片：9 片葉子在 4.7 s 內從 3.4 m 邊旋轉邊落至地面，各錯開週期的 1/9。
+//   - 右上角顯示「120fps ×0.25」（播放時間拉長 4×）。
+//   - 沒有停格或交叉淡化，每 4.7 s 無縫循環。
+// 使用情境: 適合細看短暫動作或表情，或強調情緒高點。
+// 關鍵字: slow motion, slow-mo, slomo, high frame rate, 120fps, time stretch, jump
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#037
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 13
+
+CELLS[12] = shot((k, w, h, u) => {
+  const q = P(u, 0.5, 4.3);
+  world(k, w, h, cam({ y: 1.3 }), { person: { z: 7, y: jumpY(q), armUp: q > 0 && q < 1 }, extra: leaves(u, 1) });
+  return '120fps ×0.25';
+});

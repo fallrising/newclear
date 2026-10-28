@@ -1,0 +1,20 @@
+Please use "Dutch angle" from "Camera moves & transitions".
+Motion Prompt #036 · camera/dutch-angle
+
+Meaning: Tilt the frame diagonally
+Example request (adapt to your project): Use a Dutch angle of about 15 degrees for this uneasy scene.
+What this demo shows: A level camera rolls around its lens axis and holds with the horizon on a diagonal.
+Demo specification (independent of the example request):
+- Camera: position fixed (height 1.5 m); roll only, 0 → 0.36 rad (about 21°); the whole picture turns around the frame centre
+- Timing: 0.6 s to 2.2 s (1.6 s), cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1))
+- Subject: a person stands still 7 m ahead; horizon, buildings and person all tilt by the same angle
+- Hold: stays tilted from 2.2 s to 4.2 s (time to read the tilted composition itself)
+- Return: cross-fade back to the level start over the last 0.5 s (one pass = 4.7 s)
+- Top-right readout shows the angle (∠ 0° → ∠ 21°)
+When to use it: To express unease, tension or the feeling that something is wrong.
+
+Local demo: ./?lang=en#036
+Local specification and code: ./api/v1/en/e/036.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

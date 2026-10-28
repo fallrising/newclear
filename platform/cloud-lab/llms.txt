@@ -43,3 +43,7 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 
 - [Authorization collection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-collection.md): fixed read-only Worker/D1/Access metadata with source provenance and drift checks;161tests and five original-Lab reads verified, HMAC/runner unknown, no renewal.
 - [Collection evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-authorization-collection.md): independent source review and lead-verified live metadata; all four grants and selected token expired, active0 and schedules off at observation.
+
+- [Machine self authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/self-authorization.md): authenticated own-HMAC metadata and runner inspection CLI without job dispatch; source/local verification only, not deployed. Runner process and Access expiry remain unknown; nonce storage still writes.
+
+- [Self-authorization evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-self-authorization.md):176local tests, real loopback inspection and cancellable slow-stream boundary; initial failures retained, no live rollout or renewal.

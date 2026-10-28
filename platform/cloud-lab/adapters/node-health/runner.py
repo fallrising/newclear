@@ -13,6 +13,7 @@ from pathlib import Path
 import re
 import secrets
 import signal
+import socket
 import sqlite3
 import stat
 import sys
@@ -180,7 +181,7 @@ class Config:
 
 
 def signed_headers(config, path, body, now=None, nonce=None):
-    if path not in ('/api/runner/claim', '/api/runner/report'):
+    if path not in ('/api/runner/claim', '/api/runner/report', '/api/authorization/self'):
         raise ProtocolError('unsupported runner route')
     now = int(time.time()) if now is None else integer(now, 0)
     nonce = secrets.token_hex(16) if nonce is None else nonce
@@ -227,6 +228,130 @@ class HttpClient:
                 http.client.RemoteDisconnected) as exc:
             raise RetryableError('control-plane request unavailable') from exc
         return strict_json(raw)
+
+
+INSPECTION_TIMEOUT = 10
+
+
+class InspectionClient:
+    """Fixed self query with a cancellable total transport deadline."""
+    def __init__(self, config):
+        self.config = config
+
+    def post(self, path, body):
+        if path != '/api/authorization/self' or body != b'{}':
+            raise ProtocolError('unsupported inspection request')
+        deadline = time.monotonic() + INSPECTION_TIMEOUT
+        url = urllib.parse.urlsplit(self.config.base_url)
+        if url.scheme == 'https':
+            connection_type = http.client.HTTPSConnection
+        elif url.scheme == 'http' and ipaddress.ip_address(url.hostname).is_loopback:
+            connection_type = http.client.HTTPConnection  # Config's explicit test opt-in.
+        else:
+            raise ProtocolError('invalid inspection transport')
+        conn = connection_type(url.hostname, url.port, timeout=5)
+        conn.auto_open = False  # Never reconnect after a cancellation closes the socket.
+        done, cancelled = threading.Event(), threading.Event()
+        sockets, results, errors = [], [], []
+        headers = signed_headers(self.config, path, body)
+        if self.config._access_client_secret is not None:
+            headers['CF-Access-Client-Id'] = self.config.cloudflare_access_client_id
+            headers['CF-Access-Client-Secret'] = self.config._access_client_secret
+        headers['User-Agent'] = 'cloud-lab-m1/1.0'
+
+        def perform():
+            try:
+                if cancelled.is_set():
+                    return
+                conn.connect()
+                if conn.sock is not None:
+                    sockets.append(conn.sock)
+                if cancelled.is_set():
+                    return  # A late DNS/connect completion must never send credentials.
+                conn.request('POST', path, body, headers)
+                with conn.getresponse() as response:
+                    if response.status in (401, 403):
+                        raise AuthenticationError('authorization inspection rejected')
+                    if response.status != 200 or response.headers.get_content_type() != 'application/json':
+                        raise ProtocolError('authorization inspection unavailable')
+                    results.append(strict_json(response.read(MAX_JSON + 1)))
+            except AuthenticationError:
+                errors.append(AuthenticationError('authorization inspection rejected'))
+            except Exception:
+                errors.append(ProtocolError('authorization inspection unavailable'))
+            finally:
+                conn.close()
+                done.set()
+
+        threading.Thread(target=perform, daemon=True).start()
+        if not done.wait(max(0, deadline - time.monotonic())):
+            cancelled.set()
+            try:
+                if sockets:
+                    sockets[0].shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            # Response.close may wait for read's lock: only the worker closes it.
+            raise ProtocolError('authorization inspection deadline exceeded')
+        if errors:
+            raise errors[0]
+        if len(results) != 1:
+            raise ProtocolError('authorization inspection unavailable')
+        return results[0]
+
+
+def inspect_authorization(config, client=None, *, clock=time.time):
+    """One self query; no journal, claim, retry or inferred resident deadline."""
+    started = clock()
+    response = (client or InspectionClient(config)).post('/api/authorization/self', b'{}')
+    finished = clock()
+    if not (type(started) in (int, float) and type(finished) in (int, float)
+            and math.isfinite(started) and math.isfinite(finished) and 0 <= started <= finished <= started + 10):
+        raise ProtocolError('invalid authorization observation window')
+    strict_json(encode(response))
+    fields(response, 'schema_version observed_at credential grant scope request_id')
+    if response['schema_version'] != 'cloudlab.authorization-self.v1':
+        raise ProtocolError('unsupported authorization metadata')
+    identifier(response['request_id'])
+    observed = timestamp(response['observed_at'])
+    if not started - 120 <= observed <= finished + 120:
+        raise ProtocolError('authorization observation clock skew')
+    credential, grant, scope = (response[k] for k in ('credential', 'grant', 'scope'))
+    fields(credential, 'id generation principal_id grant_id revoked expires_at')
+    fields(grant, 'id revision principal_id not_before expires_at')
+    fields(scope, 'workspace_id resource_ref recipe_ref')
+    for value in (credential['id'], credential['principal_id'], credential['grant_id'], grant['id'], grant['principal_id']):
+        identifier(value)
+    integer(credential['generation'], 1, 2147483647)
+    integer(grant['revision'], 1, 2147483647)
+    refs(scope['resource_ref'], scope['recipe_ref'])
+    if (credential['id'] != config.credential_id or credential['generation'] != config.generation
+            or credential['revoked'] is not False or credential['grant_id'] != grant['id']
+            or credential['principal_id'] != grant['principal_id']
+            or scope != dict(workspace_id=config.workspace_id, resource_ref=config.resource_ref, recipe_ref=config.recipe_ref)
+            or timestamp(credential['expires_at']) <= observed
+            or not timestamp(grant['not_before']) <= observed < timestamp(grant['expires_at'])):
+        raise ProtocolError('authorization identity or scope mismatch')
+    return {'source': 'worker_self', 'observed_at': response['observed_at'],
+            'checked_at': utc(finished), 'credential_expires_at': credential['expires_at'],
+            'grant_expires_at': grant['expires_at'], 'access_service_expires_at': None,
+            'runner_stop_at': None, 'deadline_complete': False}
+
+
+def read_inspection_config(path, allow_loopback_http=False):
+    """Do not follow the final link or accept shared/oversized credential files."""
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)
+    with os.fdopen(fd, 'rb') as handle:
+        before = os.fstat(handle.fileno())
+        if (not stat.S_ISREG(before.st_mode) or before.st_uid != os.geteuid()
+                or before.st_nlink != 1 or stat.S_IMODE(before.st_mode) != 0o600
+                or before.st_size > MAX_JSON):
+            raise ProtocolError('invalid private inspection configuration')
+        raw = handle.read(MAX_JSON + 1)
+        after = os.fstat(handle.fileno())
+        if (before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+            raise ProtocolError('inspection configuration changed')
+    return Config.from_dict(strict_json(raw), allow_loopback_http)
 
 
 def validate_assignment(a, config, now):
@@ -438,6 +563,7 @@ def resident_loop(runner, stop, *, stop_at, poll_seconds=30, clock=time.time,
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', required=True, help='private JSON configuration file')
+    parser.add_argument('--authorization-status', action='store_true', help='query own Worker metadata without claiming work or opening journal')
     parser.add_argument('--once', action='store_true', help='one claim and at most one report')
     parser.add_argument('--stop-at', help='required for resident mode: earliest grant expiry as UTC YYYY-MM-DDTHH:MM:SSZ')
     parser.add_argument('--poll-seconds', type=int, default=30, help='resident poll interval, 5 to 60 seconds')
@@ -449,6 +575,12 @@ def main(argv=None):
     try:
         if not hasattr(os, 'geteuid') or os.geteuid() == 0:
             raise ProtocolError('runner requires a non-root operating-system user')
+        if args.authorization_status:
+            if args.once or args.stop_at is not None:
+                raise ProtocolError('inspection cannot run a resident or once cycle')
+            config = read_inspection_config(args.config, args.allow_loopback_http)
+            print(encode(inspect_authorization(config)).decode(), flush=True)
+            return 0
         integer(args.poll_seconds, 5, 60)
         stop_at = timestamp(args.stop_at) if args.stop_at else None
         if not args.once and stop_at is None:
@@ -478,7 +610,7 @@ def main(argv=None):
             return 0
         return resident_loop(runner, stop, stop_at=stop_at, poll_seconds=args.poll_seconds)
     except (ProtocolError, OSError, sqlite3.Error, ValueError):
-        print('runner configuration or journal unavailable', file=sys.stderr)
+        print('authorization inspection unavailable' if args.authorization_status else 'runner configuration or journal unavailable', file=sys.stderr)
         return 1
     except KeyboardInterrupt:
         return 0

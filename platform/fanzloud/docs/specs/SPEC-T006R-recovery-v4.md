@@ -11,7 +11,7 @@ V01 — `fe-review/initial-lifecycle-v4-baseline.mjs` is a new file. Its bytes e
 - the recorded runner file name (`initial-lifecycle-v3-baseline.mjs` becomes `initial-lifecycle-v4-baseline.mjs`);
 - v3's retained-seven and ordering-reuse block is replaced by `receipt.retainedDesktopKeys=[];receipt.reuse='NONE_SOURCE_CHANGED';`.
 
-V02 — v4 reads no earlier run, accepted manifest, PNG or reuse approval, so no prior-run mount is needed. The only selectable phase stays `desktop-recovery` with state `recovery-required`, through the unchanged `selectRecoveryPhase`.
+V02 — v4 reads no earlier run, accepted manifest, PNG or reuse approval, so no prior-run mount is needed. For byte traceability it keeps v3's provenance hashing of unchanged source files, `remaining-accepted.json` included, and its unused reuse import; those bytes are hashed into the receipt but never parsed or trusted. The only selectable phase stays `desktop-recovery` with state `recovery-required`, through the unchanged `selectRecoveryPhase`.
 
 V03 — Every other v3 gate is unchanged:
 - the initial-trace v3 observer and its completeness rule;

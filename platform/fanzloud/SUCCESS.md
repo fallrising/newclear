@@ -193,7 +193,6 @@ Acceptance:
 
 Changing the client and fixture invalidates reuse of the 8 previously accepted cells, so all 27 canonical cells need recapture under a separately approved runtime. Canonical stays 8/27 until then, and delivery stays 18/19.
 
-
 ## T-0433 desktop recovery v4 runner — 2026-10-28
 
 The owner approved one desktop recovery run on the fixed source and a recovery-only runner, documentation first. The v3 runner cannot run on the fixed source: it pins the old client and fixture hashes and reuses eight cells. [SPEC-T006R recovery v4](docs/specs/SPEC-T006R-recovery-v4.md) V01–V05 defines a byte-traceable v4 copy. It changes only the source pins and removes reuse; every v3 gate is unchanged.

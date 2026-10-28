@@ -223,3 +223,19 @@ Acceptance:
 - An independent source review accepts v5, and the required CI passes.
 - Attempt `baseline-desktop-remaining-001` then runs once (at most 300 seconds, no retry).
 - A PASS yields eight candidate cells that need independent actual review. A FAIL is preserved and stops.
+
+### Result — desktop remaining 001 (2026-10-28)
+
+`baseline-desktop-remaining-001` ran once on source `e7bf285c`.
+- PASS in 21.0 seconds: exit 0, cleanup complete, container removed. Chromium 153.0.8010.12, Playwright 1.63.0.
+- All eight states passed with every health entry expected and zero `requestfailed`, including `disconnected`, where ERR_ABORTED appeared in earlier runs.
+- Per-state counts, the bootstrap, device, turn, rejection, cancel and reconnect diagnostics, storage, DOM, keyboard, axe (0 violations) and the PNGs all passed.
+
+An independent actual review returned CANONICAL_ACCEPT for all eight cells. With recovery 008, desktop is 9/9 on the T-0433 source and canonical is 9/27.
+
+Review notes:
+- The `disconnected` row does not store the stream status at capture time; the runner asserted it before the screenshot.
+- At desktop width the diff does not overflow, so local scrolling is not exercised there (same as the earlier accepted cell); tablet and mobile should show it.
+- axe marks color-contrast incomplete in every state.
+
+Remaining: tablet 9 and mobile 9 (they need a runner on the fixed source), the M2 actual UI and finite HTTP/WSS conformance. Delivery stays 18/19.

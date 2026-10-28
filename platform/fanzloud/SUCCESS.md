@@ -239,3 +239,13 @@ Review notes:
 - axe marks color-contrast incomplete in every state.
 
 Remaining: tablet 9 and mobile 9 (they need a runner on the fixed source), the M2 actual UI and finite HTTP/WSS conformance. Delivery stays 18/19.
+
+## T-0433 tablet/mobile v6 runner — 2026-10-28
+
+The owner approved preparing a tablet/mobile runner and running tablet once after review and CI. Mobile needs a tablet PASS and a separate approval. [SPEC-T006R tablet/mobile v6](docs/specs/SPEC-T006R-tablet-mobile-v6.md) P01 and V601–V604 derive a byte-traceable v6 from `remaining-baseline.mjs`. Tablet's previous-phase check becomes `assertPreviousDesktop` over the two accepted desktop results; mobile keeps the original chain. Every state gate is unchanged.
+
+Acceptance:
+- Both pure suites pass and the existing suites stay green.
+- An independent source review accepts v6, and the required CI passes.
+- Attempt `baseline-tablet-001` then runs once (at most 300 seconds, no retry).
+- A PASS yields nine candidate cells that need independent actual review. A FAIL is preserved and stops.

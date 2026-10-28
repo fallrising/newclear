@@ -32,3 +32,5 @@ Lead在初次ACCEPT後補查可選nofollow chmod平台支援，新增模擬該�
 
 
 Git交付尚未完成：feature commit已在本機，第一次SSH推送未完成，過早建立PR返回422 invalid head且未建立PR。確認遠端分支尚不存在後，只停止本次SSH子程序；Git退出128。帶連線期限的重試在啟動前被自動批准審查拒絕，原因是審查要求明確批准此次Git push。沒有替代推送或繞過CI／批准；等owner批准具體分支交付，任務列仍in_progress，不宣稱已合併或CI通過。
+
+2026-10-28T17:04:03Z owner回覆「批准推送」，解除上述Git批准阻擋，恢復具體分支的正常push／PR／CI／merge與任務板收尾。保留原失敗與拒絕紀錄；此批准不涵蓋雲端部署或授權延長，實際Git結果見任務板。

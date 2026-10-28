@@ -168,7 +168,12 @@ Owner明確批准推送後，[PR #722](https://github.com/fallrising/newclear/pu
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0008-1 | 前後AS與self grant關聯 | IA-01 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |
-| T-0008-2 | Worker／Access／resident來源綁定 | IA-02 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |
-| T-0008-3 | 新鮮度與未知／漂移處理 | IA-03 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |
-| T-0008-4 | 私人輸出、整合、審查與交付 | IA-04 | in_progress | 2026-10-28T17:18:26Z | — | 2026-10-28T17:33:16Z |
+| T-0008-1 | 前後AS與self grant關聯 | IA-01 | done | 2026-10-28T17:18:26Z | 2026-10-28T17:35:45Z | 2026-10-28T17:36:53Z |
+| T-0008-2 | Worker／Access／resident來源綁定 | IA-02 | done | 2026-10-28T17:18:26Z | 2026-10-28T17:35:45Z | 2026-10-28T17:36:53Z |
+| T-0008-3 | 新鮮度與未知／漂移處理 | IA-03 | done | 2026-10-28T17:18:26Z | 2026-10-28T17:35:45Z | 2026-10-28T17:36:53Z |
+| T-0008-4 | 私人輸出、整合、審查與交付 | IA-04 | done | 2026-10-28T17:18:26Z | 2026-10-28T17:35:45Z | 2026-10-28T17:36:53Z |
+
+- Feature [PR #724](https://github.com/fallrising/newclear/pull/724) merged `554742ae68ce87f9dc147f93efd3a2a6ba1f8762` at `2026-10-28T17:35:45Z`，feature head `f77fa595b62df47240e93cd9da181340d6d2514f`。
+- 三項CI全過：Cloud Lab `40737097237`、Project success `40737097392`、llms `40737097540`；16個交付檔案與遠端逐檔相等，共用PLAN的IA段落相等。全檔PLAN比較因同期其他項目記錄而不同，已檢查並保留差異，沒有覆寫。
+- [214tests及T830複審ACCEPT](../evidence/m1-integrated-authorization.md)完成；初始stub、fixture HTTPS映射及未綁定Access層的RED保留。
+- 本輪只交付source與隔離本機驗證，未部署、續權、重啟原服務或新增付費；完整主線pending，無usable tag。此收尾PR只改任務板。

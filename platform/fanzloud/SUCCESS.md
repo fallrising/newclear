@@ -203,4 +203,3 @@ Acceptance:
 - An independent source review accepts v4, and the required CI passes.
 - Attempt `baseline-desktop-recovery-008` then runs once (at most 300 seconds, no retry).
 - A PASS yields one candidate recovery cell that needs independent actual review. A FAIL is preserved and stops.
-

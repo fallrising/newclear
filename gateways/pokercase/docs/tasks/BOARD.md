@@ -438,3 +438,13 @@ Claude實際隔離旅程17筆durableattempt，全17費用unknown/null；原始in
 僅既有Claude Code provider→Chat/Messages/Responses串流記帳；Cursor、其他named-provider/OAuth/借用憑證與原生非Chat上游observer仍未完成，完整#698保持open。#699完整token coverage/價格來源精度/歷史語義、#700具名client/version及真實AC01/04/08與AC04工具/AC17文字範圍決策、#701既有fixture啟動/auth間歇失敗未知原因、#702Antigravity HTTP隔離保留。mainline incomplete、usable_tag none、desk in_progress；owner決定done，不用任務數或完成百分比取代產品驗收。
 
 管理帳本發布、完整備份`/home/ckc/test/backup/t0432-claude-settlement-20261028`與本輪工作樹清理由最終`.local/t0432-claude-settlement/handoff.json`核實；這份產品merge時點快照不預先宣稱其後步驟完成。新`local-demo.py`預設check並驗source/binarydigest，先前入口及舊digest保留。此輪完成即停止，不開新里程碑。
+
+## T-0432 — Cursor text-only streaming settlement
+
+Claim PR283 merged; [CU-1–CU-5](T-0432-cursor-settlement.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CU-01 | Reservation/raw usage/terminal ownership | CU-1–CU-3 | in_progress | 2026-10-29T05:00:34Z | — | 2026-10-29T05:21:37.756888+00:00 |
+| CU-02 | Persistence/recovery/admin consistency | CU-4 | in_progress | 2026-10-29T05:00:34Z | — | 2026-10-29T05:21:37.756888+00:00 |
+| CU-03 | Headless journey/review/delivery | CU-5 | in_progress | 2026-10-29T05:00:34Z | — | 2026-10-29T05:21:37.756888+00:00 |

@@ -50,7 +50,11 @@ enum ClientProto {
 }
 
 enum ClaudeOutcome {
-    Stream(crate::claude_code::ClaudeRun, StreamMode),
+    Stream(
+        crate::claude_code::ClaudeRun,
+        StreamMode,
+        Option<BodyAccounting>,
+    ),
     Done(Response),
 }
 
@@ -114,47 +118,56 @@ async fn cli_attempt(
         body: format!("invalid JSON body: {e}"),
         retryable: false,
     })?;
-    let usage =
-        (stream && matches!(cli_format(target), Some(UpstreamFormat::ClaudeCode))).then(|| {
-            crate::claude_usage::RequestContext::new(&state.store, request_id, public_model, target)
-        });
-    let run = match cli_format(target) {
+    let (run, accounting) = match cli_format(target) {
         Some(UpstreamFormat::CursorCli) => {
-            crate::cursor_cli::start(&state.cursor_cli, &target.upstream_model, &chat, cancel)
-                .await?
+            let usage = stream.then(|| {
+                crate::cursor_usage::RequestContext::new(
+                    &state.store,
+                    request_id,
+                    public_model,
+                    target,
+                )
+            });
+            let (run, attempt) = crate::cursor_cli::start_observed(
+                &state.cursor_cli,
+                &target.upstream_model,
+                &chat,
+                cancel,
+                usage.as_ref(),
+            )
+            .await?;
+            (run, attempt.map(BodyAccounting::Cursor))
         }
         _ => {
-            crate::claude_code::start_observed(
+            let usage = stream.then(|| {
+                crate::claude_usage::RequestContext::new(
+                    &state.store,
+                    request_id,
+                    public_model,
+                    target,
+                )
+            });
+            let run = crate::claude_code::start_observed(
                 &state.claude_code,
                 &target.upstream_model,
                 &chat,
                 cancel,
                 usage.as_ref(),
             )
-            .await?
+            .await?;
+            let accounting = run.accounting().map(BodyAccounting::Claude);
+            (run, accounting)
         }
     };
     state.cooldown.clear(&target.connection.id);
     let latency = start.elapsed().as_millis() as i64;
     if stream {
-        if usage.is_none() {
-            let _ = state.store.log_usage(
-                Some(public_model),
-                Some(&target.connection.id),
-                Some(200),
-                Some(latency),
-                None,
-                None,
-                None,
-                None,
-            );
-        }
         let mode = match proto {
             ClientProto::Anthropic => StreamMode::Passthrough,
             ClientProto::Chat => StreamMode::AnthropicToChat(public_model.to_string()),
             ClientProto::Responses => StreamMode::AnthropicToResponses(public_model.to_string()),
         };
-        return Ok(ClaudeOutcome::Stream(run, mode));
+        return Ok(ClaudeOutcome::Stream(run, mode, accounting));
     }
     let to_attempt = |e: AppError| UpstreamAttemptError {
         status: e.status_code().as_u16(),
@@ -729,16 +742,15 @@ pub async fn handle_chat_with_fallback(
             .await
             {
                 Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
-                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                Ok(ClaudeOutcome::Stream(run, mode, accounting)) => {
                     cancel_guard.disarm();
-                    let usage = run.accounting();
-                    return match usage {
-                        Some(usage) => {
+                    return match accounting {
+                        Some(accounting) => {
                             stream_body_accounted(
                                 run.into_stream(),
                                 state.sse_stall_secs,
                                 mode,
-                                Some(BodyAccounting::Claude(usage)),
+                                Some(accounting),
                             )
                             .await
                         }
@@ -746,7 +758,7 @@ pub async fn handle_chat_with_fallback(
                     };
                 }
                 Err(e) => {
-                    if stream && matches!(cli_format(target), Some(UpstreamFormat::ClaudeCode)) {
+                    if stream {
                         // Each actual CLI dispatch already owns a durable row. Reservation
                         // failure owns none and must never cause another inference dispatch.
                         if e.body != "usage reservation failed" {
@@ -947,16 +959,15 @@ pub async fn handle_anthropic_messages(
             .await
             {
                 Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
-                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                Ok(ClaudeOutcome::Stream(run, mode, accounting)) => {
                     cancel_guard.disarm();
-                    let usage = run.accounting();
-                    return match usage {
-                        Some(usage) => {
+                    return match accounting {
+                        Some(accounting) => {
                             stream_body_accounted(
                                 run.into_stream(),
                                 state.sse_stall_secs,
                                 mode,
-                                Some(BodyAccounting::Claude(usage)),
+                                Some(accounting),
                             )
                             .await
                         }
@@ -964,7 +975,7 @@ pub async fn handle_anthropic_messages(
                     };
                 }
                 Err(e) => {
-                    if stream && matches!(cli_format(target), Some(UpstreamFormat::ClaudeCode)) {
+                    if stream {
                         // Each actual CLI dispatch already owns a durable row. Reservation
                         // failure owns none and must never cause another inference dispatch.
                         if e.body != "usage reservation failed" {
@@ -1138,16 +1149,15 @@ pub async fn handle_responses(
             .await
             {
                 Ok(ClaudeOutcome::Done(resp)) => return Ok(resp),
-                Ok(ClaudeOutcome::Stream(run, mode)) => {
+                Ok(ClaudeOutcome::Stream(run, mode, accounting)) => {
                     cancel_guard.disarm();
-                    let usage = run.accounting();
-                    return match usage {
-                        Some(usage) => {
+                    return match accounting {
+                        Some(accounting) => {
                             stream_body_accounted(
                                 run.into_stream(),
                                 state.sse_stall_secs,
                                 mode,
-                                Some(BodyAccounting::Claude(usage)),
+                                Some(accounting),
                             )
                             .await
                         }
@@ -1155,7 +1165,7 @@ pub async fn handle_responses(
                     };
                 }
                 Err(e) => {
-                    if stream && matches!(cli_format(target), Some(UpstreamFormat::ClaudeCode)) {
+                    if stream {
                         // Each actual CLI dispatch already owns a durable row. Reservation
                         // failure owns none and must never cause another inference dispatch.
                         if e.body != "usage reservation failed" {
@@ -1643,16 +1653,18 @@ where
 enum BodyAccounting {
     Http(Box<crate::stream_usage::StreamAttempt>),
     Claude(crate::claude_usage::Attempt),
+    Cursor(crate::cursor_usage::Attempt),
 }
 impl BodyAccounting {
     fn push(&mut self, bytes: &[u8]) {
         match self {
             Self::Http(a) => a.push(bytes),
             Self::Claude(a) => a.passthrough(bytes),
+            Self::Cursor(a) => a.passthrough(bytes),
         }
     }
     fn observe_converted(&mut self, bytes: &[u8]) {
-        // Claude's producer observes raw CLI events, before EventFilter/conversion.
+        // CLI producers observe raw source events before conversion.
         if let Self::Http(a) = self {
             a.observe_converted(bytes);
         }
@@ -1661,18 +1673,21 @@ impl BodyAccounting {
         match self {
             Self::Http(a) => a.converted_terminal(failed),
             Self::Claude(a) => a.converted_terminal(failed),
+            Self::Cursor(a) => a.converted_terminal(failed),
         }
     }
     fn eof(&mut self) {
         match self {
             Self::Http(a) => a.eof(),
             Self::Claude(a) => a.eof(),
+            Self::Cursor(a) => a.eof(),
         }
     }
     fn stop(&mut self, outcome: &'static str, error: &'static str) {
         match self {
             Self::Http(a) => a.stop(outcome, error),
             Self::Claude(a) => a.stop(outcome, error),
+            Self::Cursor(a) => a.stop(outcome, error),
         }
     }
 }
@@ -2010,6 +2025,136 @@ mod settlement_ownership_tests {
                 5,
                 StreamMode::AnthropicToChat("m".into()),
                 Some(BodyAccounting::Claude(a.clone())),
+            )
+            .await
+            .unwrap();
+            drop(response);
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(
+                row.outcome,
+                if completed { "succeeded" } else { "cancelled" }
+            );
+            assert!(row.finalized_at.is_some());
+        }
+    }
+
+    fn cu_attempt(store: &Store) -> crate::cursor_usage::Attempt {
+        let connection = serde_json::from_value(json!({
+            "id":"synthetic","name":"synthetic","base_url":"http://127.0.0.1:1/v1",
+            "api_key":"synthetic","default_model":null,"priority":0,"enabled":true,
+            "input_price_per_m":1.0,"output_price_per_m":1.0,"auth_type":"api_key","oauth":null,
+            "created_at":"synthetic","updated_at":"synthetic"
+        }))
+        .unwrap();
+        crate::cursor_usage::RequestContext::new(
+            store,
+            "synthetic-request",
+            "m",
+            &ResolvedTarget {
+                connection,
+                upstream_model: "synthetic".into(),
+            },
+        )
+        .begin()
+        .unwrap()
+    }
+    fn cu_terminal(a: &crate::cursor_usage::Attempt) -> Vec<Value> {
+        a.ready();
+        a.observe_line(&json!({"type":"result","subtype":"success","is_error":false,"result":"synthetic","usage":{"inputTokens":9,"outputTokens":3,"cacheReadTokens":4,"cacheWriteTokens":0}}), true, true);
+        vec![
+            json!({"type":"message_start","message":{"id":"synthetic","type":"message","role":"assistant","content":[],"usage":{"input_tokens":0,"output_tokens":0}}}),
+            json!({"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}),
+            json!({"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"synthetic"}}),
+            json!({"type":"content_block_stop","index":0}),
+            json!({"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"input_tokens":9,"output_tokens":3}}),
+            json!({"type":"message_stop"}),
+        ]
+    }
+
+    #[tokio::test]
+    async fn cu3_terminal_settles_before_client_yield_and_drop_cannot_rewrite_it() {
+        for mode in cs_modes() {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = cu_attempt(&store);
+            let wire = cu_terminal(&a)
+                .iter()
+                .map(|e| format!("event: {}\ndata: {e}\n\n", e["type"].as_str().unwrap()))
+                .collect::<Vec<_>>();
+            let source = async_stream::stream! {for record in wire { yield Ok::<_,std::io::Error>(Bytes::from(record)); } std::future::pending::<()>().await;};
+            let response =
+                stream_body_accounted(source, 5, mode, Some(BodyAccounting::Cursor(a.clone())))
+                    .await
+                    .unwrap();
+            let mut body = response.into_body().into_data_stream();
+            // ClaudeRun yields one complete record per chunk. Poll through the
+            // client terminal, then inspect without polling for source EOF.
+            loop {
+                let chunk = body.next().await.unwrap().unwrap();
+                let text = String::from_utf8_lossy(&chunk);
+                if text.contains("event: message_stop")
+                    || text.contains("data: [DONE]")
+                    || text.contains("event: response.completed")
+                {
+                    break;
+                }
+            }
+            let row = serde_json::to_value(store.recent_usage(1).unwrap()).unwrap();
+            assert_eq!(row[0]["outcome"], "succeeded");
+            assert_eq!(row[0]["usage_status"], "partial");
+            assert!(row[0]["finalized_at"].is_string());
+            drop(body);
+            assert_eq!(
+                serde_json::to_value(store.recent_usage(1).unwrap()).unwrap(),
+                row
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn cu3_conversion_failure_overrides_queued_source_success_without_losing_raw_usage() {
+        for mode in [
+            StreamMode::AnthropicToChat("m".into()),
+            StreamMode::AnthropicToResponses("m".into()),
+        ] {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = cu_attempt(&store);
+            cu_terminal(&a);
+            let source = futures_util::stream::iter(vec![Ok::<_, std::io::Error>(Bytes::from(
+                "x".repeat(MAX_CONVERTED_LINE_BYTES + 1),
+            ))]);
+            let response = stream_body_accounted(source, 5, mode, Some(BodyAccounting::Cursor(a)))
+                .await
+                .unwrap();
+            let output = axum::body::to_bytes(response.into_body(), 1 << 20)
+                .await
+                .unwrap();
+            assert!(
+                String::from_utf8_lossy(&output).contains(crate::error::INPUT_LIMIT_STREAM_MESSAGE)
+            );
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(row.outcome, "failed");
+            assert_eq!(row.error.as_deref(), Some("stream_conversion_failed"));
+            assert_eq!(row.completion_tokens, Some(3));
+        }
+    }
+
+    #[tokio::test]
+    async fn cu3_unpolled_body_drop_settles_active_attempt_but_preserves_observed_terminal() {
+        for completed in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("db"), None).unwrap();
+            let a = cu_attempt(&store);
+            if completed {
+                cu_terminal(&a);
+            }
+            let source = futures_util::stream::pending::<Result<Bytes, std::io::Error>>();
+            let response = stream_body_accounted(
+                source,
+                5,
+                StreamMode::AnthropicToChat("m".into()),
+                Some(BodyAccounting::Cursor(a.clone())),
             )
             .await
             .unwrap();

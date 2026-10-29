@@ -275,7 +275,9 @@ pub struct UsageEvent {
     pub reported_usage: Option<ClaudeReportedUsage>,
 }
 
-/// Fixed, disjoint CLI-reported buckets. Missing fields never imply zero.
+/// Fixed raw CLI-reported buckets. Missing fields never imply zero.
+/// Claude interprets its input buckets as disjoint; Cursor relationships remain
+/// unverified and its separate finalizer must not call `prompt_total`.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ClaudeReportedUsage {
     pub input_tokens: Option<i64>,
@@ -1399,7 +1401,7 @@ impl Store {
         anyhow::ensure!(
             matches!(
                 usage_source,
-                "openai_chat_v1" | "claude_code_stream_event_v1"
+                "openai_chat_v1" | "claude_code_stream_event_v1" | "cursor_cli_result_v1"
             ),
             "invalid_stream_source"
         );
@@ -1446,7 +1448,7 @@ impl Store {
         self.conn.lock().unwrap().execute(
             "UPDATE usage_events SET cli_ready_ms = ?2, latency_ms = ?2
              WHERE attempt_id = ?1 AND finalized_at IS NULL AND cli_ready_ms IS NULL
-                   AND usage_source = 'claude_code_stream_event_v1'",
+                   AND usage_source IN ('claude_code_stream_event_v1', 'cursor_cli_result_v1')",
             params![attempt_id, cli_ready_ms],
         )?;
         Ok(())
@@ -1490,6 +1492,51 @@ impl Store {
                 finalization.usage_status,
                 finalization.error,
                 finalization.prompt_tokens,
+                finalization.completion_tokens,
+                finalization.first_output_ms,
+                finalization.total_observed_ms,
+                reported.input_tokens,
+                reported.output_tokens,
+                reported.cache_read_input_tokens,
+                reported.cache_creation_input_tokens
+            ],
+        )?;
+        Ok(changed == 1)
+    }
+
+    /// Cursor keeps raw cache buckets without assuming subset/disjoint semantics.
+    /// Only output is independently normalized; prompt totals and prices are unknown.
+    pub fn finalize_cursor_attempt(
+        &self,
+        attempt_id: &str,
+        finalization: &StreamFinalization,
+        reported: &ClaudeReportedUsage,
+    ) -> Result<bool> {
+        reported.validate()?;
+        finalization.validate_with_reported(!reported.is_empty())?;
+        anyhow::ensure!(
+            finalization.prompt_tokens.is_none()
+                && finalization.completion_tokens == reported.output_tokens
+                && finalization.estimated_cost_usd.is_none()
+                && matches!(finalization.usage_status, "missing" | "partial" | "invalid")
+                && (finalization.usage_status != "missing" || reported.is_empty()),
+            "invalid_cursor_finalization"
+        );
+        let changed = self.conn.lock().unwrap().execute(
+            "UPDATE usage_events
+             SET finalized_at = ?2, outcome = ?3, usage_status = ?4, error = ?5,
+                 prompt_tokens = NULL, completion_tokens = ?6, estimated_cost_usd = NULL,
+                 first_output_ms = ?7, total_observed_ms = ?8,
+                 reported_input_tokens = ?9, reported_output_tokens = ?10,
+                 reported_cache_read_input_tokens = ?11, reported_cache_creation_input_tokens = ?12
+             WHERE attempt_id = ?1 AND finalized_at IS NULL
+                   AND usage_source = 'cursor_cli_result_v1'",
+            params![
+                attempt_id,
+                Utc::now().to_rfc3339(),
+                finalization.outcome,
+                finalization.usage_status,
+                finalization.error,
                 finalization.completion_tokens,
                 finalization.first_output_ms,
                 finalization.total_observed_ms,

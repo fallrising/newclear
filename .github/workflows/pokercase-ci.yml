@@ -31,7 +31,9 @@ jobs:
       - name: Check formatting
         run: cargo +1.99.0 fmt --check
       - name: Run offline provider tests
-        run: cargo +1.99.0 test --locked
+        run: |
+          cargo +1.99.0 test --locked --bin thinrouter antigravity_test_transport::tests::
+          cargo +1.99.0 test --locked
       - name: Run static analysis
         run: cargo +1.99.0 clippy --locked --all-targets -- -D warnings
       - name: Verify offline walkthrough fixtures

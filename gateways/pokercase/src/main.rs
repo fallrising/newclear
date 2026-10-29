@@ -1,5 +1,7 @@
 mod admin;
 mod agy;
+#[cfg(test)]
+mod antigravity_test_transport;
 mod borrowed;
 mod cancel;
 mod claude;

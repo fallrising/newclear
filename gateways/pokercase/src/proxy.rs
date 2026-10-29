@@ -41,6 +41,8 @@ pub struct ProxyState {
     pub cursor_cli: crate::cursor_cli::CursorCli,
     #[cfg(test)]
     pub refresh_transport: Option<crate::oauth_refresh::TestTransport>,
+    #[cfg(test)]
+    pub agy_transport: Option<crate::antigravity_test_transport::AntigravityTestTransport>,
 }
 
 /// Which protocol the client speaks (for converting Claude Code output).
@@ -63,6 +65,16 @@ enum ClaudeOutcome {
 /// Targets answered by a local CLI (Claude Code, Cursor Agent) instead of HTTP.
 fn is_cli_target(target: &ResolvedTarget) -> bool {
     cli_format(target).is_some()
+}
+
+#[cfg(test)]
+fn require_agy_test_target(state: &ProxyState, target: &ResolvedTarget) -> AppResult<()> {
+    if let Some(transport) = state.agy_transport.as_ref() {
+        transport
+            .require_provider(provider_id_for(target).as_deref().unwrap_or_default())
+            .map_err(AppError::BadRequest)?;
+    }
+    Ok(())
 }
 
 fn cli_format(target: &ResolvedTarget) -> Option<UpstreamFormat> {
@@ -286,6 +298,18 @@ async fn forward_chat_completions_inner(
     context: Option<&HttpStreamContext<'_>>,
     attempt: &mut Option<crate::stream_usage::StreamAttempt>,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
+    // A sealed Antigravity test instance must reject unrelated forwarding before
+    // credential refresh, discovery, or the generic HTTP client can be selected.
+    #[cfg(test)]
+    if let Some(transport) = state.agy_transport.as_ref() {
+        transport
+            .require_provider(provider_id_for(target).as_deref().unwrap_or_default())
+            .map_err(|body| UpstreamAttemptError {
+                status: 500,
+                body,
+                retryable: false,
+            })?;
+    }
     // Refresh OAuth if near expiry (best-effort).
     let borrowed = crate::borrowed::source(&target.connection);
     let target = {
@@ -481,9 +505,7 @@ async fn forward_chat_completions_inner(
         "forwarding chat completions"
     );
 
-    let mut req = state
-        .http
-        .post(&url)
+    let mut req = upstream_post(state, &url)?
         .header("content-type", "application/json")
         .body(wire_body);
 
@@ -657,6 +679,23 @@ async fn forward_chat_completions_inner(
     }
 }
 
+fn upstream_post(
+    state: &ProxyState,
+    url: &str,
+) -> Result<reqwest::RequestBuilder, UpstreamAttemptError> {
+    #[cfg(test)]
+    if let Some(transport) = state.agy_transport.as_ref() {
+        return transport
+            .request(reqwest::Method::POST, url)
+            .map_err(|body| UpstreamAttemptError {
+                status: 500,
+                body,
+                retryable: false,
+            });
+    }
+    Ok(state.http.post(url))
+}
+
 fn force_json_stream_true(body: &Bytes) -> AppResult<Bytes> {
     let mut v: Value = serde_json::from_slice(body)
         .map_err(|e| AppError::BadRequest(format!("invalid JSON: {e}")))?;
@@ -690,7 +729,7 @@ async fn resolve_agy_project(state: &ProxyState, target: &ResolvedTarget) -> App
         }
     }
     let token = target.connection.bearer_token();
-    let project = crate::agy::fetch_project_id(token).await?;
+    let project = fetch_agy_project(state, token).await?;
     // Persist project into meta for next call
     if let Some(oauth) = &target.connection.oauth {
         let mut meta_v: Value = oauth
@@ -706,6 +745,14 @@ async fn resolve_agy_project(state: &ProxyState, target: &ResolvedTarget) -> App
             .update_oauth_meta(&target.connection.id, &meta_v.to_string());
     }
     Ok(project)
+}
+
+async fn fetch_agy_project(_state: &ProxyState, token: &str) -> AppResult<String> {
+    #[cfg(test)]
+    if let Some(transport) = _state.agy_transport.as_ref() {
+        return crate::agy::fetch_project_id_for_test(token, transport).await;
+    }
+    crate::agy::fetch_project_id(token).await
 }
 
 /// Order targets: skip cooled; apply round-robin rotation when strategy is round_robin.
@@ -765,6 +812,8 @@ pub async fn handle_chat_with_fallback(
         if cancel.is_cancelled() {
             return Err(AppError::BadRequest("client disconnected".into()));
         }
+        #[cfg(test)]
+        require_agy_test_target(state, target)?;
         let start = Instant::now();
 
         if is_cli_target(target) {
@@ -968,6 +1017,15 @@ async fn refresh_http_credentials(
     conn: &crate::store::ConnectionRow,
 ) -> AppResult<crate::store::ConnectionRow> {
     #[cfg(test)]
+    if let Some(transport) = state.agy_transport.as_ref() {
+        return crate::oauth_refresh::refresh_antigravity_connection_for_test(
+            &state.store,
+            conn,
+            transport,
+        )
+        .await;
+    }
+    #[cfg(test)]
     if let Some(transport) = state.refresh_transport.as_ref() {
         return crate::oauth_refresh::refresh_connection_for_test(&state.store, conn, transport)
             .await;
@@ -980,7 +1038,7 @@ async fn ensure_http_credentials_fresh(
     conn: crate::store::ConnectionRow,
 ) -> AppResult<crate::store::ConnectionRow> {
     #[cfg(test)]
-    if state.refresh_transport.is_some() {
+    if state.agy_transport.is_some() || state.refresh_transport.is_some() {
         if conn.auth_type != "oauth_import" || !crate::oauth_refresh::needs_refresh(&conn, 300) {
             return Ok(conn);
         }
@@ -1020,6 +1078,8 @@ pub async fn handle_anthropic_messages(
         if cancel.is_cancelled() {
             return Err(AppError::BadRequest("client disconnected".into()));
         }
+        #[cfg(test)]
+        require_agy_test_target(state, target)?;
         let start = Instant::now();
         if is_cli_target(target) {
             match cli_attempt(
@@ -1215,6 +1275,8 @@ pub async fn handle_responses(
         if cancel.is_cancelled() {
             return Err(AppError::BadRequest("client disconnected".into()));
         }
+        #[cfg(test)]
+        require_agy_test_target(state, target)?;
         let start = Instant::now();
         if is_cli_target(target) {
             match cli_attempt(
@@ -4016,3 +4078,7 @@ mod cost_completeness_tests {
 #[cfg(test)]
 #[path = "named_http_tests.rs"]
 mod named_http_tests;
+
+#[cfg(test)]
+#[path = "agy_http_tests.rs"]
+mod agy_http_tests;

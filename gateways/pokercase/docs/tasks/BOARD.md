@@ -490,3 +490,14 @@ named HTTP九階段隔離旅程通過：41筆attempt（34 succeeded、5 failed�
 本份為產品merge時點快照。NH-5全流程的後續帳本發布、完整備份`t0432-named-http-settlement-20261029`逐檔核對及本輪工作樹清理，以私人`t0432-named-http-settlement/handoff.json`最終事實核實，不預先宣稱完成；完整操作位置留在私人交接。完成此有界切片即停止，不啟動下一里程碑。
 
 最終artifact核對另從乾淨已提交source做locked build，仍得到同一b032binary，四條旅程及serve再次通過。共享target曾呈現另一digest；兩條追加旅程因root傳入該digest而在fixture啟動前被guard拒絕，改用實測locked-build digest後通過，原失敗保留、保護不變；不把這當#701根因證據。
+
+
+## T-0434 — Antigravity offline HTTP isolation
+
+Desk T-0434 claim PR288 merged; [fixed AI-1–AI-5](T-0434-antigravity-isolation.md). Product execution rows only; final ledger/backup/cleanup is separately recorded.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| AI-01 | Source matrix and closed test transport proof | AI-1–AI-2 | in_progress | 2026-10-29T12:02:00Z | — | 2026-10-29T12:02:00Z |
+| AI-02 | Existing HTTP conversion/usage/refresh/discovery/error/cleanup evidence | AI-3–AI-4 | in_progress | 2026-10-29T12:02:00Z | — | 2026-10-29T12:02:00Z |
+| AI-03 | Headless entry, four prior journeys and source/runtime review | AI-5 product validation | in_progress | 2026-10-29T12:02:00Z | — | 2026-10-29T12:02:00Z |

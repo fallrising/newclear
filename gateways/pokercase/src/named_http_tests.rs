@@ -125,6 +125,7 @@ impl Harness {
                 1,
             ),
             refresh_transport: Some(crate::oauth_refresh::TestTransport::loopback(&base)),
+            agy_transport: None,
         };
         Self {
             dir,

@@ -13,8 +13,25 @@ const LOAD_URL: &str = "https://cloudcode-pa.googleapis.com/v1internal:loadCodeA
 /// Discover `cloudaicompanionProject` via loadCodeAssist.
 pub async fn fetch_project_id(access_token: &str) -> AppResult<String> {
     let client = http_client::build_http_client().map_err(AppError::Internal)?;
-    let resp = client
-        .post(LOAD_URL)
+    fetch_project_id_using(client.post(LOAD_URL), access_token).await
+}
+
+#[cfg(test)]
+pub(crate) async fn fetch_project_id_for_test(
+    access_token: &str,
+    transport: &crate::antigravity_test_transport::AntigravityTestTransport,
+) -> AppResult<String> {
+    let request = transport
+        .request(reqwest::Method::POST, LOAD_URL)
+        .map_err(AppError::BadRequest)?;
+    fetch_project_id_using(request, access_token).await
+}
+
+async fn fetch_project_id_using(
+    request: reqwest::RequestBuilder,
+    access_token: &str,
+) -> AppResult<String> {
+    let resp = request
         .header("authorization", format!("Bearer {access_token}"))
         .header("content-type", "application/json")
         .header("user-agent", "antigravity/ide/1.0 darwin/arm64")

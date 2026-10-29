@@ -498,6 +498,24 @@ Desk T-0434 claim PR288 merged; [fixed AI-1–AI-5](T-0434-antigravity-isolation
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| AI-01 | Source matrix and closed test transport proof | AI-1–AI-2 | in_progress | 2026-10-29T12:02:00Z | — | 2026-10-29T12:02:00Z |
-| AI-02 | Existing HTTP conversion/usage/refresh/discovery/error/cleanup evidence | AI-3–AI-4 | in_progress | 2026-10-29T12:02:00Z | — | 2026-10-29T12:02:00Z |
-| AI-03 | Headless entry, four prior journeys and source/runtime review | AI-5 product validation | in_progress | 2026-10-29T12:02:00Z | — | 2026-10-29T12:02:00Z |
+| AI-01 | Source matrix and closed test transport proof | AI-1–AI-2 | done | 2026-10-29T12:02:00Z | 2026-10-29T12:46:39Z | 2026-10-29T12:46:39Z |
+| AI-02 | Existing HTTP conversion/usage/refresh/discovery/error/cleanup evidence | AI-3–AI-4 | done | 2026-10-29T12:02:00Z | 2026-10-29T12:46:39Z | 2026-10-29T12:46:39Z |
+| AI-03 | Headless entry, four prior journeys and source/runtime review | AI-5 product validation | done | 2026-10-29T12:02:00Z | 2026-10-29T12:46:39Z | 2026-10-29T12:46:39Z |
+
+本表done只記錄已合併產品步驟；完整AI-5交接門檻仍依最終handoff，不降低原驗收。
+
+產品 [PR757](https://github.com/fallrising/newclear/pull/757) source `7d7382bc79854dfbd8786a22c1b7a67c9fbfc2d9`、normal merge `3d2b125afe250b35f1ff4ff1bc0a7bd47eac5255` at 2026-10-29T12:46:39Z；三項必要CI、獨立來源/執行/文件審查通過，17檔遠端內容、source/merge祖先及雙方Desk-Task trailer回讀一致。
+
+本輪只建立既有Antigravity HTTP離線隔離與驗收基礎。測試編譯專用closed transport攔截固定inference/discovery/Google refresh URL，使用不轉送loopback proxy；六項proof通過後才執行實際gateway HTTP。Production OAuth allowlist、URL、權限、登入及依賴不變。Proof的10次fake請求（7允許/3拒絕）、四種redirect不跟隨、0sentinel連線及清理通過。
+
+七階段實際HTTP觀測37inference/3discovery/7refresh/0非預期目的地，另計37client inference與169local admin請求；36legacy usage rows。15個buffered案例涵蓋三client轉換及wrapped/unwrapped/缺值/部分/零/無效/overflow/缺價，SQLite/adminJSON/CSV一致。Discovery快取、主動refresh與一次401重試、失敗/fallback、三client opaque bytes、取消/stall及重啟重用通過。5個stream owner釋放、0active，兩server join、listener rebind、temporary data移除。
+
+360Rust tests/22groups、74Python、20validator tests、46contracts/7indexes、fmt/Clippy/locked build全通過；genericHTTP/Claude/Cursor/namedHTTP各九階段與cleanup回歸通過。乾淨已提交source的Cargo artifact回讀及40source hashes一致，保留test binary SHA256 `61645fcfdcaa361ca9bf959c7584b0218c7e2b083713b134fcf9dfad4d3f7458`、normal binary `af057a4c1337dfe8da486d731db2ad5fcaefe3bb739b33838736d1ac8115a88a`。新入口固定保留script/test binary後先proof再HTTP，不依賴可變共享target。
+
+T-0428合成請求意外到官方端點得到401的歷史保留：未讀真credential/私人DB、未觀察成功推論，但不是零外連，也未重試真provider。新增owner證據為前輪namedHTTP入口親自重跑九階段/cleanup成功、41inference/3discovery/0非預期與原b032digest；report SHA256 `3a3ef04c6bb391fa2d7acafb8488a2bdaac5f42d949494c132d8574c9c66673d`。它晚於舊handoff/backup；舊未親跑快照不覆寫，舊備份不假稱含此報告，亦不宣稱owner已跑新Antigravity入口。
+
+Antigravity仍是generateContent的opaque串流，無原生stream轉換/tools/images/observer/durable terminal attempt；malformedHTTP200→400實測沒有usage row，保留為#698剩餘記帳缺口。本輪legacy11/7合成rate估價0.000043不是訂閱帳單。完整#698其他未覆蓋路徑、#699token/價格/歷史語義、#700真client/version/provider與AC01/04/08及SIWC namespace工具、AC04工具對AC17 Cursor text-only決策仍未完成。#701啟動/auth間歇根因未知，不以green重跑推論已修。#702依完整隔離證據判斷，#698–702不自動關閉。mainline incomplete、usable_tag none、desk in_progress保持。
+
+只用合成credential/fixture與隔離臨時DB，沒有真provider/登入/credential/私人DB/Docker、新依賴、擴權、release/deploy。排除admin refresh/refresh-all/probe/host import；這是列舉應用路徑的隔離，不是全機零egress。原17AC/T1102/Cargo/既有交付及不相關tracked plan保留。全輪工具/agent/provider/model/retry/token/費用/execution-active-wait均unknown/null；局部command時間與fixture次數不替代整輪量測。
+
+此段是產品merge時點快照；AI-5後續帳本發布、完整備份`t0434-antigravity-isolation-20261029`逐檔核對與本輪工作樹清理，依私人`t0434-antigravity-isolation/handoff.json`最終回讀事實核實，不預先宣稱完成。完整操作位置留私人交接。完成本輪即停止，不啟動下一里程碑。

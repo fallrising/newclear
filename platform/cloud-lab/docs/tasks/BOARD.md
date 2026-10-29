@@ -414,7 +414,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0024-1 | 既有狀態唯讀與安全開啟 | BI-01 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |
-| T-0024-2 | 期限／額度／本機准入投影 | BI-02 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |
-| T-0024-3 | 待對帳ID與有界輸出 | BI-03 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |
-| T-0024-4 | 回歸、獨立審查與交付 | BI-04 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |
+| T-0024-1 | 既有狀態唯讀與安全開啟 | BI-01 | done | 2026-10-29T18:14:17Z | 2026-10-29T18:24:52Z | 2026-10-29T18:25:29Z |
+| T-0024-2 | 期限／額度／本機准入投影 | BI-02 | done | 2026-10-29T18:14:17Z | 2026-10-29T18:24:52Z | 2026-10-29T18:25:29Z |
+| T-0024-3 | 待對帳ID與有界輸出 | BI-03 | done | 2026-10-29T18:14:17Z | 2026-10-29T18:24:52Z | 2026-10-29T18:25:29Z |
+| T-0024-4 | 回歸、獨立審查與交付 | BI-04 | done | 2026-10-29T18:14:17Z | 2026-10-29T18:24:52Z | 2026-10-29T18:25:29Z |
+
+## T-0024交付與遠端回讀
+
+- [Feature PR801](https://github.com/fallrising/newclear/pull/801) head `4cd59fb1cdd7ccf5537d91619e57308404b8d827`，merge `2776dcf4962f345641736b00ae5ff2e04d0abd30`，合併時間2026-10-29T18:24:52Z。16份交付檔案與遠端逐byte相等、remote feature為main祖先、工作樹乾淨；同期其他project的PLAN新增內容保留，append衝突正常merge解決。
+- CI全過：Cloud Lab `40930348445`、Project success `40930348354`、llms `40930348378`。本機23focused及359fulltests（64Node／295Python）、六項文件／task／report／diff檢查、合併後索引／diff與private-literal檢查通過；T846 focusedACCEPT。[BI證據](../evidence/m1-bot-inspection.md)保留初始RED、socket沙箱失敗、CLI fixture argv及deepJSON斷言修正、review malformed-schema兩個RED與修復。
+- GitHub connector交付及匿名HTTPS回讀；remote tree `956e6cf991be915eb198efa561b1681f69634614`與local merge `ede980e266c6285926b8322084b501f46980c14b`相同，commit身份不同。原state真正CLI唯讀查詢18:17:42Z為active、calls4/240、新ID1/24、2ACK且無pending；DB／lock／config／policy／Grok client hash和mtime相同。這是本機快照，不是新的遠端授權／健康證據。
+- BI01–04 source/local完成，未安裝新runtime、變更MCP catalog、呼叫cloud／model、續權或新增command／付費。Python3.11本機未跑；自然到期／模型／帳單／完整主線仍pending，無usabletag。HL T-0015仍open；本收尾只改任務板、只關閉BI。

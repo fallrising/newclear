@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fixedAssets} from './fixture.mjs';
-import {origin,outDir,viewports,planLines,bootstrapConsole,bootstrapFailed,targetsVerdict,planVerdict,captureVerdict,pngSize} from './shared-capture-verdicts.mjs';
+import {origin,outDir,viewports,planLines,bootstrapConsole,bootstrapFailed,faviconConsole,targetsVerdict,planVerdict,captureVerdict,faviconSummary,pngSize} from './shared-capture-verdicts.mjs';
 
 // SPEC-T006R-shared-capture V01 and tests: each verdict passes its good row and fails, with one exact reason, on each broken condition.
 const sha=b=>createHash('sha256').update(b).digest('hex');
@@ -21,6 +21,9 @@ test('repository targets match the review runtime and stay unverified before cap
   ['storage state',g=>({apps:[{...g.apps[0],storageState:'/state/auth.json'}]}),'TARGETS_APP'],
   ['second page',g=>({apps:[{...g.apps[0],pages:[...g.apps[0].pages,{id:'login',path:'/login'}]}]}),'TARGETS_PAGES'],
   ['page wait',g=>({apps:[{...g.apps[0],pages:[{...g.apps[0].pages[0],settleMs:500}]}]}),'TARGETS_PAGES'],
+  ['locale',()=>({locale:'zh-TW'}),'TARGETS_SHAPE'],['project',()=>({project:'other'}),'TARGETS_SHAPE'],
+  ['kind',g=>({apps:[{...g.apps[0],kind:'terminal'}]}),'TARGETS_APP'],['second app',g=>({apps:[g.apps[0],{...g.apps[0],name:'other'}]}),'TARGETS_APP'],
+  ['page id',g=>({apps:[{...g.apps[0],pages:[{id:'index',path:'/'}]}]}),'TARGETS_PAGES'],['page path',g=>({apps:[{...g.apps[0],pages:[{id:'home',path:'/index.html'}]}]}),'TARGETS_PAGES'],
  ]);
 });
 
@@ -33,7 +36,8 @@ test('the unchanged shared script prints exactly the expected plan for the repos
 test('plan verdict needs the exact three lines, exit 0, no stderr and no output folder',()=>{
  each(planVerdict,{code:0,stdout:planLines.join('\n')+'\n',stderr:'',outputExists:false},[
   ['exit',()=>({code:2}),'EXIT'],['stderr',()=>({stderr:'warning\n'}),'STDERR'],
-  ['other port',()=>({stdout:planLines.join('\n').replace('8443','18443')}),'PLAN'],['missing line',()=>({stdout:planLines.slice(0,2).join('\n')}),'PLAN'],
+  ['other port',()=>({stdout:planLines.join('\n').replace('8443','18443')+'\n'}),'PLAN'],['missing line',()=>({stdout:planLines.slice(0,2).join('\n')+'\n'}),'PLAN'],
+  ['no final newline',()=>({stdout:planLines.join('\n')}),'PLAN'],['blank line',()=>({stdout:planLines.join('\n\n')+'\n'}),'PLAN'],
   ['output written',()=>({outputExists:true}),'OUTPUT_WRITTEN'],
  ]);
 });
@@ -41,7 +45,7 @@ test('plan verdict needs the exact three lines, exit 0, no stderr and no output 
 const record=([name],i)=>({app:'control-plane',page:'home',url:origin+'/',viewport:name,colorScheme:'dark',screenshot:`screenshots/control-plane__home__${name}__dark.png`,status:200,loadMs:300,title:'Codebox operator',horizontalOverflow:false,...(i===0?{axeViolations:[{id:'region',impact:'moderate',nodes:1,help:'x'}]}:{}),consoleErrors:[bootstrapConsole],pageErrors:[],failedRequests:[bootstrapFailed]});
 const goodCapture=()=>({code:0,stderr:'',stdout:viewports.map(([n])=>`ok   control-plane home ${n} dark`).join('\n')+'\nwrote ../output/capture/capture.json\n',
  manifest:{project:'fanzloud',axe:true,results:viewports.map(record)},pngs:Object.fromEntries(viewports.map(([n,w,h])=>[`screenshots/control-plane__home__${n}__dark.png`,{width:w,height:h+400}])),
- transport:{requests:15,unknownRequests:0,upgrades:0,rejectedUpgrades:0},fixture:{effects:0,turnStarts:0,counts:{'GET /api/p0/v1/session':3}}});
+ transport:{requests:15,unknownRequests:0,unknownFavicon:0,upgrades:0,rejectedUpgrades:0},fixture:{effects:0,turnStarts:0,counts:{'GET /api/p0/v1/session':3}}});
 const at=(g,i,change)=>({manifest:{...g.manifest,results:g.manifest.results.map((r,j)=>j===i?{...r,...change}:r)}});
 
 test('capture verdict accepts only the exact static bootstrap capture at three sizes',()=>{
@@ -54,15 +58,26 @@ test('capture verdict accepts only the exact static bootstrap capture at three s
   ['light',g=>at(g,1,{colorScheme:'light'}),'RECORD_TABLET'],['url',g=>at(g,2,{url:origin+'/login'}),'RECORD_MOBILE'],
   ['status',g=>at(g,0,{status:500}),'LOAD_DESKTOP'],['error',g=>at(g,1,{error:'TimeoutError'}),'LOAD_TABLET'],['title',g=>at(g,2,{title:''}),'LOAD_MOBILE'],['overflow',g=>at(g,2,{horizontalOverflow:true}),'LOAD_MOBILE'],
   ['page error',g=>at(g,0,{pageErrors:['Error: x']}),'HEALTH_DESKTOP'],['extra console',g=>at(g,1,{consoleErrors:[bootstrapConsole,bootstrapConsole]}),'HEALTH_TABLET'],
-  ['other failure',g=>at(g,2,{failedRequests:[bootstrapFailed,`GET ${origin}/favicon.ico HTTP 404`]}),'HEALTH_MOBILE'],['no console',g=>at(g,0,{consoleErrors:[]}),'HEALTH_DESKTOP'],
+  ['other failure',g=>at(g,2,{failedRequests:[bootstrapFailed,`GET ${origin}/robots.txt HTTP 404`]}),'HEALTH_MOBILE'],['two 404 lines',g=>({...at(g,0,{consoleErrors:[bootstrapConsole,faviconConsole,faviconConsole]}),transport:{...g.transport,requests:17,unknownRequests:2,unknownFavicon:2}}),'HEALTH_DESKTOP'],
+  ['other console',g=>at(g,1,{consoleErrors:[bootstrapConsole,'[warning] something']}),'HEALTH_TABLET'],['no console',g=>at(g,0,{consoleErrors:[]}),'HEALTH_DESKTOP'],
   ['serious axe',g=>at(g,0,{axeViolations:[{id:'color-contrast',impact:'serious',nodes:1}]}),'AXE_DESKTOP'],['critical axe',g=>at(g,0,{axeViolations:[{id:'x',impact:'critical',nodes:1}]}),'AXE_DESKTOP'],
   ['no desktop axe',g=>{const r={...g.manifest.results[0]};delete r.axeViolations;return {manifest:{...g.manifest,results:[r,...g.manifest.results.slice(1)]}};},'AXE_DESKTOP'],['tablet axe',g=>at(g,1,{axeViolations:[]}),'AXE_TABLET'],
   ['png missing',g=>({pngs:{...g.pngs,'screenshots/control-plane__home__tablet__dark.png':undefined}}),'PNG_TABLET'],
   ['png width',g=>({pngs:{...g.pngs,'screenshots/control-plane__home__mobile__dark.png':{width:780,height:2000}}}),'PNG_MOBILE'],
   ['png short',g=>({pngs:{...g.pngs,'screenshots/control-plane__home__desktop__dark.png':{width:1440,height:899}}}),'PNG_DESKTOP'],
-  ['extra request',g=>({transport:{...g.transport,requests:16}}),'TRANSPORT'],['unknown request',g=>({transport:{...g.transport,unknownRequests:1}}),'TRANSPORT'],['upgrade',g=>({transport:{...g.transport,upgrades:1}}),'TRANSPORT'],
+  ['extra request',g=>({transport:{...g.transport,requests:16}}),'TRANSPORT'],['non-favicon unknown',g=>({transport:{...g.transport,requests:16,unknownRequests:1}}),'TRANSPORT'],['refused upgrade',g=>({transport:{...g.transport,rejectedUpgrades:1}}),'TRANSPORT'],
+  ['four favicons',g=>({transport:{...g.transport,requests:19,unknownRequests:4,unknownFavicon:4}}),'TRANSPORT'],['favicon line without request',g=>at(g,0,{consoleErrors:[faviconConsole,bootstrapConsole]}),'FAVICON_CONSOLE'],
+  ['turn start',g=>({fixture:{...g.fixture,turnStarts:1}}),'FIXTURE'],['project',g=>({manifest:{...g.manifest,project:'x'}}),'MANIFEST'],['results object',g=>({manifest:{...g.manifest,results:{}}}),'MANIFEST'],
+  ['app',g=>at(g,0,{app:'x'}),'RECORD_DESKTOP'],['page',g=>at(g,1,{page:'login'}),'RECORD_TABLET'],['viewport',g=>at(g,2,{viewport:'tablet'}),'RECORD_MOBILE'],
+  ['extra stdout line',g=>({stdout:g.stdout+'note\n'}),'STDOUT'],['blank stdout line',g=>({stdout:g.stdout.replace('\nwrote','\n\nwrote')}),'STDOUT'],['upgrade',g=>({transport:{...g.transport,upgrades:1}}),'TRANSPORT'],
   ['session count',g=>({fixture:{...g.fixture,counts:{'GET /api/p0/v1/session':4}}}),'FIXTURE'],['login read',g=>({fixture:{...g.fixture,counts:{...g.fixture.counts,'GET /api/p0/v1/login':1}}}),'FIXTURE'],['effect',g=>({fixture:{...g.fixture,effects:1}}),'FIXTURE'],
  ]);
+});
+
+test('the browser favicon request is accepted only as GET /favicon.ico, counted and recorded',()=>{
+ const g=goodCapture();const withFavicon={...g,...at(g,0,{consoleErrors:[faviconConsole,bootstrapConsole]}),transport:{...g.transport,requests:16,unknownRequests:1,unknownFavicon:1}};
+ assert.deepEqual(captureVerdict(withFavicon),{passed:true,reasons:[]});assert.deepEqual(faviconSummary(withFavicon),{requests:1,consoleLines:1});
+ const silent={...g,transport:{...g.transport,requests:18,unknownRequests:3,unknownFavicon:3}};assert.deepEqual(captureVerdict(silent),{passed:true,reasons:[]});assert.deepEqual(faviconSummary(silent),{requests:3,consoleLines:0});
 });
 
 test('PNG size reads the IHDR header and rejects anything else',()=>{

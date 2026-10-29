@@ -134,10 +134,13 @@ test('canary scan names only the sources that contain a secret',()=>{
  assert.throws(()=>canaryScan(clean,['short']),/REVIEW_CANARY_INPUT/);assert.throws(()=>canaryScan(clean,[undefined]),/REVIEW_CANARY_INPUT/);
 });
 
-test('driver pins equal the current harness, verdicts and served assets',async()=>{
+test('driver pins equal the current harness, verdicts and served assets, except the historical transport pin',async()=>{
  const {readFileSync}=await import('node:fs'),{createHash}=await import('node:crypto'),{fixedAssets}=await import('./fixture.mjs');const sha=b=>createHash('sha256').update(b).digest('hex');
  const driver=readFileSync(new URL('journeys-browser.mjs',import.meta.url),'utf8');const pins=JSON.parse(driver.match(/const expectedSources=(\{[^}]*\})/)[1]);const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
  assert.deepEqual(Object.keys(pins).sort(),['/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','baseline-support.mjs','conformance-browser-verdicts.mjs','fixture.mjs','journeys-browser-verdicts.mjs','lifecycle.mjs','remaining-support.mjs','transport.mjs','trust.mjs']);
+ // SPEC-T006R-shared-capture: the favicon counter changed transport.mjs after journeys-001 ran; the driver stays pinned to the bytes it ran on.
+ const historical={'transport.mjs':'9167d04e5b4937ec1aca3a6788b27b6e9b358f738f516bb3861a9877049b988f'};
+ for(const[name,hash]of Object.entries(historical)){assert.equal(pins[name],hash,name);assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),hash,name);delete pins[name];}
  for(const[name,hash]of Object.entries(pins))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
 });
 

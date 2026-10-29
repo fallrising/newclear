@@ -371,3 +371,13 @@ test('review_transport_journey_seams_are_bounded_and_one_shot',{skip},async()=>{
   const b=await connect(env,{cookie:c.cookie});b.sock.send(subscribeFrame(sid,high));await until(()=>b.frames.some(f=>f.type==='replay_end'));b.sock.terminate();
  }finally{await env.close();}
 });
+
+// SPEC-T006R-shared-capture W08: the favicon counter names only GET /favicon.ico; every other unknown request is still unknown and 404.
+test('review_transport_counts_favicon_separately_from_other_unknown_requests',{skip},async()=>{
+ const env=await start('bootstrap-empty');
+ try{
+  for(const [method,path] of [['GET','/favicon.ico'],['HEAD','/favicon.ico'],['GET','/favicon.ico?x=1'],['GET','/robots.txt'],['POST','/favicon.ico']])assert.equal((await call(env,{method,path})).status,404,method+' '+path);
+  assert.equal((await call(env,{path:'/favicon.ico'})).status,404);
+  const s=env.transport.summary();assert.equal(s.unknownRequests,6);assert.equal(s.unknownFavicon,2);assert.equal(s.requests,6);assert.deepEqual(env.fixture.summary().counts,{});
+ }finally{await env.close();}
+});

@@ -383,6 +383,7 @@ Next: final integration (T0433-3, R2-AC-E): source commits, commands, tool versi
 The T0433-3 inventory found that SPEC-T006R R11 requires the unchanged shared `docs/fe-review/capture.mjs` to run against private targets, first as a dry run and then as a static capture, and that no run had used it. `targets.json` still named port 18443. The owner chose one bounded shared-capture run (「按你推薦做吧。」). [SPEC-T006R-shared-capture](docs/specs/SPEC-T006R-shared-capture.md) specifies:
 - `targets.json` now names the review origin `https://127.0.0.1:8443`; it stays `verified:false` until `capture-001` passes and its actual review accepts it;
 - a wrapper, `fe-review/shared-capture.mjs`, that serves the bootstrap fixture with the fresh trust, copies `targets.json` byte for byte to private state and runs `capture.mjs` unchanged;
-- exact verdicts for the dry-run plan and the three-size capture, and the `capture-001` runtime boundary.
+- exact verdicts for the dry-run plan and the three-size capture, and the `capture-001` runtime boundary;
+- one review-only transport counter for Chromium's automatic `GET /favicon.ico`, which reaches the server because `capture.mjs` installs no route. Its 404 is recorded as a presentation finding, and any other unknown request still fails.
 
-Tests: 7 new tests, including a real dry run of the unchanged shared script against the repository targets. `capture-001` has not run. It runs once, after independent review, required CI and its own owner approval.
+The independent review rejected the first version because the favicon request was missing from the expectations; this version fixes that. Tests: 8 new shared-capture tests, including a real dry run of the unchanged shared script against the repository targets, and one new loopback transport oracle. `capture-001` has not run. It runs once, after independent review, required CI and its own owner approval.

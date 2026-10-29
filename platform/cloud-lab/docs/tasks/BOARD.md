@@ -200,7 +200,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0010-1 | fresh前態與窗口固定 | OL-01 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |
-| T-0010-2 | Worker／機器授權有界更新 | OL-02 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |
-| T-0010-3 | resident與IA觀測／正常停止 | OL-03 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |
-| T-0010-4 | 回讀／補償／審查及交付 | OL-04 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |
+| T-0010-1 | fresh前態與窗口固定 | OL-01 | done | 2026-10-29T03:20:36Z | 2026-10-29T03:39:58Z | 2026-10-29T03:41:07Z |
+| T-0010-2 | Worker／機器授權有界更新 | OL-02 | done | 2026-10-29T03:20:36Z | 2026-10-29T03:39:58Z | 2026-10-29T03:41:07Z |
+| T-0010-3 | resident與IA觀測／正常停止 | OL-03 | done | 2026-10-29T03:20:36Z | 2026-10-29T03:39:58Z | 2026-10-29T03:41:07Z |
+| T-0010-4 | 回讀／補償／審查及交付 | OL-04 | done | 2026-10-29T03:20:36Z | 2026-10-29T03:39:58Z | 2026-10-29T03:41:07Z |
+
+- Evidence [PR #736](https://github.com/fallrising/newclear/pull/736) merged `96d7a9d55d6c8f547df3052c96fe843bb01b4974` at `2026-10-29T03:39:58Z`；head `5db9ec7bb23588358ff48cdc0774cdfdb0ee7ec6`。
+- CI全過：Cloud Lab `40813231171`、Project success `40813231192`、llms `40813231180`。遠端13份檔案逐檔相等，兩份根索引的Cloud Lab條目相等；其他專案同期新增條目保留。
+- [OL實際證據與T832 ACCEPT](../evidence/m1-observation-live.md)：批准窗口內完成Worker／機器授權、AS／SA／RO觀測及提前停止；journal／業務資料／Access policy與排程保留。
+- 原human／scheduler仍過期，未新增付費，未驗自然到期／回退或真人Access，完整主線pending。此PR只按實際合併時間收尾任務板。

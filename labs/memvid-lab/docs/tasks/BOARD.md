@@ -34,12 +34,23 @@ Owner 已另行明確授權合併。[PR #709](https://github.com/fallrising/newc
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | T-0436-M1 | 同步已合併狀態及固定評估規格 | NU-01 | done | 2026-10-29T16:55:00Z | 2026-10-29T17:02:27Z | 2026-10-29T17:02:27Z |
-| T-0436-M2-01 | 固定繁中筆記、查詢與品質評估 | NU-02 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
-| T-0436-M2-02 | 更新／刪除／重開一致性 | NU-03 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
-| T-0436-M2-03 | 100／1000 筆成本實測 | NU-04 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
-| T-0436-M2-04 | 回歸、採用結論及交付 | NU-05 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
+| T-0436-M2-01 | 固定繁中筆記、查詢與品質評估 | NU-02 | done | 2026-10-29T16:59:00Z | 2026-10-29T17:25:19Z | 2026-10-29T17:25:19Z |
+| T-0436-M2-02 | 更新／刪除／重開一致性 | NU-03 | done | 2026-10-29T16:59:00Z | 2026-10-29T17:25:19Z | 2026-10-29T17:25:19Z |
+| T-0436-M2-03 | 100／1000 筆成本實測 | NU-04 | done | 2026-10-29T16:59:00Z | 2026-10-29T17:25:19Z | 2026-10-29T17:25:19Z |
+| T-0436-M2-04 | 回歸、採用結論及交付 | NU-05 | done | 2026-10-29T16:59:00Z | 2026-10-29T17:25:19Z | 2026-10-29T17:25:19Z |
 
 M1 [#773](https://github.com/fallrising/newclear/pull/773) 已合併，merge `da6d735d98ffa77b363cab7cffd4715b2a864dd6`；三項 candidate CI success，獨立審查 ACCEPT。M2 已啟動；固定 corpus SHA `a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970`。首輪來源 renderer 核對失敗與修正見 [開發紀錄](../evidence/notes-development.md)。
 
 
-M2 本機驗證：`make check` 16 passed；`make notes RUN_DIR=work/notes-final-002` 所有預定 jobs 完成／0 errors。原生 Recall/MRR 0.25、二字組 0.4583，兩者均不建議直接採用，詳見 [結果](../notes-usability-results.md)。NU-02–05 實驗證據已取得；任務保持 in_progress 至 M2 PR 審查／CI／合併，之後以真實 merged_at 補 end。
+M2 本機驗證：`make check` 16 passed；`make notes RUN_DIR=work/notes-final-002` 所有預定 jobs 完成／0 errors。原生 Recall/MRR 0.25、二字組 0.4583，兩者均不建議直接採用，詳見 [結果](../notes-usability-results.md)。NU-02–05 實驗證據及正常 Git 交付均完成；四列依實際 merged_at 結案。
+
+
+### T-0436 最終 Git 交付
+
+M2 [PR #777](https://github.com/fallrising/newclear/pull/777) 於 `2026-10-29T17:25:19Z` 正常合併，merge SHA `af412068b8fa065daa7f936b63d7c5474c2e5ba3`，驗證 head `45d5483b13d51c543e7bd6277dc6fee761441686`。
+
+合併前四個 head workflows success：[Memvid lab CI](https://github.com/fallrising/newclear/actions/runs/40919594865)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/40919595145)、[llms navigation](https://github.com/fallrising/newclear/actions/runs/40919595563)、[Workflow lint](https://github.com/fallrising/newclear/actions/runs/40919595572)。Memvid CI 的16項 regression、固定筆記評估、原生工具／模型準備、既有15場景與artifact上傳均 success。
+
+獨立 M2 審查 [T-003](../../.team/reports/T-003.md) ACCEPT；合併後再次回讀 merged=true、實際 SHA／時間。遠端 evaluator、corpus與final JSON的Git blobs均與已驗證候選相同。此最後任務板PR只同步事實，不修改 runtime、資料、門檻或既有失敗證據；候選時點文件中的待CI／合併記錄由本節交付事實更新。
+
+本次完成的是評估實驗，兩種策略的自然語句檢索均不建議直接採用。沒有產品整合、release、usable tag或部署；desk正式done與owner驗收仍依owner決定。

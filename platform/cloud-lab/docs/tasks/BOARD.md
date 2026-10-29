@@ -270,3 +270,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - [Feature PR750](https://github.com/fallrising/newclear/pull/750) head `1c7bbb0d186a7584777f58a8c46cc5b3feec57e5`，merge `89ead9636c5e732b8a5a367c3f02ca5eca0bf2da`，合併時間2026-10-29T08:33:41Z。24份交付檔案與遠端逐byte相等、feature為main祖先、工作樹乾淨；既有其他專案變更保留。
 - CI全過：Cloud Lab `40842886920`、Project success `40842886813`、llms `40842886941`。本機完整265tests、fixture分鐘邊界修正後5項整合再通過；真實Chromium／workerd的12組檢查、95次API請求、T836獨立審查ACCEPT。初始RED與harness失敗保留在[HS證據](../evidence/m1-health-schedule.md)。
 - 已固定六份Worker／看板候選及hash。這是HS01–04 source／local交付；[具體15分鐘啟用與停用方案](../health-schedule.md)備妥，未部署、續scheduler授權、啟用Cron、改runner或新增付費。既有runner期限不變；Python3.11、真人Access及完整主線pending，無usable tag。本收尾只改任務板。
+
+## T-0015 — 低頻健康排程實際啟用
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0015-1 | fresh資源／來源／runner核對 | HL-01 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
+| T-0015-2 | 有界scheduler與Worker／Cron更新（等provider：資產session500） | HL-02 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
+| T-0015-3 | 首次真實觸發及runner結果（依賴HL02恢復） | HL-03 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
+| T-0015-4 | 保留／回讀／審查與交付 | HL-04 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
+
+- [HL部分執行證據](../evidence/m1-health-schedule-live.md)：資產session兩次500，未發布／續權／開Cron。2026-10-29T10:15:50Z回讀原資源／授權／業務／journal保留，runner運行中；原批准持續有效但受2026-11-05T07:24:26Z上限約束。等待provider恢復，並非等owner；所有列暫留in_progress，不以證據PR合併冒充啟用完成。

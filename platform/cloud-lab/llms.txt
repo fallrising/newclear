@@ -87,3 +87,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Persistent bot policy](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-policy.md): private <=24h lease, <=24 new IDs/240 calls, explicit offline initialization, durable reservations and trusted MCP flag; source/local only, no live configuration or renewal.
 
 - [Explicit bot-policy renewal](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-policy-renewal.md): offline preview, expired-only digest-CAS renewal, atomic archived ledger/reservations and preserved requests; identical replay does not refill quota. No MCP renewal tool or live activation.
+
+- [Bounded bot activation preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-activation.md): pinned BR/BP runtime and uninstalled host candidate, original state preserved, fresh expired-bot/verified-runner observations and non-executable <=24h proposal; live bot-only activation requires explicit approval.

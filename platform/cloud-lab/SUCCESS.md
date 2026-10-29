@@ -111,3 +111,7 @@ Owner同意繼續常態政策開發；[BP01–04契約](docs/bot-policy.md)先�
 ## BR：顯式 bot 政策續租
 
 Owner繼續開發；[BR01–04契約](docs/bot-policy-renewal.md)實作離線預覽、到期後CAS續租及歷史保留，[336tests與T843複審](docs/evidence/m1-bot-policy-renewal.md)通過，source／local驗收；live啟用及完整主線仍pending。
+
+## BA：Bot常態有界啟用準備
+
+[BA01–04](docs/bot-activation.md)固定BR/BP候選、原Lab唯讀核對及首個<=24h方案；[實際準備證據與T844審查](docs/evidence/m1-bot-activation.md)通過；本輪僅準備，實際啟用／續權與完整主線仍pending。

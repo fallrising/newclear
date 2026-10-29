@@ -535,3 +535,16 @@ Demand: desk T-0432 / #698; [fixed acceptance/design](T-0432-antigravity-settlem
 本表done記錄已合併產品步驟；完整AS-5仍需最終交接門檻。
 
 此為產品merge時點快照；AS-5後續帳本發布、完整備份`t0432-antigravity-settlement-20261029`逐檔核對與本輪工作樹清理，依私人`t0432-antigravity-settlement/handoff.json`最終事實核實，不預先宣稱完成。完成本輪即停止，不啟動下一里程碑。
+
+
+## T-0435 — Existing token and timing coverage
+
+Demand: desk T-0435 / #699. Claim PR292 merged; [MT-1–MT-5](T-0435-measurement-coverage.md).
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| MT-1 | Saved-field completeness and true RED | MT-1 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
+| MT-2 | Separate timing basis and means | MT-2 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
+| MT-3 | Matching-scope schema2/Web/CSV/TUI semantics | MT-3 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
+| MT-4 | Attempts and historical preservation | MT-4 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
+| MT-5 | Validation review and bounded delivery | MT-5 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |

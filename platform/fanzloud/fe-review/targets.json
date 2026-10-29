@@ -1,7 +1,7 @@
 {
   "project": "fanzloud",
   "verified": false,
-  "verifiedNote": "第1輪候選URL；DESIGN M1 HTTPS/WSS/CA/fixture harness未實作，無start；勿直接capture或沿用既有listener。",
+  "verifiedNote": "Review origin of the HTTPS/WSS synthetic harness (fixture + transport, private CA) used by fe-review/shared-capture.mjs (SPEC-T006R-shared-capture). No start: only the wrapper serves it, inside the pinned network-none container. Stays false until capture-001 passes and its actual review accepts it.",
   "locale": "en-US",
   "colorSchemes": [
     "dark"
@@ -11,7 +11,7 @@
       "name": "control-plane",
       "kind": "server",
       "cwd": "platform/fanzloud",
-      "baseUrl": "https://127.0.0.1:18443",
+      "baseUrl": "https://127.0.0.1:8443",
       "ready": "/",
       "pages": [
         {

@@ -115,3 +115,7 @@ Owner繼續開發；[BR01–04契約](docs/bot-policy-renewal.md)實作離線預
 ## BA：Bot常態有界啟用準備
 
 [BA01–04](docs/bot-activation.md)固定BR/BP候選、原Lab唯讀核對及首個<=24h方案；[實際準備證據與T844審查](docs/evidence/m1-bot-activation.md)通過；本輪僅準備，實際啟用／續權與完整主線仍pending。
+
+## BT：首個 bot 有界啟用
+
+Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首次政策初始化、固定Grok工具與一筆健康驗證；[實際啟用及保全](docs/evidence/m1-bot-activation-live.md)通過，bot截止2026-10-30T18:00:27Z，1新ID／4call得到validated/healthy；T845獨立公開證據審查ACCEPT，Git交付／回讀見任務板，主線仍incomplete。

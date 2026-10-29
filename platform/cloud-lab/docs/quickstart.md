@@ -39,3 +39,5 @@ python3 platform/cloud-lab/adapters/node-health/runner.py --config /private/clou
 ## Bot工具入口
 
 [固定bot bridge](bot-bridge.md)提供JSON提交／查詢與同ID恢復，使用獨立bot config及私人state。local harness預設只有human／runner身份，不能直接把runner.json當成有submit權限的bot；自動整合測試建立明示的合成bot grant，不改產品權限。
+
+[本機MCP工具](mcp-stdio.md)可用固定argv接到支援stdio的host；先驗證初始化與status，提交由可信設定另外啟用。無須第三方SDK；工具host仍需保護config/state與呼叫頻率。

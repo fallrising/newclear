@@ -15,7 +15,7 @@ T-008初審要求把拒答明確寫成逐hit cosine≥threshold、保留native t
 
 兩模型的固定資產／圖合約／CPU推論及IPv4／IPv6禁網probe通過，原始 [model probe](semantic-model-probe.json) 保留。完整評估草稿首輪 `make semantic RUN_DIR=work/semantic-final-001` exit2（內層CLI exit1），兩模型皆在開發集階段因來源manifest不符失敗；沒有threshold、heldout、update或scale結果。獨立批次、關閉auto-checkpoint、公開embedder與doctor對照詳見 [結果](../notes-semantic-results.md)。停止新增SDK修復嘗試，不降低完整性guard。
 
-可交付的獨立診斷 `timeout 90 .venv/bin/python diagnose_vectors.py --cache work/semantic-models --output work/standalone-diagnostic-002` 實得exit1：24來源、seal前18 hits、重開6 hits、put IDs不符持久frame IDs；[JSON](semantic-diagnostic.json)。這是成功保存失敗現象，不是M3通過。完整評估器、未交付CI草稿及其校準測試移到本機 `work/pending-m3`，未提交，現行workflow未改。
+可交付的獨立診斷 `timeout 90 .venv/bin/python diagnose_vectors.py --cache work/semantic-models --output work/standalone-diagnostic-final` 實得exit1：24來源、seal前18 hits、重開6 hits、put IDs不符持久frame IDs；[JSON](semantic-diagnostic.json)。這是成功保存失敗現象，不是M3通過。完整評估器、未交付CI草稿及其校準測試移到本機 `work/pending-m3`，未提交，現行workflow未改。
 
 ## 審查修正與來源版本
 

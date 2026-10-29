@@ -35,3 +35,7 @@ Server單次challenge收取最多256bytes、0.5秒；observer回應最多32KiB�
 正常resident未指定socket時行為不變；啟用時先取得原journal lock、建立runner，再用resident loop實際計算的monotonic deadline啟動觀測；finally關閉socket後才釋放journal與lock。程式在主機不同PID namespace或看不到/proc／fdinfo時失敗，不降級為PID存在檢查。
 
 Socket權限透過O_PATH／O_NOFOLLOW固定inode後，以proc fd引用設定0600，不依賴可選的nofollow chmod支援；[Python 3.11平台支援說明](https://docs.python.org/3.11/library/os.html#os.supports_follow_symlinks)。本機實際測試使用Python 3.13；未安裝／另跑Python 3.11，不將模擬缺少可選功能測試冒稱跨版本實測。
+
+## 後續實際接入 — 2026-10-29
+
+Owner後續已明確批准RP有界方案並執行；[OL實際證據](evidence/m1-observation-live.md)記錄部署、兩個機器短期期限、真實整合與驗證後停止。上文保留各原階段範圍與限制；這次不是常態服務、human／scheduler續權或完整主線驗收，沒有自然到期觀察或回退演練。

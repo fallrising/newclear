@@ -82,4 +82,6 @@ RO Git交付已獲owner明確push批准，恢復正常PR／CI／merge與任務�
 
 本輪[IA01–04授權來源整合](docs/integrated-authorization.md)source完成：[214tests與獨立複審](docs/evidence/m1-integrated-authorization.md)通過，串聯AS／SA／RO並保留缺失來源為未知。未部署、續權或進行原Lab整合採集，完整主線保持pending。
 
-本輪[RP01–04觀測部署準備](docs/observation-rollout.md)完成：[12份source候選／唯讀現況／獨立ACCEPT](docs/evidence/m1-observation-rollout-plan.md)已核對。最長兩小時的機器接入窗口及補償方案待明確批准；尚未部署、續權或啟停服務。
+本輪[RP01–04觀測部署準備](docs/observation-rollout.md)完成：[12份source候選／唯讀現況／獨立ACCEPT](docs/evidence/m1-observation-rollout-plan.md)已核對。該階段僅準備；後續owner已批准並執行OL有界接入，結果見下段。
+
+Owner明確批准後，[OL01–04實際接入](docs/evidence/m1-observation-live.md)已完成Worker100%、bot／runner短期授權、真實AS／SA／RO與正常停止回讀；原業務資料、journal、Access policy與排程保持。未擴大scope或付費；human／scheduler仍過期，未驗自然到期或真人session，完整主線pending。

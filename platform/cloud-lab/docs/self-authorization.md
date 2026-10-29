@@ -30,3 +30,7 @@ Client嚴格驗證schema、credential id/generation、grant引用及scope與目�
 本輪只改source，部署後的新介面才可提供此來源；既有AS MCP採集器仍不會自動合併self response，AL snapshot不因新增CLI而變完整。接入需保留target／scope／identity、來源時間及部署版本證據。
 
 後續[RO01–04](resident-observation.md)已實作上述程序來源的私人socket／kernel身分與鎖驗證；仍限source／本機測試，未部署到原resident，也未自動合併到AS／AL snapshot。
+
+## 後續實際接入 — 2026-10-29
+
+Owner後續已明確批准RP有界方案並執行；[OL實際證據](evidence/m1-observation-live.md)記錄部署、兩個機器短期期限、真實整合與驗證後停止。上文保留各原階段範圍與限制；這次不是常態服務、human／scheduler續權或完整主線驗收，沒有自然到期觀察或回退演練。

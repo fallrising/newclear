@@ -44,11 +44,11 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Authorization collection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-collection.md): fixed read-only Worker/D1/Access metadata with source provenance and drift checks;161tests and five original-Lab reads verified, HMAC/runner unknown, no renewal.
 - [Collection evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-authorization-collection.md): independent source review and lead-verified live metadata; all four grants and selected token expired, active0 and schedules off at observation.
 
-- [Machine self authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/self-authorization.md): authenticated own-HMAC metadata and runner inspection CLI without job dispatch; source/local verification only, not deployed. Runner process and Access expiry remain unknown; nonce storage still writes.
+- [Machine self authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/self-authorization.md): authenticated own-HMAC metadata and runner inspection CLI without job dispatch; subsequently deployed and checked in the bounded OL window. Standalone query omits resident and Access expiry; nonce storage still writes.
 
 - [Self-authorization evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-self-authorization.md):176local tests, real loopback inspection and cancellable slow-stream boundary; initial failures retained, no live rollout or renewal.
 
-- [Resident process observation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/resident-observation.md): opt-in Linux private Unix socket, peer/start/boot identity, loaded config digest and actual FLOCK ownership; conservative stop deadline and crash/drift rejection. Source/local only, not installed on the original Lab.
+- [Resident process observation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/resident-observation.md): opt-in Linux private Unix socket, peer/start/boot identity, loaded config digest and actual FLOCK ownership; conservative stop deadline and crash/drift rejection. Subsequently installed and observed on the original Lab; validation resident stopped after observation.
 
 - [Resident observation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-resident-observation.md):192tests, real fixture resident/kernel-lock observations, signal/restart/crash and drift checks, independent review; no original-service rollout or authorization change.
 
@@ -56,6 +56,8 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 
 - [Integration evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-integrated-authorization.md): real local HTTP/HMAC/SQLite and kernel socket integration with synthetic management envelopes; source-only acceptance and explicit unknown route/policy/live state.
 
-- [Observation rollout preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/observation-rollout.md): pinned source candidate, read-only baseline, bounded machine-only window proposal and compensating rollback; no deployment or renewal executed.
+- [Observation rollout preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/observation-rollout.md): pinned source candidate, read-only baseline, bounded machine-only window proposal and compensating rollback; preparation history precedes the separately approved OL execution.
 
 - [Rollout preparation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-observation-rollout-plan.md): lead read-only metadata and private source checks, explicit failures and pending live gates.
+
+- [Bounded observation live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-observation-live.md): approved machine-only expiry changes, pinned Worker/runner update, actual AS/SA/RO observation and clean early stop; business rows/journal/policy unchanged, human/scheduler expired, no natural-expiry or full-product acceptance claim.

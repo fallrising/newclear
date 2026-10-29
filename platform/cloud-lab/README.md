@@ -47,10 +47,12 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 
 [授權來源採集](docs/authorization-collection.md)已接入既有Cloudflare MCP唯讀操作端；[161tests與原Lab實證](docs/evidence/m1-authorization-collection.md)記錄來源時間、前後漂移檢查與未知層。只採集metadata，不自動續權或輪替。
 
-[機器自身授權查詢](docs/self-authorization.md)提供Worker自身HMAC metadata來源與runner `--authorization-status`命令；目前僅source／本機驗證，尚未部署。查詢不啟動工作，runner程序與Access token期限仍明示未知。
+[機器自身授權查詢](docs/self-authorization.md)提供Worker自身HMAC metadata來源與runner `--authorization-status`命令；已在原Lab有界窗口部署並通過self查詢；查詢不啟動工作，完整來源由IA整合。
 
-[Resident程序觀測](docs/resident-observation.md)以私人Unix socket、kernel peer／process／FLOCK及已載入設定digest取得實際stop-at；限Linux及明確啟用。source／本機驗證，尚未安裝到原Lab，完整授權窗口仍不完整。
+[Resident程序觀測](docs/resident-observation.md)以私人Unix socket、kernel peer／process／FLOCK及已載入設定digest取得實際stop-at；限Linux及明確啟用。已在原Lab完成一次實際觀測；驗證後resident正常停止，不將舊快照當成目前liveness。
 
-[整合授權觀測](docs/integrated-authorization.md)將管理面、機器self與resident來源對齊；前後漂移或身份衝突拒絕，缺失來源保留未知。私人快照由manifest驗證完整性；[本機整合證據](docs/evidence/m1-integrated-authorization.md)區分實際HTTP／kernel驗證與合成管理資料，尚未部署。
+[整合授權觀測](docs/integrated-authorization.md)將管理面、機器self與resident來源對齊；前後漂移或身份衝突拒絕，缺失來源保留未知。私人快照由manifest驗證完整性；[本機整合證據](docs/evidence/m1-integrated-authorization.md)區分實際HTTP／kernel驗證與合成管理資料；後續原Lab實際接入見下方OL證據。
 
-[觀測部署準備](docs/observation-rollout.md)固定程式候選、過期授權現況、短期接入與回退順序；方案完成不代表已部署。新機器窗口仍待批准。
+[觀測部署準備](docs/observation-rollout.md)固定程式候選、過期授權現況、短期接入與回退順序；原準備記錄保留；owner後續明確批准並執行短期接入。
+
+[實際觀測接入](docs/evidence/m1-observation-live.md)已完成固定Worker／runner更新、兩個機器的短期期限、真實AS／SA／RO整合及驗證後停止；原D1業務資料、journal、Access policy與排程保留。human／scheduler仍過期，常態服務與完整主線未完成。

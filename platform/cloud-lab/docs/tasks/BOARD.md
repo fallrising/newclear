@@ -409,3 +409,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - 最終head CI全過：Cloud Lab `40927743495`、Project success `40927743829`、llms `40927743529`。六項本機文件／task／report／diff檢查、合併後索引／diff及10個private literals檢查通過；T845公開證據ACCEPT。Runtime未改，前次336tests不冒稱本輪本機重跑。
 - GitHub connector交付及匿名HTTPS回讀；remote tree `9aabd0ee12e57f47a31996766a6775b413ab648a`與local merge commit `28615c0664186513900cab9cece68565ff9c4707`相同，commit身份不同。原bot-only期限固定2026-10-29T18:00:27Z至2026-10-30T18:00:27Z，實際self／一次初始化／native2tools及一筆validated/healthy通過；quota4call／1新ID，保留新entry及原歷史，原runner／Access／其他角色不延期。
 - [BT證據](../evidence/m1-bot-activation-live.md)保留初始journal BLOB收據失敗與首次self拒絕；前者在寫入前修正，後者唯讀對帳及self成功，未重放mutation或重算窗口。自然到期、模型對話、帳單、未來uptime與完整主線仍未驗，無usabletag；HL T-0015仍open。本收尾僅改任務板、只關閉BT。
+
+## T-0024 — Bot租期與額度唯讀查詢
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0024-1 | 既有狀態唯讀與安全開啟 | BI-01 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |
+| T-0024-2 | 期限／額度／本機准入投影 | BI-02 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |
+| T-0024-3 | 待對帳ID與有界輸出 | BI-03 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |
+| T-0024-4 | 回歸、獨立審查與交付 | BI-04 | in_progress | 2026-10-29T18:14:17Z | — | 2026-10-29T18:22:59Z |

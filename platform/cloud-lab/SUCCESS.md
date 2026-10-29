@@ -119,3 +119,7 @@ Owner繼續開發；[BR01–04契約](docs/bot-policy-renewal.md)實作離線預
 ## BT：首個 bot 有界啟用
 
 Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首次政策初始化、固定Grok工具與一筆健康驗證；[實際啟用及保全](docs/evidence/m1-bot-activation-live.md)通過，bot截止2026-10-30T18:00:27Z，1新ID／4call得到validated/healthy；T845獨立公開證據審查ACCEPT，Git交付／回讀見任務板，主線仍incomplete。
+
+## BI：Bot租期與額度唯讀查詢
+
+[BI01–04契約](docs/bot-inspection.md)新增不消耗額度的本機operator觀測、原state及待對帳ID保全；[359tests及原state唯讀驗證](docs/evidence/m1-bot-inspection.md)通過，T846複審ACCEPT，Git交付／遠端回讀見任務板，完整主線仍pending。

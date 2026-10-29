@@ -75,3 +75,5 @@ BR01–04依[續租契約](bot-policy-renewal.md)驗證preview、到期CAS／tra
 BA01–04以[準備證據](evidence/m1-bot-activation.md)核對候選hash、原資料／設定、管理metadata、self／resident及協議發現。tools/list不等於授權或提交成功；[方案](bot-activation.md)的實際續權／policy初始化／host切換另驗。
 
 BT01–04依[實際啟用證據](evidence/m1-bot-activation-live.md)驗fresh來源、單次窗口／bot-only更新、真實self、原state首次政策、native doctor和一筆MCP→resident→validated，以及最後保全；初始失敗與唯讀對帳保留。
+
+BI01–04依[唯讀查詢契約](bot-inspection.md)驗原state不變、FLOCK、sidecar／損壞拒絕、時間／額度投影及有界pendingIDs；[359tests與原state查詢](evidence/m1-bot-inspection.md)區分local snapshot與遠端授權未知。

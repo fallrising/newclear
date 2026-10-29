@@ -78,3 +78,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [Bot首個有界啟用準備](docs/bot-activation.md)已固定BR/BP候選、原state及<=24h方案；[唯讀證據](docs/evidence/m1-bot-activation.md)確認bot過期、runner仍可驗證。該準備階段未安裝／續權／初始化政策；後續批准的實際啟用見下段。
 
 [首個bot有界啟用](docs/bot-activation-live.md)已獲批准並執行：原bot續期至2026-10-30T18:00:27Z，首次持久政策24新ID／240call，新版Grok工具保留啟用；[一筆真實validated/healthy](docs/evidence/m1-bot-activation-live.md)使用1新ID／4call。原runner／Access不延期，不呼叫模型或新增付費。
+
+[Bot租期與額度查詢](docs/bot-inspection.md)提供operator唯讀CLI：期限、剩餘call／新ID與待對帳請求，不消耗額度、不呼叫HTTP。已在原state唯讀驗證，與遠端健康／授權分開；[測試與證據](docs/evidence/m1-bot-inspection.md)記錄359tests及保全結果。

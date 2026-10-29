@@ -2317,3 +2317,25 @@ BP evidence gate ACCEPT source/local: initial missingAPI RED retained,14policyGR
 Owner continues development and offers external help if needed. BR01–04: trusted old/new policy CLI, offline preview, expired-only CAS renewal with immutable old-policy/ledger/reservation receipt, atomic active budget transition, unchanged requests and preserved cross-window intervals/high-water. Lead owns implementation/RGR/docs/Git. T843 native independent read-only reviewer with inherited model/effort/permissions, fresh bounded public context, <=1500tokens initial plus one focused followup, five minutes monitored; no private/network/writes/delegation, unknowncost/quota, not OS isolation. Normal Git delivery authorized; no live/client/cloud/auth/model/paid changes; HL remains open.
 
 BR evidence gate ACCEPT source/local:14missingAPI RED, firstGREEN replay failed due strict JSON float archive; exactfloat.hex encoding fixed14GREEN, full334GREEN. T843 REWORK exposed non-dry-run already_applied losing observed expiry; explicit regression RED, persist high-water after validated receipt without replenishment, retain read-only preview. Final336GREEN(64Node272Python), actual8second lease/parallelCLI renewal/MCP ACK-loss originalcommand validated/replay still exhausted, T843 focusedACCEPT. Lead inspected full diff/logs. SQLite ResourceWarning and Node experimentalwarning retained; no test weakening. Final docs/task/report/diff then normalGit delivery/boardclosure. No live/client/auth/model/paid mutation; Python3.11/live activation/fullmainline pending; HL remainsopen.
+
+
+# T-0440 delivery plan
+
+Started: 2026-10-29T17:40:09.225260+00:00
+Scope: favicon response and one bounded Chromium run proving no favicon 404, stream failure closes before Refresh without automatic retry, Authenticate gap. Exclude Cloud/persistence/deploy/release.
+Estimate: 45–60 active minutes including review; checkpoints every 20 active minutes. CI wait at most 15 minutes per PR; failures retained, at most two justified fixes for one issue.
+
+1. Claim desk T-0440 through PR, then commit normative spec / SUCCESS / BOARD before code.
+2. Implement small embedded ICO route with unchanged CSP, route regression test; prepare focused browser harness using existing fixture and trusted isolated runtime.
+3. Independent fresh-context review, native checks and CI; fix supported findings.
+4. Execute one bounded browser attempt under current owner request, inspect receipts/screenshots; record limitations and failures honestly.
+5. Merge reviewed product/result PRs, update BOARD and desk completion, journal/handoff; verify remote content.
+
+Workers: bounded browser-harness worker in an isolated worktree (15 active minutes); root owns production Rust/icon. A separate fresh-context read-only acceptance reviewer follows integration. Explicit task files, no nested delegation.
+Tool accounting: tool/provider totals not yet measured; provider requests/tokens/cost null. Execution receipts and current-turn tools are sources; worker caps are not usage.
+
+Progress: desk PR302 merged/readback; normative docs commit 2d334cc7. Browser worker owns isolated fanz-followup-browser/fe-review scope (assignment in local handoff), 15 minute budget. Root owns production Rust/icon. Shared CSP already permits same-origin images, so no security widening needed. Initial cargo invocation blocked by sandbox sccache EPERM; native Red run launched using existing shared build cache, timeout 600 s.
+
+T0440 native evidence: favicon test RED (404 vs 200), then focused Rust 3/3 GREEN. Controller 10/10; cargo fmt, workspace clippy -D warnings, workspace all-targets/all-features tests and binary build all exit 0 (native-checks.json in local handoff). No runtime/browser yet.
+
+T0440 worker integration: six scoped fe-review files reviewed/copied from isolated worker. Worker report PARTIAL retained: sandbox EPERM failures, no runtime. Root full fe-review run outside sandbox passed 307/307, zero skipped (12.71 s); native source/HTTP checks remain green. Independent fresh-context review now active, bounded to 8 minutes. Browser remains NOT_RUN until review/CI.

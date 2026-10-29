@@ -2,6 +2,9 @@
 
 Status: **implemented and merged (PR761, fix W09 in PR764); `capture-001` FAIL at its tool precondition (wrapper defect); `capture-002` PASS, actual review ACCEPT_WITH_FINDINGS.** Owner direction on 2026-10-29 (「按你推薦做吧。」), accepting option A of the T0433-3 R11 gap: add one bounded run of the unchanged shared `docs/fe-review/capture.mjs` against private targets. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. `capture-001` was approved (「批准：跑一次 capture-001」) and ran once; it failed before any server or browser started (see below). After the fix passed independent review and required CI, `capture-002` was approved (「批准：跑一次 capture-002。」) as a retry of `capture-001` and ran once.
 
+Historical evidence note: T-0440 [SPEC-T006F](SPEC-T006F-browser-followup.md) adds the product favicon after these captures. The 404 findings and original runner pins below remain the observations of the earlier source, not a statement that the new route has been tested here.
+
+
 Basis:
 - [SPEC-T006R](SPEC-T006R-fe-review.md) R11: the runner owns startup, auth, fixture and trust, writes private targets, then runs the unchanged `docs/fe-review/capture.mjs <private-targets> --dry-run` and an actual initial static capture through a browser that keeps genuine TLS validation. The shared static capture never replaces the dedicated canonical states.
 - [ROUND2-SDD](../../../../docs/fe-review/ROUND2-SDD.md): `targets.json` may become `verified=true` only when targets match the runtime and the row's full conditions hold.

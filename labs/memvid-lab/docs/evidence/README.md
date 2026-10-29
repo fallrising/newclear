@@ -73,3 +73,7 @@
 GitHub app 建立的完整 tree `b0440255c81297399ed259c904e6a3da3813a381` 與本機已驗證 index 完全相同。
 終端 `git push` 缺少 HTTPS 認證（could not read Username），因此使用 GitHub app 的 create_tree → create_commit → update_ref，`force=false` 並核對 expected SHA；未直接更新 main。
 後續只補本段、SUCCESS／inventory source 及任務時間；runtime source hashes 不變。最終分支、Draft PR 與 CI 結果以該 PR 最後 head 為準。
+
+## 2026-10-29 狀態回讀
+
+以上 Draft／未合併敘述為原執行時點的歷史紀錄。後續 [#709](https://github.com/fallrising/newclear/pull/709) 與 [#733](https://github.com/fallrising/newclear/pull/733) 已合併，任務板八項 done。主導再次回讀驗證 head 的四項 workflows 均 success；相對本輪 base，runtime／locks／workflow bytes 未變。M1 只核對並同步文件，不冒充重跑 15 項模型測試；本次 PR 的 CI 另行回讀。

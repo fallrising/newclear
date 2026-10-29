@@ -54,4 +54,6 @@ Whisper 以固定官方 crate 的原生 `WhisperTranscriber` 加本地 cache 初
 完整 AC 見 [SUCCESS.md](SUCCESS.md)。先跑 dependency/API probe，將文件與實際 SDK 差異記錄，再執行基本場景與模型場景。模型不可用或功能不在 SDK 時保留具體錯誤、可重試命令和 `blocked`，主線保持 incomplete。
 必要負例包括：不存在的 query 不得得到虛構引用、既有輸出路徑拒絕覆寫、模型缺失不可偽裝為 pass、離線限制可觀察。
 
-交付包括 README、操作入口、上游閱讀／能力矩陣、精簡證據、必要 CI、獨立審查及 Draft PR。這是可重現實驗的交付，不是 production 部署。
+原交付先以 Draft PR 提交；owner 後續授權後已正常合併 #709，並由 #733 完成任務結案。README、操作入口、上游能力矩陣、精簡證據、必要 CI 與獨立審查均已交付。這是可重現實驗，沒有 production 部署。
+
+後續 owner 已批准的繁中筆記評估另見 [T-0436 規格](docs/notes-usability.md)，不修改本文件原場景與 AC。

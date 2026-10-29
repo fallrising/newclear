@@ -5,7 +5,9 @@
 文檔檔位未分級；本次是 owner 指定的有界實驗。
 
 2026-10-28 本機完整實跑 **15／15 通過**，CLI 邊界 **8／8 通過**；細節及原始失敗見 [執行紀錄](docs/evidence/README.md)。
-Git 交付保持 Draft，未合併或部署，`usable_tag: none`。
+原場景實驗已於 2026-10-28 合併（[功能 #709](https://github.com/fallrising/newclear/pull/709)、[結案 #733](https://github.com/fallrising/newclear/pull/733)）；四項 CI 通過，八項 AC 結案。`usable_tag: none`，未部署。
+
+2026-10-29 owner 批准接續 [T-0436 繁中筆記可用性評估](docs/notes-usability.md)：M1 同步狀態，M2 量測檢索、來源、更新與規模成本。這是獨立後續里程碑，原場景實驗的完成範圍不變。
 
 ## 執行
 

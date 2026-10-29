@@ -26,3 +26,17 @@ Owner 已另行明確授權合併。[PR #709](https://github.com/fallrising/newc
 - 合併後已回讀 PR 的 `merged: true`、合併 SHA／時間及 `main` ref。此次後續 PR 只更新任務板，不修改實作、依賴、驗收條件或既有失敗證據。
 
 索引修復、ask guard、Whisper cache patch 及中文／圖片限制仍保留於 [SUCCESS](../../SUCCESS.md) 與 [evidence](../evidence/README.md)。這是本次場景實跑任務的 Git 交付結案，不是 production 驗收、release、部署或 usable tag 授權；其他文件中的 Draft 敘述屬合併前快照。
+
+## T-0436 — 狀態收尾與繁中筆記評估
+
+需求：[desk T-0436](https://github.com/fallrising/desk/tree/main/tasks/T-0436-memvid-notes-usability)，認領 PR #293 已合併。Owner 於 2026-10-29 批准兩個里程碑及逐項正常合併；[規格](../notes-usability.md)，主導 codex-gpt6-pilot。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0436-M1 | 同步已合併狀態及固定評估規格 | NU-01 | in_progress | 2026-10-29T16:55:00Z | — | 2026-10-29T16:55:00Z |
+| T-0436-M2-01 | 固定繁中筆記、查詢與品質評估 | NU-02 | todo | — | — | 2026-10-29T16:55:00Z |
+| T-0436-M2-02 | 更新／刪除／重開一致性 | NU-03 | todo | — | — | 2026-10-29T16:55:00Z |
+| T-0436-M2-03 | 100／1000 筆成本實測 | NU-04 | todo | — | — | 2026-10-29T16:55:00Z |
+| T-0436-M2-04 | 回歸、採用結論及交付 | NU-05 | todo | — | — | 2026-10-29T16:55:00Z |
+
+M1 沿用相同 runtime 的原實跑證據；M2 尚未執行，不把規格或文件檢查當成功能驗收。

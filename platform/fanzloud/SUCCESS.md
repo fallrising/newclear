@@ -321,3 +321,7 @@ Not exercised:
 - an actual scroll action in the diff;
 - keyboard traversal landing on the regions;
 - a measured accessible name.
+
+## T-0433 finite HTTP/WSS conformance — proposal (2026-10-29)
+
+Milestone 3 (v7 recapture, canonical 27/27) is merged as PR731, main `0ff9bab0`. The owner asked for a documented scope proposal before any implementation. [SPEC-T006R conformance proposal](docs/specs/SPEC-T006R-conformance-proposal.md) maps the gaps against the 12 named T006R oracles. It proposes C1 (offline real-transport R03/R04, R06 pure partitions, and R07/R08/R10/R11 evidence oracles) and C2 (one focused browser run for TLS, R06 and the R07 items not yet exercised). Real backend/Cloud integration is out of scope. Status: awaiting owner confirmation; nothing is implemented.

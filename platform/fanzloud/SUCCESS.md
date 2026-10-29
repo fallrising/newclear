@@ -359,4 +359,21 @@ Limitations recorded by the actual review:
 
 The results and screenshots stay private and are backed up (`t0433-c2-conformance-20261029T054119Z`, with SHA256SUMS).
 
-Next: final integration (T0433-3, R2-AC-E). Record source commits, commands, tool versions, results, mock and real boundaries, cleanup and PR/CI readback. Delivery becomes 19/19 only then.
+## T-0433 focused journeys N01–N09 (2026-10-29)
+
+The T0433-3 inventory found that SPEC-T006R R10 requires focused desktop journeys N01–N09 with actual receipts. N03, N04, N06 and N07, and parts of N01 and N02, had only Node-loopback or pure-partition evidence. R06 also requires at least one real browser timeout. The owner chose to add one focused browser run (「按你建議。」). [SPEC-T006R-focused-journeys](docs/specs/SPEC-T006R-focused-journeys.md) maps every journey to its evidence layer and specifies:
+- five review-only, one-shot transport seams (H01–H05);
+- a new driver, `fe-review/journeys-browser.mjs`, covering J01–J06;
+- the `journeys-001` runtime boundary.
+
+The spec was independently reviewed (ACCEPT_WITH_FIXES). All ten findings are fixed in it.
+
+Tests:
+- The seam oracle runs over the real loopback transport, and six mutations each made it fail.
+- The pure verdict suite has a failing row for each pass condition.
+- With `REVIEW_MODULES` and `FE_REVIEW_RUNS` set, all 290 fe-review tests pass; without them, 271 pass and 19 skip with a stated reason. T006 passes 10/10.
+- The C2 driver's `transport.mjs` pin is now historical (`fcc6aba7…`). Its other pins and v4–v7 are unchanged.
+
+`journeys-001` has not run. It runs once, after independent review, required CI and its own owner approval.
+
+Next: `journeys-001`, then final integration (T0433-3, R2-AC-E): source commits, commands, tool versions, results, mock and real boundaries, cleanup and PR/CI readback. Delivery becomes 19/19 only then.

@@ -55,9 +55,12 @@ test('frame records keep only type, error code and numeric fields',()=>{
  assert.deepEqual(frameRecord('received',JSON.stringify({type:'error',code:'Bearer secret value'})),{dir:'received',type:'error'});
 });
 
-test('driver pins equal the current harness, support files and served assets',()=>{
+test('driver pins equal the current harness, support files and served assets, except the historical transport pin',()=>{
  const pins=JSON.parse(driver.match(/const expectedSources=(\{[^}]*\})/)[1]);const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
- assert.deepEqual(Object.keys(pins).sort(),['/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','baseline-support.mjs','conformance-browser-verdicts.mjs','fixture.mjs','lifecycle.mjs','remaining-support.mjs','transport.mjs','trust.mjs']);
+ // SPEC-T006R-focused-journeys H06: C2 ran on this transport.mjs; the journey seams changed the current file after it.
+ const historical={'transport.mjs':'fcc6aba78681b3d4446d6b71ef8f20d9fa77d83dc0c4dd246c254c523bab10d4'};
+ for(const[name,hash]of Object.entries(historical)){assert.equal(pins[name],hash,name);assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),hash,name);delete pins[name];}
+ assert.deepEqual(Object.keys(pins).sort(),['/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','baseline-support.mjs','conformance-browser-verdicts.mjs','fixture.mjs','lifecycle.mjs','remaining-support.mjs','trust.mjs']);
  for(const[name,hash]of Object.entries(pins))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
 });
 

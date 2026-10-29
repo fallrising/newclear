@@ -337,6 +337,26 @@ The owner approved repairing F1–F4 and preparing the C2 driver, with one C2 ru
 
 - Harness: upgrade refusals are safe JSON in the product order (400/404/405/422/401/503/403/426). The ninth subscriber gets `subscriber_limit` with close 1013. Lag and serialization failures are typed 1013, and a stalled write drops only its connection. Review-only bounds make `history_gap`, `subscriber_lagged` and `stream_unavailable` reachable; their defaults equal the product's.
 - Tests: the two finding tests are now contract oracles. Four oracles were added: the 503 socket bound, a graceful 1012 close under live events, the gap/lag/unavailable paths, and the R06 schedule run without a browser against the actual controller. Each repaired clause except the 10-second write bound, which the spec states, was shown meaningful by a mutation check. Historical v1–v7 pins stay on the pre-repair harness bytes. All fe-review suites pass with `REVIEW_MODULES` and `FE_REVIEW_RUNS` set, and T006 passes 10/10.
-- C2 driver: `fe-review/conformance-browser.mjs` with pure verdicts in `conformance-browser-verdicts.mjs`. It covers R02 browser TLS, R06 no-resend in a browser, and R07 keyboard traversal, measured names and mobile diff scroll. It has not run yet. The independent review returned ACCEPT_WITH_FIXES; its fixes are applied: the graceful 1012 close, the added oracles, R02 health before context close, the stale proposal text, and `limits:null`.
+- C2 driver: `fe-review/conformance-browser.mjs` with pure verdicts in `conformance-browser-verdicts.mjs`. It covers R02 browser TLS, R06 no-resend in a browser, and R07 keyboard traversal, measured names and mobile diff scroll. The independent review returned ACCEPT_WITH_FIXES, and the re-review of the fixes returned ACCEPT. The fixes were the graceful 1012 close, the added oracles, R02 health before context close, stale proposal text, and `limits:null`. PR739 merged as `74b107e6`.
 
-Next: re-review of the fixes and CI, then the one approved C2 run (`conformance-001`) and its actual review.
+### C2 result: `conformance-001` PASS, actual review ACCEPT
+
+One start on source `a126796a`, inside the pinned image with `--network none`. It took 10.8 s; the container was removed and ports 8443–8445 were proven free. The run used Node v24.18.0, Playwright 1.63.0 and Chromium 153.0.8010.12.
+
+- **R02, TLS in the browser:** HTTPS and WSS work over the private CA. A wrong-name certificate gives `ERR_CERT_COMMON_NAME_INVALID`, an untrusted CA gives `ERR_CERT_AUTHORITY_INVALID`, and plain HTTP gives `ERR_EMPTY_RESPONSE`. None of the three negatives reached its transport.
+- **R06, no resend:** the browser sent one bootstrap POST and one turn POST, and only GETs after the submit, through the 1012 restart, the gap, a reload and a keyboard Refresh. Frames: subscribe at 2, one `history_gap` (5/68), then resubscribe at 68. The fixture saw 17 turns.
+- **R07, desktop and mobile:**
+  - Tab from `body` lands on `#event-list` (7th Tab) and `#diff-output` (9th) with `:focus-visible` and Chromium's default `auto` 1px outline. The four screenshots show the ring.
+  - Playwright's role query and Chromium's accessibility tree both report the names "Ordered activity" and "Final diff".
+  - On mobile the diff overflows (831 > 448), and ArrowDown then PageDown increase `scrollTop` (0 → 1 → 9).
+- **Health:** no request failures or page errors. The one console message per context is the expected 401 before authentication.
+
+Limitations recorded by the actual review:
+- The scroll values were sampled mid smooth-scroll. ArrowDown is shown to start a scroll, but PageDown's own effect is not isolated, and no settled value was recorded.
+- Desktop regions and `#event-list` do not overflow, so keyboard scroll is shown only for the mobile diff.
+- The "refresh snapshot before resubscribe" step is inferred, not timestamped.
+- One headless browser and a synthetic fixture, not the product backend.
+
+The results and screenshots stay private and are backed up (`t0433-c2-conformance-20261029T054119Z`, with SHA256SUMS).
+
+Next: final integration (T0433-3, R2-AC-E). Record source commits, commands, tool versions, results, mock and real boundaries, cleanup and PR/CI readback. Delivery becomes 19/19 only then.

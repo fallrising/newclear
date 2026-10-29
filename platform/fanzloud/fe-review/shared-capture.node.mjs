@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fixedAssets} from './fixture.mjs';
+import {versions,modulePaths,reviewTools} from './shared-capture-tools.mjs';
 import {origin,outDir,viewports,planLines,bootstrapConsole,bootstrapFailed,faviconConsole,targetsVerdict,planVerdict,captureVerdict,faviconSummary,pngSize} from './shared-capture-verdicts.mjs';
 
 // SPEC-T006R-shared-capture V01 and tests: each verdict passes its good row and fails, with one exact reason, on each broken condition.
@@ -87,7 +88,7 @@ test('PNG size reads the IHDR header and rejects anything else',()=>{
 
 test('wrapper pins equal the current harness, shared script, targets and served assets',()=>{
  const wrapper=readFileSync(new URL('shared-capture.mjs',import.meta.url),'utf8');const pins=JSON.parse(wrapper.match(/const expectedSources=(\{[^}]*\})/)[1]);const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
- assert.deepEqual(Object.keys(pins).sort(),['../../../docs/fe-review/capture.mjs','/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','fixture.mjs','journeys-browser-verdicts.mjs','lifecycle.mjs','shared-capture-verdicts.mjs','targets.json','transport.mjs','trust.mjs']);
+ assert.deepEqual(Object.keys(pins).sort(),['../../../docs/fe-review/capture.mjs','/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','fixture.mjs','journeys-browser-verdicts.mjs','lifecycle.mjs','shared-capture-tools.mjs','shared-capture-verdicts.mjs','targets.json','transport.mjs','trust.mjs']);
  for(const[name,hash]of Object.entries(pins))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
 });
 
@@ -96,5 +97,31 @@ test('wrapper keeps TLS validation, runs capture.mjs only by its fixed path and 
  for(const forbidden of ['ignoreHTTPSErrors','shell:','exec(','execSync(','execFileSync(','route(','screenshot(','runs/','chromium.launch','NODE_TLS_REJECT_UNAUTHORIZED','storageState','holdNextResponse','injectFrame','overrideNextInstance','futureNextSubscribe'])assert.equal(wrapper.includes(forbidden),false,forbidden);
  assert.match(wrapper,/captureScript='\/work\/docs\/fe-review\/capture\.mjs'/);assert.equal(wrapper.match(/spawn\(/g).length,1);assert.match(wrapper,/spawn\(process\.execPath,\[captureScript,privateTargets,\.\.\.args,'--out',outDir\]/);
  assert.match(wrapper,/scenario:'bootstrap-empty'/);assert.match(wrapper,/ports=\[8443\]/);assert.match(wrapper,/setTimeout\(\(\)=>life\.cancel\('deadline'\),150000\)/);assert.match(wrapper,/runChild\(\['--dry-run'\],10000\)/);assert.match(wrapper,/runChild\(\[\],90000\)/);
- assert.match(wrapper,/writeFileSync\('\/output\/result\.json'/);assert.match(wrapper,/mode:'capture-001'/);assert.match(wrapper,/not canonical cells/);
+ assert.match(wrapper,/writeFileSync\('\/output\/result\.json'/);assert.match(wrapper,/mode:'shared-capture'/);assert.match(wrapper,/not canonical cells/);
+});
+
+// W09 (capture-001 FAIL): resolve every tool exactly as the wrapper and capture.mjs do, against the real review tools.
+const modules=process.env.REVIEW_MODULES;
+test('review tools resolve from one root as the wrapper and capture.mjs load them',{skip:modules?false:'REVIEW_MODULES is unset; it must name the directory containing playwright/package.json'},async()=>{
+ const tools=reviewTools(modules);assert.deepEqual(tools.versions,versions);assert.equal(typeof tools.WebSocketServer,'function');assert.deepEqual(tools.modules,modulePaths(modules));
+ // capture.mjs: loadModule keeps mod.default only when mod has no chromium; AxeBuilder is then axeMod.AxeBuilder || axeMod.default || axeMod.
+ const load=async path=>{const mod=await import(path);return mod.default&&!mod.chromium?mod.default:mod;};
+ const pw=await load(tools.modules.playwright);assert.equal(typeof pw.chromium?.launch,'function');
+ const axeMod=await load(tools.modules.axePlaywright);const AxeBuilder=axeMod.AxeBuilder||axeMod.default||axeMod;assert.equal(typeof AxeBuilder,'function');assert.equal(typeof AxeBuilder.prototype.analyze,'function');
+ const capture=readFileSync(new URL('../../../docs/fe-review/capture.mjs',import.meta.url),'utf8');assert(capture.includes('return mod.default && !mod.chromium ? mod.default : mod;'));assert(capture.includes('axeMod.AxeBuilder || axeMod.default || axeMod'));
+});
+
+test('review tool check fails closed on drift and on a missing package',async()=>{
+ const {mkdtempSync,mkdirSync,writeFileSync,rmSync}=await import('node:fs');const {tmpdir}=await import('node:os');const root=mkdtempSync(tmpdir()+'/review-tools-');
+ try{
+  mkdirSync(root+'/playwright',{recursive:true});mkdirSync(root+'/@axe-core/playwright',{recursive:true});
+  writeFileSync(root+'/playwright/package.json',JSON.stringify({version:'1.63.0'}));assert.throws(()=>reviewTools(root),{code:'ENOENT'});
+  writeFileSync(root+'/@axe-core/playwright/package.json',JSON.stringify({version:'4.12.0',exports:{'.':'./x.mjs'}}));assert.throws(()=>reviewTools(root),/REVIEW_TOOL_DRIFT_AXEPLAYWRIGHT/);
+  writeFileSync(root+'/playwright/package.json',JSON.stringify({version:'1.64.1'}));assert.throws(()=>reviewTools(root),/REVIEW_TOOL_DRIFT_PLAYWRIGHT/);
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
+
+test('wrapper keeps Node error codes in the safe failure name',()=>{
+ const wrapper=readFileSync(new URL('shared-capture.mjs',import.meta.url),'utf8');assert(wrapper.includes("/^(ERR_[A-Z0-9_]+|E[A-Z]+)$/.test(e?.code??'')?'NODE_'+e.code"));assert.match(wrapper,/receipt\.stage='TOOLS'/);
+ assert.equal(wrapper.includes("require('@axe-core/playwright/package.json')"),false);
 });

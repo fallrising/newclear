@@ -1,6 +1,6 @@
-# Shared capture gate R11 (`capture-001`)
+# Shared capture gate R11
 
-Status: **specified; wrapper and tests in this change; no run.** Owner direction on 2026-10-29 (「按你推薦做吧。」), accepting option A of the T0433-3 R11 gap: add one bounded run of the unchanged shared `docs/fe-review/capture.mjs` against private targets. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. The run, `capture-001`, needs its own owner runtime approval after independent review and required CI pass.
+Status: **implemented and merged (PR761); `capture-001` FAIL at its tool precondition (wrapper defect, W09); fix in review; `capture-002` needs its own approval.** Owner direction on 2026-10-29 (「按你推薦做吧。」), accepting option A of the T0433-3 R11 gap: add one bounded run of the unchanged shared `docs/fe-review/capture.mjs` against private targets. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. `capture-001` was approved (「批准：跑一次 capture-001」) and ran once; it failed before any server or browser started (see below). A further run, `capture-002`, needs its own owner runtime approval after the fix passes independent review and required CI.
 
 Basis:
 - [SPEC-T006R](SPEC-T006R-fe-review.md) R11: the runner owns startup, auth, fixture and trust, writes private targets, then runs the unchanged `docs/fe-review/capture.mjs <private-targets> --dry-run` and an actual initial static capture through a browser that keeps genuine TLS validation. The shared static capture never replaces the dedicated canonical states.
@@ -35,11 +35,17 @@ W05 — Children: each child is `node /work/docs/fe-review/capture.mjs /state/ta
 - Dry run: limit 10 s. Its stdout must be exactly the three plan lines (`control-plane: https://127.0.0.1:8443 (1 pages) start=undefined`, `  - home: /`, `out: /output/capture`), stderr empty, exit 0, and `/output/capture` must not exist afterwards.
 - Capture: limit 90 s. Exit 0, stderr empty, stdout `ok` lines for desktop, tablet and mobile in that order, then one `wrote …/capture.json` line, and no `FAIL` line.
 
-W06 — Safe receipt: `result.json` (private, 0600) records the plan and capture verdicts, the child exit codes and stdout lines, the first 2 KiB of any stderr for diagnosis, the `capture.json` summary (counts of console errors, page errors and failed requests, not their text), each screenshot's sha256 and PNG width and height, the transport and fixture counters, the canary result and cleanup. The screenshots stay private under `/output/capture/screenshots`.
+W06 — Safe receipt: `result.json` (private, 0600; `mode` is the gate name `shared-capture`, and the attempt is named by its output folder `runs/<attempt>`) records the plan and capture verdicts, the child exit codes and stdout lines, the first 2 KiB of any stderr for diagnosis, the `capture.json` summary (counts of console errors, page errors and failed requests, not their text), each screenshot's sha256 and PNG width and height, the transport and fixture counters, the canary result and cleanup. The screenshots stay private under `/output/capture/screenshots`.
 
 W07 — Cleanup and deadline: the internal deadline is 150 s. The lifecycle closes the transport, the fixture is disposed, port 8443 is proven absent, and only then is `result.json` written with `wx`. A child still running at the deadline is killed with SIGKILL and recorded. SIGKILL stops the Node child; Chromium, which Playwright starts in its own process group, exits when its debugging pipe closes, and the launcher's `docker rm -f` removes anything left.
 
 W08 — Favicon: Chromium requests `/favicon.ico` by itself. Playwright never reports that request as a request, response or failure event; the dedicated drivers never saw it because their `context.route('**/*')` aborts it before it is sent, but `capture.mjs` installs no route, so it reaches the transport, which answers 404 because the product has no favicon. The transport therefore counts `GET /favicon.ico` separately (`unknownFavicon`), still inside `unknownRequests`, and every other unknown request still fails the verdict. The receipt records the favicon count and the favicon console lines as a presentation finding, as ClarkQ's shared capture did; it is not reported as zero errors, and no favicon asset is added.
+
+W09 — Tool check: `fe-review/shared-capture-tools.mjs` checks the review tools from one root. It reads `playwright/package.json` and `@axe-core/playwright/package.json` directly (1.63.0 and 4.13.0), resolves `playwright-core/lib/utilsBundle` for the WebSocket server, and names the two module paths `capture.mjs` loads through `PLAYWRIGHT_MODULE` and `AXE_PLAYWRIGHT_MODULE`; the wrapper also checks those two files exist. A failure inside Node keeps its fixed Node or system error code in the receipt (`NODE_ERR_…`, `NODE_EACCES` and so on) instead of `UNCLASSIFIED`, and the receipt stage is `TOOLS` while this runs.
+
+## `capture-001` result (2026-10-29): FAIL
+
+`capture-001` ran once on `9c9f9b47` and failed in 0.3 s at stage `PRECONDITION` with failure `UNCLASSIFIED`, before the fixture, transport, trust or any browser started. Cleanup was complete, port 8443 was absent and the container was removed. The cause is a wrapper defect: it checked the axe version with `require('@axe-core/playwright/package.json')`, and that package exports only `.`, so Node throws `ERR_PACKAGE_PATH_NOT_EXPORTED`. Resolving the same module tree outside the container reproduces exactly that error. It is not a product or `capture.mjs` defect. The FAIL is preserved and backed up, the approval is consumed, and no retry ran. W09 is the fix, and a test now resolves every tool the same way against the real review tools; with the defect put back, that test fails with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
 
 ## Verdicts (V01)
 
@@ -60,11 +66,12 @@ The canary scan covers the dry-run and capture stdout and stderr and `capture.js
 ## Tests
 
 - A failing row for each verdict condition, a passing row, and passing rows with one and with three favicon requests.
+- With `REVIEW_MODULES`, a test resolves every review tool from one root exactly as the wrapper and `capture.mjs` load them (W09); another checks the tool check fails closed on drift and on a missing package.
 - A real loopback oracle (`review_transport_counts_favicon_separately_from_other_unknown_requests`): only `GET /favicon.ico` raises the favicon count; `HEAD`, `POST`, a query string and another path stay plain unknown requests, and all are 404.
 - Static checks on the wrapper: no `ignoreHTTPSErrors`, no `shell: true`, no `exec(`/`execSync(`, no `route(`, no `screenshot(`, no `runs/` path, `capture.mjs` called only through its fixed path, and the pinned hashes equal the files.
 - `targets.json` matches W04.
 
-## Runtime boundary (`capture-001`)
+## Runtime boundary (`capture-001`, `capture-002`)
 
 - One start, at most 300 seconds including cleanup. The wrapper's deadline is 150 s; the estimate is under 30 s.
 - The container setup is the same as `journeys-001`: pinned image `fe-review-trust-terminal:20261024`, `--network none`, `--cap-drop ALL`, `no-new-privileges`, `--shm-size 1g`, the worktree, the Playwright 1.63.0 tools and the browser cache read-only, and private `/state` and `/output`.
@@ -78,7 +85,7 @@ The canary scan covers the dry-run and capture stdout and stderr and `capture.js
 - Each verdict function fails on its failing rows and passes on its passing row.
 - All fe-review suites pass, with and without `REVIEW_MODULES` and `FE_REVIEW_RUNS`. T006 passes 10/10.
 - Independent review and required CI pass before merge.
-- `capture-001` then runs once, after its own approval. Its result and review go into a follow-up PR, and the T0433-3 report links R11 to it.
+- A run then happens once, after its own approval (`capture-001` failed at W09; `capture-002` follows the fix). Its result and review go into a follow-up PR, and the T0433-3 report links R11 to it.
 
 Limitations known in advance:
 - The product has no favicon, so Chromium's automatic request gets a 404 with one console line; this is recorded as a presentation finding, not fixed.

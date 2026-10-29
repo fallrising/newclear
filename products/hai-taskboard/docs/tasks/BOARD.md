@@ -153,8 +153,20 @@ Owner explicitly continued development after HP planning delivery. This activate
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM0 | Complete clause/code/test/gap inventory, rerun baseline and record conflicts | M0-01..03; H01 support | in_progress | 2026-10-29T17:47:11Z | — | 2026-10-29T18:07:37Z |
+| HM0 | Complete clause/code/test/gap inventory, rerun baseline and record conflicts | M0-01..03; H01 support | done | 2026-10-29T17:47:11Z | 2026-10-29T18:18:01Z | 2026-10-29T18:19:18Z |
 
 M0-01: all SUCCESS/v0.2/AC-P0A/main SDD/mini-SDD/ADR/OpenAPI obligations mapped with accepted/proposed distinctions. M0-02: same-source pinned backend/web and real ConnectedApp login/admission/Fake/reconnect baseline, successful Fake remains Developing. M0-03: exact conflicts/proposals, independent review, document checks, required CI/merge/readback. This does not close H01..H04 or product AC-02..04.
 
 Local evidence: [M0 report](../evidence/m0-baseline-20261029.md), full matrices and [Proposed contract decisions](../plans/m0-contract-decisions-20261029.md). Independent T-003 ACCEPT covers local M0 only; pinned backend/full/race/build,web30+safety8 and true browser13steps/30captures pass. Product AC/status unchanged; required PR CI/merge/readback pending.
+
+M0 delivery: [PR #798](https://github.com/fallrising/newclear/pull/798) merged at
+`2026-10-29T18:18:01Z` as `946636df32be6d2c140cb31b744ea75e51e7e9a3`.
+Reviewed/integrated head `de9a3548bb2d7f4d374cc5feefbdeef37be111bb` passed
+[HAI backend/web CI](https://github.com/fallrising/newclear/actions/runs/40928493612)
+and [project success CI](https://github.com/fallrising/newclear/actions/runs/40928493585).
+Remote evidence JSON blob `dcce749ae35d93ef5c51516a6ebe8c9a0fc87448` and Proposed
+contract document blob `f566d37c3ff20dc91ead8da5a3d04223dd406c84` matched the reviewed
+local files; all HAI product paths matched the merged checkpoint. HM0 closes only the
+baseline audit, not H01..H04 or SUCCESS AC-02..04. Proposed C01/C02/C06 remain unadopted;
+M1a has not started. Next: owner decision on the concrete contract proposals, followed by
+a separate accepted M1a task. No usable tag, real adapter, release or deployment.

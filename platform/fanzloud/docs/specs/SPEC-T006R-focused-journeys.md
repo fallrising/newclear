@@ -282,7 +282,7 @@ No browser runs in this suite.
 
 ## Runtime boundary (`journeys-001`)
 
-- One start, at most 300 seconds including cleanup. The internal deadline is 200 seconds. The estimate is about 120–130 s: about 70 s of waits (J03's 15 s and nine 6 s windows), plus about 45 s for 12 contexts, plus trust and launch.
+- One start, at most 300 seconds including cleanup. The driver's internal deadline is 200 seconds; the launcher allows the container run 225 seconds and stops itself at 295 seconds. The estimate is about 120–130 s: about 70 s of waits (J03's 15 s and nine 6 s windows), plus about 45 s for 12 contexts, plus trust and launch.
 - The container setup is the same as C2:
   - pinned image `fe-review-trust-terminal:20261024`;
   - `--network none`, `--cap-drop ALL` and `no-new-privileges`;
@@ -304,19 +304,22 @@ The independent actual review re-derived every verdict from the recorded rows an
 - J05: the expiry frame arrived 253 ms after the clock skew.
 - J06b: the held `GET /session` was aborted 28 ms after `pagehide`.
 
-Product finding (not a gate): in all three J04 parts the client's socket stayed open after the client detected the invalid frame itself (`socketClosedBeforeRefresh` false, one transport client) until the manual Refresh. Closes from `refresh()` were observed within about 16 ms in the same run, so a close is observable when it happens. The likely cause is `socket.close(1008, "")` in `p0-client.js`, which browsers reject for page code; this is a source inference, not observed. Impact: a failure under the refresh policy that only the client detects would not reconnect, and the server keeps a dead subscriber. The product client is unchanged in T-0433.
+Product finding (not a gate): in all three J04 parts the client's socket stayed open after the client detected the invalid frame itself (`socketClosedBeforeRefresh` false, one transport client) until the manual Refresh. Closes from `refresh()` were observed within about 16 ms in the same run, so a close is observable when it happens. The likely cause is `socket.close(1008, "")` in `p0-client.js`, which browsers reject for page code; this is a source inference, not observed. Possible impact (inferred, not observed): a failure under the refresh policy that only the client detects would not reconnect, and the server would keep a subscriber the client no longer reads. The product client is unchanged in T-0433.
 
 Recorded limitations:
 - `j06_logout`: the DOM record was overwritten after the verdict, so diff, events and device clearing are attested by the pinned verdict only, not by the stored rows.
 - J01a: `after_seq` equal to the high-water cannot tell a clamped cursor from a rewrite that never applied; N01 also rests on J01b and C2 R06.
-- J03: the resync `GET /session` was labelled `submit` because `requestfailed` arrived 5 ms after it; the turn count still covers a resend, and the rows show no mutation.
+- J03: the resync `GET /session` was labelled `submit` because `requestfailed` arrived 5 ms after it, and the mutation-after-failure check covers only the after-failure and window phases, so the verdict is weaker than the spec; the raw rows show no mutation.
 - J06b shows abort on dispose, not handling of a response that arrives after dispose; that part of N07 rests on the R09 partition tests.
+- The canary scan ran before `transport`, `fixture`, `healthVerdict`, `tools`, `cleanup` and `sourceHashes` were written; the review inspected those fields and found only numbers, booleans and fixed names.
 - The evidence comes from a synthetic fixture with one headless Chromium.
+
+The private result, receipts and actual review are backed up with SHA256SUMS in `t0433-journeys-20261029T114943Z`; the launcher log `journeys-001.log` (one summary line) is not in the backup.
 
 ## Acceptance
 
 - Each verdict function fails on its failing rows and passes on its passing rows.
 - All fe-review suites pass, with and without `REVIEW_MODULES` and `FE_REVIEW_RUNS`. T006 passes 10/10.
 - Independent review and required CI pass before merge.
-- `journeys-001` then runs once, after its own approval. Its result and review go into a follow-up PR.
+- `journeys-001` then runs once, after its own approval. Its result and review go into a follow-up PR. Done: see the `journeys-001` result above.
 - After that, the T0433-3 integration report maps N01–N09 from the table above to the actual receipts.

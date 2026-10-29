@@ -1,0 +1,381 @@
+{
+  "schema_version": 1,
+  "provenance": "公開 synthetic 合成繁體中文 held-out 筆記資料。全部情境、地點、節目與物件紀錄均為虛構，不含私人資料；不是專業建議或真實流量。筆記、查詢與相關性判斷在新語意檢索／模型推論前獨立撰寫並固定，未閱讀新檢索結果或用結果調整。本資料使用獨立記憶檔，URI 的 n01–n24 僅在此資料集內識別來源。",
+  "notes": [
+    {
+      "id": "h01",
+      "uri": "mv2://notes/n01",
+      "title": "雨具寄放",
+      "text": "長柄深綠雨傘寄放在公寓大門內的木製傘架，傘柄綁著米白布帶。折疊傘仍在通勤背包裡。"
+    },
+    {
+      "id": "h02",
+      "uri": "mv2://notes/n02",
+      "title": "社區閱覽室開放",
+      "text": "社區閱覽室每週三下午一點到五點開放。進門先在服務台登記；旁邊的會議室要另外預約，不能直接使用。"
+    },
+    {
+      "id": "h03",
+      "uri": "mv2://notes/n03",
+      "title": "修鞋領件",
+      "text": "黑色短靴送到轉角修鞋店換鞋底，領件日是十一月十五日。取件單收在紅色零錢包，店員說領鞋時出示即可。"
+    },
+    {
+      "id": "h04",
+      "uri": "mv2://notes/n04",
+      "title": "超市寄物櫃",
+      "text": "買菜時把保溫提袋寄放在超市入口的三號櫃。櫃子使用鑰匙，鑰匙扣是黃色三角片，沒有設定數字密碼。"
+    },
+    {
+      "id": "h05",
+      "uri": "mv2://notes/n05",
+      "title": "泳池置物規定",
+      "text": "這次去的室內泳池，置物櫃每次投二十元硬幣。離開開櫃後不退幣；櫃檯可把紙鈔換成硬幣。"
+    },
+    {
+      "id": "h06",
+      "uri": "mv2://notes/n06",
+      "title": "毛毯送洗",
+      "text": "客房的羊毛毯已交給洗衣店清洗，約定下週四傍晚取回。收件簡訊存在手機裡，店家沒有另開紙本單據。"
+    },
+    {
+      "id": "h07",
+      "uri": "mv2://notes/n07",
+      "title": "餐椅零件",
+      "text": "餐椅用的透明防滑腳墊放在工具箱上層小格，剩下六個。黑色圓片是門擋配件，另放在工具箱底部。"
+    },
+    {
+      "id": "h08",
+      "uri": "mv2://notes/n08",
+      "title": "壁畫志工物資",
+      "text": "壁畫志工活動的刷具已集中在活動中心後門的白桶。大平刷有四支，小圓刷有七支，顏料由主辦方當天提供。"
+    },
+    {
+      "id": "h09",
+      "uri": "mv2://notes/n09",
+      "title": "二手交換市集",
+      "text": "週日二手交換市集可以交換手作點心，參與者要自備保鮮盒盛裝，不提供一次性餐盒。交換衣物的區域在另一側。"
+    },
+    {
+      "id": "h10",
+      "uri": "mv2://notes/n10",
+      "title": "河道走讀集合",
+      "text": "河道走讀地圖已放進透明拉鍊袋，袋子掛在玄關掛鉤。集合點是舊水塔，活動結束後原路回到水塔。"
+    },
+    {
+      "id": "h11",
+      "uri": "mv2://notes/n11",
+      "title": "線香試聞紀錄",
+      "text": "這次留下的線香試聞紙是雪松款，放在米色信封內。檀木款試聞紙已丟棄；信封收在窗邊抽屜。"
+    },
+    {
+      "id": "h12",
+      "uri": "mv2://notes/n12",
+      "title": "餐具補貨",
+      "text": "新買的竹筷放進餐具抽屜最右格，共有五雙。不鏽鋼湯匙仍在左格，野餐用的叉子留在提籃內。"
+    },
+    {
+      "id": "h13",
+      "uri": "mv2://notes/n13",
+      "title": "街道節目收藏",
+      "text": "談街道名稱由來的廣播節目是《巷口故事》第八集。這集已加入收聽清單，內容以舊市場周邊的路名為主。"
+    },
+    {
+      "id": "h14",
+      "uri": "mv2://notes/n14",
+      "title": "跨區公車紀錄",
+      "text": "去植物園那天先搭南環公車，在文化中心站換搭東線。回程直接搭東線到總站，沒有再經過文化中心。"
+    },
+    {
+      "id": "h15",
+      "uri": "mv2://notes/n15",
+      "title": "證件照檔案",
+      "text": "剛拍好的證件照數位檔放在電腦的「待列印」資料夾，檔名是「正面淺灰底」。紙本照片已裝進護照套內層。"
+    },
+    {
+      "id": "h16",
+      "uri": "mv2://notes/n16",
+      "title": "借出的充電設備",
+      "text": "借給活動中心的行動電源已在週一取回，現在放在客廳插座旁。借出的短充電線還沒拿回，仍由服務台保管。"
+    },
+    {
+      "id": "h17",
+      "uri": "mv2://notes/n17",
+      "title": "裸裝雜貨店採買",
+      "text": "裸裝雜貨店的燕麥和紅豆按重量販售，買家必須自備乾淨容器，店裡不提供包裝袋。店員會先秤空罐重量再裝貨。"
+    },
+    {
+      "id": "h18",
+      "uri": "mv2://notes/n18",
+      "title": "拼圖收整",
+      "text": "還沒完成的山景拼圖用灰色硬紙板墊著，放在沙發底下。已挑出的邊框片另裝在透明夾鏈袋，和紙板放在一起。"
+    },
+    {
+      "id": "h19",
+      "uri": "mv2://notes/n19",
+      "title": "電子書閱讀設定",
+      "text": "閱讀器上的 EPUB 小說改成直排，字級設為 18。PDF 雜誌維持原版面，沒有套用小說的排版設定。"
+    },
+    {
+      "id": "h20",
+      "uri": "mv2://notes/n20",
+      "title": "螢幕連接紀錄",
+      "text": "工作桌的外接螢幕接在筆電的 HDMI 連接埠，輸入來源選 HDMI 2。另一條 DisplayPort 線目前捲好放在螢幕支架後。"
+    },
+    {
+      "id": "h21",
+      "uri": "mv2://notes/n21",
+      "title": "家庭 NAS 排程",
+      "text": "家庭 NAS 的相片整理工作設定每週六 02:00 執行，只移動「待分類」資料夾中的檔案。音樂資料夾不在本次排程範圍。"
+    },
+    {
+      "id": "h22",
+      "uri": "mv2://notes/n22",
+      "title": "3D 列印耗材",
+      "text": "3D 列印筆筒使用灰色 PETG 線材，線軸標示直徑 1.75 mm。剩餘線材收在有乾燥劑的密封箱，白色 PLA 線軸放在另一箱。"
+    },
+    {
+      "id": "h23",
+      "uri": "mv2://notes/n23",
+      "title": "Podcast 下載備忘",
+      "text": "Podcast《夜間散步》的第 12 集已下載到手機，離線清單標示長度 36 分鐘。第 13 集只是加入待聽，尚未下載。"
+    },
+    {
+      "id": "h24",
+      "uri": "mv2://notes/n24",
+      "title": "筆記本紙張尺寸",
+      "text": "隨身用的點陣筆記本是 A5，內頁共 160 頁。放在桌上的 B5 空白本只有 80 頁，兩本都沒有可撕頁設計。"
+    }
+  ],
+  "queries": [
+    {
+      "id": "hq01",
+      "category": "exact",
+      "text": "雨具寄放",
+      "relevant_uris": [
+        "mv2://notes/n01"
+      ]
+    },
+    {
+      "id": "hq02",
+      "category": "exact",
+      "text": "社區閱覽室開放",
+      "relevant_uris": [
+        "mv2://notes/n02"
+      ]
+    },
+    {
+      "id": "hq03",
+      "category": "exact",
+      "text": "修鞋領件",
+      "relevant_uris": [
+        "mv2://notes/n03"
+      ]
+    },
+    {
+      "id": "hq04",
+      "category": "exact",
+      "text": "超市寄物櫃",
+      "relevant_uris": [
+        "mv2://notes/n04"
+      ]
+    },
+    {
+      "id": "hq05",
+      "category": "exact",
+      "text": "泳池置物規定",
+      "relevant_uris": [
+        "mv2://notes/n05"
+      ]
+    },
+    {
+      "id": "hq06",
+      "category": "exact",
+      "text": "毛毯送洗",
+      "relevant_uris": [
+        "mv2://notes/n06"
+      ]
+    },
+    {
+      "id": "hq07",
+      "category": "partial",
+      "text": "防滑腳墊",
+      "relevant_uris": [
+        "mv2://notes/n07"
+      ]
+    },
+    {
+      "id": "hq08",
+      "category": "partial",
+      "text": "刷具",
+      "relevant_uris": [
+        "mv2://notes/n08"
+      ]
+    },
+    {
+      "id": "hq09",
+      "category": "partial",
+      "text": "保鮮盒",
+      "relevant_uris": [
+        "mv2://notes/n09"
+      ]
+    },
+    {
+      "id": "hq10",
+      "category": "partial",
+      "text": "走讀地圖",
+      "relevant_uris": [
+        "mv2://notes/n10"
+      ]
+    },
+    {
+      "id": "hq11",
+      "category": "partial",
+      "text": "試聞紙",
+      "relevant_uris": [
+        "mv2://notes/n11"
+      ]
+    },
+    {
+      "id": "hq12",
+      "category": "partial",
+      "text": "竹筷",
+      "relevant_uris": [
+        "mv2://notes/n12"
+      ]
+    },
+    {
+      "id": "hq13",
+      "category": "paraphrase",
+      "text": "我收藏的哪一集廣播介紹了道路命名的歷史？",
+      "relevant_uris": [
+        "mv2://notes/n13"
+      ]
+    },
+    {
+      "id": "hq14",
+      "category": "paraphrase",
+      "text": "前往植物園時，我在哪裡轉車？",
+      "relevant_uris": [
+        "mv2://notes/n14"
+      ]
+    },
+    {
+      "id": "hq15",
+      "category": "paraphrase",
+      "text": "剛拍好的大頭照，電子版存在哪裡、叫什麼名稱？",
+      "relevant_uris": [
+        "mv2://notes/n15"
+      ]
+    },
+    {
+      "id": "hq16",
+      "category": "paraphrase",
+      "text": "借給活動中心的充手機設備，哪些拿回來了、哪些還留在那裡？",
+      "relevant_uris": [
+        "mv2://notes/n16"
+      ]
+    },
+    {
+      "id": "hq17",
+      "category": "paraphrase",
+      "text": "哪些場合明確要求自行攜帶盛裝食物的盒子或罐子？",
+      "relevant_uris": [
+        "mv2://notes/n09",
+        "mv2://notes/n17"
+      ]
+    },
+    {
+      "id": "hq18",
+      "category": "paraphrase",
+      "text": "還沒拼完的山景圖和挑出的外圍拼片分別擺在哪裡？",
+      "relevant_uris": [
+        "mv2://notes/n18"
+      ]
+    },
+    {
+      "id": "hq19",
+      "category": "mixed",
+      "text": "EPUB 小說目前的直排字級是多少？",
+      "relevant_uris": [
+        "mv2://notes/n19"
+      ]
+    },
+    {
+      "id": "hq20",
+      "category": "mixed",
+      "text": "外接螢幕的 HDMI 輸入來源選哪一個？",
+      "relevant_uris": [
+        "mv2://notes/n20"
+      ]
+    },
+    {
+      "id": "hq21",
+      "category": "mixed",
+      "text": "家庭 NAS 每週幾、幾點整理哪些相片檔案？",
+      "relevant_uris": [
+        "mv2://notes/n21"
+      ]
+    },
+    {
+      "id": "hq22",
+      "category": "mixed",
+      "text": "列印筆筒的 PETG 線材直徑是多少 mm？",
+      "relevant_uris": [
+        "mv2://notes/n22"
+      ]
+    },
+    {
+      "id": "hq23",
+      "category": "mixed",
+      "text": "Podcast《夜間散步》第 12 集離線版有幾分鐘？",
+      "relevant_uris": [
+        "mv2://notes/n23"
+      ]
+    },
+    {
+      "id": "hq24",
+      "category": "mixed",
+      "text": "A5 點陣筆記本有多少頁？",
+      "relevant_uris": [
+        "mv2://notes/n24"
+      ]
+    },
+    {
+      "id": "hq25",
+      "category": "unanswerable",
+      "text": "寄放在公寓傘架的深綠長柄雨傘是哪個品牌？",
+      "relevant_uris": []
+    },
+    {
+      "id": "hq26",
+      "category": "unanswerable",
+      "text": "轉角修鞋店每天早上幾點開門？",
+      "relevant_uris": []
+    },
+    {
+      "id": "hq27",
+      "category": "unanswerable",
+      "text": "這間室內泳池的月票售價是多少？",
+      "relevant_uris": []
+    },
+    {
+      "id": "hq28",
+      "category": "unanswerable",
+      "text": "裸裝雜貨店送貨到家的運費怎麼算？",
+      "relevant_uris": []
+    },
+    {
+      "id": "hq29",
+      "category": "unanswerable",
+      "text": "列印筆筒的灰色 PETG 線材包裝標示最高耐熱溫度是多少？",
+      "relevant_uris": []
+    },
+    {
+      "id": "hq30",
+      "category": "unanswerable",
+      "text": "A5 點陣筆記本的每張內頁紙有多厚？",
+      "relevant_uris": []
+    }
+  ]
+}

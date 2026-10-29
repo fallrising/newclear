@@ -42,3 +42,15 @@ TDD: initial missing-module red; four metric tests green; true SDK integration f
 - NU-04: both strategies × 100/1000 actual counts, write/rebuild seconds, file bytes and 50 warmed timings each; every job completed within 180s. Final source/corpus hashes verified.
 - NU-05: final make check 16 passed and py_compile; first red/failure and fixes preserved; existing core baseline12 passed/3 deliberately unselected models. Pinned actionlint1.7.12 for changed workflow passed; index preflight47 contracts/8 llms files passed.
 - Independent reviewer T-003 ACCEPT, independently recomputed manifests, metrics, decisions and scale samples; reports/T-003.md. Candidate CI pending. Original full model suite will run in required CI. No runtime scope beyond fixed lexical/bigram evaluation, no dependency change.
+
+## M3 — Chinese semantic retrieval (2026-10-29T17:52:18Z)
+
+Owner accepted the previous recommendation with「好，繼續開發。」Reuse claimed T-0436. Scope: two CPU local semantic models, frozen development corpus plus independently authored held-out corpus, fixed calibration algorithm before held-out retrieval, real Memvid vectors/source/update/reopen controls, bounded cost measurements and adoption decision. No new runtime dependencies, product integration, paid API, private notes, release/tag/deploy.
+
+Budget estimate aggregate active60–90min; checkpoint every20min; each CI candidate wait25min; initial failure plus at most2 evidence-based fixes per issue. Exact active/wait/provider totals unknown. Source base a183b6568b2ee0b0253ec6fcaab5d0276c45b7b5. Root implements/integrates. Two existing native helpers retain inherited model/effort: corpus leaf authors unseen fixture in isolated worktree; read-only reviewer checks authoritative model configuration and independently reviews final implementation/evidence. No nested delegation or external provider CLI.
+
+Gates: scope/spec/data frozen before evaluating; existing notes corpus unchanged; real embeddings and SDK with networking denied; raw and threshold-filtered results separate; calibration sees only development labels; held-out scores cannot modify model/config/thresholds; errors nonzero and original failures retained; tests, source hashes, independent review, project checks and required CI before merge. Final BOARD-only closeout then desk/journal handoff.
+
+M3 preparation: desk scope #305 merged73b75fe128d02ec61e224a0fad117512f4b1b2c1. T-006 metadata PARTIAL accepted only for verified source/config facts; graph/runtime evidence remains pending. Root verified BGE tokenizer bytes and declared exporter. T-007 corpus accepted after reading all24 notes/30queries and source rationales, validator/hash check; fixed held-out SHA75fcd6855b8bffd3d843eb89e2c81782049a2b88dd8ead2ee7d6c9fa4752df5a. No model retrieval executed before freeze.
+
+T-008 design ACCEPT after clarifying per-hit rejection/no-backfill/nonfinite/null boundaries, before inference. New11 pure/boundary tests green after missing-module red. Protocol and heldout now freeze for M3; final implementation review remains pending.

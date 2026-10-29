@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "graphify": {
+    "package": "graphifyy",
+    "version": "0.9.97",
+    "repository": "https://github.com/Graphify-Labs/graphify",
+    "source_commit": "0a8cd4e1e342235fe53e881fb5d591bf0460071f"
+  },
+  "references": [
+    {
+      "name": "graphify",
+      "url": "https://github.com/Graphify-Labs/graphify.git",
+      "commit": "0a8cd4e1e342235fe53e881fb5d591bf0460071f",
+      "subdir": "graphify",
+      "license": "Apache-2.0 with prior MIT contributions; see upstream NOTICE",
+      "license_files": ["LICENSE", "LICENSE-MIT", "NOTICE"]
+    }
+  ],
+  "local_targets": [
+    {
+      "name": "codex-usage",
+      "path": "tools/codex-usage",
+      "observed_repository_commit": "68c92afda47187ec40a8dff319eb377da9998145"
+    }
+  ]
+}

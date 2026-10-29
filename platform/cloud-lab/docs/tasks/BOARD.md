@@ -382,7 +382,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0022-1 | 固定候選與原client/state | BA-01 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |
-| T-0022-2 | fresh授權／runner／管理面核對 | BA-02 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |
-| T-0022-3 | 私人proposal與協議檢查 | BA-03 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |
-| T-0022-4 | 啟用補償方案、審查交付 | BA-04 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |
+| T-0022-1 | 固定候選與原client/state | BA-01 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+| T-0022-2 | fresh授權／runner／管理面核對 | BA-02 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+| T-0022-3 | 私人proposal與協議檢查 | BA-03 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+| T-0022-4 | 啟用補償方案、審查交付 | BA-04 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+
+## T-0022交付與遠端回讀
+
+- [Feature PR787](https://github.com/fallrising/newclear/pull/787) head `8ecb3a55bf534749e9cdde57f826d2f4948b78e4`，merge `85fa65310b886f1acdc0dc40a245075f896eb893`，合併時間2026-10-29T17:46:43Z。14份交付檔案與遠端逐byte相等、remote feature為main祖先、工作樹乾淨；同期其他專案變更保留。
+- CI全過：Cloud Lab `40924306220`、Project success `40924305935`、llms `40924305944`。六項本機文件／task／report／diff檢查、private literals檢查及T844公開準備證據ACCEPT；[BA證據](../evidence/m1-bot-activation.md)保留bot self失敗與private builder3capability假設錯誤／v2修正。Runtime未改，前次336tests不冒稱本輪本機重跑。
+- GitHub connector交付及匿名HTTPS回讀；remote tree `8b33e92c35d686105f428b32edac0b9618f9b3ac`與local commit `b47afa2b86455cdd9a74735af5d57c86a5a755b4`相同，commit身份不同。11次管理唯讀、實際runner self／resident、原native1tool／候選stdio2tools零call、原state1筆／config／client保全及不可執行proposal均通過；bot grant已過期，未將candidate HMAC metadata稱為fresh成功self。
+- BA01–04準備完成：固定BR/BP候選、<=24h bot-only窗口及原外層期限減120秒、24新ID／240call、具體切換／驗證／補償。未安裝候選、初始化policy、改client／Cloudflare／授權、提交命令、呼叫模型或新增付費；實際新bot期限需owner另批並fresh回讀。原HL T-0015與完整主線仍open，無usabletag；本收尾僅改任務板並只關閉準備。

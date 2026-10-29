@@ -302,7 +302,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0017-1 | 協議生命週期與嚴格frame | MT-01 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |
-| T-0017-2 | 固定工具及可信host邊界 | MT-02 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |
-| T-0017-3 | 有界子程序與恢復語義 | MT-03 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |
-| T-0017-4 | stdio閉環、回歸與審查交付 | MT-04 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |
+| T-0017-1 | 協議生命週期與嚴格frame | MT-01 | done | 2026-10-29T14:31:25Z | 2026-10-29T14:45:42Z | 2026-10-29T14:46:32Z |
+| T-0017-2 | 固定工具及可信host邊界 | MT-02 | done | 2026-10-29T14:31:25Z | 2026-10-29T14:45:42Z | 2026-10-29T14:46:32Z |
+| T-0017-3 | 有界子程序與恢復語義 | MT-03 | done | 2026-10-29T14:31:25Z | 2026-10-29T14:45:42Z | 2026-10-29T14:46:32Z |
+| T-0017-4 | stdio閉環、回歸與審查交付 | MT-04 | done | 2026-10-29T14:31:25Z | 2026-10-29T14:45:42Z | 2026-10-29T14:46:32Z |
+
+## T-0017交付與遠端回讀
+
+- [Feature PR762](https://github.com/fallrising/newclear/pull/762) head `0233684cd63703a771985f6541793a91c65fc83a`，merge `bb1faea3820149351b75715da9211e39dc1d5fbf`，合併時間2026-10-29T14:45:42Z。19份檔案與遠端main逐byte相等、remote feature為main祖先、工作樹乾淨；保留同期其他專案變更。
+- CI全過：Cloud Lab `40894457006`、Project success `40894456965`、llms `40894457104`。本機300tests（62Node238Python）及六項文件／索引／task／report／diff檢查通過；T839獨立ACCEPT。[MT證據](../evidence/m1-mcp-stdio.md)保留RED、真實stdio／HTTP已收POST後timeout、重啟同ID恢復且只有一筆命令、實際collector及撤權驗證。
+- 既有GitHub connector交付與匿名HTTPS回讀；remote tree `4f55ca9caf3bccc29f3fc77ca17db8a150c980c1`與已測local commit `6e8a39d5451a984eab6631cd7de83089dc1340a3`完全相同，commit身份不同。fetch_pr兩次internal error，改用get_pr_info核對head／mergeable及合併時間成功，無憑證修改或繞過CI。
+- MT01–04 source／local完成；未安裝實際工具host、呼叫Grok、續權、改Kith或Cloudflare部署，無新增付費。實際client／live及完整主線仍pending，無usabletag；HL資產API500獨立保持T-0015未完成。本收尾只改任務板、只關閉MT。

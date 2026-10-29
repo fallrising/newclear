@@ -57,10 +57,17 @@ M2：[PR #778](https://github.com/fallrising/newclear/pull/778) 於 2026-10-29T1
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0439-01 | 明確來源與共用索引入口 | W-01 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:50:33Z |
-| T-0439-02 | 查詢與來源讀回邊界 | W-02 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:50:33Z |
-| T-0439-03 | 可變來源與失效驗證 | W-03 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:50:33Z |
-| T-0439-04 | 真實較大元件及 MCP | W-04 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:50:33Z |
-| T-0439-05 | 必要驗證與交付 | W-05 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:50:33Z |
+| T-0439-01 | 明確來源與共用索引入口 | W-01 | done | 2026-10-29T17:33:47Z | 2026-10-29T17:52:57Z | 2026-10-29T17:53:18Z |
+| T-0439-02 | 查詢與來源讀回邊界 | W-02 | done | 2026-10-29T17:33:47Z | 2026-10-29T17:52:57Z | 2026-10-29T17:53:18Z |
+| T-0439-03 | 可變來源與失效驗證 | W-03 | done | 2026-10-29T17:33:47Z | 2026-10-29T17:52:57Z | 2026-10-29T17:53:18Z |
+| T-0439-04 | 真實較大元件及 MCP | W-04 | done | 2026-10-29T17:33:47Z | 2026-10-29T17:52:57Z | 2026-10-29T17:53:18Z |
+| T-0439-05 | 必要驗證與交付 | W-05 | done | 2026-10-29T17:33:47Z | 2026-10-29T17:52:57Z | 2026-10-29T17:53:18Z |
 
-W-01～W-04 本機驗證與獨立實作審查通過；[本輪證據](../evidence/local-workspace/README.md)。W-05 等待最終 CI／合併與帳本同步。
+W-01～W-05 的實作、文件、必要驗證與獨立審查已通過；[本輪證據](../evidence/local-workspace/README.md)／[審查](../evidence/local-workspace/review.md)。
+[PR #791](https://github.com/fallrising/newclear/pull/791) 於 2026-10-29T17:52:57Z 合併，commit `a183b6568b2ee0b0253ec6fcaab5d0276c45b7b5`；遠端內容與 reviewed head `16548cb7875e1aab8e875e6c63bbcea6c6fc17f2` 的本次所有路徑一致。
+
+必要 CI 全部 success：[真場景與56tests](https://github.com/fallrising/newclear/actions/runs/40925281310)、[llms](https://github.com/fallrising/newclear/actions/runs/40925281311)、[success contracts](https://github.com/fallrising/newclear/actions/runs/40925281329)、[workflow validation](https://github.com/fallrising/newclear/actions/runs/40925281529)。
+20分鐘檢查點：實作已合併，剩餘工作僅本任務板與 desk／journal 事實同步；無新增需求或未解 must-fix。
+本 PR 僅關閉技術任務；desk 的 owner 驗收狀態仍保留，由 ledger 收尾 PR 同步。沒有 release／deploy，沒有啟動下一里程碑。
+
+限制仍成立：MCP 修改來源後須重啟；最短路徑可能走 contains，calls 必須另外核對；未量測 provider usage／tokens／cost。

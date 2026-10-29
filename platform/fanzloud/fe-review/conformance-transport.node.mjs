@@ -35,10 +35,10 @@ test.before(()=>{if(skip)return;const dir=mkdtempSync(join(tmpdir(),'fanz-confor
 test.after(()=>{if(tls)rmSync(tls.dir,{recursive:true,force:true});});
 
 const freePort=()=>new Promise((resolve,reject)=>{const s=netServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const {port}=s.address();s.close(()=>resolve(port));});});
-async function start(scenario,{key=tls.key,cert=tls.cert}={}){
+async function start(scenario,{key=tls.key,cert=tls.cert,historyCapacity,limits}={}){
  const port=await freePort(),origin=`https://127.0.0.1:${port}`;let now=1000;
- const fixture=createFixture({origin,scenario,bearer,now:()=>now});
- const transport=createTransport({origin,fixture,key,cert,WebSocketServer:WsServer});await transport.listen();
+ const fixture=createFixture({origin,scenario,bearer,now:()=>now,...(historyCapacity?{historyCapacity}:{})});
+ const transport=createTransport({origin,fixture,key,cert,WebSocketServer:WsServer,...(limits?{limits}:{})});await transport.listen();
  return {origin,port,fixture,transport,advance:ms=>{now+=ms;},close:()=>transport.close()};
 }
 function call(env,{method='GET',path,headers={},body='',ca=tls.ca}){
@@ -79,15 +79,33 @@ test('review_wss_upgrade_requires_exact_origin_and_accepts_valid_cookie',{skip},
  }finally{await env.close();}
 });
 
-// Finding F4: T005C P-005C-01 requires HTTP 401 for a missing cookie, and T005B unknown routes are 404,
-// both with the safe JSON envelope. The review transport refuses every upgrade with a bare, empty 403.
-test('finding_upgrade_refusals_are_bare_403_not_401_or_404',{skip},async()=>{
+// SPEC-T006R-harness-repair-c2 H01: upgrade refusals follow the product order with the T005B safe JSON envelope.
+const REFUSALS={invalid_request:'request schema is invalid',not_found:'route not found',method_not_allowed:'method not allowed',authentication_required:'operator authentication is required',origin_forbidden:'request origin is not allowed',service_unavailable:'control-plane service is unavailable',websocket_upgrade_required:'a version-13 WebSocket upgrade is required'};
+function rawStream(env,{method='GET',path=api+'/session/stream',headers={},upgrade=true}={}){
+ const base=upgrade?{connection:'Upgrade',upgrade:'websocket','sec-websocket-version':'13','sec-websocket-key':Buffer.alloc(16,1).toString('base64')}:{};
+ const merged=Array.isArray(headers)?[...Object.entries(base).flat(),...headers]:{...base,...headers};
+ return new Promise((resolve,reject)=>{const req=httpsRequest({host:'127.0.0.1',port:env.port,method,path,ca:tls.ca,headers:merged});req.on('response',res=>{const chunks=[];res.on('data',x=>chunks.push(x));res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body:Buffer.concat(chunks)}));});req.on('upgrade',(res,socket)=>{socket.destroy();resolve({status:101,headers:res.headers,body:Buffer.alloc(0)});});req.on('error',reject);req.setTimeout(5000,()=>req.destroy(Error('REVIEW_HTTP_TIMEOUT')));req.end();});
+}
+function assertRefusal(r,status,code,label){
+ assert.equal(r.status,status,label);assert.equal(r.headers['content-type'],'application/json',label);assert.equal(r.headers['cache-control'],'no-store',label);assert.equal(r.headers['x-content-type-options'],'nosniff',label);
+ assert.equal(Number(r.headers['content-length']),r.body.length,label);assert.deepEqual(JSON.parse(r.body),{error:{code,message:REFUSALS[code]}},label);
+}
+test('review_wss_upgrade_refusals_are_safe_json_in_product_order',{skip},async()=>{
  const env=await start('authenticated-ready');
- try{const c=await authenticate(env);
-  assert.equal((await connect(env,{})).status,403);
-  assert.equal((await connect(env,{cookie:c.cookie,path:api+'/session/streams'})).status,403);
-  const raw=await new Promise((resolve,reject)=>{const req=httpsRequest({host:'127.0.0.1',port:env.port,path:api+'/session/stream',ca:tls.ca,headers:{connection:'Upgrade',upgrade:'websocket','sec-websocket-version':'13','sec-websocket-key':Buffer.alloc(16,1).toString('base64'),origin:env.origin}});req.on('response',res=>{const chunks=[];res.on('data',x=>chunks.push(x));res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body:Buffer.concat(chunks)}));});req.on('upgrade',()=>reject(Error('REVIEW_UNEXPECTED_UPGRADE')));req.on('error',reject);req.end();});
-  assert.equal(raw.status,403);assert.equal(raw.body.length,0);assert.equal(raw.headers['cache-control'],undefined);
+ try{const c=await authenticate(env),ok={cookie:c.cookie,origin:env.origin};
+  assertRefusal(await rawStream(env,{headers:['cookie',c.cookie,'cookie',c.cookie,'origin',env.origin]}),400,'invalid_request','duplicate cookie');
+  assertRefusal(await rawStream(env,{path:api+'/session/streams'}),404,'not_found','unknown path without cookie');
+  assertRefusal(await rawStream(env,{method:'POST',headers:ok}),405,'method_not_allowed','POST');
+  assertRefusal(await rawStream(env,{headers:{'x-review-pad':'a'.repeat(257)}}),422,'invalid_request','long header without cookie');
+  assertRefusal(await rawStream(env,{headers:{origin:env.origin}}),401,'authentication_required','missing cookie');
+  assertRefusal(await rawStream(env,{headers:{cookie:'__Host-codebox_p0='+'A'.repeat(43),origin:env.origin}}),401,'authentication_required','unknown cookie');
+  assertRefusal(await rawStream(env,{upgrade:false}),401,'authentication_required','plain GET without cookie');
+  assertRefusal(await rawStream(env,{headers:{cookie:c.cookie,origin:'https://127.0.0.1:1'}}),403,'origin_forbidden','wrong origin');
+  for(const[label,args]of[['version 8',{headers:{...ok,'sec-websocket-version':'8'}}],['short key',{headers:{...ok,'sec-websocket-key':Buffer.alloc(8,1).toString('base64')}}],['plain GET',{upgrade:false,headers:ok}]]){
+   const r=await rawStream(env,args);assertRefusal(r,426,'websocket_upgrade_required',label);assert.equal(r.headers.upgrade,'websocket',label);assert.equal(r.headers['sec-websocket-version'],'13',label);}
+  assert.equal((await rawStream(env,{headers:ok})).status,101);
+  env.advance(300001);assertRefusal(await rawStream(env,{headers:ok}),401,'authentication_required','expired cookie');env.advance(-300001);
+  assert.deepEqual(mutations(env.fixture),{'POST /api/p0/v1/operator/session':1});
  }finally{await env.close();}
 });
 
@@ -167,15 +185,51 @@ test('review_wss_subscribe_timeout_closes_after_five_seconds',{skip,timeout:1500
  }finally{await env.close();}
 });
 
-// Findings against T005C, recorded as measured harness behavior (SPEC-T006R-conformance-proposal, deviation handling).
-test('finding_subscriber_cap_is_http_403_not_subscriber_limit_1013',{skip},async()=>{
+// SPEC-T006R-harness-repair-c2 H02: the ninth admitted subscriber is a typed subscriber_limit with close 1013.
+test('review_wss_subscriber_limit_is_typed_1013',{skip},async()=>{
  const env=await start('authenticated-ready');
- try{const c=await authenticate(env);const open=[];for(let i=0;i<8;i++){const s=await connect(env,{cookie:c.cookie});assert.equal(s.opened,true);open.push(s);}
-  const ninth=await connect(env,{cookie:c.cookie});
-  // T005C row "Subscriber cap": subscriber_limit error then close 1013. The review transport refuses the upgrade with HTTP 403.
-  assert.equal(ninth.status,403);assert.equal(ninth.opened,false);
-  for(const s of open)s.sock.close(1000);await until(()=>env.transport.summary().clients===0);
+ try{const c=await authenticate(env),sid=await sessionId(env,c);const open=[];
+  for(let i=0;i<8;i++){const s=await connect(env,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.frames.some(f=>f.type==='replay_end'));open.push(s);}
+  const ninth=await connect(env,{cookie:c.cookie});assert.equal(ninth.opened,true);ninth.sock.send(subscribeFrame(sid));await until(()=>ninth.closed);
+  assert.deepEqual(ninth.frames,[{type:'error',code:'subscriber_limit',message:'session subscriber limit reached'}]);
+  assert.equal(ninth.closed.code,1013);assert.equal(ninth.closed.reason,'subscriber_limit');assert.equal(env.fixture.summary().subscribers,8);
+  open[0].sock.close(1000);await until(()=>open[0].closed&&env.fixture.summary().subscribers===7);
+  const again=await connect(env,{cookie:c.cookie});again.sock.send(subscribeFrame(sid));await until(()=>again.frames.some(f=>f.type==='replay_end'));open.push(again);
+  for(const s of open.slice(1))s.sock.close(1000);await until(()=>env.transport.summary().clients===0&&env.fixture.summary().subscribers===0);
  }finally{await env.close();}
+});
+
+// SPEC-T006R-harness-repair-c2 H03/H04: history_gap, subscriber_lagged and stream_unavailable are reachable and typed.
+async function cycles(env,c,n,{cancelFirst=false}={}){
+ const post=(path,extra={},body='')=>call(env,{method:'POST',path,headers:mutationHeaders(env,c,extra),body});
+ if(cancelFirst)assert.equal((await post(api+'/session/cancel')).status,200);
+ for(let i=0;i<n;i++){assert.equal((await post(api+'/session/turns',{'content-type':'application/json'},'{"prompt":"Synthetic"}')).status,202);assert.equal((await post(api+'/session/cancel')).status,200);}
+}
+test('review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008',{skip},async()=>{
+ const port=await freePort(),origin=`https://127.0.0.1:${port}`,fixture=createFixture({origin,scenario:'authenticated-ready',bearer});
+ for(const limits of [{liveCapacity:7},{liveCapacity:257},{serverMessageBytes:255},{serverMessageBytes:65537},{liveCapacity:8.5}])assert.throws(()=>createTransport({origin,fixture,key:tls.key,cert:tls.cert,WebSocketServer:WsServer,limits}),/REVIEW_LIMITS/,JSON.stringify(limits));
+ for(const historyCapacity of [63,1025,64.5,'64'])assert.throws(()=>createFixture({origin,scenario:'authenticated-ready',bearer,historyCapacity}),/REVIEW_LIMITS/,String(historyCapacity));
+ fixture.dispose();
+ const gap=await start('authenticated-ready',{historyCapacity:64});
+ try{const c=await authenticate(gap),sid=await sessionId(gap,c);await cycles(gap,c,17);assert.equal(gap.fixture.summary().sequence,68);const before=mutations(gap.fixture);
+  const s=await connect(gap,{cookie:c.cookie});s.sock.send(subscribeFrame(sid,3));await until(()=>s.closed);
+  assert.deepEqual(s.frames,[{type:'error',code:'history_gap',message:'requested session history is no longer retained',oldest_available:5,latest_available:68}]);assert.equal(s.closed.code,1008);assert.equal(s.closed.reason,'history_gap');
+  const kept=await connect(gap,{cookie:c.cookie});kept.sock.send(subscribeFrame(sid,4));await until(()=>kept.frames.some(f=>f.type==='replay_end'));assert.equal(kept.frames.filter(f=>f.type==='event').length,64);kept.sock.close(1000);
+  assert.deepEqual(mutations(gap.fixture),before);await until(()=>gap.transport.summary().clients===0);
+ }finally{await gap.close();}
+ const lag=await start('authenticated-ready',{limits:{liveCapacity:8}});
+ try{const c=await authenticate(lag),sid=await sessionId(lag,c);const s=await connect(lag,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.frames.some(f=>f.type==='replay_end'));const replayed=s.frames.length;
+  lag.transport.stallLive(true);await cycles(lag,c,2);assert.equal(s.closed,null,'eight queued frames stay within the live capacity');
+  await call(lag,{method:'POST',path:api+'/session/turns',headers:mutationHeaders(lag,c,{'content-type':'application/json'}),body:'{"prompt":"Synthetic"}'});await until(()=>s.closed);
+  assert.deepEqual(s.frames.slice(replayed),[{type:'error',code:'subscriber_lagged',message:'session subscriber fell behind'}]);assert.equal(s.closed.code,1013);assert.equal(s.closed.reason,'subscriber_lagged');
+  lag.transport.stallLive(false);await until(()=>lag.transport.summary().clients===0&&lag.fixture.summary().subscribers===0);
+ }finally{await lag.close();}
+ const big=await start('turn-busy',{limits:{serverMessageBytes:256}});
+ try{const c=await authenticate(big),sid=await sessionId(big,c);assert.equal((await call(big,{method:'POST',path:api+'/session/turns',headers:mutationHeaders(big,c,{'content-type':'application/json'}),body:'{"prompt":"Synthetic"}'})).status,202);
+  const s=await connect(big,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.closed);
+  assert.deepEqual(s.frames,[{type:'error',code:'stream_unavailable',message:'session stream is unavailable'}]);assert.equal(s.closed.code,1013);assert.equal(s.closed.reason,'stream_unavailable');
+  await until(()=>big.transport.summary().clients===0&&big.fixture.summary().subscribers===0);
+ }finally{await big.close();}
 });
 
 test('review_http_over_https_matches_actual_controller_contract',{skip},async()=>{

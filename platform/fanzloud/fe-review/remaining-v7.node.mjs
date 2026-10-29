@@ -41,9 +41,11 @@ test('v7 equals remaining-baseline with exactly the R701 substitutions',()=>{
  assert.deepEqual(Object.keys(oldPins).filter(k=>oldPins[k]!==newPins[k]).sort(),[...M2_CHANGED].sort());
 });
 
-test('every v7 source pin matches the current file or embedded asset',()=>{
- const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
- for(const[name,hash]of Object.entries(pins(v7)))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
+// SPEC-T006R-harness-repair-c2 T02: the F1-F4 repair changed fixture.mjs and transport.mjs, which stay pinned to their pre-repair bytes.
+test('every v7 source pin matches the current file or embedded asset except the two repaired harness files',()=>{
+ const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));const PRE_REPAIR={'fixture.mjs':'53771d00ca5dc0b5de73f131bf22b5dbd60c6e53a85e5414ceca8034a383404d','transport.mjs':'04636827f238869182d0f7084fed9558c31f6a9f1e351d4b1f708188fecafae3'};
+ for(const[name,hash]of Object.entries(pins(v7)))assert.equal(Object.hasOwn(PRE_REPAIR,name)?PRE_REPAIR[name]:name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
+ for(const name of Object.keys(PRE_REPAIR))assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),PRE_REPAIR[name],name);
 });
 
 test('v7 reads no reuse input and chains desktop, tablet, mobile per R701',()=>{

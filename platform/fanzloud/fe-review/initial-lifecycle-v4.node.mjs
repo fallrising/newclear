@@ -10,8 +10,9 @@ const read=name=>readFileSync(new URL(name,import.meta.url),'utf8');
 const v3=read('initial-lifecycle-v3-baseline.mjs'),v4=read('initial-lifecycle-v4-baseline.mjs');
 const pins=text=>JSON.parse(text.match(/const expectedSources=(\{[^}]*\})/)[1]);
 
+// SPEC-T006R-harness-repair-c2 T02: frozen suite hashes follow the pre-repair transport pin added to the v1 restore test.
 test('v1-v3 runners and the v3 suite stay byte-identical',()=>{
- const expected={'initial-lifecycle-baseline.mjs':'3da7aeb4d23bc1405b511004562270baa21ad947e5162bf3520783ef4c8cebea','initial-lifecycle-v2-baseline.mjs':'85a1e4c897e8be8a7f4e58b6128b4e8f4f0d5c09dd35cb7ab24941b76745ce41','initial-lifecycle-v3-baseline.mjs':'721337586d3f407e1fd9656285a17265d54387f9cc4051e4a1b712de25612089','initial-lifecycle-v3.node.mjs':'270c4c882849cc5a1e2babfb429014c3c34af69cdd69d76a6283a55d333c85ee'};
+ const expected={'initial-lifecycle-baseline.mjs':'3da7aeb4d23bc1405b511004562270baa21ad947e5162bf3520783ef4c8cebea','initial-lifecycle-v2-baseline.mjs':'85a1e4c897e8be8a7f4e58b6128b4e8f4f0d5c09dd35cb7ab24941b76745ce41','initial-lifecycle-v3-baseline.mjs':'721337586d3f407e1fd9656285a17265d54387f9cc4051e4a1b712de25612089','initial-lifecycle-v3.node.mjs':'59fa50bb76e6cc96f06bccd46eb9637c20c754b51b0fa421f94d8fa8f66e0ba4'};
  for(const[name,hash]of Object.entries(expected))assert.equal(sha(readFileSync(new URL(name,import.meta.url))),hash,name);
 });
 
@@ -39,10 +40,13 @@ test('v4 equals v3 with exactly the V01 substitutions',()=>{
 
 // SPEC-T006R-m2-repair: v4 is a historical runner accepted on the milestone-1 source; M2 changed only
 // the served '/' and '/assets/p0.css', which stay pinned to their milestone-1 bytes.
-test('every v4 source pin matches the current source except the two M2-changed assets',()=>{
+// SPEC-T006R-harness-repair-c2 T02: the F1-F4 repair changed fixture.mjs and transport.mjs, which stay pinned to their pre-repair bytes.
+test('every v4 source pin matches the current source except the two M2-changed assets and the two repaired harness files',()=>{
  const MILESTONE1_ASSETS={'/':'2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf','/assets/p0.css':'96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6'};
  const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
- for(const[name,hash]of Object.entries(pins(v4)))assert.equal(Object.hasOwn(MILESTONE1_ASSETS,name)?MILESTONE1_ASSETS[name]:name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
+ const PRE_REPAIR={'fixture.mjs':'53771d00ca5dc0b5de73f131bf22b5dbd60c6e53a85e5414ceca8034a383404d','transport.mjs':'04636827f238869182d0f7084fed9558c31f6a9f1e351d4b1f708188fecafae3'};
+ for(const[name,hash]of Object.entries(pins(v4)))assert.equal(Object.hasOwn(MILESTONE1_ASSETS,name)?MILESTONE1_ASSETS[name]:Object.hasOwn(PRE_REPAIR,name)?PRE_REPAIR[name]:name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
+ for(const name of Object.keys(PRE_REPAIR))assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),PRE_REPAIR[name],name);
  for(const name of Object.keys(MILESTONE1_ASSETS))assert.notEqual(assets.get(name),MILESTONE1_ASSETS[name],name);
 });
 

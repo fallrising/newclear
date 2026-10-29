@@ -114,8 +114,9 @@ test('v2 runner reverses byte-exactly to v1, preserving all assertions, body rea
  for(const stage of Object.keys(DRIVER_REASONS))assert(next.includes("'"+stage+"'"),stage);
  const fetchBlock=s=>s.slice(s.indexOf(' const observedFetch='),s.indexOf(' try{g.fetch=')).replace(/fail\([^)]*\)/g,'fail()');assert.equal(fetchBlock(read('initial-lifecycle-v2-page.mjs')),fetchBlock(read('initial-lifecycle-page.mjs')));
 });
+// SPEC-T006R-harness-repair-c2 T02: frozen suite hashes follow the pre-repair transport pin added to the v1 restore test.
 test('the five v1 reference files remain at their frozen SHA256 values',()=>{
- const hashes={'initial-lifecycle-observer.mjs':'21365c05de88390fcec6c031260275d612b46d73e044321c57ade2660cac70a0','initial-lifecycle-page.mjs':'71f702f2bec732807348f8ccc7fa7704959e57ec1211eb0bae5f6e05466f8c55','initial-lifecycle-transport.mjs':'e6e12db41895621285f91185208c088f2a8f7df94994a2d67a16beab5b74c8df','initial-lifecycle-baseline.mjs':'3da7aeb4d23bc1405b511004562270baa21ad947e5162bf3520783ef4c8cebea','initial-lifecycle.node.mjs':'b666740221afe4efc2d21ae305e5ef9d575581567e0fd4f51ce326de0473931c'};
+ const hashes={'initial-lifecycle-observer.mjs':'21365c05de88390fcec6c031260275d612b46d73e044321c57ade2660cac70a0','initial-lifecycle-page.mjs':'71f702f2bec732807348f8ccc7fa7704959e57ec1211eb0bae5f6e05466f8c55','initial-lifecycle-transport.mjs':'e6e12db41895621285f91185208c088f2a8f7df94994a2d67a16beab5b74c8df','initial-lifecycle-baseline.mjs':'3da7aeb4d23bc1405b511004562270baa21ad947e5162bf3520783ef4c8cebea','initial-lifecycle.node.mjs':'ab0cbab1600d1d6eacedd0c4fa10bf6a015ebb027c90887d32d346ba844c3ed8'};
  for(const[name,hash]of Object.entries(hashes))assert.equal(createHash('sha256').update(readFileSync(new URL(name,import.meta.url))).digest('hex'),hash,name);
 });
 

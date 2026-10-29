@@ -29,7 +29,7 @@ cache 必須在 source 外；沿用 POSIX、directory symlink 不支援、JS/TS 
 | W-02 | query/explain/source 對真 graph 得到正確來源；來源越界、無命中、同名歧義、非法 budget/lines 拒絕；參數錯誤不先建圖；excerpt 讀取變動不回傳舊證據。 | local passed；證據見下方 |
 | W-03 | 暫存來源 rename／改動後新索引命中新名稱且無舊名；未變重用、設定變動失效、舊 graph 留存；不改真實元件。 | local passed；證據見下方 |
 | W-04 | 實際 tools/codex-usage 的 normalize_rates → norm_window → remaining_percent 路徑、來源行與真 workspace serve 的 MCP initialize/list/query 可核對；保存 corpus hash、實測時間及限制，不執行該元件。 | local passed；證據見下方 |
-| W-05 | 新邊界回歸、原 tests／7 scenarios／M2 pilot、repo gates、獨立審查與必要 CI 通過，PR 合併回讀，任務板／帳本同步。 | pending |
+| W-05 | 新邊界回歸、原 tests／7 scenarios／M2 pilot、repo gates、獨立審查與必要 CI 通過，PR 合併回讀，任務板／帳本同步。 | 交付結果見任務板 |
 
 ## 排除與投入
 
@@ -37,4 +37,4 @@ cache 必須在 source 外；沿用 POSIX、directory symlink 不支援、JS/TS 
 沒有 provider 計量來源則 tokens、requests、cost 為 null，不以命令數／bytes／程序耗時推算。
 開始 2026-10-29T17:33:47Z，主動估計 45–75 分鐘，20 分鐘檢查點，每問題最多兩次有理由修正；每 head CI 有界等待 15 分鐘。
 
-本機驗收證據：[W-01～W-05 對照](../evidence/local-workspace/README.md)。W-05 仍待最終 CI／合併回讀，不提前宣稱完成。
+本機驗收證據：[W-01～W-05 對照](../evidence/local-workspace/README.md)。W-05 的最終 CI／合併回讀由[任務板](../tasks/BOARD.md)記錄；本頁不提前宣稱遠端交付完成。

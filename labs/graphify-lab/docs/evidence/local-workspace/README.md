@@ -1,6 +1,6 @@
 # T-0439 本機工作目錄驗證
 
-W-01～W-04 的實作與本機驗證通過；W-05 的 CI／合併結果由任務板補記。
+W-01～W-04 的實作與本機驗證通過；W-05 的 CI／合併結果見[任務板](../../tasks/BOARD.md)。
 來源基準為 newclear `2c73caf464bec1281f037aca3f2281aae60b0362`，在未提交的整合 worktree 執行。
 Graphify 0.9.97／Python 3.12；未改 lock 或 tools/codex-usage 原始碼。
 

@@ -81,7 +81,9 @@ function readPNG(buf){
 // Baseline PNGs are private run evidence (not committed); set FE_REVIEW_RUNS to their directory to run this check.
 test('M2-03 rendered body pixels lie inside the computed background range',()=>{
  const root=process.env.FE_REVIEW_RUNS?new URL('file://'+process.env.FE_REVIEW_RUNS.replace(/\/?$/,'/')):new URL('runs/',import.meta.url);
- const runs=[['baseline-desktop-remaining-001','desktop'],['baseline-tablet-001','tablet'],['baseline-mobile-001','mobile']];
+ // Prefer the v7 recapture on the repaired source; fall back to the milestone-1 baseline runs.
+ const sets=[[['baseline-v7-desktop-001','desktop'],['baseline-v7-tablet-001','tablet'],['baseline-v7-mobile-001','mobile']],[['baseline-desktop-remaining-001','desktop'],['baseline-tablet-001','tablet'],['baseline-mobile-001','mobile']]];
+ const runs=sets.find(set=>set.every(([run,size])=>existsSync(new URL(`${run}/screenshots/authenticated-ready__${size}__dark.png`,root))))??[];
  const dark=hex('#07100d');let sampled=0;
  for(const[run,size]of runs){const file=new URL(`${run}/screenshots/authenticated-ready__${size}__dark.png`,root);if(!existsSync(file))continue;
   const png=readPNG(readFileSync(file));

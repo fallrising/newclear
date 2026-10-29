@@ -19,7 +19,7 @@ M2-03 — axe marks color-contrast as incomplete (serious) on all 27 cells. R07 
 - Disabled controls (`opacity: 0.45`) are exempt under WCAG 1.4.3 and are listed as such.
 - The bound requires 4.5:1 for normal text and 3:1 for large text (h1 and h2).
 - The baseline PNGs give the rendered cross-check. Pixels sampled from two fixed empty 12×12 body corners of each viewport's `authenticated-ready` capture must lie within the computed body background range, from the darkest stop `#07100d` up to the lightest bound (17.9, 45.1, 34.8). The two corners are top-left (darkest) and top-right (where the radial overlay at 80% 0% is brightest).
-- The PNGs are private run evidence and are not committed, so CI skips this check. Setting `FE_REVIEW_RUNS` to the run directory enables it, and it then requires all three captures. One run against the accepted baseline runs passed with these sampled ranges:
+- The PNGs are private run evidence and are not committed, so CI skips this check. Setting `FE_REVIEW_RUNS` to the run directory enables it, and it then requires all three captures. It prefers the v7 recapture runs on the repaired source and falls back to the milestone-1 runs. One run against the accepted baseline runs passed with these sampled ranges:
   - desktop: top-left 7–8, 16–17, 13–14; top-right 12–14, 30–32, 24–26
   - tablet: top-left 7–8, 16–17, 13–14; top-right 13–15, 34–36, 26–28
   - mobile: top-left 10–11, 26–28, 20–22; top-right 13–15, 37–39, 28–30

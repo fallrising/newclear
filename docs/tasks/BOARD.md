@@ -64,6 +64,7 @@ Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud
 | T0433-2c | v6 tablet/mobile runner, tablet-001 and mobile-001 (both PASS, actual review ACCEPT; baseline 27/27) | R2-AC-14 | done | 2026-10-28T16:57:37Z | 2026-10-28T17:26:18Z | 2026-10-28T17:26:18Z |
 | T0433-2 | M2 actual UI repairs (mobile overflow, focusable diff/event regions, contrast evidence) and finite HTTP/WSS conformance | R2-AC-14 | in_progress | 2026-10-28T17:32:56Z | — | 2026-10-28T17:40:15Z |
 | T0433-2d | v7 runner and recapture of all 27 dark cells on the M2-repaired source (desktop, tablet, mobile once each; all CANONICAL_ACCEPT; 27/27) | R2-AC-14 | in_progress | 2026-10-28T17:58:58Z | — | 2026-10-28T18:15:09Z |
+| T0433-2e | Finite HTTP/WSS conformance C1: 15 offline oracles, findings F1–F4 (C2 browser run 等 owner 批准) | R2-AC-14 | in_progress | 2026-10-29T03:18:35Z | — | 2026-10-29T03:34:01Z |
 | T0433-3 | Final integration evidence and delivery after recapture and conformance (milestone 1 merged as PR604) | R2-AC-E | todo | — | — | — |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.

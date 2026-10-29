@@ -16,7 +16,7 @@ Cursor has one process/channel per dispatch and returns ClaudeRun records, unlik
 
 Pre-output first_record currently has no independent startup timeout; cancellation remains available, post-output stall uses existing stream timeout. This slice does not claim bounded pre-output wait. Cursor tools/images support and AC04-versus-AC17 product decision remain outside this text-only accounting slice. Other namedHTTP/OAuth/borrowed/native nonChat upstream observers, full#698,#699–702 remain open; mainline incomplete,usable_tag none,desk in_progress.
 
-Estimate2–3activehours,20minute checkpoints,commands/CI600s; initial repro plus at most2 justified corrections per issue. Whole-round metrics unknown/null. Status: local implementation and checks passed; final independent evidence review and remote delivery gates pending. No realprovider/login/privateDB/Docker/dependency/permissions/release/deploy.
+Estimate2–3activehours,20minute checkpoints,commands/CI600s; initial repro plus at most2 justified corrections per issue. Whole-round metrics unknown/null. Status: local implementation and checks passed; independent source/runtime evidence review passed; remote delivery gates pending. No realprovider/login/privateDB/Docker/dependency/permissions/release/deploy.
 
 ## Local verification snapshot
 
@@ -24,6 +24,6 @@ Local source/runtime evidence: corrected actual baseline RED showed legacy statu
 
 Original failures remain: harness admin-envelope accessor (not productRED), corrected actualmissingattempt RED, worker sccache sandboxdenial followed byapprovedsamecommandPASS, initialCursorfixture reused a connection cooledby501 refusal and fallback omittedit; independentreview R1 led to isolated refusalconnections with regressionRED→GREEN andactualjourneyPASS. Diagnosticloopbackdenial and binarydigestrefusal dispatchednothing; oldHTTPscript rejected unsupported digestflag beforelaunch, corrected command passed with externaldigestcheck. No runtime cooldownpolicy/statusassertion or oldhelper protection was relaxed.
 
-Runtime source independentreview passed; final evidence/doc review and remote product/ledgerCI/merges/readbacks, backup and cleanup remain pending until recorded in finalhandoff. RealCursor version/cache relationships/account/plugins, full#698 and#699–702 remain unverified/open; no whole-product completion claim.
+Independent source/runtime/final-evidence review passed; remote product/ledgerCI/merges/readbacks, backup and cleanup remain pending until recorded in finalhandoff. RealCursor version/cache relationships/account/plugins, full#698 and#699–702 remain unverified/open; no whole-product completion claim.
 
 Actual guarded helper `--serve` also passed the full journey, authenticated admin usage HTTP200, SIGTERM exit0, owned gateway reaping and removal of disposable data. First serve-checker attempt hit a text-buffer/readiness bug; corrected checker passed with no product change and original failure retained. Required remote delivery gates remain pending until final handoff.

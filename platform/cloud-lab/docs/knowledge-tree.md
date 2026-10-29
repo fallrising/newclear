@@ -63,3 +63,5 @@ BC補充：AU-01的[固定bot caller](../tools/bot_bridge.py)及[JSON契約](bot
 MT補充：AU-01的[本機MCP接入](mcp-stdio.md)重用BC固定工具與durable ID，不建立第二份命令權威；[證據](evidence/m1-mcp-stdio.md)含實際stdio／HTTP／collector，Kith INV-09保持。
 
 GC補充：AU-01的[獨立Grok工具端](grok-connection.md)已登記status-only MCP，原生client發現通過；bot grant過期與自然語言執行仍待後續，Kith權責保持。
+
+BL補充：AU-01獨立MCP工具已完成[一筆真實原runner閉環](evidence/m1-bot-live.md)，bot僅短期窗口，Grok恢復status-only；沒有新增聊天權威、model或常態授權。

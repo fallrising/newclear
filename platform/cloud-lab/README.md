@@ -68,3 +68,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [本機MCP入口](docs/mcp-stdio.md)將固定bot bridge暴露為check／status工具，預設僅查詢；具有有界子程序、同ID恢復與去敏結果。[本機證據](docs/evidence/m1-mcp-stdio.md)區分協議閉環與尚未進行的實際Grok／live接線。
 
 [獨立Grok接線](docs/grok-connection.md)已完成現有client原生MCP握手／工具發現及唯讀status檢查；[實際證據](docs/evidence/m1-grok-connection.md)確認bot grant已過期、Access仍有效，未開提交／續權或呼叫模型。
+
+[Bot有界真實驗證](docs/bot-live.md)已完成bot-only30分鐘續權、一筆MCP→原runner→validated/healthy及保全回讀；[證據](docs/evidence/m1-bot-live.md)記錄實際觀測與操作端相對journal路徑修正。Grok已恢復status-only，未執行模型或延長其他角色。

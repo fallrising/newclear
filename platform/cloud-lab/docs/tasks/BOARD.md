@@ -329,3 +329,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40898525593`、Project success `40898525727`、llms `40898525844`。本機原生Grok doctor、registered argv status／禁止check、設定／四source／state保全、六項文件／task／report檢查與T840獨立ACCEPT；[GC證據](../evidence/m1-grok-connection.md)保留self授權exit1及fresh grant過期診斷。本輪runtime未改，沒有聲稱舊300項本機測試重新執行。
 - GitHub connector交付與匿名HTTPS回讀；remote tree `9189d111689489a0f3729746b8e7bc27afb1d602`與local commit `50c4b7dfd67fcae3cc079a7a9990b0bd67294522`相同，commit身份不同。私人Grok原設定備份、固定runtime及durable state保留。
 - GC01–04只驗收獨立client的status-only接線與診斷；bot grant已過期，live bot/check及模型自然語言仍未驗。沒有續權、模型呼叫、雲端設定／業務命令或新增付費。HL部署T-0015仍open、完整主線pending；本收尾只關閉GC、不更動實際client或雲端。
+
+## T-0019 — Bot 有界續權與真實檢查
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0019-1 | 原資源與實際runner前態 | BL-01 | in_progress | 2026-10-29T16:27:23Z | — | 2026-10-29T16:37:45Z |
+| T-0019-2 | bot-only有界續權及CAS | BL-02 | in_progress | 2026-10-29T16:27:23Z | — | 2026-10-29T16:37:45Z |
+| T-0019-3 | MCP一筆真實提交與結果 | BL-03 | in_progress | 2026-10-29T16:27:23Z | — | 2026-10-29T16:37:45Z |
+| T-0019-4 | 恢復、保全、審查及交付 | BL-04 | in_progress | 2026-10-29T16:27:23Z | — | 2026-10-29T16:37:45Z |

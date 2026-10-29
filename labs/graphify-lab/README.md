@@ -4,7 +4,8 @@
 保留一份固定 revision 的 reference source，加一份可驗證的 graph，讓多個任務直接共用。
 
 先讀 [SUCCESS](SUCCESS.md) 查看逐項驗收；設計見 [SDD](SDD.md)，上游能力與實作限制見 [研究紀錄](docs/upstream.md)。
-這是本機有界實驗；交付狀態與證據在 SUCCESS，不代表服務已部署或完整產品已驗收。
+已完成 **7 組真實場景、29 項邊界測試與獨立審查**，runtime 的四項遠端 CI 通過。
+[實測與限制](docs/evidence/README.md)／[Draft PR #759](https://github.com/fallrising/newclear/pull/759)；交付狀態在 SUCCESS，未合併、未部署。
 
 ## 為什麼分成 source 與 graph
 

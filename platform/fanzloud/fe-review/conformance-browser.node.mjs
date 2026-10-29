@@ -58,9 +58,9 @@ test('frame records keep only type, error code and numeric fields',()=>{
 test('driver pins equal the current harness, support files and served assets, except the historical transport pin',()=>{
  const pins=JSON.parse(driver.match(/const expectedSources=(\{[^}]*\})/)[1]);const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
  // SPEC-T006R-focused-journeys H06: C2 ran on this transport.mjs; the journey seams changed the current file after it.
- const historical={'transport.mjs':'fcc6aba78681b3d4446d6b71ef8f20d9fa77d83dc0c4dd246c254c523bab10d4'};
- for(const[name,hash]of Object.entries(historical)){assert.equal(pins[name],hash,name);assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),hash,name);delete pins[name];}
- assert.deepEqual(Object.keys(pins).sort(),['/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','baseline-support.mjs','conformance-browser-verdicts.mjs','fixture.mjs','lifecycle.mjs','remaining-support.mjs','trust.mjs']);
+ const historical={'transport.mjs':'fcc6aba78681b3d4446d6b71ef8f20d9fa77d83dc0c4dd246c254c523bab10d4','/assets/p0-client.js':'a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e','/assets/p0.css':'1d66f393e4adf2af7266a32feac6fbdb74980825ae0293cce0407607ab78ff8a'}; // T-0438 changed the two assets after this run
+ for(const[name,hash]of Object.entries(historical)){assert.equal(pins[name],hash,name);assert.notEqual(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);delete pins[name];}
+ assert.deepEqual(Object.keys(pins).sort(),['/','/assets/p0-app.js','baseline-support.mjs','conformance-browser-verdicts.mjs','fixture.mjs','lifecycle.mjs','remaining-support.mjs','trust.mjs']);
  for(const[name,hash]of Object.entries(pins))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
 });
 

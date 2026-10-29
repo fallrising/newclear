@@ -274,6 +274,14 @@ connection without reflecting input. Replay duplicates at or below the requested
 ignored; only a validated next version-1 envelope updates the cursor. The UI shows only fixed
 allowlisted lifecycle/event summaries, never raw prompt/diff/code/provider output.
 
+P-006-11 — client close code. When the controller closes a connection after it detects a stream
+failure itself, it calls `close(1000, "")`. The T005C codes 1008, 1012 and 1013 are server close
+codes; a browser page may send only 1000 or 3000–4999 and throws `InvalidAccessError` for any
+other code, so a `close(1008)` from the page never closes the socket. The failure policy (terminal
+or refresh) is held by the controller, not encoded in the close code, so the reconnect and refresh
+policy is unchanged; it now takes effect in browsers because the close event arrives. T-0433 `journeys-001` J04 observed the socket staying open after a
+self-detected protocol error until a manual Refresh; the `close(1008)` cause is a source inference.
+
 # Cancellation and Timeout
 
 Client HTTP operations use a 15-second abort timer. A timeout is displayed as a fixed local error;
@@ -429,7 +437,10 @@ use Node's built-in `node:test`, fake browser primitives, and the actual product
 network, browser binary, package manager, or third-party module.
 Test 6 partitions valid retained cursors, duplicates, gaps, current-session mismatch, reconnect
 delays, snapshot-high-water adoption, restart authentication loss, and storage failure. Test 7
-covers peer close, disposal, ambiguous cancellation response, and explicit cancel separately.
+covers peer close, disposal, ambiguous cancellation response, and explicit cancel separately. Its fake
+WebSocket rejects `close` codes other than 1000 and 3000–4999 with `InvalidAccessError`, as browsers
+do, and after each self-detected stream failure the socket is closed with an allowed code and the
+failure policy holds (P-006-11).
 Test 8 includes HTML/script/diff-size, invalid UTF-8, chunk, content-length, EOF, and media-type
 partitions, and proves that a declared-length body within its bound (diff and JSON) is drained whole with
 no stream reader, rejected after an over-length drain or invalid UTF-8, and fails safely when the drain

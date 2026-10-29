@@ -1138,7 +1138,7 @@ export function createP0Controller(dependencies) {
     const current = socket;
     if (current) {
       try {
-        current.close(1008, "");
+        current.close(1000, "");
       } catch (_) {
         // Closing the transport cannot cancel a turn.
       }

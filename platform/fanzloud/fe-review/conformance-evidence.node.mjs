@@ -56,11 +56,14 @@ test('review_secrets_clear_and_diff_is_inert',{skip},()=>{
 
 test('review_evidence_keeps_native_and_mock_boundaries',{skip},()=>{
  const served=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
+ // T-0438 changed these two assets after v7 ran; the v7 evidence stays on the bytes it ran on.
+ const T0438={'/assets/p0-client.js':'a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e','/assets/p0.css':'1d66f393e4adf2af7266a32feac6fbdb74980825ae0293cce0407607ab78ff8a'};
+ for(const[path,hash]of Object.entries(T0438)){assert.notEqual(served.get(path),hash,path);served.set(path,hash);}
  for(const{phase,result}of load()){
   assert.match(result.scope,/candidate until independent actual review/,phase);assert.doesNotMatch(result.scope,/production|real backend|Cloud acceptance/i,phase);
   assert.equal(result.m2Accepted,false,phase);
   assert.deepEqual([result.tools.node,result.tools.playwright,result.tools.chromium],['v24.18.0','1.63.0','153.0.8010.12'],phase);
-  for(const path of served.keys())assert.equal(result.sourceHashes[path],served.get(path),phase+' '+path); // evidence is for exactly the current served assets
+  for(const path of served.keys())assert.equal(result.sourceHashes[path],served.get(path),phase+' '+path); // evidence is for exactly the served assets as of v7
  }
  // The mock boundary and native-gate rule come from the governing Round 2 SDD, not from this proposal.
  const sdd=readFileSync(new URL('../../../docs/fe-review/ROUND2-SDD.md',import.meta.url),'utf8');

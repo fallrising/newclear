@@ -89,6 +89,9 @@ test('PNG size reads the IHDR header and rejects anything else',()=>{
 test('wrapper pins equal the current harness, shared script, targets and served assets',()=>{
  const wrapper=readFileSync(new URL('shared-capture.mjs',import.meta.url),'utf8');const pins=JSON.parse(wrapper.match(/const expectedSources=(\{[^}]*\})/)[1]);const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
  assert.deepEqual(Object.keys(pins).sort(),['../../../docs/fe-review/capture.mjs','/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','fixture.mjs','journeys-browser-verdicts.mjs','lifecycle.mjs','shared-capture-tools.mjs','shared-capture-verdicts.mjs','targets.json','transport.mjs','trust.mjs']);
+ // T-0438 changed p0-client.js and p0.css after capture-002 ran; the wrapper stays pinned to the bytes it ran on.
+ const historical={'/assets/p0-client.js':'a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e','/assets/p0.css':'1d66f393e4adf2af7266a32feac6fbdb74980825ae0293cce0407607ab78ff8a'};
+ for(const[name,hash]of Object.entries(historical)){assert.equal(pins[name],hash,name);assert.notEqual(assets.get(name),hash,name);delete pins[name];}
  for(const[name,hash]of Object.entries(pins))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
 });
 

@@ -1,5 +1,8 @@
 # HAI Taskboard current development board
 
+Planning navigation: [remaining work and proposed designs](../plans/remaining-work-20261029.md).
+This is documentation-only planning; existing implementation rows below retain their status.
+
 This board is the current work-status authority under the owner-invoked
 START_DEVELOPMENT_PROMPT and root technical-task contract. The archived class A ledger
 remains immutable historical evidence. Root `.team/PLAN.md` records routing and review
@@ -111,3 +114,21 @@ and project-success CI. Both independent document reviews were accepted after re
 KD01..KD03 are now done with that actual merge time; this board-only follow-up records the closure
 under the root technical-task contract. H01..H04 and all product AC/statuses remain unchanged.
 The merge does not enable any HAI-KZ feature, real agent, release or deployment.
+
+## T-0339 — remaining-work planning
+
+Owner requested a plan for unfinished P0-A and unimplemented designs, reviewed by Claude and
+revised before documentation delivery. The desk claim is merged. Scope: the plan, its evidence
+report, this board and README/SUCCESS/HANDOFF navigation; no production implementation or SDD changes.
+Source: `a2c0b5116018160d5e5c24c10fa49c81adff806e`. H01..H04 and product acceptance stay unchanged.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HP01 | Inventory unfinished mainline and existing proposed designs | PLAN-01 | in_progress | 2026-10-29T17:03:00Z | — | 2026-10-29T17:19:16Z |
+| HP02 | Define bounded sequence/acceptance and revise after Claude review | PLAN-02 | in_progress | 2026-10-29T17:03:00Z | — | 2026-10-29T17:19:16Z |
+| HP03 | Verify documents, deliver and retain review/evidence | PLAN-03 | in_progress | 2026-10-29T17:03:00Z | — | 2026-10-29T17:19:16Z |
+
+Plan: [remaining-work-20261029](../plans/remaining-work-20261029.md).
+Evidence and bounded review: [report](../evidence/remaining-work-plan-20261029.md).
+Future M/U/D slices are unstarted planning references, not separately claimed tasks.
+This documentation milestone stops before product implementation; the overall T-0339 remains incomplete.

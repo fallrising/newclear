@@ -5,11 +5,11 @@
 Tier: ungraded
 Status: partial
 Interfaces: cli, mcp
-Entrypoint: python -m graphify_lab (local CLI); serve <reference> (stdio MCP)
+Entrypoint: python -m graphify_lab (reference CLI); python -m graphify_lab.workspace --source <directory> (local workspace CLI/stdio MCP)
 Auth: none
 Spec: none — experimental CLI with executable acceptance scenarios, not a network API
 
-Code-only Graphify analysis. Source snapshots remain the evidence; the graph is a derived index. No hosted service or deployment.
+Code-only Graphify analysis. Source snapshots remain the evidence; the graph is a derived index. No hosted service or deployment. Mutable workspace commands revalidate source/configuration; stdio MCP serves its startup snapshot and must restart after edits.
 
 ## Interface reference
 
@@ -19,3 +19,5 @@ Code-only Graphify analysis. Source snapshots remain the evidence; the graph is 
 ## Optional
 
 - [SDD](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/SDD.md): design and scenario contract.
+
+- [Local workspace](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/docs/local-workspace.md): explicit source, shared cache, source readback and snapshot MCP.

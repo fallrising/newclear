@@ -1,0 +1,156 @@
+[
+  {
+    "status": "failed",
+    "recorded_at": "2026-10-29T17:40:33.142189+00:00",
+    "error": "ExceptionGroup: ExceptionGroup: MCPError: Request 'initialize' timed out",
+    "measurements": {
+      "snapshot_at": "2026-10-29T17:41:00.483891+00:00",
+      "coverage": "This trial process and explicit CLI/MCP operations only; excludes orchestrator and providers.",
+      "cli_commands_observed": 11,
+      "mcp_requests_observed": 1,
+      "mcp_notifications_included": false,
+      "command_retries": 0,
+      "outer_tool_calls": null,
+      "agent_starts": null,
+      "provider_requests": null,
+      "tokens": null,
+      "cost": null,
+      "elapsed_seconds": 27.341723
+    },
+    "raw_report_sha256": "af9b6cce24a88fa140bb751ae622d458507babccff97ed9e2b66ebc6265427b1",
+    "run": "workspace-trial",
+    "mcp_requests": [
+      {
+        "operation": "initialize",
+        "arguments": {},
+        "error": "MCPError: Request 'initialize' timed out",
+        "seconds": 20.020006
+      }
+    ]
+  },
+  {
+    "status": "failed",
+    "recorded_at": "2026-10-29T17:41:18.831298+00:00",
+    "error": "ExceptionGroup: ExceptionGroup: ValueError: MCP shortest_path did not recover all three helpers",
+    "measurements": {
+      "snapshot_at": "2026-10-29T17:41:25.122392+00:00",
+      "coverage": "This trial process and explicit CLI/MCP operations only; excludes orchestrator and providers.",
+      "cli_commands_observed": 11,
+      "mcp_requests_observed": 4,
+      "mcp_notifications_included": false,
+      "command_retries": 0,
+      "outer_tool_calls": null,
+      "agent_starts": null,
+      "provider_requests": null,
+      "tokens": null,
+      "cost": null,
+      "elapsed_seconds": 6.291114
+    },
+    "raw_report_sha256": "852f9a746a5e50c6aa4be66e534250edc91706d225f63313eb5ca97e54d74f15",
+    "run": "workspace-trial-native",
+    "mcp_requests": [
+      {
+        "operation": "initialize",
+        "arguments": {},
+        "response": {
+          "_meta": null,
+          "protocolVersion": "2025-11-25",
+          "capabilities": {
+            "experimental": null,
+            "logging": null,
+            "prompts": null,
+            "resources": {
+              "subscribe": false,
+              "listChanged": false
+            },
+            "tools": {
+              "listChanged": false
+            },
+            "completions": null,
+            "extensions": null,
+            "tasks": null
+          },
+          "serverInfo": {
+            "name": "graphify",
+            "title": null,
+            "version": "0.9.97",
+            "description": null,
+            "websiteUrl": null,
+            "icons": null
+          },
+          "instructions": null
+        },
+        "response_bytes": 418,
+        "seconds": 0.805411
+      },
+      {
+        "operation": "list_tools",
+        "arguments": {},
+        "response_bytes": 7753,
+        "seconds": 0.002146,
+        "tool_names": [
+          "query_graph",
+          "get_node",
+          "get_neighbors",
+          "get_community",
+          "god_nodes",
+          "graph_stats",
+          "shortest_path",
+          "list_prs",
+          "get_pr_impact",
+          "triage_prs"
+        ]
+      },
+      {
+        "operation": "query_graph",
+        "arguments": {
+          "question": "norm_window",
+          "depth": 2,
+          "token_budget": 3000,
+          "context_filter": [
+            "call"
+          ]
+        },
+        "response": {
+          "_meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "Graph: work/workspace-trial-native/cache/indexes/c0903cee26556f0f17efc66a66667942eb8bbb191be4cb26576847297c2d1b03/graphify-out/graph.json (222 nodes) | Traversal: BFS depth=2 | Start: ['norm_window()', 'window()'] | Context: call (explicit) | 51 nodes found\n\n[i] Complete answer over budget: all 51 nodes and 128 edges shown (~4861 tokens vs the requested ~3000-token budget). Edges are never dropped once every node fits, so this is already the full answer \u2014 raising --budget further will not shrink it. Narrow with context_filter=['call'] or use get_node for a specific symbol to reduce size instead.\n\nNODE norm_window() [src=codex_usage.py loc=L268 community=1]\nNODE window() [src=agent_usage.py loc=L201 community=0]\nNODE fail() [src=agent_usage.py loc=L59 community=0]\nNODE iso() [src=agent_usage.py loc=L72 community=0]\nNODE numeric() [src=agent_usage.py loc=L63 community=0]\nNODE claude_db() [src=agent_usage.py loc=L250 community=0]\nNODE claude_statusline() [src=agent_usage.py loc=L458 community=0]\nNODE normalize_rates() [src=codex_usage.py loc=L282 community=1]\nNODE codex_source() [src=agent_usage.py loc=L469 community=0]\nNODE timestamp() [src=agent_usage.py loc=L79 community=0]\nNODE integer() [src=codex_usage.py loc=L47 community=1]\nNODE manual_source() [src=agent_usage.py loc=L232 community=0]\nNODE iso() [src=codex_usage.py loc=L66 community=1]\nNODE rate_percent() [src=codex_usage.py loc=L51 community=1]\nNODE remaining_percent() [src=codex_usage.py loc=L56 community=1]\nNODE reset_seconds() [src=codex_usage.py loc=L61 community=1]\nNODE collect() [src=codex_usage.py loc=L393 community=1]\nNODE main() [src=agent_usage.py loc=L685 community=0]\nNODE capture_claude() [src=agent_usage.py loc=L427 community=0]\nNODE .manual() [src=tests/test_agent_usage.py loc=L33 community=2]\nNODE history() [src=agent_usage.py loc=L289 community=0]\nNODE snapshot() [src=agent_usage.py loc=L628 community=0]\nNODE claude_history_rows() [src=agent_usage.py loc=L329 community=0]\nNODE read_json() [src=agent_usage.py loc=L106 community=0]\nNODE run_fixed() [src=agent_usage.py loc=L498 community=0]\nNODE validate_config() [src=agent_usage.py loc=L131 community=0]\nNODE json [src= loc= community=3]\nNODE os [src= loc= community=0]\nNODE cursor_request() [src=agent_usage.py loc=L580 community=0]\nNODE observation() [src=agent_usage.py loc=L183 community=0]\nNODE time [src= loc= community=0]\nNODE regular_fd() [src=agent_usage.py loc=L91 community=0]\nNODE decode_json() [src=agent_usage.py loc=L117 community=0]\nNODE live_observation() [src=agent_usage.py loc=L194 community=0]\nNODE opencode_source() [src=agent_usage.py loc=L550 community=0]\nNODE .test_table_observation_reset_and_approximation() [src=tests/test_agent_usage.py loc=L374 community=2]\nNODE cursor_source() [src=agent_usage.py loc=L595 community=0]\nNODE statusline_fields() [src=agent_usage.py loc=L405 community=0]\nNODE number() [src=codex_usage.py loc=L38 community=1]\nNODE .test_future_and_invalid_dates() [src=tests/test_agent_usage.py loc=L75 community=2]\nNODE .test_stale_and_elapsed_reset_suppress_remaining() [src=tests/test_agent_usage.py loc=L58 community=2]\nNODE check_target() [src=agent_usage.py loc=L435 community=0]\nNODE finish() [src=agent_usage.py loc=L221 community=0]\nNODE normalize_usage() [src=codex_usage.py loc=L335 community=1]\nNODE Options [src=codex_usage.py loc=L82 community=1]\nNODE math [src= loc= community=1]\nNODE sqlite3 [src= loc= community=3]\nNODE .test_codex_reuse_and_metadata_redaction() [src=tests/test_agent_usage.py loc=L144 community=2]\nNODE .error() [src=agent_usage.py loc=L681 community=0]\nNODE UsageError [src=agent_usage.py loc=L54 community=10]\nNODE datetime [src= loc= community=0]\nEDGE norm_window() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L271\nEDGE norm_window() --calls [EXTRACTED context=call]--> iso() at=codex_usage.py:L272\nEDGE norm_window() --calls [EXTRACTED context=call]--> rate_percent() at=codex_usage.py:L270\nEDGE norm_window() --calls [EXTRACTED context=call]--> remaining_percent() at=codex_usage.py:L275\nEDGE norm_window() --calls [EXTRACTED context=call]--> reset_seconds() at=codex_usage.py:L278\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> norm_window() at=codex_usage.py:L322\nEDGE claude_db() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L275\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L464\nEDGE codex_source() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L488\nEDGE window() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L203\nEDGE window() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L216\nEDGE manual_source() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L242\nEDGE window() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L204\nEDGE window() --calls [EXTRACTED context=call]--> timestamp() at=agent_usage.py:L208\nEDGE capture_claude() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L446\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L374\nEDGE history() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L297\nEDGE live_observation() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L197\nEDGE observation() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L187\nEDGE snapshot() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L635\nEDGE .manual() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L34\nEDGE .test_codex_reuse_and_metadata_redaction() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L148\nEDGE .test_future_and_invalid_dates() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L76\nEDGE .test_stale_and_elapsed_reset_suppress_remaining() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L60\nEDGE .test_table_observation_reset_and_approximation() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L379\nEDGE fail() --calls [EXTRACTED context=call]--> UsageError at=agent_usage.py:L60\nEDGE capture_claude() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L432\nEDGE check_target() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L439\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L335\nEDGE cursor_request() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L589\nEDGE cursor_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L603\nEDGE decode_json() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L119\nEDGE history() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L292\nEDGE main() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L724\nEDGE observation() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L186\nEDGE opencode_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L559\nEDGE .error() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L682\nEDGE read_json() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L111\nEDGE regular_fd() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L98\nEDGE run_fixed() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L512\nEDGE snapshot() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L632\nEDGE statusline_fields() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L410\nEDGE validate_config() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L135\nEDGE codex_source() --calls [EXTRACTED context=call]--> Options at=agent_usage.py:L470\nEDGE codex_source() --calls [EXTRACTED context=call]--> collect() at=agent_usage.py:L470\nEDGE remaining_percent() --calls [EXTRACTED context=call]--> number() at=codex_usage.py:L57\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L365\nEDGE cursor_source() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L621\nEDGE finish() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L225\nEDGE history() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L295\nEDGE numeric() --calls [EXTRACTED context=call]--> math at=agent_usage.py:L67\nEDGE opencode_source() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L562\nEDGE statusline_fields() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L419\nEDGE validate_config() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L153\nEDGE live_observation() --calls [EXTRACTED context=call]--> timestamp() at=agent_usage.py:L198\nEDGE observation() --calls [EXTRACTED context=call]--> timestamp() at=agent_usage.py:L184\nEDGE timestamp() --calls [EXTRACTED context=call]--> datetime at=agent_usage.py:L84\nEDGE normalize_usage() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L351\nEDGE collect() --calls [EXTRACTED context=call]--> normalize_rates() at=codex_usage.py:L422\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> json at=codex_usage.py:L301\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> read_json() at=agent_usage.py:L459\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L462\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> statusline_fields() at=agent_usage.py:L463\nEDGE claude_db() --calls [EXTRACTED context=call]--> regular_fd() at=agent_usage.py:L252\nEDGE claude_db() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L253\nEDGE claude_db() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L255\nEDGE claude_db() --calls [EXTRACTED context=call]--> sqlite3 at=agent_usage.py:L257\nEDGE claude_db() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L266\nEDGE manual_source() --calls [EXTRACTED context=call]--> read_json() at=agent_usage.py:L233\nEDGE manual_source() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L236\nEDGE capture_claude() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L428\nEDGE capture_claude() --calls [EXTRACTED context=call]--> decode_json() at=agent_usage.py:L433\nEDGE capture_claude() --calls [EXTRACTED context=call]--> statusline_fields() at=agent_usage.py:L433\nEDGE capture_claude() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L445\nEDGE capture_claude() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L446\nEDGE capture_claude() --contains [EXTRACTED context=call]--> check_target() at=agent_usage.py:L435\nEDGE main() --calls [EXTRACTED context=call]--> capture_claude() at=agent_usage.py:L713\nEDGE claude_db() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L264\nEDGE claude_db() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L265\nEDGE claude_db() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L266\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> regular_fd() at=agent_usage.py:L330\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L332\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L344\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> sqlite3 at=agent_usage.py:L346\nEDGE history() --calls [EXTRACTED context=call]--> claude_history_rows() at=agent_usage.py:L306\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L461\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L465\nEDGE codex_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L474\nEDGE codex_source() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L492\nEDGE cursor_request() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L581\nEDGE cursor_request() --calls [EXTRACTED context=call]--> decode_json() at=agent_usage.py:L590\nEDGE cursor_source() --calls [EXTRACTED context=call]--> cursor_request() at=agent_usage.py:L604\nEDGE cursor_source() --calls [EXTRACTED context=call]--> live_observation() at=agent_usage.py:L625\nEDGE decode_json() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L119\nEDGE read_json() --calls [EXTRACTED context=call]--> decode_json() at=agent_usage.py:L112\nEDGE iso() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L76\nEDGE manual_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L235\nEDGE timestamp() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L81\nEDGE snapshot() --calls [EXTRACTED context=call]--> finish() at=agent_usage.py:L646\nEDGE history() --calls [EXTRACTED context=call]--> validate_config() at=agent_usage.py:L293\nEDGE history() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L294\nEDGE main() --calls [EXTRACTED context=call]--> history() at=agent_usage.py:L717\nEDGE live_observation() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L198\nEDGE opencode_source() --calls [EXTRACTED context=call]--> live_observation() at=agent_usage.py:L570\nEDGE main() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L704\nEDGE main() --calls [EXTRACTED context=call]--> read_json() at=agent_usage.py:L717\nEDGE main() --calls [EXTRACTED context=call]--> validate_config() at=agent_usage.py:L722\nEDGE main() --calls [EXTRACTED context=call]--> snapshot() at=agent_usage.py:L726\nEDGE opencode_source() --calls [EXTRACTED context=call]--> run_fixed() at=agent_usage.py:L551\nEDGE read_json() --calls [EXTRACTED context=call]--> regular_fd() at=agent_usage.py:L108\nEDGE read_json() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L108\nEDGE regular_fd() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L94\nEDGE run_fixed() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L505\nEDGE run_fixed() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L508\nEDGE snapshot() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L629\nEDGE snapshot() --calls [EXTRACTED context=call]--> validate_config() at=agent_usage.py:L630\nEDGE collect() --calls [EXTRACTED context=call]--> time at=codex_usage.py:L394\nEDGE collect() --calls [EXTRACTED context=call]--> os at=codex_usage.py:L398\nEDGE collect() --calls [EXTRACTED context=call]--> normalize_usage() at=codex_usage.py:L424\nEDGE iso() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L67\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L318\nEDGE reset_seconds() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L62\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> iso() at=codex_usage.py:L320\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> rate_percent() at=codex_usage.py:L315\nEDGE number() --calls [EXTRACTED context=call]--> math at=codex_usage.py:L42\nEDGE .test_future_and_invalid_dates() --calls [EXTRACTED context=call]--> .manual() at=tests/test_agent_usage.py:L77\nEDGE .test_stale_and_elapsed_reset_suppress_remaining() --calls [EXTRACTED context=call]--> .manual() at=tests/test_agent_usage.py:L60\nEDGE .test_table_observation_reset_and_approximation() --calls [EXTRACTED context=call]--> .manual() at=tests/test_agent_usage.py:L376",
+              "annotations": null,
+              "_meta": null
+            }
+          ],
+          "structuredContent": null,
+          "isError": false,
+          "resultType": "complete"
+        },
+        "response_bytes": 15539,
+        "seconds": 0.0069
+      },
+      {
+        "operation": "shortest_path",
+        "arguments": {
+          "source": "codex_usage_normalize_rates",
+          "target": "codex_usage_remaining_percent"
+        },
+        "response": {
+          "_meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "Shortest path (2 hops):\n  normalize_rates() <--contains [EXTRACTED]-- codex_usage.py --contains [EXTRACTED]--> remaining_percent()",
+              "annotations": null,
+              "_meta": null
+            }
+          ],
+          "structuredContent": null,
+          "isError": false,
+          "resultType": "complete"
+        },
+        "response_bytes": 296,
+        "seconds": 0.002604
+      }
+    ]
+  }
+]

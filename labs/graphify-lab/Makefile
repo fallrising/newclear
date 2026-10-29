@@ -4,7 +4,7 @@ RUN_DIR ?= work/run
 CACHE ?=
 CACHE_ARGS = $(if $(CACHE),--cache "$(CACHE)",)
 
-.PHONY: setup prepare check scenarios full
+.PHONY: setup prepare check scenarios full workspace-trial
 setup:
 	$(PYTHON) -m venv $(VENV)
 	$(VENV)/bin/python -m pip install --require-hashes -r requirements.lock
@@ -20,3 +20,6 @@ scenarios:
 
 full:
 	$(VENV)/bin/python -m graphify_lab $(CACHE_ARGS) full --out "$(RUN_DIR)"
+
+workspace-trial:
+	$(VENV)/bin/python -m graphify_lab.workspace_trial --out "$(RUN_DIR)"

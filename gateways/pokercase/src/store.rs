@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -205,6 +206,478 @@ fn query_cost_summary(conn: &Connection) -> Result<UsageCostSummary> {
     )?)
 }
 
+const MEASUREMENT_COLUMNS: [&str; 7] = [
+    "prompt_tokens",
+    "completion_tokens",
+    "headers_ms",
+    "cli_ready_ms",
+    "first_output_ms",
+    "total_observed_ms",
+    "latency_ms",
+];
+
+/// Presence of an individual saved field, independently of whole usage quality.
+/// Token sums are stored counters, never subscription consumption or bills.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsageMeasurementSummary {
+    pub known_sum: Option<i64>,
+    /// Binary-float mean of known timing observations, independently of whether
+    /// their exact integer sum fits i64. Never a price or complete-population mean.
+    pub known_mean: Option<f64>,
+    pub known_count: i64,
+    pub unknown_count: i64,
+    pub total_count: i64,
+    pub coverage: Option<f64>,
+    pub status: CostCoverageStatus,
+    pub basis: String,
+}
+
+impl UsageMeasurementSummary {
+    pub fn complete_total(&self) -> Option<i64> {
+        match self.status {
+            CostCoverageStatus::Complete => self.known_sum,
+            _ => None,
+        }
+    }
+}
+
+pub type UsageMeasurementMap = BTreeMap<String, UsageMeasurementSummary>;
+
+#[derive(Clone, Copy, Default)]
+struct MeasurementAccumulator {
+    // A SQLite table cannot contain more than i64::MAX rows. Summing that many
+    // i64 observations fits i128, so neither SQL overflow nor f64 rounding can
+    // silently change the integer subtotal.
+    sum: i128,
+    known_count: i64,
+    total_count: i64,
+}
+
+impl MeasurementAccumulator {
+    fn observe(&mut self, value: Option<i64>) {
+        self.total_count += 1;
+        if let Some(value) = value {
+            self.known_count += 1;
+            self.sum += i128::from(value);
+        }
+    }
+
+    fn finish(self, metric: &str) -> UsageMeasurementSummary {
+        let known_sum = (self.known_count > 0)
+            .then(|| i64::try_from(self.sum).ok())
+            .flatten();
+        let status = if self.total_count == 0 {
+            CostCoverageStatus::NoData
+        } else if self.known_count == 0 {
+            CostCoverageStatus::Unknown
+        } else if known_sum.is_none() {
+            CostCoverageStatus::Unavailable
+        } else if self.known_count == self.total_count {
+            CostCoverageStatus::Complete
+        } else {
+            CostCoverageStatus::Partial
+        };
+        UsageMeasurementSummary {
+            known_sum,
+            known_mean: if metric.ends_with("_ms") && self.known_count > 0 {
+                Some(self.sum as f64 / self.known_count as f64)
+            } else {
+                None
+            },
+            known_count: self.known_count,
+            unknown_count: self.total_count - self.known_count,
+            total_count: self.total_count,
+            coverage: (self.total_count > 0)
+                .then(|| self.known_count as f64 / self.total_count as f64),
+            status,
+            basis: if metric == "latency_ms" {
+                "stored_legacy_latency_ms".into()
+            } else {
+                format!("stored_{metric}")
+            },
+        }
+    }
+}
+
+#[derive(Default)]
+struct MeasurementAccumulators([MeasurementAccumulator; 7]);
+
+impl MeasurementAccumulators {
+    fn observe(&mut self, values: [Option<i64>; 7]) {
+        for (accumulator, value) in self.0.iter_mut().zip(values) {
+            accumulator.observe(value);
+        }
+    }
+
+    fn finish(self) -> UsageMeasurementMap {
+        MEASUREMENT_COLUMNS
+            .into_iter()
+            .zip(self.0)
+            .map(|(metric, accumulator)| (metric.into(), accumulator.finish(metric)))
+            .collect()
+    }
+}
+
+/// Canonical selected-day view; the numeric v1 projection is kept separately.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsageMeasurementDay {
+    pub day: String,
+    pub requests: i64,
+    pub ok: i64,
+    pub errors: i64,
+    pub incomplete: i64,
+    pub unknown: i64,
+    pub headers_200: i64,
+    pub pending: i64,
+    pub prompt_tokens: Option<i64>,
+    pub completion_tokens: Option<i64>,
+    pub estimated_cost_usd: Option<f64>,
+    pub cost_summary: UsageCostSummary,
+    /// Known-only mean of the legacy/compatibility field, never total or TTFT.
+    pub avg_latency_ms: Option<f64>,
+    pub measurement_summary: UsageMeasurementMap,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsageMeasurementReport {
+    pub data: Vec<UsageMeasurementDay>,
+    /// Exactly the rows represented by data, including no_data for an empty DB.
+    pub measurement_summary: UsageMeasurementMap,
+}
+
+#[cfg(test)]
+mod measurement_coverage_tests {
+    use super::*;
+    use serde_json::{json, Value};
+
+    const METRICS: [&str; 7] = [
+        "prompt_tokens",
+        "completion_tokens",
+        "headers_ms",
+        "cli_ready_ms",
+        "first_output_ms",
+        "total_observed_ms",
+        "latency_ms",
+    ];
+
+    fn expected(metric: &str, sum: Option<i64>, known: i64, total: i64) -> Value {
+        let status = if total == 0 {
+            "no_data"
+        } else if known == 0 {
+            "unknown"
+        } else if known == total {
+            "complete"
+        } else {
+            "partial"
+        };
+        let basis = if metric == "latency_ms" {
+            "stored_legacy_latency_ms".to_owned()
+        } else {
+            format!("stored_{metric}")
+        };
+        json!({
+            "known_sum": sum, "known_count": known, "unknown_count": total-known,
+            "total_count": total,
+            "coverage": if total == 0 { None } else { Some(known as f64 / total as f64) },
+            "status": status, "basis": basis,
+            "known_mean": if metric.ends_with("_ms") && known > 0 {
+                sum.map(|v| v as f64 / known as f64)
+            } else { None },
+        })
+    }
+
+    fn insert(store: &Store, day: &str, values: [Option<i64>; 7]) {
+        store.conn.lock().unwrap().execute(
+            "INSERT INTO usage_events(ts,prompt_tokens,completion_tokens,headers_ms,cli_ready_ms,
+             first_output_ms,total_observed_ms,latency_ms) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)",
+            params![format!("{day}T12:00:00Z"),values[0],values[1],values[2],values[3],
+                values[4],values[5],values[6]],
+        ).unwrap();
+    }
+
+    #[test]
+    fn mt1_saved_measurements_distinguish_unknown_partial_zero_and_complete() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        assert!(
+            store.usage_by_day(30).unwrap().is_empty(),
+            "empty data must not invent a zero day"
+        );
+        let cases = [
+            ("all_null", vec![[None; 7], [None; 7]]),
+            (
+                "partial",
+                vec![
+                    [Some(0), None, Some(4), None, None, Some(20), Some(2)],
+                    [None, Some(3), None, Some(8), Some(12), None, None],
+                ],
+            ),
+            ("explicit_zero", vec![[Some(0); 7]]),
+            ("complete", vec![[Some(2); 7], [Some(4); 7]]),
+        ];
+        let mut mismatches = Vec::new();
+        for (label, rows) in cases {
+            store
+                .conn
+                .lock()
+                .unwrap()
+                .execute("DELETE FROM usage_events", [])
+                .unwrap();
+            for values in &rows {
+                insert(&store, "2026-10-29", *values);
+            }
+            let day = serde_json::to_value(&store.usage_by_day(30).unwrap()[0]).unwrap();
+            for (index, metric) in METRICS.iter().enumerate() {
+                let observations: Vec<i64> = rows.iter().filter_map(|row| row[index]).collect();
+                let sum = (!observations.is_empty()).then(|| observations.iter().sum());
+                let want = expected(metric, sum, observations.len() as i64, rows.len() as i64);
+                if day["measurement_summary"][metric] != want {
+                    mismatches.push(format!(
+                        "{label}/{metric}: expected {want}, got {}",
+                        day["measurement_summary"][metric]
+                    ));
+                }
+            }
+        }
+        assert!(
+            mismatches.is_empty(),
+            "{} saved-field coverage mismatches:\n{}",
+            mismatches.len(),
+            mismatches.join("\n")
+        );
+    }
+
+    #[test]
+    fn mt2_mt4_each_saved_clock_and_attempt_has_its_own_coverage() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        let rows = [
+            [
+                Some(5),
+                Some(7),
+                Some(2),
+                None,
+                Some(11),
+                Some(20),
+                Some(101),
+            ],
+            [Some(0), None, None, Some(3), Some(13), Some(40), Some(103)],
+            [None, Some(0), Some(4), None, None, Some(60), None],
+            [None; 7],
+            [Some(17), Some(19), None, None, None, None, Some(107)],
+            [None; 7],
+        ];
+        for values in rows {
+            insert(&store, "2026-10-29", values);
+        }
+        store.conn.lock().unwrap().execute_batch(
+            "UPDATE usage_events SET request_id='shared-parent', attempt_id='fallback-first',
+               finalized_at=ts,outcome='failed',usage_status='partial',usage_source='openai_chat_v1' WHERE id=1;
+             UPDATE usage_events SET request_id='shared-parent', attempt_id='fallback-second',
+               finalized_at=ts,outcome='succeeded',usage_status='partial',usage_source='cursor_cli_result_v1' WHERE id=2;
+             UPDATE usage_events SET request_id='retry-parent', attempt_id='retry-first',
+               finalized_at=ts,outcome='failed',usage_status='invalid',usage_source='openai_responses_v1' WHERE id=3;
+             UPDATE usage_events SET request_id='retry-parent', attempt_id='retry-second',
+               finalized_at=ts,outcome='interrupted',usage_status='missing',usage_source='openai_responses_v1' WHERE id=4;
+             UPDATE usage_events SET usage_status='unknown',reported_input_tokens=17,
+               reported_output_tokens=19,reported_cache_read_input_tokens=0 WHERE id=5;
+             UPDATE usage_events SET request_id='pending-parent', attempt_id='pending-attempt',
+               usage_status='missing',usage_source='antigravity_opaque_v1' WHERE id=6;"
+        ).unwrap();
+        let before = serde_json::to_value(store.recent_usage(100).unwrap()).unwrap();
+        let day = serde_json::to_value(&store.usage_by_day(30).unwrap()[0]).unwrap();
+        assert_eq!(
+            (
+                day["requests"].as_i64(),
+                day["errors"].as_i64(),
+                day["pending"].as_i64()
+            ),
+            (Some(6), Some(3), Some(1))
+        );
+        let expected_values = [
+            (Some(22), 3),
+            (Some(26), 3),
+            (Some(6), 2),
+            (Some(3), 1),
+            (Some(24), 2),
+            (Some(120), 3),
+            (Some(311), 3),
+        ];
+        for (metric, (sum, known)) in METRICS.iter().zip(expected_values) {
+            assert_eq!(
+                day["measurement_summary"][metric],
+                expected(metric, sum, known, 6),
+                "{metric}: failed, pending and historical attempts stay in the denominator"
+            );
+        }
+        assert_eq!(
+            serde_json::to_value(store.recent_usage(100).unwrap()).unwrap(),
+            before,
+            "aggregation must not rewrite raw or whole-row quality values"
+        );
+    }
+
+    #[test]
+    fn mt4_sparse_day_scope_and_reopen_preserve_historical_observations() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = dir.path().join("synthetic.db");
+        let legacy = Connection::open(&db).unwrap();
+        legacy.execute_batch(
+            "CREATE TABLE usage_events(id INTEGER PRIMARY KEY AUTOINCREMENT,ts TEXT NOT NULL,
+               public_model TEXT,connection_id TEXT,status INTEGER,latency_ms INTEGER,error TEXT,
+               prompt_tokens INTEGER,completion_tokens INTEGER,estimated_cost_usd REAL);
+             INSERT INTO usage_events VALUES(42,'2024-01-01T00:00:00Z',NULL,NULL,200,90,NULL,NULL,0,1.25);"
+        ).unwrap();
+        drop(legacy);
+        let store = Store::open(&db, None).unwrap();
+        insert(&store, "2025-06-01", [Some(100); 7]);
+        insert(
+            &store,
+            "2026-10-29",
+            [Some(0), None, Some(2), None, None, Some(8), Some(4)],
+        );
+        let before = serde_json::to_value(store.recent_usage(100).unwrap()).unwrap();
+        let csv = store.usage_csv(1000).unwrap();
+        let selected = store.usage_by_day(1).unwrap();
+        assert_eq!(selected.len(), 1);
+        assert_eq!(selected[0].day, "2026-10-29");
+        assert_eq!(
+            store.usage_by_day(2).unwrap().len(),
+            2,
+            "limit counts populated buckets, not calendar days"
+        );
+        drop(store);
+        let reopened = Store::open(&db, None).unwrap();
+        assert_eq!(
+            serde_json::to_value(reopened.recent_usage(100).unwrap()).unwrap(),
+            before
+        );
+        assert_eq!(reopened.usage_csv(1000).unwrap(), csv);
+        let day = serde_json::to_value(&reopened.usage_by_day(1).unwrap()[0]).unwrap();
+        assert_eq!(
+            day["measurement_summary"]["prompt_tokens"],
+            expected("prompt_tokens", Some(0), 1, 1)
+        );
+        assert_eq!(
+            day["measurement_summary"]["completion_tokens"],
+            expected("completion_tokens", None, 0, 1)
+        );
+        assert_eq!(
+            day["measurement_summary"]["first_output_ms"],
+            expected("first_output_ms", None, 0, 1)
+        );
+    }
+
+    #[test]
+    fn mt1_mt3_selected_report_includes_empty_and_exact_populated_day_scope() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        let empty = serde_json::to_value(store.usage_measurement_report(30).unwrap()).unwrap();
+        assert_eq!(empty["data"], json!([]));
+        for metric in METRICS {
+            assert_eq!(
+                empty["measurement_summary"][metric],
+                expected(metric, None, 0, 0)
+            );
+        }
+        insert(&store, "2020-01-01", [Some(1000); 7]);
+        insert(&store, "2025-01-01", [Some(2); 7]);
+        insert(&store, "2026-10-29", [None; 7]);
+        insert(&store, "2026-10-29", [Some(0); 7]);
+        let two = serde_json::to_value(store.usage_measurement_report(2).unwrap()).unwrap();
+        assert_eq!(two["data"].as_array().unwrap().len(), 2);
+        assert_eq!(two["data"][0]["day"], "2026-10-29");
+        assert_eq!(two["data"][1]["day"], "2025-01-01");
+        for metric in METRICS {
+            assert_eq!(
+                two["measurement_summary"][metric],
+                expected(metric, Some(2), 2, 3)
+            );
+        }
+        let clamped = serde_json::to_value(store.usage_measurement_report(0).unwrap()).unwrap();
+        for metric in METRICS {
+            assert_eq!(
+                clamped["measurement_summary"][metric],
+                expected(metric, Some(0), 1, 2)
+            );
+        }
+    }
+
+    #[test]
+    fn mt1_unrepresentable_sum_is_unavailable_and_large_integer_is_exact() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        let large = (1_i64 << 53) + 1;
+        insert(
+            &store,
+            "2026-10-28",
+            [Some(large), None, None, None, None, None, None],
+        );
+        insert(
+            &store,
+            "2026-10-28",
+            [Some(2), None, None, None, None, None, None],
+        );
+        let precise = store.usage_measurement_report(1).unwrap();
+        assert_eq!(precise.data[0].prompt_tokens, Some(large + 2));
+        assert_eq!(
+            precise.measurement_summary["prompt_tokens"].known_sum,
+            Some(large + 2)
+        );
+
+        insert(&store, "2026-10-29", [Some(i64::MAX); 7]);
+        insert(&store, "2026-10-29", [Some(1); 7]);
+        let report = serde_json::to_value(store.usage_measurement_report(1).unwrap()).unwrap();
+        for metric in METRICS {
+            let summary = &report["measurement_summary"][metric];
+            assert_eq!(summary["known_sum"], Value::Null);
+            assert_eq!(
+                summary["known_mean"],
+                if metric.ends_with("_ms") {
+                    json!((i128::from(i64::MAX) + 1) as f64 / 2.0)
+                } else {
+                    Value::Null
+                }
+            );
+            assert_eq!(summary["status"], "unavailable");
+            assert_eq!(summary["known_count"], 2);
+            assert_eq!(summary["unknown_count"], 0);
+            assert_eq!(summary["total_count"], 2);
+            assert_eq!(summary["coverage"], 1.0);
+        }
+        assert!(report["data"][0]["prompt_tokens"].is_null());
+        assert!(
+            store.usage_by_day(1).is_err(),
+            "v1 must not turn overflow into numeric zero"
+        );
+        assert_eq!(store.recent_usage(100).unwrap().len(), 4);
+    }
+
+    #[test]
+    fn mt2_legacy_mean_survives_unrepresentable_timing_sum() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        insert(
+            &store,
+            "2026-10-29",
+            [Some(1), Some(1), None, None, None, None, Some(i64::MAX)],
+        );
+        insert(
+            &store,
+            "2026-10-29",
+            [Some(2), Some(2), None, None, None, None, Some(1)],
+        );
+        let mean = (i128::from(i64::MAX) + 1) as f64 / 2.0;
+        let report = store.usage_measurement_report(1).unwrap();
+        let latency = &report.measurement_summary["latency_ms"];
+        assert!(matches!(latency.status, CostCoverageStatus::Unavailable));
+        assert_eq!(latency.known_sum, None);
+        assert_eq!(latency.known_mean, Some(mean));
+        assert_eq!(report.data[0].avg_latency_ms, Some(mean));
+        assert_eq!(store.usage_by_day(1).unwrap()[0].avg_latency_ms, mean);
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UsageDayRow {
     pub day: String,
@@ -221,6 +694,7 @@ pub struct UsageDayRow {
     pub estimated_cost_usd: Option<f64>,
     pub cost_summary: UsageCostSummary,
     pub avg_latency_ms: f64,
+    pub measurement_summary: UsageMeasurementMap,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1686,53 +2160,133 @@ impl Store {
         query_cost_summary(&self.conn.lock().unwrap())
     }
 
-    /// Daily aggregates (most recent `days` day buckets by RFC3339 date prefix).
+    /// Legacy numeric projection. New consumers use usage_measurement_report.
     pub fn usage_by_day(&self, days: i64) -> Result<Vec<UsageDayRow>> {
+        self.usage_measurement_report(days)?
+            .data
+            .into_iter()
+            .map(|day| {
+                let prompt = &day.measurement_summary["prompt_tokens"];
+                let completion = &day.measurement_summary["completion_tokens"];
+                let latency = &day.measurement_summary["latency_ms"];
+                // Preserve v1's failure on unrepresentable token sums, rather
+                // than making overflow look like measured zero.
+                anyhow::ensure!(
+                    !matches!(prompt.status, CostCoverageStatus::Unavailable)
+                        && !matches!(completion.status, CostCoverageStatus::Unavailable),
+                    "legacy_usage_aggregate_unavailable"
+                );
+                Ok(UsageDayRow {
+                    day: day.day,
+                    requests: day.requests,
+                    ok: day.ok,
+                    errors: day.errors,
+                    incomplete: day.incomplete,
+                    unknown: day.unknown,
+                    headers_200: day.headers_200,
+                    pending: day.pending,
+                    // These are deliberately v1 compatibility fields only.
+                    prompt_tokens: prompt.known_sum.unwrap_or(0),
+                    completion_tokens: completion.known_sum.unwrap_or(0),
+                    estimated_cost_usd: day.estimated_cost_usd,
+                    cost_summary: day.cost_summary,
+                    avg_latency_ms: latency.known_mean.unwrap_or(0.0),
+                    measurement_summary: day.measurement_summary,
+                })
+            })
+            .collect()
+    }
+
+    /// Latest populated RFC3339 date-prefix buckets, not calendar-day filtering.
+    /// A read transaction binds counts, costs and saved-field measurements to
+    /// one SQLite snapshot, including when another connection writes the DB.
+    pub fn usage_measurement_report(&self, days: i64) -> Result<UsageMeasurementReport> {
         let days = days.clamp(1, 366);
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            "SELECT substr(ts, 1, 10) AS day,
-                    COUNT(*) AS requests,
-                    SUM(CASE WHEN outcome = 'succeeded' THEN 1 ELSE 0 END) AS ok,
-                    SUM(CASE WHEN outcome IN ('failed', 'cancelled', 'timeout', 'interrupted') THEN 1 ELSE 0 END) AS errors,
-                    COALESCE(SUM(prompt_tokens), 0),
-                    COALESCE(SUM(completion_tokens), 0),
-                    SUM(estimated_cost_usd),
-                    COALESCE(AVG(latency_ms), 0),
-                    COUNT(estimated_cost_usd),
-                    SUM(CASE WHEN outcome = 'incomplete' THEN 1 ELSE 0 END),
-                    SUM(CASE WHEN outcome = 'unknown' THEN 1 ELSE 0 END),
-                    SUM(CASE WHEN status = 200 THEN 1 ELSE 0 END),
-                    SUM(CASE WHEN attempt_id IS NOT NULL AND finalized_at IS NULL THEN 1 ELSE 0 END)
-             FROM usage_events
-             GROUP BY day
-             ORDER BY day DESC
-             LIMIT ?1",
-        )?;
-        let rows = stmt.query_map(params![days], |row| {
-            let cost_summary =
-                UsageCostSummary::from_observations(row.get(6)?, row.get(8)?, row.get(1)?);
-            Ok(UsageDayRow {
-                day: row.get(0)?,
-                requests: row.get(1)?,
-                ok: row.get(2)?,
-                errors: row.get(3)?,
-                incomplete: row.get(9)?,
-                unknown: row.get(10)?,
-                headers_200: row.get(11)?,
-                pending: row.get(12)?,
-                prompt_tokens: row.get(4)?,
-                completion_tokens: row.get(5)?,
-                estimated_cost_usd: cost_summary.complete_total(),
-                cost_summary,
-                avg_latency_ms: row.get(7)?,
-            })
-        })?;
-        let mut out = Vec::new();
-        for r in rows {
-            out.push(r?);
+        let tx = conn.unchecked_transaction()?;
+        let mut data = {
+            let mut stmt = tx.prepare(
+                "SELECT substr(ts, 1, 10) AS day,
+                        COUNT(*) AS requests,
+                        SUM(CASE WHEN outcome = 'succeeded' THEN 1 ELSE 0 END) AS ok,
+                        SUM(CASE WHEN outcome IN ('failed', 'cancelled', 'timeout', 'interrupted') THEN 1 ELSE 0 END) AS errors,
+                        SUM(estimated_cost_usd),
+                        COUNT(estimated_cost_usd),
+                        SUM(CASE WHEN outcome = 'incomplete' THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN outcome = 'unknown' THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN status = 200 THEN 1 ELSE 0 END),
+                        SUM(CASE WHEN attempt_id IS NOT NULL AND finalized_at IS NULL THEN 1 ELSE 0 END)
+                 FROM usage_events
+                 GROUP BY day
+                 ORDER BY day DESC
+                 LIMIT ?1",
+            )?;
+            let rows = stmt.query_map(params![days], |row| {
+                let cost_summary =
+                    UsageCostSummary::from_observations(row.get(4)?, row.get(5)?, row.get(1)?);
+                Ok(UsageMeasurementDay {
+                    day: row.get(0)?,
+                    requests: row.get(1)?,
+                    ok: row.get(2)?,
+                    errors: row.get(3)?,
+                    incomplete: row.get(6)?,
+                    unknown: row.get(7)?,
+                    headers_200: row.get(8)?,
+                    pending: row.get(9)?,
+                    prompt_tokens: None,
+                    completion_tokens: None,
+                    estimated_cost_usd: cost_summary.complete_total(),
+                    cost_summary,
+                    avg_latency_ms: None,
+                    measurement_summary: BTreeMap::new(),
+                })
+            })?;
+            rows.collect::<rusqlite::Result<Vec<_>>>()?
+        };
+        let mut per_day: BTreeMap<String, MeasurementAccumulators> = BTreeMap::new();
+        let mut selected = MeasurementAccumulators::default();
+        {
+            let mut stmt = tx.prepare(
+                "WITH selected_days AS (
+                     SELECT substr(ts, 1, 10) AS day FROM usage_events
+                     GROUP BY day ORDER BY day DESC LIMIT ?1
+                 )
+                 SELECT substr(ts, 1, 10), prompt_tokens, completion_tokens,
+                        headers_ms, cli_ready_ms, first_output_ms, total_observed_ms, latency_ms
+                 FROM usage_events
+                 WHERE substr(ts, 1, 10) IN (SELECT day FROM selected_days)",
+            )?;
+            let mut rows = stmt.query(params![days])?;
+            while let Some(row) = rows.next()? {
+                let day: String = row.get(0)?;
+                let values = [
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                    row.get(7)?,
+                ];
+                per_day.entry(day).or_default().observe(values);
+                selected.observe(values);
+            }
         }
-        Ok(out)
+        for day in &mut data {
+            let measurements = per_day
+                .remove(&day.day)
+                .context("selected usage day missing from measurement snapshot")?
+                .finish();
+            day.prompt_tokens = measurements["prompt_tokens"].complete_total();
+            day.completion_tokens = measurements["completion_tokens"].complete_total();
+            day.avg_latency_ms = measurements["latency_ms"].known_mean;
+            day.measurement_summary = measurements;
+        }
+        tx.commit()?;
+        Ok(UsageMeasurementReport {
+            data,
+            measurement_summary: selected.finish(),
+        })
     }
 
     /// CSV export of recent usage events.

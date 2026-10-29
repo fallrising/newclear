@@ -17,7 +17,7 @@ use ratatui::widgets::{Block, Borders, List, ListItem, Paragraph, Tabs};
 use ratatui::Terminal;
 
 use crate::config::AppConfig;
-use crate::store::{Store, UsageCostSummary};
+use crate::store::{Store, UsageCostSummary, UsageEvent};
 
 enum Tab {
     Connections,
@@ -129,21 +129,7 @@ pub fn run_tui(cfg: &AppConfig) -> Result<()> {
                         ))
                     })
                     .collect(),
-                Tab::Usage => usage
-                    .iter()
-                    .map(|e| {
-                        ListItem::new(format!(
-                            "{}  model={}  status={}  {}ms  {}",
-                            e.ts,
-                            e.public_model.as_deref().unwrap_or("—"),
-                            e.status
-                                .map(|s| s.to_string())
-                                .unwrap_or_else(|| "—".into()),
-                            e.latency_ms.unwrap_or(0),
-                            e.error.as_deref().unwrap_or("")
-                        ))
-                    })
-                    .collect(),
+                Tab::Usage => usage.iter().map(|e| ListItem::new(usage_line(e))).collect(),
             };
 
             let list = List::new(display_items(items)).block(
@@ -186,6 +172,25 @@ pub fn run_tui(cfg: &AppConfig) -> Result<()> {
     // ensure restore even on error
     let _ = io::Result::Ok(());
     result
+}
+
+fn usage_line(e: &UsageEvent) -> String {
+    // This column includes historical timings and newer headers/CLI-ready mirrors.
+    // It is not first-output or total duration; missing observations stay unknown.
+    let latency = e
+        .latency_ms
+        .map(|value| format!("{value}ms"))
+        .unwrap_or_else(|| "unknown".into());
+    format!(
+        "{}  legacy/compat={}  status={}  model={}  {}",
+        e.ts,
+        latency,
+        e.status
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| "—".into()),
+        e.public_model.as_deref().unwrap_or("—"),
+        e.error.as_deref().unwrap_or("")
+    )
 }
 
 // Bound by terminal display cells, not UTF-8 bytes or scalar count.
@@ -275,6 +280,79 @@ mod tests {
             .collect::<Vec<_>>()
             .join("\n")
     }
+    fn measurement_event(latency_ms: Option<i64>) -> UsageEvent {
+        serde_json::from_value(serde_json::json!({
+            "id": 1,
+            "ts": "2026-10-29T16:00:00Z",
+            "public_model": "demo",
+            "status": 200,
+            "latency_ms": latency_ms,
+            "headers_ms": 23,
+            "cli_ready_ms": 47,
+            "first_output_ms": 89,
+            "total_observed_ms": 127,
+            "outcome": "unknown",
+            "usage_status": "partial",
+            "usage_source": "unknown"
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn mt3_tui_missing_latency_is_distinct_from_explicit_zero() {
+        for width in [78, 118] {
+            let unknown = rendered(
+                List::new(vec![ListItem::new(usage_line(&measurement_event(None)))]),
+                width,
+                1,
+            );
+            let zero = rendered(
+                List::new(vec![ListItem::new(usage_line(&measurement_event(Some(0))))]),
+                width,
+                1,
+            );
+            assert_ne!(
+                unknown, zero,
+                "unknown latency must not render as measured zero"
+            );
+            assert!(unknown.contains("legacy/compat=unknown"), "{unknown}");
+            assert!(zero.contains("legacy/compat=0ms"), "{zero}");
+            assert!(!unknown.contains("0ms"), "{unknown}");
+        }
+    }
+
+    #[test]
+    fn mt3_tui_legacy_time_is_labelled_without_using_other_observations() {
+        let mut event = measurement_event(Some(17));
+        event.status = Some(502);
+        event.error = Some("upstream_attempt_failed".into());
+        let full = usage_line(&event);
+        for value in [
+            "2026-10-29T16:00:00Z",
+            "model=demo",
+            "status=502",
+            "upstream_attempt_failed",
+        ] {
+            assert!(full.contains(value), "event field disappeared: {value}");
+        }
+        for width in [78, 118] {
+            let text = rendered(List::new(vec![ListItem::new(full.clone())]), width, 1);
+            assert!(text.contains("legacy/compat=17ms"), "{text}");
+            for other in ["23ms", "47ms", "89ms", "127ms"] {
+                assert!(
+                    !text.contains(other),
+                    "legacy time replaced by another clock: {text}"
+                );
+            }
+        }
+        event.public_model = Some("long-model-".repeat(20));
+        let text = rendered(List::new(vec![ListItem::new(usage_line(&event))]), 78, 1);
+        assert!(
+            text.contains("legacy/compat=17ms"),
+            "model name hid measurement: {text}"
+        );
+    }
+
     #[test]
     fn review_connection_long_chinese_keeps_url_and_model() {
         for width in [78, 118] {

@@ -33,3 +33,5 @@ Queue receipt、Workflow progress、派送 ACK 與模型的成功文字都不是
 ## 固定bot CLI介面
 
 [BC adapter](../docs/bot-bridge.md)提供獨立單次stdin／stdout契約：[request schema](bot-request.schema.json)與[response schema](bot-response.schema.json)。僅health.check／health.status，4KiB輸入，沒有任意命令；trusted host配置與server grant共同限制權限。不是新的HTTP route或已接通Grok的宣告。
+
+[MT MCP stdio介面](../docs/mcp-stdio.md)提供固定tools/list與tools/call；input僅UUID request_id，output沿用bot-response schema。MCP RPC ID與持久request_id分離，取消RPC不表示取消遠端命令，無新增HTTP route。

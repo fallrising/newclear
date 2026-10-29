@@ -297,3 +297,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40870633012`、Project success `40870633013`、llms `40870633071`。本機283tests（61Node222Python）、JSON／文件／task／report／diff檢查及T838 focusedACCEPT；初審HTML401/403分類問題、RED及修正保留在[BC證據](../evidence/m1-bot-bridge.md)。
 - SSH推送／查詢逾時，診斷停在publickey認證；改用既有GitHub connector交付及匿名HTTPS回讀，未改憑證／SSH設定。Remote tree `58289d4fc00fcc3817e13224b3c9cc7e4f70703c`與已測本地commit `2f4ed89011a0a363910a95f10b3c9472b9f0eb5f`完全相同；兩個commit身份不同，不把本地commit誤稱remote ancestor。
 - BC01–04 source／local完成；沒有部署、續權、模型呼叫或付費變更，實際Grok接線與完整主線pending，無usabletag。T-0015的HL資產API500仍未完成；本收尾只改任務板並只關閉BC。
+
+## T-0017 — 本機 MCP 工具入口
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0017-1 | 協議生命週期與嚴格frame | MT-01 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |
+| T-0017-2 | 固定工具及可信host邊界 | MT-02 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |
+| T-0017-3 | 有界子程序與恢復語義 | MT-03 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |
+| T-0017-4 | stdio閉環、回歸與審查交付 | MT-04 | in_progress | 2026-10-29T14:31:25Z | — | 2026-10-29T14:43:16Z |

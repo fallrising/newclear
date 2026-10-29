@@ -64,3 +64,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [低頻健康檢查與看板](docs/health-schedule.md)支援具期限的15／60／1440分鐘政策、授權排程snapshot與觸發／觀測展示；[HS本機驗證](docs/evidence/m1-health-schedule.md)含265tests及12組真實瀏覽器情境。Owner已批准後，[實際接入](docs/evidence/m1-health-schedule-live.md)在資產session連續500時停止；原runner及授權保留，新版／Cron仍未啟用。
 
 [固定bot bridge](docs/bot-bridge.md)提供health.check／health.status JSON入口、持久請求及同ID恢復；[283tests與實際HTTP／Python collector](docs/evidence/m1-bot-bridge.md)本機通過。可供Grok等工具host適配，尚未實際接線／續權，不呼叫模型或新增費用。
+
+[本機MCP入口](docs/mcp-stdio.md)將固定bot bridge暴露為check／status工具，預設僅查詢；具有有界子程序、同ID恢復與去敏結果。[本機證據](docs/evidence/m1-mcp-stdio.md)區分協議閉環與尚未進行的實際Grok／live接線。

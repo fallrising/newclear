@@ -1,6 +1,6 @@
 # Finite HTTP/WSS conformance and remaining T006R oracles — scope proposal
 
-Status: **PROPOSAL awaiting owner confirmation.** Nothing here is implemented or run. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E.
+Status: **C1 confirmed by the owner on 2026-10-29** (「確認範圍：實作 C1；C2 執行前再問我。」). C2 needs a separate approval before it runs. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E.
 
 Basis:
 - [ROUND2-SDD](../../../../docs/fe-review/ROUND2-SDD.md) R2-AC-14: "M1–M3 finite HTTPS/WSS synthetic harness … mock is not real backend/Cloud acceptance; real integration needs its own explicit scope."
@@ -91,3 +91,42 @@ Stop and report if:
 - a gap needs a product controller or security change;
 - the WSS client cannot trust the private CA without weakening TLS;
 - C2 fails, in which case the evidence is preserved and nothing is retried.
+
+## C1 implementation notes
+
+Files:
+- `fe-review/conformance-transport.node.mjs`: C1-a and C1-b over a real `createTransport` HTTPS/WSS listener on an ephemeral `127.0.0.1` port.
+  - A per-test private CA, a loopback leaf, a wrong-name leaf and an unrelated CA come from `openssl` (EC P-256, the same CA/leaf pattern as `trust.mjs`) in a private temporary directory that is removed afterwards.
+  - Node's `https` client and the bundled `ws` client both trust only that CA.
+  - The bundled `ws` comes from the existing Playwright 1.63.0 tools, located through `REVIEW_MODULES` (the directory that contains `playwright/package.json`). The test skips with a stated reason when that variable is unset. No new dependency is added and no machine path is committed.
+- `fe-review/conformance-evidence.node.mjs`: the C1-c evidence oracles over the accepted v7 results, enabled by `FE_REVIEW_RUNS`.
+- `fe-review/conformance-partitions.node.mjs`: the C1-d R06 pure partitions against the actual controller.
+
+Deviation handling: where the review harness does not follow the T005C contract, the C1 oracle states the contract and records the measured harness behavior as a finding. The pinned `transport.mjs` and `fixture.mjs` are not changed in C1. Changing them would move the v7 source pins that the canonical 27/27 evidence relies on, so a harness repair is an owner decision.
+
+## C1 results (2026-10-29)
+
+Oracles added (35 fe-review node suites in total):
+
+| File | Oracles | Result |
+|---|---|---|
+| `conformance-transport.node.mjs` | `review_tls_node_client_trusts_only_private_ca_and_loopback_name`, `review_wss_upgrade_requires_cookie_origin_and_fixed_path`, `review_wss_replay_live_order_and_exact_envelopes`, `review_wss_errors_have_exact_fields_and_policy_close`, `review_wss_invalid_frames_close_without_effects`, `review_wss_logout_expiry_and_shutdown_close_promptly`, `review_wss_subscribe_timeout_closes_after_five_seconds`, `review_http_over_https_matches_actual_controller_contract`, `finding_subscriber_cap_is_http_403_not_subscriber_limit_1013` | 9/9 over the real loopback HTTPS/WSS transport (about 6 s) |
+| `conformance-partitions.node.mjs` | `review_gap_restart_timeout_and_refresh_preserve_no_resend` | 1/1 |
+| `conformance-evidence.node.mjs` | `review_canonical_capture_keys_are_complete_and_immutable`, `review_measured_presentation_is_accessible_at_three_sizes`, `review_secrets_clear_and_diff_is_inert`, `review_evidence_keeps_native_and_mock_boundaries` | 4/4 against the accepted v7 results |
+
+The meaningful-failure checks were mutations, restored byte-exactly afterwards:
+- A transport auth-check interval of 2000 ms makes the logout oracle fail (the close took 1990 ms).
+- A fixture that ignores Origin makes the upgrade oracle fail.
+- Disabling the client gap check makes the R06 oracle fail.
+- An altered desktop result breaks the R10 chain.
+- One mobile cell set to `overflow=true` fails R07.
+
+Without `REVIEW_MODULES` or `FE_REVIEW_RUNS`, the environment-dependent oracles skip with a stated reason. With both set, all fe-review suites pass 262/262; without them, 250 pass and 13 skip. The T006 suite passes 10/10.
+
+Findings against T005C (the harness is unchanged; repair is an owner decision because it moves the v7 source pins):
+
+- F1 — subscriber cap. T005C requires a `subscriber_limit` error and close 1013. The review transport refuses the ninth upgrade with HTTP 403. This is measured and pinned by `finding_subscriber_cap_is_http_403_not_subscriber_limit_1013`.
+- F2 — back-pressure. From source inspection: an outbound frame over 64 KiB, or `bufferedAmount` over 64 KiB, triggers a `protocol_error` close 1008 instead of `subscriber_lagged` (1013) or `stream_unavailable` (1013). The frames are small, so this is not reachable in a test.
+- F3 — `history_gap`, `subscriber_lagged` and `stream_unavailable` cannot be produced through the review transport. History holds 256 events, and no scenario exceeds that. The client's handling of `history_gap` is covered in the R06 partitions.
+
+R02's browser half (TLS trust in a real browser), R06 in a real browser, and the R07 items not yet exercised remain C2.

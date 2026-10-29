@@ -324,4 +324,11 @@ Not exercised:
 
 ## T-0433 finite HTTP/WSS conformance — proposal (2026-10-29)
 
-Milestone 3 (v7 recapture, canonical 27/27) is merged as PR731, main `0ff9bab0`. The owner asked for a documented scope proposal before any implementation. [SPEC-T006R conformance proposal](docs/specs/SPEC-T006R-conformance-proposal.md) maps the gaps against the 12 named T006R oracles. It proposes C1 (offline real-transport R03/R04, R06 pure partitions, and R07/R08/R10/R11 evidence oracles) and C2 (one focused browser run for TLS, R06 and the R07 items not yet exercised). Real backend/Cloud integration is out of scope. Status: awaiting owner confirmation; nothing is implemented.
+Milestone 3 (v7 recapture, canonical 27/27) is merged as PR731, main `0ff9bab0`. The owner asked for a documented scope proposal before any implementation. [SPEC-T006R conformance proposal](docs/specs/SPEC-T006R-conformance-proposal.md) maps the gaps against the 12 named T006R oracles. It proposes C1 (offline real-transport R03/R04, R06 pure partitions, and R07/R08/R10/R11 evidence oracles) and C2 (one focused browser run for TLS, R06 and the R07 items not yet exercised). Real backend/Cloud integration is out of scope. The owner confirmed C1 on 2026-10-29 and asked to be consulted before C2 runs.
+
+C1 result:
+- 14 new oracles: R03/R04 and Node-level TLS over the real loopback HTTPS/WSS transport, R06 pure partitions, and R07/R08/R10/R11 evidence over the v7 results.
+- All pass; each was shown meaningful by a mutation check.
+- Findings F1–F3 record where the review harness differs from T005C (subscriber cap returns HTTP 403; back-pressure close codes; error paths the harness cannot reach). The harness is not changed.
+
+Next: C2, one focused browser run that needs owner approval.

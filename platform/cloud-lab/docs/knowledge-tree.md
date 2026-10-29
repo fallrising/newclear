@@ -65,3 +65,5 @@ MT補充：AU-01的[本機MCP接入](mcp-stdio.md)重用BC固定工具與durable
 GC補充：AU-01的[獨立Grok工具端](grok-connection.md)已登記status-only MCP，原生client發現通過；bot grant過期與自然語言執行仍待後續，Kith權責保持。
 
 BL補充：AU-01獨立MCP工具已完成[一筆真實原runner閉環](evidence/m1-bot-live.md)，bot僅短期窗口，Grok恢復status-only；沒有新增聊天權威、model或常態授權。
+
+BP補充：AU-01的[持久bot政策](bot-policy.md)補上獨立工具host的本機租期與跨連線配額，維持原API／runner權威；常態live啟用另行驗收。

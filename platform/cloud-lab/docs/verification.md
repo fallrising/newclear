@@ -67,3 +67,5 @@ git diff --check
 [UI-01～04看板瀏覽器驗收](dashboard-qualification.md)及[本機證據](evidence/m1-dashboard.md)區分真實Chromium／workerd／D1、合成JWT與手機尺寸模擬；不取代真正Access登入、實體手機及遠端新版部署。
 
 2026-10-28 owner取消實體手機必測門檻，見[範圍調整](dashboard-rollout.md#owner調整客戶端驗收範圍)。歷史文件的手機pending描述保留作當時狀態；目前只要求一般瀏覽器真人Access流程，裝置相容性另列選測，不阻擋其他功能開發。
+
+BP01–04依[政策契約](bot-policy.md)驗證離線初始化、配置綁定、期限／額度、並行FLOCK、ACK遺失同ID與MCP參數邊界；[本機證據](evidence/m1-bot-policy.md)與live／模型驗收分開。

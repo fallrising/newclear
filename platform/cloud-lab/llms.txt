@@ -83,3 +83,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Independent Grok connection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/grok-connection.md): existing Grok Build registered with pinned status-only MCP; native doctor and direct protocol checks pass, fresh metadata confirms expired bot grant while Access remains enabled. No model invocation, check enablement or renewal.
 
 - [Bounded bot live validation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-live.md): bot-only30minute HMAC/grant window through2026-10-29T16:59:16Z; one real MCP/API/resident command validated healthy, original records/roles/Access/runner preserved and Grok restored status-only. No model call or natural-expiry acceptance.
+
+- [Persistent bot policy](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-policy.md): private <=24h lease, <=24 new IDs/240 calls, explicit offline initialization, durable reservations and trusted MCP flag; source/local only, no live configuration or renewal.

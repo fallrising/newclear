@@ -103,3 +103,7 @@ Owner已批准[HL01–04實際低頻排程接入](docs/evidence/m1-health-schedu
 本輪開始[GC01–04獨立Grok工具接線](docs/grok-connection.md)：固定source、現有client註冊／doctor、唯讀status與真實授權診斷；[原生client／工具與授權診斷](docs/evidence/m1-grok-connection.md)完成，bot grant過期而Access仍有效；未續權、不呼叫模型或改付費，自然語言與live提交待驗。
 
 本輪開始[BL01–04 bot有界續權及真實MCP檢查](docs/bot-live.md)：最長30分鐘bot-only窗口、一筆原node-health、Grok恢復status-only；[一筆validated/healthy與實際保全](docs/evidence/m1-bot-live.md)通過，原runner／Access上限不延長；自然到期及模型對話未驗。
+
+## BP：持久 bot 政策
+
+Owner同意繼續常態政策開發；[BP01–04契約](docs/bot-policy.md)先實作離線期限／持久配額及可信MCP接入。[319tests與T842獨立審查](docs/evidence/m1-bot-policy.md)通過；本輪source／local驗收，live啟用及完整主線仍pending。

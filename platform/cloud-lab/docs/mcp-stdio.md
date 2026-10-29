@@ -55,3 +55,7 @@ Tool input驗證錯誤回isError／INVALID_REQUEST；未知工具、非法RPC結
 [本機證據](evidence/m1-mcp-stdio.md)與[bot恢復契約](bot-bridge.md)說明超時後流程。部署到實際工具host時，先驗證initialize/list與status，再在已批准且有效bot授權內啟用check；本開發階段未進行該live接線。
 
 後續[GC獨立Grok接線](grok-connection.md)已完成實際client註冊／握手與唯讀工具驗證；[GC證據](evidence/m1-grok-connection.md)明示bot grant過期，沒有啟用check或模型執行。上文保留MT開發階段的範圍。
+
+## BP持久政策
+
+可信host可加`--policy /private/bot-policy.json`；須先依[bot政策](bot-policy.md)離線初始化原state。該配額跨MCP連線／程序持久，原session每秒限制仍保留。工具參數不接受policy或初始化；尚未更新live安裝。

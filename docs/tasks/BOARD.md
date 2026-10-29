@@ -68,6 +68,14 @@ Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud
 | T0433-2f | Harness repair F1–F4 and C2 browser driver (PR739); C2 conformance-001 PASS, actual review ACCEPT | R2-AC-14 | done | 2026-10-29T04:59:16Z | 2026-10-29T05:44:04Z | 2026-10-29T05:44:04Z |
 | T0433-3 | Final integration (R2-AC-E): focused journeys `journeys-001` PASS (PR752/754), shared capture `capture-001` FAIL kept and `capture-002` PASS (PR761/764/765); [R2 report](../../platform/fanzloud/fe-review/tasks/round2/report.md), R2-AC-14 conditions shown, targets `verified:true` | R2-AC-E | done | 2026-10-29T06:04:00Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |
 
+## T-0438
+
+Desk [T-0438](https://github.com/fallrising/desk/blob/main/tasks/T-0438-fanzloud-client-fixes/task.md): Fanzloud operator client fixes from the T-0433 product findings. Spec: [SPEC-T006](../../platform/fanzloud/docs/specs/SPEC-T006-private-operator-web.md) P-006-11.
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T0438-1 | Socket close code after a self-detected stream failure (P-006-11) and Authenticate spacing; RED then GREEN T006 test | P-006-11 | in_progress | 2026-10-29T17:05:00Z | — | 2026-10-29T17:05:00Z |
+
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
 
 Historical checkpoint 2026-10-24T16:20Z (superseded below): remaining R2 units [Flowshot/Loom PR598](https://github.com/fallrising/newclear/pull/598) and [Fanzloud PR604](https://github.com/fallrising/newclear/pull/604) remain in_progress with end unset. The owner approved all three prior proposals. Tokio1.53.3 passed the affected native/security checks; the two single extra browser attempts both failed and their allowances are consumed. [Current evidence, review correction and pending decisions](../fe-review/ROUND2-RETRY-CHECKPOINT.md). Both units now wait for owner decision; no new retry is authorized. Delivery remains17of19; original dirty worktrees and failures remain preserved.

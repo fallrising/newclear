@@ -395,3 +395,14 @@ The independent review rejected the first version because the favicon request wa
 The [R2 report](fe-review/tasks/round2/report.md) records R2-AC-E for this unit: source commits, commands, tool versions, results per clause (R01–R12, N01–N09) with receipts, the mock and real boundary, cleanup and backups, PR/CI readback, limits and product findings. Every R2-AC-14 condition in ROUND2-SDD line 17 holds with linked evidence, so `fe-review/targets.json` is now `verified:true`. `capture-002` ran on the pre-flip bytes (`5aa2d64c…`, `verified:false`); `capture.mjs` does not read `verified`, and the wrapper pin and targets test moved with the flip. T006R is accepted ([ACCEPT-T006R](docs/acceptance/T006R.acceptance.md)).
 
 Product findings, recorded and not fixed: the client socket stays open after a protocol error the client detected itself, until Refresh (suspected `close(1008)`, not observed); favicon 404; the Authenticate button touches the input above it. This does not change the product AC table: real backend/Cloud integration, AC-04, AC-05 and Round 3 stay open.
+
+## T-0438 operator client fixes (2026-10-29)
+
+Desk [T-0438](https://github.com/fallrising/desk/blob/main/tasks/T-0438-fanzloud-client-fixes/task.md) fixes two product findings from T-0433. The owner agreed (「按你建議」) and authorized delegating the code to coding CLIs.
+
+- **Socket close after a self-detected protocol error.** [SPEC-T006](docs/specs/SPEC-T006-private-operator-web.md) P-006-11: the controller closes a failed connection with `close(1000, "")`. Browsers reject 1008 from a page. AC: T006 test 7's fake WebSocket rejects disallowed codes as browsers do; this fails (RED) on the current `close(1008)` and passes after the fix; T006 and all fe-review suites pass.
+- **Authenticate spacing.** `p0.css` gives the Authenticate button a vertical gap below the bearer input at all sizes. AC: the CSS change is scoped to that control; no other layout changes.
+- Historical runner pins stay on the bytes they ran on, using the existing `historical` pattern in the pin tests. No earlier result is reinterpreted.
+- Out of scope: favicon 404 (it needs a new Rust route and a CSP change), backend/API/security/retry semantics, and any new browser run, which needs its own owner approval.
+
+Delivery: Codex (GPT family) implements, an independent Claude review checks the result, then required CI, merge and readback.

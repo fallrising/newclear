@@ -1,6 +1,6 @@
 # Focused desktop journeys N01–N09 and the journeys browser run
 
-Status: **specified; driver not yet implemented; no run.** Owner direction on 2026-10-29 (「按你建議。」), accepting option A of the T0433-3 inventory: add one focused desktop browser run for the R10 journeys that lack browser receipts. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. The run, `journeys-001`, needs its own owner runtime approval after independent review and required CI pass.
+Status: **implemented, merged (PR752) and `journeys-001` run once: PASS, actual review ACCEPT_WITH_FINDINGS.** Owner direction on 2026-10-29 (「按你建議。」), accepting option A of the T0433-3 inventory: add one focused desktop browser run for the R10 journeys that lack browser receipts. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. The run, `journeys-001`, was approved by the owner on 2026-10-29 (「批准：跑一次 journeys-001。」) after independent review and required CI passed.
 
 Basis:
 - [SPEC-T006R](SPEC-T006R-fe-review.md) R10: "Focused desktop journeys … must have actual fixed stage/counter/identity receipts, not screenshot filenames alone."
@@ -294,6 +294,24 @@ No browser runs in this suite.
   - A FAIL is preserved, not retried and not renamed.
   - A product defect is reported as a finding, and gates do not change.
 - An independent actual review judges the result before it is recorded as evidence.
+
+## `journeys-001` result (2026-10-29)
+
+`journeys-001` passed. It ran once on source `df10a299` (merged as `ab4ebac2`) in 80.4 s, with Node v24.18.0, Playwright 1.63.0 and Chromium 153.0.8010.12. All 11 verdicts are true: `j01_stored`, `j01_future`, `j02_restart`, `j02_instance`, `j03_timeout`, `j04_malformed`, `j04_binary`, `j04_unknown-field`, `j05_expiry`, `j06_logout` and `j06_dispose`. Every journey's health verdict passed and its canary scan was empty. Cleanup closed all 24 resources, port 8443 was absent, and the container was removed.
+
+The independent actual review re-derived every verdict from the recorded rows and accepted the run with findings. Key values:
+- J03: the client failed the turn 15,009 ms after the press and 15,007 ms after the request; the held `202` was never delivered and nothing was resent.
+- J05: the expiry frame arrived 253 ms after the clock skew.
+- J06b: the held `GET /session` was aborted 28 ms after `pagehide`.
+
+Product finding (not a gate): in all three J04 parts the client's socket stayed open after the client detected the invalid frame itself (`socketClosedBeforeRefresh` false, one transport client) until the manual Refresh. Closes from `refresh()` were observed within about 16 ms in the same run, so a close is observable when it happens. The likely cause is `socket.close(1008, "")` in `p0-client.js`, which browsers reject for page code; this is a source inference, not observed. Impact: a failure under the refresh policy that only the client detects would not reconnect, and the server keeps a dead subscriber. The product client is unchanged in T-0433.
+
+Recorded limitations:
+- `j06_logout`: the DOM record was overwritten after the verdict, so diff, events and device clearing are attested by the pinned verdict only, not by the stored rows.
+- J01a: `after_seq` equal to the high-water cannot tell a clamped cursor from a rewrite that never applied; N01 also rests on J01b and C2 R06.
+- J03: the resync `GET /session` was labelled `submit` because `requestfailed` arrived 5 ms after it; the turn count still covers a resend, and the rows show no mutation.
+- J06b shows abort on dispose, not handling of a response that arrives after dispose; that part of N07 rests on the R09 partition tests.
+- The evidence comes from a synthetic fixture with one headless Chromium.
 
 ## Acceptance
 

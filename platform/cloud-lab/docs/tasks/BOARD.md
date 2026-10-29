@@ -286,7 +286,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0016-1 | 嚴格JSON與可信提交開關 | BC-01 | in_progress | 2026-10-29T11:49:12Z | — | 2026-10-29T12:01:21Z |
-| T-0016-2 | 私人durable請求與同ID恢復 | BC-02 | in_progress | 2026-10-29T11:49:12Z | — | 2026-10-29T12:01:21Z |
-| T-0016-3 | 唯讀查詢與未知／過期投影 | BC-03 | in_progress | 2026-10-29T11:49:12Z | — | 2026-10-29T12:01:21Z |
-| T-0016-4 | HTTP閉環、回歸與審查交付 | BC-04 | in_progress | 2026-10-29T11:49:12Z | — | 2026-10-29T12:01:21Z |
+| T-0016-1 | 嚴格JSON與可信提交開關 | BC-01 | done | 2026-10-29T11:49:12Z | 2026-10-29T12:08:12Z | 2026-10-29T12:09:20Z |
+| T-0016-2 | 私人durable請求與同ID恢復 | BC-02 | done | 2026-10-29T11:49:12Z | 2026-10-29T12:08:12Z | 2026-10-29T12:09:20Z |
+| T-0016-3 | 唯讀查詢與未知／過期投影 | BC-03 | done | 2026-10-29T11:49:12Z | 2026-10-29T12:08:12Z | 2026-10-29T12:09:20Z |
+| T-0016-4 | HTTP閉環、回歸與審查交付 | BC-04 | done | 2026-10-29T11:49:12Z | 2026-10-29T12:08:12Z | 2026-10-29T12:09:20Z |
+
+## T-0016交付與遠端回讀
+
+- [Feature PR755](https://github.com/fallrising/newclear/pull/755) head `26501d9867ca763b5a4df90a60df444b46193221`，merge `adf9707a38ff72f9881e83895e9db4474a1ac073`，合併時間2026-10-29T12:08:12Z。22份交付檔案與遠端逐byte相等、remote feature為main祖先、工作樹乾淨；同期其他專案變更保留。
+- CI全過：Cloud Lab `40870633012`、Project success `40870633013`、llms `40870633071`。本機283tests（61Node222Python）、JSON／文件／task／report／diff檢查及T838 focusedACCEPT；初審HTML401/403分類問題、RED及修正保留在[BC證據](../evidence/m1-bot-bridge.md)。
+- SSH推送／查詢逾時，診斷停在publickey認證；改用既有GitHub connector交付及匿名HTTPS回讀，未改憑證／SSH設定。Remote tree `58289d4fc00fcc3817e13224b3c9cc7e4f70703c`與已測本地commit `2f4ed89011a0a363910a95f10b3c9472b9f0eb5f`完全相同；兩個commit身份不同，不把本地commit誤稱remote ancestor。
+- BC01–04 source／local完成；沒有部署、續權、模型呼叫或付費變更，實際Grok接線與完整主線pending，無usabletag。T-0015的HL資產API500仍未完成；本收尾只改任務板並只關閉BC。

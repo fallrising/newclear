@@ -162,3 +162,22 @@ P2-08 起。T-0354 試行收到 P2-07，這裡不拆、不做。
 | P5-15 | 威脅模型剩餘對策 |
 | P5-16 | security-incident runbook |
 | P6 | 加固與擴充（快取、split、原生直方圖、降採樣、Elasticsearch、remote_write v2、分角色部署、Console 儀表板、Profiling / RUM） |
+
+## T-0793 — Langfuse 比較與後續參考
+
+需求／認領：[newclear #793](https://github.com/fallrising/newclear/issues/793)；owner 於 2026-10-30 直接交辦，ChatGPT 承接。
+T-0793 是依 issue 編號建立的 repo-local 文件任務，不是 desk 卡；不重開 T-0354 或啟動 P2-08。
+範圍與文件 AC 見 [SUCCESS](../../SUCCESS.md#t-0793--langfuse-比較參考文件文件工作)。
+本輪止於 Draft PR；未合併前保持 in_progress，end 不補寫。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0793-01 | 保存來源、定位差異、現況與建議 | LF-D01 | in_progress | 2026-10-29T17:55:33Z | — | 2026-10-29T18:08:20Z |
+| T-0793-02 | README 導航與既有整合規格連結 | LF-D02 | in_progress | 2026-10-29T17:55:33Z | — | 2026-10-29T18:08:20Z |
+| T-0793-03 | 文件驗證、原子提交、Draft PR 與回讀 | LF-D03 | in_progress | 2026-10-29T17:55:33Z | — | 2026-10-29T18:08:20Z |
+
+研究基準 `a0f6b3f2200063b99b02ced53e7a893c1c467a6f`；提交前整合最新主線
+`b46552468d611356c04a72c9a0c6639e9631fd53`。已核對中間七個提交僅影響 fanzloud 與根任務紀錄，Prism、治理入口及既有 Langfuse 規格不變。
+檢查及交付證據記錄於本任務的 PR；未合併、未 release、未 deploy。
+
+參考內容見[比較文件](../langfuse-comparison.md)。本地限定文件檢查已通過；必要 CI 與審查以 PR 的最終 head 結果為準。

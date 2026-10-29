@@ -78,10 +78,15 @@ W-01～W-05 的實作、文件、必要驗證與獨立審查已通過；[本輪�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0441-01 | 過期與讀取邊界 | L-01 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
-| T-0441-02 | 明確原子刷新 | L-02 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
-| T-0441-03 | 有向calls路徑 | L-03 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
-| T-0441-04 | 真stdio完整流程 | L-04 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
-| T-0441-05 | 驗證審查與交付 | L-05 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
+| T-0441-01 | 過期與讀取邊界 | L-01 | done | 2026-10-29T18:08:39Z | 2026-10-29T18:26:26Z | 2026-10-29T18:26:26Z |
+| T-0441-02 | 明確原子刷新 | L-02 | done | 2026-10-29T18:08:39Z | 2026-10-29T18:26:26Z | 2026-10-29T18:26:26Z |
+| T-0441-03 | 有向calls路徑 | L-03 | done | 2026-10-29T18:08:39Z | 2026-10-29T18:26:26Z | 2026-10-29T18:26:26Z |
+| T-0441-04 | 真stdio完整流程 | L-04 | done | 2026-10-29T18:08:39Z | 2026-10-29T18:26:26Z | 2026-10-29T18:26:26Z |
+| T-0441-05 | 驗證審查與交付 | L-05 | done | 2026-10-29T18:08:39Z | 2026-10-29T18:26:26Z | 2026-10-29T18:26:26Z |
 
-本機驗證與獨立實作審查通過；[證據與限制](../evidence/live-workspace/README.md)。最終CI與合併回讀待交付，不提前計為完成。
+L-01～L-05 實作、文件與必要驗證已交付；[證據與限制](../evidence/live-workspace/README.md)／[獨立ACCEPT](../evidence/live-workspace/review.md)。
+[PR #802](https://github.com/fallrising/newclear/pull/802) 於2026-10-29T18:26:26Z合併，commit `d5a95c6d1e833700e41ae491b510e228ca7244b3`；本次所有路徑與reviewed head `53569b87fb7ed1e82b6233cd978bec0d8c6f64e0` 完全相同，遠端已回讀。
+四項CI success：[Graphify81tests/真場景](https://github.com/fallrising/newclear/actions/runs/40930383675)、[llms](https://github.com/fallrising/newclear/actions/runs/40930383592)、[success contracts](https://github.com/fallrising/newclear/actions/runs/40930383715)、[workflow](https://github.com/fallrising/newclear/actions/runs/40930383793)。
+唯一review must-fix（failed callback漏postvalidation）已先RED再修正，13state獨立複查與最終81tests通過；無未解阻擋問題。
+本PR只記錄技術任務完成；desk/journal另外同步事實，owner驗收與release/deploy分開。沒有擴張下一里程碑。
+限制：檢查只代表觀測時點，無watcher/自動刷新；calls是靜態邊，搜尋上限不代表無路徑；provider/tokens/cost未量測。

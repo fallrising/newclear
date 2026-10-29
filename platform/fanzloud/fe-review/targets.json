@@ -1,7 +1,7 @@
 {
   "project": "fanzloud",
-  "verified": false,
-  "verifiedNote": "Review origin of the HTTPS/WSS synthetic harness (fixture + transport, private CA) used by fe-review/shared-capture.mjs (SPEC-T006R-shared-capture). No start: only the wrapper serves it, inside the pinned network-none container. Stays false until capture-001 passes and its actual review accepts it.",
+  "verified": true,
+  "verifiedNote": "Review origin of the HTTPS/WSS synthetic harness (fixture + transport, private CA) used by fe-review/shared-capture.mjs (SPEC-T006R-shared-capture). No start: only the wrapper serves it, inside the pinned network-none container. Verified by the T0433-3 final integration after every R2-AC-14 condition was shown with linked evidence (tasks/round2/report.md). capture-002 ran on the pre-flip bytes 5aa2d64c (verified:false); capture.mjs does not read verified, so only this note and flag changed. This is metadata for the synthetic review origin, not real backend or Cloud acceptance.",
   "locale": "en-US",
   "colorSchemes": [
     "dark"

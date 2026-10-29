@@ -21,3 +21,5 @@ Code-only Graphify analysis. Source snapshots remain the evidence; the graph is 
 - [SDD](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/SDD.md): design and scenario contract.
 
 - [Local workspace](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/docs/local-workspace.md): explicit source, shared cache, source readback and snapshot MCP.
+
+M4: workspace serve-live offers freshness checks, explicit refresh and directed calls-only paths. Original serve remains a fixed snapshot. See docs/local-workspace.md.

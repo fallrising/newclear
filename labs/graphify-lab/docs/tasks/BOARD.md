@@ -71,3 +71,17 @@ W-01～W-05 的實作、文件、必要驗證與獨立審查已通過；[本輪�
 本 PR 僅關閉技術任務；desk 的 owner 驗收狀態仍保留，由 ledger 收尾 PR 同步。沒有 release／deploy，沒有啟動下一里程碑。
 
 限制仍成立：MCP 修改來源後須重啟；最短路徑可能走 contains，calls 必須另外核對；未量測 provider usage／tokens／cost。
+
+## T-0441 — M4 圖更新與有向呼叫路徑
+
+[desk](https://github.com/fallrising/desk/blob/main/tasks/T-0441-graphify-live-workspace/task.md)／[規格](../milestones/live-workspace.md)。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0441-01 | 過期與讀取邊界 | L-01 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
+| T-0441-02 | 明確原子刷新 | L-02 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
+| T-0441-03 | 有向calls路徑 | L-03 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
+| T-0441-04 | 真stdio完整流程 | L-04 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
+| T-0441-05 | 驗證審查與交付 | L-05 | in_progress | 2026-10-29T18:08:39Z | — | 2026-10-29T18:20:21Z |
+
+本機驗證與獨立實作審查通過；[證據與限制](../evidence/live-workspace/README.md)。最終CI與合併回讀待交付，不提前計為完成。

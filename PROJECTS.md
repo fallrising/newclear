@@ -18,6 +18,7 @@
 | [labs/bee-swarm](labs/bee-swarm/SUCCESS.md) | labs | 保存以 GitHub 角色協作及 SimPy 探索流程的概念框架 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
 | [labs/browser-fingerprint](labs/browser-fingerprint/SUCCESS.md) | labs | 觀測瀏覽器設備訊號與任務操作事件以比較測試環境 | 完成 | 尚無已核准標記 | 2026-10-03 |
 | [labs/eru-vps-mvp](labs/eru-vps-mvp/SUCCESS.md) | labs | 驗證四台 VPS 的 Eru 排程、受控重建與控制面恢復 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
+| [labs/graphify-lab](labs/graphify-lab/SUCCESS.md) | labs | 實跑 Graphify 開發場景並驗證固定參考程式碼與索引的單份共用 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-29 |
 | [labs/handwired-learning](labs/handwired-learning/SUCCESS.md) | labs | 用一頁溫度校正對照，讓初學者看懂固定數值圖與用梯度調整係數的差別 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-21 |
 | [labs/iris-lab](labs/iris-lab/SUCCESS.md) | labs | 以固定 Iris 與模型版本驗證可重現的本機原生生圖流程 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-24 |
 | [labs/m4-seat](labs/m4-seat/SUCCESS.md) | labs | 保存 M4 Max 48GB 單人本機推論座位的有界規劃 | 參考／封存 | 尚無已核准標記 | 2026-10-17 |

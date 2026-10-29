@@ -54,6 +54,7 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 
 ## Specifications, labs and examples
 
+- [labs/graphify-lab](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/llms.txt): **ungraded** — pinned Graphify code-only CLI/MCP experiment with shared reference snapshots, source provenance and measured developer scenarios; see SUCCESS for current acceptance.
 - [specs/fleet](https://github.com/fallrising/newclear/blob/main/specs/fleet/README.md): **B** — executable Fleet Catalog: `fleet.yaml`, Compose, outbound agents, Cloudflare. A component with code and tests despite living under `specs/`; see [docs/taxonomy.md](https://github.com/fallrising/newclear/blob/main/docs/taxonomy.md). JSON Schemas in [schemas/](https://github.com/fallrising/newclear/blob/main/specs/fleet/schemas/). Apache-2.0.
 - [labs/eru-vps-mvp](https://github.com/fallrising/newclear/blob/main/labs/eru-vps-mvp/README.md): **A** — four-machine VPS MVP experiment for Project Eru. Real host changes require separate authorisation.
 - [labs/mithril-research](https://github.com/fallrising/newclear/blob/main/labs/mithril-research/README.md): **A** — source and documentation research on `projecteru2/mithril` with a verification design. Research only: no upstream code is imported, and it does not revive `systems/snail`.

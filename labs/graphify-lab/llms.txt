@@ -1,0 +1,21 @@
+# Graphify lab
+
+> Fixed-version local code graphs, developer scenarios and one shared reference source/index per revision.
+
+Tier: ungraded
+Status: partial
+Interfaces: cli, mcp
+Entrypoint: python -m graphify_lab (local CLI); serve <reference> (stdio MCP)
+Auth: none
+Spec: none — experimental CLI with executable acceptance scenarios, not a network API
+
+Code-only Graphify analysis. Source snapshots remain the evidence; the graph is a derived index. No hosted service or deployment.
+
+## Interface reference
+
+- [README](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/README.md): execution commands and limits.
+- [SUCCESS](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/SUCCESS.md): acceptance status and evidence.
+
+## Optional
+
+- [SDD](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/SDD.md): design and scenario contract.

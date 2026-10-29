@@ -54,6 +54,11 @@
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
+      "path": "labs/graphify-lab",
+      "last_source_update": "2026-10-29T14:03:53Z",
+      "source_commit": "011fa8cac6137735b576e14b5695ea26544e91db"
+    },
+    {
       "path": "labs/handwired-learning",
       "last_source_update": "2026-10-22T01:17:24+08:00",
       "source_commit": "222c1a8a736dbb3ac89f34345a7bc73fa887aba8"

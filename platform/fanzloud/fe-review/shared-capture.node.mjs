@@ -12,7 +12,7 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 function each(verdict,good,bad){assert.deepEqual(verdict(good),{passed:true,reasons:[]});for(const[name,change,reason]of bad)assert.deepEqual(verdict({...good,...change(structuredClone(good))}).reasons,[reason],name);}
 const targets=()=>JSON.parse(readFileSync(new URL('targets.json',import.meta.url),'utf8'));
 
-test('repository targets match the review runtime and stay unverified before capture-001',()=>{
+test('repository targets match the review runtime and stay unverified until the final integration decides R2-AC-14',()=>{
  const t=targets();assert.equal(t.verified,false);assert.equal(t.apps[0].baseUrl,origin);
  each(targetsVerdict,t,[
   ['light scheme',()=>({colorSchemes:['dark','light']}),'TARGETS_SHAPE'],

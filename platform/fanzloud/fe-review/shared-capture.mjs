@@ -1,4 +1,4 @@
-/** T-0433 capture-001: the unchanged shared docs/fe-review/capture.mjs against private targets (SPEC-T006R-shared-capture); static bootstrap page only. */
+/** T-0433 shared capture gate R11: the unchanged shared docs/fe-review/capture.mjs against private targets (SPEC-T006R-shared-capture); static bootstrap page only. */
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,lstatSync,existsSync,readdirSync} from 'node:fs';
 import {createHash,randomBytes} from 'node:crypto';

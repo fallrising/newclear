@@ -6,11 +6,11 @@ Demand: desk T-0432 / #698, claim PR309 merged. [Fixed BH-1–BH-5](T-0432-buffe
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| BH-01 | Original buffered observations and durable dispatch lifecycle | BH-1–BH-3 | in_progress | 2026-10-29T18:27:00Z | — | 2026-10-29T19:28:18Z |
-| BH-02 | Isolated HTTP, protocol bytes and cross-surface reconciliation | BH-1–BH-4 | in_progress | 2026-10-29T18:27:00Z | — | 2026-10-29T19:28:18Z |
-| BH-03 | Terminal entry, regressions, reviews and bounded delivery | BH-5 | in_progress | 2026-10-29T18:27:00Z | — | 2026-10-29T19:28:18Z |
+| BH-01 | Original buffered observations and durable dispatch lifecycle | BH-1–BH-3 | done | 2026-10-29T18:27:00Z | 2026-10-29T19:43:21Z | 2026-10-29T19:44:57Z |
+| BH-02 | Isolated HTTP, protocol bytes and cross-surface reconciliation | BH-1–BH-4 | done | 2026-10-29T18:27:00Z | 2026-10-29T19:43:21Z | 2026-10-29T19:44:57Z |
+| BH-03 | Terminal entry, regressions, reviews and bounded delivery | BH-5 | done | 2026-10-29T18:27:00Z | 2026-10-29T19:43:21Z | 2026-10-29T19:44:57Z |
 
-Documentation/claim/source map preceded actual RED and implementation. Local395Rusttests/22groups,111Python,53case/9stage buffered HTTP, prior journeys/coverage/Antigravity and native checks passed; independent source/runtime and prepublication ledger reviews passed; publication pending. Existing deliveries remain intact; mainline incomplete, usable_tag none, desk in_progress. Product done only after merge; backup/cleanup separately recorded by final handoff.
+Documentation/claim/source map preceded actual RED and implementation. Local395Rusttests/22groups,111Python,53case/9stage buffered HTTP, prior journeys/coverage/Antigravity and native checks passed; independent source/runtime and prepublication ledger reviews passed. Product [PR805](https://github.com/fallrising/newclear/pull/805) merged as `afa4cf47c2308e1875b50d482a3e3f4440b62930` after required [Pokercase CI](https://github.com/fallrising/newclear/actions/runs/40941933312) and [contracts](https://github.com/fallrising/newclear/actions/runs/40941933277). All11source/merge/origin files, ancestry and Desk-Task trailers read back consistently. Existing deliveries remain intact; mainline incomplete, usable_tag none, desk in_progress. These done rows record the merged product slice. Ledger publication, full backup and owned-worktree cleanup are final handoff gates and are recorded only after verification.
 
 ## T-0377 — Cursor 外部隔離
 

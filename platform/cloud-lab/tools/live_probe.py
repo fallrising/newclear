@@ -107,8 +107,9 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class HTTPSClient:
-    def __init__(self, base_url):
+    def __init__(self, base_url, *, auth_status_only=False):
         self.base_url = base_url
+        self.auth_status_only = auth_status_only
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
         self.opener.addheaders = [("User-Agent", "cloud-lab-m1/1.0")]
 
@@ -124,6 +125,9 @@ class HTTPSClient:
                 response = response_error
             with response:
                 status = response.code
+                if self.auth_status_only and status in (401, 403):
+                    # Access may deny with HTML or a large body; do not parse it.
+                    return status, None
                 if not headers.get('X-Lab-Signature'):
                     # Anonymous denied bodies may be large Access HTML; never retain them.
                     return status, None

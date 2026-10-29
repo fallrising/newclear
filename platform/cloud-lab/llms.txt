@@ -75,3 +75,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Bounded health schedule](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/health-schedule.md): revision-bound15/60/1440minute UTC-start policy, at most7days; scoped read snapshot and dashboard trigger/result states. Local265tests and12browser scenarios; live rollout pending.
 
 - [Health schedule activation attempt](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-health-schedule-live.md): approved rollout blocked by two asset-session500 responses before deployment/renewal/Cron; original resources and running resident preserved; partial evidence only, original cutoff and authorization retained.
+
+- [Fixed bot bridge](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-bridge.md): single JSON CLI health.check/status, trusted submit gate, durable exact retry and truthful freshness;283local tests with actual HTTP/collector. No Grok execution, live grant renewal or deployment.

@@ -94,9 +94,11 @@ Overall delivery is18of19. Fanz PR604 remains incomplete: bootstrap001-only PASS
 
 ## T-0440 — Favicon and browser follow-up
 
-[Desk T-0440](https://github.com/fallrising/desk/tree/main/tasks/T-0440-fanzloud-browser-followup) · [SPEC-T006F](../../platform/fanzloud/docs/specs/SPEC-T006F-browser-followup.md)
+[Desk T-0440](https://github.com/fallrising/desk/tree/main/archive/T-0440-fanzloud-browser-followup) · [SPEC-T006F](../../platform/fanzloud/docs/specs/SPEC-T006F-browser-followup.md)
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T0440-1 | Embedded favicon route and native regression | AC-F01 | in_progress | 2026-10-29T17:41:52.916453+00:00 | — | 2026-10-29T17:54:54.908805+00:00 |
-| T0440-2 | Focused Chromium evidence and acceptance | AC-F02–F04 | in_progress | 2026-10-29T17:53:43.505657+00:00 | — | 2026-10-29T17:54:54.908805+00:00 |
+| T0440-1 | Embedded favicon route and native regression | AC-F01 | done | 2026-10-29T17:41:52.916453+00:00 | 2026-10-29T18:00:49Z | 2026-10-29T18:00:49Z |
+| T0440-2 | Focused Chromium evidence and acceptance | AC-F02–F04 | done | 2026-10-29T17:53:43.505657+00:00 | 2026-10-29T18:00:49Z | 2026-10-29T18:00:49Z |
+
+T-0440 completed: [PR790](https://github.com/fallrising/newclear/pull/790), merge `fe761aa529d23c49a8d42f2b753d6bc9c91230bb`; [ACCEPT-T006F](../../platform/fanzloud/docs/acceptance/T006F.acceptance.md) and [source-bound browser report](../../platform/fanzloud/fe-review/tasks/followup/report.md). All required checks and independent acceptance passed; remote component tree matched the reviewed head.

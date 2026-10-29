@@ -58,7 +58,15 @@ out({"type": "tool_call", "subtype": "started", "call_id": "t1", "tool_call": {"
 out({"type": "assistant", "timestamp_ms": 4, "model_call_id": "m1", "message": {"role": "assistant", "content": [{"type": "text", "text": "Hello "}]}, "session_id": sid})
 out({"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "there"}]}, "session_id": sid, "timestamp_ms": 5})
 out({"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Hello there"}]}, "session_id": sid})
-out({"type": "result", "subtype": "success", "duration_ms": 5, "duration_api_ms": 5, "is_error": False, "result": "Hello there", "session_id": sid, "request_id": "r1", "usage": {"inputTokens": 9359, "outputTokens": 33, "cacheReadTokens": 3328, "cacheWriteTokens": 0}})
+result = {"type": "result", "subtype": "success", "duration_ms": 5, "duration_api_ms": 5, "is_error": False, "result": "Hello there", "session_id": sid, "request_id": "r1", "usage": {"inputTokens": 9359, "outputTokens": 33, "cacheReadTokens": 3328, "cacheWriteTokens": 0}}
+if "CU_MISSING" in prompt: result.pop("usage")
+if "CU_ZERO" in prompt: result["usage"] = {"inputTokens": 0, "outputTokens": 0, "cacheReadTokens": 0, "cacheWriteTokens": 0}
+if "CU_INVALID" in prompt: result["usage"] = {"inputTokens": -1, "outputTokens": 7, "cacheReadTokens": "bad", "cacheWriteTokens": 0}
+out(result)
+# Later success/usage must never replace or add to the first terminal.
+if "CU_" in prompt:
+    result["usage"] = {"inputTokens":999999,"outputTokens":999999}
+    out(result)
 "#;
 
 const FAKE_DOCKER: &str = r#"#!/usr/bin/env python3
@@ -72,6 +80,7 @@ assert "run" in a, a
 with open(os.path.join(d, "docker-args.json"), "w") as f: json.dump(a, f)
 i = next(i for i, x in enumerate(a) if x.startswith("sha256:"))
 entry = a[a.index("--entrypoint") + 1]
+with open(os.path.join(d, "dispatches.jsonl"), "a") as f: f.write(json.dumps({"dispatched": True}) + "\n")
 # For hanging fixtures the runtime owns the exact executable PID; no orphan child.
 if "HANG_" in a[-1]:
     os.execvpe(entry, [entry] + a[i+1:], {"PATH": os.environ.get("PATH", "/usr/bin:/bin")})
@@ -728,4 +737,220 @@ mod disconnect_tests {
             }
         }
     }
+}
+
+#[tokio::test]
+async fn cu1_three_client_streams_persist_raw_cursor_usage() {
+    let env = Env::start().await;
+    for (path, body) in [
+        (
+            "/v1/chat/completions",
+            json!({"model":"cu","stream":true,"messages":[{"role":"user","content":"hi"}]}),
+        ),
+        (
+            "/v1/messages",
+            json!({"model":"cu","stream":true,"max_tokens":64,"messages":[{"role":"user","content":"hi"}]}),
+        ),
+        (
+            "/v1/responses",
+            json!({"model":"cu","stream":true,"input":"hi"}),
+        ),
+    ] {
+        let response = env.post(path, body).await;
+        assert_eq!(response.status(), 200);
+        let wire = response.text().await.unwrap();
+        assert!(wire.contains("Hello"), "{path}: {wire}");
+    }
+    let admin = std::fs::read_to_string(env._dir.path().join("admin-token")).unwrap();
+    let value: Value = env
+        .client
+        .get(format!("{}/admin/api/usage", env.base))
+        .header("x-admin-token", admin.trim())
+        .send()
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    let rows = value["data"].as_array().expect("admin usage data array");
+    assert_eq!(rows.len(), 3, "{value}");
+    for row in rows {
+        assert!(
+            row["attempt_id"].as_str().is_some(),
+            "durable attempt missing: {row}"
+        );
+        assert_eq!(row["usage_source"], "cursor_cli_result_v1");
+        assert_eq!(row["outcome"], "succeeded");
+        assert_eq!(row["reported_usage"]["input_tokens"], 9359);
+        assert_eq!(row["reported_usage"]["output_tokens"], 33);
+        assert_eq!(row["reported_usage"]["cache_read_input_tokens"], 3328);
+        assert_eq!(row["reported_usage"]["cache_creation_input_tokens"], 0);
+        assert!(row["prompt_tokens"].is_null());
+        assert_eq!(row["completion_tokens"], 33);
+        assert!(row["status"].is_null() && row["headers_ms"].is_null());
+        assert!(row["estimated_cost_usd"].is_null());
+    }
+}
+
+impl Env {
+    async fn usage(&self) -> Vec<Value> {
+        let admin = std::fs::read_to_string(self._dir.path().join("admin-token")).unwrap();
+        let v: Value = self
+            .client
+            .get(format!("{}/admin/api/usage", self.base))
+            .header("x-admin-token", admin.trim())
+            .send()
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
+        v["data"].as_array().unwrap().clone()
+    }
+    fn dispatches(&self) -> usize {
+        std::fs::read_to_string(self.bin_dir.path().join("dispatches.jsonl"))
+            .unwrap_or_default()
+            .lines()
+            .count()
+    }
+    async fn restart(&mut self) {
+        self._child.kill().await.unwrap();
+        self._child.wait().await.unwrap();
+        let port = self.base.rsplit(':').next().unwrap();
+        self._child = tokio::process::Command::new(env!("CARGO_BIN_EXE_thinrouter"))
+            .args([
+                "serve",
+                "--port",
+                port,
+                "--data-dir",
+                self._dir.path().to_str().unwrap(),
+                "--cursor-bin",
+                self.bin_dir.path().join("cursor-agent").to_str().unwrap(),
+                "--cursor-runtime-bin",
+                self.bin_dir.path().join("docker").to_str().unwrap(),
+                "--cursor-accept-account-plugins",
+                "--cursor-image",
+                "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "--cursor-profile-volume",
+                "thinrouter-cursor-tests",
+            ])
+            .env_remove("THINROUTER_ADMIN_TOKEN")
+            .env_remove("THINROUTER_SECRETS_KEY")
+            .kill_on_drop(true)
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        for _ in 0..100 {
+            assert!(
+                self._child.try_wait().unwrap().is_none(),
+                "owned restarted gateway exited"
+            );
+            if self
+                .client
+                .get(format!("{}/health", self.base))
+                .send()
+                .await
+                .is_ok_and(|r| r.status().is_success())
+            {
+                return;
+            }
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+        panic!("owned restarted gateway health timeout");
+    }
+}
+
+#[tokio::test]
+async fn cu2_raw_missing_zero_invalid_and_duplicate_terminal_are_honest() {
+    let env = Env::start().await;
+    for (prompt, status, output) in [
+        ("CU_MISSING", "missing", Value::Null),
+        ("CU_ZERO", "partial", json!(0)),
+        ("CU_INVALID", "invalid", json!(7)),
+    ] {
+        let r = env
+            .post(
+                "/v1/chat/completions",
+                json!({"model":"cu","stream":true,"messages":[{"role":"user","content":prompt}]}),
+            )
+            .await;
+        assert_eq!(r.status(), 200);
+        assert!(r.text().await.unwrap().contains("[DONE]"));
+        let row = env.usage().await.remove(0);
+        assert_eq!(row["outcome"], "succeeded");
+        assert_eq!(row["usage_status"], status);
+        assert_eq!(row["completion_tokens"], output);
+        assert!(row["prompt_tokens"].is_null());
+        assert!(row["estimated_cost_usd"].is_null());
+        if prompt == "CU_MISSING" {
+            assert!(row["reported_usage"].is_null());
+        } else {
+            assert_eq!(row["reported_usage"]["output_tokens"], output);
+            assert_eq!(row["reported_usage"]["cache_creation_input_tokens"], 0);
+            if prompt == "CU_INVALID" {
+                assert!(row["reported_usage"]["input_tokens"].is_null());
+                assert!(row["reported_usage"]["cache_read_input_tokens"].is_null());
+            }
+        }
+    }
+    assert_eq!(env.usage().await.len(), 3);
+    assert_eq!(env.dispatches(), 3);
+}
+
+#[tokio::test]
+async fn cu4_reservation_failure_no_dispatch_and_finalize_failure_recovers_without_replay() {
+    let mut env = Env::start().await;
+    let db = rusqlite::Connection::open(env._dir.path().join("thinrouter.db")).unwrap();
+    db.execute_batch("CREATE TRIGGER synthetic_insert_failure BEFORE INSERT ON usage_events BEGIN SELECT RAISE(FAIL, 'PRIVATE-STORAGE-CANARY'); END;").unwrap();
+    let admin = std::fs::read_to_string(env._dir.path().join("admin-token")).unwrap();
+    let connections: Value = env
+        .client
+        .get(format!("{}/admin/api/connections", env.base))
+        .header("x-admin-token", admin.trim())
+        .send()
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    let connection = &connections["data"][0]["id"];
+    let route=env.client.post(format!("{}/admin/api/routes",env.base)).header("x-admin-token",admin.trim())
+        .json(&json!({"public_model":"store-guard","strategy":"fallback","targets":[{"connection_id":connection,"model_override":"first"},{"connection_id":connection,"model_override":"second"}]})).send().await.unwrap();
+    assert_eq!(route.status(), 201, "{}", route.text().await.unwrap());
+    let request =
+        json!({"model":"store-guard","stream":true,"messages":[{"role":"user","content":"hi"}]});
+    let r = env.post("/v1/chat/completions", request.clone()).await;
+    assert_eq!(r.status(), 503);
+    let text = r.text().await.unwrap();
+    assert!(!text.contains("PRIVATE-STORAGE-CANARY"));
+    assert_eq!(env.dispatches(), 0);
+    assert!(env.usage().await.is_empty());
+    db.execute_batch("DROP TRIGGER synthetic_insert_failure; CREATE TRIGGER synthetic_finalize_failure BEFORE UPDATE OF finalized_at ON usage_events BEGIN SELECT RAISE(FAIL, 'PRIVATE-STORAGE-CANARY'); END;").unwrap();
+    let r = env.post("/v1/chat/completions", request.clone()).await;
+    assert_eq!(r.status(), 200);
+    assert!(r.text().await.unwrap().contains("[DONE]"));
+    let pending = env.usage().await;
+    assert_eq!(pending.len(), 1);
+    assert!(pending[0]["attempt_id"].is_string());
+    assert!(pending[0]["finalized_at"].is_null());
+    assert_eq!(env.dispatches(), 1);
+    db.execute_batch("DROP TRIGGER synthetic_finalize_failure;")
+        .unwrap();
+    drop(db);
+    env.restart().await;
+    let rows = env.usage().await;
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0]["attempt_id"], pending[0]["attempt_id"]);
+    assert_eq!(rows[0]["outcome"], "interrupted");
+    assert!(rows[0]["completion_tokens"].is_null());
+    assert_eq!(env.dispatches(), 1);
+    env.restart().await;
+    assert_eq!(env.usage().await, rows);
+    assert_eq!(env.dispatches(), 1);
+    let r = env.post("/v1/chat/completions", request).await;
+    assert_eq!(r.status(), 200);
+    assert!(r.text().await.unwrap().contains("[DONE]"));
+    assert_eq!(env.usage().await.len(), 2);
+    assert_eq!(env.dispatches(), 2);
 }

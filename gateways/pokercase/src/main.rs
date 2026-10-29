@@ -12,6 +12,7 @@ mod collection;
 mod config;
 mod cooldown;
 mod cursor_cli;
+mod cursor_usage;
 mod error;
 mod guard;
 mod http_client;

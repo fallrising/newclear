@@ -64,6 +64,17 @@ python3 scripts/claude_walkthrough.py --check --binary "$CARGO_TARGET_DIR/debug/
 The script defaults to check mode and accepts `--serve` for a disposable local demo. It runs a Python fake Claude plus the real gateway/MCP helper, verifies all three client streams/tools, fallback/failure/cancel/stall, usage and process/session reuse after restart, and preserves sanitized diagnostics plus source/binary hashes. It never invokes an installed Claude CLI or real provider. `--expected-binary-sha256` rejects a changed binary before launch; the delivered local helper also pins preserved script hashes. All reported tokens are synthetic fixture observations; all CLI costs remain unknown. The original generic HTTP walkthrough remains available.
 
 
+Cursor text-only streams also retain per-dispatch raw `result.usage` counters with source `cursor_cli_result_v1`. `reported_usage` preserves input/output/cache values independently; absent fields stay unknown. Cursor's cache relationship is unverified, so normalized `prompt_tokens` and cost remain null, while observed output counts are retained. JSON/HTML/CSV use the same durable attempt, outcome and CLI timing. Existing opt-in, container isolation and tools/images refusal remain. Actual CLI version/account behavior is not established by the fake-runtime evidence. See [Cursor scope and acceptance](docs/tasks/T-0432-cursor-settlement.md).
+
+For the isolated terminal walkthrough after a locked build:
+
+```sh
+python3 scripts/cursor_walkthrough.py --check --binary "$CARGO_TARGET_DIR/debug/thinrouter" --output-dir /path/to/cursor-evidence
+```
+
+This entry uses an absolute fake runtime and fake Cursor with the real gateway; it never invokes Docker or an installed Cursor CLI. It checks three-client text streaming, refusals/fallback, failure/cancel/post-output stall, usage and independent requests after restart. CLI costs remain unknown. `--serve` retains a disposable local demo until cleanup; `--expected-binary-sha256` rejects a changed executable. Before first output, a silent process can still wait until the caller cancels; this slice adds no startup timeout.
+
+
 ```bash
 cargo run -- serve
 # admin:  http://127.0.0.1:20128/admin   (token: cat ~/.thinrouter/admin-token)

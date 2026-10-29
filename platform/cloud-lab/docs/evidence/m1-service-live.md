@@ -57,3 +57,5 @@ IA維持live_verified=false，因這個工具不獨自驗證route／Access polic
 [T835獨立公開證據審查](../../../../.team/reports/T-835.md)ACCEPT；主導核對原始收據、文件與實際diff。本機project-success、llms索引、Cloud Lab連結／範圍、task／report合約及git diff檢查通過；無runtime source變更，未重跑本機249項suite。正常PR／CI／合併及回讀結果由[任務板](../tasks/BOARD.md)記錄。
 
 本機llms validator首次執行時，新證據檔尚未加入Git index，故以git ls-files為依據回報broken in-repo link；加入本次明確scope的檔案後重跑，不改validator或移除連結，原失敗log保留。
+
+交付前私人目錄掃描發現operator在launcher外import產生的__pycache__目錄mode0775；收緊為0700並保存修正receipt，全部execution entries再次通過0700／0600核對。沒有刪除cache或receipt，後續此類operator呼叫停用bytecode寫入；選定私人credential／ID未出現在公開commit diff。

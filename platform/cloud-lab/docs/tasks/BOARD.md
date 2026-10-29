@@ -214,7 +214,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0011-1 | 私人服務政策與設定綁定 | SR-01 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |
-| T-0011-2 | 啟動授權及不可延長期限 | SR-02 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |
-| T-0011-3 | 截止／斷線／journal恢復 | SR-03 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |
-| T-0011-4 | 回歸、審查與Git交付 | SR-04 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |
+| T-0011-1 | 私人服務政策與設定綁定 | SR-01 | done | 2026-10-29T05:03:15Z | 2026-10-29T05:15:14Z | 2026-10-29T05:15:14Z |
+| T-0011-2 | 啟動授權及不可延長期限 | SR-02 | done | 2026-10-29T05:03:15Z | 2026-10-29T05:15:14Z | 2026-10-29T05:15:14Z |
+| T-0011-3 | 截止／斷線／journal恢復 | SR-03 | done | 2026-10-29T05:03:15Z | 2026-10-29T05:15:14Z | 2026-10-29T05:15:14Z |
+| T-0011-4 | 回歸、審查與Git交付 | SR-04 | done | 2026-10-29T05:03:15Z | 2026-10-29T05:15:14Z | 2026-10-29T05:15:14Z |
+
+## T-0011交付與遠端回讀
+
+- [Feature PR738](https://github.com/fallrising/newclear/pull/738) head `e97199a6482b8693334ec68e3a25b34a7a1666be`，merge `35399b9ba83d9f86365ab0b672040d59c3680efd`，合併時間2026-10-29T05:15:14Z。遠端回讀17份交付檔案逐byte相等、feature為main祖先、工作樹乾淨。
+- Cloud Lab CI `40822224377`、Project success `40822224342`、llms CI `40822224343` 全數success；本機42Node／194Python共236tests、systemd模板驗證、文件／範圍／task／report檢查通過。
+- T833初審發現server-ahead未限制本機政策期限；四個RED subcases重現後修正，獨立複審ACCEPT。過程及先前fixture／sandbox限制見[SR證據](../evidence/m1-service-runner.md)。
+- SR01–04 source／local完成；無live部署、續權、服務安裝、Cron或付費變更。Python3.11未實測，真人Access與完整主線pending，無usable tag。此收尾僅更新任務板。

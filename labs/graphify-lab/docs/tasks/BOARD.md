@@ -50,3 +50,17 @@
 M1：[PR #775](https://github.com/fallrising/newclear/pull/775) 於 2026-10-29T17:07:58Z 合併，commit `97d3e6f262e7c2ffb59b2c1c99bb284ecff28442`；兩項 CI success，獨立 ACCEPT，遠端已回讀。
 
 M2：[PR #778](https://github.com/fallrising/newclear/pull/778) 於 2026-10-29T17:19:03Z 合併（`a9c61945b6af1101c024c0566a2cfb2f91399344`），三項 CI success、獨立 ACCEPT，main／tree 已回讀。P-01～P-05 的實作與驗證完成；desk 保留 owner 驗收待定，journal 同步本輪事實。
+
+## T-0439 — M3 本機工作目錄接入
+
+[desk](https://github.com/fallrising/desk/blob/main/tasks/T-0439-graphify-local-workspace/task.md)／[設計](../milestones/local-workspace.md)。Owner 要求接續；先寫規格，再實作。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0439-01 | 明確來源與共用索引入口 | W-01 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:47:19Z |
+| T-0439-02 | 查詢與來源讀回邊界 | W-02 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:47:19Z |
+| T-0439-03 | 可變來源與失效驗證 | W-03 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:47:19Z |
+| T-0439-04 | 真實較大元件及 MCP | W-04 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:47:19Z |
+| T-0439-05 | 必要驗證與交付 | W-05 | in_progress | 2026-10-29T17:33:47Z | — | 2026-10-29T17:47:19Z |
+
+W-01～W-04 本機驗證與獨立實作審查通過；[本輪證據](../evidence/local-workspace/README.md)。W-05 等待最終 CI／合併與帳本同步。

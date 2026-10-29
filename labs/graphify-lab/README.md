@@ -54,6 +54,11 @@ make full RUN_DIR=work/shared-run
 受限執行環境可使用 `CACHE="$PWD/work/shared-cache"`；此時只在這個 checkout 範圍共用。
 快取根目錄必須在被索引來源之外；run 與 cache 也必須分開。
 
+## 本機專案
+
+使用 [本機工作目錄入口](docs/local-workspace.md) 對明確指定的元件建圖、查詢、讀回來源或啟動 stdio MCP。
+不需修改 manifest；每次短命令重驗可變來源，MCP 則固定啟動時快照。
+
 ## 日常參考代碼
 
 以下命令都使用同一個預設共用 cache；可在 `-m graphify_lab` 後加 `--cache /absolute/path`。

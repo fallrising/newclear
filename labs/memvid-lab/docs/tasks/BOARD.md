@@ -33,10 +33,13 @@ Owner 已另行明確授權合併。[PR #709](https://github.com/fallrising/newc
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0436-M1 | 同步已合併狀態及固定評估規格 | NU-01 | in_progress | 2026-10-29T16:55:00Z | — | 2026-10-29T16:55:00Z |
-| T-0436-M2-01 | 固定繁中筆記、查詢與品質評估 | NU-02 | todo | — | — | 2026-10-29T16:55:00Z |
-| T-0436-M2-02 | 更新／刪除／重開一致性 | NU-03 | todo | — | — | 2026-10-29T16:55:00Z |
-| T-0436-M2-03 | 100／1000 筆成本實測 | NU-04 | todo | — | — | 2026-10-29T16:55:00Z |
-| T-0436-M2-04 | 回歸、採用結論及交付 | NU-05 | todo | — | — | 2026-10-29T16:55:00Z |
+| T-0436-M1 | 同步已合併狀態及固定評估規格 | NU-01 | done | 2026-10-29T16:55:00Z | 2026-10-29T17:02:27Z | 2026-10-29T17:02:27Z |
+| T-0436-M2-01 | 固定繁中筆記、查詢與品質評估 | NU-02 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
+| T-0436-M2-02 | 更新／刪除／重開一致性 | NU-03 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
+| T-0436-M2-03 | 100／1000 筆成本實測 | NU-04 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
+| T-0436-M2-04 | 回歸、採用結論及交付 | NU-05 | in_progress | 2026-10-29T16:59:00Z | — | 2026-10-29T17:13:00Z |
 
-M1 沿用相同 runtime 的原實跑證據；M2 尚未執行，不把規格或文件檢查當成功能驗收。
+M1 [#773](https://github.com/fallrising/newclear/pull/773) 已合併，merge `da6d735d98ffa77b363cab7cffd4715b2a864dd6`；三項 candidate CI success，獨立審查 ACCEPT。M2 已啟動；固定 corpus SHA `a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970`。首輪來源 renderer 核對失敗與修正見 [開發紀錄](../evidence/notes-development.md)。
+
+
+M2 本機驗證：`make check` 16 passed；`make notes RUN_DIR=work/notes-final-002` 所有預定 jobs 完成／0 errors。原生 Recall/MRR 0.25、二字組 0.4583，兩者均不建議直接採用，詳見 [結果](../notes-usability-results.md)。NU-02–05 實驗證據已取得；任務保持 in_progress 至 M2 PR 審查／CI／合併，之後以真實 merged_at 補 end。

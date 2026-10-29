@@ -64,9 +64,14 @@ def main(argv: list[str] | None = None) -> int:
         'serve', help='serve a frozen startup snapshot over stdio MCP',
         description='Serve a frozen startup snapshot over stdio MCP; restart after source edits. '
                     'This process does not watch files or refresh its graph.')
+    commands.add_parser('serve-live', help='serve with freshness checks and explicit refresh over stdio MCP')
     args = parser.parse_args(argv)
     try:
         _validate_options(args)
+        if args.command == 'serve-live':
+            from .live_mcp import serve
+            serve(args.source, args.cache)
+            return 0
         index = open_workspace(args.source, args.cache)
         if args.command == 'locate':
             print(json.dumps(index, ensure_ascii=False, indent=2))

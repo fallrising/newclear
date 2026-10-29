@@ -377,3 +377,28 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40920207069`、Project success `40920207309`、llms `40920207279`。本機336tests（64Node272Python）、六項文件／task／report／diff檢查及T843 focusedACCEPT；[BR證據](../evidence/m1-bot-policy-renewal.md)保留初始RED、strictJSON浮點archive修正及review重播時鐘缺口RED／修正。
 - GitHub connector交付與匿名HTTPS回讀；remote tree `51b0ffe9a9c2ac59461e0c644b909a2bbff086c1`與local commit `5a079e4fc4c994b7ec6814cd4c83bab29b77d184`相同，commit身份不同。離線preview、到期後CAS／同交易archive與活動quota切換、同指令重播不補額度、原requests／跨期間隔／時鐘保留均本機驗證；實際MCP／HTTP跨期同ID恢復保持一筆command。
 - BR01–04 source／local完成；未安裝、改Grok、續live權限、呼叫模型或新增付費。Python3.11、本機候選實際接入／原bot有界續權及完整主線仍pending，無usabletag。原HL T-0015仍open；本收尾只改任務板並只關閉BR。
+
+## T-0022 — Bot有界啟用準備
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0022-1 | 固定候選與原client/state | BA-01 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+| T-0022-2 | fresh授權／runner／管理面核對 | BA-02 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+| T-0022-3 | 私人proposal與協議檢查 | BA-03 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+| T-0022-4 | 啟用補償方案、審查交付 | BA-04 | done | 2026-10-29T17:31:43Z | 2026-10-29T17:46:43Z | 2026-10-29T17:47:32Z |
+
+## T-0022交付與遠端回讀
+
+- [Feature PR787](https://github.com/fallrising/newclear/pull/787) head `8ecb3a55bf534749e9cdde57f826d2f4948b78e4`，merge `85fa65310b886f1acdc0dc40a245075f896eb893`，合併時間2026-10-29T17:46:43Z。14份交付檔案與遠端逐byte相等、remote feature為main祖先、工作樹乾淨；同期其他專案變更保留。
+- CI全過：Cloud Lab `40924306220`、Project success `40924305935`、llms `40924305944`。六項本機文件／task／report／diff檢查、private literals檢查及T844公開準備證據ACCEPT；[BA證據](../evidence/m1-bot-activation.md)保留bot self失敗與private builder3capability假設錯誤／v2修正。Runtime未改，前次336tests不冒稱本輪本機重跑。
+- GitHub connector交付及匿名HTTPS回讀；remote tree `8b33e92c35d686105f428b32edac0b9618f9b3ac`與local commit `b47afa2b86455cdd9a74735af5d57c86a5a755b4`相同，commit身份不同。11次管理唯讀、實際runner self／resident、原native1tool／候選stdio2tools零call、原state1筆／config／client保全及不可執行proposal均通過；bot grant已過期，未將candidate HMAC metadata稱為fresh成功self。
+- BA01–04準備完成：固定BR/BP候選、<=24h bot-only窗口及原外層期限減120秒、24新ID／240call、具體切換／驗證／補償。未安裝候選、初始化policy、改client／Cloudflare／授權、提交命令、呼叫模型或新增付費；實際新bot期限需owner另批並fresh回讀。原HL T-0015與完整主線仍open，無usabletag；本收尾僅改任務板並只關閉準備。
+
+## T-0023 — 首個 bot 有界啟用
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0023-1 | fresh來源與唯一窗口 | BT-01 | in_progress | 2026-10-29T17:58:50Z | — | 2026-10-29T18:06:50Z |
+| T-0023-2 | bot-only續權與self驗證 | BT-02 | in_progress | 2026-10-29T17:58:50Z | — | 2026-10-29T18:06:50Z |
+| T-0023-3 | 政策初始化與真實MCP檢查 | BT-03 | in_progress | 2026-10-29T17:58:50Z | — | 2026-10-29T18:06:50Z |
+| T-0023-4 | 保全、獨立審查與交付 | BT-04 | in_progress | 2026-10-29T17:58:50Z | — | 2026-10-29T18:06:50Z |

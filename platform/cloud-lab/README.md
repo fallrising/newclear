@@ -74,3 +74,7 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [持久bot政策](docs/bot-policy.md)新增最多24小時租期、24新ID／240call持久上限、明確離線初始化及MCP可信接入；重新連線不重置，未知保留同ID。[319tests及獨立審查](docs/evidence/m1-bot-policy.md)通過；只交付source／local，未改實際Grok設定或續權。
 
 [顯式bot續租](docs/bot-policy-renewal.md)提供離線預覽、舊期到期後CAS切換、原請求／歷史保留及同指令重試不補額度；[336tests及獨立審查](docs/evidence/m1-bot-policy-renewal.md)通過；仍為source／local交付，未安裝或續live權限。
+
+[Bot首個有界啟用準備](docs/bot-activation.md)已固定BR/BP候選、原state及<=24h方案；[唯讀證據](docs/evidence/m1-bot-activation.md)確認bot過期、runner仍可驗證。該準備階段未安裝／續權／初始化政策；後續批准的實際啟用見下段。
+
+[首個bot有界啟用](docs/bot-activation-live.md)已獲批准並執行：原bot續期至2026-10-30T18:00:27Z，首次持久政策24新ID／240call，新版Grok工具保留啟用；[一筆真實validated/healthy](docs/evidence/m1-bot-activation-live.md)使用1新ID／4call。原runner／Access不延期，不呼叫模型或新增付費。

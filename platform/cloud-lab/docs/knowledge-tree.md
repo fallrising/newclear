@@ -69,3 +69,7 @@ BL補充：AU-01獨立MCP工具已完成[一筆真實原runner閉環](evidence/m
 BP補充：AU-01的[持久bot政策](bot-policy.md)補上獨立工具host的本機租期與跨連線配額，維持原API／runner權威；常態live啟用另行驗收。
 
 BR補充：AU-01以[顯式政策續租](bot-policy-renewal.md)連接原state的下一期，保持原API／runner權威；模型不具續租工具，live啟用另驗。
+
+BA補充：AU-01的[首期有界啟用方案](bot-activation.md)固定獨立host候選與原state；bot-only期限提議受原runner／Access限制，準備與實際權限分開。
+
+BT補充：AU-01首期政策與獨立host已[實際啟用](evidence/m1-bot-activation-live.md)，原bot-only截止與持久額度並行；工具驗證不等於模型對話驗收。

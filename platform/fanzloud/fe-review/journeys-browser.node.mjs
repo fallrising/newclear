@@ -155,6 +155,6 @@ test('driver keeps the interception, recording and output boundaries',async()=>{
 
 test('no canonical runner or earlier driver calls a journey seam',async()=>{
  const {readFileSync,readdirSync}=await import('node:fs');const dir=new URL('./',import.meta.url);
- for(const name of readdirSync(dir).filter(n=>n.endsWith('.mjs')&&!['transport.mjs','journeys-browser.mjs'].includes(n)&&!n.endsWith('.node.mjs')))
+ for(const name of readdirSync(dir).filter(n=>n.endsWith('.mjs')&&!['transport.mjs','journeys-browser.mjs','followup-browser.mjs'].includes(n)&&!n.endsWith('.node.mjs')))
   for(const seam of ['holdNextResponse','injectFrame','overrideNextInstance','futureNextSubscribe','releaseHeld'])assert.equal(readFileSync(new URL(name,dir),'utf8').includes(seam),false,name+' '+seam);
 });

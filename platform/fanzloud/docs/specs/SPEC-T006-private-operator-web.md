@@ -53,6 +53,7 @@ GET /
 GET /assets/p0-app.js
 GET /assets/p0-client.js
 GET /assets/p0.css
+GET /favicon.ico
 ```
 
 No wildcard file route, directory listing, path parameter, filesystem read, template input, or
@@ -68,6 +69,9 @@ The exact successful response media types are:
 | `/assets/p0-app.js` | `text/javascript; charset=utf-8` |
 | `/assets/p0-client.js` | `text/javascript; charset=utf-8` |
 | `/assets/p0.css` | `text/css; charset=utf-8` |
+| `/favicon.ico` | `image/x-icon` |
+
+The embedded favicon and focused browser follow-up are specified by [T006F](SPEC-T006F-browser-followup.md), clause F01. The existing same-origin image CSP is unchanged.
 
 HTML imports `/assets/p0-app.js` as an external module. `p0-app.js` owns only DOM bindings and
 constructs the controller from browser-native `fetch`, `WebSocket`, `crypto.randomUUID`,

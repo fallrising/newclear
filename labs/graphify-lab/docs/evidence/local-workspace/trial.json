@@ -1,0 +1,727 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "recorded_at": "2026-10-29T17:46:03.407587+00:00",
+  "graphify_version": "0.9.97",
+  "python_version": "3.12.3",
+  "commands": [
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "locate"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 1168,
+      "stderr_bytes": 0,
+      "seconds": 1.779245,
+      "stdout_sha256": "698a721caabf2c870d487326f3a9da5d780a4026560a3bcd361a3487f2c7f7a9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "locate"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 1168,
+      "stderr_bytes": 0,
+      "seconds": 0.159323,
+      "stdout_sha256": "0e0b32dc0ab9ec2740ffbbb6b10affc9f685b9692106ad1925bf3521b9d401b7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "source",
+        "normalize_rates()",
+        "--file",
+        "codex_usage.py",
+        "--lines",
+        "12"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 1754,
+      "stderr_bytes": 0,
+      "seconds": 0.184915,
+      "stdout_sha256": "5826ca6ffec931eafef07eb91e8aab6ad48c2c399e77db44ad825cc4a400c254",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "query",
+        "normalize_rates",
+        "--budget",
+        "3000",
+        "--context",
+        "call"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 5802,
+      "stderr_bytes": 0,
+      "seconds": 0.377832,
+      "stdout_sha256": "dcb1bcea38a095ea44da4280e1d09c10ced2fd7db056b6ceeb3750655a41da50",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "explain",
+        "codex_usage_normalize_rates"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 564,
+      "stderr_bytes": 0,
+      "seconds": 0.349532,
+      "stdout_sha256": "240e81929d1dc9179f1ee10c1f78ca2c86790a346d80f5f33ed69a9061d18472",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "source",
+        "norm_window()",
+        "--file",
+        "codex_usage.py",
+        "--lines",
+        "12"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 1902,
+      "stderr_bytes": 0,
+      "seconds": 0.17546,
+      "stdout_sha256": "4261e5665bd18c9eef9d84681f15438aaf6b6a77645dedd3299311edeb35ce5d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "query",
+        "norm_window",
+        "--budget",
+        "3000",
+        "--context",
+        "call"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 15183,
+      "stderr_bytes": 0,
+      "seconds": 0.373531,
+      "stdout_sha256": "d3b64a9d931809493cab963c97f9f640204bf883f0cbcf1a32d66bd00b4181f3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "explain",
+        "codex_usage_norm_window"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 581,
+      "stderr_bytes": 0,
+      "seconds": 0.365446,
+      "stdout_sha256": "5fc160ac8a513964d8a65a9437e924d65a9795d89e3c52807f5ca6c485fe8032",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "source",
+        "remaining_percent()",
+        "--file",
+        "codex_usage.py",
+        "--lines",
+        "12"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 1523,
+      "stderr_bytes": 0,
+      "seconds": 0.188055,
+      "stdout_sha256": "4f7cd42a6e289f9ee80fb40c5a6b99615bcf07e92fd4a2fc1f5fa96442d16690",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "query",
+        "remaining_percent",
+        "--budget",
+        "3000",
+        "--context",
+        "call"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 2464,
+      "stderr_bytes": 0,
+      "seconds": 0.374103,
+      "stdout_sha256": "6792a1da31db29499baad5002ec86b54fd62765566beddc17786cccbbedc7d31",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<repo>/tools/codex-usage",
+        "--cache",
+        "<run>/cache",
+        "explain",
+        "codex_usage_remaining_percent"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 344,
+      "stderr_bytes": 0,
+      "seconds": 0.345867,
+      "stdout_sha256": "130be5ea40f73d67de074cc66366e2d0621917df390fc23b671a17ce1893855d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<run>/mutable",
+        "--cache",
+        "<run>/cache",
+        "locate"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 1195,
+      "stderr_bytes": 0,
+      "seconds": 1.282647,
+      "stdout_sha256": "85ecfa92e1d5532cf119be9ff9c6c17c1e2aa2e0d7d80a7b77efc61ff8c6397d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "<python-env>/bin/python",
+        "-m",
+        "graphify_lab.workspace",
+        "--source",
+        "<run>/mutable",
+        "--cache",
+        "<run>/cache",
+        "locate"
+      ],
+      "exit_code": 0,
+      "stdout_bytes": 1194,
+      "stderr_bytes": 0,
+      "seconds": 1.339771,
+      "stdout_sha256": "d134d2fb6088733b1f6ec07babb9cbe1d4ba296f684d468519d5186f8bb08a30",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "One known public component and helper chain; not a blind or comprehensive evaluation.",
+    "Serve validates a snapshot at startup; source edits require restarting the MCP session.",
+    "Calls edges and AST source checks do not establish complete runtime semantics.",
+    "Shortest path considers containment too; the end-to-end route may use the file node. Each adjacent helper call is separately checked through real MCP shortest_path.",
+    "Source is read and parsed, never imported, built, or executed.",
+    "Per-operation elapsed time and bytes are observations, not speed or token-saving claims.",
+    "No global client configuration or model API is used. Provider/tokens/cost are unmeasured."
+  ],
+  "corpus": {
+    "path": "tools/codex-usage",
+    "before": {
+      "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+      "files": 29,
+      "bytes": 204000
+    },
+    "git_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+    "after": {
+      "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+      "files": 29,
+      "bytes": 204000
+    },
+    "unchanged": true
+  },
+  "consumers": [
+    {
+      "graph": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26/graphify-out/graph.json",
+      "index_root": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+      "cache_hit": false,
+      "index_id": "6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+      "source_id": "workspace:f1c4302afd74ea0b2709aa80e581f4f485f978e59279e9498b06203a1703d88e",
+      "source": "<repo>/tools/codex-usage",
+      "source_fingerprint": {
+        "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+        "files": 29,
+        "bytes": 204000
+      },
+      "graph_sha256": "bbc47ef9187929263c1c3dd50f00b7668f031c703cf60d1f55ac9b7a310739e2",
+      "context_sha256": "025b2607f10225e18e29524b030d2a2128a55670adb1d154c52e406031afdaf6",
+      "source_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+      "build_seconds": 1.6894615798955783,
+      "seconds": 1.7065989410039037
+    },
+    {
+      "graph": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26/graphify-out/graph.json",
+      "index_root": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+      "cache_hit": true,
+      "index_id": "6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+      "source_id": "workspace:f1c4302afd74ea0b2709aa80e581f4f485f978e59279e9498b06203a1703d88e",
+      "source": "<repo>/tools/codex-usage",
+      "source_fingerprint": {
+        "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+        "files": 29,
+        "bytes": 204000
+      },
+      "graph_sha256": "bbc47ef9187929263c1c3dd50f00b7668f031c703cf60d1f55ac9b7a310739e2",
+      "context_sha256": "025b2607f10225e18e29524b030d2a2128a55670adb1d154c52e406031afdaf6",
+      "source_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+      "build_seconds": 1.6894615798955783,
+      "seconds": 0.08966853504534811
+    }
+  ],
+  "shared_index_verified": true,
+  "graph": {
+    "nodes": 222,
+    "edges": 550,
+    "sha256": "bbc47ef9187929263c1c3dd50f00b7668f031c703cf60d1f55ac9b7a310739e2",
+    "bytes": 198510
+  },
+  "definitions": [
+    {
+      "node": {
+        "id": "codex_usage_normalize_rates",
+        "label": "normalize_rates()",
+        "_callable": true,
+        "_origin": "ast",
+        "community": 1,
+        "file_type": "code",
+        "norm_label": "normalize_rates()",
+        "source_file": "codex_usage.py",
+        "source_location": "L282"
+      },
+      "source": {
+        "graph": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26/graphify-out/graph.json",
+        "index_root": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+        "cache_hit": true,
+        "index_id": "6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+        "source_id": "workspace:f1c4302afd74ea0b2709aa80e581f4f485f978e59279e9498b06203a1703d88e",
+        "source": "<repo>/tools/codex-usage",
+        "source_fingerprint": {
+          "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+          "files": 29,
+          "bytes": 204000
+        },
+        "graph_sha256": "bbc47ef9187929263c1c3dd50f00b7668f031c703cf60d1f55ac9b7a310739e2",
+        "context_sha256": "025b2607f10225e18e29524b030d2a2128a55670adb1d154c52e406031afdaf6",
+        "source_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+        "build_seconds": 1.6894615798955783,
+        "seconds": 0.09474882401991636,
+        "path": "codex_usage.py",
+        "line": 282,
+        "content": "def normalize_rates(payload, now):\n    if not isinstance(payload, dict):\n        return None, [\"rate_limits_payload_invalid\"]\n    indexed, compat = payload.get(\"rateLimitsByLimitId\"), payload.get(\"rateLimits\")\n    items, issues = [], []\n    if isinstance(indexed, dict):\n        items.extend(indexed.items())\n    elif indexed is not None:\n        issues.append(\"rate_limits_index_invalid\")\n    if isinstance(compat, dict):\n        items.append((compat.get(\"limitId\"), compat))\n    elif compat is not None:"
+      },
+      "ast_verified": true
+    },
+    {
+      "node": {
+        "id": "codex_usage_norm_window",
+        "label": "norm_window()",
+        "_callable": true,
+        "_origin": "ast",
+        "community": 1,
+        "file_type": "code",
+        "norm_label": "norm_window()",
+        "source_file": "codex_usage.py",
+        "source_location": "L268"
+      },
+      "source": {
+        "graph": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26/graphify-out/graph.json",
+        "index_root": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+        "cache_hit": true,
+        "index_id": "6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+        "source_id": "workspace:f1c4302afd74ea0b2709aa80e581f4f485f978e59279e9498b06203a1703d88e",
+        "source": "<repo>/tools/codex-usage",
+        "source_fingerprint": {
+          "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+          "files": 29,
+          "bytes": 204000
+        },
+        "graph_sha256": "bbc47ef9187929263c1c3dd50f00b7668f031c703cf60d1f55ac9b7a310739e2",
+        "context_sha256": "025b2607f10225e18e29524b030d2a2128a55670adb1d154c52e406031afdaf6",
+        "source_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+        "build_seconds": 1.6894615798955783,
+        "seconds": 0.08845828997436911,
+        "path": "codex_usage.py",
+        "line": 268,
+        "content": "def norm_window(name, value, now):\n    value = value if isinstance(value, dict) else {}\n    used = rate_percent(value.get(\"usedPercent\"))\n    reset = integer(value.get(\"resetsAt\"))\n    if iso(reset) is None:\n        reset = None\n    return {\"name\": name, \"used_percent\": used,\n            \"remaining_percent\": remaining_percent(used),\n            \"window_duration_minutes\": integer(value.get(\"windowDurationMins\")),\n            \"resets_at_unix\": reset, \"resets_at\": iso(reset),\n            \"seconds_until_reset\": reset_seconds(reset, now), \"source_updated_at\": None,\n            \"cycle_tokens\": None, \"cycle_tokens_reason\": CYCLE_REASON}"
+      },
+      "ast_verified": true
+    },
+    {
+      "node": {
+        "id": "codex_usage_remaining_percent",
+        "label": "remaining_percent()",
+        "_callable": true,
+        "_origin": "ast",
+        "community": 1,
+        "file_type": "code",
+        "norm_label": "remaining_percent()",
+        "source_file": "codex_usage.py",
+        "source_location": "L56"
+      },
+      "source": {
+        "graph": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26/graphify-out/graph.json",
+        "index_root": "<run>/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+        "cache_hit": true,
+        "index_id": "6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26",
+        "source_id": "workspace:f1c4302afd74ea0b2709aa80e581f4f485f978e59279e9498b06203a1703d88e",
+        "source": "<repo>/tools/codex-usage",
+        "source_fingerprint": {
+          "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+          "files": 29,
+          "bytes": 204000
+        },
+        "graph_sha256": "bbc47ef9187929263c1c3dd50f00b7668f031c703cf60d1f55ac9b7a310739e2",
+        "context_sha256": "025b2607f10225e18e29524b030d2a2128a55670adb1d154c52e406031afdaf6",
+        "source_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+        "build_seconds": 1.6894615798955783,
+        "seconds": 0.0972535740584135,
+        "path": "codex_usage.py",
+        "line": 56,
+        "content": "def remaining_percent(value):\n    value = number(value)\n    return None if value is None else max(0, min(100, 100 - value))\n\n\ndef reset_seconds(value, now):\n    value = integer(value)\n    return None if value is None else max(0, value - now)\n\n\ndef iso(value):\n    value = integer(value)"
+      },
+      "ast_verified": true
+    }
+  ],
+  "directed_calls": [
+    {
+      "caller": "codex_usage_normalize_rates",
+      "callee": "codex_usage_norm_window",
+      "edges": [
+        {
+          "source": "codex_usage_normalize_rates",
+          "target": "codex_usage_norm_window",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "codex_usage.py",
+          "source_location": "L322",
+          "weight": 1.0
+        }
+      ],
+      "ast_call_lines": [
+        322
+      ]
+    },
+    {
+      "caller": "codex_usage_norm_window",
+      "callee": "codex_usage_remaining_percent",
+      "edges": [
+        {
+          "source": "codex_usage_norm_window",
+          "target": "codex_usage_remaining_percent",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "codex_usage.py",
+          "source_location": "L275",
+          "weight": 1.0
+        }
+      ],
+      "ast_call_lines": [
+        275
+      ]
+    }
+  ],
+  "mcp": {
+    "command": [
+      "<python-env>/bin/python",
+      "-m",
+      "graphify_lab.workspace",
+      "--source",
+      "<repo>/tools/codex-usage",
+      "--cache",
+      "<run>/cache",
+      "serve"
+    ],
+    "transport": "stdio",
+    "requests": [
+      {
+        "operation": "initialize",
+        "arguments": {},
+        "response": {
+          "_meta": null,
+          "protocolVersion": "2025-11-25",
+          "capabilities": {
+            "experimental": null,
+            "logging": null,
+            "prompts": null,
+            "resources": {
+              "subscribe": false,
+              "listChanged": false
+            },
+            "tools": {
+              "listChanged": false
+            },
+            "completions": null,
+            "extensions": null,
+            "tasks": null
+          },
+          "serverInfo": {
+            "name": "graphify",
+            "title": null,
+            "version": "0.9.97",
+            "description": null,
+            "websiteUrl": null,
+            "icons": null
+          },
+          "instructions": null
+        },
+        "response_bytes": 418,
+        "seconds": 0.743386
+      },
+      {
+        "operation": "list_tools",
+        "arguments": {},
+        "response_bytes": 7753,
+        "seconds": 0.002122,
+        "tool_names": [
+          "query_graph",
+          "get_node",
+          "get_neighbors",
+          "get_community",
+          "god_nodes",
+          "graph_stats",
+          "shortest_path",
+          "list_prs",
+          "get_pr_impact",
+          "triage_prs"
+        ]
+      },
+      {
+        "operation": "query_graph",
+        "arguments": {
+          "question": "norm_window",
+          "depth": 2,
+          "token_budget": 3000,
+          "context_filter": [
+            "call"
+          ]
+        },
+        "response": {
+          "_meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "Graph: work/t0439-workspace/cache/indexes/6cdce4ec11d209054040eac2cc941038f34850e88aa382f3b81c617f94fbbd26/graphify-out/graph.json (222 nodes) | Traversal: BFS depth=2 | Start: ['norm_window()', 'window()'] | Context: call (explicit) | 51 nodes found\n\n[i] Complete answer over budget: all 51 nodes and 128 edges shown (~4861 tokens vs the requested ~3000-token budget). Edges are never dropped once every node fits, so this is already the full answer \u2014 raising --budget further will not shrink it. Narrow with context_filter=['call'] or use get_node for a specific symbol to reduce size instead.\n\nNODE norm_window() [src=codex_usage.py loc=L268 community=1]\nNODE window() [src=agent_usage.py loc=L201 community=0]\nNODE fail() [src=agent_usage.py loc=L59 community=0]\nNODE iso() [src=agent_usage.py loc=L72 community=0]\nNODE numeric() [src=agent_usage.py loc=L63 community=0]\nNODE claude_db() [src=agent_usage.py loc=L250 community=0]\nNODE claude_statusline() [src=agent_usage.py loc=L458 community=0]\nNODE normalize_rates() [src=codex_usage.py loc=L282 community=1]\nNODE codex_source() [src=agent_usage.py loc=L469 community=0]\nNODE timestamp() [src=agent_usage.py loc=L79 community=0]\nNODE integer() [src=codex_usage.py loc=L47 community=1]\nNODE manual_source() [src=agent_usage.py loc=L232 community=0]\nNODE iso() [src=codex_usage.py loc=L66 community=1]\nNODE rate_percent() [src=codex_usage.py loc=L51 community=1]\nNODE remaining_percent() [src=codex_usage.py loc=L56 community=1]\nNODE reset_seconds() [src=codex_usage.py loc=L61 community=1]\nNODE collect() [src=codex_usage.py loc=L393 community=1]\nNODE main() [src=agent_usage.py loc=L685 community=0]\nNODE capture_claude() [src=agent_usage.py loc=L427 community=0]\nNODE .manual() [src=tests/test_agent_usage.py loc=L33 community=2]\nNODE history() [src=agent_usage.py loc=L289 community=0]\nNODE snapshot() [src=agent_usage.py loc=L628 community=0]\nNODE claude_history_rows() [src=agent_usage.py loc=L329 community=0]\nNODE read_json() [src=agent_usage.py loc=L106 community=0]\nNODE run_fixed() [src=agent_usage.py loc=L498 community=0]\nNODE validate_config() [src=agent_usage.py loc=L131 community=0]\nNODE json [src= loc= community=3]\nNODE os [src= loc= community=0]\nNODE cursor_request() [src=agent_usage.py loc=L580 community=0]\nNODE observation() [src=agent_usage.py loc=L183 community=0]\nNODE time [src= loc= community=0]\nNODE regular_fd() [src=agent_usage.py loc=L91 community=0]\nNODE decode_json() [src=agent_usage.py loc=L117 community=0]\nNODE live_observation() [src=agent_usage.py loc=L194 community=0]\nNODE opencode_source() [src=agent_usage.py loc=L550 community=0]\nNODE .test_table_observation_reset_and_approximation() [src=tests/test_agent_usage.py loc=L374 community=2]\nNODE cursor_source() [src=agent_usage.py loc=L595 community=0]\nNODE statusline_fields() [src=agent_usage.py loc=L405 community=0]\nNODE number() [src=codex_usage.py loc=L38 community=1]\nNODE .test_future_and_invalid_dates() [src=tests/test_agent_usage.py loc=L75 community=2]\nNODE .test_stale_and_elapsed_reset_suppress_remaining() [src=tests/test_agent_usage.py loc=L58 community=2]\nNODE check_target() [src=agent_usage.py loc=L435 community=0]\nNODE finish() [src=agent_usage.py loc=L221 community=0]\nNODE normalize_usage() [src=codex_usage.py loc=L335 community=1]\nNODE Options [src=codex_usage.py loc=L82 community=1]\nNODE math [src= loc= community=1]\nNODE sqlite3 [src= loc= community=3]\nNODE .test_codex_reuse_and_metadata_redaction() [src=tests/test_agent_usage.py loc=L144 community=2]\nNODE .error() [src=agent_usage.py loc=L681 community=0]\nNODE UsageError [src=agent_usage.py loc=L54 community=10]\nNODE datetime [src= loc= community=0]\nEDGE norm_window() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L271\nEDGE norm_window() --calls [EXTRACTED context=call]--> iso() at=codex_usage.py:L272\nEDGE norm_window() --calls [EXTRACTED context=call]--> rate_percent() at=codex_usage.py:L270\nEDGE norm_window() --calls [EXTRACTED context=call]--> remaining_percent() at=codex_usage.py:L275\nEDGE norm_window() --calls [EXTRACTED context=call]--> reset_seconds() at=codex_usage.py:L278\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> norm_window() at=codex_usage.py:L322\nEDGE claude_db() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L275\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L464\nEDGE codex_source() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L488\nEDGE window() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L203\nEDGE window() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L216\nEDGE manual_source() --calls [EXTRACTED context=call]--> window() at=agent_usage.py:L242\nEDGE window() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L204\nEDGE window() --calls [EXTRACTED context=call]--> timestamp() at=agent_usage.py:L208\nEDGE codex_source() --calls [EXTRACTED context=call]--> Options at=agent_usage.py:L470\nEDGE codex_source() --calls [EXTRACTED context=call]--> collect() at=agent_usage.py:L470\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> read_json() at=agent_usage.py:L459\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L462\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> statusline_fields() at=agent_usage.py:L463\nEDGE collect() --calls [EXTRACTED context=call]--> normalize_rates() at=codex_usage.py:L422\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> json at=codex_usage.py:L301\nEDGE capture_claude() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L446\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L374\nEDGE history() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L297\nEDGE live_observation() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L197\nEDGE observation() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L187\nEDGE snapshot() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L635\nEDGE .manual() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L34\nEDGE .test_codex_reuse_and_metadata_redaction() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L148\nEDGE .test_future_and_invalid_dates() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L76\nEDGE .test_stale_and_elapsed_reset_suppress_remaining() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L60\nEDGE .test_table_observation_reset_and_approximation() --calls [EXTRACTED context=call]--> iso() at=tests/test_agent_usage.py:L379\nEDGE normalize_usage() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L351\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L365\nEDGE cursor_source() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L621\nEDGE finish() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L225\nEDGE history() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L295\nEDGE numeric() --calls [EXTRACTED context=call]--> math at=agent_usage.py:L67\nEDGE opencode_source() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L562\nEDGE statusline_fields() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L419\nEDGE validate_config() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L153\nEDGE manual_source() --calls [EXTRACTED context=call]--> read_json() at=agent_usage.py:L233\nEDGE manual_source() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L236\nEDGE claude_db() --calls [EXTRACTED context=call]--> regular_fd() at=agent_usage.py:L252\nEDGE claude_db() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L253\nEDGE claude_db() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L255\nEDGE claude_db() --calls [EXTRACTED context=call]--> sqlite3 at=agent_usage.py:L257\nEDGE claude_db() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L266\nEDGE live_observation() --calls [EXTRACTED context=call]--> timestamp() at=agent_usage.py:L198\nEDGE observation() --calls [EXTRACTED context=call]--> timestamp() at=agent_usage.py:L184\nEDGE timestamp() --calls [EXTRACTED context=call]--> datetime at=agent_usage.py:L84\nEDGE fail() --calls [EXTRACTED context=call]--> UsageError at=agent_usage.py:L60\nEDGE capture_claude() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L432\nEDGE check_target() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L439\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L335\nEDGE cursor_request() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L589\nEDGE cursor_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L603\nEDGE decode_json() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L119\nEDGE history() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L292\nEDGE main() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L724\nEDGE observation() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L186\nEDGE opencode_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L559\nEDGE .error() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L682\nEDGE read_json() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L111\nEDGE regular_fd() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L98\nEDGE run_fixed() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L512\nEDGE snapshot() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L632\nEDGE statusline_fields() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L410\nEDGE validate_config() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L135\nEDGE remaining_percent() --calls [EXTRACTED context=call]--> number() at=codex_usage.py:L57\nEDGE capture_claude() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L428\nEDGE capture_claude() --calls [EXTRACTED context=call]--> decode_json() at=agent_usage.py:L433\nEDGE capture_claude() --calls [EXTRACTED context=call]--> statusline_fields() at=agent_usage.py:L433\nEDGE capture_claude() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L445\nEDGE capture_claude() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L446\nEDGE capture_claude() --contains [EXTRACTED context=call]--> check_target() at=agent_usage.py:L435\nEDGE main() --calls [EXTRACTED context=call]--> capture_claude() at=agent_usage.py:L713\nEDGE claude_db() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L264\nEDGE claude_db() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L265\nEDGE claude_db() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L266\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> regular_fd() at=agent_usage.py:L330\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L332\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L344\nEDGE claude_history_rows() --calls [EXTRACTED context=call]--> sqlite3 at=agent_usage.py:L346\nEDGE history() --calls [EXTRACTED context=call]--> claude_history_rows() at=agent_usage.py:L306\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L461\nEDGE claude_statusline() --calls [EXTRACTED context=call]--> iso() at=agent_usage.py:L465\nEDGE codex_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L474\nEDGE codex_source() --calls [EXTRACTED context=call]--> numeric() at=agent_usage.py:L492\nEDGE cursor_request() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L581\nEDGE cursor_request() --calls [EXTRACTED context=call]--> decode_json() at=agent_usage.py:L590\nEDGE cursor_source() --calls [EXTRACTED context=call]--> cursor_request() at=agent_usage.py:L604\nEDGE cursor_source() --calls [EXTRACTED context=call]--> live_observation() at=agent_usage.py:L625\nEDGE decode_json() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L119\nEDGE read_json() --calls [EXTRACTED context=call]--> decode_json() at=agent_usage.py:L112\nEDGE iso() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L76\nEDGE manual_source() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L235\nEDGE timestamp() --calls [EXTRACTED context=call]--> fail() at=agent_usage.py:L81\nEDGE snapshot() --calls [EXTRACTED context=call]--> finish() at=agent_usage.py:L646\nEDGE history() --calls [EXTRACTED context=call]--> validate_config() at=agent_usage.py:L293\nEDGE history() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L294\nEDGE main() --calls [EXTRACTED context=call]--> history() at=agent_usage.py:L717\nEDGE live_observation() --calls [EXTRACTED context=call]--> observation() at=agent_usage.py:L198\nEDGE opencode_source() --calls [EXTRACTED context=call]--> live_observation() at=agent_usage.py:L570\nEDGE main() --calls [EXTRACTED context=call]--> json at=agent_usage.py:L704\nEDGE main() --calls [EXTRACTED context=call]--> read_json() at=agent_usage.py:L717\nEDGE main() --calls [EXTRACTED context=call]--> validate_config() at=agent_usage.py:L722\nEDGE main() --calls [EXTRACTED context=call]--> snapshot() at=agent_usage.py:L726\nEDGE opencode_source() --calls [EXTRACTED context=call]--> run_fixed() at=agent_usage.py:L551\nEDGE read_json() --calls [EXTRACTED context=call]--> regular_fd() at=agent_usage.py:L108\nEDGE read_json() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L108\nEDGE regular_fd() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L94\nEDGE run_fixed() --calls [EXTRACTED context=call]--> os at=agent_usage.py:L505\nEDGE run_fixed() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L508\nEDGE snapshot() --calls [EXTRACTED context=call]--> time at=agent_usage.py:L629\nEDGE snapshot() --calls [EXTRACTED context=call]--> validate_config() at=agent_usage.py:L630\nEDGE collect() --calls [EXTRACTED context=call]--> time at=codex_usage.py:L394\nEDGE collect() --calls [EXTRACTED context=call]--> os at=codex_usage.py:L398\nEDGE collect() --calls [EXTRACTED context=call]--> normalize_usage() at=codex_usage.py:L424\nEDGE iso() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L67\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L318\nEDGE reset_seconds() --calls [EXTRACTED context=call]--> integer() at=codex_usage.py:L62\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> iso() at=codex_usage.py:L320\nEDGE normalize_rates() --calls [EXTRACTED context=call]--> rate_percent() at=codex_usage.py:L315\nEDGE number() --calls [EXTRACTED context=call]--> math at=codex_usage.py:L42\nEDGE .test_future_and_invalid_dates() --calls [EXTRACTED context=call]--> .manual() at=tests/test_agent_usage.py:L77\nEDGE .test_stale_and_elapsed_reset_suppress_remaining() --calls [EXTRACTED context=call]--> .manual() at=tests/test_agent_usage.py:L60\nEDGE .test_table_observation_reset_and_approximation() --calls [EXTRACTED context=call]--> .manual() at=tests/test_agent_usage.py:L376",
+              "annotations": null,
+              "_meta": null
+            }
+          ],
+          "structuredContent": null,
+          "isError": false,
+          "resultType": "complete"
+        },
+        "response_bytes": 15532,
+        "seconds": 0.006394
+      },
+      {
+        "operation": "shortest_path",
+        "arguments": {
+          "source": "codex_usage_normalize_rates",
+          "target": "codex_usage_remaining_percent"
+        },
+        "response": {
+          "_meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "Shortest path (2 hops):\n  normalize_rates() <--contains [EXTRACTED]-- codex_usage.py --contains [EXTRACTED]--> remaining_percent()",
+              "annotations": null,
+              "_meta": null
+            }
+          ],
+          "structuredContent": null,
+          "isError": false,
+          "resultType": "complete"
+        },
+        "response_bytes": 296,
+        "seconds": 0.002508
+      },
+      {
+        "operation": "shortest_path",
+        "arguments": {
+          "source": "codex_usage_normalize_rates",
+          "target": "codex_usage_norm_window"
+        },
+        "response": {
+          "_meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "Shortest path (1 hops):\n  normalize_rates() --calls [EXTRACTED]--> norm_window()",
+              "annotations": null,
+              "_meta": null
+            }
+          ],
+          "structuredContent": null,
+          "isError": false,
+          "resultType": "complete"
+        },
+        "response_bytes": 246,
+        "seconds": 0.001261
+      },
+      {
+        "operation": "shortest_path",
+        "arguments": {
+          "source": "codex_usage_norm_window",
+          "target": "codex_usage_remaining_percent"
+        },
+        "response": {
+          "_meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "Shortest path (1 hops):\n  norm_window() --calls [EXTRACTED]--> remaining_percent()",
+              "annotations": null,
+              "_meta": null
+            }
+          ],
+          "structuredContent": null,
+          "isError": false,
+          "resultType": "complete"
+        },
+        "response_bytes": 248,
+        "seconds": 0.001371
+      }
+    ],
+    "chain_verified": true
+  },
+  "mutation": {
+    "before": {
+      "graph": "<run>/cache/indexes/d804698b6cba49603dbe8f4f1be9c9ad3f40534909bfc93bef750c495580c755/graphify-out/graph.json",
+      "index_root": "<run>/cache/indexes/d804698b6cba49603dbe8f4f1be9c9ad3f40534909bfc93bef750c495580c755",
+      "cache_hit": false,
+      "index_id": "d804698b6cba49603dbe8f4f1be9c9ad3f40534909bfc93bef750c495580c755",
+      "source_id": "workspace:c5610eaf54c53b6c1a1d299d56e59f6cd867f58fe94f44c90bd549087b1e88b2",
+      "source": "<run>/mutable",
+      "source_fingerprint": {
+        "sha256": "de1e62db9a10c1daa332cd893103ce789ddc4779fbafd1dbeabaff7fb47361a8",
+        "files": 1,
+        "bytes": 19663
+      },
+      "graph_sha256": "b151bf1d17a1f89c4030fda453a4d4b5095f663fd85783deea66094106f775da",
+      "context_sha256": "ea6863bb30b86fac5f17c6e3da8e531ef19dea12b9e98cd37bcc80171870fccd",
+      "source_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+      "build_seconds": 1.1978508359752595,
+      "seconds": 1.2100185370072722
+    },
+    "after": {
+      "graph": "<run>/cache/indexes/213d935db6a639fbd46a20cfaa7bd081cc8ca5761ae44715b66162f7ac2c21b7/graphify-out/graph.json",
+      "index_root": "<run>/cache/indexes/213d935db6a639fbd46a20cfaa7bd081cc8ca5761ae44715b66162f7ac2c21b7",
+      "cache_hit": false,
+      "index_id": "213d935db6a639fbd46a20cfaa7bd081cc8ca5761ae44715b66162f7ac2c21b7",
+      "source_id": "workspace:c5610eaf54c53b6c1a1d299d56e59f6cd867f58fe94f44c90bd549087b1e88b2",
+      "source": "<run>/mutable",
+      "source_fingerprint": {
+        "sha256": "339765f6986fe5441c977d71c3f202d3496692279e0c81347d5286c1bd4a05f4",
+        "files": 1,
+        "bytes": 19657
+      },
+      "graph_sha256": "27c35f9d8149f88f8431a0e93274ed261cdbd42214e86c588572d3839b20d448",
+      "context_sha256": "ea6863bb30b86fac5f17c6e3da8e531ef19dea12b9e98cd37bcc80171870fccd",
+      "source_commit": "2c73caf464bec1281f037aca3f2281aae60b0362",
+      "build_seconds": 1.2571173449978232,
+      "seconds": 1.269292455050163
+    },
+    "renamed": {
+      "id": "codex_usage_remaining_quota",
+      "label": "remaining_quota()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "file_type": "code",
+      "norm_label": "remaining_quota()",
+      "source_file": "codex_usage.py",
+      "source_location": "L56"
+    },
+    "old_graph_retained": true,
+    "old_symbol_absent": true
+  },
+  "measurements": {
+    "snapshot_at": "2026-10-29T17:46:12.062739+00:00",
+    "coverage": "This trial process and explicit CLI/MCP operations only; excludes orchestrator and providers.",
+    "cli_commands_observed": 13,
+    "mcp_requests_observed": 6,
+    "mcp_notifications_included": false,
+    "command_retries": 0,
+    "outer_tool_calls": null,
+    "agent_starts": null,
+    "provider_requests": null,
+    "tokens": null,
+    "cost": null,
+    "elapsed_seconds": 8.655174
+  },
+  "raw_report_sha256": "06add67bfe125d240f30840c620c74da45b8a0754ebb392b9d883f1ffa2d812c",
+  "compaction": "CLI stdout/stderr replaced with SHA-256 digests; MCP tool schemas replaced with names. Other recorded evidence retained."
+}

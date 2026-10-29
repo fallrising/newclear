@@ -37,7 +37,9 @@ test('review_gap_restart_timeout_and_refresh_preserve_no_resend',async()=>{
   assert.deepEqual(h.mutations(),['POST /api/p0/v1/operator/session','POST /api/p0/v1/session/turns']);}finally{h.controller.dispose();}}
  // Restart / identity change and retention gap: stream errors resync with reads only.
  for(const frame of[{type:'error',code:'wrong_session',message:'session identity changed; refresh before reconnect'},{type:'error',code:'history_gap',message:'requested session history is no longer retained',oldest_available:2,latest_available:3}]){
-  const h=harness();try{await ready(h);const mark=h.log.length;const sock=h.sockets.at(-1);h.inject(frame);if(!sock.closed){sock.closed=true;sock.onclose?.({code:1008,reason:frame.code});} // server closes first
+  const h=harness();try{await ready(h);const mark=h.log.length;const sock=h.sockets.at(-1);
+   // Server sends the error frame and then closes with 1008; the client's own close() has no further effect.
+   sock.close=()=>{sock.clientClosed=true;};h.inject(frame);sock.closed=true;sock.onclose?.({code:1008,reason:frame.code});
    await until(()=>h.sockets.length===2,4000);
    assert(onlyReads(h.log.slice(mark)),frame.code+' '+h.log.slice(mark).join());assert.deepEqual(h.mutations(),['POST /api/p0/v1/operator/session'],frame.code);}finally{h.controller.dispose();}}
  // Timeout: a dispatched mutation with no response is ambiguous; it is never resent, and the follow-up is a read-only refresh.

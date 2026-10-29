@@ -44,8 +44,11 @@ test('v7 equals remaining-baseline with exactly the R701 substitutions',()=>{
 // SPEC-T006R-harness-repair-c2 T02: the F1-F4 repair changed fixture.mjs and transport.mjs, which stay pinned to their pre-repair bytes.
 test('every v7 source pin matches the current file or embedded asset except the two repaired harness files',()=>{
  const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));const PRE_REPAIR={'fixture.mjs':'53771d00ca5dc0b5de73f131bf22b5dbd60c6e53a85e5414ceca8034a383404d','transport.mjs':'04636827f238869182d0f7084fed9558c31f6a9f1e351d4b1f708188fecafae3'};
- for(const[name,hash]of Object.entries(pins(v7)))assert.equal(Object.hasOwn(PRE_REPAIR,name)?PRE_REPAIR[name]:name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
+ // T-0438 changed p0-client.js (P-006-11) and p0.css (Authenticate gap) after v7 ran; the pins stay on the bytes it ran on.
+ const T0438={'/assets/p0-client.js':'a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e','/assets/p0.css':'1d66f393e4adf2af7266a32feac6fbdb74980825ae0293cce0407607ab78ff8a'};
+ for(const[name,hash]of Object.entries(pins(v7)))assert.equal(Object.hasOwn(PRE_REPAIR,name)?PRE_REPAIR[name]:Object.hasOwn(T0438,name)?T0438[name]:name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
  for(const name of Object.keys(PRE_REPAIR))assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),PRE_REPAIR[name],name);
+ for(const name of Object.keys(T0438))assert.notEqual(assets.get(name),T0438[name],name);
 });
 
 test('v7 reads no reuse input and chains desktop, tablet, mobile per R701',()=>{

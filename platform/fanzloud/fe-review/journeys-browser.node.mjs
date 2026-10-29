@@ -139,8 +139,8 @@ test('driver pins equal the current harness, verdicts and served assets, except 
  const driver=readFileSync(new URL('journeys-browser.mjs',import.meta.url),'utf8');const pins=JSON.parse(driver.match(/const expectedSources=(\{[^}]*\})/)[1]);const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
  assert.deepEqual(Object.keys(pins).sort(),['/','/assets/p0-app.js','/assets/p0-client.js','/assets/p0.css','baseline-support.mjs','conformance-browser-verdicts.mjs','fixture.mjs','journeys-browser-verdicts.mjs','lifecycle.mjs','remaining-support.mjs','transport.mjs','trust.mjs']);
  // SPEC-T006R-shared-capture: the favicon counter changed transport.mjs after journeys-001 ran; the driver stays pinned to the bytes it ran on.
- const historical={'transport.mjs':'9167d04e5b4937ec1aca3a6788b27b6e9b358f738f516bb3861a9877049b988f'};
- for(const[name,hash]of Object.entries(historical)){assert.equal(pins[name],hash,name);assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),hash,name);delete pins[name];}
+ const historical={'transport.mjs':'9167d04e5b4937ec1aca3a6788b27b6e9b358f738f516bb3861a9877049b988f','/assets/p0-client.js':'a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e','/assets/p0.css':'1d66f393e4adf2af7266a32feac6fbdb74980825ae0293cce0407607ab78ff8a'}; // T-0438 changed the two assets after this run
+ for(const[name,hash]of Object.entries(historical)){assert.equal(pins[name],hash,name);assert.notEqual(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);delete pins[name];}
  for(const[name,hash]of Object.entries(pins))assert.equal(name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
 });
 

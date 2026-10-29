@@ -45,6 +45,8 @@ test('v5 equals remaining-baseline with exactly the D01 substitutions',()=>{
 test('every v5 source pin matches the current source except the two M2-changed assets and the two repaired harness files',()=>{
  const MILESTONE1_ASSETS={'/':'2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf','/assets/p0.css':'96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6'};
  const assets=new Map([...fixedAssets()].map(([path,asset])=>[path,sha(asset.body)]));
+ // T-0438 P-006-11 changed p0-client.js after this runner ran; the pin stays on the bytes it ran on.
+ Object.assign(MILESTONE1_ASSETS,{'/assets/p0-client.js':'a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e'});
  const PRE_REPAIR={'fixture.mjs':'53771d00ca5dc0b5de73f131bf22b5dbd60c6e53a85e5414ceca8034a383404d','transport.mjs':'04636827f238869182d0f7084fed9558c31f6a9f1e351d4b1f708188fecafae3'};
  for(const[name,hash]of Object.entries(pins(v5)))assert.equal(Object.hasOwn(MILESTONE1_ASSETS,name)?MILESTONE1_ASSETS[name]:Object.hasOwn(PRE_REPAIR,name)?PRE_REPAIR[name]:name.startsWith('/')?assets.get(name):sha(readFileSync(new URL(name,import.meta.url))),hash,name);
  for(const name of Object.keys(PRE_REPAIR))assert.notEqual(sha(readFileSync(new URL(name,import.meta.url))),PRE_REPAIR[name],name);

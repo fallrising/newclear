@@ -91,3 +91,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Bounded bot activation preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-activation.md): pinned BR/BP runtime and uninstalled host candidate, original state preserved, fresh expired-bot/verified-runner observations and non-executable <=24h proposal; live bot-only activation requires explicit approval.
 
 - [First bounded bot activation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-bot-activation-live.md) — owner-approved bot-only24hour authority, first persistent24ID/240call policy and pinned Grok check/status activated until2026-10-30T18:00:27Z; one actual healthy result consumes1ID/4calls; original runner/Access limits preserved; model execution and natural expiry unverified.
+
+- [Bot policy inspection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-inspection.md): operator-only readonly original-state CLI for lease, remaining call/new-ID quota and bounded unreconciled IDs; no HTTP, quota/high-water writes, MCP catalog change or remote authority/health claim.

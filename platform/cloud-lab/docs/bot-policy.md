@@ -64,3 +64,5 @@ MCP參數仍只有request_id。不提供初始化／改政策／重置配額工�
 | POLICY_RATE_LIMITED / STATE_BUSY | 間隔不足或其他call持鎖；host自行停止／稍後同ID再查，無自動重試 |
 
 政策是在本機補上限，不取代任何遠端准入。到期前已開始的HTTP可能於到期後回覆；這不構成延期或新提交許可。舊的未綁政策state仍支援原明確operator模式，不能把該相容路徑聲稱為常態政策保障。
+
+日常operator可用[唯讀租期／額度CLI](bot-inspection.md)觀察原帳本，不消耗call、不更新high-water、不推論遠端權限或結果。

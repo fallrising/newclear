@@ -225,3 +225,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - Cloud Lab CI `40822224377`、Project success `40822224342`、llms CI `40822224343` 全數success；本機42Node／194Python共236tests、systemd模板驗證、文件／範圍／task／report檢查通過。
 - T833初審發現server-ahead未限制本機政策期限；四個RED subcases重現後修正，獨立複審ACCEPT。過程及先前fixture／sandbox限制見[SR證據](../evidence/m1-service-runner.md)。
 - SR01–04 source／local完成；無live部署、續權、服務安裝、Cron或付費變更。Python3.11未實測，真人Access與完整主線pending，無usable tag。此收尾僅更新任務板。
+
+## T-0012 — 常態服務啟用準備
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0012-1 | 來源綁定及離線proposal | SP-01 | in_progress | 2026-10-29T06:45:00Z | — | 2026-10-29T06:58:31Z |
+| T-0012-2 | 期限與請求量估算 | SP-02 | in_progress | 2026-10-29T06:45:00Z | — | 2026-10-29T06:58:31Z |
+| T-0012-3 | 私人候選與具體啟停方案 | SP-03 | in_progress | 2026-10-29T06:45:00Z | — | 2026-10-29T06:58:31Z |
+| T-0012-4 | 測試、獨立審查與交付 | SP-04 | in_progress | 2026-10-29T06:45:00Z | — | 2026-10-29T06:58:31Z |

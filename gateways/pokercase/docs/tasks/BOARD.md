@@ -445,6 +445,16 @@ Claim PR283 merged; [CU-1–CU-5](T-0432-cursor-settlement.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| CU-01 | Reservation/raw usage/terminal ownership | CU-1–CU-3 | in_progress | 2026-10-29T05:00:34Z | — | 2026-10-29T05:21:37.756888+00:00 |
-| CU-02 | Persistence/recovery/admin consistency | CU-4 | in_progress | 2026-10-29T05:00:34Z | — | 2026-10-29T05:21:37.756888+00:00 |
-| CU-03 | Headless journey/review/delivery | CU-5 | in_progress | 2026-10-29T05:00:34Z | — | 2026-10-29T05:21:37.756888+00:00 |
+| CU-01 | Reservation/raw usage/terminal ownership | CU-1–CU-3 | done | 2026-10-29T05:00:34Z | 2026-10-29T05:33:30Z | 2026-10-29T05:33:30Z |
+| CU-02 | Persistence/recovery/admin consistency | CU-4 | done | 2026-10-29T05:00:34Z | 2026-10-29T05:33:30Z | 2026-10-29T05:33:30Z |
+| CU-03 | Headless journey and independent product review | CU-5 product validation | done | 2026-10-29T05:00:34Z | 2026-10-29T05:33:30Z | 2026-10-29T05:33:30Z |
+
+These rows record delivered product/source runtime gates; remaining CU-5 administrative closure is verified in final handoff.
+
+產品 [PR741](https://github.com/fallrising/newclear/pull/741) source `5779858af53658716d0008352157c521b47206ae`、merge `51d034f9e7a87265b282105cdc5582390b302c15` at 2026-10-29T05:33:30Z；329 Rust tests/22 groups、fmt/Clippy/locked build、57 Python、20 validator tests、46 contracts/7 indexes、Cursor及既有Claude/genericHTTP九階段旅程、獨立來源/執行審查通過。必要check/validate CI、正常合併與遠端內容/祖先/Desk-Task trailer回讀通過。
+
+Cursor隔離旅程有17筆durable attempts：11 succeeded、3 failed、2 cancelled、1 timeout；17筆費用均unknown/null。原始input/output/cache欄位獨立保存；真CLI版本與cache關係未核實，normalized prompt_tokens維持null，output可獨立觀測，沒有以缺值補零或報成完整用量。三客戶端文字串流、tools/images拒絕、fallback、管理面API/HTML/CSV及重啟保留歷史/新請求通過；重用指設定與歷史，不是Claude-style同進程session reuse。儲存故障/pending恢復另由integration/unit證據驗證。既有HTTP旅程fixture $28 partial估價不是provider帳單或開發實耗。
+
+只交付既有Cursor text-only→Chat/Messages/Responses串流的持久記帳，不增加工具/圖片支援。其他named-provider/OAuth/借用憑證及原生非Chat上游observer仍未完整覆蓋，完整#698保持open。#699完整token覆蓋率/價格來源精度/歷史語義、#700具名client/version與真實AC01/04/08以及AC04工具/AC17文字範圍決策、#701既有fixture啟動/auth間歇失敗未知根因、#702Antigravity HTTP隔離仍保留。mainline incomplete、usable_tag none、desk in_progress；不能以測試/任務數宣稱產品完成。
+
+本份是產品merge時點快照。後續帳本發布、完整備份`t0432-cursor-settlement-20261029`（完整位置留在私人交接）與本輪工作樹清理由`.local/t0432-cursor-settlement/handoff.json`核實，不預先宣稱完成。新`local-demo.py`預設check、驗證source/binary digest；舊入口與舊digest不變。本輪完成即停止，不開新里程碑。

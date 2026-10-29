@@ -49,3 +49,6 @@ and artifact/report access. Full attention/impact, activation and backup/restore
 See [browser setup](docs/local-development.md#connected-browser-foundation) and the current board.
 
 See `docs/SDD.md`. The class A ledger is archived at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/`.
+
+
+M0 基準對帳與缺口：[baseline report](docs/evidence/m0-baseline-20261029.md)。新一輪 pinned backend/web 與真實 ConnectedApp foundation 已跑；完整產品仍未完成，M1a 新契約仍待接受。

@@ -290,3 +290,6 @@ UI and providers require later assignments. No runtime or API exposes this found
 A resumed agent MUST verify the branch/baseline and actual diff before trusting this handoff. If the
 files disagree, the archived ledger at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/PLAN.md` plus Git/SQLite authority rules win; record the discrepancy rather
 than silently repairing history.
+
+
+2026-10-29 M0 接手依據：[baseline report](evidence/m0-baseline-20261029.md)。新一輪 pinned backend/web 與真實 ConnectedApp foundation 已跑；完整產品仍未完成，M1a 新契約仍待接受。

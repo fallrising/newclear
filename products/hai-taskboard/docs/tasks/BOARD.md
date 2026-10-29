@@ -1,7 +1,7 @@
 # HAI Taskboard current development board
 
 Planning navigation: [remaining work and proposed designs](../plans/remaining-work-20261029.md).
-This is documentation-only planning; existing implementation rows below retain their status.
+The planning milestone is delivered; the owner has started the separate M0 baseline below. Existing product implementation rows retain their status.
 
 This board is the current work-status authority under the owner-invoked
 START_DEVELOPMENT_PROMPT and root technical-task contract. The archived class A ledger
@@ -143,5 +143,18 @@ matched the reviewed local file; all product paths matched the merged checkpoint
 Claude Opus 5.5 returned REWORK then ACCEPT; the [report](../evidence/remaining-work-plan-20261029.md)
 retains findings, revisions, limits and actual document checks. HP01..HP03 close only this
 planning milestone. H01..H04, SUCCESS product ACs, mainline incomplete and usable tag none stay unchanged.
-The next proposed task is M0 baseline reconciliation, awaiting owner instruction; no implementation
-was started. The accepted SDD/bootstrap authority conflict remains a future explicit decision.
+At planning closeout, the next proposed task was M0 baseline reconciliation, awaiting owner instruction; no implementation
+was started in that planning turn. The following M0 entry records the subsequent owner instruction. The accepted SDD/bootstrap authority conflict remains a future explicit decision.
+
+
+## T-0339 — M0 baseline reconciliation
+
+Owner explicitly continued development after HP planning delivery. This activates M0 only, linked to H01; M1a requires a separate accepted contract/task. Scope: source/spec/test inventory, actual pinned gates and connected-browser foundation, precise conflict proposals. No production or accepted-spec changes. Source `1e70824e24161bafacfc1eca33bb31ba7045df5a`.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HM0 | Complete clause/code/test/gap inventory, rerun baseline and record conflicts | M0-01..03; H01 support | in_progress | 2026-10-29T17:47:11Z | — | 2026-10-29T18:07:37Z |
+
+M0-01: all SUCCESS/v0.2/AC-P0A/main SDD/mini-SDD/ADR/OpenAPI obligations mapped with accepted/proposed distinctions. M0-02: same-source pinned backend/web and real ConnectedApp login/admission/Fake/reconnect baseline, successful Fake remains Developing. M0-03: exact conflicts/proposals, independent review, document checks, required CI/merge/readback. This does not close H01..H04 or product AC-02..04.
+
+Local evidence: [M0 report](../evidence/m0-baseline-20261029.md), full matrices and [Proposed contract decisions](../plans/m0-contract-decisions-20261029.md). Independent T-003 ACCEPT covers local M0 only; pinned backend/full/race/build,web30+safety8 and true browser13steps/30captures pass. Product AC/status unchanged; required PR CI/merge/readback pending.

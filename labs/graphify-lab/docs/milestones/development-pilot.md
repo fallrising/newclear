@@ -25,11 +25,11 @@ Owner 2026-10-29 接受「先文件收尾，再真實開發任務試點」並授
 
 | AC | 驗收條件 | 初始狀態 |
 | --- | --- | --- |
-| P-01 | 固定來源 SHA／fingerprint；真 graph query 能定位兩個 helper、已知 caller／tests，來源行可核對，錯誤候選不計成功。 | pending |
-| P-02 | CLI 與測試使用抽出的共用來源模組；原 import 相容，來源越界／歧義／行號／讀取上限的回歸及完整既有 suite 通過。 | pending |
-| P-03 | 本機 agent recipe 可執行，不改全域設定；真 stdio MCP 至少完成 initialize、工具列舉與本任務查詢。 | pending |
-| P-04 | 報告分開列 build、query、source read、命令耗時、輸出 bytes、已觀測工具計數、agent elapsed；tokens／provider requests／費用未知為 null，不能由 bytes 或工具數推算。 | pending |
-| P-05 | 報告有結果、失敗／未驗及後續建議；必要 CI、獨立審查通過，各里程碑正常合併並回讀，帳本同步。 | pending |
+| P-01 | 固定來源 SHA／fingerprint；真 graph query 能定位兩個 helper、已知 caller／tests，來源行可核對，錯誤候選不計成功。 | passed |
+| P-02 | CLI 與測試使用抽出的共用來源模組；原 import 相容，來源越界／歧義／行號／讀取上限的回歸及完整既有 suite 通過。 | passed |
+| P-03 | 本機 agent recipe 可執行，不改全域設定；真 stdio MCP 至少完成 initialize、工具列舉與本任務查詢。 | passed |
+| P-04 | 報告分開列 build、query、source read、命令耗時、輸出 bytes、已觀測工具計數、agent elapsed；tokens／provider requests／費用未知為 null，不能由 bytes 或工具數推算。 | passed |
+| P-05 | 報告有結果、失敗／未驗及後續建議；必要 CI、獨立審查通過，各里程碑正常合併並回讀，帳本同步。 | passed |
 
 ## 邊界與判讀
 
@@ -47,4 +47,4 @@ M2：聚焦 source regression → 全部 cache/CLI tests → 真 pilot 與 MCP �
 
 ## 本輪結果入口
 
-[實測、回歸、失敗與判斷](../evidence/development-pilot/README.md)。P-01～P-04 已有本機證據；P-05 待獨立審查、CI 與合併回讀，最終狀態見任務板。
+[實測、回歸、失敗與判斷](../evidence/development-pilot/README.md)。P-01～P-05 已有實作與驗證證據；M1 #775、M2 #778 正常合併並回讀，三項 M2 CI success，獨立 ACCEPT。任務板保留實際合併時間；owner 驗收與發布／部署分開。

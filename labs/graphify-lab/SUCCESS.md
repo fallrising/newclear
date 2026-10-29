@@ -57,4 +57,4 @@ Repo gate：`python3 scripts/check_indexes.py`、根目錄 workflow static valid
 Owner 2026-10-29 授權 [T-0437 文件收尾與開發任務試點](docs/milestones/development-pilot.md)，
 其 P-01～P-05 獨立追蹤；未完成的後續試點不回溯否定第一輪有界實驗，也不提前計為通過。
 
-M2 本機結果：[開發任務試點證據](docs/evidence/development-pilot/README.md)。P-01～P-04 已取得實測與回歸證據；P-05 的遠端 CI／合併仍以任務板與 PR 為準。第一輪 AC 證據保留原版本。
+M2 本機結果：[開發任務試點證據](docs/evidence/development-pilot/README.md)。P-01～P-05 已完成；M1 #775、M2 #778 已在必要 CI 與獨立審查通過後合併，詳見任務板。第一輪 AC 證據保留原版本。

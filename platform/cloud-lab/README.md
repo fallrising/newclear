@@ -56,3 +56,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [觀測部署準備](docs/observation-rollout.md)固定程式候選、過期授權現況、短期接入與回退順序；原準備記錄保留；owner後續明確批准並執行短期接入。
 
 [實際觀測接入](docs/evidence/m1-observation-live.md)已完成固定Worker／runner更新、兩個機器的短期期限、真實AS／SA／RO整合及驗證後停止；原D1業務資料、journal、Access policy與排程保留。human／scheduler仍過期，常態服務與完整主線未完成。
+
+[常態runner服務模式](docs/service-runner.md)新增獨立私人政策、啟動自身授權核對與最早期限停止；重啟保留journal，未知工作不重做。功能先在本機驗證，尚未安裝／續權或啟用live常態服務。

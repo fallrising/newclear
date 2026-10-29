@@ -61,3 +61,7 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Rollout preparation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-observation-rollout-plan.md): lead read-only metadata and private source checks, explicit failures and pending live gates.
 
 - [Bounded observation live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-observation-live.md): approved machine-only expiry changes, pinned Worker/runner update, actual AS/SA/RO observation and clean early stop; business rows/journal/policy unchanged, human/scheduler expired, no natural-expiry or full-product acceptance claim.
+
+- [Service runner](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/service-runner.md): config-bound private service policy, startup self verification, minimum fixed deadlines and journal-safe recovery; no automatic renewal or live enablement.
+
+- [Service runner evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-service-runner.md): local HTTP/subprocess expiry, rejection and journal recovery evidence; separate from real Cloudflare acceptance.

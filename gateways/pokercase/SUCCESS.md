@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0432 — Existing buffered HTTP settlement continuation
+
+Owner instructed continued development after T-0435 delivery. Claim PR309 merged; [fixed BH-1–BH-5, scope, design and validation](docs/tasks/T-0432-buffered-http-settlement.md) cover existing generic/SIWC/Grok/OpenCode buffered HTTP across three clients. Reserve each actual dispatch, retain raw usage/terminal/clocks through failures, preserve native Responses bytes and existing retry behavior. Documentation and claim preceded RED and implementation. Actual isolated RED→GREEN,53case/9stage buffered matrix,395Rusttests/22groups,111Python,20repository validator tests,47contracts/indexes,fmt/Clippy/lockedbuild, four prior nine-stage journeys, coverage and Antigravity regressions passed locally. Independent source/runtime and prepublication ledger reviews passed. Normal PR/required CI/remote readback and final delivery facts are recorded by the task board and handoff. Prior streaming, Antigravity, coverage, original17AC and T-1102 remain unchanged. Mainline incomplete, usable_tag none; #698–702 remain open.
+
 ## 主線與範圍
 
 目錄名為 pokercase，binary／資料目錄為 thinrouter；不是兩個不同產品。

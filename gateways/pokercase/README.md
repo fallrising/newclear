@@ -55,6 +55,16 @@ Generic API-key Chat HTTP upstream streams reserve an attempt before dispatch an
 
 Existing SIWC and Grok Responses upstreams and OpenCode Chat upstreams now use durable streaming attempts for all three client protocols, including their supported tool exchanges. Each actual inference send has a separate attempt; fallback and the existing legal401 retry retain one request identity. OAuth refresh and model discovery do not create inference rows. Raw `openai_responses_v1` / `openai_chat_v1` observations preserve missing versus zero usage, HTTP status versus terminal outcome, and each attempt’s own timing. Named subscription/OAuth cost remains unknown, even with arbitrary configured rates. Borrowed Grok credentials remain read-only and are retried only when the existing reread detects a changed token. See [scope, isolation and acceptance](docs/tasks/T-0432-named-http-settlement.md).
 
+Buffered clients now also reserve and settle each generic API-key, SIWC, Grok and OpenCode HTTP dispatch. Failed collection/conversion, cancellation and legal retries retain their own attempts and original usage; missing fields remain unknown. Direct JSON has no measured first-output timestamp. Native Responses bytes and accepted background responses remain unchanged. Existing buffered configured-rate estimates require complete counters and prices; they are not verified subscription bills. See [BH-1–BH-5 and evidence boundaries](docs/tasks/T-0432-buffered-http-settlement.md).
+
+For the buffered HTTP check, preserve the native test executable reported by `cargo +1.99.0 test --locked --bin thinrouter --no-run --message-format=json`, verify its source and test inventory, and record its SHA256 before running:
+
+```sh
+python3 scripts/buffered_http_check.py --test-binary /path/to/preserved-native-test --expected-test-sha256 <verified-sha256> --output-dir /path/to/buffered-http-evidence
+```
+
+This defaults to check mode, verifies confinement before HTTP and writes a report for 53 cases across nine stages, including SQL/JSON/CSV/Web reconciliation. It uses the real gateway router, controlled fake upstreams and test-only refresh transport. Reopening exercises production recovery under an owned store lock; it is not a full process-crash matrix or real client/provider acceptance.
+
 For the headless named HTTP walkthrough after a locked build:
 
 ```sh

@@ -1,5 +1,17 @@
 # Pokercase 技術任務
 
+## T-0432 — Existing buffered HTTP settlement
+
+Demand: desk T-0432 / #698, claim PR309 merged. [Fixed BH-1–BH-5](T-0432-buffered-http-settlement.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| BH-01 | Original buffered observations and durable dispatch lifecycle | BH-1–BH-3 | in_progress | 2026-10-29T18:27:00Z | — | 2026-10-29T19:28:18Z |
+| BH-02 | Isolated HTTP, protocol bytes and cross-surface reconciliation | BH-1–BH-4 | in_progress | 2026-10-29T18:27:00Z | — | 2026-10-29T19:28:18Z |
+| BH-03 | Terminal entry, regressions, reviews and bounded delivery | BH-5 | in_progress | 2026-10-29T18:27:00Z | — | 2026-10-29T19:28:18Z |
+
+Documentation/claim/source map preceded actual RED and implementation. Local395Rusttests/22groups,111Python,53case/9stage buffered HTTP, prior journeys/coverage/Antigravity and native checks passed; independent source/runtime and prepublication ledger reviews passed; publication pending. Existing deliveries remain intact; mainline incomplete, usable_tag none, desk in_progress. Product done only after merge; backup/cleanup separately recorded by final handoff.
+
 ## T-0377 — Cursor 外部隔離
 
 需求：[desk T-0377](https://github.com/fallrising/desk/tree/main/tasks/T-0377-thinrouter-cursor-isolation)。規格：[cursor-isolation](../cursor-isolation.md)。

@@ -74,7 +74,7 @@ Desk [T-0438](https://github.com/fallrising/desk/blob/main/tasks/T-0438-fanzloud
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T0438-1 | Socket close code after a self-detected stream failure (P-006-11) and Authenticate spacing; RED then GREEN T006 test | P-006-11 | in_progress | 2026-10-29T17:05:00Z | — | 2026-10-29T17:05:00Z |
+| T0438-1 | Socket close code after a self-detected stream failure (P-006-11) and Authenticate spacing; RED then GREEN T006 test | P-006-11 | done | 2026-10-29T17:05:00Z | 2026-10-29T17:18:52Z | 2026-10-29T17:18:52Z |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
 

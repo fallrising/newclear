@@ -278,8 +278,8 @@ P-006-11 — client close code. When the controller closes a connection after it
 failure itself, it calls `close(1000, "")`. The T005C codes 1008, 1012 and 1013 are server close
 codes; a browser page may send only 1000 or 3000–4999 and throws `InvalidAccessError` for any
 other code, so a `close(1008)` from the page never closes the socket. The failure policy (terminal
-or refresh) is held by the controller, not encoded in the close code, so reconnect and refresh
-behaviour are unchanged. T-0433 `journeys-001` J04 observed the socket staying open after a
+or refresh) is held by the controller, not encoded in the close code, so the reconnect and refresh
+policy is unchanged; it now takes effect in browsers because the close event arrives. T-0433 `journeys-001` J04 observed the socket staying open after a
 self-detected protocol error until a manual Refresh; the `close(1008)` cause is a source inference.
 
 # Cancellation and Timeout

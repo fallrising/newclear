@@ -76,3 +76,24 @@ test('integrated observation correlates real HTTP self, SQLite grants and kernel
   for(const value of [cfg.secret_hex,directory,lab.base_url,'synthetic-secret','synthetic-client','local-runner'])assert.ok(!run.output.includes(value));
  }finally{await lab.close();}
 });
+
+
+test('bounded schedule → real HTTP Python collector → schedule snapshot and duplicate suppression',async()=>{
+ assert.ok(process.env.AGENT_BUILD_DIR);const directory=await mkdtemp(join(process.env.AGENT_BUILD_DIR,'scheduled-'));const lab=await createLocalLab(directory);
+ try{
+  // Real collector deadlines end with the due minute; avoid a :59 fixture race.
+  const remaining=60000-Date.now()%60000;
+  if(remaining<15000)await new Promise(resolve=>setTimeout(resolve,remaining+100));
+  const start=Math.floor(Date.now()/60000)*60000,stamp=t=>new Date(t).toISOString().replace('.000Z','Z');
+  const g=JSON.parse(lab.DB.db.prepare("SELECT policy FROM grants WHERE id='local-human'").get().policy);
+  lab.DB.db.prepare('INSERT INTO grants VALUES(?,1,0,?)').run('local-scheduler',JSON.stringify({...g,principal_id:'local-scheduler',capabilities:['commands:submit','node:health:read']}));
+  lab.DB.db.prepare('INSERT INTO schedules VALUES(?,1,1,?,NULL)').run('health-minute','local-scheduler');
+  lab.env.HEALTH_SCHEDULE=JSON.stringify({revision:1,interval_minutes:15,not_before:stamp(start),expires_at:stamp(start+3600000)});
+  const {scheduled}=await import('../apps/control/worker/index.mjs');await scheduled({scheduledTime:start},lab.env,Date.now());
+  assert.equal(lab.DB.db.prepare('SELECT count(*) n FROM commands').get().n,1);
+  const run=await runPython(join(directory,'runner.json'));assert.equal(run.code,0,run.output);
+  const response=await fetch(lab.base_url+'/api/health-schedule');assert.equal(response.status,200);const snapshot=await response.json();
+  assert.equal(snapshot.cron_verified,false);assert.equal(snapshot.schedule.latest_result.result.validation.status,'passed');assert.equal(snapshot.schedule.last_firing.command_id,snapshot.schedule.latest_result.command_id);
+  assert.equal(snapshot.schedule.next_due_at,stamp(start+900000));await scheduled({scheduledTime:start},lab.env,Date.now());assert.equal(lab.DB.db.prepare('SELECT count(*) n FROM commands').get().n,1);
+ }finally{await lab.close();}
+});

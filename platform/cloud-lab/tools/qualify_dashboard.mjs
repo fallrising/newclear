@@ -33,13 +33,13 @@ const jwk={...await crypto.subtle.exportKey('jwk',pair.publicKey),kid:'browser-f
 const b64=x=>Buffer.from(x).toString('base64url');
 const prefix=b64(JSON.stringify({alg:'RS256',kid:jwk.kid}))+'.'+b64(JSON.stringify({iss:issuer,aud:[audience],sub:'human',iat:Math.floor(now/1000),exp:Math.floor(now/1000)+600}));
 const jwt=prefix+'.'+b64(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',pair.privateKey,new TextEncoder().encode(prefix)));
-const common={workspace_id:'browser-lab',resource_ref:{resource_id:'browser-node',generation:1},recipe_ref:ref,not_before:stamp(now-1000),expires_at:stamp(now+600000),max_timeout_seconds:30,max_output_bytes:16384};
+const common={workspace_id:'browser-lab',resource_ref:{resource_id:'browser-node',generation:1},recipe_ref:ref,not_before:stamp(now-1000),expires_at:stamp(now+3600000),max_timeout_seconds:30,max_output_bytes:16384};
 const caps=['commands:read','commands:submit','commands:cancel-request','node:health:read','artifact:read'];
 const mf=new Miniflare(convertV4MiniflareOptions({host:'127.0.0.1',cf:false,telemetry:{enabled:false},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),workers:[{
  name:'browser-qualification',modulesRoot:join(root,'apps/control/worker'),modules:['index.mjs','auth.mjs','protocol.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control/worker',name)})),compatibilityDate:'2026-10-26',d1Databases:{DB:'browser'},
  assets:{directory:join(root,'apps/control/public'),binding:'ASSETS',run_worker_first:true,routerConfig:{has_user_worker:true}},
  outboundService:async request=>{assert.equal(request.url,issuer+'/cdn-cgi/access/certs');return Response.json({keys:[jwk]});},
- bindings:{ACCESS_CONFIG:JSON.stringify({issuer,audience,subjects:{human:{principal_id:'human',grant_id:'human'}}}),PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify({runner:{principal_id:'runner',grant_id:'runner',generation:1,secret_hex:secret,expires_at:common.expires_at}})}
+ bindings:{HEALTH_SCHEDULE:JSON.stringify({revision:1,interval_minutes:15,not_before:stamp(Math.floor(now/60000)*60000),expires_at:stamp(now+3600000)}),ACCESS_CONFIG:JSON.stringify({issuer,audience,subjects:{human:{principal_id:'human',grant_id:'human'}}}),PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify({runner:{principal_id:'runner',grant_id:'runner',generation:1,secret_hex:secret,expires_at:common.expires_at}})}
 }]}));
 let browser,session,server,mode='normal',dropSubmit=false,apiCalls=0,loginHits=0,submitBodies=[],errors=[],checks=[],pending=new Map(),serial=0,holdArtifactStatus=null,heldArtifact=null,downloadsStarted=0;
 const children=[];
@@ -71,12 +71,14 @@ try {
  }
  await db.batch(readFileSync(join(root,'apps/control/migrations/0001.sql'),'utf8').replace(/^--.*$/gm,'').split(';').filter(x=>x.trim()).map(x=>db.prepare(x)));
  for(const [id,capabilities] of [['human',caps],['runner',['dispatch:claim','runs:report','runs:reconcile']]])await db.prepare('INSERT INTO grants VALUES (?,1,0,?)').bind(id,JSON.stringify({...common,principal_id:id,capabilities})).run();
+ await db.prepare('INSERT INTO grants VALUES (?,1,0,?)').bind('scheduler',JSON.stringify({...common,principal_id:'scheduler',capabilities:['commands:submit','node:health:read']})).run();
+ await db.prepare('INSERT INTO schedules VALUES (?,1,0,?,NULL)').bind('health-minute','scheduler').run();
  server=http.createServer(async(req,res)=>{
   try{
    if(req.headers.host!==`127.0.0.1:${server.address().port}`){res.writeHead(403);res.end();return;}
    if(req.url==='/favicon.ico'){res.writeHead(204);res.end();return;}
    if(req.url==='/login'){loginHits++;res.writeHead(200,{'Content-Type':'text/html'});res.end('<html>synthetic login</html>');return;}
-   assert(['/','/styles.css','/dashboard.mjs','/api/bootstrap','/api/commands','/api/runner/claim','/api/runner/report'].includes(req.url)||/^\/api\/commands\/[a-zA-Z0-9-]+(?:\/artifact|\/cancel)?$/.test(req.url));
+   assert(['/','/styles.css','/dashboard.mjs','/api/bootstrap','/api/commands','/api/health-schedule','/api/runner/claim','/api/runner/report'].includes(req.url)||/^\/api\/commands\/[a-zA-Z0-9-]+(?:\/artifact|\/cancel)?$/.test(req.url));
    const chunks=[];let length=0;for await(const b of req){length+=b.length;assert(length<=32768);chunks.push(b);}const body=Buffer.concat(chunks);
    if(req.url.startsWith('/api/')){
     apiCalls++;assert(apiCalls<=300);
@@ -114,6 +116,8 @@ try {
  await send('Runtime.enable');await send('Page.enable');
  await send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
  await send('Page.navigate',{url:base});await until('document.querySelector("#submit") && !document.querySelector("#submit").disabled');
+ assert(await evaluate('document.querySelector("#schedule").textContent.includes("已停用") && document.querySelector("#schedule").textContent.includes("15 分鐘")'));
+ checks.push('bounded schedule panel shows disabled15minute policy without liveness claim');
  dropSubmit=true;await click('#submit');await until('!document.querySelector("#retry").hidden && !document.querySelector("#retry").disabled');
  assert(submitBodies.length>=1);assert.equal(new Set(submitBodies).size,1);assert.equal(await db.prepare('SELECT count(*) n FROM commands').first('n'),1);
  mode='401';await refresh();assert(await evaluate('!document.querySelector("#retry").hidden && document.querySelector("#retry").disabled'));
@@ -192,6 +196,12 @@ try {
  await db.prepare("UPDATE grants SET revision=revision+1,policy=? WHERE id='human'").bind(JSON.stringify({...common,principal_id:'human',capabilities:['commands:read']})).run();
  await refresh();assert(await evaluate('document.querySelector("#submit").disabled && document.querySelectorAll(".command-card button").length===0 && document.querySelectorAll(".command-card").length===3'));
  checks.push('read-only capability refresh retains history and removes submit/cancel/artifact controls');
+ await db.prepare('UPDATE schedules SET enabled=1 WHERE id=?').bind('health-minute').run();
+ const trigger=await (await mf.getWorker()).scheduled({scheduledTime:new Date(Math.floor(now/60000)*60000),cron:'*/15 * * * *'});
+ assert.equal(trigger.outcome,'ok');
+ await refresh();assert(await evaluate('document.querySelector("#schedule").textContent.includes("最近觸發") && /已有工作|錯過時段/.test(document.querySelector("#schedule").textContent)'));
+ assert.equal(await db.prepare('SELECT count(*) n FROM commands').first('n'),3);
+ await screenshot('schedule');checks.push('actual scheduled callback records overlap/misfire; read-only browser sees skipped trigger with unchanged unknown command');
  assert.deepEqual(errors,[]);
  writeFileSync(join(evidence,'browser.json'),JSON.stringify({status:'passed',scope:'local actual workerd/D1; synthetic JWT; Chromium viewport, not physical mobile or real Access',version,miniflare:require('miniflare/package.json').version,checks,sourceHashes,apiCalls,errors},null,2)+'\n',{flag:'wx'});
  console.log(JSON.stringify({status:'passed',checks,version:version.product}));

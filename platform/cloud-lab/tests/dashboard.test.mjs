@@ -161,7 +161,7 @@ function mounted(t, client) {
   globalThis.addEventListener = () => {};
   t.after(() => { if (original) globalThis.addEventListener = original; else delete globalThis.addEventListener; });
   t.mock.method(globalThis, 'setInterval', () => 0);
-  const stop = mount(doc, client); t.after(stop);
+  const stop = mount(doc, {schedule: async () => ({schema_version:'cloudlab.health-schedule.v1',cron_verified:false,schedule:null,now}), ...client}); t.after(stop);
   return { doc, node: doc.getElementById, settled: () => new Promise(resolve => setImmediate(resolve)) };
 }
 const bootstrapFixture = () => ({ now, workspace_id: 'test', resource_ref: { resource_id: 'node', generation: 1 },
@@ -196,4 +196,22 @@ for (const lateStatus of [200, 403]) test(`obsolete artifact ${lateStatus} canno
   await action;
   assert.equal(ui.node('submit').disabled, false); assert.equal(ui.node('total-count').textContent, '1');
   assert.equal(ui.node('message').hidden, true); assert.equal(downloads, 0);
+});
+
+const scheduleFixture = () => ({schema_version:'cloudlab.health-schedule.v1',cron_verified:false,now,schedule:{id:'health-minute',revision:1,enabled:true,status:'ready',interval_minutes:15,not_before:'2026-10-26T16:00:00Z',expires_at:'2026-10-27T16:00:00Z',next_due_at:'2026-10-26T16:15:00Z',last_firing:{due_at:'2026-10-26T16:00:00Z',outcome:'submitted',command_id:'scheduled-one'},latest_result:record()}});
+test('schedule panel renders next slot and historical result without claiming Cron verification',async t=>{
+ const client={bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:[]}),schedule:async()=>scheduleFixture()};const ui=mounted(t,client);await ui.settled();
+ assert.match(ui.node('schedule').textContent,/15 分鐘/);assert.match(ui.node('schedule').textContent,/16:15:00Z/);assert.match(ui.node('schedule').textContent,/不代表觸發器或執行端在線/);assert.match(ui.node('schedule').textContent,/最近完成觀測/);
+});
+test('schedule auth denial clears old schedule content and requires explicit recovery',async t=>{
+ let denied=false;const client={bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:[]}),schedule:async()=>{if(denied)throw Object.assign(new Error('denied'),{status:403});return scheduleFixture();}};
+ const ui=mounted(t,client);await ui.settled();assert.match(ui.node('schedule').textContent,/15 分鐘/);denied=true;await ui.node('refresh').click();assert.doesNotMatch(ui.node('schedule').textContent,/15 分鐘|scheduled-one/);assert.equal(ui.node('submit').disabled,true);
+ denied=false;await ui.node('refresh').click();assert.match(ui.node('schedule').textContent,/15 分鐘/);
+});
+test('schedule result becomes stale and past next slot is not advertised as future',async t=>{
+ const old=scheduleFixture();old.schedule.next_due_at='2026-10-26T16:00:00Z';old.schedule.latest_result.result.finished_at='2026-10-26T15:00:00Z';
+ const ui=mounted(t,{bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:[]}),schedule:async()=>old});await ui.settled();assert.match(ui.node('schedule').textContent,/觀測已過期/);assert.match(ui.node('schedule').textContent,/等待更新/);assert.doesNotMatch(ui.node('schedule').textContent,/Collector 正常/);
+});
+test('schedule API uses the authenticated read route',async()=>{
+ const paths=[];const client=createClient(async(path,init)=>{paths.push(path);assert.equal(init.method,'GET');return Response.json(scheduleFixture());});assert.equal((await client.schedule()).schema_version,'cloudlab.health-schedule.v1');assert.deepEqual(paths,['/api/health-schedule']);
 });

@@ -87,3 +87,5 @@ RO Git交付已獲owner明確push批准，恢復正常PR／CI／merge與任務�
 Owner明確批准後，[OL01–04實際接入](docs/evidence/m1-observation-live.md)已完成Worker100%、bot／runner短期授權、真實AS／SA／RO與正常停止回讀；原業務資料、journal、Access policy與排程保持。未擴大scope或付費；human／scheduler仍過期，未驗自然到期或真人session，完整主線pending。
 
 本輪開始[SR01–04常態runner服務模式](docs/service-runner.md)：獨立服務政策、啟動自身授權核對、期限與journal恢復；[236tests與實際本機程序／HTTP證據](docs/evidence/m1-service-runner.md)通過；獨立複審ACCEPT，未啟用live常態服務，完整主線pending。
+
+本輪開始[SP01–04常態啟用準備](docs/service-activation.md)：離線proposal、用量估算、固定source與唯讀前態；[249tests、私人CLI與唯讀候選證據](docs/evidence/m1-service-activation.md)通過；T834獨立審查ACCEPT，未續權或啟用服務。

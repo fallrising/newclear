@@ -99,3 +99,5 @@ Owner已批准[HL01–04實際低頻排程接入](docs/evidence/m1-health-schedu
 本輪開始[BC01–04固定bot bridge](docs/bot-bridge.md)：結構化健康檢查／查詢、durable重送及誠實結果投影。[283項本機回歸及HTTP／CLI閉環](docs/evidence/m1-bot-bridge.md)通過；不呼叫Grok模型、不續live授權或改部署，完整主線pending。
 
 本輪開始[MT01–04本機MCP入口](docs/mcp-stdio.md)：固定check/status工具、可信host參數、有界子程序與誠實未知投影；[300tests及獨立ACCEPT](docs/evidence/m1-mcp-stdio.md)通過，實際Grok／live接線及完整主線pending。
+
+本輪開始[GC01–04獨立Grok工具接線](docs/grok-connection.md)：固定source、現有client註冊／doctor、唯讀status與真實授權診斷；[原生client／工具與授權診斷](docs/evidence/m1-grok-connection.md)完成，bot grant過期而Access仍有效；未續權、不呼叫模型或改付費，自然語言與live提交待驗。

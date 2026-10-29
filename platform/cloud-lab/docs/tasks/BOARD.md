@@ -313,3 +313,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40894457006`、Project success `40894456965`、llms `40894457104`。本機300tests（62Node238Python）及六項文件／索引／task／report／diff檢查通過；T839獨立ACCEPT。[MT證據](../evidence/m1-mcp-stdio.md)保留RED、真實stdio／HTTP已收POST後timeout、重啟同ID恢復且只有一筆命令、實際collector及撤權驗證。
 - 既有GitHub connector交付與匿名HTTPS回讀；remote tree `4f55ca9caf3bccc29f3fc77ca17db8a150c980c1`與已測local commit `6e8a39d5451a984eab6631cd7de83089dc1340a3`完全相同，commit身份不同。fetch_pr兩次internal error，改用get_pr_info核對head／mergeable及合併時間成功，無憑證修改或繞過CI。
 - MT01–04 source／local完成；未安裝實際工具host、呼叫Grok、續權、改Kith或Cloudflare部署，無新增付費。實際client／live及完整主線仍pending，無usabletag；HL資產API500獨立保持T-0015未完成。本收尾只改任務板、只關閉MT。
+
+## T-0018 — 獨立 Grok 工具接線
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0018-1 | 固定source與私人前態 | GC-01 | in_progress | 2026-10-29T14:58:38Z | — | 2026-10-29T15:07:24Z |
+| T-0018-2 | Grok唯讀註冊與原生doctor | GC-02 | in_progress | 2026-10-29T14:58:38Z | — | 2026-10-29T15:07:24Z |
+| T-0018-3 | status與真實授權診斷 | GC-03 | in_progress | 2026-10-29T14:58:38Z | — | 2026-10-29T15:07:24Z |
+| T-0018-4 | 證據、審查與交付 | GC-04 | in_progress | 2026-10-29T14:58:38Z | — | 2026-10-29T15:07:24Z |

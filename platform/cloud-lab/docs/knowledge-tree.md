@@ -61,3 +61,5 @@ CL Cloud Lab
 BC補充：AU-01的[固定bot caller](../tools/bot_bridge.py)及[JSON契約](bot-bridge.md)已本機驗證durable提交／查詢；[證據](evidence/m1-bot-bridge.md)區分真正HTTP collector與尚未接線的Grok。它不接管Kith聊天室或agent原生run，亦不改HL部署pending。
 
 MT補充：AU-01的[本機MCP接入](mcp-stdio.md)重用BC固定工具與durable ID，不建立第二份命令權威；[證據](evidence/m1-mcp-stdio.md)含實際stdio／HTTP／collector，Kith INV-09保持。
+
+GC補充：AU-01的[獨立Grok工具端](grok-connection.md)已登記status-only MCP，原生client發現通過；bot grant過期與自然語言執行仍待後續，Kith權責保持。

@@ -39,7 +39,7 @@ Owner 直接指示，T-0001／Session `Memvid-20261028`。先記錄本合約及 
 
 全部八項 AC 已取得本機實跑證據：15 個場景及八項 CLI 邊界通過。Runtime 的 15 個 source／lock hash 已與報告核對。
 `mainline: complete` 僅指原場景實驗：已合併、四項 CI success、兩份獨立審查 ACCEPT；未聲稱產品化或正式部署。
-2026-10-29 回讀確認：驗證 head `67132cd45bcd4e53fb61d4a1f6b650408f34e2e8` 到本次 base 的元件差異只有任務板，runtime／lock／workflow 未變，沿用既有實跑證據。後續繁中筆記評估仍待執行，見獨立規格與任務板。
+2026-10-29 回讀確認：驗證 head `67132cd45bcd4e53fb61d4a1f6b650408f34e2e8` 到本次 base 的元件差異只有任務板，runtime／lock／workflow 未變，沿用既有實跑證據。後續繁中筆記評估已取得獨立實測，見 [結果](docs/notes-usability-results.md) 與任務板；它不更動原 AC-01～08。
 原始 SDK 的詞彙索引漏失、ask 擴大 context、中文／底線符號查詢，以及 Whisper cache 限制詳列於 [README](README.md) 與 [原始／最終證據](docs/evidence/README.md)。
 本次成功指明示適配後的有界實驗，不宣稱所有 upstream 原始路徑已無缺陷。
 
@@ -51,3 +51,10 @@ Owner 直接指示，T-0001／Session `Memvid-20261028`。先記錄本合約及 
 ## 可用版本
 
 `usable_tag: none`。原場景實驗完成與可用版本發布分開；owner 本輪授權程式／文件的 commit、PR 與合併，沒有授權 release／usable tag 或部署。
+
+
+## 後續里程碑 T-0436
+
+[固定規格](docs/notes-usability.md) 與 [結果](docs/notes-usability-results.md) 分開保留。NU-01 由 #773 完成狀態同步；NU-02–05 已有固定語料、兩種真 SDK 檢索、current view／刪除／新程序重開與 100／1000 筆實測證據，Git 交付以 [BOARD](docs/tasks/BOARD.md) 為準。
+
+原生 Recall/MRR=0.25、CJK 二字組=0.4583，均未達探索性採用門檻；這是完成評估後的不採用結論，不冒稱搜尋品質成功。來源完整性與更新控制通過；原生 append 仍保留可搜尋舊版。完整 JSON 含逐 query hits／frame manifest 與來源 hash，初次開發失敗另存。

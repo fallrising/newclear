@@ -2,7 +2,7 @@ PYTHON ?= .venv/bin/python
 CARGO ?= cargo
 RUN_DIR := $(if $(RUN_DIR),$(RUN_DIR),work/run-$(shell date -u +%Y%m%dT%H%M%SZ))
 
-.PHONY: setup prepare check core full
+.PHONY: setup prepare check core full notes
 
 setup:
 	python3 -m venv .venv
@@ -16,10 +16,13 @@ prepare:
 
 check:
 	$(PYTHON) -m unittest discover -s tests -v
-	$(PYTHON) -m py_compile lab.py offline.py scenarios.py advanced.py models.py native-whisper/prepare_core.py native-whisper/prepare_assets.py
+	$(PYTHON) -m py_compile lab.py offline.py scenarios.py advanced.py models.py notes_eval.py native-whisper/prepare_core.py native-whisper/prepare_assets.py
 
 core:
 	$(PYTHON) lab.py run --profile core --output "$(RUN_DIR)"
 
 full:
 	$(PYTHON) lab.py run --profile full --output "$(RUN_DIR)"
+
+notes:
+	$(PYTHON) notes_eval.py run --output "$(RUN_DIR)"

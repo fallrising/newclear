@@ -7,7 +7,7 @@
 2026-10-28 本機完整實跑 **15／15 通過**，CLI 邊界 **8／8 通過**；細節及原始失敗見 [執行紀錄](docs/evidence/README.md)。
 原場景實驗已於 2026-10-28 合併（[功能 #709](https://github.com/fallrising/newclear/pull/709)、[結案 #733](https://github.com/fallrising/newclear/pull/733)）；四項 CI 通過，八項 AC 結案。`usable_tag: none`，未部署。
 
-2026-10-29 owner 批准接續 [T-0436 繁中筆記可用性評估](docs/notes-usability.md)：M1 同步狀態，M2 量測檢索、來源、更新與規模成本。這是獨立後續里程碑，原場景實驗的完成範圍不變。
+2026-10-29 owner 批准接續 [T-0436 繁中筆記可用性評估](docs/notes-usability.md)：M1 已同步狀態；M2 的 [實測結論](docs/notes-usability-results.md) 不建議直接採用目前兩種策略作自然語句搜尋。這是獨立後續里程碑，原場景實驗的完成範圍不變。
 
 ## 執行
 
@@ -97,3 +97,19 @@ make core RUN_DIR=work/core-001
 `make check` 執行真 SDK／CLI 的八項邊界 regression；`make full` 是場景與模型驗收。
 repo 根目錄另執行 `python3 scripts/check_indexes.py` 與 `python3 .github/scripts/check_workflows.py`。
 CI 入口：[memvid-lab-ci.yml](../../.github/workflows/memvid-lab-ci.yml)。任務與交付：[BOARD.md](docs/tasks/BOARD.md)。
+
+## 繁中筆記可用性評估（T-0436）
+
+[固定規格](docs/notes-usability.md) 定義兩種策略、24 則合成筆記與 30 條預先標註的查詢。沿用現有 SDK 鎖檔，不需要模型下載：
+
+```sh
+make setup
+make check
+make notes RUN_DIR=work/notes-demo-001
+```
+
+`notes` 執行兩種真 SDK 策略、更新／刪除／新程序重開及 100／1000 筆規模量測，輸出 `report.json`。每個子程序上限 180 秒；runtime 封鎖網路。查詢品質低仍是有效實驗結果，以 `decisions` 表達不建議採用；資料錯誤、來源不符、更新失敗或逾時則記錄 errors、非零結束。既有輸出目錄拒絕覆寫，語料 hash 與預先凍結值不符也拒絕執行。
+
+查詢輸出是來源檢索，無生成式回答。CJK 二字組屬 lab 預處理，不是中文語意模型；來源核對檢查完整 SDK renderer 文字／URI／frame，不宣稱原文 bytes 無損保存。規模資料為確定性合成干擾資料，計時不是 production 保證。
+
+品質結果與限制見 [繁中筆記評估結果](docs/notes-usability-results.md)，完整原始輸出見 [評估 JSON](docs/evidence/notes-evaluation.json)。

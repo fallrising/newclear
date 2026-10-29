@@ -25,3 +25,20 @@ Claim: desk #293 merged. Start: 2026-10-29T16:49:00Z (approximate); projected ag
 - Native tools used, no external CLI provider dispatch. Provider requests/tokens/cost and exact active/wait split: unknown. Tool-call counts are observational only; this file does not invent totals.
 - Environment preparation: existing `wt` required elevated access to main-clone Git metadata; normal call failed read-only, approved tool retry succeeded. Shared uv cache similarly requires normal authorized setup escalation.
 - M1 independent review ACCEPT after two documented corrections (reports/T-001.md). NU-01 evidence gate: merged PR and historical CI readbacks + unchanged runtime + local index checks support status reconciliation. New baseline `make check`: 8 passed; `make core RUN_DIR=work/core-baseline`: 12 passed/3 not_run (model profile intentionally unselected); PDF AWT warning followed by successful native fallback. Candidate CI/merge pending. M2 pending.
+
+## M2 execution checkpoint
+
+M1 #773 merged at 2026-10-29T17:02:27Z, SHA da6d735d98ffa77b363cab7cffd4715b2a864dd6; three candidate CI workflows success. M2 branch starts from that merged main. Corpus writer T-002 accepted after orchestrator read of all 24 notes/30 queries and hash/schema checks; frozen SHA a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970. Original writer worktree isolated, no retrieval until freeze.
+
+TDD: initial missing-module red; four metric tests green; true SDK integration found SDK renderer normalization mismatch. Failure preserved in docs/evidence/notes-development.md. A strict full-render comparison (not substring) fixed it; 15 tests now pass. Full 100/1000 evaluation running in separate bounded processes, followed by T-003 independent review. Per scale process timeout 180 seconds, retained report after every job. No threshold/corpus revisions.
+
+2026-10-29T17:08:00Z checkpoint: ~19 minutes elapsed since approximate initial start; aggregate root/workers active estimated 25–30 minutes, exact split unknown. M1 delivered. M2 fifteen tests pass; native quality Recall/MRR .25, CJK .458333, precision/integrity1 and unknown FP0; natural paraphrases remain misses. Native append returns old+new, current filter passes. Native scale100/1000 complete (7.407s/91.368s build); CJK100 done, CJK1000 running. Review requested a persisted ingest manifest to audit frame mapping; will preserve this intermediate report, add metadata only after run exits, rerun final candidate and review. No corpus/threshold edits. Remaining CI/review/Git/handoff stays within original 60–90min estimate.
+
+
+## M2 evidence gate
+
+- NU-02: final JSON records 30 fixed queries × 2 strategies, raw hits, ranked URIs, frame-keyed manifests, global/category metrics and frozen corpus hash; retrieval/adoption FAIL remains explicit (not an execution failure).
+- NU-03: both strategies persist old/new frames, native queries expose both, application current filter excludes old; native remove absent after child-process reopen.
+- NU-04: both strategies × 100/1000 actual counts, write/rebuild seconds, file bytes and 50 warmed timings each; every job completed within 180s. Final source/corpus hashes verified.
+- NU-05: final make check 16 passed and py_compile; first red/failure and fixes preserved; existing core baseline12 passed/3 deliberately unselected models. Pinned actionlint1.7.12 for changed workflow passed; index preflight47 contracts/8 llms files passed.
+- Independent reviewer T-003 ACCEPT, independently recomputed manifests, metrics, decisions and scale samples; reports/T-003.md. Candidate CI pending. Original full model suite will run in required CI. No runtime scope beyond fixed lexical/bigram evaluation, no dependency change.

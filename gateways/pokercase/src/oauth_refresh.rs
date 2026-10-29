@@ -97,7 +97,16 @@ impl TestTransport {
 }
 
 pub async fn refresh_connection(store: &Store, conn: &ConnectionRow) -> AppResult<ConnectionRow> {
-    refresh_connection_using(store, conn, None, crate::siwc::AUTH_BASE, XAI_TOKEN_URL).await
+    refresh_connection_using(
+        store,
+        conn,
+        None,
+        crate::siwc::AUTH_BASE,
+        XAI_TOKEN_URL,
+        #[cfg(test)]
+        None,
+    )
+    .await
 }
 
 #[cfg(test)]
@@ -112,6 +121,24 @@ pub(crate) async fn refresh_connection_for_test(
         Some(&transport.http),
         &transport.siwc_auth_base,
         &transport.xai_token_url,
+        None,
+    )
+    .await
+}
+
+#[cfg(test)]
+pub(crate) async fn refresh_antigravity_connection_for_test(
+    store: &Store,
+    conn: &ConnectionRow,
+    transport: &crate::antigravity_test_transport::AntigravityTestTransport,
+) -> AppResult<ConnectionRow> {
+    refresh_connection_using(
+        store,
+        conn,
+        None,
+        crate::siwc::AUTH_BASE,
+        XAI_TOKEN_URL,
+        Some(transport),
     )
     .await
 }
@@ -122,6 +149,9 @@ async fn refresh_connection_using(
     http: Option<&reqwest::Client>,
     siwc_auth_base: &str,
     xai_token_url: &str,
+    #[cfg(test)] agy_transport: Option<
+        &crate::antigravity_test_transport::AntigravityTestTransport,
+    >,
 ) -> AppResult<ConnectionRow> {
     if crate::borrowed::source(conn).is_some() {
         return Err(AppError::BadRequest(format!(
@@ -152,6 +182,12 @@ async fn refresh_connection_using(
         .ok_or_else(|| AppError::BadRequest("no refresh_token stored".into()))?;
 
     let provider = oauth.provider.as_str();
+    #[cfg(test)]
+    if let Some(transport) = agy_transport {
+        transport
+            .require_provider(provider)
+            .map_err(AppError::BadRequest)?;
+    }
     info!(connection = %conn.name, provider, "refreshing oauth token");
 
     let tokens = match provider {
@@ -188,7 +224,36 @@ async fn refresh_connection_using(
             }
         }
         "grok" | "xai" | "grok_cli" => refresh_xai(refresh, http, xai_token_url).await?,
-        "agy" | "ag" | "antigravity" => refresh_google_antigravity(refresh).await?,
+        "agy" | "ag" | "antigravity" => {
+            #[cfg(test)]
+            {
+                if let Some(transport) = agy_transport {
+                    let request = transport
+                        .request(
+                            reqwest::Method::POST,
+                            crate::antigravity_test_transport::TOKEN_URL,
+                        )
+                        .map_err(AppError::BadRequest)?;
+                    refresh_google_antigravity_using(
+                        request,
+                        refresh,
+                        crate::antigravity_test_transport::CLIENT_ID,
+                        crate::antigravity_test_transport::CLIENT_SECRET,
+                    )
+                    .await?
+                } else if http.is_some() {
+                    // An installed SIWC/Grok test transport cannot silently send
+                    // Google refresh through the production client/environment.
+                    return Err(AppError::BadRequest(
+                        "Google refresh requires the sealed Antigravity test transport".into(),
+                    ));
+                } else {
+                    refresh_google_antigravity(refresh).await?
+                }
+            }
+            #[cfg(not(test))]
+            refresh_google_antigravity(refresh).await?
+        }
         other => {
             return Err(AppError::BadRequest(format!(
                 "refresh not implemented for provider '{other}'"
@@ -284,14 +349,28 @@ async fn refresh_google_antigravity(refresh_token: &str) -> AppResult<RefreshedT
         )
     })?;
     let client = crate::http_client::build_http_client().map_err(AppError::Internal)?;
+    refresh_google_antigravity_using(
+        client.post("https://oauth2.googleapis.com/token"),
+        refresh_token,
+        &client_id,
+        &client_secret,
+    )
+    .await
+}
+
+async fn refresh_google_antigravity_using(
+    request: reqwest::RequestBuilder,
+    refresh_token: &str,
+    client_id: &str,
+    client_secret: &str,
+) -> AppResult<RefreshedTokens> {
     let body = format!(
         "grant_type=refresh_token&refresh_token={}&client_id={}&client_secret={}",
         urlencoding_minimal(refresh_token),
-        urlencoding_minimal(&client_id),
-        urlencoding_minimal(&client_secret),
+        urlencoding_minimal(client_id),
+        urlencoding_minimal(client_secret),
     );
-    let resp = client
-        .post("https://oauth2.googleapis.com/token")
+    let resp = request
         .header("content-type", "application/x-www-form-urlencoded")
         .header("accept", "application/json")
         .body(body)

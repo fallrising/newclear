@@ -562,3 +562,12 @@ named HTTP九階段隔離旅程通過：41筆attempt（34 succeeded、5 failed�
 本份為產品merge時點快照。NH-5全流程的後續帳本發布、完整備份`t0432-named-http-settlement-20261029`逐檔核對及本輪工作樹清理，以私人`t0432-named-http-settlement/handoff.json`最終事實核實，不預先宣稱完成；完整操作位置留在私人交接。完成此有界切片即停止，不啟動下一里程碑。
 
 最終artifact核對另從乾淨已提交source做locked build，仍得到同一b032binary，四條旅程及serve再次通過。共享target曾呈現另一digest；兩條追加旅程因root傳入該digest而在fixture啟動前被guard拒絕，改用實測locked-build digest後通過，原失敗保留、保護不變；不把這當#701根因證據。
+
+
+## T-0434 — Antigravity offline HTTP isolation
+
+Owner authorized #702 as an independent isolation slice. [Fixed AI-1–AI-5, source matrix and design](docs/tasks/T-0434-antigravity-isolation.md) establish test-only controlled inference/refresh/discovery before actual HTTP acceptance. Documentation was frozen before implementation. Independent source gate and six transport proofs passed before seven-stage real gateway HTTP acceptance:37inference/3discovery/7refresh/0unexpected destinations,36legacy usage rows, all owned-resource cleanup passed. Full360Rust/22groups,74Python,20validator tests,46contracts/7indexes, fmt/Clippy/locked build and all four prior nine-stage journeys passed locally. Final product review/publication/ledger/backup/cleanup remain separate gates.
+
+Existing stream passthrough still has no native conversion or durable usage observer; malformedHTTP200→400 with no usage row remains a measured gap. Legacy buffered configured-rate estimates are not subscription bills. No provider capability or live validation is added. Original17AC/T1102/Cargo/prior deliveries remain; mainline incomplete, usable_tag none, desk in_progress. [Headless offline entry](docs/ANTIGRAVITY-OFFLINE.md) uses an independently preserved test executable; it does not add a production login/demo option or relax the OAuth allowlist.
+
+Append-only owner evidence: after the previous handoff/backup, owner personally reran the namedHTTP entry; nine stages and cleanup passed with41inference/3discovery/0unexpected destinations and original b032binary digest. ReportSHA256 `3a3ef04c6bb391fa2d7acafb8488a2bdaac5f42d949494c132d8574c9c66673d`. Earlier owner-not-run statements describe their original snapshot; the old backup did not contain this later report. This establishes owner offline rerun only, not whole-product/live-provider acceptance. Historical T-0428 official-endpoint synthetic401 is retained and not retried.

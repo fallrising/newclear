@@ -232,6 +232,39 @@ test('review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008',{skip},
  }finally{await big.close();}
 });
 
+// The actual controller over the real HTTPS/WSS transport; frames are reduced to type, code and numeric fields.
+function controllerOver(env){const storage=new Map(),seen=[],frames=[];let state,cookie='';
+ const fetch=async(path,init)=>{const headers=Object.fromEntries(new Headers(init.headers));if(cookie)headers.cookie=cookie;if(init.method!=='GET')headers.origin=env.origin;
+  const r=await call(env,{method:init.method,path,headers,body:init.body??''});seen.push({method:init.method,path,r});
+  if(r.headers['set-cookie']){const sc=r.headers['set-cookie'][0];cookie=/;\s*Max-Age=0(;|$)/.test(sc)?'':sc.split(';')[0];}
+  const out=new Headers();for(const[k,v]of Object.entries(r.headers))if(k!=='set-cookie')out.set(k,Array.isArray(v)?v.join(', '):v);
+  return new Response(r.status===204?null:r.body,{status:r.status,headers:out});};
+ const reduce=(dir,text)=>{const f=JSON.parse(text);frames.push({dir,type:f.type,...(f.code?{code:f.code}:{}),...Object.fromEntries(['after_seq','oldest_available','latest_available'].filter(k=>k in f).map(k=>[k,f[k]]))});};
+ const createWebSocket=url=>{assert.equal(url,env.origin.replace('https:','wss:')+api+'/session/stream');const shim={};
+  const sock=new WsClient(url,{ca:tls.ca,perMessageDeflate:false,headers:{origin:env.origin,cookie}});
+  sock.on('open',()=>shim.onopen?.());sock.on('message',data=>{reduce('received',data.toString());shim.onmessage?.({data:data.toString()});});sock.on('error',()=>shim.onerror?.());sock.on('close',(code,reason)=>shim.onclose?.({code,reason:reason.toString()}));
+  shim.send=raw=>{reduce('sent',raw);sock.send(raw);};shim.close=(code,reason)=>sock.close(code,reason);return shim;};
+ const controller=createP0Controller({location:{origin:env.origin},randomUUID,storage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},setTimeout,clearTimeout,AbortController,TextEncoder,TextDecoder,publish:s=>state=s,fetch,createWebSocket});
+ return {controller,seen,frames,storage,state:()=>state,cookie:()=>cookie};
+}
+
+// SPEC-T006R-harness-repair-c2 C202.2 rehearsed without a browser: the exact R06 schedule against the actual controller.
+test('review_r06_gap_after_restart_resubscribes_at_snapshot_without_resend',{skip,timeout:20000},async()=>{
+ const env=await start('authenticated-ready',{historyCapacity:64}),client=controllerOver(env);
+ try{await client.controller.load();assert.equal(await client.controller.authenticate(bearer),true);await until(()=>client.state().connection==='connected');
+  assert.equal(await client.controller.submitPrompt('Synthetic R06 prompt'),true);await until(()=>[...client.storage.values()].some(v=>JSON.parse(v).event_seq===2));
+  const mark=client.seen.length,other=await authenticate(env);env.transport.holdReconnect(5000);const t0=performance.now();
+  await call(env,{method:'POST',path:api+'/session/cancel',headers:mutationHeaders(env,other)});await cycles(env,other,16);
+  assert(performance.now()-t0<4000,'gap setup within the reconnect hold');assert.equal(env.fixture.summary().sequence,68);
+  await until(()=>{const i=client.frames.findIndex(f=>f.code==='history_gap');return i>=0&&client.frames.slice(i+1).some(f=>f.type==='replay_end');},12000);await until(()=>client.state().connection==='connected');
+  await client.controller.refresh();
+  const gaps=client.frames.filter(f=>f.code==='history_gap');assert.deepEqual(gaps,[{dir:'received',type:'error',code:'history_gap',oldest_available:5,latest_available:68}]);
+  const i=client.frames.indexOf(gaps[0]);assert.equal(client.frames.slice(0,i).filter(f=>f.type==='subscribe').at(-1).after_seq,2);assert.equal(client.frames.slice(i+1).find(f=>f.type==='subscribe').after_seq,68);
+  assert.deepEqual(client.seen.slice(mark).map(x=>x.method).filter(m=>m!=='GET'),[]);assert.equal(client.seen.filter(x=>x.method==='POST'&&x.path===api+'/session/turns').length,1);
+  assert.equal(env.fixture.summary().counts['POST '+api+'/session/turns'],17);
+ }finally{client.controller.dispose();await env.close();}
+});
+
 test('review_http_over_https_matches_actual_controller_contract',{skip},async()=>{
  const env=await start('success-diff'),storage=new Map(),seen=[];let state,cookie='';
  const fetch=async(path,init)=>{const headers=Object.fromEntries(new Headers(init.headers));if(cookie)headers.cookie=cookie;if(init.method!=='GET')headers.origin=env.origin;

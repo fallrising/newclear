@@ -48,6 +48,7 @@ H05 — Unchanged: the 1024-byte subscribe bound, the five-second subscribe dead
 T01 — `fe-review/conformance-transport.node.mjs`:
 - The two finding tests become contract oracles: `review_wss_upgrade_refusals_are_safe_json_in_product_order` (H01) and `review_wss_subscriber_limit_is_typed_1013` (H02).
 - It adds `review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008` (H03, H04). That covers `history_gap` with exact bounds and close 1008; `subscriber_lagged` with close 1013 and no frame after it; `stream_unavailable` with close 1013 and no replay frame; and `REVIEW_LIMITS` for out-of-range settings.
+- It adds `review_r06_gap_after_restart_resubscribes_at_snapshot_without_resend`, which runs the C202.2 schedule without a browser: the actual controller over the real HTTPS/WSS transport, with `historyCapacity: 64`, a 1012 restart and 68 events moved by a second session. It proves the expected frames (subscribe at 2, one `history_gap` with 5/68, resubscribe at 68) and that no mutation is resent.
 - Every existing oracle stays and still passes.
 
 T02 — Historical runners. The v4–v7 runners pin the pre-repair `fixture.mjs` and `transport.mjs`. Their pin tests compare those two names with the recorded pre-repair hashes, and check that the current files differ, in the same way as the M2 asset pins. The v1 trace-transport restore test (`initial-lifecycle.node.mjs`) compares the stripped trace transport with the pre-repair `transport.mjs` hash instead of the current file. That changes its bytes, so the frozen suite hashes that chain from it are updated in order: v1 in `initial-lifecycle-v2.node.mjs`, v1 and v2 in `initial-lifecycle-v3.node.mjs`, and v3 in `initial-lifecycle-v4.node.mjs`. No runner file changes.
@@ -76,7 +77,7 @@ C202 — Checks, in this order, in one browser:
      - the received frames include exactly one `history_gap` with `oldest_available` 5 and `latest_available` 68;
      - the next subscribe uses `after_seq` 68.
 3. **R07 keyboard and names (desktop and mobile).** Scenario `success-diff`: keyboard authentication, a turn, completion and Show diff. Then:
-   - Tab traversal from the document start, at most 60 presses, lands on `#event-list` and `#diff-output`. Each landing matches `:focus-visible` and has a computed outline style other than `none` with a width above 0. A screenshot of each landing goes into the private evidence.
+   - Tab traversal from the document start (focus moved to `body`), at most 60 presses, lands on `#event-list` and `#diff-output`. Each landing matches `:focus-visible` and has a computed outline style other than `none` with a width above 0. A screenshot of each landing goes into the private evidence.
    - The measured accessible names agree in two ways. Playwright's `getByRole('region', {name, exact:true})` resolves each heading text to its region. Chromium's accessibility tree (`Accessibility.getPartialAXTree` over CDP) reports role `region` and the heading text as the name.
    - On mobile, `#diff-output` overflows vertically (`scrollHeight > clientHeight`). With it focused, ArrowDown and then PageDown each increase `scrollTop`. On desktop, and for `#event-list`, overflow and keyboard scroll are recorded but not required.
 

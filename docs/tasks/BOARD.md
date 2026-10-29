@@ -98,5 +98,5 @@ Overall delivery is18of19. Fanz PR604 remains incomplete: bootstrap001-only PASS
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T0440-1 | Embedded favicon route and native regression | AC-F01 | in_progress | 2026-10-29T17:41:52.916453+00:00 | — | 2026-10-29T17:41:52.916453+00:00 |
-| T0440-2 | Focused Chromium evidence and acceptance | AC-F02–F04 | todo | — | — | 2026-10-29T17:41:52.916453+00:00 |
+| T0440-1 | Embedded favicon route and native regression | AC-F01 | in_progress | 2026-10-29T17:41:52.916453+00:00 | — | 2026-10-29T17:54:54.908805+00:00 |
+| T0440-2 | Focused Chromium evidence and acceptance | AC-F02–F04 | in_progress | 2026-10-29T17:53:43.505657+00:00 | — | 2026-10-29T17:54:54.908805+00:00 |

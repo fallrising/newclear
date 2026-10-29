@@ -409,4 +409,4 @@ Delivery: Codex (GPT family) implements, an independent Claude review checks the
 
 ## T-0440 favicon and browser follow-up — 2026-10-29
 
-Scope: [SPEC-T006F](docs/specs/SPEC-T006F-browser-followup.md) AC-F01–F04. Add the embedded favicon without changing CSP, and observe the T-0438 close/spacing fixes in a bounded fresh Chromium run. Native route checks establish the Rust boundary; browser evidence uses the synthetic review fixture. All four AC are pending. Historical T-0433/T-0438 evidence stays versioned; mainline AC-04/AC-05 and usable qualification are unchanged.
+Scope: [SPEC-T006F](docs/specs/SPEC-T006F-browser-followup.md) AC-F01–F04. Add the embedded favicon without changing CSP, and observe the T-0438 close/spacing fixes in a bounded fresh Chromium run. Native route checks establish the Rust boundary; browser evidence uses the synthetic review fixture. All four AC have passing observations in the [follow-up report](fe-review/tasks/followup/report.md); [independent final acceptance](docs/acceptance/T006F.acceptance.md) is ACCEPT. Historical T-0433/T-0438 evidence stays versioned; mainline AC-04/AC-05 and usable qualification are unchanged.

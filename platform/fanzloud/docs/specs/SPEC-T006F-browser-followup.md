@@ -1,6 +1,6 @@
 # T006F — Favicon and focused browser follow-up
 
-Status: specified for T-0440; implementation and runtime evidence pending.
+Status: implemented; `followup-001` ran once on `c973bcf3`, all AC observations PASS; independent final acceptance ACCEPT. See [ACCEPT-T006F](../acceptance/T006F.acceptance.md).
 Contract unit: CU-WEB-P0-01 (SPEC-T006). Owner direction, 2026-10-29: complete the previously deferred favicon fix and browser observation of the T-0438 fixes.
 
 ## Scope and design
@@ -29,3 +29,7 @@ Native commands: `cargo test --locked -p codebox-control-plane p0_web_`; `node -
 ## Semantics and exclusions
 
 Static reads are idempotent and have no side effects beyond existing route metrics. There is no new retry, recovery, authentication, persistence, cancellation or atomicity policy. Browser credentials and trust keys are private run-only artifacts; receipts omit them. Cleanup failure or unknown runtime outcome blocks acceptance. No runtime dependencies or permissions are broadened. Cloud entitlement smoke, durable actor/store/runtime integration, Round 3, releases and deployments remain outside this task.
+
+## Observed evidence
+
+[Focused follow-up report](../../fe-review/tasks/followup/report.md) records native/CI results, source-bound browser measurements, screenshots and cleanup. Historical evidence is unchanged.

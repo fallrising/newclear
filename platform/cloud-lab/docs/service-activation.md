@@ -51,3 +51,5 @@ D1 Free為每日500萬rows read、10萬rows written與總5GB儲存；超過每�
 本方案需連同補償一起批准。失敗／未知回覆先保存receipts並查實際狀態，不自動重試mutation。停止新resident並確認inactive／MainPID0及socket清理，還原原unit但保持inactive；原journal不清空、不搬移、不重做unknown。Worker若已變更則還原原secret期限／原已驗證版本，核對modules／settings；runner grant用新CAS恢復原過期policy並再增加revision，不能倒寫revision。原共用Access若不能精確還原過去期限，停用同一token並記錄對共享入口的影響，不改Access policy。任何在途工作／併發授權變更均先對帳，不直接覆蓋。
 
 自然到期後沒有自動續權。若仍需服務，重新確認範圍及期限，不把重啟視為新7日。只有一個仍無提交來源的runner不會自行生成健康檢查；低頻排程、真人登入／短期操作授權及保留／配額是後續任務。準備證據見[SP本輪證據](evidence/m1-service-activation.md)。
+
+後續owner已確認仍為Workers Free並批准上述方案；[SL實際執行結果](evidence/m1-service-live.md)記錄續權、啟動及保留運行的觀察。本頁SP準備階段的「未啟用」描述屬歷史階段，不取代SL的當次證據。

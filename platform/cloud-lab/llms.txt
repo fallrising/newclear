@@ -69,3 +69,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Service activation preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/service-activation.md): offline private non-executable proposal, explicit relative windows and request estimates; pinned runner candidate and read-only baseline, no live renewal/start.
 
 - [Service activation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-service-activation.md):249local tests, private CLI and unit validation; unknown D1/billing and stale metadata preserved.
+
+- [Routine service activation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-service-live.md): owner-confirmed Free, approved runner-only renewal and seven-day service started; self/resident verified and active at final readback, fixed ceiling2026-11-05T07:24:26Z; bot/human/scheduler expired, schedules off, future uptime/expiry and billing unverified.

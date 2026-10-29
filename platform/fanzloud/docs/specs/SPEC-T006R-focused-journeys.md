@@ -84,7 +84,7 @@ D03. Every journey records, each request and frame labelled with the journey pha
 - browser response statuses, by method and path;
 - WebSocket frames, reduced by the verdict module's `journeyFrame` to type, error code and numeric fields. A binary payload is recorded as `BINARY` and text that does not parse as `UNPARSEABLE`;
 - fixture counts per route;
-- the transport's upgrade and rejection counts;
+- the transport's upgrade and rejection counts, and the browser WebSocket close events with their phase. In every "no upgrade" window an attempt is an accepted or a refused upgrade, because after a restart, expiry or logout an attempt is refused with 401 and would not count as an accepted upgrade;
 - the DOM measure (`measureDOM`);
 - the sequence of `#error-message` texts, from a context init script with a `MutationObserver` (at most 64 entries, consecutive duplicates dropped). These are the client's fixed messages. A successful stream reconnect clears the error on `replay_end` (`p0-client.js`, `state.error = ""` in the `replay_end` branch). So a journey that reconnects checks that its message appeared in this sequence and that the final text is empty;
 - health: page errors, request failures and warning or error console messages.
@@ -94,6 +94,8 @@ Raw headers, bodies, cookies, bearer values, prompts and frame payloads are not 
 D04. Health is a pass condition of every journey part. There must be no page errors and no request failures, except those the journey names. Every warning or error console message must be `Failed to load resource` naming either a status the journey expects (each context's initial 401 before authentication, J02's 401 and 409) or the request failure it names. The number of such messages may not exceed the number of those expected responses and failures.
 
 D05. Canary scan. At the end of each journey the driver checks the following for the journey's bearer, the synthetic prompt text and the cookie value: visible DOM text, input values, every `sessionStorage` value, console text and the journey's public row. The cookie value is read in memory from the context and is never stored. A hit fails the journey with `REVIEW_CANARY` and records only which source hit.
+
+D06. Failure isolation. A journey that throws records its safe failure reason, counts as failed, and closes its own context and transport. The run then continues with the next journey, so one failure does not lose the evidence of the others. Cancellation and the deadline stay fatal, and nothing is retried.
 
 ### J01 — stored cursor and future cursor (N01)
 
@@ -129,7 +131,7 @@ Pass when:
 
 Part a, restart (scenario `authenticated-ready`):
 1. Authenticate and wait for `connected`.
-2. Close the transport. `close()` terminates its stream without a close frame, so the browser sees an abnormal close; the driver records the close as observed and does not claim 1012.
+2. Close the transport. `close()` terminates its stream without a close frame, so the browser sees an abnormal close. The driver records the browser's close event and does not claim 1012.
 3. Start a new fixture and transport on the same port with the same trusted key and certificate, but a new bearer, identity and session table. That is a restarted control plane: the browser's cookie is unknown to it.
    - From step 2 until the new transport is listening, the route delays `continue()` for same-origin requests, so the reconnect cannot reach a closed port. It never answers or aborts them.
    - The delay is capped at 5 s; past that the journey fails with `REVIEW_RESTART_GATE`.
@@ -190,10 +192,16 @@ Steps:
 
 Pass when:
 - during the 6 s no new stream upgrade reaches the transport (protocol error stops automatic reconnect);
-- after the keyboard Refresh, exactly one new upgrade and subscribe follow and the stream is `connected`;
+- after the keyboard Refresh, exactly one new upgrade and exactly one subscribe follow, and the stream is `connected`;
 - the browser sent no mutation after authentication, and the fixture's `effects` and `turnStarts` are unchanged since authentication (the bootstrap is the one effect).
 
-The pass also requires that the browser received exactly one frame of the injected kind. The pure test checks that the `unknown-field` frame minus its extra key deep-equals the fixture's valid lag frame.
+The pass also requires that the browser received exactly one frame of the injected kind.
+
+What J04 shows, and what it does not. After the protocol error the client calls `socket.close(1008, "")` (`p0-client.js`, `streamFailure`). The WebSocket API accepts only 1000 or 3000–4999 from a page and otherwise throws `InvalidAccessError`, which the client's try/catch swallows. Reading the source therefore suggests that in a browser the client leaves the socket open after a failure it detects itself. The unit tests' fake WebSocket accepts 1008, so they cannot show this. This is a source inference, not an observed result. J04 records, without judging, whether the browser socket closed before the manual Refresh and how many transport clients remained.
+- If the socket stayed open, "no upgrade in 6 s" shows that the client did not reconnect and stayed failed. It does not distinguish the terminal policy from the refresh policy, because neither one reconnects without a close event.
+- The driver then reports a product finding: a failure that the client itself detects under the refresh policy (for example a sequence gap that the server does not close) would not reconnect.
+
+Under the stop conditions, the finding is reported and no gate changes. The product client stays unchanged in this unit. The pure test checks that the `unknown-field` frame minus its extra key deep-equals the fixture's valid lag frame.
 
 ### J05 — cookie expiry (N06 cookie)
 
@@ -239,7 +247,7 @@ Pass when:
 - the browser sent no mutation after authentication;
 - there are no page errors.
 
-The pass would fail if `pagehide` no longer disposed the controller, because the held GET would stay open and the transport would keep its stream.
+The pass would fail if `pagehide` no longer disposed the controller, because the held GET would stay open, so the hold would not record `client-closed` within 1 s and the browser would record no request failure. The stream is already closed by `refresh()` before the held GET, so `openStreams` alone does not discriminate.
 
 ## Verdicts and tests
 

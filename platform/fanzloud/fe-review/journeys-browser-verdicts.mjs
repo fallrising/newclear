@@ -47,10 +47,10 @@ export function j03Verdict({requests,responses,held,fixtureTurns,pressToFailMs,r
  if(!String(sessionStatus??'').startsWith('running'))reasons.push('ADMITTED_OUTCOME');
  return result(reasons);}
 export const injectedKind=(kind,frame)=>kind==='binary'?frame.type==='BINARY':kind==='malformed'?frame.type==='UNPARSEABLE':kind==='unknown-field'?frame.type==='error'&&frame.code==='subscriber_lagged':false;
-export function j04Verdict({kind,injected,ws,errorText,upgradesInWindow,upgradesAfterRefresh,connectedAfterRefresh,requests,fixtureMutations}){const reasons=[];
+export function j04Verdict({kind,injected,ws,errorText,upgradesInWindow,upgradesAfterRefresh,subscribesAfterRefresh,connectedAfterRefresh,requests,fixtureMutations}){const reasons=[];
  if(injected!==1)reasons.push('NOT_INJECTED');if(ws.filter(f=>f.dir==='received'&&injectedKind(kind,f)).length!==1)reasons.push('RECEIVED_KIND');
  if(errorText!==messages.protocolError)reasons.push('ERROR_TEXT');if(upgradesInWindow!==0)reasons.push('AUTOMATIC_RECONNECT');
- if(upgradesAfterRefresh!==1||connectedAfterRefresh!==true)reasons.push('MANUAL_REFRESH');
+ if(upgradesAfterRefresh!==1||subscribesAfterRefresh!==1||connectedAfterRefresh!==true)reasons.push('MANUAL_REFRESH');
  if(mutations(requests,['after-auth','window','after-refresh'])!==0||fixtureMutations!==0)reasons.push('MUTATION');
  return result(reasons);}
 export function j05Verdict({ws,expiryMs,authHeading,errorText,bearerEmpty,storedCursor,requestsInWindow,upgradesInWindow,requests,fixtureMutations}){const reasons=[];
@@ -67,5 +67,5 @@ export function j06LogoutVerdict({requests,responses,openStreams,authHeading,dom
 export function j06DisposeVerdict({requests,held,heldMs,failedHeld,openStreams,requestsInWindow,upgradesInWindow,cleared,reloadedSession,connected,errorText}){const reasons=[];
  if(held?.method!=='GET'||held?.path!==api+'/session'||held?.outcome!=='client-closed'||!(heldMs<=1000)||failedHeld!==1)reasons.push('NOT_DISPOSED');
  if(openStreams!==0)reasons.push('OPEN_STREAM');if(requestsInWindow!==0||upgradesInWindow!==0)reasons.push('ACTIVITY_IN_WINDOW');if(cleared?.events!==true||cleared?.diff!==true)reasons.push('NOT_CLEARED');
- if(reloadedSession!==true||connected!==true||errorText!=='')reasons.push('RELOAD');if(mutations(requests,['after-auth','after-pagehide','after-reload'])!==0)reasons.push('MUTATION');
+ if(reloadedSession!==true||connected!==true||errorText!=='')reasons.push('RELOAD');if(mutations(requests,['refresh','after-pagehide','after-reload'])!==0)reasons.push('MUTATION');
  return result(reasons);}

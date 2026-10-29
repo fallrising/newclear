@@ -18,7 +18,7 @@ const life=new Lifecycle(),origin='https://127.0.0.1:8443',ports=[8443],sha=b=>c
 const receipt={mode:'journeys-001',scope:'focused desktop journeys N01-N09 (J01-J06) on the review harness with its journey seams; not canonical cells; candidate until independent actual review',passed:false,stage:'PRECONDITION',checks:{},sourceHashes:{}};
 const handlers=['SIGTERM','SIGINT'].map(name=>[name,()=>life.cancel(name)]);for(const [name,fn]of handlers)process.on(name,fn);const timeout=setTimeout(()=>life.cancel('deadline'),200000);
 const safeError=e=>/^REVIEW_[A-Z0-9_]+$/.test(e?.message??'')?e.message:e?.name==='AssertionError'?'ASSERTION_FAILED':e?.name==='TimeoutError'?'BROWSER_TIMEOUT':'UNCLASSIFIED';
-const expectedSources={"fixture.mjs":"8c828b21eeb34563ef64c9b81a9bdfca4f9ab0146382c5e43416d560a706e9de","transport.mjs":"9167d04e5b4937ec1aca3a6788b27b6e9b358f738f516bb3861a9877049b988f","lifecycle.mjs":"7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9","trust.mjs":"1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5","baseline-support.mjs":"445a5fcd969654c20fbe5f6e97ce8c52d8cd1343cdbf27be64ef93d7044d0636","remaining-support.mjs":"e77cfd56ad10e6e1fc77e9c20536f0d3024cad9e2ff5a0dc304d76f18be44cf4","conformance-browser-verdicts.mjs":"3c5eec7926d322b92de44fe9af0eb3f9ad9aebf10f7459f7261c7ead382428f9","journeys-browser-verdicts.mjs":"e754c563b009e4d70cc451aee5f30bca8d060b2778ec7184969f0af12f515f20","/":"dd5d6c2ebf00ecf46abaf929c2441f388e02ccee1b85135918d47e01a38e0b2f","/assets/p0-app.js":"a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0","/assets/p0-client.js":"a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e","/assets/p0.css":"1d66f393e4adf2af7266a32feac6fbdb74980825ae0293cce0407607ab78ff8a"};
+const expectedSources={"fixture.mjs":"8c828b21eeb34563ef64c9b81a9bdfca4f9ab0146382c5e43416d560a706e9de","transport.mjs":"9167d04e5b4937ec1aca3a6788b27b6e9b358f738f516bb3861a9877049b988f","lifecycle.mjs":"7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9","trust.mjs":"1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5","baseline-support.mjs":"445a5fcd969654c20fbe5f6e97ce8c52d8cd1343cdbf27be64ef93d7044d0636","remaining-support.mjs":"e77cfd56ad10e6e1fc77e9c20536f0d3024cad9e2ff5a0dc304d76f18be44cf4","conformance-browser-verdicts.mjs":"3c5eec7926d322b92de44fe9af0eb3f9ad9aebf10f7459f7261c7ead382428f9","journeys-browser-verdicts.mjs":"f99cb2c43746a1f80672cdf7f2cc72becd0f3a90301536f38f4f9567a8be4e48","/":"dd5d6c2ebf00ecf46abaf929c2441f388e02ccee1b85135918d47e01a38e0b2f","/assets/p0-app.js":"a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0","/assets/p0-client.js":"a7c0fe338f461175901d1758f6092da2e1a56f3061f538c4341753207aa57e8e","/assets/p0.css":"1d66f393e4adf2af7266a32feac6fbdb74980825ae0293cce0407607ab78ff8a"};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const turns=api+'/session/turns',session=api+'/session',cancel=api+'/session/cancel';
 let browser,tls,WebSocketServer;const fixtures=[];
@@ -38,12 +38,12 @@ async function openContext(name,state){
  const page=await context.newPage();page.setDefaultTimeout(8000);page.setDefaultNavigationTimeout(10000);return {context,page};
 }
 function observe(page,row,state){
- row.requests=[];row.responses=[];row.ws=[];const health={requestFailed:[],pageErrors:0,console:[]};row.health=health;const records=new Map();
+ row.requests=[];row.responses=[];row.ws=[];row.wsCloses=[];const health={requestFailed:[],pageErrors:0,console:[]};row.health=health;const records=new Map();
  page.on('request',r=>{let u;try{u=new URL(r.url());}catch{return;}if(u.origin!==origin)return;const rec={method:r.method(),path:u.pathname,phase:state.phase,at:performance.now()};records.set(r,rec);row.requests.push(rec);});
  page.on('response',r=>{const rec=records.get(r.request());if(rec){rec.status=r.status();row.responses.push({method:rec.method,path:rec.path,status:rec.status,phase:rec.phase});const n=state.next;if(n&&n.method===rec.method&&n.path===rec.path){state.phase=n.phase;state.next=null;}}});
  page.on('requestfailed',r=>{const rec=records.get(r);if(rec){rec.failedAt=performance.now();const n=state.nextFail;if(n&&n.method===rec.method&&n.path===rec.path){state.phase=n.phase;state.nextFail=null;}}let path='unknown';try{const u=new URL(r.url());path=u.origin===origin?u.pathname:'other-origin';}catch{}health.requestFailed.push({method:r.method(),path,error:netError(r.failure()?.errorText)});});
  page.on('pageerror',()=>{health.pageErrors++;});page.on('console',m=>{if(['warning','error'].includes(m.type()))health.console.push({type:m.type(),text:m.text().slice(0,200)});});
- page.on('websocket',socket=>{socket.on('framesent',f=>row.ws.push({...journeyFrame('sent',f.payload),phase:state.phase}));socket.on('framereceived',f=>row.ws.push({...journeyFrame('received',f.payload),phase:state.phase}));});
+ page.on('websocket',socket=>{socket.on('close',()=>row.wsCloses.push({phase:state.phase,at:Math.round(performance.now())}));socket.on('framesent',f=>row.ws.push({...journeyFrame('sent',f.payload),phase:state.phase}));socket.on('framereceived',f=>row.ws.push({...journeyFrame('received',f.payload),phase:state.phase}));});
 }
 const until=async(check,ms,label)=>{const end=performance.now()+ms;while(!(await check())){life.check();if(performance.now()>end)throw Error('REVIEW_WAIT_'+label);await sleep(25);}};
 const streamStatus=page=>page.locator('#stream-status').textContent();
@@ -62,17 +62,22 @@ async function authenticate(page,env,row,state){
  const cookie=(await state.context.cookies()).find(c=>c.name==='__Host-codebox_p0')?.value;assert(cookie,'REVIEW_NO_COOKIE');state.secrets.push(env.bearer,cookie);state.authCounts=mutationCount(env.fixture);
 }
 async function submit(page,row,state,prompt){state.secrets.push(prompt);await tabTo(page,'prompt');await page.keyboard.type(prompt);state.phase='submit';state.next={method:'POST',path:turns,phase:'after-submit'};await enter(page,'submit-turn',row);await until(()=>state.phase==='after-submit',5000,'SUBMIT');}
-async function quiet(page,row,env,ms=6000){const requests=row.requests.length,upgrades=env.transport.summary().upgrades;await sleep(ms);life.check();return {requests:row.requests.length-requests,upgrades:env.transport.summary().upgrades-upgrades};}
+// A refused upgrade (after restart, expiry or logout) counts as an upgrade attempt.
+const attempts=env=>{const t=env.transport.summary();return t.upgrades+t.rejectedUpgrades;};
+async function quiet(page,row,env,ms=6000){const requests=row.requests.length,upgrades=attempts(env);await sleep(ms);life.check();return {requests:row.requests.length-requests,upgrades:attempts(env)-upgrades};}
 async function journey(key,scenario,body,{now,statuses=[401],failures=[]}={}){
  receipt.stage=key;const row={keyboard:[]};receipt.checks[key]=row;const state={phase:'load',secrets:[],gate:null};
  const env=await serve('https-'+key,{scenario,now});const {context,page}=await openContext('context-'+key,state);state.context=context;state.env=env;observe(page,row,state);
- await page.goto(origin);life.check();const out=await body({env,page,row,state});
- // D05: canary over DOM, inputs, storage, console and the public row; only the hit sources are recorded.
- const sources=await page.evaluate(()=>({dom:document.body.innerText,inputs:[...document.querySelectorAll('input,textarea')].map(e=>e.value).join('\n'),storage:JSON.stringify(Object.fromEntries(Object.entries(sessionStorage)))}));
- sources.console=row.health.console.map(c=>c.text).join('\n');sources.row=JSON.stringify(row);row.canary=canaryScan(sources,state.secrets.filter(Boolean));
- row.healthVerdict=healthVerdict(row.health,{statuses:out?.statuses??statuses,failures:out?.failures??failures});row.fixture=state.env.fixture.summary();
- row.passed=row.verdict.passed&&row.healthVerdict.passed&&row.canary.length===0;
- await close('context-'+key);await close(state.env.name);
+ // One failed journey keeps its evidence and does not stop the others; cancellation and the deadline stay fatal. Nothing is retried.
+ try{
+  await page.goto(origin);life.check();const out=await body({env,page,row,state});row.dom=await page.evaluate(measureDOM);
+  // D05: canary over DOM, inputs, storage, console and the public row; only the hit sources are recorded.
+  const sources=await page.evaluate(()=>({dom:document.body.innerText,inputs:[...document.querySelectorAll('input,textarea')].map(e=>e.value).join('\n'),storage:JSON.stringify(Object.fromEntries(Object.entries(sessionStorage)))}));
+  sources.console=row.health.console.map(c=>c.text).join('\n');sources.row=JSON.stringify(row);row.canary=canaryScan(sources,state.secrets.filter(Boolean));
+  row.healthVerdict=healthVerdict(row.health,{statuses:out?.statuses??statuses,failures:out?.failures??failures});
+  row.passed=row.verdict.passed&&row.healthVerdict.passed&&row.canary.length===0;
+ }catch(error){if(error?.message==='REVIEW_CANCELLED')throw error;row.failure=safeError(error);row.passed=false;}
+ finally{const t=state.env.transport.summary();row.transport={upgrades:t.upgrades,rejectedUpgrades:t.rejectedUpgrades,clients:t.clients};row.fixture=state.env.fixture.summary();await close('context-'+key);await close(state.env.name);}
 }
 const J={
  // J01a: a stored cursor above the high-water is clamped by refresh(); no future_cursor reaches the browser.
@@ -107,8 +112,11 @@ const J={
  // J04: one invalid server-to-client frame of each kind (H02); a protocol error stops reconnect until a manual Refresh.
  async j04(kind,{env,page,row,state}){row.kind=kind;state.phase='auth';await authenticate(page,env,row,state);await connected(page);state.phase='after-auth';
   row.injected=env.transport.injectFrame(kind);await page.waitForFunction(()=>document.querySelector('#error-message')?.textContent==='The session stream returned an invalid frame.');row.errorText=await errorText(page);
-  state.phase='window';row.upgradesInWindow=(await quiet(page,row,env)).upgrades;const upgrades=env.transport.summary().upgrades;state.phase='after-refresh';await enter(page,'refresh',row);await connected(page);await sleep(500);
-  Object.assign(row,{upgradesAfterRefresh:env.transport.summary().upgrades-upgrades,connectedAfterRefresh:(await streamStatus(page))==='connected',fixtureMutations:mutationsSince(env.fixture,state.authCounts)});row.verdict=j04Verdict(row);},
+  state.phase='window';row.upgradesInWindow=(await quiet(page,row,env)).upgrades;
+  // Observed, not judged: whether the client closed its socket after the protocol error (see the spec's J04 finding note).
+  row.socketClosedBeforeRefresh=row.wsCloses.length>0;row.transportClientsBeforeRefresh=env.transport.summary().clients;
+  const upgrades=env.transport.summary().upgrades;state.phase='after-refresh';await enter(page,'refresh',row);await connected(page);await sleep(500);
+  Object.assign(row,{upgradesAfterRefresh:env.transport.summary().upgrades-upgrades,subscribesAfterRefresh:row.ws.filter(f=>f.phase==='after-refresh'&&f.dir==='sent'&&f.type==='subscribe').length,connectedAfterRefresh:(await streamStatus(page))==='connected',fixtureMutations:mutationsSince(env.fixture,state.authCounts)});row.verdict=j04Verdict(row);},
  // J05: the session expires under a skewed fixture clock; the 250 ms validity check closes the stream.
  async j05_expiry({env,page,row,state}){state.phase='auth';await authenticate(page,env,row,state);await connected(page);state.phase='after-auth';const expired=performance.now();state.skew.value=300001;
   await until(()=>row.ws.some(f=>f.dir==='received'&&f.code==='authentication_expired'),2500,'EXPIRY');row.expiryMs=Math.round(performance.now()-expired);await page.getByRole('heading',{name:'Authenticate',exact:true}).waitFor();
@@ -123,7 +131,8 @@ const J={
  // J06b: a synthetic pagehide disposes the controller while its GET is held (H01); a reload then starts cleanly.
  async j06_dispose({env,page,row,state}){state.phase='auth';await authenticate(page,env,row,state);await connected(page);env.transport.holdNextResponse('GET',session);state.phase='refresh';await enter(page,'refresh',row);
   await until(()=>env.transport.summary().held?.outcome===null,5000,'HELD');state.phase='after-pagehide';const hidden=performance.now();await page.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pagehide')));
-  await until(()=>env.transport.summary().held.outcome!==null,1000,'DISPOSE').catch(()=>{});row.heldMs=Math.round(performance.now()-hidden);row.held=env.transport.summary().held;row.failedHeld=row.health.requestFailed.filter(f=>f.method==='GET'&&f.path===session).length;
+  const failedHeld=()=>row.health.requestFailed.filter(f=>f.method==='GET'&&f.path===session).length;
+  await until(()=>env.transport.summary().held.outcome!==null&&failedHeld()>0,1000,'DISPOSE').catch(e=>{if(!e?.message?.startsWith('REVIEW_WAIT_'))throw e;});row.heldMs=Math.round(performance.now()-hidden);row.held=env.transport.summary().held;row.failedHeld=failedHeld();
   const window=await quiet(page,row,env);Object.assign(row,{openStreams:env.transport.summary().clients,requestsInWindow:window.requests,upgradesInWindow:window.upgrades,cleared:await page.evaluate(()=>({events:document.querySelector('#event-list').textContent==='No retained activity in this tab.',diff:document.querySelector('#diff-output').textContent==='No diff loaded.'}))});
   state.phase='after-reload';const before=row.requests.length;await page.reload();life.check();await connected(page);await sleep(500);
   Object.assign(row,{reloadedSession:row.requests.slice(before).some(r=>r.method==='GET'&&r.path===session&&r.status===200),connected:(await streamStatus(page))==='connected',errorText:await errorText(page)});row.verdict=j06DisposeVerdict(row);return {failures:[{method:'GET',path:session}]};},

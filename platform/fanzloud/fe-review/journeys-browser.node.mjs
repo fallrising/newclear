@@ -66,11 +66,11 @@ test('J04 each injected kind stops automatic reconnect until a manual refresh',(
  const frames={binary:{dir:'received',type:'BINARY'},malformed:{dir:'received',type:'UNPARSEABLE'},'unknown-field':{dir:'received',type:'error',code:'subscriber_lagged'}};
  for(const[kind,frame]of Object.entries(frames)){
   assert.equal(injectedKind(kind,frame),true);for(const other of Object.keys(frames).filter(k=>k!==kind))assert.equal(injectedKind(other,frame),false,kind+' as '+other);
-  const good={kind,injected:1,ws:[{dir:'received',type:'replay_end'},frame],errorText:messages.protocolError,upgradesInWindow:0,upgradesAfterRefresh:1,connectedAfterRefresh:true,requests:[req('POST',boot,'auth'),req('GET',session,'after-refresh')],fixtureMutations:0};
+  const good={kind,injected:1,ws:[{dir:'received',type:'replay_end'},frame],errorText:messages.protocolError,upgradesInWindow:0,upgradesAfterRefresh:1,subscribesAfterRefresh:1,connectedAfterRefresh:true,requests:[req('POST',boot,'auth'),req('GET',session,'after-refresh')],fixtureMutations:0};
   each(j04Verdict,good,[
    ['no connection',()=>({injected:0}),'NOT_INJECTED'],['not received',g=>({ws:g.ws.slice(0,1)}),'RECEIVED_KIND'],['twice',g=>({ws:[...g.ws,frame]}),'RECEIVED_KIND'],
    ['wrong text',()=>({errorText:messages.stateChanged}),'ERROR_TEXT'],['auto reconnect',()=>({upgradesInWindow:1}),'AUTOMATIC_RECONNECT'],
-   ['refresh no upgrade',()=>({upgradesAfterRefresh:0}),'MANUAL_REFRESH'],['refresh not connected',()=>({connectedAfterRefresh:false}),'MANUAL_REFRESH'],
+   ['refresh no upgrade',()=>({upgradesAfterRefresh:0}),'MANUAL_REFRESH'],['two subscribes',()=>({subscribesAfterRefresh:2}),'MANUAL_REFRESH'],['refresh not connected',()=>({connectedAfterRefresh:false}),'MANUAL_REFRESH'],
    ['browser mutation',g=>({requests:[...g.requests,req('POST',turns,'window')]}),'MUTATION'],['fixture mutation',()=>({fixtureMutations:1}),'MUTATION']]);
  }
  assert.equal(injectedKind('other',frames.binary),false);
@@ -103,7 +103,7 @@ test('J06 pagehide disposes the controller: the held GET aborts, the stream clos
   ['stream open',()=>({openStreams:1}),'OPEN_STREAM'],['login read',()=>({requestsInWindow:1}),'ACTIVITY_IN_WINDOW'],['upgrade',()=>({upgradesInWindow:1}),'ACTIVITY_IN_WINDOW'],
   ['events kept',()=>({cleared:{events:false,diff:true}}),'NOT_CLEARED'],['diff kept',()=>({cleared:{events:true,diff:false}}),'NOT_CLEARED'],
   ['no reload session',()=>({reloadedSession:false}),'RELOAD'],['not connected',()=>({connected:false}),'RELOAD'],['error shown',()=>({errorText:messages.requestFailed}),'RELOAD'],
-  ['mutation',g=>({requests:[...g.requests,req('POST',turns,'after-pagehide')]}),'MUTATION']]);
+  ['mutation',g=>({requests:[...g.requests,req('POST',turns,'after-pagehide')]}),'MUTATION'],['mutation during refresh',g=>({requests:[...g.requests,req('POST',turns,'refresh')]}),'MUTATION']]);
 });
 
 test('health allows only the named failures and console lines for expected statuses',()=>{

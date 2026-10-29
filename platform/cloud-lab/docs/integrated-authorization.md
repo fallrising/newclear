@@ -34,3 +34,7 @@ RO只有在runner self身份與D1已對齊、其config digest與RO實際載入di
 本輪僅source與合成／本機整合驗收，SA與RO尚未裝到原Lab；不為了採集而自動部署或延長已過期憑證。後續才準備指定target／期限的受控切換。
 
 實作與測試紀錄見[本輪證據](evidence/m1-integrated-authorization.md)。整合fixture的管理envelope為合成資料，loopback origin只代表測試transport；既有harness將請求映射為HTTPS交給未修改的Worker。沒有藉由fixture驗證真實Cloudflare settings／routing。
+
+## 後續實際接入 — 2026-10-29
+
+Owner後續已明確批准RP有界方案並執行；[OL實際證據](evidence/m1-observation-live.md)記錄部署、兩個機器短期期限、真實整合與驗證後停止。上文保留各原階段範圍與限制；這次不是常態服務、human／scheduler續權或完整主線驗收，沒有自然到期觀察或回退演練。

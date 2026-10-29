@@ -193,3 +193,14 @@ Owner明確批准推送後，[PR #722](https://github.com/fallrising/newclear/pu
 - CI全過：Cloud Lab `40740444463`、Project success `40740444266`、llms `40740444453`；[T831 ACCEPT與候選／唯讀盤點證據](../evidence/m1-observation-rollout-plan.md)已保存。
 - 完成的是準備：原服務仍inactive、授權期限未改；固定runtime候選、前版回退request與unit模板均未套用。具體機器窗口與部署／補償方案等待owner明確批准，不能把RP done當成live gate通過。
 - 本PR只收尾任務板，沒有runtime、雲端、憑證、服務或付費變更；完整主線pending。
+
+## T-0010 — 觀測功能有界接入
+
+Owner已批准RP方案；完整產品主線不因此通過。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0010-1 | fresh前態與窗口固定 | OL-01 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |
+| T-0010-2 | Worker／機器授權有界更新 | OL-02 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |
+| T-0010-3 | resident與IA觀測／正常停止 | OL-03 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |
+| T-0010-4 | 回讀／補償／審查及交付 | OL-04 | in_progress | 2026-10-29T03:20:36Z | — | 2026-10-29T03:36:37Z |

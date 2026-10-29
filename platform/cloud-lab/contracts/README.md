@@ -29,3 +29,7 @@ Queue receipt、Workflow progress、派送 ACK 與模型的成功文字都不是
 時間採 UTC RFC3339，durations 為整數秒；ID 是 1–128 UTF-8 bytes 的不透明字串，不含控制字元；digest 是 `sha256:` 加 64 個小寫十六進位字元。request、event、result 的 JSON body 上限均為 32 KiB（artifact bytes 另計）。其他描述字串每項最多 1024 UTF-8 bytes。使用者字串視為不可信資料，純文字呈現，不可插入 shell、HTML 或日誌指令。
 
 所有回應／稽核帶 `request_id`；錯誤語義見 commands-runs。實作前必須固定簽章 byte encoding、嚴格解析器與相容性 fixtures；本輪文件檢查不能代替 schema／驗簽或平台驗收。
+
+## 固定bot CLI介面
+
+[BC adapter](../docs/bot-bridge.md)提供獨立單次stdin／stdout契約：[request schema](bot-request.schema.json)與[response schema](bot-response.schema.json)。僅health.check／health.status，4KiB輸入，沒有任意命令；trusted host配置與server grant共同限制權限。不是新的HTTP route或已接通Grok的宣告。

@@ -57,3 +57,5 @@ CL Cloud Lab
 | OB-01／OB-02 | [看板](../apps/control/public/index.html)、snapshot／有界 health artifact | locally_verified 的 UI 模型／HTTP；互動瀏覽器與 live gate 待驗 |
 
 共同證據：[M1 evidence](evidence/m1-implementation.md)。其餘能力保持 proposed／後續計畫，不因本次實作自動升級。
+
+BC補充：AU-01的[固定bot caller](../tools/bot_bridge.py)及[JSON契約](bot-bridge.md)已本機驗證durable提交／查詢；[證據](evidence/m1-bot-bridge.md)區分真正HTTP collector與尚未接線的Grok。它不接管Kith聊天室或agent原生run，亦不改HL部署pending。

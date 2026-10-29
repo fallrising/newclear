@@ -35,3 +35,7 @@ python3 platform/cloud-lab/adapters/node-health/runner.py --config /private/clou
 ## CF 前置條件
 
 見 [部署與 live gate](deployment.md)。公開 Wrangler 檔刻意沒有真實 D1 ID、route 或 Cron，workers.dev／preview 關閉。未具備 private provisioning、Access 應用與真實 runner 之前，不執行 deploy。
+
+## Bot工具入口
+
+[固定bot bridge](bot-bridge.md)提供JSON提交／查詢與同ID恢復，使用獨立bot config及私人state。local harness預設只有human／runner身份，不能直接把runner.json當成有submit權限的bot；自動整合測試建立明示的合成bot grant，不改產品權限。

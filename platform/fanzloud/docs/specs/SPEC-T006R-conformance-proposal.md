@@ -1,6 +1,6 @@
 # Finite HTTP/WSS conformance and remaining T006R oracles — scope proposal
 
-Status: **C1 confirmed and merged (PR735).** The owner then approved the F1–F4 harness repair and one C2 run (「批准：修正 F1–F4 並準備 C2 driver，審查與 CI 通過後跑一次 C2。」); both are specified in [SPEC-T006R-harness-repair-c2](SPEC-T006R-harness-repair-c2.md). Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E.
+Status: **C1 confirmed and merged (PR735).** The owner then approved the F1–F4 harness repair and one C2 run (「批准：修正 F1–F4 並準備 C2 driver，審查與 CI 通過後跑一次 C2。」); both are specified in [SPEC-T006R-harness-repair-c2](SPEC-T006R-harness-repair-c2.md). The repair merged as PR739, and C2 `conformance-001` passed with an actual review ACCEPT. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E.
 
 Basis:
 - [ROUND2-SDD](../../../../docs/fe-review/ROUND2-SDD.md) R2-AC-14: "M1–M3 finite HTTPS/WSS synthetic harness … mock is not real backend/Cloud acceptance; real integration needs its own explicit scope."

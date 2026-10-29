@@ -1,6 +1,6 @@
 # Harness repair F1–F4 and the focused C2 browser run
 
-Status: **approved by the owner on 2026-10-29** (「批准：修正 F1–F4 並準備 C2 driver，審查與 CI 通過後跑一次 C2。」). Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. C2 runs once, only after independent review and required CI of this change pass.
+Status: **implemented, merged (PR739) and C2 run once: PASS, actual review ACCEPT.** Approved by the owner on 2026-10-29 (「批准：修正 F1–F4 並準備 C2 driver，審查與 CI 通過後跑一次 C2。」). Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. C2 runs once, only after independent review and required CI of this change pass.
 
 Basis:
 - [SPEC-T005C](SPEC-T005C-p0-websocket-stream.md): upgrade refusals, the subscriber limit, lag, the serialization bound and close codes.
@@ -104,6 +104,16 @@ C205 — Cleanup and deadline: the same `Lifecycle` cleanup as the canonical run
   - A FAIL is preserved, not retried and not renamed.
   - A product defect is reported as a finding; gates do not change.
 - An independent actual review judges the result before it is recorded as evidence.
+
+## C2 result (2026-10-29)
+
+`conformance-001` passed. It ran on source `a126796a` (merged as `74b107e6`) in 10.8 s, and the independent actual review accepted it. All four verdicts are true: `r02`, `r06`, `r07_desktop` and `r07_mobile`. Cleanup was complete, ports 8443–8445 were absent, and the container was removed.
+
+Recorded limitations:
+- Mobile keyboard scroll was sampled mid-animation (0 → 1 → 9), so PageDown's own effect is not isolated.
+- Only the mobile diff overflows, so it is the only keyboard-scroll case.
+- The snapshot refresh between the gap and the resubscribe is inferred.
+- The evidence comes from a synthetic fixture with one headless Chromium.
 
 ## Acceptance
 

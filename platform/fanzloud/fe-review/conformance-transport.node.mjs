@@ -185,6 +185,25 @@ test('review_wss_subscribe_timeout_closes_after_five_seconds',{skip,timeout:1500
  }finally{await env.close();}
 });
 
+// SPEC-T006R-harness-repair-c2 H01 row 6: over 32 open sockets is 503, checked before Origin.
+test('review_wss_socket_bound_is_503_before_origin',{skip},async()=>{
+ const env=await start('authenticated-ready');
+ try{const c=await authenticate(env);const open=[];for(let i=0;i<32;i++){const s=await connect(env,{cookie:c.cookie});assert.equal(s.opened,true);open.push(s);}
+  assertRefusal(await rawStream(env,{headers:{cookie:c.cookie,origin:'https://127.0.0.1:1'}}),503,'service_unavailable','33rd socket with a wrong Origin');
+  open[0].sock.close(1000);await until(()=>open[0].closed&&env.transport.summary().clients===31);assertRefusal(await rawStream(env,{headers:{cookie:c.cookie,origin:'https://127.0.0.1:1'}}),403,'origin_forbidden','below the bound');
+  for(const s of open.slice(1))s.sock.close(1000);await until(()=>env.transport.summary().clients===0);
+ }finally{await env.close();}
+});
+
+// SPEC-T006R-harness-repair-c2 H05: a live event right after the 1012 shutdown close does not tear the socket down.
+test('review_wss_shutdown_close_stays_graceful_under_live_events',{skip},async()=>{
+ const env=await start('authenticated-ready');
+ try{const c=await authenticate(env),sid=await sessionId(env,c),other=await authenticate(env);const s=await connect(env,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.frames.some(f=>f.type==='replay_end'));
+  env.transport.holdReconnect(50);await call(env,{method:'POST',path:api+'/session/turns',headers:mutationHeaders(env,other,{'content-type':'application/json'}),body:'{"prompt":"Synthetic"}'});
+  await until(()=>s.closed);assert.equal(s.closed.code,1012);assert.equal(env.transport.summary().writeTerminations,0);await until(()=>env.transport.summary().clients===0);
+ }finally{await env.close();}
+});
+
 // SPEC-T006R-harness-repair-c2 H02: the ninth admitted subscriber is a typed subscriber_limit with close 1013.
 test('review_wss_subscriber_limit_is_typed_1013',{skip},async()=>{
  const env=await start('authenticated-ready');
@@ -207,8 +226,9 @@ async function cycles(env,c,n,{cancelFirst=false}={}){
 }
 test('review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008',{skip},async()=>{
  const port=await freePort(),origin=`https://127.0.0.1:${port}`,fixture=createFixture({origin,scenario:'authenticated-ready',bearer});
- for(const limits of [{liveCapacity:7},{liveCapacity:257},{serverMessageBytes:255},{serverMessageBytes:65537},{liveCapacity:8.5}])assert.throws(()=>createTransport({origin,fixture,key:tls.key,cert:tls.cert,WebSocketServer:WsServer,limits}),/REVIEW_LIMITS/,JSON.stringify(limits));
+ for(const limits of [{unknown:1},{liveCapacity:7},{liveCapacity:257},{serverMessageBytes:255},{serverMessageBytes:65537},{liveCapacity:8.5}])assert.throws(()=>createTransport({origin,fixture,key:tls.key,cert:tls.cert,WebSocketServer:WsServer,limits}),/REVIEW_LIMITS/,JSON.stringify(limits));
  for(const historyCapacity of [63,1025,64.5,'64'])assert.throws(()=>createFixture({origin,scenario:'authenticated-ready',bearer,historyCapacity}),/REVIEW_LIMITS/,String(historyCapacity));
+ createTransport({origin,fixture,key:tls.key,cert:tls.cert,WebSocketServer:WsServer,limits:null});
  fixture.dispose();
  const gap=await start('authenticated-ready',{historyCapacity:64});
  try{const c=await authenticate(gap),sid=await sessionId(gap,c);await cycles(gap,c,17);assert.equal(gap.fixture.summary().sequence,68);const before=mutations(gap.fixture);
@@ -217,13 +237,24 @@ test('review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008',{skip},
   const kept=await connect(gap,{cookie:c.cookie});kept.sock.send(subscribeFrame(sid,4));await until(()=>kept.frames.some(f=>f.type==='replay_end'));assert.equal(kept.frames.filter(f=>f.type==='event').length,64);kept.sock.close(1000);
   assert.deepEqual(mutations(gap.fixture),before);await until(()=>gap.transport.summary().clients===0);
  }finally{await gap.close();}
- const lag=await start('authenticated-ready',{limits:{liveCapacity:8}});
+ const lag=await start('authenticated-ready',{limits:{liveCapacity:9}});
  try{const c=await authenticate(lag),sid=await sessionId(lag,c);const s=await connect(lag,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.frames.some(f=>f.type==='replay_end'));const replayed=s.frames.length;
-  lag.transport.stallLive(true);await cycles(lag,c,2);assert.equal(s.closed,null,'eight queued frames stay within the live capacity');
+  lag.transport.stallLive(true);await cycles(lag,c,2);await new Promise(r=>setTimeout(r,50));assert.equal(s.closed,null,'eight queued frames stay within the live capacity of nine');
   await call(lag,{method:'POST',path:api+'/session/turns',headers:mutationHeaders(lag,c,{'content-type':'application/json'}),body:'{"prompt":"Synthetic"}'});await until(()=>s.closed);
   assert.deepEqual(s.frames.slice(replayed),[{type:'error',code:'subscriber_lagged',message:'session subscriber fell behind'}]);assert.equal(s.closed.code,1013);assert.equal(s.closed.reason,'subscriber_lagged');
   lag.transport.stallLive(false);await until(()=>lag.transport.summary().clients===0&&lag.fixture.summary().subscribers===0);
  }finally{await lag.close();}
+ // The ninth queued frame fits (the 9th of 10 from the last POST) and only the tenth trips the lag, so the bound is exact.
+ const resume=await start('authenticated-ready');
+ try{const c=await authenticate(resume),sid=await sessionId(resume,c);const s=await connect(resume,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.frames.some(f=>f.type==='replay_end'));const replayed=s.frames.length;
+  resume.transport.stallLive(true);await cycles(resume,c,1);await new Promise(r=>setTimeout(r,100));assert.equal(s.frames.length,replayed,'a stalled queue delivers nothing');
+  resume.transport.stallLive(false);await until(()=>s.frames.length===replayed+4);assert.deepEqual(s.frames.slice(replayed).map(f=>f.envelope.seq),[1,2,3,4]);assert.equal(s.closed,null);s.sock.close(1000);await until(()=>resume.transport.summary().clients===0);
+ }finally{await resume.close();}
+ const live=await start('authenticated-ready',{limits:{serverMessageBytes:256}});
+ try{const c=await authenticate(live),sid=await sessionId(live,c);const s=await connect(live,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.frames.some(f=>f.type==='replay_end'));const replayed=s.frames.length;
+  await call(live,{method:'POST',path:api+'/session/turns',headers:mutationHeaders(live,c,{'content-type':'application/json'}),body:'{"prompt":"Synthetic"}'});await until(()=>s.closed);
+  assert.deepEqual(s.frames.slice(replayed).map(f=>f.type==='event'?f.envelope.seq:f.code),[1,'stream_unavailable'],'the 192-byte event goes out; the 301-byte live frame is over the bound');assert.equal(s.closed.code,1013);assert.equal(s.closed.reason,'stream_unavailable');
+ }finally{await live.close();}
  const big=await start('turn-busy',{limits:{serverMessageBytes:256}});
  try{const c=await authenticate(big),sid=await sessionId(big,c);assert.equal((await call(big,{method:'POST',path:api+'/session/turns',headers:mutationHeaders(big,c,{'content-type':'application/json'}),body:'{"prompt":"Synthetic"}'})).status,202);
   const s=await connect(big,{cookie:c.cookie});s.sock.send(subscribeFrame(sid));await until(()=>s.closed);

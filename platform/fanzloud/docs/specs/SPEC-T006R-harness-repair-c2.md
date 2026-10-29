@@ -34,6 +34,7 @@ H03 — Back-pressure and serialization (F2).
 - All replay frames (`replay_begin`, events, `snapshot`, `replay_end`) are serialized before any is sent. If any frame, or later any live frame, exceeds the server message bound, the connection sends one `stream_unavailable` error and closes 1013. No partial replay is sent.
 - Live frames go through a per-connection queue drained one send at a time. When the queue already holds the live capacity, the connection sends one `subscriber_lagged` error without `latest_available` and closes 1013. This matches the product, whose lag error carries no optional field.
 - A send that does not complete within the 10-second write bound drops the connection without another application message.
+- Once a connection is no longer open, for example after the 1012 shutdown close, no live frame or error is queued or written. A failed send on a closing socket does not terminate it, so the close handshake stays graceful.
 - The old `bufferedAmount` check and its 1008 `protocol_error` close are removed.
 
 H04 — Reachability (F3). Three review-only settings make the remaining paths reachable. Their defaults equal the product defaults, and the canonical runners do not set them.
@@ -47,7 +48,8 @@ H05 — Unchanged: the 1024-byte subscribe bound, the five-second subscribe dead
 
 T01 — `fe-review/conformance-transport.node.mjs`:
 - The two finding tests become contract oracles: `review_wss_upgrade_refusals_are_safe_json_in_product_order` (H01) and `review_wss_subscriber_limit_is_typed_1013` (H02).
-- It adds `review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008` (H03, H04). That covers `history_gap` with exact bounds and close 1008; `subscriber_lagged` with close 1013 and no frame after it; `stream_unavailable` with close 1013 and no replay frame; and `REVIEW_LIMITS` for out-of-range settings.
+- It adds `review_wss_socket_bound_is_503_before_origin` (H01 row 6) and `review_wss_shutdown_close_stays_graceful_under_live_events` (H03 and H05: a live event right after `holdReconnect` causes no write termination).
+- It adds `review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008` (H03, H04). That covers `history_gap` with exact bounds and close 1008; `subscriber_lagged` tripping exactly on the frame after a live capacity of nine, with close 1013 and no frame after it; ordered delivery after `stallLive(false)`; an oversized live frame giving `stream_unavailable` after the earlier event; `stream_unavailable` with close 1013 and no replay frame; and `REVIEW_LIMITS` for out-of-range settings.
 - It adds `review_r06_gap_after_restart_resubscribes_at_snapshot_without_resend`, which runs the C202.2 schedule without a browser: the actual controller over the real HTTPS/WSS transport, with `historyCapacity: 64`, a 1012 restart and 68 events moved by a second session. It proves the expected frames (subscribe at 2, one `history_gap` with 5/68, resubscribe at 68) and that no mutation is resent.
 - Every existing oracle stays and still passes.
 

@@ -6,6 +6,7 @@ import fcntl
 import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -20,6 +21,10 @@ probe = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(probe)
 protocol = probe._protocol
 MAX_INPUT = 4096
+POLICY_CODES = {'INVALID_POLICY', 'POLICY_CONTEXT_MISMATCH', 'POLICY_REQUIRED',
+                'POLICY_NOT_INITIALIZED', 'POLICY_ALREADY_INITIALIZED', 'POLICY_EXPIRED',
+                'POLICY_NOT_STARTED', 'POLICY_CLOCK_ROLLBACK', 'POLICY_CALL_LIMIT',
+                'POLICY_NEW_REQUEST_LIMIT', 'POLICY_RATE_LIMITED'}
 DELIVERIES = {'accepted', 'dispatching', 'reconciling', 'result_recorded',
               'cancelled_before_dispatch', 'expired_before_dispatch'}
 
@@ -94,6 +99,105 @@ def journal(directory):
         os.close(parent)
 
 
+
+def read_policy(path, fingerprint):
+    try:
+        value = protocol.strict_json(probe.private_read(path))
+        keys = {'schema_version', 'config_sha256', 'not_before', 'expires_at', 'authority_until',
+                'max_calls', 'max_new_requests', 'call_interval_seconds', 'new_request_interval_seconds'}
+        require(isinstance(value, dict) and set(value) == keys, 'INVALID_POLICY')
+        require(value['schema_version'] == 'cloudlab.bot-policy.v1', 'INVALID_POLICY')
+        for key, low, high in (('max_calls', 1, 240), ('max_new_requests', 1, 24),
+                               ('call_interval_seconds', 5, 86400),
+                               ('new_request_interval_seconds', 60, 86400)):
+            require(type(value[key]) is int and low <= value[key] <= high, 'INVALID_POLICY')
+        start, end, authority = (protocol.timestamp(value[k]) for k in
+                                 ('not_before', 'expires_at', 'authority_until'))
+        require(0 < end-start <= 86400 and end <= authority, 'INVALID_POLICY')
+        require(value['config_sha256'] == fingerprint, 'POLICY_CONTEXT_MISMATCH')
+        return value, hashlib.sha256(probe.encode(value)).hexdigest()
+    except BridgeError:
+        raise
+    except (probe.ProbeError, OSError, ValueError, TypeError, KeyError):
+        raise BridgeError('INVALID_POLICY') from None
+
+
+def policy_time(policy, now, high_water):
+    require(type(now) in (int, float) and math.isfinite(now), 'POLICY_CLOCK_ROLLBACK')
+    require(now >= high_water, 'POLICY_CLOCK_ROLLBACK')
+    require(now >= protocol.timestamp(policy['not_before']), 'POLICY_NOT_STARTED')
+    require(now < protocol.timestamp(policy['expires_at']), 'POLICY_EXPIRED')
+
+
+def observe_policy_time(db, policy, now, high_water):
+    # Remember even rejected observations: expiry must not be undone by rollback.
+    require(type(now) in (int, float) and math.isfinite(now), 'POLICY_CLOCK_ROLLBACK')
+    db.execute('UPDATE bot_policy SET high_water=? WHERE id=1', (max(now, high_water),))
+    db.commit()
+    policy_time(policy, now, high_water)
+
+
+def config_identity(path, allow_loopback_http):
+    config = protocol.strict_json(probe.private_read(path))
+    protocol.Config.from_dict(config, allow_loopback_http=allow_loopback_http)
+    require(config['recipe_ref']['recipe_id'] == 'node-health', 'UNSUPPORTED_RECIPE')
+    return config, hashlib.sha256(probe.encode(config)).hexdigest()
+
+
+def initialize_policy(config_path, state_dir, policy_path, *, allow_loopback_http=False, clock=time.time):
+    """Explicit offline provisioning; never replace a policy or reset its ledger."""
+    try:
+        _, fingerprint = config_identity(config_path, allow_loopback_http)
+        policy, digest = read_policy(policy_path, fingerprint)
+        now = clock()
+        policy_time(policy, now, protocol.timestamp(policy['not_before']))
+        with journal(state_dir) as db:
+            exists = db.execute("SELECT 1 FROM sqlite_master WHERE name='bot_policy'").fetchone()
+            require(exists is None, 'POLICY_ALREADY_INITIALIZED')
+            db.execute('BEGIN IMMEDIATE')
+            db.execute('CREATE TABLE bot_policy (id INTEGER PRIMARY KEY CHECK(id=1), digest TEXT NOT NULL, calls INTEGER NOT NULL, high_water REAL NOT NULL, last_call REAL, last_new REAL)')
+            db.execute('CREATE TABLE bot_reservations (request_id TEXT PRIMARY KEY)')
+            db.execute('INSERT INTO bot_policy VALUES(1,?,0,?,NULL,NULL)', (digest, now))
+            db.commit()
+        return {'schema_version': 'cloudlab.bot-policy-initialized.v1', 'expires_at': policy['expires_at']}
+    except BridgeError:
+        raise
+    except (probe.ProbeError, OSError, ValueError, TypeError, KeyError, sqlite3.Error):
+        raise BridgeError('CONFIG_OR_STATE_UNAVAILABLE') from None
+
+
+def admit_policy(db, path, fingerprint, request, saved, now):
+    """Call and new-ID reservations commit under the same FLOCK before any I/O."""
+    exists = db.execute("SELECT 1 FROM sqlite_master WHERE name='bot_policy'").fetchone()
+    if path is None:
+        require(exists is None, 'POLICY_REQUIRED')
+        return None
+    policy, digest = read_policy(path, fingerprint)
+    require(exists is not None, 'POLICY_NOT_INITIALIZED')
+    rows = db.execute('SELECT * FROM bot_policy').fetchall()
+    require(len(rows) == 1 and rows[0]['id'] == 1, 'STATE_CORRUPT')
+    row = rows[0]
+    require(row['digest'] == digest, 'POLICY_CONTEXT_MISMATCH')
+    require(type(row['calls']) is int and 0 <= row['calls'] <= policy['max_calls'], 'STATE_CORRUPT')
+    for key in ('high_water', 'last_call', 'last_new'):
+        require(row[key] is None and key != 'high_water' or
+                type(row[key]) in (int, float) and math.isfinite(row[key]), 'STATE_CORRUPT')
+    observe_policy_time(db, policy, now, row['high_water'])
+    require(row['calls'] < policy['max_calls'], 'POLICY_CALL_LIMIT')
+    require(row['last_call'] is None or now-row['last_call'] >= policy['call_interval_seconds'], 'POLICY_RATE_LIMITED')
+    reserved = db.execute('SELECT 1 FROM bot_reservations WHERE request_id=?', (request['request_id'],)).fetchone()
+    is_new = request['operation'] == 'health.check' and saved is None and reserved is None
+    if is_new:
+        count = db.execute('SELECT count(*) FROM bot_reservations').fetchone()[0]
+        require(count < policy['max_new_requests'], 'POLICY_NEW_REQUEST_LIMIT')
+        require(row['last_new'] is None or now-row['last_new'] >= policy['new_request_interval_seconds'], 'POLICY_RATE_LIMITED')
+        db.execute('INSERT INTO bot_reservations VALUES(?)', (request['request_id'],))
+    db.execute('UPDATE bot_policy SET calls=calls+1, last_call=?, last_new=? WHERE id=1',
+               (now, now if is_new else row['last_new']))
+    db.commit()
+    return policy
+
+
 def response(request, state, code, command_id=None):
     return {'schema_version': 'cloudlab.bot-response.v1', 'request_id': request['request_id'],
             'operation': request['operation'], 'state': state, 'code': code,
@@ -132,14 +236,11 @@ def project(request, value, command, known_id, now):
 
 
 def handle(raw, config_path, state_dir, *, allow_submit=False, allow_loopback_http=False,
-           transport=None, clock=time.time):
+           transport=None, clock=time.time, policy_path=None):
     request = parse_request(raw)
     require(request['operation'] != 'health.check' or allow_submit is True, 'SUBMIT_NOT_ENABLED')
     try:
-        config = protocol.strict_json(probe.private_read(config_path))
-        protocol.Config.from_dict(config, allow_loopback_http=allow_loopback_http)
-        require(config['recipe_ref']['recipe_id'] == 'node-health', 'UNSUPPORTED_RECIPE')
-        fingerprint = hashlib.sha256(probe.encode(config)).hexdigest()
+        config, fingerprint = config_identity(config_path, allow_loopback_http)
         send = transport or probe.HTTPSClient(config['base_url'].rstrip('/'), auth_status_only=True)
         with journal(state_dir) as db:
             saved = db.execute('SELECT * FROM requests WHERE request_id=?', (request['request_id'],)).fetchone()
@@ -154,13 +255,19 @@ def handle(raw, config_path, state_dir, *, allow_submit=False, allow_loopback_ht
                 require(known is None or isinstance(known, str) and re.fullmatch(r'[A-Za-z0-9_-]{1,128}', known), 'STATE_CORRUPT')
             else:
                 known = None
-                if request['operation'] == 'health.status':
-                    return response(request, 'not_found', 'NO_LOCAL_REQUEST')
+            admitted_at = clock()
+            policy = admit_policy(db, policy_path, fingerprint, request, saved, admitted_at)
+            if saved is None and request['operation'] == 'health.status':
+                return response(request, 'not_found', 'NO_LOCAL_REQUEST')
             if saved is not None and known is None and request['operation'] == 'health.status':
                 return response(request, 'unconfirmed', 'ACK_UNCONFIRMED')
 
             def signed(method, path, body=b''):
-                return send(method, path, body, probe.sign_headers(config, method, path, body, clock()))
+                now = clock()
+                if policy is not None:
+                    row = db.execute('SELECT high_water FROM bot_policy WHERE id=1').fetchone()
+                    observe_policy_time(db, policy, now, row['high_water'])
+                return send(method, path, body, probe.sign_headers(config, method, path, body, now))
 
             # Network/server uncertainty is projected; private state errors remain explicit.
             try:
@@ -218,11 +325,18 @@ def main(argv=None):
     parser.add_argument('--config', required=True)
     parser.add_argument('--state-dir', required=True)
     parser.add_argument('--allow-submit', action='store_true')
+    parser.add_argument('--policy', help='trusted private policy; requires explicit initialization')
+    parser.add_argument('--initialize-policy', action='store_true', help='offline, once per original state')
     parser.add_argument('--allow-loopback-http', action='store_true', help='numeric loopback tests only')
     args = parser.parse_args(argv)
     try:
+        if args.initialize_policy:
+            require(args.policy is not None, 'INVALID_POLICY')
+            print(json.dumps(initialize_policy(args.config, args.state_dir, args.policy,
+                             allow_loopback_http=args.allow_loopback_http)))
+            return 0
         out = handle(sys.stdin.buffer.read(MAX_INPUT+1), args.config, args.state_dir,
-                     allow_submit=args.allow_submit, allow_loopback_http=args.allow_loopback_http)
+                     allow_submit=args.allow_submit, allow_loopback_http=args.allow_loopback_http, policy_path=args.policy)
         print(json.dumps(out, separators=(',', ':')))
         return 1 if out['state'] in ('unconfirmed', 'denied', 'error') else 0
     except BridgeError as error:

@@ -25,11 +25,11 @@ OPERATIONS = {'cloudlab_health_status': 'health.status', 'cloudlab_health_check'
 STATES = {'not_found', 'accepted', 'dispatching', 'unknown', 'validated', 'stale', 'unverified',
           'cancelled_before_dispatch', 'expired_before_dispatch', 'unconfirmed', 'denied', 'error'}
 ERROR_CODES = {'INVALID_REQUEST', 'SUBMIT_NOT_ENABLED', 'UNSAFE_STATE', 'STATE_BUSY',
-               'CONFIG_OR_STATE_UNAVAILABLE', 'UNSUPPORTED_RECIPE', 'CONTEXT_MISMATCH', 'STATE_CORRUPT'}
+               'CONFIG_OR_STATE_UNAVAILABLE', 'UNSUPPORTED_RECIPE', 'CONTEXT_MISMATCH', 'STATE_CORRUPT'} | bridge.POLICY_CODES
 RESULT_CODES = {'NO_LOCAL_REQUEST', 'ACK_UNCONFIRMED', 'AUTHORIZATION_DENIED', 'BOOTSTRAP_UNAVAILABLE',
                 'REMOTE_UNCONFIRMED', 'SCOPE_MISMATCH', 'SERVER_TIME_INVALID', 'OBSERVATION_MISMATCH',
                 'INVALID_RESPONSE', 'TRANSPORT_OR_RESPONSE_UNCONFIRMED', 'OBSERVED',
-                'STALE_OBSERVATION', 'FRESH_VALIDATED_OBSERVATION', 'UNVERIFIED_OBSERVATION'}
+                'STALE_OBSERVATION', 'FRESH_VALIDATED_OBSERVATION', 'UNVERIFIED_OBSERVATION'} | bridge.POLICY_CODES
 
 
 def encode(value):
@@ -69,8 +69,10 @@ def validate_output(raw, request, returncode):
     return value
 
 
-def run_bridge(request, config, state_dir, *, allow_submit=False, allow_loopback_http=False):
+def run_bridge(request, config, state_dir, *, allow_submit=False, allow_loopback_http=False, policy_path=None):
     argv = [sys.executable, str(BRIDGE_SCRIPT), '--config', str(config), '--state-dir', str(state_dir)]
+    if policy_path is not None:
+        argv.extend(['--policy', str(policy_path)])
     if allow_submit:
         argv.append('--allow-submit')
     if allow_loopback_http:
@@ -254,6 +256,7 @@ def main(argv=None):
     parser.add_argument('--config', required=True)
     parser.add_argument('--state-dir', required=True)
     parser.add_argument('--allow-submit', action='store_true')
+    parser.add_argument('--policy', help='trusted private initialized policy')
     parser.add_argument('--allow-loopback-http', action='store_true', help='numeric loopback tests only')
     args = parser.parse_args(argv)
     def stop(signum, frame):
@@ -262,7 +265,7 @@ def main(argv=None):
     signal.signal(signal.SIGINT, stop)
     def invoke(request):
         return run_bridge(request, args.config, args.state_dir, allow_submit=args.allow_submit,
-                          allow_loopback_http=args.allow_loopback_http)
+                          allow_loopback_http=args.allow_loopback_http, policy_path=args.policy)
     try:
         return serve(sys.stdin.buffer, sys.stdout.buffer, invoke, allow_submit=args.allow_submit)
     except (BrokenPipeError, OSError):

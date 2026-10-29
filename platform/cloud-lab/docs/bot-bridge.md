@@ -44,3 +44,7 @@ status無ACK時回unconfirmed且不聯網；沒有本地ID時回not_found。已�
 [本機證據](evidence/m1-bot-bridge.md)覆蓋RGR、SQLite、真實HTTP與OS collector；尚未安裝到任何bot service、呼叫Grok、續bot授權或驗證live機器連線。既有HL資產API500仍是獨立未完成任務。
 
 後續[MT MCP stdio wrapper](mcp-stdio.md)提供固定tools/list/call及有界child；BC CLI本身仍是單次JSON程序，持久state／授權及恢復語義不變。
+
+## BP持久政策
+
+[私人租期／配額](bot-policy.md)用`--policy`及明確離線`--initialize-policy`接入原SQLite／FLOCK；保留舊request與payload，先持久reservation再網路。新版本的已綁定state不能省略政策執行，未綁定state保留原operator模式。

@@ -345,3 +345,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40913579795`、Project success `40913579818`、llms `40913579724`。六項本機文件／task／report／diff檢查與T841獨立公開證據ACCEPT；[BL實際證據](../evidence/m1-bot-live.md)保存bot-only CAS、MCP一筆提交／10次status、原runner fresh validated/healthy及保全。相對journal回讀錯誤及report格式首次拒絕均修正且保留原始紀錄，沒有重送命令。
 - GitHub connector交付與匿名HTTPS回讀；remote tree `2bde2a741f324100b79c440d66445867f1b91514`與local commit `6ef867e196cc9610100c20740a2aa057c6e625d7`相同，commit身份不同。Runtime source未改，舊300tests不冒稱本輪本機重跑；私人原始操作回執及持久state保留。
 - BL01–04具體live子集完成：bot窗口至2026-10-29T16:59:16Z、該次healthy觀測16:31:08Z，最終16:33:43Z原資料／角色／程式／Access／runner保持，Grok已恢復status-only。未驗自然到期／模型對話或常態bot服務，沒有新增付費；HL T-0015與完整主線仍pending，無usabletag。本收尾只改任務板，不再操作live。
+
+## T-0020 — 持久 bot 政策
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0020-1 | 私人期限及離線初始化 | BP-01 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |
+| T-0020-2 | 持久配額與同ID恢復 | BP-02 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |
+| T-0020-3 | MCP可信政策與拒絕 | BP-03 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |
+| T-0020-4 | 回歸、審查及交付 | BP-04 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |

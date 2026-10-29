@@ -68,7 +68,7 @@ class MCPTests(unittest.TestCase):
         self.assertFalse(replies[1]['result']['tools'][1]['annotations']['readOnlyHint'])
 
     def test_arguments_reject_authority_injection_and_invalid_uuid(self):
-        for args in [{'request_id':RID,'config':'/secret'},{'request_id':RID,'url':'https://evil.example'},{'request_id':RID,'allow_submit':True},{'request_id':RID.upper()},{'request_id':'../shell'},[],None]:
+        for args in [{'request_id':RID,'policy':'/secret'}, {'request_id':RID,'initialize_policy':True}, {'request_id':RID,'config':'/secret'},{'request_id':RID,'url':'https://evil.example'},{'request_id':RID,'allow_submit':True},{'request_id':RID.upper()},{'request_id':'../shell'},[],None]:
             request=call();request['params']['arguments']=args
             with self.subTest(args=args):
                 _,replies,seen=self.session(lines(INIT,READY,request),allow=True)
@@ -110,11 +110,11 @@ class MCPTests(unittest.TestCase):
         replies=[json.loads(x) for x in proc.stdout.splitlines()];self.assertEqual(len(replies),4);self.assertTrue(replies[2]['result']['isError']);self.assertEqual(replies[3]['result'],{})
 
 class ChildTests(unittest.TestCase):
-    def invoke(self, source, request=REQUEST, allow=False, timeout=2):
+    def invoke(self, source, request=REQUEST, allow=False, timeout=2, policy=None):
         with tempfile.TemporaryDirectory() as folder:
             script=Path(folder)/'child.py';script.write_text(source)
             with patch.object(mcp,'BRIDGE_SCRIPT',script),patch.object(mcp,'CALL_TIMEOUT',timeout):
-                return mcp.run_bridge(request,'/trusted/config','/trusted/state',allow_submit=allow)
+                return mcp.run_bridge(request,'/trusted/config','/trusted/state',allow_submit=allow, policy_path=policy)
 
     def test_child_argv_is_fixed_and_input_only_has_bridge_envelope(self):
         source="""import json,sys
@@ -124,6 +124,14 @@ assert a==%r
 print(%r)
 """ % (REQUEST,json.dumps(result()))
         self.assertEqual(self.invoke(source,allow=True),result())
+
+    def test_policy_path_is_trusted_argv_and_policy_errors_are_preserved(self):
+        value={'schema_version':'cloudlab.bot-error.v1','code':'POLICY_CALL_LIMIT'}
+        source="import sys,json\nassert sys.argv[-2:]==['--policy','/trusted/policy']\nprint(%r)\nsys.exit(2)" % json.dumps(value)
+        self.assertEqual(self.invoke(source, policy='/trusted/policy'), value)
+        for code in mcp.bridge.POLICY_CODES:
+            error={**value, 'code':code}
+            self.assertEqual(mcp.validate_output(json.dumps(error).encode(),REQUEST,2), error)
 
     def test_child_timeout_is_unknown_and_process_is_reaped(self):
         with tempfile.TemporaryDirectory() as folder:

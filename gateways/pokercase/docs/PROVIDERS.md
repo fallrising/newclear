@@ -18,6 +18,18 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 - **active** — import tokens + forward with format conversion (chat ↔ responses / anthropic).
 - **partial** — store OAuth/session tokens; full wire protocol is **not** built yet. Use when you need them as a *project* and we implement the executor.
 
+### Streaming usage coverage
+
+| Existing path | Raw observer | Authentication and retry accounting |
+| --- | --- | --- |
+| SIWC Responses (forced upstream stream) | `openai_responses_v1` for streaming Chat/Messages/Responses clients | OAuth proactive refresh and one legal401 refresh/retry; each actual inference send is a distinct attempt |
+| Grok Responses (follows client stream) | `openai_responses_v1` for all three streaming clients | OAuth refresh or borrowed-file reread; borrowed credentials never refresh/write, and401 retries once only if the token changed |
+| OpenCode Chat | `openai_chat_v1` for all three streaming clients | Existing token/free import; no new refresh or retry capability |
+| Generic HTTP / Claude / Cursor | Existing Chat / Claude CLI / Cursor result observers | Prior delivery retained; Cursor remains text-only |
+| Antigravity | Outside this continuation | Separate#702 isolation work remains |
+
+Refresh/discovery are not model inference. Retry/fallback attempts share a request ID while retaining separate results and clocks. Original upstream counters and terminal evidence are observed before conversion; missing values stay unknown, explicit zero survives, and a successful HTTP status alone is not completion. Named subscription/OAuth costs stay null without a verified billing basis. Pending attempts recover once as interrupted without replay. The [named HTTP acceptance and offline entry](tasks/T-0432-named-http-settlement.md) cover existing supported tools with synthetic endpoints; live client/version/provider behavior remains unverified. This does not restore the removed `codex` provider or expand buffered-client accounting.
+
 ### Import
 
 Admin UI → Connections → **Import OAuth**, or:

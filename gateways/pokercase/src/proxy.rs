@@ -39,6 +39,8 @@ pub struct ProxyState {
     pub claude_code: crate::claude_code::ClaudeCode,
     /// Local Cursor Agent CLI runs for the `cursor` provider.
     pub cursor_cli: crate::cursor_cli::CursorCli,
+    #[cfg(test)]
+    pub refresh_transport: Option<crate::oauth_refresh::TestTransport>,
 }
 
 /// Which protocol the client speaks (for converting Claude Code output).
@@ -281,7 +283,8 @@ async fn forward_chat_completions_inner(
     stream: bool,
     cancel: &CancellationToken,
     allow_401_refresh: bool,
-    mut attempt: Option<&mut crate::stream_usage::StreamAttempt>,
+    context: Option<&HttpStreamContext<'_>>,
+    attempt: &mut Option<crate::stream_usage::StreamAttempt>,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
     // Refresh OAuth if near expiry (best-effort).
     let borrowed = crate::borrowed::source(&target.connection);
@@ -297,9 +300,7 @@ async fn forward_chat_completions_inner(
                 });
             }
         } else if allow_401_refresh && t.connection.auth_type == "oauth_import" {
-            if let Ok(fresh) =
-                crate::oauth_refresh::ensure_fresh(&state.store, t.connection.clone()).await
-            {
+            if let Ok(fresh) = ensure_http_credentials_fresh(state, t.connection.clone()).await {
                 t.connection = fresh;
             }
         }
@@ -511,6 +512,39 @@ async fn forward_chat_completions_inner(
         req = req.header("accept", "text/event-stream");
     }
 
+    // Preflight/refresh are not model inference. Reserve immediately before the
+    // actual send, including each existing legal 401 retry.
+    if let Some(context) = context {
+        let reserved = if provider_key.is_none() && target.connection.auth_type == "api_key" {
+            crate::stream_usage::StreamAttempt::begin(
+                &state.store,
+                context.request_id,
+                context.public_model,
+                target,
+                &body,
+            )
+        } else {
+            crate::stream_usage::StreamAttempt::begin_http(
+                &state.store,
+                context.request_id,
+                context.public_model,
+                target,
+                &body,
+                match body_kind {
+                    UpstreamBodyKind::OpenAiResponses => {
+                        crate::stream_usage::HttpUsageFormat::Responses
+                    }
+                    _ => crate::stream_usage::HttpUsageFormat::Chat,
+                },
+                false,
+            )
+        };
+        *attempt = Some(reserved.map_err(|_| UpstreamAttemptError {
+            status: 503,
+            body: "usage reservation failed".into(),
+            retryable: false,
+        })?);
+    }
     let send_fut = req.send();
     let result = tokio::select! {
         biased;
@@ -537,6 +571,9 @@ async fn forward_chat_completions_inner(
                     reassemble_stream: reassemble,
                 })
             } else if status == 401 && borrowed.is_some() {
+                if let Some(a) = attempt.as_mut() {
+                    a.stop("failed", "upstream_attempt_failed");
+                }
                 let body_txt = read_diagnostic_cancel(resp, cancel).await?;
                 let mut reread = target.clone();
                 let changed = borrowed
@@ -555,7 +592,8 @@ async fn forward_chat_completions_inner(
                         stream,
                         cancel,
                         false,
-                        None,
+                        context,
+                        attempt,
                     ))
                     .await;
                 }
@@ -568,10 +606,11 @@ async fn forward_chat_completions_inner(
                 && allow_401_refresh
                 && target.connection.auth_type == "oauth_import"
             {
+                if let Some(a) = attempt.as_mut() {
+                    a.stop("failed", "upstream_attempt_failed");
+                }
                 let body_txt = read_diagnostic_cancel(resp, cancel).await?;
-                if let Ok(fresh) =
-                    crate::oauth_refresh::refresh_connection(&state.store, &target.connection).await
-                {
+                if let Ok(fresh) = refresh_http_credentials(state, &target.connection).await {
                     let mut retry_target = target.clone();
                     retry_target.connection = fresh;
                     return Box::pin(forward_chat_completions_inner(
@@ -582,7 +621,8 @@ async fn forward_chat_completions_inner(
                         stream,
                         cancel,
                         false,
-                        None,
+                        context,
+                        attempt,
                     ))
                     .await;
                 }
@@ -781,8 +821,8 @@ pub async fn handle_chat_with_fallback(
                 }
             }
         }
-        let mut attempt =
-            begin_http_stream_attempt(state, &request_id, public_model, target, &body, stream)?;
+        let context = http_stream_context(&request_id, public_model, target, stream);
+        let mut attempt = None;
         match forward_chat_completions_inner(
             state,
             target,
@@ -791,7 +831,8 @@ pub async fn handle_chat_with_fallback(
             stream,
             &cancel,
             true,
-            attempt.as_mut(),
+            context.as_ref(),
+            &mut attempt,
         )
         .await
         {
@@ -856,15 +897,19 @@ pub async fn handle_chat_with_fallback(
                     retryable = e.retryable,
                     "upstream attempt failed"
                 );
-                if let Some(a) = attempt.as_mut() {
-                    if e.status == 499 {
-                        a.stop("cancelled", "stream_cancelled");
-                    } else {
-                        a.stop("failed", "upstream_attempt_failed");
+                if context.is_some() {
+                    if let Some(a) = attempt.as_mut() {
+                        if e.status == 499 {
+                            a.stop("cancelled", "stream_cancelled");
+                        } else {
+                            a.stop("failed", "upstream_attempt_failed");
+                        }
                     }
-                    let secs = cooldown_secs_for_status(e.status);
-                    if secs > 0 {
-                        state.cooldown.mark(&target.connection.id, secs);
+                    if e.body != "usage reservation failed" {
+                        let secs = cooldown_secs_for_status(e.status);
+                        if secs > 0 {
+                            state.cooldown.mark(&target.connection.id, secs);
+                        }
                     }
                 } else {
                     record_failure(state, public_model, target, &e, start);
@@ -892,30 +937,62 @@ pub async fn handle_chat_with_fallback(
     })
 }
 
-fn begin_http_stream_attempt(
-    state: &ProxyState,
-    request_id: &str,
-    public_model: &str,
+struct HttpStreamContext<'a> {
+    request_id: &'a str,
+    public_model: &'a str,
+}
+
+fn http_stream_context<'a>(
+    request_id: &'a str,
+    public_model: &'a str,
     target: &ResolvedTarget,
-    body: &[u8],
     stream: bool,
-) -> AppResult<Option<crate::stream_usage::StreamAttempt>> {
-    if stream
-        && target.connection.auth_type == "api_key"
-        && provider_id_for(target).is_none()
-        && crate::borrowed::source(&target.connection).is_none()
-    {
-        crate::stream_usage::StreamAttempt::begin(
-            &state.store,
-            request_id,
-            public_model,
-            target,
-            body,
-        )
-        .map(Some)
-    } else {
-        Ok(None)
+) -> Option<HttpStreamContext<'a>> {
+    let provider = provider_id_for(target);
+    let supported = match provider.as_deref().and_then(providers::resolve) {
+        Some(p) => matches!(p.id, "siwc" | "grok" | "opencode"),
+        None => {
+            provider.is_none()
+                && target.connection.auth_type == "api_key"
+                && crate::borrowed::source(&target.connection).is_none()
+        }
+    };
+    (stream && supported).then_some(HttpStreamContext {
+        request_id,
+        public_model,
+    })
+}
+
+async fn refresh_http_credentials(
+    state: &ProxyState,
+    conn: &crate::store::ConnectionRow,
+) -> AppResult<crate::store::ConnectionRow> {
+    #[cfg(test)]
+    if let Some(transport) = state.refresh_transport.as_ref() {
+        return crate::oauth_refresh::refresh_connection_for_test(&state.store, conn, transport)
+            .await;
     }
+    crate::oauth_refresh::refresh_connection(&state.store, conn).await
+}
+
+async fn ensure_http_credentials_fresh(
+    state: &ProxyState,
+    conn: crate::store::ConnectionRow,
+) -> AppResult<crate::store::ConnectionRow> {
+    #[cfg(test)]
+    if state.refresh_transport.is_some() {
+        if conn.auth_type != "oauth_import" || !crate::oauth_refresh::needs_refresh(&conn, 300) {
+            return Ok(conn);
+        }
+        return match refresh_http_credentials(state, &conn).await {
+            Ok(fresh) => Ok(fresh),
+            Err(error) => {
+                warn!(connection = %conn.name, error = %error, "oauth refresh failed; continuing with existing token");
+                Ok(conn)
+            }
+        };
+    }
+    crate::oauth_refresh::ensure_fresh(&state.store, conn).await
 }
 
 /// Anthropic-native path: translate request → OpenAI forward → translate response.
@@ -998,8 +1075,8 @@ pub async fn handle_anthropic_messages(
                 }
             }
         }
-        let mut attempt =
-            begin_http_stream_attempt(state, &request_id, public_model, target, &oai_body, stream)?;
+        let context = http_stream_context(&request_id, public_model, target, stream);
+        let mut attempt = None;
         match forward_chat_completions_inner(
             state,
             target,
@@ -1008,7 +1085,8 @@ pub async fn handle_anthropic_messages(
             stream,
             &cancel,
             true,
-            attempt.as_mut(),
+            context.as_ref(),
+            &mut attempt,
         )
         .await
         {
@@ -1071,15 +1149,19 @@ pub async fn handle_anthropic_messages(
                 }
             }
             Err(e) => {
-                if let Some(a) = attempt.as_mut() {
-                    if e.status == 499 {
-                        a.stop("cancelled", "stream_cancelled");
-                    } else {
-                        a.stop("failed", "upstream_attempt_failed");
+                if context.is_some() {
+                    if let Some(a) = attempt.as_mut() {
+                        if e.status == 499 {
+                            a.stop("cancelled", "stream_cancelled");
+                        } else {
+                            a.stop("failed", "upstream_attempt_failed");
+                        }
                     }
-                    let secs = cooldown_secs_for_status(e.status);
-                    if secs > 0 {
-                        state.cooldown.mark(&target.connection.id, secs);
+                    if e.body != "usage reservation failed" {
+                        let secs = cooldown_secs_for_status(e.status);
+                        if secs > 0 {
+                            state.cooldown.mark(&target.connection.id, secs);
+                        }
                     }
                 } else {
                     record_failure(state, public_model, target, &e, start);
@@ -1188,14 +1270,8 @@ pub async fn handle_responses(
                 }
             }
         }
-        let mut attempt = begin_http_stream_attempt(
-            state,
-            &request_id,
-            public_model,
-            target,
-            &chat_body,
-            stream,
-        )?;
+        let context = http_stream_context(&request_id, public_model, target, stream);
+        let mut attempt = None;
         match forward_chat_completions_inner(
             state,
             target,
@@ -1204,7 +1280,8 @@ pub async fn handle_responses(
             stream,
             &cancel,
             true,
-            attempt.as_mut(),
+            context.as_ref(),
+            &mut attempt,
         )
         .await
         {
@@ -1273,15 +1350,19 @@ pub async fn handle_responses(
                 }
             }
             Err(e) => {
-                if let Some(a) = attempt.as_mut() {
-                    if e.status == 499 {
-                        a.stop("cancelled", "stream_cancelled");
-                    } else {
-                        a.stop("failed", "upstream_attempt_failed");
+                if context.is_some() {
+                    if let Some(a) = attempt.as_mut() {
+                        if e.status == 499 {
+                            a.stop("cancelled", "stream_cancelled");
+                        } else {
+                            a.stop("failed", "upstream_attempt_failed");
+                        }
                     }
-                    let secs = cooldown_secs_for_status(e.status);
-                    if secs > 0 {
-                        state.cooldown.mark(&target.connection.id, secs);
+                    if e.body != "usage reservation failed" {
+                        let secs = cooldown_secs_for_status(e.status);
+                        if secs > 0 {
+                            state.cooldown.mark(&target.connection.id, secs);
+                        }
                     }
                 } else {
                     record_failure(state, public_model, target, &e, start);
@@ -1511,6 +1592,9 @@ impl SseConvert for responses::ChatToResponsesStream {
 }
 
 impl SseConvert for responses::ResponsesToChatStream {
+    fn is_failed(&self) -> bool {
+        self.is_failed()
+    }
     fn is_done(&self) -> bool {
         responses::ResponsesToChatStream::is_done(self)
     }
@@ -1669,6 +1753,11 @@ impl BodyAccounting {
             a.observe_converted(bytes);
         }
     }
+    fn observe_native(&mut self, bytes: &[u8]) {
+        if let Self::Http(a) = self {
+            a.observe_native(bytes);
+        }
+    }
     fn converted_terminal(&mut self, failed: bool) {
         match self {
             Self::Http(a) => a.converted_terminal(failed),
@@ -1721,12 +1810,14 @@ where
         loop {
             match timeout(stall, upstream.next()).await {
                 Ok(Some(Ok(chunk))) => {
-                    if conv.is_none() {
+                    if conv.is_none() && native.is_none() {
                         if let Some(a) = attempt.as_mut() { a.push(&chunk); }
                     }
                     if let Some(native) = native.as_mut() {
-                        let out = native.push(&chunk);
+                        let (out, consumed) = native.push_counted(&chunk);
+                        if let Some(a) = attempt.as_mut() { a.observe_native(&chunk[..consumed]); }
                         if native.done {
+                            if let Some(a) = attempt.as_mut() { a.converted_terminal(native.failed); }
                             drop(upstream);
                             if !out.is_empty() { yield Ok::<Bytes, std::io::Error>(Bytes::from(out)); }
                             break;
@@ -1783,12 +1874,17 @@ where
                     }
                 }
                 Ok(Some(Err(error))) => {
-                    if let Some(a) = attempt.as_mut() { a.stop("failed", "upstream_transport_error"); }
                     // Error values can contain URLs/credentials and own resources.
                     drop(error);
                     let out = if let Some(native) = native.as_mut() {
-                        Some(native.read_error())
+                        let out = native.read_error();
+                        if let Some(a) = attempt.as_mut() {
+                            if native.failed { a.stop("failed", "upstream_transport_error"); }
+                            else { a.converted_terminal(false); }
+                        }
+                        Some(out)
                     } else {
+                        if let Some(a) = attempt.as_mut() { a.stop("failed", "upstream_transport_error"); }
                         conv.as_mut().map(|conv| {
                             conv.on_read_error().into_iter().map(|r| r + "\n\n").collect::<String>().into_bytes()
                         })
@@ -1805,6 +1901,7 @@ where
                     drop(upstream);
                     if let Some(native) = native.as_mut() {
                         let out = native.end();
+                        if let Some(a) = attempt.as_mut() { a.converted_terminal(native.failed); }
                         if !out.is_empty() { yield Ok(Bytes::from(out)); }
                     }
                     if let Some(conv) = conv.as_mut() {
@@ -1830,6 +1927,7 @@ where
                 }
                 Err(_) => {
                     if let Some(out) = native.as_mut().and_then(|n| n.finish_cr_terminal()) {
+                        if let Some(a) = attempt.as_mut() { a.converted_terminal(false); }
                         drop(upstream);
                         yield Ok(Bytes::from(out));
                         break;
@@ -3914,3 +4012,7 @@ mod cost_completeness_tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "named_http_tests.rs"]
+mod named_http_tests;

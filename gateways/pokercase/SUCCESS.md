@@ -538,3 +538,7 @@ Actual guarded helper `--serve` also passed the full journey, authenticated admi
 保留實際baseline missing-attempt RED及其先行admin envelope測試錯誤、sccache/socket sandbox拒絕與核准重跑、binary digest拒絕、舊HTTP入口不支援digest旗標的argparse失敗。獨立review R1指出拒絕fixture冷卻共用連線，已以獨立拒絕連線修正，regression RED→GREEN；R2指出本機serve checker文字緩衝/readiness問題，改reader thread後實測通過，產品不變。worker報告格式錯誤均保留。另有一次shell缺少fail-stop，報告格式驗證失敗後仍繼續首次commit/push；立即暫停PR發布，修正報告、通過驗證，再以正常followup commit發布。沒有改寫歷史、弱化產品檢查或繞過CI；見commit-gate-incident.json。先前fixture401/啟動重試通過仍不代表#701已查明或修好。
 
 本份是產品merge時點快照。後續帳本發布、完整備份`t0432-cursor-settlement-20261029`（完整位置留在私人交接）與本輪工作樹清理由`.local/t0432-cursor-settlement/handoff.json`核實，不預先宣稱完成。新`local-demo.py`預設check、驗證source/binary digest；舊入口與舊digest不變。本輪完成即停止，不開新里程碑。
+
+## T-0432 existing named HTTP settlement continuation
+
+Owner approved existing SIWC/Grok Responses and OpenCode Chat streaming accounting across all three clients, existing tools and legal auth retries. [NH-1–NH-5, matrix, design and isolation](docs/tasks/T-0432-named-http-settlement.md) are fixed before implementation. Prior SS/PC/CS/CU delivery, original17AC, T1102 and whole-product incomplete/usable_tag none remain. Actual nine-path RED was corrected; named and all three prior offline journeys passed, including actual guarded serve/admin/cleanup. Independent source/runtime review found no remaining blocker; mandatory CI and delivery gates remain pending. No real provider or credential use.

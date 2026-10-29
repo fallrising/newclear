@@ -475,11 +475,16 @@ pub struct ResponsesToChatStream {
     args_streamed: HashSet<String>,
     next_tool: usize,
     finished: bool,
+    failed: bool,
 }
 
 impl ResponsesToChatStream {
     pub(crate) fn is_done(&self) -> bool {
         self.finished
+    }
+
+    pub(crate) fn is_failed(&self) -> bool {
+        self.failed
     }
 
     pub fn new(model: impl Into<String>) -> Self {
@@ -494,6 +499,7 @@ impl ResponsesToChatStream {
             args_streamed: HashSet::new(),
             next_tool: 0,
             finished: false,
+            failed: false,
         }
     }
 
@@ -653,6 +659,7 @@ impl ResponsesToChatStream {
                 out.extend(self.finish(ev.get("response")));
             }
             "response.failed" | "error" => {
+                self.failed = true;
                 let err = ev
                     .pointer("/response/error")
                     .or_else(|| ev.get("error"))

@@ -35,8 +35,9 @@ jobs:
       - name: Run static analysis
         run: cargo +1.99.0 clippy --locked --all-targets -- -D warnings
       - name: Verify offline walkthrough fixtures
-        run: python3 -m unittest discover -s scripts/tests -p 'test_offline_*.py' -v
+        run: python3 -m unittest discover -s scripts/tests -v
       - name: Run complete offline user journey
         run: |
           cargo +1.99.0 build --locked
           python3 scripts/offline_walkthrough.py --check --binary target/debug/thinrouter --output-dir "${RUNNER_TEMP}/thinrouter-offline"
+          python3 scripts/named_http_walkthrough.py --check --binary target/debug/thinrouter --output-dir "${RUNNER_TEMP}/thinrouter-named-http-offline"

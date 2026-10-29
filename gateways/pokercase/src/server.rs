@@ -90,6 +90,8 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
         cfg: cfg.clone(),
         store: store.clone(),
         proxy: ProxyState {
+            #[cfg(test)]
+            refresh_transport: None,
             http,
             store: store.clone(),
             cooldown: CooldownMap::new(),

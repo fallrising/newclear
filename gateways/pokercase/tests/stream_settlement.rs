@@ -82,6 +82,8 @@ impl Fixture {
                 "--allow-keyless-bootstrap",
                 "--sse-stall-secs",
                 "5",
+                "--provider-base-override",
+                &format!("siwc={upstream},grok={upstream},opencode={upstream}"),
             ])
             .stdout(std::process::Stdio::null())
             .stderr(std::fs::File::create(dir.path().join("stderr")).unwrap())
@@ -212,6 +214,11 @@ impl Fixture {
                 "--allow-keyless-bootstrap",
                 "--sse-stall-secs",
                 "5",
+                "--provider-base-override",
+                &format!(
+                    "siwc={},grok={},opencode={}",
+                    self.upstream, self.upstream, self.upstream
+                ),
             ])
             .stdout(std::process::Stdio::null())
             .stderr(
@@ -842,4 +849,52 @@ async fn pc3_converted_fallback_storage_failures_and_restart_no_replay() {
         f.child.kill().await.unwrap();
         f.child.wait().await.unwrap();
     }
+}
+
+#[tokio::test]
+async fn nh1_named_http_all_clients_reserve_and_retain_raw_usage() {
+    let mut failures = Vec::new();
+    for provider in ["siwc", "grok", "opencode"] {
+        let f = Fixture::start().await;
+        let wire = if provider == "opencode" {
+            "data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"synthetic\"},\"finish_reason\":\"stop\"}]}\n\ndata: {\"choices\":[],\"usage\":{\"prompt_tokens\":11,\"completion_tokens\":7}}\n\ndata: [DONE]\n\n".to_string()
+        } else {
+            "event: response.output_text.delta\ndata: {\"type\":\"response.output_text.delta\",\"delta\":\"synthetic\"}\n\nevent: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"output\":[],\"usage\":{\"input_tokens\":11,\"output_tokens\":7}}}\n\n".to_string()
+        };
+        *f.body.lock().unwrap() = wire;
+        // No refresh token, no expiry, explicit fake base: no refresh/discovery network path.
+        f.post(
+            "/admin/api/connections/oauth/import",
+            json!({
+                "name":"synthetic", "provider":provider, "access_token":"synthetic-only",
+                "base_url":format!("{}/v1", f.upstream), "default_model":"synthetic",
+                "meta":"{\"client_id\":\"oaiapp_synthetic\"}"
+            }),
+        )
+        .await;
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            let response = f.request_for(path).send().await.unwrap();
+            assert_eq!(response.status(), 200, "{provider} {path}");
+            let wire = response.text().await.unwrap();
+            assert!(wire.contains("synthetic"), "actual forwarding succeeded");
+            let rows = f.rows().await;
+            let row = &rows[0];
+            if row["attempt_id"].as_str().is_none()
+                || row["prompt_tokens"] != 11
+                || row["completion_tokens"] != 7
+                || row["outcome"] != "succeeded"
+            {
+                failures.push(format!(
+                    "{provider} {path}: attempt={}, counts={}/{}, outcome={}",
+                    row["attempt_id"],
+                    row["prompt_tokens"],
+                    row["completion_tokens"],
+                    row["outcome"]
+                ));
+            }
+            assert!(row["estimated_cost_usd"].is_null());
+        }
+        assert_eq!(f.calls.load(Ordering::SeqCst), 3);
+    }
+    assert!(failures.is_empty(), "{}", failures.join("; "));
 }

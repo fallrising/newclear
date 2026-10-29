@@ -458,3 +458,15 @@ Cursor隔離旅程有17筆durable attempts：11 succeeded、3 failed、2 cancell
 只交付既有Cursor text-only→Chat/Messages/Responses串流的持久記帳，不增加工具/圖片支援。其他named-provider/OAuth/借用憑證及原生非Chat上游observer仍未完整覆蓋，完整#698保持open。#699完整token覆蓋率/價格來源精度/歷史語義、#700具名client/version與真實AC01/04/08以及AC04工具/AC17文字範圍決策、#701既有fixture啟動/auth間歇失敗未知根因、#702Antigravity HTTP隔離仍保留。mainline incomplete、usable_tag none、desk in_progress；不能以測試/任務數宣稱產品完成。
 
 本份是產品merge時點快照。後續帳本發布、完整備份`t0432-cursor-settlement-20261029`（完整位置留在私人交接）與本輪工作樹清理由`.local/t0432-cursor-settlement/handoff.json`核實，不預先宣稱完成。新`local-demo.py`預設check、驗證source/binary digest；舊入口與舊digest不變。本輪完成即停止，不開新里程碑。
+
+## T-0432 — Existing named HTTP streaming settlement
+
+Claim PR286 merged; [NH-1–NH-5](T-0432-named-http-settlement.md). Existing original criteria and earlier delivery records preserved.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| NH-01 | Per-inference reservation and legal authentication retry | NH-1 | in_progress | 2026-10-29T07:22:16Z | — | 2026-10-29T07:56:30Z |
+| NH-02 | Raw Chat/Responses usage, terminal and observation boundary | NH-2 | in_progress | 2026-10-29T07:22:16Z | — | 2026-10-29T07:56:30Z |
+| NH-03 | Once-only timing, cancellation and conversion failure | NH-3 | in_progress | 2026-10-29T07:22:16Z | — | 2026-10-29T07:56:30Z |
+| NH-04 | Storage recovery and management consistency | NH-4 | in_progress | 2026-10-29T07:22:16Z | — | 2026-10-29T07:56:30Z |
+| NH-05 | Headless journey, regression, review and delivery | NH-5 | in_progress | 2026-10-29T07:22:16Z | — | 2026-10-29T07:56:30Z |

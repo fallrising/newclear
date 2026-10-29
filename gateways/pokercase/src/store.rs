@@ -1401,7 +1401,10 @@ impl Store {
         anyhow::ensure!(
             matches!(
                 usage_source,
-                "openai_chat_v1" | "claude_code_stream_event_v1" | "cursor_cli_result_v1"
+                "openai_chat_v1"
+                    | "openai_responses_v1"
+                    | "claude_code_stream_event_v1"
+                    | "cursor_cli_result_v1"
             ),
             "invalid_stream_source"
         );

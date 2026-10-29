@@ -1,6 +1,6 @@
 # Finite HTTP/WSS conformance and remaining T006R oracles — scope proposal
 
-Status: **C1 confirmed by the owner on 2026-10-29** (「確認範圍：實作 C1；C2 執行前再問我。」). C2 needs a separate approval before it runs. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E.
+Status: **C1 confirmed and merged (PR735).** The owner then approved the F1–F4 harness repair and one C2 run (「批准：修正 F1–F4 並準備 C2 driver，審查與 CI 通過後跑一次 C2。」); both are specified in [SPEC-T006R-harness-repair-c2](SPEC-T006R-harness-repair-c2.md). Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E.
 
 Basis:
 - [ROUND2-SDD](../../../../docs/fe-review/ROUND2-SDD.md) R2-AC-14: "M1–M3 finite HTTPS/WSS synthetic harness … mock is not real backend/Cloud acceptance; real integration needs its own explicit scope."
@@ -102,15 +102,15 @@ Files:
 - `fe-review/conformance-evidence.node.mjs`: the C1-c evidence oracles over the accepted v7 results, enabled by `FE_REVIEW_RUNS`.
 - `fe-review/conformance-partitions.node.mjs`: the C1-d R06 pure partitions against the actual controller.
 
-Deviation handling: where the review harness does not follow the T005C contract, the C1 oracle states the contract and records the measured harness behavior as a finding. The pinned `transport.mjs` and `fixture.mjs` are not changed in C1. Changing them would move the v7 source pins that the canonical 27/27 evidence relies on, so a harness repair is an owner decision.
+Deviation handling: where the review harness did not follow the T005C contract, C1 recorded the measured behavior as a finding and left the pinned `transport.mjs` and `fixture.mjs` unchanged. The owner then approved the repair, which [SPEC-T006R-harness-repair-c2](SPEC-T006R-harness-repair-c2.md) specifies.
 
 ## C1 results (2026-10-29)
 
-Oracles added (35 fe-review node suites in total):
+Oracles (36 fe-review node suites in total, including the repair's):
 
 | File | Oracles | Result |
 |---|---|---|
-| `conformance-transport.node.mjs` | `review_tls_node_client_trusts_only_private_ca_and_loopback_name`, `review_wss_upgrade_requires_exact_origin_and_accepts_valid_cookie`, `review_wss_replay_live_order_and_exact_envelopes`, `review_wss_errors_have_exact_fields_and_policy_close`, `review_wss_invalid_frames_close_without_effects`, `review_wss_logout_expiry_and_shutdown_close_promptly`, `review_wss_subscribe_timeout_closes_after_five_seconds`, `review_http_over_https_matches_actual_controller_contract`, `finding_subscriber_cap_is_http_403_not_subscriber_limit_1013`, `finding_upgrade_refusals_are_bare_403_not_401_or_404` | 10/10 over the real loopback HTTPS/WSS transport (about 6 s) |
+| `conformance-transport.node.mjs` | `review_tls_node_client_trusts_only_private_ca_and_loopback_name`, `review_wss_upgrade_requires_exact_origin_and_accepts_valid_cookie`, `review_wss_replay_live_order_and_exact_envelopes`, `review_wss_errors_have_exact_fields_and_policy_close`, `review_wss_invalid_frames_close_without_effects`, `review_wss_logout_expiry_and_shutdown_close_promptly`, `review_wss_subscribe_timeout_closes_after_five_seconds`, `review_http_over_https_matches_actual_controller_contract`, `review_wss_subscriber_limit_is_typed_1013`, `review_wss_upgrade_refusals_are_safe_json_in_product_order` (the two C1 finding tests, now contract oracles after the repair), plus the repair's `review_wss_socket_bound_is_503_before_origin`, `review_wss_shutdown_close_stays_graceful_under_live_events`, `review_wss_history_gap_lag_and_unavailable_are_typed_1013_or_1008` and `review_r06_gap_after_restart_resubscribes_at_snapshot_without_resend` | 14/14 over the real loopback HTTPS/WSS transport (about 12 s) |
 | `conformance-partitions.node.mjs` | `review_gap_restart_timeout_and_refresh_preserve_no_resend` | 1/1 |
 | `conformance-evidence.node.mjs` | `review_canonical_capture_keys_are_complete_and_immutable`, `review_measured_presentation_is_accessible_at_three_sizes`, `review_secrets_clear_and_diff_is_inert`, `review_evidence_keeps_native_and_mock_boundaries` | 4/4 against the accepted v7 results |
 
@@ -121,14 +121,14 @@ The meaningful-failure checks were mutations, restored byte-exactly afterwards:
 - An altered desktop result breaks the R10 chain.
 - One mobile cell set to `overflow=true` fails R07.
 
-Without `REVIEW_MODULES` or `FE_REVIEW_RUNS`, the environment-dependent oracles skip with a stated reason. With both set, every fe-review suite passes; without them, the 14 environment-dependent tests skip with a stated reason. The review's follow-up changes tightened several checks: exact T005C error messages, an exact 1024-byte subscribe being accepted, a 400 ms logout/expiry bound, cookie attributes and clearing, the diff `Content-Security-Policy` and `Content-Disposition` headers, a server-first close in the R06 error partitions, and explicit plain-HTTP refusal. The T006 suite passes 10/10.
+Without `REVIEW_MODULES` or `FE_REVIEW_RUNS`, the environment-dependent oracles skip with a stated reason. With both set, every fe-review suite passes; without them, the 18 environment-dependent tests skip with a stated reason. The review's follow-up changes tightened several checks: exact T005C error messages, an exact 1024-byte subscribe being accepted, a 400 ms logout/expiry bound, cookie attributes and clearing, the diff `Content-Security-Policy` and `Content-Disposition` headers, a server-first close in the R06 error partitions, and explicit plain-HTTP refusal. The T006 suite passes 10/10.
 
-Findings against T005C (the harness is unchanged; repair is an owner decision because it moves the v7 source pins):
+Findings against T005C, all repaired by [SPEC-T006R-harness-repair-c2](SPEC-T006R-harness-repair-c2.md) H01–H04. The v4–v7 runners stay pinned to the pre-repair harness, and the canonical cells never reached these paths:
 
-- F1 — subscriber cap. T005C requires a `subscriber_limit` error and close 1013. The review transport refuses the ninth upgrade with HTTP 403. This is measured and pinned by `finding_subscriber_cap_is_http_403_not_subscriber_limit_1013`.
-- F2 — back-pressure. From source inspection: an outbound frame over 64 KiB, or `bufferedAmount` over 64 KiB, triggers a `protocol_error` close 1008 instead of `subscriber_lagged` (1013) or `stream_unavailable` (1013). The frames are small, so this is not reachable in a test.
-- F3 — `history_gap`, `subscriber_lagged` and `stream_unavailable` cannot be produced through the review transport. History holds 256 events, and no scenario exceeds that. The client's handling of `history_gap` is covered in the R06 partitions.
+- F1 — subscriber cap. T005C requires a `subscriber_limit` error and close 1013. The review transport refused the ninth upgrade with HTTP 403. Repaired by H02.
+- F2 — back-pressure. From source inspection: an outbound frame over 64 KiB, or `bufferedAmount` over 64 KiB, triggered a `protocol_error` close 1008 instead of `subscriber_lagged` (1013) or `stream_unavailable` (1013). Repaired by H03.
+- F3 — `history_gap`, `subscriber_lagged` and `stream_unavailable` could not be produced through the review transport. History held 256 events, and no scenario exceeded that. Repaired by H04: review-only history, live-capacity and message-size bounds plus a live-queue stall seam make all three reachable.
 
-- F4 — upgrade refusals. T005C P-005C-01 requires HTTP 401 for a missing cookie, and T005B unknown routes are 404, both with the safe JSON envelope. The review transport refuses every upgrade (missing cookie, wrong path, cap) with a bare, empty 403 that carries no `no-store` or `nosniff`. An Origin mismatch is 403 as required. A 426 is not reachable. This is measured by `finding_upgrade_refusals_are_bare_403_not_401_or_404`.
+- F4 — upgrade refusals. T005C P-005C-01 requires HTTP 401 for a missing cookie, and T005B unknown routes are 404, both with the safe JSON envelope. The review transport refused every upgrade (missing cookie, wrong path, cap) with a bare, empty 403 that carried no `no-store` or `nosniff`. An Origin mismatch was 403 as required. Repaired by H01, which also makes 426 reachable.
 
-R02's browser half (TLS trust in a real browser), R06 in a real browser, and the R07 items not yet exercised remain C2.
+R02's browser half (TLS trust in a real browser), R06 in a real browser, and the R07 items not yet exercised are C2, which runs the driver specified in [SPEC-T006R-harness-repair-c2](SPEC-T006R-harness-repair-c2.md) Part C.

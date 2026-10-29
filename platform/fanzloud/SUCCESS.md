@@ -329,6 +329,14 @@ Milestone 3 (v7 recapture, canonical 27/27) is merged as PR731, main `0ff9bab0`.
 C1 result:
 - 15 new oracles (including two findings recorded as tests): R03/R04 and Node-level TLS over the real loopback HTTPS/WSS transport, R06 pure partitions, and R07/R08/R10/R11 evidence over the v7 results.
 - All pass; each was shown meaningful by a mutation check.
-- Findings F1–F4 record where the review harness differs from T005C (subscriber cap returns HTTP 403; back-pressure close codes; error paths the harness cannot reach; upgrade refusals are a bare 403 instead of 401/404 JSON). The harness is not changed.
+- Findings F1–F4 recorded where the review harness differed from T005C (subscriber cap returned HTTP 403; back-pressure close codes; error paths the harness could not reach; upgrade refusals were a bare 403 instead of 401/404 JSON). They are repaired below.
 
-Next: C2, one focused browser run that needs owner approval.
+## T-0433 harness repair F1–F4 and the C2 driver (2026-10-29)
+
+The owner approved repairing F1–F4 and preparing the C2 driver, with one C2 run after review and CI (「批准：修正 F1–F4 並準備 C2 driver，審查與 CI 通過後跑一次 C2。」). [SPEC-T006R-harness-repair-c2](docs/specs/SPEC-T006R-harness-repair-c2.md) specifies both.
+
+- Harness: upgrade refusals are safe JSON in the product order (400/404/405/422/401/503/403/426). The ninth subscriber gets `subscriber_limit` with close 1013. Lag and serialization failures are typed 1013, and a stalled write drops only its connection. Review-only bounds make `history_gap`, `subscriber_lagged` and `stream_unavailable` reachable; their defaults equal the product's.
+- Tests: the two finding tests are now contract oracles. Four oracles were added: the 503 socket bound, a graceful 1012 close under live events, the gap/lag/unavailable paths, and the R06 schedule run without a browser against the actual controller. Each repaired clause except the 10-second write bound, which the spec states, was shown meaningful by a mutation check. Historical v1–v7 pins stay on the pre-repair harness bytes. All fe-review suites pass with `REVIEW_MODULES` and `FE_REVIEW_RUNS` set, and T006 passes 10/10.
+- C2 driver: `fe-review/conformance-browser.mjs` with pure verdicts in `conformance-browser-verdicts.mjs`. It covers R02 browser TLS, R06 no-resend in a browser, and R07 keyboard traversal, measured names and mobile diff scroll. It has not run yet. The independent review returned ACCEPT_WITH_FIXES; its fixes are applied: the graceful 1012 close, the added oracles, R02 health before context close, the stale proposal text, and `limits:null`.
+
+Next: re-review of the fixes and CI, then the one approved C2 run (`conformance-001`) and its actual review.

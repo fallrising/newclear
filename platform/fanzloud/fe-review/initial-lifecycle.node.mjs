@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {EventEmitter} from 'node:events';
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createInitialLifecycleObserver} from './initial-lifecycle-observer.mjs';
 import {installInitialLifecyclePage} from './initial-lifecycle-page.mjs';
@@ -19,7 +20,8 @@ test('premature close is explicit, normal close is not mislabelled; duplicates a
 test('non-target and postauth requests ignored; total cap128 and cleanup removes listeners',()=>{const x=sample();x.setPreauth(false);x.o.request(x.request);assert(x.o.snapshot().complete);x.o.close();assert.equal(x.req.listenerCount('aborted'),0);assert.equal(x.res.listenerCount('finish'),0);const y=sample();for(let i=0;i<140;i++)y.o.terminal(y.request,null);assert(y.o.snapshot().overflow);assert.equal(y.o.snapshot().events.length,128);assert.equal(y.o.snapshot().complete,false);});
 test('transport and runner restore exactly after removing authorized observation wiring',()=>{
  const root=process.env.ORIGINAL_REVIEW??fileURLToPath(new URL('.',import.meta.url));const read=n=>readFileSync(new URL(n,import.meta.url),'utf8');const strip=s=>s.replace(/\/\* INITIAL_TRACE \*\/[\s\S]*?\/\* END_INITIAL_TRACE \*\//g,'');
- const transport=strip(read('initial-lifecycle-transport.mjs')).replace('WebSocketServer,observeResponse,initialTrace})','WebSocketServer,observeResponse})');assert.equal(transport,readFileSync(root+'/transport.mjs','utf8'));
+ const transport=strip(read('initial-lifecycle-transport.mjs')).replace('WebSocketServer,observeResponse,initialTrace})','WebSocketServer,observeResponse})');// SPEC-T006R-harness-repair-c2 T02: the stripped trace transport equals the pre-repair transport.mjs.
+ const sha=s=>createHash('sha256').update(s).digest('hex');assert.equal(sha(transport),'04636827f238869182d0f7084fed9558c31f6a9f1e351d4b1f708188fecafae3');assert.notEqual(sha(readFileSync(root+'/transport.mjs','utf8')),sha(transport));
  let runner=strip(read('initial-lifecycle-baseline.mjs')).replace("from './initial-lifecycle-transport.mjs';\n","from './transport.mjs';").replace("['initial-lifecycle-baseline.mjs','initial-lifecycle-observer.mjs','initial-lifecycle-page.mjs','initial-lifecycle-transport.mjs'","['recovery-post-body-baseline.mjs'").replace('WebSocketServer,initialTrace,observeResponse','WebSocketServer,observeResponse');
  runner=runner.replace("const initialAllowed=u.origin===origin&&!u.search&&!u.hash&&allowedRequest(route.request().method(),u.pathname);initialTrace.route(route.request(),initialAllowed);if(initialAllowed)return route.continue();","if(u.origin===origin&&!u.search&&!u.hash&&allowedRequest(route.request().method(),u.pathname))return route.continue();");
  runner=runner.replace("{bodies.add(request);initialTrace.body(request,'EXACT');}else initialTrace.body(request,'MISMATCH');},()=>{initialTrace.body(request,'REJECTED');}));","bodies.add(request);},()=>{}));").replace('&&!row.initialTraceIncomplete','');

@@ -260,7 +260,13 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0014-1 | 有界低頻排程與dispatch護欄 | HS-01 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |
-| T-0014-2 | 授權排程狀態及結果API | HS-02 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |
-| T-0014-3 | 看板排程／過期／session展示 | HS-03 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |
-| T-0014-4 | 整合、審查與交付 | HS-04 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |
+| T-0014-1 | 有界低頻排程與dispatch護欄 | HS-01 | done | 2026-10-29T08:06:27Z | 2026-10-29T08:33:41Z | 2026-10-29T08:34:33Z |
+| T-0014-2 | 授權排程狀態及結果API | HS-02 | done | 2026-10-29T08:06:27Z | 2026-10-29T08:33:41Z | 2026-10-29T08:34:33Z |
+| T-0014-3 | 看板排程／過期／session展示 | HS-03 | done | 2026-10-29T08:06:27Z | 2026-10-29T08:33:41Z | 2026-10-29T08:34:33Z |
+| T-0014-4 | 整合、審查與交付 | HS-04 | done | 2026-10-29T08:06:27Z | 2026-10-29T08:33:41Z | 2026-10-29T08:34:33Z |
+
+## T-0014交付與遠端回讀
+
+- [Feature PR750](https://github.com/fallrising/newclear/pull/750) head `1c7bbb0d186a7584777f58a8c46cc5b3feec57e5`，merge `89ead9636c5e732b8a5a367c3f02ca5eca0bf2da`，合併時間2026-10-29T08:33:41Z。24份交付檔案與遠端逐byte相等、feature為main祖先、工作樹乾淨；既有其他專案變更保留。
+- CI全過：Cloud Lab `40842886920`、Project success `40842886813`、llms `40842886941`。本機完整265tests、fixture分鐘邊界修正後5項整合再通過；真實Chromium／workerd的12組檢查、95次API請求、T836獨立審查ACCEPT。初始RED與harness失敗保留在[HS證據](../evidence/m1-health-schedule.md)。
+- 已固定六份Worker／看板候選及hash。這是HS01–04 source／local交付；[具體15分鐘啟用與停用方案](../health-schedule.md)備妥，未部署、續scheduler授權、啟用Cron、改runner或新增付費。既有runner期限不變；Python3.11、真人Access及完整主線pending，無usable tag。本收尾只改任務板。

@@ -71,12 +71,13 @@ with0 unexpected destinations;37 client inference requests and169 local admin re
 are separate counts. There were36 legacy usage rows, including failure rows. These are
 fixture observations, not development-model usage or billing. Buffered15case checks
 compare actual SQLite, admin JSON and CSV counters/costs. Source fixtures retain the
-original `usageMetadata` shapes; existing persistence does not gain raw provenance.
+original `usageMetadata` shapes; that initial isolation slice did not add raw provenance.
 
 Stream tests prove opaque byte forwarding and cleanup, including client drop and the
 existing post-output stall limit. They do not prove Gemini streaming protocol support,
-terminal success or durable stream accounting. Malformed successful JSON currently
-returns400 with no usage row; this remains a recorded accounting gap. Reopen checks
+terminal success or durable stream accounting in the original T-0434 slice. At that
+snapshot, malformed successful JSON returned400 with no usage row. The AS continuation
+below addresses accounting; the original report remains historical evidence. Reopen checks
 preserve routes, keys and history without replay, then serve a new request.
 
 T-0428's historical synthetic request reached the official endpoint and returned401.
@@ -84,3 +85,39 @@ No real credential/private database was read and no successful inference was obs
 but that event was not zero outbound. It is preserved and never repeated by this check.
 Current proof is confinement of this reviewed application call tree, not a machine-wide
 egress assertion. Real client/version/provider acceptance remains outstanding.
+
+## Existing-HTTP settlement continuation
+
+[AS-1–AS-5](tasks/T-0432-antigravity-settlement.md) reuse the same closed transport and
+preserve the original entry. After building and preserving the current native test
+executable with the block above, run:
+
+```sh
+python3 scripts/antigravity_settlement_check.py \
+  --test-binary agy-evidence/thinrouter-tests \
+  --expected-test-sha256 "$(cat agy-evidence/test.sha256)" \
+  --output-dir agy-evidence/settlement-results
+```
+
+This checker runs all transport proofs before the exact settlement HTTP test and
+rejects missing/duplicate attempts, unfinalized rows, inconsistent dispatch counts,
+failed cleanup or unsupported opaque-stream success/usage claims. Its report includes
+per-inference identities, original HTTP status, terminal outcome, raw-adapter source,
+usage quality and local timing, alongside exact fake destinations/counts. The
+launcher clears inherited credentials/provider/proxy configuration and verifies the
+preserved binary before each execution. Retain both this script and
+`antigravity_http_check.py` with the binary when preserving a runnable copy.
+
+Buffered counts come from original `usageMetadata`, including wrapped/unwrapped
+responses. A supported single text candidate with raw STOP or MAX_TOKENS supplies
+succeeded or incomplete evidence; missing/unsupported/ambiguous terminals stay
+unknown. Configured estimates require valid complete counters/rates and are not
+provider bills. A malformed200 response now has a durable failed attempt while its
+existing client400 behavior stays unchanged.
+
+Opaque stream forwarding deliberately does not parse bytes, including Chat-looking
+finish/usage records. EOF finalizes unknown; known local error, cancellation or stall
+records failed/cancelled/timeout. Counts, cost and semantic first-output remain null.
+Pending attempts recover as interrupted under the existing exclusive serving owner,
+once, without replay. The separate native-stream conversion capability and real
+client/version/provider acceptance remain unfinished.

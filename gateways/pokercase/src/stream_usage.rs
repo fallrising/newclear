@@ -1,4 +1,4 @@
-//! Bounded, read-only observation of raw Chat and Responses SSE for accounting.
+//! Bounded accounting observation of supported SSE and original Antigravity JSON.
 //! It never changes bytes, drives the upstream, or retains event contents in SQLite.
 use std::time::Instant;
 
@@ -21,8 +21,100 @@ pub struct StreamAttempt {
     start: Instant,
     input_price: Option<f64>,
     output_price: Option<f64>,
-    observation: ChatObservation,
+    observation: HttpObservation,
     settled: bool,
+}
+
+/// Antigravity opaque bytes have no supported terminal/usage parser. Keeping that
+/// policy separate prevents Chat-looking content from becoming provider evidence.
+enum HttpObservation {
+    Sse(Box<ChatObservation>),
+    AntigravityBuffered(AntigravityObservation),
+    AntigravityOpaque,
+}
+
+#[derive(Default)]
+struct AntigravityObservation {
+    prompt: Option<i64>,
+    completion: Option<i64>,
+    invalid_usage: bool,
+    outcome: Option<&'static str>,
+}
+
+impl AntigravityObservation {
+    fn from_bytes(bytes: &[u8]) -> Self {
+        let Ok(value) = serde_json::from_slice::<Value>(bytes) else {
+            return Self {
+                invalid_usage: true,
+                ..Self::default()
+            };
+        };
+        // Preserve the existing whole-object precedence; never combine counters
+        // from two envelopes or use converted synthetic zero/finish fields.
+        let usage = value
+            .pointer("/response/usageMetadata")
+            .or_else(|| value.get("usageMetadata"));
+        let mut observation = Self::default();
+        if let Some(usage) = usage.filter(|usage| !usage.is_null()) {
+            if !usage.is_object() {
+                observation.invalid_usage = true;
+            } else {
+                let mut count = |field: &str| match usage.get(field) {
+                    None | Some(Value::Null) => None,
+                    Some(value) => match value.as_i64().filter(|n| *n >= 0) {
+                        Some(n) => Some(n),
+                        None => {
+                            observation.invalid_usage = true;
+                            None
+                        }
+                    },
+                };
+                observation.prompt = count("promptTokenCount");
+                observation.completion = count("candidatesTokenCount");
+            }
+        }
+        let wrapped = value.pointer("/response/candidates");
+        let root = value.get("candidates");
+        // Dual candidate envelopes are ambiguous even if the wire converter can
+        // select text. Original usage remains independently observable above.
+        if wrapped.is_some() && root.is_some() {
+            return observation;
+        }
+        let Some(candidates) = wrapped.or(root).and_then(Value::as_array) else {
+            return observation;
+        };
+        if candidates.len() != 1 {
+            return observation;
+        }
+        let candidate = &candidates[0];
+        let Some(content) = candidate.get("content").and_then(Value::as_object) else {
+            return observation;
+        };
+        if content
+            .get("role")
+            .is_some_and(|role| role.as_str() != Some("model"))
+        {
+            return observation;
+        }
+        let Some(parts) = content.get("parts").and_then(Value::as_array) else {
+            return observation;
+        };
+        if parts.is_empty()
+            || !parts.iter().all(|part| {
+                part.as_object().is_some_and(|part| {
+                    part.len() == 1 && part.get("text").is_some_and(Value::is_string)
+                })
+            })
+        {
+            return observation;
+        }
+        observation.outcome = match candidate.get("finishReason").and_then(Value::as_str) {
+            Some("STOP") => Some("succeeded"),
+            Some("MAX_TOKENS") => Some("incomplete"),
+            _ => None,
+        };
+        observation
+    }
 }
 
 impl StreamAttempt {
@@ -95,8 +187,53 @@ impl StreamAttempt {
                 .output_price_per_m
                 .filter(|_| allow_estimate),
             observation: match format {
-                HttpUsageFormat::Chat => ChatObservation::new(choices),
-                HttpUsageFormat::Responses => ChatObservation::responses(),
+                HttpUsageFormat::Chat => {
+                    HttpObservation::Sse(Box::new(ChatObservation::new(choices)))
+                }
+                HttpUsageFormat::Responses => {
+                    HttpObservation::Sse(Box::new(ChatObservation::responses()))
+                }
+            },
+            settled: false,
+        })
+    }
+
+    /// The existing Antigravity wire mode is either one buffered JSON envelope
+    /// or opaque bytes. Neither is an OpenAI Chat/Responses observation policy.
+    pub fn begin_antigravity(
+        store: &Store,
+        request_id: &str,
+        model: &str,
+        target: &crate::store::ResolvedTarget,
+        opaque: bool,
+    ) -> crate::error::AppResult<Self> {
+        let source = if opaque {
+            "antigravity_opaque_v1"
+        } else {
+            "antigravity_generate_content_v1"
+        };
+        let id = store
+            .begin_stream_attempt_with_source(
+                request_id,
+                model,
+                &target.connection.id,
+                &target.upstream_model,
+                source,
+            )
+            .map_err(|_| crate::error::AppError::Upstream {
+                status: 503,
+                body: "usage reservation failed".into(),
+            })?;
+        Ok(Self {
+            store: store.clone(),
+            id,
+            start: Instant::now(),
+            input_price: target.connection.input_price_per_m.filter(|_| !opaque),
+            output_price: target.connection.output_price_per_m.filter(|_| !opaque),
+            observation: if opaque {
+                HttpObservation::AntigravityOpaque
+            } else {
+                HttpObservation::AntigravityBuffered(AntigravityObservation::default())
             },
             settled: false,
         })
@@ -121,8 +258,12 @@ impl StreamAttempt {
         if self.settled {
             return;
         }
-        self.observation.push(bytes, self.elapsed());
-        if self.observation.transport_done {
+        let elapsed = self.elapsed();
+        let HttpObservation::Sse(observation) = &mut self.observation else {
+            return;
+        };
+        observation.push(bytes, elapsed);
+        if observation.transport_done {
             self.settle("unknown", None, true);
         }
     }
@@ -130,23 +271,29 @@ impl StreamAttempt {
     /// Conversion consumes a prefix of each received chunk. Defer settlement until
     /// that prefix has passed the converter, without observing bytes it discards.
     pub fn observe_converted(&mut self, bytes: &[u8]) {
-        if !self.settled {
-            self.observation.converted_lines = true;
-            self.observation.push(bytes, self.elapsed());
-            // Existing converters consume each LF-terminated data line, before
-            // its SSE blank delimiter. Retain that observed finish/usage even
-            // if a subsequent read error, stall or cancellation ends the source.
-            if bytes.ends_with(b"\n") {
-                self.observation.end(self.elapsed());
-            }
+        if self.settled {
+            return;
+        }
+        let elapsed = self.elapsed();
+        let HttpObservation::Sse(observation) = &mut self.observation else {
+            return;
+        };
+        observation.converted_lines = true;
+        observation.push(bytes, elapsed);
+        if bytes.ends_with(b"\n") {
+            observation.end(elapsed);
         }
     }
 
     /// Native guard owns validity and CR lookahead. Observe only the raw prefix it
     /// consumed, then let its terminal disposition settle before final output.
     pub fn observe_native(&mut self, bytes: &[u8]) {
-        if !self.settled {
-            self.observation.push(bytes, self.elapsed());
+        if self.settled {
+            return;
+        }
+        let elapsed = self.elapsed();
+        if let HttpObservation::Sse(observation) = &mut self.observation {
+            observation.push(bytes, elapsed);
         }
     }
 
@@ -156,34 +303,109 @@ impl StreamAttempt {
         if self.settled {
             return;
         }
-        self.observation.end(self.elapsed());
-        if failed && self.observation.outcome != Some("failed") {
-            self.observation.outcome = Some("failed");
-            self.observation.error = Some("stream_conversion_failed");
-            self.observation.terminal_ms = None;
+        let elapsed = self.elapsed();
+        let HttpObservation::Sse(observation) = &mut self.observation else {
+            return;
+        };
+        observation.end(elapsed);
+        if failed && observation.outcome != Some("failed") {
+            observation.outcome = Some("failed");
+            observation.error = Some("stream_conversion_failed");
+            observation.terminal_ms = None;
         }
-        let ended = self.observation.transport_done;
+        let ended = observation.transport_done;
         self.settle("unknown", None, ended);
+    }
+
+    /// Observe only original buffered JSON. The caller still owns all client
+    /// conversion and must explicitly complete or stop after it finishes.
+    pub fn observe_antigravity_buffered(&mut self, bytes: &[u8]) {
+        if !self.settled {
+            if let HttpObservation::AntigravityBuffered(observation) = &mut self.observation {
+                *observation = AntigravityObservation::from_bytes(bytes);
+            }
+        }
+    }
+
+    pub fn complete_antigravity_buffered(&mut self) {
+        if let HttpObservation::AntigravityBuffered(observation) = &self.observation {
+            self.settle_antigravity(observation.outcome.unwrap_or("unknown"), None);
+        }
     }
 
     pub fn eof(&mut self) {
         if self.settled {
             return;
         }
-        self.observation.end(self.elapsed());
-        self.settle("failed", Some("stream_incomplete"), true);
+        let elapsed = self.elapsed();
+        if let HttpObservation::Sse(observation) = &mut self.observation {
+            observation.end(elapsed);
+            self.settle("failed", Some("stream_incomplete"), true);
+        } else {
+            // Opaque EOF never proves semantic completion, even after [DONE].
+            self.settle_antigravity("unknown", None);
+        }
     }
 
     pub fn stop(&mut self, outcome: &'static str, error: &'static str) {
-        self.settle(outcome, Some(error), false);
+        if matches!(self.observation, HttpObservation::Sse(_)) {
+            self.settle(outcome, Some(error), false);
+        } else {
+            // Explicit transport/conversion/cancellation outcomes win any raw
+            // buffered STOP observation which has not yet been accepted.
+            self.settle_antigravity(outcome, Some(error));
+        }
+    }
+
+    fn settle_antigravity(&mut self, outcome: &'static str, error: Option<&'static str>) {
+        if self.settled {
+            return;
+        }
+        let (prompt, completion, usage_status, error) = match &self.observation {
+            HttpObservation::AntigravityBuffered(o) => {
+                let status = if o.invalid_usage {
+                    "invalid"
+                } else if o.prompt.is_some() && o.completion.is_some() {
+                    "complete"
+                } else if o.prompt.is_some() || o.completion.is_some() {
+                    "partial"
+                } else {
+                    "missing"
+                };
+                (
+                    o.prompt,
+                    o.completion,
+                    status,
+                    error.or(o.invalid_usage.then_some("stream_invalid_usage")),
+                )
+            }
+            HttpObservation::AntigravityOpaque => (None, None, "unknown", error),
+            HttpObservation::Sse(_) => return,
+        };
+        let cost = if usage_status == "complete" {
+            crate::proxy::estimate_cost(prompt, completion, self.input_price, self.output_price)
+        } else {
+            None
+        };
+        self.persist(StreamFinalization {
+            outcome,
+            usage_status,
+            error,
+            prompt_tokens: prompt,
+            completion_tokens: completion,
+            estimated_cost_usd: cost,
+            first_output_ms: None,
+            total_observed_ms: self.elapsed(),
+        });
     }
 
     fn settle(&mut self, fallback: &'static str, error: Option<&'static str>, ended: bool) {
         if self.settled {
             return;
         }
-        self.settled = true; // One write attempt; failure stays pending for startup recovery.
-        let o = &self.observation;
+        let HttpObservation::Sse(o) = &self.observation else {
+            return;
+        };
         let outcome = o
             .outcome
             .unwrap_or(if o.invalid { "unknown" } else { fallback });
@@ -206,7 +428,7 @@ impl StreamAttempt {
         } else {
             o.error.or(if o.outcome.is_some() { None } else { error })
         };
-        let finalization = StreamFinalization {
+        self.persist(StreamFinalization {
             outcome,
             usage_status,
             error: reason,
@@ -215,7 +437,11 @@ impl StreamAttempt {
             estimated_cost_usd: cost,
             first_output_ms: o.first_output_ms,
             total_observed_ms: o.terminal_ms.unwrap_or_else(|| self.elapsed()),
-        };
+        });
+    }
+
+    fn persist(&mut self, finalization: StreamFinalization) {
+        self.settled = true; // One write attempt; failure stays pending for startup recovery.
         if self
             .store
             .finalize_stream_attempt(&self.id, &finalization)
@@ -1161,11 +1387,21 @@ mod responses_usage_tests {
         let mut a = attempt(&store, HttpUsageFormat::Responses, false);
         a.observe_converted(b"data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"usage\":{\"input_tokens\":11,\"output_tokens\":7}}}\r\r");
         assert_eq!(
-            a.observation.outcome, None,
+            match &a.observation {
+                HttpObservation::Sse(o) => o.outcome,
+                _ => panic!("expected Responses observer"),
+            },
+            None,
             "LF converter has not accepted this raw data line"
         );
         a.observe_converted(b"\n");
-        assert_eq!(a.observation.outcome, Some("succeeded"));
+        assert_eq!(
+            match &a.observation {
+                HttpObservation::Sse(o) => o.outcome,
+                _ => panic!("expected Responses observer"),
+            },
+            Some("succeeded")
+        );
         a.converted_terminal(false);
         assert_eq!(store.recent_usage(1).unwrap()[0].outcome, "succeeded");
     }
@@ -1180,11 +1416,19 @@ mod responses_usage_tests {
             let mut a = attempt(&store, HttpUsageFormat::Responses, false);
             a.observe_converted(format!("\u{feff}data: {ignored}\n").as_bytes());
             assert_eq!(
-                a.observation.outcome, None,
+                match &a.observation {
+                    HttpObservation::Sse(o) => o.outcome,
+                    _ => panic!("expected Responses observer"),
+                },
+                None,
                 "converter ignores BOM-prefixed data"
             );
             assert_eq!(
-                a.observation.first_output_ms, None,
+                match &a.observation {
+                    HttpObservation::Sse(o) => o.first_output_ms,
+                    _ => panic!("expected Responses observer"),
+                },
+                None,
                 "ignored BOM data is not caller output"
             );
             a.observe_converted(b"data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"usage\":{\"input_tokens\":99,\"output_tokens\":88}}}\n");
@@ -1196,6 +1440,339 @@ mod responses_usage_tests {
                 (Some(99), Some(88))
             );
             assert_eq!(row.first_output_ms, None);
+        }
+    }
+}
+
+#[cfg(test)]
+mod antigravity_usage_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn target() -> crate::store::ResolvedTarget {
+        crate::store::ResolvedTarget {
+            connection: serde_json::from_value(json!({
+                "id":"synthetic","name":"synthetic","base_url":"http://127.0.0.1:1/v1",
+                "api_key":"synthetic","default_model":null,"priority":0,"enabled":true,
+                "input_price_per_m":1.0,"output_price_per_m":2.0,"auth_type":"api_key","oauth":null,
+                "created_at":"synthetic","updated_at":"synthetic"
+            }))
+            .unwrap(),
+            upstream_model: "synthetic".into(),
+        }
+    }
+
+    fn body(reason: &str, usage: Value) -> Vec<u8> {
+        serde_json::to_vec(&json!({"response":{
+            "candidates":[{"content":{"role":"model","parts":[{"text":"synthetic"}]},"finishReason":reason}],
+            "usageMetadata":usage
+        }})).unwrap()
+    }
+
+    #[test]
+    fn as2_antigravity_raw_usage_and_terminal_are_independent() {
+        for (reason, usage, outcome, quality, prompt, completion) in [
+            (
+                "STOP",
+                json!({"promptTokenCount":11,"candidatesTokenCount":7}),
+                "succeeded",
+                "complete",
+                Some(11),
+                Some(7),
+            ),
+            (
+                "MAX_TOKENS",
+                json!({"promptTokenCount":0,"candidatesTokenCount":0}),
+                "incomplete",
+                "complete",
+                Some(0),
+                Some(0),
+            ),
+            (
+                "OTHER",
+                json!({"promptTokenCount":11,"candidatesTokenCount":7}),
+                "unknown",
+                "complete",
+                Some(11),
+                Some(7),
+            ),
+            ("STOP", json!(null), "succeeded", "missing", None, None),
+            (
+                "STOP",
+                json!({"promptTokenCount":0}),
+                "succeeded",
+                "partial",
+                Some(0),
+                None,
+            ),
+            (
+                "STOP",
+                json!({"promptTokenCount":null,"candidatesTokenCount":null}),
+                "succeeded",
+                "missing",
+                None,
+                None,
+            ),
+            (
+                "STOP",
+                json!({"promptTokenCount":0,"candidatesTokenCount":-1}),
+                "succeeded",
+                "invalid",
+                Some(0),
+                None,
+            ),
+            (
+                "STOP",
+                json!({"promptTokenCount":"11","candidatesTokenCount":7}),
+                "succeeded",
+                "invalid",
+                None,
+                Some(7),
+            ),
+            (
+                "STOP",
+                json!({"promptTokenCount":u64::MAX,"candidatesTokenCount":7}),
+                "succeeded",
+                "invalid",
+                None,
+                Some(7),
+            ),
+            ("STOP", json!([]), "succeeded", "invalid", None, None),
+        ] {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+            let mut a = StreamAttempt::begin_antigravity(
+                &store,
+                "synthetic-request",
+                "public",
+                &target(),
+                false,
+            )
+            .unwrap();
+            a.headers(200);
+            a.observe_antigravity_buffered(&body(reason, usage));
+            assert!(store.recent_usage(1).unwrap()[0].finalized_at.is_none());
+            a.complete_antigravity_buffered();
+            let row = store.recent_usage(1).unwrap().remove(0);
+            assert_eq!(row.usage_source, "antigravity_generate_content_v1");
+            assert_eq!(row.outcome, outcome);
+            assert_eq!(row.usage_status, quality);
+            assert_eq!(
+                (row.prompt_tokens, row.completion_tokens),
+                (prompt, completion)
+            );
+            assert_eq!(
+                row.estimated_cost_usd,
+                if quality == "complete" {
+                    crate::proxy::estimate_cost(prompt, completion, Some(1.0), Some(2.0))
+                } else {
+                    None
+                }
+            );
+            assert!(row.first_output_ms.is_none());
+            assert!(row.total_observed_ms.unwrap() >= row.headers_ms.unwrap());
+            let before = serde_json::to_value(&row).unwrap();
+            a.stop("cancelled", "stream_cancelled");
+            a.eof();
+            drop(a);
+            assert_eq!(
+                serde_json::to_value(store.recent_usage(1).unwrap().remove(0)).unwrap(),
+                before
+            );
+        }
+    }
+
+    #[test]
+    fn as2_antigravity_unsupported_shapes_never_borrow_converted_stop() {
+        let raw: Value = serde_json::from_slice(&body(
+            "STOP",
+            json!({"promptTokenCount":3,"candidatesTokenCount":2}),
+        ))
+        .unwrap();
+        let unwrapped = raw["response"].clone();
+        let known = AntigravityObservation::from_bytes(&serde_json::to_vec(&unwrapped).unwrap());
+        assert_eq!(known.outcome, Some("succeeded"));
+        for mutation in ["missing", "many", "empty", "tool", "dual", "role"] {
+            let mut candidate = raw.clone();
+            match mutation {
+                "missing" => {
+                    candidate["response"]["candidates"][0]
+                        .as_object_mut()
+                        .unwrap()
+                        .remove("finishReason");
+                }
+                "many" => {
+                    let first = candidate["response"]["candidates"][0].clone();
+                    candidate["response"]["candidates"]
+                        .as_array_mut()
+                        .unwrap()
+                        .push(first);
+                }
+                "empty" => candidate["response"]["candidates"] = json!([]),
+                "tool" => {
+                    candidate["response"]["candidates"][0]["content"]["parts"] =
+                        json!([{"functionCall":{"name":"synthetic"}}])
+                }
+                "dual" => candidate["candidates"] = unwrapped["candidates"].clone(),
+                _ => candidate["response"]["candidates"][0]["content"]["role"] = json!("user"),
+            }
+            let observation =
+                AntigravityObservation::from_bytes(&serde_json::to_vec(&candidate).unwrap());
+            assert_eq!(observation.outcome, None, "{mutation}");
+            assert_eq!(
+                (observation.prompt, observation.completion),
+                (Some(3), Some(2))
+            );
+        }
+        let raw = json!({"response":{"usageMetadata":{"promptTokenCount":-1}},"usageMetadata":{"promptTokenCount":9,"candidatesTokenCount":8}});
+        let observation = AntigravityObservation::from_bytes(&serde_json::to_vec(&raw).unwrap());
+        assert!(observation.invalid_usage);
+        assert_eq!((observation.prompt, observation.completion), (None, None));
+    }
+
+    #[test]
+    fn as3_antigravity_opaque_never_parses_chat_or_buffered_evidence() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        let mut a = StreamAttempt::begin_antigravity(
+            &store,
+            "synthetic-request",
+            "public",
+            &target(),
+            true,
+        )
+        .unwrap();
+        a.headers(200);
+        let deceptive=b"data: {\"choices\":[{\"delta\":{\"content\":\"synthetic\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":11,\"completion_tokens\":7}}\n\ndata: [DONE]\n\n";
+        a.push(deceptive);
+        a.observe_converted(deceptive);
+        a.observe_native(deceptive);
+        a.converted_terminal(false);
+        a.observe_antigravity_buffered(&body(
+            "STOP",
+            json!({"promptTokenCount":11,"candidatesTokenCount":7}),
+        ));
+        a.complete_antigravity_buffered();
+        assert!(store.recent_usage(1).unwrap()[0].finalized_at.is_none());
+        a.eof();
+        drop(a);
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.usage_source, "antigravity_opaque_v1");
+        assert_eq!(row.outcome, "unknown");
+        assert_eq!(row.usage_status, "unknown");
+        assert!(
+            row.prompt_tokens.is_none()
+                && row.completion_tokens.is_none()
+                && row.estimated_cost_usd.is_none()
+                && row.first_output_ms.is_none()
+                && row.error.is_none()
+        );
+    }
+
+    #[test]
+    fn as4_antigravity_explicit_failures_override_raw_stop_and_drop_is_once() {
+        for (outcome, error) in [
+            ("failed", "stream_conversion_failed"),
+            ("cancelled", "stream_cancelled"),
+            ("timeout", "stream_timeout"),
+        ] {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+            let mut a = StreamAttempt::begin_antigravity(
+                &store,
+                "synthetic-request",
+                "public",
+                &target(),
+                false,
+            )
+            .unwrap();
+            a.headers(200);
+            a.observe_antigravity_buffered(&body(
+                "STOP",
+                json!({"promptTokenCount":11,"candidatesTokenCount":7}),
+            ));
+            a.stop(outcome, error);
+            a.complete_antigravity_buffered();
+            drop(a);
+            let rows = store.recent_usage(2).unwrap();
+            assert_eq!(rows.len(), 1);
+            assert_eq!(rows[0].outcome, outcome);
+            assert_eq!(rows[0].error.as_deref(), Some(error));
+            assert_eq!(rows[0].status, Some(200));
+            assert!(rows[0].first_output_ms.is_none());
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+        let mut a = StreamAttempt::begin_antigravity(
+            &store,
+            "synthetic-request",
+            "public",
+            &target(),
+            false,
+        )
+        .unwrap();
+        a.headers(200);
+        a.observe_antigravity_buffered(b"malformed");
+        a.stop("failed", "stream_conversion_failed");
+        let row = store.recent_usage(1).unwrap().remove(0);
+        assert_eq!(row.outcome, "failed");
+        assert_eq!(row.usage_status, "invalid");
+        assert!(row.prompt_tokens.is_none() && row.completion_tokens.is_none());
+    }
+
+    #[test]
+    fn as4_antigravity_storage_failures_leave_one_recoverable_reservation() {
+        for opaque in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let db = dir.path().join("synthetic.db");
+            let store = Store::open(&db, None).unwrap();
+            let conn = rusqlite::Connection::open(&db).unwrap();
+            conn.execute_batch("CREATE TRIGGER deny_insert BEFORE INSERT ON usage_events BEGIN SELECT RAISE(FAIL,'synthetic'); END;").unwrap();
+            assert!(StreamAttempt::begin_antigravity(
+                &store,
+                "synthetic-request",
+                "public",
+                &target(),
+                opaque
+            )
+            .is_err());
+            assert!(store.recent_usage(1).unwrap().is_empty());
+            conn.execute_batch("DROP TRIGGER deny_insert").unwrap();
+            let mut a = StreamAttempt::begin_antigravity(
+                &store,
+                "synthetic-request",
+                "public",
+                &target(),
+                opaque,
+            )
+            .unwrap();
+            a.headers(200);
+            conn.execute_batch("CREATE TRIGGER deny_finalization BEFORE UPDATE OF finalized_at ON usage_events BEGIN SELECT RAISE(FAIL,'synthetic'); END;").unwrap();
+            if opaque {
+                a.eof();
+            } else {
+                a.observe_antigravity_buffered(&body(
+                    "STOP",
+                    json!({"promptTokenCount":11,"candidatesTokenCount":7}),
+                ));
+                a.complete_antigravity_buffered();
+            }
+            assert!(store.recent_usage(1).unwrap()[0].finalized_at.is_none());
+            conn.execute_batch("DROP TRIGGER deny_finalization")
+                .unwrap();
+            drop(a);
+            assert!(store.recent_usage(1).unwrap()[0].finalized_at.is_none());
+            let reopened = Store::open(&db, None).unwrap();
+            assert_eq!(reopened.recover_stream_attempts().unwrap(), 1);
+            assert_eq!(reopened.recover_stream_attempts().unwrap(), 0);
+            let row = reopened.recent_usage(1).unwrap().remove(0);
+            assert_eq!(row.outcome, "interrupted");
+            assert_eq!(row.status, Some(200));
+            assert!(
+                row.prompt_tokens.is_none()
+                    && row.completion_tokens.is_none()
+                    && row.estimated_cost_usd.is_none()
+            );
         }
     }
 }

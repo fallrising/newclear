@@ -519,3 +519,13 @@ Antigravity仍是generateContent的opaque串流，無原生stream轉換/tools/im
 只用合成credential/fixture與隔離臨時DB，沒有真provider/登入/credential/私人DB/Docker、新依賴、擴權、release/deploy。排除admin refresh/refresh-all/probe/host import；這是列舉應用路徑的隔離，不是全機零egress。原17AC/T1102/Cargo/既有交付及不相關tracked plan保留。全輪工具/agent/provider/model/retry/token/費用/execution-active-wait均unknown/null；局部command時間與fixture次數不替代整輪量測。
 
 此段是產品merge時點快照；AI-5後續帳本發布、完整備份`t0434-antigravity-isolation-20261029`逐檔核對與本輪工作樹清理，依私人`t0434-antigravity-isolation/handoff.json`最終回讀事實核實，不預先宣稱完成。完整操作位置留私人交接。完成本輪即停止，不啟動下一里程碑。
+
+## T-0432 — Antigravity existing HTTP settlement
+
+Demand: desk T-0432 / #698; [fixed acceptance/design](T-0432-antigravity-settlement.md). Claim PR290 merged.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| AS-01 | Per-inference reservation and buffered raw terminal/usage | AS-1–AS-2 | in_progress | 2026-10-29T14:57:00Z | — | 2026-10-29T15:29:00Z |
+| AS-02 | Opaque disposition, errors, storage and restart | AS-3–AS-4 | in_progress | 2026-10-29T14:57:00Z | — | 2026-10-29T15:29:00Z |
+| AS-03 | Isolated HTTP/headless/regression/review and delivery | AS-5 | in_progress | 2026-10-29T14:57:00Z | — | 2026-10-29T15:29:00Z |

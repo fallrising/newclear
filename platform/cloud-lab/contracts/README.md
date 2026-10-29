@@ -37,3 +37,5 @@ Queue receipt、Workflow progress、派送 ACK 與模型的成功文字都不是
 [MT MCP stdio介面](../docs/mcp-stdio.md)提供固定tools/list與tools/call；input僅UUID request_id，output沿用bot-response schema。MCP RPC ID與持久request_id分離，取消RPC不表示取消遠端命令，無新增HTTP route。
 
 [Bot私人政策v1](../docs/bot-policy.md)為本機CLI契約：固定期限／總額，綁config與原journal；不屬MCP模型參數或雲端授權grant。
+
+[Bot續租管理CLI](../docs/bot-policy-renewal.md)提供planned／renewed／already_applied回執；只管理本機政策，非模型工具或雲端grant API。

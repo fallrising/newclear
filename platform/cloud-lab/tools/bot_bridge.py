@@ -24,7 +24,8 @@ MAX_INPUT = 4096
 POLICY_CODES = {'INVALID_POLICY', 'POLICY_CONTEXT_MISMATCH', 'POLICY_REQUIRED',
                 'POLICY_NOT_INITIALIZED', 'POLICY_ALREADY_INITIALIZED', 'POLICY_EXPIRED',
                 'POLICY_NOT_STARTED', 'POLICY_CLOCK_ROLLBACK', 'POLICY_CALL_LIMIT',
-                'POLICY_NEW_REQUEST_LIMIT', 'POLICY_RATE_LIMITED'}
+                'POLICY_NEW_REQUEST_LIMIT', 'POLICY_RATE_LIMITED',
+                'INVALID_POLICY_RENEWAL', 'POLICY_RENEWAL_TOO_EARLY'}
 DELIVERIES = {'accepted', 'dispatching', 'reconciling', 'result_recorded',
               'cancelled_before_dispatch', 'expired_before_dispatch'}
 
@@ -99,7 +100,6 @@ def journal(directory):
         os.close(parent)
 
 
-
 def read_policy(path, fingerprint):
     try:
         value = protocol.strict_json(probe.private_read(path))
@@ -129,11 +129,16 @@ def policy_time(policy, now, high_water):
     require(now < protocol.timestamp(policy['expires_at']), 'POLICY_EXPIRED')
 
 
-def observe_policy_time(db, policy, now, high_water):
+def remember_policy_time(db, now, high_water):
     # Remember even rejected observations: expiry must not be undone by rollback.
     require(type(now) in (int, float) and math.isfinite(now), 'POLICY_CLOCK_ROLLBACK')
     db.execute('UPDATE bot_policy SET high_water=? WHERE id=1', (max(now, high_water),))
     db.commit()
+    require(now >= high_water, 'POLICY_CLOCK_ROLLBACK')
+
+
+def observe_policy_time(db, policy, now, high_water):
+    remember_policy_time(db, now, high_water)
     policy_time(policy, now, high_water)
 
 
@@ -166,14 +171,7 @@ def initialize_policy(config_path, state_dir, policy_path, *, allow_loopback_htt
         raise BridgeError('CONFIG_OR_STATE_UNAVAILABLE') from None
 
 
-def admit_policy(db, path, fingerprint, request, saved, now):
-    """Call and new-ID reservations commit under the same FLOCK before any I/O."""
-    exists = db.execute("SELECT 1 FROM sqlite_master WHERE name='bot_policy'").fetchone()
-    if path is None:
-        require(exists is None, 'POLICY_REQUIRED')
-        return None
-    policy, digest = read_policy(path, fingerprint)
-    require(exists is not None, 'POLICY_NOT_INITIALIZED')
+def policy_row(db, policy, digest):
     rows = db.execute('SELECT * FROM bot_policy').fetchall()
     require(len(rows) == 1 and rows[0]['id'] == 1, 'STATE_CORRUPT')
     row = rows[0]
@@ -182,6 +180,101 @@ def admit_policy(db, path, fingerprint, request, saved, now):
     for key in ('high_water', 'last_call', 'last_new'):
         require(row[key] is None and key != 'high_water' or
                 type(row[key]) in (int, float) and math.isfinite(row[key]), 'STATE_CORRUPT')
+    return row
+
+
+def renewal_summary(receipt, state):
+    return {'schema_version': 'cloudlab.bot-policy-renewal.v1', 'state': state,
+            'previous_digest': receipt['previous_digest'], 'policy_digest': receipt['policy_digest'],
+            'renewable_at': receipt['next_policy']['not_before'],
+            'expires_at': receipt['next_policy']['expires_at'],
+            'previous_calls': receipt['previous_ledger']['calls'],
+            'previous_new_requests': len(receipt['reservation_ids']),
+            'authority_until': receipt['next_policy']['authority_until'],
+            'limits': {k: receipt['next_policy'][k] for k in ('max_calls', 'max_new_requests',
+                       'call_interval_seconds', 'new_request_interval_seconds')}}
+
+
+def renew_policy(config_path, state_dir, policy_path, next_policy_path, *,
+                 dry_run=False, allow_loopback_http=False, clock=time.time):
+    """Offline explicit rollover; an identical retry reads the receipt, never resets."""
+    try:
+        _, fingerprint = config_identity(config_path, allow_loopback_http)
+        old, old_digest = read_policy(policy_path, fingerprint)
+        new, new_digest = read_policy(next_policy_path, fingerprint)
+        require(old_digest != new_digest and protocol.timestamp(new['not_before']) >=
+                protocol.timestamp(old['expires_at']), 'INVALID_POLICY_RENEWAL')
+        with journal(state_dir) as db:
+            exists = db.execute("SELECT 1 FROM sqlite_master WHERE name='bot_policy'").fetchone()
+            require(exists is not None, 'POLICY_NOT_INITIALIZED')
+            rows = db.execute('SELECT digest FROM bot_policy').fetchall()
+            require(len(rows) == 1, 'STATE_CORRUPT')
+            active = rows[0]['digest']
+            require(active in (old_digest, new_digest), 'POLICY_CONTEXT_MISMATCH')
+            row = policy_row(db, new if active == new_digest else old, active)
+            now = clock()
+            require(type(now) in (int, float) and math.isfinite(now), 'POLICY_CLOCK_ROLLBACK')
+            require(now >= row['high_water'], 'POLICY_CLOCK_ROLLBACK')
+            history = db.execute("SELECT 1 FROM sqlite_master WHERE name='bot_policy_renewals'").fetchone()
+            if active == new_digest:
+                require(history is not None, 'STATE_CORRUPT')
+                saved = db.execute('SELECT receipt, digest FROM bot_policy_renewals WHERE old_digest=? AND new_digest=?',
+                                   (old_digest, new_digest)).fetchone()
+                require(saved is not None and hashlib.sha256(saved['receipt'].encode()).hexdigest() == saved['digest'], 'STATE_CORRUPT')
+                receipt = protocol.strict_json(saved['receipt'].encode())
+                require(isinstance(receipt, dict) and receipt.get('previous_policy') == old and
+                        receipt.get('next_policy') == new and receipt.get('previous_digest') == old_digest and
+                        receipt.get('policy_digest') == new_digest, 'STATE_CORRUPT')
+                if not dry_run:
+                    remember_policy_time(db, now, row['high_water'])
+                return renewal_summary(receipt, 'already_applied')
+            if not dry_run:
+                remember_policy_time(db, now, row['high_water'])
+                require(now >= protocol.timestamp(old['expires_at']), 'POLICY_RENEWAL_TOO_EARLY')
+                policy_time(new, now, row['high_water'])
+                row = policy_row(db, old, old_digest)
+            else:
+                require(now < protocol.timestamp(new['expires_at']), 'POLICY_EXPIRED')
+            reservations = [r[0] for r in db.execute('SELECT request_id FROM bot_reservations ORDER BY request_id')]
+            require(len(reservations) <= old['max_new_requests'], 'STATE_CORRUPT')
+            receipt = {'schema_version': 'cloudlab.bot-policy-renewal-receipt.v1',
+                       'previous_digest': old_digest, 'policy_digest': new_digest,
+                       'previous_policy': old, 'next_policy': new,
+                       # Hex strings preserve SQLite REAL timestamps exactly in integer-only JSON.
+                       'previous_ledger': {k: v.hex() if type(v) is float else v for k, v in dict(row).items()},
+                       'reservation_ids': reservations,
+                       'renewed_at': probe.utc(int(now))}
+            if dry_run:
+                return renewal_summary(receipt, 'planned')
+            # All destructive active-index changes have a durable, same-transaction archive.
+            db.execute('BEGIN IMMEDIATE')
+            db.execute('CREATE TABLE IF NOT EXISTS bot_policy_renewals (old_digest TEXT PRIMARY KEY, new_digest TEXT NOT NULL UNIQUE, receipt TEXT NOT NULL, digest TEXT NOT NULL)')
+            require(db.execute('SELECT 1 FROM bot_policy_renewals WHERE old_digest=? OR new_digest=?',
+                               (new_digest, new_digest)).fetchone() is None, 'POLICY_CONTEXT_MISMATCH')
+            raw = probe.encode(receipt)
+            db.execute('INSERT INTO bot_policy_renewals VALUES(?,?,?,?)',
+                       (old_digest, new_digest, raw.decode(), hashlib.sha256(raw).hexdigest()))
+            db.execute('DELETE FROM bot_reservations')
+            changed = db.execute('UPDATE bot_policy SET digest=?, calls=0 WHERE id=1 AND digest=?',
+                                 (new_digest, old_digest)).rowcount
+            require(changed == 1, 'POLICY_CONTEXT_MISMATCH')
+            db.commit()
+            return renewal_summary(receipt, 'renewed')
+    except BridgeError:
+        raise
+    except (probe.ProbeError, OSError, ValueError, TypeError, KeyError, sqlite3.Error):
+        raise BridgeError('CONFIG_OR_STATE_UNAVAILABLE') from None
+
+
+def admit_policy(db, path, fingerprint, request, saved, now):
+    """Call and new-ID reservations commit under the same FLOCK before any I/O."""
+    exists = db.execute("SELECT 1 FROM sqlite_master WHERE name='bot_policy'").fetchone()
+    if path is None:
+        require(exists is None, 'POLICY_REQUIRED')
+        return None
+    policy, digest = read_policy(path, fingerprint)
+    require(exists is not None, 'POLICY_NOT_INITIALIZED')
+    row = policy_row(db, policy, digest)
     observe_policy_time(db, policy, now, row['high_water'])
     require(row['calls'] < policy['max_calls'], 'POLICY_CALL_LIMIT')
     require(row['last_call'] is None or now-row['last_call'] >= policy['call_interval_seconds'], 'POLICY_RATE_LIMITED')
@@ -326,10 +419,20 @@ def main(argv=None):
     parser.add_argument('--state-dir', required=True)
     parser.add_argument('--allow-submit', action='store_true')
     parser.add_argument('--policy', help='trusted private policy; requires explicit initialization')
-    parser.add_argument('--initialize-policy', action='store_true', help='offline, once per original state')
+    actions = parser.add_mutually_exclusive_group()
+    actions.add_argument('--initialize-policy', action='store_true', help='offline, once per original state')
+    actions.add_argument('--renew-policy', action='store_true', help='offline, expired lease only')
+    parser.add_argument('--next-policy', help='trusted separate private candidate')
+    parser.add_argument('--dry-run', action='store_true', help='renewal preview only; no ledger writes')
     parser.add_argument('--allow-loopback-http', action='store_true', help='numeric loopback tests only')
     args = parser.parse_args(argv)
     try:
+        require(args.renew_policy or not args.dry_run and args.next_policy is None, 'INVALID_POLICY_RENEWAL')
+        if args.renew_policy:
+            require(args.policy is not None and args.next_policy is not None, 'INVALID_POLICY_RENEWAL')
+            print(json.dumps(renew_policy(args.config, args.state_dir, args.policy, args.next_policy,
+                             dry_run=args.dry_run, allow_loopback_http=args.allow_loopback_http)))
+            return 0
         if args.initialize_policy:
             require(args.policy is not None, 'INVALID_POLICY')
             print(json.dumps(initialize_policy(args.config, args.state_dir, args.policy,

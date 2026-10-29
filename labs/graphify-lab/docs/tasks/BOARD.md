@@ -32,3 +32,17 @@
 - 合併前確認 accepted head `d3d48f10493eb7c59fa705a8bda3414fa365b3a4` 的四項 CI 全數成功、無衝突、無未解決 review threads，獨立 reviewer 維持 ACCEPT；以 expected head SHA 正常 merge。
 - 合併後回讀 PR `merged=true`、`main` ref 與 merge parents；合併 tree `83d421ac355e448736842f71363ce6c72606b0d0` 與已驗收 head 完全相同。
 - 依根目錄任務合約，以只修改本任務板的後續 PR 將 T-0001／AC-01～09 結案。其餘文件的 Draft／待 merge 記載保留為原交付時的歷史快照，以本節為最新狀態；未建立 release／tag 或部署。
+
+## T-0437 — 文件結案與真實開發任務試點
+
+來源：[desk T-0437](https://github.com/fallrising/desk/blob/main/tasks/T-0437-graphify-development-pilot/task.md)；owner 2026-10-29 批准逐里程碑提交／PR／合併。
+設計與 AC：[development-pilot](../milestones/development-pilot.md)。原 T-0001 與 AC-01～09 結果保留。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0437-M1 | 同步第一輪已合併／已完成狀態與索引 | M1 | in_progress | 2026-10-29T16:58:00Z | — | 2026-10-29T16:58:00Z |
+| T-0437-01 | 固定來源與真 graph 導覽 | P-01 | todo | — | — | 2026-10-29T16:58:00Z |
+| T-0437-02 | 共用來源模組重構與回歸 | P-02 | todo | — | — | 2026-10-29T16:58:00Z |
+| T-0437-03 | 本機 agent recipe 與真 MCP | P-03 | todo | — | — | 2026-10-29T16:58:00Z |
+| T-0437-04 | 可重跑對照與誠實成本紀錄 | P-04 | todo | — | — | 2026-10-29T16:58:00Z |
+| T-0437-05 | 證據、獨立審查、CI 與交付 | P-05 | todo | — | — | 2026-10-29T16:58:00Z |

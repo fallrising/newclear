@@ -5,7 +5,9 @@
 
 先讀 [SUCCESS](SUCCESS.md) 查看逐項驗收；設計見 [SDD](SDD.md)，上游能力與實作限制見 [研究紀錄](docs/upstream.md)。
 已完成 **7 組真實場景、29 項邊界測試與獨立審查**，runtime 的四項遠端 CI 通過。
-[實測與限制](docs/evidence/README.md)／[Draft PR #759](https://github.com/fallrising/newclear/pull/759)；交付狀態在 SUCCESS，未合併、未部署。
+[實測與限制](docs/evidence/README.md)／[已合併 PR #759](https://github.com/fallrising/newclear/pull/759)。
+第一輪九項 AC 已完成，[結案 PR #760](https://github.com/fallrising/newclear/pull/760) 已合併；可依下列入口本機使用，未部署、未建立 usable tag。
+後續 [T-0437 開發任務試點](docs/milestones/development-pilot.md) 是獨立里程碑，不改寫第一輪結果。
 
 ## 為什麼分成 source 與 graph
 

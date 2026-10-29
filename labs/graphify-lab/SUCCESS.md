@@ -2,7 +2,7 @@
 project: labs/graphify-lab
 purpose: 實跑 Graphify 開發場景並驗證固定參考程式碼與索引的單份共用
 kind: lab
-mainline: incomplete
+mainline: complete
 usable_tag: none
 reviewed: 2026-10-29
 source_commit: 011fa8cac6137735b576e14b5695ea26544e91db
@@ -34,7 +34,10 @@ source_commit: 011fa8cac6137735b576e14b5695ea26544e91db
 本次有界實驗已取得全部九項 AC 的 runtime 證據；[完整報告](docs/evidence/full-run.json) 7 passed／0 failed。
 程式與來源 hash 已核對，獨立審查唯一 P2 已修正，沒有未解 must-fix。
 
-`mainline: incomplete` 保留本次 Draft／尚未合併的交付狀態；[PR #759](https://github.com/fallrising/newclear/pull/759) 的最新 Checks 是遠端 gate 入口。
+第一輪有界實驗的 `mainline: complete` 對應以上 AC-01～09。
+[PR #759](https://github.com/fallrising/newclear/pull/759) 已於 2026-10-29T14:14:07Z 合併（`f799a8f8a816dee05f67aa503100cd229d6e8ad1`），
+[結案 PR #760](https://github.com/fallrising/newclear/pull/760) 已於 14:17:46Z 合併（`ef690ab47cc413852b1639e4600138dfff0ea498`）。
+本次文件收尾沿用 2026-10-29 的既有 runtime 證據，沒有冒稱重跑；runtime、fixtures、lock 未變。
 沒有宣稱 token 節省、所有語言／動態呼叫完整性、HTML 真瀏覽器互動、遠端多機共享或 production 部署。
 詳見 [限制與失敗紀錄](docs/evidence/README.md)；不把這些未驗範圍標為成功。
 
@@ -46,4 +49,10 @@ Repo gate：`python3 scripts/check_indexes.py`、根目錄 workflow static valid
 
 ## 可用版本
 
-`usable_tag: none`。本次依 owner 指示交付 Draft PR，不 merge／release／deploy；任務板於合併前保持 `in_progress`。
+`usable_tag: none`。原 Draft 限制是初次交付的歷史狀態，其後 owner 已批准正常合併。
+原實驗完成與版本發布分開；未獲 tag／release／deploy 授權，沒有建立可用標記或部署。
+
+## 後續里程碑
+
+Owner 2026-10-29 授權 [T-0437 文件收尾與開發任務試點](docs/milestones/development-pilot.md)，
+其 P-01～P-05 獨立追蹤；未完成的後續試點不回溯否定第一輪有界實驗，也不提前計為通過。

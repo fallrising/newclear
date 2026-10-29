@@ -22,3 +22,5 @@ Grok Build的本機user guide與`grok mcp --help`為安裝版本的依據。新�
 私人runtime保存source commit及每檔SHA256、原Grok設定備份、追加前後digest與診斷回執。state及requests.sqlite是持久資料，不能放進cache或清理。相同host設定不得任意換state來恢復。回退可`grok mcp disable cloud-lab`停用此server；既有設定與state保留。要完全移除時只移除具名entry，不覆蓋整份設定；不以舊備份覆蓋後續其他使用者修改。
 
 本輪不執行實際Grok模型，不宣稱自然語言端到端完成；沒有自動續權、付費方案或API金鑰改動。實際結果見[接線證據](evidence/m1-grok-connection.md)。
+
+後續[BL有界驗證](bot-live.md)已實際完成bot-only短期續權與一筆健康檢查，隨後恢復status-only；原GC過期診斷仍保留為歷史前態，新的精確期限與觀測見[BL證據](evidence/m1-bot-live.md)。

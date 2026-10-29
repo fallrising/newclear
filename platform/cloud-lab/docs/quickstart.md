@@ -43,3 +43,5 @@ python3 platform/cloud-lab/adapters/node-health/runner.py --config /private/clou
 [本機MCP工具](mcp-stdio.md)可用固定argv接到支援stdio的host；先驗證初始化與status，提交由可信設定另外啟用。無須第三方SDK；工具host仍需保護config/state與呼叫頻率。
 
 現有獨立Grok的[接線／刷新／停用方式](grok-connection.md)已記錄；原生doctor通過不代表bot授權有效，實際狀態與阻擋見[GC證據](evidence/m1-grok-connection.md)。
+
+[BL真實bot檢查](bot-live.md)已由操作端完成一筆驗證並恢復Grok查詢模式；短期窗口不等於常態bot授權，無須owner在到期前再測。

@@ -16,7 +16,7 @@ Cursor has one process/channel per dispatch and returns ClaudeRun records, unlik
 
 Pre-output first_record currently has no independent startup timeout; cancellation remains available, post-output stall uses existing stream timeout. This slice does not claim bounded pre-output wait. Cursor tools/images support and AC04-versus-AC17 product decision remain outside this text-only accounting slice. Other namedHTTP/OAuth/borrowed/native nonChat upstream observers, full#698,#699–702 remain open; mainline incomplete,usable_tag none,desk in_progress.
 
-Estimate2–3activehours,20minute checkpoints,commands/CI600s; initial repro plus at most2 justified corrections per issue. Whole-round metrics unknown/null. Status: local implementation and checks passed; independent source/runtime evidence review passed; remote delivery gates pending. No realprovider/login/privateDB/Docker/dependency/permissions/release/deploy.
+Estimate2–3activehours,20minute checkpoints,commands/CI600s; initial repro plus at most2 justified corrections per issue. Whole-round metrics unknown/null. Status: local implementation and checks passed; independent source/runtime evidence review passed; PR741 product CI/merge/readback passed; administrative closure follows final handoff. No realprovider/login/privateDB/Docker/dependency/permissions/release/deploy.
 
 ## Local verification snapshot
 
@@ -24,6 +24,14 @@ Local source/runtime evidence: corrected actual baseline RED showed legacy statu
 
 Original failures remain: harness admin-envelope accessor (not productRED), corrected actualmissingattempt RED, worker sccache sandboxdenial followed byapprovedsamecommandPASS, initialCursorfixture reused a connection cooledby501 refusal and fallback omittedit; independentreview R1 led to isolated refusalconnections with regressionRED→GREEN andactualjourneyPASS. Diagnosticloopbackdenial and binarydigestrefusal dispatchednothing; oldHTTPscript rejected unsupported digestflag beforelaunch, corrected command passed with externaldigestcheck. No runtime cooldownpolicy/statusassertion or oldhelper protection was relaxed.
 
-Independent source/runtime/final-evidence review passed; remote product/ledgerCI/merges/readbacks, backup and cleanup remain pending until recorded in finalhandoff. RealCursor version/cache relationships/account/plugins, full#698 and#699–702 remain unverified/open; no whole-product completion claim.
+Independent source/runtime/final-evidence review passed; PR741 product CI/merge/readback passed; ledger CI/merges/readbacks, backup and cleanup are recorded in finalhandoff. RealCursor version/cache relationships/account/plugins, full#698 and#699–702 remain unverified/open; no whole-product completion claim.
 
-Actual guarded helper `--serve` also passed the full journey, authenticated admin usage HTTP200, SIGTERM exit0, owned gateway reaping and removal of disposable data. First serve-checker attempt hit a text-buffer/readiness bug; corrected checker passed with no product change and original failure retained. Required remote delivery gates remain pending until final handoff.
+Actual guarded helper `--serve` also passed the full journey, authenticated admin usage HTTP200, SIGTERM exit0, owned gateway reaping and removal of disposable data. First serve-checker attempt hit a text-buffer/readiness bug; corrected checker passed with no product change and original failure retained. PR741 required CI/merge/readback passed; later administrative gates are recorded in final handoff.
+
+## Cursor product delivery readback
+
+產品 [PR741](https://github.com/fallrising/newclear/pull/741) source `5779858af53658716d0008352157c521b47206ae`、merge `51d034f9e7a87265b282105cdc5582390b302c15` at 2026-10-29T05:33:30Z；329 Rust tests/22 groups、fmt/Clippy/locked build、57 Python、20 validator tests、46 contracts/7 indexes、Cursor及既有Claude/genericHTTP九階段旅程、獨立來源/執行審查通過。必要check/validate CI、正常合併與遠端內容/祖先/Desk-Task trailer回讀通過。
+
+保留實際baseline missing-attempt RED及其先行admin envelope測試錯誤、sccache/socket sandbox拒絕與核准重跑、binary digest拒絕、舊HTTP入口不支援digest旗標的argparse失敗。獨立review R1指出拒絕fixture冷卻共用連線，已以獨立拒絕連線修正，regression RED→GREEN；R2指出本機serve checker文字緩衝/readiness問題，改reader thread後實測通過，產品不變。worker報告格式錯誤均保留。另有一次shell缺少fail-stop，報告格式驗證失敗後仍繼續首次commit/push；立即暫停PR發布，修正報告、通過驗證，再以正常followup commit發布。沒有改寫歷史、弱化產品檢查或繞過CI；見commit-gate-incident.json。先前fixture401/啟動重試通過仍不代表#701已查明或修好。
+
+本份是產品merge時點快照。後續帳本發布、完整備份`t0432-cursor-settlement-20261029`（完整位置留在私人交接）與本輪工作樹清理由`.local/t0432-cursor-settlement/handoff.json`核實，不預先宣稱完成。新`local-demo.py`預設check、驗證source/binary digest；舊入口與舊digest不變。本輪完成即停止，不開新里程碑。

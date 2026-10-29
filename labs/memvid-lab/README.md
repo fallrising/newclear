@@ -94,7 +94,7 @@ make core RUN_DIR=work/core-001
 
 ## 驗證入口
 
-`make check` 執行真 SDK／CLI 的八項邊界 regression；`make full` 是場景與模型驗收。
+`make check` 執行真 SDK／CLI、固定筆記指標與模型準備邊界 regression；`make full` 是場景與模型驗收。
 repo 根目錄另執行 `python3 scripts/check_indexes.py` 與 `python3 .github/scripts/check_workflows.py`。
 CI 入口：[memvid-lab-ci.yml](../../.github/workflows/memvid-lab-ci.yml)。任務與交付：[BOARD.md](docs/tasks/BOARD.md)。
 
@@ -113,3 +113,15 @@ make notes RUN_DIR=work/notes-demo-001
 查詢輸出是來源檢索，無生成式回答。CJK 二字組屬 lab 預處理，不是中文語意模型；來源核對檢查完整 SDK renderer 文字／URI／frame，不宣稱原文 bytes 無損保存。規模資料為確定性合成干擾資料，計時不是 production 保證。
 
 品質結果與限制見 [繁中筆記評估結果](docs/notes-usability-results.md)，完整原始輸出見 [評估 JSON](docs/evidence/notes-evaluation.json)。
+
+## 中文語意模型準備（T-0436 M3，尚未完成）
+
+已加入固定中文BGE與多語E5的本地ONNX準備與encoder，沿用既有依賴：
+
+```sh
+make setup
+make semantic-prepare
+.venv/bin/python semantic_models.py verify --cache work/semantic-models
+```
+
+額外下載約583MB。BGE使用明示Xenova轉換，E5使用官方ONNX；模型來源、pooling、前綴與hash見 [規格](docs/notes-semantic.md)。真模型圖／禁網推論已驗證，但固定SDK的向量持久化控制失敗，完整品質評估尚未交付。詳見 [目前結果與重現入口](docs/notes-semantic-results.md)；保留題與100／1000規模尚未執行，不能從本輪推論兩模型的搜尋品質。

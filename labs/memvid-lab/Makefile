@@ -2,7 +2,7 @@ PYTHON ?= .venv/bin/python
 CARGO ?= cargo
 RUN_DIR := $(if $(RUN_DIR),$(RUN_DIR),work/run-$(shell date -u +%Y%m%dT%H%M%SZ))
 
-.PHONY: setup prepare check core full notes
+.PHONY: setup prepare check core full notes semantic-prepare
 
 setup:
 	python3 -m venv .venv
@@ -16,7 +16,7 @@ prepare:
 
 check:
 	$(PYTHON) -m unittest discover -s tests -v
-	$(PYTHON) -m py_compile lab.py offline.py scenarios.py advanced.py models.py notes_eval.py native-whisper/prepare_core.py native-whisper/prepare_assets.py
+	$(PYTHON) -m py_compile lab.py offline.py scenarios.py advanced.py models.py notes_eval.py semantic_models.py diagnose_vectors.py native-whisper/prepare_core.py native-whisper/prepare_assets.py
 
 core:
 	$(PYTHON) lab.py run --profile core --output "$(RUN_DIR)"
@@ -26,3 +26,6 @@ full:
 
 notes:
 	$(PYTHON) notes_eval.py run --output "$(RUN_DIR)"
+
+semantic-prepare:
+	timeout 600 $(PYTHON) semantic_models.py prepare --cache work/semantic-models

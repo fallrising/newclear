@@ -71,3 +71,5 @@ git diff --check
 BP01–04依[政策契約](bot-policy.md)驗證離線初始化、配置綁定、期限／額度、並行FLOCK、ACK遺失同ID與MCP參數邊界；[本機證據](evidence/m1-bot-policy.md)與live／模型驗收分開。
 
 BR01–04依[續租契約](bot-policy-renewal.md)驗證preview、到期CAS／transaction rollback、歷史／payload保留、重試不補額度、實際MCP／HTTP跨期恢復；[證據](evidence/m1-bot-policy-renewal.md)區分本機與live。
+
+BA01–04以[準備證據](evidence/m1-bot-activation.md)核對候選hash、原資料／設定、管理metadata、self／resident及協議發現。tools/list不等於授權或提交成功；[方案](bot-activation.md)的實際續權／policy初始化／host切換另驗。

@@ -377,3 +377,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40920207069`、Project success `40920207309`、llms `40920207279`。本機336tests（64Node272Python）、六項文件／task／report／diff檢查及T843 focusedACCEPT；[BR證據](../evidence/m1-bot-policy-renewal.md)保留初始RED、strictJSON浮點archive修正及review重播時鐘缺口RED／修正。
 - GitHub connector交付與匿名HTTPS回讀；remote tree `51b0ffe9a9c2ac59461e0c644b909a2bbff086c1`與local commit `5a079e4fc4c994b7ec6814cd4c83bab29b77d184`相同，commit身份不同。離線preview、到期後CAS／同交易archive與活動quota切換、同指令重播不補額度、原requests／跨期間隔／時鐘保留均本機驗證；實際MCP／HTTP跨期同ID恢復保持一筆command。
 - BR01–04 source／local完成；未安裝、改Grok、續live權限、呼叫模型或新增付費。Python3.11、本機候選實際接入／原bot有界續權及完整主線仍pending，無usabletag。原HL T-0015仍open；本收尾只改任務板並只關閉BR。
+
+## T-0022 — Bot有界啟用準備
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0022-1 | 固定候選與原client/state | BA-01 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |
+| T-0022-2 | fresh授權／runner／管理面核對 | BA-02 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |
+| T-0022-3 | 私人proposal與協議檢查 | BA-03 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |
+| T-0022-4 | 啟用補償方案、審查交付 | BA-04 | in_progress | 2026-10-29T17:31:43Z | — | 2026-10-29T17:43:45Z |

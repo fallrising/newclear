@@ -17,10 +17,10 @@ const expectedSources={"fixture.mjs":"8c828b21eeb34563ef64c9b81a9bdfca4f9ab01463
 const life=new Lifecycle(),ports=[8443],sha=b=>createHash('sha256').update(b).digest('hex'),CAP=65536;
 const captureScript='/work/docs/fe-review/capture.mjs',privateTargets='/state/targets.json';
 const childEnv=Object.freeze({PATH:'/usr/local/bin:/usr/bin:/bin',HOME:'/home/ubuntu',PLAYWRIGHT_MODULE:modulePaths('/review-tools/node_modules').playwright,AXE_PLAYWRIGHT_MODULE:modulePaths('/review-tools/node_modules').axePlaywright,CHROMIUM_EXECUTABLE:'/ms-playwright/chromium-1243/chrome-linux64/chrome'});
-const receipt={mode:'capture-001',scope:'unchanged shared docs/fe-review/capture.mjs against private targets on the review harness; static bootstrap page at three sizes; not canonical cells; candidate until independent actual review',passed:false,stage:'PRECONDITION',checks:{},sourceHashes:{}};
+const receipt={mode:'shared-capture',scope:'unchanged shared docs/fe-review/capture.mjs against private targets on the review harness; static bootstrap page at three sizes; not canonical cells; candidate until independent actual review',passed:false,stage:'PRECONDITION',checks:{},sourceHashes:{}};
 const handlers=['SIGTERM','SIGINT'].map(name=>[name,()=>life.cancel(name)]);for(const [name,fn]of handlers)process.on(name,fn);const timeout=setTimeout(()=>life.cancel('deadline'),150000);
-// A Node error code (for example ERR_PACKAGE_PATH_NOT_EXPORTED) is a fixed name, never a value, so it is kept.
-const safeError=e=>/^REVIEW_[A-Z0-9_]+$/.test(e?.message??'')?e.message:e?.name==='AssertionError'?'ASSERTION_FAILED':/^ERR_[A-Z0-9_]+$/.test(e?.code??'')?'NODE_'+e.code:'UNCLASSIFIED';
+// A Node or system error code (for example ERR_PACKAGE_PATH_NOT_EXPORTED or EACCES) is a fixed name, never a value, so it is kept.
+const safeError=e=>/^REVIEW_[A-Z0-9_]+$/.test(e?.message??'')?e.message:e?.name==='AssertionError'?'ASSERTION_FAILED':/^(ERR_[A-Z0-9_]+|E[A-Z]+)$/.test(e?.code??'')?'NODE_'+e.code:'UNCLASSIFIED';
 let active=null;
 // W05: no shell, fixed argv, minimal environment, output capped in bytes, SIGKILL at the limit; a spawn error settles at once.
 function runChild(args,limitMs){life.check();return new Promise(resolve=>{const child=spawn(process.execPath,[captureScript,privateTargets,...args,'--out',outDir],{cwd:'/work',env:childEnv,stdio:['ignore','pipe','pipe']});active=child;

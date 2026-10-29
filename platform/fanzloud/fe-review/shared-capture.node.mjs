@@ -97,7 +97,7 @@ test('wrapper keeps TLS validation, runs capture.mjs only by its fixed path and 
  for(const forbidden of ['ignoreHTTPSErrors','shell:','exec(','execSync(','execFileSync(','route(','screenshot(','runs/','chromium.launch','NODE_TLS_REJECT_UNAUTHORIZED','storageState','holdNextResponse','injectFrame','overrideNextInstance','futureNextSubscribe'])assert.equal(wrapper.includes(forbidden),false,forbidden);
  assert.match(wrapper,/captureScript='\/work\/docs\/fe-review\/capture\.mjs'/);assert.equal(wrapper.match(/spawn\(/g).length,1);assert.match(wrapper,/spawn\(process\.execPath,\[captureScript,privateTargets,\.\.\.args,'--out',outDir\]/);
  assert.match(wrapper,/scenario:'bootstrap-empty'/);assert.match(wrapper,/ports=\[8443\]/);assert.match(wrapper,/setTimeout\(\(\)=>life\.cancel\('deadline'\),150000\)/);assert.match(wrapper,/runChild\(\['--dry-run'\],10000\)/);assert.match(wrapper,/runChild\(\[\],90000\)/);
- assert.match(wrapper,/writeFileSync\('\/output\/result\.json'/);assert.match(wrapper,/mode:'capture-001'/);assert.match(wrapper,/not canonical cells/);
+ assert.match(wrapper,/writeFileSync\('\/output\/result\.json'/);assert.match(wrapper,/mode:'shared-capture'/);assert.match(wrapper,/not canonical cells/);
 });
 
 // W09 (capture-001 FAIL): resolve every tool exactly as the wrapper and capture.mjs do, against the real review tools.
@@ -122,6 +122,6 @@ test('review tool check fails closed on drift and on a missing package',async()=
 });
 
 test('wrapper keeps Node error codes in the safe failure name',()=>{
- const wrapper=readFileSync(new URL('shared-capture.mjs',import.meta.url),'utf8');assert.match(wrapper,/\/\^ERR_\[A-Z0-9_\]\+\$\/\.test\(e\?\.code\?\?''\)\?'NODE_'\+e\.code/);assert.match(wrapper,/receipt\.stage='TOOLS'/);
+ const wrapper=readFileSync(new URL('shared-capture.mjs',import.meta.url),'utf8');assert(wrapper.includes("/^(ERR_[A-Z0-9_]+|E[A-Z]+)$/.test(e?.code??'')?'NODE_'+e.code"));assert.match(wrapper,/receipt\.stage='TOOLS'/);
  assert.equal(wrapper.includes("require('@axe-core/playwright/package.json')"),false);
 });

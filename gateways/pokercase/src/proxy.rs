@@ -295,7 +295,7 @@ async fn forward_chat_completions_inner(
     stream: bool,
     cancel: &CancellationToken,
     allow_401_refresh: bool,
-    context: Option<&HttpStreamContext<'_>>,
+    context: Option<&HttpAttemptContext<'_>>,
     attempt: &mut Option<crate::stream_usage::StreamAttempt>,
 ) -> Result<ForwardOk, UpstreamAttemptError> {
     // A sealed Antigravity test instance must reject unrelated forwarding before
@@ -536,7 +536,7 @@ async fn forward_chat_completions_inner(
 
     // Preflight/refresh are not model inference. Reserve immediately before the
     // actual send, including each existing legal 401 retry.
-    if matches!(body_kind, UpstreamBodyKind::Antigravity) && cancel.is_cancelled() {
+    if context.is_some() && cancel.is_cancelled() {
         return Err(UpstreamAttemptError {
             status: 499,
             body: "client disconnected".into(),
@@ -551,6 +551,21 @@ async fn forward_chat_completions_inner(
                 context.public_model,
                 target,
                 upstream_stream,
+            )
+        } else if !stream {
+            crate::stream_usage::StreamAttempt::begin_buffered_http(
+                &state.store,
+                context.request_id,
+                context.public_model,
+                target,
+                &body,
+                match body_kind {
+                    UpstreamBodyKind::OpenAiResponses => {
+                        crate::stream_usage::HttpUsageFormat::Responses
+                    }
+                    _ => crate::stream_usage::HttpUsageFormat::Chat,
+                },
+                reassemble,
             )
         } else if provider_key.is_none() && target.connection.auth_type == "api_key" {
             crate::stream_usage::StreamAttempt::begin(
@@ -885,7 +900,7 @@ pub async fn handle_chat_with_fallback(
                 }
             }
         }
-        let context = http_stream_context(&request_id, public_model, target, stream);
+        let context = http_attempt_context(&request_id, public_model, target);
         let mut attempt = None;
         match forward_chat_completions_inner(
             state,
@@ -937,7 +952,7 @@ pub async fn handle_chat_with_fallback(
                     if attempt.is_some() {
                         let converted =
                             convert_upstream_to_chat(bytes, kind, &target.upstream_model);
-                        let bytes = finish_buffered_attempt(&mut attempt, converted)?;
+                        let bytes = finish_buffered_attempt(&mut attempt, kind, converted)?;
                         return Ok(json_bytes_response(StatusCode::OK, bytes));
                     }
                     let (pt, ct) = extract_upstream_usage(&bytes, kind);
@@ -1008,17 +1023,16 @@ pub async fn handle_chat_with_fallback(
     })
 }
 
-struct HttpStreamContext<'a> {
+struct HttpAttemptContext<'a> {
     request_id: &'a str,
     public_model: &'a str,
 }
 
-fn http_stream_context<'a>(
+fn http_attempt_context<'a>(
     request_id: &'a str,
     public_model: &'a str,
     target: &ResolvedTarget,
-    stream: bool,
-) -> Option<HttpStreamContext<'a>> {
+) -> Option<HttpAttemptContext<'a>> {
     let provider = provider_id_for(target);
     let profile = provider.as_deref().and_then(providers::resolve);
     let antigravity = profile.is_some_and(|p| p.format == UpstreamFormat::Antigravity);
@@ -1030,7 +1044,7 @@ fn http_stream_context<'a>(
                 && crate::borrowed::source(&target.connection).is_none()
         }
     };
-    (antigravity || (stream && supported)).then_some(HttpStreamContext {
+    (antigravity || supported).then_some(HttpAttemptContext {
         request_id,
         public_model,
     })
@@ -1159,7 +1173,7 @@ pub async fn handle_anthropic_messages(
                 }
             }
         }
-        let context = http_stream_context(&request_id, public_model, target, stream);
+        let context = http_attempt_context(&request_id, public_model, target);
         let mut attempt = None;
         match forward_chat_completions_inner(
             state,
@@ -1215,7 +1229,7 @@ pub async fn handle_anthropic_messages(
                         let converted =
                             convert_upstream_to_chat(bytes, kind, &target.upstream_model)
                                 .and_then(|chat| claude::openai_to_anthropic(&chat, public_model));
-                        let anth = finish_buffered_attempt(&mut attempt, converted)?;
+                        let anth = finish_buffered_attempt(&mut attempt, kind, converted)?;
                         return Ok(json_bytes_response(StatusCode::OK, anth));
                     }
                     let (pt, ct) = extract_upstream_usage(&bytes, kind);
@@ -1364,7 +1378,7 @@ pub async fn handle_responses(
                 }
             }
         }
-        let context = http_stream_context(&request_id, public_model, target, stream);
+        let context = http_attempt_context(&request_id, public_model, target);
         let mut attempt = None;
         match forward_chat_completions_inner(
             state,
@@ -1417,10 +1431,15 @@ pub async fn handle_responses(
                         read_forward_body_accounted(fwd, &cancel, allow_background, &mut attempt)
                             .await?;
                     if attempt.is_some() {
-                        let converted =
-                            convert_upstream_to_chat(bytes, kind, &target.upstream_model)
-                                .and_then(|chat| responses::chat_to_responses(&chat, public_model));
-                        let out = finish_buffered_attempt(&mut attempt, converted)?;
+                        // Native Responses already passed the existing validator or
+                        // collector. Accounting must not roundtrip its original bytes
+                        // through Chat and discard tools, background or opaque fields.
+                        let converted = match kind {
+                            UpstreamBodyKind::OpenAiResponses => Ok(bytes),
+                            other => convert_upstream_to_chat(bytes, other, &target.upstream_model)
+                                .and_then(|chat| responses::chat_to_responses(&chat, public_model)),
+                        };
+                        let out = finish_buffered_attempt(&mut attempt, kind, converted)?;
                         return Ok(json_bytes_response(StatusCode::OK, out));
                     }
                     let (pt, ct) = extract_upstream_usage(&bytes, kind);
@@ -1535,7 +1554,7 @@ async fn read_forward_body(
     Ok(bytes)
 }
 
-/// Antigravity holds its durable owner through body collection and conversion.
+/// Buffered HTTP holds its durable owner through body collection and conversion.
 /// Observe typed reqwest errors before the generic collector erases their type;
 /// return the collector's original error so the client wire contract is unchanged.
 async fn read_forward_body_accounted(
@@ -1544,11 +1563,18 @@ async fn read_forward_body_accounted(
     allow_background: bool,
     attempt: &mut Option<crate::stream_usage::StreamAttempt>,
 ) -> AppResult<Bytes> {
-    if !matches!(fwd.body_kind, UpstreamBodyKind::Antigravity) || attempt.is_none() {
+    if attempt.is_none() {
         return read_forward_body(fwd, cancel, allow_background).await;
     }
-    let a = attempt.as_mut().expect("checked Antigravity owner");
+    let kind = fwd.body_kind;
+    let reassemble = fwd.reassemble_stream;
+    let a = attempt.as_mut().expect("checked buffered owner");
     let source = fwd.response.bytes_stream().map(|chunk| {
+        if let Ok(bytes) = &chunk {
+            if reassemble {
+                a.observe_buffered_chunk(bytes);
+            }
+        }
         if let Err(error) = &chunk {
             if error.is_timeout() {
                 a.stop("timeout", "stream_timeout");
@@ -1560,20 +1586,43 @@ async fn read_forward_body_accounted(
     });
     let result = crate::collection::body(source, cancel).await;
     match &result {
-        Ok(bytes) => a.observe_antigravity_buffered(bytes),
+        Ok(bytes) => {
+            if matches!(kind, UpstreamBodyKind::Antigravity) {
+                a.observe_antigravity_buffered(bytes);
+            } else {
+                a.observe_buffered_body(bytes);
+            }
+        }
         Err(_) if cancel.is_cancelled() => a.stop("cancelled", "stream_cancelled"),
         Err(_) => a.stop("failed", "upstream_transport_error"),
     }
-    result
+    let bytes = result?;
+    if !matches!(kind, UpstreamBodyKind::OpenAiResponses) {
+        return Ok(bytes);
+    }
+    let validated = if reassemble {
+        responses::reassemble_sse(&String::from_utf8_lossy(&bytes))
+    } else {
+        responses::validate_json_response(&bytes, allow_background).map(|()| bytes)
+    };
+    if validated.is_err() {
+        a.stop("failed", "stream_conversion_failed");
+    }
+    validated
 }
 
 fn finish_buffered_attempt(
     attempt: &mut Option<crate::stream_usage::StreamAttempt>,
+    kind: UpstreamBodyKind,
     converted: AppResult<Bytes>,
 ) -> AppResult<Bytes> {
     if let Some(a) = attempt.as_mut() {
         if converted.is_ok() {
-            a.complete_antigravity_buffered();
+            if matches!(kind, UpstreamBodyKind::Antigravity) {
+                a.complete_antigravity_buffered();
+            } else {
+                a.complete_buffered();
+            }
         } else {
             a.stop("failed", "stream_conversion_failed");
         }
@@ -4283,3 +4332,7 @@ mod named_http_tests;
 #[cfg(test)]
 #[path = "agy_http_tests.rs"]
 mod agy_http_tests;
+
+#[cfg(test)]
+#[path = "buffered_http_tests.rs"]
+mod buffered_http_tests;

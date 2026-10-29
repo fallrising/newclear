@@ -32,6 +32,12 @@ For paths with the existing stream observer, refresh/discovery are not model inf
 
 Antigravity's [offline HTTP harness](ANTIGRAVITY-OFFLINE.md) provides the confinement foundation. The [existing-HTTP accounting continuation](tasks/T-0432-antigravity-settlement.md) reserves each actual inference, including legal401 retry and fallback; discovery/refresh alone do not create inference rows. Buffered original `usageMetadata` retains valid counts, missing/partial/invalid quality and explicit zero before client conversion. Only supported raw terminal evidence establishes succeeded/incomplete; converter-synthesized stop or zero is not evidence. Configured-rate buffered estimates retain their existing meaning, not verified subscription bills. Malformed HTTP200 conversion failure retains status200 with failed outcome and a fixed diagnostic. Streams still use `generateContent` and opaque passthrough for all three APIs: EOF means unknown, while observed cancel/stall/read failure retain their dispositions; token/cost/semantic first-output remain null. This adds no native Gemini stream conversion or tools/images. Production allowlist, endpoints and OAuth permissions remain unchanged.
 
+### Buffered HTTP usage coverage
+
+Generic API-key Chat, SIWC forced-SSE Responses, Grok JSON Responses and OpenCode Chat now use the same durable per-dispatch lifecycle for buffered Chat/Messages/Responses clients. Each fallback or existing legal401 retry has a distinct attempt under one request; refresh alone has no inference row. Original usage and terminal evidence are saved before conversion, independently of HTTP200 or client success. Failed collection, cancellation, timeout and finalization failure preserve their observed disposition; startup recovery never replays inference.
+
+Direct JSON leaves `first_output_ms` unknown. SIWC measures it only from a meaningful delta observed on arrival, and uses the collector's first terminal snapshot without borrowing missing counters from earlier envelopes. Native Responses preserves accepted bytes, extensions and background status. Buffered configured-rate estimates retain the existing complete-counter/price requirement; named streaming costs remain unknown. These estimates do not establish subscription consumption. [BH-1–BH-5](tasks/T-0432-buffered-http-settlement.md) provides the isolated terminal entry, matrix and remaining boundaries; CLI buffered observation and real provider/client-version verification remain outside this slice.
+
 ### Import
 
 Admin UI → Connections → **Import OAuth**, or:

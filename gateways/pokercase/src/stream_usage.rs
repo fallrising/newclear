@@ -1,10 +1,14 @@
-//! Bounded accounting observation of supported SSE and original Antigravity JSON.
+//! Bounded accounting observation of supported SSE and original buffered HTTP.
 //! It never changes bytes, drives the upstream, or retains event contents in SQLite.
 use std::time::Instant;
 
 use serde_json::Value;
 
 use crate::store::{Store, StreamFinalization};
+
+#[path = "buffered_usage.rs"]
+mod buffered_usage;
+use buffered_usage::BufferedObservation;
 
 const EVENT_LIMIT: usize = 64 * 1024;
 const CHOICE_LIMIT: usize = 128;
@@ -29,6 +33,7 @@ pub struct StreamAttempt {
 /// policy separate prevents Chat-looking content from becoming provider evidence.
 enum HttpObservation {
     Sse(Box<ChatObservation>),
+    Buffered(Box<BufferedObservation>),
     AntigravityBuffered(AntigravityObservation),
     AntigravityOpaque,
 }
@@ -118,6 +123,34 @@ impl AntigravityObservation {
 }
 
 impl StreamAttempt {
+    /// Ordinary buffered HTTP keeps its established configured-rate estimate
+    /// policy, independently of the named streaming paths' no-estimate policy.
+    #[allow(
+        clippy::too_many_arguments,
+        reason = "Explicit original wire format and forced SSE policy"
+    )]
+    pub fn begin_buffered_http(
+        store: &Store,
+        request_id: &str,
+        model: &str,
+        target: &crate::store::ResolvedTarget,
+        body: &[u8],
+        format: HttpUsageFormat,
+        forced_sse: bool,
+    ) -> crate::error::AppResult<Self> {
+        let mut attempt = Self::begin_http(store, request_id, model, target, body, format, true)?;
+        let choices = serde_json::from_slice::<Value>(body)
+            .ok()
+            .and_then(|value| value.get("n").cloned())
+            .map_or(Some(1), |value| {
+                value.as_u64().and_then(|n| usize::try_from(n).ok())
+            });
+        attempt.observation = HttpObservation::Buffered(Box::new(BufferedObservation::new(
+            format, choices, forced_sse,
+        )));
+        Ok(attempt)
+    }
+
     pub fn begin(
         store: &Store,
         request_id: &str,
@@ -333,6 +366,33 @@ impl StreamAttempt {
         }
     }
 
+    /// Only actual forced-SSE chunk arrival can supply a first-output clock.
+    pub fn observe_buffered_chunk(&mut self, bytes: &[u8]) {
+        if self.settled {
+            return;
+        }
+        let elapsed = self.elapsed();
+        if let HttpObservation::Buffered(observation) = &mut self.observation {
+            observation.chunk(bytes, elapsed);
+        }
+    }
+
+    /// Observe original JSON, or finish a previously observed SSE EOF tail.
+    /// The caller retains all validation, conversion and wire ownership.
+    pub fn observe_buffered_body(&mut self, bytes: &[u8]) {
+        if self.settled {
+            return;
+        }
+        let elapsed = self.elapsed();
+        if let HttpObservation::Buffered(observation) = &mut self.observation {
+            observation.body(bytes, elapsed);
+        }
+    }
+
+    pub fn complete_buffered(&mut self) {
+        self.settle_buffered(None, None);
+    }
+
     pub fn eof(&mut self) {
         if self.settled {
             return;
@@ -341,6 +401,8 @@ impl StreamAttempt {
         if let HttpObservation::Sse(observation) = &mut self.observation {
             observation.end(elapsed);
             self.settle("failed", Some("stream_incomplete"), true);
+        } else if matches!(self.observation, HttpObservation::Buffered(_)) {
+            self.settle_buffered(Some("failed"), Some("stream_incomplete"));
         } else {
             // Opaque EOF never proves semantic completion, even after [DONE].
             self.settle_antigravity("unknown", None);
@@ -350,11 +412,49 @@ impl StreamAttempt {
     pub fn stop(&mut self, outcome: &'static str, error: &'static str) {
         if matches!(self.observation, HttpObservation::Sse(_)) {
             self.settle(outcome, Some(error), false);
+        } else if matches!(self.observation, HttpObservation::Buffered(_)) {
+            self.settle_buffered(Some(outcome), Some(error));
         } else {
             // Explicit transport/conversion/cancellation outcomes win any raw
             // buffered STOP observation which has not yet been accepted.
             self.settle_antigravity(outcome, Some(error));
         }
+    }
+
+    fn settle_buffered(&mut self, stopped: Option<&'static str>, error: Option<&'static str>) {
+        if self.settled {
+            return;
+        }
+        let HttpObservation::Buffered(observation) = &self.observation else {
+            return;
+        };
+        let usage_status = observation.usage_status();
+        let cost = if usage_status == "complete" {
+            crate::proxy::estimate_cost(
+                observation.prompt,
+                observation.completion,
+                self.input_price,
+                self.output_price,
+            )
+        } else {
+            None
+        };
+        self.persist(StreamFinalization {
+            outcome: stopped.or(observation.outcome).unwrap_or("unknown"),
+            usage_status,
+            // Usage quality alone does not turn a successful buffered reply
+            // into a request error; preserve the existing T-0428 distinction.
+            error: error.or(observation.error),
+            prompt_tokens: observation.prompt,
+            completion_tokens: observation.completion,
+            estimated_cost_usd: cost,
+            first_output_ms: observation.first_output_ms,
+            total_observed_ms: if stopped.is_some() {
+                self.elapsed()
+            } else {
+                observation.terminal_ms.unwrap_or_else(|| self.elapsed())
+            },
+        });
     }
 
     fn settle_antigravity(&mut self, outcome: &'static str, error: Option<&'static str>) {
@@ -380,7 +480,7 @@ impl StreamAttempt {
                 )
             }
             HttpObservation::AntigravityOpaque => (None, None, "unknown", error),
-            HttpObservation::Sse(_) => return,
+            HttpObservation::Sse(_) | HttpObservation::Buffered(_) => return,
         };
         let cost = if usage_status == "complete" {
             crate::proxy::estimate_cost(prompt, completion, self.input_price, self.output_price)

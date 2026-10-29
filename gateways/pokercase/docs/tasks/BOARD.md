@@ -543,8 +543,12 @@ Demand: desk T-0435 / #699. Claim PR292 merged; [MT-1–MT-5](T-0435-measurement
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| MT-1 | Saved-field completeness and true RED | MT-1 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
-| MT-2 | Separate timing basis and means | MT-2 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
-| MT-3 | Matching-scope schema2/Web/CSV/TUI semantics | MT-3 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
-| MT-4 | Attempts and historical preservation | MT-4 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
-| MT-5 | Validation review and bounded delivery | MT-5 | in_progress | 2026-10-29T16:32:59Z | | 2026-10-29T17:26:11Z |
+| MT-1 | Saved-field completeness and true RED | MT-1 | done | 2026-10-29T16:32:59Z | 2026-10-29T17:40:39Z | 2026-10-29T17:40:39Z |
+| MT-2 | Separate timing basis and means | MT-2 | done | 2026-10-29T16:32:59Z | 2026-10-29T17:40:39Z | 2026-10-29T17:40:39Z |
+| MT-3 | Matching-scope schema2/Web/CSV/TUI semantics | MT-3 | done | 2026-10-29T16:32:59Z | 2026-10-29T17:40:39Z | 2026-10-29T17:40:39Z |
+| MT-4 | Attempts and historical preservation | MT-4 | done | 2026-10-29T16:32:59Z | 2026-10-29T17:40:39Z | 2026-10-29T17:40:39Z |
+| MT-5 | Validation review and bounded delivery | MT-5 | done | 2026-10-29T16:32:59Z | 2026-10-29T17:40:39Z | 2026-10-29T17:40:39Z |
+
+產品 [PR786](https://github.com/fallrising/newclear/pull/786) source `dd72d5641bae25f2aa575a404902ae91568691ed`、normal merge `1e70824e24161bafacfc1eca33bb31ba7045df5a` at2026-10-29T17:40:39Z。必要兩項 CI、獨立來源／執行審查、11檔遠端內容、source/merge祖先與雙方 Desk-Task trailer 均核對通過。
+
+本表 done 僅記錄已合併的產品步驟。MT-5 的帳本發布、完整備份逐檔核對與本輪工作樹清理，依私人 `t0435-usage-completeness/handoff.json` 最終事實核實，不預先宣稱完成。mainline incomplete、usable_tag none、desk in_progress；原17AC、T1102及AC04/AC17未決範圍不變，#698–702不因本切片自動關閉。完成本輪即停止。

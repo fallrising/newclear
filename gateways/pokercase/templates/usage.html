@@ -1,4 +1,13 @@
 {% from "cost_summary" import render_cost %}
+{% macro render_measurement(metric, label, s, is_time) -%}
+<div data-metric="{{ metric }}" data-known-sum="{% if s.known_sum is not none %}{{ s.known_sum }}{% endif %}" data-known-mean="{% if s.known_mean is not none %}{{ s.known_mean }}{% endif %}" data-known-count="{{ s.known_count }}" data-unknown-count="{{ s.unknown_count }}" data-total-count="{{ s.total_count }}" data-coverage="{% if s.coverage is not none %}{{ s.coverage }}{% endif %}" data-status="{{ s.status }}" data-basis="{{ s.basis }}">
+  <strong>{{ label }}</strong>:
+  {% if s.status == "no_data" %}No data{% elif s.status == "unknown" %}Unknown{% elif s.status == "partial" %}Partial{% elif s.status == "complete" %}Complete field{% else %}Sum unavailable{% endif %}
+  {% if s.known_sum is not none %} · Known subtotal {{ s.known_sum }}{% if is_time %} ms{% endif %}{% endif %}
+  {% if is_time and s.known_mean is not none %} · Mean of known observations {{ s.known_mean }} ms{% endif %}
+  · Coverage {{ s.known_count }}/{{ s.total_count }} rows · Unknown {{ s.unknown_count }}
+</div>
+{%- endmacro %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -31,27 +40,40 @@
       </p>
 
       <section class="panel">
-        <h2>By day (last 14)</h2>
+        <h2>By day (latest 14 populated date buckets)</h2>
+        <p class="muted">Each count covers stored event/attempt rows, including failed, interrupted and unknown attempts. Field coverage is independent of whole usage quality. Token subtotals describe saved counters, not subscription consumption. Timing means use only known observations; legacy latency mixes historical values and compatibility mirrors of headers or CLI ready.</p>
+        {% if measurement_summary is defined %}
+        <div data-measurement-scope="selected">
+          <h3>Selected date buckets</h3>
+          {{ render_measurement("prompt_tokens", "Prompt tokens (prompt_tokens)", measurement_summary.prompt_tokens, false) }}
+          {{ render_measurement("completion_tokens", "Completion tokens (completion_tokens)", measurement_summary.completion_tokens, false) }}
+          {{ render_measurement("headers_ms", "HTTP headers (headers_ms)", measurement_summary.headers_ms, true) }}
+          {{ render_measurement("cli_ready_ms", "CLI ready (cli_ready_ms)", measurement_summary.cli_ready_ms, true) }}
+          {{ render_measurement("first_output_ms", "First output (first_output_ms)", measurement_summary.first_output_ms, true) }}
+          {{ render_measurement("total_observed_ms", "Total observed (total_observed_ms)", measurement_summary.total_observed_ms, true) }}
+          {{ render_measurement("latency_ms", "Legacy/compatibility latency (latency_ms)", measurement_summary.latency_ms, true) }}
+        </div>
+        {% endif %}
         {% if daily %}
         <div class="table-scroll" tabindex="0" role="region" aria-label="Usage by day table">
         <table>
           <thead>
             <tr>
               <th>Day</th>
-              <th>Requests</th>
+              <th>Stored event/attempt rows</th>
               <th>Succeeded</th>
               <th>Failed / cancelled / timeout / interrupted</th>
               <th>Incomplete</th>
               <th>Unknown (includes pending)</th>
               <th>Pending</th>
               <th>HTTP 200 headers</th>
-              <th>Known tokens in/out</th>
+              <th>Stored token counters and coverage</th>
               <th>Cost</th>
-              <th>Avg recorded latency</th>
+              <th>Separate saved timings and known-only means</th>
             </tr>
           </thead>
-          <tbody>
-            {% for d in daily %}
+          {% for d in daily %}
+          <tbody data-measurement-scope="{{ d.day }}">
             <tr>
               <td class="mono">{{ d.day }}</td>
               <td>{{ d.requests }}</td>
@@ -61,12 +83,21 @@
               <td>{{ d.unknown }}</td>
               <td>{{ d.pending }}</td>
               <td>{{ d.headers_200 }}</td>
-              <td class="mono">{{ d.prompt_tokens }}/{{ d.completion_tokens }}</td>
+              <td class="mono">
+                {{ render_measurement("prompt_tokens", "Prompt tokens (prompt_tokens)", d.measurement_summary.prompt_tokens, false) }}
+                {{ render_measurement("completion_tokens", "Completion tokens (completion_tokens)", d.measurement_summary.completion_tokens, false) }}
+              </td>
               <td>{{ render_cost(d.cost_summary) }}</td>
-              <td>{{ d.avg_latency_ms }} ms</td>
+              <td>
+                {{ render_measurement("headers_ms", "HTTP headers (headers_ms)", d.measurement_summary.headers_ms, true) }}
+                {{ render_measurement("cli_ready_ms", "CLI ready (cli_ready_ms)", d.measurement_summary.cli_ready_ms, true) }}
+                {{ render_measurement("first_output_ms", "First output (first_output_ms)", d.measurement_summary.first_output_ms, true) }}
+                {{ render_measurement("total_observed_ms", "Total observed (total_observed_ms)", d.measurement_summary.total_observed_ms, true) }}
+                {{ render_measurement("latency_ms", "Legacy/compatibility latency (latency_ms)", d.measurement_summary.latency_ms, true) }}
+              </td>
             </tr>
-            {% endfor %}
           </tbody>
+          {% endfor %}
         </table>
         </div>
         {% else %}

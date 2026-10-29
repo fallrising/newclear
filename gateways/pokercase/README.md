@@ -175,6 +175,8 @@ Same operations as the UI under `/admin/api/*` (`x-admin-token`, or a login sess
 - `GET/POST /admin/api/keys` · `DELETE .../{id}`
 - `GET /admin/api/usage` · `.../daily` · `.../export.csv` · `GET /admin/api/stats`
 
+Daily measurement coverage is available at `GET /admin/api/usage/daily?schema=2`. It distinguishes no events, unknown, partial, explicit zero and complete saved fields; token subtotals are not subscription consumption. HTTP headers, CLI ready, first output, total observed and legacy/compatibility latency have separate known-only means and coverage. The Web usage page uses the same canonical report for its latest14 populated dates; the API selects30. Default/schema1 retains legacy numeric scalars and a compatibility notice. CSV preserves missing fields as empty cells; TUI labels missing legacy latency as unknown. See the [bounded coverage contract and checks](docs/tasks/T-0435-measurement-coverage.md).
+
 Multi-target route:
 
 ```bash

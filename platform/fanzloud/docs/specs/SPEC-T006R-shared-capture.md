@@ -10,7 +10,7 @@ Basis:
 ## Scope
 
 In scope:
-- `fe-review/targets.json` names the review origin `https://127.0.0.1:8443`, the only product page `/`, dark, `en-US`, and no `start`. It stays `verified:false` until `capture-001` passes and is reviewed.
+- `fe-review/targets.json` names the review origin `https://127.0.0.1:8443`, the only product page `/`, dark, `en-US`, and no `start`. It stays `verified:false` until the T0433-3 final integration shows every R2-AC-14 condition with evidence (see the `capture-002` result).
 - A wrapper, `fe-review/shared-capture.mjs`, that serves the fixture and transport, installs the fresh trust, copies `targets.json` byte for byte to private state, and runs `capture.mjs` twice as a child process: `--dry-run`, then the capture.
 - Pure verdicts in `fe-review/shared-capture-verdicts.mjs` and their tests.
 - One review-only counter in `fe-review/transport.mjs` (W08). The `journeys-001` driver stays pinned to the transport bytes it ran on (`9167d04e…`); its test checks that pin as historical.
@@ -45,11 +45,11 @@ W09 — Tool check: `fe-review/shared-capture-tools.mjs` checks the review tools
 
 ## `capture-001` result (2026-10-29): FAIL
 
-`capture-001` ran once on `9c9f9b47` and failed in 0.3 s at stage `PRECONDITION` with failure `UNCLASSIFIED`, before the fixture, transport, trust or any browser started. Cleanup was complete, port 8443 was absent and the container was removed. The cause is a wrapper defect: it checked the axe version with `require('@axe-core/playwright/package.json')`, and that package exports only `.`, so Node throws `ERR_PACKAGE_PATH_NOT_EXPORTED`. Resolving the same module tree outside the container reproduces exactly that error. It is not a product or `capture.mjs` defect. The FAIL is preserved and backed up, the approval is consumed, and no retry ran. W09 is the fix, and a test now resolves every tool the same way against the real review tools; with the defect put back, that test fails with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
+`capture-001` ran once on `9c9f9b47` and failed in 0.3 s at stage `PRECONDITION` with failure `UNCLASSIFIED`, before the fixture, transport, trust or any browser started. Cleanup was complete, port 8443 was absent and the container was removed. The cause is a wrapper defect: it checked the axe version with `require('@axe-core/playwright/package.json')`, and that package exports only `.`, so Node throws `ERR_PACKAGE_PATH_NOT_EXPORTED`. Resolving the same module tree outside the container reproduces exactly that error. It is not a product or `capture.mjs` defect. The FAIL is preserved and backed up, the approval is consumed, and no automatic retry ran; `capture-002` is the separately approved retry after the fix (below). W09 is the fix, and a test now resolves every tool the same way against the real review tools; with the defect put back, that test fails with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
 
 ## `capture-002` result (2026-10-29): PASS
 
-`capture-002` ran once on `92c16767` (merged as `f8b12f76`) in 5.0 s, with Node v24.18.0, Playwright 1.63.0, @axe-core/playwright 4.13.0 and Chromium 153.0.8010.12. All four verdicts are true: `targets`, `plan`, `capture` and `canary`. Cleanup closed the fixture and transport, port 8443 was absent, and the container was removed.
+`capture-002` ran once on `92c16767` (merged as `f8b12f76`) in 5.0 s, with Node v24.18.0, Playwright 1.63.0, @axe-core/playwright 4.13.0 and Chromium revision 1243 (153.0.8010.12, the build Playwright 1.63.0 pins). All four verdicts are true: `targets`, `plan`, `capture` and `canary`. Cleanup closed the fixture and transport, port 8443 was absent, and the container was removed.
 
 - The private targets were a byte-identical copy of `targets.json` (`5aa2d64c…`, `verified:false`), and they matched the runtime.
 - The unchanged `capture.mjs` (`d00b6bf7…`, last changed in `221171b9`) printed exactly the three plan lines on `--dry-run`, with empty stderr and no output folder, then captured all three sizes.
@@ -62,7 +62,7 @@ The independent actual review re-derived every verdict from the raw `capture.jso
 - TLS is shown positively only; the negative TLS evidence is C2 R02.
 - The top-level `playwright-core` 1.64.1 in the tools tree is not on the load path and is not checked.
 
-`capture-002` ran on wrapper bytes `acde3ffd…`; after the run only the wrapper's first comment line changed (it named `capture-001`), so a new run needs a new approval and freeze. `targets.json` stays `verified:false` in this change. The ROUND2-SDD rule allows `verified:true` only when every R2-AC-14 condition holds; the T0433-3 final integration decides that with linked evidence, and a flip changes the bytes that `capture-002` ran on.
+`capture-002` ran on wrapper bytes `acde3ffd…`; after the run only the wrapper's first comment line changed (it named `capture-001`), so a new run needs a new approval and freeze. `targets.json` stays `verified:false` in this change. The ROUND2-SDD rule allows `verified:true` only when every R2-AC-14 condition holds; the T0433-3 final integration decides that with linked evidence, and a flip changes the bytes that `capture-002` ran on, and the `targets.json` `verifiedNote` is updated with the flip.
 
 ## Verdicts (V01)
 
@@ -102,7 +102,7 @@ The canary scan covers the dry-run and capture stdout and stderr and `capture.js
 - Each verdict function fails on its failing rows and passes on its passing row.
 - All fe-review suites pass, with and without `REVIEW_MODULES` and `FE_REVIEW_RUNS`. T006 passes 10/10.
 - Independent review and required CI pass before merge.
-- A run then happens once, after its own approval (`capture-001` failed at W09; `capture-002` follows the fix). Its result and review go into a follow-up PR, and the T0433-3 report links R11 to it.
+- A run then happens once, after its own approval (`capture-001` failed at W09; `capture-002` ran after the fix and passed; see its result). Its result and review go into a follow-up PR, and the T0433-3 report links R11 to it.
 
 Limitations known in advance:
 - The product has no favicon, so Chromium's automatic request gets a 404 with one console line; this is recorded as a presentation finding, not fixed.

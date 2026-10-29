@@ -1,6 +1,6 @@
 # Shared capture gate R11
 
-Status: **implemented and merged (PR761); `capture-001` FAIL at its tool precondition (wrapper defect, W09); fix in review; `capture-002` needs its own approval.** Owner direction on 2026-10-29 (「按你推薦做吧。」), accepting option A of the T0433-3 R11 gap: add one bounded run of the unchanged shared `docs/fe-review/capture.mjs` against private targets. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. `capture-001` was approved (「批准：跑一次 capture-001」) and ran once; it failed before any server or browser started (see below). A further run, `capture-002`, needs its own owner runtime approval after the fix passes independent review and required CI.
+Status: **implemented and merged (PR761, fix W09 in PR764); `capture-001` FAIL at its tool precondition (wrapper defect); `capture-002` PASS, actual review ACCEPT_WITH_FINDINGS.** Owner direction on 2026-10-29 (「按你推薦做吧。」), accepting option A of the T0433-3 R11 gap: add one bounded run of the unchanged shared `docs/fe-review/capture.mjs` against private targets. Desk T-0433 (issue 706), R2-AC-14 and R2-AC-E. `capture-001` was approved (「批准：跑一次 capture-001」) and ran once; it failed before any server or browser started (see below). After the fix passed independent review and required CI, `capture-002` was approved (「批准：跑一次 capture-002。」) as a retry of `capture-001` and ran once.
 
 Basis:
 - [SPEC-T006R](SPEC-T006R-fe-review.md) R11: the runner owns startup, auth, fixture and trust, writes private targets, then runs the unchanged `docs/fe-review/capture.mjs <private-targets> --dry-run` and an actual initial static capture through a browser that keeps genuine TLS validation. The shared static capture never replaces the dedicated canonical states.
@@ -47,6 +47,23 @@ W09 — Tool check: `fe-review/shared-capture-tools.mjs` checks the review tools
 
 `capture-001` ran once on `9c9f9b47` and failed in 0.3 s at stage `PRECONDITION` with failure `UNCLASSIFIED`, before the fixture, transport, trust or any browser started. Cleanup was complete, port 8443 was absent and the container was removed. The cause is a wrapper defect: it checked the axe version with `require('@axe-core/playwright/package.json')`, and that package exports only `.`, so Node throws `ERR_PACKAGE_PATH_NOT_EXPORTED`. Resolving the same module tree outside the container reproduces exactly that error. It is not a product or `capture.mjs` defect. The FAIL is preserved and backed up, the approval is consumed, and no retry ran. W09 is the fix, and a test now resolves every tool the same way against the real review tools; with the defect put back, that test fails with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
 
+## `capture-002` result (2026-10-29): PASS
+
+`capture-002` ran once on `92c16767` (merged as `f8b12f76`) in 5.0 s, with Node v24.18.0, Playwright 1.63.0, @axe-core/playwright 4.13.0 and Chromium 153.0.8010.12. All four verdicts are true: `targets`, `plan`, `capture` and `canary`. Cleanup closed the fixture and transport, port 8443 was absent, and the container was removed.
+
+- The private targets were a byte-identical copy of `targets.json` (`5aa2d64c…`, `verified:false`), and they matched the runtime.
+- The unchanged `capture.mjs` (`d00b6bf7…`, last changed in `221171b9`) printed exactly the three plan lines on `--dry-run`, with empty stderr and no output folder, then captured all three sizes.
+- Each size returned 200 with title `Codebox operator`, no horizontal overflow, no page errors, and the single expected failed request `GET /api/p0/v1/session` 401. Desktop axe found no violations. The images are 1440×900, 834×1112 and 390×844 and show the dark bootstrap page with an empty bearer field.
+- The transport saw 16 requests: 15 plus one favicon. There was no other unknown request, no upgrade, and only `GET /api/p0/v1/session` three times at the fixture, with no effects.
+
+The independent actual review re-derived every verdict from the raw `capture.json`, the PNG headers and the counters, looked at the three images, and accepted the run with findings:
+- Favicon (presentation finding, not fixed): Chromium's one automatic `GET /favicon.ico` got a 404 and logged one console line, on desktop only.
+- The Authenticate button sits directly under the bearer input with no vertical gap at every size (cosmetic, recorded).
+- TLS is shown positively only; the negative TLS evidence is C2 R02.
+- The top-level `playwright-core` 1.64.1 in the tools tree is not on the load path and is not checked.
+
+`capture-002` ran on wrapper bytes `acde3ffd…`; after the run only the wrapper's first comment line changed (it named `capture-001`), so a new run needs a new approval and freeze. `targets.json` stays `verified:false` in this change. The ROUND2-SDD rule allows `verified:true` only when every R2-AC-14 condition holds; the T0433-3 final integration decides that with linked evidence, and a flip changes the bytes that `capture-002` ran on.
+
 ## Verdicts (V01)
 
 `planVerdict` passes only on the exact W05 dry-run output, exit 0, empty stderr and no output folder.
@@ -92,3 +109,4 @@ Limitations known in advance:
 - `capture.mjs` covers only the static initial page; it does not authenticate, so its three images show the bootstrap state only.
 - Axe runs at desktop only in the shared script; tablet and mobile axe evidence stays with the canonical 27/27.
 - The evidence comes from a synthetic fixture with one headless Chromium.
+- TLS validation is shown positively only in this run.

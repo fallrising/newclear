@@ -8,6 +8,7 @@
 [實測與限制](docs/evidence/README.md)／[已合併 PR #759](https://github.com/fallrising/newclear/pull/759)。
 第一輪九項 AC 已完成，[結案 PR #760](https://github.com/fallrising/newclear/pull/760) 已合併；可依下列入口本機使用，未部署、未建立 usable tag。
 後續 [T-0437 開發任務試點](docs/milestones/development-pilot.md) 是獨立里程碑，不改寫第一輪結果。
+[本機 agent 工作流程](docs/agent-workflow.md) 提供固定來源的真實重構調查入口。
 
 ## 為什麼分成 source 與 graph
 

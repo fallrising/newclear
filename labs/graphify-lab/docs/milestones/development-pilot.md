@@ -44,3 +44,7 @@ M1：`python3 scripts/check_indexes.py`、workflow static gate、runtime-identic
 M2：聚焦 source regression → 全部 cache/CLI tests → 真 pilot 與 MCP → 原 7 場景 → repo gates → 獨立審查及 CI。
 開始 2026-10-29T16:53:01Z；估計總主動投入 60–90 分鐘，每 20 分鐘檢查；每問題至多兩次有理由的修正；每 head CI 最多等待 15 分鐘。
 超出範圍、沒有新進展或超過重試界線時保存證據並停下該部分。成功的試點也不自動啟動第三里程碑。
+
+## 本輪結果入口
+
+[實測、回歸、失敗與判斷](../evidence/development-pilot/README.md)。P-01～P-04 已有本機證據；P-05 待獨立審查、CI 與合併回讀，最終狀態見任務板。

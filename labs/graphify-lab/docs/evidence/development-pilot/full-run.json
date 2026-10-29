@@ -1,0 +1,935 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "recorded_at": "2026-10-29T17:09:17.814090+00:00",
+  "python": "3.12.3",
+  "graphify": "0.9.97",
+  "network_policy": "Preparation fetches public Git; full uses prepared sources and code-only Graphify.",
+  "manifest": {
+    "schema": 1,
+    "graphify": {
+      "package": "graphifyy",
+      "version": "0.9.97",
+      "repository": "https://github.com/Graphify-Labs/graphify",
+      "source_commit": "0a8cd4e1e342235fe53e881fb5d591bf0460071f"
+    },
+    "references": [
+      {
+        "name": "graphify",
+        "url": "https://github.com/Graphify-Labs/graphify.git",
+        "commit": "0a8cd4e1e342235fe53e881fb5d591bf0460071f",
+        "subdir": "graphify",
+        "license": "Apache-2.0 with prior MIT contributions; see upstream NOTICE",
+        "license_files": [
+          "LICENSE",
+          "LICENSE-MIT",
+          "NOTICE"
+        ]
+      }
+    ],
+    "local_targets": [
+      {
+        "name": "codex-usage",
+        "path": "tools/codex-usage",
+        "observed_repository_commit": "68c92afda47187ec40a8dff319eb377da9998145",
+        "source_fingerprint": {
+          "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+          "files": 29,
+          "bytes": 204000
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "REF-01",
+      "ac": [
+        "AC-01",
+        "AC-03",
+        "AC-07",
+        "AC-08"
+      ],
+      "evidence": {
+        "reference": {
+          "name": "graphify",
+          "url": "https://github.com/Graphify-Labs/graphify.git",
+          "commit": "0a8cd4e1e342235fe53e881fb5d591bf0460071f",
+          "subdir": "graphify",
+          "license": "Apache-2.0 with prior MIT contributions; see upstream NOTICE",
+          "license_files": [
+            "LICENSE",
+            "LICENSE-MIT",
+            "NOTICE"
+          ]
+        },
+        "first_source_cache_hit": true,
+        "first_index_cache_hit": false,
+        "first_index_open_seconds": 10.326144641963765,
+        "original_index_build_seconds": 10.191412389976904,
+        "warm_source_validation_seconds": 0.02654737397097051,
+        "warm_index_validation_seconds": 0.16074948804453015,
+        "second_source_hit": true,
+        "second_index_hit": true,
+        "same_source_inode": true,
+        "same_graph_inode": true,
+        "source_entries_for_revision": 1,
+        "consumer_pointer_files": [
+          "consumer-a.json",
+          "consumer-b.json"
+        ],
+        "real_project": {
+          "nodes": 3925,
+          "edges": 8915,
+          "graph_json_bytes": 3185510,
+          "graph_sha256": "5773cb8954fe3d4f86c15334aaad7883d0c5f59acd3acc277392ee141c94bf83",
+          "source": {
+            "sha256": "a3325c2c2cbc5a929f07cb6141103f91c1646e62d76aedacacb66b87170dd868",
+            "files": 234,
+            "bytes": 5689338
+          },
+          "oracle": {
+            "id": "cache_file_hash",
+            "label": "file_hash()",
+            "source_file": "cache.py",
+            "source_location": "L512"
+          },
+          "verified_declaration": {
+            "path": "cache.py",
+            "line": 512,
+            "content": "def file_hash(path: Path, root: Path = Path(\".\"), cache_root: \"Path | None\" = None) -> str:"
+          },
+          "explain": "Node: file_hash()\n  ID:        cache_file_hash\n  Source:    cache.py L512\n  Type:      code\n  Community: 62\n  Degree:    10\n\nConnections (10):\n  <-- cache.py [contains] [EXTRACTED] cache.py:L512\n  --> Path [references] [EXTRACTED] cache.py:L512\n  <-- load_cached() [calls] [EXTRACTED] cache.py:L1098\n  <-- save_cached() [calls] [EXTRACTED] cache.py:L1266\n  --> _normalize_path() [calls] [EXTRACTED] cache.py:L530\n  --> _ensure_stat_index() [calls] [EXTRACTED] cache.py:L539\n  --> _stat_sig_fresh() [calls] [EXTRACTED] cache.py:L582\n  --> _stat_entry_for() [calls] [EXTRACTED] cache.py:L605\n  --> _body_content() [calls] [EXTRACTED] cache.py:L597\n  <-- SHA256 of file contents + path relative to root. Uses a stat-based fastpath… [rationale_for] [EXTRACTED] cache.py:L513\n",
+          "cli_query_seconds_including_startup": {
+            "samples": [
+              0.508639,
+              0.460081,
+              0.469181,
+              0.446219,
+              0.45205
+            ],
+            "median": 0.460081
+          },
+          "query_response_bytes": [
+            3621,
+            3621,
+            3621,
+            3621,
+            3621
+          ],
+          "source_url": "https://github.com/Graphify-Labs/graphify/blob/0a8cd4e1e342235fe53e881fb5d591bf0460071f/graphify/cache.py#L512"
+        },
+        "reviewed_core_matches_installed_package": [
+          {
+            "path": "__main__.py",
+            "sha256": "64781829b2b7e9f0df326f0a33fc88cf540a4a30b2c6b103b3e44e78702de08a",
+            "equal": true
+          },
+          {
+            "path": "cli.py",
+            "sha256": "a870f535868bc57927f4501c0edcac72194186e82033e2f0a74e25321eecb492",
+            "equal": true
+          },
+          {
+            "path": "cache.py",
+            "sha256": "fecd33655079eaa3ea5161fa50543e743a1165257ebea45d0724b19de2ff2907",
+            "equal": true
+          },
+          {
+            "path": "serve.py",
+            "sha256": "0c25f3c6344ed91a5dd21dacf3c62a517bc617da9ff3321742fe1780f30dffc8",
+            "equal": true
+          },
+          {
+            "path": "extract.py",
+            "sha256": "355f470579b44c0442ef38101e52bf2f075fdff4c6cfee8b1ef27d3508974fa5",
+            "equal": true
+          },
+          {
+            "path": "cross_repo_calls.py",
+            "sha256": "39ae4f451c48bd99e1e792729639819dcadd71da34c367fa5a3abf3f57cbc8c3",
+            "equal": true
+          }
+        ],
+        "measured_logical_bytes": {
+          "source_checkout_excluding_git": 30138739,
+          "git_metadata": 13322532,
+          "source_cache_metadata": 119,
+          "index_directory": 11598370,
+          "one_pointer": 667
+        },
+        "calculated_storage_models": [
+          {
+            "consumers": 1,
+            "separate_source_and_index_bytes": 55059760,
+            "shared_source_index_and_pointers_bytes": 55060427,
+            "saved_bytes_like_for_like": -667,
+            "saved_percent_like_for_like": -0.0012,
+            "separate_source_only_bytes": 43461271,
+            "saved_bytes_against_source_only": -11599156
+          },
+          {
+            "consumers": 2,
+            "separate_source_and_index_bytes": 110119520,
+            "shared_source_index_and_pointers_bytes": 55061094,
+            "saved_bytes_like_for_like": 55058426,
+            "saved_percent_like_for_like": 49.9988,
+            "separate_source_only_bytes": 86922542,
+            "saved_bytes_against_source_only": 31861448
+          },
+          {
+            "consumers": 5,
+            "separate_source_and_index_bytes": 275298800,
+            "shared_source_index_and_pointers_bytes": 55063095,
+            "saved_bytes_like_for_like": 220235705,
+            "saved_percent_like_for_like": 79.9988,
+            "separate_source_only_bytes": 217306355,
+            "saved_bytes_against_source_only": 162243260
+          },
+          {
+            "consumers": 10,
+            "separate_source_and_index_bytes": 550597600,
+            "shared_source_index_and_pointers_bytes": 55066430,
+            "saved_bytes_like_for_like": 495531170,
+            "saved_percent_like_for_like": 89.9988,
+            "separate_source_only_bytes": 434612710,
+            "saved_bytes_against_source_only": 379546280
+          }
+        ]
+      },
+      "status": "passed",
+      "seconds": 13.594215
+    },
+    {
+      "id": "REPO-01",
+      "ac": [
+        "AC-03"
+      ],
+      "evidence": {
+        "nodes": 222,
+        "edges": 550,
+        "graph_json_bytes": 198510,
+        "graph_sha256": "34de1d27f00727550e291c4d573ccc988b60ffe5ed31388de41aaca6ad24d324",
+        "source": {
+          "sha256": "91bf5bca1c85a10b22047bd54c6a788ba3c1ea0e696019ed4e1af82ad08d37b3",
+          "files": 29,
+          "bytes": 204000
+        },
+        "oracle": {
+          "id": "codex_usage_normalize_rates",
+          "label": "normalize_rates()",
+          "source_file": "codex_usage.py",
+          "source_location": "L282"
+        },
+        "verified_declaration": {
+          "path": "codex_usage.py",
+          "line": 282,
+          "content": "def normalize_rates(payload, now):"
+        },
+        "explain": "Node: normalize_rates()\n  ID:        codex_usage_normalize_rates\n  Source:    codex_usage.py L282\n  Type:      code\n  Community: 1\n  Degree:    7\n\nConnections (7):\n  <-- codex_usage.py [contains] [EXTRACTED] codex_usage.py:L282\n  <-- collect() [calls] [EXTRACTED] codex_usage.py:L422\n  --> json [calls] [EXTRACTED] codex_usage.py:L301\n  --> norm_window() [calls] [EXTRACTED] codex_usage.py:L322\n  --> integer() [calls] [EXTRACTED] codex_usage.py:L318\n  --> rate_percent() [calls] [EXTRACTED] codex_usage.py:L315\n  --> iso() [calls] [EXTRACTED] codex_usage.py:L320\n",
+        "cli_query_seconds_including_startup": {
+          "samples": [
+            0.238751,
+            0.237414,
+            0.22228,
+            0.227029,
+            0.229098
+          ],
+          "median": 0.229098
+        },
+        "query_response_bytes": [
+          3673,
+          3673,
+          3673,
+          3673,
+          3673
+        ],
+        "repository_commit": "68c92afda47187ec40a8dff319eb377da9998145",
+        "project": "tools/codex-usage",
+        "source_url": "https://github.com/fallrising/newclear/blob/68c92afda47187ec40a8dff319eb377da9998145/tools/codex-usage/codex_usage.py#L282",
+        "index_cache_hit": false,
+        "index_open_seconds": 1.7683996560517699
+      },
+      "status": "passed",
+      "seconds": 3.145307
+    },
+    {
+      "id": "DEV-01",
+      "ac": [
+        "AC-02",
+        "AC-08"
+      ],
+      "name": "Code map, exact source and directed call chain",
+      "evidence": {
+        "nodes": 11,
+        "edges": 16,
+        "oracle_nodes": [
+          {
+            "id": "api_checkout",
+            "label": "checkout()",
+            "source_file": "api.py",
+            "source_location": "L4"
+          },
+          {
+            "id": "orders_submit_order",
+            "label": "submit_order()",
+            "source_file": "orders.py",
+            "source_location": "L4"
+          },
+          {
+            "id": "pricing_apply_discount",
+            "label": "apply_discount()",
+            "source_file": "pricing.py",
+            "source_location": "L4"
+          },
+          {
+            "id": "tests_test_orders_test_submit_order",
+            "label": "test_submit_order()",
+            "source_file": "tests/test_orders.py",
+            "source_location": "L4"
+          }
+        ],
+        "oracle_call_edges": [
+          {
+            "source": "api_checkout",
+            "target": "orders_submit_order",
+            "relation": "calls",
+            "_origin": "ast",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "context": "call",
+            "source_file": "api.py",
+            "source_location": "L5",
+            "weight": 1.0
+          },
+          {
+            "source": "orders_submit_order",
+            "target": "pricing_apply_discount",
+            "relation": "calls",
+            "_origin": "ast",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "context": "call",
+            "source_file": "orders.py",
+            "source_location": "L5",
+            "weight": 1.0
+          },
+          {
+            "source": "tests_test_orders_test_submit_order",
+            "target": "orders_submit_order",
+            "relation": "calls",
+            "_origin": "ast",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "context": "call",
+            "source_file": "tests/test_orders.py",
+            "source_location": "L5",
+            "weight": 1.0
+          }
+        ],
+        "cold_build": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "extract",
+            "<run>/python-shop",
+            "--code-only",
+            "--out",
+            "<run>/graphs/python-shop"
+          ],
+          "exit_code": 0,
+          "seconds": 1.159453,
+          "stdout": "[graphify extract] scanning <run>/python-shop\n[graphify extract] found 4 code, 0 docs, 0 papers, 0 images\n[graphify extract] AST extraction on 4 code files...\n  AST cache: 0/4 files served from cache (0%); 4 to extract\n[graphify extract] wrote <run>/graphs/python-shop/graphify-out/graph.json: 11 nodes, 16 edges, 2 communities\n[graphify extract] wrote <run>/graphs/python-shop/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only <run>/graphs/python-shop` to generate GRAPH_REPORT.md and name communities\n",
+          "stderr": "",
+          "stdout_bytes": 922
+        },
+        "query": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "query",
+            "apply_discount",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json",
+            "--context",
+            "call",
+            "--budget",
+            "1000"
+          ],
+          "exit_code": 0,
+          "seconds": 0.216557,
+          "stdout": "Graph: graphs/python-shop/graphify-out/graph.json (11 nodes) | Traversal: BFS depth=2 | Start: ['apply_discount()'] | Context: call (explicit) | 4 nodes found\n\nNODE apply_discount() [src=pricing.py loc=L4 community=0]\nNODE submit_order() [src=orders.py loc=L4 community=1]\nNODE checkout() [src=api.py loc=L4 community=1]\nNODE test_submit_order() [src=tests/test_orders.py loc=L4 community=1]\nEDGE submit_order() --calls [EXTRACTED context=call]--> apply_discount() at=orders.py:L5\nEDGE checkout() --calls [EXTRACTED context=call]--> submit_order() at=api.py:L5\nEDGE test_submit_order() --calls [EXTRACTED context=call]--> submit_order() at=tests/test_orders.py:L5\n",
+          "stderr": "",
+          "stdout_bytes": 664
+        },
+        "explain": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "explain",
+            "pricing_apply_discount",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json"
+          ],
+          "exit_code": 0,
+          "seconds": 0.185437,
+          "stdout": "Node: apply_discount()\n  ID:        pricing_apply_discount\n  Source:    pricing.py L4\n  Type:      code\n  Community: 0\n  Degree:    3\n\nConnections (3):\n  <-- submit_order() [calls] [EXTRACTED] orders.py:L5\n  <-- orders.py [imports] [EXTRACTED] orders.py:L1\n  <-- pricing.py [contains] [EXTRACTED] pricing.py:L4\n",
+          "stderr": "",
+          "stdout_bytes": 311
+        },
+        "directed_path": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "path",
+            "api_checkout",
+            "pricing_apply_discount",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json"
+          ],
+          "exit_code": 0,
+          "seconds": 0.185617,
+          "stdout": "Shortest path (2 hops):\n  checkout() --calls [EXTRACTED]--> submit_order() --calls [EXTRACTED]--> apply_discount()\n",
+          "stderr": "",
+          "stdout_bytes": 115
+        },
+        "no_match": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "query",
+            "zz_nonexistent_symbol_942771",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json"
+          ],
+          "exit_code": 4,
+          "seconds": 0.232942,
+          "stdout": "No matching nodes found.\n",
+          "stderr": "",
+          "stdout_bytes": 25
+        },
+        "reverse_path_negative": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "path",
+            "pricing_apply_discount",
+            "api_checkout",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json"
+          ],
+          "exit_code": 0,
+          "seconds": 0.19546,
+          "stdout": "No directed path found between 'pricing_apply_discount' and 'api_checkout'. Re-run with --undirected to search ignoring edge direction.\n",
+          "stderr": "",
+          "stdout_bytes": 136
+        },
+        "native_html": {
+          "command": {
+            "command": [
+              "python",
+              "-I",
+              "-m",
+              "graphify",
+              "export",
+              "html",
+              "--graph",
+              "<run>/graphs/python-shop/graphify-out/graph.json"
+            ],
+            "exit_code": 0,
+            "seconds": 0.190385,
+            "stdout": "graph.html written - open in any browser, no server needed\n",
+            "stderr": "",
+            "stdout_bytes": 59
+          },
+          "path": "<run>/graphs/python-shop/graphify-out/graph.html",
+          "bytes": 28635,
+          "known_nodes_embedded": true,
+          "external_scripts": [
+            "https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"
+          ],
+          "browser_interaction_verified": false
+        }
+      },
+      "status": "passed",
+      "seconds": 2.367212
+    },
+    {
+      "id": "DEV-02",
+      "ac": [
+        "AC-04"
+      ],
+      "name": "Change impact and test-call-site evidence",
+      "evidence": {
+        "expected_callers": [
+          "submit_order()",
+          "checkout()",
+          "test_submit_order()"
+        ],
+        "unrelated_function_excluded": true,
+        "affected": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "affected",
+            "pricing_apply_discount",
+            "--relation",
+            "calls",
+            "--depth",
+            "3",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json"
+          ],
+          "exit_code": 0,
+          "seconds": 0.174442,
+          "stdout": "Affected nodes for apply_discount()\nRelations: calls\nDepth: 3\n- submit_order() [calls] orders.py:L5\n- checkout() [calls] api.py:L5\n- test_submit_order() [calls] tests/test_orders.py:L5\n",
+          "stderr": "",
+          "stdout_bytes": 185
+        },
+        "scope": "Known static calls in this fixture only; no test execution or completeness claim."
+      },
+      "status": "passed",
+      "seconds": 0.174527
+    },
+    {
+      "id": "DEV-03",
+      "ac": [
+        "AC-08",
+        "AC-09"
+      ],
+      "name": "Cold/warm costs and two real MCP stdio sessions",
+      "evidence": {
+        "source": {
+          "files": 4,
+          "logical_bytes": 587
+        },
+        "index_directory": {
+          "files": 11,
+          "logical_bytes": 43563
+        },
+        "graph_json_bytes": 5835,
+        "cold_build_seconds": 1.159453,
+        "unchanged_build": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "extract",
+            "<run>/python-shop",
+            "--code-only",
+            "--out",
+            "<run>/graphs/python-shop"
+          ],
+          "exit_code": 0,
+          "seconds": 1.114356,
+          "stdout": "[graphify extract] incremental scan of <run>/python-shop\n[graphify extract] 0 code, 0 docs, 0 papers, 0 images changed; 4 unchanged; 0 deleted\n[graphify extract] wrote <run>/graphs/python-shop/graphify-out/graph.json: 11 nodes, 16 edges, 2 communities\n[graphify extract] wrote <run>/graphs/python-shop/graphify-out/.graphify_analysis.json\n[graphify extract] incremental summary: 4 files cached/unchanged, 0 re-extracted, 0 deleted\n[graphify extract] next: run `graphify cluster-only <run>/graphs/python-shop` to generate GRAPH_REPORT.md and name communities\n",
+          "stderr": "",
+          "stdout_bytes": 938
+        },
+        "same_graph_sha256": "3d3b51d90eb4d035d5d7c414f7beb7d725f5692c89011be79a70fc189689e6cf",
+        "cli_query_including_startup": {
+          "samples": 5,
+          "seconds": [
+            0.253024,
+            0.214468,
+            0.225174,
+            0.227482,
+            0.211943
+          ],
+          "median_seconds": 0.225174,
+          "min_seconds": 0.211943,
+          "max_seconds": 0.253024
+        },
+        "rg_exact_search_including_startup": {
+          "samples": 5,
+          "seconds": [
+            0.004999,
+            0.004469,
+            0.004583,
+            0.004835,
+            0.004674
+          ],
+          "median_seconds": 0.004674,
+          "min_seconds": 0.004469,
+          "max_seconds": 0.004999
+        },
+        "rg_response_bytes": [
+          168,
+          168,
+          168,
+          168,
+          168
+        ],
+        "cli_query_response_bytes": 664,
+        "mcp": {
+          "transport": "stdio",
+          "network_service": false,
+          "sessions": [
+            {
+              "server": {
+                "name": "graphify",
+                "title": null,
+                "version": "0.9.97",
+                "description": null,
+                "websiteUrl": null,
+                "icons": null
+              },
+              "protocol_version": "2025-11-25",
+              "tools": [
+                "get_community",
+                "get_neighbors",
+                "get_node",
+                "get_pr_impact",
+                "god_nodes",
+                "graph_stats",
+                "list_prs",
+                "query_graph",
+                "shortest_path",
+                "triage_prs"
+              ],
+              "stats": "Nodes: 11\nEdges: 16\nCommunities: 2\nEXTRACTED: 100%\nINFERRED: 0%\nAMBIGUOUS: 0%\nBuilt at commit: 97d3e6f262e7c2ffb59b2c1c99bb284ecff28442 (matches HEAD)\n",
+              "node": "Node: apply_discount()\n  ID: pricing_apply_discount\n  Source: pricing.py L4\n  Type: code\n  Community: 0\n  Degree: 3",
+              "query": "Graph: graphs/python-shop/graphify-out/graph.json (11 nodes) | Traversal: BFS depth=2 | Start: ['apply_discount()'] | Context: call (explicit) | 4 nodes found\n\nNODE apply_discount() [src=pricing.py loc=L4 community=0]\nNODE submit_order() [src=orders.py loc=L4 community=1]\nNODE checkout() [src=api.py loc=L4 community=1]\nNODE test_submit_order() [src=tests/test_orders.py loc=L4 community=1]\nEDGE submit_order() --calls [EXTRACTED context=call]--> apply_discount() at=orders.py:L5\nEDGE checkout() --calls [EXTRACTED context=call]--> submit_order() at=api.py:L5\nEDGE test_submit_order() --calls [EXTRACTED context=call]--> submit_order() at=tests/test_orders.py:L5",
+              "directed_path": "Shortest path (2 hops):\n  checkout() --calls [EXTRACTED]--> submit_order() --calls [EXTRACTED]--> apply_discount()",
+              "first_query_seconds": 0.002311,
+              "warm_query": {
+                "samples": 5,
+                "seconds": [
+                  0.001928,
+                  0.001589,
+                  0.002101,
+                  0.001793,
+                  0.001643
+                ],
+                "median_seconds": 0.001793,
+                "min_seconds": 0.001589,
+                "max_seconds": 0.002101
+              },
+              "response_bytes": [
+                663,
+                663,
+                663,
+                663,
+                663
+              ],
+              "session_seconds": 0.708847
+            },
+            {
+              "server": {
+                "name": "graphify",
+                "title": null,
+                "version": "0.9.97",
+                "description": null,
+                "websiteUrl": null,
+                "icons": null
+              },
+              "protocol_version": "2025-11-25",
+              "tools": [
+                "get_community",
+                "get_neighbors",
+                "get_node",
+                "get_pr_impact",
+                "god_nodes",
+                "graph_stats",
+                "list_prs",
+                "query_graph",
+                "shortest_path",
+                "triage_prs"
+              ],
+              "stats": "Nodes: 11\nEdges: 16\nCommunities: 2\nEXTRACTED: 100%\nINFERRED: 0%\nAMBIGUOUS: 0%\nBuilt at commit: 97d3e6f262e7c2ffb59b2c1c99bb284ecff28442 (matches HEAD)\n",
+              "node": "Node: apply_discount()\n  ID: pricing_apply_discount\n  Source: pricing.py L4\n  Type: code\n  Community: 0\n  Degree: 3",
+              "query": "Graph: graphs/python-shop/graphify-out/graph.json (11 nodes) | Traversal: BFS depth=2 | Start: ['apply_discount()'] | Context: call (explicit) | 4 nodes found\n\nNODE apply_discount() [src=pricing.py loc=L4 community=0]\nNODE submit_order() [src=orders.py loc=L4 community=1]\nNODE checkout() [src=api.py loc=L4 community=1]\nNODE test_submit_order() [src=tests/test_orders.py loc=L4 community=1]\nEDGE submit_order() --calls [EXTRACTED context=call]--> apply_discount() at=orders.py:L5\nEDGE checkout() --calls [EXTRACTED context=call]--> submit_order() at=api.py:L5\nEDGE test_submit_order() --calls [EXTRACTED context=call]--> submit_order() at=tests/test_orders.py:L5",
+              "directed_path": "Shortest path (2 hops):\n  checkout() --calls [EXTRACTED]--> submit_order() --calls [EXTRACTED]--> apply_discount()",
+              "first_query_seconds": 0.002646,
+              "warm_query": {
+                "samples": 1,
+                "seconds": [
+                  0.002108
+                ],
+                "median_seconds": 0.002108,
+                "min_seconds": 0.002108,
+                "max_seconds": 0.002108
+              },
+              "response_bytes": [
+                663
+              ],
+              "session_seconds": 0.676896
+            }
+          ],
+          "reopen_same_node": true,
+          "benchmark_note": "Warm timings include local stdio round trip, exclude process startup."
+        },
+        "queries_preserved_graph_hash": true,
+        "comparison": "Same symbol, different tasks: Graphify returns a relation neighborhood; rg returns matching text lines."
+      },
+      "status": "passed",
+      "seconds": 4.446988
+    },
+    {
+      "id": "DEV-04",
+      "ac": [
+        "AC-05"
+      ],
+      "name": "Incremental rename and removal without stale nodes",
+      "evidence": {
+        "change": "Rename unused legacy_total to shipping_quote in copied fixture; do not mutate references.",
+        "new_symbol": {
+          "id": "pricing_shipping_quote",
+          "label": "shipping_quote()",
+          "source_file": "pricing.py",
+          "source_location": "L8"
+        },
+        "old_symbol_absent": true,
+        "unchanged_call_chain_preserved": true,
+        "update": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "update",
+            "<run>/python-shop"
+          ],
+          "exit_code": 0,
+          "seconds": 1.683563,
+          "stdout": "Re-extracting code files in <run>/python-shop (no LLM needed)...\n  AST cache: 3/4 files served from cache (75%); 1 to extract\n[graphify watch] Rebuilt: 11 nodes, 16 edges, 2 communities\n[graphify watch] graph.json, graph.html and GRAPH_REPORT.md updated in <run>/graphs/python-shop/graphify-out\nCode graph updated. For doc/paper/image changes run /graphify --update in your AI assistant.\n",
+          "stderr": "",
+          "stdout_bytes": 578
+        },
+        "deleted_symbol_negative": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "explain",
+            "legacy_total",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json"
+          ],
+          "exit_code": 4,
+          "seconds": 0.184064,
+          "stdout": "No node matching 'legacy_total' found.\n",
+          "stderr": "",
+          "stdout_bytes": 39
+        },
+        "new_symbol_explain": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "explain",
+            "pricing_shipping_quote",
+            "--graph",
+            "<run>/graphs/python-shop/graphify-out/graph.json"
+          ],
+          "exit_code": 0,
+          "seconds": 0.188591,
+          "stdout": "Node: shipping_quote()\n  ID:        pricing_shipping_quote\n  Source:    pricing.py L8\n  Type:      code\n  Community: orders.py\n  Degree:    1\n\nConnections (1):\n  <-- pricing.py [contains] [EXTRACTED] pricing.py:L8\n",
+          "stderr": "",
+          "stdout_bytes": 214
+        }
+      },
+      "status": "passed",
+      "seconds": 2.057061
+    },
+    {
+      "id": "DEV-05",
+      "ac": [
+        "AC-06"
+      ],
+      "name": "Cross-repository typed calls and ambiguity refusal",
+      "evidence": {
+        "builds": {
+          "ts-consumer": {
+            "command": [
+              "python",
+              "-I",
+              "-m",
+              "graphify",
+              "extract",
+              "<run>/ts-consumer",
+              "--code-only",
+              "--out",
+              "<run>/graphs/ts-consumer"
+            ],
+            "exit_code": 0,
+            "seconds": 1.101289,
+            "stdout": "[graphify extract] scanning <run>/ts-consumer\n[graphify extract] found 1 code, 0 docs, 0 papers, 0 images\n[graphify extract] AST extraction on 1 code files...\n  AST cache: 0/1 files served from cache (0%); 1 to extract\n[graphify extract] wrote <run>/graphs/ts-consumer/graphify-out/graph.json: 5 nodes, 4 edges, 2 communities\n[graphify extract] wrote <run>/graphs/ts-consumer/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only <run>/graphs/ts-consumer` to generate GRAPH_REPORT.md and name communities\n",
+            "stderr": "",
+            "stdout_bytes": 920
+          },
+          "ts-sdk": {
+            "command": [
+              "python",
+              "-I",
+              "-m",
+              "graphify",
+              "extract",
+              "<run>/ts-sdk",
+              "--code-only",
+              "--out",
+              "<run>/graphs/ts-sdk"
+            ],
+            "exit_code": 0,
+            "seconds": 1.156404,
+            "stdout": "[graphify extract] scanning <run>/ts-sdk\n[graphify extract] found 1 code, 0 docs, 0 papers, 0 images\n[graphify extract] AST extraction on 1 code files...\n  AST cache: 0/1 files served from cache (0%); 1 to extract\n[graphify extract] wrote <run>/graphs/ts-sdk/graphify-out/graph.json: 5 nodes, 4 edges, 2 communities\n[graphify extract] wrote <run>/graphs/ts-sdk/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only <run>/graphs/ts-sdk` to generate GRAPH_REPORT.md and name communities\n",
+            "stderr": "",
+            "stdout_bytes": 900
+          },
+          "ts-duplicate": {
+            "command": [
+              "python",
+              "-I",
+              "-m",
+              "graphify",
+              "extract",
+              "<run>/ts-duplicate",
+              "--code-only",
+              "--out",
+              "<run>/graphs/ts-duplicate"
+            ],
+            "exit_code": 0,
+            "seconds": 1.177419,
+            "stdout": "[graphify extract] scanning <run>/ts-duplicate\n[graphify extract] found 1 code, 0 docs, 0 papers, 0 images\n[graphify extract] AST extraction on 1 code files...\n  AST cache: 0/1 files served from cache (0%); 1 to extract\n[graphify extract] wrote <run>/graphs/ts-duplicate/graphify-out/graph.json: 3 nodes, 2 edges, 1 communities\n[graphify extract] wrote <run>/graphs/ts-duplicate/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only <run>/graphs/ts-duplicate` to generate GRAPH_REPORT.md and name communities\n",
+            "stderr": "",
+            "stdout_bytes": 924
+          }
+        },
+        "parked_calls": [
+          {
+            "callee": "issue",
+            "receiver_type": "InvoiceClient",
+            "lang": "typescript",
+            "line": "L7",
+            "file": "app.ts"
+          }
+        ],
+        "merge": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "merge-graphs",
+            "<run>/graphs/ts-consumer/graphify-out/graph.json",
+            "<run>/graphs/ts-sdk/graphify-out/graph.json",
+            "--out",
+            "<run>/merged.json"
+          ],
+          "exit_code": 0,
+          "seconds": 0.19032,
+          "stdout": "  resolved 1 member call(s) across repos\nMerged 2 graphs -> 10 nodes, 9 edges\nWritten to: <run>/merged.json\n",
+          "stderr": "",
+          "stdout_bytes": 203
+        },
+        "resolved_edge": {
+          "relation": "calls",
+          "context": "cross_repo",
+          "confidence": "INFERRED",
+          "confidence_score": 0.85,
+          "source_file": "app.ts",
+          "source_location": "L7",
+          "weight": 1.0,
+          "_cross_repo_call": true,
+          "source": "ts-consumer::app_checkoutapp_run",
+          "target": "ts-sdk::invoice_invoiceclient_issue"
+        },
+        "unrelated_same_method_not_selected": true,
+        "namespaced_source_nodes": true,
+        "ambiguous_merge": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "merge-graphs",
+            "<run>/graphs/ts-consumer/graphify-out/graph.json",
+            "<run>/graphs/ts-sdk/graphify-out/graph.json",
+            "<run>/graphs/ts-duplicate/graphify-out/graph.json",
+            "--out",
+            "<run>/ambiguous.json"
+          ],
+          "exit_code": 0,
+          "seconds": 0.187941,
+          "stdout": "Merged 3 graphs -> 13 nodes, 10 edges\nWritten to: <run>/ambiguous.json\n",
+          "stderr": "",
+          "stdout_bytes": 166
+        },
+        "ambiguous_cross_repo_calls": 0,
+        "ambiguous_label_exit": {
+          "command": [
+            "python",
+            "-I",
+            "-m",
+            "graphify",
+            "explain",
+            "InvoiceClient",
+            "--graph",
+            "<run>/ambiguous.json"
+          ],
+          "exit_code": 3,
+          "seconds": 0.197293,
+          "stdout": "Ambiguous: 'InvoiceClient' matches 2 nodes in different files.\n  ts-sdk/invoice.ts\n    id: ts-sdk::invoice_invoiceclient\n  ts-duplicate/invoice.ts\n    id: ts-duplicate::invoice_invoiceclient\nRetry with the full node id: the same path exists in more than one repo, so a path cannot tell them apart.\n",
+          "stderr": "",
+          "stdout_bytes": 298
+        },
+        "scope": "Typed TypeScript member call only; merge does not itself recluster communities."
+      },
+      "status": "passed",
+      "seconds": 4.013587
+    }
+  ],
+  "limitations": [
+    "This bounded trial does not establish full static-analysis correctness or LLM answer quality.",
+    "Byte counts are logical regular-file bytes; no compression, allocated-block or token claims.",
+    "The storage comparisons are calculated counterfactuals from measured sizes, not ten physical clones.",
+    "The environment/dependencies are shared and reported separately, excluded from both source/index comparisons.",
+    "Index keys include the absolute source location; relocation requires rebuilding the graph.",
+    "References are immutable by validation, not chmod; cooperating POSIX processes share locks.",
+    "Static source analysis is not proof of runtime reachability or a complete test selection system.",
+    "Cross-repository typed member-call success is a TypeScript fixture; it is not arbitrary HTTP service resolution.",
+    "Graphify query performs graph neighborhood retrieval; rg performs exact text matching. Latencies are not equivalent quality scores.",
+    "Five repeated samples are descriptive local timings, not a statistically representative performance benchmark.",
+    "Reported logical bytes are file contents, not allocated filesystem blocks, dependency footprint, or token counts.",
+    "Upstream path exits 0 when both nodes exist but no directed path exists; consumers must inspect the answer, not only the exit status.",
+    "Graphify query token_budget is a soft budget and can be exceeded; this suite records response bytes, not a hard token ceiling.",
+    "Native HTML export contains a vis-network script URL on unpkg.com; generation and embedded data are verified, browser interaction and CDN availability are not.",
+    "Fixture provenance is the recorded content hashes. An upstream graph built inside a Git checkout can inherit the enclosing Git HEAD even when the fixture is untracked."
+  ],
+  "environment_logical_bytes": 241804010,
+  "input_sha256": {
+    "graphify_lab/__init__.py": "7818a2e71bc37b4db68f9ba2cf0011ca1ca59032000a71ba5dc1022bf2434d7c",
+    "graphify_lab/__main__.py": "84f41856c87b1970c6cd28d069032a21a48940217576b48f12ff49f8195bb5bb",
+    "graphify_lab/cache.py": "9b3c601c5a063c42c1cf71c2ae3d1a89552cdaf4c81209bb5f07f52797174ed3",
+    "graphify_lab/scenarios.py": "0ea0830765ff4deb3d1ef3c785262f30bf53d7d6a89635d94c37bd519cf41b56",
+    "graphify_lab/source.py": "865a98264a3be6ee72d536cd104a99901e94975ac1275ec37ab77bcf1f1e2831",
+    "requirements.lock": "e1017e7f7f0aa7c8432dae8c241f2516233d203e2996db2a04855a72f45e9a9e",
+    "references.lock.json": "2cb567f26a4399c0e7eee062b1f708204e3ef5d87462483881b42b256113fabd",
+    "fixtures/README.md": "40a45c5a9d78327e4be2c19a6d91b61fad3438f38f78f4c7fc9afe0190549a2c",
+    "fixtures/python-shop/api.py": "7136740c77a40b7ef6ad47949563dab725ed0ff21612f42e59e371ba610c099d",
+    "fixtures/python-shop/orders.py": "a233bfabda56e27f32c32db03d223b7223576125766fa57d99ff5d797d2d18b9",
+    "fixtures/python-shop/pricing.py": "bbf781e53f164f3cb8c6433c023bfa8dc72fb6c1612ceff9571ab8179db0c635",
+    "fixtures/python-shop/tests/test_orders.py": "3ee78f1d9d9f438329c0e131b5cba868ca936da38ccda1ca7c222e7be2d4fe22",
+    "fixtures/ts-consumer/app.ts": "0a9571af290a51fab0a4c57dd2491b5e052627f7bf51cc1ca540b4664116c4e2",
+    "fixtures/ts-duplicate/invoice.ts": "acbf5f7b0a66fb955af8e7574af19d1b8bfce44e5a7be005a3e5839f6358a132",
+    "fixtures/ts-sdk/invoice.ts": "4f5810e487b2a0ca702a3bb1a2e8a1de07b0c91cd7945a0accb22039ae95c1d4"
+  },
+  "passed": 7,
+  "failed": 0
+}

@@ -240,3 +240,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - [Feature PR744](https://github.com/fallrising/newclear/pull/744) head `50f12c8b9118df671bd1a42b9b7aaa609bd7e400`，merge `6ea6667c849063f6d851ea8ee74f7972ce0fc265`，合併時間2026-10-29T07:02:28Z。遠端14份檔案逐byte相等、feature為main祖先、工作樹乾淨；同期其他專案變更保留。
 - CI全過：Cloud Lab `40832716727`、Project success `40832716762`、llms `40832716696`；本機249tests、私人CLI／unit驗證、索引／範圍／task／report檢查與T834 ACCEPT。初始RED及mode修正留在[SP證據](../evidence/m1-service-activation.md)。
 - 六份已合併SR source候選與原Lab五次唯讀metadata準備完成，原服務inactive、journal保留。7日／60秒及runner-only續權為待批方案，並非已啟用；D1／帳單未知，完整mainline pending，無usable tag。本收尾只更新任務板。
+
+## T-0013 — 常態服務實際啟用
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0013-1 | fresh資源／用量與Free確認 | SL-01 | in_progress | 2026-10-29T07:09:17Z | — | 2026-10-29T07:32:38Z |
+| T-0013-2 | 有界runner授權更新 | SL-02 | in_progress | 2026-10-29T07:09:17Z | — | 2026-10-29T07:32:38Z |
+| T-0013-3 | resident啟動與來源回讀 | SL-03 | in_progress | 2026-10-29T07:09:17Z | — | 2026-10-29T07:32:38Z |
+| T-0013-4 | 證據、審查與交付 | SL-04 | in_progress | 2026-10-29T07:09:17Z | — | 2026-10-29T07:32:38Z |

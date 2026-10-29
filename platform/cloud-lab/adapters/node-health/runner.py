@@ -347,7 +347,7 @@ def inspect_authorization(config, client=None, *, clock=time.time):
             'runner_stop_at': None, 'deadline_complete': False}
 
 
-def read_inspection_config(path, allow_loopback_http=False):
+def read_private_json(path):
     """Do not follow the final link or accept shared/oversized credential files."""
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)
     with os.fdopen(fd, 'rb') as handle:
@@ -360,10 +360,57 @@ def read_inspection_config(path, allow_loopback_http=False):
         after = os.fstat(handle.fileno())
         if (before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (after.st_size, after.st_mtime_ns, after.st_ctime_ns):
             raise ProtocolError('inspection configuration changed')
-    value = strict_json(raw)
+    return strict_json(raw)
+
+
+def read_inspection_config(path, allow_loopback_http=False):
+    value = read_private_json(path)
     config = Config.from_dict(value, allow_loopback_http)
     config._loaded_sha256 = hashlib.sha256(encode(value)).hexdigest()
     return config
+
+
+def read_service_policy(path, config):
+    value = read_private_json(path)
+    fields(value, 'schema_version config_sha256 service_until access_expires_at')
+    if (value['schema_version'] != 'cloudlab.runner-service.v1'
+            or not isinstance(value['config_sha256'], str)
+            or not re.fullmatch('[0-9a-f]{64}', value['config_sha256'])
+            or value['config_sha256'] != getattr(config, '_loaded_sha256', None)
+            or config._access_client_secret is None):
+        raise ProtocolError('invalid service policy binding')
+    timestamp(value['service_until'])
+    timestamp(value['access_expires_at'])
+    return value
+
+
+class ServiceWindow:
+    """A fixed local ceiling, never authority to renew credentials or submit work."""
+    def __init__(self, stop_at, deadline):
+        self.stop_at, self.deadline = stop_at, deadline
+
+    @classmethod
+    def authorize(cls, policy, config, client=None, *, clock=time.time, monotonic=time.monotonic):
+        started, tick = clock(), monotonic()
+        local_end = min(timestamp(policy['service_until']), timestamp(policy['access_expires_at']))
+        if local_end <= started:
+            raise AuthenticationError('service policy expired')
+        observation = authorization_observation(config, client, clock=clock)
+        response = observation['response']
+        remote_end = min(timestamp(response['credential']['expires_at']), timestamp(response['grant']['expires_at']))
+        finished, end_tick = clock(), monotonic()
+        # Count the entire query against the remaining lifetime. A server ahead of
+        # our wall clock can only shorten it, and a backwards clock cannot reset it.
+        remote_now = max(started, timestamp(response['observed_at']))
+        stop_at = min(local_end, remote_end)
+        deadline = min(tick + stop_at - remote_now, end_tick + stop_at - finished)
+        if (finished < timestamp(response['grant']['not_before'])
+                or end_tick < tick or finished >= stop_at or end_tick >= deadline):
+            raise AuthenticationError('service authorization expired or clock invalid')
+        return cls(stop_at, deadline)
+
+    def allows_start(self, *, clock=time.time, monotonic=time.monotonic):
+        return clock() < self.stop_at and monotonic() < self.deadline
 
 
 def private_socket_parent(path):
@@ -732,13 +779,14 @@ def validate_artifact(value):
 
 
 class Runner:
-    def __init__(self, config, journal, client=None, collector=None, clock=None):
+    def __init__(self, config, journal, client=None, collector=None, clock=None, admission_open=None):
         if not hasattr(os, 'geteuid') or os.geteuid() == 0:
             raise ProtocolError('runner requires a non-root operating-system user')
         self.config, self.journal = config, journal
         self.client = client or HttpClient(config)
         self.collector = collector or fixed_collector
         self.clock = clock or time.time
+        self.admission_open = admission_open or (lambda: True)
 
     def run_once(self):
         response = self.client.post('/api/runner/claim', b'{}')
@@ -750,12 +798,12 @@ class Runner:
         runnable = validate_assignment(a, self.config, int(self.clock()))
         current = self.journal.lookup(a)
         if current is None:
-            execute = a['attempt']['mode'] == 'dispatch' and runnable
+            execute = a['attempt']['mode'] == 'dispatch' and runnable and self.admission_open()
             if self.journal.start(a, unknown=not execute) and execute:
                 started = utc(self.clock())
                 try:
                     # A slow journal commit must not consume the remaining execution window.
-                    if not validate_assignment(a, self.config, timestamp(started)):
+                    if not validate_assignment(a, self.config, timestamp(started)) or not self.admission_open():
                         raise ProtocolError('execution window elapsed before collection')
                     artifact = validate_artifact(self.collector())
                     finished_seconds = int(self.clock())
@@ -783,9 +831,13 @@ def log_event(**event):
 
 
 def resident_loop(runner, stop, *, stop_at, poll_seconds=30, clock=time.time,
-                  monotonic=time.monotonic, emit=log_event, observation_socket=None, lock=None):
+                  monotonic=time.monotonic, emit=log_event, observation_socket=None, lock=None,
+                  service_window=None):
     integer(poll_seconds, 5, 60)
     deadline = monotonic() + max(0, stop_at - clock())
+    if service_window is not None:
+        stop_at = min(stop_at, service_window.stop_at)
+        deadline = min(deadline, service_window.deadline)
     observer = ResidentObservation(observation_socket, runner.config, lock, stop_at, deadline, stop) if observation_socket else None
     if observer is not None:
         observer.__enter__()
@@ -828,6 +880,7 @@ def main(argv=None):
     parser.add_argument('--authorization-status', action='store_true', help='query own Worker metadata without claiming work or opening journal')
     parser.add_argument('--once', action='store_true', help='one claim and at most one report')
     parser.add_argument('--stop-at', help='required for resident mode: earliest grant expiry as UTC YYYY-MM-DDTHH:MM:SSZ')
+    parser.add_argument('--service-policy', help='private config-bound absolute service/Access deadlines; exclusive with stop-at')
     parser.add_argument('--poll-seconds', type=int, default=30, help='resident poll interval, 5 to 60 seconds')
     parser.add_argument('--allow-loopback-http', action='store_true', help='explicit local-test transport only')
     args = parser.parse_args(argv)
@@ -837,6 +890,8 @@ def main(argv=None):
     try:
         if not hasattr(os, 'geteuid') or os.geteuid() == 0:
             raise ProtocolError('runner requires a non-root operating-system user')
+        if args.service_policy and (args.once or args.stop_at is not None or args.authorization_status or args.observe_resident):
+            raise ProtocolError('service policy requires exclusive resident mode')
         if args.observe_resident:
             if not args.observation_socket or args.once or args.authorization_status or args.stop_at is not None:
                 raise ProtocolError('invalid resident observation mode')
@@ -850,10 +905,10 @@ def main(argv=None):
             return 0
         integer(args.poll_seconds, 5, 60)
         stop_at = timestamp(args.stop_at) if args.stop_at else None
-        if not args.once and stop_at is None:
+        if not args.once and stop_at is None and not args.service_policy:
             raise ProtocolError('resident mode requires an explicit stop-at')
         path = Path(args.config)
-        if args.observation_socket:
+        if args.observation_socket or args.service_policy:
             if args.once:
                 raise ProtocolError('observation socket requires resident mode')
             config = read_inspection_config(path,args.allow_loopback_http)
@@ -862,6 +917,7 @@ def main(argv=None):
                 raise ProtocolError('configuration must be private to its owner (mode 0600)')
             with path.open('rb') as handle:
                 config = Config.from_dict(strict_json(handle.read(MAX_JSON + 1)), args.allow_loopback_http)
+        policy = read_service_policy(args.service_policy, config) if args.service_policy else None
         journal_path = Path(config.journal_path)
         if not journal_path.is_absolute():
             config.journal_path = str(path.resolve().parent / journal_path)
@@ -870,8 +926,16 @@ def main(argv=None):
         stop = threading.Event()
         for sig in (signal.SIGTERM, signal.SIGINT):
             handlers[sig] = signal.signal(sig, lambda *_: stop.set())
+        window = None
+        if policy is not None:
+            window = ServiceWindow.authorize(policy, config, clock=time.time, monotonic=time.monotonic)
+            stop_at = window.stop_at
+            log_event(event='service_authorized', stop_at=utc(stop_at))
+        if stop.is_set():
+            log_event(event='stopped', reason='signal')
+            return 0
         journal = Journal(config.journal_path)
-        runner = Runner(config, journal)
+        runner = Runner(config, journal, admission_open=(lambda: not stop.is_set() and window.allows_start()) if window else None)
         if args.once:
             if stop_at is not None and time.time() >= stop_at:
                 log_event(event='stopped', reason='deadline')
@@ -880,7 +944,8 @@ def main(argv=None):
                 runner.run_once()
                 print('runner cycle complete', flush=True)
             return 0
-        return resident_loop(runner, stop, stop_at=stop_at, poll_seconds=args.poll_seconds, observation_socket=args.observation_socket, lock=lock)
+        return resident_loop(runner, stop, stop_at=stop_at, poll_seconds=args.poll_seconds,
+                             observation_socket=args.observation_socket, lock=lock, service_window=window)
     except (ProtocolError, OSError, sqlite3.Error, ValueError):
         print('resident observation unavailable' if args.observe_resident else 'authorization inspection unavailable' if args.authorization_status else 'runner configuration or journal unavailable', file=sys.stderr)
         return 1

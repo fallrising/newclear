@@ -209,3 +209,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40813231171`、Project success `40813231192`、llms `40813231180`。遠端13份檔案逐檔相等，兩份根索引的Cloud Lab條目相等；其他專案同期新增條目保留。
 - [OL實際證據與T832 ACCEPT](../evidence/m1-observation-live.md)：批准窗口內完成Worker／機器授權、AS／SA／RO觀測及提前停止；journal／業務資料／Access policy與排程保留。
 - 原human／scheduler仍過期，未新增付費，未驗自然到期／回退或真人Access，完整主線pending。此PR只按實際合併時間收尾任務板。
+
+## T-0011 — 常態 runner 服務模式
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0011-1 | 私人服務政策與設定綁定 | SR-01 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |
+| T-0011-2 | 啟動授權及不可延長期限 | SR-02 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |
+| T-0011-3 | 截止／斷線／journal恢復 | SR-03 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |
+| T-0011-4 | 回歸、審查與Git交付 | SR-04 | in_progress | 2026-10-29T05:03:15Z | — | 2026-10-29T05:12:21Z |

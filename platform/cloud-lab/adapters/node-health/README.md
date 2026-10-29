@@ -49,3 +49,7 @@ The importable API is `Config.from_dict(value, allow_loopback_http=False)`, `Jou
 ## Resident即時觀測
 
 Resident可選`--observation-socket /private/resident.sock`；先備妥owner0700 parent。查詢使用`python3 runner.py --config /private/runner.json --observe-resident --observation-socket /private/resident.sock`，不取得journal鎖或領工作。不存在／殘留socket、設定漂移或缺少proc權限會拒絕。詳見[契約與限制](../../docs/resident-observation.md)。
+
+## 常態服務模式
+
+`--service-policy /private/service-policy.json` 使用 config-bound 私人政策與啟動 self 查詢，取 service／Access／HMAC／runner grant 的最早期限；與 once、stop-at、inspection 互斥。保留 journal，重啟不重做未知工作、不自動續權。使用與邊界見[服務契約](../../docs/service-runner.md)；新增 [unit模板](cloud-lab-runner-service.service.example) 尚未安裝到真實環境。

@@ -589,3 +589,7 @@ Antigravity仍是generateContent的opaque串流，無原生stream轉換/tools/im
 只用合成credential/fixture與隔離臨時DB，沒有真provider/登入/credential/私人DB/Docker、新依賴、擴權、release/deploy。排除admin refresh/refresh-all/probe/host import；這是列舉應用路徑的隔離，不是全機零egress。原17AC/T1102/Cargo/既有交付及不相關tracked plan保留。全輪工具/agent/provider/model/retry/token/費用/execution-active-wait均unknown/null；局部command時間與fixture次數不替代整輪量測。
 
 此段是產品merge時點快照；AI-5後續帳本發布、完整備份`t0434-antigravity-isolation-20261029`逐檔核對與本輪工作樹清理，依私人`t0434-antigravity-isolation/handoff.json`最終回讀事實核實，不預先宣稱完成。完整操作位置留私人交接。完成本輪即停止，不啟動下一里程碑。
+
+## T-0432 — Antigravity existing HTTP settlement
+
+Owner authorized the bounded continuation after T0434 isolation. [Fixed AS-1–AS-5 and design](docs/tasks/T-0432-antigravity-settlement.md) cover per-dispatch durable accounting, buffered raw usage and explicit terminal evidence, opaque unknown streaming, failure/cancel/timeout/restart and management consistency. ClaimPR290 merged before implementation. Native stream conversion/tools/images and other remaining work stay outside. Original17AC/T1102 and previous deliveries unchanged; mainline incomplete, usable_tag none. Local370Rust/81Python/20validator tests,47contracts/8indexes,fmt/Clippy/locked build and all four prior nine-stage journeys passed. Seven-stage actualHTTP evidence:45inference/2discovery/4refresh/0unexpected,45durableattempts, SQLite/adminJSON/CSV一致及完整清理。Malformed200→400漏記帳有實際RED→GREEN；opaque EOF仍unknown、無原生串流轉換。完整證據、歷史失敗、較晚owner隔離重跑及剩餘路徑見本切片文件；獨立審查與發布/帳本/備份清理另按交付門檻核實。

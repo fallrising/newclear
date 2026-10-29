@@ -1405,6 +1405,8 @@ impl Store {
                     | "openai_responses_v1"
                     | "claude_code_stream_event_v1"
                     | "cursor_cli_result_v1"
+                    | "antigravity_generate_content_v1"
+                    | "antigravity_opaque_v1"
             ),
             "invalid_stream_source"
         );
@@ -2145,6 +2147,57 @@ mod stream_store_tests {
                 .unwrap(),
             2
         );
+    }
+
+    #[test]
+    fn as4_antigravity_sources_share_the_existing_finalization_cas() {
+        for source in ["antigravity_generate_content_v1", "antigravity_opaque_v1"] {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+            let id = store
+                .begin_stream_attempt_with_source(
+                    "synthetic-request",
+                    "public",
+                    "synthetic",
+                    "synthetic",
+                    source,
+                )
+                .unwrap();
+            let barrier = std::sync::Arc::new(std::sync::Barrier::new(3));
+            let handles: Vec<_> = ["cancelled", "timeout"]
+                .into_iter()
+                .map(|outcome| {
+                    let store = store.clone();
+                    let id = id.clone();
+                    let barrier = barrier.clone();
+                    std::thread::spawn(move || {
+                        barrier.wait();
+                        store
+                            .finalize_stream_attempt(
+                                &id,
+                                &StreamFinalization {
+                                    outcome,
+                                    ..Default::default()
+                                },
+                            )
+                            .unwrap()
+                    })
+                })
+                .collect();
+            barrier.wait();
+            assert_eq!(
+                handles
+                    .into_iter()
+                    .map(|h| usize::from(h.join().unwrap()))
+                    .sum::<usize>(),
+                1
+            );
+            let rows = store.recent_usage(2).unwrap();
+            assert_eq!(rows.len(), 1);
+            assert_eq!(rows[0].usage_source, source);
+            assert!(rows[0].finalized_at.is_some());
+            assert!(matches!(rows[0].outcome.as_str(), "cancelled" | "timeout"));
+        }
     }
 
     #[test]

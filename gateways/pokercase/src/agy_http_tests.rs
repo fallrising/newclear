@@ -4,9 +4,9 @@
 use super::*;
 use crate::antigravity_test_transport::{AntigravityTestTransport, Operation};
 use axum::extract::{Request, State};
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use std::net::SocketAddr;
-use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::{AtomicBool, AtomicUsize};
 use std::sync::Mutex;
 use tempfile::TempDir;
 
@@ -15,6 +15,13 @@ const OLD: &str = "synthetic-access";
 const FRESH: &str = "synthetic-fresh-access";
 const PROJECT: &str = "synthetic-project";
 const STREAM_BYTES: &[u8] = b"event: synthetic\ndata: {\"fixture\":true}\n\ndata: [DONE]\n\n";
+const OPAQUE_BYTES: &[u8] = b"data: {\"choices\":[{\"delta\":{\"content\":\"synthetic\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":123,\"completion_tokens\":456}}\n\ndata: [DONE]\n\n";
+
+enum StreamEnd {
+    Eof,
+    Hold,
+    ReadError,
+}
 
 fn op_name(op: Operation) -> &'static str {
     match op {
@@ -29,6 +36,7 @@ enum Reply {
     Error(u16),
     Malformed,
     Stream { hold: bool },
+    Opaque(StreamEnd),
 }
 
 struct Step {
@@ -85,6 +93,10 @@ struct Fixture {
     unexpected: AtomicUsize,
     active_streams: Arc<AtomicUsize>,
     dropped_streams: Arc<AtomicUsize>,
+    body_release: Arc<tokio::sync::Notify>,
+    store: Store,
+    witness_reservations: AtomicBool,
+    reserved_attempts: Mutex<Vec<String>>,
 }
 
 struct StreamOwner {
@@ -177,6 +189,33 @@ async fn fake_endpoint(State(fake): State<Arc<Fixture>>, request: Request) -> Re
             assert!(body["request"].get("stream").is_none());
         }
     }
+    if fake.witness_reservations.load(Ordering::SeqCst) {
+        let pending: Vec<_> = fake
+            .store
+            .recent_usage(1000)
+            .unwrap()
+            .into_iter()
+            .filter(|row| row.finalized_at.is_none())
+            .collect();
+        if operation == Operation::GenerateContent {
+            assert_eq!(
+                pending.len(),
+                1,
+                "one reservation must exist before inference reaches the fixture"
+            );
+            assert!(pending[0].request_id.is_some());
+            assert!(pending[0].status.is_none());
+            fake.reserved_attempts
+                .lock()
+                .unwrap()
+                .push(pending[0].attempt_id.clone().unwrap());
+        } else {
+            assert!(
+                pending.is_empty(),
+                "discovery and refresh must not create inference attempts"
+            );
+        }
+    }
     {
         let mut records = fake.records.lock().unwrap();
         let sequence = records.len() + 1;
@@ -194,26 +233,43 @@ async fn fake_endpoint(State(fake): State<Arc<Fixture>>, request: Request) -> Re
         )
             .into_response(),
         Reply::Malformed => (StatusCode::OK, "{synthetic-malformed").into_response(),
-        Reply::Stream { hold } => {
-            fake.active_streams.fetch_add(1, Ordering::SeqCst);
-            let owner = StreamOwner {
-                active: fake.active_streams.clone(),
-                dropped: fake.dropped_streams.clone(),
-            };
-            let stream = async_stream::stream! {
-                let _owner = owner;
-                yield Ok::<Bytes, std::io::Error>(Bytes::from_static(STREAM_BYTES));
-                if hold {
-                    std::future::pending::<()>().await;
-                }
-            };
-            (
-                [("content-type", "text/event-stream")],
-                Body::from_stream(stream),
-            )
-                .into_response()
-        }
+        Reply::Stream { hold } => fixture_stream(
+            &fake,
+            STREAM_BYTES,
+            if hold {
+                StreamEnd::Hold
+            } else {
+                StreamEnd::Eof
+            },
+        ),
+        Reply::Opaque(end) => fixture_stream(&fake, OPAQUE_BYTES, end),
     }
+}
+
+fn fixture_stream(fake: &Fixture, bytes: &'static [u8], end: StreamEnd) -> Response {
+    fake.active_streams.fetch_add(1, Ordering::SeqCst);
+    let owner = StreamOwner {
+        active: fake.active_streams.clone(),
+        dropped: fake.dropped_streams.clone(),
+    };
+    let release = fake.body_release.clone();
+    let stream = async_stream::stream! {
+        let _owner = owner;
+        yield Ok::<Bytes, std::io::Error>(Bytes::from_static(bytes));
+        match end {
+            StreamEnd::Eof => {},
+            StreamEnd::Hold => std::future::pending::<()>().await,
+            StreamEnd::ReadError => {
+                release.notified().await;
+                yield Err(std::io::Error::other("synthetic body read failure"));
+            }
+        }
+    };
+    (
+        [("content-type", "text/event-stream")],
+        Body::from_stream(stream),
+    )
+        .into_response()
 }
 
 struct OwnedServer {
@@ -349,6 +405,10 @@ impl Harness {
             unexpected: AtomicUsize::new(0),
             active_streams: Arc::new(AtomicUsize::new(0)),
             dropped_streams: Arc::new(AtomicUsize::new(0)),
+            body_release: Arc::new(tokio::sync::Notify::new()),
+            store: store.clone(),
+            witness_reservations: AtomicBool::new(false),
+            reserved_attempts: Mutex::new(Vec::new()),
         });
         let fake_server = OwnedServer::start(
             listener,
@@ -918,7 +978,8 @@ async fn ai_http_acceptance() {
         StatusCode::BAD_REQUEST
     );
     h.completed(mark, &["inference"]);
-    // Observe this legacy gap without requiring future honest accounting to stay absent.
+    // Preserve this characterization's observed delta; AS-2 separately requires
+    // one durable failed attempt for a malformed successful upstream response.
     let malformed_usage_rows = h.store.recent_usage(100).unwrap().len() - rows_before;
     stages.push(stage(&h.fixture, "errors_and_fallback", start, 3));
 
@@ -1053,11 +1114,881 @@ async fn ai_http_acceptance() {
         "cleanup":cleanup,
         "gaps":["synthetic offline acceptance only; no real client/version/provider validation",
             "stream=true uses generateContent and opaque byte passthrough for all three client APIs",
-            "Antigravity has no native stream conversion or durable stream attempt/terminal accounting",
-            "legacy successful-header stream rows do not establish terminal success or measured usage",
+            "Antigravity has no native stream conversion; opaque bytes do not establish semantic completion",
+            "successful headers and opaque EOF do not establish terminal success or measured usage",
             "admin refresh, refresh-all, connection probe and host credential import are excluded",
-            "malformed buffered-success accounting is observed without a completeness claim",
+            "malformed buffered-success durability is separately checked by settlement acceptance",
             "enumerated application transport confinement is not a machine-wide egress claim"]
     });
     println!("\nANTIGRAVITY_HTTP_REPORT={report}");
+}
+
+/// AS-2 actual HTTP regression: a dispatched malformed success must not disappear.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn as2_malformed_success_has_durable_failed_attempt() {
+    let h = Harness::new().await;
+    let id = h
+        .connection("as2_malformed", true, false, false, true)
+        .await;
+    h.route("as2_malformed", &[&id]).await;
+    h.fixture
+        .pending
+        .lock()
+        .unwrap()
+        .push_back(Step::inference(Reply::Malformed));
+    let response = h.request(0, "as2_malformed", false).await;
+    let status = response.status();
+    let _ = response.bytes().await.unwrap();
+    let rows = h.store.recent_usage(100).unwrap();
+    let dispatches = h.fixture.records.lock().unwrap().len();
+    let cleanup = h.close().await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(dispatches, 1);
+    assert_eq!(cleanup["active_streams"], 0);
+    assert_eq!(
+        rows.len(),
+        1,
+        "AS2 dispatched malformed HTTP200 must persist one failed attempt"
+    );
+    assert!(rows[0].attempt_id.is_some());
+    assert_eq!(rows[0].status, Some(200));
+    assert_eq!(rows[0].outcome, "failed");
+    assert!(rows[0].finalized_at.is_some());
+}
+
+const BUFFERED_SOURCE: &str = "antigravity_generate_content_v1";
+const OPAQUE_SOURCE: &str = "antigravity_opaque_v1";
+
+fn settlement_response(usage: Option<Value>, wrapped: bool, reason: Option<&str>) -> Reply {
+    let mut body = response(usage, wrapped);
+    if let Some(reason) = reason {
+        let candidate = if wrapped {
+            &mut body["response"]["candidates"][0]
+        } else {
+            &mut body["candidates"][0]
+        };
+        candidate["finishReason"] = json!(reason);
+    }
+    Reply::Json(body)
+}
+
+fn settled_success() -> Reply {
+    settlement_response(
+        Some(json!({"promptTokenCount":11,"candidatesTokenCount":7})),
+        true,
+        Some("STOP"),
+    )
+}
+
+fn rows_for(h: &Harness, model: &str) -> Vec<crate::store::UsageEvent> {
+    let mut rows: Vec<_> = h
+        .store
+        .recent_usage(1000)
+        .unwrap()
+        .into_iter()
+        .filter(|row| row.public_model.as_deref() == Some(model))
+        .collect();
+    rows.reverse();
+    rows
+}
+
+async fn settled_rows(h: &Harness, model: &str, count: usize) -> Vec<crate::store::UsageEvent> {
+    timeout(Duration::from_secs(3), async {
+        loop {
+            let rows = rows_for(h, model);
+            assert!(
+                rows.len() <= count,
+                "an inference must not acquire duplicate accounting rows"
+            );
+            if rows.len() == count && rows.iter().all(|r| r.finalized_at.is_some()) {
+                break rows;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .expect("actual HTTP attempt did not settle")
+}
+
+fn assert_attempt(
+    row: &crate::store::UsageEvent,
+    source: &str,
+    status: i64,
+    outcome: &str,
+    usage: &str,
+) {
+    assert!(row.request_id.as_deref().is_some_and(|id| !id.is_empty()));
+    assert!(row.attempt_id.as_deref().is_some_and(|id| !id.is_empty()));
+    assert!(row.finalized_at.is_some());
+    assert_eq!(row.usage_source, source);
+    assert_eq!(row.status, Some(status));
+    assert_eq!(row.outcome, outcome);
+    assert_eq!(row.usage_status, usage);
+    assert!(
+        row.first_output_ms.is_none(),
+        "buffer completion and opaque bytes are not semantic TTFT"
+    );
+    assert!(row.headers_ms.is_some());
+    assert!(row.total_observed_ms.is_some());
+    assert!(row.headers_ms.unwrap() <= row.total_observed_ms.unwrap());
+}
+
+fn assert_group(rows: &[crate::store::UsageEvent]) {
+    assert!(!rows.is_empty());
+    let request = rows[0].request_id.as_ref().unwrap();
+    let mut ids = HashSet::new();
+    for row in rows {
+        assert_eq!(row.request_id.as_ref(), Some(request));
+        assert!(
+            ids.insert(row.attempt_id.as_ref().unwrap()),
+            "retry/fallback must reserve a distinct attempt"
+        );
+    }
+}
+
+fn attempt_report(row: &crate::store::UsageEvent) -> Value {
+    json!({
+        "case":row.public_model,"attempt_id":row.attempt_id,"request_id":row.request_id,
+        "status":row.status,"outcome":row.outcome,"usage_status":row.usage_status,
+        "usage_source":row.usage_source,"finalized_at":row.finalized_at,
+        "prompt_tokens":row.prompt_tokens,"completion_tokens":row.completion_tokens,
+        "estimated_cost_usd":row.estimated_cost_usd,"headers_ms":row.headers_ms,
+        "first_output_ms":row.first_output_ms,"total_observed_ms":row.total_observed_ms,
+        "error":row.error
+    })
+}
+
+async fn reconcile_attempt_surfaces(h: &Harness) {
+    let rows = h.store.recent_usage(1000).unwrap();
+    let admin = h
+        .admin_json(reqwest::Method::GET, "/admin/api/usage", None)
+        .await;
+    assert_eq!(admin["data"], serde_json::to_value(&rows).unwrap());
+    h.admin_requests.fetch_add(1, Ordering::SeqCst);
+    let response = h
+        .client
+        .get(h.url("/admin/api/usage/export.csv"))
+        .header("x-admin-token", ADMIN)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let csv = response.text().await.unwrap();
+    let mut lines = csv.lines();
+    let columns: Vec<_> = lines.next().unwrap().split(',').collect();
+    let exported: Vec<_> = lines.collect();
+    assert_eq!(exported.len(), rows.len());
+    let sql = rusqlite::Connection::open(h.dir.path().join("thinrouter.db")).unwrap();
+    let fields = [
+        "attempt_id",
+        "request_id",
+        "status",
+        "outcome",
+        "usage_status",
+        "usage_source",
+        "finalized_at",
+        "prompt_tokens",
+        "completion_tokens",
+        "estimated_cost_usd",
+        "headers_ms",
+        "first_output_ms",
+        "total_observed_ms",
+        "error",
+    ];
+    for row in &rows {
+        let raw: Value = sql.query_row(
+            "SELECT attempt_id,request_id,status,outcome,usage_status,usage_source,finalized_at,
+                    prompt_tokens,completion_tokens,estimated_cost_usd,headers_ms,first_output_ms,
+                    total_observed_ms,error FROM usage_events WHERE id=?1",
+            [row.id], |r| Ok(json!({
+                "attempt_id":r.get::<_,Option<String>>(0)?,"request_id":r.get::<_,Option<String>>(1)?,
+                "status":r.get::<_,Option<i64>>(2)?,"outcome":r.get::<_,String>(3)?,
+                "usage_status":r.get::<_,String>(4)?,"usage_source":r.get::<_,String>(5)?,
+                "finalized_at":r.get::<_,Option<String>>(6)?,"prompt_tokens":r.get::<_,Option<i64>>(7)?,
+                "completion_tokens":r.get::<_,Option<i64>>(8)?,"estimated_cost_usd":r.get::<_,Option<f64>>(9)?,
+                "headers_ms":r.get::<_,Option<i64>>(10)?,"first_output_ms":r.get::<_,Option<i64>>(11)?,
+                "total_observed_ms":r.get::<_,Option<i64>>(12)?,"error":r.get::<_,Option<String>>(13)?
+            }))
+        ).unwrap();
+        let report = attempt_report(row);
+        let line = exported
+            .iter()
+            .find(|line| line.starts_with(&format!("{},", row.id)))
+            .unwrap();
+        // Every selected text field is a fixed code, synthetic UUID, or timestamp.
+        // None contains CSV commas/newlines; arbitrary upstream error text is excluded.
+        let values: Vec<_> = line.split(',').collect();
+        for field in fields {
+            assert_eq!(
+                raw[field], report[field],
+                "SQLite adapter mismatch for {field}"
+            );
+            let expected = match &raw[field] {
+                Value::Null => String::new(),
+                Value::String(value) => value.clone(),
+                value => value.to_string(),
+            };
+            let index = columns.iter().position(|name| *name == field).unwrap();
+            let actual = values[index].trim_matches('"');
+            if field == "estimated_cost_usd" && !expected.is_empty() {
+                assert!(
+                    (actual.parse::<f64>().unwrap() - raw[field].as_f64().unwrap()).abs() < 1e-12
+                );
+            } else {
+                assert_eq!(actual, expected, "CSV adapter mismatch for {field}");
+            }
+        }
+    }
+}
+
+/// AS-1–AS-5: run only after the existing closed transport proof passes.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn as_http_settlement_acceptance() {
+    let mut h = Harness::new().await;
+    h.fixture.witness_reservations.store(true, Ordering::SeqCst);
+    let mut stages = Vec::new();
+    let mut usage = Vec::new();
+
+    let start = h.fixture.records.lock().unwrap().len();
+    let mut buffered_cases = 0;
+    for protocol in 0..3 {
+        for (label, reason, outcome) in [
+            ("stop", Some("STOP"), "succeeded"),
+            ("max_tokens", Some("MAX_TOKENS"), "incomplete"),
+            ("missing_terminal", None, "unknown"),
+            ("unsupported_terminal", Some("UNRECOGNIZED"), "unknown"),
+        ] {
+            let name = format!("as_buffered_{protocol}_{label}");
+            let id = h.connection(&name, true, false, false, true).await;
+            h.route(&name, &[&id]).await;
+            let mark = h.plan(vec![Step::inference(settlement_response(
+                Some(json!({"promptTokenCount":11,"candidatesTokenCount":7})),
+                protocol != 1,
+                reason,
+            ))]);
+            h.success(protocol, &name).await;
+            h.completed(mark, &["inference"]);
+            let rows = settled_rows(&h, &name, 1).await;
+            assert_attempt(&rows[0], BUFFERED_SOURCE, 200, outcome, "complete");
+            assert!(rows[0].error.is_none());
+            usage.push(h.usage(&name, (Some(11), Some(7), Some(0.000043))).await);
+            buffered_cases += 1;
+        }
+    }
+    for (name, counters, expected, quality, priced) in [
+        (
+            "as_missing_usage",
+            None,
+            (None, None, None),
+            "missing",
+            true,
+        ),
+        (
+            "as_partial_usage",
+            Some(json!({"promptTokenCount":11})),
+            (Some(11), None, None),
+            "partial",
+            true,
+        ),
+        (
+            "as_zero_usage",
+            Some(json!({"promptTokenCount":0,"candidatesTokenCount":0})),
+            (Some(0), Some(0), Some(0.0)),
+            "complete",
+            true,
+        ),
+        (
+            "as_negative_usage",
+            Some(json!({"promptTokenCount":-1,"candidatesTokenCount":7})),
+            (None, Some(7), None),
+            "invalid",
+            true,
+        ),
+        (
+            "as_type_usage",
+            Some(json!({"promptTokenCount":11,"candidatesTokenCount":"7"})),
+            (Some(11), None, None),
+            "invalid",
+            true,
+        ),
+        (
+            "as_overflow_usage",
+            Some(json!({"promptTokenCount":u64::MAX,"candidatesTokenCount":null})),
+            (None, None, None),
+            "invalid",
+            true,
+        ),
+        (
+            "as_unknown_price",
+            Some(json!({"promptTokenCount":11,"candidatesTokenCount":7})),
+            (Some(11), Some(7), None),
+            "complete",
+            false,
+        ),
+    ] {
+        let id = h.connection(name, true, false, false, priced).await;
+        h.route(name, &[&id]).await;
+        let mark = h.plan(vec![Step::inference(settlement_response(
+            counters,
+            true,
+            Some("STOP"),
+        ))]);
+        h.success(0, name).await;
+        h.completed(mark, &["inference"]);
+        let rows = settled_rows(&h, name, 1).await;
+        assert_attempt(&rows[0], BUFFERED_SOURCE, 200, "succeeded", quality);
+        assert_eq!(
+            rows[0].error.as_deref(),
+            if quality == "invalid" {
+                Some("stream_invalid_usage")
+            } else {
+                None
+            }
+        );
+        usage.push(h.usage(name, expected).await);
+        buffered_cases += 1;
+    }
+    let name = "as_ambiguous_candidates";
+    let id = h.connection(name, true, false, false, true).await;
+    h.route(name, &[&id]).await;
+    let mut ambiguous = response(
+        Some(json!({"promptTokenCount":11,"candidatesTokenCount":7})),
+        true,
+    );
+    ambiguous["response"]["candidates"][0]["finishReason"] = json!("STOP");
+    let candidate = ambiguous["response"]["candidates"][0].clone();
+    ambiguous["response"]["candidates"]
+        .as_array_mut()
+        .unwrap()
+        .push(candidate);
+    let mark = h.plan(vec![Step::inference(Reply::Json(ambiguous))]);
+    h.success(0, name).await;
+    h.completed(mark, &["inference"]);
+    let rows = settled_rows(&h, name, 1).await;
+    assert_attempt(&rows[0], BUFFERED_SOURCE, 200, "unknown", "complete");
+    usage.push(h.usage(name, (Some(11), Some(7), Some(0.000043))).await);
+    buffered_cases += 1;
+    stages.push(stage(
+        &h.fixture,
+        "buffered_raw_usage_and_terminal",
+        start,
+        buffered_cases,
+    ));
+
+    let start = h.fixture.records.lock().unwrap().len();
+    let discovered = h
+        .connection("as_discovery", false, false, false, true)
+        .await;
+    h.route("as_discovery", &[&discovered]).await;
+    let mark = h.plan(vec![
+        Step::discovery(Reply::Json(json!({"cloudaicompanionProject":PROJECT}))),
+        Step::inference(settled_success()),
+    ]);
+    h.success(0, "as_discovery").await;
+    h.completed(mark, &["discovery", "inference"]);
+    let mark = h.plan(vec![Step::inference(settled_success())]);
+    h.success(2, "as_discovery").await;
+    h.completed(mark, &["inference"]);
+    let rows = settled_rows(&h, "as_discovery", 2).await;
+    assert_ne!(rows[0].request_id, rows[1].request_id);
+    for row in &rows {
+        assert_attempt(row, BUFFERED_SOURCE, 200, "succeeded", "complete");
+    }
+    let id = h
+        .connection("as_discovery_failure", false, false, false, false)
+        .await;
+    h.route("as_discovery_failure", &[&id]).await;
+    let mark = h.plan(vec![Step::discovery(Reply::Error(503))]);
+    assert_eq!(
+        h.request(0, "as_discovery_failure", false).await.status(),
+        StatusCode::BAD_GATEWAY
+    );
+    h.completed(mark, &["discovery"]);
+    assert!(
+        rows_for(&h, "as_discovery_failure").is_empty(),
+        "preflight failure is not inference"
+    );
+    for (name, proactive, refresh_success, second_401) in [
+        ("as_proactive", true, true, false),
+        ("as_retry", false, true, false),
+        ("as_refresh_failure", false, false, false),
+        ("as_retry_bound", false, true, true),
+    ] {
+        let id = h.connection(name, true, true, proactive, true).await;
+        h.route(name, &[&id]).await;
+        let mut steps = Vec::new();
+        let mut order = Vec::new();
+        if !proactive {
+            steps.push(Step::inference(Reply::Error(401)));
+            order.push("inference");
+        }
+        steps.push(Step::refresh(if refresh_success {
+            token_success()
+        } else {
+            Reply::Error(401)
+        }));
+        order.push("refresh");
+        if refresh_success {
+            steps.push(
+                Step::inference(if second_401 {
+                    Reply::Error(401)
+                } else {
+                    settled_success()
+                })
+                .fresh(),
+            );
+            order.push("inference");
+        }
+        let mark = h.plan(steps);
+        if refresh_success && !second_401 {
+            h.success(1, name).await;
+        } else {
+            assert_eq!(
+                h.request(1, name, false).await.status(),
+                StatusCode::UNAUTHORIZED
+            );
+        }
+        h.completed(mark, &order);
+        let count = order.iter().filter(|op| **op == "inference").count();
+        let rows = settled_rows(&h, name, count).await;
+        assert_group(&rows);
+        for (index, row) in rows.iter().enumerate() {
+            let successful = refresh_success && !second_401 && index == rows.len() - 1;
+            assert_attempt(
+                row,
+                BUFFERED_SOURCE,
+                if successful { 200 } else { 401 },
+                if successful { "succeeded" } else { "failed" },
+                if successful { "complete" } else { "missing" },
+            );
+            assert_eq!(
+                row.error.as_deref(),
+                if successful {
+                    None
+                } else {
+                    Some("upstream_attempt_failed")
+                }
+            );
+        }
+    }
+    stages.push(stage(
+        &h.fixture,
+        "discovery_refresh_and_legal_retry",
+        start,
+        7,
+    ));
+
+    let start = h.fixture.records.lock().unwrap().len();
+    for protocol in 0..3 {
+        let name = format!("as_malformed_{protocol}");
+        let id = h.connection(&name, true, false, false, true).await;
+        h.route(&name, &[&id]).await;
+        let mark = h.plan(vec![Step::inference(Reply::Malformed)]);
+        let response = h.request(protocol, &name, false).await;
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+        let _ = response.bytes().await.unwrap();
+        h.completed(mark, &["inference"]);
+        let rows = settled_rows(&h, &name, 1).await;
+        assert_attempt(&rows[0], BUFFERED_SOURCE, 200, "failed", "invalid");
+        assert_eq!(rows[0].error.as_deref(), Some("stream_conversion_failed"));
+        usage.push(h.usage(&name, (None, None, None)).await);
+    }
+    for (name, status, fallback) in [("as_fallback", 503, true), ("as_nonretryable", 400, false)] {
+        let first = h
+            .connection(&format!("{name}_first"), true, false, false, true)
+            .await;
+        let second = h
+            .connection(&format!("{name}_second"), true, false, false, true)
+            .await;
+        h.route(name, &[&first, &second]).await;
+        let mut steps = vec![Step::inference(Reply::Error(status))];
+        if fallback {
+            steps.push(Step::inference(settled_success()));
+        }
+        let mark = h.plan(steps);
+        if fallback {
+            h.success(2, name).await;
+        } else {
+            assert_eq!(h.request(2, name, false).await.status().as_u16(), status);
+        }
+        h.completed(
+            mark,
+            if fallback {
+                &["inference", "inference"]
+            } else {
+                &["inference"]
+            },
+        );
+        let rows = settled_rows(&h, name, if fallback { 2 } else { 1 }).await;
+        assert_group(&rows);
+        assert_attempt(
+            &rows[0],
+            BUFFERED_SOURCE,
+            i64::from(status),
+            "failed",
+            "missing",
+        );
+        assert_eq!(rows[0].connection_id.as_deref(), Some(first.as_str()));
+        assert_eq!(rows[0].error.as_deref(), Some("upstream_attempt_failed"));
+        if fallback {
+            assert_attempt(&rows[1], BUFFERED_SOURCE, 200, "succeeded", "complete");
+            assert_eq!(rows[1].connection_id.as_deref(), Some(second.as_str()));
+        }
+    }
+    let name = "as_buffered_read_failure";
+    let id = h.connection(name, true, false, false, true).await;
+    h.route(name, &[&id]).await;
+    let dropped = h.fixture.dropped_streams.load(Ordering::SeqCst);
+    let mark = h.plan(vec![Step::inference(Reply::Opaque(StreamEnd::ReadError))]);
+    // The server releases its failing body only after the gateway has durably
+    // observed HTTP200; this avoids a race with headers without a timing sleep.
+    let (response, ()) = tokio::join!(h.request(0, name, false), async {
+        timeout(Duration::from_secs(3), async {
+            loop {
+                if rows_for(&h, name)
+                    .first()
+                    .is_some_and(|r| r.status == Some(200))
+                {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        })
+        .await
+        .expect("buffered read failure must occur after observed headers");
+        h.fixture.body_release.notify_one();
+    });
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    let _ = response.bytes().await.unwrap();
+    h.completed(mark, &["inference"]);
+    h.wait_stream_cleanup(dropped + 1).await;
+    let rows = settled_rows(&h, name, 1).await;
+    assert_attempt(&rows[0], BUFFERED_SOURCE, 200, "failed", "missing");
+    assert_eq!(rows[0].error.as_deref(), Some("upstream_transport_error"));
+    stages.push(stage(
+        &h.fixture,
+        "failed_conversion_transport_and_fallback",
+        start,
+        6,
+    ));
+
+    let start = h.fixture.records.lock().unwrap().len();
+    for protocol in 0..3 {
+        let name = format!("as_opaque_eof_{protocol}");
+        let id = h.connection(&name, true, false, false, true).await;
+        h.route(&name, &[&id]).await;
+        let dropped = h.fixture.dropped_streams.load(Ordering::SeqCst);
+        let mark = h.plan(vec![
+            Step::inference(Reply::Opaque(StreamEnd::Eof)).streaming()
+        ]);
+        let response = h.request(protocol, &name, true).await;
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.bytes().await.unwrap().as_ref(), OPAQUE_BYTES);
+        h.completed(mark, &["inference"]);
+        h.wait_stream_cleanup(dropped + 1).await;
+        let rows = settled_rows(&h, &name, 1).await;
+        assert_attempt(&rows[0], OPAQUE_SOURCE, 200, "unknown", "unknown");
+        assert!(rows[0].error.is_none());
+        usage.push(h.usage(&name, (None, None, None)).await);
+    }
+    for (name, outcome, error) in [
+        ("as_opaque_drop", "cancelled", "stream_cancelled"),
+        ("as_opaque_unpolled_drop", "cancelled", "stream_cancelled"),
+        ("as_opaque_stall", "timeout", "stream_timeout"),
+        (
+            "as_opaque_read_failure",
+            "failed",
+            "upstream_transport_error",
+        ),
+    ] {
+        let id = h.connection(name, true, false, false, true).await;
+        h.route(name, &[&id]).await;
+        let dropped = h.fixture.dropped_streams.load(Ordering::SeqCst);
+        let end = if outcome == "failed" {
+            StreamEnd::ReadError
+        } else {
+            StreamEnd::Hold
+        };
+        let mark = h.plan(vec![Step::inference(Reply::Opaque(end)).streaming()]);
+        let response = h.request(0, name, true).await;
+        assert_eq!(response.status(), StatusCode::OK);
+        if name == "as_opaque_unpolled_drop" {
+            drop(response);
+        } else {
+            let mut stream = response.bytes_stream();
+            let mut bytes = Vec::new();
+            while bytes.len() < OPAQUE_BYTES.len() {
+                let chunk = timeout(Duration::from_secs(3), stream.next())
+                    .await
+                    .unwrap()
+                    .unwrap()
+                    .unwrap();
+                bytes.extend_from_slice(&chunk);
+            }
+            assert_eq!(bytes, OPAQUE_BYTES);
+            assert_eq!(h.fixture.active_streams.load(Ordering::SeqCst), 1);
+            if outcome != "cancelled" {
+                if outcome == "failed" {
+                    h.fixture.body_release.notify_one();
+                }
+                let terminal = timeout(Duration::from_secs(8), stream.next())
+                    .await
+                    .expect("opaque body must terminate after controlled error/stall");
+                assert!(terminal.is_none_or(|chunk| chunk.is_err()));
+            }
+            drop(stream);
+        }
+        h.wait_stream_cleanup(dropped + 1).await;
+        h.completed(mark, &["inference"]);
+        let rows = settled_rows(&h, name, 1).await;
+        assert_attempt(&rows[0], OPAQUE_SOURCE, 200, outcome, "unknown");
+        assert_eq!(rows[0].error.as_deref(), Some(error));
+        usage.push(h.usage(name, (None, None, None)).await);
+    }
+    let name = "as_opaque_http_failure";
+    let id = h.connection(name, true, false, false, true).await;
+    h.route(name, &[&id]).await;
+    let mark = h.plan(vec![Step::inference(Reply::Error(503)).streaming()]);
+    assert_eq!(
+        h.request(1, name, true).await.status(),
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    h.completed(mark, &["inference"]);
+    let rows = settled_rows(&h, name, 1).await;
+    assert_attempt(&rows[0], OPAQUE_SOURCE, 503, "failed", "unknown");
+    assert_eq!(rows[0].error.as_deref(), Some("upstream_attempt_failed"));
+    usage.push(h.usage(name, (None, None, None)).await);
+    stages.push(stage(
+        &h.fixture,
+        "opaque_bytes_and_explicit_lifecycle",
+        start,
+        8,
+    ));
+
+    let start = h.fixture.records.lock().unwrap().len();
+    let first = h
+        .connection("as_reserve_first", true, false, false, true)
+        .await;
+    let second = h
+        .connection("as_reserve_second", true, false, false, true)
+        .await;
+    h.route("as_reservation_failure", &[&first, &second]).await;
+    let sql = rusqlite::Connection::open(h.dir.path().join("thinrouter.db")).unwrap();
+    sql.execute_batch("CREATE TRIGGER as_fail_reservation BEFORE INSERT ON usage_events WHEN NEW.public_model='as_reservation_failure' BEGIN SELECT RAISE(FAIL,'synthetic reservation failure'); END;").unwrap();
+    let mark = h.plan(Vec::new());
+    assert_eq!(
+        h.request(0, "as_reservation_failure", false).await.status(),
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    h.completed(mark, &[]);
+    assert!(rows_for(&h, "as_reservation_failure").is_empty());
+    sql.execute_batch("DROP TRIGGER as_fail_reservation;")
+        .unwrap();
+    let name = "as_finalization_failure";
+    let id = h.connection(name, true, false, false, true).await;
+    h.route(name, &[&id]).await;
+    sql.execute_batch("CREATE TRIGGER as_fail_finalization BEFORE UPDATE OF finalized_at ON usage_events WHEN OLD.public_model='as_finalization_failure' BEGIN SELECT RAISE(FAIL,'synthetic finalization failure'); END;").unwrap();
+    let mark = h.plan(vec![Step::inference(settled_success())]);
+    h.success(0, name).await;
+    h.completed(mark, &["inference"]);
+    let pending = rows_for(&h, name);
+    assert_eq!(pending.len(), 1);
+    assert!(pending[0].finalized_at.is_none());
+    assert_eq!(pending[0].status, Some(200));
+    assert_eq!(pending[0].usage_source, BUFFERED_SOURCE);
+    assert!(pending[0].prompt_tokens.is_none() && pending[0].completion_tokens.is_none());
+    sql.execute_batch("DROP TRIGGER as_fail_finalization;")
+        .unwrap();
+    drop(sql);
+    stages.push(stage(
+        &h.fixture,
+        "storage_failure_without_redispatch",
+        start,
+        2,
+    ));
+
+    let start = h.fixture.records.lock().unwrap().len();
+    let seed = h
+        .store
+        .begin_stream_attempt_with_source(
+            "synthetic-recovery-request",
+            "as_seeded_recovery",
+            &discovered,
+            "fixture-model",
+            BUFFERED_SOURCE,
+        )
+        .unwrap();
+    let history: Vec<_> = h
+        .store
+        .recent_usage(1000)
+        .unwrap()
+        .into_iter()
+        .filter(|r| r.finalized_at.is_some())
+        .map(|r| (r.id, serde_json::to_value(r).unwrap()))
+        .collect();
+    let routes_before = serde_json::to_value(h.store.list_routes().unwrap()).unwrap();
+    let keys_before = serde_json::to_value(h.store.list_api_keys().unwrap()).unwrap();
+    h.gateway.close().await;
+    let usage_owner = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(h.dir.path().join("thinrouter.usage-lock"))
+        .unwrap();
+    usage_owner.try_lock().unwrap();
+    h.store = Store::open(&h.dir.path().join("thinrouter.db"), None).unwrap();
+    assert_eq!(
+        h.store
+            .recent_usage(1000)
+            .unwrap()
+            .iter()
+            .filter(|r| r.finalized_at.is_none())
+            .count(),
+        2,
+        "Store::open alone must not recover live attempts"
+    );
+    assert_eq!(h.store.recover_stream_attempts().unwrap(), 2);
+    let recovered = serde_json::to_value(h.store.recent_usage(1000).unwrap()).unwrap();
+    assert_eq!(h.store.recover_stream_attempts().unwrap(), 0);
+    assert_eq!(
+        serde_json::to_value(h.store.recent_usage(1000).unwrap()).unwrap(),
+        recovered
+    );
+    let after = h.store.recent_usage(1000).unwrap();
+    for (id, before) in history {
+        assert_eq!(
+            serde_json::to_value(after.iter().find(|r| r.id == id).unwrap()).unwrap(),
+            before
+        );
+    }
+    for name in ["as_seeded_recovery", "as_finalization_failure"] {
+        let rows = rows_for(&h, name);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].outcome, "interrupted");
+        assert_eq!(rows[0].usage_status, "missing");
+        assert_eq!(rows[0].error.as_deref(), Some("stream_interrupted"));
+        assert!(rows[0].finalized_at.is_some());
+        assert!(
+            rows[0].prompt_tokens.is_none()
+                && rows[0].completion_tokens.is_none()
+                && rows[0].estimated_cost_usd.is_none()
+        );
+        assert!(rows[0].first_output_ms.is_none() && rows[0].total_observed_ms.is_none());
+    }
+    h.gateway = Harness::gateway(h.dir.path(), h.store.clone(), h.fixture.transport.clone()).await;
+    assert_eq!(
+        serde_json::to_value(h.store.list_routes().unwrap()).unwrap(),
+        routes_before
+    );
+    assert_eq!(
+        serde_json::to_value(h.store.list_api_keys().unwrap()).unwrap(),
+        keys_before
+    );
+    assert_eq!(
+        h.fixture.records.lock().unwrap().len(),
+        start,
+        "recovery/reopen must not replay inference"
+    );
+    let mark = h.plan(vec![Step::inference(settled_success())]);
+    h.success(2, "as_discovery").await;
+    h.completed(mark, &["inference"]);
+    let rows = settled_rows(&h, "as_discovery", 3).await;
+    assert_attempt(
+        rows.last().unwrap(),
+        BUFFERED_SOURCE,
+        200,
+        "succeeded",
+        "complete",
+    );
+    let final_row = rows.last().unwrap();
+    let settled_before = serde_json::to_value(final_row).unwrap();
+    let final_id = final_row.attempt_id.as_deref().unwrap();
+    assert!(
+        !h.store
+            .finalize_stream_attempt(
+                final_id,
+                &crate::store::StreamFinalization {
+                    outcome: "failed",
+                    error: Some("stream_error"),
+                    ..Default::default()
+                }
+            )
+            .unwrap(),
+        "late callback must not overwrite a settled HTTP attempt"
+    );
+    h.store.observe_stream_headers(final_id, 502, 999).unwrap();
+    assert_eq!(
+        serde_json::to_value(rows_for(&h, "as_discovery").last().unwrap()).unwrap(),
+        settled_before
+    );
+    stages.push(stage(
+        &h.fixture,
+        "reopen_recovery_and_idempotence",
+        start,
+        1,
+    ));
+
+    let start = h.fixture.records.lock().unwrap().len();
+    reconcile_attempt_surfaces(&h).await;
+    h.completed(start, &[]);
+    stages.push(stage(
+        &h.fixture,
+        "sqlite_json_csv_reconciliation",
+        start,
+        1,
+    ));
+    let records = h.fixture.records.lock().unwrap().clone();
+    let inference_count = records
+        .iter()
+        .filter(|r| r["operation"] == "inference")
+        .count();
+    let mut rows = h.store.recent_usage(1000).unwrap();
+    assert!(rows.iter().all(|r| r.finalized_at.is_some()));
+    rows.reverse();
+    let attempts: Vec<_> = rows
+        .iter()
+        .filter(|row| row.attempt_id.as_deref() != Some(seed.as_str()))
+        .map(attempt_report)
+        .collect();
+    assert_eq!(attempts.len(), inference_count);
+    let ids: Vec<_> = attempts
+        .iter()
+        .map(|r| r["attempt_id"].as_str().unwrap().to_owned())
+        .collect();
+    assert_eq!(ids, *h.fixture.reserved_attempts.lock().unwrap());
+    assert_eq!(ids.iter().collect::<HashSet<_>>().len(), ids.len());
+    let counts = json!({
+        "inference":inference_count,
+        "discovery":records.iter().filter(|r| r["operation"] == "discovery").count(),
+        "refresh":records.iter().filter(|r| r["operation"] == "refresh").count(),
+        "unexpected_destinations":h.fixture.unexpected.load(Ordering::SeqCst),
+        "client_inference_requests":h.client_inferences.load(Ordering::SeqCst),
+        "admin_http_requests":h.admin_requests.load(Ordering::SeqCst)
+    });
+    assert_eq!(counts["inference"], 45);
+    assert_eq!(counts["discovery"], 2);
+    assert_eq!(counts["refresh"], 4);
+    assert_eq!(counts["unexpected_destinations"], 0);
+    drop(usage_owner);
+    let cleanup = h.close().await;
+    let report = json!({
+        "schema_version":1,"test":"proxy::agy_http_tests::as_http_settlement_acceptance",
+        "status":"passed","actual_gateway_http":true,
+        "transport":"sealed_test_only_loopback_nonforwarding_proxy",
+        "stages":stages,"counts":counts,"destinations":records,"attempts":attempts,
+        "usage":usage,"cleanup":cleanup,"seeded_recovery_rows":1,
+        "accounting":{
+            "dispatch_rows_match":true,"unique_attempts":true,"no_pending_after_recovery":true,
+            "surfaces_match":true,"no_extra_dispatch":true,"opaque_semantics_verified":true,
+            "restart_recovery_verified":true,"reservation_failure_no_dispatch":true
+        },
+        "gaps":["synthetic offline acceptance; no real provider/client/version validation",
+            "opaque generateContent bytes are not native streaming conversion or semantic completion evidence",
+            "buffered estimates use configured rates and are not verified billing",
+            "deep owner-unpolled/race and exhaustive parser shapes require focused native tests",
+            "admin refresh/refresh-all/probes and host credential import are excluded",
+            "enumerated application transport confinement is not machine-wide egress proof"]
+    });
+    println!("\nANTIGRAVITY_SETTLEMENT_REPORT={report}");
 }

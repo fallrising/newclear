@@ -536,8 +536,23 @@ async fn forward_chat_completions_inner(
 
     // Preflight/refresh are not model inference. Reserve immediately before the
     // actual send, including each existing legal 401 retry.
+    if matches!(body_kind, UpstreamBodyKind::Antigravity) && cancel.is_cancelled() {
+        return Err(UpstreamAttemptError {
+            status: 499,
+            body: "client disconnected".into(),
+            retryable: false,
+        });
+    }
     if let Some(context) = context {
-        let reserved = if provider_key.is_none() && target.connection.auth_type == "api_key" {
+        let reserved = if matches!(body_kind, UpstreamBodyKind::Antigravity) {
+            crate::stream_usage::StreamAttempt::begin_antigravity(
+                &state.store,
+                context.request_id,
+                context.public_model,
+                target,
+                upstream_stream,
+            )
+        } else if provider_key.is_none() && target.connection.auth_type == "api_key" {
             crate::stream_usage::StreamAttempt::begin(
                 &state.store,
                 context.request_id,
@@ -917,7 +932,14 @@ pub async fn handle_chat_with_fallback(
                     .await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel, false).await?;
+                    let bytes =
+                        read_forward_body_accounted(fwd, &cancel, false, &mut attempt).await?;
+                    if attempt.is_some() {
+                        let converted =
+                            convert_upstream_to_chat(bytes, kind, &target.upstream_model);
+                        let bytes = finish_buffered_attempt(&mut attempt, converted)?;
+                        return Ok(json_bytes_response(StatusCode::OK, bytes));
+                    }
                     let (pt, ct) = extract_upstream_usage(&bytes, kind);
                     let bytes = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let cost = estimate_cost(
@@ -998,7 +1020,9 @@ fn http_stream_context<'a>(
     stream: bool,
 ) -> Option<HttpStreamContext<'a>> {
     let provider = provider_id_for(target);
-    let supported = match provider.as_deref().and_then(providers::resolve) {
+    let profile = provider.as_deref().and_then(providers::resolve);
+    let antigravity = profile.is_some_and(|p| p.format == UpstreamFormat::Antigravity);
+    let supported = match profile {
         Some(p) => matches!(p.id, "siwc" | "grok" | "opencode"),
         None => {
             provider.is_none()
@@ -1006,7 +1030,7 @@ fn http_stream_context<'a>(
                 && crate::borrowed::source(&target.connection).is_none()
         }
     };
-    (stream && supported).then_some(HttpStreamContext {
+    (antigravity || (stream && supported)).then_some(HttpStreamContext {
         request_id,
         public_model,
     })
@@ -1185,7 +1209,15 @@ pub async fn handle_anthropic_messages(
                     .await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel, false).await?;
+                    let bytes =
+                        read_forward_body_accounted(fwd, &cancel, false, &mut attempt).await?;
+                    if attempt.is_some() {
+                        let converted =
+                            convert_upstream_to_chat(bytes, kind, &target.upstream_model)
+                                .and_then(|chat| claude::openai_to_anthropic(&chat, public_model));
+                        let anth = finish_buffered_attempt(&mut attempt, converted)?;
+                        return Ok(json_bytes_response(StatusCode::OK, anth));
+                    }
                     let (pt, ct) = extract_upstream_usage(&bytes, kind);
                     let chat = convert_upstream_to_chat(bytes, kind, &target.upstream_model)?;
                     let cost = estimate_cost(
@@ -1381,7 +1413,16 @@ pub async fn handle_responses(
                     .await;
                 } else {
                     let kind = fwd.body_kind;
-                    let bytes = read_forward_body(fwd, &cancel, allow_background).await?;
+                    let bytes =
+                        read_forward_body_accounted(fwd, &cancel, allow_background, &mut attempt)
+                            .await?;
+                    if attempt.is_some() {
+                        let converted =
+                            convert_upstream_to_chat(bytes, kind, &target.upstream_model)
+                                .and_then(|chat| responses::chat_to_responses(&chat, public_model));
+                        let out = finish_buffered_attempt(&mut attempt, converted)?;
+                        return Ok(json_bytes_response(StatusCode::OK, out));
+                    }
                     let (pt, ct) = extract_upstream_usage(&bytes, kind);
                     // If upstream already returned Responses, pass through; else wrap chat.
                     let out = match kind {
@@ -1492,6 +1533,52 @@ async fn read_forward_body(
     }
     responses::validate_json_response(&bytes, allow_background)?;
     Ok(bytes)
+}
+
+/// Antigravity holds its durable owner through body collection and conversion.
+/// Observe typed reqwest errors before the generic collector erases their type;
+/// return the collector's original error so the client wire contract is unchanged.
+async fn read_forward_body_accounted(
+    fwd: ForwardOk,
+    cancel: &CancellationToken,
+    allow_background: bool,
+    attempt: &mut Option<crate::stream_usage::StreamAttempt>,
+) -> AppResult<Bytes> {
+    if !matches!(fwd.body_kind, UpstreamBodyKind::Antigravity) || attempt.is_none() {
+        return read_forward_body(fwd, cancel, allow_background).await;
+    }
+    let a = attempt.as_mut().expect("checked Antigravity owner");
+    let source = fwd.response.bytes_stream().map(|chunk| {
+        if let Err(error) = &chunk {
+            if error.is_timeout() {
+                a.stop("timeout", "stream_timeout");
+            } else {
+                a.stop("failed", "upstream_transport_error");
+            }
+        }
+        chunk
+    });
+    let result = crate::collection::body(source, cancel).await;
+    match &result {
+        Ok(bytes) => a.observe_antigravity_buffered(bytes),
+        Err(_) if cancel.is_cancelled() => a.stop("cancelled", "stream_cancelled"),
+        Err(_) => a.stop("failed", "upstream_transport_error"),
+    }
+    result
+}
+
+fn finish_buffered_attempt(
+    attempt: &mut Option<crate::stream_usage::StreamAttempt>,
+    converted: AppResult<Bytes>,
+) -> AppResult<Bytes> {
+    if let Some(a) = attempt.as_mut() {
+        if converted.is_ok() {
+            a.complete_antigravity_buffered();
+        } else {
+            a.stop("failed", "stream_conversion_failed");
+        }
+    }
+    converted
 }
 
 /// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.
@@ -2058,6 +2145,120 @@ mod settlement_ownership_tests {
             b"{}",
         )
         .unwrap()
+    }
+
+    fn agy_attempt(store: &Store, opaque: bool) -> crate::stream_usage::StreamAttempt {
+        let connection = serde_json::from_value(json!({
+            "id":"synthetic","name":"synthetic","base_url":"http://127.0.0.1:1/v1",
+            "api_key":"synthetic","default_model":null,"priority":0,"enabled":true,
+            "input_price_per_m":1.0,"output_price_per_m":1.0,"auth_type":"api_key","oauth":null,
+            "created_at":"synthetic","updated_at":"synthetic"
+        }))
+        .unwrap();
+        crate::stream_usage::StreamAttempt::begin_antigravity(
+            store,
+            "synthetic-request",
+            "public",
+            &ResolvedTarget {
+                connection,
+                upstream_model: "synthetic".into(),
+            },
+            opaque,
+        )
+        .unwrap()
+    }
+
+    #[tokio::test]
+    async fn as4_antigravity_body_owns_unpolled_drop_and_opaque_eof() {
+        let wire=b"data: {\"usage\":{\"prompt_tokens\":11,\"completion_tokens\":7},\"choices\":[{\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n";
+        for consume in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+            let mut a = agy_attempt(&store, true);
+            a.headers(200);
+            let source =
+                futures_util::stream::iter(vec![Ok::<_, std::io::Error>(Bytes::from_static(wire))]);
+            let response = stream_body_observed(source, 5, StreamMode::Passthrough, Some(a))
+                .await
+                .unwrap();
+            if consume {
+                assert_eq!(
+                    axum::body::to_bytes(response.into_body(), 1 << 20)
+                        .await
+                        .unwrap()
+                        .as_ref(),
+                    wire
+                );
+            } else {
+                drop(response);
+            }
+            let rows = store.recent_usage(2).unwrap();
+            assert_eq!(rows.len(), 1);
+            let row = &rows[0];
+            assert_eq!(row.outcome, if consume { "unknown" } else { "cancelled" });
+            assert_eq!(row.status, Some(200));
+            assert!(row.finalized_at.is_some());
+            assert!(
+                row.prompt_tokens.is_none()
+                    && row.completion_tokens.is_none()
+                    && row.first_output_ms.is_none()
+                    && row.estimated_cost_usd.is_none()
+            );
+            assert_eq!(store.recover_stream_attempts().unwrap(), 0);
+        }
+    }
+
+    #[tokio::test]
+    async fn as4_antigravity_buffered_read_failure_and_cancel_are_explicit() {
+        for cancelled in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let store = Store::open(&dir.path().join("synthetic.db"), None).unwrap();
+            let mut a = agy_attempt(&store, false);
+            a.headers(200);
+            let mut attempt = Some(a);
+            let cancel = CancellationToken::new();
+            if cancelled {
+                cancel.cancel();
+            }
+            let source = futures_util::stream::iter(vec![Err::<Bytes, _>(std::io::Error::other(
+                "synthetic-private-read",
+            ))]);
+            let response = reqwest::Response::from(
+                axum::http::Response::builder()
+                    .status(200)
+                    .body(reqwest::Body::wrap_stream(source))
+                    .unwrap(),
+            );
+            let fwd = ForwardOk {
+                response,
+                body_kind: UpstreamBodyKind::Antigravity,
+                reassemble_stream: false,
+            };
+            assert!(
+                read_forward_body_accounted(fwd, &cancel, false, &mut attempt)
+                    .await
+                    .is_err()
+            );
+            drop(attempt);
+            let rows = store.recent_usage(2).unwrap();
+            assert_eq!(rows.len(), 1);
+            assert_eq!(
+                rows[0].outcome,
+                if cancelled { "cancelled" } else { "failed" }
+            );
+            assert_eq!(
+                rows[0].error.as_deref(),
+                Some(if cancelled {
+                    "stream_cancelled"
+                } else {
+                    "upstream_transport_error"
+                })
+            );
+            assert_eq!(rows[0].status, Some(200));
+            assert!(!serde_json::to_string(&rows)
+                .unwrap()
+                .contains("synthetic-private-read"));
+        }
     }
 
     fn cs_attempt(store: &Store) -> crate::claude_usage::Attempt {

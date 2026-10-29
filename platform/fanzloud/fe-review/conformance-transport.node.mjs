@@ -330,3 +330,44 @@ test('review_http_over_https_matches_actual_controller_contract',{skip},async()=
   assert(seen.length>=8);assert(!seen.some(({r})=>r.body.includes(bearer)));
  }finally{controller.dispose();await env.close();}
 });
+
+// SPEC-T006R-focused-journeys V02a: the H01-H05 journey seams are bounded, one-shot and off by default.
+test('review_transport_journey_seams_are_bounded_and_one_shot',{skip},async()=>{
+ const env=await start('authenticated-ready');
+ try{
+  const s0=env.transport.summary();assert.deepEqual([s0.held,s0.override,s0.future],[null,null,null]);
+  const c=await authenticate(env);const sid=await sessionId(env,c);
+  // H01: arming is limited to one API route at a time.
+  for(const[method,path]of[['GET','/'],['GET','/assets/p0.css'],['GET',api+'/unknown'],['PUT',api+'/session']])assert.throws(()=>env.transport.holdNextResponse(method,path),/REVIEW_HOLD/,method+' '+path);
+  assert.throws(()=>env.transport.releaseHeld(),/REVIEW_HOLD/);
+  assert.match(readFileSync(new URL('transport.mjs',import.meta.url),'utf8'),/const HOLD_MS=20000;/);
+  // A held response is admitted but not written; the client's close is recorded and nothing is written after it.
+  env.transport.holdNextResponse('POST',api+'/session/turns');assert.throws(()=>env.transport.holdNextResponse('GET',api+'/session'),/REVIEW_HOLD/);
+  let written=false;const req=httpsRequest({host:'127.0.0.1',port:env.port,method:'POST',path:api+'/session/turns',ca:tls.ca,headers:mutationHeaders(env,c,{'content-type':'application/json','content-length':Buffer.byteLength('{"prompt":"Synthetic held"}')})},res=>{written=true;res.resume();});req.on('error',()=>{});req.end('{"prompt":"Synthetic held"}');
+  await until(()=>env.transport.summary().held);assert.equal(env.fixture.summary().turnStarts,1);assert.deepEqual(env.transport.summary().held,{method:'POST',path:api+'/session/turns',status:202,outcome:null});
+  assert.throws(()=>env.transport.holdNextResponse('GET',api+'/session'),/REVIEW_HOLD/,'a second hold while one is held');
+  req.destroy();await until(()=>env.transport.summary().held.outcome==='client-closed');assert.equal(written,false);assert.throws(()=>env.transport.releaseHeld(),/REVIEW_HOLD/);
+  // releaseHeld writes exactly the fixture response, and the hold disarms after use.
+  env.transport.holdNextResponse('GET',api+'/session');const pending=call(env,{path:api+'/session',headers:{cookie:c.cookie}});await until(()=>env.transport.summary().held?.path===api+'/session'&&env.transport.summary().held.outcome===null);
+  const direct=JSON.parse((await call(env,{path:api+'/session',headers:{cookie:c.cookie}})).body);env.transport.releaseHeld();const released=await pending;
+  assert.equal(released.status,200);assert.deepEqual(JSON.parse(released.body),direct);assert.equal(env.transport.summary().held.outcome,'released');
+  // H04: one stale-instance refusal with no effect, then the next mutation is accepted.
+  for(const[method,path]of[['GET',api+'/session'],['POST',api+'/unknown'],['POST','/']])assert.throws(()=>env.transport.overrideNextInstance(method,path),/REVIEW_OVERRIDE/,method+' '+path);
+  const before=env.fixture.summary();env.transport.overrideNextInstance('POST',api+'/session/cancel');assert.throws(()=>env.transport.overrideNextInstance('POST',api+'/session/cancel'),/REVIEW_OVERRIDE/);
+  const stale=await call(env,{method:'POST',path:api+'/session/cancel',headers:mutationHeaders(env,c)});assert.equal(stale.status,409);assert.equal(JSON.parse(stale.body).error.code,'instance_changed');
+  assert.equal(env.fixture.summary().effects,before.effects);assert.deepEqual(env.transport.summary().override,{method:'POST',path:api+'/session/cancel',applied:true});
+  assert.equal((await call(env,{method:'POST',path:api+'/session/cancel',headers:mutationHeaders(env,c)})).status,200);
+  // H02/H03: each kind reaches a subscribed client and changes no fixture state.
+  assert.throws(()=>env.transport.injectFrame('other'),/REVIEW_INJECT/);
+  const {wsError}=await import('./fixture.mjs');const {unknownFieldFrame}=await import('./transport.mjs');const frame=unknownFieldFrame();assert.equal(frame.review_extra,1);const {review_extra,...plain}=frame;assert.deepEqual(plain,wsError('subscriber_lagged').frame);
+  const raw=[];const sock=new WsClient(env.origin.replace('https:','wss:')+api+'/session/stream',{ca:tls.ca,perMessageDeflate:false,headers:{origin:env.origin,cookie:c.cookie}});sock.on('message',(data,binary)=>raw.push({binary,text:binary?null:data.toString()}));sock.on('error',()=>{});
+  await new Promise(r=>sock.on('open',r));assert.equal(env.transport.injectFrame('malformed'),0,'not yet subscribed');sock.send(subscribeFrame(sid,0));await until(()=>raw.some(f=>f.text?.includes('replay_end')));
+  const counts=JSON.stringify(env.fixture.summary());const base=raw.length;for(const kind of ['malformed','binary','unknown-field'])assert.equal(env.transport.injectFrame(kind),1,kind);await until(()=>raw.length>=base+3);
+  const tail=raw.slice(base);assert.deepEqual(tail.map(f=>f.binary?'binary':f.text),['{','binary',JSON.stringify(frame)]);assert.equal(JSON.stringify(env.fixture.summary()),counts);sock.terminate();
+  // H05: the next subscribe gets the fixture's own future_cursor; the one after is accepted.
+  env.transport.futureNextSubscribe();assert.throws(()=>env.transport.futureNextSubscribe(),/REVIEW_FUTURE/);const high=env.fixture.summary().sequence;
+  const a=await connect(env,{cookie:c.cookie});a.sock.send(subscribeFrame(sid,high));await until(()=>a.closed);
+  assert.deepEqual(a.frames,[{type:'error',code:'future_cursor',message:MESSAGES.future_cursor,latest_available:high}]);assert.equal(a.closed.code,wsError('future_cursor').closeCode);assert.deepEqual(env.transport.summary().future,{armed:false,applied:true});
+  const b=await connect(env,{cookie:c.cookie});b.sock.send(subscribeFrame(sid,high));await until(()=>b.frames.some(f=>f.type==='replay_end'));b.sock.terminate();
+ }finally{await env.close();}
+});

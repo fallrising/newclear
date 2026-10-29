@@ -1,7 +1,7 @@
 ---
 id: SPEC-T006R
 title: Finite HTTPS operator review and measured presentation regression
-status: proposed
+status: verified
 contract_unit: CU-WEB-P0-01
 module: codebox-control-plane/web
 milestone: T-0380 R2-AC-14/E
@@ -25,7 +25,7 @@ provider, protocol, retry, recovery or persistence authority. Existing accepted
 [SPEC-T005B](SPEC-T005B-p0-http-api.md) and
 [SPEC-T005C](SPEC-T005C-p0-websocket-stream.md) determine every wire shape/state.
 Contradictions stop the affected task; they are not resolved by permissive mocks.
-This is documentation only; proposed commands/files below do not yet exist.
+The commands and files named below were the planned interfaces; the commands actually run (`remaining-v7-baseline.mjs`, `conformance-browser.mjs`, `journeys-browser.mjs`, `shared-capture.mjs`) and their results are in the [R2 report](../../fe-review/tasks/round2/report.md).
 
 # Archetype F answers
 
@@ -288,11 +288,11 @@ new production atomicity contract or actor/store test is implied.
 
 # Acceptance evidence, traceability and TD gaps
 
-Current state: proposed specification, Ready task, documentation only. Every product
-fixture/browser/native oracle NOT_RUN; no product counts or screenshots are claimed.
-The separate environment-only prerequisite below has actual evidence. Fill clause→command/
-artifact/result after separate authorization. Rustdoc signatures unchanged; explicit
-projection inspection required, no claim of new automatic drift tooling.
+Current state: verified. Every R01–R12 clause and N01–N09 journey is mapped to its
+command, receipt and result in the [R2 report](../../fe-review/tasks/round2/report.md),
+with limits and product findings. The fresh-context acceptance record is
+[ACCEPT-T006R](../acceptance/T006R.acceptance.md). Rustdoc signatures are unchanged
+(inspected; one added Rust test only); no automatic drift tooling is claimed.
 
 No unresolved inherited semantic TD-GAP identified. Missing TLS tooling/trust proof is
 a startup gate; missing fixture is implementation work. If a measurement needs an

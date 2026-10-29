@@ -10,7 +10,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 # Codebox / Fanzloud 成功契約
 
-> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). An app-free [layer ablation](../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) reproduced the ERR_ABORTED signature on Chromium 153. The trigger is a no-store response consumed through a stream reader; `arrayBuffer()` gave 0/600 and Playwright interception is not necessary. The current unit fixes `p0-client.js` bounded reads and fixture framing. All 27 canonical cells, including the earlier 8, must be recaptured on the new source, and each runtime needs its own owner approval. recovery007 stays FAIL/consumed and PR604 stays Draft. Earlier closure text and "next" recommendations below are history.
+> 2026-10-29 desk T-0433 ([issue706](https://github.com/fallrising/newclear/issues/706)) delivered the Fanzloud FE Round2 unit (R2-AC-14): see the [R2 report](fe-review/tasks/round2/report.md). The evidence is a synthetic HTTPS/WSS review harness in a real browser; real backend wiring and live Cloud were not exercised. The product AC table below is unchanged: mainline stays incomplete, usable tag none, AC-04/AC-05 pending. Sections below record each milestone; the earliest ones describe superseded plans.
 
 
 ## 主線與範圍
@@ -376,16 +376,22 @@ Tests:
 
 `journeys-001` ran once after its own owner approval (「批准：跑一次 journeys-001。」) on `df10a299`: PASS, 11/11 verdicts true in 80.4 s, cleanup complete, port 8443 absent. The independent actual review accepted it with findings. It confirmed that the J03 client timer fired 15,009 ms after the press with no resend. It also recorded a product finding: after detecting an invalid frame itself, the client keeps its socket open until Refresh; the suspected cause, `close(1008)`, is not observed. The limitations are listed in the [spec's result section](docs/specs/SPEC-T006R-focused-journeys.md#journeys-001-result-2026-10-29).
 
-Next: final integration (T0433-3, R2-AC-E): source commits, commands, tool versions, results, mock and real boundaries, cleanup and PR/CI readback. Delivery becomes 19/19 only then.
+The final integration below maps N01–N09 to these receipts.
 
 ## T-0433 shared capture gate R11 (2026-10-29)
 
 The T0433-3 inventory found that SPEC-T006R R11 requires the unchanged shared `docs/fe-review/capture.mjs` to run against private targets, first as a dry run and then as a static capture, and that no run had used it. `targets.json` still named port 18443. The owner chose one bounded shared-capture run (「按你推薦做吧。」). [SPEC-T006R-shared-capture](docs/specs/SPEC-T006R-shared-capture.md) specifies:
-- `targets.json` now names the review origin `https://127.0.0.1:8443`; it stays `verified:false` until the final integration shows every R2-AC-14 condition;
+- `targets.json` now names the review origin `https://127.0.0.1:8443`;
 - a wrapper, `fe-review/shared-capture.mjs`, that serves the bootstrap fixture with the fresh trust, copies `targets.json` byte for byte to private state and runs `capture.mjs` unchanged;
 - exact verdicts for the dry-run plan and the three-size capture, and the `capture-001`/`capture-002` runtime boundary;
 - one review-only transport counter for Chromium's automatic `GET /favicon.ico`, which reaches the server because `capture.mjs` installs no route. Its 404 is recorded as a presentation finding, and any other unknown request still fails.
 
 The independent review rejected the first version because the favicon request was missing from the expectations; this version fixes that. Tests: shared-capture tests including a real dry run of the unchanged shared script, a tool-resolution test against the real review tools, and one loopback transport oracle.
 
-`capture-001` ran once after its own approval (「批准：跑一次 capture-001」) and FAILED in 0.3 s at the wrapper's tool precondition, before any server or browser started: the wrapper read the axe version with `require('@axe-core/playwright/package.json')`, which that package does not export. The FAIL is preserved and backed up. The fix (W09) reads the package files directly and adds a test that would have caught it. After the fix passed review and CI (PR764), `capture-002` ran once as its retry (「批准：跑一次 capture-002。」): PASS in 5.0 s, all four verdicts true, the unchanged `capture.mjs` dry run and three-size capture matched exactly, and cleanup was complete. The independent actual review accepted it with findings: the favicon 404 and a button that touches the input above it are recorded presentation findings, and TLS is shown positively only. `targets.json` stays `verified:false` until the final integration shows every R2-AC-14 condition. Details are in the [spec's result section](docs/specs/SPEC-T006R-shared-capture.md#capture-002-result-2026-10-29-pass).
+`capture-001` ran once after its own approval (「批准：跑一次 capture-001」) and FAILED in 0.3 s at the wrapper's tool precondition, before any server or browser started: the wrapper read the axe version with `require('@axe-core/playwright/package.json')`, which that package does not export. The FAIL is preserved and backed up. The fix (W09) reads the package files directly and adds a test that would have caught it. After the fix passed review and CI (PR764), `capture-002` ran once as its retry (「批准：跑一次 capture-002。」): PASS in 5.0 s, all four verdicts true, the unchanged `capture.mjs` dry run and three-size capture matched exactly, and cleanup was complete. The independent actual review accepted it with findings: the favicon 404 and a button that touches the input above it are recorded presentation findings, and TLS is shown positively only. Details are in the [spec's result section](docs/specs/SPEC-T006R-shared-capture.md#capture-002-result-2026-10-29-pass).
+
+## T-0433 final integration (2026-10-29)
+
+The [R2 report](fe-review/tasks/round2/report.md) records R2-AC-E for this unit: source commits, commands, tool versions, results per clause (R01–R12, N01–N09) with receipts, the mock and real boundary, cleanup and backups, PR/CI readback, limits and product findings. Every R2-AC-14 condition in ROUND2-SDD line 17 holds with linked evidence, so `fe-review/targets.json` is now `verified:true`. `capture-002` ran on the pre-flip bytes (`5aa2d64c…`, `verified:false`); `capture.mjs` does not read `verified`, and the wrapper pin and targets test moved with the flip. T006R is accepted ([ACCEPT-T006R](docs/acceptance/T006R.acceptance.md)).
+
+Product findings, recorded and not fixed: the client socket stays open after a protocol error the client detected itself, until Refresh (suspected `close(1008)`, not observed); favicon 404; the Authenticate button touches the input above it. This does not change the product AC table: real backend/Cloud integration, AC-04, AC-05 and Round 3 stay open.

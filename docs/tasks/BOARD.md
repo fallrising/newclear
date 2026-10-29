@@ -28,10 +28,10 @@
 
 ## T-0380
 
-> 2026-10-28 desk T-0433 resumed Fanzloud ([issue706](https://github.com/fallrising/newclear/issues/706)). Milestone 1, merged as PR604, fixed ERR_ABORTED ([layer ablation](../fe-review/fanzloud-completion-regression/LAYER-ABLATION.md)). Milestone 2, merged as PR725, repaired the M2 defects. The v7 recapture on the M2 source is canonical 27/27, with the R07 gates passing or passing on bounded evidence. Remaining: finite HTTP/WSS conformance and final integration. Earlier closure text below is history.
+> 2026-10-29 desk T-0433 ([issue706](https://github.com/fallrising/newclear/issues/706)) delivered the Fanzloud unit: every R2-AC-14 condition holds with linked evidence ([R2 report](../../platform/fanzloud/fe-review/tasks/round2/report.md)), so FE2-14 and FE2-E are done and Round2 is 19/19 (13 newclear, 5 kernel, Fanzloud). This is synthetic-harness scope, not real backend/Cloud or product mainline acceptance.
 
 
-依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；目前依上方結案決定停止推進Fanzloud。
+依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；Fanzloud由desk T-0433續做並已交付，見[結案紀錄](../fe-review/ROUND2-CLOSEOUT.md)。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -48,8 +48,8 @@
 | FE2-11 | Paired synthetic Web R2 delivered in PR598 | R2-AC-11 | done | 2026-10-24T11:22:03Z | 2026-10-24T17:33:41Z | 2026-10-24T17:34:24Z |
 | FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
-| FE2-14 | platform/fanzloud 暫緩、未完成（[issue706](https://github.com/fallrising/newclear/issues/706)；PR604 Draft；owner停止持續調查） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-28T10:21:52.298548+00:00 |
-| FE2-E | 原全14項整合未完成；13項證據見結案表，Fanzloud部分留issue706 | R2-AC-E | todo | — | — | 2026-10-28T10:21:52.298548+00:00 |
+| FE2-14 | platform/fanzloud 第2輪實作（desk T-0433；[R2 報告](../../platform/fanzloud/fe-review/tasks/round2/report.md)；targets verified） | R2-AC-14 | done | 2026-10-24T12:23:53Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |
+| FE2-E | 全14項證據、交付與狀態一致：13項見[結案表](../fe-review/ROUND2-CLOSEOUT.md)，Fanzloud見R2報告 | R2-AC-E | done | 2026-10-29T06:04:00Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |
 
 
 ## T-0433
@@ -66,7 +66,7 @@ Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud
 | T0433-2d | v7 runner and recapture of all 27 dark cells on the M2-repaired source (desktop, tablet, mobile once each; all CANONICAL_ACCEPT; 27/27) | R2-AC-14 | done | 2026-10-28T17:58:58Z | 2026-10-28T18:18:08Z | 2026-10-28T18:18:08Z |
 | T0433-2e | Finite HTTP/WSS conformance C1: 15 offline oracles, findings F1–F4 (merged PR735) | R2-AC-14 | done | 2026-10-29T03:18:35Z | 2026-10-29T03:41:54Z | 2026-10-29T03:41:54Z |
 | T0433-2f | Harness repair F1–F4 and C2 browser driver (PR739); C2 conformance-001 PASS, actual review ACCEPT | R2-AC-14 | done | 2026-10-29T04:59:16Z | 2026-10-29T05:44:04Z | 2026-10-29T05:44:04Z |
-| T0433-3 | Final integration evidence and delivery after recapture and conformance (milestone 1 merged as PR604). Inventory found R10 N01–N09 without browser receipts; focused journeys spec and driver first ([SPEC-T006R-focused-journeys](../../platform/fanzloud/docs/specs/SPEC-T006R-focused-journeys.md)), merged PR752; `journeys-001` PASS 11/11, actual review ACCEPT_WITH_FINDINGS; R11 shared capture ([SPEC-T006R-shared-capture](../../platform/fanzloud/docs/specs/SPEC-T006R-shared-capture.md), merged PR761): `capture-001` FAIL at wrapper tool precondition, fix PR764, `capture-002` PASS, actual review ACCEPT_WITH_FINDINGS; final integration report next | R2-AC-E | in_progress | 2026-10-29T06:04:00Z | — | 2026-10-29T15:06:37Z |
+| T0433-3 | Final integration (R2-AC-E): focused journeys `journeys-001` PASS (PR752/754), shared capture `capture-001` FAIL kept and `capture-002` PASS (PR761/764/765); [R2 report](../../platform/fanzloud/fe-review/tasks/round2/report.md), R2-AC-14 conditions shown, targets `verified:true` | R2-AC-E | done | 2026-10-29T06:04:00Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
 

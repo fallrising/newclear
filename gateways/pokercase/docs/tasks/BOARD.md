@@ -526,6 +526,12 @@ Demand: desk T-0432 / #698; [fixed acceptance/design](T-0432-antigravity-settlem
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| AS-01 | Per-inference reservation and buffered raw terminal/usage | AS-1–AS-2 | in_progress | 2026-10-29T14:57:00Z | — | 2026-10-29T15:29:00Z |
-| AS-02 | Opaque disposition, errors, storage and restart | AS-3–AS-4 | in_progress | 2026-10-29T14:57:00Z | — | 2026-10-29T15:29:00Z |
-| AS-03 | Isolated HTTP/headless/regression/review and delivery | AS-5 | in_progress | 2026-10-29T14:57:00Z | — | 2026-10-29T15:29:00Z |
+| AS-01 | Per-inference reservation and buffered raw terminal/usage | AS-1–AS-2 | done | 2026-10-29T14:57:00Z | 2026-10-29T15:45:16Z | 2026-10-29T15:45:16Z |
+| AS-02 | Opaque disposition, errors, storage and restart | AS-3–AS-4 | done | 2026-10-29T14:57:00Z | 2026-10-29T15:45:16Z | 2026-10-29T15:45:16Z |
+| AS-03 | Isolated HTTP/headless/regression/review and delivery | AS-5 | done | 2026-10-29T14:57:00Z | 2026-10-29T15:45:16Z | 2026-10-29T15:45:16Z |
+
+產品 [PR768](https://github.com/fallrising/newclear/pull/768) source `c2df63289fe3bbb538f900932e7149fcb889160f`、normal merge `9dac5735e9c56f7d12d7797ac10f1ed72d1ea0b1` at 2026-10-29T15:45:16Z；必要CI、獨立來源/執行審查、12檔遠端內容、source/merge祖先及雙方Desk-Task trailer核對通過。
+
+本表done記錄已合併產品步驟；完整AS-5仍需最終交接門檻。
+
+此為產品merge時點快照；AS-5後續帳本發布、完整備份`t0432-antigravity-settlement-20261029`逐檔核對與本輪工作樹清理，依私人`t0432-antigravity-settlement/handoff.json`最終事實核實，不預先宣稱完成。完成本輪即停止，不啟動下一里程碑。

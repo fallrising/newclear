@@ -10,6 +10,9 @@ source_commit: 0111908492c32d0b01d561b24b6024737cb4f641
 
 # HAI Taskboard 成功契約
 
+剩餘工作與後續設計的順序、依賴及規劃驗收見 [2026-10-29 計劃](docs/plans/remaining-work-20261029.md)。
+該文件工作不改下列產品 AC、歷史驗證日期或 Fake-only 範圍；提出的未來驗收仍未執行。
+
 ## 主線與範圍
 
 [P0-A SDD](docs/SDD.md)要求單 operator 能由持久工作圖與 ContextPack 接續工作，經 subject-bound review/evidence 安全完成。

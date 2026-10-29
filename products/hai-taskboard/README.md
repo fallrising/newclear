@@ -2,6 +2,8 @@
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
+> 剩餘主線與未實作設計的分階段計劃：[remaining-work plan](docs/plans/remaining-work-20261029.md)。本輪只交付規劃與審查，不啟動產品實作。
+
 
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 

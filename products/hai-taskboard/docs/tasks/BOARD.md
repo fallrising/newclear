@@ -124,11 +124,24 @@ Source: `a2c0b5116018160d5e5c24c10fa49c81adff806e`. H01..H04 and product accepta
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HP01 | Inventory unfinished mainline and existing proposed designs | PLAN-01 | in_progress | 2026-10-29T17:03:00Z | — | 2026-10-29T17:19:16Z |
-| HP02 | Define bounded sequence/acceptance and revise after Claude review | PLAN-02 | in_progress | 2026-10-29T17:03:00Z | — | 2026-10-29T17:19:16Z |
-| HP03 | Verify documents, deliver and retain review/evidence | PLAN-03 | in_progress | 2026-10-29T17:03:00Z | — | 2026-10-29T17:19:16Z |
+| HP01 | Inventory unfinished mainline and existing proposed designs | PLAN-01 | done | 2026-10-29T17:03:00Z | 2026-10-29T17:26:03Z | 2026-10-29T17:27:17Z |
+| HP02 | Define bounded sequence/acceptance and revise after Claude review | PLAN-02 | done | 2026-10-29T17:03:00Z | 2026-10-29T17:26:03Z | 2026-10-29T17:27:17Z |
+| HP03 | Verify documents, deliver and retain review/evidence | PLAN-03 | done | 2026-10-29T17:03:00Z | 2026-10-29T17:26:03Z | 2026-10-29T17:27:17Z |
 
 Plan: [remaining-work-20261029](../plans/remaining-work-20261029.md).
 Evidence and bounded review: [report](../evidence/remaining-work-plan-20261029.md).
 Future M/U/D slices are unstarted planning references, not separately claimed tasks.
 This documentation milestone stops before product implementation; the overall T-0339 remains incomplete.
+
+Delivery: [PR #781](https://github.com/fallrising/newclear/pull/781) merged at
+`2026-10-29T17:26:03Z` as `2c73caf464bec1281f037aca3f2281aae60b0362`.
+The reviewed head was `99ad6c304a36ba3fbd8be8fbdb36b54108037f91`;
+[HAI backend/web CI](https://github.com/fallrising/newclear/actions/runs/40920283358)
+and [project success CI](https://github.com/fallrising/newclear/actions/runs/40920283158)
+completed successfully. Remote plan blob `eb4c38f2993489cd69f3ee34c6ef8fc6440bbf61`
+matched the reviewed local file; all product paths matched the merged checkpoint.
+Claude Opus 5.5 returned REWORK then ACCEPT; the [report](../evidence/remaining-work-plan-20261029.md)
+retains findings, revisions, limits and actual document checks. HP01..HP03 close only this
+planning milestone. H01..H04, SUCCESS product ACs, mainline incomplete and usable tag none stay unchanged.
+The next proposed task is M0 baseline reconciliation, awaiting owner instruction; no implementation
+was started. The accepted SDD/bootstrap authority conflict remains a future explicit decision.

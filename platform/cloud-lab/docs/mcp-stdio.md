@@ -59,3 +59,5 @@ Tool input驗證錯誤回isError／INVALID_REQUEST；未知工具、非法RPC結
 ## BP持久政策
 
 可信host可加`--policy /private/bot-policy.json`；須先依[bot政策](bot-policy.md)離線初始化原state。該配額跨MCP連線／程序持久，原session每秒限制仍保留。工具參數不接受policy或初始化；尚未更新live安裝。
+
+BR新增[明確離線續租](bot-policy-renewal.md)管理CLI；MCP工具不增加續租權限。切換後仍帶old policy的host會拒絕；operator完成回執核對後才另改host的可信policy路徑。

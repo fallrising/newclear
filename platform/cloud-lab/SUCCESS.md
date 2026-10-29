@@ -107,3 +107,7 @@ Owner已批准[HL01–04實際低頻排程接入](docs/evidence/m1-health-schedu
 ## BP：持久 bot 政策
 
 Owner同意繼續常態政策開發；[BP01–04契約](docs/bot-policy.md)先實作離線期限／持久配額及可信MCP接入。[319tests與T842獨立審查](docs/evidence/m1-bot-policy.md)通過；本輪source／local驗收，live啟用及完整主線仍pending。
+
+## BR：顯式 bot 政策續租
+
+Owner繼續開發；[BR01–04契約](docs/bot-policy-renewal.md)實作離線預覽、到期後CAS續租及歷史保留，[336tests與T843複審](docs/evidence/m1-bot-policy-renewal.md)通過，source／local驗收；live啟用及完整主線仍pending。

@@ -72,3 +72,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [Bot有界真實驗證](docs/bot-live.md)已完成bot-only30分鐘續權、一筆MCP→原runner→validated/healthy及保全回讀；[證據](docs/evidence/m1-bot-live.md)記錄實際觀測與操作端相對journal路徑修正。Grok已恢復status-only，未執行模型或延長其他角色。
 
 [持久bot政策](docs/bot-policy.md)新增最多24小時租期、24新ID／240call持久上限、明確離線初始化及MCP可信接入；重新連線不重置，未知保留同ID。[319tests及獨立審查](docs/evidence/m1-bot-policy.md)通過；只交付source／local，未改實際Grok設定或續權。
+
+[顯式bot續租](docs/bot-policy-renewal.md)提供離線預覽、舊期到期後CAS切換、原請求／歷史保留及同指令重試不補額度；[336tests及獨立審查](docs/evidence/m1-bot-policy-renewal.md)通過；仍為source／local交付，未安裝或續live權限。

@@ -68,7 +68,7 @@ class MCPTests(unittest.TestCase):
         self.assertFalse(replies[1]['result']['tools'][1]['annotations']['readOnlyHint'])
 
     def test_arguments_reject_authority_injection_and_invalid_uuid(self):
-        for args in [{'request_id':RID,'policy':'/secret'}, {'request_id':RID,'initialize_policy':True}, {'request_id':RID,'config':'/secret'},{'request_id':RID,'url':'https://evil.example'},{'request_id':RID,'allow_submit':True},{'request_id':RID.upper()},{'request_id':'../shell'},[],None]:
+        for args in [{'request_id':RID,'policy':'/secret'}, {'request_id':RID,'initialize_policy':True}, {'request_id':RID,'renew_policy':True}, {'request_id':RID,'next_policy':'/secret'}, {'request_id':RID,'config':'/secret'},{'request_id':RID,'url':'https://evil.example'},{'request_id':RID,'allow_submit':True},{'request_id':RID.upper()},{'request_id':'../shell'},[],None]:
             request=call();request['params']['arguments']=args
             with self.subTest(args=args):
                 _,replies,seen=self.session(lines(INIT,READY,request),allow=True)

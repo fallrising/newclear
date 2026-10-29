@@ -361,3 +361,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40917260006`、Project success `40917260269`、llms `40917260387`。本機319tests（63Node256Python）及六項文件／task／report／diff檢查、T842 focusedACCEPT；[BP證據](../evidence/m1-bot-policy.md)保留初始RED、reviewREWORK及expiry後時鐘回退的兩個RED修正，沒有忽略失敗。
 - GitHub connector交付，匿名HTTPS回讀；remote tree `2fb69b4e8bb970d1ab06e8e8b393805cbf6dec91`與local commit `06896604e0d1547afb154cb193f064220df9c264`相同，commit身份不同。政策有界24小時、24新ID／240call，原state持久配額及同ID恢復；實際本機HTTP／多程序並行／collector閉環與額度耗盡拒絕通過。
 - BP01–04 source／local完成，未更新live安裝／Grok／Cloudflare／授權／付費；明確續期與實際啟用、Python3.11及完整主線仍pending，無usabletag。原HL T-0015仍open；本收尾僅改任務板並只關閉BP。
+
+## T-0021 — 顯式 bot 政策續租
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0021-1 | 離線預覽與可信候選 | BR-01 | in_progress | 2026-10-29T17:09:18Z | — | 2026-10-29T17:18:48Z |
+| T-0021-2 | 原子續租與歷史保留 | BR-02 | in_progress | 2026-10-29T17:09:18Z | — | 2026-10-29T17:18:48Z |
+| T-0021-3 | 重試／併發／跨期恢復 | BR-03 | in_progress | 2026-10-29T17:09:18Z | — | 2026-10-29T17:18:48Z |
+| T-0021-4 | 回歸、審查及交付 | BR-04 | in_progress | 2026-10-29T17:09:18Z | — | 2026-10-29T17:18:48Z |

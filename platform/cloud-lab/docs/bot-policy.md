@@ -19,9 +19,9 @@
 
 政策為owner-only、無symlink的本機檔案（建議0600；沿用private_read亦接受0400等owner-only模式），只從可信CLI指定。完整config SHA256綁定原credential／scope。operator必須先以fresh來源取bot HMAC、grant、Access及runner實際stop的最早期限，填入authority_until；離線工具不會把這個輸入宣稱為已驗證授權。遠端Access／HMAC／grant仍是權威。
 
-初始化是明確管理動作；首次將政策digest存入原requests.sqlite並保留全部既有request。已有政策不得再次初始化或改檔續期。執行期政策必須對應已初始化帳本；遺失帳本不可自動重建配額。新版本對已綁定帳本省略--policy亦拒絕。這是合作工具host的本機護欄，不是同OS使用者／舊版本／複製或回滾整份state的防竄改邊界；不得刪state解限。
+初始化是明確管理動作；首次將政策digest存入原requests.sqlite並保留全部既有request。已有政策不得再次初始化或改檔續期；須使用下述BR顯式流程。執行期政策必須對應已初始化帳本；遺失帳本不可自動重建配額。新版本對已綁定帳本省略--policy亦拒絕。這是合作工具host的本機護欄，不是同OS使用者／舊版本／複製或回滾整份state的防竄改邊界；不得刪state解限。
 
-啟用與更新需要固定source候選、原state備份／比對、fresh期限及具體方案。政策續期／遷移尚未實作；額度耗盡或到期先停提交並保留state，另行設計顯式續期，不能另建state繞過。
+啟用與更新需要固定source候選、原state備份／比對、fresh期限及具體方案。後續[BR顯式續租](bot-policy-renewal.md)已提供離線preview及到期後切換，保留原requests及歷史；額度耗盡先停提交，不能提前續租或另建state繞過。live啟用另行驗收。
 
 ## 私人政策與命令
 

@@ -350,7 +350,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0020-1 | 私人期限及離線初始化 | BP-01 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |
-| T-0020-2 | 持久配額與同ID恢復 | BP-02 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |
-| T-0020-3 | MCP可信政策與拒絕 | BP-03 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |
-| T-0020-4 | 回歸、審查及交付 | BP-04 | in_progress | 2026-10-29T16:51:30Z | — | 2026-10-29T17:00:00Z |
+| T-0020-1 | 私人期限及離線初始化 | BP-01 | done | 2026-10-29T16:51:30Z | 2026-10-29T17:03:08Z | 2026-10-29T17:04:36Z |
+| T-0020-2 | 持久配額與同ID恢復 | BP-02 | done | 2026-10-29T16:51:30Z | 2026-10-29T17:03:08Z | 2026-10-29T17:04:36Z |
+| T-0020-3 | MCP可信政策與拒絕 | BP-03 | done | 2026-10-29T16:51:30Z | 2026-10-29T17:03:08Z | 2026-10-29T17:04:36Z |
+| T-0020-4 | 回歸、審查及交付 | BP-04 | done | 2026-10-29T16:51:30Z | 2026-10-29T17:03:08Z | 2026-10-29T17:04:36Z |
+
+## T-0020交付與遠端回讀
+
+- [Feature PR774](https://github.com/fallrising/newclear/pull/774) head `64588f4ac31f8baec4e8e89af31f36c718fc9628`，merge `ea496aac7ff7669140341c11e00545d7ff6fb291`，合併時間2026-10-29T17:03:08Z。19份交付檔案與遠端main逐byte相等；根README／llms的Cloud Lab條目相等，其他行逐byte對照merge第一parent，確認同期memvid索引更新保留。首次整檔README相等斷言失敗已記錄並查明原因，非runtime漂移；remote feature為main祖先。
+- CI全過：Cloud Lab `40917260006`、Project success `40917260269`、llms `40917260387`。本機319tests（63Node256Python）及六項文件／task／report／diff檢查、T842 focusedACCEPT；[BP證據](../evidence/m1-bot-policy.md)保留初始RED、reviewREWORK及expiry後時鐘回退的兩個RED修正，沒有忽略失敗。
+- GitHub connector交付，匿名HTTPS回讀；remote tree `2fb69b4e8bb970d1ab06e8e8b393805cbf6dec91`與local commit `06896604e0d1547afb154cb193f064220df9c264`相同，commit身份不同。政策有界24小時、24新ID／240call，原state持久配額及同ID恢復；實際本機HTTP／多程序並行／collector閉環與額度耗盡拒絕通過。
+- BP01–04 source／local完成，未更新live安裝／Grok／Cloudflare／授權／付費；明確續期與實際啟用、Python3.11及完整主線仍pending，無usabletag。原HL T-0015仍open；本收尾僅改任務板並只關閉BP。

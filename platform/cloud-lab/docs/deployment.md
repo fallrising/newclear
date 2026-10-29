@@ -51,3 +51,7 @@ runner journal 是唯一執行證據：先保存 started，再採樣，完成先
 ## 無桌面授權
 
 連線補權與 callback 回貼流程見 [OAuth 操作紀錄](headless-oauth.md)。本輪 owner 確認 Workers Free／零新增付費；不開付費訂閱，也不將未知計費查詢寫成已驗證零帳單。
+
+## 已批准排程的接續
+
+[HL部分執行與保留證據](evidence/m1-health-schedule-live.md)記錄assets-upload-session的兩次500、bounded retry及最終保留核對。原runtime／scheduler／Cron未更新；恢復時重採fresh前態並固定新起點，不重用失敗嘗試的時間或假稱已驗真實Cron。原批准在原截止內持續有效。

@@ -14,9 +14,11 @@ M2: fixed AC in docs/milestones/development-pilot.md; meaningful pre-refactor re
 ## Status
 - Claim complete; first claim CI failed on concurrent T-0436, corrected by normal T-0437 commit and second CI succeeded.
 - M1 complete: #775 merged and read back; independent review and both required CI passed.
-- M2 implementation and local evidence complete; independent reviewer found no runtime must-fix. Final PR/CI/merge pending.
+- M2 implementation and local evidence complete; independent reviewer found no runtime must-fix. M2 #778 merged after all three CI passed; remote readback confirmed.
 
 ## Checkpoint 2026-10-29T17:15Z
 M1 #775 merged at 17:07:58Z, remote readback confirmed. M2 helpers extracted with legacy import compatibility; source RED then 4 focused/33 existing tests green; integrated 39 tests green. Original real suite 7/7; true pilot 159 nodes/470 edges, ten source callsites/six unique relations present, MCP passed. Initial sandbox MCP failure preserved; native execution passed without upstream changes. Worker T-002 accepted for integration pending independent T-003 review. 47 contracts/8 llms and 40 workflow gates passed. Provider usage unknown; two native agents started (reviewer reused), full orchestration counts unknown. No third milestone initiated.
 
 Precommit staged whitespace check caught one trailing blank line in new source.py; removed without behavioral change, then staged gate rerun. Reviewer independently passed 39 tests, verified AST-identical helpers and all report source hashes.
+
+M2 merged 2026-10-29T17:19:03Z at a9c61945b6af1101c024c0566a2cfb2f91399344. Final closeout updates documentation/BOARD and desk/journal factual records only. No new product milestone.

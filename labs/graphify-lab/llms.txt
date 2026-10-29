@@ -3,9 +3,9 @@
 > Fixed-version local code graphs, developer scenarios and one shared reference source/index per revision.
 
 Tier: ungraded
-Status: spec-only
+Status: partial
 Interfaces: cli, mcp
-Entrypoint: see README for local commands
+Entrypoint: python -m graphify_lab (local CLI); serve <reference> (stdio MCP)
 Auth: none
 Spec: none — experimental CLI with executable acceptance scenarios, not a network API
 

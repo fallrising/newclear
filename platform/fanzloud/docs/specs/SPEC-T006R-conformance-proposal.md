@@ -110,7 +110,7 @@ Oracles added (35 fe-review node suites in total):
 
 | File | Oracles | Result |
 |---|---|---|
-| `conformance-transport.node.mjs` | `review_tls_node_client_trusts_only_private_ca_and_loopback_name`, `review_wss_upgrade_requires_cookie_origin_and_fixed_path`, `review_wss_replay_live_order_and_exact_envelopes`, `review_wss_errors_have_exact_fields_and_policy_close`, `review_wss_invalid_frames_close_without_effects`, `review_wss_logout_expiry_and_shutdown_close_promptly`, `review_wss_subscribe_timeout_closes_after_five_seconds`, `review_http_over_https_matches_actual_controller_contract`, `finding_subscriber_cap_is_http_403_not_subscriber_limit_1013` | 9/9 over the real loopback HTTPS/WSS transport (about 6 s) |
+| `conformance-transport.node.mjs` | `review_tls_node_client_trusts_only_private_ca_and_loopback_name`, `review_wss_upgrade_requires_exact_origin_and_accepts_valid_cookie`, `review_wss_replay_live_order_and_exact_envelopes`, `review_wss_errors_have_exact_fields_and_policy_close`, `review_wss_invalid_frames_close_without_effects`, `review_wss_logout_expiry_and_shutdown_close_promptly`, `review_wss_subscribe_timeout_closes_after_five_seconds`, `review_http_over_https_matches_actual_controller_contract`, `finding_subscriber_cap_is_http_403_not_subscriber_limit_1013`, `finding_upgrade_refusals_are_bare_403_not_401_or_404` | 10/10 over the real loopback HTTPS/WSS transport (about 6 s) |
 | `conformance-partitions.node.mjs` | `review_gap_restart_timeout_and_refresh_preserve_no_resend` | 1/1 |
 | `conformance-evidence.node.mjs` | `review_canonical_capture_keys_are_complete_and_immutable`, `review_measured_presentation_is_accessible_at_three_sizes`, `review_secrets_clear_and_diff_is_inert`, `review_evidence_keeps_native_and_mock_boundaries` | 4/4 against the accepted v7 results |
 
@@ -121,12 +121,14 @@ The meaningful-failure checks were mutations, restored byte-exactly afterwards:
 - An altered desktop result breaks the R10 chain.
 - One mobile cell set to `overflow=true` fails R07.
 
-Without `REVIEW_MODULES` or `FE_REVIEW_RUNS`, the environment-dependent oracles skip with a stated reason. With both set, all fe-review suites pass 262/262; without them, 250 pass and 13 skip. The T006 suite passes 10/10.
+Without `REVIEW_MODULES` or `FE_REVIEW_RUNS`, the environment-dependent oracles skip with a stated reason. With both set, every fe-review suite passes; without them, the 14 environment-dependent tests skip with a stated reason. The review's follow-up changes tightened several checks: exact T005C error messages, an exact 1024-byte subscribe being accepted, a 400 ms logout/expiry bound, cookie attributes and clearing, the diff `Content-Security-Policy` and `Content-Disposition` headers, a server-first close in the R06 error partitions, and explicit plain-HTTP refusal. The T006 suite passes 10/10.
 
 Findings against T005C (the harness is unchanged; repair is an owner decision because it moves the v7 source pins):
 
 - F1 — subscriber cap. T005C requires a `subscriber_limit` error and close 1013. The review transport refuses the ninth upgrade with HTTP 403. This is measured and pinned by `finding_subscriber_cap_is_http_403_not_subscriber_limit_1013`.
 - F2 — back-pressure. From source inspection: an outbound frame over 64 KiB, or `bufferedAmount` over 64 KiB, triggers a `protocol_error` close 1008 instead of `subscriber_lagged` (1013) or `stream_unavailable` (1013). The frames are small, so this is not reachable in a test.
 - F3 — `history_gap`, `subscriber_lagged` and `stream_unavailable` cannot be produced through the review transport. History holds 256 events, and no scenario exceeds that. The client's handling of `history_gap` is covered in the R06 partitions.
+
+- F4 — upgrade refusals. T005C P-005C-01 requires HTTP 401 for a missing cookie, and T005B unknown routes are 404, both with the safe JSON envelope. The review transport refuses every upgrade (missing cookie, wrong path, cap) with a bare, empty 403 that carries no `no-store` or `nosniff`. An Origin mismatch is 403 as required. A 426 is not reachable. This is measured by `finding_upgrade_refusals_are_bare_403_not_401_or_404`.
 
 R02's browser half (TLS trust in a real browser), R06 in a real browser, and the R07 items not yet exercised remain C2.

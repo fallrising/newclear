@@ -20,6 +20,8 @@ const skip=modules?false:'REVIEW_MODULES is unset; it must name the directory co
 let WsClient,WsServer;
 if(modules){const req=createRequire(join(modules,'playwright','package.json'));assert.equal(req('playwright/package.json').version,'1.63.0');({ws:WsClient,wsServer:WsServer}=req('playwright-core/lib/utilsBundle'));}
 const bearer='synthetic-review-bootstrap-canary-0001';
+// SPEC-T005C fixed application error messages.
+const MESSAGES={authentication_expired:'operator authentication expired',subscribe_timeout:'subscription was not received before its deadline',protocol_error:'WebSocket application frame is invalid',unsupported_version:'WebSocket protocol version is unsupported',wrong_session:'session identity changed; refresh before reconnect',future_cursor:'requested session cursor is in the future'};
 const until=async(check,ms=3000)=>{const end=performance.now()+ms;while(!check()){if(performance.now()>end)throw Error('REVIEW_WAIT_TIMEOUT');await new Promise(r=>setTimeout(r,10));}};
 
 let tls;
@@ -61,20 +63,31 @@ test('review_tls_node_client_trusts_only_private_ca_and_loopback_name',{skip},as
   assert.equal((await call(env,{path:'/'})).status,200);
   await assert.rejects(call(env,{path:'/',ca:tls.other}),e=>/UNABLE_TO_VERIFY|self.signed|unable to get/i.test(e.code+' '+e.message));
   const plain=await new Promise(resolve=>{const req=httpRequest({host:'127.0.0.1',port:env.port,path:'/'},res=>{res.resume();resolve(res.statusCode);});req.on('error',()=>resolve('refused'));req.setTimeout(3000,()=>{req.destroy();resolve('refused');});req.end();});
-  assert.notEqual(plain,200);
+  assert(plain==='refused'||plain===400,`plain HTTP got ${plain}`);
  }finally{await env.close();}
  const wrong=await start('authenticated-ready',{key:tls.wrongKey,cert:tls.wrongCert});
  try{await assert.rejects(call(wrong,{path:'/'}),e=>e.code==='ERR_TLS_CERT_ALTNAME_INVALID');}finally{await wrong.close();}
 });
 
-test('review_wss_upgrade_requires_cookie_origin_and_fixed_path',{skip},async()=>{
+test('review_wss_upgrade_requires_exact_origin_and_accepts_valid_cookie',{skip},async()=>{
+ const env=await start('authenticated-ready');
+ try{const c=await authenticate(env);
+  // T005C P-005C-02: Origin mismatch is HTTP 403.
+  assert.equal((await connect(env,{cookie:c.cookie,origin:'https://127.0.0.1:1'})).status,403);
+  const good=await connect(env,{cookie:c.cookie});assert.equal(good.opened,true);
+  assert.equal(env.transport.summary().rejectedUpgrades,1);good.sock.close(1000);await until(()=>good.closed);
+ }finally{await env.close();}
+});
+
+// Finding F4: T005C P-005C-01 requires HTTP 401 for a missing cookie, and T005B unknown routes are 404,
+// both with the safe JSON envelope. The review transport refuses every upgrade with a bare, empty 403.
+test('finding_upgrade_refusals_are_bare_403_not_401_or_404',{skip},async()=>{
  const env=await start('authenticated-ready');
  try{const c=await authenticate(env);
   assert.equal((await connect(env,{})).status,403);
-  assert.equal((await connect(env,{cookie:c.cookie,origin:'https://127.0.0.1:1'})).status,403);
   assert.equal((await connect(env,{cookie:c.cookie,path:api+'/session/streams'})).status,403);
-  const good=await connect(env,{cookie:c.cookie});assert.equal(good.opened,true);
-  assert.equal(env.transport.summary().rejectedUpgrades,3);good.sock.close(1000);await until(()=>good.closed);
+  const raw=await new Promise((resolve,reject)=>{const req=httpsRequest({host:'127.0.0.1',port:env.port,path:api+'/session/stream',ca:tls.ca,headers:{connection:'Upgrade',upgrade:'websocket','sec-websocket-version':'13','sec-websocket-key':Buffer.alloc(16,1).toString('base64'),origin:env.origin}});req.on('response',res=>{const chunks=[];res.on('data',x=>chunks.push(x));res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body:Buffer.concat(chunks)}));});req.on('upgrade',()=>reject(Error('REVIEW_UNEXPECTED_UPGRADE')));req.on('error',reject);req.end();});
+  assert.equal(raw.status,403);assert.equal(raw.body.length,0);assert.equal(raw.headers['cache-control'],undefined);
  }finally{await env.close();}
 });
 
@@ -107,7 +120,7 @@ test('review_wss_errors_have_exact_fields_and_policy_close',{skip},async()=>{
   for(const[input,expected]of cases){const s=await connect(env,{cookie:c.cookie});s.sock.send(input);await until(()=>s.closed);
    assert.equal(s.frames.length,1,expected.code);const frame=s.frames[0];
    assert.deepEqual(Object.keys(frame).sort(),['code','message','type',...Object.keys(expected).filter(k=>k!=='code')].sort(),expected.code);
-   assert.equal(frame.type,'error');for(const[k,v]of Object.entries(expected))assert.equal(frame[k],v,expected.code+' '+k);
+   assert.equal(frame.type,'error');assert.equal(frame.message,MESSAGES[expected.code],expected.code);for(const[k,v]of Object.entries(expected))assert.equal(frame[k],v,expected.code+' '+k);
    assert.equal(s.closed.code,1008,expected.code);assert.equal(s.closed.reason,expected.code);}
   assert.deepEqual(mutations(env.fixture),before);await until(()=>env.transport.summary().clients===0);
  }finally{await env.close();}
@@ -120,6 +133,8 @@ test('review_wss_invalid_frames_close_without_effects',{skip},async()=>{
   assert.equal(binary.frames[0]?.code,'protocol_error');assert.equal(binary.closed.code,1008);
   const repeated=await connect(env,{cookie:c.cookie});repeated.sock.send(subscribeFrame(sid));await until(()=>repeated.frames.some(f=>f.type==='replay_end'));repeated.sock.send(subscribeFrame(sid));await until(()=>repeated.closed);
   assert.equal(repeated.frames.at(-1).code,'protocol_error');assert.equal(repeated.closed.code,1008);
+  const exact=subscribeFrame(sid).replace('{','{'+' '.repeat(1024-Buffer.byteLength(subscribeFrame(sid))));assert.equal(Buffer.byteLength(exact),1024);
+  const limit=await connect(env,{cookie:c.cookie});limit.sock.send(exact);await until(()=>limit.frames.some(f=>f.type==='replay_end'));assert.equal(limit.frames[0].type,'replay_begin');limit.sock.close(1000);await until(()=>limit.closed);
   // T005C: an oversize frame may be closed by the WebSocket library before an application error; only this connection drops.
   const oversize=await connect(env,{cookie:c.cookie});oversize.sock.send('x'.repeat(1025));await until(()=>oversize.closed);
   assert.equal(oversize.frames.length,0);assert.equal(oversize.closed.code,1009);
@@ -133,10 +148,10 @@ test('review_wss_logout_expiry_and_shutdown_close_promptly',{skip},async()=>{
   const subscribed=async()=>{const c=await authenticate(env);const s=await connect(env,{cookie:c.cookie});s.sock.send(subscribeFrame(await sessionId(env,c)));await until(()=>s.frames.some(f=>f.type==='replay_end'));return {c,s};};
   const a=await subscribed();const t0=performance.now();
   assert.equal((await call(env,{method:'DELETE',path:api+'/operator/session',headers:mutationHeaders(env,a.c)})).status,204);
-  await until(()=>a.s.closed);assert(a.s.closed.at-t0<750,`logout close took ${Math.round(a.s.closed.at-t0)}ms`);
-  assert.equal(a.s.frames.at(-1).code,'authentication_expired');assert.equal(a.s.closed.code,1008);
+  await until(()=>a.s.closed);assert(a.s.closed.at-t0<400,`logout close took ${Math.round(a.s.closed.at-t0)}ms`);
+  assert.equal(a.s.frames.at(-1).code,'authentication_expired');assert.equal(a.s.frames.at(-1).message,MESSAGES.authentication_expired);assert.equal(a.s.closed.code,1008);
   const b=await subscribed();const t1=performance.now();env.advance(300001);
-  await until(()=>b.s.closed);assert(b.s.closed.at-t1<750,`expiry close took ${Math.round(b.s.closed.at-t1)}ms`);
+  await until(()=>b.s.closed);assert(b.s.closed.at-t1<400,`expiry close took ${Math.round(b.s.closed.at-t1)}ms`);
   assert.equal(b.s.frames.at(-1).code,'authentication_expired');assert.equal(b.s.closed.code,1008);
   env.advance(-300001);const d=await subscribed();env.transport.holdReconnect(10);
   await until(()=>d.s.closed);assert.equal(d.s.closed.code,1012);assert.equal(d.s.closed.reason,'server_shutdown');
@@ -148,7 +163,7 @@ test('review_wss_subscribe_timeout_closes_after_five_seconds',{skip,timeout:1500
  const env=await start('authenticated-ready');
  try{const c=await authenticate(env);const s=await connect(env,{cookie:c.cookie});const t0=performance.now();await until(()=>s.closed,9000);
   const elapsed=s.closed.at-t0;assert(elapsed>=4500&&elapsed<7500,`timeout after ${Math.round(elapsed)}ms`);
-  assert.equal(s.frames[0].code,'subscribe_timeout');assert.equal(s.closed.code,1008);assert.equal(s.closed.reason,'subscribe_timeout');
+  assert.equal(s.frames[0].code,'subscribe_timeout');assert.equal(s.frames[0].message,MESSAGES.subscribe_timeout);assert.equal(s.closed.code,1008);assert.equal(s.closed.reason,'subscribe_timeout');
  }finally{await env.close();}
 });
 
@@ -167,7 +182,7 @@ test('review_http_over_https_matches_actual_controller_contract',{skip},async()=
  const env=await start('success-diff'),storage=new Map(),seen=[];let state,cookie='';
  const fetch=async(path,init)=>{const headers=Object.fromEntries(new Headers(init.headers));if(cookie)headers.cookie=cookie;if(init.method!=='GET')headers.origin=env.origin;
   const r=await call(env,{method:init.method,path,headers,body:init.body??''});seen.push({method:init.method,path,r});
-  if(r.headers['set-cookie'])cookie=r.headers['set-cookie'][0].split(';')[0];
+  if(r.headers['set-cookie']){const sc=r.headers['set-cookie'][0];cookie=/;\s*Max-Age=0(;|$)/.test(sc)?'':sc.split(';')[0];}
   const out=new Headers();for(const[k,v]of Object.entries(r.headers))if(k!=='set-cookie')out.set(k,Array.isArray(v)?v.join(', '):v);
   return new Response(r.status===204?null:r.body,{status:r.status,headers:out});};
  const createWebSocket=url=>{assert.equal(url,env.origin.replace('https:','wss:')+api+'/session/stream');const shim={};
@@ -188,6 +203,12 @@ test('review_http_over_https_matches_actual_controller_contract',{skip},async()=
    if(r.status===204){assert.equal(r.body.length,0,label);continue;}
    assert.equal(Number(r.headers['content-length']),r.body.length,label);assert.equal(r.headers['transfer-encoding'],undefined,label);
    assert.equal(r.headers['content-type'],path===api+'/session/diff'&&r.status===200?'text/plain; charset=utf-8':'application/json',label);}
+  const issued=seen.find(x=>x.method==='POST'&&x.path===api+'/operator/session').r.headers['set-cookie'][0];
+  assert.match(issued,/^__Host-codebox_p0=[A-Za-z0-9_-]{43}; Secure; HttpOnly; SameSite=Strict; Path=\/; Max-Age=300$/);
+  const cleared=seen.find(x=>x.method==='DELETE'&&x.path===api+'/operator/session').r.headers['set-cookie'][0];
+  assert.match(cleared,/^__Host-codebox_p0=; Secure; HttpOnly; SameSite=Strict; Path=\/; Max-Age=0$/);assert.equal(cookie,'');
+  const diff=seen.find(x=>x.path===api+'/session/diff'&&x.r.status===200).r.headers;
+  assert.equal(diff['content-security-policy'],"default-src 'none'; sandbox");assert.equal(diff['content-disposition'],'inline');
   assert(seen.length>=8);assert(!seen.some(({r})=>r.body.includes(bearer)));
  }finally{controller.dispose();await env.close();}
 });

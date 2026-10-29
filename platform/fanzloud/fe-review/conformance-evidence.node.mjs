@@ -62,6 +62,7 @@ test('review_evidence_keeps_native_and_mock_boundaries',{skip},()=>{
   assert.deepEqual([result.tools.node,result.tools.playwright,result.tools.chromium],['v24.18.0','1.63.0','153.0.8010.12'],phase);
   for(const path of served.keys())assert.equal(result.sourceHashes[path],served.get(path),phase+' '+path); // evidence is for exactly the current served assets
  }
- const spec=readFileSync(new URL('../docs/specs/SPEC-T006R-conformance-proposal.md',import.meta.url),'utf8');
- assert.match(spec,/Real backend or Cloud integration, production authentication conformance and provider calls/);
+ // The mock boundary and native-gate rule come from the governing Round 2 SDD, not from this proposal.
+ const sdd=readFileSync(new URL('../../../docs/fe-review/ROUND2-SDD.md',import.meta.url),'utf8');
+ assert.match(sdd,/mock 不等於真 backend\/Cloud 驗收；真整合須另有明確範圍/);assert.match(sdd,/無對應 test script 的項目說明原生 gate 適用性/);
 });

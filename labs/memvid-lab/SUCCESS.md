@@ -2,10 +2,10 @@
 project: labs/memvid-lab
 purpose: 以真實固定版本 Memvid 實跑官方記憶場景與文字、PDF、影像和語音能力
 kind: lab
-mainline: incomplete
+mainline: complete
 usable_tag: none
-reviewed: 2026-10-28
-source_commit: 7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2
+reviewed: 2026-10-29
+source_commit: 67132cd45bcd4e53fb61d4a1f6b650408f34e2e8
 ---
 
 # Memvid lab 成功契約
@@ -32,12 +32,14 @@ source_commit: 7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2
 ## 本次計畫
 
 Owner 直接指示，T-0001／Session `Memvid-20261028`。先記錄本合約及 [任務板](docs/tasks/BOARD.md)，再以真實依賴實作並執行；獨立 reviewer 檢查 oracle、證據與可重現性。
-本次保持 Draft PR，未合併前任務不標 done。
+原實驗已完成 [PR #709](https://github.com/fallrising/newclear/pull/709) 與 [結案 #733](https://github.com/fallrising/newclear/pull/733)。
+2026-10-29 owner 批准的後續需求 [T-0436](https://github.com/fallrising/desk/tree/main/tasks/T-0436-memvid-notes-usability) 依 [繁中筆記評估規格](docs/notes-usability.md) 另行驗收，不重開或擴張 AC-01～08。
 
 ## 現況與缺口
 
 全部八項 AC 已取得本機實跑證據：15 個場景及八項 CLI 邊界通過。Runtime 的 15 個 source／lock hash 已與報告核對。
-`mainline: incomplete` 保留本次 Draft／未合併的交付狀態，沒有尚未執行的必要本機模型案例；遠端 CI 與 owner 審閱狀態以 PR 為準。
+`mainline: complete` 僅指原場景實驗：已合併、四項 CI success、兩份獨立審查 ACCEPT；未聲稱產品化或正式部署。
+2026-10-29 回讀確認：驗證 head `67132cd45bcd4e53fb61d4a1f6b650408f34e2e8` 到本次 base 的元件差異只有任務板，runtime／lock／workflow 未變，沿用既有實跑證據。後續繁中筆記評估仍待執行，見獨立規格與任務板。
 原始 SDK 的詞彙索引漏失、ask 擴大 context、中文／底線符號查詢，以及 Whisper cache 限制詳列於 [README](README.md) 與 [原始／最終證據](docs/evidence/README.md)。
 本次成功指明示適配後的有界實驗，不宣稱所有 upstream 原始路徑已無缺陷。
 
@@ -48,4 +50,4 @@ Owner 直接指示，T-0001／Session `Memvid-20261028`。先記錄本合約及 
 
 ## 可用版本
 
-`usable_tag: none`。本次只交付 Draft PR；所有必要 AC、審查、CI 與合併前，不宣稱主線完成或發布 tag。
+`usable_tag: none`。原場景實驗完成與可用版本發布分開；owner 本輪授權程式／文件的 commit、PR 與合併，沒有授權 release／usable tag 或部署。

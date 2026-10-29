@@ -4137,3 +4137,55 @@ async fn p0_web_rejects_unknown_paths_and_methods_without_filesystem_lookup() {
         assert!(!captured.body.starts_with(b"<!doctype html>"));
     }
 }
+
+// SPEC-T006F AC-F01: the browser's implicit favicon is an embedded static read.
+#[tokio::test]
+async fn p0_web_favicon_has_exact_bytes_headers_and_method_boundary() {
+    let harness = harness(300);
+    for method in [Method::GET, Method::HEAD] {
+        let response = send(
+            &harness.router,
+            Request::builder()
+                .method(method.clone())
+                .uri("/favicon.ico")
+                .body(Body::empty())
+                .expect("favicon request"),
+        )
+        .await;
+        assert_eq!(response.status, StatusCode::OK);
+        assert_web_security_headers(&response, "image/x-icon");
+        if method == Method::HEAD {
+            assert!(response.body.is_empty());
+        } else {
+            assert_eq!(response.body, include_bytes!("../web/favicon.ico"));
+            assert_eq!(&response.body[..6], &[0, 0, 1, 0, 1, 0]);
+            assert_eq!(&response.body[6..8], &[16, 16]);
+        }
+    }
+    for (method, path, status, code) in [
+        (
+            Method::POST,
+            "/favicon.ico",
+            StatusCode::METHOD_NOT_ALLOWED,
+            "method_not_allowed",
+        ),
+        (
+            Method::GET,
+            "/favicon.ico/extra",
+            StatusCode::NOT_FOUND,
+            "not_found",
+        ),
+    ] {
+        let response = send(
+            &harness.router,
+            Request::builder()
+                .method(method)
+                .uri(path)
+                .body(Body::empty())
+                .expect("favicon boundary"),
+        )
+        .await;
+        assert_eq!(response.status, status);
+        assert_eq!(json_body(&response)["error"]["code"], code);
+    }
+}

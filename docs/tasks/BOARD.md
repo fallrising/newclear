@@ -91,3 +91,12 @@ Overall delivery is18of19. Fanz PR604 remains incomplete: bootstrap001-only PASS
 2026-10-28 Fanzloud checkpoint: approved next unit produced a test-only upstream patch with nine gtests, static applicability/reversal and helper/oracle mapping. Compilation/execution remain NOT_RUN; R9/R10 real context/V8 coverage remains GAP. [Artifact and single reassessment](../fe-review/fanzloud-completion-regression/README.md). No engine/product/dependency change or browser attempt;007FAIL/consumed,18/19,8/27 and DraftPR604 remain.
 
 2026-10-28 environment checkpoint: bounded read-only inventory identified no compatible existing Blink source/build/test route in the inspected scope; explicit exclusions/errors prevent a global absence claim. [Result and single next recommendation](../fe-review/fanzloud-completion-regression/ENVIRONMENT-FEASIBILITY.md). No engine/browser/model execution; patchNOT_RUN,R9/R10GAP,007FAIL/consumed,18/19,8/27 and DraftPR604 remain.
+
+## T-0440 — Favicon and browser follow-up
+
+[Desk T-0440](https://github.com/fallrising/desk/tree/main/tasks/T-0440-fanzloud-browser-followup) · [SPEC-T006F](../../platform/fanzloud/docs/specs/SPEC-T006F-browser-followup.md)
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T0440-1 | Embedded favicon route and native regression | AC-F01 | in_progress | 2026-10-29T17:41:52.916453+00:00 | — | 2026-10-29T17:54:54.908805+00:00 |
+| T0440-2 | Focused Chromium evidence and acceptance | AC-F02–F04 | in_progress | 2026-10-29T17:53:43.505657+00:00 | — | 2026-10-29T17:54:54.908805+00:00 |

@@ -2318,8 +2318,34 @@ Owner continues development and offers external help if needed. BR01–04: trust
 
 BR evidence gate ACCEPT source/local:14missingAPI RED, firstGREEN replay failed due strict JSON float archive; exactfloat.hex encoding fixed14GREEN, full334GREEN. T843 REWORK exposed non-dry-run already_applied losing observed expiry; explicit regression RED, persist high-water after validated receipt without replenishment, retain read-only preview. Final336GREEN(64Node272Python), actual8second lease/parallelCLI renewal/MCP ACK-loss originalcommand validated/replay still exhausted, T843 focusedACCEPT. Lead inspected full diff/logs. SQLite ResourceWarning and Node experimentalwarning retained; no test weakening. Final docs/task/report/diff then normalGit delivery/boardclosure. No live/client/auth/model/paid mutation; Python3.11/live activation/fullmainline pending; HL remainsopen.
 
+
+# T-0440 delivery plan
+
+Started: 2026-10-29T17:40:09.225260+00:00
+Scope: favicon response and one bounded Chromium run proving no favicon 404, stream failure closes before Refresh without automatic retry, Authenticate gap. Exclude Cloud/persistence/deploy/release.
+Estimate: 45–60 active minutes including review; checkpoints every 20 active minutes. CI wait at most 15 minutes per PR; failures retained, at most two justified fixes for one issue.
+
+1. Claim desk T-0440 through PR, then commit normative spec / SUCCESS / BOARD before code.
+2. Implement small embedded ICO route with unchanged CSP, route regression test; prepare focused browser harness using existing fixture and trusted isolated runtime.
+3. Independent fresh-context review, native checks and CI; fix supported findings.
+4. Execute one bounded browser attempt under current owner request, inspect receipts/screenshots; record limitations and failures honestly.
+5. Merge reviewed product/result PRs, update BOARD and desk completion, journal/handoff; verify remote content.
+
+Workers: bounded browser-harness worker in an isolated worktree (15 active minutes); root owns production Rust/icon. A separate fresh-context read-only acceptance reviewer follows integration. Explicit task files, no nested delegation.
+Tool accounting: tool/provider totals not yet measured; provider requests/tokens/cost null. Execution receipts and current-turn tools are sources; worker caps are not usage.
+
+Progress: desk PR302 merged/readback; normative docs commit 2d334cc7. Browser worker owns isolated fanz-followup-browser/fe-review scope (assignment in local handoff), 15 minute budget. Root owns production Rust/icon. Shared CSP already permits same-origin images, so no security widening needed. Initial cargo invocation blocked by sandbox sccache EPERM; native Red run launched using existing shared build cache, timeout 600 s.
+
+T0440 native evidence: favicon test RED (404 vs 200), then focused Rust 3/3 GREEN. Controller 10/10; cargo fmt, workspace clippy -D warnings, workspace all-targets/all-features tests and binary build all exit 0 (native-checks.json in local handoff). No runtime/browser yet.
+
+T0440 worker integration: six scoped fe-review files reviewed/copied from isolated worker. Worker report PARTIAL retained: sandbox EPERM failures, no runtime. Root full fe-review run outside sandbox passed 307/307, zero skipped (12.71 s); native source/HTTP checks remain green. Independent fresh-context review now active, bounded to 8 minutes. Browser remains NOT_RUN until review/CI.
+
 ## Bounded bot activation preparation — 2026-10-29T17:31:43Z
 
 Owner continues proposed first activation preparation. BA01–04 pins BR/BP source, reads original client/state and fresh Cloudflare/self/resident metadata, creates private non-executable <=24h/24new/240call proposal with fixed parent deadlines and concrete activation/compensation. No live/client/cloud/auth/model/paid mutation, no policy initialization. Lead owns private evidence; T844 one native independent read-only public-evidence reviewer, inherited model/effort/permissions, fresh context <=1500tokens initial plus one focused followup, five minutes monitored; no private/network/writes/tests/delegation, unknowncost/quota, not OS isolation. Normal Git delivery persists; actual new standing-bot authorization requires concrete owner approval. HL remains separately open.
 
 BA evidence gate ACCEPT preparation only: pinnedBR fourblobs/ancestry, oldmanifest/config/client/state preservation, owner-only uninstalledTOML/proposal;11management readonly operations before/after equality, actualrunner self/resident verified, botselfexit1 and grant expired16:59:16Z retained. Residentstop11-05T07:24:25Z yields observedouterceiling07:22:25Z; runtimepolicy absent/no initialization, candidateMCP2tools but0calls, originalnative1tool. Initialprivate builder3caps assertion failed; originalAL contract/freshgrant5caps confirmed, v2 preserved samecandidate and completedproposal with no grant change. T844 public-consistencyACCEPT; lead checkedprivate originals. No runtimecode/fullsuite rerun/model/livewrites/paidchange. Finaldocs/task/report/diff then normalGit delivery and BA-only closure; actualbot-only24h activation requires newexplicit approval with documented compensation. HL remainsopen.
+
+T0440 runtime checkpoint 2026-10-29T17:54:54.908805+00:00: required source CI and independent source/launcher review passed. One followup-001 run on c973bcf3: PASS, 5.187s, two 12px gaps, favicon200x2, socket close/zero clients/1511.7ms quiet/explicit Refresh, no unexpected browser health failures, listener/resources/container cleaned. Root inspected both PNGs; actual independent acceptance and Git/ledger closure pending. No retries.
+
+T0440 evidence gate: ACCEPT AC-F01–F04. Independent actual review checked source hashes/CI-before-start/PNGs/receipt/cleanup; no blockers. Product code unchanged after runtime. Required checks passed; sandbox failures preserved as resolved environmental attempts. Final docs/acceptance now reflect actual evidence; normal PR/CI/merge/readback and ledger closure remain.

@@ -541,4 +541,24 @@ Actual guarded helper `--serve` also passed the full journey, authenticated admi
 
 ## T-0432 existing named HTTP settlement continuation
 
-Owner approved existing SIWC/Grok Responses and OpenCode Chat streaming accounting across all three clients, existing tools and legal auth retries. [NH-1–NH-5, matrix, design and isolation](docs/tasks/T-0432-named-http-settlement.md) are fixed before implementation. Prior SS/PC/CS/CU delivery, original17AC, T1102 and whole-product incomplete/usable_tag none remain. Actual nine-path RED was corrected; named and all three prior offline journeys passed, including actual guarded serve/admin/cleanup. Independent source/runtime review found no remaining blocker; mandatory CI and delivery gates remain pending. No real provider or credential use.
+Owner approved existing SIWC/Grok Responses and OpenCode Chat streaming accounting across all three clients, existing tools and legal auth retries. [NH-1–NH-5, matrix, design and isolation](docs/tasks/T-0432-named-http-settlement.md) are fixed before implementation. Prior SS/PC/CS/CU delivery, original17AC, T1102 and whole-product incomplete/usable_tag none remain. Actual nine-path RED was corrected; named and all three prior offline journeys passed, including actual guarded serve/admin/cleanup. Independent source/runtime review and required CI passed; PR748 merged and remote content/ancestor/trailer readback passed. Ledger/backup/cleanup are recorded separately by final handoff. No real provider or credential use.
+
+## Named HTTP product-merge evidence
+
+產品 [PR748](https://github.com/fallrising/newclear/pull/748) source `667248f46d0a90a3d3d8849196f8f0df614d3e4e`、merge `af2321d68aca9c26e043c249f3bda16395ece016` at 2026-10-29T08:08:28Z；353 Rust tests/22 groups、fmt/Clippy/locked build、67 Python、20 validator tests、46 contracts/7 indexes、獨立來源/執行審查通過。必要 Pokercase CI、Project success contracts、Workflow static validation 全通過；正常 merge 後18檔內容、source/merge祖先與雙方Desk-Task trailer回讀一致。
+
+既有SIWC/Grok Responses與OpenCode Chat的三種客戶端串流現在每次實際推論前登記attempt；fallback/既有合法401重試保留相同request_id與不同attempt，refresh/discovery不列推論。原始Chat/Responses usage、終態與各attempt獨立時間入帳，缺值unknown、明確零保留；OAuth/訂閱費用不推算為已知帳單。借用Grok檔保持read-only，未變更token的401不重試；正式allowlist與retry限制不變。
+
+named HTTP九階段隔離旅程通過：41筆attempt（34 succeeded、5 failed、1 cancelled、1 timeout）、3次獨立fake discovery、0個非預期目的地，41筆cost全部null。涵蓋三provider×三client文字/既有工具兩輪、fallback/借用401、失敗/截斷/缺值/零/取消/stall、API/HTML/CSV及重啟保留歷史設定後新請求。真正refresh由test-only transport透過原有鎖/重讀/rotation/persistence測試，不冒充binary旅程曾呼叫refresh。named preheaders取消/timeout、body drop、conversion failure、儲存故障與pending一次恢復另有focused/unit/integration證據。既有genericHTTP/Claude/Cursor各九階段旅程回歸通過；generic fixture估價不是provider帳單或開發費用。
+
+新保留入口預設check，固定六個來源及獨立binary digest；實際--serve也完成旅程、authenticated admin200、SIGTERM exit0、owned child與臨時資料清理。Binary SHA256 `b03228008e0cc4668bb0aea499bdbb74ad7ccf81892fdffb0521406f836ab4fb`。舊Cursor入口與digest原文保留。這是agent離線實測，沒有宣稱owner親自跑過。
+
+保留九組baseline missing-attempt RED、converted CR-only提前觀察RED、converter failure回饋缺漏RED，以及獨立review R1的BOM消費邊界RED；各以最小修正取得GREEN，BOM另驗兩種實際轉換模式。初次socket/fetch/index sandbox拒絕由平台核准精確操作解決，沒有chmod或放寬正式限制。claim validator曾用錯cwd，fail-stop在提交前停止；讀取錯路徑不冒充產品失敗。本機未找到既有actionlint工具，未宣稱本機通過，必要remote workflow static validation已通過。所有提交/發布gate使用fail-stop；未用重試通過宣稱#701根因已知。
+
+完整#698仍需剩餘路徑完整覆蓋，Antigravity保留#702隔離工作；buffered clients維持前輪範圍。#699完整token覆蓋/價格來源精度/歷史語義、#700具名真client/version/provider與AC01/04/08、SIWC namespace工具實際相容性，以及AC04工具對AC17 Cursor text-only範圍決策仍未完成。#701既有啟動/auth間歇問題根因未知；本輪不處理CLI首次輸出前deadline或其他hardening。mainline incomplete、usable_tag none、desk in_progress；不自動關閉#698–702，不把測試數量當整體完成。
+
+只使用fake HTTP/CLI/runtime、合成憑證/借用檔與臨時DB；沒有真provider/登入/credential/私人DB/Docker、新依賴、擴權、release/deploy。原17AC、T1102、Cargo、已交付SS/PC/CS/CU及不相關tracked plans保留。全輪未完整量測工具/provider/token/費用/active-wait均unknown/null，局部command時間和fixture41次推論不代表開發模型/provider總用量。
+
+本份為產品merge時點快照。NH-5全流程的後續帳本發布、完整備份`t0432-named-http-settlement-20261029`逐檔核對及本輪工作樹清理，以私人`t0432-named-http-settlement/handoff.json`最終事實核實，不預先宣稱完成；完整操作位置留在私人交接。完成此有界切片即停止，不啟動下一里程碑。
+
+最終artifact核對另從乾淨已提交source做locked build，仍得到同一b032binary，四條旅程及serve再次通過。共享target曾呈現另一digest；兩條追加旅程因root傳入該digest而在fixture啟動前被guard拒絕，改用實測locked-build digest後通過，原失敗保留、保護不變；不把這當#701根因證據。

@@ -389,6 +389,44 @@
           }
         }
       }
+    },
+    "/api/health-schedule": {
+      "get": {
+        "summary": "Scoped read-only bounded health schedule status, latest firing and completed observation; not Cron/liveness verification",
+        "responses": {
+          "200": {
+            "description": "cloudlab.health-schedule.v1; request_id and UTC now; cron_verified=false; schedule=null or bounded scoped snapshot. See docs/health-schedule.md.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthSchedule"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or replayed credential"
+          },
+          "403": {
+            "description": "Scope, revoked grant, or Origin denied"
+          },
+          "409": {
+            "description": "Idempotency, revision, fence or result conflict"
+          },
+          "413": {
+            "description": "Bounded request/output exceeded"
+          },
+          "422": {
+            "description": "Invalid schema or deadline"
+          },
+          "429": {
+            "description": "Single active slot or storage/admission quota"
+          },
+          "503": {
+            "description": "Unavailable; retry same immutable command"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -766,6 +804,122 @@
                 "$ref": "#/components/schemas/Command/properties/recipe_ref"
               }
             }
+          }
+        }
+      },
+      "HealthSchedule": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "request_id",
+          "now",
+          "cron_verified",
+          "schedule"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": "cloudlab.health-schedule.v1"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "now": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cron_verified": {
+            "const": false
+          },
+          "schedule": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "revision",
+                  "enabled",
+                  "status",
+                  "interval_minutes",
+                  "not_before",
+                  "expires_at",
+                  "next_due_at",
+                  "last_firing",
+                  "latest_result"
+                ],
+                "properties": {
+                  "id": {
+                    "const": "health-minute"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "status": {
+                    "enum": [
+                      "disabled",
+                      "unconfigured",
+                      "invalid_policy",
+                      "waiting",
+                      "expired",
+                      "ready",
+                      "grant_unavailable",
+                      "window_exhausted"
+                    ]
+                  },
+                  "interval_minutes": {
+                    "enum": [
+                      null,
+                      15,
+                      60,
+                      1440
+                    ]
+                  },
+                  "not_before": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "expires_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "next_due_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "last_firing": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "due_at UTC, outcome submitted or skipped reason, command_id string or null; linkage comes from persisted firings."
+                  },
+                  "latest_result": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Latest in-scope scheduled public command record with result, across revisions; no artifact bytes/report_digest/holder. At most20 candidates scanned."
+                  }
+                }
+              }
+            ]
           }
         }
       }

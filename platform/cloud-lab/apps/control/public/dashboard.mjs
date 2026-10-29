@@ -93,6 +93,7 @@ export function createClient(fetcher = globalThis.fetch.bind(globalThis)) {
   const route = id => `/api/commands/${encodeURIComponent(id)}`;
   return {
     bootstrap: () => request('/api/bootstrap'), commands: () => request('/api/commands'),
+    schedule: () => request('/api/health-schedule'),
     command: id => request(route(id)), submit: raw => request('/api/commands', raw),
     cancel: id => request(`${route(id)}/cancel`, '{}'), artifact: id => request(`${route(id)}/artifact`),
   };
@@ -146,6 +147,29 @@ export function renderCommand(document, record, capabilities, now, actions) {
   return card;
 }
 
+export function renderSchedule(document, data, now) {
+  const panel = element(document, 'div');
+  const schedule = data?.schedule;
+  if (!schedule) { panel.append(element(document, 'p', '尚未設定定時檢查。', 'secondary')); return panel; }
+  const labels = { disabled: '已停用', unconfigured: '尚未設定排程政策', invalid_policy: '排程設定無效',
+    waiting: '尚未到啟用時間', expired: '排程期限已到', ready: '政策有效，等待觸發',
+    grant_unavailable: '排程授權不可用', window_exhausted: '剩餘期限不足以完成下一次檢查' };
+  panel.append(element(document, 'p', labels[schedule.status] || '排程狀態未知', 'secondary'));
+  const next = utc(schedule.next_due_at), end = utc(schedule.expires_at), current = utc(now);
+  const nextLabel = Number.isFinite(end) && current >= end ? '排程期限已到' :
+    Number.isFinite(next) && next >= current ? schedule.next_due_at : schedule.next_due_at ? '等待更新，尚未確認下一次時段' : '—';
+  const meta = element(document, 'dl', undefined, 'metadata');
+  meta.append(metric(document, '檢查間隔', schedule.interval_minutes ? `${schedule.interval_minutes} 分鐘` : '未知'),
+    metric(document, '政策截止 UTC', schedule.expires_at), metric(document, '下次預定時段 UTC', nextLabel),
+    metric(document, '最近觸發 UTC', schedule.last_firing?.due_at),
+    metric(document, '觸發結果', ({submitted:'已提交',skipped_misfire:'錯過時段，未補跑',skipped_overlap:'已有工作或未知結果，略過',skipped_grant:'授權不可用，略過',skipped_quota:'配額不足，略過',skipped_window:'期限不足，略過'})[schedule.last_firing?.outcome] || schedule.last_firing?.outcome));
+  const last = schedule.latest_result;
+  const observed = last ? observation(last, now) : { label: '尚無已完成觀測', tone: 'muted' };
+  meta.append(metric(document, '最近完成觀測 UTC', last?.result?.finished_at), metric(document, '最近完成觀測', observed.label, observed.tone));
+  panel.append(meta, element(document, 'p', '預定時段依排程政策計算，不代表觸發器或執行端在線；以實際觸發與觀測時間為準。', 'secondary'));
+  return panel;
+}
+
 export function errorMessage(error) {
   const hint = error.status === 401 ? 'Access 工作階段已失效，請重新載入並登入。' :
     error.status === 403 ? '目前授權不足或已撤銷；不會自動重試。' :
@@ -155,7 +179,7 @@ export function errorMessage(error) {
 
 export function mount(document, client = createClient()) {
   const byId = id => document.getElementById(id);
-  const state = { bootstrap: null, records: [], pending: null, busy: false, refreshing: false, synced: false, serverTime: NaN, measuredAt: 0, renderedSignature: '', refreshError: false, authBlocked: false, authRevision: 0 };
+  const state = { bootstrap: null, records: [], scheduleData: null, pending: null, busy: false, refreshing: false, synced: false, serverTime: NaN, measuredAt: 0, renderedSignature: '', refreshError: false, authBlocked: false, authRevision: 0 };
   const now = () => new Date(state.serverTime + performance.now() - state.measuredAt).toISOString().replace(/\.\d{3}Z$/, 'Z');
   function message(content = '', error = false) {
     const box = byId('message'); box.textContent = content; box.hidden = !content;
@@ -174,7 +198,7 @@ export function mount(document, client = createClient()) {
   function failed(error) {
     if (error.status !== 401 && error.status !== 403) return;
     state.authRevision++; state.authBlocked = true; state.synced = false; state.refreshError = true;
-    state.records = []; state.bootstrap = null; state.serverTime = NaN; state.renderedSignature = '';
+    state.records = []; state.scheduleData = null; byId('schedule').replaceChildren(); state.bootstrap = null; state.serverTime = NaN; state.renderedSignature = '';
     byId('commands').replaceChildren();
     for (const id of ['total-count', 'active-count', 'unknown-count']) byId(id).textContent = '—';
     for (const id of ['workspace', 'node-id', 'recipe']) byId(id).textContent = '授權未確認';
@@ -210,6 +234,7 @@ export function mount(document, client = createClient()) {
   function render() {
     if (!state.bootstrap || !Number.isFinite(state.serverTime)) return;
     const current = now(), caps = state.bootstrap.capabilities;
+    byId('schedule').replaceChildren(renderSchedule(document, state.scheduleData, current));
     byId('workspace').textContent = text(state.bootstrap.workspace_id);
     byId('node-id').textContent = text(state.bootstrap.resource_ref?.resource_id);
     byId('recipe').textContent = `${text(state.bootstrap.recipe_ref?.recipe_id)} @ ${text(state.bootstrap.recipe_ref?.version)}`;
@@ -255,8 +280,11 @@ export function mount(document, client = createClient()) {
         const data = await client.commands();
         if (!currentSession(revision)) return;
         if (!Array.isArray(data.commands)) throw new Error('命令回應格式無效。');
-        state.records = data.commands.slice(0, 100);
-      } else state.records = [];
+        const scheduleData = await client.schedule();
+        if (!currentSession(revision)) return;
+        if (scheduleData?.schema_version !== 'cloudlab.health-schedule.v1' || !Object.hasOwn(scheduleData, 'schedule')) throw new Error('排程回應格式無效。');
+        state.records = data.commands.slice(0, 100); state.scheduleData = scheduleData;
+      } else { state.records = []; state.scheduleData = null; }
       state.authBlocked = false; state.synced = true;
       byId('connection').textContent = '已連線 · 每 5 秒更新';
       if (state.refreshError) { message(); state.refreshError = false; }

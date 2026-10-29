@@ -91,3 +91,5 @@ Owner明確批准後，[OL01–04實際接入](docs/evidence/m1-observation-live
 本輪開始[SP01–04常態啟用準備](docs/service-activation.md)：離線proposal、用量估算、固定source與唯讀前態；[249tests、私人CLI與唯讀候選證據](docs/evidence/m1-service-activation.md)通過；T834獨立審查ACCEPT，未續權或啟用服務。
 
 Owner確認Workers Free並批准後，[SL01–04七日服務啟用](docs/evidence/m1-service-live.md)實際完成原Access及runner-only續期、policy／unit啟動、runner self／resident來源整合與最終回讀；截至2026-10-29T07:28:20Z保持運行，固定截止2026-11-05T07:24:26Z。其他角色授權仍過期、排程off，未驗7日uptime／自然到期／帳單；完整主線pending。
+
+本輪開始[HS01–04低頻健康檢查與看板](docs/health-schedule.md)，有界排程政策、讀取API及觸發／觀測展示已完成[265tests與12組本機瀏覽器驗證](docs/evidence/m1-health-schedule.md)；實際排程啟用仍待具體部署驗收，完整主線pending。

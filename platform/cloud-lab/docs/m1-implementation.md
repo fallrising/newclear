@@ -45,7 +45,7 @@ record 欄位：`command_id,revision,command,delivery,cancel_requested,external_
 - response `{command:record,request_id}`。只有當前 grant／scope／attempt／fence／未過期 lease 可報；terminal 同 payload 重送回原 ACK，不同 payload conflict。late 由 receiver 算。
 - Runner durable SQLite journal：command ID 唯一；保存 immutable command digest、external ref、started/completed/result bytes；起跑前先寫 started commit。重啟遇到 started 為 unknown。完成先落 journal 再回報；回報斷線可從 journal 重送，reconcile_only 絕不 collect。journal 不自動刪除。每輪最多一次 claim＋一次 report，網路 timeout 5 秒，循環最少 5 秒；可 `--once`。
 
-固定 UTC 每分鐘 schedule 首次 provisioning 預設 disabled；啟用後只處理目前分鐘，錯過 skip，due time＋revision 冪等，未知任務占用 slot。M1 不接受任意 cron parser 或無界 catch-up。
+排程首次provisioning預設disabled；[HS政策](health-schedule.md)以UTC起始分鐘為錨，支援15／60／1440分鐘與最多7日固定窗口。缺少policy或revision不匹配fail closed；僅目前分鐘及符合間隔的slot可提交，錯過skip、due＋revision冪等、unknown占位，不接受任意cron parser／catch-up。`GET /api/health-schedule`需commands:read與相同scope，提供政策狀態／next_due_at／最近firing／最近完成結果；cron_verified=false，不提供管理寫入。
 
 ## 本輪 AC
 

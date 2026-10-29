@@ -255,3 +255,12 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - [Feature PR746](https://github.com/fallrising/newclear/pull/746) head `f9c457a74ac6736f0e420bdc7e44b574491b42bf`，merge `0fbc008c4e5914a2303b379566a1c33670eb6b95`，合併時間2026-10-29T07:36:50Z。遠端12份檔案逐byte相等、feature為main祖先、工作樹乾淨。
 - CI全過：Cloud Lab `40836330005`、Project success `40836329958`、llms `40836329985`；本機文件／task／report檢查及T835獨立公開證據審查ACCEPT。實際操作、失敗／對帳及私人mode修正保留於[SL證據](../evidence/m1-service-live.md)。GitHub create／merge首次參數名稱錯誤在binding階段拒絕，核對工具schema後成功，無未知寫入或繞過CI。
 - 已批准的原runner七日服務在07:28:20Z回讀active/running、NRestarts0，policy上限2026-11-05T07:24:26Z。僅runner授權延長，原共用Access有界更新，其餘角色過期、排程off；資料及journal保留。沒有自然到期／7日uptime／帳單驗收，完整主線pending。本收尾只改任務板，不再次變更服務。
+
+## T-0014 — 低頻健康檢查與看板
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0014-1 | 有界低頻排程與dispatch護欄 | HS-01 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |
+| T-0014-2 | 授權排程狀態及結果API | HS-02 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |
+| T-0014-3 | 看板排程／過期／session展示 | HS-03 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |
+| T-0014-4 | 整合、審查與交付 | HS-04 | in_progress | 2026-10-29T08:06:27Z | — | 2026-10-29T08:27:43Z |

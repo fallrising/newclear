@@ -52,7 +52,7 @@ CL Cloud Lab
 | 能力 | 本次位置與範圍 | 狀態／證據 |
 | --- | --- | --- |
 | ID-01 | [Worker auth](../apps/control/worker/auth.mjs)：Access JWT、HMAC、D1 grant | locally_verified；真實 Access 未驗 |
-| AU-01／AU-02 | [控制面](../apps/control/worker/index.mjs)、[D1 schema](../apps/control/migrations/0001.sql)：准入、outbox、固定分鐘 schedule | locally_verified；沒有啟用排程 |
+| AU-01／AU-02 | [控制面](../apps/control/worker/index.mjs)、[D1 schema](../apps/control/migrations/0001.sql)：准入、outbox、具期限低頻schedule | locally_verified；沒有啟用排程 |
 | EX-01 | [Python OS collector](../adapters/node-health/README.md)：單節點負載與根目錄空間、durable journal | locally_verified；未接指定遠端節點 |
 | OB-01／OB-02 | [看板](../apps/control/public/index.html)、snapshot／有界 health artifact | locally_verified 的 UI 模型／HTTP；互動瀏覽器與 live gate 待驗 |
 

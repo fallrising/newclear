@@ -60,3 +60,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [常態runner服務模式](docs/service-runner.md)新增獨立私人政策、啟動自身授權核對與最早期限停止；重啟保留journal，未知工作不重做。SR階段先在本機驗證；後續live啟用結果見下段。
 
 [常態啟用準備](docs/service-activation.md)提供私人離線proposal、7日／60秒方案與請求量估算；固定SR候選及原Lab唯讀盤點完成。Owner批准後，[七日服務實際啟用](docs/evidence/m1-service-live.md)已完成runner-only續期及來源回讀，觀察時保持運行；固定截止2026-11-05T07:24:26Z，不自動續權。
+
+[低頻健康檢查與看板](docs/health-schedule.md)支援具期限的15／60／1440分鐘政策、授權排程snapshot與觸發／觀測展示；[HS本機驗證](docs/evidence/m1-health-schedule.md)含265tests及12組真實瀏覽器情境。尚未部署新版或開啟live排程。

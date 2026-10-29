@@ -14,7 +14,7 @@ Every R2-AC-14 condition in [ROUND2-SDD](../../../../../docs/fe-review/ROUND2-SD
 | Condition | Evidence | Result |
 | --- | --- | --- |
 | Every decided change has implementation or evidence | M1: C1 15 oracles (PR735) and the F1–F4 harness repair (PR739). M2: PR725. M3: v7 27/27 (PR731), `journeys-001` (PR752/754), `capture-002` (PR761/764/765) | holds |
-| Changes made only after measurement carry the observation | M2-01..03 each cite the measured baseline ([SPEC-T006R-m2-repair](../../../docs/specs/SPEC-T006R-m2-repair.md)). The read-path fix cites the app-free [layer ablation](../../../../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) (reader + no-store ERR_ABORTED; `arrayBuffer` 0/600) | holds |
+| Changes made only after measurement carry the observation | M2-01..03 each cite the measured baseline ([SPEC-T006R-m2-repair](../../../docs/specs/SPEC-T006R-m2-repair.md)). The read-path fix cites the app-free [layer ablation](../../../../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md) (reader + no-store ERR_ABORTED; `arrayBuffer` 0/600); the exact Chromium branch was not instrumented and recovery007's actual path stays unproven | holds |
 | Actual startup, journeys and owned cleanup pass | v7 desktop/tablet/mobile, `conformance-001`, `journeys-001` and `capture-002`: each container removed and its listeners (8443, plus 8444–8445 for C2) proven absent before the result was written | holds |
 | targets match the runtime | `capture-002` copied `targets.json` (`5aa2d64c…`) byte for byte to private targets and served `https://127.0.0.1:8443`, which matched | holds |
 | Evidence and limits recorded per R2-AC-E | this report | holds with this PR |
@@ -127,7 +127,7 @@ Each PR above merged normally after independent review. Both required checks pas
 | 764 | 40896391282 | 40896391594 |
 | 765 | 40898520980 | 40898520962 |
 
-After each merge, the fetched main `platform/fanzloud` tree was compared with the reviewed head and was equal. On 2026-10-29 every merge commit's `platform/fanzloud` tree was re-checked against its head and all 11 were equal.
+After each merge, the fetched main `platform/fanzloud` tree was compared with the reviewed head and was equal. On 2026-10-29 every merge commit's `platform/fanzloud` tree was re-checked against its head and all 11 were equal. The CI and merge readback of this final integration PR itself are recorded on the desk T-0433 card and in issue706.
 
 ## Preserved failures
 

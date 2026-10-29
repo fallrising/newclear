@@ -10,7 +10,7 @@ Basis:
 ## Scope
 
 In scope:
-- `fe-review/targets.json` names the review origin `https://127.0.0.1:8443`, the only product page `/`, dark, `en-US`, and no `start`. It stays `verified:false` until the T0433-3 final integration shows every R2-AC-14 condition with evidence (see the `capture-002` result).
+- `fe-review/targets.json` names the review origin `https://127.0.0.1:8443`, the only product page `/`, dark, `en-US`, and no `start`. It was `verified:false` (`5aa2d64c…`) when `capture-002` ran; the T0433-3 final integration set it to `verified:true` after showing every R2-AC-14 condition with evidence ([R2 report](../../fe-review/tasks/round2/report.md)).
 - A wrapper, `fe-review/shared-capture.mjs`, that serves the fixture and transport, installs the fresh trust, copies `targets.json` byte for byte to private state, and runs `capture.mjs` twice as a child process: `--dry-run`, then the capture.
 - Pure verdicts in `fe-review/shared-capture-verdicts.mjs` and their tests.
 - One review-only counter in `fe-review/transport.mjs` (W08). The `journeys-001` driver stays pinned to the transport bytes it ran on (`9167d04e…`); its test checks that pin as historical.
@@ -62,7 +62,7 @@ The independent actual review re-derived every verdict from the raw `capture.jso
 - TLS is shown positively only; the negative TLS evidence is C2 R02.
 - The top-level `playwright-core` 1.64.1 in the tools tree is not on the load path and is not checked.
 
-`capture-002` ran on wrapper bytes `acde3ffd…`; after the run only the wrapper's first comment line changed (it named `capture-001`), so a new run needs a new approval and freeze. `targets.json` stays `verified:false` in this change. The ROUND2-SDD rule allows `verified:true` only when every R2-AC-14 condition holds; the T0433-3 final integration decides that with linked evidence, and a flip changes the bytes that `capture-002` ran on, and the `targets.json` `verifiedNote` is updated with the flip.
+`capture-002` ran on wrapper bytes `acde3ffd…`; after the run only the wrapper's first comment line changed (it named `capture-001`), so a new run needs a new approval and freeze. The T0433-3 final integration then set `targets.json` to `verified:true` (only `verified` and `verifiedNote` changed; new sha256 `7fb78b0b…`) and moved the wrapper pin and the targets test with it; `capture.mjs` does not read `verified`.
 
 ## Verdicts (V01)
 

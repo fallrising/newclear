@@ -4,4 +4,4 @@
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FE2-14 | T006R approved M1–M3; v3 successful-completion sample correction; actual FE pending | R2-AC-14/E | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-26T17:46:36.051146+00:00 |
+| FE2-14 | T006R approved M1–M3 delivered ([R2 report](../../fe-review/tasks/round2/report.md); [ACCEPT-T006R](../acceptance/T006R.acceptance.md)); targets verified | R2-AC-14/E | done | 2026-10-24T12:23:53Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |

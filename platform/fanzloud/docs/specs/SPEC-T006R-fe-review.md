@@ -25,7 +25,7 @@ provider, protocol, retry, recovery or persistence authority. Existing accepted
 [SPEC-T005B](SPEC-T005B-p0-http-api.md) and
 [SPEC-T005C](SPEC-T005C-p0-websocket-stream.md) determine every wire shape/state.
 Contradictions stop the affected task; they are not resolved by permissive mocks.
-This is documentation only; proposed commands/files below do not yet exist.
+The commands and files named below were the planned interfaces; the commands actually run (`remaining-v7-baseline.mjs`, `conformance-browser.mjs`, `journeys-browser.mjs`, `shared-capture.mjs`) and their results are in the [R2 report](../../fe-review/tasks/round2/report.md).
 
 # Archetype F answers
 

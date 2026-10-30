@@ -295,3 +295,8 @@ Owner-approved C01 (2026-10-30) aligns this precedence; no SQLite migration is c
 
 
 2026-10-29 M0 接手依據：[baseline report](evidence/m0-baseline-20261029.md)。新一輪 pinned backend/web 與真實 ConnectedApp foundation 已跑；完整產品仍未完成，M1a 新契約仍待接受。
+
+2026-10-30 M1a: owner approved C01/C02/C06 and requested current designs. Remote HAI documents
+were unchanged since M0 closeout; the current [completion preparation contract](sdd/completion-preparation.md)
+and [evidence](evidence/m1a-completion-preparation-20261030.md) now define the bounded slice.
+Read BOARD for live delivery status; the preceding2026-10-29 waiting note is historical.

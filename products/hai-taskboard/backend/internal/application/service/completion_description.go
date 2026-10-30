@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	json "encoding/json/v2"
+	"maps"
+	"reflect"
 	"slices"
 
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/command"
@@ -11,17 +13,21 @@ import (
 )
 
 type completionPreparationSnapshot struct {
-	Material  port.CompletionMaterial
-	Identity  inputIdentity
-	Authority port.RunAuthority
-	Subject   domain.CompletionSubject
+	Material   port.CompletionMaterial
+	Identity   inputIdentity
+	Authority  port.RunAuthority
+	Subject    domain.CompletionSubject
+	Policy     CompletionPolicy
+	Incomplete bool
 }
 
 func (s *Service) readCompletionPreparation(ctx context.Context, project domain.ProjectID, item domain.WorkItemID, candidate domain.CandidateID) (completionPreparationSnapshot, error) {
 	var result completionPreparationSnapshot
 	err := s.unit.Within(ctx, func(tx port.Transaction) error {
 		var err error
-		result.Material, result.Identity, err = s.currentCompletionMaterial(ctx, tx, port.CompletionMaterialQuery{ProjectID: project, WorkItemID: item, CandidateID: candidate, MaximumRecords: 1024})
+		result.Policy = s.config.Completion
+		result.Policy.Checks = maps.Clone(result.Policy.Checks)
+		result.Material, result.Identity, result.Incomplete, err = s.preparationMaterial(ctx, tx, port.CompletionMaterialQuery{ProjectID: project, WorkItemID: item, CandidateID: candidate, MaximumRecords: 1024}, result.Policy)
 		if err != nil {
 			return err
 		}
@@ -38,7 +44,7 @@ func (s *Service) readCompletionPreparation(ctx context.Context, project domain.
 		m.Evidence = slices.Clone(m.Evidence)
 		m.Reviews = slices.Clone(m.Reviews)
 		m.Approvals = slices.Clone(m.Approvals)
-		result.Subject, err = preparationSubject(*m, s.config.Completion)
+		result.Subject, err = preparationSubject(*m, result.Policy)
 		if err != nil {
 			return err
 		}
@@ -86,8 +92,11 @@ func (s *Service) DescribeCompletion(ctx context.Context, actor domain.ActorID, 
 	if err != nil {
 		return nil, err
 	}
-	if before.Identity != after.Identity || before.Authority != after.Authority || before.Subject.Digest() != after.Subject.Digest() || !sameCompletionMaterial(before.Material, after.Material) {
+	if !reflect.DeepEqual(before.Policy, after.Policy) || before.Incomplete != after.Incomplete || before.Identity != after.Identity || before.Authority != after.Authority || before.Subject.Digest() != after.Subject.Digest() || !sameCompletionMaterial(before.Material, after.Material) {
 		return nil, staleCurrentInput(nil)
+	}
+	if after.Incomplete {
+		return nil, incompletePreparationPolicy()
 	}
 	subject := after.Subject
 	wireDigest := func(d domain.Digest) string { return "sha256:" + d.String() }
@@ -95,9 +104,9 @@ func (s *Service) DescribeCompletion(ctx context.Context, actor domain.ActorID, 
 	rules := make([]map[string]any, 0, len(subject.RequiredACRevisions()))
 	for _, ac := range subject.RequiredACRevisions() {
 		acs = append(acs, InitialACDescription{ACID: ac.ACID, RevisionDigest: wireDigest(ac.RevisionDigest)})
-		rule, ok := s.config.Completion.Checks[ac.ACID]
+		rule, ok := after.Policy.Checks[ac.ACID]
 		if !ok || rule.EnvironmentDigest.IsZero() {
-			return nil, staleCurrentInput(nil)
+			return nil, incompletePreparationPolicy()
 		}
 		rules = append(rules, map[string]any{"ac_id": ac.ACID, "verifier_class": rule.VerifierClass, "independent": rule.Independent, "prohibited_verifier_actor": rule.ProhibitedVerifierActor, "prohibited_verifier_run_role": rule.ProhibitedVerifierRunRole, "environment_digest": wireDigest(rule.EnvironmentDigest)})
 	}
@@ -108,5 +117,5 @@ func (s *Service) DescribeCompletion(ctx context.Context, actor domain.ActorID, 
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return json.Marshal(map[string]any{"expected_version": after.Material.WorkItem.Version(), "phase": after.Material.WorkItem.Phase(), "completion_subject": wireSubject, "completion_subject_digest": wireDigest(subject.Digest()), "lease_epoch": after.Authority.Lease.Fence.Epoch, "restore_generation": after.Authority.RestoreGeneration, "approval_required": s.config.Completion.ApprovalRequired, "verification_rules": rules}, json.Deterministic(true))
+	return json.Marshal(map[string]any{"expected_version": after.Material.WorkItem.Version(), "phase": after.Material.WorkItem.Phase(), "completion_subject": wireSubject, "completion_subject_digest": wireDigest(subject.Digest()), "lease_epoch": after.Authority.Lease.Fence.Epoch, "restore_generation": after.Authority.RestoreGeneration, "approval_required": after.Policy.ApprovalRequired, "verification_rules": rules}, json.Deterministic(true))
 }

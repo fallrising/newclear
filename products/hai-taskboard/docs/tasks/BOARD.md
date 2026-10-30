@@ -182,4 +182,7 @@ UI, artifact/report API, arbitrary policy or provider expansion. H01..H04 and pr
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM1A | Adopt approved contracts; expose authenticated exact completion preparation read | PREP-AC-01..04; H02 support | in_progress | 2026-10-30T03:58:51Z | — | 2026-10-30T03:58:51Z |
+| HM1A | Adopt approved contracts; expose authenticated exact completion preparation read | PREP-AC-01..04; H02 support | in_progress | 2026-10-30T03:58:51Z | — | 2026-10-30T04:23:00Z |
+
+M1a local gates and independent contract/implementation review ACCEPT; [evidence](../evidence/m1a-completion-preparation-20261030.md)
+retains exact snapshot/no-write, negative cases, frozen hashes and original failures. Required PR CI/merge/readback pending; full product ACs unchanged.

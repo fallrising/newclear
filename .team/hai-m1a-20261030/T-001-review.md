@@ -18,11 +18,11 @@ Reviewed the actual uncommitted normative diff against HEAD, the new completion-
 - `git diff -- products/hai-taskboard/api/openapi.yaml`; inspected current shared CompletionSubject and APIError schemas against HAI-PREP-001..005; the added route, response/rule schemas and `policy_rejected` enum agree with the mini-SDD — passed
 - `sha256sum products/hai-taskboard/docs/sdd/completion-preparation.md products/hai-taskboard/api/openapi.yaml`; review snapshots are respectively `e8f5fe9bb3f00e352073958ae41f69b4e875acfe2c174391b4c4a00bbcae6dee` and `e8f803ecea02ab8351915514ea3587eacc61db12598706962de2ecf886ac7d41` — passed
 - `git diff --check` returned exit 0 for the visible worktree diff — passed
-- `python3 /home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py validate-report .team/hai-m1a-20261030/T-001-review.md` returned exit 0, `validate-report validation passed` — passed
+- `python3 $TEAMCTL validate-report .team/hai-m1a-20261030/T-001-review.md` returned exit 0, `validate-report validation passed` — passed
 
 ## Documentation
 
-Only this report was written by the reviewer. The orchestrator owns all normative changes, implementation, PLAN and BOARD updates. Source references above are relative to `products/hai-taskboard/` unless a complete repository path is shown. Read the assigned task, root/product instructions and the task/report/evidence-gate contracts; no production files were edited.
+Only this report was written by the reviewer. Root subsequently normalized the private validator prefix to `$TEAMCTL`; the byte-exact original remains in the private evidence bundle. The orchestrator owns all normative changes, implementation, PLAN and BOARD updates. Source references above are relative to `products/hai-taskboard/` unless a complete repository path is shown. Read the assigned task, root/product instructions and the task/report/evidence-gate contracts; no production files were edited.
 
 ## Risks and Follow-ups
 

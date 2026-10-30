@@ -136,3 +136,8 @@ PREP-AC-01..04. Verify auth/scope, exact Review/QA snapshot with no writes, stal
 strict output/bounds/capability refusal using focused Red/Green and real SQLite; then pinned backend
 full/race/vet/build, OpenAPI lint, existing web gate, document checks, independent review and PR CI.
 Initial status NotRun; full product AC-02/03/04 remain pending. No UI or later M1/M2 slice is included.
+
+M1a local evidence: PREP-AC-01..04 focused/real SQLite checks pass; pinned backend full/race/vet/build,
+web30/type/lint/format/build and OpenAPI lint pass. Independent contract and implementation reviews
+ACCEPT. [Evidence](docs/evidence/m1a-completion-preparation-20261030.md) retains meaningful Red and
+environment/superseded runs; required Git/CI delivery is tracked in BOARD. Product ACs stay pending.

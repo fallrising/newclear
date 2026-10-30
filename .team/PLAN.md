@@ -2394,3 +2394,18 @@ M1a contract gate: T-001 independent ACCEPT including OpenAPI; fixed-digest Redo
 project47/index8 pass. Four named HTTP skeletons compiled404 Red and policy-classification Red
 retained by T-002 before production edits. Owner approval already covers precise C01/C02/C06;
 no additional approval needed. Snapshot semantics and all historical product gaps remain intact.
+
+M1a checkpoint2026-10-30T04:18Z: docs-first commit c651b83f, independent contract ACCEPT,
+OpenAPI lint/web30+build/project47/index8 green; seven-file bounded worker frozen and integrated
+with hash guards, real SQLite HTTP repeat/reopen/all-table no-write and policy/error negatives green.
+Initial root fullgate stopped137 during race after worker's final dot-ID delta; retained log is
+superseded evidence, not acceptance. Final unchanged native fullgate running on frozen source;
+author-independent final reviewer launched (10min). Remaining root verification/review/Git/CI and
+board/desk closeout remain within60–90minute estimate; exact active/wait/provider totals unknown.
+Refreshed remote main3afa8345: no HAI product changes since intake. No scope expansion.
+
+M1a local evidence gate ACCEPT2026-10-30T04:22Z: PREP-AC-01..04 mapped to actual focused/SQLite
+oracles and source; all7frozen hashes and185input hashes stable. Root final native backend full/race/
+vet/build exit0, web30gate/API lint and document contracts pass. T-003 independent ACCEPT with
+sharedoverflow evidence wording clarified. All originalRed/environment/superseded137 logs retained.
+This accepts local M1a only; exact-head CI/normal merge/readback and board/desk closure remain.

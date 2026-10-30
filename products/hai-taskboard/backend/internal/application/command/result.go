@@ -22,6 +22,7 @@ const (
 	CodeIdempotencyConflict   = "idempotency_conflict"
 	CodeIdempotencyExpired    = "idempotency_expired"
 	CodeStaleSubject          = "stale_subject"
+	CodePolicyRejected        = "policy_rejected"
 	CodeImpactPlanStale       = "impact_plan_stale"
 	CodeLifecycleRejected     = "lifecycle_rejected"
 	CodeDoneGateUnsatisfied   = "done_gate_unsatisfied"

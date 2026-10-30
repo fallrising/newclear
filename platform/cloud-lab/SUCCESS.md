@@ -27,7 +27,7 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | AC-03 | Given CF 元件及既有平台，When 分配狀態與部署責任，Then 無雙重 run／host／workload／Done 權威 | passed | [M0 文件證據](docs/evidence/m0-review.md)：唯一權威與部署邊界審查通過 |
 | AC-04 | Given 每個候選來源，When 決定歸位／抽取／adapter／reference，Then 有目標與阻擋，封存必須通過接替及回退 gate | passed | [M0 文件證據](docs/evidence/m0-review.md)：來源處置、切換／回退與退役 gate 審查通過 |
 | AC-05 | Given 完整文件候選，When 跑既有索引驗證與獨立審查，Then 導航一致、沒有 runtime 成功冒稱，所有未實作事項保留 | passed | [M0 文件證據](docs/evidence/m0-review.md)：本機 validators 及獨立 ACCEPT；Git 交付狀態見[任務板](docs/tasks/BOARD.md) |
-| AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | pending | 真實 CF＋獨立 bot API＋non-root runner 一筆閉環已通過；首次真實排程派送前過期且已補償停用，窗口修正待驗；一般瀏覽器真人Access與Grok模型對話仍待驗收；實體手機已改選測 |
+| AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | pending | 真實 CF＋獨立 bot API＋non-root runner 一筆閉環已通過；窗口修正後真實Cron→原runner→validated於04:31:06Z通過；一般瀏覽器真人Access與Grok模型對話仍待驗收；實體手機已改選測 |
 | AC-07 | Given 重複投遞、失聯、取消及恢復，When 執行與回報競爭，Then 不重做未知副作用且停止／未知／驗證狀態誠實可見 | pending | [遠端三種故障與撤權子集](docs/evidence/m1-remote-recovery.md)已通過；完整 [M1 故障矩陣](docs/verification.md)仍待驗收 |
 | AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；[首次D1隔離還原與journal對帳](docs/evidence/m1-isolated-restore.md)已通過；[獨立環境grant／Access撤權、執行中／unknown恢復](docs/evidence/m1-remote-recovery.md)已通過；配額耗盡與完整邊界仍待驗收 |
 
@@ -94,7 +94,7 @@ Owner確認Workers Free並批准後，[SL01–04七日服務啟用](docs/evidenc
 
 本輪開始[HS01–04低頻健康檢查與看板](docs/health-schedule.md)，有界排程政策、讀取API及觸發／觀測展示已完成[265tests與12組本機瀏覽器驗證](docs/evidence/m1-health-schedule.md)；實際排程啟用仍待具體部署驗收，完整主線pending。
 
-Owner已批准[HL01–04實際低頻排程接入](docs/evidence/m1-health-schedule-live.md)：原資源fresh核對、scheduler-only續權／policy與Cron、首次真實結果及保留／回讀。首輪資產session兩次500阻擋；2026-10-30接續上傳成功，原Worker及15分鐘Cron曾啟用，但首次命令派送前過期；已停用回退並通過原服務／資料／其他授權保全，派送窗口修正與重新驗收待完成、任務不關閉，不延長既有runner期限或新增付費。
+Owner已批准[HL01–04實際低頻排程接入](docs/evidence/m1-health-schedule-live.md)：原資源fresh核對、scheduler-only續權／policy與Cron、首次真實結果及保留／回讀。首輪資產session兩次500阻擋；2026-10-30接續上傳成功，原Worker及15分鐘Cron曾啟用，但首次命令派送前過期；已停用回退並通過原服務／資料／其他授權保全，後續窗口修正已完成[新revision4真實閉環](docs/evidence/m1-health-schedule-window-live.md)，保留首次失敗歷史；HL Git交付／回讀以任務板為準，不延長既有runner期限或新增付費。
 
 本輪開始[BC01–04固定bot bridge](docs/bot-bridge.md)：結構化健康檢查／查詢、durable重送及誠實結果投影。[283項本機回歸及HTTP／CLI閉環](docs/evidence/m1-bot-bridge.md)通過；不呼叫Grok模型、不續live授權或改部署，完整主線pending。
 
@@ -126,6 +126,6 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 
 [尚未完成的工作與owner協助](docs/remaining-work.md)列明主線驗收缺口、固定期限及M2/M3範圍，供接續使用；不因本次排程啟用或文件盤點推進AC-06～08。
 
-[HW01–04延遲Cron派送窗口修正](docs/schedule-window.md)針對HL首次真實expired_before_dispatch補回歸；開發中，HL與完整主線仍未通過。
+[HW01–04延遲Cron派送窗口修正](docs/schedule-window.md)針對HL首次真實expired_before_dispatch補回歸；source/local已合併，HL修正版真實接入已通過，完整主線仍未通過。
 
-[延遲Cron派送窗口修正](docs/schedule-window.md)已完成[362tests及獨立source審查](docs/evidence/m1-schedule-window.md)，保留due身份／去重及總截止；重新接入仍須真實觸發驗證。
+[延遲Cron派送窗口修正](docs/schedule-window.md)已完成[362tests及獨立source審查](docs/evidence/m1-schedule-window.md)，保留due身份／去重及總截止；修正版重新接入已通過[真實觸發驗證](docs/evidence/m1-health-schedule-window-live.md)。

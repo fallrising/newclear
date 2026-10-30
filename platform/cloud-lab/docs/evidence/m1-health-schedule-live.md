@@ -1,6 +1,6 @@
 # Health schedule live activation — HL01–04
 
-Owner已明確批准[HS具體啟用／補償方案](../health-schedule.md)。2026-10-29首輪結果是 **PARTIAL_PROVIDER_BLOCKED**：資產session兩次回HTTP500／code10013，停在發布前；沒有上傳新版Worker、續scheduler grant、修改schedule row或啟用Cron。不是新一輪等待owner批准，也不是OAuth／自動批准審查拒絕。2026-10-30依原批准接續後資產session已恢復，但首次真實命令派送前過期，已停用Cron並補償回退；最新狀態為 **PARTIAL_DISPATCH_WINDOW_FAILED_COMPENSATED**，詳見下方接續證據；以下首輪紀錄保留，不作為最新部署狀態。
+Owner已明確批准[HS具體啟用／補償方案](../health-schedule.md)。2026-10-29首輪結果是 **PARTIAL_PROVIDER_BLOCKED**：資產session兩次回HTTP500／code10013，停在發布前；沒有上傳新版Worker、續scheduler grant、修改schedule row或啟用Cron。不是新一輪等待owner批准，也不是OAuth／自動批准審查拒絕。2026-10-30依原批准接續後資產session已恢復，但首次真實命令派送前過期，已停用Cron並補償回退；這次初輪最終狀態為 **PARTIAL_DISPATCH_WINDOW_FAILED_COMPENSATED**，詳見下方接續證據；以下首輪紀錄保留，不作為最新部署狀態。
 
 | AC | 實際驗收 | 狀態 |
 | --- | --- | --- |
@@ -81,3 +81,5 @@ fresh版本／settings／D1／Cron確認後，CAS停用schedule並提高revision
 2026-10-30T03:51:05Z九項管理回讀與原runner／bot self、resident、原API及三個匿名入口核對完成：Cron空、schedule disabled revision3、scheduler原過期policy revision3、其他三個grants及Access設定／期限不變；原五commands與四journal rows保留，新一筆expired command／firing保留，沒有新journal execution。原runner同PID／NRestarts0；bot config／政策／client／ledger hash不變，原API200能讀取該expired結果，匿名302仍受Access保護。未延長權限或新增付費。
 
 [HW01–04修正契約](../schedule-window.md)針對此次時間窗口缺陷補RED/GREEN與獨立審查；source修正及未來新窗口驗證不改寫這次失敗。HL保持未完成，完整主線亦未完成。
+
+已合併修正版後的新窗口已於04:31:06Z真實validated/healthy，詳見[HL corrected-window接續](m1-health-schedule-window-live.md)；本檔的首次失敗與補償證據不改寫。

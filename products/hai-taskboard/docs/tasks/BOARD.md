@@ -1,7 +1,7 @@
 # HAI Taskboard current development board
 
 Planning navigation: [remaining work and proposed designs](../plans/remaining-work-20261029.md).
-The planning milestone is delivered; the owner has started the separate M0 baseline below. Existing product implementation rows retain their status.
+Planning, M0 and the owner-approved M1a milestone are delivered below. Existing full-product implementation rows retain their status.
 
 This board is the current work-status authority under the owner-invoked
 START_DEVELOPMENT_PROMPT and root technical-task contract. The archived class A ledger
@@ -182,7 +182,19 @@ UI, artifact/report API, arbitrary policy or provider expansion. H01..H04 and pr
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM1A | Adopt approved contracts; expose authenticated exact completion preparation read | PREP-AC-01..04; H02 support | in_progress | 2026-10-30T03:58:51Z | — | 2026-10-30T04:23:00Z |
+| HM1A | Adopt approved contracts; expose authenticated exact completion preparation read | PREP-AC-01..04; H02 support | done | 2026-10-30T03:58:51Z | 2026-10-30T04:32:43Z | 2026-10-30T04:33:38Z |
 
 M1a local gates and independent contract/implementation review ACCEPT; [evidence](../evidence/m1a-completion-preparation-20261030.md)
 retains exact snapshot/no-write, negative cases, frozen hashes and original failures. Required PR CI/merge/readback pending; full product ACs unchanged.
+
+M1a delivery: [PR #812](https://github.com/fallrising/newclear/pull/812) merged at
+`2026-10-30T04:32:43Z` as `1a681bc65783e717931390ec325fe6ac2d997010`.
+Reviewed/integrated head `3e805090dac57c8723a35a562c73493455d9c281` passed
+[HAI backend/web CI](https://github.com/fallrising/newclear/actions/runs/41002679073) and
+[project success CI](https://github.com/fallrising/newclear/actions/runs/41002679027).
+Post-merge remote readback matches every reviewed HAI product path. C01/C02/C06 are now adopted;
+PREP-AC-01..04 and both independent reviews pass. The local JSON receipt retains its pre-delivery
+snapshot; this BOARD entry records the subsequent actual delivery. Original Red, environment failures
+and superseded runs remain in the evidence. Full H01..H04 and SUCCESS AC-02..04 remain incomplete.
+Next planned slice is M1b (Run outputs and artifact reads); it has not started. No usable tag,
+real adapter, release or deployment. This final board-only follow-up records the actual merge end.

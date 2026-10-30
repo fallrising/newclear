@@ -72,9 +72,9 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 
 - [Routine service activation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-service-live.md): owner-confirmed Free, approved runner-only renewal and seven-day service started; self/resident verified and active at final readback, fixed ceiling2026-11-05T07:24:26Z; bot/human/scheduler expired, schedules off, future uptime/expiry and billing unverified.
 
-- [Bounded health schedule](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/health-schedule.md): revision-bound15/60/1440minute UTC-start policy, at most7days; scoped read snapshot and dashboard trigger/result states. Local265tests and12browser scenarios; live rollout pending.
+- [Bounded health schedule](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/health-schedule.md): revision-bound15/60/1440minute UTC-start policy, at most7days; scoped read snapshot and dashboard trigger/result states. Local265tests and12browser scenarios; first live firing expired before dispatch and was compensated; callback-window repair underway.
 
-- [Health schedule activation attempt](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-health-schedule-live.md): approved rollout blocked by two asset-session500 responses before deployment/renewal/Cron; original resources and running resident preserved; partial evidence only, original cutoff and authorization retained.
+- [Health schedule activation attempt](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-health-schedule-live.md): initial rollout blocked by two asset-session500 responses; approved resume reached a real firing, but its command expired before dispatch; Cron disabled, original active version and expired scheduler policy restored, failed history and original service retained.
 
 - [Fixed bot bridge](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-bridge.md): single JSON CLI health.check/status, trusted submit gate, durable exact retry and truthful freshness;283local tests with actual HTTP/collector. No Grok execution, live grant renewal or deployment.
 
@@ -93,3 +93,8 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [First bounded bot activation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-bot-activation-live.md) — owner-approved bot-only24hour authority, first persistent24ID/240call policy and pinned Grok check/status activated until2026-10-30T18:00:27Z; one actual healthy result consumes1ID/4calls; original runner/Access limits preserved; model execution and natural expiry unverified.
 
 - [Bot policy inspection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-inspection.md): operator-only readonly original-state CLI for lease, remaining call/new-ID quota and bounded unreconciled IDs; no HTTP, quota/high-water writes, MCP catalog change or remote authority/health claim.
+
+- [Remaining work](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/remaining-work.md): concrete M1 human/model/fault/quota acceptance gaps, owner assistance and fixed deadlines; separate M2/M3 scope, no all-done claim.
+
+- [Delayed Cron window repair](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/schedule-window.md): callback-relative60/120second command deadlines, original due identity and authority limits;362local tests and independent source acceptance; renewed live firing pending.
+- [Window repair evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-schedule-window.md): actual expired-before-dispatch failure, RED/GREEN regressions and bounded repair evidence.

@@ -275,12 +275,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0015-1 | fresh資源／來源／runner核對 | HL-01 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
-| T-0015-2 | 有界scheduler與Worker／Cron更新（等provider：資產session500） | HL-02 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
-| T-0015-3 | 首次真實觸發及runner結果（依賴HL02恢復） | HL-03 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
-| T-0015-4 | 保留／回讀／審查與交付 | HL-04 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-29T10:21:43Z |
+| T-0015-1 | fresh資源／來源／runner核對 | HL-01 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T03:25:07Z |
+| T-0015-2 | 有界scheduler與Worker／Cron更新（首次失敗已補償停用） | HL-02 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T03:25:07Z |
+| T-0015-3 | 首次真實觸發及runner結果（派送前過期，待HW修正） | HL-03 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T03:25:07Z |
+| T-0015-4 | 保留／回讀／審查與交付 | HL-04 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T03:25:07Z |
 
-- [HL部分執行證據](../evidence/m1-health-schedule-live.md)：資產session兩次500，未發布／續權／開Cron。2026-10-29T10:15:50Z回讀原資源／授權／業務／journal保留，runner運行中；原批准持續有效但受2026-11-05T07:24:26Z上限約束。等待provider恢復，並非等owner；所有列暫留in_progress，不以證據PR合併冒充啟用完成。
+- [HL首輪部分執行證據](../evidence/m1-health-schedule-live.md)：資產session兩次500，未發布／續權／開Cron。2026-10-29T10:15:50Z回讀原資源／授權／業務／journal保留，runner運行中；原批准持續有效但受2026-11-05T07:24:26Z上限約束。等待provider恢復，並非等owner；所有列暫留in_progress，不以證據PR合併冒充啟用完成。
+
+2026-10-30接續：本次資產session200，原scheduler-only續期、revision2 Worker與15分鐘Cron已啟用；起點03:45Z、截止2026-11-05T07:24:25Z。首次03:45Z命令派送前過期；已停用schedule revision3、移除Cron、還原原BT版本與scheduler過期policy revision3，03:51:05Z保全通過。HL未完成，HW修正中；原500及新失敗紀錄保留。
 
 ## T-0016 — 固定 bot 健康檢查入口
 
@@ -425,3 +427,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - CI全過：Cloud Lab `40930348445`、Project success `40930348354`、llms `40930348378`。本機23focused及359fulltests（64Node／295Python）、六項文件／task／report／diff檢查、合併後索引／diff與private-literal檢查通過；T846 focusedACCEPT。[BI證據](../evidence/m1-bot-inspection.md)保留初始RED、socket沙箱失敗、CLI fixture argv及deepJSON斷言修正、review malformed-schema兩個RED與修復。
 - GitHub connector交付及匿名HTTPS回讀；remote tree `956e6cf991be915eb198efa561b1681f69634614`與local merge `ede980e266c6285926b8322084b501f46980c14b`相同，commit身份不同。原state真正CLI唯讀查詢18:17:42Z為active、calls4/240、新ID1/24、2ACK且無pending；DB／lock／config／policy／Grok client hash和mtime相同。這是本機快照，不是新的遠端授權／健康證據。
 - BI01–04 source/local完成，未安裝新runtime、變更MCP catalog、呼叫cloud／model、續權或新增command／付費。Python3.11本機未跑；自然到期／模型／帳單／完整主線仍pending，無usabletag。HL T-0015仍open；本收尾只改任務板、只關閉BI。
+
+## T-0025 — 延遲 Cron 派送窗口修正
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0025-1 | handler時間計算派送窗口 | HW-01 | in_progress | 2026-10-30T03:52:20Z | — | 2026-10-30T03:52:20Z |
+| T-0025-2 | due去重與錯過不補跑 | HW-02 | in_progress | 2026-10-30T03:52:20Z | — | 2026-10-30T03:52:20Z |
+| T-0025-3 | policy／grant截止護欄 | HW-03 | in_progress | 2026-10-30T03:52:20Z | — | 2026-10-30T03:52:20Z |
+| T-0025-4 | 回歸／審查／固定候選交付 | HW-04 | in_progress | 2026-10-30T03:52:20Z | — | 2026-10-30T03:52:20Z |
+
+[修正契約](../schedule-window.md)；HL實際接入仍由T-0015驗收，不以source修正冒充真實成功。

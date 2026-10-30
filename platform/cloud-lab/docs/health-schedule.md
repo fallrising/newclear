@@ -39,6 +39,6 @@ next_due_at依policy／目前grant窗口及已存在的firing計算，並要求�
 
 首次真實Cron命令須經現有runner回報，驗D1 firing→command→result同一鏈及有效時間，保留nonce與新業務紀錄；不得以手工插入結果或模擬Cron替代。最終確認未影響Access入口、原runner政策／journal及非scheduler授權。看板資產發布不等於已通過真人Access；human目前過期，該驗收仍單獨列缺口。
 
-失敗先停止新schedule並提高revision、移除本次Cron，查明有無在途命令後依原journal對帳；不刪除紀錄、不重做unknown。以新CAS還原原scheduler expired policy（revision不倒退），必要時還原原Worker版本／設定。Cron移除有傳播延遲，D1 disabled／revision護欄仍須維持。這份範圍包含停用／補償，但尚未執行live變更。
+失敗先停止新schedule並提高revision、移除本次Cron，查明有無在途命令後依原journal對帳；不刪除紀錄、不重做unknown。以新CAS還原原scheduler expired policy（revision不倒退），必要時還原原Worker版本／設定。Cron移除有傳播延遲，D1 disabled／revision護欄仍須維持。這份範圍包含停用／補償；原方案撰寫時尚未執行live變更，後續批准與2026-10-30接續實際結果以[HL證據](evidence/m1-health-schedule-live.md)為準。
 
 每15分鐘最多96個due／日，單次最多一筆命令；D1 rows與帳單不是依request數保證。新snapshot在既有看板每5秒refresh中增加一次API讀取；SQL LIMIT20僅限制候選回傳，不保證只掃描20列。長時間開看板、其他流量、nonce、join／sort與retention成本須看實際analytics，未新增付費升級或自動熔斷。

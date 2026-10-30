@@ -57,6 +57,8 @@ Existing SIWC and Grok Responses upstreams and OpenCode Chat upstreams now use d
 
 Buffered clients now also reserve and settle each generic API-key, SIWC, Grok and OpenCode HTTP dispatch. Failed collection/conversion, cancellation and legal retries retain their own attempts and original usage; missing fields remain unknown. Direct JSON has no measured first-output timestamp. Native Responses bytes and accepted background responses remain unchanged. Existing buffered configured-rate estimates require complete counters and prices; they are not verified subscription bills. See [BH-1–BH-5 and evidence boundaries](docs/tasks/T-0432-buffered-http-settlement.md).
 
+Claude Code and Cursor buffered Chat/Messages/Responses requests now use their existing raw CLI observers too. Each selected attempt is reserved before dispatch and settled once, including fallback, saved-session retry, collection failure and caller cancellation. Claude tools and live/saved session reuse retain their existing behavior; Cursor remains text-only. The ledger retains original source counters and clocks, independently of converted client usage. Cursor input/cache overlap is still unknown, so its normalized prompt and cost remain null. No buffered first-output or stall timeout is added. See [CB-1–CB-5 and the isolated fake-CLI check](docs/tasks/T-0432-buffered-cli-settlement.md).
+
 For the buffered HTTP check, preserve the native test executable reported by `cargo +1.99.0 test --locked --bin thinrouter --no-run --message-format=json`, verify its source and test inventory, and record its SHA256 before running:
 
 ```sh

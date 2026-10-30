@@ -125,48 +125,43 @@ async fn cli_attempt(
     proto: ClientProto,
     request_id: &str,
     cancel: &CancellationToken,
-    start: Instant,
 ) -> Result<ClaudeOutcome, UpstreamAttemptError> {
     let chat: Value = serde_json::from_slice(chat_body).map_err(|e| UpstreamAttemptError {
         status: 400,
         body: format!("invalid JSON body: {e}"),
         retryable: false,
     })?;
-    let (run, accounting) = match cli_format(target) {
+    let (run, mut accounting) = match cli_format(target) {
         Some(UpstreamFormat::CursorCli) => {
-            let usage = stream.then(|| {
-                crate::cursor_usage::RequestContext::new(
-                    &state.store,
-                    request_id,
-                    public_model,
-                    target,
-                )
-            });
+            let usage = crate::cursor_usage::RequestContext::new(
+                &state.store,
+                request_id,
+                public_model,
+                target,
+            );
             let (run, attempt) = crate::cursor_cli::start_observed(
                 &state.cursor_cli,
                 &target.upstream_model,
                 &chat,
                 cancel,
-                usage.as_ref(),
+                Some(&usage),
             )
             .await?;
             (run, attempt.map(BodyAccounting::Cursor))
         }
         _ => {
-            let usage = stream.then(|| {
-                crate::claude_usage::RequestContext::new(
-                    &state.store,
-                    request_id,
-                    public_model,
-                    target,
-                )
-            });
+            let usage = crate::claude_usage::RequestContext::new(
+                &state.store,
+                request_id,
+                public_model,
+                target,
+            );
             let run = crate::claude_code::start_observed(
                 &state.claude_code,
                 &target.upstream_model,
                 &chat,
                 cancel,
-                usage.as_ref(),
+                Some(&usage),
             )
             .await?;
             let accounting = run.accounting().map(BodyAccounting::Claude);
@@ -174,7 +169,6 @@ async fn cli_attempt(
         }
     };
     state.cooldown.clear(&target.connection.id);
-    let latency = start.elapsed().as_millis() as i64;
     if stream {
         let mode = match proto {
             ClientProto::Anthropic => StreamMode::Passthrough,
@@ -191,30 +185,35 @@ async fn cli_attempt(
         },
         retryable: false,
     };
-    let anthropic = run.collect(public_model).await.map_err(to_attempt)?;
-    let chat_out = claude::anthropic_to_openai_response(&anthropic).map_err(to_attempt)?;
-    let (pt, ct) = extract_usage_tokens(&chat_out);
-    let _ = state.store.log_usage(
-        Some(public_model),
-        Some(&target.connection.id),
-        Some(200),
-        Some(latency),
-        None,
-        pt,
-        ct,
-        None,
-    );
-    let body = match proto {
-        ClientProto::Anthropic => anthropic,
-        ClientProto::Chat => chat_out,
-        ClientProto::Responses => {
-            responses::chat_to_responses(&chat_out, public_model).map_err(to_attempt)?
+    // Keep this reply's consumer lease through collection and every client
+    // conversion. Only the original CLI producer supplies usage and timing.
+    let converted: AppResult<Bytes> = async {
+        let anthropic = run.collect(public_model).await?;
+        let chat_out = claude::anthropic_to_openai_response(&anthropic)?;
+        match proto {
+            ClientProto::Anthropic => Ok(anthropic),
+            ClientProto::Chat => Ok(chat_out),
+            ClientProto::Responses => responses::chat_to_responses(&chat_out, public_model),
         }
-    };
-    Ok(ClaudeOutcome::Done(json_bytes_response(
-        StatusCode::OK,
-        body,
-    )))
+    }
+    .await;
+    match converted {
+        Ok(body) => {
+            if let Some(attempt) = &mut accounting {
+                attempt.eof();
+            }
+            Ok(ClaudeOutcome::Done(json_bytes_response(
+                StatusCode::OK,
+                body,
+            )))
+        }
+        Err(error) => {
+            if let Some(attempt) = &mut accounting {
+                attempt.converted_terminal(true);
+            }
+            Err(to_attempt(error))
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -856,7 +855,6 @@ pub async fn handle_chat_with_fallback(
                 ClientProto::Chat,
                 &request_id,
                 &cancel,
-                start,
             )
             .await
             {
@@ -877,17 +875,13 @@ pub async fn handle_chat_with_fallback(
                     };
                 }
                 Err(e) => {
-                    if stream {
-                        // Each actual CLI dispatch already owns a durable row. Reservation
-                        // failure owns none and must never cause another inference dispatch.
-                        if e.body != "usage reservation failed" {
-                            let secs = cooldown_secs_for_status(e.status);
-                            if secs > 0 {
-                                state.cooldown.mark(&target.connection.id, secs);
-                            }
+                    // Selected CLI dispatches own their durable row for either
+                    // client mode. Preflight/reservation refusals add no legacy row.
+                    if e.body != "usage reservation failed" {
+                        let secs = cooldown_secs_for_status(e.status);
+                        if secs > 0 {
+                            state.cooldown.mark(&target.connection.id, secs);
                         }
-                    } else {
-                        record_failure(state, public_model, target, &e, start);
                     }
                     if e.retryable && idx + 1 < targets.len() {
                         last_err = Some(e);
@@ -1129,7 +1123,6 @@ pub async fn handle_anthropic_messages(
                 ClientProto::Anthropic,
                 &request_id,
                 &cancel,
-                start,
             )
             .await
             {
@@ -1150,17 +1143,13 @@ pub async fn handle_anthropic_messages(
                     };
                 }
                 Err(e) => {
-                    if stream {
-                        // Each actual CLI dispatch already owns a durable row. Reservation
-                        // failure owns none and must never cause another inference dispatch.
-                        if e.body != "usage reservation failed" {
-                            let secs = cooldown_secs_for_status(e.status);
-                            if secs > 0 {
-                                state.cooldown.mark(&target.connection.id, secs);
-                            }
+                    // Selected CLI dispatches own their durable row for either
+                    // client mode. Preflight/reservation refusals add no legacy row.
+                    if e.body != "usage reservation failed" {
+                        let secs = cooldown_secs_for_status(e.status);
+                        if secs > 0 {
+                            state.cooldown.mark(&target.connection.id, secs);
                         }
-                    } else {
-                        record_failure(state, public_model, target, &e, start);
                     }
                     if e.retryable && idx + 1 < targets.len() {
                         last_err = Some(e);
@@ -1334,7 +1323,6 @@ pub async fn handle_responses(
                 ClientProto::Responses,
                 &request_id,
                 &cancel,
-                start,
             )
             .await
             {
@@ -1355,17 +1343,13 @@ pub async fn handle_responses(
                     };
                 }
                 Err(e) => {
-                    if stream {
-                        // Each actual CLI dispatch already owns a durable row. Reservation
-                        // failure owns none and must never cause another inference dispatch.
-                        if e.body != "usage reservation failed" {
-                            let secs = cooldown_secs_for_status(e.status);
-                            if secs > 0 {
-                                state.cooldown.mark(&target.connection.id, secs);
-                            }
+                    // Selected CLI dispatches own their durable row for either
+                    // client mode. Preflight/reservation refusals add no legacy row.
+                    if e.body != "usage reservation failed" {
+                        let secs = cooldown_secs_for_status(e.status);
+                        if secs > 0 {
+                            state.cooldown.mark(&target.connection.id, secs);
                         }
-                    } else {
-                        record_failure(state, public_model, target, &e, start);
                     }
                     if e.retryable && idx + 1 < targets.len() {
                         last_err = Some(e);
@@ -1628,22 +1612,6 @@ fn finish_buffered_attempt(
         }
     }
     converted
-}
-
-/// Chat (`prompt_tokens`) or Responses (`input_tokens`) usage.
-fn extract_usage_tokens(bytes: &Bytes) -> (Option<i64>, Option<i64>) {
-    let Ok(v) = serde_json::from_slice::<Value>(bytes) else {
-        return (None, None);
-    };
-    let pt = v
-        .pointer("/usage/prompt_tokens")
-        .or_else(|| v.pointer("/usage/input_tokens"))
-        .and_then(|n| n.as_i64());
-    let ct = v
-        .pointer("/usage/completion_tokens")
-        .or_else(|| v.pointer("/usage/output_tokens"))
-        .and_then(|n| n.as_i64());
-    (pt, ct)
 }
 
 /// Read accounting from the upstream representation before client converters can

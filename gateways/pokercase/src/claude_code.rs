@@ -1213,7 +1213,17 @@ impl ClaudeRun {
         let mut records = crate::collection::Records::default();
         while let Some(item) = self.next().await {
             match item {
-                Item::Record(r) => records.push(r)?,
+                Item::Record(r) => {
+                    if let Err(error) = records.push(r) {
+                        // Settle before dropping the receiver: otherwise the
+                        // producer can mistake this collection failure for a
+                        // caller cancellation and win the once-only finalizer.
+                        if let Some(accounting) = &self.accounting {
+                            accounting.converted_terminal(true);
+                        }
+                        return Err(error);
+                    }
+                }
                 Item::Failed { status, message } => {
                     return Err(AppError::Upstream {
                         status,
@@ -4688,6 +4698,57 @@ while True:
             );
             assert!(tx.is_closed());
         }
+    }
+
+    #[tokio::test]
+    async fn cb3_collection_failure_settles_before_receiver_close() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = crate::store::Store::open(&dir.path().join("usage.db"), None).unwrap();
+        let accounting = usage_context(&store, "collection-failure").begin().unwrap();
+        accounting.observe_event(&json!({"type":"message_start","message":{"usage":{
+            "input_tokens":12,"cache_read_input_tokens":3,"cache_creation_input_tokens":2,
+            "output_tokens":0
+        }}}));
+        let producer_accounting = accounting.clone();
+        let (tx, rx) = tokio::sync::mpsc::channel(1);
+        let producer = tokio::spawn(async move {
+            tx.closed().await;
+            // The real producer treats a closed consumer as cancellation.
+            producer_accounting.stop("cancelled", "stream_cancelled");
+        });
+        let result = tokio::time::timeout(
+            Duration::from_secs(3),
+            ClaudeRun {
+                first: Some("x".repeat(crate::collection::MAX_BYTES - 1)),
+                rx,
+                output: None,
+                accounting: Some(accounting.clone()),
+            }
+            .collect("m"),
+        )
+        .await
+        .unwrap();
+        assert!(
+            matches!(result, Err(AppError::Upstream { status: 502, body })
+            if body == crate::collection::LIMIT_MESSAGE)
+        );
+        // Force the producer to observe closure before the outer proxy handles
+        // collect's error, so scheduler timing cannot hide the settlement race.
+        tokio::time::timeout(Duration::from_secs(3), producer)
+            .await
+            .unwrap()
+            .unwrap();
+        accounting.converted_terminal(true);
+        let rows = store.recent_usage(10).unwrap();
+        assert_eq!(rows.len(), 1);
+        let row = &rows[0];
+        assert_eq!(row.outcome, "failed");
+        assert_eq!(row.error.as_deref(), Some("stream_conversion_failed"));
+        assert_eq!(row.prompt_tokens, Some(17));
+        assert_eq!(row.completion_tokens, Some(0));
+        assert_eq!(row.usage_status, "partial");
+        assert!(row.status.is_none());
+        assert!(row.finalized_at.is_some());
     }
 
     #[tokio::test]

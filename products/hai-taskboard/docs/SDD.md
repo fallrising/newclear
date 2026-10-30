@@ -1,7 +1,7 @@
 # HAI Taskboard Software Design Document
 
 Status: **Accepted at G0 for P0-A implementation**
-Last updated: 2026-09-05
+Last updated: 2026-10-30 (owner-approved C01/C02; original G0 acceptance retained)
 Baseline: `newclear/main@3ad5533d8148a84ab19145fbee92306d1b69941b`
 
 ## 1. Decision summary
@@ -78,7 +78,7 @@ React Web UI --- REST commands / SSE projections
 | Dispatch work | SQLite outbox | Claimed after command commit; external calls never occur in it |
 | Large artifacts | Filesystem | Immutable digest-addressed objects; metadata and bindings in SQLite |
 | Board/SSE/attention | Rebuildable projection | Never an independent authority |
-| Bootstrap execution status | `.team/PLAN.md` | One-time switch to SQLite; never bidirectional synchronization |
+| Bootstrap execution status | `docs/tasks/BOARD.md` | Current repository bootstrap work status; any future migration to SQLite requires an explicit authority decision; never bidirectional synchronization |
 
 - **HAI-AUTH-001** — A command that changes authoritative state MUST commit the aggregate mutation,
   command-result/idempotency record, audit record and any outbox intent in one SQLite transaction.
@@ -326,8 +326,10 @@ store. Deployment packaging is local/container development only until restore ev
   diff and verification output before updating the execution plan.
 - **HAI-DELIVERY-003** — Required failed, skipped, flaky or NotRun checks remain visible and prevent
   an unqualified completion claim.
-- **HAI-DELIVERY-004** — Product task contracts in `docs/tasks` are immutable inputs. Mutable bootstrap
-  execution status exists only in `.team/PLAN.md` until the explicit SQLite authority migration.
+- **HAI-DELIVERY-004** — Product task contracts `docs/tasks/HTB-P0A-*.md` are immutable inputs.
+  Current bootstrap execution status is recorded only in `docs/tasks/BOARD.md`. Root `.team/PLAN.md`
+  records routing, review and acceptance rationale; the archived product ledger remains immutable.
+  A future migration of execution-status authority to SQLite requires an explicit decision.
 
 ## 13. Technology baseline
 
@@ -371,3 +373,10 @@ The G0 re-review was accepted by T-011 and the design adoption by T-010, as reco
   `f7cadae975c9300478f2a4d1bd24c2c1efbf3a3bd7bba0daa20fd4ee2db6a01c`
 - `hai-taskboard-sdd-review-v0.2-augmented.md`, SHA-256
   `e03910bb3cd1cdc763201552e671f34d351a3db9cfc4c234261f507069249dbc`
+
+## 2026-10-30 accepted amendments
+
+Owner approved M0 C01/C02/C06: current repository bootstrap authority is BOARD (HAI-DELIVERY-004),
+artifact preflight wording is aligned in the Fake vertical contract, and the narrow
+[completion preparation API](sdd/completion-preparation.md) refines HAI-API-001 without granting Done.
+Original G0 acceptance, all full-product obligations and historical failures remain unchanged.

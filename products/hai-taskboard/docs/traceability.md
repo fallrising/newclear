@@ -444,3 +444,13 @@ Whole HAI-DONE/UX/ops acceptance remains pending: completion/artifact/report rea
 current-policy detail/coverage, full attention/impact, durable activation, verified restore and
 ContextPack fresh-context resume. No Git publication, tag or deployment. Historical failures,
 worker socket-denied tests and private-harness errors were not rewritten as first-run successes.
+
+## 2026-10-30 M1a completion preparation
+
+Owner-approved [HAI-PREP-001..005](sdd/completion-preparation.md) refine HAI-API-001 and support HAI-DONE
+without moving completion authority. PREP-AC-01..04 map to the four named HTTP oracles and
+`TestCompletionPreparation_PolicyPrecedence`; transport tests are in `backend/internal/transport/httpapi`,
+real SQLite HTTP/no-write/reopen tests in `backend/internal/application/service`. C01/HAI-DELIVERY-004
+aligns BOARD/bootstrap authority; C06 aligns preflight wording with HAI-INTEGRITY-003/004.
+[Current M1a evidence](evidence/m1a-completion-preparation-20261030.md) distinguishes focused results,
+root gates, independent review and delivery. No whole-product or historical oracle is promoted.

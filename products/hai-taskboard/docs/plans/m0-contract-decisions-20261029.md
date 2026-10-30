@@ -1,7 +1,10 @@
 # M0 規格衝突與下一片契約提案
 
 日期：2026-10-29。T-0339 / HM0，來源 `1e70824e24161bafacfc1eca33bb31ba7045df5a`。
-狀態：**Proposed，待 owner 決策；本文件不是 SDD 修訂，也不接受新行為。**
+狀態：**C01／C02／C06 已由 owner 於 2026-10-30 明確批准；C03／C04／C05 仍依後續切片處理。**
+
+以下保留 2026-10-29 的提案原文與當時 NotRun；批准不追溯改寫歷史證據。
+現行精確 M1a 契約見 [completion preparation](../sdd/completion-preparation.md)，工作狀態見 [BOARD](../tasks/BOARD.md)。
 
 本提案把 M0 發現收斂成可審查差異。完整來源／測試證據見 [M0 報告](../evidence/m0-baseline-20261029.md)
 與三份矩陣。依 desk 運作方法 §0／§4，修改已接受 SDD 需 owner 同意；本輪保留原文和原 NotRun，先完成不依賴決策的 M0 驗證與交付。

@@ -2374,6 +2374,42 @@ BI evidence gate ACCEPT source/local:17missingAPI RED→17GREEN,19CLIexpanded GR
 
 Current bounded execution is recorded in [the T-0442 plan](fanz-p0-t0442/PLAN.md). Earlier plans above are preserved.
 
+## HAI M1a / T-0339 — 2026-10-30T03:58:51Z
+
+Owner explicitly approved C01/C02/C06 and requested latest design authority. Remote HAI tree remains
+PR799 at baseline6b7bf17c; no newer HAI main changes/open designPRs. Deliver owner-approved authority
+and preflight wording plus one authenticated snapshot-only completion preparation API, following
+products/hai-taskboard/docs/sdd/completion-preparation.md. Root owns specs/OpenAPI/BOARD/acceptance/Git;
+bounded native backend writer owns only named Go paths in its own worktree after contract review;
+independent reviewer owns report only. Product BOARD is sole current status. No M1b/M1c/M2/UI,
+new dependencies, real providers, release/deploy or archived-ledger edits.
+Estimate60–90root active minutes plus bounded writer30minutes/reviewer10minutes each contract/final;
+20minute progress checkpoints; max2reasoned diagnoses after initial failure; each command timeout;
+CI each round <=20minutes with resumable state on timeout. Provider requests/tokens/cost and total
+roottool counts unknown/null; local worker launches and command evidence recorded separately.
+Initial SSH sync stalled (stopped); SSH443 refused untrusted host key (not bypassed); existing HTTPS
+authentication succeeded using per-command config, no global change. Native tool guidelines read.
+
+M1a contract gate: T-001 independent ACCEPT including OpenAPI; fixed-digest Redocly lint0warnings,
+project47/index8 pass. Four named HTTP skeletons compiled404 Red and policy-classification Red
+retained by T-002 before production edits. Owner approval already covers precise C01/C02/C06;
+no additional approval needed. Snapshot semantics and all historical product gaps remain intact.
+
+M1a checkpoint2026-10-30T04:18Z: docs-first commit c651b83f, independent contract ACCEPT,
+OpenAPI lint/web30+build/project47/index8 green; seven-file bounded worker frozen and integrated
+with hash guards, real SQLite HTTP repeat/reopen/all-table no-write and policy/error negatives green.
+Initial root fullgate stopped137 during race after worker's final dot-ID delta; retained log is
+superseded evidence, not acceptance. Final unchanged native fullgate running on frozen source;
+author-independent final reviewer launched (10min). Remaining root verification/review/Git/CI and
+board/desk closeout remain within60–90minute estimate; exact active/wait/provider totals unknown.
+Refreshed remote main3afa8345: no HAI product changes since intake. No scope expansion.
+
+M1a local evidence gate ACCEPT2026-10-30T04:22Z: PREP-AC-01..04 mapped to actual focused/SQLite
+oracles and source; all7frozen hashes and185input hashes stable. Root final native backend full/race/
+vet/build exit0, web30gate/API lint and document contracts pass. T-003 independent ACCEPT with
+sharedoverflow evidence wording clarified. All originalRed/environment/superseded137 logs retained.
+This accepts local M1a only; exact-head CI/normal merge/readback and board/desk closure remain.
+
 ## HL resume — 2026-10-30T03:13:47Z
 
 Owner continues and requests actionable blockers/all-done notice. Resume existing T0015/HL under original authorization/cutoff, fresh management/local source and latestBT version provenance. One new assets-session attempt after >16h and fullfresh preflight; on recurring500 stop, preserve/readback and prepare unsent provider inquiry. On success follow original guarded rollout/compensation; no additional grant/Access/runner/bot scope. T847 one native independent public-evidence reviewer, inherited model/effort/permissions, fresh <=1500tokens initial plus one focusedfollowup, five-minute monitored; no private/network/writes/tests/delegation, unknowncost/quota, not OS isolation. Mainline must remain incomplete unless all required evidence actually passes.
@@ -2381,3 +2417,6 @@ Owner continues and requests actionable blockers/all-done notice. Resume existin
 HL real firing failed: admitted03:45:23Z but due-anchored dispatch deadline03:46:00Z, originalrunner saw expired_before_dispatch with no attempt. Approved compensation executed; active originalBT version and sixbindings match, latest-upload settings retain inactiveHS binding; no redundant settings mutation. Continue HW01–04 bounded source repair under docs/schedule-window.md: handler-relative60/120second budgets, due identity/dedupe preserved, actualpolicy cutoff retained. Lead owns RGR/source; T848 fresh native read-only source reviewer <=1500tokens initial+onefollowup,5minutes monitored, inherited settings, no writes/private/network/delegation. Original15minute/authority/no-paid bounds remain.
 
 HW source evidence gate ACCEPT: actualfailure safelycompensated03:51:05Z, T847PARTIAL/ACCEPT truthfulpreservation only. RED14=12pass2fail, callbacknow60/120 pluspolicyguardfix→14GREEN; full67Node+295Python362GREEN. T848sourceACCEPT; no renderer/runner/APIupperbound/schema/authscope change. Lead reviewedactualdiff/logs; normalPR/CI/merge/readback andfixedcandidate precede renewedlivewindow. HLremainsopen.
+
+M1a integration: concurrent main3afa8345 merged normally; append-only root PLAN conflict
+resolved retaining both HAI and unrelated HL entries. HAI product/runtime inputs unchanged.

@@ -126,3 +126,18 @@ they are not added to P0-A AC-01..04. Current task status and writable scope are
 Owner continued development after the reviewed remaining-work plan. This bounded task audits current source `1e70824e24161bafacfc1eca33bb31ba7045df5a` and runs the pinned backend/web gates plus existing real ConnectedApp foundation harness. It produces full clause/implementation/test/gap coverage and precise contract-conflict proposals before M1a. Acceptance is M0-01..03 in [BOARD](docs/tasks/BOARD.md); no production/spec changes or product AC promotion. Initial tests are NotRun for this source until recorded in the new evidence. Historical failures/partial results stay intact.
 
 M0 current local result: pinned backend full/race/vet/build, web30tests/build and8harness safety tests pass; real ConnectedApp13steps/30captures pass with Fake remaining Developing/Succeeded andDone0. Two source inventories and independent T-003 review support only this baseline; [full evidence and limits](docs/evidence/m0-baseline-20261029.md) retain initial environment failures and all product gaps. Required Git/CI delivery is tracked separately in BOARD; no AC-02/03/04 promotion.
+
+## M1a completion preparation — T-0339 / 2026-10-30
+
+Owner approved C01/C02/C06 and requested current design authority. Source `6b7bf17c010f6a354f7abf3676f994f7ae2d19ec`
+has the same HAI tree as M0 closeout; no newer open HAI design PR at intake. This bounded milestone
+aligns bootstrap/preflight wording and implements the [snapshot-only completion preparation contract](docs/sdd/completion-preparation.md),
+PREP-AC-01..04. Verify auth/scope, exact Review/QA snapshot with no writes, stale/policy precedence and
+strict output/bounds/capability refusal using focused Red/Green and real SQLite; then pinned backend
+full/race/vet/build, OpenAPI lint, existing web gate, document checks, independent review and PR CI.
+Initial status NotRun; full product AC-02/03/04 remain pending. No UI or later M1/M2 slice is included.
+
+M1a local evidence: PREP-AC-01..04 focused/real SQLite checks pass; pinned backend full/race/vet/build,
+web30/type/lint/format/build and OpenAPI lint pass. Independent contract and implementation reviews
+ACCEPT. [Evidence](docs/evidence/m1a-completion-preparation-20261030.md) retains meaningful Red and
+environment/superseded runs; required Git/CI delivery is tracked in BOARD. Product ACs stay pending.

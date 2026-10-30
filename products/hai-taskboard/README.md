@@ -52,3 +52,6 @@ See `docs/SDD.md`. The class A ledger is archived at journal `archive/team-ledge
 
 
 M0 基準對帳與缺口：[baseline report](docs/evidence/m0-baseline-20261029.md)。新一輪 pinned backend/web 與真實 ConnectedApp foundation 已跑；完整產品仍未完成，M1a 新契約仍待接受。
+
+M1a: [完成準備 API 契約](docs/sdd/completion-preparation.md)與[驗證紀錄](docs/evidence/m1a-completion-preparation-20261030.md)。
+讀取只提供 exact snapshot，不代表可以完成；完整完成 UI 與其他 P0-A 缺口仍按 [BOARD](docs/tasks/BOARD.md) 推進。

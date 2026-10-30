@@ -70,6 +70,7 @@ func NewServer(commands CommandService, results CommandResultSource, projections
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/repository-bindings/{binding_id}", server.getRepositoryBinding)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/proposals/{proposal_digest}/initial-acceptance", server.getInitialAcceptance)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/events", server.streamEvents)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/completion-preparation", server.getCompletionPreparation)
 	mux.HandleFunc("/", server.notFound)
 	server.mux = mux
 	return server, nil
@@ -79,6 +80,17 @@ func (server *Server) ServeHTTP(response http.ResponseWriter, request *http.Requ
 	if request == nil || !canonicalPath(request) {
 		writeAPIError(response, http.StatusBadRequest, command.CodeInvalidRequest, "request path is not canonical")
 		return
+	}
+	// Intercept this read before ServeMux can redirect invalid dot resource IDs.
+	if request.Method == http.MethodGet && strings.HasSuffix(request.URL.Path, "/completion-preparation") {
+		parts := strings.Split(request.URL.Path, "/")
+		if len(parts) == 10 && parts[3] == "projects" && parts[5] == "work-items" && parts[7] == "candidates" && (parts[4] == "." || parts[4] == ".." || parts[6] == "." || parts[6] == ".." || parts[8] == "." || parts[8] == "..") {
+			request.SetPathValue("project_id", parts[4])
+			request.SetPathValue("work_item_id", parts[6])
+			request.SetPathValue("candidate_id", parts[8])
+			server.getCompletionPreparation(response, request)
+			return
+		}
 	}
 	server.mux.ServeHTTP(response, request)
 }

@@ -170,3 +170,19 @@ local files; all HAI product paths matched the merged checkpoint. HM0 closes onl
 baseline audit, not H01..H04 or SUCCESS AC-02..04. Proposed C01/C02/C06 remain unadopted;
 M1a has not started. Next: owner decision on the concrete contract proposals, followed by
 a separate accepted M1a task. No usable tag, real adapter, release or deployment.
+
+## T-0339 — M1a completion preparation
+
+Owner approved C01/C02/C06 on2026-10-30 and requested latest design as authority. Intake remote HAI
+product tree remains PR799; current plan includes Proposed Kanzo follow-ups without enabling them.
+One Ready bounded task: [contract and fixed cases](../sdd/completion-preparation.md).
+Writable scope: owner-approved SDD/ADR/HANDOFF authority wording, M1a spec/OpenAPI, preparation
+application/HTTP Go implementation and tests, documentation/evidence/BOARD. No dependency, migration,
+UI, artifact/report API, arbitrary policy or provider expansion. H01..H04 and product ACs retain status.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HM1A | Adopt approved contracts; expose authenticated exact completion preparation read | PREP-AC-01..04; H02 support | in_progress | 2026-10-30T03:58:51Z | — | 2026-10-30T04:23:00Z |
+
+M1a local gates and independent contract/implementation review ACCEPT; [evidence](../evidence/m1a-completion-preparation-20261030.md)
+retains exact snapshot/no-write, negative cases, frozen hashes and original failures. Required PR CI/merge/readback pending; full product ACs unchanged.

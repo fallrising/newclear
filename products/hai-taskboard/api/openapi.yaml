@@ -212,6 +212,50 @@ paths:
         default:
           $ref: "#/components/responses/Error"
         "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/completion-preparation:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - $ref: "#/components/parameters/WorkItemID"
+      - name: candidate_id
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 80
+          pattern: "^[A-Za-z0-9_.-]+$"
+          not: { enum: [".", ".."] }
+    get:
+      summary: Prepare exact completion material for explicit operator intent
+      operationId: getCompletionPreparation
+      x-hai-permission: project.read
+      description: >-
+        Snapshot only, never a Done verdict or reservation. Authenticate and authorize before
+        material reads; runtime Host and existing GET Origin semantics apply. Every response
+        is no-store. Missing capability fails closed. The application compares current authority
+        before and after bounded artifact verification; CompleteWorkItem rechecks transactionally.
+      responses:
+        "200":
+          description: Exact Review or QA snapshot, at most 1 MiB; does not change any state.
+          headers:
+            Cache-Control:
+              schema: { const: no-store }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompletionPreparation" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409":
+          description: >-
+            stale_subject takes precedence over incomplete policy. Only current identity with a
+            missing verification rule or environment yields policy_rejected and
+            error.details.reason verification_policy_incomplete. No writes or implicit retries.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/APIError" }
+        "422": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
   /projects/{project_id}/commands:
     parameters:
       - $ref: "#/components/parameters/ProjectID"
@@ -843,6 +887,56 @@ components:
         current_epoch: { type: integer, minimum: 1 }
         minimum_sequence: { type: integer, minimum: 0 }
         snapshot_url: { type: string, pattern: "^/api/v1/projects/[^/]+/(board|attention)$" }
+    CompletionPreparation:
+      type: object
+      additionalProperties: false
+      required:
+        [expected_version, phase, completion_subject, completion_subject_digest, lease_epoch,
+         restore_generation, approval_required, verification_rules]
+      description: >-
+        Subject scope equals the route and its digest is recomputed. In Review, subject version
+        equals expected_version + 1; in QA they are equal. Required ACs and rules are sorted,
+        unique and have the same exact AC set. No gate result, coverage or reservation is implied.
+      properties:
+        expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }
+        phase: { type: string, enum: [Review, QA] }
+        completion_subject: { $ref: "#/components/schemas/CompletionSubject" }
+        completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        lease_epoch: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        restore_generation: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        approval_required: { type: boolean }
+        verification_rules:
+          type: array
+          minItems: 1
+          maxItems: 1024
+          items: { $ref: "#/components/schemas/CompletionVerificationRule" }
+    CompletionVerificationRule:
+      type: object
+      additionalProperties: false
+      required:
+        [ac_id, verifier_class, independent, prohibited_verifier_actor,
+         prohibited_verifier_run_role, environment_digest]
+      properties:
+        ac_id:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: At most 120 UTF-8 bytes; no controls, whitespace or slashes.
+        verifier_class:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: At most 128 UTF-8 bytes, no control characters.
+        independent: { type: boolean }
+        prohibited_verifier_actor:
+          type: string
+          maxLength: 120
+          description: Empty or at most 120 UTF-8 bytes; no controls, whitespace or slashes.
+        prohibited_verifier_run_role:
+          type: string
+          maxLength: 128
+          description: At most 128 UTF-8 bytes, no control characters; empty is valid.
+        environment_digest: { $ref: "#/components/schemas/SHA256" }
     CompletionSubject:
       type: object
       additionalProperties: false
@@ -1376,7 +1470,7 @@ components:
           type: string
           enum:
             [invalid_request, unauthenticated, permission_denied, not_found, version_conflict,
-             idempotency_conflict, idempotency_expired, stale_subject, impact_plan_stale,
+             idempotency_conflict, idempotency_expired, stale_subject, policy_rejected, impact_plan_stale,
              lifecycle_rejected, done_gate_unsatisfied, capability_unsupported, outcome_unknown,
              storage_corruption, projection_unavailable]
         message: { type: string, minLength: 1, maxLength: 1000 }

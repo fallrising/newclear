@@ -42,7 +42,7 @@ export OFFICE_TOKEN_FILE="$PWD/.grok.token"
 curl --fail --silent http://127.0.0.1:8787/state
 ```
 
-停止／重啟相同 local instance，重讀 /state 應保留 revision、狀態與 lastSeen。不要刪除 `.wrangler` 再聲稱驗證恢復。獨立自動化 smoke：`npx --yes --package wrangler@4.156.0 --command 'node tests/workerd-smoke.mjs'`，使用 temporary directory 的合成狀態與可拋棄 token；完全不需要 Cloudflare credentials。
+停止／重啟相同 local instance，重讀 /state 應保留 revision、狀態與 lastSeen。不要刪除 `.wrangler` 再聲稱驗證恢復。獨立自動化 smoke：`npx --yes --package=wrangler@4.156.0 -- node tests/workerd-smoke.mjs`，使用 temporary directory 的合成狀態與可拋棄 token；完全不需要 Cloudflare credentials。
 
 CI 將執行實際 local workerd 的 report、衝突及重啟驗證。是否真的通過以該 commit 的 CI 結果為準，不以存在 workflow 推定成功。固定的是 Wrangler 頂層 release，不是完整 transitive dependency lock；後續正式前端／可重現部署里程碑須建立 lockfile 與依賴來源核對。
 

@@ -40,4 +40,4 @@ jobs:
       - name: Real local workerd SQLite persistence and concurrency
         env:
           WRANGLER_SEND_METRICS: "false"
-        run: npx --yes --package wrangler@4.156.0 --command 'node tests/workerd-smoke.mjs'
+        run: npx --yes --package=wrangler@4.156.0 -- node tests/workerd-smoke.mjs

@@ -275,14 +275,22 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0015-1 | fresh資源／來源／runner核對 | HL-01 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T04:33:01Z |
-| T-0015-2 | 有界scheduler與Worker／Cron更新（修正版revision4已啟用） | HL-02 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T04:33:01Z |
-| T-0015-3 | 首次真實觸發及runner結果（修正版validated，待交付） | HL-03 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T04:33:01Z |
-| T-0015-4 | 保留／回讀／審查與交付 | HL-04 | in_progress | 2026-10-29T10:09:24Z | — | 2026-10-30T04:33:01Z |
+| T-0015-1 | fresh資源／來源／runner核對 | HL-01 | done | 2026-10-29T10:09:24Z | 2026-10-30T04:37:59Z | 2026-10-30T04:38:47Z |
+| T-0015-2 | 有界scheduler與Worker／Cron更新（修正版revision4已啟用） | HL-02 | done | 2026-10-29T10:09:24Z | 2026-10-30T04:37:59Z | 2026-10-30T04:38:47Z |
+| T-0015-3 | 首次真實觸發及runner結果（修正版validated） | HL-03 | done | 2026-10-29T10:09:24Z | 2026-10-30T04:37:59Z | 2026-10-30T04:38:47Z |
+| T-0015-4 | 保留／回讀／審查與交付 | HL-04 | done | 2026-10-29T10:09:24Z | 2026-10-30T04:37:59Z | 2026-10-30T04:38:47Z |
 
 - [HL首輪部分執行證據](../evidence/m1-health-schedule-live.md)：資產session兩次500，未發布／續權／開Cron。2026-10-29T10:15:50Z回讀原資源／授權／業務／journal保留，runner運行中；原批准持續有效但受2026-11-05T07:24:26Z上限約束。等待provider恢復，並非等owner；所有列暫留in_progress，不以證據PR合併冒充啟用完成。
 
 2026-10-30接續：本次資產session200，原scheduler-only續期、revision2 Worker與15分鐘Cron已啟用；起點03:45Z、截止2026-11-05T07:24:25Z。首次03:45Z命令派送前過期；已停用schedule revision3、移除Cron、還原原BT版本與scheduler過期policy revision3，03:51:05Z保全通過。HL未完成，HW修正中；原500及新失敗紀錄保留。
+
+
+### Git交付／收尾（HL）
+
+- 修正source [PR809](https://github.com/fallrising/newclear/pull/809)與實際證據[PR815](https://github.com/fallrising/newclear/pull/815)已合併；後者head `10c521ac368ba3ef706ea3ec540d66b2181eb195`、merge `fe889fb095412d53726d8f5b4cd6b5fcb603d72b`，合併時間2026-10-30T04:37:59Z。全tree比較差異僅同期其他專案任務板，該更新完整保留；限定本機與遠端13份變更逐檔相同、source固定候選六檔相符。
+- 證據PR必要CI全過：CloudLab `41003830530`、Project success `41003830415`、llms `41003830703`。Source362tests與T848ACCEPT，實際新窗口及T849證據審查ACCEPT；T847的初輪PARTIAL與原失敗／補償永久保留。
+- [新revision4真實閉環](../evidence/m1-health-schedule-window-live.md)：due04:30、admit04:30:29、原runner完成04:31:06 validated/healthy，04:31:44最終同鏈與保全通過；原六commands／四journal、首筆expired command／firing及其他角色／Access／bot state保留。15分鐘Cron保持啟用，policy截止2026-11-05T07:24:25Z，其他原期限不延長，無新增付費。
+- HL01–04完成；T-0003-4／AC-06～08與完整mainline仍pending。真人Access、模型對話、完整故障／配額、自然到期、未來uptime與帳單未驗，沒有usable tag。本收尾只改任務板，不再次操作雲端或重跑collector。
 
 ## T-0016 — 固定 bot 健康檢查入口
 

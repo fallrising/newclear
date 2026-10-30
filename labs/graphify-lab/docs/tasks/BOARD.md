@@ -90,3 +90,15 @@ L-01～L-05 實作、文件與必要驗證已交付；[證據與限制](../evide
 唯一review must-fix（failed callback漏postvalidation）已先RED再修正，13state獨立複查與最終81tests通過；無未解阻擋問題。
 本PR只記錄技術任務完成；desk/journal另外同步事實，owner驗收與release/deploy分開。沒有擴張下一里程碑。
 限制：檢查只代表觀測時點，無watcher/自動刷新；calls是靜態邊，搜尋上限不代表無路徑；provider/tokens/cost未量測。
+
+## T-0443 — M5 修改影響與測試線索
+
+[desk](https://github.com/fallrising/desk/blob/main/tasks/T-0443-graphify-change-impact/task.md)／[規格](../milestones/change-impact.md)。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0443-01 | 呼叫者與來源證據 | I-01 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
+| T-0443-02 | 可解釋測試線索 | I-02 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
+| T-0443-03 | 有界且穩定查詢 | I-03 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
+| T-0443-04 | 真 MCP 修改刷新流程 | I-04 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
+| T-0443-05 | 驗證審查與交付 | I-05 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |

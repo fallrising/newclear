@@ -72,3 +72,35 @@ test('in-flight lease refuses disabled policy but expired lease still reconciles
  assert.equal((await f.request('/api/runner/claim','runner',T+1000,{})).status,409);
  const b=(await f.request('/api/runner/claim','runner',T+16000,{})).data.assignment;assert.equal(b.command_id,a.command_id);assert.equal(b.attempt.mode,'reconcile_only');
 });
+test('late same-minute Cron preserves dispatch time for the original minute-polling runner',async()=>{
+ for(const delay of [23000,59000]){
+  const f=await fixture();await f.fire(T,T+delay);
+  const a=(await f.request('/api/runner/claim','runner',T+60000,{})).data.assignment;
+  assert.ok(a,'the first minute poll must still be able to claim this delayed callback');
+  assert.equal(a.command.not_before,stamp(T));
+  assert.equal(a.command.dispatch_deadline,stamp(T+delay+60000));
+  assert.equal(a.command.execution_deadline,stamp(T+delay+120000));
+  const result={command_id:a.command_id,attempt_id:a.attempt.attempt_id,fence:a.attempt.fence,owner_outcome:'succeeded',started_at:stamp(T+60000),finished_at:stamp(T+61000),artifact:JSON.stringify({status:'healthy',sample_age_seconds:0,checks:{collector:'ok'},metrics:{load_1m_milli:100,cpu_count:4,disk_free_percent:70}})};
+  const response=await f.request('/api/runner/report','runner',T+62000,result);
+  assert.equal(response.status,200);assert.equal(response.data.command.result.validation.status,'passed');
+  assert.equal((await f.request('/api/health-schedule','reader',T+63000)).data.schedule.latest_result.command_id,a.command_id);
+ }
+});
+test('late due retries preserve original bytes and deadlines; next-minute delivery still skips',async()=>{
+ const f=await fixture();await f.fire(T,T+23000);const row=f.DB.db.prepare('SELECT * FROM commands').get();
+ await f.fire(T,T+45000);assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),row);
+ assert.equal(JSON.parse(row.body).idempotency_key,`schedule-1-${T}`);
+ const late=await fixture();await late.fire(T,T+60000);assert.equal(late.count(),0);
+ assert.equal(late.DB.db.prepare('SELECT outcome FROM firings').get().outcome,'skipped_misfire');
+});
+test('late callbacks need a full actual execution window before both policy and grant cutoff',async()=>{
+ for(const boundary of ['policy','grant']){
+  const f=await fixture();const end=stamp(T+130000);
+  if(boundary==='policy')f.env.HEALTH_SCHEDULE=JSON.stringify({...f.policy,expires_at:end});
+  else f.DB.db.prepare("UPDATE grants SET policy=json_set(policy,'$.expires_at',?) WHERE id='scheduler'").run(end);
+  await f.fire(T,T+23000);assert.equal(f.count(),0,`${boundary} must bound the actual callback-relative window`);
+ }
+ const exact=await fixture();exact.env.HEALTH_SCHEDULE=JSON.stringify({...exact.policy,expires_at:stamp(T+143000)});
+ await exact.fire(T,T+23000);assert.equal(exact.count(),1);
+ assert.equal(JSON.parse(exact.DB.db.prepare('SELECT body FROM commands').get().body).execution_deadline,stamp(T+143000));
+});

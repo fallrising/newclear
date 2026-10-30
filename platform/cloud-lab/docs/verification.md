@@ -81,3 +81,7 @@ BI01–04依[唯讀查詢契約](bot-inspection.md)驗原state不變、FLOCK、s
 ## 應用配額子集
 
 [QV01–04](quota-qualification.md)以Worker.handle／scheduled及本機SQLite補AC-08的總保留／滾動窗口、去重保全及Cron終局；[證據](evidence/m1-quota-qualification.md)保留fixture失敗及副本mutation。此層不證明provider耗盡、遠端競爭或帳單；其餘矩陣層級與缺口保持。
+
+## 應用用量觀測子集
+
+[UO01–04](usage-observation.md)補scope聚合、手動看板及過期／撤權競爭，[證據](evidence/m1-usage-observation.md)區分source/local與provider／live。觀測數值不是准入預留或帳單來源。

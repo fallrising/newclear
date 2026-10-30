@@ -133,3 +133,7 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 ## QV：應用配額隔離驗收
 
 [QV01–04](docs/quota-qualification.md)已完成[8focused／370fulltests、三組mutation及T850獨立審查](docs/evidence/m1-quota-qualification.md)：API／Cron共享上限、窗口恢復、去重與歷史保全。只操作本機隔離資料，Git狀態見任務板；實際provider配額／帳單與完整AC-08仍pending。
+
+## UO：應用用量觀測
+
+[UO01–04](docs/usage-observation.md)具scope的准入快照與手動看板讀取，已完成[387tests／14組本機瀏覽器驗證及T851複審](docs/evidence/m1-usage-observation.md)；provider／帳單未接線維持未知，尚未部署新版，完整AC08仍pending。

@@ -103,3 +103,6 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 
 - [Application quota qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/quota-qualification.md): isolated API/Cron retained10000 and rolling1440 boundaries, retry/history preservation and due finality; local SQLite evidence only, provider usage/billing and retention remain pending.
 - [Quota evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-quota-qualification.md): focused boundary tests and disposable mutation checks; original fixture failures retained, no live exhaustion or plan change.
+
+- [Application usage observation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/usage-observation.md): scoped single-statement application quota snapshot and manual dashboard read; all-row scope guard, stale/auth race handling, provider usage/billing not connected and null; source/local only, no deployment or retention deletion.
+- [Usage evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-usage-observation.md): RED/GREEN, SQLite/HMAC and local Chromium/workerd qualification; real provider, human Access and full mainline remain pending.

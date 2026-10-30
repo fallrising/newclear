@@ -86,3 +86,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [延遲Cron派送窗口修正](docs/schedule-window.md)已完成[362tests及獨立source審查](docs/evidence/m1-schedule-window.md)，保留due身份／去重及總截止；重新接入的[真實觸發驗證](docs/evidence/m1-health-schedule-window-live.md)已通過。
 
 [應用配額隔離驗收](docs/quota-qualification.md)覆蓋API／Cron共享上限、窗口恢復與同ID重送；[證據](docs/evidence/m1-quota-qualification.md)區分本機SQLite與provider用量，總數到頂不自動清歷史，完整AC-08仍pending。
+
+[應用用量觀測](docs/usage-observation.md)新增具scope的唯讀API與看板手動快照，顯示保留／近24h命令與active占用；失聯／過期明示，provider與帳單未接線維持未知。[驗證證據](docs/evidence/m1-usage-observation.md)區分本機與live，尚未發布新版。

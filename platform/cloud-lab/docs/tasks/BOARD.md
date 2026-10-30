@@ -471,3 +471,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - [PR820](https://github.com/fallrising/newclear/pull/820) head `ee7635e36422c16daf240e3aac5501b970a7f123`，merge `7a2e602d36d8830a188273ce65baf6edbe926c62`，合併時間2026-10-30T10:19:03Z；remote tree `5b1e1dd3b9cf39c7abcf3b4dd79a974859ab8951`等於本機候選，head為main祖先，回讀工作樹乾淨。
 - exact-head CI全過：Cloud Lab `41039656961`、Project success `41039656790`、llms `41039656651`。本機8focused／370fulltests、三組副本mutation、索引／task／report／diff與T850獨立ACCEPT；原fixture失敗及早期mutation仍留存。
 - QV01–04隔離應用驗收完成。無runtime部署、live請求、歷史清理、授權延長或付費變更；provider耗盡／用量／帳單、retention、完整故障與human／model仍pending。完整mainline保持incomplete、無usable tag。本收尾只關閉QV，不將本機SQLite或一次交錯當成遠端D1並行證據。
+
+## T-0027 — 應用用量觀測
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0027-1 | 唯讀聚合API | UO-01 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
+| T-0027-2 | scope／邊界與未知來源 | UO-02 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
+| T-0027-3 | 手動看板與session保全 | UO-03 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
+| T-0027-4 | 回歸／瀏覽器／審查／交付 | UO-04 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
+
+[範圍與驗收](../usage-observation.md)；不新增雲端資源／管理token或自動清理。

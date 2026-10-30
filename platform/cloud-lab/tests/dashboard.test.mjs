@@ -215,3 +215,54 @@ test('schedule result becomes stale and past next slot is not advertised as futu
 test('schedule API uses the authenticated read route',async()=>{
  const paths=[];const client=createClient(async(path,init)=>{paths.push(path);assert.equal(init.method,'GET');return Response.json(scheduleFixture());});assert.equal((await client.schedule()).schema_version,'cloudlab.health-schedule.v1');assert.deepEqual(paths,['/api/health-schedule']);
 });
+
+const usageFixture=()=>({schema_version:'cloudlab.usage.v1',observed_at:now,scope:{workspace_id:'test',resource_ref:bootstrapFixture().resource_ref,recipe_ref:bootstrapFixture().recipe_ref},application:{retained:{used:10,limit:10000,remaining:9990},rolling_24h:{used:4,limit:1440,remaining:1436,window_start_exclusive:'2026-10-25T16:00:30Z'},active:{used:1,limit:1,remaining:0}},provider:{status:'not_connected',workers_requests:null,d1_rows_read:null,d1_rows_written:null,d1_storage_bytes:null,billing:null}});
+test('usage is manual-only, displays global counters and does not promise provider allowance',async t=>{
+ let calls=0;const ui=mounted(t,{bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:[]}),usage:async()=>{calls++;return usageFixture();}});await ui.settled();assert.equal(calls,0);
+ await ui.node('refresh').click();assert.equal(calls,0);await ui.node('usage-refresh').click();assert.equal(calls,1);
+ assert.match(ui.node('usage').textContent,/10 \/ 10000/);assert.match(ui.node('usage').textContent,/4 \/ 1440/);assert.match(ui.node('usage').textContent,/1 \/ 1/);assert.match(ui.node('usage').textContent,/Cloudflare.*未接入/);assert.match(ui.node('usage').textContent,/不保證/);
+});
+test('usage network failure preserves explicitly unconfirmed snapshot, not a fresh zero',async t=>{
+ let fail=false;const ui=mounted(t,{bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:[]}),usage:async()=>{if(fail)throw new Error('offline');return usageFixture();}});await ui.settled();await ui.node('usage-refresh').click();fail=true;await ui.node('usage-refresh').click();
+ assert.match(ui.node('usage').textContent,/10 \/ 10000/);assert.match(ui.node('usage').textContent,/未確認/);
+});
+for(const status of [401,403])test(`usage ${status} clears sensitive snapshot and requires manual session recovery`,async t=>{
+ let denied=false;const ui=mounted(t,{bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:[]}),usage:async()=>{if(denied)throw Object.assign(new Error('denied'),{status});return usageFixture();}});await ui.settled();await ui.node('usage-refresh').click();denied=true;await ui.node('usage-refresh').click();
+ assert.doesNotMatch(ui.node('usage').textContent,/10 \/ 10000/);assert.equal(ui.node('usage-refresh').disabled,true);denied=false;await ui.node('refresh').click();assert.doesNotMatch(ui.node('usage').textContent,/10 \/ 10000/);await ui.node('usage-refresh').click();assert.match(ui.node('usage').textContent,/10 \/ 10000/);
+});
+for(const status of [200,403])test(`late usage ${status} after session revocation cannot refill data or invalidate recovered session`,async t=>{
+ let denied=false,complete,reject,calls=0;const ui=mounted(t,{bootstrap:async()=>{if(denied)throw Object.assign(new Error('denied'),{status:403});return bootstrapFixture();},commands:async()=>({commands:[]}),usage:()=>{calls++;return new Promise((r,j)=>{complete=r;reject=j;});}});await ui.settled();
+ const pending=ui.node('usage-refresh').click();await ui.node('usage-refresh').click();assert.equal(calls,1);denied=true;await ui.node('refresh').click();denied=false;await ui.node('refresh').click();assert.equal(typeof complete,'function');if(status===200)complete(usageFixture());else reject(Object.assign(new Error('old denial'),{status}));await pending;assert.doesNotMatch(ui.node('usage').textContent,/10 \/ 10000/);assert.equal(ui.node('submit').disabled,false);
+});
+test('usage stale/malformed/future snapshots and scope changes cannot advertise fresh counts',async t=>{
+ let data=usageFixture();data.observed_at='2026-10-26T15:59:00Z';data.application.rolling_24h.window_start_exclusive='2026-10-25T15:59:00Z';let bootstrap=bootstrapFixture();
+ const ui=mounted(t,{bootstrap:async()=>bootstrap,commands:async()=>({commands:[]}),usage:async()=>data});await ui.settled();await ui.node('usage-refresh').click();assert.match(ui.node('usage').textContent,/過期/);
+ for(const patch of [{schema_version:'unknown'},{provider:{...usageFixture().provider,billing:0}},{observed_at:'2026-10-26T16:00:42Z'},{application:{...usageFixture().application,retained:{used:-1,limit:10000,remaining:10001}}}]){
+  data={...usageFixture(),...patch};await ui.node('usage-refresh').click();assert.match(ui.node('usage').textContent,/未確認/);assert.doesNotMatch(ui.node('usage').textContent,/-1 \/ 10000/);
+ }
+ bootstrap={...bootstrap,workspace_id:'other'};await ui.node('refresh').click();assert.doesNotMatch(ui.node('usage').textContent,/10 \/ 10000/);
+});
+test('usage API is an authenticated GET through the existing bounded client',async()=>{
+ const paths=[];const client=createClient(async(path,init)=>{paths.push(path);assert.equal(init.method,'GET');return Response.json(usageFixture());});assert.equal((await client.usage()).schema_version,'cloudlab.usage.v1');assert.deepEqual(paths,['/api/usage']);
+});
+
+
+test('usage freshness expires at exactly sixty seconds without changing historical counts',async t=>{
+ for(const seconds of [59,60]){
+  const time=new Date(Date.parse(now)+seconds*1000).toISOString().replace('.000Z','Z');
+  const ui=mounted(t,{bootstrap:async()=>({...bootstrapFixture(),now:time}),commands:async()=>({commands:[]}),usage:async()=>usageFixture()});await ui.settled();await ui.node('usage-refresh').click();assert.match(ui.node('usage').textContent,/10 \/ 10000/);assert.equal(ui.node('usage').textContent.includes('快照已過期'),seconds===60);
+ }
+});
+
+test('usage accepts normal second rollover within measured bootstrap latency but rejects beyond its bound',async t=>{
+ let clock=0; t.mock.method(performance,'now',()=>clock);
+ let observed='2026-10-26T16:00:33Z';
+ const ui=mounted(t,{bootstrap:async()=>{clock+=1500;return bootstrapFixture();},commands:async()=>({commands:[]}),usage:async()=>{const d=usageFixture();d.observed_at=observed;d.application.rolling_24h.window_start_exclusive=observed.replace('26T','25T');return d;}});
+ await ui.settled();await ui.node('usage-refresh').click();assert.match(ui.node('usage').textContent,/10 \/ 10000/);assert.doesNotMatch(ui.node('usage').textContent,/-3 秒/);
+ observed='2026-10-26T16:00:34Z';await ui.node('usage-refresh').click();assert.match(ui.node('usage').textContent,/未確認/);assert.doesNotMatch(ui.node('usage').textContent,/16:00:34Z/);
+});
+
+test('bootstrap beyond the ten-second clock measurement bound leaves usage unavailable',async t=>{
+ let clock=0;t.mock.method(performance,'now',()=>clock);let calls=0;
+ const ui=mounted(t,{bootstrap:async()=>{clock+=10001;return bootstrapFixture();},commands:async()=>({commands:[]}),usage:async()=>{calls++;return usageFixture();}});await ui.settled();await ui.node('usage-refresh').click();assert.equal(calls,0);assert.equal(ui.node('usage-refresh').disabled,true);assert.match(ui.node('message').textContent,/時間估計已失效/);
+});

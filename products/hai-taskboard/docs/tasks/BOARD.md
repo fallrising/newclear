@@ -226,3 +226,37 @@ failed diagnostics remain retained. No new browser acceptance or full-product co
 Full H01..H04 and SUCCESS AC-02..04 retain their prior status. Next planned slice is M1c human
 report persistence/submission; it has not started. No usable tag, real adapter, release or deployment.
 This board-only follow-up records the actual primary merge end.
+
+## T-1030 — Session control-room design and provider critical-path audit
+
+Authority: direct owner request on 2026-10-30 to integrate the Session-first agent control-room
+design into HAI and explain the continued absence of a real provider. One Ready documentation-only
+task, claimed by the lead assistant before design edits. Baseline:
+`1181db123f108ab096bbc1ae9a4e804097d939ca`. Delivery branch:
+`docs/hai-session-control-room-20261030`.
+
+Writable scope: README.md, SUCCESS.md, this BOARD, docs/sdd/session-control-room.md,
+docs/plans/provider-critical-path-20261030.md and docs/evidence/session-control-room-20261030.md.
+No AGENTS/accepted-SDD/ADR changes, runtime, API, migrations, dependencies, provider credentials,
+real execution, merge, release or deployment. Existing H01..H04, M1c next-step and product ACs
+remain unchanged. A proposed alternative dependency path is not accepted execution authority.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| SC-D01 | Integrate Session identity, telemetry, role projection and capability-gated control with existing HAI contracts | SC-DOC-01 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:46:05Z |
+| SC-D02 | Separate documented provider blockers, process diagnosis and a bounded alternative critical path | SC-DOC-02 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:46:05Z |
+| SC-D03 | Verify scoped documents, preserve existing acceptance, publish Draft PR and read back Git objects | SC-DOC-03 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:46:05Z |
+
+SC-DOC-01 requires exact mapping to WorkItem/Run/Candidate/Review/Evidence/Approval/CompletionRecord,
+observation versus control, metric provenance and named future oracles. SC-DOC-02 requires a factual
+baseline, current versus proposed dependencies and an explicit authorization change list; no invented
+root-cause effort statistics. SC-DOC-03 requires exact baseline blob checks, scoped link/contract/diff
+checks and actual remote delivery receipts. CI and independent review remain separately reported;
+self-review is not independent acceptance. Rows stay in_progress until the authorized merge and
+subsequent board closure; future feature oracles remain Proposed/NotRun.
+
+Design: [Session control room](../sdd/session-control-room.md). Diagnosis and proposed L1:
+[provider critical path](../plans/provider-critical-path-20261030.md). Bounded checks and limits:
+[evidence](../evidence/session-control-room-20261030.md).
+Draft delivery: [PR #832](https://github.com/fallrising/newclear/pull/832); final-head CI and independent
+review are separate gates. No merge or product acceptance is claimed by this documentation update.

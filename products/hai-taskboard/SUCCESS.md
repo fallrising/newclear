@@ -155,3 +155,19 @@ scoping, safety and no-write evidence. Claude plan/code ACCEPT after retained RE
 [exact verification and source limits](docs/evidence/m1b-output-access-20261030.md) cover
 root full/race/vet/build plus assertion-only final delta race, web30 and API/doc checks.
 Git/CI delivery remains separately tracked in BOARD. Full product acceptance stays pending.
+
+## Session control-room documentation — T-1030 / 2026-10-30
+
+本輪來源：`1181db123f108ab096bbc1ae9a4e804097d939ca`；僅整合設計並診斷真實 provider 的依賴鏈。
+不變更上方 frontmatter、產品 AC-01..04、歷史驗證或 P0-A Fake-only。新功能全部 Proposed/NotRun；
+本次文件合併不代表接受 runtime contract、G2/pilot 授權或產品可用。
+
+SC-DOC-01：在 [Session mini-SDD](docs/sdd/session-control-room.md) 明確映射既有 domain authority、
+Session／Execution／Turn、指標可信度、角色投影、observation-only／managed 及控制命令；具名未來 oracles 不冒充已實作測試。
+SC-DOC-02：在 [provider 主線診斷](docs/plans/provider-critical-path-20261030.md) 分開已核對事實、推論、
+現行路線與待批准 L1，列出精確授權差異；不把微小切片或 planned 功能臆測成已證實工時浪費。
+SC-DOC-03：驗證原始 blob、局部連結／契約／差異、原子 Git 提交、非 force branch 更新及遠端回讀。
+必要 CI 與獨立 review 各自記錄；未完成不能算接受，自我檢查不是獨立審查。
+
+[驗證紀錄](docs/evidence/session-control-room-20261030.md)只涵蓋本輪文件；
+[BOARD](docs/tasks/BOARD.md) T-1030 是唯一任務狀態，合併前不標 done。

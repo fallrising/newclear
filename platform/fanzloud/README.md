@@ -3,7 +3,7 @@
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
 
-> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+> **Portfolio doc tier: A (active, bounded P0)** — Owner resumed the private single-operator browser-to-Cloud flow on 2026-10-30. [Quickstart and current gates](docs/quickstart.md); [PORTFOLIO](../../PORTFOLIO.md). Persistence and host runtimes remain separate milestones.
 
 
 [![Fanzloud CI](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml/badge.svg)](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml)
@@ -25,9 +25,9 @@ the provider-managed environment and never runs beside the local credential dire
 ## Current status
 
 The T001–T007 personal-BYOS path and T010/T020 domain foundations have historical acceptance.
-The deterministic Linux end-to-end test covers the browser, HTTP and WebSocket APIs, session
-runtime, trusted Codex runner, and a fake provider process. The credential-gated live operator
-smoke has not been run.
+The deterministic Linux end-to-end test covers a wire-equivalent browser flow, HTTP and WebSocket APIs, session
+runtime, trusted Codex runner, and a fake provider process; it is not a real-browser run. [T008](docs/acceptance/T008.acceptance.md) now proves actual Chromium → production Rust →
+T007 fake executable → page final diff. The credential-gated live operator smoke has not been run.
 
 T030A atomic SQLite append and T030B bounded ordered replay have been recovered locally from
 archived Fanzloud commit `0a47dcd`. Their upstream acceptance reports are retained as historical

@@ -1,8 +1,15 @@
 # Development Handoff
 
-Date: 2026-10-05
+Date: 2026-10-30
 
 ## Current Goal
+
+Owner resumed the bounded P0 browser-to-Cloud mainline under T-0442. Follow
+[SPEC-T008](specs/SPEC-T008-p0-real-browser.md), [quickstart](quickstart.md), and
+[board](tasks/BOARD.md). First prove actual Chromium against production Rust with T007 fake CLI,
+then same-source live AC-04 only with all operator prerequisites. Previous frontend acceptance
+is preserved; no Round3 or host-runtime work is authorized here. The older actor direction below
+is historical context, not the next action for this run.
 
 T030A/B monorepo recovery and T030D snapshot save are Accepted and merged. T030C public
 snapshot load and T030 A/B/C/D composition are now independently Accepted after test-first
@@ -574,3 +581,13 @@ TD §0.3 automatic rustdoc/spec drift checking is an existing gap: neither histo
 CI implements the required generator or signature/error/contract-section comparison. Recovery
 preserves the existing rustdoc and explicitly records this limitation; it does not claim full
 project-wide documentation automation compliance.
+
+## T-0442 current P0 result — 2026-10-30
+
+Actual Chromium through the production Rust binary and strict T007 fake executable now reaches
+the final diff; [T008](acceptance/T008.acceptance.md) records source/binary hashes, one exec/status/
+diff, real WS progression, explicit Refresh, logout and cleanup. The official 0.145.0 CLI has been
+separately verified without changing the default version. Live AC-04 has not run: private operator
+scope/Cloud target/HTTPS configuration is missing. Continue only from the bounded live plan once
+that input is supplied; do not replay the successful fake gate or reopen accepted frontend work.
+AC-05 remains separate, with its smallest next slice in [quickstart](quickstart.md).

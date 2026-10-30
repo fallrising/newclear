@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-30T03:25:15.139563+00:00",
+  "sourceCommit": "268305cceceb750be6642e446d63300a46064916",
+  "productionSourceUnchanged": true,
+  "build": {
+    "command": "cargo build --locked --workspace --bins --all-features",
+    "exitCode": 0
+  },
+  "rust": {
+    "command": "cargo test --locked --workspace --all-targets --all-features",
+    "exitCode": 0,
+    "passed": 307
+  },
+  "controller": {
+    "command": "node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs",
+    "exitCode": 0,
+    "passed": 10
+  },
+  "fmt": {
+    "command": "cargo fmt --all -- --check",
+    "exitCode": 0
+  },
+  "clippy": {
+    "command": "cargo clippy --locked --workspace --all-targets --all-features -- -D warnings",
+    "exitCode": 0
+  }
+}

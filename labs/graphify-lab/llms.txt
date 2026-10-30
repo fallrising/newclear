@@ -27,3 +27,5 @@ M4: workspace serve-live offers freshness checks, explicit refresh and directed 
 - [修改影響與測試線索](docs/milestones/change-impact.md)：serve-live 的 change_impact、calls 證據與有界 Python 測試 hints。
 
 - [命令列分析](docs/milestones/cli-analysis.md)：workspace calls-path／impact 的JSON、退出碼及freshness契約。
+
+- [節點來源與索引確認](docs/milestones/node-source.md)：CLI source-node／live MCP source_node，exact ID回讀及可選index_id保護條件。

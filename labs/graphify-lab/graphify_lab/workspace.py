@@ -15,7 +15,7 @@ import sys
 
 from .__main__ import DEFAULT_CACHE, environment, graph_command
 from .cache import CacheError, context_fingerprint, ensure_index, source_fingerprint
-from .source import node_at, source_excerpt
+from .source import node_at, source_excerpt, source_node, validate_source_node_options
 from .call_paths import calls_path
 from .change_impact import change_impact
 
@@ -31,6 +31,8 @@ def open_workspace(source: Path, cache: Path = DEFAULT_CACHE) -> dict:
 
 def _validate_options(args: argparse.Namespace) -> None:
     # Reject invalid requests before extraction or any cache directory creation.
+    if args.command == 'source-node':
+        validate_source_node_options(args.node_id, args.lines, args.expected_index_id)
     if args.command == 'query' and not 1 <= args.budget <= 32000:
         raise ValueError('budget must be between 1 and 32000')
     if args.command in ('calls-path', 'impact'):
@@ -54,17 +56,20 @@ def _validate_options(args: argparse.Namespace) -> None:
 
 
 def _analysis(args: argparse.Namespace) -> dict:
-    # Local import avoids the workspace/live_state import cycle. Both CLI reads
+    # Local import avoids the workspace/live_state import cycle. These CLI reads
     # use the same before/after integrity boundary as live MCP.
     from .live_state import LiveWorkspace, LiveWorkspaceError
 
     def read(index):
-        graph = json.loads(Path(index['graph']).read_text())
-        limits = {'max_hops': args.max_hops, 'max_visited': args.max_visited}
-        if args.command == 'calls-path':
-            result = calls_path(graph, args.caller, args.target, **limits)
+        if args.command == 'source-node':
+            result = source_node(index, args.node_id, args.lines, args.expected_index_id)
         else:
-            result = change_impact(graph, args.target, max_results=args.max_results, **limits)
+            graph = json.loads(Path(index['graph']).read_text())
+            limits = {'max_hops': args.max_hops, 'max_visited': args.max_visited}
+            if args.command == 'calls-path':
+                result = calls_path(graph, args.caller, args.target, **limits)
+            else:
+                result = change_impact(graph, args.target, max_results=args.max_results, **limits)
         provenance = {key: index[key] for key in
                       ('index_id', 'source_commit', 'source_fingerprint', 'context_sha256', 'graph_sha256')}
         return {'status': 'ok', 'index': provenance, 'result': result}
@@ -96,6 +101,12 @@ def main(argv: list[str] | None = None) -> int:
     show.add_argument('label')
     show.add_argument('--file', dest='filename')
     show.add_argument('--lines', type=int, default=20)
+    node_show = commands.add_parser('source-node', help='read source for one exact graph node ID',
+        description='Read bounded source with provenance; exit 0=success, 2=error. '
+                    'Edits during a read are rejected.')
+    node_show.add_argument('node_id', help='exact node ID from query, path or impact results')
+    node_show.add_argument('--lines', type=int, default=20, help='1 to 100; default 20')
+    node_show.add_argument('--expected-index-id', help='require this 64-character lowercase SHA256 index ID')
     for name, help_text in (
         ('calls-path', 'print a directed calls-only path as JSON'),
         ('impact', 'print callers and heuristic Python test hints as JSON'),
@@ -118,10 +129,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         _validate_options(args)
-        if args.command in ('calls-path', 'impact'):
+        if args.command in ('calls-path', 'impact', 'source-node'):
             answer = _analysis(args)
             print(json.dumps(answer, ensure_ascii=False, indent=2))
-            return {'not_found': 4, 'limit_reached': 5}.get(answer['result']['status'], 0)
+            return {'not_found': 4, 'limit_reached': 5}.get(answer['result'].get('status'), 0)
         if args.command == 'serve-live':
             from .live_mcp import serve
             serve(args.source, args.cache)

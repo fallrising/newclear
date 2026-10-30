@@ -15,6 +15,33 @@ def node_at(graph: Path, label: str, filename: str | None = None) -> dict:
     return found[0]
 
 
+def validate_source_node_options(node_id: str, lines: int = 20,
+                                 expected_index_id: str | None = None) -> None:
+    if not isinstance(node_id, str) or not node_id.strip():
+        raise ValueError('node_id must be a nonempty string')
+    if type(lines) is not int or not 1 <= lines <= 100:
+        raise ValueError('lines must be an integer between 1 and 100')
+    if expected_index_id is not None and (
+        not isinstance(expected_index_id, str)
+        or re.fullmatch(r'[0-9a-f]{64}', expected_index_id) is None
+    ):
+        raise ValueError('expected_index_id must be 64 lowercase hexadecimal characters')
+
+
+def source_node(index: dict, node_id: str, lines: int = 20,
+                expected_index_id: str | None = None) -> dict:
+    """Read one exact graph ID; callers enforce snapshot freshness around the read."""
+    validate_source_node_options(node_id, lines, expected_index_id)
+    if expected_index_id is not None and expected_index_id != index['index_id']:
+        raise ValueError('expected index does not match the current index')
+    graph = json.loads(Path(index['graph']).read_text())
+    found = [node for node in graph['nodes'] if node.get('id') == node_id]
+    if len(found) != 1:
+        raise ValueError(f'expected one exact source node ID, found {len(found)}: {node_id}')
+    node = found[0]
+    return {'node': node, **source_excerpt(Path(index['source']), node, lines)}
+
+
 def source_excerpt(source: Path, node: dict, lines: int = 20) -> dict:
     if not 1 <= lines <= 100:
         raise ValueError("lines must be between 1 and 100")

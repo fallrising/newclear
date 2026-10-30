@@ -97,8 +97,14 @@ L-01～L-05 實作、文件與必要驗證已交付；[證據與限制](../evide
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0443-01 | 呼叫者與來源證據 | I-01 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
-| T-0443-02 | 可解釋測試線索 | I-02 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
-| T-0443-03 | 有界且穩定查詢 | I-03 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
-| T-0443-04 | 真 MCP 修改刷新流程 | I-04 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
-| T-0443-05 | 驗證審查與交付 | I-05 | in_progress | 2026-10-30T03:55:13Z | | 2026-10-30T04:08:00Z |
+| T-0443-01 | 呼叫者與來源證據 | I-01 | done | 2026-10-30T03:55:13Z | 2026-10-30T04:12:20Z | 2026-10-30T04:12:20Z |
+| T-0443-02 | 可解釋測試線索 | I-02 | done | 2026-10-30T03:55:13Z | 2026-10-30T04:12:20Z | 2026-10-30T04:12:20Z |
+| T-0443-03 | 有界且穩定查詢 | I-03 | done | 2026-10-30T03:55:13Z | 2026-10-30T04:12:20Z | 2026-10-30T04:12:20Z |
+| T-0443-04 | 真 MCP 修改刷新流程 | I-04 | done | 2026-10-30T03:55:13Z | 2026-10-30T04:12:20Z | 2026-10-30T04:12:20Z |
+| T-0443-05 | 驗證審查與交付 | I-05 | done | 2026-10-30T03:55:13Z | 2026-10-30T04:12:20Z | 2026-10-30T04:12:20Z |
+
+I-01～I-05 實作、文件、必要驗證與獨立審查已交付；[證據與限制](../evidence/change-impact/README.md)／[獨立ACCEPT](../../../../.team/graphify-t0443/review.md)。
+[PR #810](https://github.com/fallrising/newclear/pull/810)於2026-10-30T04:12:20Z合併，commit `3afa8345539d1f67dfb933ddfe2ffd7ef157410c`；遠端本次所有路徑與reviewed head `6a08d3ba95cf260fc6c208d7dfc4abf8fd49e433`一致，已回讀。
+三項CI全部success：[Graphify真場景及92tests](https://github.com/fallrising/newclear/actions/runs/41001337068)、[llms](https://github.com/fallrising/newclear/actions/runs/41001336971)、[success contracts](https://github.com/fallrising/newclear/actions/runs/41001337038)。本機40workflow static checks通過；本次未改workflow，因此無獨立workflow CI觸發。
+原七場景、M2pilot、M3trial與新15requests真MCP流程皆通過；獨立11tests與13,824小圖／界限組合通過。初次setup/stdio準備失敗、雙向邊遺漏及full輸入完整性失敗均保留並明列重跑結果，無未解must-fix。
+本PR只關閉技術列；desk/journal另外同步事實，owner驗收仍另計。測試hints僅Python命名推論，complete僅圖內可達caller全訪問；沒有完整回歸選擇／動態語意或token節省保證。沒有release/deploy或啟動下一里程碑。

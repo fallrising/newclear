@@ -243,9 +243,9 @@ remain unchanged. A proposed alternative dependency path is not accepted executi
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| SC-D01 | Integrate Session identity, telemetry, role projection and capability-gated control with existing HAI contracts | SC-DOC-01 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:37:01Z |
-| SC-D02 | Separate documented provider blockers, process diagnosis and a bounded alternative critical path | SC-DOC-02 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:37:01Z |
-| SC-D03 | Verify scoped documents, preserve existing acceptance, publish Draft PR and read back Git objects | SC-DOC-03 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:37:01Z |
+| SC-D01 | Integrate Session identity, telemetry, role projection and capability-gated control with existing HAI contracts | SC-DOC-01 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:46:05Z |
+| SC-D02 | Separate documented provider blockers, process diagnosis and a bounded alternative critical path | SC-DOC-02 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:46:05Z |
+| SC-D03 | Verify scoped documents, preserve existing acceptance, publish Draft PR and read back Git objects | SC-DOC-03 | in_progress | 2026-10-30T11:37:01Z | — | 2026-10-30T11:46:05Z |
 
 SC-DOC-01 requires exact mapping to WorkItem/Run/Candidate/Review/Evidence/Approval/CompletionRecord,
 observation versus control, metric provenance and named future oracles. SC-DOC-02 requires a factual
@@ -254,3 +254,9 @@ root-cause effort statistics. SC-DOC-03 requires exact baseline blob checks, sco
 checks and actual remote delivery receipts. CI and independent review remain separately reported;
 self-review is not independent acceptance. Rows stay in_progress until the authorized merge and
 subsequent board closure; future feature oracles remain Proposed/NotRun.
+
+Design: [Session control room](../sdd/session-control-room.md). Diagnosis and proposed L1:
+[provider critical path](../plans/provider-critical-path-20261030.md). Bounded checks and limits:
+[evidence](../evidence/session-control-room-20261030.md).
+Draft delivery: [PR #832](https://github.com/fallrising/newclear/pull/832); final-head CI and independent
+review are separate gates. No merge or product acceptance is claimed by this documentation update.

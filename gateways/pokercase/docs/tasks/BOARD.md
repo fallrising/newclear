@@ -579,3 +579,13 @@ Demand: desk T-0432 / #698; claim PR318 merged. [Fixed CB-1–CB-5](T-0432-buffe
 Product [PR817](https://github.com/fallrising/newclear/pull/817), source `e00708759bfdf2a4528b5ca6225bf55d6c3af64c`, normal merge `5c6d55e11e49c807f7f76dd224f56c1f20a597eb` at 2026-10-30T05:01:12Z. Required [Project success contracts](https://github.com/fallrising/newclear/actions/runs/41005470141) and [Pokercase CI](https://github.com/fallrising/newclear/actions/runs/41005469972) succeeded. All12changed files matched source/merge/origin at product readback; source and merge ancestry and Desk-Task:T-0432 trailers passed. Retained normal/native executables each match53committed source/template/Cargo inputs.
 
 The bounded CB slice passed two distinct RED→GREEN proofs,396Rusttests/22groups,129Python,20repository tests,47contracts/8llms navigation,fmt/Clippy/lockedbuilds,45case/9stage actualgateway/fakeCLI and seven prior regressions. Independent source/runtime and prepublication ledger reviews passed. These done rows record merged product steps; journal/desk publication, complete backup and owned-worktree cleanup are subsequent final-handoff gates and are recorded only when verified. Mainline incomplete, usable_tag none, desk in_progress; #698–702 and AC04/17 remain open. No next milestone.
+
+## T-0445 — Fixture startup ownership and diagnostics
+
+Demand: desk T-0445 / #701; claim327 merged. [Fixed FS-1–FS-5](T-0445-fixture-startup.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FS-01 | Prove runtime listening diagnostics and owned fixture admission | FS-1–FS-2 | in_progress | 2026-10-30T10:26:13Z | — | 2026-10-30T11:33:14Z |
+| FS-02 | Bounded diagnostic drain, deadline and owned cleanup | FS-3–FS-4 | in_progress | 2026-10-30T10:26:13Z | — | 2026-10-30T11:33:14Z |
+| FS-03 | Headless evidence, regressions and bounded delivery | FS-5 | in_progress | 2026-10-30T10:26:13Z | — | 2026-10-30T11:33:14Z |

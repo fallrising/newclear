@@ -31,6 +31,18 @@ status; its historical evidence is not a new runtime verification by this docume
 progress notes, export and agent-facing workflow improvements with acceptance criteria. It is a
 proposed follow-up design, not an implemented feature list; the current P0-A scope stays Fake-only.
 
+## Session-first 角色控制室（設計，未啟用）
+
+[控制室 mini-SDD](docs/sdd/session-control-room.md)將角色視為 Session 的互動投影，沿用 HAI
+的 WorkItem／Run／Candidate／Review／Evidence／Approval／CompletionRecord；不另造任務權威。
+包含啟用時間、runner／sandbox、回合、Context、最後輸入／輸出用量及來源可信度，並區分唯讀觀測與受管派工。
+
+[真實 provider 主線診斷與 L1 提案](docs/plans/provider-critical-path-20261030.md)區分現行
+Fake-only 門檻與建議的一個 provider 真實閉環；MCP、第二 provider、跨機與角色地圖不自動成為前置。
+**本輪只融合文件，不改 AGENTS／已接受 SDD、不啟用 provider，也不宣稱重新通過產品驗收。**
+採用提早 L1 路線仍須明確批准有界 scope、成本與權限；未批准時 BOARD 的 M1c 下一步不變。
+文件任務與實際驗證見 [BOARD](docs/tasks/BOARD.md) 與[證據](docs/evidence/session-control-room-20261030.md)。
+
 ## Implementation checkpoint
 
 The owner resumed P0-A mainline development on 2026-10-23. Current work is tracked in

@@ -9,7 +9,9 @@ use std::time::Duration;
 
 use serde_json::{json, Value};
 use tempfile::TempDir;
-use tokio::net::TcpListener;
+#[path = "support/owned_gateway.rs"]
+mod owned_gateway;
+use owned_gateway::OwnedGateway;
 
 /// Answers "Hello there" (two deltas plus the duplicate flushes); "FAIL" in the prompt →
 /// not-logged-in error on stderr with exit 1.
@@ -91,7 +93,7 @@ struct Env {
     base: String,
     client: reqwest::Client,
     bin_dir: TempDir,
-    _child: tokio::process::Child,
+    _owner: OwnedGateway,
     _dir: TempDir,
 }
 
@@ -116,46 +118,29 @@ impl Env {
         std::fs::write(&runtime, FAKE_DOCKER).unwrap();
         std::fs::set_permissions(&runtime, std::fs::Permissions::from_mode(0o755)).unwrap();
         let dir = tempfile::tempdir().unwrap();
-        let port = {
-            let l = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            l.local_addr().unwrap().port()
-        };
-        let child = tokio::process::Command::new(env!("CARGO_BIN_EXE_thinrouter"))
+        let mut command = owned_gateway::command(dir.path(), "127.0.0.1", 0, false, None);
+        command
             .args([
-                "serve",
-                "--port",
-                &port.to_string(),
-                "--data-dir",
-                dir.path().to_str().unwrap(),
                 "--cursor-bin",
                 bin.to_str().unwrap(),
                 "--cursor-runtime-bin",
                 runtime.to_str().unwrap(),
             ])
             .args(extra)
-            .env_remove("THINROUTER_ADMIN_TOKEN")
-            .env_remove("THINROUTER_SECRETS_KEY")
             .env("CURSOR_API_ENDPOINT", "http://evil.example")
-            .env("HOST_SECRET_CANARY", "do-not-forward")
-            .kill_on_drop(true)
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn()
-            .unwrap();
-        let base = format!("http://127.0.0.1:{port}");
-        let plain = reqwest::Client::builder().no_proxy().build().unwrap();
-        for _ in 0..100 {
-            if plain
-                .get(format!("{base}/health"))
-                .send()
-                .await
-                .is_ok_and(|r| r.status().is_success())
-            {
-                break;
-            }
-            tokio::time::sleep(Duration::from_millis(50)).await;
-        }
-        let admin = std::fs::read_to_string(dir.path().join("admin-token")).unwrap();
+            .env("HOST_SECRET_CANARY", "do-not-forward");
+        let owner = OwnedGateway::start(
+            command,
+            dir.path(),
+            "127.0.0.1",
+            None,
+            Duration::from_secs(5),
+        )
+        .await
+        .unwrap_or_else(|failure| panic!("{failure}"));
+        let base = owner.base.clone();
+        let plain = owner.client.clone();
+        let admin = owner.admin.clone();
         let post = |path: &str, body: Value| {
             plain
                 .post(format!("{base}{path}"))
@@ -193,7 +178,7 @@ impl Env {
             base,
             client,
             bin_dir,
-            _child: child,
+            _owner: owner,
             _dir: dir,
         }
     }
@@ -814,16 +799,12 @@ impl Env {
             .count()
     }
     async fn restart(&mut self) {
-        self._child.kill().await.unwrap();
-        self._child.wait().await.unwrap();
-        let port = self.base.rsplit(':').next().unwrap();
-        self._child = tokio::process::Command::new(env!("CARGO_BIN_EXE_thinrouter"))
+        self._owner.shutdown().await;
+        assert!(self._owner.diagnostics().child_reaped);
+        assert!(self._owner.diagnostics().drainer_closed);
+        let mut command = owned_gateway::command(self._dir.path(), "127.0.0.1", 0, false, None);
+        command
             .args([
-                "serve",
-                "--port",
-                port,
-                "--data-dir",
-                self._dir.path().to_str().unwrap(),
                 "--cursor-bin",
                 self.bin_dir.path().join("cursor-agent").to_str().unwrap(),
                 "--cursor-runtime-bin",
@@ -834,30 +815,19 @@ impl Env {
                 "--cursor-profile-volume",
                 "thinrouter-cursor-tests",
             ])
-            .env_remove("THINROUTER_ADMIN_TOKEN")
-            .env_remove("THINROUTER_SECRETS_KEY")
-            .kill_on_drop(true)
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn()
-            .unwrap();
-        for _ in 0..100 {
-            assert!(
-                self._child.try_wait().unwrap().is_none(),
-                "owned restarted gateway exited"
-            );
-            if self
-                .client
-                .get(format!("{}/health", self.base))
-                .send()
-                .await
-                .is_ok_and(|r| r.status().is_success())
-            {
-                return;
-            }
-            tokio::time::sleep(Duration::from_millis(50)).await;
-        }
-        panic!("owned restarted gateway health timeout");
+            .env("CURSOR_API_ENDPOINT", "http://evil.example")
+            .env("HOST_SECRET_CANARY", "do-not-forward");
+        let owner = OwnedGateway::start(
+            command,
+            self._dir.path(),
+            "127.0.0.1",
+            None,
+            Duration::from_secs(5),
+        )
+        .await
+        .unwrap_or_else(|failure| panic!("{failure}"));
+        self.base = owner.base.clone();
+        self._owner = owner;
     }
 }
 

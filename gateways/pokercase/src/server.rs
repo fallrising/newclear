@@ -138,17 +138,17 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     }
     let app = build_app(state);
 
-    info!(%addr, data_dir = %cfg.data_dir.display(), "thinrouter listening");
-    info!("  proxy     : http://{addr}/v1/chat/completions");
-    info!("  claude    : http://{addr}/v1/messages");
-    info!("  responses : http://{addr}/v1/responses");
-    info!("  admin     : http://{addr}/admin");
     if cfg.token_saver {
         info!(max_chars = cfg.token_saver_max_chars, "token-saver enabled");
     }
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
     let bound = listener.local_addr()?;
+    info!(addr = %bound, data_dir = %cfg.data_dir.display(), "thinrouter listening");
+    info!("  proxy     : http://{bound}/v1/chat/completions");
+    info!("  claude    : http://{bound}/v1/messages");
+    info!("  responses : http://{bound}/v1/responses");
+    info!("  admin     : http://{bound}/admin");
     let host = if bound.ip().is_unspecified() {
         "127.0.0.1".to_string()
     } else {

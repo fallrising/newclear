@@ -61,10 +61,20 @@ Owner 於上一輪結果後回覆「好，繼續開發。」範圍承接 [desk #
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0436-M3-01 | 固定模型與離線真embedding | NS-01 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
-| T-0436-M3-02 | 開發校準與獨立保留集比較 | NS-02 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
-| T-0436-M3-03 | 向量更新／刪除／重開 | NS-03 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
-| T-0436-M3-04 | 規模成本與CLI邊界 | NS-04 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
-| T-0436-M3-05 | 審查、結果與Git交付 | NS-05 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
+| T-0436-M3-01 | 固定模型與離線真embedding | NS-01 | done | 2026-10-29T17:57:27Z | 2026-10-30T04:25:13Z | 2026-10-30T04:25:13Z |
+| T-0436-M3-02 | 開發校準與獨立保留集比較 | NS-02 | done | 2026-10-29T17:57:27Z | 2026-10-30T04:25:13Z | 2026-10-30T04:25:13Z |
+| T-0436-M3-03 | 向量更新／刪除／重開 | NS-03 | done | 2026-10-29T17:57:27Z | 2026-10-30T04:25:13Z | 2026-10-30T04:25:13Z |
+| T-0436-M3-04 | 規模成本與CLI邊界 | NS-04 | done | 2026-10-29T17:57:27Z | 2026-10-30T04:25:13Z | 2026-10-30T04:25:13Z |
+| T-0436-M3-05 | 審查、結果與Git交付 | NS-05 | done | 2026-10-29T17:57:27Z | 2026-10-30T04:25:13Z | 2026-10-30T04:25:13Z |
 
-2026-10-30 owner批准修復，[desk #315](https://github.com/fallrising/desk/pull/315)已合併。固定SDK/core/HNSW明示source patch及真24／1000向量控制通過；原frozen M3全job實跑完成，0errors，詳見[結果](../notes-semantic-results.md)。兩模型未達採用門檻，結論不直接採用；不是評估未跑或放寬標準。必要完整回歸／獨立審查／CI及PR#800正常合併仍在進行，五列保持in_progress，合併後才填end；原失敗保留。
+2026-10-30 owner批准修復，[desk #315](https://github.com/fallrising/desk/pull/315)已合併。固定SDK/core/HNSW明示source patch及真24／1000向量控制通過；原frozen M3全job實跑完成，0errors，詳見[結果](../notes-semantic-results.md)。兩模型未達採用門檻，結論不直接採用；不是評估未跑或放寬標準。必要完整回歸／獨立審查／CI已通過，PR#800於下述時間正常合併，五列按實際merged_at結案；原失敗保留。
+
+### M3 Git交付與驗收界線
+
+[PR#800](https://github.com/fallrising/newclear/pull/800)於2026-10-30T04:25:13Z正常squash合併；merge SHA `358870095984174d3bdb45aae94a7c21a23781b7`，已驗證head `bbf79adb906269e206a3a34c7dc58d4cc8fb66ed`。回讀確認merged=true、實際時間／SHA，遠端main包含merge；整個labs/memvid-lab與Memvid workflow的Git內容和已驗證候選完全相同。
+
+三項必要head workflows均success：[Memvid lab CI](https://github.com/fallrising/newclear/actions/runs/41001833973)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/41001834005)、[Workflow static validation](https://github.com/fallrising/newclear/actions/runs/41001833957)。Memvid兩jobs涵蓋37tests、既有筆記評估／15真模型場景、明示patch重建、24與1000持久化控制、固定dev校準／heldout／更新小場景，artifacts上傳成功。本機另有兩模型100／1000完整成本實測，沒有把CI跳過項當passed。
+
+[T-012](../../.team/reports/T-012.md)獨立審查ACCEPT implementation/local evidence；必要CI已解除其剩餘條件。GitHub沒有另外的review submission，不能冒稱外部人員approval。Patch最後只有文字格式改變，prepared源碼／native binary相同，[等價證據](../evidence/semantic-build-equivalence.json)保存評估時原patch bytes及hash，舊失敗與JSON未改寫。
+
+NS-01–05完成的是固定實驗與工程交付。BGE／E5兩者未達採用要求，均不建議直接採用，詳見[結果](../notes-semantic-results.md)。本次最後PR只補任務板的合併事實，不修改runtime、語料、規格、門檻或證據；必要CI仍照常執行。desk task維持in_progress，正式done／owner驗收保留給owner；沒有新milestone、產品整合、release、tag或部署。

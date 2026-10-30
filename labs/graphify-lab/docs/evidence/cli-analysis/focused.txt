@@ -1,0 +1,13 @@
+test_C01_real_cli_matches_mcp_readers_and_provenance (test_workspace_analysis.WorkspaceAnalysis.test_C01_real_cli_matches_mcp_readers_and_provenance) ... ok
+test_C02_bad_options_precede_cache_creation (test_workspace_analysis.WorkspaceAnalysis.test_C02_bad_options_precede_cache_creation) ... ok
+test_C02_help_describes_json_and_does_not_build (test_workspace_analysis.WorkspaceAnalysis.test_C02_help_describes_json_and_does_not_build) ... ok
+test_C02_result_status_exit_codes_and_partial_json (test_workspace_analysis.WorkspaceAnalysis.test_C02_result_status_exit_codes_and_partial_json) ... ok
+test_C02_unknown_ambiguous_and_exact_id (test_workspace_analysis.WorkspaceAnalysis.test_C02_unknown_ambiguous_and_exact_id) ... ok
+test_C03_between_commands_reindexes_and_keeps_old_graph (test_workspace_analysis.WorkspaceAnalysis.test_C03_between_commands_reindexes_and_keeps_old_graph) ... ok
+test_C03_corrupt_cache_rejects_without_stdout (test_workspace_analysis.WorkspaceAnalysis.test_C03_corrupt_cache_rejects_without_stdout) ... ok
+test_C03_success_and_error_races_discard_results_and_diagnostics (test_workspace_analysis.WorkspaceAnalysis.test_C03_success_and_error_races_discard_results_and_diagnostics) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 12.597s
+
+OK

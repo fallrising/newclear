@@ -128,3 +128,10 @@ make semantic RUN_DIR=work/semantic-new
 ```
 
 模型額外約583MB；BGE明示Xenova exporter，E5官方ONNX。M3使用固定SDK/core及既有HNSW依賴的本地source patch，經hash核對後明示啟用，不覆寫原venv SDK。Rust1.90與OpenSSL headers為build prerequisites；[修復設計](docs/notes-semantic-repair.md)保留原失敗、補丁邊界與重現方式。下載／編譯與禁網runtime分開，每run拒絕覆寫舊輸出。品質門檻與[凍結規格](docs/notes-semantic.md)不變；PR/CI與合併狀態見[任務板](docs/tasks/BOARD.md)。
+
+
+## M4：查詢級拒答
+
+[固定規格](docs/notes-rejection.md)與[完整結果](docs/notes-rejection-results.md)保留新資料、dev-only校準、逐題接受／拒答原因和採用判斷。準備既有語意資產／SDK patch後執行`make rejection RUN_DIR=work/rejection-new`；輸出report.json及不可在heldout後改寫的calibration.json。最多返回原生第一個來源，沒有LLM生成答案。
+
+事前選定的BGE score+margin在新heldout只保留1/24有答案題、無答案誤回0/24，總拒答47/48；E5無可行dev policy而停用。全部不建議直接採用，零誤回不能掩蓋低涵蓋率；M3結果不改寫。Git／CI交付以[任務板](docs/tasks/BOARD.md)為準。

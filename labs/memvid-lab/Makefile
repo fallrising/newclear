@@ -2,7 +2,7 @@ PYTHON ?= .venv/bin/python
 CARGO ?= cargo
 RUN_DIR := $(if $(RUN_DIR),$(RUN_DIR),work/run-$(shell date -u +%Y%m%dT%H%M%SZ))
 
-.PHONY: setup prepare check core full notes semantic-prepare semantic-sdk semantic-native semantic-hnsw semantic
+.PHONY: setup prepare check core full notes semantic-prepare semantic-sdk semantic-native semantic-hnsw semantic rejection
 
 setup:
 	python3 -m venv .venv
@@ -16,7 +16,7 @@ prepare:
 
 check:
 	$(PYTHON) -m unittest discover -s tests -v
-	$(PYTHON) -m py_compile lab.py offline.py scenarios.py advanced.py models.py notes_eval.py semantic_models.py diagnose_vectors.py prepare_semantic_sdk.py semantic_sdk.py semantic_eval.py tests/semantic_native.py tests/semantic_hnsw.py native-whisper/prepare_core.py native-whisper/prepare_assets.py
+	$(PYTHON) -m py_compile lab.py offline.py scenarios.py advanced.py models.py notes_eval.py semantic_models.py diagnose_vectors.py prepare_semantic_sdk.py semantic_sdk.py semantic_eval.py rejection_policy.py rejection_eval.py tests/semantic_native.py tests/semantic_hnsw.py native-whisper/prepare_core.py native-whisper/prepare_assets.py
 
 core:
 	$(PYTHON) lab.py run --profile core --output "$(RUN_DIR)"
@@ -41,3 +41,6 @@ semantic-hnsw:
 
 semantic:
 	timeout 1200 $(PYTHON) semantic_eval.py run --cache work/semantic-models --output "$(RUN_DIR)"
+
+rejection:
+	timeout 1200 $(PYTHON) rejection_eval.py run --cache work/semantic-models --output "$(RUN_DIR)"

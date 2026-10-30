@@ -78,3 +78,17 @@ Owner 於上一輪結果後回覆「好，繼續開發。」範圍承接 [desk #
 [T-012](../../.team/reports/T-012.md)獨立審查ACCEPT implementation/local evidence；必要CI已解除其剩餘條件。GitHub沒有另外的review submission，不能冒稱外部人員approval。Patch最後只有文字格式改變，prepared源碼／native binary相同，[等價證據](../evidence/semantic-build-equivalence.json)保存評估時原patch bytes及hash，舊失敗與JSON未改寫。
 
 NS-01–05完成的是固定實驗與工程交付。BGE／E5兩者未達採用要求，均不建議直接採用，詳見[結果](../notes-semantic-results.md)。本次最後PR只補任務板的合併事實，不修改runtime、語料、規格、門檻或證據；必要CI仍照常執行。desk task維持in_progress，正式done／owner驗收保留給owner；沒有新milestone、產品整合、release、tag或部署。
+
+## T-0436 M4：查詢級拒答
+
+Owner於M3交付後指示繼續開發；desk[#325](https://github.com/fallrising/desk/pull/325)已合併。範圍依[固定規格](../notes-rejection.md)，原M1–M3結果不變。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0436-M4-01 | 新資料及規格事前凍結 | NR-01 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-02 | 有來源才接受的查詢決策 | NR-02 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-03 | 開發校準與primary事前選擇 | NR-03 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-04 | 新保留題、來源與成本實測 | NR-04 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-05 | 審查、CI及Git交付 | NR-05 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+
+M4已按事前freeze完成完整實跑4quality／2updates、0errors；[結果](../notes-rejection-results.md)primary BGE margin只保留1/24正確題、未知誤回0/24，不建議直接採用。53tests、core12passed/3not_run、index／workflowlint與T016獨立審查通過；必要完整CI與Git交付仍待完成，五列保持in_progress。

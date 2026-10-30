@@ -76,6 +76,8 @@ jobs:
       - name: Frozen dev calibration and heldout quality with update controls
         working-directory: labs/memvid-lab
         run: timeout 1200 .venv/bin/python semantic_eval.py run --cache work/semantic-models --output work/ci-semantic --sizes none
+      - name: Frozen M4 query rejection and fresh heldout
+        run: make -C labs/memvid-lab rejection RUN_DIR=work/ci-rejection
       - name: Keep native patch provenance and persistence evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -88,5 +90,7 @@ jobs:
             labs/memvid-lab/work/ci-semantic-hnsw/report.json
             labs/memvid-lab/work/ci-semantic/report.json
             labs/memvid-lab/work/ci-semantic/calibration.json
+            labs/memvid-lab/work/ci-rejection/report.json
+            labs/memvid-lab/work/ci-rejection/calibration.json
           if-no-files-found: ignore
           retention-days: 7

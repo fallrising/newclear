@@ -108,3 +108,20 @@ I-01～I-05 實作、文件、必要驗證與獨立審查已交付；[證據與�
 三項CI全部success：[Graphify真場景及92tests](https://github.com/fallrising/newclear/actions/runs/41001337068)、[llms](https://github.com/fallrising/newclear/actions/runs/41001336971)、[success contracts](https://github.com/fallrising/newclear/actions/runs/41001337038)。本機40workflow static checks通過；本次未改workflow，因此無獨立workflow CI觸發。
 原七場景、M2pilot、M3trial與新15requests真MCP流程皆通過；獨立11tests與13,824小圖／界限組合通過。初次setup/stdio準備失敗、雙向邊遺漏及full輸入完整性失敗均保留並明列重跑結果，無未解must-fix。
 本PR只關閉技術列；desk/journal另外同步事實，owner驗收仍另計。測試hints僅Python命名推論，complete僅圖內可達caller全訪問；沒有完整回歸選擇／動態語意或token節省保證。沒有release/deploy或啟動下一里程碑。
+
+## T-0444 — M6 命令列分析入口
+
+[desk](https://github.com/fallrising/desk/blob/main/tasks/T-0444-graphify-cli-analysis/task.md)／[規格](../milestones/cli-analysis.md)。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0444-01 | 真CLI與來源識別 | C-01 | done | 2026-10-30T10:08:35Z | 2026-10-30T10:20:13Z | 2026-10-30T10:20:13Z |
+| T-0444-02 | 退出碼與輸入邊界 | C-02 | done | 2026-10-30T10:08:35Z | 2026-10-30T10:20:13Z | 2026-10-30T10:20:13Z |
+| T-0444-03 | 更新與讀取時變動 | C-03 | done | 2026-10-30T10:08:35Z | 2026-10-30T10:20:13Z | 2026-10-30T10:20:13Z |
+| T-0444-04 | 驗證審查與交付 | C-04 | done | 2026-10-30T10:08:35Z | 2026-10-30T10:20:13Z | 2026-10-30T10:20:13Z |
+
+C-01～C-04 實作、文件、必要驗證與獨立審查已交付；[證據](../evidence/cli-analysis/README.md)／[獨立ACCEPT](../../../../.team/graphify-t0444/review.md)。
+[PR #819](https://github.com/fallrising/newclear/pull/819)於2026-10-30T10:20:13Z合併，commit `dc6df53cd82b3f762f2ca1d0a265bbfea81d5613`；main本次所有路徑與reviewed head `74e80c935ecb32734f2840e58d4e7ff9b4ca0d7b`完全一致，已回讀。
+三項CI success：[Graphify真場景及100tests](https://github.com/fallrising/newclear/actions/runs/41039639742)、[llms](https://github.com/fallrising/newclear/actions/runs/41039639938)、[success contracts](https://github.com/fallrising/newclear/actions/runs/41039639852)。本機40workflow static checks通過；未改workflow，無獨立workflow CI觸發。
+新8tests、原92tests、原7場景、M2pilot、M3trial與獨立8tests均通過；保留missing-command RED與證據尾端空白gate修正，無未解must-fix。
+本PR僅關閉技術列；desk/journal另外同步，owner驗收另計。CLI exit5仍有部分JSON，腳本需明確處理；static calls／Python hints與觀測時點freshness限制保留。無新依賴、release/deploy或下一里程碑。

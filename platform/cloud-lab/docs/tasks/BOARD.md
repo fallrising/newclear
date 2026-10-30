@@ -454,3 +454,20 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - HW01–04 source/local完成；原HL實際閉環仍由T-0015驗收。此收尾不把原派送過期改寫為成功、不改原服務或授權截止。
 
 2026-10-30T04:31:44Z：HW修正版HL真實閉環與最終保全通過，due04:30、實際admit04:30:29、原runner完成04:31:06 validated/healthy；失敗歷史保留。[最新證據](../evidence/m1-health-schedule-window-live.md)；HL待審查／Git合併後關閉，T-0003-4／完整mainline仍open。
+
+## T-0026 — 應用配額隔離驗收
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0026-1 | API最後一格與拒絕保全 | QV-01 | done | 2026-10-30T10:09:33Z | 2026-10-30T10:19:03Z | 2026-10-30T10:19:35Z |
+| T-0026-2 | 窗口恢復與重送／讀取 | QV-02 | done | 2026-10-30T10:09:33Z | 2026-10-30T10:19:03Z | 2026-10-30T10:19:35Z |
+| T-0026-3 | Cron終局與交錯競爭 | QV-03 | done | 2026-10-30T10:09:33Z | 2026-10-30T10:19:03Z | 2026-10-30T10:19:35Z |
+| T-0026-4 | 回歸／獨立審查／交付 | QV-04 | done | 2026-10-30T10:09:33Z | 2026-10-30T10:19:03Z | 2026-10-30T10:19:35Z |
+
+[範圍與驗收](../quota-qualification.md)；fullmainline及provider額度不在此輪完成宣告內。
+
+### T-0026 Git交付／收尾
+
+- [PR820](https://github.com/fallrising/newclear/pull/820) head `ee7635e36422c16daf240e3aac5501b970a7f123`，merge `7a2e602d36d8830a188273ce65baf6edbe926c62`，合併時間2026-10-30T10:19:03Z；remote tree `5b1e1dd3b9cf39c7abcf3b4dd79a974859ab8951`等於本機候選，head為main祖先，回讀工作樹乾淨。
+- exact-head CI全過：Cloud Lab `41039656961`、Project success `41039656790`、llms `41039656651`。本機8focused／370fulltests、三組副本mutation、索引／task／report／diff與T850獨立ACCEPT；原fixture失敗及早期mutation仍留存。
+- QV01–04隔離應用驗收完成。無runtime部署、live請求、歷史清理、授權延長或付費變更；provider耗盡／用量／帳單、retention、完整故障與human／model仍pending。完整mainline保持incomplete、無usable tag。本收尾只關閉QV，不將本機SQLite或一次交錯當成遠端D1並行證據。

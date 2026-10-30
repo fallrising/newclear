@@ -84,3 +84,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [尚未完成的工作](docs/remaining-work.md)將M1真人登入、模型流程、完整故障／配額驗收與M2/M3願景分開，列明需要owner協助的環節及固定截止；目前不宣告全任務完成。
 
 [延遲Cron派送窗口修正](docs/schedule-window.md)已完成[362tests及獨立source審查](docs/evidence/m1-schedule-window.md)，保留due身份／去重及總截止；重新接入的[真實觸發驗證](docs/evidence/m1-health-schedule-window-live.md)已通過。
+
+[應用配額隔離驗收](docs/quota-qualification.md)覆蓋API／Cron共享上限、窗口恢復與同ID重送；[證據](docs/evidence/m1-quota-qualification.md)區分本機SQLite與provider用量，總數到頂不自動清歷史，完整AC-08仍pending。

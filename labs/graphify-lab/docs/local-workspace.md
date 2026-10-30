@@ -28,6 +28,28 @@ MCP client 的 command 用此 `.venv/bin/python` 絕對路徑，cwd 設為本 la
 **MCP 固定啟動時的圖快照。來源改動後要結束並重開 server。** 短命令每次重驗，長連線沒有 watcher 或熱更新；
 不可把舊 session 的行號視為最新來源。精確 source 命令在讀回後再次核對內容與 context，有變動就拒絕輸出。
 
+## 命令列呼叫路徑與修改影響
+
+不啟動 MCP 也能使用同一套 calls-only 分析：
+
+```sh
+.venv/bin/python -m graphify_lab.workspace --source ./your-project calls-path 'entry()' 'leaf()'
+.venv/bin/python -m graphify_lab.workspace --source ./your-project impact 'leaf()' --max-results 50
+```
+
+將 `./your-project` 換成明確來源目錄；函式標籤含括號時須加引號。也可使用 exact node ID 解開同名歧義。
+兩者在 stdout 輸出一份 JSON，含 `status: ok`、`index` provenance 與 `result`；內容及搜尋上限與下文對應 MCP 工具相同。
+`calls-path` 接受 max-hops/max-visited；`impact` 另接受 max-results（CLI 使用連字號選項，JSON 欄位仍為底線）。
+
+退出碼0表示 found/complete（impact可沒有caller）；4表示確定圖內沒有呼叫路徑；5表示搜尋上限，仍輸出帶原因的JSON及可用部分結果。
+`status: ok` 只表示查詢成功執行，腳本還須讀 `result.status`，不能將exit5當成沒有影響。
+參數／未知或歧義selector／cache／freshness錯誤為exit2，stdout為空，stderr提供診斷。
+在shell使用`set -e`時，須明確處理預期的4/5退出碼才能繼續處理JSON。
+
+每次命令開啟當前索引：命令之間編輯來源，下次會重新建立或驗證；命令執行中編輯則拒絕輸出，不自動重試。
+來源與graph在讀取前後驗證，仍是觀測時點保證，無watcher或檔案鎖。原`query`/`explain`退出碼契約不變。
+靜態calls可能遺漏關係，Python命名測試hints不是完整測試選擇器。詳見[M6契約](milestones/cli-analysis.md)。
+
 ## 開發中的 MCP：明確刷新
 
 需要持續編輯來源時，改用 `serve-live`；原 `serve` 的快照契約保持不變。

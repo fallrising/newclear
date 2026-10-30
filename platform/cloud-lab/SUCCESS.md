@@ -29,7 +29,7 @@ frontmatter source_commit 是文件盤點的 repository 基準，不是新文件
 | AC-05 | Given 完整文件候選，When 跑既有索引驗證與獨立審查，Then 導航一致、沒有 runtime 成功冒稱，所有未實作事項保留 | passed | [M0 文件證據](docs/evidence/m0-review.md)：本機 validators 及獨立 ACCEPT；Git 交付狀態見[任務板](docs/tasks/BOARD.md) |
 | AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | pending | 真實 CF＋獨立 bot API＋non-root runner 一筆閉環已通過；窗口修正後真實Cron→原runner→validated於04:31:06Z通過；一般瀏覽器真人Access與Grok模型對話仍待驗收；實體手機已改選測 |
 | AC-07 | Given 重複投遞、失聯、取消及恢復，When 執行與回報競爭，Then 不重做未知副作用且停止／未知／驗證狀態誠實可見 | pending | [遠端三種故障與撤權子集](docs/evidence/m1-remote-recovery.md)已通過；完整 [M1 故障矩陣](docs/verification.md)仍待驗收 |
-| AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；[首次D1隔離還原與journal對帳](docs/evidence/m1-isolated-restore.md)已通過；[獨立環境grant／Access撤權、執行中／unknown恢復](docs/evidence/m1-remote-recovery.md)已通過；配額耗盡與完整邊界仍待驗收 |
+| AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／隔離資源／零新增付費限制已有首輪證據；[首次D1隔離還原與journal對帳](docs/evidence/m1-isolated-restore.md)已通過；[獨立環境grant／Access撤權、執行中／unknown恢復](docs/evidence/m1-remote-recovery.md)已通過；[本機API／Cron配額邊界](docs/evidence/m1-quota-qualification.md)已補隔離證據；provider用量／保留策略與完整邊界仍待驗收 |
 
 ## 現況與缺口
 
@@ -129,3 +129,7 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 [HW01–04延遲Cron派送窗口修正](docs/schedule-window.md)針對HL首次真實expired_before_dispatch補回歸；source/local已合併，HL修正版真實接入已通過，完整主線仍未通過。
 
 [延遲Cron派送窗口修正](docs/schedule-window.md)已完成[362tests及獨立source審查](docs/evidence/m1-schedule-window.md)，保留due身份／去重及總截止；修正版重新接入已通過[真實觸發驗證](docs/evidence/m1-health-schedule-window-live.md)。
+
+## QV：應用配額隔離驗收
+
+[QV01–04](docs/quota-qualification.md)已完成[8focused／370fulltests、三組mutation及T850獨立審查](docs/evidence/m1-quota-qualification.md)：API／Cron共享上限、窗口恢復、去重與歷史保全。只操作本機隔離資料，Git狀態見任務板；實際provider配額／帳單與完整AC-08仍pending。

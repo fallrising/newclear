@@ -2447,3 +2447,9 @@ Claude plan REWORK11points then ACCEPT; code REWORK2assertion gaps/no production
 Root original191-input full/race/vet/build passed; final3assertion-only test changes passed affected
 TestOutputAccess race suites, with every production input unchanged. Web30/API/docs passed.
 No new browser/full-product acceptance. Primary PR/CI/merge/readback and board/desk closure remain.
+
+## QV isolated application quota qualification — 2026-10-30T10:09:33Z
+
+Owner continues development and requests concrete assistance only when needed. Lead adds bounded API/Cron quota qualification per docs/quota-qualification.md; no live calls, deployment, credentials, renewal, deletion or paid plan. Lead owns tests and docs. T850 one fresh native read-only reviewer, inherited model/effort/permissions, <=1500tokens initial plus one focusedfollowup, five-minute monitored budget, unknowncost/quota; no private/network/writes/tests/Git/delegation. Native stop via interrupt is available; scope instructions are not OS isolation. Existing behavior qualification needs no fabricated RED; use disposable source mutations to demonstrate boundary assertions detect regressions, retain all results. Mainline/AC08 stays pending. Normal authorized PR/CI/merge/readback then board-only closeout.
+
+QV evidence gate ACCEPT 2026-10-30T10:16:15Z: lead-reviewed scoped diff,8focused/370fulltests, mutation final3/5/2fail detecting deliberate defects withsourcehashpreserved, document/task/index checks passed; T850independentACCEPT. Initial isolation/fixture and supersededmutation evidence retained. No runtime/live/authority/billing change. QV01–04 local scope accepted; normalGit delivery then boardclosure, fullmainline stays incomplete.

@@ -64,3 +64,5 @@ M3：[T-0439 本機工作目錄接入](docs/milestones/local-workspace.md) 已�
 M4：[圖更新與有向呼叫路徑](docs/milestones/live-workspace.md)；L-01～L-05 的實作、驗證與交付進度見[任務板](docs/tasks/BOARD.md)，不回溯改動 M3 證據。
 
 M5：[修改影響與測試線索](docs/milestones/change-impact.md)；I-01～I-05 進度與交付見[任務板](docs/tasks/BOARD.md)。
+
+M6：[命令列分析入口](docs/milestones/cli-analysis.md)；C-01～C-04 與交付進度見[任務板](docs/tasks/BOARD.md)。

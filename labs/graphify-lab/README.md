@@ -147,3 +147,5 @@ directory symlink 不支援，越界的 file symlink 拒絕。
 開發時可用 `workspace ... serve-live` 取得過期檢查、明確刷新與 calls-only 路徑；六個 MCP 工具與限制見[本機工作目錄](docs/local-workspace.md)。既有 `serve` 保持固定快照。
 
 - [修改影響與測試線索](docs/milestones/change-impact.md)：serve-live 的 change_impact、calls 證據與有界 Python 測試 hints。
+
+- [命令列分析](docs/milestones/cli-analysis.md)：workspace calls-path／impact 的JSON、退出碼及freshness契約。

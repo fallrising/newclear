@@ -1,0 +1,182 @@
+{
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "models": [
+    {
+      "model": "bge_zh",
+      "graph": {
+        "inputs": [
+          {
+            "name": "input_ids",
+            "type": "tensor(int64)",
+            "shape": [
+              "batch_size",
+              "sequence_length"
+            ]
+          },
+          {
+            "name": "attention_mask",
+            "type": "tensor(int64)",
+            "shape": [
+              "batch_size",
+              "sequence_length"
+            ]
+          },
+          {
+            "name": "token_type_ids",
+            "type": "tensor(int64)",
+            "shape": [
+              "batch_size",
+              "sequence_length"
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "last_hidden_state",
+            "type": "tensor(float)",
+            "shape": [
+              "batch_size",
+              "sequence_length",
+              512
+            ]
+          }
+        ],
+        "provider": [
+          "CPUExecutionProvider"
+        ],
+        "pad_id": 0,
+        "max_tokens": 512,
+        "pooling": "cls",
+        "dimension": 512
+      },
+      "assets": {
+        "assets": [
+          {
+            "model": "bge_zh",
+            "path": "bge_zh/onnx/model.onnx",
+            "size_bytes": 94851877,
+            "sha256": "69a0b846f4f116b5e6aabf9546ea6754d02264f3211a13a1bd69b31b8040749a",
+            "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+            "license": "Original BAAI model: MIT; exporter metadata has no separate declaration",
+            "url": "https://huggingface.co/Xenova/bge-small-zh-v1.5/resolve/75c43b069aac4d136ba6bc1122f995fedcfd2781/onnx/model.onnx"
+          },
+          {
+            "model": "bge_zh",
+            "path": "bge_zh/tokenizer.json",
+            "size_bytes": 439125,
+            "sha256": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+            "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+            "license": "Original BAAI model: MIT; exporter metadata has no separate declaration",
+            "url": "https://huggingface.co/Xenova/bge-small-zh-v1.5/resolve/75c43b069aac4d136ba6bc1122f995fedcfd2781/tokenizer.json"
+          }
+        ],
+        "total_bytes": 95291002
+      },
+      "finite": true,
+      "norms": [
+        0.9999999977102395,
+        1.000000015059892,
+        0.9999999567993085
+      ],
+      "document_count": 2,
+      "query_count": 1
+    },
+    {
+      "model": "e5_multi",
+      "graph": {
+        "inputs": [
+          {
+            "name": "input_ids",
+            "type": "tensor(int64)",
+            "shape": [
+              "batch_size",
+              "sequence_length"
+            ]
+          },
+          {
+            "name": "attention_mask",
+            "type": "tensor(int64)",
+            "shape": [
+              "batch_size",
+              "sequence_length"
+            ]
+          },
+          {
+            "name": "token_type_ids",
+            "type": "tensor(int64)",
+            "shape": [
+              "batch_size",
+              "sequence_length"
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "last_hidden_state",
+            "type": "tensor(float)",
+            "shape": [
+              "batch_size",
+              "sequence_length",
+              384
+            ]
+          }
+        ],
+        "provider": [
+          "CPUExecutionProvider"
+        ],
+        "pad_id": 1,
+        "max_tokens": 512,
+        "pooling": "mean",
+        "dimension": 384
+      },
+      "assets": {
+        "assets": [
+          {
+            "model": "e5_multi",
+            "path": "e5_multi/onnx/model.onnx",
+            "size_bytes": 470268510,
+            "sha256": "ca456c06b3a9505ddfd9131408916dd79290368331e7d76bb621f1cba6bc8665",
+            "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+            "license": "MIT (official model)",
+            "url": "https://huggingface.co/intfloat/multilingual-e5-small/resolve/614241f622f53c4eeff9890bdc4f31cfecc418b3/onnx/model.onnx"
+          },
+          {
+            "model": "e5_multi",
+            "path": "e5_multi/tokenizer.json",
+            "size_bytes": 17082730,
+            "sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39",
+            "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+            "license": "MIT (official model)",
+            "url": "https://huggingface.co/intfloat/multilingual-e5-small/resolve/614241f622f53c4eeff9890bdc4f31cfecc418b3/tokenizer.json"
+          }
+        ],
+        "total_bytes": 487351240
+      },
+      "finite": true,
+      "norms": [
+        0.9999999972969738,
+        1.0000000002817029,
+        0.9999999969981674
+      ],
+      "document_count": 2,
+      "query_count": 1
+    }
+  ],
+  "scope": "Small synthetic tensor/inference control after protocol freeze; no dev or heldout retrieval; not PyTorch/ONNX parity"
+}

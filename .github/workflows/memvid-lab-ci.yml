@@ -52,3 +52,41 @@ jobs:
             labs/memvid-lab/work/ci-notes/report.json
           if-no-files-found: ignore
           retention-days: 7
+
+  semantic-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12.14"
+      - name: Prepare pinned dependencies, SDK source patch and model assets
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          make -C labs/memvid-lab setup
+          make -C labs/memvid-lab semantic-sdk
+          make -C labs/memvid-lab semantic-prepare
+      - name: Real vectors, returned IDs, update, delete and child reopen
+        run: make -C labs/memvid-lab semantic-native RUN_DIR=work/ci-semantic-native
+      - name: Real HNSW retention across the 1000-vector boundary
+        run: make -C labs/memvid-lab semantic-hnsw RUN_DIR=work/ci-semantic-hnsw
+      - name: Frozen dev calibration and heldout quality with update controls
+        working-directory: labs/memvid-lab
+        run: timeout 1200 .venv/bin/python semantic_eval.py run --cache work/semantic-models --output work/ci-semantic --sizes none
+      - name: Keep native patch provenance and persistence evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: memvid-semantic-native-report
+          path: |
+            labs/memvid-lab/work/semantic-sdk/manifest.json
+            labs/memvid-lab/work/ci-semantic-native/report.json
+            labs/memvid-lab/work/ci-semantic-native/update-report.json
+            labs/memvid-lab/work/ci-semantic-hnsw/report.json
+            labs/memvid-lab/work/ci-semantic/report.json
+            labs/memvid-lab/work/ci-semantic/calibration.json
+          if-no-files-found: ignore
+          retention-days: 7

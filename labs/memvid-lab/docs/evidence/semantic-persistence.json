@@ -1,0 +1,380 @@
+{
+  "schema_version": 1,
+  "sdk": "2.0.160",
+  "core": "2.0.140",
+  "model": "bge_zh",
+  "model_revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+  "corpus_sha256": "a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970",
+  "expected_source_count": 24,
+  "put_many_ids": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23"
+  ],
+  "before_seal": {
+    "frames": {
+      "mv2://notes/n01": 0,
+      "mv2://notes/n02": 1,
+      "mv2://notes/n03": 2,
+      "mv2://notes/n04": 3,
+      "mv2://notes/n05": 4,
+      "mv2://notes/n06": 5,
+      "mv2://notes/n07": 6,
+      "mv2://notes/n08": 7,
+      "mv2://notes/n09": 8,
+      "mv2://notes/n10": 9,
+      "mv2://notes/n11": 10,
+      "mv2://notes/n12": 11,
+      "mv2://notes/n13": 12,
+      "mv2://notes/n14": 13,
+      "mv2://notes/n15": 14,
+      "mv2://notes/n16": 15,
+      "mv2://notes/n17": 16,
+      "mv2://notes/n18": 17,
+      "mv2://notes/n19": 18,
+      "mv2://notes/n20": 19,
+      "mv2://notes/n21": 20,
+      "mv2://notes/n22": 21,
+      "mv2://notes/n23": 22,
+      "mv2://notes/n24": 23
+    },
+    "hits": [
+      {
+        "frame_id": 0,
+        "uri": "mv2://notes/n01",
+        "score": 0.6367264986038208
+      },
+      {
+        "frame_id": 7,
+        "uri": "mv2://notes/n08",
+        "score": 0.4788588881492615
+      },
+      {
+        "frame_id": 4,
+        "uri": "mv2://notes/n05",
+        "score": 0.46834439039230347
+      },
+      {
+        "frame_id": 15,
+        "uri": "mv2://notes/n16",
+        "score": 0.4624180793762207
+      },
+      {
+        "frame_id": 5,
+        "uri": "mv2://notes/n06",
+        "score": 0.4580346941947937
+      },
+      {
+        "frame_id": 23,
+        "uri": "mv2://notes/n24",
+        "score": 0.45213985443115234
+      },
+      {
+        "frame_id": 11,
+        "uri": "mv2://notes/n12",
+        "score": 0.4479793310165405
+      },
+      {
+        "frame_id": 14,
+        "uri": "mv2://notes/n15",
+        "score": 0.4417712688446045
+      },
+      {
+        "frame_id": 19,
+        "uri": "mv2://notes/n20",
+        "score": 0.4390268921852112
+      },
+      {
+        "frame_id": 1,
+        "uri": "mv2://notes/n02",
+        "score": 0.4322826862335205
+      },
+      {
+        "frame_id": 10,
+        "uri": "mv2://notes/n11",
+        "score": 0.42831873893737793
+      },
+      {
+        "frame_id": 8,
+        "uri": "mv2://notes/n09",
+        "score": 0.4278048872947693
+      },
+      {
+        "frame_id": 2,
+        "uri": "mv2://notes/n03",
+        "score": 0.42674916982650757
+      },
+      {
+        "frame_id": 17,
+        "uri": "mv2://notes/n18",
+        "score": 0.4258221983909607
+      },
+      {
+        "frame_id": 3,
+        "uri": "mv2://notes/n04",
+        "score": 0.42189180850982666
+      },
+      {
+        "frame_id": 18,
+        "uri": "mv2://notes/n19",
+        "score": 0.4209214448928833
+      },
+      {
+        "frame_id": 6,
+        "uri": "mv2://notes/n07",
+        "score": 0.41759830713272095
+      },
+      {
+        "frame_id": 9,
+        "uri": "mv2://notes/n10",
+        "score": 0.4153871536254883
+      },
+      {
+        "frame_id": 20,
+        "uri": "mv2://notes/n21",
+        "score": 0.4134564995765686
+      },
+      {
+        "frame_id": 16,
+        "uri": "mv2://notes/n17",
+        "score": 0.4036244750022888
+      },
+      {
+        "frame_id": 21,
+        "uri": "mv2://notes/n22",
+        "score": 0.3912610411643982
+      },
+      {
+        "frame_id": 22,
+        "uri": "mv2://notes/n23",
+        "score": 0.39037877321243286
+      },
+      {
+        "frame_id": 13,
+        "uri": "mv2://notes/n14",
+        "score": 0.38268667459487915
+      },
+      {
+        "frame_id": 12,
+        "uri": "mv2://notes/n13",
+        "score": 0.3724132776260376
+      }
+    ]
+  },
+  "after_reopen": {
+    "frames": {
+      "mv2://notes/n01": 0,
+      "mv2://notes/n02": 1,
+      "mv2://notes/n03": 2,
+      "mv2://notes/n04": 3,
+      "mv2://notes/n05": 4,
+      "mv2://notes/n06": 5,
+      "mv2://notes/n07": 6,
+      "mv2://notes/n08": 7,
+      "mv2://notes/n09": 8,
+      "mv2://notes/n10": 9,
+      "mv2://notes/n11": 10,
+      "mv2://notes/n12": 11,
+      "mv2://notes/n13": 12,
+      "mv2://notes/n14": 13,
+      "mv2://notes/n15": 14,
+      "mv2://notes/n16": 15,
+      "mv2://notes/n17": 16,
+      "mv2://notes/n18": 17,
+      "mv2://notes/n19": 18,
+      "mv2://notes/n20": 19,
+      "mv2://notes/n21": 20,
+      "mv2://notes/n22": 21,
+      "mv2://notes/n23": 22,
+      "mv2://notes/n24": 23
+    },
+    "hits": [
+      {
+        "frame_id": 0,
+        "uri": "mv2://notes/n01",
+        "score": 0.6367264986038208
+      },
+      {
+        "frame_id": 7,
+        "uri": "mv2://notes/n08",
+        "score": 0.4788588881492615
+      },
+      {
+        "frame_id": 4,
+        "uri": "mv2://notes/n05",
+        "score": 0.46834439039230347
+      },
+      {
+        "frame_id": 15,
+        "uri": "mv2://notes/n16",
+        "score": 0.4624180793762207
+      },
+      {
+        "frame_id": 5,
+        "uri": "mv2://notes/n06",
+        "score": 0.4580346941947937
+      },
+      {
+        "frame_id": 23,
+        "uri": "mv2://notes/n24",
+        "score": 0.45213985443115234
+      },
+      {
+        "frame_id": 11,
+        "uri": "mv2://notes/n12",
+        "score": 0.4479793310165405
+      },
+      {
+        "frame_id": 14,
+        "uri": "mv2://notes/n15",
+        "score": 0.4417712688446045
+      },
+      {
+        "frame_id": 19,
+        "uri": "mv2://notes/n20",
+        "score": 0.4390268921852112
+      },
+      {
+        "frame_id": 1,
+        "uri": "mv2://notes/n02",
+        "score": 0.4322826862335205
+      },
+      {
+        "frame_id": 10,
+        "uri": "mv2://notes/n11",
+        "score": 0.42831873893737793
+      },
+      {
+        "frame_id": 8,
+        "uri": "mv2://notes/n09",
+        "score": 0.4278048872947693
+      },
+      {
+        "frame_id": 2,
+        "uri": "mv2://notes/n03",
+        "score": 0.42674916982650757
+      },
+      {
+        "frame_id": 17,
+        "uri": "mv2://notes/n18",
+        "score": 0.4258221983909607
+      },
+      {
+        "frame_id": 3,
+        "uri": "mv2://notes/n04",
+        "score": 0.42189180850982666
+      },
+      {
+        "frame_id": 18,
+        "uri": "mv2://notes/n19",
+        "score": 0.4209214448928833
+      },
+      {
+        "frame_id": 6,
+        "uri": "mv2://notes/n07",
+        "score": 0.41759830713272095
+      },
+      {
+        "frame_id": 9,
+        "uri": "mv2://notes/n10",
+        "score": 0.4153871536254883
+      },
+      {
+        "frame_id": 20,
+        "uri": "mv2://notes/n21",
+        "score": 0.4134564995765686
+      },
+      {
+        "frame_id": 16,
+        "uri": "mv2://notes/n17",
+        "score": 0.4036244750022888
+      },
+      {
+        "frame_id": 21,
+        "uri": "mv2://notes/n22",
+        "score": 0.3912610411643982
+      },
+      {
+        "frame_id": 22,
+        "uri": "mv2://notes/n23",
+        "score": 0.39037877321243286
+      },
+      {
+        "frame_id": 13,
+        "uri": "mv2://notes/n14",
+        "score": 0.38268667459487915
+      },
+      {
+        "frame_id": 12,
+        "uri": "mv2://notes/n13",
+        "score": 0.3724132776260376
+      }
+    ]
+  },
+  "returned_ids_match_persisted_frames": true,
+  "all_sources_searchable_after_reopen": true,
+  "native_persistence_passed": true,
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "sources": {
+    "diagnose_vectors.py": "3ac013a2a978ecef71b8229914b2fa6d45f46249d23b24b1bd313184461fadf0",
+    "semantic_models.py": "3ddcdc737bb23086f8b16c122b429d2c5c00d698722a5def383404af827054d6",
+    "requirements.lock": "46982859187a17fdc10c405074e49b14b27fddcefb411ba597f9186b4091dbcd",
+    "requirements-models.lock": "c02e6ef0ac4b75d03b45217cdd6328a958d5d16479c5cedf909b5a75e01ee7a1"
+  },
+  "patched_sdk": {
+    "patch": "explicit-vector-batch-v3-hnsw",
+    "sdk": "2.0.160",
+    "core": "2.0.140",
+    "archive_sha256": "8eab5aec9a30eb459f553ed091038b6916d02a2f33569b32a7aee1b556820243",
+    "patch_sha256": "5fc53ca7865178f6b86a95b1658479e85007ff00f351ef051c9b5b80aa0d53f2",
+    "original_cargo_lock_sha256": "43cbd08f2ea7ee24b6dac987e14a8880fa6dec2fb20c772a27746e758dc4127d",
+    "cargo_lock_sha256": "f3270621bd0e67786a8d21363d3f038c9accbc80069fe11627581d7f92e795e1",
+    "lock_patch_sha256": "87ec425c4f3b2b3303b74d2455adced2b2171a728c56e178e2c13f0ccb5ce4f0",
+    "binding_sha256": "4fdc04d3e5dbb22665cd2db12692563e4bb28ebe687b975dd651cdc519a416b5",
+    "core_vec_sha256": "3c25d30284af02999e3c1debcc602ca2279f4d0f191034941dfdd055f7cd885b",
+    "hnsw_archive_sha256": "2b9740ebf8769ec4ad6762cc951ba18f39bba6dfbc2fbbe46285f7539af79752",
+    "hnsw_source_sha256": "3e476595bc7702da129ad152a50f838b7c4a725bb3e5bac26301698eef5c7f4f",
+    "preparer_sha256": "44f99993c7242fae5eea023d74fa76e8943449d978f35f7ecb7c8fbb0e8b0ed7",
+    "library_sha256": "9b200a81ee94835051d891cc36d3dcf0442a6e8fba2fb62a080441b353c9eec9",
+    "toolchain": "1.90.0",
+    "features": "pinned SDK default features",
+    "runtime": "explicit opt-in overlay"
+  }
+}

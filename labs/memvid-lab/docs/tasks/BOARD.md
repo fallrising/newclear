@@ -54,3 +54,17 @@ M2 [PR #777](https://github.com/fallrising/newclear/pull/777) 於 `2026-10-29T17
 獨立 M2 審查 [T-003](../../.team/reports/T-003.md) ACCEPT；合併後再次回讀 merged=true、實際 SHA／時間。遠端 evaluator、corpus與final JSON的Git blobs均與已驗證候選相同。此最後任務板PR只同步事實，不修改 runtime、資料、門檻或既有失敗證據；候選時點文件中的待CI／合併記錄由本節交付事實更新。
 
 本次完成的是評估實驗，兩種策略的自然語句檢索均不建議直接採用。沒有產品整合、release、usable tag或部署；desk正式done與owner驗收仍依owner決定。
+
+## T-0436 M3 — 中文語意檢索
+
+Owner 於上一輪結果後回覆「好，繼續開發。」範圍承接 [desk #305](https://github.com/fallrising/desk/pull/305)，[固定規格](../notes-semantic.md)，主導 codex-gpt6-pilot。M1/M2 完成與低分結論保留。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0436-M3-01 | 固定模型與離線真embedding | NS-01 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
+| T-0436-M3-02 | 開發校準與獨立保留集比較 | NS-02 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
+| T-0436-M3-03 | 向量更新／刪除／重開 | NS-03 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
+| T-0436-M3-04 | 規模成本與CLI邊界 | NS-04 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
+| T-0436-M3-05 | 審查、結果與Git交付 | NS-05 | in_progress | 2026-10-29T17:57:27Z | | 2026-10-30T04:10:33Z |
+
+2026-10-30 owner批准修復，[desk #315](https://github.com/fallrising/desk/pull/315)已合併。固定SDK/core/HNSW明示source patch及真24／1000向量控制通過；原frozen M3全job實跑完成，0errors，詳見[結果](../notes-semantic-results.md)。兩模型未達採用門檻，結論不直接採用；不是評估未跑或放寬標準。必要完整回歸／獨立審查／CI及PR#800正常合併仍在進行，五列保持in_progress，合併後才填end；原失敗保留。

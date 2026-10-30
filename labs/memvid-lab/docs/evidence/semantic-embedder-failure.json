@@ -1,0 +1,17 @@
+{
+  "path": "public put_many(embedder=ExplicitVectors, embedding_identity=...)",
+  "sdk": "2.0.160",
+  "core": "2.0.140",
+  "input_notes": 24,
+  "model": "Xenova/bge-small-zh-v1.5",
+  "model_revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+  "phase": "after seal/close/reopen, first semantic query",
+  "error_type": "VecIndexDisabledError",
+  "error": "MV011: Vector index is not enabled",
+  "command_exit": 1,
+  "network_probes": {
+    "ipv4": "EPERM",
+    "ipv6": "EPERM"
+  },
+  "limitation": "Exception occurred before report write; this compact record is transcribed from observed stderr, not a successful JSON run."
+}

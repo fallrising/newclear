@@ -94,7 +94,7 @@ make core RUN_DIR=work/core-001
 
 ## 驗證入口
 
-`make check` 執行真 SDK／CLI 的八項邊界 regression；`make full` 是場景與模型驗收。
+`make check` 執行真 SDK／CLI、固定筆記指標與模型準備邊界 regression；`make full` 是場景與模型驗收。
 repo 根目錄另執行 `python3 scripts/check_indexes.py` 與 `python3 .github/scripts/check_workflows.py`。
 CI 入口：[memvid-lab-ci.yml](../../.github/workflows/memvid-lab-ci.yml)。任務與交付：[BOARD.md](docs/tasks/BOARD.md)。
 
@@ -113,3 +113,18 @@ make notes RUN_DIR=work/notes-demo-001
 查詢輸出是來源檢索，無生成式回答。CJK 二字組屬 lab 預處理，不是中文語意模型；來源核對檢查完整 SDK renderer 文字／URI／frame，不宣稱原文 bytes 無損保存。規模資料為確定性合成干擾資料，計時不是 production 保證。
 
 品質結果與限制見 [繁中筆記評估結果](docs/notes-usability-results.md)，完整原始輸出見 [評估 JSON](docs/evidence/notes-evaluation.json)。
+
+## 中文語意模型比較（T-0436 M3）
+
+固定中文BGE／多語E5、dev-only校準、保留集與100／1000成本評估已實跑。原生排名Recall@5均為1.0，但篩選後heldout Recall分別0.2083／0.7083且兩者都有無答案誤回；按固定門檻均不建議直接採用。詳見[結果與完整證據](docs/notes-semantic-results.md)。
+
+```sh
+make setup
+make semantic-prepare
+make semantic-sdk
+make semantic-native RUN_DIR=work/native-new
+make semantic-hnsw RUN_DIR=work/hnsw-new
+make semantic RUN_DIR=work/semantic-new
+```
+
+模型額外約583MB；BGE明示Xenova exporter，E5官方ONNX。M3使用固定SDK/core及既有HNSW依賴的本地source patch，經hash核對後明示啟用，不覆寫原venv SDK。Rust1.90與OpenSSL headers為build prerequisites；[修復設計](docs/notes-semantic-repair.md)保留原失敗、補丁邊界與重現方式。下載／編譯與禁網runtime分開，每run拒絕覆寫舊輸出。品質門檻與[凍結規格](docs/notes-semantic.md)不變；PR/CI與合併狀態見[任務板](docs/tasks/BOARD.md)。

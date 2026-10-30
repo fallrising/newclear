@@ -58,3 +58,5 @@ Owner 直接指示，T-0001／Session `Memvid-20261028`。先記錄本合約及 
 [固定規格](docs/notes-usability.md) 與 [結果](docs/notes-usability-results.md) 分開保留。NU-01 由 #773 完成狀態同步；NU-02–05 已有固定語料、兩種真 SDK 檢索、current view／刪除／新程序重開與 100／1000 筆實測證據，Git 交付以 [BOARD](docs/tasks/BOARD.md) 為準。
 
 原生 Recall/MRR=0.25、CJK 二字組=0.4583，均未達探索性採用門檻；這是完成評估後的不採用結論，不冒稱搜尋品質成功。來源完整性與更新控制通過；原生 append 仍保留可搜尋舊版。完整 JSON 含逐 query hits／frame manifest 與來源 hash，初次開發失敗另存。
+
+M3依[凍結規格](docs/notes-semantic.md)完成真模型比較實跑：先修復明示本地SDK/core/HNSW來源補丁，再取得dev校準、heldout、兩模型更新及100／1000成本證據。原始失敗仍保留，[結果](docs/notes-semantic-results.md)不建議直接採用：兩模型heldout raw Recall1.0，但篩選Recall0.2083／0.7083且均有無答案誤回。工程評估完成不代表模型達採用門檻；必要CI、獨立審查與Git交付以任務板為準。沒有新runtime依賴、產品整合、release或部署。

@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-29T18:06:24.450582+00:00",
+  "evaluation_completed": false,
+  "quality_completed": false,
+  "scale_completed": false,
+  "scale_requested": [
+    100,
+    1000
+  ],
+  "corpora": {
+    "dev": "a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970",
+    "heldout": "75fcd6855b8bffd3d843eb89e2c81782049a2b88dd8ead2ee7d6c9fa4752df5a"
+  },
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "sources": {
+    "semantic_eval.py": "bfb6dc166910897739dbb474c19b063f522a3c72475df03938e007d0d3aee844",
+    "semantic_models.py": "64e9d99fea7bc928fa080f195c096154b638c5c83c9cb1786cba8c7d002188ce",
+    "notes_eval.py": "012591ee6d53892792c040845d07c11bb813f2ceaed04dd7028dec19668d3b4b",
+    "models.py": "caebf62cdcbb9f046852ebb235bcb3f97bd5e9e24cceed1f3c36e7bd0ee2df77",
+    "offline.py": "dc325a1466950893319d8fd349538d62ce6e47f491bcf648e06ab86dc2183b9c",
+    "scenarios.py": "d6a368672473a6ae3eb666dd0d90e39ed743209fec5723b7ca17b5428296456d",
+    "requirements.lock": "46982859187a17fdc10c405074e49b14b27fddcefb411ba597f9186b4091dbcd",
+    "requirements-models.lock": "c02e6ef0ac4b75d03b45217cdd6328a958d5d16479c5cedf909b5a75e01ee7a1",
+    "docs/notes-semantic.md": "1a746e0e8872db37fd4e06a0e780dc04ec56e734c8d16948b669d5fd46e390ee"
+  },
+  "versions": {
+    "memvid-sdk": "2.0.160",
+    "numpy": "2.5.4",
+    "onnxruntime": "1.31.1",
+    "tokenizers": "0.23.3"
+  },
+  "native_core_version": "2.0.140",
+  "python": "3.12.14",
+  "platform": "Linux x86_64",
+  "models": {
+    "bge_zh": {
+      "repository": "Xenova/bge-small-zh-v1.5",
+      "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+      "base_model": "BAAI/bge-small-zh-v1.5",
+      "dimension": 512,
+      "pooling": "cls",
+      "pad_token": "[PAD]",
+      "query_prefix": "为这个句子生成表示以用于检索相关文章：",
+      "passage_prefix": "",
+      "license": "Original BAAI model: MIT; exporter metadata has no separate declaration",
+      "files": {
+        "onnx/model.onnx": [
+          94851877,
+          "69a0b846f4f116b5e6aabf9546ea6754d02264f3211a13a1bd69b31b8040749a"
+        ],
+        "tokenizer.json": [
+          439125,
+          "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26"
+        ]
+      }
+    },
+    "e5_multi": {
+      "repository": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "base_model": "intfloat/multilingual-e5-small",
+      "dimension": 384,
+      "pooling": "mean",
+      "pad_token": "<pad>",
+      "query_prefix": "query: ",
+      "passage_prefix": "passage: ",
+      "license": "MIT (official model)",
+      "files": {
+        "onnx/model.onnx": [
+          470268510,
+          "ca456c06b3a9505ddfd9131408916dd79290368331e7d76bb621f1cba6bc8665"
+        ],
+        "tokenizer.json": [
+          17082730,
+          "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39"
+        ]
+      }
+    }
+  },
+  "assets": {
+    "assets": [
+      {
+        "model": "bge_zh",
+        "path": "bge_zh/onnx/model.onnx",
+        "size_bytes": 94851877,
+        "sha256": "69a0b846f4f116b5e6aabf9546ea6754d02264f3211a13a1bd69b31b8040749a",
+        "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+        "license": "Original BAAI model: MIT; exporter metadata has no separate declaration",
+        "url": "https://huggingface.co/Xenova/bge-small-zh-v1.5/resolve/75c43b069aac4d136ba6bc1122f995fedcfd2781/onnx/model.onnx"
+      },
+      {
+        "model": "bge_zh",
+        "path": "bge_zh/tokenizer.json",
+        "size_bytes": 439125,
+        "sha256": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+        "revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+        "license": "Original BAAI model: MIT; exporter metadata has no separate declaration",
+        "url": "https://huggingface.co/Xenova/bge-small-zh-v1.5/resolve/75c43b069aac4d136ba6bc1122f995fedcfd2781/tokenizer.json"
+      },
+      {
+        "model": "e5_multi",
+        "path": "e5_multi/onnx/model.onnx",
+        "size_bytes": 470268510,
+        "sha256": "ca456c06b3a9505ddfd9131408916dd79290368331e7d76bb621f1cba6bc8665",
+        "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+        "license": "MIT (official model)",
+        "url": "https://huggingface.co/intfloat/multilingual-e5-small/resolve/614241f622f53c4eeff9890bdc4f31cfecc418b3/onnx/model.onnx"
+      },
+      {
+        "model": "e5_multi",
+        "path": "e5_multi/tokenizer.json",
+        "size_bytes": 17082730,
+        "sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39",
+        "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+        "license": "MIT (official model)",
+        "url": "https://huggingface.co/intfloat/multilingual-e5-small/resolve/614241f622f53c4eeff9890bdc4f31cfecc418b3/tokenizer.json"
+      }
+    ],
+    "total_bytes": 582642242
+  },
+  "quality": [],
+  "baselines": [],
+  "updates": [],
+  "scale": [],
+  "errors": [
+    {
+      "kind": "quality",
+      "model": "bge_zh",
+      "split": "dev",
+      "size": 24,
+      "error": "\u001b[0;93m2026-10-29 18:06:24.686705898 [W:onnxruntime:Default, telemetry_1ds.cc:600 operator()] Failed to persist telemetry device ID; using an in-memory identifier\u001b[m\nTraceback (most recent call last):\n  File \"<component>/semantic_eval.py\", line 384, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"<component>/semantic_eval.py\", line 359, in main\n    result = quality(output, corpus, model, Path(cache))\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<component>/semantic_eval.py\", line 152, in quality\n    hits, engine = find(memory, query[\"text\"], vector, manifest, vectors)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<component>/semantic_eval.py\", line 132, in find\n    raise ValueError(\"Returned frame has no ingested vector\")\nValueError: Returned frame has no ingested vector\n"
+    },
+    {
+      "kind": "quality",
+      "model": "e5_multi",
+      "split": "dev",
+      "size": 24,
+      "error": "\u001b[0;93m2026-10-29 18:06:26.514724664 [W:onnxruntime:Default, telemetry_1ds.cc:600 operator()] Failed to persist telemetry device ID; using an in-memory identifier\u001b[m\nTraceback (most recent call last):\n  File \"<component>/semantic_eval.py\", line 384, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"<component>/semantic_eval.py\", line 359, in main\n    result = quality(output, corpus, model, Path(cache))\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<component>/semantic_eval.py\", line 152, in quality\n    hits, engine = find(memory, query[\"text\"], vector, manifest, vectors)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<component>/semantic_eval.py\", line 132, in find\n    raise ValueError(\"Returned frame has no ingested vector\")\nValueError: Returned frame has no ingested vector\n"
+    }
+  ],
+  "source_check": "Full SDK-rendered normalized text plus exact fixture metadata and frame/URI ingest manifest; not raw-byte round-trip",
+  "measurement_conditions": "Shared CPU host; no exclusive load/cache control; one build per scale; synthetic corpus",
+  "ended_at": "2026-10-29T18:06:30.050172+00:00"
+}

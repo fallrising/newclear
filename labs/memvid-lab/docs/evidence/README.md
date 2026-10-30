@@ -77,3 +77,16 @@ GitHub app 建立的完整 tree `b0440255c81297399ed259c904e6a3da3813a381` 與�
 ## 2026-10-29 狀態回讀
 
 以上 Draft／未合併敘述為原執行時點的歷史紀錄。後續 [#709](https://github.com/fallrising/newclear/pull/709) 與 [#733](https://github.com/fallrising/newclear/pull/733) 已合併，任務板八項 done。主導再次回讀驗證 head 的四項 workflows 均 success；相對本輪 base，runtime／locks／workflow bytes 未變。M1 只核對並同步文件，不冒充重跑 15 項模型測試；本次 PR 的 CI 另行回讀。
+
+## 2026-10-30 M3持久化修復與固定模型比較
+
+Owner已批准修復後承接原凍結M3。[修復設計](../notes-semantic-repair.md)記錄pinned source、SDK/core/HNSW本地補丁、stock red與兩次有依據correction；[比較結果](../notes-semantic-results.md)區分工程實跑完成和模型未達採用要求。原2026-10-29失敗JSON全部保留。
+
+- `semantic-sdk-build.json`：最終opt-in native build的source／lock／patch／library hashes，不代表上游已發布修復。
+- `semantic-persistence.json`、`semantic-persistence-updates.json`：24真向量、frame IDs、無效批次、追加／刪除／新程序。
+- `semantic-hnsw-retention.json`：真BGE payloads重複於1000不同URI的儲存control，manifest1000→1001→1000與24組native來源query。不是模型品質語料或全量近鄰recall保證。
+- `semantic-evaluation.json`、`semantic-calibration.json`：最終凍結評估與dev-only門檻；含逐題hits、float32原向量、來源manifest、資產與程式hash、成本samples。
+- `semantic-evaluation-before-strict-guard.json`、相對應calibration：審查前版本完整實跑；cosine邊界後來按原規格嚴格化，不修改其歷史來源hash。
+- `semantic-repair-stock-failure.json`、`semantic-hnsw-retention-failure.json`、`semantic-hnsw-short-result-failure.json`：明示未通過，對應stock18→6、v1 HNSW1000→1、v2數量保留但native搜尋panic。
+
+完整Git／CI／審查狀態見[任務板](../tasks/BOARD.md)。不包含模型權重、native binaries、私人內容或本機路徑；raw可重建runtime資料保留於指定本機backup。

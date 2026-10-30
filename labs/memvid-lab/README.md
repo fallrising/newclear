@@ -114,14 +114,17 @@ make notes RUN_DIR=work/notes-demo-001
 
 品質結果與限制見 [繁中筆記評估結果](docs/notes-usability-results.md)，完整原始輸出見 [評估 JSON](docs/evidence/notes-evaluation.json)。
 
-## 中文語意模型準備（T-0436 M3，尚未完成）
+## 中文語意模型比較（T-0436 M3）
 
-已加入固定中文BGE與多語E5的本地ONNX準備與encoder，沿用既有依賴：
+固定中文BGE／多語E5、dev-only校準、保留集與100／1000成本評估已實跑。原生排名Recall@5均為1.0，但篩選後heldout Recall分別0.2083／0.7083且兩者都有無答案誤回；按固定門檻均不建議直接採用。詳見[結果與完整證據](docs/notes-semantic-results.md)。
 
 ```sh
 make setup
 make semantic-prepare
-.venv/bin/python semantic_models.py verify --cache work/semantic-models
+make semantic-sdk
+make semantic-native RUN_DIR=work/native-new
+make semantic-hnsw RUN_DIR=work/hnsw-new
+make semantic RUN_DIR=work/semantic-new
 ```
 
-額外下載約583MB。BGE使用明示Xenova轉換，E5使用官方ONNX；模型來源、pooling、前綴與hash見 [規格](docs/notes-semantic.md)。真模型圖／禁網推論已驗證，但固定SDK的向量持久化控制失敗，完整品質評估尚未交付。詳見 [目前結果與重現入口](docs/notes-semantic-results.md)；保留題與100／1000規模尚未執行，不能從本輪推論兩模型的搜尋品質。
+模型額外約583MB；BGE明示Xenova exporter，E5官方ONNX。M3使用固定SDK/core及既有HNSW依賴的本地source patch，經hash核對後明示啟用，不覆寫原venv SDK。Rust1.90與OpenSSL headers為build prerequisites；[修復設計](docs/notes-semantic-repair.md)保留原失敗、補丁邊界與重現方式。下載／編譯與禁網runtime分開，每run拒絕覆寫舊輸出。品質門檻與[凍結規格](docs/notes-semantic.md)不變；PR/CI與合併狀態見[任務板](docs/tasks/BOARD.md)。

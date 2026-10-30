@@ -9,7 +9,7 @@ from notes_eval import digest, FROZEN_CORPUS_SHA256, validate_corpus, write_json
 from semantic_models import LocalEncoder, MODELS, verify_assets
 
 
-def run(cache, output):
+def run(cache, output, *, patched=False):
     if output.exists() or output.is_symlink():
         raise FileExistsError("Output already exists; not overwritten")
     root = Path(__file__).resolve().parent
@@ -20,6 +20,10 @@ def run(cache, output):
     from offline import local_environment, deny_network
     local_environment()
     network = deny_network()
+    patch_manifest = None
+    if patched:
+        from semantic_sdk import activate
+        patch_manifest = activate()
     verify_assets(cache, "bge_zh")
     encoder = LocalEncoder(cache, "bge_zh")
     import memvid_sdk as sdk
@@ -64,6 +68,8 @@ def run(cache, output):
               "returned_ids_match_persisted_frames": ids_match, "all_sources_searchable_after_reopen": observed == expected,
               "native_persistence_passed": passed, "network": network,
               "sources": {n: digest(root / n) for n in ("diagnose_vectors.py", "semantic_models.py", "requirements.lock", "requirements-models.lock")}}
+    if patch_manifest is not None:
+        report["patched_sdk"] = patch_manifest
     write_json(output / "report.json", report)
     print(json.dumps({"native_persistence_passed": passed, "returned_ids_match": ids_match,
                       "before_count": len(before["hits"]), "after_count": len(after["hits"]), "expected": len(docs)}))

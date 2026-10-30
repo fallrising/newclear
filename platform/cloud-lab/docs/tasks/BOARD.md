@@ -476,9 +476,16 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0027-1 | 唯讀聚合API | UO-01 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
-| T-0027-2 | scope／邊界與未知來源 | UO-02 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
-| T-0027-3 | 手動看板與session保全 | UO-03 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
-| T-0027-4 | 回歸／瀏覽器／審查／交付 | UO-04 | in_progress | 2026-10-30T10:49:43Z | — | 2026-10-30T11:04:05Z |
+| T-0027-1 | 唯讀聚合API | UO-01 | done | 2026-10-30T10:49:43Z | 2026-10-30T11:06:42Z | 2026-10-30T11:07:31Z |
+| T-0027-2 | scope／邊界與未知來源 | UO-02 | done | 2026-10-30T10:49:43Z | 2026-10-30T11:06:42Z | 2026-10-30T11:07:31Z |
+| T-0027-3 | 手動看板與session保全 | UO-03 | done | 2026-10-30T10:49:43Z | 2026-10-30T11:06:42Z | 2026-10-30T11:07:31Z |
+| T-0027-4 | 回歸／瀏覽器／審查／交付 | UO-04 | done | 2026-10-30T10:49:43Z | 2026-10-30T11:06:42Z | 2026-10-30T11:07:31Z |
 
 [範圍與驗收](../usage-observation.md)；不新增雲端資源／管理token或自動清理。
+
+### T-0027 Git交付／收尾
+
+- [PR827](https://github.com/fallrising/newclear/pull/827) head `98a0692e1883fdbac3b0a6f026c0223c05620461`，merge `f92aaa38055cc3972a1f5d834ceb2d57d87a3962`，合併時間2026-10-30T11:06:42Z。Cloud Lab與T851檔案逐byte等於remote main，feature head為main祖先；六份固定候選亦與remote相等。其他專案並行更新保留，沒有用全樹相等掩蓋無關變更。
+- exact-head CI全過：Cloud Lab `41045528224`、Project success `41045528263`、llms `41045528168`。本機最終92Node＋295Python＝387tests、UO3實際本機workerd/D1／Chromium14情境／103API／無JS或gateway error；三份資產hash與最後source相符。文件／索引／task／report／diff及公開邊界通過，T851初審REWORK後複審ACCEPT。
+- 原UO2跨秒時間失敗、fixture錯誤與clockRED保留；修正有界bootstrap耗時＋整秒容差，超限時間拒絕，非重跑掩蓋。UO01–04 source/local完成；候選在共享workspace的UO-candidate保存source pin／六份hash，尚未發布新版。
+- 完整mainline／AC08仍pending，無usable tag。沒有live管理請求、續權、D1資料清理、Cron變更或付費方案；provider analytics／帳單尚未接線、真人Access／模型及retention／完整故障仍待驗。本收尾只改任務板、只關閉UO。

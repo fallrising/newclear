@@ -168,16 +168,30 @@ P2-08 起。T-0354 試行收到 P2-07，這裡不拆、不做。
 需求／認領：[newclear #793](https://github.com/fallrising/newclear/issues/793)；owner 於 2026-10-30 直接交辦，ChatGPT 承接。
 T-0793 是依 issue 編號建立的 repo-local 文件任務，不是 desk 卡；不重開 T-0354 或啟動 P2-08。
 範圍與文件 AC 見 [SUCCESS](../../SUCCESS.md#t-0793--langfuse-比較參考文件文件工作)。
-本輪止於 Draft PR；未合併前保持 in_progress，end 不補寫。
+初次交付止於 Draft PR；owner 後續於原對話明確授權合併。下表 end 使用 PR #797 的實際合併時間。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0793-01 | 保存來源、定位差異、現況與建議 | LF-D01 | in_progress | 2026-10-29T17:55:33Z | — | 2026-10-29T18:08:20Z |
-| T-0793-02 | README 導航與既有整合規格連結 | LF-D02 | in_progress | 2026-10-29T17:55:33Z | — | 2026-10-29T18:08:20Z |
-| T-0793-03 | 文件驗證、原子提交、Draft PR 與回讀 | LF-D03 | in_progress | 2026-10-29T17:55:33Z | — | 2026-10-29T18:08:20Z |
+| T-0793-01 | 保存來源、定位差異、現況與建議 | LF-D01 | done | 2026-10-29T17:55:33Z | 2026-10-30T16:35:45Z | 2026-10-30T16:39:51Z |
+| T-0793-02 | README 導航與既有整合規格連結 | LF-D02 | done | 2026-10-29T17:55:33Z | 2026-10-30T16:35:45Z | 2026-10-30T16:39:51Z |
+| T-0793-03 | 文件驗證、原子提交、Draft PR 與回讀 | LF-D03 | done | 2026-10-29T17:55:33Z | 2026-10-30T16:35:45Z | 2026-10-30T16:39:51Z |
 
 研究基準 `a0f6b3f2200063b99b02ced53e7a893c1c467a6f`；提交前整合最新主線
 `b46552468d611356c04a72c9a0c6639e9631fd53`。已核對中間七個提交僅影響 fanzloud 與根任務紀錄，Prism、治理入口及既有 Langfuse 規格不變。
-檢查及交付證據記錄於本任務的 PR；未合併、未 release、未 deploy。
+初次交付時為未合併的 Draft；下方記錄本輪授權後的最終交付。沒有 release／deploy。
 
 參考內容見[比較文件](../langfuse-comparison.md)。本地限定文件檢查已通過；必要 CI 與審查以 PR 的最終 head 結果為準。
+
+### PR #797 合併與文件里程碑結案
+
+[PR #797](https://github.com/fallrising/newclear/pull/797) 已於 `2026-10-30T16:35:45Z` 正常合併，
+merge SHA：`7297f14fdc8c8b8e41d900e169dd1518e4a471b6`；已回讀 `merged=true` 及 main。
+已驗證 head：`00ccb91234ab481dec79c272842c4804f6dc2c60`；四個變更檔的合併後 blob 與已驗證 head 全數一致。
+
+[Prism CI](https://github.com/fallrising/newclear/actions/runs/40928372827) 與
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/40928372745) 全部 success；
+Prism 的 golangci、依賴方向、依賴守衛與 `make lint test` 均通過。合併前主導者完成文件範圍複核；未冒稱獨立 reviewer 已接受。
+
+本次只結案 LF-D01–03；SUCCESS 內的 Draft-only 是初次交付範圍，後續合併授權與最新狀態以本節及 PR 紀錄為準。
+此收尾變更只修改任務板，不重寫研究日期、不重開 T-0354、不啟動 P2-08 或 T-1101／T-1102 runtime。
+Prism 的 `mainline: incomplete`、`usable_tag: none` 及所有未驗 runtime AC 保持不變；沒有 release、deploy、付費模型請求或外部服務操作。

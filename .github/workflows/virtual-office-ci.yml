@@ -1,0 +1,43 @@
+name: Virtual Office Lab CI
+on:
+  pull_request:
+    paths:
+      - labs/virtual-office-lab/**
+      - .github/workflows/virtual-office-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - labs/virtual-office-lab/**
+      - .github/workflows/virtual-office-ci.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: virtual-office-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: labs/virtual-office-lab
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24.18.0"
+      - name: Canonical project index and repository contracts
+        working-directory: .
+        run: |
+          python3 scripts/check_project_success.py --write-index
+          git diff --exit-code -- PROJECTS.md
+          python3 scripts/check_indexes.py
+      - run: npm run check
+      - run: npm test
+      - name: Real local workerd SQLite persistence and concurrency
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npx --yes --package wrangler@4.156.0 --command 'node tests/workerd-smoke.mjs'

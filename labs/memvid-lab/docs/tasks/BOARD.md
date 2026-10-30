@@ -85,10 +85,21 @@ Owner於M3交付後指示繼續開發；desk[#325](https://github.com/fallrising
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0436-M4-01 | 新資料及規格事前凍結 | NR-01 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
-| T-0436-M4-02 | 有來源才接受的查詢決策 | NR-02 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
-| T-0436-M4-03 | 開發校準與primary事前選擇 | NR-03 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
-| T-0436-M4-04 | 新保留題、來源與成本實測 | NR-04 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
-| T-0436-M4-05 | 審查、CI及Git交付 | NR-05 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-01 | 新資料及規格事前凍結 | NR-01 | done | 2026-10-30T10:13:22Z | 2026-10-30T10:51:21Z | 2026-10-30T10:51:21Z |
+| T-0436-M4-02 | 有來源才接受的查詢決策 | NR-02 | done | 2026-10-30T10:13:22Z | 2026-10-30T10:51:21Z | 2026-10-30T10:51:21Z |
+| T-0436-M4-03 | 開發校準與primary事前選擇 | NR-03 | done | 2026-10-30T10:13:22Z | 2026-10-30T10:51:21Z | 2026-10-30T10:51:21Z |
+| T-0436-M4-04 | 新保留題、來源與成本實測 | NR-04 | done | 2026-10-30T10:13:22Z | 2026-10-30T10:51:21Z | 2026-10-30T10:51:21Z |
+| T-0436-M4-05 | 審查、CI及Git交付 | NR-05 | done | 2026-10-30T10:13:22Z | 2026-10-30T10:51:21Z | 2026-10-30T10:51:21Z |
 
-M4已按事前freeze完成完整實跑4quality／2updates、0errors；[結果](../notes-rejection-results.md)primary BGE margin只保留1/24正確題、未知誤回0/24，不建議直接採用。53tests、core12passed/3not_run、index／workflowlint與T016獨立審查通過；必要完整CI與Git交付仍待完成，五列保持in_progress。
+M4已按事前freeze完成完整實跑4quality／2updates、0errors；[結果](../notes-rejection-results.md)primary BGE margin只保留1/24正確題、未知誤回0/24，不建議直接採用。53tests、core12passed/3not_run、index／workflowlint與T016獨立審查通過；必要完整 CI 與產品 Git 交付已完成，五列按實際 merged_at 結案。
+
+
+### M4 Git 交付與驗收界線
+
+[PR #823](https://github.com/fallrising/newclear/pull/823) 於 `2026-10-30T10:51:21Z` 正常 squash 合併，merge SHA `276df71a3e874b142efc53b11f9c98d009d668c4`；已驗證 head `6d87bb61fe9b7d36879e5db74f78e723ee611da1`。合併後 API 回讀確認 merged=true、SHA 與時間；遠端 main 包含合併提交，整個元件及 Memvid workflow 與已驗證 head 內容完全相同。
+
+三項必要 head workflows 全部 success：[Memvid lab CI](https://github.com/fallrising/newclear/actions/runs/41041971729)、[Project contracts](https://github.com/fallrising/newclear/actions/runs/41041971739)、[Workflow static validation](https://github.com/fallrising/newclear/actions/runs/41041971712)。Memvid 兩個 jobs 包含 53 tests、原筆記評估與完整真模型場景、24／1000 持久化控制、M3 品質與新 M4 拒答實驗，artifact 上傳成功。本機 core 的 3 個 not_run 保持原義，完整模型回歸由上述 CI 通過。
+
+[T-016](../../.team/reports/T-016.md) 獨立審查 ACCEPT 實作與實測證據；必要 CI 已解除其剩餘條件。合併前沒有 GitHub review submissions 或未解 threads，不冒稱外部 reviewer approval。原始失敗、固定資料、門檻及負面採用結論均保留。
+
+NR-01–05 完成的是實驗與工程交付。Primary BGE margin 的 heldout 正確回答 1/24、未知誤回 0/24、拒答 47/48；E5 無可行開發策略而 disabled。兩者都不建議直接採用，小樣本零誤回不代表普遍可靠。這個最後 PR 只同步任務板事實，必要 CI 仍照常執行。desk task 保持 in_progress，正式 done／owner 驗收未自動標記；沒有啟動新里程碑、release、tag 或部署。

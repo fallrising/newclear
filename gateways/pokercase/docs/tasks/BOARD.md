@@ -564,3 +564,14 @@ Demand: desk T-0435 / #699. Claim PR292 merged; [MT-1–MT-5](T-0435-measurement
 產品 [PR786](https://github.com/fallrising/newclear/pull/786) source `dd72d5641bae25f2aa575a404902ae91568691ed`、normal merge `1e70824e24161bafacfc1eca33bb31ba7045df5a` at2026-10-29T17:40:39Z。必要兩項 CI、獨立來源／執行審查、11檔遠端內容、source/merge祖先與雙方 Desk-Task trailer 均核對通過。
 
 本表 done 僅記錄已合併的產品步驟。MT-5 的帳本發布、完整備份逐檔核對與本輪工作樹清理，依私人 `t0435-usage-completeness/handoff.json` 最終事實核實，不預先宣稱完成。mainline incomplete、usable_tag none、desk in_progress；原17AC、T1102及AC04/AC17未決範圍不變，#698–702不因本切片自動關閉。完成本輪即停止。
+
+
+## T-0432 — Existing buffered CLI settlement
+
+Demand: desk T-0432 / #698; claim PR318 merged. [Fixed CB-1–CB-5](T-0432-buffered-cli-settlement.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CB-01 | Per-selected-dispatch reservation and original CLI observations | CB-1–CB-2 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T03:58:45Z |
+| CB-02 | Consumer settlement, failure/storage/restart and existing behavior | CB-3–CB-4 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T03:58:45Z |
+| CB-03 | Headless isolated matrix, regressions and delivery evidence | CB-5 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T03:58:45Z |

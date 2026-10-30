@@ -38,6 +38,12 @@ Generic API-key Chat, SIWC forced-SSE Responses, Grok JSON Responses and OpenCod
 
 Direct JSON leaves `first_output_ms` unknown. SIWC measures it only from a meaningful delta observed on arrival, and uses the collector's first terminal snapshot without borrowing missing counters from earlier envelopes. Native Responses preserves accepted bytes, extensions and background status. Buffered configured-rate estimates retain the existing complete-counter/price requirement; named streaming costs remain unknown. These estimates do not establish subscription consumption. [BH-1–BH-5](tasks/T-0432-buffered-http-settlement.md) provides the isolated terminal entry, matrix and remaining boundaries; CLI buffered observation and real provider/client-version verification remain outside this slice.
 
+### Existing buffered CLI observation
+
+Claude Code and Cursor non-stream requests across Chat/Messages/Responses now share the existing per-attempt observers. Raw `claude_code_stream_event_v1` and `cursor_cli_result_v1` name the original CLI formats, independently of the client stream flag. The ledger uses raw events rather than converted response usage. Claude requires all three explicit input/cache buckets for a normalized prompt; Cursor preserves raw buckets and independently known output while normalized prompt remains unknown. Both retain null HTTP status/headers and cost, with separate observed CLI-ready/first-output/total times.
+
+Reservations precede the existing selected dispatch boundary; a preparation failure can therefore retain an attempt without successful CLI input. Fallback/retry attempts remain distinct, and storage refusal never triggers an inference replay. Collection failures settle before producer cancellation can overwrite their classification. Claude tools/live user/saved-session reuse and Cursor text-only admission remain unchanged. This adds no buffered timeout, installed-CLI/version/account verification or capability. [CB-1–CB-5](tasks/T-0432-buffered-cli-settlement.md) defines the fake-CLI/runtime, actual gateway HTTP, recovery and cross-surface evidence.
+
 ### Import
 
 Admin UI → Connections → **Import OAuth**, or:

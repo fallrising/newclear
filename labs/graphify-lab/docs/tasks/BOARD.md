@@ -132,7 +132,14 @@ C-01～C-04 實作、文件、必要驗證與獨立審查已交付；[證據](..
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0446-01 | 精確ID來源回讀 | N-01 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |
-| T-0446-02 | 版本與來源邊界 | N-02 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |
-| T-0446-03 | 修改刷新與讀取競態 | N-03 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |
-| T-0446-04 | 驗證審查與交付 | N-04 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |
+| T-0446-01 | 精確ID來源回讀 | N-01 | done | 2026-10-30T10:52:16Z | 2026-10-30T11:09:51Z | 2026-10-30T11:09:51Z |
+| T-0446-02 | 版本與來源邊界 | N-02 | done | 2026-10-30T10:52:16Z | 2026-10-30T11:09:51Z | 2026-10-30T11:09:51Z |
+| T-0446-03 | 修改刷新與讀取競態 | N-03 | done | 2026-10-30T10:52:16Z | 2026-10-30T11:09:51Z | 2026-10-30T11:09:51Z |
+| T-0446-04 | 驗證審查與交付 | N-04 | done | 2026-10-30T10:52:16Z | 2026-10-30T11:09:51Z | 2026-10-30T11:09:51Z |
+
+N-01～N-04實作、文件、必要驗證與獨立審查已交付；[證據](../evidence/node-source/README.md)／[獨立ACCEPT](../../../../.team/graphify-t0446/review.md)。
+[PR #828](https://github.com/fallrising/newclear/pull/828)於2026-10-30T11:09:51Z合併，commit `570611ea2f18844e9b9ad8852cc234abc56630b0`；main本次21個路徑與reviewed head `68448939ff6381f0481913da5b08adae7cf2dc36`完全一致，已回讀。
+三項CI success：[Graphify真場景及109tests](https://github.com/fallrising/newclear/actions/runs/41045683040)、[llms](https://github.com/fallrising/newclear/actions/runs/41045683045)、[success contracts](https://github.com/fallrising/newclear/actions/runs/41045683025)。本機40workflow static checks通過；workflow未修改。
+新9tests、原100tests、原7場景、M2pilot、M3trial與獨立9tests全部通過。真stdio15requests覆蓋path→exactID來源→edit/stale→refresh→舊index拒絕→新index內容；6組讀取競態不輸出舊正文或診斷。
+保留missing-helper RED、新MCP測試欄位誤用與首輪全套同錯誤、未stage規格造成的index gate失敗；修正後全數重驗通過，無未解must-fix。
+本PR僅關閉技術列；desk/journal另外同步，owner驗收另計。ID不保證跨版本語意身份；expected_index_id比對目前快照，不讀歷史索引；freshness仍是觀測時點。無新依賴、release/deploy或下一里程碑。

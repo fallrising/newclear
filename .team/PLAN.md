@@ -2370,6 +2370,10 @@ BI01–04 adds separate read-only operator CLI over original config/policy/state
 
 BI evidence gate ACCEPT source/local:17missingAPI RED→17GREEN,19CLIexpanded GREEN; initialfullsuite sandbox socketsEPERM/Node abort/Python35errors retained, normal355GREEN. T846REWORK malformedSQLite missing-column traceback reproduced2CLI RED; IndexError normalization plus safe deepJSON rejection, separate quota/cooldown RED fixed. Deepfixture expectedcode initiallyoverstrict, Python3.13 safeSTATE_CORRUPT observed, not claimed recursiontraceback. Final23focusedGREEN/359fullGREEN(64Node295Python), T846focusedACCEPT. Actualoriginalstate CLI18:17:42Z quota4/240/1of24,2ACK/zero pending, state/config/policy/client hashes+mtime unchanged. No network/liveinstall/newcommand/auth/model/paidchanges. Lead inspectedsource/tests/rawlogs, scopes and limits. Five docs/task/diff checks passed; finalreport/privacy then normalGitdelivery/BI-onlyclosure. HL/model/fullmainline remainopen.
 
+## T-0442 P0 mainline — 2026-10-30
+
+Current bounded execution is recorded in [the T-0442 plan](fanz-p0-t0442/PLAN.md). Earlier plans above are preserved.
+
 ## HL resume — 2026-10-30T03:13:47Z
 
 Owner continues and requests actionable blockers/all-done notice. Resume existing T0015/HL under original authorization/cutoff, fresh management/local source and latestBT version provenance. One new assets-session attempt after >16h and fullfresh preflight; on recurring500 stop, preserve/readback and prepare unsent provider inquiry. On success follow original guarded rollout/compensation; no additional grant/Access/runner/bot scope. T847 one native independent public-evidence reviewer, inherited model/effort/permissions, fresh <=1500tokens initial plus one focusedfollowup, five-minute monitored; no private/network/writes/tests/delegation, unknowncost/quota, not OS isolation. Mainline must remain incomplete unless all required evidence actually passes.

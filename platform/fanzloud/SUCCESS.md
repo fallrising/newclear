@@ -4,8 +4,8 @@ purpose: 提供單人 Codex Cloud 任務控制與可追溯事件儲存
 kind: application
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-21
-source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
+reviewed: 2026-10-30
+source_commit: 268305cceceb750be6642e446d63300a46064916
 ---
 
 # Codebox / Fanzloud 成功契約
@@ -18,7 +18,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 [TD](docs/TD.md)的長期目標是 provider-neutral coding platform；已接受的 P0 是私人單 operator BYOS Codex Cloud 控制面。
 P1 event store 與 T040A command planner 是後續獨立切片，尚未形成完整持久 actor/runtime。
 
-保留 [README](README.md) 的 dormant 投入狀態；盤點不恢復開發。
+Owner 於 2026-10-30 明確恢復私人單 operator P0 主線；本輪依 [T008 規格](docs/specs/SPEC-T008-p0-real-browser.md) 補真瀏覽器／Rust 串接及同來源 live Cloud 證據，取代舊 dormant 與前端限定範圍。AC-05 僅規劃下一個最小里程碑，不在本輪實作。
 個人訂閱不得池化、轉售或供第二個人喚醒；不允許 local codex exec/cloud apply 進 P0 authority。
 
 本契約核對的是上述來源版本中的文件與程式。
@@ -31,7 +31,7 @@ P1 event store 與 T040A command planner 是後續獨立切片，尚未形成完
 
 | AC ID | Given / When / Then | 狀態 | 證據或缺少原因 |
 | --- | --- | --- | --- |
-| AC-01 | Given 固定 CLI 與 fake provider，When 瀏覽器建立任務並觀看狀態與 diff，Then HTTP/WS、session 與 trusted runner 依契約運作 | historical | [T007 驗收](docs/acceptance/T007.acceptance.md)、[README](README.md) |
+| AC-01 | Given 固定 CLI 與 fake provider，When 瀏覽器建立任務並觀看狀態與 diff，Then HTTP/WS、session 與 trusted runner 依契約運作 | passed | [T008 真 Chromium／Rust 證據](docs/acceptance/T008.acceptance.md)：一次 submit、WS 更新、頁面 final diff；非 live |
 | AC-02 | Given durable event prefix，When append/replay/save/load 與重啟組合，Then 權威事件不被損壞 cache 掩蓋且錯誤維持 typed | historical | [T030 組合驗收](docs/acceptance/T030.acceptance.md) |
 | AC-03 | Given 三種 typed command 與 v1 狀態，When 決策函式執行，Then 只產生不可變零或一事件 proposal | historical | [T040A 驗收](docs/acceptance/T040A.acceptance.md) |
 | AC-04 | Given 真實 operator Cloud entitlement，When 提交、追蹤與取回 diff，Then 同版 live smoke 能證明 provider 邊界 | pending | [交接](docs/HANDOFF.md)：credential-gated live operator smoke 未跑 |
@@ -44,7 +44,7 @@ T030A/B/C/D store 已獨立接受；P0 session replay 仍只在 process lifetime
 取消本機監看不能保證 provider task 已終止；未知提交只能依既有對帳介面處理。
 實際原生 agent、local sandbox、多使用者認證不是已交付能力。
 
-這次僅新增驗收入口，未改變 runtime 或原有驗收 oracle。
+本輪先執行 AC-01 真 Chromium → 正式 Rust binary → T007 fake executable → 頁面 final diff；再在同版來源執行 AC-04 live gate。歷史 T007 為 wire-equivalent flow，並非真瀏覽器。
 歷史結果若與現行 source 有相關差異，必須補驗而不能直接繼承。
 
 ## 啟動與驗證
@@ -410,3 +410,9 @@ Delivery: Codex (GPT family) implements, an independent Claude review checks the
 ## T-0440 favicon and browser follow-up — 2026-10-29
 
 Scope: [SPEC-T006F](docs/specs/SPEC-T006F-browser-followup.md) AC-F01–F04. Add the embedded favicon without changing CSP, and observe the T-0438 close/spacing fixes in a bounded fresh Chromium run. Native route checks establish the Rust boundary; browser evidence uses the synthetic review fixture. All four AC have passing observations in the [follow-up report](fe-review/tasks/followup/report.md); [independent final acceptance](docs/acceptance/T006F.acceptance.md) is ACCEPT. Historical T-0433/T-0438 evidence stays versioned; mainline AC-04/AC-05 and usable qualification are unchanged.
+
+## T-0442 execution gates — 2026-10-30
+
+[Specification](docs/specs/SPEC-T008-p0-real-browser.md), [call chain and executable entry](docs/quickstart.md), [task board](docs/tasks/BOARD.md).
+AC-01 real-browser run passed with a fake provider; AC-04 not run — credential/environment gate unavailable.
+The official 0.145.0 executable is verified separately; the existing default credential directory does not satisfy private mode 0700 and no Cloud target/private HTTPS setup was supplied. No version or security check is relaxed.

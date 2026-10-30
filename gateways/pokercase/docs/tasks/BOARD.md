@@ -572,6 +572,10 @@ Demand: desk T-0432 / #698; claim PR318 merged. [Fixed CB-1–CB-5](T-0432-buffe
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| CB-01 | Per-selected-dispatch reservation and original CLI observations | CB-1–CB-2 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T04:53:51Z |
-| CB-02 | Consumer settlement, failure/storage/restart and existing behavior | CB-3–CB-4 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T04:53:51Z |
-| CB-03 | Headless isolated matrix, regressions and delivery evidence | CB-5 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T04:53:51Z |
+| CB-01 | Per-selected-dispatch reservation and original CLI observations | CB-1–CB-2 | done | 2026-10-30T03:58:45Z | 2026-10-30T05:01:12Z | 2026-10-30T05:02:03Z |
+| CB-02 | Consumer settlement, failure/storage/restart and existing behavior | CB-3–CB-4 | done | 2026-10-30T03:58:45Z | 2026-10-30T05:01:12Z | 2026-10-30T05:02:03Z |
+| CB-03 | Headless isolated matrix, regressions and delivery evidence | CB-5 | done | 2026-10-30T03:58:45Z | 2026-10-30T05:01:12Z | 2026-10-30T05:02:03Z |
+
+Product [PR817](https://github.com/fallrising/newclear/pull/817), source `e00708759bfdf2a4528b5ca6225bf55d6c3af64c`, normal merge `5c6d55e11e49c807f7f76dd224f56c1f20a597eb` at 2026-10-30T05:01:12Z. Required [Project success contracts](https://github.com/fallrising/newclear/actions/runs/41005470141) and [Pokercase CI](https://github.com/fallrising/newclear/actions/runs/41005469972) succeeded. All12changed files matched source/merge/origin at product readback; source and merge ancestry and Desk-Task:T-0432 trailers passed. Retained normal/native executables each match53committed source/template/Cargo inputs.
+
+The bounded CB slice passed two distinct RED→GREEN proofs,396Rusttests/22groups,129Python,20repository tests,47contracts/8llms navigation,fmt/Clippy/lockedbuilds,45case/9stage actualgateway/fakeCLI and seven prior regressions. Independent source/runtime and prepublication ledger reviews passed. These done rows record merged product steps; journal/desk publication, complete backup and owned-worktree cleanup are subsequent final-handoff gates and are recorded only when verified. Mainline incomplete, usable_tag none, desk in_progress; #698–702 and AC04/17 remain open. No next milestone.

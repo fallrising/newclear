@@ -157,10 +157,11 @@ export async function scheduled(event,env,now=Date.now()){
  const mark=async outcome=>db.prepare(`INSERT OR IGNORE INTO firings(schedule_id,revision,due,outcome) SELECT ?,?,?,? WHERE EXISTS(SELECT 1 FROM schedules WHERE id=? AND revision=? AND enabled=1)`).bind(s.id,s.revision,due,outcome,s.id,s.revision).run();
  if(due!==Math.floor(now/60000)*60000){await mark('skipped_misfire');return;}
  if(due<policy.start||(due-policy.start)%policy.interval!==0)return;
- if(due+120000>policy.end){await mark('skipped_window');return;}
+ if(now+120000>policy.end){await mark('skipped_window');return;}
  const grantRow=await db.prepare('SELECT * FROM grants WHERE id=?').bind(s.grant_id).first();if(!grantRow)return;const p=JSON.parse(grantRow.policy);let ctx;
  try{ctx={principal:p.principal_id,grant_id:s.grant_id,grant:await getGrant(db,s.grant_id,p.principal_id,now)};capability(ctx,'commands:submit','node:health:read');}catch(e){if(!(e instanceof Fault))throw e;await mark('skipped_grant');return;}
- const c={schema_version:'cloudlab.command.v1',schema_minor:0,workspace_id:p.workspace_id,resource_ref:p.resource_ref,recipe_ref:p.recipe_ref,parameters:{max_sample_age_seconds:30},idempotency_key:`schedule-${s.revision}-${due}`,not_before:iso(due),dispatch_deadline:iso(due+60000),execution_deadline:iso(due+120000),timeout_seconds:10,output_budget_bytes:16384};
+ // Keep the due slot as identity; provider delay must not consume dispatch time.
+ const c={schema_version:'cloudlab.command.v1',schema_minor:0,workspace_id:p.workspace_id,resource_ref:p.resource_ref,recipe_ref:p.recipe_ref,parameters:{max_sample_age_seconds:30},idempotency_key:`schedule-${s.revision}-${due}`,not_before:iso(due),dispatch_deadline:iso(now+60000),execution_deadline:iso(now+120000),timeout_seconds:10,output_budget_bytes:16384};
  try{await validateCommand(c,ctx,now);}catch(e){if(!(e instanceof Fault))throw e;await mark(e.code);return;}
  const command_id=crypto.randomUUID(),raw=JSON.stringify(c),v={command_id,revision:1,command:c,delivery:'accepted',cancel_requested:false,external_ref:null,attempt:null,result:null,created_at:iso(now),updated_at:iso(now)};
  try{

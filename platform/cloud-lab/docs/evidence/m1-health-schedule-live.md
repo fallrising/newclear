@@ -1,6 +1,6 @@
 # Health schedule live activation — HL01–04
 
-Owner已明確批准[HS具體啟用／補償方案](../health-schedule.md)。本輪結果是 **PARTIAL_PROVIDER_BLOCKED**：資產session兩次回HTTP500／code10013，停在發布前；沒有上傳新版Worker、續scheduler grant、修改schedule row或啟用Cron。不是新一輪等待owner批准，也不是OAuth／自動批准審查拒絕。
+Owner已明確批准[HS具體啟用／補償方案](../health-schedule.md)。2026-10-29首輪結果是 **PARTIAL_PROVIDER_BLOCKED**：資產session兩次回HTTP500／code10013，停在發布前；沒有上傳新版Worker、續scheduler grant、修改schedule row或啟用Cron。不是新一輪等待owner批准，也不是OAuth／自動批准審查拒絕。2026-10-30依原批准接續後資產session已恢復，但首次真實命令派送前過期，已停用Cron並補償回退；最新狀態為 **PARTIAL_DISPATCH_WINDOW_FAILED_COMPENSATED**，詳見下方接續證據；以下首輪紀錄保留，不作為最新部署狀態。
 
 | AC | 實際驗收 | 狀態 |
 | --- | --- | --- |
@@ -48,3 +48,36 @@ Owner已明確批准[HS具體啟用／補償方案](../health-schedule.md)。本
 任務板T-0015保持in_progress、end空白，明示等待provider恢復。此次Git交付只保存部分執行與保留證據，不關閉HL01–04。
 
 [T837獨立審查](../../../../.team/reports/T-837.md)接受部分狀態與保留證據的表述，不接受為完成部署。Reviewer僅讀公開指定文件及主導去識別摘要，未查raw/live；主導補明一秒期限差與實際Cron更新前傳播餘裕，並保存未執行的operator v2供下次fresh審查。
+
+## 2026-10-30接續範圍
+
+Owner繼續開發並要求明示阻擋與全任務完成狀態。沿用原HL01–04批准與截止，先fresh核對最新BT後部署／D1及原Access／服務，再只做一次新資產session嘗試以觀測provider是否恢復。距原失敗已逾16小時；不把時間經過當成恢復證據。若再次500，停止重試、回讀保全並準備供owner向provider查詢的去敏資料，不自行發送issue或私人帳號資料。若成功，沿原順序fresh規劃與scheduler-only CAS／原Worker發布／Cron啟用／實際觸發驗證，既有bot／runner／Access不延期；操作前不得重用舊時間、JWT或秘密快照。
+
+
+### 本次實際部署與啟用
+
+2026-10-30T03:13:50Z fresh預檢通過：六份固定source逐檔hash相符；最新BT後原100%版本及settings、四個grants、五筆commands／active0、disabled schedule、零firings、Cron空均符合前態。原runner與bot self及resident通過；runner保守停止時間仍2026-11-05T07:24:25Z，bot截止2026-10-30T18:00:27Z，Access截止2026-11-05T07:43:27Z。沒有把BT前舊secret／版本當成保留基準。
+
+本次唯一assets-upload-session請求回200，回傳兩個bucket，依固定manifest上傳所需bytes並取得completion JWT；JWT與原始收據只保存在私人目錄。這表示此次上傳成功，不證明先前500的服務端根因已查明。
+
+資產完成後再次fresh核對版本／settings／D1／service及完整grant來源，再執行原scheduler-only CAS revision1→2，保留scope／principal／capabilities，截止2026-11-05T07:24:26Z。原disabled schedule CAS revision1→2，發布三modules／三assets與同revision policy，沿用當前secret bindings；100%新版本及全部runtime settings回讀相符，僅明示provider deployment annotations變化。沒有重用BT前MACHINE_KEYS。
+
+2026-10-30T03:19:19Z完成schedule enable與原Worker Cron回讀：`*/15 * * * *`，HEALTH_SCHEDULE revision2／interval15／not_before2026-10-30T03:45:00Z／expires_at2026-11-05T07:24:25Z。實際Cron寫入前再次通過>=15分鐘餘裕，完成時仍餘1540秒。補償以此次fresh BT後版本為基準，未觸發回退。
+
+03:20後九項管理回讀及實際機器GET /api/health-schedule200通過：狀態waiting、next_due為03:45、last_firing／latest_result空，API的cron_verified=false誠實保留（Cron存在由管理回讀證明）。五筆原commands、四筆原journal及bot ledger／policy／client/config不變；原runner同PID、NRestarts0且self／resident正常，其他roles與Access不延期。三個匿名入口302到Access登入；不等於真人登入／資產畫面驗收。HMAC self與API可寫nonce，不宣稱D1零寫入。
+
+這次保留檢查末尾因新產生的operator Python快取目錄mode0775失敗；其私人父目錄一直0700，快取檔0600。保留失敗並只收緊該目錄至0700後完成權限核對，沒有刪資料、重播部署或重啟runner。03:23:53Z保存接續核對成功，尚未有排程command。
+
+### 首次真實觸發
+
+2026-10-30T03:45:23Z由provider建立due03:45的一筆命令；first observation從零firings到一筆accepted，03:46:00Z原runner的claim把它標為expired_before_dispatch。due-based dispatch_deadline為03:46:00、execution_deadline03:47:00，provider延遲23秒後只剩37秒派送時間。六次有界只讀觀測後停止，沒有手工觸發或重播。該筆attempt／external_ref／result全為null，原journal沒有它的execution；不能稱為健康檢查成功。HL03未通過。
+
+### 已執行補償與最終保全
+
+fresh版本／settings／D1／Cron確認後，CAS停用schedule並提高revision2→3、移除本次Cron；以新CAS將scheduler還原原過期policy，revision2→3而不倒退。保留新firing及expired command，active0，沒有collector重跑。原BT後版本100%回退成功。
+
+回退後初次settings相等檢查失敗：GET script/settings仍帶最後上傳版本的HEALTH_SCHEDULE與provider annotations。沒有重播回退或貿然PATCH secrets；另查實際active version，確認ID與原BT baseline相同，該版本六個bindings逐欄等於原設定。latest-upload settings僅多inactive revision2政策，D1已disabled revision3；其餘runtime設定逐欄相同。公開證據保留這個視圖差異，不宣稱所有settings JSON完全相等。
+
+2026-10-30T03:51:05Z九項管理回讀與原runner／bot self、resident、原API及三個匿名入口核對完成：Cron空、schedule disabled revision3、scheduler原過期policy revision3、其他三個grants及Access設定／期限不變；原五commands與四journal rows保留，新一筆expired command／firing保留，沒有新journal execution。原runner同PID／NRestarts0；bot config／政策／client／ledger hash不變，原API200能讀取該expired結果，匿名302仍受Access保護。未延長權限或新增付費。
+
+[HW01–04修正契約](../schedule-window.md)針對此次時間窗口缺陷補RED/GREEN與獨立審查；source修正及未來新窗口驗證不改寫這次失敗。HL保持未完成，完整主線亦未完成。

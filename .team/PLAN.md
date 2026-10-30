@@ -2409,3 +2409,14 @@ oracles and source; all7frozen hashes and185input hashes stable. Root final nati
 vet/build exit0, web30gate/API lint and document contracts pass. T-003 independent ACCEPT with
 sharedoverflow evidence wording clarified. All originalRed/environment/superseded137 logs retained.
 This accepts local M1a only; exact-head CI/normal merge/readback and board/desk closure remain.
+
+## HL resume — 2026-10-30T03:13:47Z
+
+Owner continues and requests actionable blockers/all-done notice. Resume existing T0015/HL under original authorization/cutoff, fresh management/local source and latestBT version provenance. One new assets-session attempt after >16h and fullfresh preflight; on recurring500 stop, preserve/readback and prepare unsent provider inquiry. On success follow original guarded rollout/compensation; no additional grant/Access/runner/bot scope. T847 one native independent public-evidence reviewer, inherited model/effort/permissions, fresh <=1500tokens initial plus one focusedfollowup, five-minute monitored; no private/network/writes/tests/delegation, unknowncost/quota, not OS isolation. Mainline must remain incomplete unless all required evidence actually passes.
+
+HL real firing failed: admitted03:45:23Z but due-anchored dispatch deadline03:46:00Z, originalrunner saw expired_before_dispatch with no attempt. Approved compensation executed; active originalBT version and sixbindings match, latest-upload settings retain inactiveHS binding; no redundant settings mutation. Continue HW01–04 bounded source repair under docs/schedule-window.md: handler-relative60/120second budgets, due identity/dedupe preserved, actualpolicy cutoff retained. Lead owns RGR/source; T848 fresh native read-only source reviewer <=1500tokens initial+onefollowup,5minutes monitored, inherited settings, no writes/private/network/delegation. Original15minute/authority/no-paid bounds remain.
+
+HW source evidence gate ACCEPT: actualfailure safelycompensated03:51:05Z, T847PARTIAL/ACCEPT truthfulpreservation only. RED14=12pass2fail, callbacknow60/120 pluspolicyguardfix→14GREEN; full67Node+295Python362GREEN. T848sourceACCEPT; no renderer/runner/APIupperbound/schema/authscope change. Lead reviewedactualdiff/logs; normalPR/CI/merge/readback andfixedcandidate precede renewedlivewindow. HLremainsopen.
+
+M1a integration: concurrent main3afa8345 merged normally; append-only root PLAN conflict
+resolved retaining both HAI and unrelated HL entries. HAI product/runtime inputs unchanged.

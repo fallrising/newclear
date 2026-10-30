@@ -36,7 +36,7 @@ MCP client 的 command 用此 `.venv/bin/python` 絕對路徑，cwd 設為本 la
 .venv/bin/python -m graphify_lab.workspace --source ../../tools/codex-usage serve-live
 ```
 
-Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`。此入口只提供以下五個工具，不代理其他上游工具：
+Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`。此入口只提供以下六個工具，不代理其他上游工具：
 
 | 工具 | 輸入與用途 |
 | --- | --- |
@@ -45,6 +45,7 @@ Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`�
 | `query_graph` | question、可選 budget（1～32000，預設1000）、context；呼叫真 Graphify CLI。 |
 | `source_excerpt` | exact label、可選 file、lines（1～100，預設20）；回讀有界來源。 |
 | `calls_path` | source/target 為exact ID或唯一exact label；只沿有向 calls 邊查詢。 |
+| `change_impact` | target 為exact ID或唯一exact label；反向尋找 caller，回傳來源、正向 calls 證據與 Python 測試線索。 |
 
 先查 `workspace_status`；來源或設定變動後，讀取工具會以 MCP `isError` 回覆並省略查詢正文，須呼叫 `refresh_workspace`。
 刷新失敗不能視為成功：查狀態，修復原因，再明確刷新。新結果帶 index_id、source fingerprint、context／graph digest；舊圖仍留在cache。
@@ -56,6 +57,20 @@ Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`�
 預設 max_hops=32、max_visited=10000，上限分別100與100000；visited包含起點，同節點0-hop有效。
 路徑保留節點的source指標與原calls邊，方向為source→target；同名必須改用ID，contains不參與。
 靜態calls仍不代表完整執行語義。更多結果與驗收見[M4規格](milestones/live-workspace.md)。
+
+## 修改影響與測試線索
+
+對 `change_impact` 傳入 `{"target":"leaf()"}`，可用 query 結果中的 exact ID 解開同名歧義。
+結果的 `callers` 每筆有原 `node`（source_file/source_location）、`hops`、`direct`、`path` 與 `edges`。
+遍歷方向是反向找 caller；證據 path/edges 仍依 caller→target 排列，contains 不參與。
+`test_hints` 引用 caller ID，僅當 Python `test_` 符號位於 test/tests 目錄或 test_*.py/*_test.py 時提供命名理由；這不是實際測試發現或完整測試選擇器。
+可以再用 `source_excerpt` 讀回 caller 的來源與行號，核對測試是否適用。
+
+可選 max_hops=32（1～100）、max_visited=10000（1～100000，含target）、max_results=100（1～1000，不含target）。
+`complete` 僅表示走完圖中可達的 calls；`limit_reached` 和 `reasons` 表示仍有 caller 未搜尋，已找到的結果仍可核對。
+空 callers/test_hints 不代表沒有執行時影響或不需測試；圖可能遺漏邊，實測雙向互呼只保留一個方向。
+不支援其他語言的測試命名推論，不執行被索引程式；界限不限制整圖讀取與驗證成本。
+本工具沿用前後 freshness 檢查、成功 provenance 與明確刷新流程；詳見 [M5 規格](milestones/change-impact.md)。
 
 ## 選擇來源與資料位置
 

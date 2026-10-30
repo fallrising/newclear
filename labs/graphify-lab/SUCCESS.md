@@ -62,3 +62,5 @@ M2 本機結果：[開發任務試點證據](docs/evidence/development-pilot/REA
 M3：[T-0439 本機工作目錄接入](docs/milestones/local-workspace.md) 已實作並完成 W-01～W-04 本機驗證；[本輪證據](docs/evidence/local-workspace/README.md) 記錄 56 tests、原7場景、M2 replay 及新 workspace trial。W-05 的 CI／合併回讀與最終狀態以[任務板](docs/tasks/BOARD.md)為準；既有里程碑證據保持其版本與限制。
 
 M4：[圖更新與有向呼叫路徑](docs/milestones/live-workspace.md)；L-01～L-05 的實作、驗證與交付進度見[任務板](docs/tasks/BOARD.md)，不回溯改動 M3 證據。
+
+M5：[修改影響與測試線索](docs/milestones/change-impact.md)；I-01～I-05 進度與交付見[任務板](docs/tasks/BOARD.md)。

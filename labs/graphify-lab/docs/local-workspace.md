@@ -58,7 +58,7 @@ MCP client 的 command 用此 `.venv/bin/python` 絕對路徑，cwd 設為本 la
 .venv/bin/python -m graphify_lab.workspace --source ../../tools/codex-usage serve-live
 ```
 
-Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`。此入口只提供以下六個工具，不代理其他上游工具：
+Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`。此入口只提供以下七個工具，不代理其他上游工具：
 
 | 工具 | 輸入與用途 |
 | --- | --- |
@@ -66,6 +66,7 @@ Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`�
 | `refresh_workspace` | 無參數；明確重用或建立索引，驗證成功才切換；失敗保留舊 pointer。 |
 | `query_graph` | question、可選 budget（1～32000，預設1000）、context；呼叫真 Graphify CLI。 |
 | `source_excerpt` | exact label、可選 file、lines（1～100，預設20）；回讀有界來源。 |
+| `source_node` | exact node_id、可選 lines（1～100，預設20）、expected_index_id；精確讀回節點來源並確認索引版本。 |
 | `calls_path` | source/target 為exact ID或唯一exact label；只沿有向 calls 邊查詢。 |
 | `change_impact` | target 為exact ID或唯一exact label；反向尋找 caller，回傳來源、正向 calls 證據與 Python 測試線索。 |
 
@@ -86,7 +87,7 @@ Client 的 command/cwd 與前節相同，最後一個 args 改為 `serve-live`�
 結果的 `callers` 每筆有原 `node`（source_file/source_location）、`hops`、`direct`、`path` 與 `edges`。
 遍歷方向是反向找 caller；證據 path/edges 仍依 caller→target 排列，contains 不參與。
 `test_hints` 引用 caller ID，僅當 Python `test_` 符號位於 test/tests 目錄或 test_*.py/*_test.py 時提供命名理由；這不是實際測試發現或完整測試選擇器。
-可以再用 `source_excerpt` 讀回 caller 的來源與行號，核對測試是否適用。
+可以再用 `source_node` 傳入 caller 的 ID 與結果的 index_id，讀回來源與行號，核對測試是否適用。
 
 可選 max_hops=32（1～100）、max_visited=10000（1～100000，含target）、max_results=100（1～1000，不含target）。
 `complete` 僅表示走完圖中可達的 calls；`limit_reached` 和 `reasons` 表示仍有 caller 未搜尋，已找到的結果仍可核對。
@@ -113,3 +114,20 @@ make workspace-trial RUN_DIR=work/workspace-first-run
 試跑真實 `tools/codex-usage` 的三層函式鏈、共享索引與 MCP；只在暫存來源副本驗 rename／索引失效，不修改或執行該元件。
 RUN_DIR 必須是新目錄。結果為 `report.json`，保留正誤檢查、來源 fingerprint、時間與未知 provider 用量；不宣稱通用速度／token 節省。
 [本輪 AC](milestones/local-workspace.md)；最新結果由任務板連到對應證據。
+
+## 按節點 ID 讀回來源
+
+同一檔案可能有兩個相同 label，例如不同 class 的 `.run()`。使用 query/path/impact 回傳的節點 ID，避免同名歧義：
+
+```sh
+.venv/bin/python -m graphify_lab.workspace --source /path/to/project source-node NODE_ID --lines 20 --expected-index-id INDEX_ID
+```
+
+Live MCP 對應 `source_node`，參數為 `{"node_id":"NODE_ID","lines":20,"expected_index_id":"INDEX_ID"}`；INDEX_ID 替換成先前結果中的64位小寫hex index_id。
+只接受 exact ID，不退回 label；原 `source`／`source_excerpt` 仍依 label 查詢，同名時拒絕。
+成功回覆含 `status=ok`、五項 `index` provenance，以及 `result.node/path/line/content`。CLI成功exit0；錯誤exit2且stdout空，MCP錯誤isError且沒有result。
+
+`expected_index_id` 可省略；提供時要求當前有效快照與先前結果一致，不會載入歷史索引。
+CLI每次開目前索引；來源編輯後，即使節點 ID 相同，舊index_id仍會被拒絕。MCP先拒絕stale，明確refresh後仍須使用新index_id。
+節點 ID 不保證跨版本的語意身份。非法參數在CLI建立cache前拒絕；格式正確但版本不符可能在開啟目前索引後才確定。
+保留既有來源範圍、symlink、行號及前後freshness檢查；詳見[M7規格](milestones/node-source.md)。

@@ -66,3 +66,5 @@ M4：[圖更新與有向呼叫路徑](docs/milestones/live-workspace.md)；L-01�
 M5：[修改影響與測試線索](docs/milestones/change-impact.md)；I-01～I-05 進度與交付見[任務板](docs/tasks/BOARD.md)。
 
 M6：[命令列分析入口](docs/milestones/cli-analysis.md)；C-01～C-04 與交付進度見[任務板](docs/tasks/BOARD.md)。
+
+M7：[節點來源與索引確認](docs/milestones/node-source.md)；N-01～N-04 與交付進度見[任務板](docs/tasks/BOARD.md)。

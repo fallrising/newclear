@@ -39,7 +39,7 @@ class LiveMCPJourney(unittest.IsolatedAsyncioTestCase):
                     async with ClientSession(read, write, read_timeout_seconds=timeout) as session:
                         await session.initialize()
                         names = {t.name for t in (await session.list_tools()).tools}
-                        self.assertEqual(names, {'workspace_status', 'refresh_workspace', 'query_graph', 'source_excerpt', 'calls_path', 'change_impact'})
+                        self.assertEqual(names, {'workspace_status', 'refresh_workspace', 'query_graph', 'source_excerpt', 'calls_path', 'change_impact', 'source_node'})
                         observations = []
                         async def call(name, args=None, error=False):
                             response = await session.call_tool(name, args or {})

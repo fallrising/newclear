@@ -13,7 +13,7 @@ from .__main__ import graph_command
 from .call_paths import calls_path
 from .change_impact import change_impact
 from .live_state import LiveWorkspace, LiveWorkspaceError
-from .source import node_at, source_excerpt
+from .source import node_at, source_excerpt, source_node, validate_source_node_options
 
 
 def _schema(properties=None, required=()):
@@ -29,6 +29,9 @@ TOOLS = [
                input_schema=_schema({'question': STRING, 'budget': {'type':'integer','minimum':1,'maximum':32000}, 'context':STRING}, ['question'])),
     types.Tool(name='source_excerpt', description='Read bounded source for one exact label; fail if stale.',
                input_schema=_schema({'label':STRING, 'file':STRING, 'lines':{'type':'integer','minimum':1,'maximum':100}}, ['label'])),
+    types.Tool(name='source_node', description='Read bounded source for one exact node ID, optionally requiring a prior index ID; fail if stale.',
+               input_schema=_schema({'node_id':STRING, 'lines':{'type':'integer','minimum':1,'maximum':100},
+                                     'expected_index_id':{'type':'string','pattern':'^[0-9a-f]{64}$'}}, ['node_id'])),
     types.Tool(name='calls_path', description='Find a bounded directed calls-only path using exact ID or unique exact label.',
                input_schema=_schema({'source':STRING,'target':STRING,'max_hops':{'type':'integer','minimum':1,'maximum':100},
                                      'max_visited':{'type':'integer','minimum':1,'maximum':100000}}, ['source','target'])),
@@ -56,6 +59,8 @@ def _validate(name: str, args: dict) -> None:
         path = PurePosixPath(args['file'])
         if path.is_absolute() or '..' in path.parts or '\\' in args['file']:
             raise ValueError('file must be a relative source path without traversal')
+    if name == 'source_node':
+        validate_source_node_options(args['node_id'], args.get('lines', 20), args.get('expected_index_id'))
 
 
 def dispatch(state: LiveWorkspace, name: str, args: dict) -> dict:
@@ -78,6 +83,8 @@ def dispatch(state: LiveWorkspace, name: str, args: dict) -> dict:
         elif name == 'source_excerpt':
             node = node_at(graph, args['label'], args.get('file'))
             value = source_excerpt(Path(index['source']), node, args.get('lines', 20))
+        elif name == 'source_node':
+            value = source_node(index, args['node_id'], args.get('lines', 20), args.get('expected_index_id'))
         elif name == 'change_impact':
             value = change_impact(json.loads(graph.read_text()), args['target'],
                                   max_hops=args.get('max_hops', 32), max_visited=args.get('max_visited', 10000),

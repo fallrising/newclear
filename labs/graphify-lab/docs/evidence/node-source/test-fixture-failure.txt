@@ -1,0 +1,60 @@
+test_N01_same_file_same_label_uses_exact_id_and_provenance (test_node_source.NodeSource.test_N01_same_file_same_label_uses_exact_id_and_provenance) ... ok
+test_N02_adversarial_source_metadata_is_rejected (test_node_source.NodeSource.test_N02_adversarial_source_metadata_is_rejected) ... ok
+test_N02_expected_index_mismatch_has_no_source (test_node_source.NodeSource.test_N02_expected_index_mismatch_has_no_source) ... ok
+test_N02_help_and_default_reader (test_node_source.NodeSource.test_N02_help_and_default_reader) ... ok
+test_N02_invalid_options_rejected_before_cli_cache (test_node_source.NodeSource.test_N02_invalid_options_rejected_before_cli_cache) ... ok
+test_N02_no_label_fallback_unknown_and_duplicate_ids (test_node_source.NodeSource.test_N02_no_label_fallback_unknown_and_duplicate_ids) ... ok
+test_N03_cli_guard_rejects_old_index_even_when_node_id_survives (test_node_source.NodeSource.test_N03_cli_guard_rejects_old_index_even_when_node_id_survives) ... ok
+test_N03_cli_read_races_discard_success_and_error_diagnostics (test_node_source.NodeSource.test_N03_cli_read_races_discard_success_and_error_diagnostics) ... ok
+test_N03_exact_node_edit_refresh_and_index_guard (test_node_source_mcp.NodeSourceMCP.test_N03_exact_node_edit_refresh_and_index_guard) ... Executing <Task pending name='Task-2' coro=<NodeSourceMCP.test_N03_exact_node_edit_refresh_and_index_guard() running at <worktree>/labs/graphify-lab/tests/test_node_source_mcp.py:30> cb=[_run_until_complete_cb() at /usr/lib/python3.12/asyncio/base_events.py:182] created at /usr/lib/python3.12/asyncio/runners.py:100> took 0.399 seconds
+ERROR
+
+======================================================================
+ERROR: test_N03_exact_node_edit_refresh_and_index_guard (test_node_source_mcp.NodeSourceMCP.test_N03_exact_node_edit_refresh_and_index_guard)
+----------------------------------------------------------------------
+  + Exception Group Traceback (most recent call last):
+  |   File "/usr/lib/python3.12/unittest/async_case.py", line 90, in _callTestMethod
+  |     if self._callMaybeAsync(method) is not None:
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/unittest/async_case.py", line 112, in _callMaybeAsync
+  |     return self._asyncioRunner.run(
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+  |     return future.result()
+  |            ^^^^^^^^^^^^^^^
+  |   File "<worktree>/labs/graphify-lab/tests/test_node_source_mcp.py", line 30, in test_N03_exact_node_edit_refresh_and_index_guard
+  |     async with stdio_client(params,errlog=log) as (read,write):
+  |   File "/usr/lib/python3.12/contextlib.py", line 231, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "<worktree>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 201, in stdio_client
+  |     async with anyio.create_task_group() as tg:
+  |   File "<worktree>/labs/graphify-lab/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "<worktree>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 205, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "<worktree>/labs/graphify-lab/tests/test_node_source_mcp.py", line 32, in test_N03_exact_node_edit_refresh_and_index_guard
+    |     async with ClientSession(read,write,read_timeout_seconds=timeout) as session:
+    |   File "<worktree>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/session.py", line 514, in __aexit__
+    |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "<worktree>/labs/graphify-lab/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+    |     raise BaseExceptionGroup(
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "<worktree>/labs/graphify-lab/tests/test_node_source_mcp.py", line 46, in test_N03_exact_node_edit_refresh_and_index_guard
+      |     self.assertEqual(path['result']['nodes'][0]['id'],nodes[0]['id'])
+      |                      ~~~~~~~~~~~~~~^^^^^^^^^
+      | KeyError: 'nodes'
+      +------------------------------------
+
+----------------------------------------------------------------------
+Ran 9 tests in 9.864s
+
+FAILED (errors=1)

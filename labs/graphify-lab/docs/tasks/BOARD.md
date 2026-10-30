@@ -125,3 +125,14 @@ C-01～C-04 實作、文件、必要驗證與獨立審查已交付；[證據](..
 三項CI success：[Graphify真場景及100tests](https://github.com/fallrising/newclear/actions/runs/41039639742)、[llms](https://github.com/fallrising/newclear/actions/runs/41039639938)、[success contracts](https://github.com/fallrising/newclear/actions/runs/41039639852)。本機40workflow static checks通過；未改workflow，無獨立workflow CI觸發。
 新8tests、原92tests、原7場景、M2pilot、M3trial與獨立8tests均通過；保留missing-command RED與證據尾端空白gate修正，無未解must-fix。
 本PR僅關閉技術列；desk/journal另外同步，owner驗收另計。CLI exit5仍有部分JSON，腳本需明確處理；static calls／Python hints與觀測時點freshness限制保留。無新依賴、release/deploy或下一里程碑。
+
+## T-0446 — M7 節點來源與索引確認
+
+[desk](https://github.com/fallrising/desk/blob/main/tasks/T-0446-graphify-node-source/task.md)／[規格](../milestones/node-source.md)。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0446-01 | 精確ID來源回讀 | N-01 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |
+| T-0446-02 | 版本與來源邊界 | N-02 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |
+| T-0446-03 | 修改刷新與讀取競態 | N-03 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |
+| T-0446-04 | 驗證審查與交付 | N-04 | in_progress | 2026-10-30T10:52:16Z | | 2026-10-30T10:52:16Z |

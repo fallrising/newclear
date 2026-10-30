@@ -144,8 +144,10 @@ directory symlink 不支援，越界的 file symlink 拒絕。
 若一般沙箱的 MCP initialize 逾時，請檢查它是否允許 stdio 子程序／事件迴圈。此次相同原生 Graphify／MCP 在允許的執行環境成功，未修改上游或降級 SDK。
 元件 CI 在根目錄 [graphify-lab-ci.yml](../../.github/workflows/graphify-lab-ci.yml)；另須通過 repo index／workflow gate。
 
-開發時可用 `workspace ... serve-live` 取得過期檢查、明確刷新與 calls-only 路徑；六個 MCP 工具與限制見[本機工作目錄](docs/local-workspace.md)。既有 `serve` 保持固定快照。
+開發時可用 `workspace ... serve-live` 取得過期檢查、明確刷新與 calls-only 路徑；七個 MCP 工具與限制見[本機工作目錄](docs/local-workspace.md)。既有 `serve` 保持固定快照。
 
 - [修改影響與測試線索](docs/milestones/change-impact.md)：serve-live 的 change_impact、calls 證據與有界 Python 測試 hints。
 
 - [命令列分析](docs/milestones/cli-analysis.md)：workspace calls-path／impact 的JSON、退出碼及freshness契約。
+
+- [節點來源與索引確認](docs/milestones/node-source.md)：CLI source-node／live MCP source_node，exact ID回讀及可選index_id保護條件。

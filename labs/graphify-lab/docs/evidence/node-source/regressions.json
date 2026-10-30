@@ -1,0 +1,50 @@
+[
+  {
+    "run": "m7-full",
+    "status": "passed",
+    "passed": 7,
+    "failed": 0,
+    "raw_report_sha256": "124fc1fae6022d15636839be0f93fd3ea15d897393c63da5a80651eb1e6f1449",
+    "input_sha256": {
+      "graphify_lab/__init__.py": "7818a2e71bc37b4db68f9ba2cf0011ca1ca59032000a71ba5dc1022bf2434d7c",
+      "graphify_lab/__main__.py": "84f41856c87b1970c6cd28d069032a21a48940217576b48f12ff49f8195bb5bb",
+      "graphify_lab/cache.py": "9b3c601c5a063c42c1cf71c2ae3d1a89552cdaf4c81209bb5f07f52797174ed3",
+      "graphify_lab/call_graph.py": "514f115e8678e63acb05061c997404ec25a48af1df8841b6e9da306c100ac3cf",
+      "graphify_lab/call_paths.py": "eb6a90d9f8262a27eb4fb10b33a654bf5af0838f77a7a0d2c7b6b0502e788a5e",
+      "graphify_lab/change_impact.py": "3d3266475dd1dbf38c58ece75ccd4dfed74a84490806a5c104ae19ae785dd5fb",
+      "graphify_lab/live_mcp.py": "67ba9240cb7a676223e335cd9002597a9daf23caec44c56a6c49d120ee8ff3db",
+      "graphify_lab/live_state.py": "c4f93081887f9bceaf30633746242c817f65222834dff1a2777b2afadecb28c1",
+      "graphify_lab/pilot.py": "9a6a0240fc32d8cf6d0f9561f9f7739faef3813fefb9d767c75067b05733acc1",
+      "graphify_lab/scenarios.py": "0ea0830765ff4deb3d1ef3c785262f30bf53d7d6a89635d94c37bd519cf41b56",
+      "graphify_lab/source.py": "4bb8da7013029191d7f2e8f9641fab17fe96394003140ba5b53effe95e3fb615",
+      "graphify_lab/workspace.py": "59aff70742afd8483bf415b5d236516642c44783dcc10154eba8dc18b9c1f92f",
+      "graphify_lab/workspace_trial.py": "b613d7133d1c579ac0c7640b0ab831f7231cd94fb0af7335a32a72d2538d8813",
+      "requirements.lock": "e1017e7f7f0aa7c8432dae8c241f2516233d203e2996db2a04855a72f45e9a9e",
+      "references.lock.json": "2cb567f26a4399c0e7eee062b1f708204e3ef5d87462483881b42b256113fabd",
+      "fixtures/README.md": "40a45c5a9d78327e4be2c19a6d91b61fad3438f38f78f4c7fc9afe0190549a2c",
+      "fixtures/python-shop/api.py": "7136740c77a40b7ef6ad47949563dab725ed0ff21612f42e59e371ba610c099d",
+      "fixtures/python-shop/orders.py": "a233bfabda56e27f32c32db03d223b7223576125766fa57d99ff5d797d2d18b9",
+      "fixtures/python-shop/pricing.py": "bbf781e53f164f3cb8c6433c023bfa8dc72fb6c1612ceff9571ab8179db0c635",
+      "fixtures/python-shop/tests/test_orders.py": "3ee78f1d9d9f438329c0e131b5cba868ca936da38ccda1ca7c222e7be2d4fe22",
+      "fixtures/ts-consumer/app.ts": "0a9571af290a51fab0a4c57dd2491b5e052627f7bf51cc1ca540b4664116c4e2",
+      "fixtures/ts-duplicate/invoice.ts": "acbf5f7b0a66fb955af8e7574af19d1b8bfce44e5a7be005a3e5839f6358a132",
+      "fixtures/ts-sdk/invoice.ts": "4f5810e487b2a0ca702a3bb1a2e8a1de07b0c91cd7945a0accb22039ae95c1d4"
+    }
+  },
+  {
+    "run": "m7-pilot",
+    "status": "passed",
+    "passed": null,
+    "failed": null,
+    "raw_report_sha256": "91857effefe9c155ad2a73d346fbbada656d0601ae05d539e7a2d3ca8c21f750",
+    "input_sha256": null
+  },
+  {
+    "run": "m7-workspace",
+    "status": "passed",
+    "passed": null,
+    "failed": null,
+    "raw_report_sha256": "1a654723297028d05f8679491cd5a4ecc3c6a545e7534a3cc7d47cfd7132ca61",
+    "input_sha256": null
+  }
+]

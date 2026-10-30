@@ -288,8 +288,10 @@ UI and providers require later assignments. No runtime or API exposes this found
 ## Restore invariant
 
 A resumed agent MUST verify the branch/baseline and actual diff before trusting this handoff. If the
-files disagree, the archived ledger at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/PLAN.md` plus Git/SQLite authority rules win; record the discrepancy rather
-than silently repairing history.
+files disagree, current bootstrap work status comes from `docs/tasks/BOARD.md`, alongside accepted
+Git/SQLite authority rules. The archived product PLAN preserves historical acceptance evidence only;
+root `.team/PLAN.md` records routing/review rationale. Record discrepancies without repairing history.
+Owner-approved C01 (2026-10-30) aligns this precedence; no SQLite migration is claimed.
 
 
 2026-10-29 M0 接手依據：[baseline report](evidence/m0-baseline-20261029.md)。新一輪 pinned backend/web 與真實 ConnectedApp foundation 已跑；完整產品仍未完成，M1a 新契約仍待接受。

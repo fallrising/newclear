@@ -2373,3 +2373,24 @@ BI evidence gate ACCEPT source/local:17missingAPI RED→17GREEN,19CLIexpanded GR
 ## T-0442 P0 mainline — 2026-10-30
 
 Current bounded execution is recorded in [the T-0442 plan](fanz-p0-t0442/PLAN.md). Earlier plans above are preserved.
+
+## HAI M1a / T-0339 — 2026-10-30T03:58:51Z
+
+Owner explicitly approved C01/C02/C06 and requested latest design authority. Remote HAI tree remains
+PR799 at baseline6b7bf17c; no newer HAI main changes/open designPRs. Deliver owner-approved authority
+and preflight wording plus one authenticated snapshot-only completion preparation API, following
+products/hai-taskboard/docs/sdd/completion-preparation.md. Root owns specs/OpenAPI/BOARD/acceptance/Git;
+bounded native backend writer owns only named Go paths in its own worktree after contract review;
+independent reviewer owns report only. Product BOARD is sole current status. No M1b/M1c/M2/UI,
+new dependencies, real providers, release/deploy or archived-ledger edits.
+Estimate60–90root active minutes plus bounded writer30minutes/reviewer10minutes each contract/final;
+20minute progress checkpoints; max2reasoned diagnoses after initial failure; each command timeout;
+CI each round <=20minutes with resumable state on timeout. Provider requests/tokens/cost and total
+roottool counts unknown/null; local worker launches and command evidence recorded separately.
+Initial SSH sync stalled (stopped); SSH443 refused untrusted host key (not bypassed); existing HTTPS
+authentication succeeded using per-command config, no global change. Native tool guidelines read.
+
+M1a contract gate: T-001 independent ACCEPT including OpenAPI; fixed-digest Redocly lint0warnings,
+project47/index8 pass. Four named HTTP skeletons compiled404 Red and policy-classification Red
+retained by T-002 before production edits. Owner approval already covers precise C01/C02/C06;
+no additional approval needed. Snapshot semantics and all historical product gaps remain intact.

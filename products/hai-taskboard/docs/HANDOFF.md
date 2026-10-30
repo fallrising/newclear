@@ -300,3 +300,13 @@ Owner-approved C01 (2026-10-30) aligns this precedence; no SQLite migration is c
 were unchanged since M0 closeout; the current [completion preparation contract](sdd/completion-preparation.md)
 and [evidence](evidence/m1a-completion-preparation-20261030.md) now define the bounded slice.
 Read BOARD for live delivery status; the preceding2026-10-29 waiting note is historical.
+
+## M1b continuation — 2026-10-30
+
+Owner continued M1b and authorized Claude Code plan/code review. The
+[reviewed plan](plans/m1b-output-access-20261030.md) fixes ACCESS-AC-01..04 before code.
+Scope: scoped historical Run outputs and project-bound verified artifact download; no writes,
+no current-head/lease requirement for historical output and no global-hash authority.
+Claude plan/code REWORK was revised and accepted; implementation and root gates pass within
+the [documented evidence boundaries](evidence/m1b-output-access-20261030.md). Full product remains incomplete.
+The next planned slice after M1b is M1c human report persistence/submission; it is not started.

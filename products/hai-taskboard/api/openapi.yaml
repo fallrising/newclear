@@ -407,6 +407,41 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         default:
           $ref: "#/components/responses/Error"
+  /projects/{project_id}/work-items/{work_item_id}/runs/{run_id}/outputs:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - $ref: "#/components/parameters/WorkItemID"
+      - name: run_id
+        in: path
+        required: true
+        schema: { $ref: "#/components/schemas/RunID" }
+    get:
+      summary: List immutable outputs of one scoped Run
+      operationId: getRunOutputs
+      x-hai-permission: project.read
+      description: >-
+        Complete digest-sorted historical output set, at most 1024 entries and 1 MiB JSON.
+        Project, WorkItem and Run must match the persisted Run in one metadata snapshot.
+        Empty history returns an empty array; no inferred association or current lease is required.
+        Metadata does not guarantee later object availability or completion eligibility.
+        HEAD is rejected with 405 before material reads. Query strings have no selection semantics.
+      responses:
+        "200":
+          description: Complete scoped immutable metadata; never a Done verdict.
+          headers:
+            Cache-Control:
+              schema: { type: string, const: no-store }
+            X-Content-Type-Options:
+              schema: { type: string, const: nosniff }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunOutputList" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
   /projects/{project_id}/artifacts/{sha256}:
     parameters:
       - $ref: "#/components/parameters/ProjectID"
@@ -418,20 +453,50 @@ paths:
       summary: Read a bound immutable artifact by digest
       operationId: getArtifact
       x-hai-permission: artifact.read-and-project.read
+      description: >-
+        The local operator must have project access and an immutable Run output association
+        in that project. Global hashes and candidate/evidence-only associations confer no access
+        in this slice. Validate the selected association, canonical MIME policy and 0..10 MiB
+        metadata before opening; copy and verify exact bytes outside the transaction, then
+        recheck the same association before responding. Current head/lease/generation do not
+        invalidate historical output. Allowed MIME bases are text/plain, text/markdown,
+        application/json and application/octet-stream, with only optional case-insensitive
+        charset=utf-8 for text/JSON. All bytes are sent as an octet-stream attachment.
+        Open failures return 503 projection_unavailable (including missing/symlink objects);
+        service-detected byte or binding corruption returns 503 storage_corruption.
+        Existing local storage refuses empty files, so a zero-byte locator can list but its
+        local download fails closed. Range and conditional headers cannot bypass verification:
+        a valid GET always returns complete 200, never 206 or 304. HEAD returns 405 before
+        material reads. Query strings have no selection semantics. Errors carry no object bytes.
       responses:
         "200":
-          description: Bound Present object whose bytes match the path digest.
+          description: Project-bound Present object whose copied bytes match the path digest.
           headers:
             ETag:
-              schema: { type: string }
+              schema: { type: string, pattern: '^"sha256:[0-9a-f]{64}"$' }
+            Content-Disposition:
+              schema: { type: string, pattern: '^attachment; filename="[0-9a-f]{64}\.bin"$' }
+            Cache-Control:
+              schema: { type: string, const: no-store }
             X-Content-Type-Options:
               schema: { type: string, const: nosniff }
+            Content-Security-Policy:
+              schema: { type: string, const: "sandbox; default-src 'none'" }
+            Cross-Origin-Resource-Policy:
+              schema: { type: string, const: same-origin }
+            Accept-Ranges:
+              schema: { type: string, const: none }
           content:
             application/octet-stream:
               schema: { type: string, contentMediaType: application/octet-stream }
-        default:
-          $ref: "#/components/responses/Error"
+        "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
 components:
   securitySchemes:
     localSession:
@@ -749,6 +814,40 @@ components:
           oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
         resolved_at:
           oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
+    RunOutputList:
+      type: object
+      additionalProperties: false
+      required: [project_id, work_item_id, run_id, outputs]
+      properties:
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        run_id: { $ref: "#/components/schemas/RunID" }
+        outputs:
+          type: array
+          maxItems: 1024
+          description: Complete, strictly increasing artifact digest order; empty for no associations.
+          items: { $ref: "#/components/schemas/HistoricalRunOutput" }
+    HistoricalRunOutput:
+      type: object
+      additionalProperties: false
+      required: [input_digest, lease_epoch, restore_generation, artifact]
+      properties:
+        input_digest: { $ref: "#/components/schemas/SHA256" }
+        lease_epoch: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        restore_generation: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        artifact: { $ref: "#/components/schemas/RunOutputArtifact" }
+      description: Historical publication identity; clients must preserve integers above 2^53 losslessly.
+    RunOutputArtifact:
+      type: object
+      additionalProperties: false
+      required: [sha256, media_type, byte_length, availability, href, disposition]
+      properties:
+        sha256: { $ref: "#/components/schemas/SHA256" }
+        media_type: { type: string, minLength: 1, maxLength: 160 }
+        byte_length: { type: integer, minimum: 0, maximum: 10485760 }
+        availability: { type: string, const: Present }
+        href: { type: string, pattern: "^/api/v1/projects/prj_[0-9A-HJKMNP-TV-Z]{10,26}/artifacts/sha256:[0-9a-f]{64}$" }
+        disposition: { type: string, const: attachment }
     ArtifactLocator:
       type: object
       additionalProperties: false

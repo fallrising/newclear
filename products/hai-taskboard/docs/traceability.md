@@ -454,3 +454,12 @@ real SQLite HTTP/no-write/reopen tests in `backend/internal/application/service`
 aligns BOARD/bootstrap authority; C06 aligns preflight wording with HAI-INTEGRITY-003/004.
 [Current M1a evidence](evidence/m1a-completion-preparation-20261030.md) distinguishes focused results,
 root gates, independent review and delivery. No whole-product or historical oracle is promoted.
+
+## 2026-10-30 M1b output access
+
+[ACCESS-AC-01..04](plans/m1b-output-access-20261030.md) refine the authorized M1b read slice
+under HAI-OUTPUT-001..003, HAI-AUTH-004, HAI-SEC-003 and HAI-API. Scope is authenticated
+project/WorkItem/Run output metadata and bound verified byte access, with unchanged historical
+identity and zero writes. [M1b evidence](evidence/m1b-output-access-20261030.md) maps the four
+ACs to actual HTTP/service/SQLite/runtime oracles and root/Claude acceptance; Git delivery is in BOARD.
+Full v0.2 AC-06/44/46 and SUCCESS AC-02..04 are not accepted by this bounded slice.

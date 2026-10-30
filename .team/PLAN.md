@@ -2427,6 +2427,27 @@ HW sourcePR809 mergedf3d08f90 after requiredCI on40e30aea andT848ACCEPT; sixcand
 
 HL corrected-window evidence gate ACCEPT: sourcePR809 fixed40e30aea/362tests/3CI/T848; fresh04:01preflight, revision4 activated04:02:35 with1644secpropagationmargin. Actualprovider due04:30/admit04:30:29, deadlines04:31:29/04:32:29, originalrunner completed04:31:06 validatedhealthy, firstterminal04:31:13 age7.67sec. Final04:31:44 sameIDchain/artifactbytes+digest/identity+externalref/API, old6commands+4journal+failedrev2firing preserved, one newcompleted, active0, samePID/NRestarts0, botledger/client/config/policy and othergrants/Access unchanged. Finalobservation38secold explicitlyhistorical; T849publicevidenceACCEPT, leadrawproof. NormalGitdelivery thenHL-onlyclosure; HWsourceclosureuses809timestamp. Fullmainline/human/model/fault/quota/naturalexpiry/billing remainpending.
 
+## HAI M1b — T-0339 / 2026-10-30T10:10:44Z
+
+Owner continued M1b and authorized Claude Code plan/code review. Routing only; product status in
+products/hai-taskboard/docs/tasks/BOARD.md HM1B. Root owns plan/API/docs/final gates and Git delivery.
+Named Claude reviews use cli-team's current direct installed no-tools packet workflow (same bounded
+profile as the preceding HAI plan), not unattended cli-workers dispatch. No separate dispatcher
+authority or live-route verification is inferred. Native team task/report validators and evidence gate
+still apply. Source kernel operation card f36635671c65fc63ba6db5a4741a2c3ff102821f, CLI2.1.312,
+claude-opus-5-5/high, safe-mode/no tools/MCP/no persistence;8minutes each plan/code, each at most
+one actual-revision follow-up. Root60–90active minutes/20minute checkpoints; optional Go leaf30minutes,
+no recursive work; CI20minutes. Exact total provider/tools/active-vs-wait unknown until observed.
+Scope/AC/test strategy: products/hai-taskboard/docs/plans/m1b-output-access-20261030.md.
+No runtime adapter/provider integration, M1c, M2, UI, dependencies/migrations/release/deploy.
+
+M1b evidence gate: local ACCEPT for ACCESS-AC-01..04. Sole native leaf supplied9frozenGo files and
+PARTIAL history-preserving report; root reviewed actual diff/logs and resolved required gates.
+Claude plan REWORK11points then ACCEPT; code REWORK2assertion gaps/no production defect then ACCEPT.
+Root original191-input full/race/vet/build passed; final3assertion-only test changes passed affected
+TestOutputAccess race suites, with every production input unchanged. Web30/API/docs passed.
+No new browser/full-product acceptance. Primary PR/CI/merge/readback and board/desk closure remain.
+
 ## QV isolated application quota qualification — 2026-10-30T10:09:33Z
 
 Owner continues development and requests concrete assistance only when needed. Lead adds bounded API/Cron quota qualification per docs/quota-qualification.md; no live calls, deployment, credentials, renewal, deletion or paid plan. Lead owns tests and docs. T850 one fresh native read-only reviewer, inherited model/effort/permissions, <=1500tokens initial plus one focusedfollowup, five-minute monitored budget, unknowncost/quota; no private/network/writes/tests/Git/delegation. Native stop via interrupt is available; scope instructions are not OS isolation. Existing behavior qualification needs no fabricated RED; use disposable source mutations to demonstrate boundary assertions detect regressions, retain all results. Mainline/AC08 stays pending. Normal authorized PR/CI/merge/readback then board-only closeout.

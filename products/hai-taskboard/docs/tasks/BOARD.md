@@ -198,3 +198,18 @@ snapshot; this BOARD entry records the subsequent actual delivery. Original Red,
 and superseded runs remain in the evidence. Full H01..H04 and SUCCESS AC-02..04 remain incomplete.
 Next planned slice is M1b (Run outputs and artifact reads); it has not started. No usable tag,
 real adapter, release or deployment. This final board-only follow-up records the actual merge end.
+
+## T-0339 — M1b scoped output access
+
+Owner continued development and requested Claude Code plan/code review. Source `e00866434e856d164a59516bc9c7de2f4770020b`.
+One Ready task: [M1b plan and fixed acceptance cases](../plans/m1b-output-access-20261030.md).
+Scope: bounded output/artifact read port, SQLite read adapter, service, HTTP, focused tests and docs/API.
+No migrations, dependency, UI, report writes or later slice. H01..H04 and full product ACs retain status.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HM1B | Expose scoped historical Run outputs and verified artifact downloads | ACCESS-AC-01..04; H02 support | in_progress | 2026-10-30T10:10:44Z | — | 2026-10-30T10:42:40Z |
+
+M1b local implementation/gates and Claude plan/code review ACCEPT after retained REWORK.
+[Evidence](../evidence/m1b-output-access-20261030.md) preserves original failures and exact
+fullgate/assertion-delta source boundaries. Required PR CI/merge/readback pending.

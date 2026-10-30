@@ -71,6 +71,8 @@ func NewServer(commands CommandService, results CommandResultSource, projections
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/proposals/{proposal_digest}/initial-acceptance", server.getInitialAcceptance)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/events", server.streamEvents)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/completion-preparation", server.getCompletionPreparation)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/runs/{run_id}/outputs", server.getRunOutputs)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/artifacts/{sha256}", server.getOutputArtifact)
 	mux.HandleFunc("/", server.notFound)
 	server.mux = mux
 	return server, nil
@@ -79,6 +81,9 @@ func NewServer(commands CommandService, results CommandResultSource, projections
 func (server *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	if request == nil || !canonicalPath(request) {
 		writeAPIError(response, http.StatusBadRequest, command.CodeInvalidRequest, "request path is not canonical")
+		return
+	}
+	if server.interceptOutputRead(response, request) {
 		return
 	}
 	// Intercept this read before ServeMux can redirect invalid dot resource IDs.

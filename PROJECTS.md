@@ -28,6 +28,7 @@
 | [labs/openmmo-lab](labs/openmmo-lab/SUCCESS.md) | labs | 建立固定 OpenMMO 的本機雙人世界與持久化試驗入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/openviking-context](labs/openviking-context/SUCCESS.md) | labs | 以來源校驗與 byte 預算驗證共享 context 投影服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [labs/pg-jev-router](labs/pg-jev-router/SUCCESS.md) | labs | 以真 PostgreSQL 擴充套件和合成 provider 驗證輸入路由政策接線 | 完成 | [usable/pg-jev-router/v0.1.0](https://github.com/fallrising/newclear/tree/usable/pg-jev-router/v0.1.0/labs/pg-jev-router) | 2026-10-04 |
+| [labs/pixelorama-class-showcase](labs/pixelorama-class-showcase/SUCCESS.md) | labs | 驗證 Pixelorama 素材管線與四職業能力值展示 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-30 |
 | [labs/retro-economy](labs/retro-economy/SUCCESS.md) | labs | 驗證兩職業的瀏覽器循環、故障恢復與受控策略下補給流通 | 完成 | 尚無已核准標記 | 2026-10-21 |
 | [labs/zircon-godot](labs/zircon-godot/SUCCESS.md) | labs | 研究並規劃 Zircon C# 伺服器與 Godot 客戶端的有界遊戲實驗 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-03 |
 | [platform/agent-platform](platform/agent-platform/SUCCESS.md) | platform | 以網頁派送、監看與介入隔離的程式代理任務 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |

@@ -71,6 +71,28 @@ async function healthSchedule(env,ctx,now){
  envelope.schedule={id:s.id,revision:s.revision,enabled:Boolean(s.enabled),status,interval_minutes:p?.interval_minutes??null,not_before:p?.not_before??null,expires_at:p?.expires_at??null,next_due_at:next===null?null:iso(next),last_firing:last,latest_result:latest};
  requireThat(enc.encode(JSON.stringify(envelope)).length<=30000,503,'SNAPSHOT_TOO_LARGE');return envelope;
 }
+async function usage(db,ctx,now){
+ capability(ctx,'commands:read');const g=ctx.grant.policy;
+ // One statement observes global admission counters and scope together. A filtered
+ // count would misrepresent remaining capacity when another scope owns history.
+ const counts=await db.prepare(`SELECT count(*) AS retained,
+  coalesce(sum(CASE WHEN created_at>? THEN 1 ELSE 0 END),0) AS recent,
+  coalesce(sum(active),0) AS active,
+  coalesce(sum(CASE WHEN json_extract(record,'$.command.workspace_id')=?
+   AND json_extract(record,'$.command.resource_ref.resource_id')=?
+   AND json_extract(record,'$.command.resource_ref.generation')=?
+   AND json_extract(record,'$.command.recipe_ref.recipe_id')=?
+   AND json_extract(record,'$.command.recipe_ref.version')=?
+   AND json_extract(record,'$.command.recipe_ref.digest')=? THEN 1 ELSE 0 END),0) AS scoped
+  FROM commands`).bind(now-86400000,g.workspace_id,g.resource_ref.resource_id,g.resource_ref.generation,g.recipe_ref.recipe_id,g.recipe_ref.version,g.recipe_ref.digest).first();
+ requireThat(counts&&['retained','recent','active','scoped'].every(k=>Number.isSafeInteger(counts[k])&&counts[k]>=0),503,'SNAPSHOT_INVALID');
+ requireThat(counts.scoped===counts.retained,403,'SCOPE_DENIED');
+ const counter=(used,limit)=>({used,limit,remaining:Math.max(0,limit-used)});
+ return {schema_version:'cloudlab.usage.v1',observed_at:iso(now),
+  scope:{workspace_id:g.workspace_id,resource_ref:g.resource_ref,recipe_ref:g.recipe_ref},
+  application:{retained:counter(counts.retained,10000),rolling_24h:{...counter(counts.recent,1440),window_start_exclusive:iso(now-86400000)},active:counter(counts.active,1)},
+  provider:{status:'not_connected',workers_requests:null,d1_rows_read:null,d1_rows_written:null,d1_storage_bytes:null,billing:null}};
+}
 async function claim(db,ctx,now,env){
  capability(ctx,'runs:reconcile');const r=await db.prepare('SELECT * FROM commands WHERE active=1 ORDER BY created_at LIMIT 1').first();if(!r)return null;const v=record(r);scope(ctx,v.command);
  if(v.attempt&&timestamp(v.attempt.lease_expires_at)>now){
@@ -130,6 +152,7 @@ export async function handle(request,env,now=Date.now(),fetcher=fetch){
   }
   if(url.pathname==='/api/bootstrap'&&request.method==='GET'){capability(ctx,'commands:read');return send({workspace_id:ctx.grant.policy.workspace_id,resource_ref:ctx.grant.policy.resource_ref,recipe_ref:await recipeRef(),capabilities:ctx.grant.policy.capabilities,now:iso(now)});}
   if(url.pathname==='/api/health-schedule'&&request.method==='GET')return send(await healthSchedule(env,ctx,now));
+  if(url.pathname==='/api/usage'&&request.method==='GET')return send(await usage(db,ctx,now));
   if(url.pathname==='/api/commands'){
    if(request.method==='POST')return send({command:publicRecord(await submit(db,ctx,b,new TextDecoder().decode(bytes),now))},202);
    capability(ctx,'commands:read');const rows=(await db.prepare('SELECT * FROM commands ORDER BY created_at DESC LIMIT 20').all()).results;const commands=[];for(const r of rows){try{scope(ctx,record(r).command);const item=publicRecord(view(r,now));if(enc.encode(JSON.stringify([...commands,item])).length<30000)commands.push(item);}catch(e){if(!(e instanceof Fault))throw e;}}return send({commands,now:iso(now)});

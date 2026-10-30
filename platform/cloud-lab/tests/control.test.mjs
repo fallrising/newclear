@@ -143,3 +143,39 @@ test('self authorization retains signature and nonce replay checks',async()=>{
  const ok=await handle(req(),f.env,T);assert.equal(ok.status,200);assert.equal(ok.headers.get('cache-control'),'no-store');
  assert.equal((await handle(req(),f.env,T)).status,401);
 });
+
+test('usage reads empty application quotas with unknown provider metrics and no business writes',async()=>{
+ const f=await fixture();const before=['grants','commands','schedules','firings'].map(t=>f.DB.db.prepare('SELECT * FROM '+t).all());
+ const r=await f.req('/api/usage');assert.equal(r.status,200);assert.equal(r.data.schema_version,'cloudlab.usage.v1');assert.equal(r.data.observed_at,iso(T));
+ assert.deepEqual(r.data.scope,{workspace_id:'ws_test',resource_ref:{resource_id:'node_test',generation:1},recipe_ref:await recipeRef()});
+ assert.deepEqual(r.data.application,{retained:{used:0,limit:10000,remaining:10000},rolling_24h:{used:0,limit:1440,remaining:1440,window_start_exclusive:iso(T-86400000)},active:{used:0,limit:1,remaining:1}});
+ assert.deepEqual(r.data.provider,{status:'not_connected',workers_requests:null,d1_rows_read:null,d1_rows_written:null,d1_storage_bytes:null,billing:null});
+ assert.deepEqual(['grants','commands','schedules','firings'].map(t=>f.DB.db.prepare('SELECT * FROM '+t).all()),before);
+ assert.equal((await f.req('/api/usage',undefined,'runner')).status,403);assert.equal((await f.req('/api/usage',{})).status,404);
+});
+test('usage counts terminal history, exact rolling lower bound and active unknown without writes',async()=>{
+ const f=await fixture();
+ for(const [key,created] of [['old',T-86400000],['recent',T-86400000+1000]]){
+  const c=(await f.req('/api/commands',f.command(key))).data.command;await f.req(`/api/commands/${c.command_id}/cancel`,{});
+  f.DB.db.prepare('UPDATE commands SET created_at=? WHERE id=?').run(created,c.command_id);
+ }
+ const a=await f.start();await f.req('/api/runner/report',{...f.result(a),owner_outcome:'unknown',started_at:null,finished_at:null,artifact:null},'runner');
+ const before=f.DB.db.prepare('SELECT * FROM commands ORDER BY id').all();const r=await f.req('/api/usage');assert.equal(r.status,200);
+ assert.deepEqual(r.data.application.retained,{used:3,limit:10000,remaining:9997});assert.equal(r.data.application.rolling_24h.used,2);assert.deepEqual(r.data.application.active,{used:1,limit:1,remaining:0});
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands ORDER BY id').all(),before);assert.equal(JSON.stringify(r.data).includes(a.command_id),false);
+});
+test('usage refuses mixed global scope for every workspace/resource/recipe identity field',async()=>{
+ for(const [path,value] of [['workspace_id','other'],['resource_ref.resource_id','other'],['resource_ref.generation',2],['recipe_ref.recipe_id','other'],['recipe_ref.version','2.0.0'],['recipe_ref.digest','sha256:'+'0'.repeat(64)],['workspace_id',null]]){
+  const f=await fixture();await f.req('/api/commands',f.command());
+  f.DB.db.prepare('UPDATE commands SET record=json_set(record,?,?)').run('$.command.'+path,value);
+  const r=await f.req('/api/usage');assert.equal(r.status,403,path);assert.equal(r.data.code,'SCOPE_DENIED');assert.equal(r.data.application,undefined);
+ }
+});
+test('usage cannot bypass credential expiry or revoked reader grant',async()=>{
+ const f=await fixture();f.DB.db.exec("UPDATE grants SET revoked=1 WHERE id='gb'");assert.equal((await f.req('/api/usage')).status,403);
+ const g=await fixture();assert.equal((await g.req('/api/usage',undefined,'bot',T+3600000)).status,401);
+});
+test('usage database errors return unavailable rather than a zero snapshot',async()=>{
+ const f=await fixture(),original=f.DB.prepare.bind(f.DB);f.DB.prepare=sql=>{if(sql.includes('FROM commands'))throw new Error('storage unavailable');return original(sql);};
+ const r=await f.req('/api/usage');assert.equal(r.status,503);assert.equal(r.data.code,'TEMPORARILY_UNAVAILABLE');assert.equal(r.data.application,undefined);
+});

@@ -80,6 +80,11 @@ for (const [limit, created] of [[1440, T - 1000], [10000, T - DAY - 1000]]) {
     const id = accepted.data.command.command_id;
     assert.equal((await f.request(`/api/commands/${id}/cancel`, {})).status, 200);
     const before = f.rows();
+    const usage = await f.request('/api/usage');
+    assert.equal(usage.status, 200);
+    assert.deepEqual(usage.data.application.retained, {used: limit, limit: 10000, remaining: 10000 - limit});
+    assert.equal(usage.data.application.rolling_24h.used, limit === 1440 ? 1440 : 1);
+    assert.equal(usage.data.application.active.used, 0);
     const rejected = await f.submit('over');
     assert.equal(rejected.status, 429);
     assert.equal(rejected.data.code, 'QUOTA_EXCEEDED');
@@ -166,4 +171,14 @@ test('API and Cron compete for the last rolling slot; at most one command is adm
   else assert.equal(firing, additions[0].id);
   assert.equal((await f.request(`/api/commands/${additions[0].id}/cancel`, {})).status, 200);
   assert.equal((await f.submit('after-race')).status, 429); // Quota, even with no active command.
+});
+
+
+test('usage preserves over-cap retained history and clamps remaining instead of hiding overage', async t => {
+  const f = await fixture(t);
+  await f.seed(10001, T - DAY - 1000);
+  const before = f.rows(), response = await f.request('/api/usage');
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.data.application.retained, {used: 10001, limit: 10000, remaining: 0});
+  assert.deepEqual(f.rows(), before);
 });

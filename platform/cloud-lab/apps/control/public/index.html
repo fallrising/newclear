@@ -24,6 +24,7 @@
       <div class="submit-panel"><h3>檢查 collector</h3><p>只觀測非 root Python collector 是否完成。正常結果不代表整台節點或服務健康。</p><div class="actions"><button id="submit" type="button" class="button primary-button" disabled>執行節點檢查 <span aria-hidden="true">↗</span></button><button id="retry" type="button" class="button secondary-button" hidden>重試原提交</button></div><p id="submit-note" class="secondary">連線確認後即可檢查。</p></div>
     </section>
     <section class="history" aria-labelledby="schedule-heading"><h2 id="schedule-heading">定時健康檢查</h2><div id="schedule"><p class="secondary">等待控制面資料，尚未確認排程。</p></div></section>
+    <section class="history" aria-labelledby="usage-heading"><div class="history-heading"><h2 id="usage-heading">應用額度快照</h2><button id="usage-refresh" type="button" class="button secondary-button" disabled>讀取用量</button></div><div id="usage"><p class="secondary">尚未讀取用量；按需查詢，不會自動更新。</p></div></section>
     <section class="stats" aria-label="最近命令摘要">
       <div><span class="stat-label">歷史命令</span><strong id="total-count">—</strong><span class="secondary">本次回傳最多 20 筆</span></div>
       <div><span class="stat-label">等待處理／對帳</span><strong id="active-count">—</strong><span class="secondary">包含未知結果</span></div>

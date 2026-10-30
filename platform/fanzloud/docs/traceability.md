@@ -96,3 +96,7 @@ inspected. This row is not an infrastructure-only CU exemption.
 ## T006F — favicon and focused browser follow-up (T-0440)
 
 [Specification](specs/SPEC-T006F-browser-followup.md), CU-WEB-P0-01. AC-F01 maps to `p0_web_favicon_has_exact_bytes_headers_and_method_boundary` (RED 404, then GREEN) and unchanged native security gates. AC-F02–F04 map to `followup-browser.mjs`, its pure verdict/HTTPS tests and the source-bound `followup-001` receipt. `followup-001` has passing browser/cleanup observations in the [report](../fe-review/tasks/followup/report.md); [ACCEPT-T006F](acceptance/T006F.acceptance.md) accepts AC-F01–F04. Original T006R captures and pins retain their historical meaning.
+
+## T008 actual browser P0 composition
+
+SUCCESS AC-01 is proved by actual Chromium against the production Rust binary and strict T007 fake executable. See [SPEC-T008](specs/SPEC-T008-p0-real-browser.md) and [runtime evidence](acceptance/T008.acceptance.md). No production authority or UI changed. AC-04 remains credential/environment gated; AC-05 remains outside this milestone.

@@ -79,7 +79,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | `newclear/systems/snail` | 未知 | C | 保留 benchmark 歷史。 |
 | `newclear/systems/ojbquay` | 未知 | C | 維持現有環境，不擴建。 |
 | `newclear/systems/wotar` | 未知 | C | security-sensitive E2EE client；恢復時不能只靠 local suite 維護。 |
-| `newclear/platform/fanzloud` | 未知 | C | 不投資 cloud execution layer。archive source 的 open PR #3/#4 保存決策待決。 |
+| `newclear/platform/fanzloud` | 開發中 | A | 2026-10-30 owner 恢復私人單 operator P0：真瀏覽器到 Rust／Cloud 任務、狀態與 diff。持久化與 host runtime 為後續範圍；不是部署宣告。見 [SUCCESS](platform/fanzloud/SUCCESS.md)。 |
 | `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
 | `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
 | `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo；檔位仍為 A，是否降為 C 待決。 |
@@ -141,7 +141,7 @@ study repo 合併進去。
 `agent-workforce` 擁有跨產品的工作者／帳號／資源綁定、持久通信與調用協調；本次只到 SDD。Kith 的聊天／個人訂閱喚醒規則、Agent Platform 的隔離 Run、HAI Taskboard 的交付驗收各自保留；Workforce 只透過 adapter 與外部 references 接合，不另造工作完成權威。
 
 `kernel/agents/codex-team-superpowers` 是可驗證的 workflow canonical。`agent-platform`（自管 agent 工作台）、`kith`（人機群聊）、
-`fanzloud`（personal BYOS／Codex Cloud，休眠）責任分開。`pokercase` 不加入 agent orchestration。
+`fanzloud`（personal BYOS／Codex Cloud，僅 P0 主線復工）責任分開。`pokercase` 不加入 agent orchestration。
 
 ### 個人自動化與傳輸
 

@@ -454,3 +454,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - HW01–04 source/local完成；原HL實際閉環仍由T-0015驗收。此收尾不把原派送過期改寫為成功、不改原服務或授權截止。
 
 2026-10-30T04:31:44Z：HW修正版HL真實閉環與最終保全通過，due04:30、實際admit04:30:29、原runner完成04:31:06 validated/healthy；失敗歷史保留。[最新證據](../evidence/m1-health-schedule-window-live.md)；HL待審查／Git合併後關閉，T-0003-4／完整mainline仍open。
+
+## T-0026 — 應用配額隔離驗收
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0026-1 | API最後一格與拒絕保全 | QV-01 | in_progress | 2026-10-30T10:09:33Z | — | 2026-10-30T10:16:15Z |
+| T-0026-2 | 窗口恢復與重送／讀取 | QV-02 | in_progress | 2026-10-30T10:09:33Z | — | 2026-10-30T10:16:15Z |
+| T-0026-3 | Cron終局與交錯競爭 | QV-03 | in_progress | 2026-10-30T10:09:33Z | — | 2026-10-30T10:16:15Z |
+| T-0026-4 | 回歸／獨立審查／交付 | QV-04 | in_progress | 2026-10-30T10:09:33Z | — | 2026-10-30T10:16:15Z |
+
+[範圍與驗收](../quota-qualification.md)；fullmainline及provider額度不在此輪完成宣告內。

@@ -100,3 +100,6 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Window repair evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-schedule-window.md): actual expired-before-dispatch failure, RED/GREEN regressions and bounded repair evidence.
 
 - [Corrected-window live continuation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-health-schedule-window-live.md): merged HW candidate, fresh revision4 activation and original-state preservation; distinct new provider firing required, first failed firing retained; real revision4 firing completed validated/healthy, original journal/artifact/API chain and authority preservation verified.
+
+- [Application quota qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/quota-qualification.md): isolated API/Cron retained10000 and rolling1440 boundaries, retry/history preservation and due finality; local SQLite evidence only, provider usage/billing and retention remain pending.
+- [Quota evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-quota-qualification.md): focused boundary tests and disposable mutation checks; original fixture failures retained, no live exhaustion or plan change.

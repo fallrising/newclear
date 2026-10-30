@@ -77,3 +77,7 @@ BA01–04以[準備證據](evidence/m1-bot-activation.md)核對候選hash、原�
 BT01–04依[實際啟用證據](evidence/m1-bot-activation-live.md)驗fresh來源、單次窗口／bot-only更新、真實self、原state首次政策、native doctor和一筆MCP→resident→validated，以及最後保全；初始失敗與唯讀對帳保留。
 
 BI01–04依[唯讀查詢契約](bot-inspection.md)驗原state不變、FLOCK、sidecar／損壞拒絕、時間／額度投影及有界pendingIDs；[359tests與原state查詢](evidence/m1-bot-inspection.md)區分local snapshot與遠端授權未知。
+
+## 應用配額子集
+
+[QV01–04](quota-qualification.md)以Worker.handle／scheduled及本機SQLite補AC-08的總保留／滾動窗口、去重保全及Cron終局；[證據](evidence/m1-quota-qualification.md)保留fixture失敗及副本mutation。此層不證明provider耗盡、遠端競爭或帳單；其餘矩陣層級與缺口保持。

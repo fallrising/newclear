@@ -2440,3 +2440,10 @@ one actual-revision follow-up. Root60–90active minutes/20minute checkpoints; o
 no recursive work; CI20minutes. Exact total provider/tools/active-vs-wait unknown until observed.
 Scope/AC/test strategy: products/hai-taskboard/docs/plans/m1b-output-access-20261030.md.
 No runtime adapter/provider integration, M1c, M2, UI, dependencies/migrations/release/deploy.
+
+M1b evidence gate: local ACCEPT for ACCESS-AC-01..04. Sole native leaf supplied9frozenGo files and
+PARTIAL history-preserving report; root reviewed actual diff/logs and resolved required gates.
+Claude plan REWORK11points then ACCEPT; code REWORK2assertion gaps/no production defect then ACCEPT.
+Root original191-input full/race/vet/build passed; final3assertion-only test changes passed affected
+TestOutputAccess race suites, with every production input unchanged. Web30/API/docs passed.
+No new browser/full-product acceptance. Primary PR/CI/merge/readback and board/desk closure remain.

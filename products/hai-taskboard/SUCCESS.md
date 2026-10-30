@@ -149,3 +149,9 @@ fixes ACCESS-AC-01..04 before implementation: authenticated Run output list and 
 verified artifact bytes, zero writes and historical restart readability. Initial status NotRun.
 Checks: focused Red/Green and real SQLite, pinned backend full/race/vet/build, existing web gate,
 OpenAPI/doc checks, independent Claude reviews and required PR CI. No product AC promotion.
+
+M1b local result: ACCESS-AC-01..04 pass with real SQLite/HTTP/localArtifactStore repeat/reopen,
+scoping, safety and no-write evidence. Claude plan/code ACCEPT after retained REWORK;
+[exact verification and source limits](docs/evidence/m1b-output-access-20261030.md) cover
+root full/race/vet/build plus assertion-only final delta race, web30 and API/doc checks.
+Git/CI delivery remains separately tracked in BOARD. Full product acceptance stays pending.

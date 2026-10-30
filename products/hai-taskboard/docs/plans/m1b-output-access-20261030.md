@@ -1,6 +1,6 @@
 # M1b — scoped Run outputs and artifact reads
 
-Status: implementation plan accepted after Claude REWORK and one revision review (2026-10-30). Implementation/verification remain pending.
+Status: implementation plan accepted after Claude REWORK and one revision review (2026-10-30). Implementation and local verification now pass; delivery status is in BOARD.
 Desk T-0339; supports H02 / SUCCESS AC-02 without accepting the full product.
 Source: `e00866434e856d164a59516bc9c7de2f4770020b`; latest HAI change is M1a closure PR814.
 Authority: accepted HAI-OUTPUT-001..003, HAI-AUTH-004, HAI-SEC-003, existing OpenAPI
@@ -121,7 +121,7 @@ the optional read interfaces and assert storage_corruption to avoid a false capa
 The existing store may hash then the service buffers at most10MiB again; no concurrency framework
 is added for the current single-operator slice.
 
-## Fixed acceptance cases (initially NotRun)
+## Fixed acceptance cases
 
 - ACCESS-AC-01: no session401; project denial404; invalid project/item/run/digest and dot/encoded
   paths refuse with no sensitive read. Capability absent503 and sanitized no-store errors.

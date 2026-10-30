@@ -208,4 +208,8 @@ No migrations, dependency, UI, report writes or later slice. H01..H04 and full p
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM1B | Expose scoped historical Run outputs and verified artifact downloads | ACCESS-AC-01..04; H02 support | in_progress | 2026-10-30T10:10:44Z | — | 2026-10-30T10:10:44Z |
+| HM1B | Expose scoped historical Run outputs and verified artifact downloads | ACCESS-AC-01..04; H02 support | in_progress | 2026-10-30T10:10:44Z | — | 2026-10-30T10:42:40Z |
+
+M1b local implementation/gates and Claude plan/code review ACCEPT after retained REWORK.
+[Evidence](../evidence/m1b-output-access-20261030.md) preserves original failures and exact
+fullgate/assertion-delta source boundaries. Required PR CI/merge/readback pending.

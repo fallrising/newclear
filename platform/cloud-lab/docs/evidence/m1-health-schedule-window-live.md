@@ -38,7 +38,7 @@ policy為revision4、interval15、not_before2026-10-30T04:30:00Z、expires_at202
 | HL-01 | 已合併固定候選、fresh補償後原資源、self／resident與剩餘期限 | passed |
 | HL-02 | scheduler／schedule CAS3→4、100%發布、原Cron及>=15分鐘傳播餘裕 | passed |
 | HL-03 | provider延遲29秒仍由原runner完成，同一firing／command／journal／artifact／API鏈 | passed |
-| HL-04 | 歷史／原角色／Access／secrets／service保全；獨立審查與Git交付 | 保全與T849審查passed，Git交付待完成 |
+| HL-04 | 歷史／原角色／Access／secrets／service保全；獨立審查與Git交付 | 保全與T849審查passed；Git結果見任務板 |
 
 本輪沒有再改runtime source；362tests、T848及source CI證據沿用固定PR809，沒有宣稱重跑完整suite或真人瀏覽器。[T849獨立審查](../../../../.team/reports/T-849.md)已ACCEPT，只讀公開證據與主導去敏摘要；raw receipts由主導核對。任務板須等本輪證據PR合併才關閉HL。
 

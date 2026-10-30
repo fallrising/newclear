@@ -94,7 +94,7 @@ Owner確認Workers Free並批准後，[SL01–04七日服務啟用](docs/evidenc
 
 本輪開始[HS01–04低頻健康檢查與看板](docs/health-schedule.md)，有界排程政策、讀取API及觸發／觀測展示已完成[265tests與12組本機瀏覽器驗證](docs/evidence/m1-health-schedule.md)；實際排程啟用仍待具體部署驗收，完整主線pending。
 
-Owner已批准[HL01–04實際低頻排程接入](docs/evidence/m1-health-schedule-live.md)：原資源fresh核對、scheduler-only續權／policy與Cron、首次真實結果及保留／回讀。首輪資產session兩次500阻擋；2026-10-30接續上傳成功，原Worker及15分鐘Cron曾啟用，但首次命令派送前過期；已停用回退並通過原服務／資料／其他授權保全，後續窗口修正已完成[新revision4真實閉環](docs/evidence/m1-health-schedule-window-live.md)，保留首次失敗歷史；HL證據交付中，不延長既有runner期限或新增付費。
+Owner已批准[HL01–04實際低頻排程接入](docs/evidence/m1-health-schedule-live.md)：原資源fresh核對、scheduler-only續權／policy與Cron、首次真實結果及保留／回讀。首輪資產session兩次500阻擋；2026-10-30接續上傳成功，原Worker及15分鐘Cron曾啟用，但首次命令派送前過期；已停用回退並通過原服務／資料／其他授權保全，後續窗口修正已完成[新revision4真實閉環](docs/evidence/m1-health-schedule-window-live.md)，保留首次失敗歷史；HL Git交付／回讀以任務板為準，不延長既有runner期限或新增付費。
 
 本輪開始[BC01–04固定bot bridge](docs/bot-bridge.md)：結構化健康檢查／查詢、durable重送及誠實結果投影。[283項本機回歸及HTTP／CLI閉環](docs/evidence/m1-bot-bridge.md)通過；不呼叫Grok模型、不續live授權或改部署，完整主線pending。
 

@@ -572,6 +572,6 @@ Demand: desk T-0432 / #698; claim PR318 merged. [Fixed CB-1–CB-5](T-0432-buffe
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| CB-01 | Per-selected-dispatch reservation and original CLI observations | CB-1–CB-2 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T03:58:45Z |
-| CB-02 | Consumer settlement, failure/storage/restart and existing behavior | CB-3–CB-4 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T03:58:45Z |
-| CB-03 | Headless isolated matrix, regressions and delivery evidence | CB-5 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T03:58:45Z |
+| CB-01 | Per-selected-dispatch reservation and original CLI observations | CB-1–CB-2 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T04:53:51Z |
+| CB-02 | Consumer settlement, failure/storage/restart and existing behavior | CB-3–CB-4 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T04:53:51Z |
+| CB-03 | Headless isolated matrix, regressions and delivery evidence | CB-5 | in_progress | 2026-10-30T03:58:45Z | — | 2026-10-30T04:53:51Z |

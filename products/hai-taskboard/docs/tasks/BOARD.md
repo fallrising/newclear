@@ -208,8 +208,21 @@ No migrations, dependency, UI, report writes or later slice. H01..H04 and full p
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM1B | Expose scoped historical Run outputs and verified artifact downloads | ACCESS-AC-01..04; H02 support | in_progress | 2026-10-30T10:10:44Z | — | 2026-10-30T10:42:40Z |
+| HM1B | Expose scoped historical Run outputs and verified artifact downloads | ACCESS-AC-01..04; H02 support | done | 2026-10-30T10:10:44Z | 2026-10-30T10:57:34Z | 2026-10-30T10:58:00Z |
 
 M1b local implementation/gates and Claude plan/code review ACCEPT after retained REWORK.
 [Evidence](../evidence/m1b-output-access-20261030.md) preserves original failures and exact
-fullgate/assertion-delta source boundaries. Required PR CI/merge/readback pending.
+fullgate/assertion-delta source boundaries. Local evidence receipts retain their pre-delivery snapshot;
+the following records subsequent final-head CI and actual delivery.
+
+M1b delivery: [PR #824](https://github.com/fallrising/newclear/pull/824) merged at
+`2026-10-30T10:57:34Z` as `02ba79b6770bc20582b9f99175af24c572dc3c78`.
+Reviewed/integrated head `e04c21ae9092b08ade86bedf247d4bd5301916d0` passed
+[HAI backend/web CI](https://github.com/fallrising/newclear/actions/runs/41043345746) and
+[project success CI](https://github.com/fallrising/newclear/actions/runs/41043345828).
+Remote readback matches every reviewed HAI product and task-report path, including the plan and
+JSON receipt. ACCESS-AC-01..04 and Claude plan/code follow-ups are accepted; original REWORK and
+failed diagnostics remain retained. No new browser acceptance or full-product completion is claimed.
+Full H01..H04 and SUCCESS AC-02..04 retain their prior status. Next planned slice is M1c human
+report persistence/submission; it has not started. No usable tag, real adapter, release or deployment.
+This board-only follow-up records the actual primary merge end.

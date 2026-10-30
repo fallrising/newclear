@@ -1,0 +1,30 @@
+test_I02_hints_require_python_name_and_path (test_change_impact.ImpactAlgorithmEdges.test_I02_hints_require_python_name_and_path) ... ok
+test_I03_deterministic_diamond_parallel_edges_no_mutation (test_change_impact.ImpactAlgorithmEdges.test_I03_deterministic_diamond_parallel_edges_no_mutation) ... ok
+test_I03_id_precedence_edges_alias_and_invalid_graph (test_change_impact.ImpactAlgorithmEdges.test_I03_id_precedence_edges_alias_and_invalid_graph) ... ok
+test_I03_limits_on_diamond_do_not_invent_callers (test_change_impact.ImpactAlgorithmEdges.test_I03_limits_on_diamond_do_not_invent_callers) ... ok
+test_I01_callers_paths_and_source_lines (test_change_impact.RealChangeImpact.test_I01_callers_paths_and_source_lines) ... ok
+test_I01_unknown_ambiguity_and_exact_id (test_change_impact.RealChangeImpact.test_I01_unknown_ambiguity_and_exact_id) ... ok
+test_I02_only_reachable_test_hints_with_reasons (test_change_impact.RealChangeImpact.test_I02_only_reachable_test_hints_with_reasons) ... ok
+test_I03_cycle_excludes_target_and_contains_is_not_impact (test_change_impact.RealChangeImpact.test_I03_cycle_excludes_target_and_contains_is_not_impact) ... FAIL
+test_I03_invalid_bounds_and_selectors (test_change_impact.RealChangeImpact.test_I03_invalid_bounds_and_selectors) ... ok
+test_I03_limits_keep_partial_evidence (test_change_impact.RealChangeImpact.test_I03_limits_keep_partial_evidence) ... ok
+
+======================================================================
+FAIL: test_I03_cycle_excludes_target_and_contains_is_not_impact (test_change_impact.RealChangeImpact.test_I03_cycle_excludes_target_and_contains_is_not_impact)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/labs/graphify-lab/tests/test_change_impact.py", line 91, in test_I03_cycle_excludes_target_and_contains_is_not_impact
+    self.assertEqual([r['node']['label'] for r in result['callers']], ['cycle_b()'])
+AssertionError: Lists differ: [] != ['cycle_b()']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'cycle_b()'
+
+- []
++ ['cycle_b()']
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.531s
+
+FAILED (failures=1)

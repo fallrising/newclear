@@ -11,6 +11,7 @@ from mcp.server.stdio import stdio_server
 
 from .__main__ import graph_command
 from .call_paths import calls_path
+from .change_impact import change_impact
 from .live_state import LiveWorkspace, LiveWorkspaceError
 from .source import node_at, source_excerpt
 
@@ -31,6 +32,10 @@ TOOLS = [
     types.Tool(name='calls_path', description='Find a bounded directed calls-only path using exact ID or unique exact label.',
                input_schema=_schema({'source':STRING,'target':STRING,'max_hops':{'type':'integer','minimum':1,'maximum':100},
                                      'max_visited':{'type':'integer','minimum':1,'maximum':100000}}, ['source','target'])),
+    types.Tool(name='change_impact', description='Find bounded callers with forward calls evidence and heuristic Python test hints; not a complete test selector.',
+               input_schema=_schema({'target':STRING,'max_hops':{'type':'integer','minimum':1,'maximum':100},
+                                     'max_visited':{'type':'integer','minimum':1,'maximum':100000},
+                                     'max_results':{'type':'integer','minimum':1,'maximum':1000}}, ['target'])),
 ]
 
 
@@ -73,6 +78,10 @@ def dispatch(state: LiveWorkspace, name: str, args: dict) -> dict:
         elif name == 'source_excerpt':
             node = node_at(graph, args['label'], args.get('file'))
             value = source_excerpt(Path(index['source']), node, args.get('lines', 20))
+        elif name == 'change_impact':
+            value = change_impact(json.loads(graph.read_text()), args['target'],
+                                  max_hops=args.get('max_hops', 32), max_visited=args.get('max_visited', 10000),
+                                  max_results=args.get('max_results', 100))
         else:
             value = calls_path(json.loads(graph.read_text()), args['source'], args['target'],
                                max_hops=args.get('max_hops', 32), max_visited=args.get('max_visited', 10000))

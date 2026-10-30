@@ -49,3 +49,12 @@ Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，�
 [resident契約](resident-runner.md)與[實機證據](evidence/m1-resident.md)補充先前one-shot階段：現已驗證有期限的user service自動拾取一筆任務，以及正常重啟journal不變。繼續使用原私人config及journal，先停服務再人工once；不要重啟不持鎖的舊版並行執行。期限與續權仍由operator核實；不假設linger、開機恢復或完整故障矩陣已通過。
 
 [隔離恢復工具](recovery-qualification.md)使用synthetic身份及專用journal，不能指向live配置。遇到live unknown時先保留命令／external_ref／journal對帳；本機故障工具通過不授權清空unknown、刷新deadline或重跑原命令。
+
+## 排程接續與版本回退的實測注意事項
+
+[HL首次真實觸發](evidence/m1-health-schedule-live.md)保留了派送前過期及補償；[HW修正](schedule-window.md)將命令預算改從handler實際時間計算，due仍作去重身份。接手必須讀最新證據、固定已合併候選，不能只看Cron存在或舊healthy結果。
+
+- fresh核對原active版本、最新設定、disabled schedule、active命令、原journal、self與resident截止。資產成功後再規劃CAS與新UTC起點；在實際寫入Cron前再次確認至少15分鐘傳播餘裕，舊not_before或JWT不得重用。
+- 記錄due、實際admitted_at、dispatch／execution deadline、runner claim與finished_at。provider在當分鐘內延遲不等於錯過整個slot；但handler時間亦不是D1持久提交時間，不保證任意延遲下都有足夠執行窗口。
+- 失敗先依批准方案停用並提升schedule revision、移除本次Cron及對帳；還原grant也使用新CAS revision。保留failed firing／command和journal，不刪除或重播未知工作。
+- Worker版本回退後，GET script/settings可能仍反映最後上傳設定。本次實測active版本已回原版本、其六個bindings與原值相符，而settings視圖仍帶inactive HEALTH_SCHEDULE。遇到此差異先讀deployments與該active version的resources/bindings，逐欄核對；不要為了讓兩個視圖相等而盲目PATCH bindings、重播回退或覆寫secret。把例外與實際D1停用／revision狀態記進收據。

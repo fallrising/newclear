@@ -6,7 +6,7 @@
 
 | 門檻 | 已有證據 | 還缺什麼／由誰處理 |
 | --- | --- | --- |
-| AC-06：API／排程／bot與看板閉環 | 真實API及獨立Grok MCP工具→原runner→validated；[HL](evidence/m1-health-schedule-live.md)記錄此次Cron接續 | lead完成首次真實Cron同鏈核對；真人瀏覽器流程須owner本人登入。human grant目前過期，登入前須準備並取得具體限時human-only續權批准，不能借bot身份或擴大本次scheduler批准。手機為選測 |
+| AC-06：API／排程／bot與看板閉環 | 真實API及獨立Grok MCP工具→原runner→validated；[修正版HL](evidence/m1-health-schedule-window-live.md)已驗真實Cron→原runner→validated | 真人瀏覽器流程須owner本人登入。human grant目前過期，登入前須準備並取得具體限時human-only續權批准，不能借bot身份或擴大本次scheduler批准。手機為選測 |
 | Grok自然語言調度 | 原生client已發現兩個固定工具，真實工具提交與持久配額驗證通過 | 尚未由實際模型對話選用工具。既有接線不證明模型流程；先確認owner可用模型入口及費用限制，不能以「繼續開發」推定批准付費模型呼叫 |
 | AC-07：完整故障矩陣 | [RF](evidence/m1-remote-recovery.md)已驗遠端回報前斷線、ACK遺失、started後終止、撤權後reconcile及舊fence拒絕；本機另有正反例 | lead逐列對齊[矩陣](verification.md)，補明取消／deadline／回報競爭、恢復與重投遞所需實際層級。不得以三個遠端案例替代全部矩陣；不為驗收直接中斷原live runner |
 | AC-08：配額／成本／保留與恢復 | 隔離D1還原、journal對帳、Access service-token撤權及bot本機持久上限已有證據 | lead補足應用超限邊界、儲存保留策略與用量可見性。Cloudflare供應商配額實際耗盡／帳單仍未驗；不以壓滿免費額度或升級測試。刪除歷史前另有具體保留／恢復方案及批准 |

@@ -61,7 +61,7 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 
 [常態啟用準備](docs/service-activation.md)提供私人離線proposal、7日／60秒方案與請求量估算；固定SR候選及原Lab唯讀盤點完成。Owner批准後，[七日服務實際啟用](docs/evidence/m1-service-live.md)已完成runner-only續期及來源回讀，觀察時保持運行；固定截止2026-11-05T07:24:26Z，不自動續權。
 
-[低頻健康檢查與看板](docs/health-schedule.md)支援具期限的15／60／1440分鐘政策、授權排程snapshot與觸發／觀測展示；[HS本機驗證](docs/evidence/m1-health-schedule.md)含265tests及12組真實瀏覽器情境。Owner已批准後，[實際接入](docs/evidence/m1-health-schedule-live.md)首輪受資產session500阻擋；2026-10-30首次真實Cron命令派送前過期，已停用Cron／回退原版本並保留歷史；原runner及其他授權保留，派送窗口修正中。
+[低頻健康檢查與看板](docs/health-schedule.md)支援具期限的15／60／1440分鐘政策、授權排程snapshot與觸發／觀測展示；[HS本機驗證](docs/evidence/m1-health-schedule.md)含265tests及12組真實瀏覽器情境。Owner已批准後，[實際接入](docs/evidence/m1-health-schedule-live.md)首輪受資產session500阻擋；2026-10-30首次命令派送前過期後已補償；窗口修正已合併部署，[新revision4真實觸發](docs/evidence/m1-health-schedule-window-live.md)於04:31:06Z由原runner回報validated/healthy，歷史及其他授權保留。
 
 [固定bot bridge](docs/bot-bridge.md)提供health.check／health.status JSON入口、持久請求及同ID恢復；[283tests與實際HTTP／Python collector](docs/evidence/m1-bot-bridge.md)本機通過。可供Grok等工具host適配，尚未實際接線／續權，不呼叫模型或新增費用。
 
@@ -83,4 +83,4 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 
 [尚未完成的工作](docs/remaining-work.md)將M1真人登入、模型流程、完整故障／配額驗收與M2/M3願景分開，列明需要owner協助的環節及固定截止；目前不宣告全任務完成。
 
-[延遲Cron派送窗口修正](docs/schedule-window.md)已完成[362tests及獨立source審查](docs/evidence/m1-schedule-window.md)，保留due身份／去重及總截止；重新接入仍須真實觸發驗證。
+[延遲Cron派送窗口修正](docs/schedule-window.md)已完成[362tests及獨立source審查](docs/evidence/m1-schedule-window.md)，保留due身份／去重及總截止；重新接入的[真實觸發驗證](docs/evidence/m1-health-schedule-window-live.md)已通過。

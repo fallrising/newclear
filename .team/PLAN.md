@@ -2420,3 +2420,9 @@ HW source evidence gate ACCEPT: actualfailure safelycompensated03:51:05Z, T847PA
 
 M1a integration: concurrent main3afa8345 merged normally; append-only root PLAN conflict
 resolved retaining both HAI and unrelated HL entries. HAI product/runtime inputs unchanged.
+
+## HL corrected-window live continuation — 2026-10-30T04:02:17Z
+
+HW sourcePR809 mergedf3d08f90 after requiredCI on40e30aea andT848ACCEPT; sixcandidateblobs equalremote. OriginalboundedHL authority persists: sameWorker/assets,15minuteCron,originalcutoff,roles/secrets/service preserved; due-window defect repaired without wideningAPI60/120budgets. Fresh04:01:24Z preflight sixcommands/fourjournalrows/active0/scheduleoffrev3/Cronempty/selfresidentpassed. Lead will renewscheduler3→4, schedule3→4,newUTCquarterhour with>=15min margin, preservefailedrev2firing; newrealresult stillrequired. T849 freshnativepublicevidence review afteractualresult, <=1500tokens initial+onefollowup,5minutesmonitored, inheritedsettings/unknowncost, no private/network/writes/tests/delegation.
+
+HL corrected-window evidence gate ACCEPT: sourcePR809 fixed40e30aea/362tests/3CI/T848; fresh04:01preflight, revision4 activated04:02:35 with1644secpropagationmargin. Actualprovider due04:30/admit04:30:29, deadlines04:31:29/04:32:29, originalrunner completed04:31:06 validatedhealthy, firstterminal04:31:13 age7.67sec. Final04:31:44 sameIDchain/artifactbytes+digest/identity+externalref/API, old6commands+4journal+failedrev2firing preserved, one newcompleted, active0, samePID/NRestarts0, botledger/client/config/policy and othergrants/Access unchanged. Finalobservation38secold explicitlyhistorical; T849publicevidenceACCEPT, leadrawproof. NormalGitdelivery thenHL-onlyclosure; HWsourceclosureuses809timestamp. Fullmainline/human/model/fault/quota/naturalexpiry/billing remainpending.

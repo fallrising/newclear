@@ -141,3 +141,11 @@ M1a local evidence: PREP-AC-01..04 focused/real SQLite checks pass; pinned backe
 web30/type/lint/format/build and OpenAPI lint pass. Independent contract and implementation reviews
 ACCEPT. [Evidence](docs/evidence/m1a-completion-preparation-20261030.md) retains meaningful Red and
 environment/superseded runs; required Git/CI delivery is tracked in BOARD. Product ACs stay pending.
+
+## M1b scoped output access — T-0339 / 2026-10-30
+
+Owner continued with Claude Code plan/code review. [Bounded plan](docs/plans/m1b-output-access-20261030.md)
+fixes ACCESS-AC-01..04 before implementation: authenticated Run output list and project-bound
+verified artifact bytes, zero writes and historical restart readability. Initial status NotRun.
+Checks: focused Red/Green and real SQLite, pinned backend full/race/vet/build, existing web gate,
+OpenAPI/doc checks, independent Claude reviews and required PR CI. No product AC promotion.

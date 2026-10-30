@@ -43,6 +43,7 @@ a complete APM service.
 - [Code and documentation inventory](docs/inventory.md): implementation evidence,
   known gaps, and the next integration boundary.
 - [SDD](docs/sdd/README.md) and [task sequence](docs/sdd/12-IMPLEMENTATION-PHASES.md).
+- [Prism 與 Langfuse 比較及後續參考](docs/langfuse-comparison.md)：定位、現況、整合邊界與建議；不是已實作功能或新增開發承諾。
 
 ## Repository layout
 

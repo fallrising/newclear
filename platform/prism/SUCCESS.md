@@ -68,3 +68,22 @@ go build ./...
 既有版本號、合併紀錄與歷史驗收不自動轉換為可用版本標記。
 
 須完成 daemon 接線與剩餘主線 gate，補跑所需外部 client、storage、告警整合；P2-07 完成不能轉為全 Prism usable tag。
+
+## T-0793 — Langfuse 比較參考文件（文件工作）
+
+需求與認領：[newclear #793](https://github.com/fallrising/newclear/issues/793)，owner 於 2026-10-30 直接交辦；承接者 ChatGPT。
+這是 repo-local 文件任務，不重開 T-0354，不變更上方原有 AC、mainline 或 usable_tag。
+允許路徑僅 README、本 SUCCESS、任務板與新增 `docs/langfuse-comparison.md`。
+交付止於 Draft PR；不修改 runtime、SPI、SDD、依賴、配置或部署。
+
+| AC ID | Given / When / Then | 驗證計畫 |
+| --- | --- | --- |
+| LF-D01 | Given 固定來源與既有比較，When 整理文件，Then 定位、現況、歷史決策與提案分開且有來源 | 核對固定 newclear 版本及 Langfuse 官方文件；保留查核日期 |
+| LF-D02 | Given 新參考文件，When 從 README 進入，Then 可回查 T-1101／T-1102 且不改產品完成狀態 | 檢查導航、相對連結、原有內容與 frontmatter 不變 |
+| LF-D03 | Given 文件候選，When 提交 Draft PR，Then 保存檢查、CI、原子提交與遠端回讀證據 | 本地文件檢查；必要 Actions；比較四檔範圍與 blob SHA |
+
+進度見[任務板](docs/tasks/BOARD.md)。文件檢查不取代 runtime 驗收；本輪不重跑實際部署。
+
+本地文件證據：三個原檔的 Git blob SHA 與 app 讀取一致；只新增比較文件與三處文件入口／追蹤變更，原歷史內容未改。
+`python /mnt/data/prism-langfuse-work/check_docs.py` 驗證新增相對連結、來源標記、Markdown 邊界與原狀態保留。
+完整 repo／Go 測試不在本地執行；必要 CI、檢查輸出及遠端回讀由本任務 PR 保存，不預填通過。

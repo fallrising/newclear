@@ -85,10 +85,10 @@ Owner於M3交付後指示繼續開發；desk[#325](https://github.com/fallrising
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0436-M4-01 | 新資料及規格事前凍結 | NR-01 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:13:22Z |
-| T-0436-M4-02 | 有來源才接受的查詢決策 | NR-02 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:13:22Z |
-| T-0436-M4-03 | 開發校準與primary事前選擇 | NR-03 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:13:22Z |
-| T-0436-M4-04 | 新保留題、來源與成本實測 | NR-04 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:13:22Z |
-| T-0436-M4-05 | 審查、CI及Git交付 | NR-05 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:13:22Z |
+| T-0436-M4-01 | 新資料及規格事前凍結 | NR-01 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-02 | 有來源才接受的查詢決策 | NR-02 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-03 | 開發校準與primary事前選擇 | NR-03 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-04 | 新保留題、來源與成本實測 | NR-04 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
+| T-0436-M4-05 | 審查、CI及Git交付 | NR-05 | in_progress | 2026-10-30T10:13:22Z | | 2026-10-30T10:34:00Z |
 
-尚未執行M4模型評估；新corpus由隔離worker撰寫，root先完成manualoracle與hashfreeze後才實跑。品質未達標可完成實驗但不可宣稱可採用。
+M4已按事前freeze完成完整實跑4quality／2updates、0errors；[結果](../notes-rejection-results.md)primary BGE margin只保留1/24正確題、未知誤回0/24，不建議直接採用。53tests、core12passed/3not_run、index／workflowlint與T016獨立審查通過；必要完整CI與Git交付仍待完成，五列保持in_progress。

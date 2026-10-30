@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0445 — Fixture startup ownership and safe diagnostics
+
+[FS-1–FS-5](docs/tasks/T-0445-fixture-startup.md) cover the bounded #701 continuation. The two implicated integration fixtures now require their owned post-bind address, health and admin identity before configuration; stderr drainage and failure diagnostics are bounded. Actual listening-log RED→GREEN and a separate mocked runner-cleanup RED→GREEN are retained. The fixed headless entry passed 10 scenarios, with 406 Rust tests/23 groups, 149 Python, 20 repository tests, original-target serial checks, fmt/Clippy/locked builds and eight previous isolated regressions. The first full-suite failure in an unchanged third Claude fixture and later passing controls remain explicit, with unknown cause. Independent review, normal PR/required CI, remote readback and final ledger/backup/cleanup are delivery gates. Original17AC/T1102/Cargo, mainline incomplete/usable_tag none and unresolved AC04/17 remain; no broader #701 or live-provider acceptance.
+
 ## T-0432 — Existing buffered CLI settlement continuation
 
 Owner approved the bounded Claude Code/Cursor non-stream accounting continuation. Claim PR318 merged; [fixed CB-1–CB-5, scope and design](docs/tasks/T-0432-buffered-cli-settlement.md) precede implementation. Connect existing raw observers and per-dispatch reservation through collection/conversion; preserve Claude tools/session reuse, Cursor text-only and all previous delivery contracts. Actual gateway/fakeCLI baseline RED→GREEN and a separate native collection-race RED→GREEN are retained. The new45-case/9-stage real gateway/fakeCLI matrix passed with50selected attempts and exact-scope SQLite/JSON/CSV/Web reconciliation;396Rust/129Python/20repository tests, fmt/Clippy/locked builds and seven prior regressions passed. Independent source/runtime and prepublication ledger reviews passed. Publication and required CI remain delivery gates. No new timeout policy, schema/API, real CLI/provider acceptance or whole-product completion. Original17AC/T1102/Cargo and mainline incomplete/usable_tag none remain unchanged.

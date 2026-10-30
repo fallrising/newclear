@@ -10,5 +10,5 @@
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T008-FAKE | Actual Chromium → production Rust → T007 fake executable → displayed diff | AC-01 | in_progress | 2026-10-30T03:16:17Z | | 2026-10-30T03:16:17Z |
-| T008-LIVE | 等 owner：private setup/Cloud target/task for same-source pinned CLI live task/status/diff; not run | AC-04 | in_progress | 2026-10-30T03:16:17Z | | 2026-10-30T03:16:17Z |
+| T008-FAKE | Actual Chromium → production Rust → T007 fake executable → displayed diff; [PR807](https://github.com/fallrising/newclear/pull/807) / [evidence](../acceptance/T008.acceptance.md) | AC-01 | done | 2026-10-30T03:16:17Z | 2026-10-30T03:39:51Z | 2026-10-30T03:39:51Z |
+| T008-LIVE | 等 owner：private setup/Cloud target/task for same-source pinned CLI live task/status/diff; not run | AC-04 | in_progress | 2026-10-30T03:16:17Z | | 2026-10-30T03:39:51Z |

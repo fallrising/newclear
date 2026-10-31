@@ -542,3 +542,12 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - exact-head CI全過：CloudLab `41227642659`、Project success `41227642639`、llms `41227642637`。T855獨立公開證據ACCEPT；本機50project／8llms／task-report／diff檢查及11候選source保全通過。私人raw由主導核對，不冒稱reviewer獨立接觸憑證或線上資料。
 - 原unknown以未知結果結案，單次CAS changes1；原runner約7秒後恢復，新18:00Cron在18:00:55Z validated/healthy。最終123commands／152firings／119journal／active0，原121terminal／151firings／118journal保全，4grants／Access／secrets／Cron／期限與免費方案不變。原multipart parser失敗與修正保留；無舊命令重跑、續權或新瀏覽器測試。
 - 本卡僅關閉已批准ULR01–04，完整mainline仍incomplete／無usable tag；原unknown根因、未來uptime、完整AC07／08及provider用量／保留策略仍見剩餘工作。本收尾只改任務板。
+
+## T-0031 — 故障矩陣與保留邊界
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0031-1 | 逐列證據與缺口 | FQ-01 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |
+| T-0031-2 | 競爭與到期隔離驗證 | FQ-02 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |
+| T-0031-3 | 保留／恢復方案 | FQ-03 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |
+| T-0031-4 | 回歸審查與交付 | FQ-04 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |

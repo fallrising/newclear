@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { handle, scheduled } from '../apps/control/worker/index.mjs';
 import { strictJSON, digest, sign, recipeRef } from '../apps/control/worker/protocol.mjs';
 
@@ -242,4 +243,149 @@ test('a genuine result racing before the operator CAS wins without being overwri
  const saved=f.DB.db.prepare('SELECT * FROM commands').get();
  assert.equal(f.DB.db.prepare(f.plan.query.sql).run(...f.plan.query.params).changes,0);
  assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);f.journal.close();
+});
+
+// FQ: application races and retention boundaries on real local SQLite.
+// These tests do not claim remote D1 concurrency or actual host interruption.
+for (const cancelFirst of [true, false]) {
+ test(`FQ cancellation ${cancelFirst ? 'before' : 'after'} completion preserves the successful evidence`, async t => {
+  const f=await fixture();t.after(()=>f.DB.db.close());const a=await f.start(),body=f.result(a);
+  const cancel=()=>f.req(`/api/commands/${a.command_id}/cancel`,{},'bot',T+2000);
+  if(cancelFirst){
+   const intent=await cancel();assert.equal(intent.status,200);assert.equal(intent.data.command.cancel_requested,true);
+   assert.equal(intent.data.command.delivery,'dispatching');assert.equal(intent.data.command.result,null);
+   assert.equal(f.DB.db.prepare('SELECT active FROM commands').get().active,1);
+  }
+  const completed=await f.req('/api/runner/report',body,'runner',T+2000);assert.equal(completed.status,200);
+  const stored=f.DB.db.prepare('SELECT * FROM commands').get();
+  if(!cancelFirst)assert.equal((await cancel()).status,200);
+  const after=f.DB.db.prepare('SELECT * FROM commands').get(),record=JSON.parse(after.record),before=JSON.parse(stored.record);
+  assert.equal(record.delivery,'result_recorded');assert.equal(record.cancel_requested,true);assert.equal(after.active,0);
+  assert.deepEqual(record.result,before.result);assert.equal(record.result.validation.status,'passed');
+  for(const key of ['artifact','report_digest','attempt','external_ref','command'])assert.deepEqual(record[key],before[key]);
+  for(const key of ['id','body','body_digest','idem_key','created_at','submit_grant','grant_revision'])assert.equal(after[key],stored[key]);
+  assert.equal((await f.req('/api/runner/claim',{},'runner',T+3000)).data.assignment,null);
+ });
+}
+
+test('FQ simultaneous cancel/report read the same revision; loser retries without overwriting evidence',{timeout:5000},async t=>{
+ const f=await fixture();t.after(()=>f.DB.db.close());const a=await f.start(),body=f.result(a);
+ const original=f.DB.prepare.bind(f.DB);let arrived=0,release;
+ const barrier=new Promise(resolve=>{release=resolve;});
+ f.DB.prepare=sql=>{
+  const statement=original(sql);
+  if(sql!=='SELECT * FROM commands WHERE id=?')return statement;
+  return {...statement,bind(...args){const bound=statement.bind(...args);return {...bound,async first(){
+   const row=await bound.first();if(++arrived<=2){if(arrived===2)release();await barrier;}return row;
+  }};}};
+ };
+ const [cancel,report]=await Promise.all([
+  f.req(`/api/commands/${a.command_id}/cancel`,{},'bot',T+2000),
+  f.req('/api/runner/report',body,'runner',T+2000),
+ ]);
+ f.DB.prepare=original;
+ assert.equal(arrived,2);assert.deepEqual([cancel.status,report.status].sort(),[200,409]);
+ assert.equal((cancel.status===409?cancel:report).data.code,'REVISION_CONFLICT');
+ if(report.status===409){
+  const pending=JSON.parse(f.DB.db.prepare('SELECT record FROM commands').get().record);
+  assert.equal(pending.result,null);assert.equal(pending.cancel_requested,true);
+  assert.equal((await f.req('/api/runner/report',body,'runner',T+3000)).status,200);
+ }
+ if(cancel.status===409)assert.equal((await f.req(`/api/commands/${a.command_id}/cancel`,{},'bot',T+3000)).status,200);
+ const saved=f.DB.db.prepare('SELECT * FROM commands').get(),v=JSON.parse(saved.record);
+ assert.equal(saved.active,0);assert.equal(v.cancel_requested,true);assert.equal(v.delivery,'result_recorded');
+ assert.equal(v.result.validation.status,'passed');assert.equal(v.artifact,body.artifact);
+ assert.equal(v.result.artifact_sha256,'sha256:'+createHash('sha256').update(body.artifact).digest('hex'));
+ assert.equal((await f.req('/api/runner/report',body,'runner',T+4000)).status,200);
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);
+});
+
+test('FQ cancellation of an unknown remains intent after the execution deadline',async t=>{
+ const f=await fixture();t.after(()=>f.DB.db.close());const a=await f.start();
+ const unknown={...f.result(a),owner_outcome:'unknown',started_at:null,finished_at:null,artifact:null};
+ assert.equal((await f.req('/api/runner/report',unknown,'runner',T+1000)).status,200);
+ const cancel=await f.req(`/api/commands/${a.command_id}/cancel`,{},'bot',T+2000);
+ assert.equal(cancel.data.command.cancel_requested,true);assert.equal(cancel.data.command.delivery,'reconciling');
+ assert.equal(cancel.data.command.result,null);assert.equal(f.DB.db.prepare('SELECT active FROM commands').get().active,1);
+ const reconciled=(await f.req('/api/runner/claim',{},'runner',T+121000)).data.assignment;
+ assert.equal(reconciled.command_id,a.command_id);assert.equal(reconciled.attempt.mode,'reconcile_only');
+ assert.deepEqual(reconciled.command,a.command);assert.deepEqual(reconciled.external_ref,a.external_ref);
+});
+
+for(const [name,deadline,claimAt] of [['dispatch deadline',120000,60000],['remaining execution budget',20000,11000]]){
+ test(`FQ ${name} prevents first dispatch and retains the admission record`,async t=>{
+  const f=await fixture();t.after(()=>f.DB.db.close());const command={...f.command(),execution_deadline:iso(T+deadline),dispatch_deadline:iso(T+Math.min(60000,deadline))};
+  const accepted=await f.req('/api/commands',command);assert.equal(accepted.status,202);
+  const saved=f.DB.db.prepare('SELECT * FROM commands').get();
+  assert.equal((await f.req('/api/runner/claim',{},'runner',T+claimAt)).data.assignment,null);
+  const after=f.DB.db.prepare('SELECT * FROM commands').get(),v=JSON.parse(after.record);
+  assert.equal(v.delivery,'expired_before_dispatch');assert.equal(v.attempt,null);assert.equal(v.external_ref,null);assert.equal(v.result,null);assert.equal(after.active,0);
+  assert.equal(after.body,saved.body);assert.equal(after.id,saved.id);
+  assert.equal((await f.req('/api/commands',command,'bot',T+121000)).data.command.command_id,after.id);
+  assert.equal(f.DB.db.prepare('SELECT count(*) n FROM commands').get().n,1);
+ });
+}
+
+test('FQ exact lease expiry rejects an old report without mutation; new fence reuses the result',async t=>{
+ const f=await fixture();t.after(()=>f.DB.db.close());const a=await f.start(),body=f.result(a),saved=f.DB.db.prepare('SELECT * FROM commands').get();
+ const old=await f.req('/api/runner/report',body,'runner',T+15000);
+ assert.equal(old.status,409);assert.equal(old.data.code,'STALE_FENCE');assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);
+ const next=(await f.req('/api/runner/claim',{},'runner',T+15000)).data.assignment;
+ assert.equal(next.attempt.mode,'reconcile_only');assert.equal(next.attempt.fence,a.attempt.fence+1);
+ const report=await f.req('/api/runner/report',{...body,attempt_id:next.attempt.attempt_id,fence:next.attempt.fence},'runner',T+16000);
+ assert.equal(report.status,200);assert.equal(report.data.command.result.validation.status,'passed');
+ assert.equal(report.data.command.result.finished_at,body.finished_at);assert.equal(report.data.command.result.received_at,iso(T+16000));
+});
+
+for(const finish of [120000,121000]){
+ test(`FQ late delivery preserves completion at execution deadline ${finish===120000?'boundary':'plus one second'}`,async t=>{
+  const f=await fixture();t.after(()=>f.DB.db.close());const a=await f.start();
+  const reconcile=(await f.req('/api/runner/claim',{},'runner',T+122000)).data.assignment;
+  const body={...f.result(a),attempt_id:reconcile.attempt.attempt_id,fence:reconcile.attempt.fence,started_at:iso(T+finish-1000),finished_at:iso(T+finish)};
+  const out=await f.req('/api/runner/report',body,'runner',T+123000);assert.equal(out.status,200);
+  const result=out.data.command.result;assert.equal(result.late,true);assert.equal(result.started_at,body.started_at);assert.equal(result.finished_at,body.finished_at);assert.equal(result.received_at,iso(T+123000));
+  assert.equal(result.validation.status,finish===120000?'passed':'incomplete');assert.equal(result.health,finish===120000?'healthy':'unknown');
+ });
+}
+
+test('FQ rejected report payloads leave the original row intact',async t=>{
+ const f=await fixture();t.after(()=>f.DB.db.close());const a=await f.start(),body=f.result(a),before=f.DB.db.prepare('SELECT * FROM commands').get();
+ for(const [bad,status] of [[{...body,artifact:'x'.repeat(16385)},413],[{...body,late:false},422],[{...body,owner_outcome:'unknown'},422]]){
+  assert.equal((await f.req('/api/runner/report',bad,'runner',T+2000)).status,status);
+  assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),before);
+ }
+ assert.equal((await f.req('/api/runner/report',body,'runner',T+2000)).status,200);
+ const saved=f.DB.db.prepare('SELECT * FROM commands').get();
+ const conflict=await f.req('/api/runner/report',{...body,artifact:body.artifact+' '},'runner',T+3000);
+ assert.equal(conflict.status,409);assert.equal(conflict.data.code,'RESULT_CONFLICT');assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);
+});
+
+test('FQ artifact expiry denies bytes at seven days without deleting history or freeing dedupe',async t=>{
+ const f=await fixture();t.after(()=>f.DB.db.close());const day=86400000,until=iso(T+8*day);
+ for(const row of f.DB.db.prepare('SELECT * FROM grants').all()){
+  const policy={...JSON.parse(row.policy),expires_at:until};f.DB.db.prepare('UPDATE grants SET policy=? WHERE id=?').run(JSON.stringify(policy),row.id);
+ }
+ const keys=JSON.parse(f.env.MACHINE_KEYS);for(const key of Object.values(keys))key.expires_at=until;f.env.MACHINE_KEYS=JSON.stringify(keys);
+ f.DB.db.prepare('INSERT INTO schedules VALUES(?,1,1,?,NULL)').run('health-minute','gb');
+ await scheduled({scheduledTime:T},f.env,T);
+ const a=(await f.req('/api/runner/claim',{},'runner')).data.assignment,body=f.result(a),firings=f.DB.db.prepare('SELECT * FROM firings').all();
+ assert.equal(firings.length,1);assert.equal(firings[0].outcome,a.command_id);
+ body.artifact=JSON.stringify(JSON.parse(body.artifact),null,2);
+ assert.equal((await f.req('/api/runner/report',body,'runner',T+2000)).status,200);
+ const saved=f.DB.db.prepare('SELECT * FROM commands').get(),record=JSON.parse(saved.record),expires=T+2000+7*day;
+ assert.equal(record.result.artifact_sha256,'sha256:'+createHash('sha256').update(body.artifact).digest('hex'));assert.equal(record.result.artifact_expires_at,iso(expires));
+ async function download(now,nonce){
+  const path=`/api/commands/${a.command_id}/artifact`,timestamp=String(now/1000);
+  const signature=await sign(secret,'lab-test','bot',1,'GET',path,timestamp,nonce,'');
+  return handle(new Request('https://lab.example'+path,{headers:{'x-lab-key-id':'bot','x-lab-time':timestamp,'x-lab-nonce':nonce,'x-lab-signature':signature}}),f.env,now);
+ }
+ const available=await download(expires-1000,'fc'.repeat(16));assert.equal(available.status,200);assert.equal(await available.text(),body.artifact);
+ const expired=await download(expires,'fd'.repeat(16));assert.equal(expired.status,410);assert.equal((await expired.json()).code,'EVIDENCE_EXPIRED');
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);
+ assert.equal((await f.req('/api/commands',a.command,'bot',expires)).data.command.command_id,a.command_id);
+ assert.equal((await f.req('/api/commands',{...a.command,parameters:{max_sample_age_seconds:20}},'bot',expires)).status,409);
+ assert.equal((await f.req('/api/usage',undefined,'bot',expires)).data.application.retained.used,1);
+ await scheduled({scheduledTime:T},f.env,expires);
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM firings').all(),firings);
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);
 });

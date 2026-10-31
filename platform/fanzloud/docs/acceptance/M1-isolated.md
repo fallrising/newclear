@@ -123,7 +123,7 @@ zero automatic resend. No new VM manager or native agent loop is required.
 M1-WEB-06 is supported by10 focused Rust tests (including rejection before forwarding
 of all non-cancel/extra/duplicate/noninteger fields), actual cancellation, the two final
 PostgreSQL lifecycle tests and the labelled browser failure/readback evidence. Required
-final CI and normal merge/readback remain delivery gates; no second provider call is
+final CI and normal merge/readback remain delivery gates; no second coding CLI invocation is
 needed to re-prove unchanged execution code.
 
 ## Delivery and final source

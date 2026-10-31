@@ -2593,5 +2593,5 @@ T-0447/M1 actual acceptance: one official subscription invocation on33e1eb70 pro
 and zero errors; AP cleanup plus independent0claims/VM/cgroup/processes. Reviewer
 acceptedEX01–03/FN01/singleFN03. FN06 found reason/cancel and never-allocated display
 gaps; narrow correction plus realdenial/queuedcancel/noVM and labelledmockprojections
-passed; original success read back unchanged, no secondprovider. Final review/CI/merge
+passed; original success read back unchanged, no second coding CLI invocation. Final review/CI/merge
 and ledger closure remain. M2/M3/CloudAC04/AC05 not claimed.

@@ -285,7 +285,7 @@ the separately rejected target probe, not another admitted task or coding execut
 The resumed browser also downloads the original successful task's result through the
 updated gateway/UI. Independently hashed both original and replay files:285bytes,
 SHA256 `c5134c8015bad2104fceb70e5c4c79086d6ec9bd85a0b4fa0f833b4ed3ef6fdb` for both.
-There was no second provider execution. Browser errors and teardown events are empty;
+There was no second coding CLI invocation. Browser errors and teardown events are empty;
 401/404 expected diagnostics are explicit and separate.
 
 The four failure-reason projections are explicitly PASS_INTERCEPTED_ONLY: deadline and

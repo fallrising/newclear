@@ -6,7 +6,9 @@ Owner 指示繼續。範圍：純函式呈現模型，八狀態、stale/alert �
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0006-1 | 呈現模型、48 tests、Opus review 與索引通過；[證據](../PRESENTATION.md) | AC-06 | in_progress | 2026-10-31T19:02:39Z | — | 2026-10-31T19:04:43Z |
+| T-0006-1 | 呈現模型、48 tests、Opus review 與索引通過；[證據](../PRESENTATION.md) | AC-06 | done | 2026-10-31T19:02:39Z | 2026-10-31T19:06:15Z | 2026-10-31T19:06:15Z |
+
+收據：[PR #877](https://github.com/fallrising/newclear/pull/877)，merge SHA `220252da3ad2f9c9e56764f1e2d3ceb2c104659a` 已 fetch 回讀。候選 `b4b7e7c` 的 contracts（含真 workerd）／validate 均通過後正常合併。程式／測試模型 review PASS，非阻擋建議的後續防禦修改以測試驗證；未冒稱修改後另有一輪模型 review。此收尾僅改 BOARD；完整 AC-06、renderer 與瀏覽器驗收仍 pending。
 
 
 ## T-0005 — 長命令 heartbeat

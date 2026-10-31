@@ -52,11 +52,17 @@ export STRATA_HOME="$(cd ../strata-mac && pwd)"  # 或你自己的外部安裝�
 "$STRATA_HOME/source/.venv/bin/python" scripts/run_local_work.py --harness office-opencode --check-cancel --keep-open
 # 獨立生命週期驗收：合成權限回覆、瀏覽器刷新及終止後恢復原 session
 "$STRATA_HOME/source/.venv/bin/python" scripts/run_local_work.py --harness office-opencode --check-lifecycle
+# 真實 Office host 崩潰／重啟、保持 interrupted、手動恢復原 session
+"$STRATA_HOME/source/.venv/bin/python" scripts/run_local_work.py --harness office-opencode --check-restart
 # 不載入模型的 sandbox 邊界 probe，執行前確認 8080 沒有服務
 "$STRATA_HOME/source/.venv/bin/python" scripts/check_opencode_sandbox.py
 ```
 
-`--check-lifecycle` 是有界合成測試，不能與 keep-open、check-cancel 或 queue-repair 合用。它將該 Office worker 的 edit／bash 權限設為 ask，等待原生權限事件與終端畫面，確認產物仍未寫入後才透過 PTY 按 Enter 選一次 Allow once；最多八次，不選 Allow always。一般 demo 設定不變。它另外刷新真正的 lite 瀏覽器，再終止已完成任務的 OpenCode 程序，以原生 worker.resume 恢復同一 session 並核對第二個產物。這不是 Office host restart 驗收；固定上游的自動 wakeAll 與手動恢復契約仍有差異。
+`--check-lifecycle` 是有界合成測試，不能與 keep-open、check-cancel 或 queue-repair 合用。它將該 Office worker 的 edit／bash 權限設為 ask，等待原生權限事件與終端畫面，確認產物仍未寫入後才透過 PTY 按 Enter 選一次 Allow once；最多八次，不選 Allow always。一般 demo 設定不變。它另外刷新真正的 lite 瀏覽器，再終止已完成任務的 OpenCode 程序，以原生 worker.resume 恢復同一 session 並核對第二個產物。Office host restart 另以 `--check-restart` 驗收。
+
+`--check-restart` 使用同樣的有界合成權限回覆，不能與其他 Office 驗收旗標或 keep-open 合用。它在權限等待時強制結束獨立 Office host，再用相同 workspace／home／port 啟動新 host；驗證舊 PTY 退出、沒有新 PID 或產物、再次重啟仍保留 interrupted。最後在真瀏覽器中點開中斷工位，透過原生 worker.resume 恢復原 session，完成後再重啟確認不重跑。
+
+一般 Office demo 也套用 lab 的手動恢復政策：重啟時停止殘留 PTY，未完成任務顯示 `interrupted ·`，點開離線工位才恢復；等同 session 的已認證 usage 與新終端就緒後，才透過原生 PTY 送出一次繼續指令（30 秒未就緒則停止並保留 interrupted）。固定版 OpenCode 的 `--prompt` 不會在既有 session 自動送出，所以不能只傳 CLI 旗標。沒有 session 的中斷任務必須重新提交。狀態記在合成 workspace 的 `.agent-office/lab-recovery.json`，損壞或不一致時拒絕啟動。adapter 依賴固定版本的 WorkerManager 內部介面，不適用其他上游版本；每次新 runner 仍建立全新 run，跨 host 恢復由同一 run 的 host 驗收示範。
 
 需要環境允許 Metal、loopback、PTY、sysctl 和 macOS sandbox-exec；受限代理中失敗時不能取消工具 sandbox 來偽裝成功。
 資源 guard 在 memory pressure critical／連續 warning、swap 增量超過 1 GiB、磁碟剩餘少於 50 GiB 或監控失敗時停止本次 runner。

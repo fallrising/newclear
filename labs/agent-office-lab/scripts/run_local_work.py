@@ -73,18 +73,22 @@ def main():
     parser.add_argument('--keep-open', action='store_true', help='Keep the verified local Office demo open until Ctrl+C')
     parser.add_argument('--check-cancel', action='store_true', help='Verify cancelling a second task through the native Office')
     parser.add_argument('--check-lifecycle', action='store_true', help='Verify synthetic permission replies, browser refresh and native session resume')
+    parser.add_argument('--check-restart', action='store_true', help='Verify actual Office host crash, interrupted state and manual resume')
     args = parser.parse_args()
-    if (args.keep_open or args.check_cancel or args.check_lifecycle) and args.harness != 'office-opencode':
+    if (args.keep_open or args.check_cancel or args.check_lifecycle or args.check_restart) and args.harness != 'office-opencode':
         parser.error('Office lifecycle options require --harness office-opencode')
     if args.check_lifecycle and (args.task != 'file' or args.check_cancel or args.keep_open):
         parser.error('--check-lifecycle is a bounded file test; do not combine with --check-cancel or --keep-open')
+    if args.check_restart and (args.task != 'file' or args.check_cancel or args.check_lifecycle or args.keep_open):
+        parser.error('--check-restart is a separate bounded file acceptance')
     out = LAB / 'runs' / ('local-work-' + datetime.datetime.now(
         datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
     workspace = out / 'workspace'
     workspace.mkdir(parents=True)
     (out / 'runner.py').write_text(Path(__file__).read_text())
     if args.harness != 'codex':
-        for name in ('local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs'):
+        for name in ('local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs', 'manual_recovery.mjs',
+                     'office_runtime.mjs', 'office_host.mjs', 'office_restart.mjs'):
             (out / name).write_text((LAB / 'scripts' / name).read_text())
         (out / 'opencode-launcher.py').write_text((LAB / 'scripts/bin/opencode').read_text())
     codex_home = out / 'codex-home'
@@ -127,7 +131,8 @@ def main():
     elif args.harness == 'office-opencode':
         (out / 'prompt.txt').write_text(command[-1])
         _, opencode_env = prepare_opencode(out, workspace)
-        command = [shutil.which('node'), str(LAB / 'scripts/office_opencode.mjs'), str(out),
+        driver = 'office_restart.mjs' if args.check_restart else 'office_opencode.mjs'
+        command = [shutil.which('node'), str(LAB / 'scripts' / driver), str(out),
                    str(workspace), str(out / 'prompt.txt')]
         if args.keep_open:
             command.append('--keep-open')

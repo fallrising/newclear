@@ -49,3 +49,14 @@ T-0004 真實驗收與 15 項離線測試通過，詳見 [生命週期證據](..
 
 T-0004 合併 commit：`37ec57999d547ce6b40819ae3758573a7f4d328f`。元件 offline、project contracts 與 workflow lint 三項 CI success。
 主線的生命週期摘要已回讀：completed、permission_wait_verified=true、resume_verified=true；原 runtime source hash 與受測 bytes 一致。
+
+## T-0005：Office host 中斷與手動恢復
+
+Owner 指示繼續開發；沿用停止現有合成 demo、驗收後重新開啟的安排。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0005-01 | 持久 interrupted、停止舊 PTY、防止自動喚醒與明確恢復 | AC-08（OpenCode host） | in_progress | 2026-10-31T12:29:42Z | — | 2026-10-31T12:50:57Z |
+| T-0005-02 | 真實 host crash／重啟、瀏覽器狀態與同 session 恢復驗收 | AC-08（OpenCode host） | in_progress | 2026-10-31T12:29:42Z | — | 2026-10-31T12:50:57Z |
+
+T-0005 的四個 host 真實恢復驗收、既有生命週期回歸及 26 項離線測試通過，詳見[重啟證據](../evidence/restart.md)。合併後補完成時間與遠端回讀。

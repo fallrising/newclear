@@ -84,8 +84,10 @@ T-0007：owner 已確認一次付費驗收；3 次 DeepSeek 請求、原生 agen
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0008-01 | 原生登入等待、隔離與清理已驗證；待 PR 交付 | AC-01、AC-03（前置） | in_progress | 2026-10-31T18:31:19Z | — | 2026-10-31T18:36:04Z |
+| T-0008-01 | 原生登入等待、隔離與清理已驗證及交付 | AC-01、AC-03（前置） | done | 2026-10-31T18:31:19Z | 2026-10-31T18:38:03Z | 2026-10-31T18:38:30Z |
 
 本輪先驗證固定官方 CLI 的原生啟動，OS 阻擋外部網路、不載入 owner 登入檔、不接受 prompt；AC-03 真實任務保持 pending。
 
 T-0008：47 項離線測試及原生啟動驗收通過，詳見[證據](../evidence/grok-startup-2026-11-01.json)。未載入 owner auth、未送 prompt，登入後 session hook／真實任務仍未驗收。
+
+T-0008 [PR #864](https://github.com/fallrising/newclear/pull/864) 已合併，commit `46845e4aacd6c8de2eeedacfd4f61e2fc100d7cc`。offline／validate 兩項 CI success；已回讀主線證據：startup completed、login_required、cleanup_completed=true、model_inference_verified=false。這只完成啟動前置，AC-03 與其 T-0002-03 保持待驗，沒有付費呼叫、release／deploy／usable tag。

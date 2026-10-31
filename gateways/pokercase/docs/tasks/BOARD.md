@@ -6,9 +6,11 @@ Demand: desk T-0426 / R-04; renewed claim PR344 merged. [LP-1–LP-3](T-0426-cla
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| LP-01 | Selected-version safety/model and isolated preflight | LP-1 | in_progress | 2026-10-31T18:41:00Z | — | 2026-10-31T18:41:00Z |
+| LP-01 | Selected-version safety/model and isolated preflight | LP-1 | done | 2026-10-31T18:41:00Z | 2026-10-31T19:01:13Z | 2026-10-31T19:01:13Z |
 | LP-02 | Six admissions executed; native same-process/resume acceptance remains open | LP-2 | in_progress | 2026-10-31T18:41:00Z | — | 2026-10-31T18:55:00Z |
 | LP-03 | Evidence, independent review and bounded delivery | LP-3 | in_progress | 2026-10-31T18:41:00Z | — | 2026-10-31T18:41:00Z |
+
+Product [PR874](https://github.com/fallrising/newclear/pull/874), source `f3352863e0f04acfbba19ce9db4040c02389e488`, normal merge `cf702ca20380f000e9ebc4b4d9e10f3a3b41d0f8` at2026-10-31T19:01:13Z. Required check/validate and source/merge/origin content readback passed. LP-01 is verified; LP-02 remains partial for native reuse. LP-03 includes later ledger/backup/cleanup; final private handoff records actual closure.
 
 Observed five successful/complete and one cancelled/partial finalized rows. Text, Read tool and context continuation after restart passed; six distinct upstream CLI processes and zero `--resume` mean AC12–14 native reuse remains unverified. Scope decision now approved: Claude tools, Cursor text-only. Historical pending-decision text below remains a historical phase snapshot. No further live calls in this bounded attempt.
 

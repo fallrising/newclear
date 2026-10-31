@@ -71,3 +71,9 @@ Owner 指示繼續，並提供需要其執行的命令；本輪不發出付費�
 | T-0006-02 | 隔離登入設定與無秘密診斷，提供 owner 可執行命令 | AC-01（接入前置） | done | 2026-10-31T17:47:08Z | 2026-10-31T17:53:36Z | 2026-10-31T17:54:03Z |
 
 T-0006 真實 Grok／Pi help/version 與 Pi 隔離設定格式檢查通過，全程 OS 阻擋網路；35 項離線測試通過。遠端任務等 owner 登入／設定，見[命令與範圍](../REMOTE-SETUP.md)。[PR #856](https://github.com/fallrising/newclear/pull/856) 已合併，commit `5c5afa06aec8a40df86c89f0a9913772772d77b1`。offline／validate 兩項 CI success；回讀主線證據，Pi 1.4.0 與官方 Grok 1.0.70 compatible=true、remote_requests_sent=false。這是 CLI 前置結案，AC-01 整體、AC-03／AC-04 與三 provider MVP 仍 pending；等待 owner 設定後才繼續遠端任務。
+
+## T-0007：Pi + DeepSeek 原生工位驗收
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0007-01 | 有界 Pi runner／原生零請求啟動通過；等 owner 一次付費驗收授權 | AC-04 | in_progress | 2026-10-31T18:03:31Z | — | 2026-10-31T18:09:40Z |

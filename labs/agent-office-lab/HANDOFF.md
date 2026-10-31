@@ -2,6 +2,8 @@
 
 先讀 [SUCCESS](SUCCESS.md)、[SDD](docs/SDD.md)、[任務板](docs/tasks/BOARD.md)。canonical 位置是 `fallrising/newclear` 的 `labs/agent-office-lab`。
 
+T-0007 已備妥 Pi 原生 Office PTY、固定 DeepSeek relay 與合成工具邊界；41 項離線測試及真實零請求啟動通過。[啟動證據](docs/evidence/pi-startup-2026-11-01.json)與[執行命令](docs/PI-REMOTE.md)。Owner 已回覆設定完成，隔離 Pi／官方 Grok auth 檔均存在且模式 0600；未印出憑證。已詢問一次有界付費驗收授權，尚未收到時不得執行 --allow-remote。不得用 startup 或 CLI compatible 宣稱 AC-04 通過。
+
 T-0006 已準備官方 Grok Build 1.0.70／Pi 1.4.0 的 lab 內固定安裝、真實 CLI 版本與能力 probe、隔離 owner 登入設定入口；35 項離線測試通過。見[owner 命令](docs/REMOTE-SETUP.md)與[白名單證據](docs/evidence/remote-preflight-2026-11-01.json)。本輪沒有遠端模型請求，沒有重啟 Strata；需要 owner 完成 DeepSeek key／Grok 登入後，再接實際遠端 worker 與合成任務。不得把 CLI compatible 或合成金鑰格式解析當成 auth／推論通過。
 
 T-0005 的 OpenCode host crash／interrupted／手動恢復已完成真實驗收：四個獨立 host，舊 PTY 全退出、重複重啟不執行、lite 可見中斷、點開工位接回同 session 完成、完成後重啟不重跑。91.22 秒；既有生命週期回歸 62.96 秒通過，26 項離線測試通過；[證據及三次先前失敗](docs/evidence/restart.md)。adapter 依賴固定上游內部介面，沒有修改 vendor。完整三 provider AC-08 仍 pending。

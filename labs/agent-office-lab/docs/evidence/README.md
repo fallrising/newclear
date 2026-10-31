@@ -21,3 +21,5 @@
 後續新增：[T-0004 生命週期](lifecycle.md)、[T-0005 host 中斷與手動恢復](restart.md)。各自保留當輪 runtime hash、先前失敗與範圍，不覆寫歷史結果。
 
 T-0006：[Grok／Pi 真實 CLI 前置檢查](remote-preflight-2026-11-01.json)在 OS 斷網環境核對固定 package／version／help；合成憑證只驗證 Pi 設定格式，沒有 remote model request。35 項離線測試通過；[設定與剩餘範圍](../REMOTE-SETUP.md)。
+
+T-0007：[原生 Office／Pi 零請求啟動](pi-startup-2026-11-01.json)通過；41 項離線測試通過。有界 DeepSeek 推論需另取得 owner 授權；本摘要不代表 AC-04 完成。

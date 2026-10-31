@@ -43,3 +43,5 @@ python3 scripts/remote_cli.py login-grok
 ## 接下來的驗收
 
 遠端 adapter、具體模型、合成任務與用量上限要明確設定後才能做付費 smoke。Grok 上游的 `--trust` 表示初次 workspace 信任，必須揭露／處理，不能當成逐次工具權限；本輪沒有執行這個信任動作。Pi 的 extension 必須以 `agent_settled` 判定完成，不能把 accepted／agent_end 當成功。這些仍是 AC-03／AC-04 待辦，既有 demo 不會因安裝 CLI 而自動開放雲端 provider。
+
+Pi 的原生 Office 有界 runner 已備妥，見[Pi 遠端驗收](PI-REMOTE.md)。`--check-startup` 不發出遠端請求；`--allow-remote` 是付費驗收的明確 opt-in，不因登入設定自動執行。

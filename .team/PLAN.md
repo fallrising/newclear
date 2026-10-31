@@ -2467,3 +2467,14 @@ Owner繼續原Worker已授權更新；lead只部署PR827固定候選，保留所
 ### UL partial delivery decision
 
 T852 initial and sole focusedfollowup returned PARTIAL/REWORK on static-human versus read-scope wording and403 route inference. Lead corrected all four primary/residual locations, checked exact staged text; reviewer conditionally supported partial-record acceptance after the final two residual navigation fixes. Lead accepts documentation only, preserving both actual REWORK reports and failed/skipped checks. No fabricated independent ACCEPT. UL03 remainspartial/T0028open: asset200/bytes andusage200/human unavailable without separately approved human window. Live deployment100%,3modules exact, originalsettings/4grants/121terminal+1unknown/118journal preserved; unknown predateddeployment and continues blockingnewCron. Live boundary JSON is immutable sanitizedreceipt; source387/localbrowser14 historical, not rerun. Required docs checks and9private-literal scan passed; CI/Git readback pending. No authorityrenewal/paidchange/unknownclear.
+
+
+## HAI M1c — T-0339 / 2026-10-31T10:49:00Z
+
+Owner continues the next M1c slice; existing claim retained (desk continuation PR334 merged).
+Scope/AC authority: products/hai-taskboard/docs/plans/m1c-human-reports-20261031.md and BOARD HM1C.
+Newest Session/provider proposals retain Fake-only/M1c; no L1 acceptance is inferred. Root owns docs/API/plan, integration/gates and Git delivery. One native10minute read-only audit, then at most one bounded45minute implementation assignment with isolated worktree; no recursion. Claude plan/code each480seconds and one actual-revision follow-up, claude-opus-5-5/high. Native helper inherits parent settings, no override; actual provider totals unknown.
+Named Claude reviews use installed direct no-tools cli-team workflow, not unattended dispatcher. Kernel operation card pin f36635671c65fc63ba6db5a4741a2c3ff102821f read; CLI2.1.312 help/config checked, safe-mode/no tools/MCP/no persistence. No auth/config changes, installation or model fallback. Native task/report validators and evidence gate apply.
+Root90–120active minutes/20minute checkpoints; CI20minutes per round; repeated failure initial plus at most2 reasoned diagnoses. Scope excludes M2, UI, real provider, dependency/permission change, release/deploy. Accurate observed usage retained per invocation; aggregate tools/provider/billing/active-wait unknown/null.
+
+M1c plan gate ACCEPT: Claude initial REWORK4points; human-only policy, transient-failure recording and metadata capacity clarified. JSONv2 premise corrected by real pinned stdlib probe; follow-up ACCEPT. Native T002 read-only audit ACCEPT; T003 compiling Red retained and implementation authorized11:00:15Z through11:45:15Z. Root web/API/docs gates tracked separately; no product completion claim.

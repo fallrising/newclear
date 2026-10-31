@@ -260,3 +260,19 @@ Design: [Session control room](../sdd/session-control-room.md). Diagnosis and pr
 [evidence](../evidence/session-control-room-20261030.md).
 Draft delivery: [PR #832](https://github.com/fallrising/newclear/pull/832); final-head CI and independent
 review are separate gates. No merge or product acceptance is claimed by this documentation update.
+
+
+## T-0339 — M1c sealed human reports
+
+One Ready task: [M1c plan](../plans/m1c-human-reports-20261031.md), REPORT-AC-01..05; supports H02.
+Source9e536de1dc1a532c8e3d78355e770bc757e190da. Existing claim/owner continuation applies.
+The newer Session/provider proposals preserve this next step and Fake-only. Root owns plan/API/docs;
+bounded implementation adds human report command/read ports, immutable SQL migration, service/HTTP and
+real integration/fault tests. No M2/UI/L1/provider/dependencies/release/deploy; full product ACs unchanged.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HM1C | Seal scoped human reports and atomically submit Review or Evidence | REPORT-AC-01..05; H02 support | in_progress | 2026-10-31T10:49:00Z | — | 2026-10-31T11:02:03Z |
+
+Plan and independent Claude review precede production edits. Named tests remain Proposed/NotRun until
+actual logs exist. Historical product acceptance and other task rows retain their status.

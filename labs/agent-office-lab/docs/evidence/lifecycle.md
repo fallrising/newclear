@@ -25,3 +25,5 @@
 固定上游的 Office host restart 仍會在 Workers.start() 呼叫 wakeAll，自動恢復 worker，與 SDD 的 interrupted／手動恢復契約不同。**AC-08 整體仍 pending**；此處的程序 resume 不等於 Office host restart。AC-05 亦僅有 OpenCode 寫入權限子集，Grok／Pi 待驗。完整 OS egress／讀取邊界仍未驗收。
 
 來源：[OpenCode 1.19.5 權限 TUI](https://github.com/anomalyco/opencode/blob/v1.19.5/packages/tui/src/routes/session/permission.tsx)、[固定 Office manager](https://github.com/AgentSystemLabs/agent-office/blob/852e2ab28c4f3f31bffdf4b20353bd119c9d3270/src/server/workers/manager.ts)。
+
+後續 T-0005 已補上 lab host 中斷／手動恢復 adapter，見[重啟實測與範圍](restart.md)；本頁保留 T-0004 當時的結果與限制。

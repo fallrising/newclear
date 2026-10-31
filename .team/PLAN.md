@@ -2539,6 +2539,28 @@ ULR live checks passed: 17:59:47Z runner stopped, compatible100%/3modules/settin
 
 ULR evidence gate ACCEPT 2026-10-31T18:04:12Z: lead inspected actual private raw management/SQL/journal/service receipts and final preservation; T855 independent public-evidence ACCEPT and actual index/task/diff checks passed. No production source edits, authority extension or billing change. Final PR/CI/readback and board closure remain.
 
+## Program: Fanzloud M1 executor T-0447 (2026-10-31T18:37:19Z)
+
+Owner approved bounded AP extension and private KVM host preparation; desk PR343 merged.
+Contract: platform/agent-platform/docs/EXTERNAL-WORKSPACE.md.
+Root owns docs, host preparation, trusted adapter, live qualification and parent Web wiring.
+One native worker owns AP source/tests in isolated fanz-executor-worker-20261031 worktree; task .team/fanz-executor-t0447/worker.md. No nested delegation.
+Independent reviewer after integration; gate EX-01/02/03 before parent Web acceptance.
+One VM4CPU/4GiB, coding10min, existing subscription only. Unknown never auto-retried.
+Status: implementation starting; all new gates pending.
+
+T-0447 EX02 actual VM/tools boundary passed; source.bundle moved from disappearing
+/tmp to trusted fixed control path following actual failed checkout+SDKstat evidence.
+All failed VM runs cancelled with confirmed cleanup. Real provider calls still0.
+Same implementation worker now receives gateway-worker.md (Rust-only isolated tree),
+root owns functional HTML/JS and live browser. One final browser coding invocation
+will jointly prove EX03/M1; no separate duplicated live coding probe.
+
+T-0447 source gate: integrated gateway/Rust workspace green; AP full native run
+retained backup019 fingerprint failures, independently derived exact new catalog
+and27 affected/negative cases now pass. Remote11 runtime/helper hashes match.
+Browser real login/catalog/logout and mocked unknown-submit reload refusal checked;
+real coding invocation still0. Preparing frozen source for one live Web run.
 ## T-0339 immutable project policy — 2026-10-31
 
 Owner approved the concrete local JSON/exact-project/exact-AC/immutable accepted-policy direction. Root owns the specification, plan, integration and acceptance. BOARD HMPOL is the product progress authority. T-001 is one 10-minute read-only native audit; no recursive delegation. Claude Code claude-opus-5-5/high reviews the concrete plan and frozen code, each480s initial plus at most one actual-revision follow-up. Root active estimate120–150minutes,20minute checkpoints; CI each round20minutes. Failed checks retain evidence; initial failure plus at most two new-hypothesis diagnoses. No coverage/UI/provider/dependency/release/deploy. All implementation waits for the concrete plan review.
@@ -2565,3 +2587,11 @@ FQ evidence gate ACCEPT 2026-10-31T18:47:06Z: final107Node/304Python=411tests, f
 Owner continues. Lead sole writer for DI01–04/T0032: bounded rawartifact client, WebCrypto exact-byte verification, session/expiry/race guard and exactBlob; no Worker/API/runner/schema/authoritychanges. RGR, fullsuite and existing syntheticlocalbrowser qualification. One fresh readonly finalreviewer T857, inheritedmodel/effort/permissions, <=1500tokens+onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota, no delegation/private/network/writes/tests; instructions not OS isolation. Prior approved originaldashboard update scope persists; source qualification and any actual live deployment receipts kept separate, no newhumanwindow/ownerbrowserchecks or paidupgrade.
 
 DI source/local evidence gate ACCEPT 2026-10-31T19:13:43Z: RED11, initialGREEN42, final121Node/304Python=425, DI1 realbrowser15checks/104API/noerrors with exactbytes/digest and tamper rejection; T857 finalACCEPT. Initial socketpathfailure retained, shorttaskID correction only. Browser3asset hashes exact, document checks passed. Originaldashboard upload to follow qualified pinned source and prior approval, without runner pause/authority renewal; any live evidence separate.
+
+T-0447/M1 actual acceptance: one official subscription invocation on33e1eb70 produced
+285byte totals.py-only patch, real checks passed, browser five states/diff/download
+and zero errors; AP cleanup plus independent0claims/VM/cgroup/processes. Reviewer
+acceptedEX01–03/FN01/singleFN03. FN06 found reason/cancel and never-allocated display
+gaps; narrow correction plus realdenial/queuedcancel/noVM and labelledmockprojections
+passed; original success read back unchanged, no secondprovider. Final review/CI/merge
+and ledger closure remain. M2/M3/CloudAC04/AC05 not claimed.

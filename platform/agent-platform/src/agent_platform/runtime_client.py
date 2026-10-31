@@ -61,7 +61,14 @@ class RuntimeClient:
                     catalog["egress_policy_sha256"],
                 ),
             )
-            conn.execute("UPDATE runtime_capacity SET draining=false WHERE node_id='cocoon-local'")
+            slots = catalog.get("slots", 4)
+            if type(slots) is not int or not 1 <= slots <= 4:
+                raise Problem(409, "runtime_capacity_invalid")
+            conn.execute(
+                "UPDATE runtime_capacity SET draining=false,slots=%s,cpu=%s,memory_bytes=%s "
+                "WHERE node_id='cocoon-local'",
+                (slots, slots * 4, slots * 4 * 1024**3),
+            )
         return catalog
 
     def fence(self, run):
@@ -133,8 +140,15 @@ class RuntimeClient:
                 "base_sha": run["base_sha"],
                 "deadline": run["deadline"].isoformat(),
                 "require_approval": run.get("require_approval", False),
-                "model_transport": getattr(self, "model_transport", False),
+                "model_transport": False
+                if run.get("backend") == "claude-subscription"
+                else getattr(self, "model_transport", False),
                 "tool_transport": run.get("tool_transport", False),
+                **(
+                    {"external_workspace": True}
+                    if run.get("backend") == "claude-subscription"
+                    else {}
+                ),
                 "egress_policy_sha256": run.get("egress_policy_sha256"),
                 "verification": run.get(
                     "verification",

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fanzloud · 隔離任務</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/assets/p0.css">
+  <script type="module" src="/assets/isolated.js"></script>
+</head>
+<body>
+<main class="shell">
+  <header><p class="eyebrow">PRIVATE OPERATOR</p><h1>Fanzloud 隔離任務</h1><p id="connection-status" class="status" aria-live="polite">正在連線…</p></header>
+  <section id="login-panel" class="panel">
+    <h2>登入</h2>
+    <form id="login-form">
+      <label for="username">Operator</label><input id="username" autocomplete="username" required>
+      <label for="password">密碼</label><input id="password" type="password" autocomplete="current-password" required>
+      <button id="login" type="submit">登入</button>
+    </form>
+  </section>
+  <section id="task-panel" class="panel" hidden>
+    <div class="panel-heading"><h2>建立 coding 任務</h2><button id="logout" class="quiet" type="button">登出</button></div>
+    <p>每個任務使用獨立工作區；完成後取得 diff 與檢查結果。</p>
+    <form id="task-form">
+      <label for="project">專案與來源版本</label><select id="project" required></select>
+      <p id="base-sha" class="mono"></p>
+      <label for="agent">Agent</label><select id="agent" required></select>
+      <label for="title">任務名稱</label><input id="title" maxlength="200" required>
+      <label for="prompt">任務內容</label><textarea id="prompt" rows="6" maxlength="20000" required></textarea>
+      <button id="submit-task" type="submit">提交任務</button>
+    </form>
+    <p id="submit-status" class="status" aria-live="polite"></p>
+    <section class="card">
+      <h3>任務進度</h3><p id="run-id" class="mono"></p><p id="run-status" aria-live="polite">尚未提交</p><p id="run-reason" aria-live="polite"></p>
+      <pre id="activity" class="timeline" tabindex="0" aria-label="任務狀態紀錄"></pre>
+      <button id="cancel-run" type="button" disabled>取消任務</button><p id="cancel-status" aria-live="polite"></p>
+      <button id="refresh" class="secondary" type="button">重新讀取狀態</button>
+    </section>
+    <section class="card">
+      <div class="panel-heading"><h3>Final diff</h3><button id="download-diff" type="button" disabled>下載 diff</button></div>
+      <p id="verification" aria-live="polite">尚無檢查結果</p><p id="cleanup"></p>
+      <pre id="diff-output" class="diff" tabindex="0" aria-label="任務 diff">尚無 diff</pre>
+    </section>
+    <section class="card"><h3>最近任務</h3><ul id="recent-tasks"></ul></section>
+  </section>
+  <p id="error-message" class="error" role="alert"></p>
+</main>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Fanzloud 主線重校：Web 操作隔離 coding agents
 
-- 日期：2026-10-31；desk：T-0442；狀態：**Owner approved（2026-10-31「同意，繼續開發。」）；M1 qualification 開始**。
+- 日期：2026-10-31；desk：T-0442；狀態：**Owner approved（2026-10-31「同意，繼續開發。」）；M1 單任務實測通過，交付見驗收紀錄**。
 - 本文件與 ADR-0008 的主線方向已批准；不因此宣稱 route 已驗證，不授權新增付費、部署或相鄰專案變更。
 - 原始目標：[TD §1](docs/TD.md#1-product-definition)。目前實際能力與歷史證據：[SUCCESS](SUCCESS.md)。
 
@@ -74,7 +74,11 @@ M1 qualification 的第一個可執行驗收：在既有、已授權的隔離後
 
 M1 預先鎖定操作目標、一次提交、單任務 10 分鐘、最大並行 1；M2 最大並行 2；M3 handoff 最多 writer 兩次／review 兩次。超時停止新工作並對帳／清理；不能把停止觀察當成已停止遠端工作。不透明 CLI 的 provider request／token／費用記 unknown，不能把 invocation 數宣稱為硬 token 或金額上限。
 
-## 6. 最終驗收（全部必須通過，現時全部 NOT_RUN）
+## 6. 最終驗收（全部必須通過）
+
+2026-10-31：M1 的 FN-01、FN-03 單任務／循序部分與 FN-06 證據見
+[M1 實測紀錄](docs/acceptance/M1-isolated.md)。FN-02、FN-03 並行、FN-04/05/07
+仍未完成；最終 MVP 的條件不變。
 
 | ID | Given / When / Then | 必留證據 |
 | --- | --- | --- |

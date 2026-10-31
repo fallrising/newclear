@@ -1,3 +1,5 @@
+> T-0447 adds explicit opt-in external workspace tools for [Fanzloud M1](../fanzloud/docs/acceptance/M1-isolated.md). Default OpenHands behavior remains separate; [contract and bounds](docs/EXTERNAL-WORKSPACE.md). One real subscription coding task is verified, not full platform completion.
+
 # Agent Platform
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。

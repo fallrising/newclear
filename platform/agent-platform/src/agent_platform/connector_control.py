@@ -92,6 +92,8 @@ def control(service, run_id, request):
 
     with service.journal.locked(run_id):
         row = service.require(run_id, request.generation)
+        if row["input"].get("external_workspace"):
+            raise Problem(409, "external_workspace_control_unsupported")
         service.guard(row, controlling=True)
         if datetime.fromisoformat(row["input"]["deadline"]) <= datetime.now(UTC):
             raise Problem(409, "run_deadline_expired")

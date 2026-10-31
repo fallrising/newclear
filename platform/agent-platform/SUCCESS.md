@@ -217,3 +217,11 @@ after actual Worker outcomes; existing backend behavior is unchanged.
 | RTF-02 | passed (local) | Same single scenario4.0s includes persist exception→interrupted/resultless/noarchive/held1/no release; reload/live observations unchanged; freshbuild/type/format/Ruff passed |
 
 No SQL-state rewrite/trigger bypass or new product RED claim. Fullfake/live/M4 remains open.
+
+## Bounded scope: T-0447 Fanzloud M1 external workspace
+
+Owner approved the [external workspace contract](docs/EXTERNAL-WORKSPACE.md).
+EX-01 contract, EX-02 real isolated workspace and EX-03 real subscription coding
+are pending; no whole-platform or Fanzloud Web completion claim.
+
+T-0447 EX01–03 have actual external-workspace evidence in [Fanzloud M1 acceptance](../fanzloud/docs/acceptance/M1-isolated.md): one official subscription CLI repair, fixed-base checks/diff, secret/egress/sequence isolation and observed cleanup. This does not close the remaining Agent Platform mainline or M4.

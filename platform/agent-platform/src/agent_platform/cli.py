@@ -295,7 +295,12 @@ def main():
                     runner.run_once()
                     time.sleep(1)
         elif args.command == "worker":
-            runner = Worker(db, RuntimeClient.from_env())
+            subscription = None
+            if os.environ.get("SUBSCRIPTION_CONFIG"):
+                from .subscription_claude import ClaudeSubscription
+
+                subscription = ClaudeSubscription(os.environ["SUBSCRIPTION_CONFIG"])
+            runner = Worker(db, RuntimeClient.from_env(), subscription=subscription)
             if args.once:
                 runner.run_once()
             else:

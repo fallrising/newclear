@@ -1,5 +1,14 @@
 # Virtual Office 任務板
 
+## T-0007 — 瀏覽器文字狀態頁
+
+範圍：唯讀 HTML 文字 fallback、15 秒 jitter 單一請求輪詢／隱藏暫停／失敗退避、斷線與最後成功時間、安全文字節點、限定靜態根的本機 preview。預定 Node/Chrome/review/CI。不部署、不冒充 Three.js 或完整 AC-06。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0007-1 | 51 Node tests、真 Chrome、索引通過；[證據](../DASHBOARD.md) | AC-06 | in_progress | 2026-10-31T19:08:22Z | — | 2026-10-31T19:11:21Z |
+
+
 ## T-0006 — 前端共用呈現規則
 
 Owner 指示繼續。範圍：純函式呈現模型，八狀態、stale/alert 優先序、雙向協作與固定座位、預設關閉夜間 overlay。測試輸入不變、順序穩定與邊界時間；Claude 唯讀 review。不是 renderer、路徑規劃或完整 M2；Three.js／瀏覽器／真實宿主與部署驗收仍保留。

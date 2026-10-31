@@ -4,5 +4,5 @@
   "private": true,
   "type": "module",
   "engines": {"node": ">=22"},
-  "scripts": {"test": "node --test tests/*.test.mjs", "check": "node --check src/presentation.mjs && node --check src/core.mjs && node --check src/worker.mjs && node --check bin/office-report.mjs && node --check bin/office-run.mjs"}
+  "scripts": {"preview": "node bin/office-preview.mjs", "test:browser": "node tests/browser-smoke.mjs", "test": "node --test tests/*.test.mjs", "check": "node --check web/app.mjs && node --check bin/office-preview.mjs && node --check src/presentation.mjs && node --check src/core.mjs && node --check src/worker.mjs && node --check bin/office-report.mjs && node --check bin/office-run.mjs"}
 }

@@ -494,13 +494,33 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0028-1 | 固定候選與fresh前態 | UL-01 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
-| T-0028-2 | 既有Worker與資產更新 | UL-02 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
-| T-0028-3 | 保全與有界live核驗（等owner） | UL-03 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
-| T-0028-4 | 公開證據／審查／交付 | UL-04 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
+| T-0028-1 | 固定候選與fresh前態 | UL-01 | done | 2026-10-31T10:01:16Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
+| T-0028-2 | 既有Worker與資產更新 | UL-02 | done | 2026-10-31T10:01:16Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
+| T-0028-3 | 保全與有界live核驗 | UL-03 | done | 2026-10-31T10:01:16Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
+| T-0028-4 | 公開證據／審查／交付 | UL-04 | done | 2026-10-31T10:01:16Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
 
 [範圍與驗收](../usage-rollout.md)；正向usage200／真人登入另列pending，不以403代替。
 
 ### T-0028 部分執行
 
 2026-10-31T10:08:42Z：原Worker100%更新、module管理bytes及設定／歷史保全通過；UL03 partial，等owner準備好後批准human-only30分鐘窗口及登入。原09:15 unknown保留且後續Cron skipped_overlap。UL01／02證據已備，所有列保持in_progress／end空白；本輪PR只保存部分結果，不關閉任務。[證據](../evidence/m1-usage-live.md)。
+
+2026-10-31T12:08:11Z：owner批准原human-only1800秒窗口；10項隔離SQLite guard cases及T853操作審查ACCEPT。只續原human grant revision1→2，截止12:38:10Z（開始12:08:10Z），scope/capabilities與其他三roles不變，unknown／排程保留。通用authorization.py仍要求全域靜止；此次已批准的特定operator用精確human CAS及同grant active/schedule guard，原其他role在途不被清除。真人登入／asset／usage驗證仍等owner回報，T0028保持open，實際續期／回讀收據留私人目錄。
+
+2026-10-31T12:18:35Z：owner以Safari完成真人登入與手動用量讀取，122／84／1與主導唯讀D1窗口聚合相符。依owner加快流程的指示，不再要求Console資產hash；該項未執行，不冒稱已驗。UL真人功能讀取接受，原unknown未修復；待文件Git交付後依規則收尾，保持end空白。owner目前不需再操作。
+
+## T-0029 — 未知結果結案
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0029-1 | 離線證據與計畫 | UR-01 | done | 2026-10-31T12:28:56Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
+| T-0029-2 | 精確CAS與歷史保全 | UR-02 | done | 2026-10-31T12:28:56Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
+| T-0029-3 | Worker／看板／bot未知終局 | UR-03 | done | 2026-10-31T12:28:56Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
+| T-0029-4 | 隔離回歸／審查／交付 | UR-04 | done | 2026-10-31T12:28:56Z | 2026-10-31T12:41:57Z | 2026-10-31T12:42:52Z |
+
+### T-0028／T-0029 Git交付與收尾
+
+- [PR850](https://github.com/fallrising/newclear/pull/850) head `d84934526c75029c74ba93b09057dd6f9c17871f`，merge `8bdc5666f6e1efea3c40d54240fec8db8a809a03`，合併時間2026-10-31T12:41:57Z；本機與遠端fulltree相同，head為main祖先，11份固定候選逐byte等於remote，readback工作樹乾淨。並行PLAN append與他專案修改正常merge保留，無force。
+- exact-head CI全過：CloudLab `41202122647`、Project success `41202122685`、llms `41202122675`；本機400tests（96Node/304Python），跨Python／真SQLite結案→新Cron→validated及真result先到CAS0保全；T854 source／隔離ACCEPT。RED、fixture祖先拒絕及同步spawn timeout皆保留。
+- T0028依owner調整驗收範圍收尾：Safari真人登入／手動用量122/84/1與D1同窗口相符；Console asset hash取消且未執行，不冒稱逐byte瀏覽器驗證。T853接受human-only1800秒操作，原窗口固定12:08:10Z–12:38:10Z，不自動延長。T852原REWORK及其修文歷史保留；不要求owner新增手動驗收。
+- T0029僅關閉UR01–04 source／local，尚未部署新Worker或處置原unknown；私人原命令／journal已唯讀採集並由真CLI生成未applied計畫。實際原09:15UTC命令結案與短暫runnerpause/drain仍需具體批准，保留原結果unknown、journal與授權／服務截止、免費方案。完整主線仍incomplete，無usable tag。本收尾只改任務板。

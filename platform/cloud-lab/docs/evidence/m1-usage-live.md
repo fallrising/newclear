@@ -1,6 +1,14 @@
 # UL：應用用量觀測部署與部分驗證
 
-## 結論
+## 最新真人驗證
+
+Owner於2026-10-31使用Safari登入，回報觀測時間12:18:35Z：保留122/10000（剩9878）、近24h84/1440（剩1356）、active1/1（剩0），畫面顯示快照約46秒、時間估計誤差2秒。主導另以唯讀D1聚合按同一24h窗口核對，三項數字相符，無觀測時間後新增command；不是同一transaction或獨立擷取的browser HTTP receipt。登入與手動用量功能驗證通過，unknown仍佔槽，不代表排程已恢復。
+
+Owner指出驗收過細並要求加快；取消要求owner執行Console逐asset hash比對。這項額外技術檢查明確未做，不記為通過；以實際Safari功能回報加管理數字核對接受本輪真人讀取。Safari是正常支援客戶端，不需換瀏覽器、傳session或再做同一測試。後續優先處理unknown的可稽核處置，不擴大真人驗收流程。Human窗口仍固定12:08:10Z至12:38:10Z，不再續期。
+
+以下保留早先部署階段的partial狀態與失敗紀錄；後續真人回報以上段為準。
+
+## 原部署階段結論
 
 2026-10-31原Worker已發布PR827固定候選，新版本100%；三個module管理下載逐byte相符，三份assets已由新session／bucket上傳並在同次Worker metadata附completion JWT。原D1／Access／secrets bindings／Cron／所有期限保留。**UL-03尚未完成**：runner不是human且沒有commands:read，靜態頁面及usage403；正向資產HTTP bytes、usage200及真人登入未驗，不能以成功上傳或拒絕結果代替。
 

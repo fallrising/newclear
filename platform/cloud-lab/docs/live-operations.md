@@ -58,3 +58,7 @@ Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，�
 - 記錄due、實際admitted_at、dispatch／execution deadline、runner claim與finished_at。provider在當分鐘內延遲不等於錯過整個slot；但handler時間亦不是D1持久提交時間，不保證任意延遲下都有足夠執行窗口。
 - 失敗先依批准方案停用並提升schedule revision、移除本次Cron及對帳；還原grant也使用新CAS revision。保留failed firing／command和journal，不刪除或重播未知工作。
 - Worker版本回退後，GET script/settings可能仍反映最後上傳設定。本次實測active版本已回原版本、其六個bindings與原值相符，而settings視圖仍帶inactive HEALTH_SCHEDULE。遇到此差異先讀deployments與該active version的resources/bindings，逐欄核對；不要為了讓兩個視圖相等而盲目PATCH bindings、重播回退或覆寫secret。把例外與實際D1停用／revision狀態記進收據。
+
+## Unknown結案的版本邊界
+
+原命令unknown先留存D1與原journal證據；只按[UR操作條件](unknown-resolution.md)準備私人plan。計畫生成不等於批准或執行。不得為使active0而直接UPDATE／刪row／清journal；先確認新Worker支援closed_unknown，再按具體批准暫停runner、排空在途、fresh完整CAS一次、回讀及恢復原service與截止。原unknown不得重跑，恢復只接受新ID；結案後舊Worker rollback不安全，需保留新護欄。

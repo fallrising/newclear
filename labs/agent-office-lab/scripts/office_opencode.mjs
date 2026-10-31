@@ -6,7 +6,7 @@ import { appendFileSync, existsSync, readFileSync, statSync, writeFileSync } fro
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { localOnly } from './local_office_policy.mjs';
+import { startLocalOffice } from './office_runtime.mjs';
 import { PermissionProbe, observePermissions } from './permission_probe.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -72,21 +72,9 @@ try {
   git(['add', '.']);
   git(['-c', 'core.hooksPath=/dev/null', '-c', 'commit.gpgsign=false', '-c', 'user.name=Lab fixture',
     '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'Synthetic OpenCode task']);
-  for (const key of Object.keys(process.env)) if (key.startsWith('AGENT_OFFICE_')) delete process.env[key];
-  process.env.LAB_OPENCODE_RUN = out;
-  process.env.LAB_OPENCODE_WORKSPACE = workspace;
-  if (checkLifecycle) process.env.LAB_OPENCODE_PERMISSION_MODE = 'ask';
-  const { loadConfig } = await import('../vendor/agent-office/dist/server/server/config.js');
-  const { startServer } = await import('../vendor/agent-office/dist/server/server/server.js');
   const password = randomBytes(24).toString('base64url');
-  const cfg = loadConfig([workspace, '--home', path.join(out, 'office-home'),
-    '--projects', path.join(out, 'projects'), '--host', '127.0.0.1', '--no-open',
-    '--max-workers', '1', '--weather', 'clear', '--webhook', '', '--password', password,
-    '--agent', path.join(lab, 'scripts/bin/opencode')]);
-  cfg.port = 0;
-  office = await startServer(cfg);
+  office = await startLocalOffice({ out, workspace, password, ask: checkLifecycle });
   for (const floor of office.floors()) {
-    localOnly(floor, report.model);
     if (checkLifecycle) {
       observePermissions(floor.workers, permissions, error => { probeError = error; });
     }

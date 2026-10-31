@@ -39,3 +39,5 @@ Queue receipt、Workflow progress、派送 ACK 與模型的成功文字都不是
 [Bot私人政策v1](../docs/bot-policy.md)為本機CLI契約：固定期限／總額，綁config與原journal；不屬MCP模型參數或雲端授權grant。
 
 [Bot續租管理CLI](../docs/bot-policy-renewal.md)提供planned／renewed／already_applied回執；只管理本機政策，非模型工具或雲端grant API。
+
+[未知結果結案](../docs/unknown-resolution.md)新增可信operator離線計畫及closed_unknown控制面終局；owner結果仍unknown，沒有新增模型工具或授權capability。

@@ -1,7 +1,7 @@
 import {Fault,requireThat,strictJSON,readBody,enc,iso,timestamp,integer,fields,id,digest,recipeRef,sameRef,sameRecipe} from './protocol.mjs';
 import {authenticate,getGrant,capability} from './auth.mjs';
 
-const terminal=new Set(['result_recorded','cancelled_before_dispatch','expired_before_dispatch']);
+const terminal=new Set(['closed_unknown','result_recorded','cancelled_before_dispatch','expired_before_dispatch']);
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}});
 function scope(ctx,c){const g=ctx.grant.policy;requireThat(c.workspace_id===g.workspace_id&&sameRef(c.resource_ref,g.resource_ref)&&sameRecipe(c.recipe_ref,g.recipe_ref),403,'SCOPE_DENIED');}
 function guardSQL(){return 'EXISTS(SELECT 1 FROM grants WHERE id=? AND revision=? AND revoked=0)';}
@@ -126,7 +126,7 @@ async function claim(db,ctx,now,env){
 function assignment(v){return {command_id:v.command_id,command:v.command,attempt:v.attempt,external_ref:v.external_ref};}
 async function report(db,ctx,b,now){
  capability(ctx,'runs:report');fields(b,['command_id','attempt_id','fence','owner_outcome','started_at','finished_at','artifact']);id(b.command_id);id(b.attempt_id);integer(b.fence,1,2147483647);requireThat(['succeeded','unknown'].includes(b.owner_outcome));
- const r=await row(db,b.command_id),v=record(r);scope(ctx,v.command);requireThat(v.holder===ctx.principal&&v.attempt?.attempt_id===b.attempt_id&&v.attempt.fence===b.fence,409,'STALE_FENCE');const hash=await digest(JSON.stringify(b));
+ const r=await row(db,b.command_id),v=record(r);scope(ctx,v.command);requireThat(v.delivery!=='closed_unknown',409,'RECONCILIATION_CLOSED');requireThat(v.holder===ctx.principal&&v.attempt?.attempt_id===b.attempt_id&&v.attempt.fence===b.fence,409,'STALE_FENCE');const hash=await digest(JSON.stringify(b));
  if(v.report_digest){requireThat(v.report_digest===hash,409,'RESULT_CONFLICT');return v;}
  requireThat(timestamp(v.attempt.lease_expires_at)>now,409,'STALE_FENCE');if(v.attempt.mode==='reconcile_only')capability(ctx,'runs:reconcile');
  if(b.owner_outcome==='unknown'){requireThat(b.started_at===null&&b.finished_at===null&&b.artifact===null);v.delivery='reconciling';v.attempt.lease_expires_at=iso(now);v.updated_at=iso(now);return save(db,r,v,ctx);}
@@ -161,7 +161,7 @@ export async function handle(request,env,now=Date.now(),fetcher=fetch){
   if(url.pathname==='/api/runner/report'&&request.method==='POST')return send({command:publicRecord(await report(db,ctx,b,now))});
   const match=url.pathname.match(/^\/api\/commands\/([A-Za-z0-9_-]{1,128})(?:\/(cancel|artifact))?$/);
   if(match){const r=await row(db,match[1]),v=record(r);scope(ctx,v.command);
-   if(match[2]==='cancel'&&request.method==='POST'){capability(ctx,'commands:cancel-request');fields(b,[]);v.cancel_requested=true;v.updated_at=iso(now);if(!v.attempt)v.delivery='cancelled_before_dispatch';return send({command:publicRecord(await save(db,r,v,ctx))});}
+   if(match[2]==='cancel'&&request.method==='POST'){capability(ctx,'commands:cancel-request');fields(b,[]);if(v.delivery==='closed_unknown')return send({command:publicRecord(v)});v.cancel_requested=true;v.updated_at=iso(now);if(!v.attempt)v.delivery='cancelled_before_dispatch';return send({command:publicRecord(await save(db,r,v,ctx))});}
    if(match[2]==='artifact'&&request.method==='GET'){capability(ctx,'artifact:read');requireThat(v.result&&v.artifact,404,'NOT_FOUND');requireThat(timestamp(v.result.artifact_expires_at)>now,410,'EVIDENCE_EXPIRED');return new Response(v.artifact,{headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Disposition':'attachment; filename="health.json"','X-Request-Id':request_id}});}
    if(!match[2]&&request.method==='GET'){capability(ctx,'commands:read');return send({command:publicRecord(view(r,now))});}
   }

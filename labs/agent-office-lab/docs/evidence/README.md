@@ -17,3 +17,5 @@
 保留的失敗包括：受限環境無 Metal／socket、Codex 109,823-token prompt 超出 32K、模型把 apply_patch 寫成文字未改檔、OpenCode 插件缺 SDK 時等待，以及取消驗收等待 activity=bash 超時。後續修正沒有覆寫失敗紀錄。早期 Strata GitHub 研究 loop 未驗收成功，不能把外層代理的研究冒充本地模型產出。
 
 舊文件原 runs 連結統一改指向本摘要，不表示 raw log／圖片在 repo 中。詳細已知限制見 [SUCCESS](../../SUCCESS.md)。本次匯入檢查另記於 [publication.md](publication.md)。
+
+後續新增：[T-0004 生命週期](lifecycle.md)、[T-0005 host 中斷與手動恢復](restart.md)。各自保留當輪 runtime hash、先前失敗與範圍，不覆寫歷史結果。

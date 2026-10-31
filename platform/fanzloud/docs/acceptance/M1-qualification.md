@@ -10,7 +10,7 @@ Status: PARTIAL. No real coding task, Web integration or FN acceptance passed in
 - Post-run exact-argv process observation found zero owned CLI/MCP processes. This is probe process cleanup, not VM cleanup.
 - Q1 **PASS_CAPABILITY_ONLY**: supported native tool restriction plus a trusted inert MCP tool works with the existing login. It does not prove repository tools cannot read secrets in a real executor, license arbitrary services, or provide a coding diff.
 - Q2 **PREREQUISITE_FAILED**: reviewed Agent Platform connector supports prepare/prompt/result/release and a fixture-only bind/poll/deliver/ack/close mailbox. It does not expose the host-to-guest native-agent workspace tool route this proposal needs. Relevant sources: [allocation/preparation](../../../agent-platform/src/agent_platform/connector.py), [tool mailbox](../../../agent-platform/src/agent_platform/connector_tool.py), [runtime client](../../../agent-platform/src/agent_platform/runtime_client.py). No private driver call or host-shell fallback used.
-- Q3 and FN-01–07 **NOT_RUN**. Zero coding submissions, VM allocations, remote mutations, Cloud retries or new API calls. The inert CLI call is a real model invocation, distinct from those zero counts. Internal provider requests/token costs remain unknown.
+- Q3 and FN-01–07 **NOT_RUN**. Zero coding submissions, VM allocations, remote mutations or Cloud retries. No API-billing route was enabled. The inert CLI call is a real model invocation; internal provider request count, token usage and actual billing remain unknown.
 
 ## Environment prerequisite
 

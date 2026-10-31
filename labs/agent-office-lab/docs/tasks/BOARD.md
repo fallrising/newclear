@@ -79,3 +79,13 @@ T-0006 真實 Grok／Pi help/version 與 Pi 隔離設定格式檢查通過，全
 | T-0007-01 | 有界 Pi runner、原生啟動與 owner 授權的一次付費任務通過 | AC-04 | done | 2026-10-31T18:03:31Z | 2026-10-31T18:19:17Z | 2026-10-31T18:19:51Z |
 
 T-0007：owner 已確認一次付費驗收；3 次 DeepSeek 請求、原生 agent_settled、產物及清理通過。[真實證據](../evidence/pi-live-2026-11-01.json)。此次授權已用完，未追加重跑；[PR #861](https://github.com/fallrising/newclear/pull/861) 已合併，commit `55c0c6d68c055aab6613ce6293a4d8ba7b8e2f39`。offline／validate 兩項 CI success；已回讀主線 evidence：completed、model_inference_verified=true、3 次請求、204 output tokens。AC-04 與其 T-0002-04 待辦一併結案，完整 MVP 仍 incomplete。
+
+## T-0008：Grok 原生啟動與隔離
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0008-01 | 原生登入等待、隔離與清理已驗證；待 PR 交付 | AC-01、AC-03（前置） | in_progress | 2026-10-31T18:31:19Z | — | 2026-10-31T18:36:04Z |
+
+本輪先驗證固定官方 CLI 的原生啟動，OS 阻擋外部網路、不載入 owner 登入檔、不接受 prompt；AC-03 真實任務保持 pending。
+
+T-0008：47 項離線測試及原生啟動驗收通過，詳見[證據](../evidence/grok-startup-2026-11-01.json)。未載入 owner auth、未送 prompt，登入後 session hook／真實任務仍未驗收。

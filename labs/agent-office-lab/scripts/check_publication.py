@@ -34,7 +34,7 @@ for path in files:
             errors.append(f'{rel}: personal absolute path')
         if re.search(r'gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----', content):
             errors.append(f'{rel}: possible credential; inspect locally')
-        if path.suffix == '.py' or rel.as_posix() in {'scripts/bin/opencode', 'scripts/bin/pi'}:
+        if path.suffix == '.py' or rel.as_posix() in {'scripts/bin/opencode', 'scripts/bin/pi', 'scripts/bin/grok'}:
             ast.parse(content, filename=str(rel))
         elif path.suffix == '.json':
             json.loads(content)

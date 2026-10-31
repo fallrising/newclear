@@ -5,7 +5,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: 55d666b4d60083f54e558b75db6b4f5cc20d66f7
+source_commit: 205579b22db64d9c45754dede6f37cb8b29e9f24
 ---
 
 # Agent Office Lab 驗收
@@ -43,6 +43,8 @@ T-0009-02：owner 已完成 Cursor 登入，原生 status 回報 authenticated�
 | AC-13 | Given 官方 Cursor Agent 與明確登入，When 執行同等合成任務，Then 原生 session、模型來源、完成事件與產物 hash 可核對。 | pending | [Cursor 原生登入等待／隔離／清理](docs/evidence/cursor-startup-2026-11-01.json)通過；登入後 session／模型／任務仍待驗。 |
 
 ## 現況與缺口
+
+T-0009-02 的 owner 授權單次任務已執行，但[驗收失敗](docs/evidence/cursor-live-2026-11-01.json)：產物正確，loop_limit=0 卻使原生 hooks 整份被忽略，沒有事件／用量證據，AC-13 保持 pending。已修正為 1、增加原生 schema 預檢並補合法讀取回歸；63 tests 與無 prompt 啟動通過。清理正確、沒有追加付費重跑；等 owner 新的一次批准。
 
 T-0009 已固定 Cursor CLI 並完成原生登入等待、workspace hooks 安裝／移除、OS 外網拒絕與程序清理，12.51 秒；55 項離線測試通過。[安裝／owner 登入命令](docs/CURSOR.md)。owner 已登入並由原生 status 核對；有界任務 runner 已準備，待一次配額／付費批准。
 

@@ -23,6 +23,7 @@ class CursorTaskBoundary(unittest.TestCase):
     def test_exact_single_prompt_and_two_tools(self):
         self.start()
         self.assertEqual(self.call('preToolUse', tool_name='Read', tool_input={'path':'input.json'})[0], {'permission':'allow'})
+        self.assertEqual(self.call('beforeReadFile', file_path=str(self.workspace/'input.json'))[0], {'permission':'allow'})
         self.call('postToolUse', tool_name='Read')
         self.assertEqual(self.call('preToolUse', tool_name='Write', tool_input={'path':'result.json','contents':'{}'})[0], {'permission':'allow'})
         self.call('postToolUse', tool_name='Write')

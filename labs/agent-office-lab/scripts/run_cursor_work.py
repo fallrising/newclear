@@ -22,7 +22,7 @@ from run_grok_startup import process_table, collect_owned, alive_owned
 from grok_startup import sandbox_profile
 
 SOURCES = ['run_cursor_work.py', 'cursor_cli.py', 'cursor_task_hook.py', 'cursor_work_policy.mjs',
-           'office_cursor_work.mjs', 'cursor-task/cursor-agent', 'remote_cli.py', 'run_grok_startup.py', 'grok_startup.py']
+           'office_cursor_work.mjs', 'cursor_hook_preflight.mjs', 'cursor-task/cursor-agent', 'remote_cli.py', 'run_grok_startup.py', 'grok_startup.py']
 
 
 def credential_path(lab=LAB):
@@ -62,7 +62,7 @@ def prepare(out, socket_dir, remote):
         'permissions': {'allow': ['Read(input.json)', 'Write(result.json)'],
                         'deny': ['Shell(*)', 'WebFetch(*)', 'Mcp(*:*)']}})
     hooks = {event: [{'command': shlex.join([sys.executable, str(LAB / 'scripts/cursor_task_hook.py'), event]),
-                      'timeout': 3, 'failClosed': True, **({'loop_limit': 0} if event == 'stop' else {})}] for event in EVENTS}
+                      'timeout': 3, 'failClosed': True, **({'loop_limit': 1} if event == 'stop' else {})}] for event in EVENTS}
     write_new_private(cursor / 'hooks.json', {'version': 1, 'hooks': hooks})
     write_new_private(out / 'task-plan.json', {'allow_remote': remote, 'model': MODEL,
         'prompt': PROMPT if remote else None, 'deadline': time.time() + 120})

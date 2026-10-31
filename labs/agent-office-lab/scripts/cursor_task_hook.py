@@ -56,7 +56,10 @@ def evaluate(event, payload, state, workspace, remote, deadline, now):
         if allowed: state.setdefault('tools', []).append(tool)
         result = {'permission': 'allow' if allowed else 'deny'}
         record.update(tool=tool if tool in ['Read', 'Write'] else 'other', allowed=bool(allowed))
-    elif event in ['beforeReadFile', 'beforeShellExecution', 'beforeMCPExecution', 'subagentStart']:
+    elif event == 'beforeReadFile':
+        allowed = valid and remote and state.get('prompts') == 1 and not state.get('failed') and safe_path(payload.get('file_path'), workspace, 'input.json', True)
+        result = {'permission': 'allow' if allowed else 'deny'}; record['allowed'] = bool(allowed)
+    elif event in ['beforeShellExecution', 'beforeMCPExecution', 'subagentStart']:
         result = {'permission': 'deny'}; record['allowed'] = False
     elif event == 'postToolUseFailure':
         state['failed'] = True; record['failed'] = True

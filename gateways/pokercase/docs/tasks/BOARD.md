@@ -1,5 +1,17 @@
 # Pokercase 技術任務
 
+## T-0426 — Bounded official Claude client pilot
+
+Demand: desk T-0426 / R-04; renewed claim PR344 merged. [LP-1–LP-3](T-0426-claude-pilot.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| LP-01 | Selected-version safety/model and isolated preflight | LP-1 | in_progress | 2026-10-31T18:41:00Z | — | 2026-10-31T18:41:00Z |
+| LP-02 | Six admissions executed; native same-process/resume acceptance remains open | LP-2 | in_progress | 2026-10-31T18:41:00Z | — | 2026-10-31T18:55:00Z |
+| LP-03 | Evidence, independent review and bounded delivery | LP-3 | in_progress | 2026-10-31T18:41:00Z | — | 2026-10-31T18:41:00Z |
+
+Observed five successful/complete and one cancelled/partial finalized rows. Text, Read tool and context continuation after restart passed; six distinct upstream CLI processes and zero `--resume` mean AC12–14 native reuse remains unverified. Scope decision now approved: Claude tools, Cursor text-only. Historical pending-decision text below remains a historical phase snapshot. No further live calls in this bounded attempt.
+
 ## T-0432 — Existing buffered HTTP settlement
 
 Demand: desk T-0432 / #698, claim PR309 merged. [Fixed BH-1–BH-5](T-0432-buffered-http-settlement.md).

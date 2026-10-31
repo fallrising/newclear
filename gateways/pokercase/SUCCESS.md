@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0432 — Process interruption and durable recovery
+
+Claim PR336 merged before product work. [Fixed CR-1–CR-5 and design](docs/tasks/T-0432-crash-recovery.md) implement the existing T-1102 M-10 recovery evidence requirement. Separate storage-subprocess boundaries from actual isolated HTTP/fakeCLI dispatch, retain identities and finalized history through SIGKILL/restart, and prove no replay or duplicate amounts. Existing behavior may already pass; no runtime defect or RED is claimed from a missing test. Current runtime passed unchanged:9storage-process cuts and3actual buffered gateway cases,407Rust/199Python/20repository tests,49contracts/8indexes,fmt/Clippy/locked builds and8prior isolated regressions. Independent source/runtime review passed; publication and final ledger/backup/cleanup remain delivery gates. Original17AC/T1102/Cargo and mainline incomplete/usable_tag none remain; AC04/17 and live acceptance are separate unresolved gates.
+
 ## T-0445 — Fixture startup ownership and safe diagnostics
 
 [FS-1–FS-5](docs/tasks/T-0445-fixture-startup.md) cover the bounded #701 continuation. The two implicated integration fixtures now require their owned post-bind address, health and admin identity before configuration; stderr drainage and failure diagnostics are bounded. Actual listening-log RED→GREEN and a separate mocked runner-cleanup RED→GREEN are retained. The fixed headless entry passed 10 scenarios, with 406 Rust tests/23 groups, 149 Python, 20 repository tests, original-target serial checks, fmt/Clippy/locked builds and eight previous isolated regressions. The first full-suite failure in an unchanged third Claude fixture and later passing controls remain explicit, with unknown cause. Independent review, normal PR/required CI, remote readback and final ledger/backup/cleanup are delivery gates. Original17AC/T1102/Cargo, mainline incomplete/usable_tag none and unresolved AC04/17 remain; no broader #701 or live-provider acceptance.

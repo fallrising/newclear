@@ -9,6 +9,10 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
+#[cfg(all(test, unix))]
+#[path = "store_crash_tests.rs"]
+mod crash_recovery_tests;
+
 use crate::secrets::{self, SecretBox, StoredKind};
 
 #[derive(Clone)]

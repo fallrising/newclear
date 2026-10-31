@@ -28,8 +28,8 @@ evidence.teardown_events=[];
 try {
   browser = await chromium.launch({headless:true,args:[`--ignore-certificate-errors-spki-list=${spki}`]});
   const page = await browser.newPage({acceptDownloads:true,viewport:{width:1280,height:960}});
-  page.on('pageerror', error => evidence.browser_errors.push(error.message));
-  page.on('console', msg => {if(msg.type()==='error') evidence.browser_errors.push(msg.text());});
+  page.on('pageerror', error => (tearingDown ? evidence.teardown_events : evidence.browser_errors).push(error.message));
+  page.on('console', msg => {if(msg.type()==='error') (tearingDown ? evidence.teardown_events : evidence.browser_errors).push(msg.text());});
   page.on('requestfailed', req => (tearingDown ? evidence.teardown_events : evidence.browser_errors).push(`${req.method()} ${new URL(req.url()).pathname}: ${req.failure()?.errorText}`));
   page.on('request', req => {if(req.method()==='POST'&&new URL(req.url()).pathname==='/api/v1/tasks') evidence.task_posts++;});
   page.on('response', async response => {
@@ -106,6 +106,8 @@ try {
 finally {
   tearingDown=true;
   await browser?.close(); await new Promise(resolve=>server.close(resolve));
+  if(evidence.browser_errors.length) evidence.status='FAILED';
   await writeFile(join(root,process.argv.includes('--preflight')?'browser-preflight.json':'browser-evidence.json'),JSON.stringify(evidence,null,2),{mode:0o600});
   console.log(JSON.stringify(evidence));
+  if(evidence.status==='FAILED') process.exitCode=1;
 }

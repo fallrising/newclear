@@ -6,6 +6,9 @@ date: 2026-07-27
 deciders: [project]
 ---
 
+> **2026-10-31 follow-up (proposed):** [ADR-0008](ADR-0008-provider-neutral-mainline.md) proposes removing Cloud P0 from the critical path while preserving this ADR’s credential and private-operator boundaries. This accepted ADR is not silently relaxed or retroactively marked live-verified.
+
+
 # Context
 
 The project owner wants to operate their existing coding-agent subscriptions from a private cloud

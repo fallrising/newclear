@@ -284,3 +284,18 @@ acceptance retain their status.
 M1c delivery: [PR #844](https://github.com/fallrising/newclear/pull/844) merged at `2026-10-31T11:54:35Z` as `013e3efdf81007981f8ebfc4ee35c93e45e7ffee`. Reviewed head `d116cb426c1973bc3a11f17a482710961bebed23` passed [HAI CI41198067472](https://github.com/fallrising/newclear/actions/runs/41198067472) and [project CI41198067429](https://github.com/fallrising/newclear/actions/runs/41198067429). Remote product/task-report readback matches the reviewed source.
 
 HM1C end uses the actual primary merge time. This closes only the sealed human-report API slice; full H01..H04/SUCCESS AC-02..04 retain their prior status. Next planned slice is M2, not started. Session/provider proposals remain Proposed; no usable tag/release/deploy. BOARD-only closure CI and desk synchronization are tracked separately in the private handoff.
+
+
+## T-0339 — M2 identity alignment and remaining policy decisions
+
+Owner continued after M1c. Source24af3ab7c7d6722314125cbe3ac009db57bd4ad1; no newer HAI design
+changes. One Ready bounded task: [M2 plan](../plans/m2-ac-identity-20261031.md).
+Writable: AC-specific backend validators/tests, AC API schemas, this board and related plan/evidence/
+navigation. No runtime policy configuration, migration, UI, provider, dependency, release/deploy.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HM2ID | Align new AC identity boundaries and verify policy-safe completion; document remaining M2 decisions | ID-AC-01..04; H02 support | in_progress | 2026-10-31T12:24:40Z | — | 2026-10-31T12:24:40Z |
+
+Full M2 policy-source and verified coverage remain unimplemented/pending contracts; this row does
+not close full M2, H02 or product AC-02. Claude plan review and implementation gates pending.

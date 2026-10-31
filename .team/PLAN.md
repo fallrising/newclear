@@ -2486,3 +2486,16 @@ M1c 11:38Z checkpoint: initial root full backend passed442.419s/168inputs; Claud
 M1c local evidence gate ACCEPT: revised fullbackend367.911s/168unchanged inputs, web30tests/39unchanged inputs, APIzero-warning, project49contracts/8indexes and task/report/document checks. Root compared all scoped files and acceptance oracles; T004 final review conditions are locally met. Final-head required CI, normal merge/readback and BOARD/desk closure still required. No full-product completion or subsequent milestone claim.
 
 M1c delivery integration: normal main49ac7a09 merge preserves the unrelated Agent Office Lab work;50project contracts/8indexes and20milestone Markdown/211links pass. All168backend/39web/17reviewed input hashes unchanged. No HAI contract drift.
+
+
+## HAI M2 — T-0339 / 2026-10-31T12:24:40Z
+
+Owner continued after M1c. Source24af3ab7c7d6722314125cbe3ac009db57bd4ad1 has no HAI product diff from delivered M1c; desk claim unchanged at a1b1bf8. Root first resolves M2 contract scope, then docs-first implementation where accepted rules suffice. New policy/coverage decisions require exact proposal and approval before dependent production work. BOARD is sole product status; root owns specs, gates and Git delivery. One native10minute readonly audit T001; Claude installed direct no-tools cli-team plan/code review (not dispatcher), claude-opus-5-5/high each480seconds plus at most one revision followup; no recursion/model fallback. Root90–120active minute estimate,20minute progress checkpoints; CI20minutes per round, commands bounded; failure initial plus at most2evidence-based diagnoses. Unknown aggregate tools/provider/billing/active-wait remain null. No M3/UI/realprovider/dependencies/release/deploy. Current phase contract reconciliation, production unstarted.
+
+M2 plan gate: Claude initial REWORK then ACCEPT with five required predispatch document edits, all
+applied. Explicit legacy Draft HAI-FIRST001 remains frozen; fixture canonicalization retains old80
+replay arm and adds strict accepted120. Full caller inventory confirms only strict HTTP production
+ingresses for initial/human commands; no CLI/bootstrap bypass. Initial reviewer B2 decoder-sharing
+hypothesis corrected against full method. Root verified docs7files/159links,50project contracts/8indexes
+and fixed API lint. T002 isolated implementation dispatched after plan acceptance;40minute bound.
+Policy source and verified coverage remain proposed and cannot be counted as completed M2.

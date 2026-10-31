@@ -6,9 +6,12 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID, createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
+import {run as lifecycle} from '../bin/office-run.mjs';
 const dir = await mkdtemp(join(tmpdir(), 'office-workerd-'));
 const token = randomBytes(32).toString('base64url');
 const hash = createHash('sha256').update(token).digest('hex');
+const lifecycleToken = randomBytes(32).toString('base64url');
+const lifecycleHash = createHash('sha256').update(lifecycleToken).digest('hex');
 const origin = 'http://127.0.0.1:18787';
 let child;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -34,8 +37,14 @@ async function post(status, revision, eventId = randomUUID()) {
 }
 try {
   await writeFile(join(dir, 'wrangler.json'), JSON.stringify({name: 'office-local-smoke', main: fileURLToPath(new URL('../src/worker.mjs', import.meta.url)), compatibility_date: '2026-10-01', workers_dev: false, vars: {OFFICE_ID: 'isolated-test', OFFICE_MODE: 'live'}, durable_objects: {bindings: [{name: 'OFFICE', class_name: 'OfficeRoom'}]}, migrations: [{tag: 'v1', new_sqlite_classes: ['OfficeRoom']}]}));
-  await writeFile(join(dir, '.dev.vars'), `AGENT_TOKEN_HASHES='${JSON.stringify({grok: hash})}'\n`, {mode: 0o600});
+  await writeFile(join(dir, '.dev.vars'), `AGENT_TOKEN_HASHES='${JSON.stringify({grok: hash, content: lifecycleHash})}'\n`, {mode: 0o600});
   await start();
+  const lifecycleResult = await lifecycle(['content', '--', process.execPath, '--check', fileURLToPath(new URL('../src/core.mjs', import.meta.url))],
+    {...process.env, OFFICE_URL: origin, OFFICE_TOKEN: lifecycleToken});
+  assert.deepEqual(lifecycleResult, {exitCode: 0, reported: true, started: true});
+  const completed = (await (await fetch(`${origin}/state`)).json()).bots.find(bot => bot.id === 'content');
+  assert.equal(completed.status, 'done');
+  assert.equal(completed.revision, 2);
   // Reserve a full fixed-minute window for both process starts and quota checks.
   await sleep(60000 - Date.now() % 60000 + 100);
   const window = Math.floor(Date.now() / 60000);

@@ -11,6 +11,15 @@
 | T-0002-1 | SQLite 重啟去重／限流回歸本機通過，Draft-only；[證據](../evidence/m1-persistence.md) | AC-03 | in_progress | 2026-10-31T18:29:44Z | — | 2026-10-31T18:31:13Z |
 
 
+## T-0003 — 命令生命週期上報 adapter
+
+來源：owner 指示「好，繼續」。範圍為明確授權命令的開始／完成／失敗上報，不讀命令輸出，不新增模型呼叫或部署。延續同一 Draft PR；不是各宿主原生 hooks 或完整 AC-07 驗收。
+預定驗證：實際子程序成功／失敗、憑證隔離、上報故障不冒充成功、既有 Node 與全倉檢查。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0003-1 | office-run、35 測試與真 workerd 命令上報通過；[證據](../evidence/m1-lifecycle.md)，Draft PR #863 | AC-07 | in_progress | 2026-10-31T18:36:35Z | — | 2026-10-31T18:38:12Z |
+
 ## T-0001 — 虛擬辦公室設計、CLI 與 Workers 骨架
 
 來源：owner 2026-10-31 直接指示。認領者：本次 ChatGPT agent。

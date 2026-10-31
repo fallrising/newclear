@@ -45,6 +45,10 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 > A pinned local container image and dedicated profile volume are also required; see
 > [Cursor isolation and setup](docs/cursor-isolation.md). Ask mode is not a security boundary.
 
+## Process interruption and recovery evidence
+
+The existing ledger now has a reproducible [M-10 crash-recovery check](docs/tasks/T-0432-crash-recovery.md): nine storage-process boundaries and three actual isolated buffered HTTP/fakeCLI gateway cases. Pending attempts recover once as interrupted/unknown usage; finalized history stays intact and restart sends no new request. The current runtime already passed, so this delivery adds tests and evidence without changing runtime policy. The retained private `local-demo.py` defaults to check and verifies source/binary pins; the task documents source-checkout commands and read-only report verification. This is offline evidence, not live client/provider acceptance.
+
 ## Cost aggregate compatibility
 
 Admin stats and daily JSON expose `cost_summary` with `known_sum`, known/unknown/total row counts, nullable `coverage`, `status`, and `basis: "stored_estimate_usd"`. The legacy `estimated_cost_usd` aggregate is now null for empty, unknown or partial scopes; only a nonempty complete scope returns a number. A known zero remains zero. Web, TUI and `doctor` distinguish partial subtotals from complete estimates. Stats and the usage header are all-time; daily rows retain their existing bucket limits. Coverage measures non-null stored estimates, not billing accuracy. Event CSV values and stored rows are unchanged. See the [fixed acceptance and limits](docs/tasks/T-0429-cost-coverage.md).

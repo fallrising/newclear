@@ -1,7 +1,7 @@
 # Fanzloud 主線重校：Web 操作隔離 coding agents
 
-- 日期：2026-10-31；desk：T-0442；狀態：**Proposed，等待文件審查與 owner 定案**。
-- 本文件是本輪產品決策提案；未批准前不取代已接受 TD／ADR，不授權新 runtime、付費、部署或跨專案實作。
+- 日期：2026-10-31；desk：T-0442；狀態：**Owner approved（2026-10-31「同意，繼續開發。」）；M1 qualification 開始**。
+- 本文件與 ADR-0008 的主線方向已批准；不因此宣稱 route 已驗證，不授權新增付費、部署或相鄰專案變更。
 - 原始目標：[TD §1](docs/TD.md#1-product-definition)。目前實際能力與歷史證據：[SUCCESS](SUCCESS.md)。
 
 ## 1. 使用者最後要得到什麼
@@ -48,7 +48,7 @@
 
 **秘密邊界維持 ADR-0002 的要求**：repository 及其工具不能讀取 operator 登入資料、控制面秘密或其他任務資料。一般容器、工作目錄分開、CLI sandbox 參數、`app-server` 名稱均不構成證明。採用外部 CLI 前必須證明官方受支援的工具執行／認證分離能落在選定隔離後端，並有 canary 與跨任務讀寫拒絕證據。無法做到的 route 不准入。
 
-**待決 O-1（M1 入口關卡）：本次使用既有個人訂閱，或 operator 明確指定的既有已授權 API 額度。** 尚未指定任何 API credential／provider／額度可供本產品使用；不能從「已登入」推導 API 授權。未決前不開始 M1 qualification。
+**O-1 本次決定：沿用既有個人訂閱優先的方案；未授權 API 路線或新增支出。** 尚未指定任何 API credential／provider／額度可供本產品使用；不能從「已登入」推導 API 授權。本次只啟動訂閱路線的 M1 qualification；API 選項仍需另行明確指定。
 
 - 訂閱路線：保持官方認證方式、既有個人使用限制及秘密邊界；先證明受支援的工具／憑證分離，不能先假定 MCP 或 app-server 可行。
 - 既有 API 額度路線：需確認 provider／credential reference、允許模型、既有使用授權、由 provider 或可信 proxy 可強制的消費上限及超限拒絕方式；沒有可驗證上限就不啟動計費探針。不得自行開通或增加付費。

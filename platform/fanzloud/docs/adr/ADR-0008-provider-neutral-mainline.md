@@ -1,7 +1,7 @@
 ---
 id: ADR-0008
 title: Provider-neutral Web mainline rebaseline
-status: proposed
+status: accepted
 date: 2026-10-31
 deciders: [owner]
 ---
@@ -10,9 +10,9 @@ deciders: [owner]
 
 Owner requests the original provider-neutral Web coding-agent product, finite milestones and final user acceptance before further implementation. The Codex Cloud P0 path has actual browser/Rust/fake evidence, but live submission remains unrun. Successful private login and empty environment catalogs do not establish a working live path or prove every possible upstream interface unusable.
 
-# Proposed decision
+# Decision
 
-Adopt [SDD](../../SDD.md) as the finite delivery proposal: D0 document agreement, M1 one real Web task, M2 two vendors/two isolated tasks, M3 recovery and bounded fixed-candidate review. All FN-01–07 remain NOT_RUN.
+Adopt [SDD](../../SDD.md) as the owner-approved finite delivery scope: D0 document agreement, M1 one real Web task, M2 two vendors/two isolated tasks, M3 recovery and bounded fixed-candidate review. All FN-01–07 remain NOT_RUN.
 
 Fanzloud owns the product entry and result presentation. Agent Platform is the first candidate for the sole isolated execution authority; compatibility is a qualification gate, not an asserted capability. Agent Workforce contracts are references, not a required daemon. Do not build another native agent loop or VM manager. The subscription/API route remains an explicit operator choice, with no paid fallback or credential-boundary relaxation.
 
@@ -27,3 +27,5 @@ The existing Cloud adapter remains version-pinned and regression-tested; its liv
 # Evidence and decision gate
 
 See [document review](../acceptance/REBASELINE-20261031.md). This is a proposed architecture, not a qualification receipt. The first executable qualification and final acceptance are defined in SDD §§4–6. Owner approval of the document does not certify an untested route, authorize new spending, or authorize deployment.
+
+Owner approved on 2026-10-31: “同意，繼續開發。” PR849 merged as `72c3e9b779a827206b6bfb9ce4d7d8f8651ee986`. M1 proceeds subscription-first without any API-spend authorization; qualification remains unproven.

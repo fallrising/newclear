@@ -1,6 +1,6 @@
 # Codebox
 
-> **2026-10-31 主線重校提案**：owner 要求回到廠商中立 Web coding-agent 產品。先核對 [SDD](SDD.md) 的三個里程碑與最終驗收、[ADR-0008](docs/adr/ADR-0008-provider-neutral-mainline.md) 的責任調整；文件待定案，尚未改動 runtime。以下 P0 是目前實作，並非新產品已完成。
+> **2026-10-31 M1**：owner 已批准 [SDD](SDD.md)，[PR849](https://github.com/fallrising/newclear/pull/849) 已合併。既有訂閱優先；[M1 qualification](docs/acceptance/M1-qualification.md) 只通過實際 Claude MCP 工具面探針，隔離 executor 接口與 KVM 前置未齊，真實 Web coding 任務尚未完成。
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 

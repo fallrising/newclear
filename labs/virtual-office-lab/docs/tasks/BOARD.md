@@ -6,7 +6,9 @@
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0007-1 | 51 Node tests、真 Chrome、索引通過；[證據](../DASHBOARD.md) | AC-06 | in_progress | 2026-10-31T19:08:22Z | — | 2026-10-31T19:11:21Z |
+| T-0007-1 | 51 Node tests、真 Chrome、索引通過；[證據](../DASHBOARD.md) | AC-06 | done | 2026-10-31T19:08:22Z | 2026-10-31T19:13:20Z | 2026-10-31T19:13:20Z |
+
+收據：[PR #881](https://github.com/fallrising/newclear/pull/881)，merge `f6af5b9913e85ec3a77c16073cd89befbb07a20d` 已 fetch 回讀。候選 `c979ad9` 的 contracts（含真 Chrome、workerd）、project contracts、workflow static validation 全通過後正常合併。Opus review 建議已修正並用回歸驗證，沒有宣稱第二輪模型審查。此收尾只改 BOARD；完整 AC-06、Three.js 與長期真宿主接入仍 pending。
 
 
 ## T-0006 — 前端共用呈現規則

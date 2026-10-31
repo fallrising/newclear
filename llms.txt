@@ -83,3 +83,5 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 - [MIGRATION.md](https://github.com/fallrising/newclear/blob/main/MIGRATION.md): how these components were consolidated from separate repositories into this monorepo.
 - [refs/INDEX.md](https://github.com/fallrising/newclear/blob/main/refs/INDEX.md): 67 repositories written by other people, kept as an index of notes and tags rather than forks. Nothing there is this author's work.
 - [LICENSE](https://github.com/fallrising/newclear/blob/main/LICENSE): MIT at the root. `systems/ojbquay` and `specs/fleet` are Apache-2.0 per their own `LICENSE`.
+
+- [labs/agent-office-lab](https://github.com/fallrising/newclear/blob/main/labs/agent-office-lab/README.md): **ungraded** — local-first Office lab; historical native OpenCode + Strata task and cancellation verified. Grok, Pi and the three-provider MVP remain incomplete.

@@ -74,6 +74,7 @@
 | --- | --- | --- |
 | [`specs/fleet`](specs/fleet/) | **可執行**的 Fleet Catalog（`fleet.yaml`、Compose、agents、Cloudflare）。路徑在 `specs/`，但內容是系統元件／公開契約，**不是**根目錄文檔。見 [taxonomy](docs/taxonomy.md)。 | B |
 | [`examples/bite-pi`](examples/bite-pi/) | Pi agent 公開示範 | D |
+| [`labs/agent-office-lab`](labs/agent-office-lab/) | 本地優先的三 provider Office 實驗：OpenCode 原生任務已驗證，完整 MVP 待完成 | 未分級 |
 | [`labs/memvid-lab`](labs/memvid-lab/) | 固定 Memvid 的 11 類場景＋PDF／語意／CLIP／Whisper（15 項實跑通過並已合併；繁中筆記實測不建議直接採用） | 未分級 |
 | [`labs/graphify-lab`](labs/graphify-lab/) | Graphify 開發場景、固定參考程式碼與索引單份共用實驗 | 未分級 |
 | [`labs/bee-swarm`](labs/bee-swarm/) | AI 角色協作 workflow 模擬（歷史） | D |

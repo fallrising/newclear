@@ -4,8 +4,8 @@ purpose: 透過 Web 操作廠商中立的隔離 coding agents
 kind: application
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-30
-source_commit: 268305cceceb750be6642e446d63300a46064916
+reviewed: 2026-10-31
+source_commit: 391aa1aa72f1dd550d8acc7323f00c7a6229c3d4
 ---
 
 > **2026-10-31 M1**：[真實單任務閉環](docs/acceptance/M1-isolated.md) 已通過：正式 Claude Code、真 VM、真 Rust／AP 與 Chromium，固定 base diff／檢查及清理可核對。FN-01 與 FN-03 單任務部分已驗；FN-06 已補齊有區分的失敗／取消驗證，CI／合併依該報告，M2／M3與整體 FN-01–07 未完成。舊 Cloud AC-04、持久化 AC-05 不改為通過。

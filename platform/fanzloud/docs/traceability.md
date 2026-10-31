@@ -100,3 +100,10 @@ inspected. This row is not an infrastructure-only CU exemption.
 ## T008 actual browser P0 composition
 
 SUCCESS AC-01 is proved by actual Chromium against the production Rust binary and strict T007 fake executable. See [SPEC-T008](specs/SPEC-T008-p0-real-browser.md) and [runtime evidence](acceptance/T008.acceptance.md). No production authority or UI changed. AC-04 remains credential/environment gated; AC-05 remains outside this milestone.
+
+## Approved isolated M1 — T-0442 / T-0447
+
+EX01–03 and M1-WEB01–06 map to [SPEC-M1-isolated-web](specs/SPEC-M1-isolated-web.md),
+[external workspace contract](../../agent-platform/docs/EXTERNAL-WORKSPACE.md),
+[actual M1 acceptance](acceptance/M1-isolated.md) and PR885. FN01/FN06 and
+single/sequential FN03 are accepted; M2/M3 and full FN02–07 remain per SDD.

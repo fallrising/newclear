@@ -1,7 +1,7 @@
 # M1: one real isolated browser coding task
 
 2026-10-31; T-0442 with approved T-0447 dependency; [PR885](https://github.com/fallrising/newclear/pull/885).
-Live success accepted independently; FN-06 completion and final CI/merge tracked below.
+Bounded M1 independently accepted. Final CI passed and PR885 merged; see delivery below.
 
 ## Observed result
 
@@ -123,5 +123,23 @@ zero automatic resend. No new VM manager or native agent loop is required.
 M1-WEB-06 is supported by10 focused Rust tests (including rejection before forwarding
 of all non-cancel/extra/duplicate/noninteger fields), actual cancellation, the two final
 PostgreSQL lifecycle tests and the labelled browser failure/readback evidence. Required
-final CI and normal merge/readback remain delivery gates; no second provider call is
+final CI and normal merge/readback remain delivery gates; no second coding CLI invocation is
 needed to re-prove unchanged execution code.
+
+## Delivery and final source
+
+PR885 merged at 2026-10-31T19:40:53Z as `a63f7eee37c3557b9f29d584c000bf8e4de8a810`. Remote merge source was fetched and the
+reviewed Rust/page/harness bytes compared exactly. Final source391aa1aa72f1dd550d8acc7323f00c7a6229c3d4
+has binary SHA256 `bc887d38786996819b86a8f495e3ba5b01bc96514e7ae41f9ef02b23920ef7fa`;
+served HTML/JS equal that commit. All111 AP execution source files are unchanged from
+the single live33e1eb70 run; final page/gateway readback is a separate no-provider receipt.
+
+Required final CI: [Fanzloud](https://github.com/fallrising/newclear/actions/runs/41234894042),
+[Agent Platform check/control-plane/web](https://github.com/fallrising/newclear/actions/runs/41234894033),
+[project validation](https://github.com/fallrising/newclear/actions/runs/41234894026), all passed.
+The full hosted PostgreSQL suite passed after the exact backup contract correction.
+
+Owned temporary local listeners/API/database and remote transient executor/Connector/registry
+were stopped after acceptance; installed fixed runtime and private state/results remain.
+No resident/public service is promised. Source/receipts/screenshots/failed attempts are
+retained in the private evidence archive. M2/M3 and owner FN07 remain open.

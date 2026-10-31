@@ -39,6 +39,10 @@ source_commit: 8bf48551f524086d81fa66d946c984f8052152ff
 
 已驗證 SIGINT/SIGTERM 轉送、5 秒後強制終止、取消後上報 error 而非 done，以及正常退出後清理 signal listeners。39 項 Node 測試、真 workerd 與全倉檢查通過，見[證據](docs/evidence/m1-cancellation.md)。使用真子程序測試，不以原生 Agent hook 或前端驗收代稱。
 
+## T-0005：長命令 heartbeat
+
+每 5 分鐘固定 terminal 上報、不傳命令內容；單一 in-flight，結尾等 heartbeat 完成再送 done/error。驗證慢請求無重疊、結尾不被晚到 heartbeat 覆寫、上報失敗可見且不重跑命令。43 項測試、真 workerd、全倉檢查通過，Claude Opus 5.5 二輪 review 無 blockers；[證據與審查範圍](docs/evidence/m1-heartbeat.md)。完整 AC-07 仍 pending。
+
 ## 現況與缺口
 
 已具設計、CLI、API安全核心與Workers adapter。28項本機Node測試通過，包含真loopback HTTP；storage test double不等於DO恢復。當前未建立完整3D UI、未真正接入模型宿主、未公開部署。CI與runtime結果需對照當次PR，不能從workflow存在推論通過。

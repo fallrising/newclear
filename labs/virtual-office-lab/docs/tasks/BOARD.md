@@ -1,5 +1,14 @@
 # Virtual Office 任務板
 
+## T-0005 — 長命令 heartbeat
+
+Owner 指示繼續開發並可用 Claude review。範圍：每 5 分鐘 terminal heartbeat、單一 in-flight、結尾等待 heartbeat 後才上報、失敗可見且不重試命令。預定 Node 回歸、真 workerd、索引與唯讀模型 review。沒有 provider 原生 hook 或 UI 驗收聲明。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0005-1 | heartbeat 實作、測試、review 與 PR | AC-07 | in_progress | 2026-10-31T18:54:29Z | — | 2026-10-31T18:54:29Z |
+
+
 ## T-0004 — 命令取消生命週期
 
 Owner 最新指示：每個里程碑 commit → PR → 必要檢查通過且無阻擋後合併，取代先前 Draft-only。不延伸至部署、release 或付費。

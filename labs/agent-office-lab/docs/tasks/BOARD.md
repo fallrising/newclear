@@ -76,4 +76,6 @@ T-0006 真實 Grok／Pi help/version 與 Pi 隔離設定格式檢查通過，全
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0007-01 | 有界 Pi runner／原生零請求啟動通過；等 owner 一次付費驗收授權 | AC-04 | in_progress | 2026-10-31T18:03:31Z | — | 2026-10-31T18:09:40Z |
+| T-0007-01 | 有界 Pi runner、原生啟動與 owner 授權的一次付費任務通過，待 PR 合併 | AC-04 | in_progress | 2026-10-31T18:03:31Z | — | 2026-10-31T18:17:34Z |
+
+T-0007：owner 已確認一次付費驗收；3 次 DeepSeek 請求、原生 agent_settled、產物及清理通過。[真實證據](../evidence/pi-live-2026-11-01.json)。此次授權已用完，未追加重跑；合併後補結案與主線回讀。

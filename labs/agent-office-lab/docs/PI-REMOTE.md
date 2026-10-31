@@ -31,3 +31,9 @@ python3 scripts/run_pi_work.py --allow-remote
 必須同時具備：原生 Office session hook、Pi `agent_settled`、一致的 session/provider/model、實際 read/write 事件、正確 marker／sum 與結果 hash、relay 的真實成功回覆與 output usage。`agent_end`、CLI 啟動或單純產物存在都不算成功。成功後關閉 Office，驗證其 Pi PID 退出；強制停止或未確認清理會標失敗。完整取消／恢復仍需後續驗收。
 
 原始 run 包含私密 session、終端及 fixture，不提交。公開證據只保存欄位白名單摘要與受測來源 hash。啟動測試及離線測試不代表付費推論已驗收；實際狀態見 [SUCCESS](../SUCCESS.md)。
+
+## 本次真實結果
+
+2026-11-01，owner 確認後執行一次，22.62 秒完成。DeepSeek 共三次 HTTP 200 請求，2147 input／204 output tokens；原生 read → write → 最終回覆，Office starting → idle → working → done，Pi agent_settled 與一致的 session／模型通過。result.json 的 marker／sum 正確、hash 已保存，cleanup_errors=[]。沒有自動重跑，沒有追加付費請求。見[欄位白名單證據](evidence/pi-live-2026-11-01.json)。
+
+AC-04 因此通過；Grok、三工位 UI、Pi 完整權限／取消／恢復與 AC-11 仍未驗收。這次單次授權已使用，後續付費測試需另有授權。歷史[零請求啟動證據](evidence/pi-startup-2026-11-01.json)保留當時 pending 狀態，不覆寫為推論成功。

@@ -1,6 +1,6 @@
 # Agent Office Lab
 
-本地優先的 Agent Office 實驗：OpenCode + Strata 原生任務、取消、寫入權限回覆、瀏覽器刷新、程序 session 恢復及 host 中斷／手動恢復已實測，Grok、Pi + DeepSeek 與完整三工位 MVP 尚未完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
+本地優先的 Agent Office 實驗：OpenCode + Strata 原生任務、取消、寫入權限回覆、瀏覽器刷新、程序 session 恢復及 host 中斷／手動恢復已實測，Pi + DeepSeek 的原生合成任務也已實測通過；Grok 與完整三工位 MVP 尚未完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
 
 - [安裝與重跑](docs/SETUP.md)：macOS arm64、固定依賴與外部 Strata 前置條件。
 - [Pi 遠端驗收](docs/PI-REMOTE.md)：原生工位、有界請求與合成檔案任務。

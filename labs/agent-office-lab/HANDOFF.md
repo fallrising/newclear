@@ -2,7 +2,7 @@
 
 先讀 [SUCCESS](SUCCESS.md)、[SDD](docs/SDD.md)、[任務板](docs/tasks/BOARD.md)。canonical 位置是 `fallrising/newclear` 的 `labs/agent-office-lab`。
 
-T-0007 已備妥 Pi 原生 Office PTY、固定 DeepSeek relay 與合成工具邊界；41 項離線測試及真實零請求啟動通過。[啟動證據](docs/evidence/pi-startup-2026-11-01.json)與[執行命令](docs/PI-REMOTE.md)。Owner 已回覆設定完成，隔離 Pi／官方 Grok auth 檔均存在且模式 0600；未印出憑證。已詢問一次有界付費驗收授權，尚未收到時不得執行 --allow-remote。不得用 startup 或 CLI compatible 宣稱 AC-04 通過。
+T-0007 的 Pi + DeepSeek 原生工位實測通過（AC-04）：owner 明確授權一次有界付費驗收，3 次 HTTP 200 請求，2147 input／204 output tokens，22.62 秒，agent_settled、session/model、read/write、產物 hash 與清理全部通過。[真實證據](docs/evidence/pi-live-2026-11-01.json)與[命令／限制](docs/PI-REMOTE.md)。41 項離線測試與零請求啟動也通過。此次授權已使用，不代表可再做付費重跑或 Grok 任務；下一步是 Grok 與剩餘 MVP，原 local-only demo 不變。
 
 T-0006 已準備官方 Grok Build 1.0.70／Pi 1.4.0 的 lab 內固定安裝、真實 CLI 版本與能力 probe、隔離 owner 登入設定入口；35 項離線測試通過。見[owner 命令](docs/REMOTE-SETUP.md)與[白名單證據](docs/evidence/remote-preflight-2026-11-01.json)。本輪沒有遠端模型請求，沒有重啟 Strata；需要 owner 完成 DeepSeek key／Grok 登入後，再接實際遠端 worker 與合成任務。不得把 CLI compatible 或合成金鑰格式解析當成 auth／推論通過。
 
@@ -10,7 +10,7 @@ T-0005 的 OpenCode host crash／interrupted／手動恢復已完成真實驗收
 
 目前已有 Codex → Strata 本地讀寫與合成程式修復、Office 基底建置／614 tests，以及原生 Office → OpenCode → Strata 的檔案任務、同 session 後續任務取消與程序清理。這些是 2026-10-31 的歷史實測，[摘要與限制](docs/evidence/README.md) 保留成功及失敗範圍。同 session 續做不等於真正 restart/resume。
 
-下一步先確認 Grok CLI 版別與偵測能力，再接 Grok 與 Pi + DeepSeek；OpenCode 的權限、refresh、程序恢復與 host 重啟子集已有實測。Grok 官方／社群版身分仍待確認；遠端服務須顯式選擇，不可替私人任務自動 fallback。最後整合三工位入口、產物、錯誤、取消與安全邊界。
+下一步接官方 Grok Build 的有界任務，再補三工位流程與其餘生命週期；Pi + DeepSeek 的 AC-04 已通過，OpenCode 的權限、refresh、程序恢復與 host 重啟子集已有實測。官方 Grok 的隔離登入檔已存在，但尚未發出模型任務；遠端服務須顯式選擇，不可替私人任務自動 fallback。最後整合三工位入口、產物、錯誤、取消與安全邊界。
 
 依 [SETUP](docs/SETUP.md) 準備環境；`STRATA_HOME` 指向外部本機 Strata 根目錄。32K context、現有 Q2_0 量化及資源 guard 不任意變更。不要同時載入另一個大型模型、取消全部 sandbox、修改全域憑證，或將 mock 當成 live 證據。
 

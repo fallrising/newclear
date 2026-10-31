@@ -1,0 +1,25 @@
+// Motion Prompt #027 · MIT License (c) 2026 Shohei Ohtaki · ./#027
+//
+// 推軌靠近（Dolly in）
+// 分類組: camera (鏡頭運動與轉場) · element 03 · 分類: 鏡頭運動
+// 示範內容: 攝影機本身向主體靠近；近物快速放大並掠過，遠山幾乎不變。
+// 動作／視覺規格:
+//   - 攝影機：沿深度方向前進 0 m→5.8 m；高度 1.5 m，方向與焦距固定（330 px，標示為 24mm）。
+//   - 時間：0.5 s 至 3.4 s（2.9 s），三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 主體：人物靜止站在前方 8 m；距離從 8 m→2.2 m，因此視覺大小約增加至 3.6×。
+//   - 視差：前景柱子（左側 1.5 m、深度 3.6 m）與石頭（右側 1.6 m、深度 4.8 m）移出畫面；120 m+ 外的山大小幾乎不變。
+//   - 回到起點：3.4–4.2 s 停留，最後 0.5 s 交叉淡化回起始畫面（一輪 = 4.7 s）。
+//   - 右上角持續顯示 24mm，這是與本 pack 第 04 項 Zoom in 的差別。
+// 使用情境: 適合靠近人物或細節，同時保留空間深度。
+// 關鍵字: dolly, dolly in, push in, track in, move forward, parallax, camera move
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#027
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 03
+
+CELLS[2] = shot(camCell((k, w, h, p) => world(k, w, h, cam({ z: lerp(0, 5.8, p) }), { person: { z: 8 }, fg: [[-1.5, 3.6], [1.6, 4.8, 'rock']] }),
+  p => mm(F0)));

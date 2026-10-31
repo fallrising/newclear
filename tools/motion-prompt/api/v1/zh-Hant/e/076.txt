@@ -1,0 +1,51 @@
+// Motion Prompt #076 · MIT License (c) 2026 Shohei Ohtaki · ./#076
+//
+// 區塊固定捲動（Pinning）
+// 分類組: lp (網頁與登陸頁效果) · element 04 · 分類: 捲動效果
+// 示範內容: 深藍區塊填滿可視區域後停住；繼續捲動會讓數字與照片依序切換 1→2→3，之後區塊再繼續捲走。
+// 動作／視覺規格:
+//   - 捲動：0.3–3.0 s 從 0→500 px，3.5–4.5 s 從 500→0（cubic ease-in-out）。
+//   - 深藍區塊高 168，在捲動到 110 px 時抵達頂部，並在接下來的 300 px 捲動期間保持固定（如 GSAP ScrollTrigger pin）。
+//   - 固定期間的進度 p = (scroll − 110) / 300；左側長 124 的垂直線依 p 填入橘色。
+//   - 在 p = 1/3 與 2/3 時切換到下一步（±0.07，cubic ease-in-out）：數字（46 px）向上滾動 52 px，照片（226 × 124）向上滑動 124 px。
+//   - 經過 300 px 後解除固定，區塊與下方白色區塊一起向上捲動。
+// 使用情境: 適合在同一畫面逐步說明流程、特色或前後對照。
+// 關鍵字: pin, pinning, scrolltrigger, gsap, scroll-driven, steps, storytelling
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#076
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 04
+
+CELLS[3] = (k, w, h, u) => {
+  frame(k);
+  const y = steps([[0.3, 0], [3.0, 500], [3.5, 500], [4.5, 0]], u);
+  const PIN0 = 110, PD = 300;
+  const top = y < PIN0 ? PIN0 - y : y < PIN0 + PD ? 0 : PIN0 + PD - y, p = clamp((y - PIN0) / PD);
+
+  const f = eIO(P(p, 1 / 3 - 0.07, 1 / 3 + 0.07)) + eIO(P(p, 2 / 3 - 0.07, 2 / 3 + 0.07));
+  view(k, () => {
+    txt(k, "3 步驟完成", 34, 56 - y, `800 22px ${JP}`, C.ink); bars(k, 34, 72 - y, 240, 2);
+    k.save(); k.translate(0, top);
+    k.fillStyle = C.ink; k.fillRect(0, 0, VW, VH);
+
+    txt(k, "步驟", 34, 40, `700 12px ${EN}`, 'rgba(255,255,255,.6)', 'left', 'alphabetic', '2px');
+    k.save(); k.beginPath(); k.rect(30, 46, 120, 52); k.clip();
+    for (let i = 0; i < 3; i++) txt(k, '0' + (i + 1), 32, 90 + (i - f) * 52, `800 46px ${EN}`, '#fff');
+    k.restore();
+    bars(k, 34, 110, 150, 3, 'rgba(255,255,255,.28)');
+
+    k.fillStyle = 'rgba(255,255,255,.16)'; rr(k, 232, 22, 4, 124, 2); k.fill();
+    k.fillStyle = C.acc; rr(k, 232, 22, 4, 124 * p, 2); k.fill();
+
+    k.save(); rr(k, 256, 22, 226, 124, 8); k.clip();
+    for (let i = 0; i < 3; i++) pic(k, 256, 22 + (i - f) * 124, 226, 124, i, 0);
+    k.restore();
+    k.fillStyle = '#fff'; k.fillRect(0, VH, VW, 200); bars(k, 34, VH + 30, 300, 3);
+    k.restore();
+    sbar(k, y / 500, 0.3);
+  });
+};

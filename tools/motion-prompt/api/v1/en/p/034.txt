@@ -1,0 +1,20 @@
+Please use "Handheld" from "Camera moves & transitions".
+Motion Prompt #034 · camera/handheld
+
+Meaning: A slight shake, as if the camera were held by hand
+Example request (adapt to your project): Handheld shot following behind the walking person, with only a slight shake.
+What this demo shows: Adds a small, irregular shake to the whole frame, as if the camera were held by hand instead of on a tripod.
+Demo specification (independent of the example request):
+- Camera: position almost fixed; yaw, pitch, roll and height each get a sum of sine waves with different periods (T = 2π×u/4.7)
+- Yaw (rad) = 0.016·sin(3T) + 0.008·sin(7T+1) + 0.004·sin(13T+2), at most about ±1.6°
+- Pitch (rad) = 0.012·sin(4T+2) + 0.006·sin(9T+0.5) + 0.003·sin(17T+1.2), at most about ±1.2°
+- Roll (rad) = 0.02·sin(5T+1) + 0.008·sin(11T+3), at most about ±1.6°; height = 1.5 + 0.03·sin(6T) m
+- Subject: a person stands still 6.5 m ahead; the shake runs continuously with no easing or hold
+- All multipliers are integers, so it loops seamlessly every 4.7 s; top-right readout shows "HANDHELD"
+When to use it: To give a documentary feel or the sense of being present in the scene.
+
+Local demo: ./?lang=en#034
+Local specification and code: ./api/v1/en/e/034.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

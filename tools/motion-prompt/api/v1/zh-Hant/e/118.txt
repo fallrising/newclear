@@ -1,0 +1,30 @@
+// Motion Prompt #118 · MIT License (c) 2026 Shohei Ohtaki · ./#118
+//
+// 底片顆粒（Film grain）
+// 分類組: photo (攝影效果、打光與風格) · element 22 · 分類: 色調與後製風格
+// 示範內容: 同一片景色的整個畫面出現細顆粒，色彩稍微偏向溫暖奶油色。
+// 動作／視覺規格:
+//   - 場景 3：左側為胸像，頭部中心 x 140、y 82、半徑 28 px；右側有山丘、房屋、樹木與太陽，太陽位於 x 432、y 54、半徑 15 px。
+//   - 顆粒為 2,600 個方形，採固定亂數種子，尺寸 0.8–1.7 px；55% 為深色 #3A3530，45% 為白色。
+//   - 顆粒不透明度為 16–38% × 效果強度；顆粒不移動、不閃爍。
+//   - 每個色彩朝 #F2DDBE 混合 16%。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合減少乾淨的數位感，加入類比底片質地。
+// 關鍵字: film grain, grain, noise, analog, 35mm film, texture, warm tone
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#118
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 22
+
+CELLS[21] = cell((k, u) => {
+  const a = env(u);
+  const FILM = mapPal(BASE, c => mixc(c, '#F2DDBE', 0.16));
+  const p = pal(BASE, FILM, a);
+  const G = once('grain', () => { const r = rng(22), o = []; for (let i = 0; i < 2600; i++) o.push([r() * CW, r() * CH, 0.8 + r() * 0.9, r() < 0.55 ? 0 : 1, 0.16 + r() * 0.22]); return o; });
+  const grain = kk => { kk.save(); for (const [x, y, s, d, al] of G) { kk.globalAlpha = al * a; kk.fillStyle = d ? '#FFFFFF' : '#3A3530'; kk.fillRect(x, y, s, s); } kk.restore(); };
+  stageLand(k, p); grain(k);
+});

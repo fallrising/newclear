@@ -1,0 +1,31 @@
+// Motion Prompt #030 · MIT License (c) 2026 Shohei Ohtaki · ./#030
+//
+// 環繞鏡頭（Orbit (Arc shot)）
+// 分類組: camera (鏡頭運動與轉場) · element 06 · 分類: 鏡頭運動
+// 示範內容: 攝影機沿圓周繞行主體，人物維持置中，後方樹木與建築橫向移動。
+// 動作／視覺規格:
+//   - 攝影機：以人物（前方 9 m）為中心，沿半徑 6 m 的圓周移動，從 -0.95 rad→+0.95 rad（-54°→+54°，合計約 109°）。
+//   - 方向：始終朝向圓心（yaw = -angle）；高度 1.7 m，俯仰角固定 -0.07 rad（向下約 4°）。
+//   - 時間：0.5 s 至 3.6 s（3.1 s），三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 主體：人物不動，臉部白點隨角度橫移；地面有半徑 1.3 m 的虛線圓。
+//   - 背景：12 棵樹平均分布於半徑 10 m 的圓上，隨鏡頭繞行從人物後方掠過。
+//   - 回到起點：3.6–4.2 s 停留，最後 0.5 s 交叉淡化回起點；右上角顯示角度（-54°→+54°）。
+// 使用情境: 適合立體展示人物或產品，或強調登場與重要時刻。
+// 關鍵字: orbit, arc shot, circle, 360, rotate around, revolve, camera move
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#030
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 06
+
+CELLS[5] = shot(camCell((k, w, h, p) => {
+  const a = lerp(-0.95, 0.95, p), R = 6, P0 = [0, 0, 9];
+  const c = cam({ x: P0[0] + Math.sin(a) * R, z: P0[2] - Math.cos(a) * R, yaw: -a, y: 1.7, pitch: -0.07 });
+  world(k, w, h, c, {
+    person: { z: 9, face: a }, ring: [0, 9, 10], buildings: true, trees: false,
+    after: (kk, cc) => { kk.strokeStyle = C.blueM; kk.lineWidth = 2; kk.setLineDash([5, 5]); kk.beginPath(); for (let i = 0; i <= 48; i++) { const b = i / 48 * Math.PI * 2; const q = proj(cc, Math.sin(b) * 1.3, 0, 9 + Math.cos(b) * 1.3); i ? kk.lineTo(q.x, q.y) : kk.moveTo(q.x, q.y); } kk.stroke(); kk.setLineDash([]); }
+  });
+}, p => `${Math.round(lerp(-0.95, 0.95, p) * 57.3)}°`.replace(/^(\d)/, '+$1'), 0.5, 3.6));

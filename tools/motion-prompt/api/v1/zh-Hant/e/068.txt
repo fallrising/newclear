@@ -1,0 +1,42 @@
+// Motion Prompt #068 · MIT License (c) 2026 Shohei Ohtaki · ./#068
+//
+// 步驟指示器（Step indicator）
+// 分類組: ui (UI 元件) · element 20 · 分類: 導覽與狀態
+// 示範內容: 每點一次下一步，四個圓形步驟中的下一個變成勾號，藍線向後延伸。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。四步驟為資料、確認、付款、完成，位於 x 80, 207, 334, 461，y 35；半徑 17 的圓以 4 px 灰線相連。
+//   - 游標於 0.9, 1.7, 2.5 s 點擊右下下一步按鈕（110×38）。
+//   - 每次點擊，目前步驟變為藍圓白勾，下一步成為藍圓白色編號；尚未到達的步驟為白底灰框。
+//   - 藍線每次以 easeInOutCubic 在 0.3 s 內延伸 127 px；第三次點擊後四步皆打勾。
+//   - 重設：指示器於 3.75–4.05 s 淡出，於 4.05–4.3 s 以第 1 步狀態淡入。
+// 使用情境: 適合註冊、結帳等多步驟流程，顯示目前進度與剩餘步驟。
+// 關鍵字: step-indicator, stepper, steps, progress-steps, wizard, multi-step, checkout
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#068
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 20
+
+CELLS[19] = ui((w, h, t) => {
+  const clicks = [.9, 1.7, 2.5]; let step = 0; clicks.forEach(c => { if (t >= c) step++; });
+  const reset = seg(t, 3.75, 4.05), back = seg(t, 4.05, 4.3);
+  const showStep = reset >= 1 ? 0 : step;
+  const xs = [80, 207, 334, 461], labs = ["填寫", "確認", "付款", "完成"];
+  const prog = clicks.reduce((s, c) => s + eio(seg(t, c, c + .3)), 0);
+  X.save(); X.globalAlpha = reset < 1 ? 1 - reset : back;
+  const pr = reset >= 1 ? 0 : prog;
+  fillRR(xs[0], 33, xs[3] - xs[0], 4, 2, '#e3e1df'); fillRR(xs[0], 33, (xs[1] - xs[0]) * pr, 4, 2, C.blue);
+  xs.forEach((x, i) => {
+    const done = i < showStep || (showStep === 3 && i === 3), cur = i === showStep && showStep < 3;
+    circle(x, 35, 17, done || cur ? C.blue : '#fff'); if (!(done || cur)) ring(x, 35, 16, C.line2, 2);
+    if (done) check(x, 35, 7, '#fff', 2.6); else text(String(i + 1), x, 36, 16, cur ? '#fff' : '#9a9896', 700, 'center', NUMF);
+    text(labs[i], x, 70, 14, done || cur ? C.blue : '#9a9896', 600, 'center');
+  });
+  X.restore();
+  strokeRR(24, 96, 494, 30, 7, C.line2, 1.5); bar(36, 106, 160, C.line); bar(24, 148, 200, C.line);
+  fillRR(w - 24 - 110, 142, 110, 38, 8, C.blue); text("下一步", w - 24 - 55, 161, 16, '#fff', 600, 'center');
+  pointer([[.3, w + 30, h + 30], [.85, w - 74, 166], [2.6, w - 74, 166], [3.3, w + 30, h + 30]], clicks, t);
+});

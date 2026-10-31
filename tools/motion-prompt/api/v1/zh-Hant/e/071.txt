@@ -1,0 +1,41 @@
+// Motion Prompt #071 · MIT License (c) 2026 Shohei Ohtaki · ./#071
+//
+// 計數徽章（Badge）
+// 分類組: ui (UI 元件) · element 23 · 分類: 導覽與狀態
+// 示範內容: 每次通知抵達，頁首鈴鐺的藍點依序計數 1、2、3；點鈴鐺清除。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。頁首高 54，右側 (482, 27) 為線條鈴鐺。
+//   - 徽章：鈴鐺右上（+12, −12）的藍圓，半徑 12、2.5 px 白框、白色 14 px 數字。
+//   - 通知於 0.7, 1.3, 1.9 s 抵達，計數 1→2→3；第一次於 0.7–0.9 s 以 easeOutCubic 縮放進場。
+//   - 每次抵達，縮放在 0.3 s 內從 1.3 回到 1，並在 0.5 s 內發出漣漪環（半徑 12→28、不透明度 0.5→0）。
+//   - 游標於 2.95 s 抵達鈴鐺，3.0 s 點擊；徽章於 3.0–3.25 s 以 easeInOutCubic 縮至 0。
+// 使用情境: 適合提醒未讀訊息或購物車品項等數量。
+// 關鍵字: badge, notification-badge, counter, count, dot, unread
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#071
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 23
+
+CELLS[22] = ui((w, h, t) => {
+  X.fillStyle = '#fff'; X.fillRect(0, 0, w, 54); X.fillStyle = C.line; X.fillRect(0, 54, w, 1.5);
+  fillRR(24, 19, 76, 16, 4, C.mb);
+
+  const bx = w - 60, by = 27; X.save(); X.translate(bx, by);
+  X.beginPath(); X.moveTo(-12, 8); X.quadraticCurveTo(-11, -12, 0, -13); X.quadraticCurveTo(11, -12, 12, 8); X.lineTo(15, 11); X.lineTo(-15, 11); X.closePath();
+  X.strokeStyle = '#333'; X.lineWidth = 2.4; X.lineJoin = 'round'; X.stroke(); X.beginPath(); X.arc(0, 14, 4, 0, Math.PI); X.stroke(); X.restore();
+  const arr = [.7, 1.3, 1.9]; let n = 0; arr.forEach(c => { if (t >= c) n++; });
+  const clear = eio(seg(t, 3.0, 3.25));
+  if (n > 0 && clear < 1) {
+    const last = arr.filter(c => t >= c).pop(), pop = 1 - seg(t, last, last + .3);
+    const s = (n === 1 ? eo(seg(t, .7, .9)) : 1) * (1 + .3 * pop) * (1 - clear);
+
+    const k = seg(t, last, last + .5); if (k > 0 && k < 1) ring(bx + 12, by - 12, 12 + 16 * k, `rgba(31,90,232,${.5 * (1 - k)})`, 2.5);
+    X.save(); X.translate(bx + 12, by - 12); X.scale(s, s); circle(0, 0, 12, C.blue); ring(0, 0, 12, '#fff', 2.5); text(String(n), 0, 1, 14, '#fff', 800, 'center', NUMF); X.restore();
+  }
+  bar(24, 76, 220, C.line2, 12); bar(24, 102, 494); bar(24, 120, 400); fillRR(24, 140, 494, 40, 8, C.block);
+  pointer([[.3, w + 30, h + 30], [2.3, w + 30, h + 30], [2.95, bx + 2, by + 4], [3.4, bx + 2, by + 4], [4.1, w + 30, h + 30]], [3.0], t);
+});

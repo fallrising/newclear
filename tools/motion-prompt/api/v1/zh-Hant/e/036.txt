@@ -1,0 +1,24 @@
+// Motion Prompt #036 · MIT License (c) 2026 Shohei Ohtaki · ./#036
+//
+// 荷蘭角（傾斜構圖）（Dutch angle）
+// 分類組: camera (鏡頭運動與轉場) · element 12 · 分類: 拍攝方式與時間效果
+// 示範內容: 原本水平的攝影機繞鏡頭軸旋轉，保持地平線傾斜的構圖。
+// 動作／視覺規格:
+//   - 攝影機：位置固定（高度 1.5 m），只做翻滾，0→0.36 rad（約 21°）；整個畫面繞中心旋轉。
+//   - 時間：0.6 s 至 2.2 s（1.6 s），三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 主體：人物靜止站在前方 7 m；地平線、建築與人物都傾斜相同角度。
+//   - 停留：2.2 s 至 4.2 s 保持傾斜，讓觀眾看清構圖。
+//   - 回到起點：最後 0.5 s 交叉淡化回水平畫面（一輪 = 4.7 s）。
+//   - 右上角顯示角度（∠ 0°→∠ 21°）。
+// 使用情境: 適合表達不安、緊張或情況不對勁。
+// 關鍵字: dutch angle, dutch tilt, canted angle, oblique, roll, tension, tilted horizon
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#036
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 12
+
+CELLS[11] = shot(camCell((k, w, h, p) => world(k, w, h, cam({ roll: lerp(0, 0.36, p) }), { person: { z: 7 } }), p => `∠ ${Math.round(lerp(0, 0.36, p) * 57.3)}°`, 0.6, 2.2));

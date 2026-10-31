@@ -1,0 +1,27 @@
+// Motion Prompt #031 · MIT License (c) 2026 Shohei Ohtaki · ./#031
+//
+// 搖臂升鏡（Crane up）
+// 分類組: camera (鏡頭運動與轉場) · element 07 · 分類: 鏡頭運動
+// 示範內容: 攝影機升高，同時向下俯拍，最後俯視人物。
+// 動作／視覺規格:
+//   - 攝影機：從高度 1.4 m 升至 9 m，同時向前移動 0 m→1.5 m。
+//   - 方向：向下轉動以讓人物（前方 8 m）留在畫面；pitch = -0.86 × atan2(height - 1.0, 8 - forward)，約 -2.5°→-44°。
+//   - 時間：0.5 s 至 3.4 s（2.9 s），三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 主體：人物不移動，隨鏡頭升高而變小；地面網格填滿畫面，地平線從頂部離開。
+//   - 回到起點：3.4–4.2 s 停留，最後 0.5 s 交叉淡化回起始畫面（一輪 = 4.7 s）。
+//   - 右上角顯示高度（↑ 1.4m→↑ 9.0m）。
+// 使用情境: 適合在場景結尾遠離人物，或揭示環境的規模。
+// 關鍵字: crane, crane up, jib, boom up, rise, high angle, camera move
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#031
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 07
+
+CELLS[6] = shot(camCell((k, w, h, p) => {
+  const y = lerp(1.4, 9, p), z = lerp(0, 1.5, p);
+  world(k, w, h, cam({ y, z, pitch: -0.86 * Math.atan2(y - 1.0, 8 - z) }), { person: { z: 8 } });
+}, p => `↑ ${lerp(1.4, 9, p).toFixed(1)}m`));

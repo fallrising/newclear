@@ -1,0 +1,19 @@
+Please use "Badge" from "UI component names".
+Motion Prompt #071 · ui/badge
+
+Meaning: A small dot with a number showing a count
+Example request (adapt to your project): Add a badge to the bell in the header to show the unread count: it pops for 0.3 s each time the count goes up and disappears when opened.
+What this demo shows: Each time a notification arrives, the blue dot on the bell in the header counts up 1, 2, 3; clicking the bell clears it.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. A 54-tall header with a line-drawn bell at (482, 27) on the right.
+- Badge: a blue circle of radius 12 at the bell's top right (+12, −12), 2.5 px white rim, white 14 px number.
+- Notifications arrive at 0.7, 1.3 and 1.9 s: the count goes 1 → 2 → 3. The first scales in over 0.7–0.9 s with easeOutCubic.
+- Each arrival pops the scale from 1.3 back to 1 over 0.3 s and sends out a ripple ring (radius 12 → 28, opacity 0.5 → 0) over 0.5 s.
+- The cursor reaches the bell at 2.95 s and clicks at 3.0 s; the badge shrinks to 0 over 3.0–3.25 s with easeInOutCubic.
+When to use it: Use it to call attention to a count, such as unread messages or items in a cart.
+
+Local demo: ./?lang=en#071
+Local specification and code: ./api/v1/en/e/071.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

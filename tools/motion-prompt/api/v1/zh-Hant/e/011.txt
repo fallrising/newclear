@@ -1,0 +1,40 @@
+// Motion Prompt #011 · MIT License (c) 2026 Shohei Ohtaki · ./#011
+//
+// 擠壓與拉伸（Squash & stretch）
+// 分類組: motion (動態圖像與動畫效果) · element 11 · 分類: 動態修飾
+// 示範內容: 彈跳角色落地時壓扁，起跳時拉長。
+// 動作／視覺規格:
+//   - 圓形角色半徑 37。每 1.175 s 彈跳一次（每 4.7 s 四次），拋物線高度 92 px；整個週期沿正弦波水平漂移 ±150 px。
+//   - 接地期間（每次彈跳開頭與結尾各 10%）：垂直縮放以二次曲線在 0.52（撞地瞬間）與 1.28（離地瞬間）間變化。
+//   - 在空中：垂直縮放 = 1 + 0.28 × s^3；s 為距離最高點的時間偏移（最高點為 0，起跳與落地為 1），因此速度快時拉伸較多。
+//   - 水平縮放始終為 1 ÷ vertical（維持體積感），變形錨點位於腳底。
+//   - 高度增加時陰影變小、變薄；每次落地時向左右短暫射出黃色短線（約佔一次彈跳的 18%）。
+// 使用情境: 適合賦予角色或標誌重量感與柔軟感。
+// 關鍵字: squash, stretch, squash-and-stretch, bounce, character, ball, animation-principle
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#011
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 11
+
+CELLS[10] = (k, w, h, u) => {
+  stage(k);
+  const T = CYC / 4, q = mod(u, T) / T, c = 0.1, floor = h - 28, R = 37, Hgt = 92;
+  const X = w / 2 + 150 * Math.sin(u / CYC * Math.PI * 2);
+  let sy, yb, grounded = false;
+  if (q < c || q > 1 - c) { const d = (q < c ? q : 1 - q) / c; sy = lerp(0.52, 1.28, d * d); yb = floor; grounded = true; }
+  else { const qq = (q - c) / (1 - 2 * c), sp = Math.abs(2 * qq - 1); yb = floor - Hgt * (1 - sp * sp); sy = 1 + 0.28 * Math.pow(sp, 3); }
+  const sx = 1 / sy, hg = (floor - yb) / Hgt;
+  k.fillStyle = C.navy3; rr(k, 40, floor, w - 80, 5, 2.5); k.fill();
+  k.fillStyle = 'rgba(0,0,0,.32)'; k.beginPath(); k.ellipse(X, floor + 9, R * 1.2 * (1 - hg * 0.55) * Math.max(1, sx), 6 * (1 - hg * 0.5), 0, 0, 7); k.fill();
+
+  const dq = q < 0.5 ? q : q - 1; if (Math.abs(dq) < 0.16 && dq > -0.02) { const t = (dq + 0.02) / 0.18; k.strokeStyle = C.yel; k.lineWidth = 5 * (1 - t); k.lineCap = 'round';[-1, 1].forEach(s => { k.beginPath(); k.moveTo(X + s * (50 + 28 * t), floor - 6 - 10 * t); k.lineTo(X + s * (62 + 40 * t), floor - 12 - 20 * t); if (t < 0.97) k.stroke(); }); }
+  k.save(); k.translate(X, yb); k.scale(sx, sy);
+  k.fillStyle = C.coral; k.beginPath(); k.arc(0, -R, R, 0, 7); k.fill();
+  k.fillStyle = '#fff'; k.beginPath(); k.ellipse(-12, -R - 4, 7, 9.5, 0, 0, 7); k.ellipse(12, -R - 4, 7, 9.5, 0, 0, 7); k.fill();
+  k.fillStyle = C.navy; k.beginPath(); k.arc(-10.5, -R - 3, 3.8, 0, 7); k.arc(13.5, -R - 3, 3.8, 0, 7); k.fill();
+  k.restore();
+};

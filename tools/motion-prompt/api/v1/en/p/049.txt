@@ -1,0 +1,19 @@
+Please use "Modal dialog" from "UI component names".
+Motion Prompt #049 · ui/modal-dialog
+
+Meaning: A window opens in the middle while the page behind dims
+Example request (adapt to your project): When the delete button is pressed, show a confirmation in a modal dialog. Dim the page about 40% and fade it in over 0.3 s with a slight scale-up.
+What this demo shows: Clicking "Open" dims the whole page and a small window scales up slightly into the centre; clicking × closes it.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. The cursor reaches the "Open" button (120×36, lower left) at 0.95 s and clicks at 1.0 s.
+- Open amount a: 0→1 over 1.0–1.32 s with easeOutCubic. A full-card scrim rgba(18,20,28) at opacity 0.42·a.
+- Window: white 280×140, radius 12, centred at (271, 97), shadow blur 24, offset y 8, alpha 0.25. Scale 0.9 + 0.1·a, opacity a.
+- Inside: a bold title bar, two text lines, a blue 88×30 button at lower right and × at top right.
+- Close: the cursor moves to × by 3.0 s and clicks at 3.3 s; a is multiplied by (1 − easeInOutCubic over 3.3–3.58 s).
+When to use it: Use it when the user must stop and deal with one thing, such as a confirmation or a short form.
+
+Local demo: ./?lang=en#049
+Local specification and code: ./api/v1/en/e/049.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

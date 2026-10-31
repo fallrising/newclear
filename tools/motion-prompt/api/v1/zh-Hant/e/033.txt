@@ -1,0 +1,36 @@
+// Motion Prompt #033 · MIT License (c) 2026 Shohei Ohtaki · ./#033
+//
+// 轉移焦點（Rack focus）
+// 分類組: camera (鏡頭運動與轉場) · element 09 · 分類: 拍攝方式與時間效果
+// 示範內容: 攝影機不移動，焦點從前景花朵轉至後方人物，清晰與模糊的對象互換。
+// 動作／視覺規格:
+//   - 攝影機：位置、方向與焦距皆固定（高度 1.1 m），只改變模糊量。
+//   - 模糊：前景花朵（左側 0.75 m、距離 2 m）從 0 px→7 px；人物與背景（人物在右側 0.9 m、距離 9 m）從 6 px→0 px；地面網格使用背景模糊量的 0.6×。
+//   - 時間：1.0 s 至 2.6 s（1.6 s），三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 對焦標記：藍色角框沿直線從花朵移至人物，半寬由 46 px→30 px。
+//   - 主體：花朵與人物都不移動。
+//   - 回到起點：2.6–4.2 s 停留，最後 0.5 s 交叉淡化回起點；右上角顯示對焦距離（◎ 2m→◎ 9m）。
+// 使用情境: 適合不切鏡就將注意力由前景帶到背景，或反向轉移。
+// 關鍵字: rack focus, focus pull, pull focus, depth of field, blur, bokeh, foreground
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#033
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 09
+
+CELLS[8] = shot(camCell((k, w, h, p) => {
+  world(k, w, h, cam({ y: 1.1 }), {
+    person: { x: 0.9, z: 9 }, blurFg: 7 * p, blurBg: 6 * (1 - p),
+    extra: [[-0.75, 0, 2.0, (kk, s) => { kk.fillStyle = C.g3; kk.fillRect(-0.025, 0, 0.05, 0.75); kk.fillStyle = C.blueM; for (let i = 0; i < 6; i++) { kk.beginPath(); kk.ellipse(Math.cos(i) * 0.09, 0.8 + Math.sin(i) * 0.09, 0.08, 0.05, i, 0, 7); kk.fill(); } kk.fillStyle = C.blue; kk.beginPath(); kk.arc(0, 0.8, 0.05, 0, 7); kk.fill(); }, true]],
+    after: (kk, cc) => {
+      const a = proj(cc, -0.75, 0.8, 2.0), b = proj(cc, 0.9, 0.9, 9);
+      const x = lerp(a.x, b.x, p), y = lerp(a.y, b.y, p), r = lerp(46, 30, p);
+      kk.strokeStyle = C.blue; kk.lineWidth = 2; kk.beginPath();
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => { kk.moveTo(x + sx * r, y + sy * r - sy * 9); kk.lineTo(x + sx * r, y + sy * r); kk.lineTo(x + sx * r - sx * 9, y + sy * r); });
+      kk.stroke();
+    }
+  });
+}, p => `◎ ${lerp(2, 9, p).toFixed(0)}m`, 1.0, 2.6));

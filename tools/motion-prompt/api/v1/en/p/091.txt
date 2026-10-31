@@ -1,0 +1,18 @@
+Please use "Infinite scroll" from "Landing page & web effects".
+Motion Prompt #091 · lp/infinite-scroll
+
+Meaning: More items load automatically at the bottom
+Example request (adapt to your project): Make the news list an infinite scroll: show a spinner at the bottom and add ten items at a time.
+What this demo shows: Scrolling down to the end of the list brings up a spinner, then three new items are added so reading can go on.
+Demo specification (independent of the example request):
+- A list of items (331 × 44, radius 8, 52 apart) with a spinner (radius 10, one turn per 0.8 s) under the last item.
+- Scroll: 38→116 px at 0.25–0.85 s, 116→194 px at 1.15–1.75 s (cubic ease-in-out); it stops with the end of the list in view.
+- At 2.6 s three items are added: each fades 0→1 and rises from 10 px below over 0.35 s (cubic ease-out). The spinner moves to the new end.
+- Each cycle advances by three items (156 px). The content repeats every three items, so the end of the cycle looks the same as the start.
+When to use it: Use it for feeds and news lists that people should keep reading without paging.
+
+Local demo: ./?lang=en#091
+Local specification and code: ./api/v1/en/e/091.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

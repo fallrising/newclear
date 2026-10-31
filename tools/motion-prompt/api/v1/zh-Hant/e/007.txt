@@ -1,0 +1,49 @@
+// Motion Prompt #007 · MIT License (c) 2026 Shohei Ohtaki · ./#007
+//
+// 數字遞增（Count-up）
+// 分類組: motion (動態圖像與動畫效果) · element 07 · 分類: 登場與文字
+// 示範內容: 數字快速增加，最後準確停在目標值。
+// 動作／視覺規格:
+//   - 每 4.7 s 一輪。於 0.1–0.4 s 淡入，4.0–4.4 s 淡出。
+//   - 數字（粗體 104 px）：於 0.45–2.9 s 從 0→2,480。值 = round(target × (1 − (1 − p)^4))，先快後慢。
+//   - 顯示千分位分隔符；數字等寬並靠右對齊，避免數值變動時左右跳動。
+//   - 2.9 s 定位：顏色由白→黃，並以 1 + 0.07·e^(−7t)·cos(15t) 做輕微縮放回彈。
+//   - 左側向上箭頭徽章（薄荷綠圓形、半徑 34）：從 0.35 s 起以彈簧曲線 1 − e^(−7t)·cos(14t) 出現；計數期間以 6 px × (1 − p)^3 × sin(30u) 上下振動。
+//   - 下方長條（330 × 12、藍→薄荷綠漸層）：依數值 ÷ 目標值的比例填滿。
+// 使用情境: 適合用於營收、使用者人數或完成率，凸顯數值的規模與成長。
+// 關鍵字: count-up, counter, number, odometer, stats, kpi, progress
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#007
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 07
+
+CELLS[6] = (k, w, h, u) => {
+  stage(k);
+  const TARGET = 2480, a = P(u, 0.1, 0.4) * (1 - P(u, 4.0, 4.4));
+  const p = P(u, 0.45, 2.9), v = Math.round(TARGET * (1 - Math.pow(1 - p, 4)));
+  const s = v.toLocaleString('en-US'), f = `800 104px ${DISP}`;
+  k.font = f; const dw = k.measureText('0').width + 2, cw = k.measureText(',').width;
+  const full = TARGET.toLocaleString('en-US'); let tot = 0; for (const ch of full) tot += ch === ',' ? cw : dw;
+  const land = u - 2.9, pop = 1 + (land > 0 ? 0.07 * Math.exp(-7 * land) * Math.cos(15 * land) : 0);
+  const X = w / 2 + 42, Y = 96;
+  k.save(); k.globalAlpha = a; k.translate(X, Y); k.scale(pop, pop);
+  let x = tot / 2;
+  const speed = p < 1 ? Math.pow(1 - p, 3) : 0;
+  for (const ch of [...s].reverse()) {
+    const cwid = ch === ',' ? cw : dw; x -= cwid;
+    txt(k, ch, x + cwid / 2, 0, f, land > 0 ? C.yel : '#fff', 'center', 'middle');
+  }
+  k.restore();
+
+  const ar = spring(u - 0.35, 14, 7) * (1 - P(u, 4.0, 4.3)), bob = speed * 6 * Math.sin(u * 30);
+  if (ar > 0.01) { k.save(); k.translate(X - tot / 2 - 58, Y - 2 + bob); k.scale(ar, ar); k.fillStyle = C.mint; k.beginPath(); k.arc(0, 0, 34, 0, 7); k.fill(); k.strokeStyle = C.navy; k.lineWidth = 8; k.lineCap = 'round'; k.lineJoin = 'round'; k.beginPath(); k.moveTo(0, 15); k.lineTo(0, -14); k.moveTo(-13, -1); k.lineTo(0, -15); k.lineTo(13, -1); k.stroke(); k.restore(); }
+
+  const bw = 330, bx = w / 2 - bw / 2, by = 168;
+  k.globalAlpha = a; k.fillStyle = C.navy3; rr(k, bx, by, bw, 12, 6); k.fill();
+  const g = k.createLinearGradient(bx, 0, bx + bw, 0); g.addColorStop(0, C.blue); g.addColorStop(1, C.mint);
+  k.fillStyle = g; rr(k, bx, by, Math.max(12, bw * (v / TARGET)), 12, 6); k.fill(); k.globalAlpha = 1;
+};

@@ -1,0 +1,31 @@
+// Motion Prompt #041 · MIT License (c) 2026 Shohei Ohtaki · ./#041
+//
+// 跳接（Jump cut）
+// 分類組: camera (鏡頭運動與轉場) · element 17 · 分類: 轉場
+// 示範內容: 攝影機位置與構圖不變，人物位置與時鐘卻跳變，略過同一場景中的時間。
+// 動作／視覺規格:
+//   - 接點：直接硬切，無效果（0 影格）；共 5 個鏡頭，每個 0.94 s（4.7 s ÷ 5）。
+//   - 攝影機：各鏡頭位置與構圖完全相同（高度 1.4 m、朝前），背景不移動任何像素。
+//   - 變化：人物（距離 7 m）的水平位置依序跳為 -2.2 m→1.4 m→-0.4 m→2.4 m→0.6 m；第 2 與第 4 鏡頭雙手舉起。
+//   - 各鏡頭內人物靜止，只以位置與姿勢差異呈現跳躍。
+//   - 右上時鐘：10:02→10:17→10:41→11:06→11:30，表示同一地點略過了時間。
+//   - 第 5 鏡頭直接切回第 1 鏡頭。
+// 使用情境: 適合刪去談話或工作停頓、加快節奏，或表現時間快速流逝。
+// 關鍵字: jump cut, cut, time skip, same framing, vlog, ellipsis, edit
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#041
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 17
+
+CELLS[16] = shot((k, w, h, u) => {
+  const shots = [[-2.2, 0], [1.4, 1], [-0.4, 0], [2.4, 1], [0.6, 0]];
+  const times = ['10:02', '10:17', '10:41', '11:06', '11:30'];
+  const i = Math.min(4, Math.floor(u / (CYC / 5)));
+  const [x, arm] = shots[i];
+  world(k, w, h, cam({ y: 1.4 }), { person: { x, z: 7, armUp: !!arm } });
+  return times[i];
+});

@@ -29,4 +29,6 @@ jobs:
       - name: Check public source, syntax and links (no model inference)
         run: python3 labs/agent-office-lab/scripts/check_publication.py
       - name: Check local provider boundary
-        run: node --test labs/agent-office-lab/scripts/local_office_policy.test.mjs
+        run: node --test labs/agent-office-lab/scripts/*.test.mjs
+      - name: Check isolated permission configuration
+        run: python3 -m unittest discover -s labs/agent-office-lab/scripts -p 'test_*.py' -v

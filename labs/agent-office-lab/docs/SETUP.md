@@ -50,9 +50,13 @@ export STRATA_HOME="$(cd ../strata-mac && pwd)"  # 或你自己的外部安裝�
 "$STRATA_HOME/source/.venv/bin/python" scripts/run_local_work.py --harness office-opencode
 # 加驗取消，再保持 demo 開啟；Ctrl+C 清理
 "$STRATA_HOME/source/.venv/bin/python" scripts/run_local_work.py --harness office-opencode --check-cancel --keep-open
+# 獨立生命週期驗收：合成權限回覆、瀏覽器刷新及終止後恢復原 session
+"$STRATA_HOME/source/.venv/bin/python" scripts/run_local_work.py --harness office-opencode --check-lifecycle
 # 不載入模型的 sandbox 邊界 probe，執行前確認 8080 沒有服務
 "$STRATA_HOME/source/.venv/bin/python" scripts/check_opencode_sandbox.py
 ```
+
+`--check-lifecycle` 是有界合成測試，不能與 keep-open、check-cancel 或 queue-repair 合用。它將該 Office worker 的 edit／bash 權限設為 ask，等待原生權限事件與終端畫面，確認產物仍未寫入後才透過 PTY 按 Enter 選一次 Allow once；最多八次，不選 Allow always。一般 demo 設定不變。它另外刷新真正的 lite 瀏覽器，再終止已完成任務的 OpenCode 程序，以原生 worker.resume 恢復同一 session 並核對第二個產物。這不是 Office host restart 驗收；固定上游的自動 wakeAll 與手動恢復契約仍有差異。
 
 需要環境允許 Metal、loopback、PTY、sysctl 和 macOS sandbox-exec；受限代理中失敗時不能取消工具 sandbox 來偽裝成功。
 資源 guard 在 memory pressure critical／連續 warning、swap 增量超過 1 GiB、磁碟剩餘少於 50 GiB 或監控失敗時停止本次 runner。
@@ -65,7 +69,8 @@ export STRATA_HOME="$(cd ../strata-mac && pwd)"  # 或你自己的外部安裝�
 
 ```sh
 python3 scripts/check_publication.py
-node --test scripts/local_office_policy.test.mjs
+node --test scripts/*.test.mjs
+python3 -m unittest discover -s scripts -p 'test_*.py' -v
 # 在 newclear 根目錄
 python3 scripts/check_indexes.py
 ```

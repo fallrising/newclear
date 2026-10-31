@@ -12,6 +12,12 @@ def prepare(out, workspace, office=False):
     out, workspace = Path(out).resolve(), Path(workspace).resolve()
     settings = json.loads((LAB / 'configs/opencode-strata-local.json').read_text())
     if office:
+        # Explicit synthetic acceptance mode, not a global auto-approval setting.
+        mode = os.environ.get('LAB_OPENCODE_PERMISSION_MODE', 'fixture-allow')
+        if mode not in ('fixture-allow', 'ask'):
+            raise ValueError('Unknown local permission mode')
+        if mode == 'ask':
+            settings['permission'].update(edit='ask', bash='ask')
         # Keep only the local status plugin injected by the native Office adapter.
         # Provider/model/permissions remain fixed by our own configuration.
         from urllib.parse import urlparse, unquote

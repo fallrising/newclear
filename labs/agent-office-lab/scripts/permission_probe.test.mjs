@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { PermissionProbe } from './permission_probe.mjs';
+const worker = { id: 'fixture-worker', sessionId: 'fixture-session', status: 'needs_input' };
+const asked = { type: 'permission', status: 'needs_input', detail: 'edit', sessionId: worker.sessionId };
+const frame = { t: 'screen', workerId: worker.id, full: true, lines: { 0: [['Permission required']], 1: [['Allow once Allow always Reject']] } };
+function prompt() { const p = new PermissionProbe(); p.hook(worker.id, asked, true); p.screen(frame); return p; }
+test('requires an accepted native permission hook and the actual terminal prompt', () => {
+  const p = new PermissionProbe(); p.screen(frame); p.hook(worker.id, asked, false);
+  assert.equal(p.ready(worker), false);
+  p.hook(worker.id, asked, true); assert.equal(p.ready(worker), true);
+  p.screen({ ...frame, lines: {} }); assert.equal(p.ready(worker), false);
+});
+test('does not answer a foreign worker, session or nonwaiting state', () => {
+  const p = prompt();
+  for (const change of [{ id: 'other' }, { sessionId: 'other' }, { status: 'working' }]) assert.equal(p.ready({ ...worker, ...change }), false);
+});
+test('one PTY reply per request and matching continuation required', () => {
+  const p = prompt(); assert.deepEqual(p.reply(worker), { t: 'term.input', workerId: worker.id, data: '\r' });
+  assert.throws(() => p.reply(worker));
+  p.hook('other', { ...asked, type: 'session', status: 'working' }, true); assert(p.pending);
+  p.hook(worker.id, { ...asked, type: 'session', status: 'working' }, true);
+  assert.deepEqual(p.summary(), [{ kind: 'edit', replied: true, continued: true }]);
+});
+test('unexpected requests, overlap and advance before reply fail closed', () => {
+  assert.throws(() => prompt().hook(worker.id, asked, true), /Overlapping/);
+  assert.throws(() => new PermissionProbe().hook(worker.id, { ...asked, detail: 'external_directory' }, true), /Unexpected/);
+  assert.throws(() => prompt().hook(worker.id, { ...asked, type: 'session', status: 'working' }, true), /before/);
+});
+test('provider errors cannot count as permission replies', () => {
+  assert.throws(() => prompt().hook(worker.id, { ...asked, type: 'error' }, true), /error/);
+});

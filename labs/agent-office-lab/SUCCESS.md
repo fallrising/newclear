@@ -13,7 +13,9 @@ source_commit: 9e536de1dc1a532c8e3d78355e770bc757e190da
 ## 主線與範圍
 
 依 [SDD](docs/SDD.md) 完成單專案、單執行佇列、三 provider 的本機 Office。
-本輪僅匯入既有 lab、修正可搬移性、整理公開證據與待辦，並完成 PR／CI 交付。
+公開匯入已完成。本輪 T-0004 驗證 OpenCode 權限等待／PTY 回覆、browser refresh 不重跑及程序終止後原 session 恢復；使用本機 Strata 與合成 fixture。
+預定核對原生 needs_input → working → done、回覆前產物未寫入、刷新前後 PID／session／產物不變，以及恢復後新 PID／同 session／新產物與增加的 usage。
+Office host 重啟不在本輪通過範圍：固定上游會自動 wakeAll，尚不符合手動恢復契約，AC-08 保持 pending。
 `source_commit` 是匯入時核對的 monorepo 基準；lab 原先沒有 Git 歷史。既有 runtime 結果以來源檔 hash 追溯。
 SDD 原 A01–A11 在公開版統一寫為 AC-01–AC-11，條件未縮減。AC-12 僅為本次匯入驗收。
 不包含部署、發布套件、模型權重、私人專案或雲端自動 fallback。
@@ -38,7 +40,7 @@ SDD 原 A01–A11 在公開版統一寫為 AC-01–AC-11，條件未縮減。AC-
 ## 現況與缺口
 
 本地 Codex 檔案／合成程式修復、Office 基底及 OpenCode 真實任務已驗證；614 個上游測試不能代替三 provider 整合。
-下一步先補 AC-05、AC-08，再處理遠端 provider 與剩餘 MVP；詳見 [任務板](docs/tasks/BOARD.md)。
+AC-05／AC-08 的 OpenCode [驗收程式與離線檢查](docs/evidence/lifecycle.md) 已補，真實測試待取得模型獨占時段；狀態仍 pending。之後處理遠端 provider 與剩餘 MVP；詳見 [任務板](docs/tasks/BOARD.md)。
 OpenCode sandbox 仍允許區外讀取；Office／Strata 整棵程序樹尚未做 egress audit。
 維持 `strict_network_isolation_verified=false`，僅使用合成資料。
 

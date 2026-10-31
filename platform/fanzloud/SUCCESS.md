@@ -8,6 +8,9 @@ reviewed: 2026-10-30
 source_commit: 268305cceceb750be6642e446d63300a46064916
 ---
 
+> **2026-10-31 最新需求**：[主線重校 SDD](SDD.md) 提出 D0＋M1–M3 與 FN-01–07（全部 NOT_RUN）；等待 owner 定案。舊 AC-01 fake 證據保留，AC-04 live 未跑，AC-05 未完成；新提案不改寫下列歷史驗收。
+
+
 # Codebox / Fanzloud 成功契約
 
 > 2026-10-29 desk T-0433 ([issue706](https://github.com/fallrising/newclear/issues/706)) delivered the Fanzloud FE Round2 unit (R2-AC-14): see the [R2 report](fe-review/tasks/round2/report.md). The evidence is a synthetic HTTPS/WSS review harness in a real browser; real backend wiring and live Cloud were not exercised. The product AC table below is unchanged: mainline stays incomplete, usable tag none, AC-04/AC-05 pending. Sections below record each milestone; the earliest ones describe superseded plans.

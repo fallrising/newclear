@@ -79,7 +79,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | `newclear/systems/snail` | 未知 | C | 保留 benchmark 歷史。 |
 | `newclear/systems/ojbquay` | 未知 | C | 維持現有環境，不擴建。 |
 | `newclear/systems/wotar` | 未知 | C | security-sensitive E2EE client；恢復時不能只靠 local suite 維護。 |
-| `newclear/platform/fanzloud` | 開發中 | A | 2026-10-30 owner 恢復私人單 operator P0：真瀏覽器到 Rust／Cloud 任務、狀態與 diff。持久化與 host runtime 為後續範圍；不是部署宣告。見 [SUCCESS](platform/fanzloud/SUCCESS.md)。 |
+| `newclear/platform/fanzloud` | 開發中 | A | 2026-10-31 owner 要求廠商中立主線重校；[SDD](platform/fanzloud/SDD.md) 提案由 Fanzloud 提供 Web、優先重用 Agent Platform 隔離執行，待文件定案。既有 P0 fake 已驗、live 未跑；不是部署宣告。見 [SUCCESS](platform/fanzloud/SUCCESS.md)。 |
 | `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
 | `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
 | `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo；檔位仍為 A，是否降為 C 待決。 |
@@ -169,3 +169,5 @@ edge 擁有 request／effect admission，policy 擁有 feature resolution／eval
    Goku `copilot`／`gemini`、Flowshot `agent/sdd-baseline`、Bee Swarm `project-restructure`？Phark 的保存 branch 是否視為被 PR #10/#11 取代？
 3. archived `config_center` 歷史中曝光的 n8n PostgreSQL／basic-auth credential 是否已輪換？repo 已 archive 不等於風險已解除。
 4. 繼續投入目前有 16 項，遠超過 2026-09-05 提議的 3 條戰線上限。還要設上限嗎？要的話，上限是多少？
+
+2026-10-31 T-0442：上述 Fanzloud／Agent Platform／Workforce 責任分開的基準有一份[明示調整提案](platform/fanzloud/docs/adr/ADR-0008-provider-neutral-mainline.md)。批准前不改相鄰專案責任或實作；不以跨專案整合之名同時啟動三套未完成產品。

@@ -1,4 +1,6 @@
 # Codebox
+
+> **2026-10-31 delivery rebaseline proposal:** [SDD](../SDD.md) and [ADR-0008](adr/ADR-0008-provider-neutral-mainline.md) propose a bounded external-agent-first path and reuse of an isolated executor. Pending owner approval; existing accepted contracts remain normative for current production code.
 ## Unified Technical Design, Specification Contract, and LLM Delivery Protocol
 
 > **Status:** Implementation Ready  

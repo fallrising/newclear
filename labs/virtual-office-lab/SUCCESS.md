@@ -35,6 +35,10 @@ source_commit: 8bf48551f524086d81fa66d946c984f8052152ff
 
 新增 opt-in `office-run` 命令生命週期 adapter：開始上報 terminal，正常退出上報 done，失敗上報 error；不擷取或上傳命令與輸出。開始上報失敗不得啟動命令，最終上報失敗不得回傳整體成功。35 項 Node 測試及真 workerd 命令上報已通過，包含實際子程序與憑證隔離，見[本輪證據](docs/evidence/m1-lifecycle.md)；這不是原生 Agent hook、瀏覽器觀察或完整 AC-07 驗收。
 
+## T-0004：取消處理
+
+已驗證 SIGINT/SIGTERM 轉送、5 秒後強制終止、取消後上報 error 而非 done，以及正常退出後清理 signal listeners。39 項 Node 測試、真 workerd 與全倉檢查通過，見[證據](docs/evidence/m1-cancellation.md)。使用真子程序測試，不以原生 Agent hook 或前端驗收代稱。
+
 ## 現況與缺口
 
 已具設計、CLI、API安全核心與Workers adapter。28項本機Node測試通過，包含真loopback HTTP；storage test double不等於DO恢復。當前未建立完整3D UI、未真正接入模型宿主、未公開部署。CI與runtime結果需對照當次PR，不能從workflow存在推論通過。

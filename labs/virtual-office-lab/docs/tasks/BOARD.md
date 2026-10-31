@@ -1,5 +1,14 @@
 # Virtual Office 任務板
 
+## T-0006 — 前端共用呈現規則
+
+Owner 指示繼續。範圍：純函式呈現模型，八狀態、stale/alert 優先序、雙向協作與固定座位、預設關閉夜間 overlay。測試輸入不變、順序穩定與邊界時間；Claude 唯讀 review。不是 renderer、路徑規劃或完整 M2；Three.js／瀏覽器／真實宿主與部署驗收仍保留。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0006-1 | 呈現模型、48 tests、Opus review 與索引通過；[證據](../PRESENTATION.md) | AC-06 | in_progress | 2026-10-31T19:02:39Z | — | 2026-10-31T19:04:43Z |
+
+
 ## T-0005 — 長命令 heartbeat
 
 Owner 指示繼續開發並可用 Claude review。範圍：每 5 分鐘 terminal heartbeat、單一 in-flight、結尾等待 heartbeat 後才上報、失敗可見且不重試命令。預定 Node 回歸、真 workerd、索引與唯讀模型 review。沒有 provider 原生 hook 或 UI 驗收聲明。

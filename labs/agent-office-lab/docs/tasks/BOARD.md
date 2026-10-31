@@ -40,9 +40,12 @@ Owner 指示「試試下一步」。本輪不擴大為 Grok／Pi 或完整 host 
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0004-01 | 真實權限等待、合成測試的 Allow once PTY 回覆與繼續 | AC-05（OpenCode） | in_progress | 2026-10-31T12:03:32Z | — | 2026-10-31T12:18:18Z |
-| T-0004-02 | 真瀏覽器刷新不重跑，終止程序後明確恢復同一 session | AC-08（OpenCode 子集） | in_progress | 2026-10-31T12:03:32Z | — | 2026-10-31T12:18:18Z |
+| T-0004-01 | 真實權限等待、合成測試的 Allow once PTY 回覆與繼續 | AC-05（OpenCode） | done | 2026-10-31T12:03:32Z | 2026-10-31T12:20:19Z | 2026-10-31T12:20:55Z |
+| T-0004-02 | 真瀏覽器刷新不重跑，終止程序後明確恢復同一 session | AC-08（OpenCode 子集） | done | 2026-10-31T12:03:32Z | 2026-10-31T12:20:19Z | 2026-10-31T12:20:55Z |
 
 Owner 已同意先停止舊 demo、完成真實生命週期驗收後重新開啟；T-0004 繼續執行。
 
-T-0004 真實驗收與 15 項離線測試通過，詳見 [生命週期證據](../evidence/lifecycle.md)。待 PR #847 合併後補 done／end；不將 OpenCode 子集當成完整 AC-05／AC-08。
+T-0004 真實驗收與 15 項離線測試通過，詳見 [生命週期證據](../evidence/lifecycle.md)。[PR #847](https://github.com/fallrising/newclear/pull/847) 已合併並回讀主線 evidence；不將 OpenCode 子集當成完整 AC-05／AC-08。
+
+T-0004 合併 commit：`37ec57999d547ce6b40819ae3758573a7f4d328f`。元件 offline、project contracts 與 workflow lint 三項 CI success。
+主線的生命週期摘要已回讀：completed、permission_wait_verified=true、resume_verified=true；原 runtime source hash 與受測 bytes 一致。

@@ -116,5 +116,28 @@
       "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
       "Failed to load resource: the server responded with a status of 404 (Not Found)"
     ]
+  },
+  "final_source_binding": {
+    "source_commit": "391aa1aa72f1dd550d8acc7323f00c7a6229c3d4",
+    "live_source_commit": "33e1eb70d66eb74644e8ad81e64e8bdc69c9fe07",
+    "execution_source_files_unchanged": 111,
+    "files": {
+      "platform/fanzloud/apps/control-plane/src/isolated.rs": "ee2101bb4c1a35a4c21aaa182e6a6cb4d53dd1e3b7c5cf4fc5030f0e2f4f9197",
+      "platform/fanzloud/apps/control-plane/web/isolated.js": "330735a17b7685a81bea30c6a0519b508232e7d6d933f54a8bed02fcb7d5cc56",
+      "platform/fanzloud/apps/control-plane/web/isolated.html": "de80f8a53fa980b5596c5ffea054a15bee217e24628a3c243543c979b95c3218",
+      "platform/fanzloud/acceptance/m1-browser.mjs": "007b7b6c4db5dca6b2cef846f11d704082838ff77165ef35bc554e0edb4da00d"
+    },
+    "binary_sha256": "bc887d38786996819b86a8f495e3ba5b01bc96514e7ae41f9ef02b23920ef7fa",
+    "served_html_js_exact_match": true,
+    "browser_faults_sha256": "b1fa0fce06d9fd33167f0fe27ea006a21737e2a62b97e1c82f6b9d409d4fab5d",
+    "live_diff_sha256": "c5134c8015bad2104fceb70e5c4c79086d6ec9bd85a0b4fa0f833b4ed3ef6fdb"
+  },
+  "delivery": {
+    "headRefOid": "391aa1aa72f1dd550d8acc7323f00c7a6229c3d4",
+    "mergeCommit": {
+      "oid": "a63f7eee37c3557b9f29d584c000bf8e4de8a810"
+    },
+    "mergedAt": "2026-10-31T19:40:53Z",
+    "state": "MERGED"
   }
 }

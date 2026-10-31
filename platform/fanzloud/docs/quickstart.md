@@ -1,3 +1,5 @@
+> Current approved M1 entry: [isolated operator workflow](isolated-operator.md) and [actual browser acceptance](acceptance/M1-isolated.md). The P0 Cloud quickstart below is historical; live Cloud AC-04 remains unverified.
+
 # Private P0 operator flow
 
 This is the 2026-10-30 resumed P0 milestone (T-0442), not a public deployment or a persistence claim.

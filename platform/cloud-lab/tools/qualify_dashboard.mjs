@@ -42,6 +42,7 @@ const mf=new Miniflare(convertV4MiniflareOptions({host:'127.0.0.1',cf:false,tele
  bindings:{HEALTH_SCHEDULE:JSON.stringify({revision:1,interval_minutes:15,not_before:stamp(Math.floor(now/60000)*60000),expires_at:stamp(now+3600000)}),ACCESS_CONFIG:JSON.stringify({issuer,audience,subjects:{human:{principal_id:'human',grant_id:'human'}}}),PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify({runner:{principal_id:'runner',grant_id:'runner',generation:1,secret_hex:secret,expires_at:common.expires_at}})}
 }]}));
 let usageCalls=0,usageMode='normal';
+let tamperArtifact=false;
 let browser,session,server,mode='normal',dropSubmit=false,apiCalls=0,loginHits=0,submitBodies=[],errors=[],checks=[],pending=new Map(),serial=0,holdArtifactStatus=null,heldArtifact=null,downloadsStarted=0;
 const children=[];
 function send(method,params={},target=session){
@@ -94,6 +95,7 @@ try {
    if(req.method==='POST'&&req.url==='/api/commands')submitBodies.push(body.toString());
    const response=await mf.dispatchFetch(origin+req.url,{method:req.method,headers,...(req.method==='POST'?{body}:{}),redirect:'manual'});
    let data=Buffer.from(await response.arrayBuffer());
+   if(tamperArtifact&&req.url.endsWith('/artifact')&&response.status===200)data=Buffer.concat([data,Buffer.from(' ')]);
    if(req.url==='/api/usage'&&usageMode==='stale'&&response.status===200){const value=JSON.parse(data);value.observed_at=stamp(Date.now()-120000);value.application.rolling_24h.window_start_exclusive=stamp(Date.parse(value.observed_at)-86400000);data=Buffer.from(JSON.stringify(value));}
    if(req.url.endsWith('/artifact')&&holdArtifactStatus!==null){
     const status=holdArtifactStatus;holdArtifactStatus=null;
@@ -150,8 +152,15 @@ try {
  await evaluate('[...document.querySelectorAll(".command-card button")].find(b=>b.textContent==="下載 JSON 成果").click()');
  const download=join(downloads,'node-health.json'),downloadDeadline=Date.now()+5000;
  while(!existsSync(download)&&Date.now()<downloadDeadline)await wait(50);
- assert.deepEqual(JSON.parse(readFileSync(download,'utf8')),JSON.parse(completed.artifact));
- checks.push('browser downloads original actual-collector artifact JSON');
+ assert.deepEqual(readFileSync(download),Buffer.from(completed.artifact));
+ assert.equal('sha256:'+createHash('sha256').update(readFileSync(download)).digest('hex'),completed.result.artifact_sha256);
+ checks.push('browser verifies SHA-256 and downloads exact original actual-collector artifact bytes');
+ const beforeTamper=downloadsStarted;tamperArtifact=true;
+ await evaluate('[...document.querySelectorAll(".command-card button")].find(b=>b.textContent==="下載 JSON 成果").click()');
+ await until('document.querySelector("#message").textContent.includes("成果完整性核對失敗")');
+ assert.equal(downloadsStarted,beforeTamper);assert.deepEqual(readFileSync(download),Buffer.from(completed.artifact));
+ assert.equal(await evaluate('document.querySelectorAll(".command-card").length'),1);tamperArtifact=false;
+ checks.push('browser rejects whitespace-tampered artifact without downloading or altering saved bytes');
  mode='403';await evaluate('[...document.querySelectorAll(".command-card button")].find(b=>b.textContent==="下載 JSON 成果").click()');
  await until('document.querySelectorAll(".command-card").length===0');
  assert(await evaluate('document.querySelector("#total-count").textContent==="—" && document.querySelector("#submit").disabled'));

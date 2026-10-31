@@ -149,3 +149,5 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 後續owner明確批准的[ULR線上結案](docs/evidence/m1-unknown-resolution-live.md)已完成：原unknown保留未知結果與歷史並釋放槽，原runner恢復後新Cron於18:00:55Z validated/healthy；原權限期限／Access／免費方案保持。此前「尚未部署／原unknown佔槽」為歷史狀態，完整mainline仍incomplete。
 
 [FQ故障與保留邊界](docs/failure-retention-qualification.md)補十四列[證據矩陣](docs/failure-matrix.md)、取消／完成競爭及七天artifact存取邊界；[保留方案](docs/retention.md)維持歷史與去重，未實作刪除／歸檔。[本輪證據](docs/evidence/m1-failure-retention.md)與live層級分開，完整AC-07／08仍pending。
+
+[DI成果下載完整性](docs/artifact-integrity.md)以原生Web Crypto核對原bytes，通過才精確保存；session／expiry／digest變化保守拒絕。[425tests與真本機browser證據](docs/evidence/m1-artifact-integrity.md)區分source/local與原看板實際更新，後者以任務板及live收據為準；不重開human授權或要求Safari測試。

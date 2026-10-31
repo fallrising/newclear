@@ -13,7 +13,7 @@
 | F07 submit撤權／到期、lease過期且run不明 | control revoked submit／reduced runner；runner `expired_reconcile_still_reuses_completed_evidence`；RF獨立reconcile-only grant與保留原時間／artifact | local＋歷史remote撤權reconcile；不可新增dispatch或刷新原deadline。[ULR](evidence/m1-unknown-resolution-live.md)是另外明確批准的unknown結案，不取代原run結果。 |
 | F08 deadline後送達 | control原late case及FQ late delivery兩案例：完成恰好deadline可fresh/passed；完成超過一秒為incomplete/unknown；送達兩者皆late，原時間保留；payload自填late拒絕 | local；精確remote邊界未重演。late是接收metadata，不能把「晚送達」與「晚執行完成」混為一談。 |
 | F09 deadline／取消／完成競爭 | FQ cancellation before/after completion、same-revision barrier競爭、unknown取消、兩種首次dispatch截止、exact lease expiry | local真SQLite交錯；一寫勝出、另一409，補報不覆寫成果；取消只是意圖，結果已完成可保留成功，unknown仍active。不是多isolate或實體停止證據。 |
-| F10 artifact大小／digest／schema | control malformed artifact記validation failed；FQ rejected report payloads驗16385bytes拒絕且整列不變、改terminal bytes409；FQ expiry用獨立Node crypto算SHA-256並驗下載exact bytes | local；receiver計算digest，report無client digest欄。瀏覽器目前解析JSON後重新格式化下載，沒有原bytes digest核對；不能聲稱已通過client digest-mismatch拒絕，該缺口仍在。 |
+| F10 artifact大小／digest／schema | control malformed artifact記validation failed；FQ rejected report payloads驗16385bytes拒絕且整列不變、改terminal bytes409；FQ expiry用獨立Node crypto算SHA-256並驗下載exact bytes | local；receiver計算digest，report無client digest欄。後續[DI](evidence/m1-artifact-integrity.md)新增client原bytes digest核對，真本機browser驗exact下載及空白篡改拒絕；remote／真人下載未因此自動通過。 |
 | F11 事件重複／亂序／漏seq | control report重送、[dashboard](../tests/dashboard.test.mjs) session失效／舊inflight處理 | M1採輪詢快照，沒有seq事件consumer；原事件場景尚未實作／驗收。不能用report去重替代漏seq恢復，也不能靠本文件默默豁免原要求。 |
 | F12 runner/control恢復與schedule重送 | [health-schedule](../tests/health-schedule.test.mjs) concurrent due／revision CAS、same due／misfire／rollback；[quota](../tests/quota.test.mjs)不補跑舊due；[service](../tests/test_service_runner.py)真程序restart journal；FQ expiry七天後原due不改firings | local；ULR歷史remote保留舊journal／firing且新Cron成功。不是遠端整個控制面故障切換或長期uptime。 |
 | F13 瀏覽器離線／stale | dashboard freshness／unknown及[UI瀏覽器證據](evidence/m1-dashboard.md)真Chromium/workerd offline-stale；[UL](evidence/m1-usage-live.md)owner Safari登入／手動usage與D1相符 | local browser＋owner歷史功能讀取；不宣稱Safari重演全部故障。依owner指示不再要求Console hash／手機驗收。 |
@@ -21,4 +21,4 @@
 
 ## 接續順序
 
-先補與目前功能直接相關的成果完整性下載與拒絕稽核缺口，再設計unknown/in-flight的隔離還原演練；跨系統快照必須按identity對帳。事件seq／通知場景需先明確對齊M1輪詢設計與原契約，不能為填表加入未要求的事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。
+成果完整性下載已補DI source／local browser驗證，接續補拒絕稽核缺口，再設計unknown/in-flight的隔離還原演練；跨系統快照必須按identity對帳。事件seq／通知場景需先明確對齊M1輪詢設計與原契約，不能為填表加入未要求的事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。

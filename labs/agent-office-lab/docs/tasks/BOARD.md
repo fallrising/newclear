@@ -60,3 +60,14 @@ Owner 指示繼續開發；沿用停止現有合成 demo、驗收後重新開啟
 | T-0005-02 | 真實 host crash／重啟、瀏覽器狀態與同 session 恢復驗收 | AC-08（OpenCode host） | done | 2026-10-31T12:29:42Z | 2026-10-31T12:52:39Z | 2026-10-31T12:52:59Z |
 
 T-0005 的四個 host 真實恢復驗收、既有生命週期回歸及 26 項離線測試通過，詳見[重啟證據](../evidence/restart.md)。[PR #852](https://github.com/fallrising/newclear/pull/852) 已合併，commit `843eaf97e77962df75d0b8f7618b01945e2d2b3e`。元件 offline 與 project contracts validate 兩項 CI 全部 success；已回讀主線摘要，host recovery 與 lifecycle regression 均為 completed，manual_resume_verified=true。完整 AC-08 與三 provider MVP 仍待驗收，沒有 release／deploy／usable tag。
+
+## T-0006：遠端 CLI 接入前置
+
+Owner 指示繼續，並提供需要其執行的命令；本輪不發出付費模型請求。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0006-01 | 固定官方 Grok／Pi，實測版本、身分與必要能力，缺失時拒絕 | AC-01（接入前置） | in_progress | 2026-10-31T17:47:08Z | — | 2026-10-31T17:52:29Z |
+| T-0006-02 | 隔離登入設定與無秘密診斷，提供 owner 可執行命令 | AC-01（接入前置） | in_progress | 2026-10-31T17:47:08Z | — | 2026-10-31T17:52:29Z |
+
+T-0006 真實 Grok／Pi help/version 與 Pi 隔離設定格式檢查通過，全程 OS 阻擋網路；35 項離線測試通過。遠端任務等 owner 登入／設定，見[命令與範圍](../REMOTE-SETUP.md)。合併後補時間與主線回讀。

@@ -317,10 +317,27 @@ synchronization are tracked separately in the private handoff.
 
 ## T-0339 — immutable local project policy
 
-Owner approved the prior M2 policy-source proposal on 2026-10-31. Source f987cb85dc6a3ac4fc24ff8aaed53c73ff2d5fe2; no newer HAI design or open HAI PR. Scope: strict operator-selected local JSON, exact project/AC rules, immutable canonical policy persistence, fail-closed startup and existing workflow binding. The contract, implementation and local gates now pass Claude plan/code review; final CI/delivery remains. Coverage remains separate.
+Owner approved the prior M2 policy-source proposal on 2026-10-31. Source f987cb85dc6a3ac4fc24ff8aaed53c73ff2d5fe2; no newer HAI design or open HAI PR. Scope: strict operator-selected local JSON, exact project/AC rules, immutable canonical policy persistence, fail-closed startup and existing workflow binding. The contract, implementation, Claude review and final CI/delivery are complete for this slice, as recorded below. Coverage remains separate.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HMPOL | Implement approved immutable local project policy profiles | POL-AC-01..05; H02 support | in_progress | 2026-10-31T17:56:40Z | — | 2026-10-31T18:41:00Z |
+| HMPOL | Implement approved immutable local project policy profiles | POL-AC-01..05; H02 support | done | 2026-10-31T17:56:40Z | 2026-10-31T19:09:52Z | 2026-10-31T19:10:29Z |
 
-Local acceptance: [evidence](../evidence/project-policy-20261031.md) and [receipt](../evidence/project-policy-20261031.json). Root full backend/race/vet/build passed on 182 frozen inputs; final two-test delta passed focused normal/race/vet and Claude follow-up ACCEPT. Web 30 tests, API lint and document checks pass. HMPOL remains in_progress until final-commit CI, normal merge and readback; no full M2/product/release claim.
+Local acceptance: [evidence](../evidence/project-policy-20261031.md) and [receipt](../evidence/project-policy-20261031.json). Root full backend/race/vet/build passed on 182 frozen inputs; final two-test delta passed focused normal/race/vet and Claude follow-up ACCEPT. Web 30 tests, API lint and document checks pass. Final-commit CI, normal merge and readback are recorded below; no full M2/product/release claim.
+
+HMPOL delivery: [PR #868](https://github.com/fallrising/newclear/pull/868) merged at
+`2026-10-31T19:09:52Z` as `c4264e14f71f27957a416c505ceb82e1105e995e`.
+Final reviewed head `55ec7b625c0faa63e4e1cf701215f6f8cd991e41` passed
+[HAI CI 41231915632](https://github.com/fallrising/newclear/actions/runs/41231915632) and
+[project CI 41231915611](https://github.com/fallrising/newclear/actions/runs/41231915611).
+Remote readback matches every reviewed HAI product and task/report path. The previous CI-passing
+head aca27d4d encountered a concurrent shared-PLAN append conflict at normal merge; both additions
+were retained, product/task trees stayed identical, and the final head passed the complete CI again.
+No force, history rewrite or check bypass was used.
+
+POL-AC-01..05 are delivered for this bounded policy slice; HMPOL end uses the primary merge time.
+The JSON receipt retains its historical local-acceptance snapshot; this BOARD resolves its then-pending
+delivery status. Full M2 verified coverage, completion UI and SUCCESS AC-02..04 remain incomplete.
+Coverage needs its own concrete contract and has not started in this round. Session/provider proposals
+remain Proposed. No usable tag, release or deployment. BOARD closure CI and desk synchronization
+are recorded separately in the persistent handoff.

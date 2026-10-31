@@ -547,7 +547,14 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0031-1 | 逐列證據與缺口 | FQ-01 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |
-| T-0031-2 | 競爭與到期隔離驗證 | FQ-02 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |
-| T-0031-3 | 保留／恢復方案 | FQ-03 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |
-| T-0031-4 | 回歸審查與交付 | FQ-04 | in_progress | 2026-10-31T18:39:23Z | | 2026-10-31T18:47:06Z |
+| T-0031-1 | 逐列證據與缺口 | FQ-01 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+| T-0031-2 | 競爭與到期隔離驗證 | FQ-02 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+| T-0031-3 | 保留／恢復方案 | FQ-03 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+| T-0031-4 | 回歸審查與交付 | FQ-04 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+
+### T-0031 Git交付與收尾
+
+- [PR870](https://github.com/fallrising/newclear/pull/870) head `1069df552fabd00a39aaf3ead9c1cf70a46a0021`，merge `95ae2ea0769a66c52c0a4c38c1d22180690da621`，2026-10-31T18:49:16Z合併；正常merge保留並行工作，本機／remote fulltree相同、head為main祖先、工作樹乾淨，61個已測input逐hash保持。
+- exact-head CI全過：CloudLab `41231130035`、Project success `41231130103`、llms `41231130059`。本機107Node＋304Python＝411tests，focused／final baseline11通過；五種source副本mutation在預期assertion產生3／1／1／1／1fail且原Worker不變。T856獨立最終ACCEPT；50project／8llms、task/report、400相對連結與diff檢查通過，最後exit狀態另有結構化收據。
+- 初次file-only結果不冒稱11tests；sandbox35Python socket errors與Node native assertion保留，准許loopback後完整重跑成功，未跳過或改runtime。十四列矩陣保留實際層級／缺口，七天artifact禁止下載不代表刪資料；無自動歸檔／tombstone／DELETE機制。
+- 本卡僅關閉FQ01–04 local qualification與retention設計；沒有本輪部署、cloud操作、續權或付費。完整AC07／08與mainline仍pending、無usable tag。後續優先成果下載完整性，再處理稽核／隔離還原等實際缺口。本收尾只改任務板。

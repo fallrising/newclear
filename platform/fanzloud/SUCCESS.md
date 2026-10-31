@@ -419,3 +419,10 @@ Scope: [SPEC-T006F](docs/specs/SPEC-T006F-browser-followup.md) AC-F01–F04. Add
 [Specification](docs/specs/SPEC-T008-p0-real-browser.md), [call chain and executable entry](docs/quickstart.md), [task board](docs/tasks/BOARD.md).
 AC-01 real-browser run passed with a fake provider; AC-04 not run — credential/environment gate unavailable.
 The official 0.145.0 executable is verified separately; the existing default credential directory does not satisfy private mode 0700 and no Cloud target/private HTTPS setup was supplied. No version or security check is relaxed.
+
+## T-0442 M1 isolated Web implementation
+
+[Prior contract](docs/specs/SPEC-M1-isolated-web.md) binds the approved T-0447
+executor to a real browser submission. EX02 actual KVM tools/denials/cleanup passed;
+EX03 and M1-WEB01–05 remain pending until same-source actual CLI/browser evidence.
+Original Cloud AC-04 and persistent AC-05 are not changed to passed.

@@ -20,10 +20,11 @@ from .store import event
 
 
 class Worker:
-    def __init__(self, db, connector=None):
+    def __init__(self, db, connector=None, subscription=None):
         self.db = db
         self.owner = uuid4()
         self.connector = connector
+        self.subscription = subscription
         self.tool_config = os.environ.get("TOOL_BROKER_MOCK_CONFIG")
         self.model_proxy = None
         if connector is not None and os.environ.get("MODEL_PROXY_CONFIG"):
@@ -114,7 +115,15 @@ class Worker:
             recovery = claim_recovery(self)
             if recovery:
                 return recovery
-        for node, backend in [("fake-local", "fake"), ("cocoon-local", "openhands")]:
+        for node, backend in [
+            ("fake-local", "fake"),
+            ("cocoon-local", "openhands"),
+            ("cocoon-local", "claude-subscription"),
+        ]:
+            if backend == "claude-subscription" and (
+                self.connector is None or self.subscription is None
+            ):
+                continue
             if backend == "openhands" and self.connector is None:
                 continue
             claim = self.claim_node(node, backend)
@@ -228,7 +237,7 @@ class Worker:
     def execute(self, claim):
         if claim.get("expired"):
             return
-        if claim.get("backend") == "openhands":
+        if claim.get("backend") in {"openhands", "claude-subscription"}:
             from .runtime_worker import execute_real
 
             return execute_real(self, claim)

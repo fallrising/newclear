@@ -2538,3 +2538,26 @@ Owner explicitly approved compatible deployment, brief runner pause/drain, origi
 ULR live checks passed: 17:59:47Z runner stopped, compatible100%/3modules/settings at17:59:53Z, exact CAS changes1 and originalservice resumed17:59:54Z; new18:00Cron healthy/validated18:00:55Z. Final123commands/152firings/119journal/active0, old121terminal/151firings/118journal preserved. Initial rawmultipart parser failure retained/corrected without repeated GET or live write. T855 fresh readonly public-evidence audit, inherited model/effort/permissions, <=1000tokens plus onefocusedfollowup, five-minute monitored with native interruption; cost/quotaunknown; no private/network/writes/tests/delegation, instructions not OS isolation. Normal Git gates pending.
 
 ULR evidence gate ACCEPT 2026-10-31T18:04:12Z: lead inspected actual private raw management/SQL/journal/service receipts and final preservation; T855 independent public-evidence ACCEPT and actual index/task/diff checks passed. No production source edits, authority extension or billing change. Final PR/CI/readback and board closure remain.
+
+## Program: Fanzloud M1 executor T-0447 (2026-10-31T18:37:19Z)
+
+Owner approved bounded AP extension and private KVM host preparation; desk PR343 merged.
+Contract: platform/agent-platform/docs/EXTERNAL-WORKSPACE.md.
+Root owns docs, host preparation, trusted adapter, live qualification and parent Web wiring.
+One native worker owns AP source/tests in isolated fanz-executor-worker-20261031 worktree; task .team/fanz-executor-t0447/worker.md. No nested delegation.
+Independent reviewer after integration; gate EX-01/02/03 before parent Web acceptance.
+One VM4CPU/4GiB, coding10min, existing subscription only. Unknown never auto-retried.
+Status: implementation starting; all new gates pending.
+
+T-0447 EX02 actual VM/tools boundary passed; source.bundle moved from disappearing
+/tmp to trusted fixed control path following actual failed checkout+SDKstat evidence.
+All failed VM runs cancelled with confirmed cleanup. Real provider calls still0.
+Same implementation worker now receives gateway-worker.md (Rust-only isolated tree),
+root owns functional HTML/JS and live browser. One final browser coding invocation
+will jointly prove EX03/M1; no separate duplicated live coding probe.
+
+T-0447 source gate: integrated gateway/Rust workspace green; AP full native run
+retained backup019 fingerprint failures, independently derived exact new catalog
+and27 affected/negative cases now pass. Remote11 runtime/helper hashes match.
+Browser real login/catalog/logout and mocked unknown-submit reload refusal checked;
+real coding invocation still0. Preparing frozen source for one live Web run.

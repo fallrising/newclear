@@ -8,7 +8,7 @@ from uuid import uuid4
 from psycopg.types.json import Jsonb
 
 from .auth import audit
-from .domain import TERMINAL, Problem, capabilities
+from .domain import TERMINAL, Problem, capabilities, execution_mode
 from .task_query import decode_cursor, encode_cursor, literal_pattern, scope_key
 
 
@@ -59,7 +59,7 @@ def run_view(row):
     return {
         **row,
         "capabilities": capabilities(row["backend"]),
-        "execution_mode": "cocoon-fixture" if row["backend"] == "openhands" else "fake",
+        "execution_mode": execution_mode(row["backend"]),
     }
 
 
@@ -127,6 +127,10 @@ class Store:
             raise Problem(409, "unsupported_capability:mock_tools")
         if data.require_approval and data.backend != "openhands":
             raise Problem(409, "unsupported_capability:approval")
+        if data.backend == "claude-subscription" and (
+            data.deadline_seconds > 600 or data.verification.mode != "commands"
+        ):
+            raise Problem(422, "subscription_requires_bounded_verified_run")
         profile = data.profile_id or uuid4()
         revision = 1
         if data.profile_id:
@@ -143,7 +147,7 @@ class Store:
             revision = old["revision"] + 1
         template = "fixture:m1"
         egress_policy = None
-        if data.backend == "openhands":
+        if data.backend in {"openhands", "claude-subscription"}:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -165,13 +169,15 @@ class Store:
                 revision,
                 data.name,
                 data.backend,
-                "openai-compatible:chat-completions"
+                "claude-subscription:claude-opus-5-5"
+                if data.backend == "claude-subscription"
+                else "openai-compatible:chat-completions"
                 if data.backend == "openhands"
                 else "fixture:m1",
                 template,
                 Jsonb(
                     {
-                        "exec": data.backend == "openhands",
+                        "exec": data.backend in {"openhands", "claude-subscription"},
                         "network": data.backend == "openhands",
                         "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
@@ -198,7 +204,7 @@ class Store:
             "profile_not_found",
         )
         egress_policy = profile["tool_policy"].get("egress_policy_sha256")
-        if profile["backend"] == "openhands":
+        if profile["backend"] in {"openhands", "claude-subscription"}:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -254,7 +260,7 @@ class Store:
             {
                 "state": "queued",
                 "state_version": 1,
-                "execution_mode": "cocoon-fixture" if profile["backend"] == "openhands" else "fake",
+                "execution_mode": execution_mode(profile["backend"]),
             },
         )
         event(

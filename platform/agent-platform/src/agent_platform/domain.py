@@ -63,7 +63,7 @@ class ProjectInput(Input):
 class ProfileInput(Input):
     name: str = Field(min_length=1, max_length=120)
     profile_id: UUID | None = None
-    backend: Literal["fake", "openhands"] = "fake"
+    backend: Literal["fake", "openhands", "claude-subscription"] = "fake"
     deadline_seconds: int = Field(default=1800, ge=30, le=7200)
     require_approval: bool = False
     mock_tools: bool = Field(default=False, strict=True)
@@ -96,7 +96,24 @@ OPENHANDS_CAPABILITIES = {
 }
 
 
+def execution_mode(backend):
+    return (
+        "cocoon-external"
+        if backend == "claude-subscription"
+        else "cocoon-fixture"
+        if backend == "openhands"
+        else "fake"
+    )
+
+
 def capabilities(backend):
+    if backend == "claude-subscription":
+        return {
+            **CAPABILITIES,
+            "protocol_revision": "subscription-workspace-v1",
+            "cancel": True,
+            "terminal_output": True,
+        }
     return (OPENHANDS_CAPABILITIES if backend == "openhands" else CAPABILITIES).copy()
 
 

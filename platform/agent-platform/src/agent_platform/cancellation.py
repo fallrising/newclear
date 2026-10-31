@@ -15,7 +15,7 @@ def request_cancel(conn, run_id, data, command_id):
     )
     if run["state_version"] != data.expected_state_version:
         raise Problem(409, "state_conflict")
-    if data.action != "cancel" or run["backend"] != "openhands":
+    if data.action != "cancel" or run["backend"] not in {"openhands", "claude-subscription"}:
         raise Problem(409, "unsupported_capability:" + data.action)
     if run["state"] == "finalizing":
         raise Problem(409, "finalizing")

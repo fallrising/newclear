@@ -218,3 +218,13 @@ This post-merge record supersedes pre-merge wording in the dated local snapshot.
 | --- | --- | --- | --- | --- | --- |
 | T-0112.1 | Present actual failed and unverified Worker outcomes without false verification success | RTF-01 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |
 | T-0112.2 | Preserve interrupted/resultless archive-failure UI and held capacity | RTF-02 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |
+
+## T-0447 — Fanzloud M1 isolated executor dependency
+
+[Contract](../EXTERNAL-WORKSPACE.md); parent T-0442.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0447.1 | Run-scoped external workspace API | EX-01 | in_progress | 2026-10-31T18:37:19Z | | 2026-10-31T19:21:49Z |
+| T-0447.2 | Actual VM isolation and cleanup | EX-02 | in_progress | 2026-10-31T18:37:19Z | | 2026-10-31T19:21:49Z |
+| T-0447.3 | Subscription CLI coding qualification | EX-03 | in_progress | 2026-10-31T18:37:19Z | | 2026-10-31T19:21:49Z |

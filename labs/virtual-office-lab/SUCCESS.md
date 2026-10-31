@@ -27,6 +27,14 @@ source_commit: 8bf48551f524086d81fa66d946c984f8052152ff
 | AC-07 | Given一個真實Agent執行端，When執行無敏感的已授權任務，Then開始、執行、完成由hook實際上報且可由畫面觀察 | pending | 未取得／執行真實宿主接入；HTTP測試替身與人工命令不算 |
 | AC-08 | Given owner批准公開環境，When空白正式namespace部署並重啟／復原／撤權，Then公開狀態正確、秘密不洩漏、demo不污染live | pending | 未授權也未部署；[驗收關卡](docs/RUNBOOK.md) |
 
+## 本次開發範圍：T-0002
+
+補強 AC-03 真 local workerd／SQLite 重啟後的去重與限流證據：填滿 12 次配額後重啟，相同事件可安全重送、同 ID 不同內容回 409、新事件仍回 429，拒絕與重送不改公開狀態。使用真實分鐘窗口，不替換 runtime 時鐘。Node 28 項測試、真 workerd、索引與 success contract 檢查均已通過，見[本輪證據](docs/evidence/m1-persistence.md)；完整 M1 的真 Agent 接入及 AC-06～08 仍未完成。
+
+## T-0003 開發範圍
+
+新增 opt-in `office-run` 命令生命週期 adapter：開始上報 terminal，正常退出上報 done，失敗上報 error；不擷取或上傳命令與輸出。開始上報失敗不得啟動命令，最終上報失敗不得回傳整體成功。35 項 Node 測試及真 workerd 命令上報已通過，包含實際子程序與憑證隔離，見[本輪證據](docs/evidence/m1-lifecycle.md)；這不是原生 Agent hook、瀏覽器觀察或完整 AC-07 驗收。
+
 ## 現況與缺口
 
 已具設計、CLI、API安全核心與Workers adapter。28項本機Node測試通過，包含真loopback HTTP；storage test double不等於DO恢復。當前未建立完整3D UI、未真正接入模型宿主、未公開部署。CI與runtime結果需對照當次PR，不能從workflow存在推論通過。

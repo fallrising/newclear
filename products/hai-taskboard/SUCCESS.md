@@ -196,3 +196,13 @@ accepted-input/evidence/completion behavior under explicit test policy. ID-AC-01
 passed. [Evidence](docs/evidence/m2-ac-identity-20261031.md) records limits and retained failures.
 ID-AC-04 delivery remains pending in BOARD. General policy configuration and verified coverage remain pending explicit contracts; full M2 and
 AC-02/03/04 remain incomplete. No UI/provider/dependency/restore change.
+
+## Immutable project policy — 2026-10-31
+
+Owner approved the concrete M2 local policy-source direction. This slice fixes POL-AC-01..05 in
+[the local project policy contract](docs/sdd/local-project-policy.md): strict operator-selected JSON,
+exact project/AC selection, canonical immutable persistence, startup rejection and actual completion/
+restart regression. Concrete plan review precedes implementation; all new oracles initially NotRun.
+Required checks are pinned backend full/race/vet/build, existing web/API/document checks, Claude
+plan/code review and normal CI/merge/readback/ledger. No full M2/coverage/UI/provider/AC-02..04 claim.
+Status and scope: BOARD HMPOL.

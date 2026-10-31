@@ -2530,3 +2530,9 @@ diff/source/hashes/logs, corrected reviewer full-table wording to21selected tabl
 invalid-UTF8 decoder-vector and existing-ID negative limits. ID-AC-04 still requires normal CI/merge/
 readback/BOARD/desk; full M2/product remains incomplete. Next contract question pending; no inference
 of approval or policy configuration implementation. Latest main843eaf97 has unrelated work only.
+
+## T-0339 immutable project policy — 2026-10-31
+
+Owner approved the concrete local JSON/exact-project/exact-AC/immutable accepted-policy direction. Root owns the specification, plan, integration and acceptance. BOARD HMPOL is the product progress authority. T-001 is one 10-minute read-only native audit; no recursive delegation. Claude Code claude-opus-5-5/high reviews the concrete plan and frozen code, each480s initial plus at most one actual-revision follow-up. Root active estimate120–150minutes,20minute checkpoints; CI each round20minutes. Failed checks retain evidence; initial failure plus at most two new-hypothesis diagnoses. No coverage/UI/provider/dependency/release/deploy. All implementation waits for the concrete plan review.
+
+Policy plan review: initial REWORK159.099s → revision ACCEPT53.725s; all blockers disposed before implementation. Root source-check corrects the reviewer's fixture-human overstatement; explicit authenticated human fixture evidence remains valid, automatic producer evidence does not. T002 is now ready for the reviewed contract.

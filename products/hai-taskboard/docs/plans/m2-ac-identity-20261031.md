@@ -124,6 +124,8 @@ browser acceptance are claimed. Valid legacy input/output bytes and migrations 0
 
 ## Pending policy contract — concrete proposal for owner acceptance
 
+Update2026-10-31: owner approved this direction. The concrete successor is [local project policy](../sdd/local-project-policy.md), tracked by BOARD HMPOL. The proposal below remains the historical decision input; its implementation status is not inferred from approval.
+
 Recommended bounded successor: **explicit immutable per-project policy profiles**, loaded from an
 operator-selected local JSON file at startup; no HTTP/agent policy writes, hot reload or wildcard rule.
 The file is an operator input, never discovered in an untrusted repository. Missing flag retains exact

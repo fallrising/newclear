@@ -14,6 +14,7 @@
 | [apps/loom](apps/loom/SUCCESS.md) | apps | 整合畫布、原生終端、Markdown 與 AI 的本機桌面工作區 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-04 |
 | [examples/bite-pi](examples/bite-pi/SUCCESS.md) | examples | 保留 Pi 驅動基礎平台產生器與 9router 接線示範 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
 | [gateways/pokercase](gateways/pokercase/SUCCESS.md) | gateways | 以 thinrouter 提供個人訂閱憑證的多協定 LLM gateway | 未完成／待驗收 | 尚無已核准標記 | 2026-10-11 |
+| [labs/agent-office-lab](labs/agent-office-lab/SUCCESS.md) | labs | 驗證本地優先的 OpenCode、Grok、Pi 三工位 Agent Office | 未完成／待驗收 | 尚無已核准標記 | 2026-10-31 |
 | [labs/aweshore](labs/aweshore/SUCCESS.md) | labs | 保存個人筆記與 avatar LLM 的早期 PKM 實驗 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |
 | [labs/bee-swarm](labs/bee-swarm/SUCCESS.md) | labs | 保存以 GitHub 角色協作及 SimPy 探索流程的概念框架 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
 | [labs/browser-fingerprint](labs/browser-fingerprint/SUCCESS.md) | labs | 觀測瀏覽器設備訊號與任務操作事件以比較測試環境 | 完成 | 尚無已核准標記 | 2026-10-03 |

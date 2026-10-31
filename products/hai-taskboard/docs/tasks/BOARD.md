@@ -264,7 +264,7 @@ review are separate gates. No merge or product acceptance is claimed by this doc
 
 ## T-0339 — M1c sealed human reports
 
-One Ready task: [M1c plan](../plans/m1c-human-reports-20261031.md), REPORT-AC-01..05; supports H02.
+Bounded task: [M1c plan](../plans/m1c-human-reports-20261031.md), REPORT-AC-01..05; supports H02.
 Source9e536de1dc1a532c8e3d78355e770bc757e190da. Existing claim/owner continuation applies.
 The newer Session/provider proposals preserve this next step and Fake-only. Root owns plan/API/docs;
 bounded implementation adds human report command/read ports, immutable SQL migration, service/HTTP and
@@ -272,11 +272,15 @@ real integration/fault tests. No M2/UI/L1/provider/dependencies/release/deploy; 
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM1C | Seal scoped human reports and atomically submit Review or Evidence | REPORT-AC-01..05; H02 support | in_progress | 2026-10-31T10:49:00Z | — | 2026-10-31T11:41:39Z |
+| HM1C | Seal scoped human reports and atomically submit Review or Evidence | REPORT-AC-01..05; H02 support | done | 2026-10-31T10:49:00Z | 2026-10-31T11:54:35Z | 2026-10-31T11:54:47Z |
 
 Plan and Claude review preceded production edits. REPORT-AC-01..05 now pass locally, including
 real human Review/Evidence completion joins and refusal cases; Claude code REWORK B1–B3 corrected
 and revision ACCEPT. Final full backend gate367.911s/168unchanged inputs, web30tests, API0warnings
 and document gates passed. [Evidence](../evidence/m1c-human-reports-20261031.md) retains all original
-failures and source hashes. PR CI/merge/readback remain required; other task rows and full-product
+failures and source hashes. The local checkpoint preceded the delivery recorded below; other task rows and full-product
 acceptance retain their status.
+
+M1c delivery: [PR #844](https://github.com/fallrising/newclear/pull/844) merged at `2026-10-31T11:54:35Z` as `013e3efdf81007981f8ebfc4ee35c93e45e7ffee`. Reviewed head `d116cb426c1973bc3a11f17a482710961bebed23` passed [HAI CI41198067472](https://github.com/fallrising/newclear/actions/runs/41198067472) and [project CI41198067429](https://github.com/fallrising/newclear/actions/runs/41198067429). Remote product/task-report readback matches the reviewed source.
+
+HM1C end uses the actual primary merge time. This closes only the sealed human-report API slice; full H01..H04/SUCCESS AC-02..04 retain their prior status. Next planned slice is M2, not started. Session/provider proposals remain Proposed; no usable tag/release/deploy. BOARD-only closure CI and desk synchronization are tracked separately in the private handoff.

@@ -6,7 +6,9 @@ Owner 指示繼續開發並可用 Claude review。範圍：每 5 分鐘 terminal
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0005-1 | 43 tests、workerd、Opus 5.5 review 通過；PR #873 | AC-07 | in_progress | 2026-10-31T18:54:29Z | — | 2026-10-31T18:56:28Z |
+| T-0005-1 | 43 tests、workerd、Opus 5.5 review 通過；PR #873 已合併 | AC-07 | done | 2026-10-31T18:54:29Z | 2026-10-31T18:58:16Z | 2026-10-31T18:58:16Z |
+
+合併收據：[PR #873](https://github.com/fallrising/newclear/pull/873)，merge `a8c621e43d7226c7c5b3c76e827ab2d8640ae12e` 已 fetch 回讀。候選 `035eeff` 的 contracts／validate 均通過；程式與測試經 Opus 5.5 二輪唯讀 review 後無 blockers，文件主導自檢。AC-07 整體仍 pending，沒有 deploy/release。此最終收尾僅改 BOARD。
 
 
 ## T-0004 — 命令取消生命週期

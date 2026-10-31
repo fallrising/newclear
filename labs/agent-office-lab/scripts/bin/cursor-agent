@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""Exact native Office Cursor startup; never accepts a model prompt or credentials."""
+import json
+import os
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from remote_cli import LAB
+from cursor_cli import installed_cli
+
+try:
+    out = Path(os.environ['LAB_CURSOR_OUT']).resolve(strict=True)
+    workspace = out / 'workspace'
+    if not out.is_relative_to(LAB / 'runs') or Path.cwd().resolve() != workspace:
+        raise ValueError('Invalid synthetic scope')
+    if sys.argv[1:] != ['--trust']:
+        raise ValueError('Cursor startup cannot accept prompts or launch overrides')
+    if Path(os.environ['HOME']).resolve() != out / 'home' or Path(os.environ['CURSOR_CONFIG_DIR']).resolve() != out / 'home/.cursor':
+        raise ValueError('Invalid isolated settings')
+    if os.environ.get('AGENT_CLI_CREDENTIAL_STORE') != 'file':
+        raise ValueError('System credential storage is forbidden')
+    if any(k in os.environ for k in ('CURSOR_API_KEY', 'CURSOR_API_ENDPOINT', 'GROK_AUTH', 'XAI_API_KEY')):
+        raise ValueError('Startup cannot receive credentials or alternate endpoints')
+    (out / 'native-launch.json').write_text(json.dumps({'provider': 'cursor', 'pid': os.getpid(),
+        'workspace_trust': 'synthetic_fixture_only', 'prompt_supplied': False, 'credentials_supplied': False}))
+    command = ['/usr/bin/sandbox-exec', '-f', str(out / 'cursor.sb'), str(installed_cli()), '--trust']
+    os.execve(command[0], command, dict(os.environ))
+except Exception:
+    print('Cursor startup launch rejected; no credential is printed', file=sys.stderr)
+    sys.exit(1)

@@ -11,4 +11,12 @@
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | T008-FAKE | Actual Chromium → production Rust → T007 fake executable → displayed diff; [PR807](https://github.com/fallrising/newclear/pull/807) / [evidence](../acceptance/T008.acceptance.md) | AC-01 | done | 2026-10-30T03:16:17Z | 2026-10-30T03:39:51Z | 2026-10-30T03:39:51Z |
-| T008-LIVE | 等 owner：private setup/Cloud target/task for same-source pinned CLI live task/status/diff; not run | AC-04 | in_progress | 2026-10-30T03:16:17Z | | 2026-10-30T03:39:51Z |
+| T008-LIVE | Private login ready; CLI catalog empty; live not run, Cloud retries paused by owner rebaseline | AC-04 | in_progress | 2026-10-30T03:16:17Z | | 2026-10-30T03:39:51Z |
+
+## T-0442 主線重校（2026-10-31）
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| D0 | [SDD](../../SDD.md)／ADR-0008，Codex＋Claude Code 文件核對；owner 定案前不實作 | FN-01–07（規劃；全部 NOT_RUN） | in_progress | 2026-10-31T12:26:30Z | | 2026-10-31T12:26:30Z |
+
+M1–M3 固定見 SDD；尚未開工，不再擴張舊 Cloud 或原生 actor 子任務。D0 時間為文件記帳 checkpoint；實際審查耗時見 review receipt。

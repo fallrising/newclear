@@ -21,3 +21,9 @@ Official pinned CLI acquired from official release and verified by digest/versio
 ## Acceptance decision
 
 Fresh-context native reviewer ACCEPTED the bounded implementation and AC-01 evidence with no blocker; verified88 hashes/binary/embedded assets/WS/diff/cleanup/native logs and independently ran2 harness tests. Root evidence-gate accepts AC-01 only. AC-04 skipped for missing private operator input, so T008/T-0442 remain in_progress. Required hosted CI remains a merge gate. Additional report-format/index-enum diagnostics were repaired without runtime changes; historical failures retained.
+
+## 2026-10-31 owner business rebaseline
+
+Current scope: documents only, original provider-neutral Web/isolated coding-agent outcome. Preserve P0 fake evidence and live failure. Root owns SDD/ADR/entry-point alignment; explicitly requested Claude Code independently reviews supplied source excerpts and final document bundle, no tools/writes/delegation. Exact route claude-opus-5-5/high through installed Claude Code 2.1.312, existing first-party login, safe/restricted/no-tools/no-MCP/no-session-persistence, host timeout 600s per call. Two planned calls, at most one focused correction review. Tokens/cost unknown unless actually reported; no paid fallback.
+
+Deliver finite M1–M3 and FN-01–07, source-bound review and documentation checks, PR. SDD remains proposed pending material owner decisions; no runtime/Cloud calls or adjacent-project implementation. Qualification is a necessary implementation gate, not passed documentation evidence. Final evidence gate must distinguish proposal readiness from owner acceptance and product completion.

@@ -1,5 +1,19 @@
 # Virtual Office 任務板
 
+## T-0004 — 命令取消生命週期
+
+Owner 最新指示：每個里程碑 commit → PR → 必要檢查通過且無阻擋後合併，取代先前 Draft-only。不延伸至部署、release 或付費。
+範圍：SIGINT/SIGTERM 轉送子程序、有限時間終止、取消不回報 done；以實際 subprocess 回歸。AC-07 整體仍 pending。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0004-1 | 取消與真程序回歸已合併；[39 tests/workerd/索引證據](../evidence/m1-cancellation.md) | AC-07 | done | 2026-10-31T18:39:26Z | 2026-10-31T18:42:16Z | 2026-10-31T18:42:16Z |
+
+T-0004 收據：[PR #866](https://github.com/fallrising/newclear/pull/866) 正常合併，merge SHA `2997e63aff00b51836669d343ee95154c4706b64` 已 fetch 回讀。候選 `21b392f3e67a325d31b85e4c5b82a359e988dfe8` 的 contracts／validate CI 通過，無衝突；沒有獨立 review 紀錄。此完成狀態不代表完整 AC-07、產品、部署或 release 完成。此收尾 PR 僅更新 BOARD。
+
+PR #863 已於 2026-10-31T18:39:26Z 合併；merge SHA `2665c0886ba7e99ac1cbfdafc8daf7bf2ec53d8d` 已 fetch 回讀。必要 contracts/validate CI 通過，無獨立人工 review 紀錄。T-0002/3 完成僅指有界交付，非完整 M1。
+
+
 ## T-0002 — M1 持久化驗證補強（進行中）
 
 來源：owner 直接指示開發 virtual-office-lab。保持 Draft-only、不部署、不付費、不宣稱完整 M1 或產品完成。
@@ -8,7 +22,7 @@
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0002-1 | SQLite 重啟去重／限流回歸本機通過，Draft-only；[證據](../evidence/m1-persistence.md) | AC-03 | in_progress | 2026-10-31T18:29:44Z | — | 2026-10-31T18:31:13Z |
+| T-0002-1 | SQLite 重啟去重／限流回歸本機通過，Draft-only；[證據](../evidence/m1-persistence.md) | AC-03 | done | 2026-10-31T18:29:44Z | 2026-10-31T18:39:26Z | 2026-10-31T18:31:13Z |
 
 
 ## T-0003 — 命令生命週期上報 adapter
@@ -18,7 +32,7 @@
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0003-1 | office-run、35 測試與真 workerd 命令上報通過；[證據](../evidence/m1-lifecycle.md)，Draft PR #863 | AC-07 | in_progress | 2026-10-31T18:36:35Z | — | 2026-10-31T18:38:12Z |
+| T-0003-1 | office-run、35 測試與真 workerd 命令上報通過；[證據](../evidence/m1-lifecycle.md)，Draft PR #863 | AC-07 | done | 2026-10-31T18:36:35Z | 2026-10-31T18:39:26Z | 2026-10-31T18:38:12Z |
 
 ## T-0001 — 虛擬辦公室設計、CLI 與 Workers 骨架
 

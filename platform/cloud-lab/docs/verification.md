@@ -89,3 +89,7 @@ BI01–04依[唯讀查詢契約](bot-inspection.md)驗原state不變、FLOCK、s
 [UL部分live證據](evidence/m1-usage-live.md)：已發布固定六檔，三modules／settings／歷史保全通過；UL03正向asset HTTP bytes／usage200 pending。runner403、expired bot401及匿名302是拒絕邊界，不能取代成功讀取。原unknown仍佔active槽，未恢復排程。
 
 Owner以Safari回報UL真人登入／手動用量成功，三counter與D1同窗口聚合一致；額外asset hash依owner要求取消，沒有假稱執行。UR新增離線CAS結案與晚到report／競爭／新Cron隔離驗證，原live unknown處置仍pending。
+
+## FQ逐列接續核對
+
+[十四列證據矩陣](failure-matrix.md)列出具名local／歷史workerd／remote證據及尚未實作的事件／稽核／完整性／restore缺口；[保留方案](retention.md)區分七天禁止下載與實際資料保留。本輪[FQ範圍](failure-retention-qualification.md)不新增live故障操作。前段UR原unknown pending已由後續[ULR](evidence/m1-unknown-resolution-live.md)完成單筆結案與新Cron驗證，結果仍unknown，沒有重跑。

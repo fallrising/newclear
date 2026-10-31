@@ -1,12 +1,13 @@
 # Agent Office Lab
 
-本地優先的 Agent Office 實驗：OpenCode + Strata 原生任務、取消、寫入權限回覆、瀏覽器刷新、程序 session 恢復及 host 中斷／手動恢復已實測，Pi + DeepSeek 的原生合成任務也已實測通過；Grok 與完整三工位 MVP 尚未完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
+本地優先的 Agent Office 實驗：OpenCode + Strata 原生任務、取消、寫入權限回覆、瀏覽器刷新、程序 session 恢復及 host 中斷／手動恢復已實測，Pi + DeepSeek 的原生合成任務也已實測通過；Grok／Cursor 真實任務與完整四工位 MVP 尚未完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
 
 - [安裝與重跑](docs/SETUP.md)：macOS arm64、固定依賴與外部 Strata 前置條件。
+- [Cursor 第四工位](docs/CURSOR.md)：固定官方 CLI、隔離登入及原生啟動驗證。
 - [Pi 遠端驗收](docs/PI-REMOTE.md)：原生工位、有界請求與合成檔案任務。
 - [Grok／Pi 設定命令](docs/REMOTE-SETUP.md)：固定 CLI、隔離登入及尚待驗收的遠端流程。
-- [SDD](docs/SDD.md)：單專案、單執行佇列及三 provider 的驗收。
-- [任務板](docs/tasks/BOARD.md)：追蹤 OpenCode 生命週期與後續三 provider MVP。
+- [SDD](docs/SDD.md)：單專案、單執行佇列及四 provider 的驗收。
+- [任務板](docs/tasks/BOARD.md)：追蹤 OpenCode 生命週期與後續四 provider MVP。
 - [交接](HANDOFF.md)、[歷史驗收摘要](docs/evidence/README.md)。
 - [OpenCode 工位](docs/OPENCODE-LOCAL.md)、[Office 基底](docs/OFFICE-LOCAL.md)、[Codex 本地任務](docs/LOCAL-CODEX.md)。
 - [上游研究](research/repositories.md)、[來源](research/sources.json)、[Strata 研究限制](docs/STRATA-EXPERIMENT.md)。

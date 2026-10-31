@@ -14,9 +14,33 @@ export function execute(command, args, env) {
   return new Promise(resolve => {
     // No shell interpretation, no output capture, and no reporter settings in child env.
     const childEnv = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('OFFICE_')));
-    const child = spawn(command, args, {env: childEnv, stdio: 'inherit', shell: false});
-    child.once('error', () => resolve(127));
-    child.once('exit', (code, signal) => resolve(signal ? 128 : code ?? 127));
+    const grouped = process.platform !== 'win32';
+    const child = spawn(command, args, {env: childEnv, stdio: 'inherit', shell: false, detached: grouped});
+    let cancelled = 0; let timer;
+    const kill = signal => {
+      try { if (grouped && child.pid) process.kill(-child.pid, signal); else child.kill(signal); } catch {}
+    };
+    const cancel = signal => {
+      if (cancelled) return;
+      cancelled = signal === 'SIGINT' ? 130 : 143;
+      kill(signal);
+      timer = setTimeout(() => kill('SIGKILL'), 5000);
+      timer.unref();
+    };
+    const interrupt = () => cancel('SIGINT');
+    const terminate = () => cancel('SIGTERM');
+    process.on('SIGINT', interrupt);
+    process.on('SIGTERM', terminate);
+    const finish = code => {
+      clearTimeout(timer);
+      process.off('SIGINT', interrupt);
+      process.off('SIGTERM', terminate);
+      // Clean up remaining members when a cancelled group leader exits early.
+      if (cancelled && grouped) kill('SIGKILL');
+      resolve(cancelled || code);
+    };
+    child.once('error', () => finish(127));
+    child.once('exit', (code, signal) => finish(signal ? 128 : code ?? 127));
   });
 }
 export async function run(argv, env = process.env, send = report, launch = execute) {

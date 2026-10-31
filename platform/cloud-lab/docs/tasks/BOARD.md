@@ -494,13 +494,26 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0028-1 | 固定候選與fresh前態 | UL-01 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
-| T-0028-2 | 既有Worker與資產更新 | UL-02 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
-| T-0028-3 | 保全與有界live核驗（等owner） | UL-03 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
-| T-0028-4 | 公開證據／審查／交付 | UL-04 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
+| T-0028-1 | 固定候選與fresh前態 | UL-01 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T12:39:08Z |
+| T-0028-2 | 既有Worker與資產更新 | UL-02 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T12:39:08Z |
+| T-0028-3 | 保全與有界live核驗 | UL-03 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T12:39:08Z |
+| T-0028-4 | 公開證據／審查／交付 | UL-04 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T12:39:08Z |
 
 [範圍與驗收](../usage-rollout.md)；正向usage200／真人登入另列pending，不以403代替。
 
 ### T-0028 部分執行
 
 2026-10-31T10:08:42Z：原Worker100%更新、module管理bytes及設定／歷史保全通過；UL03 partial，等owner準備好後批准human-only30分鐘窗口及登入。原09:15 unknown保留且後續Cron skipped_overlap。UL01／02證據已備，所有列保持in_progress／end空白；本輪PR只保存部分結果，不關閉任務。[證據](../evidence/m1-usage-live.md)。
+
+2026-10-31T12:08:11Z：owner批准原human-only1800秒窗口；10項隔離SQLite guard cases及T853操作審查ACCEPT。只續原human grant revision1→2，截止12:38:10Z（開始12:08:10Z），scope/capabilities與其他三roles不變，unknown／排程保留。通用authorization.py仍要求全域靜止；此次已批准的特定operator用精確human CAS及同grant active/schedule guard，原其他role在途不被清除。真人登入／asset／usage驗證仍等owner回報，T0028保持open，實際續期／回讀收據留私人目錄。
+
+2026-10-31T12:18:35Z：owner以Safari完成真人登入與手動用量讀取，122／84／1與主導唯讀D1窗口聚合相符。依owner加快流程的指示，不再要求Console資產hash；該項未執行，不冒稱已驗。UL真人功能讀取接受，原unknown未修復；待文件Git交付後依規則收尾，保持end空白。owner目前不需再操作。
+
+## T-0029 — 未知結果結案
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0029-1 | 離線證據與計畫 | UR-01 | in_progress | 2026-10-31T12:28:56Z | — | 2026-10-31T12:39:08Z |
+| T-0029-2 | 精確CAS與歷史保全 | UR-02 | in_progress | 2026-10-31T12:28:56Z | — | 2026-10-31T12:39:08Z |
+| T-0029-3 | Worker／看板／bot未知終局 | UR-03 | in_progress | 2026-10-31T12:28:56Z | — | 2026-10-31T12:39:08Z |
+| T-0029-4 | 隔離回歸／審查／交付 | UR-04 | in_progress | 2026-10-31T12:28:56Z | — | 2026-10-31T12:39:08Z |

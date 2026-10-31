@@ -2486,3 +2486,15 @@ M1c 11:38Z checkpoint: initial root full backend passed442.419s/168inputs; Claud
 M1c local evidence gate ACCEPT: revised fullbackend367.911s/168unchanged inputs, web30tests/39unchanged inputs, APIzero-warning, project49contracts/8indexes and task/report/document checks. Root compared all scoped files and acceptance oracles; T004 final review conditions are locally met. Final-head required CI, normal merge/readback and BOARD/desk closure still required. No full-product completion or subsequent milestone claim.
 
 M1c delivery integration: normal main49ac7a09 merge preserves the unrelated Agent Office Lab work;50project contracts/8indexes and20milestone Markdown/211links pass. All168backend/39web/17reviewed input hashes unchanged. No HAI contract drift.
+
+## HV human-only approved window — 2026-10-31
+
+Owner explicitly approved UL prepared1800second human-only window and requested steps. Generic authorization.py quiescence remains unchanged. Prepare isolated exact-human CAS with active-command/enabled-schedule guards on that grant; no unknown clear, Cron stop or role expansion. Private intent/before/after,10syntheticSQLite guard cases and one T853 independent readonly review before mutation. Fresh profile mapping must match approved proposal; end=min(actualnow+1800,residentstop), exactone affectedrow, unknownreply reconcile withoutretry. Review <=900tokens+onefollowup,5minute monitored; inherited model/effort/permissions, unknowncost/quota, no delegation. Existing T0028 remainsopen awaiting realhumanread.
+
+HV owner outcome: Safari manualusage observed12:18:35Z values122/84/1; independent boundedD1 read matches exactrollingwindow, no latercreatedcommands. Owner explicitly requested less granular/faster acceptance. Stop pendingConsole request; assethash notperformed, notclaimed. Accept functionalhumanread; no furtherowneraction/windowrenewal. Existingunknown remainspriority. Documentation/Git continuation remains pending; no allmainline completion claim.
+
+## UR source delivery — 2026-10-31T12:28:56Z
+
+Owner繼續開發且要求快速、減少人工驗證。Lead單一writer實作offline close_unknown計畫、Worker終局護欄、UI/bot投影；一個fresh native readonly reviewer T854，inherited model/effort/permissions、<=1500tokens+一個focusedfollowup、5分鐘監控，cost/quota未知，不委派／不碰private/network，指令scope不是OS隔離。RED→GREEN、完整現有回歸、實際SQLite跨語言CAS/late report/新Cron/idempotency；不再要求ownerConsole。保留HV/Safari未交付文件一起交付，UL依owner調整接受功能驗證但不偽稱assetbytes。未知原命令live結案與短暫runnerpause須另列具體批准，source批准不覆蓋。
+
+UR gate:400tests (96Node/304Python), focused8/2/16 and actual2cross-languageSQLite cycles passed; T854 initialsourceACCEPT and full-log focusedACCEPT accepted bylead. Original RED, privatefixtureancestor failure and syncspawn timeout retained. Lead realprivateCLI plan prepared using readonly originalD1/journal; no apply/deploy/stop/renew. Git delivery/candidate pin pending; UL Safari acceptance keeps assethash explicitly waived/unrun, no moreowner tests.

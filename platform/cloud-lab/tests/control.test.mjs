@@ -179,3 +179,67 @@ test('usage database errors return unavailable rather than a zero snapshot',asyn
  const f=await fixture(),original=f.DB.prepare.bind(f.DB);f.DB.prepare=sql=>{if(sql.includes('FROM commands'))throw new Error('storage unavailable');return original(sql);};
  const r=await f.req('/api/usage');assert.equal(r.status,503);assert.equal(r.data.code,'TEMPORARILY_UNAVAILABLE');assert.equal(r.data.application,undefined);
 });
+
+test('closed unknown rejects late reports and remains terminal on view, cancel and same-id retry',async()=>{
+ const f=await fixture(),a=await f.start(),r=f.result(a);
+ const row=f.DB.db.prepare('SELECT * FROM commands WHERE id=?').get(a.command_id),v=JSON.parse(row.record);
+ v.delivery='closed_unknown';v.revision++;v.resolution={id:'operator-resolution',action:'close_unknown'};
+ f.DB.db.prepare('UPDATE commands SET record=?,revision=?,active=0 WHERE id=?').run(JSON.stringify(v),v.revision,a.command_id);
+ const before=f.DB.db.prepare('SELECT * FROM commands').get();
+ for(const body of [r,{...r,owner_outcome:'unknown',started_at:null,finished_at:null,artifact:null}]){
+  const result=await f.req('/api/runner/report',body,'runner',T+2000);assert.equal(result.status,409);assert.equal(result.data.code,'RECONCILIATION_CLOSED');
+ }
+ assert.equal((await f.req(`/api/commands/${a.command_id}`,undefined,'bot',T+20000)).data.command.delivery,'closed_unknown');
+ assert.equal((await f.req(`/api/commands/${a.command_id}/cancel`,{},'bot',T+20000)).data.command.delivery,'closed_unknown');
+ assert.equal((await f.req('/api/commands',f.command(),'bot',T+20000)).data.command.delivery,'closed_unknown');
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),before);
+ assert.equal((await f.req('/api/runner/claim',{},'runner',T+20000)).data.assignment,null);
+ assert.equal((await f.req('/api/commands',f.command('new-after-close'),'bot',T+20000)).status,202);
+});
+
+import {spawn} from 'node:child_process';
+const ordered = v => Array.isArray(v) ? v.map(ordered) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k=>[k,ordered(v[k])])) : v;
+async function resolutionFixture(){
+ const f=await fixture(),a=await f.start();
+ const unknown={command_id:a.command_id,attempt_id:a.attempt.attempt_id,fence:a.attempt.fence,owner_outcome:'unknown',started_at:null,finished_at:null,artifact:null};
+ assert.equal((await f.req('/api/runner/report',unknown,'runner',T+2000)).status,200);
+ const current=(await f.req('/api/runner/claim',{},'runner',T+121000)).data.assignment;
+ const journal=new DatabaseSync(':memory:');journal.exec('CREATE TABLE executions(command_id TEXT,identity_digest TEXT,state TEXT,result TEXT)');
+ const identity=await digest(JSON.stringify(ordered({command:current.command,external_ref:current.external_ref})));
+ journal.prepare('INSERT INTO executions VALUES(?,?,?,?)').run(a.command_id,identity,'unknown',JSON.stringify({owner_outcome:'unknown',started_at:null,finished_at:null,artifact:null}));
+ const saved=journal.prepare('SELECT * FROM executions').get();
+ const snapshot={schema_version:'cloudlab.unknown-resolution.v1',observed_at:iso(T+122000),target:{worker_name:'cloud-lab',database_id:'12345678-1234-4234-8234-123456789abc'},command:f.DB.db.prepare('SELECT * FROM commands WHERE id=?').get(a.command_id),journal:{...saved,result:JSON.parse(saved.result)}};
+ const script="import sys,json,importlib.util; s=importlib.util.spec_from_file_location('resolution',sys.argv[1]); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); print(json.dumps(m.make_plan(json.load(sys.stdin),operator_id='operator-approved',resolution_id='12345678-1234-4234-8234-123456789abc',now=int(sys.argv[2]))))";
+ const output=await new Promise((resolve,reject)=>{
+  const child=spawn('python3',['-c',script,new URL('../tools/resolve_unknown.py',import.meta.url).pathname,String((T+122000)/1000)],{stdio:['pipe','pipe','pipe'],timeout:10000});
+  let stdout='',stderr='';child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);child.once('error',reject);child.once('close',status=>resolve({status,stdout,stderr}));child.stdin.end(JSON.stringify(snapshot));
+ });
+ assert.equal(output.status,0,output.stderr);const plan=JSON.parse(output.stdout);
+ f.DB.db.function('unixepoch',()=>Math.floor((T+122000)/1000));
+ return {...f,a:current,journal,saved,plan,unknown:{...unknown,attempt_id:current.attempt.attempt_id,fence:current.attempt.fence}};
+}
+test('Python resolution SQL releases one slot, preserves journal and admits a fresh real SQLite Cron cycle',async()=>{
+ const f=await resolutionFixture();
+ assert.equal(f.DB.db.prepare(f.plan.query.sql).run(...f.plan.query.params).changes,1);
+ assert.equal(f.DB.db.prepare(f.plan.query.sql).run(...f.plan.query.params).changes,0);
+ assert.deepEqual(f.journal.prepare('SELECT * FROM executions').get(),f.saved);
+ assert.equal((await f.req('/api/runner/report',f.unknown,'runner',T+123000)).data.code,'RECONCILIATION_CLOSED');
+ const usage=(await f.req('/api/usage',undefined,'bot',T+123000)).data;
+ assert.equal(usage.application.retained.used,1);assert.equal(usage.application.rolling_24h.used,1);assert.equal(usage.application.active.used,0);
+ const retry=await f.req('/api/commands',f.command(),'bot',T+123000);assert.equal(retry.data.command.delivery,'closed_unknown');assert.equal(retry.data.command.command_id,f.a.command_id);
+ f.DB.db.prepare('INSERT INTO schedules VALUES(?,1,1,?,NULL)').run('health-minute','gb');
+ await scheduled({scheduledTime:T+900000},f.env,T+900000);
+ assert.equal(f.DB.db.prepare('SELECT count(*) n FROM commands').get().n,2);
+ const next=(await f.req('/api/runner/claim',{},'runner',T+901000)).data.assignment;
+ assert.notEqual(next.command_id,f.a.command_id);assert.equal(next.attempt.mode,'dispatch');
+ const result={...f.result(next),started_at:iso(T+901000),finished_at:iso(T+902000)};
+ const report=await f.req('/api/runner/report',result,'runner',T+903000);assert.equal(report.status,200);assert.equal(report.data.command.result.validation.status,'passed');
+ assert.deepEqual(f.journal.prepare('SELECT * FROM executions').get(),f.saved);f.journal.close();
+});
+test('a genuine result racing before the operator CAS wins without being overwritten',async()=>{
+ const f=await resolutionFixture();const result=await f.req('/api/runner/report',f.result(f.a),'runner',T+122000);
+ assert.equal(result.status,200);assert.equal(result.data.command.delivery,'result_recorded');
+ const saved=f.DB.db.prepare('SELECT * FROM commands').get();
+ assert.equal(f.DB.db.prepare(f.plan.query.sql).run(...f.plan.query.params).changes,0);
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);f.journal.close();
+});

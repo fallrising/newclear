@@ -91,3 +91,14 @@ T-0007：owner 已確認一次付費驗收；3 次 DeepSeek 請求、原生 agen
 T-0008：47 項離線測試及原生啟動驗收通過，詳見[證據](../evidence/grok-startup-2026-11-01.json)。未載入 owner auth、未送 prompt，登入後 session hook／真實任務仍未驗收。
 
 T-0008 [PR #864](https://github.com/fallrising/newclear/pull/864) 已合併，commit `46845e4aacd6c8de2eeedacfd4f61e2fc100d7cc`。offline／validate 兩項 CI success；已回讀主線證據：startup completed、login_required、cleanup_completed=true、model_inference_verified=false。這只完成啟動前置，AC-03 與其 T-0002-03 保持待驗，沒有付費呼叫、release／deploy／usable tag。
+
+## T-0009：Cursor Agent 第四工位接入
+
+Owner 明確要求加入 Cursor Agent；先固定官方 CLI、缺失／版本偵測、隔離登入入口與無推論啟動驗收，真實任務另需登入及有界配額授權。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0009-01 | Cursor 固定安裝、隔離設定及原生啟動已驗證；待 PR 交付 | AC-01、AC-13（前置） | in_progress | 2026-10-31T18:41:54Z | — | 2026-10-31T18:46:31Z |
+| T-0009-02 | 登入後 Cursor 真實任務與生命週期；等 owner 執行隔離登入命令 | AC-13、AC-05–AC-09、AC-11 | todo | — | — | 2026-10-31T18:41:54Z |
+
+T-0009-01：55 項離線測試、真實官方 archive 提取／摘要與無憑證原生啟動通過。[證據](../evidence/cursor-startup-2026-11-01.json)。T-0009-02 仍待登入與有界真實任務，不把前置當 AC-13 通過。

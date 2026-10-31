@@ -2,13 +2,15 @@
 
 > 公開匯入版：先依 [SETUP](SETUP.md) 設定環境（research 文件請見 ../docs/SETUP.md）。原 runs 的連結改指向歷史摘要，原始日誌及截圖不公開。
 
-版本：0.1，2026-10-31。SDD 在此指規格驅動開發的設計文件（Software Design Description）。狀態：P0 基底已安裝、建置及通過 614 個測試與瀏覽器 smoke；三 provider 的 live integration 與 MVP 驗收尚未完成。見 [本機進度](OFFICE-LOCAL.md)。
+版本：0.1，2026-10-31。SDD 在此指規格驅動開發的設計文件（Software Design Description）。狀態：P0 基底已安裝、建置及通過 614 個測試與瀏覽器 smoke；四 provider 的 live integration 與 MVP 驗收尚未完成。見 [本機進度](OFFICE-LOCAL.md)。
 
-最新：OpenCode＋Strata 真實工位任務 **AC-02 已通過**；OpenCode 的取消及清理也通過（AC-06 的本地 provider 部分）。Grok／Pi、完整權限等待／resume／重啟與三工位 MVP 尚未完成。[證據](OPENCODE-LOCAL.md)。
+最新：OpenCode＋Strata 真實工位任務 **AC-02 已通過**；OpenCode 的取消及清理也通過（AC-06 的本地 provider 部分）。Grok／Pi、完整權限等待／resume／重啟與四工位 MVP 尚未完成。[證據](OPENCODE-LOCAL.md)。
+
+2026-11-01 owner 擴充：新增 Cursor Agent 第四工位，沿用單執行佇列、原生 PTY／hooks、明確模型來源與禁止自動 fallback；新增 AC-13，不縮減既有 AC。
 
 ## 1. 目標與使用情境
 
-在這台 Mac 的本地工作目錄，提供單人使用的 agent office：選擇專案、選擇工位，交給 OpenCode、Grok CLI 或 Pi 執行任務，看到真實狀態、終端輸出及交付檔案。Pi 必須接 DeepSeek API。Strata 作為可選本地模型，用於先驗證 GitHub 調研工具迴圈及後續 OpenCode 接入。
+在這台 Mac 的本地工作目錄，提供單人使用的 agent office：選擇專案、選擇工位，交給 OpenCode、Grok CLI、Pi 或 Cursor Agent 執行任務，看到真實狀態、終端輸出及交付檔案。Pi 必須接 DeepSeek API。Strata 作為可選本地模型，用於先驗證 GitHub 調研工具迴圈及後續 OpenCode 接入。
 
 第一個端到端案例：使用者選擇 research 任務 → agent 搜尋 LLM agent office repositories → 抓取 README／整合文件 → 產生附來源的比較與 SDD 草稿 → 使用者從工位開啟產物。模型提出工具呼叫，host 執行搜尋；模型本身不等同於瀏覽器。
 
@@ -16,19 +18,19 @@
 
 必要能力：
 
-1. 本機單使用者、一個專案空間、三個固定 provider 工位。
+1. 本機單使用者、一個專案空間、四個固定 provider 工位。
 2. 註冊／選擇明確的工作目錄；顯示 agent CLI 可用性、版本、模型及登入缺失。
 3. 送出單一任務、串流查看輸出、看到等待輸入、完成、失敗與取消；可進入原生終端回覆問題。
 4. 每個工位獨立 session；顯式恢復指定 session，避免把上一個 unrelated session 當成本次任務。
 5. 任務及產物清單，保留日誌、來源 URL、版本與執行結果。
-6. Pi + DeepSeek API 真實呼叫成功；OpenCode、Grok 各至少一個真實任務成功。
+6. Pi + DeepSeek API 真實呼叫成功；OpenCode、Grok、Cursor 各至少一個真實任務成功。
 7. 預設同時一個執行中任務；多張工位卡片不代表必須平行載入模型。
 
 延後：多人協作、雲端部署、語音、遊戲化場景、排程、自動 hiring、多 agent 自主派工、跨專案 PR、成本精算。MVP 不強制製作新 3D 美術；使用上游 lite／現有 office 呈現。
 
 ## 3. 架構決策
 
-**ADR-001：優先沿用 AgentSystemLabs/agent-office。** 三種 provider 已存在；先驗證固定 commit，再做 lab 專用設定與小幅修改，不從零重造 terminal／session 層。[調研與來源](../research/repositories.md)
+**ADR-001：優先沿用 AgentSystemLabs/agent-office。** 四種 provider 已存在；先驗證固定 commit，再做 lab 專用設定與小幅修改，不從零重造 terminal／session 層。[調研與來源](../research/repositories.md)
 
 基底 commit：`852e2ab28c4f3f31bffdf4b20353bd119c9d3270`。後續 checkout 放 `vendor/agent-office/`，記錄 Node／套件鎖／CLI 版本。上游文件及程式碼只證明實作存在，不能取代本機驗收。
 
@@ -42,6 +44,8 @@ flowchart TD
     Host --> OC[OpenCode PTY + event plugin]
     Host --> GK[Grok CLI PTY + hooks]
     Host --> PI[Pi PTY + extension]
+    Host --> CU[Cursor PTY + workspace hooks]
+    CU --> Cursor[Explicit Cursor login and selected model]
     OC --> Model[Selected model provider]
     Model -. optional .-> Strata[Strata localhost:8080/v1]
     GK --> XAI[Grok login / supported credentials]
@@ -56,8 +60,9 @@ flowchart TD
 | Provider | MVP 路徑 | 驗證重點 | 狀態 |
 |---|---|---|---|
 | OpenCode | 原生 CLI + 上游 Office plugin；lab wrapper 保留本地 status plugin、固定 Strata | prompt、session、permission、question、error | 1.19.5 + Strata 真實檔案任務及取消通過；完整生命週期未驗收 |
-| Grok CLI | 暫採官方版，原生 CLI + 上游 Office hooks、獨立 `GROK_HOME` | session 恢復、登入與等待提示、完成／錯誤；不得與社群 `grok-dev` 混用 | CLI 種類待使用者回覆，未 live test |
-| Pi + DeepSeek | 原生 Pi + 上游 Office extension、每工位 session directory | DeepSeek model/provider 實際可用；`agent_settled` 才可結束任務 | 文件及 adapter 已讀，未 live test |
+| Grok CLI | 暫採官方版，原生 CLI + 上游 Office hooks、獨立 `GROK_HOME` | session 恢復、登入與等待提示、完成／錯誤；不得與社群 `grok-dev` 混用 | 官方 Grok 1.0.70；無憑證啟動通過，真實任務待驗 |
+| Pi + DeepSeek | 原生 Pi + 上游 Office extension、每工位 session directory | DeepSeek model/provider 實際可用；`agent_settled` 才可結束任務 | Pi 1.4.0 + DeepSeek 有界真實任務通過（AC-04） |
+| Cursor Agent | 官方 CLI + 上游 Office 的 workspace .cursor/hooks.json；隔離 HOME 與 CURSOR_CONFIG_DIR | session、模型、完成／錯誤、登入等待；不自動轉接 Grok host | 固定官方 2026.10.22-27dcf5f；無憑證啟動通過，AC-13 真實任務待驗 |
 
 每個 provider 提供共通行為：`detect`、`launch`、`sendInput`、`cancel`、`resume`、`stop`，但不要求參數與事件名稱完全相同。`detect` 必須核對 executable 實際來源與 `--version`／`--help`，不能只看檔名 `grok`。
 
@@ -94,11 +99,11 @@ Worker 的 idle／offline 與 Task 狀態分開。沒有事件時呈現 starting
 
 ## 6. 工作目錄、輸入與取消
 
-每個 task 使用指定 workspace；MVP 串行，避免三個 agent 同時改同一檔。若後續啟用並行，必須改用獨立 git worktree 或複本，不能只加大 concurrency。
+每個 task 使用指定 workspace；MVP 串行，避免四個 agent 同時改同一檔。若後續啟用並行，必須改用獨立 git worktree 或複本，不能只加大 concurrency。
 
 終端輸入只能送給所選 worker 的當前 session。使用 argv array 啟動程序，不把 prompt 拼入 shell 字串。取消先發原生中斷，再於 10 秒後終止本 run 擁有的程序與其子程序；不按程序名稱批量 kill。取消保留現有產物及日誌，不宣稱回滾檔案修改。
 
-只監聽 loopback；hooks 使用上游每 worker token。產物路徑須解析 realpath 並限定 project/run root，阻擋 `..` 與 symlink 逃逸。工作目錄邊界不是 OS 沙箱；檔案、shell 權限仍由各 agent 原生機制執行。等待權限時在終端顯示，不加全域自動批准旗標。上游 Grok `--trust` 必須在第一次 workspace 設定時揭露或移除，而非把工作目錄信任與每次工具授權混為一談。
+只監聽 loopback；hooks 使用上游每 worker token。產物路徑須解析 realpath 並限定 project/run root，阻擋 `..` 與 symlink 逃逸。工作目錄邊界不是 OS 沙箱；檔案、shell 權限仍由各 agent 原生機制執行。等待權限時在終端顯示，不加全域自動批准旗標。上游 Grok／Cursor `--trust` 必須在第一次 workspace 設定時揭露或移除，而非把工作目錄信任與每次工具授權混為一談。
 
 ## 7. Strata 調研實驗
 
@@ -114,7 +119,7 @@ GitHub 調研實驗先前在 bind 階段被沙箱拒絕，AC-10 尚未通過。[
 
 | ID | 操作與預期 | 必要證據 |
 |---|---|---|
-| AC-01 | 三種 CLI detect 正確；缺失或不相容時不啟動 | 版本、help capability、缺失原因 |
+| AC-01 | 四種 CLI detect 正確；缺失或不相容時不啟動 | 版本、help capability、缺失原因 |
 | AC-02 | OpenCode 在 fixture workspace 寫一個指定內容的檔案 | 原生事件、session id、檔案 hash |
 | AC-03 | 官方／確認版 Grok 完成同等任務 | 同上；記錄實際 CLI 身分 |
 | AC-04 | Pi 透過 DeepSeek 完成同等任務 | provider/model、settled 事件、檔案 hash |
@@ -122,22 +127,23 @@ GitHub 調研實驗先前在 bind 階段被沙箱拒絕，AC-10 尚未通過。[
 | AC-06 | 取消執行中任務，10 秒 grace 後清掉所擁有程序 | PID ownership、退出／取消事件 |
 | AC-07 | 模擬 CLI crash／API 401／429，不顯示成功且無無限重試 | 失敗原因及最多 2 次顯式重試記錄 |
 | AC-08 | browser refresh 不重跑；host 重啟後 unfinished 標 interrupted | run/session 不重複、恢復記錄 |
-| AC-09 | OpenCode／Grok／Pi 執行結果可分別開啟，模型與來源可辨識 | 三個真實 run 的 evidence |
+| AC-09 | OpenCode／Grok／Pi／Cursor 執行結果可分別開啟，模型與來源可辨識 | 四個真實 run 的 evidence |
 | AC-10 | Strata 完成真實 GitHub tool loop | 模型 tool_call、API 結果、後續回答；獨立於 AC-02–AC-09 |
 | AC-11 | 路徑逃逸、偽造 hook、含金鑰輸出測例被阻擋／遮蔽 | 針對性測試結果 |
+| AC-13 | Cursor Agent 完成同等合成任務 | CLI 身分、session、model、原生完成事件、產物 hash |
 
-MVP 完成要求 AC-01–AC-09、AC-11 通過；Strata 實驗另以 AC-10 判定，不以 mock 代替 live。UI 收到狀態後 1 秒內更新、停止後無 orphan process，作為待量測目標，不是目前成績。
+MVP 完成要求 AC-01–AC-09、AC-11、AC-13 通過；Strata 實驗另以 AC-10 判定，不以 mock 代替 live。UI 收到狀態後 1 秒內更新、停止後無 orphan process，作為待量測目標，不是目前成績。
 
 ## 9. 實作順序與退出條件
 
-1. **P0：基底驗證。** 固定上游 checkout、保留授權，啟動 lite/office；記錄 package lock 與 CLI 版本。核對三種 provider，特別是 Grok 版別與 Pi + DeepSeek。若現有 adapter 失效，先小範圍修 adapter；只有 host 無法支援生命週期才另寫輕量 host。
-2. **P1：最小流程。** 只暴露三工位、單 workspace、單 run queue、原生終端、產物清單；完成 AC-01–AC-06。
+1. **P0：基底驗證。** 固定上游 checkout、保留授權，啟動 lite/office；記錄 package lock 與 CLI 版本。核對四種 provider，特別是 Grok 版別與 Pi + DeepSeek。若現有 adapter 失效，先小範圍修 adapter；只有 host 無法支援生命週期才另寫輕量 host。
+2. **P1：最小流程。** 只暴露四工位、單 workspace、單 run queue、原生終端、產物清單；完成 AC-01–AC-06、AC-13。
 3. **P2：可靠性。** 完成 AC-07–AC-09、AC-11，補重連、取消與失敗 evidence。完成這一步才稱 MVP。
 4. **P3：本地模型實驗。** 在可使用 loopback／Metal 的環境跑 AC-10，驗證後再把 Strata 配給 OpenCode。沿用既有資源 guard，與 Decider 不同時載入。
 
 ## 10. 待確認及限制
 
 - Grok 官方版或社群版：已詢問；暫採官方版以便沿用基底。
-- 尚未取得三種 CLI 的本機實際版本與 provider 登入成功證據。
+- 尚未取得四種 CLI 的本機實際版本與 provider 登入成功證據。
 - 預設執行沙箱無法取得 Metal；本次已對具體 runner 命令取得批准，成功使用 Metal／loopback／sysctl。模型工具本身仍使用 workspace-write 沙箱。
 - 已有 SDD、調研、可重跑的 Strata 檔案／程式修復驗證，以及固定 Office 基底與本機預覽 launcher；不宣稱雲端 API 或三個 CLI 已整合完成。

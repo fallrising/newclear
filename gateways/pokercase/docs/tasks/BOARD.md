@@ -600,10 +600,14 @@ Demand: desk T-0432 / #698; claim PR336 merged. [Fixed CR-1–CR-5](T-0432-crash
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| CR-01 | Deterministic durable storage boundary proof | CR-1 | in_progress | 2026-10-31T11:05:51Z | — | 2026-10-31T11:37:30Z |
-| CR-02 | Actual dispatched process interruption | CR-2 | in_progress | 2026-10-31T11:05:51Z | — | 2026-10-31T11:37:30Z |
-| CR-03 | Finalized history and once-only recovery | CR-3 | in_progress | 2026-10-31T11:05:51Z | — | 2026-10-31T11:37:30Z |
-| CR-04 | Matching-scope recovery reconciliation | CR-4 | in_progress | 2026-10-31T11:05:51Z | — | 2026-10-31T11:37:30Z |
-| CR-05 | Headless evidence and complete bounded delivery | CR-5 | in_progress | 2026-10-31T11:05:51Z | — | 2026-10-31T11:37:30Z |
+| CR-01 | Deterministic durable storage boundary proof | CR-1 | done | 2026-10-31T11:05:51Z | 2026-10-31T11:44:46Z | 2026-10-31T11:45:07Z |
+| CR-02 | Actual dispatched process interruption | CR-2 | done | 2026-10-31T11:05:51Z | 2026-10-31T11:44:46Z | 2026-10-31T11:45:07Z |
+| CR-03 | Finalized history and once-only recovery | CR-3 | done | 2026-10-31T11:05:51Z | 2026-10-31T11:44:46Z | 2026-10-31T11:45:07Z |
+| CR-04 | Matching-scope recovery reconciliation | CR-4 | done | 2026-10-31T11:05:51Z | 2026-10-31T11:44:46Z | 2026-10-31T11:45:07Z |
+| CR-05 | Headless evidence and complete bounded delivery | CR-5 | in_progress | 2026-10-31T11:05:51Z | — | 2026-10-31T11:45:07Z |
 
-Local verification passed9storage-process/3actualbufferedcases,407Rust/199Python/20repository tests,49contracts/8indexes and8priorregressions; runtime unchanged. Independent source/runtime review passed; publication and final ledger review pending. CR-5 includes subsequent management publication/backup/cleanup and remains in_progress until those actual gates are recorded. Original core AC and broader issues remain open.
+Local verification passed9storage-process/3actualbufferedcases,407Rust/199Python/20repository tests,49contracts/8indexes and8priorregressions; runtime unchanged. Independent source/runtime and prepublication ledger reviews passed; product merged. CR-5 includes subsequent management publication/backup/cleanup and remains in_progress until those actual gates are recorded. Original core AC and broader issues remain open.
+
+Product [PR843](https://github.com/fallrising/newclear/pull/843), source `0afc82dbd40437bbbb47fc616f6e35c8180e4fc8`, normal merge `6f40c937d3c600dd60a050cc44e230b74f8140b8` at 2026-10-31T11:44:46Z. Required [Pokercase CI](https://github.com/fallrising/newclear/actions/runs/41197770638) and [Project success contracts](https://github.com/fallrising/newclear/actions/runs/41197770623) passed. All12 changed files matched source/merge/origin; ancestry and source/merge Desk-Task trailers passed. Three retained ordinary/native/integration artifacts match54 committed inputs each.
+
+CR01–04 are merged and verified. CR05 remains in_progress at this product-merge phase snapshot because its unchanged CR5 acceptance includes subsequent management publication, full verified backup and owned cleanup. The final private handoff records those later facts only after they happen. This adds evidence to already-correct runtime; no production correction or live acceptance is claimed. Mainline incomplete, usable_tag none, desk in_progress and #698–702 open; original17AC and AC04/17 decision remain. No next milestone.

@@ -8,14 +8,14 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | T-0001-01 | 匯入可重建來源、公開證據摘要、任務及索引，完成 PR／CI／回讀 | AC-12 | done | 2026-10-31T11:19:24Z | 2026-10-31T11:23:55Z | 2026-10-31T11:24:23Z |
 
-## T-0002：後續 MVP（尚未在本輪執行）
+## T-0002：後續 MVP（持續追蹤）
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | T-0002-01 | CLI capability／版本／缺失偵測 | AC-01 | todo | — | — | — |
 | T-0002-02 | 已有 OpenCode 合成任務；移植後補完整 runtime 回歸 | AC-02 | todo | — | — | — |
 | T-0002-03 | 確認 Grok 版別，再做顯式遠端任務 | AC-03 | todo | — | — | — |
-| T-0002-04 | Pi + DeepSeek 顯式遠端任務 | AC-04 | todo | — | — | — |
+| T-0002-04 | Pi + DeepSeek 顯式遠端任務 | AC-04 | done | 2026-10-31T18:03:31Z | 2026-10-31T18:19:17Z | 2026-10-31T18:19:51Z |
 | T-0002-05 | 原生權限等待、終端回覆及繼續 | AC-05 | todo | — | — | — |
 | T-0002-06 | 補 Grok／Pi 取消與所屬程序清理 | AC-06 | todo | — | — | — |
 | T-0002-07 | crash、401／429、有界重試與失敗狀態 | AC-07 | todo | — | — | — |
@@ -76,6 +76,6 @@ T-0006 真實 Grok／Pi help/version 與 Pi 隔離設定格式檢查通過，全
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0007-01 | 有界 Pi runner、原生啟動與 owner 授權的一次付費任務通過，待 PR 合併 | AC-04 | in_progress | 2026-10-31T18:03:31Z | — | 2026-10-31T18:17:34Z |
+| T-0007-01 | 有界 Pi runner、原生啟動與 owner 授權的一次付費任務通過 | AC-04 | done | 2026-10-31T18:03:31Z | 2026-10-31T18:19:17Z | 2026-10-31T18:19:51Z |
 
-T-0007：owner 已確認一次付費驗收；3 次 DeepSeek 請求、原生 agent_settled、產物及清理通過。[真實證據](../evidence/pi-live-2026-11-01.json)。此次授權已用完，未追加重跑；合併後補結案與主線回讀。
+T-0007：owner 已確認一次付費驗收；3 次 DeepSeek 請求、原生 agent_settled、產物及清理通過。[真實證據](../evidence/pi-live-2026-11-01.json)。此次授權已用完，未追加重跑；[PR #861](https://github.com/fallrising/newclear/pull/861) 已合併，commit `55c0c6d68c055aab6613ce6293a4d8ba7b8e2f39`。offline／validate 兩項 CI success；已回讀主線 evidence：completed、model_inference_verified=true、3 次請求、204 output tokens。AC-04 與其 T-0002-04 待辦一併結案，完整 MVP 仍 incomplete。

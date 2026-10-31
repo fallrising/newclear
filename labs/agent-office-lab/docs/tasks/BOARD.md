@@ -56,7 +56,7 @@ Owner 指示繼續開發；沿用停止現有合成 demo、驗收後重新開啟
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0005-01 | 持久 interrupted、停止舊 PTY、防止自動喚醒與明確恢復 | AC-08（OpenCode host） | in_progress | 2026-10-31T12:29:42Z | — | 2026-10-31T12:50:57Z |
-| T-0005-02 | 真實 host crash／重啟、瀏覽器狀態與同 session 恢復驗收 | AC-08（OpenCode host） | in_progress | 2026-10-31T12:29:42Z | — | 2026-10-31T12:50:57Z |
+| T-0005-01 | 持久 interrupted、停止舊 PTY、防止自動喚醒與明確恢復 | AC-08（OpenCode host） | done | 2026-10-31T12:29:42Z | 2026-10-31T12:52:39Z | 2026-10-31T12:52:59Z |
+| T-0005-02 | 真實 host crash／重啟、瀏覽器狀態與同 session 恢復驗收 | AC-08（OpenCode host） | done | 2026-10-31T12:29:42Z | 2026-10-31T12:52:39Z | 2026-10-31T12:52:59Z |
 
-T-0005 的四個 host 真實恢復驗收、既有生命週期回歸及 26 項離線測試通過，詳見[重啟證據](../evidence/restart.md)。合併後補完成時間與遠端回讀。
+T-0005 的四個 host 真實恢復驗收、既有生命週期回歸及 26 項離線測試通過，詳見[重啟證據](../evidence/restart.md)。[PR #852](https://github.com/fallrising/newclear/pull/852) 已合併，commit `843eaf97e77962df75d0b8f7618b01945e2d2b3e`。元件 offline 與 project contracts validate 兩項 CI 全部 success；已回讀主線摘要，host recovery 與 lifecycle regression 均為 completed，manual_resume_verified=true。完整 AC-08 與三 provider MVP 仍待驗收，沒有 release／deploy／usable tag。

@@ -1,9 +1,9 @@
 const DELIVERY = {
   accepted: '已接受，等待派送', dispatching: '派送中', awaiting_result: '等待執行結果',
-  reconciling: '對帳中，結果未知', result_recorded: '已保存結果',
+  closed_unknown: '已結案，結果仍未知', reconciling: '對帳中，結果未知', result_recorded: '已保存結果',
   expired_before_dispatch: '派送前已到期', cancelled_before_dispatch: '派送前已取消',
 };
-const TERMINAL = new Set(['result_recorded', 'expired_before_dispatch', 'cancelled_before_dispatch']);
+const TERMINAL = new Set(['closed_unknown', 'result_recorded', 'expired_before_dispatch', 'cancelled_before_dispatch']);
 const utc = value => {
   if (typeof value !== 'string' || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/.test(value)) return NaN;
   const parsed = Date.parse(value);
@@ -15,7 +15,7 @@ export const can = (capabilities, capability) => Array.isArray(capabilities) && 
 export function observation(record, now) {
   const result = record?.result;
   const unknown = { state: 'unknown', label: '未知', tone: 'muted', ageSeconds: null };
-  if (!result || record.delivery === 'reconciling' || result.owner_outcome !== 'succeeded' ||
+  if (!result || ['reconciling', 'closed_unknown'].includes(record.delivery) || result.owner_outcome !== 'succeeded' ||
       !['healthy', 'unhealthy'].includes(result.health)) return unknown;
   const finished = utc(result.finished_at), current = utc(now);
   const maxAge = record.command?.parameters?.max_sample_age_seconds;
@@ -32,7 +32,7 @@ export function commandView(record, capabilities, now) {
     ...observation(record, now), status: DELIVERY[record.delivery] || '未知派送狀態',
     canCancel: can(capabilities, 'commands:cancel-request') && !record.cancel_requested && !TERMINAL.has(record.delivery),
     cancelLabel: record.cancel_requested ? '已記錄取消意圖；尚不代表程序停止' : '要求取消',
-    artifactAvailable: can(capabilities, 'artifact:read') && Boolean(record.result?.artifact_sha256) &&
+    artifactAvailable: record.delivery !== 'closed_unknown' && can(capabilities, 'artifact:read') && Boolean(record.result?.artifact_sha256) &&
       Number.isFinite(utc(record.result?.artifact_expires_at)) && utc(now) < utc(record.result.artifact_expires_at),
   };
 }
@@ -286,7 +286,7 @@ export function mount(document, client = createClient()) {
     const readable = can(caps, 'commands:read');
     byId('total-count').textContent = readable ? String(state.records.length) : '—';
     byId('active-count').textContent = readable ? String(state.records.filter(item => !TERMINAL.has(item.delivery)).length) : '—';
-    byId('unknown-count').textContent = readable ? String(state.records.filter(item => item.delivery === 'reconciling' || item.result?.health === 'unknown').length) : '—';
+    byId('unknown-count').textContent = readable ? String(state.records.filter(item => ['reconciling', 'closed_unknown'].includes(item.delivery) || item.result?.health === 'unknown').length) : '—';
     const signature = JSON.stringify([state.records, caps, state.records.map(record => {
       const status = commandView(record, caps, current); return [status.state, status.tone, status.artifactAvailable];
     })]);

@@ -26,7 +26,7 @@ POLICY_CODES = {'INVALID_POLICY', 'POLICY_CONTEXT_MISMATCH', 'POLICY_REQUIRED',
                 'POLICY_NOT_STARTED', 'POLICY_CLOCK_ROLLBACK', 'POLICY_CALL_LIMIT',
                 'POLICY_NEW_REQUEST_LIMIT', 'POLICY_RATE_LIMITED',
                 'INVALID_POLICY_RENEWAL', 'POLICY_RENEWAL_TOO_EARLY'}
-DELIVERIES = {'accepted', 'dispatching', 'reconciling', 'result_recorded',
+DELIVERIES = {'closed_unknown', 'accepted', 'dispatching', 'reconciling', 'result_recorded',
               'cancelled_before_dispatch', 'expired_before_dispatch'}
 
 
@@ -304,7 +304,8 @@ def project(request, value, command, known_id, now):
             and (known_id is None or command_id == known_id), 'OBSERVATION_MISMATCH')
     delivery = value.get('delivery')
     require(isinstance(delivery, str) and delivery in DELIVERIES, 'INVALID_RESPONSE')
-    out = response(request, 'unknown' if delivery == 'reconciling' else delivery, 'OBSERVED', command_id)
+    out = response(request, 'unknown' if delivery in ('reconciling', 'closed_unknown') else delivery,
+                   'RECONCILIATION_CLOSED' if delivery == 'closed_unknown' else 'OBSERVED', command_id)
     if delivery != 'result_recorded':
         return out
     result = value.get('result')

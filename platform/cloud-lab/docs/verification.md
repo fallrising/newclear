@@ -87,3 +87,5 @@ BI01–04依[唯讀查詢契約](bot-inspection.md)驗原state不變、FLOCK、s
 [UO01–04](usage-observation.md)補scope聚合、手動看板及過期／撤權競爭，[證據](evidence/m1-usage-observation.md)區分source/local與provider／live。觀測數值不是准入預留或帳單來源。
 
 [UL部分live證據](evidence/m1-usage-live.md)：已發布固定六檔，三modules／settings／歷史保全通過；UL03正向asset HTTP bytes／usage200 pending。runner403、expired bot401及匿名302是拒絕邊界，不能取代成功讀取。原unknown仍佔active槽，未恢復排程。
+
+Owner以Safari回報UL真人登入／手動用量成功，三counter與D1同窗口聚合一致；額外asset hash依owner要求取消，沒有假稱執行。UR新增離線CAS結案與晚到report／競爭／新Cron隔離驗證，原live unknown處置仍pending。

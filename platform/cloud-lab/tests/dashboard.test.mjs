@@ -266,3 +266,10 @@ test('bootstrap beyond the ten-second clock measurement bound leaves usage unava
  let clock=0;t.mock.method(performance,'now',()=>clock);let calls=0;
  const ui=mounted(t,{bootstrap:async()=>{clock+=10001;return bootstrapFixture();},commands:async()=>({commands:[]}),usage:async()=>{calls++;return usageFixture();}});await ui.settled();await ui.node('usage-refresh').click();assert.equal(calls,0);assert.equal(ui.node('usage-refresh').disabled,true);assert.match(ui.node('message').textContent,/時間估計已失效/);
 });
+
+test('operator-closed unknown stays unknown and cannot cancel or download a synthetic success', () => {
+  const item=record();item.delivery='closed_unknown';
+  const view=commandView(item,['commands:cancel-request','artifact:read'],now);
+  assert.equal(view.status,'已結案，結果仍未知');assert.equal(view.state,'unknown');
+  assert.equal(view.canCancel,false);assert.equal(view.artifactAvailable,false);
+});

@@ -177,3 +177,12 @@ class BridgeTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
+class ClosedUnknownTests(unittest.TestCase):
+    def test_closed_unknown_is_never_verified(self):
+        command={'parameters':{'max_sample_age_seconds':30}}
+        request={'request_id':RID,'operation':'health.status'}
+        value={'command_id':'command-1','command':command,'delivery':'closed_unknown','result':{'owner_outcome':'succeeded'}}
+        out=bridge.project(request,value,command,'command-1',1793059200)
+        self.assertEqual(out['state'],'unknown');self.assertEqual(out['code'],'RECONCILIATION_CLOSED')
+        self.assertFalse(out['verified']);self.assertIsNone(out['health']);self.assertIsNone(out['observed_at'])

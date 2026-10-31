@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import * as dashboard from '../apps/control/public/dashboard.mjs';
 import { observation, commandView, makeSubmission, createClient, can, renderCommand, mount } from '../apps/control/public/dashboard.mjs';
 
 const now = '2026-10-26T16:00:30Z';
@@ -7,7 +9,7 @@ const record = (overrides = {}) => ({
   command_id: 'cmd_demo', revision: 1, delivery: 'result_recorded', cancel_requested: false,
   command: { parameters: { max_sample_age_seconds: 30 } },
   result: { owner_outcome: 'succeeded', health: 'healthy', finished_at: '2026-10-26T16:00:10Z',
-    received_at: now, artifact_sha256: 'a'.repeat(64), validation: { status: 'passed', checks: {} }, artifact_expires_at: '2026-11-02T16:00:10Z' },
+    received_at: now, artifact_sha256: 'sha256:' + 'a'.repeat(64), validation: { status: 'passed', checks: {} }, artifact_expires_at: '2026-11-02T16:00:10Z' },
   ...overrides,
 });
 
@@ -272,4 +274,87 @@ test('operator-closed unknown stays unknown and cannot cancel or download a synt
   const view=commandView(item,['commands:cancel-request','artifact:read'],now);
   assert.equal(view.status,'已結案，結果仍未知');assert.equal(view.state,'unknown');
   assert.equal(view.canCancel,false);assert.equal(view.artifactAvailable,false);
+});
+
+const artifactBytes = new TextEncoder().encode('{\n  "status": "healthy", "note": "觀測"\n}\n');
+const artifactHash = bytes => 'sha256:' + createHash('sha256').update(bytes).digest('hex');
+const artifactRecord = () => { const r=record();r.result.artifact_sha256=artifactHash(artifactBytes);return r; };
+
+test('DI artifact client preserves raw UTF-8 and whitespace across stream chunks',async()=>{
+ const bytes=artifactBytes,client=createClient(async()=>new Response(new ReadableStream({start(c){c.enqueue(bytes.slice(0,38));c.enqueue(bytes.slice(38));c.close();}}),{headers:{'Content-Type':'application/json'}}));
+ assert.deepEqual(await client.artifact('cmd_demo'),bytes);
+});
+
+test('DI verifier rejects malformed metadata and mismatched bytes; returns an independent verified copy',async()=>{
+ const input=artifactBytes.slice(),verified=await dashboard.verifyArtifact(input,artifactHash(input));
+ assert.deepEqual(verified,input);assert.notEqual(verified,input);input[0]=0;assert.equal(verified[0],123);
+ for(const hash of [null,'a'.repeat(64),'sha256:'+'A'.repeat(64),'sha256:'+'a'.repeat(63)])
+  await assert.rejects(dashboard.verifyArtifact(artifactBytes,hash),e=>e.code==='ARTIFACT_METADATA_INVALID');
+ const altered=new TextEncoder().encode(new TextDecoder().decode(artifactBytes)+' ');
+ await assert.rejects(dashboard.verifyArtifact(altered,artifactHash(artifactBytes)),e=>e.code==='ARTIFACT_INTEGRITY_MISMATCH');
+ await assert.rejects(dashboard.verifyArtifact(new Uint8Array(16385),artifactHash(artifactBytes)),e=>e.code==='ARTIFACT_TOO_LARGE');
+});
+
+test('DI artifact stream cancels at 16385 bytes and preserves API error status',async()=>{
+ let pulled=0,cancelled=false;
+ const client=createClient(async()=>new Response(new ReadableStream({pull(c){pulled++;c.enqueue(new Uint8Array(pulled===1?16384:1));},cancel(){cancelled=true;}},{highWaterMark:0}),{headers:{'Content-Type':'application/json'}}));
+ await assert.rejects(client.artifact('cmd_demo'),e=>e.code==='ARTIFACT_TOO_LARGE');assert.equal(pulled,2);assert.equal(cancelled,true);
+ for(const status of [401,403,410]){
+  const denied=createClient(async()=>new Response(JSON.stringify({code:'denied',request_id:'safe-request',message:'denied'}),{status,headers:{'Content-Type':'application/json'}}));
+  await assert.rejects(denied.artifact('cmd_demo'),e=>e.status===status&&e.requestId==='safe-request');
+ }
+});
+
+test('DI invalid digest metadata never offers download',()=>{
+ for(const value of [null,'a'.repeat(64),'sha256:'+'A'.repeat(64)]){
+  const r=record();r.result.artifact_sha256=value;assert.equal(commandView(r,['artifact:read'],now).artifactAvailable,false);
+ }
+});
+
+for(const valid of [true,false])test(`DI mounted download ${valid?'preserves verified original bytes':'blocks a digest mismatch'}`,async t=>{
+ let blob=null;const bytes=valid?artifactBytes:new TextEncoder().encode('{"status":"healthy"}');
+ t.mock.method(URL,'createObjectURL',value=>{blob=value;return 'blob:test';});t.mock.method(URL,'revokeObjectURL',()=>{});
+ const ui=mounted(t,{bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:[artifactRecord()]}),artifact:async()=>bytes});await ui.settled();
+ await ui.node('commands').querySelector('button').click();
+ if(valid){assert.ok(blob);assert.deepEqual(new Uint8Array(await blob.arrayBuffer()),artifactBytes);}
+ else{assert.equal(blob,null);assert.match(ui.node('message').textContent,/完整性/);}
+});
+
+test('DI unavailable crypto fails closed without a download',async t=>{
+ t.mock.method(globalThis.crypto.subtle,'digest',async()=>{throw new Error('unavailable');});
+ await assert.rejects(dashboard.verifyArtifact(artifactBytes,artifactHash(artifactBytes)),e=>e.code==='ARTIFACT_VERIFICATION_UNAVAILABLE');
+});
+
+for(const change of ['session','expiry','digest','capability'])test(`DI ${change} change while hashing prevents download`,async t=>{
+ const realDigest=globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);let finish,hashing=false,denied=false,current=artifactRecord(),caps=bootstrapFixture().capabilities,downloads=0;
+ t.mock.method(globalThis.crypto.subtle,'digest',(...args)=>{hashing=true;return new Promise((resolve,reject)=>{finish=()=>realDigest(...args).then(resolve,reject);});});
+ t.mock.method(URL,'createObjectURL',()=>{downloads++;return 'blob:test';});
+ const ui=mounted(t,{bootstrap:async()=>{if(denied)throw Object.assign(new Error('revoked'),{status:403});return {...bootstrapFixture(),capabilities:caps};},commands:async()=>({commands:[current]}),artifact:async()=>artifactBytes});
+ await ui.settled();const action=ui.node('commands').querySelector('button').click();await ui.settled();assert.equal(hashing,true);
+ if(change==='session'){denied=true;await ui.node('refresh').click();denied=false;await ui.node('refresh').click();}
+ if(change==='expiry'){current=structuredClone(current);current.result.artifact_expires_at=now;await ui.node('refresh').click();}
+ if(change==='digest'){current=structuredClone(current);current.result.artifact_sha256='sha256:'+'0'.repeat(64);await ui.node('refresh').click();}
+ if(change==='capability'){caps=caps.filter(x=>x!=='artifact:read');await ui.node('refresh').click();}
+ await finish();await action;assert.equal(downloads,0);assert.equal(ui.node('total-count').textContent,'1');
+ if(change==='session'){assert.equal(ui.node('submit').disabled,false);assert.equal(ui.node('message').hidden,true);}
+});
+
+test('DI maximum-sized diagnostic bytes verify without JSON reserialization',async()=>{
+ const bytes=new Uint8Array(16384).fill(32);bytes[0]=123;bytes[bytes.length-1]=125;
+ assert.deepEqual(await dashboard.verifyArtifact(bytes,artifactHash(bytes)),bytes);
+ const diagnostic=new TextEncoder().encode('invalid JSON retained as diagnostic evidence');
+ assert.deepEqual(await dashboard.verifyArtifact(diagnostic,artifactHash(diagnostic)),diagnostic);
+});
+
+test('DI artifact success requires JSON media type and cancels other content',async()=>{
+ let cancelled=false;
+ const client=createClient(async()=>new Response(new ReadableStream({cancel(){cancelled=true;}},{highWaterMark:0}),{headers:{'Content-Type':'text/plain'}}));
+ await assert.rejects(client.artifact('cmd_demo'),e=>e.code==='ARTIFACT_TYPE_INVALID');assert.equal(cancelled,true);
+});
+
+test('DI verifier copies bytes before waiting for crypto',async t=>{
+ const original=globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);let finish;
+ t.mock.method(globalThis.crypto.subtle,'digest',(...args)=>new Promise((resolve,reject)=>{finish=()=>original(...args).then(resolve,reject);}));
+ const input=Buffer.from(artifactBytes),verification=dashboard.verifyArtifact(input,artifactHash(input));input[0]=0;
+ await finish();assert.deepEqual(await verification,artifactBytes);
 });

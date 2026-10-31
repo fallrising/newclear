@@ -94,3 +94,34 @@ Old Cloud AC-04 remains NOT_RUN. M2 adds a second actual vendor and two isolated
 AC-05's minimum integration is M3: persist Fanzloud submission intent and the sole AP
 run/result reference, then verify restart/replay and lost-submit reconciliation with
 zero automatic resend. No new VM manager or native agent loop is required.
+
+## FN-06 completed without another coding invocation
+
+- Real Chromium→Rust→AP rejected unauthenticated project access with401 and an
+  unregistered project submission with404. Neither created a job.
+- One separate deterministic qualification task was created queued and cancelled
+  through the new strict Web action. Run `88e99fb3-7c81-4d51-9551-2222f0701dd8` has
+  state cancelled, reason operator_cancelled, cleanup not_allocated, null sandbox and
+  backend references, and no runtime.allocated/agent.started events. No worker was
+  running and no provider or VM was started for this task.
+- The first browser fault pass exposed a real display defect: cancelled+not_allocated
+  was labelled cleanup-unconfirmed. The correction explicitly displays「任務已取消，
+  未建立工作區」and terminates polling; other unknown states remain unknown. The same
+  cancelled run was read back; task/action were not repeated. Denied target probes
+  were repeated, so this is read-only replay of accepted runs, not an entirely GET-only run.
+- Four explicitly intercepted UI projections checked deadline, provider-unknown,
+  failed verification and cancellation messages, with separate unknown/confirmed
+  cleanup. These are mock projection evidence, not additional live provider failures.
+  Real PostgreSQL lifecycle tests preserve deadline/provider-unknown reasons and never
+  restart the CLI; the actual fake-process watchdog proves deadline stop. Earlier
+  real-VM cancellation/removal receipts cover already allocated uncertain work.
+- Final browser evidence has0 unexpected errors and0 teardown errors. Expected401/404
+  diagnostics are separately recorded. It reloaded the original successful run and
+  downloaded the exact original diff on the revised page/gateway, without re-execution.
+  The running AP/CLI/Connector source remains identical to the live success source.
+
+M1-WEB-06 is supported by10 focused Rust tests (including rejection before forwarding
+of all non-cancel/extra/duplicate/noninteger fields), actual cancellation, the two final
+PostgreSQL lifecycle tests and the labelled browser failure/readback evidence. Required
+final CI and normal merge/readback remain delivery gates; no second provider call is
+needed to re-prove unchanged execution code.

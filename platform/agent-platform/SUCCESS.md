@@ -223,3 +223,5 @@ No SQL-state rewrite/trigger bypass or new product RED claim. Fullfake/live/M4 r
 Owner approved the [external workspace contract](docs/EXTERNAL-WORKSPACE.md).
 EX-01 contract, EX-02 real isolated workspace and EX-03 real subscription coding
 are pending; no whole-platform or Fanzloud Web completion claim.
+
+T-0447 EX01–03 have actual external-workspace evidence in [Fanzloud M1 acceptance](../fanzloud/docs/acceptance/M1-isolated.md): one official subscription CLI repair, fixed-base checks/diff, secret/egress/sequence isolation and observed cleanup. This does not close the remaining Agent Platform mainline or M4.

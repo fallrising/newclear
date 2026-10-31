@@ -57,13 +57,21 @@ try {
       return (await fetch('/api/v1/tasks',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':session.csrf_token,'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({project_id:crypto.randomUUID(),profile_revision:document.querySelector('#agent').value,base_sha:document.querySelector('#base-sha').textContent,title:'Rejected target',goal:'Must never execute'})})).status;
     });
     assert.equal(evidence.unregistered_target_status,404);
-    await page.locator('#title').fill('FN06 queued cancellation — no agent execution');
-    await page.locator('#prompt').fill('Cancel this queued qualification task before any worker allocation. No provider invocation.');
-    await page.locator('#submit-task').click();
-    await page.waitForFunction(()=>document.querySelector('#run-status').textContent==='排隊中');
-    evidence.cancelled_run_id=await page.locator('#run-id').textContent();
-    await page.locator('#cancel-run').click();
-    await page.waitForFunction(()=>document.querySelector('#run-status').textContent==='已取消' && document.querySelector('#cleanup').textContent==='隔離工作區已停止並清理');
+    if(process.argv.includes('--resume-faults')) {
+      const first=JSON.parse(await readFile(join(root,'browser-faults-first.json'),'utf8'));
+      assert.ok(first.cancelled_run_id);
+      evidence.cancelled_run_id=first.cancelled_run_id;
+      evidence.cancel_observation='read-only existing cancellation; no repeated task/action';
+      await page.evaluate(id=>sessionStorage.setItem('fanz-current-run',id),first.cancelled_run_id);await page.reload();
+    } else {
+      await page.locator('#title').fill('FN06 queued cancellation — no agent execution');
+      await page.locator('#prompt').fill('Cancel this queued qualification task before any worker allocation. No provider invocation.');
+      await page.locator('#submit-task').click();
+      await page.waitForFunction(()=>document.querySelector('#run-status').textContent==='排隊中');
+      evidence.cancelled_run_id=await page.locator('#run-id').textContent();
+      await page.locator('#cancel-run').click();
+    }
+    await page.waitForFunction(()=>document.querySelector('#run-status').textContent==='已取消' && document.querySelector('#cleanup').textContent==='任務已取消，未建立工作區');
     assert.match(await page.locator('#run-reason').textContent(),/已要求取消/);
     evidence.real_queued_cancel='PASS; no allocation or provider';
     await page.evaluate(id=>sessionStorage.setItem('fanz-current-run',id),baseline.run_id);

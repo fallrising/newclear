@@ -90,7 +90,9 @@ async function refresh() {
     element('activity').textContent += `${new Date().toLocaleTimeString()} · ${states[run.state] || run.state}\n`;
     lastState = `${run.state}:${run.state_version}`;
   }
-  element('cleanup').textContent = run.cleanup_state === 'confirmed' ? '隔離工作區已停止並清理' : '隔離工作區清理尚未確認';
+  const neverAllocated = run.state === 'cancelled' && run.cleanup_state === 'not_allocated';
+  const cleanupComplete = run.cleanup_state === 'confirmed' || neverAllocated;
+  element('cleanup').textContent = neverAllocated ? '任務已取消，未建立工作區' : run.cleanup_state === 'confirmed' ? '隔離工作區已停止並清理' : '隔離工作區清理尚未確認';
   if (run.result) {
     const checks = run.result.verification;
     element('verification').textContent = checks.status === 'passed' ? '檢查通過' : checks.status === 'failed' ? '檢查失敗' : '檢查結果不確定';
@@ -98,7 +100,7 @@ async function refresh() {
     finalDiff = run.result.diff;
     element('download-diff').disabled = false;
   }
-  if (!['succeeded', 'failed', 'cancelled'].includes(run.state) || run.cleanup_state !== 'confirmed') {
+  if (!['succeeded', 'failed', 'cancelled'].includes(run.state) || !cleanupComplete) {
     timer = setTimeout(() => { void refresh().catch(fail); }, 500);
   } else {
     if (pendingSubmission?.runId === run.id) {

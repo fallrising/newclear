@@ -25,13 +25,13 @@ M1–M3 固定見 SDD；M1 qualification 已開始，不再擴張舊 Cloud 或�
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M1-Q | [有界 route qualification](../acceptance/M1-qualification.md)：Q1 capability pass；等 owner 批准有界 executor／KVM 依賴，M1 未完成 | FN-01/03/06 prerequisites | in_progress | 2026-10-31T17:55:49Z | | 2026-10-31T18:06:45Z |
+| M1-Q | [有界 route qualification](../acceptance/M1-qualification.md)：Q1–Q3 completed through approved T-0447; actual Web task passed; final PR gates pending | FN-01/03/06 prerequisites | in_progress | 2026-10-31T17:55:49Z | | 2026-10-31T18:06:45Z |
 
 ## T-0442 — M1 isolated Web after T-0447 EX02
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0442.M1 | Real Rust→AP→isolated subscription task→browser diff | M1-WEB01–05, EX03 | in_progress | 2026-10-31T19:06:00Z | | 2026-10-31T19:21:49Z |
+| T-0442.M1 | Real Rust→AP→isolated subscription task→browser diff | M1-WEB01–06, EX03/FN-06 | in_progress | 2026-10-31T19:06:00Z | | 2026-10-31T19:21:49Z |
 
 Single Ready Fanzloud production task; [contract](../specs/SPEC-M1-isolated-web.md).
 No Cloud catalog investigation, UI redesign or new milestone.

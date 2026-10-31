@@ -8,7 +8,7 @@ reviewed: 2026-10-30
 source_commit: 268305cceceb750be6642e446d63300a46064916
 ---
 
-> **2026-10-31 M1**：[真實單任務閉環](docs/acceptance/M1-isolated.md) 已通過：正式 Claude Code、真 VM、真 Rust／AP 與 Chromium，固定 base diff／檢查及清理可核對。FN-01 與 FN-03 單任務部分已驗；FN-06 收尾、CI／合併依該報告，M2／M3與整體 FN-01–07 未完成。舊 Cloud AC-04、持久化 AC-05 不改為通過。
+> **2026-10-31 M1**：[真實單任務閉環](docs/acceptance/M1-isolated.md) 已通過：正式 Claude Code、真 VM、真 Rust／AP 與 Chromium，固定 base diff／檢查及清理可核對。FN-01 與 FN-03 單任務部分已驗；FN-06 已補齊有區分的失敗／取消驗證，CI／合併依該報告，M2／M3與整體 FN-01–07 未完成。舊 Cloud AC-04、持久化 AC-05 不改為通過。
 
 
 # Codebox / Fanzloud 成功契約

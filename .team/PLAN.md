@@ -2582,3 +2582,11 @@ FQ evidence gate ACCEPT 2026-10-31T18:47:06Z: final107Node/304Python=411tests, f
 Owner continues. Lead sole writer for DI01–04/T0032: bounded rawartifact client, WebCrypto exact-byte verification, session/expiry/race guard and exactBlob; no Worker/API/runner/schema/authoritychanges. RGR, fullsuite and existing syntheticlocalbrowser qualification. One fresh readonly finalreviewer T857, inheritedmodel/effort/permissions, <=1500tokens+onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota, no delegation/private/network/writes/tests; instructions not OS isolation. Prior approved originaldashboard update scope persists; source qualification and any actual live deployment receipts kept separate, no newhumanwindow/ownerbrowserchecks or paidupgrade.
 
 DI source/local evidence gate ACCEPT 2026-10-31T19:13:43Z: RED11, initialGREEN42, final121Node/304Python=425, DI1 realbrowser15checks/104API/noerrors with exactbytes/digest and tamper rejection; T857 finalACCEPT. Initial socketpathfailure retained, shorttaskID correction only. Browser3asset hashes exact, document checks passed. Originaldashboard upload to follow qualified pinned source and prior approval, without runner pause/authority renewal; any live evidence separate.
+
+T-0447/M1 actual acceptance: one official subscription invocation on33e1eb70 produced
+285byte totals.py-only patch, real checks passed, browser five states/diff/download
+and zero errors; AP cleanup plus independent0claims/VM/cgroup/processes. Reviewer
+acceptedEX01–03/FN01/singleFN03. FN06 found reason/cancel and never-allocated display
+gaps; narrow correction plus realdenial/queuedcancel/noVM and labelledmockprojections
+passed; original success read back unchanged, no secondprovider. Final review/CI/merge
+and ledger closure remain. M2/M3/CloudAC04/AC05 not claimed.

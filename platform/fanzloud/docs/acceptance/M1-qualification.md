@@ -1,3 +1,5 @@
+> 2026-10-31 後續：owner 已批准 T-0447；隔離 executor／KVM／真實 Web coding 已實測，見 [M1-isolated](M1-isolated.md)。以下保留原 qualification 的版本與前置差距，不改寫舊結果。
+
 # T-0442 M1 qualification checkpoint
 
 Status: PARTIAL. No real coding task, Web integration or FN acceptance passed in this checkpoint.

@@ -75,7 +75,8 @@ func (service *Service) DescribeInitialAcceptance(ctx context.Context, principal
 			}
 			items[i] = port.InitialWorkItemVersion{WorkItemID: id, ExpectedVersion: item.Version()}
 		}
-		subject := port.NewInitialAcceptanceSubject(project, state.Project.Version, p, service.config.Completion.RevisionDigest, items)
+		policy := service.completionFor(project)
+		subject := port.NewInitialAcceptanceSubject(project, state.Project.Version, p, policy.RevisionDigest, items)
 		_, sd, err := port.CanonicalInitialAcceptanceSubject(subject)
 		if err != nil {
 			return err
@@ -87,14 +88,14 @@ func (service *Service) DescribeInitialAcceptance(ctx context.Context, principal
 		material := record.Material()
 		for _, binding := range material.Bindings {
 			for _, node := range binding.Nodes {
-				if node.Recipe != service.config.Completion.RecipeDigest.String() {
+				if node.Recipe != policy.RecipeDigest.String() {
 					return errors.New("unsupported recipe")
 				}
 			}
 		}
 		acs := make([]InitialACDescription, len(material.ACs))
 		for i, ac := range material.ACs {
-			rule, ok := service.config.Completion.Checks[ac.ACID]
+			rule, ok := policy.Checks[ac.ACID]
 			if !ok || rule.VerifierClass == "" {
 				return errors.New("AC verification policy missing")
 			}

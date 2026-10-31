@@ -46,6 +46,10 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 	if err := config.validate(); err != nil {
 		return nil, err
 	}
+	profiles, err := loadPolicyProfiles(config.CompletionPoliciesFile)
+	if err != nil {
+		return nil, err
+	}
 	web, err := loadBrowserAssets(config.WebRoot, config.DataRoot)
 	if err != nil {
 		return nil, err
@@ -91,6 +95,9 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 		}
 	}()
 
+	if err := store.RegisterPolicyProfiles(ctx, profiles, clock.Now().UnixNano()); err != nil {
+		return nil, errors.New("project completion policy startup rejected")
+	}
 	authority, err := newLocalSessionAuthority(config.SessionToken, config.SessionActor)
 	config.SessionToken = ""
 	if err != nil {
@@ -114,6 +121,7 @@ func startRuntime(ctx context.Context, config runtimeConfig, supplied net.Listen
 			IdempotencyTTL:      24 * time.Hour,
 			Specification:       unavailableSpecification{},
 			Completion:          localCompletionPolicy(),
+			ProjectPolicies:     profiles,
 		},
 		HTTP: httpapi.Config{Origin: config.Origin},
 	})

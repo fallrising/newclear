@@ -8,6 +8,7 @@ import (
 	json "encoding/json/v2"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"time"
@@ -44,6 +45,14 @@ func New(
 	declaration := executor.Declaration().Clone()
 	if !validExecutorDeclaration(declaration) {
 		return nil, errors.New("P0-A requires a declared fake/v1 executor")
+	}
+	config.ProjectPolicies = maps.Clone(config.ProjectPolicies)
+	for project, profile := range config.ProjectPolicies {
+		verified, err := port.DecodePolicyProfile(profile.CanonicalJSON(), profile.Digest())
+		if err != nil || verified.Material().ProjectID != project {
+			return nil, errors.New("invalid project completion policy")
+		}
+		config.ProjectPolicies[project] = verified
 	}
 	config.Completion = config.Completion.clone()
 	return &Service{
@@ -587,7 +596,8 @@ func (service *Service) completionInput(
 	material port.CompletionMaterial,
 	now time.Time,
 ) (domain.CompletionInput, selectedCompletion, error) {
-	current, err := currentSubject(material, service.config.Completion)
+	policy := service.completionFor(material.WorkItem.ProjectID())
+	current, err := currentSubject(material, policy)
 	if err != nil {
 		switch {
 		case !material.CandidatePresent || !material.RunPresent:
@@ -601,7 +611,7 @@ func (service *Service) completionInput(
 	requirements := make([]domain.CheckRequirement, 0, len(material.RequiredACRevisions))
 	revisions := make(map[domain.ACID]domain.Digest, len(material.RequiredACRevisions))
 	for _, requirement := range material.RequiredACRevisions {
-		rule, ok := service.config.Completion.Checks[requirement.ACID]
+		rule, ok := policy.Checks[requirement.ACID]
 		if !ok || rule.VerifierClass == "" {
 			return domain.CompletionInput{}, selectedCompletion{}, command.NewError(command.CodeDoneGateUnsatisfied, "verification policy is incomplete", false, []domain.RejectionCode{domain.CodeEvidenceMissing}, nil)
 		}
@@ -619,14 +629,14 @@ func (service *Service) completionInput(
 		artifactAvailability[artifact.Digest] = artifact.Availability
 	}
 	for _, persisted := range material.Evidence {
-		rule, required := service.config.Completion.Checks[persisted.ACID]
+		rule, required := policy.Checks[persisted.ACID]
 		revision, bound := revisions[persisted.ACID]
 		if !required || !bound || revision != persisted.ACRevisionDigest || persisted.SubjectDigest != current.Digest() || persisted.VerifierClass != rule.VerifierClass {
 			continue
 		}
 		applicability := domain.EvidenceApplicability(persisted.Applicability)
 		availability := domain.EvidenceAvailability(persisted.Availability)
-		if persisted.RecipeDigest != service.config.Completion.RecipeDigest ||
+		if persisted.RecipeDigest != policy.RecipeDigest ||
 			(!rule.EnvironmentDigest.IsZero() && persisted.EnvironmentDigest != rule.EnvironmentDigest) {
 			applicability = domain.EvidenceStale
 		}
@@ -689,7 +699,7 @@ func (service *Service) completionInput(
 		CandidateAvailable: material.CandidateAvailable,
 		ActiveOrUnknownRun: material.ActiveOrUnknownRun,
 		RequiredChecks:     requirements, Evidence: evidence, Review: review,
-		ApprovalRequired: service.config.Completion.ApprovalRequired, Approval: approval,
+		ApprovalRequired: policy.ApprovalRequired, Approval: approval,
 		Now: now, RecordID: domain.CompletionRecordID(recordID),
 	}, selected, nil
 }

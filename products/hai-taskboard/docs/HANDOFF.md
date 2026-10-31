@@ -1,9 +1,9 @@
 # HAI Taskboard Handoff
 
-Current continuation: M1c is delivered. M2 accepted-workflow identity repair has passed local gates
-and Claude plan/code review; see [M2 plan](plans/m2-ac-identity-20261031.md) and
-[evidence](evidence/m2-ac-identity-20261031.md). Required delivery remains in BOARD HM2ID.
-General policy profiles and verified coverage are pending contract decisions; no M3/UI starts.
+Current continuation: M1c and M2 accepted-workflow identity repair are delivered. Owner approved
+the immutable local project-policy direction; [concrete contract](sdd/local-project-policy.md)
+passed Claude plan review before implementation; local backend/web/API/docs and final code review
+now pass. [Evidence](evidence/project-policy-20261031.md) and BOARD HMPOL track final CI/delivery. Verified coverage remains unimplemented; full M2/product are incomplete.
 
 Planning checkpoint (2026-10-29): the owner requested documentation-first sequencing of remaining
 P0-A and proposed designs with Claude review. See [the plan](plans/remaining-work-20261029.md) and

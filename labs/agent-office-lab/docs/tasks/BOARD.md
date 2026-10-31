@@ -98,7 +98,9 @@ Owner 明確要求加入 Cursor Agent；先固定官方 CLI、缺失／版本偵
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0009-01 | Cursor 固定安裝、隔離設定及原生啟動已驗證；待 PR 交付 | AC-01、AC-13（前置） | in_progress | 2026-10-31T18:41:54Z | — | 2026-10-31T18:46:31Z |
+| T-0009-01 | Cursor 固定安裝、隔離設定及原生啟動已驗證及交付 | AC-01、AC-13（前置） | done | 2026-10-31T18:41:54Z | 2026-10-31T18:48:30Z | 2026-10-31T18:48:52Z |
 | T-0009-02 | 登入後 Cursor 真實任務與生命週期；等 owner 執行隔離登入命令 | AC-13、AC-05–AC-09、AC-11 | todo | — | — | 2026-10-31T18:41:54Z |
 
 T-0009-01：55 項離線測試、真實官方 archive 提取／摘要與無憑證原生啟動通過。[證據](../evidence/cursor-startup-2026-11-01.json)。T-0009-02 仍待登入與有界真實任務，不把前置當 AC-13 通過。
+
+T-0009-01 [PR #869](https://github.com/fallrising/newclear/pull/869) 已合併，commit `5e4c1a6f5c427433b4897905ab59c988f1f90658`。offline／validate 兩項 CI success；已回讀主線證據：login_required、workspace_hooks_removed=true、model_inference_verified=false。T-0009-02／AC-13 保持待驗；owner 下一步只需執行 [隔離登入](../CURSOR.md)，不需交出憑證，本次未做付費呼叫。

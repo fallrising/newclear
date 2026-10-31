@@ -2,6 +2,8 @@
 
 先讀 [SUCCESS](SUCCESS.md)、[SDD](docs/SDD.md)、[任務板](docs/tasks/BOARD.md)。canonical 位置是 `fallrising/newclear` 的 `labs/agent-office-lab`。
 
+T-0006 已準備官方 Grok Build 1.0.70／Pi 1.4.0 的 lab 內固定安裝、真實 CLI 版本與能力 probe、隔離 owner 登入設定入口；35 項離線測試通過。見[owner 命令](docs/REMOTE-SETUP.md)與[白名單證據](docs/evidence/remote-preflight-2026-11-01.json)。本輪沒有遠端模型請求，沒有重啟 Strata；需要 owner 完成 DeepSeek key／Grok 登入後，再接實際遠端 worker 與合成任務。不得把 CLI compatible 或合成金鑰格式解析當成 auth／推論通過。
+
 T-0005 的 OpenCode host crash／interrupted／手動恢復已完成真實驗收：四個獨立 host，舊 PTY 全退出、重複重啟不執行、lite 可見中斷、點開工位接回同 session 完成、完成後重啟不重跑。91.22 秒；既有生命週期回歸 62.96 秒通過，26 項離線測試通過；[證據及三次先前失敗](docs/evidence/restart.md)。adapter 依賴固定上游內部介面，沒有修改 vendor。完整三 provider AC-08 仍 pending。
 
 目前已有 Codex → Strata 本地讀寫與合成程式修復、Office 基底建置／614 tests，以及原生 Office → OpenCode → Strata 的檔案任務、同 session 後續任務取消與程序清理。這些是 2026-10-31 的歷史實測，[摘要與限制](docs/evidence/README.md) 保留成功及失敗範圍。同 session 續做不等於真正 restart/resume。

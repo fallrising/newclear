@@ -19,3 +19,5 @@
 舊文件原 runs 連結統一改指向本摘要，不表示 raw log／圖片在 repo 中。詳細已知限制見 [SUCCESS](../../SUCCESS.md)。本次匯入檢查另記於 [publication.md](publication.md)。
 
 後續新增：[T-0004 生命週期](lifecycle.md)、[T-0005 host 中斷與手動恢復](restart.md)。各自保留當輪 runtime hash、先前失敗與範圍，不覆寫歷史結果。
+
+T-0006：[Grok／Pi 真實 CLI 前置檢查](remote-preflight-2026-11-01.json)在 OS 斷網環境核對固定 package／version／help；合成憑證只驗證 Pi 設定格式，沒有 remote model request。35 項離線測試通過；[設定與剩餘範圍](../REMOTE-SETUP.md)。

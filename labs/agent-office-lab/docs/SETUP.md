@@ -69,7 +69,7 @@ export STRATA_HOME="$(cd ../strata-mac && pwd)"  # 或你自己的外部安裝�
 每次結果在全新的 `runs/`；一次性登入連結、session、SQLite 和 prompt 不可提交。
 
 基底預覽：`node scripts/office.mjs --serve`，預設 agent 關閉；`--screenshot` 跑 smoke 後退出。預覽產生的 `projects/`、`state/` 也已忽略。
-後續遠端 Grok／Pi 不在本次安裝流程中；`configs/pi-models.example.json` 只是未驗證的設定草稿。
+Grok／Pi 另見[固定安裝與 owner 設定命令](REMOTE-SETUP.md)。Pi 模板已做真實 CLI 的離線格式／模型清單檢查，尚未驗證遠端推論。
 
 ## 離線驗證
 

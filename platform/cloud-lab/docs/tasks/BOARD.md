@@ -529,9 +529,16 @@ Owner已批准RP方案；完整產品主線不因此通過。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0030-1 | 固定候選與原資源前態 | ULR-01 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
-| T-0030-2 | 相容部署與原unknown單筆結案 | ULR-02 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
-| T-0030-3 | 恢復原runner與新Cron驗證 | ULR-03 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
-| T-0030-4 | 保全、證據與交付 | ULR-04 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
+| T-0030-1 | 固定候選與原資源前態 | ULR-01 | done | 2026-10-31T17:57:09Z | 2026-10-31T18:06:34Z | 2026-10-31T18:06:58Z |
+| T-0030-2 | 相容部署與原unknown單筆結案 | ULR-02 | done | 2026-10-31T17:57:09Z | 2026-10-31T18:06:34Z | 2026-10-31T18:06:58Z |
+| T-0030-3 | 恢復原runner與新Cron驗證 | ULR-03 | done | 2026-10-31T17:57:09Z | 2026-10-31T18:06:34Z | 2026-10-31T18:06:58Z |
+| T-0030-4 | 保全、證據與交付 | ULR-04 | done | 2026-10-31T17:57:09Z | 2026-10-31T18:06:34Z | 2026-10-31T18:06:58Z |
 
 ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際PR合併後依規則關閉本列。[操作證據](../evidence/m1-unknown-resolution-live.md)保留初始parser失敗、原unknown與全部期限限制。
+
+### T-0030 Git交付與收尾
+
+- [PR858](https://github.com/fallrising/newclear/pull/858) head `c79b6346616ee5c78ebe99fc299de9bab0c96e78`，merge `6f6b416612b9e13ea0e6eb22a46f1d6c826cc60c`，2026-10-31T18:06:34Z合併。本機與remote fulltree相等、head為main祖先、工作樹乾淨；並行PLAN追加正常merge保留。
+- exact-head CI全過：CloudLab `41227642659`、Project success `41227642639`、llms `41227642637`。T855獨立公開證據ACCEPT；本機50project／8llms／task-report／diff檢查及11候選source保全通過。私人raw由主導核對，不冒稱reviewer獨立接觸憑證或線上資料。
+- 原unknown以未知結果結案，單次CAS changes1；原runner約7秒後恢復，新18:00Cron在18:00:55Z validated/healthy。最終123commands／152firings／119journal／active0，原121terminal／151firings／118journal保全，4grants／Access／secrets／Cron／期限與免費方案不變。原multipart parser失敗與修正保留；無舊命令重跑、續權或新瀏覽器測試。
+- 本卡僅關閉已批准ULR01–04，完整mainline仍incomplete／無usable tag；原unknown根因、未來uptime、完整AC07／08及provider用量／保留策略仍見剩餘工作。本收尾只改任務板。

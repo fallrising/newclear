@@ -38,7 +38,7 @@
 | [platform/cloud-lab](platform/cloud-lab/SUCCESS.md) | platform | 以共同契約與知識樹組合個人 Cloudflare 工具、遠端運維及代理能力 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-26 |
 | [platform/dim-gate](platform/dim-gate/SUCCESS.md) | platform | 以有狀態模擬資料展示跨角色資源申請、發布與故障恢復 | 完成 | [usable/dim-gate/v0.1.0](https://github.com/fallrising/newclear/tree/usable/dim-gate/v0.1.0/platform/dim-gate) | 2026-10-18 |
 | [platform/edge-ops](platform/edge-ops/SUCCESS.md) | platform | 以非特權代理收集主機狀態並提供受控運維流程 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-28 |
-| [platform/fanzloud](platform/fanzloud/SUCCESS.md) | platform | 提供單人 Codex Cloud 任務控制與可追溯事件儲存 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
+| [platform/fanzloud](platform/fanzloud/SUCCESS.md) | platform | 透過 Web 操作廠商中立的隔離 coding agents | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/ice-maker](platform/ice-maker/SUCCESS.md) | platform | 將文件與工程工作轉為保留來源的知識候選及可重建出版物 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/local-ocr-services](platform/local-ocr-services/SUCCESS.md) | platform | 以可獨立部署的本機引擎提供受限且一致的 OCR HTTP 介面 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/prism](platform/prism/SUCCESS.md) | platform | 以可插拔儲存提供標準遙測接收、查詢與告警相容層 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-20 |

@@ -7,6 +7,7 @@ import {readFile, writeFile} from 'node:fs/promises';
 import {createHash, X509Certificate} from 'node:crypto';
 import {join} from 'node:path';
 const root = process.env.M1_PRIVATE_DIR;
+const faults=process.argv.includes('--faults');
 const {chromium} = await import(process.env.M1_PLAYWRIGHT_MODULE);
 const config = JSON.parse(await readFile(join(root, 'browser-live.json'), 'utf8'));
 assert.equal(config.origin, 'https://localhost:18447');
@@ -39,12 +40,65 @@ try {
     }
   });
   await page.goto(config.origin);
+  if(faults) {
+    evidence.unauthenticated_status=await page.evaluate(async()=>(await fetch('/api/v1/projects')).status);
+    assert.equal(evidence.unauthenticated_status,401);
+  }
   await page.locator('#username').fill(config.operator_name);
   await page.locator('#password').fill(config.operator_password);
   await page.locator('#login').click();
   await page.waitForFunction(() => !document.querySelector('#task-panel').hidden && document.querySelector('#agent').options.length===1 && !document.querySelector('#submit-task').disabled);
   assert.equal(await page.locator('#password').inputValue(),'');
-  if (process.argv.includes('--preflight')) {
+  if (faults) {
+    const baseline=JSON.parse(await readFile(join(root,'browser-evidence.json'),'utf8'));
+    evidence.scope='FN06 real Rust/AP denials and queued cancel; intercepted failure projections; final-source read-only live-result replay';
+    evidence.unregistered_target_status=await page.evaluate(async()=>{
+      const session=await (await fetch('/api/v1/session')).json();
+      return (await fetch('/api/v1/tasks',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':session.csrf_token,'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({project_id:crypto.randomUUID(),profile_revision:document.querySelector('#agent').value,base_sha:document.querySelector('#base-sha').textContent,title:'Rejected target',goal:'Must never execute'})})).status;
+    });
+    assert.equal(evidence.unregistered_target_status,404);
+    await page.locator('#title').fill('FN06 queued cancellation — no agent execution');
+    await page.locator('#prompt').fill('Cancel this queued qualification task before any worker allocation. No provider invocation.');
+    await page.locator('#submit-task').click();
+    await page.waitForFunction(()=>document.querySelector('#run-status').textContent==='排隊中');
+    evidence.cancelled_run_id=await page.locator('#run-id').textContent();
+    await page.locator('#cancel-run').click();
+    await page.waitForFunction(()=>document.querySelector('#run-status').textContent==='已取消' && document.querySelector('#cleanup').textContent==='隔離工作區已停止並清理');
+    assert.match(await page.locator('#run-reason').textContent(),/已要求取消/);
+    evidence.real_queued_cancel='PASS; no allocation or provider';
+    await page.evaluate(id=>sessionStorage.setItem('fanz-current-run',id),baseline.run_id);
+    await page.reload();
+    await page.waitForFunction(()=>!document.querySelector('#download-diff').disabled);
+    const replay=await page.locator('#diff-output').textContent();
+    assert.equal(createHash('sha256').update(replay).digest('hex'),baseline.diff_sha256);
+    const ready=page.waitForEvent('download');await page.locator('#download-diff').click();
+    const download=await ready;await download.saveAs(join(root,'browser-replay.diff'));
+    assert.equal(await readFile(join(root,'browser-replay.diff'),'utf8'),replay);
+    await page.screenshot({path:join(root,'browser-replay.png'),fullPage:true});
+    evidence.read_only_replay={run_id:baseline.run_id,diff_sha256:baseline.diff_sha256,status:'PASS'};
+    const mockId='00000000-0000-4000-8000-000000000006';
+    let projection;
+    await page.route(`**/api/v1/runs/${mockId}`,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(projection)}));
+    evidence.mock_projection=[];
+    for(const [reason,state,cleanup,expected] of [
+      ['subscription_deadline_expired','interrupted','unknown','任務已逾時'],
+      ['subscription_result_unconfirmed','interrupted','unknown','Agent 執行結果尚未確認'],
+      ['verification_failed','failed','confirmed','程式檢查未通過'],
+      ['operator_cancelled','cancelled','confirmed','已要求取消'],
+    ]) {
+      projection={id:mockId,state,state_version:1,reason,cleanup_state:cleanup,result:null};
+      await page.evaluate(id=>sessionStorage.setItem('fanz-current-run',id),mockId);await page.reload();
+      await page.waitForFunction(text=>document.querySelector('#run-reason').textContent.includes(text),expected);
+      assert.equal(await page.locator('#cleanup').textContent(),cleanup==='confirmed'?'隔離工作區已停止並清理':'隔離工作區清理尚未確認');
+      assert.equal(await page.locator('#download-diff').isDisabled(),true);
+      evidence.mock_projection.push({reason,state,cleanup,status:'PASS_INTERCEPTED_ONLY'});
+    }
+    const expectedErrors=new Set(['Failed to load resource: the server responded with a status of 401 (Unauthorized)','Failed to load resource: the server responded with a status of 404 (Not Found)']);
+    evidence.expected_denial_diagnostics=evidence.browser_errors.filter(x=>expectedErrors.has(x));
+    evidence.browser_errors=evidence.browser_errors.filter(x=>!expectedErrors.has(x));
+    assert.deepEqual(evidence.browser_errors,[]);
+    evidence.status='PASS_FN06_AND_READ_ONLY_REPLAY';
+  } else if (process.argv.includes('--preflight')) {
     assert.equal(evidence.task_posts,0);
     let mockedSubmissions=0;
     await page.route('**/api/v1/tasks', async route=> {
@@ -107,7 +161,7 @@ finally {
   tearingDown=true;
   await browser?.close(); await new Promise(resolve=>server.close(resolve));
   if(evidence.browser_errors.length) evidence.status='FAILED';
-  await writeFile(join(root,process.argv.includes('--preflight')?'browser-preflight.json':'browser-evidence.json'),JSON.stringify(evidence,null,2),{mode:0o600});
+  await writeFile(join(root,faults?'browser-faults.json':process.argv.includes('--preflight')?'browser-preflight.json':'browser-evidence.json'),JSON.stringify(evidence,null,2),{mode:0o600});
   console.log(JSON.stringify(evidence));
   if(evidence.status==='FAILED') process.exitCode=1;
 }

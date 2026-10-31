@@ -1,3 +1,7 @@
+# Current M1 handoff — 2026-10-31
+
+[Real browser/isolated task evidence](acceptance/M1-isolated.md), [operator entry](isolated-operator.md), [PR885](https://github.com/fallrising/newclear/pull/885). One actual subscription coding run succeeded; preserve its source/diff/cleanup evidence. No Cloud retry. M2 second vendor and M3 durable recovery remain open. Final acceptance/CI state is in the M1 report. Historical handoff follows.
+
 # Development Handoff
 
 > **2026-10-31 M1 checkpoint**：PR849／SDD 已批准並合併，沿既有訂閱優先。下一步只處理 [qualification 缺口與有界方案](acceptance/M1-qualification.md)：需要 Agent Platform external-tool interface 與授權 KVM target，不能繼續用 mock 宣稱 M1。Cloud 重試仍暫停。

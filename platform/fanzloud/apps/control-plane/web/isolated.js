@@ -12,6 +12,15 @@ let lockedSubmission = Boolean(pendingSubmission);
 if (lockedSubmission) element('submit-status').textContent = '已有提交紀錄待對帳；重新整理不會重送。';
 let finalDiff = null;
 let authenticated = false;
+let currentRun = null;
+function reasonText(reason) {
+  if (!reason) return '';
+  if (reason === 'operator_cancelled') return '已要求取消；是否停止以工作區清理狀態為準。';
+  if (/deadline|timeout/.test(reason)) return '任務已逾時；未確認的執行不會自動重送。';
+  if (reason === 'verification_failed') return '程式檢查未通過，請查看 diff 與檢查結果。';
+  if (/subscription|provider|agent/.test(reason)) return 'Agent 執行結果尚未確認，請對帳或取消；不會自動重送。';
+  return '執行受阻，請對帳目前任務；不會自動重送。';
+}
 
 async function api(path, {method = 'GET', body, key, text = false} = {}) {
   const headers = {Accept: 'application/json'};
@@ -59,6 +68,7 @@ async function recent() {
 }
 function observe(id) {
   clearTimeout(timer); runId = id; sessionStorage.setItem('fanz-current-run', id);
+  currentRun = null; element('cancel-run').disabled = true; element('cancel-status').textContent = '';
   lastState = ''; finalDiff = null; element('activity').textContent = '';
   element('diff-output').textContent = '尚無 diff'; element('download-diff').disabled = true;
   element('verification').textContent = '尚無檢查結果'; element('cleanup').textContent = '';
@@ -71,7 +81,11 @@ async function refresh() {
   const run = await api(`/runs/${requested}`);
   if (requested !== runId || !authenticated) return;
   element('run-id').textContent = run.id;
+  currentRun = run;
   element('run-status').textContent = states[run.state] || run.state;
+  element('run-reason').textContent = reasonText(run.reason);
+  const terminal = ['succeeded', 'failed', 'cancelled'].includes(run.state);
+  element('cancel-run').disabled = terminal || run.state === 'cancelling' || sessionStorage.getItem(`fanz-cancel-${run.id}`) !== null;
   if (lastState !== `${run.state}:${run.state_version}`) {
     element('activity').textContent += `${new Date().toLocaleTimeString()} · ${states[run.state] || run.state}\n`;
     lastState = `${run.state}:${run.state_version}`;
@@ -131,6 +145,17 @@ element('download-diff').addEventListener('click', async () => {
     const link = document.createElement('a'); link.href = url; link.download = `run-${requested}.diff`; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (error) { fail(error); }
+});
+element('cancel-run').addEventListener('click', async () => {
+  if (!currentRun || element('cancel-run').disabled) return;
+  const requested = currentRun; const key = crypto.randomUUID();
+  sessionStorage.setItem(`fanz-cancel-${requested.id}`, key); element('cancel-run').disabled = true;
+  element('cancel-status').textContent = '正在要求取消…';
+  try {
+    await api(`/runs/${requested.id}/actions`, {method: 'POST', key, body: {action: 'cancel', expected_state_version: requested.state_version}});
+    element('cancel-status').textContent = '取消已受理；等待後端確認停止與清理。';
+    await refresh();
+  } catch (error) { element('cancel-status').textContent = '取消結果尚未確認，請重新讀取狀態；不會自動重送。'; fail(error); }
 });
 element('refresh').addEventListener('click', () => { void refresh().catch(fail); });
 element('project').addEventListener('change', updateSelection);

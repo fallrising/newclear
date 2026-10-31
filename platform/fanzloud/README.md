@@ -1,6 +1,6 @@
 # Codebox
 
-> **2026-10-31 M1**：owner 已批准 [SDD](SDD.md)，[PR849](https://github.com/fallrising/newclear/pull/849) 已合併。既有訂閱優先；[M1 qualification](docs/acceptance/M1-qualification.md) 只通過實際 Claude MCP 工具面探針，隔離 executor 接口與 KVM 前置未齊，真實 Web coding 任務尚未完成。
+> **2026-10-31 M1**：真 Chromium → Rust → Agent Platform → 隔離 VM → 官方 Claude Code 已完成一次修復，頁面顯示進度、檢查通過並下載精確 diff。[實測證據與限制](docs/acceptance/M1-isolated.md)、[私人操作入口](docs/isolated-operator.md)。目前僅單一已登錄專案／agent，尚非完整廠商中立 MVP。
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
@@ -10,10 +10,11 @@
 
 [![Fanzloud CI](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml/badge.svg)](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml)
 
-Codebox is a private Codex Cloud task control plane written in Rust. Its longer-term design
-adds provider-neutral agents and isolated per-session sandboxes; those runtimes are not implemented.
+Fanzloud is a private Rust Web entry for isolated coding tasks. Explicit `isolated` mode
+uses Agent Platform as its sole execution authority. The original Codex Cloud P0 mode
+remains a separately versioned historical route; its live Cloud gate is unverified.
 
-The currently implemented milestone is the accepted **P0 personal BYOS** slice: a private,
+The earlier accepted **P0 personal BYOS** slice is: a private,
 single-operator web control layer for the operator's own ChatGPT/Codex subscription. Codebox uses a
 pinned official Codex CLI to submit work to an administrator-configured Codex Cloud environment,
 stream normalized task state, and display the resulting diff. Repository-controlled work stays in

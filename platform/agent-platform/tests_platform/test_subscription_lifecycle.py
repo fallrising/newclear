@@ -10,6 +10,12 @@ from agent_platform.worker import Worker
 
 class LifecycleTests(SubscriptionFixture):
     def test_ex01_uncertain_subscription_is_not_restarted(self):
+        self.uncertain("subscription_result_unconfirmed")
+
+    def test_fn06_deadline_keeps_reason_and_never_restarts(self):
+        self.uncertain("subscription_deadline_expired")
+
+    def uncertain(self, reason):
         self.real_profile()
         response = self.post(
             "/agent-profiles",
@@ -35,7 +41,7 @@ class LifecycleTests(SubscriptionFixture):
         }
         connector.operation.return_value = {"ref": created["run"]["id"], "model_transport": False}
         driver = Mock()
-        driver.execute.side_effect = Problem(409, "subscription_result_unconfirmed")
+        driver.execute.side_effect = Problem(409, reason)
         worker = Worker(self.db, connector, subscription=driver)
         worker.execute(worker.claim())
         self.assertEqual(driver.execute.call_count, 1)
@@ -44,7 +50,7 @@ class LifecycleTests(SubscriptionFixture):
                 "SELECT state,reason,cleanup_state FROM runs WHERE id=%s", (created["run"]["id"],)
             ).fetchone()
             self.assertEqual(row["state"], "interrupted")
-            self.assertEqual(row["reason"], "subscription_result_unconfirmed")
+            self.assertEqual(row["reason"], reason)
             self.assertEqual(row["cleanup_state"], "unknown")
             conn.execute(
                 "UPDATE jobs SET available_at=clock_timestamp() WHERE run_id=%s",

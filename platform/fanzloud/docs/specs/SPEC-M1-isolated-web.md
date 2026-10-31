@@ -50,3 +50,21 @@ transaction owns submit and job; Fanzloud has no second job queue. Retry: unknow
 no automated retry. Recovery: existing AP read/reconcile authority, no CLI restart;
 M3 durable product intent remains future work. Cancellation: backend capability only;
 M1 page need not invent pause/resume. Failure: preserve status/result/cleanup separately.
+
+## M1 FN-06 completion after success-path review
+
+M1-WEB-06: show a bounded reason message separately from state and cleanup. Deadline,
+operator cancellation, failed checks and uncertain agent/provider output remain distinct;
+unknown never means stopped. Add one exact POST /api/v1/runs/{UUID}/actions gateway
+route accepting only {action:"cancel",expected_state_version:positive integer}; reject
+other actions/fields before forwarding. AP still owns authentication, CSRF, idempotency,
+state-version fencing and stop proof. Web sends one cancellation intent and never retries
+an uncertain reply; polling observes whether stopping actually completed.
+
+Acceptance uses real Rust/AP unauthenticated and unregistered-target rejection and one
+queued task cancelled before allocation (no worker/VM/provider). Existing actual VM
+cancellation receipts prove running-work cleanup. A separately labelled intercepted
+browser projection covers timeout/provider-unknown/check-failure/cancel reasons; real DB
+subscription recovery and actual watchdog subprocess tests establish failure semantics.
+No extra coding invocation is required or allowed by this follow-up. The live success
+source remains versioned; final-source read-only replay must still download the same diff.

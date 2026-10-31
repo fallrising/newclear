@@ -1,6 +1,6 @@
 ---
 project: platform/fanzloud
-purpose: 提供單人 Codex Cloud 任務控制與可追溯事件儲存
+purpose: 透過 Web 操作廠商中立的隔離 coding agents
 kind: application
 mainline: incomplete
 usable_tag: none
@@ -8,7 +8,7 @@ reviewed: 2026-10-30
 source_commit: 268305cceceb750be6642e446d63300a46064916
 ---
 
-> **2026-10-31 M1**：三個里程碑與 FN-01–07 已獲 owner 批准；[qualification](docs/acceptance/M1-qualification.md) 只證明既有訂閱 CLI 可限定 MCP 工具。FN 仍全部 NOT_RUN；Cloud AC-04、持久化 AC-05 未完成。
+> **2026-10-31 M1**：[真實單任務閉環](docs/acceptance/M1-isolated.md) 已通過：正式 Claude Code、真 VM、真 Rust／AP 與 Chromium，固定 base diff／檢查及清理可核對。FN-01 與 FN-03 單任務部分已驗；FN-06 收尾、CI／合併依該報告，M2／M3與整體 FN-01–07 未完成。舊 Cloud AC-04、持久化 AC-05 不改為通過。
 
 
 # Codebox / Fanzloud 成功契約
@@ -424,5 +424,5 @@ The official 0.145.0 executable is verified separately; the existing default cre
 
 [Prior contract](docs/specs/SPEC-M1-isolated-web.md) binds the approved T-0447
 executor to a real browser submission. EX02 actual KVM tools/denials/cleanup passed;
-EX03 and M1-WEB01–05 remain pending until same-source actual CLI/browser evidence.
+EX03 and M1-WEB01–05 passed on33e1eb70; see [actual acceptance](docs/acceptance/M1-isolated.md).
 Original Cloud AC-04 and persistent AC-05 are not changed to passed.

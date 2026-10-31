@@ -101,6 +101,9 @@ fn allowed(method: &Method, path: &str) -> bool {
     if path == "/api/v1/tasks" {
         return matches!(*method, Method::GET | Method::POST);
     }
+    if method == Method::POST && cancel_target(path) {
+        return true;
+    }
     if method != Method::GET {
         return false;
     }
@@ -115,6 +118,28 @@ fn allowed(method: &Method, path: &str) -> bool {
     };
     let identifier = run.strip_suffix("/result.diff").unwrap_or(run);
     Uuid::parse_str(identifier).is_ok_and(|value| value.to_string() == identifier)
+}
+
+fn cancel_target(path: &str) -> bool {
+    path.strip_prefix("/api/v1/runs/")
+        .and_then(|run| run.strip_suffix("/actions"))
+        .is_some_and(|identifier| {
+            Uuid::parse_str(identifier).is_ok_and(|value| value.to_string() == identifier)
+        })
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CancelRequest {
+    action: String,
+    expected_state_version: i64,
+}
+
+fn valid_cancel(body: &[u8]) -> bool {
+    // Struct deserialization also supports JSON sequences; the gateway requires an object.
+    body.iter().find(|byte| !byte.is_ascii_whitespace()) == Some(&b'{')
+        && serde_json::from_slice::<CancelRequest>(body)
+            .is_ok_and(|value| value.action == "cancel" && value.expected_state_version > 0)
 }
 
 fn security(response: &mut Response<Body>) {
@@ -267,6 +292,9 @@ async fn handle(State(config): State<Arc<Config>>, request: Request) -> Response
         || (parts.method == Method::GET && !body.is_empty())
     {
         return error(StatusCode::BAD_REQUEST, "invalid_gateway_framing");
+    }
+    if cancel_target(&path) && !valid_cancel(&body) {
+        return error(StatusCode::BAD_REQUEST, "invalid_cancel_request");
     }
     let mutation = parts.method != Method::GET;
     let upstream = tokio::task::spawn_blocking(move || {
@@ -484,6 +512,129 @@ mod tests {
             assert!(!allowed(&Method::POST, path), "{path}");
         }
     }
+    #[test]
+    fn isolated_cancel_route_is_exact() {
+        let path = "/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/actions";
+        assert!(allowed(&Method::POST, path));
+        for method in [Method::GET, Method::PUT, Method::PATCH, Method::DELETE] {
+            assert!(!allowed(&method, path));
+        }
+        for path in [
+            "/api/v1/runs/018FF3AB-1277-7000-8000-000000000001/actions",
+            "/api/v1/runs/018ff3ab127770008000000000000001/actions",
+            "/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/actions/",
+            "/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/actions/retry",
+            "/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/%61ctions",
+            "/api/v1/runs/invalid/actions",
+        ] {
+            assert!(!allowed(&Method::POST, path), "{path}");
+        }
+    }
+
+    #[tokio::test]
+    async fn isolated_cancel_invalid_bodies_never_reach_upstream() {
+        use tower::ServiceExt;
+        let app = router(Config::new("https://operator.invalid", "127.0.0.1:1").expect("config"));
+        for body in [
+            r#"{"action":"pause","expected_state_version":1}"#,
+            r#"{"action":"resume","expected_state_version":1}"#,
+            r#"{"action":"approval","expected_state_version":1}"#,
+            r#"{"action":"cancel","expected_state_version":0}"#,
+            r#"{"action":"cancel","expected_state_version":-1}"#,
+            r#"{"action":"cancel","expected_state_version":1.0}"#,
+            r#"{"action":"cancel","expected_state_version":1e0}"#,
+            r#"{"action":"cancel","expected_state_version":"1"}"#,
+            r#"{"action":"cancel","expected_state_version":true}"#,
+            r#"{"action":"cancel","expected_state_version":null}"#,
+            r#"{"action":"cancel","expected_state_version":9223372036854775808}"#,
+            r#"{"action":"cancel","expected_state_version":1,"extra":true}"#,
+            r#"{"action":"cancel","action":"cancel","expected_state_version":1}"#,
+            r#"{"action":"cancel","expected_state_version":1,"expected_state_version":2}"#,
+            r#"{"action":"cancel"}"#,
+            r#"{"expected_state_version":1}"#,
+            r#"["cancel",1]"#,
+            r#"{"action":"cancel","expected_state_version":1} {}"#,
+            "",
+        ] {
+            let response = app
+                .clone()
+                .oneshot(
+                    Request::builder()
+                        .method(Method::POST)
+                        .uri("/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/actions")
+                        .header(header::ORIGIN, "https://operator.invalid")
+                        .header(header::CONTENT_TYPE, "application/json")
+                        .header(header::CONTENT_LENGTH, body.len())
+                        .body(Body::from(body))
+                        .expect("request"),
+                )
+                .await
+                .expect("router");
+            assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{body}");
+        }
+    }
+
+    #[tokio::test]
+    async fn isolated_cancel_forwards_exact_body_and_operator_authority() {
+        use std::net::TcpListener;
+        use tower::ServiceExt;
+        for body in [
+            r#"{"action":"cancel","expected_state_version":1}"#,
+            r#"{"expected_state_version":9223372036854775807,"action":"cancel"}"#,
+        ] {
+            let listener = TcpListener::bind("127.0.0.1:0").expect("listener");
+            let address = listener.local_addr().expect("address");
+            let thread = std::thread::spawn(move || {
+                let (mut socket, _) = listener.accept().expect("accept");
+                socket
+                    .set_read_timeout(Some(Duration::from_secs(2)))
+                    .expect("timeout");
+                let mut wire = Vec::new();
+                while !wire.ends_with(b"\r\n\r\n") {
+                    let mut byte = [0];
+                    socket.read_exact(&mut byte).expect("header");
+                    wire.push(byte[0]);
+                }
+                let headers = String::from_utf8(wire).expect("headers");
+                assert!(headers.starts_with(
+                    "POST /api/v1/runs/018ff3ab-1277-7000-8000-000000000001/actions HTTP/1.1\r\n"
+                ));
+                for field in [
+                    "cookie: session=synthetic",
+                    "x-csrf-token: synthetic-csrf",
+                    "idempotency-key: synthetic-command",
+                    "origin: https://operator.invalid",
+                ] {
+                    assert!(headers.contains(field), "missing {field}");
+                }
+                let mut received = vec![0; body.len()];
+                socket.read_exact(&mut received).expect("body");
+                assert_eq!(received, body.as_bytes());
+                socket.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}").expect("response");
+            });
+            let response = router(
+                Config::new("https://operator.invalid", &address.to_string()).expect("config"),
+            )
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/actions")
+                    .header(header::ORIGIN, "https://operator.invalid")
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .header(header::CONTENT_LENGTH, body.len())
+                    .header(header::COOKIE, "session=synthetic")
+                    .header("x-csrf-token", "synthetic-csrf")
+                    .header("idempotency-key", "synthetic-command")
+                    .body(Body::from(body))
+                    .expect("request"),
+            )
+            .await
+            .expect("router");
+            assert_eq!(response.status(), StatusCode::OK);
+            thread.join().expect("upstream");
+        }
+    }
+
     #[test]
     fn isolated_config_requires_https_and_one_literal_loopback() {
         assert!(Config::new("https://operator.invalid", "127.0.0.1:18000").is_ok());

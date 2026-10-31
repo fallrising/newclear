@@ -32,8 +32,9 @@
     </form>
     <p id="submit-status" class="status" aria-live="polite"></p>
     <section class="card">
-      <h3>任務進度</h3><p id="run-id" class="mono"></p><p id="run-status" aria-live="polite">尚未提交</p>
+      <h3>任務進度</h3><p id="run-id" class="mono"></p><p id="run-status" aria-live="polite">尚未提交</p><p id="run-reason" aria-live="polite"></p>
       <pre id="activity" class="timeline" tabindex="0" aria-label="任務狀態紀錄"></pre>
+      <button id="cancel-run" type="button" disabled>取消任務</button><p id="cancel-status" aria-live="polite"></p>
       <button id="refresh" class="secondary" type="button">重新讀取狀態</button>
     </section>
     <section class="card">

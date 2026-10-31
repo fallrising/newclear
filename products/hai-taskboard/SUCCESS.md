@@ -171,3 +171,18 @@ SC-DOC-03：驗證原始 blob、局部連結／契約／差異、原子 Git 提�
 
 [驗證紀錄](docs/evidence/session-control-room-20261030.md)只涵蓋本輪文件；
 [BOARD](docs/tasks/BOARD.md) T-1030 是唯一任務狀態，合併前不標 done。
+
+
+## M1c human report slice — 2026-10-31
+
+Current bounded objective: [M1c plan](docs/plans/m1c-human-reports-20261031.md), REPORT-AC-01..05.
+Seal exact bounded human text, bind authenticated actor/subject/scope, atomically publish distinct
+Review/Evidence plus durable command bookkeeping, and read metadata/verified attachments after restart.
+Required evidence: meaningful Red/Green, immutable migration/rollback, real SQLite/service/HTTP/local-store
+replay/no unintended transitions, pinned full backend/web/API gates, Claude plan/code review and PR CI.
+Local REPORT-AC-01..05 now pass, including real human-record QA/approval/Done joins and isolated
+missing Evidence/ChangesRequested refusals. Claude plan/code each REWORK then ACCEPT; final pinned
+backend full/race/vet/build, unchanged web30tests, API lint and document gates passed.
+[Evidence and receipt](docs/evidence/m1c-human-reports-20261031.md) distinguish this backend slice
+from full AC-02..04, which remain pending; no UI/L1/provider/release is included.
+New Session/provider documents remain Proposed and do not change current authority. Status: BOARD HM1C.

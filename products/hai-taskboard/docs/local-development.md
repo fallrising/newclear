@@ -223,3 +223,33 @@ bindings under the previous policy cannot authorize new work, while committed re
 available. See [the policy contract](sdd/connected-local-runtime.md#usable-local-verification-policy-accepted-locally).
 Actual Chromium evidence is described in [traceability](traceability.md); it is not full UI or Done
 acceptance. Synthetic human fixture tests do not certify real-world task completion.
+
+## Human report API
+
+M1c implementation follows the [reviewed plan](plans/m1c-human-reports-20261031.md); consult
+[BOARD HM1C](tasks/BOARD.md#t-0339--m1c-sealed-human-reports) for its actual delivery status.
+This is an API path; the connected browser does not yet provide the completion/report form.
+
+1. Obtain the exact current completion-preparation snapshot for the candidate. Keep its WorkItem
+   version, subject digest, Run and fence values; evidence also needs the bound AC revision and
+   configured human recipe/environment. A successful Fake Run alone is insufficient.
+2. Submit `SubmitHumanReport` through the existing project command endpoint with the session cookie,
+   exact Origin, a new command ID/idempotency key and `report_` identifier. Send exact UTF-8 text
+   (1..65536 bytes, no NUL) as `text/plain` or `text/markdown`, and the matching `review` or `evidence`
+   intent defined in [OpenAPI](../api/openapi.yaml). The server owns actor, timestamp, digest and
+   stored availability. Review accepts Approved/ChangesRequested; Evidence explicitly asserts Passing
+   under the configured independent human policy. Submission does not move the phase or mark Done.
+3. If the response is lost, recover the command result with its original identity. Retrying the same
+   recorded intent replays its original bytes and does not republish material. Changed content or
+   intent requires a fresh command/key/report ID. Unrecorded storage failures permit a same-key retry;
+   they do not authorize a successful evidence assertion or an automatic retry of external work.
+4. Read `/api/v1/projects/{project_id}/human-reports/{report_id}` for immutable metadata, then follow
+   its scoped `artifact.href` to download verified bytes as an attachment. A metadata record or replayed
+   success does not guarantee the file is still available; missing/tampered files fail closed.
+
+Same bytes with different MIME conflict with existing immutable artifact metadata and are refused;
+use the original media type. Reports and their semantic records are immutable. Failed post-seal commits
+can leave unreferenced objects, which grant no read authority and are retained without automatic deletion.
+Keep the private data root intact; M6 owns complete backup/restore and any future safe offline GC.
+Do not delete shared digest files to retry a report. Existing completion verification still checks
+eligible Evidence bytes; a Review report is retained provenance, not a new Done condition.

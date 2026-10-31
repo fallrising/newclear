@@ -2,7 +2,7 @@
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
-> 剩餘主線與未實作設計的分階段計劃：[remaining-work plan](docs/plans/remaining-work-20261029.md)。本輪只交付規劃與審查，不啟動產品實作。
+> 剩餘主線與未實作設計的分階段計劃：[remaining-work plan](docs/plans/remaining-work-20261029.md)。已交付切片與目前進度以 [BOARD](docs/tasks/BOARD.md) 為準。
 
 
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
@@ -39,8 +39,8 @@ proposed follow-up design, not an implemented feature list; the current P0-A sco
 
 [真實 provider 主線診斷與 L1 提案](docs/plans/provider-critical-path-20261030.md)區分現行
 Fake-only 門檻與建議的一個 provider 真實閉環；MCP、第二 provider、跨機與角色地圖不自動成為前置。
-**本輪只融合文件，不改 AGENTS／已接受 SDD、不啟用 provider，也不宣稱重新通過產品驗收。**
-採用提早 L1 路線仍須明確批准有界 scope、成本與權限；未批准時 BOARD 的 M1c 下一步不變。
+**此提案只融合設計文件，不改 AGENTS／已接受 SDD、不啟用 provider，也不代表產品驗收。**
+採用提早 L1 路線仍須明確批准有界 scope、成本與權限；未批准時仍依 BOARD 的 Fake-only 主線推進。
 文件任務與實際驗證見 [BOARD](docs/tasks/BOARD.md) 與[證據](docs/evidence/session-control-room-20261030.md)。
 
 ## Implementation checkpoint
@@ -70,4 +70,9 @@ M1a: [完成準備 API 契約](docs/sdd/completion-preparation.md)與[驗證紀�
 
 M1b: [Run 產出與 artifact 讀取計劃](docs/plans/m1b-output-access-20261030.md)。
 只允許讀取已授權 project 的既有產出關聯；下載內容須先核對雜湊與大小。
-完整完成介面與人工 report 寫入仍待後續切片，交付狀態以 BOARD 為準。
+完整完成介面仍待後續切片，交付狀態以 BOARD 為準。
+
+M1c: [人工 report 封存與提交計劃](docs/plans/m1c-human-reports-20261031.md)已經 Claude 審查，
+實作、本機驗證與代碼複核已通過，交付狀態見 BOARD。新路徑以明確人工意圖提交 text/plain 或 Markdown，保存 actor／exact subject／
+digest，再原子建立獨立 Review 或 Evidence；不自動完成工作。讀取與重送邊界見
+[操作說明](docs/local-development.md#human-report-api)與[驗證紀錄](docs/evidence/m1c-human-reports-20261031.md)。

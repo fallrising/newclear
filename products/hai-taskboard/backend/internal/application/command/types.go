@@ -178,6 +178,8 @@ type CompleteWorkItem struct {
 }
 
 type Result struct {
+	ReportID                string
+	ReportKind              string
 	AcceptedRevisionDigest  string
 	AcceptanceSubjectDigest string
 	ProposalDigest          string

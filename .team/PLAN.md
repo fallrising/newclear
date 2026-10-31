@@ -2530,3 +2530,11 @@ diff/source/hashes/logs, corrected reviewer full-table wording to21selected tabl
 invalid-UTF8 decoder-vector and existing-ID negative limits. ID-AC-04 still requires normal CI/merge/
 readback/BOARD/desk; full M2/product remains incomplete. Next contract question pending; no inference
 of approval or policy configuration implementation. Latest main843eaf97 has unrelated work only.
+
+## ULR approved live closure — 2026-10-31T17:57:09Z
+
+Owner explicitly approved compatible deployment, brief runner pause/drain, original unknown closure, original service resume and one new Cron verification. Lead executes fixed PR850 candidate, retains all grants/deadlines/Access/secrets/history/free plan; no source behavior change or repeat browser checks. Existing T854 source review applies; evidence audit of actual receipts follows. Scope ULR01–04 in T0030; live changes only within approved proposal.
+
+ULR live checks passed: 17:59:47Z runner stopped, compatible100%/3modules/settings at17:59:53Z, exact CAS changes1 and originalservice resumed17:59:54Z; new18:00Cron healthy/validated18:00:55Z. Final123commands/152firings/119journal/active0, old121terminal/151firings/118journal preserved. Initial rawmultipart parser failure retained/corrected without repeated GET or live write. T855 fresh readonly public-evidence audit, inherited model/effort/permissions, <=1000tokens plus onefocusedfollowup, five-minute monitored with native interruption; cost/quotaunknown; no private/network/writes/tests/delegation, instructions not OS isolation. Normal Git gates pending.
+
+ULR evidence gate ACCEPT 2026-10-31T18:04:12Z: lead inspected actual private raw management/SQL/journal/service receipts and final preservation; T855 independent public-evidence ACCEPT and actual index/task/diff checks passed. No production source edits, authority extension or billing change. Final PR/CI/readback and board closure remain.

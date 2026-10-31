@@ -524,3 +524,14 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - exact-head CI全過：CloudLab `41202122647`、Project success `41202122685`、llms `41202122675`；本機400tests（96Node/304Python），跨Python／真SQLite結案→新Cron→validated及真result先到CAS0保全；T854 source／隔離ACCEPT。RED、fixture祖先拒絕及同步spawn timeout皆保留。
 - T0028依owner調整驗收範圍收尾：Safari真人登入／手動用量122/84/1與D1同窗口相符；Console asset hash取消且未執行，不冒稱逐byte瀏覽器驗證。T853接受human-only1800秒操作，原窗口固定12:08:10Z–12:38:10Z，不自動延長。T852原REWORK及其修文歷史保留；不要求owner新增手動驗收。
 - T0029僅關閉UR01–04 source／local，尚未部署新Worker或處置原unknown；私人原命令／journal已唯讀採集並由真CLI生成未applied計畫。實際原09:15UTC命令結案與短暫runnerpause/drain仍需具體批准，保留原結果unknown、journal與授權／服務截止、免費方案。完整主線仍incomplete，無usable tag。本收尾只改任務板。
+
+## T-0030 — 已批准的未知任務線上結案
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0030-1 | 固定候選與原資源前態 | ULR-01 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
+| T-0030-2 | 相容部署與原unknown單筆結案 | ULR-02 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
+| T-0030-3 | 恢復原runner與新Cron驗證 | ULR-03 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
+| T-0030-4 | 保全、證據與交付 | ULR-04 | in_progress | 2026-10-31T17:57:09Z | | 2026-10-31T18:04:12Z |
+
+ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際PR合併後依規則關閉本列。[操作證據](../evidence/m1-unknown-resolution-live.md)保留初始parser失敗、原unknown與全部期限限制。

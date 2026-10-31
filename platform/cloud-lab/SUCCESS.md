@@ -145,3 +145,5 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 ## UR：未知結果結案
 
 [UR01–04](docs/unknown-resolution.md)完成具審計的offline單筆結案與closed_unknown相容性，[400tests／跨Python-SQLite新Cron與競爭證據](docs/evidence/m1-unknown-resolution.md)及T854審查通過。保留未知owner結果、journal與原身份；實際原命令只準備私人方案，尚未部署／結案，沒有自動解鎖。
+
+後續owner明確批准的[ULR線上結案](docs/evidence/m1-unknown-resolution-live.md)已完成：原unknown保留未知結果與歷史並釋放槽，原runner恢復後新Cron於18:00:55Z validated/healthy；原權限期限／Access／免費方案保持。此前「尚未部署／原unknown佔槽」為歷史狀態，完整mainline仍incomplete。

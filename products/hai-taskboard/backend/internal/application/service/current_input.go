@@ -35,7 +35,7 @@ func (s *Service) currentRunInput(ctx context.Context, tx port.Transaction, item
 }
 
 func (s *Service) runInputFromCurrent(item domain.WorkItem, scenario string, current port.CurrentSpecification) (port.RunInput, error) {
-	policy := s.config.Completion
+	policy := s.completionFor(item.ProjectID())
 	if current.ProjectID != item.ProjectID() || current.WorkItemID != item.ID() || current.ProjectHeadVersion == 0 || current.WorkItemHeadVersion == 0 || current.AcceptedRevisionDigest.IsZero() {
 		return port.RunInput{}, domain.StorageCorruptionError{Reason: "current specification scope mismatch"}
 	}

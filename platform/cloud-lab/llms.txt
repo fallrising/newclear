@@ -112,3 +112,9 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Unknown resolution](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/unknown-resolution.md): offline approved closure plan, exact expiring CAS, retained journal/unknown result and late-report terminal guard; source verified locally; subsequent explicitly approved live closure completed with retained history and one new healthy Cron.
 
 - [Unknown resolution live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-unknown-resolution-live.md): compatible original Worker deployment, audited unknown closure, original runner resume and one new Cron validated healthy; original deadlines/settings/history preserved, no paid upgrade.
+
+- [Failure matrix](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/failure-matrix.md): fourteen original cases mapped to named local/historical remote evidence and explicit remaining gaps.
+- [Retention design](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/retention.md): artifact access expiry retains bytes/history; no automatic deletion, archive or tombstone implementation.
+- [Failure/retention qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-failure-retention.md): controlled cancellation/report races, deadline boundaries, rejected-row preservation and seven-day access qualification; isolated only.
+
+- [Artifact download integrity](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-artifact-integrity.md): bounded raw bytes, SHA-256 verification and exact Blob; session/expiry/digest guards, 425 tests and real local browser exact-download/tamper rejection verified; actual rollout tracked separately on task board.

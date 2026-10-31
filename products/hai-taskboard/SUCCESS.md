@@ -194,5 +194,16 @@ Current bounded objective and fixed ID-AC-01..04: [M2 plan](docs/plans/m2-ac-ide
 Align new AC inputs with accepted UTF-8 byte identity, preserve canonical history, and verify exact
 accepted-input/evidence/completion behavior under explicit test policy. ID-AC-01..03 now pass; root full/race/vet/build, web30/build, API lint and Claude plan/code review
 passed. [Evidence](docs/evidence/m2-ac-identity-20261031.md) records limits and retained failures.
-ID-AC-04 delivery remains pending in BOARD. General policy configuration and verified coverage remain pending explicit contracts; full M2 and
+ID-AC-04 delivery completed through PR #854 and BOARD closure #855. General policy configuration is tracked in the approved successor below; verified coverage remains pending. Full M2 and
 AC-02/03/04 remain incomplete. No UI/provider/dependency/restore change.
+
+## Immutable project policy — 2026-10-31
+
+Owner approved the concrete M2 local policy-source direction. This slice fixes POL-AC-01..05 in
+[the local project policy contract](docs/sdd/local-project-policy.md): strict operator-selected JSON,
+exact project/AC selection, canonical immutable persistence, startup rejection and actual completion/
+restart regression. POL-AC-01..04 pass locally; pinned backend full/race/vet/build, web/API/docs
+and Claude plan/code reviews pass with explicit final test-delta evidence. POL-AC-05 still requires
+normal final-commit CI/merge/readback/ledger, tracked by BOARD. See [evidence](docs/evidence/project-policy-20261031.md).
+No full M2/coverage/UI/provider/AC-02..04 claim.
+Status and scope: BOARD HMPOL.

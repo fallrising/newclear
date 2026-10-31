@@ -27,6 +27,30 @@ source_commit: 8bf48551f524086d81fa66d946c984f8052152ff
 | AC-07 | Given一個真實Agent執行端，When執行無敏感的已授權任務，Then開始、執行、完成由hook實際上報且可由畫面觀察 | pending | 未取得／執行真實宿主接入；HTTP測試替身與人工命令不算 |
 | AC-08 | Given owner批准公開環境，When空白正式namespace部署並重啟／復原／撤權，Then公開狀態正確、秘密不洩漏、demo不污染live | pending | 未授權也未部署；[驗收關卡](docs/RUNBOOK.md) |
 
+## 本次開發範圍：T-0002
+
+補強 AC-03 真 local workerd／SQLite 重啟後的去重與限流證據：填滿 12 次配額後重啟，相同事件可安全重送、同 ID 不同內容回 409、新事件仍回 429，拒絕與重送不改公開狀態。使用真實分鐘窗口，不替換 runtime 時鐘。Node 28 項測試、真 workerd、索引與 success contract 檢查均已通過，見[本輪證據](docs/evidence/m1-persistence.md)；完整 M1 的真 Agent 接入及 AC-06～08 仍未完成。
+
+## T-0003 開發範圍
+
+新增 opt-in `office-run` 命令生命週期 adapter：開始上報 terminal，正常退出上報 done，失敗上報 error；不擷取或上傳命令與輸出。開始上報失敗不得啟動命令，最終上報失敗不得回傳整體成功。35 項 Node 測試及真 workerd 命令上報已通過，包含實際子程序與憑證隔離，見[本輪證據](docs/evidence/m1-lifecycle.md)；這不是原生 Agent hook、瀏覽器觀察或完整 AC-07 驗收。
+
+## T-0004：取消處理
+
+已驗證 SIGINT/SIGTERM 轉送、5 秒後強制終止、取消後上報 error 而非 done，以及正常退出後清理 signal listeners。39 項 Node 測試、真 workerd 與全倉檢查通過，見[證據](docs/evidence/m1-cancellation.md)。使用真子程序測試，不以原生 Agent hook 或前端驗收代稱。
+
+## T-0005：長命令 heartbeat
+
+每 5 分鐘固定 terminal 上報、不傳命令內容；單一 in-flight，結尾等 heartbeat 完成再送 done/error。驗證慢請求無重疊、結尾不被晚到 heartbeat 覆寫、上報失敗可見且不重跑命令。43 項測試、真 workerd、全倉檢查通過，Claude Opus 5.5 二輪 review 無 blockers；[證據與審查範圍](docs/evidence/m1-heartbeat.md)。完整 AC-07 仍 pending。
+
+## T-0006：呈現模型
+
+建立 renderer-neutral 純函式供未來 Three.js／文字 fallback 共用。AC-06 子範圍：八狀態、stale 保留 alert、互相同意協作才移動、固定排序座位、夜間 overlay 預設關閉且不遮蔽警示。48 項 Node tests、索引與模型 review 通過，見[介面與證據](docs/PRESENTATION.md)；未實作瀏覽器／WebGL／移動路徑，不把此基礎視為完整 M2 或 AC-06 完成。
+
+## T-0007：文字 fallback 頁面
+
+實作本機唯讀頁、單一 in-flight polling、隱藏暫停、jitter/backoff、斷線與上次成功標示及安全文字呈現。51 項 Node 測試與實際 Chrome smoke 已通過，見[證據](docs/DASHBOARD.md)；未實作 Three.js、相機／路徑與完整瀏覽器狀態矩陣，完整 AC-06 保留 pending。
+
 ## 現況與缺口
 
 已具設計、CLI、API安全核心與Workers adapter。28項本機Node測試通過，包含真loopback HTTP；storage test double不等於DO恢復。當前未建立完整3D UI、未真正接入模型宿主、未公開部署。CI與runtime結果需對照當次PR，不能從workflow存在推論通過。

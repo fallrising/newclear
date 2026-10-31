@@ -10,7 +10,24 @@ const utc = value => {
   return Number.isFinite(parsed) && new Date(parsed).toISOString().replace('.000Z', 'Z') === value ? parsed : NaN;
 };
 const text = value => value == null ? '—' : String(value);
+const artifactDigest = value => typeof value === 'string' && /^sha256:[a-f0-9]{64}$/.test(value);
+const artifactError = (code, message) => Object.assign(new Error(message), { code });
 export const can = (capabilities, capability) => Array.isArray(capabilities) && capabilities.includes(capability);
+
+export async function verifyArtifact(bytes, expectedDigest) {
+  if (!artifactDigest(expectedDigest)) throw artifactError('ARTIFACT_METADATA_INVALID', '成果完整性資料無效，請重新整理。');
+  if (!(bytes instanceof Uint8Array) || bytes.byteLength === 0) throw artifactError('ARTIFACT_CONTENT_INVALID', '成果內容無效，未下載檔案。');
+  if (bytes.byteLength > 16384) throw artifactError('ARTIFACT_TOO_LARGE', '成果超過允許大小。');
+  // Freeze the bytes being checked across the asynchronous digest operation.
+  const copy = new Uint8Array(bytes);
+  let hash;
+  try {
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', copy);
+    hash = 'sha256:' + Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  } catch { throw artifactError('ARTIFACT_VERIFICATION_UNAVAILABLE', '無法核對成果完整性，未下載檔案。'); }
+  if (hash !== expectedDigest) throw artifactError('ARTIFACT_INTEGRITY_MISMATCH', '成果完整性核對失敗，未下載檔案。');
+  return copy;
+}
 
 export function observation(record, now) {
   const result = record?.result;
@@ -32,7 +49,7 @@ export function commandView(record, capabilities, now) {
     ...observation(record, now), status: DELIVERY[record.delivery] || '未知派送狀態',
     canCancel: can(capabilities, 'commands:cancel-request') && !record.cancel_requested && !TERMINAL.has(record.delivery),
     cancelLabel: record.cancel_requested ? '已記錄取消意圖；尚不代表程序停止' : '要求取消',
-    artifactAvailable: record.delivery !== 'closed_unknown' && can(capabilities, 'artifact:read') && Boolean(record.result?.artifact_sha256) &&
+    artifactAvailable: record.delivery !== 'closed_unknown' && can(capabilities, 'artifact:read') && artifactDigest(record.result?.artifact_sha256) &&
       Number.isFinite(utc(record.result?.artifact_expires_at)) && utc(now) < utc(record.result.artifact_expires_at),
   };
 }
@@ -51,7 +68,7 @@ export function makeSubmission(bootstrap, now, idempotencyKey) {
 }
 
 export function createClient(fetcher = globalThis.fetch.bind(globalThis)) {
-  async function request(path, body) {
+  async function request(path, body, artifact = false) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     try {
@@ -65,21 +82,29 @@ export function createClient(fetcher = globalThis.fetch.bind(globalThis)) {
         response.body?.cancel().catch(() => {});
         throw Object.assign(new Error('回應不是 JSON；Access 工作階段可能已失效，請重新載入頁面。'), { status: html && response.status >= 400 ? response.status : 401 });
       }
-      const reader = response.body?.getReader();
-      let raw = '', size = 0;
-      const decoder = new TextDecoder();
+      const rawArtifact = artifact && response.ok;
+      if (rawArtifact && response.headers?.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') {
+        response.body?.cancel().catch(() => {});
+        throw artifactError('ARTIFACT_TYPE_INVALID', '成果格式無效，未下載檔案。');
+      }
+      const reader = response.body?.getReader(), limit = rawArtifact ? 16384 : 32768;
+      const bytes = new Uint8Array(limit);
+      let size = 0;
       try {
         if (reader) while (true) {
           const { done, value } = await reader.read(); if (done) break;
-          size += value.byteLength;
-          if (size > 32768) throw new Error('回應超過允許大小。');
-          raw += decoder.decode(value, { stream: true });
+          if (size + value.byteLength > limit) {
+            if (rawArtifact) throw artifactError('ARTIFACT_TOO_LARGE', '成果超過允許大小。');
+            throw new Error('回應超過允許大小。');
+          }
+          bytes.set(value, size); size += value.byteLength;
         }
-        raw += decoder.decode();
       } catch (error) {
         if (response.status === 401 || response.status === 403) error.status = response.status;
         throw error;
       } finally { if (reader) await reader.cancel().catch(() => {}); }
+      if (rawArtifact) return bytes.slice(0, size);
+      const raw = new TextDecoder().decode(bytes.subarray(0, size));
       let data;
       try { data = JSON.parse(raw); } catch { throw Object.assign(new Error('回應不是 JSON；Access 工作階段可能已失效，請重新載入頁面。'), { status: response.status >= 400 ? response.status : 401 }); }
       if (!response.ok) {
@@ -95,7 +120,7 @@ export function createClient(fetcher = globalThis.fetch.bind(globalThis)) {
     bootstrap: () => request('/api/bootstrap'), commands: () => request('/api/commands'),
     schedule: () => request('/api/health-schedule'), usage: () => request('/api/usage'),
     command: id => request(route(id)), submit: raw => request('/api/commands', raw),
-    cancel: id => request(`${route(id)}/cancel`, '{}'), artifact: id => request(`${route(id)}/artifact`),
+    cancel: id => request(`${route(id)}/cancel`, '{}'), artifact: id => request(`${route(id)}/artifact`, undefined, true),
   };
 }
 
@@ -255,11 +280,20 @@ export function mount(document, client = createClient()) {
     },
     async artifact(id, button) {
       if (!state.synced || state.authBlocked) return;
+      const selected = state.records.find(record => record.command_id === id);
+      if (!selected || !commandView(selected, state.bootstrap?.capabilities, now()).artifactAvailable) return;
+      const expectedDigest = selected.result.artifact_sha256;
       const revision = state.authRevision; button.dataset.busy = 'true'; button.disabled = true;
       try {
         const artifact = await client.artifact(id);
         if (!currentSession(revision)) return;
-        const url = URL.createObjectURL(new Blob([JSON.stringify(artifact, null, 2)], { type: 'application/json' }));
+        const verified = await verifyArtifact(artifact, expectedDigest);
+        if (!currentSession(revision)) return;
+        const current = state.records.find(record => record.command_id === id);
+        if (!state.synced || !current || current.result?.artifact_sha256 !== expectedDigest ||
+            !commandView(current, state.bootstrap?.capabilities, now()).artifactAvailable)
+          throw artifactError('ARTIFACT_CONTEXT_CHANGED', '成果或授權已更新，請重新整理後再下載。');
+        const url = URL.createObjectURL(new Blob([verified], { type: 'application/json' }));
         const link = element(document, 'a'); link.href = url; link.download = 'node-health.json'; link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       } catch (error) { if (!currentSession(revision)) return; failed(error); message(errorMessage(error), true); }

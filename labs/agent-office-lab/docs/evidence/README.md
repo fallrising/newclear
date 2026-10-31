@@ -25,3 +25,7 @@ T-0006：[Grok／Pi 真實 CLI 前置檢查](remote-preflight-2026-11-01.json)�
 T-0007：[原生 Office／Pi 零請求啟動](pi-startup-2026-11-01.json)通過；41 項離線測試通過。有界 DeepSeek 推論需另取得 owner 授權；本摘要不代表 AC-04 完成。
 
 T-0007 後續在 owner 明確授權後完成[一次 Pi + DeepSeek 真實驗收](pi-live-2026-11-01.json)：3 次請求、2147 input／204 output tokens、22.62 秒，原生 settled、產物與清理通過。AC-04 passed；不代表 Grok 或完整 MVP。
+
+Grok 原生登入等待、外部 TCP 拒絕與清理：[2026-11-01 啟動證據](grok-startup-2026-11-01.json)。僅無憑證啟動，未驗 session hook 或推論。
+
+Cursor 第四工位的原生登入等待、workspace hooks 清理與外部 TCP 拒絕：[2026-11-01 啟動證據](cursor-startup-2026-11-01.json)。AC-13 真實任務仍 pending。

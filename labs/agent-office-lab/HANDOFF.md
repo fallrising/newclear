@@ -2,6 +2,10 @@
 
 先讀 [SUCCESS](SUCCESS.md)、[SDD](docs/SDD.md)、[任務板](docs/tasks/BOARD.md)。canonical 位置是 `fallrising/newclear` 的 `labs/agent-office-lab`。
 
+T-0009 依 owner 要求新增 Cursor Agent 第四工位：固定官方 2026.10.22-27dcf5f、archive／runtime 摘要核對、隔離 HOME／CURSOR_CONFIG_DIR／file credential store、原生 Office PTY 與 workspace hooks。無憑證啟動 12.51 秒通過，hooks 安裝／移除、外部 TCP 拒絕與 5 個追蹤程序清理正確；55 項離線測試通過。[證據](docs/evidence/cursor-startup-2026-11-01.json)、[owner 登入命令](docs/CURSOR.md)。需 owner 自行 `python3 scripts/cursor_cli.py login`；未登入不是執行失敗，也沒有驗證 session hook／模型／任務。新增 AC-13，完整目標擴為四工位，保持單 run queue。下一步補有界 Cursor／Grok 真實任務；登入不代表付費授權，不重跑已通過的 Pi 任務。
+
+T-0008 已加入 Grok 無憑證啟動 runner：官方 1.0.70 進入原生登入畫面、Office needs_input、OS 拒絕外部 TCP、PTY 與額外背景程序清理通過，12.83 秒。47 項離線測試通過；[證據](docs/evidence/grok-startup-2026-11-01.json)、[命令及限制](docs/GROK-STARTUP.md)。故意不讀 owner auth；這不是登入失效，也沒有發出模型任務。第一次等 SessionStart 超時，後續以原生登入畫面＋needs_input 驗證未登入狀態，未把它算成 session／任務成功。下一步建立登入後的有界 Grok 任務 runner、工具與請求限制，再請 owner 確認具體的配額／付費驗收；尚無可直接執行的遠端命令。
+
 T-0007 的 Pi + DeepSeek 原生工位實測通過（AC-04）：owner 明確授權一次有界付費驗收，3 次 HTTP 200 請求，2147 input／204 output tokens，22.62 秒，agent_settled、session/model、read/write、產物 hash 與清理全部通過。[真實證據](docs/evidence/pi-live-2026-11-01.json)與[命令／限制](docs/PI-REMOTE.md)。41 項離線測試與零請求啟動也通過。此次授權已使用，不代表可再做付費重跑或 Grok 任務；下一步是 Grok 與剩餘 MVP，原 local-only demo 不變。
 
 T-0006 已準備官方 Grok Build 1.0.70／Pi 1.4.0 的 lab 內固定安裝、真實 CLI 版本與能力 probe、隔離 owner 登入設定入口；35 項離線測試通過。見[owner 命令](docs/REMOTE-SETUP.md)與[白名單證據](docs/evidence/remote-preflight-2026-11-01.json)。本輪沒有遠端模型請求，沒有重啟 Strata；需要 owner 完成 DeepSeek key／Grok 登入後，再接實際遠端 worker 與合成任務。不得把 CLI compatible 或合成金鑰格式解析當成 auth／推論通過。

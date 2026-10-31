@@ -52,8 +52,26 @@ func TestAdmission_CurrentHeadsOwnReadinessAndDispatch(t *testing.T) {
 }
 
 func acceptedReadyInput(t *testing.T) (*Service, *sqlite.Store, *sql.DB, command.DispatchRun) {
+	return acceptedReadyInputPolicy(t, nil)
+}
+
+func acceptedReadyInputPolicy(t *testing.T, profile *port.PolicyProfile) (*Service, *sqlite.Store, *sql.DB, command.DispatchRun) {
 	t.Helper()
 	svc, store, db, q := initialFixture(t)
+	if profile != nil {
+		svc.config.ProjectPolicies = map[domain.ProjectID]port.PolicyProfile{projectID: *profile}
+		q.PolicyRevisionDigest = profile.Digest()
+		if err := store.Within(t.Context(), func(tx port.Transaction) error {
+			p, err := tx.(port.AdmissionTransaction).LoadProposal(t.Context(), projectID, q.ProposalDigest)
+			if err != nil {
+				return err
+			}
+			_, q.AcceptanceSubjectDigest, err = port.CanonicalInitialAcceptanceSubject(port.NewInitialAcceptanceSubject(projectID, q.ExpectedVersion, p, q.PolicyRevisionDigest, q.WorkItems))
+			return err
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
 	rule := svc.config.Completion.Checks["AC-A"]
 	rule.EnvironmentDigest = domain.HashString(port.FakeEnvironmentProfile)
 	svc.config.Completion.Checks["AC-A"] = rule

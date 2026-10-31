@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""Launch only a new native Grok startup; reject prompts and credentials."""
+import json
+import os
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from remote_cli import LAB, installed_cli
+from grok_startup import native_args
+
+try:
+    out = Path(os.environ['LAB_GROK_OUT']).resolve(strict=True)
+    workspace = out / 'workspace'
+    socket_dir = Path(os.environ['LAB_GROK_SOCKET_DIR']).resolve(strict=True)
+    if not out.is_relative_to(LAB / 'runs') or Path.cwd().resolve() != workspace:
+        raise ValueError('Invalid synthetic scope')
+    if socket_dir.parent != Path('/private/tmp') or not socket_dir.name.startswith('office-grok-'):
+        raise ValueError('Invalid private socket directory')
+    if any(key in os.environ for key in ('GROK_AUTH_PATH', 'GROK_AUTH', 'XAI_API_KEY', 'GROK_API_KEY')):
+        raise ValueError('Startup must not receive credentials')
+    if Path(os.environ['GROK_HOME']).resolve() != workspace / '.agent-office/grok-home':
+        raise ValueError('Invalid isolated Grok home')
+    args = native_args(sys.argv[1:], workspace, socket_dir / 'leader.sock')
+    (out / 'native-launch.json').write_text(json.dumps({'pid': os.getpid(), 'session': sys.argv[-1],
+        'workspace_trust': 'synthetic_fixture_only', 'prompt_supplied': False, 'credentials_supplied': False}))
+    command = ['/usr/bin/sandbox-exec', '-f', str(out / 'grok.sb'), str(installed_cli('grok')), *args]
+    os.execve(command[0], command, dict(os.environ))
+except Exception:
+    print('Grok startup launch rejected; no credential is printed', file=sys.stderr)
+    sys.exit(1)

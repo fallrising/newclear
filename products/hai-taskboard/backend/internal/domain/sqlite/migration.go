@@ -31,6 +31,9 @@ var v4Migration string
 //go:embed migrations/0005_human_reports.sql
 var v5Migration string
 
+//go:embed migrations/0006_project_policies.sql
+var v6Migration string
+
 func migrate(conn *sql.Conn, ctx context.Context, appliedAtNS int64) error {
 	return runMigrations(conn, ctx, compiledMigrations(), appliedAtNS)
 }
@@ -42,6 +45,7 @@ func compiledMigrations() []migrationStep {
 		{3, v3Migration, "77da66f51221f7af1a792ed40b2f1b3a04d0f706b737288f2c54a1def7fb48e7"},
 		{4, v4Migration, "314e6826bae7cfd8bfd8a7cee0d61a07a574d65e06654a477590b8164a39ef7b"},
 		{5, v5Migration, "d0048fb2e1c067a85703dca3e41d2d83c20aa480306b39954a569b21761f51e3"},
+		{6, v6Migration, "eb4f27731942c071fda857687e58bdb6d644fb5b5630c0e29d5ad2df5443ffb3"},
 	}
 }
 

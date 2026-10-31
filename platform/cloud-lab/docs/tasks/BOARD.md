@@ -542,3 +542,37 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - exact-head CI全過：CloudLab `41227642659`、Project success `41227642639`、llms `41227642637`。T855獨立公開證據ACCEPT；本機50project／8llms／task-report／diff檢查及11候選source保全通過。私人raw由主導核對，不冒稱reviewer獨立接觸憑證或線上資料。
 - 原unknown以未知結果結案，單次CAS changes1；原runner約7秒後恢復，新18:00Cron在18:00:55Z validated/healthy。最終123commands／152firings／119journal／active0，原121terminal／151firings／118journal保全，4grants／Access／secrets／Cron／期限與免費方案不變。原multipart parser失敗與修正保留；無舊命令重跑、續權或新瀏覽器測試。
 - 本卡僅關閉已批准ULR01–04，完整mainline仍incomplete／無usable tag；原unknown根因、未來uptime、完整AC07／08及provider用量／保留策略仍見剩餘工作。本收尾只改任務板。
+
+## T-0031 — 故障矩陣與保留邊界
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0031-1 | 逐列證據與缺口 | FQ-01 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+| T-0031-2 | 競爭與到期隔離驗證 | FQ-02 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+| T-0031-3 | 保留／恢復方案 | FQ-03 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+| T-0031-4 | 回歸審查與交付 | FQ-04 | done | 2026-10-31T18:39:23Z | 2026-10-31T18:49:16Z | 2026-10-31T18:49:38Z |
+
+### T-0031 Git交付與收尾
+
+- [PR870](https://github.com/fallrising/newclear/pull/870) head `1069df552fabd00a39aaf3ead9c1cf70a46a0021`，merge `95ae2ea0769a66c52c0a4c38c1d22180690da621`，2026-10-31T18:49:16Z合併；正常merge保留並行工作，本機／remote fulltree相同、head為main祖先、工作樹乾淨，61個已測input逐hash保持。
+- exact-head CI全過：CloudLab `41231130035`、Project success `41231130103`、llms `41231130059`。本機107Node＋304Python＝411tests，focused／final baseline11通過；五種source副本mutation在預期assertion產生3／1／1／1／1fail且原Worker不變。T856獨立最終ACCEPT；50project／8llms、task/report、400相對連結與diff檢查通過，最後exit狀態另有結構化收據。
+- 初次file-only結果不冒稱11tests；sandbox35Python socket errors與Node native assertion保留，准許loopback後完整重跑成功，未跳過或改runtime。十四列矩陣保留實際層級／缺口，七天artifact禁止下載不代表刪資料；無自動歸檔／tombstone／DELETE機制。
+- 本卡僅關閉FQ01–04 local qualification與retention設計；沒有本輪部署、cloud操作、續權或付費。完整AC07／08與mainline仍pending、無usable tag。後續優先成果下載完整性，再處理稽核／隔離還原等實際缺口。本收尾只改任務板。
+
+## T-0032 — 成果下載完整性
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- |
+| T-0032-1 | 有界原bytes讀取 | DI-01 | done | 2026-10-31T19:06:07Z | 2026-10-31T19:16:12Z | 2026-10-31T19:17:39Z |
+| T-0032-2 | SHA-256核對 | DI-02 | done | 2026-10-31T19:06:07Z | 2026-10-31T19:16:12Z | 2026-10-31T19:17:39Z |
+| T-0032-3 | 下載與session競爭 | DI-03 | done | 2026-10-31T19:06:07Z | 2026-10-31T19:16:12Z | 2026-10-31T19:17:39Z |
+| T-0032-4 | 回歸瀏覽器審查與交付 | DI-04 | done | 2026-10-31T19:06:07Z | 2026-10-31T19:16:12Z | 2026-10-31T19:17:39Z |
+
+### T-0032 Git交付、原看板更新與收尾
+
+- [PR883](https://github.com/fallrising/newclear/pull/883) head `bd4625fd7cdb9020525662c5842a3961a500f1a8`，merge `74d8c0f15274a59ca9d6d8b64aa99a6ba5bfd52c`，2026-10-31T19:16:12Z合併；正常merge保留並行工作，本機／remote fulltree相等、head為main祖先，6份部署候選逐byte符合remote main。
+- exact-head CI全過：CloudLab `41233248118`、Project success `41233248227`、llms `41233248181`。RED11→GREEN42→完整121Node＋304Python＝425tests；DI1真Chromium/workerd15checks／104API／errors空，原bytes/digest下載與空白篡改拒絕通過。T857最終source/local ACCEPT，61inputs保全；50project／8llms／task-report／diff／378links通過，原socket路徑失敗保留。
+- 沿用owner先前對原Worker看板更新的明確批准，合併／CI／固定候選回讀後實際發布三資產manifest；2026-10-31T19:16:49Z最終確認新active version100%、3個Worker modules逐byte未變、原settings（除provider部署annotations）／secret bindings／D1 binding／Access／Cron／4grants／期限保持。沒有暫停runner、續權或新增付費。
+- 主導實際私人前後receipt核對：原127commands整列相同、156firings及123journal rows保留；最終128commands／157firings／124journal、active0，原closed_unknown與result null保持。原unit/config/policy/client/ledger及journal identity保持，runner同PID無restart，保守截止仍2026-11-05T07:24:25Z。新增排程活動沒有被部署清除或重播。
+- Live部分是管理介面發布／版本／來源與設定歷史保全；未續human窗口，未執行新真人下載或live asset HTTP bytes驗收，未要求owner重測Safari。真正下載完整性行為由本輪local Chromium/workerd驗證支持。T857未接觸私人收據，live保全由主導核對；公開不放domain/account/command IDs/secrets。
+- 本卡關閉DI01–04及此次已授權原看板更新，完整產品仍mainline incomplete／無usable tag；下一項是拒絕稽核與其他矩陣缺口。本收尾只改任務板。

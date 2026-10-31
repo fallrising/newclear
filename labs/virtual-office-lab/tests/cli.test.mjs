@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createServer} from 'node:http';
 import {buildReport, officeUrl, readToken, run} from '../bin/office-report.mjs';
+import {run as lifecycle} from '../bin/office-run.mjs';
 import {handle, initialState, digest} from '../src/core.mjs';
 const token = 'c'.repeat(40);
 test('80 Unicode code points accepted; 81 and controls rejected', () => {
@@ -82,5 +83,13 @@ test('real loopback HTTP: CLI -> handler -> public state; no raw summary on wire
     assert.equal(projection.bots[0].status, 'coding');
     assert.equal(projection.bots[0].summary, '程式開發：撰寫程式');
     assert.ok(bodies.every(b => !b.includes('LOCAL-SENSITIVE-SAMPLE')));
+    const completed = await lifecycle(['grok', '--', process.execPath, '-e', '/* PRIVATE-COMMAND */ process.exit(0)'],
+      {...process.env, OFFICE_URL: url, OFFICE_TOKEN: token});
+    assert.deepEqual(completed, {exitCode: 0, started: true, reported: true});
+    assert.deepEqual(bodies.slice(1).map(b => JSON.parse(b).status), ['terminal', 'done']);
+    assert.ok(bodies.every(b => !b.includes('PRIVATE-COMMAND')));
+    const final = await (await fetch(`${url}/state`)).json();
+    assert.equal(final.bots[0].status, 'done');
+    assert.equal(final.bots[0].revision, 3);
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });

@@ -78,4 +78,7 @@ digest，再原子建立獨立 Review 或 Evidence；不自動完成工作。讀
 [操作說明](docs/local-development.md#human-report-api)與[驗證紀錄](docs/evidence/m1c-human-reports-20261031.md)。
 
 
-M2 continuation: [identity plan](docs/plans/m2-ac-identity-20261031.md) and [evidence](docs/evidence/m2-ac-identity-20261031.md) track accepted-workflow AC alignment. Legacy nonempty Draft stays compatible; general policy and verified coverage remain pending. Current state is BOARD HM2ID; full P0-A is incomplete.
+M2 identity repair is delivered. The approved [immutable project-policy contract](docs/sdd/local-project-policy.md)
+and [evidence](docs/evidence/project-policy-20261031.md) track exact project/AC configuration and durable
+startup binding; see BOARD HMPOL and [operator setup](docs/local-development.md#immutable-per-project-completion-policies).
+Verified coverage and full P0-A remain incomplete.

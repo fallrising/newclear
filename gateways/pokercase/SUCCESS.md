@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Bounded official Claude client pilot
+
+Owner approved Claude tools / Cursor text-only and a subscription-only, single-model Claude pilot. [LP-1–LP-3 scope, gates and results](docs/tasks/T-0426-claude-pilot.md) govern this continuation; renewed claim PR344 merged before implementation. Existing core AC wording and historical evidence remain intact. A failed safety, model, admission or cleanup preflight stops before inference. Six gateway requests are not six internal model calls or a monetary cap; this pilot cannot close the full mainline.
+
 ## T-0432 — Process interruption and durable recovery
 
 Claim PR336 merged before product work. [Fixed CR-1–CR-5 and design](docs/tasks/T-0432-crash-recovery.md) implement the existing T-1102 M-10 recovery evidence requirement. Separate storage-subprocess boundaries from actual isolated HTTP/fakeCLI dispatch, retain identities and finalized history through SIGKILL/restart, and prove no replay or duplicate amounts. Existing behavior may already pass; no runtime defect or RED is claimed from a missing test. Current runtime passed unchanged:9storage-process cuts and3actual buffered gateway cases,407Rust/199Python/20repository tests,49contracts/8indexes,fmt/Clippy/locked builds and8prior isolated regressions. Independent source/runtime review passed; publication and final ledger/backup/cleanup remain delivery gates. Original17AC/T1102/Cargo and mainline incomplete/usable_tag none remain; AC04/17 and live acceptance are separate unresolved gates.

@@ -16,6 +16,18 @@
 | 設定、重啟、真實接入與公開部署關卡 | [RUNBOOK](docs/RUNBOOK.md) |
 | 已跑／未跑的證據與進度 | [驗證紀錄](docs/evidence/m0.md)、[任務板](docs/tasks/BOARD.md) |
 
+## 本機唯讀頁面
+
+啟動本機 workerd 後，執行 `npm run preview`，開啟 `http://127.0.0.1:8790`。提供狀態文字清單、過期／斷線提示與安全文字呈現；[設定與證據範圍](docs/DASHBOARD.md)。尚無 3D 場景，不代表完整產品可用。
+
+## 前端呈現規則（尚無 3D UI）
+
+[`presentation.mjs`](docs/PRESENTATION.md) 提供八狀態、過期警示、雙向協作與夜間 overlay 的共用純函式。未實作 renderer，不能以此代替瀏覽器驗收。
+
+## 命令生命週期 adapter（開發中）
+
+新增 [`office-run`](docs/LIFECYCLE.md)：Agent 明確執行命令時上報 terminal → done/error，不傳命令與輸出。這不是原生宿主 hook，也尚未通過完整 AC-07／瀏覽器驗收。
+
 ## 不需安裝依賴的本機入口
 
 ```sh

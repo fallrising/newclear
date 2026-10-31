@@ -492,5 +492,15 @@ acceptance/human reports/QA/Done, missing explicit policy and Store reopen/repla
 TestAdmission_AllPublicationConsumersRejectStaleInputs, ModeledCurrentSemanticChangesRejectAllConsumers,
 TestCompletionPreparation_PolicyPrecedence and runtime/domain independence/Done regressions passed
 in the final full gate; those negatives retain original IDs. No full HAI-DONE/UX/OPS claim follows.
-Legacy nonempty Draft and domain rehydration stay unchanged. General policy source and
-TestCoverageProjection_MatchesCurrentDonePredicate remain Proposed/NotRun; full M2 is incomplete.
+Legacy nonempty Draft and domain rehydration stay unchanged. The approved policy-source successor
+is tracked below. TestCoverageProjection_MatchesCurrentDonePredicate remains Proposed/NotRun; full M2 is incomplete.
+
+## 2026-10-31 immutable local project policy
+
+[Contract](sdd/local-project-policy.md) POL-AC-01..05 is the approved policy-source successor to
+HAI-CONNECT-005, preserving HAI-FIRST-002/005, HAI-INPUT-002/005/006 and preparation error precedence.
+Claude plan/code revision ACCEPT and named codec/admission, immutable registration, project selection
+matrix and actual runtime completion/restart oracles pass locally. [Evidence](evidence/project-policy-20261031.md)
+records full-gate/test-delta binding and limitations. Migration 0006 is implemented; 0001..0005
+remain frozen. Final CI/delivery status is BOARD HMPOL.
+TestCoverageProjection_MatchesCurrentDonePredicate remains Proposed/NotRun; full M2 is incomplete.

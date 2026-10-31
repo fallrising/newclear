@@ -16,8 +16,8 @@ node bin/office-run.mjs content -- npm test
 - stdout/stderr 留在本機終端，不擷取、不放入 HTTP。命令／參數可能仍出現在本機 process list，禁止把秘密放 argv。
 - 子程序環境移除 OFFICE_*，防止意外繼承 reporter token；不是 sandbox，同一使用者仍可能存取 token 檔案。
 - 起始上報失敗：退出 125，命令不執行。最終上報失敗：印固定警告，成功命令改回 125；失敗命令保留非零碼。
-- 無法啟動命令：127；觀察到子程序自行因 signal 結束：128。命令執行期間 wrapper 收到 SIGINT/SIGTERM 時轉送至子程序（POSIX 為整個 process group），最多等 5 秒再 SIGKILL；分別退出 130/143 並嘗試回報 error，即使子程序自行 exit 0 也不報 done。取消的 group leader 提前退出時亦清理剩餘 group members；自行脫離 process group 的程序不在保證範圍。wrapper 自身被 SIGKILL／斷電或在 HTTP 上報期間被終止無法保證最終回報，公開狀態須靠 stale 提示，不假裝 done。長命令沒有 heartbeat，超過 30 分鐘會 stale。
-- 不會重試命令本身；HTTP 重試沿用既有有界策略。單一命令消耗兩次更新配額。
+- 無法啟動命令：127；觀察到子程序自行因 signal 結束：128。命令執行期間 wrapper 收到 SIGINT/SIGTERM 時轉送至子程序（POSIX 為整個 process group），最多等 5 秒再 SIGKILL；分別退出 130/143 並嘗試回報 error，即使子程序自行 exit 0 也不報 done。取消的 group leader 提前退出時亦清理剩餘 group members；自行脫離 process group 的程序不在保證範圍。wrapper 自身被 SIGKILL／斷電或在 HTTP 上報期間被終止無法保證最終回報，公開狀態須靠 stale 提示，不假裝 done。長命令每 5 分鐘送一次 terminal heartbeat，單一 in-flight；結尾等待既有 heartbeat 完成才送 done/error。heartbeat 不代表模型正在推理，只代表命令仍未結束。離線仍會 stale；最終上報成功時以最終結果為準，先前 heartbeat 故障只印固定警告，不把成功命令誤判失敗。
+- 不會重試命令本身；HTTP 重試沿用既有有界策略。短命令消耗兩次更新配額；長命令另每 5 分鐘消耗一次 heartbeat 配額。
 
 ## 證據邊界
 

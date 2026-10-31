@@ -295,7 +295,22 @@ navigation. No runtime policy configuration, migration, UI, provider, dependency
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM2ID | Align accepted-workflow AC identity and verify policy-safe completion; document remaining M2 decisions | ID-AC-01..04; H02 support | in_progress | 2026-10-31T12:24:40Z | — | 2026-10-31T12:56:00Z |
+| HM2ID | Align accepted-workflow AC identity and verify policy-safe completion; document remaining M2 decisions | ID-AC-01..04; H02 support | done | 2026-10-31T12:24:40Z | 2026-10-31T13:09:36Z | 2026-10-31T13:10:00Z |
 
 Full M2 policy-source and verified coverage remain unimplemented/pending contracts; this row does
-not close full M2, H02 or product AC-02. Claude plan/code reviews and root backend/web/API/document gates pass. [Evidence](../evidence/m2-ac-identity-20261031.md) retains original failures and exact compatibility limits; required CI/merge/readback remain pending.
+not close full M2, H02 or product AC-02. Claude plan/code reviews and root backend/web/API/document gates pass. [Evidence](../evidence/m2-ac-identity-20261031.md) retains original failures and exact compatibility limits; its JSON is the historical local acceptance snapshot.
+
+Primary [PR #854](https://github.com/fallrising/newclear/pull/854) merged at
+`2026-10-31T13:09:36Z` as `f8b5f0c5fbd8a745d29c7b83e5dd5ff670a46a68`.
+Reviewed head `3046ba98ec0223a6a38340ebc0dba0020b192646` passed
+[HAI CI41203460558](https://github.com/fallrising/newclear/actions/runs/41203460558) and
+[project CI41203460531](https://github.com/fallrising/newclear/actions/runs/41203460531).
+Remote readback matches all reviewed HAI product and task/report paths; plan blob
+`bd0e99356305975500e9a8ce800038636b2535d7` and JSON receipt blob
+`086da4c869c7044cdde919b0ee7290a6a75cf6ca` were verified.
+
+HM2ID end uses the primary merge time. This closes only the accepted-workflow identity repair;
+policy profiles and verified coverage remain Proposed/unimplemented, and SUCCESS AC-02..04 retain
+their prior status. Next decision is the concrete policy-source proposal in the plan; no answer has
+been treated as approval. No UI, real provider, usable tag, release or deploy. BOARD-only CI and desk
+synchronization are tracked separately in the private handoff.

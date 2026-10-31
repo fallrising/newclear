@@ -85,3 +85,5 @@ BI01–04依[唯讀查詢契約](bot-inspection.md)驗原state不變、FLOCK、s
 ## 應用用量觀測子集
 
 [UO01–04](usage-observation.md)補scope聚合、手動看板及過期／撤權競爭，[證據](evidence/m1-usage-observation.md)區分source/local與provider／live。觀測數值不是准入預留或帳單來源。
+
+[UL部分live證據](evidence/m1-usage-live.md)：已發布固定六檔，三modules／settings／歷史保全通過；UL03正向asset HTTP bytes／usage200 pending。runner403、expired bot401及匿名302是拒絕邊界，不能取代成功讀取。原unknown仍佔active槽，未恢復排程。

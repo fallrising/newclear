@@ -136,4 +136,8 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 
 ## UO：應用用量觀測
 
-[UO01–04](docs/usage-observation.md)具scope的准入快照與手動看板讀取，已完成[387tests／14組本機瀏覽器驗證及T851複審](docs/evidence/m1-usage-observation.md)；provider／帳單未接線維持未知，尚未部署新版，完整AC08仍pending。
+[UO01–04](docs/usage-observation.md)具scope的准入快照與手動看板讀取，已完成[387tests／14組本機瀏覽器驗證及T851複審](docs/evidence/m1-usage-observation.md)；provider／帳單未接線維持未知，後續原Worker已發布；正向asset／usage與真人驗證仍pending，完整AC08仍pending。
+
+## UL：應用用量觀測部署
+
+[UL01–04](docs/usage-rollout.md)原Worker已更新並通過[管理／module與歷史保全](docs/evidence/m1-usage-live.md)；UL03 partial：asset bytes需有效human＋commands:read；usage200與真人仍pending。部署前已有unknown佔active槽、後續Cron skipped_overlap，完整保留且未修復；過期角色未續期，完整mainline仍pending。

@@ -489,3 +489,18 @@ Owner已批准RP方案；完整產品主線不因此通過。
 - exact-head CI全過：Cloud Lab `41045528224`、Project success `41045528263`、llms `41045528168`。本機最終92Node＋295Python＝387tests、UO3實際本機workerd/D1／Chromium14情境／103API／無JS或gateway error；三份資產hash與最後source相符。文件／索引／task／report／diff及公開邊界通過，T851初審REWORK後複審ACCEPT。
 - 原UO2跨秒時間失敗、fixture錯誤與clockRED保留；修正有界bootstrap耗時＋整秒容差，超限時間拒絕，非重跑掩蓋。UO01–04 source/local完成；候選在共享workspace的UO-candidate保存source pin／六份hash，尚未發布新版。
 - 完整mainline／AC08仍pending，無usable tag。沒有live管理請求、續權、D1資料清理、Cron變更或付費方案；provider analytics／帳單尚未接線、真人Access／模型及retention／完整故障仍待驗。本收尾只改任務板、只關閉UO。
+
+## T-0028 — 應用用量觀測部署
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0028-1 | 固定候選與fresh前態 | UL-01 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
+| T-0028-2 | 既有Worker與資產更新 | UL-02 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
+| T-0028-3 | 保全與有界live核驗（等owner） | UL-03 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
+| T-0028-4 | 公開證據／審查／交付 | UL-04 | in_progress | 2026-10-31T10:01:16Z | — | 2026-10-31T10:12:43Z |
+
+[範圍與驗收](../usage-rollout.md)；正向usage200／真人登入另列pending，不以403代替。
+
+### T-0028 部分執行
+
+2026-10-31T10:08:42Z：原Worker100%更新、module管理bytes及設定／歷史保全通過；UL03 partial，等owner準備好後批准human-only30分鐘窗口及登入。原09:15 unknown保留且後續Cron skipped_overlap。UL01／02證據已備，所有列保持in_progress／end空白；本輪PR只保存部分結果，不關閉任務。[證據](../evidence/m1-usage-live.md)。

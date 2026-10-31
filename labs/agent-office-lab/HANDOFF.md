@@ -2,6 +2,8 @@
 
 先讀 [SUCCESS](SUCCESS.md)、[SDD](docs/SDD.md)、[任務板](docs/tasks/BOARD.md)。canonical 位置是 `fallrising/newclear` 的 `labs/agent-office-lab`。
 
+T-0009-02 進行中：owner 已登入；原生 status authenticated、catalog 有 composer-2.5。已準備[一次有界任務](docs/CURSOR-WORK.md)，63 項離線測試與已登入無 prompt 啟動通過；[證據](docs/evidence/cursor-ready-2026-11-01.json)。完全斷網啟動曾回 internal error，允許 HTTPS metadata 後進入 Composer 2.5 待命畫面。沒有執行模型 prompt；等 owner 明確批准一次 120 秒／最多兩個工具的配額驗收。Cursor 不提供 runner 可保證的 request／token／金額硬上限；停止本機也不等於即時停止服務端計費。取得批准後執行 `python3 scripts/run_cursor_work.py --allow-remote` 一次，保留失敗，不自動重跑；AC-13 仍 pending，功能 PR 保持 draft，驗收後才合併與結案。
+
 T-0009 依 owner 要求新增 Cursor Agent 第四工位：固定官方 2026.10.22-27dcf5f、archive／runtime 摘要核對、隔離 HOME／CURSOR_CONFIG_DIR／file credential store、原生 Office PTY 與 workspace hooks。無憑證啟動 12.51 秒通過，hooks 安裝／移除、外部 TCP 拒絕與 5 個追蹤程序清理正確；55 項離線測試通過。[證據](docs/evidence/cursor-startup-2026-11-01.json)、[owner 登入命令](docs/CURSOR.md)。需 owner 自行 `python3 scripts/cursor_cli.py login`；未登入不是執行失敗，也沒有驗證 session hook／模型／任務。新增 AC-13，完整目標擴為四工位，保持單 run queue。下一步補有界 Cursor／Grok 真實任務；登入不代表付費授權，不重跑已通過的 Pi 任務。
 
 T-0008 已加入 Grok 無憑證啟動 runner：官方 1.0.70 進入原生登入畫面、Office needs_input、OS 拒絕外部 TCP、PTY 與額外背景程序清理通過，12.83 秒。47 項離線測試通過；[證據](docs/evidence/grok-startup-2026-11-01.json)、[命令及限制](docs/GROK-STARTUP.md)。故意不讀 owner auth；這不是登入失效，也沒有發出模型任務。第一次等 SessionStart 超時，後續以原生登入畫面＋needs_input 驗證未登入狀態，未把它算成 session／任務成功。下一步建立登入後的有界 Grok 任務 runner、工具與請求限制，再請 owner 確認具體的配額／付費驗收；尚無可直接執行的遠端命令。

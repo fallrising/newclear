@@ -5,7 +5,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: 75b2d3b762cbad3f8f8d32bf085b1696be728131
+source_commit: 55d666b4d60083f54e558b75db6b4f5cc20d66f7
 ---
 
 # Agent Office Lab 驗收
@@ -21,6 +21,8 @@ SDD 原 A01–A11 在公開版統一寫為 AC-01–AC-11，條件未縮減。AC-
 不包含部署、發布套件、模型權重、私人專案或雲端自動 fallback。
 
 T-0009 依 owner 要求新增第四 provider Cursor Agent；固定官方下載版本與摘要、缺失／版本／能力偵測、獨立 HOME／CURSOR_CONFIG_DIR 與 owner 登入命令，先以 OS 阻擋外網驗證原生啟動及清理。AC-13 的真實任務不以未登入或離線啟動冒充。
+
+T-0009-02：owner 已完成 Cursor 登入，原生 status 回報 authenticated；本輪準備 Composer 2.5 單一合成 prompt、最多一次 input read／一次 result write、120 秒期限、無 host 自動重試。Cursor 不提供可在此保證的請求／token／金額硬上限，配額驗收須另取得一次明確批准。63 項離線測試與[已登入無 prompt 啟動](docs/evidence/cursor-ready-2026-11-01.json)已通過。啟動須允許 HTTPS metadata；原生工具回圈與 AC-13 保持 pending，詳見[待批准的執行範圍](docs/CURSOR-WORK.md)。
 
 ## 驗收條件
 
@@ -42,7 +44,7 @@ T-0009 依 owner 要求新增第四 provider Cursor Agent；固定官方下載�
 
 ## 現況與缺口
 
-T-0009 已固定 Cursor CLI 並完成原生登入等待、workspace hooks 安裝／移除、OS 外網拒絕與程序清理，12.51 秒；55 項離線測試通過。[安裝／owner 登入命令](docs/CURSOR.md)。尚需 owner 自行登入，再準備有界真實任務驗收。
+T-0009 已固定 Cursor CLI 並完成原生登入等待、workspace hooks 安裝／移除、OS 外網拒絕與程序清理，12.51 秒；55 項離線測試通過。[安裝／owner 登入命令](docs/CURSOR.md)。owner 已登入並由原生 status 核對；有界任務 runner 已準備，待一次配額／付費批准。
 
 T-0008 的無憑證 Grok 原生啟動檢查通過：12.83 秒，實際登入畫面、needs_input、外部 TCP 拒絕與完整清理；47 項離線測試通過。[命令與限制](docs/GROK-STARTUP.md)。沒有 session hook／推論／產物驗收，AC-03 保持 pending。
 

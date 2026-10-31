@@ -2,16 +2,20 @@
 import assert from 'node:assert/strict';
 import { randomBytes, createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { localOnly } from './local_office_policy.mjs';
+import { PermissionProbe, observePermissions } from './permission_probe.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [out, workspace, promptFile] = process.argv.slice(2, 5).map(p => path.resolve(p));
 const keepOpen = process.argv.includes('--keep-open');
 const checkCancel = process.argv.includes('--check-cancel');
+const checkLifecycle = process.argv.includes('--check-lifecycle');
+const permissions = new PermissionProbe();
+let probeError;
 assert(out.startsWith(lab + '/runs/') && workspace.startsWith(out + '/'));
 const fixture = JSON.parse(readFileSync(path.join(workspace, 'input.json'), 'utf8'));
 const prompt = readFileSync(promptFile, 'utf8');
@@ -71,6 +75,7 @@ try {
   for (const key of Object.keys(process.env)) if (key.startsWith('AGENT_OFFICE_')) delete process.env[key];
   process.env.LAB_OPENCODE_RUN = out;
   process.env.LAB_OPENCODE_WORKSPACE = workspace;
+  if (checkLifecycle) process.env.LAB_OPENCODE_PERMISSION_MODE = 'ask';
   const { loadConfig } = await import('../vendor/agent-office/dist/server/server/config.js');
   const { startServer } = await import('../vendor/agent-office/dist/server/server/server.js');
   const password = randomBytes(24).toString('base64url');
@@ -80,7 +85,12 @@ try {
     '--agent', path.join(lab, 'scripts/bin/opencode')]);
   cfg.port = 0;
   office = await startServer(cfg);
-  for (const floor of office.floors()) localOnly(floor, report.model);
+  for (const floor of office.floors()) {
+    localOnly(floor, report.model);
+    if (checkLifecycle) {
+      observePermissions(floor.workers, permissions, error => { probeError = error; });
+    }
+  }
   const base = `http://127.0.0.1:${office.server.address().port}`;
   report.url = `${base}/lite`;
   const login = await fetch(`${base}/api/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
@@ -90,6 +100,7 @@ try {
   ws = new WebSocket(`${base.replace('http', 'ws')}/ws?name=Local%20Lab&lite=1`, { headers: { cookie, origin: base } });
   ws.on('message', raw => {
     const msg = JSON.parse(raw.toString());
+    if (checkLifecycle) permissions.screen(msg);
     messages.push(msg);
     if (msg.t === 'worker.update' || msg.t === 'worker.remove' || msg.t === 'toast') {
       appendFileSync(path.join(out, 'office-events.jsonl'), JSON.stringify({ at: new Date().toISOString(), ...msg }) + '\n');
@@ -104,6 +115,7 @@ try {
   async function until(check, ms, message) {
     const deadline = Date.now() + ms;
     while (Date.now() < deadline) {
+      if (probeError) throw probeError;
       if (check()) return;
       await new Promise(resolve => setTimeout(resolve, 200));
     }
@@ -113,7 +125,25 @@ try {
   ws.send(JSON.stringify({ t: 'worker.spawn', deskId: 'desk-1', provider: 'opencode', model: report.model, prompt, worktree: false }));
   await until(() => lastWorker, 15000, 'Office did not create the worker');
   ws.send(JSON.stringify({ t: 'worker.attach', workerId: lastWorker.id }));
-  await until(() => lastWorker?.status === 'done' && lastWorker?.usage?.output > 0, 240000, 'No completed worker with reported model usage');
+  async function completeWithPermissions(target, previousOutput = 0) {
+    const deadline = Date.now() + 240000;
+    while (Date.now() < deadline) {
+      if (probeError) throw probeError;
+      if (lastWorker?.status === 'done' && lastWorker?.usage?.output > previousOutput && existsSync(target)) return;
+      if (permissions.ready(lastWorker)) {
+        assert(permissions.requests.length <= 8, 'Too many synthetic permission prompts');
+        assert(!existsSync(target), 'Artifact appeared before permission was answered');
+        // Deliberately leave this real request unanswered, then prove the write is still blocked.
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        assert(!existsSync(target), 'Artifact changed while native permission was pending');
+        ws.send(JSON.stringify(permissions.reply(lastWorker)));
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    throw new Error('No completed native task after permission replies');
+  }
+  if (checkLifecycle) await completeWithPermissions(path.join(workspace, 'result.json'));
+  else await until(() => lastWorker?.status === 'done' && lastWorker?.usage?.output > 0, 240000, 'No completed worker with reported model usage');
   report.worker = lastWorker;
   assert(lastWorker.sessionId, 'Native OpenCode session ID missing');
   assert(report.states.includes('working'), 'No native working event');
@@ -137,7 +167,63 @@ try {
   await page.getByRole('button', { name: 'Come on in' }).click();
   await page.getByText(lastWorker.name, { exact: true }).first().waitFor();
   await page.screenshot({ path: path.join(out, 'office-opencode.png'), fullPage: true });
-  await browser.close();
+  if (checkLifecycle) {
+    const workerId = lastWorker.id;
+    const sessionId = lastWorker.sessionId;
+    const ownerPid = () => office.floors()[0].workers.owners().find(p => p.workerId === workerId)?.pid;
+    const oldPid = ownerPid();
+    assert(oldPid, 'Missing owned PID');
+    const before = { output: lastWorker.usage.output, mtime: statSync(path.join(workspace, 'result.json')).mtimeMs, event: messages.length };
+    const promptsBefore = permissions.requests.length;
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.getByText(lastWorker.name, { exact: true }).first().waitFor();
+    await page.screenshot({ path: path.join(out, 'office-refreshed.png'), fullPage: true });
+    assert.equal(ownerPid(), oldPid);
+    assert.equal(lastWorker.sessionId, sessionId);
+    assert.equal(lastWorker.usage.output, before.output);
+    assert.equal(statSync(path.join(workspace, 'result.json')).mtimeMs, before.mtime);
+    assert(!messages.slice(before.event).some(m => m.t === 'worker.update' && m.worker.status === 'working'));
+    report.refresh_without_rerun = true;
+    // Release the browser before starting another TUI; keep the resource guard unchanged.
+    await browser.close();
+    browser = undefined;
+    // End the actual process; keep the Office worker record so native resume can reuse its session.
+    const owned = descendants(oldPid).map(p => p.pid);
+    process.kill(oldPid, 'SIGTERM');
+    await until(() => lastWorker?.status === 'exited', 15000, 'No native exit event');
+    await until(() => owned.every(pid => {
+      try { process.kill(pid, 0); return false; } catch (error) { return error.code === 'ESRCH'; }
+    }), 10000, 'Old OpenCode process survived exit');
+    const resumeFrom = messages.length;
+    const usageFrom = permissions.usageEvents.length;
+    ws.send(JSON.stringify({ t: 'worker.resume', workerId }));
+    await until(() => ownerPid() && ownerPid() !== oldPid && messages.slice(resumeFrom).some(m =>
+      m.t === 'worker.update' && m.worker.id === workerId && ['idle', 'done'].includes(m.worker.status)) &&
+      permissions.usageEvents.slice(usageFrom).some(e => e.workerId === workerId && e.sessionId === sessionId && e.output >= before.output) &&
+      permissions.text(workerId).includes('ctrl+p') && permissions.text(workerId).includes('Qwen3.8'),
+      45000, 'Native resumed session did not hydrate usage and render its TUI');
+    assert.equal(lastWorker.sessionId, sessionId, 'Resume created a different session');
+    assert.equal(statSync(path.join(workspace, 'result.json')).mtimeMs, before.mtime, 'Resume replayed the original task');
+    ws.send(JSON.stringify({ t: 'worker.attach', workerId }));
+    ws.send(JSON.stringify({ t: 'worker.prompt', workerId, prompt:
+      'Read input.json and write resumed.json with exactly the input marker as marker and the sum of values as total. Do not change result.json. Use your file tools. Do not use the network.' }));
+    await completeWithPermissions(path.join(workspace, 'resumed.json'), before.output);
+    assert.equal(lastWorker.sessionId, sessionId);
+    const resumed = readFileSync(path.join(workspace, 'resumed.json'));
+    assert.deepEqual(JSON.parse(resumed), JSON.parse(artifact));
+    assert.equal(statSync(path.join(workspace, 'result.json')).mtimeMs, before.mtime);
+    assert(permissions.requests.length > promptsBefore, 'Allow once unexpectedly persisted across resumed task');
+    assert(permissions.requests.every(p => p.replied && p.continued), 'Unresolved permission request');
+    report.permission_roundtrips = permissions.summary();
+    report.permission_wait_verified = true;
+    report.resume_verified = true;
+    report.resume = { same_session: true, new_process: true, old_processes_exited: true,
+      native_usage_hydrated: true,
+      original_artifact_unchanged: true, output_before: before.output, output_after: lastWorker.usage.output,
+      artifact_sha256: createHash('sha256').update(resumed).digest('hex') };
+    report.worker = lastWorker;
+  }
+  await browser?.close();
   browser = undefined;
   if (checkCancel) {
     const workerId = lastWorker.id;
@@ -172,6 +258,7 @@ try {
 } catch (error) {
   report.status = 'failed';
   report.error = String(error);
+  if (checkLifecycle) report.permission_roundtrips = permissions.summary();
   if (lastWorker) report.last_worker = lastWorker;
   save();
   process.exitCode = 1;

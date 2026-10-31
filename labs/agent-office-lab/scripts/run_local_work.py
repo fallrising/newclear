@@ -72,16 +72,19 @@ def main():
     parser.add_argument('--harness', choices=('codex', 'opencode', 'office-opencode'), default='codex')
     parser.add_argument('--keep-open', action='store_true', help='Keep the verified local Office demo open until Ctrl+C')
     parser.add_argument('--check-cancel', action='store_true', help='Verify cancelling a second task through the native Office')
+    parser.add_argument('--check-lifecycle', action='store_true', help='Verify synthetic permission replies, browser refresh and native session resume')
     args = parser.parse_args()
-    if (args.keep_open or args.check_cancel) and args.harness != 'office-opencode':
-        parser.error('--keep-open and --check-cancel require --harness office-opencode')
+    if (args.keep_open or args.check_cancel or args.check_lifecycle) and args.harness != 'office-opencode':
+        parser.error('Office lifecycle options require --harness office-opencode')
+    if args.check_lifecycle and (args.task != 'file' or args.check_cancel or args.keep_open):
+        parser.error('--check-lifecycle is a bounded file test; do not combine with --check-cancel or --keep-open')
     out = LAB / 'runs' / ('local-work-' + datetime.datetime.now(
         datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
     workspace = out / 'workspace'
     workspace.mkdir(parents=True)
     (out / 'runner.py').write_text(Path(__file__).read_text())
     if args.harness != 'codex':
-        for name in ('local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs'):
+        for name in ('local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs'):
             (out / name).write_text((LAB / 'scripts' / name).read_text())
         (out / 'opencode-launcher.py').write_text((LAB / 'scripts/bin/opencode').read_text())
     codex_home = out / 'codex-home'
@@ -130,6 +133,8 @@ def main():
             command.append('--keep-open')
         if args.check_cancel:
             command.append('--check-cancel')
+        if args.check_lifecycle:
+            command.append('--check-lifecycle')
     events_name = args.harness + '.jsonl'
     (out / f'{args.harness}-command.json').write_text(json.dumps(command, indent=2) + '\n')
     report = {'status': 'prepared', 'harness': args.harness, 'task': args.task, 'cloud_fallback': False, 'model': settings['model'],

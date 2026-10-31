@@ -341,3 +341,9 @@ delivery status. Full M2 verified coverage, completion UI and SUCCESS AC-02..04 
 Coverage needs its own concrete contract and has not started in this round. Session/provider proposals
 remain Proposed. No usable tag, release or deployment. BOARD closure CI and desk synchronization
 are recorded separately in the persistent handoff.
+
+Closure #880 also repairs one pre-existing session-test ordering assumption exposed by its initial
+web CI. [CI follow-up](../evidence/project-policy-ci-followup-20261031.md) retains the original failure,
+deterministic Red and two test-author/format corrections; final pinned web30/format/lint/type/build
+passes with URL/method fixtures and actual logout success assertions. Production source is unchanged.
+The primary policy delivery above remains the scope of HMPOL; closure receipts are in the handoff.

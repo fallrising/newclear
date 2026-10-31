@@ -34,6 +34,11 @@
       "source_commit": "9d23bd72850af83d32dcd1081b44d09bc4fc7b8d"
     },
     {
+      "path": "labs/agent-office-lab",
+      "last_source_update": "2026-10-31T11:19:24Z",
+      "source_commit": "9e536de1dc1a532c8e3d78355e770bc757e190da"
+    },
+    {
       "path": "labs/aweshore",
       "last_source_update": "2026-09-27T14:43:37+00:00",
       "source_commit": "60cd7e582474823c91f3af9916ba2d720a4cbae6"

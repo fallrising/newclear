@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-31",
+  "office_commit": "852e2ab28c4f3f31bffdf4b20353bd119c9d3270",
+  "sources": [
+    {
+      "id": "office-readme",
+      "url": "https://github.com/AgentSystemLabs/agent-office/blob/main/README.md",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "office-agents",
+      "url": "https://github.com/AgentSystemLabs/agent-office/blob/main/docs/agents.md",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "office-architecture",
+      "url": "https://github.com/AgentSystemLabs/agent-office/blob/main/docs/how-it-works.md",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "office-grok-adapter",
+      "url": "https://github.com/AgentSystemLabs/agent-office/blob/main/src/server/providers/grok.ts",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "office-pi-adapter",
+      "url": "https://github.com/AgentSystemLabs/agent-office/blob/main/src/server/providers/pi.ts",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "office-opencode-adapter",
+      "url": "https://github.com/AgentSystemLabs/agent-office/blob/main/src/server/providers/opencode.ts",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "pi-rpc",
+      "url": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/rpc.md",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "pi-models",
+      "url": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    },
+    {
+      "id": "deepseek-pi",
+      "url": "https://github.com/deepseek-ai/awesome-deepseek-agent/blob/main/docs/pi_mono.md",
+      "retrieved_at": "2026-10-31",
+      "retrieved": true,
+      "source": "GitHub connected tool",
+      "verification": "documentation/static source only; not executed"
+    }
+  ]
+}

@@ -165,5 +165,13 @@
     "Review bytes add no Done predicate; Evidence bytes use existing integrity",
     "unbound sealed objects retained; no GC/backup/restore acceptance",
     "Fake-only; no M2/L1/provider/release/deploy"
-  ]
+  ],
+  "integration": {
+    "main": "49ac7a09236ce817fe98f51e5f8d3aabd3118906",
+    "project_contracts": 50,
+    "indexes": 8,
+    "milestone_markdown_files": 20,
+    "local_links_anchors": 211,
+    "all_backend_web_review_inputs_unchanged": true
+  }
 }

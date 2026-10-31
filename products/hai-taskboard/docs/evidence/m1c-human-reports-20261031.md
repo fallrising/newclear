@@ -129,7 +129,8 @@ through execution; manifest SHA256 `5cecf62718e9ec9722c148f7b6fd3a9b09a5c78fdc32
 The initial full pass442.419s is retained as superseded source evidence; final gate reran after both
 production capability changes and all test additions. Web `bash scripts/check-web.sh` passed30tests
 in9files plus format/lint/type/build;39unchanged inputs were reread. Fixed Redocly lint passed0warnings.
-Project49contracts,8indexes, changed Markdown links/anchors, task/report contracts and diff checks
+Project49contracts initially, then50 after normal main integration;8indexes, milestone Markdown
+links/anchors, task/report contracts and diff checks
 passed; final exact document count is in the private gate log. No required local check remains failed
 or skipped. Root accepted T003/T005 only after inspecting actual diffs, tests, logs and frozen hashes.
 
@@ -145,3 +146,7 @@ The remaining delivery conditions are normal final-head PR CI, merge and remote 
 and desk synchronization. These are not replaced by local tests or the reviewer's source inspection.
 Current state is [BOARD HM1C](../tasks/BOARD.md#t-0339--m1c-sealed-human-reports). Next planned slice
 is M2; it has not started. Full H02/SUCCESS AC-02..04 remain incomplete; no usable tag/release/deploy.
+
+Normal integration of main49ac7a09 preserved unrelated Agent Office Lab delivery. All168 backend,39web
+and17reviewed-source hashes still match. Integrated checks:50project contracts,8indexes,20milestone
+Markdown files/211local links and anchors. No HAI design or runtime change arrived from that merge.

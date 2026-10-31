@@ -7,7 +7,9 @@ Owner 最新指示：每個里程碑 commit → PR → 必要檢查通過且無�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0004-1 | 取消與真程序回歸通過；[39 tests/workerd/索引證據](../evidence/m1-cancellation.md) | AC-07 | in_progress | 2026-10-31T18:39:26Z | — | 2026-10-31T18:41:01Z |
+| T-0004-1 | 取消與真程序回歸已合併；[39 tests/workerd/索引證據](../evidence/m1-cancellation.md) | AC-07 | done | 2026-10-31T18:39:26Z | 2026-10-31T18:42:16Z | 2026-10-31T18:42:16Z |
+
+T-0004 收據：[PR #866](https://github.com/fallrising/newclear/pull/866) 正常合併，merge SHA `2997e63aff00b51836669d343ee95154c4706b64` 已 fetch 回讀。候選 `21b392f3e67a325d31b85e4c5b82a359e988dfe8` 的 contracts／validate CI 通過，無衝突；沒有獨立 review 紀錄。此完成狀態不代表完整 AC-07、產品、部署或 release 完成。此收尾 PR 僅更新 BOARD。
 
 PR #863 已於 2026-10-31T18:39:26Z 合併；merge SHA `2665c0886ba7e99ac1cbfdafc8daf7bf2ec53d8d` 已 fetch 回讀。必要 contracts/validate CI 通過，無獨立人工 review 紀錄。T-0002/3 完成僅指有界交付，非完整 M1。
 

@@ -7,7 +7,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { localOnly } from './local_office_policy.mjs';
-import { PermissionProbe } from './permission_probe.mjs';
+import { PermissionProbe, observePermissions } from './permission_probe.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [out, workspace, promptFile] = process.argv.slice(2, 5).map(p => path.resolve(p));
@@ -88,13 +88,7 @@ try {
   for (const floor of office.floors()) {
     localOnly(floor, report.model);
     if (checkLifecycle) {
-      const native = floor.workers.handleOpenCodeHook.bind(floor.workers);
-      floor.workers.handleOpenCodeHook = (id, token, payload) => {
-        const accepted = native(id, token, payload);
-        // Observe only authenticated events, preserving the native result and token handling.
-        try { permissions.hook(id, payload, accepted); } catch (error) { probeError = error; }
-        return accepted;
-      };
+      observePermissions(floor.workers, permissions, error => { probeError = error; });
     }
   }
   const base = `http://127.0.0.1:${office.server.address().port}`;
@@ -190,6 +184,9 @@ try {
     assert.equal(statSync(path.join(workspace, 'result.json')).mtimeMs, before.mtime);
     assert(!messages.slice(before.event).some(m => m.t === 'worker.update' && m.worker.status === 'working'));
     report.refresh_without_rerun = true;
+    // Release the browser before starting another TUI; keep the resource guard unchanged.
+    await browser.close();
+    browser = undefined;
     // End the actual process; keep the Office worker record so native resume can reuse its session.
     const owned = descendants(oldPid).map(p => p.pid);
     process.kill(oldPid, 'SIGTERM');
@@ -198,10 +195,13 @@ try {
       try { process.kill(pid, 0); return false; } catch (error) { return error.code === 'ESRCH'; }
     }), 10000, 'Old OpenCode process survived exit');
     const resumeFrom = messages.length;
+    const usageFrom = permissions.usageEvents.length;
     ws.send(JSON.stringify({ t: 'worker.resume', workerId }));
     await until(() => ownerPid() && ownerPid() !== oldPid && messages.slice(resumeFrom).some(m =>
-      m.t === 'worker.update' && m.worker.id === workerId && ['idle', 'done'].includes(m.worker.status)),
-      45000, 'Native resumed process did not become ready');
+      m.t === 'worker.update' && m.worker.id === workerId && ['idle', 'done'].includes(m.worker.status)) &&
+      permissions.usageEvents.slice(usageFrom).some(e => e.workerId === workerId && e.sessionId === sessionId && e.output >= before.output) &&
+      permissions.text(workerId).includes('ctrl+p') && permissions.text(workerId).includes('Qwen3.8'),
+      45000, 'Native resumed session did not hydrate usage and render its TUI');
     assert.equal(lastWorker.sessionId, sessionId, 'Resume created a different session');
     assert.equal(statSync(path.join(workspace, 'result.json')).mtimeMs, before.mtime, 'Resume replayed the original task');
     ws.send(JSON.stringify({ t: 'worker.attach', workerId }));
@@ -218,12 +218,12 @@ try {
     report.permission_wait_verified = true;
     report.resume_verified = true;
     report.resume = { same_session: true, new_process: true, old_processes_exited: true,
+      native_usage_hydrated: true,
       original_artifact_unchanged: true, output_before: before.output, output_after: lastWorker.usage.output,
       artifact_sha256: createHash('sha256').update(resumed).digest('hex') };
     report.worker = lastWorker;
-    await page.screenshot({ path: path.join(out, 'office-resumed.png'), fullPage: true });
   }
-  await browser.close();
+  await browser?.close();
   browser = undefined;
   if (checkCancel) {
     const workerId = lastWorker.id;

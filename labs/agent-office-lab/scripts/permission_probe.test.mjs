@@ -1,10 +1,23 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { PermissionProbe } from './permission_probe.mjs';
+import { PermissionProbe, observePermissions } from './permission_probe.mjs';
 const worker = { id: 'fixture-worker', sessionId: 'fixture-session', status: 'needs_input' };
 const asked = { type: 'permission', status: 'needs_input', detail: 'edit', sessionId: worker.sessionId };
 const frame = { t: 'screen', workerId: worker.id, full: true, lines: { 0: [['Permission required']], 1: [['Allow once Allow always Reject']] } };
 function prompt() { const p = new PermissionProbe(); p.hook(worker.id, asked, true); p.screen(frame); return p; }
+test('observes the HTTP router generic hook after native authentication, preserving all arguments', () => {
+  const calls = []; const probe = new PermissionProbe(); const failures = [];
+  const manager = { handleProviderHook(...args) { calls.push(args); return args[2] === 'fixture-token'; } };
+  observePermissions(manager, probe, error => failures.push(error));
+  assert.equal(manager.handleProviderHook('opencode', worker.id, 'wrong', '', asked), false);
+  assert.equal(probe.requests.length, 0);
+  manager.handleProviderHook('pi', worker.id, 'fixture-token', '', asked);
+  assert.equal(probe.requests.length, 0);
+  assert.equal(manager.handleProviderHook('opencode', worker.id, 'fixture-token', '', asked), true);
+  assert.equal(probe.requests.length, 1);
+  assert.deepEqual(calls.at(-1), ['opencode', worker.id, 'fixture-token', '', asked]);
+  assert.deepEqual(failures, []);
+});
 test('requires an accepted native permission hook and the actual terminal prompt', () => {
   const p = new PermissionProbe(); p.screen(frame); p.hook(worker.id, asked, false);
   assert.equal(p.ready(worker), false);
@@ -29,4 +42,12 @@ test('unexpected requests, overlap and advance before reply fail closed', () => 
 });
 test('provider errors cannot count as permission replies', () => {
   assert.throws(() => prompt().hook(worker.id, { ...asked, type: 'error' }, true), /error/);
+});
+test('records only accepted usage snapshots for resumed-session readiness', () => {
+  const p = new PermissionProbe();
+  const usage = { type: 'usage', sessionId: worker.sessionId, usage: { output: 123 } };
+  p.hook(worker.id, usage, false); assert.deepEqual(p.usageEvents, []);
+  p.hook(worker.id, usage, true);
+  assert.deepEqual(p.usageEvents, [{ workerId: worker.id, sessionId: worker.sessionId, output: 123 }]);
+  assert.equal(p.pending, undefined);
 });

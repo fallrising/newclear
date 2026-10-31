@@ -40,5 +40,9 @@ Owner 指示「試試下一步」。本輪不擴大為 Grok／Pi 或完整 host 
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0004-01 | 真實權限等待、合成測試的 Allow once PTY 回覆與繼續（等 owner：停止既有 demo 的選擇） | AC-05（OpenCode） | in_progress | 2026-10-31T12:03:32Z | — | 2026-10-31T12:08:10Z |
-| T-0004-02 | 真瀏覽器刷新不重跑，終止程序後明確恢復同一 session（等 owner：停止既有 demo 的選擇） | AC-08（OpenCode 子集） | in_progress | 2026-10-31T12:03:32Z | — | 2026-10-31T12:08:10Z |
+| T-0004-01 | 真實權限等待、合成測試的 Allow once PTY 回覆與繼續 | AC-05（OpenCode） | in_progress | 2026-10-31T12:03:32Z | — | 2026-10-31T12:18:18Z |
+| T-0004-02 | 真瀏覽器刷新不重跑，終止程序後明確恢復同一 session | AC-08（OpenCode 子集） | in_progress | 2026-10-31T12:03:32Z | — | 2026-10-31T12:18:18Z |
+
+Owner 已同意先停止舊 demo、完成真實生命週期驗收後重新開啟；T-0004 繼續執行。
+
+T-0004 真實驗收與 15 項離線測試通過，詳見 [生命週期證據](../evidence/lifecycle.md)。待 PR #847 合併後補 done／end；不將 OpenCode 子集當成完整 AC-05／AC-08。

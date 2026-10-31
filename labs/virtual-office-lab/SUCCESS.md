@@ -47,6 +47,10 @@ source_commit: 8bf48551f524086d81fa66d946c984f8052152ff
 
 建立 renderer-neutral 純函式供未來 Three.js／文字 fallback 共用。AC-06 子範圍：八狀態、stale 保留 alert、互相同意協作才移動、固定排序座位、夜間 overlay 預設關閉且不遮蔽警示。48 項 Node tests、索引與模型 review 通過，見[介面與證據](docs/PRESENTATION.md)；未實作瀏覽器／WebGL／移動路徑，不把此基礎視為完整 M2 或 AC-06 完成。
 
+## T-0007：文字 fallback 頁面
+
+實作本機唯讀頁、單一 in-flight polling、隱藏暫停、jitter/backoff、斷線與上次成功標示及安全文字呈現。51 項 Node 測試與實際 Chrome smoke 已通過，見[證據](docs/DASHBOARD.md)；未實作 Three.js、相機／路徑與完整瀏覽器狀態矩陣，完整 AC-06 保留 pending。
+
 ## 現況與缺口
 
 已具設計、CLI、API安全核心與Workers adapter。28項本機Node測試通過，包含真loopback HTTP；storage test double不等於DO恢復。當前未建立完整3D UI、未真正接入模型宿主、未公開部署。CI與runtime結果需對照當次PR，不能從workflow存在推論通過。

@@ -37,6 +37,10 @@ jobs:
           python3 scripts/check_indexes.py
       - run: npm run check
       - run: npm test
+      - name: Real Chrome readonly dashboard smoke
+        run: |
+          export OFFICE_CHROME="$(command -v google-chrome)"
+          npm run test:browser
       - name: Real local workerd SQLite persistence and concurrency
         env:
           WRANGLER_SEND_METRICS: "false"

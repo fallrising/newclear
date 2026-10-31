@@ -2499,3 +2499,22 @@ ingresses for initial/human commands; no CLI/bootstrap bypass. Initial reviewer 
 hypothesis corrected against full method. Root verified docs7files/159links,50project contracts/8indexes
 and fixed API lint. T002 isolated implementation dispatched after plan acceptance;40minute bound.
 Policy source and verified coverage remain proposed and cannot be counted as completed M2.
+
+M2 12:44Z checkpoint: docs-first84ec0598 committed after desk refresh; no HAI design drift/open HAI
+PR at intake. Worker meaningful command Red retained, then strict helper and compatibility union
+implemented. Root preliminary inspected all five production changes and new boundary/SQLite/HTTP
+tests. Three long-ID acceptance/Fake/human Evidence/Done flows now green; selected21table counts
+plus aggregate versions and Store/service reopen are the exact proof boundary, not crash/process or
+production artifact confinement. Original fixture/setup diagnostics retained. Worker affected tests/
+vet passed; race running. Root web30/39unchanged inputs, fixed API0warnings and docs checks passed.
+Remaining: local-only rule negative, freeze/final backend, Claude code review, normal CI/Git/readback
+and ledger closure. Policy direction question sent asynchronously; no answer or approval inferred.
+Work remains inside root90–120active-minute estimate; exact active/wait uninstrumented/null.
+
+M2 local evidence gate ACCEPT: ten frozen Go files,173input root fullbackend378.361s/exit0/unchanged;
+web30/39inputs unchanged, APIzero-warning, native report/task and document gates. Claude plan REWORK
+then ACCEPT with edits verified; code ACCEPT67.203s/no blockers, no follow-up. Root checked actual
+diff/source/hashes/logs, corrected reviewer full-table wording to21selected tables and documented
+invalid-UTF8 decoder-vector and existing-ID negative limits. ID-AC-04 still requires normal CI/merge/
+readback/BOARD/desk; full M2/product remains incomplete. Next contract question pending; no inference
+of approval or policy configuration implementation. Latest main843eaf97 has unrelated work only.

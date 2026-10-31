@@ -141,7 +141,8 @@ different revision is rejected with an explicit reconciliation requirement; chan
 policy is deferred to the approved activation/reconciliation path. Existing local profile identity and
 history retain exact digest compatibility; do not re-hash its legacy version label retroactively.
 
-Proposed fixed resource limits: at most 256 exact rules/profile, the initial-acceptance/current Run-input limit (not the import maximum);
+Proposed fixed resource limits: at most 256 exact rules/profile, the verified initial-acceptance and
+current Run-input limit (not the import maximum);
 profile JSON at most 256 KiB before parse. These are admission limits, not measured capacity claims.
 Import itself allows 1024 ACs/node and 20000 aggregate; this proposed profile cannot activate such
 larger imports through the bounded initial-acceptance path. No new policy_rejected mapping is

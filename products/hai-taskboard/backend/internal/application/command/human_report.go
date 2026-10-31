@@ -71,7 +71,7 @@ func CanonicalSubmitHumanReport(v SubmitHumanReport) ([]byte, domain.Digest, err
 		}
 	case "evidence":
 		e := v.Evidence
-		if v.Review != nil || e == nil || !validText(string(e.ACID), 120) || strings.ContainsAny(string(e.ACID), "/\\") || e.ACRevisionDigest.IsZero() || e.RecipeDigest.IsZero() || e.EnvironmentDigest.IsZero() || e.Verdict != "Passing" {
+		if v.Review != nil || e == nil || !domain.ValidACID(string(e.ACID)) || e.ACRevisionDigest.IsZero() || e.RecipeDigest.IsZero() || e.EnvironmentDigest.IsZero() || e.Verdict != "Passing" {
 			return nil, domain.Digest{}, ErrInvalidCommand
 		}
 		c.Evidence = &canonicalHumanEvidence{ACID: e.ACID, ACRevisionDigest: canonicalSHA256(e.ACRevisionDigest), RecipeDigest: canonicalSHA256(e.RecipeDigest), EnvironmentDigest: canonicalSHA256(e.EnvironmentDigest), Verdict: e.Verdict}

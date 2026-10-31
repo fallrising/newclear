@@ -192,6 +192,7 @@ New Session/provider documents remain Proposed and do not change current authori
 
 Current bounded objective and fixed ID-AC-01..04: [M2 plan](docs/plans/m2-ac-identity-20261031.md).
 Align new AC inputs with accepted UTF-8 byte identity, preserve canonical history, and verify exact
-accepted-input/evidence/completion behavior under explicit test policy. Initial status NotRun.
-General policy configuration and verified coverage remain pending explicit contracts; full M2 and
+accepted-input/evidence/completion behavior under explicit test policy. ID-AC-01..03 now pass; root full/race/vet/build, web30/build, API lint and Claude plan/code review
+passed. [Evidence](docs/evidence/m2-ac-identity-20261031.md) records limits and retained failures.
+ID-AC-04 delivery remains pending in BOARD. General policy configuration and verified coverage remain pending explicit contracts; full M2 and
 AC-02/03/04 remain incomplete. No UI/provider/dependency/restore change.

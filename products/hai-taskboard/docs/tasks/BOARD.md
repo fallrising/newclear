@@ -295,7 +295,7 @@ navigation. No runtime policy configuration, migration, UI, provider, dependency
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM2ID | Align new AC identity boundaries and verify policy-safe completion; document remaining M2 decisions | ID-AC-01..04; H02 support | in_progress | 2026-10-31T12:24:40Z | — | 2026-10-31T12:24:40Z |
+| HM2ID | Align accepted-workflow AC identity and verify policy-safe completion; document remaining M2 decisions | ID-AC-01..04; H02 support | in_progress | 2026-10-31T12:24:40Z | — | 2026-10-31T12:56:00Z |
 
 Full M2 policy-source and verified coverage remain unimplemented/pending contracts; this row does
-not close full M2, H02 or product AC-02. Claude plan review and implementation gates pending.
+not close full M2, H02 or product AC-02. Claude plan/code reviews and root backend/web/API/document gates pass. [Evidence](../evidence/m2-ac-identity-20261031.md) retains original failures and exact compatibility limits; required CI/merge/readback remain pending.

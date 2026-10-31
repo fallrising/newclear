@@ -65,9 +65,17 @@ func initialMetadata(n int, v uint64) command.Metadata {
 	return command.Metadata{CommandID: fmt.Sprintf("cmd_01HABCDEF%02d", n), IdempotencyKey: fmt.Sprintf("00000000-0000-4000-8000-%012d", n), ExpectedVersion: v, IssuedAt: fixedTime(), CorrelationID: "initial"}
 }
 func initialReader(t *testing.T, content []byte, extra ...domain.WorkItemID) *fakeReader {
+	return initialReaderAC(t, content, "AC-A", extra...)
+}
+func initialReaderAC(t *testing.T, content []byte, ac domain.ACID, extra ...domain.WorkItemID) *fakeReader {
 	t.Helper()
 	format := specification.SHA1
 	manifest := strings.ReplaceAll(literalManifest, "wi_A", string(workItemID))
+	encodedAC, err := json.Marshal(ac)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest = strings.ReplaceAll(manifest, `"AC-A"`, string(encodedAC))
 	for _, id := range extra {
 		manifest = strings.Replace(manifest, `"work_item_ids":["`+string(workItemID)+`"`, `"work_item_ids":["`+string(workItemID)+`","`+string(id)+`"`, 1)
 	}
@@ -98,6 +106,9 @@ func initialFixture(t *testing.T) (*Service, *sqlite.Store, *sql.DB, command.Acc
 	return initialFixtureContent(t, initialContent)
 }
 func initialFixtureContent(t *testing.T, content []byte, extra ...domain.WorkItemID) (*Service, *sqlite.Store, *sql.DB, command.AcceptInitialSpecification) {
+	return initialFixtureContentAC(t, content, "AC-A", extra...)
+}
+func initialFixtureContentAC(t *testing.T, content []byte, ac domain.ACID, extra ...domain.WorkItemID) (*Service, *sqlite.Store, *sql.DB, command.AcceptInitialSpecification) {
 	t.Helper()
 	root := t.TempDir()
 	path := filepath.Join(root, "initial.db")
@@ -124,14 +135,14 @@ func initialFixtureContent(t *testing.T, content []byte, extra ...domain.WorkIte
 			t.Fatal(e)
 		}
 	}
-	a := port.ApprovedRepository{Binding: specification.RepositoryBinding{ProjectID: projectID, ID: "binding", Version: 1, ObjectFormat: specification.SHA1}, ConfigurationID: "initial-repo", ApprovedBy: operator, Refs: []string{"refs/heads/main"}, ManifestPaths: []string{"manifest.json"}, Reader: initialReader(t, content, extra...)}
+	a := port.ApprovedRepository{Binding: specification.RepositoryBinding{ProjectID: projectID, ID: "binding", Version: 1, ObjectFormat: specification.SHA1}, ConfigurationID: "initial-repo", ApprovedBy: operator, Refs: []string{"refs/heads/main"}, ManifestPaths: []string{"manifest.json"}, Reader: initialReaderAC(t, content, ac, extra...)}
 	_, a.Binding.Digest, e = port.CanonicalRepositoryBinding(a)
 	if e != nil {
 		t.Fatal(e)
 	}
 	svc.config.RepositoryAuthority = fixedRepository{a}
 	svc.config.Completion.RecipeDigest = domain.HashString("initial recipe")
-	svc.config.Completion.Checks = map[domain.ACID]VerificationRule{"AC-A": {VerifierClass: "test"}}
+	svc.config.Completion.Checks = map[domain.ACID]VerificationRule{ac: {VerifierClass: "test"}}
 	out, e := svc.ProposeSpecification(t.Context(), operator, command.ProposeSpecification{Metadata: initialMetadata(12, 1), ProjectID: projectID, BindingID: "binding", BindingVersion: 1, BindingDigest: a.Binding.Digest, Ref: "refs/heads/main", ManifestPath: "manifest.json"})
 	if e != nil {
 		t.Fatal(e)
@@ -148,7 +159,7 @@ func initialFixtureContent(t *testing.T, content []byte, extra ...domain.WorkIte
 	if e != nil {
 		t.Fatal(e)
 	}
-	q := command.AcceptInitialSpecification{Metadata: initialMetadata(13, 1), ProjectID: projectID, ProposalDigest: pd, PolicyRevisionDigest: svc.config.Completion.RevisionDigest, WorkItems: []port.InitialWorkItemVersion{{WorkItemID: workItemID, ExpectedVersion: 1}}, ACContents: []command.InitialACContent{{ACID: "AC-A", Content: bytes.Clone(content)}}}
+	q := command.AcceptInitialSpecification{Metadata: initialMetadata(13, 1), ProjectID: projectID, ProposalDigest: pd, PolicyRevisionDigest: svc.config.Completion.RevisionDigest, WorkItems: []port.InitialWorkItemVersion{{WorkItemID: workItemID, ExpectedVersion: 1}}, ACContents: []command.InitialACContent{{ACID: ac, Content: bytes.Clone(content)}}}
 	for _, id := range extra {
 		q.WorkItems = append(q.WorkItems, port.InitialWorkItemVersion{WorkItemID: id, ExpectedVersion: 1})
 	}

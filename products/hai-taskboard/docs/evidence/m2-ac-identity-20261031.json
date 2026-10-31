@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "task": "T-0339",
+  "scope": "M2 accepted-workflow identity repair",
+  "status": "locally_accepted_delivery_pending",
+  "source_commit": "24af3ab7c7d6722314125cbe3ac009db57bd4ad1",
+  "docs_first_commit": "84ec059814f9a8cd0acaaf78266b6d9b299f9f05",
+  "full_m2_complete": false,
+  "full_product_complete": false,
+  "reviews": [
+    {
+      "phase": "plan",
+      "verdict": "REWORK",
+      "duration_seconds": 89.582,
+      "exit_code": 0,
+      "requested_model": "claude-opus-5-5",
+      "observed_models": [
+        "claude-opus-5-5"
+      ],
+      "effort": "high",
+      "is_error": false,
+      "permission_denial_count": 0,
+      "reported_children": 0,
+      "reported_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 2,
+          "outputTokens": 9078,
+          "cacheReadInputTokens": 1545,
+          "cacheCreationInputTokens": 36916,
+          "webSearchRequests": 0,
+          "costUSD": 0.477205,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 6324,
+          "cacheCreationEphemeral5mInputTokens": 0,
+          "cacheCreationEphemeral1hInputTokens": 36916,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      }
+    },
+    {
+      "phase": "plan-followup",
+      "verdict": "ACCEPT",
+      "duration_seconds": 81.38,
+      "exit_code": 0,
+      "requested_model": "claude-opus-5-5",
+      "observed_models": [
+        "claude-opus-5-5"
+      ],
+      "effort": "high",
+      "is_error": false,
+      "permission_denial_count": 0,
+      "reported_children": 0,
+      "reported_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 2,
+          "outputTokens": 8195,
+          "cacheReadInputTokens": 1545,
+          "cacheCreationInputTokens": 35517,
+          "webSearchRequests": 0,
+          "costUSD": 0.448353,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 5855,
+          "cacheCreationEphemeral5mInputTokens": 0,
+          "cacheCreationEphemeral1hInputTokens": 35517,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      }
+    },
+    {
+      "phase": "code",
+      "verdict": "ACCEPT",
+      "duration_seconds": 67.203,
+      "exit_code": 0,
+      "requested_model": "claude-opus-5-5",
+      "observed_models": [
+        "claude-opus-5-5"
+      ],
+      "effort": "high",
+      "is_error": false,
+      "permission_denial_count": 0,
+      "reported_children": 0,
+      "reported_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 2,
+          "outputTokens": 6739,
+          "cacheReadInputTokens": 1545,
+          "cacheCreationInputTokens": 97038,
+          "webSearchRequests": 0,
+          "costUSD": 0.911401,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 4295,
+          "cacheCreationEphemeral5mInputTokens": 0,
+          "cacheCreationEphemeral1hInputTokens": 97038,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      }
+    }
+  ],
+  "worker_backend_input_count": 162,
+  "worker_backend_manifest_sha256": "fb1b8248abbc88bdd2e96dae4638a1b7b63959c6d1504fc7897b921cfbda6f5a",
+  "integrated_source": {
+    "products/hai-taskboard/backend/internal/application/command/ac_identity_test.go": "a2609b8dec413250f04dfe9da44a8d9767c192c78d89cc00b885a6573bd9fb63",
+    "products/hai-taskboard/backend/internal/application/command/human_report.go": "2c7e218c043ef625a5c226ed7e8f22aa12b0fdc6dd2f61347ac5c05ccd3967b5",
+    "products/hai-taskboard/backend/internal/application/command/initial_acceptance.go": "9efa201cfb4c056657283c85fd832e4bcc0cba46289e9c94d15aac95351d0268",
+    "products/hai-taskboard/backend/internal/application/command/vertical.go": "172dca243ead4615806a807de804694ccc76b4ba594509889eb10fcd4ac8204e",
+    "products/hai-taskboard/backend/internal/application/service/ac_identity_test.go": "a3aa27e9e1fab4d83fed7a4d14088fd4303a68c4cf6f6ca2e6928ee38b1f3bd7",
+    "products/hai-taskboard/backend/internal/application/service/initial_acceptance_test.go": "a6adcb9fc20d94e98be89cbf86e65f886ce78f6c8fdf8e064aeb095fdda5b61b",
+    "products/hai-taskboard/backend/internal/domain/ac_identity.go": "87306cbd50d371815c48cd86985272132c17de2a12b500125bf34af381e3180d",
+    "products/hai-taskboard/backend/internal/domain/ac_identity_test.go": "87e3963211ff75af62a9fbc69b9a778b2634d5cb341db82ce825c8daae2c9807",
+    "products/hai-taskboard/backend/internal/transport/httpapi/ac_identity_test.go": "690e5f8d706fec9a30ff360681f4225d4237caa7dc13b3c3d803702159dc11b8",
+    "products/hai-taskboard/backend/internal/transport/httpapi/initial_acceptance.go": "c2ba57035272e0236f7a181f2d0dc4e1e4d46454a9ce42e9c24939fa35ec24a1"
+  },
+  "root_full_backend": {
+    "elapsed_seconds": 378.361,
+    "exit_code": 0,
+    "inputs": 173,
+    "input_manifest_sha256": "12bf01b5133091c20f5b9e21e7399e45c902f81f8512b07a2cdfe0676b6b972b",
+    "source_unchanged": true,
+    "command": "bash scripts/check-backend.sh"
+  },
+  "web": {
+    "passed": true,
+    "tests": 30,
+    "files": 9,
+    "source_input_count": 39,
+    "source_unchanged": true
+  },
+  "api": {
+    "passed": true,
+    "warnings": 0,
+    "version": "2.51.2"
+  },
+  "accounting": {
+    "native_leaf_launches": 1,
+    "native_assignments": 2,
+    "external_cli_launches": 3,
+    "root_outer_tool_total": null,
+    "root_nested_tool_total": null,
+    "provider_request_count": null,
+    "actual_billed_cost_usd": null,
+    "root_active_seconds": null,
+    "root_wait_seconds": null,
+    "reported_cost_basis": "list estimate; not actual billing"
+  },
+  "pending": [
+    "required CI/merge/readback/BOARD/desk",
+    "general policy contract decision",
+    "verified coverage"
+  ],
+  "limits": [
+    "selected21 table counts plus project/work-item versions",
+    "Store reopen retains auxiliary SQL connection",
+    "test disk artifact store, not production confinement",
+    "no new browser or two-process recovery proof",
+    "no policy loader/UI/provider/dependency/migration/release/deploy"
+  ],
+  "recorded_at_utc": "2026-10-31T12:56:42.050728+00:00"
+}

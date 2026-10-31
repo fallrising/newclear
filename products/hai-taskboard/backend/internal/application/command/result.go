@@ -67,6 +67,8 @@ type successCommand struct {
 }
 
 type successResult struct {
+	ReportID                string            `json:"report_id,omitempty"`
+	ReportKind              string            `json:"report_kind,omitempty"`
 	AcceptedRevisionDigest  string            `json:"accepted_revision_digest,omitempty"`
 	AcceptanceSubjectDigest string            `json:"acceptance_subject_digest,omitempty"`
 	ProposalDigest          string            `json:"proposal_digest,omitempty"`
@@ -112,7 +114,7 @@ type failureDetails struct {
 func CanonicalSuccess(metadata Metadata, operation Operation, result Result, auditSequence uint64, cursor port.Cursor) ([]byte, error) {
 	if !commandIDPattern.MatchString(metadata.CommandID) || !validText(metadata.CorrelationID, 80) ||
 		!validSuccessResult(operation, successResult{
-			AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID,
+			ReportID: result.ReportID, ReportKind: result.ReportKind, AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID,
 			RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID,
 		}) || auditSequence == 0 || cursor.Epoch == 0 || cursor.Sequence == 0 {
 		return nil, ErrInvalidCommand
@@ -120,7 +122,7 @@ func CanonicalSuccess(metadata Metadata, operation Operation, result Result, aud
 	return json.Marshal(successEnvelope{
 		APIVersion: "v1", OK: true,
 		Command:          successCommand{CommandID: metadata.CommandID, Operation: operation, Status: "recorded", Replayed: false},
-		Result:           successResult{AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID},
+		Result:           successResult{ReportID: result.ReportID, ReportKind: result.ReportKind, AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID},
 		Audit:            successAudit{Sequence: auditSequence},
 		ProjectionCursor: successCursor{StreamEpoch: cursor.Epoch, EventSequence: cursor.Sequence},
 		CorrelationID:    metadata.CorrelationID,
@@ -191,7 +193,7 @@ func canonicalBytes(payload []byte, value any) bool {
 
 func validOperation(operation Operation) bool {
 	switch operation {
-	case AcceptInitialSpecificationOperation, ProposeSpecificationOperation, CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
+	case SubmitHumanReportOperation, AcceptInitialSpecificationOperation, ProposeSpecificationOperation, CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
 		SubmitCandidateOperation, PublishReviewOperation, PublishEvidenceOperation, ApproveSubjectOperation,
 		RequestQAOperation, RequestCancelOperation, CompleteWorkItemOperation:
 		return true
@@ -201,6 +203,9 @@ func validOperation(operation Operation) bool {
 }
 
 func validSuccessResult(operation Operation, result successResult) bool {
+	if operation != SubmitHumanReportOperation && (result.ReportID != "" || result.ReportKind != "") {
+		return false
+	}
 	if operation != AcceptInitialSpecificationOperation && (result.AcceptedRevisionDigest != "" || result.AcceptanceSubjectDigest != "") {
 		return false
 	}
@@ -210,6 +215,8 @@ func validSuccessResult(operation Operation, result successResult) bool {
 	projectValid := projectIDPattern.MatchString(string(result.ProjectID))
 	workItemValid := workItemIDPattern.MatchString(string(result.WorkItemID))
 	switch operation {
+	case SubmitHumanReportOperation:
+		return result.Type == "HumanReportSubmitted" && projectValid && workItemValid && runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && port.ValidHumanReportID(result.ReportID) && (result.ReportKind == "review" && result.Phase == domain.PhaseReview || result.ReportKind == "evidence" && (result.Phase == domain.PhaseReview || result.Phase == domain.PhaseQA))
 	case AcceptInitialSpecificationOperation:
 		validDigest := func(s string) bool {
 			d, e := domain.ParseDigest(strings.TrimPrefix(s, "sha256:"))

@@ -1,6 +1,6 @@
 # M1c — sealed human reports and atomic submission
 
-Status: accepted implementation plan after Claude REWORK and one revised-plan ACCEPT (2026-10-31). Desk T-0339.
+Status: accepted plan and locally verified implementation after Claude plan/code REWORK and revised ACCEPT (2026-10-31). Delivery: BOARD HM1C. Desk T-0339.
 Source `9e536de1dc1a532c8e3d78355e770bc757e190da`. Supports H02 / SUCCESS AC-02, not full acceptance.
 The newer [Session proposal](../sdd/session-control-room.md) and [provider path](provider-critical-path-20261030.md)
 retain M1c and Fake-only. They do not enable L1 or change accepted completion predicates.
@@ -86,8 +86,10 @@ the new human path accepts content and explicit intent, never a browser-supplied
    Any late failure rolls back all database writes (use existing rollbackMutationError convention).
    No executor outbox, dispatch, phase or WorkItem version change; publish a normal work_item refresh.
    Report-ID collision under a new intent returns idempotency_conflict, never silently replaces it.
-   Only final execute-transaction rejections use existing recordableFailure rules (including a first
-   discovered metadata collision, which records503 storage_corruption); late mutation/DB
+   Only final execute-transaction rejections use existing recordableFailure rules: version_conflict,
+   stale_subject, lifecycle_rejected and done_gate_unsatisfied are recordable. A first-discovered
+   metadata collision503 storage_corruption and ID collision409 idempotency_conflict are NOT recorded;
+   the root/worker checked the actual helper rather than the reviewer's broader assumption. Late mutation/DB
    failures roll back result/idempotency too. Replays acknowledge a previously recorded decision,
    not transient unrecorded storage failures. Concurrent in-flight calls may both Put identical bytes,
    but only one canonical result/report/semantic record/audit/event commits.
@@ -95,6 +97,8 @@ the new human path accepts content and explicit intent, never a browser-supplied
    do not substitute a narrower subject-only query for those collection limits. The extra report-row
    limit is per subject. A same-version work_item refresh follows fixture convention; no new UI
    consumption behavior is claimed by this backend slice.
+   The existing web stream invalidates by newer projection cursor, independent of resource_version;
+   a same-version event still refreshes the existing board, but no report UI is added.
 
 Filesystem and SQLite are not one transaction. A sealed object may survive a canceled/stale/failed
 commit as an unreferenced object. It grants no read authority or Evidence/Review and is never deleted
@@ -135,7 +139,8 @@ Noncanonical escaped/doubled/dot resource paths follow M1b's strict behavior, no
 
 Errors use existing codes: malformed input400 invalid_request; authentication401; denied project or
 missing scoped report404; unauthorized human/independence/rule403; stale/version/idempotency409;
-unsupported capability503; lifecycle422. Opaque store Put/Open errors503 projection_unavailable;
+unsupported command capability503 capability_unsupported (non-retryable); lifecycle422. Missing
+read capabilities retain M1b's projection_unavailable convention. Opaque store Put/Open errors503 projection_unavailable;
 service-detected mismatched bytes/metadata/read/close errors503 storage_corruption; actual cancellation
 503 projection_unavailable. No submitted report content, paths or internal storage errors in responses.
 Historical metadata does not guarantee byte availability. Stored success replay remains an acknowledgement
@@ -161,6 +166,8 @@ Existing fixture publication contracts are not retroactively changed or relabele
   post-I/O stale snapshot, late DB failure, metadata collision and orphan non-authority. Original state
   and all relevant table snapshots prove rollback; no deletion of shared sealed objects.
   Assert presence/absence of command-result/idempotency per failure class and healthy same-key retry.
+  Assert exact codes, unchanged-version material drift and count-only report drift after Put; a
+  version bump alone proves version_conflict, not the final stale-subject snapshot comparison.
   Include metadata-only at-limit/limit-plus-one count/unique-object/50MiB admission tests, replay at cap,
   and final-transaction capacity change. Exact MIME collision returns503 storage_corruption deliberately,
   consistent with immutable global metadata; no overwrite or misleading new Present row occurs.
@@ -169,10 +176,15 @@ Existing fixture publication contracts are not retroactively changed or relabele
   confined runtime store integration, repeated GET/reopen and zero read-side table/directory writes.
 - REPORT-AC-05: `TestHumanReport_Migration` covers fresh/upgrade preservation/reopen/failed migration
   rollback/constraints. Existing full completion and fixture canonical compatibility tests remain green.
+  Also exercise real human Review/Evidence through RequestQA/ApproveSubject/CompleteWorkItem,
+  proving report semantic IDs/role survive domain rehydration and appear in completion joins.
+  Missing human Evidence bytes must yield evidence_unavailable with no completion row;
+  ChangesRequested must retain the existing review_rejected gate.
 
 Root gates: pinned backend script (format/vet/full/race/build), unchanged pinned web gates, fixed
 OpenAPI lint, project/index/document/task validators, independent Claude code review and required
-final-head PR CI. Named tests are proposed until real logs exist. No new browser acceptance is claimed.
+final-head PR CI. Named tests now have actual focused/race/full logs in the evidence report; final-head
+CI and remote delivery are recorded in BOARD. No new browser acceptance is claimed.
 Root owns plan/API/docs and acceptance; one bounded native implementation leaf after plan acceptance.
 Claude plan/code: claude-opus-5-5 high, installed CLI safe-mode/no tools,480s each, at most one revision
 follow-up each. Root90–120active minutes with20minute checkpoints; worker45minutes; CI20minutes/round.

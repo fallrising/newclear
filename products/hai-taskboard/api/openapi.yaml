@@ -1204,12 +1204,10 @@ components:
         review: { $ref: "#/components/schemas/HumanReportReviewIntent" }
         evidence: { $ref: "#/components/schemas/HumanReportEvidenceIntent" }
       oneOf:
-        - properties: { kind: { const: review } }
+        - properties: { kind: { const: review }, evidence: false }
           required: [review]
-          not: { required: [evidence] }
-        - properties: { kind: { const: evidence } }
+        - properties: { kind: { const: evidence }, review: false }
           required: [evidence]
-          not: { required: [review] }
     HumanReport:
       type: object
       additionalProperties: false

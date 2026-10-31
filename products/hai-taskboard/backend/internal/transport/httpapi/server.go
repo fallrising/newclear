@@ -73,6 +73,8 @@ func NewServer(commands CommandService, results CommandResultSource, projections
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/completion-preparation", server.getCompletionPreparation)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/runs/{run_id}/outputs", server.getRunOutputs)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/artifacts/{sha256}", server.getOutputArtifact)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/human-reports/{report_id}", server.getHumanReport)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/human-reports/{report_id}/content", server.getHumanReportContent)
 	mux.HandleFunc("/", server.notFound)
 	server.mux = mux
 	return server, nil
@@ -83,7 +85,7 @@ func (server *Server) ServeHTTP(response http.ResponseWriter, request *http.Requ
 		writeAPIError(response, http.StatusBadRequest, command.CodeInvalidRequest, "request path is not canonical")
 		return
 	}
-	if server.interceptOutputRead(response, request) {
+	if server.interceptHumanReportRead(response, request) || server.interceptOutputRead(response, request) {
 		return
 	}
 	// Intercept this read before ServeMux can redirect invalid dot resource IDs.
@@ -145,6 +147,12 @@ func (server *Server) submitCommand(response http.ResponseWriter, request *http.
 	var outcome command.Outcome
 	var err error
 	switch command.Operation(envelope.Operation) {
+	case command.SubmitHumanReportOperation:
+		var handled bool
+		outcome, err, handled = server.submitHumanReport(response, request, session, projectID, metadata, envelope.Payload)
+		if !handled {
+			return
+		}
 	case command.AcceptInitialSpecificationOperation:
 		var handled bool
 		outcome, err, handled = server.acceptInitialSpecification(response, request, session, projectID, metadata, envelope.Payload)

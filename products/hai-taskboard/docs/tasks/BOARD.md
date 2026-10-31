@@ -272,7 +272,11 @@ real integration/fault tests. No M2/UI/L1/provider/dependencies/release/deploy; 
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM1C | Seal scoped human reports and atomically submit Review or Evidence | REPORT-AC-01..05; H02 support | in_progress | 2026-10-31T10:49:00Z | — | 2026-10-31T11:02:03Z |
+| HM1C | Seal scoped human reports and atomically submit Review or Evidence | REPORT-AC-01..05; H02 support | in_progress | 2026-10-31T10:49:00Z | — | 2026-10-31T11:41:39Z |
 
-Plan and independent Claude review precede production edits. Named tests remain Proposed/NotRun until
-actual logs exist. Historical product acceptance and other task rows retain their status.
+Plan and Claude review preceded production edits. REPORT-AC-01..05 now pass locally, including
+real human Review/Evidence completion joins and refusal cases; Claude code REWORK B1–B3 corrected
+and revision ACCEPT. Final full backend gate367.911s/168unchanged inputs, web30tests, API0warnings
+and document gates passed. [Evidence](../evidence/m1c-human-reports-20261031.md) retains all original
+failures and source hashes. PR CI/merge/readback remain required; other task rows and full-product
+acceptance retain their status.

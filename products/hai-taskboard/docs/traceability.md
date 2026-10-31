@@ -463,3 +463,19 @@ project/WorkItem/Run output metadata and bound verified byte access, with unchan
 identity and zero writes. [M1b evidence](evidence/m1b-output-access-20261030.md) maps the four
 ACs to actual HTTP/service/SQLite/runtime oracles and root/Claude acceptance; Git delivery is in BOARD.
 Full v0.2 AC-06/44/46 and SUCCESS AC-02..04 are not accepted by this bounded slice.
+
+
+## 2026-10-31 M1c human report submission and reads
+
+[REPORT-AC-01..05](plans/m1c-human-reports-20261031.md) cover explicit bounded human text,
+server-owned actor/digest/time, immutable subject/scope provenance, atomic separate Review/Evidence
+and command bookkeeping, replay and historical verified downloads. [M1c evidence](evidence/m1c-human-reports-20261031.md)
+maps each AC to command/service/HTTP/SQLite/confined-store tests and separates worker/root/reviewer
+acceptance. Migration0005 is appended;0001..0004 and fixture/Done contracts are unchanged.
+
+`TestHumanReport_PostIOSnapshotDecisions` distinguishes version-stable material changes from count-only
+report changes and checks recorded stale replay versus unrecorded conflict.
+`TestHumanReport_CompletionConsumesHumanRecords` exercises real QA/approval/completion joins containing
+both submitted semantic IDs, isolated missing Evidence and ChangesRequested failures, and completion
+with missing Review bytes under the unchanged predicate. These are bounded backend integration tests;
+full connected completion UI and SUCCESS AC-02..04 remain pending. Current delivery status is BOARD HM1C.

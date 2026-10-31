@@ -2,9 +2,15 @@
 
 Planning checkpoint (2026-10-29): the owner requested documentation-first sequencing of remaining
 P0-A and proposed designs with Claude review. See [the plan](plans/remaining-work-20261029.md) and
-[its review record](evidence/remaining-work-plan-20261029.md). This turn does not resume runtime
+[its review record](evidence/remaining-work-plan-20261029.md). That planning checkpoint did not resume runtime
 implementation or accept any new normative clause; the historical implementation checkpoint below
 retains its date and scope. Current task state remains in [BOARD](tasks/BOARD.md).
+
+2026-10-31 continuation: M1a/M1b have been delivered; owner continued M1c human reports. The newer
+Session/control-room and provider-path documents remain Proposed and preserve Fake-only/M1c.
+[Reviewed M1c plan](plans/m1c-human-reports-20261031.md) fixes REPORT-AC-01..05 and actor/subject/
+idempotency/capacity/retention boundaries. Implementation, final local gates and Claude plan/code
+review now pass, including human-record completion joins and failure cases. Evidence and actual delivery stay in [the M1c report](evidence/m1c-human-reports-20261031.md) and BOARD HM1C.
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 

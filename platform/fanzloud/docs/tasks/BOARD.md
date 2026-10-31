@@ -17,6 +17,12 @@
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| D0 | [SDD](../../SDD.md)／ADR-0008，Codex＋Claude Code 文件核對；owner 定案前不實作 | FN-01–07（規劃；全部 NOT_RUN） | in_progress | 2026-10-31T12:26:30Z | | 2026-10-31T12:26:30Z |
+| D0 | [SDD](../../SDD.md)／ADR-0008，Codex＋Claude Code 文件核對；owner 已於2026-10-31批准；PR849 merged | FN-01–07（規劃；全部 NOT_RUN） | done | 2026-10-31T12:26:30Z | 2026-10-31T17:52:46Z | 2026-10-31T17:52:46Z |
 
-M1–M3 固定見 SDD；尚未開工，不再擴張舊 Cloud 或原生 actor 子任務。D0 時間為文件記帳 checkpoint；實際審查耗時見 review receipt。
+M1–M3 固定見 SDD；M1 qualification 已開始，不再擴張舊 Cloud 或原生 actor 子任務。D0 時間為文件記帳 checkpoint；實際審查耗時見 review receipt。
+
+## T-0442 M1 qualification
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M1-Q | [有界 route qualification](../acceptance/M1-qualification.md)：Q1 capability pass；等 owner 批准有界 executor／KVM 依賴，M1 未完成 | FN-01/03/06 prerequisites | in_progress | 2026-10-31T17:55:49Z | | 2026-10-31T18:06:45Z |

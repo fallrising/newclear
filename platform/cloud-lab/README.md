@@ -90,3 +90,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [應用用量觀測](docs/usage-observation.md)新增具scope的唯讀API與看板手動快照，顯示保留／近24h命令與active占用；失聯／過期明示，provider與帳單未接線維持未知。[驗證證據](docs/evidence/m1-usage-observation.md)區分本機與live；[後續部署](docs/evidence/m1-usage-live.md)已更新原Worker，但正向asset／usage200與真人驗證pending。原09:15未知結果仍佔active槽，Cron跳過重疊，未冒稱排程健康。Owner其後以Safari完成登入／用量讀取，122／84／1與管理聚合相符；依owner指示不再要求Console hash，未執行不記通過。
 
 [未知結果結案](docs/unknown-resolution.md)提供離線、需具體批准的原命令處置計畫：保留journal／未知結果、留下決議並釋放槽；新Worker拒絕晚到回報重新打開命令，看板及bot誠實顯示。Source／隔離驗證見[證據](docs/evidence/m1-unknown-resolution.md)，尚未部署或處置原live unknown。
+
+後續owner明確批准的[ULR線上結案](docs/evidence/m1-unknown-resolution-live.md)已完成：原unknown保留未知結果與歷史並釋放槽，原runner恢復後新Cron於18:00:55Z validated/healthy；原權限期限／Access／免費方案保持。此前「尚未部署／原unknown佔槽」為歷史狀態，完整mainline仍incomplete。

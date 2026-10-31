@@ -12,7 +12,7 @@
 | AC-08：配額／成本／保留與恢復 | 隔離D1還原、journal對帳、Access service-token撤權及bot本機持久上限已有證據；[QV隔離應用上限](evidence/m1-quota-qualification.md)補API／Cron邊界、窗口及歷史保全 | [UO](evidence/m1-usage-observation.md)應用額度API／手動看板已完成source/local驗收，[UL](evidence/m1-usage-live.md)已發布，Safari真人功能讀取已確認；額外asset hash依owner指示取消，未執行不記通過；lead續補儲存保留策略及provider用量來源。Cloudflare供應商配額實際耗盡／帳單仍未驗；不以壓滿免費額度或升級測試。刪除歷史前另有具體保留／恢復方案及批准 |
 | 最終整合驗收 | 各子里程碑都有獨立證據與Git交付 | 所有必要AC、CI及獨立審查完成並合併後，才依repo規則建立usable tag；目前仍為mainline incomplete／usable_tag none |
 
-2026-10-31 fresh觀測原09:15命令在journal為unknown，佔active槽且後續Cron skipped_overlap；原結果保留，不能清DB／標成功／重播解鎖。建議接續優先補unknown診斷與可稽核顯式處置，再補AC-07／08的可重現隔離驗收，並把真人登入安排成owner方便時的一次短窗口。不要為等待owner而反覆續人類grant，也不要重建bot state來重置額度。
+2026-10-31 fresh觀測原09:15命令在journal為unknown，佔active槽且後續Cron skipped_overlap；原結果保留，不能清DB／標成功／重播解鎖。其後owner已批准[顯式結案](evidence/m1-unknown-resolution-live.md)：原結果unknown保留、active槽釋放，18:00新Cron validated/healthy。接續補AC-07／08的可重現隔離驗收；Safari真人登入已驗，不重開窗口。不要為等待owner而反覆續人類grant，也不要重建bot state來重置額度。
 
 ## 時間限制與操作責任
 
@@ -28,4 +28,4 @@
 
 對owner的完成提示須明確區分「本次HL里程碑完成」、「M1主線完成」及「長期M2/M3願景完成」。目前不能宣告所有任務完成。
 
-[UR未知結案](unknown-resolution.md)本輪新增source／隔離驗證；線上原命令仍unknown。下一步是固定候選、新Worker相容性、短暫runnerpause/drain與單筆批准的CAS結案，再驗一筆新Cron；不重測ownerSafari或續其授權。
+[UR未知結案](unknown-resolution.md)source／隔離驗證與後續[ULR線上操作](evidence/m1-unknown-resolution-live.md)已完成：原命令closed_unknown、result仍null、journal保留，新Cron成功。無需重測ownerSafari或續其授權；原unknown原因仍未確定。

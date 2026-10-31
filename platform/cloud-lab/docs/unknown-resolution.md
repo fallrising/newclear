@@ -24,3 +24,7 @@
 先備份原command／journal及資源設定，取得owner對原命令結案的具體批准；部署已驗證的新Worker與相容bot（需要啟用bot時），先確認active version及module bytes支援closed_unknown。**舊Worker不理解此terminal，不能在結案後直接回退到舊程式。** 為避免舊版本／在途report競爭，實際操作方案須短暫暫停原runner、確認程序停止且無在途HTTP後，fresh產生並一次執行CAS，再回讀決議及active0，恢復原service/config/journal與原截止。這不是重跑舊命令；後續只有新id可新採集。此短暫服務暫停及單筆結案須在具體live方案中明示，不能藉source開發批准直接執行。
 
 SQL回覆未知先按resolution id／row回讀，不重播。CAS0不代表成功；fresh對帳漂移，不能強制UPDATE或清歷史。已有成功結果或不同決議則停止。新Cron恢復後驗一筆新due即可，不要求owner重複瀏覽器檢查。原Safari功能驗證沿用；Console asset hash依owner指示取消，未跑不記通過。
+
+## 後續已批准的線上操作
+
+Owner具體批准後，ULR01–04已完成[原命令結案與新Cron成功驗證](evidence/m1-unknown-resolution-live.md)。本頁前文的source-only範圍為UR歷史里程碑；後續操作保留原未知結果、所有歷史與期限，沒有把source驗證當成live證據。

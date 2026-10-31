@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Native Office Pi launcher for one isolated, bounded fixture run."""
+import json
+import os
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from remote_cli import LAB, installed_cli
+
+try:
+    out = Path(os.environ['LAB_PI_OUT']).resolve()
+    workspace = Path(os.environ['LAB_PI_WORKSPACE']).resolve()
+    if not out.is_relative_to(LAB / 'runs') or workspace != out / 'workspace' or Path.cwd().resolve() != workspace:
+        raise ValueError('Invalid synthetic scope')
+    args = sys.argv[1:]
+    # Office chooses these values; an arbitrary native invocation cannot switch model or extensions.
+    expected = {'--model': 'deepseek/deepseek-flash', '--extension': str(workspace / '.agent-office/agent-office-pi-extension.mjs')}
+    for flag, value in expected.items():
+        if args.count(flag) != 1 or args[args.index(flag) + 1] != value:
+            raise ValueError('Invalid native Pi launch')
+    binary = installed_cli('pi')
+    command = ['/usr/bin/sandbox-exec', '-f', str(out / 'pi.sb'), str(binary),
+               '--offline', '--no-extensions', '--no-mcp', '--no-skills', '--no-prompt-templates',
+               '--no-context-files', '--no-themes', '--no-approve', '--tools', 'read,write',
+               '--thinking', 'off', '--system-prompt', 'Complete the synthetic file task using only read and write. Read input.json and write result.json. Do not access any other path.', '--extension', str(LAB / 'scripts/pi_boundary.mjs'), *args]
+    os.execve(command[0], command, dict(os.environ))
+except Exception:
+    print('Pi fixture launch rejected; no credential is printed', file=sys.stderr)
+    sys.exit(1)

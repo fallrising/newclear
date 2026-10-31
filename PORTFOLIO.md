@@ -79,7 +79,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | `newclear/systems/snail` | 未知 | C | 保留 benchmark 歷史。 |
 | `newclear/systems/ojbquay` | 未知 | C | 維持現有環境，不擴建。 |
 | `newclear/systems/wotar` | 未知 | C | security-sensitive E2EE client；恢復時不能只靠 local suite 維護。 |
-| `newclear/platform/fanzloud` | 開發中 | A | 2026-10-31 owner 要求廠商中立主線重校；[SDD](platform/fanzloud/SDD.md) 提案由 Fanzloud 提供 Web、優先重用 Agent Platform 隔離執行，待文件定案。既有 P0 fake 已驗、live 未跑；不是部署宣告。見 [SUCCESS](platform/fanzloud/SUCCESS.md)。 |
+| `newclear/platform/fanzloud` | 開發中 | A | 2026-10-31 owner 要求廠商中立主線重校；[SDD](platform/fanzloud/SDD.md) 提案由 Fanzloud 提供 Web、優先重用 Agent Platform 隔離執行，owner 已批准（PR849）；M1 qualification 仍缺 executor 接口與授權 KVM target。既有 P0 fake 已驗、live 未跑；不是部署宣告。見 [SUCCESS](platform/fanzloud/SUCCESS.md)。 |
 | `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
 | `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
 | `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo；檔位仍為 A，是否降為 C 待決。 |

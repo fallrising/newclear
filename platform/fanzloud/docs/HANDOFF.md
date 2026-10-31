@@ -1,6 +1,6 @@
 # Development Handoff
 
-> **2026-10-31 最新交接**：本輪先完成 [主線重校提案](../SDD.md) 與 Claude Code 文件核對。舊 Cloud 前置已進展到私人登入成功，但固定 0.145.0／獨立 0.166.0 catalog 仍空；不再要求 owner 重建環境或反覆登入。依 owner 指示暫停 Cloud 重試，非刪除或放棄舊驗收；等待新文件與認證方向定案；以下 2026-10-30 goal 是歷史範圍。
+> **2026-10-31 M1 checkpoint**：PR849／SDD 已批准並合併，沿既有訂閱優先。下一步只處理 [qualification 缺口與有界方案](acceptance/M1-qualification.md)：需要 Agent Platform external-tool interface 與授權 KVM target，不能繼續用 mock 宣稱 M1。Cloud 重試仍暫停。
 
 Date: 2026-10-30
 

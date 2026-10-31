@@ -76,3 +76,6 @@ M1c: [人工 report 封存與提交計劃](docs/plans/m1c-human-reports-20261031
 實作、本機驗證與代碼複核已通過，交付狀態見 BOARD。新路徑以明確人工意圖提交 text/plain 或 Markdown，保存 actor／exact subject／
 digest，再原子建立獨立 Review 或 Evidence；不自動完成工作。讀取與重送邊界見
 [操作說明](docs/local-development.md#human-report-api)與[驗證紀錄](docs/evidence/m1c-human-reports-20261031.md)。
+
+
+M2 continuation: [identity plan](docs/plans/m2-ac-identity-20261031.md) and [evidence](docs/evidence/m2-ac-identity-20261031.md) track accepted-workflow AC alignment. Legacy nonempty Draft stays compatible; general policy and verified coverage remain pending. Current state is BOARD HM2ID; full P0-A is incomplete.

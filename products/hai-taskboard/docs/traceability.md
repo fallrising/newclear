@@ -479,3 +479,18 @@ report changes and checks recorded stale replay versus unrecorded conflict.
 both submitted semantic IDs, isolated missing Evidence and ChangesRequested failures, and completion
 with missing Review bytes under the unchanged predicate. These are bounded backend integration tests;
 full connected completion UI and SUCCESS AC-02..04 remain pending. Current delivery status is BOARD HM1C.
+
+
+## 2026-10-31 M2 accepted-workflow AC identity
+
+[Plan](plans/m2-ac-identity-20261031.md) ID-AC-01..04 and [evidence](evidence/m2-ac-identity-20261031.md)
+map HAI-IMPORT-003/004, HAI-FIRST-001, HAI-INPUT-002/005/006 and HAI-CONNECT-007 without changing
+their acceptance criteria. TestACIdentity_AcceptedBoundary/CommandIngress/HTTPIngress and
+CanonicalCompatibility cover exact byte/Unicode agreement and historical canonical identity.
+TestAcceptedACIdentity_EvidenceAndCompletionBoundary covers real SQLite/proposal/Fake plus HTTP
+acceptance/human reports/QA/Done, missing explicit policy and Store reopen/replay. Existing
+TestAdmission_AllPublicationConsumersRejectStaleInputs, ModeledCurrentSemanticChangesRejectAllConsumers,
+TestCompletionPreparation_PolicyPrecedence and runtime/domain independence/Done regressions passed
+in the final full gate; those negatives retain original IDs. No full HAI-DONE/UX/OPS claim follows.
+Legacy nonempty Draft and domain rehydration stay unchanged. General policy source and
+TestCoverageProjection_MatchesCurrentDonePredicate remain Proposed/NotRun; full M2 is incomplete.

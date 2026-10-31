@@ -139,8 +139,10 @@ func CanonicalPublishFixtureReview(value PublishFixtureReview) ([]byte, domain.D
 func CanonicalPublishFixtureEvidence(value PublishFixtureEvidence) ([]byte, domain.Digest, error) {
 	metadata, err := canonicalizeMetadata(value.Metadata, PublishEvidenceOperation, value.ProjectID)
 	evidence := value.Evidence
+	// Retain the historical text80 arm for exact recorded replay. New writes
+	// still require membership in the current accepted Run input in the service.
 	if err != nil || value.ExpectedVersion == 0 || !runIDPattern.MatchString(string(value.RunID)) || value.LeaseEpoch == 0 || value.RestoreGeneration == 0 ||
-		!validText(string(evidence.ID), 80) || evidence.SubjectDigest.IsZero() || !validText(string(evidence.ACID), 80) || evidence.ACRevisionDigest.IsZero() ||
+		!validText(string(evidence.ID), 80) || evidence.SubjectDigest.IsZero() || (!validText(string(evidence.ACID), 80) && !domain.ValidACID(string(evidence.ACID))) || evidence.ACRevisionDigest.IsZero() ||
 		!oneOf(evidence.ObservationVerdict, "Passing", "Failing", "Inconclusive", "Error") || !oneOf(evidence.ReviewDisposition, "Pending", "Accepted", "Rejected") ||
 		!oneOf(evidence.Applicability, "Fresh", "Stale", "Unknown") || !oneOf(evidence.MaterialAvailability, "Present", "Missing", "Quarantined") ||
 		!validText(string(evidence.VerifierID), 120) || !oneOf(evidence.VerifierClass, "producer", "independent", "human") ||

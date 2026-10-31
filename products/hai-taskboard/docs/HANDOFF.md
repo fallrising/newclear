@@ -1,5 +1,10 @@
 # HAI Taskboard Handoff
 
+Current continuation: M1c is delivered. M2 accepted-workflow identity repair has passed local gates
+and Claude plan/code review; see [M2 plan](plans/m2-ac-identity-20261031.md) and
+[evidence](evidence/m2-ac-identity-20261031.md). Required delivery remains in BOARD HM2ID.
+General policy profiles and verified coverage are pending contract decisions; no M3/UI starts.
+
 Planning checkpoint (2026-10-29): the owner requested documentation-first sequencing of remaining
 P0-A and proposed designs with Claude review. See [the plan](plans/remaining-work-20261029.md) and
 [its review record](evidence/remaining-work-plan-20261029.md). That planning checkpoint did not resume runtime
@@ -316,3 +321,6 @@ no current-head/lease requirement for historical output and no global-hash autho
 Claude plan/code REWORK was revised and accepted; implementation and root gates pass within
 the [documented evidence boundaries](evidence/m1b-output-access-20261030.md). Full product remains incomplete.
 The next planned slice after M1b is M1c human report persistence/submission; it is not started.
+
+
+M2 continuation: [identity plan](plans/m2-ac-identity-20261031.md) and [evidence](evidence/m2-ac-identity-20261031.md) track accepted-workflow AC alignment. Legacy nonempty Draft stays compatible; general policy and verified coverage remain pending. Current state is BOARD HM2ID; full P0-A is incomplete.

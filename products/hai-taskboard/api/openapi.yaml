@@ -833,7 +833,7 @@ components:
         goal: { type: string, minLength: 1, maxLength: 8000 }
         accepted_ac_revisions:
           type: array
-          items: { $ref: "#/components/schemas/ACRevisionRef" }
+          items: { $ref: "#/components/schemas/InitialACRevisionRef" }
         dependencies:
           type: array
           items: { $ref: "#/components/schemas/DependencyRef" }
@@ -972,7 +972,7 @@ components:
       properties:
         evidence_id: { type: string, minLength: 1, maxLength: 80 }
         completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
-        ac_id: { type: string, minLength: 1, maxLength: 80 }
+        ac_id: { $ref: "#/components/schemas/InitialACID" }
         ac_revision_digest: { $ref: "#/components/schemas/SHA256" }
         observation_verdict: { type: string, enum: [Passing, Failing, Inconclusive, Error] }
         review_disposition: { type: string, enum: [Pending, Accepted, Rejected] }

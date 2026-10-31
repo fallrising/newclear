@@ -2498,3 +2498,35 @@ HV owner outcome: Safari manualusage observed12:18:35Z values122/84/1; independe
 Owner繼續開發且要求快速、減少人工驗證。Lead單一writer實作offline close_unknown計畫、Worker終局護欄、UI/bot投影；一個fresh native readonly reviewer T854，inherited model/effort/permissions、<=1500tokens+一個focusedfollowup、5分鐘監控，cost/quota未知，不委派／不碰private/network，指令scope不是OS隔離。RED→GREEN、完整現有回歸、實際SQLite跨語言CAS/late report/新Cron/idempotency；不再要求ownerConsole。保留HV/Safari未交付文件一起交付，UL依owner調整接受功能驗證但不偽稱assetbytes。未知原命令live結案與短暫runnerpause須另列具體批准，source批准不覆蓋。
 
 UR gate:400tests (96Node/304Python), focused8/2/16 and actual2cross-languageSQLite cycles passed; T854 initialsourceACCEPT and full-log focusedACCEPT accepted bylead. Original RED, privatefixtureancestor failure and syncspawn timeout retained. Lead realprivateCLI plan prepared using readonly originalD1/journal; no apply/deploy/stop/renew. Git delivery/candidate pin pending; UL Safari acceptance keeps assethash explicitly waived/unrun, no moreowner tests.
+
+
+## HAI M2 — T-0339 / 2026-10-31T12:24:40Z
+
+Owner continued after M1c. Source24af3ab7c7d6722314125cbe3ac009db57bd4ad1 has no HAI product diff from delivered M1c; desk claim unchanged at a1b1bf8. Root first resolves M2 contract scope, then docs-first implementation where accepted rules suffice. New policy/coverage decisions require exact proposal and approval before dependent production work. BOARD is sole product status; root owns specs, gates and Git delivery. One native10minute readonly audit T001; Claude installed direct no-tools cli-team plan/code review (not dispatcher), claude-opus-5-5/high each480seconds plus at most one revision followup; no recursion/model fallback. Root90–120active minute estimate,20minute progress checkpoints; CI20minutes per round, commands bounded; failure initial plus at most2evidence-based diagnoses. Unknown aggregate tools/provider/billing/active-wait remain null. No M3/UI/realprovider/dependencies/release/deploy. Current phase contract reconciliation, production unstarted.
+
+M2 plan gate: Claude initial REWORK then ACCEPT with five required predispatch document edits, all
+applied. Explicit legacy Draft HAI-FIRST001 remains frozen; fixture canonicalization retains old80
+replay arm and adds strict accepted120. Full caller inventory confirms only strict HTTP production
+ingresses for initial/human commands; no CLI/bootstrap bypass. Initial reviewer B2 decoder-sharing
+hypothesis corrected against full method. Root verified docs7files/159links,50project contracts/8indexes
+and fixed API lint. T002 isolated implementation dispatched after plan acceptance;40minute bound.
+Policy source and verified coverage remain proposed and cannot be counted as completed M2.
+
+M2 12:44Z checkpoint: docs-first84ec0598 committed after desk refresh; no HAI design drift/open HAI
+PR at intake. Worker meaningful command Red retained, then strict helper and compatibility union
+implemented. Root preliminary inspected all five production changes and new boundary/SQLite/HTTP
+tests. Three long-ID acceptance/Fake/human Evidence/Done flows now green; selected21table counts
+plus aggregate versions and Store/service reopen are the exact proof boundary, not crash/process or
+production artifact confinement. Original fixture/setup diagnostics retained. Worker affected tests/
+vet passed; race running. Root web30/39unchanged inputs, fixed API0warnings and docs checks passed.
+Remaining: local-only rule negative, freeze/final backend, Claude code review, normal CI/Git/readback
+and ledger closure. Policy direction question sent asynchronously; no answer or approval inferred.
+Work remains inside root90–120active-minute estimate; exact active/wait uninstrumented/null.
+
+M2 local evidence gate ACCEPT: ten frozen Go files,173input root fullbackend378.361s/exit0/unchanged;
+web30/39inputs unchanged, APIzero-warning, native report/task and document gates. Claude plan REWORK
+then ACCEPT with edits verified; code ACCEPT67.203s/no blockers, no follow-up. Root checked actual
+diff/source/hashes/logs, corrected reviewer full-table wording to21selected tables and documented
+invalid-UTF8 decoder-vector and existing-ID negative limits. ID-AC-04 still requires normal CI/merge/
+readback/BOARD/desk; full M2/product remains incomplete. Next contract question pending; no inference
+of approval or policy configuration implementation. Latest main843eaf97 has unrelated work only.

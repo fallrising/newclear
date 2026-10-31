@@ -6,7 +6,7 @@ Owner 指示繼續開發並可用 Claude review。範圍：每 5 分鐘 terminal
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0005-1 | heartbeat 實作、測試、review 與 PR | AC-07 | in_progress | 2026-10-31T18:54:29Z | — | 2026-10-31T18:54:29Z |
+| T-0005-1 | 43 tests、workerd、Opus 5.5 review 通過；PR #873 | AC-07 | in_progress | 2026-10-31T18:54:29Z | — | 2026-10-31T18:56:28Z |
 
 
 ## T-0004 — 命令取消生命週期

@@ -45,8 +45,8 @@ func TestRunOutput_V3UpgradePreservesHistory(t *testing.T) {
 	if err = db.QueryRow("SELECT schema_version FROM instance_state").Scan(&version); err != nil {
 		t.Fatal(err)
 	}
-	if version != 5 {
-		t.Fatalf("schema=%d; want V5", version)
+	if version != 6 {
+		t.Fatalf("schema=%d; want V6", version)
 	}
 	if err = db.QueryRow("SELECT count(*) FROM run_output_artifacts").Scan(&count); err != nil || count != 0 {
 		t.Fatalf("backfill/count=%d err=%v", count, err)
@@ -314,7 +314,7 @@ func TestRunOutput_RollbackCancellationAndCapacity(t *testing.T) {
 // the intentionally advanced schema version and newly appended ledger entry.
 func outputV3Snapshot(t *testing.T, db *sql.DB) string {
 	t.Helper()
-	rows, err := db.QueryContext(t.Context(), `SELECT name FROM sqlite_schema WHERE type='table' AND name NOT GLOB 'sqlite_*' AND name<>'run_output_artifacts' AND name<>'human_reports' ORDER BY name`)
+	rows, err := db.QueryContext(t.Context(), `SELECT name FROM sqlite_schema WHERE type='table' AND name NOT GLOB 'sqlite_*' AND name<>'run_output_artifacts' AND name<>'human_reports' AND name<>'project_completion_policies' ORDER BY name`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -364,7 +364,7 @@ func outputV3Snapshot(t *testing.T, db *sql.DB) string {
 		slices.Sort(records)
 		fmt.Fprintf(&out, "%s:%v\n", name, records)
 	}
-	rows, err = db.QueryContext(t.Context(), `SELECT type,name,tbl_name,sql FROM sqlite_schema WHERE tbl_name<>'run_output_artifacts' AND tbl_name<>'human_reports' ORDER BY type,name`)
+	rows, err = db.QueryContext(t.Context(), `SELECT type,name,tbl_name,sql FROM sqlite_schema WHERE tbl_name<>'run_output_artifacts' AND tbl_name<>'human_reports' AND tbl_name<>'project_completion_policies' ORDER BY type,name`)
 	if err != nil {
 		t.Fatal(err)
 	}

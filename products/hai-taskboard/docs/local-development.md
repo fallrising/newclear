@@ -253,3 +253,43 @@ can leave unreferenced objects, which grant no read authority and are retained w
 Keep the private data root intact; M6 owns complete backup/restore and any future safe offline GC.
 Do not delete shared digest files to retry a report. Existing completion verification still checks
 eligible Evidence bytes; a Review report is retained provenance, not a new Done condition.
+
+## Immutable per-project completion policies
+
+The owner-approved [contract](sdd/local-project-policy.md) and [evidence](evidence/project-policy-20261031.md)
+define this bounded M2 policy slice; consult BOARD HMPOL for actual implementation/delivery status.
+The runtime remains Fake-only and accepts environment configuration only.
+
+1. Create the project using the existing authenticated runtime/API, without accepting a specification
+   or dispatching a Run. Stop the runtime before installing the profile. Existing accepted or Run
+   history cannot be changed into a new custom policy through restart.
+2. Copy the [synthetic example](examples/project-policies.json) to an operator-controlled absolute
+   path. Replace its project ID and exact AC IDs with the intended existing project/specification.
+   Keep the file owned by the runtime user, regular, mode 0600, single-link and free of symlinks.
+   The example uses the established local recipe and deterministic Fake environment digests.
+3. Set HAI_TASKBOARD_COMPLETION_POLICIES_FILE to that absolute file path and start the runtime
+   with the other existing settings. The document contains every previously registered custom
+   project plus any new eligible project, at most 32 profiles and 256 rules per profile, 256 KiB total.
+4. Propose and explicitly accept the specification through the existing API. Initial preparation
+   returns the selected policy digest; do not invent a revision label or copy another project's
+   digest. Required ACs and node recipes must match the selected profile. Human report/evidence
+   submission, QA/approval and explicit completion retain all existing current-subject guards.
+
+V1 profiles accept only human verification with explicit independent=true. Every boolean, rule
+field and integration-base member is mandatory; absent base has explicit digest:null. Digests in
+the configuration are lowercase 64-hex without the API's sha256: prefix. Unknown fields, duplicates,
+wrong types, missing/null required values and unsafe/oversize files reject startup.
+
+The first successful registration is permanent for this slice, even before first acceptance.
+Reordering JSON keys/rules or changing formatting preserves the semantic policy. Changing a field,
+removing a registered project, or unsetting the selector after registration rejects startup. The
+file is read once: editing it during operation does not hot-reload policy. An eligible new project
+may be added while all old registrations remain identical. There is no delete/reset/activation
+operation; changing established policy requires a separately implemented reconciliation workflow.
+A registration committed before a later listener failure remains registered.
+
+Without custom registrations or the selector, the compiled local-policy-v2 behavior remains.
+Unconfigured projects retain that default even alongside configured projects; missing AC rules
+inside a configured project never fall back to local. Old local-policy-v1 history remains
+readable/replayable but cannot authorize new work. Loading policy never creates Passing evidence
+or treats a successful Fake Run as Done. This API/backend slice does not add a completion UI.

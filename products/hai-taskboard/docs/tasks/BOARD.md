@@ -317,8 +317,10 @@ synchronization are tracked separately in the private handoff.
 
 ## T-0339 — immutable local project policy
 
-Owner approved the prior M2 policy-source proposal on2026-10-31. Source f987cb85dc6a3ac4fc24ff8aaed53c73ff2d5fe2; no newer HAI design or open HAI PR. Scope: strict operator-selected local JSON, exact project/AC rules, immutable canonical policy persistence, fail-closed startup and existing workflow binding. Concrete contract and acceptance are being fixed before implementation; coverage remains separate.
+Owner approved the prior M2 policy-source proposal on 2026-10-31. Source f987cb85dc6a3ac4fc24ff8aaed53c73ff2d5fe2; no newer HAI design or open HAI PR. Scope: strict operator-selected local JSON, exact project/AC rules, immutable canonical policy persistence, fail-closed startup and existing workflow binding. The contract, implementation and local gates now pass Claude plan/code review; final CI/delivery remains. Coverage remains separate.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HMPOL | Implement approved immutable local project policy profiles | POL-AC-01..05; H02 support | in_progress | 2026-10-31T17:56:40Z | — | 2026-10-31T18:00:00Z |
+| HMPOL | Implement approved immutable local project policy profiles | POL-AC-01..05; H02 support | in_progress | 2026-10-31T17:56:40Z | — | 2026-10-31T18:41:00Z |
+
+Local acceptance: [evidence](../evidence/project-policy-20261031.md) and [receipt](../evidence/project-policy-20261031.json). Root full backend/race/vet/build passed on 182 frozen inputs; final two-test delta passed focused normal/race/vet and Claude follow-up ACCEPT. Web 30 tests, API lint and document checks pass. HMPOL remains in_progress until final-commit CI, normal merge and readback; no full M2/product/release claim.

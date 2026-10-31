@@ -20,8 +20,12 @@ import (
 )
 
 func acceptedSucceededInput(t *testing.T) (*Service, *sqlite.Store, *sql.DB, port.ExecutorEnvelope, command.SubmitCandidate) {
+	return acceptedSucceededInputPolicy(t, nil)
+}
+
+func acceptedSucceededInputPolicy(t *testing.T, profile *port.PolicyProfile) (*Service, *sqlite.Store, *sql.DB, port.ExecutorEnvelope, command.SubmitCandidate) {
 	t.Helper()
-	svc, store, db, dispatch := acceptedReadyInput(t)
+	svc, store, db, dispatch := acceptedReadyInputPolicy(t, profile)
 	svc.artifacts = currentArtifacts{}
 	rule := svc.config.Completion.Checks["AC-A"]
 	rule.VerifierClass = "independent"
@@ -122,8 +126,12 @@ type currentFlow struct {
 }
 
 func acceptedCurrentFlow(t *testing.T, stage int) currentFlow {
+	return acceptedCurrentFlowPolicy(t, stage, nil)
+}
+
+func acceptedCurrentFlowPolicy(t *testing.T, stage int, profile *port.PolicyProfile) currentFlow {
 	t.Helper()
-	svc, store, db, envelope, candidate := acceptedSucceededInput(t)
+	svc, store, db, envelope, candidate := acceptedSucceededInputPolicy(t, profile)
 	f := currentFlow{svc: svc, store: store, db: db, candidate: candidate}
 	if stage == 0 {
 		return f
@@ -137,13 +145,13 @@ func acceptedCurrentFlow(t *testing.T, stage int) currentFlow {
 		if err != nil {
 			return err
 		}
-		subject, err = preparationSubject(material, svc.config.Completion)
+		subject, err = preparationSubject(material, svc.completionFor(projectID))
 		return err
 	}); err != nil {
 		t.Fatal(err)
 	}
 	f.review = command.PublishFixtureReview{Metadata: initialMetadata(61, 5), ProjectID: projectID, RunID: candidate.RunID, LeaseEpoch: envelope.Fence.Epoch, RestoreGeneration: envelope.Fence.RestoreGeneration, Review: command.Review{ID: "review-current", SubjectDigest: subject.Digest(), ReviewerID: operator, ReviewerClass: "independent", Verdict: "Approved", CreatedAt: fixedTime()}}
-	f.evidence = command.PublishFixtureEvidence{Metadata: initialMetadata(62, 5), ProjectID: projectID, RunID: candidate.RunID, LeaseEpoch: envelope.Fence.Epoch, RestoreGeneration: envelope.Fence.RestoreGeneration, Evidence: command.Evidence{ID: "evidence-current", SubjectDigest: subject.Digest(), ACID: "AC-A", ACRevisionDigest: domain.HashBytes(initialContent), ObservationVerdict: "Passing", ReviewDisposition: "Accepted", Applicability: "Fresh", MaterialAvailability: "Present", VerifierID: operator, VerifierClass: "independent", RecipeDigest: svc.config.Completion.RecipeDigest, EnvironmentDigest: svc.config.Completion.Checks["AC-A"].EnvironmentDigest, ObservedAt: fixedTime(), Report: candidate.Candidate.Artifacts[0]}}
+	f.evidence = command.PublishFixtureEvidence{Metadata: initialMetadata(62, 5), ProjectID: projectID, RunID: candidate.RunID, LeaseEpoch: envelope.Fence.Epoch, RestoreGeneration: envelope.Fence.RestoreGeneration, Evidence: command.Evidence{ID: "evidence-current", SubjectDigest: subject.Digest(), ACID: "AC-A", ACRevisionDigest: domain.HashBytes(initialContent), ObservationVerdict: "Passing", ReviewDisposition: "Accepted", Applicability: "Fresh", MaterialAvailability: "Present", VerifierID: operator, VerifierClass: svc.completionFor(projectID).Checks["AC-A"].VerifierClass, RecipeDigest: svc.completionFor(projectID).RecipeDigest, EnvironmentDigest: svc.completionFor(projectID).Checks["AC-A"].EnvironmentDigest, ObservedAt: fixedTime(), Report: candidate.Candidate.Artifacts[0]}}
 	f.approval = command.ApproveSubject{Metadata: initialMetadata(63, 5), ProjectID: projectID, WorkItemID: workItemID, CandidateID: candidate.Candidate.ID, RequestID: "approval-current", SubjectDigest: subject.Digest(), Decision: "Approved"}
 	f.qa = command.RequestQA{Metadata: initialMetadata(64, 5), ProjectID: projectID, WorkItemID: workItemID, CandidateID: candidate.Candidate.ID, SubjectDigest: subject.Digest()}
 	f.complete = command.CompleteWorkItem{Metadata: initialMetadata(65, 6), ProjectID: projectID, WorkItemID: workItemID, Subject: subject}

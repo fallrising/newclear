@@ -69,10 +69,11 @@ func (s *Service) humanReportPreflight(ctx context.Context, tx port.Transaction,
 	if actor == snap.run.Lease.Fence.Holder {
 		return snap, humanReportDenied()
 	}
+	policy := s.completionFor(snap.run.Run.ProjectID)
 	if v.Kind == "evidence" {
 		e := v.Evidence
-		rule, ok := s.config.Completion.Checks[e.ACID]
-		if !ok || rule.VerifierClass != "human" || !rule.Independent || rule.EnvironmentDigest.IsZero() || rule.EnvironmentDigest != e.EnvironmentDigest || s.config.Completion.RecipeDigest != e.RecipeDigest || actor == rule.ProhibitedVerifierActor || rule.ProhibitedVerifierRunRole == "human" {
+		rule, ok := policy.Checks[e.ACID]
+		if !ok || rule.VerifierClass != "human" || !rule.Independent || rule.EnvironmentDigest.IsZero() || rule.EnvironmentDigest != e.EnvironmentDigest || policy.RecipeDigest != e.RecipeDigest || actor == rule.ProhibitedVerifierActor || rule.ProhibitedVerifierRunRole == "human" {
 			return snap, humanReportDenied()
 		}
 	}
@@ -90,7 +91,7 @@ func (s *Service) humanReportPreflight(ctx context.Context, tx port.Transaction,
 	if m.WorkItem.Version() != v.ExpectedVersion {
 		return snap, domain.Rejection{Code: domain.CodeVersionConflict}
 	}
-	subject, err := preparationSubject(m, s.config.Completion)
+	subject, err := preparationSubject(m, policy)
 	if err != nil || subject.Digest() != v.SubjectDigest {
 		return snap, command.NewError(command.CodeStaleSubject, "completion subject is not current", false, nil, nil)
 	}
@@ -143,6 +144,7 @@ func (s *Service) humanReportPreflight(ctx context.Context, tx port.Transaction,
 // Admission mirrors completion's exact collections and material eligibility,
 // without opening existing bytes or adding a Review-byte completion predicate.
 func (s *Service) humanReportAdmission(m port.CompletionMaterial, v command.SubmitHumanReport, a port.Artifact, count int) error {
+	policy := s.completionFor(m.WorkItem.ProjectID())
 	reviews, evidence := len(m.Reviews), len(m.Evidence)
 	artifacts := len(m.Artifacts)
 	if v.Kind == "review" {
@@ -183,9 +185,9 @@ func (s *Service) humanReportAdmission(m port.CompletionMaterial, v command.Subm
 		byDigest[a.Digest] = a
 	}
 	for _, e := range m.Evidence {
-		rule, required := s.config.Completion.Checks[e.ACID]
+		rule, required := policy.Checks[e.ACID]
 		bound := slices.ContainsFunc(m.RequiredACRevisions, func(ac port.ACRequirement) bool { return ac.ACID == e.ACID && ac.RevisionDigest == e.ACRevisionDigest })
-		if !required || !bound || e.SubjectDigest != v.SubjectDigest || e.VerifierClass != rule.VerifierClass || e.Verdict != "Passed" || e.Applicability != "Current" || e.Availability != "Present" || e.RecipeDigest != s.config.Completion.RecipeDigest || (!rule.EnvironmentDigest.IsZero() && e.EnvironmentDigest != rule.EnvironmentDigest) {
+		if !required || !bound || e.SubjectDigest != v.SubjectDigest || e.VerifierClass != rule.VerifierClass || e.Verdict != "Passed" || e.Applicability != "Current" || e.Availability != "Present" || e.RecipeDigest != policy.RecipeDigest || (!rule.EnvironmentDigest.IsZero() && e.EnvironmentDigest != rule.EnvironmentDigest) {
 			continue
 		}
 		if a, ok := byDigest[e.ArtifactDigest]; ok && a.Availability == "Present" {

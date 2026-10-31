@@ -1,6 +1,6 @@
 # Immutable local project policy
 
-Status: owner approved the concrete direction on 2026-10-31; Claude plan revision ACCEPT. Implementation and acceptance evidence pending.
+Status: owner approved the direction on 2026-10-31; Claude plan/code revision ACCEPT and local gates pass. Delivery is tracked in BOARD HMPOL.
 Task: T-0339 / HMPOL. This realizes the policy proposal in [M2 identity plan](../plans/m2-ac-identity-20261031.md).
 The existing Fake-only boundary, Done predicate and full product ACs do not change.
 
@@ -108,8 +108,10 @@ For a present registered head, require exactly one project accepted_spec_revisio
 that head, and total project work_item_spec_heads/current_ac_requirements counts equal to the
 verified record expectations regardless of revision digest; the existing loader alone does not
 detect extra rows attached to a different revision. Run eligibility uses its persisted project key
-and existing FK scope, never caller text. The outbox has a composite Run FK and cannot lawfully
-outlive that Run; an offline orphan is not a valid headless-history input.
+and existing FK scope, never caller text. Dispatch outbox rows with a Run ID have a composite Run FK
+and cannot lawfully outlive that Run. The schema also permits inert generic rows with null Run ID;
+DispatchCandidates starts from Runs and cannot claim or execute those rows. They do not change
+the first-registration predicate. An offline nonnull orphan is not valid headless-history input.
 Historical accepted bodies and Run inputs
 remain immutable. Corrupt stored registration bytes/digest/scope must fail closed, not be repaired from
 the current file. Database hostile-operator tampering is not a new security boundary.

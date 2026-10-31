@@ -574,9 +574,10 @@ func (service *Service) PublishFixtureEvidence(ctx context.Context, principal do
 			if identity != snapshotIdentity || !sameCompletionMaterial(snapshot, material) {
 				return mutation{}, staleCurrentInput(nil)
 			}
-			rule, required := service.config.Completion.Checks[value.Evidence.ACID]
+			policy := service.completionFor(material.WorkItem.ProjectID())
+			rule, required := policy.Checks[value.Evidence.ACID]
 			if !required || value.Evidence.VerifierID != principal || principal == run.Lease.Fence.Holder || value.Evidence.VerifierClass == "producer" ||
-				value.Evidence.VerifierClass != rule.VerifierClass || value.Evidence.RecipeDigest != service.config.Completion.RecipeDigest ||
+				value.Evidence.VerifierClass != rule.VerifierClass || value.Evidence.RecipeDigest != policy.RecipeDigest ||
 				(!rule.EnvironmentDigest.IsZero() && value.Evidence.EnvironmentDigest != rule.EnvironmentDigest) {
 				return mutation{}, command.NewError(command.CodePermissionDenied, "evidence verifier or recipe is not authorized", false, nil, nil)
 			}
@@ -643,7 +644,7 @@ func (service *Service) ApproveSubject(ctx context.Context, principal domain.Act
 			if completionMaterial.WorkItem.Phase() != domain.PhaseReview && completionMaterial.WorkItem.Phase() != domain.PhaseQA {
 				return mutation{}, port.ErrRunLifecycle
 			}
-			current, err := preparationSubject(completionMaterial, service.config.Completion)
+			current, err := preparationSubject(completionMaterial, service.completionFor(completionMaterial.WorkItem.ProjectID()))
 			if err != nil || current.Digest() != value.SubjectDigest {
 				return mutation{}, command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, err)
 			}
@@ -691,7 +692,7 @@ func (service *Service) RequestQA(ctx context.Context, principal domain.ActorID,
 			if err != nil {
 				return mutation{}, err
 			}
-			subject, err := preparationSubject(material, service.config.Completion)
+			subject, err := preparationSubject(material, service.completionFor(material.WorkItem.ProjectID()))
 			if err != nil || subject.Digest() != value.SubjectDigest {
 				return mutation{}, command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, err)
 			}
@@ -905,7 +906,7 @@ func (service *Service) preparationForRun(ctx context.Context, tx port.Authority
 	if err != nil {
 		return port.RunAuthority{}, port.CompletionMaterial{}, domain.CompletionSubject{}, err
 	}
-	subject, err := preparationSubject(material, service.config.Completion)
+	subject, err := preparationSubject(material, service.completionFor(material.WorkItem.ProjectID()))
 	if err != nil || subject.Digest() != requested {
 		return port.RunAuthority{}, port.CompletionMaterial{}, domain.CompletionSubject{}, command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, err)
 	}

@@ -25,7 +25,7 @@ func (s *Service) readCompletionPreparation(ctx context.Context, project domain.
 	var result completionPreparationSnapshot
 	err := s.unit.Within(ctx, func(tx port.Transaction) error {
 		var err error
-		result.Policy = s.config.Completion
+		result.Policy = s.completionFor(project)
 		result.Policy.Checks = maps.Clone(result.Policy.Checks)
 		result.Material, result.Identity, result.Incomplete, err = s.preparationMaterial(ctx, tx, port.CompletionMaterialQuery{ProjectID: project, WorkItemID: item, CandidateID: candidate, MaximumRecords: 1024}, result.Policy)
 		if err != nil {

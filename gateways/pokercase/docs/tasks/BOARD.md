@@ -6,11 +6,13 @@ Demand: desk T-0426; claim348 merged. [CT-1–CT-3](T-0426-cli-cache-review.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| CT-01 | Pin Claude TUI mechanism and cache/accounting evidence | CT-1 | in_progress | 2026-11-01T04:18:54Z | — | 2026-11-01T04:24:20Z |
-| CT-02 | Other CLI primary-source comparison | CT-2 | in_progress | 2026-11-01T04:18:54Z | — | 2026-11-01T04:24:20Z |
+| CT-01 | Pin Claude TUI mechanism and cache/accounting evidence | CT-1 | done | 2026-11-01T04:18:54Z | 2026-11-01T04:33:23Z | 2026-11-01T04:33:23Z |
+| CT-02 | Other CLI primary-source comparison | CT-2 | done | 2026-11-01T04:18:54Z | 2026-11-01T04:33:23Z | 2026-11-01T04:33:23Z |
 | CT-03 | TUI mode decision — waiting for owner | CT-3 | in_progress | 2026-11-01T04:18:54Z | — | 2026-11-01T04:24:20Z |
 
 No runtime replacement has been implemented. A review merge cannot mark CT-03 or native reuse accepted; the next action is the owner's explicit transport/streaming decision.
+
+Evidence/design [PR887](https://github.com/fallrising/newclear/pull/887), source `2cfa2161fae13d3ad2d3205cdfccee9691d40f5d`, merged `dca330b7ba4be089327bcca5f79e09444089ef53` at 2026-11-01T04:33:23Z. Required check/validate succeeded; source ancestry and three-file origin/main equality passed. CT01–02 describe merged research, CT03 remains waiting for owner. Journal/desk and final backup/cleanup have their own later readback; no core implementation or new live acceptance is claimed.
 
 ## T-0426 — Bounded official Claude client pilot
 

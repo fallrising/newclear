@@ -456,5 +456,10 @@ unique external run/result reference, persisted observed history, authenticated 
 readback and unknown zero automatic resend even in a new browser. AP stays sole executor.
 M2 is accepted and delivered via PR906/914; earlier pending snapshots are historical.
 No new VM or coding invocation. Native transaction/fault tests and actual Rust/AP/DB/browser
-restart evidence are required; all new M3 checks NOT_RUN until recorded. FN05/FN07 and full
-M3 remain outside this slice; original Cloud AC04 and full mainline are not declared passed.
+restart evidence passed on2e08fabe, independently ACCEPT_M3_MINIMUM; see
+[actual acceptance](docs/acceptance/M3-durable-intents.md). Two queued/cancelled tasks,
+two graceful Rust/AP restarts and one Rust SIGKILL establish confirmed recovery and
+unknown zero resend. Prior real M2 result/diff survives restart. Native339/Web26 pass.
+Original final-summary UUID export failed after cleanup; separate read-only reconciliation
+accepted without replay. FN05/FN07 and full M3 remain outside this slice; original Cloud
+AC04 and full mainline are not declared passed. Required CI/PR929 delivery is pending.

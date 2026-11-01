@@ -2768,7 +2768,11 @@ after integration. No recursive delegation. Original M1/M2 dirty workers preserv
 Estimated90–150 active minutes plus bounded CI;20min checkpoints. No VM/coding invocations.
 Tests first, transaction/security/fault checks, Rust/Web/native checks, real restart readback,
 independent acceptance, required CI/normal merge/readback/ledger/backup. No FN05/FN07 expansion.
-Current result: NOT_RUN; API gap means unknown stays pending investigation without POST replay.
+Result: independent ACCEPT_M3_MINIMUM on2e08fabe;339 native/26Web pass, actual
+confirmed admission/restarts and held real202/SIGKILL unknown lock, prior M2 result readback.
+Zero new coding/VM; two explicit queued tasks cancelled. Original summary-export UUID
+failure retained; read-only reconciliation accepted without rerun. API gap means unknown
+stays pending investigation without POST replay. Required CI/merge/readback/ledger remain.
 
 ## RX remote D1 restore audit — 2026-11-01T14:31:46Z
 

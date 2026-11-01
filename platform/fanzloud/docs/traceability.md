@@ -107,3 +107,12 @@ EX01–03 and M1-WEB01–06 map to [SPEC-M1-isolated-web](specs/SPEC-M1-isolated
 [external workspace contract](../../agent-platform/docs/EXTERNAL-WORKSPACE.md),
 [actual M1 acceptance](acceptance/M1-isolated.md) and PR885. FN01/FN06 and
 single/sequential FN03 are accepted; M2/M3 and full FN02–07 remain per SDD.
+
+## M3 minimum durable submission — T-0442
+
+[CU-M3-01–05](specs/SPEC-M3-durable-intents.md) map to SubmissionStore transaction/security
+tests, isolated gateway TCP fault tests and Web recovery tests;
+[ACCEPT_M3_MINIMUM](acceptance/M3-durable-intents.md) maps M3-01–06 to actual queued
+admission, Rust/AP restarts, held real202/SIGKILL/unknown lock and prior real result readback.
+SubmissionStore public API documents typed failures and bounds in rustdoc. AP remains the
+sole execution authority. Full FN04 events, FN05 and FN07 are outside this accepted slice.

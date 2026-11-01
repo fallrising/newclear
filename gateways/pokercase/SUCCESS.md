@@ -10,9 +10,13 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Approved interactive Claude transport
+
+Owner selected A: genuine interactive CLI plus response tap. [TA-1–TA-5 design and acceptance](docs/tasks/T-0426-claude-tui.md) govern the core update after claim351. This explicitly resolves the earlier pending choice. Preserve original17AC history while extending the transport; no live quota/compatibility or native-reuse acceptance is implied. The implementation has passed432Rusttests/25groups,199Python tests, formatter/Clippy and independent code review. RemoteCI/delivery and finalbackup/cleanup remain separate gates; the linked task records actual outcomes.
+
 ## T-0426 — CLI transport/cache decision
 
-Owner requested a Claude TUI core update and other-CLI comparison. [CT-1–CT-3 evidence and concrete choices](docs/tasks/T-0426-cli-cache-review.md) distinguish prompt caching, native reuse and subscription weighting. Claim PR348 merged. Magpie's incremental TUI streaming uses a runtime preload tap; transcript-only output changes streaming behavior. The material choice awaits owner decision before implementation. Review publication does not complete the requested core update; original17AC and the exhausted live-call budget remain unchanged.
+Owner requested a Claude TUI core update and other-CLI comparison. [CT-1–CT-3 evidence and concrete choices](docs/tasks/T-0426-cli-cache-review.md) distinguish prompt caching, native reuse and subscription weighting. Claim PR348 merged. Magpie's incremental TUI streaming uses a runtime preload tap; transcript-only output changes streaming behavior. At that historical checkpoint the material choice awaited owner decision; the approved A extension above now supersedes that pending state. Review publication does not complete the requested core update; original17AC and the exhausted live-call budget remain unchanged.
 
 ## T-0426 — Bounded official Claude client pilot
 

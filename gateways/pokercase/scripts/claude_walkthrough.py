@@ -77,7 +77,7 @@ class ClaudeGateway(Gateway):
         self.child = subprocess.Popen([str(self.binary), "serve", "--host", "127.0.0.1",
             "--port", str(self.port), "--data-dir", str(self.directory),
             "--admin-token", self.admin, "--sse-stall-secs", "5",
-            "--claude-bin", str(self.fake), "--claude-idle-secs", "120"],
+            "--claude-mode", "print", "--claude-bin", str(self.fake), "--claude-idle-secs", "120"],
             env=env, cwd=self.directory, stdin=subprocess.DEVNULL,
             stdout=self.log, stderr=self.log, start_new_session=True)
         deadline = time.monotonic() + 15

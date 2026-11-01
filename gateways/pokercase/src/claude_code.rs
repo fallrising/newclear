@@ -1,4 +1,4 @@
-//! Claude subscription through the real Claude Code CLI (`claude -p`).
+//! Claude subscription through the real Claude Code CLI (interactive TUI or print).
 //!
 //! thinrouter never sends a Claude subscription token itself. Every request is answered
 //! by the local `claude` binary, signed in with the user's own account, so requests to
@@ -41,11 +41,19 @@ use crate::claude_usage::{Attempt, RequestContext};
 use crate::error::AppError;
 use crate::proxy::UpstreamAttemptError;
 
+/// The server selects TUI by default; print remains an explicit compatibility mode.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+pub enum Mode {
+    Tui,
+    Print,
+}
+
 /// Process settings and live runs shared by every request.
 #[derive(Clone)]
 pub struct ClaudeCode {
     /// `claude` executable (PATH lookup when bare).
     pub bin: String,
+    pub mode: Mode,
     /// Empty folder runs start in, so no project CLAUDE.md or settings are picked up.
     pub work_dir: PathBuf,
     /// Bounds concurrent Claude Code processes (waiting runs hold a slot).
@@ -245,6 +253,9 @@ fn signature(model: &str, chat: &Value) -> String {
 impl ClaudeCode {
     pub fn new(bin: Option<String>, data_dir: &std::path::Path, max_runs: usize) -> Self {
         Self {
+            // Keep this internal constructor compatible with direct print fixtures.
+            // AppConfig/server owns the operator-facing default and always sets it.
+            mode: Mode::Print,
             bin: bin
                 .filter(|b| !b.trim().is_empty())
                 .unwrap_or_else(|| "claude".into()),
@@ -264,6 +275,11 @@ impl ClaudeCode {
 
     pub fn with_store(mut self, store: crate::store::Store) -> Self {
         self.store = Some(store);
+        self
+    }
+
+    pub fn with_mode(mut self, mode: Mode) -> Self {
+        self.mode = mode;
         self
     }
 
@@ -399,7 +415,8 @@ impl ClaudeCode {
         for r in &runs {
             r.stop.cancel();
         }
-        let deadline = Instant::now() + Duration::from_secs(6);
+        let deadline =
+            Instant::now() + Duration::from_secs(if self.mode == Mode::Tui { 7 } else { 6 });
         while self.alive.load(std::sync::atomic::Ordering::SeqCst) > 0 && Instant::now() < deadline
         {
             tokio::time::sleep(Duration::from_millis(50)).await;
@@ -1256,7 +1273,7 @@ pub(crate) fn status_for(message: &str) -> u16 {
 
 /// Ask Claude Code to stop with SIGTERM (it then removes its OAuth refresh lock), and
 /// kill it only after a grace period.
-pub(crate) async fn stop(mut child: Child) {
+async fn stop(mut child: Child, mode: Mode) {
     #[cfg(unix)]
     if let Some(pid) = child.id() {
         // SAFETY: plain kill(2) on our own child's pid.
@@ -1264,9 +1281,12 @@ pub(crate) async fn stop(mut child: Child) {
             libc::kill(pid as i32, libc::SIGTERM);
         }
     }
-    if tokio::time::timeout(Duration::from_secs(5), child.wait())
-        .await
-        .is_err()
+    if tokio::time::timeout(
+        Duration::from_secs(if mode == Mode::Tui { 6 } else { 5 }),
+        child.wait(),
+    )
+    .await
+    .is_err()
     {
         let _ = child.kill().await;
     }
@@ -1561,7 +1581,26 @@ async fn spawn_run(
     }
     let allowed: Vec<String> = names.keys().cloned().collect();
 
-    let mut cmd = Command::new(&cc.bin);
+    let mut cmd = match cc.mode {
+        Mode::Print => Command::new(&cc.bin),
+        Mode::Tui => {
+            let executable = std::env::current_exe()
+                .map_err(|_| fail(503, "cannot locate Claude TUI helper".into(), false))?;
+            let mut command = Command::new(executable);
+            command.arg("claude-tui-helper").arg("--").arg(&cc.bin);
+            // Only the helper's owned tap may instrument the interactive child.
+            // Remove loaders before launching the helper, not only inside it.
+            for key in [
+                "BUN_OPTIONS",
+                "NODE_OPTIONS",
+                "LD_PRELOAD",
+                "DYLD_INSERT_LIBRARIES",
+            ] {
+                command.env_remove(key);
+            }
+            command
+        }
+    };
     cmd.args(cli_args(
         model,
         mcp_config.as_deref(),
@@ -1606,14 +1645,14 @@ async fn spawn_run(
             debug!(target: "thinrouter::claude_lifecycle", stage = "startup_input_cancelled");
             // A partial write cannot be replayed safely. Retire this new child
             // with the existing grace period before returning a non-retryable error.
-            stop(child.take()).await;
+            stop(child.take(), cc.mode).await;
             diagnostics.stop().await;
             return Err(fail(499, "client disconnected".into(), false));
         },
         result = stdin.write_all(input.as_bytes()) => result,
     };
     if let Err(e) = written {
-        stop(child.take()).await;
+        stop(child.take(), cc.mode).await;
         diagnostics.stop().await;
         return Err(fail(502, format!("Claude Code input: {e}"), true));
     }
@@ -1843,7 +1882,7 @@ async fn spawn_run(
         cc.forget(&run);
         run.stop.cancel();
         clear_reply(&run);
-        stop(child).await;
+        stop(child, cc.mode).await;
         diagnostics.stop().await;
         // An idle run's session is kept for its next turn; any other run's is removed.
         let idle = run.idle_now.load(std::sync::atomic::Ordering::SeqCst);

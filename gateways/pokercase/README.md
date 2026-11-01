@@ -32,7 +32,7 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 **Out of scope (for now):** MITM, cloud sync, 9router.db compatibility, media APIs.
 
 > [!WARNING]
-> **`claude` provider** answers through your local, signed-in Claude Code CLI (`claude -p`);
+> **`claude` provider** answers through your local, signed-in Claude Code CLI (interactive TUI by default; explicit print compatibility);
 > thinrouter never holds or sends a Claude token, and your system prompt never replaces
 > Claude Code's. Automated use of a subscription is still subject to Anthropic's terms —
 > see [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md).
@@ -89,7 +89,7 @@ For a terminal-only, isolated Claude walkthrough after a locked build:
 python3 scripts/claude_walkthrough.py --check --binary "$CARGO_TARGET_DIR/debug/thinrouter" --output-dir /path/to/claude-evidence
 ```
 
-The script defaults to check mode and accepts `--serve` for a disposable local demo. It runs a Python fake Claude plus the real gateway/MCP helper, verifies all three client streams/tools, fallback/failure/cancel/stall, usage and process/session reuse after restart, and preserves sanitized diagnostics plus source/binary hashes. It never invokes an installed Claude CLI or real provider. `--expected-binary-sha256` rejects a changed binary before launch; the delivered local helper also pins preserved script hashes. All reported tokens are synthetic fixture observations; all CLI costs remain unknown. The original generic HTTP walkthrough remains available.
+This retained walkthrough explicitly tests print compatibility. The new synthetic `claude_tui_e2e` suite exercises the actual PTY/helper with a fake interactive child. Neither establishes real CLI compatibility or quota savings. The script defaults to check mode and accepts `--serve` for a disposable local demo. It runs a Python fake Claude plus the real gateway/MCP helper, verifies all three client streams/tools, fallback/failure/cancel/stall, usage and process/session reuse after restart, and preserves sanitized diagnostics plus source/binary hashes. It never invokes an installed Claude CLI or real provider. `--expected-binary-sha256` rejects a changed binary before launch; the delivered local helper also pins preserved script hashes. All reported tokens are synthetic fixture observations; all CLI costs remain unknown. The original generic HTTP walkthrough remains available.
 
 
 Cursor text-only streams also retain per-dispatch raw `result.usage` counters with source `cursor_cli_result_v1`. `reported_usage` preserves input/output/cache values independently; absent fields stay unknown. Cursor's cache relationship is unverified, so normalized `prompt_tokens` and cost remain null, while observed output counts are retained. JSON/HTML/CSV use the same durable attempt, outcome and CLI timing. Existing opt-in, container isolation and tools/images refusal remain. Actual CLI version/account behavior is not established by the fake-runtime evidence. See [Cursor scope and acceptance](docs/tasks/T-0432-cursor-settlement.md).
@@ -167,6 +167,7 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_SECRETS_KEY` / `--secrets-key` | Passphrase (Argon2id) for at-rest encryption; default: random `<data_dir>/secrets.key` |
 | `THINROUTER_PROVIDER_BASE_OVERRIDES` / `--provider-base-override` | Operator-only `provider=url` upstream base (mocks, egress proxies) |
 | `THINROUTER_CLAUDE_BIN` / `--claude-bin` | Claude Code CLI for the `claude` provider (default `claude` on PATH) |
+| `THINROUTER_CLAUDE_MODE` / `--claude-mode` | `tui` (default): genuine Unix PTY + incremental response observation; `print`: explicit legacy compatibility. No automatic print fallback. |
 | `THINROUTER_CLAUDE_MAX_RUNS` / `--claude-max-runs` | Concurrent Claude Code processes (default 2) |
 | `THINROUTER_CLAUDE_IDLE_SECS` / `--claude-idle-secs` | How long a completed Claude Code turn waits for client tool results or the next user turn (default 600) |
 | `THINROUTER_CURSOR_BIN` / `--cursor-bin` | Cursor command inside the pinned image (default `cursor-agent`) |

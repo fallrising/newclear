@@ -59,7 +59,18 @@ M3/AC05 is not started; T-0442/T-0447 remain in_progress.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-D | Durable submit intent, unique AP run/result reference, restart readback and unknown zero-resend | AC05 minimum / FN04 slice, CU-M3-01–05 | in_progress | 2026-11-01T14:25:00Z | | 2026-11-01T15:06:00Z |
+| M3-D | Durable submit intent, unique AP run/result reference, restart readback and unknown zero-resend; [PR929](https://github.com/fallrising/newclear/pull/929) | AC05 minimum / FN04 slice, CU-M3-01–05 | done | 2026-11-01T14:25:00Z | 2026-11-01T15:06:57Z | 2026-11-01T15:06:57Z |
 
 [Contract](../specs/SPEC-M3-durable-intents.md). Single Ready production task;
 does not start FN05 review handoff/FN07 full journey or claim whole M3 complete.
+
+M3-D independently ACCEPT_M3_MINIMUM: actual source2e08fabe, Rust339/Web26,
+real Rust/AP restarts and held real202/SIGKILL unknown zero-resend. No new coding/VM.
+[Acceptance](../acceptance/M3-durable-intents.md) retains original summary-export failure
+and successful read-only reconciliation. PR929 finalhead a73a2c39 required Fanzloud
+[CI41319261391](https://github.com/fallrising/newclear/actions/runs/41319261391) and
+[contracts41319261482](https://github.com/fallrising/newclear/actions/runs/41319261482)
+passed; merged `935ffbc1c717d61864cd32b60f2e2e5452d811b2` at2026-11-01T15:06:57Z.
+Remote Fanzloud/AP bytes read back equal. Earlier pending-delivery snapshots are historical.
+Only this minimum slice is done; full M3/FN04 events/FN05/FN07 remain open. Services stopped,
+no resident URL; unknown intent retained for trusted manual investigation.

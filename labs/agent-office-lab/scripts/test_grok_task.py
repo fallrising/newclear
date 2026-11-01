@@ -105,6 +105,17 @@ class GrokTaskBoundary(unittest.TestCase):
         self.state={};self.start();self.call('PreToolUse',toolName='read_file',toolUseId='a',toolInput={'target_file':'input.json'})
         self.assertEqual(self.call('PreToolUse',toolName='search_replace',toolUseId='b',toolInput={'file_path':'result.json','old_string':'{}','new_string':'[]'})[0]['decision'],'deny')
 
+    def test_doubled_budget_allows_eight_but_rejects_ninth(self):
+        from grok_task_hook import task_prompt
+        self.plan['budget_multiplier']=2
+        self.call('SessionStart',modelId=MODEL)
+        self.assertTrue(self.call('UserPromptSubmit',prompt=task_prompt(2))[1]['allowed'])
+        self.tool('read_file','input.json','0');self.tool('read_file','result.json','1')
+        self.tool('search_replace','result.json','2',old_string='{}',new_string='[]')
+        for n in range(3,8):self.tool('read_file','result.json',str(n))
+        self.assertEqual(self.call('PreToolUse',toolName='read_file',toolUseId='8',toolInput={'target_file':'result.json'})[0]['decision'],'deny')
+        with self.assertRaises(ValueError):task_prompt(3)
+
     def test_payload_content_and_private_paths_not_logged(self):
         self.start();_,record=self.call('PreToolUse',toolName='other',toolUseId='a',toolInput={'file_path':'/PRIVATE','secret':'PRIVATE'})
         self.assertNotIn('PRIVATE',json.dumps(record))

@@ -15,7 +15,7 @@ import sys
 import tempfile
 import time
 from remote_cli import LAB, isolated_env, installed_cli, private_directory, write_new_private, probe
-from grok_task_hook import MODEL, PROMPT
+from grok_task_hook import MODEL, task_prompt
 from run_grok_startup import process_table, collect_owned, alive_owned
 from grok_startup import sandbox_profile
 
@@ -34,7 +34,7 @@ def credential_path(lab=LAB):
     return auth
 
 
-def prepare(out, socket_dir, remote, timeout_seconds=240):
+def prepare(out, socket_dir, remote, timeout_seconds=240, budget_multiplier=1):
     home = private_directory(out / 'home'); config = private_directory(home / 'grok')
     workspace = private_directory(out / 'workspace')
     write_new_private(workspace / 'input.json', {'marker': secrets.token_hex(12), 'values': [7, 11, -2, 9]})
@@ -48,7 +48,7 @@ def prepare(out, socket_dir, remote, timeout_seconds=240):
     fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     with os.fdopen(fd, 'wb') as f: f.write(body)
     write_new_private(out / 'task-plan.json', {'allow_remote': remote, 'model': MODEL,
-        'prompt': PROMPT if remote else None, 'deadline': time.time() + timeout_seconds, 'timeout_seconds': timeout_seconds})
+        'prompt': task_prompt(budget_multiplier) if remote else None, 'budget_multiplier': budget_multiplier, 'max_tool_calls': 4*budget_multiplier, 'deadline': time.time() + timeout_seconds, 'timeout_seconds': timeout_seconds})
     profile = sandbox_profile(out, socket_dir)
     # Signed-in native startup needs HTTPS metadata even without a prompt.
     profile += '(allow network-outbound (remote ip "*:443"))'
@@ -65,24 +65,26 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--check-startup', action='store_true', help='Authenticated CLI startup with HTTPS metadata access; no prompt')
     group.add_argument('--allow-remote', action='store_true', help='Explicitly authorize one quota-consuming fixture')
-    parser.add_argument('--timeout-seconds', type=int, choices=[240], default=240, help='Approved task deadline; 240 seconds')
+    parser.add_argument('--timeout-seconds', type=int, choices=[240,480], default=240, help='Approved task deadline; default 240 seconds')
+    parser.add_argument('--budget-multiplier', type=int, choices=[1,2], default=1)
     args = parser.parse_args()
+    if args.timeout_seconds > 240*args.budget_multiplier:parser.error('480 seconds requires doubled budget')
     if not args.check_startup and not args.allow_remote:
-        print(json.dumps({'mode': 'plan', 'model': MODEL, 'max_prompts': 1, 'max_tool_calls': 4, 'native_max_turns': 6, 'hook_failure_behavior': 'fail_open',
+        print(json.dumps({'mode': 'plan', 'model': MODEL, 'max_prompts': 1, 'max_tool_calls': 4*args.budget_multiplier, 'native_max_turns': 6*args.budget_multiplier, 'hook_failure_behavior': 'fail_open',
             'allowed_tools': ['read_file(input.json/result.json)', 'search_replace(result.json)'], 'timeout_seconds': args.timeout_seconds,
             'host_retries': 0, 'provider_request_cap': None, 'token_cap': None, 'money_cap': None,
-            'command': f'python3 scripts/run_grok_work.py --allow-remote --timeout-seconds {args.timeout_seconds}', 'remote_requests_sent': False}, indent=2)); return 0
+            'command': f'python3 scripts/run_grok_work.py --allow-remote --timeout-seconds {args.timeout_seconds} --budget-multiplier {args.budget_multiplier}', 'remote_requests_sent': False}, indent=2)); return 0
     if not probe('grok')['compatible']: raise ValueError('preflight_failed')
     out = private_directory(LAB / 'runs' / ('grok-work-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')))
     socket_dir = Path(tempfile.mkdtemp(prefix='office-grok-', dir='/private/tmp'))
     report = {'status': 'starting', 'provider': 'grok', 'version': '1.0.70', 'model': MODEL,
-              'startup_only': args.check_startup, 'timeout_seconds': args.timeout_seconds, 'model_inference_verified': False,
+              'startup_only': args.check_startup, 'budget_multiplier': args.budget_multiplier, 'timeout_seconds': args.timeout_seconds, 'model_inference_verified': False,
               'provider_request_cap': None, 'token_cap': None, 'money_cap': None, 'cleanup_errors': []}
     process = None; owned = {}; started = time.monotonic()
     def interrupted(*_): raise InterruptedError('interrupted')
     signal.signal(signal.SIGINT, interrupted); signal.signal(signal.SIGTERM, interrupted)
     try:
-        env = prepare(out, socket_dir, args.allow_remote, args.timeout_seconds)
+        env = prepare(out, socket_dir, args.allow_remote, args.timeout_seconds, args.budget_multiplier)
         report['source_sha256'] = {}
         for name in SOURCES:
             source = LAB / 'scripts' / name; report['source_sha256'][name] = hashlib.sha256(source.read_bytes()).hexdigest()

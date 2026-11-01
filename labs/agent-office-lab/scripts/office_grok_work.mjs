@@ -104,7 +104,7 @@ try {
     const recorded=events();
     const state=JSON.parse(fs.readFileSync(path.join(out,'boundary-state.json')));
     assert(!state.failed && state.prompts===1 && nativeModel(worker.sessionId)===plan.model && state.stop && Object.keys(state.pending ?? {}).length===0);
-    assert(state.calls.length>=3 && state.calls.length<=4 && state.edited);
+    assert(state.calls.length>=3 && state.calls.length<=plan.max_tool_calls && state.edited);
     assert.deepEqual([...state.completed].sort(),[...state.calls].sort());
     assert(recorded.every(e => e.session===worker.sessionId));
     assert(report.authenticated_hooks.some(e=>e.event==='Stop' && e.session===worker.sessionId));

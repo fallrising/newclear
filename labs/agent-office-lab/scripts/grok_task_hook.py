@@ -17,8 +17,15 @@ PROMPT = 'Read input.json using read_file. Read result.json, then use search_rep
 EVENTS = ['SessionStart','UserPromptSubmit','PreToolUse','PostToolUse','PostToolUseFailure','PermissionDenied','Stop','StopFailure','StopCancelled','SubagentStart']
 
 
+def task_prompt(multiplier=1):
+    if type(multiplier) is not int or multiplier not in (1,2):raise ValueError('invalid_budget')
+    return PROMPT if multiplier==1 else PROMPT.replace('at most four tool calls','at most eight tool calls')
+
+
 def evaluate(event, payload, state, workspace, plan, now):
     if event not in EVENTS or not isinstance(payload, dict): raise ValueError('invalid_event')
+    multiplier=plan.get('budget_multiplier',1)
+    expected_prompt=task_prompt(multiplier)
     payload=dict(payload)
     for camel, aliases in {'sessionId':['session_id'],'modelId':['model_id','model'],'toolName':['tool_name'],'toolUseId':['tool_use_id'],'toolInput':['tool_input'],'toolResult':['tool_response'],'toolInputTruncated':['tool_input_truncated'],'toolResultTruncated':['tool_result_truncated'],'stopHookActive':['stop_hook_active']}.items():
         values=[payload[k] for k in [camel,*aliases] if k in payload]
@@ -37,7 +44,7 @@ def evaluate(event, payload, state, workspace, plan, now):
         if valid:state['started']=True
         record['model_field_present']='modelId' in payload
     elif event == 'UserPromptSubmit':
-        valid = valid and plan['allow_remote'] and state.get('started') and plan.get('native_model') == MODEL and not state.get('prompts') and payload.get('prompt') == PROMPT
+        valid = valid and plan['allow_remote'] and state.get('started') and plan.get('native_model') == MODEL and not state.get('prompts') and payload.get('prompt') == expected_prompt
         if valid: state['prompts'] = 1
         reply = {} if valid else {'decision':'block','reason':'Lab task boundary'}
     elif event == 'PreToolUse':
@@ -50,13 +57,13 @@ def evaluate(event, payload, state, workspace, plan, now):
                 for name in ['input.json','result.json']:
                     if safe_path(params[fields[0]],workspace,name,True):target=name
         pending=state.get('pending',{})
-        valid = valid and plan['allow_remote'] and state.get('prompts')==1 and plan.get('native_model')==MODEL and isinstance(tool_id,str) and 0<len(tool_id)<=160 and tool_id not in state.get('tool_ids',[]) and not payload.get('toolInputTruncated') and len(state.get('calls',[]))<4
+        valid = valid and plan['allow_remote'] and state.get('prompts')==1 and plan.get('native_model')==MODEL and isinstance(tool_id,str) and 0<len(tool_id)<=160 and tool_id not in state.get('tool_ids',[]) and not payload.get('toolInputTruncated') and len(state.get('calls',[]))<4*multiplier
         done=state.get('completed',[]);calls=state.get('calls',[])
         if tool=='read_file':
             # Independent fixture reads may share one native tool batch and finish in either order.
             valid = valid and target!='other' and not any(v['tool']=='search_replace' for v in pending.values())
             count=calls.count('read_file:'+target)
-            valid = valid and (count==0 or (target=='result.json' and count==1 and 'search_replace:result.json' in done))
+            valid = valid and (multiplier==2 or count==0 or (target=='result.json' and count==1 and 'search_replace:result.json' in done))
         elif tool=='search_replace':
             new=params.get('new_string') if isinstance(params,dict) else None
             valid = valid and not pending and target=='result.json' and all(x in done for x in ['read_file:input.json','read_file:result.json']) and not state.get('edited') and isinstance(new,str) and len(new.encode())<=4096 and params.get('old_string') in ['{}','{}\n'] and params.get('replace_all',False) is False

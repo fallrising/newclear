@@ -29,6 +29,7 @@ def main():
     parser.add_argument('--config')
     parser.add_argument('--collector-log')
     parser.add_argument('--block-collector',action='store_true')
+    parser.add_argument('--unknown-collector',action='store_true')
     args = parser.parse_args()
     if args.snapshot:
         print(json.dumps(snapshot(args.snapshot)))
@@ -50,6 +51,8 @@ def main():
         if args.block_collector:
             while True:
                 signal.pause()  # Parent owns this child and supplies SIGKILL at the marker.
+        if args.unknown_collector:
+            raise RuntimeError('isolated collector failure')
         return original()
     r.fixed_collector = collector
     return r.main(['--config',args.config,'--allow-loopback-http','--once'])

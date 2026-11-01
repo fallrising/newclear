@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+from operator_inventory import load_inventory
 import re
 
 from labops import ClusterLock, atomic_json
@@ -96,7 +97,7 @@ def _validated_review_input(project, review_plan_id, review_plan_sha256, input_p
         review['target']['node'], document['snapshot'], document['apps'],
         document['destinations'], document['detection'], document['fence'],
         document['control_plane_health_ok'], document['healthy_workers_ok'],
-        document['unexpected_consistency_issues'], review['id'])
+        document['unexpected_consistency_issues'], review['id'], inventory=load_inventory(project))
     if rebuilt.get('plan_sha256') != review['plan_sha256']:
         raise ValueError('private worker loss input differs from the saved review plan')
     return review, document
@@ -109,7 +110,7 @@ def save_review_plan(project, target, input_path, plan_id=None):
         target, document['snapshot'], document['apps'], document['destinations'],
         document['detection'], document['fence'], document['control_plane_health_ok'],
         document['healthy_workers_ok'], document['unexpected_consistency_issues'],
-        plan_id)
+        plan_id, inventory=load_inventory(project))
     output = _write_plan(project, 'review-plans', plan)
     return plan, output
 

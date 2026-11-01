@@ -1,4 +1,5 @@
 """Build a private, worker-only bootstrap plan from an owner-verified replacement host."""
+from operator_inventory import workers
 from datetime import datetime, timezone
 import hashlib
 import ipaddress
@@ -7,14 +8,10 @@ from pathlib import Path
 import uuid
 
 from labops import atomic_json, digest
+from operator_inventory import topology
 from worker_payload import build_worker_payload
 from core_release import validation_record
 
-WORKER_INDEX = {
-    'ckc-disposable-02': ('worker-2', 2),
-    'ckc-disposable-03': ('worker-3', 3),
-    'ckc-disposable-04': ('worker-4', 4),
-}
 POST_REIMAGE_BLOCKER = (
     'Generation commit and recovery executor are not implemented'
 )
@@ -58,6 +55,7 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
     from reimage_receipt import load_receipt, verify_local_hostkeys
     from reimage_host import REQUIRED_FACTS, validate_facts
 
+    WORKER_INDEX = {alias: (node, index) for index, (alias, node, role) in enumerate(topology(operator.inventory), 1) if role == 'worker'}
     source_plan, host, preparation = _source_plan(
         operator, source_plan_id, expected_hash)
     source_plan_id = source_plan['id']
@@ -77,7 +75,7 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
         raise ValueError('owner receipt changed after it was recorded')
     trusted = verify_local_hostkeys(receipt['receipt']['target']['alias'],
                                     receipt['receipt']['host_key_fingerprints'],
-                                    operator.trusted_hostkeys_dir)
+                                    operator.trusted_hostkeys_dir, allowed_aliases=set(workers(operator.inventory).values()))
     if trusted != receipt_record.get('trusted_host_key_file_check'):
         raise ValueError('replacement host trust file changed after receipt recording')
 
@@ -142,7 +140,7 @@ def plan_reimage_worker(operator, source_plan_id, expected_hash):
     }
     artifacts_lock_path = operator.project / 'artifacts.amd64.lock.json'
     artifacts_lock = json.loads(artifacts_lock_path.read_text())
-    payload = build_worker_payload(worker_host, core_ip, artifacts_lock)
+    payload = build_worker_payload(worker_host, core_ip, artifacts_lock, inventory=operator.inventory)
     if payload['role'] != 'worker' or {row['repository'] for row in payload['artifacts']} != {
             'projecteru2/agent', 'containernetworking/plugins'}:
         raise ValueError('replacement payload contains non-worker artifacts')

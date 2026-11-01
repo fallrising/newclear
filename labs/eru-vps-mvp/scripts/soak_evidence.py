@@ -11,12 +11,13 @@ import uuid
 from labctl import identifier
 from labops import atomic_json
 from soak_remote import config_hash
+from operator_inventory import aliases
 from soak_runner import MAX_BYTES
 
-HOSTS = ('ckc-disposable-01', 'ckc-disposable-02', 'ckc-disposable-03')
 
 
-def validate_manifest(manifest):
+def validate_manifest(manifest, *, inventory=None):
+    HOSTS = aliases(inventory)[:3]
     if set(manifest['hosts']) != set(HOSTS):
         raise ValueError('expected exactly observer hosts 01–03')
     for alias, item in manifest['hosts'].items():
@@ -31,7 +32,7 @@ def validate_manifest(manifest):
 
 
 def transfer(op, alias, request, path):
-    if alias not in HOSTS:
+    if alias not in aliases(op.inventory)[:3]:
         raise ValueError('unexpected observer host')
     source = (op.project / 'scripts/soak_remote.py').read_text()
     program = source + '\nimport sys\nexport_samples(' + repr(request) + ',sys.stdout.buffer)\n'
@@ -59,7 +60,7 @@ def collect(op, run_id):
     manifest = json.loads((root / 'manifest.json').read_text())
     if manifest['id'] != run_id:
         raise ValueError('run identity mismatch')
-    validate_manifest(manifest)
+    validate_manifest(manifest, inventory=op.inventory)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ-') + uuid.uuid4().hex[:8]
     directory = root / 'collections' / stamp
     directory.mkdir(parents=True, mode=0o700)

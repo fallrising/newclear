@@ -16,7 +16,7 @@ import test_fresh_bootstrap_host as fixture
 class SSHTests(unittest.TestCase):
     def setUp(self):
         self.f = fixture.HostTests(); self.f.setUp(); self.addCleanup(self.f.doCleanups)
-        self.keys = {'ckc-disposable-%02d' % i: 'ssh-ed25519 ' + base64.b64encode(
+        self.keys = {'lab-host-%02d' % i: 'ssh-ed25519 ' + base64.b64encode(
             b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00\x20' + bytes([i]) * 32).decode() for i in range(1, 5)}
         self.calls = []
         self.adapter = ssh.SSHBootstrapAdapter(self.keys, transport=self.transport)
@@ -35,6 +35,17 @@ class SSHTests(unittest.TestCase):
             result = namespace['handle'](request, root=str(self.f.root), owner_uid=os.getuid(), owner_gid=os.getgid(),
                 now=self.f.now, runner=self.f.runner, artifact_reader=lambda a: self.f.archives[a['repository']])
         return render.canonical(result)
+
+    def test_copied_program_imports_in_clean_isolated_interpreter(self):
+        import subprocess
+        program = ssh.build_program({'schema_version': 1, 'operation': 'observe', 'action': self.f.action(0)})
+        tree = ast.parse(program)
+        # Compile every actual bundled support/helper statement; omit host dispatch.
+        tree.body.pop()
+        result = subprocess.run([sys.executable, '-I', '-c',
+                                 "exec(compile(__import__('sys').stdin.read(), '<isolated-bundle>', 'exec'))"],
+                                input=ast.unparse(tree), capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_actual_bundle_install_start_empty_and_readonly_recovery(self):
         a = self.f.action(0)

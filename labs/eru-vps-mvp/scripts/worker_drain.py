@@ -11,15 +11,11 @@ from pathlib import Path
 import re
 import uuid
 
+from operator_inventory import workers, load_inventory
 from app_desired import WORKERS, build_plan as build_app_plan, canonical_bytes
 from app_desired import sha256, snapshot_binding, spec_identity
 
 PLAN_ID = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_-]{0,95}$')
-NODE_ALIASES = {
-    'worker-2': 'ckc-disposable-02',
-    'worker-3': 'ckc-disposable-03',
-    'worker-4': 'ckc-disposable-04',
-}
 MAX_APPS = 32
 MAX_ISSUES = 128
 
@@ -31,13 +27,14 @@ def plan_digest(plan):
 
 
 def build_plan(target, snapshot, desired_specs, destinations, health_ok,
-               consistency_issues=(), plan_id=None):
+               consistency_issues=(), plan_id=None, *, inventory=None):
     """Build a review-only plan to move ERU-012 apps off one nonempty worker.
 
     desired_specs contains the exact current v1 spec for every app on target.
     destinations explicitly maps each app's logical name to a different,
     reviewed worker. Only a complete, owned source revision may be moved.
     """
+    NODE_ALIASES = workers(inventory)
     if not isinstance(target, str) or target not in WORKERS:
         raise ValueError('target must be a reviewed worker')
     if (not isinstance(snapshot, dict)
@@ -237,6 +234,7 @@ def _read_json(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--project', type=Path, required=True, help='project with explicit private inventory')
     parser.add_argument('--target', required=True, choices=sorted(WORKERS))
     parser.add_argument('--input', required=True,
                         help='offline JSON with snapshot, apps, destinations, health_ok, consistency_issues')
@@ -248,7 +246,7 @@ def main():
         parser.error('input JSON must contain exactly: ' + ', '.join(sorted(allowed)))
     plan = build_plan(args.target, document['snapshot'], document['apps'],
                       document['destinations'], document['health_ok'],
-                      document['consistency_issues'], args.plan_id)
+                      document['consistency_issues'], args.plan_id, inventory=load_inventory(args.project))
     print(json.dumps(plan, indent=2, sort_keys=True))
 
 

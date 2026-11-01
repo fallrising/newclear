@@ -8,7 +8,8 @@ import os
 from fresh_execution import context, exact, identifier
 from fresh_rebuild import plan_digest
 from labops import ClusterLock
-from fresh_observation import (ALIASES, HOST_LIMIT, capture, decode, public_key, script, trust_keys,
+from operator_inventory import key_aliases, aliases, valid_alias
+from fresh_observation import (HOST_LIMIT, capture, decode, public_key, script, trust_keys,
                                validate_observation)
 
 AREA = 'private/operations/fresh-rebuild/observations'
@@ -20,8 +21,14 @@ def _raw(value):
 
 class SSHReader:
     """No user SSH config, arbitrary command, trust update, forwarding or retry."""
+    def __init__(self, *, aliases):
+        if (not isinstance(aliases, (dict, list, tuple, set)) or len(aliases) != 4
+                or len(set(aliases)) != 4 or any(not valid_alias(alias) for alias in aliases)):
+            raise ValueError('four explicit reviewed aliases required')
+        self.aliases = tuple(aliases)
+
     def __call__(self, host, source, key):
-        if host['alias'] not in ALIASES or str(ipaddress.IPv4Address(host['ip'])) != host['ip']:
+        if host['alias'] not in self.aliases or str(ipaddress.IPv4Address(host['ip'])) != host['ip']:
             raise ValueError('invalid observation SSH endpoint')
         public_key(key)
         fd = os.memfd_create('eru-observation-known-hosts', os.MFD_CLOEXEC)
@@ -88,6 +95,8 @@ def collect_observation(project, plan_id, review_sha, run_id, observation_id, *,
             manifest, _, _ = files.read('private/verified-host-public-keys.json')
             trusted = trust_keys(manifest)
             inventory = files.binding(plan['bindings']['inventory'])
+            if set(trusted) != set(aliases(inventory)):
+                raise ValueError('observation trust aliases differ from bound inventory')
             parent = files.directory(files.parts(AREA), create=True)
             try:
                 os.mkdir(observation_id, 0o700, dir_fd=parent)
@@ -96,7 +105,7 @@ def collect_observation(project, plan_id, review_sha, run_id, observation_id, *,
             finally:
                 os.close(parent)
             captures = []
-            transport = reader if reader is not None else SSHReader()
+            transport = reader if reader is not None else SSHReader(aliases=trusted)
             for index, host in enumerate(inventory):
                 files.recheck()
                 lock.check_private_root()

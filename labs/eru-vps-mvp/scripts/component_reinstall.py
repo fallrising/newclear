@@ -14,14 +14,15 @@ import urllib.request
 from labops import atomic_json, digest, lock_fds
 from worker_scope import REINSTALL_FILES
 from canaries import HTTPGuards
+from operator_inventory import WORKER_NODES, workers
 
 TARGET = 'worker-4'
-ALIAS = 'ckc-disposable-04'
-WORKERS = {'worker-2': 'ckc-disposable-02', 'worker-3': 'ckc-disposable-03', TARGET: ALIAS}
 UNITS = ['eru-agent.service', 'eru-containerd-proxy.socket', 'eru-containerd-proxy.service']
 
 
-def empty_target(snapshot, target=TARGET, alias=ALIAS):
+def empty_target(snapshot, target=TARGET, alias=None):
+    if alias is None:
+        raise ValueError('explicit inventory-bound worker alias required')
     node = next(n for n in snapshot['nodes'] if n['name'] == target)
     def nonzero(value):
         if isinstance(value, dict):
@@ -36,7 +37,9 @@ def empty_target(snapshot, target=TARGET, alias=ALIAS):
     return node
 
 
-def protected_membership(snapshot, target=TARGET, alias=ALIAS):
+def protected_membership(snapshot, target=TARGET, alias=None):
+    if alias is None:
+        raise ValueError('explicit inventory-bound worker alias required')
     return {
         'pods': sorted(snapshot['pods'], key=lambda p: p['name']),
         'nodes': sorted([{k: n.get(k) for k in ['name', 'podname', 'endpoint', 'labels', 'resource_capacity', 'resource_usage', 'available', 'bypass']}
@@ -48,10 +51,10 @@ def protected_membership(snapshot, target=TARGET, alias=ALIAS):
 
 class ComponentReinstall:
     def __init__(self, operator, guard_factory=HTTPGuards, target=TARGET):
-        if target not in WORKERS:
+        if target not in WORKER_NODES:
             raise ValueError('unreviewed worker target')
         self.target = target
-        self.alias = WORKERS[target]
+        self.alias = workers(operator.inventory)[target]
         self.op = operator
         self.guard_factory = guard_factory
         self.guards = None

@@ -10,7 +10,7 @@ from fresh_bootstrap_render import build_render, validate_render
 def fixture():
     def sha(raw):
         return hashlib.sha256(raw).hexdigest()
-    hosts = [{'alias': 'ckc-disposable-%02d' % (i + 1), 'node': 'worker-%d' % (i + 1),
+    hosts = [{'alias': 'lab-host-%02d' % (i + 1), 'node': 'worker-%d' % (i + 1),
               'ip': '100.91.0.%d' % (i + 1), 'machine_id': 'machine-%d' % i,
               'boot_id': '00000000-0000-0000-0000-%012d' % (i + 1),
               'host_key_sha256': sha(b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00\x20' + bytes([i + 1]) * 32),

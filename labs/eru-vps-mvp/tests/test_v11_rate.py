@@ -10,7 +10,8 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from labops import atomic_json
-from soak_evidence import HOSTS
+import fixture_inventory
+HOSTS = fixture_inventory.ALIASES[:3]
 from soak_remote import config_hash
 from soak_report import report
 from soak_runner import RateSampler, Summary, disk_uses, observe
@@ -109,7 +110,7 @@ class V11Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             v11_fixture(root, lambda rows: rows[1]['http_requests'].pop(5))
-            result = report(root)
+            result = report(root, inventory=fixture_inventory.inventory())
             self.assertEqual(result['hosts'][HOSTS[1]]['assessment'], 'observed_failures')
             self.assertIn('http_rate_sequence', result['hosts'][HOSTS[1]]['summary']['failures'])
             self.assertEqual(result['hosts'][HOSTS[1]]['integrity_errors'], {})
@@ -117,7 +118,7 @@ class V11Tests(unittest.TestCase):
     def test_short_pilot_is_not_formal_v11_and_full_synthetic_rate_is_visible(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); v11_fixture(root)
-            result = report(root)
+            result = report(root, inventory=fixture_inventory.inventory())
             self.assertEqual(result['assessment'], 'incomplete')
             self.assertFalse(result['formal_v11_duration'])
             self.assertEqual(result['hosts'][HOSTS[1]]['summary']['http_rate']['successful'], 30)

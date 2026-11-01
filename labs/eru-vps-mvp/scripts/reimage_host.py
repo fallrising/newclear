@@ -5,9 +5,9 @@ from pathlib import Path
 import subprocess
 
 from reimage_receipt import verify_local_hostkeys
+from operator_inventory import workers
 
 
-WORKER_ALIASES = {"ckc-disposable-02", "ckc-disposable-03", "ckc-disposable-04"}
 REQUIRED_FACTS = {
     "schema_version", "machine_id", "boot_id", "os_release", "tailscale_ipv4",
     "services", "core_config_present", "etcd_data_present", "eru_agent_binary_present",
@@ -120,13 +120,14 @@ def validate_facts(facts, expected):
     return {key: facts[key] for key in sorted(REQUIRED_FACTS)}
 
 
-def inspect_replacement_host(alias, replacement, known_hosts_dir, *, runner=subprocess.run):
+def inspect_replacement_host(alias, replacement, known_hosts_dir, *, inventory=None, runner=subprocess.run):
     """Verify an owner-attested worker identity over strict, read-only SSH."""
+    WORKER_ALIASES = set(workers(inventory).values())
     if alias not in WORKER_ALIASES:
-        raise ValueError("replacement host must use ckc-disposable-02, -03, or -04")
+        raise ValueError('replacement host requires a reviewed inventory worker alias')
     if not isinstance(replacement, dict):
         raise ValueError("replacement identity must be a validated receipt object")
-    trust_check = verify_local_hostkeys(alias, replacement.get("host_key_fingerprints"), known_hosts_dir)
+    trust_check = verify_local_hostkeys(alias, replacement.get("host_key_fingerprints"), known_hosts_dir, allowed_aliases=WORKER_ALIASES)
     _ssh_config(_run(runner, ["ssh", "-G", alias]), alias)
     trust_path = str((Path(known_hosts_dir) / alias.removeprefix("ckc-")).resolve())
     argv = [

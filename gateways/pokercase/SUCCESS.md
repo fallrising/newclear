@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Approved three-request real TUI pilot
+
+Owner approved [TP-1–TP-3](docs/tasks/T-0426-tui-pilot.md): new3gatewayrequests/10minutes/60seconds each, fixed-input firsttext/sameprocess/restartresume. Stopfirstfailure; prior6admissions remain exhausted. This is a bounded acceptance attempt, with no new runtime change or whole-product completion claim. Result: first real admission stopped at an owner-interaction prompt (HTTP401); later two cases unexecuted, no retry. Official Pro login preflight passed; native live reuse remains unaccepted.
+
 ## T-0426 — Inline instruction role preservation
 
 [NR-1–NR-3](docs/tasks/T-0426-instruction-roles.md) correct the observed system text-block/string role mismatch while preserving strict reuse criteria. This bounded offline correction does not accept live native reuse or reopen the exhausted pilot budget. Original17AC remains unchanged.

@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — CLI transport/cache decision
+
+Owner requested a Claude TUI core update and other-CLI comparison. [CT-1–CT-3 evidence and concrete choices](docs/tasks/T-0426-cli-cache-review.md) distinguish prompt caching, native reuse and subscription weighting. Claim PR348 merged. Magpie's incremental TUI streaming uses a runtime preload tap; transcript-only output changes streaming behavior. The material choice awaits owner decision before implementation. Review publication does not complete the requested core update; original17AC and the exhausted live-call budget remain unchanged.
+
 ## T-0426 — Bounded official Claude client pilot
 
 Owner approved Claude tools / Cursor text-only and a subscription-only, single-model Claude pilot. [LP-1–LP-3 scope, gates and results](docs/tasks/T-0426-claude-pilot.md) govern this continuation; renewed claim PR344 merged before implementation. Existing core AC wording and historical evidence remain intact. A failed safety, model, admission or cleanup preflight stops before inference. Six gateway requests are not six internal model calls or a monetary cap; this pilot cannot close the full mainline.

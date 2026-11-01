@@ -1,5 +1,17 @@
 # Pokercase 技術任務
 
+## T-0426 — CLI transport/cache review
+
+Demand: desk T-0426; claim348 merged. [CT-1–CT-3](T-0426-cli-cache-review.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| CT-01 | Pin Claude TUI mechanism and cache/accounting evidence | CT-1 | in_progress | 2026-11-01T04:18:54Z | — | 2026-11-01T04:24:20Z |
+| CT-02 | Other CLI primary-source comparison | CT-2 | in_progress | 2026-11-01T04:18:54Z | — | 2026-11-01T04:24:20Z |
+| CT-03 | TUI mode decision — waiting for owner | CT-3 | in_progress | 2026-11-01T04:18:54Z | — | 2026-11-01T04:24:20Z |
+
+No runtime replacement has been implemented. A review merge cannot mark CT-03 or native reuse accepted; the next action is the owner's explicit transport/streaming decision.
+
 ## T-0426 — Bounded official Claude client pilot
 
 Demand: desk T-0426 / R-04; renewed claim PR344 merged. [LP-1–LP-3](T-0426-claude-pilot.md).

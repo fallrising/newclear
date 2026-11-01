@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prepare or run one native Office/Pi synthetic task with a bounded DeepSeek relay."""
 import argparse
+from execution_slot import guarded_main, mark_started, mark_clean
 import datetime
 import hashlib
 import json
@@ -14,6 +15,7 @@ import sys
 import time
 from deepseek_relay import Relay, MAX_REQUESTS, MAX_OUTPUT, MAX_BODY
 from remote_cli import LAB, isolated_env, private_directory, probe, write_new_private
+from process_ownership import process_table, collect_owned, alive_owned
 
 
 def prepare(out, port, token):
@@ -45,12 +47,13 @@ def prepare(out, port, token):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--check-startup', action='store_true', help='Real Office/Pi boot, no remote request permitted')
     group.add_argument('--allow-remote', action='store_true', help='Authorize one bounded paid DeepSeek fixture run')
+    group.add_argument('--check-failure', type=int, choices=(401, 429), help='Native Pi against an injected loopback error; no credentials or external requests')
     args = parser.parse_args()
-    if not args.allow_remote and not args.check_startup:
+    if not args.allow_remote and not args.check_startup and args.check_failure is None:
         print(json.dumps({'mode': 'plan', 'command': 'python3 scripts/run_pi_work.py --allow-remote',
                           'provider': 'pi', 'model': 'deepseek-flash', 'max_requests': MAX_REQUESTS,
                           'max_output_tokens_per_request': MAX_OUTPUT, 'max_request_bytes': MAX_BODY,
@@ -67,12 +70,15 @@ def main():
         if saved.get('type') != 'api_key' or not isinstance(saved.get('key'), str) or not saved['key']:
             raise ValueError('DeepSeek key missing')
         api_key = saved['key']
+    mark_started()
     out = private_directory(LAB / 'runs' / ('pi-work-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')))
     token = secrets.token_urlsafe(32)
-    relay = Relay(token, api_key)
-    process = None
+    relay = Relay(token, api_key, fault_status=args.check_failure)
+    process = None; owned = {}
     report = {'status': 'starting', 'startup_only': args.check_startup, 'provider': 'pi', 'model': 'deepseek-flash',
               'model_inference_verified': False, 'cleanup_errors': [], 'cloud_fallback': False}
+    if args.check_failure is not None:
+        report.update(fault_injection={'source': 'loopback', 'http_status': args.check_failure}, failure_check_passed=False)
     started = time.monotonic()
     def interrupted(*_):
         raise InterruptedError('Interrupted')
@@ -81,48 +87,79 @@ def main():
     try:
         port = relay.start()
         env = prepare(out, port, token)
-        for name in ('run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'remote_cli.py'):
+        for name in ('execution_slot.py', 'process_ownership.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'remote_cli.py'):
             shutil.copy2(LAB / 'scripts' / name, out / name)
         shutil.copy2(LAB / 'scripts/bin/pi', out / 'pi-launcher.py')
         command = [shutil.which('node'), str(LAB / 'scripts/office_pi.mjs'), str(out)]
         if args.check_startup: command.append('--check-startup')
+        if args.check_failure is not None: command += ['--check-failure', str(args.check_failure)]
         with (out / 'office.stdout.log').open('w') as stdout, (out / 'office.stderr.log').open('w') as stderr:
             process = subprocess.Popen(command, cwd=out, env=env, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr, start_new_session=True)
-            code = process.wait(timeout=180)
+            deadline = time.monotonic() + 180
+            while process.poll() is None:
+                owned = collect_owned(process_table(), owned, process.pid)
+                if time.monotonic() > deadline: raise subprocess.TimeoutExpired(command, 180)
+                time.sleep(0.1)
+            code = process.returncode
         office = json.loads((out / 'office-result.json').read_text())
         report['office'] = office
-        if code or office['status'] != 'completed': raise ValueError('Native Office/Pi acceptance failed')
-        if args.check_startup:
+        if args.check_failure is not None:
+            if (code or office.get('status') != 'failed' or office.get('native_error_verified') is not True
+                    or office.get('failure_check_passed') is not True or relay.external_requests != 0
+                    or relay.client_requests != 1 or len(relay.records) != 1
+                    or relay.records[0].get('http_status') != args.check_failure
+                    or relay.records[0].get('origin') != 'injected_loopback'
+                    or (out / 'workspace/result.json').exists()):
+                raise ValueError('Native injected failure acceptance failed')
+            report.update(status='failed', reason='injected_api_error', failure_check_passed=True)
+        elif code or office['status'] != 'completed':
+            raise ValueError('Native Office/Pi acceptance failed')
+        elif args.check_startup:
             if relay.records: raise ValueError('Startup unexpectedly requested inference')
         else:
             if not relay.records or any(r['status'] != 'completed' for r in relay.records): raise ValueError('Provider requests did not complete')
             if not any(r.get('output_tokens', 0) > 0 for r in relay.records): raise ValueError('No provider usage evidence')
             if not office.get('file_task_passed') or not office.get('agent_settled_verified'): raise ValueError('Missing native evidence')
             report['model_inference_verified'] = True
-        report['status'] = 'completed'
+        if args.check_failure is None: report['status'] = 'completed'
     except (OSError, ValueError, subprocess.SubprocessError):
         report['status'] = 'failed'; report['reason'] = 'bounded_pi_acceptance_failed'
     finally:
         signal.signal(signal.SIGINT, signal.SIG_IGN); signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        if process: owned = collect_owned(process_table(), owned, process.pid)
         if process and process.poll() is None:
             process.terminate()
             try: process.wait(timeout=15)
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL); process.wait(); report['cleanup_errors'].append('forced_process_group_stop')
+        remaining = alive_owned(process_table(), owned)
+        deadline = time.monotonic() + 10
+        while remaining and time.monotonic() < deadline:
+            time.sleep(0.1); remaining = alive_owned(process_table(), owned)
+        report['owned_processes_seen'] = len(owned)
+        report['remaining_owned_processes'] = len(remaining)
+        if remaining: report['cleanup_errors'].append('owned_pi_process_survived')
         relay.close()
         if (out / 'office-result.json').is_file(): report['office'] = json.loads((out / 'office-result.json').read_text())
         report['requests'] = relay.records
+        report['client_requests'] = relay.client_requests
+        report['external_requests'] = relay.external_requests
         report['elapsed_s'] = time.monotonic() - started
         if not report.get('office', {}).get('cleanup_completed'): report['cleanup_errors'].append('native_cleanup_not_verified')
-        if report['cleanup_errors']: report['status'] = 'failed'
+        if report['cleanup_errors']:
+            report['status'] = 'failed'
+            if args.check_failure is not None: report['failure_check_passed'] = False
         (out / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
         print(json.dumps({'status': report['status'], 'model_inference_verified': report['model_inference_verified'],
+              'failure_check_passed': report.get('failure_check_passed'), 'external_requests': relay.external_requests,
               'requests': len(relay.records), 'cleanup_errors': report['cleanup_errors'], 'artifacts': str(out)}, indent=2))
-    return 0 if report['status'] == 'completed' else 1
+    if not report['cleanup_errors']:
+        mark_clean()
+    return 0 if report['status'] == 'completed' or report.get('failure_check_passed') is True else 1
 
 
 if __name__ == '__main__':
-    try: raise SystemExit(main())
+    try: raise SystemExit(guarded_main(main, bool(set(sys.argv[1:]) & {'--allow-remote', '--check-startup'}) or any(a == '--check-failure' or a.startswith('--check-failure=') for a in sys.argv[1:])))
     except (OSError, ValueError):
         print('Pi fixture could not start; check preflight and isolated credentials. No secret is printed.', file=sys.stderr)
         raise SystemExit(1)

@@ -1,0 +1,152 @@
+{
+  "schema_version": "cloudlab.remote-restore-evidence.v1",
+  "status": "remote-data-restore-verified",
+  "recorded_at": "2026-11-01T14:58:25.383333+00:00",
+  "local_audit": {
+    "focused_tests": 17,
+    "source_command_count": 3,
+    "source_journal_count": 3,
+    "classifications": {
+      "completed_preserved": 2,
+      "unknown_preserved": 1
+    },
+    "all_dispatch_allowed": false,
+    "full_suite": {
+      "node": 138,
+      "python": 325,
+      "total": 463,
+      "failed": 0
+    },
+    "suite_rerun_after_owner_approval": false,
+    "unchanged_source_inputs": 69
+  },
+  "remote_preflight": {
+    "d1_count": 5,
+    "source_commands": 3,
+    "source_active": 1,
+    "source_schedule_enabled": false,
+    "source_cron_count": 0,
+    "source_test_token_enabled": false,
+    "grants_expired": 6
+  },
+  "remote_restore": {
+    "export_executed": true,
+    "database_created": true,
+    "import_executed": true,
+    "journal_backup_executed": true,
+    "source_mutation": false,
+    "completed_at": "2026-11-01T14:55:43.450360+00:00",
+    "sql_bytes": 16454,
+    "sql_sha256": "0acd47caa911aa8632a0c649235fc4587843ea4c36621d43d48937e88b65ff88",
+    "export_polls": 2,
+    "import_ingest_calls": 1,
+    "signed_upload_calls": 1
+  },
+  "limits": {
+    "runner_executed": false,
+    "failover_verified": false,
+    "authority_renewed": false,
+    "paid_upgrade": false,
+    "billing": null,
+    "mainline_complete": false
+  },
+  "inputs": {
+    "tools/restore_audit.py": "531132a7da29bf1d699bc3d972b76ca7bb1839ea2d40959799e50996ef65e5b8",
+    "tests/test_restore_audit.py": "67fc43e1bae7fcc2f0894ba21682683ee12cc2567ea1ac18de04ce05c739ffbb"
+  },
+  "history": {
+    "initial_full_export_rejected_before_execution": true,
+    "explicit_owner_approval_received": true,
+    "source_pr": 925,
+    "source_board_pr": 927
+  },
+  "remote_equality": {
+    "at": "2026-11-01T14:57:28.561236+00:00",
+    "schema_exact": true,
+    "schema_exclusions": [
+      "_cf_KV"
+    ],
+    "app_tables": 5,
+    "explicit_indexes": 3,
+    "implicit_indexes": 6,
+    "source_before_export_restored_source_after_equal": true,
+    "all_columns_all_rows_equal": true,
+    "row_counts": {
+      "grants": 6,
+      "commands": 3,
+      "nonces": 32,
+      "schedules": 1,
+      "firings": 0
+    },
+    "quick_check": "ok",
+    "foreign_key_violations": 0,
+    "restored_grants_expired": 6,
+    "journal_backups": [
+      {
+        "case": "before",
+        "rows": 1,
+        "state": "completed",
+        "source_main_sha256": "33d71fcd2c0c5b11163a04c1283cd34ede18432cb7c7195f14d61eccb98df5e3",
+        "backup_sha256": "a7b73b2ff55297ba5fe48ed9274522ae5914b555309adf6a3e2ffe8dd80044c5",
+        "exact_row_bytes_equal": true,
+        "source_main_bytes_unchanged": true,
+        "backup_integrity": "ok",
+        "mode": "0o600"
+      },
+      {
+        "case": "after",
+        "rows": 1,
+        "state": "completed",
+        "source_main_sha256": "ec55fdb44757c91793e81a815a192ea077cacef09aa49db4bcb9ada5b937eaf4",
+        "backup_sha256": "8393e98df87edd47fb4ebaefd8f82d41a2b85c40e60ad31e210a573b0189779a",
+        "exact_row_bytes_equal": true,
+        "source_main_bytes_unchanged": true,
+        "backup_integrity": "ok",
+        "mode": "0o600"
+      },
+      {
+        "case": "started",
+        "rows": 1,
+        "state": "started",
+        "source_main_sha256": "26cce9f989e742351fda884ee5677293e0b9d7a5f7460aa7c65020693ed1af67",
+        "backup_sha256": "c312d4a34cde0f580df7e61082f83ea5ce14aab7f7ce135c9f9b950c006520a4",
+        "exact_row_bytes_equal": true,
+        "source_main_bytes_unchanged": true,
+        "backup_integrity": "ok",
+        "mode": "0o600"
+      }
+    ],
+    "audit_counts": {
+      "completed_preserved": 2,
+      "unknown_preserved": 1
+    },
+    "unknown_active": 1,
+    "unknown_journal_state": "started",
+    "all_dispatch_allowed": false,
+    "runner_invocations": 0,
+    "schema_sha256": "126231b5da6f0c656bdf5a45d8288de086c36f82d0c24962ccd2b241932ec376",
+    "data_sha256": "4f95d8571dd8927f7f438d29b93648aa25979503c8e590ff4e23fb5827f5b0e7",
+    "journal_schema_exact": true
+  },
+  "boundaries": {
+    "at": "2026-11-01T14:58:25.383333+00:00",
+    "d1_before": 5,
+    "d1_after": 6,
+    "added_databases": 1,
+    "removed_databases": 0,
+    "application_query_writes": 0,
+    "worker_access_schedule_writes": 0,
+    "private_directory_mode": "0700",
+    "private_file_mode": "0600",
+    "request_count": 20,
+    "export_polls": 2,
+    "import_ingest_calls": 1,
+    "signed_upload_calls": 1,
+    "worker_bindings_checked": 4,
+    "worker_binding_matches": 0,
+    "pages_inventory": "403 insufficient page.read; not retried",
+    "runner_invocations": 0,
+    "paid_upgrade": false,
+    "authority_renewal": false
+  }
+}

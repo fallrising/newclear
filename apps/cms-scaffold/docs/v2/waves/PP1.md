@@ -241,3 +241,9 @@ npm run e2e:mock
 本次只在完成必要工程與環境驗收後才可宣稱相應能力；本文DRAFT不替代實作。無新程式／新疑慮時不重跑已過完整套件；必要PR/main CI仍執行。沒有私人帳本工具／task ID時不捏造同步。
 
 外部一次來源查證（2026-10-08）：[Vite static deployment](https://vite.dev/guide/static-deploy.html) 說明 preview用途；[Docker Compose production](https://docs.docker.com/compose/how-tos/production/) 與 [restart policy](https://docs.docker.com/engine/containers/start-containers-automatically/) 支持單機正式設定與process重啟策略；[PostgreSQL16 SQL dump](https://www.postgresql.org/docs/16/backup-dump.html) 說明資料庫dump一致性。停全部writer來協調獨立media是本專案的設計推論，仍須真實演練證明。
+
+## 2026-11-01 PP1b 本地驗收
+
+已在隔離 prod runtime 通過 fresh-init 真 TTY、initialized SQL 七項 rollback 語義負例、guard live 負例、可信 TLS 正式帳號／distinct operator／explicit public grants／Q25／reset 旅程；旅程後同 API 容器重啟，20 張表 counts/hash 相同。Flyway validation 需要第二個 logical handle 的問題已修正，仍共用同一 bound PostgreSQL backend，Hikari pool 上限保持 1。
+
+[本輪證據](../../../.team/resume-20261101/RUNTIME-REPORT.md)記錄實際來源、工具例外、失敗與重驗。狀態為 local acceptance，最終整合202/202與mock93/93已通過；獨立review收尾／CI／正常合併及遠端回讀仍待完成。host recover-success 仍缺 PP1c matching verified DB＋media rollback bundle；PP1c DRAFT、完整備份還原、正式 host/offsite/upgrade/ops 與全 BW6 均未因此完成。沒有部署或 usable tag。

@@ -1,0 +1,214 @@
+{
+  "observedAt": "2026-11-01T14:58:58.453834+00:00",
+  "sourceCommit": "bc14ba834c6b99da4834e80938b75ecae898103c",
+  "codeChange": "SingleConnectionDataSource for Flyway validation; pool maximum remains1",
+  "changedSources": {
+    "services/cms-api/src/main/java/com/fallrising/cms/identity/maintenance/IdentityMaintenanceConfiguration.java": "d848dafd930ac3228cfec98ca8439331420e3d482e2f7fba6123468bb0b35218",
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/JdbcIdentityMaintenanceContractTests.java": "069ab3fe81d2e453f02555cd3f61d2962797c89a8f7a5bffc11471825505b902"
+  },
+  "guardCases": [
+    {
+      "case": "acquire-real-empty-runtime",
+      "passed": true
+    },
+    {
+      "case": "exclusive-concurrent-contenders",
+      "rejected": 2,
+      "all20TablesUnchanged": true
+    },
+    {
+      "case": "preconnection-extra-idle",
+      "rejected": "QUIESCENCE_NOT_PROVEN",
+      "all20TablesUnchanged": true
+    },
+    {
+      "case": "api-restart-during-maintenance",
+      "rejected": "QUIESCENCE_NOT_PROVEN",
+      "all20TablesUnchanged": true
+    },
+    {
+      "case": "target-metadata-drift",
+      "rejected": "QUIESCENCE_NOT_PROVEN",
+      "all20TablesUnchanged": true
+    },
+    {
+      "case": "bound-real-backend",
+      "passed": true,
+      "pid": 976,
+      "backendStartEpoch": "1793543729.652303"
+    },
+    {
+      "case": "bound-extra-same-name",
+      "rejected": "QUIESCENCE_NOT_PROVEN",
+      "all20TablesUnchanged": true
+    },
+    {
+      "case": "bound-backend-missing",
+      "rejected": "QUIESCENCE_NOT_PROVEN",
+      "all20TablesUnchanged": true
+    },
+    {
+      "case": "bound-backend-replaced",
+      "rejected": "QUIESCENCE_NOT_PROVEN",
+      "all20TablesUnchanged": true
+    },
+    {
+      "case": "negative-run-preserved",
+      "phase": "FAILED_OR_UNKNOWN",
+      "all20TablesUnchanged": true
+    }
+  ],
+  "toolImages": {
+    "baseImage": "sha256:1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09",
+    "browserImage": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+    "postgresImage": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d"
+  },
+  "composeVersion": "5.6.1",
+  "composeSha256": "47737f4236e6d3ccea7291995203f8f018058783b4c3a9469119811a0b5db8c0",
+  "scope": "local-isolated; no deploy/release",
+  "positiveCases": [
+    {
+      "case": "fresh-verifier",
+      "passed": true
+    },
+    {
+      "case": "browser-runtime-untrusted",
+      "exit": 0
+    },
+    {
+      "case": "browser-runtime-trusted",
+      "exit": 0
+    },
+    {
+      "case": "fresh-restart-verifier",
+      "passed": true
+    },
+    {
+      "case": "true-tty-fresh-init",
+      "exit": 0,
+      "prompts": 2,
+      "fixedErrors": []
+    },
+    {
+      "case": "initialized-verifier-before-login",
+      "passed": true
+    },
+    {
+      "case": "initialized-sql-negative-role-assignment",
+      "passed": true,
+      "countUnchanged": true,
+      "rollbackRestoredAll20Tables": true
+    },
+    {
+      "case": "initialized-sql-negative-permission-surface",
+      "passed": true,
+      "countUnchanged": true,
+      "rollbackRestoredAll20Tables": true
+    },
+    {
+      "case": "initialized-sql-negative-permission-type",
+      "passed": true,
+      "countUnchanged": true,
+      "rollbackRestoredAll20Tables": true
+    },
+    {
+      "case": "initialized-sql-negative-permission-predicate",
+      "passed": true,
+      "countUnchanged": true,
+      "rollbackRestoredAll20Tables": true
+    },
+    {
+      "case": "initialized-sql-negative-permission-role",
+      "passed": true,
+      "countUnchanged": true,
+      "rollbackRestoredAll20Tables": true
+    },
+    {
+      "case": "initialized-sql-negative-principal-state",
+      "passed": true,
+      "countUnchanged": true,
+      "rollbackRestoredAll20Tables": true
+    },
+    {
+      "case": "initialized-sql-negative-audit-link",
+      "passed": true,
+      "countUnchanged": true,
+      "rollbackRestoredAll20Tables": true
+    },
+    {
+      "case": "initialized-verifier-after-negatives",
+      "passed": true
+    },
+    {
+      "case": "browser-accounts-trusted",
+      "exit": 0
+    },
+    {
+      "case": "E01-complete",
+      "passed": true,
+      "credentialDeliveredOnce": true
+    },
+    {
+      "case": "forwarder-stopped",
+      "loopbackClosed": true
+    }
+  ],
+  "positiveArtifact": {
+    "baseImage": "sha256:1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09",
+    "browserImage": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+    "postgresImage": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+    "jarSha256": "e37379a1b2c6b3e4a95a33419b711fd408f0d5eabfa1b7121336116615214d9a",
+    "sourceCommit": "bc14ba834c6b99da4834e80938b75ecae898103c",
+    "apiImage": "sha256:f5d7b5ac800f7191e23b041d664fa3c865a92521d93d28a5ce25d17630f04241",
+    "composeVersion": "5.6.1",
+    "composeSha256": "47737f4236e6d3ccea7291995203f8f018058783b4c3a9469119811a0b5db8c0",
+    "worktreeDirty": true
+  },
+  "currentGates": {
+    "unit": {
+      "tests": 517,
+      "failures": 0
+    },
+    "integrationFirst": {
+      "tests": 202,
+      "failures": 1,
+      "failure": "public list p95 134ms >100ms while concurrent runtime/mock execution"
+    },
+    "mock": {
+      "tests": 93,
+      "failures": 0,
+      "duration": "5.2m",
+      "command": "timeout 920 python3 local/reconcile-20261101/mock-driver.py",
+      "innerCommand": "npm run e2e:mock",
+      "network": "none"
+    },
+    "ci": "pending final head",
+    "integrationIsolated": {
+      "tests": 202,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": "5m31s",
+      "p95Ms": {
+        "work": 59,
+        "public": 52,
+        "patch": 17
+      },
+      "thresholdsMs": {
+        "work": 150,
+        "public": 100,
+        "patch": 80
+      },
+      "command": "JAVA_HOME=<verified JDK25> timeout 900 ./gradlew integrationTest --no-daemon --no-parallel"
+    }
+  },
+  "postJourneyRestart": {
+    "sameApiContainer": true,
+    "health": "healthy",
+    "all20TableCountsAndHashesUnchanged": true
+  },
+  "codegen": {
+    "twoRunsUnchanged": true,
+    "openApiPaths": 52
+  }
+}

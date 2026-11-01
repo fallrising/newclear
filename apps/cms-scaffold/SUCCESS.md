@@ -28,7 +28,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 | AC-01 | Given 有權限編輯者與三個 demo，When 編輯、發布及公開讀取，Then 共用 API／三面流程及草稿拒絕符合契約。 | historical | [W5 交付](.team/reports/W5-DELIVERY.md)：2026-10-06 real API 14/14；648 前端及 93 mock 等歷史檢查。 |
 | AC-02 | Given 版本衝突或無權限內容操作，When 寫入／讀取，Then 原子版本檢查與 RBAC 拒絕不漏資料。 | historical | [BW1c](.team/reports/BW1c-DELIVERY.md)、[BW5](.team/reports/BW5-DELIVERY.md) 與 [P0](docs/v2/waves/P0.md)。 |
 | AC-03 | Given 本地隔離環境，When 啟動 PP1a，Then HTTPS、prod 設定、DB 不對外且不植入 demo。 | historical | [PP1a](docs/v2/waves/PP1a.md)、[狀態表](docs/v2/README.md)：PR327 VERIFIED local scope。 |
-| AC-04 | Given 正式日常帳號與維護操作，When 初始化及執行 Q25 治理，Then 權限、自身保護與恢復路徑可用。 | pending | [PP1b](docs/v2/waves/PP1b.md) 為施工圖；不能把 DOC_READY 視為實作完成。 |
+| AC-04 | Given 正式日常帳號與維護操作，When 初始化及執行 Q25 治理，Then 權限、自身保護與恢復路徑可用。 | pending | [PP1b本輪實測](.team/resume-20261101/RUNTIME-REPORT.md)已通過本地fresh/Q25；交付待CI／合併，host recover仍依PP1c，AC-04整體保持pending。 |
 | AC-05 | Given DB 與媒體持續使用，When 備份還原、升級失敗回復與例行維運，Then 資料一致且符合 RPO24h／RTO4h。 | pending | [PP1](docs/v2/waves/PP1.md) 與 [恢復契約](docs/v2/contracts/PP1-recovery.md)；完整操作驗收尚缺。 |
 
 ## 現況與缺口
@@ -68,3 +68,11 @@ mock E2E 與 real API 驗收分別記錄；保留資料時不能使用刪除 vol
 驗收計畫：共用 capture 的 dry-run／--start、三尺寸 light 擷取、component-only final URL／fixture／身份與載入斷言、focused guard regression、原生前端 gates、獨立 review 和 owned cleanup。實跑前 targets 保持 false；只有全部 M2 gates 通過才改 true。本節不改 PP1 缺口、mainline incomplete 或 usable_tag none；完整 R3、real API 與正式操作驗收未執行。結果將記錄於 [Round 2 report](fe-review/tasks/round2/report.md)。
 
 本機結果：648 workspace＋66既有PP1 unit tests及lint/types/build/bundle通過；153有效擷取（原144＋明列補抓9）和51逐頁HTTP200／final URL／身份／載入檢查通過，所有owned listeners與容器清理有證據。原9次selector timeout保留，沒有重跑144綠圖。targets verified=true僅指本次R2；24console與27request/HTTP事件如實留存，axe/fullR3未跑。獨立review與當前PR的CI／合併由root收尾，並未代行owner acceptance。
+
+## 2026-11-01 PP1b／PP1c PR續作
+
+Owner要求接續最舊PR333/334；T-0351已認領。PP1b本輪依已合併DOC_READY施工圖補AC-04（對應PP1-AC02/06、FM04–07/15）的真實fresh-init、initialized SQL與rollback-only語義負例、剩餘guard live negatives、可信TLS帳號旅程及最終同來源native/CI/獨立review。原斷言、no-demo與秘密／private network邊界保留；不以歷史部分通過代替本輪驗收。
+
+PP1c僅修正舊DRAFT與14項審查缺口，與PP1b分支隔離；未批准新規格不施工或合併。完整AC-05／正式host／offsite／upgrade／ops仍pending。本輪不部署或建立usable tag。
+
+計畫與邊界見[續作計畫](.team/resume-20261101/PLAN.md)，進度見[任務板](docs/tasks/BOARD.md)。初始pure helper suite在正常主機執行117passed/0failed/0skipped；sandbox首次僅回報8file wrappers、6failed，屬不可用執行環境結果而非產品已驗收。本輪517Java unit、201PostgreSQL integration、672workspace與117helper、lint/types/build/bundle已通過；E01收尾lint修正已重驗。Owner已批准工具例外；真TTY初始化、七項SQL rollback語義負例、真guard負例與可信TLS E01現已通過。首次Java整合201/202（public p95=134ms>100ms）保留；停止其他負載後原suite隔離202/202、p95=52ms通過，mock93/93通過。最終review／CI／合併仍待完成。詳見[本輪runtime報告](.team/resume-20261101/RUNTIME-REPORT.md)，原[前置證據表](.team/resume-20261101/EVIDENCE.md)保留歷史失敗。

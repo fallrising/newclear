@@ -517,3 +517,17 @@ selected immutable policy, 120-byte Unicode identity, sealed human reports, HTTP
 reopen and explicit Done. `TestVerifiedCoverageHTTP_*` checks closed wire/auth/scope/byte limits;
 service matrices check all-match vetoes, artifact budgets, two-snapshot races and all-table no-writes.
 Exact gate results and residual limits are recorded in [delivery evidence](evidence/m2-verified-coverage-20261101.md).
+
+
+## 2026-11-01 WorkItem material index
+
+[Approved IDX-01..05](sdd/work-item-material-index.md) refines HAI-API-001/004/005 and supports
+HAI-CONNECT-007 through stored identity discovery. Fixed IDX-AC-01..06 map to
+`TestWorkItemMaterialIndexHTTP_*` (auth, closed wire, bounds and optional adapter),
+`TestWorkItemMaterialIndex_StoredIdentityAndHistory/AcceptedRelations/BoundsAndCorruption/RunEnumVocabulary/AcceptedBoundsAndCorruption`,
+`TestWorkItemMaterialIndex_SnapshotAndNoWrites` (real WAL concurrent writer and reopen), and
+`TestWorkItemMaterialIndex_DiscoverThenComplete/MissingPolicyAndArtifactsStillReadable` (real
+accepted SQLite/Fake/HTTP, downstream discovered IDs, explicit completion and semantic stale rejection).
+[Evidence](evidence/work-item-material-index-20261101.md) distinguishes injected Impact rows,
+actual accepted command history, synthetic wire bounds and source-bound native gates.
+No full WorkItemDetail/history, M2 or connected completion acceptance is inferred.

@@ -135,3 +135,9 @@ BW5 開放問題收尾已於 PR #267 合併：帳號 404、媒體錯誤碼與既
 W3 公開面已完成本地驗收：相簿／相片燈箱、診所／獸醫、專案／里程碑，並補手機導覽、安全 Markdown、SEO 與載入／空／錯誤狀態。339 Java／473 前端／60 mock E2E 通過；Front 直接依賴宣告後另通過乾淨安裝及 119 項 API／Front 回歸。[交付與驗收證據](.team/reports/W3-DELIVERY.md)。待必要遠端 CI 與合併，未部署。
 
 W4 共用 Admin 治理已於 [PR #289](https://github.com/fallrising/newclear/pull/289) 合併；W5前端硬化本地驗收完成，648前端、93mock×3、25Vitals、60axe、11hardening、70canonical與real14均通過；[W5交付證據](.team/reports/W5-DELIVERY.md)。正式VERIFIED隨[PR #300](https://github.com/fallrising/newclear/pull/300)通過必要CI／審查並合併生效。下一步BW6/W6先文件細化；沒有部署。
+
+## 2026-11-01 PP1b 本地驗收
+
+已在隔離 prod runtime 通過 fresh-init 真 TTY、initialized SQL 七項 rollback 語義負例、guard live 負例、可信 TLS 正式帳號／distinct operator／explicit public grants／Q25／reset 旅程；旅程後同 API 容器重啟，20 張表 counts/hash 相同。Flyway validation 需要第二個 logical handle 的問題已修正，仍共用同一 bound PostgreSQL backend，Hikari pool 上限保持 1。
+
+[本輪證據](.team/resume-20261101/RUNTIME-REPORT.md)記錄實際來源、工具例外、失敗與重驗。狀態為 local acceptance，最終整合202/202與mock93/93已通過；獨立review收尾／CI／正常合併及遠端回讀仍待完成。host recover-success 仍缺 PP1c matching verified DB＋media rollback bundle；PP1c DRAFT、完整備份還原、正式 host/offsite/upgrade/ops 與全 BW6 均未因此完成。沒有部署或 usable tag。

@@ -5,6 +5,8 @@ Run from an environment that permits Metal, loopback and Codex sandbox creation.
 No cloud fallback. No permission escalation. Uses synthetic input only.
 """
 import argparse
+from execution_slot import guarded_main, mark_started, mark_clean
+from local_run_state import interrupt, failure_status, cleanup_confirmed, exit_code
 import ctypes
 import datetime
 import json
@@ -66,7 +68,7 @@ def stop_owned(proc):
         raise RuntimeError('Owned descendants remain alive')
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--task', choices=('file', 'queue-repair'), default='file')
     parser.add_argument('--harness', choices=('codex', 'opencode', 'office-opencode'), default='codex')
@@ -81,13 +83,14 @@ def main():
         parser.error('--check-lifecycle is a bounded file test; do not combine with --check-cancel or --keep-open')
     if args.check_restart and (args.task != 'file' or args.check_cancel or args.check_lifecycle or args.keep_open):
         parser.error('--check-restart is a separate bounded file acceptance')
+    mark_started()
     out = LAB / 'runs' / ('local-work-' + datetime.datetime.now(
         datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
     workspace = out / 'workspace'
     workspace.mkdir(parents=True)
     (out / 'runner.py').write_text(Path(__file__).read_text())
     if args.harness != 'codex':
-        for name in ('local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs', 'manual_recovery.mjs',
+        for name in ('execution_slot.py', 'local_run_state.py', 'local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs', 'manual_recovery.mjs',
                      'office_runtime.mjs', 'office_host.mjs', 'office_restart.mjs'):
             (out / name).write_text((LAB / 'scripts' / name).read_text())
         (out / 'opencode-launcher.py').write_text((LAB / 'scripts/bin/opencode').read_text())
@@ -149,10 +152,8 @@ def main():
     server = guard = codex = awake = None
     handles = []
     started = time.monotonic()
-    def interrupted(signum, frame):
-        raise RuntimeError(f'Interrupted by signal {signum}')
-    signal.signal(signal.SIGTERM, interrupted)
-    signal.signal(signal.SIGINT, interrupted)
+    signal.signal(signal.SIGTERM, interrupt)
+    signal.signal(signal.SIGINT, interrupt)
     def log(name):
         handle = (out / name).open('w')
         handles.append(handle)
@@ -290,8 +291,8 @@ def main():
                 raise RuntimeError('Code repair failed independent acceptance checks')
         report['status'] = 'completed'
     except Exception as exc:
-        report.update(status='failed', error=str(exc))
-        if args.keep_open and isinstance(exc, RuntimeError) and str(exc).startswith('Interrupted by signal'):
+        report.update(status=failure_status(exc), error=str(exc))
+        if args.keep_open and failure_status(exc, preview_completed=True) == 'stopped':
             if (out / 'office-result.json').exists():
                 office_result = json.loads((out / 'office-result.json').read_text())
                 if ((out / 'office-ready.json').exists() and office_result.get('file_task_passed')
@@ -309,12 +310,16 @@ def main():
             handle.close()
         if args.harness == 'office-opencode' and (out / 'office-result.json').exists():
             report['office_result'] = json.loads((out / 'office-result.json').read_text())
+        if args.harness == 'office-opencode' and codex is not None and report.get('office_result', {}).get('cleanup_completed') is not True:
+            report['cleanup_errors'].append('native_cleanup_unverified')
         if report['cleanup_errors']:
             report['status'] = 'failed'
         report['elapsed_s'] = time.monotonic() - started
         (out / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
         print(json.dumps(dict(report, artifacts=str(out)), indent=2), flush=True)
-    return 0 if report['status'] in ('completed', 'stopped') else 1
+    if cleanup_confirmed(report['cleanup_errors'], args.harness == 'office-opencode' and codex is not None, report.get('office_result', {})):
+        mark_clean()
+    return exit_code(report['status'])
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(guarded_main(main, '--prepare-only' not in sys.argv and not set(sys.argv[1:]) & {'--help', '-h'}))

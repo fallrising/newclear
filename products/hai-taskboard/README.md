@@ -85,4 +85,8 @@ The approved [verified-coverage API](docs/sdd/verified-coverage.md) adds authent
 and QA eligibility observations. [Implementation evidence](docs/evidence/m2-verified-coverage-20261101.md)
 and BOARD HM2C track its gates and delivery. The completion UI, full M2 and full P0-A remain incomplete.
 
-Next proposed backend slice: [WorkItem material index](docs/plans/work-item-material-index-20261101.md), a metadata/discovery prerequisite. It is not yet approved or implemented; full detail/history and M2 remain incomplete.
+The owner-approved [WorkItem material index](docs/sdd/work-item-material-index.md) provides scoped
+metadata, exact AC requirements and stored Run/Candidate identities for downstream reads.
+[Usage](docs/local-development.md#workitem-material-index) and
+[implementation evidence](docs/evidence/work-item-material-index-20261101.md) describe its boundaries;
+BOARD HMDTL owns delivery status. Full detail/history, completion UI and M2 remain incomplete.

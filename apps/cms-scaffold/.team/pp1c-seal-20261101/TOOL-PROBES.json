@@ -1,0 +1,62 @@
+{
+  "observedAt": "2026-11-01T15:29:16.478964+00:00",
+  "scope": "isolated synthetic no-network prerequisites only; no DB or recovery execution",
+  "cases": [
+    {
+      "kind": "java",
+      "image": "sha256:f5d7b5ac800f7191e23b041d664fa3c865a92521d93d28a5ce25d17630f04241",
+      "uidGid": "1000:1000",
+      "network": "none",
+      "readOnlyRootfs": true,
+      "exitCode": 0,
+      "stdout": "java=25.0.5+8-LTS;jdbc-load=true;imageio=true;private-read=true;private-write=true",
+      "stderr": "",
+      "syntheticOnly": true
+    },
+    {
+      "kind": "node",
+      "image": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+      "uidGid": "1000:1000",
+      "network": "none",
+      "readOnlyRootfs": true,
+      "exitCode": 0,
+      "stdout": "{\"node\":\"v24.18.0\",\"uid\":1000,\"gid\":1000,\"nlink\":1,\"privateReadWrite\":true,\"directoryFsync\":true}",
+      "stderr": "",
+      "syntheticOnly": true
+    },
+    {
+      "kind": "postgres",
+      "image": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+      "uidGid": "1000:1000",
+      "network": "none",
+      "readOnlyRootfs": true,
+      "exitCode": 0,
+      "stdout": "uid=1000 gid=1000 groups=1000\n/usr/local/bin/pg_dump\npg_dump (PostgreSQL) 16.15\n/usr/local/bin/pg_restore\npg_restore (PostgreSQL) 16.15",
+      "stderr": "",
+      "syntheticOnly": true
+    }
+  ],
+  "additionalObservedAt": "2026-11-01T15:47:04.662358+00:00",
+  "additionalCases": [
+    {
+      "kind": "api-default-uid",
+      "image": "sha256:f5d7b5ac800f7191e23b041d664fa3c865a92521d93d28a5ce25d17630f04241",
+      "user": "inherited",
+      "exitCode": 0,
+      "stdout": "uid=0(root) gid=0(root) groups=0(root)",
+      "stderr": "",
+      "noNetwork": true,
+      "syntheticOnly": true
+    },
+    {
+      "kind": "browser-nss-uid1000",
+      "image": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+      "user": "1000:1000",
+      "exitCode": 0,
+      "stdout": "{\"uid\":1000,\"gid\":1000,\"chrome\":\"Google Chrome for Testing 153.0.8010.12\",\"chromeExit\":0,\"nssExit\":0,\"nssDb\":true}",
+      "stderr": "",
+      "noNetwork": true,
+      "syntheticOnly": true
+    }
+  ]
+}

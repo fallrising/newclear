@@ -70,3 +70,5 @@ T961independentDONEreportactuallyread/validated, no scope/securityblocker; allre
 
 ## Active2026-11-01 resume
 See [bounded CMS PR333/334 resume](resume-20261101/PLAN.md); earlier plan remains historical.
+
+Current T0351 PP1c D01–D03 seal work is routed in [pp1c-seal-20261101/PLAN.md](pp1c-seal-20261101/PLAN.md); root owns integration, T114 is the only bounded independent reviewer.

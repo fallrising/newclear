@@ -41,7 +41,7 @@ No Cloud catalog investigation, UI redesign or new milestone.
 | ID | 任務 | 對應AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | M2-1 | Official Codex route qualification and same Web integration; PR895 merged | FN-02 | done | 2026-11-01T04:27:00Z | 2026-11-01T05:30:52Z | 2026-11-01T05:30:52Z |
-| M2-2 | Concurrent workspace denial, cancellation independence and cleanup; bounded resources approved | FN-03 | in_progress | 2026-11-01T11:05:00Z | — | 2026-11-01T11:05:00Z |
+| M2-2 | Concurrent workspace denial, cancellation independence and cleanup; PR906 merged | FN-03 | done | 2026-11-01T11:05:00Z | 2026-11-01T11:39:17Z | 2026-11-01T11:39:17Z |
 
 
 M2 single-route checkpoint2026-11-01T05:10Z: actual Codex Web run142e9aee passed,
@@ -49,4 +49,28 @@ fixed-base diff/check/download and cleanup confirmed; see [acceptance](../accept
 Concurrent FN03 remains pending explicit two-VM approval; no M3 work started.
 
 M2-2 actual pair2026-11-01T11:21:42Z passed, original15min window retained; capacity1 restored.
-Final independent acceptance and PR906 merge pending before this row is closed.
+Fresh independent ACCEPT_M2_LIVE and all three final-head workflows passed.
+[PR906](https://github.com/fallrising/newclear/pull/906) merged2026-11-01T11:39:17Z
+as `d55db6a9ad4606cd7df30b2bc9411b559d04f75a`; remote product bytes read back equal.
+This supersedes the earlier pending-resource checkpoint. Services stopped; no standing URL.
+M3/AC05 is not started; T-0442/T-0447 remain in_progress.
+
+## T-0442 M3 — minimum durable intent and restart slice
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M3-D | Durable submit intent, unique AP run/result reference, restart readback and unknown zero-resend; [PR929](https://github.com/fallrising/newclear/pull/929) | AC05 minimum / FN04 slice, CU-M3-01–05 | done | 2026-11-01T14:25:00Z | 2026-11-01T15:06:57Z | 2026-11-01T15:06:57Z |
+
+[Contract](../specs/SPEC-M3-durable-intents.md). Single Ready production task;
+does not start FN05 review handoff/FN07 full journey or claim whole M3 complete.
+
+M3-D independently ACCEPT_M3_MINIMUM: actual source2e08fabe, Rust339/Web26,
+real Rust/AP restarts and held real202/SIGKILL unknown zero-resend. No new coding/VM.
+[Acceptance](../acceptance/M3-durable-intents.md) retains original summary-export failure
+and successful read-only reconciliation. PR929 finalhead a73a2c39 required Fanzloud
+[CI41319261391](https://github.com/fallrising/newclear/actions/runs/41319261391) and
+[contracts41319261482](https://github.com/fallrising/newclear/actions/runs/41319261482)
+passed; merged `935ffbc1c717d61864cd32b60f2e2e5452d811b2` at2026-11-01T15:06:57Z.
+Remote Fanzloud/AP bytes read back equal. Earlier pending-delivery snapshots are historical.
+Only this minimum slice is done; full M3/FN04 events/FN05/FN07 remain open. Services stopped,
+no resident URL; unknown intent retained for trusted manual investigation.

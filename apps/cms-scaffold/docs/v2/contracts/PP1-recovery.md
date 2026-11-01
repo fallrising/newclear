@@ -164,3 +164,7 @@ Java tests用@TempDir与explicitrecords；ImageIO生成32×16 PNG original，既
 - [ ] root做五卡weakmodelwalk、独立review、精確檔案／20table計數等契約一致性與必要CI；實際超400拆卡；整體>30提拆波。
 
 外部一次來源查證2026-10-09：[PostgreSQL16 pg_restore](https://www.postgresql.org/docs/16/app-pgrestore.html)確認single-transaction implying exit-on-error、不能與paralleljobs一起；[Node24 fs](https://nodejs.org/docs/latest-v24.x/api/fs.html)為mkdir/open/fsync/rename的stdlib來源，未承諾任意主機filesystemdurability。Java媒體decode全部依上述同版source，不新增依賴。這些唯讀查證不是產品測試通過或主機工具安裝證據。
+
+## 10 2026-11-01 local adapter細化提案
+
+[PP1c local adapters](PP1c-local-adapters.md)收斂D01–D03的工具向量、RawComparisonV1、memory-only credential/socket、合成fixture與逐列browser差異。仍是待批准的新協定；本父契約既有媒體、session transaction與RTO段落不變。PP1c新增startup/stop及restart/stop獨立零差異比較，不以live API旁的inventory冒充停寫。H03/T03/T04/C10/C16群別名各指PP1c§6的a/b串行兩卡，總44卡；沒有新增平行R卡。

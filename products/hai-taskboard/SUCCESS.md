@@ -224,3 +224,20 @@ UI and product AC-02..04 remain incomplete. No release, usable tag or deployment
 ## WorkItem material-index proposal — 2026-11-01
 
 [Concrete next contract](docs/plans/work-item-material-index-20261101.md) maps remaining M2/detail gaps and proposes one metadata-only discovery API. DTL-PLAN-01..03 in BOARD cover this planning delivery; IDX-AC-01..06 remain NotRun until owner acceptance and implementation. Existing full WorkItemDetail, product ACs and delivered policy/coverage contracts are unchanged.
+
+Owner approved D1 on2026-11-01. [Normative material-index contract](docs/sdd/work-item-material-index.md)
+is now the bounded implementation scope: authenticated closed metadata/AC/Run/Candidate read,
+one SQLite snapshot, exact legacy compatibility, deterministic limits and no writes/authority.
+Fixed IDX-AC-01..06 require named Red/Green, storage/concurrency and real discovery-to-completion
+regressions, backend full/race/vet/build, web/API/docs, Claude code review and normal delivery.
+The bounded implementation is delivered in [#920](https://github.com/fallrising/newclear/pull/920)
+after independent code review, complete exact-head CI and remote source verification.
+[BOARD HMDTL](docs/tasks/BOARD.md) and [evidence](docs/evidence/work-item-material-index-20261101.md) record delivery.
+No whole-product AC or full M2 status is promoted.
+
+## Rework loop proposal — 2026-11-01
+
+[Concrete proposal](docs/plans/rework-loop-20261101.md) for the accepted but unimplemented RequestRework,
+redispatch from Developing and an explicit current-Candidate rule, so Review/QA can return to work and
+Candidate B cannot use Candidate A's material. RWK-AC-01..05 remain NotRun pending owner D1/D2; this
+documentation does not change product ACs, production behavior or the delivered M2 slices. Status: BOARD HRWK.

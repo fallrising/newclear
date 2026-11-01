@@ -29,6 +29,7 @@ CODEBOX_MODE=isolated \
 CODEBOX_LISTEN_ADDRESS=127.0.0.1:18449 \
 CODEBOX_PUBLIC_ORIGIN=https://localhost:18447 \
 CODEBOX_AGENT_PLATFORM_ADDRESS=127.0.0.1:18448 \
+CODEBOX_ISOLATED_STORE=/absolute/private/state/submissions.sqlite \
 cargo +1.97.1 run --locked -p codebox-control-plane
 ```
 
@@ -36,6 +37,21 @@ AP's configured origin must equal that HTTPS origin. The upstream is one literal
 loopback address, not an arbitrary URL. Use an approved private tunnel and trusted
 certificate for human operation; do not expose the test listeners publicly. Existing
 operator bootstrap/session rules apply; passwords are not stored in browser storage.
+
+The isolated store is required: create its administrator-owned canonical parent directory
+with0700 permissions, outside repository/guest mounts. An existing file must be private0600;
+unsafe paths, incompatible schema or storage failure refuse startup/submission. Reuse the
+same file across process restarts. Do not point it at the separate P1 event database.
+Local records contain task inputs and AP references, never session cookies or provider auth.
+
+After login, the page reads durable submission history before enabling new work. Confirmed
+tasks can be reopened from that history; observed statuses retain a cursor across restart.
+The history is a bounded record of observed AP snapshots, not every AP tool/event message.
+An unknown submission remains blocked across fresh browser sessions. Refresh is GET-only;
+it can recover a saved confirmation but never resend a task. AP currently has no public
+client-key query, so an unresolved gateway-to-AP uncertainty requires trusted investigation;
+do not delete the database or clear browser storage to bypass it. This slice provides no
+automatic abandon/retry or offline authentication. AP must be reachable for authorization.
 
 The checked-in `acceptance/m1-browser.mjs` is an explicit acceptance launcher, not a
 resident service. Its private inputs are `M1_PRIVATE_DIR` (operator-only config and

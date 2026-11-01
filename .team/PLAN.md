@@ -47,6 +47,22 @@ no repeated code review/provider. Concurrent approval question remains pending, 
 
 # Repository team ledger
 
+## HAI material-index implementation — T-0339 / 2026-11-01
+
+Owner approved reviewed D1/IDX-01..05/IDX-AC-01..06. Root owns normative/API/HTTP/integration and
+acceptance and port; one native core leaf in isolated worktree owns new SQLite files only,70minutes,
+no children/commits/network/provider calls. Model/effort inherit root. Root90–150active minutes,
+20minute checkpoints; Claude exact opus5.5/high no-tools480s+one actual-revision follow-up;
+CI20minute rounds, same failure initial+two new-hypothesis diagnoses. Named404 Red before code.
+Evidence maps fixed ACs; original failures retained. Full M2/UI/history not claimed, no new
+dependency/migration/provider/release/deploy. Aggregate tool/provider/billing/active-wait unknown.
+
+HMDTL local evidence-gate ACCEPT: root verified worker hashes/source, original194-input native
+full gate573.127s unchanged, five-file revision with actual corruption-before-capacity Red→Green,
+normal8.600s/race88.873s/vet/build5.854s. Web30/API/docs pass; Claude conditional ACCEPT249.363s
+then final ACCEPT91.023s, F1–F6 closed by source/test/doc evidence. Two code launches, no children;
+aggregate provider/tool/billing unknown. Exact-final-head full CI/merge/readback/ledger remain.
+
 ## HAI detail-read contract — T-0339 / 2026-11-01
 
 Owner continues after verified coverage delivery. Root owns next bounded backend detail contract, M2 gap mapping and fixed acceptance; no UI/provider/dependency/release/deploy. One native read-only T001,10min/1800tokens/no children/no writes, audits schema/storage gaps. Root45–75active minutes with20minute checkpoints; Claude exact opus5.5/high no-tools480s initial plus one material-revision follow-up. Existing claim remains valid. New product semantics require concrete owner decision before implementation; no repeated policy/Git approval. CI20min rounds; original failures retained. BOARD HMDTL owns status.
@@ -2735,3 +2751,37 @@ No M3, public URL, release or full-platform completion claim.
 Owner continues stated contract/polling alignment. Lead sole writer forPS01–04/T0036: bounded dashboard revision/consistency guard and durableoutbox ACKloss qualification, preserveM0 Event gap explicit, no live/provider/authoritychanges. RGR/fullsuite/actualbrowser. One freshnative readonlyreviewer T861, inheritedmodel/effort/permissions,<=1500tokens+one<=1000tokenfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota,no writes/tests/network/private/delegation. Instruction scope notOSisolation;lead owns evidencegate and authorizedGit delivery.
 
 PS source/local evidence gate ACCEPT 2026-11-01T11:09:00Z:6behavioralRED/1existingpass→52dashboardGREEN;138Node/308Python=446full;actualPS1browser16checks/114API/noerrors/3assethashes. T861 finalACCEPT,437links/50contracts/8indexes/task/syntax/diff,67inputsfrozen. Initialisolationtestfailure andsandboxEPERM/nativeassertion retained;unchangedfullsuite passed via normal escalation. Sourceonly, no live/authority/paidchange;GitCI/merge/readbackandboardclosurefollow.
+
+## PSL original dashboard rollout — 2026-11-01T11:42:24Z
+
+Ownercontinues statednextstep afterPS and prior explicit originaldashboardapproval. Leadsoleoperator:pinPR9056files, freshstate, assetupload/publish only with3unchangedmodules, keepsecrets/D1/Access/Cron/deadlines, nopause/renewal/paidupgrade. ExistingT861sourceACCEPT/446tests/16browserchecks apply. Onefreshnative readonlypublic-evidence reviewerT862,inheritedmodel/effort/permissions,<=1200tokens+onefocusedfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota; no private/network/tests/writes/delegation. InstructionsnotOSisolation;leadchecksprivate receipts.
+
+PSL evidence gate ACCEPT 2026-11-01T11:48:42Z:originaldashboardat100%11:44:40Z,manifest3/actualupload1,publishonce;final11:45:28Z preserves193commands/222firings/186journal/4grants/Access/Cron/deadlines,samePID/NRestarts,3exactunchangedmodules. Leadprivateaudit;T862initialREWORKstaleindexstatus→correctedfourentries→focusedACCEPT.51contracts/9indexes/task-report/diff/402links/67unchangedinputs/8privateliteralsscan. No newjob/renewal/restart/paidupgrade/humanwindow. NormalGitgatesremain.
+
+# T-0442 M3 durable-intent slice — 2026-11-01
+
+Owner continuation after accepted M2. Scope and failure semantics:
+platform/fanzloud/docs/specs/SPEC-M3-durable-intents.md, CU-M3-01–05.
+Parent owns gateway/Web integration, real process/AP/browser evidence and final delivery.
+One isolated store worker: .team/fanz-m3-t0442/store-task.md; one fresh acceptance reviewer
+after integration. No recursive delegation. Original M1/M2 dirty workers preserved.
+Estimated90–150 active minutes plus bounded CI;20min checkpoints. No VM/coding invocations.
+Tests first, transaction/security/fault checks, Rust/Web/native checks, real restart readback,
+independent acceptance, required CI/normal merge/readback/ledger/backup. No FN05/FN07 expansion.
+Result: independent ACCEPT_M3_MINIMUM on2e08fabe;339 native/26Web pass, actual
+confirmed admission/restarts and held real202/SIGKILL unknown lock, prior M2 result readback.
+Zero new coding/VM; two explicit queued tasks cancelled. Original summary-export UUID
+failure retained; read-only reconciliation accepted without rerun. API gap means unknown
+stays pending investigation without POST replay. Required CI/merge/readback/ledger remain.
+
+## RX remote D1 restore audit — 2026-11-01T14:31:46Z
+
+Ownercontinues statedremoteisolatedrestore. Leadsolewriter/operator: pureaudit withRGR/fullsuite; existinginactiveRFsource only, officialexport/privatebackup/importone newunboundD1; no sourcewrites/liveLab/authorityrenewal/paidupgrade/runnerexecution. Keepdatarestorevsreconcile/failover distinction. Onefreshnative readonlyreviewerT863,inheritedmodel/effort/permissions,<=1500tokens+one<=1000tokenfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota,no tests/network/private/writes/delegation. NaturalinstructionsnotOSisolation;leadownsprivateverification/evidencegate/Git.
+
+RX scoped evidence gate ACCEPT_SOURCE_PARTIAL_REMOTE 2026-11-01T14:41:42Z:17focused/138Node+325Python=463full,69inputsfrozen,52contracts/9indexes/432links/diff. T863onecallACCEPTpureaudit/partialclaims; actualsource2completed/1unknown originaljournals readonly. Automaticapprovalreview rejected fullsensitiveexportdownloaddestination beforeexecution; explicitownerquestionpending, no export/newD1/import/journalbackup. No workaround/authority/liveLabchanges; RX02/03notdone; sourceGitdeliverycontinues.
+
+## RX authorized remote execution — 2026-11-01T14:53:29Z
+
+Owner explicitly approved full RF sensitive D1 export to established privateRX destination and one new unboundD1 import. Leadsoleoperator preserves rejected preapproval attempt, source/noauthority/noLab/nopaidchanges; freshpreflight, export/import bounded, exactschema/allrows/3onlinejournalbackups/audit, independentT864 publicevidencereview thennormalGitdelivery. T864freshnative inheritedmodel/effort/permissions,<=1500tokens+one<=1000followup,five-minute monitored/nativeinterrupt,unknowncost/quota; no private/network/tests/writes/delegation. InstructionsnotOSisolation. No source changes planned; prior463tests apply only with69inputhash equality.
+
+RX remote evidence gate ACCEPT_BOUNDED_DATA_RESTORE 2026-11-01T15:04:10Z:ownerexplicitapprovalafterrejection;officialexport2polls16454bytes,onecreate/upload/ingest,4way5tables/42rows/3explicit+6implicitindexes equal;3onlinejournalbackup exactBLOB/schema/sourcebytes,2completed/1unknownactive1started,0runner.6expiredgrants,4Workersettingsnobinding,optionalPagesGET403preserved/notexpanded.69inputsunchanged→historical463tests;52contracts/9indexes/436links/9privateliteralsscan. T864onecallACCEPT,leadprivateaudit. NormalGitgatesremain,nofailover/fullmainline/knownbillingclaims.

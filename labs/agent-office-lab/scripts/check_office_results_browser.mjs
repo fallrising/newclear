@@ -39,8 +39,23 @@ try {
     assert(await page.locator('#detail').isHidden());
   }
   await page.selectOption('#provider', 'all');
+  for (const status of ['failed', 'cancelled']) {
+    await page.selectOption('#status', status);
+    const matching = data.runs.filter(r => r.status === status);
+    assert.equal(await page.locator('#runs tr').count(), matching.length);
+    if (status === 'cancelled' && matching.length) {
+      await page.locator('#runs button').first().click();
+      assert((await page.locator('#detail').innerText()).includes('已取消'));
+    }
+  }
+  await page.selectOption('#provider', 'pi');
   await page.selectOption('#status', 'failed');
-  assert.equal(await page.locator('#runs tr').count(), data.runs.filter(r => r.status === 'failed').length);
+  for (const run of data.runs.filter(r => r.test_scenario && r.status === 'failed')) {
+    await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
+    const detail = await page.locator('#detail').innerText();
+    assert(detail.includes(`本機注入 HTTP ${run.test_scenario.slice(-3)}`));
+    assert(detail.includes(run.failure_check_passed ? '故障測試通過；任務仍為失敗。' : '故障測試未通過。'));
+  }
   await page.reload();
   assert.equal(await page.locator('#runs tr').count(), data.runs.length);
   assert.deepEqual(errors, []);assert.deepEqual(external, []);

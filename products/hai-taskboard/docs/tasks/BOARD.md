@@ -389,8 +389,44 @@ Owner continues after HM2C. Source9f3f72af; HAI unchanged from#902, no open HAI 
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HMDTL | Review next backend material-index contract; 等 owner D1 before implementation | DTL-PLAN-01..03; H02 support | in_progress | 2026-11-01T11:00:00Z | — | 2026-11-01T11:17:20Z |
+| HMDTL | Implement approved backend material-index contract | DTL-PLAN-01..03; IDX-AC-01..06; H02 support | done | 2026-11-01T11:00:00Z | 2026-11-01T12:22:17Z | 2026-11-01T12:22:52Z |
 
 DTL-PLAN-01 maps every M2 requirement and detail field to current authority/storage and gaps. DTL-PLAN-02 defines one bounded route/shape/consistency/error/resource proposal with fixed product oracles and explicit unresolved decisions. DTL-PLAN-03 disposes Claude review, validates documents and completes required Git/CI/readback/ledger synchronization. These are planning ACs, not product acceptance; full M2 remains incomplete.
 
 [Concrete proposal](../plans/work-item-material-index-20261101.md) and [review dispositions](../evidence/work-item-material-index-plan-20261101.md): Claude follow-up ACCEPT for presenting D1, all source conditions closed. Owner decision pending; merging these documents does not approve IDX-01..05 or run IDX-AC-01..06. Production/OpenAPI/accepted SDD unchanged. HMDTL remains in_progress without end while awaiting D1.
+
+2026-11-01T11:40:31Z: owner explicitly approved D1; the preceding waiting point is historical.
+[Normative contract](../sdd/work-item-material-index.md) and fixed IDX-AC-01..06 now govern
+implementation. Source d55db6a9 (wt new fetched unrelated main after intake211da65f; HAI/CI identical); no HAI open PR at intake. One isolated native core leaf70minutes,
+root90–150active minutes/20minute checkpoints, Claude exact opus5.5/high480s+one material-revision
+follow-up; CI20minute rounds. No UI/provider/dependency/migration/release/deploy; full M2 incomplete.
+
+2026-11-01T12:09:30Z: approved implementation locally accepted. [Evidence](../evidence/work-item-material-index-20261101.md)
+maps IDX-AC-01..05 to real storage/HTTP/discovery oracles; full baseline573.127s, bounded final
+revision normal/race88.873s/vet/build and web30/API/docs pass. Claude initial conditional ACCEPT
+249.363s → revised ACCEPT91.023s, F1–F6 disposed. Original failures retained. IDX-AC-06 remains
+pending exact-head CI/normal merge/readback/ledger; HMDTL keeps in_progress and no end.
+
+2026-11-01T12:22:52Z: implementation [#920](https://github.com/fallrising/newclear/pull/920) merged normally at
+2026-11-01T12:22:17Z as `c545aedb054ab9d0a45317e8e25c7d7f018ff4a6`. Exact head `ab039c9afe3d638175b8ae95097257ec0ef9ce67`
+passed full HAI CI41305208581 (backend normal/race/vet/build and web) and Project success41305208583;
+no pending review threads. Remote332 product paths match reviewed source byte-for-byte. HMDTL end
+uses that actual functional merge time. This closeout changes documentation only; ledger/final private
+handoff receipts follow normal delivery. IDX-AC-01..05 and final-head implementation gates accepted;
+full detail/history, completion UI, full M2 and full product remain incomplete. T-0339 stays in_progress.
+
+## T-0339 — rework loop contract
+
+Owner continues after HMDTL. Source caad3c3a; no open HAI PR at intake. Comparing remaining-work M2 with source found
+that accepted RequestRework is unimplemented, DispatchRun starts only from Ready and the current Candidate is implicit,
+so Review/QA cannot return to work and v0.2 AC-02 is lawfully unreachable. This task prepares the concrete contract first;
+implementation waits for owner D1/D2. UI, ReopenWorkItem, full detail/history, migration and providers stay out of scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HRWK | Propose rework/redispatch/current-Candidate contract; 等 owner D1/D2 before implementation | RWK-PLAN-01..03; RWK-AC-01..05 proposed; H02 support | in_progress | 2026-11-01T14:15:00Z | — | 2026-11-01T14:42:00Z |
+
+RWK-PLAN-01 maps the remaining M2/Done gaps to source with evidence. RWK-PLAN-02 fixes one bounded contract,
+acceptance and the minimal owner decisions. RWK-PLAN-03 disposes Claude review, passes document checks and
+completes Git/CI/readback/ledger delivery. These are planning ACs; RWK-AC-01..05 stay NotRun until approval and
+implementation. [Proposal](../plans/rework-loop-20261101.md); [review evidence](../evidence/rework-loop-plan-20261101.md).

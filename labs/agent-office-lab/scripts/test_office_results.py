@@ -57,7 +57,7 @@ class OfficeResultsTest(unittest.TestCase):
 
     def test_failure_stop_startup_and_incomplete_never_complete(self):
         for index, (status, startup, expected) in enumerate([
-            ('failed', False, 'failed'), ('stopped', False, 'stopped'),
+            ('failed', False, 'failed'), ('stopped', False, 'stopped'), ('cancelled', False, 'cancelled'),
             ('interrupted', False, 'stopped'), ('completed', True, 'startup_only'),
             ('starting', False, 'incomplete'),
         ]):
@@ -90,6 +90,32 @@ class OfficeResultsTest(unittest.TestCase):
             (run / 'workspace/result.json').write_bytes(raw)
         self.assertTrue(all(r['status'] == 'unverified' for r in self.read()))
         self.assertTrue(all('content' not in r['artifact'] for r in self.read()))
+
+    def test_fault_acceptance_never_counts_as_successful_task(self):
+        run, report = self.make_run('pi')
+        (run / 'workspace/result.json').unlink()
+        report['office']['native_error_verified'] = True
+        report.update(status='failed', fault_injection={'source': 'loopback', 'http_status': 401}, failure_check_passed=True,
+                      model_inference_verified=False, client_requests=1, external_requests=0, remaining_owned_processes=0)
+        (run / 'result.json').write_text(json.dumps(report))
+        row = self.read()[0]
+        self.assertEqual(row['status'], 'failed')
+        self.assertEqual(row['test_scenario'], 'injected_http_401')
+        self.assertTrue(row['failure_check_passed'])
+        del report['remaining_owned_processes']
+        (run / 'result.json').write_text(json.dumps(report))
+        self.assertFalse(self.read()[0]['failure_check_passed'])
+        report['status'] = 'completed'
+        (run / 'result.json').write_text(json.dumps(report))
+        self.assertEqual(self.read()[0]['status'], 'unverified')
+        self.assertFalse(self.read()[0]['failure_check_passed'])
+
+    def test_malformed_fault_metadata_is_invalid_not_completed(self):
+        run, report = self.make_run('pi')
+        for fault in ('private', {'source':'loopback','http_status':200}, {'source':'loopback','http_status':401.0}, {'source':'remote','http_status':401}):
+            report['fault_injection'] = fault
+            (run / 'result.json').write_text(json.dumps(report))
+            self.assertEqual(self.read()[0]['status'], 'invalid')
 
     def test_missing_artifact_or_report(self):
         run, _ = self.make_run()

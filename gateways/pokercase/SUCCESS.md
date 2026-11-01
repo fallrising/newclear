@@ -10,6 +10,14 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Fresh TUI trial in owner-trusted directory
+
+Owner confirmed directory trust and explicitly approved [TT-1–TT-3](docs/tasks/T-0426-tui-trusted.md): a new3request/600second/60second fixed-input text/native-reuse trial. Earlier budgets remain closed. Exact trustedcwd with separate gateway data, pinned reviewedCLI/runtime, stopfirstfailure/no retry; actual result:3/3passed, sameprocess and matching-session restart verified on retainedCLI2.1.312; usagehistory and ownedcleanup passed. Original17AC and mainline incomplete remain.
+
+## T-0426 — Approved three-request real TUI pilot
+
+Owner approved [TP-1–TP-3](docs/tasks/T-0426-tui-pilot.md): new3gatewayrequests/10minutes/60seconds each, fixed-input firsttext/sameprocess/restartresume. Stopfirstfailure; prior6admissions remain exhausted. This is a bounded acceptance attempt, with no new runtime change or whole-product completion claim. Result: first real admission stopped at an owner-interaction prompt (HTTP401); later two cases unexecuted, no retry. Official Pro login preflight passed; native live reuse remains unaccepted.
+
 ## T-0426 — Inline instruction role preservation
 
 [NR-1–NR-3](docs/tasks/T-0426-instruction-roles.md) correct the observed system text-block/string role mismatch while preserving strict reuse criteria. This bounded offline correction does not accept live native reuse or reopen the exhausted pilot budget. Original17AC remains unchanged.

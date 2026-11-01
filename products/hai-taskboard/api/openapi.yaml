@@ -194,6 +194,48 @@ paths:
         default:
           $ref: "#/components/responses/Error"
         "401": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/work-items/{work_item_id}/material-index:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - $ref: "#/components/parameters/WorkItemID"
+    get:
+      summary: Discover persisted WorkItem material identities
+      operationId: getWorkItemMaterialIndex
+      x-hai-permission: project.read
+      description: >-
+        Observation only, one SQLite snapshot. No policy/artifact eligibility or Done claim.
+        All responses are no-store/nosniff. Fixed precedence is canonical path, GET-only method
+        (HEAD is 405 with Allow GET), session, masked project authorization, masked item syntax,
+        query/body rejection, scoped storage. No query or body is accepted. Recheck cancellation
+        and session revocation before success. Legacy Candidate IDs are returned byte-exact even
+        when narrower downstream routes cannot address them. Initial/Impact reports recorded
+        relations only; no activation. Full WorkItemDetail remains a separate contract.
+      responses:
+        "200":
+          description: Closed snapshot, at most 4 MiB encoded JSON, with no writes or artifact IO.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkItemMaterialIndex" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405":
+          description: Only GET is accepted, including explicit rejection of HEAD.
+          headers:
+            Allow:
+              schema: { type: string, const: GET }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/APIError" }
+        "503":
+          description: Capacity/unavailable or malformed bounded stored data; no private cause.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/MaterialIndexReadError"
+                  - $ref: "#/components/schemas/MaterialIndexCapacityError"
+        default: { $ref: "#/components/responses/Error" }
   /projects/{project_id}/work-items/{work_item_id}:
     parameters:
       - $ref: "#/components/parameters/ProjectID"
@@ -664,6 +706,159 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/APIError" }
   schemas:
+    MaterialIndexDigest:
+      allOf:
+        - $ref: "#/components/schemas/SHA256"
+        - not: { const: "sha256:0000000000000000000000000000000000000000000000000000000000000000" }
+    MaterialIndexLegacyACRevisionRef:
+      type: object
+      additionalProperties: false
+      required: [ac_id, revision_digest]
+      properties:
+        ac_id:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Exact legacy validText ID, at most80 UTF-8 bytes; Unicode/space/slash allowed, controls forbidden.
+        revision_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+    MaterialIndexAcceptedSpecification:
+      type: object
+      additionalProperties: false
+      required: [accepted_revision_digest, binding_digest, graph_revision_digest, policy_revision_digest, project_head_version, work_item_head_version, acceptance_kind]
+      properties:
+        accepted_revision_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        binding_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        graph_revision_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        policy_revision_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        project_head_version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        work_item_head_version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        acceptance_kind: { type: string, enum: [Initial, Impact] }
+    MaterialIndexRun:
+      type: object
+      additionalProperties: false
+      required: [run_id, input_digest, created_at, desired_action, dispatch_state, observed_state, reconciliation_state, side_effect_outcome]
+      properties:
+        run_id: { $ref: "#/components/schemas/RunID" }
+        input_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        created_at: { $ref: "#/components/schemas/MaterialIndexTimestamp" }
+        desired_action: { type: string, enum: [None, Dispatch, CancelRequested] }
+        dispatch_state: { type: string, enum: [Pending, Claimed, Sent, Acknowledged, FailedToDispatch] }
+        observed_state: { type: string, enum: [Unknown, Starting, Running, Succeeded, Failed, Canceled] }
+        reconciliation_state: { type: string, enum: [None, NeedsReconcile, Resolved] }
+        side_effect_outcome: { type: string, enum: [NotApplicable, Confirmed, OutcomeUnknown] }
+    MaterialIndexTimestamp:
+      type: string
+      format: date-time
+      description: Canonical UTC RFC3339Nano from positive signed-int64 Unix nanoseconds, exact roundtrip (1970..2262).
+    MaterialIndexCandidate:
+      type: object
+      additionalProperties: false
+      required: [candidate_id, run_id, candidate_digest, input_subject_digest, created_at]
+      properties:
+        candidate_id:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Exact generic validText ID, at most80 UTF-8 bytes; no URL-addressability guarantee.
+        run_id: { $ref: "#/components/schemas/RunID" }
+        candidate_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        input_subject_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        created_at: { $ref: "#/components/schemas/MaterialIndexTimestamp" }
+    WorkItemMaterialIndex:
+      type: object
+      additionalProperties: false
+      required: [api_version, kind, observation_only, project_id, work_item_id, title, goal, human_owner_id, phase, work_item_version, accepted_specification, required_ac_revisions, runs, candidates, cursor, restore_generation]
+      properties:
+        api_version: { type: string, const: v1 }
+        kind: { type: string, const: work_item_material_index/v1 }
+        observation_only: { type: boolean, const: true }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        title: { type: string, minLength: 1, maxLength: 240, description: "validText, at most240 UTF-8 bytes." }
+        goal: { type: string, minLength: 1, maxLength: 8000, description: "validText, at most8000 UTF-8 bytes." }
+        human_owner_id: { type: string, minLength: 1, maxLength: 120, description: "validText, at most120 UTF-8 bytes." }
+        phase: { type: string, enum: [Draft, Ready, Developing, Review, QA, Done, Canceled] }
+        work_item_version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        accepted_specification:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/MaterialIndexAcceptedSpecification"
+        required_ac_revisions:
+          type: array
+          maxItems: 1024
+          items:
+            anyOf:
+              - $ref: "#/components/schemas/MaterialIndexLegacyACRevisionRef"
+              - $ref: "#/components/schemas/InitialACRevisionRef"
+          description: Exact ID then revision ordering; accepted/legacy branch is selected below, no normalization.
+        runs:
+          type: array
+          maxItems: 1024
+          items: { $ref: "#/components/schemas/MaterialIndexRun" }
+        candidates:
+          type: array
+          maxItems: 1024
+          items: { $ref: "#/components/schemas/MaterialIndexCandidate" }
+        cursor:
+          type: object
+          additionalProperties: false
+          required: [stream_epoch, event_sequence]
+          properties:
+            stream_epoch: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+            event_sequence: { type: integer, minimum: 0, maximum: 9223372036854775807 }
+        restore_generation: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+      allOf:
+        - if: { properties: { accepted_specification: { type: "null" } } }
+          then:
+            properties:
+              required_ac_revisions:
+                items: { $ref: "#/components/schemas/MaterialIndexLegacyACRevisionRef" }
+          else:
+            properties:
+              required_ac_revisions:
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/InitialACRevisionRef"
+                    - properties:
+                        revision_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+    MaterialIndexReadError:
+      type: object
+      additionalProperties: false
+      required: [api_version, ok, error, correlation_id]
+      properties:
+        api_version: { type: string, const: v1 }
+        ok: { type: boolean, const: false }
+        correlation_id: { type: string }
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, retryable]
+          properties:
+            code: { type: string, enum: [projection_unavailable, storage_corruption] }
+            message: { type: string }
+            retryable: { type: boolean, const: false }
+    MaterialIndexCapacityError:
+      type: object
+      additionalProperties: false
+      required: [api_version, ok, error, correlation_id]
+      properties:
+        api_version: { type: string, const: v1 }
+        ok: { type: boolean, const: false }
+        correlation_id: { type: string }
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, retryable, details]
+          properties:
+            code: { type: string, const: projection_unavailable }
+            message: { type: string }
+            retryable: { type: boolean, const: false }
+            details:
+              type: object
+              additionalProperties: false
+              required: [reason]
+              properties:
+                reason: { type: string, const: material_index_capacity_exceeded }
     LocalSession:
       type: object
       additionalProperties: false

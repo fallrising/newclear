@@ -55,6 +55,8 @@ flowchart TD
     Harness --> GH[GitHub read-only search / repo metadata]
 ```
 
+T-0012 加入[統一 CLI](DISPATCH.md)：真實斷網 detect、預設 plan、顯式 run 與四 runner 共用執行鎖。此為既有合成任務入口；T-0013 已完成本地 OpenCode 新入口真實任務、原生取消與 Ctrl+C 清理，遠端新入口及 UI 派工仍待驗。原生事件與生命週期契約不變。
+
 ## 4. Provider 接入契約
 
 | Provider | MVP 路徑 | 驗證重點 | 狀態 |
@@ -133,6 +135,8 @@ GitHub 調研實驗先前在 bind 階段被沙箱拒絕，AC-10 尚未通過。[
 | AC-13 | Cursor Agent 完成同等合成任務 | CLI 身分、session、model、原生完成事件、產物 hash |
 
 MVP 完成要求 AC-01–AC-09、AC-11、AC-13 通過；Strata 實驗另以 AC-10 判定，不以 mock 代替 live。UI 收到狀態後 1 秒內更新、停止後無 orphan process，作為待量測目標，不是目前成績。
+
+T-0014 的 [Pi 401／429 故障驗收](FAILURES.md) 使用真實原生工位與本機注入 HTTP 錯誤，已驗證失敗、不自動重試、清理與結果分類。這是 AC-07 子集，不代表 DeepSeek 真實服務故障、其他 provider 或完整顯式重試流程通過。
 
 ## 9. 實作順序與退出條件
 

@@ -30,8 +30,13 @@ export const copy = {
   "error.failed": "操作沒有完成，請再試一次。",
   "error.forbidden": "你沒有執行這個操作的權限。",
   "error.lastAdmin": "這個變更會讓系統沒有任何可用的管理員，已取消。",
+  "error.confirmationRequired": "請重新確認要永久刪除的內容。",
+  "error.selfDisable": "無法停用自己的帳號。",
+  "error.selfDemotion": "無法移除自己的管理員角色。",
 
   "confirm.phraseLabel": "請輸入「{phrase}」以確認",
+  "confirm.deletionWordLabel": "請輸入 DELETE",
+  "confirm.irreversible": "我了解永久刪除後無法復原。",
   "password.body": "這是臨時密碼，只會顯示這一次。請用安全的方式交給對方；對方登入後要自行更改。",
   "password.copy": "複製密碼",
   "password.copied": "已複製",

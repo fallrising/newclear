@@ -645,3 +645,47 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 真RED6fail／1existingpass，GREEN52dashboard；完整138Node＋308Python＝446tests，零fail/skip；PS1真Chromium/workerd/D1/Python16checks／114API／零browser errors，三asset hash與公開原receipt相同。兩種快照GET注入均拒絕、原D1列不變；HTTP ACK遺失及原artifact精確下載回歸保持。T861最終獨立ACCEPT。
 - 初次default-isolation只有file級失敗，不算行為RED；sandbox full的Node native assertion／35Python socket EPERM保留，正常escalation後同套測試全過，無跳測。既有SQLite warnings保留。50contracts／8indexes初驗，正常合併並行main後51contracts／9indexes通過；task/report／syntax／diff／437links與67inputs固定。回讀local/remote fulltree相等、clean、head為main祖先，67inputs皆相符。
 - 本輪只改dashboard source及驗證／文件；Worker／runner／D1 schema未改，原看板尚未部署。M0 Event/source_seq/cursor未實作，不以完整snapshot跳版冒充漏seq恢復；原要求與source/local/live差別保留，完整mainline incomplete／usable_tag none。沒有private/live操作、續權、付費升級或owner重測。後續按既有流程接入已驗證看板修正；本結案只改任務板。
+
+## T-0037 — 原看板快照順序修正接入
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0037-1 | 固定候選與現況 | PSL-01 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+| T-0037-2 | 原看板更新 | PSL-02 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+| T-0037-3 | 歷史與權限回讀 | PSL-03 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+| T-0037-4 | 審查及交付 | PSL-04 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+
+### T-0037 Git交付與原看板接入收尾
+
+- [PR915](https://github.com/fallrising/newclear/pull/915) head `c311f54d35206100a3a7575c489c0c9d421ccf00`，merge `39a3bab0ea45b6a7a38a270e32e35618481f4f85`，2026-11-01T11:50:59Z合併。exact-head CI全過：CloudLab `41303587929`、Project success `41303587975`、llms `41303587963`。
+- PSL01–04：固定PR905六份候選；11:44:40Z原Worker新版100%，三modules逐byte不變，只有dashboard.mjs內容改變。一次asset session、一個bucket／一份上傳、一次publish，無失敗／重播。manifest三條、實際上傳一份分列；舊helper assets_uploaded3欄位計的是manifest，原收據保留、最終按bucket證據修正解讀。
+- 11:45:00Z final snapshot／11:45:28Z保全驗證：原193commands整列、222firings／186journal及稽核歷史／應用schema保留，最終193commands／active0；4grants、Access、Cron、settings、secret bindings及授權期限相同。runner同PID／NRestarts，本機config/policy/client ledger hash與journal identity保持。沒有額外job／重啟／續權／付費升級；resident保守截止仍2026-11-05T07:24:25Z。
+- Lead核對實際private receipts；T862初審要求四份入口把「未部署」改為歷史狀態，修正後集中複審ACCEPT。51contracts初驗／合併並行main後52contracts、9indexes、task-report／diff／402links、67inputs未變與8private-literals掃描通過；公開receipt與實際final欄位一致。正常merge保留並行工作，local/remote fulltree相等、clean、head為main祖先、67remote inputs相符。
+- 歷史PR905的446tests／16browserchecks支持source候選，不冒充本輪真人asset下載。未續human窗口或要求Console／Safari／手機；secret採繼承且metadata保持，無逐值讀回。回退request已保存未執行，原D1／歷史保留；provider用量／帳單unknown，完整mainline incomplete／無usable tag。後續遠端unknown/in-flight隔離還原及provider用量缺口；本結案只改任務板。
+
+## T-0038 — 遠端D1隔離還原對帳
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0038-1 | 有界純對帳器 | RX-01 | done | 2026-11-01T14:31:46Z | 2026-11-01T14:44:33Z | 2026-11-01T15:07:29Z |
+| T-0038-2 | 官方遠端還原（owner已批准） | RX-02 | done | 2026-11-01T14:31:46Z | 2026-11-01T15:06:46Z | 2026-11-01T15:07:29Z |
+| T-0038-3 | 遠端原結果及未知保留 | RX-03 | done | 2026-11-01T14:31:46Z | 2026-11-01T15:06:46Z | 2026-11-01T15:07:29Z |
+| T-0038-4 | 驗證審查交付 | RX-04 | done | 2026-11-01T14:31:46Z | 2026-11-01T15:06:46Z | 2026-11-01T15:07:29Z |
+
+PR925／927時RX為partial：純對帳器與來源唯讀核對已完成；自動審批拒絕完整敏感export下載，未執行遠端匯出／新D1／import。等待owner批准具體payload與私人保存位置，不宣稱RX02／03通過。
+
+RX01 source交付PR[925](https://github.com/fallrising/newclear/pull/925)於2026-11-01T14:44:33Z合併（head8b41f8b934044ce3c66044624ab233db761a186c、mergef216f48192342d491e6561b960515d48ec2db6ef）。三項exact-head CI通過：CloudLab41317523620、project41317523633、llms41317523637；本機463tests、17auditcases、T863ACCEPT、52contracts／9indexes／432links／8private-literals無命中。回讀fulltree相等、clean、69inputs相同、head為main祖先。僅RX01結案；RX02／03仍等owner批准，RX04的remote驗證與整輪交付未完成。未export／create／import／backup／部署／續權／付費升級；source-only2completed／1unknown不冒充restore。
+
+2026-11-01T14:53:29Z owner已明確批准完整RF備份payload／私人保存位置及新未綁定D1還原，RX02–04繼續；前述等批准及未執行是PR925／927時的歷史狀態。
+
+RX02／03實際完成：官方export兩poll、16454bytes、單一新D1／signed PUT／ingest；source-before／SQL／restore／source-after完整schema及42列相同、remote quick_check／FK通過。3份online journal backup／原BLOB與source main hash相同，2completed原bytes／時間保留、1unknown仍active1／started，零runner。四Worker無新D1binding；額外Pages清單缺page.read回403，不擴權、不聲稱全域盤點通過。等本輪獨立review／Gitmerge後填RX02–04 end。
+
+T864獨立審查ACCEPT bounded remote data restore；主導privateaudit接受，69inputs不變支持歷史463tests；52contracts／9indexes／436links／9private-literals掃描通過。保留Pages403／fullmainline與failover未完成，正常Git交付中。
+
+### T-0038 遠端還原驗證交付
+
+- RX01已由PR925／927交付；RX02–04在owner明確批准完整payload／私人目的地後完成，PR[931](https://github.com/fallrising/newclear/pull/931)於2026-11-01T15:06:46Z合併：head `b916bc22dcde251ae534b9d6303c385ed5374bc7`，merge `75b31f332e50612ccdb2b1f34d251475970a7e9f`。
+- Exact-head CI全過：CloudLab `41319376995`、Project success `41319376982`、llms `41319376951`。T864獨立ACCEPT與lead privateaudit接受限定資料還原；52contracts／9indexes／436links、9private-literals無命中。正常merge保留並行main，fulltree回讀相同／clean／head為main祖先，69runtime/test/tool/recipe inputs與歷史463tests版本一致。
+- 官方export2polls、16454bytes、單一新D1／signed PUT／ingest14:55:43Z完成；四方schema（5應用表、3explicit／6implicit indexes，僅_cf_KV排除）與42列相同。3journal onlinebackup完整schema／raw BLOB rows及source main bytes一致；2completed原artifact bytes／digest／outcome／時間保留，1unknown仍reconciling／active1／journal started。6grant已到期，schedule關閉、testtoken停用、無Cron，零runnerinvocations。
+- D1清單5→6，未刪除舊DB，四Worker settings無新binding；本輪沒有Worker／Access／Cron／Pages設定寫入或原Lab變更。額外Pages全域GET403缺page.read，沒有重試／擴權，不宣稱其盤點通過。初次自動審批拒絕與後續owner明確批准保留。
+- 本輪RX限定資料還原完成；不是活躍程序failover、新fence補報或跨系統原子快照，沒有續權／付費升級。provider用量／帳單仍unknown，完整mainline incomplete／無usable tag。後續補provider用量觀測；本收尾PR只改任務板。

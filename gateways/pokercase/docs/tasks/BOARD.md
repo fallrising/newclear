@@ -6,9 +6,9 @@ Demand:deskT0426;claim383merged. [TR-1–TR-3](T-0426-tui-tools-renewed.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TR-01 | Pinned unchanged runner and independent preflight | TR-1 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:05:45Z | 2026-11-01T17:08:23.771072+00:00 |
-| TR-02 | New bounded actual MCP tool/result attempt | TR-2 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:05:45Z | 2026-11-01T17:08:23.771072+00:00 |
-| TR-03 | Actual evidence and delivery | TR-3 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:06:24.731898+00:00 | 2026-11-01T17:08:23.771072+00:00 |
+| TR-01 | Pinned unchanged runner and independent preflight | TR-1 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:05:45Z | 2026-11-01T17:09:08.818997+00:00 |
+| TR-02 | New bounded actual MCP tool/result attempt | TR-2 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:05:45Z | 2026-11-01T17:09:08.818997+00:00 |
+| TR-03 | Actual evidence and delivery | TR-3 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:06:24.731898+00:00 | 2026-11-01T17:09:08.818997+00:00 |
 
 
 Product [PR950](https://github.com/fallrising/newclear/pull/950), source `18e9f18fd74327cff30f7e0fc2f92902b2d8e000`, merged `8cf0f3309a936653cb822b482c79eacc36e7b3a8` at 2026-11-01T17:05:45Z. Required component check (5m33s) and validate (9s) passed; source/merge/origin content, ancestry and Desk-Task trailers matched. TR01–02 accept the fixed single-tool HTTP Messages → official TUI 2.1.312 tuple: 2/2 HTTP200 in 4.631s, expected tool and fresh result, reported claude-opus-5-5, one PID/birth/executable and matched MCP callback without relaunch. Both admissions consumed; no retry. Two durable usage rows and first-row history preserved; owned runtime cleanup passed. No downstream official-client/dynamic-instruction, cancellation, tool-restart, account-safety, billing/cache-savings or whole-product acceptance. Original17AC/runtime/Cargo and the earlier failed429 packet remain unchanged.
@@ -262,9 +262,9 @@ Demand/contract: [task](T-0408-terminal-release.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TR-01 | Release recognized terminal sources before final frame | TR-1 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-11-01T17:08:23.771072+00:00 |
-| TR-02 | Release observed EOF sources before finalization output | TR-2 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-11-01T17:08:23.771072+00:00 |
-| TR-03 | Preserve usage tails and session reuse; verify HTTP close | TR-3 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-11-01T17:08:23.771072+00:00 |
+| TR-01 | Release recognized terminal sources before final frame | TR-1 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-10-24T19:46:58Z |
+| TR-02 | Release observed EOF sources before finalization output | TR-2 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-10-24T19:46:58Z |
+| TR-03 | Preserve usage tails and session reuse; verify HTTP close | TR-3 | done | 2026-10-24T19:39:38Z | 2026-10-24T19:46:58Z | 2026-10-24T19:46:58Z |
 
 TR-1–TR-3 delivered in [PR #625](https://github.com/fallrising/newclear/pull/625), merge `343ecae1f90d2bbcd4d8bd7a3a9eee6565c66882` at `2026-10-24T19:46:58Z`. Reviewed HEAD `e89c7bbebbd1d0ca7b66440594f4d5660735d172` is an ancestor of fetched main; scoped contents match. Independent source/final-document review PASS;148tests/85new scenarios and required component CI112s/contracts CI8s passed. Opaque byte behavior, finish_reason usage tails and reusable Claude sessions remain intact. Provider/Docker and whole-product acceptance remain incomplete.
 

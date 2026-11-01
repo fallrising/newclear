@@ -1,20 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { handle, scheduled } from '../apps/control/worker/index.mjs';
 import { strictJSON, digest, sign, recipeRef } from '../apps/control/worker/protocol.mjs';
 
 class D1 {
-  constructor(){ this.db=new DatabaseSync(':memory:'); for(const name of ['0001.sql','0002.sql'])this.db.exec(readFileSync(new URL('../apps/control/migrations/'+name,import.meta.url),'utf8')); }
+  constructor(path=':memory:'){ this.db=new DatabaseSync(path); if (!this.db.prepare("SELECT name FROM sqlite_master WHERE name='commands'").get()) for(const name of ['0001.sql','0002.sql'])this.db.exec(readFileSync(new URL('../apps/control/migrations/'+name,import.meta.url),'utf8')); }
   prepare(sql){const db=this.db;return {bind(...params){return {async first(){return db.prepare(sql).get(...params)||null},async all(){return {results:db.prepare(sql).all(...params)}},async run(){const r=db.prepare(sql).run(...params);return {meta:{changes:r.changes}}},sql,params}},async first(){return db.prepare(sql).get()||null},async all(){return {results:db.prepare(sql).all()}},sql,params:[]};}
   async batch(stmts){this.db.exec('BEGIN');try{const out=[];for(const s of stmts){const st=this.db.prepare(s.sql);if(st.columns().length)out.push({results:st.all(...s.params)});else out.push({meta:{changes:st.run(...s.params).changes}});}this.db.exec('COMMIT');return out;}catch(e){this.db.exec('ROLLBACK');throw e;}}
 }
 const T=1793059200000, iso=t=>new Date(t).toISOString().replace('.000Z','Z');
 const secret='ab'.repeat(32);
-async function fixture(){
- const DB=new D1(), ref=await recipeRef();
+async function fixture(path){
+ const DB=new D1(path), ref=await recipeRef();
  const env={DB,PUBLIC_ORIGIN:'https://lab.example',AUDIENCE:'lab-test',MACHINE_KEYS:JSON.stringify({bot:{principal_id:'bot',grant_id:'gb',generation:1,secret_hex:secret,expires_at:iso(T+3600000)},runner:{principal_id:'runner',grant_id:'gr',generation:1,secret_hex:'cd'.repeat(32),expires_at:iso(T+3600000)}})};
  for(const [id,principal,caps] of [['gb','bot',['commands:read','commands:submit','commands:cancel-request','node:health:read','artifact:read']],['gr','runner',['dispatch:claim','runs:report','runs:reconcile']]]){
  const g={principal_id:principal,workspace_id:'ws_test',resource_ref:{resource_id:'node_test',generation:1},recipe_ref:ref,capabilities:caps,not_before:iso(T-1000),expires_at:iso(T+3600000),max_timeout_seconds:30,max_output_bytes:16384};
@@ -417,4 +419,27 @@ test('RA quota and evidence expiry refusals retain request IDs and business hist
  assert.equal(expired.status,410);assert.equal(expired.data.retryable,false);
  const audit=f.DB.db.prepare('SELECT * FROM rejection_audit WHERE request_id=?').get(expired.data.request_id);
  assert.equal(audit.route,'artifact');assert.equal(audit.code,'EVIDENCE_EXPIRED');assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),before);
+});
+
+
+test('PS durable outbox survives discarded admission ACK and full SQLite reopen without notification',async t=>{
+ const directory=mkdtempSync(join(tmpdir(),'polling-outbox-')),path=join(directory,'control.sqlite');
+ const f=await fixture(path);t.after(()=>{f.env.DB.db.close();rmSync(directory,{recursive:true});});
+ const body=f.command('lost-admission-ack');
+ await f.req('/api/commands',body); // The caller discards the response after the real transaction committed.
+ const before=f.env.DB.db.prepare('SELECT * FROM commands').get();assert.equal(before.active,1);
+ f.env.DB.db.close();f.env.DB=new D1(path);
+ assert.deepEqual(f.env.DB.db.prepare('SELECT * FROM commands').get(),before);
+ const a=(await f.req('/api/runner/claim',{},'runner',T+1000)).data.assignment;
+ assert.equal(a.command_id,before.id);assert.equal(a.attempt.mode,'dispatch');
+ const claimRow=f.env.DB.db.prepare('SELECT * FROM commands').get();
+ const retry=await f.req('/api/commands',body,'bot',T+2000);
+ assert.equal(retry.data.command.command_id,before.id);assert.deepEqual(f.env.DB.db.prepare('SELECT * FROM commands').get(),claimRow);
+ const completed=await f.req('/api/runner/report',f.result(a),'runner',T+2000);assert.equal(completed.status,200);
+ const final=f.env.DB.db.prepare('SELECT * FROM commands').get();
+ f.env.DB.db.close();f.env.DB=new D1(path);
+ assert.deepEqual(f.env.DB.db.prepare('SELECT * FROM commands').get(),final);
+ assert.equal((await f.req('/api/runner/claim',{},'runner',T+3000)).data.assignment,null);
+ assert.equal(f.env.DB.db.prepare('SELECT count(*) n FROM commands').get().n,1);
+ assert.equal((await f.req('/api/commands/'+before.id,undefined,'bot',T+3000)).data.command.result.artifact_sha256,completed.data.command.result.artifact_sha256);
 });

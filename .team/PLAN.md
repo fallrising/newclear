@@ -1,5 +1,7 @@
 # T-0442 Fanzloud M2 — 2026-11-01
 
+Spring Pool PR196 / T-0356: [bounded plan and evidence gate](spring-pool-pr196/PLAN.md).
+
 Owner explicitly requests M2; desk claim PR349 merged/read back 42e474182de3d64b0be8023d7f6ae26d02904ada.
 Base newclear d3207b3a97a5b223da501af1418e64e94745bf10. Preserve old dirty M1 worker tree.
 
@@ -2671,38 +2673,34 @@ model call, as reviewer explicitly allowed. Product COV-ACs remain NotRun; only 
 is accepted. See product evidence/m2-coverage-proposal-20261101.md for measured/unknown accounting.
 
 
-## spring-pool PR196 reconciliation — 2026-11-01 / T-0356
+## HAI verified coverage implementation — T-0339 / HM2C / 2026-11-01
 
-Owner asks oldest-first PR reconciliation and completion of merge blockers. Original
-source 2eb29676863869a67f90dc68b8332ff1db87078e; no replacement feature PR or
-mainline component found. Desk claim PR355 merged a0788fcd7fd1a6595dcdcedbdcda4376067c8465.
-Fixed acceptance remains SDD T-* scenarios, not a reduced MVP. Root integrates
-current main while preserving its root indexes, owns runtime tooling, original
-API/config/integration/browser gates, project inventory/SUCCESS/board, current CI,
-independent review and normal existing-PR Git delivery. Staging/old five-provider
-24-hour grant expired; no deployment/model CLI authorization is inferred.
+Owner approved D1–D3. Normative entry products/hai-taskboard/docs/sdd/verified-coverage.md references
+the exact accepted contract and R1–R7; COV-AC01..06 fixed. Root owns docs/OpenAPI/HTTP and acceptance.
+One isolated native T-001 backend worker (70min,20min checkpoints, no children/no Git) owns
+application/domain/SQLite/local artifact core and real-store tests. Expected root90–150active minutes;
+Claude code review exact opus5.5/high480s plus at most one material follow-up; existing plan review
+retained, no redundant model plan call. CI20min rounds; same failure initial+two new-hypothesis diagnoses.
+No UI/provider/dependency/migration/release/deploy. Raw evidence and unknown accounting retained.
 
-T993 is one inherited-native leaf writer in an isolated worktree, web-only scope
-and a new narrow regression test; inputs and explicit exclusions in its task file.
-One independent inherited-native read-only reviewer after integration (T994),
-15-minute monitored limit, one correction follow-up only. No recursive delegation.
-Root estimate90–150 active minutes, 20-minute checkpoints; build/test<=15minutes,
-CI wait<=15minutes, two hypothesis-driven corrections per blocker. Required tests
-and original failure evidence remain; no force push, no skip counted as pass.
-Tool/provider/token/cost totals unknown where not measured; native starts tracked
-in this section. Root retains final evidence acceptance.
 
-Initial read-only merge-tree: conflicts only README.md/PORTFOLIO.md, preserve both
-additive entries. Original missing web config remains a known FAIL. npm ci installed
-43 existing locked packages; npm reported unapproved esbuild/workerd postinstall
-scripts, no approval/config policy changed. Initial config test process requires
-diagnosis before further runtime launches. Worker starts: 1 (T993 native leaf; no external provider CLI).
+HM2C integration: root inspected13 worker files and verified byte-exact hashes before integration.
+Original worker report remains PARTIAL solely for the transferred cursor regression task; root does not
+accept that report as DONE. Full native backend baseline passed600.763s on190 stable inputs; web30,
+API and document gates pass. Claude initial code review ACCEPT294.007s requires E1 revision oracle;
+root implements E1/C1/C2/C3/C6/C8/C9 plus cursor regression and lawful SQLite numeric boundaries,
+with retained Red→Green. Separate wt revision kept the full-gate source frozen. Final focused race,
+follow-up review, CI/merge/readback remain before root evidence-gate acceptance. No new product scope.
 
-Checkpoint2026-11-01T05:53Z: T993 bounded scope inspected/copied; root final38 named Node,46Rust,host/WasmClippy,type/format/build and21realAPI/web plus restart pass. T994 independently found and rechecked multiline prose CRLF fix (rootRED/GREEN). Both reports remain PARTIAL for outstanding CI/browser/visual gates. Two native agents launched,0external provider CLI; aggregate provider/tool counts unknown. Original desktop/mobile assertions preserved; UI evidence driver uses sandboxed CDP. Local browser unusable sandbox documented, not bypassed; existing CI owns remaining browser gate. Build path/root llms index corrections remain within integration scope. No staging/deploy authority renewed.
+
+HM2C local evidence-gate ACCEPT: final focused race164.111s, build/format, web30, API/docs pass;
+Claude follow-up ACCEPT148.581s with schema-specific subject bound, already-enforced epoch bounds
+proved by tests, and observation/headroom text closed without a third call as explicitly allowed.
+Root closed worker cursor PARTIAL by regression Red→Green. All original failures/source manifests
+preserved; exact-head full CI/merge/readback/BOARD/desk are the remaining delivery gate.
+
 ## XR cross-snapshot restoration qualification — 2026-11-01T05:22:43Z
 
 Owner continues after RAL. Lead solewriter for XR01–04/T0035, isolated six-case actualworkerd/D1 plusPythonrunner andSQLiteonlinebackup. No live/private/networkauthority/paidchange. Test-first snapshotfixture, qualification before runtimefix if needed, fullregression and sourcehash preservation. One fresh native readonly reviewer T860, inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no tests/writes/private/network/delegation. Instructionscope notOSisolation. No originalrunnerstop or remoteexport/import claim.
 
 XR source/local evidence gate ACCEPT 2026-11-01T05:33:30Z: RED4→GREEN4,130Node/308Python=438tests; XR2 sixactualworkerd/Pythonrunner cases,zero restoredcollection/sourceunchanged,9hashes; XM1/XM2 badguardsdetected without productmutation; T860 finalACCEPT. XR1 metadata-countfailure retained andexplicitplatformtablefilterfixed, no weakenedapplicationoracle. Productruntime/liveauthority unchanged. NormalGit CI/merge/readback andboardclosure remain; fullmainlineincomplete.
-
-Final bounded T994 follow-up accepted capture/build/icon/multiline scope and found missingdoctype. Root RED/GREEN literal Honohtmlprefix,39namedNode pass9.133s,format/type/webbuildpass,originalbrowserhelperaddsCSS1Compat assertion. Reviewer report stayshonestlyPARTIAL; root owns correctionevidence and CIvisualgate. FirstCI41278663845 targetsaded283d and stillinstallstools; subsequentfinalheadrequired.

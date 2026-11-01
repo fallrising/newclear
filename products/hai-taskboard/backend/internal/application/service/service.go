@@ -608,6 +608,21 @@ func (service *Service) completionInput(
 			return domain.CompletionInput{}, selectedCompletion{}, domain.StorageCorruptionError{Reason: "invalid current completion subject"}
 		}
 	}
+	input, selected, err := assembleCompletionInput(principal, value, material, policy, current, now)
+	if err != nil {
+		return domain.CompletionInput{}, selectedCompletion{}, err
+	}
+	recordID, err := service.nextID(port.IDCompletionRecord)
+	if err != nil {
+		return domain.CompletionInput{}, selectedCompletion{}, err
+	}
+	input.RecordID = domain.CompletionRecordID(recordID)
+	return input, selected, nil
+}
+
+// assembleCompletionInput is pure: the reader supplies its exact prospective or
+// current subject and policy; only the command wrapper allocates a record ID.
+func assembleCompletionInput(principal domain.ActorID, value command.CompleteWorkItem, material port.CompletionMaterial, policy CompletionPolicy, current domain.CompletionSubject, now time.Time) (domain.CompletionInput, selectedCompletion, error) {
 	requirements := make([]domain.CheckRequirement, 0, len(material.RequiredACRevisions))
 	revisions := make(map[domain.ACID]domain.Digest, len(material.RequiredACRevisions))
 	for _, requirement := range material.RequiredACRevisions {
@@ -688,10 +703,6 @@ func (service *Service) completionInput(
 		}
 	}
 
-	recordID, err := service.nextID(port.IDCompletionRecord)
-	if err != nil {
-		return domain.CompletionInput{}, selectedCompletion{}, err
-	}
 	return domain.CompletionInput{
 		WorkItem: material.WorkItem, ExpectedVersion: value.ExpectedVersion,
 		RequestedSubject: value.Subject, CurrentSubject: current,
@@ -700,7 +711,7 @@ func (service *Service) completionInput(
 		ActiveOrUnknownRun: material.ActiveOrUnknownRun,
 		RequiredChecks:     requirements, Evidence: evidence, Review: review,
 		ApprovalRequired: policy.ApprovalRequired, Approval: approval,
-		Now: now, RecordID: domain.CompletionRecordID(recordID),
+		Now: now,
 	}, selected, nil
 }
 

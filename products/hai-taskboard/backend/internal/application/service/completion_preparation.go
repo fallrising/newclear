@@ -13,6 +13,10 @@ import (
 // Preparation compares every available identity before classifying incomplete
 // current policy. Mutating commands retain verifyCurrentRunInput's semantics.
 func (s *Service) preparationMaterial(ctx context.Context, tx port.Transaction, query port.CompletionMaterialQuery, policy CompletionPolicy) (port.CompletionMaterial, inputIdentity, bool, error) {
+	return s.preparationMaterialMode(ctx, tx, query, policy, false)
+}
+
+func (s *Service) preparationMaterialMode(ctx context.Context, tx port.Transaction, query port.CompletionMaterialQuery, policy CompletionPolicy, coverage bool) (port.CompletionMaterial, inputIdentity, bool, error) {
 	m, err := tx.LoadCompletionMaterial(ctx, query)
 	if err != nil {
 		return m, inputIdentity{}, false, err
@@ -22,6 +26,11 @@ func (s *Service) preparationMaterial(ctx context.Context, tx port.Transaction, 
 	}
 	if !m.CandidatePresent || !m.RunPresent || m.Candidate.ID != query.CandidateID {
 		return m, inputIdentity{}, false, port.ErrNotFound
+	}
+	if coverage {
+		if err := validateCoverageMaterial(m); err != nil {
+			return m, inputIdentity{}, false, err
+		}
 	}
 	v, err := currentInputTransaction(tx)
 	if err != nil {
@@ -86,7 +95,12 @@ func (s *Service) preparationMaterial(ctx context.Context, tx port.Transaction, 
 			incomplete = true
 			continue
 		}
-		stale = stale || rule.VerifierClass != old.VerifierClass || rule.Independent != old.Independent || rule.ProhibitedVerifierActor != old.ProhibitedVerifierActor || rule.ProhibitedVerifierRunRole != old.ProhibitedVerifierRunRole
+		if coverage && rule.VerifierClass == "" {
+			incomplete = true
+		} else {
+			stale = stale || rule.VerifierClass != old.VerifierClass
+		}
+		stale = stale || rule.Independent != old.Independent || rule.ProhibitedVerifierActor != old.ProhibitedVerifierActor || rule.ProhibitedVerifierRunRole != old.ProhibitedVerifierRunRole
 		if rule.EnvironmentDigest.IsZero() {
 			incomplete = true
 		} else {

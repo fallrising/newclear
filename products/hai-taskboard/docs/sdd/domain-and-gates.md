@@ -69,3 +69,12 @@ Minimum rejection codes include `phase_not_qa`, `active_blocker`, `active_or_unk
 - `TestCompleteWorkItem_RejectsEveryNonPassingEvidenceState`
 - `TestCompleteWorkItem_RejectsSubjectTOCTOU`
 - `TestCompleteWorkItem_PreservesHistoryOnReopenAndStale`
+
+## 2026-11-01 owner-approved V1 vocabulary mapping
+
+For P0-A V1 coverage, Accepted disposition means an admitted immutable semantic Evidence record
+created through existing command/provenance validation, rather than an unadmitted Run output.
+Fresh applicability maps to stored Current; Stale and Superseded are not fresh. Admission is not a
+Passing verdict: exact subject, terminal Passed, verified Present bytes, verifier class and independence
+remain required. V1 has no separately editable disposition field.
+The [verified coverage contract](verified-coverage.md) defines the observation API; it grants no Done authority.

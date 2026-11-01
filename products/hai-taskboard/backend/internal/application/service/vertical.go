@@ -5,7 +5,6 @@ import (
 	"context"
 	json "encoding/json/v2"
 	"errors"
-	"io"
 	"mime"
 	"slices"
 	"time"
@@ -938,22 +937,18 @@ func preparationSubject(material port.CompletionMaterial, policy CompletionPolic
 }
 
 func (service *Service) verifyArtifact(ctx context.Context, locator command.ArtifactLocator) error {
-	if locator.Availability != "Present" {
-		return command.NewError(command.CodeLifecycleRejected, "artifact is unavailable", false, nil, nil)
+	err := service.readArtifact(ctx, locator)
+	if failure, ok := errors.AsType[artifactReadFailure](err); ok {
+		switch failure.stage {
+		case "availability":
+			return command.NewError(command.CodeLifecycleRejected, "artifact is unavailable", false, nil, nil)
+		case "open":
+			return command.NewError(command.CodeLifecycleRejected, "artifact bytes are unavailable", false, nil, failure.cause)
+		case "mismatch":
+			return command.NewError(command.CodeLifecycleRejected, "artifact bytes do not match their immutable locator", false, nil, nil)
+		}
 	}
-	reader, err := service.artifacts.Open(ctx, locator.Digest)
-	if err != nil {
-		return command.NewError(command.CodeLifecycleRejected, "artifact bytes are unavailable", false, nil, err)
-	}
-	defer reader.Close()
-	content, err := io.ReadAll(io.LimitReader(reader, int64(locator.ByteLength)+1))
-	if err != nil {
-		return err
-	}
-	if uint64(len(content)) != locator.ByteLength || domain.HashBytes(content) != locator.Digest {
-		return command.NewError(command.CodeLifecycleRejected, "artifact bytes do not match their immutable locator", false, nil, nil)
-	}
-	return nil
+	return err
 }
 
 func artifactStorageKey(digest domain.Digest) string { return "sha256:" + digest.String() }

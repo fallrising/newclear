@@ -68,14 +68,25 @@ func initialReader(t *testing.T, content []byte, extra ...domain.WorkItemID) *fa
 	return initialReaderAC(t, content, "AC-A", extra...)
 }
 func initialReaderAC(t *testing.T, content []byte, ac domain.ACID, extra ...domain.WorkItemID) *fakeReader {
+	return initialReaderACs(t, content, []domain.ACID{ac}, extra...)
+}
+func initialReaderACs(t *testing.T, content []byte, acs []domain.ACID, extra ...domain.WorkItemID) *fakeReader {
 	t.Helper()
 	format := specification.SHA1
 	manifest := strings.ReplaceAll(literalManifest, "wi_A", string(workItemID))
-	encodedAC, err := json.Marshal(ac)
+	var entries []map[string]string
+	for _, ac := range acs {
+		entries = append(entries, map[string]string{"ac_id": string(ac), "ac_revision_digest": domain.HashBytes(content).String()})
+	}
+	encoded, err := json.Marshal(entries)
 	if err != nil {
 		t.Fatal(err)
 	}
-	manifest = strings.ReplaceAll(manifest, `"AC-A"`, string(encodedAC))
+	pattern := `[{"ac_id":"AC-A","ac_revision_digest":"` + strings.Repeat("1", 64) + `"}]`
+	if !strings.Contains(manifest, pattern) {
+		t.Fatal("initial manifest AC pattern changed")
+	}
+	manifest = strings.Replace(manifest, pattern, string(encoded), 1)
 	for _, id := range extra {
 		manifest = strings.Replace(manifest, `"work_item_ids":["`+string(workItemID)+`"`, `"work_item_ids":["`+string(workItemID)+`","`+string(id)+`"`, 1)
 	}
@@ -109,6 +120,9 @@ func initialFixtureContent(t *testing.T, content []byte, extra ...domain.WorkIte
 	return initialFixtureContentAC(t, content, "AC-A", extra...)
 }
 func initialFixtureContentAC(t *testing.T, content []byte, ac domain.ACID, extra ...domain.WorkItemID) (*Service, *sqlite.Store, *sql.DB, command.AcceptInitialSpecification) {
+	return initialFixtureContentACs(t, content, []domain.ACID{ac}, extra...)
+}
+func initialFixtureContentACs(t *testing.T, content []byte, acs []domain.ACID, extra ...domain.WorkItemID) (*Service, *sqlite.Store, *sql.DB, command.AcceptInitialSpecification) {
 	t.Helper()
 	root := t.TempDir()
 	path := filepath.Join(root, "initial.db")
@@ -135,14 +149,17 @@ func initialFixtureContentAC(t *testing.T, content []byte, ac domain.ACID, extra
 			t.Fatal(e)
 		}
 	}
-	a := port.ApprovedRepository{Binding: specification.RepositoryBinding{ProjectID: projectID, ID: "binding", Version: 1, ObjectFormat: specification.SHA1}, ConfigurationID: "initial-repo", ApprovedBy: operator, Refs: []string{"refs/heads/main"}, ManifestPaths: []string{"manifest.json"}, Reader: initialReaderAC(t, content, ac, extra...)}
+	a := port.ApprovedRepository{Binding: specification.RepositoryBinding{ProjectID: projectID, ID: "binding", Version: 1, ObjectFormat: specification.SHA1}, ConfigurationID: "initial-repo", ApprovedBy: operator, Refs: []string{"refs/heads/main"}, ManifestPaths: []string{"manifest.json"}, Reader: initialReaderACs(t, content, acs, extra...)}
 	_, a.Binding.Digest, e = port.CanonicalRepositoryBinding(a)
 	if e != nil {
 		t.Fatal(e)
 	}
 	svc.config.RepositoryAuthority = fixedRepository{a}
 	svc.config.Completion.RecipeDigest = domain.HashString("initial recipe")
-	svc.config.Completion.Checks = map[domain.ACID]VerificationRule{ac: {VerifierClass: "test"}}
+	svc.config.Completion.Checks = map[domain.ACID]VerificationRule{}
+	for _, ac := range acs {
+		svc.config.Completion.Checks[ac] = VerificationRule{VerifierClass: "test"}
+	}
 	out, e := svc.ProposeSpecification(t.Context(), operator, command.ProposeSpecification{Metadata: initialMetadata(12, 1), ProjectID: projectID, BindingID: "binding", BindingVersion: 1, BindingDigest: a.Binding.Digest, Ref: "refs/heads/main", ManifestPath: "manifest.json"})
 	if e != nil {
 		t.Fatal(e)
@@ -159,7 +176,10 @@ func initialFixtureContentAC(t *testing.T, content []byte, ac domain.ACID, extra
 	if e != nil {
 		t.Fatal(e)
 	}
-	q := command.AcceptInitialSpecification{Metadata: initialMetadata(13, 1), ProjectID: projectID, ProposalDigest: pd, PolicyRevisionDigest: svc.config.Completion.RevisionDigest, WorkItems: []port.InitialWorkItemVersion{{WorkItemID: workItemID, ExpectedVersion: 1}}, ACContents: []command.InitialACContent{{ACID: ac, Content: bytes.Clone(content)}}}
+	q := command.AcceptInitialSpecification{Metadata: initialMetadata(13, 1), ProjectID: projectID, ProposalDigest: pd, PolicyRevisionDigest: svc.config.Completion.RevisionDigest, WorkItems: []port.InitialWorkItemVersion{{WorkItemID: workItemID, ExpectedVersion: 1}}, ACContents: []command.InitialACContent{}}
+	for _, ac := range acs {
+		q.ACContents = append(q.ACContents, command.InitialACContent{ACID: ac, Content: bytes.Clone(content)})
+	}
 	for _, id := range extra {
 		q.WorkItems = append(q.WorkItems, port.InitialWorkItemVersion{WorkItemID: id, ExpectedVersion: 1})
 	}

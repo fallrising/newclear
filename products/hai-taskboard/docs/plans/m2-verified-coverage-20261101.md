@@ -1,6 +1,6 @@
 # M2 verified coverage — proposed bounded contract
 
-Status: **Proposed; Claude plan REWORK → ACCEPT for owner presentation; owner decision required before production/API changes.**
+Status: **Owner approved D1–D3 and COV-01..04/COV-AC-01..06 on2026-11-01 after Claude REWORK → ACCEPT. Implementation tracked in BOARD HM2C.**
 Task: T-0339 / BOARD HM2C. Source: `d3207b3a97a5b223da501af1418e64e94745bf10`.
 Identity (#854/#855) and immutable project policy (#868/#880) are delivered. This proposal does
 not reopen those decisions or close full M2, completion UI or SUCCESS AC-02..04.
@@ -304,7 +304,7 @@ is all three as written, together with COV-01..04 and COV-AC-01..06 as the bound
 contract, including Review prospective versus QA current semantics, all-matches veto, observation
 of missing/tampered bytes, unknown-I/O503 versus unchanged command classification, and limits above. Existing policy design and Git delivery authority need
 no new approval. If this is accepted, implement and complete the authorized delivery chain.
-Until then, only proposal/documentation/review/ledger work proceeds; no runtime/OpenAPI amendment.
+Owner approved all three on2026-11-01. The decision boundary above is retained as the reviewed decision input; implementation is now authorized under the accepted contract and precision conditions.
 
 Claude Code uses exact claude-opus-5-5/high, supplied public-source packet, no tools/MCP/hooks/skills,
 no session persistence or children, 480-second process-group deadline. Plan and later code review each

@@ -82,3 +82,17 @@ Root index preflight: PASS,51contracts and8llms files. PR diff against integrate
 main passes `git diff --check`. A naive staged check against the September feature
 HEAD reported pre-existing whitespace in incoming main history; that content was
 preserved and the actual PR delta was checked against the merged main instead.
+
+### CI runner correction
+
+[Run41278663845](https://github.com/fallrising/newclear/actions/runs/41278663845)
+on aded283d passed nativequality,build and realintegration, then all8 browser
+launches failed before page execution with `No usable sandbox`. This is not a
+product-browser pass. The new doctype head could not start CI while a concurrent
+main addition caused a rootPLAN append conflict; all other work was preserved.
+
+Correction1 pins `ubuntu-22.04`, still listed in the
+[official runner catalog](https://github.com/actions/runner-images/blob/main/README.md),
+instead of the Ubuntu24.04 latest image. Chromium sandbox and all acceptance
+assertions remain enabled. No sysctl, AppArmor or permissions are changed. This
+is a runner compatibility hypothesis until the new CI browser result arrives.

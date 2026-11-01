@@ -81,4 +81,6 @@ digest，再原子建立獨立 Review 或 Evidence；不自動完成工作。讀
 M2 identity repair is delivered. The approved [immutable project-policy contract](docs/sdd/local-project-policy.md)
 and [evidence](docs/evidence/project-policy-20261031.md) track exact project/AC configuration and durable
 startup binding; see BOARD HMPOL and [operator setup](docs/local-development.md#immutable-per-project-completion-policies).
-Verified coverage and full P0-A remain incomplete.
+The approved [verified-coverage API](docs/sdd/verified-coverage.md) adds authenticated per-AC byte verification
+and QA eligibility observations. [Implementation evidence](docs/evidence/m2-verified-coverage-20261101.md)
+and BOARD HM2C track its gates and delivery. The completion UI, full M2 and full P0-A remain incomplete.

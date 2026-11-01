@@ -218,6 +218,16 @@ func CompleteWorkItem(input CompletionInput) (CompletionResult, error) {
 }
 
 func EvaluateCompletion(input CompletionInput) []RejectionCode {
+	codes := EvaluateCompletionEligibility(input)
+	if input.RecordID == "" {
+		codes = append(codes, CodeCompletionRecordMissing)
+	}
+	return codes
+}
+
+// EvaluateCompletionEligibility evaluates domain prerequisites without allocating
+// or requiring the completion record that only the command constructs.
+func EvaluateCompletionEligibility(input CompletionInput) []RejectionCode {
 	codes := make([]RejectionCode, 0)
 	add := func(code RejectionCode) {
 		if !slices.Contains(codes, code) {
@@ -262,32 +272,9 @@ func EvaluateCompletion(input CompletionInput) []RejectionCode {
 	}
 
 	for _, requirement := range input.RequiredChecks {
-		matching := make([]Evidence, 0)
-		for _, evidence := range input.Evidence {
-			if evidence.checkID == requirement.CheckID && evidence.subjectDigest == requestedDigest &&
-				evidence.verifierClass == requirement.VerifierClass {
-				matching = append(matching, evidence)
-			}
-		}
-		if len(matching) == 0 {
-			add(CodeEvidenceMissing)
-			continue
-		}
-		for _, evidence := range matching {
-			if evidence.availability != EvidencePresent {
-				add(CodeEvidenceUnavailable)
-			}
-			if evidence.applicability != EvidenceCurrent {
-				add(CodeEvidenceStale)
-			}
-			if evidence.state != EvidencePassed {
-				add(CodeEvidenceNonpassing)
-			}
-			if requirement.Independent &&
-				((requirement.ProhibitedVerifierActor != "" && evidence.verifierActor == requirement.ProhibitedVerifierActor) ||
-					(requirement.ProhibitedVerifierRunRole != "" && evidence.verifierRole == requirement.ProhibitedVerifierRunRole)) {
-				add(CodeVerifierNotIndependent)
-			}
+		_, reasons := EvaluateCheckRequirement(requirement, requestedDigest, input.Evidence)
+		for _, reason := range reasons {
+			add(reason)
 		}
 	}
 
@@ -298,9 +285,6 @@ func EvaluateCompletion(input CompletionInput) []RejectionCode {
 		} else if !input.Approval.expiresAt.After(input.Now) {
 			add(CodeApprovalExpired)
 		}
-	}
-	if input.RecordID == "" {
-		add(CodeCompletionRecordMissing)
 	}
 
 	return codes
@@ -325,4 +309,38 @@ func ValidateCandidatePublication(currentRunInput, publicationRunInput Digest) e
 		return Rejection{Code: CodeSubjectStale}
 	}
 	return nil
+}
+
+// EvaluateCheckRequirement retains all matching evidence and its vetoes in
+// evidence order. Presentation layers may normalize the returned reason set.
+func EvaluateCheckRequirement(requirement CheckRequirement, subject Digest, evidence []Evidence) ([]EvidenceID, []RejectionCode) {
+	ids := make([]EvidenceID, 0)
+	codes := make([]RejectionCode, 0)
+	add := func(code RejectionCode) {
+		if !slices.Contains(codes, code) {
+			codes = append(codes, code)
+		}
+	}
+	for _, e := range evidence {
+		if e.checkID != requirement.CheckID || e.subjectDigest != subject || e.verifierClass != requirement.VerifierClass {
+			continue
+		}
+		ids = append(ids, e.id)
+		if e.availability != EvidencePresent {
+			add(CodeEvidenceUnavailable)
+		}
+		if e.applicability != EvidenceCurrent {
+			add(CodeEvidenceStale)
+		}
+		if e.state != EvidencePassed {
+			add(CodeEvidenceNonpassing)
+		}
+		if requirement.Independent && ((requirement.ProhibitedVerifierActor != "" && e.verifierActor == requirement.ProhibitedVerifierActor) || (requirement.ProhibitedVerifierRunRole != "" && e.verifierRole == requirement.ProhibitedVerifierRunRole)) {
+			add(CodeVerifierNotIndependent)
+		}
+	}
+	if len(ids) == 0 {
+		add(CodeEvidenceMissing)
+	}
+	return ids, codes
 }

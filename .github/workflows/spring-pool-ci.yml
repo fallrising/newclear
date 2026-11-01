@@ -21,7 +21,8 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Keep Chromium sandbox enabled on a supported runner with usable user namespaces.
+    runs-on: ubuntu-22.04
     timeout-minutes: 35
     defaults:
       run:

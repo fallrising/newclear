@@ -256,6 +256,56 @@ paths:
               schema: { $ref: "#/components/schemas/APIError" }
         "422": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
+  /projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/verified-coverage:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+      - $ref: "#/components/parameters/WorkItemID"
+      - name: candidate_id
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 80
+          pattern: "^[A-Za-z0-9_.-]+$"
+          not: { enum: [".", ".."] }
+    get:
+      summary: Observe verified per-AC coverage and separate QA eligibility
+      operationId: getVerifiedCoverage
+      x-hai-permission: project.read
+      description: >-
+        Read-only observation, never a reservation or completion authority. No query/body inputs.
+        Authenticate and authorize before material reads. Review uses the prospective QA subject
+        and does not evaluate completion eligibility; QA evaluates the current subject. Each AC
+        requires all matching evidence to pass, be current, independently allowed and byte-verified.
+        Candidate failure never skips evidence verification. Final material and high-water share a
+        transaction; external artifact I/O is outside writer locks, followed by full revalidation.
+        Missing/tampered bytes are unavailable observations; unknown I/O is 503. All responses
+        are no-store. CompleteWorkItem independently rechecks. See docs/sdd/verified-coverage.md.
+      responses:
+        "200":
+          description: Complete observation, at most 1 MiB; no writes, ID allocation or approval consumption.
+          headers:
+            X-Content-Type-Options:
+              schema: { type: string, const: nosniff }
+            Cache-Control:
+              schema: { const: no-store }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VerifiedCoverage" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409":
+          description: >-
+            stale_subject takes precedence over incomplete policy. Only current identity with a
+            missing verification rule or environment yields policy_rejected and
+            error.details.reason verification_policy_incomplete. No writes or implicit retries.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/APIError" }
+        "422": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
   /projects/{project_id}/commands:
     parameters:
       - $ref: "#/components/parameters/ProjectID"
@@ -1086,6 +1136,90 @@ components:
           minItems: 1
           maxItems: 1024
           items: { $ref: "#/components/schemas/CompletionVerificationRule" }
+    VerifiedCoverage:
+      type: object
+      additionalProperties: false
+      required:
+        [schema_version, observation_only, observed_at, expected_version, phase, subject_mode,
+         completion_subject, completion_subject_digest, lease_epoch, restore_generation, cursor,
+         approval_required, verification_rules, coverage, completion_eligibility]
+      description: >-
+        Scope and subject digest are validated. Required ACs, rules and coverage have identical
+        sorted unique exact AC sets (max256). Review subject version is actual+1; QA is actual. Review actual version must permit a SQLite-safe actual+1.
+        Matching evidence IDs identify all matching records, not only passing ones. Total IDs
+        across the response are at most1024. No truncation. Byte limits are enforced by Go;
+        JSON Schema maxLength counts characters. QA satisfied iff no eligibility reasons;
+        satisfied requires every AC covered. Review is unevaluated with only phase_not_qa.
+      properties:
+        schema_version: { type: integer, const: 1 }
+        observation_only: { type: boolean, const: true }
+        observed_at: { $ref: "#/components/schemas/Timestamp" }
+        expected_version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        phase: { type: string, enum: [Review, QA] }
+        subject_mode: { type: string, enum: [prospective_qa, current_qa] }
+        completion_subject: { $ref: "#/components/schemas/VerifiedCoverageSubject" }
+        completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
+        lease_epoch: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        restore_generation: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        cursor:
+          type: object
+          additionalProperties: false
+          required: [stream_epoch, event_sequence]
+          properties:
+            stream_epoch: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+            event_sequence: { type: integer, minimum: 0, maximum: 9223372036854775807 }
+        approval_required: { type: boolean }
+        verification_rules:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items: { $ref: "#/components/schemas/CompletionVerificationRule" }
+        coverage:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items: { $ref: "#/components/schemas/VerifiedACCoverage" }
+        completion_eligibility:
+          type: object
+          additionalProperties: false
+          required: [evaluated, satisfied, reasons]
+          properties:
+            evaluated: { type: boolean }
+            satisfied: { type: boolean }
+            reasons:
+              type: array
+              maxItems: 13
+              uniqueItems: true
+              items:
+                type: string
+                enum: [phase_not_qa, active_blocker, active_or_unknown_run, candidate_unavailable,
+                       review_missing, review_rejected, evidence_missing, evidence_unavailable,
+                       evidence_stale, evidence_nonpassing, verifier_not_independent,
+                       approval_missing, approval_expired]
+    VerifiedACCoverage:
+      type: object
+      additionalProperties: false
+      required: [ac_id, ac_revision_digest, covered, matching_evidence_ids, reasons]
+      description: >-
+        Covered iff reasons is empty and at least one matching ID exists. Missing iff IDs empty
+        and evidence_missing is the sole reason. Reasons use the fixed listed order. Every
+        uncovered AC reason must occur in QA eligibility; all matching records may veto coverage.
+      properties:
+        ac_id: { type: string, minLength: 1, maxLength: 120, description: "Exact accepted AC ID, at most120 UTF-8 bytes." }
+        ac_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        covered: { type: boolean }
+        matching_evidence_ids:
+          type: array
+          maxItems: 1024
+          uniqueItems: true
+          items: { type: string, minLength: 1, maxLength: 120, description: "At most120 UTF-8 bytes, no controls; sorted exact bytes." }
+        reasons:
+          type: array
+          maxItems: 5
+          uniqueItems: true
+          items:
+            type: string
+            enum: [evidence_missing, evidence_unavailable, evidence_stale, evidence_nonpassing, verifier_not_independent]
     CompletionVerificationRule:
       type: object
       additionalProperties: false
@@ -1113,6 +1247,30 @@ components:
           maxLength: 128
           description: At most 128 UTF-8 bytes, no control characters; empty is valid.
         environment_digest: { $ref: "#/components/schemas/SHA256" }
+    VerifiedCoverageSubject:
+      type: object
+      additionalProperties: false
+      required:
+        [project_id, work_item_id, work_item_version, candidate_id, candidate_digest, run_id,
+         run_input_digest, required_ac_revisions, accepted_graph_revision_digest,
+         policy_revision_digest, completion_recipe_digest]
+      properties:
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        work_item_version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        candidate_id: { type: string, minLength: 1, maxLength: 80 }
+        candidate_digest: { $ref: "#/components/schemas/SHA256" }
+        run_id: { $ref: "#/components/schemas/RunID" }
+        run_input_digest: { $ref: "#/components/schemas/SHA256" }
+        required_ac_revisions:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items: { $ref: "#/components/schemas/InitialACRevisionRef" }
+        accepted_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
+        completion_recipe_digest: { $ref: "#/components/schemas/SHA256" }
+        integration_base_digest: { $ref: "#/components/schemas/SHA256" }
     CompletionSubject:
       type: object
       additionalProperties: false

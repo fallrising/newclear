@@ -493,7 +493,7 @@ TestAdmission_AllPublicationConsumersRejectStaleInputs, ModeledCurrentSemanticCh
 TestCompletionPreparation_PolicyPrecedence and runtime/domain independence/Done regressions passed
 in the final full gate; those negatives retain original IDs. No full HAI-DONE/UX/OPS claim follows.
 Legacy nonempty Draft and domain rehydration stay unchanged. The approved policy-source successor
-is tracked below. TestCoverageProjection_MatchesCurrentDonePredicate remains Proposed/NotRun; full M2 is incomplete.
+is tracked below. At this historical checkpoint, TestCoverageProjection_MatchesCurrentDonePredicate was Proposed/NotRun; the 2026-11-01 section below supersedes that test status. Full M2 remains incomplete.
 
 ## 2026-10-31 immutable local project policy
 
@@ -503,4 +503,17 @@ Claude plan/code revision ACCEPT and named codec/admission, immutable registrati
 matrix and actual runtime completion/restart oracles pass locally. [Evidence](evidence/project-policy-20261031.md)
 records full-gate/test-delta binding and limitations. Migration 0006 is implemented; 0001..0005
 remain frozen. Final CI/delivery status is BOARD HMPOL.
-TestCoverageProjection_MatchesCurrentDonePredicate remains Proposed/NotRun; full M2 is incomplete.
+At this historical checkpoint, TestCoverageProjection_MatchesCurrentDonePredicate was Proposed/NotRun; the 2026-11-01 section below supersedes that test status. Full M2 remains incomplete.
+
+
+## 2026-11-01 verified coverage
+
+[Approved contract](sdd/verified-coverage.md) COV-AC-01..06 maps the bounded coverage portion of
+HAI-CONNECT-007, HAI-DONE and M2 to an authenticated observation-only API. It does not accept the
+remaining completion UI or all M2. `TestCoverageProjection_MatchesCurrentDonePredicate` now runs
+against real accepted SQLite state and follows a satisfied QA observation with explicit Complete.
+`TestVerifiedCoverage_AcceptedMultiACHTTPAndRestart` adds authenticated multi-AC Git acceptance,
+selected immutable policy, 120-byte Unicode identity, sealed human reports, HTTP observations,
+reopen and explicit Done. `TestVerifiedCoverageHTTP_*` checks closed wire/auth/scope/byte limits;
+service matrices check all-match vetoes, artifact budgets, two-snapshot races and all-table no-writes.
+Exact gate results and residual limits are recorded in [delivery evidence](evidence/m2-verified-coverage-20261101.md).

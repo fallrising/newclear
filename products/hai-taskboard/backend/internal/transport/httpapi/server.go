@@ -71,6 +71,7 @@ func NewServer(commands CommandService, results CommandResultSource, projections
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/proposals/{proposal_digest}/initial-acceptance", server.getInitialAcceptance)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/events", server.streamEvents)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/completion-preparation", server.getCompletionPreparation)
+	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/verified-coverage", server.getVerifiedCoverage)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/work-items/{work_item_id}/runs/{run_id}/outputs", server.getRunOutputs)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/artifacts/{sha256}", server.getOutputArtifact)
 	mux.HandleFunc("GET /api/v1/projects/{project_id}/human-reports/{report_id}", server.getHumanReport)
@@ -89,13 +90,17 @@ func (server *Server) ServeHTTP(response http.ResponseWriter, request *http.Requ
 		return
 	}
 	// Intercept this read before ServeMux can redirect invalid dot resource IDs.
-	if request.Method == http.MethodGet && strings.HasSuffix(request.URL.Path, "/completion-preparation") {
+	if request.Method == http.MethodGet && (strings.HasSuffix(request.URL.Path, "/completion-preparation") || strings.HasSuffix(request.URL.Path, "/verified-coverage")) {
 		parts := strings.Split(request.URL.Path, "/")
 		if len(parts) == 10 && parts[3] == "projects" && parts[5] == "work-items" && parts[7] == "candidates" && (parts[4] == "." || parts[4] == ".." || parts[6] == "." || parts[6] == ".." || parts[8] == "." || parts[8] == "..") {
 			request.SetPathValue("project_id", parts[4])
 			request.SetPathValue("work_item_id", parts[6])
 			request.SetPathValue("candidate_id", parts[8])
-			server.getCompletionPreparation(response, request)
+			if strings.HasSuffix(request.URL.Path, "/verified-coverage") {
+				server.getVerifiedCoverage(response, request)
+			} else {
+				server.getCompletionPreparation(response, request)
+			}
 			return
 		}
 	}

@@ -1,5 +1,16 @@
 # Pokercase 技術任務
 
+## T-0426 — Two-request real TUI tool continuation
+
+Demand:deskT0426;claim378merged. [TC-1–TC-3](T-0426-tui-tools.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| TC-01 | Guarded MCP preflight and independent review | TC-1 | in_progress | 2026-11-01T15:24:46.292030+00:00 | — | 2026-11-01T15:24:46.292030+00:00 |
+| TC-02 | Bounded real TUI tool/result attempt | TC-2 | in_progress | 2026-11-01T15:24:46.292030+00:00 | — | 2026-11-01T15:24:46.292030+00:00 |
+| TC-03 | Actual evidence and delivery | TC-3 | in_progress | 2026-11-01T15:24:46.292030+00:00 | — | 2026-11-01T15:24:46.292030+00:00 |
+
+
 ## T-0426 — Fresh TUI trial after owner trust confirmation
 
 Demand:deskT0426;claim372merged. [TT-1–TT-3](T-0426-tui-trusted.md).

@@ -6,9 +6,14 @@ Demand:deskT0426;claim364merged. [TP-1–TP-3](T-0426-tui-pilot.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TP-01 | Guarded preflight and independent review | TP-1 | in_progress | 2026-11-01T11:46:14Z | — | 2026-11-01T12:05:35.240535+00:00 |
-| TP-02 | Bounded real TUI lifecycle attempt | TP-2 | in_progress | 2026-11-01T11:46:14Z | — | 2026-11-01T12:05:35.240535+00:00 |
-| TP-03 | Evidence acceptance and delivery | TP-3 | in_progress | 2026-11-01T11:46:14Z | — | 2026-11-01T12:05:35.240535+00:00 |
+| TP-01 | Guarded preflight and independent review | TP-1 | done | 2026-11-01T11:46:14Z | 2026-11-01T12:14:29Z | 2026-11-01T12:14:29Z |
+| TP-02 | Bounded real TUI lifecycle attempt | TP-2 | done | 2026-11-01T11:46:14Z | 2026-11-01T12:14:29Z | 2026-11-01T12:14:29Z |
+| TP-03 | Evidence acceptance and delivery | TP-3 | done | 2026-11-01T11:46:14Z | 2026-11-01T12:15:24.965650+00:00 | 2026-11-01T12:15:24.965650+00:00 |
+
+
+Product [PR919](https://github.com/fallrising/newclear/pull/919), source `5588fd95fa29414396ed2cf64e8322950694a547`, merged `c65393fca83da99319a3e24db5c1b8cf98e2eaeb` at 2026-11-01T12:14:29Z. Required check/validate passed; all3source/merge/origin files, ancestry and Desk-Task trailers matched. TP01–02 record completion of the bounded attempt and its evidence, **not a successful real TUI acceptance**: firstrequest failedHTTP401 requiring ownerinteraction,1of3admissions; nextturn/restartresume notrun. AuthPropreflight passed; exactprompt/providerinference/billing unknown. No retry or runtimechange. Original17AC remains unchanged.
+
+Independent T001preflight/T002result-and-ledger reviews accepted the actual outcome. Local52contracts/9indexes/20repositorytests,147journalruns/30tests and447deskdocuments passed. Journal [PR216](https://github.com/fallrising/journal/pull/216) and desk [PR366](https://github.com/fallrising/desk/pull/366) passed requiredCI, normalmerge and exactsource/merge/originreadback. TP03 records primarydeliveryclosure at 2026-11-01T12:15:24.965650+00:00: separatecompletebackup verified 104payloadfiles/179993193bytes andmodes, then fourclean merged primaryworktrees were normally removed. Branches, otherworktrees/caches and alloldpackets/backups preserved. This finalboard-onlyreceipt is subsequently appended tobackup and its soleworktree removed before finalprivatehandoff; those later actions are not preclaimed here. Native live reuse unaccepted; mainlineincomplete/usable_tagnone. Ownernext inspects ordinaryofficialTUI startup in exactownedcwd without a modelprompt, then a freshtrialdecision; no automaticuse of the remaining2slots.
 
 ## T-0426 — Inline instruction role preservation
 

@@ -11,6 +11,7 @@ class CursorTaskBoundary(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name).resolve(); self.workspace = self.root / 'workspace'; self.workspace.mkdir()
         (self.workspace / 'input.json').write_text('{"values":[7,11,-2,9]}')
+        (self.workspace / 'result.json').write_text('{}')
         self.state = {}
 
     def call(self, event, **payload):
@@ -55,9 +56,34 @@ class CursorTaskBoundary(unittest.TestCase):
     def test_duplicate_tool_excess_output_and_context_file_reads_fail(self):
         self.start();self.call('preToolUse',tool_name='Read',tool_input={'path':'input.json'})
         self.assertEqual(self.call('preToolUse',tool_name='Read',tool_input={'path':'input.json'})[0]['permission'],'deny')
-        self.state={};self.start();self.call('preToolUse',tool_name='Read',tool_input={'path':'input.json'})
+        self.state={};self.start();self.call('preToolUse',tool_name='Read',tool_input={'path':'input.json'});self.call('postToolUse',tool_name='Read')
         self.assertEqual(self.call('preToolUse',tool_name='Write',tool_input={'path':'result.json','content':'x'*4097})[0]['permission'],'deny')
         self.assertEqual(self.call('beforeReadFile',file_path=str(self.root/'private'))[0]['permission'],'deny')
+
+    def test_native_output_inspection_is_bounded_and_correlated(self):
+        self.start()
+        for index, (tool, target) in enumerate([('Read','input.json'),('Read','result.json'),('Write','result.json'),('Read','result.json')]):
+            params = {'file_path': target, **({'content':'{}'} if tool == 'Write' else {})}
+            self.assertEqual(self.call('preToolUse', tool_name=tool, tool_input=params, tool_use_id=str(index))[0]['permission'], 'allow')
+            if tool == 'Read':
+                self.assertEqual(self.call('beforeReadFile',file_path=str(self.workspace/target),tool_use_id=str(index))[0]['permission'], 'allow')
+            self.call('postToolUse',tool_name=tool,tool_use_id=str(index))
+        self.assertFalse(self.state.get('failed',False))
+        self.assertEqual(len(self.state['completed_tools']),4)
+        self.assertEqual(self.call('preToolUse',tool_name='Read',tool_input={'path':'result.json'})[0]['permission'],'deny')
+
+    def test_output_read_requires_completed_input_and_rejects_symlinks(self):
+        self.start()
+        self.assertEqual(self.call('preToolUse',tool_name='Read',tool_input={'path':'result.json'})[0]['permission'],'deny')
+        self.state={};self.start()
+        self.call('preToolUse',tool_name='Read',tool_input={'path':'input.json'},tool_use_id='read')
+        self.call('postToolUse',tool_name='Read',tool_use_id='foreign')
+        self.assertTrue(self.state['failed'])
+        self.state={};self.start()
+        self.call('preToolUse',tool_name='Read',tool_input={'path':'input.json'})
+        self.call('postToolUse',tool_name='Read')
+        (self.workspace/'result.json').unlink();(self.workspace/'result.json').symlink_to(self.workspace/'input.json')
+        self.assertEqual(self.call('preToolUse',tool_name='Read',tool_input={'path':'result.json'})[0]['permission'],'deny')
 
     def test_native_stop_errors_are_not_success_and_usage_remains_unknown(self):
         _,record=self.call('stop',status='error',loop_count=0)

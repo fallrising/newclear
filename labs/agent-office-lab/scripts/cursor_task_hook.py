@@ -10,7 +10,8 @@ import sys
 import time
 
 MODEL = 'composer-2.5'
-PROMPT = 'Read input.json with Read. Write result.json with Write containing exactly the input marker and the sum of input values as {"marker": "...", "total": 25}. Use only these two files and these two tools, once each. Do not use shell, search, subagents or other files. Then briefly confirm completion.'
+MAX_TOOL_CALLS = 4
+PROMPT = 'Read input.json first. Write result.json containing exactly the input marker and the sum of input values as {"marker": "...", "total": 25}. result.json already contains an empty object; you may read it before or after writing. Use only Read and Write on these two files, at most four tool operations total and one write. Do not use shell, search, subagents or other files. Then briefly confirm completion.'
 EVENTS = ['sessionStart', 'beforeSubmitPrompt', 'preToolUse', 'postToolUse', 'postToolUseFailure',
           'beforeReadFile', 'beforeShellExecution', 'beforeMCPExecution', 'subagentStart', 'afterAgentResponse', 'stop']
 
@@ -44,29 +45,47 @@ def evaluate(event, payload, state, workspace, remote, deadline, now):
         result = {'continue': bool(allowed)}; record['allowed'] = bool(allowed)
     elif event == 'preToolUse':
         tool = payload.get('tool_name'); params = payload.get('tool_input')
-        allowed = valid and remote and state.get('prompts') == 1 and not state.get('failed') and isinstance(params, dict)
-        target = 'input.json' if tool == 'Read' else 'result.json'
-        if allowed:
+        allowed = bool(valid and remote and state.get('prompts') == 1 and not state.get('failed') and isinstance(params, dict))
+        target = 'other'
+        if isinstance(params, dict):
             paths = [params[k] for k in ['path', 'file_path', 'target_file'] if k in params]
-            allowed = tool in ['Read', 'Write'] and len(paths) == 1 and safe_path(paths[0], workspace, target, tool == 'Read')
-            allowed = allowed and tool not in state.get('tools', [])
-            if tool == 'Write':
-                content = [params[k] for k in ['content', 'contents'] if k in params]
-                allowed = allowed and state.get('tools') == ['Read'] and len(content) == 1 and isinstance(content[0], str) and len(content[0].encode()) <= 4096
-        if allowed: state.setdefault('tools', []).append(tool)
+            if len(paths) == 1:
+                for name in ['input.json', 'result.json']:
+                    if safe_path(paths[0], workspace, name, True): target = name
+        calls = state.get('calls', [])
+        completed = state.get('completed_tools', [])
+        allowed = allowed and tool in ['Read', 'Write'] and target != 'other' and len(calls) < MAX_TOOL_CALLS and not state.get('pending')
+        if tool == 'Read':
+            allowed = allowed and ((target == 'input.json' and not calls) or
+                (target == 'result.json' and completed and completed[0] == 'Read' and
+                 sum(c == {'tool': 'Read', 'target': 'result.json'} for c in calls) < 2))
+        elif tool == 'Write':
+            content = [params[k] for k in ['content', 'contents'] if k in params] if isinstance(params, dict) else []
+            allowed = allowed and target == 'result.json' and completed and completed[0] == 'Read' and 'Write' not in state.get('tools', []) and len(content) == 1 and isinstance(content[0], str) and len(content[0].encode()) <= 4096
+        if allowed:
+            call = {'tool': tool, 'target': target}
+            state.setdefault('tools', []).append(tool); state.setdefault('calls', []).append(call)
+            state['pending'] = {**call, 'tool_use_id': payload.get('tool_use_id')}
         result = {'permission': 'allow' if allowed else 'deny'}
-        record.update(tool=tool if tool in ['Read', 'Write'] else 'other', allowed=bool(allowed))
+        record.update(tool=tool if tool in ['Read', 'Write'] else 'other', target=target, allowed=bool(allowed))
     elif event == 'beforeReadFile':
-        allowed = valid and remote and state.get('prompts') == 1 and not state.get('failed') and safe_path(payload.get('file_path'), workspace, 'input.json', True)
-        result = {'permission': 'allow' if allowed else 'deny'}; record['allowed'] = bool(allowed)
+        pending = state.get('pending', {})
+        target = pending.get('target')
+        allowed = bool(valid and remote and state.get('prompts') == 1 and not state.get('failed') and
+            pending.get('tool') == 'Read' and pending.get('tool_use_id') == payload.get('tool_use_id') and
+            target in ['input.json', 'result.json'] and safe_path(payload.get('file_path'), workspace, target, True))
+        result = {'permission': 'allow' if allowed else 'deny'}; record['allowed'] = allowed
     elif event in ['beforeShellExecution', 'beforeMCPExecution', 'subagentStart']:
         result = {'permission': 'deny'}; record['allowed'] = False
     elif event == 'postToolUseFailure':
         state['failed'] = True; record['failed'] = True
     elif event == 'postToolUse':
         tool = payload.get('tool_name'); record['tool'] = tool if tool in ['Read', 'Write'] else 'other'
-        if not valid or tool not in state.get('tools', []): state['failed'] = True
-        state.setdefault('completed_tools', []).append(record['tool'])
+        pending = state.get('pending', {})
+        if not valid or tool != pending.get('tool') or payload.get('tool_use_id') != pending.get('tool_use_id'):
+            state['failed'] = True
+        else:
+            state.pop('pending'); state.setdefault('completed_tools', []).append(record['tool'])
     elif event == 'stop':
         record['status'] = payload.get('status') if payload.get('status') in ['completed', 'aborted', 'error'] else 'unknown'
         record['loop_count'] = payload.get('loop_count') if isinstance(payload.get('loop_count'), int) else None

@@ -1,14 +1,17 @@
 ---
+
 project: labs/agent-office-lab
 purpose: 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Office
 kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: 205579b22db64d9c45754dede6f37cb8b29e9f24
+source_commit: 4569ff7ed93a16f7728e28846e9230034de6a673
 ---
 
 # Agent Office Lab 驗收
+
+最新單次批准已使用：240 秒期限下於 34.05 秒因第二個 Read 被邊界拒絕而停止，沒有產物；session／固定模型／hooks 有證據，清理完整。第二次讀取的目標未記錄，不能確認它是否為輸出檢查。已離線準備最多四次工具規則、預建空 result.json 與檔案分類診斷；65 tests 和無 prompt 啟動通過，尚未再次跑模型。[本輪證據](docs/evidence/cursor-bounded-2026-11-01.json)。AC-13 保持 pending、PR #878 保持 draft；下一次付費任務須新批准。
 
 ## 主線與範圍
 
@@ -44,7 +47,7 @@ T-0009-02：owner 已完成 Cursor 登入，原生 status 回報 authenticated�
 
 ## 現況與缺口
 
-T-0009-02 的 owner 授權單次任務已執行，但[驗收失敗](docs/evidence/cursor-live-2026-11-01.json)：產物正確，loop_limit=0 卻使原生 hooks 整份被忽略，沒有事件／用量證據，AC-13 保持 pending。已修正為 1、增加原生 schema 預檢並補合法讀取回歸；63 tests 與無 prompt 啟動通過。清理正確、沒有追加付費重跑；等 owner 新的一次批准。
+T-0009-02 前次的 owner 授權單次任務已執行，但[驗收失敗](docs/evidence/cursor-live-2026-11-01.json)：產物正確，loop_limit=0 卻使原生 hooks 整份被忽略，沒有事件／用量證據，AC-13 保持 pending。已修正為 1、增加原生 schema 預檢並補合法讀取回歸；63 tests 與無 prompt 啟動通過。清理正確、沒有追加付費重跑；等 owner 新的一次批准。
 
 T-0009 已固定 Cursor CLI 並完成原生登入等待、workspace hooks 安裝／移除、OS 外網拒絕與程序清理，12.51 秒；55 項離線測試通過。[安裝／owner 登入命令](docs/CURSOR.md)。owner 已登入並由原生 status 核對；有界任務 runner 已準備，待一次配額／付費批准。
 

@@ -92,12 +92,15 @@ try {
   await until(() => welcomed, 10000, 'Office welcome missing');
   ws.send(JSON.stringify({ t: 'worker.spawn', deskId: 'desk-1', provider: 'cursor', model: plan.model, prompt: plan.prompt ?? undefined, worktree: false }));
   if (plan.allow_remote) {
-    await until(() => worker?.status === 'done' && events().some(e => e.event === 'stop'), 110000, 'Cursor task did not complete');
+    await until(() => worker?.status === 'done' && events().some(e => e.event === 'stop'), Math.max(0, plan.deadline * 1000 - Date.now()), 'Cursor task did not complete');
     const recorded = events();
     const state = JSON.parse(fs.readFileSync(path.join(out, 'boundary-state.json')));
     assert(!state.failed && state.prompts === 1);
-    assert.deepEqual(state.tools, ['Read', 'Write']);
-    assert.deepEqual(state.completed_tools, ['Read', 'Write']);
+    assert(state.tools.length >= 2 && state.tools.length <= 4 && state.tools[0] === 'Read');
+    assert.equal(state.tools.filter(t => t === 'Write').length, 1);
+    assert(state.tools.every(t => t === 'Read' || t === 'Write'));
+    assert.deepEqual(state.completed_tools, state.tools);
+    assert(!state.pending);
     assert(worker.sessionId && recorded.every(e => e.session === worker.sessionId && e.model === plan.model));
     assert(report.authenticated_hooks.some(e => e.event === 'stop' && e.session === worker.sessionId));
     const stopped = recorded.find(e => e.event === 'stop');

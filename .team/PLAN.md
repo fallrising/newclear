@@ -2702,3 +2702,14 @@ preserved; exact-head full CI/merge/readback/BOARD/desk are the remaining delive
 Owner continues after RAL. Lead solewriter for XR01–04/T0035, isolated six-case actualworkerd/D1 plusPythonrunner andSQLiteonlinebackup. No live/private/networkauthority/paidchange. Test-first snapshotfixture, qualification before runtimefix if needed, fullregression and sourcehash preservation. One fresh native readonly reviewer T860, inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no tests/writes/private/network/delegation. Instructionscope notOSisolation. No originalrunnerstop or remoteexport/import claim.
 
 XR source/local evidence gate ACCEPT 2026-11-01T05:33:30Z: RED4→GREEN4,130Node/308Python=438tests; XR2 sixactualworkerd/Pythonrunner cases,zero restoredcollection/sourceunchanged,9hashes; XM1/XM2 badguardsdetected without productmutation; T860 finalACCEPT. XR1 metadata-countfailure retained andexplicitplatformtablefilterfixed, no weakenedapplicationoracle. Productruntime/liveauthority unchanged. NormalGit CI/merge/readback andboardclosure remain; fullmainlineincomplete.
+
+## T-0442 M2 approved pair continuation — 2026-11-01
+
+Same claimed task and existing scope. Parent owns runtime capacity/start/stop,
+shared15min deadline, evidence and delivery. One12min bounded native helper writes
+private cancellation/monitor script; one8min independent readonly preflight reviewer.
+No children; at most two focused corrections. Live max2 new CLI invocations under
+approved 2x4CPU4GiB zero-warm resources, then restore1. Native/source gates already
+passed for unchanged AP/Fanz bytes; verify acceptance scripts, inspect actual receipts,
+fresh-context independent acceptance and required CI before normal merge/readback.
+Estimated continuation45–75min plus CI; unknown metrics remain null. No M3.

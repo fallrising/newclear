@@ -436,3 +436,8 @@ fixed-base repair/check/download and confirmed cleanup; code and single-live ind
 reviews accepted, native and hosted CI green. Two simultaneous workspaces/current shared
 Claude route remain pending explicit resource approval. max_claims remains1; temporary
 services stopped, no resident URL, no M3/AC05 or full platform completion claim.
+
+2026-11-01 continuation: owner approved the exact bounded two-VM proposal. This
+round verifies M2-03 concurrent markers/boundaries, actual agent overlap, browser
+cancelA/completeB and final cleanup/max1 restoration. Previous singleCodex result
+is retained without replay. FN03 remains pending until actual evidence is accepted.

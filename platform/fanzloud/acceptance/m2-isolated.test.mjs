@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const source = await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8');
 const run = id => ({id, state: 'running', state_version: 3, cleanup_state: 'pending'});
-async function page({stored, submit, action, getRun} = {}) {
+async function page({stored, submit, action, getRun, tasks} = {}) {
   const elements = new Map(), storage = new Map(stored || []), requests = [], timers = [];
   const node = id => {
     if (!elements.has(id)) elements.set(id, {value: '0', textContent: '', disabled: false, options: [], listeners: {}, children: [],
@@ -24,7 +24,7 @@ async function page({stored, submit, action, getRun} = {}) {
       else if (url.endsWith('/agent-profiles')) data = {items: ['claude', 'codex', 'fake'].map(name => ({id: name, name, backend: `${name}-subscription`}))};
       else if (url.endsWith('/runtime')) data = {repositories: [{canonical_repo: 'repo', base_sha: 'a'.repeat(40)}]};
       else if (url.endsWith('/tasks') && options.method === 'POST') data = await (submit ? submit() : Promise.resolve({run: run('A')}));
-      else if (url.endsWith('/tasks')) data = {items: [{title: 'A', run_id: 'A', state: 'running'}, {title: 'B', run_id: 'B', state: 'running'}]};
+      else if (url.endsWith('/tasks')) data = {items: tasks ? await tasks() : [{title: 'A', run_id: 'A', state: 'running'}, {title: 'B', run_id: 'B', state: 'running'}]};
       else if (url.endsWith('/actions')) data = await action();
       else data = getRun ? await getRun(url.split('/').at(-1)) : run(url.split('/').at(-1));
       return {ok: true, status: 200, json: async () => data};
@@ -44,6 +44,47 @@ test('M2-04: accepted running A allows explicit B with distinct submit keys', as
   await p.submitForm();
   const posts = p.requests.filter(x => x.url.endsWith('/tasks') && x.method === 'POST');
   assert.equal(posts.length, 2); assert.notEqual(posts[0].headers['Idempotency-Key'], posts[1].headers['Idempotency-Key']);
+});
+test('M2-04: newly accepted active tasks can be selected without reload or completion', async () => {
+  const tasks = [];
+  const p = await page({tasks: () => [...tasks], submit: async () => {
+    const id = tasks.length ? 'B' : 'A';
+    tasks.push({title: id, run_id: id, state: 'running'});
+    return {run: run(id)};
+  }});
+  assert.equal(p.node('recent-tasks').children.length, 0);
+  await p.submitForm(); await p.submitForm();
+  assert.equal(p.node('recent-tasks').children.length, 2);
+  p.node('recent-tasks').children[0].children[0].listeners.click(); await p.flush();
+  assert.equal(p.node('run-id').textContent, 'A');
+  assert.equal(p.requests.filter(x => x.url.endsWith('/tasks') && x.method === 'POST').length, 2);
+});
+test('M2-04: list read failure preserves confirmed admission and never resends', async () => {
+  let accepted = false;
+  const p = await page({tasks: () => {
+    if (accepted) throw new Error('list offline');
+    return [];
+  }, submit: async () => {accepted = true; return {run: run('A')};}});
+  await p.submitForm();
+  assert.equal(p.node('submit-status').textContent, '任務已受理');
+  assert.equal(p.node('submit-task').disabled, false);
+  assert.equal(JSON.parse(p.storage.get('fanz-submission')).runId, 'A');
+  assert.equal(p.requests.filter(x => x.url.endsWith('/tasks') && x.method === 'POST').length, 1);
+});
+test('M2-04: an older task list cannot hide a more recently accepted task', async () => {
+  const tasks = []; let release;
+  const p = await page({tasks: () => {
+    const snapshot = [...tasks];
+    return snapshot.length === 1 ? new Promise(resolve => {release = () => resolve(snapshot);}) : snapshot;
+  }, submit: async () => {
+    const id = tasks.length ? 'B' : 'A'; tasks.push({title: id, run_id: id, state: 'running'});
+    return {run: run(id)};
+  }});
+  const first = p.submitForm(); await p.flush();
+  await p.submitForm(); release(); await first; await p.flush();
+  assert.equal(p.node('recent-tasks').children.length, 2);
+  p.node('recent-tasks').children[1].children[0].listeners.click(); await p.flush();
+  assert.equal(p.node('run-id').textContent, 'B');
 });
 test('M2-04: reload of a confirmed receipt allows a distinct task', async () => {
   const p = await page({stored: [['fanz-submission', JSON.stringify({key: 'old', runId: 'A'})]]});

@@ -100,3 +100,19 @@ before the RPC audit; absent execution environments remain the tool boundary.
 Native backup admission also preserves exact completed queued-cancel proof and the
 same confirmed real binding/released-reservation proof for both subscription backends.
 No unresolved cleanup, generation mismatch, or unknown operation is admitted.
+
+## Approved concurrent experiment — 2026-11-01
+
+Owner approved the previously proposed bounded experiment after the single-route
+closeout. Same existing host, temporary max2, each4CPU/4GiB (total8vCPU/8GiB with
+explicit CPU oversubscription), zero warm. Shared15min experiment deadline and
+600s per coding invocation, at most2 new official invocations: cancel CodexA during
+actual overlap while ClaudeB finishes the repair. Start RAM>=12GiB/disk>=15GiB; stop
+owned runs for RAM<2GiB or load1>6 continuously60s, unknown dispatch or boundary drift.
+AP alone cancels/reconciles. Verify both gone, restore max1 and stop services.
+Earlier pending-approval text is historical. No M3/release/deploy/API billing.
+
+M2-04 regression found during preflight: after confirmed admission, refresh the
+recent-task list so both active tasks can be selected without waiting for completion
+or reloading. List-read failure cannot turn a confirmed submission into an unknown
+one, lock it again or resend it. Test the active-list and failed-list-read cases.

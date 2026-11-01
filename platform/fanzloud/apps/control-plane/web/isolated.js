@@ -13,6 +13,7 @@ if (lockedSubmission) element('submit-status').textContent = '已有提交紀錄
 let finalDiff = null;
 let authenticated = false;
 let currentRun = null;
+let recentRequest = 0;
 function reasonText(reason) {
   if (!reason) return '';
   if (reason === 'operator_cancelled') return '已要求取消；是否停止以工作區清理狀態為準。';
@@ -56,7 +57,9 @@ async function catalog() {
   await recent();
 }
 async function recent() {
+  const requested = ++recentRequest;
   const tasks = await api('/tasks');
+  if (requested !== recentRequest || !authenticated) return;
   element('recent-tasks').replaceChildren(...tasks.items.map(task => {
     const item = document.createElement('li');
     const button = document.createElement('button');
@@ -135,6 +138,7 @@ element('task-form').addEventListener('submit', async (event) => {
     sessionStorage.setItem('fanz-submission', JSON.stringify(pendingSubmission));
     lockedSubmission = false; element('submit-task').disabled = !selected.length || !element('agent').options.length;
     element('submit-status').textContent = '任務已受理'; observe(value.run.id);
+    try { await recent(); } catch (error) { fail(error); }
   } catch (error) {
     element('submit-status').textContent = '提交結果尚未確認。請從最近任務對帳；不會自動重送。'; fail(error);
     try { await recent(); } catch { /* The first uncertainty remains visible. */ }

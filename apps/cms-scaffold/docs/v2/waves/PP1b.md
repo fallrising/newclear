@@ -993,16 +993,16 @@ page沒有ref field，refs409使用另兩筆僅本case的既有catalog fixture�
 
 ## 9 交付檢查表
 
-以下為產品交付檢查表，目前一律未勾；由root根據實際證據更新。施工圖審查通過與文件PR合併僅使DOC_READY生效，不代表產品VERIFIED。
+以下為產品交付檢查表；2026-11-01 root依[本輪實測](../../../.team/resume-20261101/RUNTIME-REPORT.md)更新已觀察項目，尚未完成的交付 gate 保持未勾。施工圖審查通過與文件PR合併僅使DOC_READY生效，不代表產品VERIFIED。
 
 - [ ] PP1a VERIFIED與本PP1b DOC_READY前置已由root回讀已合併main；34carddiff各≤400且獨立review通過。
-- [ ] B/G/Q focused Red意圖與Green結果有compactevidence；regularJUnit不需Docker，PGcontract真PostgreSQL、sameDS/fault/race通過。
-- [ ] localadapter真正停寫/epochpin/ownedmedia負例已觀察；沒有以receipt/mock/PP1aprobe替代、沒有DBports/hostnetwork/docker.sock掛app。
-- [ ] fresh-init trueTTY／initializedverifier／normalprodrestart／distinctoperator／explicitpublicgrant／Q25/reset scopedTLS真browser旅程有觀察結果，privatecredential無trace/log。
-- [ ] OAS僅Q25增量、52paths、原projection/email/schema不變；codegen第二次無diff，relative links與source refs有效。
+- [x] B/G/Q focused Red意圖與Green結果有compactevidence；regularJUnit不需Docker，PGcontract真PostgreSQL、sameDS/fault/race通過。
+- [x] localadapter真正停寫/epochpin/ownedmedia負例已觀察；沒有以receipt/mock/PP1aprobe替代、沒有DBports/hostnetwork/docker.sock掛app。
+- [x] fresh-init trueTTY／initializedverifier／normalprodrestart／distinctoperator／explicitpublicgrant／Q25/reset scopedTLS真browser旅程有觀察結果，privatecredential無trace/log。
+- [x] OAS僅Q25增量、52paths、原projection/email/schema不變；codegen第二次無diff，relative links與source refs有效。
 - [ ] `./gradlew test integrationTest --no-daemon --no-parallel`、`npm run lint`、`npm run typecheck`、`npm test`、`npm run build`、`npm run test:bundle`、`npm run e2e:mock`、`git diff --check` 與requiredCI全通過；失敗或未跑明列。
 - [ ] root更新主PP1/readiness/README與privatehandoff，正常PR/CI/review/合併/遠端回讀後才宣告本子波VERIFIED；文件worker只寫三個授權文件，不代操作。
-- [ ] **hostrecover-success/完整restore依PP1c仍未完成**；formalhost/TLS、backup/upgrade/ops不被本地fresh/Q25通過代替。
+- [x] **hostrecover-success/完整restore依PP1c仍未完成**；formalhost/TLS、backup/upgrade/ops不被本地fresh/Q25通過代替。
 
 查閱2026-10-09：backend網路/epoch序列化官方來源與精確SQL見[帳號附約§10.3](../contracts/PP1-accounts.md)。外部查證不是產品runtime證據。
 

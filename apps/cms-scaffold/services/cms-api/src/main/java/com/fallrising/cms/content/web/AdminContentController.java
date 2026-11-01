@@ -8,9 +8,7 @@ import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.service.EntryService;
 import com.fallrising.cms.content.service.NavigationService;
 import com.fallrising.cms.content.store.ContentStore;
-import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.CmsAction;
-import com.fallrising.cms.identity.domain.Surface;
 import com.fallrising.cms.identity.service.AuditLog;
 import com.fallrising.cms.identity.web.AuthController;
 import com.fallrising.cms.identity.web.IdentityRequest;
@@ -49,6 +47,8 @@ public class AdminContentController {
             String key, String displayName, String pluralDisplayName, String titleField, String slugPolicy, List<FieldBody> fields) {}
 
     public record NavBody(Map<String, Object> document) {}
+
+    public record PurgeBody(String confirmPhrase, String confirmId) {}
 
     private final ContentStore store;
     private final NavigationService navigation;
@@ -217,22 +217,15 @@ public class AdminContentController {
 
     @PostMapping("/entries/{id}/purge")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void purge(@PathVariable UUID id, HttpServletRequest request) {
-        IdentityRequest identity = adminSurface(request);
-        entries.purge(identity.principal(), identity.surface(), id);
+    public void purge(@PathVariable UUID id, @RequestBody(required = false) PurgeBody body, HttpServletRequest request) {
+        IdentityRequest identity = AuthController.current(request);
+        entries.purge(identity.principal(), identity.surface(), id,
+                body == null ? null : body.confirmPhrase(), body == null ? null : body.confirmId());
     }
 
     private IdentityRequest manageTypes(HttpServletRequest request) {
         IdentityRequest identity = AuthController.current(request);
         authorization.require(identity.principal(), CmsAction.MANAGE_TYPES, null, null, identity.surface());
-        return identity;
-    }
-
-    private static IdentityRequest adminSurface(HttpServletRequest request) {
-        IdentityRequest identity = AuthController.current(request);
-        if (identity.surface() != Surface.ADMIN) {
-            throw IdentityException.surfaceForbidden("delete", null, identity.surface().wire());
-        }
         return identity;
     }
 

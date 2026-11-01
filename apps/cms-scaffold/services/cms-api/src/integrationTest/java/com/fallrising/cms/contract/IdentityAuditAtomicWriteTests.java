@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,10 +48,11 @@ class IdentityAuditAtomicWriteTests {
     private PrincipalAdminService admin;
     private TransactionRunner transactions;
     private boolean failAudit;
+    private javax.sql.DataSource source;
 
     @BeforeEach
     void setUp() {
-        var source = PostgresFixture.cleanDataSource();
+        source = PostgresFixture.cleanDataSource();
         jdbc = new JdbcTemplate(source);
         var template = new TransactionTemplate(new DataSourceTransactionManager(source));
         store = new JdbcIdentityStore(source, template) {
@@ -234,6 +236,88 @@ class IdentityAuditAtomicWriteTests {
         assertAuditFailure(() -> auth.login(principal.username(), PASSWORD, request));
         assertThat(store.findPrincipalById(principal.id())).contains(locked);
         assertNoAudit();
+    }
+
+    @Test
+    void PP1FM06_selfDenialSurvivesAmbientRollbackAndItsOwnFaultIsAtomic() throws Exception {
+        failAudit = false;
+        var before = store.findPrincipalById(request.principal().id()).orElseThrow();
+        var roles = store.rolesOf(before.id());
+        assertThatThrownBy(() -> transactions.run(() -> admin.disable(request, before.id())))
+                .isInstanceOfSatisfying(IdentityException.class, failure ->
+                        assertThat(failure.code()).isEqualTo(com.fallrising.cms.api.error.ErrorCode.SELF_DISABLE_FORBIDDEN));
+        try (var connection = source.getConnection(); var statement = connection.createStatement();
+                var rows = statement.executeQuery("SELECT outcome, detail_json->>'reason' FROM cms_audit_event")) {
+            assertThat(rows.next()).isTrue();
+            assertThat(rows.getString(1)).isEqualTo("denied");
+            assertThat(rows.getString(2)).isEqualTo("SELF_DISABLE_FORBIDDEN");
+            assertThat(rows.next()).isFalse();
+        }
+        assertThat(store.findPrincipalById(before.id())).contains(before);
+        assertThat(store.rolesOf(before.id())).isEqualTo(roles);
+        assertSessionUnchanged();
+        failAudit = true;
+        assertAuditFailure(() -> admin.replaceRoles(request, before.id(), List.of()));
+        assertThat(store.listAudits(null, null)).hasSize(1);
+        assertThat(store.findPrincipalById(before.id())).contains(before);
+        assertThat(store.rolesOf(before.id())).isEqualTo(roles);
+        assertSessionUnchanged();
+    }
+
+    @Test
+    void PP1FM05_selfRoleCheckUsesSharedGuard() throws Exception {
+        failAudit = false;
+        var managerRole = IdentityStoreContract.role("manager");
+        var adminRole = store.findRoleByCode("admin").orElseThrow();
+        store.insertRole(managerRole);
+        store.insertPermission(IdentityStoreContract.permission(managerRole.id(), "manage_principals", null, null, List.of("admin")));
+        store.replacePrincipalRoles(principal.id(), List.of(new PrincipalRoleAssignment(principal.id(), managerRole.id(), "manager", List.of())));
+        request.setPrincipal(principal);
+        var enteredTransaction = new java.util.concurrent.CountDownLatch(1);
+        var grantCommitted = new java.util.concurrent.CountDownLatch(1);
+        var workerPid = new java.util.concurrent.atomic.AtomicInteger();
+        var controlled = new TransactionRunner(source) {
+            @Override public void run(Runnable work) {
+                super.run(() -> {
+                    workerPid.set(jdbc.queryForObject("SELECT pg_backend_pid()", Integer.class));
+                    enteredTransaction.countDown();
+                    try { assertThat(grantCommitted.await(10, TimeUnit.SECONDS)).isTrue(); }
+                    catch (InterruptedException failure) { Thread.currentThread().interrupt(); throw new IllegalStateException(failure); }
+                    work.run();
+                });
+            }
+        };
+        var mapper = new ObjectMapper();
+        var controlledAdmin = new PrincipalAdminService(store, mock(PasswordHasher.class), auth,
+                new AuthorizationService(store, mapper, controlled), mapper, mock(ContentTypeDirectory.class),
+                controlled, new AuditLog(store, mapper));
+        try (var connection = source.getConnection(); var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+            connection.setAutoCommit(false);
+            int ownerPid;
+            try (var query = connection.createStatement(); var row = query.executeQuery("SELECT pg_backend_pid(), pg_advisory_xact_lock(4849623913531787598)")) {
+                assertThat(row.next()).isTrue(); ownerPid = row.getInt(1);
+            }
+            var attempt = executor.submit(() -> {
+                try { controlledAdmin.replaceRoles(request, principal.id(), List.of()); return "allowed"; }
+                catch (IdentityException failure) { return failure.code().wire(); }
+            });
+            try {
+                assertThat(enteredTransaction.await(10, TimeUnit.SECONDS)).isTrue();
+                assertThat(workerPid.get()).isNotEqualTo(ownerPid);
+                try (var insert = connection.prepareStatement("INSERT INTO cms_principal_role(principal_id,role_id,content_type_codes) VALUES (?,?,ARRAY[]::text[])")) {
+                    insert.setObject(1, principal.id()); insert.setObject(2, adminRole.id()); insert.executeUpdate();
+                }
+                connection.commit();
+            } finally { grantCommitted.countDown(); }
+            assertThat(attempt.get(10, TimeUnit.SECONDS)).isEqualTo("SELF_DEMOTION_FORBIDDEN");
+        }
+        assertThat(store.rolesOf(principal.id()).stream().map(PrincipalRoleAssignment::roleCode)).containsExactlyInAnyOrder("manager", "admin");
+        assertThat(store.findPrincipalById(principal.id())).contains(principal);
+        assertSessionUnchanged();
+        assertThat(store.listAudits("ROLE_ASSIGNED", principal.id())).singleElement().satisfies(event -> {
+            assertThat(event.outcome()).isEqualTo("denied");
+            assertThat(event.detailJson()).contains("SELF_DEMOTION_FORBIDDEN");
+        });
     }
 
     private void assertAuditFailure(Runnable action) {

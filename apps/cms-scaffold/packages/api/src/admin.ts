@@ -15,6 +15,7 @@ import type {
   PermissionList,
   Principal,
   PrincipalList,
+  PurgeEntryRequest,
   RoleAssignmentInput,
   RoleList,
   TemporaryPassword,
@@ -83,8 +84,8 @@ export function adminApi(t: Transport) {
       return t.call(() => t.client.POST("/api/v1/admin/content-types/{typeKey}/disable", { params: { path: { typeKey: type } } }));
     },
     /** Hard delete with an audit event (admin role only, 204). */
-    purgeEntry(id: string): Promise<void> {
-      return t.call(() => t.client.POST("/api/v1/admin/entries/{id}/purge", { params: { path: { id } } }));
+    purgeEntry(id: string, body?: PurgeEntryRequest): Promise<void> {
+      return t.call(() => t.client.POST("/api/v1/admin/entries/{id}/purge", { params: { path: { id } }, body }), { retryCsrf: false });
     },
     audit(query: AuditQuery = {}, signal?: AbortSignal): Promise<AuditEventPage> {
       return t.call(() => t.client.GET("/api/v1/admin/audit", { params: { query: auditParams(query) }, signal }));

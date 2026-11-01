@@ -45,6 +45,8 @@ import static org.mockito.Mockito.when;
 /** Real PostgreSQL checks for entry/ref/media/revision/audit transaction boundaries. */
 class EntryAtomicWriteTests {
     private JdbcTemplate jdbc;
+    private javax.sql.DataSource dataSource;
+    private com.fallrising.cms.platform.TransactionRunner transactions;
     private JdbcContentStore store;
     private JdbcMediaStore media;
     private IdentityStore identity;
@@ -55,7 +57,7 @@ class EntryAtomicWriteTests {
 
     @BeforeEach
     void setUp() {
-        var dataSource = PostgresFixture.cleanDataSource();
+        dataSource = PostgresFixture.cleanDataSource();
         jdbc = new JdbcTemplate(dataSource);
         store = new JdbcContentStore(dataSource, new ObjectMapper());
         media = new JdbcMediaStore(dataSource);
@@ -63,7 +65,10 @@ class EntryAtomicWriteTests {
         auditStore = new JdbcIdentityStore(dataSource, null);
         var authorization = mock(AuthorizationService.class);
         mediaService = new MediaService(media, null, store, authorization);
-        service = new EntryService(store, authorization, identity, mediaService);
+        transactions = new com.fallrising.cms.platform.TransactionRunner(dataSource);
+        var audit = new com.fallrising.cms.identity.service.AuditLog(identity, new ObjectMapper());
+        service = new EntryService(store, authorization, identity, mediaService, audit,
+                new com.fallrising.cms.identity.service.GovernanceDenialAudit(transactions, audit));
         type = ContentStoreContract.type("atomic");
         store.insertType(type);
         store.insertField(new FieldRecord(UUID.randomUUID(), type.id(), "cover", "media-ref", false, false,
@@ -244,17 +249,22 @@ class EntryAtomicWriteTests {
         EntryRecord entry = service.create(null, Surface.BACK, type.typeKey(), "work", Map.of("cover", cover.toString()));
         service.publish(null, Surface.BACK, entry.id());
         EntryRecord current = store.findEntry(entry.id()).orElseThrow();
+        var rows = store.indexRowsOf(entry.id());
+        var revisions = store.revisionsOf(entry.id());
+        var refs = store.refsTo(cover);
+        var attachments = media.attachmentsOfMedia(cover);
         Principal admin = admin();
         doAnswer(call -> {
             // The audit really reaches the database before failure; it too must roll back.
             auditStore.insertAudit(call.getArgument(0));
             throw new IllegalStateException("audit failed");
         }).when(identity).insertAudit(any());
-        assertThatThrownBy(() -> service.purge(admin, Surface.ADMIN, entry.id())).hasMessage("audit failed");
+        assertThatThrownBy(() -> service.purge(admin, Surface.ADMIN, entry.id(), "DELETE", entry.id().toString())).hasMessage("audit failed");
         assertThat(store.findEntry(entry.id())).contains(current);
-        assertThat(store.revisionsOf(entry.id())).hasSize(1);
-        assertThat(store.refsTo(cover)).hasSize(1);
-        assertThat(media.attachmentsOfMedia(cover)).hasSize(1);
+        assertThat(store.indexRowsOf(entry.id())).isEqualTo(rows);
+        assertThat(store.revisionsOf(entry.id())).isEqualTo(revisions);
+        assertThat(store.refsTo(cover)).isEqualTo(refs);
+        assertThat(media.attachmentsOfMedia(cover)).isEqualTo(attachments);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM cms_audit_event", Long.class)).isZero();
     }
 
@@ -268,7 +278,7 @@ class EntryAtomicWriteTests {
             auditStore.insertAudit(call.getArgument(0));
             return null;
         }).when(identity).insertAudit(any());
-        service.purge(admin, Surface.ADMIN, entry.id());
+        service.purge(admin, Surface.ADMIN, entry.id(), "DELETE", entry.id().toString());
         assertThat(store.findEntry(entry.id())).isEmpty();
         assertThat(store.revisionsOf(entry.id())).isEmpty();
         assertThat(store.refsTo(cover)).isEmpty();
@@ -411,6 +421,86 @@ class EntryAtomicWriteTests {
         assertThat(store.findEntry(legacy.id())).contains(before);
         assertThat(store.indexRowsOf(legacy.id())).containsExactlyElementsOf(rows);
         assertThat(store.revisionsOf(legacy.id())).isEmpty();
+    }
+
+    @Test
+    void PP1FM06_purgeDenialSurvivesAmbientRollbackAndDenialAuditFaultLeavesNoPartialWrite() throws Exception {
+        UUID cover = insertMedia();
+        var entry = service.create(null, Surface.BACK, type.typeKey(), "denied", Map.of("cover", cover.toString()));
+        service.publish(null, Surface.BACK, entry.id());
+        var before = store.findEntry(entry.id()).orElseThrow();
+        var revisions = store.revisionsOf(entry.id());
+        var refs = store.refsTo(cover);
+        var attachments = media.attachmentsOfMedia(cover);
+        var administrator = admin();
+        var fail = new AtomicBoolean(false);
+        doAnswer(call -> {
+            auditStore.insertAudit(call.getArgument(0));
+            if (fail.get()) throw new IllegalStateException("denial audit failed");
+            return null;
+        }).when(identity).insertAudit(any());
+        assertThatThrownBy(() -> transactions.run(() -> service.purge(administrator, Surface.ADMIN, entry.id(), null, null)))
+                .isInstanceOfSatisfying(ContentException.class, error -> assertThat(error.code()).isEqualTo(ErrorCode.CONFIRMATION_REQUIRED));
+        try (var connection = dataSource.getConnection(); var statement = connection.createStatement();
+                var rows = statement.executeQuery("SELECT outcome, detail_json->>'reason' FROM cms_audit_event")) {
+            assertThat(rows.next()).isTrue();
+            assertThat(rows.getString(1)).isEqualTo("denied");
+            assertThat(rows.getString(2)).isEqualTo("CONFIRMATION_REQUIRED");
+            assertThat(rows.next()).isFalse();
+        }
+        fail.set(true);
+        assertThatThrownBy(() -> service.purge(administrator, Surface.ADMIN, entry.id(), "secret-canary", entry.id().toString()))
+                .hasMessage("denial audit failed");
+        assertThat(auditStore.listAudits("entry.purge", entry.id())).singleElement().satisfies(event ->
+                assertThat(event.detailJson()).doesNotContain("secret-canary"));
+        assertThat(store.findEntry(entry.id())).contains(before);
+        assertThat(store.revisionsOf(entry.id())).isEqualTo(revisions);
+        assertThat(store.refsTo(cover)).isEqualTo(refs);
+        assertThat(media.attachmentsOfMedia(cover)).isEqualTo(attachments);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"refs", "cas"})
+    void PP1FM06_referenceAndVersionDenialsPreserveDependents(String mode) {
+        UUID cover = insertMedia();
+        var entry = service.create(null, Surface.BACK, type.typeKey(), "governed", Map.of("cover", cover.toString()));
+        service.publish(null, Surface.BACK, entry.id());
+        if (mode.equals("refs")) {
+            var referring = service.create(null, Surface.BACK, type.typeKey(), "referring", Map.of());
+            store.replaceRefs(referring.id(), List.of(new EntryRefRecord(referring.id(), "link", entry.id(), "entry", 0)));
+        } else {
+            var staleVersionStore = new JdbcContentStore(dataSource, new ObjectMapper()) {
+                @Override public void hardDeleteEntry(UUID id, int expectedVersion) {
+                    // Force the real SQL compare-and-delete to observe a stale version, in the same attempt transaction.
+                    jdbc.update("UPDATE cms_entry SET version=version+1 WHERE id=?", id);
+                    super.hardDeleteEntry(id, expectedVersion);
+                }
+            };
+            var audit = new com.fallrising.cms.identity.service.AuditLog(identity, new ObjectMapper());
+            service = new EntryService(staleVersionStore, mock(AuthorizationService.class), identity, mediaService, audit,
+                    new com.fallrising.cms.identity.service.GovernanceDenialAudit(transactions, audit));
+        }
+        var before = store.findEntry(entry.id()).orElseThrow();
+        var rows = store.indexRowsOf(entry.id());
+        var revisions = store.revisionsOf(entry.id());
+        var refs = store.refsTo(entry.id());
+        var mediaRefs = store.refsTo(cover);
+        var attachments = media.attachmentsOfMedia(cover);
+        var administrator = admin();
+        doAnswer(call -> { auditStore.insertAudit(call.getArgument(0)); return null; }).when(identity).insertAudit(any());
+        var code = mode.equals("refs") ? ErrorCode.REF_CONSTRAINT : ErrorCode.VERSION_CONFLICT;
+        assertThatThrownBy(() -> service.purge(administrator, Surface.ADMIN, entry.id(), "DELETE", entry.id().toString()))
+                .isInstanceOfSatisfying(ContentException.class, failure -> assertThat(failure.code()).isEqualTo(code));
+        assertThat(store.findEntry(entry.id())).contains(before);
+        assertThat(store.indexRowsOf(entry.id())).isEqualTo(rows);
+        assertThat(store.revisionsOf(entry.id())).isEqualTo(revisions);
+        assertThat(store.refsTo(entry.id())).isEqualTo(refs);
+        assertThat(store.refsTo(cover)).isEqualTo(mediaRefs);
+        assertThat(media.attachmentsOfMedia(cover)).isEqualTo(attachments);
+        assertThat(auditStore.listAudits("entry.purge", entry.id())).singleElement().satisfies(event -> {
+            assertThat(event.outcome()).isEqualTo("denied");
+            assertThat(event.detailJson()).contains(code.wire());
+        });
     }
 
     private Principal admin() {

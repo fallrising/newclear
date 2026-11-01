@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, createCmsClient, keys, workQueries } from "./index";
+import { ApiError, createCmsClient, keys, workQueries, type PurgeEntryRequest } from "./index";
 import { createFrontClient } from "./public-entry";
 
 type Call = { url: string; method: string; headers: Headers; body: string | null };
@@ -41,6 +41,33 @@ const entry = {
 describe("@cms/api transport", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it("PP1FM07 purge sends only explicit raw body and preserves missing body", async () => {
+    const calls = stubFetch((call) => call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: "t" })
+      : call.body ? new Response(null, { status: 204 })
+      : json(400, { error: { code: "CONFIRMATION_REQUIRED", message: "Confirmation required" } }));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    const body = { confirmPhrase: " DELETE ", confirmId: " raw-slug " };
+    // JavaScript callers can still send invalid raw input; the transport must not rewrite it.
+    await api.admin.purgeEntry(entry.id, body as unknown as PurgeEntryRequest);
+    expect(JSON.parse(calls[1].body!)).toEqual(body);
+    await expect(api.admin.purgeEntry(entry.id)).rejects.toMatchObject({ status: 400, code: "CONFIRMATION_REQUIRED" });
+    expect(calls[2].body).toBe("");
+  });
+
+  it("PP1FM07 purge never automatically retries CSRF failure but next manual attempt gets a fresh token", async () => {
+    let tokens = 0;
+    const calls = stubFetch((call) => call.url.endsWith("/auth/csrf") ? json(200, { csrfToken: `t${++tokens}` })
+      : call.headers.get("X-CSRF-Token") === "t1"
+        ? json(403, { error: { code: "CSRF_FAILED", message: "Bad token" } }) : new Response(null, { status: 204 }));
+    const api = createCmsClient({ baseUrl: "http://api.test" });
+    const body = { confirmPhrase: "DELETE" as const, confirmId: entry.id };
+    await expect(api.admin.purgeEntry(entry.id, body)).rejects.toMatchObject({ code: "CSRF_FAILED" });
+    expect(calls.map((call) => call.method)).toEqual(["GET", "POST"]);
+    await api.admin.purgeEntry(entry.id, body);
+    expect(calls.map((call) => call.headers.get("X-CSRF-Token"))).toEqual([null, "t1", null, "t2"]);
+    expect(calls.filter((call) => call.method === "POST").map((call) => JSON.parse(call.body!))).toEqual([body, body]);
   });
 
   it("S-03 fetches the CSRF token once and reuses it for later writes", async () => {

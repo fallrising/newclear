@@ -151,3 +151,7 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 [FQ故障與保留邊界](docs/failure-retention-qualification.md)補十四列[證據矩陣](docs/failure-matrix.md)、取消／完成競爭及七天artifact存取邊界；[保留方案](docs/retention.md)維持歷史與去重，未實作刪除／歸檔。[本輪證據](docs/evidence/m1-failure-retention.md)與live層級分開，完整AC-07／08仍pending。
 
 [DI成果下載完整性](docs/artifact-integrity.md)以原生Web Crypto核對原bytes，通過才精確保存；session／expiry／digest變化保守拒絕。[425tests與真本機browser證據](docs/evidence/m1-artifact-integrity.md)區分source/local與原看板實際更新，後者以任務板及live收據為準；不重開human授權或要求Safari測試。
+
+## RA：持久拒絕稽核
+
+本輪開始[RA01–04](docs/rejection-audit.md)：最小非敏感metadata、10000列保留上限、明示未保存與隔離持久性／故障驗證；[434tests及真本機workerd證據](docs/evidence/m1-rejection-audit.md)通過，source/local驗證；雲端遷移／部署另列，不改主線incomplete。

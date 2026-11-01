@@ -576,3 +576,20 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 主導實際私人前後receipt核對：原127commands整列相同、156firings及123journal rows保留；最終128commands／157firings／124journal、active0，原closed_unknown與result null保持。原unit/config/policy/client/ledger及journal identity保持，runner同PID無restart，保守截止仍2026-11-05T07:24:25Z。新增排程活動沒有被部署清除或重播。
 - Live部分是管理介面發布／版本／來源與設定歷史保全；未續human窗口，未執行新真人下載或live asset HTTP bytes驗收，未要求owner重測Safari。真正下載完整性行為由本輪local Chromium/workerd驗證支持。T857未接觸私人收據，live保全由主導核對；公開不放domain/account/command IDs/secrets。
 - 本卡關閉DI01–04及此次已授權原看板更新，完整產品仍mainline incomplete／無usable tag；下一項是拒絕稽核與其他矩陣缺口。本收尾只改任務板。
+
+## T-0033 — 有界拒絕稽核
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0033-1 | 最小拒絕metadata | RA-01 | done | 2026-11-01T04:27:29Z | 2026-11-01T04:35:30Z | 2026-11-01T04:35:59Z |
+| T-0033-2 | 隱私與可信邊界 | RA-02 | done | 2026-11-01T04:27:29Z | 2026-11-01T04:35:30Z | 2026-11-01T04:35:59Z |
+| T-0033-3 | 容量與失敗可觀測 | RA-03 | done | 2026-11-01T04:27:29Z | 2026-11-01T04:35:30Z | 2026-11-01T04:35:59Z |
+| T-0033-4 | 隔離驗證審查交付 | RA-04 | done | 2026-11-01T04:27:29Z | 2026-11-01T04:35:30Z | 2026-11-01T04:35:59Z |
+
+### T-0033 Git交付與source/local收尾
+
+- [PR889](https://github.com/fallrising/newclear/pull/889) head `b0f8190494177cd2fa7b79a5f804e74112dc4d80`，merge `1c2fee2d90b0435a521a7bf81934c41945924bb0`，2026-11-01T04:35:30Z合併。exact-head CI全過：CloudLab `41273576845`、Project success `41273576837`、llms `41273576850`。
+- 真RED7→GREEN51；完整130Node＋304Python＝434tests，無fail/skip；最終關閉所有SQLite連線再重開的test-only加強另有7/7。真本機RA2 workerd/D1九checks，最後容量並發只有一筆保存、原業務／稽核列保持、缺表保留401並明示unavailable；六個來源hash與公開receipt逐byte核對。T858最終獨立source/local ACCEPT。
+- 初次fixture漏scope的兩項失敗、RA1把volatile D1 metadata當業務列的assertion失敗及既有SQLite ResourceWarning均保留；沒有放寬原業務列比較或跳測。50contracts／8llms／task-report／diff、222相對連結與三個qualifier語法檢查通過，API JSON確認只加header契約。
+- 正常main merge保留並行工作；PLAN尾段衝突保留雙方段落。最終本機／remote fulltree相等、工作樹乾淨、head為main祖先；64份runtime/test/tool input及七份固定部署候選均與remote main相符。未測的本輪真人／Safari／手機沒有補記通過。
+- 本卡完成RA01–04 source/local；尚未在原D1套用0002、未發布新版Worker，線上稽核未啟用。已固定原服務候選及「先新增表後Worker、回退保留表與歷史」步驟。原grant／Access／secrets／runner／Cron／授權期限與免費方案沒有本輪變動。完整mainline incomplete／usable_tag none；接續具體原服務部署及unknown/in-flight隔離還原，無需owner重測瀏覽器。本收尾只改任務板。

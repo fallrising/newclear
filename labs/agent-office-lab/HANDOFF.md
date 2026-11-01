@@ -1,6 +1,12 @@
 # 開發交接
 
-先讀 [SUCCESS](SUCCESS.md)、[SDD](docs/SDD.md)、[任務板](docs/tasks/BOARD.md)。canonical 位置是 `fallrising/newclear` 的 `labs/agent-office-lab`。
+T-0009-02 的第三次獨立授權任務通過 AC-13：Composer 2.5，15.57 秒，Read(input) → Read(result) → Write(result)，原生同 session／model、completed stop、37723 input／424 output tokens、精確產物 hash 與完整清理一致。[成功證據](docs/evidence/cursor-completed-2026-11-01.json)。前兩次失敗保留；本次授權已使用，沒有自動重跑。65 項離線測試通過；PR #878 待 CI／合併，完整 MVP 仍 incomplete。
+
+前次單次批准紀錄：240 秒期限下於 34.05 秒因第二個 Read 被邊界拒絕而停止，沒有產物；session／固定模型／hooks 有證據，清理完整。第二次讀取的目標未記錄，不能確認它是否為輸出檢查。已離線準備最多四次工具規則、預建空 result.json 與檔案分類診斷；65 tests 和無 prompt 啟動通過，尚未再次跑模型。[本輪證據](docs/evidence/cursor-bounded-2026-11-01.json)。AC-13 保持 pending、PR #878 保持 draft；下一次付費任務須新批准。
+
+T-0009-02 前次紀錄：owner 已批准且執行一次 Composer 2.5 任務，產物正確，但 lab 的 stop.loop_limit=0 讓原生 CLI 拒絕整份 hooks，沒有事件／用量／工具邊界證據，AC-13 未通過。[失敗及修正證據](docs/evidence/cursor-live-2026-11-01.json)。已停止並完整清理，未追加付費重跑。已改 loop_limit=1、仍不返回 followup_message；修正合法 beforeReadFile，並在 wrapper 增加固定 CLI 內純 schema validator 的實際預檢。63 tests、原生設定預檢與修正後無 prompt 啟動通過。PR #878 保持 draft，這次授權已使用；再執行 `--allow-remote` 必須得到 owner 的新批准，範圍及無金額硬上限見 [CURSOR-WORK](docs/CURSOR-WORK.md)。
+
+T-0009-02 先前準備紀錄：owner 已登入；原生 status authenticated、catalog 有 composer-2.5。已準備[一次有界任務](docs/CURSOR-WORK.md)，63 項離線測試與已登入無 prompt 啟動通過；[證據](docs/evidence/cursor-ready-2026-11-01.json)。完全斷網啟動曾回 internal error，允許 HTTPS metadata 後進入 Composer 2.5 待命畫面。沒有執行模型 prompt；等 owner 明確批准一次 120 秒／最多兩個工具的配額驗收。Cursor 不提供 runner 可保證的 request／token／金額硬上限；停止本機也不等於即時停止服務端計費。取得批准後執行 `python3 scripts/run_cursor_work.py --allow-remote` 一次，保留失敗，不自動重跑；AC-13 仍 pending，功能 PR 保持 draft，驗收後才合併與結案。
 
 T-0009 依 owner 要求新增 Cursor Agent 第四工位：固定官方 2026.10.22-27dcf5f、archive／runtime 摘要核對、隔離 HOME／CURSOR_CONFIG_DIR／file credential store、原生 Office PTY 與 workspace hooks。無憑證啟動 12.51 秒通過，hooks 安裝／移除、外部 TCP 拒絕與 5 個追蹤程序清理正確；55 項離線測試通過。[證據](docs/evidence/cursor-startup-2026-11-01.json)、[owner 登入命令](docs/CURSOR.md)。需 owner 自行 `python3 scripts/cursor_cli.py login`；未登入不是執行失敗，也沒有驗證 session hook／模型／任務。新增 AC-13，完整目標擴為四工位，保持單 run queue。下一步補有界 Cursor／Grok 真實任務；登入不代表付費授權，不重跑已通過的 Pi 任務。
 

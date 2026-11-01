@@ -2588,6 +2588,12 @@ Owner continues. Lead sole writer for DI01–04/T0032: bounded rawartifact clien
 
 DI source/local evidence gate ACCEPT 2026-10-31T19:13:43Z: RED11, initialGREEN42, final121Node/304Python=425, DI1 realbrowser15checks/104API/noerrors with exactbytes/digest and tamper rejection; T857 finalACCEPT. Initial socketpathfailure retained, shorttaskID correction only. Browser3asset hashes exact, document checks passed. Originaldashboard upload to follow qualified pinned source and prior approval, without runner pause/authority renewal; any live evidence separate.
 
+## RA rejection audit — 2026-11-01T04:27:29Z
+
+Owner continues after DI. Lead sole writer for RA01–04/T0033. Additive0002, bounded minimal4xx audit, no raw identities/content, explicit persistence header; no live authority/paid change. RED→GREEN, actual SQLite reopen/capacity/races and localworkerd plus full regression. One fresh read-only native reviewer T858 with inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no private/network/writes/tests/delegation. Natural language scope is not OS isolation. Existing approved Git delivery applies; live migration requires concrete candidate/readback boundary.
+
+RA source/local evidence gate ACCEPT 2026-11-01T04:32:32Z: RED7, correctedGREEN51, full130Node/304Python=434tests, finaltest-only durabilitytightening7pass and realRA2workerd9checks/6matchinghashes. T858 finalACCEPT. Initialfixture2fail andRA1 metadataassertionfailure retained/corrected without weakeningbusiness-roworacle. Lead source/authorization/evidence audit accepts; index50contracts/8llms/task/diff passed. GitCI/merge/readback remain; no live schema/deploy/renewal or paidupgrade.
+
 T-0447/M1 actual acceptance: one official subscription invocation on33e1eb70 produced
 285byte totals.py-only patch, real checks passed, browser five states/diff/download
 and zero errors; AP cleanup plus independent0claims/VM/cgroup/processes. Reviewer

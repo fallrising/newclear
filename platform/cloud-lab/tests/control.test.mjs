@@ -7,7 +7,7 @@ import { handle, scheduled } from '../apps/control/worker/index.mjs';
 import { strictJSON, digest, sign, recipeRef } from '../apps/control/worker/protocol.mjs';
 
 class D1 {
-  constructor(){ this.db=new DatabaseSync(':memory:'); this.db.exec(readFileSync(new URL('../apps/control/migrations/0001.sql',import.meta.url),'utf8')); }
+  constructor(){ this.db=new DatabaseSync(':memory:'); for(const name of ['0001.sql','0002.sql'])this.db.exec(readFileSync(new URL('../apps/control/migrations/'+name,import.meta.url),'utf8')); }
   prepare(sql){const db=this.db;return {bind(...params){return {async first(){return db.prepare(sql).get(...params)||null},async all(){return {results:db.prepare(sql).all(...params)}},async run(){const r=db.prepare(sql).run(...params);return {meta:{changes:r.changes}}},sql,params}},async first(){return db.prepare(sql).get()||null},async all(){return {results:db.prepare(sql).all()}},sql,params:[]};}
   async batch(stmts){this.db.exec('BEGIN');try{const out=[];for(const s of stmts){const st=this.db.prepare(s.sql);if(st.columns().length)out.push({results:st.all(...s.params)});else out.push({meta:{changes:st.run(...s.params).changes}});}this.db.exec('COMMIT');return out;}catch(e){this.db.exec('ROLLBACK');throw e;}}
 }
@@ -388,4 +388,33 @@ test('FQ artifact expiry denies bytes at seven days without deleting history or 
  await scheduled({scheduledTime:T},f.env,expires);
  assert.deepEqual(f.DB.db.prepare('SELECT * FROM firings').all(),firings);
  assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),saved);
+});
+
+test('RA wrong holder and stale fence persist refusal without changing original command',async()=>{
+ const f=await fixture(),a=await f.start(),before=f.DB.db.prepare('SELECT * FROM commands').get();
+ const keys=JSON.parse(f.env.MACHINE_KEYS);keys.runner.principal_id='other-runner';f.env.MACHINE_KEYS=JSON.stringify(keys);
+ const g=JSON.parse(f.DB.db.prepare("SELECT policy FROM grants WHERE id='gr'").get().policy);g.principal_id='other-runner';f.DB.db.prepare("UPDATE grants SET policy=? WHERE id='gr'").run(JSON.stringify(g));
+ const wrong=await f.req('/api/runner/report',f.result(a),'runner',T+2000);
+ assert.equal(wrong.status,409);assert.equal(wrong.data.code,'STALE_FENCE');
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),before);
+ const audit=f.DB.db.prepare('SELECT * FROM rejection_audit WHERE request_id=?').get(wrong.data.request_id);
+ assert.equal(audit.authenticated,1);assert.equal(audit.route,'runner-report');assert.equal(audit.code,'STALE_FENCE');assert.equal(JSON.stringify(audit).includes(a.command_id),false);
+ keys.runner.principal_id='runner';f.env.MACHINE_KEYS=JSON.stringify(keys);g.principal_id='runner';f.DB.db.prepare("UPDATE grants SET policy=? WHERE id='gr'").run(JSON.stringify(g));
+ const stale=await f.req('/api/runner/report',f.result(a),'runner',T+15000);
+ assert.equal(stale.status,409);assert.equal(f.DB.db.prepare('SELECT code FROM rejection_audit WHERE request_id=?').get(stale.data.request_id).code,'STALE_FENCE');
+ assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),before);
+});
+
+test('RA quota and evidence expiry refusals retain request IDs and business history',async()=>{
+ const f=await fixture(),a=await f.start();
+ const quota=await f.req('/api/commands',f.command('over-capacity'));
+ assert.equal(quota.status,429);assert.equal(quota.data.retryable,true);
+ assert.equal(f.DB.db.prepare('SELECT status FROM rejection_audit WHERE request_id=?').get(quota.data.request_id).status,429);
+ assert.equal((await f.req('/api/runner/report',f.result(a),'runner',T+2000)).status,200);
+ f.DB.db.prepare("UPDATE commands SET record=json_set(record,'$.result.artifact_expires_at',?)").run(iso(T));
+ const before=f.DB.db.prepare('SELECT * FROM commands').get();
+ const expired=await f.req(`/api/commands/${a.command_id}/artifact`);
+ assert.equal(expired.status,410);assert.equal(expired.data.retryable,false);
+ const audit=f.DB.db.prepare('SELECT * FROM rejection_audit WHERE request_id=?').get(expired.data.request_id);
+ assert.equal(audit.route,'artifact');assert.equal(audit.code,'EVIDENCE_EXPIRED');assert.deepEqual(f.DB.db.prepare('SELECT * FROM commands').get(),before);
 });

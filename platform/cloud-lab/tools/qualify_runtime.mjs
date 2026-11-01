@@ -6,6 +6,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {sign,recipeRef} from '../apps/control/worker/protocol.mjs';
+import {createHash} from 'node:crypto';
 
 const toolchain=process.argv[2];
 assert.ok(toolchain&&process.env.AGENT_BUILD_DIR&&process.env.AGENT_EVIDENCE_DIR,
@@ -31,7 +32,7 @@ const mf=new Miniflare(convertV4MiniflareOptions({host:"127.0.0.1",cf:false,tele
  bindings:{ACCESS_CONFIG:JSON.stringify({issuer,audience:'synthetic-audience',subjects:{'synthetic-human':{principal_id:'bot',grant_id:'bot'}}}),PUBLIC_ORIGIN:'https://lab.example',AUDIENCE:'runtime-qualification',MACHINE_KEYS:JSON.stringify(keys)}}]}));
 try {
  const db=await mf.getD1Database('DB');
- const sql=readFileSync(join(root,'apps/control/migrations/0001.sql'),'utf8').replace(/^--.*$/gm,'');
+ const sql=['0001.sql','0002.sql'].map(name=>readFileSync(join(root,'apps/control/migrations',name),'utf8')).join('\n').replace(/^--.*$/gm,'');
  await db.batch(sql.split(';').filter(x=>x.trim()).map(x=>db.prepare(x)));
  checks.push('actual migration via D1 binding');
  for(const [id,caps] of [['bot',['commands:read','commands:submit','commands:cancel-request','node:health:read','artifact:read']],['runner',['dispatch:claim','runs:report','runs:reconcile']]]) {
@@ -47,7 +48,7 @@ try {
  assert.deepEqual(cas.map(x=>x.meta.changes).sort(),[0,1]);
  checks.push('concurrent CAS permits one revision transition');
  for(const path of ['/','/styles.css','/dashboard.mjs','/api/bootstrap'])
-  {const r=await mf.dispatchFetch('https://lab.example'+path);assert.equal(r.status,401,await r.text());}
+  {const r=await mf.dispatchFetch('https://lab.example'+path);assert.equal(r.status,401);assert.equal(r.headers.get('X-Cloud-Lab-Audit'),'persisted');const body=await r.json();const audit=await db.prepare('SELECT * FROM rejection_audit WHERE request_id=?').bind(body.request_id).first();assert.equal(audit.code,body.code);assert.equal(audit.authenticated,0);}
  assert.equal((await mf.dispatchFetch('https://other.example/')).status,403);
  checks.push('anonymous assets/API and wrong origin denied by actual Worker');
  for(const [path,file] of [['/','index.html'],['/styles.css','styles.css'],['/dashboard.mjs','dashboard.mjs']]) {
@@ -84,7 +85,31 @@ try {
  assert.equal((await request(`/api/commands/${assignment.command_id}/artifact`)).status,200);
  assert.equal((await request(`/api/commands/${assignment.command_id}/artifact`,undefined,'runner')).status,403);
  checks.push('actual Worker HMAC, dedupe, claim, report, artifact ACL');
- const evidence={status:'passed',scope:'local workerd and D1 only; synthetic identities/collector',miniflare:require('miniflare/package.json').version,checks};
+ const originalRows=(await db.prepare('SELECT * FROM rejection_audit ORDER BY request_id').all()).results;
+ const business=async()=>Promise.all(['commands','grants','schedules','firings'].map(async name=>(await db.prepare('SELECT * FROM '+name).all()).results));
+ const originalBusiness=await business();
+ const sentinel='SECRET_NOT_STORED';
+ const denied=await mf.dispatchFetch('https://lab.example/api/commands/'+sentinel+'/artifact?secret='+sentinel,{headers:{'X-Lab-Key-Id':sentinel}});
+ assert.equal(denied.status,403);assert.equal(denied.headers.get('X-Cloud-Lab-Audit'),'persisted');
+ const denial=await denied.json(),audit=await db.prepare('SELECT * FROM rejection_audit WHERE request_id=?').bind(denial.request_id).first();
+ assert.equal(audit.route,'artifact');assert.equal(audit.authenticated,0);assert.equal(JSON.stringify(audit).includes(sentinel),false);
+ checks.push('actual workerd rejection request ID persists in D1; untrusted identity/query/path omitted');
+ const used=await db.prepare('SELECT count(*) n FROM rejection_audit').first('n');
+ await db.prepare("WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM n WHERE x<?) INSERT INTO rejection_audit SELECT printf('seed-%05d',x),0,'GET','other',401,'UNAUTHENTICATED',0 FROM n").bind(9999-used).run();
+ const last=await Promise.all([1,2].map(()=>mf.dispatchFetch('https://lab.example/api/usage')));
+ assert.deepEqual(last.map(r=>r.headers.get('X-Cloud-Lab-Audit')).sort(),['full','persisted']);assert.ok(last.every(r=>r.status===401));
+ assert.equal(await db.prepare('SELECT count(*) n FROM rejection_audit').first('n'),10000);
+ for(const row of originalRows)assert.deepEqual(await db.prepare('SELECT * FROM rejection_audit WHERE request_id=?').bind(row.request_id).first(),row);
+ assert.deepEqual(await business(),originalBusiness);
+ assert.equal((await request('/api/bootstrap')).status,200);
+ checks.push('actual D1 concurrent final audit slot has one winner, original evidence/business unchanged, success still works at capacity');
+ // Isolated fixture only: simulate a missing migration without touching business data.
+ await db.prepare('ALTER TABLE rejection_audit RENAME TO preserved_audit').run();
+ const unavailable=await mf.dispatchFetch('https://lab.example/api/usage');assert.equal(unavailable.status,401);assert.equal(unavailable.headers.get('X-Cloud-Lab-Audit'),'unavailable');assert.equal((await unavailable.json()).code,'UNAUTHENTICATED');
+ assert.equal(await db.prepare('SELECT count(*) n FROM preserved_audit').first('n'),10000);assert.deepEqual(await business(),originalBusiness);
+ checks.push('missing audit table keeps original 401 and reports unavailable; isolated evidence retained');
+ const sources=Object.fromEntries(['apps/control/worker/index.mjs','apps/control/worker/auth.mjs','apps/control/worker/protocol.mjs','apps/control/migrations/0001.sql','apps/control/migrations/0002.sql','tools/qualify_runtime.mjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(root,path))).digest('hex')]));
+ const evidence={status:'passed',scope:'local workerd and D1 only; synthetic identities/collector; no live Cloudflare writes',miniflare:require('miniflare/package.json').version,checks,sources};
  writeFileSync(join(process.env.AGENT_EVIDENCE_DIR,'runtime.json'),JSON.stringify(evidence,null,2)+'\n',{flag:'wx'});
  console.log(JSON.stringify(evidence));
 } finally {await mf.dispose();}

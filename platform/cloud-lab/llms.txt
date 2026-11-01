@@ -118,3 +118,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Failure/retention qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-failure-retention.md): controlled cancellation/report races, deadline boundaries, rejected-row preservation and seven-day access qualification; isolated only.
 
 - [Artifact download integrity](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-artifact-integrity.md): bounded raw bytes, SHA-256 verification and exact Blob; session/expiry/digest guards, 425 tests and real local browser exact-download/tamper rejection verified; actual rollout tracked separately on task board.
+
+- [Bounded rejection audit](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/rejection-audit.md): additive D1 rejection metadata keyed by request ID, no raw identity/content; atomic10000-row cap, explicit persisted/full/unavailable header; source/local qualification distinct from live migration.

@@ -130,3 +130,12 @@ T-0010 的一次已授權 Grok 任務已執行，12.55 秒後因 lab 只識別 f
 T-0010 最新：owner 再批准一次翻倍範圍後，Grok 1.0.70／grok-4.6 真實任務通過 AC-03，18.00 秒完成兩個 read_file 與一個 search_replace；同 session 模型、authenticated hooks、成功工具結果、end_turn Stop、精確產物 hash 與清理一致。[成功證據](../evidence/grok-completed-2026-11-01.json)。81 項離線測試通過；先前失敗保留，本次授權已使用、沒有自動重跑。交付及結案狀態見[任務板](BOARD.md)。四 provider 各有合成任務證據，但統一產品流程、權限／取消／恢復及完整 MVP 尚未完成。
 
 T-0010／T-0002-03 結案：[PR #897](https://github.com/fallrising/newclear/pull/897) 已合併，commit `bd96e88f269d5f25d62ad38c62ded1c0d516992d`，offline／validate 兩項 CI success。已回讀主線成功證據：completed、model_inference_verified=true、三次工具、18.00 秒、cleanup completed。前次失敗及原受測來源 hash 保留；本次單次授權已用完，沒有追加模型呼叫。四 provider 各有合成任務成功證據，完整 MVP 仍 incomplete；下一步為統一工位／結果入口與剩餘權限、取消及恢復驗收，沒有 release／deploy／usable tag。
+
+## T-0011：四 provider 唯讀結果入口
+
+Owner 指示繼續開發；整合既有真實結果，不新增模型呼叫。完整 AC 保持 pending。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0011-01 | 統一結果查詢、產物重驗與離線互動頁 | AC-09 子集 | in_progress | 2026-11-01T11:14:35Z | — | 2026-11-01T11:19:23Z |
+| T-0011-02 | 白名單輸出、檔案讀取及頁面注入邊界 | AC-11 子集 | in_progress | 2026-11-01T11:14:35Z | — | 2026-11-01T11:19:23Z |

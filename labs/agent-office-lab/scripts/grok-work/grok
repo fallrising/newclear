@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+"""Launch one exact Grok fixture; inspect native configuration before launch."""
+import json
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+import uuid
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from remote_cli import LAB, installed_cli
+from grok_task_hook import MODEL, PROMPT, EVENTS
+
+try:
+    out=Path(os.environ['LAB_GROK_WORK_OUT']).resolve(strict=True);workspace=out/'workspace'
+    socket_dir=Path(os.environ['LAB_GROK_SOCKET_DIR']).resolve(strict=True)
+    if not out.is_relative_to(LAB/'runs') or Path.cwd().resolve()!=workspace:raise ValueError('scope')
+    if socket_dir.parent!=Path('/private/tmp') or not socket_dir.name.startswith('office-grok-'):raise ValueError('socket')
+    home=workspace/'.agent-office/grok-home'
+    if Path(os.environ['GROK_HOME']).resolve()!=home or Path(os.environ['GROK_AUTH_PATH']).resolve()!=out/'home/grok/auth.json':raise ValueError('auth_scope')
+    plan=json.loads((out/'task-plan.json').read_text());args=sys.argv[1:]
+    if len(args)<6 or str(uuid.UUID(args[5]))!=args[5]:raise ValueError('session')
+    expected=['--no-alt-screen','--trust','--leader-socket',str(workspace/'.agent-office/grok-leader.sock'),'--session-id',args[5],'--model',MODEL]+(['--',PROMPT] if plan['allow_remote'] else [])
+    if args!=expected:raise ValueError('arguments')
+    plan['session']=args[5];(out/'task-plan.json').write_text(json.dumps(plan))
+    hooks={e:[{'hooks':[{'type':'command','command':shlex.join([sys.executable,str(LAB/'scripts/grok_task_hook.py'),e]),'timeout':3}]}] for e in EVENTS}
+    (home/'hooks/lab-task.json').write_text(json.dumps({'hooks':hooks}))
+    config=''.join('[compat.'+v+']\nhooks = false\nrules = false\nskills = false\nagents = false\nmcps = false\n' for v in ['cursor','claude'])
+    (home/'config.toml').write_text(config)
+    binary=installed_cli('grok')
+    checked=subprocess.run(['/usr/bin/sandbox-exec','-p','(version 1)(allow default)(deny network*)',str(binary),'--trust','inspect','--json'],capture_output=True,text=True,timeout=15)
+    inspection=json.loads(checked.stdout)
+    if checked.returncode or inspection['grokVersion']!='1.0.70' or inspection.get('mcpServers') or inspection.get('plugins'):raise ValueError('inspect')
+    # Only a native-loaded hook configuration may launch the task.
+    loaded=inspection.get('hooks',[])
+    for event in EVENTS:
+        expected=shlex.join([sys.executable,str(LAB/'scripts/grok_task_hook.py'),event])
+        if not any(h.get('hookType')=='command' and h.get('target')==expected for h in loaded):raise ValueError('lab_hooks_missing')
+    if not any('agent-office-grok-hook.cjs' in h.get('target','') for h in loaded):raise ValueError('office_hooks_missing')
+    (out/'config-inspection.json').write_text(json.dumps(inspection))
+    (out/'native-launch.json').write_text(json.dumps({'session':args[5],'model':MODEL,'prompt_supplied':plan['allow_remote']}))
+    native=['--no-alt-screen','--trust','--leader-socket',str(socket_dir/'leader.sock'),'--session-id',args[5],'--model',MODEL,
+        '--no-subagents','--disable-web-search','--no-plan','--max-turns','6','--tools','read_file,search_replace',
+        '--permission-mode','dontAsk','--allow','Read(input.json)','--allow','Read(result.json)','--allow','Edit(result.json)']
+    if plan['allow_remote']:native+=['--',PROMPT]
+    command=['/usr/bin/sandbox-exec','-f',str(out/'grok.sb'),str(binary),*native]
+    os.execve(command[0],command,dict(os.environ))
+except Exception:
+    print('Grok task launch rejected; no credential printed',file=sys.stderr);sys.exit(1)

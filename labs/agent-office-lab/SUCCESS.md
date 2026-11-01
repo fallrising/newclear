@@ -6,16 +6,20 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: d6678d4449e24a86dee4ac06103cee2951d4d9cc
+source_commit: 4a0ec98332843c418a91a59c7b39bdacffb6bfee
 ---
 
 # Agent Office Lab 驗收
+
+T-0010 已準備 Grok 1.0.70／grok-4.6 單任務 runner：原生 inspect 確認 hooks、已登入無 prompt 啟動與同 session 模型選擇、清理通過（12.52 秒）；78 項離線測試通過。[證據](docs/evidence/grok-ready-2026-11-01.json)、[單次範圍](docs/GROK-WORK.md)。沒有送模型 prompt；AC-03 仍 pending，等 owner 明確批准一次付費驗收。四工具 hook gate 會受原生 fail-open 行為限制，沒有 request／token／金額硬上限。
 
 T-0009-02 的第三次獨立授權任務通過 AC-13：Composer 2.5，15.57 秒，Read(input) → Read(result) → Write(result)，原生同 session／model、completed stop、37723 input／424 output tokens、精確產物 hash 與完整清理一致。[成功證據](docs/evidence/cursor-completed-2026-11-01.json)。前兩次失敗保留；本次授權已使用，沒有自動重跑。65 項離線測試通過；PR #878 待 CI／合併，完整 MVP 仍 incomplete。
 
 前次單次批准紀錄：240 秒期限下於 34.05 秒因第二個 Read 被邊界拒絕而停止，沒有產物；session／固定模型／hooks 有證據，清理完整。第二次讀取的目標未記錄，不能確認它是否為輸出檢查。已離線準備最多四次工具規則、預建空 result.json 與檔案分類診斷；65 tests 和無 prompt 啟動通過，尚未再次跑模型。[本輪證據](docs/evidence/cursor-bounded-2026-11-01.json)。AC-13 保持 pending、PR #878 保持 draft；下一次付費任務須新批准。
 
 ## 主線與範圍
+
+T-0010 本輪範圍：建立 Grok 1.0.70 的單任務 runner，固定 grok-4.6、四次工具 gate、六個原生 agent turns、240 秒期限；先測無 prompt 啟動與原生設定載入，再等待明確的單次付費批准。原生 hooks 當機會 fail-open，工具數不是服務端硬上限；用原生工具／路徑權限和 OS 寫入限制補強，不宣稱完整 egress 隔離。AC-03 仍須真實任務證據。
 
 依 [SDD](docs/SDD.md) 完成單專案、單執行佇列、四 provider 的本機 Office。
 本輪 T-0007 接入 Pi + DeepSeek 的單工位合成驗收：固定 Pi 1.4.0，原生 Office PTY／extension／authenticated hooks，以 agent_settled、session、模型與產物 hash 判定結果。

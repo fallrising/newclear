@@ -28,6 +28,8 @@
 | `products/hai-taskboard/.team/reports/` | 51 |
 | `products/hai-taskboard/.team/tasks/` | 5 |
 
+`platform/local-ocr-services/.team/` 與 `products/hai-taskboard/.team/` 已從本 repo 移除，對照列指向的檔案在 journal `archive/team-ledgers/newclear/<component>/.team/`（來源 tag `team-archive-20261018`）。`platform/ice-maker/.team/` 仍留在本 repo，因為 `tests/test_execution.py` 會讀 `.team/tasks/T-008.md`。
+
 ## 引用舊雜湊的文件
 
 下列可修改文件引用了被遮蔽紀錄的 SHA-256，已在文件開頭加註指向本紀錄；被遮蔽紀錄彼此之間的引用不改（它們是不可改寫紀錄），以下表對照。
@@ -35,8 +37,8 @@
 - `.team/PLAN.md`
 - `platform/dim-gate/docs/HANDOFF-WORKSPACES.md`
 - `platform/dim-gate/docs/STATUS.md`
-- `products/hai-taskboard/.team/PLAN.md`
-- `products/hai-taskboard/.team/REVIEWER_REPORT_CONTRACT.md`
+- `products/hai-taskboard/.team/PLAN.md`（已移至 journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/PLAN.md`）
+- `products/hai-taskboard/.team/REVIEWER_REPORT_CONTRACT.md`（已移至 journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/REVIEWER_REPORT_CONTRACT.md`）
 - `products/hai-taskboard/docs/HANDOFF.md`
 - `products/hai-taskboard/docs/adr/ADR-005-sqlite-and-local-deployment.md`
 - `products/hai-taskboard/docs/reproducibility.md`

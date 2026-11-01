@@ -88,7 +88,12 @@ class Node:
         alive = next(
             r["alive"] for r in self.rows.values() if r["observed"]["vm_id"] == observed["vm_id"]
         )
-        return {key: not alive and not self.partial_removal for key in STOP_KEYS}
+        return {
+            key: not alive
+            and not self.partial_removal
+            and key != getattr(self, "missing_stop_key", None)
+            for key in STOP_KEYS
+        }
 
     def wait_removed(self, observed):
         return self.removal(observed)
@@ -105,6 +110,11 @@ class Node:
 
 
 class FixtureConnector(Connector):
+    def conversation(self, row, http):
+        # This in-memory upstream has one synchronous state, with no autosaved copy.
+        # Dedicated event tests exercise production polling; KVM covers live approvals.
+        return http.expect("GET", "/api/conversations/" + row["run_id"])
+
     def network(self, row=None):
         from agent_platform.domain import Problem
 
@@ -147,7 +157,9 @@ class FixtureConnector(Connector):
         self.client.calls["result"] += 1
         return {
             "execution_mode": "cocoon-fixture",
-            "diff_sha256": "f" * 64,
+            "diff_sha256": hashlib.sha256(b"fixed fixture").hexdigest(),
+            "diff_bytes": len(b"fixed fixture"),
+            "base_sha": row["input"]["base_sha"],
             "verification": {"status": "passed"},
             "diff": "fixed fixture",
         }
@@ -185,6 +197,10 @@ class Server:
         if not token.exists():
             token.write_text(secrets.token_urlsafe(32))
             token.chmod(0o600)
+        sandbox_token = root / "sandbox-root-token"
+        if not sandbox_token.exists():
+            sandbox_token.write_text(secrets.token_urlsafe(32))
+            sandbox_token.chmod(0o600)
         bundle = root / "fixture.bundle"
         bundle.write_bytes(b"not-a-real-git-bundle")
         launcher = root / "terminal"
@@ -200,6 +216,7 @@ class Server:
             "terminal_launcher_file": str(launcher),
             "terminal_launcher_sha256": hashlib.sha256(binary).hexdigest(),
             "connector_token_file": str(token),
+            "sandbox_token_file": str(sandbox_token),
             "repositories": [
                 {
                     "canonical_repo": repo,

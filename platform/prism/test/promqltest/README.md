@@ -1,0 +1,15 @@
+# Official PromQL float corpus
+
+This package preserves all 12 unchanged Prometheus v0.53.0 official `promql/promqltest/testdata/*.test` files (Apache-2.0). The upstream LICENSE and per-file SHA256 hashes in `testdata/corpus-manifest.tsv` preserve identity and provenance. The complete inventory is 768 eval commands: 579 float-compatible evaluations execute; 189 native-dependent evaluations are explicitly outside the float SPI acceptance scope.
+
+The official `RunBuiltinTests` argument is a `promql.QueryEngine`, not a storage adapter. Its original loader creates TSDB fixtures, and its assertion imports include an ISC dependency outside Prism's license whitelist. `upstream_harness_test.go` therefore narrowly adapts the Apache-2.0 core of `promql/promqltest/test.go`, original SHA256 `dc62bc7bff92eeccf9241456d254755f6de831bff0e4c961cf99a9866664d6b6`.
+
+The adaptation removes unused exported loaders and LazyLoader, replaces `testutil`/`testify` assertions with standard `testing`, and substitutes a bounded memory SPI appender for TSDB fixture storage. Float loads call `spi.MetricStore.Write`; every query uses the actual upstream PromQL engine and production `promqladapter.New(memory.Metrics(), tenant, Limits{})`. It retains the upstream value comparator, instant/range equivalence checks, and generated `@` checks. Timestamp conversion uses UTM helpers; context follows the test lifetime; query/storage cleanup includes error paths. There are no TSDB, teststorage, testify, or substitute evaluation paths.
+
+A parser-based audit classifies each original eval command: selectors matching loaded native or mixed histogram series and expected native samples are outside this scope. Every exclusion records its original file, line, command and reason. Classification never uses filenames, function names, or test outcomes. Classic histogram bucket/sum/count series remain in scope. Independent float controls in a histogram fixture would remain in scope; all 189 evaluations in this pinned native fixture independently depend on native samples.
+
+Only native/mixed load definitions and their dependent eval blocks are removed from derived input. Exact original bytes remain unchanged, while original/derived SHA256 identities and per-command dispositions are checked against the committed manifest. Unknown commands or malformed samples/expressions fail closed. Native append explicitly errors rather than flattening or silently dropping samples.
+
+Run `go test -mod=readonly -race ./test/promqltest`; TestMain performs goleak verification. `TestCorpusAudit` validates the committed manifest. After reviewing an intentional upstream/version change, regenerate with `go test -mod=readonly ./test/promqltest -run TestCorpusAudit -update-corpus`.
+
+The exact upstream `subquery.test` contains trailing whitespace at original lines 85/88 and a final blank line at 117. These immutable vendored bytes are a narrowly documented whitespace exception: validate that fixture by exact upstream SHA256 identity, and run ordinary whitespace checks on every authored file. Do not normalize the fixture or suppress whitespace validation globally.

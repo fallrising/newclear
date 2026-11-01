@@ -22,12 +22,14 @@ use parking_lot::Mutex;
 
 use loom_contracts::Origin;
 
-use super::atomic_write::atomic_write;
+use super::atomic_write::{atomic_create, atomic_write};
 use super::echo_guard::EchoGuard;
 use super::error::{FsError, FsResult};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DocumentSnapshot {
+    /// Absolute, normalized identity shared with watcher events.
+    pub path: PathBuf,
     pub content: String,
     /// Hex-encoded blake3 of the bytes that produced `content`.
     pub on_disk_hash: String,
@@ -61,6 +63,8 @@ pub struct DocumentService {
     vault_root: PathBuf,
     echo_guard: Arc<EchoGuard>,
     editors: Arc<Mutex<HashMap<PathBuf, EditorState>>>,
+    // Serialize publications and echo registration across service clones.
+    publication: Arc<Mutex<()>>,
 }
 
 impl DocumentService {
@@ -75,6 +79,7 @@ impl DocumentService {
             vault_root,
             echo_guard,
             editors: Arc::new(Mutex::new(HashMap::new())),
+            publication: Arc::new(Mutex::new(())),
         }
     }
 
@@ -87,7 +92,7 @@ impl DocumentService {
     /// blocking the runtime; the async wrappers in the public IPC layer
     /// will hop to `spawn_blocking`.
     pub fn read_document(&self, path: &Path) -> FsResult<DocumentSnapshot> {
-        let abs = self.absolute(path)?;
+        let abs = self.resolve_path(path)?;
         let bytes = std::fs::read(&abs).map_err(|e| match e.kind() {
             std::io::ErrorKind::NotFound => FsError::NotFound(abs.clone()),
             _ => FsError::Io {
@@ -98,6 +103,7 @@ impl DocumentService {
         let on_disk_hash = hash_hex(&bytes);
         let content = String::from_utf8_lossy(&bytes).into_owned();
         Ok(DocumentSnapshot {
+            path: abs,
             content,
             on_disk_hash,
         })
@@ -119,22 +125,29 @@ impl DocumentService {
         content: &[u8],
         expected_hash: Option<&str>,
     ) -> FsResult<WriteOutcome> {
-        let abs = self.absolute(path)?;
+        let _publication = self.publication.lock();
+        let abs = self.resolve_path(path)?;
         tracing::info!(?origin, path = ?abs, len = content.len(), "write_document");
 
         if let Some(expected) = expected_hash {
-            if let Ok(existing) = std::fs::read(&abs) {
-                let current = hash_hex(&existing);
-                if current != expected {
+            let existing = match std::fs::read(&abs) {
+                Ok(bytes) => bytes,
+                // An absent target has no current content hash. Preserve the
+                // existing conflict DTO: an empty hash means deletion, never
+                // permission to recreate without an explicit no-hash write.
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
                     return Ok(WriteOutcome::Conflict {
-                        current_disk_hash: current,
+                        current_disk_hash: String::new(),
                     });
                 }
+                Err(source) => return Err(FsError::Io { path: abs, source }),
+            };
+            let current = hash_hex(&existing);
+            if current != expected {
+                return Ok(WriteOutcome::Conflict {
+                    current_disk_hash: current,
+                });
             }
-            // If the file doesn't exist yet and the caller expected a
-            // hash, the write still proceeds — they may be creating it
-            // for the first time and `expected_hash` was their stand-in
-            // for "I haven't seen it." A stricter mode can come later.
         }
 
         // Register echo guard BEFORE the rename so the notify event,
@@ -152,13 +165,47 @@ impl DocumentService {
         Ok(WriteOutcome::Written { new_hash })
     }
 
+    /// Create a missing document without replacing any destination entry.
+    /// Acknowledge the submitted bytes directly: a later external write must
+    /// never become the version the editor believes it just published.
+    pub fn create_document(
+        &self,
+        origin: &Origin,
+        path: &Path,
+        content: &str,
+    ) -> FsResult<DocumentSnapshot> {
+        let _publication = self.publication.lock();
+        let abs = self.resolve_path(path)?;
+        tracing::info!(?origin, path = ?abs, len = content.len(), "create_document");
+        // Avoid disturbing a successful prior create's echo registration.
+        // This is only a preflight; hard_link below closes the creation race.
+        match std::fs::symlink_metadata(&abs) {
+            Ok(_) => return Err(FsError::AlreadyExists(abs)),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(source) => return Err(FsError::Io { path: abs, source }),
+        }
+        self.echo_guard
+            .register_self_write(&abs, content.as_bytes());
+        if let Err(error) = atomic_create(&abs, content.as_bytes()) {
+            self.echo_guard.forget(&abs);
+            return Err(error);
+        }
+        let on_disk_hash = hash_hex(content.as_bytes());
+        self.update_editor_after_save(&abs, &on_disk_hash);
+        Ok(DocumentSnapshot {
+            path: abs,
+            content: content.to_owned(),
+            on_disk_hash,
+        })
+    }
+
     // ── editor state ──────────────────────────────────────────────────
 
     /// Editor opened the document — remember the on-disk hash the user
     /// is looking at. Idempotent; calling twice with different hashes
     /// just replaces the record.
     pub fn mark_open(&self, path: &Path, on_disk_hash: &str) {
-        let Ok(abs) = self.absolute(path) else {
+        let Ok(abs) = self.resolve_path(path) else {
             return;
         };
         self.editors.lock().insert(
@@ -171,7 +218,7 @@ impl DocumentService {
     }
 
     pub fn mark_dirty(&self, path: &Path) {
-        if let Ok(abs) = self.absolute(path) {
+        if let Ok(abs) = self.resolve_path(path) {
             if let Some(s) = self.editors.lock().get_mut(&abs) {
                 s.dirty = true;
             }
@@ -179,7 +226,7 @@ impl DocumentService {
     }
 
     pub fn mark_clean(&self, path: &Path) {
-        if let Ok(abs) = self.absolute(path) {
+        if let Ok(abs) = self.resolve_path(path) {
             if let Some(s) = self.editors.lock().get_mut(&abs) {
                 s.dirty = false;
             }
@@ -187,7 +234,7 @@ impl DocumentService {
     }
 
     pub fn mark_closed(&self, path: &Path) {
-        if let Ok(abs) = self.absolute(path) {
+        if let Ok(abs) = self.resolve_path(path) {
             self.editors.lock().remove(&abs);
         }
     }
@@ -198,7 +245,7 @@ impl DocumentService {
     /// the user. The frontend uses this to decide whether to surface
     /// "reload / keep" to the user.
     pub fn check_conflict(&self, path: &Path) -> ConflictStatus {
-        let Ok(abs) = self.absolute(path) else {
+        let Ok(abs) = self.resolve_path(path) else {
             return ConflictStatus::Unknown;
         };
         let Some(editor) = self.editors.lock().get(&abs).cloned() else {
@@ -231,8 +278,10 @@ impl DocumentService {
 
     /// Resolve `path` to an absolute path inside the vault root. Accepts
     /// either an absolute path that lives under `vault_root`, or a path
-    /// relative to it. Rejects anything that resolves outside the root.
-    fn absolute(&self, path: &Path) -> FsResult<PathBuf> {
+    /// relative to it. Rejects anything that resolves outside the root and
+    /// every existing symlink component, including ones followed by `..`.
+    /// This preflight is not race-safe against concurrent path replacement.
+    pub fn resolve_path(&self, path: &Path) -> FsResult<PathBuf> {
         let candidate = if path.is_absolute() {
             path.to_path_buf()
         } else {
@@ -244,6 +293,37 @@ impl DocumentService {
         if !normalized.starts_with(&root_normalized) {
             return Err(FsError::PathOutsideVault(candidate));
         }
+        // Inspect the original components before returning the lexical
+        // identity: normalization must not erase a symlink in `link/../a`.
+        let relative = candidate
+            .strip_prefix(&root_normalized)
+            .map_err(|_| FsError::PathOutsideVault(candidate.clone()))?;
+        let mut component_path = root_normalized.clone();
+        for component in relative.components() {
+            match component {
+                std::path::Component::ParentDir => {
+                    component_path.pop();
+                }
+                std::path::Component::CurDir => continue,
+                other => component_path.push(other.as_os_str()),
+            }
+            if !component_path.starts_with(&root_normalized) {
+                return Err(FsError::PathOutsideVault(candidate));
+            }
+            match std::fs::symlink_metadata(&component_path) {
+                Ok(meta) if meta.file_type().is_symlink() => {
+                    return Err(FsError::SymlinkUnsupported(component_path));
+                }
+                Ok(_) => {}
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+                Err(source) => {
+                    return Err(FsError::Io {
+                        path: component_path,
+                        source,
+                    })
+                }
+            }
+        }
         Ok(normalized)
     }
 }
@@ -253,11 +333,34 @@ fn hash_hex(bytes: &[u8]) -> String {
     h.to_hex().to_string()
 }
 
-/// Try `canonicalize`; fall back to the input if the path doesn't exist.
-/// Used at constructor time so the vault root matches FSEvents-canonical
-/// paths even on macOS where `/var/folders/X` → `/private/var/folders/X`.
+/// Canonicalize the existing ancestor and append any not-yet-created tail.
+/// A relative missing vault must still produce an absolute identity; trusted
+/// root aliases retain platform canonicalization (e.g. macOS `/var/folders`).
 pub(crate) fn canonicalize_lenient(p: &Path) -> PathBuf {
-    p.canonicalize().unwrap_or_else(|_| p.to_path_buf())
+    let absolute = if p.is_absolute() {
+        p.to_path_buf()
+    } else {
+        std::env::current_dir().map_or_else(|_| p.to_path_buf(), |cwd| cwd.join(p))
+    };
+    let absolute = normalize(&absolute);
+    let mut ancestor = absolute.as_path();
+    let mut tail = Vec::new();
+    loop {
+        if let Ok(mut canonical) = ancestor.canonicalize() {
+            for component in tail.into_iter().rev() {
+                canonical.push(component);
+            }
+            return canonical;
+        }
+        let Some(name) = ancestor.file_name() else {
+            return absolute;
+        };
+        tail.push(name.to_os_string());
+        let Some(parent) = ancestor.parent() else {
+            return absolute;
+        };
+        ancestor = parent;
+    }
 }
 
 /// Lexical normalization (no I/O, no symlink resolution). Resolves `.`
@@ -295,8 +398,39 @@ mod tests {
         let (_d, s) = svc();
         std::fs::write(s.vault_root().join("a.md"), b"hello").unwrap();
         let snap = s.read_document(Path::new("a.md")).unwrap();
+        assert_eq!(snap.path, s.vault_root().join("a.md"));
         assert_eq!(snap.content, "hello");
         assert_eq!(snap.on_disk_hash, hash_hex(b"hello"));
+    }
+
+    #[test]
+    fn relative_and_absolute_reads_share_canonical_identity() {
+        let (_d, s) = svc();
+        std::fs::create_dir(s.vault_root().join("sub")).unwrap();
+        std::fs::write(s.vault_root().join("sub/a.md"), b"hello").unwrap();
+        let relative = s.read_document(Path::new("./sub/../sub/a.md")).unwrap();
+        let absolute = s.read_document(&s.vault_root().join("sub/a.md")).unwrap();
+        assert_eq!(relative, absolute);
+        assert!(relative.path.is_absolute());
+    }
+
+    #[test]
+    fn relative_missing_vault_root_keeps_absolute_document_identity() {
+        let dir = tempfile::tempdir_in(".").unwrap();
+        let relative_root = PathBuf::from(dir.path().file_name().unwrap()).join("new-vault");
+        assert!(!relative_root.is_absolute());
+        let svc = DocumentService::new(relative_root, Arc::new(EchoGuard::new()));
+        svc.write_document(&Origin::User, Path::new("a.md"), b"new", None)
+            .unwrap();
+        let snap = svc.read_document(Path::new("a.md")).unwrap();
+        assert!(
+            snap.path.is_absolute(),
+            "canonical identity must be absolute even for a newly created vault"
+        );
+        assert_eq!(
+            snap.path,
+            svc.vault_root().join("a.md").canonicalize().unwrap()
+        );
     }
 
     #[test]
@@ -318,7 +452,7 @@ mod tests {
         assert!(matches!(res, WriteOutcome::Written { .. }));
 
         // The on-disk bytes match the guard's stored hash.
-        let abs = s.absolute(path).unwrap();
+        let abs = s.resolve_path(path).unwrap();
         let bytes = std::fs::read(&abs).unwrap();
         assert!(
             s.echo_guard.should_ignore_event(&abs, &bytes),
@@ -359,6 +493,102 @@ mod tests {
         assert_eq!(
             std::fs::read(s.vault_root().join("note.md")).unwrap(),
             b"current"
+        );
+    }
+
+    #[test]
+    fn expected_hash_rejects_deleted_document_without_recreating_it() {
+        let (_d, s) = svc();
+        let path = s.vault_root().join("deleted.md");
+        std::fs::write(&path, b"old").unwrap();
+        let expected = s
+            .read_document(Path::new("deleted.md"))
+            .unwrap()
+            .on_disk_hash;
+        std::fs::remove_file(&path).unwrap();
+        assert!(matches!(
+            s.write_document(&Origin::User, Path::new("deleted.md"), b"new", Some(&expected)),
+            Ok(WriteOutcome::Conflict { current_disk_hash }) if current_disk_hash.is_empty()
+        ));
+        assert!(
+            !path.exists(),
+            "optimistic save must not recreate a deleted document"
+        );
+    }
+
+    #[test]
+    fn expected_hash_reports_read_io_failure_before_writing() {
+        let (_d, s) = svc();
+        let blocker = s.vault_root().join("blocked");
+        std::fs::write(&blocker, b"not a directory").unwrap();
+        let path = blocker.join("note.md");
+        let result = s.write_document(
+            &Origin::User,
+            Path::new("blocked/note.md"),
+            b"new",
+            Some("old"),
+        );
+        assert!(matches!(result, Err(FsError::Io { path: error_path, .. }) if error_path == path));
+        let entries = std::fs::read_dir(s.vault_root()).unwrap().count();
+        assert_eq!(
+            entries, 1,
+            "failed precondition must not leave a temporary write"
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn rejects_symlink_documents_and_existing_parent_components() {
+        use std::os::unix::fs::symlink;
+        let (_d, s) = svc();
+        let outside = TempDir::new().unwrap();
+        std::fs::write(outside.path().join("secret.md"), b"outside").unwrap();
+        symlink(
+            outside.path().join("secret.md"),
+            s.vault_root().join("link.md"),
+        )
+        .unwrap();
+        symlink(outside.path(), s.vault_root().join("linked")).unwrap();
+        for path in [
+            "link.md",
+            "linked/secret.md",
+            "linked/new.md",
+            "linked/../new.md",
+            "missing/../linked/new.md",
+        ] {
+            assert!(
+                s.read_document(Path::new(path)).is_err(),
+                "read followed symlink: {path}"
+            );
+            assert!(
+                s.write_document(&Origin::User, Path::new(path), b"clobber", None)
+                    .is_err(),
+                "write followed symlink: {path}"
+            );
+        }
+        assert_eq!(
+            std::fs::read(outside.path().join("secret.md")).unwrap(),
+            b"outside"
+        );
+        assert!(!outside.path().join("new.md").exists());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn rejects_canvas_sidecar_below_symlinked_loom_directory() {
+        use std::os::unix::fs::symlink;
+        let (_d, s) = svc();
+        let outside = TempDir::new().unwrap();
+        std::fs::write(outside.path().join("canvas.json"), b"original").unwrap();
+        symlink(outside.path(), s.vault_root().join(".loom")).unwrap();
+        let path = Path::new(".loom/canvas.json");
+        assert!(s.read_document(path).is_err());
+        assert!(s
+            .write_document(&Origin::User, path, b"clobber", None)
+            .is_err());
+        assert_eq!(
+            std::fs::read(outside.path().join("canvas.json")).unwrap(),
+            b"original"
         );
     }
 

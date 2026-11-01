@@ -5,7 +5,9 @@ import com.fallrising.cms.media.domain.MediaAttachment;
 import com.fallrising.cms.media.domain.MediaVariant;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +32,11 @@ public class InMemoryMediaStore implements MediaStore {
             return Optional.empty();
         }
         return Optional.of(withVariants(asset));
+    }
+
+    @Override
+    public List<MediaAsset> findAll(Collection<UUID> ids) {
+        return ids.stream().distinct().map(assets::get).filter(java.util.Objects::nonNull).map(this::withVariants).toList();
     }
 
     @Override
@@ -86,6 +93,13 @@ public class InMemoryMediaStore implements MediaStore {
     }
 
     @Override
+    public List<MediaAttachment> attachmentsOfMedia(Collection<UUID> mediaIds) {
+        if (mediaIds.isEmpty()) return List.of();
+        var ids = new HashSet<>(mediaIds);
+        return attachmentsByEntry.values().stream().flatMap(List::stream).filter(a -> ids.contains(a.mediaId())).toList();
+    }
+
+    @Override
     public long countFiles() {
         return assets.size();
     }
@@ -122,6 +136,6 @@ public class InMemoryMediaStore implements MediaStore {
                 asset.deletedAt(),
                 asset.createdAt(),
                 asset.updatedAt(),
-                variantsOf(asset.id()));
+                List.copyOf(variants.getOrDefault(asset.id(), List.of())));
     }
 }

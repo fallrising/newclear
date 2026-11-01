@@ -1,0 +1,17 @@
+certificates: exit 0
+bootstrap: exit 0
+native: exit 0
+broker-start: exit 0
+integration: exit 0
+public-smoke: exit 0
+broker-log: exit 0
+broker-stop: exit 0
+broker-remove: exit 0
+network-remove: exit 0
+Traceback (most recent call last):
+  File "/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/scripts/verify_isolated.py", line 145, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/scripts/verify_isolated.py", line 123, in main
+    raise RuntimeError("requested gate skipped tests: " + label)
+RuntimeError: requested gate skipped tests: integration

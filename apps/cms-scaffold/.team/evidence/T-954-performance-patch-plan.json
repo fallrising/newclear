@@ -1,0 +1,19 @@
+{
+  "iteration": 2,
+  "front": [
+    "Lazy member and fallback route modules, retain all route paths and public/member semantics",
+    "Move useMemberSession/useMemberUnauthorized into pure member-session.ts; gate keeps screens, consumers import hook-only module"
+  ],
+  "back_admin": [
+    "Lazy existing shell route Components; leave auth providers and gates in place"
+  ],
+  "ui": [
+    "After 38-module audit, sideEffects=[**/*.css] preserves explicit stylesheet imports and permits unused UI TS modules to be omitted",
+    "Unused Sonner wrapper may be omitted; imported live toast/Toaster retains Sonner initialization and injected styles; regression builds and DOM test verify this"
+  ],
+  "prohibited": [
+    "No dependency/lock changes",
+    "No async whole-App bootstrap",
+    "No budget change"
+  ]
+}

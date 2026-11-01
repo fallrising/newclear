@@ -3,6 +3,7 @@ package dev.ojbk.gateway.consume;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ojbk.v1.Code;
+import dev.ojbk.config.PullSubscriptionSpec;
 import dev.ojbk.config.SubscriptionConfig;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -14,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
@@ -80,6 +84,70 @@ final class PullShareWorkerTest {
             assertThat(worker.inflightCount()).isEqualTo(1);
             assertThat(broker.hasTerminalDisposition(PullRecordId.from(delivery)))
                     .isFalse();
+        }
+    }
+
+    @Test
+    void rejectsAcknowledgementsBeyondTheCommandQueueBound() throws Exception {
+        CountDownLatch release = new CountDownLatch(1);
+        CountDownLatch polling = new CountDownLatch(1);
+        PullBroker blocked = new PullBroker() {
+            @Override
+            public List<PullBrokerRecord> poll(Duration timeout) {
+                polling.countDown();
+                try {
+                    release.await();
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+                return List.of();
+            }
+
+            @Override
+            public void settle(Map<PullRecordId, PullDisposition> dispositions) {}
+
+            @Override
+            public void wakeup() {
+                release.countDown();
+            }
+
+            @Override
+            public void close() {}
+        };
+        try (PushPipeline pipeline = new PushPipeline();
+                PullShareWorker worker = new PullShareWorker(
+                        blocked,
+                        subscription(),
+                        pipeline,
+                        (message, topic, reason) -> {},
+                        Clock.systemUTC());
+                var callers = Executors.newVirtualThreadPerTaskExecutor()) {
+            worker.start();
+            // The worker drains commands only between polls; block it first.
+            assertThat(polling.await(5, TimeUnit.SECONDS)).isTrue();
+            List<Future<PullAckResult>> waiting = new ArrayList<>();
+            for (int i = 0; i < PullSubscriptionSpec.MAX_INFLIGHT; i++) {
+                String token = "token-" + i;
+                waiting.add(callers.submit(() -> worker.acknowledge(
+                        List.of(token), List.of(), Duration.ofSeconds(10))));
+            }
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (worker.queuedAckCommands() < PullSubscriptionSpec.MAX_INFLIGHT
+                    && System.nanoTime() < deadline) {
+                Thread.sleep(5);
+            }
+            assertThat(worker.queuedAckCommands()).isEqualTo(PullSubscriptionSpec.MAX_INFLIGHT);
+
+            long started = System.nanoTime();
+            PullAckResult overflow = worker.acknowledge(
+                    List.of("overflow"), List.of(), Duration.ofSeconds(10));
+
+            assertThat(overflow.code()).isEqualTo(Code.BROKER_UNAVAILABLE);
+            assertThat(Duration.ofNanos(System.nanoTime() - started)).isLessThan(Duration.ofSeconds(1));
+            release.countDown();
+            for (Future<PullAckResult> result : waiting) {
+                assertThat(result.get(5, TimeUnit.SECONDS).code()).isEqualTo(Code.INVALID_ARGUMENT);
+            }
         }
     }
 

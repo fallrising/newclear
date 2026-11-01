@@ -154,6 +154,10 @@ type Controller struct {
 	pendingOperations int
 	pendingBytes      int64
 	recoveredApplied  []storage.Frame
+	marks             []appendMark
+	operationOrder    []string
+	gateOrder         []string
+	marksFloor        uint64
 }
 
 func NewController(node *raft.Node, log RecordLog, config Config, now time.Time) (*Controller, error) {
@@ -184,7 +188,7 @@ func NewController(node *raft.Node, log RecordLog, config Config, now time.Time)
 		controller.resetLeaderTerm(snapshot, now)
 	}
 	recovered := node.RecoveredApplied()
-	controller.recoveredApplied = cloneFrames(recovered)
+	controller.recoveredApplied = recovered
 	if _, err := controller.apply(recovered); err != nil {
 		return nil, err
 	}
@@ -223,6 +227,7 @@ func (controller *Controller) HandleReady(ready raft.Ready, now time.Time) ([]Ga
 	snapshot = controller.node.Snapshot()
 	if snapshot.Role == raft.Leader && snapshot.Term == controller.term {
 		controller.durableMatch[controller.config.NodeID] = snapshot.LastLogIndex
+		controller.markAppended(snapshot.LastLogIndex, now)
 		for _, observation := range controller.peers {
 			if observation.InSync && observation.CatchupTarget < snapshot.LastLogIndex {
 				observation.CatchupTarget = snapshot.LastLogIndex
@@ -250,8 +255,11 @@ func (controller *Controller) HandleReady(ready raft.Ready, now time.Time) ([]Ga
 			observation.InSync = true
 			controller.isr[ack.PeerID] = struct{}{}
 			observation.CatchupTarget = snapshot.LastLogIndex
+		} else if at := controller.caughtUpAsOf(ack.MatchIndex); observation.InSync && at.After(observation.LastCaughtUpAt) {
+			observation.LastCaughtUpAt = at
 		}
 	}
+	controller.pruneMarks()
 	for _, read := range ready.ReadStates {
 		if _, pending := controller.pendingReads[read.Context]; pending && snapshot.Role == raft.Leader && snapshot.Term == controller.term {
 			delete(controller.pendingReads, read.Context)
@@ -302,7 +310,7 @@ func (controller *Controller) proposeData(operationID, requestID string, records
 		results, err := controller.retry(existing, requestID)
 		return existing.index, raft.Ready{LeaderReady: controller.leaderReady}, results, err
 	}
-	if len(controller.operations) >= controller.config.MaxOperationHistory || len(controller.gates) >= controller.config.MaxGateHistory {
+	if !controller.roomForOperation() || !controller.roomForGate() {
 		return 0, raft.Ready{}, nil, ErrBackpressure
 	}
 	if controller.role != raft.Leader {
@@ -333,8 +341,10 @@ func (controller *Controller) proposeData(operationID, requestID string, records
 		bytes: reserved, pendingGate: requestID,
 	}
 	controller.operations[operationID] = operation
+	controller.operationOrder = append(controller.operationOrder, operationID)
 	controller.pendingOperations++
 	controller.pendingBytes += reserved
+	controller.gateOrder = append(controller.gateOrder, requestID)
 	controller.gates[requestID] = &gate{result: GateResult{
 		RequestID: requestID, OperationID: operationID, Index: index,
 		BaseOffset: operation.baseOffset, LastOffset: operation.lastOffset,
@@ -350,7 +360,7 @@ func (controller *Controller) proposeData(operationID, requestID string, records
 func (controller *Controller) AwaitExistingData(operationID, requestID string, index, baseOffset, lastOffset, entryTerm uint64, bytes int64) ([]GateResult, error) {
 	existingOperation := controller.operations[operationID]
 	if existingOperation == nil {
-		if len(controller.operations) >= controller.config.MaxOperationHistory {
+		if !controller.roomForOperation() {
 			return nil, ErrBackpressure
 		}
 		entry, err := controller.node.Entry(index)
@@ -366,6 +376,7 @@ func (controller *Controller) AwaitExistingData(operationID, requestID string, i
 			entryTerm: entryTerm, bytes: bytes,
 		}
 		controller.operations[operationID] = existingOperation
+		controller.operationOrder = append(controller.operationOrder, operationID)
 	} else if existingOperation.index != index || existingOperation.baseOffset != baseOffset || existingOperation.lastOffset != lastOffset || existingOperation.entryTerm != entryTerm || existingOperation.bytes != bytes {
 		return nil, errors.New("operation identity refers to different DATA metadata")
 	}
@@ -387,7 +398,7 @@ func (controller *Controller) retry(operation *operation, requestID string) ([]G
 	if existing := controller.gates[requestID]; existing != nil {
 		return []GateResult{cloneGateResult(existing.result)}, nil
 	}
-	if len(controller.gates) >= controller.config.MaxGateHistory {
+	if !controller.roomForGate() {
 		return nil, ErrBackpressure
 	}
 	if operation.pendingGate != "" {
@@ -410,6 +421,7 @@ func (controller *Controller) retry(operation *operation, requestID string) ([]G
 	operation.pendingGate = requestID
 	controller.pendingOperations++
 	controller.pendingBytes += operation.bytes
+	controller.gateOrder = append(controller.gateOrder, requestID)
 	controller.gates[requestID] = &gate{result: GateResult{
 		RequestID: requestID, OperationID: operation.id, Index: operation.index,
 		BaseOffset: operation.baseOffset, LastOffset: operation.lastOffset,
@@ -452,15 +464,39 @@ func (controller *Controller) BeginFetch(context string) (raft.Ready, error) {
 	return ready, nil
 }
 
+// CancelFetch releases a read barrier whose caller gave up waiting.
+func (controller *Controller) CancelFetch(context string) {
+	delete(controller.pendingReads, context)
+	delete(controller.readBarriers, context)
+	controller.node.CancelRead(context)
+}
+
 func (controller *Controller) Fetch(context string, offset uint64, maxBytes int) ([]storage.LocalRecord, uint64, uint64, storage.ReadStats, error) {
+	if err := controller.consumeBarrier(context); err != nil {
+		return nil, offset, controller.highWatermark, storage.ReadStats{}, err
+	}
+	records, next, stats, err := controller.log.ReadRecords(offset, controller.highWatermark, maxBytes)
+	return records, next, controller.highWatermark, stats, err
+}
+
+// ConfirmedHighWatermark consumes a completed read barrier and returns the
+// HW it proves: this leader still served the barrier's term after a
+// current-term majority confirmed it. A deposed leader gets ErrReadBarrier.
+func (controller *Controller) ConfirmedHighWatermark(context string) (uint64, error) {
+	if err := controller.consumeBarrier(context); err != nil {
+		return 0, err
+	}
+	return controller.highWatermark, nil
+}
+
+func (controller *Controller) consumeBarrier(context string) error {
 	barrier, ok := controller.readBarriers[context]
 	delete(controller.readBarriers, context)
 	snapshot := controller.node.Snapshot()
 	if !ok || snapshot.Role != raft.Leader || !snapshot.LeaderReady || barrier.term != snapshot.Term || snapshot.LastApplied < barrier.index {
-		return nil, offset, controller.highWatermark, storage.ReadStats{}, ErrReadBarrier
+		return ErrReadBarrier
 	}
-	records, next, stats, err := controller.log.ReadRecords(offset, controller.highWatermark, maxBytes)
-	return records, next, controller.highWatermark, stats, err
+	return nil
 }
 
 func (controller *Controller) HighWatermark() uint64 { return controller.highWatermark }
@@ -503,7 +539,7 @@ func (controller *Controller) PendingFetches() int {
 // exactly once so another deterministic state machine can replay the same
 // durable entries.
 func (controller *Controller) RecoveredApplied() []storage.Frame {
-	result := cloneFrames(controller.recoveredApplied)
+	result := controller.recoveredApplied
 	controller.recoveredApplied = nil
 	return result
 }
@@ -517,6 +553,7 @@ func (controller *Controller) resetLeaderTerm(snapshot raft.Snapshot, now time.T
 	controller.readBarriers = make(map[string]readBarrier)
 	controller.pendingReads = make(map[string]struct{})
 	controller.peers = make(map[uint32]*PeerObservation)
+	controller.marks, controller.marksFloor = nil, 0
 	for _, voter := range controller.config.Voters {
 		if voter != controller.config.NodeID {
 			controller.peers[voter] = &PeerObservation{

@@ -3,6 +3,7 @@ package queue
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync"
 	"testing"
 	"time"
@@ -288,5 +289,43 @@ func TestValidName(t *testing.T) {
 		if got := ValidName(name); got != want {
 			t.Fatalf("ValidName(%q) = %v, want %v", name, got, want)
 		}
+	}
+}
+
+func TestMergeSkipsConsumedMessage(t *testing.T) {
+	m := NewManager(10, 100, 1024)
+	msg, err := m.Enqueue("orders", EnqueueInput{Body: "once"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.Dequeue("orders"); err != nil {
+		t.Fatal(err)
+	}
+
+	added, err := m.MergeMessages("orders", []Message{msg})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(added) != 0 {
+		t.Fatalf("consumed message merged back: %#v", added)
+	}
+}
+
+func TestPushFrontClearsRemovedRecord(t *testing.T) {
+	m := NewManager(10, 100, 1024)
+	msg, err := m.Enqueue("orders", EnqueueInput{Body: "retry"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	popped, err := m.CompareAndPop("orders", msg.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := m.PushFront("orders", popped); err != nil {
+		t.Fatal(err)
+	}
+
+	if slices.Contains(m.RemovedIDs("orders"), msg.ID) {
+		t.Fatal("message put back at the head is still reported as removed")
 	}
 }

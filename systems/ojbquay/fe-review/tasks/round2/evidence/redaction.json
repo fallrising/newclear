@@ -1,0 +1,226 @@
+{
+  "originalMobileGroupPrivacyFailed": true,
+  "otherFiveOriginalDrawerPngsRedactionUnverified": true,
+  "originalsRetainedPrivately": true,
+  "retakes": [
+    {
+      "key": "desktop-topic-configuration.png",
+      "deviceScale": 1,
+      "image": {
+        "width": 1440,
+        "height": 900
+      },
+      "visibleSecretRectangles": 1,
+      "coverage": [
+        {
+          "bounds": [
+            980,
+            388,
+            1194,
+            406
+          ],
+          "pixels": 3852,
+          "masked": 3852,
+          "coverage": 1
+        }
+      ],
+      "stable": true,
+      "passed": true
+    },
+    {
+      "key": "desktop-group.png",
+      "deviceScale": 1,
+      "image": {
+        "width": 1440,
+        "height": 900
+      },
+      "visibleSecretRectangles": 1,
+      "coverage": [
+        {
+          "bounds": [
+            942,
+            198,
+            1157,
+            216
+          ],
+          "pixels": 3870,
+          "masked": 3870,
+          "coverage": 1
+        }
+      ],
+      "stable": true,
+      "passed": true
+    },
+    {
+      "key": "tablet-topic-configuration.png",
+      "deviceScale": 1,
+      "image": {
+        "width": 834,
+        "height": 1112
+      },
+      "visibleSecretRectangles": 1,
+      "coverage": [
+        {
+          "bounds": [
+            374,
+            388,
+            588,
+            406
+          ],
+          "pixels": 3852,
+          "masked": 3852,
+          "coverage": 1
+        }
+      ],
+      "stable": true,
+      "passed": true
+    },
+    {
+      "key": "tablet-group.png",
+      "deviceScale": 1,
+      "image": {
+        "width": 834,
+        "height": 1112
+      },
+      "visibleSecretRectangles": 1,
+      "coverage": [
+        {
+          "bounds": [
+            336,
+            198,
+            551,
+            216
+          ],
+          "pixels": 3870,
+          "masked": 3870,
+          "coverage": 1
+        }
+      ],
+      "stable": true,
+      "passed": true
+    },
+    {
+      "key": "mobile-topic-configuration.png",
+      "deviceScale": 1,
+      "image": {
+        "width": 390,
+        "height": 844
+      },
+      "visibleSecretRectangles": 1,
+      "coverage": [
+        {
+          "bounds": [
+            162,
+            410,
+            345,
+            450
+          ],
+          "pixels": 7320,
+          "masked": 7320,
+          "coverage": 1
+        }
+      ],
+      "stable": true,
+      "passed": true
+    },
+    {
+      "key": "mobile-group.png",
+      "deviceScale": 1,
+      "image": {
+        "width": 390,
+        "height": 844
+      },
+      "visibleSecretRectangles": 1,
+      "coverage": [
+        {
+          "bounds": [
+            168,
+            238,
+            346,
+            278
+          ],
+          "pixels": 7120,
+          "masked": 7120,
+          "coverage": 1
+        }
+      ],
+      "stable": true,
+      "passed": true
+    }
+  ],
+  "auditChecks": [
+    {
+      "viewport": "desktop",
+      "priorPngSha256": "e5feb02d9f8818ec52a2ae9721120de8e20fe856cf5f652b2a89c9c7061c8f50",
+      "sourceSame": true,
+      "deviceScale": 1,
+      "visibleSecretRectangles": 4,
+      "retaken": false,
+      "priorCoverage": [
+        {
+          "bounds": [
+            1095,
+            1440,
+            1362,
+            1590
+          ],
+          "pixels": 40050,
+          "masked": 40050,
+          "coverage": 1
+        },
+        {
+          "bounds": [
+            1095,
+            1341,
+            1360,
+            1403
+          ],
+          "pixels": 16430,
+          "masked": 16430,
+          "coverage": 1
+        },
+        {
+          "bounds": [
+            1095,
+            1242,
+            1360,
+            1304
+          ],
+          "pixels": 16430,
+          "masked": 16430,
+          "coverage": 1
+        },
+        {
+          "bounds": [
+            1095,
+            1143,
+            1360,
+            1205
+          ],
+          "pixels": 16430,
+          "masked": 16430,
+          "coverage": 1
+        }
+      ]
+    },
+    {
+      "viewport": "tablet",
+      "priorPngSha256": "e2539d666a66c7ea3fc4555821f98e742d9300c86847aff8d4ebc949a9ab607b",
+      "sourceSame": true,
+      "deviceScale": 1,
+      "visibleSecretRectangles": 0,
+      "retaken": false,
+      "note": "No token code rectangle intersects the current viewport width; historical zero-mask pixels alone are not exposure proof."
+    },
+    {
+      "viewport": "mobile",
+      "priorPngSha256": "d84322ae1e00159800f8329219e9749f810a5fc1806b30c5ed827796a6a25022",
+      "sourceSame": true,
+      "deviceScale": 1,
+      "visibleSecretRectangles": 0,
+      "retaken": false,
+      "note": "No token code rectangle intersects the current viewport width; historical zero-mask pixels alone are not exposure proof."
+    }
+  ],
+  "maskReceiptSha256": "b5cfbe478530b5af8c4cb87ff25a00a7a8ebcab9674adbc1cbc3498c2d38e866"
+}

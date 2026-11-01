@@ -11,7 +11,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,6 +60,21 @@ public class JdbcMediaStore implements MediaStore {
         }
         MediaAsset asset = rows.getFirst();
         return Optional.of(withVariants(asset));
+    }
+
+    /** Media and variants use two queries for any nonempty set of known media. */
+    @Override
+    public List<MediaAsset> findAll(Collection<UUID> ids) {
+        List<UUID> distinct = ids.stream().distinct().toList();
+        if (distinct.isEmpty()) return List.of();
+        List<MediaAsset> rows = jdbc.query("SELECT * FROM cms_media WHERE id IN (" + placeholders(distinct.size()) + ")",
+                assetMapper(), distinct.toArray());
+        if (rows.isEmpty()) return List.of();
+        Map<UUID, List<MediaVariant>> variants = jdbc.query(
+                        "SELECT * FROM cms_media_variant WHERE media_id IN (" + placeholders(rows.size()) + ")",
+                        variantMapper(), rows.stream().map(MediaAsset::id).toArray())
+                .stream().collect(Collectors.groupingBy(MediaVariant::mediaId));
+        return rows.stream().map(asset -> withVariants(asset, variants.getOrDefault(asset.id(), List.of()))).toList();
     }
 
     @Override
@@ -135,6 +153,19 @@ public class JdbcMediaStore implements MediaStore {
     }
 
     @Override
+    public List<MediaAttachment> attachmentsOfMedia(Collection<UUID> mediaIds) {
+        List<UUID> distinct = mediaIds.stream().distinct().toList();
+        if (distinct.isEmpty()) return List.of();
+        return jdbc.query("SELECT * FROM cms_media_attachment WHERE media_id IN (" + placeholders(distinct.size()) + ")",
+                (rs, n) -> new MediaAttachment(rs.getObject("media_id", UUID.class), rs.getObject("entry_id", UUID.class),
+                        rs.getString("field_key"), instant(rs, "attached_at")), distinct.toArray());
+    }
+
+    private static String placeholders(int count) {
+        return String.join(", ", java.util.Collections.nCopies(count, "?"));
+    }
+
+    @Override
     public long countFiles() {
         Long count = jdbc.queryForObject("SELECT COUNT(*) FROM cms_media", Long.class);
         return count == null ? 0 : count;
@@ -167,6 +198,10 @@ public class JdbcMediaStore implements MediaStore {
     }
 
     private MediaAsset withVariants(MediaAsset asset) {
+        return withVariants(asset, variantsOf(asset.id()));
+    }
+
+    private static MediaAsset withVariants(MediaAsset asset, List<MediaVariant> variants) {
         return new MediaAsset(
                 asset.id(),
                 asset.ownerPrincipalId(),
@@ -183,7 +218,7 @@ public class JdbcMediaStore implements MediaStore {
                 asset.deletedAt(),
                 asset.createdAt(),
                 asset.updatedAt(),
-                variantsOf(asset.id()));
+                variants);
     }
 
     private RowMapper<MediaAsset> assetMapper() {

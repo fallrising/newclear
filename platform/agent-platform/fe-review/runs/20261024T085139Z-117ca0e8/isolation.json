@@ -1,0 +1,18 @@
+{
+  "runId": "20261024T085139Z-117ca0e8",
+  "mode": "capture",
+  "postgresImage": "postgres@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873",
+  "status": "failed",
+  "ownedContainersRemoved": true,
+  "runnerSha256": "7ddf03074a98618854045817071ed46bbd635fd7e10a752a294000a48cea4d6d",
+  "privateArtifactsRetained": true,
+  "source": "427dec01e78e66d4c06f4032bddfb3efaba44954",
+  "phase": "runtime",
+  "postgresLoopbackVerified": true,
+  "processExit": 1,
+  "logSha256": "0fdd6904a4a9839157271a59ad9abe17328831a27496c308dcce35fad13fa54b",
+  "logSecretRedactionRequired": false,
+  "postgresLogSecretRedactionRequired": false,
+  "cleanupObservations": [],
+  "elapsedSeconds": 49.324
+}

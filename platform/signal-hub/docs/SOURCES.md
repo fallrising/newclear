@@ -21,3 +21,10 @@
 
 - Apache ECharts 的授權與 bundle 大小：M3 前確認。
 - SQLite WAL 與 online backup 的官方文件：sqlite.org 本次未存取；M1／M5 實作前確認。
+
+## M0 契約查核（2026-10-03）
+
+- [CloudEvents JSON format v1.0.2](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md)：讀取原文核對 attribute JSON 型別、null 與 batch。Signal Hub 的 object-only data 是明確縮限的 profile。
+- [OpenAPI 3.1.1](https://spec.openapis.org/oas/v3.1.1.html)：schema dialect 與 request/response 文件結構；契約使用此固定版本。
+- [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)：JCS canonicalization；本次使用鎖定 rfc8785 套件與固定向量。
+- [RFC 4231](https://www.rfc-editor.org/rfc/rfc4231)：HMAC-SHA256 test case 1 作 checker 的已知答案。

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "appDir": "/opt/kith",
+  "contentRepo": "/srv/private/kith/content",
+  "contentCommit": "REPLACE_WITH_FULL_40_LOWERCASE_HEX_COMMIT",
+  "registry": "articles.json",
+  "contentBranch": "main",
+  "contentRemote": "ssh://git@code.example/private/reading.git",
+  "exportRepo": "/srv/private/kith/export",
+  "exportBranch": "main",
+  "exportRemote": "ssh://git@code.example/private/reading.git",
+  "baseUrl": "https://kith.example",
+  "tokenFile": "/srv/private/kith/secrets/export-token",
+  "releaseRoot": "/srv/private/kith/releases"
+}

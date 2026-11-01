@@ -297,6 +297,10 @@ type CompletionMaterialQuery struct {
 	RunID               domain.RunID
 	SubjectDigest       domain.Digest
 	GraphRevisionDigest domain.Digest
+	// MaximumRecords bounds each metadata collection and rejects overflow without
+	// truncation. Zero leaves requirement/evidence/review/approval reads unbounded;
+	// CandidateArtifacts always has a maximum capacity of 1024 records.
+	MaximumRecords uint64
 }
 
 type CompletionMaterial struct {
@@ -313,6 +317,9 @@ type CompletionMaterial struct {
 	Reviews             []Review
 	Approvals           []Approval
 	Artifacts           []Artifact
+	// CandidateArtifacts contains the complete digest-ordered committed binding
+	// set for the named Candidate, separate from Evidence report locators.
+	CandidateArtifacts []Artifact
 }
 
 type Completion struct {

@@ -141,10 +141,7 @@ mod tests {
                 None,
                 "cheap",
                 "fallback",
-                &[
-                    (c1.id.clone(), Some("gpt-4o-mini".into())),
-                    (c2.id, None),
-                ],
+                &[(c1.id.clone(), Some("gpt-4o-mini".into())), (c2.id, None)],
             )
             .unwrap();
         (dir, store)

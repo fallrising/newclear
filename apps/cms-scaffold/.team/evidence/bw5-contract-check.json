@@ -1,0 +1,11 @@
+{
+  "samePaths": 52,
+  "sameSchemaNames": 76,
+  "changedSchemas": [
+    "ErrorCode",
+    "ErrorEnvelope",
+    "FieldError",
+    "FieldErrorCode"
+  ],
+  "runtimeEqualsWave": true
+}

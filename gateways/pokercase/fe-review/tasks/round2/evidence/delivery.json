@@ -1,0 +1,36 @@
+{
+  "headRefOid": "0389438e353666e29b7cdc86eceb1cfc64cfc76c",
+  "isDraft": false,
+  "mergeable": "MERGEABLE",
+  "state": "MERGED",
+  "statusCheckRollup": [
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-24T14:16:37Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/fallrising/newclear/actions/runs/40101635102/job/120894833153",
+      "name": "check",
+      "startedAt": "2026-10-24T14:14:52Z",
+      "status": "COMPLETED",
+      "workflowName": "Pokercase CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-24T14:14:59Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/fallrising/newclear/actions/runs/40101635117/job/120894833102",
+      "name": "validate",
+      "startedAt": "2026-10-24T14:14:52Z",
+      "status": "COMPLETED",
+      "workflowName": "Project success contracts"
+    }
+  ],
+  "url": "https://github.com/fallrising/newclear/pull/603",
+  "mergeCommit": {
+    "oid": "05aeed43a3a49cc1b4a98f760e52fa2881c61064"
+  },
+  "mergedAt": "2026-10-24T14:18:11Z",
+  "scopedRemoteEquality": "git diff --exit-code reviewed HEAD origin/main -- gateways/pokercase .team/PLAN.md docs/tasks/BOARD.md passed",
+  "scope": "Original Round2 M1\u2013M4 only; no overall owner acceptance or fullRound3",
+  "mergeTitleNote": "GitHub used the original claim title for the squash commit; PR603 title and reviewed implementation HEAD identify the delivered change. History is preserved."
+}

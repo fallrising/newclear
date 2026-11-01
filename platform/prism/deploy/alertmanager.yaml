@@ -1,0 +1,71 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.example.com:587'
+  smtp_from: 'prism@example.com'
+  smtp_auth_username: 'prism@example.com'
+  smtp_auth_password_file: /etc/prism/secrets/smtp_password
+
+route:
+  receiver: default
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    # Watchdog 必須走獨立路由，最短間隔，且永不靜默
+    - matchers: ['alertname="PrismWatchdog"']
+      receiver: watchdog
+      group_wait: 0s
+      group_interval: 1m
+      repeat_interval: 1m
+      continue: false
+
+    # 平台自身的致命問題送到獨立渠道（避免用壞掉的渠道通知渠道壞了）
+    - matchers: ['alertname=~"PrismNotificationDead|PrismBroadSilenceCreated"']
+      receiver: ops-fallback
+      group_wait: 0s
+      repeat_interval: 30m
+      continue: false
+
+    - matchers: ['severity="critical"']
+      receiver: oncall
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: false
+
+inhibit_rules:
+  # 主機掛了就不用報該主機上服務的告警
+  - source_matchers: ['alertname="HostDown"']
+    target_matchers: ['severity=~"warning|info"']
+    equal: ['instance']
+  # critical 抑制同名的 warning
+  - source_matchers: ['severity="critical"']
+    target_matchers: ['severity="warning"']
+    equal: ['alertname', 'instance']
+  # 存儲掛了就不用報依賴存儲的所有 Prism 告警
+  - source_matchers: ['alertname="PrismStorageUnavailable"']
+    target_matchers: ['alertname=~"PrismIngestDropping|PrismRuleEvaluationFailing"']
+    equal: ['cluster']
+
+receivers:
+  - name: default
+    email_configs:
+      - to: 'ops@example.com'
+        send_resolved: true
+
+  - name: oncall
+    prism_lark_configs:
+      - webhook_url_file: /etc/prism/secrets/lark_oncall
+        sign_secret_file: /etc/prism/secrets/lark_sign
+        send_resolved: true
+
+  - name: watchdog
+    webhook_configs:
+      - url_file: /etc/prism/secrets/healthchecks_url
+        send_resolved: false
+
+  - name: ops-fallback
+    prism_telegram_configs:
+      - bot_token_file: /etc/prism/secrets/tg_token
+        chat_id: -1001234567890
+        send_resolved: true

@@ -1,0 +1,86 @@
+[
+  {
+    "path": "apps/web-front/src/App.tsx",
+    "sha256": "3791725345f1b5b21fef269d67c623e03c2d70305866551f5b74749c721678ce"
+  },
+  {
+    "path": "apps/web-front/src/routes.tsx",
+    "sha256": "5241b1929264cef2b04e291be23eaf8de0a33385b3655f90703b409620a2be7c"
+  },
+  {
+    "path": "apps/web-front/src/home.tsx",
+    "sha256": "508059a5b17a29d916f03da8470291d517b52a82d7722c43e810984d1db1decd"
+  },
+  {
+    "path": "apps/web-front/src/member-auth.tsx",
+    "sha256": "5cf1a843747168effdd5a451f5f60a0f1ac60afe8aeabfc8b53102f86ca55b88"
+  },
+  {
+    "path": "apps/web-front/src/member-session.ts",
+    "sha256": "704cdbcff057c8350af374e4c7ce6b2d1b1f8b623da6268e498ba3cedf613fea"
+  },
+  {
+    "path": "apps/web-front/src/pages/member.tsx",
+    "sha256": "620fc4757484aa6f2a4e4f574bbbe38bbfbc0369526bab37407a51553b7b1497"
+  },
+  {
+    "path": "apps/web-front/src/pages/appointment-new.tsx",
+    "sha256": "2f9d8b408f167657d15b89cf68f971fc53e840e9e3e619fb1af6883af630e802"
+  },
+  {
+    "path": "apps/web-front/src/shell.tsx",
+    "sha256": "d62a85d7298a0062e840fd814f41f693da91d0de31496e0d3ad4691a694e19c6"
+  },
+  {
+    "path": "apps/web-front/src/query-lifetime.ts",
+    "sha256": "1ff69192d486bc09b5a3f17d26f82caae610789f8fc533d4faa1a21680b70c69"
+  },
+  {
+    "path": "apps/web-front/src/api-route.tsx",
+    "sha256": "7b228bf2d736d4d519406d0259c7e305d3f4fc9b116393dc8f4f47c79059ea09"
+  },
+  {
+    "path": "apps/web-front/src/browser-routes.tsx",
+    "sha256": "1e0bce7992f8c08974ce913da0ccca4951f54cdd60ce35bb22f803aa329919c2"
+  },
+  {
+    "path": "apps/web-front/src/App.lifecycle.test.tsx",
+    "sha256": "e7446b25f36e5a364d3d3e5c79719be1f8faba39a1f54ff313cb4ee1267b7373"
+  },
+  {
+    "path": "apps/web-front/src/App.routing.test.tsx",
+    "sha256": "b4ae2dab77dbe6ce6696ddea930785fdc5dfb022aacd2853053db733d1c20beb"
+  },
+  {
+    "path": "apps/web-back/src/routes.tsx",
+    "sha256": "ef9f760c9b0ccfd2661e28226cddab7a4a8aaf55cb56431abe225bf226a7cc77"
+  },
+  {
+    "path": "apps/web-back/src/App.providers.test.tsx",
+    "sha256": "d57bd11a921ef1960e201161726e7a6638d41aff648dcccce9aa87c483259349"
+  },
+  {
+    "path": "apps/web-admin/src/routes.tsx",
+    "sha256": "690721ca429b7869dd0b3ff00f81dfd463772209d31d01a61a986a3627760afb"
+  },
+  {
+    "path": "packages/ui/package.json",
+    "sha256": "b9a9c04c6549ce08a19d38d33fd8c881c60f374fe41e2b8aec07e0334b067831"
+  },
+  {
+    "path": "packages/ui/src/patterns/query-boundary.tsx",
+    "sha256": "8b8d6740a8c526f44b5cd355dbad3d6e87b7b65e977e743318ffbec2b9ae54bb"
+  },
+  {
+    "path": "packages/ui/src/bundle-boundary.test.ts",
+    "sha256": "9f37a6608c367c27848b3bb00d8cd2fe136ee10d64554500c34af600c3a52121"
+  },
+  {
+    "path": "packages/ui/src/toaster.test.tsx",
+    "sha256": "28fa7b4cb537aa704c51f2cffa2b2d63e1f25f0fbb7fb49579e7cdb4e6c33d9b"
+  },
+  {
+    "path": "packages/ui/src/hydration-skeleton.test.tsx",
+    "sha256": "aacbaecaf262ae56d48775deea4c06b133d45094634ca400f7b3fdeafec0e288"
+  }
+]

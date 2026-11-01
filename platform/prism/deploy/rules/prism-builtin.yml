@@ -1,0 +1,89 @@
+groups:
+  - name: prism-platform
+    interval: 30s
+    rules:
+      - alert: PrismWatchdog
+        expr: vector(1)
+        labels: {severity: none}
+        annotations:
+          summary: "Prism is alive. If you stop receiving this, Prism is down."
+
+      - alert: PrismStorageUnavailable
+        expr: prism_storage_up == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "Storage backend {{ $labels.driver }} unreachable"
+          runbook_url: "https://docs/runbooks/prism-down"
+
+      - alert: PrismIngestDropping
+        expr: sum by (signal, reason) (rate(prism_ingest_dropped_total[5m])) > 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Dropping {{ $labels.signal }} data: {{ $labels.reason }} ({{ $value | humanize }}/s)"
+          runbook_url: "https://docs/runbooks/ingest-dropping"
+
+      - alert: PrismHighCardinalityLabel
+        expr: increase(prism_ingest_high_cardinality_total[15m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "High cardinality on {{ $labels.metric }}.{{ $labels.label }} (tenant {{ $labels.tenant }})"
+          runbook_url: "https://docs/runbooks/high-cardinality"
+
+      - alert: PrismRuleEvaluationFailing
+        expr: sum by (group) (rate(prism_rule_eval_failures_total[10m])) > 0
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Rule group {{ $labels.group }} failing to evaluate"
+
+      - alert: PrismRuleEvaluationSlow
+        expr: prism_rule_group_eval_duration_seconds > prism_rule_group_interval_seconds
+        for: 15m
+        labels: {severity: warning}
+        annotations:
+          summary: "Rule group {{ $labels.group }} takes longer than its interval"
+
+      - alert: PrismNotificationDead
+        expr: increase(prism_notification_dead_total[15m]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $value }} notifications gave up after all retries on {{ $labels.channel }}"
+          runbook_url: "https://docs/runbooks/notification-failing"
+
+      - alert: PrismNotificationBacklog
+        expr: prism_notification_oldest_pending_seconds > 600
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Oldest pending notification is {{ $value | humanizeDuration }} old"
+
+      - alert: PrismDiskPressure
+        expr: prism_disk_pressure_level > 0
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Storage disk pressure level {{ $value }} ({{ $labels.backend }})"
+          runbook_url: "https://docs/runbooks/disk-pressure"
+
+      - alert: PrismAgentDown
+        expr: time() - prism_agent_last_seen_timestamp_seconds > 180
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Agent {{ $labels.hostname }} has not reported for {{ $value | humanizeDuration }}"
+
+      - alert: PrismAgentWALGrowing
+        expr: prism_agent_wal_oldest_age_seconds > 600
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Agent {{ $labels.hostname }} WAL backlog is {{ $value | humanizeDuration }} old"
+
+      - alert: PrismQueryRejecting
+        expr: sum by (reason) (rate(prism_query_rejected_total[5m])) > 0.1
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Rejecting queries: {{ $labels.reason }}"

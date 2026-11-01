@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import re
 import uuid
 
-from app_desired import build_plan, canonical_bytes, sha256, snapshot_binding, spec_identity
+from app_desired import build_plan, canonical_bytes, sha256, snapshot_binding, spec_identity, revision_matches
 from labops import ClusterLock, atomic_json
 
 PLAN_ID = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_-]{0,95}$')
@@ -67,7 +67,6 @@ def _utc_now():
 def _safe_revision_rows(rows, plan):
     if not isinstance(rows, list) or len(rows) != plan['spec']['replicas']:
         return False, 'replica_count_mismatch', []
-    expected_prefix = plan['appname'] + '_'
     seen = set()
     identifiers = []
     for row in rows:
@@ -78,7 +77,7 @@ def _safe_revision_rows(rows, plan):
         if wid in seen:
             return False, 'duplicate_workload_id', identifiers
         seen.add(wid)
-        if not wid.startswith(expected_prefix):
+        if not revision_matches(row, plan['appname'], plan['spec']['entrypoint']):
             return False, 'unexpected_workload_name', identifiers
         if row.get('nodename') != plan['spec']['node']:
             return False, 'unexpected_workload_node', identifiers
@@ -312,7 +311,8 @@ class AppExecutor:
                 'appname': journal['appname'],
                 'logical_app': journal['logical_app'],
                 'spec_sha256': journal['spec_sha256'],
-                'spec': {'node': journal['target_node'], 'replicas': journal['replicas']},
+                'spec': {'node': journal['target_node'], 'replicas': journal['replicas'],
+                         'entrypoint': journal['spec']['entrypoint']},
             }
             valid, reason, identifiers = _safe_revision_rows(rows, plan_stub)
             journal['reconciliation'] = {

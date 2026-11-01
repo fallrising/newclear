@@ -2,13 +2,31 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW1b](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW1b.openapi.yaml](../contracts/BW1b.openapi.yaml) ・ 前一波：[BW1a](BW1a.md)
 
-狀態：**DOC_READY**（本檔合併即生效）  
+狀態：**VERIFIED**（2026-10-03，[PR #224](https://github.com/fallrising/newclear/pull/224) 已合併，遠端四項 CI 通過）
 日期：2026-09-25  
 讀者：實作 BW1b 的 agent。只讀本檔、`contracts/BW1b.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
 > **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW1a 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。`./gradlew :services:cms-api:test` 在 T02、T04、T06、T08、T10 完成後依序是 144、155、155、171、180 個測試，每次唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；`integrationTest` 依序是 54、65、66、66、66 個全綠，T11 後是 67 個，但用的是本機 PostgreSQL 16.13，不是 Testcontainers。各「測試先行」卡的預期紅燈清單也是實際跑出來的。T11 的效能量測在預演環境得到：工作列表 p95 43 ms、公開列表 p95 40 ms、單筆更新 p95 8 ms。
 
 ---
+
+## 0. 本次增量施工補充（2026-10-03，先文件後開發）
+
+本節優先於下方歷史 BW1a patch 與驗收數字。依使用者「繼續開發」授權，在已本地完整驗證的 BW1a 上繼續本地 BW1b；前置 BW1a 尚未提交／合併，不將其狀態冒稱 VERIFIED。已保存可還原的 BW1a 檔案快照與 SHA256 manifest，分工使用各自工作樹。PR 必須依 BW1a → BW1b 分波審查，本次不自動提交／推送／合併或部署。
+
+- **P0 寫入不可退化。** `insertEntry`／`updateEntry` 的雙 scope 索引更新必須參與原有 service transaction；保留原子 version CAS、purge 條件、revision／audit／refs／attachments 回滾與發布媒體隔離。不可用本檔舊整段 SQL 把 P0 的 WHERE version 條件改掉。測試含索引失敗回滾，以及原 P0 競爭／媒體回歸。
+- **BW1a 權限不可退化。** 保留角色與 grants 的 request-local 共用快取、principal 隔離及 enabled type 排序。predicate 下推只改列表求值；单筆授權仍由伺服器執行，分頁前先過濾權限與公開可見性。
+- **前端同期整合。** 取消舊 §2.1／§9 可接受 web 紅燈的例外。同步 generated schema、client 的 page/size/sort/filter/repeated ref 傳送與 cache key，以及 MSW 回應的 page/size/total 和篩選語義。不可用型別斷言繞過新 required 欄位。無新執行期依賴。
+- **既有頁面相容。** 既有頁面尚無 W1 分頁控制；凡原先依賴完整列表的瀏覽、編排、日程／看板，改用明確的逐頁取齊 helper，不能默默截成第一頁。`entries` client 本身仍回單頁，新 helper 使用有限 page/size 與伺服器 total；後續 W1 再讓一般列表顯式操作分頁。保留原排序、查詢條件、取消訊號，對回應缺頁／不前進明確失敗，不無限迴圈。
+- **額外相容性範圍。** `packages/api/src/**`、`packages/mocks/src/**` 與必要 fixtures/generated files、`apps/web-{back,front,admin}/src` 和 `packages/auth` 中必要的既有列表消費者／測試 fixture 適配。只改呼叫與最小相容性行為，不重新設計 UI。既有 store 契約與 P0/BW1a 額外測試可改新查詢參數，必須保留原斷言；PublicOrderTests 移除前，分數、null timestamp 與穩定排序覆蓋移入 store 查詢契約。
+- **公開可見性不可因索引缺漏放寬。** 舊資料可能有停用／非索引型別的 visibility 或 required-ref 欄位；索引無列不能當成 payload 無值。公開列表與 required-ref 目標的可見性，直接在同一 COUNT／page SQL 判斷 published payload，保持 `PublicVisibility` 語義（缺值／空白為 public，列表只接受 public，單筆目標排除 private）；required-ref 的來源也以 published payload 判斷缺值／無效引用，避免停用欄位繞過關聯限制。記憶體 store 必須一致，測試含停用欄位、object/list visibility 和無效 required ref。查詢數仍為 2，不增加逐筆讀取。
+- **公開查詢欄位。** `sort=title` 同樣套用公開欄位的 enabled／indexed／visibility 規則，不得藉別名繞過檢查；預設 public sortField 不符合規則時退回 publishedAt，顯式非法排序回 400。
+- **數值與頁碼相容補充。** 現有 `int` 欄位允許 JSON 小數，BW1a 已明確測試小數排序；在未要求破壞性資料清理的前提下，保留此行為。V6 將既有 `value_int` 改為 PostgreSQL `NUMERIC`，`IndexRow` 使用 `BigDecimal`，索引／V7 回填不截斷小數；記憶體與 JDBC 的比較按數值而非 scale 相等。`filter.int` 仍依既有契約只接受 long 範圍整數字串，不擴張查詢語法。此規則取代下方歷史 `longValue()`／BIGINT 截斷實作。頁碼維持正 int 範圍，offset 用 long 計算，極大合法頁返回空頁；授權先於完整查詢參數驗證，依 §4.3 行為規則修正 §5.5 舊步驟順序。
+- **驗證與量測。** 使用目前實際測試數，不沿用歷史 180／67。保留 10,000 筆 PostgreSQL 效能測試與 p95 工作列表 ≤150ms、公開列表 ≤100ms、patch ≤80ms；不可提高門檻或略過。content SQL 數與媒體展開限制依 §5.6 分開報告。完整 Java／PostgreSQL／前端／bundle／mock E2E 閘門全部通過後才標 LOCAL_VERIFIED。
+
+### 本次驗收結果
+
+202 單元／API＋91 PostgreSQL、166 前端＋17 mock E2E，lint/typecheck/build/bundle、bootJar 與 OpenAPI 一致性全通過。10,000 筆 store p95 工作／公開／更新為 85／77／18ms；門檻未變更。證據與完整驗收對照見 [BW1b 交付](../../../.team/reports/BW1b-DELIVERY.md) 與 `.team/PLAN.md`。下方歷史數字、合併前提與 PR 步驟不代表本輪已執行；本輪沒有 commit／push／merge／部署，未達正式生產可用。
 
 ## 1. 範圍
 

@@ -1,0 +1,9 @@
+{
+  "baseline": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "protectedSourceFiles": 480,
+  "changedProtectedFiles": [],
+  "sourceFreezeFiles": 17,
+  "sourceFreezeMatched": true,
+  "lockUnchanged": true,
+  "existingE2ETestsUnchanged": true
+}

@@ -18,11 +18,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +30,8 @@ import java.util.UUID;
 public class EntryController {
 
     public record EntryWriteBody(String slug, Map<String, Object> payload, Integer version) {}
+
+    public record BatchPatchBody(List<EntryService.BatchItem> items) {}
 
     private final EntryService entries;
     private final ContentStore store;
@@ -55,29 +55,17 @@ public class EntryController {
     }
 
     @GetMapping("/content-types/{typeKey}/entries")
-    public Map<String, Object> list(
-            @PathVariable String typeKey,
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String q,
-            HttpServletRequest request) {
+    public Map<String, Object> list(@PathVariable String typeKey, HttpServletRequest request) {
         IdentityRequest identity = work(request, CmsAction.READ_DRAFT, typeKey);
-        List<String> states = state == null || state.isBlank()
-                ? List.of()
-                : Arrays.stream(state.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        String refField = null;
-        UUID refTarget = null;
-        for (String name : request.getParameterMap().keySet()) {
-            if (name.startsWith("ref.") && request.getParameter(name) != null && !request.getParameter(name).isBlank()) {
-                refField = name.substring(4);
-                refTarget = parseRefTarget(name, request.getParameter(name));
-            }
-        }
-        List<Map<String, Object>> items = entries.listWork(
-                        identity.principal(), identity.surface(), typeKey, states, q, refField, refTarget)
-                .stream()
-                .map(ContentProjection::work)
+        EntryService.ListResult result = entries.listWork(
+                identity.principal(), identity.surface(), typeKey, request.getParameterMap());
+        boolean refs = includeRefs(request);
+        Map<UUID, Map<String, Object>> summaries = refs
+                ? entries.refSummaries(identity.principal(), identity.surface(), result.page().items(), result.fields()) : Map.of();
+        List<Map<String, Object>> items = result.page().items().stream()
+                .map(entry -> withRefs(ContentProjection.work(entry, result.type()), entry.id(), summaries, refs))
                 .toList();
-        return Map.of("items", items, "total", items.size(), "offset", 0, "limit", items.size());
+        return ContentProjection.page(items, result);
     }
 
     @PostMapping("/content-types/{typeKey}/entries")
@@ -88,14 +76,37 @@ public class EntryController {
         EntryWriteBody write = body == null ? new EntryWriteBody(null, Map.of(), null) : body;
         EntryRecord created = entries.create(
                 identity.principal(), identity.surface(), typeKey, write.slug(), write.payload());
-        return ContentProjection.work(created);
+        return workJson(created);
     }
 
     @GetMapping("/entries/{id}")
     public Map<String, Object> get(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
         EntryRecord entry = entries.getWork(identity.principal(), identity.surface(), id);
-        return ContentProjection.work(entry);
+        boolean refs = includeRefs(request);
+        if (!refs) return workJson(entry);
+        ContentTypeRecord type = store.findTypeByKey(entry.contentTypeKey()).orElseThrow(com.fallrising.cms.content.ContentException::typeNotFound);
+        return withRefs(ContentProjection.work(entry, type), entry.id(),
+                entries.refSummaries(identity.principal(), identity.surface(), List.of(entry), store.fieldsOf(type.id())), true);
+    }
+
+    @PostMapping("/entries:batch-patch")
+    public Map<String, Object> batchPatch(@RequestBody(required = false) BatchPatchBody body, HttpServletRequest request) {
+        IdentityRequest identity = rejectFront(request);
+        List<EntryRecord> updated = entries.batchPatch(identity.principal(), identity.surface(), body == null ? null : body.items());
+        return Map.of("items", updated.stream().map(this::workJson).toList());
+    }
+
+    @PostMapping("/entries/{id}/publish-request")
+    public Map<String, Object> requestPublish(@PathVariable UUID id, HttpServletRequest request) {
+        IdentityRequest identity = rejectFront(request);
+        return workJson(entries.requestPublish(identity.principal(), identity.surface(), id));
+    }
+
+    @DeleteMapping("/entries/{id}/publish-request")
+    public Map<String, Object> cancelPublishRequest(@PathVariable UUID id, HttpServletRequest request) {
+        IdentityRequest identity = rejectFront(request);
+        return workJson(entries.cancelPublishRequest(identity.principal(), identity.surface(), id));
     }
 
     @PatchMapping("/entries/{id}")
@@ -104,31 +115,31 @@ public class EntryController {
         IdentityRequest identity = rejectFront(request);
         EntryRecord updated = entries.patch(
                 identity.principal(), identity.surface(), id, body.slug(), body.payload(), body.version());
-        return ContentProjection.work(updated);
+        return workJson(updated);
     }
 
     @PostMapping("/entries/{id}/publish")
     public Map<String, Object> publish(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
-        return ContentProjection.work(entries.publish(identity.principal(), identity.surface(), id));
+        return workJson(entries.publish(identity.principal(), identity.surface(), id));
     }
 
     @PostMapping("/entries/{id}/unpublish")
     public Map<String, Object> unpublish(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
-        return ContentProjection.work(entries.unpublish(identity.principal(), identity.surface(), id));
+        return workJson(entries.unpublish(identity.principal(), identity.surface(), id));
     }
 
     @PostMapping("/entries/{id}/archive")
     public Map<String, Object> archive(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
-        return ContentProjection.work(entries.archive(identity.principal(), identity.surface(), id));
+        return workJson(entries.archive(identity.principal(), identity.surface(), id));
     }
 
     @PostMapping("/entries/{id}/restore")
     public Map<String, Object> restore(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
-        return ContentProjection.work(entries.restore(identity.principal(), identity.surface(), id));
+        return workJson(entries.restore(identity.principal(), identity.surface(), id));
     }
 
     @DeleteMapping("/entries/{id}")
@@ -154,13 +165,33 @@ public class EntryController {
     @PostMapping("/entries/{id}/revisions/{revisionNo}/revert")
     public Map<String, Object> revert(@PathVariable UUID id, @PathVariable int revisionNo, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
-        return ContentProjection.work(entries.revert(identity.principal(), identity.surface(), id, revisionNo));
+        return workJson(entries.revert(identity.principal(), identity.surface(), id, revisionNo));
     }
 
     @GetMapping("/preview/entries/{id}")
     public Map<String, Object> preview(@PathVariable UUID id, HttpServletRequest request) {
         IdentityRequest identity = rejectFront(request);
-        return ContentProjection.work(entries.getWork(identity.principal(), identity.surface(), id));
+        return workJson(entries.getWork(identity.principal(), identity.surface(), id));
+    }
+
+    private static boolean includeRefs(HttpServletRequest request) {
+        String[] values = request.getParameterValues("include");
+        if (values == null || values.length == 0) return false;
+        if (values.length > 1) throw com.fallrising.cms.content.ContentException.invalidParameter("include must not repeat");
+        boolean refs = false;
+        for (String value : values[0].split(",")) {
+            value = value.trim();
+            if (value.isEmpty()) continue;
+            if (!"refs".equals(value)) throw com.fallrising.cms.content.ContentException.invalidParameter("include: unknown value " + value);
+            refs = true;
+        }
+        return refs;
+    }
+
+    private static Map<String, Object> withRefs(Map<String, Object> json, UUID id,
+            Map<UUID, Map<String, Object>> summaries, boolean included) {
+        if (included) json.put("refs", summaries.getOrDefault(id, Map.of()));
+        return json;
     }
 
     private static IdentityRequest work(HttpServletRequest request, CmsAction action, String typeKey) {
@@ -172,25 +203,11 @@ public class EntryController {
     }
 
     private Map<String, Object> typeJson(ContentTypeRecord type) {
-        java.util.LinkedHashMap<String, Object> json = new java.util.LinkedHashMap<>();
-        json.put("key", type.typeKey());
-        json.put("displayName", type.displayName());
-        json.put("pluralDisplayName", type.pluralDisplayName());
-        json.put("titleField", type.titleField());
-        json.put("slugPolicy", type.slugPolicy());
-        json.put("fields", store.fieldsOf(type.id()).stream()
-                .filter(f -> f.enabled() && !"internal".equals(f.visibility()))
-                .map(f -> {
-                    java.util.LinkedHashMap<String, Object> field = new java.util.LinkedHashMap<>();
-                    field.put("key", f.fieldKey());
-                    field.put("type", f.fieldType());
-                    field.put("required", f.required());
-                    field.put("refTarget", f.refTargetTypeKey());
-                    field.put("enumValues", f.enumValues());
-                    return field;
-                })
-                .toList());
-        return json;
+        return ContentProjection.typeSchema(type, store.fieldsOf(type.id()), false);
+    }
+
+    private Map<String, Object> workJson(EntryRecord entry) {
+        return ContentProjection.work(entry, store.findTypeByKey(entry.contentTypeKey()).orElse(null));
     }
 
     private static IdentityRequest rejectFront(HttpServletRequest request) {
@@ -199,13 +216,5 @@ public class EntryController {
             throw IdentityException.surfaceForbidden("read_draft", null, Surface.FRONT.wire());
         }
         return identity;
-    }
-
-    private static UUID parseRefTarget(String name, String raw) {
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException e) {
-            throw com.fallrising.cms.content.ContentException.invalidParameter(name + " must be a UUID");
-        }
     }
 }

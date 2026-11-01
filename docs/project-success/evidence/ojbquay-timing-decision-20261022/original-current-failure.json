@@ -1,0 +1,23 @@
+{
+  "source": "preserved repair cda7571+pending candidate; AC_05 name added only",
+  "exit": 1,
+  "tests": 1,
+  "failures": 1,
+  "skipped": 0,
+  "intervals_ms": [
+    191,
+    311,
+    610
+  ],
+  "first_epoch_ms": {
+    "arrival": 1792663861150,
+    "response_sent": 1792663861164,
+    "client_result": 1792663861172,
+    "due": 1792663861322,
+    "ingest_commit": 1792663861259,
+    "dispatch_start": 1792663861325,
+    "dispatch_sent": 1792663861336,
+    "next_arrival": 1792663861342
+  },
+  "measurement_note": "Assertions use full Instant duration truncated to ms; epoch-ms differences may differ by1ms. No anchor/oracle/warmup change."
+}

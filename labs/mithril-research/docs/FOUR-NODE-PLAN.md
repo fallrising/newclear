@@ -1,5 +1,11 @@
 # Mithril 四台測試機使用計劃
 
+2026-10-15 更新：以下保留 2026-09-27 的四機設計與當時授權／缺口記錄。已完成四機唯讀 metadata 盤點及第一段 P1a 本機工具，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 和 [VALIDATION](VALIDATION.md)。文中的「工具尚不存在」等敘述是歷史狀態；目前 strict planner／synthetic lifecycle／runtime lock／offline CI 已提供。P1b 的 Compose/auth 產生、固定 SSH observe/down 與 purge preview 見 [P1-TOOLS](P1-TOOLS.md)。完整 P1 的 startup／cluster orchestration、purge apply 及四機實測仍待完成，原有實機驗收門檻繼續有效。
+
+2026-10-17 P1c 補充：[offline bootstrap tools](P1-BOOTSTRAP.md) 可驗證 synthetic／operator-supplied snapshots 及產生四階段提案，未執行任何實機階段，也不替代以下健康與批准門檻。
+
+2026-10-17 P1d 補充：[獨立唯讀 collector](P1-COLLECTOR.md) 以 mock SSH/runtime 驗證完整回應與身份綁定；不代表 authenticated live collection、freshness 或 phase admission 已通過。P1e 的 [獨立離線 validator](P1-PHASE.md) 已另定五個 snapshot predicates；實機 phase-aware validation／execution 仍缺。
+
 版本：0.1；日期：2026-09-27；狀態：**文件設計完成，尚未部署或驗收**。
 
 Owner 已確認有四台測試機，要求文檔先行並以 PR 合併。本次授權只涵蓋文件與 GitHub 交付；不是登入、安裝、重灌、故障注入或資料清除授權。主機身分、可用資源與既有服務尚未現場核對。以下拓撲、配額、門檻均是 **DESIGN／INFERENCE**，不是實測事實。
@@ -275,3 +281,9 @@ U01–U04 固定在本研究 commit；R/D/T 是 2026-09-27 查閱的官方動態
 [D01]: https://docs.docker.com/engine/network/drivers/host/
 [D02]: https://docs.docker.com/engine/network/packet-filtering-firewalls/
 [T01]: https://tailscale.com/docs/reference/connection-types
+
+## P1f 本機 intent journal 邊界
+
+[P1-JOURNAL](P1-JOURNAL.md) 與[獨立契約](P1-JOURNAL-CONTRACT.md) 定義本機持久化 intent／uncertainty 基礎。它不執行 action、不推進 phase、不接收新 snapshot 或批准來清除 uncertainty；未知或部分本機狀態拒絕使用。Timeout／lost reply 不等於遠端取消。保護只涵蓋同一保留的 journal root，不能用新 root 或 rollback 取得重送授權。
+
+實機階段前後 authenticated fresh collection、逐效果身分核對、精確獨立批准、durable executor／reconciliation、runtime image provenance、有效 network／ACL、replication health／lag、保留資料 lifecycle 與 proxy smoke 仍須完成。Down 保留資料，purge 必須另有精確條件與批准。完整 P1／MR-004 尚未完成；正式計數以 STATUS 的 4 DONE／1 BLOCKED_ENV／4 TODO 為準。

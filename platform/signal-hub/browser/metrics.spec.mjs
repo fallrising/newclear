@@ -1,0 +1,53 @@
+import { test, expect } from '@playwright/test';
+import { startFixture } from './fixture.mjs';
+
+test('real metrics retain history, paginate, render versions and partial buckets, and remain usable on mobile', async ({ page }, testInfo) => {
+  const hub = await startFixture();
+  const failures = [];
+  page.on('pageerror', error => failures.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') failures.push(message.text()+' '+message.location().url); });
+  page.on('response', response => { if (response.status() >= 400) failures.push('HTTP '+response.status()+' '+response.url()); });
+  try {
+    const now=Date.now();
+    const makeEvent=(id,time,subject)=>({specversion:'1.0',id,source:'urn:example:demo:service',type:'release.deploy.succeeded',time:new Date(time).toISOString(),subject});
+    await hub.api('/v1/events',{role:'source',method:'POST',body:makeEvent('metric-history',now-11*86400000,'api-service')});
+    await hub.api('/v1/events',{role:'source',method:'POST',body:makeEvent('metric-other',now,'worker')});
+    const rule={id:'deploys',version:1,title:'發佈趨勢',filter:{types:['release.deploy.*']},aggregation:{fn:'count'},bucket:'1h',group_by:['subject'],threshold:{op:'>=',value:50,for_buckets:1,severity:'warning'}};
+    await hub.configureRules([rule]);
+    hub.expireMetricHistory();
+    await hub.configureRules([{...rule,version:2}]);
+    const requests=[];
+    page.on('request', request => { if(request.url().includes('/v1/metrics/')) requests.push(request.url()); });
+    await page.goto(hub.base+'/?range=all&view=metrics');
+    await page.getByLabel('存取 token',{exact:true}).fill(hub.tokens.reader);
+    await page.getByRole('button',{name:'驗證並連線'}).click();
+    const card=page.locator('.metric-card');
+    await expect(card.getByRole('heading',{name:'發佈趨勢',exact:true})).toBeVisible();
+    await expect(card.locator('.metric-chart')).toBeVisible();
+    await expect(card.locator('[data-version="2"]')).toHaveCount(1);
+    await expect(card.locator('[data-threshold="50"]')).toHaveCount(1);
+    expect(await card.locator('[data-partial="true"]').count()).toBeGreaterThan(0);
+    expect(requests.some(url=>new URL(url).searchParams.has('cursor'))).toBe(true);
+    await expect(card.locator('.metric-metadata')).not.toContainText('尚無');
+    await page.screenshot({path:testInfo.outputPath('desktop-metrics.png'),fullPage:false});
+    await card.locator('select').selectOption('["worker"]');
+    await card.locator('summary').click();
+    const rows=card.locator('.metric-table tbody tr');
+    expect(await rows.count()).toBeGreaterThan(0);
+    for (const text of await rows.locator('td:nth-child(2)').allTextContents()) expect(text).toBe('["worker"]');
+    await card.locator('select').selectOption('');
+    expect(await rows.count()).toBeGreaterThan(200);
+    await expect(card.locator('.metric-table')).toContainText('舊版本規則');
+    await expect(card.locator('.metric-table')).toContainText('未結束（partial）');
+    await card.locator('summary').click();
+    await page.setViewportSize({width:390,height:844});
+    await expect(card.locator('.metric-chart')).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+    await page.screenshot({path:testInfo.outputPath('mobile-metrics.png'),fullPage:false});
+    expect(await page.evaluate(()=>({local:Object.keys(localStorage),session:Object.keys(sessionStorage),cookie:document.cookie}))).toEqual({local:[],session:[],cookie:''});
+    expect(page.url()).not.toContain(hub.tokens.reader);
+    await page.getByRole('button',{name:'清除 token'}).click();
+    await expect(page.locator('.metric-chart')).toHaveCount(0);
+    expect(failures).toEqual([]);
+  } finally { await hub.stop(); }
+});

@@ -44,6 +44,16 @@ export function AppLayout(props: { me: Me; mobile: "list" | "content"; children:
               </div>
             )}
           </div>
+          {props.me.is_operator === 1 && (
+            <Link data-testid="capture-link" to="/captures" className="mx-3 mb-2 rounded-md px-3 py-2 font-medium text-accent-strong hover:bg-surface-2">
+              {t("captures.title")}
+            </Link>
+          )}
+          {props.me.is_operator === 1 && (
+            <Link data-testid="reading-link" to="/reading" className="mx-3 mb-2 rounded-md px-3 py-2 font-medium text-accent-strong hover:bg-surface-2">
+              {t("reading.title")}
+            </Link>
+          )}
           <div className="flex-1 overflow-y-auto">
             <RoomList />
           </div>

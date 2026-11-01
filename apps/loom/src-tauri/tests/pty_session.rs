@@ -138,3 +138,32 @@ async fn already_exited_session_rejects_resize_and_stdin() {
     // kill on a dead session is idempotent.
     session.kill().expect("kill on dead session is ok");
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn split_utf8_and_incomplete_eof_reach_the_real_pty_ring() {
+    let session = PtySession::spawn(SessionId("test-utf8".into()), SpawnConfig {
+        cwd: std::env::temp_dir(),
+        // Delay between the two halves so they arrive in separate reads.
+        cmd: Some(r"printf '\344'; sleep 0.1; printf '\270\255\360\237'; sleep 0.1; printf '\230\200\342\202'".into()),
+        shell: "/bin/sh".into(), cols: 80, rows: 24,
+    }).expect("spawn ok");
+    tokio::time::timeout(Duration::from_secs(5), session.wait_for_exit())
+        .await
+        .expect("child exits");
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            let text: String = session
+                .ring()
+                .snapshot()
+                .into_iter()
+                .map(|f| f.text)
+                .collect();
+            if text == "中😀\u{fffd}" {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .expect("UTF-8 survives reads, incomplete EOF gets one replacement");
+}

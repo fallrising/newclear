@@ -1,0 +1,58 @@
+[
+  {
+    "argv": [
+      "make",
+      "install"
+    ],
+    "cwd": "systems/wotar/secure-mqtt-e2ee",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:40.531835+00:00",
+    "end": "2026-10-21T15:40:41.848685+00:00",
+    "duration_seconds": 1.317,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "wotar-01.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "make",
+      "doctor"
+    ],
+    "cwd": "systems/wotar/secure-mqtt-e2ee",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:41.848911+00:00",
+    "end": "2026-10-21T15:40:42.119838+00:00",
+    "duration_seconds": 0.271,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "wotar-02.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "make",
+      "lint",
+      "typecheck",
+      "test"
+    ],
+    "cwd": "systems/wotar/secure-mqtt-e2ee",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:42.120716+00:00",
+    "end": "2026-10-21T15:40:42.150851+00:00",
+    "duration_seconds": 0.03,
+    "exit_code": 2,
+    "timed_out": false,
+    "log": "wotar-03.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  }
+]

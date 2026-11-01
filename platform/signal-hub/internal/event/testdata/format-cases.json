@@ -1,0 +1,19 @@
+[
+  {"format":"uri","value":"http://exa%6dple.invalid/x","valid":true},
+  {"format":"uri","value":"http://[v1.ab]/x","valid":true},
+  {"format":"uri","value":"http://[2001:db8::1]/x","valid":true},
+  {"format":"uri","value":"urn:example:release","valid":true},
+  {"format":"uri","value":"http://[v1.]/x","valid":false},
+  {"format":"uri","value":"http://[invalid]/x","valid":false},
+  {"format":"uri","value":"http://exa%6mple.invalid/x","valid":false},
+  {"format":"uri","value":"http://example.invalid/a[b]","valid":false},
+  {"format":"uri","value":"relative/path","valid":false},
+  {"format":"uri-reference","value":"relative/path","valid":true},
+  {"format":"uri-reference","value":"//exa%6dple.invalid/x","valid":true},
+  {"format":"uri-reference","value":"//[v1.ab]/x","valid":true},
+  {"format":"date-time","value":"0000-01-01T00:00:00Z","valid":false},
+  {"format":"date-time","value":"0001-01-01T00:00:00+01:00","valid":true},
+  {"format":"date-time","value":"9999-12-31T23:59:59-01:00","valid":true},
+  {"format":"date-time","value":"2026-10-03T10:00:00.1234567890123456789Z","valid":true},
+  {"format":"date-time","value":"2026-10-03t10:00:00z","valid":true}
+]

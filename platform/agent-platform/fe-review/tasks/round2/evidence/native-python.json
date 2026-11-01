@@ -1,0 +1,38 @@
+{
+  "snapshot": "2026-10-24T08:56:51.732458+00:00",
+  "source": "427dec01e78e66d4c06f4032bddfb3efaba44954",
+  "productPythonUnchanged": true,
+  "versions": {
+    "python": "3.12.3",
+    "psycopg": "3.3.6",
+    "cc": "13.3.0"
+  },
+  "initial": {
+    "command": "make platform-check",
+    "isolationRunId": "20261024T084904Z-27b90204",
+    "lint": "passed",
+    "formatFiles": 165,
+    "unitTests": 45,
+    "unitSeconds": 6.821,
+    "platformTestsRun": 641,
+    "platformSeconds": 223.931,
+    "platformOutcome": "FAILED (errors=4)",
+    "errors": [
+      "BackupTests setUpClass: Docker CLI absent",
+      "LiveNodeAttestationTests setUpClass: C compiler lacks development headers",
+      "GuestIsolationTests setUpClass: C compiler lacks development headers",
+      "SingleNodeDeploymentTests native restore: Docker CLI absent"
+    ],
+    "logSha256": "57d62e9953f897dc3013c9623ef10fa73c1ef94ea35399a1054d66da0783b2bd"
+  },
+  "focused": {
+    "command": "PYTHONPATH=tests_platform .venv/bin/python scripts/test-postgres.py .venv/bin/python -m unittest -v test_backup.BackupTests test_egress.LiveNodeAttestationTests test_guest_isolation.GuestIsolationTests test_single_node_deployment.SingleNodeDeploymentTests.test_real_process_restart_and_native_restore",
+    "tests": 35,
+    "seconds": 24.891,
+    "status": "passed",
+    "ownedPostgresRemoved": true,
+    "logSha256": "0e1fbc3e5ccc903f216b722586d0455971a9f59976f820ba30629e2944613dbc"
+  },
+  "fullCurrentHeadCI": "pending",
+  "nativeIsolationBoundary": "Existing host-native test-postgres.py and backup NativeClient Docker harness; separate from browser namespace, no Docker socket given to browser."
+}

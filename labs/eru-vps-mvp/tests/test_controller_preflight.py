@@ -83,6 +83,15 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(len(result['locks']['artifacts']), 6)
         self.assertNotIn(self.secret, json.dumps(result))
 
+    def test_optional_reviewed_core_key_preserves_legacy_worker_requirement(self):
+        self.write('private/verified-host-public-keys.json',
+                   {alias: [self.secret] for alias in cp.ALIASES})
+        self.assertTrue(self.assess()['ready_for_review'])
+        for aliases in (cp.ALIASES[:-1], [*cp.ALIASES, 'foreign-host']):
+            self.write('private/verified-host-public-keys.json',
+                       {alias: [self.secret] for alias in aliases})
+            self.assertFalse(self.assess()['ready_for_review'])
+
     def test_missing_artifact_or_private_state_fails_closed(self):
         (self.private / 'builds/core-lock-context-go1.27.1/eru-core').unlink()
         (self.private / 'operations/cluster.json').unlink()

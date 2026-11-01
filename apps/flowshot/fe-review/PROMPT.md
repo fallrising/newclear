@@ -1,61 +1,31 @@
-# FE Review Prompt — flowshot
+# Flowshot R2 review runner
 
-你是負責 **flowshot** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
+Read [DESIGN](DESIGN.md), [SUCCESS](../SUCCESS.md), [REVIEW](REVIEW.md), [scenario map](tasks/round2/SCENARIOS.md) and [report](tasks/round2/report.md). Scope is synthetic Web foundation loading/ready/error only. D1 preload and D2 Web-only are owner-approved. Mainline/native/Mac gates are unchanged.
 
-先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
+## Actual interface
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+Root prepares locked npm dependencies, Node24.18, external Playwright/axe and Chromium, then launches the following from the repo root **inside a fresh isolated network namespace**:
 
-## 專案概況
+```sh
+node apps/flowshot/fe-review/run-review.mjs --run flowshot-001
+```
 
-- **元件路徑：** `apps/flowshot/`
-- **一句話：** Local-first 唯讀 Markdown annotation 桌面 App：Tauri 2（Rust）包 React 19 + Vite 8 前端。
-- **技術棧：** Tauri 2（Rust）、React 19、Vite 8
-- **UI 入口：** `apps/flowshot/`（Vite dev port 1420；原生視窗由 `npm run tauri dev` 開啟）
+`flowshot-001` is already used and immutable; choose a new unused run ID for any independently justified future run. Root passes REVIEW_MODULES (external node_modules directory) and REVIEW_BROWSER (Chromium executable). It provides canonical source/modules/browser mounts, component runs writable, nonroot UID ownership, no host network/ports/socket/profile/secrets. No inherited TAURI_DEV_HOST. Current observed root execution used Node24.18.0 / Playwright1.63.0 / Chromium153.0.8010.12. Only root may launch services for this task.
 
-## 啟動線索（未驗證）
+The driver uses original Vite config with review-only runner config loading, owned cache in runs/<id>/.state, 127.0.0.1:1420/strictPort, a fresh context for each scene and pre-navigation promise injection. It first tests external HTTP/WS refusal; normal scenes have independent strict browser-health checks. The runner creates actual capture.json/REPORT and ignored screenshots. Shared capture.mjs is unchanged and has no preload hook; do not claim `capture --start` creates this fixture.
 
-- headless 只擷取 Web 層：`npm ci` 後 `npm run dev -- --host 127.0.0.1`。
-- 瀏覽器中沒有 Tauri IPC；若 App 因 `@tauri-apps/api` 失敗，以 Playwright `addInitScript` 注入最小的 IPC mock（放在 `fe-review/`），並在報告註明哪些畫面依賴原生能力。
-- 原生視窗截圖需桌面環境或 xvfb，屬選用；`scripts/macos-window-check.swift` 只適用 macOS。
+Focused tests from repo root:
 
-## 主要流程
+```sh
+node --test apps/flowshot/fe-review/preload.node.mjs apps/flowshot/fe-review/runtime-guards.node.mjs
+```
 
-至少走通以下流程各一次，並對每一步截圖：
+Existing frontend gates remain `npm run lint`, `npm test`, `npm run build` from apps/flowshot; root owns these and all required native/CI gates. Review node tests originally used *.test.mjs and collided with Vitest discovery; the failed attempt remains recorded, and names now use *.node.mjs. No application test/config was excluded.
 
-- 開啟 Markdown 文件 → 閱讀 → 新增 annotation → 檢視 annotation 列表
+## Evidence and limits
 
-## 專案特有檢查重點
+Actual [flowshot-001](runs/flowshot-001/capture.json) covers 3 states × 3 viewports × 2 preferences and one mobile long revision. Fixed colors are observed under both preferences, not a new dark theme. Long revision is visibly ellipsized but exact full synthetic text remains in the DOM. Cleanup records browser/server close and listener absence; root outer receipt independently records container removal. Signal/failed-close guards have focused tests, not an invented actual TERM control run.
 
-在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
+All 19 axe scans have color-contrast incomplete; zero violations is not proof that contrast passed. No native IPC, real workspace/DB, reader/annotation, Mac timing or full Round3 completion is claimed. Keep both initial fixture RED and original native discovery failure. Runtime manifest remains immutable; test filename references changed afterward and are explicitly reconstructed in the [audit](tasks/round2/evidence/flowshot-artifact-audit.json).
 
-- Markdown 排版（標題、表格、程式碼區塊、長行）。
-- annotation 標記與側欄的對應、對比、focus。
-- 視窗縮小時的版面。
-
-## 可重用的既有資產
-
-- `src/App.test.tsx` 等既有測試。
-
-## 待補的頁面
-
-無路由；以 IPC mock 提供文件內容。
-
-## 執行步驟
-
-先讀 [REVIEW.md](REVIEW.md) 確認目前輪次，只做該輪允許的事（PROTOCOL.md「三輪節奏」）：
-
-1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
-2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 從 repository root 執行
-   ```bash
-   node docs/fe-review/capture.mjs apps/flowshot/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs apps/flowshot/fe-review/targets.json
-   ```
-   需要互動才能看到的狀態，另寫 Playwright 腳本放在本目錄；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
-
-## 產出
-
-- 第 1 輪：`PROMPT.md`、`targets.json`、`REVIEW.md` 的修訂（每次一個 PR）
-- 第 2 輪：前端修正與已決定事項的實作，每個問題一個 commit，附驗證指令
-- 第 3 輪：`runs/<ts>/capture.json`、`runs/<ts>/REPORT.md`（提交）；`runs/<ts>/screenshots/`（不提交）
+Post-runtime source note: after the filename rename, the paired runtime gained a `unit === 'loom'`-only Vite5 hash-pinned config loader. Flowshot options/behavior are unchanged. [Exact delta](tasks/round2/evidence/post-runtime-loom-loader-delta.json) and the artifact audit reconstruct the original runtime hash; green Flowshot browser evidence was not rerun.

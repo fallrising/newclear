@@ -1,0 +1,12 @@
+# User unit TEMPLATE ONLY. Not installed/enabled by preparation commands.
+[Unit]
+Description=Run Kith reading export after each bounded pass
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+AccuracySec=30s
+Unit=kith-reading-export.service
+
+[Install]
+WantedBy=timers.target

@@ -1,8 +1,8 @@
 import type { Surface } from "@cms/api";
 
 /** Failure scenarios selectable with `?mock=<name>` (01 §11.3). */
-export type Scenario = "none" | "slow" | "error500" | "empty" | "conflict";
-export const SCENARIOS: readonly Scenario[] = ["none", "slow", "error500", "empty", "conflict"];
+export type Scenario = "none" | "slow" | "error500" | "empty" | "conflict" | "memberPetsEmpty" | "memberAppointmentsEmpty" | "rateLimited";
+export const SCENARIOS: readonly Scenario[] = ["none", "slow", "error500", "empty", "conflict", "memberPetsEmpty", "memberAppointmentsEmpty", "rateLimited"];
 
 export const MOCK_CSRF_TOKEN = "mock-csrf-token";
 /** Any non-empty password logs in, except this one, which returns 401 INVALID_CREDENTIALS. */

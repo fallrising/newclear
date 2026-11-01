@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-03",
+  "scope": "authenticated persisted diff transport and inert browser rendering",
+  "mode": "local fake runtime, real PostgreSQL/API/Chromium, no provider or VM",
+  "platform_python": "3.12",
+  "browser_api_python": "3.13.5",
+  "node": "24.18.0",
+  "checks": {
+    "platform_unit": 45,
+    "platform_sql_http": 260,
+    "frontend": 37,
+    "browser": 2,
+    "targeted_backend": 7,
+    "skipped": 0
+  },
+  "red_green": {
+    "backend": "absent endpoint: 5 tests,39 failing subtests; implemented endpoint:7passed",
+    "frontend": "absent button:2failed,35passed; implemented UI:37passed"
+  },
+  "log_sha256": {
+    "backend_red": "f57fd475d07d587f6c9a65cc36ef569d0cf7bca1e95051e654d5e590730155c4",
+    "backend_targeted": "e7ba8d6758889250a04a78447704b1c67b1f15800146d54a48af6f0f96183685",
+    "platform_check": "61069540d6b2c9bc41373937c0f93aee9f9359eae623c34491ba73a97083976d",
+    "frontend_red": "e951369e83c4683b49ab31d05058d4f15645fedc1155b83d8cb4fb014bd29f67",
+    "web_check": "8653fa6a4bec94ba561eff04908dc6a1b862491178ed861c0f221d308cdbda31",
+    "browser_test": "534302fab7a931f8cb441f7c2bd9ce028be318630cfcd40d70c26e976d74eae2"
+  },
+  "limitations": [
+    "This is a bounded M3 slice, not full M3 acceptance.",
+    "General artifacts, Git export and real VM/provider acceptance are separate.",
+    "Billing remains deferred."
+  ],
+  "environment_recovery": [
+    "Initial Docker/network sandbox denials were rerun with approved access.",
+    "Browser fixture import path corrected using absolute source path.",
+    "Chromium shared libraries extracted to a temporary test directory; no host package installation.",
+    "Generated browser output moved aside before existing Prettier check."
+  ],
+  "base_commit": "10d572936642b14d4df81865a4e066500cffbbfb",
+  "review": "Independent source and final evidence review completed with no required findings (T-004)."
+}

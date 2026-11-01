@@ -2,6 +2,8 @@
 
 日期：2026-09-25。此紀錄只涵蓋本機程式及 fake operator 測試；沒有下載新 upstream source、產生新 core artifact、操作 VPS 或執行 E2E。
 
+2026-10-03 更新：下列 atomic replace 是初次實作的歷史描述；本輪改為原子不可覆寫發布，並補上重複 build 檔案身分拒絕、獨立 build 的版本相容性與 step 歧義核對。現況與驗證入口見 [本機收尾矩陣](LOCAL-CLOSEOUT-2026-10-03.md)。
+
 ## 本輪交付
 
 - validate_core_patch.py 可選擇 patches/ 內的 patch、明確 patch revision，以及 Go 版本與官方 archive SHA。Go 1.27.1 仍是預設值；換工具鏈必須提供精確 checksum。每個舊版相容聲明可指定一個受限 Go test package，並在兩次獨立 build 都通過後才可發布。

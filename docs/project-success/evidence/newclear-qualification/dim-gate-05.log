@@ -1,0 +1,2 @@
+$ node scripts/check-docs.mjs
+Documentation gate passed: 42 Markdown files, 249 repository links, 0 journal pointers.

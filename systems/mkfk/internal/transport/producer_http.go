@@ -10,6 +10,7 @@ import (
 	"mime"
 	"net/http"
 
+	"github.com/fallrising/newclear/systems/mkfk/internal/partition"
 	"github.com/fallrising/newclear/systems/mkfk/internal/producer"
 	"github.com/fallrising/newclear/systems/mkfk/internal/protocol"
 	"github.com/fallrising/newclear/systems/mkfk/internal/raft"
@@ -185,10 +186,27 @@ func writeMappedError(response http.ResponseWriter, requestID string, err error)
 		return
 	}
 	switch {
+	case errors.Is(err, partition.ErrStorage), errors.Is(err, partition.ErrFailed):
+		outcome := protocol.OutcomeNotApplied
+		if errors.Is(err, partition.ErrStorage) {
+			outcome = protocol.OutcomeUnknown
+		}
+		writeError(response, http.StatusServiceUnavailable, requestID, protocol.APIError{
+			Code: "STORAGE_ERROR", Message: "The partition stopped serving after a storage failure.", Retryable: true, Outcome: outcome,
+		})
+	case errors.Is(err, partition.ErrBusy):
+		writeError(response, http.StatusTooManyRequests, requestID, protocol.APIError{
+			Code: "RESOURCE_EXHAUSTED", Message: "The partition did not accept the request in time.", Retryable: true,
+			Outcome: protocol.OutcomeNotApplied,
+		})
+	case errors.Is(err, ErrUnknownPartition):
+		writeError(response, http.StatusNotFound, requestID, protocol.APIError{
+			Code: "UNKNOWN_TOPIC_OR_PARTITION", Message: "The topic partition does not exist.", Outcome: protocol.OutcomeNotApplied,
+		})
 	case errors.Is(err, raft.ErrNotLeader):
 		writeError(response, http.StatusConflict, requestID, protocol.APIError{
 			Code: "NOT_LEADER", Message: "This broker is not the partition leader.", Retryable: true,
-			Outcome: protocol.OutcomeNotApplied,
+			Outcome: protocol.OutcomeNotApplied, Details: hintDetails(err),
 		})
 	case errors.Is(err, raft.ErrLeaderNotReady):
 		writeError(response, http.StatusServiceUnavailable, requestID, protocol.APIError{

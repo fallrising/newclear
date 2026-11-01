@@ -54,3 +54,22 @@ impl EventSink for TauriEventSink {
         }
     }
 }
+
+/// Refresh hint only; callers retrieve the authoritative runtime snapshot.
+pub struct TauriHistorySink {
+    app: AppHandle,
+}
+
+impl TauriHistorySink {
+    pub fn new(app: AppHandle) -> Self {
+        Self { app }
+    }
+}
+
+impl crate::session_store::HistorySink for TauriHistorySink {
+    fn changed(&self) {
+        if let Err(error) = self.app.emit("session:changed", ()) {
+            tracing::warn!(%error, "failed to emit session:changed");
+        }
+    }
+}

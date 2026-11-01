@@ -15,7 +15,7 @@
     "test:integration": "node --test --test-concurrency=1 tests/integration/*.test.mjs",
     "test:e2e": "playwright test",
     "build:api": "cd api && worker-build --release",
-    "build:web": "wrangler deploy --config web/wrangler.jsonc --dry-run --outdir ../dist/web",
+    "build:web": "wrangler deploy --config web/wrangler.jsonc --dry-run --outdir \"$PWD/dist/web\"",
     "build": "npm run build:api && npm run build:web",
     "dev": "wrangler dev --config web/wrangler.jsonc --config api/wrangler.toml",
     "test:local": "node scripts/local-test.mjs",

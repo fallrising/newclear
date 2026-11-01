@@ -4,7 +4,7 @@ The [SDD](SDD.md) is the source of truth. This page is the operator checklist.
 
 ## Cloudflare (once)
 
-1. Zone in the account; API token with Tunnel Write, DNS Write, Access Apps/Policies Write, Cloudflare One Networks Write, Access IdP Write.
+1. Zone in the account; API token with Tunnel Write, DNS Write, Access Apps/Policies Write, Access IdP Write.
 2. Enable Zero Trust. One-time PIN IdP can be created by `fleetd` in the background (`EnsureOTPProvider`).
 3. Create a **manual bootstrap tunnel** named `fleet-control`. Record UUID as `FLEET_BOOTSTRAP_TUNNEL_ID`.
 4. PUT ingress for `FLEET_UI_HOSTNAME` and `FLEET_API_HOSTNAME` → `http://127.0.0.1:18765`. CNAME both.
@@ -45,26 +45,30 @@ Two `cloudflared` processes on the control-plane VPS (if it also hosts workloads
 
 Copy `contrib/github-actions/deploy.yml` into the workload repo (hello-healthz already has it). Set `FLEET_URL` and `FLEET_CI_TOKEN`. Push `main`. Catalog stores the SHA tag, not `:latest`.
 
-## WARP / private-mode checklist
+## Access web login (current operating path)
 
-Private hostnames are **not** RFC1918. Cloudflare assigns initial resolved IPs in CGNAT:
+Set `CF_ACCESS_ALLOWED_EMAILS` to the explicit allowed email addresses. Empty configuration fails reconciliation; it never creates an allow-everyone policy. Enable the One-time PIN identity provider in Zero Trust. Use `expose.mode: access`; all shipped workload examples use this mode. `public` remains supported but is currently unused.
 
-- IPv4: `100.80.0.0/16`
-- IPv6: `2606:4700:0cf1:4000::/64`
+Fleet creates/verifies the Access application and its managed email policy before publishing the workload's ingress rule and DNS. Existing managed policies are updated to the configured allowlist; unmanaged policies require operator review. The normal user flow is browser → HTTPS service URL → email address → one-time PIN from email → application.
 
-Default WARP Split Tunnels **Exclude** lists `100.64.0.0/10`, which covers `100.80.0.0/16`. Official steps: [Connect a private hostname](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/private-net/cloudflared/connect-private-hostname/).
+Verify in a fresh browser session that unauthenticated requests cannot reach the origin. Complete login using an allowed email and verify the service. Also check a non-allowlisted identity is denied. Keep sanitized timestamps, hostname aliases, expected denial and authorized success in the acceptance record.
 
-1. Enroll the operator laptop (and phone) in **Cloudflare WARP** (Gateway with WARP) for the same Zero Trust org.
-2. **Split Tunnels — Exclude mode (typical default):**
-   1. **Remove** `100.64.0.0/10` from the exclude list so `100.80.0.0/16` rides WARP.
-   2. Optionally add back unused CGNAT slices so other CGNAT stays local, e.g. exclude `100.64.0.0/12`, `100.81.0.0/16`, `100.82.0.0/15`, `100.84.0.0/14`, `100.88.0.0/13`, `100.112.0.0/12`. Do **not** re-add `100.80.0.0/16`.
-   3. **Include mode** (if that is the profile): add `100.80.0.0/16` and `2606:4700:0cf1:4000::/64`.
-3. **Local Domain Fallback:** **delete** `fleet.internal` (and any parent that would catch `*.fleet.internal`) from the LDF list so DNS hits Gateway. Adding a fallback for `fleet.internal` is the wrong knob.
-4. Hostname routes are created by `fleetd` (`POST .../zerotrust/routes/hostname`). Confirm `warp-routing.enabled=true` on the **node** tunnel (`ingress_status=ok`).
-5. From the WARP device: `curl -sS http://files.fleet.internal/healthz` after Example C is running.
+The Fleet UI hostname has Access; the machine API hostname continues using Fleet bearer tokens because agents and CI cannot complete an interactive browser login. Existing Fleet operator-token authentication for the control panel remains in place.
 
-Do **not** allocate `10.42.0.0/16` / teamnet CIDR routes in Phase 1. SSH port-forward to `127.0.0.1:<hostPort>` remains a manual escape hatch.
+## Database upgrade
+
+Back up the SQLite database before upgrading. Migration `002_web_exposure.sql` removes the retired route-ID column and enforces the two supported modes on inserts and updates. Historical migration `001_init.sql` stays immutable. If an existing row uses an unsupported mode, startup fails and the migration transaction rolls back; no row is deleted or silently made public. Use the previous version to explicitly redeploy the service as `access` with an allowed zone hostname, or uninstall it, then retry the upgrade. Review/remove any previously provisioned external resources separately; this source change performs no Cloudflare cleanup on a live account.
 
 ## Hygiene footgun
 
 `vps-hygiene` `clean-docker.sh --aggressive` runs `docker system prune -af --volumes` and will delete named volumes of **stopped** `fleet-*` stacks. Prefer `compose stop` only when you will not prune.
+
+## Isolated lifecycle and recovery acceptance
+
+The repeatable non-Cloudflare acceptance entrypoints are `scripts/verify.py` and `scripts/acceptance.py` (Python standard library tooling). Run both through the common agent workspace launcher. The verifier executes the Makefile-equivalent native commands and writes three binaries under `AGENT_ARTIFACTS_DIR/bin`, plus source hashes and logs under `AGENT_EVIDENCE_DIR`.
+
+On an authorized test host, first inspect current processes, services, containers, storage and active tasks. The acceptance runner requires real Docker/Compose, the `registry:2` image already present, and free loopback ports 15001, 18765, 19600 and 20000. It refuses reused state. Transfer the exact built binaries and runner, then invoke `scripts/acceptance.py --bin-dir <artifact-bin-dir> --source-id <source-manifest-id>` through the launcher. These arguments are operator inputs, not a claim that a particular host has been approved.
+
+It creates a dedicated local registry, one synthetic node and one hello-healthz workload; checks literal env/argv, lifecycle, stable generations, secret merge, fresh restart reporting, outage reconciliation and uninstall after generated-file loss. It then stops its own processes, removes only its own containers/network, and verifies the original container inventory. State databases, logs and test image artifacts remain available for inspection; there is no prune or automatic data cleanup. A daemon/host reboot is not part of this runner.
+
+Cloudflare credentials are deliberately absent in this local-origin test; the synthetic workload uses Access mode but no edge authentication is claimed. To finish AC-03, supply account/zone and API-token configuration, base/allowed domains, protected bootstrap tunnel/hostnames and a nonempty Access email allowlist. Verify unauthenticated denial and authorized email OTP success in a real browser. Local origin success cannot satisfy these checks. Prior lifecycle results: [2026-10-23 acceptance](evidence/2026-10-23-acceptance.md); current scope and results: [SUCCESS](../SUCCESS.md).

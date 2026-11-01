@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/elliothux/open-compute",
+  "release": "v0.2.4",
+  "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d",
+  "published_at": "2026-10-05T23:09:38Z",
+  "artifact": {
+    "name": "ocd-v0.2.4-linux-x64",
+    "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64",
+    "os": "Linux",
+    "architecture": "x86_64",
+    "bytes": 195537392,
+    "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f"
+  },
+  "embedded_workerd": {
+    "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+    "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+  }
+}

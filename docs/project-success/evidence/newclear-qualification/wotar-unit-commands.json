@@ -1,0 +1,20 @@
+[
+  {
+    "argv": [
+      "make",
+      "test"
+    ],
+    "cwd": "systems/wotar/secure-mqtt-e2ee",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:42:30.414079+00:00",
+    "end": "2026-10-21T15:42:38.448685+00:00",
+    "duration_seconds": 8.035,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "wotar-unit-01.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  }
+]

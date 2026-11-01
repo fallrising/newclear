@@ -2,6 +2,7 @@ name: ojbquay
 
 x-runtime-environment: &runtime-environment
   OJBQUAY_KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+  OJBQUAY_CONSUME_RUNTIME_ROSTER: ${OJBQUAY_CONSUME_RUNTIME_ROSTER:-compose-consume=http://gateway-consume:9202}
   JAVA_TOOL_OPTIONS: ${OJBQUAY_JAVA_TOOL_OPTIONS:-}
 
 x-database-environment: &database-environment

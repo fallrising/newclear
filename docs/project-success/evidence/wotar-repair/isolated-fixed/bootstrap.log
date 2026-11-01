@@ -1,0 +1,8 @@
+{
+  "keyring": ".secure_mqtt/keyring.json",
+  "public_keys": "config/public-keys.local.json",
+  "topic_groups": [
+    "default",
+    "vector1"
+  ]
+}

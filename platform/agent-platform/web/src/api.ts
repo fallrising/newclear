@@ -35,6 +35,8 @@ export type Run = {
   result: {
     diff?: string;
     diff_sha256?: string;
+    diff_bytes?: number;
+    base_sha?: string;
     execution_mode?: string;
     summary: string;
     verification: {
@@ -44,6 +46,44 @@ export type Run = {
       checks?: Array<{ id: string; status: string; exit_code: number | null }>;
     };
   } | null;
+};
+export type Artifact = {
+  pruned_at?: string | null;
+  id: string;
+  run_id: string;
+  kind: string;
+  sha256: string;
+  size: number;
+  mime: string;
+  created_at: string;
+};
+export type ExportTarget = { repo: string; base_branch: string };
+export type ExportPreview = {
+  run_id: string;
+  artifact_id: string;
+  artifact_sha256: string;
+  target_repo: string;
+  base_branch: string;
+  base_sha: string;
+  branch: string;
+  approval_digest: string;
+  verification_status: string;
+  diff: string;
+  files: string[];
+};
+export type ExportOperation = {
+  id: string;
+  run_id: string;
+  artifact_id: string;
+  artifact_sha256: string;
+  target_repo: string;
+  base_branch: string;
+  base_sha: string;
+  branch: string;
+  state: 'queued' | 'exporting' | 'succeeded' | 'failed' | 'uncertain';
+  reason: string | null;
+  pr_url: string | null;
+  created_at: string;
 };
 export type Usage = {
   configured: boolean;

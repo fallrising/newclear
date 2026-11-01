@@ -1,6 +1,6 @@
 # Signal Hub — Software Design Document
 
-版本：0.1 draft · 日期：2026-09-28 · 狀態：設計提案，尚未實作。
+版本：0.2 個人使用範圍 · 日期：2026-10-17 · runtime 狀態見 docs/STATUS.md。
 
 ## 1. 結論與理由
 
@@ -13,7 +13,7 @@
 
 不擴充 edge-ops、dim-gate、hai-taskboard 或 PIF：它們的核心物件、生命週期與權限模型都與「跨來源、可查詢、可訂閱的事件」不同。判斷過程見 knowledge-base `44.05` 筆記。
 
-**第一條可驗收閉環：** 一個生產者用 token 送出事件 → 事件入庫並去重 → 看板時間線可按時段查到 → 一條指標規則畫出圖表 → 一條 ntfy 訂閱送到手機 → 生產者停止上報時看板標示為沉默。
+**第一條個人使用閉環：** 一個有實際用途的生產者用 token 送出事件 → 事件入庫並去重 → 看板時間線可查到 → 重啟後資料仍在，且備份能隔離還原。指標與訂閱按需要啟用；手機暫緩。週期來源可設定沉默檢查，非週期來源不必另造 heartbeat。具體驗收以 [06](docs/sdd/06-security-operations-acceptance.md) 為準。
 
 ## 2. 使用者與規模
 
@@ -34,12 +34,12 @@
 | 階段 | 價值 | 能力 | 明確排除 |
 | --- | --- | --- | --- |
 | M0 | 契約先行 | 事件 JSON Schema、規則與訂閱設定 schema、OpenAPI、正反 fixtures | 任何 runtime |
-| M1 | 事件可靠落地 | ingest API、來源 token、去重、事件庫、查詢 API | UI、指標、投遞 |
+| M1 | 事件可靠落地 | ingest API、來源 token、去重、事件庫、查詢 API、本機 Alertmanager mapping | UI、指標、投遞 |
 | M2 | 看得見 | 時間線、事件詳情、關聯鏈、來源新鮮度 | 圖表 |
 | M3 | 看得懂趨勢 | 指標規則、rollup、回填、門檻事件、圖表 | 百分位數聚合 |
 | M4 | 送得出去 | 訂閱、webhook、ntfy、即時與摘要、重試、DLQ、重放 | Email、Telegram、Slack |
 | M5 | 放得久、救得回 | 封存、SQLite 備份、還原演練 | 異地備份的自動化（沿用既有備份工具） |
-| M6 | 真實資料 | 發佈、巡檢、Alertmanager 三個生產者 adapter；部署（需另行授權） | 新聞、業務日誌衍生事件（放下一階段） |
+| M6 | 個人使用接入 | 先接一個有用的真實來源；單一實例的持久資料與備份還原；部署需另行授權 | 不以三來源齊備、固定七天、手機或獨立停機通知作為首次使用門檻；不新增其他元件 |
 
 決策閉環（決策系統訂閱巡檢失敗 → 策略推薦 → 人選擇 → 執行 → 結果事件）是 M4 之後的下一個專案。中樞一側只需要 M4 的 webhook 與 M2 的關聯鏈檢視，不為它另加能力。
 
@@ -77,11 +77,11 @@ flowchart LR
 | 後端 | Go，單一 binary | 與 onefleet、goku、prism 同語言；週期工作與 HTTP 服務放同一個 process 最簡單 |
 | 儲存 | SQLite（WAL 模式） | 量級小；單檔易備份；不需另外維運資料庫 |
 | 前端 | React + TypeScript + Vite，建置後以 `go:embed` 內嵌 | 與 dim-gate、edge-ops 一致；部署只有一個檔案 |
-| 圖表 | 候選 Apache ECharts | 44.02 已評估；M3 前確認授權與 bundle 大小 |
-| 設定 | YAML 檔，放在 private 設定 repo | 規則與訂閱以 git 管版本；AI agent 可以用 PR 修改 |
-| 部署 | OneFleet 管理的一個 workload（需另行授權） | 不另建部署機制 |
+| 圖表 | 既有 React + SVG | M3 不新增 runtime dependency；圖表與精確值表共同提供趨勢與可讀數值 |
+| 設定 | YAML 檔，M1 先支援 strict JSON 子集；設定由 git 管理 | 規則與訂閱以 git 管版本；AI agent 可以用 PR 修改 |
+| 部署 | 單一非 root Docker 實例，或具備必要 admission 的 OneFleet workload（需另行授權） | 沿用現有執行環境，不另建控制器；個人使用不綁定 OneFleet generic adapter 改造 |
 
-精確依賴版本在 M0 以可重現的 build 鎖定，不在沒有安裝測試時寫入 lockfile。
+M0 鎖定實際安裝並驗證過的契約檢查工具版本；Go／前端 runtime 的依賴與 build 在對應實作階段再鎖定。
 
 ## 6. 詳細設計
 
@@ -98,7 +98,7 @@ flowchart LR
 
 **ADR-01：採用 CloudEvents 1.0 作事件信封。** 必填 `id`、`source`、`specversion`、`type`，且 `source + id` 唯一，正好是去重鍵。不自訂信封。[S01]
 
-**ADR-02：單機 Go + SQLite，而不是 Cloudflare Workers + D1。** edge-ops 選 Cloudflare，是因為它的控制面必須在被監控主機之外。本專案的週期工作（規則評估、封存、投遞重試）與本機檔案（封存 JSONL）在單一 process 裡最簡單。代價是宿主故障時中樞也停，所以必須有中樞以外的存活檢查，見 06。若日後中樞本身的可用性比簡單更重要，再評估搬遷；事件格式與 API 不因此改變。
+**ADR-02：單機 Go + SQLite，而不是 Cloudflare Workers + D1。** edge-ops 選 Cloudflare，是因為它的控制面必須在被監控主機之外。本專案的週期工作（規則評估、封存、投遞重試）與本機檔案（封存 JSONL）在單一 process 裡最簡單。代價是宿主故障時中樞也停。只有要求「宿主停機仍主動通知」時，才必須有中樞與宿主以外的存活檢查，見 06；目前通知暫緩，不宣稱停機偵測或到達時間保證。若日後中樞本身的可用性比簡單更重要，再評估搬遷；事件格式與 API 不因此改變。
 
 **ADR-03：指標由受限的規則格式定義，不開放 SQL。** 受限格式可以驗證、可以版本化、可以安全地由 AI agent 修改，也能翻譯成 LogsQL `stats`，保留日後投影到 VictoriaLogs／vmalert／Grafana 的路徑。[S03][S04]
 
@@ -117,3 +117,7 @@ flowchart LR
 - 自動執行任何動作
 - 取代 Alertmanager、Grafana 或日誌平台
 - 高可用、多副本
+
+M5 的不覆寫檔案、永久去重身分、復原與投影保護細節見 [M5 實作契約](docs/m5-design.md)；此連結不代替 STATUS 的驗證結果。
+
+M6 的個人使用驗收見 [06](docs/sdd/06-security-operations-acceptance.md)；來源相容性與準備工具見 [M6 設計](docs/m6-design.md)。原三來源七天／手機／獨立主機／前日快照條件保留為選用的擴展運維驗收，不再阻擋首次個人使用，也不因縮減範圍而視為已通過。

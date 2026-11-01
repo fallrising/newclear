@@ -1,0 +1,254 @@
+{
+  "recorded_at": "2026-10-05T17:17:55.008049+00:00",
+  "scope": "Single-node operator runbook and isolated loopback mock control-plane rehearsal; no production runtime/dependency/schema changes",
+  "source_base": "bf6909e4cd318e03e5957eab6b6c0f47acc6f81c",
+  "integration_base": "4cd12c2432281470a7bc2c98c119786cc874c3d1",
+  "base_update": "Only unrelated component changes; agent-platform and applicable instructions identical",
+  "source_sha256": {
+    "Makefile": "af241ff1304537bcfa1fdbf7232ef68b3c81c7393aba4d198d8e12cc217960e7",
+    "README.md": "14dad80d83a487b51d5103024c46bd0a02a937983576bc4e7d8799f64798f608",
+    "SDD.md": "6729d2169dd24ee4978c6fb9cadd1546f15220d05bd19c60b66c19afdcf52a59",
+    "docs/SINGLE-NODE.md": "7ee2707e2b99a0a716731bae80c8717defe3a28e95d998bdae7fc4925fc5dc3c",
+    "docs/HANDOFF.md": "7155e30a012bf440a95fa1a19c83f2b3f8d959c02b0629cb8330099157bbc846",
+    "docs/NEXT-PROMPT.md": "20aa32bba816ce92badfca2fd1e9a9f535e7cbe9de50b8d6c59adf7da7e4b2ba",
+    "scripts/single-node-rehearsal.py": "75b43052f2e436b659cc3fc532f63661a7e88177ab53033fad27191bd003fbb1",
+    "tests_platform/test_single_node_deployment.py": "f7cb9ec13da3db6bddab2c96a0e5421aff39e0f11f911160be58b82ae7e26e1c"
+  },
+  "checks": [
+    {
+      "command": "make platform-check",
+      "status": "passed",
+      "python": "3.12.15",
+      "unit_tests": 45,
+      "platform_tests": 673,
+      "ruff_formatted_files": 164,
+      "skips": 0,
+      "log": "root-platform-check.log"
+    },
+    {
+      "command": "make web-check",
+      "status": "passed",
+      "node": "24.18.0",
+      "tests": 80,
+      "typecheck": true,
+      "prettier": true,
+      "production_build": true,
+      "log": "root-web-check.log"
+    },
+    {
+      "command": "make browser-test",
+      "status": "passed",
+      "tests": 11,
+      "scope": "Real Chromium/API/PostgreSQL and local fake GitHub",
+      "log": "root-browser-test.log"
+    },
+    {
+      "command": "python scripts/single-node-rehearsal.py --web-dist web/dist --directory <new private output directory>",
+      "status": "passed",
+      "python": "3.12.15",
+      "tests": 7,
+      "log": "root-actual-dist-rehearsal.log"
+    },
+    {
+      "command": "make deployment-rehearsal",
+      "status": "passed",
+      "python": "3.12.15",
+      "tests": 7,
+      "log": "root-deployment-rehearsal.log"
+    },
+    {
+      "command": "worker focused and hostile-environment wrapper",
+      "status": "passed",
+      "python": "3.13.5",
+      "tests_each": 7,
+      "logs": [
+        "worker-focused-03.log",
+        "worker-wrapper-rehearsal.log"
+      ]
+    },
+    {
+      "command": "manual Python/Bash syntax, private config/no-overwrite, Compose config with synthetic credentials",
+      "status": "passed",
+      "details": [
+        {
+          "name": "manual embedded Python syntax",
+          "blocks": 3,
+          "status": "passed"
+        },
+        {
+          "name": "fresh private config creation",
+          "file_mode": "0600",
+          "directory_mode": "0700",
+          "status": "passed"
+        },
+        {
+          "name": "existing private config not overwritten",
+          "status": "passed"
+        },
+        {
+          "name": "current documentation local links except pending evidence artifact",
+          "status": "passed"
+        },
+        {
+          "name": "all Bash blocks parse with bash -n",
+          "status": "passed"
+        },
+        {
+          "name": "docker compose config --quiet with synthetic password",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "command": "actual manual shell blocks with harmless tool substitutions",
+      "status": "passed",
+      "cases": [
+        "existing config",
+        "unsafe state",
+        "missing restore config",
+        "missing target URL with ambient old URL",
+        "valid fresh configuration"
+      ],
+      "logs": [
+        "review-manual-failure-guard-green.log",
+        "root-manual-positive-shell.log"
+      ]
+    },
+    {
+      "command": "Reviewer-specified focused rehearsal executed through primary tool channel",
+      "status": "passed",
+      "python": "3.12.15",
+      "tests": 7,
+      "skips": 0,
+      "log": "root-review-focused.log",
+      "reason": "Sub-agent Docker escalation transport stalled; reviewer independently inspects this executed command and output"
+    }
+  ],
+  "actual_build_rehearsal": {
+    "schema_version": "single-node-rehearsal-v1",
+    "status": "passed",
+    "checks": [
+      "cli_migrate",
+      "cli_bootstrap",
+      "tcp_static_and_api",
+      "session_csrf",
+      "independent_worker",
+      "mock_result_archive",
+      "api_worker_restart",
+      "no_duplicate_dispatch",
+      "offline_native_backup_restore",
+      "cli_backup_verify",
+      "source_unchanged",
+      "durable_history_identical",
+      "old_session_rejected",
+      "fresh_login",
+      "fresh_maintenance_identity",
+      "runtime_drained",
+      "owned_databases_removed",
+      "owned_client_removed",
+      "owned_processes_stopped"
+    ],
+    "web_mode": "built-dist",
+    "web_entry_sha256": "5c29970f18950bc32bd6c45d01846f91561a0f0e722a4e63c64ec7d9c99caef3",
+    "web_asset_count": 2,
+    "archive_sha256": "1ed6395e88c587a56545ce4cb2cb3e72a384b79e91dbd7f8ff158e704a8c0171",
+    "archive_bytes": 1046,
+    "dump_sha256": "95ee47e95361f6f76c22e056ecf78f0984441f62cd230146f85764f4c7ef5a92",
+    "counts": {
+      "runs": 1,
+      "provider_prompts": 0,
+      "conversations": 1,
+      "local_mock_messages": 1,
+      "job_attempts": 1,
+      "events": 9
+    },
+    "drained_nodes": 2,
+    "native_transport": "real pg_dump/pg_restore in owned PostgreSQL18 client container; test-only backup runner injection, not installed-host backup CLI acceptance",
+    "limits": [
+      "loopback HTTP only",
+      "fake backend",
+      "no external provider/export",
+      "no VM/KVM or deployed database",
+      "no TLS or service-manager acceptance"
+    ]
+  },
+  "intermediate_findings": [
+    {
+      "kind": "red-green",
+      "issue": "wrapper inherited hostile ambient settings and accepted hostaddr override",
+      "resolution": "strict environment allowlist/local Docker socket and dedicated connection guard; final7 pass"
+    },
+    {
+      "kind": "harness",
+      "issue": "local FILE/TEXT path has zero agent.prompt operations",
+      "resolution": "assert one conversation/local-mock message/job attempt, zero provider prompts; identical counts after restart/replay"
+    },
+    {
+      "kind": "environment",
+      "issue": "group-writable intermediate task scratch directory rejected by existing backup guard",
+      "resolution": "root-owned writer parent permissions corrected to0700; product guard unchanged"
+    },
+    {
+      "kind": "manual-review",
+      "issue": "anonymous session endpoint is not a database health probe",
+      "resolution": "separate HTTP liveness, DB readiness and authenticated DB/worker checks"
+    },
+    {
+      "kind": "manual-review",
+      "issue": "pasted setup/restore could continue after a failed config operation",
+      "resolution": "fail-closed subshells, unset DATABASE_URL before loading, required value check; four independent failure cases pass"
+    },
+    {
+      "kind": "environment",
+      "issue": "initial non-root verification container used outer namespace socket GID and could not access Docker",
+      "resolution": "read-only inner stat identified correct supplementary GID; full root gates rerun passed, no socket/daemon permission changes"
+    },
+    {
+      "kind": "verification-transport",
+      "issue": "Reviewer sandbox Docker denied; two sub-agent escalation calls stalled before fixture execution",
+      "resolution": "Primary channel executed requested focused7 successfully; independent reviewer audits output, exact frozen source and hashes"
+    }
+  ],
+  "independent_review": {
+    "task": "T-024",
+    "status": "accepted",
+    "manual_findings": "both corrected and independently verified",
+    "execution_attribution": "Reviewer-specified fresh focused7 executed in primary channel after sub-agent escalation wait; reviewer independently audits output; no check waived",
+    "report": ".team/reports/T-024.md",
+    "unresolved_findings": []
+  },
+  "log_sha256": {
+    "root-browser-test.log": "bb4b9d1b562edfee0715399d7dc1be1fd9df21153fb0bad34773a3e137af4cea",
+    "root-deployment-rehearsal-environment-failed.log": "a2c73f1cf63a37b010fa12742f80f0a4e82bab5e9336ffed690ec988ee52d671",
+    "root-deployment-rehearsal.log": "71d912166d06cc81dcb586d2862ab4cfe2338731593ded3d16b4dd765777508e",
+    "root-manual-positive-shell.log": "9224cbd961649f2c4fedebd7a87fa0dac9558a09ec16be74a3f52eb6d47a436c",
+    "root-platform-check-environment-failed.log": "c9d7c77d70376b636b35e495fc4aa0b8918b0c52a3dea5a4fa793e28b9d505d1",
+    "root-platform-check.log": "fc7ea1aad715898d9af0e431e9c5b136baa2ec44e64509a7f0a957661873b257",
+    "root-web-check.log": "2026458e595993026c7085704e96fa9e7dc7eb75a456cafc80075683db328265",
+    "worker-boundary-red.log": "ec638b4a2c8928f82837c169fc0d8ee5a05a07e7b9b98a8510ede30f0f216956",
+    "worker-environment-green.log": "feb606befd1e9ceb58e55c2f87481b4e16da89d355c73fcf97b29214a940687d",
+    "worker-environment-red.log": "eee645732d16bf7543e7b770cb61c8d1681d76b7be2d0477c16a0c3c79080099",
+    "worker-focused-01.log": "e49ad77528b99a39815dcb0674ef5efc94358ad054f21707fd3ef7730633c66d",
+    "worker-focused-02.log": "9f22cbb6337de77caf9d5612abe07799fb8b018f0e14418c7e9b8608f5a8fff3",
+    "worker-focused-03.log": "42ac68de0665464c061cc9f7b344dfdc2a8077b9538144e3d18b80be1e45f9a7",
+    "worker-wrapper-01.json": "c88e63672f392d643298affd417d346685650491cf4a96dde4eaf8cad6f58c71",
+    "worker-wrapper-01.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "review-independent-wrapper.log": "ab0bfd9175225614cb881536df3b2f263f9a2e95c5b50f58ac2d8289c82c7b09",
+    "review-manual-failure-guard-green.log": "47d58179df6193556539e5d9a1bc273f670d28a8b4682e87c01fb4231cb0d140",
+    "review-manual-failure-guard-red.log": "a3865e26e8da75740c059bbae4a4df7ca054a61b95def7723cae2edbd7550828",
+    "root-actual-dist-rehearsal.log": "9b30664151862b55e43c8be6b6c182b339d19c9b4c9e83cd0fbdd5efdf81f33c",
+    "worker-wrapper-rehearsal.log": "3724f2fd531554042fa972c9c2c4a3bed96dab84e9fbf9460bb9a9705748f6d3",
+    "review-evidence-audit-initial.json": "ddb7f7a7e01f9df88207ed00ec23217f537abfff6cc287dab7ac881a46469bdd",
+    "root-review-execution.log": "fa746eb5042ae9bc0f2b0a5dacdcf08decb08c27271dbceddc6b2ef24f9246cf",
+    "root-review-focused.log": "c47420052b22236eec67200018a1d4faab42d3149cb08045936054d515437467"
+  },
+  "limits": [
+    "Fresh synthetic databases only; no existing operator database or host deployment",
+    "Loopback HTTP; no TLS, SSH, service-manager or boot supervision acceptance",
+    "Fake/local-mock backend; no KVM or external provider/product GitHub export",
+    "Native pg_dump/pg_restore via disclosed owned-container transport injection; installed-host backup-create/restore CLI not accepted by this rehearsal",
+    "Billing deferred, cost unknown; complete M3/M4/MVP and release long-run acceptance remain open",
+    "Hard kills/host failure cannot guarantee cleanup; no broad resource deletion"
+  ],
+  "publication": "Commit/PR and merge status are recorded on GitHub and the task report; this file does not infer publication from local tests"
+}

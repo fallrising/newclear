@@ -8,11 +8,19 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && npm run test:pp1-local",
     "lint": "npm run lint --workspaces --if-present",
     "test:bundle": "node scripts/check-bundles.mjs",
+    "measure:bundle": "node --test scripts/measure-bundles.test.mjs && node scripts/measure-bundles.mjs",
     "e2e": "bash e2e/run.sh",
-    "e2e:mock": "playwright test --config playwright.mock.config.ts"
+    "e2e:mock": "playwright test --config playwright.mock.config.ts",
+    "record:frontend": "node scripts/record-frontend.mjs",
+    "measure:vitals": "npm run build && playwright test --config playwright.vitals.config.ts vitals-w5.spec.ts",
+    "test:a11y": "playwright test --config playwright.quality.config.ts axe-w5.spec.ts",
+    "test:visual": "playwright test --config playwright.quality.config.ts visual-w5.spec.ts",
+    "test:hardening": "playwright test --config playwright.quality.config.ts hardening-w5.spec.ts",
+    "test:pp1-local": "node --test scripts/local/*.test.mjs",
+    "e2e:pp1-local": "playwright test --config playwright.pp1-local.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

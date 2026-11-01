@@ -43,8 +43,6 @@ pub struct Config {
     pub maxmemory: u64,
     #[serde(default = "default_pin_cores")]
     pub pin_cores: bool,
-    #[serde(default = "default_channel_cap")]
-    pub channel_cap: usize,
     #[serde(default = "default_shutdown_deadline")]
     pub shutdown_deadline_secs: u64,
 }
@@ -70,7 +68,6 @@ impl Default for Config {
             expire_budget: default_expire_budget(),
             maxmemory: 0,
             pin_cores: default_pin_cores(),
-            channel_cap: default_channel_cap(),
             shutdown_deadline_secs: default_shutdown_deadline(),
         }
     }
@@ -117,9 +114,6 @@ fn default_expire_budget() -> usize {
 }
 fn default_pin_cores() -> bool {
     true
-}
-fn default_channel_cap() -> usize {
-    8192
 }
 fn default_shutdown_deadline() -> u64 {
     10

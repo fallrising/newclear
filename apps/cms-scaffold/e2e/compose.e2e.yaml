@@ -1,0 +1,25 @@
+# Used exclusively with a freshly minted cms-w5-e2e-* project by runner.mjs.
+# Password values are supplied through the child environment, never this file.
+services:
+  postgres:
+    labels:
+      cms.w5.e2e.owner: ${CMS_E2E_PROJECT:?runner-owned project required}
+  cms-api:
+    labels:
+      cms.w5.e2e.owner: ${CMS_E2E_PROJECT:?runner-owned project required}
+  web-front:
+    labels:
+      cms.w5.e2e.owner: ${CMS_E2E_PROJECT:?runner-owned project required}
+  web-back:
+    labels:
+      cms.w5.e2e.owner: ${CMS_E2E_PROJECT:?runner-owned project required}
+  web-admin:
+    labels:
+      cms.w5.e2e.owner: ${CMS_E2E_PROJECT:?runner-owned project required}
+volumes:
+  cms-postgres:
+    labels:
+      cms.w5.e2e.owner: ${CMS_E2E_PROJECT:?runner-owned project required}
+  cms-media:
+    labels:
+      cms.w5.e2e.owner: ${CMS_E2E_PROJECT:?runner-owned project required}

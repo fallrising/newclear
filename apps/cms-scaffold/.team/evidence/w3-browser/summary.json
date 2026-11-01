@@ -1,0 +1,246 @@
+{
+  "captures": 13,
+  "failures": 0,
+  "records": [
+    {
+      "name": "selector",
+      "path": "/",
+      "width": 1440,
+      "filename": "selector-1440.png",
+      "metrics": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "title": "CMS Scaffold",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "name": "album",
+      "path": "/album/albums/coast-light-2026",
+      "width": 1440,
+      "filename": "album-1440.png",
+      "metrics": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "title": "Coast Light 2026 · 相簿",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/album/slugs/coast-light-2026",
+        "http://localhost:8080/api/v1/public/content-types/photo/entries?size=100&ref.album=30000000-0000-4000-8000-000000000001",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000003/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000004/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000005/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000006/file/thumbnail"
+      ]
+    },
+    {
+      "name": "photo",
+      "path": "/album/photos/coast-sun",
+      "width": 1440,
+      "filename": "photo-1440.png",
+      "metrics": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "title": "Late sun · 相簿",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/photo/slugs/coast-sun",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/web",
+        "http://localhost:8080/api/v1/public/content-types/album/entries/30000000-0000-4000-8000-000000000001",
+        "http://localhost:8080/api/v1/public/content-types/photo/entries?size=100&ref.album=30000000-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "name": "clinic",
+      "path": "/clinic",
+      "width": 1440,
+      "filename": "clinic-1440.png",
+      "metrics": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "title": "診所",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/clinic_profile/entries?size=1",
+        "http://localhost:8080/api/v1/public/content-types/vet/entries?size=6&sort=title"
+      ]
+    },
+    {
+      "name": "project",
+      "path": "/projects/cms-scaffold",
+      "width": 1440,
+      "filename": "project-1440.png",
+      "metrics": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "title": "CMS Scaffold · 專案",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/project/slugs/cms-scaffold",
+        "http://localhost:8080/api/v1/public/content-types/milestone/entries?size=5&ref.project=30000000-0000-4000-8000-000000000024"
+      ]
+    },
+    {
+      "name": "lightbox",
+      "path": "/album/albums/coast-light-2026?photo=coast-sun",
+      "width": 1440,
+      "filename": "lightbox-1440.png",
+      "metrics": {
+        "width": 1440,
+        "documentWidth": 1440,
+        "title": "Coast Light 2026 · 相簿",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/album/slugs/coast-light-2026",
+        "http://localhost:8080/api/v1/public/content-types/photo/entries?size=100&ref.album=30000000-0000-4000-8000-000000000001",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/web",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000003/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000004/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000005/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000006/file/thumbnail"
+      ]
+    },
+    {
+      "name": "selector",
+      "path": "/",
+      "width": 390,
+      "filename": "selector-390.png",
+      "metrics": {
+        "width": 390,
+        "documentWidth": 390,
+        "title": "CMS Scaffold",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "name": "album",
+      "path": "/album/albums/coast-light-2026",
+      "width": 390,
+      "filename": "album-390.png",
+      "metrics": {
+        "width": 390,
+        "documentWidth": 390,
+        "title": "Coast Light 2026 · 相簿",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/album/slugs/coast-light-2026",
+        "http://localhost:8080/api/v1/public/content-types/photo/entries?size=100&ref.album=30000000-0000-4000-8000-000000000001",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000003/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000004/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000005/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000006/file/thumbnail"
+      ]
+    },
+    {
+      "name": "photo",
+      "path": "/album/photos/coast-sun",
+      "width": 390,
+      "filename": "photo-390.png",
+      "metrics": {
+        "width": 390,
+        "documentWidth": 390,
+        "title": "Late sun · 相簿",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/photo/slugs/coast-sun",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/web",
+        "http://localhost:8080/api/v1/public/content-types/album/entries/30000000-0000-4000-8000-000000000001",
+        "http://localhost:8080/api/v1/public/content-types/photo/entries?size=100&ref.album=30000000-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "name": "clinic",
+      "path": "/clinic",
+      "width": 390,
+      "filename": "clinic-390.png",
+      "metrics": {
+        "width": 390,
+        "documentWidth": 390,
+        "title": "診所",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/clinic_profile/entries?size=1",
+        "http://localhost:8080/api/v1/public/content-types/vet/entries?size=6&sort=title"
+      ]
+    },
+    {
+      "name": "project",
+      "path": "/projects/cms-scaffold",
+      "width": 390,
+      "filename": "project-390.png",
+      "metrics": {
+        "width": 390,
+        "documentWidth": 390,
+        "title": "CMS Scaffold · 專案",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/project/slugs/cms-scaffold",
+        "http://localhost:8080/api/v1/public/content-types/milestone/entries?size=5&ref.project=30000000-0000-4000-8000-000000000024"
+      ]
+    },
+    {
+      "name": "lightbox",
+      "path": "/album/albums/coast-light-2026?photo=coast-sun",
+      "width": 390,
+      "filename": "lightbox-390.png",
+      "metrics": {
+        "width": 390,
+        "documentWidth": 390,
+        "title": "Coast Light 2026 · 相簿",
+        "brokenImages": [],
+        "headingCount": 1
+      },
+      "errors": [],
+      "requests": [
+        "http://localhost:8080/api/v1/public/content-types/album/slugs/coast-light-2026",
+        "http://localhost:8080/api/v1/public/content-types/photo/entries?size=100&ref.album=30000000-0000-4000-8000-000000000001",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/web",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000001/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000002/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000003/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000004/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000005/file/thumbnail",
+        "http://localhost:8080/api/v1/public/media/20000000-0000-4000-8000-000000000006/file/thumbnail"
+      ]
+    }
+  ]
+}

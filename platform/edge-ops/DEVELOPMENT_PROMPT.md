@@ -37,7 +37,7 @@ platform/edge-ops/docs/sdd/07-capacity-and-operations.md
 
 有實作授權後，從最小且可離線驗證的切片開始；先契約後前端／後端／Agent 平行，獨立 worktree 不互改權威檔。不得重造 OneVPS host authority、OneFleet workload lifecycle 或 agent-platform LLM runtime。
 
-回報實際修改、commit／PR、已執行 gate、未執行原因、獨立 review 狀態與下一步。docs/STATUS 是唯一進度權威。不要自動合併 PR，不執行 deployment、bootstrap、Terraform apply、sudo、reboot 或現役機器測試，除非使用者另行明確授權該環境與操作。
+在工作紀錄保存實際修改、commit／PR、已執行 gate、未執行原因、獨立 review 狀態與下一步。docs/STATUS 是唯一進度權威。已授權里程碑的 PR 交付與向 owner 收尾依[根規則](../../AGENTS.md#交付與對人回報)，當次明確停止／Draft-only 指示仍優先。不執行 deployment、bootstrap、Terraform apply、sudo、reboot 或現役機器測試，除非使用者另行明確授權該環境與操作。
 
 ## 可交给下一個 session 的要求
 

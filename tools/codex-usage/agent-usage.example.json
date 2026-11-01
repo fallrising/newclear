@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "sources": [
+    {"provider":"codex","kind":"codex","target_file":"/private/path/target.json"},
+    {"provider":"claude","kind":"claude-db","path":"/private/path/quota.db"},
+    {"provider":"opencode-go","kind":"opencode-stats","days":1,"timeout":20},
+    {"provider":"cursor","kind":"cursor-admin","expected_email":"you@example.invalid","token_env":"CURSOR_ADMIN_API_KEY"},
+    {"provider":"grok","kind":"manual","path":"/private/path/grok-observation.json"},
+    {"provider":"grok-bot","kind":"manual","path":"/private/path/grok-bot-observation.json"},
+    {"provider":"antigravity","kind":"manual","path":"/private/path/antigravity-observation.json"}
+  ]
+}

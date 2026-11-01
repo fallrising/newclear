@@ -1,0 +1,83 @@
+{
+  "record_type": "tool-output transcription; compact observation, not original raw stdout",
+  "snapshot_utc": "2026-10-24T06:23:24+00:00",
+  "source": "Worker conversation tool outputs retained in this session; no tests were rerun to reconstruct this record.",
+  "native_batch": {
+    "command": "docker exec kith-fe2-20261024-b npm --prefix products/kith test",
+    "exec_session": 63000,
+    "output_chunks": [
+      "eef847",
+      "a428ec",
+      "be8a49"
+    ],
+    "exit": 1,
+    "failure": "final test:reading stage: spawnSync git ENOENT in initial container image",
+    "stages": [
+      {
+        "stage": "base vitest",
+        "tests_passed": 155
+      },
+      {
+        "stage": "test:sidecar",
+        "tests_passed": 14
+      },
+      {
+        "stage": "test:m1",
+        "tests_passed": 45
+      },
+      {
+        "stage": "test:m3",
+        "tests_passed": 8
+      },
+      {
+        "stage": "test:m4",
+        "tests_passed": 40
+      },
+      {
+        "stage": "test:m6",
+        "tests_passed": 22
+      },
+      {
+        "stage": "test:m7",
+        "tests_passed": 9
+      }
+    ],
+    "total_before_reading": 293,
+    "status_basis": "Explicit per-stage passed counts in tool output. Package script chains stages with &&, so reaching the next stage establishes prior stage success. No standalone original stdout files were saved."
+  },
+  "type_and_build_batch": {
+    "command": "npm --prefix products/kith/e2e run lint\nnpm --prefix products/kith run lint\nnpm --prefix products/kith/web run build",
+    "exec_session": 45223,
+    "output_chunks": [
+      "3b5d31",
+      "05c86c"
+    ],
+    "batch_exit": 0,
+    "e2e_lint": {
+      "observed": "tsc --noEmit -p tsconfig.json, no diagnostic output",
+      "individual_exit": null
+    },
+    "root_lint": {
+      "observed": "tsc --noEmit, no diagnostic output",
+      "individual_exit": null
+    },
+    "web_build": {
+      "exit": 0,
+      "reading_tests_passed": 2,
+      "timeline_tests_passed": 5,
+      "typescript": "web build && sequence reached Vite successfully",
+      "vite": "6.4.3; 2166 modules transformed; built in4.18s",
+      "warning": "Some chunks are larger than500kB after minification"
+    },
+    "limitation": "The first two commands were newline-separated rather than &&-chained; their individual exit codes were not captured. Earlier report exit0 wording was stronger than the directly retained evidence. This record preserves the distinction rather than inventing standalone exits."
+  },
+  "later_saved_evidence": {
+    "reading": "runs/.state/reading-gate.log:37passed/exit0 after image Git prerequisite",
+    "full_e2e": "runs/.state/e2e-gate-canonical.log:57passed/2paths failures/1existing skip/exit1",
+    "targeted_PT01": "external private pt01-gate.log and pt01-result.json:2passed/exit0"
+  },
+  "unknown": [
+    "Original raw stdout files for native293 and type/build batch are unavailable.",
+    "Provider/token/cost counts are not reconstructed from output chunks."
+  ]
+}

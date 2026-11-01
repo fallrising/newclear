@@ -19,17 +19,19 @@ export interface TombstoneNodeData {
   onDismiss: () => void;
 }
 
-export function TombstoneNode({ data }: NodeProps) {
+export function TombstoneNode({ data, width, height }: NodeProps) {
   const d = data as unknown as TombstoneNodeData;
   return (
     <div
       className={`${CSS.nodeFrame} loom-canvas-tombstone`}
-      style={{ width: NODE_SIZE.tombstone.width, height: NODE_SIZE.tombstone.height }}
+      style={{ width: width ?? NODE_SIZE.tombstone.width, height: height ?? NODE_SIZE.tombstone.height }}
     >
       {/* A tombstone keeps the incoming-triggers handle so a doc's
           existing edge stays valid; restart updates the same edge to
           point at the new live session. */}
-      <Handle type="target" position={Position.Left} />
+      <Handle type="target" position={Position.Left} id="in" />
+      <Handle type="source" position={Position.Right} id="out" />
+      <Handle type="source" position={Position.Top} id="context-out" />
       <div className={CSS.nodeHeader}>
         <strong>session ended</strong>
         {d.was.name && <span className="sid">{d.was.name}</span>}

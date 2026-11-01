@@ -534,6 +534,19 @@ class DocumentBatchContractTests(unittest.TestCase):
             with self.assertRaises(BatchContractError):
                 document_batch._read_source(root, descriptor)
 
+    def test_production_toolchain_digest_tracks_pdf_extractor_semantics(self):
+        paths = [str(self.root / name)
+                 for name in ("pdfinfo", "pdftotext", "pdftoppm", "tesseract")]
+        toolchain = ProductionToolchain(*paths, "poppler 25", "tesseract 5", ("eng",))
+        with mock.patch("ice_maker.production_extraction.PDF_EXTRACTOR_VERSION",
+                        "production-pdf-v2"):
+            legacy_digest = toolchain.digest
+        with mock.patch("ice_maker.production_extraction.PDF_EXTRACTOR_VERSION",
+                        "production-pdf-v3"):
+            current_digest = toolchain.digest
+            self.assertEqual(toolchain.digest, current_digest)
+        self.assertNotEqual(current_digest, legacy_digest)
+
     def test_normal_toolchain_route_and_cli_exit_contract(self):
         root = self.root / "input"; root.mkdir(); (root / "a.pdf").write_bytes(b"%PDF-tool")
         manifest = self.root / "manifest.json"; manifest.write_bytes(self.manifest_bytes("a.pdf"))

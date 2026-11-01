@@ -1,0 +1,24 @@
+### 1. Blocking Ambiguities
+
+1. **State Transition Versioning & CAS Parameters**: P0 requires all updates (including publish, unpublish, archive, restore, revert) to perform atomic CAS and increment `version`. However, current lifecycle endpoints take no `version` argument, while P0 forbids API changes. It is ambiguous whether lifecycle mutations must adopt optimistic lock parameters (requiring schema/contract additions) or CAS purely against the DB's current snapshot.
+2. **Field Clearing Semantics (`null` vs `""`)**: The specification allows explicit `null` or empty string `""` for cleared text fields, but `EntryService.validatePayload` treats both as `isBlank`. Whether clearing a `required` text field during a draft patch accepts `""` or `null` before publish validation is unspecified.
+
+---
+
+### 2. High-Value Verification Cases
+
+1. **Atomic Rollback on Partial Write Failure**:
+   - *Setup*: Trigger [EntryService.create](services/cms-api/src/main/java/com/fallrising/cms/content/service/EntryService.java#L80) or [patch](services/cms-api/src/main/java/com/fallrising/cms/content/service/EntryService.java#L152) with valid entry data but force an error in `mediaService.replaceAttachments` or `store.replaceRefs`.
+   - *Expectation*: The entire database transaction aborts; `entries`, `entry_refs`, and `media_attachments` contain zero partial inserts or orphan rows.
+2. **Concurrent CAS Contention on Same Version**:
+   - *Setup*: Dispatch two concurrent [patch](services/cms-api/src/main/java/com/fallrising/cms/content/service/EntryService.java#L152) or state actions specifying identical `version: N`.
+   - *Expectation*: Exactly one request commits and advances `version` to `N + 1`; the concurrent request fails at the database store CAS boundary with HTTP `409 VERSION_CONFLICT` without overwriting data.
+3. **Form Field Clearing & Input Retention on 409**:
+   - *Setup*: In [entries.tsx](apps/web-back/src/pages/entries.tsx#L57), clear an existing string field and submit concurrently with an out-of-band version increment.
+   - *Expectation*: The payload explicitly sends `{ field: null }` (not omitted), and upon receiving `409`, the UI prevents form reset, preserves dirty local inputs, displays a reload-required alert, and disables overlapping submissions.
+
+---
+
+### 3. Scope Coherence
+
+**The scope is coherent.** The boundary cleanly confines changes to database-level transactional CAS mechanics and frontend payload type fidelity in `EditorForm`. It correctly defers UI pickers, capability queries (BW1a), and media storage compensation to subsequent waves without introducing new external runtime dependencies.

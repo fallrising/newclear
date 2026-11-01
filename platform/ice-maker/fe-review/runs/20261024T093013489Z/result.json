@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "runId": "20261024T093013489Z",
+  "status": "passed",
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "steps": [
+    {
+      "name": "fresh-flow-only-fixture",
+      "batch_id": "b6be0bf0ca4722722f7686f83e6dc386286a53d309aba8f38d9c233d0adef2dc",
+      "source_sha256": [
+        "90b9bf248cc722e4841ad158082592475e8b4b35ae7cf6ebafe042659801cbab",
+        "352b52b23c3a895bcb48d0acbb4431c0704cad5f2149cb8d6d6728a0f9dd786d"
+      ]
+    },
+    {
+      "name": "real-upload-normalized-language-busy-preview-download",
+      "batch": "15415e8533f2d5472e1fc8688eaa96d96d2717779316b416cadbcb51ff7add52",
+      "source": "0df8ee05a72963c9b81ab8bec9314f9aae0172a757511294aa046ccd90ea8b8d",
+      "markdownSha256": "55a4ab2a1d39756937e670d228ff326a6e9e9d591146595acadb68a1bf5de1b5",
+      "markdownBytes": 231
+    },
+    {
+      "name": "real-failed-batch",
+      "pollsStopped": true
+    },
+    {
+      "name": "upload-detail-literal",
+      "pollsStopped": true
+    },
+    {
+      "name": "real-upload-400",
+      "pollsStopped": true
+    },
+    {
+      "name": "poll-404",
+      "pollsStopped": true
+    },
+    {
+      "name": "poll-409",
+      "pollsStopped": true
+    },
+    {
+      "name": "poll-network",
+      "pollsStopped": true
+    },
+    {
+      "name": "poll-invalid",
+      "pollsStopped": true
+    },
+    {
+      "name": "30min-ui-cap",
+      "clock": "controlled-fast-forward",
+      "pollsStopped": true
+    }
+  ],
+  "axe": [],
+  "captures": [
+    {
+      "name": "real-running-busy",
+      "path": "screenshots/real-running-busy.png",
+      "sha256": "1237b4cc17baaf4725720c1a290eada2ce4fca419242f577d8f958d7172683ab",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "real-result",
+      "path": "screenshots/real-result.png",
+      "sha256": "80d126f5e7a019d62ccb1cb9ec151e575ddac8ae4ba1f16490fc470deccea130",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "real-failed-batch",
+      "path": "screenshots/real-failed-batch.png",
+      "sha256": "a8f374c2775ff4b864eed44077e0d2e21cd5c20d83ff775c3074f2b82864557e",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "upload-detail-literal",
+      "path": "screenshots/upload-detail-literal.png",
+      "sha256": "ddcec7c0a4d43f1e71154da5ac718e1c9f91d4545f315cfdb65485f3eeb76e97",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "real-upload-400",
+      "path": "screenshots/real-upload-400.png",
+      "sha256": "f46fd64f9fba43c76b7b28736632e948b2d125a9ef14a1058c2d0ea9b942ee88",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "poll-404",
+      "path": "screenshots/poll-404.png",
+      "sha256": "4a00ba6c6ce728d9777a77783668da39fe4b9ff4ecb763ece0ac9808733dd0f4",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "poll-409",
+      "path": "screenshots/poll-409.png",
+      "sha256": "943e3c308de9c0a0724e13606f954a915d02cd3d852f7e0d58e834460cba8a6a",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "poll-network",
+      "path": "screenshots/poll-network.png",
+      "sha256": "b57e3ddd90187f1bd076087351172f32381569aac66973ca2f00f0b2b08c3e7b",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "poll-invalid",
+      "path": "screenshots/poll-invalid.png",
+      "sha256": "abc9020621621681dbebb166705feb4afc0fe25fe3a63619a43ba98aab858710",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "controlled-timeout",
+      "path": "screenshots/controlled-timeout.png",
+      "sha256": "60cc9076c5d39a537b65f8db8d01c5d84d29fac536935e58bd9dde4abe2324c6",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    }
+  ],
+  "health": [
+    {
+      "kind": "http",
+      "status": 400,
+      "path": "/api/batches",
+      "phase": "controlled-response"
+    },
+    {
+      "kind": "http",
+      "status": 400,
+      "path": "/api/batches",
+      "phase": "actual-invalid-metadata"
+    },
+    {
+      "kind": "http",
+      "status": 404,
+      "path": "/api/batches/36e54c9660c1ee5e16ee053b03781bff2863054110158cdc26c8bee3ec6bcb08",
+      "phase": "controlled-poll-404"
+    },
+    {
+      "kind": "http",
+      "status": 409,
+      "path": "/api/batches/39147e175f8206181cf82d3ebb49e238aaeec76474d8e636f3d280408d108d28",
+      "phase": "controlled-poll-409"
+    },
+    {
+      "kind": "requestfailed",
+      "path": "/api/batches/508dc4b5a86d73ae8e453ec47930ede818caa6d597d8affe0b0f8daeda9cee85",
+      "phase": "controlled-poll-network"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "fixture",
+      "code": null,
+      "signal": "SIGTERM",
+      "serviceClosed": true,
+      "listenerAbsent": true
+    }
+  ],
+  "sourceHashes": {
+    "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+    "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+    "fe-review/serve_fixture.py": "e44092e2b5ab06db37b488470adcc0ecaa143f7b029decfa18386ae365577a18",
+    "fe-review/verify-browser.mjs": "d2036b7b4e410220550516871372b3d32d3a57ac878ac62098a995a54489a112",
+    "fe-review/targets.json": "fcc26dc2c421cb9b22d85e876a27bdc5a8c0bb1273e19f30c1fe9f657f745b63"
+  }
+}

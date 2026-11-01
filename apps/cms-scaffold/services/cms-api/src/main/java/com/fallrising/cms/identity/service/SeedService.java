@@ -12,12 +12,14 @@ import com.fallrising.cms.identity.domain.Role;
 import com.fallrising.cms.identity.domain.RoleCode;
 import com.fallrising.cms.identity.domain.Surface;
 import com.fallrising.cms.identity.store.IdentityStore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -36,6 +38,7 @@ import java.util.UUID;
 @Order(0)
 public class SeedService {
 
+    private static final ObjectMapper PREDICATE_JSON = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
     private static final Logger log = LoggerFactory.getLogger(SeedService.class);
     private static final List<String> PUBLIC_READ =
             List.of("album", "photo", "page", "project", "milestone", "vet", "clinic_profile");
@@ -46,13 +49,13 @@ public class SeedService {
     private final IdentityStore store;
     private final PasswordHasher passwordHasher;
     private final IdentityProperties properties;
-    private final Environment environment;
+    private final DemoSeedPolicy demoSeedPolicy;
 
-    public SeedService(IdentityStore store, PasswordHasher passwordHasher, IdentityProperties properties, Environment environment) {
+    public SeedService(IdentityStore store, PasswordHasher passwordHasher, IdentityProperties properties, DemoSeedPolicy demoSeedPolicy) {
         this.store = store;
         this.passwordHasher = passwordHasher;
         this.properties = properties;
-        this.environment = environment;
+        this.demoSeedPolicy = demoSeedPolicy;
     }
 
     @Order(0)
@@ -60,12 +63,7 @@ public class SeedService {
     public void onReady() { seed(); }
 
     public void seed() {
-        boolean prod = List.of(environment.getActiveProfiles()).contains("prod");
-        if (prod && !properties.isSeedEnabled()) { ensureRoles(); return; }
-        if (prod && properties.isSeedEnabled() && properties.seedPasswordFor("seed-admin") == null) {
-            throw new IllegalStateException("CMS_SEED_ENABLED requires CMS_SEED_PASSWORD or per-user seed password in prod");
-        }
-        if (!properties.isSeedEnabled()) { ensureRoles(); return; }
+        if (!demoSeedPolicy.enabled()) { ensureRoles(); return; }
         ensureRoles();
         ensurePermissions();
         Map<String, String> generated = new LinkedHashMap<>();
@@ -109,6 +107,7 @@ public class SeedService {
         ensurePermission(member.id(), CmsAction.READ_PUBLISHED, "pet", predicate, ALL_SURFACES);
         ensurePermission(member.id(), CmsAction.READ_PUBLISHED, "visit", predicate, ALL_SURFACES);
         ensurePermission(member.id(), CmsAction.READ_PUBLISHED, "owner", predicate, ALL_SURFACES);
+        ensurePermission(member.id(), CmsAction.CREATE, "appointment_request", null, List.of(Surface.FRONT.wire()));
         if (store.permissionsOfRole(editor.id()).isEmpty()) {
             addPermission(editor.id(), CmsAction.READ_PUBLISHED, null, null, ALL_SURFACES);
             addPermission(editor.id(), CmsAction.READ_DRAFT, null, null, WORK_SURFACES);
@@ -143,9 +142,22 @@ public class SeedService {
         boolean exists = store.permissionsOfRole(roleId).stream().anyMatch(permission ->
                 permission.action().equals(action.wire())
                         && java.util.Objects.equals(blankToNull(type), blankToNull(permission.contentTypeCode()))
-                        && java.util.Objects.equals(blankToNull(predicate), blankToNull(permission.predicateJson())));
+                        && samePredicate(predicate, permission.predicateJson()));
         if (!exists) {
             addPermission(roleId, action, type, predicate, surfaces);
+        }
+    }
+
+    /** PostgreSQL JSONB changes whitespace/key order; those changes do not describe a new grant. */
+    private static boolean samePredicate(String requested, String existing) {
+        String left = blankToNull(requested), right = blankToNull(existing);
+        if (java.util.Objects.equals(left, right)) return true;
+        if (left == null || right == null) return false;
+        try {
+            return PREDICATE_JSON.readTree(left).equals(PREDICATE_JSON.readTree(right));
+        } catch (JsonProcessingException ignored) {
+            // Keep the existing literal comparison behavior for invalid predicate text.
+            return false;
         }
     }
 

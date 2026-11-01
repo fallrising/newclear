@@ -1,0 +1,7 @@
+✖ smith return step label is neutral after poll/reload and resets for the next departure (1.396782ms)
+✖ herbalist return step label is neutral after poll/reload and resets for the next departure (1.140116ms)
+ℹ tests 36
+ℹ pass 34
+ℹ fail 2
+✖ smith return step label is neutral after poll/reload and resets for the next departure (1.396782ms)
+✖ herbalist return step label is neutral after poll/reload and resets for the next departure (1.140116ms)

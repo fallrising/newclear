@@ -1,0 +1,61 @@
+# 項目主線、驗收與可用版本
+
+本規範處理「何時算做完、哪個版本確實可用」。各項目的 `SUCCESS.md` 是該項目的驗收入口；既有 SDD、測試、需求決策仍是內容依據，不得為了打標縮小已承諾的主線。範圍有實質衝突時先記錄並請 owner 決定。做 desk 大需求卡時，那張卡的 AC 以它的 SDD（desk 運作方法 §0 N3）為準；SUCCESS.md 是項目主線的驗收，收錄同一條時用相同編號、在證據欄連到 SDD，不另訂不同內容。
+
+## 每個項目都要有
+
+- `SUCCESS.md`：主線目標、範圍與非目標；具固定 AC 編號的 Given/When/Then 驗收；逐項現況及證據；剩餘缺口；啟動與驗證入口；可用版本。
+- `README.md`：連到 SUCCESS，讓使用者先看到主線是否完成及可用範圍。
+- `AGENTS.md`：要求接手先讀 SUCCESS、相關規格和最近證據；實作前更新本次目標／範圍／驗收計畫，收尾補實際結果、缺口與版本。
+- 根目錄 `PROJECTS.md`：全項目索引。第三方 `refs/`、歷史文件快照及元件內部子模組不另算獨立產品；legacy 項目仍各自保留契約。
+
+前置資料採簡單 frontmatter，欄位為 `project`（repo 相對目錄）、`purpose`（一句用途）、`kind`（application/service/tool/lab/reference/archived）、`mainline`（complete/incomplete/not-applicable）、`usable_tag`（none 或完整 tag）、`reviewed`（YYYY-MM-DD）、`source_commit`（核對的完整 SHA）。`not-applicable` 只用於沒有執行主線的參考文件或封存案，必須寫出保留／結束條件；它不是完成宣告。
+
+## 何時算完成
+
+1. 原先約定的核心使用情境能由文件入口完成，而不只是程序啟動或測試用替身回傳成功。
+2. 必要的 AC 全部有可核對結果；失敗、未跑和環境限制逐項保留。歷史紀錄寫明日期／版本，不冒充本次重跑。
+3. 必要測試、建置、整合與使用流程驗證通過；需外部系統才能完成的核心流程，不能用 mock 代替真實整合證據。
+4. 啟動需求、設定方式、資料位置及已知限制足以讓另一人使用。個人用工具不強加未承諾的 HA、企業資安或規模要求。
+5. 主線完成後，新功能進另一個具名里程碑，不無限擴張已完成的驗收，也不將後續願望混成當前缺口。
+
+實驗以原本的實驗問題、可重現步驟及結果作結；腳本以可觀察輸入／輸出及操作邊界作結；封存不代表驗收成功，也不由此恢復開發。
+
+## 可用版本標記
+
+普通版本 tag 只標版本，不能單憑它宣稱主線完成。新的可用標記採 annotated Git tag：
+
+`usable/<component-slug>/v<major>.<minor>.<patch>`
+
+slug 使用項目目錄末段；若發生命名碰撞，先在本規範及索引指定包含類別的唯一 slug。tag 訊息必須記錄項目路徑、可用範圍、驗證來源 SHA、驗證命令／結果、證據文件及限制。這是使用能力的證明，不是 production／已部署宣告；限定實驗或 local-only 能力必須直接寫進範圍。
+
+打標前須核對目標 commit 已合併、必要 CI／審查通過、啟動及核心流程證據對應目標程式。若沿用較早的證據，必須比對其後程式與設定的差異；相關變更必須補跑。文件變更也不能掩蓋未通過的必要檢查。只有局部 prototype 可跑而主線仍缺核心能力者，不建立全項目 usable tag。
+
+先在 PR 補齊證據與預定 tag；合併後建立 tag，回讀遠端 tag object 及 peeled commit，核對與驗收版本一致。tag 不得刪除、搬移、覆寫，也不得用 `--force`。日後發現缺陷，保留舊 tag 並在 SUCCESS 記錄限制／撤回推薦；修復後建立新版本。發布 tag 不等於授權部署、發佈套件或付費呼叫；先檢查 workflow 觸發範圍，額外行動依原授權處理。
+
+未具足證據者保持 `usable_tag: none`，寫出缺哪一項驗證及如何補足，不能把文件盤點當成 runtime 驗收。主線狀態和版本必須分開：既有完成紀錄可以保留，但未核准新 tag 就不宣稱已有此命名的可用版本。
+
+## 文件先行與收尾順序
+
+1. 接手：讀 SUCCESS、README、最近 AGENTS 及相關 SDD／任務；核對目前分支與文件來源版本。
+2. 動手前：更新目標、範圍、AC、預定驗證和目前缺口；實質改動既定需求須先獲 owner 決定。
+3. 實作與驗證：依 AC 執行，保存精簡可重現證據，不記秘密；各項標為通過、失敗或未跑及原因。
+4. 收尾：更新 SUCCESS、README 必要入口及項目任務結果；同步索引，檢查連結與契約。
+5. 滿足主線及打標條件後，完成 PR、檢查、合併；建立 annotated usable tag 算 release，要 owner 同意（desk 運作方法 §6），同意後打標並回讀遠端；不以文字 DONE 代替驗收。
+
+文件檢查指令：`python3 scripts/check_project_success.py`。它只檢查覆蓋、格式及導航一致性，不替人判斷產品已可用。
+
+## 新增元件與提交前檢查
+
+1. 更新 `docs/project-success/inventory.json`，加入元件及所需 Category；非產品目錄在 `excluded_roots` 寫明理由。
+2. 補齊元件的 `SUCCESS.md`，從元件 `README.md` 和 `AGENTS.md` 連回驗收入口。
+3. 明確執行 `python3 scripts/check_project_success.py --write-index` 產生 `PROJECTS.md`，檢視 diff。
+4. 有新增能力檔時更新元件 `llms.txt`、根 `llms.txt` 導航和 README catalog。證據檔不要命名為 `llms.txt`；用 `llms-output.txt` 等名稱，避免被當作正式能力檔。
+5. 將預定提交的新檔加入 Git index，再執行 `python3 scripts/check_indexes.py`。這是唯讀入口，直接執行既有 project-success 與 llms validators；兩者的診斷都會保留，其中任一失敗即回傳非零。不會重建索引、安裝 hook 或執行產品測試。
+
+`untracked project` 指出尚未登錄的元件；`PROJECTS.md is stale` 要求明確執行上述 `--write-index`；缺漏或壞掉的 llms 連結會指出實際路徑。修改後重跑共用入口。
+
+入口驗證工作樹內容；llms 檔案清單沿用 `git ls-files`，因此尚未加入 index 的新能力檔不在該驗證器範圍。它不宣稱驗證 staged bytes：部分 staged 時，須先對齊 index 與工作樹，或在預定 candidate commit 的乾淨 checkout 執行。CI 的 Project success contracts job 使用同一入口驗證 checkout 的內容。測試入口為 `python3 -m unittest discover -s scripts/tests -v`。
+
+
+Inventory 的 `excluded_roots` 逐項列明非產品根目錄與理由；新增 Category 或元件不得靜默漏列。CI 在所有 PR／main 更新執行結構檢查，包含只新增程式碼的項目。資格紀錄的 RESULT、Project、Tag、Source 必須精確唯一，並連到實際驗證證據。

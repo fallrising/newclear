@@ -1,0 +1,93 @@
+name: prism
+
+services:
+  clickhouse:
+    image: docker.io/clickhouse/clickhouse-server:24.8.14.39@sha256:b002e56ed5c16e224c312527f6fcba7e77216fec5d7a88a7828f59efc614feb5
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: prism
+      CLICKHOUSE_USER: prism
+      CLICKHOUSE_PASSWORD_FILE: /run/secrets/clickhouse_password
+    volumes:
+      - ch-data:/var/lib/clickhouse
+      - ./clickhouse/prism.xml:/etc/clickhouse-server/config.d/prism.xml:ro
+      - ./clickhouse/users.xml:/etc/clickhouse-server/users.d/prism.xml:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/clickhouse_password:/run/secrets/clickhouse_password:ro
+    ulimits:
+      nofile: {soft: 262144, hard: 262144}
+    healthcheck:
+      test: [CMD, wget, -qO-, http://127.0.0.1:8123/ping]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+    deploy:
+      resources:
+        limits: {memory: 2G, pids: 4096}
+    security_opt: [no-new-privileges:true]
+
+  prismd:
+    image: prism/prismd:${PRISM_VERSION:-dev}
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.prismd
+      args:
+        VERSION: ${PRISM_VERSION:-dev}
+        REVISION: ${PRISM_REVISION:-unknown}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PRISM_HTTP_PORT:-9090}:9090"
+      - "127.0.0.1:${PRISM_GRPC_PORT:-4317}:4317"
+    volumes:
+      - ./prismd.yaml:/etc/prism/prismd.yaml:ro
+      - ./rules:/etc/prism/rules:ro
+      - ./phase1-notify.yaml:/etc/prism/phase1-notify.yaml:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/clickhouse_dsn:/etc/prism/secrets/clickhouse_dsn:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/ingest_api_key:/etc/prism/secrets/ingest_api_key:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/jwt_secret:/etc/prism/secrets/jwt_secret:ro
+    environment:
+      GOMEMLIMIT: 1200MiB
+    depends_on:
+      clickhouse: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, /prismd, healthcheck, --url, http://127.0.0.1:9090/-/ready]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits: {memory: 1500M, pids: 4096}
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: [/tmp]
+
+  grafana:
+    image: docker.io/grafana/grafana-oss:12.0.0@sha256:884f0f140669a5b9dccee1baece011a3fa5dd1951f1ba158b03de8ad1d178380
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GRAFANA_HTTP_PORT:-3000}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ${PRISM_SECRETS_DIR:-./secrets}/grafana_password:/run/secrets/grafana_password:ro
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_password
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      PRISM_DATASOURCE_TOKEN: ${PRISM_DATASOURCE_TOKEN:?set PRISM_DATASOURCE_TOKEN}
+    depends_on:
+      prismd: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {memory: 256M, pids: 1024}
+    security_opt: [no-new-privileges:true]
+
+volumes:
+  ch-data:
+  grafana-data:

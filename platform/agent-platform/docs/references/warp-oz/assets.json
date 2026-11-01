@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "source_owner": "Warp",
+  "purpose": "Attributed product-interface reference and commentary",
+  "rights_notice": "Third-party screenshots retain their original rights; repository MIT license does not relicense these images.",
+  "assets": [
+    {
+      "file": "images/runs.webp",
+      "description_zh_tw": "任務執行清單",
+      "source_page": "https://docs.warp.dev/platform/oz-web-app/",
+      "source_image": "https://docs.warp.dev/_astro/oz-web-app-runs-view.Dc_nRcAU_Z2qfNGl.webp?dpl=dpl_BQotxUDyhhcrchJ8t3tzsgwYXqsc",
+      "retrieved_date": "2026-10-04",
+      "format": "WEBP",
+      "width": 2399,
+      "height": 1011,
+      "bytes": 29276,
+      "sha256": "1891399cf630c27a55d0c12c0524d4e0599ffcdb5ab86d22c8192d8f36b7f117",
+      "transformation": "none; exact downloaded bytes"
+    },
+    {
+      "file": "images/new-agent.webp",
+      "description_zh_tw": "建立 Agent",
+      "source_page": "https://docs.warp.dev/platform/oz-web-app/",
+      "source_image": "https://docs.warp.dev/_astro/oz-web-app-new-agent.BDCCUbrO_Z1b9cHq.webp?dpl=dpl_BQotxUDyhhcrchJ8t3tzsgwYXqsc",
+      "retrieved_date": "2026-10-04",
+      "format": "WEBP",
+      "width": 2402,
+      "height": 1558,
+      "bytes": 35824,
+      "sha256": "dffd0f6c603cd30df5ba0e93d79ecc2c888592dd96858d36c99c9b18d48a0f85",
+      "transformation": "none; exact downloaded bytes"
+    },
+    {
+      "file": "images/new-environment.webp",
+      "description_zh_tw": "建立執行環境",
+      "source_page": "https://docs.warp.dev/platform/environments/configuring-environments/",
+      "source_image": "https://docs.warp.dev/_astro/oz-web-app-new-environment.6oAOc_HQ_1qTc4a.webp?dpl=dpl_BQotxUDyhhcrchJ8t3tzsgwYXqsc",
+      "retrieved_date": "2026-10-04",
+      "format": "WEBP",
+      "width": 1512,
+      "height": 951,
+      "bytes": 21232,
+      "sha256": "5d227067f5eb843fa5288b0075aead849153f8cb3c315c1ef949df597a999117",
+      "transformation": "none; exact downloaded bytes"
+    },
+    {
+      "file": "images/schedules.webp",
+      "description_zh_tw": "排程清單的未設定狀態",
+      "source_page": "https://docs.warp.dev/platform/oz-web-app/",
+      "source_image": "https://docs.warp.dev/_astro/oz-web-app-schedules.CiPmn9eL_Z22FMSo.webp?dpl=dpl_BQotxUDyhhcrchJ8t3tzsgwYXqsc",
+      "retrieved_date": "2026-10-04",
+      "format": "WEBP",
+      "width": 1512,
+      "height": 951,
+      "bytes": 19368,
+      "sha256": "f4871fc6be153d2b2a2117e728cb3133d52984c0834b42e641c4a0b176d59015",
+      "transformation": "none; exact downloaded bytes"
+    },
+    {
+      "file": "images/integrations.webp",
+      "description_zh_tw": "外部服務整合",
+      "source_page": "https://docs.warp.dev/platform/oz-web-app/",
+      "source_image": "https://docs.warp.dev/_astro/oz-web-app-integrations.nS54nztb_Z2gl1ih.webp?dpl=dpl_BQotxUDyhhcrchJ8t3tzsgwYXqsc",
+      "retrieved_date": "2026-10-04",
+      "format": "WEBP",
+      "width": 1512,
+      "height": 951,
+      "bytes": 26502,
+      "sha256": "583e3e5ad9e69ab73cc8ccbf6b726190a5d7613ef1db68118fe0905912f8e777",
+      "transformation": "none; exact downloaded bytes"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "name": "details",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "dimensions": {
+      "viewport": 1440,
+      "width": 1440,
+      "title": "Lens notes · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "index",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "dimensions": {
+      "viewport": 1440,
+      "width": 1440,
+      "title": "Notes · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "details",
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "dimensions": {
+      "viewport": 375,
+      "width": 375,
+      "title": "Lens notes · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "index",
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "dimensions": {
+      "viewport": 375,
+      "width": 375,
+      "title": "Notes · CMS 作業台"
+    },
+    "errors": []
+  }
+]

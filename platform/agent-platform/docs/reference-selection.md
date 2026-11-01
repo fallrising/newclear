@@ -5,6 +5,10 @@
 - Decision：**OpenHands Agent Canvas** 為唯一主產品範本
 - Implementation status：未安裝候選平台；未測試 OpenHands × Cocoon 相容性
 
+## 補充產品參考
+
+- [Warp Oz 圖文功能手冊與設計對照（2026-10-04）](references/warp-oz/README.md)：官方介面截圖、功能與操作流程、英文來源、限制及本平台對照。作為雲端 Agent 管理與自動化的補充參考；不更改本文件的 OpenHands 主範本決策，不表示相關能力已在本平台實作或驗收。
+
 ## 1. 如何理解需求
 
 本次「最流程」依前文理解為「最流行」。研究目標是從主流候選中挑選適合「伺服器常駐、多 agent 並行、統一 Web UI」的範本。並非建立全 GitHub 的完整排名，也不把星數最多直接等同最適合。

@@ -62,9 +62,16 @@
       "displayName": "Projects operator",
       "email": null,
       "status": "active"
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "username": "mock-operator-notes",
+      "displayName": "Notes operator",
+      "email": null,
+      "status": "active"
     }
   ],
   "page": 0,
   "size": 9,
-  "total": 9
+  "total": 10
 }

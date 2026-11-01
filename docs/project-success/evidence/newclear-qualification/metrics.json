@@ -1,0 +1,13 @@
+{
+  "recorded": "2026-10-21T15:56:51.018785+00:00",
+  "coverage": "All persisted qualification *-commands.json records in this evidence directory; excludes diagnostic/read/tooling shell calls.",
+  "native_command_records": 34,
+  "child_exit_zero": 29,
+  "child_exit_nonzero": 5,
+  "sum_command_seconds_not_wall_time": 780.878,
+  "outer_orchestration_calls": null,
+  "nested_tool_calls": null,
+  "provider_requests": null,
+  "agent_starts": 0,
+  "unknown_reason": "Conversation compacted; no reliable complete tool/provider ledger. Native process record count is not a provider-call count."
+}

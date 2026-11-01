@@ -431,3 +431,51 @@ checks, affected-module checks, documentation, and acceptance evidence pass.
     its production 10 ms evaluation budget elapsed. The semantic assertion now
     retries within a bounded five-second test window, matching the existing
     real-Kafka test strategy without changing the production limit.
+
+## T-0368 mainline SDD proposal (2026-10-22)
+
+Active-repository provenance search completed: no original normative SDD found in the documented scope. [New SDD proposal](../SDD.md) preserves existing AC-01 through AC-05 and strict retry timing, with a source/difference table and [reference execution report](test-reports/mainline-sdd-20261022.md). Unchanged main reference build:119/119 PASS; Go SDK import FAIL. This is not acceptance of the uncommitted repair candidate (prior132 tests:131 PASS/1 strict FAIL703ms; later focused20 PASS). Mainline remains incomplete; usable_tag:none. Owner agreement, missing AC probes and repair qualification remain pending.
+
+## T-0368 AC-09 runtime lifecycle slice (2026-10-22)
+
+- [x] Push worker lifecycle runs on a bounded reconciler, not the config-bus poll thread; a failed stop keeps the worker and unconfirmed revision and is retried.
+- [x] Fatal config-bus failure lowers readiness and pause confirmation; shutdown attempts every owned resource.
+- [x] Unconfigured runtime roster keeps ordinary startup but never confirms a pause; a configured roster still requires membership.
+- [x] Scheduled reconcile survives a thrown pass; stop retries continue after config-bus loss without starting or confirming.
+- [x] Console reset requires every roster runtime to confirm the paused revision, takes a PG advisory maintenance fence shared with subscription mutations, bounds HTTP/Kafka waits by the deadline, and reads back altered offsets.
+- [x] Session-loss contention during the synchronous reset call is fenced by a committed `group_maintenance_lease` row (reset deadline + 5 min); ordinary mutations check it under the shared advisory key. Failed lease acquisition releases the key, or aborts the physical connection if unlocking fails.
+- [ ] Kafka timeout/interrupt does not prove broker completion: retain/reconcile uncertain reset outcomes before restoring consumers or releasing protection. Expiry also does not fence a process suspended beyond the lease margin; stale-owner safety remains open.
+- [ ] Preview/confirm, whole-group coordination, real two-runtime reset evidence (remaining AC-09).
+
+## T-0368 timing-contract decision proposal, 2026-10-22
+
+Owner approved original SDD PR472/874517a8. Continued candidate still fails original AC05; details in docs/test-reports/retry-contract-decision-20261022.md. This docs-only PR explicitly proposes changing measurement from adjacent arrivals to failure-result completion→next arrival, with identical numeric limits and original503fixture. It does not change runtime/tests, does not make historical failures pass, and must not merge without owner agreement. AC09 and original candidate work remain separate, uncommitted and unqualified. No usable tag.
+
+## T-0374 AC09 uncertain outcome safety slice (2026-10-22)
+
+In progress: token/expiry-checked durable quarantine before Kafka alter, retained on unverified outcome, restored/released only after successful offset readback. Recovery automation, whole-group coordination and preview remain separate tasks. See [reset outcome safety](reset-outcome-safety.md) for design and acceptance.
+
+Validation2026-10-22T16:20Z: final `./gradlew build --no-daemon --no-parallel` PASS (console 51/0/0/0 executed; 145 current JUnit cases including cached modules, 21 executed tasks/14 cache/9 up-to-date). Deploy models,15 contract tests,41 project contracts and diff check PASS. Initial RED was an unhandled timeout ServletException before the state assertion, preserved as failure; final integration test verifies pause/infinite row/rejected resume and reacquisition. Independent review and final-head CI remain required. No full AC09 or real delayed-broker acceptance.
+
+## T-0374 specification/source/test map (2026-10-22)
+
+Owner requested consolidation against code. [Specification map](specification-map.md) records existing product/ADR/M2–M6/semantics, AC01–11 source/test links and explicit discrepancies at 6c611778. This is documentation only; approved requirements and historical failures remain unchanged. README/product-spec/SUCCESS/BOARD approval notes are reconciled to PR472/477; M2's value-vs-encoded-request wording is clarified from existing M3/MessageLimits. [Current evidence](test-reports/specification-map-20261022.md) separates cached native build, static review, CI and unrun qualification.
+
+## T-0380 FE Round2 claim
+
+Approved M1–M4 and bounded review-only overlay/gRPC addendum; [task](../fe-review/tasks/round2/task.md). Docs-only claim, no implementation/build/runtime success claimed. Before implementation commit record full Gradle/frontend/native/runtime/ownership evidence and independent acceptance.
+
+## T-0380 FE Round2 implementation evidence (2026-10-24)
+
+Approved M1–M4 implemented within the explicit review-only isolation/gRPC scope.
+Production delta is Dashboard ResizeObserver and its focused regression only;
+measured drawer bounds needed no CSS change. Full Gradle build passed102.356s,
+153 reported cases including cache (28 executed/16 cached tasks); web6tests/build,
+deploy validation and original mock browser1test passed. One fresh exact-owned
+stack plus approved bounded continuations produced42 state/27 route/3chart images;
+six original drawer images were superseded by100% pixel-mask coverage retakes.
+Original failures, axe/preload/mobileLogout limitations and tested-source deltas
+remain in [report](../fe-review/tasks/round2/report.md) and [verification](../fe-review/tasks/round2/evidence/verification.json).
+All exact owned resources were removed with positive absence. Independent final
+acceptance and current CI/publication remain pending; no full Round3 or changed
+mainline/usable qualification.

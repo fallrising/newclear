@@ -1,0 +1,8 @@
+{
+  "name": "agent-office-lab-grok",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "@xai-official/grok": "1.0.70"
+  }
+}

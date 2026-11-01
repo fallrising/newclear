@@ -93,7 +93,7 @@ mkdir -p -- "$case_root/agpl-fixture" "$case_root/internal/guardagpl"
 cat >"$case_root/agpl-fixture/go.mod" <<'EOF'
 module github.com/grafana/loki
 
-go 1.23.0
+go 1.27.1
 EOF
 cat >"$case_root/agpl-fixture/loki.go" <<'EOF'
 package loki

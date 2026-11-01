@@ -1,0 +1,21 @@
+{
+  "baseline": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "npmCi": {
+    "exitCode": 0,
+    "warning": "Existing one high severity advisory; no dependency change."
+  },
+  "build": {
+    "exitCode": 0,
+    "log": ".team/evidence/w5-baseline-build.log"
+  },
+  "bundleIsolation": {
+    "exitCode": 0
+  },
+  "mockInventory": {
+    "exitCode": 0,
+    "total": 68,
+    "files": 5
+  },
+  "w5TightBundleBudgets": "not measured by root yet",
+  "fullTestsRepeated": false
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "attempt": 1,
+    "project": "cms-w5-e2e-1942395-769b7e022bc9d437",
+    "containersRemaining": 0,
+    "volumesRemaining": 0,
+    "networksRemaining": 0,
+    "privateDirectoryRemoved": true,
+    "cleanupLogSha256": "73f0be9d64d2cc3fb33f44a74fdcc89a0c46a1006f02b83d2c6bbfae2e8643f3"
+  },
+  {
+    "attempt": 2,
+    "project": "cms-w5-e2e-1946377-913c0c36e39cc6cc",
+    "containersRemaining": 0,
+    "volumesRemaining": 0,
+    "networksRemaining": 0,
+    "privateDirectoryRemoved": true,
+    "cleanupLogSha256": "26c1f61c3afb9430e99ce6897e057f407c470e8cb70011857fd8f8eebc9a0cd7"
+  },
+  {
+    "attempt": 3,
+    "project": "cms-w5-e2e-2051694-3e943f0111a67954",
+    "containersRemaining": 0,
+    "volumesRemaining": 0,
+    "networksRemaining": 0,
+    "privateDirectoryRemoved": true,
+    "cleanupLogSha256": "c72f3357ba2a7b4c6e8423c12a485ac6bf04fda95c563e959ea821b04ebf0a55"
+  },
+  {
+    "attempt": 4,
+    "project": "cms-w5-e2e-2055853-91e5311cf64123c1",
+    "containersRemaining": 0,
+    "volumesRemaining": 0,
+    "networksRemaining": 0,
+    "privateDirectoryRemoved": true,
+    "cleanupLogSha256": "9ed530f5b4d04bc6cf80f1db246a12cee695e30de7a5fa74e2284ec6579fd273"
+  }
+]

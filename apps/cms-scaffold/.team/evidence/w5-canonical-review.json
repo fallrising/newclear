@@ -1,0 +1,10 @@
+{
+  "run": "https://github.com/fallrising/newclear/actions/runs/37349357513",
+  "artifactId": 11361114634,
+  "head": "d84738eb728190494145866bf6b0648305105701",
+  "ciMergeCommit": "24f40f2734cb5d4c2aff00a367609d28d341b9cb",
+  "pngCount": 70,
+  "hashesMatch": true,
+  "review": "All70 via seven sheets; full-size clinic390,Admin role matrix390,confirmation1280. Content/headings/navigation/cards/forms/dialogs visible; mobile table clips only inside intended horizontal scroller. Cyan image tiles and small lightbox image are existing deterministic mock media, not missing production files. No blocking visual findings. Initial authoring accepted; comparison-only CI pending.",
+  "responsiveFollowup": "390/375/320 clinic document/header scrollWidth equalsviewport; zero pageerrors;320 brand wraps without overlap. Evidence w5-clinic-widths.json closes T959 speculative overflow risk."
+}

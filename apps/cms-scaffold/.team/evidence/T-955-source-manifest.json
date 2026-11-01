@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "e2e-mock/admin-w4.spec.ts",
+      "sha256": "6c7ef8e18d1025b26a71b1db560b16b08c6b65c3065fdd26ae80d050d73f0d4c",
+      "lines": 143
+    },
+    {
+      "path": "e2e-quality/axe-w5.spec.ts",
+      "sha256": "861dced9612458cb3a5259bc78f02023db00859946db71b192768973c0a24288",
+      "lines": 42
+    },
+    {
+      "path": "e2e-quality/hardening-w5.spec.ts",
+      "sha256": "6dd92388d16f46f3c6c6fe296d5d6a1fff5a1a1cf2760fae3c814779e0a0239d",
+      "lines": 180
+    },
+    {
+      "path": "e2e-quality/helpers.ts",
+      "sha256": "d985d53338d2c6727fb59229a846094d90c3c144c54df9b8c055dccfdd442126",
+      "lines": 69
+    },
+    {
+      "path": "e2e-quality/manifest.contract.test.ts",
+      "sha256": "a3fc1749f765ce2f6a46e8f81083cdabf7d538542d8e0e926394cf606d804118",
+      "lines": 46
+    },
+    {
+      "path": "e2e-quality/pages.ts",
+      "sha256": "a2a8f9c5ed5c9e6555437857502407275d84b7103bf603a9f94f31c7e308064b",
+      "lines": 81
+    },
+    {
+      "path": "e2e-quality/visual-w5.spec.ts",
+      "sha256": "d3597135aa4a191d84a415a72cf6797074bb4f6c86b7a7f966322db7dab4a717",
+      "lines": 82
+    },
+    {
+      "path": "e2e-vitals/routes.contract.test.ts",
+      "sha256": "41518ed22700c955a39716965bdfc4b2115416c0e8c8371baf82f7885c345243",
+      "lines": 74
+    },
+    {
+      "path": "e2e-vitals/routes.ts",
+      "sha256": "ffa2882a161a6f70270634c661aaac850bb4e86057186b748437bedad6b75ce4",
+      "lines": 96
+    },
+    {
+      "path": "e2e-vitals/vitals-w5.spec.ts",
+      "sha256": "1a8b47e2d8e737c2ac6cb7ae5df15ea599580669a0fe3574cf5e0bea72f7f8ef",
+      "lines": 161
+    },
+    {
+      "path": "playwright.quality.config.ts",
+      "sha256": "03407216138c9a24a544a16caf8695dbd2cae5ee146a67033f93033da262b34e",
+      "lines": 37
+    },
+    {
+      "path": "playwright.vitals.config.ts",
+      "sha256": "f8fc2ea3f745fc7be36afcb9f784537a8c7ebfb007dc7cba3d80e3532e381fc6",
+      "lines": 36
+    }
+  ]
+}

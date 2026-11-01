@@ -37,9 +37,10 @@ func TestM2ST06SegmentRotationAndCrossBoundaryRead(t *testing.T) {
 		}
 		for index, record := range records {
 			want = append(want, LocalRecord{
-				Offset: result.BaseOffset + uint64(index),
-				Key:    cloneNullableBytes(record.Key),
-				Value:  append([]byte{}, record.Value...),
+				Offset:          result.BaseOffset + uint64(index),
+				Key:             cloneNullableBytes(record.Key),
+				Value:           append([]byte{}, record.Value...),
+				AppendTimestamp: uint64(1000 + batch),
 			})
 		}
 	}
@@ -95,9 +96,10 @@ func TestM2ST07SparseSeekMatchesReferenceAndReportsWork(t *testing.T) {
 		}
 		for index, record := range records {
 			reference = append(reference, LocalRecord{
-				Offset: result.BaseOffset + uint64(index),
-				Key:    cloneNullableBytes(record.Key),
-				Value:  append([]byte{}, record.Value...),
+				Offset:          result.BaseOffset + uint64(index),
+				Key:             cloneNullableBytes(record.Key),
+				Value:           append([]byte{}, record.Value...),
+				AppendTimestamp: uint64(2000 + batch),
 			})
 		}
 	}

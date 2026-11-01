@@ -118,8 +118,10 @@ hashes the canonical V1 request. The write unit of work is:
    events, append zero or more outbox intents, persist the canonical command result/idempotency row;
 6. commit, then publish the retained event to the in-process hub and let an outbox worker claim work.
 
-No adapter dispatch, filesystem hashing/publication, Git traversal or SSE socket write occurs before
-commit. Artifact bytes are staged/fsynced/hashed/renamed before a later binding transaction; orphan
+Adapter dispatch and externally visible projection delivery occur after durable command commit.
+Immutable artifact/Git preflight may occur before the binding transaction, outside SQLite writer
+locks; the final transaction rechecks current authority and captured material identity. Publication
+without a committed binding remains an orphan and confers no authority. (Owner-approved C06, 2026-10-30.) Artifact bytes are staged/fsynced/hashed/renamed before a later binding transaction; orphan
 objects are recoverable and a missing bound object is corruption. The first bounded checkpoint is
 the committed `runs + outbox + audit + command result` transaction: a returned/recorded Run is never
 missing its dispatch intent, and response loss recovers solely by command-id/idempotency lookup.

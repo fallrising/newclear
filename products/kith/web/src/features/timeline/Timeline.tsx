@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { roomMembersQueryKey } from "../../api/rooms";
 import { useDraftStore } from "../../store/drafts";
 import { useNow, useStatusStore } from "../../store/statuses";
@@ -9,6 +9,7 @@ import { useT } from "../../copy";
 import type { RoomTimeline } from "../../sync/types";
 import { localTimeZone } from "../../ui/time";
 import { buildItems, type TimelineItem } from "./buildItems";
+import { timelineAnchoring } from "./anchor";
 import { DateDivider } from "./DateDivider";
 import { NewDivider } from "./NewDivider";
 import { JumpToLatest } from "./JumpToLatest";
@@ -62,12 +63,15 @@ export function Timeline(props: Props): ReactElement {
   const [unseen, setUnseen] = useState(0);
 
   const virtualizer = useVirtualizer({
+    ...timelineAnchoring,
     count: items.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => 64,
     overscan: 8,
     getItemKey: (i) => items[i]!.key,
   });
+
+  const lastKey = items[items.length - 1]?.key ?? null;
 
   const scrollToEnd = (): void => {
     if (items.length > 0) virtualizer.scrollToIndex(items.length - 1, { align: "end" });
@@ -113,23 +117,9 @@ export function Timeline(props: Props): ReactElement {
     return () => cancelAnimationFrame(id);
   }, [hasMessages, timeline.phase]);
 
-  // 4. Keep the anchor when older rows are prepended (W1 §5.6.2; measured 0 px jump).
-  const firstKey = items.find((i) => i.kind === "message" || i.kind === "pending")?.key ?? null;
-  const lastKey = items[items.length - 1]?.key ?? null;
-  const prevFirstKey = useRef<string | null>(null);
-  const prevLastKey = useRef<string | null>(null);
-  const prevTotal = useRef(0);
+  // 4. The virtualizer preserves the keyed anchor across prepends and delayed
+  // measurements. Keep logical and DOM offsets under the same owner.
   const prevItems = useRef<TimelineItem[]>(items);
-  useLayoutEffect(() => {
-    const el = scrollRef.current;
-    const total = virtualizer.getTotalSize();
-    if (el && prevFirstKey.current !== null && firstKey !== prevFirstKey.current && prevLastKey.current === lastKey) {
-      el.scrollTop += total - prevTotal.current;
-    }
-    prevFirstKey.current = firstKey;
-    prevLastKey.current = lastKey;
-    prevTotal.current = total;
-  });
 
   // 5. Items appended at the end.
   useEffect(() => {

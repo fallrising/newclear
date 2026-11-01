@@ -1,0 +1,720 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T16:45:42.691Z",
+  "gitCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "dirty": true,
+  "expected": 60,
+  "result": "passed",
+  "rows": [
+    {
+      "id": "front-selector",
+      "url": "http://127.0.0.1:5173/",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-login",
+      "url": "http://127.0.0.1:5173/login",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-album-home",
+      "url": "http://127.0.0.1:5173/album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-album-list",
+      "url": "http://127.0.0.1:5173/album/albums",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-album-detail",
+      "url": "http://127.0.0.1:5173/album/albums/coast-light-2026",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-photo",
+      "url": "http://127.0.0.1:5173/album/photos/coast-sun",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-clinic-home",
+      "url": "http://127.0.0.1:5173/clinic",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-vet-list",
+      "url": "http://127.0.0.1:5173/clinic/vets",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-vet-detail",
+      "url": "http://127.0.0.1:5173/clinic/vets/james-carter",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-projects-home",
+      "url": "http://127.0.0.1:5173/projects",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-project-detail",
+      "url": "http://127.0.0.1:5173/projects/cms-scaffold",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-milestone-list",
+      "url": "http://127.0.0.1:5173/projects/cms-scaffold/milestones",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-milestone-detail",
+      "url": "http://127.0.0.1:5173/projects/cms-scaffold/milestones/m1-specs",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-not-found",
+      "url": "http://127.0.0.1:5173/album/albums/secret",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-empty",
+      "url": "http://127.0.0.1:5173/projects?mock=empty",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-error",
+      "url": "http://127.0.0.1:5173/clinic/vets/james-carter?mock=error500",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-member-home",
+      "url": "http://127.0.0.1:5173/clinic/me?mockUser=seed-member-clinic",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-member-new",
+      "url": "http://127.0.0.1:5173/clinic/appointments/new?mockUser=seed-member-clinic",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-member-detail",
+      "url": "http://127.0.0.1:5173/clinic/appointments/43000000-0000-4000-8000-000000000001?mockUser=seed-member-clinic",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-member-forbidden",
+      "url": "http://127.0.0.1:5173/clinic/appointments/43000000-0000-4000-8000-000000000001?mockUser=seed-member-projects",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "front-member-empty",
+      "url": "http://127.0.0.1:5173/clinic/me?mock=empty&mockUser=seed-member-clinic",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-sign-in",
+      "url": "http://127.0.0.1:5174/sign-in",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-home",
+      "url": "http://127.0.0.1:5174/?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-index",
+      "url": "http://127.0.0.1:5174/entries/album?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-new",
+      "url": "http://127.0.0.1:5174/entries/album/new?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": [
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "targets": [
+            [
+              ".top-14"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "back-detail",
+      "url": "http://127.0.0.1:5174/entries/album/30000000-0000-4000-8000-000000000008?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": [
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "targets": [
+            [
+              ".top-14"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "back-preview",
+      "url": "http://127.0.0.1:5174/entries/note/30000000-0000-4000-8000-000000000037/preview?mockUser=mock-operator-notes",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-history",
+      "url": "http://127.0.0.1:5174/entries/note/30000000-0000-4000-8000-000000000037/history?mockUser=mock-operator-notes",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-media",
+      "url": "http://127.0.0.1:5174/media?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-media-detail",
+      "url": "http://127.0.0.1:5174/media/20000000-0000-4000-8000-000000000008?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": [
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "targets": [
+            [
+              ".top-14"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "back-composer",
+      "url": "http://127.0.0.1:5174/views/album.composer?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-schedule",
+      "url": "http://127.0.0.1:5174/views/clinic.schedule?mockUser=seed-operator-clinic",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-board",
+      "url": "http://127.0.0.1:5174/views/projects.board?project=30000000-0000-4000-8000-000000000024&mockUser=seed-operator-projects",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-forbidden",
+      "url": "http://127.0.0.1:5174/forbidden?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "back-not-found",
+      "url": "http://127.0.0.1:5174/not-found?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-overview",
+      "url": "http://127.0.0.1:5175/?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-types",
+      "url": "http://127.0.0.1:5175/types?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-type-detail",
+      "url": "http://127.0.0.1:5175/types/owner?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-roles",
+      "url": "http://127.0.0.1:5175/roles?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-role-detail",
+      "url": "http://127.0.0.1:5175/roles/member?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-principals",
+      "url": "http://127.0.0.1:5175/principals?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-principal-new",
+      "url": "http://127.0.0.1:5175/principals/new?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-principal-detail",
+      "url": "http://127.0.0.1:5175/principals/10000000-0000-4000-8000-000000000003?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": [
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "targets": [
+            [
+              ".top-14"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "admin-audit",
+      "url": "http://127.0.0.1:5175/audit?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-audit-detail",
+      "url": "http://127.0.0.1:5175/audit/70000000-0000-4000-8000-000000000007?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-media",
+      "url": "http://127.0.0.1:5175/media?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-settings",
+      "url": "http://127.0.0.1:5175/settings?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-audit-settings",
+      "url": "http://127.0.0.1:5175/settings/audit?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-entry-lookup",
+      "url": "http://127.0.0.1:5175/entries?type=album&mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-entry-inspector",
+      "url": "http://127.0.0.1:5175/entries/30000000-0000-4000-8000-000000000017?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": [
+        {
+          "id": "landmark-unique",
+          "impact": "moderate",
+          "targets": [
+            [
+              ".top-14"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "admin-forbidden",
+      "url": "http://127.0.0.1:5175/403?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "admin-not-found",
+      "url": "http://127.0.0.1:5175/impersonate?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-front-mobile-menu",
+      "url": "http://127.0.0.1:5173/album",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-front-lightbox",
+      "url": "http://127.0.0.1:5173/album/albums/coast-light-2026?photo=coast-sun",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-back-media-picker",
+      "url": "http://127.0.0.1:5174/entries/album/30000000-0000-4000-8000-000000000008?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-back-conflict",
+      "url": "http://127.0.0.1:5174/entries/album/30000000-0000-4000-8000-000000000008?mockUser=seed-operator-album&mock=conflict",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-back-leave",
+      "url": "http://127.0.0.1:5174/entries/album/30000000-0000-4000-8000-000000000008?mockUser=seed-operator-album",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-admin-confirm",
+      "url": "http://127.0.0.1:5175/types/owner?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-admin-password",
+      "url": "http://127.0.0.1:5175/principals/new?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    },
+    {
+      "id": "state-admin-member-link",
+      "url": "http://127.0.0.1:5175/entries/30000000-0000-4000-8000-000000000017?mockUser=seed-admin",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "critical": 0,
+      "serious": 0,
+      "violations": []
+    }
+  ]
+}

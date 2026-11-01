@@ -1,5 +1,7 @@
 # Controller B 操作器
 
+2026-10-03 的本機能力與尚缺程式／E2E 以 [收尾矩陣](LOCAL-CLOSEOUT-2026-10-03.md) 為準。發布新 core validation manifest 時，兩個 build result 必須為不同檔案身分；每個跨版本相容性聲明在主要及獨立 build 都需成功且無歧義的 step。manifest 採原子不可覆寫發布，競爭失敗保留已存在內容。檔案不同不代替可信的獨立建置證據；現有 deployment lock 未升級。
+
 最新狀態：[故障恢復與 reapply 驗證](M2-RECOVERY-2026-09-23.md)，操作入口見 [恢復與修補版 reapply](RECOVERY.md)。core 修補已部署，worker-4 的新操作器 smoke 已 PASS；worker-4 元件重裝已完成連續三次實機驗收。下列早期紀錄保留作背景，以最新實測為準。
 
 ERU-001 已補上 core 更新於替換前中斷的 `recovery.py plan --action core-cancel`；來源、封存與回覆遺失規則見 [RECOVERY.md](RECOVERY.md)，剩餘編號見 [TASKS.md](TASKS.md)。

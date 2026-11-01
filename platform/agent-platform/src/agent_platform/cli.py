@@ -3,6 +3,8 @@
 import argparse
 import getpass
 import json
+import logging
+import os
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -18,12 +20,176 @@ from .domain import Problem
 from .runtime_client import RuntimeClient
 from .worker import Worker
 
+MAINTENANCE_COMMANDS = {
+    "backup-create",
+    "backup-verify",
+    "backup-restore",
+    "archive-gc-preview",
+    "archive-gc-apply",
+    "event-gc-preview",
+    "event-gc-apply",
+    "audit-gc-preview",
+    "audit-gc-apply",
+    "stale-cleanup-preview",
+    "stale-cleanup-apply",
+}
+
+
+def read_gc_plan(path, *, code="archive_gc_plan_invalid"):
+    from .private_config import read_private_text
+
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError()
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError()
+
+    try:
+        value = json.loads(
+            read_private_text(path.absolute(), max_bytes=65536),
+            object_pairs_hook=unique,
+            parse_constant=reject_constant,
+        )
+        if not isinstance(value, dict):
+            raise ValueError()
+        return value
+    except (ValueError, OSError, RecursionError):
+        raise ValueError(code) from None
+
+
+def maintenance_command(args):
+    from psycopg import Error as DatabaseError
+    from psycopg.conninfo import conninfo_to_dict
+
+    db = None
+    pool_logger = logging.getLogger("psycopg.pool")
+
+    def hide_pool_details(record):
+        # This standalone CLI emits one bounded error; background pool diagnostics may
+        # embed malformed connection values before open() returns to our exception guard.
+        return False
+
+    try:
+        plan = None
+        if args.command in {
+            "archive-gc-apply",
+            "event-gc-apply",
+            "audit-gc-apply",
+            "stale-cleanup-apply",
+        }:
+            code = (
+                "stale_cleanup_plan_invalid"
+                if args.command == "stale-cleanup-apply"
+                else args.command.split("-", 1)[0] + "_gc_plan_invalid"
+            )
+            plan = read_gc_plan(args.plan, code=code)
+        if args.command == "backup-verify":
+            from .backup import verify_backup
+
+            result = verify_backup(args.directory)
+        else:
+            url = os.environ.get("DATABASE_URL")
+            if not url:
+                raise ValueError("maintenance_database_required")
+            if args.command == "backup-create":
+                from .backup import create_backup
+
+                result = create_backup(url, args.directory, offline=args.offline)
+            elif args.command == "backup-restore":
+                from .backup import restore_backup
+
+                result = restore_backup(
+                    url,
+                    args.directory,
+                    offline=args.offline,
+                    confirm_database=args.confirm_database,
+                )
+            else:
+                if args.command.startswith("stale-cleanup-"):
+                    from .stale_cleanup import apply, preview
+                elif args.command.startswith("audit-gc-"):
+                    from .audit_retention import apply, preview
+                elif args.command.startswith("event-gc-"):
+                    from .event_retention import apply, preview
+                else:
+                    from .archive_retention import apply, preview
+
+                conninfo_to_dict(url)
+                pool_logger.addFilter(hide_pool_details)
+                db = Database(url)
+                db.open()
+                if args.command.startswith("stale-cleanup-"):
+                    connector = RuntimeClient.from_env()
+                    if connector is None:
+                        raise ValueError("stale_cleanup_connector_required")
+                    if args.command.endswith("-preview"):
+                        result = preview(db, connector, run_id=args.run_id)
+                    else:
+                        result = apply(db, connector, plan, approval_digest=args.approve)
+                elif args.command in {"archive-gc-preview", "event-gc-preview", "audit-gc-preview"}:
+                    options = {"retention_days": args.retention_days, "limit": args.limit}
+                    if args.command == "event-gc-preview":
+                        options["event_limit"] = args.event_limit
+                    result = preview(db, **options)
+                else:
+                    result = apply(db, plan, approval_digest=args.approve)
+        print(json.dumps(result, ensure_ascii=False, allow_nan=False, sort_keys=True))
+        return 0
+    except (ValueError, Problem) as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    except DatabaseError:
+        print("maintenance_database_unavailable", file=sys.stderr)
+        return 1
+    finally:
+        try:
+            if db is not None:
+                db.close()
+        finally:
+            pool_logger.removeFilter(hide_pool_details)
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("migrate")
     commands.add_parser("register-runtime")
+    for name in ("backup-create", "backup-verify", "backup-restore"):
+        maintenance = commands.add_parser(name)
+        maintenance.add_argument("--directory", type=Path, required=True)
+        if name != "backup-verify":
+            maintenance.add_argument("--offline", action="store_true", required=True)
+        if name == "backup-restore":
+            maintenance.add_argument("--confirm-database", required=True)
+    preview = commands.add_parser("archive-gc-preview")
+    preview.add_argument("--retention-days", type=int, default=30)
+    preview.add_argument("--limit", type=int, default=100)
+    pruning = commands.add_parser("archive-gc-apply")
+    pruning.add_argument("--plan", type=Path, required=True)
+    pruning.add_argument("--approve", required=True)
+    event_preview = commands.add_parser("event-gc-preview")
+    event_preview.add_argument("--retention-days", type=int, default=30)
+    event_preview.add_argument("--limit", type=int, default=100)
+    event_preview.add_argument("--event-limit", type=int, default=1000)
+    event_pruning = commands.add_parser("event-gc-apply")
+    event_pruning.add_argument("--plan", type=Path, required=True)
+    event_pruning.add_argument("--approve", required=True)
+    audit_preview = commands.add_parser("audit-gc-preview")
+    audit_preview.add_argument("--retention-days", type=int, default=90)
+    audit_preview.add_argument("--limit", type=int, default=100)
+    audit_pruning = commands.add_parser("audit-gc-apply")
+    audit_pruning.add_argument("--plan", type=Path, required=True)
+    audit_pruning.add_argument("--approve", required=True)
+    stale_preview = commands.add_parser("stale-cleanup-preview")
+    stale_preview.add_argument("--run-id", required=True)
+    stale_apply = commands.add_parser("stale-cleanup-apply")
+    stale_apply.add_argument("--plan", type=Path, required=True)
+    stale_apply.add_argument("--approve", required=True)
     connector = commands.add_parser("connector")
     connector.add_argument("--config", type=Path, required=True)
     connector.add_argument("--port", type=int, default=17800)
@@ -36,6 +202,9 @@ def main():
     api.add_argument("--web-dist", type=Path)
     worker = commands.add_parser("worker")
     worker.add_argument("--once", action="store_true")
+    export = commands.add_parser("export-worker")
+    export.add_argument("--config", type=Path, required=True)
+    export.add_argument("--once", action="store_true")
     rehearse = commands.add_parser("rehearse-mock")
     rehearse.add_argument("--directory", type=Path, required=True)
     rehearse.add_argument("--goal", required=True)
@@ -44,6 +213,8 @@ def main():
     reconcile.add_argument("--config", type=Path, required=True)
     reconcile.add_argument("--run-id", required=True)
     args = parser.parse_args()
+    if args.command in MAINTENANCE_COMMANDS:
+        return maintenance_command(args)
     if args.command == "rehearse-mock":
         from .model_mock import rehearse
 
@@ -113,8 +284,33 @@ def main():
                 len(catalog["repositories"]),
                 "repository revisions",
             )
+        elif args.command == "export-worker":
+            from .export_worker import from_private_config
+
+            runner = from_private_config(db, args.config)
+            if args.once:
+                runner.run_once()
+            else:
+                while True:
+                    runner.run_once()
+                    time.sleep(1)
         elif args.command == "worker":
-            runner = Worker(db, RuntimeClient.from_env())
+            subscription = None
+            if os.environ.get("SUBSCRIPTION_CONFIG"):
+                from .subscription_claude import ClaudeSubscription
+
+                subscription = ClaudeSubscription(os.environ["SUBSCRIPTION_CONFIG"])
+            codex_subscription = None
+            if os.environ.get("CODEX_SUBSCRIPTION_CONFIG"):
+                from .subscription_codex import CodexSubscription
+
+                codex_subscription = CodexSubscription(os.environ["CODEX_SUBSCRIPTION_CONFIG"])
+            runner = Worker(
+                db,
+                RuntimeClient.from_env(),
+                subscription=subscription,
+                codex_subscription=codex_subscription,
+            )
             if args.once:
                 runner.run_once()
             else:

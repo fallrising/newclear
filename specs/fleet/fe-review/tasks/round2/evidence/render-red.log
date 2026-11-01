@@ -1,0 +1,44 @@
+--- FAIL: TestReviewResponsiveTableSemantics (0.01s)
+    --- FAIL: TestReviewResponsiveTableSemantics/catalog (0.00s)
+        pages_test.go:163: missing responsive viewport
+        pages_test.go:170: missing table semantics class="table-scroll"
+        pages_test.go:170: missing table semantics <caption
+        pages_test.go:170: missing table semantics scope="col"
+    --- FAIL: TestReviewResponsiveTableSemantics/node (0.00s)
+        pages_test.go:163: missing responsive viewport
+        pages_test.go:170: missing table semantics class="table-scroll"
+        pages_test.go:170: missing table semantics <caption
+        pages_test.go:170: missing table semantics scope="col"
+    --- FAIL: TestReviewResponsiveTableSemantics/service (0.00s)
+        pages_test.go:163: missing responsive viewport
+        pages_test.go:170: missing table semantics class="table-scroll"
+        pages_test.go:170: missing table semantics <caption
+        pages_test.go:170: missing table semantics scope="col"
+    --- FAIL: TestReviewResponsiveTableSemantics/login (0.00s)
+        pages_test.go:163: missing responsive viewport
+--- FAIL: TestReviewPollingAndActions (0.01s)
+    pages_test.go:181: catalog must use htmx polling only
+    pages_test.go:185: catalog lost required contract id="act-hello-toggle"
+    pages_test.go:185: catalog lost required contract id="act-hello-redeploy"
+    pages_test.go:185: catalog lost required contract aria-label="Stop hello"
+    pages_test.go:185: catalog lost required contract hx-disabled-elt="this"
+    pages_test.go:194: service action must not swap response into the button
+    pages_test.go:197: rollback has no object-specific accessible name
+    pages_test.go:206: node health lacks shared status class
+--- FAIL: TestReviewEmptyStates (0.01s)
+    pages_test.go:215: missing "No services on this node."
+    pages_test.go:215: missing "No facts reported yet."
+    pages_test.go:221: missing "No releases yet."
+    pages_test.go:221: missing "No instance reported yet."
+    pages_test.go:221: missing "No audit entries."
+--- FAIL: TestReviewRollbackJSONAndErrorAlert (0.00s)
+    pages_test.go:231: missing browser contract hx-ext="json-body"
+    pages_test.go:231: missing browser contract id="flash" role="alert" hidden
+    pages_test.go:231: missing browser contract encodeParameters
+    pages_test.go:231: missing browser contract JSON.stringify
+    pages_test.go:231: missing browser contract .textContent
+    pages_test.go:235: JSON content type alone must not masquerade as JSON encoding
+FAIL
+FAIL	github.com/fallrising/newclear/specs/fleet/internal/ui	0.031s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/api	0.014s
+FAIL

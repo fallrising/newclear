@@ -23,8 +23,19 @@ pub fn build_http_client() -> Result<Client> {
         .ok();
 
     if let Some(url) = proxy_url {
-        info!(%url, "using upstream HTTP proxy from env");
-        let proxy = Proxy::all(&url).with_context(|| format!("invalid proxy URL {url}"))?;
+        // The proxy URL may carry credentials; log only scheme/host/port.
+        let shown = reqwest::Url::parse(&url)
+            .map(|u| {
+                format!(
+                    "{}://{}:{}",
+                    u.scheme(),
+                    u.host_str().unwrap_or("?"),
+                    u.port_or_known_default().unwrap_or(0)
+                )
+            })
+            .unwrap_or_else(|_| "<unparsable>".into());
+        info!(proxy = %shown, "using upstream HTTP proxy from env");
+        let proxy = Proxy::all(&url).context("invalid upstream proxy URL")?;
         builder = builder.proxy(proxy);
     }
 

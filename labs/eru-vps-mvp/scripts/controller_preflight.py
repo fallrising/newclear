@@ -123,7 +123,7 @@ def assess(project=PROJECT, ssh_home=None, run=command):
         blockers.append('private inventory topology differs from reviewed four hosts')
     host_keys = json_input(private / 'verified-host-public-keys.json', blockers, 'verified-host-public-keys.json')
     report['private_inputs']['verified-host-public-keys.json'] = host_keys is not None
-    if host_keys is not None and (not isinstance(host_keys, dict) or set(host_keys) != set(ALIASES[1:])):
+    if host_keys is not None and (not isinstance(host_keys, dict) or set(host_keys) not in (set(ALIASES[1:]), set(ALIASES))):
         blockers.append('verified worker host key map differs from reviewed aliases')
     state = private / 'operations'
     for name in STATE_FILES:

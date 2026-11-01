@@ -402,22 +402,63 @@ class MockTransportTests(PlatformFixture):
         self.assertEqual(usage_view(self.db, self.run)["request_slots_consumed"], 1)
 
     def test_invalid_usage_retains_uncertain_request_and_pinned_model(self):
+        identity = uuid4()
         broken = mock_response(SDKCompletion(request()).payload(self.policy.model), str(self.run))
         broken["usage"]["completion_tokens"] = 4097
         broken["usage"]["total_tokens"] = 4107
         with patch("agent_platform.model_mock.mock_response", return_value=broken):
             with self.assertRaisesRegex(Problem, "model_response_invalid"):
                 self.proxy.complete(
-                    self.run, self.token, uuid4(), SDKCompletion(request()), sdk=True
+                    self.run, self.token, identity, SDKCompletion(request()), sdk=True
                 )
         usage = usage_view(self.db, self.run)
         self.assertEqual(usage["uncertain_requests"], 1)
         self.assertEqual(usage["entries"][0]["status"], "unknown")
+        self.proxy = ModelProxy(self.db, self.policy)
+        self.token = self.proxy.issue(self.run, 1, self.worker.owner)
+        with patch("agent_platform.model_mock.mock_response", wraps=mock_response) as upstream:
+            with self.assertRaisesRegex(Problem, "model_request_already_reserved"):
+                self.proxy.complete(
+                    self.run, self.token, identity, SDKCompletion(request()), sdk=True
+                )
+            self.proxy.complete(self.run, self.token, uuid4(), SDKCompletion(request()), sdk=True)
+            with self.assertRaisesRegex(Problem, "model_request_limit_reached"):
+                self.proxy.complete(
+                    self.run, self.token, uuid4(), SDKCompletion(request()), sdk=True
+                )
+            self.assertEqual(upstream.call_count, 1)
+        self.assertEqual(usage_view(self.db, self.run)["request_slots_consumed"], 2)
+        self.assertEqual(usage_view(self.db, self.run)["uncertain_requests"], 1)
         with self.assertRaisesRegex(Problem, "model_policy_changed"):
             ModelProxy(
                 self.db,
                 Policy(self.policy.origin, self.secret, 2, mode=MOCK_MODE, model="other/mock"),
             ).issue(self.run, 1, self.worker.owner)
+
+    def test_concurrent_mock_requests_dispatch_only_admitted_slots(self):
+        ready = threading.Barrier(8)
+
+        def complete(_):
+            ready.wait(timeout=5)
+            try:
+                self.proxy.complete(
+                    self.run, self.token, uuid4(), SDKCompletion(request()), sdk=True
+                )
+            except Problem as exc:
+                return exc.code
+            return "final"
+
+        with (
+            patch("agent_platform.model_mock.mock_response", wraps=mock_response) as upstream,
+            concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool,
+        ):
+            outcomes = list(pool.map(complete, range(8)))
+        self.assertEqual(outcomes.count("final"), 2)
+        self.assertEqual(outcomes.count("model_request_limit_reached"), 6)
+        self.assertEqual(upstream.call_count, 2)
+        usage = usage_view(self.db, self.run)
+        self.assertEqual(usage["request_slots_consumed"], 2)
+        self.assertTrue(all(entry["status"] == "final" for entry in usage["entries"]))
 
     def test_mock_policy_rejects_remote_origin_and_price_preview(self):
         with self.assertRaises(ValueError):

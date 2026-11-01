@@ -86,11 +86,11 @@ sources:
 | 新事件寫入 | `202`，body 含 `seq` |
 | 重複：同 `source + id`，內容雜湊相同 | `200`，body 含原本的 `seq` 與 `duplicate: true` |
 | 衝突：同 `source + id`，內容不同 | `409`；原事件保留，衝突寫入 `ingest_conflicts` 供查看 |
-| 格式錯誤、超過大小、`type` 不在允許範圍 | `400` 或 `413`，附錯誤碼 |
-| token 無效或越權 | `401`／`403` |
+| 格式錯誤或超過大小 | `400` 或 `413`，附錯誤碼 |
+| token 無效或 source/type 越權 | `401`／`403` |
 | 資料庫忙碌或磁碟錯誤 | `503`，生產者應重試 |
 
-批次請求逐筆回結果；一筆失敗不影響其他筆。內容雜湊以 canonical JSON（排序 key、無空白）計算，不含 `seq` 等中樞自己加的欄位。
+批次請求逐筆回結果；一筆失敗不影響其他筆。內容雜湊使用 RFC 8785 JCS；先移除可選 attribute 的頂層 null，再以 SHA-256 計算，不含 hub metadata。data 大小以 JCS UTF-8 bytes 計算。精確限制、批次回應與正反案例見 [M0 契約](../../contracts/README.md)。
 
 ### 時間
 
@@ -115,7 +115,7 @@ sources:
 | `originurl` | `generatorURL` |
 | `data` | `labels`、`annotations`、`groupKey` |
 
-Alertmanager 重送同一個 alert 時 `id` 相同，所以由去重吸收。
+Alertmanager 重送相同映射內容時，`id` 相同且內容雜湊相同，才由去重吸收。同一 fingerprint／startsAt／status 若改變 annotations、labels、groupKey、generatorURL 或其他映射內容，仍是不可變身分衝突，回應 member `409`；有效 envelope 的 HTTP `200` 不代表所有 alert 成功。真實接入前必須用實際重送樣本核對相容性，不能改 ID 或忽略 member 錯誤來掩蓋衝突。詳見 [M6 來源接入](../source-integration.md)。
 
 ## 5. 驗收
 

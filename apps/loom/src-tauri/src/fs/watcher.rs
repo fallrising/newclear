@@ -113,17 +113,23 @@ impl FsWatcher {
             })
             .expect("spawn fs bridge thread");
 
+        // Capture the initial baseline before either task can observe events.
+        // Notify updates it even for suppressed echoes, so a later scan does
+        // not re-announce a known self-created path after its echo TTL.
+        let known_paths = Arc::new(Mutex::new(scan(&vault_root)));
         let debouncer_task = tokio::spawn(run_debouncer(
             tokio_rx,
             debounce,
             event_sink.clone(),
             echo_guard.clone(),
+            known_paths.clone(),
         ));
         let reconcile_task = tokio::spawn(run_reconcile(
             vault_root.clone(),
             reconcile_interval,
             event_sink,
             echo_guard.clone(),
+            known_paths,
         ));
 
         Ok(Self {
@@ -192,6 +198,7 @@ async fn run_debouncer(
     debounce: Duration,
     sink: Arc<dyn EventSink>,
     echo: Arc<EchoGuard>,
+    known_paths: Arc<Mutex<HashSet<PathBuf>>>,
 ) {
     // PathBuf → latest pending change. Rename overrides Modified; Delete
     // overrides everything; Create stays Create unless a later Delete
@@ -216,12 +223,12 @@ async fn run_debouncer(
             Ok(None) => {
                 // Bridge thread closed → no more events ever; drain whatever's
                 // pending and exit.
-                flush(&mut pending, &sink, &echo);
+                flush(&mut pending, &sink, &echo, &known_paths);
                 break;
             }
             Err(_) => {
                 // Debounce deadline reached without further events.
-                flush(&mut pending, &sink, &echo);
+                flush(&mut pending, &sink, &echo, &known_paths);
                 deadline = None;
             }
         }
@@ -300,9 +307,25 @@ fn flush(
     pending: &mut HashMap<PathBuf, PendingChange>,
     sink: &Arc<dyn EventSink>,
     echo: &EchoGuard,
+    known_paths: &Mutex<HashSet<PathBuf>>,
 ) {
     for (path, change) in pending.drain() {
         let kind = change.into_kind();
+        {
+            let mut known = known_paths.lock();
+            match &kind {
+                FsChangeKind::Deleted => {
+                    known.remove(&path);
+                }
+                FsChangeKind::Renamed { from } => {
+                    known.remove(Path::new(from));
+                    known.insert(path.clone());
+                }
+                FsChangeKind::Created | FsChangeKind::Modified => {
+                    known.insert(path.clone());
+                }
+            }
+        }
         if !should_emit(&path, &kind, echo) {
             continue;
         }
@@ -320,12 +343,13 @@ fn should_emit(path: &Path, kind: &FsChangeKind, echo: &EchoGuard) -> bool {
     if is_hidden(path) {
         return false;
     }
-    // Created / Modified events on a path with a live self-write
-    // registration are echoes of our own write — drop them. Delete and
-    // Rename are never echoes (the guard only knows about content), so
-    // they always flow.
-    if matches!(kind, FsChangeKind::Created | FsChangeKind::Modified)
-        && is_self_write_echo(path, echo)
+    // Atomic self-writes can be paired renames. Only suppress a rename
+    // whose destination path AND bytes match a live self-write registration.
+    // Deleted events always flow; a missing target cannot match a hash.
+    if matches!(
+        kind,
+        FsChangeKind::Created | FsChangeKind::Modified | FsChangeKind::Renamed { .. }
+    ) && is_self_write_echo(path, echo)
     {
         tracing::trace!(?path, "echo-loop event suppressed");
         return false;
@@ -357,37 +381,49 @@ async fn run_reconcile(
     interval: Duration,
     sink: Arc<dyn EventSink>,
     echo: Arc<EchoGuard>,
+    known_paths: Arc<Mutex<HashSet<PathBuf>>>,
 ) {
-    let mut last_seen: HashSet<PathBuf> = scan(&vault_root);
     let mut ticker = tokio::time::interval(interval);
     ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     ticker.tick().await; // consume immediate first tick
 
     loop {
         ticker.tick().await;
-        let current = scan(&vault_root);
+        reconcile_once(&vault_root, &sink, &echo, &known_paths);
+    }
+}
 
-        for new_path in current.difference(&last_seen) {
-            if !should_emit(new_path, &FsChangeKind::Created, &echo) {
-                continue;
-            }
-            tracing::debug!(?new_path, "reconcile: backfilling Created");
+fn reconcile_once(
+    vault_root: &Path,
+    sink: &Arc<dyn EventSink>,
+    echo: &EchoGuard,
+    known_paths: &Mutex<HashSet<PathBuf>>,
+) {
+    let changes = {
+        // Keep notify baseline updates from being lost between scan and
+        // replacement. Emission and hash I/O happen after releasing the lock.
+        let mut known = known_paths.lock();
+        let current = scan(vault_root);
+        let changes: Vec<_> = current
+            .difference(&known)
+            .map(|path| (path.clone(), FsChangeKind::Created))
+            .chain(
+                known
+                    .difference(&current)
+                    .map(|path| (path.clone(), FsChangeKind::Deleted)),
+            )
+            .collect();
+        *known = current;
+        changes
+    };
+    for (path, change) in changes {
+        if should_emit(&path, &change, echo) {
+            tracing::debug!(?path, ?change, "reconcile: backfilling change");
             sink.emit(Event::FsChanged {
-                path: new_path.to_string_lossy().into_owned(),
-                change: FsChangeKind::Created,
+                path: path.to_string_lossy().into_owned(),
+                change,
             });
         }
-        for missing_path in last_seen.difference(&current) {
-            if !should_emit(missing_path, &FsChangeKind::Deleted, &echo) {
-                continue;
-            }
-            tracing::debug!(?missing_path, "reconcile: backfilling Deleted");
-            sink.emit(Event::FsChanged {
-                path: missing_path.to_string_lossy().into_owned(),
-                change: FsChangeKind::Deleted,
-            });
-        }
-        last_seen = current;
     }
 }
 
@@ -455,6 +491,65 @@ mod tests {
             PendingChange::Renamed { from } => assert_eq!(from, Path::new("/old")),
             other => panic!("unexpected: {other:?}"),
         }
+    }
+
+    #[test]
+    fn paired_self_write_rename_requires_matching_target_and_hash() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let target = dir.path().join("note.md");
+        let other = dir.path().join("other.md");
+        std::fs::write(&target, b"saved").unwrap();
+        std::fs::write(&other, b"saved").unwrap();
+        let echo = EchoGuard::new();
+        echo.register_self_write(&target, b"saved");
+        let kind = FsChangeKind::Renamed {
+            from: dir.path().join(".tmp").to_string_lossy().into_owned(),
+        };
+        assert!(
+            !should_emit(&target, &kind, &echo),
+            "self-write paired rename leaked"
+        );
+        assert!(
+            should_emit(&other, &kind, &echo),
+            "different rename target swallowed"
+        );
+        std::fs::write(&target, b"external").unwrap();
+        assert!(
+            should_emit(&target, &kind, &echo),
+            "external bytes swallowed"
+        );
+        assert!(should_emit(&target, &FsChangeKind::Deleted, &echo));
+    }
+
+    #[test]
+    fn reconcile_backfills_missed_creation_and_deletion_once() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let path = dir.path().join("missed.md");
+        let known = Mutex::new(scan(dir.path()));
+        let events = crate::pty::VecEventSink::shared();
+        let sink: Arc<dyn EventSink> = events.clone();
+        let echo = EchoGuard::new();
+        std::fs::write(&path, b"external").unwrap();
+        reconcile_once(dir.path(), &sink, &echo, &known);
+        reconcile_once(dir.path(), &sink, &echo, &known);
+        assert_eq!(events.snapshot().len(), 1);
+        assert!(matches!(
+            &events.snapshot()[0],
+            Event::FsChanged {
+                change: FsChangeKind::Created,
+                ..
+            }
+        ));
+        std::fs::remove_file(&path).unwrap();
+        reconcile_once(dir.path(), &sink, &echo, &known);
+        assert_eq!(events.snapshot().len(), 2);
+        assert!(matches!(
+            &events.snapshot()[1],
+            Event::FsChanged {
+                change: FsChangeKind::Deleted,
+                ..
+            }
+        ));
     }
 
     #[test]

@@ -1,0 +1,15 @@
+{
+  "command": "mvn --batch-mode -Dmaven.repo.local=<shared repository> test",
+  "exitCode": 0,
+  "elapsedSeconds": 37.289,
+  "containerRemoved": true,
+  "tests": 610,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "rawLogSHA256": "34bbb54ae1c535b9be4960d8ef83671f1e70c1f69fadfc328b5ab8f2ed5a0221",
+  "observedSummary": [
+    "[INFO] Tests run: 610, Failures: 0, Errors: 0, Skipped: 0",
+    "[INFO] BUILD SUCCESS"
+  ]
+}

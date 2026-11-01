@@ -1,10 +1,9 @@
 {
   "project": "clarkq",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verified": true,
+  "verifiedNote": "2026-10-24 original R2 M1–M3 only: final-001 shared3 geometry + final-002 strict3 views/14 journeys; exact browser favicon404 remains. Use RUNNER isolated fixture and ephemeral private storageState; this tracked file contains no key and cannot authenticate standalone. Full R3/current CI/publication separate.",
   "locale": "zh-TW",
   "colorSchemes": [
-    "light",
     "dark"
   ],
   "apps": [
@@ -13,14 +12,14 @@
       "kind": "server",
       "cwd": "systems/clarkq",
       "install": "go mod download",
-      "start": "go run ./cmd/clarkq",
       "env": {},
       "baseUrl": "http://127.0.0.1:8080",
       "ready": "/ui/",
       "pages": [
         {
           "id": "ui",
-          "path": "/ui/"
+          "path": "/ui/",
+          "waitFor": "#queuesWrap tbody tr:nth-child(14) [data-act=\"use\"]"
         }
       ]
     }

@@ -1,0 +1,31 @@
+{
+  "result": {
+    "passed": true,
+    "macosAcceptance": false,
+    "fixtureFiles": 5001,
+    "interactiveMs": 179,
+    "files": 500,
+    "grantDenied": true,
+    "rawSource": true,
+    "arrayBuffer": true,
+    "blobDecoded": true,
+    "pid": 442,
+    "windows": [
+      {
+        "id": "2097155",
+        "name": "Flowshot"
+      }
+    ],
+    "dialogHandled": true,
+    "sourceUnchanged": true
+  },
+  "evidence_directory": "<shared-workspace>/flowshot/tasks/m1-integration-20261023/preserve/evidence/n02-webview/run-5jfeuhze",
+  "sha256": {
+    "stdout.jsonl": "62dd81e9fa997477ed53453e249bc0d5acfb609797452e447a77f5acc9c021ec",
+    "stderr.log": "19fc7b8778133909e984ee3d09beb1f0acde91cf74498d6b7570e4b07cfb7b15",
+    "window.png": "5e2e5a63cdb010c8146bb8885ed33d333feca7ce50da36902b0bd8c8c6ab3679",
+    "build.log": "92d19d503a63da5ef527b8a7b9a128c54ecb8975aedcdd17833b4e18a14aee32",
+    "picker.png": "f3c7188a45e709ca9841dd9c2b4b2b5910b6b1906c4ca60c3484a5158a039bdd",
+    "result.json": "4966aa45d3f12dc904bd4192da638eebd96423ae59666387c12993c2914af958"
+  }
+}

@@ -9,7 +9,7 @@ from psycopg.types.json import Jsonb
 from agent_platform_m0.transport import HTTP, ProbeError
 
 from .connector_journal import private_file
-from .domain import Problem
+from .domain import SUBSCRIPTION_BACKENDS, Problem
 
 
 class RuntimeClient:
@@ -61,7 +61,14 @@ class RuntimeClient:
                     catalog["egress_policy_sha256"],
                 ),
             )
-            conn.execute("UPDATE runtime_capacity SET draining=false WHERE node_id='cocoon-local'")
+            slots = catalog.get("slots", 4)
+            if type(slots) is not int or not 1 <= slots <= 4:
+                raise Problem(409, "runtime_capacity_invalid")
+            conn.execute(
+                "UPDATE runtime_capacity SET draining=false,slots=%s,cpu=%s,memory_bytes=%s "
+                "WHERE node_id='cocoon-local'",
+                (slots, slots * 4, slots * 4 * 1024**3),
+            )
         return catalog
 
     def fence(self, run):
@@ -77,6 +84,48 @@ class RuntimeClient:
     def cancel(self, run):
         return self.call("POST", f"/v1/runs/{run['id']}/cancel", {"generation": run["generation"]})
 
+    def cleanup_preview(self, run_id, context):
+        return self.call("POST", f"/v1/runs/{run_id}/cleanup-preview", context)
+
+    def cleanup_lookup(self, plan, *, generation, lease_until, resume):
+        return self.call(
+            "POST",
+            f"/v1/runs/{plan['run_id']}/cleanup-lookup",
+            {
+                "plan": plan,
+                "generation": generation,
+                "lease_until": lease_until,
+                "resume": resume,
+            },
+        )
+
+    def cleanup_fence(self, plan, run):
+        if run["generation"] != plan["next_generation"]:
+            raise Problem(409, "stale_cleanup_generation_changed")
+        try:
+            self.lease_http.expect(
+                "PUT",
+                f"/v1/runs/{plan['run_id']}/cleanup-lease",
+                {
+                    "plan": plan,
+                    "lease_until": run["lease_until"].isoformat(),
+                },
+            )
+        except ProbeError:
+            raise Problem(409, "stale_cleanup_lease_unconfirmed") from None
+
+    def cleanup_apply(self, plan, generation, db_digest, *, observe_only=False):
+        return self.call(
+            "POST",
+            f"/v1/runs/{plan['run_id']}/cleanup-apply",
+            {
+                "plan": plan,
+                "generation": generation,
+                "db_digest": db_digest,
+                "observe_only": observe_only,
+            },
+        )
+
     def inspect(self, run):
         return self.call("GET", f"/v1/runs/{run['id']}?generation={run['generation']}")
 
@@ -91,7 +140,15 @@ class RuntimeClient:
                 "base_sha": run["base_sha"],
                 "deadline": run["deadline"].isoformat(),
                 "require_approval": run.get("require_approval", False),
-                "model_transport": getattr(self, "model_transport", False),
+                "model_transport": False
+                if run.get("backend") in SUBSCRIPTION_BACKENDS
+                else getattr(self, "model_transport", False),
+                "tool_transport": run.get("tool_transport", False),
+                **(
+                    {"external_workspace": True}
+                    if run.get("backend") in SUBSCRIPTION_BACKENDS
+                    else {}
+                ),
                 "egress_policy_sha256": run.get("egress_policy_sha256"),
                 "verification": run.get(
                     "verification",
@@ -147,3 +204,22 @@ class RuntimeClient:
             f"/v1/runs/{run['id']}/model",
             {"generation": run["generation"], "action": action, **data},
         )
+
+    def tool(self, run, action, **data):
+        # Tool control must not inherit the 120-second prepare/result timeout.
+        try:
+            status, result = self.lease_http.request(
+                "POST",
+                f"/v1/runs/{run['id']}/tool",
+                {
+                    "generation": run["generation"],
+                    "binding_id": str(run["sandbox_id"]),
+                    "action": action,
+                    **data,
+                },
+            )
+        except ProbeError:
+            raise Problem(503, "tool_connector_unavailable_or_uncertain") from None
+        if status != 200:
+            raise Problem(409, "tool_connector_operation_unconfirmed")
+        return result

@@ -4,7 +4,7 @@ Point any OpenAI-compatible or Anthropic Messages client at thinrouter.
 
 Default base: `http://127.0.0.1:20128/v1`  
 Auth: `Authorization: Bearer <gateway-key>` or `x-api-key: <gateway-key>`  
-(If no gateway keys exist, auth is open for bootstrap.)
+Enabled gateway keys are required by default, including when no keys exist or all keys are disabled. Explicit `--allow-keyless-bootstrap` allows requests with no credential headers only on an exact loopback listener, for direct (non-forwarded) requests, with zero total keys. See [cost safety](cost-safety.md).
 
 Model values:
 
@@ -53,7 +53,7 @@ thinrouter translates to OpenAI-compatible upstreams and maps the response back.
 
 1. Settings → Models → OpenAI-compatible / custom base URL.
 2. **Base URL:** `http://127.0.0.1:20128/v1`
-3. **API Key:** your thinrouter gateway key (or any string if bootstrap open).
+3. **API Key:** your thinrouter gateway key. Clients that require a key cannot use keyless bootstrap.
 4. **Model:** your route name (e.g. `cheap`) or `connection/model`.
 
 If Cursor only supports OpenAI shape, use `/v1/chat/completions` (default).
@@ -113,6 +113,6 @@ The important parts: **base URL ends at `/v1` for OpenAI**, and **model = route 
 ## Notes
 
 - **Admin UI:** `http://127.0.0.1:20128/admin`  
-  If `THINROUTER_ADMIN_TOKEN` is set, open `/admin/login` first.
+  Open `/admin/login` first with the admin token (`--admin-token`, or `cat ~/.thinrouter/admin-token`).
 - **Docker:** publish port `20128`, set `THINROUTER_HOST=0.0.0.0`.
 - **Health:** `GET /health`

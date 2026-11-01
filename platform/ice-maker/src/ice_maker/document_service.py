@@ -1239,7 +1239,22 @@ def validate_bind(host: str) -> str:
 
 
 _PAGE = """<!doctype html>
-<meta charset="utf-8"><title>Ice Maker document upload</title>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark"><title>Ice Maker document upload</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: Canvas; color: CanvasText; }
+main { max-width: 48rem; margin: auto; padding: 1.25rem; }
+h1 { overflow-wrap: anywhere; }
+label { display: block; margin-block: 1rem; }
+input, select, button { font: inherit; max-width: 100%; }
+label input, label select { display: block; width: 100%; margin-top: .35rem; padding: .45rem; }
+button { padding: .5rem 1rem; margin-block: .5rem; }
+:focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
+#results { overflow-wrap: anywhere; line-height: 1.6; }
+#results a { display: inline-block; margin-block: .25rem; }
+</style></head><body><main>
 <h1>Upload a local document batch</h1>
 <form id="upload" method="post" action="/api/batches" enctype="multipart/form-data">
 <label>Files <input id="files" type="file" name="files" multiple required></label>
@@ -1249,7 +1264,90 @@ _PAGE = """<!doctype html>
 <input id="metadata" type="hidden" name="metadata"><button type="submit">Upload</button>
 </form>
 <p id="results" aria-live="polite"></p>
-<script>document.getElementById('upload').addEventListener('submit',async function(e){e.preventDefault();const out=document.getElementById('results');const l=document.getElementById('languages').value.split(',').filter(Boolean).sort();const r=document.getElementById('rights').value;const d=document.getElementById('data_class').value;document.getElementById('metadata').value=JSON.stringify(Array.from(document.getElementById('files').files).map(f=>({data_class:d,languages:l,name:f.name,rights:r,size:f.size})));const response=await fetch('/api/batches',{method:'POST',body:new FormData(this)});if(!response.ok){out.textContent='Upload failed';return;}const batch=(await response.json()).batch_id;out.textContent='Processing '+batch;const poll=async()=>{const status=await (await fetch('/api/batches/'+batch)).json();if(status.status==='completed'){const answer=await fetch('/api/batches/'+batch+'/documents');if(!answer.ok){out.textContent='Readable results unavailable';return;}const docs=(await answer.json()).documents;out.replaceChildren();for(const doc of docs){const link=document.createElement('a');link.href='/batches/'+batch+'/documents/'+doc.source_sha256;link.textContent=doc.source_sha256;out.append(link,document.createElement('br'));}}else if(status.status==='failed'){out.textContent='Processing failed';}else{setTimeout(poll,500);}};poll();});</script>
+<script>
+const form = document.getElementById('upload');
+const button = form.querySelector('button[type="submit"]');
+const out = document.getElementById('results');
+async function detail(response) {
+  try {
+    const body = await response.json();
+    if (typeof body.detail === 'string') return body.detail;
+  } catch {}
+  return 'HTTP ' + response.status;
+}
+form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (button.disabled) return;
+  button.disabled = true;
+  form.setAttribute('aria-busy', 'true');
+  out.textContent = 'Uploading…';
+  let phase = 'Upload failed: ';
+  let timer;
+  let batch;
+  let expired = false;
+  const controller = new AbortController();
+  try {
+    const languages = document.getElementById('languages').value.split(',')
+      .map(value => value.trim()).filter(Boolean).sort();
+    const rights = document.getElementById('rights').value;
+    const dataClass = document.getElementById('data_class').value;
+    document.getElementById('metadata').value = JSON.stringify(
+      Array.from(document.getElementById('files').files).map(file => ({
+        data_class: dataClass, languages, name: file.name, rights, size: file.size
+      }))
+    );
+    const response = await fetch('/api/batches', { method: 'POST', body: new FormData(this) });
+    if (!response.ok) throw new Error(await detail(response));
+    batch = (await response.json()).batch_id;
+    if (!/^[0-9a-f]{64}$/.test(batch)) throw new Error('Invalid batch response');
+    phase = 'Status unavailable: ';
+    const deadline = Date.now() + 30 * 60 * 1000;
+    timer = setTimeout(() => { expired = true; controller.abort(); }, 30 * 60 * 1000);
+    for (;;) {
+      if (Date.now() >= deadline) { expired = true; throw new Error('Polling timed out'); }
+      const response = await fetch('/api/batches/' + batch, { signal: controller.signal });
+      if (!response.ok) throw new Error(await detail(response));
+      const status = await response.json();
+      if (!['queued', 'running', 'completed', 'failed'].includes(status.status))
+        throw new Error('Invalid status response');
+      const counts = status.counts;
+      const keys = ['processed', 'duplicate', 'failed', 'rejected'];
+      if (!counts || keys.some(key => !Number.isSafeInteger(counts[key]) || counts[key] < 0))
+        throw new Error('Invalid status counts');
+      out.textContent = 'Batch ' + batch + ': ' + status.status + ' — ' +
+        keys.map(key => key + ': ' + counts[key]).join(', ');
+      if (status.status === 'failed') { out.textContent += '. Processing failed'; break; }
+      if (status.status === 'completed') {
+        const answer = await fetch('/api/batches/' + batch + '/documents', { signal: controller.signal });
+        if (!answer.ok) throw new Error(await detail(answer));
+        const docs = (await answer.json()).documents;
+        if (!Array.isArray(docs) || docs.some(doc => !/^[0-9a-f]{64}$/.test(doc.source_sha256)))
+          throw new Error('Invalid readable results');
+        out.append(document.createElement('br'));
+        for (const doc of docs) {
+          const preview = document.createElement('a');
+          preview.href = '/batches/' + batch + '/documents/' + doc.source_sha256;
+          preview.textContent = doc.source_sha256;
+          const download = document.createElement('a');
+          download.href = '/api/batches/' + batch + '/documents/' + doc.source_sha256 + '/markdown';
+          download.textContent = 'Download Markdown';
+          out.append(preview, document.createTextNode(' — '), download, document.createElement('br'));
+        }
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  } catch (error) {
+    out.textContent = phase + (expired
+      ? 'Polling timed out after 30 minutes. Batch ' + batch + ' may still be processing. Refresh and query its status.'
+      : error instanceof Error ? error.message : 'Network or response error');
+  } finally {
+    clearTimeout(timer);
+    button.disabled = false;
+    form.setAttribute('aria-busy', 'false');
+  }
+});
+</script></main></body></html>
 """
 
 

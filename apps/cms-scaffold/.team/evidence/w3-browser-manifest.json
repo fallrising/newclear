@@ -1,0 +1,78 @@
+{
+  "w3-browser/album-1440.png": {
+    "sha256": "61c7b397769629b14b5a72fe62747a8ad57a94cdea2e5655111f5dce783339ef",
+    "bytes": 23681
+  },
+  "w3-browser/album-390.png": {
+    "sha256": "41bd6660f111a9e301a89dc2a3f52198bf273f2d1dd7e8a97c7c78a07d9a774a",
+    "bytes": 18499
+  },
+  "w3-browser/clinic-1440.png": {
+    "sha256": "01b3a9f3752ff939940704a8c8ae6981e45967f047152ff994e6a0088dacb81f",
+    "bytes": 42430
+  },
+  "w3-browser/clinic-390.png": {
+    "sha256": "a20123d7919a82efbb2efb253a0461d9fdd1e9aa2eaf34999d309eb6b0fc0433",
+    "bytes": 41666
+  },
+  "w3-browser/lightbox-1440.png": {
+    "sha256": "8cd811af2591d3c2204cc2b4b154f3ef1c0dc68e5f8b32e96fc80f1712ea9e89",
+    "bytes": 13708
+  },
+  "w3-browser/lightbox-390.png": {
+    "sha256": "39fd96d52ad72a1824fcd803cd9d1a7462f1fa422b59d7bc303b4d35ccb98879",
+    "bytes": 10188
+  },
+  "w3-browser/menu-390.png": {
+    "sha256": "095881c4aafef2c9d61d6696553efb64501985231e8a26d490758418e594689d",
+    "bytes": 24700
+  },
+  "w3-browser/photo-1440.png": {
+    "sha256": "42fc19ea640bf278573f2be85fd5c99e559fc265e2606b96da152fac4ec76741",
+    "bytes": 22913
+  },
+  "w3-browser/photo-390.png": {
+    "sha256": "9741363e98fde33ead89101431330351d2799253fd5ee615ceb362e1749fb0ac",
+    "bytes": 17962
+  },
+  "w3-browser/project-1440.png": {
+    "sha256": "4e19c6cce7f1d939c80164286cd710f3d482fa295528c78723733ec15ba5e5ad",
+    "bytes": 36666
+  },
+  "w3-browser/project-390.png": {
+    "sha256": "4e279efda0d8b51445432da8f6f2f7bae320bbd555dd0edeb4e4ce37a5e52ab9",
+    "bytes": 31322
+  },
+  "w3-browser/runner-clinic/1440x900.json": {
+    "sha256": "8c6030dc7b8c51d3f9726dc2f1b2fc8d56f6bbca898c6c92d25249e626d9394f",
+    "bytes": 456
+  },
+  "w3-browser/runner-clinic/1440x900.png": {
+    "sha256": "01b3a9f3752ff939940704a8c8ae6981e45967f047152ff994e6a0088dacb81f",
+    "bytes": 42430
+  },
+  "w3-browser/runner-clinic/390x900.json": {
+    "sha256": "775a9f5b1feb7757b8360011a6ed13289612f799f82c32e24cb7ea86d61bee41",
+    "bytes": 573
+  },
+  "w3-browser/runner-clinic/390x900.png": {
+    "sha256": "a20123d7919a82efbb2efb253a0461d9fdd1e9aa2eaf34999d309eb6b0fc0433",
+    "bytes": 41666
+  },
+  "w3-browser/runner-clinic/summary.json": {
+    "sha256": "b8d095e0c0aa1687dc8db214d5692a8fd2ac8f93fcfe9121852ecb48d4fb0501",
+    "bytes": 492
+  },
+  "w3-browser/selector-1440.png": {
+    "sha256": "2c7d501f72fee6cf4247e84d9f4c7bad0ed6744fa9cc8d690dd0af45d2286ae3",
+    "bytes": 40748
+  },
+  "w3-browser/selector-390.png": {
+    "sha256": "413b2698f8d7f543636a478c7bd710a93d071c99d57e69b4398fafe09025e05a",
+    "bytes": 40133
+  },
+  "w3-browser/summary.json": {
+    "sha256": "3fd9787ce2348e664e07f0f9c507b16364ce3a394af3b22963ab62597b0733d1",
+    "bytes": 9577
+  }
+}

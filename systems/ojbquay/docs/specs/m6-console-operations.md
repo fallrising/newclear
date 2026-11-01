@@ -42,9 +42,9 @@ local full stack with documented dashboards and alerts.
   operation uses the real Kafka topic, enforces bounded inputs, and never writes
   payload content to logs.
 - Given a classic ordered subscription, when offset reset is requested, then
-  the subscription is paused and published, the broker group must become empty,
-  offsets are previewed and altered, the subscription is resumed and published,
-  and all phases are audited. Failure before broker silence does not alter
+  the subscription is paused and published, every runtime confirms the pause,
+  the broker group must become empty, offsets are altered and read back, the
+  subscription is resumed and published, and all phases are audited. Failure before broker silence does not alter
   offsets. Pull and unordered Share subscriptions return `UNSUPPORTED`.
 - Given a delay ID, when it is queried or a pending record is canceled, then the
   console reports its durable PostgreSQL state and cancellation uses the same
@@ -102,8 +102,8 @@ local full stack with documented dashboards and alerts.
 
 - `TopicMessageOperations` samples and publishes test records.
 - `SubscriptionPreviewService` reuses the common CEL/transit semantics.
-- `GroupOperations` reports classic offsets and performs previewed reset only
-  after an empty-group hard gate.
+- `GroupOperations` reports classic offsets and performs a verified reset only
+  after the runtime-pause and empty-group hard gates.
 - `DelayService` queries PostgreSQL and publishes cancellation commands.
 - cluster/user endpoints expose bounded administrative views.
 - a Prometheus lag exporter renders the same classic progress model.

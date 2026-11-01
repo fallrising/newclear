@@ -295,8 +295,10 @@ class ProductionToolchain:
             raise BatchContractError("production toolchain is invalid")
 
     def as_dict(self) -> dict[str, Any]:
+        from .production_extraction import PDF_EXTRACTOR_VERSION
         return {
             "languages": list(self.languages),
+            "pdf_extractor_version": PDF_EXTRACTOR_VERSION,
             "pdfinfo": self.pdfinfo,
             "pdftoppm": self.pdftoppm,
             "pdftotext": self.pdftotext,

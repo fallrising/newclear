@@ -4,6 +4,7 @@ The API/worker never receive node or guest credentials. A private durable journa
 quarantines uncertain mutations; recovery only reattaches proven instances.
 """
 
+import asyncio
 import hashlib
 import hmac
 import json
@@ -18,7 +19,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlencode
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
@@ -33,7 +34,7 @@ from agent_platform_m0.sandbox_smoke import Config
 from agent_platform_m0.transport import HTTP
 
 from .connector_fence import Fences, Lease
-from .connector_isolation import CODE, CONTROL, HELPERS, REVISION, attest
+from .connector_isolation import CODE, CONTROL, HELPERS, REVISION, TOOL_HELPERS, attest
 from .connector_journal import Journal, private_file
 from .connector_output import OutputPolicy, workspace_result
 from .connector_recovery import blocks_new_admission, inspect
@@ -52,6 +53,8 @@ class Allocate(Input):
     deadline: datetime
     require_approval: bool = False
     model_transport: bool = False
+    tool_transport: bool = False
+    external_workspace: bool = Field(default=False, exclude_if=lambda value: value is False)
     verification: VerificationPolicy = Field(default_factory=VerificationPolicy)
 
 
@@ -94,6 +97,7 @@ def fingerprint(value):
 
 class Connector:
     def __init__(self, config, *, client=None, host=None):
+        self.tool_epoch = str(uuid4())
         self.config = config
         Config(config["origin"], config["template"]).validate()
         self.journal = Journal(config["state_dir"])
@@ -147,9 +151,9 @@ class Connector:
         return {
             "node_id": "cocoon-local",
             "template_digest": self.config["template"],
-            "slots": 4,
-            "cpu": 16,
-            "memory_bytes": 16 * 1024**3,
+            "slots": self.config.get("max_claims", 4),
+            "cpu": self.config.get("max_claims", 4) * 4,
+            "memory_bytes": self.config.get("max_claims", 4) * 4 * 1024**3,
             "egress_policy_sha256": egress["policy_sha256"],
             "repositories": [
                 {k: v for k, v in e.items() if k in {"canonical_repo", "base_sha", "sha256"}}
@@ -170,7 +174,10 @@ class Connector:
         return row
 
     def guard(self, row, *, stopping=False, controlling=False):
+        from .connector_cleanup import check_admission
+
         self.fences.require(row["run_id"], row["generation"])
+        check_admission(row, stopping=stopping)
         if row.get("pause", {}).get("hold") and not (stopping or controlling):
             raise Problem(409, "sandbox_pause_requested")
         if row.get("cancel_requested") and not stopping:
@@ -198,7 +205,21 @@ class Connector:
         return self.client.attach(value["owner"], value["id"], value["token"])
 
     def allocate(self, run_id, request):
+        if request.external_workspace:
+            if self.config.get("external_workspace_enabled") is not True:
+                raise Problem(409, "external_workspace_not_enabled")
+            if request.require_approval or request.model_transport or request.tool_transport:
+                raise Problem(422, "external_workspace_transport_conflict")
+            if request.verification.mode == "fixture-m2":
+                raise Problem(422, "external_workspace_requires_verification_policy")
+        if request.tool_transport and self.config.get("tool_transport_fixture") is not True:
+            raise Problem(409, "tool_fixture_not_enabled")
         data = request.model_dump(mode="json")
+        if not request.external_workspace:
+            data.pop("external_workspace", None)
+        if not request.tool_transport:
+            # Preserve durable allocation hashes for default/legacy runs.
+            data.pop("tool_transport")
         if request.egress_policy_sha256 != self.network()["policy_sha256"]:
             raise Problem(409, "egress_run_policy_changed")
         if request.template != self.config["template"]:
@@ -208,6 +229,11 @@ class Connector:
             raise Problem(422, "repository_revision_not_registered")
         if request.deadline.tzinfo is None:
             raise Problem(422, "deadline_requires_timezone")
+        if (
+            request.external_workspace
+            and not 0 < (request.deadline - datetime.now(UTC)).total_seconds() <= 600
+        ):
+            raise Problem(422, "external_workspace_deadline_invalid")
         with self.journal.locked(run_id), self.admission:
             self.fences.require(run_id, request.generation)
             row = self.journal.read(run_id)
@@ -238,7 +264,9 @@ class Connector:
                 unresolved = [r for r in pending if blocks_new_admission(r, run_id)]
                 if unresolved:
                     raise Problem(409, "unresolved_allocation_blocks_admission")
-                if max(len(self.client.sandboxes()), len(self.host.vms())) >= 4:
+                if max(len(self.client.sandboxes()), len(self.host.vms())) >= self.config.get(
+                    "max_claims", 4
+                ):
                     raise Problem(409, "node_capacity_unavailable")
                 self.check_host_reserve()
                 self.guard(row)
@@ -309,6 +337,10 @@ class Connector:
             listener.close()
 
     def prepare(self, row):
+        if row["input"].get("external_workspace"):
+            from .connector_workspace import prepare
+
+            return prepare(self, row)
         sb = self.handle(row)
         if (
             sb.exec("sha256sum", "/usr/local/bin/openhands-agent-server", timeout=15).split()[0]
@@ -323,7 +355,8 @@ class Connector:
             mode=0o644,
         )
         sb.exec("install", "-d", "-m", "0755", CODE, timeout=10)
-        for name in HELPERS:
+        tool_transport = row["input"].get("tool_transport", False)
+        for name in HELPERS + (TOOL_HELPERS if tool_transport else ()):
             self.guard(row)
             sb.write_file(
                 CODE + "/" + name,
@@ -332,7 +365,11 @@ class Connector:
             )
         self.guard(row)
         sb.exec(
-            "python3", "-I", CODE + "/guest_control.py", json.dumps({"action": "setup"}), timeout=10
+            "python3",
+            "-I",
+            CODE + "/guest_control.py",
+            json.dumps({"action": "setup", "tool_transport": tool_transport}),
+            timeout=10,
         )
         sb.write_file(CODE + "/terminal", self.launcher(), mode=0o700)
         sb.exec("chown", "0:2001", CODE + "/terminal", timeout=5)
@@ -351,6 +388,18 @@ class Connector:
         if data.get("model_transport"):
             row["model_local_key"] = secrets.token_urlsafe(32)
         self.journal.write(row)
+        if tool_transport:
+            row["tool_relay_key"] = secrets.token_urlsafe(32)
+            self.journal.write(row)
+            self.guard(row)
+            sb.spawn(
+                "python3",
+                "-I",
+                CODE + "/guest_tool.py",
+                user="agentcontrol",
+                cwd=CONTROL,
+                env={"TOOL_RUN_ID": row["run_id"], "TOOL_RELAY_KEY": row["tool_relay_key"]},
+            )
         self.guard(row)
         sb.spawn(
             "python3",
@@ -433,6 +482,8 @@ class Connector:
             )
             if created.get("id") != row["run_id"]:
                 raise Problem(409, "conversation_mismatch")
+        if tool_transport:
+            row["tool_isolation_revision"] = "tool-mailbox-v1"
         row["isolation_revision"] = REVISION
         self.isolation(row)
         self.journal.write(row)
@@ -443,11 +494,17 @@ class Connector:
         }
 
     def isolation(self, row, *, terminal=False):
+        if row.get("input", {}).get("external_workspace"):
+            from .connector_workspace import attest as external_attest
+
+            return external_attest(self, row)
         proof = attest(self, row, terminal=terminal)
         self.network(row)
         return proof
 
     def prompt(self, row, goal):
+        if row.get("input", {}).get("external_workspace"):
+            raise Problem(409, "external_workspace_prompt_unsupported")
         self.isolation(row)
         with self.relay(row) as http:
             path = "/api/conversations/" + row["run_id"]
@@ -479,7 +536,13 @@ class Connector:
         )
 
     def conversation(self, row, http):
-        if row.get("pause") or row["input"].get("model_transport"):
+        # Approval mutations need a fresh, stable boundary. Active event polling
+        # uses durable status events instead so it never waits on the SDK tool lock.
+        if (
+            row.get("pause")
+            or row["input"].get("model_transport")
+            or row["input"].get("require_approval")
+        ):
             from .connector_state import live_state
 
             return live_state(row, http)
@@ -488,12 +551,17 @@ class Connector:
     def events(self, run_id, generation, cursor):
         with self.journal.locked(run_id):
             row = self.require(run_id, generation)
+            if row["input"].get("external_workspace"):
+                raise Problem(409, "external_workspace_events_unsupported")
             if row["operations"].get("release", {}).get("state") == "completed":
                 raise Problem(409, "sandbox_already_released")
             self.network(row)
             with self.relay(row) as http:
                 path = "/api/conversations/" + row["run_id"]
-                state = self.conversation(row, http)["execution_status"]
+                # Full-state subscriptions wait on the active SDK tool lock. Read
+                # durable status changes with the events instead; REST is only a
+                # fallback for histories with no status update (e.g. before run).
+                state = http.expect("GET", path)["execution_status"]
                 all_events, page_id, seen = [], None, set()
                 for _ in range(100):
                     query = {"limit": 100}
@@ -516,6 +584,22 @@ class Connector:
                 raise Problem(409, "backend_duplicate_event")
             if cursor and cursor not in ids:
                 raise Problem(409, "backend_event_gap")
+            for item in all_events:
+                if (
+                    item.get("kind") == "ConversationStateUpdateEvent"
+                    and item.get("key") == "execution_status"
+                ):
+                    state = policy.metadata(item.get("value"), 128)
+                    if state not in {
+                        "idle",
+                        "running",
+                        "waiting_for_confirmation",
+                        "finished",
+                        "paused",
+                        "stuck",
+                        "error",
+                    }:
+                        raise Problem(409, "backend_execution_status_invalid")
             pending = all_events[ids.index(cursor) + 1 :] if cursor else all_events
             normalized = []
             for item in pending[:100]:
@@ -563,12 +647,30 @@ class Connector:
                 )
             response = {"events": normalized, "state": state, "caught_up": len(pending) <= 100}
             if state == "waiting_for_confirmation":
-                from .connector_approval import pending_approval
+                from .connector_approval import approval_from_history
 
-                response["approval"] = pending_approval(self, row)
+                approval = approval_from_history(self, row, all_events)
+                # A successful ACK may precede the SDK's asynchronous run start.
+                # An exact completed receipt proves only this batch was applied;
+                # it cannot finish a run or authorize a new batch.
+                applied = any(
+                    key.startswith("approval:")
+                    and operation.get("state") == "completed"
+                    and operation.get("result", {}).get("action_digest")
+                    == approval["action_digest"]
+                    for key, operation in row["operations"].items()
+                )
+                if applied:
+                    response["state"] = "running"
+                else:
+                    response["approval"] = approval
             return response
 
     def result(self, row):
+        if row.get("input", {}).get("external_workspace"):
+            from .connector_workspace import result
+
+            return result(self, row)
         self.isolation(row, terminal=True)
         sb = self.handle(row)
         with self.relay(row) as http:
@@ -628,6 +730,14 @@ class Connector:
             ) <= datetime.now(UTC):
                 raise Problem(409, "run_deadline_expired")
             prerequisites = {"prepare": "allocate", "prompt": "prepare", "result": "prompt"}
+            if row["input"].get("external_workspace"):
+                prerequisites["result"] = "prepare"
+                if request.action != "release" and any(
+                    op["state"] != "completed"
+                    for name, op in row["operations"].items()
+                    if name != request.action
+                ):
+                    raise Problem(409, "connector_operation_uncertain")
             prerequisite = prerequisites.get(request.action)
             if prerequisite and row["operations"].get(prerequisite, {}).get("state") != "completed":
                 raise Problem(409, "connector_prerequisite_unconfirmed")
@@ -676,13 +786,63 @@ def create_connector(config, service=None):
     async def boundary(request: Request, call_next):
         if request.headers.get("origin"):
             return JSONResponse({"error": "browser_origin_forbidden"}, status_code=403)
-        chunks, size = [], 0
-        async for chunk in request.stream():
-            size += len(chunk)
-            if size > (384 * 1024 if request.url.path.endswith("/model") else 65536):
-                return JSONResponse({"error": "request_too_large"}, status_code=413)
-            chunks.append(chunk)
-        request._body = b"".join(chunks)
+        tool = request.url.path.endswith("/tool")
+        workspace = request.url.path.endswith("/workspace")
+        private_tool = tool or workspace
+        if private_tool and (
+            request.url.query
+            or "origin" in request.headers
+            or "cookie" in request.headers
+            or "content-encoding" in request.headers
+            or "transfer-encoding" in request.headers
+            or len(request.headers.getlist("x-session-api-key")) != 1
+            or len(request.headers.getlist("content-length")) != 1
+            or request.headers.get("content-type") != "application/json"
+        ):
+            return JSONResponse({"error": "tool_envelope_invalid"}, status_code=422)
+        limit = (
+            1024 * 1024 + 4096
+            if tool
+            else (
+                256 * 1024
+                if workspace
+                else 384 * 1024
+                if request.url.path.endswith("/model")
+                else 65536
+            )
+        )
+
+        async def read_body():
+            chunks, size = [], 0
+            async for chunk in request.stream():
+                size += len(chunk)
+                if size > limit:
+                    raise Problem(413, "request_too_large")
+                chunks.append(chunk)
+            return b"".join(chunks)
+
+        try:
+            request._body = (
+                await asyncio.wait_for(read_body(), 5) if private_tool else await read_body()
+            )
+            if tool:
+                from .connector_tool import validate_wire
+
+                validate_wire(request._body)
+            if workspace:
+                from .connector_workspace import validate_wire as validate_workspace_wire
+
+                validate_workspace_wire(request._body)
+            if request.url.path.endswith(
+                ("/cleanup-preview", "/cleanup-lookup", "/cleanup-apply", "/cleanup-lease")
+            ):
+                from .stale_cleanup_contract import loads
+
+                loads(request._body)
+        except Problem as exc:
+            return JSONResponse({"error": exc.code}, status_code=exc.status)
+        except (ValueError, RecursionError, TimeoutError):
+            return JSONResponse({"error": "tool_envelope_invalid"}, status_code=422)
         try:
             response = await call_next(request)
         except Exception:
@@ -729,6 +889,19 @@ def create_connector(config, service=None):
 
         return approve(service, run_id, data)
 
+    from .connector_tool import ToolExchange
+    from .connector_tool import exchange as tool_exchange
+    from .connector_workspace import WorkspaceOperation
+    from .connector_workspace import exchange as workspace_exchange
+
+    @app.post("/v1/runs/{run_id}/workspace")
+    def workspace(run_id: UUID, data: WorkspaceOperation, _=auth):
+        return workspace_exchange(service, run_id, data)
+
+    @app.post("/v1/runs/{run_id}/tool")
+    def tool_channel(run_id: UUID, data: ToolExchange, _=auth):
+        return tool_exchange(service, run_id, data)
+
     @app.post("/v1/runs/{run_id}/model")
     def model_exchange(run_id: UUID, data: ModelExchange, _=auth):
         from .connector_model import exchange
@@ -738,6 +911,62 @@ def create_connector(config, service=None):
     @app.post("/v1/runs/{run_id}/operations")
     def mutate(run_id: UUID, data: Mutation, _=auth):
         return service.mutate(run_id, data)
+
+    @app.post("/v1/runs/{run_id}/cleanup-preview")
+    def cleanup_preview(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import preview
+
+        return preview(service, run_id, data)
+
+    @app.post("/v1/runs/{run_id}/cleanup-lookup")
+    def cleanup_lookup(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import lookup
+        from .stale_cleanup_contract import fail
+
+        if (
+            set(data) != {"plan", "generation", "lease_until", "resume"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+            or type(data["resume"]) is not bool
+        ):
+            fail()
+        return lookup(
+            service, data["plan"], data["generation"], data["lease_until"], data["resume"]
+        )
+
+    @app.put("/v1/runs/{run_id}/cleanup-lease")
+    def cleanup_lease(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import grant
+        from .stale_cleanup_contract import fail
+
+        if (
+            set(data) != {"plan", "lease_until"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+        ):
+            fail()
+        return grant(service, data["plan"], data["lease_until"])
+
+    @app.post("/v1/runs/{run_id}/cleanup-apply")
+    def cleanup_apply(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import apply
+        from .stale_cleanup_contract import fail, hash_text
+
+        if (
+            set(data) != {"plan", "generation", "db_digest", "observe_only"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+            or type(data["observe_only"]) is not bool
+        ):
+            fail()
+        hash_text(data["db_digest"])
+        return apply(
+            service,
+            data["plan"],
+            data["generation"],
+            data["db_digest"],
+            observe_only=data["observe_only"],
+        )
 
     @app.get("/v1/runs/{run_id}/events")
     def events(run_id: UUID, generation: int, cursor: str | None = None, _=auth):

@@ -1,0 +1,26 @@
+[
+  {
+    "width": 1280,
+    "passed": true,
+    "overflow": false,
+    "uncaughtErrors": [],
+    "checks": [
+      "save-first lifecycle guard",
+      "successful save feedback",
+      "enum control",
+      "no horizontal overflow"
+    ]
+  },
+  {
+    "width": 390,
+    "passed": true,
+    "overflow": false,
+    "uncaughtErrors": [],
+    "checks": [
+      "save-first lifecycle guard",
+      "successful save feedback",
+      "enum control",
+      "no horizontal overflow"
+    ]
+  }
+]

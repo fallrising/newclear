@@ -118,12 +118,14 @@ CREATE TABLE rules (
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- P2-07 先建這張表，不等 P5-01。欄位以 07 §11.4 為準。
+-- P5-01 用 CREATE TABLE IF NOT EXISTS，不改欄位、不加 tenants 外鍵、不搬列。
 CREATE TABLE alert_state (
-    tenant_id   TEXT NOT NULL,
-    fingerprint BIGINT NOT NULL,
-    rule_id     UUID,
+    tenant_id   TEXT NOT NULL,                  -- 檔案規則是空字串，不必先有 tenants 列
+    fingerprint BIGINT NOT NULL,                -- 標籤雜湊的 int64 二補數
+    rule_id     UUID,                           -- 檔案規則是 NULL
     labels      JSONB NOT NULL,
-    state       SMALLINT NOT NULL,              -- 0 inactive 1 pending 2 firing
+    state       SMALLINT NOT NULL,              -- 1 pending，2 firing；不寫 0
     active_at   TIMESTAMPTZ,
     fired_at    TIMESTAMPTZ,
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),

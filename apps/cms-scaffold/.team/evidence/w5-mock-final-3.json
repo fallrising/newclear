@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T17:37:28.672Z",
+  "gitCommit": "d84738eb728190494145866bf6b0648305105701",
+  "dirty": false,
+  "node": "v24.18.0",
+  "chromium": "153.0.8010.12",
+  "command": "e2e:mock",
+  "artifact": "test-results/frontend/mock-final-3-results.json",
+  "result": "passed",
+  "recordId": "W5-MOCK-20261005-04",
+  "repetition": 3,
+  "playwright": "1.63.0",
+  "passed": 93,
+  "total": 93,
+  "axePassed": 60,
+  "axeTotal": 60,
+  "critical": 0,
+  "serious": 0,
+  "notes": "Final F frozen product source; serial run 3 of3; final axe60 confirmed by CI37349357513 on d84738eb; first2runs began before same source commit; no product changes between runs"
+}

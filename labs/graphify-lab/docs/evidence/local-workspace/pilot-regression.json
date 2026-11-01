@@ -1,0 +1,270 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "baseline": "c31f0de93ddfdd5113f8db2e0a5e16fc206b2ca7",
+  "recorded_at": "2026-10-29T17:45:13.675915+00:00",
+  "graphify_version": "0.9.97",
+  "python_version": "3.12.3",
+  "limitations": [
+    "Known-task replay on one public component; no blind evaluation or causal productivity claim.",
+    "Graphify returns graph neighborhoods; rg returns matching lines. Command timings are different operations.",
+    "AST direct-name calls are source evidence, not proof of runtime reachability or complete dependencies.",
+    "No baseline code is imported or executed; only the installed pinned Graphify processes it.",
+    "Graphify Git metadata can inherit the enclosing checkout; the source manifest identifies the actual frozen baseline.",
+    "Token budgets are upstream settings, not measured tokens. No provider or cost instrumentation is available."
+  ],
+  "graph": {
+    "nodes": 159,
+    "edges": 470,
+    "sha256": "1f70483bcaf0a2087236ea8c7c797dc7c537de07bc254d8549a872045f310a41",
+    "bytes": 162091
+  },
+  "relationship_checks": [
+    {
+      "source_file": "graphify_lab/__main__.py",
+      "line": 110,
+      "caller": "inspect_real",
+      "caller_line": 104,
+      "callee": "node_at",
+      "status": "present",
+      "edges": [
+        {
+          "source": "graphify_lab_main_inspect_real",
+          "target": "graphify_lab_main_node_at",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "graphify_lab/__main__.py",
+          "source_location": "L110",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "graphify_lab/__main__.py",
+      "line": 335,
+      "caller": "main",
+      "caller_line": 283,
+      "callee": "node_at",
+      "status": "present",
+      "edges": [
+        {
+          "source": "graphify_lab_main_main",
+          "target": "graphify_lab_main_node_at",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "graphify_lab/__main__.py",
+          "source_location": "L335",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "tests/test_cli.py",
+      "line": 74,
+      "caller": "test_same_name_requires_file_selection",
+      "caller_line": 69,
+      "callee": "node_at",
+      "status": "present",
+      "edges": [
+        {
+          "source": "tests_test_cli_cliboundaries_test_same_name_requires_file_selection",
+          "target": "graphify_lab_main_node_at",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "tests/test_cli.py",
+          "source_location": "L74",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "tests/test_cli.py",
+      "line": 75,
+      "caller": "test_same_name_requires_file_selection",
+      "caller_line": 69,
+      "callee": "node_at",
+      "status": "present",
+      "edges": [
+        {
+          "source": "tests_test_cli_cliboundaries_test_same_name_requires_file_selection",
+          "target": "graphify_lab_main_node_at",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "tests/test_cli.py",
+          "source_location": "L74",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "graphify_lab/__main__.py",
+      "line": 111,
+      "caller": "inspect_real",
+      "caller_line": 104,
+      "callee": "source_excerpt",
+      "status": "present",
+      "edges": [
+        {
+          "source": "graphify_lab_main_inspect_real",
+          "target": "graphify_lab_main_source_excerpt",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "graphify_lab/__main__.py",
+          "source_location": "L111",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "graphify_lab/__main__.py",
+      "line": 336,
+      "caller": "main",
+      "caller_line": 283,
+      "callee": "source_excerpt",
+      "status": "present",
+      "edges": [
+        {
+          "source": "graphify_lab_main_main",
+          "target": "graphify_lab_main_source_excerpt",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "graphify_lab/__main__.py",
+          "source_location": "L336",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "tests/test_cli.py",
+      "line": 61,
+      "caller": "test_source_pointer_containment_and_bounds",
+      "caller_line": 55,
+      "callee": "source_excerpt",
+      "status": "present",
+      "edges": [
+        {
+          "source": "tests_test_cli_cliboundaries_test_source_pointer_containment_and_bounds",
+          "target": "graphify_lab_main_source_excerpt",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "tests/test_cli.py",
+          "source_location": "L61",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "tests/test_cli.py",
+      "line": 63,
+      "caller": "test_source_pointer_containment_and_bounds",
+      "caller_line": 55,
+      "callee": "source_excerpt",
+      "status": "present",
+      "edges": [
+        {
+          "source": "tests_test_cli_cliboundaries_test_source_pointer_containment_and_bounds",
+          "target": "graphify_lab_main_source_excerpt",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "tests/test_cli.py",
+          "source_location": "L61",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "tests/test_cli.py",
+      "line": 65,
+      "caller": "test_source_pointer_containment_and_bounds",
+      "caller_line": 55,
+      "callee": "source_excerpt",
+      "status": "present",
+      "edges": [
+        {
+          "source": "tests_test_cli_cliboundaries_test_source_pointer_containment_and_bounds",
+          "target": "graphify_lab_main_source_excerpt",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "tests/test_cli.py",
+          "source_location": "L61",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    },
+    {
+      "source_file": "tests/test_cli.py",
+      "line": 67,
+      "caller": "test_source_pointer_containment_and_bounds",
+      "caller_line": 55,
+      "callee": "source_excerpt",
+      "status": "present",
+      "edges": [
+        {
+          "source": "tests_test_cli_cliboundaries_test_source_pointer_containment_and_bounds",
+          "target": "graphify_lab_main_source_excerpt",
+          "relation": "calls",
+          "_origin": "ast",
+          "confidence": "EXTRACTED",
+          "confidence_score": 1.0,
+          "context": "call",
+          "source_file": "tests/test_cli.py",
+          "source_location": "L61",
+          "weight": 1.0
+        }
+      ],
+      "caller_in_helper_query": true
+    }
+  ],
+  "measurements": {
+    "snapshot_at": "2026-10-29T17:45:22.629841+00:00",
+    "coverage": "This pilot process only; local child commands and explicit MCP requests. Excludes orchestrator/agent and provider activity.",
+    "recorded_cli_commands_observed": 10,
+    "git_read_commands_observed": 9,
+    "mcp_protocol_requests_observed": 6,
+    "outer_tool_calls": null,
+    "agent_starts": null,
+    "provider_requests": null,
+    "tokens": null,
+    "cost": null,
+    "agent_elapsed_seconds": null,
+    "command_retries": 0,
+    "pilot_elapsed_seconds": 8.953946
+  },
+  "raw_report_sha256": "205b9e9e23d9310d1660a65621ef5ee0ff81dbf853e1a7adadb5f7a5ae845ebd"
+}

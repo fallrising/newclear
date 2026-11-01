@@ -1,0 +1,1425 @@
+{
+  "runId": "20261024T055718246Z-3f41ff45-0318-4e63-8791-603411d1069b",
+  "browser": "141.0.7390.37",
+  "axe": "not installed; not claimed",
+  "results": [
+    {
+      "id": "01-login",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/login",
+      "screenshot": "web__01-login__desktop__light.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "02-home",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/",
+      "screenshot": "web__02-home__desktop__light.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "03-message",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__03-message__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "04-streaming",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__04-streaming__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "05-complete",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__05-complete__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "06-thread",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby/t/eb013788-d915-4b77-8452-393758a5b65e",
+      "screenshot": "web__06-thread__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "07-history",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "screenshot": "web__07-history__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/messages: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/members: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "scrollBefore": {
+        "top": 0,
+        "height": 787
+      },
+      "scrollAfter": {
+        "top": 5249,
+        "height": 6036
+      }
+    },
+    {
+      "id": "08-agents",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "screenshot": "web__08-agents__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "screenshot": "web__08-agent__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /src/features/console/RenameRoomDialog.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/agents/GenerationsTab.tsx: net::ERR_ABORTED",
+        "GET /src/ui/CopyBlock.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/agents/RuntimeChangeDialog.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/CreatePersonDialog.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/ResetPasswordDialog.tsx: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED",
+        "GET /src/api/providers.ts: net::ERR_ABORTED",
+        "GET /src/api/agents.ts: net::ERR_ABORTED",
+        "GET /src/ui/SelectField.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/ArchiveRoomDialog.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/agents/TokensTab.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/providers/ProviderForm.tsx: net::ERR_ABORTED",
+        "GET /src/features/console/agents/RuntimeForm.tsx: net::ERR_ABORTED",
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent-new",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "screenshot": "web__08-agent-new__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-providers",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "screenshot": "web__08-providers__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers/a9dcb642-2ed9-43ba-b42b-c8a648c37256",
+      "screenshot": "web__08-provider__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider-new",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "screenshot": "web__08-provider-new__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-people",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/people",
+      "screenshot": "web__08-people__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-rooms",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "screenshot": "web__08-rooms__desktop__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "09-offline",
+      "viewport": "desktop",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__09-offline__desktop__light.png",
+      "consoleErrors": [
+        "WebSocket connection to 'ws://127.0.0.1:5174/api/rooms/room-lobby/ws' failed: Error in connection establishment: net::ERR_INTERNET_DISCONNECTED"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "offline": "observed"
+    },
+    {
+      "id": "01-login",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/login",
+      "screenshot": "web__01-login__desktop__dark.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "02-home",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/",
+      "screenshot": "web__02-home__desktop__dark.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "03-message",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__03-message__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "04-streaming",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__04-streaming__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "05-complete",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__05-complete__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "06-thread",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby/t/a3db1f52-f318-4012-bd48-f5186ebc9761",
+      "screenshot": "web__06-thread__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "07-history",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "screenshot": "web__07-history__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/messages: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/members: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "scrollBefore": {
+        "top": 0,
+        "height": 787
+      },
+      "scrollAfter": {
+        "top": 2181,
+        "height": 2968
+      }
+    },
+    {
+      "id": "08-agents",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "screenshot": "web__08-agents__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "screenshot": "web__08-agent__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent-new",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "screenshot": "web__08-agent-new__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-providers",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "screenshot": "web__08-providers__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers/4a16b829-849e-462c-b608-11582c3a2103",
+      "screenshot": "web__08-provider__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider-new",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "screenshot": "web__08-provider-new__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-people",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/people",
+      "screenshot": "web__08-people__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-rooms",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "screenshot": "web__08-rooms__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "09-offline",
+      "viewport": "desktop",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__09-offline__desktop__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "offline": "observed"
+    },
+    {
+      "id": "01-login",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/login",
+      "screenshot": "web__01-login__tablet__light.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "02-home",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/",
+      "screenshot": "web__02-home__tablet__light.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "03-message",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__03-message__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "04-streaming",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__04-streaming__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "05-complete",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__05-complete__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "06-thread",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby/t/4d8bb356-3103-42e3-9fb9-db3a23432965",
+      "screenshot": "web__06-thread__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "07-history",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "screenshot": "web__07-history__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "scrollBefore": {
+        "top": 0,
+        "height": 999
+      },
+      "scrollAfter": {
+        "top": 4983,
+        "height": 5986
+      }
+    },
+    {
+      "id": "08-agents",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "screenshot": "web__08-agents__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "screenshot": "web__08-agent__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent-new",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "screenshot": "web__08-agent-new__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-providers",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "screenshot": "web__08-providers__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers/a4d53010-9ee3-453e-b2f3-49a16a115fb1",
+      "screenshot": "web__08-provider__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider-new",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "screenshot": "web__08-provider-new__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-people",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/people",
+      "screenshot": "web__08-people__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-rooms",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "screenshot": "web__08-rooms__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "09-offline",
+      "viewport": "tablet",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__09-offline__tablet__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "offline": "observed"
+    },
+    {
+      "id": "01-login",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/login",
+      "screenshot": "web__01-login__tablet__dark.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "02-home",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/",
+      "screenshot": "web__02-home__tablet__dark.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "03-message",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__03-message__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "04-streaming",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__04-streaming__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "05-complete",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__05-complete__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "06-thread",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby/t/bf846a25-bd5f-43c6-9583-a8f7fc97deff",
+      "screenshot": "web__06-thread__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "07-history",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "screenshot": "web__07-history__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "scrollBefore": {
+        "top": 0,
+        "height": 999
+      },
+      "scrollAfter": {
+        "top": 1933,
+        "height": 2932
+      }
+    },
+    {
+      "id": "08-agents",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "screenshot": "web__08-agents__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "screenshot": "web__08-agent__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent-new",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "screenshot": "web__08-agent-new__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-providers",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "screenshot": "web__08-providers__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers/09ece99c-cd74-4d3e-a820-9123696e6b37",
+      "screenshot": "web__08-provider__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider-new",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "screenshot": "web__08-provider-new__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-people",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/people",
+      "screenshot": "web__08-people__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-rooms",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "screenshot": "web__08-rooms__tablet__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "09-offline",
+      "viewport": "tablet",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__09-offline__tablet__dark.png",
+      "consoleErrors": [
+        "WebSocket connection to 'ws://127.0.0.1:5174/api/rooms/room-lobby/ws' failed: Error in connection establishment: net::ERR_INTERNET_DISCONNECTED"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "offline": "observed"
+    },
+    {
+      "id": "01-login",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/login",
+      "screenshot": "web__01-login__mobile__light.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "02-home",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/",
+      "screenshot": "web__02-home__mobile__light.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "03-message",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__03-message__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "04-streaming",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__04-streaming__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "05-complete",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__05-complete__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "06-thread",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby/t/2694120b-636c-45be-9e66-e7d6a2821370",
+      "screenshot": "web__06-thread__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "07-history",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "screenshot": "web__07-history__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "scrollBefore": {
+        "top": 0,
+        "height": 731
+      },
+      "scrollAfter": {
+        "top": 5323,
+        "height": 6054
+      }
+    },
+    {
+      "id": "08-agents",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "screenshot": "web__08-agents__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "screenshot": "web__08-agent__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent-new",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "screenshot": "web__08-agent-new__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-providers",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "screenshot": "web__08-providers__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers/5dc652a8-8a18-4761-b84e-409992d5df49",
+      "screenshot": "web__08-provider__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider-new",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "screenshot": "web__08-provider-new__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-people",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/people",
+      "screenshot": "web__08-people__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-rooms",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "screenshot": "web__08-rooms__mobile__light.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "09-offline",
+      "viewport": "mobile",
+      "scheme": "light",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__09-offline__mobile__light.png",
+      "consoleErrors": [
+        "WebSocket connection to 'ws://127.0.0.1:5174/api/rooms/room-lobby/ws' failed: Error in connection establishment: net::ERR_INTERNET_DISCONNECTED"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "offline": "observed"
+    },
+    {
+      "id": "01-login",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/login",
+      "screenshot": "web__01-login__mobile__dark.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "02-home",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/",
+      "screenshot": "web__02-home__mobile__dark.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "03-message",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__03-message__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "04-streaming",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__04-streaming__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "05-complete",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__05-complete__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "06-thread",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby/t/54324afa-49db-4420-8ea9-3297b4832484",
+      "screenshot": "web__06-thread__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "07-history",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "screenshot": "web__07-history__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-long/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "scrollBefore": {
+        "top": 0,
+        "height": 731
+      },
+      "scrollAfter": {
+        "top": 2249,
+        "height": 2980
+      }
+    },
+    {
+      "id": "08-agents",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "screenshot": "web__08-agents__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "screenshot": "web__08-agent__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-agent-new",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "screenshot": "web__08-agent-new__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-providers",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "screenshot": "web__08-providers__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers/9d79df99-44de-46c5-93d7-3c5ac6acaa7d",
+      "screenshot": "web__08-provider__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-provider-new",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "screenshot": "web__08-provider-new__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-people",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/people",
+      "screenshot": "web__08-people__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "08-rooms",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "screenshot": "web__08-rooms__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false
+    },
+    {
+      "id": "09-offline",
+      "viewport": "mobile",
+      "scheme": "dark",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "screenshot": "web__09-offline__mobile__dark.png",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET /api/me: net::ERR_ABORTED",
+        "GET /api/rooms: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/members: net::ERR_ABORTED",
+        "GET /api/rooms/room-lobby/messages: net::ERR_ABORTED"
+      ],
+      "horizontalOverflow": false,
+      "offline": "observed"
+    }
+  ]
+}

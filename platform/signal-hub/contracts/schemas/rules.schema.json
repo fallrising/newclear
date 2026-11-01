@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signalhub.example.invalid/contracts/rules.schema.json",
+  "type": "object",
+  "properties": {
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}(?![\\s\\S])"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "filter": {
+            "$ref": "filter.schema.json"
+          },
+          "aggregation": {
+            "type": "object",
+            "properties": {
+              "fn": {
+                "enum": [
+                  "count",
+                  "count_distinct",
+                  "sum",
+                  "min",
+                  "max",
+                  "avg"
+                ]
+              },
+              "field": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^(source|type|subject|severity|data\\.[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+){0,2})(?![\\s\\S])"
+                  },
+                  {
+                    "const": ""
+                  }
+                ]
+              }
+            },
+            "required": [
+              "fn"
+            ],
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "fn": {
+                      "const": "count"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "field": {
+                      "const": ""
+                    }
+                  }
+                },
+                "else": {
+                  "required": [
+                    "field"
+                  ],
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "pattern": "^(source|type|subject|severity|data\\.[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+){0,2})(?![\\s\\S])"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "bucket": {
+            "enum": [
+              "5m",
+              "1h",
+              "1d"
+            ]
+          },
+          "group_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(source|type|subject|severity|data\\.[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+){0,2})(?![\\s\\S])"
+            },
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "threshold": {
+            "type": "object",
+            "properties": {
+              "op": {
+                "enum": [
+                  ">",
+                  ">=",
+                  "<",
+                  "<=",
+                  "==",
+                  "!="
+                ]
+              },
+              "value": {
+                "type": "number"
+              },
+              "for_buckets": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "severity": {
+                "enum": [
+                  "debug",
+                  "info",
+                  "notice",
+                  "warning",
+                  "error",
+                  "critical"
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "value",
+              "for_buckets",
+              "severity"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "title",
+          "filter",
+          "aggregation",
+          "bucket"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "rules"
+  ],
+  "additionalProperties": false
+}

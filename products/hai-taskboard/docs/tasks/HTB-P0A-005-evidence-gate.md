@@ -7,7 +7,7 @@ or hiding failed/skipped/NotRun evidence.
 
 ## Inputs
 
-- `.team/PLAN.md`, accepted SDD/ADRs/mini-SDDs
+- journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/PLAN.md`, accepted SDD/ADRs/mini-SDDs
 - `docs/traceability.md`
 - all task/report evidence and actual repository diff
 

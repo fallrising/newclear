@@ -1,0 +1,47 @@
+## Review (pagination, SQL, permission predicates)
+
+Excludes known **offset overflow** and **fractional `page`/`size` truncation**.
+
+### 1. Duplicate index rows → nondeterministic filter/sort/access (§5.2, V6)
+
+V6 adds indexes on `(field_key, scope, value_*)` and `(entry_id, scope)` but **no uniqueness** on `(entry_id, scope, field_key)`. If the store or V7 backfill ever writes duplicates, JDBC field sort uses `(SELECT … LIMIT 1)` with **no `ORDER BY`**, and in-memory uses `findFirst()` on an unordered list—**BD-10 parity breaks** for sort, `FieldFilter`, and `AccessFilter` (which ORs `(field_key, value_string)` matches).
+
+**Regression:** Insert two `cms_entry_index` rows for the same `(entry_id, scope, field_key)` with different `value_string`; assert `queryEntries` sort and `filter.<field>` match `InMemoryContentStore` and are stable across runs.
+
+### 2. List predicates are index-only; single-entry auth may differ (§4.4, §5.2 #10)
+
+`AccessFilter` / `listAccess` matching is **only** `EXISTS … value_string = ?` on scope index rows. The spec does not require list to re-read payload. If an index row is missing/stale but `allow()` still passes on payload, callers get **get yes / list no** (or the reverse if index exists but payload differs).
+
+**Regression:** Grant `ownerPrincipalId=$currentPrincipalId`; entry with correct owner in payload but no work-scope index row → list empty, single get behavior per BW1a `allow()`.
+
+### 3. Malformed predicates skipped in `listAccess` (§4.4 step 4)
+
+Unparseable predicates are **skipped** (no clause), not failed. A role whose grants are **all** malformed yields an **empty clause list → empty page, total 0**, not 403—while single-entry `allow()` rejects. Differs from “no matching grant” (403).
+
+**Regression:** One grant matching action/type/surface with predicate `{not json}`; list returns 200 empty; single read returns 403.
+
+### 4. Any predicate-less grant → unrestricted list (§4.4 step 3)
+
+One grant without predicate on the same role **drops all pushed restrictions** for that list action. Correct per B10 table but **high-impact misconfiguration**: adding a broad grant silently widens list visibility.
+
+**Regression:** Role with `(owner=$self)` and `(read, no predicate)` → list returns all entries of type.
+
+### 5. `requiredRefs` UUID gate: lowercase regex vs index text (§5.2 #5, `UUID_TEXT`)
+
+SQL only casts when `value_string ~ '^[0-9a-f-…$'`. In-memory requires canonical lowercase via `UUID.fromString().toString().equals(text)`. **Uppercase** ref in published index: both exclude (OK). If indexer ever wrote non-canonical but parseable forms, behavior depends on regex, not `UUID` rules—**subtle drift** from `ref.<field>` validation (strict UUID).
+
+**Regression:** Published index `value_string` = valid UUID with uppercase hex; entry with that ref appears on public list iff in-memory `publiclyReadable` agrees.
+
+### 6. Auth-before-parse (§4.3 rule 5)
+
+Unauthorized callers get **403 before** `VALIDATION_FAILED`. Same bad params never yield 400 for forbidden users—**no param oracle** for outsiders; authorized users see 400. Acceptable; note for security tests.
+
+### 7. Empty `states` on WORK (§5.2 #2)
+
+Empty `states` → `AND FALSE`. Parser defaults `draft,published`; if wiring ever passes empty list, silent empty catalog (not 400).
+
+**Regression:** Direct `EntryQuery` with `states=[]` → empty page, not error.
+
+---
+
+**Highest priority:** (1) missing index uniqueness + `LIMIT 1`, (2) index-only list access vs entry `allow()`, (3) malformed-predicate empty list vs 403 semantics.

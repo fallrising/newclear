@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed — failover keeps queues on their replicas (#297)
+- Queue ownership used `hash % alive nodes`; losing a node remapped many queues, often to a node with no copy, which answered `404 QUEUE_NOT_FOUND` until catch-up ran
+- Ownership now uses **rendezvous hashing**: only the dead node's queues move, each to the replica that already holds it; queues on live owners stay put
+- **Upgrade note:** old and new binaries pick different owners — do not mix versions in one cluster; drain queues before upgrading a cluster that holds messages
+
+### Fixed — consumed messages no longer come back after a node rejoins (#302)
+- Catch-up merged any message a peer still held, so a node restarted from its WAL re-introduced messages consumed while it was down; the same merge occasionally duplicated a message during failover
+- Every node remembers removed message IDs for **`CLARKQ_REMOVED_TTL`** (default `1h`); catch-up and replica pushes skip them
+- Messages restored from WAL/snapshot stay unconfirmed until every live replica answers a catch-up round; ones a peer removed and no peer holds are dropped
+- WAL replay removes a dequeued message by ID instead of popping the head (replicas held a different order and lost the wrong message)
+- **Limits:** removed IDs are in memory only — rejoin a node down longer than the TTL with an empty data dir
+
+### Verified on a real 3-node cluster
+- Three VMs, RF=2 sync, WAL: cluster scenarios 01/02/03/05/06/07 pass (42/0)
+- Stop any one node → drain 300 messages over 30 queues → rejoin: 300/300, 0 duplicates, 0 FIFO violations, 0 404, depth 0 after rejoin (before: 160–190 resurrected, 4 queues 404)
+- SIGKILL all nodes → restart: 300/300 recovered from WAL
+
 ## [1.5.1] — 2026-07-29
 
 ### Admin UI + reality check

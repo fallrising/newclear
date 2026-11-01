@@ -1,0 +1,72 @@
+uv venv .venv --python 3.12
+Using CPython 3.12.3 interpreter at: /usr/bin/python3.12
+Creating virtual environment at: .venv
+Activate with: source .venv/bin/activate
+uv pip install -e ".[dev]" --python .venv/bin/python
+Resolved 48 packages in 331ms
+   Building secure-mqtt-e2ee @ file://<worker-worktree>/systems/wotar/secure-mqtt-e2ee
+Downloading ruff (9.9MiB)
+Downloading pygments (1.2MiB)
+Downloading ast-serialize (1.3MiB)
+Downloading pip (1.7MiB)
+Downloading cryptography (4.5MiB)
+Downloading mypy (14.8MiB)
+Downloading hypothesis (1.1MiB)
+ Downloaded pygments
+ Downloaded hypothesis
+ Downloaded ast-serialize
+ Downloaded pip
+ Downloaded cryptography
+ Downloaded ruff
+ Downloaded mypy
+      Built secure-mqtt-e2ee @ file://<worker-worktree>/systems/wotar/secure-mqtt-e2ee
+Prepared 48 packages in 733ms
+Installed 48 packages in 98ms
+ + ast-serialize==0.13.1
+ + boolean-py==5.0
+ + cachecontrol==0.14.4
+ + cbor2==6.1.5
+ + certifi==2026.10.19
+ + cffi==2.1.1
+ + charset-normalizer==3.5.2
+ + coverage==7.16.2
+ + cryptography==50.0.2
+ + cyclonedx-python-lib==11.12.0
+ + defusedxml==0.7.1
+ + filelock==4.2.4
+ + hypothesis==6.170.5
+ + idna==3.20
+ + iniconfig==2.3.1
+ + librt==0.16.0
+ + license-expression==30.4.4
+ + markdown-it-py==4.2.0
+ + mdurl==0.1.2
+ + msgpack==1.2.3
+ + mypy==2.4.0
+ + mypy-extensions==1.1.0
+ + packageurl-python==0.17.6
+ + packaging==26.3
+ + paho-mqtt==2.1.0
+ + pathspec==1.1.1
+ + pip==26.2.2
+ + pip-api==0.0.35
+ + pip-audit==2.10.1
+ + pip-requirements-parser==32.0.1
+ + platformdirs==4.13.5
+ + pluggy==1.7.0
+ + py-serializable==2.1.0
+ + pycparser==3.11
+ + pygments==2.21.0
+ + pyparsing==3.3.3
+ + pytest==9.1.1
+ + pytest-asyncio==1.4.0
+ + pytest-cov==7.1.0
+ + requests==2.34.2
+ + rich==15.0.0
+ + ruff==0.17.1
+ + secure-mqtt-e2ee==0.1.0 (from file://<worker-worktree>/systems/wotar/secure-mqtt-e2ee)
+ + sortedcontainers==2.4.0
+ + tomli==2.5.0
+ + tomli-w==1.2.0
+ + typing-extensions==4.16.0
+ + urllib3==2.8.0

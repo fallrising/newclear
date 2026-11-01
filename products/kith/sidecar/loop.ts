@@ -230,23 +230,56 @@ export async function queryMaxSeq(
   }
 }
 
-async function* sseBlocks(body: ReadableStream<Uint8Array>): AsyncGenerator<string> {
+async function* sseBlocks(
+  body: ReadableStream<Uint8Array>,
+  signal?: AbortSignal,
+  onReadError?: () => void,
+): AsyncGenerator<string> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buf = "";
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-    buf = buf.replaceAll("\r\n", "\n");
-    let idx = buf.indexOf("\n\n");
-    while (idx >= 0) {
-      yield buf.slice(0, idx);
-      buf = buf.slice(idx + 2);
-      idx = buf.indexOf("\n\n");
+  const cancel = () => { void reader.cancel().catch(() => {}); };
+  signal?.addEventListener("abort", cancel, { once: true });
+  try {
+    if (signal?.aborted) return;
+    for (;;) {
+      let chunk: ReadableStreamReadResult<Uint8Array>;
+      try {
+        chunk = await reader.read();
+      } catch {
+        // Only a transport read failure reconnects. Execution/write failures must never replay a CLI wake.
+        if (!signal?.aborted) onReadError?.();
+        return;
+      }
+      if (chunk.done || signal?.aborted) break;
+      buf += decoder.decode(chunk.value, { stream: true });
+      buf = buf.replaceAll("\r\n", "\n");
+      let idx = buf.indexOf("\n\n");
+      while (idx >= 0) {
+        yield buf.slice(0, idx);
+        buf = buf.slice(idx + 2);
+        idx = buf.indexOf("\n\n");
+      }
     }
+    if (buf.trim() && !signal?.aborted) yield buf;
+  } finally {
+    signal?.removeEventListener("abort", cancel);
+    cancel();
+    reader.releaseLock();
   }
-  if (buf.trim()) yield buf;
+}
+
+function reconnectDelay(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal?.addEventListener("abort", done, { once: true });
+  });
 }
 
 /** Live GET /mcp/events tail. First cursor is MAX(seq), never implicit 0. */
@@ -280,20 +313,27 @@ export async function runLiveSidecar(opts: {
 
   while (!opts.signal?.aborted) {
     const url = eventsUrl(opts.config.mcp_base_url, opts.config.room_id, cursor);
-    const res = await opts.fetch(url, {
-      headers: {
-        authorization: `Bearer ${token}`,
-        accept: "text/event-stream",
-      },
-      signal: opts.signal,
-    });
+    let res: Response;
+    try {
+      res = await opts.fetch(url, {
+        headers: {
+          authorization: `Bearer ${token}`,
+          accept: "text/event-stream",
+        },
+        signal: opts.signal,
+      });
+    } catch (error) {
+      if (opts.signal?.aborted) break;
+      throw error;
+    }
     if (!res.ok || !res.body) {
       log(`events HTTP ${res.status}; retry`);
-      await new Promise((r) => setTimeout(r, 1000));
+      void res.body?.cancel().catch(() => {});
+      await reconnectDelay(1000, opts.signal);
       continue;
     }
     let gapped = false;
-    for await (const block of sseBlocks(res.body)) {
+    for await (const block of sseBlocks(res.body, opts.signal, () => log("events read failed; reconnect"))) {
       if (opts.signal?.aborted) break;
       if (block.split("\n").some((l) => l.startsWith(": gap") || l === ": gap")) {
         log("gap; reconnect");
@@ -302,6 +342,7 @@ export async function runLiveSidecar(opts: {
       }
       const events = parseSseEvents(`${block}\n\n`);
       if (events.length === 0) continue;
+      // Finish this generation before resuming reads, even if the transport rotates while the CLI is active.
       const part = await consumeEvents({
         config: opts.config,
         events,
@@ -328,7 +369,7 @@ export async function runLiveSidecar(opts: {
       for (const line of part.logs) log(line);
     }
     if (!gapped && !opts.signal?.aborted) {
-      await new Promise((r) => setTimeout(r, 500));
+      await reconnectDelay(500, opts.signal);
     }
   }
   return acc;

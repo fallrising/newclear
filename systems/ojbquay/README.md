@@ -1,5 +1,8 @@
 # ojbquay
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
 
 
@@ -208,8 +211,13 @@ OJBQUAY_KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
 
 Its pull gRPC port defaults to `9101` and its metrics/readiness port to `9202`.
 Optional settings are `OJBQUAY_INSTANCE_ID`, `OJBQUAY_GRPC_PORT`,
-`OJBQUAY_METRICS_PORT`, and
-`OJBQUAY_CONFIG_BOOTSTRAP_TIMEOUT_MS`.
+`OJBQUAY_METRICS_PORT`, `OJBQUAY_CONFIG_BOOTSTRAP_TIMEOUT_MS`, and
+`OJBQUAY_CONSUME_RUNTIME_ROSTER` (`instance=http://host:port,...`). Without a
+roster the gateway starts normally but `/internal/pause-status` never confirms a
+pause, so offset reset stays fail-closed; console-api reads the same variable and
+rejects a reset with `RUNTIME_PAUSE_UNCONFIRMED` unless every listed runtime
+confirms. With a roster the instance ID must be
+a member or startup fails.
 
 Unordered subscriptions use Kafka 4.2 Share Groups with explicit per-record
 acknowledgement and `record_limit` acquisition. Failed HTTP delivery publishes
@@ -362,3 +370,5 @@ docs                   Product spec, ADRs, tasks, and runbooks
 ojbquay is licensed under the
 [Apache License, Version 2.0](LICENSE). Third-party dependencies and images
 retain their own license terms.
+
+規格閱讀入口：[規格、程式與測試對照](docs/specification-map.md)；固定 AC 見 [SDD](SDD.md)，驗收狀態見 [SUCCESS](SUCCESS.md)。

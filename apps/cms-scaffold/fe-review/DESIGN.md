@@ -1,6 +1,7 @@
 # FE Review — cms-scaffold — DESIGN
 
-> 活文件：描述第 2 輪要做的修改與驗收方式。狀態：**草稿**（待擁有者在設計 PR 確認）。每次修改都走 PR。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採 (b)：packages/ui 維持先提議，不授權直接修改；D2 採 (b)：loopback 啟動覆寫，不改共用 Vite 設定。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -8,9 +9,9 @@ cms-scaffold 的前端正在依 v2 路線圖（`docs/v2/README.md`）逐波重�
 
 ## 依據
 
-- REVIEW.md 已決定：無。
-- 假設（待擁有者在本 PR 確認）：
-  - **D1 採 (a)**：第 2 輪可以直接修改 `packages/ui`，條件是三個 app 的 `lint`／`typecheck`／`test`／`build` 與 `test:bundle` 都通過；PR 說明列出受影響的 app。本設計的修改項目目前都不需要動 `packages/ui`，這個假設約束的是第 3 輪之後的修正 PR。
+- REVIEW.md 已決定：採用上述 owner 確認的方案。
+- 已確認的設計依據（2026-10-23）：
+  - **D1 採 (b)**：`packages/ui` 維持先提議；三 app gate 通過也不能替代另行批准。目前 M 項不需共用套件修改。
 - 相關規範：
   - 元件 `AGENTS.md`「v2」一節：一波一個 PR、只碰該波列出的路徑；元件只用 shadcn/ui（經 `packages/ui`）；前端閘門是 `lint`／`typecheck`／`test`／`build`，W0 起加 `test:bundle` 與 `e2e:mock`。
   - `docs/v2/01-frontend-sdd.md` §0：前端架構、視覺語言、元件、實作波次以 01 為權威；權限與資料可見性以 `docs/specs/surface-*.md` 為準。fe-review 的修改不得與兩者衝突。
@@ -23,7 +24,7 @@ cms-scaffold 的前端正在依 v2 路線圖（`docs/v2/README.md`）逐波重�
 - 不修改任何已列入 v2 稽核（`docs/v2/00-v1-frontend-audit.md` 的 F-、S-、C-、U-、E- 編號）或 v2 施工圖範圍的問題；它們由對應波次處理。
 - v2 前端波次（W1、W2、W3、W3b、W4、W5）尚未 `VERIFIED` 前，不修改 `apps/*/src/`、`packages/*`、`apps/*/vite.config.ts`、`e2e-mock/`。
 - 不修改後端（`services/cms-api`）、`openapi.yaml`、`packages/mocks` 的 fixture 與 handler、CI、依賴版本。
-- 不改 `apps/*/vite.config.ts` 的 `host: true`（REVIEW.md D2 待決定；擷取改用啟動指令覆寫）。
+- 不改 `apps/*/vite.config.ts` 的 `host: true`（REVIEW.md D2 已確認採啟動覆寫；擷取改用啟動指令覆寫）。
 - 不為作業面加深色模式，不做 v2 非目標（Front prerender、批次操作、token 預覽、Polaris 套件）。
 - 不跑接真實 API 的 `npm run e2e`，不啟動 Compose 或後端。
 

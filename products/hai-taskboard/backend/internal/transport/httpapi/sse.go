@@ -155,6 +155,10 @@ func (server *Server) streamEvents(response http.ResponseWriter, request *http.R
 	)
 	if supplied {
 		replay, err := server.projections.Replay(request.Context(), projectID, cursor)
+		if errors.Is(err, ErrProjectionNotFound) {
+			writeAPIError(response, http.StatusNotFound, command.CodeNotFound, "resource is unavailable")
+			return
+		}
 		if err != nil || replay.Epoch == 0 || replay.MinimumSequence > replay.HighWater+1 {
 			writeAPIError(response, http.StatusServiceUnavailable, command.CodeProjectionUnavailable, "projection replay is unavailable")
 			return
@@ -172,6 +176,10 @@ func (server *Server) streamEvents(response http.ResponseWriter, request *http.R
 		}
 	} else {
 		snapshot, err := server.projections.Snapshot(request.Context(), projectID)
+		if errors.Is(err, ErrProjectionNotFound) {
+			writeAPIError(response, http.StatusNotFound, command.CodeNotFound, "resource is unavailable")
+			return
+		}
 		if err != nil || snapshot.ProjectID != projectID || snapshot.Cursor.Epoch == 0 || snapshot.MinimumSequence > snapshot.Cursor.Sequence+1 {
 			writeAPIError(response, http.StatusServiceUnavailable, command.CodeProjectionUnavailable, "projection snapshot is unavailable")
 			return

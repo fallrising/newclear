@@ -1,0 +1,11 @@
+{
+  "project_success_contracts": 41,
+  "validator_tests": 15,
+  "validate_deploy": "PASS namespace/compose/prometheus5rules/kustomize3dashboards; modelonly",
+  "diff_check": "PASS: final staged git diff --cached --check exit 0; initial failed check preserved separately",
+  "independent_review": "T460 ACCEPT publication of unapprovedproposal only",
+  "product_acceptance": "FAIL originalAC05; notqualified",
+  "usable_tag": "none",
+  "initial_staged_diff_check": "FAIL: raw log/XML trailing whitespace; preserved separate receipt",
+  "format_followup_reference_build": "PASS: 44 tasks up-to-date; no new test execution"
+}

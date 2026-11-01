@@ -1,0 +1,20 @@
+{
+  "commandBaseline": "npx playwright test --config test-results/frontend/visual-negative-control/probe.config.ts --update-snapshots",
+  "commandNegative": "W5_VISUAL_NEGATIVE=1 npx playwright test --config test-results/frontend/visual-negative-control/probe.config.ts",
+  "baselineExit": 0,
+  "negativeExit": 1,
+  "differentPixels": 39200,
+  "ratio": 0.04,
+  "maxDiffPixelRatio": 0.001,
+  "result": "passed negative control; mismatch was rejected",
+  "scope": "Ignored isolated test-only page, no canonical product baseline written or changed",
+  "hashes": {
+    "probe.config.ts": "2ef7134381125d5b142c66dea95c7faaa96068cf65aebc8bf4478253cc826bc7",
+    "probe.spec.ts": "fe60751f978f07c76b5dec50d3982b850eb8837f03b0c8a450e601661151906a",
+    "baseline/probe.png": "d090aa22cc96175ebb3ff464be77497f9abb8b7c34e388bba13b0a04af0ee2ba",
+    "artifacts/probe-W5-screenshot-mismatch-negative-control/probe-diff.png": "624df89d0034db2204513e1b1be082c4bd73a6951a814aa6dcbe4fbf90dbb446",
+    "artifacts/probe-W5-screenshot-mismatch-negative-control/test-failed-1.png": "7daa5f2247799c70963741d943ad593afa5b11e2a4a1b23c4c2bfb870c0977c5",
+    "artifacts/probe-W5-screenshot-mismatch-negative-control/probe-expected.png": "d090aa22cc96175ebb3ff464be77497f9abb8b7c34e388bba13b0a04af0ee2ba",
+    "artifacts/probe-W5-screenshot-mismatch-negative-control/probe-actual.png": "7daa5f2247799c70963741d943ad593afa5b11e2a4a1b23c4c2bfb870c0977c5"
+  }
+}

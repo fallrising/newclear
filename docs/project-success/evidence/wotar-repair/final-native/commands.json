@@ -1,0 +1,37 @@
+[
+  {
+    "label": "certificates",
+    "argv": [
+      "bash",
+      "scripts/generate_dev_certs.sh"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 2.469
+  },
+  {
+    "label": "bootstrap",
+    "argv": [
+      "/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/python",
+      "scripts/bootstrap_local_keys.py"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.064
+  },
+  {
+    "label": "native",
+    "argv": [
+      "make",
+      "VENV=/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv",
+      "lint",
+      "typecheck",
+      "doctor",
+      "test",
+      "coverage"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 20.102
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "tracked_source_unchanged": true,
+  "credential_location": "fresh temporary fixture only",
+  "broker_container": "wotar-test-58684edd4cf1446097428e95deef14e9",
+  "broker_network": "dedicated bridge; host listener loopback only",
+  "published_listener": "127.0.0.1:8883",
+  "existing_certificates_or_settings_written": false
+}

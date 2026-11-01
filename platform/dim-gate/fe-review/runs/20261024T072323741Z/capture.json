@@ -1,0 +1,36 @@
+{
+  "project": "dim-gate",
+  "scope": "R2 navigation capture; not workflow or full Round3 acceptance",
+  "resumedFrom": "20261024T064605334Z",
+  "driverSha256": "0352663d5a04249a97c745b861885bbafb73e7e3e4f57537e1cb6e60b84a23b5",
+  "browser": "153.0.8010.12",
+  "node": "v24.18.0",
+  "axe": true,
+  "results": [
+    {
+      "persona": "user-rd-commerce",
+      "page": "alerts",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/alerts",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__alerts__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 告警規則",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,9 +1,11 @@
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from core_publish import publish
@@ -66,6 +68,88 @@ class CorePublishTests(unittest.TestCase):
         self.assertNotIn('/tmp/build', text)
         self.assertIn('<private artifact>', text)
         self.assertEqual(len(report['build_result_sha256']['primary']), 64)
+
+    def test_same_result_file_cannot_claim_independent_builds(self):
+        first = self.first / 'result.json'
+        for index, independent in enumerate((first, Path('private/builds/primary/result.json'))):
+            with self.subTest(independent=str(independent)):
+                with self.assertRaisesRegex(ValueError, 'distinct.*files'):
+                    publish(self.project, first, independent,
+                            f'patches/same-file-{index}.validation.json')
+
+    def test_hardlinked_result_files_cannot_claim_independent_builds(self):
+        second = self.second / 'result.json'
+        second.unlink()
+        os.link(self.first / 'result.json', second)
+        with self.assertRaisesRegex(ValueError, 'distinct.*files'):
+            publish(self.project, self.first / 'result.json', second,
+                    'patches/hardlink.validation.json')
+
+    def test_distinct_result_files_with_identical_bytes_are_accepted(self):
+        first, second = self.first / 'result.json', self.second / 'result.json'
+        self.assertEqual(first.read_bytes(), second.read_bytes())
+        self.assertFalse(first.samefile(second))
+        output = 'patches/identical.validation.json'
+        publish(self.project, first, second, output)
+        self.assertEqual(validation_record(self.project, output)['artifact_sha256'],
+                         self.artifact_sha)
+        self.assertEqual(list(self.patches.glob('.*.validation.json')), [])
+
+    def test_racing_destination_creation_preserves_competing_manifest(self):
+        output = self.patches / 'race.validation.json'
+        competing = b'{"competing": "immutable reviewed release"}\n'
+
+        def create_competitor(project, temporary):
+            release = validation_record(project, temporary)
+            output.write_bytes(competing)
+            return release
+
+        with patch('core_publish.validation_record', side_effect=create_competitor):
+            with self.assertRaises(FileExistsError):
+                publish(self.project, self.first / 'result.json',
+                        self.second / 'result.json', output)
+        self.assertEqual(output.read_bytes(), competing)
+        self.assertEqual(list(self.patches.glob('.*.validation.json')), [])
+
+    def test_racing_destination_symlink_is_preserved_without_touching_its_target(self):
+        output = self.patches / 'symlink-race.validation.json'
+        target = self.patches / 'competing.validation.json'
+        target.write_bytes(b'previous reviewed manifest\n')
+
+        def create_competitor(project, temporary):
+            release = validation_record(project, temporary)
+            output.symlink_to(target)
+            return release
+
+        with patch('core_publish.validation_record', side_effect=create_competitor):
+            with self.assertRaises(FileExistsError):
+                publish(self.project, self.first / 'result.json',
+                        self.second / 'result.json', output)
+        self.assertTrue(output.is_symlink())
+        self.assertEqual(target.read_bytes(), b'previous reviewed manifest\n')
+        self.assertEqual(list(self.patches.glob('.*.validation.json')), [])
+
+    def test_result_inputs_must_remain_regular_files(self):
+        second = self.second / 'result.json'
+        second.unlink()
+        second.symlink_to(self.first / 'result.json')
+        with self.assertRaisesRegex(ValueError, 'regular result.json'):
+            publish(self.project, self.first / 'result.json', second,
+                    'patches/symlink.validation.json')
+        second.unlink()
+        second.mkdir()
+        with self.assertRaisesRegex(ValueError, 'regular result.json'):
+            publish(self.project, self.first / 'result.json', second,
+                    'patches/directory.validation.json')
+
+    def test_validation_failure_cleans_temporary_manifest(self):
+        output = self.patches / 'failed.validation.json'
+        with patch('core_publish.validation_record', side_effect=ValueError('invalid candidate')):
+            with self.assertRaisesRegex(ValueError, 'invalid candidate'):
+                publish(self.project, self.first / 'result.json',
+                        self.second / 'result.json', output)
+        self.assertFalse(output.exists())
+        self.assertEqual(list(self.patches.glob('.*.validation.json')), [])
 
     def test_mismatched_build_provenance_or_binary_is_rejected(self):
         second = json.loads((self.second / 'result.json').read_text())

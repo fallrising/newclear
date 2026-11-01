@@ -91,7 +91,12 @@ def validation_record(project, validation_file):
     independent_steps = independent.get("steps")
     if not isinstance(independent_steps, list):
         raise ValueError("independent build steps are missing")
-    independent_map = {step.get("name"): step for step in independent_steps if isinstance(step, dict)}
+    if any(not isinstance(step, dict) or not isinstance(step.get("name"), str)
+           or not step["name"] for step in independent_steps):
+        raise ValueError("independent build step records are malformed")
+    independent_map = {step["name"]: step for step in independent_steps}
+    if len(independent_map) != len(independent_steps):
+        raise ValueError("independent build step names must be unique")
     if not {"regression", "calcium", "locks", "build"}.issubset(independent_map):
         raise ValueError("independent reproducible build steps are incomplete")
     if any(independent_map[name].get("exit_code") != 0
@@ -134,6 +139,9 @@ def validation_record(project, validation_file):
         if (not step or step.get("exit_code") != 0
                 or not isinstance(step.get("argv"), list) or not step["argv"]):
             raise ValueError("cross-version compatibility requires a passing version-specific test step")
+        independent_step = independent_map.get("compatibility-from-" + version)
+        if not independent_step or independent_step.get("exit_code") != 0:
+            raise ValueError("independent compatibility requires a passing version-specific test step")
 
     toolchain = data.get("toolchain")
     if not isinstance(toolchain, dict) or toolchain.get("os") != "linux" or toolchain.get("arch") != "amd64":

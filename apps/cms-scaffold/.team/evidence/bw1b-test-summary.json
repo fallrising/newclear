@@ -1,0 +1,173 @@
+{
+  "test": {
+    "totals": {
+      "tests": 202,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "files": [
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.ApiExceptionHandlerTests.xml",
+        "sha256": "a51ccb1e9ba5d81b3153be45798f7cc544c447fccd17297dcae0e516751cda90"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.CapabilitiesTests.xml",
+        "sha256": "3777dcc702b808f5d51798132c7c078891377571fa6cdc9a17c2a239bd41cf9a"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.CmsApiApplicationTests.xml",
+        "sha256": "3848b7ca3efbce2af94c4d1672d68625f5dc940b7d90ab5c77069459a532aac3"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.ContentApiTests.xml",
+        "sha256": "e54a4670f1812b7ce10b8cd7b005ac2f46f35757d2153876130a2a61e00c4225"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.DemoPackTests.xml",
+        "sha256": "0b3dd2afbfce003069c043a6472ba4073525b56670432aec6d132ac99a239179"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.ErrorCodeContractTests.xml",
+        "sha256": "dde581bc2707c1fa5aa74ec0991a976feb4dbbe1aa9e2e27bb23bf5a63d4811c"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.ErrorEnvelopeTests.xml",
+        "sha256": "a6a652f31c76c09a48dc4a44f4452485ca2f042556dcc4e89f746330e9784113"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.IdentityAuthTests.xml",
+        "sha256": "b1ae2f8e45193d83a38294a124c62494cdd1b5b2171f24165d9ee26bb46be7cf"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.IdentityHardeningTests.xml",
+        "sha256": "6ef80372d7fd95d9dcec5a8419b92610df7a434002bbcaea6b0a9dab6f801284"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.IdentitySeedPasswordTests.xml",
+        "sha256": "f1f4ff788dedbd70e30496c99bd38794c06588842af6b0de11f1fec33caa961b"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.IdentitySurfaceHardeningTests.xml",
+        "sha256": "2d3a03c988e758b568565736d6d961467c76ed67509b37aa3b168f427b28c6f9"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.ListQueryApiTests.xml",
+        "sha256": "f74b4c5ee8de5c38bb82e0d44b2d6f5777e104d05e8fffded5428f09e2e43414"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.ListQueryCountTests.xml",
+        "sha256": "44e0485b40f1ba76f023ca226a8cc2799dd96ce04b960aac588b34e13549f229"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.MediaApiTests.xml",
+        "sha256": "03638eb93bf0f51045784a570d0925a97e2b7b69ec13b97d3603e94d5c610f6e"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.OpenApiCompletenessTests.xml",
+        "sha256": "252e643761eba1972367cd130a45e8f3dc205c89a2ddd17294ada6da1d510585"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.OpenApiContractTests.xml",
+        "sha256": "2c6cfc24041c540204ded3d8f9f3c829e72c6230b5d2cbb187a53c9202d1485d"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.OpenApiResponseValidatorSelfTests.xml",
+        "sha256": "9716691ba7a0595e3cef0c6111dcd7f4af4d5542d59ce4f72878deb5d9ffacdd"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.PublicVisibilityTests.xml",
+        "sha256": "ef215f3fe9ec93d9eae0f88cc6b63948b77585b5f75adfe44f3f58c829fdf689"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.TypeSchemaTests.xml",
+        "sha256": "741ac5aef18b37054c66539832402a20a6a3516b7e782d4aa5a1441fe363c92b"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.WaveEAcceptanceTests.xml",
+        "sha256": "aefe4f9736b8ca3b73115ffc891aa3a325e73f9ae32a891affbbfae39ba9b424"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.content.query.ListQueryParserTests.xml",
+        "sha256": "ffe3a66a8d0909c626fd7c6dbd981b5d646bc8c868fbee447f0049a6be9ce74c"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.content.service.ContentTypeSeedTests.xml",
+        "sha256": "7f805cf8c696010431bf10d54fc649a5366abdd257840ec26227b7a9d31511c9"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.contract.InMemoryContentStoreContractTests.xml",
+        "sha256": "4f56aef3b866f08eeac574dff59750d343b22213e0a6153c44dfb8ce353aed55"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.contract.InMemoryIdentityStoreContractTests.xml",
+        "sha256": "4d1b90635cbfb3d019c4b5600175a7ce40b4fe053549869490a976c2efb0d030"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.contract.InMemoryMediaStoreContractTests.xml",
+        "sha256": "886cac4cd5797cca4c3327895475ea04441b65f32c0afafab58473413eae9927"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.identity.service.GrantCacheTests.xml",
+        "sha256": "6525d877ff050d7b055367909a65d09626b1a1a96d1addae3adc7f0c197e5e45"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.identity.service.ListAccessTests.xml",
+        "sha256": "7e2506a54fcdd0d306ce16aff9c635ce2251d673fd3e9a10ecfc12e7be273724"
+      },
+      {
+        "path": "services/cms-api/build/test-results/test/TEST-com.fallrising.cms.identity.service.PredicateIndexCheckTests.xml",
+        "sha256": "c94b9bb864ae1e149f7512da3bec654fd64c331afffeef4a5b3fa30a9afa4047"
+      }
+    ]
+  },
+  "integrationTest": {
+    "totals": {
+      "tests": 91,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "files": [
+      {
+        "path": "services/cms-api/build/test-results/integrationTest/TEST-com.fallrising.cms.JdbcIdentityStoreIntegrationTests.xml",
+        "sha256": "56d66d1ed78a74c5402fc4788c480b27b4bcd3d238ddc17c360ad1e3c0ed558e"
+      },
+      {
+        "path": "services/cms-api/build/test-results/integrationTest/TEST-com.fallrising.cms.contract.EntryAtomicWriteTests.xml",
+        "sha256": "f25023eb9595720af4f8d6014c796e771294b2910dd57a4ba9f08ffa0d1360b0"
+      },
+      {
+        "path": "services/cms-api/build/test-results/integrationTest/TEST-com.fallrising.cms.contract.EntryIndexBackfillTests.xml",
+        "sha256": "3ef032159fe4828b715667a0e6d66aa8a721ad66602ded4baf614e028023e5a6"
+      },
+      {
+        "path": "services/cms-api/build/test-results/integrationTest/TEST-com.fallrising.cms.contract.JdbcContentStoreContractTests.xml",
+        "sha256": "90a9927908fc1ad563d1a5e9e26bb43c9699fe230f79e904c29dbbd9f8e9aadf"
+      },
+      {
+        "path": "services/cms-api/build/test-results/integrationTest/TEST-com.fallrising.cms.contract.JdbcIdentityStoreContractTests.xml",
+        "sha256": "666f83b1ed958e55da9ee8086632c6972fe05e02eeb79a54d9838d277f65c046"
+      },
+      {
+        "path": "services/cms-api/build/test-results/integrationTest/TEST-com.fallrising.cms.contract.JdbcMediaStoreContractTests.xml",
+        "sha256": "6c357dfa5885da6e4c74d6f7a77dce98843a261f78b11a2aca2f52e6be223be8"
+      },
+      {
+        "path": "services/cms-api/build/test-results/integrationTest/TEST-com.fallrising.cms.contract.ListQueryPerformanceTests.xml",
+        "sha256": "fbcbb6275e9914fefd573a2539ba9a6f3fec0e9181260a65ed9949d07d52426c"
+      }
+    ]
+  },
+  "performance": {
+    "entries": 10000,
+    "work_p95_ms": 85,
+    "public_p95_ms": 77,
+    "patch_p95_ms": 18,
+    "threshold_ms": [
+      150,
+      100,
+      80
+    ]
+  }
+}

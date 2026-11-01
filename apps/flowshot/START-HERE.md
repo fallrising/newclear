@@ -34,7 +34,7 @@ contracts/locks/N00.json
 - repository 是乾淨新 repo。
 - `SPEC.md` SHA-256 與 N00 front matter 一致。
 - N00 allowed paths 沒有其他 writer。
-- 能在目標 macOS 環境啟動最小 Tauri 視窗。
+- 能在 Linux Docker 實際啟動最小 Tauri 視窗並完成 frontend IPC；受控 Mac 啟動性能另為發行門檻（SPEC §13.1）。
 
 ## 禁止
 

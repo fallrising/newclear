@@ -64,8 +64,8 @@ class DemoPackTests {
                         .header("X-CSRF-Token", op.csrf)
                         .cookie(op.sessionCookie(), op.csrfCookie())
                         .content("""
-                                {"payload":{"cover":"%s"}}
-                                """.formatted(media[0])))
+                                {"version":%d,"payload":{"cover":"%s"}}
+                                """.formatted(currentVersion(op, albumId), media[0])))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/v1/preview/entries/" + albumId)
                         .header("Origin", BACK)
@@ -334,8 +334,8 @@ class DemoPackTests {
                         .header("X-CSRF-Token", op.csrf)
                         .cookie(op.sessionCookie(), op.csrfCookie())
                         .content("""
-                                {"payload":{"status":"in_progress"}}
-                                """))
+                                {"version":%d,"payload":{"status":"in_progress"}}
+                                """.formatted(currentVersion(op, issueId))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.payload.status").value("in_progress"))
                 .andExpect(jsonPath("$.publicationState").value("draft"));
@@ -402,10 +402,18 @@ class DemoPackTests {
                         .header("X-CSRF-Token", op.csrf)
                         .cookie(op.sessionCookie(), op.csrfCookie())
                         .content("""
-                                {"payload":{"status":"epic"}}
-                                """))
+                                {"version":%d,"payload":{"status":"epic"}}
+                                """.formatted(currentVersion(op, issueId))))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.error.code").value("FIELD_VALIDATION"));
+    }
+
+    private int currentVersion(Session session, String id) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/entries/" + id)
+                        .header("Origin", BACK).cookie(session.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        return new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree(result.getResponse().getContentAsString()).get("version").asInt();
     }
 
     private String createEntry(Session session, String type, String slug, String payloadJson) throws Exception {

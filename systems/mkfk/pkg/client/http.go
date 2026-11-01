@@ -98,6 +98,27 @@ func (transport *HTTPTransport) post(ctx context.Context, path, requestID string
 		return err
 	}
 	request.Header.Set("Content-Type", "application/json")
+	return transport.exchange(request, requestID, destination)
+}
+
+func (transport *HTTPTransport) get(ctx context.Context, path string, query url.Values, requestID string, destination any) error {
+	if err := protocol.ValidateRequestID(requestID); err != nil {
+		return err
+	}
+	endpoint, err := url.Parse(transport.endpoint(path))
+	if err != nil {
+		return err
+	}
+	endpoint.RawQuery = query.Encode()
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
+	if err != nil {
+		return err
+	}
+	return transport.exchange(request, requestID, destination)
+}
+
+// exchange sends one request and decodes the strict success or error envelope.
+func (transport *HTTPTransport) exchange(request *http.Request, requestID string, destination any) error {
 	request.Header.Set("X-Request-ID", requestID)
 	response, err := transport.client.Do(request)
 	if err != nil {

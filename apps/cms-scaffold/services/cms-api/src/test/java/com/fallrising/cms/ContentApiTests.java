@@ -77,8 +77,8 @@ class ContentApiTests {
                         .header("X-CSRF-Token", op.csrf)
                         .cookie(op.sessionCookie(), op.csrfCookie())
                         .content("""
-                                {"payload":{"title":"Dirty draft title"}}
-                                """))
+                                {"version":%d,"payload":{"title":"Dirty draft title"}}
+                                """.formatted(currentVersion(op, id))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.payload.title").value("Dirty draft title"))
                 .andExpect(jsonPath("$.dirty").value(true));
@@ -132,6 +132,14 @@ class ContentApiTests {
         mockMvc.perform(get("/api/v1/public/content-types/photo/entries/" + photoId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.payload.album").value(albumId));
+    }
+
+    private int currentVersion(Session session, String id) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/entries/" + id)
+                        .header("Origin", BACK).cookie(session.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        return new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree(result.getResponse().getContentAsString()).get("version").asInt();
     }
 
     private String createAlbum(Session session, String slug, String title) throws Exception {

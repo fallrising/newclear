@@ -1,0 +1,87 @@
+{
+  "schema_version": "result-archive-evidence-v1",
+  "baseline": "c5fe7385d7021cc071c5dc793437a911044aa380",
+  "scope": "Bounded immutable PostgreSQL JSON result archive, authenticated download and selected-run UI; M4 slice only",
+  "checks": [
+    {
+      "command": "make platform-check",
+      "environment": "Python 3.12.15, existing python:3.12-bookworm image e91fec3d1ac6, read-only source, isolated PostgreSQL",
+      "status": "passed",
+      "unit_tests": 45,
+      "platform_tests": 439,
+      "skipped": 0
+    },
+    {
+      "command": "make web-check",
+      "environment": "Node 24.18.0, locked existing dependencies",
+      "status": "passed",
+      "tests": 71,
+      "build": true
+    },
+    {
+      "command": "make browser-test",
+      "environment": "Real Chromium + PostgreSQL + HTTP API, local mock Worker",
+      "status": "passed",
+      "tests": 8
+    }
+  ],
+  "properties": [
+    "one immutable archive per run; exact stored UTF-8 bytes/hash/size",
+    "archive/result/terminal transition atomic in one database transaction",
+    "real persistence failure retains original runtime for recovery",
+    "lease recovery retrieves completed result without another prompt",
+    "prior run archive survives API reconstruction, cleanup and edited retry",
+    "expired/missing sessions and wrong run association rejected",
+    "corrupt identity/hash/size/schema fails closed; attachment is not rendered as active content"
+  ],
+  "source_sha256": {
+    "src/agent_platform/result_archive.py": "18e82666908b74e3ca1f642e6e7cd4aa5a9bc9cb928eecd1833f96dfa0eb0329",
+    "src/agent_platform/migrations/014_result_archive.sql": "07ccbf3d5782c7c816c66c81e9fe030fdf242194d4967b59198321fb64fc0ddc",
+    "src/agent_platform/api.py": "c42bf3333d13e4e0d7c1b1559e728f82a10a6dc5946c4a130498d25d67afcd18",
+    "src/agent_platform/worker.py": "087b5231635c96c6bd022822437f777d3236c989f7f66e41eb95743d15055037",
+    "src/agent_platform/runtime_worker.py": "8a70559db023504491b18fde540708f85e17f4fb04a33b70efc60d043551355b",
+    "tests_platform/test_result_archive.py": "f7c24ab354dd2a20c83a4a1b604ea107f5454ae0037367c10e77c03f6ae3e95a",
+    "tests_platform/recovery_fixture.py": "9c707c276403af028600a57405553a1a857f949805ce04051c317abcbb3656f1",
+    "tests_platform/test_runtime.py": "b3b4b64e828ac66e173b83207c4a649159ec8d20904c7ab3540720eda2480f46",
+    "tests_platform/worker_tools_fixture.py": "68e298cb500bf188919e7141c570678228cffd72b952da0355dea8df4cc8a1ae",
+    "scripts/browser-fixture.py": "a4693fef2aa34ea605d5641d620cc974f8b7936dda589a08cd1fb2947ca869bc",
+    "web/src/App.tsx": "ccda762af3480514766a8178dd8f2afe3475442f7259ed6786e5915b366a6960",
+    "web/src/App.test.tsx": "83630ebd9aed7c1926b490126760d7e4647ca67aff6643d71559ee3db8c90600",
+    "web/src/api.ts": "8a44a4ac7fddd68386d4a7de26fce2de56c28bcc38c5d093f10dcbf2cd89e6ab",
+    "web/src/style.css": "fe0ecb114d446ddc097da92ed68c7639e021b7a38e5c17884b8ba23540abfb83",
+    "web/e2e/result-archive.spec.ts": "767181089300c87b357071f216a38e52476afa8af45686ffe28495025f39550f"
+  },
+  "log_sha256": {
+    "platform": "fe403c15bc89accd3225b2e757b32aa6bf69e16308de68104b619b6e75d9987d",
+    "backend_rework_green": "cb8874e7549ea911257e85537ce57d36c332999c834fdbe38024245b7b2f6ee4",
+    "prefetch_recovery_red": "cef6c3d34b6832b7cb40c831bd34aee587d0c66732a4448d3e7c6cf1f0696de2",
+    "independent_initial_focused": "b5921ada6490165e8678bde61fd1d0b0a727c9806cb75bbc41f454cce26dbb3f",
+    "independent_rework": "cd25256ae215958ab8701b76aee8b6c58e1a58b53b3ce4ecf5c82b36fa53d1a3",
+    "web": "3046252b1aacb660fa5713b73313f1a98b27cff5570b9ed107eebf52a85f8dc4",
+    "browser": "da3f4d786e5a17e9bb889d91374b4d5e888f1e1c193f3d3bf95ed5bede4acb2d",
+    "initial_backend_red": "42b0c3cffdaafa99edd78bc2a3adcc39d4a1d3960f59fe6013186e1d94743f2b",
+    "initial_ui_red": "4c8c805b1995e1e7fcb864572a4c88160762d4006c01ae10a3c6115f5e88c663",
+    "focused_ui_green": "4a88d102277cdd1f0b46652564de2b0a1a92bbccf272fc7e8a5ec6385879e7c6",
+    "recovery_red": "426ac679a5e05a84c9849342b811afd453c4adbfda4475903b3f429bad42a928",
+    "outage_red": "fc3314cc77c30b3d0915c61f4d5fd891819af379d2ce270307ac3430a4a16e2f",
+    "initial_browser_fixture_failure": "0c2cbed837bf7b2e7780250ab75e99415af1a93a6e8177624729e68a651c3eaf",
+    "platform_recovery_regression": "b58875c4625f05f0512e8a51f740d959547a727ebdb7f0e9c3d0dc0ce4ff1aa7"
+  },
+  "resolved_failures": [
+    "Initial archive API/table/module and UI controls absent; red tests established expected failure before implementation.",
+    "Recovery after archive failure originally obeyed model cutoff before result persistence; narrow existing-result recovery now prioritizes persistence.",
+    "Database outage could also prevent quarantine reason; resultless interrupted finalization protects the original workspace.",
+    "Full regression exposed pre-result SIGKILL recovery still in connector running phase; corrected attested result collection without model/tool re-admission.",
+    "Browser fixture initially used unsupported FILE/TEXT characters and correctly returned fake not_run; corrected fixture uses valid card plus independent inert HTML/Unicode goal line.",
+    "One long fixture literal and generated browser test-results formatting interrupted local style gates; corrected literal and moved ignored browser artifacts to private evidence before final web gate."
+  ],
+  "limits": [
+    "No legacy-result backfill",
+    "1 MiB archive, 256 KiB diff",
+    "No arbitrary workspace files or independent object-store upload/retry",
+    "No live provider, new KVM acceptance, GitHub export, backup/restore/GC or deployment",
+    "Original VM TTL still bounds unarchived result recovery",
+    "Full M3 and M4 remain in progress"
+  ],
+  "cleanup": "Owned PostgreSQL tests self-remove containers; verification container uses --rm; no live VM was allocated in this slice"
+}

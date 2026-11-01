@@ -1,4 +1,4 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{delete, get, post};
@@ -8,8 +8,8 @@ use serde_json::{json, Value};
 
 use crate::error::{AppError, AppResult};
 use crate::server::AppState;
-use crate::store::ConnectionPublic;
-use crate::web::{admin_authorized, ADMIN_COOKIE};
+use crate::store::{ConnectionPublic, ConnectionRow};
+use crate::web::admin_authorized;
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -24,10 +24,7 @@ pub fn router() -> Router<AppState> {
                 .put(update_connection)
                 .delete(delete_connection),
         )
-        .route(
-            "/admin/api/connections/{id}/test",
-            post(test_connection),
-        )
+        .route("/admin/api/connections/{id}/test", post(test_connection))
         .route("/admin/api/routes", get(list_routes).post(create_route))
         .route(
             "/admin/api/routes/{id}",
@@ -45,7 +42,10 @@ pub fn router() -> Router<AppState> {
             post(import_oauth_connection),
         )
         .route("/admin/api/providers", get(list_providers))
-        .route("/admin/api/connections/oauth/refresh-all", post(refresh_all_oauth))
+        .route(
+            "/admin/api/connections/oauth/refresh-all",
+            post(refresh_all_oauth),
+        )
         .route(
             "/admin/api/connections/{id}/refresh",
             post(refresh_one_oauth),
@@ -60,10 +60,40 @@ fn check_admin(state: &AppState, headers: &HeaderMap) -> AppResult<()> {
     }
 }
 
-async fn stats(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+/// Editing a connection must not redirect its stored credential to another host:
+/// OAuth connections stay on their provider's allowlist; API-key connections must
+/// re-enter the key when base_url changes.
+pub fn check_connection_update(
+    state: &AppState,
+    existing: &ConnectionRow,
+    new_base: &str,
+    new_api_key: &str,
+) -> AppResult<()> {
+    let new_base = new_base.trim().trim_end_matches('/');
+    let changed = new_base != existing.base_url;
+    if existing.auth_type == "oauth_import" {
+        let provider = existing.oauth.as_ref().map(|o| o.provider.as_str());
+        match provider.and_then(crate::providers::resolve) {
+            Some(p) => {
+                crate::providers::check_base_url(p, new_base, &state.cfg.provider_base_overrides)
+                    .map_err(AppError::BadRequest)?;
+            }
+            None if changed => {
+                return Err(AppError::BadRequest(
+                    "base_url of an imported OAuth connection cannot be changed; re-import it with its token".into(),
+                ));
+            }
+            None => {}
+        }
+    } else if changed && new_api_key.trim().is_empty() {
+        return Err(AppError::BadRequest(
+            "changing base_url requires entering the API key again".into(),
+        ));
+    }
+    Ok(())
+}
+
+async fn stats(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(state.store.stats()?))
 }
@@ -161,13 +191,9 @@ async fn update_connection(
         .store
         .get_connection(&id)?
         .ok_or_else(|| AppError::NotFound("connection not found".into()))?;
-    let api_key = if input.api_key.is_empty() {
-        // empty means keep existing (store handles '' as keep when encrypted write)
-        String::new()
-    } else {
-        input.api_key
-    };
-    let _ = existing;
+    check_connection_update(&state, &existing, &input.base_url, &input.api_key)?;
+    // Empty api_key keeps the stored one (store treats '' as keep).
+    let api_key = input.api_key;
     let row = state.store.upsert_connection(
         Some(id),
         input.name.trim(),
@@ -250,10 +276,7 @@ fn default_strategy() -> String {
     "fallback".into()
 }
 
-async fn list_routes(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn list_routes(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(json!({ "data": state.store.list_routes()? })))
 }
@@ -288,12 +311,10 @@ async fn create_route(
         .into_iter()
         .map(|t| (t.connection_id, t.model_override))
         .collect();
-    let row = state.store.upsert_route(
-        None,
-        input.public_model.trim(),
-        &input.strategy,
-        &targets,
-    )?;
+    let row =
+        state
+            .store
+            .upsert_route(None, input.public_model.trim(), &input.strategy, &targets)?;
     Ok((StatusCode::CREATED, Json(json!(row))))
 }
 
@@ -336,10 +357,7 @@ async fn delete_route(
     Ok(Json(json!({"ok": true})))
 }
 
-async fn list_keys(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn list_keys(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(json!({ "data": state.store.list_api_keys()? })))
 }
@@ -407,20 +425,54 @@ async fn disable_key(
     Ok(Json(json!({"ok": true})))
 }
 
-async fn usage(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> AppResult<Json<Value>> {
+async fn usage(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
     Ok(Json(json!({ "data": state.store.recent_usage(100)? })))
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct UsageDailyQuery {
+    schema: Option<String>,
 }
 
 async fn usage_daily(
     State(state): State<AppState>,
     headers: HeaderMap,
+    Query(query): Query<UsageDailyQuery>,
 ) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
-    Ok(Json(json!({ "data": state.store.usage_by_day(30)? })))
+    match query.schema.as_deref().unwrap_or("1") {
+        "1" => Ok(Json(json!({
+            "schema_revision": 1,
+            "data": state.store.usage_by_day(30)?,
+            "compatibility": {
+                "status": "legacy_numeric",
+                "message": "Legacy numeric token/latency fields do not distinguish missing values; use schema=2.",
+                "canonical_url": "/admin/api/usage/daily?schema=2"
+            }
+        }))),
+        "2" => {
+            let report = state.store.usage_measurement_report(30)?;
+            Ok(Json(json!({
+                "schema_revision": 2,
+                "data": report.data,
+                "measurement_summary": report.measurement_summary,
+                "scope": {
+                    "day_bucket_limit": 30,
+                    "selection": "latest_populated_date_prefix_buckets",
+                    "denominator": "stored_event_attempt_rows"
+                },
+                "basis": {
+                    "tokens": "stored_counters_not_subscription_consumption",
+                    "timing_mean": "known_saved_observations",
+                    "latency_ms": "mixed_legacy_and_headers_or_cli_ready_compatibility"
+                }
+            })))
+        }
+        _ => Err(AppError::BadRequest(
+            "unsupported usage schema; expected 1 or 2".into(),
+        )),
+    }
 }
 
 async fn usage_export_csv(
@@ -431,10 +483,7 @@ async fn usage_export_csv(
     let csv = state.store.usage_csv(1000)?;
     Ok((
         [
-            (
-                axum::http::header::CONTENT_TYPE,
-                "text/csv; charset=utf-8",
-            ),
+            (axum::http::header::CONTENT_TYPE, "text/csv; charset=utf-8"),
             (
                 axum::http::header::CONTENT_DISPOSITION,
                 "attachment; filename=\"thinrouter-usage.csv\"",
@@ -448,7 +497,7 @@ async fn usage_export_csv(
 #[derive(Debug, Deserialize)]
 pub struct OAuthImportInput {
     pub name: String,
-    /// Provider id: codex | claude | github_copilot | cursor | kiro | generic
+    /// Provider id: siwc | claude | grok | cursor | opencode | agy | generic
     pub provider: String,
     pub access_token: String,
     pub refresh_token: Option<String>,
@@ -522,7 +571,10 @@ async fn import_oauth_connection(
     }
     if profile.is_some()
         && input.access_token.trim().is_empty()
-        && profile.map(|p| p.id) != Some("opencode")
+        && !matches!(
+            profile.map(|p| p.id),
+            Some("opencode" | "claude" | "cursor")
+        )
     {
         return Err(AppError::BadRequest(
             "access_token is required for this provider".into(),
@@ -535,6 +587,25 @@ async fn import_oauth_connection(
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| crate::providers::default_base_url(canonical));
+    if let Some(p) = profile {
+        crate::providers::check_base_url(p, base, &state.cfg.provider_base_overrides)
+            .map_err(AppError::BadRequest)?;
+    }
+    // Re-importing under an existing name keeps its refresh token, so the target
+    // (provider + base_url) may only change when a new refresh token comes with it.
+    if let Some(existing) = state.store.get_connection_by_name(input.name.trim())? {
+        let same_provider = existing.oauth.as_ref().map(|o| o.provider.as_str()) == Some(canonical);
+        let same_base = existing.base_url == base.trim_end_matches('/');
+        let new_refresh = input
+            .refresh_token
+            .as_deref()
+            .is_some_and(|r| !r.trim().is_empty());
+        if !(same_provider && same_base) && !new_refresh {
+            return Err(AppError::BadRequest(
+                "connection exists with another provider/base_url; delete it first or include refresh_token".into(),
+            ));
+        }
+    }
 
     let default_model = input
         .default_model
@@ -578,10 +649,4 @@ async fn import_oauth_connection(
             "notes": profile.map(|p| p.notes).unwrap_or(""),
         })),
     ))
-}
-
-// re-export for cookie name used by tests/docs
-#[allow(dead_code)]
-pub fn admin_cookie_name() -> &'static str {
-    ADMIN_COOKIE
 }

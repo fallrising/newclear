@@ -1,0 +1,377 @@
+{
+  "schema_version": 1,
+  "scope": "normal Worker mock-only tool workflow on real KVM",
+  "live_github": false,
+  "paid_model": false,
+  "production_activation": false,
+  "integration_commit": "7abd71a8b1daf9e8ba48bd17105e5d85435c9dbd",
+  "source_manifest_sha256": "bb68ca6fabf74371d7d7ca7d31fee237276aea4654062a8967ea677d2453d6a7",
+  "matched_source_files": 145,
+  "source_sha256": {
+    "scripts/worker-tools-kvm.py": "99470e5ca03f8558225d69ac2cdfa92bd6af680c7c14a70a6ad051ccebecffb2",
+    "scripts/tool_process_fixture.py": "e5dd99cac9ed16a4382397a7854a0a0c40fb8f813e50c7658b663075df2640c4",
+    "scripts/tool-broker-kvm.py": "ad07aaea96469cb6b0887ec48137d0381b0fe487601a73779e16a133bcad4a87",
+    "tests_platform/test_worker_tools_kvm.py": "faa338c8dd088414f77384462f5fd369e79dd480cf065071f49af6cba86ee93a",
+    "src/agent_platform/worker.py": "67fe495538be5f6844719bf85412fbe785bac2a1e8b8cb7af3c0b0c1ff8e5927",
+    "src/agent_platform/runtime_worker.py": "fe22d62e3dfced7b973b855949bec4cea29b4e699c0ca892a958ec7784e3972a",
+    "src/agent_platform/tool_worker.py": "482e5ad200c6f08a70ef1d2504ffb4de92f508509131b014a7be42f916146f8d",
+    "src/agent_platform/tool_session.py": "044b4e0c58dfd611edbc87f13094d17671ecc3213f1d893fdea04ad54120c65a",
+    "src/agent_platform/tool_broker/broker.py": "271e14b4a43327faa5933a1c367c1bf400a0f917093022896e334b428932d2c1",
+    "src/agent_platform/connector.py": "96240fa4123e26401381b0a59cd7c08c955bda95438d431a73a37b7fc3ddcb94",
+    "src/agent_platform/connector_recovery.py": "83ce5122fd9a7eb1cb1d0a7092c123589a5c91e552e1dc61cc8a44cd7d9eb9f0",
+    "src/agent_platform/guest_fixture.py": "55a45fa5dab4f34a255635c9d047d4eda94cea63e7004bfb330b675b86cad0dc",
+    "src/agent_platform/guest_tool_client.py": "8938ee4f99abd7313244d7830be20515e44be65a756c3ae19a356cb3cf97e8c5",
+    "pyproject.toml": "ced09ae89c9e7941ac3c830f5bc600e2be7be626cf699484fbe161f200bd3e7f"
+  },
+  "runtime": {
+    "binaries_sha256": {
+      "cocoon": "515590c7cdcd0034f63d790398253f06958c30f59241314a5d55c75635b9157b",
+      "sandboxd": "d46adf71c028d428560a50a4e7ecfe08ac3c76c20ba0712497d82441d9efd6ca",
+      "cloud-hypervisor": "c91b07f0b18e97417e242c37c18f7b5022acdfd872af053c0cf4cd1588e51002"
+    },
+    "sdk_binary_sha256": "4a57c2cfed15ad7aa311a1d44c1680da92c88f05c4aea77cfd277bca18de89ed",
+    "python_packages": {
+      "psycopg": "3.3.6",
+      "fastapi": "0.141.1",
+      "pydantic": "2.13.5",
+      "cocoonstack-sandbox": "0.1.12"
+    }
+  },
+  "private_matrix_report_sha256": "cafdd42e916b2212a94de20118dcd00f8251e238f0c9e5f55e6fcd54211b6517",
+  "started_at": "2026-10-03T20:18:39.246117+00:00",
+  "finished_at": "2026-10-03T20:22:45.512189+00:00",
+  "sealed_deny_all_policy_confirmed": true,
+  "egress_policy_sha256": "ed685044a612dbf83b2f69d86c6957a4ac0f5d50ada7949cffb0a7583276de3b",
+  "cases": [
+    {
+      "case": "normal",
+      "started_at": "2026-10-03T20:18:40.711528+00:00",
+      "finished_at": "2026-10-03T20:19:28.772984+00:00",
+      "passed": true,
+      "normal_worker_lifecycle": true,
+      "run_state": "succeeded",
+      "sdk_finished": true,
+      "sdk_caught_up": true,
+      "sdk_poll_count": 23,
+      "sdk_event_count": 23,
+      "sdk_no_duplicate_events": true,
+      "markers": [
+        "WORKER_TOOL_1",
+        "WORKER_TOOL_2",
+        "WORKER_TOOL_3"
+      ],
+      "diff_sha256": "d3597057b981a436b20474b6ed58a60ff8286633f33878b7500440008723ef93",
+      "verification_contract_sha256": "5b19f5681d8ea167b3486c92a20f14c6613a1d2ae11581aeee69a3e5bee7d9ea",
+      "profile_verification_passed": true,
+      "authenticated_upstream_hops": 7,
+      "no_replay": true,
+      "tool_authority_revoked_or_absent": true,
+      "fault_zero_deliver_ack": false,
+      "partial_proof_retained_capacity": false,
+      "cancel_returned_while_upstream_held": false,
+      "capacity_retained_until_full_proof": true,
+      "cleanup_confirmed": true,
+      "applied_approvals": 3,
+      "dispatches_before_approvals": [
+        0,
+        1,
+        3
+      ],
+      "operations": [
+        {
+          "generation": 1,
+          "status": "succeeded",
+          "delivery": "acknowledged",
+          "http_calls": 1,
+          "receipt_present": true
+        },
+        {
+          "generation": 1,
+          "status": "succeeded",
+          "delivery": "acknowledged",
+          "http_calls": 2,
+          "receipt_present": true
+        },
+        {
+          "generation": 1,
+          "status": "succeeded",
+          "delivery": "acknowledged",
+          "http_calls": 4,
+          "receipt_present": true
+        }
+      ],
+      "proof_observations": [
+        {
+          "complete": true,
+          "withheld": false,
+          "reserved_before_return": 1
+        }
+      ],
+      "tool_deliver_attempts": 3,
+      "tool_ack_attempts": 3
+    },
+    {
+      "case": "disabled",
+      "started_at": "2026-10-03T20:19:28.773245+00:00",
+      "finished_at": "2026-10-03T20:20:06.558726+00:00",
+      "passed": true,
+      "normal_worker_lifecycle": true,
+      "run_state": "succeeded",
+      "sdk_finished": true,
+      "sdk_caught_up": true,
+      "sdk_poll_count": 10,
+      "sdk_event_count": 13,
+      "sdk_no_duplicate_events": true,
+      "markers": [
+        "WORKER_TOOL_DISABLED"
+      ],
+      "diff_sha256": "e4faf4241efc870b5a6b905a3754a9e521fab2a3f5b3c1bf6eea3d23225ff385",
+      "verification_contract_sha256": "f4abb11abbd4d8356d0ebec3067f3560f32317efe908b245252e9145d91580ec",
+      "profile_verification_passed": true,
+      "authenticated_upstream_hops": 0,
+      "no_replay": true,
+      "tool_authority_revoked_or_absent": true,
+      "fault_zero_deliver_ack": false,
+      "partial_proof_retained_capacity": false,
+      "cancel_returned_while_upstream_held": false,
+      "capacity_retained_until_full_proof": true,
+      "cleanup_confirmed": true,
+      "applied_approvals": 1,
+      "dispatches_before_approvals": [
+        0
+      ],
+      "operations": [],
+      "proof_observations": [
+        {
+          "complete": true,
+          "withheld": false,
+          "reserved_before_return": 1
+        }
+      ],
+      "tool_deliver_attempts": 0,
+      "tool_ack_attempts": 0
+    },
+    {
+      "case": "cancel-in-flight",
+      "started_at": "2026-10-03T20:20:06.558930+00:00",
+      "finished_at": "2026-10-03T20:20:44.665593+00:00",
+      "passed": true,
+      "normal_worker_lifecycle": true,
+      "run_state": "cancelled",
+      "sdk_finished": false,
+      "sdk_caught_up": false,
+      "sdk_poll_count": 5,
+      "sdk_event_count": 8,
+      "sdk_no_duplicate_events": true,
+      "markers": [],
+      "authenticated_upstream_hops": 1,
+      "no_replay": true,
+      "tool_authority_revoked_or_absent": true,
+      "fault_zero_deliver_ack": true,
+      "partial_proof_retained_capacity": false,
+      "cancel_returned_while_upstream_held": true,
+      "capacity_retained_until_full_proof": true,
+      "cleanup_confirmed": true,
+      "applied_approvals": 1,
+      "dispatches_before_approvals": [
+        0
+      ],
+      "operations": [
+        {
+          "generation": 1,
+          "status": "succeeded",
+          "delivery": "withheld",
+          "http_calls": 1,
+          "receipt_present": false
+        }
+      ],
+      "proof_observations": [
+        {
+          "complete": true,
+          "withheld": false,
+          "reserved_before_return": 1
+        }
+      ],
+      "tool_deliver_attempts": 0,
+      "tool_ack_attempts": 0
+    },
+    {
+      "case": "tool-outcome-uncertain",
+      "started_at": "2026-10-03T20:20:44.665721+00:00",
+      "finished_at": "2026-10-03T20:21:24.890851+00:00",
+      "passed": true,
+      "normal_worker_lifecycle": true,
+      "run_state": "failed",
+      "sdk_finished": false,
+      "sdk_caught_up": false,
+      "sdk_poll_count": 6,
+      "sdk_event_count": 8,
+      "sdk_no_duplicate_events": true,
+      "markers": [],
+      "authenticated_upstream_hops": 1,
+      "no_replay": true,
+      "tool_authority_revoked_or_absent": true,
+      "fault_zero_deliver_ack": true,
+      "partial_proof_retained_capacity": false,
+      "cancel_returned_while_upstream_held": false,
+      "capacity_retained_until_full_proof": true,
+      "cleanup_confirmed": true,
+      "applied_approvals": 1,
+      "dispatches_before_approvals": [
+        0
+      ],
+      "operations": [
+        {
+          "generation": 1,
+          "status": "unknown",
+          "delivery": "none",
+          "http_calls": 1,
+          "receipt_present": false
+        }
+      ],
+      "proof_observations": [
+        {
+          "complete": true,
+          "withheld": false,
+          "reserved_before_return": 1
+        }
+      ],
+      "tool_deliver_attempts": 0,
+      "tool_ack_attempts": 0
+    },
+    {
+      "case": "partial-stop-proof",
+      "started_at": "2026-10-03T20:21:24.891150+00:00",
+      "finished_at": "2026-10-03T20:22:45.080661+00:00",
+      "passed": true,
+      "normal_worker_lifecycle": true,
+      "run_state": "succeeded",
+      "sdk_finished": true,
+      "sdk_caught_up": true,
+      "sdk_poll_count": 20,
+      "sdk_event_count": 23,
+      "sdk_no_duplicate_events": true,
+      "markers": [
+        "WORKER_TOOL_1",
+        "WORKER_TOOL_2",
+        "WORKER_TOOL_3"
+      ],
+      "diff_sha256": "d3597057b981a436b20474b6ed58a60ff8286633f33878b7500440008723ef93",
+      "verification_contract_sha256": "5b19f5681d8ea167b3486c92a20f14c6613a1d2ae11581aeee69a3e5bee7d9ea",
+      "profile_verification_passed": true,
+      "authenticated_upstream_hops": 7,
+      "no_replay": true,
+      "tool_authority_revoked_or_absent": true,
+      "fault_zero_deliver_ack": false,
+      "partial_proof_retained_capacity": true,
+      "cancel_returned_while_upstream_held": false,
+      "capacity_retained_until_full_proof": true,
+      "cleanup_confirmed": true,
+      "applied_approvals": 3,
+      "dispatches_before_approvals": [
+        0,
+        1,
+        3
+      ],
+      "operations": [
+        {
+          "generation": 1,
+          "status": "succeeded",
+          "delivery": "acknowledged",
+          "http_calls": 1,
+          "receipt_present": true
+        },
+        {
+          "generation": 1,
+          "status": "succeeded",
+          "delivery": "acknowledged",
+          "http_calls": 2,
+          "receipt_present": true
+        },
+        {
+          "generation": 1,
+          "status": "succeeded",
+          "delivery": "acknowledged",
+          "http_calls": 4,
+          "receipt_present": true
+        }
+      ],
+      "proof_observations": [
+        {
+          "complete": true,
+          "withheld": true,
+          "reserved_before_return": 1
+        },
+        {
+          "complete": true,
+          "withheld": true,
+          "reserved_before_return": 1
+        },
+        {
+          "complete": true,
+          "withheld": false,
+          "reserved_before_return": 1
+        }
+      ],
+      "tool_deliver_attempts": 3,
+      "tool_ack_attempts": 3
+    }
+  ],
+  "cleanup": {
+    "remaining_vms": 0,
+    "remaining_claims": 0,
+    "remaining_worker_processes": 0,
+    "remaining_connector_processes": 0,
+    "remaining_cpu_scopes": 0,
+    "node_service_active": false,
+    "original_child_pids_absent": true,
+    "remaining_reservations": 0,
+    "cleanup_failures": 0,
+    "owned_postgres_removed": true
+  },
+  "native_checks": {
+    "unit_tests": 45,
+    "platform_tests": 380,
+    "oracle_tests_included": 14,
+    "ruff_check": "passed",
+    "ruff_format": "passed"
+  },
+  "earlier_attempts": [
+    {
+      "attempt": "native-01",
+      "outcome": "failed",
+      "reason": "Shared editable environment imported an older worktree; explicit PYTHONPATH corrected the source."
+    },
+    {
+      "attempt": "native-02",
+      "outcome": "failed",
+      "reason": "Concurrent oracle edits mixed old test data with the corrected driver; stable final source passed."
+    },
+    {
+      "attempt": "kvm-01",
+      "outcome": "failed before allocation",
+      "reason": "Fixture idle timeout exceeded the immutable policy bound; corrected fixture and added regression. No owned VM, claim, reservation or child remained."
+    },
+    {
+      "attempt": "kvm-02",
+      "outcome": "failed after two tool operations",
+      "reason": "Separate read-only approval/run queries raced; one joined observation now uses coherent state/version. Native cancel and cleanup completed."
+    },
+    {
+      "attempt": "kvm-03",
+      "outcome": "failed before VM creation",
+      "reason": "Temporary filesystem fell below the unchanged disk reserve. Unknown allocation retained one SQL reservation until test database removal. Native offline reconciliation preserved the journal; owned storage moved to disk."
+    },
+    {
+      "attempt": "kvm-04",
+      "outcome": "failed preflight",
+      "reason": "Relocated receipt parent was a symlink; native privacy validation refused startup. Receipt now uses its real private directory."
+    },
+    {
+      "attempt": "kvm-05",
+      "outcome": "normal case passed",
+      "reason": "Three approvals, three original operations and ACKs, seven mock hops, SDK finished, verified result and complete cleanup."
+    }
+  ],
+  "passed": true
+}

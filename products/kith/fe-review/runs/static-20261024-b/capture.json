@@ -1,0 +1,1707 @@
+{
+  "project": "kith",
+  "targets": "products/kith/fe-review/targets.json",
+  "startedAt": "2026-10-24T06:00:05.698Z",
+  "axe": false,
+  "results": [
+    {
+      "app": "web-anon",
+      "page": "login",
+      "url": "http://127.0.0.1:5174/login",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web-anon__login__desktop__light.png",
+      "status": 200,
+      "loadMs": 898,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "[error] Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/me HTTP 401"
+      ]
+    },
+    {
+      "app": "web-anon",
+      "page": "login",
+      "url": "http://127.0.0.1:5174/login",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web-anon__login__desktop__dark.png",
+      "status": 200,
+      "loadMs": 880,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "[error] Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/me HTTP 401"
+      ]
+    },
+    {
+      "app": "web-anon",
+      "page": "login",
+      "url": "http://127.0.0.1:5174/login",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web-anon__login__tablet__light.png",
+      "status": 200,
+      "loadMs": 854,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "[error] Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/me HTTP 401"
+      ]
+    },
+    {
+      "app": "web-anon",
+      "page": "login",
+      "url": "http://127.0.0.1:5174/login",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web-anon__login__tablet__dark.png",
+      "status": 200,
+      "loadMs": 865,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "[error] Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/me HTTP 401"
+      ]
+    },
+    {
+      "app": "web-anon",
+      "page": "login",
+      "url": "http://127.0.0.1:5174/login",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web-anon__login__mobile__light.png",
+      "status": 200,
+      "loadMs": 858,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "[error] Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/me HTTP 401"
+      ]
+    },
+    {
+      "app": "web-anon",
+      "page": "login",
+      "url": "http://127.0.0.1:5174/login",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web-anon__login__mobile__dark.png",
+      "status": 200,
+      "loadMs": 861,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "[error] Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/me HTTP 401"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5174/",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__desktop__light.png",
+      "status": 200,
+      "loadMs": 932,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5174/",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__home__desktop__dark.png",
+      "status": 200,
+      "loadMs": 902,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5174/",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__tablet__light.png",
+      "status": 200,
+      "loadMs": 901,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5174/",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__home__tablet__dark.png",
+      "status": 200,
+      "loadMs": 894,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5174/",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__mobile__light.png",
+      "status": 200,
+      "loadMs": 903,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5174/",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__home__mobile__dark.png",
+      "status": 200,
+      "loadMs": 899,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-lobby",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-lobby__desktop__light.png",
+      "status": 200,
+      "loadMs": 996,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-lobby/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-lobby",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-lobby__desktop__dark.png",
+      "status": 200,
+      "loadMs": 986,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-lobby/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-lobby",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-lobby__tablet__light.png",
+      "status": 200,
+      "loadMs": 977,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-lobby/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-lobby",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-lobby__tablet__dark.png",
+      "status": 200,
+      "loadMs": 972,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-lobby/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-lobby",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-lobby__mobile__light.png",
+      "status": 200,
+      "loadMs": 958,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-lobby/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-lobby",
+      "url": "http://127.0.0.1:5174/r/lobby",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-lobby__mobile__dark.png",
+      "status": 200,
+      "loadMs": 1000,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-lobby/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-long-history",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-long-history__desktop__light.png",
+      "status": 200,
+      "loadMs": 980,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-long/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-long-history",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-long-history__desktop__dark.png",
+      "status": 200,
+      "loadMs": 979,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-long/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-long-history",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-long-history__tablet__light.png",
+      "status": 200,
+      "loadMs": 970,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-long/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-long-history",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-long-history__tablet__dark.png",
+      "status": 200,
+      "loadMs": 965,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-long/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-long-history",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-long-history__mobile__light.png",
+      "status": 200,
+      "loadMs": 958,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-long/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-long-history",
+      "url": "http://127.0.0.1:5174/r/long-history",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-long-history__mobile__dark.png",
+      "status": 200,
+      "loadMs": 953,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-long/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-quiet",
+      "url": "http://127.0.0.1:5174/r/quiet",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-quiet__desktop__light.png",
+      "status": 200,
+      "loadMs": 995,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-quiet/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-quiet",
+      "url": "http://127.0.0.1:5174/r/quiet",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-quiet__desktop__dark.png",
+      "status": 200,
+      "loadMs": 980,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-quiet/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-quiet",
+      "url": "http://127.0.0.1:5174/r/quiet",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-quiet__tablet__light.png",
+      "status": 200,
+      "loadMs": 964,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-quiet/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-quiet",
+      "url": "http://127.0.0.1:5174/r/quiet",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-quiet__tablet__dark.png",
+      "status": 200,
+      "loadMs": 968,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-quiet/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-quiet",
+      "url": "http://127.0.0.1:5174/r/quiet",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-quiet__mobile__light.png",
+      "status": 200,
+      "loadMs": 954,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-quiet/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-quiet",
+      "url": "http://127.0.0.1:5174/r/quiet",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-quiet__mobile__dark.png",
+      "status": 200,
+      "loadMs": 956,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-quiet/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-ada-private",
+      "url": "http://127.0.0.1:5174/r/ada-private",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-ada-private__desktop__light.png",
+      "status": 200,
+      "loadMs": 964,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-ada-private/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-ada-private",
+      "url": "http://127.0.0.1:5174/r/ada-private",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-ada-private__desktop__dark.png",
+      "status": 200,
+      "loadMs": 974,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-ada-private/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-ada-private",
+      "url": "http://127.0.0.1:5174/r/ada-private",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-ada-private__tablet__light.png",
+      "status": 200,
+      "loadMs": 970,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-ada-private/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-ada-private",
+      "url": "http://127.0.0.1:5174/r/ada-private",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-ada-private__tablet__dark.png",
+      "status": 200,
+      "loadMs": 966,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-ada-private/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-ada-private",
+      "url": "http://127.0.0.1:5174/r/ada-private",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__room-ada-private__mobile__light.png",
+      "status": 200,
+      "loadMs": 981,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-ada-private/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "room-ada-private",
+      "url": "http://127.0.0.1:5174/r/ada-private",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__room-ada-private__mobile__dark.png",
+      "status": 200,
+      "loadMs": 955,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms/room-ada-private/members net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "settings",
+      "url": "http://127.0.0.1:5174/settings",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__settings__desktop__light.png",
+      "status": 200,
+      "loadMs": 899,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "settings",
+      "url": "http://127.0.0.1:5174/settings",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__settings__desktop__dark.png",
+      "status": 200,
+      "loadMs": 896,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "settings",
+      "url": "http://127.0.0.1:5174/settings",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__settings__tablet__light.png",
+      "status": 200,
+      "loadMs": 900,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "settings",
+      "url": "http://127.0.0.1:5174/settings",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__settings__tablet__dark.png",
+      "status": 200,
+      "loadMs": 914,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "settings",
+      "url": "http://127.0.0.1:5174/settings",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__settings__mobile__light.png",
+      "status": 200,
+      "loadMs": 924,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "settings",
+      "url": "http://127.0.0.1:5174/settings",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__settings__mobile__dark.png",
+      "status": 200,
+      "loadMs": 896,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-rooms",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-rooms__desktop__light.png",
+      "status": 200,
+      "loadMs": 1193,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-rooms",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-rooms__desktop__dark.png",
+      "status": 200,
+      "loadMs": 1189,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-rooms",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-rooms__tablet__light.png",
+      "status": 200,
+      "loadMs": 1202,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-rooms",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-rooms__tablet__dark.png",
+      "status": 200,
+      "loadMs": 1185,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-rooms",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-rooms__mobile__light.png",
+      "status": 200,
+      "loadMs": 1205,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-rooms",
+      "url": "http://127.0.0.1:5174/console/rooms",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-rooms__mobile__dark.png",
+      "status": 200,
+      "loadMs": 1192,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agents",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agents__desktop__light.png",
+      "status": 200,
+      "loadMs": 1197,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agents",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agents__desktop__dark.png",
+      "status": 200,
+      "loadMs": 1200,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agents",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agents__tablet__light.png",
+      "status": 200,
+      "loadMs": 1202,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agents",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agents__tablet__dark.png",
+      "status": 200,
+      "loadMs": 1218,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agents",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agents__mobile__light.png",
+      "status": 200,
+      "loadMs": 1216,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agents",
+      "url": "http://127.0.0.1:5174/console/agents",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agents__mobile__dark.png",
+      "status": 200,
+      "loadMs": 1197,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-grok",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agent-grok__desktop__light.png",
+      "status": 200,
+      "loadMs": 1237,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents/m-grok net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-grok",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agent-grok__desktop__dark.png",
+      "status": 200,
+      "loadMs": 1227,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents/m-grok net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-grok",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agent-grok__tablet__light.png",
+      "status": 200,
+      "loadMs": 1208,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents/m-grok net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-grok",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agent-grok__tablet__dark.png",
+      "status": 200,
+      "loadMs": 1206,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents/m-grok net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-grok",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agent-grok__mobile__light.png",
+      "status": 200,
+      "loadMs": 1218,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents/m-grok net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-grok",
+      "url": "http://127.0.0.1:5174/console/agents/m-grok",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agent-grok__mobile__dark.png",
+      "status": 200,
+      "loadMs": 1209,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/agents/m-grok net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms?all=1 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-new",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agent-new__desktop__light.png",
+      "status": 200,
+      "loadMs": 952,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-new",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agent-new__desktop__dark.png",
+      "status": 200,
+      "loadMs": 950,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-new",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agent-new__tablet__light.png",
+      "status": 200,
+      "loadMs": 955,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-new",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agent-new__tablet__dark.png",
+      "status": 200,
+      "loadMs": 943,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-new",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-agent-new__mobile__light.png",
+      "status": 200,
+      "loadMs": 943,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-agent-new",
+      "url": "http://127.0.0.1:5174/console/agents/new",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-agent-new__mobile__dark.png",
+      "status": 200,
+      "loadMs": 953,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-people",
+      "url": "http://127.0.0.1:5174/console/people",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-people__desktop__light.png",
+      "status": 200,
+      "loadMs": 1187,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/members?kind=human&include_disabled=1&limit=100 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-people",
+      "url": "http://127.0.0.1:5174/console/people",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-people__desktop__dark.png",
+      "status": 200,
+      "loadMs": 1193,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/members?kind=human&include_disabled=1&limit=100 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-people",
+      "url": "http://127.0.0.1:5174/console/people",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-people__tablet__light.png",
+      "status": 200,
+      "loadMs": 1199,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/members?kind=human&include_disabled=1&limit=100 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-people",
+      "url": "http://127.0.0.1:5174/console/people",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-people__tablet__dark.png",
+      "status": 200,
+      "loadMs": 1194,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/members?kind=human&include_disabled=1&limit=100 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-people",
+      "url": "http://127.0.0.1:5174/console/people",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-people__mobile__light.png",
+      "status": 200,
+      "loadMs": 1185,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/members?kind=human&include_disabled=1&limit=100 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-people",
+      "url": "http://127.0.0.1:5174/console/people",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-people__mobile__dark.png",
+      "status": 200,
+      "loadMs": 1200,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/members?kind=human&include_disabled=1&limit=100 net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-providers",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-providers__desktop__light.png",
+      "status": 200,
+      "loadMs": 1201,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-providers",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-providers__desktop__dark.png",
+      "status": 200,
+      "loadMs": 1203,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-providers",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-providers__tablet__light.png",
+      "status": 200,
+      "loadMs": 1202,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-providers",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-providers__tablet__dark.png",
+      "status": 200,
+      "loadMs": 1193,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-providers",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-providers__mobile__light.png",
+      "status": 200,
+      "loadMs": 1192,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-providers",
+      "url": "http://127.0.0.1:5174/console/providers",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-providers__mobile__dark.png",
+      "status": 200,
+      "loadMs": 1197,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-provider-new",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-provider-new__desktop__light.png",
+      "status": 200,
+      "loadMs": 1190,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-provider-new",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-provider-new__desktop__dark.png",
+      "status": 200,
+      "loadMs": 1211,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-provider-new",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-provider-new__tablet__light.png",
+      "status": 200,
+      "loadMs": 1210,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-provider-new",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-provider-new__tablet__dark.png",
+      "status": 200,
+      "loadMs": 1201,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-provider-new",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__console-provider-new__mobile__light.png",
+      "status": 200,
+      "loadMs": 1202,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "console-provider-new",
+      "url": "http://127.0.0.1:5174/console/providers/new",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__console-provider-new__mobile__dark.png",
+      "status": 200,
+      "loadMs": 1206,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/providers net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "not-found",
+      "url": "http://127.0.0.1:5174/does-not-exist",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__not-found__desktop__light.png",
+      "status": 200,
+      "loadMs": 909,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "not-found",
+      "url": "http://127.0.0.1:5174/does-not-exist",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__not-found__desktop__dark.png",
+      "status": 200,
+      "loadMs": 885,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "not-found",
+      "url": "http://127.0.0.1:5174/does-not-exist",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__not-found__tablet__light.png",
+      "status": 200,
+      "loadMs": 895,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "not-found",
+      "url": "http://127.0.0.1:5174/does-not-exist",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__not-found__tablet__dark.png",
+      "status": 200,
+      "loadMs": 894,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "not-found",
+      "url": "http://127.0.0.1:5174/does-not-exist",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__not-found__mobile__light.png",
+      "status": 200,
+      "loadMs": 888,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    },
+    {
+      "app": "web",
+      "page": "not-found",
+      "url": "http://127.0.0.1:5174/does-not-exist",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "screenshot": "screenshots/web__not-found__mobile__dark.png",
+      "status": 200,
+      "loadMs": 895,
+      "title": "Kith",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [
+        "GET http://127.0.0.1:5174/api/me net::ERR_ABORTED",
+        "GET http://127.0.0.1:5174/api/rooms net::ERR_ABORTED"
+      ]
+    }
+  ],
+  "finishedAt": "2026-10-24T06:01:47.196Z"
+}

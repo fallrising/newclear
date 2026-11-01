@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Navigate, useLocation } from "react-router";
+import { useEffect, useRef, type ReactNode } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router";
 import type { Surface } from "@cms/api/public";
 import { DefaultSkeleton, ErrorState } from "@cms/ui";
 import { useSession } from "./session";
@@ -13,6 +13,22 @@ export interface RequireSurfaceProps {
   /** Rendered when the user is signed in but may not use this surface. */
   forbidden: ReactNode;
   children: ReactNode;
+}
+
+/** Keep the signed-in subtree mounted while expiry navigation passes through its blockers. */
+function SignedIn({ expired, loginTarget, children }: { expired: boolean; loginTarget: string; children: ReactNode }) {
+  const navigate = useNavigate();
+  const tried = useRef<string | null>(null);
+  useEffect(() => {
+    if (!expired) {
+      tried.current = null;
+      return;
+    }
+    if (tried.current === loginTarget) return;
+    tried.current = loginTarget;
+    void navigate(loginTarget, { replace: true });
+  }, [expired, navigate, loginTarget]);
+  return <>{children}</>;
 }
 
 /** Route guard: loading → skeleton; anonymous → login with the current path; wrong surface → forbidden. */
@@ -33,11 +49,10 @@ export function RequireSurface({ surface, loginPath, returnParam, forbidden, chi
       </div>
     );
   }
-  if (!session.me) {
-    const here = `${location.pathname}${location.search}${location.hash}`;
-    const target = here === "/" ? loginPath : `${loginPath}?${returnParam}=${encodeURIComponent(here)}`;
-    return <Navigate to={target} replace />;
-  }
-  if (!session.me.surfaces[surface]) return <>{forbidden}</>;
-  return <>{children}</>;
+  const here = `${location.pathname}${location.search}${location.hash}`;
+  const target = here === "/" ? loginPath : `${loginPath}?${returnParam}=${encodeURIComponent(here)}`;
+  if (!session.me) return <Navigate to={target} replace />;
+  return <SignedIn expired={session.status === "expired"} loginTarget={target}>
+    {session.me.surfaces[surface] ? children : forbidden}
+  </SignedIn>;
 }

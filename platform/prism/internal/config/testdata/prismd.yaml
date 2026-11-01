@@ -24,9 +24,13 @@ tenancy:
 auth:
   allow_anonymous_read: true
   jwt_secret_file: secrets/jwt
+  ingest_api_key_file: secrets/ingest_api_key
 ingest:
   max_request_bytes: 16MiB
-  queue_depth: 64
+  queue_depth: 4
+  otlp:
+    max_recv_msg_size: 4MiB
+    max_concurrent_requests: 16
   batch:
     metrics: {max_items: 10000, max_bytes: 8MiB, flush_interval: 1s}
     logs: {max_items: 5000, max_bytes: 8MiB, flush_interval: 1s}

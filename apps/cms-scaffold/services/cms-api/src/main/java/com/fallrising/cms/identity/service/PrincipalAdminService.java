@@ -14,12 +14,14 @@ import com.fallrising.cms.identity.domain.RoleCode;
 import com.fallrising.cms.identity.domain.Surface;
 import com.fallrising.cms.identity.store.IdentityStore;
 import com.fallrising.cms.identity.web.IdentityRequest;
+import com.fallrising.cms.platform.TransactionRunner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -41,21 +43,61 @@ public class PrincipalAdminService {
     private final AuthService authService;
     private final AuthorizationService authorizationService;
     private final ObjectMapper objectMapper;
+    private final ContentTypeDirectory contentTypes;
+    private final TransactionRunner transactions;
+    private final AuditLog auditLog;
 
     public PrincipalAdminService(IdentityStore store, PasswordHasher passwordHasher, AuthService authService,
-            AuthorizationService authorizationService, ObjectMapper objectMapper) {
+            AuthorizationService authorizationService, ObjectMapper objectMapper, ContentTypeDirectory contentTypes) {
+        this(store, passwordHasher, authService, authorizationService, objectMapper, contentTypes,
+                TransactionRunner.withoutDatabase(), new AuditLog(store, objectMapper));
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PrincipalAdminService(IdentityStore store, PasswordHasher passwordHasher, AuthService authService,
+            AuthorizationService authorizationService, ObjectMapper objectMapper, ContentTypeDirectory contentTypes,
+            TransactionRunner transactions, AuditLog auditLog) {
         this.store = store;
         this.passwordHasher = passwordHasher;
         this.authService = authService;
         this.authorizationService = authorizationService;
         this.objectMapper = objectMapper;
+        this.contentTypes = contentTypes;
+        this.transactions = transactions;
+        this.auditLog = auditLog;
     }
 
     public List<Principal> list(IdentityRequest request) { authService.requireManagePrincipals(request); return store.listPrincipals(); }
 
+    /**
+     * Principals that can be assigned to entries of contentType (G-04): active, not deleted, and holding update on
+     * that type on the Back surface (predicates ignored). The caller needs update on the type on its own surface.
+     * q filters by username or displayName (case-insensitive substring). Ordered by displayName, then username; at
+     * most 20.
+     */
+    public List<Principal> assignable(IdentityRequest request, String contentType, String q) {
+        if (request.principal() == null) throw IdentityException.unauthenticated();
+        if (contentType == null || contentType.isBlank()) throw IdentityException.validation("contentType is required");
+        if (!contentTypes.enabledTypeKeys().contains(contentType)) throw IdentityException.validation("unknown contentType");
+        if (!authorizationService.hasAction(request.principal(), CmsAction.UPDATE, contentType, request.surface())) {
+            throw IdentityException.forbidden(CmsAction.UPDATE.wire(), contentType, request.surface().wire());
+        }
+        String needle = q == null ? "" : q.trim().toLowerCase(Locale.ROOT);
+        return store.listPrincipals().stream()
+                .filter(p -> !p.deleted() && p.status() == PrincipalStatus.ACTIVE)
+                .filter(p -> needle.isEmpty()
+                        || p.username().toLowerCase(Locale.ROOT).contains(needle)
+                        || (p.displayName() != null && p.displayName().toLowerCase(Locale.ROOT).contains(needle)))
+                .filter(p -> authorizationService.hasAction(p, CmsAction.UPDATE, contentType, Surface.BACK))
+                .sorted(Comparator.comparing((Principal p) -> p.displayName() == null ? "" : p.displayName().toLowerCase(Locale.ROOT))
+                        .thenComparing(Principal::username))
+                .limit(20)
+                .toList();
+    }
+
     public Principal get(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
-        return store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        return store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
     }
 
     public CreatedPrincipal create(IdentityRequest request, String username, String displayName, String email, String temporaryPassword) {
@@ -63,6 +105,7 @@ public class PrincipalAdminService {
         String normalized = username == null ? "" : username.toLowerCase(Locale.ROOT);
         if (!USERNAME.matcher(normalized).matches()) throw IdentityException.validation("username must match [a-z0-9._-]{3,32}");
         if (store.findPrincipalByUsername(normalized).isPresent()) throw IdentityException.validation("username is taken");
+        validateProfile(null, displayName, email);
         String password = temporaryPassword;
         if (password == null || password.isBlank()) password = SessionTokens.randomToken() + "Aa1";
         authService.validateNewPassword(normalized, password);
@@ -70,50 +113,58 @@ public class PrincipalAdminService {
         Principal principal = new Principal(UUID.randomUUID(), normalized,
                 displayName == null || displayName.isBlank() ? normalized : displayName, email, PrincipalStatus.ACTIVE,
                 0, null, null, now, now, null);
-        store.insertPrincipal(principal);
-        store.upsertPasswordCredential(principal.id(), passwordHasher.hash(password), passwordHasher.algo());
-        audit(request, "PRINCIPAL_CREATED", principal.id());
+        String hash = passwordHasher.hash(password);
+        transactions.run(() -> {
+            store.insertPrincipal(principal);
+            store.upsertPasswordCredential(principal.id(), hash, passwordHasher.algo());
+            audit(request, "PRINCIPAL_CREATED", principal.id());
+        });
         return new CreatedPrincipal(principal, password);
     }
 
     public Principal patch(IdentityRequest request, UUID id, String displayName, String email, String status) {
         authService.requireManagePrincipals(request);
-        Principal current = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        Principal current = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
+        validateProfile(id, displayName, email);
         Instant now = Instant.now();
         PrincipalStatus nextStatus = status == null ? current.status() : parseStatus(status);
         Principal updated = current.withProfile(displayName == null ? current.displayName() : displayName,
                 email == null ? current.email() : email, now);
         if (nextStatus != current.status()) updated = updated.withStatus(nextStatus, now);
         boolean removesUsableAdmin = current.status() == PrincipalStatus.ACTIVE && nextStatus != PrincipalStatus.ACTIVE;
-        updated = removesUsableAdmin ? store.updatePrincipalKeepingUsableAdmin(updated) : store.updatePrincipal(updated);
-        if (nextStatus == PrincipalStatus.DISABLED && current.status() != PrincipalStatus.DISABLED) {
-            store.revokeAllForPrincipal(id, now, null);
-            audit(request, "PRINCIPAL_DISABLED", id);
-        }
-        return updated;
+        Principal next = updated;
+        return transactions.inTransaction(() -> {
+            Principal saved = removesUsableAdmin ? store.updatePrincipalKeepingUsableAdmin(next) : store.updatePrincipal(next);
+            if (nextStatus == PrincipalStatus.DISABLED && current.status() != PrincipalStatus.DISABLED) {
+                store.revokeAllForPrincipal(id, now, null);
+                audit(request, "PRINCIPAL_DISABLED", id);
+            }
+            return saved;
+        });
     }
 
     public Principal disable(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
-        Principal current = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
-        Principal updated = store.updatePrincipalKeepingUsableAdmin(current.withStatus(PrincipalStatus.DISABLED, Instant.now()));
-        store.revokeAllForPrincipal(id, Instant.now(), null);
-        audit(request, "PRINCIPAL_DISABLED", id);
-        return updated;
+        Principal current = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
+        return transactions.inTransaction(() -> {
+            Principal updated = store.updatePrincipalKeepingUsableAdmin(current.withStatus(PrincipalStatus.DISABLED, Instant.now()));
+            store.revokeAllForPrincipal(id, Instant.now(), null);
+            audit(request, "PRINCIPAL_DISABLED", id);
+            return updated;
+        });
     }
 
     public Principal unlock(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
-        Principal current = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        Principal current = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         if (current.status() == PrincipalStatus.DISABLED) throw IdentityException.accountDisabled();
         Principal updated = current.withLock(0, null, PrincipalStatus.ACTIVE, Instant.now());
-        store.updatePrincipal(updated);
-        return updated;
+        return transactions.inTransaction(() -> store.updatePrincipal(updated));
     }
 
     public void replaceRoles(IdentityRequest request, UUID id, List<RoleAssignmentInput> inputs) {
         authService.requireManagePrincipals(request);
-        store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         if (inputs == null) throw IdentityException.validation("roles are required");
         Set<String> seen = new HashSet<>();
         List<PrincipalRoleAssignment> assignments = new ArrayList<>();
@@ -127,19 +178,24 @@ public class PrincipalAdminService {
             }
             assignments.add(new PrincipalRoleAssignment(id, role.id(), role.code(), allowlist));
         }
-        store.replacePrincipalRolesKeepingUsableAdmin(id, assignments);
-        audit(request, "ROLE_ASSIGNED", id);
+        transactions.run(() -> {
+            store.replacePrincipalRolesKeepingUsableAdmin(id, assignments);
+            audit(request, "ROLE_ASSIGNED", id);
+        });
     }
 
     public String setPassword(IdentityRequest request, UUID id, String temporaryPassword) {
         authService.requireManagePrincipals(request);
-        Principal principal = store.findPrincipalById(id).orElseThrow(() -> IdentityException.validation("not found"));
+        Principal principal = store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         String password = temporaryPassword;
         if (password == null || password.isBlank()) password = SessionTokens.randomToken() + "Aa1";
         authService.validateNewPassword(principal.username(), password);
-        store.upsertPasswordCredential(id, passwordHasher.hash(password), passwordHasher.algo());
-        store.revokeAllForPrincipal(id, Instant.now(), null);
-        audit(request, "PASSWORD_SET_BY_ADMIN", id);
+        String hash = passwordHasher.hash(password);
+        transactions.run(() -> {
+            store.upsertPasswordCredential(id, hash, passwordHasher.algo());
+            store.revokeAllForPrincipal(id, Instant.now(), null);
+            audit(request, "PASSWORD_SET_BY_ADMIN", id);
+        });
         return password;
     }
 
@@ -166,18 +222,41 @@ public class PrincipalAdminService {
             try { action = CmsAction.fromWire(p.action()); } catch (IllegalArgumentException e) { throw IdentityException.validation(e.getMessage()); }
             List<String> surfaces = p.allowedSurfaces() == null || p.allowedSurfaces().isEmpty() ? defaultSurfaces(action.wire()) : p.allowedSurfaces().stream().distinct().toList();
             if (surfaces.stream().anyMatch(s -> !SURFACES.contains(s))) throw IdentityException.validation("unknown surface");
+            if (p.contentTypeCode() != null && p.contentTypeCode().codePointCount(0, p.contentTypeCode().length()) > 64) {
+                throw IdentityException.validation("contentTypeCode must be at most 64 characters");
+            }
             validatePredicate(p.predicateJson());
+            String predicateProblem = PredicateIndexCheck.problem(objectMapper, contentTypes, p.contentTypeCode(), p.predicateJson());
+            if (predicateProblem != null) throw IdentityException.validation(predicateProblem);
             String key = action.wire() + "|" + (p.contentTypeCode() == null ? "" : p.contentTypeCode()) + "|" + (p.predicateJson() == null ? "" : p.predicateJson()) + "|" + surfaces;
             if (!seen.add(key)) throw IdentityException.validation("duplicate permission");
             next.add(new Permission(UUID.randomUUID(), role.id(), action.wire(), p.contentTypeCode(), p.predicateJson(), surfaces, now));
         }
-        store.replaceRolePermissionsKeepingUsableAdmin(role.id(), next);
-        audit(request, "PERMISSION_CHANGED", role.id());
+        transactions.run(() -> {
+            store.replaceRolePermissionsKeepingUsableAdmin(role.id(), next);
+            auditLog.record(request.principal(), request.surface(), "AUTH", "role.permissions_update", "role", role.id(),
+                    AuditLog.OK, java.util.Map.of("roleCode", role.code(), "permissions", next.size()));
+        });
     }
 
     public List<java.util.Map<String, Object>> effective(IdentityRequest request, UUID id) {
         authService.requireManagePrincipals(request);
+        store.findPrincipalById(id).orElseThrow(IdentityException::principalNotFound);
         return authorizationService.effectivePermissions(id);
+    }
+
+    /** Database column limits count Unicode code points; another principal's email is case-insensitively unique. */
+    private void validateProfile(UUID self, String displayName, String email) {
+        if (displayName != null && displayName.codePointCount(0, displayName.length()) > 80) {
+            throw IdentityException.validation("displayName must be at most 80 characters");
+        }
+        if (email == null) return;
+        if (email.codePointCount(0, email.length()) > 254) {
+            throw IdentityException.validation("email must be at most 254 characters");
+        }
+        boolean taken = store.listPrincipals().stream()
+                .anyMatch(p -> !p.id().equals(self) && p.email() != null && p.email().equalsIgnoreCase(email));
+        if (taken) throw IdentityException.validation("email is taken");
     }
 
     private void validatePredicate(String predicateJson) {

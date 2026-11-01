@@ -17,7 +17,16 @@ from uuid import uuid4
 
 import psycopg
 from fastapi.testclient import TestClient
-from model_kvm_checks import attack_response, child, cross_run_probe, install_attack
+from model_kvm_checks import (
+    ObservedRuntimeClient,
+    attack_response,
+    child,
+    cross_run_probe,
+    finalize_acceptance,
+    install_attack,
+    validate_mock_usage,
+    validate_model_trace,
+)
 
 import agent_platform.model_fixture as model_fixture
 import agent_platform.model_mock as model_mock
@@ -32,7 +41,6 @@ from agent_platform.model_fixture import fixture_server
 from agent_platform.model_mock import mock_server
 from agent_platform.model_policy import HTTPS_MODE, Policy
 from agent_platform.model_proxy import ModelProxy, usage_view
-from agent_platform.runtime_client import RuntimeClient
 from agent_platform.store import Store
 from agent_platform.worker import Worker
 from agent_platform_m0.kvm_lifecycle import Host
@@ -190,7 +198,7 @@ def main():
 
     model_mock.mock_response = compatible_response
 
-    class Client(RuntimeClient):
+    class Client(ObservedRuntimeClient):
         def operation(self, run, action):
             if fixture["case"] == "isolation" and action in {"prompt", "result"}:
                 row = json.loads(
@@ -492,7 +500,30 @@ def main():
                     Worker(db, client).run_once()
                     require(not node.sandboxes() and not host.vms(), "cross_run_cleanup_failed")
                     require(fixture["upstream_calls"] == 2, "cross_run_model_dispatched")
-                    report["cases"].append({"case": case, **proof, "cleanup_confirmed": True})
+                    for identity in (run["id"], sibling["id"]):
+                        cancelled = Store(db).run(identity)
+                        require(
+                            cancelled["state"] == "cancelled"
+                            and cancelled["cleanup_state"] == "confirmed",
+                            "cross_run_cancellation_unconfirmed",
+                        )
+                    report["cases"].append(
+                        {
+                            "case": case,
+                            **proof,
+                            "cleanup_confirmed": True,
+                            "sdk_terminal_oracle": "cancelled_with_confirmed_cleanup",
+                            "sdk_runs": [
+                                {
+                                    "run_id": identity,
+                                    **validate_model_trace(
+                                        client.event_pages.get(identity, []), finished=False
+                                    ),
+                                }
+                                for identity in (run["id"], sibling["id"])
+                            ],
+                        }
+                    )
                     print(json.dumps(report["cases"][-1]), flush=True)
                     continue
                 if case in {"approval", "pause", "cancel"}:
@@ -579,19 +610,7 @@ def main():
                 )
                 require(usage["request_slots_consumed"] == requests, "request_count_mismatch")
                 if case.startswith("mock-"):
-                    require(not usage["hard_money_limit_supported"], "mock_claimed_hard_money")
-                    require(usage["amount_decimal"] is None, "mock_claimed_provider_bill")
-                    require(
-                        usage["entries"][0]["reason"]
-                        in {"mock_reported_usage", "provider_reported_usage_unbilled"},
-                        "mock_usage_source_invalid",
-                    )
-                    if case == "mock-unknown":
-                        require(
-                            usage["entries"][0]["status"] == "unknown"
-                            and usage["uncertain_requests"] == 1,
-                            "mock_unknown_not_retained",
-                        )
+                    validate_mock_usage(case, usage)
                 if case == "mock-https-complete":
                     require(
                         current["result"]["verification"]["status"] == "passed"
@@ -686,7 +705,21 @@ def main():
                     {
                         "case": case,
                         "state": current["state"],
+                        "sdk_terminal_oracle": (
+                            "finished_and_caught_up"
+                            if expected == "succeeded"
+                            else expected + "_with_confirmed_cleanup_and_usage"
+                        ),
+                        **validate_model_trace(
+                            client.event_pages.get(run["id"], []),
+                            finished=expected == "succeeded",
+                            resumed=case.startswith("crash-"),
+                        ),
                         "requests": usage["request_slots_consumed"],
+                        "usage_statuses": [entry["status"] for entry in usage["entries"]],
+                        "usage_reasons": [entry["reason"] for entry in usage["entries"]],
+                        "uncertain_requests": usage["uncertain_requests"],
+                        "cutoff_reason": usage["cutoff_reason"],
                         "guest_connected": True,
                         "cleanup_confirmed": True,
                         "public_secret_scan": True,
@@ -703,11 +736,11 @@ def main():
             report["passed"] = True
     finally:
         # Do not destroy unknown resources, reset generations, or delete journals.
-        for run_id in issued:
+        def cleanup_run(run_id):
             for _ in range(8):
                 current = Store(db).run(run_id)
                 if current["cleanup_state"] in {"confirmed", "not_allocated"}:
-                    break
+                    return
                 with db.transaction() as conn:
                     conn.execute(
                         "UPDATE jobs SET available_at=clock_timestamp() "
@@ -716,21 +749,27 @@ def main():
                     )
                 Worker(db, client).run_once()
                 time.sleep(0.2)
-        report["zero_vms"] = not host.vms()
-        report["zero_claims"] = not node.sandboxes()
-        report["finished_at"] = datetime.now(UTC).isoformat()
-        (args.output / "report.json").write_text(json.dumps(report, indent=2))
-        upstream.shutdown()
-        upstream.server_close()
-        mock.shutdown()
-        mock.server_close()
-        mock_https.shutdown()
-        mock_https.server_close()
-        db.close()
-        model_worker.SDKCompletion = original_completion
-        model_worker.ModelSession.step, ModelProxy.complete = original_step, original_complete
-        model_fixture.tool_response = original_response
-        model_mock.mock_response = original_mock_response
+            require(
+                Store(db).run(run_id)["cleanup_state"] in {"confirmed", "not_allocated"},
+                "final_cleanup_not_confirmed",
+            )
+
+        def restore():
+            model_worker.SDKCompletion = original_completion
+            model_worker.ModelSession.step, ModelProxy.complete = original_step, original_complete
+            model_fixture.tool_response = original_response
+            model_mock.mock_response = original_mock_response
+
+        finalize_acceptance(
+            report,
+            cleanups=[lambda run_id=run_id: cleanup_run(run_id) for run_id in issued],
+            host=host,
+            node=node,
+            servers=[upstream, mock, mock_https],
+            db=db,
+            restore=restore,
+            save=lambda: (args.output / "report.json").write_text(json.dumps(report, indent=2)),
+        )
 
 
 if __name__ == "__main__":

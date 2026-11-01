@@ -5,6 +5,8 @@ import os
 import runpy
 import signal
 import socket
+import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -140,3 +142,132 @@ def cross_run_probe(node, first, second, proxy, payload):
         "cross_run_sdk_rejected": True,
         "cross_run_proxy_rejected": True,
     }
+
+
+def finalize_acceptance(report, *, cleanups, host, node, servers, db, restore, save):
+    """Keep case failures and attempt every owned cleanup before persisting verdict."""
+    original_error = sys.exception()
+    case_passed = report["passed"] is True and original_error is None
+    report["case_passed"] = case_passed
+    report["passed"] = False
+    failures = []
+
+    def attempt(stage, operation):
+        try:
+            return operation()
+        except Exception as exc:
+            # Error messages may contain credentials or private fixture data.
+            failures.append({"stage": stage, "error": type(exc).__name__})
+            return None
+
+    for index, cleanup in enumerate(cleanups):
+        attempt(f"run_{index}", cleanup)
+    for key, observe in (("zero_vms", host.vms), ("zero_claims", node.sandboxes)):
+        resources = attempt(key, observe)
+        report[key] = resources is not None and not resources
+        if resources is not None and resources:
+            failures.append({"stage": key, "error": "resource_residue"})
+    for index, server in enumerate(servers):
+        attempt(f"server_{index}_shutdown", server.shutdown)
+        attempt(f"server_{index}_close", server.server_close)
+    attempt("database_close", db.close)
+    attempt("restore", restore)
+    report["cleanup_failures"] = failures
+    report["finished_at"] = datetime.now(UTC).isoformat()
+    report["passed"] = case_passed and not failures and report["zero_vms"] and report["zero_claims"]
+    attempt("report_save", save)
+    if failures:
+        report["passed"] = False
+    if not report["passed"] and original_error is None:
+        raise RuntimeError("acceptance_cleanup_failed")
+
+
+class ObservedRuntimeClient(RuntimeClient):
+    """Pass through polling unchanged, retaining only acceptance metadata."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.event_pages = {}
+
+    def events(self, run):
+        request_cursor = run["backend_cursor"]
+        value = super().events(run)
+        events = [
+            {"event_id": item["event_id"], "cursor": item["cursor"]} for item in value["events"]
+        ]
+        self.event_pages.setdefault(str(run["id"]), []).append(
+            {
+                "generation": run["generation"],
+                "request_cursor": request_cursor,
+                "response_cursor": events[-1]["cursor"] if events else request_cursor,
+                "state": value["state"],
+                "caught_up": value["caught_up"],
+                "events": events,
+            }
+        )
+        return value
+
+
+def validate_model_trace(pages, *, finished, resumed=False):
+    """Validate consumed polling metadata; recovery only proves its observed suffix."""
+    initial_cursor = pages[0]["request_cursor"] if pages else None
+    cursor = initial_cursor if resumed else None
+    ids = set()
+    for page in pages:
+        if page["request_cursor"] != cursor:
+            raise RuntimeError("sdk_cursor_discontinuity")
+        for item in page["events"]:
+            if item["event_id"] in ids or item["event_id"] == initial_cursor:
+                raise RuntimeError("sdk_event_replayed")
+            if not item["event_id"] or item["cursor"] != item["event_id"]:
+                raise RuntimeError("sdk_cursor_invalid")
+            ids.add(item["event_id"])
+            cursor = item["cursor"]
+        if page["response_cursor"] != cursor:
+            raise RuntimeError("sdk_response_cursor_invalid")
+    sdk_finished = bool(pages and pages[-1]["state"] == "finished")
+    caught_up = bool(pages and pages[-1]["caught_up"] is True)
+    if finished and not (sdk_finished and caught_up):
+        raise RuntimeError("sdk_completion_missing")
+    return {
+        "sdk_finished": sdk_finished,
+        "sdk_caught_up": caught_up,
+        "sdk_completion_required": finished,
+        "sdk_poll_count": len(pages),
+        "sdk_event_count": len(ids),
+        "sdk_no_duplicate_events": True,
+        "sdk_cursor_continuity": True,
+        "sdk_initial_cursor": initial_cursor,
+        "sdk_observation_scope": "post_recovery_suffix" if resumed else "entire_worker",
+        "sdk_pages": pages,
+    }
+
+
+def validate_mock_usage(case, usage):
+    """Separate final measurement provenance from retained invalid usage."""
+    if case not in {"mock-complete", "mock-cutoff", "mock-unknown", "mock-https-complete"}:
+        raise RuntimeError("mock_case_invalid")
+    if usage["hard_money_limit_supported"] is not False:
+        raise RuntimeError("mock_claimed_hard_money")
+    if usage["amount_decimal"] is not None:
+        raise RuntimeError("mock_claimed_provider_bill")
+    unknown = case == "mock-unknown"
+    reason = (
+        "model_response_invalid"
+        if unknown
+        else "provider_reported_usage_unbilled"
+        if case == "mock-https-complete"
+        else "mock_reported_usage"
+    )
+    entries = usage["entries"]
+    if (
+        not entries
+        or (unknown and len(entries) != 1)
+        or type(usage["uncertain_requests"]) is not int
+        or usage["uncertain_requests"] != int(unknown)
+        or any(
+            entry["status"] != ("unknown" if unknown else "final") or entry["reason"] != reason
+            for entry in entries
+        )
+    ):
+        raise RuntimeError("mock_usage_source_invalid")

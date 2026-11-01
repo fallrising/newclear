@@ -2,11 +2,22 @@ package com.fallrising.cms.identity;
 
 import com.fallrising.cms.api.error.CmsApiException;
 import com.fallrising.cms.api.error.ErrorCode;
+import com.fallrising.cms.api.error.FieldError;
+
+import java.util.List;
 
 public class IdentityException extends CmsApiException {
 
     public IdentityException(ErrorCode code, String message, String action, String contentType, String surface) {
         super(code, message, action, contentType, surface);
+    }
+
+    private IdentityException(ErrorCode code, String message, List<FieldError> fields) {
+        super(code, message, null, null, null, fields);
+    }
+
+    public static IdentityException fieldValidation(List<FieldError> fields) {
+        return new IdentityException(ErrorCode.FIELD_VALIDATION, "Invalid fields", fields);
     }
 
     public static IdentityException unauthenticated() {
@@ -59,6 +70,14 @@ public class IdentityException extends CmsApiException {
                 "manage_principals",
                 null,
                 "admin");
+    }
+
+    public static IdentityException principalNotFound() {
+        return new IdentityException(ErrorCode.PRINCIPAL_NOT_FOUND, "Principal not found", null, null, null);
+    }
+
+    public static IdentityException auditNotFound() {
+        return new IdentityException(ErrorCode.AUDIT_EVENT_NOT_FOUND, "Audit event not found", null, null, null);
     }
 
     public static IdentityException validation(String message) {

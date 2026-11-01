@@ -14,15 +14,19 @@ from uuid import uuid4
 from psycopg.types.json import Jsonb
 
 from .adapters import FakeAgentBackend, FakeSandboxProvider
-from .domain import TERMINAL, Problem
+from .domain import RUNTIME_BACKENDS, SUBSCRIPTION_BACKENDS, TERMINAL, Problem
+from .result_archive import persist_archive
 from .store import event
 
 
 class Worker:
-    def __init__(self, db, connector=None):
+    def __init__(self, db, connector=None, subscription=None, codex_subscription=None):
         self.db = db
         self.owner = uuid4()
         self.connector = connector
+        self.subscription = subscription
+        self.codex_subscription = codex_subscription
+        self.tool_config = os.environ.get("TOOL_BROKER_MOCK_CONFIG")
         self.model_proxy = None
         if connector is not None and os.environ.get("MODEL_PROXY_CONFIG"):
             from .model_policy import Policy
@@ -32,6 +36,13 @@ class Worker:
             connector.model_transport = True
         self.agent = FakeAgentBackend()
         self.sandbox = FakeSandboxProvider()
+
+    def subscription_for(self, backend):
+        if backend == "claude-subscription":
+            return self.subscription
+        if backend == "codex-subscription":
+            return self.codex_subscription
+        return None
 
     def state(self, conn, run, state, reason=None):
         row = conn.execute(
@@ -112,7 +123,16 @@ class Worker:
             recovery = claim_recovery(self)
             if recovery:
                 return recovery
-        for node, backend in [("fake-local", "fake"), ("cocoon-local", "openhands")]:
+        for node, backend in [
+            ("fake-local", "fake"),
+            ("cocoon-local", "openhands"),
+            ("cocoon-local", "claude-subscription"),
+            ("cocoon-local", "codex-subscription"),
+        ]:
+            if backend in SUBSCRIPTION_BACKENDS and (
+                self.connector is None or self.subscription_for(backend) is None
+            ):
+                continue
             if backend == "openhands" and self.connector is None:
                 continue
             claim = self.claim_node(node, backend)
@@ -226,7 +246,7 @@ class Worker:
     def execute(self, claim):
         if claim.get("expired"):
             return
-        if claim.get("backend") == "openhands":
+        if claim.get("backend") in RUNTIME_BACKENDS:
             from .runtime_worker import execute_real
 
             return execute_real(self, claim)
@@ -273,20 +293,22 @@ class Worker:
                 "summary": content,
                 "diff": diff,
                 "diff_sha256": hashlib.sha256(diff.encode()).hexdigest(),
+                "diff_bytes": len(diff.encode("utf-8")),
+                "base_sha": run["base_sha"],
                 "verification": {
                     "status": "passed" if passed else "failed",
                     "name": "m2_fixture_workspace_assertion",
                     "reason": "Local mock rehearsal; repository tests are not configured.",
                 },
             }
+            persist_archive(conn, run, result)
             conn.execute("UPDATE runs SET result=%s WHERE id=%s", (Jsonb(result), run["id"]))
             event(conn, run["id"], "run.result_saved", result)
             self.state(conn, run, "finalizing")
-        with self.owned(claim) as (conn, run):
             self.state(
                 conn,
                 run,
-                "succeeded" if run["result"]["verification"]["status"] == "passed" else "failed",
+                "succeeded" if result["verification"]["status"] == "passed" else "failed",
             )
         with self.owned(claim) as (conn, run):
             self.sandbox.release(conn, run, f"{run['id']}:release")
@@ -351,6 +373,7 @@ class Worker:
                     "reason": "M1 deterministic fixture does not execute code or model calls",
                 },
             }
+            persist_archive(conn, run, result)
             conn.execute("UPDATE runs SET result=%s WHERE id=%s", (Jsonb(result), run["id"]))
             event(conn, run["id"], "run.result_saved", result)
             self.state(conn, run, "succeeded")

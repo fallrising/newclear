@@ -1,0 +1,18 @@
+{
+  "authorization": "Owner explicitly agreed to both pinned runtime dependencies on 2026-10-03.",
+  "direct": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0"
+  },
+  "addedLockPackages": {
+    "node_modules/@dnd-kit/accessibility": "3.1.1",
+    "node_modules/@dnd-kit/core": "6.3.1",
+    "node_modules/@dnd-kit/sortable": "10.0.0",
+    "node_modules/@dnd-kit/utilities": "3.2.2"
+  },
+  "existingLockedVersionsUnchanged": true,
+  "changedManifests": [
+    "apps/web-back/package.json",
+    "package-lock.json"
+  ]
+}

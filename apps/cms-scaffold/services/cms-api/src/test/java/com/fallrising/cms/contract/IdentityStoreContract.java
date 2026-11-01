@@ -2,6 +2,8 @@ package com.fallrising.cms.contract;
 
 import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.AuditEvent;
+import com.fallrising.cms.identity.domain.AuditQuery;
+import com.fallrising.cms.identity.domain.AuditRetention;
 import com.fallrising.cms.identity.domain.Permission;
 import com.fallrising.cms.identity.domain.Principal;
 import com.fallrising.cms.identity.domain.PrincipalRoleAssignment;
@@ -208,6 +210,73 @@ public abstract class IdentityStoreContract {
         assertThat(store.rolesOf(root.id())).hasSize(1);
         assertThat(store.findPrincipalById(root.id()).orElseThrow().status()).isEqualTo(PrincipalStatus.ACTIVE);
         assertThat(store.permissionsOfRole(admin.id())).hasSize(1);
+    }
+
+    @Test
+    void B07_queryCombinesFiltersAndUsesInclusiveExclusiveTimeBounds() {
+        Principal actor = principal("audit-actor");
+        store.insertPrincipal(actor);
+        UUID target = UUID.randomUUID();
+        AuditEvent match = new AuditEvent(UUID.randomUUID(), T0, actor.id(), "CONTENT", "entry.publish",
+                "entry", target, "back", "ok", null, "{\"revisionNo\":1}");
+        store.insertAudit(match);
+        store.insertAudit(new AuditEvent(UUID.randomUUID(), T0.plusSeconds(1), actor.id(), "CONTENT", "entry.publish",
+                "entry", target, "back", "ok", null, null));
+        var page = store.queryAudits(new AuditQuery(T0, T0.plusSeconds(1), actor.id(), "entry.", true,
+                "CONTENT", "entry", target, "ok", 1, 20));
+        assertThat(page.items()).extracting(AuditEvent::id).containsExactly(match.id());
+        assertThat(page.total()).isEqualTo(1);
+        assertThat(store.findAudit(match.id())).isPresent();
+        assertThat(store.findAudit(UUID.randomUUID())).isEmpty();
+        assertThat(store.queryAudits(new AuditQuery(null, null, actor.id(), "entry", false,
+                null, null, null, null, 1, 20)).items()).isEmpty();
+    }
+
+    @Test
+    void B07_literalPrefixStableTiesAndLongOffset() {
+        UUID target = UUID.randomUUID();
+        for (String action : List.of("literal%_\\.one", "literalAB.one", "entry.publish")) {
+            store.insertAudit(audit(action, target, T0));
+        }
+        var literal = store.queryAudits(new AuditQuery(null, null, null, "literal%_\\.", true,
+                null, null, null, null, 1, 20));
+        assertThat(literal.items()).extracting(AuditEvent::action).containsExactly("literal%_\\.one");
+        var all = store.queryAudits(new AuditQuery(null, null, null, null, false, null, null, null, null, 1, 20));
+        var ids = all.items().stream().map(e -> e.id().toString()).toList();
+        assertThat(ids).isSorted();
+        var second = store.queryAudits(new AuditQuery(null, null, null, null, false, null, null, null, null, 2, 1));
+        assertThat(second.total()).isEqualTo(3);
+        assertThat(second.items().getFirst().id().toString()).isEqualTo(ids.get(1));
+        AuditQuery huge = new AuditQuery(null, null, null, null, false, null, null, null, null, Integer.MAX_VALUE, 100);
+        assertThat(huge.offset()).isEqualTo(214748364600L);
+        assertThat(store.queryAudits(huge).items()).isEmpty();
+        assertThat(store.queryAudits(huge).total()).isEqualTo(3);
+    }
+
+    @Test
+    void BW4_auditRetentionDefaultsToNinetyDaysAndRoundTrips() {
+        AuditRetention initial = store.auditRetention();
+        assertThat(initial.days()).isEqualTo(90);
+        assertThat(initial.updatedAt()).isNotNull();
+        assertThat(initial.updatedBy()).isNull();
+        Principal anna = principal("anna");
+        store.insertPrincipal(anna);
+        store.updateAuditRetention(new AuditRetention(30, T0.plusSeconds(5), anna.id()));
+        assertThat(store.auditRetention()).isEqualTo(new AuditRetention(30, T0.plusSeconds(5), anna.id()));
+        store.updateAuditRetention(new AuditRetention(365, T0.plusSeconds(6), null));
+        assertThat(store.auditRetention()).isEqualTo(new AuditRetention(365, T0.plusSeconds(6), null));
+    }
+
+    @Test
+    void BW4_deleteAuditsBeforeRemovesOnlyOlderEvents() {
+        AuditEvent old = audit("LOGIN_SUCCESS", UUID.randomUUID(), T0.minusSeconds(1));
+        AuditEvent edge = audit("LOGIN_SUCCESS", UUID.randomUUID(), T0);
+        AuditEvent fresh = audit("LOGOUT", UUID.randomUUID(), T0.plusSeconds(1));
+        List.of(old, edge, fresh).forEach(store::insertAudit);
+        assertThat(store.deleteAuditsBefore(T0)).isEqualTo(1);
+        assertThat(store.listAudits(null, null)).extracting(AuditEvent::id).containsExactly(fresh.id(), edge.id());
+        assertThat(store.findAudit(old.id())).isEmpty();
+        assertThat(store.deleteAuditsBefore(T0)).isZero();
     }
 
     protected static Principal principal(String username) {

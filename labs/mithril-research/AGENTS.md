@@ -2,7 +2,7 @@
 
 Scope: `fallrising/newclear/labs/mithril-research/`.
 
-先完整讀取 README、`upstream.lock.json`、`docs/STATUS.md`、`docs/RESEARCH.md`、`docs/SDD.md`、`docs/SOURCES.md`、`docs/VALIDATION.md`、`docs/quickstart.md`、`docs/FOUR-NODE-PLAN.md`、`docs/EXECUTION_PROMPT.md`；再讀 root README、PORTFOLIO、taxonomy、portfolio-doc-tiers 及 monorepo-ci 規範。超過輸出限制就分段續讀，不只讀搜尋片段。
+先完整讀取 README、`upstream.lock.json`、`runtime.lock.json`、`docs/STATUS.md`、`docs/RESEARCH.md`、`docs/SDD.md`、`docs/SOURCES.md`、`docs/VALIDATION.md`、`docs/quickstart.md`、`docs/FOUR-NODE-PLAN.md`、`docs/EXECUTION_PROMPT.md`、`docs/P1-CONTRACT.md`、`docs/P1-LOCAL.md`、`docs/P1-TOOLS-CONTRACT.md`、`docs/P1-TOOLS.md`、`docs/P1-BOOTSTRAP-CONTRACT.md`、`docs/P1-BOOTSTRAP.md`、`docs/P1-COLLECTOR-CONTRACT.md`、`docs/P1-COLLECTOR.md`、`docs/P1-PHASE-CONTRACT.md`、`docs/P1-PHASE.md`、`docs/P1-JOURNAL-CONTRACT.md`、`docs/P1-JOURNAL.md`；再讀 root README、PORTFOLIO、taxonomy、portfolio-doc-tiers 及 monorepo-ci 規範。超過輸出限制就分段續讀，不只讀搜尋片段。
 
 ## 接手契約
 
@@ -17,4 +17,18 @@ Scope: `fallrising/newclear/labs/mithril-research/`.
 
 ## 下一輪入口
 
-MR-004 / P0：依四機計劃先盤點與映射，再確認 artifacts／網路／資源／回復與操作批准。預編譯 binary／容器不要求每台安裝 Rust；source/native checks 在隔離 builder。需要的 Compose、runtime lock、lifecycle CLI 與實機 evidence 尚未交付，不得宣稱已有可執行 up/smoke/down。
+MR-004 尚未完成。P1a 已提供 runtime lock 與僅 local-fixture 的 plan/up/status/smoke/down/reconcile/report；source/native checks 及證據在隔離 builder。P1b 提供 Compose/auth 產生、fixed SSH observe/down/reconcile 與 purge preview，先讀 `docs/P1-TOOLS-CONTRACT.md`／`docs/P1-TOOLS.md`。完整 P1 的 startup／cluster orchestration、purge apply 與 P2/P3 實機驗收仍缺。後續先重核私有映射／資源／有效網路政策／回復與操作批准；不得把 synthetic lane、unkeyed plan hash 或 operator 宣告當作 live readiness／授權。
+
+P1c 提供離線六節點觀察驗證及四階段 bootstrap proposal，見 `docs/P1-BOOTSTRAP.md`；沒有 collector／phase executor／up，不能把 proposal 當作實機准入。
+
+P1d 的獨立唯讀 collector 與 mock 證據見 `docs/P1-COLLECTOR.md`；不會把 collection 轉成 P1c admission。P1e 的獨立離線 phase-snapshot validator 見 `docs/P1-PHASE.md`；它只比對指定 barrier，不代表 phase admission。實機 collection/freshness、phase-aware live validation／executor 尚未驗收。
+
+P1f 的本機 durable intent 基礎見 `docs/P1-JOURNAL.md`：單一 unresolved intent 在同一 retained journal 阻擋再次記錄，沒有 dispatcher、resolution、phase advance 或實機授權。新 root／rollback 不受跨根防重放保證；完整 live journal／executor 仍待後續契約。
+
+## 主線與驗收文件先行
+
+- 接手前先讀 [SUCCESS.md](SUCCESS.md)、相關規格與最近驗證紀錄，核對目前主線及缺口。
+- 實作前先更新 SUCCESS 的本次目標、範圍、AC 與驗證計畫；不得為了完成而縮小已承諾主線。
+- 收尾逐項記錄實際命令、結果、來源版本與未通過原因，同步 README 必要入口及項目進度；未跑不可寫通過。
+- 主線全部驗收、必要 CI／審查通過並合併後，按 repo 共用規範建立 annotated `usable/<slug>/vX.Y.Z`，回讀遠端並更新索引。現行 owner 授權適用；本規則不授權部署或付費服務。
+- 參考／封存項目保留其結束條件，不以新增文件當作可執行版本，也不因此恢復開發。

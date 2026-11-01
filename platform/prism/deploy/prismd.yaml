@@ -1,0 +1,45 @@
+# Phase 1 Compose configuration. Later-phase rules and notification examples are
+# reference artifacts only; existing validation still requires bounded files.
+server:
+  http_listen: ":9090"
+  grpc_listen: ":4317"
+  mode: all-in-one
+  shutdown_timeout: 30s
+
+storage:
+  driver: clickhouse
+  dsn_file: /etc/prism/secrets/clickhouse_dsn
+  options:
+    cluster: ""
+    async_insert: "1"
+    max_execution_time: "55"
+    max_rows_to_read: "5000000"
+    max_result_rows: "5000000"
+    max_result_bytes: "67108864"
+  retention:
+    metrics_days: 30
+    logs_days: 14
+    traces_days: 7
+    red_days: 90
+
+tenancy:
+  mode: single
+  default_tenant: default
+
+auth:
+  allow_anonymous_read: false
+  jwt_secret_file: /etc/prism/secrets/jwt_secret
+  ingest_api_key_file: /etc/prism/secrets/ingest_api_key
+
+rules:
+  path: /etc/prism/rules
+  builtin_enabled: false
+
+notify:
+  config_path: /etc/prism/phase1-notify.yaml
+  deadletter_receiver: ops-fallback
+
+telemetry:
+  self_monitor: true
+  log_level: info
+  log_format: json

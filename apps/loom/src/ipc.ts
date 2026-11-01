@@ -45,11 +45,24 @@ export async function resizePty(
   await invoke("pty_resize", { origin: USER, sessionId, cols, rows });
 }
 
+// The terminal and document Run both submit through this boundary. Keep one
+// native write in flight per session so separately scheduled IPC calls cannot
+// reorder keystrokes or let a Run payload overtake them.
+const stdinTails = new Map<SessionId, Promise<void>>();
+
 export async function writeStdin(
   sessionId: SessionId,
   data: string,
 ): Promise<void> {
-  await invoke("pty_write_stdin", { origin: USER, sessionId, data });
+  const previous = stdinTails.get(sessionId);
+  const submit = () => invoke<void>("pty_write_stdin", { origin: USER, sessionId, data });
+  const current = previous ? previous.then(submit) : submit();
+  const tail = current.then(
+    () => { if (stdinTails.get(sessionId) === tail) stdinTails.delete(sessionId); },
+    () => { if (stdinTails.get(sessionId) === tail) stdinTails.delete(sessionId); },
+  );
+  stdinTails.set(sessionId, tail);
+  await current;
 }
 
 export async function subscribe(sessionId: SessionId): Promise<StreamId> {
@@ -68,6 +81,30 @@ export async function sessionMeta(
   sessionId: SessionId,
 ): Promise<SessionMeta | null> {
   return invoke<SessionMeta | null>("pty_session_meta", { sessionId });
+}
+
+// Runtime history DTOs are intentionally outside the frozen v1 contracts.
+export interface SessionHistorySnapshot {
+  sessions: SessionMeta[];
+  live_session_ids: SessionId[];
+  persistent: boolean;
+  warning: string | null;
+}
+
+export function sessionHistory(): Promise<SessionHistorySnapshot> {
+  return invoke<SessionHistorySnapshot>("session_history");
+}
+
+export function restartSession(sessionId: SessionId): Promise<SessionId> {
+  return invoke<SessionId>("session_restart", { origin: USER, sessionId, cols: 120, rows: 30 });
+}
+
+export async function forgetSession(sessionId: SessionId): Promise<void> {
+  await invoke("session_forget", { origin: USER, sessionId });
+}
+
+export function onSessionChanged(handler: () => void): Promise<UnlistenFn> {
+  return listen("session:changed", () => handler());
 }
 
 export async function ptyScrollback(

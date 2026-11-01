@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "trackedEnvAfterStage": [],
+  "exampleVerifiedExactPublicLocalDefault": true,
+  "commands": [
+    "git add -- products/goku/web/.env products/goku/web/.env.example products/goku/web/.gitignore",
+    "git ls-files -- products/goku/web/.env"
+  ],
+  "scope": "staged index, before commit"
+}

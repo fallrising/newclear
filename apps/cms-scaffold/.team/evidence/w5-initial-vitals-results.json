@@ -1,0 +1,1166 @@
+{
+  "config": {
+    "argv": [
+      "<local-home>/.local/node-v24.18.0/bin/node",
+      "<delivery-workspace>/node_modules/.bin/playwright",
+      "test",
+      "--config",
+      "playwright.vitals.config.ts",
+      "vitals-w5.spec.ts",
+      "--reporter=list,json"
+    ],
+    "configFile": "<delivery-workspace>/playwright.vitals.config.ts",
+    "rootDir": "<delivery-workspace>/e2e-vitals",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "<delivery-workspace>/test-results/frontend/vitals-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "<delivery-workspace>/e2e-vitals",
+        "testIgnore": [],
+        "testMatch": [
+          "vitals-w5.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "vitals-w5.spec.ts",
+      "file": "vitals-w5.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "front-album",
+          "file": "vitals-w5.spec.ts",
+          "line": 154,
+          "column": 36,
+          "specs": [
+            {
+              "title": "W5 Vitals front-album cold run 1",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping",
+                        "stack": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43",
+                        "location": {
+                          "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                          "column": 48,
+                          "line": 83
+                        },
+                        "snippet": "  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                            "column": 48,
+                            "line": 83
+                          },
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n\n  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43"
+                        },
+                        {
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before starting a new chunk"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:43.581Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-front-album-W5-Vitals-front-album-cold-run-1-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-front-album-W5-Vitals-front-album-cold-run-1-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                        "column": 48,
+                        "line": 83
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "862bf4f334c028407710-819e4a9c277c38dce6fe",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-album cold run 2",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:43.874Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-a928197b5ee58319adeb",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-album cold run 3",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:43.874Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-4cd7a678835a15211759",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-album cold run 4",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:43.874Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-4fdc0ab6973ac7e6761b",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-album cold run 5",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:43.874Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-af0aadc9cb94efbd2fc1",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            }
+          ]
+        },
+        {
+          "title": "front-clinic",
+          "file": "vitals-w5.spec.ts",
+          "line": 154,
+          "column": 36,
+          "specs": [
+            {
+              "title": "W5 Vitals front-clinic cold run 1",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping",
+                        "stack": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43",
+                        "location": {
+                          "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                          "column": 48,
+                          "line": 83
+                        },
+                        "snippet": "  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                            "column": 48,
+                            "line": 83
+                          },
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n\n  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43"
+                        },
+                        {
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before starting a new chunk"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:44.311Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-front-clinic-W5-Vitals-front-clinic-cold-run-1-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-front-clinic-W5-Vitals-front-clinic-cold-run-1-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                        "column": 48,
+                        "line": 83
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "862bf4f334c028407710-9817a489d01606ed3fd1",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-clinic cold run 2",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:44.577Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-741397aa45d1b7e46293",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-clinic cold run 3",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:44.577Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-1cb973b69b86e60ac20f",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-clinic cold run 4",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:44.577Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-276c1bd63248eb14d1b6",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-clinic cold run 5",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:44.577Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-532124b680bc31666374",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            }
+          ]
+        },
+        {
+          "title": "front-projects",
+          "file": "vitals-w5.spec.ts",
+          "line": 154,
+          "column": 36,
+          "specs": [
+            {
+              "title": "W5 Vitals front-projects cold run 1",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping",
+                        "stack": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43",
+                        "location": {
+                          "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                          "column": 48,
+                          "line": 83
+                        },
+                        "snippet": "  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                            "column": 48,
+                            "line": 83
+                          },
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n\n  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43"
+                        },
+                        {
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before starting a new chunk"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:45.016Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-front-projects-W5-Vitals-front-projects-cold-run-1-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-front-projects-W5-Vitals-front-projects-cold-run-1-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                        "column": 48,
+                        "line": 83
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "862bf4f334c028407710-d5ced9b307e77c019b99",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-projects cold run 2",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:45.304Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-e893e42ade4218557fb0",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-projects cold run 3",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:45.304Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-ab4e8d5789babfd786de",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-projects cold run 4",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:45.304Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-ce82b7ffed58608c5309",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals front-projects cold run 5",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:45.304Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-23ae5f1b930256ee63fd",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            }
+          ]
+        },
+        {
+          "title": "back-home",
+          "file": "vitals-w5.spec.ts",
+          "line": 154,
+          "column": 36,
+          "specs": [
+            {
+              "title": "W5 Vitals back-home cold run 1",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping",
+                        "stack": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43",
+                        "location": {
+                          "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                          "column": 48,
+                          "line": 83
+                        },
+                        "snippet": "  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                            "column": 48,
+                            "line": 83
+                          },
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n\n  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43"
+                        },
+                        {
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before starting a new chunk"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:45.721Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-back-home-W5-Vitals-back-home-cold-run-1-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-back-home-W5-Vitals-back-home-cold-run-1-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                        "column": 48,
+                        "line": 83
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "862bf4f334c028407710-8c2378e390a937f62739",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals back-home cold run 2",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.005Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-ec3bf9827486cc7975bc",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals back-home cold run 3",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.005Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-23bdee30970ebe88d295",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals back-home cold run 4",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.005Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-b27da4f5cf84d8d5409b",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals back-home cold run 5",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.005Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-d5e96b4a4aa9197c54d7",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            }
+          ]
+        },
+        {
+          "title": "admin-home",
+          "file": "vitals-w5.spec.ts",
+          "line": 154,
+          "column": 36,
+          "specs": [
+            {
+              "title": "W5 Vitals admin-home cold run 1",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping",
+                        "stack": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43",
+                        "location": {
+                          "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                          "column": 48,
+                          "line": 83
+                        },
+                        "snippet": "  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                            "column": 48,
+                            "line": 83
+                          },
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before stopping\n\n  81 |     if (errorMessage) { writeFileSync(`${sampleDir}/${label}-failed.json`, JSON.stringify({ target: target.id, run, hits: routeLog?.hits ?? [], error: errorMessage }, null, 2)); await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` }); }\n  82 |     else await context.tracing.stop({ path: `${sampleDir}/${label}-trace.zip` });\n> 83 |     try { await session?.detach(); } finally { await context.close(); }\n     |                                                ^\n  84 |   }\n  85 | }\n  86 | function median(values: number[]): number {\n    at measure (<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:83:48)\n    at <delivery-workspace>/e2e-vitals/vitals-w5.spec.ts:155:43"
+                        },
+                        {
+                          "message": "Error: browserContext._wrapApiCall: Must start tracing before starting a new chunk"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.418Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-admin-home-W5-Vitals-admin-home-cold-run-1-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "<delivery-workspace>/test-results/frontend/vitals-artifacts/vitals-w5-admin-home-W5-Vitals-admin-home-cold-run-1-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<delivery-workspace>/e2e-vitals/vitals-w5.spec.ts",
+                        "column": 48,
+                        "line": 83
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "862bf4f334c028407710-fe8cd4a3753c76cc25f9",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals admin-home cold run 2",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.682Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-9e8baa87e0430c93d8ca",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals admin-home cold run 3",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.682Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-273958828f229994f0a2",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals admin-home cold run 4",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.682Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-424601dec91882fd18ae",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            },
+            {
+              "title": "W5 Vitals admin-home cold run 5",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-05T16:56:46.682Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "862bf4f334c028407710-a250177ab0d4f262c4aa",
+              "file": "vitals-w5.spec.ts",
+              "line": 156,
+              "column": 42
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-05T16:56:40.322Z",
+    "duration": 6404.131,
+    "expected": 0,
+    "skipped": 20,
+    "unexpected": 5,
+    "flaky": 0
+  }
+}

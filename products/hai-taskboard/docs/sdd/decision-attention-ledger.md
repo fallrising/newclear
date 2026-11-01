@@ -1,8 +1,11 @@
 # Mini-SDD: Decisions, attention and external ledger import
 
-Status: **Proposed** (2026-09-28). Not accepted. Per HAI-DELIVERY-001 no production behavior may
-precede acceptance of these clauses and their named oracles. Acceptance means the owner merges this
-file and `.team/PLAN.md` gains the corresponding tasks.
+Status: **HAI-CI-001 clause and bounded implementation accepted (2026-10-04)**. Candidate
+`8f45a951d6f5285d833a51fe452eda708a86ceeb` passed the actual PR-run oracle and fresh T-112
+independent review; `.team/PLAN.md` records the exact acceptance evidence and retained failed
+predecessor. The remaining Decision/Attention/ledger clauses remain
+**Proposed** (2026-09-28). Per HAI-DELIVERY-001 no production behavior may precede acceptance of
+its clause and named oracle. Merging this design file alone does not accept every proposed feature.
 
 Parent: `../SDD.md` (§5 domain, §6 HAI-EXEC-008, §8 API, §9 Attention, §12 delivery).
 
@@ -21,7 +24,8 @@ Three things a single operator needs every day are still missing:
    HAI Taskboard cannot show that work without retyping it, and the SDD forbids bidirectional
    Markdown/DB synchronization.
 
-There is also no root CI workflow for this component.
+At the design baseline there was no root CI workflow for this component. T-110 now supplies the
+bounded backend/web workflow; its acceptance and PR-run evidence are tracked in `.team/PLAN.md`.
 
 ## 2. Scope
 
@@ -101,7 +105,7 @@ not copy the private ledger's rules.
   `todo`→`Ready`, `doing`→`Developing`, `blocked`→ blocker, `review`→`Review`, `done`→`Done`,
   `dropped`→`Canceled`. The mapping is part of the versioned profile.
 - **HAI-LEDGER-005** — Moving authority for a project from the ledger to HAI Taskboard is a separate,
-  explicit, one-time migration per project, consistent with the bootstrap rule in `.team/PLAN.md`.
+  explicit, one-time migration per project, consistent with the bootstrap authority rule in `../SDD.md` and current `../tasks/BOARD.md`.
   It is not part of this slice.
 - **HAI-LEDGER-006** — Imported text is untrusted data (HAI-BOUNDARY-004); it is rendered, never
   executed or interpreted as instructions.

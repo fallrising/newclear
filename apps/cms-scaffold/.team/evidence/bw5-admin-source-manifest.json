@@ -1,0 +1,10 @@
+{
+  "services/cms-api/src/main/java/com/fallrising/cms/api/error/ErrorCode.java": "35b3b64b25684465327ad7120a110cf4d3a0608748fbc0a0bafc48d609e10ad9",
+  "services/cms-api/src/main/java/com/fallrising/cms/api/error/FieldErrorCode.java": "85d2b996767458eb3791d5e6483b6986a6579d51cda6a9729b8c020bf9c40898",
+  "services/cms-api/src/main/java/com/fallrising/cms/identity/IdentityException.java": "5c144b9a8e629965c262a87ce045375827f32a210dba36e49b9db9a6ab3a2eba",
+  "services/cms-api/src/main/java/com/fallrising/cms/identity/service/PrincipalAdminService.java": "dfe12a265bbe4217f6d018a69ec52e690a83a290419585b2f29bee39d2d3420f",
+  "services/cms-api/src/main/java/com/fallrising/cms/content/web/AdminContentController.java": "6c38ebed17d1701369c16d55772af71ffc7162edba85aeb0e5bcdfc79cfda8a0",
+  "services/cms-api/src/test/java/com/fallrising/cms/PrincipalNotFoundApiTests.java": "dcce584a56911de7879b6397b39f4d917114f5ab9e5399e49cabed92cb264c9c",
+  "services/cms-api/src/test/java/com/fallrising/cms/MediaErrorCodeApiTests.java": "c4863e1a6147fd15467b9719e230857b8533d32f19959a520bdb518e6149e7d1",
+  "services/cms-api/src/test/java/com/fallrising/cms/AdminInputValidationApiTests.java": "7be2d022db8164711729f3228b0991ecd1001e157089333f7baff9270c10d9bf"
+}

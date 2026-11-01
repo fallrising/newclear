@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "task": "T-0436 M4",
+  "freeze_commit": "b3b420d81e9b97818585aa51c5ec7998eca92a35",
+  "events": [
+    {
+      "event": "policy_red",
+      "command": "python3 -m unittest discover -s tests -p test_rejection.py -v",
+      "exit_code": 1,
+      "observed": "ModuleNotFoundError: rejection_policy; intended missing implementation"
+    },
+    {
+      "event": "design_review",
+      "observed": "T015 requested subset metric denominators and strict all-raw-hit/policy validation; clarified beforefreeze without changing candidates/data/model"
+    },
+    {
+      "event": "focused_green",
+      "observed": "10 policy tests then16 policy/evaluation tests passed"
+    },
+    {
+      "event": "build_prerequisite_failure",
+      "command": "make semantic-sdk with runtime-matching task-local headers and system libdir",
+      "exit_code": 2,
+      "cargo_exit_code": 101,
+      "observed": "openssl-sys could read3.0.13 headers but unversioned linker files missing",
+      "correction": "task-local libssl.so/libcrypto.so symlinks point to installedso.3; OPENSSL_LIB_DIR local; no host packageinstall or source/dependency changes"
+    },
+    {
+      "event": "build_corrected",
+      "exit_code": 0,
+      "observed": "unchanged pinned native build succeeded in3m18s; newbinaryhash recorded inreport"
+    },
+    {
+      "event": "original_core",
+      "command": "make core RUN_DIR=work/rejection-core",
+      "exit_code": 0,
+      "counts": {
+        "passed": 12,
+        "not_run": 3
+      },
+      "not_run_reason": "coreprofile excludes semantic/CLIP/Whisper; requiredfullCI remains"
+    },
+    {
+      "event": "complete_evaluation",
+      "command": "make rejection RUN_DIR=work/rejection-final-001",
+      "exit_code": 0,
+      "quality_jobs": 4,
+      "update_jobs": 2,
+      "errors": 0,
+      "recommendation": "do_not_adopt_directly",
+      "not_a_failure_retry": "No furthermodel/threshold/data change basedonheldout"
+    }
+  ]
+}

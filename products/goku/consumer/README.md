@@ -30,7 +30,7 @@ Goku Consumer is an MQTT consumer that processes URLs and uploads batches to the
    export CLIENT_ID=goku-consumer
    export TOPIC=urls
    export BATCH_SIZE=10
-   export API_ENDPOINT=http://your-goku-api:8080/upload
+   export API_ENDPOINT=http://your-goku-api:8080/api/v1/upload
    ```
 
 4. Run the binary:
@@ -55,7 +55,7 @@ You have two options for running Goku Consumer as a Docker container:
               -e CLIENT_ID=goku-consumer \
               -e TOPIC=urls \
               -e BATCH_SIZE=10 \
-              -e API_ENDPOINT=http://your-goku-api:8080/upload \
+              -e API_ENDPOINT=http://your-goku-api:8080/api/v1/upload \
               kccy/goku-consumer:latest
    ```
 
@@ -72,7 +72,7 @@ You have two options for running Goku Consumer as a Docker container:
               -e CLIENT_ID=goku-consumer \
               -e TOPIC=urls \
               -e BATCH_SIZE=10 \
-              -e API_ENDPOINT=http://your-goku-api:8080/upload \
+              -e API_ENDPOINT=http://your-goku-api:8080/api/v1/upload \
               goku-consumer
    ```
 
@@ -84,7 +84,9 @@ The following environment variables are used to configure the application:
 - `CLIENT_ID`: The client ID to use when connecting to the MQTT broker
 - `TOPIC`: The MQTT topic to subscribe to
 - `BATCH_SIZE`: The number of URLs to process before sending to the API
-- `API_ENDPOINT`: The endpoint of your Goku API instance
+- `API_ENDPOINT`: The full upload URL of your Goku API instance, including
+  `/api/v1/upload`. The [client](internal/api/client.go) posts to this URL as given;
+  it does not append a route prefix. See the [API endpoints](../api/README.md#api-endpoints).
 
 ## Deploying to a Server
 

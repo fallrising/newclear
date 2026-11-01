@@ -5,6 +5,8 @@
 
 /* F-01: Tailwind v4 only detects classes under the app's own directory. Scan this package too. */
 @source "./";
+/* W1 field widgets live in another workspace, outside each app's automatic scan. */
+@source "../../fields/src";
 
 @theme inline {
   --color-background: var(--background);

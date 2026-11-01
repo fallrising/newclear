@@ -25,13 +25,22 @@ type lokiStream struct {
 // NormalizeLokiJSON maps a Loki JSON push payload to bounded UTM log records.
 func (n *Normalizer) NormalizeLokiJSON(ctx context.Context, payload []byte, receivedAt time.Time) ([]utm.LogRecord, Report, error) {
 	report := newReport()
+	if err := ctx.Err(); err != nil {
+		return nil, report, fmt.Errorf("normalize Loki push: %w", err)
+	}
 	var request lokiPushRequest
 	if err := json.Unmarshal(payload, &request); err != nil {
 		return nil, report, fmt.Errorf("unmarshal Loki push JSON: %w", err)
 	}
 	records := make([]utm.LogRecord, 0)
 	for _, stream := range request.Streams {
+		if err := ctx.Err(); err != nil {
+			return nil, report, fmt.Errorf("normalize Loki push: %w", err)
+		}
 		streamLabels, streamAttrs := lokiLabels(stream.Stream, &report)
+		// Cap shared attributes before cloning them for every entry. Metadata may
+		// still override these keys; the final sorted cap remains authoritative.
+		streamAttrs, streamDropped := capAttributes(streamAttrs, n.options.MaxAttrsPerRecord)
 		resource := &utm.Resource{
 			Tenant:  n.options.Tenant,
 			Service: cmp.Or(stream.Stream["service"], stream.Stream["job"]),
@@ -89,7 +98,7 @@ func (n *Normalizer) NormalizeLokiJSON(ctx context.Context, payload []byte, rece
 				continue
 			}
 			attrs, dropped := capAttributes(attrs, n.options.MaxAttrsPerRecord)
-			if dropped > 0 {
+			if dropped > 0 || streamDropped > 0 {
 				report.normalized("truncate")
 				report.warning("attributes_truncated")
 			}

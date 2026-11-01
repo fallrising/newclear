@@ -1,0 +1,305 @@
+{
+  "originalFailuresPreserved": true,
+  "attempts": [
+    {
+      "run": "browser-001",
+      "originalPassed": false,
+      "stage": "real-seed",
+      "failure": {
+        "stage": "real-seed",
+        "category": "REVIEW_API_400"
+      },
+      "cleanup": {
+        "children": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "be628e7f3381b83f3581ded66034bbc4a0fd2d98ea20950cc01a6df741fd5088",
+        "fe-review/browser-support.mjs": "355cca489731c748d696e075f1d1bb797cac4af045857fc5d40dc6ebc17965d3",
+        "fe-review/states.spec.ts": "0eeb6a73b2cf35e2bd46b9f8041a6ed9666382c101e6cdf94faf757de6665ee4",
+        "fe-review/playwright.config.ts": "501c875e1cd56171975a63f7b5301aaedc747ffa09c911764a290b47a86a2f12",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "cfd37b7647941371bc5a39c936516274c563570af320edd2eb38e62aef65ca0c",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [],
+      "childForcedKill": false
+    },
+    {
+      "run": "browser-002",
+      "originalPassed": false,
+      "stage": "real-seed",
+      "failure": {
+        "stage": "real-seed",
+        "category": "REVIEW_GRPC_RESULT"
+      },
+      "cleanup": {
+        "children": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "056bad30d1c64480e1306600eff706300458de7a72b6d41df2e19436bf563c59",
+        "fe-review/browser-support.mjs": "15c804b298df3d6a5774b1833c4fd061253da5e344174c150f786daacaa0140f",
+        "fe-review/states.spec.ts": "11252738fc974e91129395a15fa61453a97fd64b500d40f2a22073a73996e30c",
+        "fe-review/playwright.config.ts": "501c875e1cd56171975a63f7b5301aaedc747ffa09c911764a290b47a86a2f12",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "0d1798663170e3d4491a5fba613be66bc9393d87bf6e83a31c77c0ec42d4d2a4",
+        "fe-review/browser-policy.mjs": "8009c0687432d925536efcd1138b91641f47118b83ecea0030c507d5b3212122",
+        "fe-review/resume-plan.mjs": "1f2e24a2be5c5e3734befcb5324c3f4b21de8bb704388b32adf752f75e485226",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [],
+      "childForcedKill": false
+    },
+    {
+      "run": "browser-003",
+      "originalPassed": false,
+      "stage": "drawer-baseline",
+      "failure": {
+        "stage": "drawer-baseline",
+        "category": "TimeoutError"
+      },
+      "cleanup": {
+        "children": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "056bad30d1c64480e1306600eff706300458de7a72b6d41df2e19436bf563c59",
+        "fe-review/browser-support.mjs": "b65004798261b59e09dc029e7c4a09c393e90b07bb3b747b679f577d67683140",
+        "fe-review/states.spec.ts": "11252738fc974e91129395a15fa61453a97fd64b500d40f2a22073a73996e30c",
+        "fe-review/playwright.config.ts": "501c875e1cd56171975a63f7b5301aaedc747ffa09c911764a290b47a86a2f12",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "0d1798663170e3d4491a5fba613be66bc9393d87bf6e83a31c77c0ec42d4d2a4",
+        "fe-review/browser-policy.mjs": "8009c0687432d925536efcd1138b91641f47118b83ecea0030c507d5b3212122",
+        "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [],
+      "childForcedKill": false
+    },
+    {
+      "run": "browser-004",
+      "originalPassed": false,
+      "stage": "chart",
+      "failure": {
+        "stage": "chart",
+        "site": "chart",
+        "category": "TimeoutError"
+      },
+      "cleanup": {
+        "children": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "3fba663a98fcaf9ca7dfe20ecdf0286a67ea2a8b04243ece2fd334107c066e1f",
+        "fe-review/browser-support.mjs": "b65004798261b59e09dc029e7c4a09c393e90b07bb3b747b679f577d67683140",
+        "fe-review/states.spec.ts": "0ea1ec6247b8b9b9fbe69e3fd40a4586f7e149771085f0e6c5dd2c0411fb3ea5",
+        "fe-review/playwright.config.ts": "501c875e1cd56171975a63f7b5301aaedc747ffa09c911764a290b47a86a2f12",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "0d1798663170e3d4491a5fba613be66bc9393d87bf6e83a31c77c0ec42d4d2a4",
+        "fe-review/browser-policy.mjs": "8009c0687432d925536efcd1138b91641f47118b83ecea0030c507d5b3212122",
+        "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [],
+      "childForcedKill": false
+    },
+    {
+      "run": "browser-005",
+      "originalPassed": false,
+      "stage": "chart",
+      "failure": {
+        "stage": "chart",
+        "site": "chart:expand-click",
+        "category": "TimeoutError"
+      },
+      "cleanup": {
+        "children": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "3dcb08be00b2fc733dcd8cfe8bea9dbeee49161a155ee60a294720b1cc9243e9",
+        "fe-review/browser-support.mjs": "b65004798261b59e09dc029e7c4a09c393e90b07bb3b747b679f577d67683140",
+        "fe-review/states.spec.ts": "0ea1ec6247b8b9b9fbe69e3fd40a4586f7e149771085f0e6c5dd2c0411fb3ea5",
+        "fe-review/playwright.config.ts": "501c875e1cd56171975a63f7b5301aaedc747ffa09c911764a290b47a86a2f12",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "46e85ebc613d0c1ae51d228bc2424789232d57e1c2f92946d1caaa92b35f2c4c",
+        "fe-review/browser-policy.mjs": "8009c0687432d925536efcd1138b91641f47118b83ecea0030c507d5b3212122",
+        "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [],
+      "childForcedKill": false
+    },
+    {
+      "run": "browser-006",
+      "originalPassed": false,
+      "stage": "states",
+      "failure": {
+        "stage": "states",
+        "site": "states",
+        "category": "REVIEW_CHILD_CLEANUP"
+      },
+      "cleanup": {
+        "children": false,
+        "acquisitionsDrained": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "81dea98a506c7c81797b37f4b1c730ec8664390a0a3d1fdbb53ea747eeb31591",
+        "fe-review/browser-support.mjs": "b65004798261b59e09dc029e7c4a09c393e90b07bb3b747b679f577d67683140",
+        "fe-review/states.spec.ts": "f3b4d7a6c799d15e6e8b09f0d2a162d28f2862927eacd04b249dfe183bd1c9cb",
+        "fe-review/playwright.config.ts": "109a951c15ca840bb0657ad0c720359b22cef320cebbc55d2deceabfa620be11",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "46e85ebc613d0c1ae51d228bc2424789232d57e1c2f92946d1caaa92b35f2c4c",
+        "fe-review/browser-policy.mjs": "8009c0687432d925536efcd1138b91641f47118b83ecea0030c507d5b3212122",
+        "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+        "fe-review/lifecycle.mjs": "f558d11fa3d37dc1d4db0c857bb20877259d4bcb03761e0801bdefd656dc7070",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [],
+      "childForcedKill": true
+    },
+    {
+      "run": "browser-007",
+      "originalPassed": false,
+      "stage": "shared-capture",
+      "failure": {
+        "stage": "shared-capture",
+        "site": "shared-capture",
+        "category": "REVIEW_CAPTURE_REQUEST_HEALTH"
+      },
+      "cleanup": {
+        "children": true,
+        "acquisitionsDrained": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "bc79993e27a15df624d86588b9fb588e69f61b8cbb8f74f46c215129e43e69c0",
+        "fe-review/browser-support.mjs": "d5d42fec740635f9ad101978988b83c66642e7e73702c5bb4865bb0e73ead99c",
+        "fe-review/states.spec.ts": "ba38faeaaaab80d7ec06fae9927fcd859aa037e0a2d90859b3bec129fe47f847",
+        "fe-review/playwright.config.ts": "109a951c15ca840bb0657ad0c720359b22cef320cebbc55d2deceabfa620be11",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "46e85ebc613d0c1ae51d228bc2424789232d57e1c2f92946d1caaa92b35f2c4c",
+        "fe-review/browser-policy.mjs": "8009c0687432d925536efcd1138b91641f47118b83ecea0030c507d5b3212122",
+        "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+        "fe-review/lifecycle.mjs": "f558d11fa3d37dc1d4db0c857bb20877259d4bcb03761e0801bdefd656dc7070",
+        "fe-review/child-outcome.mjs": "cdb873ecd5dd0c58966cdc4dca451db1a4f0ff40dcf7ddd65373d1992afc2c33",
+        "fe-review/negative-state.mjs": "c034956749ada9465b275be967b4ada73fc727af6ba91b0a9fbdd6aaefd14f53",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [
+        {
+          "label": "states",
+          "timeoutMs": 180000,
+          "timedOut": false,
+          "exitCode": 0,
+          "signal": null,
+          "cleanup": true
+        },
+        {
+          "label": "capture-plan",
+          "timeoutMs": 180000,
+          "timedOut": false,
+          "exitCode": 0,
+          "signal": null,
+          "cleanup": true
+        },
+        {
+          "label": "capture",
+          "timeoutMs": 180000,
+          "timedOut": false,
+          "exitCode": 0,
+          "signal": null,
+          "cleanup": true
+        }
+      ],
+      "childForcedKill": false
+    },
+    {
+      "run": "browser-008",
+      "originalPassed": true,
+      "stage": "redaction-retakes",
+      "failure": null,
+      "cleanup": {
+        "children": true,
+        "acquisitionsDrained": true,
+        "browser": true,
+        "vite": true,
+        "proxy": true,
+        "listenersAbsent": true
+      },
+      "sourceHashes": {
+        "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+        "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+        "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+        "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+        "fe-review/run-browser.mjs": "b43bd2b32ba607b6722661624285195ba00e5ba1d112182a4324505e5e098425",
+        "fe-review/browser-support.mjs": "d5d42fec740635f9ad101978988b83c66642e7e73702c5bb4865bb0e73ead99c",
+        "fe-review/states.spec.ts": "ba38faeaaaab80d7ec06fae9927fcd859aa037e0a2d90859b3bec129fe47f847",
+        "fe-review/playwright.config.ts": "109a951c15ca840bb0657ad0c720359b22cef320cebbc55d2deceabfa620be11",
+        "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+        "fe-review/health.mjs": "3629aee64545315eefc32d370c822a283d7be8e458f42e0fa082787b8d6cf003",
+        "fe-review/browser-policy.mjs": "ef54668126746d8e8b0a425b082341f142b655923e70d49eeeb9fc2105a24712",
+        "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+        "fe-review/lifecycle.mjs": "f558d11fa3d37dc1d4db0c857bb20877259d4bcb03761e0801bdefd656dc7070",
+        "fe-review/child-outcome.mjs": "cdb873ecd5dd0c58966cdc4dca451db1a4f0ff40dcf7ddd65373d1992afc2c33",
+        "fe-review/negative-state.mjs": "c034956749ada9465b275be967b4ada73fc727af6ba91b0a9fbdd6aaefd14f53",
+        "fe-review/png-mask.mjs": "496d07a55cc28c8e3dc6eab579716fa82378ec2fefbb0ef2da6430ef4a1f5517",
+        "fe-review/retake-secrets.mjs": "f9b478f0722e14883ab079055a2724caf00a3bff8246a1463a18af71611d3360",
+        "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "commands": [],
+      "childForcedKill": false
+    }
+  ]
+}

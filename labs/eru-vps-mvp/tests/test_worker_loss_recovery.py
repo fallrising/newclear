@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from app_desired import OWNER, spec_identity
+from app_desired import OWNER, spec_identity, workload_name
 import labctl
 from worker_loss_executor import UncertainDissociation, _record_digest, plan_digest
 from worker_loss_ops import (
@@ -58,6 +58,7 @@ class RecoveryAPI(FakeLossAPI):
         for index in range(normalized['replicas']):
             self.live['workloads'].append({
                 'id': appname + '_replacement_' + str(index + 1),
+                'name': appname + '_' + normalized['entrypoint'] + '_' + str(index + 1),
                 'nodename': normalized['node'],
                 'labels': {'owner': OWNER, 'logical_app': normalized['name'],
                            'spec_sha256': digest},
@@ -67,7 +68,7 @@ class RecoveryAPI(FakeLossAPI):
 
     def list_revision(self, appname):
         return [copy.deepcopy(row) for row in self.live['workloads']
-                if row.get('id', '').startswith(appname + '_')]
+                if (identity := workload_name(row)) is not None and identity[0] == appname]
 
     def probe(self, row, desired):
         self.probe_calls.append(row['id'])
@@ -134,6 +135,91 @@ class WorkerLossRecoveryTests(unittest.TestCase):
               contextlib.redirect_stderr(errors)):
             labctl.main()
         return output.getvalue() + errors.getvalue(), json.loads(output.getvalue())
+
+    def test_fake_replacement_name_uses_reviewed_entrypoint_and_keeps_raw_id(self):
+        from app_executor import _safe_revision_rows
+        document = spec()
+        document['node'] = 'worker-2'
+        document['entrypoint'] = 'http'
+        normalized, digest, appname = spec_identity(document)
+        api = RecoveryAPI(self.document['snapshot'])
+        api.deploy({'id': 'fixture-name-contract', 'spec': document})
+        rows = api.list_revision(appname)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['id'], appname + '_replacement_1')
+        self.assertEqual(rows[0]['name'], appname + '_http_1')
+        stub = {'appname': appname, 'logical_app': normalized['name'],
+                'spec_sha256': digest, 'spec': normalized}
+        self.assertTrue(_safe_revision_rows(rows, stub)[0])
+        row = next(r for r in api.live['workloads'] if r['id'] == rows[0]['id'])
+        row['name'] = appname + '_foreign_1'
+        self.assertFalse(_safe_revision_rows(api.list_revision(appname), stub)[0])
+        row['name'] = 'foreign_http_1'
+        self.assertEqual(api.list_revision(appname), [])
+        row['name'] = 'malformed'
+        self.assertEqual(api.list_revision(appname), [])
+
+    def test_drain_readiness_uses_original_nondefault_entrypoint(self):
+        from worker_drain_executor import WorkerDrainExecutor
+        document = spec()
+        document['entrypoint'] = 'http'
+        source = spec_identity(document)
+        replacement_spec = dict(document, node='worker-2')
+        normalized, digest, appname = spec_identity(replacement_spec)
+        api = RecoveryAPI(self.document['snapshot'])
+        api.deploy({'id': 'fixture-drain-entrypoint', 'spec': normalized})
+        rows = api.list_revision(appname)
+        move = {'logical_app': document['name'], 'source': {'replicas': 1},
+                'replacement': {'node': normalized['node'], 'appname': appname,
+                                'spec_sha256': digest},
+                'replacement_workload_ids': [rows[0]['id']]}
+        executor = WorkerDrainExecutor(self.project / 'drain', api)
+        ready, _ = executor._all_replacements_ready(
+            {'moves': [move]}, {document['name']: source})
+        self.assertTrue(ready)
+        row = next(r for r in api.live['workloads'] if r['id'] == rows[0]['id'])
+        row['name'] = appname + '_foreign_1'
+        ready, failure = executor._all_replacements_ready(
+            {'moves': [move]}, {document['name']: source})
+        self.assertFalse(ready)
+        self.assertEqual(failure['reason'], 'unexpected_workload_name')
+
+    def test_drain_execute_and_recovery_preserve_verified_explicit_name(self):
+        from test_worker_drain_executor import FakeDrainAPI, make_snapshot, rows_for
+        from worker_drain import build_plan
+        from worker_drain_executor import WorkerDrainExecutor, execution_plan
+
+        class NamedDrainAPI(FakeDrainAPI):
+            def deploy(self, plan):
+                super().deploy(plan)
+                for index, row in enumerate(self.live['workloads']):
+                    if row['labels'].get('spec_sha256') == plan['spec_sha256']:
+                        row['name'] = (plan['appname'] + '_' + plan['spec']['entrypoint']
+                                       + '_actualname' + str(index + 1))
+
+            def list_revision(self, appname):
+                return [copy.deepcopy(row) for row in self.live['workloads']
+                        if (identity := workload_name(row)) is not None
+                        and identity[0] == appname]
+
+        document = spec()
+        state = make_snapshot(rows_for(document))
+        api = NamedDrainAPI(state)
+        review = build_plan('worker-4', state, [document],
+                            {document['name']: 'worker-2'}, True, (), 'named-drain')
+        plan = execution_plan(review, [document], api)
+        executor = WorkerDrainExecutor(
+            self.project / 'private/operations/worker-drain', api,
+            self.project / 'private/operations/apps')
+        result = executor.execute(plan, plan['plan_sha256'], [document])
+        self.assertEqual(result['status'], 'complete')
+        staged = result['staged_revisions']
+        self.assertEqual(staged[0]['name'], api.live['workloads'][0]['name'])
+        self.assertNotEqual(staged[0]['name'], staged[0]['id'])
+        mutations = (api.fence_calls, list(api.deploy_calls), list(api.remove_calls))
+        recovered = executor.reconcile(plan['id'])
+        self.assertTrue(recovered['reconciliation']['snapshot_matches_reconciled_state'])
+        self.assertEqual((api.fence_calls, api.deploy_calls, api.remove_calls), mutations)
 
     def test_partial_recovery_creates_fresh_bound_subset_and_new_journal(self):
         api, prepared, remaining = self.partial()

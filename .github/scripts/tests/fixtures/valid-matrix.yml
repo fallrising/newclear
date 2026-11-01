@@ -1,0 +1,12 @@
+name: Valid matrix expressions
+on: push
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    env:
+      OS_NAME: ${{ format('{0}', matrix.os) }}
+    steps:
+      - run: echo "$OS_NAME"

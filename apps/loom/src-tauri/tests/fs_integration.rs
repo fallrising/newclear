@@ -201,3 +201,52 @@ async fn b2_5_md_content_is_byte_exact_from_filesystem() {
     assert!(!snap.content.is_empty());
     assert_eq!(snap.on_disk_hash, blake3::hash(&bytes).to_hex().to_string());
 }
+
+// The first reconcile is later than echo expiry, matching production timing.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn self_created_file_is_not_reemitted_after_echo_ttl() {
+    let dir = tempfile::TempDir::new().unwrap();
+    let root = dir.path().canonicalize().unwrap();
+    let guard = Arc::new(EchoGuard::with_ttl(Duration::from_millis(150)));
+    let sink = VecEventSink::shared();
+    let svc = DocumentService::new(&root, guard.clone());
+    let _watcher = FsWatcher::start_with(
+        &root,
+        guard,
+        sink.clone(),
+        DEBOUNCE,
+        Duration::from_millis(500),
+    )
+    .unwrap();
+    tokio::time::sleep(Duration::from_millis(60)).await;
+    svc.write_document(&Origin::User, Path::new("created.md"), b"saved", None)
+        .unwrap();
+    tokio::time::sleep(Duration::from_millis(280)).await;
+    sink.take(); // Focus this assertion on delayed reconciliation, not the rename defect.
+    tokio::time::sleep(Duration::from_millis(450)).await;
+    assert_eq!(
+        count_fs_changed(&sink.snapshot(), &root.join("created.md")),
+        0,
+        "reconcile duplicated a known self-created file after TTL: {:?}",
+        sink.snapshot()
+    );
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn external_rename_preserves_from_and_destination() {
+    let rig = rig();
+    let from = rig.root.join("old.md");
+    let to = rig.root.join("new.md");
+    std::fs::write(&from, b"external").unwrap();
+    tokio::time::sleep(SETTLE).await;
+    rig.sink.take();
+    std::fs::rename(&from, &to).unwrap();
+    tokio::time::sleep(SETTLE).await;
+    assert!(
+        rig.sink.snapshot().iter().any(|event| matches!(event,
+        Event::FsChanged { path, change: FsChangeKind::Renamed { from: previous } }
+        if path == &to.to_string_lossy() && previous == &from.to_string_lossy())),
+        "genuine external rename must survive: {:?}",
+        rig.sink.snapshot()
+    );
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T16:49:24.973Z",
+  "gitCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "dirty": true,
+  "node": "v24.18.0",
+  "chromium": "Google Chrome for Testing 153.0.8010.12",
+  "command": "e2e:mock",
+  "artifact": "test-results/frontend/mock-1.json",
+  "result": "failed",
+  "recordId": "W5-MOCK-20261005-01",
+  "repetition": 1,
+  "playwright": "1.63.0",
+  "passed": 92,
+  "total": 93,
+  "axePassed": 60,
+  "axeTotal": 60,
+  "critical": 0,
+  "serious": 0,
+  "notes": "Initial attempt:92/93; deferred W4 memberlink hardcodedversion1 conflicts with approved packagedcurrentversion2. Existing68 journeys pass. E amendment approved; no retries."
+}

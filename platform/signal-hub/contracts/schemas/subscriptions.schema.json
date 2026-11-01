@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signalhub.example.invalid/contracts/subscriptions.schema.json",
+  "type": "object",
+  "properties": {
+    "subscriptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}(?![\\s\\S])"
+          },
+          "filter": {
+            "$ref": "filter.schema.json"
+          },
+          "channel": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "webhook"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https://[^/?#@]+(?:/[^#]*)?(?![\\s\\S])"
+                  },
+                  "secret_ref": {
+                    "type": "string",
+                    "pattern": "^file:/[^\\s]+(?![\\s\\S])"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "url",
+                  "secret_ref"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "ntfy"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https://[^/?#@]+(?:/[^#]*)?(?![\\s\\S])"
+                  },
+                  "token_ref": {
+                    "type": "string",
+                    "pattern": "^file:/[^\\s]+(?![\\s\\S])"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "url",
+                  "token_ref"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "mode": {
+            "enum": [
+              "immediate",
+              "digest"
+            ]
+          },
+          "start": {
+            "enum": [
+              "now",
+              "earliest_hot"
+            ]
+          },
+          "digest": {
+            "type": "object",
+            "properties": {
+              "every": {
+                "const": "24h"
+              },
+              "at": {
+                "type": "string",
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9](?![\\s\\S])"
+              },
+              "timezone": {
+                "type": "string",
+                "minLength": 1
+              },
+              "skip_empty": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "every",
+              "at",
+              "timezone",
+              "skip_empty"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "filter",
+          "channel",
+          "mode"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "mode": {
+                  "const": "digest"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "digest"
+              ],
+              "properties": {
+                "channel": {
+                  "properties": {
+                    "kind": {
+                      "const": "ntfy"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "digest"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "subscriptions"
+  ],
+  "additionalProperties": false
+}

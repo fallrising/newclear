@@ -8,12 +8,12 @@
 | **Binaries** | `fleetd` (control plane), `fleet-agent` (node agent) |
 | **Author** | Cheng Kung Chiang (@fallrising) |
 | **Date** | 2026-09-04 |
-| **Status** | Draft (revised 2026-09-04 after review) |
+| **Status** | Phase 1 implemented; acceptance tracked in SUCCESS.md (reconciled 2026-10-23) |
 | **Audience** | GitHub / senior engineers implementing Phase 1 MVP |
 | **Language** | Go 1.23+, Docker Compose v2, SQLite, Cloudflare Tunnel + Access |
 | **Module path** | `github.com/fallrising/newclear/specs/fleet` (replace `OWNER` at repo creation) |
 
-This document is implementation-ready. Protocols, JSON schemas, SQL, file layout, Cloudflare API calls, and GitHub Actions contracts are specified so Phase 1 can be built without guessing.
+This document is the Phase 1 implementation contract. The component now lives in the monorepo at `specs/fleet`; current acceptance evidence and remaining external gates are in [SUCCESS.md](../SUCCESS.md). Historical PR numbers below describe the implementation sequence, not current delivery status.
 
 ---
 
@@ -21,7 +21,7 @@ This document is implementation-ready. Protocols, JSON schemas, SQL, file layout
 
 Fleet Catalog is a **personal service catalog and thin control plane** for a small fleet of pet VPS hosts. The operator (one human, often with an LLM) writes a small service, compiles it to a container image, pins it to a specific VPS, deploys it with Docker Compose, and **registers** it. The catalog then shows URL, node, version, health, and expose mode, and supports start / stop / redeploy.
 
-The product contract is **`fleet.yaml`**. The runtime unit is **Docker Compose**. Ingress is **Cloudflare** with three expose modes (`public`, `access`, `private`). Orchestration is **agent desired-state reconciliation**: each VPS runs `fleet-agent`, which connects **outbound-only** to `fleetd`, pulls compiled Compose for that node, and makes local reality match desired state.
+The product contract is **`fleet.yaml`**. The runtime unit is **Docker Compose**. Ingress is **Cloudflare** with two expose modes (`public`, `access`). Orchestration is **agent desired-state reconciliation**: each VPS runs `fleet-agent`, which connects **outbound-only** to `fleetd`, pulls compiled Compose for that node, and makes local reality match desired state.
 
 This is **not** Coolify, Dokploy, Kubernetes, Nomad, Swarm, or a fork of the adjacent `clarkQ` / `vps-hygiene` trees. Those remain neighboring tools. Fleet Catalog owns the catalog, the `fleet.yaml` contract, the agent protocol, and Cloudflare ingress. Workloads (file relay, knowledge pipelines, dashboards, `clarkQ` itself if deployed as an app) only implement `/healthz` and ship a `fleet.yaml`.
 
@@ -59,7 +59,7 @@ The highest-leverage artifact is **`fleet.yaml` + agent protocol + Cloudflare ow
 
 ### Goals (Phase 1 MVP)
 
-- `fleet.yaml` v1 contract with validator, JSON Schema, and three worked examples (`public` / `access` / `private`).
+- `fleet.yaml` v1 contract with validator, JSON Schema, and Access web examples and public/access contract tests.
 - `fleetd`: small Go HTTP service + SQLite + server-rendered catalog UI.
 - `fleet-agent`: small Go binary (also runnable as a Compose service) per VPS; outbound-only.
 - Desired-state semantics: start / stop / deploy / uninstall as specified below.
@@ -110,7 +110,7 @@ If any of these is exceeded by 10×, revisit SQLite and the single-writer CF rec
 4. **Control plane is Go + SQLite (`fleetd`).** Matches operator comfort (`clarkQ` is Go) and the scale table. `modernc.org/sqlite` (pure Go, `CGO_ENABLED=0`) so `fleetd` can ship distroless like workloads.
 5. **GitHub + GHCR is the build system.** `fleetd` never clones. CI is the only builder.
 6. **Cloudflare API is owned by `fleetd`, not by workloads.** Workloads implement `/healthz` and bind `127.0.0.1`. `fleetd` writes tunnel ingress, DNS, and Access apps.
-7. **Three expose modes, one overlay vendor in MVP.** `public` / `access` use public hostnames on a Cloudflare zone. `private` uses **Cloudflare WARP-to-Tunnel via private hostname routes** (no public DNS, no RFC1918 CIDR routes in Phase 1). Tailscale is *not* provisioned in MVP (see Alternatives).
+7. **Two web exposure modes.** `public` and `access` use hostnames on a Cloudflare zone. Current deployments use `access` with browser email OTP; public remains supported but unused.
 8. **Split hostnames for `fleetd` itself.** UI (`FLEET_UI_HOSTNAME`) is Access-gated; agent/CI API (`FLEET_API_HOSTNAME`) is bearer/cookie only. Access OTP cannot be completed by agents or GHA.
 9. **Control plane compiles Compose; agent only applies.** Agents do not interpret full `fleet.yaml`. They receive `compose_yaml` + env + health URL. Compilation bugs stay in one place.
 10. **Always bind `127.0.0.1:<hostPort>`.** Aligns with `vps-hygiene` ports-audit guidance. Public reachability is Cloudflare’s job, never a `0.0.0.0` publish.
@@ -122,11 +122,11 @@ If any of these is exceeded by 10×, revisit SQLite and the single-writer CF rec
 16. **Tombstones on the wire, not silent omission.** `GET /api/v1/agent/desired` includes `desired_state=absent` (+ `purge_volumes`) until the owning agent reports the project gone (or 24h timeout). Node-move is a tombstone on the old node plus a live row on the destination.
 17. **Protected-hostname allowlist; never PUT the bootstrap tunnel.** Reconcile is `union(catalog rules for that node tunnel ∪ existing rules whose hostname ∈ FLEET_PROTECTED_HOSTNAMES)`. Register never writes empty ingress over a tunnel that already has rules. `FLEET_BOOTSTRAP_TUNNEL_ID` is immutable and not stored as `nodes.tunnel_id`.
 18. **Agent image is `docker:27.5.1-cli` + `apk add docker-cli-compose`, not distroless.** Official `*-cli` tags do **not** include Compose v2; install the plugin and assert `docker compose version` in the image build. Apply goes through `ComposeClient` (CLI). Agent process is **root** (docker.sock). `fleetd` remains distroless. Node `cloudflared` is the official distroless image. Token handoff is **path B**: bake `agent-stack.yml` into the agent image; agent writes `cloudflared.env` (0600 root — Compose CLI reads it, **not** the sidecar); then `ComposeClient.UpSidecar` recreates **only** the `cloudflared` service of project `fleet-agent`. `Up`/`Down`/`Stop` of the whole `fleet-agent`/`fleet-control` project still return `ErrProtectedProject`. Never a shell wait-loop.
-19. **Every tick reconciles actual Docker state.** Hash/generation equality skips *file writes* only. If desired=running and `Ps` is not running → `Up`; if desired=stopped and a container is running → `Stop`. `--force-recreate` on generation bump (including same image).
+19. **Every tick reconciles actual Docker state.** Hash/generation equality skips *file writes* only. If desired=running and `Ps` is not running → `Up`; if desired=stopped and a container is running → `Stop`. `--force-recreate` on an unapplied generation (including same image) or changed Compose/env hash. A persisted `force_recreate=true` is scoped to its generation and must not recreate the workload again on every tick or process restart.
 20. **Heartbeat is independent of apply/pull.** A dedicated goroutine heartbeats every 15s even during a 5-minute `compose pull`. Apply holds a per-agent lock and processes one service at a time.
 21. **`POST /api/v1/deploy` upsert is allowed for `ci` tokens.** One operator; a leaked CI token can create public hostnames; revoke is the mitigation. Pre-creating catalog rows is not required.
 22. **Do not register `fleetd` as an agent-managed workload in Phase 1.** No `fleet.yaml` for the control plane; no second Compose project fighting `fleet-control`. An agent *may* run on the control-plane VPS for *other* workloads; it must use a distinct node tunnel.
-23. **Private mode stays in Phase 1** as hostname-route + ingress hostname + WARP bootstrap checklist: **remove `100.64.0.0/10` from Split Tunnel Exclude** (private hostnames resolve to CGNAT `100.80.0.0/16`), and **delete `fleet.internal` from Local Domain Fallback** so DNS hits Gateway. **Do not** allocate RFC1918/`10.42.0.0/16` CIDRs until a later phase actually binds those IPs.
+23. **Access web is the current operating path.** Require a nonempty email allowlist and establish the Access app/policy before publishing tunnel ingress or DNS. Reject unsupported exposure modes without conversion.
 24. **Cookie `fleet_op` is a first-class credential on `/api/v1` and `/ui/*`.** Cookie *or* `Authorization: Bearer`. HTML catalog is never served without the cookie (so `fleet-api` cannot leak the UI). `/healthz`, `/version`, `GET/POST /login` are the only unauthenticated HTML/JSON exceptions (`/healthz` and `/version` are JSON).
 25. **Phase 1 token rotation is revoke + re-register**, not extra rotate endpoints. Tunnel-token loss uses `POST /api/v1/nodes/{id}/reissue-tunnel-token` (Cloudflare `GET .../cfd_tunnel/{id}/token`). Agent `agent_instance_id` is persisted on disk so a normal restart does not 409.
 
@@ -142,7 +142,6 @@ flowchart LR
     Dev[Laptop / LLM]
     GHA[GitHub Actions]
     Browser[Browser]
-    Warp[WARP client]
   end
 
   subgraph GitHub
@@ -154,7 +153,6 @@ flowchart LR
     Edge[Tunnel edge]
     Access[Access OTP / GitHub SSO]
     DNS[Zone DNS]
-    WarpNet[WARP / private hostname]
   end
 
   subgraph CP[Control-plane VPS]
@@ -181,7 +179,6 @@ flowchart LR
   Fleetd -->|CF API| DNS
   Fleetd -->|CF API| Edge
   Fleetd -->|CF API| Access
-  Warp --> WarpNet --> CFd --> App
   Edge -->|public/access hostname| CFd --> App
   Agent --> Comp --> App
   GHCR -->|docker pull| Comp
@@ -285,7 +282,7 @@ Renderer **output** validator (run on the YAML before persist):
 
 #### Complete rendered example (Example C — volume + resources + command)
 
-Input: `examples/private-files/fleet.yaml` plus deploy overlay `image=ghcr.io/fallrising/file-relay:cafebabe`, allocated `host_port=20014`. Assume the workload image entrypoint is replaced for illustration:
+Input: `examples/access-files/fleet.yaml` plus deploy overlay `image=ghcr.io/fallrising/file-relay:cafebabe`, allocated `host_port=20014`. Assume the workload image entrypoint is replaced for illustration:
 
 ```yaml
 name: fleet-files
@@ -425,7 +422,7 @@ Per node, `fleetd` allocates `host_port` from `nodes.host_port_min`–`host_port
 
 This range is chosen to miss `vps-hygiene`’s known public/demo binds (`22/80/443`, ojbquay `28080–29202`, `25432`, `23000`, Kafka `9092`). Agents never publish `0.0.0.0`.
 
-On `spec.node` change (move): insert the tombstone **first** (capturing the old `host_port`); then allocate a new port on the destination; then `UPDATE services`. The old origin keeps `127.0.0.1:<oldPort>` until the old agent `Down`s; that port is still in the in-use set. Dual-run window: public/private URL points only at the new host port.
+On `spec.node` change (move): insert the tombstone **first** (capturing the old `host_port`); then allocate a new port on the destination; then `UPDATE services`. The old origin keeps `127.0.0.1:<oldPort>` until the old agent `Down`s; that port is still in the in-use set. Dual-run window: service URL points only at the new host port.
 
 ### 8. Node facts (hygiene boundary)
 
@@ -469,7 +466,6 @@ UI shows `mem_used_pct`, `disk_root_used_pct`, `load1`/`ncpu` on the node row. T
 | Go module | `github.com/fallrising/newclear/specs/fleet` |
 | API tokens prefix | `flt_op_`, `flt_ag_`, `flt_ci_`, `flt_bs_` (bootstrap) |
 | Default public zone hostnames | `<service>.<FLEET_BASE_DOMAIN>` if `spec.expose.hostname` omitted for public/access |
-| Private hostname suffix | `<service>.fleet.internal` |
 
 Reserved service names: `agent`, `control`, `fleetd`, `fleet-agent`, `ui`. Testdata must reject `ui` and `fleet-agent`.
 
@@ -522,7 +518,7 @@ Highest-leverage artifact. Checked into each **workload** repo as `/fleet.yaml`.
 
 ### JSON Schema (canonical)
 
-Ship as `schemas/fleet.v1.schema.json`. YAML files are parsed then validated against this schema. Go structs in `internal/fleetfile` are generated-by-hand to match (do not introduce a codegen dependency in MVP).
+Ship as `schemas/fleet.v1.schema.json`. YAML files are parsed then validated against this schema. Raw field presence and types are checked before typed decoding and defaults; explicit null is not omission. Compile strings as quoted YAML scalars with Compose dollar escaping, and preserve literal dotenv values including newlines. Volume targets use Compose long syntax so colons remain part of the target path. Go structs in `internal/fleetfile` are generated-by-hand to match (do not introduce a codegen dependency in MVP).
 
 ```json
 {
@@ -586,11 +582,11 @@ Ship as `schemas/fleet.v1.schema.json`. YAML files are parsed then validated aga
           "additionalProperties": false,
           "required": ["mode", "port"],
           "properties": {
-            "mode": { "type": "string", "enum": ["public", "access", "private"] },
+            "mode": { "type": "string", "enum": ["public", "access"] },
             "hostname": {
               "type": "string",
               "maxLength": 253,
-              "description": "FQDN for public/access. For private, defaults to <name>.fleet.internal (not a public DNS name)."
+              "description": "FQDN for public/access; defaults to <name>.<FLEET_BASE_DOMAIN>."
             },
             "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
             "healthPath": {
@@ -645,21 +641,20 @@ Ship as `schemas/fleet.v1.schema.json`. YAML files are parsed then validated aga
 | Rule | Error code |
 | --- | --- |
 | `metadata.name` not in reserved set `{agent, control, fleetd, fleet-agent, ui}` | `name_reserved` |
-| After defaults, `hostname` is **always** a concrete FQDN stored on the row (never `''`). public/access: `spec.expose.hostname` or `<name>.<FLEET_BASE_DOMAIN>`. private: `spec.expose.hostname` or `<name>.fleet.internal` | `hostname_required` if public/access and both spec and `FLEET_BASE_DOMAIN` empty |
+| After defaults, `hostname` is **always** a concrete FQDN stored on the row (never `''`). `spec.expose.hostname` or `<name>.<FLEET_BASE_DOMAIN>` | `hostname_required` if public/access and both spec and `FLEET_BASE_DOMAIN` empty |
 | `spec.expose.hostname` for public/access must be under `FLEET_ALLOWED_SUFFIXES` (default `[FLEET_BASE_DOMAIN]`) | `hostname_not_allowed` |
 | Materialized hostname must **not** equal `FLEET_UI_HOSTNAME`, `FLEET_API_HOSTNAME`, or any name in `FLEET_PROTECTED_HOSTNAMES` (case-insensitive). Testdata: public service at the UI hostname. | `hostname_protected` |
-| `spec.expose.mode=private` ⇒ materialized hostname must end with `.fleet.internal` and must **not** be in `FLEET_ALLOWED_SUFFIXES` | `private_hostname_invalid` |
 | `spec.image` required on `POST /deploy` and on create if `desiredState=running` | `image_required` |
 | `spec.env` keys must not overlap `spec.secrets` | `env_secret_overlap` |
 | `spec.env` values matching `(?i)(-----BEGIN\|sk_live\|ghp_\|github_pat_\|cfut_[A-Za-z0-9]{20,})` rejected | `secret_in_env` |
 | `spec.volumes[].name` unique within the file | `volume_name_dup` |
 | `spec.node` must exist in `nodes` | `node_not_found` |
 | Moving a service to a node that is `offline` is allowed but UI warns | (warning, not error) |
-| Large-file caveat: label `fleet.catalog/large-origin: "true"` **forbids** `expose.mode=public` (must be `private` or non-HTTP object storage). Documented constraint, validator-enforced if label present. | `public_large_origin` |
+| Large-file caveat: label `fleet.catalog/large-origin: "true"` **forbids** `expose.mode=public` (use an Access-protected UI and object storage for large payloads). Documented constraint, validator-enforced if label present. | `public_large_origin` |
 
 `apiVersion` other than `fleet.catalog/v1` → `400 unsupported_version`.
 
-### Example A — public
+### Example A — Access-protected health service (current path)
 
 ```yaml
 # examples/hello-healthz/fleet.yaml
@@ -675,7 +670,7 @@ spec:
   node: vps-hel-1
   image: ghcr.io/fallrising/hello-healthz:REPLACE_SHA
   expose:
-    mode: public
+    mode: access
     hostname: hello.example.com
     port: 8080
     healthPath: /healthz
@@ -708,22 +703,22 @@ spec:
     - DECK_SESSION_KEY
 ```
 
-### Example C — private (no public DNS; WARP-to-Tunnel)
+### Example C — Access-protected file relay UI
 
 ```yaml
 apiVersion: fleet.catalog/v1
 kind: Service
 metadata:
   name: files
-  description: File relay origin. Large blobs must not use public Tunnel hostnames.
+  description: Access-protected file relay UI. Store large blobs in object storage.
   labels:
     fleet.catalog/large-origin: "true"
 spec:
   node: vps-hel-1
   image: ghcr.io/fallrising/file-relay:REPLACE_SHA
   expose:
-    mode: private
-    hostname: files.fleet.internal
+    mode: access
+    hostname: files.example.com
     port: 8080
     healthPath: /healthz
   command: ["/file-relay"]
@@ -746,13 +741,13 @@ spec:
 2. `GET spec.expose.healthPath` returns **2xx** with no auth when requested from localhost.
 3. Do **not** call Cloudflare APIs.
 4. Do **not** publish host ports themselves; Fleet owns the generated Compose.
-5. Large file / video: put objects in **R2 (presigned URLs)** or serve only on `private` overlay. Public Tunnel hostnames are a poor fit (request timeouts, no streaming range cache at origin, CF limits). The catalog will not stop you unless the `large-origin` label is set; the constraint is still documented here as a product rule.
+5. Large file / video: put objects in **R2 (presigned URLs)**; protect the web UI with `access`. Public Tunnel hostnames are a poor fit (request timeouts, Cloudflare transport limits still apply even with Access). The catalog will not stop you unless the `large-origin` label is set; the constraint is still documented here as a product rule.
 
 ---
 
 ## Repo / code layout
 
-New GitHub repository `fleet-catalog` (greenfield). Do not nest inside `clarkQ` or `vps-hygiene`.
+The existing component is `specs/fleet` in the monorepo. Do not create a second repository or nest it inside `clarkQ` or `vps-hygiene`. The tree below is relative to this component.
 
 ```text
 fleet-catalog/
@@ -809,7 +804,7 @@ fleet-catalog/
       README.md
     access-dashboard/
       fleet.yaml            # example B only (no app code required in MVP)
-    private-files/
+    access-files/
       fleet.yaml            # example C
   deploy/
     fleet-control/
@@ -1079,8 +1074,8 @@ On register, `fleetd` (idempotent):
 2. Call `IngressReconciler.EnsureNodeTunnel(nodeID)`:
    - `POST /accounts/{account_id}/cfd_tunnel` `{ "name": "fleet-<node_id>", "config_src": "cloudflare" }` if no `tunnel_id` stored.
    - **Must not** reuse `FLEET_BOOTSTRAP_TUNNEL_ID`. If the CF name `fleet-<node_id>` already exists, adopt that id rather than creating a duplicate.
-   - **Must not** PUT ingress at all during register (empty PUT would wipe a tunnel that already has rules). First workload reconcile writes ingress, always with `warp-routing.enabled: true`.
-3. **Do not** allocate RFC1918 CIDRs or call `teamnet/routes` in Phase 1.
+   - **Must not** PUT ingress at all during register (empty PUT would wipe a tunnel that already has rules). First workload reconcile writes ingress after Access policy setup for access workloads.
+3. Node tunnels publish only HTTP hostname ingress.
 4. Issue `agent_token`; return `tunnel_token` from the create response (or `GET /accounts/{account_id}/cfd_tunnel/{id}/token`). Shown once.
 
 `noop` reconciler (PR-3 tests): `tunnel_id=""`, `tunnel_token=""`, still inserts the node and agent token.
@@ -1209,7 +1204,6 @@ Catalog view object (list and get):
 | --- | --- |
 | public | `https://<hostname>` |
 | access | `https://<hostname>` (Access interstitial in front) |
-| private | `http://<hostname>` (e.g. `http://files.fleet.internal`). WARP + Local Domain Fallback required. **No** `private_ip` / RFC1918 field in Phase 1. |
 
 Instance:
 
@@ -1500,8 +1494,8 @@ Hard excludes: `compose_project ∈ {fleet-agent, fleet-control}` → log `prote
 
 ```
 on apply tick:
-  desired = GET desired
-  write atomic desired.json
+  desired = GET desired, or load same-node desired.json if fetch fails
+  on successful fetch: write atomic desired.json before applying
   actual = []
   for svc in desired.services:          # only these names; never glob
         if svc.compose_project in ProtectedProjects: skip
@@ -1522,7 +1516,7 @@ on apply tick:
         ps = ComposeClient.Ps(project, file)
         if svc.desired_state == running:
               if registry present: ComposeClient.Login(url, "x-access-token", password)
-              if svc.force_recreate or svc.generation != applied.generation:
+              if svc.generation != applied.generation or hash(compose_yaml, env) != applied.hash:
                     actual.append(name, state=progressing, error=pull_in_progress, gen=svc.generation)
                     POST actual          # mid-tick, BEFORE Pull, so UI can see progressing
                     ComposeClient.Pull(...)   # 5 min timeout; heartbeats continue
@@ -1600,7 +1594,7 @@ CREATE TABLE services (
   fleet_json          TEXT NOT NULL,             -- canonical fleet document
   image               TEXT NOT NULL DEFAULT '',
   desired_state       TEXT NOT NULL CHECK (desired_state IN ('running','stopped','absent')),
-  expose_mode         TEXT NOT NULL CHECK (expose_mode IN ('public','access','private')),
+  expose_mode         TEXT NOT NULL CHECK (expose_mode IN ('public','access')),
   hostname            TEXT NOT NULL,             -- always materialized; never ''
   container_port      INTEGER NOT NULL,
   host_port           INTEGER NOT NULL,
@@ -1614,7 +1608,6 @@ CREATE TABLE services (
   cf_dns_record_id    TEXT NOT NULL DEFAULT '',
   cf_access_app_id    TEXT NOT NULL DEFAULT '',
   cf_access_policy_id TEXT NOT NULL DEFAULT '',
-  cf_hostname_route_id TEXT NOT NULL DEFAULT '',
   ingress_status      TEXT NOT NULL DEFAULT 'pending'
                       CHECK (ingress_status IN ('pending','ok','error','drift','na')),
   ingress_error       TEXT NOT NULL DEFAULT '',
@@ -1712,7 +1705,9 @@ Timestamps: RFC3339 UTC strings. IDs for tokens/releases: ULID prefixed (`tok_`,
 
 Prune: after inserting a release, `DELETE FROM releases WHERE service=? AND id NOT IN (SELECT id FROM releases WHERE service=? ORDER BY created_at DESC LIMIT 20)` AND `id` is not `services.current_release_id`. `instances.release_id` is `ON DELETE SET NULL`, so a stale instance pointer cannot block prune. Deleting a `services` row (after uninstall ack) cascades `releases` and `instances`. `tombstones` are deleted explicitly in the same tx.
 
-`hostname` is required and unique; the validator **always** writes a concrete FQDN before INSERT so two private services cannot collide on `''`.
+`hostname` is required and unique; the validator **always** writes a concrete FQDN before INSERT so two services cannot collide on `''`.
+
+The SQL block above describes the effective two-mode contract. Migration `001_init.sql` remains immutable; `002_web_exposure.sql` transactionally rejects unsupported existing modes, removes the obsolete route column, and enforces the narrowed modes with insert/update triggers without rebuilding tables or cascading data.
 
 SQLite table order in `001_init.sql`: `nodes`, `services`, `tombstones`, `releases`, `instances`, `tokens`, `audit_events`, `cf_state`. Circular FKs (`current_release_id`, `agent_token_id`) are application-enforced; `releases.service` and `instances.service` are real FKs with `ON DELETE CASCADE`.
 
@@ -1720,27 +1715,9 @@ SQLite table order in `001_init.sql`: `nodes`, `services`, `tombstones`, `releas
 
 ## Cloudflare integration
 
-### Overlay choice for `private` (MVP)
+### Browser-based access
 
-**MVP private overlay = Cloudflare WARP-to-Tunnel**, not Tailscale.
-
-Why:
-
-- `fleetd` already holds a Cloudflare API token and already creates per-node remotely-managed tunnels for `public`/`access`.
-- Agents already run `cloudflared`. A second overlay (Tailscale) would be another identity, another daemon, and another thing `fleetd` cannot provision via the API it owns.
-- WARP enrollment for the single operator (laptop + phone) is acceptable ceremony at this scale.
-- Tailscale remains a **fine operator-managed side channel** (SSH, escape hatch). Agent may *report* a `tailscale0` IP in facts later; Fleet will not write tailnet ACLs in MVP.
-
-Private mode (Phase 1, Decision 23):
-
-- **No** zone DNS record.
-- **No** public hostname on a customer zone.
-- **No** `10.42.0.0/16` / teamnet CIDR routes (nothing binds those IPs). Private hostnames use Cloudflare **initial resolved IPs** in CGNAT (`100.80.0.0/16`), which default WARP Split Tunnels **exclude** via `100.64.0.0/10` — see the WARP checklist. Do not invent RFC1918 overlays.
-- Tunnel config always includes `"warp-routing": { "enabled": true }` on every PUT of a **node** tunnel.
-- Ingress hostname rule `<name>.fleet.internal` → `http://127.0.0.1:<hostPort>`.
-- `POST /accounts/{account_id}/zerotrust/routes/hostname` registers the private hostname on that tunnel. Persist `cf_hostname_route_id`.
-- Operator reaches it from a WARP-enrolled device. Catalog `url` is `http://<name>.fleet.internal`.
-- One-time WARP / Gateway bootstrap (below) is **required** before the first private service is usable. Per-service CF calls do not enroll devices.
+Owner scope (2026-10-23): retain `public` and `access`; current deployments use `access` with browser email OTP. Public mode remains supported but is unused for the current rollout. The operator needs a browser and an allowed email address.
 
 ### Credentials on `fleetd`
 
@@ -1751,7 +1728,6 @@ Token permissions (from the [create-remote-tunnel-api](https://developers.cloudf
 - Account: `Cloudflare Tunnel Write` **or** `Cloudflare One Connectors Write` **or** `Cloudflare One Connector: cloudflared Write`
 - Zone: `DNS Write`
 - Account: `Access: Apps and Policies Write`
-- Account: `Cloudflare One Networks Write` (hostname routes)
 - Account: `Access: Organizations, Identity Providers, and Groups Write` (OTP provider ensure)
 
 ### Idempotent helpers
@@ -1763,7 +1739,7 @@ All CF mutations go through a **single goroutine mutex** `cfMu` (serialize). Rat
 Ingress update algorithm (per **node** tunnel):
 
 1. `GET /accounts/{account_id}/cfd_tunnel/{tunnel_id}/configurations`
-2. Build catalog rules from **all catalog services on nodes with this tunnel_id** whose `desired_state` is `running` or `stopped` (keep hostname while stopped so start is instant) and whose mode is `public` | `access` | `private`. Skip `absent`.
+2. Build catalog rules from **all catalog services on nodes with this tunnel_id** whose `desired_state` is `running` or `stopped` (keep hostname while stopped so start is instant) and whose mode is `public` | `access`. Skip `absent`. Access rules require saved app/policy IDs and successful reconciliation; a pending or errored row is excluded unless its policy was just verified in the current service reconcile.
 3. Each catalog rule: `{ "hostname": "<hostname>", "service": "http://127.0.0.1:<hostPort>", "originRequest": { "connectTimeout": 30, "keepAliveTimeout": 90, "noHappyEyeballs": true } }`
    - `connectTimeout` / `keepAliveTimeout` are **seconds** (Cloudflare originRequest numbers, not nanoseconds).
 4. **Preserve** any existing ingress rule whose `hostname` is in `FLEET_PROTECTED_HOSTNAMES` (even if not in the catalog).
@@ -1773,7 +1749,6 @@ Ingress update algorithm (per **node** tunnel):
 ```json
 {
   "config": {
-    "warp-routing": { "enabled": true },
     "ingress": [ "/* catalog + protected rules */", { "service": "http_status:404" } ]
   }
 }
@@ -1800,10 +1775,10 @@ Register **must not** PUT empty ingress. A brand-new tunnel has no config; the f
 
 | Step | API |
 | --- | --- |
-| 1. Ingress | same as public |
-| 2. DNS CNAME proxied | same as public |
-| 3. Access application | `GET /accounts/{account_id}/access/apps` find `domain == hostname`; else `POST /accounts/{account_id}/access/apps` |
-| 4. Policy | `GET /accounts/{account_id}/access/apps/{app_id}/policies`; ensure one Allow policy |
+| 1. Access application | `GET /accounts/{account_id}/access/apps` find `domain == hostname`; else `POST /accounts/{account_id}/access/apps` |
+| 2. Policy | Require nonempty `CF_ACCESS_ALLOWED_EMAILS`; GET policies, POST a `fleet-operator` Allow policy or PUT the existing managed policy to match the configured emails. Refuse unmanaged policies. |
+| 3. Ingress | Publish only after the Access app and policy succeeded; persist their IDs. |
+| 4. DNS CNAME proxied | same as public, after the identity gate exists |
 
 Create app body:
 
@@ -1839,16 +1814,6 @@ If GitHub IdP is configured, `include` may also have `{ "github": { "identity_pr
 
 Optional origin check (defense in depth, not required for MVP): set `originRequest.access` aud tags on the ingress rule. Phase 2.
 
-#### `private`
-
-| Step | API |
-| --- | --- |
-| 1. Ingress hostname `<name>.fleet.internal` → `http://127.0.0.1:<hostPort>` plus `warp-routing.enabled=true` | GET + PUT configurations |
-| 2. **Do not** create zone DNS |
-| 3. Hostname route | `GET /accounts/{account_id}/zerotrust/routes/hostname` ; if missing `POST /accounts/{account_id}/zerotrust/routes/hostname` `{ "hostname": "files.fleet.internal", "tunnel_id": "<id>", "comment": "fleet:files" }`. Store `result.id` in `cf_hostname_route_id`. |
-| 4. **Do not** create teamnet CIDR routes |
-| 5. No Access app in MVP (WARP enrollment is the gate) |
-
 #### Uninstall / delete
 
 Reverse, still idempotent (404 = success):
@@ -1856,8 +1821,7 @@ Reverse, still idempotent (404 = success):
 1. Remove ingress rule (PUT remaining).
 2. Delete DNS record if `cf_dns_record_id` or lookup by name+comment `fleet:<service>`.
 3. Delete Access app if any.
-4. Delete hostname route if private.
-5. Mark `ingress_status=na`.
+4. Mark `ingress_status=na`.
 
 Do **not** delete the node’s tunnel.
 
@@ -1878,10 +1842,10 @@ sequenceDiagram
   F->>DB: upsert service, release, desired=running, generation++, ingress_status=pending
   F->>Q: enqueue ReconcileService (async)
   F-->>CI: 201 or 202 (never waits on CF or agent)
-  Q->>CF: missing objects only (ingress, DNS, Access, hostname route)
+  Q->>CF: missing objects only (Access policy, ingress, DNS)
   alt CF ok all objects
     Q->>DB: ingress_status=ok
-  else partial (e.g. DNS ok, Access POST fails)
+  else partial (e.g. Access POST fails before ingress/DNS)
     Q->>DB: ingress_status=error, ingress_error=access_app: ...
     Q->>Q: retry missing objects every 60s
   end
@@ -1893,7 +1857,7 @@ Rules:
 
 - HTTP deploy/create **always** returns on catalog commit (`201`/`202`/`200`). Never `503`.
 - CF reconcile is triggered by the **catalog write**, not by agent health.
-- Retry the **missing** CF objects every 60s under `cfMu`, using per-object ids (`cf_dns_record_id`, `cf_access_app_id`, `cf_access_policy_id`, `cf_hostname_route_id`). Do not rebuild objects that already have an id unless drift says so.
+- Retry the **missing** CF objects every 60s under `cfMu`, using per-object ids (`cf_dns_record_id`, `cf_access_app_id`, `cf_access_policy_id`). Do not rebuild objects that already have an id unless drift says so.
 - **Do not roll back Compose** if CF fails. **Do not roll back CF** if Compose fails (ingress 502 at origin; instance `missing`/`unhealthy`).
 - `EnsureOTPProvider` is the same worker; never blocks `main()`.
 
@@ -1901,10 +1865,9 @@ Rules:
 
 Background ticker **5 min**, per node tunnel (skip bootstrap tunnel):
 
-1. GET tunnel configuration; repair ingress (catalog ∪ protected hostnames; `warp-routing.enabled=true`).
+1. GET tunnel configuration; repair ingress (catalog ∪ protected hostnames).
 2. List DNS records with comment prefix `fleet:`; create/update/delete to match public+access catalog hostnames. **Never** create/update/delete records whose name is in `{FLEET_UI_HOSTNAME, FLEET_API_HOSTNAME} ∪ FLEET_PROTECTED_HOSTNAMES`.
 3. List Access apps whose name starts with `fleet:`; delete extras; ensure allow-policy emails match `CF_ACCESS_ALLOWED_EMAILS`.
-4. List hostname routes with comment prefix `fleet:`; create/delete to match `private` catalog hostnames.
 
 If any repair happened: `ingress_status=drift` then `ok`. Log `msg=cf_drift_repaired`.
 
@@ -1915,7 +1878,7 @@ Cloudflare Tunnel public hostnames are a poor origin for multi-GB file/video:
 - Edge-to-origin is a long-lived multiplexed connection, not a CDN cache for arbitrary origin ranges.
 - Uploads/downloads of large blobs hit timeouts and lack proper object-storage semantics.
 
-**Rule:** file-relay of big blobs uses **R2 presigned URLs** (app-level) or `expose.mode=private` (WARP). Validator rejects `public` when label `fleet.catalog/large-origin=true`. Document in `examples/private-files/`.
+**Rule:** file-relay of big blobs uses **R2 presigned URLs** (app-level), with an Access-protected web UI. Validator rejects `public` when label `fleet.catalog/large-origin=true`. Document in `examples/access-files/`.
 
 ---
 
@@ -2049,7 +2012,6 @@ HTML is served **only** on `FLEET_UI_HOSTNAME` and **only** with cookie `fleet_o
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | hello | https://hello.example.com | vps-hel-1 (online) | `a1b2c3d` | healthy | public | running | Stop, Redeploy |
 | deck | https://deck.example.com | vps-hel-2 | `deadbeef` | healthy | access | running | Stop, Redeploy |
-| files | http://files.fleet.internal | vps-hel-1 | `cafebabe` | unhealthy | private | running | Start, Redeploy |
 
 Health cell: `healthy` / `unhealthy` / `unknown` / `offline-node` / `progressing` (generation mismatch). Color via CSS classes, no JS charting.
 
@@ -2168,31 +2130,13 @@ Phase 3: optional `/metrics` Prometheus text (node_offline, deploy_total, cf_err
 5. Log into UI (`/login`), confirm empty catalog. `fleetd` is **not** a catalog row.
 6. **First agent** (typically a *different* VPS): copy `deploy/fleet-agent/.env.example`, set `FLEET_URL=https://<FLEET_API_HOSTNAME>`, `FLEET_NODE_ID=vps-hel-1`, `FLEET_BOOTSTRAP_TOKEN`. `docker compose -p fleet-agent up -d fleet-agent` (do **not** pass `--profile tunnel`). Agent registers (creates a **distinct** `fleet-vps-hel-1` tunnel), writes `cloudflared.env` (`0600` root), then `ComposeClient.UpSidecar` recreates only the `cloudflared` service from the **baked** stack file. No second operator compose command.
 7. **Control-plane VPS as a workload node (optional):** run a second compose project `fleet-agent` on that box with a node id like `vps-cp-1`. Result: **two cloudflared processes** — bootstrap (`fleet-control`) + node (`fleet-agent`). They must use different tokens/tunnels.
-8. **First workload:** `examples/hello-healthz` workflow, `FLEET_URL` / `FLEET_CI_TOKEN`, push `main`. Confirm catalog row URL 200.
+8. **First workload:** `examples/hello-healthz` uses `access`; set `FLEET_URL` / `FLEET_CI_TOKEN`, push `main`. Confirm the catalog URL requests Access login, then returns the workload after authorized email OTP.
 
 `fleetd` compose publishes `127.0.0.1:18765:18765` only.
 
-### WARP / private-mode bootstrap checklist (required before Example C)
+### Access web acceptance
 
-Private hostnames are **not** RFC1918. Cloudflare assigns **initial resolved IPs** in CGNAT:
-
-- IPv4: `100.80.0.0/16`
-- IPv6: `2606:4700:0cf1:4000::/64`
-
-Default WARP Split Tunnels **Exclude** mode lists `100.64.0.0/10`, which covers `100.80.0.0/16`. Leaving that exclude in place keeps private hostnames off-WARP.
-
-Do this **once** on the Zero Trust org / WARP device profile. `fleetd` does not automate enrollment. Official steps: [Connect a private hostname](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/private-net/cloudflared/connect-private-hostname/).
-
-1. Enroll the operator laptop (and phone) in **Cloudflare WARP** (Gateway with WARP), team/org matching `CF_ACCOUNT_ID`. Minimum client versions as in that doc (desktop 2025.4.929.0+).
-2. **Split Tunnels — Exclude mode (typical default):**
-   1. **Remove** `100.64.0.0/10` from the exclude list so `100.80.0.0/16` rides WARP.
-   2. Optionally add back unused CGNAT slices so other CGNAT uses stay local, e.g. exclude `100.64.0.0/12`, `100.81.0.0/16`, `100.82.0.0/15`, `100.84.0.0/14`, `100.88.0.0/13`, `100.112.0.0/12` (per Cloudflare’s private-hostname doc). Do **not** re-add `100.80.0.0/16`.
-   3. **Include mode** (if that is the profile): add `100.80.0.0/16` and `2606:4700:0cf1:4000::/64`.
-3. **Local Domain Fallback:** **delete** `fleet.internal` (and any parent that would catch `*.fleet.internal`) from the LDF list. LDF sends DNS to the *local* resolver; hostname routes need WARP to send `*.fleet.internal` **to Gateway**. Adding a fallback for `fleet.internal` is the wrong knob.
-4. Hostname route itself is created by `fleetd` on deploy (`POST .../zerotrust/routes/hostname`). Confirm `warp-routing.enabled=true` on the **node** tunnel after the first private deploy (`ingress_status=ok`).
-5. From the WARP device: `curl -sS http://files.fleet.internal/healthz` (after Example C is running).
-
-SSH port-forward to `127.0.0.1:<hostPort>` on the node remains a **manual escape hatch** if WARP is misconfigured. It is not a product fallback mode. Do not document RFC1918 Split Tunnel includes for Phase 1 private.
+Set a nonempty `CF_ACCESS_ALLOWED_EMAILS`, enable the One-time PIN identity provider, and deploy an `access` workload. An unauthenticated browser must receive the Access login page, never the workload response. Log in with an allowed email and its one-time code, then verify the service and `/healthz`. A non-allowlisted identity must not reach the application. Save sanitized evidence; local origin or fake-API tests do not satisfy this external acceptance.
 
 ### Agent image and compose (normative)
 
@@ -2355,7 +2299,7 @@ Personal: control plane → one agent → hello → remaining nodes → remainin
 | --- | --- | --- |
 | Time to first deploy | Hours, if you accept their model | Days to write, minutes per subsequent service once built |
 | LLM contract | UI-centric, schema not stable | `fleet.yaml` is the product |
-| Ingress | Traefik/Caddy + optional CF | CF Tunnel native, three modes, API-owned |
+| Ingress | Traefik/Caddy + optional CF | CF Tunnel native, two web modes, API-owned |
 | Inbound | Typically needs 80/443 or SSH | Outbound-only pets |
 | Builds | In-cluster or nixpacks | GitHub Actions already |
 | Fit at 5–40 services / 1 operator | Over-product | Right-sized |
@@ -2377,17 +2321,9 @@ Cons:
 
 **Decision:** agent outbound. Kamal-style remains a manual escape hatch (`ssh && compose`), not the protocol.
 
-### 3. Tailscale-only vs Cloudflare Access for “internal”
+### 3. Cloudflare Access web
 
-**Tailscale-only internal:** every VPS and the laptop in a tailnet; bind to tailscale0; no Access; public still needs *something* (CF, or Tailscale Funnel).
-
-Pros: MagicDNS, trivial private URLs, great operator UX, ACLs.
-
-Cons: Funnel is weaker than CF Access+WAF for public; two systems if public is still Cloudflare; `fleetd` cannot provision Tailscale hostnames via the CF token it already has; agent would still need a Tailscale sidecar.
-
-**CF Access for internal:** `access` mode is “public DNS + identity gate” — not overlay-only. Fine for operator dashboards. Not equivalent to `private`.
-
-**WARP-to-Tunnel (chosen):** one vendor for public, access, and private; `fleetd` owns the API; WARP is the laptop client. Cost: WARP enrollment. Tailscale display-only in Phase 3.
+The current operating path is HTTPS with public DNS and an identity gate. Users authenticate in a browser using an allowed email address and one-time PIN. Public mode remains available for a future explicit choice.
 
 ### 4. Kubernetes (or Nomad / Swarm)
 
@@ -2421,7 +2357,6 @@ Rejected. Builds belong in GHA; credentials and builders stay off the pet contro
 
 Closed as Key Decisions (do not reopen in Phase 1):
 
-1. ~~Private hostname UX~~ → **Decision 23:** private mode stays in MVP; WARP + Local Domain Fallback checklist; no RFC1918 CIDR routes; no silent `127.0.0.1` fallback mode (SSH port-forward remains a manual escape hatch).
 3. ~~CI upsert~~ → **Decision 21:** `ci` may `POST /api/v1/deploy` upsert (can create public hostnames). Dedicated `POST /api/v1/services` stays operator-only.
 4. ~~`fleetd` in catalog~~ → **Decision 22:** do **not** register `fleetd` as an agent-managed workload. Optional agent on the CP VPS is for *other* services and uses a distinct tunnel.
 
@@ -2455,7 +2390,7 @@ Do **not** fork or modify these as part of Fleet Catalog implementation (they li
 
 ### Other one-offs (`mac-in-docker`, `wotar`, dashboards)
 
-Register as workloads with their own `fleet.yaml`. `mac-in-docker` exposes noVNC — that is a **large interactive origin**; prefer `access` or `private`, never unauthenticated `public`.
+Register as workloads with their own `fleet.yaml`. `mac-in-docker` exposes noVNC — that is a **large interactive origin**; use `access`, never unauthenticated `public`.
 
 ---
 
@@ -2487,11 +2422,9 @@ Covered in **Observability**. Summary: slog JSON, `/healthz`, `last_seen` stalen
 
 - Cloudflare Tunnel create + ingress + DNS: [Create a tunnel (API)](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel-api/)
 - Tunnel token: `GET /accounts/{account_id}/cfd_tunnel/{tunnel_id}/token`
-- Tunnel configurations API: `GET/PUT /accounts/{account_id}/cfd_tunnel/{tunnel_id}/configurations` (`warp-routing.enabled`, originRequest timeouts in **seconds**)
+- Tunnel configurations API: `GET/PUT /accounts/{account_id}/cfd_tunnel/{tunnel_id}/configurations` (originRequest timeouts in **seconds**)
 - Access apps: `POST /accounts/{account_id}/access/apps`
 - OTP IdP: [One-time PIN login](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/)
-- Private hostname routes: `POST /accounts/{account_id}/zerotrust/routes/hostname`
-- WARP private hostname (Split Tunnel CGNAT + delete Local Domain Fallback): [Connect a private hostname](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/private-net/cloudflared/connect-private-hostname/)
 - Adjacent: `vps-hygiene/README.md`, `newclear/systems/clarkq/README.md`, `clarkQ/deploy/docker-compose.yml`
 - Constraint: VPS inbound default-deny; agents outbound; GHCR builds in GitHub Actions
 
@@ -2504,9 +2437,9 @@ Phase 1 MVP only. Sequential, each PR independently reviewable and mergeable on 
 ### PR-1 — Repo skeleton, `fleet.yaml` schema, validator
 
 - **Title:** `feat: fleet.yaml v1 schema, validator, and hello-healthz example`
-- **Files/components:** `go.mod`, `Makefile`, `schemas/fleet.v1.schema.json`, `schemas/agent.*.v1.schema.json` (desired/actual/heartbeat stubs), `internal/fleetfile/*`, `internal/version/*`, `examples/hello-healthz/**`, `examples/access-dashboard/fleet.yaml`, `examples/private-files/fleet.yaml`, `testdata/fleetfile/**`, `testdata/compose/files.golden.yaml`, `README.md` (stub pointing at SDD)
+- **Files/components:** `go.mod`, `Makefile`, `schemas/fleet.v1.schema.json`, `schemas/agent.*.v1.schema.json` (desired/actual/heartbeat stubs), `internal/fleetfile/*`, `internal/version/*`, `examples/hello-healthz/**`, `examples/access-dashboard/fleet.yaml`, `examples/access-files/fleet.yaml`, `testdata/fleetfile/**`, `testdata/compose/files.golden.yaml`, `README.md` (stub pointing at SDD)
 - **Depends on:** none
-- **Changes:** Go module, JSON Schema, parse/validate library with table tests (valid public/access/private; reserved names **including `ui` and `fleet-agent`**; secret-in-env; large-origin+public; **hostname_protected** for UI/API hostnames). `examples/hello-healthz` is a 50-line `net/http` server (`/` and `/healthz`) plus distroless Dockerfile. No HTTP API yet. `go test ./...` green.
+- **Changes:** Go module, JSON Schema, parse/validate library with table tests (valid public/access; reserved names **including `ui` and `fleet-agent`**; secret-in-env; large-origin+public; **hostname_protected** for UI/API hostnames). `examples/hello-healthz` is a 50-line `net/http` server (`/` and `/healthz`) plus distroless Dockerfile. No HTTP API yet. `go test ./...` green.
 
 ### PR-2 — SQLite store, tombstones, migrations
 
@@ -2529,12 +2462,12 @@ Phase 1 MVP only. Sequential, each PR independently reviewable and mergeable on 
 - **Depends on:** PR-3
 - **Changes:** `ComposeClient` interface + CLI impl + fake, including **`UpSidecar`** (only carve-out: service `cloudflared` of project `fleet-agent`). `Up`/`Down`/`Stop` of `fleet-agent` still `ErrProtectedProject`. Bake `deploy/fleet-agent/docker-compose.yml` into the image as `/usr/local/share/fleet/agent-stack.yml`. Independent heartbeat goroutine. Disk `agent_instance_id`. Apply: no `Ls`/glob; hard-exclude `fleet-agent`/`fleet-control`; every-tick `Ps` reconcile; `--force-recreate` on generation bump; `absent` → `Down`; **`POST actual` immediately before `Pull`**. After register, write `cloudflared.env` (`0600` root) and `UpSidecar`. Crash cache. GHCR login `x-access-token`. Health: any 2xx, 3-tick consecutive fail. **Required tests:** empty desired does not down `fleet-agent`/`fleet-control`; `UpSidecar` does not `Down` the agent; image build runs `docker compose version`. Fake `ComposeClient` unit tests; live Docker optional.
 
-### PR-5 — Cloudflare Tunnel, DNS, Access, private hostname
+### PR-5 — Cloudflare Tunnel, DNS, Access web
 
 - **Title:** `feat: fleetd Cloudflare IngressReconciler (protected hostnames, no CIDR)`
 - **Files:** `internal/cf/**` implementing `ingress.Reconciler`; `cf_state`; background OTP + retry worker
 - **Depends on:** PR-3 (not blocked on agent)
-- **Changes:** Swap noop for CF client. Node register creates **distinct** `fleet-<node_id>` tunnel; **never** PUT `FLEET_BOOTSTRAP_TUNNEL_ID`; never empty-ingress PUT; `warp-routing.enabled=true`; preserve `FLEET_PROTECTED_HOSTNAMES`. Public/access DNS+Access; private hostname routes **without** teamnet CIDR. Per-object retry 60s under `cfMu`; deploy still 202 on catalog commit. Drift ticker covers ingress + DNS + Access policies + hostname routes. `ReissueTunnelToken` via GET token. Tests with a fake CF HTTP API, including “bootstrap tunnel not PUT” and “protected hostname survives catalog-only rebuild”.
+- **Changes:** Swap noop for CF client. Node register creates **distinct** `fleet-<node_id>` tunnel; **never** PUT `FLEET_BOOTSTRAP_TUNNEL_ID`; never empty-ingress PUT; preserve `FLEET_PROTECTED_HOSTNAMES`. Public/access DNS+Access; establish Access policy before ingress/DNS. Per-object retry 60s under `cfMu`; deploy still 202 on catalog commit. Drift ticker covers ingress + DNS + Access policies. `ReissueTunnelToken` via GET token. Tests with a fake CF HTTP API, including “bootstrap tunnel not PUT” and “protected hostname survives catalog-only rebuild”.
 
 ### PR-6 — Catalog UI (HTMX)
 
@@ -2545,14 +2478,14 @@ Phase 1 MVP only. Sequential, each PR independently reviewable and mergeable on 
 
 ### PR-7 — GitHub Actions template, two-cloudflared topology, bootstrap docs
 
-- **Title:** `feat: GHA deploy template, control-plane compose, WARP bootstrap path`
-- **Files:** `contrib/github-actions/deploy.yml` (copy-pasteable, yq action pinned), `examples/hello-healthz` workflow, `deploy/fleet-control/**` (add bootstrap `cloudflared`), `deploy/fleet-agent/**` (already from PR-4; fill `.env.example`), `docs/bootstrap.md` (WARP checklist, two-cloudflared, unset bootstrap operator token)
+- **Title:** `feat: GHA deploy template, control-plane compose, Access web bootstrap path`
+- **Files:** `contrib/github-actions/deploy.yml` (copy-pasteable, yq action pinned), `examples/hello-healthz` workflow, `deploy/fleet-control/**` (add bootstrap `cloudflared`), `deploy/fleet-agent/**` (already from PR-4; fill `.env.example`), `docs/bootstrap.md` (Access web checklist, two-cloudflared, unset bootstrap operator token)
 - **Depends on:** PR-4, PR-5, PR-6
-- **Changes:** Commit the SDD’s full `deploy/fleet-control/docker-compose.yml` (bootstrap `TUNNEL_TOKEN` env, host-net cloudflared, `127.0.0.1:18765` publish). WARP checklist in `docs/bootstrap.md` must match the CGNAT Split Tunnel + *delete* Local Domain Fallback steps (link Cloudflare private-hostname doc). hello-healthz workflow uses `/api/v1/deploy`. Closes Phase 1 **only if** PR-4 empty-desired + cloudflared handoff + PR-5 protected-hostname tests are present.
+- **Changes:** Commit the SDD’s full `deploy/fleet-control/docker-compose.yml` (bootstrap `TUNNEL_TOKEN` env, host-net cloudflared, `127.0.0.1:18765` publish). Access web checklist in `docs/bootstrap.md` must cover email allowlist, unauthenticated denial and authenticated browser success. hello-healthz workflow uses `/api/v1/deploy`. Closes Phase 1 **only if** PR-4 empty-desired + cloudflared handoff + PR-5 protected-hostname tests are present.
 
 ### Follow-ups (not this stack)
 
 - **Phase 2:** control-plane secret store (AES-GCM; then `golang.org/x/crypto` is allowed), `docker logs` in UI, `fleet` CLI (`validate`, `deploy`), wait-for-healthy in GHA, backup doc, nicer token rotation.
-- **Phase 3:** `/metrics`, drift UI, optional `vps-hygiene` fact comparison, Tailscale IP in node facts, origin Access JWT validation on cloudflared, RFC1918 private-network CIDRs **if** something actually binds them.
+- **Phase 3:** `/metrics`, drift UI, optional `vps-hygiene` fact comparison, Tailscale IP in node facts, origin Access JWT validation on cloudflared.
 
 Each PR should include tests for the new package and keep `go test ./...` green. Do not dump schema+API+agent+CF+UI in a single PR.

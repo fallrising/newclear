@@ -1,16 +1,18 @@
 import hashlib
+import json
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
 import warnings
+from unittest import mock
 
 from ice_maker.document_batch import BatchItem, CODE_MAXIMA, CONFIG_SCHEMA, SourceDescriptor
 from ice_maker.production_extraction import (
     DecodedImage, OcrWord, PdfExtraction, PdfPageExtraction,
     ProductionExtractionError, RasterExtraction, Tile, canonical_pdf_chunk_id,
     _parse_pdfinfo, decode_image, deduplicate_words, extract_pdf, extract_raster, parse_tsv,
-    run_tesseract, tile_image,
+    pdf_cache_key, run_tesseract, tile_image,
 )
 
 PNG = b"\x89PNG\r\n\x1a\nfixture"
@@ -40,6 +42,85 @@ def pdf_descriptor(source):
 
 
 class ProductionExtractionTests(unittest.TestCase):
+    def test_native_pdf_keeps_syntax_highlighted_constructor_order(self):
+        """A tool-boundary fixture models reordered colored PDF text spans."""
+        source = b"%PDF-1.7\nsynthetic layout-sensitive code"
+        expected = (
+            "A synthetic code example. var Widget = Class.extend({ "
+            "initialize: function(value){ this.value = value; } }); "
+            "var instance = new Widget('example'); instance.value;"
+        )
+        ordered = (
+            "\uff21 synthetic code example.\n"
+            "var Widget = Class.extend({\n"
+            "  initialize: function(value){ this.value = value; }\n"
+            "});\nvar instance = new Widget('example');\ninstance.value;\n"
+        ).encode("utf-8")
+        reordered = (
+            "A synthetic code example.\nvar Widget = Class.extend(\n"
+            "initialize: function(value){ this.value = value; }\n"
+            "var instance = new Widget(\ninstance.value;\n{\n});\n'example');\n"
+        ).encode("utf-8")
+        calls = []
+        with tempfile.TemporaryDirectory() as directory:
+            paths = {}
+            for name in ("pdfinfo", "pdftotext", "pdftoppm", "tesseract"):
+                path = Path(directory) / name
+                path.write_text("#!/bin/sh\n")
+                path.chmod(0o700)
+                paths[name] = str(path)
+
+            def runner(argv, **kwargs):
+                name = Path(argv[0]).name
+                calls.append(name)
+                if name == "pdfinfo":
+                    return subprocess.CompletedProcess(
+                        argv, 0, b"Pages: 1\nEncrypted: no\n", b""
+                    )
+                if name == "pdftotext":
+                    self.assertEqual(argv[argv.index("-f") + 1], "1")
+                    self.assertEqual(argv[argv.index("-l") + 1], "1")
+                    return subprocess.CompletedProcess(
+                        argv, 0, ordered if "-layout" in argv else reordered, b""
+                    )
+                self.fail("usable native code must not invoke rasterization or OCR")
+
+            result = extract_pdf(
+                source, pdf_descriptor(source), config=config(),
+                pdfinfo_executable=paths["pdfinfo"],
+                pdftotext_executable=paths["pdftotext"],
+                pdftoppm_executable=paths["pdftoppm"], poppler_version="poppler 25.0",
+                ocr_executable=paths["tesseract"], languages=("eng",),
+                installed_languages=("eng",), tesseract_version="tesseract 5",
+                runner=runner,
+            )
+        self.assertEqual(calls, ["pdfinfo", "pdftotext"])
+        self.assertEqual(len(result.pages), 1)
+        page = result.pages[0]
+        self.assertEqual(page.text, expected)
+        self.assertEqual(page.source_sha256, hashlib.sha256(source).hexdigest())
+        self.assertEqual((page.page, page.method, page.confidence), (1, "pdf-text", 1.0))
+        self.assertEqual(page.text_region, (0, len(expected)))
+        self.assertEqual(page.ocr_words, ())
+        self.assertEqual(page.chunk_id, canonical_pdf_chunk_id(
+            page.source_sha256, 1, "pdf-text", page.config_sha256,
+            page.tool_versions_sha256, text=expected,
+            text_region=(0, len(expected)), ocr_words=(),
+        ))
+
+    def test_layout_pdf_cache_key_does_not_reuse_legacy_v2_outputs(self):
+        source, configuration = "a" * 64, "b" * 64
+        legacy_key = hashlib.sha256(json.dumps(
+            {"config_sha256": configuration, "extractor_version": "production-pdf-v2",
+             "languages": ("eng",), "poppler_version": "poppler 25.0",
+             "source_sha256": source, "tesseract_version": "tesseract 5"},
+            sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        ).encode("ascii")).hexdigest()
+        current_key = pdf_cache_key(
+            source, configuration, "poppler 25.0", "tesseract 5", ("eng",)
+        )
+        self.assertNotEqual(current_key, legacy_key)
+
     def test_pdfinfo_accepts_supported_utf8_metadata_without_retaining_it(self):
         metadata = (
             "Title: 歷史系統技術分析\n"
@@ -144,18 +225,18 @@ class ProductionExtractionTests(unittest.TestCase):
                                             text="different native text", text_region=(0, 21), ocr_words=())
         self.assertNotEqual(native_id, changed_id)
         page = PdfPageExtraction(digest, 1, "pdf-text", "useful native content", 1.0,
-                                 (0, 21), (), None, None, None, "production-pdf-v2", digest,
+                                 (0, 21), (), None, None, None, "production-pdf-v3", digest,
                                  tool_digest, native_id)
         for field in ("page", "text", "ocr_words", "raster_sha256", "chunk_id"):
             values = dict(zip(PdfPageExtraction.__dataclass_fields__, (
                 digest, 1, "pdf-text", "useful native content", 1.0, (0, 21), (), None,
-                None, None, "production-pdf-v2", digest, tool_digest, native_id,
+                None, None, "production-pdf-v3", digest, tool_digest, native_id,
             )))
             values[field] = {"page": "1", "text": object(), "ocr_words": object(),
                              "raster_sha256": digest, "chunk_id": "forged"}[field]
             with self.subTest(field=field), self.assertRaises(ProductionExtractionError): PdfPageExtraction(**values)
         with self.assertRaises(ProductionExtractionError):
-            PdfExtraction(digest, (page,) * 1001, "production-pdf-v2", digest, tool_digest,
+            PdfExtraction(digest, (page,) * 1001, "production-pdf-v3", digest, tool_digest,
                           "poppler 25.0", "tesseract 5", ("eng",), "forged")
 
     def test_red_pdf_page_routing_and_failure_matrix(self):
@@ -267,10 +348,23 @@ class ProductionExtractionTests(unittest.TestCase):
             with self.assertRaises(ProductionExtractionError):
                 decode_image(PNG, limits={"max_decoded_pixels": 1000, "max_image_dimension": 100}, decoder=lambda raw, r=response: r)
         with self.assertRaises(ProductionExtractionError): decode_image(PNG, expected_sha256="0" * 64, decoder=lambda raw: ("png", 1, 1, "RGB", object()))
-        with self.assertRaisesRegex(ProductionExtractionError, "image codec unavailable"): decode_image(PNG)
+        with mock.patch.dict("sys.modules", {"PIL": None}):
+            with self.assertRaisesRegex(ProductionExtractionError, "image codec unavailable"):
+                decode_image(PNG)
         with self.assertRaises(ProductionExtractionError): decode_image(PNG, decoder=lambda raw: (_ for _ in ()).throw(RuntimeError("bomb")))
         with self.assertRaises(ProductionExtractionError):
             decode_image(PNG, decoder=lambda raw: (warnings.warn("bomb"), ("png", 1, 1, "RGB", object()))[1])
+
+    def test_default_decoder_rejects_invalid_png_with_or_without_pillow(self):
+        try:
+            from PIL import Image
+        except ImportError:
+            expected = "image codec unavailable"
+        else:
+            self.assertIsNotNone(Image)
+            expected = "image decode failed"
+        with self.assertRaisesRegex(ProductionExtractionError, expected):
+            decode_image(PNG)
 
     def test_red_tiler_complete_and_bounded(self):
         self.assertEqual(tile_image(5, 4, 10, 2), (Tile(0, 0, 5, 4),))

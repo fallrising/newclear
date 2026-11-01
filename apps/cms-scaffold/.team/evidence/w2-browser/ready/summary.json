@@ -1,0 +1,106 @@
+[
+  {
+    "name": "media",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "dimensions": {
+      "viewport": 1440,
+      "width": 1440,
+      "title": "媒體庫 · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "composer",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "dimensions": {
+      "viewport": 1440,
+      "width": 1440,
+      "title": "相簿編排 · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "board",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "dimensions": {
+      "viewport": 1440,
+      "width": 1440,
+      "title": "看板 · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "picker",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "dimensions": {
+      "viewport": 1440,
+      "width": 1440,
+      "title": "Coast Light 2026 · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "media",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "dimensions": {
+      "viewport": 390,
+      "width": 390,
+      "title": "媒體庫 · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "composer",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "dimensions": {
+      "viewport": 390,
+      "width": 390,
+      "title": "相簿編排 · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "board",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "dimensions": {
+      "viewport": 390,
+      "width": 390,
+      "title": "看板 · CMS 作業台"
+    },
+    "errors": []
+  },
+  {
+    "name": "picker",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "dimensions": {
+      "viewport": 390,
+      "width": 390,
+      "title": "Coast Light 2026 · CMS 作業台"
+    },
+    "errors": []
+  }
+]

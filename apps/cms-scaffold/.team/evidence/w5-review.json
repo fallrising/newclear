@@ -1,0 +1,74 @@
+{
+  "reviewer": "T-953",
+  "status": "PARTIAL",
+  "baselineCommit": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "sourceReview": {
+    "status": "passed",
+    "files": {
+      "apps/web-front/src/routes.tsx": "bf65198add7115455533673665815eb62918c03dee45b51fda5feefe07afc72f",
+      "apps/web-front/src/shell.tsx": "bdd5384a5c13f82e314ca8d7fca576f86855b7a2b3b1a3ee6c0a8843195940ee",
+      "apps/web-back/src/App.tsx": "f9e5ad27452456e805d4bc52c2423f0ebcb01b8de296f44883741f6f8a2254c5",
+      "apps/web-back/src/routes.tsx": "41c1fdac1c36e617f50a377e934811bb82a7f0488dfab4d08a99fdef3ed54299",
+      "apps/web-admin/src/App.tsx": "fb6a642664af51559fcd0aee6fb74d3355a2e6fb827515d3a39ed5655d7249df"
+    },
+    "findings": [
+      "Front routes statically import SiteShell and MemberGate/member pages; shell statically imports Sheet.",
+      "Back App wraps every route in FieldsProvider and statically imports Toaster.",
+      "Admin App statically imports Toaster.",
+      "packages/fields/src/values.tsx RefValue and MediaThumb call useFieldsServices; Back media, composer and schedule pages render them, while their routes are siblings outside the T02 entries-only lazy FieldsProvider parent. This is a concrete provider-coverage gap."
+    ],
+    "limits": "These hashes are the reviewed baseline source, not the pending T-951 changed-file hashes."
+  },
+  "baselineEvidence": {
+    "artifactRoot": ".team/evidence",
+    "preflight": "w5-preflight.json: npm ci/build/bundle isolation passed; 68 mock tests; W5 budgets not measured.",
+    "mockList": "w5-baseline-list.log",
+    "reviewCheckoutBuildAttempt": {
+      "command": "npm run build && npm run test:bundle && npm run e2e:mock -- --list",
+      "exitCode": 127,
+      "result": "failed",
+      "reason": "vite executable absent in isolated review checkout; no dependency install attempted. Root evidence supplies the baseline build."
+    }
+  },
+  "policyConflict": {
+    "status": "unresolved",
+    "spec": "W5 §2.2 says canonical CI ubuntu-latest; checked-in .github/workflows/cms-scaffold-ci.yml pins ubuntu-24.04.",
+    "scope": "W5 §3 excludes workflow changes; existing workflow installs Chromium and runs e2e:mock, not test:visual.",
+    "impact": "No in-scope reproducible path is authorized to generate initial canonical 70-PNG baseline.",
+    "proposedAmendment": "Pin canonical baseline to ubuntu-24.04 and authorize a bounded generation job on that runner to upload exactly the 70 approved baseline PNGs as an artifact."
+  },
+  "t02ProviderGap": {
+    "status": "confirmed statically; browser reproduction pending root",
+    "providerHook": "packages/fields/src/values.tsx:34,55",
+    "consumerRoutes": {
+      "apps/web-back/src/pages/media.tsx": "MediaThumb at lines 68 and 228; routes /media and /media/:id",
+      "apps/web-back/src/pages/composer.tsx": "MediaThumb at line 57; route /views/album.composer",
+      "apps/web-back/src/pages/schedule.tsx": "RefValue at line 70; route /views/clinic.schedule"
+    },
+    "prescribedBoundary": "W5 §5.1 puts only five /entries routes under lazy EntryLayout/FieldsProvider; the consumer routes remain sibling routes.",
+    "proposedAmendment": "Inventory all useFieldsServices consumers and extend the same deferred provider boundary to every route that mounts them, keeping unrelated routes outside it."
+  },
+  "bundleWorker": {
+    "status": "root evidence independently read; T-951 frozen source diff/hashes pending",
+    "measurementArtifact": ".team/evidence/w5-root-measure.log",
+    "closureTests": { "passed": 10, "failed": 0 },
+    "budgets": [
+      { "app": "front", "total": 177721, "limit": 92160, "delta": 85561, "result": "failed" },
+      { "app": "back", "total": 179622, "limit": 163840, "delta": 15782, "result": "failed" },
+      { "app": "admin", "total": 180275, "limit": 163840, "delta": 16435, "result": "failed" }
+    ],
+    "focusedRoutesArtifact": ".team/evidence/w5-focused-app.log",
+    "focusedRoutes": {
+      "passed": ["Back notes-only operator", "Front mobile navigation sheet"],
+      "failed": ["Back media library: h1 never appeared; consistent with missing FieldsProvider"],
+      "errorContext": "test-results/e2e-mock/back-w2-W2-Back-media-and--e2543-an-and-no-engineering-words-chromium/error-context.md"
+    },
+    "changedFileHashManifest": ".team/evidence/T-951-source-hashes.json",
+    "hashCheck": { "files": 17, "mismatches": 0, "result": "passed" },
+    "attributionArtifacts": [
+      ".team/evidence/T-951-entry-modules.json",
+      ".team/evidence/T-951-closure-largest10.json"
+    ],
+    "reviewFinding": "Front member pages remain statically imported through routes.tsx and states/shell/member-auth paths; @cms/ui barrel imports retain Sonner in app entries. Any new split exceeds fixed T02 and needs explicit amendment."
+  }
+}

@@ -84,9 +84,6 @@ Open decisions that do not block M0:
 - Whether offset reset requires two-person approval.
 - Tenant-level gateway deduplication beyond Kafka producer idempotence.
 - Production quotas and delay capacity values, which require load tests.
-- Whether the sub-second retry path needs a different scheduler mechanism to
-  meet the SDD's 150 ms `<20%` timeline target without weakening durable,
-  no-early delivery or creating an unsafe broker poll rate.
 
 ## Design
 
@@ -114,3 +111,13 @@ Conventional Commit, and push.
 - Milestone-specific Testcontainers and E2E commands recorded in
   `docs/execution-plan.md`
 - Final `make e2e` once all deployable services exist
+
+## Specification navigation (2026-10-22)
+
+The [specification/source/test map](specification-map.md) connects this existing
+baseline, ADRs, M2–M6 designs and messaging semantics to the implementation and
+named tests. It records discrepancies without making code the specification.
+[SDD.md](../SDD.md) was approved in PR472; PR477 approved the AC-05 measurement
+amendment only. Original failed measurements remain failed; approval is not
+product qualification. The [provenance report](test-reports/mainline-sdd-20261022.md)
+records the bounded original-file search and historical reference execution.

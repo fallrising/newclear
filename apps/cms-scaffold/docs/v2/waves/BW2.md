@@ -2,11 +2,47 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW2](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW2.openapi.yaml](../contracts/BW2.openapi.yaml) ・ 前一波：[BW1c](BW1c.md)
 
-狀態：**DOC_READY**（本檔合併即生效）  
+狀態：**VERIFIED**（2026-10-03，PR #235 完整 CI 通過並合併）
 日期：2026-09-25  
 讀者：實作 BW2 的 agent。只讀本檔、`contracts/BW2.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
 > **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW1c 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。T02、T04、T06、T08、T10、T12、T14、T16 完成後，`./gradlew :services:cms-api:test` 依序是 197、199、202、205、208、210、214、217 個測試；`integrationTest` 依序是 70、72、72、72、72、72、72、72 個全綠。預演環境只有 JDK 21，所以 `test` 每次唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`；`integrationTest` 用的是本機 PostgreSQL 16.13，不是 Testcontainers。各「測試先行」卡的預期紅燈清單也是實際跑出來的。
+
+---
+
+## 0. 現行增量實作契約（2026-10-03，優先於歷史施工片段）
+
+使用者已授權保存 W1 至 GitHub並繼續下一個任務；下一波依路線圖為 BW2。W1 PR #229 通過 CI 並合併後開始程式實作。本節於實作前落盤，保留後文的產品行為，修正已過時的基底、檔案限制與驗收例外。
+
+- 以已合併 P0、BW1a/b/c、W1 為基底增量修改，禁止套用整檔取代而失去現有功能。既有226 Java／93 PostgreSQL／300前端／27 mock E2E 是回歸基線；後文197／217／72等預演數字不再是驗收數字。
+- 保留 P0 的 ContentStore.writeTransaction、JDBC compare-and-set version、生命週期遞增、失敗回滾，以及 BW1b 的索引／排序／可见性／查詢界線。EntryRecord 與 EntryQuery 可保留相容建構子，現有呼叫不必大量重寫。新發布請求實際設定／清除也遞增 version，重複操作維持冪等；正常生命週期依 §4.2 清除或保留請求。
+- 請求發布後，PATCH／revert 可能使工作副本再次等於已發布快照。此時 publish 清除尚存請求（CAS/version+1，entry.publish_request_cancel 審計），不新增內容 revision 或 entry.publish；沒有請求且乾淨的原 P0 publish 仍完全 no-op。
+- 批次 prepare 和 apply 均位於同一 content write transaction；每次寫入仍須 CAS，不採後文「沒有版本保護」舊假設。先完成所有驗證，聚合422；資料庫中後續寫入失敗／CAS競爭時整批回滾，錯誤訊息維持 items[i] 位置。批次不改 slug、不新增一般 PATCH 審計。
+- EntryService 沿用現有 content transaction 加入 AuditLog；其他服務用同一 DataSource 的 TransactionRunner 包住狀態與審計。治理拒絕檢查應置於交易之前，確保 denied 事件不因拋出403消失。媒體資料庫軟刪除與審計須原子；保留既有不移除實體 blob 的 softDelete 與媒體存取規則，不新增檔案刪除。
+- 獨立審查確認既有 identity 審計仍有交易缺口，依 B-07／BD-09 一併補齊：PrincipalAdminService 的建立／更新狀態／停用／解鎖／角色／管理員改密碼，及 AuthService 登入成功／失敗計數／登出／自行改密碼，狀態和原事件同交易。僅補現有事件的交易邊界，不為原本沒有事件的 unlock／一般profile或status更新創造新事件。保留事件名稱、ip、session撤銷、最後管理員與密碼規則；登入拒絕事件與計數先成功提交，再拋原本的拒絕錯誤。新增 PostgreSQL 審計故障回滾及拒絕計數持久化測試。不改session協定或擴張權限。
+- 不以未測試交易推論作為完成證據：新增真實 PostgreSQL 回歸驗證 create/publish 審計失敗回滾、第二筆 batch 寫入失敗回滾所有 entry/index/ref/media/version、版本競爭。保留原 P0測試；in-memory store 仍為測試替身，不宣稱具有跨 store rollback。
+- include=refs 僅展開 enabled ref，使用目標工作副本判定 read_draft；restricted/missing 不洩漏標題或類型。新增缺失／軟刪除、predicate、批次讀取有界測試。audit 查詢保留字面 LIKE 跳脫、穩定排序、long offset、未知 actor 空頁及已刪 actor 的 nullable 顯示。
+- §3範圍擴充：必要現有建構子呼叫／測試、EntryAtomicWriteTests及新 BW2 integration tests；02-backend-sdd測試註記；README／個人使用驗收／.team任務報告證據；packages/api的generated/schema.d.ts、schema alias、必要型別相容、codegen目標；packages/mocks fixture及生成檔／處理器、必要前端測試資料。限於新必填nullable publish request 欄位、audit schema與契約新鮮度整合，不提前實作 W2/W4 UI。所有其他既有實作與依賴版本保留。
+- runtime OpenAPI 與 BW2.openapi.yaml 以現有BW1c為基底增量對齊；前端同步生成，不接受後文「只有codegen／fixture失敗也可交付」例外。不新增依賴，不改既有migration、workflow、seed秘密、P0/BW1快照。
+- 最终閘門：Java test＋PostgreSQL integrationTest；前端lint/typecheck/test/build/bundle/mock E2E；runtime/波次OpenAPI位元組一致、codegen、diff與task/report validator。工作者先有界 Red→Green，root獨立跑整合閘門與便宜模型審查後標 LOCAL_VERIFIED。下一波不自行部署或宣稱正式生產可用。
+
+### 0.1 有界分工與驗收
+
+- T-601（Codex high）：identity audit stores/query/transaction helper/governance/non-entry audit、assignable；獨立worktree。
+- T-602（Codex high）：content publish-request/store/query/batch/refs及entry audit、V8、content/JDBC回歸；獨立worktree。
+- root：契約／codegen／fixture相容、範圍內整合、完整閘門、文件、交付證據；先文件後實作。
+- T-603（Codex Luna medium）：最終整合程式及證據唯讀獨立審查，不遞迴分工。
+
+### 0.2 現行验收（取代歷史 §9 預演數字與允許紅燈例外）
+
+- [x] B-07／B-11（部分）、G-03／G-04／G-09／G-10 增量完成；T601、T602、T604 程式与 T603 獨立審查驗收。
+- [x] 254 Java 單元／API；120 PostgreSQL 案例依各 class 最後證據全通過：完整118輪中108非identity案例通過，identity10有6個 byte-array 比較測試問題；唯一該測試檔修正並增2案例後，以強制實跑12/12重驗，未重跑無變更的大型效能測試。完整失敗紀錄保留。
+- [x] 300 前端＋27 mock E2E；npm ci、lint、typecheck、三面 build／bundle；契約說明最後同步後 API30再驗證codegen。
+- [x] runtime／BW2 OpenAPI完全一致；384來源雜湊與171受保護來源／依賴／舊migration；既有快照及原工作樹保留。
+- [x] 10,000筆 store p95：工作列表86ms、公開列表80ms、更新19ms；未降低原門檻，不代表HTTP全鏈路效能。
+- [x] 故障注入驗證 entry、batch CAS／第二筆寫入、type、navigation、media、role及identity狀態和審計共同回滾；治理／登入拒絕紀錄可跨外層回滾保存。
+
+完整指令／錯誤歷史／驗收界線：[BW2交付](../../../.team/reports/BW2-DELIVERY.md)。W1 已於 PR #229 合併；本波已於 PR #235 合併，另見 [合併驗證](../../../.team/reports/BW2-PUBLICATION.md)；不宣稱生產可用。W2/W4 UI、BW4應用層store選用／啟動及運維門檻仍待後續。
 
 ---
 

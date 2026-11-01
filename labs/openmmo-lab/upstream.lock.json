@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "repository": "https://github.com/Julian-adv/OpenMMO.git",
+  "commit": "8ba09cf662bcc1b9d4ccebc0a7a1fba85cc47dc5",
+  "asset_repository": "jake-song-openmmo/onlinerpg-assets",
+  "asset_revision": "0b1797ef92f58caa73697aaa1f3bd4d88eda1d08",
+  "asset_lock_sha256": "83908ca0f1383e4b35ae239de555645bbc553133f33d7ce4dc4124e8372c3201",
+  "license": "PolyForm-Noncommercial-1.0.0"
+}

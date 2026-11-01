@@ -25,12 +25,13 @@
 
 ## 3. 查詢 API
 
-所有查詢 API 都需要 owner token。時間參數為 RFC 3339；列表 API 用 `cursor` 分頁，單頁最多 200 筆。
+查詢 API 接受 owner 或唯讀 token；重放與重載只接受 owner。healthz／readyz 在 tailnet 內免 token，僅回傳狀態。時間參數為 RFC 3339，範圍 `[from,to)`；列表 API 用 `cursor` 分頁，預設100、單頁最多200筆。每個 endpoint 的欄位、錯誤與回應以 [OpenAPI](../../contracts/openapi.json) 為 M0 機械契約。
 
 | 方法 | 路徑 | 說明 |
 | --- | --- | --- |
 | GET | `/v1/events?from&to&source&type&severity_min&subject_prefix&correlationid&q&cursor&limit` | 查詢事件；`type` 支援結尾 `*` |
 | GET | `/v1/events/{seq}` | 單筆事件與它的關聯鏈 |
+| GET | `/v1/rules?cursor&limit` | 生效規則的安全定義，不含憑證；id 升序 |
 | GET | `/v1/metrics/{rule_id}?from&to&group` | rollup 時間序列，含版本與 `partial` 標記 |
 | GET | `/v1/sources` | 來源新鮮度 |
 | GET | `/v1/subscriptions`、`/v1/deliveries?subscription&state&cursor` | 投遞狀態 |
@@ -43,7 +44,7 @@
 
 ## 4. 自我觀測
 
-中樞本身也是被觀測的對象。
+中樞本身也是被觀測的對象。本節列的是設計目標；`/v1/self` 的未實作差距見 [runtime](../runtime.md) 與 [STATUS](../STATUS.md)，已列為延後補強，不是首次個人使用條件。
 
 **`/v1/self` 提供：** ingest 次數與錯誤（依錯誤碼）、去重與衝突次數、各訂閱待投遞與 DLQ 數、規則最後成功計算時間、最後一次封存結果、資料庫檔案大小、磁碟可用空間。
 
@@ -57,7 +58,7 @@
 | `signalhub.archive.succeeded`／`failed` | 每日封存結果 |
 | `signalhub.config.reloaded`／`rejected` | 設定重載結果 |
 
-**中樞死掉時誰知道？** 中樞無法回報自己的停機，所以需要一個**中樞以外**的檢查：另一台主機定期請求 `/healthz`，失敗時直接發 ntfy。這在部署階段（M6）實作，屬於部署需求，不在中樞程式內。
+**中樞死掉時誰知道？** 中樞無法回報自己的停機。若要承諾主機故障時仍主動通知，必須由另一個主機故障域檢查 `/healthz`，並用獨立於中樞的通知路徑。個人使用目前將此能力與手機通知一起延後，不承諾停機偵測時限；不為首次使用新增第二主機或「監控監控器」。這是選用的部署能力，不在中樞程式內，見 [06](06-security-operations-acceptance.md)。
 
 ## 5. 驗收
 

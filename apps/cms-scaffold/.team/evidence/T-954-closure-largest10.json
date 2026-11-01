@@ -1,0 +1,253 @@
+[
+  {
+    "app": "front",
+    "total": 85127,
+    "limit": 92160,
+    "delta": -7033,
+    "closure": [
+      {
+        "key": "index.html",
+        "file": "assets/index-CE8rOokn.js",
+        "name": "index",
+        "src": "index.html",
+        "isEntry": true,
+        "dynamicImports": [
+          "src/pages/selector.tsx",
+          "src/api-route.tsx",
+          "src/pages/login.tsx",
+          "src/pages/logout.tsx",
+          "src/root-route.tsx",
+          "src/home.tsx",
+          "src/pages/album.tsx",
+          "src/pages/album.tsx",
+          "src/pages/album.tsx",
+          "src/states.tsx",
+          "src/root-route.tsx",
+          "src/home.tsx",
+          "src/pages/clinic.tsx",
+          "src/pages/clinic.tsx",
+          "src/member-route.tsx",
+          "src/pages/member.tsx",
+          "src/pages/appointment-new.tsx",
+          "src/pages/member.tsx",
+          "src/states.tsx",
+          "src/root-route.tsx",
+          "src/home.tsx",
+          "src/pages/projects.tsx",
+          "src/pages/projects.tsx",
+          "src/pages/projects.tsx",
+          "src/states.tsx",
+          "src/states.tsx"
+        ],
+        "css": [
+          "assets/index-DbqXEShB.css"
+        ]
+      }
+    ],
+    "largest10": [
+      {
+        "file": "assets/index-CE8rOokn.js",
+        "gzipBytes": 85127
+      },
+      {
+        "file": "assets/markdown-3qcHVu7s.js",
+        "gzipBytes": 38611
+      },
+      {
+        "file": "assets/shell-BXaLYrqe.js",
+        "gzipBytes": 33348
+      },
+      {
+        "file": "assets/button-DrYUqLzw.js",
+        "gzipBytes": 11147
+      },
+      {
+        "file": "assets/appointment-new-BpEF5f-4.js",
+        "gzipBytes": 10579
+      },
+      {
+        "file": "assets/query-tNt-9b_t.js",
+        "gzipBytes": 5122
+      },
+      {
+        "file": "assets/public-entry-CdX8otqU.js",
+        "gzipBytes": 4874
+      },
+      {
+        "file": "assets/album-auD1SKhz.js",
+        "gzipBytes": 3251
+      },
+      {
+        "file": "assets/api-route-ByUmbY5j.js",
+        "gzipBytes": 2473
+      },
+      {
+        "file": "assets/api-CdGujHsI.js",
+        "gzipBytes": 2143
+      }
+    ]
+  },
+  {
+    "app": "back",
+    "total": 130889,
+    "limit": 163840,
+    "delta": -32951,
+    "closure": [
+      {
+        "key": "index.html",
+        "file": "assets/index-BEIjGULj.js",
+        "name": "index",
+        "src": "index.html",
+        "isEntry": true,
+        "dynamicImports": [
+          "src/pages/sign-in.tsx",
+          "src/shell.tsx",
+          "src/pages/home.tsx",
+          "src/pages/entry-layout.tsx",
+          "src/pages/resource-index.tsx",
+          "src/pages/resource-details.tsx",
+          "src/pages/resource-details.tsx",
+          "src/pages/preview.tsx",
+          "src/pages/history.tsx",
+          "src/pages/media.tsx",
+          "src/pages/media.tsx",
+          "src/pages/composer.tsx",
+          "src/pages/schedule.tsx",
+          "src/pages/board.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/deferred-toaster.tsx"
+        ],
+        "css": [
+          "assets/index-H2I13Hs6.css"
+        ]
+      }
+    ],
+    "largest10": [
+      {
+        "file": "assets/index-BEIjGULj.js",
+        "gzipBytes": 130889
+      },
+      {
+        "file": "assets/resource-details-DOmSDA7A.js",
+        "gzipBytes": 41902
+      },
+      {
+        "file": "assets/index-CJC3bYdB.js",
+        "gzipBytes": 36911
+      },
+      {
+        "file": "assets/page-header-Bus7mBfR.js",
+        "gzipBytes": 31686
+      },
+      {
+        "file": "assets/entry-form-DMO59TbI.js",
+        "gzipBytes": 25817
+      },
+      {
+        "file": "assets/core.esm-QkNH2kdR.js",
+        "gzipBytes": 14133
+      },
+      {
+        "file": "assets/index-JRc25rWi.js",
+        "gzipBytes": 9753
+      },
+      {
+        "file": "assets/select-BLTz4qQB.js",
+        "gzipBytes": 7954
+      },
+      {
+        "file": "assets/pickers-ClglCGRJ.js",
+        "gzipBytes": 5946
+      },
+      {
+        "file": "assets/composer-irA0AJrU.js",
+        "gzipBytes": 5074
+      }
+    ]
+  },
+  {
+    "app": "admin",
+    "total": 136589,
+    "limit": 163840,
+    "delta": -27251,
+    "closure": [
+      {
+        "key": "index.html",
+        "file": "assets/index-hV5q7jbb.js",
+        "name": "index",
+        "src": "index.html",
+        "isEntry": true,
+        "dynamicImports": [
+          "src/pages/login.tsx",
+          "src/shell.tsx",
+          "_overview-Bu742Bhp.js",
+          "src/pages/types.tsx",
+          "src/pages/types.tsx",
+          "src/pages/roles.tsx",
+          "src/pages/principals.tsx",
+          "src/pages/roles.tsx",
+          "src/pages/principals.tsx",
+          "src/pages/principals.tsx",
+          "src/pages/audit.tsx",
+          "src/pages/audit.tsx",
+          "src/pages/media.tsx",
+          "src/pages/settings.tsx",
+          "src/pages/settings.tsx",
+          "src/pages/entries.tsx",
+          "src/pages/entries.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/deferred-toaster.tsx"
+        ],
+        "css": [
+          "assets/index-Dlgc9iXQ.css"
+        ]
+      }
+    ],
+    "largest10": [
+      {
+        "file": "assets/index-hV5q7jbb.js",
+        "gzipBytes": 136589
+      },
+      {
+        "file": "assets/page-header-DWt4KDFG.js",
+        "gzipBytes": 30647
+      },
+      {
+        "file": "assets/index-uYp08F5S.js",
+        "gzipBytes": 9752
+      },
+      {
+        "file": "assets/index-pagination-D5lWpa4l.js",
+        "gzipBytes": 8311
+      },
+      {
+        "file": "assets/entries-Cpugr1Ct.js",
+        "gzipBytes": 4870
+      },
+      {
+        "file": "assets/principals-BOp0gt3i.js",
+        "gzipBytes": 4719
+      },
+      {
+        "file": "assets/audit-COw1amUa.js",
+        "gzipBytes": 3016
+      },
+      {
+        "file": "assets/radio-group-DENA3gza.js",
+        "gzipBytes": 2578
+      },
+      {
+        "file": "assets/shell-CkkhSEd5.js",
+        "gzipBytes": 2541
+      },
+      {
+        "file": "assets/types-BMnmW_SW.js",
+        "gzipBytes": 2488
+      }
+    ]
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "java": {
+    "tests": 339,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "javaExecution": "Gradle test FROM-CACHE; backend unchanged",
+  "frontendWorkspaceCounts": [
+    41,
+    43,
+    61,
+    111,
+    18,
+    7,
+    133,
+    132
+  ],
+  "frontendTests": 546,
+  "mockE2E": 68,
+  "memberE2E": 8,
+  "memberAxeStatesPerViewport": 8,
+  "memberAxeViewportWidths": [
+    1440,
+    390
+  ],
+  "browserCaptures": 20,
+  "browserStateCaptures": 18,
+  "protectedBaselineFiles": 834,
+  "sourceFiles": 453,
+  "originalFilesPreserved": 468,
+  "priorSnapshots": {
+    "cms-bw1b-baseline": 412,
+    "cms-bw1c-baseline": 449,
+    "cms-bw2-baseline": 566,
+    "cms-bw3-baseline": 710,
+    "cms-bw4-baseline": 732,
+    "cms-bw5-baseline": 762,
+    "cms-w1-baseline": 468,
+    "cms-w2-baseline": 602,
+    "cms-w3-baseline": 793
+  },
+  "runtimeOpenApiEqualsBw5": true,
+  "memberFixtureByteEquality": true,
+  "dependencyLockUnchanged": true,
+  "publication": "Pending required remote CI and merge. Not deployed."
+}

@@ -1,6 +1,7 @@
 # FE Review — ice-maker — DESIGN
 
-> 活文件：描述第 2 輪要做的修改與驗收方式。狀態：**草稿**（待擁有者在設計 PR 確認）。每次修改都走 PR。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：維持內嵌頁面；fe-review 專用腳本注入既有合成 extractor，不新增依賴。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -14,8 +15,8 @@ ice-maker 的 UI 只有兩個伺服器產生的頁面：`document-service` 的�
 
 ## 依據
 
-- REVIEW.md 已決定：無。
-- 假設（待擁有者在本 PR 確認）：
+- REVIEW.md 已決定：採用上述 owner 確認的方案。
+- 已確認的設計依據（2026-10-23）：
   - **A1（REVIEW.md D1，採建議）：第 2 輪維持內嵌頁面**，在 `document_service.py` 的 `_PAGE` 與 `readable_results.py` 的 `render_html` 原地修改；是否抽成 package data 在第 3 輪報告後再決定。
   - **A2（本設計新增）：隔離啟動用 `fe-review/` 內的啟動腳本**，以 `create_app(..., runner=...)` 注入和 `tests/test_document_service.py:84-91` 的 `indexed_runner` 相同的合成 extractor（`ice_maker.extraction.extract_bytes`，只接受 `%ICE-MAKER-SYNTHETIC-PDF` 與 `P1` 點陣圖）。它不是正式啟動路徑，也不修改 `src/`。
 - 相關規範：
@@ -72,7 +73,7 @@ ice-maker 的 UI 只有兩個伺服器產生的頁面：`document-service` 的�
   5. 輪詢期間只顯示 `Processing <batch id>`，看不到 `queued`／`running` 與 `counts`（`status` 已回傳，`:891`）。
 - 修改：只改 `_PAGE` 內的 script，行為範圍如下：
   - 上傳失敗顯示 `Upload failed: <detail>`；`detail` 以 `textContent` 寫入，不用 `innerHTML`。
-  - 輪詢遇到非 2xx 或例外時停止輪詢，顯示 `Status unavailable: <detail 或 HTTP 狀態>`。輪詢加上上限（例如 30 分鐘，或依 `config` 的 `timeout_seconds` × 檔案數推算，第 2 輪決定具體值並寫回本檔），逾時顯示訊息而不是無限重試。
+  - 輪詢遇到非 2xx 或例外時停止輪詢，顯示 `Status unavailable: <detail 或 HTTP 狀態>`。輪詢加上上限（本次第 2 輪決定：從批次被接受起計 30 分鐘；只停止 UI 輪詢，不取消後端工作，顯示批次 ID 與重新整理／查詢指引），逾時顯示訊息而不是無限重試。
   - 送出後停用按鈕，並設 `aria-busy="true"`；完成、失敗或停止輪詢時恢復。
   - `languages` 每一項 `trim()` 後再過濾空字串與排序。
   - 輪詢期間顯示 `Batch <id>: <status>` 與 `counts` 的數字（純文字）。

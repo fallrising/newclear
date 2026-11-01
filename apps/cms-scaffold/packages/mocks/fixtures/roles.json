@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "code": "admin",
+      "displayName": "Admin",
+      "system": true
+    },
+    {
+      "code": "anonymous",
+      "displayName": "Anonymous",
+      "system": true
+    },
+    {
+      "code": "editor",
+      "displayName": "Editor",
+      "system": true
+    },
+    {
+      "code": "member",
+      "displayName": "Member",
+      "system": true
+    },
+    {
+      "code": "operator",
+      "displayName": "Operator",
+      "system": true
+    }
+  ]
+}

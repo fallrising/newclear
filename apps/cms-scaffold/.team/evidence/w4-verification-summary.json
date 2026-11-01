@@ -1,0 +1,44 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "java": {
+    "tests": 339,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "javaExecution": "Gradle FROM-CACHE; backend unchanged",
+  "frontendWorkspaceCounts": [
+    43,
+    43,
+    61,
+    125,
+    19,
+    68,
+    133,
+    132
+  ],
+  "frontendTests": 624,
+  "mockE2E": 68,
+  "visualSmokeCaptures": 14,
+  "rootInspectedCaptures": 8,
+  "w4AppendixAE2E": "Deferred to W5 per specification; not executed or claimed",
+  "protectedBaselineFiles": 883,
+  "sourceFiles": 482,
+  "originalFilesPreserved": 468,
+  "priorSnapshots": {
+    "cms-bw1b-baseline": 413,
+    "cms-bw1c-baseline": 489,
+    "cms-bw2-baseline": 567,
+    "cms-bw3-baseline": 711,
+    "cms-bw4-baseline": 733,
+    "cms-bw5-baseline": 763,
+    "cms-w1-baseline": 469,
+    "cms-w2-baseline": 603,
+    "cms-w3-baseline": 794,
+    "cms-w3b-baseline": 857
+  },
+  "runtimeOpenApiEqualsBw5": true,
+  "fixtureByteEquality": "Four new governance fixtures, member fixture and two corrected type fixtures; other historical fixture projections preserved",
+  "dependencyLockUnchanged": true,
+  "publication": "Pending required remote CI, review and merge. No deployment."
+}

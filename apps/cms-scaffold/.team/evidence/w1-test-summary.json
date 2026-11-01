@@ -1,0 +1,50 @@
+{
+  "java": {
+    "tests": 226,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "api": 30,
+    "auth": 43,
+    "fields": 49,
+    "mocks": 59,
+    "ui": 17,
+    "admin": 7,
+    "back": 86,
+    "front": 9
+  },
+  "frontendTotal": 300,
+  "mockE2E": {
+    "tests": 27,
+    "passed": 27,
+    "durationSeconds": 45.0
+  },
+  "protectedSourceFiles": 190,
+  "gateSourceFiles": 362,
+  "browserReadyCaptures": 4,
+  "browserBlockingFindings": 0,
+  "npmCiExitCode": 0,
+  "logs": {
+    "w1-java-test.log": "fbe5ac2bea90076c35479e3c27109d160389271ab9cd1723ca413d957d6d3809",
+    "w1-lint.log": "d27e126f456cfce28e422f37624e61458d17d7e7847ce327e35139c91968d692",
+    "w1-typecheck.log": "1b8c62754cedbc492b21fb080987fe0ee039d4fa248a3734a32a1d21685474ed",
+    "w1-web-test.log": "08b862347b4f2be07c290b373d7546a827e7e3d84616d64c5cac280362aee817",
+    "w1-build-final.log": "fa10d17619bc34a96a91553bef9656ae45cacd1f0d517e1339c40924ac69a98e",
+    "w1-bundle-final.log": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+    "w1-e2e-final.log": "407ca3a2f17cb9c2810a5dd221097ace637a80905b956db592d89daab9ccd6ef",
+    "w1-npm-ci.log": "0fdb22861df18ed187048e48d1d5a5ba0a285bc446c4ec61912134c7f2b0b9a2",
+    "w1-build-ci.log": "3ee8a1659295264f5ac151bb21eaf9aca58bce89aaf3dc489ae3808f38b722e6",
+    "w1-bundle-ci.log": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+    "w1-browser-ready-final.log": "2831c952fc7df2386798f2fbded0d73bdaebc686a8c254d973b44b9888f43c38",
+    "w1-browser-skill-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "w1-doc-validation.log": "15595751f973a80f0340f04ed267aaec665075000506d2e756c6a2f84c587776"
+  },
+  "unchangedBackendPostgresEvidence": {
+    "pr": 225,
+    "tests": 93,
+    "sourceManifest": "w1-protected-source-manifest.json"
+  },
+  "scopeNote": "All TS sources passed final lint/typecheck/300 tests; subsequent favicon/CSS and one E2E assertion were verified with repeated three-app build/bundle/full27E2E and browser captures. Final npm ci plus build/bundle passed without source/lock changes."
+}

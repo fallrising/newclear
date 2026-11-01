@@ -1,0 +1,32 @@
+MKFK_TEST_LOG=<worker-worktree>/systems/mkfk/.test-output/model.log GO=go ./scripts/run-named-tests.sh "./internal/raft ./internal/replication ./internal/group" TestM3DeterministicModel100Seeds1000Events TestM4RandomizedISRAndGateInvariants TestM6GroupModel100Seeds300Events
+--- PASS: TestM3DeterministicModel100Seeds1000Events (0.10s)
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/raft	0.102s
+--- PASS: TestM4RandomizedISRAndGateInvariants (1.61s)
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/replication	1.612s
+--- PASS: TestM6GroupModel100Seeds300Events (0.00s)
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/group	0.920s
+full output: <worker-worktree>/systems/mkfk/.test-output/model.log
+MKFK_TEST_LOG=<worker-worktree>/systems/mkfk/.test-output/integration.log GO=go ./scripts/run-named-tests.sh "./internal/storage ./internal/raft ./internal/replication ./cmd/mkfkctl ./pkg/client ./cmd/mkfk" TestM1ST03DurableAfterSIGKILL TestM3ThreeProcessFailoverAndRestartDriver TestM4RF1PersistentHWRecoveryAndCommittedFetch TestM5PR07CLIResumesDurablePendingBatchBeforeNewInput TestM6CG05CG06RealWALRestartKeepsOffsetsAndFencesOldSessions TestM6CG04SDKStopsStaleGenerationAndNeverCommitsItsWork TestM6SDKRetriesUnknownCommitWithTheSameRequest TestM6CG03SDKRejoinsAfterItsSessionExpired TestM6SDKDropsUnknownCommitFromAFencedGeneration TestM6DemoRebalanceCrashAndCoordinatorRestart TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets TestM7OP03FloodSlowClientsAndFetchStormStayBounded TestM7OP04LostProduceReplyIsRetriedWithTheSameIdentity TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines
+--- PASS: TestM1ST03DurableAfterSIGKILL (0.02s)
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/storage	0.019s
+--- PASS: TestM3ThreeProcessFailoverAndRestartDriver (0.06s)
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/raft	0.068s
+--- PASS: TestM4RF1PersistentHWRecoveryAndCommittedFetch (0.01s)
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/replication	0.017s
+--- PASS: TestM5PR07CLIResumesDurablePendingBatchBeforeNewInput (0.00s)
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfkctl	0.009s
+--- PASS: TestM6CG03SDKRejoinsAfterItsSessionExpired (0.04s)
+--- PASS: TestM6CG04SDKStopsStaleGenerationAndNeverCommitsItsWork (0.05s)
+--- PASS: TestM6SDKDropsUnknownCommitFromAFencedGeneration (0.04s)
+--- PASS: TestM6DemoRebalanceCrashAndCoordinatorRestart (0.11s)
+--- PASS: TestM6CG05CG06RealWALRestartKeepsOffsetsAndFencesOldSessions (0.07s)
+--- PASS: TestM6SDKRetriesUnknownCommitWithTheSameRequest (0.03s)
+ok  	github.com/fallrising/newclear/systems/mkfk/pkg/client	0.195s
+--- PASS: TestM7OP02MisconfiguredOrDuplicateBrokersFailWithoutTouchingData (0.09s)
+--- PASS: TestM7OP04LostProduceReplyIsRetriedWithTheSameIdentity (1.19s)
+--- PASS: TestM7ThreeBrokerProcessesFailOverCatchUpAndKeepGroupOffsets (2.71s)
+--- PASS: TestM7OP04StaleRoutesAreBoundedAndLeakNoGoroutines (1.66s)
+--- PASS: TestM7OP06GracefulShutdownKeepsDataAndLeaksNoPayload (1.58s)
+--- PASS: TestM7OP03FloodSlowClientsAndFetchStormStayBounded (9.66s)
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfk	12.468s
+full output: <worker-worktree>/systems/mkfk/.test-output/integration.log

@@ -1,0 +1,13 @@
+make: Entering directory '<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay'
+docker compose -f deploy/compose/docker-compose.yml config --quiet
+./deploy/validate.sh
+validated OJBK namespace
+Checking /etc/prometheus/prometheus.yml
+  SUCCESS: 1 rule files found
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
+
+Checking /etc/prometheus/alerts.yml
+  SUCCESS: 5 rules found
+
+validated 3 Grafana dashboards
+make: Leaving directory '<operator-home>/test/codex/wt/newclear/ojbquay-mainline-sdd/systems/ojbquay'

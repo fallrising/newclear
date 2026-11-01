@@ -55,8 +55,8 @@
 ## Multi-model team execution
 
 - 若上層 `AGENTS.md` 提供具體多模型 routing、CLI 與 escalation table，完整套用；本文件的安全、知識與完成規則不得被較寬鬆的 worker prompt 降低。
-- 一個 ORCHESTRATOR 擁有 `.team/PLAN.md`、task 拆分、dispatch、diff review、驗證重跑與 integration branch。
-- WORKER 只執行一份 `.team/tasks/T-###.md`，只修改 allowlist paths，並把結果寫到 `.team/reports/T-###.md`。
+- 一個 ORCHESTRATOR 擁有 task 拆分、dispatch、diff review、驗證重跑與 integration branch。驗收證據不寫進本 repo 的 `.team/`；歷史帳本見 `docs/evidence-pointer.json` 的 journal 指標。
+- WORKER 只執行一份指派的 task，只修改 allowlist paths。不要把報告寫回 `.team/reports/`。
 - 每個可寫 worker 使用獨立 branch/worktree；read-only research/review 不得修改 shared workspace。
 - Dispatch 前必須用 `doctor` 或 CLI 官方查詢驗證 availability、model ID、auth 與 non-interactive mode。缺少指定 worker 時依本地 escalation route 改派並記錄，不可虛構成功。
 - Orchestrator 不接受 worker 自述；必須讀 diff、重跑 verification，並在 `PLAN.md` 記錄 `ACCEPT`、`REWORK` 或 `REASSIGN`。

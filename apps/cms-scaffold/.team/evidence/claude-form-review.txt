@@ -1,0 +1,33 @@
+# Code Review: CMS Form + Tests
+
+**No concrete correctness bugs found.**
+
+The implementation correctly satisfies all contract requirements:
+
+## ✓ Contract Compliance
+
+**Clear existing fields → null:** The logic checks `Object.hasOwn(entry?.payload ?? {}, field.key)` before sending null (onSubmit lines ~126-128). New entries correctly omit fields that never existed. Test verifies all five field types clear correctly.
+
+**Boolean/enum typed:** Select dropdowns render for both (lines ~172-182), converting "true"/"false" strings to boolean and enum values to strings. Test confirms `false` (boolean) and `"ready"` (enum) send as typed.
+
+**Integers safe:** Uses `Number.isSafeInteger()` to reject NaN, Infinity, overflow (line ~142). Test checks all edge cases (1.5, NaN, Infinity, 12oops, 9007199254740993) are rejected while keeping draft intact.
+
+**Preserve draft on VERSION_CONFLICT:** The `failed()` function (lines ~59-61) detects conflict by code and sets an error message without clearing `payload`/`slug`. Test confirms draft fields retain entered values after conflict response.
+
+**No overlapping writes:** `writing` ref + `beginWrite()` guard (lines ~63-72) prevents concurrent mutations. All mutations have `onSettled: finished` (lines ~90, 104, 115). Test verifies three simultaneous action attempts result in one request only.
+
+**Dirty blocks lifecycle:** `runAction()` checks `!dirty` before allowing publish/unpublish/archive (line ~149). Buttons disabled with `disabled={busy || dirty}`. Form shows save-first message (line ~211). Test confirms buttons are disabled until save succeeds.
+
+**After success, sync form + version:** The `stored()` function (lines ~74-82) updates `editVersion.current`, `baseline.current`, and calls `setSlug()`/`setPayload()`. Second save uses the updated version. Test confirms resync after lifecycle action and subsequent save uses incremented version.
+
+**Lifecycle API unchanged:** Lifecycle calls (`api.work[action]`) pass only `id`, no version parameter (line ~99). Complies with "no version" scope note.
+
+---
+
+## Minor Observation (Not a Bug)
+
+**QueryBoundary key change (line ~258):** Changed from `${current.id}:${current.version}` to `current.id`. This removes automatic remount on version changes. It *works* because `stored()` manually syncs refs/state post-mutation, and the ID-based key forces remount when navigating between entries. The test "retains success feedback" verifies the manual sync is called. This is a valid refactoring, not a defect.
+
+---
+
+No data-loss bugs, state inconsistencies, or contract violations detected. Tests comprehensively cover the new typed-field handling, conflict behavior, and concurrency constraints.

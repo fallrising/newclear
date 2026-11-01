@@ -1,7 +1,7 @@
 {
   "project": "ice-maker",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動。start 指向 DESIGN.md M1 在第 2 輪新增的合成啟動腳本（fe-review/serve_fixture.py），新增前無法執行；結果頁待腳本印出 batch_id 後補齊，驗證後改為 true。",
+  "verified": true,
+  "verifiedNote": "2026-10-24：已驗證原批准 R2 M1–M4。shared --dry-run/--start 18 records、18 axe scans、真 synthetic flow及必要受控錯誤已實測；原 harness race FAIL及兩次focused補證保留。僅metadata更新，apps/runtime設定與實測版本相同。獨立審查及exact-head CI/merge另由root收尾；不是第3輪或完整產品驗收。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light",
@@ -23,6 +23,14 @@
         {
           "id": "upload",
           "path": "/"
+        },
+        {
+          "id": "short-result",
+          "path": "/batches/b6be0bf0ca4722722f7686f83e6dc386286a53d309aba8f38d9c233d0adef2dc/documents/90b9bf248cc722e4841ad158082592475e8b4b35ae7cf6ebafe042659801cbab"
+        },
+        {
+          "id": "long-result",
+          "path": "/batches/b6be0bf0ca4722722f7686f83e6dc386286a53d309aba8f38d9c233d0adef2dc/documents/352b52b23c3a895bcb48d0acbb4431c0704cad5f2149cb8d6d6728a0f9dd786d"
         }
       ]
     }

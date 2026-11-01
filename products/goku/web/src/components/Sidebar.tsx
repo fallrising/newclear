@@ -96,14 +96,16 @@ export function Sidebar() {
                       />
                       <button
                         type="submit"
-                        className="ml-1 p-1 text-green-600 hover:text-green-700"
+                        aria-label="Save category"
+                        className="ml-1 p-1 text-green-600 hover:text-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                       >
                         <Check className="w-4 h-4" />
                       </button>
                       <button
                         type="button"
+                        aria-label="Cancel category edit"
                         onClick={() => setEditingCategory(null)}
-                        className="p-1 text-gray-400 hover:text-gray-600"
+                        className="p-1 text-gray-400 hover:text-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -121,19 +123,23 @@ export function Sidebar() {
                       >
                         {category.name}
                       </button>
-                      <div className="hidden group-hover:flex items-center">
+                      <div className="hidden group-hover:flex group-focus-within:flex items-center">
                         <button
+                          type="button"
+                          aria-label={`Edit category ${category.name}`}
                           onClick={() => {
                             setEditingCategory(category.id);
                             setNewCategoryName(category.name);
                           }}
-                          className="p-1 text-gray-400 hover:text-gray-600"
+                          className="p-1 text-gray-400 hover:text-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                         >
                           <Edit2 className="w-3 h-3" />
                         </button>
                         <button
+                          type="button"
+                          aria-label={`Delete category ${category.name}`}
                           onClick={() => removeCategory(category.id)}
-                          className="p-1 text-gray-400 hover:text-red-600"
+                          className="p-1 text-gray-400 hover:text-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -155,17 +161,19 @@ export function Sidebar() {
                   />
                   <button
                     type="submit"
-                    className="ml-1 p-1 text-green-600 hover:text-green-700"
+                    aria-label="Save new category"
+                    className="ml-1 p-1 text-green-600 hover:text-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
                     <Check className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
+                    aria-label="Cancel new category"
                     onClick={() => {
                       setIsAddingCategory(false);
                       setNewCategoryName('');
                     }}
-                    className="p-1 text-gray-400 hover:text-gray-600"
+                    className="p-1 text-gray-400 hover:text-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
                     <X className="w-4 h-4" />
                   </button>

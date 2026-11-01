@@ -1,15 +1,30 @@
-import type { Me } from "@cms/api";
-import { me as seedUsers } from "./fixtures.gen";
+import type { CmsAction, Me } from "@cms/api";
+import { capabilities, me as seedUsers } from "./fixtures.gen";
+import { db } from "./db";
 import { apiError } from "./respond";
 import { getState, MOCK_CSRF_TOKEN } from "./state";
 
 export function currentUser(): Me | null {
   const name = getState().user;
-  return name ? (seedUsers[name] ?? null) : null;
+  const user = name ? seedUsers[name] : null;
+  if (!name || !user) return null;
+  const capability = capabilities[name][getState().surface];
+  return { ...user, capabilities: { ...capability,
+    types: capability.types.filter((type) => db.adminTypes.some((item) => item.key === type.key && item.enabled)),
+  } };
 }
 
 export function isAdmin(user: Me) {
   return user.roles.some((r) => r.code === "admin");
+}
+
+/** Capabilities are the action contract on the current surface, including type disabling. */
+export function can(user: Me, action: CmsAction, type: string) {
+  return user.capabilities.types.some((capability) => capability.key === type && capability.actions.includes(action));
+}
+
+export function canGlobal(user: Me, action: CmsAction) {
+  return user.capabilities.global.includes(action);
 }
 
 export function allowedType(user: Me, type: string) {
@@ -36,11 +51,20 @@ export function requireWork(): Me | Response {
   const user = currentUser();
   if (!user) return apiError(401, "UNAUTHENTICATED", "Authentication required");
   if (getState().surface === "front") return apiError(403, "SURFACE_FORBIDDEN", "Surface front is not allowed");
-  if (!user.surfaces.back) return apiError(403, "FORBIDDEN", "Missing permission");
+  if (!user.surfaces[getState().surface]) return apiError(403, "FORBIDDEN", "Missing permission");
   return user;
 }
 
-/** Admin surface rules: signed in, Admin surface, admin role. */
+/** Governance rules (BW5): signed in, Admin surface, and the global action in the caller's capabilities. */
+export function requireGovernance(action: CmsAction): Me | Response {
+  const user = currentUser();
+  if (!user) return apiError(401, "UNAUTHENTICATED", "Authentication required");
+  if (getState().surface !== "admin") return apiError(403, "SURFACE_FORBIDDEN", "Admin surface required");
+  if (!canGlobal(user, action)) return apiError(403, "FORBIDDEN", `Missing permission ${action}`);
+  return user;
+}
+
+/** Admin surface rules: signed in, Admin surface, admin role (purge). */
 export function requireAdmin(): Me | Response {
   const user = currentUser();
   if (!user) return apiError(401, "UNAUTHENTICATED", "Authentication required");

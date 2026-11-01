@@ -1,0 +1,57 @@
+{
+  "id": "negative-control-unlabeled-button",
+  "url": "about:blank",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "critical": 1,
+  "serious": 2,
+  "violations": [
+    {
+      "id": "button-name",
+      "impact": "critical",
+      "targets": [
+        [
+          "button"
+        ]
+      ]
+    },
+    {
+      "id": "document-title",
+      "impact": "serious",
+      "targets": [
+        [
+          "html"
+        ]
+      ]
+    },
+    {
+      "id": "html-has-lang",
+      "impact": "serious",
+      "targets": [
+        [
+          "html"
+        ]
+      ]
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": "moderate",
+      "targets": [
+        [
+          "html"
+        ]
+      ]
+    },
+    {
+      "id": "page-has-heading-one",
+      "impact": "moderate",
+      "targets": [
+        [
+          "html"
+        ]
+      ]
+    }
+  ]
+}

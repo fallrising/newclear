@@ -1,0 +1,1240 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T-952",
+  "status": "PARTIAL",
+  "measuredAt": "2026-10-04T17:13:23.286832+00:00",
+  "baseline": "3b7be596e32920268036d4eb91361972f52bc8ba",
+  "sourceOnly": true,
+  "productWrites": false,
+  "discovery": [
+    {
+      "command": "node $SHARED_CMS/node_modules/@playwright/test/cli.js test --config playwright.mock.config.ts --list",
+      "NODE_PATH": "$SHARED_CMS/node_modules",
+      "exitCode": 0,
+      "total": 68,
+      "unique": 68,
+      "perFile": {
+        "back-w1.spec.ts": 10,
+        "back-w2.spec.ts": 12,
+        "front-w3.spec.ts": 21,
+        "front-w3b.spec.ts": 8,
+        "shell.spec.ts": 17
+      },
+      "titles": [
+        "[chromium] \u203a back-w1.spec.ts:13:7 \u203a W1 Back core \u203a V2-AC-10 a notes-only operator sees only Notes; list and editor work",
+        "[chromium] \u203a back-w1.spec.ts:22:7 \u203a W1 Back core \u203a V2-AC-05 each field type has its control and no raw UUID is visible",
+        "[chromium] \u203a back-w1.spec.ts:36:7 \u203a W1 Back core \u203a V2-AC-07 draft: \u767c\u5e03 is the primary action and there is no \u4e0b\u67b6; published unchanged: no primary action",
+        "[chromium] \u203a back-w1.spec.ts:45:7 \u203a W1 Back core \u203a V2-AC-08 unsaved changes: the side nav asks first; closing the tab triggers beforeunload",
+        "[chromium] \u203a back-w1.spec.ts:58:7 \u203a W1 Back core \u203a V2-AC-09 a conflicting save opens the dialog and keeps the typed value",
+        "[chromium] \u203a back-w1.spec.ts:75:9 \u203a W1 Back core \u203a V2-AC-14 V2-AC-15 Back index: axe clean and no engineering words",
+        "[chromium] \u203a back-w1.spec.ts:75:9 \u203a W1 Back core \u203a V2-AC-14 V2-AC-15 Back details: axe clean and no engineering words",
+        "[chromium] \u203a back-w1.spec.ts:75:9 \u203a W1 Back core \u203a V2-AC-14 V2-AC-15 Back new entry: axe clean and no engineering words",
+        "[chromium] \u203a back-w1.spec.ts:75:9 \u203a W1 Back core \u203a V2-AC-14 V2-AC-15 Back forbidden: axe clean and no engineering words",
+        "[chromium] \u203a back-w1.spec.ts:75:9 \u203a W1 Back core \u203a V2-AC-14 V2-AC-15 Back board: axe clean and no engineering words",
+        "[chromium] \u203a back-w2.spec.ts:25:7 \u203a W2 Back media and views \u203a B-S4 AC-MEDIA-01 the cover picker uploads a file and uses it without leaving the editor",
+        "[chromium] \u203a back-w2.spec.ts:42:7 \u203a W2 Back media and views \u203a C-08 G-09 album.composer: dragging a photo reorders with one batch write",
+        "[chromium] \u203a back-w2.spec.ts:57:7 \u203a W2 Back media and views \u203a B-S5 album.composer uploads several photos into the album",
+        "[chromium] \u203a back-w2.spec.ts:70:7 \u203a W2 Back media and views \u203a V2-AC-12 projects.board: a drag moves the card; a failed move puts it back with a toast",
+        "[chromium] \u203a back-w2.spec.ts:89:9 \u203a W2 Back media and views \u203a in Asia/Taipei \u203a V2-AC-11 clinic.schedule opens on the local today at 07:30",
+        "[chromium] \u203a back-w2.spec.ts:102:9 \u203a W2 Back media and views \u203a at 390px \u203a V2-AC-13 U-03 the board shows one column at a time and no page scrolls sideways",
+        "[chromium] \u203a back-w2.spec.ts:135:9 \u203a W2 Back media and views \u203a V2-AC-14 V2-AC-15 Back media library: axe clean and no engineering words",
+        "[chromium] \u203a back-w2.spec.ts:135:9 \u203a W2 Back media and views \u203a V2-AC-14 V2-AC-15 Back media details: axe clean and no engineering words",
+        "[chromium] \u203a back-w2.spec.ts:135:9 \u203a W2 Back media and views \u203a V2-AC-14 V2-AC-15 Back preview: axe clean and no engineering words",
+        "[chromium] \u203a back-w2.spec.ts:135:9 \u203a W2 Back media and views \u203a V2-AC-14 V2-AC-15 Back history: axe clean and no engineering words",
+        "[chromium] \u203a back-w2.spec.ts:135:9 \u203a W2 Back media and views \u203a V2-AC-14 V2-AC-15 Back composer: axe clean and no engineering words",
+        "[chromium] \u203a back-w2.spec.ts:135:9 \u203a W2 Back media and views \u203a V2-AC-14 V2-AC-15 Back schedule: axe clean and no engineering words",
+        "[chromium] \u203a front-w3.spec.ts:7:7 \u203a W3 Front public site \u203a AC-02 V2-AC-04 album \u2192 photo wall \u2192 lightbox (keyboard, ?photo=) \u2192 photo page, public API only",
+        "[chromium] \u203a front-w3.spec.ts:48:7 \u203a W3 Front public site \u203a F-S2 the lightbox blank background closes it while image and controls clicks stay open",
+        "[chromium] \u203a front-w3.spec.ts:74:7 \u203a W3 Front public site \u203a V2-AC-02 C-02 a slow list shows only the skeleton for the first second, never the empty copy",
+        "[chromium] \u203a front-w3.spec.ts:84:7 \u203a W3 Front public site \u203a V2-AC-03 C-03 a 500 on a detail page shows ErrorPublic with retry, not NotFoundPublic",
+        "[chromium] \u203a front-w3.spec.ts:92:7 \u203a W3 Front public site \u203a AC-07 AC-17 an unpublished album with ?preview= is NotFoundPublic (noindex); a published one gets a canonical URL without the query",
+        "[chromium] \u203a front-w3.spec.ts:106:7 \u203a W3 Front public site \u203a C-04 an unknown path stays on its URL and shows NotFoundPublic",
+        "[chromium] \u203a front-w3.spec.ts:113:7 \u203a W3 Front public site \u203a V2-AC-01 Front: the clinic site uses its warm scheme; the title uses the Front size",
+        "[chromium] \u203a front-w3.spec.ts:121:7 \u203a W3 Front public site \u203a U-03 at 390px the navigation is a sheet and no page scrolls sideways",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front album list",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front album detail",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front photo page",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front clinic home",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front vet list",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front vet page",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front projects home",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front project page",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front milestone list",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front milestone page",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front not found",
+        "[chromium] \u203a front-w3.spec.ts:155:9 \u203a W3 Front public site \u203a V2-AC-14 axe: Front empty list",
+        "[chromium] \u203a front-w3.spec.ts:163:7 \u203a W3 Front public site \u203a V2-AC-14 axe: Front mobile menu open",
+        "[chromium] \u203a front-w3b.spec.ts:43:5 \u203a W3b AC-10 anonymous member routes redirect to login and return after sign-in",
+        "[chromium] \u203a front-w3b.spec.ts:53:5 \u203a W3b AC-10 member dashboard shows only owned records at 390px",
+        "[chromium] \u203a front-w3b.spec.ts:69:5 \u203a W3b AC-11 foreign appointment is forbidden without leaked content",
+        "[chromium] \u203a front-w3b.spec.ts:81:5 \u203a W3b AC-12 create stays on Front and sends no publication field",
+        "[chromium] \u203a front-w3b.spec.ts:110:5 \u203a W3b AC-13 malicious next remains on Front",
+        "[chromium] \u203a front-w3b.spec.ts:119:5 \u203a W3b V2-AC-15 visible text contains no engineering term or UUID",
+        "[chromium] \u203a front-w3b.spec.ts:131:5 \u203a W3b V2-AC-14 eight member states have no serious accessibility violation",
+        "[chromium] \u203a front-w3b.spec.ts:166:5 \u203a W3b mobile pages have no horizontal overflow and member menu supports keyboard navigation",
+        "[chromium] \u203a shell.spec.ts:5:7 \u203a W0 shell pages \u203a V2-AC-01 Back: @cms/ui classes are generated and the page title uses the token size",
+        "[chromium] \u203a shell.spec.ts:15:7 \u203a W0 shell pages \u203a V2-AC-01 Admin: cards have border and radius, the accent bar is drawn",
+        "[chromium] \u203a shell.spec.ts:25:7 \u203a W0 shell pages \u203a V2-AC-01 Front: the album site uses its dark scheme and the Front title size",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Front selector",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Front album",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Front login",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Back sign-in",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Back home",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Back entries",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Admin login",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Admin home",
+        "[chromium] \u203a shell.spec.ts:44:9 \u203a W0 shell pages \u203a V2-AC-14 axe: Admin types",
+        "[chromium] \u203a shell.spec.ts:52:7 \u203a W0 shell pages \u203a S-01 AC-13 Front login ignores an external next",
+        "[chromium] \u203a shell.spec.ts:60:7 \u203a W0 shell pages \u203a S-02 Back and Admin login forms start empty",
+        "[chromium] \u203a shell.spec.ts:67:7 \u203a W0 shell pages \u203a C-17 Back: anonymous deep link \u2192 sign in \u2192 back to the same page",
+        "[chromium] \u203a shell.spec.ts:77:7 \u203a W0 shell pages \u203a E-01 AppFrame moves the side navigation into a sheet below 1024px",
+        "[chromium] \u203a shell.spec.ts:89:7 \u203a W0 shell pages \u203a C-02 W0-FM23 ?mock=slow shows a skeleton first, then data, never the empty copy"
+      ]
+    },
+    {
+      "command": "node $SHARED_CMS/node_modules/@playwright/test/cli.js test --config playwright.config.ts --list",
+      "NODE_PATH": "$SHARED_CMS/node_modules",
+      "exitCode": 0,
+      "total": 14,
+      "unique": 14,
+      "perFile": {
+        "admin.spec.ts": 3,
+        "back.spec.ts": 5,
+        "front.spec.ts": 6
+      },
+      "titles": [
+        "[chromium] \u203a admin.spec.ts:5:7 \u203a Admin center \u203a admin sees types and users, not a writing bench",
+        "[chromium] \u203a admin.spec.ts:18:7 \u203a Admin center \u203a operator cannot use Admin governance routes",
+        "[chromium] \u203a admin.spec.ts:23:7 \u203a Admin center \u203a admin login on Back does not show Admin navigation",
+        "[chromium] \u203a back.spec.ts:5:7 \u203a Back office \u203a operator can open album composer",
+        "[chromium] \u203a back.spec.ts:17:7 \u203a Back office \u203a operator can open clinic schedule and projects board",
+        "[chromium] \u203a back.spec.ts:24:7 \u203a Back office \u203a projects board patches status without a boards API",
+        "[chromium] \u203a back.spec.ts:39:7 \u203a Back office \u203a editor does not see Publish on an album editor",
+        "[chromium] \u203a back.spec.ts:48:7 \u203a Back office \u203a member cannot enter Back work routes",
+        "[chromium] \u203a front.spec.ts:5:7 \u203a Front office \u203a album index shows published public albums only",
+        "[chromium] \u203a front.spec.ts:13:7 \u203a Front office \u203a album wall shows ordered published photos",
+        "[chromium] \u203a front.spec.ts:21:7 \u203a Front office \u203a draft album URL is a not-found state",
+        "[chromium] \u203a front.spec.ts:28:7 \u203a Front office \u203a unlisted album is reachable by slug",
+        "[chromium] \u203a front.spec.ts:33:7 \u203a Front office \u203a clinic shows published profile and vets, not draft Douglas",
+        "[chromium] \u203a front.spec.ts:40:7 \u203a Front office \u203a projects list hides private and draft"
+      ]
+    }
+  ],
+  "eventualMockCount": 93,
+  "quality": {
+    "pageCount": 52,
+    "mobileCount": 15,
+    "pages": [
+      {
+        "id": "front-selector",
+        "surface": "front",
+        "path": "/",
+        "mockUser": "null",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:267",
+        "routeEvidence": "apps/web-front/src/routes.tsx:15",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/selector.tsx:24"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-login",
+        "surface": "front",
+        "path": "/login",
+        "mockUser": "null",
+        "ready": "H:`\u767b\u5165`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:268",
+        "routeEvidence": "apps/web-front/src/routes.tsx:16",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/login.tsx:21"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/login",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-album-home",
+        "surface": "front",
+        "path": "/album",
+        "mockUser": "null",
+        "ready": "H:`\u76f8\u7c3f`",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:269",
+        "routeEvidence": "apps/web-front/src/routes.tsx:21",
+        "readinessEvidence": [
+          "apps/web-front/src/home.tsx:23"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/album",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-album-list",
+        "surface": "front",
+        "path": "/album/albums",
+        "mockUser": "null",
+        "ready": "H:`\u76f8\u7c3f`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:270",
+        "routeEvidence": "apps/web-front/src/routes.tsx:22",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/album.tsx:31"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/album/albums",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-album-detail",
+        "surface": "front",
+        "path": "/album/albums/coast-light-2026",
+        "mockUser": "null",
+        "ready": "H:`Coast Light 2026`",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:271",
+        "routeEvidence": "apps/web-front/src/routes.tsx:23",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/album.tsx:152"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/album/albums/:slug",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-photo",
+        "surface": "front",
+        "path": "/album/photos/coast-sun",
+        "mockUser": "null",
+        "ready": "H:`Late sun`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:272",
+        "routeEvidence": "apps/web-front/src/routes.tsx:24",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/album.tsx:193"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/album/photos/:slug",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-clinic-home",
+        "surface": "front",
+        "path": "/clinic",
+        "mockUser": "null",
+        "ready": "H:`Cedar Pet Clinic`",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:273",
+        "routeEvidence": "apps/web-front/src/routes.tsx:31",
+        "readinessEvidence": [
+          "apps/web-front/src/home.tsx:93"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-vet-list",
+        "surface": "front",
+        "path": "/clinic/vets",
+        "mockUser": "null",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:274",
+        "routeEvidence": "apps/web-front/src/routes.tsx:32",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/clinic.tsx:19"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/vets",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-vet-detail",
+        "surface": "front",
+        "path": "/clinic/vets/james-carter",
+        "mockUser": "null",
+        "ready": "H:`James Carter`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:275",
+        "routeEvidence": "apps/web-front/src/routes.tsx:33",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/clinic.tsx:39"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/vets/:slug",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-projects-home",
+        "surface": "front",
+        "path": "/projects",
+        "mockUser": "null",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:276",
+        "routeEvidence": "apps/web-front/src/routes.tsx:43",
+        "readinessEvidence": [
+          "apps/web-front/src/home.tsx:23"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/projects",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-project-detail",
+        "surface": "front",
+        "path": "/projects/cms-scaffold",
+        "mockUser": "null",
+        "ready": "H:`CMS Scaffold`",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:277",
+        "routeEvidence": "apps/web-front/src/routes.tsx:44",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/projects.tsx:49"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/projects/:slug",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-milestone-list",
+        "surface": "front",
+        "path": "/projects/cms-scaffold/milestones",
+        "mockUser": "null",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:278",
+        "routeEvidence": "apps/web-front/src/routes.tsx:45",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/projects.tsx:87"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/projects/:slug/milestones",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-milestone-detail",
+        "surface": "front",
+        "path": "/projects/cms-scaffold/milestones/m1-specs",
+        "mockUser": "null",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:279",
+        "routeEvidence": "apps/web-front/src/routes.tsx:46",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/projects.tsx:117"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/projects/:slug/milestones/:mSlug",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-not-found",
+        "surface": "front",
+        "path": "/album/albums/secret",
+        "mockUser": "null",
+        "ready": "T:`not-found-public`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:280",
+        "routeEvidence": "apps/web-front/src/routes.tsx:23",
+        "readinessEvidence": [
+          "apps/web-front/src/states.tsx:77"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/album/albums/:slug",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-empty",
+        "surface": "front",
+        "path": "/projects?mock=empty",
+        "mockUser": "null",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:281",
+        "routeEvidence": "apps/web-front/src/routes.tsx:43",
+        "readinessEvidence": [
+          "apps/web-front/src/home.tsx:23"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/projects",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-error",
+        "surface": "front",
+        "path": "/clinic/vets/james-carter?mock=error500",
+        "mockUser": "null",
+        "ready": "H:`\u66ab\u6642\u7121\u6cd5\u8f09\u5165`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:282",
+        "routeEvidence": "apps/web-front/src/routes.tsx:33",
+        "readinessEvidence": [
+          "apps/web-front/src/states.tsx:111"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/vets/:slug",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-member-home",
+        "surface": "front",
+        "path": "/clinic/me",
+        "mockUser": "`seed-member-clinic`",
+        "ready": "T:`member-home`",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:283",
+        "routeEvidence": "apps/web-front/src/routes.tsx:34",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/member.tsx:42"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/me",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-member-new",
+        "surface": "front",
+        "path": "/clinic/appointments/new",
+        "mockUser": "`seed-member-clinic`",
+        "ready": "T:`appointment-form`",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:284",
+        "routeEvidence": "apps/web-front/src/routes.tsx:36",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/appointment-new.tsx:84"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/appointments/:id",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "front-member-detail",
+        "surface": "front",
+        "path": "/clinic/appointments/43000000-0000-4000-8000-000000000001",
+        "mockUser": "`seed-member-clinic`",
+        "ready": "T:`appointment-detail`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:285",
+        "routeEvidence": "apps/web-front/src/routes.tsx:36",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/member.tsx:132"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/appointments/:id",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/member-entries.json:42"
+        ]
+      },
+      {
+        "id": "front-member-forbidden",
+        "surface": "front",
+        "path": "/clinic/appointments/43000000-0000-4000-8000-000000000001",
+        "mockUser": "`seed-member-projects`",
+        "ready": "T:`member-forbidden`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:286",
+        "routeEvidence": "apps/web-front/src/routes.tsx:36",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/member.tsx:24"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/appointments/:id",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/member-entries.json:42"
+        ]
+      },
+      {
+        "id": "front-member-empty",
+        "surface": "front",
+        "path": "/clinic/me?mock=empty",
+        "mockUser": "`seed-member-clinic`",
+        "ready": "T:`member-home`",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:287",
+        "routeEvidence": "apps/web-front/src/routes.tsx:34",
+        "readinessEvidence": [
+          "apps/web-front/src/pages/member.tsx:42"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/clinic/me",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-sign-in",
+        "surface": "back",
+        "path": "/sign-in",
+        "mockUser": "null",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:288",
+        "routeEvidence": "apps/web-back/src/routes.tsx:15",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/sign-in.tsx:10",
+          "packages/auth/src/login-page.tsx:83"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/sign-in",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-home",
+        "surface": "back",
+        "path": "/",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:289",
+        "routeEvidence": "apps/web-back/src/routes.tsx:20",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/home.tsx:60",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-index",
+        "surface": "back",
+        "path": "/entries/album",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:290",
+        "routeEvidence": "apps/web-back/src/routes.tsx:21",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/resource-index.tsx:143",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/entries/:type",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-new",
+        "surface": "back",
+        "path": "/entries/album/new",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:291",
+        "routeEvidence": "apps/web-back/src/routes.tsx:23",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/resource-details.tsx:233",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/entries/:type/:id",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-detail",
+        "surface": "back",
+        "path": "/entries/album/30000000-0000-4000-8000-000000000008",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:292",
+        "routeEvidence": "apps/web-back/src/routes.tsx:23",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/resource-details.tsx:233",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/entries/:type/:id",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/work-entries.json:140"
+        ]
+      },
+      {
+        "id": "back-preview",
+        "surface": "back",
+        "path": "/entries/note/30000000-0000-4000-8000-000000000037/preview",
+        "mockUser": "`mock-operator-notes`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:293",
+        "routeEvidence": "apps/web-back/src/routes.tsx:24",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/preview.tsx:30",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/entries/:type/:id/preview",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/work-entries.json:718"
+        ]
+      },
+      {
+        "id": "back-history",
+        "surface": "back",
+        "path": "/entries/note/30000000-0000-4000-8000-000000000037/history",
+        "mockUser": "`mock-operator-notes`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:294",
+        "routeEvidence": "apps/web-back/src/routes.tsx:25",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/history.tsx:138",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/entries/:type/:id/history",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/work-entries.json:718"
+        ]
+      },
+      {
+        "id": "back-media",
+        "surface": "back",
+        "path": "/media",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:295",
+        "routeEvidence": "apps/web-back/src/routes.tsx:26",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/media.tsx:163",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/media",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-media-detail",
+        "surface": "back",
+        "path": "/media/20000000-0000-4000-8000-000000000008",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:296",
+        "routeEvidence": "apps/web-back/src/routes.tsx:27",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/media.tsx:163",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/media/:id",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/media-assets.json:4"
+        ]
+      },
+      {
+        "id": "back-composer",
+        "surface": "back",
+        "path": "/views/album.composer",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:297",
+        "routeEvidence": "apps/web-back/src/routes.tsx:28",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/composer.tsx:296",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/views/album.composer",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-schedule",
+        "surface": "back",
+        "path": "/views/clinic.schedule",
+        "mockUser": "`seed-operator-clinic`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:298",
+        "routeEvidence": "apps/web-back/src/routes.tsx:29",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/schedule.tsx:102",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/views/clinic.schedule",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-board",
+        "surface": "back",
+        "path": "/views/projects.board?project=30000000-0000-4000-8000-000000000024",
+        "mockUser": "`seed-operator-projects`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:299",
+        "routeEvidence": "apps/web-back/src/routes.tsx:30",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/board.tsx:247",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/views/projects.board",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/work-entries.json:458",
+          "packages/mocks/fixtures/public-entries.json:376"
+        ]
+      },
+      {
+        "id": "back-forbidden",
+        "surface": "back",
+        "path": "/forbidden",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:300",
+        "routeEvidence": "apps/web-back/src/routes.tsx:31",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/status.tsx:9",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/forbidden",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "back-not-found",
+        "surface": "back",
+        "path": "/not-found",
+        "mockUser": "`seed-operator-album`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:301",
+        "routeEvidence": "apps/web-back/src/routes.tsx:32",
+        "readinessEvidence": [
+          "apps/web-back/src/pages/status.tsx:9",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/not-found",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-overview",
+        "surface": "admin",
+        "path": "/",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:302",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:16",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/overview.tsx:141",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-types",
+        "surface": "admin",
+        "path": "/types",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:303",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:20",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/types.tsx:102",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/types",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-type-detail",
+        "surface": "admin",
+        "path": "/types/owner",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:304",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:21",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/types.tsx:102",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/types/:key",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-roles",
+        "surface": "admin",
+        "path": "/roles",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:305",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:27",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/roles.tsx:76",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/roles",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-role-detail",
+        "surface": "admin",
+        "path": "/roles/member",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:306",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:35",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/roles.tsx:76",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/roles/:code",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-principals",
+        "surface": "admin",
+        "path": "/principals",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:307",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:28",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/principals.tsx:191",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/principals",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-principal-new",
+        "surface": "admin",
+        "path": "/principals/new",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:308",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:37",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/principals.tsx:191",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/principals/:id",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-principal-detail",
+        "surface": "admin",
+        "path": "/principals/10000000-0000-4000-8000-000000000003",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:309",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:37",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/principals.tsx:191",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/principals/:id",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/audit-events.json:38",
+          "packages/mocks/fixtures/principals.json:46",
+          "packages/mocks/fixtures/me.json:284"
+        ]
+      },
+      {
+        "id": "admin-audit",
+        "surface": "admin",
+        "path": "/audit",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:310",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:43",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/audit.tsx:179",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/audit",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-audit-detail",
+        "surface": "admin",
+        "path": "/audit/70000000-0000-4000-8000-000000000007",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:311",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:44",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/audit.tsx:179",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/audit/:id",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/audit-events.json:88"
+        ]
+      },
+      {
+        "id": "admin-media",
+        "surface": "admin",
+        "path": "/media",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:312",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:49",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/media.tsx:14",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/media",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-settings",
+        "surface": "admin",
+        "path": "/settings",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:313",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:53",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/settings.tsx:39",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/settings",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-audit-settings",
+        "surface": "admin",
+        "path": "/settings/audit",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:314",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:57",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/settings.tsx:39",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/settings/audit",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-entry-lookup",
+        "surface": "admin",
+        "path": "/entries?type=album",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:315",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:62",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/entries.tsx:85",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/entries",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-entry-inspector",
+        "surface": "admin",
+        "path": "/entries/30000000-0000-4000-8000-000000000017",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": true,
+        "specEvidence": "docs/v2/waves/W5.md:316",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:63",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/entries.tsx:85",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/entries/:id",
+        "fixtureEvidence": [
+          "packages/mocks/fixtures/work-entries.json:316"
+        ]
+      },
+      {
+        "id": "admin-forbidden",
+        "surface": "admin",
+        "path": "/403",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:317",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:66",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/status.tsx:9",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "/403",
+        "fixtureEvidence": []
+      },
+      {
+        "id": "admin-not-found",
+        "surface": "admin",
+        "path": "/impersonate",
+        "mockUser": "`seed-admin`",
+        "ready": "H",
+        "mobile": false,
+        "specEvidence": "docs/v2/waves/W5.md:318",
+        "routeEvidence": "apps/web-admin/src/routes.tsx:69",
+        "readinessEvidence": [
+          "apps/web-admin/src/pages/status.tsx:9",
+          "packages/ui/src/patterns/page-header.tsx:64"
+        ],
+        "review": "Source-compatible; browser runtime unverified",
+        "matchedRoute": "*",
+        "fixtureEvidence": []
+      }
+    ],
+    "states": [
+      {
+        "id": "state-front-mobile-menu",
+        "pageId": "front-album-home",
+        "prepare": "frontMobileMenu",
+        "specEvidence": "docs/v2/waves/W5.md:337",
+        "sourceEvidence": [
+          "apps/web-front/src/shell.tsx:96",
+          "apps/web-front/src/shell.tsx:106"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      },
+      {
+        "id": "state-front-lightbox",
+        "pageId": "front-album-detail",
+        "prepare": "frontLightbox",
+        "specEvidence": "docs/v2/waves/W5.md:338",
+        "sourceEvidence": [
+          "apps/web-front/src/pages/album.tsx:38",
+          "apps/web-front/src/lightbox.tsx:53",
+          "e2e-mock/front-w3.spec.ts:16"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      },
+      {
+        "id": "state-back-media-picker",
+        "pageId": "back-detail",
+        "prepare": "backMediaPicker",
+        "specEvidence": "docs/v2/waves/W5.md:339",
+        "sourceEvidence": [
+          "packages/fields/src/pickers.tsx:67",
+          "packages/fields/src/pickers.tsx:357",
+          "packages/fields/src/pickers.tsx:192"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      },
+      {
+        "id": "state-back-conflict",
+        "pageId": "back-detail",
+        "prepare": "backConflictDialog",
+        "specEvidence": "docs/v2/waves/W5.md:340",
+        "sourceEvidence": [
+          "apps/web-back/src/pages/resource-details.tsx:367",
+          "e2e-mock/back-w1.spec.ts:58"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      },
+      {
+        "id": "state-back-leave",
+        "pageId": "back-detail",
+        "prepare": "backLeaveDialog",
+        "specEvidence": "docs/v2/waves/W5.md:341",
+        "sourceEvidence": [
+          "packages/ui/src/patterns/contextual-save-bar.tsx:55",
+          "apps/web-back/src/nav.ts:71",
+          "e2e-mock/back-w1.spec.ts:45"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      },
+      {
+        "id": "state-admin-confirm",
+        "pageId": "admin-type-detail",
+        "prepare": "adminConfirmDialog",
+        "specEvidence": "docs/v2/waves/W5.md:342",
+        "sourceEvidence": [
+          "apps/web-admin/src/pages/types.tsx:173",
+          "apps/web-admin/src/confirm.tsx:39"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      },
+      {
+        "id": "state-admin-password",
+        "pageId": "admin-principal-new",
+        "prepare": "adminTemporaryPassword",
+        "specEvidence": "docs/v2/waves/W5.md:343",
+        "sourceEvidence": [
+          "apps/web-admin/src/pages/principals.tsx:324",
+          "apps/web-admin/src/pages/principals.tsx:119",
+          "apps/web-admin/src/pages/principals.tsx:137",
+          "apps/web-admin/src/pages/principals.tsx:349",
+          "apps/web-admin/src/confirm.tsx:74"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      },
+      {
+        "id": "state-admin-member-link",
+        "pageId": "admin-entry-inspector",
+        "prepare": "adminMemberLinkDialog",
+        "specEvidence": "docs/v2/waves/W5.md:344",
+        "sourceEvidence": [
+          "apps/web-admin/src/pages/entries.tsx:284",
+          "apps/web-admin/src/pages/entries.tsx:218"
+        ],
+        "review": "Specified trigger/readiness IDs supported; browser runtime unverified"
+      }
+    ]
+  },
+  "vitals": {
+    "operations": [
+      {
+        "specEvidence": "docs/v2/waves/W5.md:500",
+        "row": "| `front-album` | `GET /api/v1/public/content-types/page/slugs/home`\uff08\u7121 query\uff09 | fixture \u7121\u6b64 entry\uff1b\u56fa\u5b9a\u56de `404 application/json`\uff1a`{\"error\":{\"code\":\"ENTRY_NOT_FOUND\",\"message\":\"Entry not found\"},\"requestId\":\"vitals-front-album\"}`\uff0c\u4f7f W3 \u7684\u56fa\u5b9a album fallback hero \u986f\u793a |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:501",
+        "row": "| `front-album` | `GET /api/v1/public/content-types/album/entries?size=6` | \u5f9e `public-entries.json` \u7be9 `contentType===\"album\"`\uff0c\u4fdd\u6301\u6a94\u6848\u9806\u5e8f\uff0c\u56de `{items,total,page:1,size:6,offset:0,limit:6}` |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:502",
+        "row": "| `front-clinic` | `GET /api/v1/public/content-types/clinic_profile/entries?size=1` | \u540c\u4e0a\u7be9 `clinic_profile`\uff0csize\uff0flimit \u70ba 1 |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:503",
+        "row": "| `front-clinic` | `GET /api/v1/public/content-types/vet/entries?size=6&sort=title` | \u540c\u4e0a\u7be9 `vet` \u5f8c\u4f9d `title` \u505a `localeCompare(\"en\")`\uff0csize\uff0flimit \u70ba 6 |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:504",
+        "row": "| `front-clinic` | `GET /api/v1/auth/me`\uff08\u7121 query\uff09 | \u56fa\u5b9a\u56de `401 application/json`\uff1a`{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"Authentication required\"},\"requestId\":\"vitals-front-clinic-auth\"}`\uff1bClinic header \u8207 CTA \u9032 anonymous \u72c0\u614b |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:505",
+        "row": "| `front-projects` | `GET /api/v1/public/content-types/project/entries?size=12` | \u540c\u4e0a\u7be9 `project`\uff0csize\uff0flimit \u70ba 12 |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:506",
+        "row": "| \u4e09\u500b Front target\uff08\u689d\u4ef6\u5f0f\uff09 | `GET /api/v1/public/media/{uuid}/file/{variant}`\uff08\u7121 query\uff1b\u53ea\u5141\u8a31\u4e0a\u8ff0\u56de\u61c9 payload \u4e2d\u5be6\u969b\u51fa\u73fe\u7684 media id \u8207 variant\uff09 | allowlist \u975e\u7a7a\u6642\uff0c\u6bcf\u500b response payload \u5be6\u969b\u5f15\u7528\u4e14\u9801\u9762\u6e32\u67d3\u7684 media URL \u90fd\u662f required\uff1ballowlist \u7a7a\u6642\u9810\u671f 0 \u500b media request\uff0c\u4e0d\u7b97 missing\u3002\u56de `routes.ts` \u5167\u56fa\u5b9a `MEDIA_PNG_BASE64` \u89e3\u78bc\u7684 64\u00d764 PNG bytes\uff1b`contentType:\"image/png\"`\u3001`cache-control:\"no-store\"` |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:507",
+        "row": "| `back-home` | `GET /api/v1/auth/me`\uff08\u7121 query\uff09 | `{...me.json[\"seed-operator-album\"],capabilities:capabilities.json[\"seed-operator-album\"].back}` |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:508",
+        "row": "| `back-home` | `GET /api/v1/content-types`\uff08\u7121 query\uff09 | `work-content-types.json` \u539f\u6a23 |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:509",
+        "row": "| `back-home` | `GET /api/v1/content-types/album/entries?publishRequested=true&size=1`\u3001\u540c path \u7684 `photo` | \u5f9e `work-entries.json` \u7be9\u5c0d\u61c9 type \u4e14 `publishRequestedAt!==null`\uff0c\u5404\u56de `{items,total,page:1,size:1,offset:0,limit:1}` |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:510",
+        "row": "| `admin-home` | `GET /api/v1/auth/me`\uff08\u7121 query\uff09 | `{...me.json[\"seed-admin\"],capabilities:capabilities.json[\"seed-admin\"].admin}` |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:511",
+        "row": "| `admin-home` | `GET /api/v1/admin/content-types`\uff08\u7121 query\uff09 | `admin-content-types.json` \u539f\u6a23 |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:512",
+        "row": "| `admin-home` | `GET /api/v1/principals`\uff08\u7121 query\uff09 | `principals.json` \u539f\u6a23 |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:513",
+        "row": "| `admin-home` | `GET /api/v1/media/quota`\uff08\u7121 query\uff09 | `media-quota.json` \u539f\u6a23 |"
+      },
+      {
+        "specEvidence": "docs/v2/waves/W5.md:514",
+        "row": "| `admin-home` | `GET /api/v1/admin/audit?size=10` | `audit-events.json` \u524d 10 \u7b46\uff0c\u56de `{items,total,page:1,size:10,offset:0,limit:10}`\uff0c`total` \u662f\u5b8c\u6574\u9663\u5217\u9577\u5ea6 |"
+      }
+    ],
+    "png": {
+      "bytes": 156,
+      "dimensions": [
+        64,
+        64
+      ],
+      "chunks": [
+        {
+          "type": "IHDR",
+          "crcValid": true
+        },
+        {
+          "type": "IDAT",
+          "crcValid": true
+        },
+        {
+          "type": "IEND",
+          "crcValid": true
+        }
+      ],
+      "fullyConsumed": true
+    }
+  },
+  "hardening": {
+    "requiredTitles": 11,
+    "oldTaskProse": 10,
+    "rootCorrectionReported": true
+  },
+  "confirmedProductDefects": [],
+  "sourceHashes": {
+    "docs/v2/waves/W5.md": "cd29686b0ab4928346872704d96fbfeccc6385befe23c92622f0e33d1cb7d6f9",
+    "docs/v2/waves/W3.md": "6010d0a0f5c12cfaa6882e8a66eb652f6330b9a1844e3a4dec819ff64a1adcac",
+    "docs/v2/waves/W4.md": "07b7d613138af440d0007269141bd2ac6e5443c2d720d55d7b351d137d51fb8e",
+    "e2e-mock/front-w3.spec.ts": "38af1cd9cc7c690520eb1f28f48c555b09628aa4a4fb4568dd2eb1042c72f4a2",
+    "playwright.mock.config.ts": "1b86eeb7c505e5308c5be1e8057965c46ecd4128f2fb3d8d87ee28fc34241502",
+    "playwright.config.ts": "b9b6d452beea91d32422fd523373c482e71457868e8f4a285c0c9625827ec504",
+    "e2e/run.sh": "ffea51d415b83379df8683cd841b26790d3fbee1c6eef5464355cdef16c54417",
+    "e2e/helpers.ts": "7960f7531d741d44022c55765fcc5fc6c243ea85e0260af8fda0f8e0a1d3d11c",
+    "compose.yaml": "fd0637a0a4bc51b5b981412702b80902a1992a7a41386b50f4a3c8fcc1c4800f",
+    "docs/v2/contracts/fixtures/capabilities.json": "efc9e9dbf123c3670b787061a46696b79e0fcc092362862c8f3661c6701c625a",
+    "docs/v2/contracts/fixtures/work-content-types.json": "118d4649cdbd9eb667a1aa121e02be9d8890c23bb5c34da059b7276b5472141f",
+    "docs/v2/contracts/fixtures/work-entries.json": "29610c89c0e83cfa729692ddeb2a8d2f683b3b161c9e6fce6c78df06d4847906",
+    "docs/v2/contracts/fixtures/admin-content-types.json": "5d756cec5483d7449d13c585bfa76583b705f45b43ed3686800a3f1f3a38ceb5",
+    "docs/v2/contracts/fixtures/media-quota.json": "78e25704e1cd6c7996e1faac2673ad1b55b0377a9f28e529e51d93e9e4ace283",
+    "docs/v2/contracts/fixtures/audit-events.json": "748cade3307aa78e76892ab9c1b11aa364977d8863a6ff14b8867b93a3ebf2d1",
+    "docs/v2/contracts/fixtures/role-permissions.json": "9487fc7fd0608fd93089095b6df131a4d18c98c1bfba5050a9898b304d9e1775",
+    "docs/v2/contracts/fixtures/revisions.json": "c7f7e60d1d26dfb36db73d08930ed5f549466cb8c14899a4414389be7eb0f5cd",
+    "docs/v2/contracts/fixtures/principals.json": "ac62f2e6250121c3515e2b09619bcf4743df5287382ee17f4e3c2c0131dfd72b",
+    "docs/v2/contracts/fixtures/member-entries.json": "43f4f3c97c6b837fe0ac7494a1b0828f9962a5a7d978c7c60747eaa11dec6979",
+    "docs/v2/contracts/fixtures/media-assets.json": "5e1b6a7df7d138fa0f2f7a8ce6eb967efc5a9a3931e162cb47c577df36cad842",
+    "docs/v2/contracts/fixtures/public-content-types.json": "743f858bbd9f159fef7753b2eeb01a545c2c1f998d52a897bdea1d4a82d10338",
+    "docs/v2/contracts/fixtures/roles.json": "fce9e82784381fb96c3fa859a27b1c046492682e6fb6e3676264edfa9ebba755",
+    "docs/v2/contracts/fixtures/public-entries.json": "b26a0bdf6eccb688bb63c49d39559f2c41eb73b7180575575cc5ffb7d6f6d036",
+    "docs/v2/contracts/fixtures/me.json": "afff40a06f794fab5a5a49c946c82418fe06134e0e81a58081ecee695eecd7a4",
+    "docs/v2/contracts/fixtures/audit-settings.json": "4886574248d097aec399a20ac7771df668b3cc834299675f0f36e39d5f51471c"
+  },
+  "changedFileHashes": {
+    ".team/reports/T-952.md": "9d0d09f3829245fd16f63f236031b5abff08aca3f85212e92346e4b2fde910f6"
+  },
+  "resolvedFalsePositives": [
+    "Exact source PNG valid; manual-copy corruption claim withdrawn.",
+    "W3 historical appendix and source both assert64x64; no dimension drift.",
+    "field-cover-pick is supported by dynamic test ID."
+  ],
+  "rootNormalizedReportSha256": "2ea426f86ecaa2107ea32a90e1f9d41759c03bd14c7eccf605bba2cef4b7ec04"
+}

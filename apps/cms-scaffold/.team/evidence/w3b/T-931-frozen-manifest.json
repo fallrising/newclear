@@ -1,0 +1,14 @@
+{
+  "packages/api/src/public-entry.ts": "4c92dbcbc869b2896533454f887fdb28f2aa9f5c2cb48e0b7e890293cebb3e8e",
+  "packages/api/src/member-api.test.ts": "77bd6ac21fbdd833e732f1be849673edb58032fd3a69bb0f01d1ca9e1fd40324",
+  "packages/api/src/client.test.ts": "3221dbc0abc3b0c115e456e396546131d86d9700196c46fef44d08a9d78bf04e",
+  "packages/mocks/scripts/gen-fixtures.mjs": "4f6b03d004c8ac38d5fb05dd9d8bebc790380251487b9f070a9b5dab4665d2b2",
+  "packages/mocks/src/db.ts": "3d0241e39b69498252179d322a84df4de2aba59016b9edfdee9344acb4d3ffc9",
+  "packages/mocks/src/state.ts": "bfae1679aba5157487fe2eb78b8a37cf78b4244c2c5fa60660f008432b3ec3b5",
+  "packages/mocks/src/fixtures.gen.ts": "d37d78f6fd531ef759b35a7eb94949455ae0259e233ff35734d230606bbe366a",
+  "packages/mocks/src/handlers/member.ts": "5c307322d498e6e8ae657be17985209b241b6b1cde441726e958619ca9e9b551",
+  "packages/mocks/src/handlers/index.ts": "3106a8d8601ed166a4c043724545c3e32ae26038f8b11dcee7b1742eed700c80",
+  "packages/mocks/src/member-fixture.test.ts": "5cbd22cb17e48d4227a0d872433fc2a01053f38d6f8c322c7cb60b3c58204379",
+  "packages/mocks/fixtures/member-entries.json": "43f4f3c97c6b837fe0ac7494a1b0828f9962a5a7d978c7c60747eaa11dec6979",
+  ".team/reports/T-931.md": "d5d7818a06694a1e0d8e6be8734786707aa2bdb54a4da48c65381f7ded57c22b"
+}

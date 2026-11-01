@@ -1,0 +1,1002 @@
+=== RUN   TestM3DeterministicModel100Seeds1000Events
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-000
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-001
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-002
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-003
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-004
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-005
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-006
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-007
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-008
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-009
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-010
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-011
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-012
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-013
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-014
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-015
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-016
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-017
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-018
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-019
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-020
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-021
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-022
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-023
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-024
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-025
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-026
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-027
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-028
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-029
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-030
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-031
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-032
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-033
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-034
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-035
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-036
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-037
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-038
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-039
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-040
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-041
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-042
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-043
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-044
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-045
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-046
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-047
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-048
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-049
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-050
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-051
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-052
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-053
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-054
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-055
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-056
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-057
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-058
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-059
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-060
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-061
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-062
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-063
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-064
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-065
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-066
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-067
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-068
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-069
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-070
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-071
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-072
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-073
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-074
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-075
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-076
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-077
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-078
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-079
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-080
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-081
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-082
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-083
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-084
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-085
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-086
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-087
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-088
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-089
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-090
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-091
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-092
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-093
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-094
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-095
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-096
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-097
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-098
+=== RUN   TestM3DeterministicModel100Seeds1000Events/seed-099
+--- PASS: TestM3DeterministicModel100Seeds1000Events (0.10s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-000 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-001 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-002 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-003 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-004 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-005 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-006 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-007 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-008 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-009 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-010 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-011 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-012 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-013 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-014 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-015 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-016 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-017 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-018 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-019 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-020 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-021 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-022 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-023 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-024 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-025 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-026 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-027 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-028 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-029 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-030 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-031 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-032 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-033 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-034 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-035 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-036 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-037 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-038 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-039 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-040 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-041 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-042 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-043 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-044 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-045 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-046 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-047 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-048 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-049 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-050 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-051 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-052 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-053 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-054 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-055 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-056 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-057 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-058 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-059 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-060 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-061 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-062 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-063 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-064 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-065 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-066 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-067 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-068 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-069 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-070 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-071 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-072 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-073 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-074 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-075 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-076 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-077 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-078 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-079 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-080 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-081 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-082 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-083 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-084 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-085 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-086 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-087 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-088 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-089 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-090 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-091 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-092 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-093 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-094 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-095 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-096 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-097 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-098 (0.00s)
+    --- PASS: TestM3DeterministicModel100Seeds1000Events/seed-099 (0.00s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/raft	0.102s
+=== RUN   TestM4RandomizedISRAndGateInvariants
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-000
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-001
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-002
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-003
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-004
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-005
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-006
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-007
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-008
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-009
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-010
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-011
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-012
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-013
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-014
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-015
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-016
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-017
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-018
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-019
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-020
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-021
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-022
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-023
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-024
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-025
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-026
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-027
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-028
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-029
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-030
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-031
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-032
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-033
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-034
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-035
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-036
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-037
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-038
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-039
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-040
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-041
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-042
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-043
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-044
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-045
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-046
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-047
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-048
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-049
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-050
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-051
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-052
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-053
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-054
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-055
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-056
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-057
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-058
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-059
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-060
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-061
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-062
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-063
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-064
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-065
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-066
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-067
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-068
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-069
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-070
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-071
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-072
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-073
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-074
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-075
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-076
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-077
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-078
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-079
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-080
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-081
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-082
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-083
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-084
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-085
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-086
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-087
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-088
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-089
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-090
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-091
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-092
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-093
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-094
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-095
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-096
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-097
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-098
+=== RUN   TestM4RandomizedISRAndGateInvariants/seed-099
+--- PASS: TestM4RandomizedISRAndGateInvariants (1.61s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-000 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-001 (0.00s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-002 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-003 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-004 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-005 (0.03s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-006 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-007 (0.04s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-008 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-009 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-010 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-011 (0.00s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-012 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-013 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-014 (0.04s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-015 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-016 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-017 (0.04s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-018 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-019 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-020 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-021 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-022 (0.03s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-023 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-024 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-025 (0.03s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-026 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-027 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-028 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-029 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-030 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-031 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-032 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-033 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-034 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-035 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-036 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-037 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-038 (0.03s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-039 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-040 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-041 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-042 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-043 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-044 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-045 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-046 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-047 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-048 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-049 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-050 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-051 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-052 (0.03s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-053 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-054 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-055 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-056 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-057 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-058 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-059 (0.03s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-060 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-061 (0.00s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-062 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-063 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-064 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-065 (0.03s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-066 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-067 (0.04s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-068 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-069 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-070 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-071 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-072 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-073 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-074 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-075 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-076 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-077 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-078 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-079 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-080 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-081 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-082 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-083 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-084 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-085 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-086 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-087 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-088 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-089 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-090 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-091 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-092 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-093 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-094 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-095 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-096 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-097 (0.01s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-098 (0.02s)
+    --- PASS: TestM4RandomizedISRAndGateInvariants/seed-099 (0.03s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/replication	1.612s
+=== RUN   TestM6GroupModel100Seeds300Events
+=== PAUSE TestM6GroupModel100Seeds300Events
+=== CONT  TestM6GroupModel100Seeds300Events
+=== RUN   TestM6GroupModel100Seeds300Events/seed-000
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-000
+=== RUN   TestM6GroupModel100Seeds300Events/seed-001
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-001
+=== RUN   TestM6GroupModel100Seeds300Events/seed-002
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-002
+=== RUN   TestM6GroupModel100Seeds300Events/seed-003
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-003
+=== RUN   TestM6GroupModel100Seeds300Events/seed-004
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-004
+=== RUN   TestM6GroupModel100Seeds300Events/seed-005
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-005
+=== RUN   TestM6GroupModel100Seeds300Events/seed-006
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-006
+=== RUN   TestM6GroupModel100Seeds300Events/seed-007
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-007
+=== RUN   TestM6GroupModel100Seeds300Events/seed-008
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-008
+=== RUN   TestM6GroupModel100Seeds300Events/seed-009
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-009
+=== RUN   TestM6GroupModel100Seeds300Events/seed-010
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-010
+=== RUN   TestM6GroupModel100Seeds300Events/seed-011
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-011
+=== RUN   TestM6GroupModel100Seeds300Events/seed-012
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-012
+=== RUN   TestM6GroupModel100Seeds300Events/seed-013
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-013
+=== RUN   TestM6GroupModel100Seeds300Events/seed-014
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-014
+=== RUN   TestM6GroupModel100Seeds300Events/seed-015
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-015
+=== RUN   TestM6GroupModel100Seeds300Events/seed-016
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-016
+=== RUN   TestM6GroupModel100Seeds300Events/seed-017
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-017
+=== RUN   TestM6GroupModel100Seeds300Events/seed-018
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-018
+=== RUN   TestM6GroupModel100Seeds300Events/seed-019
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-019
+=== RUN   TestM6GroupModel100Seeds300Events/seed-020
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-020
+=== RUN   TestM6GroupModel100Seeds300Events/seed-021
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-021
+=== RUN   TestM6GroupModel100Seeds300Events/seed-022
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-022
+=== RUN   TestM6GroupModel100Seeds300Events/seed-023
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-023
+=== RUN   TestM6GroupModel100Seeds300Events/seed-024
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-024
+=== RUN   TestM6GroupModel100Seeds300Events/seed-025
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-025
+=== RUN   TestM6GroupModel100Seeds300Events/seed-026
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-026
+=== RUN   TestM6GroupModel100Seeds300Events/seed-027
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-027
+=== RUN   TestM6GroupModel100Seeds300Events/seed-028
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-028
+=== RUN   TestM6GroupModel100Seeds300Events/seed-029
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-029
+=== RUN   TestM6GroupModel100Seeds300Events/seed-030
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-030
+=== RUN   TestM6GroupModel100Seeds300Events/seed-031
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-031
+=== RUN   TestM6GroupModel100Seeds300Events/seed-032
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-032
+=== RUN   TestM6GroupModel100Seeds300Events/seed-033
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-033
+=== RUN   TestM6GroupModel100Seeds300Events/seed-034
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-034
+=== RUN   TestM6GroupModel100Seeds300Events/seed-035
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-035
+=== RUN   TestM6GroupModel100Seeds300Events/seed-036
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-036
+=== RUN   TestM6GroupModel100Seeds300Events/seed-037
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-037
+=== RUN   TestM6GroupModel100Seeds300Events/seed-038
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-038
+=== RUN   TestM6GroupModel100Seeds300Events/seed-039
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-039
+=== RUN   TestM6GroupModel100Seeds300Events/seed-040
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-040
+=== RUN   TestM6GroupModel100Seeds300Events/seed-041
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-041
+=== RUN   TestM6GroupModel100Seeds300Events/seed-042
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-042
+=== RUN   TestM6GroupModel100Seeds300Events/seed-043
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-043
+=== RUN   TestM6GroupModel100Seeds300Events/seed-044
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-044
+=== RUN   TestM6GroupModel100Seeds300Events/seed-045
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-045
+=== RUN   TestM6GroupModel100Seeds300Events/seed-046
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-046
+=== RUN   TestM6GroupModel100Seeds300Events/seed-047
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-047
+=== RUN   TestM6GroupModel100Seeds300Events/seed-048
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-048
+=== RUN   TestM6GroupModel100Seeds300Events/seed-049
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-049
+=== RUN   TestM6GroupModel100Seeds300Events/seed-050
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-050
+=== RUN   TestM6GroupModel100Seeds300Events/seed-051
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-051
+=== RUN   TestM6GroupModel100Seeds300Events/seed-052
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-052
+=== RUN   TestM6GroupModel100Seeds300Events/seed-053
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-053
+=== RUN   TestM6GroupModel100Seeds300Events/seed-054
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-054
+=== RUN   TestM6GroupModel100Seeds300Events/seed-055
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-055
+=== RUN   TestM6GroupModel100Seeds300Events/seed-056
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-056
+=== RUN   TestM6GroupModel100Seeds300Events/seed-057
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-057
+=== RUN   TestM6GroupModel100Seeds300Events/seed-058
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-058
+=== RUN   TestM6GroupModel100Seeds300Events/seed-059
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-059
+=== RUN   TestM6GroupModel100Seeds300Events/seed-060
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-060
+=== RUN   TestM6GroupModel100Seeds300Events/seed-061
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-061
+=== RUN   TestM6GroupModel100Seeds300Events/seed-062
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-062
+=== RUN   TestM6GroupModel100Seeds300Events/seed-063
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-063
+=== RUN   TestM6GroupModel100Seeds300Events/seed-064
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-064
+=== RUN   TestM6GroupModel100Seeds300Events/seed-065
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-065
+=== RUN   TestM6GroupModel100Seeds300Events/seed-066
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-066
+=== RUN   TestM6GroupModel100Seeds300Events/seed-067
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-067
+=== RUN   TestM6GroupModel100Seeds300Events/seed-068
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-068
+=== RUN   TestM6GroupModel100Seeds300Events/seed-069
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-069
+=== RUN   TestM6GroupModel100Seeds300Events/seed-070
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-070
+=== RUN   TestM6GroupModel100Seeds300Events/seed-071
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-071
+=== RUN   TestM6GroupModel100Seeds300Events/seed-072
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-072
+=== RUN   TestM6GroupModel100Seeds300Events/seed-073
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-073
+=== RUN   TestM6GroupModel100Seeds300Events/seed-074
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-074
+=== RUN   TestM6GroupModel100Seeds300Events/seed-075
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-075
+=== RUN   TestM6GroupModel100Seeds300Events/seed-076
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-076
+=== RUN   TestM6GroupModel100Seeds300Events/seed-077
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-077
+=== RUN   TestM6GroupModel100Seeds300Events/seed-078
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-078
+=== RUN   TestM6GroupModel100Seeds300Events/seed-079
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-079
+=== RUN   TestM6GroupModel100Seeds300Events/seed-080
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-080
+=== RUN   TestM6GroupModel100Seeds300Events/seed-081
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-081
+=== RUN   TestM6GroupModel100Seeds300Events/seed-082
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-082
+=== RUN   TestM6GroupModel100Seeds300Events/seed-083
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-083
+=== RUN   TestM6GroupModel100Seeds300Events/seed-084
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-084
+=== RUN   TestM6GroupModel100Seeds300Events/seed-085
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-085
+=== RUN   TestM6GroupModel100Seeds300Events/seed-086
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-086
+=== RUN   TestM6GroupModel100Seeds300Events/seed-087
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-087
+=== RUN   TestM6GroupModel100Seeds300Events/seed-088
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-088
+=== RUN   TestM6GroupModel100Seeds300Events/seed-089
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-089
+=== RUN   TestM6GroupModel100Seeds300Events/seed-090
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-090
+=== RUN   TestM6GroupModel100Seeds300Events/seed-091
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-091
+=== RUN   TestM6GroupModel100Seeds300Events/seed-092
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-092
+=== RUN   TestM6GroupModel100Seeds300Events/seed-093
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-093
+=== RUN   TestM6GroupModel100Seeds300Events/seed-094
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-094
+=== RUN   TestM6GroupModel100Seeds300Events/seed-095
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-095
+=== RUN   TestM6GroupModel100Seeds300Events/seed-096
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-096
+=== RUN   TestM6GroupModel100Seeds300Events/seed-097
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-097
+=== RUN   TestM6GroupModel100Seeds300Events/seed-098
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-098
+=== RUN   TestM6GroupModel100Seeds300Events/seed-099
+=== PAUSE TestM6GroupModel100Seeds300Events/seed-099
+=== CONT  TestM6GroupModel100Seeds300Events/seed-000
+=== CONT  TestM6GroupModel100Seeds300Events/seed-050
+=== NAME  TestM6GroupModel100Seeds300Events/seed-000
+    model_test.go:49: commits committed=14 illegal_generation=23 other_rejection=35 unknown=12 failovers=13 final_generation=36
+=== CONT  TestM6GroupModel100Seeds300Events/seed-099
+=== NAME  TestM6GroupModel100Seeds300Events/seed-050
+    model_test.go:49: commits committed=13 illegal_generation=21 other_rejection=39 unknown=14 failovers=15 final_generation=33
+=== CONT  TestM6GroupModel100Seeds300Events/seed-098
+    model_test.go:49: commits committed=18 illegal_generation=32 other_rejection=28 unknown=12 failovers=13 final_generation=36
+=== CONT  TestM6GroupModel100Seeds300Events/seed-097
+=== NAME  TestM6GroupModel100Seeds300Events/seed-099
+    model_test.go:49: commits committed=13 illegal_generation=29 other_rejection=35 unknown=16 failovers=17 final_generation=39
+=== CONT  TestM6GroupModel100Seeds300Events/seed-096
+    model_test.go:49: commits committed=17 illegal_generation=28 other_rejection=37 unknown=15 failovers=16 final_generation=33
+=== CONT  TestM6GroupModel100Seeds300Events/seed-095
+=== NAME  TestM6GroupModel100Seeds300Events/seed-097
+    model_test.go:49: commits committed=9 illegal_generation=22 other_rejection=41 unknown=20 failovers=21 final_generation=45
+=== CONT  TestM6GroupModel100Seeds300Events/seed-094
+=== NAME  TestM6GroupModel100Seeds300Events/seed-095
+    model_test.go:49: commits committed=15 illegal_generation=22 other_rejection=46 unknown=13 failovers=14 final_generation=37
+=== CONT  TestM6GroupModel100Seeds300Events/seed-093
+=== NAME  TestM6GroupModel100Seeds300Events/seed-094
+    model_test.go:49: commits committed=11 illegal_generation=33 other_rejection=18 unknown=12 failovers=13 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-092
+=== NAME  TestM6GroupModel100Seeds300Events/seed-093
+    model_test.go:49: commits committed=8 illegal_generation=21 other_rejection=38 unknown=15 failovers=16 final_generation=39
+=== CONT  TestM6GroupModel100Seeds300Events/seed-091
+=== NAME  TestM6GroupModel100Seeds300Events/seed-092
+    model_test.go:49: commits committed=14 illegal_generation=37 other_rejection=29 unknown=15 failovers=16 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-090
+=== NAME  TestM6GroupModel100Seeds300Events/seed-091
+    model_test.go:49: commits committed=19 illegal_generation=24 other_rejection=28 unknown=13 failovers=14 final_generation=43
+=== CONT  TestM6GroupModel100Seeds300Events/seed-089
+=== NAME  TestM6GroupModel100Seeds300Events/seed-090
+    model_test.go:49: commits committed=12 illegal_generation=29 other_rejection=31 unknown=14 failovers=15 final_generation=43
+=== CONT  TestM6GroupModel100Seeds300Events/seed-088
+    model_test.go:49: commits committed=7 illegal_generation=25 other_rejection=33 unknown=18 failovers=19 final_generation=47
+=== CONT  TestM6GroupModel100Seeds300Events/seed-087
+=== NAME  TestM6GroupModel100Seeds300Events/seed-089
+    model_test.go:49: commits committed=12 illegal_generation=24 other_rejection=34 unknown=10 failovers=11 final_generation=32
+=== CONT  TestM6GroupModel100Seeds300Events/seed-086
+    model_test.go:49: commits committed=8 illegal_generation=28 other_rejection=40 unknown=20 failovers=21 final_generation=49
+=== CONT  TestM6GroupModel100Seeds300Events/seed-085
+=== NAME  TestM6GroupModel100Seeds300Events/seed-087
+    model_test.go:49: commits committed=17 illegal_generation=24 other_rejection=47 unknown=18 failovers=19 final_generation=42
+=== CONT  TestM6GroupModel100Seeds300Events/seed-084
+=== NAME  TestM6GroupModel100Seeds300Events/seed-085
+    model_test.go:49: commits committed=12 illegal_generation=29 other_rejection=38 unknown=10 failovers=11 final_generation=30
+=== CONT  TestM6GroupModel100Seeds300Events/seed-083
+=== NAME  TestM6GroupModel100Seeds300Events/seed-084
+    model_test.go:49: commits committed=12 illegal_generation=25 other_rejection=40 unknown=12 failovers=13 final_generation=32
+=== CONT  TestM6GroupModel100Seeds300Events/seed-082
+=== NAME  TestM6GroupModel100Seeds300Events/seed-083
+    model_test.go:49: commits committed=16 illegal_generation=30 other_rejection=34 unknown=13 failovers=14 final_generation=32
+=== CONT  TestM6GroupModel100Seeds300Events/seed-081
+=== NAME  TestM6GroupModel100Seeds300Events/seed-082
+    model_test.go:49: commits committed=15 illegal_generation=17 other_rejection=47 unknown=6 failovers=7 final_generation=33
+=== CONT  TestM6GroupModel100Seeds300Events/seed-080
+=== NAME  TestM6GroupModel100Seeds300Events/seed-081
+    model_test.go:49: commits committed=13 illegal_generation=25 other_rejection=42 unknown=16 failovers=17 final_generation=36
+=== CONT  TestM6GroupModel100Seeds300Events/seed-079
+=== NAME  TestM6GroupModel100Seeds300Events/seed-080
+    model_test.go:49: commits committed=11 illegal_generation=17 other_rejection=44 unknown=9 failovers=10 final_generation=23
+=== CONT  TestM6GroupModel100Seeds300Events/seed-078
+=== NAME  TestM6GroupModel100Seeds300Events/seed-079
+    model_test.go:49: commits committed=10 illegal_generation=18 other_rejection=36 unknown=7 failovers=8 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-077
+=== NAME  TestM6GroupModel100Seeds300Events/seed-078
+    model_test.go:49: commits committed=12 illegal_generation=31 other_rejection=34 unknown=7 failovers=8 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-076
+    model_test.go:49: commits committed=16 illegal_generation=22 other_rejection=39 unknown=17 failovers=18 final_generation=35
+=== CONT  TestM6GroupModel100Seeds300Events/seed-075
+=== NAME  TestM6GroupModel100Seeds300Events/seed-077
+    model_test.go:49: commits committed=14 illegal_generation=20 other_rejection=38 unknown=16 failovers=16 final_generation=37
+=== CONT  TestM6GroupModel100Seeds300Events/seed-074
+=== NAME  TestM6GroupModel100Seeds300Events/seed-075
+    model_test.go:49: commits committed=15 illegal_generation=26 other_rejection=37 unknown=22 failovers=23 final_generation=40
+=== CONT  TestM6GroupModel100Seeds300Events/seed-073
+=== NAME  TestM6GroupModel100Seeds300Events/seed-074
+    model_test.go:49: commits committed=15 illegal_generation=20 other_rejection=43 unknown=20 failovers=21 final_generation=45
+=== CONT  TestM6GroupModel100Seeds300Events/seed-072
+=== NAME  TestM6GroupModel100Seeds300Events/seed-073
+    model_test.go:49: commits committed=11 illegal_generation=28 other_rejection=44 unknown=14 failovers=15 final_generation=41
+=== CONT  TestM6GroupModel100Seeds300Events/seed-071
+=== NAME  TestM6GroupModel100Seeds300Events/seed-072
+    model_test.go:49: commits committed=9 illegal_generation=26 other_rejection=45 unknown=16 failovers=17 final_generation=42
+=== CONT  TestM6GroupModel100Seeds300Events/seed-070
+=== NAME  TestM6GroupModel100Seeds300Events/seed-071
+    model_test.go:49: commits committed=8 illegal_generation=17 other_rejection=26 unknown=10 failovers=11 final_generation=40
+=== CONT  TestM6GroupModel100Seeds300Events/seed-069
+=== NAME  TestM6GroupModel100Seeds300Events/seed-070
+    model_test.go:49: commits committed=11 illegal_generation=26 other_rejection=33 unknown=9 failovers=10 final_generation=38
+=== CONT  TestM6GroupModel100Seeds300Events/seed-068
+=== NAME  TestM6GroupModel100Seeds300Events/seed-069
+    model_test.go:49: commits committed=16 illegal_generation=31 other_rejection=36 unknown=9 failovers=10 final_generation=24
+=== CONT  TestM6GroupModel100Seeds300Events/seed-067
+=== NAME  TestM6GroupModel100Seeds300Events/seed-068
+    model_test.go:49: commits committed=11 illegal_generation=25 other_rejection=29 unknown=16 failovers=17 final_generation=41
+=== CONT  TestM6GroupModel100Seeds300Events/seed-066
+=== NAME  TestM6GroupModel100Seeds300Events/seed-067
+    model_test.go:49: commits committed=12 illegal_generation=22 other_rejection=42 unknown=12 failovers=13 final_generation=28
+=== CONT  TestM6GroupModel100Seeds300Events/seed-065
+=== NAME  TestM6GroupModel100Seeds300Events/seed-066
+    model_test.go:49: commits committed=16 illegal_generation=21 other_rejection=30 unknown=15 failovers=16 final_generation=44
+=== CONT  TestM6GroupModel100Seeds300Events/seed-064
+=== NAME  TestM6GroupModel100Seeds300Events/seed-065
+    model_test.go:49: commits committed=13 illegal_generation=32 other_rejection=33 unknown=13 failovers=14 final_generation=45
+=== CONT  TestM6GroupModel100Seeds300Events/seed-063
+=== NAME  TestM6GroupModel100Seeds300Events/seed-064
+    model_test.go:49: commits committed=13 illegal_generation=35 other_rejection=27 unknown=15 failovers=16 final_generation=41
+=== CONT  TestM6GroupModel100Seeds300Events/seed-062
+=== NAME  TestM6GroupModel100Seeds300Events/seed-063
+    model_test.go:49: commits committed=19 illegal_generation=29 other_rejection=30 unknown=16 failovers=17 final_generation=38
+=== CONT  TestM6GroupModel100Seeds300Events/seed-061
+=== NAME  TestM6GroupModel100Seeds300Events/seed-062
+    model_test.go:49: commits committed=18 illegal_generation=22 other_rejection=43 unknown=16 failovers=17 final_generation=33
+=== CONT  TestM6GroupModel100Seeds300Events/seed-060
+=== NAME  TestM6GroupModel100Seeds300Events/seed-061
+    model_test.go:49: commits committed=14 illegal_generation=34 other_rejection=38 unknown=15 failovers=16 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-059
+    model_test.go:49: commits committed=15 illegal_generation=27 other_rejection=34 unknown=13 failovers=14 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-058
+=== NAME  TestM6GroupModel100Seeds300Events/seed-060
+    model_test.go:49: commits committed=17 illegal_generation=18 other_rejection=43 unknown=8 failovers=9 final_generation=27
+=== CONT  TestM6GroupModel100Seeds300Events/seed-057
+    model_test.go:49: commits committed=14 illegal_generation=27 other_rejection=32 unknown=11 failovers=12 final_generation=29
+=== CONT  TestM6GroupModel100Seeds300Events/seed-056
+=== NAME  TestM6GroupModel100Seeds300Events/seed-058
+    model_test.go:49: commits committed=13 illegal_generation=23 other_rejection=51 unknown=20 failovers=21 final_generation=43
+=== CONT  TestM6GroupModel100Seeds300Events/seed-055
+=== NAME  TestM6GroupModel100Seeds300Events/seed-056
+    model_test.go:49: commits committed=12 illegal_generation=17 other_rejection=46 unknown=12 failovers=13 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-054
+=== NAME  TestM6GroupModel100Seeds300Events/seed-055
+    model_test.go:49: commits committed=14 illegal_generation=25 other_rejection=34 unknown=13 failovers=14 final_generation=40
+=== CONT  TestM6GroupModel100Seeds300Events/seed-053
+=== NAME  TestM6GroupModel100Seeds300Events/seed-054
+    model_test.go:49: commits committed=17 illegal_generation=18 other_rejection=53 unknown=11 failovers=12 final_generation=24
+=== CONT  TestM6GroupModel100Seeds300Events/seed-052
+=== NAME  TestM6GroupModel100Seeds300Events/seed-053
+    model_test.go:49: commits committed=11 illegal_generation=30 other_rejection=39 unknown=15 failovers=16 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-051
+=== NAME  TestM6GroupModel100Seeds300Events/seed-052
+    model_test.go:49: commits committed=13 illegal_generation=24 other_rejection=26 unknown=14 failovers=15 final_generation=37
+=== CONT  TestM6GroupModel100Seeds300Events/seed-025
+=== NAME  TestM6GroupModel100Seeds300Events/seed-051
+    model_test.go:49: commits committed=14 illegal_generation=29 other_rejection=35 unknown=10 failovers=11 final_generation=32
+=== CONT  TestM6GroupModel100Seeds300Events/seed-049
+=== NAME  TestM6GroupModel100Seeds300Events/seed-025
+    model_test.go:49: commits committed=18 illegal_generation=21 other_rejection=34 unknown=18 failovers=19 final_generation=36
+=== CONT  TestM6GroupModel100Seeds300Events/seed-048
+=== NAME  TestM6GroupModel100Seeds300Events/seed-049
+    model_test.go:49: commits committed=12 illegal_generation=19 other_rejection=40 unknown=11 failovers=12 final_generation=37
+=== CONT  TestM6GroupModel100Seeds300Events/seed-047
+=== NAME  TestM6GroupModel100Seeds300Events/seed-048
+    model_test.go:49: commits committed=13 illegal_generation=22 other_rejection=31 unknown=14 failovers=15 final_generation=44
+=== CONT  TestM6GroupModel100Seeds300Events/seed-046
+=== NAME  TestM6GroupModel100Seeds300Events/seed-047
+    model_test.go:49: commits committed=12 illegal_generation=20 other_rejection=53 unknown=13 failovers=14 final_generation=44
+=== CONT  TestM6GroupModel100Seeds300Events/seed-045
+=== NAME  TestM6GroupModel100Seeds300Events/seed-046
+    model_test.go:49: commits committed=11 illegal_generation=29 other_rejection=43 unknown=17 failovers=18 final_generation=40
+=== CONT  TestM6GroupModel100Seeds300Events/seed-044
+=== NAME  TestM6GroupModel100Seeds300Events/seed-045
+    model_test.go:49: commits committed=12 illegal_generation=26 other_rejection=46 unknown=10 failovers=11 final_generation=40
+=== CONT  TestM6GroupModel100Seeds300Events/seed-043
+=== NAME  TestM6GroupModel100Seeds300Events/seed-044
+    model_test.go:49: commits committed=15 illegal_generation=19 other_rejection=33 unknown=13 failovers=14 final_generation=46
+=== CONT  TestM6GroupModel100Seeds300Events/seed-042
+=== NAME  TestM6GroupModel100Seeds300Events/seed-043
+    model_test.go:49: commits committed=13 illegal_generation=21 other_rejection=42 unknown=22 failovers=23 final_generation=45
+=== CONT  TestM6GroupModel100Seeds300Events/seed-041
+=== NAME  TestM6GroupModel100Seeds300Events/seed-042
+    model_test.go:49: commits committed=11 illegal_generation=26 other_rejection=33 unknown=14 failovers=15 final_generation=38
+=== CONT  TestM6GroupModel100Seeds300Events/seed-040
+=== NAME  TestM6GroupModel100Seeds300Events/seed-041
+    model_test.go:49: commits committed=12 illegal_generation=24 other_rejection=36 unknown=14 failovers=15 final_generation=37
+=== CONT  TestM6GroupModel100Seeds300Events/seed-039
+=== NAME  TestM6GroupModel100Seeds300Events/seed-040
+    model_test.go:49: commits committed=17 illegal_generation=25 other_rejection=31 unknown=7 failovers=8 final_generation=38
+=== CONT  TestM6GroupModel100Seeds300Events/seed-038
+=== NAME  TestM6GroupModel100Seeds300Events/seed-039
+    model_test.go:49: commits committed=11 illegal_generation=27 other_rejection=44 unknown=12 failovers=13 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-037
+=== NAME  TestM6GroupModel100Seeds300Events/seed-038
+    model_test.go:49: commits committed=15 illegal_generation=19 other_rejection=35 unknown=15 failovers=16 final_generation=36
+=== CONT  TestM6GroupModel100Seeds300Events/seed-036
+=== NAME  TestM6GroupModel100Seeds300Events/seed-037
+    model_test.go:49: commits committed=16 illegal_generation=35 other_rejection=34 unknown=12 failovers=13 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-035
+    model_test.go:49: commits committed=8 illegal_generation=22 other_rejection=42 unknown=14 failovers=15 final_generation=32
+=== CONT  TestM6GroupModel100Seeds300Events/seed-034
+=== NAME  TestM6GroupModel100Seeds300Events/seed-036
+    model_test.go:49: commits committed=11 illegal_generation=24 other_rejection=46 unknown=14 failovers=14 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-033
+    model_test.go:49: commits committed=15 illegal_generation=28 other_rejection=50 unknown=9 failovers=9 final_generation=27
+=== CONT  TestM6GroupModel100Seeds300Events/seed-032
+=== NAME  TestM6GroupModel100Seeds300Events/seed-034
+    model_test.go:49: commits committed=16 illegal_generation=22 other_rejection=25 unknown=12 failovers=13 final_generation=47
+=== CONT  TestM6GroupModel100Seeds300Events/seed-031
+=== NAME  TestM6GroupModel100Seeds300Events/seed-032
+    model_test.go:49: commits committed=17 illegal_generation=36 other_rejection=28 unknown=10 failovers=11 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-030
+=== NAME  TestM6GroupModel100Seeds300Events/seed-031
+    model_test.go:49: commits committed=14 illegal_generation=18 other_rejection=43 unknown=13 failovers=14 final_generation=37
+=== CONT  TestM6GroupModel100Seeds300Events/seed-029
+=== NAME  TestM6GroupModel100Seeds300Events/seed-030
+    model_test.go:49: commits committed=17 illegal_generation=17 other_rejection=36 unknown=13 failovers=14 final_generation=32
+=== CONT  TestM6GroupModel100Seeds300Events/seed-028
+=== NAME  TestM6GroupModel100Seeds300Events/seed-029
+    model_test.go:49: commits committed=10 illegal_generation=21 other_rejection=34 unknown=12 failovers=13 final_generation=35
+=== CONT  TestM6GroupModel100Seeds300Events/seed-027
+=== NAME  TestM6GroupModel100Seeds300Events/seed-028
+    model_test.go:49: commits committed=8 illegal_generation=13 other_rejection=50 unknown=12 failovers=13 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-026
+=== NAME  TestM6GroupModel100Seeds300Events/seed-027
+    model_test.go:49: commits committed=13 illegal_generation=19 other_rejection=37 unknown=8 failovers=9 final_generation=33
+=== CONT  TestM6GroupModel100Seeds300Events/seed-012
+=== NAME  TestM6GroupModel100Seeds300Events/seed-026
+    model_test.go:49: commits committed=8 illegal_generation=18 other_rejection=32 unknown=22 failovers=23 final_generation=43
+=== CONT  TestM6GroupModel100Seeds300Events/seed-024
+=== NAME  TestM6GroupModel100Seeds300Events/seed-012
+    model_test.go:49: commits committed=12 illegal_generation=20 other_rejection=46 unknown=12 failovers=12 final_generation=33
+=== CONT  TestM6GroupModel100Seeds300Events/seed-023
+=== NAME  TestM6GroupModel100Seeds300Events/seed-024
+    model_test.go:49: commits committed=19 illegal_generation=15 other_rejection=43 unknown=16 failovers=17 final_generation=32
+=== CONT  TestM6GroupModel100Seeds300Events/seed-022
+=== NAME  TestM6GroupModel100Seeds300Events/seed-023
+    model_test.go:49: commits committed=10 illegal_generation=20 other_rejection=30 unknown=12 failovers=13 final_generation=45
+=== CONT  TestM6GroupModel100Seeds300Events/seed-021
+=== NAME  TestM6GroupModel100Seeds300Events/seed-022
+    model_test.go:49: commits committed=11 illegal_generation=23 other_rejection=27 unknown=14 failovers=15 final_generation=40
+=== CONT  TestM6GroupModel100Seeds300Events/seed-020
+=== NAME  TestM6GroupModel100Seeds300Events/seed-021
+    model_test.go:49: commits committed=15 illegal_generation=32 other_rejection=33 unknown=9 failovers=10 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-019
+=== NAME  TestM6GroupModel100Seeds300Events/seed-020
+    model_test.go:49: commits committed=12 illegal_generation=28 other_rejection=42 unknown=8 failovers=9 final_generation=39
+=== CONT  TestM6GroupModel100Seeds300Events/seed-018
+=== NAME  TestM6GroupModel100Seeds300Events/seed-019
+    model_test.go:49: commits committed=17 illegal_generation=17 other_rejection=32 unknown=14 failovers=15 final_generation=42
+=== CONT  TestM6GroupModel100Seeds300Events/seed-017
+=== NAME  TestM6GroupModel100Seeds300Events/seed-018
+    model_test.go:49: commits committed=16 illegal_generation=23 other_rejection=46 unknown=13 failovers=14 final_generation=40
+=== CONT  TestM6GroupModel100Seeds300Events/seed-016
+=== NAME  TestM6GroupModel100Seeds300Events/seed-017
+    model_test.go:49: commits committed=25 illegal_generation=15 other_rejection=25 unknown=11 failovers=11 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-015
+=== NAME  TestM6GroupModel100Seeds300Events/seed-016
+    model_test.go:49: commits committed=10 illegal_generation=27 other_rejection=30 unknown=16 failovers=17 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-014
+=== NAME  TestM6GroupModel100Seeds300Events/seed-015
+    model_test.go:49: commits committed=14 illegal_generation=33 other_rejection=25 unknown=7 failovers=7 final_generation=39
+=== CONT  TestM6GroupModel100Seeds300Events/seed-013
+    model_test.go:49: commits committed=12 illegal_generation=21 other_rejection=42 unknown=7 failovers=8 final_generation=28
+=== CONT  TestM6GroupModel100Seeds300Events/seed-006
+=== NAME  TestM6GroupModel100Seeds300Events/seed-014
+    model_test.go:49: commits committed=15 illegal_generation=27 other_rejection=43 unknown=12 failovers=13 final_generation=29
+=== CONT  TestM6GroupModel100Seeds300Events/seed-011
+=== NAME  TestM6GroupModel100Seeds300Events/seed-006
+    model_test.go:49: commits committed=11 illegal_generation=23 other_rejection=30 unknown=9 failovers=10 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-010
+=== NAME  TestM6GroupModel100Seeds300Events/seed-011
+    model_test.go:49: commits committed=13 illegal_generation=26 other_rejection=34 unknown=10 failovers=11 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-009
+=== NAME  TestM6GroupModel100Seeds300Events/seed-010
+    model_test.go:49: commits committed=9 illegal_generation=26 other_rejection=51 unknown=10 failovers=11 final_generation=36
+=== CONT  TestM6GroupModel100Seeds300Events/seed-008
+=== NAME  TestM6GroupModel100Seeds300Events/seed-009
+    model_test.go:49: commits committed=15 illegal_generation=25 other_rejection=37 unknown=11 failovers=12 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-007
+=== NAME  TestM6GroupModel100Seeds300Events/seed-008
+    model_test.go:49: commits committed=13 illegal_generation=29 other_rejection=45 unknown=11 failovers=11 final_generation=38
+=== CONT  TestM6GroupModel100Seeds300Events/seed-003
+=== NAME  TestM6GroupModel100Seeds300Events/seed-007
+    model_test.go:49: commits committed=12 illegal_generation=21 other_rejection=31 unknown=12 failovers=13 final_generation=31
+=== CONT  TestM6GroupModel100Seeds300Events/seed-005
+    model_test.go:49: commits committed=17 illegal_generation=24 other_rejection=41 unknown=11 failovers=12 final_generation=39
+=== CONT  TestM6GroupModel100Seeds300Events/seed-004
+=== NAME  TestM6GroupModel100Seeds300Events/seed-003
+    model_test.go:49: commits committed=18 illegal_generation=34 other_rejection=37 unknown=9 failovers=10 final_generation=34
+=== CONT  TestM6GroupModel100Seeds300Events/seed-001
+    model_test.go:49: commits committed=12 illegal_generation=26 other_rejection=22 unknown=13 failovers=14 final_generation=38
+=== CONT  TestM6GroupModel100Seeds300Events/seed-002
+=== NAME  TestM6GroupModel100Seeds300Events/seed-004
+    model_test.go:49: commits committed=15 illegal_generation=29 other_rejection=30 unknown=15 failovers=16 final_generation=44
+=== NAME  TestM6GroupModel100Seeds300Events/seed-002
+    model_test.go:49: commits committed=9 illegal_generation=19 other_rejection=36 unknown=16 failovers=17 final_generation=45
+--- PASS: TestM6GroupModel100Seeds300Events (0.00s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-000 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-050 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-098 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-099 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-096 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-097 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-095 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-094 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-093 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-092 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-091 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-090 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-088 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-089 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-086 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-087 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-085 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-084 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-083 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-082 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-081 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-080 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-079 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-078 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-076 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-077 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-075 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-074 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-073 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-072 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-071 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-070 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-069 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-068 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-067 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-066 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-065 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-064 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-063 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-062 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-061 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-059 (0.01s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-060 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-057 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-058 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-056 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-055 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-054 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-053 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-052 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-051 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-025 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-049 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-048 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-047 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-046 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-045 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-044 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-043 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-042 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-041 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-040 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-039 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-038 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-037 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-035 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-036 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-033 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-034 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-032 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-031 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-030 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-029 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-028 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-027 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-026 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-012 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-024 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-023 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-022 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-021 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-020 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-019 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-018 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-017 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-016 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-015 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-013 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-014 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-006 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-011 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-010 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-009 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-008 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-007 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-005 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-003 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-001 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-004 (0.02s)
+    --- PASS: TestM6GroupModel100Seeds300Events/seed-002 (0.01s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/group	0.920s

@@ -465,6 +465,9 @@ func (tx transaction) LoadWorkItem(ctx context.Context, projectID domain.Project
 
 func (tx transaction) LoadCompletionMaterial(ctx context.Context, query port.CompletionMaterialQuery) (port.CompletionMaterial, error) {
 	var material port.CompletionMaterial
+	if query.MaximumRecords > 1024 {
+		return material, domain.StorageCorruptionError{Reason: "completion metadata limit exceeds capacity"}
+	}
 	item, err := tx.LoadWorkItem(ctx, query.ProjectID, query.WorkItemID)
 	if err != nil {
 		return material, err
@@ -507,11 +510,15 @@ WHERE c.project_id=? AND (?='' OR c.candidate_id=?) AND (?='' OR c.run_id=?) AND
 	}
 	material.ActiveOrUnknownRun = activeOrUnknown != 0
 
-	rows, err := tx.conn.QueryContext(ctx, `SELECT ac_id,revision_digest FROM work_item_ac_requirements WHERE project_id=? AND work_item_id=? ORDER BY ac_id,revision_digest`, query.ProjectID, query.WorkItemID)
+	rows, err := tx.conn.QueryContext(ctx, `SELECT ac_id,revision_digest FROM work_item_ac_requirements WHERE project_id=? AND work_item_id=? ORDER BY ac_id,revision_digest LIMIT ?`, query.ProjectID, query.WorkItemID, completionRowLimit(query))
 	if err != nil {
 		return port.CompletionMaterial{}, normalizeError(err)
 	}
 	for rows.Next() {
+		if completionRowsExceeded(query, len(material.RequiredACRevisions)) {
+			rows.Close()
+			return port.CompletionMaterial{}, domain.StorageCorruptionError{Reason: "completion requirement metadata exceeds capacity"}
+		}
 		var requirement port.ACRequirement
 		var digest string
 		if err := rows.Scan(&requirement.ACID, &digest); err != nil {
@@ -560,22 +567,66 @@ WHERE c.project_id=? AND (?='' OR c.candidate_id=?) AND (?='' OR c.run_id=?) AND
 	if err := tx.loadApprovals(ctx, query, &material); err != nil {
 		return port.CompletionMaterial{}, err
 	}
-	var candidateArtifactCount, unavailableCount int
-	if err := tx.conn.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(CASE WHEN a.availability<>'Present' THEN 1 ELSE 0 END),0) FROM candidate_artifacts ca JOIN artifacts a ON a.digest=ca.artifact_digest WHERE ca.project_id=? AND ca.candidate_id=?`, query.ProjectID, query.CandidateID).Scan(&candidateArtifactCount, &unavailableCount); err != nil {
-		return port.CompletionMaterial{}, normalizeError(err)
+	if err := tx.loadCandidateArtifacts(ctx, query, &material); err != nil {
+		return port.CompletionMaterial{}, err
 	}
-	material.CandidateAvailable = material.CandidatePresent && candidateArtifactCount > 0 && unavailableCount == 0
 	return material, nil
+}
+
+func completionRowLimit(query port.CompletionMaterialQuery) int64 {
+	if query.MaximumRecords == 0 {
+		return -1
+	}
+	return int64(query.MaximumRecords) + 1
+}
+
+func completionRowsExceeded(query port.CompletionMaterialQuery, count int) bool {
+	return query.MaximumRecords > 0 && uint64(count) >= query.MaximumRecords
+}
+
+func (tx transaction) loadCandidateArtifacts(ctx context.Context, query port.CompletionMaterialQuery, material *port.CompletionMaterial) error {
+	maximumCandidateArtifacts := 1024
+	if query.MaximumRecords > 0 {
+		maximumCandidateArtifacts = int(query.MaximumRecords)
+	}
+	rows, err := tx.conn.QueryContext(ctx, `SELECT a.digest,a.media_type,a.byte_length,a.storage_key,a.availability
+FROM candidate_artifacts ca JOIN artifacts a ON a.digest=ca.artifact_digest
+WHERE ca.project_id=? AND ca.candidate_id=? ORDER BY a.digest LIMIT ?`, query.ProjectID, query.CandidateID, maximumCandidateArtifacts+1)
+	if err != nil {
+		return normalizeError(err)
+	}
+	defer rows.Close()
+	available := material.CandidatePresent
+	for rows.Next() {
+		var artifact port.Artifact
+		var digest string
+		var length int64
+		if err := rows.Scan(&digest, &artifact.MediaType, &length, &artifact.StorageKey, &artifact.Availability); err != nil {
+			return normalizeError(err)
+		}
+		artifact.Digest, err = ParseStorageDigest(digest)
+		if err != nil || length < 0 || len(material.CandidateArtifacts) == maximumCandidateArtifacts {
+			return domain.StorageCorruptionError{Reason: "invalid or excessive candidate artifact metadata"}
+		}
+		artifact.ByteLength = uint64(length)
+		available = available && artifact.Availability == "Present"
+		material.CandidateArtifacts = append(material.CandidateArtifacts, artifact)
+	}
+	material.CandidateAvailable = available && len(material.CandidateArtifacts) > 0
+	return normalizeError(rows.Err())
 }
 
 func (tx transaction) loadEvidence(ctx context.Context, query port.CompletionMaterialQuery, material *port.CompletionMaterial) error {
 	rows, err := tx.conn.QueryContext(ctx, `SELECT e.evidence_id,e.ac_id,e.ac_revision_digest,e.verdict,e.applicability,e.availability,e.verifier_class,e.verifier_actor,e.verifier_role,e.recipe_digest,e.environment_digest,e.artifact_digest,a.media_type,a.byte_length,a.storage_key,a.availability
-FROM evidence e LEFT JOIN artifacts a ON a.digest=e.artifact_digest WHERE e.project_id=? AND e.completion_subject_digest=? ORDER BY e.evidence_id`, query.ProjectID, query.SubjectDigest.String())
+FROM evidence e LEFT JOIN artifacts a ON a.digest=e.artifact_digest WHERE e.project_id=? AND e.completion_subject_digest=? ORDER BY e.evidence_id LIMIT ?`, query.ProjectID, query.SubjectDigest.String(), completionRowLimit(query))
 	if err != nil {
 		return normalizeError(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
+		if completionRowsExceeded(query, len(material.Evidence)) {
+			return domain.StorageCorruptionError{Reason: "completion evidence metadata exceeds capacity"}
+		}
 		var value port.Evidence
 		var acDigest, recipeDigest, environmentDigest string
 		var artifactDigest, mediaType, storageKey, artifactAvailability sql.NullString
@@ -606,12 +657,15 @@ FROM evidence e LEFT JOIN artifacts a ON a.digest=e.artifact_digest WHERE e.proj
 }
 
 func (tx transaction) loadReviews(ctx context.Context, query port.CompletionMaterialQuery, material *port.CompletionMaterial) error {
-	rows, err := tx.conn.QueryContext(ctx, `SELECT review_id,verdict,reviewer_id,independent,created_at_ns FROM reviews WHERE project_id=? AND completion_subject_digest=? ORDER BY created_at_ns,review_id`, query.ProjectID, query.SubjectDigest.String())
+	rows, err := tx.conn.QueryContext(ctx, `SELECT review_id,verdict,reviewer_id,independent,created_at_ns FROM reviews WHERE project_id=? AND completion_subject_digest=? ORDER BY created_at_ns,review_id LIMIT ?`, query.ProjectID, query.SubjectDigest.String(), completionRowLimit(query))
 	if err != nil {
 		return normalizeError(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
+		if completionRowsExceeded(query, len(material.Reviews)) {
+			return domain.StorageCorruptionError{Reason: "completion review metadata exceeds capacity"}
+		}
 		var review port.Review
 		if err := rows.Scan(&review.ID, &review.Verdict, &review.Reviewer, &review.Independent, &review.CreatedAtNS); err != nil {
 			return normalizeError(err)
@@ -623,12 +677,15 @@ func (tx transaction) loadReviews(ctx context.Context, query port.CompletionMate
 }
 
 func (tx transaction) loadApprovals(ctx context.Context, query port.CompletionMaterialQuery, material *port.CompletionMaterial) error {
-	rows, err := tx.conn.QueryContext(ctx, `SELECT approval_id,command_kind,actor_id,expires_at_ns FROM approvals WHERE project_id=? AND completion_subject_digest=? ORDER BY approval_id`, query.ProjectID, query.SubjectDigest.String())
+	rows, err := tx.conn.QueryContext(ctx, `SELECT approval_id,command_kind,actor_id,expires_at_ns FROM approvals WHERE project_id=? AND completion_subject_digest=? ORDER BY approval_id LIMIT ?`, query.ProjectID, query.SubjectDigest.String(), completionRowLimit(query))
 	if err != nil {
 		return normalizeError(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
+		if completionRowsExceeded(query, len(material.Approvals)) {
+			return domain.StorageCorruptionError{Reason: "completion approval metadata exceeds capacity"}
+		}
 		var approval port.Approval
 		if err := rows.Scan(&approval.ID, &approval.CommandKind, &approval.Actor, &approval.ExpiresAtNS); err != nil {
 			return normalizeError(err)
@@ -1213,45 +1270,6 @@ func configure(conn *sql.Conn, ctx context.Context) error {
 	if foreignKeys != 1 || strings.ToLower(journalMode) != "wal" || synchronous != 2 || busyTimeout != busyTimeoutMS {
 		return fmt.Errorf("SQLite pragma assertion failed")
 	}
-	return nil
-}
-
-func migrate(conn *sql.Conn, ctx context.Context, appliedAtNS int64) error {
-	if _, err := conn.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations (
-version INTEGER PRIMARY KEY CHECK(version > 0), checksum TEXT NOT NULL UNIQUE, applied_at_ns INTEGER NOT NULL)`); err != nil {
-		return normalizeError(err)
-	}
-	checksum := migrationChecksum()
-	var applied string
-	err := conn.QueryRowContext(ctx, "SELECT checksum FROM schema_migrations WHERE version = ?", migrationVersion).Scan(&applied)
-	if err == nil {
-		if applied != checksum {
-			return fmt.Errorf("schema migration checksum mismatch")
-		}
-		return nil
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return normalizeError(err)
-	}
-	if _, err := conn.ExecContext(ctx, "BEGIN IMMEDIATE"); err != nil {
-		return normalizeError(err)
-	}
-	committed := false
-	defer func() {
-		if !committed {
-			_, _ = conn.ExecContext(context.Background(), "ROLLBACK")
-		}
-	}()
-	if _, err := conn.ExecContext(ctx, v1Migration); err != nil {
-		return normalizeError(err)
-	}
-	if _, err := conn.ExecContext(ctx, "INSERT INTO schema_migrations (version, checksum, applied_at_ns) VALUES (?, ?, ?)", migrationVersion, checksum, appliedAtNS); err != nil {
-		return normalizeError(err)
-	}
-	if _, err := conn.ExecContext(ctx, "COMMIT"); err != nil {
-		return normalizeError(err)
-	}
-	committed = true
 	return nil
 }
 

@@ -12,7 +12,7 @@
 
 | ID | 任務 | 依賴 | 允許路徑 | 驗收 |
 |---|---|---|---|---|
-| P0-01 | Repo 初始化：`go.mod`、`Makefile`、`.golangci.yml`、`.github/workflows/ci.yml`、`AGENTS.md`、目錄骨架 | — | 全域（僅新建） | `make lint test` 通過（空測試） |
+| P0-01 | Repo 初始化：`go.mod`、`Makefile`、`.golangci.yml`、monorepo 根目錄的 [`.github/workflows/prism-ci.yml`](../../../../.github/workflows/prism-ci.yml)、`AGENTS.md`、目錄骨架 | — | 全域（僅新建） | `make lint test` 通過（空測試） |
 | P0-02 | `pkg/utm`：全部型別 + `time.go` 轉換函式 + 單元測試。**逐字規格見 `14-SPI-GO-REFERENCE.md` §1–§3** | P0-01 | `pkg/utm/**` | 時間轉換與 `FormatPromValue` 的 table-driven 測試全綠；`go vet` 乾淨 |
 | P0-03 | `pkg/spi`：`Driver`/`Backend`/三個 Store/`Capabilities`/IR/迭代器/錯誤。**逐字規格見 `14-SPI-GO-REFERENCE.md` §4–§9** | P0-02 | `pkg/spi/**` | 編譯通過；`Register`/`Open`/`Capabilities.Validate` 有測試 |
 | P0-04 | `drivers/memory`：完整實作三種 Store（用 map + slice，不求效能） | P0-03 | `drivers/memory/**` | 自身單元測試通過 |
@@ -42,7 +42,7 @@
 | P1-08 | `internal/compat/promapi`：query/query_range/series/labels/label values/metadata/buildinfo | P1-07 | `internal/compat/promapi/**` | 回應信封與狀態碼符合 `02` §2；`promtool query` 可用 |
 | P1-09 | `drivers/clickhouse`：schema 遷移 + 三種 Store 寫入（**規格見 `17-DRIVER-CLICKHOUSE.md` §1–§3、§10**） | P0-03 | `drivers/clickhouse/**` | 寫入路徑 conformance 測項綠；遷移冪等且 checksum 漂移會擋啟動 |
 | P1-10 | `drivers/clickhouse`：查詢實作（**SQL 模板見 `17` §4–§7、錯誤映射見 §9**） | P1-09 | `drivers/clickhouse/**` | `conformance.Run` 全綠；`promqltest` 全綠；`C-MET-05`（空值匹配）特別驗證 |
-| P1-11 | `deploy/` 全部產物（**逐字內容見 `22-DEPLOY-ARTIFACTS.md`**）：compose、ClickHouse 調校、Grafana provisioning、Dockerfile、Makefile | P1-08,P1-10 | `deploy/**`、`Makefile` | `docker compose up --wait` 成功；Grafana Prometheus datasource health 綠；`make deps-check` 通過 |
+| P1-11 | Phase 1 部署產物與核心鏈路 E2E（`22`、當期 P1-11 spec）：Compose、ClickHouse 調校、Grafana provisioning、Dockerfile、Makefile、最小 lifecycle 接線 | P1-08,P1-10 | `deploy/**`、`Makefile`、`cmd/prismd/**`、`internal/server/**`、有界 E2E scripts/tests、D011 限定的四個 promapi query 檔、相關 docs | image build/config-check/up --wait/deps-check；Grafana Prometheus health/實際 query；真實三訊號入庫、PromQL、重啟持久性、owned cleanup；雙驅動既有 conformance/corpus及凍結來源獨立審查 |
 
 **Phase 1 出口條件**：E2E-01 與 E2E-02（僅 Prometheus datasource）通過；`conformance` 與 `promqltest` 在 `memory` + `clickhouse` 雙驅動全綠。
 
@@ -52,13 +52,13 @@
 
 | ID | 任務 | 依賴 | 允許路徑 | 驗收 |
 |---|---|---|---|---|
-| P2-01 | `internal/query/logql`：lexer + parser → `spi.LogQuery`（**EBNF 與錯誤訊息表見 `16-LOGQL-GRAMMAR.md` §1–§3.3**） | P0-03 | `internal/query/logql/**` | `16` §4 的測試矩陣全綠；不支援語法回「不支援」而非「語法錯誤」 |
+| P2-01 | `internal/query/logql`：lexer + parser → `spi.LogQuery`（**EBNF 與錯誤訊息表見 `16-LOGQL-GRAMMAR.md` §1–§3.3**） | P0-03 | `internal/query/logql/**` | `16` §4.1 的 parser 驗收全綠（完整矩陣依 P2-01/02/03/04 分期）；有效但不支援的語法回「不支援」，格式錯誤仍回「語法錯誤」 |
 | P2-02 | `internal/query/logql/compile.go`：正則預編譯 + `LiteralHint` 抽取（**演算法見 `16` §3.4**） | P2-01 | 同上 | `FuzzLiteralHint` 通過；8 個種子語料全綠 |
-| P2-03 | `internal/query/logql/exec.go` + `agg.go`：串流補算與聚合（**執行順序見 `16` §3.5–§3.7**） | P2-02 | 同上 | 16 種 `PushdownPlan` 組合結果一致；100 萬行 + limit=100 的讀取量斷言通過 |
-| P2-04 | `internal/compat/lokiapi`：query_range/query/labels/label values/series/index stats/ready | P2-03 | `internal/compat/lokiapi/**` | Grafana Loki datasource health 綠；Explore 可查與自動完成 |
-| P2-05 | `drivers/clickhouse`：`NativeLogQuerier`（**翻譯規則見 `17` §6**） | P2-01,P1-10 | `drivers/clickhouse/**` | `C-LOG-03`/`C-LOG-04`/`C-LOG-05` 綠；logfmt 正確回 `ErrUnsupported` 觸發回退 |
-| P2-06 | `internal/alerting/rules`：規則檔解析（Prometheus 格式 + `prism_` 擴充）、熱重載 | P0-07 | `internal/alerting/rules/**` | 真實 rule 檔載入；`promtool check rules` 相容性實測並記入 ADR |
-| P2-07 | `internal/alerting/eval` + `state`：評估器、狀態機、`ALERTS` 回寫、Postgres 狀態持久化 | P2-06,P1-08 | `internal/alerting/{eval,state}/**` | A4/A5 驗收通過 |
+| P2-03 | `internal/query/logql/exec.go` + `agg.go`：串流補算與聚合（**執行順序見 `16` §3.5–§3.7**） | P2-02 | 同上 | `16` §4.2 的 AC-1 至 AC-28，以及 AC-42 |
+| P2-04 | `internal/compat/lokiapi`：query_range/query/labels/label values/series/index stats/ready | P2-03 | `internal/compat/lokiapi/**` | `02` §3.4 的 AC-29 至 AC-41。Grafana Loki datasource health 與 Explore 以這組為準 |
+| P2-05 | `drivers/clickhouse`：`NativeLogQuerier`（**翻譯規則見 `17` §6**） | P2-01,P1-10 | `drivers/clickhouse/**`；`pkg/spi` 的 `Capabilities.Validate`（AC-59）；`pkg/spi/conformance` 只限 C-LOG-03/04/05 的 `NativeLogQuery` 與 pushdown 分流（AC-63、AC-64） | `17` §6.5 的 AC-43 至 AC-71。`C-LOG-03`/`C-LOG-04`/`C-LOG-05` 綠；logfmt 正確回 `ErrUnsupported` 觸發回退。Owner 於 2026-10-20 選 2，並對 JSON `Eq` 選方案 1（粗篩超集，再以與執行器相同的 parseJSON 規則精篩）。空字串 `Eq` 鎖定為 AC-71。規格 PR 不實作 |
+| P2-06 | `internal/alerting/rules`：規則檔解析（Prometheus 格式 + `annotations.prism_log_expr`）、SIGHUP 熱重載 | P0-07 | `internal/alerting/rules/**`；`internal/config/**` 只限空規則檔與第二份 YAML 文件（AC-89、AC-90）；`cmd/prismd/**` 只限 SIGHUP（AC-92） | `07` §10 的 AC-72 至 AC-93。Owner 於 2026-10-20 鎖定 AC-88 至 AC-93。規格 PR 不實作 |
+| P2-07 | `internal/alerting/eval` + `state`：評估器、狀態機、`ALERTS` 回寫、規則與告警 API、`alert_state` | P2-06,P1-08 | `internal/alerting/{eval,state}/**`（含 `state/migrations/001_alert_state.*`）；`internal/compat/promapi/**` 只限 `GET /prom/api/v1/rules` 與 `GET /prom/api/v1/alerts` | `07` §11 的 AC-94 至 AC-109。Owner 於 2026-10-20 鎖定。規格 PR 不實作 |
 | P2-08 | `internal/alerting/{silence,inhibit,dispatch}`：靜默、抑制、分組 | P2-07 | 對應路徑 | A7 通過；抑制環在載入時被拒絕 |
 | P2-09 | `internal/alerting/notify`：Notifier SPI + 六個渠道（**webhook payload 契約見 `20` §9**） | P2-08,P0-10 | `internal/alerting/notify/**` | 每渠道有測試；payload 與 Alertmanager 逐欄位比對；憑證遮罩測試通過 |
 | P2-10 | 通知投遞持久化 + 重試 + dead letter（`07` §6.2） | P2-09 | `internal/alerting/notify/**`、`internal/controlplane/store/**` | A6 通過 |
@@ -108,7 +108,7 @@
 
 | ID | 任務 | 依賴 | 允許路徑 | 驗收 |
 |---|---|---|---|---|
-| P5-01 | Postgres schema 遷移（`09` §2） | P0-07 | `internal/controlplane/migrations/**` | up/down 皆可執行且冪等 |
+| P5-01 | Postgres schema 遷移（`09` §2） | P0-07 | `internal/controlplane/migrations/**` | up/down 皆可執行且冪等。`alert_state` 若已由 P2-07 建立，up 只用 `CREATE TABLE IF NOT EXISTS`，不改欄位、不加 `tenants` 外鍵、不搬列。見 `07` §11.4 |
 | P5-02 | `internal/controlplane/store`：全部 CRUD，簽章強制帶 tenant | P5-01 | `internal/controlplane/store/**` | 靜態檢查：無不帶 tenant 的查詢 |
 | P5-03 | `authn`：密碼、JWT、API key、快取與失效 | P5-02 | 對應路徑 | P1 通過；SEC-04 通過 |
 | P5-04 | `authz`：RBAC middleware | P5-03 | 對應路徑 | 權限矩陣 table-driven 測試 |

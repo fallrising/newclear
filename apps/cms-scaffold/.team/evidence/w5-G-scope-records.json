@@ -1,0 +1,35 @@
+{
+  "baseline": "35bc6634debcdd58643b608ed9704b4db6eeaa6e",
+  "changedFiles": [
+    "apps/cms-scaffold/.team/PLAN.md",
+    "apps/cms-scaffold/.team/evidence/w5-real-cleanup.json",
+    "apps/cms-scaffold/.team/reports/W5-DELIVERY.md",
+    "apps/cms-scaffold/.team/reports/W5-REAL-AMENDMENT.md",
+    "apps/cms-scaffold/README.md",
+    "apps/cms-scaffold/docs/v2/03-personal-use-readiness.md",
+    "apps/cms-scaffold/docs/v2/README.md",
+    "apps/cms-scaffold/docs/v2/frontend-records.md",
+    "apps/cms-scaffold/docs/v2/waves/W5.md",
+    "apps/cms-scaffold/e2e/admin.spec.ts",
+    "apps/cms-scaffold/e2e/back.spec.ts",
+    "apps/cms-scaffold/e2e/global-setup.ts",
+    "apps/cms-scaffold/e2e/helpers.test.mjs",
+    "apps/cms-scaffold/e2e/prepare-owned.ts"
+  ],
+  "sourceFiles": [
+    "apps/cms-scaffold/e2e/admin.spec.ts",
+    "apps/cms-scaffold/e2e/back.spec.ts",
+    "apps/cms-scaffold/e2e/global-setup.ts",
+    "apps/cms-scaffold/e2e/helpers.test.mjs",
+    "apps/cms-scaffold/e2e/prepare-owned.ts"
+  ],
+  "protectedFiles": 608,
+  "changedProtectedFiles": [],
+  "visualPngCount": 70,
+  "appendOnlyRecordIds": [
+    "W5-REAL-20261006-03",
+    "W5-REAL-20261006-04"
+  ],
+  "maxGAttempts": 2,
+  "usedGAttempts": 2
+}

@@ -1,0 +1,7 @@
+{
+  "command": "CGO_ENABLED=0 go build -o <build>/clarkq ./cmd/clarkq",
+  "exitCode": 0,
+  "elapsedSeconds": 0.869,
+  "uiSHA256": "c99ad4916caee4757a14e5b6ceca2074bdab3a57f8636ddcedc51a36ff0e3bc3",
+  "binarySHA256": "7a4c942dc143fbf5128a72ee531da1523ee85a63d8b81607751d6f3845005856"
+}

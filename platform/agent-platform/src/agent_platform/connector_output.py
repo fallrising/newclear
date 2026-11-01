@@ -39,6 +39,7 @@ class OutputPolicy:
                         getattr(service.client, "api_token", None),
                         row.get("session_key"),
                         row.get("model_local_key"),
+                        row.get("tool_relay_key"),
                         row.get("handle", {}).get("token"),
                         *row.get("model_tokens", []),
                     )
@@ -152,9 +153,13 @@ def workspace_result(raw, row, policy):
         if contract.mode == "commands"
         else "OpenHands 已在獨立 VM 執行；此 profile 未設定驗證條件。"
     )
+    if row["input"].get("external_workspace"):
+        summary = "外部 agent 已在獨立 VM 執行；驗證結果依此 profile 的固定檢查回報。"
     return {
         **value,
-        "execution_mode": "cocoon-fixture",
+        "execution_mode": "cocoon-external"
+        if row["input"].get("external_workspace")
+        else "cocoon-fixture",
         "summary": summary,
     }
 

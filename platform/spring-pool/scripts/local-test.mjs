@@ -245,8 +245,10 @@ try {
       delete env.SP_PERSIST_PHASE;
       if (web) await ready(`${env.SP_WEB_URL}/healthz`, web.child);
     }
-    if (mode === "all" || mode === "e2e")
+    if (mode === "all" || mode === "e2e") {
       await command(resolve(root, "node_modules/.bin/playwright"), ["test"]);
+      await command(process.execPath, ["scripts/capture-ui.mjs"]);
+    }
   }
 } catch (e) {
   console.error(e.message);

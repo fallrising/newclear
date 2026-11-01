@@ -52,7 +52,7 @@ a:hover { text-decoration: underline; }
   text-decoration: none;
 }
 .logout { margin-top: auto; padding-top: 1rem; }
-.content { flex: 1; padding: 1.5rem 2rem; max-width: 1100px; }
+.content { min-width: 0; flex: 1; padding: 1.5rem 2rem; max-width: 1100px; }
 h1 { margin: 0 0 1rem; font-size: 1.6rem; }
 h2 { margin: 0 0 0.75rem; font-size: 1.1rem; }
 .subhead { margin: 0.75rem 0 0.5rem; font-size: 0.95rem; color: var(--muted); font-weight: 600; }
@@ -219,3 +219,22 @@ th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: u
   .sidebar nav { flex-direction: row; flex-wrap: wrap; }
   .content { padding: 1rem; }
 }
+
+/* R2: measured intrinsic-width tables stay within the existing content column. */
+.table-scroll { max-width: 100%; overflow-x: auto; }
+.table-scroll td { overflow-wrap: anywhere; }
+.content li a { text-decoration: underline; }
+:focus-visible { outline: 3px solid #8bbcff; outline-offset: 2px; }
+
+/* R2 visual repair: readable columns scroll locally instead of collapsing tall rows. */
+.table-scroll > table { min-width: 48rem; }
+.table-scroll th, .table-scroll td { min-width: 4.5rem; }
+.table-scroll th:first-child, .table-scroll td:first-child { min-width: 12rem; }
+.table-scroll[aria-label="Connections table"] th:nth-child(3),
+.table-scroll[aria-label="Connections table"] td:nth-child(3),
+.table-scroll[aria-label="Routes table"] th:nth-child(3),
+.table-scroll[aria-label="Routes table"] td:nth-child(3) { min-width: 20rem; }
+.table-scroll[aria-label="Recent usage table"] td:nth-child(1),
+.table-scroll[aria-label="Recent usage table"] td:nth-child(3),
+.table-scroll[aria-label="API keys table"] td:nth-child(4) { min-width: 14rem; }
+.table-scroll .actions { min-width: 10rem; }

@@ -1,5 +1,9 @@
 # Traceability
 
+Existing accepted rows retain historical upstream evidence. Recovered T030A/B acceptance is
+source-history evidence; current monorepo recovery is tracked separately as T030R below.
+Old hosted runs do not prove execution of the new root workflow.
+
 | Requirement / Invariant | CU | Specification / Decision | Test or check | Code / Configuration | Evidence | Status |
 |---|---|---|---|---|---|---|
 | T000 Cargo workspace and CI baseline | N/A — ADR-0001 infrastructure exception | T000 task §Outcome | T000 machine acceptance | `Cargo.toml`, `.github/workflows/ci.yml` | Local suite at `76f72b3`; [hosted CI run 30260756940](https://github.com/fallrising/fanzloud/actions/runs/30260756940) passed on `f9f3e2d` | Accepted |
@@ -12,6 +16,8 @@
 | T010 strong IDs, paths, and base errors | CU-FS-00 | SPEC-T010; TD §16.1 | T010 acceptance suite | `crates/codebox-domain/**` | Local checks passed; hosted [CI run 30262687153](https://github.com/fallrising/fanzloud/actions/runs/30262687153) passed on `aa56b75`; fresh Claude acceptance review found no blockers | Accepted |
 | T020 versioned event schema and deterministic session reducer; INV-003/INV-004 | CU-PROTO-01 | SPEC-T020; TD §§4.2, 4.4–4.5, 16.2 | Exact serde fixtures, legal/illegal transition matrix, stream/sequence/version/identity checks, replay determinism, and E0 snapshots | `crates/codebox-domain/src/{event,reducer}.rs`; `tests/events_reducer.rs` | 1 reducer unit + 16 T020 integration tests, retained T010/workspace gates, fresh Cursor acceptance, and [hosted run 30523996895](https://github.com/fallrising/fanzloud/actions/runs/30523996895) passed; ACCEPT-T020 | Accepted |
 | T020 durable/ephemeral runtime-event separation; P7 | CU-PROTO-03 | SPEC-T020; TD §§4.4, 11.3 | `runtime_event_kind_classification_is_total`; `regression_ephemeral_not_persisted` | `crates/codebox-domain/src/event.rs` | Total classifier and named P7 regression passed locally and in [hosted run 30523996895](https://github.com/fallrising/fanzloud/actions/runs/30523996895); fresh Cursor acceptance; ACCEPT-T020 | Accepted |
+| T030A SQLite initialization and atomic expected-sequence append; INV-003 | CU-EVT-01 | SPEC-T030A; TD §§4.4–4.6, 16.2 | 6 unit + 17 append/codec/concurrency/rollback/restart/cancel/busy/path/schema tests | `crates/codebox-event-store/**`; workspace member and lockfile | Focused suite, 219-test workspace, 10-test Node suite, Clippy/build/fmt/deny/diff, fresh contract/security reviews, and [hosted run 30554757181](https://github.com/fallrising/fanzloud/actions/runs/30554757181) passed; ACCEPT-T030A | Accepted |
+| T030B bounded ordered SQLite replay after sequence; INV-003 | CU-EVT-02 | SPEC-T030B; TD §§4.4–4.6, 8.5–8.7 | 2 T030B unit + 19 replay/limit/order/isolation/restart/model/corruption/snapshot/busy/cancel/E0 tests; retained 23 T030A tests | `crates/codebox-event-store/src/{lib,error,codec,sqlite}.rs`; `tests/sqlite_replay.rs` | Focused 44-test event-store, 240-test workspace, Clippy/build/fmt/deny/diff, fresh reviews, and [hosted run 31325149204](https://github.com/fallrising/fanzloud/actions/runs/31325149204) passed; ACCEPT-T030B | Accepted |
 | T002A credential scope lease and isolation | CU-AUTH-P0-02 | SPEC-T002A; ADR-0002 | T002A scope, permission, concurrency, and P14 suite | `crates/codebox-agent-codex/**` | 1 unit + 12 contract/security tests, focused/workspace Clippy, workspace tests/build, cargo-deny, and fresh Claude acceptance passed | Accepted |
 | T002B Codex device-login lifecycle | CU-AUTH-P0-01 | SPEC-T002B; pinned `0.145.0` fixtures | T002B lifecycle, parser, process, and recovery suite | `crates/codebox-agent-codex/**` | 22 T002B tests plus focused/workspace gates, dependency policy, P14, and fresh Claude acceptance passed | Accepted |
 | T002 Codex login broker parent | CU-AUTH-P0-01, CU-AUTH-P0-02 | SPEC-T002; ADR-0002 | Combined T002A/T002B and P14 gates | `crates/codebox-agent-codex/**` | Both child tasks, combined local gates, P14, and fresh composition review passed | Accepted |
@@ -26,3 +32,78 @@
 | T005 P0 session/API/stream parent | CU-SES-P0-01, CU-API-P0-01, CU-API-P0-02 | SPEC-T005; ADR-0004 | All child suites plus two exact private operator API/stream composition regressions | Child code above | T005A/T005B/T005C Accepted; 176 workspace tests and all gates passed; fresh review returned COMPOSITION ACCEPTED; hosted CI run 30382918115 passed; ACCEPT-T005 | Accepted |
 | T006 private single-page operator flow | CU-WEB-P0-01 | SPEC-T006; ADR-0002; ADR-0004 | 12 static-route, browser-controller, security, reconnect, and schedule-model tests | `apps/control-plane/{src,web}/**`; `.github/workflows/ci.yml` | 2 Rust + 10 Node tests, 20× browser/concurrency/reconnect stress, 178 workspace tests, all gates, fresh review `T006 ACCEPTED`, hosted CI run 30423184446; ACCEPT-T006 | Accepted |
 | T004 Codex Cloud orchestrator parent | T004 P0 CUs | SPEC-T004; ADR-0003; child specifications | All child acceptances plus combined P14/P15/workspace gates | Accepted T004A/T004A1/T004B/T004C boundaries | All child reports, combined gates, exact P14/P15, and fresh Cursor Agent composition review passed; ACCEPT-T004 | Accepted |
+| T030R local monorepo recovery and root CI | CU-EVT-01, CU-EVT-02; CI: ADR-0001 exception | SPEC-T030R; retained SPEC-T030A/B | Source identity, retained focused tests, Node/fmt/diff, full integrated gates and fresh review | `crates/codebox-event-store/**`; root `.github/workflows/fanzloud-ci.yml` | Current 44 store + 240 workspace Rust + 10 Node tests, fmt/Clippy/build/deny/diff/actionlint and independent identity/preservation checks passed; fresh GPT-6 Astra acceptance, ACCEPT-T030R; recovery PR #242 merged at1f555f61; hosted root branch37148404076 and main37148875720 passed | Accepted; merged |
+
+
+## Snapshot Save, Load and Store Composition Accepted
+
+The historical design and A/B reports above are preserved. Current D runtime evidence is in
+[ACCEPT-T030D](acceptance/T030D.acceptance.md); schema-aware regressions retain append/replay
+behavior with the new exact v2 schema. The matrix in SPEC-T030D assigns 29 D/D-shared test names
+and three C-only names; D acceptance does not assert public-load coverage.
+
+| Requirement | Spec/ADR | Clauses | Runtime evidence | State |
+|---|---|---|---|---|
+| CU-EVT-04 bounded value and persisted provenance | SPEC-T030D / ADR-0005 | S01–S04 | Value/codec/head tests; legal fabricated candidate rejection; full-field equality; bounded persisted-prefix replay | Accepted D |
+| CU-EVT-04 concurrency, monotonicity, E1 and retry | SPEC-T030D | S05–S08 | Concurrent same-head savers and append orders; rollback, busy/worker faults, cancellation, lost reply and subprocess crashes | Accepted D |
+| CU-EVT-03 discardable cache and E0 load | SPEC-T030C / ADR-0005 | C01–C12; D S09–S10 | 19 substantive public-load oracles: pinned pages, verified projection, bounds, miss/error precedence, caller-owned continuation, E0 faults/restart and model; ACCEPT-T030C | Accepted C |
+| CU-EVT-01/02 compatibility and strict schema | SPEC-T030D | S11–S13 | Exact new/v1 upgrade, identity/integrity faults, nullable malformed values, concurrent opens, upgrade crashes, pinned replay across upgrade, retained full-u64 A/B tests and baseline v1 executable rejection | Accepted D |
+| Security, observability and acceptance | SPEC-T030D | S14–S16 | Gated body/metadata, bounded redacted diagnostics, private paths, generated multi-stream schedules, RED before code, full gates and independent review | Accepted D; C evidence in separate report |
+| Canonical extended-year timestamp compatibility | ADR-0006; SPEC-T030B/C | C06 and bounded event decoder | Targeted behavior RED before strict-first/exact-canonical repair; full extrema/leap/legacy/malformed append/replay/save/load/reopen matrix | Accepted C/parent repair |
+| Complete one-schema event store | T030 task; accepted A/B/C/D | CU-EVT-01–04 | Three public composition tests cover restart, cache misses/history authority and failures/independent streams; ACCEPT-T030 | Accepted parent |
+
+T030A/B/C/D and parent T030 are **Accepted**. [C runtime](acceptance/T030C.acceptance.md) and
+[parent composition](acceptance/T030.acceptance.md) record current 99 store / 295 workspace /
+10 Node tests, complete gates and independent review. Historical reports remain unchanged.
+The adapter is a P1 library capability; P0 session persistence, startup acceleration, native
+agents and real-provider live acceptance are not implied. Automated rustdoc/spec drift tooling
+remains a gap; current source/document projections were reviewed explicitly.
+
+
+## T040 Actor Decomposition — T040A Pure Runtime Accepted
+
+| Requirement | Contract / artifact | Evidence | State |
+|---|---|---|---|
+| First actor prerequisite, exact v1 behavior | CU-SES-03 / SPEC-T040A A01–A09 | [Runtime acceptance](acceptance/T040A.acceptance.md): all 11 named oracles, 41 domain checks, independent 5,760-case model; all 27 state/command cells plus three empty cases, 77/96-byte identity, immutable E0 and exact metadata | T040A Accepted |
+| Preserve current v1 and P0 boundaries | SPEC-T020 / accepted T030 / SPEC-T040 | No v1 withdrawal reinterpretation, snapshot restore or P0 protocol replacement; production reducer/dependency/historical acceptance hashes unchanged; only domain command API/tests and a private cfg(test) reducer seam added | Preserved |
+| Parent task and future safety contracts | T040 task / SPEC-T040 / draft ADR-0007 | Proposed B–I seeds own version/schema/lease/receipt/commit/startup/mailbox/audit/effect gaps; separate E0/E1/effect-specific atomicity | Parent and B–I Blocked; ADR draft |
+
+[T040A design acceptance](acceptance/T040A-design.acceptance.md) is preserved as historical design-only
+evidence; separate [runtime acceptance](acceptance/T040A.acceptance.md) accepts only CU-SES-03.
+Managed storage, lease/clock guarantees and external execution remain absent. Later full tasks/specifications
+must resolve their owned gaps before Ready. Project-wide automatic rustdoc/spec drift tooling
+remains a gap; this milestone's explicit document/source review does not claim that automation.
+
+
+## T006R — approved R2 operator review
+
+Existing P0/P1 accepted rows remain unchanged. TD§15.0/§19 dependency extension for
+this review is accepted T006 + accepted T007 → [T006R](tasks/T006R.task.md), Accepted.
+Blocked T040 and its later seeds are not dependencies. Evidence per clause:
+[R2 report](../fe-review/tasks/round2/report.md); decision:
+[ACCEPT-T006R](acceptance/T006R.acceptance.md).
+
+| Requirement | CU / normative clauses | Machine evidence | Current state |
+|---|---|---|---|
+| Approved R2 M1 finite HTTPS/WSS fixture, ownership/TLS | CU-WEB-P0-01; [SPEC-T006R](specs/SPEC-T006R-fe-review.md) R01–R06/R09; consumed T005A/B/C | named fe-review oracles; C1 real loopback HTTPS/WSS; `conformance-001` browser TLS positive/negative and R06 no-resend | Accepted |
+| M2 measured presentation/keyboard/axe/contrast | CU-WEB-P0-01; R07/R10 | v7 canonical 27/27; `conformance-001` R07 keyboard, names, mobile scroll; `journeys-001` N01–N09 | Accepted, limits in report |
+| M3 no implicit actions/secrets/text-only diff | CU-WEB-P0-01; R05/R06/R08 | action/mutation counts, actual 15 s timeout, cleared fields, canary, inert diff | Accepted |
+| Evidence/native/published boundaries | R11/R12; original T006/T007 contracts | unchanged native gates and CI; `capture-002` unchanged `capture.mjs`; report | Accepted; no real backend/Cloud/mainline claim |
+
+No Rust public signature changed (one added Rust test); rustdoc projection was
+inspected. This row is not an infrastructure-only CU exemption.
+
+## T006F — favicon and focused browser follow-up (T-0440)
+
+[Specification](specs/SPEC-T006F-browser-followup.md), CU-WEB-P0-01. AC-F01 maps to `p0_web_favicon_has_exact_bytes_headers_and_method_boundary` (RED 404, then GREEN) and unchanged native security gates. AC-F02–F04 map to `followup-browser.mjs`, its pure verdict/HTTPS tests and the source-bound `followup-001` receipt. `followup-001` has passing browser/cleanup observations in the [report](../fe-review/tasks/followup/report.md); [ACCEPT-T006F](acceptance/T006F.acceptance.md) accepts AC-F01–F04. Original T006R captures and pins retain their historical meaning.
+
+## T008 actual browser P0 composition
+
+SUCCESS AC-01 is proved by actual Chromium against the production Rust binary and strict T007 fake executable. See [SPEC-T008](specs/SPEC-T008-p0-real-browser.md) and [runtime evidence](acceptance/T008.acceptance.md). No production authority or UI changed. AC-04 remains credential/environment gated; AC-05 remains outside this milestone.
+
+## Approved isolated M1 — T-0442 / T-0447
+
+EX01–03 and M1-WEB01–06 map to [SPEC-M1-isolated-web](specs/SPEC-M1-isolated-web.md),
+[external workspace contract](../../agent-platform/docs/EXTERNAL-WORKSPACE.md),
+[actual M1 acceptance](acceptance/M1-isolated.md) and PR885. FN01/FN06 and
+single/sequential FN03 are accepted; M2/M3 and full FN02–07 remain per SDD.

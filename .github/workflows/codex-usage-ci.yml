@@ -1,14 +1,16 @@
-name: codex-usage CI
+name: Agent Usage CI
 
 on:
   pull_request:
     paths:
       - tools/codex-usage/**
+      - tools/cc-quota/**
       - .github/workflows/codex-usage-ci.yml
   push:
     branches: [main]
     paths:
       - tools/codex-usage/**
+      - tools/cc-quota/**
       - .github/workflows/codex-usage-ci.yml
   workflow_dispatch:
 
@@ -30,7 +32,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Offline unit tests
-        run: python3 -m unittest discover -s tests -v
-      - name: Compile collector
-        run: python3 -m py_compile codex_usage.py
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: Unified and Codex offline tests
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/agent-usage-pycache
+          TMPDIR: ${{ runner.temp }}
+        run: python3 -W error::ResourceWarning -m unittest discover -s tests -v
+      - name: Archived Claude compatibility regression tests
+        working-directory: tools/cc-quota
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/agent-usage-pycache
+          TMPDIR: ${{ runner.temp }}
+        run: python3 -W error::ResourceWarning -m unittest discover -s tests -v
+      - name: Compile entry points
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/agent-usage-pycache
+        run: python3 -m py_compile codex_usage.py agent_usage.py

@@ -1,0 +1,146 @@
+{
+  "w3-browser-runner-final.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "w3-browser-runner.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "w3-browser.log": {
+    "sha256": "3d6f1cfbe52912393fffb1359298ba119636c8274fbb99b8079110828f3cf1b1",
+    "bytes": 29
+  },
+  "w3-ci-install.log": {
+    "sha256": "f853557187b6a6ac2ec41a238301f1d4f8bdf1d09d5a13836708e82734f3216a",
+    "bytes": 864
+  },
+  "w3-codegen.log": {
+    "sha256": "2d8941b0ab18837221cd0eb2647f8feb8aacbeb1cd7b4914ac97593b1bb5d62a",
+    "bytes": 274
+  },
+  "w3-dependency-build.log": {
+    "sha256": "7723e3892c737cb68fe11f0477a98c3d1107adfc8e71d0e7ca99df04ac865bd8",
+    "bytes": 6048
+  },
+  "w3-dependency-bundle.log": {
+    "sha256": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+    "bytes": 100
+  },
+  "w3-dependency-ci.log": {
+    "sha256": "c6377551f94d39c600a5ae00689a2ff7880f371b2db374187b2ae170f4af44d7",
+    "bytes": 655
+  },
+  "w3-dependency-gen.log": {
+    "sha256": "c0f8aaf0446aa53c2688c2e7b20d705391a272a0bfb808e14d603a7f603a9bfd",
+    "bytes": 272
+  },
+  "w3-dependency-install.log": {
+    "sha256": "b5284cc45c715d59395edd9d8e5774e60b103905b842a91b803c60f8240c256c",
+    "bytes": 599
+  },
+  "w3-dependency-lint.log": {
+    "sha256": "d27e126f456cfce28e422f37624e61458d17d7e7847ce327e35139c91968d692",
+    "bytes": 306
+  },
+  "w3-dependency-ls.log": {
+    "sha256": "18a85afa68533e9327871112dff2c23b4b403c9b956a26f3cb03f988fa7f30ae",
+    "bytes": 243
+  },
+  "w3-dependency-tests.log": {
+    "sha256": "fc6ea71fdac12fd4039a854d1efcdd576bf56f5c07144da95d365cabed6e6f9c",
+    "bytes": 881
+  },
+  "w3-dependency-typecheck.log": {
+    "sha256": "1b8c62754cedbc492b21fb080987fe0ee039d4fa248a3734a32a1d21685474ed",
+    "bytes": 372
+  },
+  "w3-e2e.log": {
+    "sha256": "4b19d54ff89c50ecdf7ce866207e52aff375a4405067cc9f2d45da7fc287d64e",
+    "bytes": 9722
+  },
+  "w3-favicon-build.log": {
+    "sha256": "6d99c92ca9394add3bc653a61ef9693eb37475c6ace5cd06b4b1097ac8ee3680",
+    "bytes": 1021
+  },
+  "w3-favicon-bundle.log": {
+    "sha256": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+    "bytes": 100
+  },
+  "w3-final-build.log": {
+    "sha256": "390676a5bdaf2fad5475249a20683ff86ad620679a396ee72ecdcbb1e98d79cf",
+    "bytes": 6050
+  },
+  "w3-final-bundle.log": {
+    "sha256": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+    "bytes": 100
+  },
+  "w3-final-front-tests.log": {
+    "sha256": "849abb9eae4ecf54be55bdc3ff236a9bb1dd269381d1a81bd5c800911889c497",
+    "bytes": 614
+  },
+  "w3-final-lint.log": {
+    "sha256": "d27e126f456cfce28e422f37624e61458d17d7e7847ce327e35139c91968d692",
+    "bytes": 306
+  },
+  "w3-final-typecheck.log": {
+    "sha256": "1b8c62754cedbc492b21fb080987fe0ee039d4fa248a3734a32a1d21685474ed",
+    "bytes": 372
+  },
+  "w3-java.log": {
+    "sha256": "14a2e3a09035fc17dc1132e5ea48bf6b285353ef567121a2d7d87ea07e04e9bb",
+    "bytes": 1191
+  },
+  "w3-lightbox-red.log": {
+    "sha256": "72c94aa8b6893e20e917f620894be272353b13f3cc34be6190c2ece5a047b917",
+    "bytes": 7484
+  },
+  "w3-lint.log": {
+    "sha256": "d27e126f456cfce28e422f37624e61458d17d7e7847ce327e35139c91968d692",
+    "bytes": 306
+  },
+  "w3-preview.log": {
+    "sha256": "0d70d4fe7246510db345750baf341c33fb788d72ce5b1546d47d3f97698183d5",
+    "bytes": 262
+  },
+  "w3-route-red.log": {
+    "sha256": "fff8b75c18d9cde3df38eaf719451ee86c934d142de0d626ab94023bcdde8b3f",
+    "bytes": 26152
+  },
+  "w3-tests.log": {
+    "sha256": "b23748ee5cdee79acd9b57c2d9ee06bc02f76cc845b1e57b9d82217de736b7cf",
+    "bytes": 3083
+  },
+  "w3-typecheck.log": {
+    "sha256": "1b8c62754cedbc492b21fb080987fe0ee039d4fa248a3734a32a1d21685474ed",
+    "bytes": 372
+  },
+  "w3-ui-tests.log": {
+    "sha256": "bb667c7a4f2365ae6a997ef865778abf0ece6fa1c7b0aa197abf7dca73d37c84",
+    "bytes": 282
+  },
+  "w3-worker-browser-green.log": {
+    "sha256": "3f5a0624c937a40b7d25cc14fd037c1b2793b1bc2567b692cad8900c9dbf44eb",
+    "bytes": 3873
+  },
+  "w3-worker-production-build.log": {
+    "sha256": "e192e3ecbbd909c6d9e487b9a9fb20f8b192532ee980ac026cb2d2368ecdb9b8",
+    "bytes": 1021
+  },
+  "w3-worker-production-lint.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "w3-worker-production-typecheck.log": {
+    "sha256": "8fa1cf5506304e8abac55868e7f1a136c9b1dde57a3981a382da4c21ea129a6f",
+    "bytes": 29
+  },
+  "w3-worker-unit-contention.log": {
+    "sha256": "4f49c59c22160f65ea03af064f82c194c27a798291553bb1690785c137afe871",
+    "bytes": 19059
+  },
+  "w3-worker-unit-green.log": {
+    "sha256": "b9bbe892468c4f90d5417f4931bac44263802329c7e5d3bea9158decb8bf7938",
+    "bytes": 611
+  }
+}

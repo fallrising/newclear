@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-10-05T17:39:14.238Z",
+  "gitCommit": "24f40f2734cb5d4c2aff00a367609d28d341b9cb",
+  "dirty": true,
+  "node": "v24.18.0",
+  "chromium": "153.0.8010.12",
+  "command": "test:visual",
+  "artifact": ".team/evidence/w5-canonical-initial-visual.json",
+  "result": "passed",
+  "recordId": "W5-VISUAL-20261005-01",
+  "os": "Ubuntu 24.04.5 LTS",
+  "desktopCases": 52,
+  "mobileCases": 15,
+  "stateCases": 3,
+  "threshold": 0.2,
+  "maxDiffPixelRatio": 0.001,
+  "hashManifest": ".team/evidence/w5-canonical-initial-hashes.sha256",
+  "authorization": "W5 initial canonical CI authoring; owner A\u2013D approved 2026-10-05",
+  "notes": "Noto TC font aliases resolve to TC face; exact 70 expected baselines; CI37349357513 artifact11361114634 verified70 SHA256; root reviewed all70 in7 contact sheets plus full-size clinic/mobile roles/confirmation; no blocking defect"
+}

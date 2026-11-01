@@ -55,7 +55,18 @@ func ParsePromTime(s string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("empty timestamp")
 	}
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
-		return MilliToTime(SecFloatToMilli(f)), nil
+		// The legacy SecFloatToMilli formula is asymmetric below zero. HTTP
+		// timestamps instead round signed milliseconds and reject values that
+		// cannot be represented before any float-to-integer conversion.
+		const millisecondsPerSecond = float64(time.Second / MetricTimeUnit)
+		if math.IsNaN(f) || math.IsInf(f, 0) || f >= float64(math.MaxInt64)/millisecondsPerSecond || f <= float64(math.MinInt64)/millisecondsPerSecond {
+			return time.Time{}, fmt.Errorf("timestamp is outside the finite millisecond range")
+		}
+		milliseconds := math.Round(f * millisecondsPerSecond)
+		if milliseconds >= float64(math.MaxInt64) || milliseconds < float64(math.MinInt64) {
+			return time.Time{}, fmt.Errorf("timestamp is outside the finite millisecond range")
+		}
+		return MilliToTime(int64(milliseconds)), nil
 	}
 	if t, err := time.Parse(time.RFC3339Nano, s); err == nil {
 		return t.UTC(), nil

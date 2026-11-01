@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,6 +48,17 @@ public class PrincipalController {
         List<Map<String, Object>> items =
                 principals.list(AuthController.current(request)).stream().map(PrincipalController::principalJson).toList();
         return Map.of("items", items, "page", 0, "size", items.size(), "total", items.size());
+    }
+
+    @GetMapping("/principals/assignable")
+    public Map<String, Object> assignable(
+            @RequestParam(required = false) String contentType,
+            @RequestParam(required = false) String q,
+            HttpServletRequest request) {
+        List<Map<String, Object>> items = principals.assignable(AuthController.current(request), contentType, q).stream()
+                .map(p -> Map.<String, Object>of("id", p.id().toString(), "displayName", p.displayName()))
+                .toList();
+        return Map.of("items", items);
     }
 
     @PostMapping("/principals")

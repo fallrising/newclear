@@ -1,0 +1,59 @@
+{
+  "source_sha": "e383d4a020c46acce37a845eae5cc84a867ecffc",
+  "dotnet_version": "10.0.402",
+  "source_manifest_files": 41,
+  "binary_sha256": {
+    "ServerCore/Autofac.dll": "bca71ded9acfbfbdcd0f330708e868d8ca3917284743695d8ec3fd5c229bf7b3",
+    "ServerCore/LibraryCore.dll": "2073449a419cc39834a732acb12ae536f2dff63760819cd909bd89b2a1c3899d",
+    "ServerCore/ServerCore.dll": "5ef6d4e99f1bd66611903f6654b8f7a2029cc0f21eda75d9c30ae7cfdfa6ed73",
+    "ServerCore/ServerLibrary.dll": "4f829af763916312b4069bebf325a908cc9a32c154b2d84ffaa7655191d59d8e",
+    "ZirconClient/BCnEncoder.dll": "e7b031ed37b23c38d1d2198ad9984f892c462082b9b9b1a27d57606961bd9cde",
+    "ZirconClient/CommunityToolkit.HighPerformance.dll": "f8e5787b02ec9fe8a27b9dea5f4317dd2cdce3e32680e3e8a26673c534549dbc",
+    "ZirconClient/GodotSharp.dll": "2142e62894176d7340f50581f8b2fe84e36ae64e1a85f1b2bd7737a7e8a5c8ba",
+    "ZirconClient/GodotSharpEditor.dll": "77c61b007a70309cada2180c90ecc93c5ca559760be3c7e381b2e1f2f34cd4e9",
+    "ZirconClient/LibraryCore.dll": "1cf0bcbe5954981b29eb54a6681854b59afad28b6b493d8d3158080d8e646e35",
+    "ZirconClient/ZirconClient.dll": "b28a8254e1287cf040072c239badcc7e9b288c1ef9d245b0b52848b35cdeaaf4",
+    "GroundLootChecks/GroundLootChecks.dll": "f9370fbda344df63036fa2663af554390ef2d38b1c84dfbc52ab46f2ec0a5fd7"
+  },
+  "runtime_acceptance": "not run",
+  "note": "Public summary of actual isolated build; full local paths/commands remain in workspace evidence. No gameplay acceptance.",
+  "projects": [
+    {
+      "project": "ServerCore/ServerCore.csproj",
+      "exit_code": 0
+    },
+    {
+      "project": "GodotClient/ZirconClient.csproj",
+      "exit_code": 0
+    },
+    {
+      "project": "Tests/GroundLootChecks/GroundLootChecks.csproj",
+      "exit_code": 0
+    }
+  ],
+  "godot": {
+    "sha512": "962c4f5fd3a704de36c9dedcb2f5f6c973065ac8ed8fd6e12c7ebf7e48c3852d774bcef2ccf76b50b206c0c564ceea54315e2943e76e397529923e7de680508e",
+    "version": "4.6.3.stable.mono.official.7d41c59c4",
+    "exit_code": 0,
+    "stderr": ""
+  },
+  "headless_editor": {
+    "exit_code": 0,
+    "errors": [],
+    "desktop_acceptance": false
+  },
+  "shutdown_host_tests": {
+    "baseline": {
+      "failures": 2,
+      "tests": 2
+    },
+    "patched": {
+      "failures": 0,
+      "tests": 2
+    },
+    "world": "test double, not MirDB"
+  },
+  "historical_patch_sha256": "bf55eca9c71c1c739c499156defc97e0ad78174d7bddf1edd76fd84c4d1b1dbe",
+  "patch_sha256": "13f8f61e05321a4e7894f4e1a6e0e6c48000de5c8becf1111474528284202760",
+  "patch_format_note": "PR patch uses one line of context to avoid whitespace-only context lines in the patch artifact. Applied Program.cs is identical to the tested patch."
+}

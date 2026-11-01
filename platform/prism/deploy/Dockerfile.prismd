@@ -1,0 +1,28 @@
+FROM docker.io/library/golang:1.27.1-alpine@sha256:cd9a32216aee5667f957a62d13a10032a63fd58e14b3f3d9cc8c2122f501e95e AS build
+WORKDIR /src
+ENV GOTOOLCHAIN=go1.27.1 GOFLAGS=-mod=readonly CGO_ENABLED=0
+COPY go.mod go.sum ./
+# The optional secret is a session CA bundle for managed build networks.
+RUN --mount=type=secret,id=prism_ca,required=false \
+    if [ -s /run/secrets/prism_ca ]; then \
+      SSL_CERT_FILE=/run/secrets/prism_ca go mod download; \
+    else \
+      go mod download; \
+    fi
+COPY cmd/ ./cmd/
+COPY drivers/ ./drivers/
+COPY internal/ ./internal/
+COPY pkg/ ./pkg/
+ARG VERSION=dev
+ARG REVISION=unknown
+RUN --mount=type=secret,id=prism_ca,required=false \
+    if [ -s /run/secrets/prism_ca ]; then export SSL_CERT_FILE=/run/secrets/prism_ca; fi; \
+    go build -trimpath -ldflags "-s -w -X main.version=${VERSION} -X main.revision=${REVISION}" \
+      -o /out/prismd ./cmd/prismd
+
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:52dcfbabb7457ea47c82f6e13af8c8a4a1d9f7b0145142b3ecab20f2b888411d
+COPY --from=build /out/prismd /prismd
+USER nonroot:nonroot
+EXPOSE 9090 4317
+ENTRYPOINT ["/prismd"]
+CMD ["--config", "/etc/prism/prismd.yaml"]

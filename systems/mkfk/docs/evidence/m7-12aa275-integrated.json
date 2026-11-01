@@ -1,0 +1,113 @@
+{
+ "milestone": "M7 integrated failure verification and portfolio delivery",
+ "status": "VERIFIED",
+ "date": "2026-10-08",
+ "source_commit": "12aa275",
+ "evidence_scope": "Gates and chaos ran on 37b41ba, which changes only the benchmark tool's ssh retry on top of 12aa275, the broker commit the baseline measured. Earlier M7 parts merged as newclear #311-#314.",
+ "toolchain": {
+  "go": "go1.27.1 linux/amd64",
+  "os": "Linux 6.1, Debian 12, ext4",
+  "test_host": "4 vCPU, 8 GiB RAM",
+  "benchmark_hosts": "three cloud VMs (4 vCPU/7.8 GiB, 2 vCPU/1.9 GiB, 4 vCPU/3.8 GiB) on a private network, one broker each"
+ },
+ "commands": [
+  {
+   "command": "make fmt-check",
+   "exit_code": 0
+  },
+  {
+   "command": "make vet",
+   "exit_code": 0
+  },
+  {
+   "command": "make test",
+   "exit_code": 0
+  },
+  {
+   "command": "make test-race",
+   "exit_code": 0
+  },
+  {
+   "command": "make test-model",
+   "exit_code": 0,
+   "result": "M3, M4, and M6 model suites: 100 seeds each"
+  },
+  {
+   "command": "make test-integration",
+   "exit_code": 0,
+   "result": "includes the M7 process tests: OP-02, OP-03, OP-04 (two tests), OP-06, and three-broker failover"
+  },
+  {
+   "command": "make test-model-extended",
+   "exit_code": 0,
+   "result": "1,000 seeds x 10,000 events for M3, M4, and M6; 41.5 min"
+  },
+  {
+   "command": "make test-chaos (full, 28 faults)",
+   "exit_code": 0,
+   "result": "passed on seven seeds across PR 3 and PR 5"
+  },
+  {
+   "command": "make demo / make demo-down DELETE_DATA=1",
+   "exit_code": 0,
+   "result": "three-broker Compose demo; passes on the test host and in the mkfk CI workflow"
+  },
+  {
+   "command": "make bench (three hosts)",
+   "exit_code": 0,
+   "result": "12 configurations x 3 repeats; docs/benchmarks/m7-baseline.md"
+  }
+ ],
+ "gate_contract": "test-model, test-model-extended, test-integration, and test-chaos fail unless every named test ran and passed (scripts/run-named-tests.sh)",
+ "seeds": {
+  "chaos_full": [
+   "1791359540515728391",
+   "1791371829399073381",
+   "1791371925160450368",
+   "1791372018490574523",
+   "1791372111993356927",
+   "1791389968443792185",
+   "1791390059722352879"
+  ],
+  "model": "0-99 per suite (make test-model); 0-999 x 10,000 events (extended)"
+ },
+ "fault_schedule": "seeded: SIGKILL of a partition leader, a follower, or the group coordinator; SIGSTOP 2 s; isolation of a broker's peer links; a one-way peer cut (requests dropped, replies lost); a 200 ms peer delay. Each fault is healed and every broker is ready again before the next. Separately: disk full and sync failure through the storage fault adapter; a flood of 400 producers, 200 slow-header clients, and a storm of 600 fetches; a lost produce reply; a dead-broker route.",
+ "acceptance": {
+  "OP-01": "malformed, duplicate-key, oversized, bad-base64, path-traversal, and wrong-topology peer and client requests are rejected before any backend sees them",
+  "OP-02": "a locked data dir, wrong node, changed topology bytes, unformatted dir, or non-loopback listener without the opt-in all fail to start, and the manifest is unchanged",
+  "OP-03": "flood: 400/400 acknowledged, peak 25 pending waiters (cap 256); slow headers closed after 5 s while metadata keeps being served; the fetch storm answers 200, 429, or 503 within the deadline; disk full and sync failure fail closed with STORAGE_ERROR and outcome unknown",
+  "OP-04": "a lost reply is resent with the same identity and lands once at the same offsets; a stale route reaches the new leader within one pass of at most 3 requests per call; no client goroutine leak",
+  "OP-05": "two full chaos runs on the final code acknowledged 11,224 and 11,306 records with no violations: no loss, no duplicates, identical committed replicas, both groups processed every record, disjoint assignments, monotonic committed offsets",
+  "OP-06": "SIGTERM exits 0 within its bound; data survives the restart; logs and metrics carry no payload; readyz is false before the listeners and after shutdown",
+  "FR_INV": "every FR-01 to FR-08 and INV-01 to INV-12 maps to an executed test in docs/traceability.md"
+ },
+ "metrics_summary": {
+  "single_record_batches": "140-215 records/s, produce p50 25-60 ms (fsync-bound)",
+  "batches_of_100": "RF1 6,423-12,482 records/s; RF3 2,518-3,788 records/s; leader CPU 140-330%",
+  "read_back": "11,353-35,803 records/s; 10.8-14.0 segment and index comparisons per fetch",
+  "fsync_mean_ms": "0.80-2.25",
+  "cold_restart_s": "4.5-7.4 for small logs; 35-167 for 0.5-1.4 GiB per partition"
+ },
+ "defects_found_and_fixed": [
+  "M6: a new RF3 coordinator never started serving (failover messages left unsent)",
+  "M3: the leader's sent-RPC table was unbounded under message loss",
+  "M3: every proposal re-sent all pending entries (no flow control)",
+  "M4: followers one round trip behind a busy leader were evicted from the ISR",
+  "M3: a rejected higher-term vote reset election timers, so a stale candidate kept a partition leaderless",
+  "M3: restart replay and single-entry reads were quadratic",
+  "M4: operation and gate history were never pruned; writes stopped after about 4,096 operations",
+  "M7 recovery: up to three copies of the replayed prefix in memory",
+  "write outcome after a storage failure reported not_applied instead of unknown"
+ ],
+ "mutation_checks": "PR 1: 6, PR 2: 6, PR 3: 12, PR 5: 3; all killed",
+ "output_location": "full logs under .test-output/ on the test host, uploaded as CI artifacts for the chaos job; scrubbed benchmark results in docs/benchmarks/",
+ "limitations": [
+  "No TLS or authentication; peers are trusted (X4). Non-loopback listeners need --allow-insecure-bind.",
+  "No group commit, binary payload, or snapshots: single-record throughput is fsync-bound, and restart time and memory grow with the log (X2/X3).",
+  "Fetch does not long-poll; read barriers are not batched.",
+  "Chaos applies one fault at a time; overlapping faults are not scheduled.",
+  "The SIGKILL tests do not prove power-loss durability; that depends on the platform's fsync (ADR-007).",
+  "Delivery to consumers is at least once."
+ ],
+ "next_task": "none in P-032 core; X1-X4 need separate design and owner approval"
+}

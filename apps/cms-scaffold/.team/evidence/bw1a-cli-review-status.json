@@ -1,0 +1,20 @@
+[
+  {
+    "provider": "grok",
+    "exit": 0,
+    "seconds": 114.1,
+    "model": "grok-4.7-build-fast"
+  },
+  {
+    "provider": "cursor",
+    "exit": 0,
+    "seconds": 24.9,
+    "model": "composer-2.5"
+  },
+  {
+    "provider": "opencode",
+    "exit": 0,
+    "seconds": 37.8,
+    "model": "opencode-go/gpt-6-luna"
+  }
+]

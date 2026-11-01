@@ -1,0 +1,22 @@
+{
+  "attempt": 3,
+  "record": "W5-REAL-20261006-03",
+  "stats": {
+    "startTime": "2026-10-06T12:30:52.632Z",
+    "duration": 48512.100999999995,
+    "expected": 12,
+    "skipped": 1,
+    "unexpected": 1,
+    "flaky": 0
+  },
+  "cleanup": {
+    "attempt": 3,
+    "project": "cms-w5-e2e-2051694-3e943f0111a67954",
+    "containersRemaining": 0,
+    "volumesRemaining": 0,
+    "networksRemaining": 0,
+    "privateDirectoryRemoved": true,
+    "cleanupLogSha256": "c72f3357ba2a7b4c6e8423c12a485ac6bf04fda95c563e959ea821b04ebf0a55"
+  },
+  "boardDiagnosticAttachments": 0
+}

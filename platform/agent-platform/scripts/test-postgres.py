@@ -4,6 +4,7 @@
 import json
 import os
 import secrets
+import signal
 import subprocess
 import sys
 import tempfile
@@ -15,6 +16,9 @@ IMAGE = "postgres@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f408
 
 
 def main():
+    # An owned runner must cooperate even when its launching shell ignored SIGINT.
+    # Set this before allocating resources; Python children inherit the default again.
+    signal.signal(signal.SIGINT, signal.default_int_handler)
     name = "agent-platform-m1-test-" + uuid.uuid4().hex[:12]
     with tempfile.TemporaryDirectory(prefix="agent-platform-pg-") as temporary:
         root = Path(temporary)

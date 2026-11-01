@@ -1,15 +1,257 @@
-# Quickstart — 目前為設計閱讀入口
+# Quickstart — M5 本機事件中樞
 
-**Runtime blocked / not implemented。** 目前沒有 Go binary、前端、設定 schema 或 fixtures。本檔明確記錄阻擋，不提供會讓人以為能執行的指令。
+M5 已提供本機 Go runtime、SQLite WAL、來源 token 授權、事件寫入／查詢、Alertmanager v4 adapter、事件看板與來源新鮮度。服務預設只監聽 `127.0.0.1:8080`。已提供規則指標與圖表、webhook／ntfy、摘要、重試與DLQ重放；另有封存／匯回與一致備份／隔離還原；部署尚未驗收；完整範圍見 [runtime 契約](runtime.md) 與 [狀態](STATUS.md)。
 
-閱讀順序：[總綱](../SDD.md) → [SDD 索引](sdd/README.md) → [狀態](STATUS.md) → [開發約定](../AGENTS.md)。
+若要使用 Docker，請從[個人 Docker 啟動包](../deployment/docker/README.md)開始；它包含持久目錄、既有備份與隔離還原步驟。以下保留直接執行 binary 的開發範例。
 
-| 驗證種類 | 本階段狀態 | 理由 |
-| --- | --- | --- |
-| 設計閱讀／邊界自查 | 可進行 | 所有 SDD 與來源都在 tree 中 |
-| schema／fixtures 驗證 | skipped | M0 尚未開始 |
-| Go 單元與整合測試 | skipped | 沒有 Go module |
-| 前端 build | skipped | 沒有 package 與 lockfile |
-| 部署與真實資料 | skipped | 需要另行授權 |
+以下步驟會在專案目錄的 `.local/` 建立合成 token、設定和資料庫；該目錄已加入 git ignore。請從 `platform/signal-hub` 執行，並使用 Go 1.26.8 或相容的 Go 1.26 工具鏈。
 
-M1 完成後，把本檔改成真正執行過、可重現的本機啟動與驗證步驟。
+## 建置並建立本機設定
+
+```sh
+go build -o /tmp/signalhub ./cmd/signalhub
+mkdir -p .local
+```
+
+用 Python 建立三個互不相同的 token 檔案和初始設定。權限由 `umask 077` 限制；token 不會印到終端機，也不會放進命令列參數。
+
+```sh
+python3 - <<'PY'
+import json
+import os
+import secrets
+from pathlib import Path
+
+os.umask(0o077)
+local = Path('.local').resolve()
+local.mkdir(mode=0o700, exist_ok=True)
+local.chmod(0o700)
+for role in ('source', 'owner', 'readonly'):
+    path = local / f'{role}.token'
+    path.write_text(secrets.token_urlsafe(32), encoding='ascii')
+    path.chmod(0o600)
+config = {
+    'sources': [{
+        'name': 'demo',
+        'source_prefix': 'urn:example:demo:',
+        'allowed_types': ['demo.event.*'],
+        'token_ref': f'file:{local / "source.token"}',
+    }],
+    'rules': [],
+    'subscriptions': [],
+    'webhook_allowlist': [],
+}
+(local / 'config.json').write_text(json.dumps(config, indent=2) + '\n', encoding='utf-8')
+(local / 'config.json').chmod(0o600)
+PY
+```
+
+## 啟動服務
+
+```sh
+/tmp/signalhub \
+  --config .local/config.json \
+  --db .local/events.db \
+  --owner-token-ref "file:$(pwd)/.local/owner.token" \
+  --readonly-token-ref "file:$(pwd)/.local/readonly.token"
+```
+
+保持此終端機開啟；`Ctrl-C` 會正常停止服務。預設只綁定 loopback。非 loopback 綁定僅接受明確的 Tailscale 位址，且此檢查本身不會驗證主機、ACL 或 tailnet 部署狀態。
+
+## 使用看板
+
+開啟 `http://127.0.0.1:8080/`，輸入 `.local/readonly.token` 的內容。token 只存在頁面記憶體；不寫入 URL、cookie 或 browser storage，重新整理後需再次輸入。篩選與詳情保存在 URL，可重開或分享給有權限的讀者。
+
+時間線可篩選、分頁並查看原始事件與關聯事件。來源頁區分新鮮、延遲、沉默、尚未收到事件；本範例沒有 `expected_interval`，收到事件後會顯示「未啟用新鮮度檢查」。如設定 `expected_interval: "5m"` 並重啟，逾 5 分鐘為延遲、逾 10 分鐘為沉默。從 M1 升級後，來源先保持 never，直到收到首次合法上報；詳見[來源契約](source-freshness.md)。
+
+前端產物已提交並由 Go embed，因此使用者只需 Go 即可建置。修改前端時先使用 Node 24.19.0 執行：
+
+```sh
+cd web
+npm ci
+npm test
+npm run build
+cd ..
+```
+
+再重新建置 Go binary。CI 會確認重新建置的 `web/dist` 與提交內容一致。
+
+## 寫入、重送並唯讀查詢
+
+在另一個終端機，同樣從專案目錄執行以下 Python 範例。它從 token 檔讀取憑證，不會把 token 放進 shell 命令列；同一份事件送兩次後，預期收到 `202` 新增和 `200` 去重，再用唯讀 token 查詢事件。
+
+```sh
+python3 - <<'PY'
+import json
+import time
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
+base = 'http://127.0.0.1:8080'
+local = Path('.local')
+def token(role):
+    return (local / f'{role}.token').read_text(encoding='ascii').strip()
+def request(path, role, method='GET', body=None, content_type=None):
+    headers = {'Authorization': 'Bearer ' + token(role)}
+    if content_type:
+        headers['Content-Type'] = content_type
+    req = Request(base + path, data=body, headers=headers, method=method)
+    try:
+        with urlopen(req, timeout=3) as response:
+            return response.status, response.read()
+    except HTTPError as response:
+        return response.code, response.read()
+
+for attempt in range(30):
+    try:
+        with urlopen(base + '/readyz', timeout=1):
+            break
+    except Exception:
+        if attempt == 29:
+            raise
+        time.sleep(0.2)
+
+now = datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
+event = {
+    'specversion': '1.0',
+    'id': 'demo-' + uuid.uuid4().hex,
+    'source': 'urn:example:demo:service',
+    'type': 'demo.event.created',
+    'time': now,
+    'subject': 'quickstart',
+    'data': {'result': 'ok'},
+}
+body = json.dumps(event).encode()
+for expected in (202, 200):
+    status, response = request('/v1/events', 'source', 'POST', body, 'application/cloudevents+json')
+    print(status, response.decode().strip())
+    assert status == expected
+status, response = request('/v1/events?limit=10', 'readonly')
+assert status == 200
+page = json.loads(response)
+assert any(item['event']['id'] == event['id'] for item in page['items'])
+print('readonly query: found', event['id'])
+PY
+```
+
+如需確認資料庫可跨程序重啟保存事件，按 `Ctrl-C` 停止服務，再執行同一個啟動命令；重複上面的唯讀查詢即可看到先前事件。範例每次產生新的合成 ID，可重複測試。
+
+## 驗證
+
+先建立隔離的 Python 驗證環境；契約 checker 和 smoke test 共用這些依賴。
+
+```sh
+python3 -m venv /tmp/signalhub-checks
+/tmp/signalhub-checks/bin/pip install --only-binary=:all: -r contracts/requirements.txt
+```
+
+接著執行 Go 測試、靜態檢查、建置、契約 checker 與本機端到端 smoke test：
+
+```sh
+go test -race ./...
+go vet ./...
+go build -o /tmp/signalhub ./cmd/signalhub
+/tmp/signalhub-checks/bin/python contracts/check.py
+/tmp/signalhub-checks/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
+/tmp/signalhub-checks/bin/python scripts/e2e_rules.py --binary /tmp/signalhub
+/tmp/signalhub-checks/bin/python scripts/e2e_delivery.py --binary /tmp/signalhub
+```
+
+`e2e_smoke.py` 使用本機合成憑證及暫存資料庫執行 HTTP／SQLite smoke test，不會部署服務或連接外部系統。契約檢查驗證 schemas、fixtures、vectors 與 OpenAPI；它不取代 runtime 測試。
+
+
+瀏覽器驗證使用 Playwright 和真正的 Go binary，建立自己的合成 token／事件與暫存資料庫。請以支援 Chromium sandbox 的非 root 開發環境執行：
+
+```sh
+cd browser
+npm ci
+npx playwright install --with-deps chromium
+SIGNALHUB_BINARY=/tmp/signalhub npm test
+```
+
+## 加入第一條指標規則
+
+先完成上述啟動與事件寫入。以下修改本機 JSON 設定並由 owner 呼叫重載；token 不會印到輸出。看板的「指標趨勢」會顯示目前未結束的桶，之後每分鐘更新資料；按「重新查詢指標」取得最新結果。
+
+```sh
+python3 - <<'PYCODE'
+import json
+from pathlib import Path
+from urllib.request import Request, urlopen
+local = Path('.local')
+path = local / 'config.json'
+config = json.loads(path.read_text())
+config['rules'] = [{
+    'id': 'demo-count', 'version': 1, 'title': '示範事件數',
+    'filter': {'types': ['demo.event.*']},
+    'aggregation': {'fn': 'count'}, 'bucket': '1h',
+    'threshold': {'op': '>=', 'value': 3, 'for_buckets': 2, 'severity': 'warning'},
+}]
+path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n')
+headers = {'Authorization': 'Bearer ' + (local / 'owner.token').read_text().strip()}
+with urlopen(Request('http://127.0.0.1:8080/v1/config:reload', headers=headers, method='POST')) as response:
+    assert response.status == 200
+    print('configuration reloaded')
+PYCODE
+```
+
+變更規則內容時必須使用新 version；同版本內容不同會回400，舊設定仍生效。圖表的虛線／空心點表示 partial，垂直線表示版本分隔，資料表保留精確數字與空值。切換時間或分組可縮小結果；圖表載入全部分頁後才顯示。
+
+需要手動回填時先停止服務，再執行（日期換成所需的 UTC 起點）：
+
+```sh
+/tmp/signalhub rules backfill --config .local/config.json --db .local/events.db --rule demo-count --from 2026-10-01
+```
+
+此命令只重新計算已生效規則，不修改來源、規則版本或 token。自動回填仍以資料庫實際保留的最早事件為界；本階段尚未執行 retention cleanup。
+
+## 訂閱與投遞
+
+訂閱設定格式見 [SDD](sdd/04-subscriptions-and-delivery.md)。把 webhook／ntfy 的完整 HTTPS URL 加入 `webhook_allowlist`，使用各自的 `secret_ref`／`token_ref` 檔案，再以 owner 重載。正式目標的全部 DNS 位址必須在 tailnet 範圍且具有效 TLS 憑證；即使列入允許清單，loopback／LAN／公網／redirect 仍拒絕。這個範例不連接真實通知帳號。
+
+新訂閱預設 `start: now`；需補送現有事件才明寫 `earliest_hot`。設定身份固定，改 filter／channel kind／digest 排程請使用新 ID；目標 URL 與憑證可原子輪替。日摘要以指定 IANA 時区當地時間切窗，前20筆及總數會在排隊時固定；遲到事件不重写已排摘要。
+
+看板「投遞」可查看 counts、狀態／訂閱篩選、最近嘗試及分頁。DLQ 重放需 owner token 與理由，唯讀 token 會收到403；移除的訂閱先恢復相同設定才能重放。重試／重放保留原 delivery ID，接收端仍必須持久化去重。驗收真實本機 TLS 接收端（包括 SIGKILL／lease 復原）：
+
+```sh
+go test -race -v ./cmd/signalhub -run 'TestM4ReferenceReceiverVectors|TestM4RealServiceDeliveryRecovery' -count=1
+```
+
+上述測試使用獨立服務 process、合成 SQLite 事件與具固定憑證的接收端，僅測試內注入時鐘及該接收端的精確位址。正式 CLI 沒有停用 SSRF 或 TLS 驗證的選項。`e2e_delivery.py` 另啟動正式 binary 驗證 HTTP／OpenAPI，並確認 allowlisted loopback 仍未被連線。
+
+
+## M5 合成資料還原演練
+
+從 component 根目錄執行下列命令。腳本自己建立、清理暫存 DB、設定與合成憑證；不使用 quickstart 的既有資料或真實通知帳號。結果包含 manifest/hash/筆數／精確清除、遲到 part、匯回去重與 audit、live-WAL 備份、隔離還原後查詢／寫入／重放。TLS 接收端與 lease 到期恢復另由 Go subprocess 測試涵蓋。
+
+```sh
+go build -trimpath -o /tmp/signalhub ./cmd/signalhub
+python3 -m venv .local/contracts
+.local/contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
+.local/contracts/bin/python scripts/e2e_archive.py --binary /tmp/signalhub
+go test -v ./cmd/signalhub -run TestM5RealServiceArchiveBackupDeliveryRecovery -count=1
+```
+
+手動操作與故障復原步驟見 [runtime 的 M5 節](runtime.md#m5-封存備份與隔離還原)。啟動時不帶維護目錄旗標，就不會自動封存或備份。
+
+## M6 準備包的隔離驗證
+
+這些命令只建置／檢查準備包並啟動自己的合成 loopback 服務，不接入真實來源或通知。既有 Python 契約依賴不屬於 Go runtime；沿用鎖定版本。從 component 目錄執行：
+
+```sh
+python3 -m venv .local/run/contracts
+.local/run/contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
+go build -trimpath -o .local/run/signalhub ./cmd/signalhub
+.local/run/contracts/bin/python scripts/test_check_sources.py
+.local/run/contracts/bin/python scripts/check_sources.py
+python3 scripts/test_check_deployment.py
+python3 scripts/check_deployment.py
+.local/run/contracts/bin/python scripts/e2e_m6.py --binary .local/run/signalhub
+```
+
+HTTP 演練從 `examples/sources/` 讀取三來源範例，在本輪新建目錄產生合成憑證、設定與 SQLite；檢查原 seq、重送／衝突、來源權限、Alertmanager member 狀態、真實經過四秒以上的沉默／恢復，以及一致快照還原到新路徑。結束只清理這次自建的合成目錄。沒有真實通知、外部 monitor 或七天觀測；新產生的快照也不是前一天的真實快照。M5 的 archive／queue／lease／DLQ 恢復回歸仍須另外執行。
+
+個人使用先依 [目前驗收](sdd/06-security-operations-acceptance.md) 接一個有用來源；[來源接入說明](source-integration.md) 保留錯誤與重試處理。[擴展部署／還原包](deployment-acceptance.md) 及其三來源／七天 checker 為選用，不必為首次使用填齊。不要把範例設定或離線 checker 通過當成部署授權。

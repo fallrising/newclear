@@ -1,8 +1,8 @@
 ---
 document_id: GENERATED-COMPLETE-SDD
 project: flowshot
-version: 1.0.1
-generated_from: flowshot-sdd-v1.0.1
+version: 1.0.2
+generated_from: flowshot-sdd-v1.0.2
 status: generated-non-authoritative-export
 ---
 
@@ -21,9 +21,9 @@ status: generated-non-authoritative-export
 document_id: SPEC-ROOT
 title: Markdown Annotator 技術規格
 project_slug: flowshot
-version: 1.0.1
+version: 1.0.2
 status: approved-for-m0
-date: 2026-07-29
+date: 2026-10-23
 authority: product-architecture-security
 language: zh-TW
 ---
@@ -493,7 +493,12 @@ PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
 PRAGMA synchronous = NORMAL;
 PRAGMA busy_timeout = 5000;
+PRAGMA recursive_triggers = ON;
 ```
+
+`recursive_triggers` 確保 `INSERT OR REPLACE` 的隱含 DELETE 也受 hard-delete/system-tag triggers 保護。
+
+僅測試用 in-memory connection 的 journal mode 為 SQLite `memory`（不支援 WAL）；其餘 PRAGMA 不豁免。並行、busy 與重啟證據必須使用 tempfile WAL。
 
 migration 只提供 `up`，必須可重跑檢查、不可跳版。破壞性 migration 前必須先建立 DB backup；v1 不允許破壞性 migration。
 
@@ -935,13 +940,19 @@ Machine-readable DAG：[`docs/graph.yaml`](docs/graph.yaml)。
 
 | 里程碑 | 節點 | Gate |
 |---|---|---|
-| M0 地基 | N00, N01 | `make ci` 全綠；migration/invariant test 全綠；G2 記錄檔可寫入 |
+| M0 地基 | N00, N01 | Linux Docker `make ci`、`make native-ci` 與原生啟動 smoke 全綠；migration/invariant test 全綠；G2 記錄檔可寫入 |
 | M1 能讀 | N02, N03, N04 | 連續 3 天用真實 KB 閱讀；性能預算達標 |
 | M2 能標 | N05, N06, N07 | 至少 30 條真批注、10 條留言；重開皆可見 |
 | M3 標不死 | N09, N10, A02 | 真實 git 變更回放；attached 比例 ≥ 90%；零遺失；所有 orphan 可恢復 |
 | M4 能檢索 | N08, A01, A03, A04 | 標籤搜尋至少 3 次真實命中；原始核心需求閉環 |
 | M4+ 收尾 | A05, A06, A07 | 各節點獨立驗收 |
 | Bonus | 非目標候選 | 連續 14 天 dogfood 與全部核心 gate 通過 |
+
+### 13.1 開發驗收與 macOS 發行驗收
+
+依 owner 2026-10-23 指示，Linux Docker 是正式開發驗證環境。N00 開發驗收必須實際通過完整 Rust/frontend/contract gate、Linux Tauri native build/test 與 Xvfb 視窗及真實 frontend IPC smoke；不得用 native skip 或 mock 代替。通過後可將 N00 標為 `done` 並依 DAG 啟動 N01 等下游；`done` 表示節點開發驗收，不表示 macOS 發行驗收。
+
+macOS 13+ Apple Silicon／Intel 仍為 v1 發行目標。受控目標 Mac 的可見視窗與 frontend command completion 都必須 `< 1500 ms`，原 oracle、硬體紀錄及歷史失敗證據不變。此項獨立追蹤於 SUCCESS AC-02；未通過禁止 usable tag／發行，但不阻塞 Linux 開發、里程碑提交與 PR 合併。CI 中 macOS native build/test 仍需通過，hosted timing 仍只作診斷。其他產品安全、性能、BDD 與 dogfood gate 不變。
 
 關鍵路徑：`N00 → N03 → N05 → N06 → N09 → N10 → A02`。
 
@@ -1020,7 +1031,7 @@ todo
 - Node BDD 全過。
 - Node TDD/contract/invariant test 全綠。
 - `make ci` 全綠。
-- 性能與安全驗收有證據。
+- 性能與安全驗收有證據；§13.1 的受控 Mac 發行驗收另於 SUCCESS 追蹤，不以 Linux 結果代替。
 - verification report 已完成。
 - contract drift 為零。
 - node outcome 已追加到 JSONL。
@@ -1123,8 +1134,8 @@ M4 後計算：
 ```yaml
 schema_version: 1
 project: flowshot
-spec_version: 1.0.1
-spec_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+spec_version: 1.0.2
+spec_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 critical_path:
 - N00
 - N03
@@ -1140,7 +1151,7 @@ nodes:
     milestone: M0
     depends_on: []
     size: M
-    status: blocked
+    status: done
     spec: docs/nodes/N00-foundation-ci-contracts.md
     contract_lock: contracts/locks/N00.json
     verification: docs/verification/N00.md
@@ -1151,7 +1162,7 @@ nodes:
     depends_on:
     - N00
     size: M
-    status: todo
+    status: done
     spec: docs/nodes/N01-sqlite-schema-migrations.md
     contract_lock: contracts/locks/N01.json
     verification: docs/verification/N01.md
@@ -1163,7 +1174,7 @@ nodes:
     - N00
     - N01
     size: M
-    status: todo
+    status: implementing
     spec: docs/nodes/N02-workspace-lazy-tree.md
     contract_lock: contracts/locks/N02.json
     verification: docs/verification/N02.md
@@ -1174,7 +1185,7 @@ nodes:
     depends_on:
     - N00
     size: M
-    status: todo
+    status: blocked
     spec: docs/nodes/N03-markdown-render-model.md
     contract_lock: contracts/locks/N03.json
     verification: docs/verification/N03.md
@@ -1353,7 +1364,7 @@ milestones:
     nodes:
     - N00
     - N01
-    gate: make ci 全綠；migration/invariant test 全綠；G2 記錄機制可用
+    gate: Linux Docker make ci/native-ci/native smoke 全綠；migration/invariant test 全綠；G2 記錄機制可用
   M1:
     title: 能讀
     nodes:
@@ -1404,6 +1415,9 @@ scheduling_rules:
   max_parallel_nodes: unbounded by spec; file ownership must not overlap
   failure_loop_limit: 3
   milestone_gate_blocks_next_milestone: true
+
+release_gates:
+  controlled_macos_launch: SUCCESS.md AC-02; both signals <1500ms; blocks usable/release, not development
 ```
 
 ---
@@ -1412,7 +1426,7 @@ scheduling_rules:
 
 ---
 document_id: PROTOCOL-LLM-EXECUTION
-version: 1.0.0
+version: 1.0.1
 status: approved
 authority: execution-process
 ---
@@ -1427,7 +1441,7 @@ authority: execution-process
 
 Agent 只可領取 `docs/graph.yaml` 中符合以下條件的 node：
 
-1. 所有 `depends_on` 狀態為 `done`。
+1. 所有 `depends_on` 狀態為 `done`（開發驗收，見 SPEC §13.1；Mac 發行驗收另追蹤）。
 2. Node front matter 的 `source_sha256` 等於目前 `SPEC.md` SHA-256。
 3. Node 狀態為 `ready` 或被 orchestrator 明確指派。
 4. Dependency contract 已凍結。
@@ -1784,8 +1798,8 @@ depends_on:
 size: S
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread in-document search
@@ -1921,8 +1935,8 @@ depends_on:
 size: M
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread notify watcher
@@ -2079,8 +2093,8 @@ depends_on:
 size: M
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread command palette
@@ -2226,8 +2240,8 @@ depends_on:
 size: S
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: []
 allowed_paths: 
@@ -2357,8 +2371,8 @@ depends_on:
 size: M
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread wikilink/backlinks
@@ -2502,8 +2516,8 @@ depends_on:
 size: S
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread Mermaid rendering
@@ -2625,8 +2639,8 @@ depends_on:
 size: S
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: []
 allowed_paths: 
@@ -2765,14 +2779,14 @@ id: N00
 title: 專案骨架、CI 與 Contract Pipeline
 kind: core
 milestone: M0
-status: blocked
+status: done
 depends_on: []
 size: M
-revision: 1
+revision: 3
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-contract_status: draft
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+contract_status: frozen
 legacy_reference: 
   - mdread repository layout
   - loom contract-first CI pattern
@@ -2785,6 +2799,8 @@ allowed_paths:
   - src-tauri/**
   - src/**
   - Makefile
+  - scripts/**
+  - ../../.github/workflows/flowshot-ci.yml
   - README.md
   - .gitignore
   - index.html
@@ -2898,7 +2914,8 @@ pub trait CommandContract {
 
 ## 性能與觀測
 
-- 空應用 release build 冷啟動到可互動 `< 1.5 s`，記錄基準硬體。
+- 開發驗收：Linux Docker 完整 native gate 與 Xvfb 可見視窗／真實 frontend IPC smoke。
+- 發行驗收：受控 Mac 空應用 release build 冷啟動到可互動 `< 1.5 s`，記錄基準硬體；獨立於開發 `done`，依 SPEC §13.1 追蹤 SUCCESS AC-02。
 - CI 每個階段輸出可辨識名稱與耗時。
 - build info 與 command correlation ID 可在本地日誌確認。
 
@@ -2945,18 +2962,25 @@ id: N01
 title: SQLite Schema、Migration 與 Repository
 kind: core
 milestone: M0
-status: todo
+status: done
 depends_on: 
   - N00
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-contract_status: draft
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+contract_status: frozen
 legacy_reference: 
   - mdread SQLite schema and migration patterns
 allowed_paths: 
+  - Cargo.lock
+  - src-tauri/Cargo.toml
+  - src-tauri/src/lib.rs
+  - src-tauri/tauri.conf.json
+  - scripts/linux-db-smoke.py
+  - docs/graph.yaml
+  - docs/metrics/node-outcomes.jsonl
   - crates/db/**
   - crates/core/src/contracts/N01*
   - src-tauri/src/db*
@@ -3002,7 +3026,10 @@ pub struct AnnotationId(pub Uuid);
 pub struct TagId(pub Uuid);
 
 pub trait TransactionRunner {
-    fn transaction<T>(&self, f: impl FnOnce(&mut Transaction) -> Result<T>) -> Result<T>;
+    fn transaction<T: Send + 'static>(
+        &self,
+        f: impl FnOnce(&mut Transaction) -> Result<T> + Send + 'static,
+    ) -> Result<T>;
 }
 ```
 
@@ -3107,6 +3134,20 @@ Repository interface 只暴露 typed method；SQL row 不得跨出 `db` crate。
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+## N01 契約釐清（2026-10-23）
+
+- Transaction closure/result 為 owned `Send + 'static`，只在 writer actor 借用 opaque transaction；不暴露 SQL。同步等待只可由 blocking caller 使用，Tauri async caller 必須經 `spawn_blocking`。Panic/error 回滾，不遺留半筆 mutation。
+- SQLite INTEGER 的 persisted row/revision token 限 `0..=i64::MAX`；checked conversion/increment，溢位拒絕並回滾。App-state changed mutation 使用 checked `max(clock_ms, previous_updated_at + 1)`，確保固定 clock 下 stale CAS 仍失敗；idempotent no-op 不更新 token。
+- 僅 in-memory test factory 採 memory journal，其餘 PRAGMA 不變；WAL/busy/restart 使用 tempfile。
+- T01 先驗證 migration registry，再在 serialized write transaction 內查 metadata 及套用 DDL。首個 migration 在 T02/T03 完成前只用 disposable fixtures，尚未發布，不變更已套用 checksum。
+- Comment UPDATE 必須保護 self-parent、含 replies 的 root 被降成 reply，以及 cross-annotation descendants。System pin 不可透過 kind demotion 繞過保護，annotation_tags INSERT/UPDATE 都須拒絕 pin。
+- Canonical SQL 不足以表達 AnchorV1/model version 語義時，由 typed repository input 驗證；不得宣稱 JSON CHECK 已驗證 domain。Documents 沒有 deleted_at，因此不提供 document delete primitive，missing/detached 仍保留資料。
+- 10k gate 記錄 migration、seed 及 combined 時間；以 combined `<1s` 驗收，包含 10k annotation 與 10k binding，走正式 repository transaction path。
+- 下游功能專用查詢與 tag merge 在 N08 實作；N01 提供可證明 persistence/invariant 的最小 typed primitives，不把未實作的 tag merge 測試計為通過。
+
+- Executor shutdown：先關閉新 writer/read admissions，drain 已接受的 writer jobs 與所有 read calls（含等待連線者），join writer 並釋放 read connections，重複 shutdown 冪等。同 runtime callback 內重入 blocking operations／shutdown 必須立即拒絕，避免 self-wait/self-join。`Completion::wait` 亦不可在所屬 writer thread 上等待。
+- 所有 managed connections 啟用並驗證 `recursive_triggers=ON`，讓 REPLACE 隱含刪除無法繞過 trigger；pin identity 使用 null-safe 比較。空 migration metadata 搭配任何未知既有 schema 必須拒絕，不可自動接管。
+
 ---
 
 # FILE: `docs/nodes/N02-workspace-lazy-tree.md`
@@ -3116,19 +3157,34 @@ id: N02
 title: Workspace、PathGuard 與 Lazy File Tree
 kind: core
 milestone: M1
-status: todo
+status: implementing
 depends_on: 
   - N00
   - N01
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-contract_status: draft
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+contract_status: frozen
 legacy_reference: 
   - mdread workspace, mtime cache, large-directory guard
 allowed_paths: 
+  - scripts/n02-native-smoke.py
+  - Cargo.lock
+  - crates/db/**
+  - contracts/locks/N00.json
+  - contracts/locks/N01.json
+  - crates/core/src/contracts/mod.rs
+  - crates/xtask/src/contracts.rs
+  - crates/core/tests/**
+  - src/generated/contracts/**
+  - src-tauri/Cargo.toml
+  - src-tauri/src/lib.rs
+  - src-tauri/src/commands/mod.rs
+  - src-tauri/src/commands/workspace*
+  - src-tauri/capabilities/**
+  - src-tauri/tauri.conf.json
   - src-tauri/src/workspace/**
   - src-tauri/src/path_guard/**
   - crates/core/src/contracts/N02*
@@ -3195,7 +3251,7 @@ list_recent_documents({ workspace_id, cursor?, limit? })
 - 目錄列舉 deterministic：directory 先、file 後；同類按 Unicode display name 穩定排序。
 - `.mdx` 不執行 JSX。
 - root 內任何操作只讀。
-- 大目錄不得一次讀取/渲染全部 entry。
+- 大目錄不得一次 materialize 或渲染全部 entry；單層名稱可 bounded-memory streaming 掃描以提供全域排序，禁止讀取未展開子目錄或正文（ADR-003）。
 
 ## BDD 場景
 
@@ -3297,6 +3353,10 @@ list_recent_documents({ workspace_id, cursor?, limit? })
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+## Implementation decisions
+
+[ADR-003](../adr/ADR-003-workspace-boundaries.md) resolves T-007 path-handle, pagination, ignore, identity and binary transport questions. All original BDD/security/performance gates remain. Backward-compatible typed DB query/identity additions and multi-command generator/registration are owned by the N02 worker; immutable DDL and existing N00 public DTO behavior do not change. Root owns App composition and later N04 state commands.
+
 ---
 
 # FILE: `docs/nodes/N03-markdown-render-model.md`
@@ -3306,18 +3366,21 @@ id: N03
 title: Deterministic Markdown Render Model
 kind: core
 milestone: M1
-status: todo
+status: blocked
 depends_on: 
   - N00
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-contract_status: draft
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+contract_status: frozen
 legacy_reference: 
   - mdread GFM/TOC/highlight reader UI
 allowed_paths: 
+  - package.json
+  - package-lock.json
+  - docs/adr/ADR-002-document-model-v1.md
   - src/lib/document-model/**
   - src/features/reader/**
   - fixtures/markdown/**
@@ -3465,6 +3528,15 @@ buildDocumentModel(source: string): DocumentModel
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+
+## Initial v1 contract decisions
+
+Before implementation, follow [ADR-002](../adr/ADR-002-document-model-v1.md). This is the initial schemaVersion=1 freeze, not a change to a shipped canonicalizer. Root owns shared App/native composition; this node provides a pure model and an isolated reader with injected link/asset callbacks. All original BDD/performance/security gates remain mandatory.
+
+## Current execution blocker
+
+Functional candidate and initial public API are implemented, but repeated unchanged 1MiB benchmarks fail the <300ms gate. Actual WebKitGTK confirms the failure; source-map overhead is not the bottleneck. See [candidate evidence](../verification/N03.md) and the independent T-010 review. The orchestrator marks this node blocked under execution protocol §8; N04 is not unlocked. Next work requires a separately bounded parser/pipeline performance design task with the same fixture and complete semantic equivalence, or an explicitly reviewed specification decision. Neither asynchronous UI responsiveness nor an easier fixture establishes this synchronous full-model gate.
+
 ---
 
 # FILE: `docs/nodes/N04-tabs-state.md`
@@ -3479,14 +3551,23 @@ depends_on:
   - N02
   - N03
 size: S
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread open_tabs persistence
 allowed_paths: 
+  - docs/adr/ADR-004-tab-session-persistence.md
+  - src/App.tsx
+  - src/App.test.tsx
+  - src/styles.css
+  - src-tauri/src/lib.rs
+  - src-tauri/src/commands/mod.rs
+  - crates/core/src/contracts/mod.rs
+  - crates/xtask/src/contracts.rs
+  - src/generated/contracts/**
   - src/features/tabs/**
   - src-tauri/src/commands/app_state*
   - crates/core/src/contracts/N04*
@@ -3613,6 +3694,11 @@ State JSON 必須帶 schema version；未知較新版本不得崩潰，回明確
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+
+## Initial session contract decisions
+
+Follow [ADR-004](../adr/ADR-004-tab-session-persistence.md) when deriving the initial N04 plan, DTOs, lock and tests. `expected_updated_at` is a per-key map with explicit null creation tokens; multi-entry saves are atomic. Native window-close and application-exit barriers acknowledge only after persistence, with explicit safe no-write cases. Root owns shared integration after N02/N03 acceptance. This specification preparation does not authorize implementation while either dependency remains incomplete. All original restart, lazy-read, scroll and <16ms gates remain.
+
 ---
 
 # FILE: `docs/nodes/N05-selection-anchor-capture.md`
@@ -3628,8 +3714,8 @@ depends_on:
 size: L
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread TextQuoteSelector capture
@@ -3797,8 +3883,8 @@ depends_on:
 size: M
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread annotation CRUD, sidebar, highlight
@@ -3978,8 +4064,8 @@ depends_on:
 size: S
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread annotation reply thread
@@ -4127,8 +4213,8 @@ depends_on:
 size: M
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: []
 allowed_paths: 
@@ -4296,8 +4382,8 @@ depends_on:
 size: L
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread anchor recovery prototype
@@ -4489,8 +4575,8 @@ depends_on:
 size: M
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread unmatched annotation list and manual reanchor

@@ -386,6 +386,19 @@ pub enum SessionReducerError {
 }
 
 #[cfg(test)]
+impl SessionReducer {
+    // Retain a legally constructed projection; vary only both matching high-water values.
+    pub(crate) fn command_test_at_head(&self, head: EventSeq) -> Self {
+        let mut state = self.clone();
+        state.last_seq = head;
+        if let Some(projection) = &mut state.projection {
+            projection.last_seq = head;
+        }
+        state
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use chrono::{TimeZone, Utc};
     use uuid::Uuid;

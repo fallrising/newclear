@@ -1,0 +1,10 @@
+✔ route classification requires exact origin and no query or fragment (0.690398ms)
+✔ console summary never emits raw unknown message or URL (0.25052ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 54.658092

@@ -1,0 +1,19 @@
+Tool stdout retained; repository absolute paths normalized to <repo> for publication.
+✔ loaded authorized page accepted (0.892766ms)
+✔ reject loginRedirect without disclosing URL (0.448908ms)
+✔ reject otherOrigin without disclosing URL (0.984545ms)
+✔ reject wrongQuery without disclosing URL (0.157279ms)
+✔ reject fragment without disclosing URL (0.094338ms)
+✔ reject staleIdentity without disclosing URL (0.10464ms)
+✔ reject skeleton without disclosing URL (0.07487ms)
+✔ reject httpError without disclosing URL (0.06416ms)
+✔ reject pageError without disclosing URL (0.15268ms)
+✔ intentional logout only accepts exact anonymous selector (0.382448ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 86.074233

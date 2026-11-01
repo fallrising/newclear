@@ -69,6 +69,7 @@ func New(cfg config.Config) (*Server, error) {
 	}
 
 	manager := queue.NewManager(cfg.MaxQueues, cfg.MaxDepth, cfg.MaxMessageBytes)
+	manager.SetRemovedTTL(cfg.RemovedTTL)
 
 	var engine *persist.Engine
 	engCfg := persist.EngineConfig{
@@ -81,6 +82,7 @@ func New(cfg config.Config) (*Server, error) {
 		if err := engine.Load(); err != nil {
 			return nil, err
 		}
+		manager.MarkAllUnconfirmed()
 	}
 
 	jwtValidator, err := auth.NewValidator(auth.JWTConfig{

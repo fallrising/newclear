@@ -1,60 +1,39 @@
-# FE Review Prompt — loom
+# Loom R2 review runner
 
-你是負責 **loom** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
+Read [DESIGN](DESIGN.md), [SUCCESS](../SUCCESS.md), [REVIEW](REVIEW.md), [report](tasks/round2/report.md) and [PROTOCOL](../../../docs/fe-review/PROTOCOL.md). Only approved review-only Web simulation is in scope. Product/native/dependency/AI behavior is unchanged; dormant backlog remains closed.
 
-先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
+## Executable interface and isolation
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+From repositoryroot inside a fresh root-owned isolated networknamespace:
 
-## 專案概況
+```sh
+node apps/loom/fe-review/run-review.mjs --run unused-run-id
+```
 
-- **元件路徑：** `apps/loom/`
-- **一句話：** AI-native canvas / terminal / document 工作區桌面 App：Tauri 2（Rust）包 React 18 + Vite 5 + React Flow 前端。
-- **技術棧：** Tauri 2（Rust）、React 18、Vite 5、React Flow（`@xyflow/react`）
-- **UI 入口：** `apps/loom/`（Vite dev port 1420，HMR 1421）
+This command owns Vite127.0.0.1:1420/strictPort, installs the fixture before navigation, runs matrix/workflow assertions and writes capture.json/REPORT plus ignoredPNGs. Node24.18.0, locked npm dependencies, external Playwright1.63.0/axe4.13.0 and Chromium153.0.8010.12 were observed. Root supplies REVIEW_MODULES and REVIEW_BROWSER to external read-only tools/browser locations. Source is mountedread-only; only fresh run output/state writable. Use nonroot UID, networknone, capdropALL/no-newprivileges, no hostports/socket/profile/secrets; reject TAURI_DEV_HOST. Server/browser share only their isolatedloopback, separate fromFlowshot. The reviewVite configuration is sourcehash-pinned to original Vite5 config.
 
-## 啟動線索（未驗證）
+No newrun is authorized merely by this documentation. Existing green evidence is reused unless a sourcechange or newly approved scope requires execution. The actual successful remaining invocation was:
 
-- headless 只擷取 Web 層：`npm ci` 後 `npm run dev -- --host 127.0.0.1`。
-- `src/ipc.ts` 依賴 Tauri；以 `addInitScript` 注入 IPC mock，並在報告註明無法在瀏覽器驗證的部分（終端、檔案系統）。
+```sh
+LOOM_REVIEW_RESUME=journey-only node apps/loom/fe-review/run-review.mjs --run loom-006
+```
 
-## 主要流程
+loom006is already used and immutable. Root's reviewed outerlauncher supplied240s totalbound, owned cleanup and sourcefreeze; it mounted prior runs read-only. Journey-only verifies exactloom002 matrixreceipt/source andloom001canary before continuing remainingworkflow. It does not claim originalfailedruns passed. Full defaultmode is the future complete entry; do not execute it to repeat acceptedmatrix/canary.
 
-至少走通以下流程各一次，並對每一步截圖：
+Generic `docs/fe-review/capture.mjs` has no init-script hook and cannot install this stateful nativefixture. targets describes only basepage/devserver and observedmetadata; use this componentrunner for review evidence.
 
-- canvas 新增節點與連線 → 開啟 document surface → terminal surface
+## Scope and checks
 
-## 專案特有檢查重點
+Fixture validates nativecommands/arguments and uses actual lockedTauriSDK callback/listener behavior; unknown use rejects. Actualscenarios include canvas/document/terminal creation, keyboardediting, edge/Run/Pin, Cancel/Discard/saveerror/conflict, windowCancel, sidecarreload/tombstones, sessionhistory/loading/error/empty/memory/restart/forget anddisposal. No realvault/PTY/provider or productionadapter fallback.
 
-在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
+Focused pure test command from repo root:
 
-- React Flow 畫布的縮放、節點文字截斷、選取狀態對比。
-- Terminal 元件的字型、捲動與 resize。
-- 多 surface 切換的 focus 管理。
+```sh
+node --test apps/loom/fe-review/preload.node.mjs apps/loom/fe-review/ui-steps.node.mjs apps/loom/fe-review/geometry.node.mjs apps/loom/fe-review/vite-review-config.node.mjs
+```
 
-## 可重用的既有資產
+Existing native/frontend gates from apps/loom: `npm run typecheck:contracts`, `npm run typecheck:app`, `npm test`, `npm run build`; requiredCI retainsRust/contracts/drift. These commands are documented, not newly executed by the documentation closeout.
 
-- `npm run verify`：contracts 與 app typecheck、測試。
+## Evidence limits
 
-## 待補的頁面
-
-無路由。
-
-## 執行步驟
-
-先讀 [REVIEW.md](REVIEW.md) 確認目前輪次，只做該輪允許的事（PROTOCOL.md「三輪節奏」）：
-
-1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
-2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 從 repository root 執行
-   ```bash
-   node docs/fe-review/capture.mjs apps/loom/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs apps/loom/fe-review/targets.json
-   ```
-   需要互動才能看到的狀態，另寫 Playwright 腳本放在本目錄；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
-
-## 產出
-
-- 第 1 輪：`PROMPT.md`、`targets.json`、`REVIEW.md` 的修訂（每次一個 PR）
-- 第 2 輪：前端修正與已決定事項的實作，每個問題一個 commit，附驗證指令
-- 第 3 輪：`runs/<ts>/capture.json`、`runs/<ts>/REPORT.md`（提交）；`runs/<ts>/screenshots/`（不提交）
+[loom002](runs/loom-002/capture.json) supplies12complete empty/populatedkeys across3sizes×2preferences; overallfailedstatus preserved. [loom006](runs/loom-006/capture.json) supplies9desktop/lightworkflowcaptures/12steps. Allnormalhealth/overflow checks pass. Seriousaxe violations, incompletecontrast/aria andcloseCancel focusVisiblefalse remain [openfindings](REVIEW.md), so fullRound3is not accepted. Native/sourcechecks and finaldelivery are separate [reportgates](tasks/round2/report.md). PrivatePNG/rawlogs/authstate are never published.

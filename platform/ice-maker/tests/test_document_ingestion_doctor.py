@@ -51,6 +51,30 @@ class DocumentIngestionDoctorTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0)
             self.assertEqual(data["classification"], "runtime-ready")
 
+    def test_poppler_uses_short_version_flag_and_tesseract_uses_long_flag(self):
+        with tempfile.TemporaryDirectory() as directory:
+            env = self.base(directory)
+            for key, name in (("DOCTOR_PDFINFO_CMD", "pdfinfo"),
+                              ("DOCTOR_PDFTOTEXT_CMD", "pdftotext"),
+                              ("DOCTOR_PDFTOPPM_CMD", "pdftoppm")):
+                env[key] = self.command(directory, name, '[ "$#" = 1 ] && [ "$1" = -v ]')
+            env["DOCTOR_TESSERACT_CMD"] = self.command(
+                directory, "tesseract",
+                'case "$1" in --version) exit 0;; --list-langs) printf "eng\\nchi_tra\\n";; *) exit 1;; esac',
+            )
+            result, data = self.invoke(env)
+            self.assertEqual(result.returncode, 1)
+            self.assertEqual(data["tools"], dict.fromkeys(
+                ("pdfinfo", "pdftotext", "pdftoppm", "tesseract"), True))
+
+    def test_poppler_nonzero_version_probe_remains_unavailable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            env = self.base(directory)
+            env["DOCTOR_PDFINFO_CMD"] = self.command(directory, "pdfinfo", "exit 1")
+            result, data = self.invoke(env)
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse(data["tools"]["pdfinfo"])
+
     def test_malformed_numeric_observation_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             env = self.base(directory)

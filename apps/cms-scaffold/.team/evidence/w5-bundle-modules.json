@@ -1,0 +1,1951 @@
+[
+  {
+    "app": "front",
+    "file": "assets/index-CGGGCTox.js",
+    "imports": [],
+    "modules": [
+      {
+        "path": "node_modules/react-dom/cjs/react-dom-client.production.js",
+        "renderedLength": 644593
+      },
+      {
+        "path": "node_modules/react-router/dist/development/chunk-OB3PAWPO.mjs",
+        "renderedLength": 227262
+      },
+      {
+        "path": "node_modules/tailwind-merge/dist/bundle-mjs.mjs",
+        "renderedLength": 102703
+      },
+      {
+        "path": "node_modules/@radix-ui/react-select/dist/index.mjs",
+        "renderedLength": 50558
+      },
+      {
+        "path": "node_modules/sonner/dist/index.mjs",
+        "renderedLength": 29245
+      },
+      {
+        "path": "node_modules/@floating-ui/core/dist/floating-ui.core.mjs",
+        "renderedLength": 27062
+      },
+      {
+        "path": "node_modules/@floating-ui/dom/dist/floating-ui.dom.mjs",
+        "renderedLength": 26088
+      },
+      {
+        "path": "node_modules/@radix-ui/react-menu/dist/index.mjs",
+        "renderedLength": 22913
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryClient.js",
+        "renderedLength": 22831
+      },
+      {
+        "path": "node_modules/react/cjs/react.production.js",
+        "renderedLength": 19185
+      },
+      {
+        "path": "node_modules/@radix-ui/react-collection/dist/index.mjs",
+        "renderedLength": 17678
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryObserver.js",
+        "renderedLength": 17485
+      },
+      {
+        "path": "node_modules/openapi-fetch/dist/index.mjs",
+        "renderedLength": 15577
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/query.js",
+        "renderedLength": 15436
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs",
+        "renderedLength": 13860
+      },
+      {
+        "path": "node_modules/scheduler/cjs/scheduler.production.js",
+        "renderedLength": 11134
+      },
+      {
+        "path": "node_modules/@radix-ui/react-popper/dist/index.mjs",
+        "renderedLength": 11079
+      },
+      {
+        "path": "node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.mjs",
+        "renderedLength": 9953
+      },
+      {
+        "path": "node_modules/@radix-ui/react-roving-focus/dist/index.mjs",
+        "renderedLength": 9651
+      },
+      {
+        "path": "node_modules/@radix-ui/react-focus-scope/dist/index.mjs",
+        "renderedLength": 8988
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/mutation.js",
+        "renderedLength": 8764
+      },
+      {
+        "path": "apps/web-front/src/pages/member.tsx",
+        "renderedLength": 8190
+      },
+      {
+        "path": "apps/web-front/src/pages/appointment-new.tsx",
+        "renderedLength": 8026
+      },
+      {
+        "path": "node_modules/react-dom/cjs/react-dom.production.js",
+        "renderedLength": 7918
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/SideEffect.js",
+        "renderedLength": 7798
+      },
+      {
+        "path": "apps/web-front/src/states.tsx",
+        "renderedLength": 6726
+      },
+      {
+        "path": "node_modules/@radix-ui/react-presence/dist/index.mjs",
+        "renderedLength": 6436
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/utils.js",
+        "renderedLength": 6219
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/useMutation.js",
+        "renderedLength": 6208
+      },
+      {
+        "path": "apps/web-front/src/shell.tsx",
+        "renderedLength": 6190
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dropdown-menu/dist/index.mjs",
+        "renderedLength": 6090
+      },
+      {
+        "path": "node_modules/@radix-ui/react-slot/dist/index.mjs",
+        "renderedLength": 6028
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryCache.js",
+        "renderedLength": 5808
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/mutationObserver.js",
+        "renderedLength": 5718
+      },
+      {
+        "path": "node_modules/@floating-ui/utils/dist/floating-ui.utils.dom.mjs",
+        "renderedLength": 5485
+      },
+      {
+        "path": "apps/web-front/src/routes.tsx",
+        "renderedLength": 5440
+      },
+      {
+        "path": "node_modules/aria-hidden/dist/es2015/index.js",
+        "renderedLength": 5359
+      },
+      {
+        "path": "packages/ui/src/components/ui/select.tsx",
+        "renderedLength": 5296
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/mutationCache.js",
+        "renderedLength": 5030
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/handleScroll.js",
+        "renderedLength": 4398
+      },
+      {
+        "path": "node_modules/@radix-ui/react-context/dist/index.mjs",
+        "renderedLength": 4220
+      },
+      {
+        "path": "apps/web-front/src/copy.ts",
+        "renderedLength": 4040
+      },
+      {
+        "path": "node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs",
+        "renderedLength": 3897
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/timeoutManager.js",
+        "renderedLength": 3896
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/retryer.js",
+        "renderedLength": 3734
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-controllable-state/dist/index.mjs",
+        "renderedLength": 3512
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/component.js",
+        "renderedLength": 3150
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/notifyManager.js",
+        "renderedLength": 3103
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/focusManager.js",
+        "renderedLength": 2965
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js",
+        "renderedLength": 2915
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/buildLucideIconNode.mjs",
+        "renderedLength": 2795
+      },
+      {
+        "path": "packages/api/src/core.ts",
+        "renderedLength": 2559
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/onlineManager.js",
+        "renderedLength": 2552
+      },
+      {
+        "path": "node_modules/use-sidecar/dist/es2015/medium.js",
+        "renderedLength": 2376
+      },
+      {
+        "path": "node_modules/class-variance-authority/dist/index.mjs",
+        "renderedLength": 2365
+      },
+      {
+        "path": "packages/ui/src/components/ui/dropdown-menu.tsx",
+        "renderedLength": 2210
+      },
+      {
+        "path": "node_modules/tslib/tslib.es6.mjs",
+        "renderedLength": 2189
+      },
+      {
+        "path": "apps/web-front/src/sites.ts",
+        "renderedLength": 2122
+      },
+      {
+        "path": "packages/ui/src/components/ui/button.tsx",
+        "renderedLength": 2091
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/UI.js",
+        "renderedLength": 2024
+      },
+      {
+        "path": "\u0000vite/preload-helper.js",
+        "renderedLength": 1877
+      },
+      {
+        "path": "node_modules/@radix-ui/primitive/dist/index.mjs",
+        "renderedLength": 1862
+      },
+      {
+        "path": "apps/web-front/src/member-auth.tsx",
+        "renderedLength": 1827
+      },
+      {
+        "path": "packages/ui/src/components/ui/breadcrumb.tsx",
+        "renderedLength": 1777
+      },
+      {
+        "path": "packages/api/src/keys.ts",
+        "renderedLength": 1770
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js",
+        "renderedLength": 1761
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/useBaseQuery.js",
+        "renderedLength": 1718
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/useMergeRef.js",
+        "renderedLength": 1654
+      },
+      {
+        "path": "packages/api/src/public.ts",
+        "renderedLength": 1643
+      },
+      {
+        "path": "packages/ui/src/components/ui/card.tsx",
+        "renderedLength": 1635
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js",
+        "renderedLength": 1602
+      },
+      {
+        "path": "apps/web-front/src/seo.ts",
+        "renderedLength": 1589
+      },
+      {
+        "path": "apps/web-front/src/parts.tsx",
+        "renderedLength": 1573
+      },
+      {
+        "path": "packages/api/src/query.ts",
+        "renderedLength": 1545
+      },
+      {
+        "path": "packages/api/src/public-entry.ts",
+        "renderedLength": 1541
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/Icon.mjs",
+        "renderedLength": 1513
+      },
+      {
+        "path": "packages/ui/src/components/ui/badge.tsx",
+        "renderedLength": 1495
+      },
+      {
+        "path": "packages/ui/src/components/ui/alert.tsx",
+        "renderedLength": 1436
+      },
+      {
+        "path": "node_modules/@radix-ui/react-focus-guards/dist/index.mjs",
+        "renderedLength": 1333
+      },
+      {
+        "path": "apps/web-front/src/member.ts",
+        "renderedLength": 1305
+      },
+      {
+        "path": "node_modules/react/cjs/react-jsx-runtime.production.js",
+        "renderedLength": 1294
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-size/dist/index.mjs",
+        "renderedLength": 1265
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/singleton.js",
+        "renderedLength": 1240
+      },
+      {
+        "path": "packages/api/src/errors.ts",
+        "renderedLength": 1214
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/useRef.js",
+        "renderedLength": 1182
+      },
+      {
+        "path": "\u0000vite/modulepreload-polyfill.js",
+        "renderedLength": 1168
+      },
+      {
+        "path": "node_modules/@radix-ui/react-compose-refs/dist/index.mjs",
+        "renderedLength": 1107
+      },
+      {
+        "path": "node_modules/@radix-ui/react-primitive/dist/index.mjs",
+        "renderedLength": 1051
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/utils.js",
+        "renderedLength": 983
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-is-hydrated/dist/index.mjs",
+        "renderedLength": 929
+      },
+      {
+        "path": "packages/ui/src/components/ui/input.tsx",
+        "renderedLength": 887
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/suspense.js",
+        "renderedLength": 882
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-effect-event/dist/index.mjs",
+        "renderedLength": 874
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js",
+        "renderedLength": 846
+      },
+      {
+        "path": "packages/auth/src/query-client.ts",
+        "renderedLength": 751
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js",
+        "renderedLength": 720
+      },
+      {
+        "path": "packages/ui/src/patterns/empty-state.tsx",
+        "renderedLength": 718
+      },
+      {
+        "path": "node_modules/@radix-ui/react-label/dist/index.mjs",
+        "renderedLength": 710
+      },
+      {
+        "path": "node_modules/@radix-ui/react-portal/dist/index.mjs",
+        "renderedLength": 695
+      },
+      {
+        "path": "packages/ui/src/components/ui/textarea.tsx",
+        "renderedLength": 684
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/createLucideIcon.mjs",
+        "renderedLength": 673
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/inbox.mjs",
+        "renderedLength": 568
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/aggresiveCapture.js",
+        "renderedLength": 560
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toCamelCase.mjs",
+        "renderedLength": 551
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/component.js",
+        "renderedLength": 549
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/assignRef.js",
+        "renderedLength": 548
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/hook.js",
+        "renderedLength": 546
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/removable.js",
+        "renderedLength": 542
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/buildLucideIconForReact.mjs",
+        "renderedLength": 532
+      },
+      {
+        "path": "node_modules/use-sidecar/dist/es2015/exports.js",
+        "renderedLength": 528
+      },
+      {
+        "path": "node_modules/@radix-ui/react-id/dist/index.mjs",
+        "renderedLength": 527
+      },
+      {
+        "path": "node_modules/react-dom/index.js",
+        "renderedLength": 520
+      },
+      {
+        "path": "node_modules/react-dom/client.js",
+        "renderedLength": 512
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-previous/dist/index.mjs",
+        "renderedLength": 479
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toLucideIconData.mjs",
+        "renderedLength": 473
+      },
+      {
+        "path": "packages/ui/src/patterns/query-boundary.tsx",
+        "renderedLength": 473
+      },
+      {
+        "path": "packages/api/src/auth.ts",
+        "renderedLength": 470
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-callback-ref/dist/index.mjs",
+        "renderedLength": 436
+      },
+      {
+        "path": "packages/ui/src/components/ui/label.tsx",
+        "renderedLength": 436
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/subscribable.js",
+        "renderedLength": 427
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/defaultAttributes.mjs",
+        "renderedLength": 414
+      },
+      {
+        "path": "node_modules/@radix-ui/react-direction/dist/index.mjs",
+        "renderedLength": 373
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/mergeClasses.mjs",
+        "renderedLength": 370
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/chevron-right.mjs",
+        "renderedLength": 366
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/chevron-down.mjs",
+        "renderedLength": 363
+      },
+      {
+        "path": "node_modules/clsx/dist/clsx.mjs",
+        "renderedLength": 362
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/chevron-up.mjs",
+        "renderedLength": 361
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/hasA11yProp.mjs",
+        "renderedLength": 358
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/check.mjs",
+        "renderedLength": 353
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/constants.js",
+        "renderedLength": 346
+      },
+      {
+        "path": "apps/web-front/src/App.tsx",
+        "renderedLength": 335
+      },
+      {
+        "path": "node_modules/@radix-ui/react-visually-hidden/dist/index.mjs",
+        "renderedLength": 321
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toPascalCase.mjs",
+        "renderedLength": 317
+      },
+      {
+        "path": "packages/ui/src/patterns/document-title.ts",
+        "renderedLength": 286
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toKebabCase.mjs",
+        "renderedLength": 266
+      },
+      {
+        "path": "node_modules/@radix-ui/number/dist/index.mjs",
+        "renderedLength": 262
+      },
+      {
+        "path": "apps/web-front/src/main.tsx",
+        "renderedLength": 242
+      },
+      {
+        "path": "node_modules/react/jsx-runtime.js",
+        "renderedLength": 239
+      },
+      {
+        "path": "packages/ui/src/components/ui/skeleton.tsx",
+        "renderedLength": 238
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/Combination.js",
+        "renderedLength": 235
+      },
+      {
+        "path": "node_modules/scheduler/index.js",
+        "renderedLength": 226
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/environmentManager.js",
+        "renderedLength": 195
+      },
+      {
+        "path": "node_modules/react/index.js",
+        "renderedLength": 194
+      },
+      {
+        "path": "packages/ui/src/copy.ts",
+        "renderedLength": 150
+      },
+      {
+        "path": "node_modules/get-nonce/dist/es2015/index.js",
+        "renderedLength": 145
+      },
+      {
+        "path": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "path": "packages/auth/src/session.tsx",
+        "renderedLength": 140
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/context.mjs",
+        "renderedLength": 124
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-layout-effect/dist/index.mjs",
+        "renderedLength": 116
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/useQuery.js",
+        "renderedLength": 115
+      },
+      {
+        "path": "virtual:node_modules/react/index.js?commonjs-es-import",
+        "renderedLength": 100
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/queryOptions.js",
+        "renderedLength": 81
+      },
+      {
+        "path": "apps/web-front/src/api.ts",
+        "renderedLength": 68
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/sidecar.js",
+        "renderedLength": 62
+      },
+      {
+        "path": "packages/ui/src/lib/utils.ts",
+        "renderedLength": 58
+      },
+      {
+        "path": "virtual:node_modules/react/jsx-runtime.js?commonjs-es-import",
+        "renderedLength": 44
+      },
+      {
+        "path": "virtual:node_modules/react-dom/index.js?commonjs-es-import",
+        "renderedLength": 40
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/medium.js",
+        "renderedLength": 38
+      },
+      {
+        "path": "virtual:node_modules/react/cjs/react-jsx-runtime.production.js?commonjs-exports",
+        "renderedLength": 36
+      },
+      {
+        "path": "virtual:node_modules/react-dom/client.js?commonjs-es-import",
+        "renderedLength": 36
+      },
+      {
+        "path": "virtual:node_modules/react-dom/cjs/react-dom-client.production.js?commonjs-exports",
+        "renderedLength": 35
+      },
+      {
+        "path": "virtual:node_modules/react/jsx-runtime.js?commonjs-module",
+        "renderedLength": 31
+      },
+      {
+        "path": "virtual:node_modules/scheduler/index.js?commonjs-module",
+        "renderedLength": 30
+      },
+      {
+        "path": "virtual:node_modules/scheduler/cjs/scheduler.production.js?commonjs-exports",
+        "renderedLength": 30
+      },
+      {
+        "path": "virtual:node_modules/react-dom/index.js?commonjs-module",
+        "renderedLength": 29
+      },
+      {
+        "path": "virtual:node_modules/react-dom/cjs/react-dom.production.js?commonjs-exports",
+        "renderedLength": 29
+      },
+      {
+        "path": "virtual:node_modules/react-dom/client.js?commonjs-module",
+        "renderedLength": 27
+      },
+      {
+        "path": "virtual:node_modules/react/index.js?commonjs-module",
+        "renderedLength": 26
+      },
+      {
+        "path": "virtual:node_modules/react/cjs/react.production.js?commonjs-exports",
+        "renderedLength": 26
+      }
+    ]
+  },
+  {
+    "app": "back",
+    "file": "assets/index-CcrmPZPD.js",
+    "imports": [],
+    "modules": [
+      {
+        "path": "node_modules/react-dom/cjs/react-dom-client.production.js",
+        "renderedLength": 644593
+      },
+      {
+        "path": "node_modules/react-router/dist/development/chunk-OB3PAWPO.mjs",
+        "renderedLength": 228680
+      },
+      {
+        "path": "node_modules/tailwind-merge/dist/bundle-mjs.mjs",
+        "renderedLength": 102703
+      },
+      {
+        "path": "node_modules/sonner/dist/index.mjs",
+        "renderedLength": 68151
+      },
+      {
+        "path": "node_modules/@radix-ui/react-menu/dist/index.mjs",
+        "renderedLength": 32196
+      },
+      {
+        "path": "node_modules/@floating-ui/core/dist/floating-ui.core.mjs",
+        "renderedLength": 27058
+      },
+      {
+        "path": "node_modules/@floating-ui/dom/dist/floating-ui.dom.mjs",
+        "renderedLength": 26088
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryClient.js",
+        "renderedLength": 22831
+      },
+      {
+        "path": "node_modules/react/cjs/react.production.js",
+        "renderedLength": 19185
+      },
+      {
+        "path": "node_modules/@radix-ui/react-collection/dist/index.mjs",
+        "renderedLength": 17678
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryObserver.js",
+        "renderedLength": 17485
+      },
+      {
+        "path": "node_modules/openapi-fetch/dist/index.mjs",
+        "renderedLength": 15577
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/query.js",
+        "renderedLength": 15436
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs",
+        "renderedLength": 13860
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dialog/dist/index.mjs",
+        "renderedLength": 11980
+      },
+      {
+        "path": "node_modules/scheduler/cjs/scheduler.production.js",
+        "renderedLength": 11134
+      },
+      {
+        "path": "node_modules/@radix-ui/react-popper/dist/index.mjs",
+        "renderedLength": 11079
+      },
+      {
+        "path": "node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.mjs",
+        "renderedLength": 9953
+      },
+      {
+        "path": "node_modules/@radix-ui/react-roving-focus/dist/index.mjs",
+        "renderedLength": 9639
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dropdown-menu/dist/index.mjs",
+        "renderedLength": 9075
+      },
+      {
+        "path": "node_modules/@radix-ui/react-focus-scope/dist/index.mjs",
+        "renderedLength": 8988
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/mutation.js",
+        "renderedLength": 8764
+      },
+      {
+        "path": "node_modules/react-dom/cjs/react-dom.production.js",
+        "renderedLength": 7918
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/SideEffect.js",
+        "renderedLength": 7798
+      },
+      {
+        "path": "apps/web-back/src/copy.ts",
+        "renderedLength": 7344
+      },
+      {
+        "path": "node_modules/@radix-ui/react-presence/dist/index.mjs",
+        "renderedLength": 6436
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/utils.js",
+        "renderedLength": 6286
+      },
+      {
+        "path": "node_modules/@radix-ui/react-slot/dist/index.mjs",
+        "renderedLength": 6028
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryCache.js",
+        "renderedLength": 5808
+      },
+      {
+        "path": "node_modules/@floating-ui/utils/dist/floating-ui.utils.dom.mjs",
+        "renderedLength": 5485
+      },
+      {
+        "path": "packages/api/src/work.ts",
+        "renderedLength": 5436
+      },
+      {
+        "path": "node_modules/aria-hidden/dist/es2015/index.js",
+        "renderedLength": 5359
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/mutationCache.js",
+        "renderedLength": 5030
+      },
+      {
+        "path": "packages/ui/src/patterns/app-frame.tsx",
+        "renderedLength": 4799
+      },
+      {
+        "path": "apps/web-back/src/routes.tsx",
+        "renderedLength": 4697
+      },
+      {
+        "path": "packages/ui/src/components/ui/dropdown-menu.tsx",
+        "renderedLength": 4557
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/handleScroll.js",
+        "renderedLength": 4398
+      },
+      {
+        "path": "node_modules/@radix-ui/react-context/dist/index.mjs",
+        "renderedLength": 4220
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/timeoutManager.js",
+        "renderedLength": 3896
+      },
+      {
+        "path": "node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs",
+        "renderedLength": 3895
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/retryer.js",
+        "renderedLength": 3734
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-controllable-state/dist/index.mjs",
+        "renderedLength": 3506
+      },
+      {
+        "path": "packages/api/src/admin.ts",
+        "renderedLength": 3494
+      },
+      {
+        "path": "packages/ui/src/components/ui/sheet.tsx",
+        "renderedLength": 3176
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/component.js",
+        "renderedLength": 3150
+      },
+      {
+        "path": "packages/ui/src/patterns/page-header.tsx",
+        "renderedLength": 3117
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/notifyManager.js",
+        "renderedLength": 3103
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/focusManager.js",
+        "renderedLength": 2965
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js",
+        "renderedLength": 2915
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/buildLucideIconNode.mjs",
+        "renderedLength": 2795
+      },
+      {
+        "path": "packages/api/src/core.ts",
+        "renderedLength": 2559
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/onlineManager.js",
+        "renderedLength": 2552
+      },
+      {
+        "path": "node_modules/use-sidecar/dist/es2015/medium.js",
+        "renderedLength": 2376
+      },
+      {
+        "path": "node_modules/class-variance-authority/dist/index.mjs",
+        "renderedLength": 2365
+      },
+      {
+        "path": "node_modules/tslib/tslib.es6.mjs",
+        "renderedLength": 2189
+      },
+      {
+        "path": "packages/ui/src/components/ui/button.tsx",
+        "renderedLength": 2093
+      },
+      {
+        "path": "packages/ui/src/patterns/query-boundary.tsx",
+        "renderedLength": 2059
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/UI.js",
+        "renderedLength": 2024
+      },
+      {
+        "path": "apps/web-back/src/nav.ts",
+        "renderedLength": 1941
+      },
+      {
+        "path": "\u0000vite/preload-helper.js",
+        "renderedLength": 1877
+      },
+      {
+        "path": "node_modules/@radix-ui/primitive/dist/index.mjs",
+        "renderedLength": 1862
+      },
+      {
+        "path": "packages/auth/src/session.tsx",
+        "renderedLength": 1829
+      },
+      {
+        "path": "packages/api/src/keys.ts",
+        "renderedLength": 1770
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js",
+        "renderedLength": 1761
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/useBaseQuery.js",
+        "renderedLength": 1718
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/useMergeRef.js",
+        "renderedLength": 1654
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js",
+        "renderedLength": 1602
+      },
+      {
+        "path": "packages/api/src/query.ts",
+        "renderedLength": 1545
+      },
+      {
+        "path": "packages/auth/src/require-surface.tsx",
+        "renderedLength": 1514
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/Icon.mjs",
+        "renderedLength": 1513
+      },
+      {
+        "path": "packages/ui/src/components/ui/alert.tsx",
+        "renderedLength": 1442
+      },
+      {
+        "path": "apps/web-back/src/shell.tsx",
+        "renderedLength": 1364
+      },
+      {
+        "path": "node_modules/@radix-ui/react-focus-guards/dist/index.mjs",
+        "renderedLength": 1333
+      },
+      {
+        "path": "node_modules/react/cjs/react-jsx-runtime.production.js",
+        "renderedLength": 1294
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-size/dist/index.mjs",
+        "renderedLength": 1265
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/singleton.js",
+        "renderedLength": 1240
+      },
+      {
+        "path": "packages/api/src/errors.ts",
+        "renderedLength": 1214
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/useRef.js",
+        "renderedLength": 1182
+      },
+      {
+        "path": "\u0000vite/modulepreload-polyfill.js",
+        "renderedLength": 1168
+      },
+      {
+        "path": "node_modules/@radix-ui/react-compose-refs/dist/index.mjs",
+        "renderedLength": 1107
+      },
+      {
+        "path": "packages/ui/src/copy.ts",
+        "renderedLength": 1095
+      },
+      {
+        "path": "node_modules/@radix-ui/react-primitive/dist/index.mjs",
+        "renderedLength": 1051
+      },
+      {
+        "path": "packages/api/src/public.ts",
+        "renderedLength": 992
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/utils.js",
+        "renderedLength": 983
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-is-hydrated/dist/index.mjs",
+        "renderedLength": 929
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/suspense.js",
+        "renderedLength": 882
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-effect-event/dist/index.mjs",
+        "renderedLength": 874
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js",
+        "renderedLength": 846
+      },
+      {
+        "path": "packages/auth/src/query-client.ts",
+        "renderedLength": 751
+      },
+      {
+        "path": "apps/web-back/src/App.tsx",
+        "renderedLength": 743
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js",
+        "renderedLength": 720
+      },
+      {
+        "path": "node_modules/@radix-ui/react-portal/dist/index.mjs",
+        "renderedLength": 695
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/createLucideIcon.mjs",
+        "renderedLength": 673
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/aggresiveCapture.js",
+        "renderedLength": 560
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toCamelCase.mjs",
+        "renderedLength": 551
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/component.js",
+        "renderedLength": 549
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/assignRef.js",
+        "renderedLength": 548
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/hook.js",
+        "renderedLength": 546
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/removable.js",
+        "renderedLength": 542
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/buildLucideIconForReact.mjs",
+        "renderedLength": 532
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/ellipsis.mjs",
+        "renderedLength": 532
+      },
+      {
+        "path": "node_modules/use-sidecar/dist/es2015/exports.js",
+        "renderedLength": 528
+      },
+      {
+        "path": "node_modules/@radix-ui/react-id/dist/index.mjs",
+        "renderedLength": 527
+      },
+      {
+        "path": "node_modules/react-dom/index.js",
+        "renderedLength": 520
+      },
+      {
+        "path": "node_modules/react-dom/client.js",
+        "renderedLength": 512
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toLucideIconData.mjs",
+        "renderedLength": 473
+      },
+      {
+        "path": "packages/api/src/auth.ts",
+        "renderedLength": 470
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/menu.mjs",
+        "renderedLength": 447
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/user.mjs",
+        "renderedLength": 447
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-callback-ref/dist/index.mjs",
+        "renderedLength": 436
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/subscribable.js",
+        "renderedLength": 427
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/arrow-left.mjs",
+        "renderedLength": 417
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/defaultAttributes.mjs",
+        "renderedLength": 414
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/x.mjs",
+        "renderedLength": 392
+      },
+      {
+        "path": "node_modules/@radix-ui/react-direction/dist/index.mjs",
+        "renderedLength": 373
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/mergeClasses.mjs",
+        "renderedLength": 370
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/chevron-right.mjs",
+        "renderedLength": 366
+      },
+      {
+        "path": "node_modules/clsx/dist/clsx.mjs",
+        "renderedLength": 362
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/hasA11yProp.mjs",
+        "renderedLength": 358
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/constants.js",
+        "renderedLength": 346
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toPascalCase.mjs",
+        "renderedLength": 317
+      },
+      {
+        "path": "packages/ui/src/patterns/document-title.ts",
+        "renderedLength": 286
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toKebabCase.mjs",
+        "renderedLength": 266
+      },
+      {
+        "path": "packages/api/src/index.ts",
+        "renderedLength": 248
+      },
+      {
+        "path": "apps/web-back/src/main.tsx",
+        "renderedLength": 242
+      },
+      {
+        "path": "packages/ui/src/components/ui/skeleton.tsx",
+        "renderedLength": 240
+      },
+      {
+        "path": "node_modules/react/jsx-runtime.js",
+        "renderedLength": 239
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/Combination.js",
+        "renderedLength": 235
+      },
+      {
+        "path": "node_modules/scheduler/index.js",
+        "renderedLength": 226
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/environmentManager.js",
+        "renderedLength": 195
+      },
+      {
+        "path": "node_modules/react/index.js",
+        "renderedLength": 194
+      },
+      {
+        "path": "packages/api/src/public-entry.ts",
+        "renderedLength": 155
+      },
+      {
+        "path": "node_modules/get-nonce/dist/es2015/index.js",
+        "renderedLength": 145
+      },
+      {
+        "path": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/context.mjs",
+        "renderedLength": 124
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-layout-effect/dist/index.mjs",
+        "renderedLength": 116
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/useQuery.js",
+        "renderedLength": 115
+      },
+      {
+        "path": "virtual:node_modules/react-dom/index.js?commonjs-es-import",
+        "renderedLength": 112
+      },
+      {
+        "path": "virtual:node_modules/react/index.js?commonjs-es-import",
+        "renderedLength": 100
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/queryOptions.js",
+        "renderedLength": 81
+      },
+      {
+        "path": "apps/web-back/src/api.ts",
+        "renderedLength": 66
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/sidecar.js",
+        "renderedLength": 62
+      },
+      {
+        "path": "packages/ui/src/lib/utils.ts",
+        "renderedLength": 60
+      },
+      {
+        "path": "virtual:node_modules/react/jsx-runtime.js?commonjs-es-import",
+        "renderedLength": 44
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/medium.js",
+        "renderedLength": 38
+      },
+      {
+        "path": "virtual:node_modules/react/cjs/react-jsx-runtime.production.js?commonjs-exports",
+        "renderedLength": 36
+      },
+      {
+        "path": "virtual:node_modules/react-dom/client.js?commonjs-es-import",
+        "renderedLength": 36
+      },
+      {
+        "path": "virtual:node_modules/react-dom/cjs/react-dom-client.production.js?commonjs-exports",
+        "renderedLength": 35
+      },
+      {
+        "path": "virtual:node_modules/react/jsx-runtime.js?commonjs-module",
+        "renderedLength": 31
+      },
+      {
+        "path": "virtual:node_modules/scheduler/index.js?commonjs-module",
+        "renderedLength": 30
+      },
+      {
+        "path": "virtual:node_modules/scheduler/cjs/scheduler.production.js?commonjs-exports",
+        "renderedLength": 30
+      },
+      {
+        "path": "virtual:node_modules/react-dom/index.js?commonjs-module",
+        "renderedLength": 29
+      },
+      {
+        "path": "virtual:node_modules/react-dom/cjs/react-dom.production.js?commonjs-exports",
+        "renderedLength": 29
+      },
+      {
+        "path": "virtual:node_modules/react-dom/client.js?commonjs-module",
+        "renderedLength": 27
+      },
+      {
+        "path": "virtual:node_modules/react/index.js?commonjs-module",
+        "renderedLength": 26
+      },
+      {
+        "path": "virtual:node_modules/react/cjs/react.production.js?commonjs-exports",
+        "renderedLength": 26
+      }
+    ]
+  },
+  {
+    "app": "admin",
+    "file": "assets/index-DAbxD87n.js",
+    "imports": [],
+    "modules": [
+      {
+        "path": "node_modules/react-dom/cjs/react-dom-client.production.js",
+        "renderedLength": 644593
+      },
+      {
+        "path": "node_modules/react-router/dist/development/chunk-OB3PAWPO.mjs",
+        "renderedLength": 228680
+      },
+      {
+        "path": "node_modules/tailwind-merge/dist/bundle-mjs.mjs",
+        "renderedLength": 102703
+      },
+      {
+        "path": "node_modules/sonner/dist/index.mjs",
+        "renderedLength": 68151
+      },
+      {
+        "path": "node_modules/@floating-ui/core/dist/floating-ui.core.mjs",
+        "renderedLength": 27058
+      },
+      {
+        "path": "node_modules/@floating-ui/dom/dist/floating-ui.dom.mjs",
+        "renderedLength": 26088
+      },
+      {
+        "path": "node_modules/@radix-ui/react-menu/dist/index.mjs",
+        "renderedLength": 23636
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryClient.js",
+        "renderedLength": 22831
+      },
+      {
+        "path": "node_modules/react/cjs/react.production.js",
+        "renderedLength": 19185
+      },
+      {
+        "path": "node_modules/@radix-ui/react-collection/dist/index.mjs",
+        "renderedLength": 17678
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryObserver.js",
+        "renderedLength": 17485
+      },
+      {
+        "path": "node_modules/openapi-fetch/dist/index.mjs",
+        "renderedLength": 15577
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/query.js",
+        "renderedLength": 15436
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs",
+        "renderedLength": 13860
+      },
+      {
+        "path": "apps/web-admin/src/copy.ts",
+        "renderedLength": 12444
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dialog/dist/index.mjs",
+        "renderedLength": 11980
+      },
+      {
+        "path": "node_modules/scheduler/cjs/scheduler.production.js",
+        "renderedLength": 11134
+      },
+      {
+        "path": "node_modules/@radix-ui/react-popper/dist/index.mjs",
+        "renderedLength": 11079
+      },
+      {
+        "path": "node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.mjs",
+        "renderedLength": 9953
+      },
+      {
+        "path": "node_modules/@radix-ui/react-roving-focus/dist/index.mjs",
+        "renderedLength": 9639
+      },
+      {
+        "path": "node_modules/@radix-ui/react-focus-scope/dist/index.mjs",
+        "renderedLength": 8988
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/mutation.js",
+        "renderedLength": 8764
+      },
+      {
+        "path": "node_modules/react-dom/cjs/react-dom.production.js",
+        "renderedLength": 7918
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/SideEffect.js",
+        "renderedLength": 7798
+      },
+      {
+        "path": "node_modules/@radix-ui/react-dropdown-menu/dist/index.mjs",
+        "renderedLength": 6983
+      },
+      {
+        "path": "apps/web-admin/src/routes.tsx",
+        "renderedLength": 6605
+      },
+      {
+        "path": "node_modules/@radix-ui/react-presence/dist/index.mjs",
+        "renderedLength": 6436
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/utils.js",
+        "renderedLength": 6219
+      },
+      {
+        "path": "node_modules/@radix-ui/react-slot/dist/index.mjs",
+        "renderedLength": 6028
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/queryCache.js",
+        "renderedLength": 5808
+      },
+      {
+        "path": "node_modules/@floating-ui/utils/dist/floating-ui.utils.dom.mjs",
+        "renderedLength": 5485
+      },
+      {
+        "path": "packages/api/src/work.ts",
+        "renderedLength": 5436
+      },
+      {
+        "path": "node_modules/aria-hidden/dist/es2015/index.js",
+        "renderedLength": 5359
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/mutationCache.js",
+        "renderedLength": 5030
+      },
+      {
+        "path": "packages/ui/src/patterns/app-frame.tsx",
+        "renderedLength": 4799
+      },
+      {
+        "path": "packages/api/src/admin.ts",
+        "renderedLength": 4733
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/handleScroll.js",
+        "renderedLength": 4398
+      },
+      {
+        "path": "node_modules/@radix-ui/react-context/dist/index.mjs",
+        "renderedLength": 4220
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/timeoutManager.js",
+        "renderedLength": 3896
+      },
+      {
+        "path": "node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs",
+        "renderedLength": 3895
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/retryer.js",
+        "renderedLength": 3734
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-controllable-state/dist/index.mjs",
+        "renderedLength": 3506
+      },
+      {
+        "path": "packages/ui/src/components/ui/sheet.tsx",
+        "renderedLength": 3176
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/component.js",
+        "renderedLength": 3150
+      },
+      {
+        "path": "packages/ui/src/patterns/page-header.tsx",
+        "renderedLength": 3117
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/notifyManager.js",
+        "renderedLength": 3103
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/focusManager.js",
+        "renderedLength": 2965
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js",
+        "renderedLength": 2915
+      },
+      {
+        "path": "packages/ui/src/components/ui/dropdown-menu.tsx",
+        "renderedLength": 2824
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/buildLucideIconNode.mjs",
+        "renderedLength": 2795
+      },
+      {
+        "path": "packages/api/src/core.ts",
+        "renderedLength": 2559
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/onlineManager.js",
+        "renderedLength": 2552
+      },
+      {
+        "path": "node_modules/use-sidecar/dist/es2015/medium.js",
+        "renderedLength": 2376
+      },
+      {
+        "path": "node_modules/class-variance-authority/dist/index.mjs",
+        "renderedLength": 2365
+      },
+      {
+        "path": "node_modules/tslib/tslib.es6.mjs",
+        "renderedLength": 2189
+      },
+      {
+        "path": "packages/ui/src/components/ui/button.tsx",
+        "renderedLength": 2093
+      },
+      {
+        "path": "packages/ui/src/patterns/query-boundary.tsx",
+        "renderedLength": 2059
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/UI.js",
+        "renderedLength": 2024
+      },
+      {
+        "path": "\u0000vite/preload-helper.js",
+        "renderedLength": 1877
+      },
+      {
+        "path": "node_modules/@radix-ui/primitive/dist/index.mjs",
+        "renderedLength": 1862
+      },
+      {
+        "path": "packages/auth/src/session.tsx",
+        "renderedLength": 1829
+      },
+      {
+        "path": "packages/api/src/keys.ts",
+        "renderedLength": 1770
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js",
+        "renderedLength": 1761
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/useBaseQuery.js",
+        "renderedLength": 1718
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/useMergeRef.js",
+        "renderedLength": 1654
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js",
+        "renderedLength": 1602
+      },
+      {
+        "path": "packages/api/src/query.ts",
+        "renderedLength": 1545
+      },
+      {
+        "path": "apps/web-admin/src/labels.ts",
+        "renderedLength": 1539
+      },
+      {
+        "path": "packages/auth/src/require-surface.tsx",
+        "renderedLength": 1514
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/Icon.mjs",
+        "renderedLength": 1513
+      },
+      {
+        "path": "apps/web-admin/src/nav.ts",
+        "renderedLength": 1445
+      },
+      {
+        "path": "packages/ui/src/components/ui/alert.tsx",
+        "renderedLength": 1442
+      },
+      {
+        "path": "node_modules/@radix-ui/react-focus-guards/dist/index.mjs",
+        "renderedLength": 1333
+      },
+      {
+        "path": "node_modules/react/cjs/react-jsx-runtime.production.js",
+        "renderedLength": 1294
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-size/dist/index.mjs",
+        "renderedLength": 1265
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/singleton.js",
+        "renderedLength": 1240
+      },
+      {
+        "path": "packages/api/src/errors.ts",
+        "renderedLength": 1214
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/useRef.js",
+        "renderedLength": 1182
+      },
+      {
+        "path": "apps/web-admin/src/shell.tsx",
+        "renderedLength": 1174
+      },
+      {
+        "path": "\u0000vite/modulepreload-polyfill.js",
+        "renderedLength": 1168
+      },
+      {
+        "path": "node_modules/@radix-ui/react-compose-refs/dist/index.mjs",
+        "renderedLength": 1107
+      },
+      {
+        "path": "packages/ui/src/copy.ts",
+        "renderedLength": 1095
+      },
+      {
+        "path": "node_modules/@radix-ui/react-primitive/dist/index.mjs",
+        "renderedLength": 1051
+      },
+      {
+        "path": "packages/api/src/public.ts",
+        "renderedLength": 992
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/utils.js",
+        "renderedLength": 983
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-is-hydrated/dist/index.mjs",
+        "renderedLength": 929
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/suspense.js",
+        "renderedLength": 882
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-effect-event/dist/index.mjs",
+        "renderedLength": 874
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js",
+        "renderedLength": 846
+      },
+      {
+        "path": "packages/auth/src/query-client.ts",
+        "renderedLength": 751
+      },
+      {
+        "path": "apps/web-admin/src/App.tsx",
+        "renderedLength": 743
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js",
+        "renderedLength": 720
+      },
+      {
+        "path": "node_modules/@radix-ui/react-portal/dist/index.mjs",
+        "renderedLength": 695
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/createLucideIcon.mjs",
+        "renderedLength": 673
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/aggresiveCapture.js",
+        "renderedLength": 560
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toCamelCase.mjs",
+        "renderedLength": 551
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/component.js",
+        "renderedLength": 549
+      },
+      {
+        "path": "node_modules/use-callback-ref/dist/es2015/assignRef.js",
+        "renderedLength": 548
+      },
+      {
+        "path": "node_modules/react-style-singleton/dist/es2015/hook.js",
+        "renderedLength": 546
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/removable.js",
+        "renderedLength": 542
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/buildLucideIconForReact.mjs",
+        "renderedLength": 532
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/ellipsis.mjs",
+        "renderedLength": 532
+      },
+      {
+        "path": "node_modules/use-sidecar/dist/es2015/exports.js",
+        "renderedLength": 528
+      },
+      {
+        "path": "node_modules/@radix-ui/react-id/dist/index.mjs",
+        "renderedLength": 527
+      },
+      {
+        "path": "node_modules/react-dom/index.js",
+        "renderedLength": 520
+      },
+      {
+        "path": "node_modules/react-dom/client.js",
+        "renderedLength": 512
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toLucideIconData.mjs",
+        "renderedLength": 473
+      },
+      {
+        "path": "packages/api/src/auth.ts",
+        "renderedLength": 470
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/menu.mjs",
+        "renderedLength": 447
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/user.mjs",
+        "renderedLength": 447
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-callback-ref/dist/index.mjs",
+        "renderedLength": 436
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/subscribable.js",
+        "renderedLength": 427
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/arrow-left.mjs",
+        "renderedLength": 417
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/build/defaultAttributes.mjs",
+        "renderedLength": 414
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/icons/x.mjs",
+        "renderedLength": 392
+      },
+      {
+        "path": "node_modules/@radix-ui/react-direction/dist/index.mjs",
+        "renderedLength": 373
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/mergeClasses.mjs",
+        "renderedLength": 370
+      },
+      {
+        "path": "node_modules/clsx/dist/clsx.mjs",
+        "renderedLength": 362
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/hasA11yProp.mjs",
+        "renderedLength": 358
+      },
+      {
+        "path": "node_modules/react-remove-scroll-bar/dist/es2015/constants.js",
+        "renderedLength": 346
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toPascalCase.mjs",
+        "renderedLength": 317
+      },
+      {
+        "path": "packages/ui/src/patterns/document-title.ts",
+        "renderedLength": 286
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/shared/src/utils/toKebabCase.mjs",
+        "renderedLength": 266
+      },
+      {
+        "path": "packages/api/src/index.ts",
+        "renderedLength": 248
+      },
+      {
+        "path": "apps/web-admin/src/main.tsx",
+        "renderedLength": 242
+      },
+      {
+        "path": "packages/ui/src/components/ui/skeleton.tsx",
+        "renderedLength": 240
+      },
+      {
+        "path": "node_modules/react/jsx-runtime.js",
+        "renderedLength": 239
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/Combination.js",
+        "renderedLength": 235
+      },
+      {
+        "path": "node_modules/scheduler/index.js",
+        "renderedLength": 226
+      },
+      {
+        "path": "apps/web-admin/src/gate.tsx",
+        "renderedLength": 210
+      },
+      {
+        "path": "node_modules/@tanstack/query-core/build/modern/environmentManager.js",
+        "renderedLength": 195
+      },
+      {
+        "path": "node_modules/react/index.js",
+        "renderedLength": 194
+      },
+      {
+        "path": "packages/api/src/public-entry.ts",
+        "renderedLength": 155
+      },
+      {
+        "path": "node_modules/get-nonce/dist/es2015/index.js",
+        "renderedLength": 145
+      },
+      {
+        "path": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "path": "node_modules/lucide-react/dist/esm/context.mjs",
+        "renderedLength": 124
+      },
+      {
+        "path": "node_modules/@radix-ui/react-use-layout-effect/dist/index.mjs",
+        "renderedLength": 116
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/useQuery.js",
+        "renderedLength": 115
+      },
+      {
+        "path": "virtual:node_modules/react-dom/index.js?commonjs-es-import",
+        "renderedLength": 112
+      },
+      {
+        "path": "virtual:node_modules/react/index.js?commonjs-es-import",
+        "renderedLength": 100
+      },
+      {
+        "path": "node_modules/@tanstack/react-query/build/modern/queryOptions.js",
+        "renderedLength": 81
+      },
+      {
+        "path": "apps/web-admin/src/api.ts",
+        "renderedLength": 66
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/sidecar.js",
+        "renderedLength": 62
+      },
+      {
+        "path": "packages/ui/src/lib/utils.ts",
+        "renderedLength": 60
+      },
+      {
+        "path": "virtual:node_modules/react/jsx-runtime.js?commonjs-es-import",
+        "renderedLength": 44
+      },
+      {
+        "path": "node_modules/react-remove-scroll/dist/es2015/medium.js",
+        "renderedLength": 38
+      },
+      {
+        "path": "virtual:node_modules/react/cjs/react-jsx-runtime.production.js?commonjs-exports",
+        "renderedLength": 36
+      },
+      {
+        "path": "virtual:node_modules/react-dom/client.js?commonjs-es-import",
+        "renderedLength": 36
+      },
+      {
+        "path": "virtual:node_modules/react-dom/cjs/react-dom-client.production.js?commonjs-exports",
+        "renderedLength": 35
+      },
+      {
+        "path": "virtual:node_modules/react/jsx-runtime.js?commonjs-module",
+        "renderedLength": 31
+      },
+      {
+        "path": "virtual:node_modules/scheduler/index.js?commonjs-module",
+        "renderedLength": 30
+      },
+      {
+        "path": "virtual:node_modules/scheduler/cjs/scheduler.production.js?commonjs-exports",
+        "renderedLength": 30
+      },
+      {
+        "path": "virtual:node_modules/react-dom/index.js?commonjs-module",
+        "renderedLength": 29
+      },
+      {
+        "path": "virtual:node_modules/react-dom/cjs/react-dom.production.js?commonjs-exports",
+        "renderedLength": 29
+      },
+      {
+        "path": "virtual:node_modules/react-dom/client.js?commonjs-module",
+        "renderedLength": 27
+      },
+      {
+        "path": "virtual:node_modules/react/index.js?commonjs-module",
+        "renderedLength": 26
+      },
+      {
+        "path": "virtual:node_modules/react/cjs/react.production.js?commonjs-exports",
+        "renderedLength": 26
+      }
+    ]
+  }
+]

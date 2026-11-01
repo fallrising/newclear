@@ -7,6 +7,8 @@ A single-owner operations script library. Keep Bash, Python and PowerShell text 
 The web surface is a Hono SSR Worker. A private Rust/Wasm Worker owns the D1 database; the two communicate through a service binding. Staging requires Cloudflare Access and one allowed owner identity.
 
 - [Design and behavior contract](docs/SDD.md)
+- [Acceptance status and remaining gaps](SUCCESS.md)
+- [Current task board](docs/tasks/BOARD.md)
 - [API schemas](contracts/openapi.json)
 - [Local quickstart and verification status](docs/quickstart.md)
 

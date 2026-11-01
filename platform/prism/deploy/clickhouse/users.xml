@@ -1,0 +1,16 @@
+<clickhouse>
+    <profiles>
+        <default>
+            <max_memory_usage>1000000000</max_memory_usage>
+            <max_bytes_before_external_group_by>500000000</max_bytes_before_external_group_by>
+            <max_execution_time>55</max_execution_time>
+            <max_result_rows>5000000</max_result_rows>
+            <result_overflow_mode>throw</result_overflow_mode>
+            <readonly>0</readonly>
+            <async_insert>1</async_insert>
+            <wait_for_async_insert>0</wait_for_async_insert>
+            <async_insert_max_data_size>10485760</async_insert_max_data_size>
+            <async_insert_busy_timeout_ms>1000</async_insert_busy_timeout_ms>
+        </default>
+    </profiles>
+</clickhouse>

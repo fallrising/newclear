@@ -1,0 +1,14 @@
+{
+  "labs/retro-economy/retro/__init__.py": "03024c64f0c2a631d512fd9087bf43833cda0738df1db441fcf357ed279f00be",
+  "labs/retro-economy/retro/domain.py": "12ff0425d8cb3917b7fcdde5a3418484bbbe354c810477df4e3ef23dfa5fa5bd",
+  "labs/retro-economy/retro/http.py": "756d9762eecdaf63c066a972d861d71784e8d6c82b1ef7e1c8a8e3e9ed93920c",
+  "labs/retro-economy/retro/static/app.js": "cb899e62c2abcc20d921f93d70c0a5dedfe2639d6cc64c490910d7ff9041d342",
+  "labs/retro-economy/retro/static/index.html": "490cc0fc96a9415ccb9c4ff069eaf0f7057d3c8279118bc391724140edd3be83",
+  "labs/retro-economy/retro/static/style.css": "9aaccf49538153eae2f284d1712d337691425c3527c466672c7f32fcf5179e79",
+  "labs/retro-economy/retro/store.py": "42935c54acb1d816bf406b73e999e5d99300f6b7184bba9d32d478f98e7af1c4",
+  "labs/retro-economy/server.py": "e9485a30f68ff8166ddec3690c30020455b1f04dd61e3105a6cd7e5ab5b4defc",
+  "labs/retro-economy/tests/browser_smoke.mjs": "dcc0f128e0613c64dcfac7c3f8a4c1e38d5ddc45e1b790942223e37669a38b42",
+  "labs/retro-economy/tools/browser_explore.mjs": "373ed85b5fecd6ccfecb7b39b4a7ff453a888733a13435f0c5949fc15f1ccba9",
+  "labs/retro-economy/tools/simulate.py": "81e8cae31cb9ba12b234e5169954dead1a3f76bee20d43dd97dcbb46e3dd9f33",
+  "labs/retro-economy/tools/ui_command.py": "aa50958146d068796a4172a04c260755ca223c690e2cefef2e54ff0bf8bbe3eb"
+}

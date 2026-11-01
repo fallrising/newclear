@@ -1,0 +1,70 @@
+[
+  {
+    "path": "scripts/measure-bundles.mjs",
+    "sha256": "a11932c7350dd8cbdeda7a356a4870af504d05d8ba865152d061ae17367114ba"
+  },
+  {
+    "path": "scripts/measure-bundles.test.mjs",
+    "sha256": "2d723f9cb80d4c436b37e83d998bf20d3604dcfb54c7919d4e728ca81277e6b0"
+  },
+  {
+    "path": "package.json",
+    "sha256": "83dabac81679af2ae1a0ffc5d66be59baaaf1f7d29f764e8524696a7f09744ae"
+  },
+  {
+    "path": "apps/web-front/vite.config.ts",
+    "sha256": "d293bcd849caba484750351c39c6da5fe630e4bb088110170c4339ee9579feb0"
+  },
+  {
+    "path": "apps/web-back/vite.config.ts",
+    "sha256": "db2d14bc5b361e1ee5a4d9f513e976f9c092794f91587e698a419bdb8bc001ce"
+  },
+  {
+    "path": "apps/web-admin/vite.config.ts",
+    "sha256": "e7af31d4ee0e437bc0d606e64601f78de50db9d8c96be5af62a3685bb2d30801"
+  },
+  {
+    "path": "apps/web-front/src/routes.tsx",
+    "sha256": "b8367576ae1045d1451b184ebbb2270ed03fee93fb53d80c772a223cf4376fd4"
+  },
+  {
+    "path": "apps/web-front/src/shell.tsx",
+    "sha256": "63853dd0b6b5780082714c36f796ab8c3c04990e292cdec7c0a5d3d50fd45107"
+  },
+  {
+    "path": "apps/web-front/src/mobile-nav.tsx",
+    "sha256": "6236a051e5e95e946a4c9cbe9afb4e5dbe0b2600cefd62eca8a9bfd6882b335c"
+  },
+  {
+    "path": "apps/web-front/src/root-route.tsx",
+    "sha256": "0f5b800a8fbb71f7c4b517805e258c3c29bf9341075f56b6b88e0629af212916"
+  },
+  {
+    "path": "apps/web-front/src/member-route.tsx",
+    "sha256": "3daa37aec5eb824ae888e520da8315ad428f1b5b275c1faa675f1a7858e48724"
+  },
+  {
+    "path": "apps/web-back/src/App.tsx",
+    "sha256": "f7d92c36313c82f1594d0fb38ac7c9d5af0277f52017228129c9f7cdb4eecded"
+  },
+  {
+    "path": "apps/web-back/src/routes.tsx",
+    "sha256": "b93e6d7a28ea59101fbbf8f3c2f584de3b880d1dccd62bf4946cb16edc0bf705"
+  },
+  {
+    "path": "apps/web-back/src/deferred-toaster.tsx",
+    "sha256": "9f00d3e9dfcb4f94bc1971cae6689840d5c33e66bb54f77e984304b3bccecbfc"
+  },
+  {
+    "path": "apps/web-back/src/pages/entry-layout.tsx",
+    "sha256": "66c9202e28763493b20aa6415ea66c8250c08f20d56d3ff0a85be5292fe1d42c"
+  },
+  {
+    "path": "apps/web-admin/src/App.tsx",
+    "sha256": "f7d92c36313c82f1594d0fb38ac7c9d5af0277f52017228129c9f7cdb4eecded"
+  },
+  {
+    "path": "apps/web-admin/src/deferred-toaster.tsx",
+    "sha256": "9f00d3e9dfcb4f94bc1971cae6689840d5c33e66bb54f77e984304b3bccecbfc"
+  }
+]

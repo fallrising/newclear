@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import socket
-import subprocess
+import ssl
 import threading
 import time
 import uuid
@@ -23,41 +23,26 @@ KEYRING = ROOT / ".secure_mqtt" / "keyring.json"
 PUBLIC_KEYS = ROOT / "config" / "public-keys.local.json"
 
 
-def docker_emqx_running() -> bool:
+def emqx_available(host: str = "localhost", port: int = 8883) -> bool:
+    """A listening Docker proxy is insufficient: require authenticated mutual TLS."""
     try:
-        result = subprocess.run(
-            ["docker", "compose", "ps", "--services", "--filter", "status=running"],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=10,
-            cwd=ROOT,
-        )
-        return "emqx" in result.stdout
-    except (FileNotFoundError, subprocess.TimeoutExpired):
+        context = ssl.create_default_context(cafile=str(CERTS / "ca.pem"))
+        context.load_cert_chain(str(CERTS / "client.pem"), str(CERTS / "client.key"))
+        with socket.create_connection((host, port), timeout=2.0) as sock:
+            with context.wrap_socket(sock, server_hostname="localhost"):
+                return True
+    except (OSError, ssl.SSLError):
         return False
-
-
-def port_open(host: str, port: int) -> bool:
-    try:
-        with socket.create_connection((host, port), timeout=2.0):
-            return True
-    except OSError:
-        return False
-
-
-def emqx_available() -> bool:
-    return docker_emqx_running() or port_open("localhost", 8883)
 
 
 @pytest.fixture(scope="session")
 def require_emqx() -> None:
     deadline = time.time() + 60
     while time.time() < deadline:
-        if emqx_available() and port_open("localhost", 8883):
+        if emqx_available():
             return
         time.sleep(2)
-    pytest.skip("EMQX docker compose stack is not running on localhost:8883")
+    pytest.skip("EMQX mutual TLS is not ready on localhost:8883")
 
 
 @pytest.fixture

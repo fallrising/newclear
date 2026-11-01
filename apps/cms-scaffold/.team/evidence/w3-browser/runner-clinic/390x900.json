@@ -1,0 +1,32 @@
+{
+  "viewport": {
+    "name": "390x900",
+    "width": 390,
+    "height": 900
+  },
+  "metrics": {
+    "innerWidth": 390,
+    "innerHeight": 900,
+    "scrollWidth": 390,
+    "scrollHeight": 1150,
+    "outsideViewport": [],
+    "smallTouchTargets": [
+      "a",
+      "button"
+    ],
+    "title": "診所"
+  },
+  "findings": [
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "a"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button"
+    }
+  ],
+  "url": "http://localhost:5173/clinic"
+}

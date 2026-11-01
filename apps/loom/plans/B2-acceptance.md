@@ -1,5 +1,7 @@
 # B2 Acceptance Mapping (03-acceptance §B2)
 
+> Historical track snapshot. Counts, manual checks and deferred items below describe that delivery stage, not current acceptance. See [current reliability status and requirements](../docs/reliability.md).
+
 Run with `cargo test -p loom-core` (all tests) or
 `cargo test -p loom-core --test fs_integration` (just B2 acceptance).
 

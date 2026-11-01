@@ -26,6 +26,8 @@ export interface PageHeaderProps {
   badges?: ReactNode;
   /** More than two are collapsed into the "更多動作" menu (01 §6.2). */
   secondaryActions?: PageAction[];
+  /** Always listed in the "更多動作" menu, after any collapsed secondary actions (01 §7.2: 封存, 移到回收). */
+  moreActions?: PageAction[];
   primaryAction?: PageAction;
 }
 
@@ -38,15 +40,17 @@ function ActionButton({ action, variant }: { action: PageAction; variant: "defau
     );
   }
   return (
-    <Button variant={variant} onClick={action.onSelect} disabled={action.disabled} data-testid={action.testId}>
+    // type="button": a details page renders the header inside its <form>, and an action must never submit it.
+    <Button type="button" variant={variant} onClick={action.onSelect} disabled={action.disabled} data-testid={action.testId}>
       {action.label}
     </Button>
   );
 }
 
-export function PageHeader({ title, backTo, badges, secondaryActions = [], primaryAction }: PageHeaderProps) {
+export function PageHeader({ title, backTo, badges, secondaryActions = [], moreActions = [], primaryAction }: PageHeaderProps) {
   useDocumentTitle(title);
   const collapse = secondaryActions.length > 2;
+  const menu = [...(collapse ? secondaryActions : []), ...moreActions];
   return (
     <header className="mb-4 flex flex-wrap items-start justify-between gap-3" data-testid="page-header">
       <div className="flex min-w-0 flex-col gap-1">
@@ -62,16 +66,17 @@ export function PageHeader({ title, backTo, badges, secondaryActions = [], prima
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {collapse ? (
+        {collapse ? null : secondaryActions.map((action) => <ActionButton key={action.label} action={action} variant="outline" />)}
+        {menu.length > 0 ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" data-testid="page-more-actions">
+              <Button type="button" variant="outline" data-testid="page-more-actions">
                 <EllipsisIcon aria-hidden="true" />
                 {uiCopy["ui.actions.more"]}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {secondaryActions.map((action) => (
+              {menu.map((action) => (
                 <DropdownMenuItem
                   key={action.label}
                   disabled={action.disabled}
@@ -84,9 +89,7 @@ export function PageHeader({ title, backTo, badges, secondaryActions = [], prima
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          secondaryActions.map((action) => <ActionButton key={action.label} action={action} variant="outline" />)
-        )}
+        ) : null}
         {primaryAction ? <ActionButton action={primaryAction} variant="default" /> : null}
       </div>
     </header>

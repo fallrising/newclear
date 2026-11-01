@@ -1,7 +1,11 @@
 # Local development
 
 The current executable is a loopback-only Fake/SQLite integration runtime. It accepts and persists
-commands; automatic Run execution and board/SSE projections are intentionally unavailable.
+commands, executes durable Pending Runs through the deterministic `local-success` Fake scenario,
+and serves persisted board/SSE projections. Explicitly configured local repositories can now
+produce durable proposals through HTTP. A proposal is not accepted specification authority;
+`MarkReady` still fails closed without an admitted specification. First acceptance and its
+current-head consumers are tracked on the [development board](tasks/BOARD.md).
 
 From `products/hai-taskboard/backend`, build the binary:
 
@@ -30,7 +34,7 @@ IPv4-mapped aliases, expanded IPv6 aliases, broad/public roots, roots not owned 
 effective UID, and roots whose mode is not already `0700` are rejected without chmod before storage
 or a listener is opened.
 
-Readiness is public but reports the unavailable runtime surfaces explicitly:
+Readiness is public and reports command, persistence, automatic execution and projection availability:
 
 ```sh
 curl --fail-with-body http://127.0.0.1:8080/healthz
@@ -57,7 +61,7 @@ curl --fail-with-body \
   http://127.0.0.1:8080/api/v1/projects/prj_0123456789ABCDEFGHJKMNPR/commands/cmd_0123456789ABCDEFGHJKMNPQ
 ```
 
-Stop cleanly and wait for the process to close HTTP before SQLite:
+Stop cleanly and wait for the process to stop HTTP and join the persistent worker before closing SQLite:
 
 ```sh
 kill -TERM "$taskboard_pid"
@@ -70,5 +74,222 @@ Unset the token when finished:
 
 ```sh
 unset HAI_TASKBOARD_SESSION_TOKEN
-rm -rf -- "$taskboard_private_parent"
 ```
+
+Keep the private parent when you need to resume: it contains the durable database and artifacts.
+For agent build/test jobs, follow the common workspace launcher instructions in the root AGENTS;
+put retained state and evidence in its preserve directories rather than disposable build output.
+
+The poller scans at startup and every 250 ms, in bounded batches. Claimed work is never
+redispatched after restart. Expired nonterminal claims become `NeedsReconcile` / `OutcomeUnknown`;
+no automatic retry or Done transition follows. A worker/storage failure terminates the process.
+
+Authenticated board reads use `/api/v1/projects/{project_id}/board`; durable event replay uses
+`/api/v1/projects/{project_id}/events`. The current global event allocator can produce a gap between
+project events: replay explicitly requests a fresh snapshot instead of leaking other projects.
+Snapshot evidence coverage is conservative (`effective_satisfied=false`, `covered_ac_count=0`):
+current-policy evidence evaluation is unavailable here, not proof that no evidence exists.
+
+## Approved local proposal import
+
+Before starting the runtime, set `HAI_TASKBOARD_APPROVED_REPOSITORIES_FILE` to an absolute
+operator-owned, nonsymlink regular JSON file with mode `0600`. Its parent path components
+must also be nonsymlinks. Maximum size is 64 KiB and maximum repository count is 32.
+Unset configuration leaves proposal import unavailable. An empty `repositories` array revokes
+all current bindings on the next graceful restart; already committed command replay remains
+available. Configuration is immutable within a running process.
+
+The following shape is illustrative; replace private paths with local approved paths and keep
+the file outside the repository. `git_executable` is an absolute canonical executable path,
+and `git_dir` is the existing `.git` directory or supported bare repository. The existing Git
+reader requires compatible filesystem placement for source and runtime scratch. Linked worktree,
+symlink, alternate-object and other unsupported configurations are rejected by that reader.
+`configuration_id` is an opaque public ID, not a path. The approver must exactly match
+`HAI_TASKBOARD_SESSION_ACTOR`. The legacy project's repository hint grants no approval.
+
+```json
+{
+  "schema_version": 1,
+  "repositories": [{
+    "project_id": "prj_0123456789ABCDEFGHJKMNPR",
+    "id": "local-spec",
+    "version": 1,
+    "object_format": "sha1",
+    "configuration_id": "local-spec-v1",
+    "approved_by_actor": "local-operator",
+    "refs": ["refs/heads/main"],
+    "manifest_paths": ["specification.json"],
+    "git_executable": "/absolute/path/to/git",
+    "git_dir": "/absolute/path/to/repository/.git"
+  }]
+}
+```
+
+Create the project using the command above, then read
+`GET /api/v1/projects/prj_0123456789ABCDEFGHJKMNPR/repository-bindings/local-spec`
+with the session cookie. It returns the approved public binding and `binding_digest`; private
+paths and executable configuration are excluded. Use that exact digest in a project command:
+
+```json
+{
+  "command_id": "cmd_0123456789ABCDEFGHJKMNPS",
+  "idempotency_key": "123e4567-e89b-42d3-a456-426614174001",
+  "operation": "ProposeSpecification",
+  "expected_version": 1,
+  "issued_at": "2026-10-23T00:00:00Z",
+  "payload": {
+    "repository_binding_id": "local-spec",
+    "binding_version": 1,
+    "binding_digest": "sha256:<exact digest returned by the query>",
+    "ref": "refs/heads/main",
+    "manifest_path": "specification.json"
+  }
+}
+```
+
+POST to `/api/v1/projects/{project_id}/commands` with JSON content type, session cookie and exact
+Origin. Use the current project version and fresh command/idempotency identities for a new intent.
+The committed manifest must follow [the import contract](sdd/proposal-import-core.md); only
+immutable Git objects are read, with no fetch, repository instruction execution or working-tree
+input. The result records proposal/graph SHA-256 identities and the format-tagged Git commit OID.
+It installs no accepted head, changes no WorkItem phase and starts no Run. On response loss,
+query the original command ID or replay the identical request rather than generating a new intent.
+
+## Component verification gates
+
+From `products/hai-taskboard`, use the same entry points as root CI:
+
+```sh
+bash scripts/check-ci-pins.sh
+bash scripts/check-backend.sh
+bash scripts/check-web.sh
+```
+
+Use Go 1.27.1 with a working C compiler for the mandatory race suite, Node 24.20.0 and pnpm
+11.25.0. The scripts reject version drift before dependency installation; the backend keeps
+`GOTOOLCHAIN=local` and enables CGO. The web gate uses the existing lockfile and disables install
+lifecycle scripts. Dependency downloads require network access unless the caches are populated.
+The gates cover the current backend and web tests/build. Actual browser workflows, backup/restore
+and full product acceptance require separate checks.
+
+## Browser session and static hosting
+
+The local runtime now exposes POST/GET/DELETE `/api/v1/session`. POST accepts only a JSON
+`token` field under the configured exact Host and Origin, and establishes the existing
+`__Host-hai_session` Secure/HttpOnly/SameSite=Strict cookie. GET returns authenticated actor
+status; DELETE with exact Origin clears this browser cookie. This remains the single configured
+local operator token, not production account authentication. Do not put it in URLs, storage,
+logs or built assets. Current Chromium loopback login/send/logout has been verified; other
+browsers have not been accepted.
+
+Optional `HAI_TASKBOARD_WEB_ROOT` selects an absolute clean prebuilt web directory owned by
+the runtime UID, without symlinks or group/world write permissions. Keep it separate from the
+private data root, including ancestor/descendant paths. Startup verifies and loads `/index.html`
+and its directly referenced finite `/assets/` files into memory. Files must be regular, owned,
+single-link and bounded (index256KiB, each asset4MiB, total16MiB, at most64 references).
+Only explicit loaded routes are served; unknown API/assets never fall back to HTML. The current
+single Vite bundle fits this contract; nested dynamic imports/CSS resource discovery is not
+implemented. With no web root the API remains available and health reports UI unavailable.
+
+The initial hosting/session evidence used a public test shell. The later connected browser flow
+below exercises actual project/admission/dispatch operations; detail/attention and Done workflows
+remain tracked separately in [BOARD](tasks/BOARD.md).
+
+## Connected browser foundation
+
+Build the frontend with the pinned toolchain and component commands documented above, then set
+`HAI_TASKBOARD_WEB_ROOT` before starting the Go runtime to the absolute built `web/dist` directory
+(or the common workspace's retained equivalent). Open the exact configured loopback Origin.
+The runtime validates the finite asset list and serves it from that same origin. If the variable
+is absent, the API still runs and the UI is unavailable. This is a local single-operator runtime.
+
+Sign in with the configured session token using the password form. The connected entry reads
+actual projects, creates an empty Draft and shows the durable board. Use the explicitly configured
+repository binding to propose specifications, review the prepared acceptance and supply exact AC
+bytes before accepting. The repository's manifest must name the created project and WorkItem IDs;
+project repository hints alone do not authorize import. Accepted Drafts can become Ready and be
+dispatched through the deterministic `local-success` Fake scenario. A successful Run remains
+Developing until the separate completion gates succeed.
+
+The UI retains an uncertain command's identity and offers original-result lookup after response
+loss. It displays connection state and revalidates board authority on reconnect/reset; it never
+reposts uncertain work automatically. Token values are cleared after sign-in and are not stored
+in URL/localStorage/sessionStorage. Logout clears the browser cookie.
+
+The currently connected surface ends before candidate selection and human review/evidence/QA/Done.
+Detail, attention and impact workflows and backup/restore are still tracked as incomplete. The
+runtime now uses the explicit `local-policy-v2` human-independent verification profile; old accepted
+bindings under the previous policy cannot authorize new work, while committed result replay remains
+available. See [the policy contract](sdd/connected-local-runtime.md#usable-local-verification-policy-accepted-locally).
+Actual Chromium evidence is described in [traceability](traceability.md); it is not full UI or Done
+acceptance. Synthetic human fixture tests do not certify real-world task completion.
+
+## Human report API
+
+M1c implementation follows the [reviewed plan](plans/m1c-human-reports-20261031.md); consult
+[BOARD HM1C](tasks/BOARD.md#t-0339--m1c-sealed-human-reports) for its actual delivery status.
+This is an API path; the connected browser does not yet provide the completion/report form.
+
+1. Obtain the exact current completion-preparation snapshot for the candidate. Keep its WorkItem
+   version, subject digest, Run and fence values; evidence also needs the bound AC revision and
+   configured human recipe/environment. A successful Fake Run alone is insufficient.
+2. Submit `SubmitHumanReport` through the existing project command endpoint with the session cookie,
+   exact Origin, a new command ID/idempotency key and `report_` identifier. Send exact UTF-8 text
+   (1..65536 bytes, no NUL) as `text/plain` or `text/markdown`, and the matching `review` or `evidence`
+   intent defined in [OpenAPI](../api/openapi.yaml). The server owns actor, timestamp, digest and
+   stored availability. Review accepts Approved/ChangesRequested; Evidence explicitly asserts Passing
+   under the configured independent human policy. Submission does not move the phase or mark Done.
+3. If the response is lost, recover the command result with its original identity. Retrying the same
+   recorded intent replays its original bytes and does not republish material. Changed content or
+   intent requires a fresh command/key/report ID. Unrecorded storage failures permit a same-key retry;
+   they do not authorize a successful evidence assertion or an automatic retry of external work.
+4. Read `/api/v1/projects/{project_id}/human-reports/{report_id}` for immutable metadata, then follow
+   its scoped `artifact.href` to download verified bytes as an attachment. A metadata record or replayed
+   success does not guarantee the file is still available; missing/tampered files fail closed.
+
+Same bytes with different MIME conflict with existing immutable artifact metadata and are refused;
+use the original media type. Reports and their semantic records are immutable. Failed post-seal commits
+can leave unreferenced objects, which grant no read authority and are retained without automatic deletion.
+Keep the private data root intact; M6 owns complete backup/restore and any future safe offline GC.
+Do not delete shared digest files to retry a report. Existing completion verification still checks
+eligible Evidence bytes; a Review report is retained provenance, not a new Done condition.
+
+## Immutable per-project completion policies
+
+The owner-approved [contract](sdd/local-project-policy.md) and [evidence](evidence/project-policy-20261031.md)
+define this bounded M2 policy slice; consult BOARD HMPOL for actual implementation/delivery status.
+The runtime remains Fake-only and accepts environment configuration only.
+
+1. Create the project using the existing authenticated runtime/API, without accepting a specification
+   or dispatching a Run. Stop the runtime before installing the profile. Existing accepted or Run
+   history cannot be changed into a new custom policy through restart.
+2. Copy the [synthetic example](examples/project-policies.json) to an operator-controlled absolute
+   path. Replace its project ID and exact AC IDs with the intended existing project/specification.
+   Keep the file owned by the runtime user, regular, mode 0600, single-link and free of symlinks.
+   The example uses the established local recipe and deterministic Fake environment digests.
+3. Set HAI_TASKBOARD_COMPLETION_POLICIES_FILE to that absolute file path and start the runtime
+   with the other existing settings. The document contains every previously registered custom
+   project plus any new eligible project, at most 32 profiles and 256 rules per profile, 256 KiB total.
+4. Propose and explicitly accept the specification through the existing API. Initial preparation
+   returns the selected policy digest; do not invent a revision label or copy another project's
+   digest. Required ACs and node recipes must match the selected profile. Human report/evidence
+   submission, QA/approval and explicit completion retain all existing current-subject guards.
+
+V1 profiles accept only human verification with explicit independent=true. Every boolean, rule
+field and integration-base member is mandatory; absent base has explicit digest:null. Digests in
+the configuration are lowercase 64-hex without the API's sha256: prefix. Unknown fields, duplicates,
+wrong types, missing/null required values and unsafe/oversize files reject startup.
+
+The first successful registration is permanent for this slice, even before first acceptance.
+Reordering JSON keys/rules or changing formatting preserves the semantic policy. Changing a field,
+removing a registered project, or unsetting the selector after registration rejects startup. The
+file is read once: editing it during operation does not hot-reload policy. An eligible new project
+may be added while all old registrations remain identical. There is no delete/reset/activation
+operation; changing established policy requires a separately implemented reconciliation workflow.
+A registration committed before a later listener failure remains registered.
+
+Without custom registrations or the selector, the compiled local-policy-v2 behavior remains.
+Unconfigured projects retain that default even alongside configured projects; missing AC rules
+inside a configured project never fall back to local. Old local-policy-v1 history remains
+readable/replayable but cannot authorize new work. Loading policy never creates Passing evidence
+or treats a successful Fake Run as Done. This API/backend slice does not add a completion UI.

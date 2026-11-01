@@ -1,0 +1,41 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "sourceFiles": 403,
+  "protectedFiles": 229,
+  "authorizedDependencyFiles": [
+    "apps/web-back/package.json",
+    "package-lock.json"
+  ],
+  "existingLockedVersionsUnchanged": true,
+  "preservedSnapshots": {
+    "BW1a": 412,
+    "BW1b": 449,
+    "BW1c": 468,
+    "W1": 566,
+    "BW2": 602
+  },
+  "originalIntegrationFilesPreserved": 468,
+  "frontendFullGateTests": 395,
+  "frontendCounts": [
+    32,
+    43,
+    61,
+    92,
+    18,
+    7,
+    133,
+    9
+  ],
+  "e2ePassed": 39,
+  "e2eExcluded": 0,
+  "browserCaptures": 8,
+  "browserErrors": 0,
+  "runtimeOpenApiEqualsBw2": true,
+  "backendLocalEvidence": "Unchanged Java/build dependencies; reuse full successful BW2 CI37146275424; W2 local backend suites not rerun.",
+  "npmAudit": {
+    "exitCode": 1,
+    "inheritedDevTransitiveHigh": 1,
+    "package": "brace-expansion"
+  },
+  "publication": "Pending required remote CI and merge; standing authorization recorded."
+}

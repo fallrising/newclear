@@ -1,0 +1,47 @@
+## Capabilities (§4.4)
+
+**Enabled type ordering** — Contract requires enabled type keys in ascending key order. `StoreContentTypeDirectory` only filters `enabled`; order follows `store.listTypes()`. If the store is not sorted by `typeKey`, `/auth/me` and login `capabilities.types` order can disagree with §4.4 and stable client assumptions.
+
+*Test:* Seed types `b`, `a` (enabled); assert `capabilities(...).types()` keys are `["a","b"]`.
+
+**Per-type `scoped` aggregation** — For each listed action, `scoped` is set when every `matchesGrant` hit has a non-blank `predicateJson`; the type-level flag is effectively “any action satisfied that.” That matches the `Capabilities` Javadoc (“some listed action … only through predicate grants”) but is easy to misread against step 2.3 alone (per-action wording).
+
+*Test:* Two grants match `read_published` (one with predicate, one without) → action listed, `scoped == false`. Only predicate grants for `update` → `scoped == true` even if `read_published` was unpredicated.
+
+**Capabilities vs enforcement** — Listing uses `matchesGrant` only (predicates ignored). A listed action can still be denied on a concrete entry. Not an auth bypass if `authorize`/`matches` still evaluates predicates; it is a client semantic risk if UI treats listed actions as universal.
+
+*Test:* Grant with predicate that always fails → `capabilities` includes action; `authorize(..., entry)` denies.
+
+**Null / anonymous principal** — `collectGrants(null)` uses cache key `anonymous` and anonymous role grants only. If `/auth/me` can run without a logged-in principal, capabilities reflect anonymous, not conflated with a real user id.
+
+*Test:* `capabilities(null, BACK, keys)` vs authenticated principal with no roles; distinct cache keys if both run in one request (unusual).
+
+## Request-scoped grant cache (B-12)
+
+**Mid-request permission changes** — Cached grants live for the whole request. Contract notes no “mutate then re-check” flow today; adding one without removing `GRANT_CACHE_PREFIX + principalId` (or `anonymous`) yields stale allow/deny and stale `capabilities` in the same response.
+
+*Test:* In one mocked request: load grants (populate cache), change role permissions in store, call `capabilities` again → still old grants unless attribute cleared.
+
+**Cache key scope** — Key is principal id (or `anonymous`), not session/token. Correct for one principal per request; impersonation or “evaluate two principals in one request” needs two keys (already) but callers must not assume a single cached list for the whole request.
+
+*Test:* Same `RequestAttributes`, `collectGrants(principalA)` then `collectGrants(principalB)` → two entries, each consistent with `loadGrants`.
+
+**Immutability** — `List.copyOf` on load limits accidental list mutation; if `Grant`/`Permission` records are mutable elsewhere, cached objects could still change semantically (depends on types not shown).
+
+*Test:* After first `collectGrants`, mutate returned list (if API ever exposes it) or underlying store view; second call within request must return identical grant set.
+
+## AuthController integration
+
+**Surface on login vs `/me`** — Both pass `identity.surface()` into `capabilities`. Wrong or default surface on login yields capabilities for the wrong surface while session is valid.
+
+*Test:* Login with `Surface.FRONT` vs `BACK` hard-denied actions; `capabilities.surface` and omitted actions match `FRONT_HARD_DENY` / `BACK_HARD_DENY`.
+
+**`ContentTypeDirectory` per call** — Enabled types are re-read from content store each `mePayload`; not grant-cached. Disabled type mid-request could appear in capabilities until types are re-listed (low severity, consistency).
+
+*Test:* Disable type after first capability computation in same request (if ever batched) — document expected behavior.
+
+---
+
+**Hard deny / `matchesGrant` alignment** — Not verifiable from excerpts alone; if `FRONT_HARD_DENY`/`BACK_HARD_DENY` or `matchesGrant` drift from §4.4, capabilities and `authorize` diverge.
+
+*Test:* Matrix: each hard-denied action absent from capabilities on that surface; granted global/type actions present when `matchesGrant` true.

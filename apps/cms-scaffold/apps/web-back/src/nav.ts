@@ -1,4 +1,4 @@
-import type { Me } from "@cms/api";
+import type { CmsAction, Me, WorkContentType } from "@cms/api";
 import type { NavSection } from "@cms/ui";
 import { copy } from "./copy";
 
@@ -8,43 +8,70 @@ export const BACK_RETURN_ROUTES = [
   "/entries/:type",
   "/entries/:type/new",
   "/entries/:type/:id",
+  "/entries/:type/:id/preview",
+  "/entries/:type/:id/history",
+  "/media",
+  "/media/:id",
   "/views/album.composer",
   "/views/clinic.schedule",
   "/views/projects.board",
 ] as const;
 
-// GAP(G-01): v1 behaviour kept in W0. W1 replaces this with me.capabilities (C-07).
-const ADMIN_TYPES = ["album", "photo", "page", "clinic_profile", "owner", "pet", "vet", "visit", "project", "issue", "milestone"];
-
-export function allowedTypes(me: Me): string[] {
-  if (me.roles.some((r) => r.code === "admin")) return ADMIN_TYPES;
-  return [...new Set(me.roles.flatMap((r) => r.contentTypeCodes))];
+/** True when me.capabilities (BW1a §4.4, Back surface) grants `action` on `type`. The only permission check in web-back (C-07). */
+export function can(me: Me, type: string, action: CmsAction): boolean {
+  return me.capabilities.types.some((t) => t.key === type && t.actions.includes(action));
 }
 
-// GAP(G-01): publish buttons follow the role code until capabilities exist (W1).
-export function canPublish(me: Me | null): boolean {
-  return !!me && me.roles.some((r) => r.code === "operator" || r.code === "admin");
+/** True when me.capabilities grants a global action (BW1a §4.4), for example manage_media for the media library. */
+export function canGlobal(me: Me, action: CmsAction): boolean {
+  return me.capabilities.global.includes(action);
 }
 
-export function viewKeysFor(types: string[]): { key: string; label: string; path: string }[] {
-  const views = [];
-  if (types.includes("album") && types.includes("photo")) {
-    views.push({ key: "album.composer", label: copy["view.album.composer"], path: "/views/album.composer" });
-  }
-  if (types.includes("visit")) {
-    views.push({ key: "clinic.schedule", label: copy["view.clinic.schedule"], path: "/views/clinic.schedule" });
-  }
-  if (types.includes("issue") && types.includes("project")) {
-    views.push({ key: "projects.board", label: copy["view.projects.board"], path: "/views/projects.board" });
-  }
-  return views;
+/** 01 §7.2 B-S1: a type is workable when the user has read_draft, create or update on it. Order follows capabilities. */
+export function workTypeKeys(me: Me): string[] {
+  return me.capabilities.types
+    .filter((t) => t.actions.some((a) => a === "read_draft" || a === "create" || a === "update"))
+    .map((t) => t.key);
 }
 
-export function navFor(me: Me): NavSection[] {
-  const types = allowedTypes(me);
-  const views = viewKeysFor(types);
+export interface ViewLink {
+  key: string;
+  label: string;
+  lead: string;
+  path: string;
+}
+
+// A view appears only when every type it reads is workable (surface-back §3.3).
+const VIEWS = [
+  { key: "album.composer", types: ["album", "photo"] },
+  { key: "clinic.schedule", types: ["visit"] },
+  { key: "projects.board", types: ["project", "issue"] },
+] as const;
+
+export function viewsFor(me: Me): ViewLink[] {
+  const workable = workTypeKeys(me);
+  return VIEWS.filter((view) => view.types.every((t) => workable.includes(t))).map((view) => ({
+    key: view.key,
+    label: copy[`view.${view.key}`],
+    lead: copy[`view.${view.key}.lead`],
+    path: `/views/${view.key}`,
+  }));
+}
+
+/** Workable types in capability order, with their schema; types missing from `types` (still loading) are left out. */
+export function workTypes(me: Me, types: WorkContentType[] | undefined): WorkContentType[] {
+  const byKey = new Map((types ?? []).map((t) => [t.key, t]));
+  return workTypeKeys(me).flatMap((key) => (byKey.has(key) ? [byKey.get(key)!] : []));
+}
+
+/** Side navigation: 首頁, 內容 (pluralDisplayName, U-02), 視圖, 媒體 (manage_media). No hard-coded type list (C-07). */
+export function navFor(me: Me, types: WorkContentType[] | undefined): NavSection[] {
   const sections: NavSection[] = [{ items: [{ label: copy["nav.home"], to: "/", end: true }] }];
+  const content = workTypes(me, types);
+  if (content.length) sections.push({ label: copy["nav.content"], items: content.map((t) => ({ label: t.pluralDisplayName, to: `/entries/${t.key}` })) });
+  const views = viewsFor(me);
   if (views.length) sections.push({ label: copy["nav.views"], items: views.map((v) => ({ label: v.label, to: v.path })) });
-  sections.push({ label: copy["nav.content"], items: types.map((t) => ({ label: t, to: `/entries/${t}` })) });
+  // GET /media needs manage_media, so the library appears only with it (surface-back §3.6-3).
+  if (canGlobal(me, "manage_media")) sections.push({ label: copy["nav.media"], items: [{ label: copy["nav.mediaLibrary"], to: "/media" }] });
   return sections;
 }

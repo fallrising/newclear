@@ -1,0 +1,34 @@
+{
+  "sourceCommit": "1233a7be1ec91930f8f47be2822fc0c177c55bf2",
+  "dirtyScopedChanges": true,
+  "checks": [
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "elapsedSeconds": 1.09
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "elapsedSeconds": 2.092
+    }
+  ],
+  "versions": {
+    "node": "24.18.0",
+    "npm": "11.16.0",
+    "vite": "5.4.8",
+    "json-server": "0.17.4"
+  },
+  "sourceHashes": {
+    "web/src/store/bookmarkStore.ts": "b473b497e1af243ba21887f60485737748da728a054c6de28a8f56b81a3ca1c7",
+    "web/src/components/BookmarkCard.tsx": "874333d14c2a57d0905fa413c2af4cb6a02265a6b2cc18db061011d6cbb21222",
+    "web/src/components/BookmarkGrid.tsx": "9255c012680b99a9eb8ce75cc8d6182d887757c69d36c4868a7dd40d36947d4c",
+    "web/src/components/Sidebar.tsx": "a2315ccbc6a4b55e2b26035de288c7f4766c115a461a1251408a722030c36b4d"
+  },
+  "rawLogSha256": {
+    "lint.log": "b87b0553ce7ede9cd687ee2826d6d5c67944d845831f5d3d0ebeaf5bf31f072a",
+    "build.log": "c160f5149c3a0c3d562b7366bfc2521c33449b5723d0bd67498b10985ba53c82",
+    "npm-ci.log": "bc267c5298a3641859d8c2c710b14a5ad44e28648932fb698361864209bcdb4a"
+  },
+  "limits": "Vite build is not tsc; exact-head required CI remains pending."
+}

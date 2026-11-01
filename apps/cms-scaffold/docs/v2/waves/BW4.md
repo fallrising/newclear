@@ -2,13 +2,33 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW4](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW4.openapi.yaml](../contracts/BW4.openapi.yaml) ・ 前一波：[BW3](BW3.md) ・ 量測紀錄：[perf-records.md](../perf-records.md)
 
-狀態：**DOC_READY**（本檔合併即生效）  
+狀態：**VERIFIED**（2026-10-04；293 Java／133 PostgreSQL／395前端／39 mock E2E及三次效能量測，已於 PR #258 通過遠端 CI 並合併）
+
+[增量交付與驗收證據](../../../.team/reports/BW4-DELIVERY.md)、[遠端發布核對](../../../.team/reports/BW4-PUBLICATION.md)；下方預演與歷史施工片段依§0覆寫。
 日期：2026-09-25  
 讀者：實作 BW4 的 agent。只讀本檔、`contracts/BW4.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
 > **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW3 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。T02、T04、T05 完成後，`./gradlew :services:cms-api:test` 依序是 225、229、230 個測試，唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；`integrationTest` 在 T02 後是 74 個、T07 後是 76 個，全綠（本機 PostgreSQL 16.13，不是 Testcontainers）。各「測試先行」卡的預期紅燈也是實際跑出來的；§5.3 的矩陣測試與 §5.5 的回滾測試另外做過反向檢查（故意改錯一格、故意拿掉 `publish` 的交易，測試都會失敗）。
 
 > **Owner 決定（2026-09-25）：** 審計保留預設 **90 天**（[surface-admin §7.2](../../specs/surface-admin.md)，[02 BQ-03](../02-backend-sdd.md#8-開放問題)）；[02 BQ-12](../02-backend-sdd.md#8-開放問題) 選 A，在本波次加回滾測試（§5.5）；寫回滾測試時發現「應用程式有 DataSource 卻用 in-memory store」，owner 決定在本波次修正（§5.5，02 BQ-13）。
+
+---
+
+## 0. 現行增量實作契約（2026-10-04，優先於歷史片段）
+
+Owner已要求BW4，沿持續授權在驗收後commit/push/PR/必要CI/merge；沒有部署。BW3 PR252已VERIFIED；以其已合併來源增量實作，不整檔取代、不回退P0/BW1/BW2/W2/BW3，歷史固定測試數與容許CI失敗不適用。
+
+- 範圍為BQ-03審計保留（90天預設，30/90/365）、設定GET/PATCH、V9、延後每日清理，以及BQ-12/BQ-13完整應用JDBC接線、真正交易回滾、安全拒絕矩陣及三次效能量測。沒有新依賴；前端UI留W4。
+- HTTP邊界沿既有Spring MVC/BW3模式：缺body、無效JSON或非object由binding回400；合法object進service後先manage_settings授權，再驗unknownkey／retentionDays，錯surface不可因object內非法值變成400/422。這釐清§4.2的「授權先行」適用範圍，不另寫自訂JSON parser。
+- 設定沿§4：只Admin/manage_settings、未知屬性400、缺值/null422 REQUIRED、非整數WRONG_TYPE、非法enum NOT_IN_ENUM。同值不寫資料／audit；變更與settings.retention_updated在同交易。縮短期限不立即清理，事件恰好cutoff保留；預設啟動1h、之後fixedDelay24h，可配置。
+- 三個StoreConfig在bean建立時解析ObjectProvider；有DataSource的完整Spring Boot應用應使用三個JDBC store，無DataSource單元測試仍用memory。保留既有交易/CAS機制，不能用手動建立store的測試取代應用接線驗證。
+- 補真正應用PostgreSQL讀寫成功、publish audit DB失敗回滾，以及新增保留設定update與audit DB失敗回滾。故障須走真實DB並檢查資料與審計都不殘留；不沿歷史§7.5跳過設定回滾。加重新建立應用context後讀回已寫資料／設定的證據，與實際部署／備份還原驗收區分。
+- 保留設定store契約在memory與PostgreSQL都執行；新增必要固定Clock/排程預設與覆寫、HTTP輸入型別／no-op／權限拒絕audit回歸。舊測試與舊migration不覆寫；V9新增，migration default/constraint透過真PG驗證。
+- 安全矩陣沿§5.3全部51拒絕格，並補設定401／403必要角色及拒絕audit；任何既有行為不符交root查明，不修改預期以換綠燈。新增矩陣保護既有行為，因此不要求它先紅；新增功能與wiring故障採有意義Red→Green。
+- OpenAPI只從現行runtime增量加入setting paths/schema與兩段FieldError說明，再同步BW4契約/generatedTS；保留BW2/BW3更正及所有既有路徑。API codegen freshness與前端所有閘門必須綠，不採舊例外。
+- §3允許額外必要測試（應用重啟／rollback／scheduler）、generatedTS、BW3發布證據、README/readiness/SDD/PLAN/任務報告；根因若涉及範圍外程式，先交root檢查並記錄後才動。root擁有OpenAPI/application.yaml以外的docs/codegen/整合與matrix；worker明確分區。
+- 必要閘門：完整Java/PostgreSQL/bootJar，npmci/lint/typecheck/test/build/bundle及39 mock E2E，契約一致性、來源／快照／文件檢查、獨立審查；無UI改動重用W2視覺證據。效能測試不變，三次強制實跑、保留每次結果與原門檻；根據實際SQL計數記錄，不假定數字。
+- 多模型有界Codex分工T901審計保留/store/API/job；T902store wiring/真應用PG/重啟；T903輕量獨立review。新隔離worktree、明確檔案轉移，不遞迴委派。既有所有dirty worktree與快照保留。
 
 ---
 

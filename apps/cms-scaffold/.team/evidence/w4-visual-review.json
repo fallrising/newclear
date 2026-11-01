@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "inspected": [
+    "overview-1440.png",
+    "permissions-390.png",
+    "new-principal-390.png",
+    "disable-confirmation-390.png",
+    "audit-390.png",
+    "inspector-390.png",
+    "type-detail-1440.png",
+    "permissions-1440.png"
+  ],
+  "findings": [
+    "Hierarchy, spacing and labels readable at desktop/mobile; no document overflow.",
+    "Wide permission/type/audit tables scroll inside their own containers as specified; mobile sidebar collapses.",
+    "Disable dialog clearly names resource, explains effect and requires exact name before enabling submit.",
+    "Initial dialog screenshot caught entrance fade; preserved initial capture locally and reran capture with screenshot animations disabled. Product source unchanged."
+  ],
+  "limits": "Bounded visual smoke, not full Appendix A accessibility/functional acceptance; that remains W5."
+}

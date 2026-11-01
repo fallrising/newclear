@@ -1,3 +1,4 @@
+{% from "cost_summary" import render_cost %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -18,7 +19,7 @@
         <a href="/admin/usage">Usage</a>
       </nav>
       {% if admin_protected %}
-      <form method="post" action="/admin/logout" class="logout"><button type="submit" class="ghost">Logout</button></form>
+      <form method="post" action="/admin/logout" class="logout"><input type="hidden" name="csrf" value="{{ csrf }}" /><button type="submit" class="ghost">Logout</button></form>
       {% endif %}
     </aside>
     <main class="content">
@@ -28,7 +29,7 @@
         <div class="card"><div class="label">Routes</div><div class="value">{{ stats.routes }}</div></div>
         <div class="card"><div class="label">API Keys</div><div class="value">{{ stats.api_keys }}</div></div>
         <div class="card"><div class="label">Usage events</div><div class="value">{{ stats.usage_events }}</div></div>
-        <div class="card"><div class="label">Est. cost</div><div class="value small-val">${{ stats.estimated_cost_usd }}</div></div>
+        <div class="card"><div class="label">All-time recorded estimates (USD)</div><div class="value small-val">{{ render_cost(stats.cost_summary) }}</div></div>
       </div>
       <section class="panel">
         <h2>Endpoint</h2>
@@ -44,7 +45,7 @@
         <ol>
           <li>Add a <a href="/admin/connections">Connection</a> (base URL + API key)</li>
           <li>Create a <a href="/admin/routes">Route</a> that maps a public model name to targets</li>
-          <li>Optionally create an <a href="/admin/keys">API Key</a> (if none exist, /v1 is open for bootstrap)</li>
+          <li>Create an <a href="/admin/keys">API Key</a> — keys are required by default. Local bootstrap needs an explicit operator opt-in with zero total keys.</li>
         </ol>
       </section>
     </main>

@@ -189,6 +189,17 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 	if err := partition.validateRoute(request.Topic, request.Partition); err != nil {
 		return ProduceResult{}, raft.Ready{}, nil, err
 	}
+	// A replica that is not the ready leader must not apply sequence rules.
+	// Its producer state can lag the committed prefix, and OUT_OF_ORDER_SEQUENCE
+	// is not retryable, so the client would stop instead of following NOT_LEADER
+	// or waiting out NOT_READY.
+	snapshot := partition.node.Snapshot()
+	if snapshot.Role != raft.Leader {
+		return ProduceResult{}, raft.Ready{}, nil, raft.ErrNotLeader
+	}
+	if !snapshot.LeaderReady {
+		return ProduceResult{}, raft.Ready{}, nil, raft.ErrLeaderNotReady
+	}
 	epoch := uint64(request.Epoch)
 	firstSequence := uint64(request.FirstSequence)
 	count := uint32(len(validated.Records))
@@ -202,7 +213,9 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 		pending.waiters[requestID] = true
 		if pending.gateRequestID == "" {
 			gateRequestID := partition.nextGateRequestID()
-			gateResults, retryErr := partition.replication.Retry(pending.operationID, gateRequestID)
+			gateResults, retryErr := partition.replication.AwaitExistingData(
+				pending.operationID, gateRequestID, pending.index, pending.baseOffset, pending.lastOffset, pending.entryTerm, pending.bytes,
+			)
 			if retryErr != nil {
 				delete(pending.waiters, requestID)
 				return ProduceResult{}, raft.Ready{}, nil, retryErr
@@ -256,7 +269,7 @@ func (partition *Partition) Produce(requestID string, request protocol.ProduceRe
 		}
 		return partition.pendingProduceResult(pending, requestID), raft.Ready{LeaderReady: partition.node.Snapshot().LeaderReady}, completions, nil
 	}
-	snapshot := partition.node.Snapshot()
+	snapshot = partition.node.Snapshot()
 	operationID := dataOperationID(snapshot.LastLogIndex+1, snapshot.Term)
 	index, ready, gateResults, err := partition.replication.ProposeProducerData(
 		operationID, gateRequestID, timestamp,

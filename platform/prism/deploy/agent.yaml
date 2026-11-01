@@ -1,0 +1,98 @@
+agent:
+  hostname: ""                    # 空 = 自動偵測
+  state_dir: /var/lib/prism-agent
+  config_mode: merge              # local | remote | merge
+  labels:
+    env: prod
+    role: web
+  detailed_metrics: false
+
+output:
+  endpoint: prismd.internal:4317
+  protocol: otlp-grpc
+  api_key_file: /etc/prism/secrets/agent_key
+  compression: gzip
+  batch_size: 1000
+  batch_timeout: 1s
+  tls:
+    enabled: true
+    insecure_skip_verify: false
+    ca_file: ""
+    client_cert_file: ""
+    client_key_file: ""
+  retry:
+    initial_interval: 1s
+    max_interval: 60s
+    max_elapsed_time: 0s          # 0 = 永久重試（資料在 WAL 中）
+
+wal:
+  enabled: true
+  max_bytes: 512MiB
+  max_age: 4h
+  segment_bytes: 8MiB
+  sync_policy: interval           # always | interval | never
+  sync_interval: 1s
+  min_free_bytes: 1GiB
+
+control:
+  enabled: true
+  endpoint: https://prismd.internal:9090
+  heartbeat_interval: 30s
+  auto_upgrade: false
+
+inputs:
+  hostmetrics:
+    enabled: true
+    interval: 15s
+    collectors: [cpu, memory, disk, filesystem, network, load, uptime, filefd]
+    filesystem:
+      ignore_mount_points: '^/(dev|proc|sys|run|var/lib/docker/.+)($|/)'
+      ignore_fs_types: '^(autofs|binfmt_misc|cgroup.*|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$'
+    process:
+      enabled: false
+      top_n: 20
+
+  filelog:
+    - name: nginx-access
+      paths: ["/var/log/nginx/access.log"]
+      labels: {service: nginx, log_type: access}
+      max_line_bytes: 262144
+    - name: app
+      paths: ["/var/log/app/*.log"]
+      exclude: ["/var/log/app/*.gz"]
+      labels: {service: app}
+      multiline:
+        start_pattern: '^\d{4}-\d{2}-\d{2}'
+        max_lines: 500
+        timeout: 3s
+      discovery_interval: 10s
+      delete_grace: 30s
+
+  journald:
+    enabled: true
+    units: []                     # 空 = 全部
+    exclude_units: ["prism-agent.service"]   # 避免自我循環
+
+  docker:
+    enabled: false
+    socket: /var/run/docker.sock
+    label_allowlist: ["com.docker.compose.service", "com.docker.compose.project"]
+
+process:
+  redact:
+    - pattern: '(?i)(password|passwd|pwd)\s*[=:]\s*\S+'
+      replace: '$1=***'
+    - pattern: '(?i)authorization:\s*bearer\s+\S+'
+      replace: 'authorization: bearer ***'
+    - pattern: '(?i)(api[_-]?key)\s*[=:]\s*\S+'
+      replace: '$1=***'
+    - pattern: '-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----'
+      replace: '***PRIVATE KEY REDACTED***'
+    - pattern: '\b(?:\d[ -]*?){13,16}\b'
+      replace: '***CARD REDACTED***'
+  sample: []
+
+telemetry:
+  log_level: info
+  log_format: json
+  self_metrics_port: 0            # 0 = 不開 HTTP，自身指標經 OTLP 上報

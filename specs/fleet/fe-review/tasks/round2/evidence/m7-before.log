@@ -1,0 +1,11 @@
+--- FAIL: TestReviewRollbackJSONAndErrorAlert (0.01s)
+    pages_test.go:231: missing browser contract hx-ext="json-body"
+    pages_test.go:231: missing browser contract id="flash" role="alert" hidden
+    pages_test.go:231: missing browser contract encodeParameters
+    pages_test.go:231: missing browser contract JSON.stringify
+    pages_test.go:231: missing browser contract .textContent
+    pages_test.go:235: JSON content type alone must not masquerade as JSON encoding
+FAIL
+FAIL	github.com/fallrising/newclear/specs/fleet/internal/ui	0.031s
+ok  	github.com/fallrising/newclear/specs/fleet/internal/api	0.014s
+FAIL

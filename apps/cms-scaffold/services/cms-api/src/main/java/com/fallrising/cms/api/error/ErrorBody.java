@@ -29,6 +29,12 @@ public final class ErrorBody {
     }
 
     public static Map<String, Object> of(CmsApiException ex, String requestId) {
-        return of(ex.code(), ex.getMessage(), ex.action(), ex.contentType(), ex.surface(), requestId);
+        Map<String, Object> body = of(ex.code(), ex.getMessage(), ex.action(), ex.contentType(), ex.surface(), requestId);
+        if (!ex.fields().isEmpty()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> error = (Map<String, Object>) body.get("error");
+            error.put("fields", ex.fields());
+        }
+        return body;
     }
 }

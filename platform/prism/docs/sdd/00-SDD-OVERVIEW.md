@@ -125,7 +125,7 @@ flowchart LR
 
 | 能力 | v1 選擇 | 後續可升級 |
 |---|---|---|
-| 語言 | Go 1.23+ | — |
+| 語言 | Go 1.27.1（CI 以 go.mod 為準） | 依官方支援窗口更新 |
 | 服務端 | 單一 `prismd` binary，`--mode` 決定啟用的角色 | 拆成 ingest / query / ruler / console 多行程 |
 | 預設存儲驅動 | ClickHouse 24.x 單節點 | ClickHouse cluster / 分層冷存 S3 |
 | 備選存儲驅動 | VictoriaMetrics single + VictoriaLogs single | — |

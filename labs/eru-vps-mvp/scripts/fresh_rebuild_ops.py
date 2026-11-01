@@ -135,6 +135,8 @@ def _current_bindings(project, input_path, input_sha, inventory_path, inventory_
         if path.is_symlink() or not path.is_file():
             raise ValueError(label + ' is missing or unsafe')
     inputs = code_inputs(project)
+    from fresh_generation import historical_code_inputs
+    inputs = historical_code_inputs(project, inputs)
     return {
         'fresh_input': {'path': input_path, 'sha256': input_sha},
         'inventory': {'path': inventory_path, 'sha256': inventory_sha},
@@ -183,6 +185,10 @@ def _previous_accepted(project, series):
         project, previous['acceptance'],
         directory='operations/fresh-rebuild/accepted-runs',
         label='previous accepted run evidence')
+    # Claimed PASS fields and a digest require their actual sealed backing
+    # evidence, exact local commit and durable completion to be verified.
+    from fresh_generation_ops import verify_accepted_lineage
+    verify_accepted_lineage(project, previous['acceptance'])
     return {
         'review_plan': review,
         'review_path': review_path,

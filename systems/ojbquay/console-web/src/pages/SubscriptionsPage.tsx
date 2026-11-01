@@ -283,12 +283,16 @@ export function SubscriptionWizard({
         <section hidden={step !== 0}>
           <Form.Item label="Topic" name="topicId" rules={[{required: true}]}>
             <Select
+              showSearch
+              optionFilterProp="label"
               placeholder="Select a topic"
               options={topics.data?.map((topic) => ({label: topic.name, value: topic.id}))}
             />
           </Form.Item>
           <Form.Item label="Consumer group" name="groupId" rules={[{required: true}]}>
             <Select
+              showSearch
+              optionFilterProp="label"
               placeholder="Select a group"
               options={groups.data?.map((group) => ({label: group.name, value: group.id}))}
             />

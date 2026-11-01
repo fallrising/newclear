@@ -1,0 +1,467 @@
+{
+  "config": {
+    "argv": [
+      "<local-home>/.local/node-v24.18.0/bin/node",
+      "<delivery-workspace>/node_modules/.bin/playwright",
+      "test",
+      "--config",
+      "playwright.quality.config.ts",
+      "hardening-w5.spec.ts",
+      "--reporter=list,json"
+    ],
+    "configFile": "<delivery-workspace>/playwright.quality.config.ts",
+    "rootDir": "<delivery-workspace>/e2e-quality",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "<delivery-workspace>/test-results/frontend/quality-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "<delivery-workspace>/e2e-quality",
+        "testIgnore": [],
+        "testMatch": [
+          "axe-w5.spec.ts",
+          "visual-w5.spec.ts",
+          "hardening-w5.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "none",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "hardening-w5.spec.ts",
+      "file": "hardening-w5.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "W5 F03 F04 F05 computed tokens fonts titles",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4262,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:19.173Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-82269a2377847df0e61b",
+          "file": "hardening-w5.spec.ts",
+          "line": 9,
+          "column": 5
+        },
+        {
+          "title": "W5 S03 CSRF is cached and one 403 retries once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2601,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:23.601Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-3b20d675e79e67097149",
+          "file": "hardening-w5.spec.ts",
+          "line": 25,
+          "column": 5
+        },
+        {
+          "title": "W5 S04 markdown never executes raw HTML",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1965,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:26.221Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-1138f4b001af92953b8d",
+          "file": "hardening-w5.spec.ts",
+          "line": 51,
+          "column": 5
+        },
+        {
+          "title": "W5 C10 board follows project query changes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1890,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:28.200Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-56376f026ee9d22eb895",
+          "file": "hardening-w5.spec.ts",
+          "line": 77,
+          "column": 5
+        },
+        {
+          "title": "W5 C11 member navigation and logout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2371,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:30.099Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-7b2c9de5a98dcbdf7270",
+          "file": "hardening-w5.spec.ts",
+          "line": 86,
+          "column": 5
+        },
+        {
+          "title": "W5 C13 C14 markdown images",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5232,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:32.479Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-17542e959ec8c53deb78",
+          "file": "hardening-w5.spec.ts",
+          "line": 97,
+          "column": 5
+        },
+        {
+          "title": "W5 C16 stale response cannot replace new route",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3830,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:37.724Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "delayed-old-album-responses",
+                      "contentType": "application/json",
+                      "body": "eyJzdGFydGVkIjoyLCJjb21wbGV0ZWQiOjIsInN3aXRjaGVkQXQiOjE3MzIsInJlcXVlc3RzIjpbeyJzdGFydGVkQXQiOjE2MzIuNSwiZGVsYXlTdGFydGVkQXQiOjE2MzguNSwiY29tcGxldGVkQXQiOjMxMzguNzk5OTk5OTUyMzE2Mywic3RhdHVzIjoyMDAsImZhaWxlZCI6ZmFsc2V9LHsic3RhcnRlZEF0IjoxNjMzLjIwMDAwMDA0NzY4MzcsImRlbGF5U3RhcnRlZEF0IjoxNjQxLjg5OTk5OTk3NjE1ODEsImNvbXBsZXRlZEF0IjozMTQyLjEwMDAwMDAyMzg0Miwic3RhdHVzIjoyMDAsImZhaWxlZCI6ZmFsc2V9XX0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-d2364feed812d0fbfad4",
+          "file": "hardening-w5.spec.ts",
+          "line": 118,
+          "column": 5
+        },
+        {
+          "title": "W5 C17 each app requests auth me once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6510,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:41.565Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-3356c09f00b80e14109a",
+          "file": "hardening-w5.spec.ts",
+          "line": 170,
+          "column": 5
+        },
+        {
+          "title": "W5 C18 non JSON 502 is product error",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5155,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:48.090Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-bc96808cbc3e794d7775",
+          "file": "hardening-w5.spec.ts",
+          "line": 183,
+          "column": 5
+        },
+        {
+          "title": "W5 C19 U04 U05 confirmation feedback structure",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6704,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:53.259Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-341c7404b913d30e4902",
+          "file": "hardening-w5.spec.ts",
+          "line": 196,
+          "column": 5
+        },
+        {
+          "title": "W5 E01 E04 production versions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T17:06:59.977Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9a783e4db138c1178085-3c7a28a40be3ee0f9b8a",
+          "file": "hardening-w5.spec.ts",
+          "line": 211,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-05T17:06:15.453Z",
+    "duration": 44744.841,
+    "expected": 11,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

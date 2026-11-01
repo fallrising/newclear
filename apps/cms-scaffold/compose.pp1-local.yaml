@@ -1,0 +1,95 @@
+# Local isolated verification only. Never merge this file with compose.yaml.
+name: ${CMS_PP1_PROJECT:?prepare a new local run first}
+x-logging: &bounded-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+services:
+  postgres:
+    image: ${CMS_PP1_POSTGRES_IMAGE:?}
+    pull_policy: never
+    restart: "no"
+    environment:
+      POSTGRES_DB: cms
+      POSTGRES_USER: cms_local
+      POSTGRES_PASSWORD_FILE: /run/secrets/spring.datasource.password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - type: bind
+        source: ${CMS_PP1_RUN_ROOT:?}/secrets/spring.datasource.password
+        target: /run/secrets/spring.datasource.password
+        read_only: true
+    networks: [data]
+    healthcheck:
+      test: [CMD, pg_isready, -U, cms_local, -d, cms]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    logging: *bounded-logging
+  cms-api:
+    image: ${CMS_PP1_API_IMAGE:?}
+    pull_policy: never
+    restart: "no"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      CMS_RUNTIME_PRODUCTION_REQUIRED: "true"
+      CMS_SITE_DOMAIN: cms.test
+      CMS_API_ORIGIN: https://api.cms.test:8443
+      CMS_CORS_ORIGINS: https://front.cms.test:8443,https://back.cms.test:8443,https://admin.cms.test:8443
+      CMS_SURFACE_ORIGINS: https://front.cms.test:8443:front,https://back.cms.test:8443:back,https://admin.cms.test:8443:admin
+      CMS_IDENTITY_SEED_ENABLED: "false"
+      CMS_IDENTITY_COOKIE_SECURE: "true"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cms
+      SPRING_DATASOURCE_USERNAME: cms_local
+      SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+      CMS_MEDIA_ROOT: /data/media
+      SERVER_PORT: "8080"
+    volumes:
+      - media-data:/data/media
+      - type: bind
+        source: ${CMS_PP1_RUN_ROOT:?}/secrets/spring.datasource.password
+        target: /run/secrets/spring.datasource.password
+        read_only: true
+    networks: [web, data]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:8080/actuator/health]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    logging: *bounded-logging
+  ingress:
+    image: ${CMS_PP1_NODE_IMAGE:?}
+    pull_policy: never
+    restart: "no"
+    read_only: true
+    entrypoint: [/opt/pp1-node]
+    command: [/tool/ingress.mjs, --config, /config/ingress.json]
+    volumes:
+      - ${NODE_BINARY:?}:/opt/pp1-node:ro
+      - ${CMS_PP1_INGRESS_SCRIPT:?}:/tool/ingress.mjs:ro
+      - ${CMS_PP1_RUN_ROOT:?}/ingress.json:/config/ingress.json:ro
+      - ${CMS_PP1_RUN_ROOT:?}/tls/leaf.crt:/tls/leaf.crt:ro
+      - ${CMS_PP1_RUN_ROOT:?}/tls/leaf.key:/tls/leaf.key:ro
+      - ${CMS_PP1_FRONT_DIST:?}:/dist/front:ro
+      - ${CMS_PP1_BACK_DIST:?}:/dist/back:ro
+      - ${CMS_PP1_ADMIN_DIST:?}:/dist/admin:ro
+    networks:
+      web:
+        aliases: [front.cms.test, back.cms.test, admin.cms.test, api.cms.test]
+    depends_on:
+      cms-api:
+        condition: service_healthy
+    logging: *bounded-logging
+volumes:
+  db-data:
+  media-data:
+networks:
+  web:
+    internal: true
+  data:
+    internal: true

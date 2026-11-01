@@ -6,7 +6,7 @@ The imported component workflows remain under component directories, which GitHu
 
 ## Goal
 
-Provide root-level, path-scoped CI workflows for selected executable components, including imported private-to-public snapshots whose nested workflows are no longer active. Named members of this set include Goku, Phark, CloudForm, AweShore, Streaming Converter, Ojbquay, Prism, Ice Maker, Local OCR Services, CMS Scaffold, Dim Gate, Kith, cc-quota, and Edge Ops.
+Provide root-level, path-scoped CI workflows for selected executable components, including imported private-to-public snapshots whose nested workflows are no longer active. Named members of this set include Goku, Phark, CloudForm, AweShore, Streaming Converter, Ojbquay, Prism, Ice Maker, Local OCR Services, CMS Scaffold, Dim Gate, Kith, cc-quota, Edge Ops, and mkfk.
 
 ## Non-goals
 
@@ -41,7 +41,19 @@ Scenario: Kith source changes
   Given a change under `products/kith/**` or `.github/workflows/kith.yml`
   When GitHub evaluates root workflows
   Then `.github/workflows/kith.yml` is eligible
-  And it runs Node 24.18.0 `npm ci`, `npm run lint`, and `npm test` in `products/kith`, `npm ci` and `npm run build` in `products/kith/web`, and the Playwright E2E suite (`npm run e2e:all`, `npm run e2e:validate`) with evidence uploaded as an artifact, with `contents: read` and no secrets or deploy
+  And it runs Node 24.18.0 `npm ci`, `npm run lint`, and `npm test` in `products/kith`, plus `npm ci` and `npm run build` in `products/kith/web`, with `contents: read` and no secrets or deploy
+
+Scenario: mkfk source changes
+  Given a change under `systems/mkfk/**` or `.github/workflows/mkfk-ci.yml`
+  When GitHub evaluates root workflows
+  Then `.github/workflows/mkfk-ci.yml` is eligible
+  And it runs the Go gates, the short seeded chaos profile, and the Compose demo with its teardown, with `contents: read` and no secrets, image publish, or deploy
+
+Scenario: Edge Ops source changes
+  Given a change under `platform/edge-ops/**` or `.github/workflows/edge-ops-ci.yml`
+  When its root workflow runs
+  Then backend TS contracts, the mock-Agent demo chain, local workerd/D1 smoke, Go agent contracts, and React build/Playwright acceptance run
+  And the checks use synthetic local resources without Cloudflare credentials, remote resource creation, or deploy
 
 ## Constraints
 
@@ -67,13 +79,66 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | Local OCR Services | `local-ocr-services-ci.yml` | `platform/local-ocr-services/**`, `.github/workflows/local-ocr-services-ci.yml` | Repository-native `make check` (syntax, contract-test image, Compose rendering) |
 | CMS Scaffold | `cms-scaffold-ci.yml` | `apps/cms-scaffold/**`, `.github/workflows/cms-scaffold-ci.yml` | Java 25 `./gradlew test`; Node 24 `npm ci`, test, lint, typecheck, and build |
 | Dim Gate | `dim-gate-ci.yml` | `platform/dim-gate/**`, `.github/workflows/dim-gate-ci.yml` | Component-native lint/test with `contents: read` |
-| Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `npm ci`, `npm run build` in `products/kith/web`; `npm run e2e:all` + `npm run e2e:validate` (Playwright 1.56.1 Chromium), evidence artifact kept 14 days; `contents: read`; no secrets or deploy |
-| Edge Ops | `edge-ops-ci.yml` | `platform/edge-ops/**`, `.github/workflows/edge-ops-ci.yml` | Node 24.18.0 `npm ci`, `npm run typecheck`, `npm test` in `platform/edge-ops/backend`; Go 1.24.7 `gofmt` check, `go vet`, `go test` in `platform/edge-ops/agent`; offline contract vectors only, no Cloudflare credentials or deploy |
+| Kith | `kith.yml` | `products/kith/**`, `.github/workflows/kith.yml` | Node 24.18.0 `npm ci`, `npm run lint`, `npm test` in `products/kith`; `npm ci`, `npm run build` in `products/kith/web`, then immutable synthetic article bundle from exact checkout commit; Node/Git crash-recovery tests in `npm test`; `contents: read`; no private content, secrets or deploy |
+| Edge Ops | `edge-ops-ci.yml` | `platform/edge-ops/**`, `.github/workflows/edge-ops-ci.yml` | Node 24.18.0 backend `npm ci`, `npm run typecheck`, `npm test`; root demo-chain `npm run check`; backend `npm run test:workerd` for local workerd/D1 HTTP smoke; Go 1.24.7 agent `gofmt` check, `go vet`, `go test -count=1 ./...`; web `npm ci`, React `npm run build`, Chromium installation and Playwright `npm run test:e2e`, with browser evidence retained; synthetic local resources, no Cloudflare credentials or deploy |
 | cc-quota | `cc-quota-ci.yml` | `tools/cc-quota/**`, `.github/workflows/cc-quota-ci.yml` | Python 3 stdlib `unittest` offline suite (no network or credentials); `bash -n install.sh` |
-
-| Spring Pool | `spring-pool-ci.yml` | `platform/spring-pool/**`, `.github/workflows/spring-pool-ci.yml` | Pinned Node/Rust; native validation/export tests, type/format/build, compiled Wasm + local workerd/D1 integration, three browser journeys; synthetic fixtures only, no Cloudflare token or deploy |
+| mkfk | `mkfk-ci.yml` | `systems/mkfk/**`, `.github/workflows/mkfk-ci.yml` | Go from `go.mod`: `make fmt-check vet test test-race test-model test-integration`; `make test-chaos CHAOS_PROFILE=short` with its output uploaded as an artifact; `make demo` (three-broker Compose on a locally built `FROM scratch` image, no registry pull, loopback-only ports) followed by `make demo-down DELETE_DATA=1` |
+| Spring Pool | `spring-pool-ci.yml` | `platform/spring-pool/**`, `.github/workflows/spring-pool-ci.yml` | Pinned Node/Rust; native validation/export tests, type/format/build, compiled Wasm + local workerd/D1 integration, desktop/mobile browser journeys and responsive PNG/browser-health evidence; synthetic fixtures only, no Cloudflare token or deploy |
 
 All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
+
+OpenViking context lab adds `.github/workflows/openviking-context-ci.yml`, scoped to
+`labs/openviking-context/**` and its own workflow. Its native gate is
+`make -C labs/openviking-context check`: stdlib offline contracts and a synthetic demo.
+It does not install OpenViking, call models, or validate live-server behavior.
+
+## Shared workflow static validation
+
+`python3 .github/scripts/check_workflows.py` is the local and CI entrypoint.
+It checks only enabled root `.github/workflows/*.yml` and `*.yaml` files;
+component-local imported workflows remain dormant. Explicit file arguments can
+check a regression fixture before a commit:
+
+```sh
+python3 .github/scripts/check_workflows.py --cache-dir /path/to/task/build/actionlint
+python3 .github/scripts/check_workflows.py --cache-dir /path/to/task/build/actionlint .github/scripts/tests/fixtures/invalid-runner-job-env.yml
+ACTIONLINT_ARCHIVE=/path/to/task/build/actionlint/actionlint_1.7.12_linux_amd64.tar.gz python3 -m unittest discover -s .github/scripts/tests -v
+```
+
+Use the shared build-workspace launcher where available: its `AGENT_BUILD_DIR`
+supplies the cache location automatically. Otherwise give `--cache-dir` or
+`ACTIONLINT_CACHE_DIR` explicitly, outside the checkout. No global install or
+source-tree binary is created. The first check downloads an official release
+archive; subsequent checks reuse that archive, verify its SHA256 every time and
+extract a fresh private executable for the invocation. `--archive PATH` provides
+an offline archive subject to the same digest check. Download/digest/platform
+failures return 2; workflow diagnostics return 1, with file, line and column;
+success returns 0. The checker never runs a workflow or changes its YAML.
+
+[The pin manifest](../../.github/actionlint.json) records the exact
+[official actionlint 1.7.12 release](https://github.com/rhysd/actionlint/releases/tag/v1.7.12),
+download source and SHA256 values from its published checksum list for Linux and
+macOS amd64/arm64. Version 1.7.7 was evaluated but rejects the valid
+`macos-15-intel` matrix label in Flowshot; 1.7.12 accepts it without an exception.
+Upgrades require reviewing the release/checksum source and rerunning fixtures
+and all root workflows, rather than following a moving latest download.
+
+The real negative fixture places `runner.temp` in job-level `env` and must fail.
+Separate positive fixtures cover step-level runner context, writing through
+`GITHUB_ENV`, and matrix/expression evaluation including the hosted Intel Mac
+label. No workflow-specific ignores or custom runner exceptions are configured.
+Actionlint validates expression availability and statically inferable matrix
+types; generated runtime values are not executed or proven by this gate.
+The optional ShellCheck/Pyflakes integrations are disabled explicitly with
+`-shellcheck= -pyflakes=` to make the Actions validity check deterministic without
+extra linters; YAML, context, expression, runner and action checks remain enabled
+([upstream usage](https://github.com/rhysd/actionlint/blob/v1.7.12/docs/usage.md)).
+
+`workflow-lint.yml` runs the entrypoint and real fixture suite only when root
+workflows, the checker, its tests or actionlint configuration change (plus manual
+dispatch). It uses a read-only checkout, contents-read permissions, cancellation
+concurrency and a five-minute timeout. Existing component filters, product tests,
+release behavior and workflow permissions/concurrency/timeouts are unchanged.
 
 ## Steps
 
@@ -83,7 +148,50 @@ All listed workflows use `permissions.contents: read`. None introduce deploy, pu
 
 ## Verification
 
-- Pinned actionlint container against `.github/workflows/*.yml`
+- Shared `python3 .github/scripts/check_workflows.py` against enabled root workflows
+- `ACTIONLINT_ARCHIVE=<verified-archive> python3 -m unittest discover -s .github/scripts/tests -v`
 - Static assertions for triggers, path filters, permissions, concurrency, timeouts, and forbidden release/deploy/publish or credential use
 - Representative native gates: shell syntax; clean web install/lint/build where dependencies are available; component build/test commands where runtime prerequisites are available
 - `git diff --check`
+
+## Memvid memory lab
+
+`.github/workflows/memvid-lab-ci.yml` is scoped to `labs/memvid-lab/**` and itself.
+It installs hash-pinned Python dependencies, runs actual SDK/CLI boundary regressions,
+prepares fixed public model assets and a locked Rust 1.90.0 native Whisper helper,
+then executes all eleven memory scenarios plus PDF, local text embeddings, native
+CLIP and Whisper-to-memory under a process-local Linux seccomp network deny.
+Whisper uses an explicit, reviewed patch to select its prepared model cache; the
+patch does not alter inference. Downloads happen only during preparation. The job
+has read-only permissions, a 20-minute timeout and no secret, deployment or publish
+step. It retains only a compact JSON report for seven days.
+
+## pg-jev router lab
+
+`.github/workflows/pg-jev-router-ci.yml` is scoped to `labs/pg-jev-router/**` and itself.
+It runs `make check` and `make integration`: PostgreSQL 16, PL/Python and pinned
+pg-jev 0.2.1 against a deterministic loopback provider. The disposable container
+runs with `--network none`; build-time public dependencies require network.
+No secrets, paid model calls, host volumes, image publishing or deployment.
+
+## open-compute runtime lab
+
+`.github/workflows/open-compute-ci.yml` is scoped to `labs/open-compute/**` and
+itself. It runs `make check` for the Python standard-library harness and
+`make integration` on a fresh non-root Linux x64 runner. The integration gate
+verifies the pinned original release, creates only a new owned scope, deploys a
+trusted synthetic Worker, and checks D1 plus a durable Workflow through a normal
+daemon restart. It does not accept existing scope data or use production
+credentials, machine service installation, deployment, or release publishing.
+Only a bounded sanitized report may be retained as a short-lived artifact.
+
+## Mithril research local contracts
+
+`.github/workflows/mithril-research-ci.yml` is scoped to
+`labs/mithril-research/**` and itself. It runs `make check` with Python 3.11
+standard-library fixture, private bundle and mock SSH contract tests, and
+`make demo` through the real CLI with synthetic data
+in a new private runner-temporary directory. Permissions
+are `contents: read`, checkout does not persist credentials, and the job has a
+five-minute timeout. It does not build upstream, run Redis/Mithril, connect SSH,
+use credentials, change VPS state, publish an image or perform deployment.

@@ -6,9 +6,9 @@
 //! on this stream**. The initial replay batch is always `dropped_old = 0` —
 //! a fresh stream has no "previous batch" to delta against.
 //!
-//! Cancellation: the manager holds the `JoinHandle` and calls `abort()`
-//! on detach. The batcher has no async-Drop-critical state so abort-mid-tick
-//! is safe (sink emits are sync mutex pushes).
+//! Cancellation: the manager first closes a per-subscription sink gate,
+//! waiting for in-flight synchronous emissions, then aborts the `JoinHandle`.
+//! Aborting alone cannot stop synchronous work already executing on a worker.
 
 use std::sync::Arc;
 use std::time::Duration;

@@ -1,0 +1,29 @@
+name: pg-jev router lab CI
+on:
+  pull_request:
+    paths:
+      - labs/pg-jev-router/**
+      - .github/workflows/pg-jev-router-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - labs/pg-jev-router/**
+      - .github/workflows/pg-jev-router-ci.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pg-jev-router-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts-and-extension:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Offline policy and HTTP contracts
+        run: make -C labs/pg-jev-router check
+      - name: Real pg-jev with synthetic provider (runtime network disabled)
+        run: make -C labs/pg-jev-router integration

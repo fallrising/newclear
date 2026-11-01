@@ -1,0 +1,19 @@
+WARNING: Default (insecure) Erlang cookie is in use.
+WARNING: Configure node.cookie in /opt/emqx/etc/emqx.conf or override from environment variable EMQX_NODE__COOKIE
+WARNING: NOTE: Use the same cookie for all nodes in the cluster.
+EMQX_RPC__PORT_DISCOVERY [rpc.port_discovery]: manual
+EMQX_NODE__NAME [node.name]: emqx@172.18.0.2
+EMQX_AUTHORIZATION__SOURCES__1__PATH [authorization.sources.1.path]: /opt/emqx/etc/acl.conf
+EMQX_AUTHORIZATION__SOURCES__1__ENABLE [authorization.sources.1.enable]: true
+EMQX_AUTHORIZATION__SOURCES__1__TYPE [authorization.sources.1.type]: file
+EMQX_AUTHORIZATION__NO_MATCH [authorization.no_match]: deny
+Listener tcp:default is NOT started due to: disabled.
+Listener ssl:default on :8883 started.
+Listener ws:default is NOT started due to: disabled.
+Listener wss:default is NOT started due to: disabled.
+2026-10-21T17:31:01.111313+00:00 [error] msg: cert_file_not_found, path: ${EMQX_ETC_DIR}/certs/key.pem, resolved_path: /opt/emqx/etc/certs/key.pem
+2026-10-21T17:31:01.111493+00:00 [error] msg: cert_file_not_found, path: ${EMQX_ETC_DIR}/certs/cert.pem, resolved_path: /opt/emqx/etc/certs/cert.pem
+2026-10-21T17:31:01.111684+00:00 [error] msg: cert_file_not_found, path: ${EMQX_ETC_DIR}/certs/cacert.pem, resolved_path: /opt/emqx/etc/certs/cacert.pem
+Listener http:dashboard on :18083 started.
+EMQX 5.8.3 is running now!
+2026-10-21T17:31:04.050583+00:00 [warning] tag: AUTHZ, clientid: unauthorized-pub-test, msg: cannot_publish_to_topic_due_to_not_authorized, peername: 172.18.0.1:35144, topic: test/e2ee/84e75f290ef74399867496c926cfddca/data, reason: not_authorized

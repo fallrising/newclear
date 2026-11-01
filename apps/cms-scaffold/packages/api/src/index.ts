@@ -7,10 +7,10 @@ import { workApi } from "./work";
 
 export { ApiError, errorFromBody, isApiError, type ApiErrorCode, type ClientErrorCode } from "./errors";
 export type { Transport, TransportOptions } from "./core";
-export { keys, type PublicListParams, type WorkListParams } from "./keys";
+export { keys, type AuditQuery, type PublicListParams, type WorkListParams } from "./keys";
 export { publicQueries, type PublicApi } from "./public";
 export { workQueries, type WorkApi } from "./work";
-export { adminQueries, type AdminApi } from "./admin";
+export { adminQueries, type AdminApi, type RetentionDays } from "./admin";
 export type { AuthApi } from "./auth";
 export type * from "./schema";
 

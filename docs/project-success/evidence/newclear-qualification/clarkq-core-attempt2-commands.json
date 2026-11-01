@@ -1,0 +1,50 @@
+[
+  {
+    "argv": [
+      "docker",
+      "compose",
+      "-f",
+      "<qualification-evidence>/clarkq-compose.yaml",
+      "-p",
+      "qualification-clarkq-20261021",
+      "up",
+      "-d",
+      "--build",
+      "--wait",
+      "clarkq"
+    ],
+    "cwd": "systems/clarkq",
+    "start": "2026-10-21T15:48:46.486950+00:00",
+    "duration_seconds": 26.177,
+    "exit_code": 0,
+    "log": "clarkq-core-attempt2-startup.log"
+  },
+  {
+    "argv": [
+      "sh",
+      "demo/run-scenarios.sh"
+    ],
+    "cwd": "systems/clarkq",
+    "start": "2026-10-21T15:49:12.663932+00:00",
+    "duration_seconds": 1.629,
+    "exit_code": 0,
+    "log": "clarkq-core-attempt2-scenarios.log"
+  },
+  {
+    "argv": [
+      "docker",
+      "compose",
+      "-f",
+      "<qualification-evidence>/clarkq-compose.yaml",
+      "-p",
+      "qualification-clarkq-20261021",
+      "down",
+      "--volumes"
+    ],
+    "cwd": "systems/clarkq",
+    "start": "2026-10-21T15:49:14.292794+00:00",
+    "duration_seconds": 0.299,
+    "exit_code": 0,
+    "log": "clarkq-core-attempt2-cleanup.log"
+  }
+]

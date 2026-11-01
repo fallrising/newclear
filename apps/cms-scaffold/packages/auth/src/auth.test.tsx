@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { createCmsClient } from "@cms/api";
+import { createCmsClient, keys } from "@cms/api";
 import { MOCK_WRONG_PASSWORD, setSurface, setUser } from "@cms/mocks";
 import { resetMocks, server } from "@cms/mocks/node";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -57,6 +57,17 @@ async function fillLogin(username: string, password: string) {
 }
 
 describe("RequireSurface + LoginPage", () => {
+  it("BW1a retains capabilities in the session after login, without caching the CSRF token", async () => {
+    const { queryClient } = setup("/sign-in");
+    await fillLogin("seed-operator-album", "pw");
+    expect(await screen.findByText("home:seed-operator-album")).toBeInTheDocument();
+    const me = queryClient.getQueryData(keys.auth.me());
+    expect(me).toMatchObject({ capabilities: { surface: "back", types: expect.arrayContaining([
+      expect.objectContaining({ key: "album", actions: expect.arrayContaining(["publish"]) }),
+    ]) } });
+    expect(me).not.toHaveProperty("csrfToken");
+  });
+
   it("C-17 W0-FM01 anonymous deep link goes to /sign-in?returnTo=<path>, then back after login", async () => {
     const { router } = setup("/entries/album");
     await waitFor(() => expect(router.state.location.pathname).toBe("/sign-in"));

@@ -8,8 +8,14 @@ pub enum FsError {
     #[error("path {0:?} is not inside the configured vault root")]
     PathOutsideVault(PathBuf),
 
+    #[error("symlink path component {0:?} is unsupported")]
+    SymlinkUnsupported(PathBuf),
+
     #[error("document {0:?} not found in vault")]
     NotFound(PathBuf),
+
+    #[error("document {0:?} already exists; reload from disk to inspect it before saving")]
+    AlreadyExists(PathBuf),
 
     #[error("write to {path:?} rejected: on-disk content changed since the caller last read it")]
     Conflict {

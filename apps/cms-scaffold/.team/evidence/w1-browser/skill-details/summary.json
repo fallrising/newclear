@@ -1,0 +1,26 @@
+{
+  "url": "http://localhost:5184/entries/note/30000000-0000-4000-8000-000000000036?mockUser=mock-operator-notes",
+  "viewports": [
+    {
+      "viewport": {
+        "name": "1440x900",
+        "width": 1440,
+        "height": 900
+      },
+      "json": "1440x900.json",
+      "png": "1440x900.png",
+      "blockingFindings": 1
+    },
+    {
+      "viewport": {
+        "name": "375x812",
+        "width": 375,
+        "height": 812
+      },
+      "json": "375x812.json",
+      "png": "375x812.png",
+      "blockingFindings": 0
+    }
+  ],
+  "blockingFindings": 1
+}

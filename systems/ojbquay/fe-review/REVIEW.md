@@ -1,37 +1,42 @@
-# FE Review — ojbquay console — REVIEW
+# FE Review — ojbquay console
 
-> 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
+## Current scope
 
-## 目前輪次
+Approved R2 M1–M4 and the owner-approved2026-10-24 isolation/gRPC addendum have
+required local evidence. Independent acceptance and current CI/publication are
+pending root completion. [Report](tasks/round2/report.md), [result](tasks/round2/result.json).
+Historical mainline/usable qualification and dormant status are unchanged.
+Complete Round3 was not run or accepted.
 
-- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
-- 第 2 輪：修改（未開始）
-- 第 3 輪：完整 e2e（未開始）
+## Resolved within R2
 
-## 修改權限
+- C1/D1: the unchanged eleven-service real stack now has a review-only overlay,
+  unique ownership and credentials, no host publications, real session/CSRF,
+  REST/gRPC fixtures and transparent loopback proxy. No mock API substituted.
+  Exact owned cleanup and absence are recorded; the stack is no longer running.
+- C2: measured unchanged AntD drawer bounds at834px DLQ and768px group were within
+  the viewport/document. No CSS change was justified.
+- C3: Dashboard now observes its actual chart container and releases its observer.
+  Focused RED/GREEN plus same-document1440px663→780→663 browser evidence passed.
+- M2:42 unique state images and27 actual route/content checks are indexed, with
+  controlled empty/500 supplements separated from real401/missing-delay results.
 
-文檔檔位 **C（dormant）**：依 [`PORTFOLIO.md`](../../../PORTFOLIO.md)「休眠」一節的 fe-review 例外，第 2 輪可在 `DESIGN.md` 範圍內修改前端與做最小解耦。這不恢復投入，不做新功能或 major 依賴升級。
+## Findings retained for later scope
 
-## 矛盾點
+- Mobile header CSS hides Logout text/icon spans; it lacks an accessible name.
+  Required mobile wrong-password evidence uses a true anonymous context/401;
+  this does not claim mobile logout passed.
+- Source Google Fonts requires external assets; the observer blocks them.
+  Existing React/AntD compatibility and Modal deprecation warnings remain visible.
+- Nine desktop axe runs had font-preload limitations and actual findings:
+  nine serious color-contrast, one moderate missing-h1, two minor empty-header
+  entries. Complete Round3/axe-zero is not claimed; no permission to broaden
+  product changes is inferred from these findings.
+- Original token-bearing drawer PNGs had animation/mask problems. All remain
+  private; six replacement PNGs have stable geometry and100% measured pixel-mask
+  coverage. Audit desktop four regions also have100% coverage; narrow audit token
+  columns are outside the current viewport. Historical image claims remain exact.
 
-### C1 後端是 Kafka＋JVM 控制面，啟動成本高
-
-`console-web/e2e/serve.mjs` 可能提供假服務，但用途與覆蓋範圍未確認。
-
-## 需要放開或決定的點
-
-### D1 以 `e2e/serve.mjs` 作為第 3 輪後端
-
-- 選項：(a) 採用並補齊缺少的端點；(b) 起完整 JVM＋Kafka。
-- 建議：(a)。
-- 狀態：**待擁有者決定**。撰寫 `DESIGN.md` 時可先以建議作為「假設」，在設計 PR 中由擁有者確認。
-
-## 進入第 2 輪的條件
-
-- `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
-- `PROMPT.md` 與 `targets.json` 已依設計更新。
-
-## 相關 PR
-
-- fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+Original configuration/build/browser failures and explicit bounded continuations
+are in the report. Only approved production files changed; backend/API/auth/
+production Compose/dependencies/CI/styles remain untouched.

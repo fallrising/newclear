@@ -1,0 +1,59 @@
+{
+  "source_commit": "152c75a5cd975d3c9112520e615ae5e4c904dd67",
+  "binary_sha256": "4c5b7ce86049495d0aceb87c9a3b75277508c2ce0c6014c9bb8a7c08977ec069",
+  "frontend_sha256": {
+    "assets/index-44LOeRqh.js": "b084e5771d1dd5c7ff02a9e040be475ef77a301867ef1e9d8f1158857b59d4ab",
+    "assets/index-PpChdjYA.css": "ed319f8f0bb6df806dc255c6673baec144b974557e213d7508a6932e134c63d3",
+    "index.html": "37fb9e295ca65d6c936801d66e7643406257b700d2939fc0cdf59d723d6cdc8c"
+  },
+  "cargo_installed_tools": "tauri-driver v2.0.4:\n    tauri-driver",
+  "webkit_packages": "libwebkit2gtk-4.1-0:amd64\t2.50.6-1~deb12u2\nwebkit2gtk-driver\t2.50.6-1~deb12u2",
+  "python_version": "Python 3.11.2",
+  "xdotool_version": "xdotool version 3.20160805.1",
+  "harness_sha256": "8114e3d169a8aa68335ea8d966e5d409929cdae406da3f1c8f3787c01987a27f",
+  "selected_cases": [
+    "external_changes",
+    "named_routing",
+    "pin_persistence",
+    "restart_no_auto",
+    "history_actions",
+    "removal_fallback"
+  ],
+  "limits": "Linux only; no Windows/macOS, provider, crash recovery or physical hardware claim. DOM button activation/focus with native WebDriver keyboard input; pointer hit testing is not covered. Root owns isolated display/WM/HTTP server.",
+  "platform": "Linux x86_64; Debian 12 container; Xvfb 1920x1200; native window 1800x1000",
+  "raw_summary_sha256": "33599665037c5902133cc082e440f47bb0b5fff5bb444fe98819bc9dc5098d25",
+  "source_inventory_sha256": "464f1de9c2a9945405ada1eba9aad25dfb5daf91f6eb1431b640e43f45f6fb08",
+  "source_files_matched": 138,
+  "results": [
+    {
+      "case": "external_changes",
+      "status": "passed"
+    },
+    {
+      "case": "named_routing",
+      "status": "passed"
+    },
+    {
+      "case": "pin_persistence",
+      "status": "passed"
+    },
+    {
+      "case": "restart_no_auto",
+      "status": "passed"
+    },
+    {
+      "case": "history_actions",
+      "status": "passed"
+    },
+    {
+      "case": "removal_fallback",
+      "status": "passed"
+    }
+  ],
+  "prior_findings": [
+    "Correct browser key order produced reordered PTY input; repaired by per-session frontend write serialization and deterministic regressions.",
+    "Harness corrections: explicit modifier actions/Enter, read-only DOM retry after driver reset, measured stable canvas geometry.",
+    "Earlier 1100x720 attempt had missing SVG edges; cause unresolved. Final controlled-viewport pass is not a repair claim."
+  ],
+  "raw_evidence_availability": "Raw screenshots, fixtures and logs retained locally for review; not published or guaranteed cross-host durable storage."
+}

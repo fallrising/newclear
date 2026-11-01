@@ -1,0 +1,14 @@
+[
+  {
+    "path": "../measured-red.log",
+    "beforeSHA256": "f217890a6623c75893a820a1165ee906247cf45e25fe215fa22e40d5986c1922",
+    "afterSHA256": "5a24e20d87348a61b4273a1afeeca7fef98ed00eabb4f4bceb1b255ed903f83d",
+    "operation": "strip trailing whitespace from reviewed publication copy only; raw original retained under ignored runs/.state/evidence-raw and private archive; no result/assertion changed"
+  },
+  {
+    "path": "../notifications-red.log",
+    "beforeSHA256": "08293ea3c07eb01888431ddb423914b060c36f6e637ed57cf9138bf4f5fba048",
+    "afterSHA256": "94e4743ac90a128042b88f97bea2acdf61db45ed04499c633038e1528f43e699",
+    "operation": "strip trailing whitespace from reviewed publication copy only; raw original retained under ignored runs/.state/evidence-raw and private archive; no result/assertion changed"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "runtimeVersion": "0.11.0",
+  "contractVersion": "0.11.0",
+  "equalPaths": [
+    "/api/v1/me/content-types/{typeKey}/entries",
+    "/api/v1/me/entries/{id}"
+  ],
+  "equalSchemas": [
+    "MemberEntry",
+    "MemberEntryPage",
+    "MemberCreateRequest"
+  ],
+  "result": "passed"
+}

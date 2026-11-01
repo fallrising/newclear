@@ -4,9 +4,8 @@
 //! and batcher tasks are implementation detail.
 //!
 //! Concurrency: a single `parking_lot::Mutex<HashMap<...>>` serializes
-//! lookups and writes. Lock-held operations are all non-blocking — including
-//! the initial replay emit, because `BatchSink::emit` is contracted to be
-//! fast (sync queue push). Tokio tasks (reader / waiter / batcher / exit
+//! lookups and writes. Sinks must be fast (sync queue push). Subscription
+//! cancellation waits for any in-flight sink call before returning. Tokio tasks (reader / waiter / batcher / exit
 //! watcher) run outside the lock.
 
 use std::collections::HashMap;
@@ -16,7 +15,7 @@ use std::time::Duration;
 use parking_lot::Mutex;
 use tokio::task::JoinHandle;
 
-use loom_contracts::{Event, Origin, SessionId, StreamId};
+use loom_contracts::{Event, Origin, PtyBatch, SessionId, StreamId};
 
 use super::batcher::{emit_initial_replay, run_batcher_loop, DEFAULT_BATCH_INTERVAL};
 use super::error::{PtyError, PtyResult};
@@ -39,6 +38,30 @@ struct SessionEntry {
 struct Subscription {
     stream_id: StreamId,
     join: JoinHandle<()>,
+    sink: Arc<SubscriptionSink>,
+}
+
+/// An abort only cancels future async polls. This gate also waits for a
+/// synchronous emit already executing on another worker before cancel returns.
+struct SubscriptionSink {
+    active: Mutex<bool>,
+    downstream: Arc<dyn BatchSink>,
+}
+
+impl BatchSink for SubscriptionSink {
+    fn emit(&self, batch: PtyBatch) {
+        let active = self.active.lock();
+        if *active {
+            self.downstream.emit(batch);
+        }
+    }
+}
+
+impl Subscription {
+    fn stop(self) {
+        *self.sink.active.lock() = false;
+        self.join.abort();
+    }
 }
 
 impl PtyManager {
@@ -127,19 +150,23 @@ impl PtyManager {
 
         if let Some(old) = entry.subscription.take() {
             tracing::debug!(sid = ?sid, "replacing existing subscription");
-            old.join.abort();
+            old.stop();
         }
 
         let stream_id = fresh_stream_id();
+        let sink = Arc::new(SubscriptionSink {
+            active: Mutex::new(true),
+            downstream: self.batch_sink.clone(),
+        });
         let ring = entry.session.ring();
         let (start_last_seen, start_dropped) =
-            emit_initial_replay(&stream_id, sid, &ring, &*self.batch_sink);
+            emit_initial_replay(&stream_id, sid, &ring, sink.as_ref());
 
         let join = tokio::spawn(run_batcher_loop(
             stream_id.clone(),
             sid.clone(),
             ring,
-            self.batch_sink.clone(),
+            sink.clone(),
             self.batch_interval,
             start_last_seen,
             start_dropped,
@@ -148,6 +175,7 @@ impl PtyManager {
         entry.subscription = Some(Subscription {
             stream_id: stream_id.clone(),
             join,
+            sink,
         });
         Ok(stream_id)
     }
@@ -162,13 +190,14 @@ impl PtyManager {
             .ok_or_else(|| PtyError::NotFound(sid.clone()))?;
         if let Some(old) = entry.subscription.take() {
             tracing::debug!(sid = ?sid, "detach");
-            old.join.abort();
+            old.stop();
         }
         Ok(())
     }
 
-    /// Forget about this session. Aborts the subscription (if any), the
-    /// exit-watcher task, and best-effort kills the underlying child.
+    /// Forget about this session. Aborts the subscription (if any), and
+    /// best-effort kills the underlying child. The exit observer completes
+    /// independently so removal cannot suppress its final event.
     pub fn remove(&self, sid: &SessionId) -> PtyResult<()> {
         let entry = self
             .sessions
@@ -176,9 +205,10 @@ impl PtyManager {
             .remove(sid)
             .ok_or_else(|| PtyError::NotFound(sid.clone()))?;
         if let Some(sub) = entry.subscription {
-            sub.join.abort();
+            sub.stop();
         }
-        entry.exit_watcher.abort();
+        // Let the observer report PtyExited even when close races child exit.
+        drop(entry.exit_watcher);
         let _ = entry.session.kill();
         Ok(())
     }
@@ -287,5 +317,17 @@ mod tests {
         // Result must be valid UTF-8 and strictly shorter than the input.
         assert!(out.len() <= 2);
         assert!(out.chars().count() <= 2);
+    }
+}
+
+impl Drop for PtyManager {
+    fn drop(&mut self) {
+        for (_, entry) in self.sessions.get_mut().drain() {
+            if let Some(subscription) = entry.subscription {
+                subscription.stop();
+            }
+            let _ = entry.session.kill();
+            // Dropping the handle detaches the observer; the killed child wakes it.
+        }
     }
 }

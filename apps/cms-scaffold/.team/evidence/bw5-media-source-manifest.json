@@ -1,0 +1,14 @@
+{
+  "services/cms-api/src/main/java/com/fallrising/cms/media/store/MediaStore.java": "bd51f84a83f68dca3076d83e1cf1ae2d1f32dd5bd416cc56e0894b229579f69e",
+  "services/cms-api/src/main/java/com/fallrising/cms/media/store/InMemoryMediaStore.java": "ec535b68f210bf66d2c67f3e072e72a0c30d2706ea2acf0cea706e4854296175",
+  "services/cms-api/src/main/java/com/fallrising/cms/media/store/JdbcMediaStore.java": "2de4a36aca8a8b19258a45f6c3249b3bc9fcc7546cfb752b49c8200953c300e8",
+  "services/cms-api/src/main/java/com/fallrising/cms/media/service/MediaService.java": "880c68dc633927d7385999e3345c5ba4ea1c541a2ec0953cdea9e6b64bf6c5fa",
+  "services/cms-api/src/main/java/com/fallrising/cms/content/web/ContentProjection.java": "14cf976d52213b1c90d34874f485b49d0250962f5f84be03317d2c547660aa1b",
+  "services/cms-api/src/main/java/com/fallrising/cms/content/web/PublicContentController.java": "3a4ee69d2677d0d99db19fa899d0e421554ba3ac15f00704be6b03f22260042d",
+  "services/cms-api/src/main/java/com/fallrising/cms/content/web/MeController.java": "125ad9b0375b286cb673ce96d7205aaa973abe3630a28c0e31bf1d310c618ab6",
+  "services/cms-api/src/test/java/com/fallrising/cms/contract/MediaStoreContract.java": "a012e379b12e8f7469e2de1a0a4df74ae8bd6125cf60d4ba4c0d39a156c8a640",
+  "services/cms-api/src/test/java/com/fallrising/cms/PublicMediaCountTests.java": "c43bc090eb5fefccc1c7d27575310149f7d3b336b8168d3d625cfca7b375940c",
+  "services/cms-api/src/test/java/com/fallrising/cms/MemberMediaCountTests.java": "ed12ec767d978b489ec5a6da644c73595311619a4313c4bc426022025c2f769c",
+  "services/cms-api/src/test/java/com/fallrising/cms/media/service/MediaBatchTests.java": "d03111d85c40f2385ce020365cb3227cc9b4d4f9d9291ceb8456b1dd808f8a7e",
+  "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/MediaBatchQueryCountTests.java": "be81a92e7e024d104434e5d7f721ed86fe832b0755a309f72404b64102f4cb3f"
+}

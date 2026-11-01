@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate/build the pinned core patch with an isolated official Go toolchain."""
+"""Validate/build a pinned core patch with an isolated official Go toolchain."""
 import argparse
 import hashlib
 import io
@@ -19,7 +19,7 @@ GO_SHA256 = '63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445'
 TESTS = '^TestWithNodesPlanLocked(NilContextOnLockFailure|PartialFailureUnlocks)$'
 
 
-def apply_source_patch(source, patch, *, include=None, check=False):
+def apply_source_patch(source, patch, *, include=None, exclude=None, check=False):
     # Keep upstream-relative paths independent of any enclosing monorepo.
     subprocess.run(['git', 'init', '--quiet'], cwd=source, check=True)
     # The reviewed patch is bound to an exact upstream commit. Allowing zero-context
@@ -29,13 +29,39 @@ def apply_source_patch(source, patch, *, include=None, check=False):
         argv.append('--check')
     if include:
         argv.append('--include=' + include)
+    if exclude:
+        argv.append('--exclude=' + exclude)
     subprocess.run([*argv, str(patch)], cwd=source, check=True)
+
+
+def select_source(checkout, upstream, source_tag=None, source_commit=None):
+    """Bind a stable local tag to an exact commit without changing the checkout."""
+    if (source_tag is None) != (source_commit is None):
+        raise ValueError('--source-tag and --source-commit must be provided together')
+    tag = upstream['tag'] if source_tag is None else source_tag
+    commit = upstream['commit'] if source_commit is None else source_commit
+    if not isinstance(tag, str) or not re.fullmatch(
+            r'v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', tag):
+        raise ValueError('source tag must be a stable vMAJOR.MINOR.PATCH')
+    if not isinstance(commit, str) or not re.fullmatch(r'[0-9a-f]{40}', commit):
+        raise ValueError('source commit must be an exact lowercase 40-hex SHA')
+    try:
+        actual = subprocess.check_output(
+            ['git', '-C', str(checkout.resolve()), 'rev-parse', '--verify',
+             f'refs/tags/{tag}^{{commit}}'], text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as exc:
+        raise ValueError('source tag must resolve to a local commit') from exc
+    if actual != commit:
+        raise ValueError('source tag does not match the selected commit')
+    return commit, tag
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path, required=True, help='Existing core Git checkout; read via git archive only')
     parser.add_argument('--output', type=Path, required=True, help='New isolated private build directory')
+    parser.add_argument('--source-tag', help='Candidate stable core tag; requires --source-commit')
+    parser.add_argument('--source-commit', help='Exact candidate commit; requires --source-tag')
     parser.add_argument('--patch', type=Path, default=PROJECT / 'patches/core-v0.1.5-lock-context.patch',
                         help='Reviewed patch file under patches/')
     parser.add_argument('--patch-revision', type=int, default=1)
@@ -48,9 +74,9 @@ def main():
     args = parser.parse_args()
     os.umask(0o077)
     root = args.output.resolve()
-    root.mkdir(parents=True, mode=0o700)  # never reuse an uncertain build
     upstream = json.loads((PROJECT / 'upstream.lock.json').read_text())['core']
-    commit, source_tag = upstream['commit'], upstream['tag']
+    commit, source_tag = select_source(
+        args.source, upstream, args.source_tag, args.source_commit)
     patch_input = args.patch if args.patch.is_absolute() else PROJECT / args.patch
     patch = patch_input.resolve()
     patch_dir = (PROJECT / 'patches').resolve()
@@ -60,8 +86,6 @@ def main():
     if args.patch_revision < 1:
         raise ValueError('--patch-revision must be positive')
     version_re = re.compile(r'^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$')
-    if not version_re.fullmatch(source_tag):
-        raise ValueError('upstream.lock core tag must be a stable vMAJOR.MINOR.PATCH')
     compatibility_tests = []
     seen_versions = {source_tag}
     for spec in args.compatibility_from:
@@ -89,6 +113,7 @@ def main():
               'go_version': go_version, 'go_archive_sha256': go_sha256, 'steps': [], 'status': 'running',
               'independent_runner_verification': {'status': 'pending', 'artifact_sha256': None,
                                                    'byte_identical_to_first_build': False, 'steps': []}}
+    root.mkdir(parents=True, mode=0o700)  # never reuse an uncertain build
     source = root / 'core'; source.mkdir()
     archive = subprocess.check_output(['git', '-C', str(args.source.resolve()), 'archive', commit])
     with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
@@ -121,12 +146,11 @@ def main():
         baseline = (root / 'baseline.log').read_text()
         if not failed or baseline.count('cannot create context from nil parent') < 2:
             raise ValueError('baseline did not reproduce both expected nil-context failures')
-        apply_source_patch(source, patch, include='cluster/calcium/lock.go')
-        apply_source_patch(source, patch, include='store/common/node.go')
-        apply_source_patch(source, patch, include='store/common/node_test.go')
+        apply_source_patch(source, patch, exclude='cluster/calcium/lock_test.go', check=True)
+        apply_source_patch(source, patch, exclude='cluster/calcium/lock_test.go')
         for name, argv in [
             ('regression', [go, 'test', './cluster/calcium', '-run', TESTS, '-count=1']),
-            ('calcium', [go, 'test', './cluster/calcium', './store/common', '-count=1']),
+            ('calcium', [go, 'test', './cluster/calcium', './store/common', './store/etcdv3/meta', '-count=1']),
             ('locks', [go, 'test', './lock/...', '-count=1']),
             ('build', [go, 'build', '-buildvcs=false', '-trimpath', '-o', str(root / 'eru-core'), '.']),
         ]:

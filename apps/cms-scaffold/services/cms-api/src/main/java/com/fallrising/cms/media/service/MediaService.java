@@ -2,6 +2,7 @@ package com.fallrising.cms.media.service;
 
 import com.fallrising.cms.content.PublicVisibility;
 import com.fallrising.cms.content.domain.EntryRecord;
+import com.fallrising.cms.content.domain.ContentTypeRecord;
 import com.fallrising.cms.content.domain.FieldRecord;
 import com.fallrising.cms.content.domain.PublicationState;
 import com.fallrising.cms.content.store.ContentStore;
@@ -9,7 +10,9 @@ import com.fallrising.cms.identity.IdentityException;
 import com.fallrising.cms.identity.domain.CmsAction;
 import com.fallrising.cms.identity.domain.Principal;
 import com.fallrising.cms.identity.domain.Surface;
+import com.fallrising.cms.identity.service.AuditLog;
 import com.fallrising.cms.identity.service.AuthorizationService;
+import com.fallrising.cms.platform.TransactionRunner;
 import com.fallrising.cms.media.ImageVariants;
 import com.fallrising.cms.media.MediaException;
 import com.fallrising.cms.media.domain.MediaAsset;
@@ -22,6 +25,9 @@ import org.springframework.stereotype.Service;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 public class MediaService {
@@ -40,13 +47,23 @@ public class MediaService {
     private final MediaObjectStore objects;
     private final ContentStore content;
     private final AuthorizationService authorization;
+    private final TransactionRunner transactions;
+    private final AuditLog audit;
 
-    public MediaService(
-            MediaStore store, MediaObjectStore objects, ContentStore content, AuthorizationService authorization) {
+    /** Compatibility constructor for existing manually assembled test services. */
+    public MediaService(MediaStore store, MediaObjectStore objects, ContentStore content, AuthorizationService authorization) {
+        this(store, objects, content, authorization, TransactionRunner.withoutDatabase(), null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public MediaService(MediaStore store, MediaObjectStore objects, ContentStore content, AuthorizationService authorization,
+            TransactionRunner transactions, AuditLog audit) {
         this.store = store;
         this.objects = objects;
         this.content = content;
         this.authorization = authorization;
+        this.transactions = transactions;
+        this.audit = audit;
     }
 
     public MediaAsset upload(
@@ -151,7 +168,10 @@ public class MediaService {
                 current.createdAt(),
                 now,
                 current.variants());
-        store.update(deleted);
+        transactions.run(() -> {
+            store.update(deleted);
+            if (audit != null) audit.record(principal, surface, "MEDIA", "media.delete", "media", id, AuditLog.OK, null);
+        });
         return deleted;
     }
 
@@ -160,24 +180,7 @@ public class MediaService {
     }
 
     public boolean publiclyReadable(UUID mediaId) {
-        MediaAsset asset = store.find(mediaId).orElse(null);
-        if (asset == null || !asset.available()) {
-            return false;
-        }
-        for (MediaAttachment attachment : store.attachmentsOfMedia(mediaId)) {
-            Optional<EntryRecord> entry = content.findEntry(attachment.entryId());
-            if (entry.isEmpty() || entry.get().deleted() || entry.get().publicationState() != PublicationState.PUBLISHED) {
-                continue;
-            }
-            boolean allowedField = content.fieldsOf(entry.get().contentTypeId()).stream()
-                    .anyMatch(f -> f.fieldKey().equals(attachment.fieldKey()) && f.publicBytes() && f.enabled());
-            if (allowedField
-                    && PublicVisibility.gettable(entry.get().publishedPayload())
-                    && publishedRefsOk(entry.get())) {
-                return true;
-            }
-        }
-        return false;
+        return readableAssets(List.of(mediaId)).containsKey(mediaId);
     }
 
     public byte[] privateBytes(Principal principal, Surface surface, UUID id, String variant) {
@@ -235,38 +238,109 @@ public class MediaService {
                 "maxFileBytes", quota.maxFileBytes());
     }
 
-    private boolean publishedRefsOk(EntryRecord entry) {
-        var type = content.findTypeByKey(entry.contentTypeKey()).orElse(null);
-        if (type == null || type.publicRequiresPublishedRefs().isEmpty()) {
-            return true;
+    public Optional<Map<String, Object>> resolvePublic(Object rawMediaRef) {
+        UUID id = parseMediaId(rawMediaRef);
+        return id == null ? Optional.empty() : Optional.ofNullable(resolvePublicAll(List.of(id)).get(id));
+    }
+
+    /** Public JSON for all readable media on a page; unavailable or private values are absent. */
+    public Map<UUID, Map<String, Object>> resolvePublicAll(Collection<?> rawMediaRefs) {
+        Set<UUID> ids = new LinkedHashSet<>();
+        for (Object raw : rawMediaRefs) {
+            UUID id = parseMediaId(raw);
+            if (id != null) ids.add(id);
         }
-        Map<String, Object> payload = entry.publishedPayload() == null ? entry.payload() : entry.publishedPayload();
-        for (String refField : type.publicRequiresPublishedRefs()) {
-            Object raw = payload == null ? null : payload.get(refField);
-            if (raw == null) {
-                continue;
+        Map<UUID, Map<String, Object>> resolved = new LinkedHashMap<>();
+        readableAssets(ids).forEach((id, asset) -> resolved.put(id, json(asset, true)));
+        return resolved;
+    }
+
+    /** Resolve once for a page, then expand each value without more store reads. */
+    public Function<Object, Object> publicExpander(Collection<?> rawMediaRefs) {
+        Map<UUID, Map<String, Object>> resolved = resolvePublicAll(rawMediaRefs);
+        return raw -> {
+            UUID id = parseMediaId(raw);
+            return id == null ? null : resolved.get(id);
+        };
+    }
+
+    private Map<UUID, MediaAsset> readableAssets(Collection<UUID> ids) {
+        if (ids.isEmpty()) return Map.of();
+        List<MediaAsset> assets = store.findAll(ids).stream().filter(MediaAsset::available).toList();
+        if (assets.isEmpty()) return Map.of();
+        List<MediaAttachment> attachments = store.attachmentsOfMedia(assets.stream().map(MediaAsset::id).toList());
+        Map<UUID, EntryRecord> entries = content.findEntries(attachments.stream().map(MediaAttachment::entryId).toList());
+        Lookup lookup = new Lookup();
+        Set<UUID> targetIds = new LinkedHashSet<>();
+        for (EntryRecord entry : entries.values()) {
+            if (!published(entry) || entry.publishedPayload() == null) continue;
+            ContentTypeRecord type = lookup.type(entry.contentTypeKey());
+            if (type == null || !type.enabled()) continue;
+            for (String field : type.publicRequiresPublishedRefs()) {
+                UUID target = uuidOrNull(entry.publishedPayload().get(field));
+                if (target != null) targetIds.add(target);
             }
-            try {
-                EntryRecord target = content.findEntry(UUID.fromString(raw.toString())).orElse(null);
-                if (target == null
-                        || target.deleted()
-                        || target.publicationState() != PublicationState.PUBLISHED
-                        || !PublicVisibility.gettable(target.publishedPayload())) {
-                    return false;
+        }
+        Map<UUID, EntryRecord> targets = content.findEntries(targetIds);
+        Map<UUID, MediaAsset> readable = new LinkedHashMap<>();
+        for (MediaAsset asset : assets) {
+            for (MediaAttachment attachment : attachments) {
+                if (!attachment.mediaId().equals(asset.id())) continue;
+                EntryRecord entry = entries.get(attachment.entryId());
+                if (entry == null || !published(entry) || entry.publishedPayload() == null) continue;
+                ContentTypeRecord type = lookup.type(entry.contentTypeKey());
+                if (type == null || !type.enabled()
+                        || !asset.id().equals(parseMediaId(entry.publishedPayload().get(attachment.fieldKey())))) continue;
+                boolean allowedField = lookup.fields(entry.contentTypeId()).stream()
+                        .anyMatch(field -> field.fieldKey().equals(attachment.fieldKey()) && "media-ref".equals(field.fieldType())
+                                && field.publicBytes() && field.enabled());
+                if (allowedField && PublicVisibility.gettable(type, entry.publishedPayload())
+                        && publishedRefsOk(entry, type, lookup, targets)) {
+                    readable.put(asset.id(), asset);
+                    break;
                 }
-            } catch (IllegalArgumentException e) {
-                return false;
             }
+        }
+        return readable;
+    }
+
+    private boolean publishedRefsOk(EntryRecord entry, ContentTypeRecord type, Lookup lookup, Map<UUID, EntryRecord> targets) {
+        for (String field : type.publicRequiresPublishedRefs()) {
+            Object raw = entry.publishedPayload().get(field);
+            if (raw == null) continue;
+            UUID id = uuidOrNull(raw);
+            EntryRecord target = id == null ? null : targets.get(id);
+            if (target == null || !published(target)
+                    || !PublicVisibility.gettable(lookup.type(target.contentTypeKey()), target.publishedPayload())) return false;
         }
         return true;
     }
 
-    public Optional<Map<String, Object>> resolvePublic(Object rawMediaRef) {
-        UUID id = parseMediaId(rawMediaRef);
-        if (id == null || !publiclyReadable(id)) {
-            return Optional.empty();
+    private static boolean published(EntryRecord entry) {
+        return !entry.deleted() && entry.publicationState() == PublicationState.PUBLISHED;
+    }
+
+    private static UUID uuidOrNull(Object raw) {
+        if (raw == null) return null;
+        try {
+            return UUID.fromString(raw.toString());
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return Optional.of(json(get(id), true));
+    }
+
+    /** Cache both present and missing types, and fields, for one resolution. */
+    private final class Lookup {
+        private final Map<String, Optional<ContentTypeRecord>> types = new HashMap<>();
+        private final Map<UUID, List<FieldRecord>> fields = new HashMap<>();
+
+        ContentTypeRecord type(String key) {
+            return types.computeIfAbsent(key, content::findTypeByKey).orElse(null);
+        }
+
+        List<FieldRecord> fields(UUID id) {
+            return fields.computeIfAbsent(id, content::fieldsOf);
+        }
     }
 
     public static UUID parseMediaId(Object raw) {

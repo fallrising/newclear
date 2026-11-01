@@ -160,3 +160,8 @@ W2 actual closeout reconciled 2026-09-23: PR36 ACCEPTED/MERGED at 2026-09-23T10:
 W3 run DG-W3-20260923-01 從實際 W2 merge 建立隔離工作樹 `newclear-dim-gate-w3`／branch `agent/dim-gate/mainline/w3-service-delivery`；T037–040 與 [W3 contract](W3-INTEGRATION-CONTRACT.md) 固定全範圍、API、權限、遷移、owner 與驗收。現在僅固定合約，尚未宣稱 W3 功能已實作或驗收。W4／W5 尚未開始；舊段落保留歷史觀察。
 
 W2 postmerge reconciliation: actual merge91626851fb17df7ab31c96dee9353b9ee4d42c92 [CI35849832030](https://github.com/fallrising/newclear/actions/runs/35849832030) is now SUCCESS, as is mirror35849832043. W2 stays ACCEPTED/MERGED, terminalDONE/ownerNONE. Prior running observations remain historical.
+
+
+## FE Round2 checkpoint — 2026-10-24 / PR583
+
+Variant fe-round2，T-0380 FE2-2：原批准 DESIGN M1–M3 的 review-only persona/theme/navigation 工具已實作；native非E2E門檻通過，隔離static42及persona216唯一頁擷取完成；既有100-case E2E通過；單頁null-theme補證完成，等待獨立複審／交付。來源5275f401加本次工作差異；不改既有產品主線驗收，不宣稱Round3完成。詳見 [本輪報告](../fe-review/tasks/round2/report.md)；root持有PLAN／PR／獨立審查與交付決策。

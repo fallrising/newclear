@@ -1,0 +1,105 @@
+{
+  "recorded": "2026-10-21T15:42:00.008712+00:00",
+  "tested_checkout": "d62cf11d722f229c3a048e4021282aa5783b976e",
+  "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+  "components": {
+    "platform/dim-gate": {
+      "current_vs_baseline_diff": "",
+      "baseline_tree": "527a72abcae93a40d81af72e38311ba34d3c79be",
+      "historical_ref": "616d67e",
+      "historical_commit_available": true,
+      "historical_diff": "M\t.github/workflows/dim-gate-ci.yml\nM\tplatform/dim-gate/README.md\nM\tplatform/dim-gate/docs/HANDOFF-M5.md\nM\tplatform/dim-gate/docs/HANDOFF-WORKSPACES.md\nM\tplatform/dim-gate/docs/STATUS.md\nA\tplatform/dim-gate/docs/evidence-pointer.json\nA\tplatform/dim-gate/docs/quickstart.md\nM\tplatform/dim-gate/docs/sdd/14-workspace-delivery.md\nA\tplatform/dim-gate/fe-review/.gitignore\nA\tplatform/dim-gate/fe-review/DESIGN.md\nA\tplatform/dim-gate/fe-review/PROMPT.md\nA\tplatform/dim-gate/fe-review/README.md\nA\tplatform/dim-gate/fe-review/REVIEW.md\nA\tplatform/dim-gate/fe-review/runs/.gitkeep\nA\tplatform/dim-gate/fe-review/targets.json\nM\tplatform/dim-gate/scripts/check-ci.mjs\nM\tplatform/dim-gate/scripts/check-docs.mjs\nA\tplatform/dim-gate/scripts/evidence-pointer.mjs\n",
+      "tested_tree": "527a72abcae93a40d81af72e38311ba34d3c79be",
+      "current_diff_command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "b97319d74f8442b5173ef42be72a0aa757d87df0",
+        "d62cf11d722f229c3a048e4021282aa5783b976e",
+        "--",
+        "platform/dim-gate"
+      ],
+      "historical_commit": "616d67ec62df763dab9d08d539852767d0fb8c0e"
+    },
+    "systems/clarkq": {
+      "current_vs_baseline_diff": "",
+      "baseline_tree": "0f46f6833a8e78884cce5b996260f253876cd6cf",
+      "historical_ref": null,
+      "tested_tree": "0f46f6833a8e78884cce5b996260f253876cd6cf",
+      "current_diff_command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "b97319d74f8442b5173ef42be72a0aa757d87df0",
+        "d62cf11d722f229c3a048e4021282aa5783b976e",
+        "--",
+        "systems/clarkq"
+      ]
+    },
+    "systems/mkfk": {
+      "current_vs_baseline_diff": "",
+      "baseline_tree": "2be2685d67b3d87f00121744a48e46bf8bbd98bd",
+      "historical_ref": "12aa275",
+      "historical_commit_available": true,
+      "historical_diff": "M\tsystems/mkfk/AGENTS.md\nM\tsystems/mkfk/Makefile\nM\tsystems/mkfk/cmd/mkfk/broker_test.go\nM\tsystems/mkfk/cmd/mkfk/main.go\nM\tsystems/mkfk/cmd/mkfk/op03_test.go\nM\tsystems/mkfk/cmd/mkfk/process_test.go\nM\tsystems/mkfk/cmd/mkfkbench/launcher.go\nM\tsystems/mkfk/cmd/mkfkbench/main.go\nA\tsystems/mkfk/cmd/mkfkbench/silent.go\nA\tsystems/mkfk/cmd/mkfkbench/silent_test.go\nA\tsystems/mkfk/deploy/compose.silent-follower.yaml\nA\tsystems/mkfk/deploy/silent-follower-cluster.json\nM\tsystems/mkfk/docs/STATUS.md\nA\tsystems/mkfk/docs/adr/013-fsync-on-the-partition-actor.md\nA\tsystems/mkfk/docs/adr/014-raft-pre-vote-not-implemented.md\nM\tsystems/mkfk/docs/architecture.md\nA\tsystems/mkfk/docs/benchmarks/adr-013-index-rewrite-results.json\nA\tsystems/mkfk/docs/benchmarks/adr-013-index-rewrite.md\nA\tsystems/mkfk/docs/benchmarks/adr-013-real-host-overlay-results.json\nA\tsystems/mkfk/docs/benchmarks/adr-013-real-host-results.json\nA\tsystems/mkfk/docs/benchmarks/adr-013-real-host.md\nA\tsystems/mkfk/docs/benchmarks/m7-baseline-results.json\nA\tsystems/mkfk/docs/benchmarks/m7-baseline.md\nA\tsystems/mkfk/docs/benchmarks/m7-environment-b-reruns.json\nA\tsystems/mkfk/docs/benchmarks/m7-environment-b-results.json\nA\tsystems/mkfk/docs/benchmarks/m7-environment-b.md\nA\tsystems/mkfk/docs/benchmarks/silent-follower/README.md\nA\tsystems/mkfk/docs/benchmarks/silent-follower/broker-1.log\nA\tsystems/mkfk/docs/benchmarks/silent-follower/broker-2.log\nA\tsystems/mkfk/docs/benchmarks/silent-follower/broker-3.log\nA\tsystems/mkfk/docs/benchmarks/silent-follower/results.json\nA\tsystems/mkfk/docs/evidence/m7-12aa275-integrated.json\nM\tsystems/mkfk/docs/sdd/01-storage.md\nM\tsystems/mkfk/docs/sdd/02-replication.md\nM\tsystems/mkfk/docs/sdd/06-decisions-sources.md\nA\tsystems/mkfk/docs/tasks/BOARD.md\nM\tsystems/mkfk/docs/traceability.md\nM\tsystems/mkfk/internal/adapters/sync_stats.go\nA\tsystems/mkfk/internal/adapters/sync_stats_test.go\nM\tsystems/mkfk/internal/broker/admin.go\nM\tsystems/mkfk/internal/broker/broker.go\nA\tsystems/mkfk/internal/group/assign_test.go\nM\tsystems/mkfk/internal/group/service.go\nM\tsystems/mkfk/internal/partition/actor.go\nA\tsystems/mkfk/internal/partition/actor_stall_test.go\nM\tsystems/mkfk/internal/partition/data.go\nM\tsystems/mkfk/internal/partition/data_test.go\nM\tsystems/mkfk/internal/partition/metrics.go\nM\tsystems/mkfk/internal/producer/cluster_test.go\nM\tsystems/mkfk/internal/producer/partition.go\nM\tsystems/mkfk/internal/raft/liveness_test.go\nM\tsystems/mkfk/internal/raft/node.go\nM\tsystems/mkfk/internal/raft/types.go\nA\tsystems/mkfk/internal/storage/index_rewrite_test.go\nM\tsystems/mkfk/internal/storage/partition.go\nA\tsystems/mkfk/scripts/silent-follower.sh\n",
+      "tested_tree": "2be2685d67b3d87f00121744a48e46bf8bbd98bd",
+      "current_diff_command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "b97319d74f8442b5173ef42be72a0aa757d87df0",
+        "d62cf11d722f229c3a048e4021282aa5783b976e",
+        "--",
+        "systems/mkfk"
+      ],
+      "historical_commit": "12aa27504d5d759ffbb9eb28468ac491c8a051da"
+    },
+    "systems/ojbquay": {
+      "current_vs_baseline_diff": "",
+      "baseline_tree": "698b5a9f60b04c8b65f9e31c2f6c8968b8369eb3",
+      "historical_ref": "cd80c5c8b9b0cd86b4a8d4f190917648446b16b6",
+      "historical_commit_available": false,
+      "tested_tree": "698b5a9f60b04c8b65f9e31c2f6c8968b8369eb3",
+      "current_diff_command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "b97319d74f8442b5173ef42be72a0aa757d87df0",
+        "d62cf11d722f229c3a048e4021282aa5783b976e",
+        "--",
+        "systems/ojbquay"
+      ]
+    },
+    "systems/wotar": {
+      "current_vs_baseline_diff": "",
+      "baseline_tree": "a31132653ba29f4908bf23473072d32aaf850be9",
+      "historical_ref": null,
+      "tested_tree": "a31132653ba29f4908bf23473072d32aaf850be9",
+      "current_diff_command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "b97319d74f8442b5173ef42be72a0aa757d87df0",
+        "d62cf11d722f229c3a048e4021282aa5783b976e",
+        "--",
+        "systems/wotar"
+      ]
+    },
+    "labs/pg-jev-router": {
+      "current_vs_baseline_diff": "",
+      "baseline_tree": "f8fcc9a114d772b9cf5aa4e743e20cdb9f21b9f3",
+      "historical_ref": "0b1e44ac2e37577259be63b50332abcd1697cc97",
+      "historical_commit_available": false,
+      "tested_tree": "f8fcc9a114d772b9cf5aa4e743e20cdb9f21b9f3",
+      "current_diff_command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "b97319d74f8442b5173ef42be72a0aa757d87df0",
+        "d62cf11d722f229c3a048e4021282aa5783b976e",
+        "--",
+        "labs/pg-jev-router"
+      ]
+    }
+  }
+}

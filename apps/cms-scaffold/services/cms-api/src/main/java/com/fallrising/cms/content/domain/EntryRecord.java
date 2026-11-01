@@ -20,7 +20,22 @@ public record EntryRecord(
         UUID createdBy,
         UUID updatedBy,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        Instant publishRequestedAt,
+        UUID publishRequestedBy) {
+
+    /** Compatibility for entries created before publish requests were added. */
+    public EntryRecord(UUID id, UUID contentTypeId, String contentTypeKey, String slug, PublicationState publicationState,
+            int version, Map<String, Object> payload, Map<String, Object> publishedPayload, Instant publishedAt,
+            Instant archivedAt, Instant deletedAt, UUID createdBy, UUID updatedBy, Instant createdAt, Instant updatedAt) {
+        this(id, contentTypeId, contentTypeKey, slug, publicationState, version, payload, publishedPayload, publishedAt,
+                archivedAt, deletedAt, createdBy, updatedBy, createdAt, updatedAt, null, null);
+    }
+
+    public EntryRecord withPublishRequest(Instant at, UUID by) {
+        return new EntryRecord(id, contentTypeId, contentTypeKey, slug, publicationState, version, payload, publishedPayload,
+                publishedAt, archivedAt, deletedAt, createdBy, updatedBy, createdAt, updatedAt, at, by);
+    }
 
     public boolean deleted() {
         return deletedAt != null;

@@ -1,0 +1,31 @@
+[
+  {
+    "argv": [
+      "make",
+      "demo",
+      "COMPOSE_PROJECT=qualification-mkfk-20261021",
+      "DOCKER=<qualification-evidence>/mkfk-docker"
+    ],
+    "cwd": "<worker-worktree>/systems/mkfk",
+    "start": "2026-10-21T15:49:49.392787+00:00",
+    "duration_seconds": 22.144,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-core-demo.log"
+  },
+  {
+    "argv": [
+      "make",
+      "demo-down",
+      "DELETE_DATA=1",
+      "COMPOSE_PROJECT=qualification-mkfk-20261021",
+      "DOCKER=<qualification-evidence>/mkfk-docker"
+    ],
+    "cwd": "<worker-worktree>/systems/mkfk",
+    "start": "2026-10-21T15:50:11.536535+00:00",
+    "duration_seconds": 0.576,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "mkfk-core-cleanup.log"
+  }
+]

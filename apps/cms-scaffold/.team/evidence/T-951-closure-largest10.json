@@ -1,0 +1,244 @@
+[
+  {
+    "app": "front",
+    "total": 177721,
+    "limit": 92160,
+    "delta": 85561,
+    "closure": [
+      {
+        "key": "index.html",
+        "file": "assets/index-CGGGCTox.js",
+        "name": "index",
+        "src": "index.html",
+        "isEntry": true,
+        "dynamicImports": [
+          "src/mobile-nav.tsx",
+          "src/pages/selector.tsx",
+          "src/pages/login.tsx",
+          "src/pages/logout.tsx",
+          "src/root-route.tsx",
+          "src/home.tsx",
+          "src/pages/album.tsx",
+          "src/pages/album.tsx",
+          "src/pages/album.tsx",
+          "src/root-route.tsx",
+          "src/home.tsx",
+          "src/pages/clinic.tsx",
+          "src/pages/clinic.tsx",
+          "src/member-route.tsx",
+          "src/root-route.tsx",
+          "src/home.tsx",
+          "src/pages/projects.tsx",
+          "src/pages/projects.tsx",
+          "src/pages/projects.tsx"
+        ],
+        "css": [
+          "assets/index-DbqXEShB.css"
+        ]
+      }
+    ],
+    "largest10": [
+      {
+        "file": "assets/index-CGGGCTox.js",
+        "gzipBytes": 177721
+      },
+      {
+        "file": "assets/markdown-D9eW30M2.js",
+        "gzipBytes": 38540
+      },
+      {
+        "file": "assets/album-DVAe7Zly.js",
+        "gzipBytes": 3070
+      },
+      {
+        "file": "assets/login-BoM7U9tr.js",
+        "gzipBytes": 1856
+      },
+      {
+        "file": "assets/home-HsZCFE9q.js",
+        "gzipBytes": 1698
+      },
+      {
+        "file": "assets/x-B_7Bu-JH.js",
+        "gzipBytes": 1656
+      },
+      {
+        "file": "assets/projects-XKWK6xKw.js",
+        "gzipBytes": 1116
+      },
+      {
+        "file": "assets/mobile-nav-BJJqO4SI.js",
+        "gzipBytes": 1012
+      },
+      {
+        "file": "assets/selector-BFY9QqX9.js",
+        "gzipBytes": 734
+      },
+      {
+        "file": "assets/clinic-BhNT67H3.js",
+        "gzipBytes": 692
+      }
+    ]
+  },
+  {
+    "app": "back",
+    "total": 179622,
+    "limit": 163840,
+    "delta": 15782,
+    "closure": [
+      {
+        "key": "index.html",
+        "file": "assets/index-CcrmPZPD.js",
+        "name": "index",
+        "src": "index.html",
+        "isEntry": true,
+        "dynamicImports": [
+          "src/pages/sign-in.tsx",
+          "src/pages/home.tsx",
+          "src/pages/entry-layout.tsx",
+          "src/pages/resource-index.tsx",
+          "src/pages/resource-details.tsx",
+          "src/pages/resource-details.tsx",
+          "src/pages/preview.tsx",
+          "src/pages/history.tsx",
+          "src/pages/media.tsx",
+          "src/pages/media.tsx",
+          "src/pages/composer.tsx",
+          "src/pages/schedule.tsx",
+          "src/pages/board.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/deferred-toaster.tsx"
+        ],
+        "css": [
+          "assets/index-H2I13Hs6.css"
+        ]
+      }
+    ],
+    "largest10": [
+      {
+        "file": "assets/index-CcrmPZPD.js",
+        "gzipBytes": 179622
+      },
+      {
+        "file": "assets/resource-details-Hwn5GDhU.js",
+        "gzipBytes": 41827
+      },
+      {
+        "file": "assets/index-CuVOjio_.js",
+        "gzipBytes": 36911
+      },
+      {
+        "file": "assets/entry-form-Bq1mzZMq.js",
+        "gzipBytes": 25782
+      },
+      {
+        "file": "assets/core.esm-_YHhMK5x.js",
+        "gzipBytes": 14120
+      },
+      {
+        "file": "assets/select-DvMmGZ7U.js",
+        "gzipBytes": 7931
+      },
+      {
+        "file": "assets/pickers-CsZvl5YB.js",
+        "gzipBytes": 5896
+      },
+      {
+        "file": "assets/composer-p0ekmvLR.js",
+        "gzipBytes": 5011
+      },
+      {
+        "file": "assets/resource-index-BCHczoTp.js",
+        "gzipBytes": 3509
+      },
+      {
+        "file": "assets/board-BTMoDi9s.js",
+        "gzipBytes": 2950
+      }
+    ]
+  },
+  {
+    "app": "admin",
+    "total": 180275,
+    "limit": 163840,
+    "delta": 16435,
+    "closure": [
+      {
+        "key": "index.html",
+        "file": "assets/index-DAbxD87n.js",
+        "name": "index",
+        "src": "index.html",
+        "isEntry": true,
+        "dynamicImports": [
+          "src/pages/login.tsx",
+          "_overview-CTWo03e6.js",
+          "src/pages/types.tsx",
+          "src/pages/types.tsx",
+          "src/pages/roles.tsx",
+          "src/pages/principals.tsx",
+          "src/pages/roles.tsx",
+          "src/pages/principals.tsx",
+          "src/pages/principals.tsx",
+          "src/pages/audit.tsx",
+          "src/pages/audit.tsx",
+          "src/pages/media.tsx",
+          "src/pages/settings.tsx",
+          "src/pages/settings.tsx",
+          "src/pages/entries.tsx",
+          "src/pages/entries.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/pages/status.tsx",
+          "src/deferred-toaster.tsx"
+        ],
+        "css": [
+          "assets/index-Dlgc9iXQ.css"
+        ]
+      }
+    ],
+    "largest10": [
+      {
+        "file": "assets/index-DAbxD87n.js",
+        "gzipBytes": 180275
+      },
+      {
+        "file": "assets/index-pagination-BDht4bLq.js",
+        "gzipBytes": 8279
+      },
+      {
+        "file": "assets/entries-BiufcpVk.js",
+        "gzipBytes": 4773
+      },
+      {
+        "file": "assets/principals-nR4uYufX.js",
+        "gzipBytes": 4618
+      },
+      {
+        "file": "assets/audit-DKa_TIlh.js",
+        "gzipBytes": 2935
+      },
+      {
+        "file": "assets/radio-group-fazamr_v.js",
+        "gzipBytes": 2540
+      },
+      {
+        "file": "assets/types-l_rVrD8r.js",
+        "gzipBytes": 2398
+      },
+      {
+        "file": "assets/overview-CTWo03e6.js",
+        "gzipBytes": 2336
+      },
+      {
+        "file": "assets/roles-CT-4xvZY.js",
+        "gzipBytes": 2336
+      },
+      {
+        "file": "assets/alert-dialog-Ds8Qavza.js",
+        "gzipBytes": 2217
+      }
+    ]
+  }
+]

@@ -24,6 +24,7 @@ import warnings
 from typing import Any, Callable, Mapping, Sequence
 
 from .document_batch import CODE_MAXIMA, CONFIG_SCHEMA, SourceDescriptor
+from .text_assignment_safety import contains_sensitive_assignment
 
 
 class ProductionExtractionError(ValueError):
@@ -32,7 +33,7 @@ class ProductionExtractionError(ValueError):
 
 EXTRACTOR_VERSION = "production-raster-ocr-v1"
 METHOD = "ocr-tesseract-tsv"
-PDF_EXTRACTOR_VERSION = "production-pdf-v2"
+PDF_EXTRACTOR_VERSION = "production-pdf-v3"
 PDF_TEXT_METHOD = "pdf-text"
 PDF_OCR_METHOD = "ocr"
 MIN_USEFUL_PDF_TEXT_BYTES = 20
@@ -54,7 +55,7 @@ def _safe_text(value: Any, *, limit: int = _MAX_WORD_TEXT) -> str:
     if not isinstance(value, str):
         raise ProductionExtractionError("unsafe OCR text")
     normalized = unicodedata.normalize("NFKC", " ".join(value.split()))
-    if not normalized or len(normalized) > limit or _SECRET.search(normalized):
+    if not normalized or len(normalized) > limit or contains_sensitive_assignment(normalized):
         raise ProductionExtractionError("unsafe OCR text")
     for char in normalized:
         code = ord(char)
@@ -1054,7 +1055,7 @@ def extract_pdf(source: bytes, descriptor: SourceDescriptor, *, config: Mapping[
             for page in range(1, page_count + 1):
                 page_arg = str(page)
                 native = _native_pdf_text(_run_pdf_tool(
-                    [str(text_tool), "-enc", "UTF-8", "-eol", "unix", "-nopgbrk",
+                    [str(text_tool), "-enc", "UTF-8", "-eol", "unix", "-nopgbrk", "-layout",
                      "-f", page_arg, "-l", page_arg, str(pdf_path), "-"],
                     timeout_seconds=limits["timeout_seconds"], maximum=limits["max_ocr_output_bytes"],
                     runner=runner, process_factory=process_factory, kill_group=kill_group,

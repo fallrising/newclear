@@ -385,7 +385,8 @@ class WorkerDrainExecutor:
                 'appname': replacement['appname'],
                 'logical_app': move['logical_app'],
                 'spec_sha256': replacement['spec_sha256'],
-                'spec': {'node': replacement['node'], 'replicas': move['source']['replicas']},
+                'spec': {'node': replacement['node'], 'replicas': move['source']['replicas'],
+                         'entrypoint': document['entrypoint']},
             }
             rows = self.api.list_revision(replacement['appname'])
             valid, reason, ids = _safe_revision_rows(rows, stub)
@@ -497,11 +498,12 @@ class WorkerDrainExecutor:
                     raise UncertainExecution('replacement executor did not confirm readiness')
                 move['replacement_state'] = 'ready'
                 move['replacement_workload_ids'] = child['observed_workload_ids']
-                journal['staged_revisions'] = sorted(journal['staged_revisions'] + [
-                    {'id': workload_id, 'nodename': move['replacement']['node'],
-                     'labels': {'owner': OWNER, 'logical_app': move['logical_app'],
-                                'spec_sha256': move['replacement']['spec_sha256']}}
-                    for workload_id in child['observed_workload_ids']],
+                rows = self.api.list_revision(app_plan['appname'])
+                valid, _, identifiers = _safe_revision_rows(rows, app_plan)
+                if not valid or identifiers != sorted(child['observed_workload_ids']):
+                    raise UncertainExecution('replacement identity changed after readiness')
+                journal['staged_revisions'] = sorted(
+                    journal['staged_revisions'] + _identity_rows({'workloads': rows}),
                     key=lambda row: row['id'])
                 self._save(path, journal)
                 expected = self._expected_workloads(journal)
@@ -661,11 +663,25 @@ class WorkerDrainExecutor:
             }
             app_observation = {'logical_app': move['logical_app']}
             try:
+                child_path = AppExecutor(self.app_root, self.api).run_path(move['app_run_id'])
+                if child_path.is_symlink() or not child_path.is_file():
+                    raise ValueError('replacement child journal is unavailable')
+                child = json.loads(child_path.read_text())
+                document, spec_hash, appname = spec_identity(child['spec'])
+                if (child.get('id') != move['app_run_id']
+                        or child.get('operation') != 'app-reconcile'
+                        or spec_hash != replacement['spec_sha256']
+                        or appname != replacement['appname']
+                        or document['node'] != replacement['node']
+                        or document['replicas'] != move['source']['replicas']):
+                    raise ValueError('replacement child spec differs from the reviewed move')
+                stub['spec']['entrypoint'] = document['entrypoint']
                 rows = self.api.list_revision(replacement['appname'])
                 valid, reason, identifiers = _safe_revision_rows(rows, stub)
                 app_observation['replacement'] = {
                     'state': 'exact_revision_present' if valid else 'incomplete_or_mismatched',
                     'reason': reason, 'workload_ids': identifiers,
+                    'workload_bindings': _identity_rows({'workloads': rows}) if valid else [],
                     'readiness_reprobed': False,
                 }
                 if (not valid or identifiers != sorted(
@@ -856,16 +872,24 @@ class WorkerDrainExecutor:
                     or seen_replacement_ids.intersection(replacement_ids)):
                 raise ValueError('recovery replacement identity is uncertain')
             seen_replacement_ids.update(replacement_ids)
-            for workload_id in replacement_ids:
-                row = {
-                    'id': workload_id, 'nodename': replacement['node'],
-                    'labels': {'owner': OWNER, 'logical_app': logical,
-                               'spec_sha256': replacement['spec_sha256']},
-                }
+            bindings = replacement_observation.get('workload_bindings')
+            if (not isinstance(bindings, list) or len(bindings) != len(replacement_ids)
+                    or sorted(row.get('id') for row in bindings if isinstance(row, dict))
+                       != sorted(replacement_ids)):
+                raise ValueError('recovery lacks exact observed replacement bindings')
+            for row in bindings:
+                if (not isinstance(row, dict)
+                        or set(row) not in ({'id', 'nodename', 'labels'},
+                                            {'id', 'name', 'nodename', 'labels'})
+                        or row['nodename'] != replacement['node']
+                        or row['labels'] != {'owner': OWNER, 'logical_app': logical,
+                                             'spec_sha256': replacement['spec_sha256']}):
+                    raise ValueError('observed replacement binding differs from reviewed move')
+                workload_id = row['id']
                 existing = expected.get(workload_id)
                 if existing is not None and existing != row:
                     raise ValueError('replacement ID conflicts with baseline workload')
-                expected[workload_id] = row
+                expected[workload_id] = copy.deepcopy(row)
         return sorted(expected.values(), key=lambda item: item['id'])
 
     @staticmethod

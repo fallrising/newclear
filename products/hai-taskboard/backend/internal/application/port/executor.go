@@ -7,10 +7,12 @@ type ExecutorDeclaration struct {
 	AdapterID      string
 	AdapterVersion string
 	Capabilities   []string
+	Scenarios      []string
 }
 
 func (declaration ExecutorDeclaration) Clone() ExecutorDeclaration {
 	declaration.Capabilities = slices.Clone(declaration.Capabilities)
+	declaration.Scenarios = slices.Clone(declaration.Scenarios)
 	return declaration
 }
 

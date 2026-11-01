@@ -20,6 +20,7 @@ import (
 func (n *Normalizer) NormalizeMetrics(ctx context.Context, metrics pmetric.Metrics, receivedAt time.Time) (MetricBatch, Report, error) {
 	report := newReport()
 	batch := MetricBatch{
+		maxOrigins: n.options.MaxRecords, activeOrigin: -1,
 		Points:   make([]utm.MetricPoint, 0, min(metrics.DataPointCount(), n.options.MaxRecords)),
 		Metadata: make([]utm.MetricMetadata, 0),
 	}
@@ -41,6 +42,15 @@ func (n *Normalizer) NormalizeMetrics(ctx context.Context, metrics pmetric.Metri
 	return batch, report, nil
 }
 
+// PreviewMetrics performs the same mapping without changing delta state. Owners
+// must bound all expanded candidates below MaxRecords and use the same receivedAt
+// for preview and commit; otherwise output truncation can hide later candidates.
+func (n *Normalizer) PreviewMetrics(ctx context.Context, metrics pmetric.Metrics, receivedAt time.Time) (MetricBatch, Report, error) {
+	preview := *n
+	preview.previewMetrics = true
+	return preview.NormalizeMetrics(ctx, metrics, receivedAt)
+}
+
 func (n *Normalizer) normalizeMetric(metric pmetric.Metric, resource *utm.Resource, receivedAt time.Time, batch *MetricBatch, report *Report) {
 	baseName := utm.SanitizeMetricName(validUTF8(metric.Name()))
 	if baseName != metric.Name() {
@@ -49,6 +59,9 @@ func (n *Normalizer) normalizeMetric(metric pmetric.Metric, resource *utm.Resour
 	if baseName == "" {
 		report.normalized("drop")
 		report.rejected("empty_metric_name")
+		for range originalMetricCount(metric) {
+			batch.startOriginal()
+		}
 		return
 	}
 	name, scale := normalizeUnit(baseName, metric.Unit(), report)
@@ -98,6 +111,7 @@ func (n *Normalizer) normalizeMetric(metric pmetric.Metric, resource *utm.Resour
 func (n *Normalizer) normalizeNumberPoints(points pmetric.NumberDataPointSlice, name string, scale float64, metricType utm.MetricType, delta bool, resource *utm.Resource, receivedAt time.Time, batch *MetricBatch, report *Report) {
 	for i := range points.Len() {
 		point := points.At(i)
+		batch.startOriginal()
 		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
@@ -107,13 +121,16 @@ func (n *Normalizer) normalizeNumberPoints(points pmetric.NumberDataPointSlice, 
 			value = math.NaN()
 		}
 		pointLabels := n.metricLabels(point.Attributes(), resource, report)
-		if delta && !math.IsNaN(value) {
+		if delta && !n.previewMetrics && !math.IsNaN(value) {
 			var status deltaconv.Status
 			value, status = n.delta.Convert(deltaSeriesKey(name, pointLabels), value)
 			switch status {
 			case deltaconv.Baseline:
 				report.normalized("drop")
 				report.warning("delta_baseline")
+				if batch.activeOrigin >= 0 && batch.activeOrigin < len(batch.Origins) {
+					batch.Origins[batch.activeOrigin].Rejected = false
+				}
 				continue
 			case deltaconv.Capacity:
 				report.normalized("drop")
@@ -138,11 +155,15 @@ func (n *Normalizer) normalizeHistogramPoints(histogram pmetric.Histogram, name 
 	if histogram.AggregationTemporality() == pmetric.AggregationTemporalityDelta {
 		report.normalized("drop")
 		report.rejected("delta_histogram_unsupported")
+		for range histogram.DataPoints().Len() {
+			batch.startOriginal()
+		}
 		return
 	}
 	points := histogram.DataPoints()
 	for i := range points.Len() {
 		point := points.At(i)
+		batch.startOriginal()
 		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
@@ -188,11 +209,15 @@ func (n *Normalizer) normalizeExponentialHistogramPoints(histogram pmetric.Expon
 	if histogram.AggregationTemporality() == pmetric.AggregationTemporalityDelta {
 		report.normalized("drop")
 		report.rejected("delta_histogram_unsupported")
+		for range histogram.DataPoints().Len() {
+			batch.startOriginal()
+		}
 		return
 	}
 	points := histogram.DataPoints()
 	for i := range points.Len() {
 		point := points.At(i)
+		batch.startOriginal()
 		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
@@ -230,6 +255,7 @@ func (n *Normalizer) normalizeExponentialHistogramPoints(histogram pmetric.Expon
 func (n *Normalizer) normalizeSummaryPoints(points pmetric.SummaryDataPointSlice, name string, scale float64, resource *utm.Resource, receivedAt time.Time, batch *MetricBatch, report *Report) {
 	for i := range points.Len() {
 		point := points.At(i)
+		batch.startOriginal()
 		timestamp, ok := n.normalizeMetricTimestamp(utm.NanoToMilli(otelTimestampNano(point.Timestamp())), receivedAt, report)
 		if !ok {
 			continue
@@ -259,11 +285,19 @@ func (n *Normalizer) normalizeSummaryPoints(points pmetric.SummaryDataPointSlice
 
 func (n *Normalizer) appendPoint(batch *MetricBatch, point utm.MetricPoint, report *Report) bool {
 	if len(batch.Points) >= n.options.MaxRecords {
+		if batch.activeOrigin >= 0 && batch.activeOrigin < len(batch.Origins) {
+			batch.Origins[batch.activeOrigin].Rejected = true
+		}
 		report.normalized("drop")
 		report.rejected("output_limit")
 		return false
 	}
 	batch.Points = append(batch.Points, point)
+	if batch.activeOrigin >= 0 && batch.activeOrigin < len(batch.Origins) {
+		origin := &batch.Origins[batch.activeOrigin]
+		origin.End = len(batch.Points)
+		origin.Rejected = false
+	}
 	return true
 }
 
@@ -396,5 +430,30 @@ func approximateExponentialHistogram(point pmetric.ExponentialHistogramDataPoint
 		Sum:    point.Sum() * scale,
 		Bounds: bounds,
 		Counts: counts,
+	}
+}
+
+func (b *MetricBatch) startOriginal() {
+	b.activeOrigin = -1
+	if len(b.Origins) >= b.maxOrigins {
+		return
+	}
+	b.activeOrigin = len(b.Origins)
+	b.Origins = append(b.Origins, MetricOrigin{Start: len(b.Points), End: len(b.Points), Rejected: true})
+}
+func originalMetricCount(metric pmetric.Metric) int {
+	switch metric.Type() {
+	case pmetric.MetricTypeGauge:
+		return metric.Gauge().DataPoints().Len()
+	case pmetric.MetricTypeSum:
+		return metric.Sum().DataPoints().Len()
+	case pmetric.MetricTypeHistogram:
+		return metric.Histogram().DataPoints().Len()
+	case pmetric.MetricTypeExponentialHistogram:
+		return metric.ExponentialHistogram().DataPoints().Len()
+	case pmetric.MetricTypeSummary:
+		return metric.Summary().DataPoints().Len()
+	default:
+		return 0
 	}
 }

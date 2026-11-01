@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""Pinned Cursor fixture launcher: one exact model and optional approved prompt."""
+import json
+import os
+import subprocess
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from cursor_cli import installed_cli
+from cursor_task_hook import MODEL, PROMPT
+from remote_cli import LAB
+
+try:
+    out = Path(os.environ['LAB_CURSOR_WORK_OUT']).resolve(strict=True)
+    if not out.is_relative_to(LAB / 'runs') or Path.cwd().resolve() != out / 'workspace': raise ValueError('scope')
+    plan = json.loads((out / 'task-plan.json').read_text())
+    expected = ['--trust', '--model', MODEL] + (['--', PROMPT] if plan['allow_remote'] else [])
+    if sys.argv[1:] != expected: raise ValueError('arguments')
+    if Path(os.environ['HOME']).resolve() != out / 'home' or Path(os.environ['CURSOR_CONFIG_DIR']).resolve() != out / 'home/.cursor': raise ValueError('home')
+    if os.environ.get('AGENT_CLI_CREDENTIAL_STORE') != 'file': raise ValueError('credential_store')
+    binary = installed_cli()
+    checked = subprocess.run(['node', str(LAB / 'scripts/cursor_hook_preflight.mjs'),
+        str(out / 'workspace/.cursor/hooks.json')], capture_output=True, text=True, timeout=10)
+    if checked.returncode or not json.loads(checked.stdout).get('valid'): raise ValueError('native_hook_config_invalid')
+    (out / 'hook-preflight.json').write_text(checked.stdout)
+    (out / 'native-launch.json').write_text(json.dumps({'provider': 'cursor', 'model': MODEL, 'prompt_supplied': plan['allow_remote'], 'pid': os.getpid()}))
+    command = ['/usr/bin/sandbox-exec', '-f', str(out / 'cursor.sb'), str(binary), *expected]
+    os.execve(command[0], command, dict(os.environ))
+except Exception:
+    print('Cursor task launch rejected', file=sys.stderr); sys.exit(1)

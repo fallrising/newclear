@@ -1,0 +1,1043 @@
+{
+  "schema": 1,
+  "id": "final-002",
+  "phase": "remaining-routes-and-journeys",
+  "status": "failed",
+  "startedAt": "2026-10-24T11:33:48.911Z",
+  "controlledMockBeforeSpring": false,
+  "api": [
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "cb8303c4-dc74-4442-aac8-b2c23247aa7d",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "4b5d5f93-fb9f-46c8-9008-984ef9e5bf0f",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "ef329b23-1a3c-4e8c-9e5f-c26e583b5c46",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "c5696e4b-2c9e-4385-bb44-9fe647b713ea",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "d7d8adf2-a1cb-4ff5-a5cc-013215d3df25",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "72614544-219b-467b-afd0-363d79fc9a1f",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "29d94992-a6ca-4394-8c0f-c8154af70ba4",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "774e524b-8ab0-49eb-bae2-df8dbcc03e94",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/accounts",
+      "status": 201,
+      "requestId": "3fd4b99d-28a5-48b1-b1bd-ee982883df9c",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "be663966-0d4a-40cc-aeca-d4952954276e",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "4a52df0f-c53a-4537-b0c6-f81861e3fb6b",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "requestId": "e8be98c2-4e0c-4f6a-8019-cee554304797",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/csrf",
+      "status": 200,
+      "requestId": "f8d1ccc3-b5e7-42bb-a52a-da19a1cde4af",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "status": 200,
+      "requestId": "a84eada2-cb27-44fb-9050-da2304ededb6",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "f76962f8-0e2a-43cf-b278-ee09611cbbc0",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "0d859660-ace7-4a78-b5b6-342a803a9ac2",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "a08f1c89-ffe0-474a-8a5d-cb46e4f4db7d",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "POST",
+      "path": "/api/posts",
+      "status": 201,
+      "requestId": "9eb017c6-467e-48f7-9658-2eb79b9175bd",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/replies",
+      "status": 201,
+      "requestId": "b96327fc-dc2d-4ee6-b9da-2d35d40c7d0b",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/10/like",
+      "status": 200,
+      "requestId": "1576b281-c53a-44ed-90c8-7cf2c5078b38",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "PUT",
+      "path": "/api/posts/11/repost",
+      "status": 200,
+      "requestId": "d86b820a-0f7a-45d1-b4b4-006716e5c6f4",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200,
+      "requestId": "71982540-8531-459d-8a32-c01595e6027a",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "c210d045-f3b6-40f3-a9bf-559d3fe8e0de",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/posts",
+      "status": 200,
+      "requestId": "a454ca67-aee1-4093-8233-5fb4c9ddb19f",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/profiles/r84ed6e023b",
+      "status": 200,
+      "requestId": "8b9dd360-74df-4280-8328-22dd60703a12",
+      "controlled": false
+    },
+    {
+      "actor": "A",
+      "method": "GET",
+      "path": "/api/search",
+      "status": 200,
+      "requestId": "c7c92af3-684e-414d-b4a8-409907252813",
+      "controlled": false
+    },
+    {
+      "actor": "B",
+      "method": "POST",
+      "path": "/api/posts/10/reports",
+      "status": 201,
+      "requestId": "a35f7abc-3db2-453b-b9fb-3aacfe1e4cc7",
+      "controlled": false
+    }
+  ],
+  "steps": [
+    {
+      "name": "real-register-login-csrf",
+      "actor": "A",
+      "handle": "r84ed6e023b",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-register-login-csrf",
+      "actor": "B",
+      "handle": "rcfcd4dc2d0",
+      "registerDoesNotLogin": true,
+      "csrfRotated": true
+    },
+    {
+      "name": "real-api-seed",
+      "posts": {
+        "home": 10,
+        "tech": 11,
+        "ops": 12,
+        "second": 13
+      },
+      "replyId": 1,
+      "channels": [
+        "home",
+        "tech",
+        "ops"
+      ],
+      "image": {
+        "id": 1,
+        "bytes": 79,
+        "sha256": "af9d971dc1f45fc5e79c98c2bbaade8ac05d71c7e41e188d6a065ab4cba558ce"
+      },
+      "notifications": 3,
+      "opaqueCursorPaging": true,
+      "reportId": 1,
+      "controlled": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "shared-capture",
+      "code": 0,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "spring",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    },
+    {
+      "name": "owned-service-exit",
+      "service": "vite",
+      "code": 143,
+      "signal": null,
+      "spawnError": false,
+      "forcedKill": false
+    }
+  ],
+  "mocks": [],
+  "baseline": [],
+  "captures": [
+    {
+      "name": "shared-notifications-mobile",
+      "path": "screenshots/shared-notifications-mobile.png",
+      "sha256": "7fd454340c754a579ed99e375a18be07637724c4e0cd7db2438a5e168455b42a",
+      "bytes": 127000,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-notifications-tablet",
+      "path": "screenshots/shared-notifications-tablet.png",
+      "sha256": "2aea5d8d2f299027a19bdba2290bfaa2d0607e72cddf50184aa2a66153303fcd",
+      "bytes": 130351,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "shared-notifications-desktop",
+      "path": "screenshots/shared-notifications-desktop.png",
+      "sha256": "c918fb12f1a2b7866fb47ce55b69c5bff946c9a19b7b49fc9ada558666788ae1",
+      "bytes": 140004,
+      "controlled": false,
+      "shared": true
+    },
+    {
+      "name": "flow-composer-pending",
+      "path": "screenshots/flow-composer-pending.png",
+      "sha256": "19465f5dba5aa708678049614125d16a55b259dc89eb92825a17178d60d7531d",
+      "bytes": 143385,
+      "controlled": true
+    },
+    {
+      "name": "flow-composer-error",
+      "path": "screenshots/flow-composer-error.png",
+      "sha256": "3b2ad6f2592d9498c70a656484035356d8d997f309433b7ecc96d07cd1741a48",
+      "bytes": 146122,
+      "controlled": true
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/App.tsx": "7b3cf366f10d30c4e7134d2336cfae033ec78e449858f72fd31df204911eb810",
+    "frontend/src/components/Column.tsx": "79098b1540de8c2f9c3445a59e14367c5b2079a67497e24c3107d90be2ed3a41",
+    "frontend/src/components/PostCard.tsx": "10029f5ebad596f5c48f9a3205834f638c1922799f1ee6407948f1216627e49a",
+    "frontend/src/components/ReplyThread.tsx": "f11ed54a9d8ffb5e6695bb15e49de7ce16b353b0c4b0004f2b010d288436c325",
+    "frontend/src/components/Composer.tsx": "116d03dd08e1a6d45d4aebbd4b0697a0b68efb279009789f11fac6421a1f416d",
+    "frontend/src/components/AccountControls.tsx": "c1fced79c1d46da05fdc4c2ad1e072b8b320b755d0d0b316c2c0f67b260af741",
+    "frontend/src/index.css": "7e0aae4dc3e392776ec0a58bbb7947fe9a031fb26efaa50b8e5dc7b2ed142d3f",
+    "frontend/vite.config.ts": "49687e45d1891dee0580e4996c554abe158fa69b2de6e15ff960f9dbe0a28ef4",
+    "backend/target/deck-1.0.0.jar": "5e83881ca2832bfaf7be566c7c087059ebd571cfadce2d8bf1728010e9e302f9",
+    "fe-review/run-review.mjs": "50540b89f78fcd01408296ef3e775819ac49d778f002f1a222604efb59667829",
+    "fe-review/api-fixture.mjs": "d482368dafa8f06df8a8714c519e835222bb1525acfb60e6652ac0e79135e465",
+    "fe-review/guards.mjs": "72f215327fd6b91a066769ee19d194937171c73eee79e020f08c3a87f74b4f7e",
+    "fe-review/mock-baseline.mjs": "4db5dbebae8d994c5732f0fb80158a12e675de59fcf1633cfdbdadf9bae66b4c",
+    "fe-review/baseline.mjs": "2df48b8f662367413b63d0fedea88e5e0a7fde3021d90db29eb87f87bba80024",
+    "fe-review/serve-web.mjs": "495174e0627352294fcc02939f491d6750dcbfa6242c0e1634538f2275945484",
+    "fe-review/routes.mjs": "1fccf1664acfb04e4448f6912d67c666b0a967ba48cbf8f763e92ce5f2617c41",
+    "fe-review/journey.mjs": "9ef25ac8c8e1f136af54cef473991c44c1a255547aec833ca9f3f42d96533354",
+    "fe-review/keyboard.mjs": "3bdf2c54ebcbf982073f57be24c02b960fd835a775d5093ded9f22c23d6968cf",
+    "fe-review/load-more.mjs": "0a16f7b4ca8720b8157e9dc03145b03032d9ae260a4b888b017c1803b7192425",
+    "fe-review/layout-contract.mjs": "ae75f88f3b8c6b4bc29ff143743681476c1ecacfb01c51b1ce42fd5c733c736c",
+    "fe-review/shared-capture.mjs": "6051172007794a9ff4f51256b95d5f6252ad08861ece32ffe3b9ba6fa5def418",
+    "fe-review/capture-selection.mjs": "aa35944feb89362157e69550f89ed8ee4ca6167abbeae9454def0d1b357af218"
+  },
+  "cleanup": [
+    {
+      "name": "api-contexts",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "shared-capture",
+      "passed": true
+    },
+    {
+      "name": "spring",
+      "passed": true
+    },
+    {
+      "name": "vite",
+      "passed": true
+    },
+    {
+      "name": "listeners-absent",
+      "passed": true
+    }
+  ],
+  "stage": "real-keyboard-journey",
+  "exactNotificationStyleDelta": {
+    "appAttribute": "data-view={route.kind}",
+    "cssSelector": "[data-view=\"notifications\"] main .whitespace-pre-wrap",
+    "appBeforeSHA256": "ebefeb43099f0e6ccd1202005f1db4106f4bd7fc07a07249f243c93585cc3117",
+    "cssBeforeSHA256": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b"
+  },
+  "tools": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "mockPrerequisite": {
+    "run": "baseline-005",
+    "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+    "passed": 6,
+    "rerun": false
+  },
+  "homePrerequisites": {
+    "mobile": {
+      "run": "mobile-003",
+      "sha256": "3794ecc1f8331ee93b25740f704db319200e17979e0b547f044ebb9c6087ccad",
+      "viewport": 390
+    },
+    "tabletDesktop": {
+      "run": "baseline-005",
+      "sha256": "355407fba4d8e182d71747b9336f70d6cdb0273d0c2bab01fbea380e231defcb",
+      "viewports": [
+        834,
+        1440
+      ],
+      "laterDelta": "PostCard relative containing block; covered by mobile-003 and new route captures"
+    },
+    "rerun": false
+  },
+  "lastAPI": {
+    "actor": "B",
+    "method": "POST",
+    "path": "/api/posts/10/reports",
+    "status": 201,
+    "expected": 201
+  },
+  "seedBudget": {
+    "registrations": 2,
+    "logins": 2,
+    "posts": 4,
+    "replies": 1,
+    "socialWrites": 2,
+    "reports": 1,
+    "rateLimitDisabled": false
+  },
+  "sharedCapture": {
+    "tool": "docs/fe-review/capture.mjs",
+    "toolSHA256": "d00b6bf71cc68a7a540d0d832b58c9f971905848107d34f970530fe5fe2ba2ee",
+    "rawManifestSHA256": "01d0d1fbb15de7476e4e0e755144936c886b80662171e8ab3d09e9cbd609b452",
+    "ownedServersAlreadyRunning": true,
+    "startFlagUsed": false,
+    "storageStatePrivate": true,
+    "records": [
+      {
+        "page": "home",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-home-mobile.png",
+        "sha256": "4ecf6367607d10e6333e9e9094197c92c342d52f5cb250c330476edd323d2699",
+        "bytes": 84578,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "home",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-home-tablet.png",
+        "sha256": "a07f7d899b7fd5d6cab430b980a503d5396695155ce35d16d0f79a28e65b14fd",
+        "bytes": 174463,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "home",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-home-desktop.png",
+        "sha256": "4cc01d2687d6eb62ff1d0aacb27415145bfc2b11bd8fac3cd8f0df01274ca70a",
+        "bytes": 141907,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "search",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [
+          {
+            "id": "landmark-unique",
+            "impact": "moderate",
+            "nodes": 1
+          }
+        ],
+        "screenshot": "screenshots/shared-search-mobile.png",
+        "sha256": "7b26e4f9c8bb7aba9f4fc64a946d0cdc0370228eee782c2672cee5cb0e8aec0e",
+        "bytes": 98930,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "search",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-search-tablet.png",
+        "sha256": "f536fcb66c8dd21b224ff6fc27407ef87b409b9f76f1194e62c537af1edf458a",
+        "bytes": 106230,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "search",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-search-desktop.png",
+        "sha256": "32630f9bf8e7b8c5d4bc7e810978635f39904c63587b3b9bcb0215d3a9907fee",
+        "bytes": 124444,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "profile",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-profile-mobile.png",
+        "sha256": "3a5608e47b72365b182f53bcb50b8b9987c26186765a019a6f1903d52c7aa01d",
+        "bytes": 167298,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "profile",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-profile-tablet.png",
+        "sha256": "c8137fe701a9c937bfe6d6a1cabc552cb941d72bb76b78e0e7c2138c07ec856c",
+        "bytes": 179757,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "profile",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-profile-desktop.png",
+        "sha256": "832474f4b80ea8059a046142d8ac4a3e3059ecdc073becef8fc0b6bf86b3d3b8",
+        "bytes": 209965,
+        "sourceRun": "final-001"
+      },
+      {
+        "page": "notifications",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "sourceRun": "final-002",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-mobile.png",
+        "sha256": "7fd454340c754a579ed99e375a18be07637724c4e0cd7db2438a5e168455b42a",
+        "bytes": 127000
+      },
+      {
+        "page": "notifications",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "sourceRun": "final-002",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-tablet.png",
+        "sha256": "2aea5d8d2f299027a19bdba2290bfaa2d0607e72cddf50184aa2a66153303fcd",
+        "bytes": 130351
+      },
+      {
+        "page": "notifications",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "sourceRun": "final-002",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-desktop.png",
+        "sha256": "c918fb12f1a2b7866fb47ce55b69c5bff946c9a19b7b49fc9ada558666788ae1",
+        "bytes": 140004
+      }
+    ],
+    "newRecords": [
+      {
+        "page": "notifications",
+        "viewport": "mobile",
+        "colorScheme": "light",
+        "sourceRun": "final-002",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-mobile.png",
+        "sha256": "7fd454340c754a579ed99e375a18be07637724c4e0cd7db2438a5e168455b42a",
+        "bytes": 127000
+      },
+      {
+        "page": "notifications",
+        "viewport": "tablet",
+        "colorScheme": "light",
+        "sourceRun": "final-002",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-tablet.png",
+        "sha256": "2aea5d8d2f299027a19bdba2290bfaa2d0607e72cddf50184aa2a66153303fcd",
+        "bytes": 130351
+      },
+      {
+        "page": "notifications",
+        "viewport": "desktop",
+        "colorScheme": "light",
+        "sourceRun": "final-002",
+        "status": 200,
+        "error": false,
+        "horizontalOverflow": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedRequests": 0,
+        "axeViolations": [],
+        "screenshot": "screenshots/shared-notifications-desktop.png",
+        "sha256": "c918fb12f1a2b7866fb47ce55b69c5bff946c9a19b7b49fc9ada558666788ae1",
+        "bytes": 140004
+      }
+    ],
+    "selection": {
+      "retainedRun": "final-001",
+      "retainedRunSHA256": "958e68cc089c5572cf25fc629a0e3479700a306116c085f4c621d6b0463fc51e",
+      "retained": 9,
+      "replacements": 3,
+      "unique": 12,
+      "sourceDelta": {
+        "appAttribute": "data-view={route.kind}",
+        "cssSelector": "[data-view=\"notifications\"] main .whitespace-pre-wrap",
+        "appBeforeSHA256": "ebefeb43099f0e6ccd1202005f1db4106f4bd7fc07a07249f243c93585cc3117",
+        "cssBeforeSHA256": "f71bf9f4dfb4805e1cdd10d04c5800d79b533a13f5ebb7033400a973fc2e9c6b"
+      }
+    }
+  },
+  "routes": [
+    {
+      "name": "notifications",
+      "path": "/notifications",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 22
+          }
+        ]
+      }
+    },
+    {
+      "name": "search",
+      "path": "/search?q=fe-review",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "landmark-unique",
+            "impact": "moderate",
+            "count": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 23
+          }
+        ]
+      }
+    },
+    {
+      "name": "profile",
+      "path": "/profiles/r84ed6e023b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 28
+          }
+        ]
+      }
+    },
+    {
+      "name": "notifications",
+      "path": "/notifications",
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 834,
+        "clientWidth": 834
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 22
+          }
+        ]
+      }
+    },
+    {
+      "name": "search",
+      "path": "/search?q=fe-review",
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 834,
+        "clientWidth": 834
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "landmark-unique",
+            "impact": "moderate",
+            "count": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 23
+          }
+        ]
+      }
+    },
+    {
+      "name": "profile",
+      "path": "/profiles/r84ed6e023b",
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 834,
+        "clientWidth": 834
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 28
+          }
+        ]
+      }
+    },
+    {
+      "name": "notifications",
+      "path": "/notifications",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 22
+          }
+        ]
+      }
+    },
+    {
+      "name": "search",
+      "path": "/search?q=fe-review",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [
+          {
+            "id": "landmark-unique",
+            "impact": "moderate",
+            "count": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 23
+          }
+        ]
+      }
+    },
+    {
+      "name": "profile",
+      "path": "/profiles/r84ed6e023b",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "loadedIdentity": true,
+      "geometry": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "health": {
+        "pageErrors": 0,
+        "consoleErrors": 0,
+        "requestFailures": 0,
+        "httpErrors": 0
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "count": 28
+          }
+        ]
+      }
+    }
+  ],
+  "routeProgress": {
+    "name": "profile",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "journey": [
+    {
+      "name": "keyboard-login",
+      "focus": {
+        "tabs": 1,
+        "direction": "Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "real": true
+    },
+    {
+      "name": "composer-pending-error-no-resend",
+      "focus": {
+        "tabs": 1,
+        "direction": "Shift+Tab",
+        "focus": {
+          "focusVisible": true,
+          "outlineWidth": 1,
+          "outlineStyle": "none",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklch(0.55 0.12 255) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "disabled": false
+        }
+      },
+      "count": 1,
+      "retainedInput": true,
+      "controlled": true
+    }
+  ],
+  "journeyProgress": "composer-real",
+  "journeyHealth": {
+    "external": 0,
+    "pageErrors": 0,
+    "consoleErrors": 1,
+    "requestFailures": 0,
+    "controlledFailures": [
+      {
+        "method": "POST",
+        "path": "/api/posts",
+        "status": 500
+      }
+    ],
+    "unexpectedHTTP": []
+  },
+  "failure": "REVIEW_ASSERTION",
+  "failureSite": "journey.mjs:74:47",
+  "endedAt": "2026-10-24T11:34:18.025Z"
+}

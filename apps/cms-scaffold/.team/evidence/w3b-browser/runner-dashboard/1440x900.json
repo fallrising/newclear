@@ -1,0 +1,32 @@
+{
+  "viewport": {
+    "name": "1440x900",
+    "width": 1440,
+    "height": 900
+  },
+  "metrics": {
+    "innerWidth": 1440,
+    "innerHeight": 900,
+    "scrollWidth": 1440,
+    "scrollHeight": 900,
+    "outsideViewport": [],
+    "smallTouchTargets": [
+      "a",
+      "button#radix-_r_3_"
+    ],
+    "title": "我的資料 · 診所"
+  },
+  "findings": [
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "a"
+    },
+    {
+      "type": "small-touch-target",
+      "severity": "advisory",
+      "detail": "button#radix-_r_3_"
+    }
+  ],
+  "url": "http://localhost:5173/clinic/me?mockUser=seed-member-clinic"
+}

@@ -236,7 +236,7 @@ type SpanLink struct {
 
 ## 6. ClickHouse 參考 Schema
 
-驅動 `drivers/clickhouse`。所有 DDL 放在 `drivers/clickhouse/migrations/NNN_*.sql`，由 `Migrate()` 依序執行並記錄於 `prism_schema_migrations` 表。
+驅動 `drivers/clickhouse`。所有 DDL 放在 `drivers/clickhouse/migrations/NNN_*.sql`，由 `Migrate()` 依序執行並記錄於 `prism_schema_migrations` 表。P1-09 已批准的可執行 schema 另保留完整 Resource 欄位（service_instance、service_version、namespace、res_attrs；span 加 cluster）、trace_state 與 links.attrs；下方簡化設計需與 [P1-09 contract](../specs/p1-09-clickhouse-write.md) 和 embedded migrations 合讀。本輪 production reads 与 background pending-link reconciliation 尚未實作。
 
 ### 6.1 日誌
 
@@ -315,7 +315,7 @@ CREATE TABLE IF NOT EXISTS trace_index
     tenant     LowCardinality(String),
     start_ts   SimpleAggregateFunction(min, DateTime64(9)),
     end_ts     SimpleAggregateFunction(max, DateTime64(9)),
-    services   SimpleAggregateFunction(groupUniqArrayArray, Array(LowCardinality(String))),
+    services   SimpleAggregateFunction(groupUniqArrayArray, Array(String)),
     span_count SimpleAggregateFunction(sum, UInt64),
     error_count SimpleAggregateFunction(sum, UInt64),
     duration_ns SimpleAggregateFunction(max, UInt64)
@@ -395,8 +395,8 @@ CREATE TABLE IF NOT EXISTS metric_series
     tenant      LowCardinality(String),
     metric      LowCardinality(String),
     labels      Map(LowCardinality(String), String),
-    first_seen  SimpleAggregateFunction(min, DateTime),
-    last_seen   SimpleAggregateFunction(max, DateTime)
+    first_seen  SimpleAggregateFunction(min, DateTime64(3)),
+    last_seen   SimpleAggregateFunction(max, DateTime64(3))
 )
 ENGINE = AggregatingMergeTree
 PARTITION BY toYYYYMM(first_seen) ORDER BY (tenant, metric, fingerprint);
@@ -415,7 +415,7 @@ TTL toDateTime(ts) + INTERVAL {{ .MetricRetentionDays }} DAY
 SETTINGS ttl_only_drop_parts = 1;
 ```
 
-`fingerprint` = `labels` 的 xxhash64（含 metric 名稱），由中間層計算並保證與 Prometheus 的 label 排序規則一致。
+P1-09 以現行 `utm.Fingerprint` 對完整 sorted labels（含 `__name__` 与 `__tenant__`）計算 fingerprint；可執行 MetricPoint 沒有預算 fingerprint 欄位，見 ADR-018。`metric_series` metadata 無 TTL，first_seen/last_seen 保留毫秒精度；跨 first_seen 月分區的同序列 metadata，後续查詢需跨分區聚合 min/max 与去重。
 
 **誠實提醒（必須寫進 driver README）**：ClickHouse 不是時序資料庫。這套 schema 對指標的效能明顯不如 VictoriaMetrics/Prometheus（壓縮率約差 3–5 倍，高基數查詢差更多）。之所以提供，是為了「一個後端搞定三種訊號」的部署簡單性。**生產環境若指標量大，應改用 `vmvl` 驅動——這正是可換底層設計要解決的問題。**
 

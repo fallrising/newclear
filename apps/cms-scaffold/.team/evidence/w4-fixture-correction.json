@@ -1,0 +1,12 @@
+{
+  "admin-content-types.json": {
+    "before": "acc5d1ea11aa123ed1db8956418acec216d0e2f14cc9635fa5c9a8fa4b8d4e57",
+    "after": "5d756cec5483d7449d13c585bfa76583b705f45b43ed3686800a3f1f3a38ceb5",
+    "change": "remove identical duplicate note only; 13 rows ->12"
+  },
+  "work-content-types.json": {
+    "before": "ebb4eac322008721952857e3529090982977d90d4b78d059176420b84651d709",
+    "after": "118d4649cdbd9eb667a1aa121e02be9d8890c23bb5c34da059b7276b5472141f",
+    "change": "remove identical duplicate note only; 13 rows ->12"
+  }
+}

@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -83,6 +84,49 @@ class MediaApiTests {
                 .andExpect(jsonPath("$.payload.media.variants.thumbnail.url").value(
                         "/api/v1/public/media/" + mediaId + "/file/thumbnail"));
 
+        MvcResult secondUpload = mockMvc.perform(multipart("/api/v1/media")
+                        .file(new MockMultipartFile("file", "draft.png", "image/png", png))
+                        .header("Origin", BACK)
+                        .header("X-CSRF-Token", op.csrf)
+                        .cookie(op.sessionCookie(), op.csrfCookie()))
+                .andExpect(status().isCreated()).andReturn();
+        String draftMediaId = id(secondUpload);
+        mockMvc.perform(patch("/api/v1/entries/" + photoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Origin", BACK)
+                        .header("X-CSRF-Token", op.csrf)
+                        .cookie(op.sessionCookie(), op.csrfCookie())
+                        .content("{\"version\":%d,\"payload\":{\"media\":\"%s\"}}".formatted(currentVersion(op, photoId), draftMediaId)))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/public/media/" + mediaId + "/file/thumbnail"))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/public/media/" + draftMediaId + "/file/thumbnail"))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/v1/entries/" + photoId + "/publish")
+                        .header("Origin", BACK).header("X-CSRF-Token", op.csrf)
+                        .cookie(op.sessionCookie(), op.csrfCookie()))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/public/media/" + mediaId + "/file/thumbnail"))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/public/media/" + draftMediaId + "/file/thumbnail"))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/v1/entries/" + photoId + "/revisions/1/revert")
+                        .header("Origin", BACK).header("X-CSRF-Token", op.csrf)
+                        .cookie(op.sessionCookie(), op.csrfCookie()))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/public/media/" + mediaId + "/file/thumbnail"))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/public/media/" + draftMediaId + "/file/thumbnail"))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/v1/entries/" + photoId + "/publish")
+                        .header("Origin", BACK).header("X-CSRF-Token", op.csrf)
+                        .cookie(op.sessionCookie(), op.csrfCookie()))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/public/media/" + mediaId + "/file/thumbnail"))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/public/media/" + draftMediaId + "/file/thumbnail"))
+                .andExpect(status().isNotFound());
+
         mockMvc.perform(post("/api/v1/entries/" + albumId + "/unpublish")
                         .header("Origin", BACK)
                         .header("X-CSRF-Token", op.csrf)
@@ -94,6 +138,14 @@ class MediaApiTests {
                         .header("Origin", BACK)
                         .cookie(op.sessionCookie()))
                 .andExpect(status().isOk());
+    }
+
+    private int currentVersion(Session session, String id) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/entries/" + id)
+                        .header("Origin", BACK).cookie(session.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        return new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree(result.getResponse().getContentAsString()).get("version").asInt();
     }
 
     private String createAlbum(Session session, String slug) throws Exception {

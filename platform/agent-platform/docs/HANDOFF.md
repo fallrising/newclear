@@ -1,8 +1,110 @@
+# 最新接續 — PR659已合併，Worker成果真實性 browser本機驗收通過
+
+PR659正常合併760fffab，四項CI成功，45+756Python與118web通過。DUXdone板隨本次
+真正測試來源變更補入，原e4d4a11b候選保留；下方pending為歷史快照。
+[RTF契約](../tasks/379-result-truth/task.md)／[本機快照](../tasks/379-result-truth/report.md)
+補直接AT09UI證據，不聲稱新產品缺陷；scriptedruntime經實際Worker寫入failed／unknown／
+注入封存失敗的interrupted狀態，再由真實API與Chromium觀察。既有backend因果證據沿用。
+T114-browser1單一新情境含三種Worker結果4.0s通過，Ruff/format/strictTS/Prettier/重建資產通過；
+來源前後一致，owned helper與PostgreSQL已結束。子程序清理審查修正發生在runtime前，舊spec保留。
+獨立最終審查／必要CI／正常合併仍為門檻；全fake/live/M4/部署仍未完成。
+
+---
+
+# 最新接續 — PR658已合併，下載過期修正本機通過
+
+PR658正常合併d81a7d91，四項必要CI成功，45+756Python與103web通過。
+EUXdone任務板隨本次產品變更補入，原59a33fc8候選保留。下方pending為歷史快照。
+[DUX契約](../tasks/379-download-expiry/task.md)與[本機報告](../tasks/379-download-expiry/report.md)
+針對下載410僅refetch而未保留過期狀態的缺陷；已取得11fail/4pass真實RED。
+新browser helper使用合成歷史首次INSERT，保留immutable guard；舊archive-prune不執行。
+38項focusedweb、strictTS/format及重建資產後單一browser3.5s通過；兩個test-helper Ruff通過。
+來源凍結與前後一致、ownedruntime清理證據保留。獨立最終審查／必要CI／正常合併仍為門檻；全M4/live/部署未完成。
+
+---
+
+# 最新接續 — PR655已合併，過期匯出 UI 修正本機通過（2026-10-26）
+
+PR655已正常合併0b4e42d9，四項必要CI成功、45+756通過，BGCdone列隨本次真正產品變更補入；
+原ecd66b08本機候選保留。本次[EUX契約](../tasks/379-expired-export/task.md)先提交7ae9d2d9，
+取得真實RED6fail/12pass後，才修正預覽／授權410留下失效控制的UI問題。
+[本機快照](../tasks/379-expired-export/report.md)記錄30項focusedweb及重建資產後browser1/9.6s通過。
+TypeScript測試選項錯誤與A/Bfixture錯誤均已修正且原始證據保留；不改寫首次全綠。
+只改App/ExportPanel產品來源，後端授權／冪等／GC／schema／dependencies／CI不變。
+本次行為取代下方歷史BGC快照中的「先授權失敗，再點下載才更新」；不必再操作已失效下載。
+獨立最終審查與必要CI／正常合併仍為交付門檻；全M4／live／部署未完成。
+
+---
+
+# 最新接續 — PR653已合併，browser／GC／export整合本機通過（2026-10-26）
+
+PR653正常合併ada118988b909c6aa826a76da8939e1ec7451432；四項必要CI成功、hosted45+756，
+COMPdone板隨本次真正測試來源變更補入，原本機a36候選保留。下方pending屬歷史快照。
+
+[BGC01/02契約](../tasks/379-browser-retention/task.md)與[本機快照](../tasks/379-browser-retention/report.md)
+串接兩個已登入Chromium頁面、合成歷史首次INSERT、真實event/archive GC、export引用保護、
+410重連及過期控制拒絕。T102-browser3單一新情境9.8s通過；前兩次45s本文讀取逾時及初次lint失敗保留。
+產品來源未改；不重跑舊長測試。獨立審查、必要CI與正常合併仍為交付門檻。
+完整fake/live AT09/12/13、未知host residue、VM recovery／實際部署及M4仍未完成。
+
+---
+
+# 最新接續 — PR649 已合併，跨流程 fake 驗收本機通過（2026-10-26）
+
+[PR649](https://github.com/fallrising/newclear/pull/649) 已於2026-10-25T17:00:58Z正常合併，
+merge `ce5b5e6848884bf92ea0bca4c72f4acc877057f5`；四項必要CI全成功，hosted45+755通過。
+T0092done列隨本次真正測試來源變更補入，原本機候選保留；下方 pending 是歷史快照。
+
+新增 COMP01/02 串接同一DB的真實 terminal lifecycle→stale cleanup→recovery→
+明確批准的合成GitHub HTTP export→PR回覆斷線／只讀reconcile→native restore。
+T098-composite1：1項/2.234s通過；不改產品程式、不重跑舊長套件。
+[契約](../tasks/379-fake-composite/task.md)／[本機報告](../tasks/379-fake-composite/report.md)
+保留精確來源、前置審查修正及real/synthetic界線；T097已獨立接受，必要CI與合併仍是後續門檻。
+這不涵蓋GC操作整合、browser/full fake E2E、live VM/sandboxd/provider／部署或完整M4。
+
+---
+
+# 最新接續 — audit 已合併，stale cleanup 本機驗證完成（2026-10-25）
+
+手動 event retention 已由 PR633 合併；audit retention 已由 [PR641](https://github.com/fallrising/newclear/pull/641) 合併，必要 CI45 base／724 platform 通過。初次 hosted723測試中的 pause helper 失敗、實際 row-lock RED 與後續修正證據仍保留，見[任務板](tasks/BOARD.md)。下方舊交付段落的待 CI 狀態是歷史快照。
+
+下一片是[單一終態 binding 的明確批准清理](STALE-CLEANUP.md)，契約已獨立審查，實際 PostgreSQL／HTTP fault-before-release RED 已取得，本機28 focused、2 HTTP overlap、1 native roundtrip與12相關回歸已通過；原始 RED 與獨立審查要求的補測均保留。必要 CI／正常合併仍是後續交付門檻，見[本機快照](../tasks/379-stale-cleanup/report.md)。此處不表示 stale cleanup、AT-13/M4、實際部署或 live qualification 已完成。
+
+---
+
+# 本次 bounded event-retention 切片 — 2026-10-25
+
+T-087 在先行契約／獨立審查後，新增手動 `event-gc-preview`／`event-gc-apply`、migration017 永久 replay identity、原子前綴／floor 清理及保守 ownership 保護。Root-run 真 PostgreSQL focused24、native backup26、browser1 本機檢查通過；production freeze 未因環境 private-path 失敗而放寬 guard 或修改主機權限。T088 已接受 focused EVT-01–04；額外 regression 為初次644pass/4fail、targeted4pass，並非 clean full suite，export-lock 仍為 intermittent／原因未歸因；必要 CI／最終交付仍待完成，不能以本機切片稱作完整 AT-13/M4 或 AC-04。詳見 [契約／操作](EVENT-RETENTION.md)及[交付報告](../tasks/379-event-retention/report.md)。
+
+以下保留先前已交付切片與歷史停止點；不取代本次範圍和仍未完成的 live／整體 gate。
+
+---
+
+# 歷史停止點 — 2026-10-06
+
+本輪完成單節點操作手冊與隔離 control-plane 演練，範圍與重跑入口見 [SINGLE-NODE.md](SINGLE-NODE.md)。涵蓋同版 API／獨立 worker／Web build、初次設定、觀測、停寫/drain、native backup／空 DB restore、升級／回滾與故障排查。模型維持 local mock，billing 延後、金額 unknown；沒有實際主機部署或真 provider／GitHub export／KVM 操作。
+
+前置成果封存、GitHub export 與備份／保留已隨 [PR293](https://github.com/fallrising/newclear/pull/293) 合併，包含 PR270/282，基準 main 為 `bf6909e4cd318e03e5957eab6b6c0f47acc6f81c`。這一輪收尾要求是完成本片、提交並合併，再停止；本輪 PR 與最新 CI 以 GitHub 和交付報告為準，不能用文件存在推定已合併。
+
+演練只用新建合成資料庫與 owned processes，驗證真 TCP API／CLI worker、成果及重啟持久性、原生 DB 備份還原、舊 session 失效／新登入、archive hash 與 runtime drain。CLI migrate/bootstrap/API/worker 使用實際子程序；backup native transport 在測試中注入自有 PostgreSQL client container，產品 CLI 仍要求本機安裝同 major clients。精確命令、結果、來源／log hashes 見 [single-node evidence](evidence/single-node.json)。既有備份／保留行為見 [BACKUP-RETENTION.md](BACKUP-RETENTION.md)。
+
+本輪本機 gates：Python3.12.15 下45 unit +673 PostgreSQL/platform tests、Ruff164 files；80 Web tests/typecheck/format/build；11 Chromium/API/PostgreSQL 情境；實際 Web build 與預設 Makefile 兩種隔離演練入口均通過。獨立 review 與公開來源/log hashes 見 evidence。
+
+M0–M2 Passed；M3/M4 整體仍 In progress。TLS／service-manager 安裝、實際 runtime 部署、stale VM cleanup、整體 MVP gate、真自然語言 coding／live export 與 release 前長任務仍需另外選定範圍。使用者要求在這一片告一段落，接手先核對最新任務與明確指示，不自動開下一片，也不把計費或真 key 當作這輪完成條件。
+
+---
+
 # 開發接續紀錄 — 2026-09-24
 
 > 2026-09-26：本機 `hrv` 與 SSH 的四台 disposable 都沒有 `<tmp>/apm3-*`、`<tmp>/apm2-20260922` 或 sandboxd journal。使用者說明舊 controller 已重灌。那筆 `allocate=started` 無法再對帳，下一輪 KVM 使用新的 state directory。新主機先選 `<disposable-04>`（hostname `<kvm-host>`，Debian 13）。
 >
 > 2026-09-27：`<kvm-host>` 上 guest Docker smoke 與 `sandbox-smoke` 通過。`mock-https-complete` 與 `isolation` 都是 succeeded，cleanup 後 VM／claim 為零。OCI manifest 是 `sha256:14bc92c062aeca28d9218a3f1757cc0db83538791436c0c432005ba5dd1589ba`。24 小時實機長任務改列為 release 前整合測試；功能切片繼續用最長 2 小時的 deadline，不在開發中留一台 VM 跑滿 sandbox 的 24 小時上限。
+
+## 2026-10-03 單人 mock 續作（原始切片；2026-10-04 整合）
+
+本輪以單人使用為範圍：先驗收本機 mock 的 request cap、unknown 保守占用、token 輪替與 proxy 重啟後的額度持久性。真 API、可信帳單與硬金額上限延後，不作為這個切片的完成條件。費用繼續顯示 unknown；沒有付費呼叫或新增 KVM 驗收。詳細範圍及證據見 [單人 mock 驗收](M3-SINGLE-OPERATOR.md)。
+
+M3 整體仍為 In progress，完整 AT-07／AT-11 整合尚未結束；M4 尚未開始。後續已有 [diff 下載與瀏覽器注入驗收](M3-RESULT-DOWNLOAD.md) 及 [正常 Worker KVM 驗收](WORKER-TOOLS-KVM.md)；本段「沒有新增 KVM」僅指原始 mock 預算切片，不撤回後續證據。以下 2026-09-27 的 mock／真接口段落保留既有方向；更下方 2026-09-24 的施工日記不是目前停止指令。
 
 目前停止點：**先把整條流程用本機 mock 做完，再換成真 API。** 真接口暫定 [OpenCode Go](https://opencode.ai/docs/go) 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。這是 Go 訂閱的 key，不是 Zen 的按量 key。以後在 [opencode.ai/auth](https://opencode.ai/auth) 訂 Go 再建立 key，只放 0600 檔。現在沒有 key，也不要為了開發去申請。Go 上走 `/responses` 或 `/messages` 的模型還接不上。卡片可以出現在較長的使用者訊息裡，並同時寫入該檔與 `m2-result.txt`。一般 fake 任務仍不改 repository。目標含一張 FILE／TEXT 卡片時，同一個 worker 會把本機 mock 的寫檔結果存進 run，不開虛擬機、不呼叫 OpenCode Go。虛擬機裡的固定模型 `guest_fixture.py` 用同一張卡片。2026-09-27 在 `<kvm-host>` 用 `scripts/m2-card-kvm.py` 跑過一台真實 VM：目標是 `FILE note.txt` / `TEXT hello`，run succeeded，diff 含 `note.txt` 與 `m2-result.txt`，結束時 VM 與 claim 為零。fixture 驗收現在也核對卡片檔的內容；內容不符就不能通過。工作台會把這種本機 mock 結果標成「未開虛擬機」，並顯示 diff 與 SHA-256。硬金額上限與 24 小時停留都還沒做。
 

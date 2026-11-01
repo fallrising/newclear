@@ -1,6 +1,12 @@
 # AGENTS.md
 
-本文件適用於所有實作 Prism 的 coding agent。子目錄若有更嚴格的 `AGENTS.md`，以更嚴格者為準。
+本文件是 Prism 的實作契約，適用於所有實作 Prism 的 coding agent。`platform/prism/AGENTS.md` 只指向本檔。子目錄若有更嚴格的 `AGENTS.md`，以更嚴格者為準。
+
+## 工作方式
+
+過程紀錄以 desk 的 [`docs/operating-method.md`](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) 為準。本檔不複製該文。
+
+任務板 `docs/tasks/BOARD.md` 與 journal run 紀錄是允許改動的路徑。
 
 ## Mission
 
@@ -73,6 +79,6 @@
 
 ## Completion response
 
-輸出：完成內容、changed files、實際執行的 commands 與輸出、acceptance mapping、未完成項與理由、風險與 open questions。
+已授權里程碑的交付與向 owner 收尾依[根規則](../../../../AGENTS.md#交付與對人回報)。詳細工作紀錄保存完成內容、changed files、實際執行的 commands 與輸出、acceptance mapping、未完成項與理由、風險與 open questions；內部 worker 報告仍依指定契約。
 
 **不得宣稱未實際執行過的驗證。** 測試沒跑就說沒跑；跑了失敗就貼失敗輸出。

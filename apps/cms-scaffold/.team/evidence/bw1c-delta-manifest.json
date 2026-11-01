@@ -1,0 +1,232 @@
+[
+  {
+    "path": ".team/PLAN.md",
+    "before_sha256": "e22dcff0ba099646368d47250a9b611cff548f761632f210fefb5a5891f61599",
+    "after_sha256": "2349739f73f4d51da0145685a155b17e30d57c8607de0ddb6a88296724c0bda0"
+  },
+  {
+    "path": ".team/evidence/bw1c-gate-source-manifest.json",
+    "before_sha256": null,
+    "after_sha256": "fbff437ea2d2f2ae4ef4c80546dbf82afbec76bec655371dad9b801f4647f546"
+  },
+  {
+    "path": ".team/evidence/bw1c-test-summary.json",
+    "before_sha256": null,
+    "after_sha256": "cfd8accf930566ebf8661e5e35ed566a4823d3687077d803a9cb50306b63bb20"
+  },
+  {
+    "path": ".team/reports/BW1c-DELIVERY.md",
+    "before_sha256": null,
+    "after_sha256": "ea89d4d4422a433d1c3ae146ffe9db62f3e863653c6ea8c8ec8dc8604c7cf498"
+  },
+  {
+    "path": ".team/reports/T-401.md",
+    "before_sha256": null,
+    "after_sha256": "7b854b50dbe1e130584de4d1cce790beae3bbc02a54399dd30b35deda3e0a3ce"
+  },
+  {
+    "path": ".team/reports/T-402.md",
+    "before_sha256": null,
+    "after_sha256": "3ace5a48a41adff0cf7b43223b39168a50ee9a9e9cd004522fd621fabd0a8b82"
+  },
+  {
+    "path": ".team/reports/T-403.md",
+    "before_sha256": null,
+    "after_sha256": "94708b653ffa54be40f50b01df810f7149d28abe698fad415c28a5b20ed91b38"
+  },
+  {
+    "path": ".team/reports/T-404.md",
+    "before_sha256": null,
+    "after_sha256": "5635d9adc84e30c130a3f5c1ef997f8fad4686674e616f5772b4713b39bbcf61"
+  },
+  {
+    "path": ".team/tasks/T-401.md",
+    "before_sha256": null,
+    "after_sha256": "f74c0f23aab329f20ddd9ffb2d8316d91b8aab7e167007443abb39678f813cb9"
+  },
+  {
+    "path": ".team/tasks/T-402.md",
+    "before_sha256": null,
+    "after_sha256": "5cdf7e4cfb8b90c317ca2f60510cda1adc48ab519070d1454f8d2c287a9a90ba"
+  },
+  {
+    "path": ".team/tasks/T-403.md",
+    "before_sha256": null,
+    "after_sha256": "49ebfb4c95aeb36d3af81fde6c9890cc1e74bf33dc1fd4f68e76d850fc97043a"
+  },
+  {
+    "path": ".team/tasks/T-404.md",
+    "before_sha256": null,
+    "after_sha256": "b99ef0bc4705a303bde84740229f961eec697edd220c5c0fc81bfdca6a6e50cd"
+  },
+  {
+    "path": "README.md",
+    "before_sha256": "2b93bb9a791e9c2775b3fc6305f13aba7da220ca9165c734d857b7eb595cbb95",
+    "after_sha256": "91cfa4e122ceee6553b875123c1bb79d39bc75d16b6beb55e300c1378e852ead"
+  },
+  {
+    "path": "apps/web-back/src/pages/entries.tsx",
+    "before_sha256": "8756a24522f2329134e6f6d44c32a4f83c095e82f5c9bd8470b873c6f17bdcec",
+    "after_sha256": "39d0e5286019a136035350cc9956e9803eb195290836473d699e0ff576fda35a"
+  },
+  {
+    "path": "docs/v2/03-personal-use-readiness.md",
+    "before_sha256": "7bf46084adfc54310c5e7192e9875c9ee3aa6f820e161c459ca2d04886fa60a7",
+    "after_sha256": "6edc86d176ebcfb0258b3248e50f7b587107c461f4acfd9ff5457ea562a35e02"
+  },
+  {
+    "path": "docs/v2/README.md",
+    "before_sha256": "2d088827ff3ace980e7eb2bb6605b13321a91b9c9024ed29b38481123a374496",
+    "after_sha256": "e345928323299c8f7561311c259d020847b048a61965ddfbd0720f20f2c04d26"
+  },
+  {
+    "path": "docs/v2/waves/BW1c.md",
+    "before_sha256": "b4107a712d9ad6c2024e40155d2d545af0eb315e0c333506f7650c08ea7a58cf",
+    "after_sha256": "577efec08d612ded1f112d9ef1e6646f08a7b79df1d1a3a511fe4bc899ba2ac1"
+  },
+  {
+    "path": "packages/api/src/client.test.ts",
+    "before_sha256": "00d50026b961eb5be8c94728c395d54312b688018900cd087e3aea357fc82d0b",
+    "after_sha256": "4119bc00a89db0b913748ad70813bdbb7c7ab932fde1fdb18f84cfdeab455192"
+  },
+  {
+    "path": "packages/api/src/errors.ts",
+    "before_sha256": "ea910c5d0409629f183f228a3e9ad4032b7e7bbe7579abe44ae97021ba3fd0e3",
+    "after_sha256": "3c72c6f364930013d93c0e39a62d5b35b5dcac2042113490192c276549fdcdf3"
+  },
+  {
+    "path": "packages/api/src/generated/schema.d.ts",
+    "before_sha256": "e5977810430b18964bf015c10319ba05b942fe4caf056a0170093c4e282fdc4f",
+    "after_sha256": "e4dfc458e0660048b08fb6d5a8c535fa95511502523ef00de810f6a8866c7ab8"
+  },
+  {
+    "path": "packages/api/src/schema.ts",
+    "before_sha256": "727235a005a96e42dbd6f4372a73eacd3b1ac5f16105062caee686074423a276",
+    "after_sha256": "22e2eb49568edb3052db28c453cefe0685ba8be3cc547b37b7e74965f540cf49"
+  },
+  {
+    "path": "packages/api/src/work.ts",
+    "before_sha256": "58b08b63505e9cd98b6bc28029591f510ecc2756a63cad1a93c0d17164b7a091",
+    "after_sha256": "8e4ec7070803e31be2c8ff2385096d745c3b20b3662595561ece01004206e6a4"
+  },
+  {
+    "path": "packages/mocks/src/handlers.test.ts",
+    "before_sha256": "a0a2f94a3f2abac282d64706625e8e0f87aef06997ae2291bf7d09898d5030a5",
+    "after_sha256": "b9b3a1b9b28a97dfedd958a18dfe1457e42df1876d1de50e3aa4852ccbd61453"
+  },
+  {
+    "path": "packages/mocks/src/handlers/public.ts",
+    "before_sha256": "2c9713ad4445c10ba998f6d349a41e89f35e2eb33ffbaa89bfd30d26454d5016",
+    "after_sha256": "0073ef930768e243aa5c195c1677dddba600910cbc8e44048033fef522cdfcc8"
+  },
+  {
+    "path": "packages/mocks/src/handlers/work.ts",
+    "before_sha256": "d7b2870f27db11e05d693730ee764ca35d51321c5597072fd928e3d57567625b",
+    "after_sha256": "1bef56a8d75c50a1c7f241780b2f840a8e42ba9d3822ac01cd9404807a220a96"
+  },
+  {
+    "path": "packages/mocks/src/respond.ts",
+    "before_sha256": "d061c9df248c06a8842495a0747f99397ad9be3271784058130512ddb544112f",
+    "after_sha256": "24aedeae5de6f8e348ec469dbaf46914e5c273bd9baced98615f55e48242a3d9"
+  },
+  {
+    "path": "packages/mocks/src/validation.ts",
+    "before_sha256": null,
+    "after_sha256": "85b7e12b0838905fe070e1cb34bfe4feb513d0ddeb08847ea505671a2d327035"
+  },
+  {
+    "path": "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/EntryAtomicWriteTests.java",
+    "before_sha256": "3a389ae766ce46ffed78ee89b1ed8375f1c9f197fe71f9b1ddf4bea991d8a218",
+    "after_sha256": "a8a3039a0961bbb3dff323d03b876a39bc4b9e56ac5dee4855362a9f2997dd93"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/api/error/CmsApiException.java",
+    "before_sha256": "8bc45647f67aab2a9ecce80dcb524a855a419e81bb47fc64506527a3ea481865",
+    "after_sha256": "1a45bc00e6ab5bed1bab77fd5d6de3e285ae9ebe1d4eedfa6b01080eadcc5f5b"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/api/error/ErrorBody.java",
+    "before_sha256": "6811e6b4bc85a95277430c9e4d036f2b4dffcc12b5448b42d140a6d0baa8760d",
+    "after_sha256": "e118209db5fb30a1e03fc7fb4dbf479c706b05dacb6a2d52552951156b36e43a"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/api/error/ErrorCode.java",
+    "before_sha256": "8f43992dffb81492a48cb9cd4d8590c198b06a66672d68ed9ec23fbbc72ff6a1",
+    "after_sha256": "43360d6bc103d6157d64b59e1dd6b5543cc249ce8c522dd8bf986bb3c867ac97"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/api/error/FieldError.java",
+    "before_sha256": null,
+    "after_sha256": "c4159be7947751e2cd9c6d26872f42f54f0e45b84841657827803fc1f947c28f"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/api/error/FieldErrorCode.java",
+    "before_sha256": null,
+    "after_sha256": "6643a9c4f6b0ce112a4933654abb1ee43e8e64f369554ce556b1c4e449f84f80"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/ContentException.java",
+    "before_sha256": "d4f4954397b43c8c693a7cebe0741489ae16154dc92b2aca8c26ddc061780753",
+    "after_sha256": "92b04fbf00300e6cd93e1578d1d7b88ca6adbc0ed05d9f8726170679730a3312"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/service/EntryService.java",
+    "before_sha256": "cb806c3450bfee84eedc6915d34552599498e76826ee3a7d3f80e8dd1d15f7dc",
+    "after_sha256": "39b3d4c39c11694d36d68d5bdb25ff674b9a614d2b0b5bac6dafdb802eb5a87d"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/validation/PayloadValidator.java",
+    "before_sha256": null,
+    "after_sha256": "e355d33d406522e0f7c7b5b1dcf20fb80562102f90a2bb2cff38102ff3b3dccd"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/web/ContentProjection.java",
+    "before_sha256": "43622bdbafe55f9dbb3630f16f78af26774873e3c3b617891361d3d1bdcd5a33",
+    "after_sha256": "994136926144b448c6194105b9b87b4e006c8136137f2e424ee152567d88699a"
+  },
+  {
+    "path": "services/cms-api/src/main/java/com/fallrising/cms/content/web/PublicContentController.java",
+    "before_sha256": "86c3884d5ca7d804d843e7388d5d83be6905bc8adf23e6af29f9b3c80110bdf0",
+    "after_sha256": "efc6dc9b4f4ddf1613da9d1d9036ffb2a866064c0261d12193344cbb2c05f29b"
+  },
+  {
+    "path": "services/cms-api/src/main/resources/openapi/openapi.yaml",
+    "before_sha256": "c42950aaa9f5f0eb1f25d770320641a57172a1027ff250c0d3d6c4cf4c4b1b33",
+    "after_sha256": "9cd8958539d079194f5806a624a35d3ea0588ec3f4e9e4fe9880678199d1350c"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/ContentApiTests.java",
+    "before_sha256": "87b564ee8ae9554d97c003bb3cf66ac8c82ab21179905614087269e3247c4d62",
+    "after_sha256": "49c761591fee09b7689bddf6a0b7eafadf537bf497b654c77665090b9f07ea8d"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/DemoPackTests.java",
+    "before_sha256": "6e4577434f71154f1c385874a1900d2d47fcc8ed85d0b304163f95396fbbf8fa",
+    "after_sha256": "cf727d709b69f6a616977269f98012c5b4b68a07e6e10d4d43cbf305a9e093b4"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/EntryWriteRulesApiTests.java",
+    "before_sha256": null,
+    "after_sha256": "902800ff721bf0a08907aff2d1b4105715084059cdf09d624821eb072508ef56"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/MediaApiTests.java",
+    "before_sha256": "cc378e75459b80b4deee493a6aec401f9ff3c888e50cb53a28433a99b8cd3af6",
+    "after_sha256": "fb3bdf3d8a735bae0c9821c123f23fd40ba77d02c0b54f16397a4abe62f99e03"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/WaveEAcceptanceTests.java",
+    "before_sha256": "26e0020cc47a4e600193d4920fb122933701789bfd7c876c539bac00f11ebe39",
+    "after_sha256": "067c778b6ca8b2aeb8ab6616ed2cf5dcbce13369fd396889abb87a87e210deba"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/content/validation/PayloadValidatorTests.java",
+    "before_sha256": null,
+    "after_sha256": "fb2768ec2594ecaf75dd3c9239053f6c00d13dc91f8c88d89bdeab2d4f28acbf"
+  },
+  {
+    "path": "services/cms-api/src/test/java/com/fallrising/cms/content/web/ContentProjectionTests.java",
+    "before_sha256": null,
+    "after_sha256": "da97d4796c6306215e690e8945ac64c99cb54e2846c85500e493ee9756694c20"
+  }
+]

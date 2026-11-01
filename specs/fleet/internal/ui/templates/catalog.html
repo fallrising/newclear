@@ -1,10 +1,12 @@
 {{define "catalog"}}
 {{template "header" .}}
 <h1>Catalog</h1>
+<div class="table-scroll">
 <table id="catalog" hx-get="/" hx-trigger="every 15s" hx-select="table" hx-swap="outerHTML">
+  <caption class="visually-hidden">Fleet services</caption>
   <thead>
     <tr>
-      <th>Service</th><th>URL</th><th>Node</th><th>Version</th><th>Health</th><th>Expose</th><th>Desired</th><th>Actions</th>
+      <th scope="col">Service</th><th scope="col">URL</th><th scope="col">Node</th><th scope="col">Version</th><th scope="col">Health</th><th scope="col">Expose</th><th scope="col">Desired</th><th scope="col">Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -13,11 +15,12 @@
     {{end}}
   </tbody>
 </table>
+</div>
 {{template "footer" .}}
 {{end}}
 
 {{define "row"}}
-<tr id="row-{{.Name}}">
+<tr id="row-{{.Name}}" hx-select="#row-{{.Name}}">
   <td><a href="/services/{{.Name}}">{{.Name}}</a></td>
   <td>{{if .URL}}<a href="{{.URL}}">{{.URL}}</a>{{end}}</td>
   <td><a href="/nodes/{{.Node}}">{{.Node}}</a> ({{.NodeStatus}})</td>
@@ -27,11 +30,11 @@
   <td>{{.DesiredState}}</td>
   <td>
     {{if eq .DesiredState "stopped"}}
-    <button hx-post="/api/v1/services/{{.Name}}/start" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Start</button>
+    <button id="act-{{.Name}}-toggle" aria-label="Start {{.Name}}" hx-disabled-elt="this" hx-post="/api/v1/services/{{.Name}}/start" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Start</button>
     {{else if eq .DesiredState "running"}}
-    <button hx-post="/api/v1/services/{{.Name}}/stop" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Stop</button>
+    <button id="act-{{.Name}}-toggle" aria-label="Stop {{.Name}}" hx-disabled-elt="this" hx-post="/api/v1/services/{{.Name}}/stop" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Stop</button>
     {{end}}
-    <button hx-post="/api/v1/services/{{.Name}}/redeploy" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Redeploy</button>
+    <button id="act-{{.Name}}-redeploy" aria-label="Redeploy {{.Name}}" hx-disabled-elt="this" hx-post="/api/v1/services/{{.Name}}/redeploy" hx-target="#row-{{.Name}}" hx-swap="outerHTML">Redeploy</button>
   </td>
 </tr>
 {{end}}

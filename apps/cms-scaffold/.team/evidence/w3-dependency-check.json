@@ -1,0 +1,6 @@
+{
+  "ownerAuthorized": true,
+  "version": "10.1.0",
+  "onlyLockChange": "apps/web-front.dependencies.react-markdown",
+  "existingLockedVersionsAndPackagesUnchanged": true
+}

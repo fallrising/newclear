@@ -1,0 +1,144 @@
+{
+  "task_id": "T-0061",
+  "base_sha": "c5fe7385d7021cc071c5dc793437a911044aa380",
+  "status": "completed",
+  "summary": "The owner-selected real English PDF completed the existing isolated local ingestion, native extraction, immutable provenance/index, readable Markdown/HTML and citation-backed unpromoted candidate flow at code 0038175b9a82a98c02fb9b64688cae243e9f2ad3. All 81 physical pages were represented; no OCR was needed. The private candidate Draft PR was created and its eight files and branch/commit were read back successfully; candidates remain unpromoted. This is a dated component verification record, not an orchestrator adapter result. Some command descriptions are redacted execution summaries; exact commands and full observed output remain in private evidence. Desk completion and production readiness are not implied. Usage describes verification subprocesses only, not this interactive session.",
+  "changed_files": [
+    ".team/PLAN.md",
+    "docs/runbooks/production-document-ingestion.md",
+    "docs/verification/first-real-result.md",
+    "docs/verification/first-real-result.json",
+    "scripts/document-ingestion-doctor.sh",
+    "tests/test_document_ingestion_doctor.py",
+    "specs/active/production-document-batch/spec.md",
+    "src/ice_maker/production_extraction.py",
+    "src/ice_maker/knowledge_index.py",
+    "src/ice_maker/text_assignment_safety.py",
+    "tests/test_production_extraction.py",
+    "tests/test_text_assignment_safety.py",
+    "src/ice_maker/document_batch.py",
+    "tests/test_document_batch.py"
+  ],
+  "commands_run": [
+    {
+      "command": "scripts/document-ingestion-doctor.sh --json",
+      "exit_code": 1,
+      "output": "Non-root operator on prepared host: host-capable; required Docker AppArmor, seccomp, cgroup-v2 and host resource gates passed; pinned container supplies absent host runtime/parser packages."
+    },
+    {
+      "command": "scripts/build-document-service.sh",
+      "exit_code": 0,
+      "output": "Existing non-root build script produced the source-bound pinned image recorded in the Markdown evidence."
+    },
+    {
+      "command": "scripts/run-document-service.sh \"$PRIVATE_DATA_DIR\" 18080",
+      "exit_code": 0,
+      "output": "Private data argument redacted. Existing script started non-root parser UID 1000, network none, read-only root, all capabilities dropped, no-new-privileges, AppArmor docker-default, 8 GiB memory, two CPUs and 256 PIDs. Loopback relay has no document-data mount."
+    },
+    {
+      "command": "real multipart PDF upload, existing status/readable endpoints, bounded private provenance/page QA, identical-input re-upload",
+      "exit_code": 0,
+      "output": "One processed; zero failed/rejected/duplicate. 81 native pages and chunks; 174832 normalized characters. Separate layout extraction matches all pages, Markdown/HTML repeats and real re-upload are identical, unknown source 404. Full identity, request IDs, state, corpus and location evidence stay private."
+    },
+    {
+      "command": "existing KnowledgeIndex.propose calls and private citation binding review",
+      "exit_code": 0,
+      "output": "10 unpromoted proposals; 32 selected citation rows, 31 unique chunks, 33 source anchors; full source/page/chunk/text-range bindings and semantic support reviewed."
+    },
+    {
+      "command": "assignment guard regressions before fix",
+      "exit_code": 1,
+      "output": "8 tests ran; 6 expected errors reproduce rejection of ordinary lexer tokens; credential-negative controls retained."
+    },
+    {
+      "command": "three native-layout/cache/toolchain regressions before fix",
+      "exit_code": 1,
+      "output": "All three fail on the unchanged checkpoint; minimal layout option and both version bindings repair the observed order defect and prevent legacy cache reuse."
+    },
+    {
+      "command": "PYTHONPATH=src python3 -m unittest tests.test_production_extraction tests.test_document_batch tests.test_text_assignment_safety tests.test_knowledge_index tests.test_document_ingestion_doctor -v",
+      "exit_code": 0,
+      "output": "Focused repaired checkpoint: 81 tests passed."
+    },
+    {
+      "command": "make check",
+      "exit_code": 2,
+      "output": "Clean actual main c5fe7385d7021cc071c5dc793437a911044aa380 with pinned extras: 303 tests, 302 pass, one Pillow-absence assumption fails; zero errors/skips. Baseline failure evidence retained."
+    },
+    {
+      "command": "make check",
+      "exit_code": 0,
+      "output": "Clean actual PR code 0038175b9a82a98c02fb9b64688cae243e9f2ad3, non-root with pinned extras: 317 tests passed, zero failures/errors/skips; source unchanged and checkout clean. Pillow-absence test explicitly simulates absence; real invalid-raster rejection retained."
+    },
+    {
+      "command": "PYTHONPATH=src python3 -m unittest tests.test_document_ingestion_doctor -v",
+      "exit_code": 0,
+      "output": "10 tests passed; original Poppler -v fix retained."
+    },
+    {
+      "command": "PYTHONPATH=src python3 -m unittest tests.test_hardening_e2e tests.test_publication_e2e -v",
+      "exit_code": 0,
+      "output": "3 synthetic controls passed. These are control evidence only; real-document success is independently recorded."
+    },
+    {
+      "command": "repo policy, 11 immutable SDD hashes, Phase 8/9 validate, four bash syntax checks, compileall, clean/staged/actual PR diff whitespace checks",
+      "exit_code": 0,
+      "output": "All 15 independently recorded checkpoint checks passed, including full make check."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "Local environment gate with existing isolation and non-root requirements",
+      "status": "pass",
+      "evidence": "Actual doctor exit 1 host-capable route; measured pinned parser and relay controls. Rootful daemon is recorded honestly."
+    },
+    {
+      "criterion": "Real source identity and study deduplication",
+      "status": "pass",
+      "evidence": "Original bytes freshly reacquired and hashed; full latest study inventories and source registries checked before ingestion, no matching study. Detailed identity/registry evidence retained privately."
+    },
+    {
+      "criterion": "Complete page extraction and readable-result quality",
+      "status": "pass",
+      "evidence": "81/81 native pages, no blank/missing pages or extraction routing mismatches; 12 original pages visually reviewed and highlighted-code order repaired; repeated result/re-upload stable."
+    },
+    {
+      "criterion": "Provenance and citation-backed unpromoted knowledge candidate",
+      "status": "pass",
+      "evidence": "Immutable identity/cache/progress/index/page-region bindings verified; 10 major claims, 32 citation rows, 33 supporting anchors; candidate awaits owner review."
+    },
+    {
+      "criterion": "Candidate Draft PR publication",
+      "status": "pass",
+      "evidence": "Private candidate Draft PR is open and unmerged; eight files and exact native-tested Git tree were read back. Existing KB validator: 53 tests passed and 223 tracked files, zero errors. No private source or repository URL is published here."
+    },
+    {
+      "criterion": "Required repository verification at tested code checkpoint",
+      "status": "pass",
+      "evidence": "317 tests and all 15 checks pass; baseline Pillow failure was reproduced and the test assumption minimally corrected."
+    },
+    {
+      "criterion": "Production rootless rollout and 100-document benchmark",
+      "status": "not-tested",
+      "evidence": "This accepted single-document local pilot supplies neither production rootless nor benchmark evidence."
+    }
+  ],
+  "tests": {
+    "passed": 317,
+    "failed": 0
+  },
+  "risks": [
+    "All changes and candidates remain Draft/unpromoted pending owner review; no merge or deployment.",
+    "Existing old extraction/index states remain immutable; v3 uses fresh state/index and version-bound caches. Migration of existing indexes requires a separate reviewed procedure.",
+    "Normalized text does not retain indentation or layout-perfect tables. Historical JavaScript examples were inspected, not executed or endorsed as current recommendations.",
+    "OCR was not needed or exercised on this native-text PDF; installed chi_tra/eng/osd and document eng policy do not establish OCR accuracy.",
+    "The Docker daemon is rootful; production rootless requirements and 100-document benchmark remain follow-up gates."
+  ],
+  "open_questions": [],
+  "usage": {
+    "provider": "none",
+    "model": "none",
+    "estimated_cost_usd": 0,
+    "elapsed_seconds": 92
+  }
+}

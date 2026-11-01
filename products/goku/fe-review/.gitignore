@@ -3,3 +3,4 @@ runs/*/screenshots/
 runs/*/tui/
 runs/*/*.storage.json
 runs/.state/
+runs/20261024T102243844Z-b4b441d3/result.json

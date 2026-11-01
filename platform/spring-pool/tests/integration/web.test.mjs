@@ -252,3 +252,41 @@ test("T-CSRF-1: state-changing web POSTs must pass Origin and double-submit chec
   );
   assert.equal(after.json.items[0].action, "script.create");
 });
+
+test("multiline web forms save descriptions and pinned step instructions through the real API", async () => {
+  const initial = await fetch(`${WEB_BASE}/scripts/new`);
+  const cookie = initial.headers.get("set-cookie").split(";")[0];
+  const token = cookie.slice(cookie.indexOf("=") + 1);
+  async function submit(path, fields) {
+    const form = new FormData();
+    for (const [key, value] of Object.entries({ csrf: token, ...fields }))
+      form.set(key, value);
+    const response = await fetch(`${WEB_BASE}${path}`, {
+      method: "POST",
+      redirect: "manual",
+      headers: { Origin: new URL(WEB_BASE).origin, Cookie: cookie },
+      body: form,
+    });
+    assert.equal(response.status, 303, await response.text());
+    return response.headers.get("location").split("/").at(-1);
+  }
+  const scriptId = await submit("/scripts", {
+    title: `${RUN}-multiline`,
+    description: "first\r\nsecond",
+    language: "bash",
+    body: "echo first\r\necho second\r\n",
+  });
+  const script = await api(`/v1/scripts/${scriptId}`);
+  assert.equal(script.json.description, "first\nsecond");
+  assert.equal(script.json.body, "echo first\necho second\n");
+  const runbookId = await submit("/runbooks", {
+    title: `${RUN}-multiline-runbook`,
+    description: "prepare\r\nrun",
+    "steps[0].script_id": scriptId,
+    "steps[0].script_revision": "1",
+    "steps[0].instruction": "inspect\r\ncopy",
+  });
+  const runbook = await api(`/v1/runbooks/${runbookId}`);
+  assert.equal(runbook.json.description, "prepare\nrun");
+  assert.equal(runbook.json.steps[0].instruction, "inspect\ncopy");
+});

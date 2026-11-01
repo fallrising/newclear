@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-03",
+  "base_commit": "82cd9d8159b31cdd852f333a219132dc614e5d66",
+  "feature": "literal task title/latest-goal search with project/latest-state filters and scoped pagination",
+  "mode": "read-only local API/PostgreSQL/Chromium; fake effects unchanged",
+  "environments": {
+    "platform_python": "3.12",
+    "browser_api_python": "3.13.5",
+    "node": "24.18.0"
+  },
+  "checks": {
+    "unit": 45,
+    "sql_http": 273,
+    "frontend": 40,
+    "browser": 3,
+    "targeted_backend": 13,
+    "skipped": 0
+  },
+  "red_green": [
+    "Original backend10tests8failures, final13passed",
+    "NUL regression1error before422 validation, final13passed",
+    "Absent UI controls3failures37passed, final40passed"
+  ],
+  "log_sha256": {
+    "backend_red": "7b4cd8eead88fef1996a487977ea23414b382139b9c0668c6b7a9fd95a18fa28",
+    "nul_red": "3333bce65d3d2167d00e92732ce472e0262e9b6245a02a7c9e5121e9f0457f2f",
+    "backend_green": "83039115e1f190a1b170b779dce5e61dae410f1325927604396546cc3b33ac11",
+    "frontend_red": "398fba44271090cf50db47d9b0fae9280951d00bf07bc53981aa7eaf0e7c80f9",
+    "platform_check": "4e152071e778a512dcbf709d8dd815e9fb9de0ec60e8e77314f3eb71baf81b03",
+    "web_check": "91cc1c2eeda607af8faedfac805d10c73a7545058433eb92b55c28cffb6ba0af",
+    "browser_test": "769bacb01540e8637519d793c62d2cd08eb6c4f5355fec79587c8b43e1ba4ad5"
+  },
+  "limitations": [
+    "Filters reset on page reload.",
+    "Matches can change during paging when tasks are created or latest states change; not a snapshot.",
+    "Cursor scope fingerprint is not authentication; all requests require a session.",
+    "No new schema/dependencies or VM/provider/billing/deployment work."
+  ],
+  "review": "Independent source/evidence review T-006 DONE, no required findings; all seven log hashes matched."
+}

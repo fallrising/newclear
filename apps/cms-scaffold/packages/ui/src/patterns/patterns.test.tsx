@@ -52,6 +52,16 @@ describe("QueryBoundary", () => {
 });
 
 describe("PageHeader", () => {
+  it("W1-FM08 actions inside a form never submit the surrounding form", () => {
+    const submit = vi.fn((event) => event.preventDefault());
+    const select = vi.fn();
+    render(<MemoryRouter><form onSubmit={submit}><PageHeader title="t" primaryAction={{label: "Save", onSelect: select}} secondaryActions={[{label: "Discard", onSelect: select}]} /></form></MemoryRouter>);
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "Discard" }));
+    expect(select).toHaveBeenCalledTimes(2);
+    expect(submit).not.toHaveBeenCalled();
+  });
+
   it("F-05 writes '<title> · <suffix>' to document.title", () => {
     render(
       <MemoryRouter>

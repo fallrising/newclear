@@ -1,0 +1,78 @@
+{
+  "apps/web-front/src/copy.ts": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/media.ts": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/seo.ts": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/sites.ts": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/markdown.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/parts.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/shell.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/states.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/cards.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/home.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/lightbox.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": false
+  },
+  "apps/web-front/src/routes.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/pages/album.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": false
+  },
+  "apps/web-front/src/pages/clinic.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/pages/projects.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/pages/selector.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/pages/login.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/src/pages/logout.tsx": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  },
+  "apps/web-front/public/robots.txt": {
+    "initialMatchesExactSpec": true,
+    "finalUnchanged": true
+  }
+}

@@ -174,9 +174,7 @@ func TestConcurrentAccess(t *testing.T) {
 	errorsCh := make(chan error, workers*4)
 	var waitGroup sync.WaitGroup
 	for i := range workers {
-		waitGroup.Add(1)
-		go func() {
-			defer waitGroup.Done()
+		waitGroup.Go(func() {
 			tenant := "tenant"
 			metricLabels := labels.FromStrings(utm.LabelName, "requests_total", utm.LabelTenant, tenant, "worker", fmt.Sprint(i))
 			if err := backend.metrics.Write(context.Background(), []utm.MetricPoint{{Labels: metricLabels, TS: int64(i), Value: float64(i)}}); err != nil {
@@ -191,7 +189,7 @@ func TestConcurrentAccess(t *testing.T) {
 			if _, err := backend.metrics.LabelNames(context.Background(), spi.LabelQuery{Tenant: tenant, Start: 0, End: workers}); err != nil {
 				errorsCh <- err
 			}
-		}()
+		})
 	}
 	waitGroup.Wait()
 	close(errorsCh)

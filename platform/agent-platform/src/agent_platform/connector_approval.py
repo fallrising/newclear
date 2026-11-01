@@ -42,6 +42,13 @@ def pending_approval(service, row):
             raise Problem(409, "approval_backend_not_waiting")
     if before.get("leaf_event_id") != after.get("leaf_event_id"):
         raise Problem(409, "approval_history_changed")
+    return approval_from_history(service, row, history)
+
+
+def approval_from_history(service, row, history):
+    """Project a proposal from one history; only approve() can authorize it."""
+    if not (row["input"].get("require_approval") or row["input"].get("model_transport")):
+        raise Problem(409, "approval_policy_mismatch")
     ids = [item["id"] for item in history]
     if len(ids) != len(set(ids)):
         raise Problem(409, "backend_duplicate_event")
@@ -85,6 +92,8 @@ def approve(service, run_id, request):
 
     with service.journal.locked(run_id):
         row = service.require(run_id, request.generation)
+        if row["input"].get("external_workspace"):
+            raise Problem(409, "external_workspace_approval_unsupported")
         service.guard(row)
         if request.expires_at.tzinfo is None:
             raise Problem(422, "approval_expiry_requires_timezone")

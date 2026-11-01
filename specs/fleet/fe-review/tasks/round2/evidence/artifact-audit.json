@@ -1,0 +1,230 @@
+{
+  "selectedCount": 12,
+  "replacementOnly": "service/mobile/light",
+  "selected": [
+    {
+      "key": "login/desktop/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleet-login__login__desktop__light.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "7f94336053627849456e8157193ed6991a8f6ce652d904342edb0df6a61207b8",
+      "selected": true
+    },
+    {
+      "key": "login/tablet/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleet-login__login__tablet__light.png",
+      "width": 834,
+      "height": 1112,
+      "sha256": "078a5e44b558cdef4d43e8031d5f21276d30595c00c416ae766d3b491c7f963e",
+      "selected": true
+    },
+    {
+      "key": "login/mobile/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleet-login__login__mobile__light.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "9720dcf82350e4fbf23350dee4b925d9c7ee9bb166bbcc29d265b61cc0a342c6",
+      "selected": true
+    },
+    {
+      "key": "catalog/desktop/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__catalog__desktop__light.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "6b76fad0324cae718150bf24fbfc311c4000703aae77626b9ac99f821bb6bdd5",
+      "selected": true
+    },
+    {
+      "key": "catalog/tablet/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__catalog__tablet__light.png",
+      "width": 834,
+      "height": 1112,
+      "sha256": "4edce33c0a11ad95bc19aa2737934e423aa6033c40fcb4352b0c39bd52619f5e",
+      "selected": true
+    },
+    {
+      "key": "catalog/mobile/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__catalog__mobile__light.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "229182c4722ad6c9626ea33886150874f29d2e4e8d5a18d7f0cf8cabcb3582d4",
+      "selected": true
+    },
+    {
+      "key": "node/desktop/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__node__desktop__light.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "911f8012ae281415cc9eb1754b544d394b2ec93c3b25baea8d322aca4df8d95a",
+      "selected": true
+    },
+    {
+      "key": "node/tablet/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__node__tablet__light.png",
+      "width": 834,
+      "height": 1112,
+      "sha256": "2198ee205c01d48770417f855ff5e81ed18bded4cef56a06f5582689d1f76849",
+      "selected": true
+    },
+    {
+      "key": "node/mobile/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__node__mobile__light.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "89d898c171183fced4a886c0f7ef3f108b36fa9ef2c995d945d9d8edb5bc2c2a",
+      "selected": true
+    },
+    {
+      "key": "service/desktop/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__service__desktop__light.png",
+      "width": 1440,
+      "height": 942,
+      "sha256": "ac9560aabb8877b6067cbd6ef3a686d77fe57c8a14968c4d0d2817fc997cf065",
+      "selected": true
+    },
+    {
+      "key": "service/tablet/light",
+      "run": "final-003",
+      "screenshot": "screenshots/fleetd__service__tablet__light.png",
+      "width": 834,
+      "height": 2769,
+      "sha256": "beb481520256a80c70141ccb10ed880f786b66e9ba38f3eafc04425b01d25a26",
+      "selected": true
+    },
+    {
+      "key": "service/mobile/light",
+      "run": "repair-001",
+      "screenshot": "screenshots/fleetd__service__mobile__light.png",
+      "width": 390,
+      "height": 2790,
+      "sha256": "e3edccea9e5f5dc8b113a86999cf3ede568f8edd464531edab784d6c1c902b83",
+      "selected": true
+    }
+  ],
+  "originalFailedArtifact": {
+    "key": "service/mobile/light",
+    "run": "final-003",
+    "screenshot": "screenshots/fleetd__service__mobile__light.png",
+    "width": 759,
+    "height": 2790,
+    "sha256": "e6c07fb5199ebbf4fe6c7018c3e7ba864e76c7ab3ed2a60282b5713b3edbe9ad",
+    "selected": false
+  },
+  "unionNegativeCanariesPassed": 2,
+  "productDeltaAfterAcceptedFlow": [
+    "internal/ui/static/app.css"
+  ],
+  "interactionRun": "final-003",
+  "remainingRun": "repair-001",
+  "loaded": 12,
+  "axeScans": 4,
+  "axeFindings": [
+    {
+      "page": "login",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "catalog",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "span"
+            ]
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "page": "node",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "span"
+            ]
+          ]
+        },
+        {
+          "id": "meta-refresh",
+          "impact": "critical",
+          "nodes": 1,
+          "targets": [
+            [
+              "meta[http-equiv=\"refresh\"]"
+            ]
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "page": "service",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "header > .muted"
+            ]
+          ]
+        },
+        {
+          "id": "meta-refresh",
+          "impact": "critical",
+          "nodes": 1,
+          "targets": [
+            [
+              "meta[http-equiv=\"refresh\"]"
+            ]
+          ]
+        }
+      ],
+      "incomplete": []
+    }
+  ],
+  "cleanup": {
+    "final-003": {
+      "captureExited": true,
+      "heartbeatStopped": true,
+      "browserClosed": true,
+      "serverExited": true,
+      "listenerAbsent": true,
+      "privateStateRemoved": true
+    },
+    "repair-001": {
+      "captureExited": true,
+      "heartbeatStopped": true,
+      "browserClosed": true,
+      "serverExited": true,
+      "listenerAbsent": true,
+      "privateStateRemoved": true
+    }
+  },
+  "limits": [
+    "11 original PNGs precede the one-property CSS containment repair",
+    "12 loaded guards and 4 axe scans use final CSS binary",
+    "fresh repair synthetic IDs, generation and timestamps differ",
+    "full R3 and CF OTP unverified"
+  ]
+}

@@ -115,6 +115,20 @@ def require(value, message):
         raise RuntimeError(message)
 
 
+def fixture_source(prefix):
+    source = Path("src/agent_platform/guest_fixture.py").read_text()
+    marker = "\nclass Handler("
+    require(source.count(marker) == 1, "guest_fixture_hook_changed")
+    return source.replace(
+        marker,
+        "\noriginal_edit_command = edit_command\n"
+        "def edit_command(messages, run_id):\n"
+        "    return " + repr(prefix) + " + original_edit_command(messages, run_id)\n"
+        "\nclass Handler(",
+        1,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
@@ -220,16 +234,7 @@ def main():
             "in (p/'cmdline').read_bytes().split(bytes([0]))]",
             timeout=15,
         )
-        source = (
-            Path("src/agent_platform/guest_fixture.py")
-            .read_text()
-            .replace(
-                "class Handler(",
-                "COMMAND = "
-                + repr(f"python3 -I {CODE}/egress_probe.py; ")
-                + " + COMMAND\n\nclass Handler(",
-            )
-        )
+        source = fixture_source(f"python3 -I {CODE}/egress_probe.py; ")
         sb.write_file(CODE + "/egress_fixture.py", source.encode(), mode=0o644)
         sb.spawn(
             "python3",

@@ -12,14 +12,100 @@ type Queue struct {
 	messages []Message
 	maxDepth int
 	notify   chan struct{}
+
+	// removed remembers IDs taken out of this queue so catch-up and replica
+	// pushes cannot bring a consumed message back. Entries expire after removedTTL.
+	removed    map[string]time.Time
+	removedTTL time.Duration
+	nextPrune  time.Time
+
+	// unconfirmed holds IDs loaded from disk at startup that peers have not yet
+	// vouched for; they may have been consumed elsewhere while this node was down.
+	unconfirmed map[string]struct{}
 }
 
-func newQueue(name string, maxDepth int) *Queue {
+func newQueue(name string, maxDepth int, removedTTL time.Duration) *Queue {
 	return &Queue{
-		name:     name,
-		maxDepth: maxDepth,
-		notify:   make(chan struct{}),
+		name:        name,
+		maxDepth:    maxDepth,
+		notify:      make(chan struct{}),
+		removed:     make(map[string]time.Time),
+		removedTTL:  removedTTL,
+		unconfirmed: make(map[string]struct{}),
 	}
+}
+
+func (q *Queue) markAllUnconfirmed() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	for _, msg := range q.messages {
+		q.unconfirmed[msg.ID] = struct{}{}
+	}
+}
+
+func (q *Queue) confirmAll() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	clear(q.unconfirmed)
+}
+
+func (q *Queue) unconfirmedIDs() map[string]struct{} {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	out := make(map[string]struct{}, len(q.unconfirmed))
+	for id := range q.unconfirmed {
+		out[id] = struct{}{}
+	}
+	return out
+}
+
+func (q *Queue) markRemovedLocked(id string) {
+	now := time.Now()
+	delete(q.unconfirmed, id)
+	q.removed[id] = now
+	if now.Before(q.nextPrune) {
+		return
+	}
+	for removedID, at := range q.removed {
+		if now.Sub(at) > q.removedTTL {
+			delete(q.removed, removedID)
+		}
+	}
+	q.nextPrune = now.Add(q.removedTTL / 2)
+}
+
+func (q *Queue) wasRemovedLocked(id string) bool {
+	at, ok := q.removed[id]
+	return ok && time.Since(at) <= q.removedTTL
+}
+
+// restore appends msg unless its ID is already queued or was removed. Reports whether it was added.
+func (q *Queue) restore(msg Message) (bool, error) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	if q.wasRemovedLocked(msg.ID) || q.hasIDLocked(msg.ID) {
+		return false, nil
+	}
+	if len(q.messages) >= q.maxDepth {
+		return false, ErrQueueFull
+	}
+	q.messages = append(q.messages, msg)
+	close(q.notify)
+	q.notify = make(chan struct{})
+	return true, nil
+}
+
+// removedIDs returns the unexpired IDs removed from this queue.
+func (q *Queue) removedIDs() []string {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	ids := make([]string, 0, len(q.removed))
+	for id := range q.removed {
+		if q.wasRemovedLocked(id) {
+			ids = append(ids, id)
+		}
+	}
+	return ids
 }
 
 func (q *Queue) push(msg Message) error {
@@ -54,6 +140,7 @@ func (q *Queue) read(ctx context.Context, peek bool, timeout time.Duration) (Mes
 			if !peek {
 				q.messages[0] = Message{}
 				q.messages = q.messages[1:]
+				q.markRemovedLocked(msg.ID)
 			}
 			q.mu.Unlock()
 			return msg, true
@@ -80,6 +167,9 @@ func (q *Queue) clear() int {
 	defer q.mu.Unlock()
 
 	count := len(q.messages)
+	for _, msg := range q.messages {
+		q.markRemovedLocked(msg.ID)
+	}
 	q.messages = nil
 	return count
 }
@@ -115,9 +205,11 @@ func (q *Queue) replaceMessages(msgs []Message) {
 }
 
 // removeByID deletes the first message with the given ID. Returns true if found.
+// The ID is remembered even when absent, so a later copy cannot resurrect it.
 func (q *Queue) removeByID(id string) bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
+	q.markRemovedLocked(id)
 	for i, msg := range q.messages {
 		if msg.ID == id {
 			copy(q.messages[i:], q.messages[i+1:])
@@ -132,6 +224,10 @@ func (q *Queue) removeByID(id string) bool {
 func (q *Queue) hasID(id string) bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
+	return q.hasIDLocked(id)
+}
+
+func (q *Queue) hasIDLocked(id string) bool {
 	for _, msg := range q.messages {
 		if msg.ID == id {
 			return true
@@ -162,15 +258,18 @@ func (q *Queue) compareAndPop(expectedID string) (Message, bool) {
 	msg := q.messages[0]
 	q.messages[0] = Message{}
 	q.messages = q.messages[1:]
+	q.markRemovedLocked(msg.ID)
 	return cloneMessage(msg), true
 }
 
+// pushFront puts a message back at the head (compensation), undoing its removal record.
 func (q *Queue) pushFront(msg Message) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	if len(q.messages) >= q.maxDepth {
 		return ErrQueueFull
 	}
+	delete(q.removed, msg.ID)
 	q.messages = append([]Message{msg}, q.messages...)
 	close(q.notify)
 	q.notify = make(chan struct{})

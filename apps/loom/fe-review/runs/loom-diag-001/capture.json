@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "unit": "loom",
+  "synthetic": true,
+  "status": "failed",
+  "stage": "MATRIX_desktop__light_FIT_VIEW",
+  "started": "2026-10-24T11:45:38.384Z",
+  "sourceHashes": {
+    "fe-review/preload.mjs": "fdaa370f4ec8aa8180eea17482f94e5fa665ee2c17d878fe7a58a331eab27c1a",
+    "fe-review/preload.node.mjs": "df919610272d9da0a1c894da3c96aadf68d2e4669a06aff2e654138c3a228015",
+    "fe-review/run-review.mjs": "4c5e9f209b00a00c744a1bf9d85dff984a5797a0ae115371d13017ba6ea84254",
+    "fe-review/ui-steps.mjs": "571c7f80767654e7630b4a8e9ad7cc80cd616eeb1a1a762e9ff83c4b4e0cb40f",
+    "fe-review/vite-review-config.mjs": "e509aa929a58701c425b6fe0e9aac39a26585ad5ea99b9c6c09430b6d2d18d48",
+    "vite.config.ts": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+    "../flowshot/fe-review/browser-runtime.mjs": "23adc88ebc6466a7f5616b43149ebab3d059fd7a47394c00a277047988c4ca3c",
+    "../flowshot/fe-review/runtime-guards.mjs": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+    "src/ipc.ts": "3c56b0c5b60309e50758c90bcfde277a54787fc4a4049647dd0b0bc617aa1e18",
+    "src/App.tsx": "dc2c8c8885fde55955b0988755c90aae385222ce42f6efed420f0b53be47fc26",
+    "src/main.tsx": "7cf38f34838d009ef718093a1686b55bedd34b732d4a9bd1a07e4a37037b095c",
+    "src/Terminal.tsx": "5723ca6004f1af87d345f4a54f70436a0bf15a3e9e48628ad413f49f84da0513",
+    "src/surfaces/canvas/CanvasSurface.tsx": "54ef8c2d3820ae74da624cee9ed1fb11936813f739625f3c3c43963538392378",
+    "src/surfaces/canvas/persistence.ts": "f180099aff2b590d917d7c79f3965fac59c5e5d065dd8f6fc55a3ee98ae65549",
+    "src/surfaces/canvas/history.ts": "7c2ef08e69bd6cac87e17c4a35d4577e2b770623656962f08b31fff1c83e0acf",
+    "src/surfaces/canvas/window_close_ipc.ts": "1429cc472105b6811cb27c76215896324e9a826538fb958ae016d066b17d397f",
+    "src/surfaces/document/DocumentSurface.tsx": "06dcde9765cb0ffbf43f8a57054b91bab5e1479d2c9737b232ea22586abc430c",
+    "src/surfaces/document/doc_ipc.ts": "bd19031e6655a31343b86e23019ea24fddc453dc3990acf44611851c3f23219b",
+    "src/surfaces/document/ai_ipc.ts": "a73fae88a9ec2149a1f765ebdb55c6c2db70e670cb0f81d4a568bc3e316299a6",
+    "package-lock.json": "79e87f1819728b06bb45091404661964e5560486c5d094db597b54a516f3aad6"
+  },
+  "tools": {
+    "node": "v24.18.0",
+    "playwright": "1.63.0",
+    "browser": "153.0.8010.12"
+  },
+  "captures": [
+    {
+      "id": "empty__desktop__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 1
+          }
+        ],
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      },
+      "screenshot": "screenshots/empty__desktop__light.png",
+      "sha256": "eb9804370ed8f8ad135762781b171df1cc3da35a653841a055fd154d197fbb3d",
+      "bytes": 23064,
+      "fixture": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "external-http-websocket-refused",
+      "passed": true,
+      "blockedHttp": 1,
+      "blockedWebSocket": 1
+    },
+    {
+      "id": "network-canary-fixture-disposal",
+      "passed": true,
+      "beforeForcedDispose": {
+        "synthetic": true,
+        "disposed": false,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 3,
+        "callbacks": 3,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      },
+      "afterForcedDispose": {
+        "synthetic": true,
+        "disposed": true,
+        "counts": {
+          "plugin:event|listen": 6,
+          "canvas_read": 2,
+          "vault_root": 2,
+          "plugin:event|unlisten": 3,
+          "session_history": 1
+        },
+        "unknownCommands": 0,
+        "rejectedArguments": 0,
+        "listeners": 0,
+        "callbacks": 0,
+        "listenerIdsDistinct": true,
+        "subscriptions": 0,
+        "sessions": 0,
+        "openDocuments": 0,
+        "dirtyDocuments": 0,
+        "pending": 0,
+        "detached": 0,
+        "closedDocuments": 0,
+        "closeApproved": 0,
+        "exactRunPayloads": 0
+      }
+    }
+  ],
+  "cleanup": {
+    "context0": true,
+    "browserClosed": true,
+    "serverClosed": true,
+    "listenerAbsent": true
+  },
+  "limits": [
+    "Web simulation only",
+    "Native/real vault/PTY/AI/Mac not verified",
+    "Full Round3 not accepted"
+  ],
+  "viteOriginalConfigSha256": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+  "diagnosticOnly": "first-populated",
+  "failure": {
+    "stage": "MATRIX_desktop__light_FIT_VIEW",
+    "reason": "UNCLASSIFIED_FAILURE",
+    "site": "ui-steps.mjs:37:101",
+    "fixture": {
+      "synthetic": true,
+      "disposed": false,
+      "counts": {
+        "plugin:event|listen": 14,
+        "canvas_read": 2,
+        "vault_root": 2,
+        "plugin:event|unlisten": 7,
+        "session_history": 2,
+        "canvas_write": 2,
+        "home_dir": 1,
+        "pty_spawn": 1,
+        "pty_session_meta": 1,
+        "pty_detach": 1,
+        "pty_subscribe": 1,
+        "pty_resize": 4,
+        "ai_status": 2,
+        "doc_read": 2,
+        "doc_close": 1,
+        "doc_open": 1,
+        "doc_mark_clean": 1
+      },
+      "unknownCommands": 0,
+      "rejectedArguments": 0,
+      "listeners": 7,
+      "callbacks": 7,
+      "listenerIdsDistinct": true,
+      "subscriptions": 1,
+      "sessions": 1,
+      "openDocuments": 1,
+      "dirtyDocuments": 0,
+      "pending": 0,
+      "detached": 1,
+      "closedDocuments": 1,
+      "closeApproved": 0,
+      "exactRunPayloads": 0
+    }
+  },
+  "ended": "2026-10-24T11:45:54.576Z"
+}

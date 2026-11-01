@@ -1,0 +1,46 @@
+✖ labs/handwired-learning/tests/build.test.mjs (0.388135ms)
+✖ labs/handwired-learning/tests/forward.test.mjs (0.067279ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13.016921
+
+✖ failing tests:
+
+test at labs/handwired-learning/tests/build.test.mjs:1:1
+✖ labs/handwired-learning/tests/build.test.mjs (0.388135ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ckc/test/codex/product-directions-20261021/worktrees/Handwired-20261021-1845/labs/handwired-learning/scripts/build.mjs' imported from /home/ckc/test/codex/product-directions-20261021/worktrees/Handwired-20261021-1845/labs/handwired-learning/tests/build.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:991:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:719:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:736:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:765:52)
+      at #resolve (node:internal/modules/esm/loader:701:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:621:35)
+      at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)
+      at ModuleJob.link (node:internal/modules/esm/module_job:245:17) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///home/ckc/test/codex/product-directions-20261021/worktrees/Handwired-20261021-1845/labs/handwired-learning/scripts/build.mjs'
+  }
+
+test at labs/handwired-learning/tests/forward.test.mjs:1:1
+✖ labs/handwired-learning/tests/forward.test.mjs (0.067279ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ckc/test/codex/product-directions-20261021/worktrees/Handwired-20261021-1845/labs/handwired-learning/web/forward.mjs' imported from /home/ckc/test/codex/product-directions-20261021/worktrees/Handwired-20261021-1845/labs/handwired-learning/tests/forward.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:991:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:719:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:736:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:765:52)
+      at #resolve (node:internal/modules/esm/loader:701:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:621:35)
+      at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)
+      at ModuleJob.link (node:internal/modules/esm/module_job:245:17) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///home/ckc/test/codex/product-directions-20261021/worktrees/Handwired-20261021-1845/labs/handwired-learning/web/forward.mjs'
+  }

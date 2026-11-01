@@ -1,0 +1,13 @@
+{
+  "historical": true,
+  "command": "browser-evidence.mjs --mode browser --url http://localhost:5173/clinic",
+  "exitCode": 2,
+  "findings": [
+    {
+      "type": "http-error-response",
+      "url": "http://localhost:5173/favicon.ico",
+      "status": 404
+    }
+  ],
+  "resolvedBy": "Front declares inline local SVG favicon; final CDP runner passed both viewports after readiness prewarm. Initial animation frames were replaced by finite-animation-completed screenshots."
+}

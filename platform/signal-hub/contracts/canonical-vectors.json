@@ -1,0 +1,32 @@
+[
+  {
+    "name": "original",
+    "input": "{\"specversion\": \"1.0\", \"id\": \"synthetic-1\", \"source\": \"urn:example:release\", \"type\": \"release.deploy.succeeded\", \"time\": \"2026-10-03T00:00:00Z\", \"summary\": \"測試\"}",
+    "canonical": "{\"id\":\"synthetic-1\",\"source\":\"urn:example:release\",\"specversion\":\"1.0\",\"summary\":\"測試\",\"time\":\"2026-10-03T00:00:00Z\",\"type\":\"release.deploy.succeeded\"}",
+    "sha256": "c9253c0d0206a1715b055398ef60cc97fd28bc95823c5810bf201dde2135ee49"
+  },
+  {
+    "name": "reordered",
+    "input": "{\"summary\": \"\\u6e2c\\u8a66\", \"time\": \"2026-10-03T00:00:00Z\", \"type\": \"release.deploy.succeeded\", \"source\": \"urn:example:release\", \"id\": \"synthetic-1\", \"specversion\": \"1.0\"}",
+    "canonical": "{\"id\":\"synthetic-1\",\"source\":\"urn:example:release\",\"specversion\":\"1.0\",\"summary\":\"測試\",\"time\":\"2026-10-03T00:00:00Z\",\"type\":\"release.deploy.succeeded\"}",
+    "sha256": "c9253c0d0206a1715b055398ef60cc97fd28bc95823c5810bf201dde2135ee49"
+  },
+  {
+    "name": "null-unset",
+    "input": "{\"specversion\": \"1.0\", \"id\": \"synthetic-1\", \"source\": \"urn:example:release\", \"type\": \"release.deploy.succeeded\", \"time\": \"2026-10-03T00:00:00Z\", \"summary\": \"\\u6e2c\\u8a66\", \"subject\": null}",
+    "canonical": "{\"id\":\"synthetic-1\",\"source\":\"urn:example:release\",\"specversion\":\"1.0\",\"summary\":\"測試\",\"time\":\"2026-10-03T00:00:00Z\",\"type\":\"release.deploy.succeeded\"}",
+    "sha256": "c9253c0d0206a1715b055398ef60cc97fd28bc95823c5810bf201dde2135ee49"
+  },
+  {
+    "name": "explicit-default",
+    "input": "{\"specversion\": \"1.0\", \"id\": \"synthetic-1\", \"source\": \"urn:example:release\", \"type\": \"release.deploy.succeeded\", \"time\": \"2026-10-03T00:00:00Z\", \"summary\": \"\\u6e2c\\u8a66\", \"severity\": \"info\"}",
+    "canonical": "{\"id\":\"synthetic-1\",\"severity\":\"info\",\"source\":\"urn:example:release\",\"specversion\":\"1.0\",\"summary\":\"測試\",\"time\":\"2026-10-03T00:00:00Z\",\"type\":\"release.deploy.succeeded\"}",
+    "sha256": "166e1579c02f38d7bff496d37696f96fdc96d4ef45411d6235188c6dc2416c2f"
+  },
+  {
+    "name": "number-unicode",
+    "input": "{\"specversion\": \"1.0\", \"id\": \"synthetic-1\", \"source\": \"urn:example:release\", \"type\": \"release.deploy.succeeded\", \"time\": \"2026-10-03T00:00:00Z\", \"summary\": \"測試\", \"data\": {\"z\": 1.0, \"a\": \"é\", \"nested\": {\"b\": 2, \"a\": -0.0}}}",
+    "canonical": "{\"data\":{\"a\":\"é\",\"nested\":{\"a\":0,\"b\":2},\"z\":1},\"id\":\"synthetic-1\",\"source\":\"urn:example:release\",\"specversion\":\"1.0\",\"summary\":\"測試\",\"time\":\"2026-10-03T00:00:00Z\",\"type\":\"release.deploy.succeeded\"}",
+    "sha256": "f20290028069540f445b5ab49ba0cce778be44afd5b6022616fdbc07edb9b507"
+  }
+]

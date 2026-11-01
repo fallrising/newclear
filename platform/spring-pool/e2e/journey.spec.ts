@@ -82,6 +82,9 @@ test.describe("T-E2E-1 no-JS paste + file -> reordered runbook export", () => {
 
     await gotoChecked(page, "/scripts/new");
     await page.getByLabel("Title").fill(titleA);
+    await page
+      .getByLabel("Description")
+      .fill("Prepare the environment.\nInspect the saved revision.");
     await page.getByLabel("Language").selectOption("bash");
     await page.getByLabel("Script content").fill(bodyA);
     await saveScript(page);
@@ -102,7 +105,15 @@ test.describe("T-E2E-1 no-JS paste + file -> reordered runbook export", () => {
 
     await gotoChecked(page, "/runbooks/new");
     await page.getByLabel("Title").fill(runbookTitle);
-    await fillStep(page, 1, idA!, "run the paste script");
+    await page
+      .getByLabel("Description")
+      .fill("First review.\nThen run manually.");
+    await fillStep(
+      page,
+      1,
+      idA!,
+      "inspect the saved text\nrun the paste script",
+    );
     await page.getByRole("button", { name: /add step/i }).click();
     await expect(page.getByRole("group", { name: "Step 2" })).toBeVisible();
     await fillStep(page, 2, idB!, "run the uploaded script");

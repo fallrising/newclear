@@ -23,6 +23,7 @@ import (
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/service"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain/internal/rehydrationcap"
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/testfixture"
 )
 
 const capabilityImport = "github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain/internal/rehydrationcap"
@@ -916,6 +917,7 @@ func newVerticalAuthorityFixture(t *testing.T) verticalFixture {
 			"AC-1": {VerifierClass: "independent", Independent: true, EnvironmentDigest: domain.HashString("vertical-environment"), ProhibitedVerifierRunRole: "producer"},
 		},
 	}
+	unit.delegate = testfixture.VerifiedInputUnit{Base: store, View: testfixture.View(verticalProject, verticalWorkItem, "AC-1", acDigest, graphDigest, policy.RevisionDigest, policy.RecipeDigest)}
 	application, err := service.New(unit, clock, &verticalIDs{}, verticalExecutor{}, artifacts, &verticalProjection{}, service.Config{
 		Operator: verticalOperator, IdempotencyTTL: time.Hour, Specification: verticalSpecification{}, Completion: policy,
 	})
@@ -1036,7 +1038,7 @@ func (clock *verticalClock) Advance(delta time.Duration) {
 }
 
 type verticalTrackingUnit struct {
-	delegate *Store
+	delegate port.UnitOfWork
 	mu       sync.Mutex
 	depth    int
 	calls    int
@@ -1104,7 +1106,7 @@ func (source *verticalIDs) Next(kind port.IDKind) (string, error) {
 type verticalExecutor struct{}
 
 func (verticalExecutor) Declaration() port.ExecutorDeclaration {
-	return port.ExecutorDeclaration{AdapterID: "fake/v1", AdapterVersion: "1", Capabilities: []string{"start_ack", "heartbeat", "lookup", "cancel_ack", "durable_checkpoint"}}
+	return port.ExecutorDeclaration{AdapterID: "fake/v1", AdapterVersion: "1", Scenarios: []string{"vertical"}, Capabilities: []string{"start_ack", "heartbeat", "lookup", "cancel_ack", "durable_checkpoint"}}
 }
 
 type verticalSpecification struct{}

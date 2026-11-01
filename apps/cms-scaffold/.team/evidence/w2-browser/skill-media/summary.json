@@ -1,0 +1,26 @@
+{
+  "url": "http://localhost:5184/media?mockUser=seed-operator-album",
+  "viewports": [
+    {
+      "viewport": {
+        "name": "1440x900",
+        "width": 1440,
+        "height": 900
+      },
+      "json": "1440x900.json",
+      "png": "1440x900.png",
+      "blockingFindings": 0
+    },
+    {
+      "viewport": {
+        "name": "390x844",
+        "width": 390,
+        "height": 844
+      },
+      "json": "390x844.json",
+      "png": "390x844.png",
+      "blockingFindings": 0
+    }
+  ],
+  "blockingFindings": 0
+}

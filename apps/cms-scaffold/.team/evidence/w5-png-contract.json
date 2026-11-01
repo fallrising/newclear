@@ -1,0 +1,34 @@
+{
+  "fixture": "W5 MEDIA_PNG_BASE64",
+  "bytes": 156,
+  "signatureValid": true,
+  "dimensions": [
+    64,
+    64
+  ],
+  "chunks": [
+    {
+      "type": "IHDR",
+      "length": 13,
+      "complete": true,
+      "crcMatches": true
+    },
+    {
+      "type": "IDAT",
+      "length": 99,
+      "complete": true,
+      "crcMatches": true
+    },
+    {
+      "type": "IEND",
+      "length": 0,
+      "complete": true,
+      "crcMatches": true
+    }
+  ],
+  "consumedBytes": 156,
+  "valid": true,
+  "decodedScanlineBytes": 16448,
+  "expectedScanlineBytes": 16448,
+  "decodedSizeValid": true
+}

@@ -115,7 +115,7 @@ func findEnvironmentField(value reflect.Value, path string) (reflect.Value, stri
 		if fieldType.PkgPath != "" {
 			continue
 		}
-		tag := strings.Split(fieldType.Tag.Get("yaml"), ",")[0]
+		tag, _, _ := strings.Cut(fieldType.Tag.Get("yaml"), ",")
 		if tag == "" || tag == "-" {
 			continue
 		}
@@ -166,7 +166,7 @@ func setEnvironmentMapValue(value reflect.Value, path, raw string) error {
 
 func setScalar(value reflect.Value, raw string) error {
 	if value.CanAddr() {
-		if unmarshaler, ok := value.Addr().Interface().(encoding.TextUnmarshaler); ok {
+		if unmarshaler, ok := reflect.TypeAssert[encoding.TextUnmarshaler](value.Addr()); ok {
 			return unmarshaler.UnmarshalText([]byte(raw))
 		}
 	}

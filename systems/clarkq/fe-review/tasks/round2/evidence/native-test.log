@@ -1,0 +1,14 @@
+?   	github.com/fallrising/newclear/systems/clarkq/cmd/clarkq	[no test files]
+?   	github.com/fallrising/newclear/systems/clarkq/examples/client	[no test files]
+ok  	github.com/fallrising/newclear/systems/clarkq/internal/auth	0.172s
+?   	github.com/fallrising/newclear/systems/clarkq/internal/observability	[no test files]
+ok  	github.com/fallrising/newclear/systems/clarkq/internal/cluster	0.081s
+ok  	github.com/fallrising/newclear/systems/clarkq/internal/config	0.004s
+?   	github.com/fallrising/newclear/systems/clarkq/internal/ui	[no test files]
+?   	github.com/fallrising/newclear/systems/clarkq/internal/version	[no test files]
+?   	github.com/fallrising/newclear/systems/clarkq/sdk/go/example	[no test files]
+ok  	github.com/fallrising/newclear/systems/clarkq/internal/crypto	5.460s
+ok  	github.com/fallrising/newclear/systems/clarkq/internal/persist	0.155s
+ok  	github.com/fallrising/newclear/systems/clarkq/internal/queue	0.018s
+ok  	github.com/fallrising/newclear/systems/clarkq/internal/server	4.010s
+ok  	github.com/fallrising/newclear/systems/clarkq/sdk/go/clarkq	0.239s

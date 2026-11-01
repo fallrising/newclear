@@ -1,0 +1,483 @@
+{
+  "kind": "offline-derived-health-postcheck",
+  "originalAttemptPassed": false,
+  "noRuntimeRerun": true,
+  "manifestSha256": "a841c6ba46069e70a6abcda971fd4fabaa222c9bff690dc347c8019e5e1a0e1d",
+  "classifierSha256": "3629aee64545315eefc32d370c822a283d7be8e458f42e0fa082787b8d6cf003",
+  "all27Classified": true,
+  "axePreloadIncompleteRows": 9,
+  "axeFullPassClaim": false,
+  "rows": [
+    {
+      "page": "login",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "anonymous-session",
+        "existing-google-font"
+      ],
+      "consoleCount": 4,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        },
+        {
+          "id": "page-has-heading-one",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Page should contain a level-one heading"
+        }
+      ]
+    },
+    {
+      "page": "login",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font",
+        "anonymous-session"
+      ],
+      "consoleCount": 2,
+      "axeViolations": null
+    },
+    {
+      "page": "login",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font",
+        "anonymous-session"
+      ],
+      "consoleCount": 2,
+      "axeViolations": null
+    },
+    {
+      "page": "dashboard",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 9,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "page": "dashboard",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "dashboard",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "topics",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 3,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "page": "topics",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "topics",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "groups",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 7,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "page": "groups",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "groups",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "subscriptions",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        },
+        {
+          "id": "empty-table-header",
+          "impact": "minor",
+          "nodes": 1,
+          "help": "Table header text should not be empty"
+        }
+      ]
+    },
+    {
+      "page": "subscriptions",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "subscriptions",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "delay",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "page": "delay",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "delay",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "admin-clusters",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        },
+        {
+          "id": "empty-table-header",
+          "impact": "minor",
+          "nodes": 1,
+          "help": "Table header text should not be empty"
+        }
+      ]
+    },
+    {
+      "page": "admin-clusters",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "admin-clusters",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "admin-audit",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "page": "admin-audit",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "admin-audit",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "admin-users",
+      "viewport": "desktop",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": true,
+      "classifiedFailures": [
+        "existing-google-font",
+        "existing-google-font"
+      ],
+      "consoleCount": 3,
+      "axeViolations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 3,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "page": "admin-users",
+      "viewport": "tablet",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    },
+    {
+      "page": "admin-users",
+      "viewport": "mobile",
+      "status": 200,
+      "overflow": false,
+      "pageErrors": 0,
+      "passed": true,
+      "axePreloadIncomplete": false,
+      "classifiedFailures": [
+        "existing-google-font"
+      ],
+      "consoleCount": 1,
+      "axeViolations": null
+    }
+  ]
+}

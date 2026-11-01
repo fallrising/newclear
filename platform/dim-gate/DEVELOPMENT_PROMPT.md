@@ -83,12 +83,12 @@ kernel 不能存取時，仍可完成 public repo 的唯讀盤點與恢復報告
 
 可修改 `platform/dim-gate/**`，以及必要的 root README、本項目 root CI、`.team/PLAN.md` 的本 program 區塊和本 program task/report。其他 component、kernel、全域設定不在範圍；private logs／credentials 不可進 public repo。
 
-不包含自動 merge、直接寫 main、force push、丟棄既有修改、發布、部署、付費資源或真實基建操作。若本輪沒有 push 權限，保存本地 checkpoint 並明示「尚不能跨機器恢復」，不得聲稱 GitHub 已保存。
+已授權里程碑的 PR 交付依[根規則](../../AGENTS.md#交付與對人回報)，包含必要 CI／獨立審查通過後的正常合併與回讀；當次明確 Draft-only／停止指示仍優先。不包含直接寫 main、force push、丟棄既有修改、release、部署、付費資源或真實基建操作。若本輪沒有 push 權限，保存本地 checkpoint 並明示「尚不能跨機器恢復」，不得聲稱 GitHub 已保存。
 
 ## 8. 結束前留下可恢復現場
 
 依協定保存 implementation commit、spec/input versions、測試對應的 commit、review、task reports、主控決策、PLAN 的 resume block，再更新 STATUS 摘要。已有 branch／PR 就沿用，不為同一工作重複建立。
 
-回報：本輪目標及狀態、實際 agents/models、驗證 passed/failed/skipped、commit/PR、是否已遠端保存／整合、未完成項與一個明確下一步。`DONE` 只表示本輪限定交付通過所有要求，不表示整個 M0–M5 已完成；`ACCEPTED`、`MERGED` 與「產品 v0.1 完成」分別判斷。
+詳細紀錄保存本輪目標及狀態、實際 agents/models、驗證 passed/failed/skipped、commit/PR、是否已遠端保存／整合、未完成項與一個明確下一步。向 owner 收尾依[根規則](../../AGENTS.md#交付與對人回報)，連到上述證據。`DONE` 只表示本輪限定交付通過所有要求，不表示整個 M0–M5 已完成；`ACCEPTED`、`MERGED` 與「產品 v0.1 完成」分別判斷。
 
 現在先讀來源並對帳，然後在本輪範圍內實際開發、驗證與保存進度。

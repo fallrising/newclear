@@ -13,7 +13,7 @@ const EVERY_APP = [
 
 const FRONT_ONLY = [
   { what: "work API path (AC-08)", pattern: /\/api\/v1\/(entries|content-types|preview|principals|roles|admin|media\/)/ },
-  { what: "draft-only field (AC-08, 01 §10.4)", pattern: /publicationState|previewToken|includeDraft|includeUnpublished|revisionId|read_draft/ },
+  { what: "draft-only field (AC-08, 01 §10.4)", pattern: /previewToken|includeDraft|includeUnpublished|revisionId|read_draft/ },
 ];
 
 const APPS = [

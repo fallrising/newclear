@@ -1,0 +1,36 @@
+.venv/bin/ruff check src tests
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests/unit/test_key_rotation.py:3:1
+   |
+ 1 |   """DEK rotation via keyring admin operations."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | from pathlib import Path
+ 6 | |
+ 7 | | import pytest
+ 8 | |
+ 9 | | from secure_mqtt.errors import InvalidKeyStateError
+10 | | from secure_mqtt.keys.keyring_admin import (
+11 | |     activate_dek,
+12 | |     add_pending_dek,
+13 | |     list_keys,
+14 | |     validate_keyring,
+15 | | )
+16 | | from secure_mqtt.keys.file_keyring import FileKeyringProvider
+17 | | from secure_mqtt.keys.provider import KeyState
+   | |______________________________________________^
+help: Organize imports
+   |
+9  | from secure_mqtt.errors import InvalidKeyStateError
+10 + from secure_mqtt.keys.file_keyring import FileKeyringProvider
+11 | from secure_mqtt.keys.keyring_admin import (
+--------------------------------------------------------------------------------
+16 | )
+   - from secure_mqtt.keys.file_keyring import FileKeyringProvider
+17 | from secure_mqtt.keys.provider import KeyState
+   |
+
+Found 1 error.
+[*] 1 fixable with `--fix`.
+make: *** [Makefile:14: lint] Error 1

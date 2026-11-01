@@ -22,12 +22,15 @@ const (
 )
 
 type runtimeConfig struct {
-	DataRoot       string
-	ListenAddress  string
-	Origin         string
-	SessionToken   string
-	SessionActor   domain.ActorID
-	ShutdownWindow time.Duration
+	ApprovedRepositoriesFile string
+	CompletionPoliciesFile   string
+	DataRoot                 string
+	WebRoot                  string
+	ListenAddress            string
+	Origin                   string
+	SessionToken             string
+	SessionActor             domain.ActorID
+	ShutdownWindow           time.Duration
 }
 
 func loadRuntimeConfig(getenv func(string) string, args []string) (runtimeConfig, error) {
@@ -43,12 +46,15 @@ func loadRuntimeConfig(getenv func(string) string, args []string) (runtimeConfig
 		actor = defaultLocalActor
 	}
 	config := runtimeConfig{
-		DataRoot:       getenv("HAI_TASKBOARD_DATA_ROOT"),
-		ListenAddress:  listenAddress,
-		Origin:         getenv("HAI_TASKBOARD_ORIGIN"),
-		SessionToken:   getenv("HAI_TASKBOARD_SESSION_TOKEN"),
-		SessionActor:   domain.ActorID(actor),
-		ShutdownWindow: 5 * time.Second,
+		ApprovedRepositoriesFile: getenv("HAI_TASKBOARD_APPROVED_REPOSITORIES_FILE"),
+		CompletionPoliciesFile:   getenv("HAI_TASKBOARD_COMPLETION_POLICIES_FILE"),
+		DataRoot:                 getenv("HAI_TASKBOARD_DATA_ROOT"),
+		WebRoot:                  getenv("HAI_TASKBOARD_WEB_ROOT"),
+		ListenAddress:            listenAddress,
+		Origin:                   getenv("HAI_TASKBOARD_ORIGIN"),
+		SessionToken:             getenv("HAI_TASKBOARD_SESSION_TOKEN"),
+		SessionActor:             domain.ActorID(actor),
+		ShutdownWindow:           5 * time.Second,
 	}
 	if err := config.validate(); err != nil {
 		return runtimeConfig{}, err
@@ -66,6 +72,11 @@ func (config runtimeConfig) validate() error {
 	}
 	if config.Origin != "http://"+config.ListenAddress {
 		return errors.New("HAI_TASKBOARD_ORIGIN must exactly match the loopback listener")
+	}
+	if config.WebRoot != "" {
+		if err := validateWebRoot(config.WebRoot, config.DataRoot); err != nil {
+			return err
+		}
 	}
 	if !validSessionToken(config.SessionToken) {
 		return errors.New("HAI_TASKBOARD_SESSION_TOKEN is missing or insufficiently strong")

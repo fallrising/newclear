@@ -1,0 +1,44 @@
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/pytest tests/integration -m integration -v
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0 -- /home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /tmp/wotar-isolated-_37rocto/source
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5, asyncio-1.4.0, cov-7.1.0, hypothesis-6.170.5
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 16 items / 1 deselected / 15 selected
+
+tests/integration/test_emqx_e2e.py::test_emqx_tls_port_reachable SKIPPED [  6%]
+tests/integration/test_emqx_e2e.py::test_valid_publisher_subscriber SKIPPED [ 13%]
+tests/integration/test_emqx_e2e.py::test_wrong_ca_rejects_connection SKIPPED [ 20%]
+tests/integration/test_emqx_e2e.py::test_missing_ca_file_fails_at_config SKIPPED [ 26%]
+tests/integration/test_emqx_e2e.py::test_topic_substitution_rejected SKIPPED [ 33%]
+tests/integration/test_emqx_e2e.py::test_ciphertext_on_broker_plaintext_not_visible SKIPPED [ 40%]
+tests/integration/test_emqx_e2e.py::test_duplicate_delivery_handler_once SKIPPED [ 46%]
+tests/integration/test_emqx_e2e.py::test_restart_resumes_pending_outbox SKIPPED [ 53%]
+tests/integration/test_emqx_e2e.py::test_key_rotation_decrypt_only_still_works SKIPPED [ 60%]
+tests/integration/test_emqx_e2e.py::test_plaintext_port_not_used_for_client SKIPPED [ 66%]
+tests/integration/test_emqx_e2e.py::test_outbox_never_contains_plaintext SKIPPED [ 73%]
+tests/integration/test_emqx_e2e.py::test_wrong_hostname_rejects_connection SKIPPED [ 80%]
+tests/integration/test_emqx_e2e.py::test_unauthorized_client_publish_rejected SKIPPED [ 86%]
+tests/integration/test_emqx_e2e.py::test_reconnect_with_queued_outbox SKIPPED [ 93%]
+tests/integration/test_emqx_e2e.py::test_restart_resumes_pending_inbox SKIPPED [100%]
+
+=========================== short test summary info ============================
+SKIPPED [1] tests/integration/test_emqx_e2e.py:39: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:43: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:69: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:92: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:98: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:127: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:147: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:186: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:218: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:280: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:294: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:312: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:331: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:350: EMQX docker compose stack is not running on localhost:8883
+SKIPPED [1] tests/integration/test_emqx_e2e.py:383: EMQX docker compose stack is not running on localhost:8883
+================= 15 skipped, 1 deselected in 61.52s (0:01:01) =================

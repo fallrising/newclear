@@ -1,0 +1,1 @@
+{"failure":"compiled_binary_mode_0775","sourceManifestMatched":true,"providerSubmits":0,"repair":"Copy same binary bytes into owned acceptance artifact with mode0500; do not change shared build or weaken assertion"}

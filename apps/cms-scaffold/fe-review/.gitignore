@@ -3,3 +3,6 @@ runs/*/screenshots/
 runs/*/tui/
 runs/*/*.storage.json
 runs/.state/
+
+# Round 2 raw captures, stdout and screenshots remain private until Round 3.
+runs/round2-*/

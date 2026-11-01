@@ -1,0 +1,2 @@
+# Optional live server. The adapter/test suite needs only Python's stdlib.
+openviking==0.4.23

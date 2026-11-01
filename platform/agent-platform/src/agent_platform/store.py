@@ -1,15 +1,23 @@
 """Atomic commands, queue admission and durable event sequence allocation."""
 
-import base64
 import hashlib
 import json
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from psycopg.types.json import Jsonb
 
 from .auth import audit
-from .domain import TERMINAL, Problem, capabilities
+from .domain import (
+    RUNTIME_BACKENDS,
+    SUBSCRIPTION_BACKENDS,
+    SUBSCRIPTION_MODELS,
+    TERMINAL,
+    Problem,
+    capabilities,
+    execution_mode,
+)
+from .task_query import decode_cursor, encode_cursor, literal_pattern, scope_key
 
 
 def json_value(value):
@@ -25,20 +33,33 @@ def event(conn, run_id, kind, payload, *, source="platform", source_id=None):
     source_id = source_id or str(uuid4())
     # Row locking serializes producers; duplicate replay never consumes another seq.
     conn.execute("SELECT id FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
-    old = conn.execute(
-        "SELECT * FROM run_events WHERE run_id=%s AND source=%s AND source_event_id=%s",
+    identity = conn.execute(
+        "SELECT * FROM run_event_identities WHERE run_id=%s AND source=%s AND source_event_id=%s",
         (run_id, source, source_id),
     ).fetchone()
-    if old:
-        return old
+    if identity:
+        old = conn.execute(
+            "SELECT * FROM run_events WHERE run_id=%s AND seq=%s", (run_id, identity["seq"])
+        ).fetchone()
+        return old if old is not None else {**identity, "payload": None}
     seq = conn.execute(
         "UPDATE runs SET last_event_seq=last_event_seq+1 WHERE id=%s RETURNING last_event_seq",
         (run_id,),
     ).fetchone()["last_event_seq"]
+    event_id = uuid4()
+    created_at = conn.execute("SELECT clock_timestamp() AS now").fetchone()["now"]
+    metadata = (run_id, seq, event_id, source, source_id, kind, created_at)
+    conn.execute(
+        "INSERT INTO run_event_identities(run_id,seq,event_id,source,source_event_id,"
+        "type,created_at) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s)",
+        metadata,
+    )
     return conn.execute(
-        "INSERT INTO run_events(run_id,seq,event_id,source,source_event_id,type,payload) "
-        "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING *",
-        (run_id, seq, uuid4(), source, source_id, kind, Jsonb(json_value(payload))),
+        "INSERT INTO run_events(run_id,seq,event_id,source,source_event_id,type,"
+        "created_at,payload) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *",
+        (*metadata, Jsonb(json_value(payload))),
     ).fetchone()
 
 
@@ -46,7 +67,7 @@ def run_view(row):
     return {
         **row,
         "capabilities": capabilities(row["backend"]),
-        "execution_mode": "cocoon-fixture" if row["backend"] == "openhands" else "fake",
+        "execution_mode": execution_mode(row["backend"]),
     }
 
 
@@ -110,8 +131,14 @@ class Store:
         return {"status": 201, "body": row}
 
     def create_profile(self, conn, data):
+        if data.mock_tools and data.backend != "openhands":
+            raise Problem(409, "unsupported_capability:mock_tools")
         if data.require_approval and data.backend != "openhands":
             raise Problem(409, "unsupported_capability:approval")
+        if data.backend in SUBSCRIPTION_BACKENDS and (
+            data.deadline_seconds > 600 or data.verification.mode != "commands"
+        ):
+            raise Problem(422, "subscription_requires_bounded_verified_run")
         profile = data.profile_id or uuid4()
         revision = 1
         if data.profile_id:
@@ -128,7 +155,7 @@ class Store:
             revision = old["revision"] + 1
         template = "fixture:m1"
         egress_policy = None
-        if data.backend == "openhands":
+        if data.backend in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -150,16 +177,19 @@ class Store:
                 revision,
                 data.name,
                 data.backend,
-                "openai-compatible:chat-completions"
+                SUBSCRIPTION_MODELS[data.backend]
+                if data.backend in SUBSCRIPTION_BACKENDS
+                else "openai-compatible:chat-completions"
                 if data.backend == "openhands"
                 else "fixture:m1",
                 template,
                 Jsonb(
                     {
-                        "exec": data.backend == "openhands",
+                        "exec": data.backend in RUNTIME_BACKENDS,
                         "network": data.backend == "openhands",
                         "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
+                        "mock_tools": data.mock_tools,
                     }
                 ),
                 Jsonb(
@@ -182,7 +212,7 @@ class Store:
             "profile_not_found",
         )
         egress_policy = profile["tool_policy"].get("egress_policy_sha256")
-        if profile["backend"] == "openhands":
+        if profile["backend"] in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -238,7 +268,7 @@ class Store:
             {
                 "state": "queued",
                 "state_version": 1,
-                "execution_mode": "cocoon-fixture" if profile["backend"] == "openhands" else "fake",
+                "execution_mode": execution_mode(profile["backend"]),
             },
         )
         event(
@@ -295,26 +325,30 @@ class Store:
             ).fetchall()
             return [{**row, "capabilities": capabilities(row["backend"])} for row in rows]
 
-    def tasks(self, cursor=None, limit=30):
-        args = []
-        where = ""
+    def tasks(self, cursor=None, limit=30, *, q="", project_id=None, state=None):
+        q = q.strip()
+        scope = scope_key(q, project_id, state)
+        args, clauses = [], []
         if cursor:
-            try:
-                stamp, identifier = json.loads(
-                    base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4))
-                )
-                stamp, identifier = datetime.fromisoformat(stamp), UUID(identifier)
-                if stamp.tzinfo is None:
-                    raise ValueError()
-            except (ValueError, TypeError, UnicodeDecodeError):
-                raise Problem(422, "invalid_cursor") from None
-            where = "WHERE (t.created_at,t.id)<(%s,%s)"
-            args = [stamp, identifier]
+            stamp, identifier = decode_cursor(cursor, scope)
+            clauses.append("(t.created_at,t.id)<(%s,%s)")
+            args.extend((stamp, identifier))
+        if q:
+            clauses.append("(t.title ILIKE %s ESCAPE '!' OR r.goal ILIKE %s ESCAPE '!')")
+            pattern = literal_pattern(q)
+            args.extend((pattern, pattern))
+        if project_id:
+            clauses.append("t.project_id=%s")
+            args.append(project_id)
+        if state:
+            clauses.append("r.state=%s")
+            args.append(state)
+        where = "WHERE " + " AND ".join(clauses) if clauses else ""
         with self.db.transaction() as conn:
             rows = conn.execute(
                 "SELECT t.*,p.name AS project_name,r.id AS run_id,r.state,r.attempt_no "
                 "FROM tasks t JOIN projects p ON p.id=t.project_id "
-                "JOIN LATERAL (SELECT id,state,attempt_no FROM runs WHERE task_id=t.id "
+                "JOIN LATERAL (SELECT id,state,attempt_no,goal FROM runs WHERE task_id=t.id "
                 "ORDER BY attempt_no DESC LIMIT 1) r ON true "
                 + where
                 + " ORDER BY t.created_at DESC,t.id DESC LIMIT %s",
@@ -322,15 +356,7 @@ class Store:
             ).fetchall()
         more = len(rows) > limit
         rows = rows[:limit]
-        next_cursor = None
-        if more:
-            next_cursor = (
-                base64.urlsafe_b64encode(
-                    json.dumps([rows[-1]["created_at"].isoformat(), str(rows[-1]["id"])]).encode()
-                )
-                .decode()
-                .rstrip("=")
-            )
+        next_cursor = encode_cursor(rows[-1], scope) if more else None
         return {"items": rows, "next_cursor": next_cursor}
 
     def task(self, task_id):
@@ -357,6 +383,7 @@ class Store:
 
     def events(self, run_id, after):
         with self.db.transaction() as conn:
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
             run = require_row(
                 conn.execute(
                     "SELECT event_floor,last_event_seq FROM runs WHERE id=%s", (run_id,)

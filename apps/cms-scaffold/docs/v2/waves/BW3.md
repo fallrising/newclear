@@ -2,11 +2,33 @@
 
 [回 v2 索引](../README.md) ・ 框架：[02 §7 BW3](../02-backend-sdd.md#7-後端波次) ・ 契約：[contracts/BW3.openapi.yaml](../contracts/BW3.openapi.yaml) ・ 前一波：[BW2](BW2.md)
 
-狀態：**DOC_READY**（本檔合併即生效）  
+狀態：**VERIFIED**（2026-10-04；PR #252 遠端CI通過並合併）
+
+[增量交付與驗收證據](../../../.team/reports/BW3-DELIVERY.md)；下方2026-09-25預演數字為歷史紀錄。
 日期：2026-09-25  
 讀者：實作 BW3 的 agent。只讀本檔、`contracts/BW3.openapi.yaml` 與本檔引用的檔案就能完成，不需要做任何設計決定。
 
 > **預演紀錄。** 本檔的程式碼、YAML 與測試，已套用在「BW2 施工圖完成後」的 `services/cms-api` 副本上，並逐張任務卡執行過（2026-09-25）。T02、T04 完成後，`./gradlew :services:cms-api:test` 依序是 218、223 個測試，唯一失敗的是 `CmsApiApplicationTests.runtimeIsJava25`（預演環境只有 JDK 21）；`integrationTest` 兩次都是 72 個全綠（本機 PostgreSQL 16.13，不是 Testcontainers）。各「測試先行」卡的預期紅燈清單也是實際跑出來的。
+
+---
+
+## 0. 現行增量實作契約（2026-10-04，優先於歷史片段）
+
+Owner已要求接續BW3並持續授權驗收後commit/push/PR/CI/merge；不含部署。以已合併W2 PR245和BW2為基底，保留P0/BW1/W1/BW2/W2全部行為、回歸和快照。歷史整檔覆蓋、固定測試數與允許CI失敗不適用。
+
+- 本波只做三個會員API、頻率限制及appointment_request種子／Front create權限；會員UI留W3b，完整app/DataSource wiring留BW4。沒有新runtime依賴或migration。
+- 讀取強制Front及登入，以工作副本ownerField限制；列表固定draft/published，單筆沿§4.2/§8允許自己的非刪除條目（包含archived）。state/publishRequested合法值只驗語法不改固定列表狀態，其他filter/ref/sort/page依現有parser，不退回掃描。
+- 投影只有enabled/public欄位，media仍公開解析失敗為null；title也只能來自enabled/public titleField，不能洩露私有或停用欄位。沒有version／slug／publishedPayload等工作metadata。offset沿用long避免大page溢位。
+- create先驗登入/surface/type/create，再拒絕body內任何publicationState鍵（含null，400；此時尚未消耗limiter），然後limiter／覆蓋owner，永遠draft。未登入／錯surface不能因帶publicationState而改回400。必填和foreign ref檢查只對enabled欄位，其他BW1c型別／ref／reserved metadata驗證沿EntryService，不能讓disabled必填阻擋建立。偽造owner不信任；foreign ref錯誤不洩漏目標資料。
+- 獨立審查確認歷史controller接受缺body／缺payload／null payload，與MemberCreateRequest必填契約不符；依現行契約在HTTP輸入邊界一律400 VALIDATION_FAILED，不進limiter。payload必須是JSON object，空object仍進既有必填欄位422驗證。先加缺body／缺key／null／非object回歸再修，保留合法請求的auth/surface優先順序。
+- 限制每principal單實例rolling60秒最多5次，達到limiter的失敗驗證也計數；精確60秒邊界、不同principal、同時請求有確定性回歸。clock與佇列操作在同一鎖內，不以sleep測時間。多實例仍各自計數，沒有新增分散式元件。
+- 建立必須經現有EntryService交易與entry.create審計；補PostgreSQL會員建立成功／owner隔離／audit failure rollback回歸，不能只用記憶體測試宣稱原子性。
+- PostgreSQL種子重跑回歸發現既有ensurePermission以JSON字串比較predicate，JSONB正規化後會重複加入pet/visit/owner授權；本波在原SeedService內改為JSON結構相等，保留null/blank/literal與無效JSON的保守行為，不刪除既有權限、不改權限意義。先保留真PG Red再修，種子與create Front-only斷言不減弱。
+- BW3歷史契約包含舊BW2發布請求版本語義；只把Member tag/paths/schemas/Error429/RATE_LIMITED增量加入目前runtime，保留既有BW2文字與契約。同步修正BW3契約的state文案，runtime/BW3位元組一致。codegen繼續讀runtime並同步生成，API freshness不能skip或故意失敗；Front/Admin/Back UI不變。
+- 允許§3以外的必要新增服務／投影單元與PostgreSQL回歸、必要既有測試的種子數量適配（保留斷言意義）、generated API及codegen一致性、README/readiness/波次索引／本元件.team任務證據。依賴／migration／舊store來源保持不變；擴大核心修正先交root記錄依據。
+- 有界Codex分工：T801會員服務/controller/projection/API tests；T802limiter/error/seeds/unit與會員PG tests；root OpenAPI/codegen/docs/integration。各用新隔離worktree，root只轉移明確檔案，T803輕量獨立審查；不遞迴派工。
+- 整合回歸補充：會員測試以既有合法visibility `back/internal` 表示非公開欄位，不能在共享store插入契約不存在的 `private` 值而污染Admin schema測試；保留所有投影／契約斷言。
+- 必需閘門：有意義Red→Green、完整Java＋PostgreSQL/bootJar、前端npmci/lint/typecheck/test/build/bundle/mock E2E、OpenAPI相等與codegen、scope/protected/snapshot/文件驗證。無UI變更重用W2截圖；不假稱跑過真API瀏覽器或部署驗收。歷史失敗／skip及既有advisory保持可見。
 
 ---
 

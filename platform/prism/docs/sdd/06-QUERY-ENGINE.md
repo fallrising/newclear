@@ -19,8 +19,8 @@ type Router struct {
 
 | 請求 | 條件 | 路徑 |
 |---|---|---|
-| PromQL instant/range | `caps.Metrics.NativePromQL == true` 且後端實作 `NativeMetricQuerier` | **下推**：整條 PromQL 字串交給後端 |
-| PromQL instant/range | 否則 | **回退**：`promql.Engine` + `promqladapter` 讀 `Select` |
+| PromQL instant/range | 含 storage selector，`caps.Metrics.NativePromQL == true` 且後端實作 `NativeMetricQuerier` | **下推**：整條 PromQL 字串交給後端 |
+| PromQL instant/range | 否則 | **回退**：`promql.Engine`；需要資料時透過 `promqladapter` 讀 `Select`，無 storage selector 時不呼叫儲存 |
 | `/series`、`/labels`、`/label/*/values` | 一律 | 直接呼叫 Tier-1 原語 |
 | LogQL | `caps.Logs.NativeLogQuery == true` | **下推**：`LogQuery` IR 交給 `NativeLogQuerier` |
 | LogQL | 否則 | **混合**：可下推部分給 `Search`，其餘中間層串流補算 |
@@ -31,6 +31,8 @@ type Router struct {
 每次查詢必須遞增 `prism_storage_query_duration_seconds{driver,signal,path="pushdown"|"fallback"}`。使用者能從指標看出自己的後端走了哪條路。
 
 **強制開關**：設定 `query.force_fallback: true` 時，即使後端支援下推也走回退路徑。這是 differential test 的基礎（見 `10-CONFORMANCE-TESTING.md` §4），必須實作。
+
+P2-05 只規格化 `drivers/clickhouse` 的 `SearchNative`（`17` §6.5，AC-43 起）。本表的路由器與 `force_fallback` 接線仍是 P3-07，不在那一階段的允許路徑裡。
 
 ## 2. PromQL 回退引擎
 
@@ -82,24 +84,23 @@ internal/query/logql/
 
 ### 3.3 `LiteralHint` 抽取（下推優化）
 
-`|~ "error.*timeout"` 這類正則，抽出必然出現的字面子串（此例為 `error`），填入 `LineFilter.LiteralHint`。驅動可用它做粗篩（如 ClickHouse 的 tokenbf 索引 / `hasToken`），中間層再用完整正則精篩。
+`|~ "error.*timeout"` 這類正則，抽出必然出現的字面子串（此例為最長的 `timeout`，與 `16` §3.4 相同），填入 `LineFilter.LiteralHint`。驅動可用它做粗篩（如 ClickHouse 的 tokenbf 索引 / `hasToken`），中間層再用完整正則精篩。
 
-抽取規則（保守，寧可不抽也不抽錯）：
-- 只處理 `^`、`$`、字面字元、`.`、`.*`、`.+`、字元類的簡單組合。
-- 遇到 `|`（交替）、`?`（可選）、`{0,n}` 一律放棄抽取。
-- 抽取結果為最長的字面片段，長度需 ≥ 3 才使用。
+抽取規則（保守，寧可不抽也不抽錯；演算法見 `16` §3.4）：
+- 非空 hint 必定出現在每個匹配中。取最長且長度 ≥ 3 的必要字面；沒有安全字面就回空字串。
+- `|`、`?`、`{0,n}` 只丟掉不保證出現的片段，不放棄整條正則。`error|errorfoo` 為 `error`，`abcd?wxyz` 為 `wxyz`，`hello{0,3}world` 為 `world`。`\d+ERROR\d+` 為 `ERROR`。
 
 單元測試必須覆蓋「抽取錯誤導致漏資料」的情境：對隨機正則做 property test，驗證 `LiteralHint` 是所有匹配字串的必要子串。
 
 ### 3.4 補算執行器
 
 ```go
-func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, done spi.LogPushdown) (spi.LogResult, error)
+func Execute(ctx context.Context, it spi.LogIterator, q spi.LogQuery, plan spi.PushdownPlan) (spi.LogResult, error)
 ```
 
-`done` 標明驅動已經處理過哪些條件；執行器只補做剩下的。**必須串流**：邊讀迭代器邊過濾邊計數，達到 `Limit` 立即 `Close()` 並返回，不得先收集全部再處理。
+`plan` 用已落地的 `spi.PushdownPlan`，不用 `spi.LogPushdown`。不另設 `Limits`；`promqladapter.Limits` 只約束指標查詢。步驟與 P2-03 驗收見 `16` §3.5–§3.7 與 §4.2。**必須串流**：不得先收集全部再處理。只有 `plan.Limit == false` 且 `q.Limit > 0`，而且正在收集原始日誌時，達到筆數才 `Close()` 並返回。
 
-聚合（`count_over_time` 等）用固定桶的滑窗累加，記憶體上限 `query.max_agg_series`（預設 10_000 個輸出序列），超出回 `ErrTooLarge` 並提示使用者加 `by` 或縮小範圍。
+聚合（`count_over_time` 等）用固定桶的滑窗累加。輸出序列上限是 `query.max_agg_series`（預設 10_000），超出回 `ErrTooLarge`，並提示使用者加 `by` 或縮小範圍。輸入序列另計，上限是 `query.max_agg_input_series`（預設 100_000）。超過時回 `ErrTooLarge`，訊息請使用者縮小 stream selector 或時間範圍，不要叫人加 `by`。規則與 AC-42 見 `16` §3.7。
 
 ## 4. Jaeger 查詢
 
@@ -120,7 +121,8 @@ internal/query/tracequery/
 
 ### 5.1 時間範圍
 
-- `query.max_lookback`（預設 30 天）：起點早於此則夾到邊界並回 warning。
+- `query.max_lookback`（預設 30 天）：起點早於此則夾到邊界並回 warning；完整落在界線前的資料查詢會拒絕。
+- P1-11 [D011](../specs/p1-11-deploy-e2e.md#d011--approved-storage-free-instant-historical-evaluation) 核准例外：bounded AST 完全沒有 vector/matrix storage selector 的 instant expression 可使用歷史頂層評估時間。所有無儲存 expression 都在本地引擎求值，不派送 native storage query。資料查詢（含歷史頂層時間搭配 current `@`）、range、future、修飾子、安全與資源限制維持。
 - `query.max_range`（預設 7 天）+ `step` 檢查：`(end-start)/step > query.max_points`（預設 11_000，與 Grafana 面板寬度同量級）時回 `400` 並提示加大 step。**這一條能擋掉九成的意外全表掃描。**
 
 ### 5.2 併發與超時

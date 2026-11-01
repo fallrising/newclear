@@ -1,0 +1,13 @@
+{
+  "name": "board",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "dimensions": {
+    "viewport": 1440,
+    "width": 1440,
+    "title": "看板 · CMS 作業台"
+  },
+  "errors": []
+}

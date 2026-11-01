@@ -1,0 +1,39 @@
+{
+  "status": "LOCAL_VERIFIED",
+  "sourceFiles": 410,
+  "protectedFiles": 396,
+  "java": {
+    "tests": 279,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "tests": 125,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": 395,
+  "mockE2e": 39,
+  "runtimeOpenApiEqualsBw3": true,
+  "dependenciesChanged": false,
+  "preservedSnapshots": {
+    "BW1a": 412,
+    "BW1b": 449,
+    "BW1c": 468,
+    "W1": 566,
+    "BW2": 602,
+    "W2": 710
+  },
+  "originalIntegrationFilesPreserved": 468,
+  "backendCommand": "./gradlew test integrationTest bootJar --rerun-tasks --no-daemon --no-parallel --console=plain",
+  "backendExitCode": 0,
+  "firstBackendGate": {
+    "tests": 279,
+    "failures": 1,
+    "reason": "New fixture used invalid private visibility; corrected to valid back, retaining assertions.",
+    "log": "bw3-backend-first.log"
+  },
+  "publication": "Pending required remote CI and exact-head merge."
+}

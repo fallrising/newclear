@@ -1,0 +1,468 @@
+{
+  "admin": [
+    {
+      "id": "60000000-0000-4000-8000-000000000001",
+      "action": "read_published",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000002",
+      "action": "read_draft",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000003",
+      "action": "create",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000004",
+      "action": "update",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000005",
+      "action": "publish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000006",
+      "action": "unpublish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000007",
+      "action": "delete",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000008",
+      "action": "archive",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000009",
+      "action": "manage_media",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000010",
+      "action": "manage_types",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000011",
+      "action": "manage_principals",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000012",
+      "action": "manage_settings",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000013",
+      "action": "read_audit",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "admin"
+      ]
+    }
+  ],
+  "anonymous": [
+    {
+      "id": "60000000-0000-4000-8000-000000000014",
+      "action": "read_published",
+      "contentTypeCode": "album",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000015",
+      "action": "read_published",
+      "contentTypeCode": "photo",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000016",
+      "action": "read_published",
+      "contentTypeCode": "page",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000017",
+      "action": "read_published",
+      "contentTypeCode": "project",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000018",
+      "action": "read_published",
+      "contentTypeCode": "milestone",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000019",
+      "action": "read_published",
+      "contentTypeCode": "vet",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000020",
+      "action": "read_published",
+      "contentTypeCode": "clinic_profile",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    }
+  ],
+  "editor": [
+    {
+      "id": "60000000-0000-4000-8000-000000000021",
+      "action": "read_published",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000022",
+      "action": "read_draft",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000023",
+      "action": "create",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000024",
+      "action": "update",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000025",
+      "action": "manage_media",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    }
+  ],
+  "member": [
+    {
+      "id": "60000000-0000-4000-8000-000000000026",
+      "action": "read_published",
+      "contentTypeCode": "album",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000027",
+      "action": "read_published",
+      "contentTypeCode": "photo",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000028",
+      "action": "read_published",
+      "contentTypeCode": "page",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000029",
+      "action": "read_published",
+      "contentTypeCode": "project",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000030",
+      "action": "read_published",
+      "contentTypeCode": "milestone",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000031",
+      "action": "read_published",
+      "contentTypeCode": "vet",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000032",
+      "action": "read_published",
+      "contentTypeCode": "clinic_profile",
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000033",
+      "action": "read_published",
+      "contentTypeCode": "pet",
+      "predicateJson": "{\"type\":\"fieldEquals\",\"field\":\"ownerPrincipalId\",\"value\":\"$currentPrincipalId\"}",
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000034",
+      "action": "read_published",
+      "contentTypeCode": "visit",
+      "predicateJson": "{\"type\":\"fieldEquals\",\"field\":\"ownerPrincipalId\",\"value\":\"$currentPrincipalId\"}",
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000035",
+      "action": "read_published",
+      "contentTypeCode": "owner",
+      "predicateJson": "{\"type\":\"fieldEquals\",\"field\":\"ownerPrincipalId\",\"value\":\"$currentPrincipalId\"}",
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    }
+  ],
+  "operator": [
+    {
+      "id": "60000000-0000-4000-8000-000000000036",
+      "action": "read_published",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "front",
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000037",
+      "action": "read_draft",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000038",
+      "action": "create",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000039",
+      "action": "update",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000040",
+      "action": "publish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000041",
+      "action": "unpublish",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000042",
+      "action": "delete",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000043",
+      "action": "archive",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000044",
+      "action": "manage_media",
+      "contentTypeCode": null,
+      "predicateJson": null,
+      "allowedSurfaces": [
+        "back",
+        "admin"
+      ]
+    }
+  ]
+}

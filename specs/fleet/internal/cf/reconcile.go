@@ -18,17 +18,16 @@ type ingressRule struct {
 }
 
 type tunnelConfig struct {
-	WarpRouting map[string]any `json:"warp-routing"`
-	Ingress     []ingressRule  `json:"ingress"`
+	Ingress []ingressRule `json:"ingress"`
 }
 
 func (c *Client) ReconcileTunnel(ctx context.Context, tunnelID string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.reconcileTunnelLocked(ctx, tunnelID)
+	return c.reconcileTunnelLocked(ctx, tunnelID, "")
 }
 
-func (c *Client) reconcileTunnelLocked(ctx context.Context, tunnelID string) error {
+func (c *Client) reconcileTunnelLocked(ctx context.Context, tunnelID, accessReady string) error {
 	if tunnelID == "" {
 		return nil
 	}
@@ -37,7 +36,7 @@ func (c *Client) reconcileTunnelLocked(ctx context.Context, tunnelID string) err
 		return nil
 	}
 	existing, _ := c.getConfig(ctx, tunnelID)
-	catalog := c.catalogRules(tunnelID)
+	catalog := c.catalogRules(tunnelID, accessReady)
 	protected := c.protectedRules(existing)
 	seen := map[string]struct{}{}
 	var rules []ingressRule
@@ -63,8 +62,7 @@ func (c *Client) reconcileTunnelLocked(ctx context.Context, tunnelID string) err
 	}
 	rules = append(rules, ingressRule{Service: "http_status:404"})
 	cfg := tunnelConfig{
-		WarpRouting: map[string]any{"enabled": true},
-		Ingress:     rules,
+		Ingress: rules,
 	}
 	if sameConfig(existing, cfg) {
 		return nil
@@ -95,7 +93,7 @@ func (c *Client) getConfig(ctx context.Context, tunnelID string) (tunnelConfig, 
 	return cfg, nil
 }
 
-func (c *Client) catalogRules(tunnelID string) []ingressRule {
+func (c *Client) catalogRules(tunnelID, accessReady string) []ingressRule {
 	list, err := c.st.ListServices()
 	if err != nil {
 		return nil
@@ -103,7 +101,10 @@ func (c *Client) catalogRules(tunnelID string) []ingressRule {
 	var rules []ingressRule
 	for i := range list {
 		svc := list[i]
-		if svc.DesiredState == "absent" {
+		if svc.DesiredState == "absent" || (svc.ExposeMode != "public" && svc.ExposeMode != "access") {
+			continue
+		}
+		if svc.ExposeMode == "access" && (svc.CFAccessAppID == "" || svc.CFAccessPolicyID == "" || (svc.IngressStatus != "ok" && svc.Name != accessReady)) {
 			continue
 		}
 		n, err := c.st.GetNode(svc.NodeID)
@@ -142,19 +143,17 @@ func (c *Client) protectedRules(existing tunnelConfig) []ingressRule {
 }
 
 func sameConfig(a, b tunnelConfig) bool {
-	ab, _ := json.Marshal(canonical(a))
-	bb, _ := json.Marshal(canonical(b))
+	ab, _ := json.Marshal(a)
+	bb, _ := json.Marshal(b)
 	return string(ab) == string(bb)
-}
-
-func canonical(c tunnelConfig) tunnelConfig {
-	c.WarpRouting = map[string]any{"enabled": true}
-	return c
 }
 
 func (c *Client) ReconcileService(ctx context.Context, svc ingress.ServiceView) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if svc.ExposeMode != "public" && svc.ExposeMode != "access" {
+		return fmt.Errorf("unsupported expose mode %q", svc.ExposeMode)
+	}
 	if svc.TunnelID == c.cfg.BootstrapTunnelID && svc.TunnelID != "" {
 		c.log.Info("skip_bootstrap_tunnel", "service", svc.Name)
 		return nil
@@ -166,44 +165,45 @@ func (c *Client) ReconcileService(ctx context.Context, svc ingress.ServiceView) 
 	if svc.DesiredState == "absent" || (row != nil && row.DesiredState == "absent") {
 		return c.deleteObjects(ctx, svc)
 	}
-	if err := c.reconcileTunnelLocked(ctx, svc.TunnelID); err != nil {
-		_ = c.st.SetIngress(svc.Name, "error", err.Error(), svc.DNSRecordID, svc.AccessAppID, svc.AccessPolicyID, svc.HostnameRouteID)
+	dnsID, appID, polID := svc.DNSRecordID, svc.AccessAppID, svc.AccessPolicyID
+	fail := func(err error) error {
+		_ = c.st.SetIngress(svc.Name, "error", err.Error(), dnsID, appID, polID)
 		return err
 	}
-	switch svc.ExposeMode {
-	case "public":
-		dnsID, err := c.upsertDNS(ctx, svc)
+	if svc.ExposeMode == "access" {
+		// Establish the identity gate before a tunnel rule or public DNS can expose the origin.
+		if len(c.cfg.CFAccessAllowedEmails) == 0 {
+			return fail(fmt.Errorf("CF_ACCESS_ALLOWED_EMAILS is required for access mode"))
+		}
+		appID, polID, err = c.upsertAccess(ctx, svc)
 		if err != nil {
-			_ = c.st.SetIngress(svc.Name, "error", "dns: "+err.Error(), dnsID, "", "", "")
+			return fail(fmt.Errorf("access_app: %w", err))
+		}
+		if appID == "" || polID == "" {
+			return fail(fmt.Errorf("access_app: missing application or policy ID"))
+		}
+		if err := c.st.SetIngress(svc.Name, "pending", "", dnsID, appID, polID); err != nil {
 			return err
 		}
-		_ = c.deleteAccess(ctx, svc)
-		_ = c.st.SetIngress(svc.Name, "ok", "", dnsID, "", "", "")
-	case "access":
-		dnsID, err := c.upsertDNS(ctx, svc)
-		if err != nil {
-			_ = c.st.SetIngress(svc.Name, "error", "dns: "+err.Error(), dnsID, svc.AccessAppID, svc.AccessPolicyID, "")
-			return err
-		}
-		appID, polID, err := c.upsertAccess(ctx, svc)
-		if err != nil {
-			_ = c.st.SetIngress(svc.Name, "error", "access_app: "+err.Error(), dnsID, appID, polID, "")
-			return err
-		}
-		_ = c.st.SetIngress(svc.Name, "ok", "", dnsID, appID, polID, "")
-	case "private":
-		routeID, err := c.upsertHostnameRoute(ctx, svc)
-		if err != nil {
-			_ = c.st.SetIngress(svc.Name, "error", "hostname_route: "+err.Error(), "", "", "", routeID)
-			return err
-		}
-		_ = c.st.SetIngress(svc.Name, "ok", "", "", "", "", routeID)
 	}
-	return nil
+	if err := c.reconcileTunnelLocked(ctx, svc.TunnelID, svc.Name); err != nil {
+		return fail(err)
+	}
+	dnsID, err = c.upsertDNS(ctx, svc)
+	if err != nil {
+		return fail(fmt.Errorf("dns: %w", err))
+	}
+	if svc.ExposeMode == "public" {
+		if err := c.deleteAccess(ctx, svc); err != nil {
+			return fail(err)
+		}
+		appID, polID = "", ""
+	}
+	return c.st.SetIngress(svc.Name, "ok", "", dnsID, appID, polID)
 }
 
 func (c *Client) deleteObjects(ctx context.Context, svc ingress.ServiceView) error {
-	_ = c.reconcileTunnelLocked(ctx, svc.TunnelID)
+	_ = c.reconcileTunnelLocked(ctx, svc.TunnelID, "")
 	if svc.DNSRecordID != "" {
 		_, _ = c.do(ctx, http.MethodDelete, "/zones/"+c.cfg.CFZoneID+"/dns_records/"+svc.DNSRecordID, nil, nil)
 	} else if svc.Hostname != "" && !c.isProtected(svc.Hostname) {
@@ -212,11 +212,8 @@ func (c *Client) deleteObjects(ctx context.Context, svc ingress.ServiceView) err
 		}
 	}
 	_ = c.deleteAccess(ctx, svc)
-	if svc.HostnameRouteID != "" {
-		_, _ = c.do(ctx, http.MethodDelete, "/accounts/"+c.cfg.CFAccountID+"/zerotrust/routes/hostname/"+svc.HostnameRouteID, nil, nil)
-	}
 	if svc.Name != "" {
-		_ = c.st.SetIngress(svc.Name, "na", "", "", "", "", "")
+		_ = c.st.SetIngress(svc.Name, "na", "", "", "", "")
 	}
 	return nil
 }
@@ -290,7 +287,7 @@ func (c *Client) findDNSFull(ctx context.Context, name string) (id, content stri
 func (c *Client) upsertAccess(ctx context.Context, svc ingress.ServiceView) (appID, polID string, err error) {
 	appID, err = c.findAccessApp(ctx, svc.Hostname)
 	if err != nil {
-		appID = ""
+		return "", "", err
 	}
 	if appID == "" {
 		body := map[string]any{
@@ -343,24 +340,39 @@ func (c *Client) findAccessApp(ctx context.Context, domain string) (string, erro
 }
 
 func (c *Client) ensurePolicy(ctx context.Context, appID string) (string, error) {
-	res, err := c.do(ctx, http.MethodGet, "/accounts/"+c.cfg.CFAccountID+"/access/apps/"+appID+"/policies", nil, nil)
-	if err == nil {
-		var list []struct {
-			ID string `json:"id"`
-		}
-		if json.Unmarshal(res, &list) == nil && len(list) > 0 {
-			return list[0].ID, nil
-		}
-	}
 	include := []map[string]any{}
 	for _, em := range c.cfg.CFAccessAllowedEmails {
-		include = append(include, map[string]any{"email": map[string]string{"email": em}})
+		if em = strings.TrimSpace(em); em != "" {
+			include = append(include, map[string]any{"email": map[string]string{"email": em}})
+		}
 	}
 	if len(include) == 0 {
-		include = append(include, map[string]any{"everyone": map[string]any{}})
+		return "", fmt.Errorf("CF_ACCESS_ALLOWED_EMAILS is required for access mode")
 	}
-	res, err = c.do(ctx, http.MethodPost, "/accounts/"+c.cfg.CFAccountID+"/access/apps/"+appID+"/policies", map[string]any{
+	path := "/accounts/" + c.cfg.CFAccountID + "/access/apps/" + appID + "/policies"
+	res, err := c.do(ctx, http.MethodGet, path, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	var policies []struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal(res, &policies); err != nil {
+		return "", err
+	}
+	// Never accept an arbitrary existing policy as the configured email gate.
+	if len(policies) > 1 || len(policies) == 1 && (policies[0].Name != "fleet-operator" || policies[0].ID == "") {
+		return "", fmt.Errorf("access application has unmanaged policies; review before publishing")
+	}
+	method := http.MethodPost
+	if len(policies) == 1 {
+		method = http.MethodPut
+		path += "/" + policies[0].ID
+	}
+	res, err = c.do(ctx, method, path, map[string]any{
 		"name": "fleet-operator", "decision": "allow", "include": include,
+		"exclude": []any{}, "require": []any{},
 	}, nil)
 	if err != nil {
 		return "", err
@@ -368,7 +380,12 @@ func (c *Client) ensurePolicy(ctx context.Context, appID string) (string, error)
 	var created struct {
 		ID string `json:"id"`
 	}
-	_ = json.Unmarshal(res, &created)
+	if err := json.Unmarshal(res, &created); err != nil {
+		return "", err
+	}
+	if created.ID == "" {
+		return "", fmt.Errorf("access policy response missing ID")
+	}
 	return created.ID, nil
 }
 
@@ -381,35 +398,6 @@ func (c *Client) deleteAccess(ctx context.Context, svc ingress.ServiceView) erro
 		_, _ = c.do(ctx, http.MethodDelete, "/accounts/"+c.cfg.CFAccountID+"/access/apps/"+id, nil, nil)
 	}
 	return nil
-}
-
-func (c *Client) upsertHostnameRoute(ctx context.Context, svc ingress.ServiceView) (string, error) {
-	res, err := c.do(ctx, http.MethodGet, "/accounts/"+c.cfg.CFAccountID+"/zerotrust/routes/hostname", nil, nil)
-	if err == nil {
-		var list []struct {
-			ID       string `json:"id"`
-			Hostname string `json:"hostname"`
-			TunnelID string `json:"tunnel_id"`
-		}
-		if json.Unmarshal(res, &list) == nil {
-			for _, r := range list {
-				if strings.EqualFold(r.Hostname, svc.Hostname) {
-					return r.ID, nil
-				}
-			}
-		}
-	}
-	res, err = c.do(ctx, http.MethodPost, "/accounts/"+c.cfg.CFAccountID+"/zerotrust/routes/hostname", map[string]any{
-		"hostname": svc.Hostname, "tunnel_id": svc.TunnelID, "comment": "fleet:" + svc.Name,
-	}, nil)
-	if err != nil {
-		return "", err
-	}
-	var created struct {
-		ID string `json:"id"`
-	}
-	_ = json.Unmarshal(res, &created)
-	return created.ID, nil
 }
 
 func (c *Client) drift(ctx context.Context) {
@@ -438,18 +426,17 @@ func (c *Client) drift(ctx context.Context) {
 			continue
 		}
 		view := ingress.ServiceView{
-			Name:            s.Name,
-			NodeID:          s.NodeID,
-			TunnelID:        n.TunnelID,
-			DesiredState:    s.DesiredState,
-			ExposeMode:      s.ExposeMode,
-			Hostname:        s.Hostname,
-			HostPort:        s.HostPort,
-			ContainerPort:   s.ContainerPort,
-			DNSRecordID:     s.CFDNSRecordID,
-			AccessAppID:     s.CFAccessAppID,
-			AccessPolicyID:  s.CFAccessPolicyID,
-			HostnameRouteID: s.CFHostnameRouteID,
+			Name:           s.Name,
+			NodeID:         s.NodeID,
+			TunnelID:       n.TunnelID,
+			DesiredState:   s.DesiredState,
+			ExposeMode:     s.ExposeMode,
+			Hostname:       s.Hostname,
+			HostPort:       s.HostPort,
+			ContainerPort:  s.ContainerPort,
+			DNSRecordID:    s.CFDNSRecordID,
+			AccessAppID:    s.CFAccessAppID,
+			AccessPolicyID: s.CFAccessPolicyID,
 		}
 		if err := c.ReconcileService(ctx, view); err != nil {
 			c.log.Error("cf_error", "msg", "drift service", "service", s.Name, "err", err.Error())

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strings"
 
@@ -22,14 +23,11 @@ func ParseYAML(b []byte) (*Document, error) {
 		}
 		return nil, newError("invalid_yaml", err.Error())
 	}
-	if err := checkUnknownTree("", raw, allowedRoot); err != nil {
-		return nil, err
+	var extra any
+	if err := dec.Decode(&extra); err != io.EOF {
+		return nil, newError("invalid_yaml", "expected exactly one YAML document")
 	}
-	var doc Document
-	if err := yaml.Unmarshal(b, &doc); err != nil {
-		return nil, newError("invalid_yaml", err.Error())
-	}
-	return &doc, nil
+	return decodeRaw(raw)
 }
 
 // ParseJSON decodes a fleet document from JSON bytes.
@@ -38,14 +36,130 @@ func ParseJSON(b []byte) (*Document, error) {
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return nil, newError("invalid_json", err.Error())
 	}
-	if err := checkUnknownTree("", raw, allowedRoot); err != nil {
+	return decodeRaw(raw)
+}
+
+// Validate raw values before decoding: Go zero values otherwise erase explicit
+// nulls and YAML's string coercions erase the input's schema types.
+func decodeRaw(raw map[string]any) (*Document, error) {
+	ve := &Error{}
+	checkRaw(ve, "", raw, documentRule)
+	if err := ve.finish(); err != nil {
 		return nil, err
+	}
+	b, err := json.Marshal(raw)
+	if err != nil {
+		return nil, newError("invalid_json", err.Error())
 	}
 	var doc Document
 	if err := json.Unmarshal(b, &doc); err != nil {
 		return nil, newError("invalid_json", err.Error())
 	}
 	return &doc, nil
+}
+
+type rawRule struct {
+	kind     string
+	fields   map[string]rawRule
+	required []string
+	items    *rawRule
+	values   *rawRule
+}
+
+var stringRule = rawRule{kind: "string"}
+var stringArrayRule = rawRule{kind: "array", items: &stringRule}
+var stringMapRule = rawRule{kind: "object", values: &stringRule}
+var volumeRule = rawRule{kind: "object", required: []string{"name", "mount"}, fields: map[string]rawRule{
+	"name": stringRule, "mount": stringRule,
+}}
+var documentRule = rawRule{kind: "object", required: []string{"apiVersion", "kind", "metadata", "spec"}, fields: map[string]rawRule{
+	"apiVersion": stringRule, "kind": stringRule,
+	"metadata": {kind: "object", required: []string{"name"}, fields: map[string]rawRule{
+		"name": stringRule, "description": stringRule, "labels": stringMapRule,
+	}},
+	"spec": {kind: "object", required: []string{"node", "expose"}, fields: map[string]rawRule{
+		"node": stringRule, "image": stringRule, "desiredState": stringRule,
+		"replicas": {kind: "integer"}, "command": stringArrayRule, "args": stringArrayRule,
+		"workingDir": stringRule, "user": stringRule, "env": stringMapRule,
+		"secrets": stringArrayRule, "volumes": {kind: "array", items: &volumeRule},
+		"expose": {kind: "object", required: []string{"mode", "port"}, fields: map[string]rawRule{
+			"mode": stringRule, "hostname": stringRule, "port": {kind: "integer"}, "healthPath": stringRule,
+		}},
+		"resources": {kind: "object", fields: map[string]rawRule{"memory": stringRule, "cpus": stringRule}},
+	}},
+}}
+
+func checkRaw(ve *Error, path string, value any, rule rawRule) {
+	badType := func() { ve.add(path, "invalid_type") }
+	switch rule.kind {
+	case "object":
+		m, ok := value.(map[string]any)
+		if !ok || m == nil {
+			badType()
+			return
+		}
+		for _, key := range rule.required {
+			if _, exists := m[key]; !exists {
+				ve.add(joinPath(path, key), "required")
+			}
+		}
+		for key, v := range m {
+			child, exists := rule.fields[key]
+			if rule.values != nil {
+				child, exists = *rule.values, true
+			}
+			if !exists {
+				ve.add(joinPath(path, key), "additional_property")
+				continue
+			}
+			checkRaw(ve, joinPath(path, key), v, child)
+			// JSON Schema integers may be written as 8080.0. Normalize only
+			// after the type check so the typed decoder can preserve them.
+			if child.kind == "integer" {
+				if n, ok := v.(float64); ok && math.Trunc(n) == n && n >= -2147483648 && n <= 2147483647 {
+					m[key] = int(n)
+				}
+			}
+		}
+	case "array":
+		items, ok := value.([]any)
+		if !ok {
+			badType()
+			return
+		}
+		for i, item := range items {
+			checkRaw(ve, fmt.Sprintf("%s[%d]", path, i), item, *rule.items)
+		}
+	case "integer":
+		switch n := value.(type) {
+		case int, int64, uint64:
+		case float64:
+			if math.Trunc(n) != n {
+				badType()
+			}
+		default:
+			badType()
+		}
+	case "string":
+		s, ok := value.(string)
+		if !ok {
+			badType()
+			return
+		}
+		if s == "" {
+			switch path {
+			case "spec.image", "spec.desiredState", "spec.expose.healthPath", "spec.resources.memory", "spec.resources.cpus":
+				ve.add(path, "invalid_value")
+			}
+		}
+	}
+}
+
+func joinPath(prefix, key string) string {
+	if prefix == "" {
+		return key
+	}
+	return prefix + "." + key
 }
 
 // ParseFile reads YAML or JSON based on extension.
@@ -58,95 +172,4 @@ func ParseFile(path string) (*Document, error) {
 		return ParseJSON(b)
 	}
 	return ParseYAML(b)
-}
-
-type allowed map[string]any // nested allowed keys; nil value = leaf object handled specially
-
-var allowedRoot = map[string]map[string]any{
-	"apiVersion": nil,
-	"kind":       nil,
-	"metadata": {
-		"name":        nil,
-		"description": nil,
-		"labels":      nil,
-	},
-	"spec": {
-		"node":         nil,
-		"image":        nil,
-		"desiredState": nil,
-		"replicas":     nil,
-		"command":      nil,
-		"args":         nil,
-		"workingDir":   nil,
-		"user":         nil,
-		"expose": map[string]any{
-			"mode":       nil,
-			"hostname":   nil,
-			"port":       nil,
-			"healthPath": nil,
-		},
-		"env":     nil,
-		"secrets": nil,
-		"volumes": nil,
-		"resources": map[string]any{
-			"memory": nil,
-			"cpus":   nil,
-		},
-	},
-}
-
-func checkUnknownTree(prefix string, raw map[string]any, schema map[string]map[string]any) error {
-	ve := &Error{}
-	checkMap(ve, prefix, raw, flatten(schema))
-	return ve.finish()
-}
-
-func flatten(schema map[string]map[string]any) map[string]any {
-	out := make(map[string]any, len(schema))
-	for k, v := range schema {
-		if v == nil {
-			out[k] = nil
-		} else {
-			out[k] = v
-		}
-	}
-	return out
-}
-
-func checkMap(ve *Error, prefix string, raw map[string]any, allowedKeys map[string]any) {
-	if raw == nil {
-		return
-	}
-	for k, v := range raw {
-		path := k
-		if prefix != "" {
-			path = prefix + "." + k
-		}
-		child, ok := allowedKeys[k]
-		if !ok {
-			ve.add(path, "additional_property")
-			continue
-		}
-		if nested, ok := child.(map[string]any); ok {
-			if m, ok := v.(map[string]any); ok {
-				checkMap(ve, path, m, nested)
-			}
-		}
-	}
-	if prefix == "spec" {
-		if vols, ok := raw["volumes"].([]any); ok {
-			for i, item := range vols {
-				m, ok := item.(map[string]any)
-				if !ok {
-					continue
-				}
-				volPath := fmt.Sprintf("spec.volumes[%d]", i)
-				for k := range m {
-					if k != "name" && k != "mount" {
-						ve.add(volPath+"."+k, "additional_property")
-					}
-				}
-			}
-		}
-	}
 }

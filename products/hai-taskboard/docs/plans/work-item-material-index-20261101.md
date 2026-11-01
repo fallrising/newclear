@@ -1,6 +1,6 @@
 # Proposed WorkItem material index
 
-Status: **Owner approved D1, 2026-11-01; implementation in progress**. T-0339 / HMDTL.
+Status: **Owner approved D1, 2026-11-01; bounded implementation delivered in #920**. T-0339 / HMDTL.
 The owner explicitly replied “批准。” to the concrete material-index decision. IDX-01..05 and
 IDX-AC-01..06 below are accepted; the [normative entry](../sdd/work-item-material-index.md)
 records implementation seams. Original proposal/review chronology below is retained.

@@ -42,7 +42,7 @@ const mf=new Miniflare(convertV4MiniflareOptions({host:'127.0.0.1',cf:false,tele
  bindings:{HEALTH_SCHEDULE:JSON.stringify({revision:1,interval_minutes:15,not_before:stamp(Math.floor(now/60000)*60000),expires_at:stamp(now+3600000)}),ACCESS_CONFIG:JSON.stringify({issuer,audience,subjects:{human:{principal_id:'human',grant_id:'human'}}}),PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify({runner:{principal_id:'runner',grant_id:'runner',generation:1,secret_hex:secret,expires_at:common.expires_at}})}
 }]}));
 let usageCalls=0,usageMode='normal';
-let tamperArtifact=false;
+let tamperArtifact=false, snapshotMode='normal';
 let browser,session,server,mode='normal',dropSubmit=false,apiCalls=0,loginHits=0,submitBodies=[],errors=[],checks=[],pending=new Map(),serial=0,holdArtifactStatus=null,heldArtifact=null,downloadsStarted=0;
 const children=[];
 function send(method,params={},target=session){
@@ -96,6 +96,12 @@ try {
    const response=await mf.dispatchFetch(origin+req.url,{method:req.method,headers,...(req.method==='POST'?{body}:{}),redirect:'manual'});
    let data=Buffer.from(await response.arrayBuffer());
    if(tamperArtifact&&req.url.endsWith('/artifact')&&response.status===200)data=Buffer.concat([data,Buffer.from(' ')]);
+   if(snapshotMode!=='normal'&&req.method==='GET'&&req.url==='/api/commands'&&response.status===200){
+    const value=JSON.parse(data);assert.equal(value.commands.length,1);
+    if(snapshotMode==='older')value.commands[0].revision--;
+    value.commands[0].result=null;value.commands[0].delivery='reconciling';
+    data=Buffer.from(JSON.stringify(value));
+   }
    if(req.url==='/api/usage'&&usageMode==='stale'&&response.status===200){const value=JSON.parse(data);value.observed_at=stamp(Date.now()-120000);value.application.rolling_24h.window_start_exclusive=stamp(Date.parse(value.observed_at)-86400000);data=Buffer.from(JSON.stringify(value));}
    if(req.url.endsWith('/artifact')&&holdArtifactStatus!==null){
     const status=holdArtifactStatus;holdArtifactStatus=null;
@@ -147,6 +153,15 @@ try {
  await python(config);await refresh();await until('document.querySelector("#commands").textContent.includes("已保存結果")');
  assert.equal(await db.prepare("SELECT json_extract(record,'$.result.validation.status') s FROM commands").first('s'),'passed');
  const completed=JSON.parse(await db.prepare('SELECT record FROM commands').first('record'));
+ const beforeSnapshots=await db.prepare('SELECT * FROM commands').all();
+ for(const injection of ['older','conflict']){
+  snapshotMode=injection;await refresh();
+  assert(await evaluate('document.querySelector("#commands").textContent.includes("已保存結果") && document.querySelector("#message").textContent.includes("快照") && document.querySelector("#submit").disabled && [...document.querySelectorAll(".command-card button")].every(b=>b.disabled)'));
+  snapshotMode='normal';await refresh();
+  assert(await evaluate('!document.querySelector("#submit").disabled && document.querySelector("#message").hidden && document.querySelector("#commands").textContent.includes("已保存結果")'));
+ }
+ assert.deepEqual((await db.prepare('SELECT * FROM commands').all()).results,beforeSnapshots.results);
+ checks.push('older and conflicting command snapshots rejected in real browser; original completed view retained, actions blocked, fresh polling recovers; D1 command row unchanged');
  const downloads=join(evidence,'downloads');mkdirSync(downloads);
  await send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloads,eventsEnabled:true},null);
  await evaluate('[...document.querySelectorAll(".command-card button")].find(b=>b.textContent==="下載 JSON 成果").click()');

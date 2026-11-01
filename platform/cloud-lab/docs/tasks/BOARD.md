@@ -628,3 +628,12 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - RED4→GREEN4，完整130Node＋308Python＝438tests，零fail/skip；XM1去模式保護與XM2去identity核對均被oracle偵測，原runtime未改。XR1平台metadata誤計數失敗保留，只明示排除_cf_METADATA及既有_cf_KV；初次索引因新文件未stage報錯，stage後通過；既有SQLite warnings保留。T860首輪REWORK後集中複審ACCEPT。
 - 50contracts／8indexes／task-report／syntax／diff／397links通過；九份workerd來源hash與公開原摘要相符。正常main merge保留並行工作；合併回讀本機與remote fulltree相等、工作樹乾淨、head為main祖先，67份runtime/test/tool input與remote main相同。
 - 原Worker／auth／protocol／migrations／runner／看板未改；沒有原服務或private state操作、授權續期、付費升級或真人重測。此為local logical restore，官方遠端unknown/in-flight export/import與正式failover仍pending；完整mainline incomplete／usable_tag none。接續對齊事件seq／通知原契約與M1輪詢範圍；本結案只改任務板。
+
+## T-0036 — 輪詢快照順序與恢復
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0036-1 | 協定範圍對齊 | PS-01 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |
+| T-0036-2 | 看板版本防倒退 | PS-02 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |
+| T-0036-3 | 持久outbox恢復 | PS-03 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |
+| T-0036-4 | 驗證審查交付 | PS-04 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |

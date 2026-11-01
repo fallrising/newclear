@@ -93,3 +93,7 @@ Owner以Safari回報UL真人登入／手動用量成功，三counter與D1同窗�
 ## FQ逐列接續核對
 
 [十四列證據矩陣](failure-matrix.md)列出具名local／歷史workerd／remote證據及尚未實作的事件／稽核／完整性／restore缺口；[保留方案](retention.md)區分七天禁止下載與實際資料保留。本輪[FQ範圍](failure-retention-qualification.md)不新增live故障操作。前段UR原unknown pending已由後續[ULR](evidence/m1-unknown-resolution-live.md)完成單筆結案與新Cron驗證，結果仍unknown，沒有重跑。
+
+## M1 snapshot profile的具體對映
+
+[PS輪詢順序與恢復](snapshot-ordering.md)沿已授權ADR-03／08明列通知／Event提案與現行profile的差異：commit後ACK遺失靠持久command重讀，完整snapshot以command revision防倒退／衝突並可跳版。這不是Event source_seq或covered-through snapshot相容實作，原事件要求沒有被記成passed；採用事件協定時仍須獨立實作與驗證。

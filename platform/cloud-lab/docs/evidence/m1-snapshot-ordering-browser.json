@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "scope": "local actual workerd/D1; synthetic JWT; Chromium viewport, not physical mobile or real Access",
+  "version": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.57",
+    "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.11"
+  },
+  "miniflare": "5.20261019.2-beta",
+  "checks": [
+    "bounded schedule panel shows disabled15minute policy without liveness claim",
+    "manual application usage uses actual Worker/D1, no five-second usage polling; injected old snapshot and lost response stay stale/unconfirmed, provider unknown",
+    "older and conflicting command snapshots rejected in real browser; original completed view retained, actions blocked, fresh polling recovers; D1 command row unchanged",
+    "browser verifies SHA-256 and downloads exact original actual-collector artifact bytes",
+    "browser rejects whitespace-tampered artifact without downloading or altering saved bytes",
+    "action-level revocation also clears application usage snapshot",
+    "action-level403 clears authorization; uncertain submission survives401 and explicit revalidation with original bytes",
+    "retry POST401/403 retains original identity; late artifact200/403 after revalidation is discarded without session/message/download changes",
+    "browser exact-body retry after stored-submit ACK loss; actual Worker/D1 + Python collector result",
+    "390px and320px Chromium mobile viewport: no horizontal overflow",
+    "browser cancellation reaches actual Worker; no claim of process stopped",
+    "HTML/401/403/redirect clear all stale data, stop polls and recover only on explicit refresh; offline retains data",
+    "cached completed observation becomes stale after real30second budget while disconnected",
+    "synthetic unknown runner report through actual Worker remains active and is visibly unknown",
+    "read-only capability refresh retains history and removes submit/cancel/artifact controls",
+    "actual scheduled callback records overlap/misfire; read-only browser sees skipped trigger with unchanged unknown command"
+  ],
+  "sourceHashes": {
+    "index.html": "ab5e407b4c1ae4dc7b95fd4211c7c276995c3e63773c10c31938865561db270c",
+    "styles.css": "873fbfe381ae8d30c3df23f7fc14e7067cf7ff5c4cae9f487d446c3a13ac71e1",
+    "dashboard.mjs": "5f6379cbd5cb2a7564c597e54ef41a55b49b66bff3f7d137370feda52733f5ba"
+  },
+  "apiCalls": 114,
+  "errors": []
+}

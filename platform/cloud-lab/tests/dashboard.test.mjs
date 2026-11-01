@@ -358,3 +358,61 @@ test('DI verifier copies bytes before waiting for crypto',async t=>{
  const input=Buffer.from(artifactBytes),verification=dashboard.verifyArtifact(input,artifactHash(input));input[0]=0;
  await finish();assert.deepEqual(await verification,artifactBytes);
 });
+
+
+test('PS duplicate and skipped revisions are full snapshots, not event deltas',()=>{
+ const prior=record({revision:2}),duplicate=structuredClone(prior),latest=record({revision:5,delivery:'closed_unknown',result:null});
+ assert.deepEqual(dashboard.acceptCommandSnapshot([prior],[duplicate],now),[prior]);
+ assert.deepEqual(dashboard.acceptCommandSnapshot([prior],[latest],now),[latest]);
+ assert.deepEqual(prior,duplicate);
+});
+
+test('PS older revisions and equal-revision conflicts reject the complete batch',()=>{
+ const prior=record({revision:5});
+ for(const item of [record({revision:4,result:null}),record({revision:5,result:null})])
+  assert.throws(()=>dashboard.acceptCommandSnapshot([prior],[record({command_id:'new'}),item],now),/快照/);
+ assert.equal(prior.result.health,'healthy');
+});
+
+test('PS validates bounded unique IDs and positive safe revisions instead of silently truncating',()=>{
+ for(const rows of [[record({revision:0})],[record({revision:1.5})],[record({revision:Number.MAX_SAFE_INTEGER+1})],[record({command_id:''})],[record(),record()],Array.from({length:21},(_,i)=>record({command_id:'id'+i}))])
+  assert.throws(()=>dashboard.acceptCommandSnapshot([],rows,now),/快照/);
+ assert.deepEqual(dashboard.acceptCommandSnapshot([record()],[],now),[]);
+});
+
+test('PS lease expiry projection is legal at the same revision and cannot roll back to running',()=>{
+ const running=record({delivery:'dispatching',result:null,attempt:{lease_expires_at:now}}),expired={...running,delivery:'reconciling'};
+ assert.deepEqual(dashboard.acceptCommandSnapshot([running],[expired],now),[expired]);
+ assert.deepEqual(dashboard.acceptCommandSnapshot([expired],[running],now),[expired]);
+ assert.equal(running.delivery,'dispatching');
+ const before='2026-10-26T16:00:29Z';
+ assert.throws(()=>dashboard.acceptCommandSnapshot([running],[expired],before),/快照/);
+});
+
+test('PS mounted stale/conflicting reads preserve state, disable actions and recover on fresh polling',async t=>{
+ let rows=[record({revision:5})];
+ const ui=mounted(t,{bootstrap:async()=>bootstrapFixture(),commands:async()=>({commands:structuredClone(rows)})});await ui.settled();
+ const before=ui.node('commands').textContent;
+ for(const revision of [4,5]){
+  rows=[record({revision,result:null,delivery:'reconciling'})];await ui.node('refresh').click();
+  assert.equal(ui.node('commands').textContent,before);assert.equal(ui.node('submit').disabled,true);
+  assert.match(ui.node('message').textContent,/快照/);assert.match(ui.node('connection').textContent,/未確認/);
+  assert(ui.node('commands').querySelectorAll('button').every(b=>b.disabled));
+ }
+ rows=[record({revision:8,result:null,delivery:'reconciling'})];await ui.node('refresh').click();
+ assert.equal(ui.node('submit').disabled,false);assert.equal(ui.node('message').hidden,true);assert.equal(ui.node('unknown-count').textContent,'1');
+});
+
+test('PS changing scope clears the old comparison baseline even when new read fails',async t=>{
+ let bootstrap=bootstrapFixture(),rows=[record({revision:5})],fail=false;
+ const ui=mounted(t,{bootstrap:async()=>bootstrap,commands:async()=>{if(fail)throw new Error('offline');return {commands:rows};}});await ui.settled();
+ bootstrap={...bootstrap,workspace_id:'other'};fail=true;await ui.node('refresh').click();
+ assert.equal(ui.node('commands').textContent,'');assert.equal(ui.node('submit').disabled,true);
+ fail=false;rows=[record({revision:1,result:null,delivery:'accepted'})];await ui.node('refresh').click();assert.equal(ui.node('total-count').textContent,'1');assert.equal(ui.node('submit').disabled,false);
+});
+
+test('PS auth loss clears revision baseline before explicit recovery',async t=>{
+ let denied=false,rows=[record({revision:5})];
+ const ui=mounted(t,{bootstrap:async()=>{if(denied)throw Object.assign(new Error('denied'),{status:403});return bootstrapFixture();},commands:async()=>({commands:rows})});await ui.settled();
+ denied=true;await ui.node('refresh').click();denied=false;rows=[record({revision:1})];await ui.node('refresh').click();assert.equal(ui.node('submit').disabled,false);assert.equal(ui.node('message').hidden,true);
+});

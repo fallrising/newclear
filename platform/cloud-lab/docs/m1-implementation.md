@@ -69,3 +69,7 @@ M1-LIVE（pending）：真實 Access/D1/Workers、target runner、手機/bot、�
 ## 官方 API 依據
 
 2026-10-26 核對 [D1 batch 交易語義](https://developers.cloudflare.com/d1/worker-api/d1-database/)、[Access JWT 驗證](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/)與 [Static Assets binding](https://developers.cloudflare.com/workers/static-assets/binding/)。`run_worker_first=true` 確保資產也經 Worker 驗權；workers.dev／preview 關閉，公開設定不提供任何 route。
+
+## M1 snapshot profile的具體對映
+
+[PS輪詢順序與恢復](snapshot-ordering.md)沿已授權ADR-03／08明列通知／Event提案與現行profile的差異：commit後ACK遺失靠持久command重讀，完整snapshot以command revision防倒退／衝突並可跳版。這不是Event source_seq或covered-through snapshot相容實作，原事件要求沒有被記成passed；採用事件協定時仍須獨立實作與驗證。

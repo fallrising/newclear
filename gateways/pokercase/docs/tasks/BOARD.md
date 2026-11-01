@@ -1,5 +1,15 @@
 # Pokercase 技術任務
 
+## T-0426 — Three-request real TUI pilot
+
+Demand:deskT0426;claim364merged. [TP-1–TP-3](T-0426-tui-pilot.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| TP-01 | Guarded preflight and independent review | TP-1 | in_progress | 2026-11-01T11:46:14Z | — | 2026-11-01T12:05:35.240535+00:00 |
+| TP-02 | Bounded real TUI lifecycle attempt | TP-2 | in_progress | 2026-11-01T11:46:14Z | — | 2026-11-01T12:05:35.240535+00:00 |
+| TP-03 | Evidence acceptance and delivery | TP-3 | in_progress | 2026-11-01T11:46:14Z | — | 2026-11-01T12:05:35.240535+00:00 |
+
 ## T-0426 — Inline instruction role preservation
 
 Demand:deskT0426; claim358 merged. [NR-1–NR-3](T-0426-instruction-roles.md).

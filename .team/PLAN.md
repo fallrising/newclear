@@ -45,6 +45,12 @@ no repeated code review/provider. Concurrent approval question remains pending, 
 
 # Repository team ledger
 
+## HAI detail-read contract — T-0339 / 2026-11-01
+
+Owner continues after verified coverage delivery. Root owns next bounded backend detail contract, M2 gap mapping and fixed acceptance; no UI/provider/dependency/release/deploy. One native read-only T001,10min/1800tokens/no children/no writes, audits schema/storage gaps. Root45–75active minutes with20minute checkpoints; Claude exact opus5.5/high no-tools480s initial plus one material-revision follow-up. Existing claim remains valid. New product semantics require concrete owner decision before implementation; no repeated policy/Git approval. CI20min rounds; original failures retained. BOARD HMDTL owns status.
+
+Root accepted the bounded native source inventory and Claude-reviewed proposal, not product behavior. Initial REWORK then ACCEPT; C1–C3 closed against original schema/writers. D1 asks whether to adopt separate material-index IDX-01..05/IDX-AC-01..06, retaining full detail/M2 gaps. Pending owner decision; docs delivery proceeds under existing authorization. All product oracles NotRun. Review dispositions and document evidence are in the product evidence report; aggregate tool/provider/billing/active-wait totals unknown.
+
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../docs/remediation/2026-09-host-info.md](../docs/remediation/2026-09-host-info.md)。
 
 此檔保存主控計畫與接受決策；目前只有 dim-gate 試點。其他 program 使用獨立區塊，只有對應 program/variant 的主控可更新本區；worker 只能讀。

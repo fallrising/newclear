@@ -41,7 +41,7 @@ jobs:
           node-version: '24.18.0'
           package-manager-cache: false
       - name: Test private operator web
-        run: node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs
+        run: node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs acceptance/m2-isolated.test.mjs
       - name: Check qualification evidence parser (offline only)
         run: python3 -m unittest discover -s tools -p 'test_m1*.py' -v
       - name: Install pinned Rust toolchain

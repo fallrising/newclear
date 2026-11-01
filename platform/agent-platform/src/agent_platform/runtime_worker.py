@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from psycopg.types.json import Jsonb
 
 from .connector_recovery import stopped
-from .domain import TERMINAL, Problem, execution_mode
+from .domain import SUBSCRIPTION_BACKENDS, TERMINAL, Problem, execution_mode
 from .model_worker import ModelSession, cutoff_reason
 from .recovery import quarantine
 from .result_archive import persist_archive
@@ -52,7 +52,7 @@ def heartbeat(worker, claim):
 
 def execute_real(worker, claim):
     client = worker.connector
-    external = claim.get("backend") == "claude-subscription"
+    external = claim.get("backend") in SUBSCRIPTION_BACKENDS
     model = ModelSession(worker, claim) if worker.model_proxy and not external else None
     tools = None
     archive_pending = False
@@ -338,9 +338,10 @@ def execute_real(worker, claim):
                 model.step(run)
             if external and phase != "result":
                 # Never restart an external CLI after an uncertain owner/invocation.
-                if claim.get("recovery") or worker.subscription is None:
+                driver = worker.subscription_for(claim["backend"])
+                if claim.get("recovery") or driver is None:
                     raise Problem(409, "subscription_outcome_unknown")
-                worker.subscription.execute(worker, claim, run, lost)
+                driver.execute(worker, claim, run, lost)
                 with worker.owned(claim) as (conn, current):
                     state(conn, current, "finalizing")
             elif phase in {"absent", "allocated", "prepared"}:

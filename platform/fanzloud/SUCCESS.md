@@ -426,3 +426,7 @@ The official 0.145.0 executable is verified separately; the existing default cre
 executor to a real browser submission. EX02 actual KVM tools/denials/cleanup passed;
 EX03 and M1-WEB01–05 passed on33e1eb70; see [actual acceptance](docs/acceptance/M1-isolated.md).
 Original Cloud AC-04 and persistent AC-05 are not changed to passed.
+
+## T-0442 M2 — 2026-11-01 active scope
+
+Owner requests the approved second-vendor/two-task milestone. [M2 contract](docs/specs/SPEC-M2-two-vendors.md) fixes scope and checks before implementation. Codex tool/credential separation and concurrent isolation are NOT_RUN. Existing host authority remains one4CPU/4GiB VM and coding<=600s; parallel2 requires separate approval. No M3, API spend, public deployment or release.

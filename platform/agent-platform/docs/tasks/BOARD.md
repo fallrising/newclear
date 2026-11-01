@@ -228,3 +228,16 @@ This post-merge record supersedes pre-merge wording in the dated local snapshot.
 | T-0447.1 | Run-scoped external workspace API | EX-01 | done | 2026-10-31T18:37:19Z | 2026-10-31T19:40:53Z | 2026-10-31T19:40:53Z |
 | T-0447.2 | Actual VM isolation and cleanup | EX-02 | done | 2026-10-31T18:37:19Z | 2026-10-31T19:40:53Z | 2026-10-31T19:40:53Z |
 | T-0447.3 | Subscription CLI coding qualification | EX-03 | done | 2026-10-31T18:37:19Z | 2026-10-31T19:40:53Z | 2026-10-31T19:40:53Z |
+
+
+## T-0442 — Fanzloud M2 bounded second subscription route
+
+[Scope and acceptance](../../../fanzloud/docs/specs/SPEC-M2-two-vendors.md).
+Existing T-0447 executor authority is reused; this does not open another AP milestone.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M2-route | Exact Codex admission/driver, trusted tool boundary and native backup compatibility | M2-01/02 | in_progress | 2026-11-01T04:15Z | — | 2026-11-01T04:55Z |
+
+Code review corrections and native backup31 tests passed; actual Codex Web execution
+and concurrent workspace proof remain pending. Host ceiling remains one4CPU/4GiB VM.

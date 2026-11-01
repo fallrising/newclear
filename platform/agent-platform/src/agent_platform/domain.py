@@ -8,6 +8,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .verification import VerificationPolicy
 
+SUBSCRIPTION_MODELS = {
+    "claude-subscription": "claude-subscription:claude-opus-5-5",
+    "codex-subscription": "codex-subscription:gpt-6.1-sol",
+}
+SUBSCRIPTION_BACKENDS = frozenset(SUBSCRIPTION_MODELS)
+RUNTIME_BACKENDS = {"openhands", *SUBSCRIPTION_BACKENDS}
+
 TERMINAL = {"succeeded", "failed", "cancelled"}
 CAPABILITIES = {
     "protocol_revision": "m1-fake-1",
@@ -63,7 +70,7 @@ class ProjectInput(Input):
 class ProfileInput(Input):
     name: str = Field(min_length=1, max_length=120)
     profile_id: UUID | None = None
-    backend: Literal["fake", "openhands", "claude-subscription"] = "fake"
+    backend: Literal["fake", "openhands", "claude-subscription", "codex-subscription"] = "fake"
     deadline_seconds: int = Field(default=1800, ge=30, le=7200)
     require_approval: bool = False
     mock_tools: bool = Field(default=False, strict=True)
@@ -99,7 +106,7 @@ OPENHANDS_CAPABILITIES = {
 def execution_mode(backend):
     return (
         "cocoon-external"
-        if backend == "claude-subscription"
+        if backend in SUBSCRIPTION_BACKENDS
         else "cocoon-fixture"
         if backend == "openhands"
         else "fake"
@@ -107,7 +114,7 @@ def execution_mode(backend):
 
 
 def capabilities(backend):
-    if backend == "claude-subscription":
+    if backend in SUBSCRIPTION_BACKENDS:
         return {
             **CAPABILITIES,
             "protocol_revision": "subscription-workspace-v1",

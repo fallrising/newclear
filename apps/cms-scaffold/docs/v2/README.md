@@ -74,7 +74,7 @@ BW6 前端缺口收尾（01 Q-12／14／17／20／23／24／25／26，owner 2026
 | BW6 | DOC_READY（本波文件PR合併生效） | [02 §7](02-backend-sdd.md#7-後端波次) | [waves/BW6.md](waves/BW6.md) | 01 Q-12、Q-14、Q-17、Q-20、Q-23～Q-26（後端部分） |
 | PP1a | VERIFIED（local scope，PR #327） | [個人使用驗收](03-personal-use-readiness.md) | [waves/PP1a.md](waves/PP1a.md) | 本地prod／HTTPS／靜態工具／DB不對外／no-demo；非正式環境可用 |
 | PP1b | DOC_READY（本文件PR必要CI通過且合併生效） | [個人使用驗收](03-personal-use-readiness.md) | [waves/PP1b.md](waves/PP1b.md) | 本地正式帳號／維護guard／Q25；host recover成功另依PP1c完整備份 |
-| PP1c | DOC_READY（owner已批准；PR333必要CI通過並合併生效） | PP1a／PP1b已驗收 | [waves/PP1c.md](waves/PP1c.md) | local DB/media一致備份與空白還原；44卡分9/12/9/14四子波；A格式／盤點／離線入口正在驗證與審查，B–D尚未實作 |
+| PP1c | DOC_READY（owner已批准；PR333必要CI通過並合併生效） | PP1a／PP1b已驗收 | [waves/PP1c.md](waves/PP1c.md) | local DB/media一致備份與空白還原；44卡分9/12/9/14四子波；A格式／盤點／離線入口已由PR955合併；B核心測試通過但規格修訂PR956待決、整合未完成；C–D尚未實作 |
 | W6 | DRAFT | [01 §12](01-frontend-sdd.md#12-實作波次給-llm-agent)、[§13](01-frontend-sdd.md#13-開放問題與已知衝突) | — | 01 Q-14、Q-17、Q-20、Q-23～Q-26（前端部分） |
 
 本地交付另用 `LOCAL_VERIFIED`：整合檢查已通過，但未提交／合併，不能等同正式 `VERIFIED`。

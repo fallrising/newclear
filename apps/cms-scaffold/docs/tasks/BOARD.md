@@ -33,7 +33,9 @@ CMS-R5/PR333 has explicit owner approval; required CI passed on28886f9d and norm
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| CMS-C-A | canonical protocol／readonly inventory／offline dispatch (9cards) | AC-05 / PP1-AC03 FM08/12 | in_progress | 2026-11-01T16:49:21Z | — | 2026-11-01T16:49:21Z |
-| CMS-C-B | quiescence registry／owned helpers／capture (12cards) | AC-05 / PP1-AC03 FM08–12 | todo | — | — | 2026-11-01T16:49:21Z |
+| CMS-C-A | canonical protocol／readonly inventory／offline dispatch (9cards) | AC-05 / PP1-AC03 FM08/12 | done | 2026-11-01T16:49:21Z | 2026-11-01T17:44:55Z | 2026-11-01T17:44:55Z |
+| CMS-C-B | quiescence registry／owned helpers／capture (12cards) | AC-05 / PP1-AC03 FM08–12 | in_progress | 2026-11-01T17:46:32.816742+00:00 | — | 2026-11-01T17:46:32.816742+00:00 |
 | CMS-C-C | blank target／artifact verification／restore (9cards) | AC-05 / PP1-AC03 FM08–12 | todo | — | — | 2026-11-01T16:49:21Z |
 | CMS-C-D | recovery proof／session/browser/restart／real drill (14cards) | AC-04/05 / PP1-AC03 FM08–12 | todo | — | — | 2026-11-01T16:49:21Z |
+
+B remains in_progress: local registry/media/helper cores passed388Node tests and T121 scoped review, but H02b/C07/C08 and fullwave gates are incomplete. [Draft PR956](https://github.com/fallrising/newclear/pull/956) proposes endpoint lifecycle and restore receipt hash preimages; explicit owner decisions are pending. T121 requires a real registry-bound close-before-result/drain regression before helper integration. No B product commit/PR, restore pass or release/deploy is claimed.

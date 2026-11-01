@@ -382,3 +382,15 @@ HM2C end uses the primary feature merge time. COV-AC-01..06 close only this back
 slice. Full M2, completion UI, H01..H04 and SUCCESS AC-02..04 are not completed by this delivery.
 Physical byte verification is point-in-time; it does not reserve or guarantee a later completion.
 No usable tag, new dependency/migration/provider, release or deployment.
+
+## T-0339 — WorkItem detail-read contract
+
+Owner continues after HM2C. Source9f3f72af; HAI unchanged from#902, no open HAI PR at intake. Determine remaining M2/detail obligations and exact bounded read contract before implementation. UI and later product slices stay outside this task.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HMDTL | Review next backend material-index contract; 等 owner D1 before implementation | DTL-PLAN-01..03; H02 support | in_progress | 2026-11-01T11:00:00Z | — | 2026-11-01T11:17:20Z |
+
+DTL-PLAN-01 maps every M2 requirement and detail field to current authority/storage and gaps. DTL-PLAN-02 defines one bounded route/shape/consistency/error/resource proposal with fixed product oracles and explicit unresolved decisions. DTL-PLAN-03 disposes Claude review, validates documents and completes required Git/CI/readback/ledger synchronization. These are planning ACs, not product acceptance; full M2 remains incomplete.
+
+[Concrete proposal](../plans/work-item-material-index-20261101.md) and [review dispositions](../evidence/work-item-material-index-plan-20261101.md): Claude follow-up ACCEPT for presenting D1, all source conditions closed. Owner decision pending; merging these documents does not approve IDX-01..05 or run IDX-AC-01..06. Production/OpenAPI/accepted SDD unchanged. HMDTL remains in_progress without end while awaiting D1.

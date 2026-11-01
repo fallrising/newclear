@@ -13,6 +13,12 @@ if (lockedSubmission) element('submit-status').textContent = '已有提交紀錄
 let finalDiff = null;
 let authenticated = false;
 let currentRun = null;
+let durableReady = false;
+let durableBlocked = false;
+let recoveryRequest = 0;
+let submissionGeneration = 0;
+let fallbackRunId = '';
+element('submit-task').disabled = true;
 let recentRequest = 0;
 function reasonText(reason) {
   if (!reason) return '';
@@ -33,7 +39,7 @@ async function api(path, {method = 'GET', body, key, text = false} = {}) {
   const response = await fetch(`/api/v1${path}`, {method, headers, credentials: 'same-origin', cache: 'no-store', body: body === undefined ? undefined : JSON.stringify(body)});
   if (!response.ok) {
     if (response.status === 401) { authenticated = false; clearTimeout(timer); showLogin(); }
-    throw new Error(`請求失敗（${response.status}）；請重新讀取狀態。`);
+    const error = new Error(`請求失敗（${response.status}）；請重新讀取狀態。`); error.status = response.status; throw error;
   }
   return response.status === 204 ? null : text ? response.text() : response.json();
 }
@@ -52,9 +58,44 @@ async function catalog() {
   element('project').replaceChildren(...selected.map((item, index) => new Option(`${item.name} · ${item.base_sha.slice(0, 12)}`, String(index))));
   const agents = profiles.items.filter(p => ['claude-subscription', 'codex-subscription'].includes(p.backend));
   element('agent').replaceChildren(...agents.map(p => new Option(p.name, p.id)));
-  element('submit-task').disabled = lockedSubmission || !selected.length || !agents.length;
+  element('submit-task').disabled = true;
+  await recoverSubmissions();
   updateSelection();
   await recent();
+}
+function updateSubmitLock() {
+  const localUnknown = Boolean(pendingSubmission && (pendingSubmission.unknown || typeof pendingSubmission.runId !== 'string' || !pendingSubmission.runId));
+  lockedSubmission = !durableReady || durableBlocked || localUnknown;
+  element('submit-task').disabled = lockedSubmission || !selected.length || !element('agent').options.length;
+}
+async function recoverSubmissions() {
+  const requested = ++recoveryRequest;
+  durableReady = false; updateSubmitLock();
+  const saved = await api('/submissions');
+  if (requested !== recoveryRequest || !authenticated) return;
+  if (!Array.isArray(saved.items) || typeof saved.blocked !== 'boolean') throw new Error('提交紀錄無法確認；請重新讀取。');
+  durableBlocked = saved.blocked;
+  const matching = saved.items.find(item => item.key === pendingSubmission?.key);
+  if (matching?.state === 'confirmed' && matching.receipt?.run?.id) {
+    pendingSubmission = {key: matching.key, runId: matching.receipt.run.id};
+    sessionStorage.setItem('fanz-submission', JSON.stringify(pendingSubmission));
+  } else if (matching?.state === 'rejected') {
+    pendingSubmission = null; sessionStorage.removeItem('fanz-submission');
+  }
+  element('submission-history').replaceChildren(...saved.items.map(item => {
+    const entry = document.createElement('li');
+    const label = `${item.request?.title || '提交'} · ${item.state === 'confirmed' ? '已受理' : item.state === 'rejected' ? '已拒絕' : '待對帳，不會重送'}`;
+    if (item.state === 'confirmed' && item.receipt?.run?.id) {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'quiet'; button.textContent = label;
+      button.addEventListener('click', () => observe(item.receipt.run.id)); entry.append(button);
+    } else { entry.textContent = label; }
+    return entry;
+  }));
+  durableReady = true; updateSubmitLock();
+  if (lockedSubmission) element('submit-status').textContent = '已有提交紀錄待對帳；重新整理不會重送。';
+  else if (matching?.state === 'confirmed') element('submit-status').textContent = '任務已受理（從持久紀錄恢復）';
+  fallbackRunId = saved.items.find(item => item.state === 'confirmed' && item.receipt?.run?.id)?.receipt.run.id || '';
+  if (!runId && fallbackRunId) { runId = fallbackRunId; sessionStorage.setItem('fanz-current-run', runId); }
 }
 async function recent() {
   const requested = ++recentRequest;
@@ -83,7 +124,14 @@ async function refresh() {
   clearTimeout(timer);
   if (!authenticated || !runId) return;
   const requested = runId;
-  const run = await api(`/runs/${requested}`);
+  let run;
+  try { run = await api(`/runs/${requested}`); }
+  catch (error) {
+    if (error.status === 404 && requested === runId && authenticated && fallbackRunId && fallbackRunId !== requested) {
+      const recovered = fallbackRunId; fallbackRunId = ''; observe(recovered); return;
+    }
+    throw error;
+  }
   if (requested !== runId || !authenticated) return;
   element('run-id').textContent = run.id;
   currentRun = run;
@@ -91,7 +139,9 @@ async function refresh() {
   element('run-reason').textContent = reasonText(run.reason);
   const terminal = ['succeeded', 'failed', 'cancelled'].includes(run.state);
   element('cancel-run').disabled = terminal || run.state === 'cancelling' || sessionStorage.getItem(`fanz-cancel-${run.id}`) !== null;
-  if (lastState !== `${run.state}:${run.state_version}`) {
+  if (run.fanz_history && Array.isArray(run.fanz_history.events)) {
+    element('activity').textContent = (run.fanz_history.history_truncated ? '僅顯示最近保留的狀態紀錄\n' : '') + run.fanz_history.events.map(item => `#${item.cursor} · ${states[item.state] || item.state}`).join('\n');
+  } else if (lastState !== `${run.state}:${run.state_version}`) {
     element('activity').textContent += `${new Date().toLocaleTimeString()} · ${states[run.state] || run.state}\n`;
     lastState = `${run.state}:${run.state_version}`;
   }
@@ -110,7 +160,7 @@ async function refresh() {
   } else {
     if (pendingSubmission?.runId === run.id) {
       pendingSubmission = null; lockedSubmission = false; sessionStorage.removeItem('fanz-submission');
-      element('submit-task').disabled = !selected.length || !element('agent').options.length;
+      updateSubmitLock();
     }
     await recent();
   }
@@ -128,18 +178,22 @@ element('task-form').addEventListener('submit', async (event) => {
   event.preventDefault(); if (lockedSubmission) return;
   const source = selected[Number(element('project').value)];
   if (!source) return;
-  pendingSubmission = {key: crypto.randomUUID(), unknown: true};
+  const key = crypto.randomUUID(); const generation = ++submissionGeneration;
+  const selectedAtSubmit = runId;
+  pendingSubmission = {key, unknown: true};
   sessionStorage.setItem('fanz-submission', JSON.stringify(pendingSubmission));
   lockedSubmission = true; element('submit-task').disabled = true; element('error-message').textContent = '';
   element('submit-status').textContent = '正在提交…';
   try {
-    const value = await api('/tasks', {method: 'POST', key: pendingSubmission.key, body: {project_id: source.project_id, base_sha: source.base_sha, profile_revision: element('agent').value, title: element('title').value, goal: element('prompt').value}});
-    pendingSubmission = {key: pendingSubmission.key, runId: value.run.id};
+    const value = await api('/tasks', {method: 'POST', key, body: {project_id: source.project_id, base_sha: source.base_sha, profile_revision: element('agent').value, title: element('title').value, goal: element('prompt').value}});
+    if (generation !== submissionGeneration || !authenticated) return;
+    pendingSubmission = {key, runId: value.run.id};
     sessionStorage.setItem('fanz-submission', JSON.stringify(pendingSubmission));
-    lockedSubmission = false; element('submit-task').disabled = !selected.length || !element('agent').options.length;
-    element('submit-status').textContent = '任務已受理'; observe(value.run.id);
+    updateSubmitLock();
+    element('submit-status').textContent = '任務已受理'; if (runId === selectedAtSubmit) observe(value.run.id);
     try { await recent(); } catch (error) { fail(error); }
   } catch (error) {
+    if (generation !== submissionGeneration || !authenticated) return;
     element('submit-status').textContent = '提交結果尚未確認。請從最近任務對帳；不會自動重送。'; fail(error);
     try { await recent(); } catch { /* The first uncertainty remains visible. */ }
   }
@@ -170,10 +224,10 @@ element('cancel-run').addEventListener('click', async () => {
     element('cancel-status').textContent = '取消結果尚未確認，請重新讀取狀態；不會自動重送。'; fail(error);
   }
 });
-element('refresh').addEventListener('click', () => { void refresh().catch(fail); });
+element('refresh').addEventListener('click', () => { void (async () => { await recoverSubmissions(); await refresh(); })().catch(fail); });
 element('project').addEventListener('change', updateSelection);
 element('logout').addEventListener('click', async () => {
-  try { await api('/session', {method: 'DELETE'}); authenticated = false; csrf = ''; clearTimeout(timer); showLogin(); }
+  try { await api('/session', {method: 'DELETE'}); authenticated = false; csrf = ''; durableReady = false; recoveryRequest++; submissionGeneration++; updateSubmitLock(); clearTimeout(timer); showLogin(); }
   catch (error) { fail(error); }
 });
 try {

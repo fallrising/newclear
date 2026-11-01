@@ -2757,3 +2757,14 @@ PS source/local evidence gate ACCEPT 2026-11-01T11:09:00Z:6behavioralRED/1existi
 Ownercontinues statednextstep afterPS and prior explicit originaldashboardapproval. Leadsoleoperator:pinPR9056files, freshstate, assetupload/publish only with3unchangedmodules, keepsecrets/D1/Access/Cron/deadlines, nopause/renewal/paidupgrade. ExistingT861sourceACCEPT/446tests/16browserchecks apply. Onefreshnative readonlypublic-evidence reviewerT862,inheritedmodel/effort/permissions,<=1200tokens+onefocusedfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota; no private/network/tests/writes/delegation. InstructionsnotOSisolation;leadchecksprivate receipts.
 
 PSL evidence gate ACCEPT 2026-11-01T11:48:42Z:originaldashboardat100%11:44:40Z,manifest3/actualupload1,publishonce;final11:45:28Z preserves193commands/222firings/186journal/4grants/Access/Cron/deadlines,samePID/NRestarts,3exactunchangedmodules. Leadprivateaudit;T862initialREWORKstaleindexstatus→correctedfourentries→focusedACCEPT.51contracts/9indexes/task-report/diff/402links/67unchangedinputs/8privateliteralsscan. No newjob/renewal/restart/paidupgrade/humanwindow. NormalGitgatesremain.
+# T-0442 M3 durable-intent slice — 2026-11-01
+
+Owner continuation after accepted M2. Scope and failure semantics:
+platform/fanzloud/docs/specs/SPEC-M3-durable-intents.md, CU-M3-01–05.
+Parent owns gateway/Web integration, real process/AP/browser evidence and final delivery.
+One isolated store worker: .team/fanz-m3-t0442/store-task.md; one fresh acceptance reviewer
+after integration. No recursive delegation. Original M1/M2 dirty workers preserved.
+Estimated90–150 active minutes plus bounded CI;20min checkpoints. No VM/coding invocations.
+Tests first, transaction/security/fault checks, Rust/Web/native checks, real restart readback,
+independent acceptance, required CI/normal merge/readback/ledger/backup. No FN05/FN07 expansion.
+Current result: NOT_RUN; API gap means unknown stays pending investigation without POST replay.

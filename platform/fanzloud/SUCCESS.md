@@ -447,3 +447,14 @@ Claude repair, Codex cancellation, two live isolated workspaces, secret/network/
 denials and cancelA/completeB. Both cleaned; capacity restored1 and services stopped.
 See [M2 acceptance](docs/acceptance/M2-two-vendors.md). Fresh independent ACCEPT_M2_LIVE; final PR906 delivery pending.
 Earlier pending-resource text is historical. M3/AC05 not started; mainline incomplete.
+
+## T-0442 M3 durable-intent slice — 2026-11-01
+
+Owner continuation starts the previously fixed AC05 minimum within M3, specified in
+[CU-M3-01–05](docs/specs/SPEC-M3-durable-intents.md): durable intent before one AP POST,
+unique external run/result reference, persisted observed history, authenticated restart
+readback and unknown zero automatic resend even in a new browser. AP stays sole executor.
+M2 is accepted and delivered via PR906/914; earlier pending snapshots are historical.
+No new VM or coding invocation. Native transaction/fault tests and actual Rust/AP/DB/browser
+restart evidence are required; all new M3 checks NOT_RUN until recorded. FN05/FN07 and full
+M3 remain outside this slice; original Cloud AC04 and full mainline are not declared passed.

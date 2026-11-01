@@ -234,3 +234,10 @@ The bounded implementation is delivered in [#920](https://github.com/fallrising/
 after independent code review, complete exact-head CI and remote source verification.
 [BOARD HMDTL](docs/tasks/BOARD.md) and [evidence](docs/evidence/work-item-material-index-20261101.md) record delivery.
 No whole-product AC or full M2 status is promoted.
+
+## Rework loop proposal — 2026-11-01
+
+[Concrete proposal](docs/plans/rework-loop-20261101.md) for the accepted but unimplemented RequestRework,
+redispatch from Developing and an explicit current-Candidate rule, so Review/QA can return to work and
+Candidate B cannot use Candidate A's material. RWK-AC-01..05 remain NotRun pending owner D1/D2; this
+documentation does not change product ACs, production behavior or the delivered M2 slices. Status: BOARD HRWK.

@@ -99,7 +99,7 @@ Owner 明確要求加入 Cursor Agent；先固定官方 CLI、缺失／版本偵
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | T-0009-01 | Cursor 固定安裝、隔離設定及原生啟動已驗證及交付 | AC-01、AC-13（前置） | done | 2026-10-31T18:41:54Z | 2026-10-31T18:48:30Z | 2026-10-31T18:48:52Z |
-| T-0009-02 | Cursor 真實任務 AC-13 通過；公開證據與 CI／合併交付 | AC-13；其餘生命週期待驗 | in_progress | 2026-10-31T18:57:23Z | — | 2026-11-01T04:30:54Z |
+| T-0009-02 | Cursor 真實任務 AC-13 通過並交付；完整生命週期待後續 | AC-13；其餘生命週期待驗 | done | 2026-10-31T18:57:23Z | 2026-11-01T04:32:33Z | 2026-11-01T04:33:09Z |
 
 T-0009-01：55 項離線測試、真實官方 archive 提取／摘要與無憑證原生啟動通過。[證據](../evidence/cursor-startup-2026-11-01.json)。T-0009-02 仍待登入與有界真實任務，不把前置當 AC-13 通過。
 
@@ -112,3 +112,5 @@ T-0009-02 本次執行與修正見[證據](../evidence/cursor-live-2026-11-01.js
 最新單次批准已使用：240 秒期限下於 34.05 秒因第二個 Read 被邊界拒絕而停止，沒有產物；session／固定模型／hooks 有證據，清理完整。第二次讀取的目標未記錄，不能確認它是否為輸出檢查。已離線準備最多四次工具規則、預建空 result.json 與檔案分類診斷；65 tests 和無 prompt 啟動通過，尚未再次跑模型。[本輪證據](../evidence/cursor-bounded-2026-11-01.json)。AC-13 保持 pending、PR #878 保持 draft；下一次付費任務須新批准。
 
 T-0009-02 的第三次獨立授權任務通過 AC-13：Composer 2.5，15.57 秒，Read(input) → Read(result) → Write(result)，原生同 session／model、completed stop、37723 input／424 output tokens、精確產物 hash 與完整清理一致。[成功證據](../evidence/cursor-completed-2026-11-01.json)。前兩次失敗保留；本次授權已使用，沒有自動重跑。65 項離線測試通過；PR #878 待 CI／合併，完整 MVP 仍 incomplete。
+
+T-0009-02 結案：[PR #878](https://github.com/fallrising/newclear/pull/878) 已合併，commit `c73950eccab2263e8b22e383c55b20899c98d186`，offline／validate 兩項 CI success。已回讀主線成功證據：completed、model_inference_verified=true、424 output tokens、cleanup completed。AC-13 通過；前兩次失敗保留，本次單次授權已使用，無追加模型任務。完整四工位 MVP、Grok 真實任務及 Cursor 權限／取消／恢復仍待驗；沒有 release／deploy／usable tag。此列與結案紀錄更新 HANDOFF 內合併前的「待 CI／合併」狀態。

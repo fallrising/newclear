@@ -114,3 +114,17 @@ T-0009-02 本次執行與修正見[證據](../evidence/cursor-live-2026-11-01.js
 T-0009-02 的第三次獨立授權任務通過 AC-13：Composer 2.5，15.57 秒，Read(input) → Read(result) → Write(result)，原生同 session／model、completed stop、37723 input／424 output tokens、精確產物 hash 與完整清理一致。[成功證據](../evidence/cursor-completed-2026-11-01.json)。前兩次失敗保留；本次授權已使用，沒有自動重跑。65 項離線測試通過；PR #878 待 CI／合併，完整 MVP 仍 incomplete。
 
 T-0009-02 結案：[PR #878](https://github.com/fallrising/newclear/pull/878) 已合併，commit `c73950eccab2263e8b22e383c55b20899c98d186`，offline／validate 兩項 CI success。已回讀主線成功證據：completed、model_inference_verified=true、424 output tokens、cleanup completed。AC-13 通過；前兩次失敗保留，本次單次授權已使用，無追加模型任務。完整四工位 MVP、Grok 真實任務及 Cursor 權限／取消／恢復仍待驗；沒有 release／deploy／usable tag。此列與結案紀錄更新 HANDOFF 內合併前的「待 CI／合併」狀態。
+
+## T-0010：Grok 登入後有界任務
+
+Owner 指示繼續開發；先完成原生協定、隔離憑證副本、工具 gate、無 prompt 啟動及離線測試，再提出單次付費驗收範圍。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0010-01 | Grok 真實任務 AC-03 通過；證據、CI 與合併交付 | AC-03 | in_progress | 2026-11-01T04:50:31Z | — | 2026-11-01T11:00:50Z |
+
+T-0010 已準備 Grok 1.0.70／grok-4.6 單任務 runner：原生 inspect 確認 hooks、已登入無 prompt 啟動與同 session 模型選擇、清理通過（12.52 秒）；78 項離線測試通過。[證據](../evidence/grok-ready-2026-11-01.json)、[單次範圍](../GROK-WORK.md)。沒有送模型 prompt；AC-03 仍 pending，等 owner 明確批准一次付費驗收。四工具 hook gate 會受原生 fail-open 行為限制，沒有 request／token／金額硬上限。
+
+T-0010 的一次已授權 Grok 任務已執行，12.55 秒後因 lab 只識別 file_path、未識別原生 read_file 的 target_file 而停止；兩次讀取請求被拒，seed output 未變，AC-03 未通過。原生 session／模型／prompt 正確，程序與憑證副本清理完整。[失敗與離線修正](../evidence/grok-live-2026-11-01.json)：已支援無歧義路徑別名、兩檔並行讀取、按 tool ID 核對完成，保留四次工具 gate／唯一編輯；80 tests 通過。沒有追加付費重跑；PR #897 保持 draft，等新的單次批准。
+
+T-0010 最新：owner 再批准一次翻倍範圍後，Grok 1.0.70／grok-4.6 真實任務通過 AC-03，18.00 秒完成兩個 read_file 與一個 search_replace；同 session 模型、authenticated hooks、成功工具結果、end_turn Stop、精確產物 hash 與清理一致。[成功證據](../evidence/grok-completed-2026-11-01.json)。81 項離線測試通過；先前失敗保留，本次授權已使用、沒有自動重跑。交付及結案狀態見[任務板](BOARD.md)。四 provider 各有合成任務證據，但統一產品流程、權限／取消／恢復及完整 MVP 尚未完成。

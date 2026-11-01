@@ -28,3 +28,7 @@ Prepared but not yet adopted JRE/curl image1ad1f859e141f2296a7d49457414f84c2813a
 Merge validation note: staged comparison against the old September/October PR parent reports inherited trailing whitespace in three unrelated current-main evidence/README files. Those three index blobs were byte-compared with MERGE_HEAD and remain identical; no historical evidence rewritten. `git diff --cached --check MERGE_HEAD` passes for the actual feature delta. Root index validation passes52contracts/9llms.
 
 Checkpoint: native Java517+201PG,web672+117helper and native build/static/bundle gates pass; E01 finally throw lint fixed and rechecked. Root evidence gate remains PARTIAL: G07/E01 await owner tooling decision; no final acceptance/merge. Exact commands, prior failures and next action in EVIDENCE.md.
+
+## Owner decision — 2026-11-01
+
+Owner replied「批准。」to the concrete local-tooling exception. This authorizes exactly the prepared proposal, now reflected in PP1a§5.2; it does not approve PP1c's unresolved protocol or waive live acceptance. Continue G07/E01 with fresh owned resources. Existing source gates/CI remain valid for unchanged product code; run affected gates again only if a fix changes them. Remaining estimate60–100 active minutes within original90–150 estimate,20minute checkpoints,900s command and15minuteCI bounds; same failure initial+2reasoned corrections. One bounded final independent acceptance follow-up is reserved. No new worker yet.

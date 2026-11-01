@@ -41,3 +41,5 @@ python3 scripts/run_cursor_startup.py --check-startup
 2026-11-01 實測 12.51 秒，原生登入等待、workspace hooks 安裝／移除、外部 TCP 拒絕、5 個追蹤程序清理通過；31 項 Node 與 24 項 Python 測試通過，官方 archive 的實際提取／摘要也通過。[白名單證據](evidence/cursor-startup-2026-11-01.json)。
 
 `status=completed` 僅指啟動檢查完成；`task_completed=false`、`session_hook_verified=false`、`model_inference_verified=false`。Cursor 的 session、模型、任務產物與取消／恢復仍待登入後的有界驗收。上游尚不能完整辨識 Cursor 工具權限等待，不把登入等待當作 AC-05 已完成。
+
+Owner 已登入並經原生 status 核對；後續見[有界任務與待批准範圍](CURSOR-WORK.md)。

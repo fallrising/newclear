@@ -1,0 +1,71 @@
+{
+  "recorded_at": "2026-10-31T19:12:34Z",
+  "status": "failed",
+  "authorized_attempts": 1,
+  "additional_paid_attempts": 0,
+  "tested_commit": "205579b22db64d9c45754dede6f37cb8b29e9f24",
+  "provider": "cursor",
+  "model": "composer-2.5",
+  "model_activity_observed": true,
+  "model_inference_verified": false,
+  "artifact_matches_fixture": true,
+  "artifact_sha256": "7f0933d287cb479916176a1797b9edf631a3435d303b80da1a697539c1c7e3d2",
+  "authenticated_hook_count": 0,
+  "boundary_hook_events": 0,
+  "tool_boundary_enforcement_verified": false,
+  "input_tokens": null,
+  "output_tokens": null,
+  "provider_requests": null,
+  "cost": null,
+  "reason": "stop loop_limit=0 invalidated the whole native hook configuration; task ran without hook evidence",
+  "termination": "Office stopped explicitly after the artifact was observed and missing hooks confirmed",
+  "elapsed_s": 99.6454441670794,
+  "cleanup_errors": [],
+  "copied_credentials_removed": true,
+  "runtime_source_sha256": {
+    "run_cursor_work.py": "177fddace83a60ebee3d0506d914f72786572dfbb4a1b63ed63596f0b9940367",
+    "cursor_cli.py": "90fee7eab9f04b536a1ce0ebe75169509b200684c0e5e015c6ecae7fd1b229f2",
+    "cursor_task_hook.py": "d4b53c8a3e6046c6b6ccac8efb227d2219e99f3921ff2e7e2769ad5008457983",
+    "cursor_work_policy.mjs": "b9c65d411d61e2c4803c54811b4ea954192cff5e52686ba37564544c58e32a41",
+    "office_cursor_work.mjs": "14203023fd62e318852ba84ada2855b3cfb2e1943199f5225656fd2e00806d3c",
+    "cursor-task/cursor-agent": "897a385bcf752ab70a9d7e6f0a0a9fe27cdd3d764b41c26ab5431ae9cb33e692",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72"
+  },
+  "fix": {
+    "stop_loop_limit": 1,
+    "followup_message_returned": false,
+    "native_validator": {
+      "valid": true,
+      "errors": [],
+      "rejects_zero_loop_limit": true
+    },
+    "valid_input_read_allowed": true,
+    "offline_tests": {
+      "node": 33,
+      "python": 30
+    },
+    "startup": {
+      "status": "completed",
+      "outcome": "ready_without_prompt",
+      "model_inference_verified": false,
+      "copied_credentials_removed": true,
+      "cleanup_errors": [],
+      "elapsed_s": 12.586916832951829,
+      "source_sha256": {
+        "run_cursor_work.py": "1ef1e9156696d2dc5695b6be4ea51495d271c107d182feca4c12fbeb04f4931b",
+        "cursor_cli.py": "90fee7eab9f04b536a1ce0ebe75169509b200684c0e5e015c6ecae7fd1b229f2",
+        "cursor_task_hook.py": "6e68400a42969113638270de204c6fc84dbecc8f3079568142a7eaf595b54ded",
+        "cursor_work_policy.mjs": "b9c65d411d61e2c4803c54811b4ea954192cff5e52686ba37564544c58e32a41",
+        "office_cursor_work.mjs": "14203023fd62e318852ba84ada2855b3cfb2e1943199f5225656fd2e00806d3c",
+        "cursor_hook_preflight.mjs": "3115fc57df97757a68ba35d0fee1ffb152a8808f3a8f946a72368a1b781022a9",
+        "cursor-task/cursor-agent": "4cda9627980c703a4e04efac8e8939c16000ba3ee866c3aed15a1d091a9ddf2a",
+        "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+        "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+        "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72"
+      }
+    }
+  },
+  "remaining": "AC-13 pending; requires separate approval for one further model attempt"
+}

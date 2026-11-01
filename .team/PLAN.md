@@ -2758,6 +2758,22 @@ Ownercontinues statednextstep afterPS and prior explicit originaldashboardapprov
 
 PSL evidence gate ACCEPT 2026-11-01T11:48:42Z:originaldashboardat100%11:44:40Z,manifest3/actualupload1,publishonce;final11:45:28Z preserves193commands/222firings/186journal/4grants/Access/Cron/deadlines,samePID/NRestarts,3exactunchangedmodules. Leadprivateaudit;T862initialREWORKstaleindexstatus→correctedfourentries→focusedACCEPT.51contracts/9indexes/task-report/diff/402links/67unchangedinputs/8privateliteralsscan. No newjob/renewal/restart/paidupgrade/humanwindow. NormalGitgatesremain.
 
+# T-0442 M3 durable-intent slice — 2026-11-01
+
+Owner continuation after accepted M2. Scope and failure semantics:
+platform/fanzloud/docs/specs/SPEC-M3-durable-intents.md, CU-M3-01–05.
+Parent owns gateway/Web integration, real process/AP/browser evidence and final delivery.
+One isolated store worker: .team/fanz-m3-t0442/store-task.md; one fresh acceptance reviewer
+after integration. No recursive delegation. Original M1/M2 dirty workers preserved.
+Estimated90–150 active minutes plus bounded CI;20min checkpoints. No VM/coding invocations.
+Tests first, transaction/security/fault checks, Rust/Web/native checks, real restart readback,
+independent acceptance, required CI/normal merge/readback/ledger/backup. No FN05/FN07 expansion.
+Result: independent ACCEPT_M3_MINIMUM on2e08fabe;339 native/26Web pass, actual
+confirmed admission/restarts and held real202/SIGKILL unknown lock, prior M2 result readback.
+Zero new coding/VM; two explicit queued tasks cancelled. Original summary-export UUID
+failure retained; read-only reconciliation accepted without rerun. API gap means unknown
+stays pending investigation without POST replay. Required CI/merge/readback/ledger remain.
+
 ## RX remote D1 restore audit — 2026-11-01T14:31:46Z
 
 Ownercontinues statedremoteisolatedrestore. Leadsolewriter/operator: pureaudit withRGR/fullsuite; existinginactiveRFsource only, officialexport/privatebackup/importone newunboundD1; no sourcewrites/liveLab/authorityrenewal/paidupgrade/runnerexecution. Keepdatarestorevsreconcile/failover distinction. Onefreshnative readonlyreviewerT863,inheritedmodel/effort/permissions,<=1500tokens+one<=1000tokenfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota,no tests/network/private/writes/delegation. NaturalinstructionsnotOSisolation;leadownsprivateverification/evidencegate/Git.

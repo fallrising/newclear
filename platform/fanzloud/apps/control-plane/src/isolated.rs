@@ -15,6 +15,9 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use crate::P0PublicOrigin;
+use codebox_event_store::SubmissionStore;
+
+mod persistence;
 
 const REQUEST_LIMIT: usize = 64 * 1024;
 const RESPONSE_LIMIT: usize = 2 * 1024 * 1024;
@@ -28,6 +31,9 @@ const FORWARDED: [&str; 5] = [
     "idempotency-key",
 ];
 const CSP: &str = "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'";
+
+#[cfg(test)]
+mod persistence_tests;
 
 /// Redacted gateway errors: external messages never contain upstream bodies or credentials.
 #[derive(Debug, Error)]
@@ -53,6 +59,7 @@ pub enum IsolatedError {
 struct Config {
     origin: P0PublicOrigin,
     upstream: SocketAddr,
+    store: Option<SubmissionStore>,
 }
 
 impl Config {
@@ -62,7 +69,11 @@ impl Config {
         if upstream.ip() != IpAddr::V4(Ipv4Addr::LOCALHOST) || upstream.port() == 0 {
             return Err(IsolatedError::Configuration);
         }
-        Ok(Self { origin, upstream })
+        Ok(Self {
+            origin,
+            upstream,
+            store: None,
+        })
     }
 }
 
@@ -72,10 +83,17 @@ impl Config {
 /// `CODEBOX_AGENT_PLATFORM_ADDRESS` (literal `127.0.0.1:port`). No P0 credentials are read.
 pub async fn serve() -> Result<(), IsolatedError> {
     let required = |name| env::var(name).map_err(|_| IsolatedError::Configuration);
-    let config = Config::new(
+    let mut config = Config::new(
         &required("CODEBOX_PUBLIC_ORIGIN")?,
         &required("CODEBOX_AGENT_PLATFORM_ADDRESS")?,
     )?;
+    let store_path = std::path::PathBuf::from(required("CODEBOX_ISOLATED_STORE")?);
+    config.store = Some(
+        tokio::task::spawn_blocking(move || SubmissionStore::open(store_path))
+            .await
+            .map_err(|_| IsolatedError::Configuration)?
+            .map_err(|_| IsolatedError::Configuration)?,
+    );
     let listen: SocketAddr = required("CODEBOX_LISTEN_ADDRESS")?
         .parse()
         .map_err(|_| IsolatedError::Configuration)?;
@@ -95,6 +113,9 @@ fn router(config: Config) -> Router {
 }
 
 fn allowed(method: &Method, path: &str) -> bool {
+    if path == "/api/v1/submissions" {
+        return method == Method::GET;
+    }
     if path == "/api/v1/session" {
         return matches!(*method, Method::GET | Method::POST | Method::DELETE);
     }
@@ -295,6 +316,27 @@ async fn handle(State(config): State<Arc<Config>>, request: Request) -> Response
     }
     if cancel_target(&path) && !valid_cancel(&body) {
         return error(StatusCode::BAD_REQUEST, "invalid_cancel_request");
+    }
+    if path == "/api/v1/submissions"
+        || (parts.method == Method::POST && path == "/api/v1/tasks")
+        || (parts.method == Method::GET
+            && path.starts_with("/api/v1/runs/")
+            && !path.ends_with("/result.diff"))
+    {
+        if let Some(store) = config.store.clone() {
+            return persistence::handle(
+                config,
+                store,
+                parts.method,
+                path,
+                parts.headers,
+                body.to_vec(),
+            )
+            .await;
+        }
+        // Only legacy transport unit fixtures may omit the store. serve() always requires it.
+        #[cfg(not(test))]
+        return error(StatusCode::SERVICE_UNAVAILABLE, "durable_store_unavailable");
     }
     let mutation = parts.method != Method::GET;
     let upstream = tokio::task::spawn_blocking(move || {

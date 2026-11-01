@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const source = await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8');
 const run = id => ({id, state: 'running', state_version: 3, cleanup_state: 'pending'});
-async function page({stored, submit, action, getRun, tasks} = {}) {
+async function page({stored, submit, action, getRun, tasks, submissions} = {}) {
   const elements = new Map(), storage = new Map(stored || []), requests = [], timers = [];
   const node = id => {
     if (!elements.has(id)) elements.set(id, {value: '0', textContent: '', disabled: false, options: [], listeners: {}, children: [],
@@ -20,6 +20,7 @@ async function page({stored, submit, action, getRun, tasks} = {}) {
       requests.push({url, ...options});
       let data;
       if (url.endsWith('/session')) data = {authenticated: true, csrf_token: 'csrf'};
+      else if (url.endsWith('/submissions')) data = submissions ? await submissions() : {items: [], blocked: false};
       else if (url.endsWith('/projects')) data = {items: [{id: 'project', canonical_repo: 'repo', name: 'fixture'}]};
       else if (url.endsWith('/agent-profiles')) data = {items: ['claude', 'codex', 'fake'].map(name => ({id: name, name, backend: `${name}-subscription`}))};
       else if (url.endsWith('/runtime')) data = {repositories: [{canonical_repo: 'repo', base_sha: 'a'.repeat(40)}]};
@@ -123,4 +124,52 @@ test('M2-04: pending or failed B fetch never leaves A identity/status/reason', a
   assert.equal(p.node('run-id').textContent, 'B');
   assert.equal(p.node('run-status').textContent, '讀取中');
   assert.equal(p.node('cancel-run').disabled, true);
+});
+
+test('M3-06: fresh browser recovers server unknown and cannot submit', async () => {
+  const p = await page({submissions: async () => ({blocked: true, items: [{key: 'unknown-key', state: 'unknown', request: {title: 'uncertain'}}]})});
+  assert.equal(p.node('submit-task').disabled, true);
+  await p.submitForm();
+  assert.equal(p.requests.filter(x => x.method === 'POST').length, 0);
+  assert.match(p.node('submit-status').textContent, /待對帳/);
+});
+test('M3-06: fresh browser opens persisted confirmed run without submit', async () => {
+  const p = await page({submissions: async () => ({blocked: false, items: [{key: 'saved-key', state: 'confirmed', receipt: {run: {id: 'saved-run'}}}]})});
+  assert.equal(p.node('run-id').textContent, 'saved-run');
+  assert.equal(p.requests.filter(x => x.method === 'POST').length, 0);
+});
+test('M3-06: durable list failure fails closed instead of enabling submit', async () => {
+  const p = await page({submissions: async () => {throw new Error('store unavailable');}});
+  assert.equal(p.node('submit-task').disabled, true);
+  await p.submitForm();
+  assert.equal(p.requests.filter(x => x.method === 'POST').length, 0);
+});
+test('M3-04: observation history replaces browser wall-clock reconstruction', async () => {
+  const p = await page({stored: [['fanz-current-run','A']], getRun: async () => ({...run('A'), fanz_history: {cursor: 2, history_truncated: false, events: [{cursor: 1, state: 'queued', state_version: 1}, {cursor: 2, state: 'running', state_version: 3}]}})});
+  assert.match(p.node('activity').textContent, /#1.*排隊中/);
+  assert.match(p.node('activity').textContent, /#2.*Agent 執行中/);
+});
+test('M3-06: late A response cannot replace B uncertainty after durable A recovery', async () => {
+  let releaseA, recovery = false, submits = 0;
+  const p = await page({submissions: async () => ({blocked: false, items: recovery ? [{key: JSON.parse(p.storage.get('fanz-submission')).key, state: 'confirmed', receipt: {run: {id: 'A'}}}] : []}), submit: async () => {
+    submits++;
+    if (submits === 1) return new Promise(resolve => {releaseA = resolve;});
+    throw new Error('lost B response');
+  }});
+  const first = p.submitForm(); await p.flush(); recovery = true;
+  p.node('refresh').listeners.click(); await p.flush();
+  assert.equal(p.node('submit-task').disabled, false);
+  await p.submitForm(); const unknownB = p.storage.get('fanz-submission');
+  assert.equal(JSON.parse(unknownB).unknown, true);
+  releaseA({run: run('A')}); await first;
+  assert.equal(p.storage.get('fanz-submission'), unknownB);
+  assert.equal(p.node('submit-task').disabled, true);
+});
+test('M3-06: confirmed 404 of stale selection falls back to durable run without POST', async () => {
+  const p = await page({stored: [['fanz-current-run','gone']], submissions: async () => ({blocked: false, items: [{key:'saved', state:'confirmed', receipt:{run:{id:'saved-run'}}}]}), getRun: async id => {
+    if(id === 'gone') { const e = new Error('not found'); e.status = 404; throw e; }
+    return run(id);
+  }});
+  await p.flush(); assert.equal(p.node('run-id').textContent,'saved-run');
+  assert.equal(p.requests.filter(x=>x.method==='POST').length,0);
 });

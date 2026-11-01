@@ -54,3 +54,12 @@ Fresh independent ACCEPT_M2_LIVE and all three final-head workflows passed.
 as `d55db6a9ad4606cd7df30b2bc9411b559d04f75a`; remote product bytes read back equal.
 This supersedes the earlier pending-resource checkpoint. Services stopped; no standing URL.
 M3/AC05 is not started; T-0442/T-0447 remain in_progress.
+
+## T-0442 M3 — minimum durable intent and restart slice
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M3-D | Durable submit intent, unique AP run/result reference, restart readback and unknown zero-resend | AC05 minimum / FN04 slice, CU-M3-01–05 | in_progress | 2026-11-01T14:25:00Z | | 2026-11-01T15:06:00Z |
+
+[Contract](../specs/SPEC-M3-durable-intents.md). Single Ready production task;
+does not start FN05 review handoff/FN07 full journey or claim whole M3 complete.

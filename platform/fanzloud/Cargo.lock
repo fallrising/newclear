@@ -157,6 +157,7 @@ dependencies = [
  "bytes",
  "codebox-agent-codex",
  "codebox-domain",
+ "codebox-event-store",
  "codebox-session-runtime",
  "futures-util",
  "getrandom 0.4.3",

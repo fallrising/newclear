@@ -414,3 +414,19 @@ no pending review threads. Remote332 product paths match reviewed source byte-fo
 uses that actual functional merge time. This closeout changes documentation only; ledger/final private
 handoff receipts follow normal delivery. IDX-AC-01..05 and final-head implementation gates accepted;
 full detail/history, completion UI, full M2 and full product remain incomplete. T-0339 stays in_progress.
+
+## T-0339 — rework loop contract
+
+Owner continues after HMDTL. Source caad3c3a; no open HAI PR at intake. Comparing remaining-work M2 with source found
+that accepted RequestRework is unimplemented, DispatchRun starts only from Ready and the current Candidate is implicit,
+so Review/QA cannot return to work and v0.2 AC-02 is lawfully unreachable. This task prepares the concrete contract first;
+implementation waits for owner D1/D2. UI, ReopenWorkItem, full detail/history, migration and providers stay out of scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HRWK | Propose rework/redispatch/current-Candidate contract; 等 owner D1/D2 before implementation | RWK-PLAN-01..03; RWK-AC-01..05 proposed; H02 support | in_progress | 2026-11-01T14:15:00Z | — | 2026-11-01T14:42:00Z |
+
+RWK-PLAN-01 maps the remaining M2/Done gaps to source with evidence. RWK-PLAN-02 fixes one bounded contract,
+acceptance and the minimal owner decisions. RWK-PLAN-03 disposes Claude review, passes document checks and
+completes Git/CI/readback/ledger delivery. These are planning ACs; RWK-AC-01..05 stay NotRun until approval and
+implementation. [Proposal](../plans/rework-loop-20261101.md); [review evidence](../evidence/rework-loop-plan-20261101.md).

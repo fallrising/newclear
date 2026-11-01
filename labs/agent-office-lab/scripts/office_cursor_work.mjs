@@ -112,7 +112,7 @@ try {
     assert.deepEqual(JSON.parse(artifact), { marker: input.marker, total: input.values.reduce((a, b) => a + b, 0) });
     report.artifact_sha256 = createHash('sha256').update(artifact).digest('hex');
     report.native_stop_verified = true; report.session_hook_verified = true;
-    report.file_task_passed = true; report.task_completed = true;
+    report.file_task_passed = true; report.task_completed = true; report.model_inference_verified = true;
     report.model = plan.model; report.input_tokens = stopped.input_tokens; report.output_tokens = stopped.output_tokens;
   } else {
     const ready = () => office.floors().flatMap(f => f.workers.fullScreens()).some(s => {

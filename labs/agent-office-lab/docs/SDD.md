@@ -62,7 +62,7 @@ flowchart TD
 | OpenCode | 原生 CLI + 上游 Office plugin；lab wrapper 保留本地 status plugin、固定 Strata | prompt、session、permission、question、error | 1.19.5 + Strata 真實檔案任務及取消通過；完整生命週期未驗收 |
 | Grok CLI | 暫採官方版，原生 CLI + 上游 Office hooks、獨立 `GROK_HOME` | session 恢復、登入與等待提示、完成／錯誤；不得與社群 `grok-dev` 混用 | 官方 Grok 1.0.70；無憑證啟動通過，真實任務待驗 |
 | Pi + DeepSeek | 原生 Pi + 上游 Office extension、每工位 session directory | DeepSeek model/provider 實際可用；`agent_settled` 才可結束任務 | Pi 1.4.0 + DeepSeek 有界真實任務通過（AC-04） |
-| Cursor Agent | 官方 CLI + 上游 Office 的 workspace .cursor/hooks.json；隔離 HOME 與 CURSOR_CONFIG_DIR | session、模型、完成／錯誤、登入等待；不自動轉接 Grok host | 固定官方 2026.10.22-27dcf5f；無憑證啟動通過，AC-13 真實任務待驗 |
+| Cursor Agent | 官方 CLI + 上游 Office 的 workspace .cursor/hooks.json；隔離 HOME 與 CURSOR_CONFIG_DIR | session、模型、完成／錯誤、登入等待；不自動轉接 Grok host | 固定官方 2026.10.22-27dcf5f；Composer 2.5 真實任務 AC-13 通過，完整生命週期待驗 |
 
 每個 provider 提供共通行為：`detect`、`launch`、`sendInput`、`cancel`、`resume`、`stop`，但不要求參數與事件名稱完全相同。`detect` 必須核對 executable 實際來源與 `--version`／`--help`，不能只看檔名 `grok`。
 

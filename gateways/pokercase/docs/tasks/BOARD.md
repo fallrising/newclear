@@ -6,11 +6,11 @@ Demand:deskT0426; ownerselectedA,claim351merged. [TA-1–TA-5](T-0426-claude-tui
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TA-01 | PTY/tap transport and explicit print compatibility | TA-1–TA-3 | in_progress | 2026-11-01T04:48:00Z | — | 2026-11-01T05:14:58Z |
-| TA-02 | Lifecycle/protocol/offline regression evidence | TA-4 | in_progress | 2026-11-01T04:48:00Z | — | 2026-11-01T05:14:58Z |
-| TA-03 | Independent acceptance and full delivery | TA-5 | in_progress | 2026-11-01T04:48:00Z | — | 2026-11-01T05:14:58Z |
+| TA-01 | PTY/tap transport and explicit print compatibility | TA-1–TA-3 | done | 2026-11-01T04:48:00Z | 2026-11-01T05:21:18Z | 2026-11-01T05:21:18Z |
+| TA-02 | Lifecycle/protocol/offline regression evidence | TA-4 | done | 2026-11-01T04:48:00Z | 2026-11-01T05:21:18Z | 2026-11-01T05:21:18Z |
+| TA-03 | Independent acceptance and full delivery | TA-5 | done | 2026-11-01T04:48:00Z | 2026-11-01T05:29:40.709143+00:00 | 2026-11-01T05:29:40.709143+00:00 |
 
-Prior CT03 awaiting-owner snapshot is superseded by the owner's explicit A selection; no core or live acceptance is preclaimed.
+Product [PR896](https://github.com/fallrising/newclear/pull/896), source `6b40c5d7ad397fc0d450d6fe99eab2ae833528ba`, merged `82189e8ef74177c5a9bee81ae062b3287df7a10c` at 2026-11-01T05:21:18Z. Required check/validate passed; all23source/merge/origin blobs, ancestry and Desk-Task trailers read back consistently. Local432Rusttests/25groups,199Python,fmt/Clippy/build,5isolatedjourneys,50contracts/8indexes/20repository tests and independent code review passed. TA01–02 record the merged product slice. TA03 records the verified primary closure at 2026-11-01T05:29:40.709143+00:00: journalPR208 anddeskPR353 normallymerged withCI/readback; completeprimarybackup verified123payloadfiles/181581773bytes and theirmodes; sixprimary/workerworktrees normallyremoved, otherworktrees/branches/sharedcaches preserved. Initialbackupmanifest SHA256 `5985ab87079bec405b3fc7c994a71cf245f1cfd622d6fbe9d6ac3063d4833224`. This final board-only receipt is then appended to that backup and its soleclosureworktree removed before the finalhandoff; those last two actions are not preclaimed by this receipt. Prior CT03 wait is resolved by explicit A; realCLI/version/account/native reuse and savings remain unverified. Mainlineincomplete,usable_tagnone.
 
 ## T-0426 — CLI transport/cache review
 
@@ -20,11 +20,11 @@ Demand: desk T-0426; claim348 merged. [CT-1–CT-3](T-0426-cli-cache-review.md).
 | --- | --- | --- | --- | --- | --- | --- |
 | CT-01 | Pin Claude TUI mechanism and cache/accounting evidence | CT-1 | done | 2026-11-01T04:18:54Z | 2026-11-01T04:33:23Z | 2026-11-01T04:33:23Z |
 | CT-02 | Other CLI primary-source comparison | CT-2 | done | 2026-11-01T04:18:54Z | 2026-11-01T04:33:23Z | 2026-11-01T04:33:23Z |
-| CT-03 | TUI mode decision — waiting for owner | CT-3 | in_progress | 2026-11-01T04:18:54Z | — | 2026-11-01T04:24:20Z |
+| CT-03 | Owner selected A; implementation tracked above | CT-3 | done | 2026-11-01T04:18:54Z | 2026-11-01T05:21:18Z | 2026-11-01T05:21:18Z |
 
-No runtime replacement has been implemented. A review merge cannot mark CT-03 or native reuse accepted; the next action is the owner's explicit transport/streaming decision.
+Historical review checkpoint: no runtime replacement was implemented by PR887. The owner later selected A; PR896 delivers the approved transport above. Native live reuse remains unaccepted.
 
-Evidence/design [PR887](https://github.com/fallrising/newclear/pull/887), source `2cfa2161fae13d3ad2d3205cdfccee9691d40f5d`, merged `dca330b7ba4be089327bcca5f79e09444089ef53` at 2026-11-01T04:33:23Z. Required check/validate succeeded; source ancestry and three-file origin/main equality passed. CT01–02 describe merged research, CT03 remains waiting for owner. Journal/desk and final backup/cleanup have their own later readback; no core implementation or new live acceptance is claimed.
+Evidence/design [PR887](https://github.com/fallrising/newclear/pull/887), source `2cfa2161fae13d3ad2d3205cdfccee9691d40f5d`, merged `dca330b7ba4be089327bcca5f79e09444089ef53` at 2026-11-01T04:33:23Z. Required check/validate succeeded; source ancestry and three-file origin/main equality passed. CT01–02 describe merged research; the later approved A implementation supersedes the historical CT03 wait. Journal/desk and final backup/cleanup have their own later readback; no core implementation or new live acceptance is claimed.
 
 ## T-0426 — Bounded official Claude client pilot
 

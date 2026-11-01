@@ -2814,3 +2814,5 @@ Claim PR382 merged; owner批准 bounded proposal. Parent owns Fanzloud specifica
 T-0449 actual checkpoint 2026-11-01T17:11:52.045902+00:00: source865ed05e, one Codex review accepted retained Claude candidate, exact result after Rust/AP restart; OS/Connector boundary and cleanup receipts passed. AP832/M0-45/finalDB12/Web38/native Rust pass. Final independent/CI pending; no new live rerun. Original unknownstore preserved; fullM3/FN07 open.
 
 T-0449 evidence gate: ACCEPT_READONLY_ACTUAL_AND_NATIVE from independent final review; R01/R04native, R02/R03actual, R05source+cleanup+sourceCI accepted. Source865ed05e all3requiredCI green. Finaldocshead CI/merge/readback/ledger remain delivery gates; no actual replay.
+
+T-0449 delivery gate: PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. R01–05 boundeddependency accepted; FN05-R closes, overallM3/FN07/T0442 remainopen. No live rerun.

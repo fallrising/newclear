@@ -1,8 +1,11 @@
 # Local quickstart
 
-Status: development checkpoint. The dependency installation and toolchain commands below were executed during preparation; The Rust API and local D1 contracts have passed; frontend, complete browser journeys and staging remain incomplete. Do not treat this page as proof of a deployed service.
+The Rust/Wasm API, Hono SSR and real local D1/service-binding checks pass on the
+reconciled candidate. Browser/visual evidence and CI status are recorded in
+[the reconciliation report](evidence/pr196-reconciliation.md); staging and owner
+acceptance are separate. These commands do not deploy a service.
 
-From `platform/spring-pool`, use Node 24.18.0, Rust 1.98.1 and the wasm32 target:
+From `platform/spring-pool`, use Node24.18.0, Rust1.98.1 and the wasm32 target:
 
 ```sh
 rustup target add wasm32-unknown-unknown
@@ -11,9 +14,14 @@ npm ci
 npx playwright install chromium
 ```
 
-`worker-build` requires OpenSSL development headers on Linux. Preparation used a dedicated tool cache with matching distro headers/static libraries because the host did not have them; no system package was changed. `npm install --ignore-scripts --no-audit --no-fund` and Wasm target/worker-build installation passed. Chromium installation completed, but normal sandbox launch failed on this development host; no browser pass is claimed. `npm ci` remains to be verified on this checkpoint.
+`worker-build` requires OpenSSL development headers on Linux; Chromium requires
+its platform libraries and a usable sandbox. The current development host lacks
+both. Matching distro headers in shared user cache allowed worker-build to compile
+without a system install. Local Chromium still reports no usable sandbox; do not
+disable it to turn a required check green. The existing CI runner installs browser
+dependencies and runs the same sandboxed tests.
 
-The planned local checks are:
+Run the component checks:
 
 ```sh
 cargo test --manifest-path api/Cargo.toml --locked
@@ -26,10 +34,31 @@ npm run build
 npm run test:local
 ```
 
-At the backend checkpoint, Rust test/fmt/Clippy on both host and Wasm, Node focused tests, typecheck of the present helpers, and formatting passed. Full `npm test`, the web build and full `test:local` still require the frontend. `test:local` runs dedicated local D1 migrations and starts two local Workers on loopback ports 8817 (web) and 8818 (API), then executes contract/integration tests and browser journeys. It refuses occupied ports and only stops processes it created. Local synthetic state persists under `.wrangler/test-state`; no cloud credentials are passed. A user running `dev:tests` can inspect the local app until stopping the command.
+`test:local` applies migrations to dedicated local D1, starts loopback Workers on
+8817(web) and8818(API), runs API/web contracts, restarts the API to verify exact
+persistence/export, then runs desktop/mobile browser journeys and responsive
+list/detail/step-editor evidence at1440,768,390px. It refuses occupied ports,
+strips Cloudflare credential environment variables, and stops only its own
+processes. Synthetic state persists under `.wrangler/test-state`; logs and
+PNG/browser-health JSON are under `artifacts/`, browser failures under
+`test-results/`. Inspect PNGs as well as deterministic browser-health results.
 
-`npm run test:local:api` starts only the API Worker and runs the same API contracts plus seed→restart→verify persistence checks. It does not start the frontend or browser and cannot establish service-binding or UI behavior. This mode passed 18 real Rust/Wasm API contracts, then seeded local D1, stopped/restarted the API and verified byte-identical stored content and Markdown export. Its child-process regressions separately check crash, signal and forced cleanup behavior.
+Useful narrower modes:
 
-Cloud staging is a separate operator action after independent review and evidence checks. Never place an API token in Worker configuration, application code or model input. The API must have no public route, workers.dev endpoint or preview URL. Access identity verification remains fail-closed until the operator supplies the staging team domain, audience and owner identity.
+- `npm run test:local:integration`: both Workers, all API/web contracts and persistence; no browser claim.
+- `npm run test:local:api`: API-only contracts and persistence; no web/service-binding claim.
+- `npm run test:local:e2e`: both Workers, original browser journeys and responsive evidence.
+- `npm run dev:tests`: keep the synthetic local pair available for manual inspection until interrupted.
 
-No deployment, release, acceptance or automatic recovery is established by these commands. The backend result does not establish web service-binding behavior, live Access interoperability, staging health or owner acceptance.
+For ordinary `npm run dev`, copy `web/.dev.vars.example` to the ignored
+`web/.dev.vars` and set an explicit local owner identity. Local auth works only
+with local environment and a loopback URL; never reuse it for staging.
+
+Cloud staging is a separate operator action after review and evidence checks.
+The earlier time-limited grant has expired. The API must have no public route,
+workers.dev endpoint or preview URL. Access verification remains fail-closed
+until the operator supplies the staging team domain, audience and owner identity
+and protects the dedicated hostname. No token belongs in committed configuration.
+
+Local tests and code merge do not establish live Access interoperability,
+deployment, release, automatic recovery or owner acceptance.

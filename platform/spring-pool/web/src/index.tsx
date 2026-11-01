@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { html } from "hono/html";
 import type { Child } from "hono/jsx";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { authenticate } from "./auth.ts";
@@ -32,9 +33,11 @@ function page(
   status: ContentfulStatusCode = 200,
 ) {
   return c.html(
-    <Layout title={title} actor={c.get("actor")} local={c.get("local")}>
-      {children}
-    </Layout>,
+    html`<!doctype html>${(
+        <Layout title={title} actor={c.get("actor")} local={c.get("local")}>
+          {children}
+        </Layout>
+      )}`,
     status,
   );
 }

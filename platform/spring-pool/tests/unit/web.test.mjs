@@ -365,3 +365,11 @@ test("web normalizes native textarea CRLF in descriptions and step instructions"
       assert.equal(saved.steps[0].instruction, "prepare\nrun");
   }
 });
+
+test("HTML responses select standards mode with a doctype", async () => {
+  const response = await request("/scripts/new", binding());
+  assert.equal(
+    (await response.text()).slice(0, 15).toLowerCase(),
+    "<!doctype html>",
+  );
+});

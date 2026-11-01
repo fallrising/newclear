@@ -53,7 +53,7 @@ Model/provider/tokens/cost and exact active/wait split remain unknown unless obs
 - `cargo fmt --manifest-path api/Cargo.toml --check`: PASS.
 - Host `cargo clippy --manifest-path api/Cargo.toml --locked --all-targets -- -D warnings` and Wasm target Clippy: PASS.
 - `npm run lint`, `npm run format`: PASS.
-- `npm test`: PASS,38 named tests,0failed/0skipped,9.643s after review fix.
+- `npm test`: PASS,39 named tests,0failed/0skipped,9.133s after both review fixes.
 - `npm run build`: PASS, compiled Rust/Wasm and web dry-run. Follow-up `npm run build:web`: PASS after correcting the old output path so generated README and bundle remain inside the component. No lockfile/dependency change.
 - `npm run test:local:integration`: PASS,21 real API/web contracts plus separate seed and byte-identical persistence/export checks after API restart.
 - `node scripts/browser-evidence.mjs --mode self-test`: PASS. This is tool self-test only, not rendered evidence.
@@ -67,3 +67,18 @@ Model/provider/tokens/cost and exact active/wait split remain unknown unless obs
 Original browser journeys, responsive PNG inspection, required GitHub CI and remote
 readback are pending. No completion, deploy or usable-tag claim. Protected staging
 and owner acceptance remain separate, with the old grant expired.
+
+### Final review correction
+
+The bounded reviewer follow-up accepted capture/build/icon/multiline changes and
+confirmed the missing doctype. Root added a response-prefix test (RED), then
+prefixed the escaped Hono JSX template with literal `<!doctype html>` (GREEN).
+All39named Node tests, typecheck, format and web dry-run pass; the browser helper
+now also asserts `document.compatMode === "CSS1Compat"`. Final named unit output
+is retained in the local `artifacts/pr196/node-final.log`; CI will retain the same
+suite output. No assertion was removed and no raw user HTML was introduced.
+
+Root index preflight: PASS,51contracts and8llms files. PR diff against integrated
+main passes `git diff --check`. A naive staged check against the September feature
+HEAD reported pre-existing whitespace in incoming main history; that content was
+preserved and the actual PR delta was checked against the merged main instead.

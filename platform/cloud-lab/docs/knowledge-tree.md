@@ -2,6 +2,8 @@
 
 本樹是 Cloud Lab 的產品知識導航。它描述責任與關係，不保存私人知識庫或覆寫來源元件的主線狀態。M0表保留來源映射；下方M1對照已按具名live證據更新。live_verified只表示曾完成該子集驗證，不保證當前授權仍有效；近期方向見[重排計畫](direction-review.md)。
 
+[CF工具目錄](tool-catalog.md)補上2026-11-01來源盤點與Edge Ops比較；這是導航文件，未新增執行介面。RS-01的下一個有界工作為沿用既有inventory的唯讀報告；EX-01維持Cloud Lab日常健康入口，Edge Ops只作參考。
+
 ## 知識樹
 
 ```text
@@ -57,6 +59,6 @@ CL Cloud Lab
 | OB-01／OB-02 | [看板](../apps/control/public/index.html)、snapshot／artifact／應用用量 | live_verified子集：Safari手動用量與[新版看板](evidence/m1-snapshot-rollout.md)。完整Event/seq未實作，provider用量／帳單unknown。 |
 | AU-01 bot | [bot bridge](../tools/bot_bridge.py)、[MCP](mcp-stdio.md)、[獨立Grok工具接線](grok-connection.md) | [真實工具閉環](evidence/m1-bot-activation-live.md)已驗；沒有模型對話驗收，過期bot不會自動續權。 |
 | OP-01 | 配額／稽核／[隔離還原](evidence/m1-remote-restore.md) | 5應用表／42列與3journal恢復已驗；沒有活躍程序failover，Pages全域盤點缺讀取權限。 |
-| RS-01／RS-02、EX-02／EX-03、AP、OP-02 | 來源／adapter／遷移設計 | proposed；沒有既有應用搬遷／封存或agent平台接入。這是接下來的產品工作，不能被更多node-health加固取代。 |
+| RS-01／RS-02、EX-02／EX-03、AP、OP-02 | 來源／adapter／遷移設計 | runtime仍proposed；已有[文件目錄與處置建議](tool-catalog.md)，沒有既有應用搬遷／封存或agent平台接入。下一項為inventory報告adapter。 |
 
 歷史細項見[里程碑紀錄](milestone-history.md)及[任務板](tasks/BOARD.md)。本樹只投影證據，不產生新的執行或授權權威。

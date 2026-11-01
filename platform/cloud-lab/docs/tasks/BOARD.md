@@ -703,3 +703,15 @@ T864獨立審查ACCEPT bounded remote data restore；主導privateaudit接受，
 DIR01–03由PR[937](https://github.com/fallrising/newclear/pull/937)於2026-11-01T15:30:51Z合併（head `167b69c67e4afe1885caba72b94f8d7a9f21c6cd`、merge `5c02b6422ed37ebd80024a85d9f3523058c4a5d5`）。Exact-head CI通過：CloudLab41321464785／project41321464672／llms41321464719；本機52contracts／9indexes／392links、task-report／diff、9private-literals無命中，歷史SUCCESS尾段完整保存、69runtime inputs不變。正常merge/readback fulltree相同、clean、head為main祖先。
 
 實際Claude Code2.1.307／claude-opus-5-5／high、一次呼叫／一turn／124480ms／exit0、model tools與MCP空；REPLAN由主導核對後採納並修正部分推論。原文與處置分開保存，沒有把工具受限review冒充live驗證。下一個產品工作為CF工具目錄與Edge Ops重複判定；provider API與新加固層暫緩。沒有續權、封存、runtime或AGENTS變更；主線仍incomplete。本PR只補任務結案。
+
+## T-0040 — CF工具盤點與Edge Ops重複判定
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0040-1 | GitHub完整可見清單、固定來源及工具目錄 | CAT-01 | in_progress | 2026-11-01T16:48:38Z | — | 2026-11-01T16:55:00Z |
+| T-0040-2 | Edge Ops與node-health行為比較及處置建議 | CAT-02 | in_progress | 2026-11-01T16:48:38Z | — | 2026-11-01T16:55:00Z |
+| T-0040-3 | 第二種唯讀能力選擇、文件驗證與審查 | CAT-03 | in_progress | 2026-11-01T16:48:38Z | — | 2026-11-01T16:55:00Z |
+
+Owner批准近期計畫B。Lead為唯一writer；T866新context唯讀review，gpt-6.1-sol/high、一次≤1500token與至多一次≤700token修正、五分鐘監看／interrupt，成本未知，不讀私人來源或執行測試。Lead核對私人證據、diff、validators與evidence gate；無runtime／live／授權／付費／AGENTS變更，不搬遷或封存。結果集中[目錄](../tool-catalog.md)，不建立新同步器或複製長篇里程碑。
+
+CAT文件驗證：52contracts、9indexes、631個相對連結、公開41／私人23快照一致與公開邊界檢查通過；69runtime路徑與來源pin相同。T866先REWORK tree_sha命名，改tree_query_ref並說明connector回傳差異後ACCEPT；Lead獨立核對私人來源。原缺report forward-link與report格式驗證失敗已修正；無本機runtime測試重跑。正常PR與CI交付中，合併後填end。

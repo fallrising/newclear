@@ -2800,3 +2800,9 @@ CLI/VM. Old dirty workers/stores preserved. FN05/fullM3 not accepted by candidat
 Pause adding providerusage features while exact ClaudeOpus5.5 independently reviews originalintent/plan/results. T865 packetonly,claude2.1.307/modelclaude-opus-5-5/efforthigh; safe-mode/tools-empty/strict-emptyMCP/dontAsk/no persistence,480s hosttimeout+10s killgrace,maxUSD3,onecall/noauto-retry/fallback/no delegation. ExistingClaude login retained, no installation/authrepair/configedit. NativeCLItool controlsnotOSACL; modelreceivespublicpacketonly;leadowns findings validation and replan.
 
 DIR evidence gate ACCEPT_REPLAN 2026-11-01T15:28:07Z:exactOpus5.5/high/onecall125.5s/one modelturn/no toolsorMCP/exit0;CLIlistcost0.8600896actualbillunknown. Leadvalidates integrationdrift/staleindexes, rejects totalexpiry/freequotaassumptions/arbitrary7day24hour150linegates. README/SUCCESScurrent+singlehistory+knowledge-treecorrected;originalACGivenWhenThenpreserved,AC06historicalnotmodelblocked,mainlineincomplete.52contracts/9indexes/392links/task-report/diff;69runtimeinputsunchanged. InitialACformatvalidator andtrailingblank failures fixed/retained. No runtime/live/permission/AGENTSchanges;nextCFcatalog+overlap beforesecondcapability. NormalGitdeliveryremains.
+
+T-0442 fixed-candidate evidence gate: ACCEPT_FIXED_CANDIDATE_C01_C05 on4fa2f781.
+Real Chromium twice downloads same1932-byte AP archive/hash; no new task/coding/VM.
+Web33/native/checks pass; tool-truncated native log explicitly parent-attributed.
+One check-detail correction passed focused RED/GREEN; final review also accepted
+backup/ledger. T-0449 remains proposed/unclaimed; no AP edits. Required CI/Git delivery next.

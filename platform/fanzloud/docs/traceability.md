@@ -116,3 +116,12 @@ tests, isolated gateway TCP fault tests and Web recovery tests;
 admission, Rust/AP restarts, held real202/SIGKILL/unknown lock and prior real result readback.
 SubmissionStore public API documents typed failures and bounds in rustdoc. AP remains the
 sole execution authority. Full FN04 events, FN05 and FN07 are outside this accepted slice.
+
+## M3 fixed candidate preparation — T-0442
+
+CU-M3-C01–04 [contract](specs/SPEC-M3-fixed-candidate.md) maps to `c01_artifact_*`
+Rust route/TCP tests and C02–04 JS candidate identity/hash/expiry/stale-response cases.
+C05 actual retained AP archive/browser download evidence is in
+[M3 candidate acceptance](acceptance/M3-fixed-candidate.md). No Rust public API changed;
+private routing plus documented Web readCandidate only. Full FN05 waits for separately
+approved [AP readonly review dependency](specs/PROPOSAL-M3-readonly-review.md).

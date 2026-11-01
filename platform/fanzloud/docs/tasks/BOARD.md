@@ -79,5 +79,5 @@ no resident URL; unknown intent retained for trusted manual investigation.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-C | Immutable AP candidate inspection/download; [contract](../specs/SPEC-M3-fixed-candidate.md) | FN05 preparation, C01–05 | in_progress | 2026-11-01T15:14:00Z | | 2026-11-01T15:25:00Z |
-| M3-R | Actual cross-vendor readonly review; waiting for bounded AP dependency approval under SDD§3 | FN05 | todo | | | 2026-11-01T15:25:00Z |
+| M3-C | Immutable AP candidate inspection/download; [contract](../specs/SPEC-M3-fixed-candidate.md) | FN05 preparation, C01–05 | in_progress | 2026-11-01T15:14:00Z | | 2026-11-01T15:42:24Z |
+| M3-R | Actual cross-vendor readonly review; waiting for bounded AP dependency approval under SDD§3 | FN05 | todo | | | 2026-11-01T15:42:24Z |

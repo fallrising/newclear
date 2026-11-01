@@ -1,5 +1,7 @@
 # Codebox
 
+> **2026-11-01 固定審查候選**：同一 Web 可核對並下載既有 writer 的不可變成果包，包含原任務、diff、檢查與固定 hash；兩個真瀏覽器回讀一致。[實測與限制](docs/acceptance/M3-fixed-candidate.md)。實際跨廠商 reviewer 尚待 T-0449 後端契約批准，FN05 尚未完成。
+
 > **2026-11-01 AC05 最小持久化**：提交意圖與唯一 AP run／成果引用已持久保存；真 Rust／AP 重啟及新瀏覽器回讀、unknown 零自動重送通過獨立驗收。[證據與限制](docs/acceptance/M3-durable-intents.md)。unknown 仍需可信端人工對帳；完整 M3／FN05／FN07 尚未完成。
 
 > **2026-11-01 M2**：同一 Web 的兩家正式 agent 已有真實修復／diff 證據；兩個同時工作區的邊界、取消互不影響與清理已實跑通過，獨立驗收已接受，PR906／914 已合併並完成遠端回讀。[證據與限制](docs/acceptance/M2-two-vendors.md)。驗收服務已停止，目前沒有常駐操作網址。

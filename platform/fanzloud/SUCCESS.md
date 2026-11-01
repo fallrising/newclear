@@ -473,3 +473,9 @@ Actual reviewer requires a bounded AP read-only admission/tool/result extension,
 present in existing routes; SDD§3 requires separate dependency approval before AP edits.
 This continuation does not shrink FN05 acceptance or mark it done. Zero new task/coding/VM;
 no new dependencies, public URL, paid API or full M3/FN07 claim.
+
+C01–05 actual checkpoint: source4fa2f781, immutable1932-byte candidate hash43a30ab6
+verified against AP and downloaded identically in two fresh Chromium contexts; zero new
+task/coding/VM, all services stopped. [Evidence](docs/acceptance/M3-fixed-candidate.md).
+Native/Web33 and project52 pass; independent ACCEPT_FIXED_CANDIDATE_C01_C05; CI/publication pending.
+T-0449 proposal remains unapproved; candidate preparation is not full FN05 acceptance.

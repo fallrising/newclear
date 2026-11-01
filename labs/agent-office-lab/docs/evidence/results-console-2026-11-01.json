@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-01",
+  "scope": "read_only_historical_results_and_offline_browser",
+  "baseline_commit": "22e5b66730b31963cb93b48428436ccd0fd8c981",
+  "new_model_calls": 0,
+  "strata_started": false,
+  "historical_runs_read": 33,
+  "status_counts": {
+    "completed": 5,
+    "failed": 15,
+    "startup_only": 8,
+    "incomplete": 2,
+    "unverified": 1,
+    "stopped": 1,
+    "invalid": 1
+  },
+  "historical_artifacts_reverified": [
+    {
+      "provider": "grok",
+      "model": "grok-4.6",
+      "version": "1.0.70",
+      "status": "completed",
+      "cleanup_verified": true,
+      "artifact_sha256": "4df84ae86ea2e03536d4ca2aa215e53781f353ad668e482cf316d20d7ab21a77"
+    },
+    {
+      "provider": "cursor",
+      "model": "composer-2.5",
+      "version": "2026.10.22-27dcf5f",
+      "status": "completed",
+      "cleanup_verified": true,
+      "artifact_sha256": "836df85be1a2cb9b5e12ec0d9480e2382171e4d2ac0a5b26610bdbb4bad35d4e"
+    },
+    {
+      "provider": "pi",
+      "model": "deepseek/deepseek-flash",
+      "version": null,
+      "status": "completed",
+      "cleanup_verified": true,
+      "artifact_sha256": "88a30d05d8cdf752faf1d8c4d5f26d75caf519d3bba7b611e54f6b4dc3586aa3"
+    },
+    {
+      "provider": "opencode",
+      "model": "strata/qwen3.8-flash-next-q2_0",
+      "version": null,
+      "status": "completed",
+      "cleanup_verified": true,
+      "artifact_sha256": "df2288a218d3f44ff4370bf38991cd91c5329f4505c8788226c5f3e8035b2cc4"
+    }
+  ],
+  "tests": {
+    "python": 61,
+    "node": 35,
+    "total": 96
+  },
+  "browser": {
+    "status": "passed",
+    "provider_filters": true,
+    "status_filters": true,
+    "artifact_content_and_sha256": true,
+    "refresh": true,
+    "external_requests": 0,
+    "javascript_errors": 0
+  },
+  "source_sha256": {
+    "office_results.py": "79c74c4fcbafe749611d246ec7932a4f3db3fd6130f48b233377beb8f94015e9",
+    "office_results.html": "80bde6b02f589d20d909d2707ae0a12ed8c31bccabafe85d76a1d7ef12a6b725",
+    "test_office_results.py": "ee561e94d70a8bf5ea2f9d6e0dcbd39c10131c577681ffe2ae3801797d43ec16",
+    "check_office_results_browser.mjs": "e4f1ff6c351ebe292b80a0c667bdae61a7964609931830f75d470d20654998d8"
+  },
+  "limitations": [
+    "saved native evidence is trusted, not replayed or cryptographically authenticated",
+    "HTML is a point-in-time snapshot",
+    "no unified dispatch or cross-provider lifecycle acceptance",
+    "AC-09 and AC-11 remain pending; no usable tag"
+  ]
+}

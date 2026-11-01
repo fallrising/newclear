@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | F01 同key同payload | [control](../tests/control.test.mjs) `admission persists...`及FQ artifact expiry：同ID、相同整列／保留總數；[RF](evidence/m1-remote-recovery.md)原bytes重送同ID | local＋歷史remote子集；不主張所有並發拓撲已驗。 |
 | F02 同key不同payload | control admission conflict、FQ artifact expiry改parameters後409及整列不變 | local；remote changed-payload對帳未補跑。 |
-| F03 未授權caller/resource/recipe/revoked grant | control scope、grant revision、HMAC/replay/JWT guards；RF revoked submitter／runner403、Access token停用401 | local＋歷史remote撤權子集；[RA](rejection-audit.md)補有界4xx持久稽核與未保存header，來源／local層級，不證明Access邊緣攔截或所有真人session撤銷。 |
+| F03 未授權caller/resource/recipe/revoked grant | control scope、grant revision、HMAC/replay/JWT guards；RF revoked submitter／runner403、Access token停用401 | local＋歷史remote撤權子集；[RA](rejection-audit.md)補有界4xx持久稽核與未保存header，來源／local及[RAL一個真機器拒絕](evidence/m1-rejection-audit-live.md)對帳；不證明Access邊緣攔截或所有真人session撤銷。 |
 | F04 D1已保存但通知失敗 | [migration](../apps/control/migrations/0001.sql) command row即outbox；control admission／claim及schedule transaction rollback；[runner](../tests/test_runner.py) completed先持久化再回報 | 目前由runner輪詢，沒有獨立通知通道。持久列可領取不等於注入過「通知失敗」；原場景差異保留，不為驗收加Queues。 |
 | F05 接收後／回報途中斷線 | runner `completion_persisted_before_failed_report_and_exact_retry`、`started_restart_never_recollects`；[FR](evidence/m1-recovery.md)及RF送達前斷線／ACK遺失／started後SIGKILL | local、歷史workerd及remote具名案例；整機斷電未驗。 |
 | F06 stale fence／錯誤來源回報 | control stale fence與scope guards；FQ exact lease expiry在等號邊界409且整列不變；RF獨立reconciler舊fence409 | local＋歷史remote舊fence；RA補wrong-holder與精確lease到期拒絕的request_id→audit及原命令整列保全，屬local／workerd驗證，非新remote故障測試。 |

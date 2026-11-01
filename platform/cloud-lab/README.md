@@ -100,3 +100,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [RA拒絕稽核](docs/rejection-audit.md)為Worker4xx保存最小metadata，以request_id查找；獨立10000列上限、無敏感內容、不自動刪除，full/unavailable明示未保存。來源／本機驗證與雲端遷移分開；不增加grant或付費服務。
 
 [RAL原服務拒絕稽核接入](docs/evidence/m1-rejection-audit-live.md)已於2026-11-01T04:51:37Z完成：原D1新增表／索引、原Worker100%、真機器GET403與D1 request_id對帳；原166commands／195firings／160journal及4grants／Access／Cron／期限保持，runner未重啟。初次非JSON及一次診斷重試保留；無付費升級，完整mainline仍incomplete。
+
+[XR隔離還原驗證](docs/restore-qualification.md)已完成[六種真本機workerd／Python runner情境、438tests及兩個mutation](docs/evidence/m1-restore-qualification.md)：恢復後零採集，保留unknown／原結果與跨快照不一致拒絕；不操作原服務。官方遠端unknown/in-flight restore與完整主線仍pending。

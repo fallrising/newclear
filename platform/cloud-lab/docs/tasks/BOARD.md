@@ -611,3 +611,12 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 04:51:37Z最終核對原166commands整列相同、195firings／160journal保持、active0；原unit/config/policy/Grok/bot ledger hash及journal identity相同。runner同PID／NRestarts，4grants／Access／Cron／期限保持，保守停止仍2026-11-05T07:24:25Z；沒有續權、新真人窗口或付費升級，billing仍unknown。可回退前一compatibleWorker但保留稽核表／歷史；回退未執行。
 - Lead檢查實際私人收據；T859獨立公開證據ACCEPT，未讀private或重跑live。50contracts／8llms／task-report／diff、226links、64runtimeinputs未變與173private-literal公開diff掃描通過。正常main merge保留並行工作，PLAN尾端保留雙方段落；remote fulltree相等、工作樹乾淨、head為main祖先。未要求owner重測Safari／手機。
 - RAL01–04完成；完整mainline仍incomplete／無usable tag。後續unknown/in-flight隔離恢復，不中斷原runner、不自動續權。本收尾只改任務板。
+
+## T-0035 — 未知與執行中隔離還原
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0035-1 | 獨立快照與還原 | XR-01 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |
+| T-0035-2 | 未知及原結果對帳 | XR-02 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |
+| T-0035-3 | 錯位缺失拒絕重做 | XR-03 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |
+| T-0035-4 | 隔離驗證審查交付 | XR-04 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |

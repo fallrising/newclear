@@ -1,0 +1,34 @@
+// Motion Prompt #043 · MIT License (c) 2026 Shohei Ohtaki · ./#043
+//
+// 甩鏡轉場（Whip pan）
+// 分類組: camera (鏡頭運動與轉場) · element 19 · 分類: 轉場
+// 示範內容: 攝影機快速橫向甩動，在拉成條紋的模糊中換成下一幕。
+// 動作／視覺規格:
+//   - 接點：1.7 s 至 2.5 s，共 0.8 s；前 0.4 s 將前一鏡頭甩出，後 0.4 s 將下一鏡頭甩入並停穩。
+//   - 前半：前一鏡頭水平偏角 0→+0.45 rad（約 26°），二次方 ease-in-out；後半：下一鏡頭從 -0.45 rad→0，使用相同緩動。
+//   - 切換：進度 50% 時直接替換畫面，此時模糊最強，遮住接點。
+//   - 模糊：將分布在 ±1.6 影格範圍內（30 fps）的 9 次繪製取平均。
+//   - 攝影機：高度 1.4 m，除甩動期間外固定；主體（A 的人物、B 的汽車與城市）不動。
+//   - 每 4.7 s 交替 A→B、B→A（往返 9.4 s）；右上角顯示「A→B」或「B→A」。
+// 使用情境: 適合帶著動勢切換地點或話題。
+// 關鍵字: whip pan, swish pan, motion blur, fast pan, transition, energy
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#043
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 19
+
+CELLS[18] = shot(abCell((k, w, h, u, A, B) => {
+  const t0 = 1.7, t1 = 2.5;
+  const at = (kk, s) => {
+    if (s < .5) world(kk, w, h, cam({ y: 1.4, yaw: eIOs(s * 2) * 0.45 }), A === sceneA ? { person: { x: -0.6, z: 7 } } : SB);
+    else world(kk, w, h, cam({ y: 1.4, yaw: -(1 - eIOs((s - .5) * 2)) * 0.45 }), B === sceneA ? { person: { x: -0.6, z: 7 } } : SB);
+  };
+  if (u < t0) return A(k, w, h);
+  if (u > t1) return B(k, w, h);
+  const s = P(u, t0, t1), ds = 1 / FPS / (t1 - t0);
+  mblur(k, at, clamp(s - ds * 1.6), clamp(s + ds * 1.6), 9);
+}));

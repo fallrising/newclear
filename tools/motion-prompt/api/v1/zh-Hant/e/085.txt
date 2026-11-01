@@ -1,0 +1,40 @@
+// Motion Prompt #085 · MIT License (c) 2026 Shohei Ohtaki · ./#085
+//
+// 點擊漣漪（Ripple effect）
+// 分類組: lp (網頁與登陸頁效果) · element 13 · 分類: 懸停與點擊互動
+// 示範內容: 每次點擊都會從點擊位置擴散白色圓形，填滿按鈕後消失。
+// 動作／視覺規格:
+//   - 橘色按鈕為 280 × 56，圓角半徑 10；0.7 s 點擊中央偏左，2.9 s 點擊中央偏右。
+//   - 圓形以點擊位置為中心，半徑在 0.6 s 內從 0 增至按鈕最遠角落的距離（cubic ease-out）。
+//   - 白色不透明度為 0.4，在點擊後 0.3 到 0.8 s 之間淡至 0。
+//   - 圓形裁切在按鈕內（overflow: hidden），文字位於圓形上方。
+// 使用情境: 適合在按鈕或清單項目上，於實際點擊位置提供確認回饋。
+// 關鍵字: ripple, ink-ripple, material, click, tap, feedback, button
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#085
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 13
+
+CELLS[12] = (k, w, h, u) => {
+  frame(k);
+  const B = { x: 115, y: 78, w: 280, h: 56 }, TAPS = [[0.7, 165, 110], [2.9, 345, 100]], DUR = 0.6;
+  const [cx, cy] = path([[0, 430, 160], [0.55, 165, 110], [1.6, 165, 110], [2.7, 345, 100], [3.6, 345, 100], [4.4, 430, 160], [4.8, 430, 160]], u);
+  view(k, () => {
+    k.fillStyle = C.soft; k.fillRect(0, 0, VW, VH);
+    txt(k, "立即報名", VW / 2, 38, `800 18px ${JP}`, C.ink, 'center'); bars(k, VW / 2 - 110, 50, 220, 1, C.faint, 6, 11, 1);
+    k.save(); k.shadowColor = 'rgba(28,35,51,.18)'; k.shadowBlur = 8; k.shadowOffsetY = 3; k.fillStyle = C.acc; rr(k, B.x, B.y, B.w, B.h, 10); k.fill(); k.restore();
+    k.save(); rr(k, B.x, B.y, B.w, B.h, 10); k.clip();
+    for (const [tc, px, py] of TAPS) {
+      const d = u - tc; if (d < 0 || d > 0.8) continue;
+      const Rm = Math.max(Math.hypot(px - B.x, py - B.y), Math.hypot(px - B.x - B.w, py - B.y), Math.hypot(px - B.x, py - B.y - B.h), Math.hypot(px - B.x - B.w, py - B.y - B.h));
+      k.fillStyle = `rgba(255,255,255,${0.4 * (1 - P(d, 0.3, 0.8))})`; k.beginPath(); k.arc(px, py, Rm * eOut(P(d, 0, DUR)), 0, 7); k.fill();
+    }
+    k.restore();
+    txt(k, "送出", VW / 2, B.y + B.h / 2 + 1, `800 17px ${JP}`, '#fff', 'center', 'middle');
+    click(k, cx, cy, u, TAPS.map(a => a[0]));
+  });
+};

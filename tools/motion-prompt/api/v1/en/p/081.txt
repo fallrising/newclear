@@ -1,0 +1,18 @@
+Please use "Hover lift" from "Landing page & web effects".
+Motion Prompt #081 · lp/hover-lift
+
+Meaning: On hover, the element rises with a deeper shadow
+Example request (adapt to your project): Give the cards a hover lift: up 8 px with a deeper shadow, over 0.3 s.
+What this demo shows: Only the card under the cursor lifts slightly and its shadow spreads; it settles back when the cursor leaves.
+Demo specification (independent of the example request):
+- Three cards (146 × 128, radius 10). The cursor rests on each, left to right, for about 1 s.
+- On hover the card rises 10 px over 0.3 s (cubic ease-out); on leave it returns over the same 0.3 s (like a CSS transition).
+- Shadow, changed together with the lift: blur 6→22 px, y offset 2→12 px, opacity 0.08→0.22.
+- Light grey page, white cards, so the shadow reads.
+When to use it: Use it to make cards and buttons look clickable.
+
+Local demo: ./?lang=en#081
+Local specification and code: ./api/v1/en/e/081.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

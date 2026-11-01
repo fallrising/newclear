@@ -1,0 +1,42 @@
+// Motion Prompt #080 · MIT License (c) 2026 Shohei Ohtaki · ./#080
+//
+// 螢光筆標記動畫（Highlighter animation）
+// 分類組: lp (網頁與登陸頁效果) · element 08 · 分類: 捲動效果
+// 示範內容: 文案捲入可視區域時，黃色螢光筆筆畫從左到右覆蓋關鍵字的下半部。
+// 動作／視覺規格:
+//   - 捲動：0.35–1.0 s 從 0→90 px，1.6–2.2 s 從 90→180 px，3.3–4.4 s 從 180→0（cubic ease-in-out）。
+//   - 兩行粗體文案（20 px）位於頁面下方 190 px 與 290 px，起初在可視區域之外。
+//   - 文字頂緣越過觸發線時開始畫出標記；觸發線位於可視高度的 80%（134 px）。
+//   - 筆畫為黃色 #FFE36B，高 11，位於文字下半部，從基準線上方 8 px 到下方 3 px；寬度在 0.8 s 內由 0 從左側延伸至關鍵字寬度（cubic ease-out），畫在文字後方。
+//   - 從可視區域底部離開的文字會在畫面外重設。
+// 使用情境: 適合登陸頁文案，讓讀者閱讀時注意到最關鍵的一句話。
+// 關鍵字: highlighter, marker, text-highlight, emphasis, scroll-reveal, copy, underline
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#080
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 08
+
+CELLS[7] = (k, w, h, u) => {
+  frame(k);
+  const SY = t => steps([[0.35, 0], [1.0, 90], [1.6, 90], [2.2, 180], [3.3, 180], [4.4, 0]], t), y = SY(u);
+  const LINE = VH * 0.8, DUR = 0.8, MARK = '#FFE36B', F = `800 20px ${JP}`;
+  const rows = [[190, ["日常餐點，", "只要 10 分鐘", "就能完成。"]], [290, ["新手也能上手的", "安心食譜", "。"]]];
+  view(k, () => {
+    k.save(); k.translate(0, -y);
+    txt(k, "為忙碌的你而設", 70, 50, `700 14px ${JP}`, C.sub); txt(k, "廚房新幫手", 70, 80, `800 24px ${JP}`, C.ink);
+    bars(k, 70, 96, 330, 4, C.faint, 6, 12, 0.8);
+    for (const [base, parts] of rows) {
+      k.font = F; const ws = parts.map(s => k.measureText(s).width); let x = (VW - ws.reduce((a, b) => a + b, 0)) / 2;
+      const t0 = enteredAt(SY, base - 20, LINE, u), q = t0 === null ? 0 : eOut(P(u, t0, t0 + DUR));
+      if (q > 0) { k.fillStyle = MARK; k.fillRect(x + ws[0], base - 8, ws[1] * q, 11); }
+      parts.forEach((s, i) => { txt(k, s, x, base, F, i === 1 ? C.ink : '#4A5368'); x += ws[i]; });
+      bars(k, 110, base + 22, 291, 2, C.faint, 6, 12, 0.7);
+    }
+    k.restore();
+    sbar(k, y / 180, 0.5);
+  });
+};

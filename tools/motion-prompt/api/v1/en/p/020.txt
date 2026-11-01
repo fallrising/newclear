@@ -1,0 +1,19 @@
+Please use "Zoom through" from "Motion graphics moves".
+Motion Prompt #020 · motion/zoom-through
+
+Meaning: Zooms into an object and passes through it into the next scene
+Example request (adapt to your project): Zoom through the hole of the "O" in the logo into the next scene, 0.6 s, accelerating.
+What this demo shows: The camera pushes into the hole of a letter O and comes out in the next scene.
+Demo specification (independent of the example request):
+- Scene X (ZOOM on yellow) → scene Y (GO! on blue) → scene X, 2.35 s each.
+- The current scene is scaled around the centre of an O's hole (radius 24.5). Maximum scale is 1.08× the value at which the hole covers the whole frame (about 14×).
+- Scale = maxScale^p (exponential zoom, which reads as constant speed).
+- p = 0.8 × cubic ease-in (0.25–1.2 s) + 0.2 × cubic ease-out (1.2–1.65 s): accelerate in, slow down at the end.
+- Inside the hole the next scene is placed at 1/maxScale. When the zoom ends it is exactly at full size, and the view switches to the next scene.
+When to use it: Use it to dive into a logo or letter and move to the next scene with momentum.
+
+Local demo: ./?lang=en#020
+Local specification and code: ./api/v1/en/e/020.txt
+Local helper code: ./api/v1/kit/en/motion.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

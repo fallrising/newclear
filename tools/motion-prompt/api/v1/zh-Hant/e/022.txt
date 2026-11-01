@@ -1,0 +1,40 @@
+// Motion Prompt #022 · MIT License (c) 2026 Shohei Ohtaki · ./#022
+//
+// 掃光（Light sweep）
+// 分類組: motion (動態圖像與動畫效果) · element 22 · 分類: 轉場與重點效果
+// 示範內容: 光帶斜向掠過標誌徽章的表面。
+// 動作／視覺規格:
+//   - 每 2.35 s 掃光一次。光只畫在徽章裁切範圍內（400 × 112、圓角半徑 28、藍色漸層）。
+//   - 光帶：寬 116 px 的白色漸層（中央不透明度 0.72、兩邊 0），加上相隔 78 px 的 12 px 細帶（不透明度 0.5），旋轉 0.42 rad（約 24°）。
+//   - 於 0.45–1.5 s，從徽章左側外 130 px 移至右側外 130 px（共 660 px），採二次方 ease-in-out。
+//   - 閃光：右上角於 1.38–1.98 s 顯示四角星；尺寸 30 × sin(πq) × (1 + 0.2(1 − q))，旋轉 0.9 rad。
+//   - 徽章本身不移動。
+// 使用情境: 適合為標誌、徽章或按鈕增添細緻光澤。
+// 關鍵字: light-sweep, shine, sheen, glint, highlight, logo, badge, premium
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#022
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 22
+
+CELLS[21] = (k, w, h, u) => {
+  stage(k);
+  const T = CYC / 2, lu = mod(u, T), p = eIOs(P(lu, 0.45, 1.5));
+  const BW = 400, BH = 112, X = w / 2 - BW / 2, Y = h / 2 - BH / 2;
+  k.fillStyle = 'rgba(0,0,0,.3)'; rr(k, X + 3, Y + 9, BW, BH, 28); k.fill();
+  const g = k.createLinearGradient(X, Y, X + BW, Y + BH); g.addColorStop(0, '#2B62E0'); g.addColorStop(1, '#4E8BFF'); k.fillStyle = g; rr(k, X, Y, BW, BH, 28); k.fill();
+  k.fillStyle = C.yel; star(k, X + 64, Y + BH / 2, 30, 0, 0.5); k.lineJoin = 'round'; k.strokeStyle = C.yel; k.lineWidth = 5; k.stroke(); k.fill();
+  txt(k, "精選", X + 112, Y + BH / 2 + 3, `800 50px ${DISP}`, '#fff', 'left', 'middle', '3px');
+  if (p > 0 && p < 1) {
+    k.save(); rr(k, X, Y, BW, BH, 28); k.clip();
+    k.translate(lerp(X - 130, X + BW + 130, p), Y + BH / 2); k.rotate(0.42);
+    const gr = k.createLinearGradient(-58, 0, 58, 0); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.5, 'rgba(255,255,255,.72)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    k.fillStyle = gr; k.fillRect(-58, -160, 116, 320); k.fillStyle = 'rgba(255,255,255,.5)'; k.fillRect(78, -160, 12, 320);
+    k.restore();
+  }
+
+  const tt = lu - 1.38; if (tt > 0 && tt < 0.6) { const q = tt / 0.6, sc = Math.sin(Math.PI * q) * (1 + 0.2 * (1 - q)); k.save(); k.translate(X + BW - 8, Y + 6); k.rotate(q * 0.9); k.fillStyle = '#fff'; star(k, 0, 0, 30 * sc, 0, 0.22, 4); k.fill(); k.restore(); }
+};

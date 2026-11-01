@@ -1,0 +1,38 @@
+// Motion Prompt #081 · MIT License (c) 2026 Shohei Ohtaki · ./#081
+//
+// 游標懸停上浮（Hover lift）
+// 分類組: lp (網頁與登陸頁效果) · element 09 · 分類: 懸停與點擊互動
+// 示範內容: 只有游標下的卡片會稍微升起，陰影擴散；游標離開時回到原位。
+// 動作／視覺規格:
+//   - 三張卡片各 146 × 128，圓角半徑 10；游標從左到右依序停留約 1 s。
+//   - 懸停時卡片在 0.3 s 內上升 10 px（cubic ease-out）；離開時同樣以 0.3 s 返回，如 CSS transition。
+//   - 陰影隨上浮一起改變：模糊 6→22 px、y 位移 2→12 px、不透明度 0.08→0.22。
+//   - 淺灰頁面搭配白色卡片，讓陰影清楚可見。
+// 使用情境: 適合讓卡片與按鈕看起來可以點擊。
+// 關鍵字: hover, lift, float, card, shadow, translatey, interaction
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#081
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 09
+
+CELLS[8] = (k, w, h, u) => {
+  frame(k);
+  const CX = [26, 192, 358], CY = 18, CWD = 146, CHT = 128, LIFT = 10;
+  const cur = t => path([[0, 70, 160], [0.45, 96, 78], [1.4, 110, 86], [1.62, 262, 80], [2.5, 276, 88], [2.72, 428, 80], [3.6, 440, 88], [4.0, 470, 160], [4.8, 70, 160]], t);
+  view(k, () => {
+    k.fillStyle = C.soft; k.fillRect(0, 0, VW, VH);
+    for (let i = 0; i < 3; i++) {
+      const inside = t => { const [x, y] = cur(t); return x > CX[i] && x < CX[i] + CWD && y > CY && y < CY + CHT; };
+      const q = trans(inside, u, 0.3), x = CX[i], y = CY - LIFT * q;
+      k.save(); k.shadowColor = `rgba(28,35,51,${0.08 + 0.14 * q})`; k.shadowBlur = 6 + 16 * q; k.shadowOffsetY = 2 + 10 * q;
+      k.fillStyle = '#fff'; rr(k, x, y, CWD, CHT, 10); k.fill(); k.restore();
+      pic(k, x + 8, y + 8, CWD - 16, 66, i, 6);
+      txt(k, ["山間旅宿", "海邊旅宿", "星空旅宿"][i], x + 12, y + 96, `800 13px ${JP}`, C.ink); bars(k, x + 12, y + 106, 100, 1);
+    }
+    const [cx, cy] = cur(u); cursor(k, cx, cy);
+  });
+};

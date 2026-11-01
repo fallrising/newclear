@@ -1,0 +1,42 @@
+// Motion Prompt #016 · MIT License (c) 2026 Shohei Ohtaki · ./#016
+//
+// 視差（Parallax）
+// 分類組: motion (動態圖像與動畫效果) · element 16 · 分類: 動態修飾
+// 示範內容: 風景橫向平移，近層移動較多、遠層較少，產生空間深度。
+// 動作／視覺規格:
+//   - 鏡頭橫移：沿正弦波移動 ±108 px，每 4.7 s 往返一次。
+//   - 各圖層反向偏移 pan × factor；由後至前的係數依序為星星 0.05、月亮 0.1、遠山 0.28、中層山脊 0.6、前景山丘與樹 1.25、最近的深色形狀 2.1。
+//   - 遠層使用接近背景的暗色，近層較明亮；最近一層是底部的大面積深色剪影。
+//   - 每層至少延伸到畫面左右邊界外各 200 px，避免露出端點。
+// 使用情境: 適合讓平面插畫或照片具有深度，用於背景、風景與捲動場景。
+// 關鍵字: parallax, depth, layers, pan, 2.5d, background, landscape
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#016
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 16
+
+const PLX = (() => {
+  const R = rand(16), ridge = (base, amp, step, seed) => { const r = rand(seed), pts = []; for (let x = -220; x <= CW + 220; x += step) pts.push([x, base - amp * (0.35 + 0.65 * r())], [x + step / 2, base + amp * 0.1 * r()]); return pts; };
+  const stars = []; for (let i = 0; i < 16; i++) stars.push([R() * (CW + 80) - 40, 12 + R() * 80, 1.5 + R() * 2]);
+  const trees = []; for (let i = 0; i < 9; i++) trees.push([-160 + i * 108 + R() * 30, 34 + R() * 24, i % 3]);
+  return { far: ridge(150, 78, 120, 3), mid: ridge(172, 74, 92, 8), stars, trees };
+})();
+CELLS[15] = (k, w, h, u) => {
+  const pan = 108 * Math.sin(u / CYC * Math.PI * 2);
+  const g = k.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#0F1A3D'); g.addColorStop(1, '#27408F'); k.fillStyle = g; k.fillRect(0, 0, w, h);
+  k.fillStyle = '#fff'; for (const s of PLX.stars) { k.globalAlpha = 0.8; k.beginPath(); k.arc(s[0] - pan * 0.05, s[1], s[2], 0, 7); k.fill(); } k.globalAlpha = 1;
+
+  k.fillStyle = C.yel; k.beginPath(); k.arc(390 - pan * 0.1, 56, 30, 0, 7); k.fill();
+  const poly = (pts, m, col) => { k.fillStyle = col; k.beginPath(); k.moveTo(-260, h + 10); pts.forEach(p => k.lineTo(p[0] - pan * m, p[1])); k.lineTo(w + 260, h + 10); k.closePath(); k.fill(); };
+  poly(PLX.far, 0.28, '#31499C');
+  poly(PLX.mid, 0.6, C.blue);
+
+  k.fillStyle = C.mint; k.beginPath(); k.moveTo(-300, h + 10); for (let x = -300; x <= w + 300; x += 20) k.lineTo(x - pan * 1.25, 176 + 12 * Math.sin(x * 0.012)); k.lineTo(w + 300, h + 10); k.closePath(); k.fill();
+  for (const t of PLX.trees) { const x = t[0] - pan * 1.25, by = 180 + 12 * Math.sin(t[0] * 0.012), hh = t[1] * 1.45; k.fillStyle = C.navy; k.fillRect(x - 4, by - 16, 8, 22); k.fillStyle = t[2] === 0 ? C.coral : '#12A57B'; k.beginPath(); k.moveTo(x, by - hh); k.lineTo(x + 20, by - 12); k.lineTo(x - 20, by - 12); k.closePath(); k.fill(); }
+
+  k.fillStyle = '#0A1230';[[-40, 60], [300, 44], [620, 66]].forEach(([x, r]) => { k.beginPath(); k.arc(x - pan * 2.1, h + 18, r, 0, 7); k.fill(); });
+};

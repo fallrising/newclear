@@ -1,0 +1,25 @@
+// Motion Prompt #026 · MIT License (c) 2026 Shohei Ohtaki · ./#026
+//
+// 垂直搖鏡（Tilt）
+// 分類組: camera (鏡頭運動與轉場) · element 02 · 分類: 鏡頭運動
+// 示範內容: 攝影機位置不變，從地面人物向上仰轉至塔頂。
+// 動作／視覺規格:
+//   - 攝影機：位置固定（高度 1.4 m），只改變俯仰角，由 -0.06 rad→+0.36 rad（-3°→+21°，合計約 24°）。
+//   - 時間：0.5 s 至 3.4 s（2.9 s），三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 主體：人物靜止站在前方 7 m；後方 26 m 處有高 9.5 m 的塔（天線頂端高 11.8 m）。
+//   - 畫面中所有物體向下移：人物從底部離開，塔頂與天線進入畫面。
+//   - 回到起點：3.4–4.2 s 停留，最後 0.5 s 交叉淡化回起始畫面（一輪 = 4.7 s）。
+//   - 右上角以整數角度顯示俯仰角（-3°→+21°）。
+// 使用情境: 適合展示建築或人物的高度與規模。
+// 關鍵字: tilt, tilt up, pitch, vertical, look up, camera move
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#026
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 02
+
+CELLS[1] = shot(camCell((k, w, h, p) => world(k, w, h, cam({ pitch: lerp(-0.06, 0.36, p), y: 1.4 }), { person: { z: 7 }, tower: [0, 26], buildings: false, sun: [7, 13, 40], sunScale: 0.4 }),
+  p => `${Math.round(lerp(-0.06, 0.36, p) * 57.3)}°`.replace(/^(\d)/, '+$1')));

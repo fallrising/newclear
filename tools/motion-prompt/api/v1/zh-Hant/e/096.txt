@@ -1,0 +1,46 @@
+// Motion Prompt #096 · MIT License (c) 2026 Shohei Ohtaki · ./#096
+//
+// 輕盈漂浮（Floating animation）
+// 分類組: lp (網頁與登陸頁效果) · element 24 · 分類: 載入、導覽與循環動態
+// 示範內容: 標題旁的手機、愛心徽章與評分標籤各自錯開節奏輕柔浮動，手機下方的陰影隨之放大縮小。
+// 動作／視覺規格:
+//   - 手機為 92 × 132：y = −8·sin(2πt/2.4)，每 2.4 s 浮動一次；正弦曲線讓兩端減速。
+//   - 愛心徽章半徑 20：y = −6·sin(2πt/1.6 + 1.2)；評分標籤為 76 × 30：y = −6·sin(2πt/2.4 + 2.4)。
+//   - 手機下方陰影是 54 × 6 的橢圓，尺寸與不透明度乘以 (1 + y/40)，因此手機升起時，陰影縮小並變淡。
+//   - 2.4 s 與 1.6 s 兩種週期都能整除 4.8 s，讓循環沒有接縫。
+// 使用情境: 適合為產品圖、應用程式示意圖或裝飾圖示加入安靜的動態。
+// 關鍵字: floating, float, bob, hover-animation, keyframes, translatey, decoration, loop
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#096
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 24
+
+CELLS[23] = (k, w, h, u) => {
+  frame(k);
+  const bob = (T, A, ph) => -A * Math.sin(2 * Math.PI * u / T + ph);
+  const y1 = bob(2.4, 8, 0), y2 = bob(1.6, 6, 1.2), y3 = bob(2.4, 6, 2.4);
+  view(k, () => {
+    k.fillStyle = C.soft; k.fillRect(0, 0, VW, VH);
+    txt(k, "透過應用程式，", 34, 62, `800 24px ${JP}`, C.ink); txt(k, "讓生活更輕鬆。", 34, 94, `800 24px ${JP}`, C.ink);
+    bars(k, 34, 108, 170, 2); btn(k, 34, 134, 112, 24, "下載");
+
+    const sh = 1 + y1 / 40;
+    k.fillStyle = `rgba(28,35,51,${0.16 * sh})`; k.beginPath(); k.ellipse(352, 160, 54 * sh, 6 * sh, 0, 0, 7); k.fill();
+
+    k.save(); k.translate(0, y1);
+    k.fillStyle = C.ink; rr(k, 306, 18, 92, 132, 16); k.fill(); k.fillStyle = '#fff'; rr(k, 312, 24, 80, 120, 11); k.fill();
+    pic(k, 318, 32, 68, 52, 0, 6); bars(k, 318, 92, 68, 3, C.faint, 5, 10);
+    k.restore();
+
+    k.save(); k.translate(0, y2); k.shadowColor = 'rgba(28,35,51,.18)'; k.shadowBlur = 10; k.shadowOffsetY = 4;
+    k.fillStyle = C.acc; k.beginPath(); k.arc(268, 54, 20, 0, 7); k.fill(); k.shadowColor = 'transparent';
+    k.fillStyle = '#fff'; k.beginPath(); k.moveTo(268, 62); k.bezierCurveTo(254, 53, 260, 41, 268, 48); k.bezierCurveTo(276, 41, 282, 53, 268, 62); k.fill(); k.restore();
+    k.save(); k.translate(0, y3); k.shadowColor = 'rgba(28,35,51,.16)'; k.shadowBlur = 10; k.shadowOffsetY = 4;
+    k.fillStyle = '#fff'; rr(k, 410, 92, 76, 30, 15); k.fill(); k.shadowColor = 'transparent';
+    txt(k, '★ 4.8', 448, 108, `800 13px ${EN}`, C.acc, 'center', 'middle'); k.restore();
+  });
+};

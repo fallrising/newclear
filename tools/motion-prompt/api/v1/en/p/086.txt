@@ -1,0 +1,18 @@
+Please use "Underline animation" from "Landing page & web effects".
+Motion Prompt #086 · lp/underline-animation
+
+Meaning: A link's underline grows from the left on hover
+Example request (adapt to your project): Add an underline animation to the menu links: grow from the left in 0.3 s on hover, and exit to the right on leave.
+What this demo shows: Under the link the cursor is on, an orange line grows from the left; when the cursor leaves, the line shrinks away to the right.
+Demo specification (independent of the example request):
+- Three links (20 px, bold, 56 apart). The cursor rests on each, left to right, for about 1 s (hit area 6 px wider than the text on each side).
+- Underline: orange, 3 thick, 8 px below the baseline.
+- On hover, width 0→100% from the left end over 0.3 s (cubic ease-out).
+- On leave, the left end moves right over 0.3 s, so the line exits to the right (like scaleX with transform-origin on the right).
+When to use it: Use it on menu and text links to show where the pointer is, quietly.
+
+Local demo: ./?lang=en#086
+Local specification and code: ./api/v1/en/e/086.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

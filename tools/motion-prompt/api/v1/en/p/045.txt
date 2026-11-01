@@ -1,0 +1,20 @@
+Please use "Wipe" from "Camera moves & transitions".
+Motion Prompt #045 · camera/wipe
+
+Meaning: A moving edge replaces the shot
+Example request (adapt to your project): Wipe from left to right into the next scene.
+What this demo shows: A vertical edge moves from left to right and the next picture replaces the current one behind it.
+Demo specification (independent of the example request):
+- Join: 1.1 s, from 1.7 s to 2.8 s; the edge travels from just outside the left side (x = -4 px) to just outside the right side (x = 543 px)
+- Easing: cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1))
+- The incoming picture shows left of the edge and the outgoing one right of it; neither picture moves (a reveal by clipping, not a push)
+- Edge: a 4 px blue vertical line, visible only while it is moving
+- Camera: fixed in both pictures; the subjects do not move either
+- Alternates A→B and B→A every 4.7 s (9.4 s for the round trip); top-right readout shows "A → B" / "B → A"
+When to use it: To mark a clear change of scene or topic, or to switch between the two sides of a comparison.
+
+Local demo: ./?lang=en#045
+Local specification and code: ./api/v1/en/e/045.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

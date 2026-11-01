@@ -1,0 +1,37 @@
+// Motion Prompt #040 · MIT License (c) 2026 Shohei Ohtaki · ./#040
+//
+// 定格（Freeze frame）
+// 分類組: camera (鏡頭運動與轉場) · element 16 · 分類: 拍攝方式與時間效果
+// 示範內容: 人物跳到最高點時畫面停止，1.4 s 後從同一影格繼續。
+// 動作／視覺規格:
+//   - 攝影機：完全固定（高度 1.3 m），停止的是素材時間。
+//   - 定格：1.6 s 停止、3.0 s 恢復（1.4 s）；素材在 0–1.6 s 正常播放，定格時維持 1.6 s，之後按 u-1.4 繼續。
+//   - 主體：距離 7 m 的人物在素材時間 0.6–2.6 s 做拋物線跳躍，最高 1.1 m；定格正好落在最高點（進度 50%）。
+//   - 九片落葉也一併停止，落下速度是本 pack 第 13 項 Slow motion 的 1.5×。
+//   - 定格標記：5 px 藍框與底部中央暫停圖示（68×40 px 白色圓角框內兩條藍條），以 0.12 s 淡入淡出。
+//   - 只有定格時右上角顯示定格狀態；無交叉淡化重設。
+// 使用情境: 適合強調決定性瞬間，或暫停畫面以放置姓名與字幕。
+// 關鍵字: freeze frame, still frame, pause, hold, stop motion, highlight
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#040
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 16
+
+CELLS[15] = shot((k, w, h, u) => {
+
+  const tj = u < 1.6 ? u : u < 3.0 ? 1.6 : u - 1.4;
+  const q = P(tj, 0.6, 2.6);
+  const frozen = u >= 1.6 && u < 3.0;
+  world(k, w, h, cam({ y: 1.3 }), { person: { z: 7, y: jumpY(q), armUp: q > 0 && q < 1 }, extra: leaves(tj, 1.5) });
+  if (frozen) {
+    const a = Math.min(1, (u - 1.6) / 0.12, (3.0 - u) / 0.12);
+    k.save(); k.globalAlpha = a; k.strokeStyle = C.blue; k.lineWidth = 5; k.strokeRect(2.5, 2.5, w - 5, h - 5);
+    k.fillStyle = 'rgba(255,255,255,.88)'; rr(k, w / 2 - 34, h - 58, 68, 40, 8); k.fill();
+    k.fillStyle = C.blue; k.fillRect(w / 2 - 12, h - 49, 8, 22); k.fillRect(w / 2 + 4, h - 49, 8, 22); k.restore();
+  }
+  return frozen ? "定格" : '';
+});

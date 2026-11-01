@@ -1,0 +1,35 @@
+// Motion Prompt #056 · MIT License (c) 2026 Shohei Ohtaki · ./#056
+//
+// 短暫通知（Toast notification）
+// 分類組: ui (UI 元件) · element 08 · 分類: 展開與浮層
+// 示範內容: 點選儲存後，深色通知滑入右下角；剩餘時間條歸零時滑出。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。游標於 1.0 s 點擊左下藍色儲存按鈕（110×36），再往左下離開。
+//   - 通知：#26282c、214×52、圓角半徑 10，距右側 18 px、底部 16 px；於 1.05–1.4 s 以 easeOutCubic 從右側滑入 240 px。
+//   - 內容：藍圓內白色勾號，與白色 15 px 已儲存文字。
+//   - 底部剩餘時間線（高 3 px）於 1.4–3.2 s 線性由 194 px 縮至 0。
+//   - 退場：於 3.2–3.55 s 以 easeInOutCubic 向右滑出 240 px。
+// 使用情境: 適合不打斷使用者地確認儲存或送出等操作結果。
+// 關鍵字: toast, snackbar, notification, alert, message, auto-dismiss
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#056
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 08
+
+CELLS[7] = ui((w, h, t) => {
+  bar(24, 16, 90, C.line2, 10); strokeRR(24, 34, 300, 34, 7, C.line2, 1.5); bar(24, 82, 90, C.line2, 10); strokeRR(24, 100, 300, 34, 7, C.line2, 1.5);
+  fillRR(24, 146, 110, 36, 8, C.blue); text("儲存", 79, 164, 16, '#fff', 600, 'center');
+  const tin = eo(seg(t, 1.05, 1.4)), tout = eio(seg(t, 3.2, 3.55));
+  if (tin > 0 && tout < 1) {
+    const tw0 = 214, th = 52, tx = w - 18 - tw0 + (1 - tin) * 240 + tout * 240, ty = h - 16 - th;
+    shadowed(() => fillRR(tx, ty, tw0, th, 10, C.dark), 18, 6, .25);
+    circle(tx + 26, ty + 24, 11, C.blue); check(tx + 26, ty + 24, 5, '#fff', 2.4);
+    text("已儲存", tx + 46, ty + 24, 15, '#fff', 600);
+    const life = 1 - seg(t, 1.4, 3.2); fillRR(tx + 10, ty + th - 7, (tw0 - 20) * life, 3, 1.5, C.sb);
+  }
+  pointer([[.3, -30, h + 30], [.95, 84, 168], [1.5, 84, 168], [2.2, -40, h + 40]], [1.0], t);
+});

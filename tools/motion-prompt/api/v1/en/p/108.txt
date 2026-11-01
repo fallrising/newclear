@@ -1,0 +1,20 @@
+Please use "Panning shot" from "Photo looks, lighting & styles".
+Motion Prompt #108 · photo/panning-shot
+
+Meaning: Follow a moving subject so only the background streaks
+Example request (adapt to your project): Panning shot of a red car driving past, 1/15 s shutter: the car sharp, the trees and buildings behind streaked sideways.
+What this demo shows: The camera follows the moving car: the car stays sharp in the middle of the frame while only the buildings, trees and lamps behind it streak sideways.
+Demo specification (independent of the example request):
+- Street corner: buildings, trees and lamps behind a road at y 132–162 (no large person in front)
+- Car: without the effect it drives from x −80 to 620 in 5 s; with it, it stays at x 270 ±10 px
+- Streak: the background is drawn 12 times spread over 46 px sideways and averaged (spread 0 → 46 px)
+- Wheels: a spoke line turns 12 times per 5 s
+- Top-right shutter speed 1/1000 → 1/15
+- Timing: the effect comes in from 0.4 s to 1.4 s, holds until 4.0 s and is gone again by 4.8 s (one pass = 5 s, cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1)))
+When to use it: To show the speed of a car, bike or runner in a still photo.
+
+Local demo: ./?lang=en#108
+Local specification and code: ./api/v1/en/e/108.txt
+Local helper code: ./api/v1/kit/en/photo.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

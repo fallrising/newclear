@@ -1,0 +1,19 @@
+Please use "Popover" from "UI component names".
+Motion Prompt #055 · ui/popover
+
+Meaning: Click a button to open a small panel pointing at it
+Example request (adapt to your project): Attach a popover to the "Details" button: clicking opens a small panel to its right over 0.3 s, and OK closes it.
+What this demo shows: Clicking "Details" opens a small white panel to its right with a pointer at the button; clicking OK inside closes it.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. An outlined blue "Details" button (108×36) at (24, 112); the cursor clicks it at 1.0 s.
+- Show amount a: 0→1 over 1.0–1.28 s with easeOutCubic; opacity a, sliding 6 px in from the right.
+- Panel: white 300×120, radius 10, at (156, 62), 1 px border, shadow blur 22, offset y 6. A 10-wide triangle on its left edge (y 122–138) points at the button.
+- Inside: a bold title bar, two text lines, an outlined 70×26 button and a blue 72×26 OK button.
+- Close: the cursor moves to OK (402, 157) by 3.0 s and clicks at 3.3 s; a is multiplied by (1 − easeInOutCubic over 3.3–3.5 s).
+When to use it: Use it for a short setting or confirmation that belongs right next to the button that opened it.
+
+Local demo: ./?lang=en#055
+Local specification and code: ./api/v1/en/e/055.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

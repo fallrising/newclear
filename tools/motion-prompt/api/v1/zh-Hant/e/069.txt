@@ -1,0 +1,41 @@
+// Motion Prompt #069 · MIT License (c) 2026 Shohei Ohtaki · ./#069
+//
+// 骨架畫面（Skeleton screen）
+// 分類組: ui (UI 元件) · element 21 · 分類: 導覽與狀態
+// 示範內容: 點重新整理後，清單變成相同形狀的灰色區塊並出現掃光；載入結束後恢復內容。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。兩列清單，每列含 96×56 圖片與三行文字；游標於 1.0 s 點擊右上重新整理圖示。
+//   - 於 1.05–1.2 s 線性切換成灰色 #e9e7e5 圓角區塊，尺寸與位置不變。
+//   - 掃光：寬 160 的白色光帶，兩側透明、中央不透明度 0.75；每 0.9 s 從 x −200 掃至 x 742，只畫在區塊上。
+//   - 內容於 3.0–3.3 s 線性恢復。
+// 使用情境: 適合需要短暫載入的清單或卡片，等待時仍能看到版面結構。
+// 關鍵字: skeleton, skeleton-screen, placeholder, shimmer, loading, ghost-content
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#069
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 21
+
+CELLS[20] = ui((w, h, t) => {
+  const sk = seg(t, 1.05, 1.2) * (1 - seg(t, 3.0, 3.3));
+  ring(w - 40, 26, 14, C.line2, 1.8); X.beginPath(); X.arc(w - 40, 26, 7, -Math.PI * .1, Math.PI * 1.4); X.strokeStyle = '#666'; X.lineWidth = 2.2; X.stroke();
+  bar(24, 20, 160, C.line2, 12);
+  for (let k = 0; k < 2; k++) {
+    const y = 56 + k * 66;
+    X.save(); X.globalAlpha = 1 - sk; mountains(24, y, 96, 56, k); bar(136, y + 6, 200, C.ink, 11); bar(136, y + 26, 340); bar(136, y + 42, 260); X.restore();
+    if (sk > 0) {
+      X.save(); X.globalAlpha = sk; const g = '#e9e7e5';
+      fillRR(24, y, 96, 56, 8, g); fillRR(136, y + 4, 200, 14, 7, g); fillRR(136, y + 26, 340, 10, 5, g); fillRR(136, y + 42, 260, 10, 5, g);
+
+      const sx = -200 + ((t - 1.1) % 0.9) / 0.9 * (w + 400);
+      X.globalCompositeOperation = 'source-atop';
+      const gr = X.createLinearGradient(sx - 80, 0, sx + 80, 0); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.5, 'rgba(255,255,255,.75)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      X.fillStyle = gr; X.fillRect(0, y - 2, w, 64);
+      X.restore();
+    }
+  }
+  pointer([[.3, w + 30, h + 30], [.95, w - 38, 30], [1.4, w - 38, 30], [2.1, w + 30, h + 30]], [1.0], t);
+});

@@ -179,7 +179,9 @@ def detect(provider, lab=LAB):
             and all(runtime.values()) and auth in ('not_required', 'present_unverified')}
 
 
-def plan(provider):
+def plan(provider, check_cancel=False):
+    if check_cancel and provider != 'opencode':
+        raise SlotError('local_cancel_check_only')
     spec = SPECS[provider]
     limits = {'timeout_seconds': spec['timeout_seconds'], 'host_retries': 0,
               'provider_request_cap': 4 if provider == 'pi' else None,
@@ -192,12 +194,16 @@ def plan(provider):
     return {'mode': 'plan', 'provider': provider, 'model': spec['model'], 'pinned_version': spec['version'],
             'task': 'synthetic_file', 'remote': spec['remote'], 'limits': limits,
             'command': ['python3', 'scripts/office_dispatch.py', 'run', provider, '--execute']
-                       + (['--allow-remote'] if spec['remote'] else []),
+                       + (['--allow-remote'] if spec['remote'] else [])
+                       + (['--check-cancel'] if check_cancel else []),
+            'native_cancel_check': check_cancel,
             'model_task_started': False, 'automatic_fallback': False}
 
 
-def launch(provider, allow_remote, lab=LAB):
+def launch(provider, allow_remote, lab=LAB, check_cancel=False):
     spec = SPECS[provider]
+    if check_cancel and provider != 'opencode':
+        raise SlotError('local_cancel_check_only')
     if spec['remote'] != allow_remote:
         raise SlotError('explicit_remote_authorization_required' if spec['remote'] else 'local_remote_flag_forbidden')
     # Lock before preflight, then replace this process; the runner adopts the same lock/PID.
@@ -208,6 +214,8 @@ def launch(provider, allow_remote, lab=LAB):
             return 1
         python = strata_home(lab) / 'source/.venv/bin/python' if provider == 'opencode' else Path(sys.executable)
         command = [str(python), str(lab / 'scripts' / spec['runner']), *spec['args']]
+        if check_cancel:
+            command.append('--check-cancel')
         os.execve(str(python), command, slot.exec_env(os.environ))
         raise RuntimeError('exec_returned_without_replacing_process')
 
@@ -219,6 +227,7 @@ def main(argv=None):
     preview = commands.add_parser('plan'); preview.add_argument('provider', choices=SPECS)
     run = commands.add_parser('run'); run.add_argument('provider', choices=SPECS)
     run.add_argument('--execute', action='store_true'); run.add_argument('--allow-remote', action='store_true')
+    run.add_argument('--check-cancel', action='store_true', help='OpenCode only: verify a second fixed native cancellation task')
     ack = commands.add_parser('acknowledge-interruption')
     ack.add_argument('--confirm-all-owned-processes-stopped', action='store_true', required=True)
     args = parser.parse_args(argv)
@@ -234,8 +243,8 @@ def main(argv=None):
         if args.action == 'plan' or not args.execute:
             if args.action == 'run' and args.allow_remote:
                 parser.error('--allow-remote requires --execute')
-            print(json.dumps(plan(args.provider), indent=2)); return 0
-        return launch(args.provider, args.allow_remote)
+            print(json.dumps(plan(args.provider, getattr(args, 'check_cancel', False)), indent=2)); return 0
+        return launch(args.provider, args.allow_remote, check_cancel=args.check_cancel)
     except SlotError as error:
         print(json.dumps({'status': 'blocked', 'reason': str(error)}), file=sys.stderr)
         return 1

@@ -24,6 +24,7 @@ HTML 是產生當時的離線快照，檔案權限 `0600`；只允許建立新�
 
 - `completed`：runner 記錄模型推論通過、原生完成證據／模型與 provider 一致、清理通過，且現在的產物內容符合 input、SHA-256 與原紀錄一致。
 - `failed`／`stopped`：保留原 runner 的失敗或停止，產物正確也不能改成成功。
+- `cancelled`：本地任務收到使用者 Ctrl+C，與失敗分開顯示；已存在產物仍不代表該任務完成。清理未確認的 runner 會回報 failed。
 - `startup_only`：僅啟動檢查，沒有任務驗收。
 - `incomplete`：缺少最終報告，無法從靜態檔案判定程序是否仍在執行。
 - `unverified`：報告聲稱完成，但缺模型／完成／清理證據，或產物遺失／內容或 hash 不符。

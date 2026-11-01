@@ -6,10 +6,17 @@ Demand:deskT0426;claim378merged. [TC-1–TC-3](T-0426-tui-tools.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TC-01 | Guarded MCP preflight and independent review | TC-1 | in_progress | 2026-11-01T15:24:46.292030+00:00 | — | 2026-11-01T15:24:46.292030+00:00 |
-| TC-02 | Bounded real TUI tool/result attempt | TC-2 | in_progress | 2026-11-01T15:24:46.292030+00:00 | — | 2026-11-01T15:24:46.292030+00:00 |
-| TC-03 | Actual evidence and delivery | TC-3 | in_progress | 2026-11-01T15:24:46.292030+00:00 | — | 2026-11-01T15:24:46.292030+00:00 |
+| TC-01 | Guarded MCP preflight and independent review | TC-1 | done | 2026-11-01T15:24:46.292030+00:00 | 2026-11-01T15:46:08Z | 2026-11-01T15:46:08Z |
+| TC-02 | Bounded real TUI tool/result attempt | TC-2 | done | 2026-11-01T15:24:46.292030+00:00 | 2026-11-01T15:46:08Z | 2026-11-01T15:46:08Z |
+| TC-03 | Actual evidence and delivery | TC-3 | done | 2026-11-01T15:24:46.292030+00:00 | 2026-11-01T15:47:21.685091+00:00 | 2026-11-01T15:47:21.685091+00:00 |
 
+
+
+Product [PR942](https://github.com/fallrising/newclear/pull/942), source`bd7daef8c72e9e59ae8049f2cc28d88db18fc5c4`, merged`10d7960c7a1a63142b4dfe30f52eb954afaa041b` at2026-11-01T15:46:08Z. Requiredcheck/validate passed;3source/merge/originfiles, ancestry andDesk-Tasktrailers matched. TC01–02 record completion of the boundedattempt and its evidence, **not passed realtoolacceptance**: firstHTTP429 in1.745s,total2.411s,1of2admissions; secondtoolresult/sameprocesscontinuation notrun. AuthPropassed, but no acceptedmodelresponse/toolcall. No retry; unusedslotclosed. Onefailedusage row/nullreportedusage; allownedruntimecleanup passed. Exactquota cause/resettime/internalprovidercalls/billingunknown. Original17AC/runtime/Cargo andoldhistory retained.
+
+IndependentT001preflight/T002truthful-result reviews passed. Initialisolateddry2fake/0real in0.551s,onePTY/input/actualMCPcallback passed; local52contracts/9indexes/20repotests,154journalruns/30tests and448deskdocuments passed. Journal [PR223](https://github.com/fallrising/journal/pull/223) and desk [PR379](https://github.com/fallrising/desk/pull/379) passedCI/normalmerge/exactreadback. TC03 records primaryclosure at2026-11-01T15:47:21.685091+00:00: separatecompletebackup verified93payloadfiles/187370254bytes andmodes, thenfourclean mergedprimaryworktrees normallyremoved. Branches, oldpackets/backups/trustedtarget, otherworktrees/caches preserved.
+
+FinalboardCI/normalmerge/readback, backupappend and removalofits soleworktree occur afterthischeckpoint andbeforefinalprivatehandoff, notpreclaimed. Ownernext may report ordinaryofficialCLI usage-limit/reset display withoutsecrets; no agentusageprobe or automaticretry. Mainlineincomplete/usable_tagnone remain; no furthermilestone.
 
 ## T-0426 — Fresh TUI trial after owner trust confirmation
 

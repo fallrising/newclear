@@ -293,3 +293,25 @@ Unconfigured projects retain that default even alongside configured projects; mi
 inside a configured project never fall back to local. Old local-policy-v1 history remains
 readable/replayable but cannot authorize new work. Loading policy never creates Passing evidence
 or treats a successful Fake Run as Done. This API/backend slice does not add a completion UI.
+
+
+## WorkItem material index
+
+Authenticated GET `/api/v1/projects/{project_id}/work-items/{work_item_id}/material-index` returns
+stored metadata, exact AC requirements, accepted specification references when present, and scoped
+Run/Candidate identities. Use the existing session cookie and a WorkItem ID from the project board.
+Send no query or request body; HEAD is explicitly rejected with405. All responses disable caching.
+
+Use a returned Run ID with its existing output read and a returned Candidate ID with the existing
+completion-preparation and verified-coverage reads. Those endpoints keep their own authorization,
+phase, policy, byte verification and current-subject checks. Inspect their exact results before an
+explicit command; this index neither selects a default Candidate nor grants completion authority.
+Legacy IDs are preserved byte-for-byte, including historically valid IDs that downstream URL syntax
+cannot address. Do not normalize, guess or silently replace them.
+
+One SQLite snapshot supplies all rows plus cursor and restore generation. Missing artifact bytes or
+current policy do not hide historical metadata. Each collection is limited to1024 rows and the wire
+response to4MiB; excess fails503 projection_unavailable with reason=material_index_capacity_exceeded,
+without truncation. There is no pagination in this version. Storage corruption fails503; missing or
+unauthorized scope is masked404. See the [approved contract](sdd/work-item-material-index.md).
+Full WorkItemDetail/history and the connected completion UI remain future work.

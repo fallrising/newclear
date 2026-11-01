@@ -224,3 +224,12 @@ UI and product AC-02..04 remain incomplete. No release, usable tag or deployment
 ## WorkItem material-index proposal — 2026-11-01
 
 [Concrete next contract](docs/plans/work-item-material-index-20261101.md) maps remaining M2/detail gaps and proposes one metadata-only discovery API. DTL-PLAN-01..03 in BOARD cover this planning delivery; IDX-AC-01..06 remain NotRun until owner acceptance and implementation. Existing full WorkItemDetail, product ACs and delivered policy/coverage contracts are unchanged.
+
+Owner approved D1 on2026-11-01. [Normative material-index contract](docs/sdd/work-item-material-index.md)
+is now the bounded implementation scope: authenticated closed metadata/AC/Run/Candidate read,
+one SQLite snapshot, exact legacy compatibility, deterministic limits and no writes/authority.
+Fixed IDX-AC-01..06 require named Red/Green, storage/concurrency and real discovery-to-completion
+regressions, backend full/race/vet/build, web/API/docs, Claude code review and normal delivery.
+The bounded implementation passes local gates and independent code review; exact-head CI and
+Git delivery remain tracked in BOARD HMDTL and [evidence](docs/evidence/work-item-material-index-20261101.md).
+No whole-product AC or full M2 status is promoted.

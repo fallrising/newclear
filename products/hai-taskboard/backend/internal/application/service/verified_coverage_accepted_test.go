@@ -6,6 +6,7 @@ import (
 	json "encoding/json/v2"
 	"errors"
 	"fmt"
+	"maps"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -32,6 +33,13 @@ func (e *coverageCountingExecutor) Declaration() port.ExecutorDeclaration {
 // All accepted state is produced by commands against authenticated Git objects;
 // the multi-AC case never installs accepted heads directly in SQL.
 func TestVerifiedCoverage_AcceptedMultiACHTTPAndRestart(t *testing.T) {
+	testAcceptedMultiACHTTPAndRestart(t, false)
+}
+
+// The index variant shares lawful accepted/Fake/human-report setup with the
+// original coverage oracle; only material discovery and its extra assertions differ.
+func testAcceptedMultiACHTTPAndRestart(t *testing.T, discover bool) {
+	t.Helper()
 	acs := []domain.ACID{"AC-A", domain.ACID(strings.Repeat("界", 40))}
 	svc, store, db, accept := initialFixtureContentACs(t, initialContent, acs)
 	environment := domain.HashString("selected coverage environment")
@@ -107,13 +115,29 @@ func TestVerifiedCoverage_AcceptedMultiACHTTPAndRestart(t *testing.T) {
 	}
 	read := func() []byte {
 		t.Helper()
+		rowsBefore := preparationDatabaseSnapshot(t, db)
+		idsBefore := maps.Clone(svc.ids.(*sequenceIDs).values)
 		h, e := httpapi.NewServer(svc, httpapi.UnitCommandResults{Unit: store}, httpapi.PersistedProjections{Store: store}, initialHTTPAuthority{}, httpapi.NewHub(), httpapi.Config{Origin: "https://taskboard.test"})
 		if e != nil {
 			t.Fatal(e)
 		}
-		r := initialHTTPRequest(h, http.MethodGet, "/api/v1/projects/"+string(projectID)+"/work-items/"+string(workItemID)+"/candidates/candidate-multi/verified-coverage", nil, true, false)
+		lookup := "candidate-multi"
+		if discover {
+			index := readDiscoveredMaterial(t, h)
+			if index.Accepted == nil || len(index.ACs) != len(acs) || index.ACs[1].ACID != string(acs[1]) {
+				t.Fatalf("accepted discovery: %+v", index)
+			}
+			lookup = index.Candidates[0].ID
+			candidate.Candidate.ID = domain.CandidateID(lookup)
+			run = domain.RunID(index.Candidates[0].RunID)
+			consumeDiscoveredMaterial(t, h, index)
+		}
+		r := initialHTTPRequest(h, http.MethodGet, "/api/v1/projects/"+string(projectID)+"/work-items/"+string(workItemID)+"/candidates/"+lookup+"/verified-coverage", nil, true, false)
 		if r.Code != 200 {
 			t.Fatalf("coverage HTTP %d: %s", r.Code, r.Body)
+		}
+		if !bytes.Equal(rowsBefore, preparationDatabaseSnapshot(t, db)) || !maps.Equal(idsBefore, svc.ids.(*sequenceIDs).values) {
+			t.Fatal("discovery/linked reads wrote rows or allocated IDs")
 		}
 		return bytes.Clone(r.Body.Bytes())
 	}
@@ -204,6 +228,15 @@ func TestVerifiedCoverage_AcceptedMultiACHTTPAndRestart(t *testing.T) {
 	item, err := store.LoadWorkItem(t.Context(), projectID, workItemID)
 	if err != nil || item.Phase() != domain.PhaseDone {
 		t.Fatal("explicit completion did not reach Done", err)
+	}
+	if discover {
+		h, e := httpapi.NewServer(svc, httpapi.UnitCommandResults{Unit: store}, httpapi.PersistedProjections{Store: store}, initialHTTPAuthority{}, httpapi.NewHub(), httpapi.Config{Origin: "https://taskboard.test"})
+		if e != nil {
+			t.Fatal(e)
+		}
+		if index := readDiscoveredMaterial(t, h); index.Phase != "Done" {
+			t.Fatal("Done discovery lost guarded phase", index.Phase)
+		}
 	}
 }
 

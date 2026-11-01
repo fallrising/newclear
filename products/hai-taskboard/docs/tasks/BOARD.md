@@ -389,8 +389,20 @@ Owner continues after HM2C. Source9f3f72af; HAI unchanged from#902, no open HAI 
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HMDTL | Review next backend material-index contract; 等 owner D1 before implementation | DTL-PLAN-01..03; H02 support | in_progress | 2026-11-01T11:00:00Z | — | 2026-11-01T11:17:20Z |
+| HMDTL | Implement approved backend material-index contract | DTL-PLAN-01..03; IDX-AC-01..06; H02 support | in_progress | 2026-11-01T11:00:00Z | — | 2026-11-01T12:09:30Z |
 
 DTL-PLAN-01 maps every M2 requirement and detail field to current authority/storage and gaps. DTL-PLAN-02 defines one bounded route/shape/consistency/error/resource proposal with fixed product oracles and explicit unresolved decisions. DTL-PLAN-03 disposes Claude review, validates documents and completes required Git/CI/readback/ledger synchronization. These are planning ACs, not product acceptance; full M2 remains incomplete.
 
 [Concrete proposal](../plans/work-item-material-index-20261101.md) and [review dispositions](../evidence/work-item-material-index-plan-20261101.md): Claude follow-up ACCEPT for presenting D1, all source conditions closed. Owner decision pending; merging these documents does not approve IDX-01..05 or run IDX-AC-01..06. Production/OpenAPI/accepted SDD unchanged. HMDTL remains in_progress without end while awaiting D1.
+
+2026-11-01T11:40:31Z: owner explicitly approved D1; the preceding waiting point is historical.
+[Normative contract](../sdd/work-item-material-index.md) and fixed IDX-AC-01..06 now govern
+implementation. Source d55db6a9 (wt new fetched unrelated main after intake211da65f; HAI/CI identical); no HAI open PR at intake. One isolated native core leaf70minutes,
+root90–150active minutes/20minute checkpoints, Claude exact opus5.5/high480s+one material-revision
+follow-up; CI20minute rounds. No UI/provider/dependency/migration/release/deploy; full M2 incomplete.
+
+2026-11-01T12:09:30Z: approved implementation locally accepted. [Evidence](../evidence/work-item-material-index-20261101.md)
+maps IDX-AC-01..05 to real storage/HTTP/discovery oracles; full baseline573.127s, bounded final
+revision normal/race88.873s/vet/build and web30/API/docs pass. Claude initial conditional ACCEPT
+249.363s → revised ACCEPT91.023s, F1–F6 disposed. Original failures retained. IDX-AC-06 remains
+pending exact-head CI/normal merge/readback/ledger; HMDTL keeps in_progress and no end.

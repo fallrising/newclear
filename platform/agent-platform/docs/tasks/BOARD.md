@@ -237,7 +237,11 @@ Existing T-0447 executor authority is reused; this does not open another AP mile
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M2-route | Exact Codex admission/driver, trusted tool boundary and native backup compatibility | M2-01/02 | in_progress | 2026-11-01T04:15Z | — | 2026-11-01T04:55Z |
+| M2-route | Exact Codex admission/driver, trusted tool boundary and native backup compatibility; PR895 merged | M2-01/02 | done | 2026-11-01T04:15Z | 2026-11-01T05:30:52Z | 2026-11-01T05:30:52Z |
 
 Code review corrections and native backup31 tests passed; actual Codex Web execution
 and concurrent workspace proof remain pending. Host ceiling remains one4CPU/4GiB VM.
+
+2026-11-01 M2 pair: exact approved2VM window passed real dual-vendor overlap, boundaries,
+cancelA/completeB and cleanup; max1 restored. PR906 final review/delivery pending.
+No AP production code changes or M3. Earlier pending-resource snapshot superseded.

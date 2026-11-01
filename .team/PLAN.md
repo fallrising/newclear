@@ -2711,6 +2711,25 @@ Owner continues after RAL. Lead solewriter for XR01–04/T0035, isolated six-cas
 
 XR source/local evidence gate ACCEPT 2026-11-01T05:33:30Z: RED4→GREEN4,130Node/308Python=438tests; XR2 sixactualworkerd/Pythonrunner cases,zero restoredcollection/sourceunchanged,9hashes; XM1/XM2 badguardsdetected without productmutation; T860 finalACCEPT. XR1 metadata-countfailure retained andexplicitplatformtablefilterfixed, no weakenedapplicationoracle. Productruntime/liveauthority unchanged. NormalGit CI/merge/readback andboardclosure remain; fullmainlineincomplete.
 
+## T-0442 M2 approved pair continuation — 2026-11-01
+
+Same claimed task and existing scope. Parent owns runtime capacity/start/stop,
+shared15min deadline, evidence and delivery. One12min bounded native helper writes
+private cancellation/monitor script; one8min independent readonly preflight reviewer.
+No children; at most two focused corrections. Live max2 new CLI invocations under
+approved 2x4CPU4GiB zero-warm resources, then restore1. Native/source gates already
+passed for unchanged AP/Fanz bytes; verify acceptance scripts, inspect actual receipts,
+fresh-context independent acceptance and required CI before normal merge/readback.
+Estimated continuation45–75min plus CI; unknown metrics remain null. No M3.
+
+M2 pair evidence gate ACCEPT_M2_LIVE: fresh independent reviewer verifies actual
+Codex/Claude streams, prior Codex repair and current Claude same fixed-base diff,
+two actual VM/workspace denials and A/B/A overlap, Web cancelA thenB success after
+A cleanup. Original15min window retained, exactly2 new coding invocations; three
+pre-inference queued cancellations remain explicit. Capacity1 restored, no resources
+or services left. Final source/docs/CI/normal merge/readback and board closure remain.
+No M3, public URL, release or full-platform completion claim.
+
 ## PS snapshot ordering — 2026-11-01T11:02:36Z
 
 Owner continues stated contract/polling alignment. Lead sole writer forPS01–04/T0036: bounded dashboard revision/consistency guard and durableoutbox ACKloss qualification, preserveM0 Event gap explicit, no live/provider/authoritychanges. RGR/fullsuite/actualbrowser. One freshnative readonlyreviewer T861, inheritedmodel/effort/permissions,<=1500tokens+one<=1000tokenfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota,no writes/tests/network/private/delegation. Instruction scope notOSisolation;lead owns evidencegate and authorizedGit delivery.

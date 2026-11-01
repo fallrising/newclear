@@ -235,3 +235,9 @@ fixed-base repair/check/download and confirmed cleanup; code and single-live ind
 reviews accepted, native and hosted CI green. Two simultaneous workspaces/current shared
 Claude route remain pending explicit resource approval. max_claims remains1; temporary
 services stopped, no resident URL, no M3/AC05 or full platform completion claim.
+
+M2 concurrent checkpoint2026-11-01: owner-approved bounded pair on d008fc47 passed actual
+Claude repair, Codex cancellation, two live isolated workspaces, secret/network/traversal
+denials and cancelA/completeB. Both cleaned; capacity restored1 and services stopped.
+See [M2 acceptance](../fanzloud/docs/acceptance/M2-two-vendors.md). Fresh independent ACCEPT_M2_LIVE; final PR906 delivery pending.
+Earlier pending-resource text is historical. M3/AC05 not started; mainline incomplete.

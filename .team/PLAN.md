@@ -2669,3 +2669,9 @@ Claude substantive plan137.257s REWORK → follow-up186.133s ACCEPT for owner pr
 production approval. Root disposed all findings; final R1–R7 conditions incorporated without another
 model call, as reviewer explicitly allowed. Product COV-ACs remain NotRun; only proposal publication
 is accepted. See product evidence/m2-coverage-proposal-20261101.md for measured/unknown accounting.
+
+## XR cross-snapshot restoration qualification — 2026-11-01T05:22:43Z
+
+Owner continues after RAL. Lead solewriter for XR01–04/T0035, isolated six-case actualworkerd/D1 plusPythonrunner andSQLiteonlinebackup. No live/private/networkauthority/paidchange. Test-first snapshotfixture, qualification before runtimefix if needed, fullregression and sourcehash preservation. One fresh native readonly reviewer T860, inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no tests/writes/private/network/delegation. Instructionscope notOSisolation. No originalrunnerstop or remoteexport/import claim.
+
+XR source/local evidence gate ACCEPT 2026-11-01T05:33:30Z: RED4→GREEN4,130Node/308Python=438tests; XR2 sixactualworkerd/Pythonrunner cases,zero restoredcollection/sourceunchanged,9hashes; XM1/XM2 badguardsdetected without productmutation; T860 finalACCEPT. XR1 metadata-countfailure retained andexplicitplatformtablefilterfixed, no weakenedapplicationoracle. Productruntime/liveauthority unchanged. NormalGit CI/merge/readback andboardclosure remain; fullmainlineincomplete.

@@ -159,3 +159,5 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 [RAL原服務接入](docs/rejection-audit-rollout.md)開始：依已提出下一步新增稽核表並更新原Worker，完整AC及期限／免費方案邊界保持。實際結果另列證據，不由source驗證推定部署成功。
 
 [RAL原服務拒絕稽核接入](docs/evidence/m1-rejection-audit-live.md)已於2026-11-01T04:51:37Z完成：原D1新增表／索引、原Worker100%、真機器GET403與D1 request_id對帳；原166commands／195firings／160journal及4grants／Access／Cron／期限保持，runner未重啟。初次非JSON及一次診斷重試保留；無付費升級，完整mainline仍incomplete。
+
+[XR隔離還原驗證](docs/restore-qualification.md)已完成[六種真本機workerd／Python runner情境、438tests及兩個mutation](docs/evidence/m1-restore-qualification.md)：恢復後零採集，保留unknown／原結果與跨快照不一致拒絕；不操作原服務。官方遠端unknown/in-flight restore與完整主線仍pending。

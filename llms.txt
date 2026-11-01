@@ -85,3 +85,5 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 - [LICENSE](https://github.com/fallrising/newclear/blob/main/LICENSE): MIT at the root. `systems/ojbquay` and `specs/fleet` are Apache-2.0 per their own `LICENSE`.
 
 - [labs/agent-office-lab](https://github.com/fallrising/newclear/blob/main/labs/agent-office-lab/README.md): **ungraded** — local-first Office lab; historical native OpenCode + Strata task and cancellation verified. Grok, Pi and the three-provider MVP remain incomplete.
+
+- [Cross-snapshot restore qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-restore-qualification.md): six isolated real workerd/Python-runner cases, no restored collection, original artifact and unknown preservation; 438 tests and two detected mutations. Local logical D1 restore only; remote unknown/in-flight restore and full mainline pending.

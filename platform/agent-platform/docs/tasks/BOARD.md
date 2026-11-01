@@ -252,4 +252,6 @@ No AP production code changes or M3. Earlier pending-resource snapshot supersede
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | in_progress | 2026-11-01T16:44:02Z | | 2026-11-01T17:11:52.045902+00:00 |
+| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | done | 2026-11-01T16:44:02Z | 2026-11-01T17:25:32.944657+00:00 | 2026-11-01T17:25:32.944657+00:00 |
+
+PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. Bounded FN05-R done; completeM3/FN07 remains open.

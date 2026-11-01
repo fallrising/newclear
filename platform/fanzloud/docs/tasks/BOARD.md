@@ -80,7 +80,7 @@ no resident URL; unknown intent retained for trusted manual investigation.
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | M3-C | Immutable AP candidate inspection/download; [contract](../specs/SPEC-M3-fixed-candidate.md) | FN05 preparation, C01–05 | done | 2026-11-01T15:14:00Z | 2026-11-01T15:47:06Z | 2026-11-01T15:47:06Z |
-| M3-R | Actual cross-vendor readonly review; source865ed05e passed, independent accepted; final docs-head CI/merge pending | FN05 | in_progress | 2026-11-01T16:40:00Z | | 2026-11-01T17:02:00Z |
+| M3-R | Actual cross-vendor readonly review; source865ed05e passed, independent accepted; PR952 merged and remotely verified | FN05 | done | 2026-11-01T16:40:00Z | 2026-11-01T17:25:32.944657+00:00 | 2026-11-01T17:25:32.944657+00:00 |
 
 M3-C independently ACCEPT_FIXED_CANDIDATE_C01_C05; [PR941](https://github.com/fallrising/newclear/pull/941)
 merged2026-11-01T15:47:06Z as `c7dfdde57c017ea254eb9effa670e7788339bc4b`.
@@ -94,4 +94,6 @@ Historical candidate-only checkpoint: T-0449 then awaited approval; approved act
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | in_progress | 2026-11-01T16:44:02Z | | 2026-11-01T17:11:52.045902+00:00 |
+| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | done | 2026-11-01T16:44:02Z | 2026-11-01T17:25:32.944657+00:00 | 2026-11-01T17:25:32.944657+00:00 |
+
+PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. Bounded FN05-R done; completeM3/FN07 remains open.

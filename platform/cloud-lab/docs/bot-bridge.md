@@ -41,7 +41,7 @@ status無ACK時回unconfirmed且不聯網；沒有本地ID時回not_found。已�
 
 不含list／cancel／任意recipe／agent原生run或聊天發訊息；既有executor與工作驗收authority保留。沒有自動retention、state backup、總請求budget或用量熔斷；新ID會增長本機journal，受信任工具host需限制頻率，server仍執行既有單active／quota。SQLite／FLOCK是同機合作程序的邊界，不是阻擋相同OS使用者的sandbox。保留state才能恢復原請求。
 
-[本機證據](evidence/m1-bot-bridge.md)覆蓋RGR、SQLite、真實HTTP與OS collector；尚未安裝到任何bot service、呼叫Grok、續bot授權或驗證live機器連線。既有HL資產API500仍是獨立未完成任務。
+[BC本機證據](evidence/m1-bot-bridge.md)記錄當時RGR、SQLite、HTTP與OS collector。後續[獨立Grok工具接線](grok-connection.md)、[真實bot閉環](evidence/m1-bot-activation-live.md)及[HL窗口修正](evidence/m1-health-schedule-window-live.md)已完成相應子集；原HL pending是歷史狀態。bot窗口已到期，不宣稱目前可提交或模型對話已驗。近期順序見[方向調整](direction-review.md)。
 
 後續[MT MCP stdio wrapper](mcp-stdio.md)提供固定tools/list/call及有界child；BC CLI本身仍是單次JSON程序，持久state／授權及恢復語義不變。
 

@@ -11,7 +11,7 @@ Worktree base `935ffbc1` (HAI tree identical to the proposal merge `cc7931dd`). 
 | RWK-AC-02 | `TestDispatchRun_RedispatchFromDeveloping` (after rework, after Failed Run, Succeeded-without-Candidate abandonment; strict clock order with retryable refusal, same-key replay, regressed clock; active Run; injected CancelRequested+Failed, NeedsReconcile, OutcomeUnknown and blocker; retry_of_run_id; Review phase) | Pass |
 | RWK-AC-03 | `TestCurrentCandidate_LatestRunOnly` (older-Run Candidate stale for human evidence/review, fixture review, approval, RequestQA, completion, RequestRework, preparation and coverage GETs, for both its original subject and an impersonated current-version subject; SubmitCandidate on an older Run or a second Candidate refused; material-index and Run outputs keep both histories) | Pass |
 | RWK-AC-04 | `TestReworkLoop_CandidateBCannotUseCandidateAEvidence` (real SQLite/Fake/HTTP: ChangesRequested → rework → Run 2 → Candidate B over HTTP; Review-phase completion `stale_subject`; producer-class reviewer and forged principal refused; QA with only A-bound Evidence and with one of two ACs → `done_gate_unsatisfied` exactly `evidence_missing`; explicit completion joins only B's two Evidence; A verdict stays `Rejected`; restart replays the completion result with unchanged history) | Pass |
-| RWK-AC-05 | Gates, review and delivery below; Git/CI/merge/readback recorded in BOARD and the desk task | Pending delivery |
+| RWK-AC-05 | Gates, review and delivery below; [#945](https://github.com/fallrising/newclear/pull/945) merged as `053e2bcd`, CI and readback in BOARD HRWK | Pass |
 
 "No domain writes" is asserted by snapshotting every table except `command_results` and `idempotency_records`,
 which grow by exactly one row for recordable refusals and not at all for 400/404, permission and human-report refusals.
@@ -56,3 +56,12 @@ AC-06 needs M6. If an accepted input ever changed while an item was in Review/QA
 `stale_subject` (approved wording; unreachable while policy is immutable and only Draft accepts specifications).
 No completion UI, full M2, full detail/history or SUCCESS AC-02..04 claim; no migration, dependency, provider,
 release or deploy.
+
+## CI timeout note
+
+The first exact-head backend job failed with `panic: test timed out after 10m0s` in the `service` package race run;
+goroutines were running SQLite work, not deadlocked. Base `935ffbc1` versus head race timings in the pinned container
+were 436.4 s and 462.7 s (+26 s, the four new oracles). The single re-run of the unchanged head passed (377.5 s).
+The closeout PR's docs-only head (code identical to main) then failed the same way (non-race `service` 44.8 s versus
+about 23 s on normal runners), so the limit, not this slice, was the recurring cause. `scripts/check-backend.sh` now
+passes `-timeout 15m` to both test runs; the tested set and assertions are unchanged and the 20-minute job cap remains.

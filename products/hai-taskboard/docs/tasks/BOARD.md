@@ -425,7 +425,7 @@ implements it after owner approval. UI, ReopenWorkItem, full detail/history, mig
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | HRWKP | Propose and review rework/redispatch/current-Candidate contract | RWK-PLAN-01..03 | done | 2026-11-01T14:15:00Z | 2026-11-01T15:03:21Z | 2026-11-01T15:04:25Z |
-| HRWK | Implement approved rework loop: RequestRework, settled redispatch, latest-Run current Candidate | RWK-AC-01..05; H02 support | in_progress | 2026-11-01T15:07:09Z | — | 2026-11-01T15:26:00Z |
+| HRWK | Implement approved rework loop: RequestRework, settled redispatch, latest-Run current Candidate | RWK-AC-01..05; H02 support | done | 2026-11-01T15:07:09Z | 2026-11-01T16:34:10Z | 2026-11-01T16:35:00Z |
 
 RWK-PLAN-01 maps the remaining M2/Done gaps to source with evidence. RWK-PLAN-02 fixes one bounded contract,
 acceptance and the minimal owner decisions. RWK-PLAN-03 disposes Claude review, passes document checks and
@@ -436,3 +436,11 @@ completes Git/CI/readback/ledger delivery; HRWKP closed with proposal [#926](htt
 merged; the waiting point above is historical. [Normative contract](../sdd/rework-loop.md) governs implementation.
 Source 935ffbc1 (HAI identical to cc7931dd); no HAI open PR. Root-only implementation, no worker; Claude code review
 600 s plus one follow-up on actual revisions; CI 20-minute rounds. No UI, provider, dependency, migration, release or deploy.
+
+2026-11-01T16:34:10Z: [#945](https://github.com/fallrising/newclear/pull/945) merged normally as `053e2bcd63cedb36e463c9b8f640fd2831101f23`.
+Reviewed head `1f0140656c387d5a3c555680cc9d7c953bb0dbe8` passed HAI CI 41324340395 (backend after one re-run, web) and
+Project success 41324340413; remote HAI files match the reviewed head. The first backend attempt hit Go's default
+10-minute package timeout in `internal/application/service` race on a slow runner (non-race also 1.65× slower);
+measured base→head race cost +26 s (436→463 s locally) and the re-run took 377.5 s, so the failure was retained and
+re-run once without code change. That package sits near the default timeout independent of this slice. HRWK end uses
+the merge time. RWK-AC-01..05 accepted for this backend slice; full M2, completion UI and SUCCESS AC-02..04 remain open.

@@ -18,13 +18,18 @@ class SubscriptionFixture(PlatformFixture):
 
 
 class SubscriptionTests(SubscriptionFixture):
+    backend = "claude-subscription"
+    model_ref = "claude-subscription:claude-opus-5-5"
+    driver_argument = "subscription"
+    other_driver_argument = "codex_subscription"
+
     def test_ex01_subscription_profile_and_claim(self):
         self.real_profile()
         response = self.post(
             "/agent-profiles",
             {
                 "name": "Claude subscription",
-                "backend": "claude-subscription",
+                "backend": self.backend,
                 "deadline_seconds": 600,
                 "verification": {
                     "mode": "commands",
@@ -41,7 +46,7 @@ class SubscriptionTests(SubscriptionFixture):
         )
         self.assertEqual(response.status_code, 201, response.text)
         profile = response.json()
-        self.assertEqual(profile["model_ref"], "claude-subscription:claude-opus-5-5")
+        self.assertEqual(profile["model_ref"], self.model_ref)
         self.assertTrue(profile["capabilities"]["cancel"])
         self.assertFalse(profile["capabilities"]["pause"])
         self.payload["profile_revision"] = profile["id"]
@@ -49,10 +54,13 @@ class SubscriptionTests(SubscriptionFixture):
         self.assertEqual(run["execution_mode"], "cocoon-external")
         self.assertIsNone(Worker(self.db).claim())
         self.assertIsNone(Worker(self.db, connector=object()).claim())
-        worker = Worker(self.db, connector=object(), subscription=object())
+        self.assertIsNone(
+            Worker(self.db, connector=object(), **{self.other_driver_argument: object()}).claim()
+        )
+        worker = Worker(self.db, connector=object(), **{self.driver_argument: object()})
         claim = worker.claim()
         self.assertEqual(str(claim["run_id"]), run["id"])
-        self.assertEqual(claim["backend"], "claude-subscription")
+        self.assertEqual(claim["backend"], self.backend)
         with worker.owned(claim) as (_, owned):
             self.assertEqual(owned["generation"], claim["generation"])
             self.assertIsNotNone(owned["lease_until"])
@@ -70,9 +78,16 @@ class SubscriptionTests(SubscriptionFixture):
                     "/agent-profiles",
                     {
                         "name": "invalid",
-                        "backend": "claude-subscription",
+                        "backend": self.backend,
                         "deadline_seconds": 600,
                         **fields,
                     },
                 )
                 self.assertIn(reply.status_code, (409, 422))
+
+
+class CodexSubscriptionTests(SubscriptionTests):
+    backend = "codex-subscription"
+    model_ref = "codex-subscription:gpt-6.1-sol"
+    driver_argument = "codex_subscription"
+    other_driver_argument = "subscription"

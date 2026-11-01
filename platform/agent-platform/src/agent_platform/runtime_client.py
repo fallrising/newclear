@@ -9,7 +9,7 @@ from psycopg.types.json import Jsonb
 from agent_platform_m0.transport import HTTP, ProbeError
 
 from .connector_journal import private_file
-from .domain import Problem
+from .domain import SUBSCRIPTION_BACKENDS, Problem
 
 
 class RuntimeClient:
@@ -141,12 +141,12 @@ class RuntimeClient:
                 "deadline": run["deadline"].isoformat(),
                 "require_approval": run.get("require_approval", False),
                 "model_transport": False
-                if run.get("backend") == "claude-subscription"
+                if run.get("backend") in SUBSCRIPTION_BACKENDS
                 else getattr(self, "model_transport", False),
                 "tool_transport": run.get("tool_transport", False),
                 **(
                     {"external_workspace": True}
-                    if run.get("backend") == "claude-subscription"
+                    if run.get("backend") in SUBSCRIPTION_BACKENDS
                     else {}
                 ),
                 "egress_policy_sha256": run.get("egress_policy_sha256"),

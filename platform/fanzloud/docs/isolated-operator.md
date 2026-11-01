@@ -1,4 +1,4 @@
-# Private isolated-task entry (M1)
+# Private isolated-task entry
 
 The verified route is [M1 isolated acceptance](acceptance/M1-isolated.md). Operator
 workflow: open the configured private HTTPS origin, log in, select the registered
@@ -48,3 +48,21 @@ calling a provider. Keep their receipts distinct. The accepted live run is not r
 M1 does not provide deployment automation, arbitrary project onboarding, a second
 vendor or durable Fanzloud recovery. Those limits are visible in SUCCESS/SDD; installed
 libraries, a passing CLI or a merged PR alone do not establish owner readiness.
+
+
+## M2 Codex configuration (live acceptance pending)
+
+The same Web catalog now admits `codex-subscription` as well as Claude. Register a
+Codex profile with the same bounded verification/deadline contract; the exact model
+reference is `codex-subscription:gpt-6.1-sol`. Its private `CODEX_SUBSCRIPTION_CONFIG`
+contains `executable`, `model_catalog_json`, `state_dir`, `connector_origin` and
+`connector_token_file`. The driver pins official CLI0.166.0 and the qualified unmodified
+model-catalog bytes; mismatches fail closed. Existing trusted ChatGPT login is required,
+API-key environments are refused. A fresh private CLI home references that login;
+no credentials or built-in host execution environment are exposed to repository tools.
+
+Once AP returns a confirmed run ID, the operator may explicitly submit another task
+and select either recent task. An unknown submission remains locked; a late response
+for A cannot replace selected B. Resource admission remains AP's responsibility and
+currently stays at one VM. Code availability does not establish simultaneous isolation
+or second-vendor live acceptance; see the M2 acceptance record when available.

@@ -225,3 +225,13 @@ EX-01 contract, EX-02 real isolated workspace and EX-03 real subscription coding
 are pending; no whole-platform or Fanzloud Web completion claim.
 
 T-0447 EX01–03 have actual external-workspace evidence in [Fanzloud M1 acceptance](../fanzloud/docs/acceptance/M1-isolated.md): one official subscription CLI repair, fixed-base checks/diff, secret/egress/sequence isolation and observed cleanup. This does not close the remaining Agent Platform mainline or M4.
+
+## T-0442 M2 — 2026-11-01 active scope
+
+Owner requests the approved second-vendor/two-task milestone. [M2 contract](../fanzloud/docs/specs/SPEC-M2-two-vendors.md) fixes scope and checks before implementation. Codex tool/credential separation and concurrent isolation are NOT_RUN. Existing host authority remains one4CPU/4GiB VM and coding<=600s; parallel2 requires separate approval. No M3, API spend, public deployment or release.
+
+M2 checkpoint2026-11-01: sourcea51a8663 actual Codex Web run142e9aee passed
+fixed-base repair/check/download and confirmed cleanup; code and single-live independent
+reviews accepted, native and hosted CI green. Two simultaneous workspaces/current shared
+Claude route remain pending explicit resource approval. max_claims remains1; temporary
+services stopped, no resident URL, no M3/AC05 or full platform completion claim.

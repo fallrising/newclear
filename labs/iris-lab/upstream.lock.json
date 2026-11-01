@@ -1,0 +1,43 @@
+{
+  "lock_version": 1,
+  "kind": "research-baseline",
+  "checked_at": "2026-10-24",
+  "engine": {
+    "repository": "https://github.com/antirez/iris.c",
+    "commit": "ff97831282ecc6691710828604165da84b0616f5",
+    "license": "MIT",
+    "source_reviewed": true,
+    "binary_built": false,
+    "binary_sha256": null
+  },
+  "primary_model": {
+    "id": "flux2-klein-4b-distilled",
+    "repository": "black-forest-labs/FLUX.2-klein-4B",
+    "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "metadata_source": "https://huggingface.co/api/models/black-forest-labs/FLUX.2-klein-4B",
+    "license": "Apache-2.0",
+    "format": "diffusers-directory-safetensors",
+    "required_components": [
+      "transformer",
+      "text_encoder",
+      "tokenizer",
+      "vae"
+    ],
+    "weights_downloaded": false,
+    "weights_verified": false,
+    "file_manifest_sha256": null,
+    "note": "Revision metadata verified only. M1 must enumerate exact files, verify sizes and source digests (SHA-256 for LFS, Git blob OID for ordinary Git files), and record local SHA-256 for every file in a separate manifest. Upstream resolve/main downloader does not satisfy this revision pin."
+  },
+  "planned_primary_profile": {
+    "os": "macOS",
+    "architecture": "arm64",
+    "backend": "metal",
+    "mode": "txt2img",
+    "width": 512,
+    "height": 512,
+    "steps": 4,
+    "guidance": 1.0,
+    "seed": 42,
+    "runtime_verified": false
+  }
+}

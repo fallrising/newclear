@@ -25,6 +25,8 @@
 | D-17 | Playwright 鎖定 1.56.1（Chromium revision 1194） | 與預裝瀏覽器一致；使用者決定（Q-12） | Accepted（使用者 2026-09-23） |
 | D-18 | Phase 2 由 agent 逐里程碑細化，每個里程碑開 PR 並自行合併，不停下來詢問；遇到需要使用者決定的事，採文件中的預設並記為 Q-xx | 使用者 2026-09-23 指示 | Accepted（使用者 2026-09-23） |
 
+D-16 後續 #387：W7 已 VERIFIED，另立 [本地 pixel oracle](11-visual-oracle.md)；三個工程 baseline 與獨立 config 不回改 W0–W7 的歷史驗收，也不冒稱 root CI 已有 pixel gate。
+
 ## 2. 對 v1 的修訂
 
 v2 批准並落地後，下列 v1 條文被修訂。其餘 v1 條文不變。

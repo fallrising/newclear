@@ -59,11 +59,11 @@
           "additionalProperties": false,
           "required": ["mode", "port"],
           "properties": {
-            "mode": { "type": "string", "enum": ["public", "access", "private"] },
+            "mode": { "type": "string", "enum": ["public", "access"] },
             "hostname": {
               "type": "string",
               "maxLength": 253,
-              "description": "FQDN for public/access. For private, defaults to <name>.fleet.internal (not a public DNS name)."
+              "description": "FQDN for public/access; defaults to <name>.<FLEET_BASE_DOMAIN>."
             },
             "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
             "healthPath": {

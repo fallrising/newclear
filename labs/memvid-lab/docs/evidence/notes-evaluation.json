@@ -1,0 +1,2108 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-29T17:08:37.195880+00:00",
+  "evaluation_completed": true,
+  "corpus_sha256": "a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970",
+  "provenance": "公開 synthetic 合成繁體中文個人筆記與預先指定的相關性判斷；人物、活動、物件標籤與地點均為虛構，不代表真實私人資料、專業建議或實際流量。全部筆記是互相獨立的當前事實；查詢與 gold labels 在任何檢索執行前人工固定，未依檢索結果調整。",
+  "sources": {
+    "notes_eval.py": "012591ee6d53892792c040845d07c11bb813f2ceaed04dd7028dec19668d3b4b",
+    "offline.py": "dc325a1466950893319d8fd349538d62ce6e47f491bcf648e06ab86dc2183b9c",
+    "scenarios.py": "d6a368672473a6ae3eb666dd0d90e39ed743209fec5723b7ca17b5428296456d",
+    "requirements.lock": "46982859187a17fdc10c405074e49b14b27fddcefb411ba597f9186b4091dbcd"
+  },
+  "python": "3.12.14",
+  "platform": "Linux x86_64",
+  "sdk_version": "2.0.160",
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "native_core_version": "2.0.140 (checked in every worker)",
+  "measurement_conditions": "Shared Linux host; single sequential evaluation; no exclusive CPU/OS cache control; build timings include explicit index rebuild",
+  "source_check": "Exact full SDK-rendered NFKC/whitespace-normalized text and known metadata; URI/frame checked against input manifest, not raw-byte storage round-trip",
+  "quality": [
+    {
+      "strategy": "native",
+      "queries": [
+        {
+          "id": "q01",
+          "category": "exact",
+          "text": "桂花烏龍收納",
+          "relevant_uris": [
+            "mv2://notes/n01"
+          ],
+          "transformed_query": "桂花烏龍收納",
+          "hits": [
+            {
+              "uri": "mv2://notes/n01",
+              "frame_id": 0,
+              "score": 5.043164253234863,
+              "text": "桂花烏龍收納 桂花烏龍放在廚房第二層抽屜的圓形白鐵罐。罐蓋貼著橘色圓點,旁邊的方罐裝紅茶。 title: 桂花烏龍收納 uri: mv2://notes/n01 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n01"
+          ]
+        },
+        {
+          "id": "q02",
+          "category": "exact",
+          "text": "海邊散步取書",
+          "relevant_uris": [
+            "mv2://notes/n02"
+          ],
+          "transformed_query": "海邊散步取書",
+          "hits": [
+            {
+              "uri": "mv2://notes/n02",
+              "frame_id": 1,
+              "score": 4.904397964477539,
+              "text": "海邊散步取書 圖書館預約的《海邊散步》已到館,取書位置是二樓自助取書櫃的第六格。借書證放在灰色帆布袋內袋。 title: 海邊散步取書 uri: mv2://notes/n02 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n02"
+          ]
+        },
+        {
+          "id": "q03",
+          "category": "exact",
+          "text": "單車保養收據",
+          "relevant_uris": [
+            "mv2://notes/n03"
+          ],
+          "transformed_query": "單車保養收據",
+          "hits": [
+            {
+              "uri": "mv2://notes/n03",
+              "frame_id": 2,
+              "score": 4.972569465637207,
+              "text": "單車保養收據 這次單車保養更換後輪內胎,費用是二百八十元。紙本收據放在玄關藍色資料夾,前輪沒有更換。 title: 單車保養收據 uri: mv2://notes/n03 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n03"
+          ]
+        },
+        {
+          "id": "q04",
+          "category": "exact",
+          "text": "陶藝體驗報到",
+          "relevant_uris": [
+            "mv2://notes/n04"
+          ],
+          "transformed_query": "陶藝體驗報到",
+          "hits": [
+            {
+              "uri": "mv2://notes/n04",
+              "frame_id": 3,
+              "score": 4.972569465637207,
+              "text": "陶藝體驗報到 陶藝體驗預約在十一月八日下午兩點,地點是河岸工房。報到要帶紙本確認單;圍裙由工房提供。 title: 陶藝體驗報到 uri: mv2://notes/n04 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n04"
+          ]
+        },
+        {
+          "id": "q05",
+          "category": "exact",
+          "text": "羅勒花盆標籤",
+          "relevant_uris": [
+            "mv2://notes/n05"
+          ],
+          "transformed_query": "羅勒花盆標籤",
+          "hits": [
+            {
+              "uri": "mv2://notes/n05",
+              "frame_id": 4,
+              "score": 4.972569465637207,
+              "text": "羅勒花盆標籤 陽台右側長方盆種的是羅勒,白色圓盆種的是薄荷。羅勒的木牌上畫了三角形,兩盆沒有交換位置。 title: 羅勒花盆標籤 uri: mv2://notes/n05 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n05"
+          ]
+        },
+        {
+          "id": "q06",
+          "category": "exact",
+          "text": "山城住宿備忘",
+          "relevant_uris": [
+            "mv2://notes/n06"
+          ],
+          "transformed_query": "山城住宿備忘",
+          "hits": [
+            {
+              "uri": "mv2://notes/n06",
+              "frame_id": 5,
+              "score": 4.972569465637207,
+              "text": "山城住宿備忘 山城旅行訂了兩晚的松影客棧,房間有吹風機,沒有洗衣機。行李清單中的備用布袋已放進側袋。 title: 山城住宿備忘 uri: mv2://notes/n06 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n06"
+          ]
+        },
+        {
+          "id": "q07",
+          "category": "partial",
+          "text": "洗衣袋",
+          "relevant_uris": [
+            "mv2://notes/n07"
+          ],
+          "transformed_query": "洗衣袋",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q08",
+          "category": "partial",
+          "text": "紙膠帶",
+          "relevant_uris": [
+            "mv2://notes/n08"
+          ],
+          "transformed_query": "紙膠帶",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q09",
+          "category": "partial",
+          "text": "野餐墊",
+          "relevant_uris": [
+            "mv2://notes/n09"
+          ],
+          "transformed_query": "野餐墊",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q10",
+          "category": "partial",
+          "text": "電影票",
+          "relevant_uris": [
+            "mv2://notes/n10"
+          ],
+          "transformed_query": "電影票",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q11",
+          "category": "partial",
+          "text": "替換筆芯",
+          "relevant_uris": [
+            "mv2://notes/n11"
+          ],
+          "transformed_query": "替換筆芯",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q12",
+          "category": "partial",
+          "text": "展覽圖錄",
+          "relevant_uris": [
+            "mv2://notes/n12"
+          ],
+          "transformed_query": "展覽圖錄",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q13",
+          "category": "paraphrase",
+          "text": "外語練習的音檔存在哪個裝置與資料夾？",
+          "relevant_uris": [
+            "mv2://notes/n13"
+          ],
+          "transformed_query": "外語練習的音檔存在哪個裝置與資料夾？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q14",
+          "category": "paraphrase",
+          "text": "我偏好的那款咖啡是誰烘的，屬於哪種焙度？",
+          "relevant_uris": [
+            "mv2://notes/n14"
+          ],
+          "transformed_query": "我偏好的那款咖啡是誰烘的，屬於哪種焙度？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q15",
+          "category": "paraphrase",
+          "text": "家裡不用的玻璃容器最後送去哪裡？",
+          "relevant_uris": [
+            "mv2://notes/n15"
+          ],
+          "transformed_query": "家裡不用的玻璃容器最後送去哪裡？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q16",
+          "category": "paraphrase",
+          "text": "做布袋剩下的黃線和樣板分別收在哪裡？",
+          "relevant_uris": [
+            "mv2://notes/n16"
+          ],
+          "transformed_query": "做布袋剩下的黃線和樣板分別收在哪裡？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q17",
+          "category": "paraphrase",
+          "text": "合奏排練的聲音紀錄放在哪裡，叫什麼名字？",
+          "relevant_uris": [
+            "mv2://notes/n17"
+          ],
+          "transformed_query": "合奏排練的聲音紀錄放在哪裡，叫什麼名字？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q18",
+          "category": "paraphrase",
+          "text": "哪些預約明確要求攜帶印出來的確認文件？",
+          "relevant_uris": [
+            "mv2://notes/n04",
+            "mv2://notes/n19"
+          ],
+          "transformed_query": "哪些預約明確要求攜帶印出來的確認文件？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q19",
+          "category": "mixed",
+          "text": "Photo Walk P7 幾點在哪裡集合？",
+          "relevant_uris": [
+            "mv2://notes/n19"
+          ],
+          "transformed_query": "Photo Walk P7 幾點在哪裡集合？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q20",
+          "category": "mixed",
+          "text": "Archive-2 SSD 備份了哪個月份的相簿？",
+          "relevant_uris": [
+            "mv2://notes/n20"
+          ],
+          "transformed_query": "Archive-2 SSD 備份了哪個月份的相簿？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q21",
+          "category": "mixed",
+          "text": "Luma R2 暖光亮度記了多少 %？",
+          "relevant_uris": [
+            "mv2://notes/n21"
+          ],
+          "transformed_query": "Luma R2 暖光亮度記了多少 %？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q22",
+          "category": "mixed",
+          "text": "NoteBox 的 CSV 使用哪種編碼與欄位順序？",
+          "relevant_uris": [
+            "mv2://notes/n22"
+          ],
+          "transformed_query": "NoteBox 的 CSV 使用哪種編碼與欄位順序？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q23",
+          "category": "mixed",
+          "text": "Sketch 101 的 replay 可以看幾天？",
+          "relevant_uris": [
+            "mv2://notes/n23"
+          ],
+          "transformed_query": "Sketch 101 的 replay 可以看幾天？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q24",
+          "category": "mixed",
+          "text": "Star Orchard 的繁中規則書在哪裡？",
+          "relevant_uris": [
+            "mv2://notes/n24"
+          ],
+          "transformed_query": "Star Orchard 的繁中規則書在哪裡？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q25",
+          "category": "unanswerable",
+          "text": "《海邊散步》續借逾期一天要收多少費用？",
+          "relevant_uris": [],
+          "transformed_query": "《海邊散步》續借逾期一天要收多少費用？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q26",
+          "category": "unanswerable",
+          "text": "這次更換的單車後輪內胎保固到哪一天？",
+          "relevant_uris": [],
+          "transformed_query": "這次更換的單車後輪內胎保固到哪一天？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q27",
+          "category": "unanswerable",
+          "text": "山城旅行回程車站的末班火車幾點開？",
+          "relevant_uris": [],
+          "transformed_query": "山城旅行回程車站的末班火車幾點開？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q28",
+          "category": "unanswerable",
+          "text": "天文社觀星夜預定用哪一款望遠鏡？",
+          "relevant_uris": [],
+          "transformed_query": "天文社觀星夜預定用哪一款望遠鏡？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q29",
+          "category": "unanswerable",
+          "text": "合唱團鋼琴下一次調音日期是哪天？",
+          "relevant_uris": [],
+          "transformed_query": "合唱團鋼琴下一次調音日期是哪天？",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q30",
+          "category": "unanswerable",
+          "text": "遠端氣象站的雨量資料每隔幾分鐘更新？",
+          "relevant_uris": [],
+          "transformed_query": "遠端氣象站的雨量資料每隔幾分鐘更新？",
+          "hits": [],
+          "ranked_uris": []
+        }
+      ],
+      "metrics": {
+        "query_count": 30,
+        "answerable_count": 24,
+        "no_answer_count": 6,
+        "recall_at_5": 0.25,
+        "mrr_at_5": 0.25,
+        "source_precision": 1.0,
+        "no_answer_false_return_rate": 0.0,
+        "source_integrity": 1.0,
+        "relevant_return_count": 6,
+        "return_count": 6,
+        "raw_hit_count": 6,
+        "valid_raw_hit_count": 6
+      },
+      "source_manifest": {
+        "0": {
+          "uri": "mv2://notes/n01",
+          "title": "桂花烏龍收納",
+          "text": "桂花烏龍收納\n桂花烏龍放在廚房第二層抽屜的圓形白鐵罐。罐蓋貼著橘色圓點，旁邊的方罐裝紅茶。"
+        },
+        "1": {
+          "uri": "mv2://notes/n02",
+          "title": "海邊散步取書",
+          "text": "海邊散步取書\n圖書館預約的《海邊散步》已到館，取書位置是二樓自助取書櫃的第六格。借書證放在灰色帆布袋內袋。"
+        },
+        "2": {
+          "uri": "mv2://notes/n03",
+          "title": "單車保養收據",
+          "text": "單車保養收據\n這次單車保養更換後輪內胎，費用是二百八十元。紙本收據放在玄關藍色資料夾，前輪沒有更換。"
+        },
+        "3": {
+          "uri": "mv2://notes/n04",
+          "title": "陶藝體驗報到",
+          "text": "陶藝體驗報到\n陶藝體驗預約在十一月八日下午兩點，地點是河岸工房。報到要帶紙本確認單；圍裙由工房提供。"
+        },
+        "4": {
+          "uri": "mv2://notes/n05",
+          "title": "羅勒花盆標籤",
+          "text": "羅勒花盆標籤\n陽台右側長方盆種的是羅勒，白色圓盆種的是薄荷。羅勒的木牌上畫了三角形，兩盆沒有交換位置。"
+        },
+        "5": {
+          "uri": "mv2://notes/n06",
+          "title": "山城住宿備忘",
+          "text": "山城住宿備忘\n山城旅行訂了兩晚的松影客棧，房間有吹風機，沒有洗衣機。行李清單中的備用布袋已放進側袋。"
+        },
+        "6": {
+          "uri": "mv2://notes/n07",
+          "title": "外套清洗紀錄",
+          "text": "外套清洗紀錄\n米色外套清洗時用了最大的洗衣袋。洗衣袋現在掛在浴室門後，深藍色小袋仍放在洗衣籃裡。"
+        },
+        "7": {
+          "uri": "mv2://notes/n08",
+          "title": "包裝材料",
+          "text": "包裝材料\n生日禮物包裝剩下的星星紙膠帶收進客廳矮櫃左抽屜。透明膠帶在書桌上，兩種膠帶分開收納。"
+        },
+        "8": {
+          "uri": "mv2://notes/n09",
+          "title": "週末野餐用品",
+          "text": "週末野餐用品\n綠色野餐墊已交給活動主辦的服務台保管，當天從北側入口領取。家裡留下的是灰色地墊。"
+        },
+        "9": {
+          "uri": "mv2://notes/n10",
+          "title": "週五電影",
+          "text": "週五電影\n週五晚上的電影票是九排十二號，場次開始時間為七點二十分。取票用的紙本代碼夾在橘色記事本中。"
+        },
+        "10": {
+          "uri": "mv2://notes/n11",
+          "title": "筆芯整理",
+          "text": "筆芯整理\n黑色鋼珠筆的替換筆芯在書桌右側透明盒，盒蓋貼著黑色方塊。藍色筆芯在另一個有藍點的小盒。"
+        },
+        "11": {
+          "uri": "mv2://notes/n12",
+          "title": "展覽帶回的書",
+          "text": "展覽帶回的書\n《光的房間》展覽圖錄放在客廳書架第三層，封面是銀灰色。展覽摺頁另放進白色文件袋。"
+        },
+        "12": {
+          "uri": "mv2://notes/n13",
+          "title": "日語課作業",
+          "text": "日語課作業\n日語課的聽力作業錄音存在平板的「語言練習」資料夾，檔名是「第三課慢速」。課堂講義則留在綠色活頁夾。"
+        },
+        "13": {
+          "uri": "mv2://notes/n14",
+          "title": "咖啡試飲",
+          "text": "咖啡試飲\n上次試飲最喜歡的咖啡豆來自霧丘烘焙，包裝標示榛果與可可風味。那包豆子的烘焙程度是中焙。"
+        },
+        "14": {
+          "uri": "mv2://notes/n15",
+          "title": "空玻璃瓶去向",
+          "text": "空玻璃瓶去向\n家中的空玻璃瓶已送到社區西門旁的回收點。紙箱這次沒有一起搬走，仍放在儲藏室。"
+        },
+        "15": {
+          "uri": "mv2://notes/n16",
+          "title": "縫紉材料位置",
+          "text": "縫紉材料位置\n做帆布收納袋剩下的黃色棉線收在紅色針線盒底層。袋子的紙樣折好放在盒蓋下。"
+        },
+        "16": {
+          "uri": "mv2://notes/n17",
+          "title": "練琴錄音備忘",
+          "text": "練琴錄音備忘\n木笛合奏的彩排錄音存在隨身錄音筆，名稱是「窗邊下午」。正式演出尚未錄音，這份只有彩排內容。"
+        },
+        "17": {
+          "uri": "mv2://notes/n18",
+          "title": "共享廚房筆記",
+          "text": "共享廚房筆記\n這次共享廚房聚會做了番茄麵，使用的是白色大鍋。聚會結束後，大鍋已歸還三樓器材櫃。"
+        },
+        "18": {
+          "uri": "mv2://notes/n19",
+          "title": "Photo Walk 報到",
+          "text": "Photo Walk 報到\nPhoto Walk P7 的集合時間是上午九點十分，集合處為南門鐘樓。這個預約報到要帶紙本確認單，現場會發借用的識別背帶。"
+        },
+        "19": {
+          "uri": "mv2://notes/n20",
+          "title": "SSD 備份紀錄",
+          "text": "SSD 備份紀錄\n相片備份存到標籤為 Archive-2 的 SSD，完成的是十月份相簿。連接線為 USB-C，SSD 收在書桌下方的防震包。"
+        },
+        "20": {
+          "uri": "mv2://notes/n21",
+          "title": "家用設備標籤",
+          "text": "家用設備標籤\n書房的閱讀燈型號是 Luma R2，暖光亮度記錄為 40%。客廳的同系列燈是 Luma R1，這次沒有記錄其亮度。"
+        },
+        "21": {
+          "uri": "mv2://notes/n22",
+          "title": "練習專案匯出",
+          "text": "練習專案匯出\n練習專案 NoteBox 的 CSV 匯出使用 UTF-8 編碼，欄位順序是 title、date、body。這是本機練習資料，不含帳號或聯絡資訊。"
+        },
+        "22": {
+          "uri": "mv2://notes/n23",
+          "title": "線上工作坊",
+          "text": "線上工作坊\nSketch 101 工作坊在十一月十二日 19:30 開始，報名方案包含活動後七天內可觀看的 replay。教材以 PDF 提供。"
+        },
+        "23": {
+          "uri": "mv2://notes/n24",
+          "title": "桌遊收藏",
+          "text": "桌遊收藏\n桌遊 Star Orchard 的繁中規則書收在盒蓋內側，遊戲人數標示為 2–4 人。擴充牌裝在獨立的紫色布袋。"
+        }
+      },
+      "by_category": {
+        "exact": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "source_precision": 1.0,
+          "no_answer_false_return_rate": null,
+          "source_integrity": 1.0,
+          "relevant_return_count": 6,
+          "return_count": 6,
+          "raw_hit_count": 6,
+          "valid_raw_hit_count": 6
+        },
+        "mixed": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 0.0,
+          "mrr_at_5": 0.0,
+          "source_precision": null,
+          "no_answer_false_return_rate": null,
+          "source_integrity": null,
+          "relevant_return_count": 0,
+          "return_count": 0,
+          "raw_hit_count": 0,
+          "valid_raw_hit_count": 0
+        },
+        "paraphrase": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 0.0,
+          "mrr_at_5": 0.0,
+          "source_precision": null,
+          "no_answer_false_return_rate": null,
+          "source_integrity": null,
+          "relevant_return_count": 0,
+          "return_count": 0,
+          "raw_hit_count": 0,
+          "valid_raw_hit_count": 0
+        },
+        "partial": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 0.0,
+          "mrr_at_5": 0.0,
+          "source_precision": null,
+          "no_answer_false_return_rate": null,
+          "source_integrity": null,
+          "relevant_return_count": 0,
+          "return_count": 0,
+          "raw_hit_count": 0,
+          "valid_raw_hit_count": 0
+        },
+        "unanswerable": {
+          "query_count": 6,
+          "answerable_count": 0,
+          "no_answer_count": 6,
+          "recall_at_5": null,
+          "mrr_at_5": null,
+          "source_precision": null,
+          "no_answer_false_return_rate": 0.0,
+          "source_integrity": null,
+          "relevant_return_count": 0,
+          "return_count": 0,
+          "raw_hit_count": 0,
+          "valid_raw_hit_count": 0
+        }
+      },
+      "costs": {
+        "write_seal_seconds": 2.6597702429862693,
+        "rebuild_seconds": 0.055094868992455304,
+        "total_seconds": 2.7148651119787246,
+        "file_bytes": 217039,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "memory_sha256": "421b3320e19cbe55d2a336878621ec012a58f57aac736175a7597bafda130566",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    },
+    {
+      "strategy": "cjk_bigrams",
+      "queries": [
+        {
+          "id": "q01",
+          "category": "exact",
+          "text": "桂花烏龍收納",
+          "relevant_uris": [
+            "mv2://notes/n01"
+          ],
+          "transformed_query": "z65367d0d z684282b1 z70cf9f8d z82b170cf z9f8d6536",
+          "hits": [
+            {
+              "uri": "mv2://notes/n01",
+              "frame_id": 0,
+              "score": 14.774360656738281,
+              "text": "桂花烏龍收納 桂花烏龍放在廚房第二層抽屜的圓形白鐵罐。罐蓋貼著橘色圓點,旁邊的方罐裝紅茶。 Lab CJK index: z4e8c5c64 z57135f62 z57139ede z57285eda z5c5c7684 z5c6462bd z5eda623f z5f62767d z623f7b2c z62bd5c5c z65367d0d z653e5728 z65b97f50 z65c1908a z684282b1 z6a588272 z70cf9f8d z767d9435 z76845713 z768465b9 z7b2c4e8c z7d058336 z7f5084cb z7f5088dd z82725713 z82b170cf z84576a58 z84cb8cbc z88dd7d05 z8cbc8457 z908a7684 z94357f50 z9f8d6536 z9f8d653e title: 桂花烏龍收納 uri: mv2://notes/n01 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n01"
+          ]
+        },
+        {
+          "id": "q02",
+          "category": "exact",
+          "text": "海邊散步取書",
+          "relevant_uris": [
+            "mv2://notes/n02"
+          ],
+          "transformed_query": "z53d666f8 z65636b65 z6b6553d6 z6d77908a z908a6563",
+          "hits": [
+            {
+              "uri": "mv2://notes/n02",
+              "frame_id": 1,
+              "score": 15.220024108886719,
+              "text": "海邊散步取書 圖書館預約的《海邊散步》已到館,取書位置是二樓自助取書櫃的第六格。借書證放在灰色帆布袋內袋。 Lab CJK index: z4e8c6a13 z4f4d7f6e z501f66f8 z5167888b z516d683c z52309928 z52a953d6 z53d666f8 z571666f8 z57287070 z5df25230 z5e03888b z5e065e03 z653e5728 z65636b65 z662f4e8c z66f84f4d z66f86ac3 z66f88b49 z66f89928 z6a1381ea z6ac37684 z6b6553d6 z6d77908a z70708272 z76847b2c z7b2c516d z7d047684 z7f6e662f z81ea52a9 z82725e06 z888b5167 z8b49653e z908a6563 z98107d04 z99289810 title: 海邊散步取書 uri: mv2://notes/n02 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n02"
+          ]
+        },
+        {
+          "id": "q03",
+          "category": "exact",
+          "text": "單車保養收據",
+          "relevant_uris": [
+            "mv2://notes/n03"
+          ],
+          "transformed_query": "z4fdd990a z55ae8eca z653664da z8eca4fdd z990a6536",
+          "hits": [
+            {
+              "uri": "mv2://notes/n03",
+              "frame_id": 2,
+              "score": 15.43530559539795,
+              "text": "單車保養收據 這次單車保養更換後輪內胎,費用是二百八十元。紙本收據放在玄關藍色資料夾,前輪沒有更換。 Lab CJK index: z4e8c767e z4fdd990a z516780ce z516b5341 z524d8f2a z53415143 z55ae8eca z57287384 z5f8c8f2a z63db5f8c z64da653e z653664da z653e5728 z6599593e z662f4e8c z66f463db z670966f4 z672c6536 z6b2155ae z6c926709 z738495dc z7528662f z767e516b z7d19672c z82728cc7 z85cd8272 z8cbb7528 z8cc76599 z8eca4fdd z8f2a5167 z8f2a6c92 z90196b21 z95dc85cd z990a6536 z990a66f4 title: 單車保養收據 uri: mv2://notes/n03 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n03"
+          ]
+        },
+        {
+          "id": "q04",
+          "category": "exact",
+          "text": "陶藝體驗報到",
+          "relevant_uris": [
+            "mv2://notes/n04"
+          ],
+          "transformed_query": "z58315230 z85dd9ad4 z967685dd z9a575831 z9ad49a57",
+          "hits": [
+            {
+              "uri": "mv2://notes/n04",
+              "frame_id": 3,
+              "score": 14.911107063293457,
+              "text": "陶藝體驗報到 陶藝體驗預約在十一月八日下午兩點,地點是河岸工房。報到要帶紙本確認單;圍裙由工房提供。 Lab CJK index: z4e006708 z4e0b5348 z51699ede z516b65e5 z52308981 z53414e00 z53485169 z570d88d9 z57285341 z57309ede z58315230 z5cb85de5 z5de5623f z5e367d19 z623f63d0 z63d04f9b z65e54e0b z662f6cb3 z6708516b z672c78ba z6cb35cb8 z75315de5 z78ba8a8d z7d045728 z7d19672c z85dd9ad4 z88d97531 z89815e36 z8a8d55ae z967685dd z98107d04 z9a575831 z9a579810 z9ad49a57 z9ede662f title: 陶藝體驗報到 uri: mv2://notes/n04 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n04"
+          ]
+        },
+        {
+          "id": "q05",
+          "category": "exact",
+          "text": "羅勒花盆標籤",
+          "relevant_uris": [
+            "mv2://notes/n05"
+          ],
+          "transformed_query": "z52d282b1 z6a197c64 z76c66a19 z7f8552d2 z82b176c6",
+          "hits": [
+            {
+              "uri": "mv2://notes/n05",
+              "frame_id": 4,
+              "score": 14.363512992858887,
+              "text": "羅勒花盆標籤 陽台右側長方盆種的是羅勒,白色圓盆種的是薄荷。羅勒的木牌上畫了三角形,兩盆沒有交換位置。 Lab CJK index: z4e0989d2 z4e0a756b z4e864e09 z4ea463db z4f4d7f6e z50749577 z516976c6 z52d27684 z52d282b1 z53f053f3 z53f35074 z571376c6 z63db4f4d z65b976c6 z662f7f85 z662f8584 z67094ea4 z6728724c z6a197c64 z6c926709 z724c4e0a z756b4e86 z767d8272 z7684662f z76846728 z76c66a19 z76c66c92 z76c67a2e z7a2e7684 z7f8552d2 z82725713 z82b176c6 z85848377 z89d25f62 z957765b9 z967d53f0 title: 羅勒花盆標籤 uri: mv2://notes/n05 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n05"
+          ]
+        },
+        {
+          "id": "q06",
+          "category": "exact",
+          "text": "山城住宿備忘",
+          "relevant_uris": [
+            "mv2://notes/n06"
+          ],
+          "transformed_query": "z4f4f5bbf z50995fd8 z57ce4f4f z5bbf5099 z5c7157ce",
+          "hits": [
+            {
+              "uri": "mv2://notes/n06",
+              "frame_id": 5,
+              "score": 14.502277374267578,
+              "text": "山城住宿備忘 山城旅行訂了兩晚的松影客棧,房間有吹風機,沒有洗衣機。行李清單中的備用布袋已放進側袋。 Lab CJK index: z4e2d7684 z4e865169 z4f4f5bbf z5074888b z50995fd8 z50997528 z5169665a z543998a8 z55ae4e2d z57ce4f4f z57ce65c5 z5ba268e7 z5bbf5099 z5c7157ce z5df2653e z5e03888b z5f715ba2 z623f9593 z653e9032 z65c5884c z665a7684 z67095439 z67096d17 z674e6e05 z677e5f71 z6c926709 z6d178863 z6e0555ae z75285e03 z76845099 z7684677e z884c674e z884c8a02 z88636a5f z888b5df2 z8a024e86 z90325074 z95936709 z98a86a5f title: 山城住宿備忘 uri: mv2://notes/n06 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n06"
+          ]
+        },
+        {
+          "id": "q07",
+          "category": "partial",
+          "text": "洗衣袋",
+          "relevant_uris": [
+            "mv2://notes/n07"
+          ],
+          "transformed_query": "z6d178863 z8863888b",
+          "hits": [
+            {
+              "uri": "mv2://notes/n07",
+              "frame_id": 6,
+              "score": 6.330625534057617,
+              "text": "外套清洗紀錄 米色外套清洗時用了最大的洗衣袋。洗衣袋現在掛在浴室門後,深藍色小袋仍放在洗衣籃裡。 Lab CJK index: z4e866700 z4ecd653e z5728639b z57286d17 z57286d74 z59165957 z59277684 z59576e05 z5ba49580 z5c0f888b z639b5728 z653e5728 z66427528 z67005927 z6d176642 z6d177d00 z6d178863 z6d745ba4 z6df185cd z6e056d17 z73fe5728 z75284e86 z76846d17 z7c4388e1 z7c738272 z7d009304 z82725916 z82725c0f z85cd8272 z88637c43 z8863888b z888b4ecd z888b73fe z95805f8c title: 外套清洗紀錄 uri: mv2://notes/n07 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n07"
+          ]
+        },
+        {
+          "id": "q08",
+          "category": "partial",
+          "text": "紙膠帶",
+          "relevant_uris": [
+            "mv2://notes/n08"
+          ],
+          "transformed_query": "z7d1981a0 z81a05e36",
+          "hits": [
+            {
+              "uri": "mv2://notes/n08",
+              "frame_id": 7,
+              "score": 6.77412223815918,
+              "text": "包裝材料 生日禮物包裝剩下的星星紙膠帶收進客廳矮櫃左抽屜。透明膠帶在書桌上,兩種膠帶分開收納。 Lab CJK index: z4e0b7684 z51697a2e z5206958b z52694e0b z530588dd z572866f8 z5ba25ef3 z5de662bd z5e365206 z5e365728 z5e366536 z5ef377ee z62bd5c5c z65367d0d z65369032 z65e579ae z660e81a0 z661f661f z661f7d19 z66f8684c z67506599 z684c4e0a z6ac35de6 z72695305 z751f65e5 z7684661f z77ee6ac3 z79ae7269 z7a2e81a0 z7d1981a0 z81a05e36 z88dd5269 z88dd6750 z900f660e z90325ba2 z958b6536 title: 包裝材料 uri: mv2://notes/n08 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n08"
+          ]
+        },
+        {
+          "id": "q09",
+          "category": "partial",
+          "text": "野餐墊",
+          "relevant_uris": [
+            "mv2://notes/n09"
+          ],
+          "transformed_query": "z91ce9910 z9910588a",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q10",
+          "category": "partial",
+          "text": "電影票",
+          "relevant_uris": [
+            "mv2://notes/n10"
+          ],
+          "transformed_query": "z5f717968 z96fb5f71",
+          "hits": [
+            {
+              "uri": "mv2://notes/n10",
+              "frame_id": 9,
+              "score": 6.604427814483643,
+              "text": "週五電影 週五晚上的電影票是九排十二號,場次開始時間為七點二十分。取票用的紙本代碼夾在橘色記事本中。 Lab CJK index: z4e039ede z4e0a7684 z4e5d6392 z4e8b672c z4e8c5341 z4e8c865f z4e94665a z4e9496fb z4ee378bc z53414e8c z53415206 z53d67968 z57286a58 z58346b21 z593e5728 z59cb6642 z5f717968 z63925341 z662f4e5d z66429593 z665a4e0a z672c4e2d z672c4ee3 z6a588272 z6b21958b z70ba4e03 z75287684 z76847d19 z768496fb z78bc593e z7968662f z79687528 z7d19672c z82728a18 z8a184e8b z90314e94 z958b59cb z959370ba z96fb5f71 z9ede4e8c title: 週五電影 uri: mv2://notes/n10 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n10"
+          ]
+        },
+        {
+          "id": "q11",
+          "category": "partial",
+          "text": "替換筆芯",
+          "relevant_uris": [
+            "mv2://notes/n11"
+          ],
+          "transformed_query": "z63db7b46 z66ff63db z7b4682af",
+          "hits": [
+            {
+              "uri": "mv2://notes/n11",
+              "frame_id": 10,
+              "score": 9.66118335723877,
+              "text": "筆芯整理 黑色鋼珠筆的替換筆芯在書桌右側透明盒,盒蓋貼著黑色方塊。藍色筆芯在另一個有藍點的小盒。 Lab CJK index: z4e00500b z500b6709 z5074900f z53e64e00 z53f35074 z572853e6 z572866f8 z5c0f76d2 z63db7b46 z65747406 z65b9584a z660e76d2 z66f8684c z66ff63db z670985cd z684c53f3 z73e07b46 z76845c0f z768466ff z76d284cb z7b467684 z7b4682af z827265b9 z82727b46 z827292fc z82af5728 z82af6574 z84579ed1 z84cb8cbc z85cd8272 z85cd9ede z8cbc8457 z900f660e z92fc73e0 z9ed18272 z9ede7684 title: 筆芯整理 uri: mv2://notes/n11 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n11"
+          ]
+        },
+        {
+          "id": "q12",
+          "category": "partial",
+          "text": "展覽圖錄",
+          "relevant_uris": [
+            "mv2://notes/n12"
+          ],
+          "transformed_query": "z57169304 z5c5589bd z89bd5716",
+          "hits": [
+            {
+              "uri": "mv2://notes/n12",
+              "frame_id": 11,
+              "score": 9.66118335723877,
+              "text": "展覽帶回的書 《光的房間》展覽圖錄放在客廳書架第三層,封面是銀灰色。展覽摺頁另放進白色文件袋。 Lab CJK index: z4e095c64 z4ef6888b z51497684 z53e6653e z56de7684 z57169304 z57285ba2 z5ba25ef3 z5c019762 z5c5589bd z5e3656de z5ef366f8 z623f9593 z647a9801 z653e5728 z653e9032 z65874ef6 z662f9280 z66f867b6 z67b67b2c z70708272 z767d8272 z7684623f z768466f8 z7b2c4e09 z82726587 z89bd5716 z89bd5e36 z89bd647a z9032767d z92807070 z9304653e z9762662f z980153e6 title: 展覽帶回的書 uri: mv2://notes/n12 labels: fixture fixture: \"synthetic\"",
+              "integrity_ok": true
+            }
+          ],
+          "ranked_uris": [
+            "mv2://notes/n12"
+          ]
+        },
+        {
+          "id": "q13",
+          "category": "paraphrase",
+          "text": "外語練習的音檔存在哪個裝置與資料夾？",
+          "relevant_uris": [
+            "mv2://notes/n13"
+          ],
+          "transformed_query": "z500b88dd z54ea500b z572854ea z59168a9e z5b585728 z6599593e z6a945b58 z768497f3 z7df47fd2 z7f6e8207 z7fd27684 z82078cc7 z88dd7f6e z8a9e7df4 z8cc76599 z97f36a94",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q14",
+          "category": "paraphrase",
+          "text": "我偏好的那款咖啡是誰烘的，屬於哪種焙度？",
+          "relevant_uris": [
+            "mv2://notes/n14"
+          ],
+          "transformed_query": "z504f597d z54965561 z54ea7a2e z5561662f z597d7684 z5c6c65bc z6211504f z65bc54ea z662f8ab0 z6b3e5496 z70d87684 z71195ea6 z768490a3 z7a2e7119 z8ab070d8 z90a36b3e",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q15",
+          "category": "paraphrase",
+          "text": "家裡不用的玻璃容器最後送去哪裡？",
+          "relevant_uris": [
+            "mv2://notes/n15"
+          ],
+          "transformed_query": "z4e0d7528 z53bb54ea z54ea88e1 z56686700 z5bb688e1 z5bb95668 z5f8c9001 z67005f8c z73bb7483 z74835bb9 z75287684 z768473bb z88e14e0d z900153bb",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q16",
+          "category": "paraphrase",
+          "text": "做布袋剩下的黃線和樣板分別收在哪裡？",
+          "relevant_uris": [
+            "mv2://notes/n16"
+          ],
+          "transformed_query": "z4e0b7684 z505a5e03 z52065225 z52256536 z52694e0b z548c6a23 z54ea88e1 z572854ea z5e03888b z65365728 z677f5206 z6a23677f z76849ec3 z7dda548c z888b5269 z9ec37dda",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q17",
+          "category": "paraphrase",
+          "text": "合奏排練的聲音紀錄放在哪裡，叫什麼名字？",
+          "relevant_uris": [
+            "mv2://notes/n17"
+          ],
+          "transformed_query": "z4ec09ebc z53eb4ec0 z5408594f z540d5b57 z54ea88e1 z572854ea z594f6392 z63927df4 z653e5728 z76848072 z7d009304 z7df47684 z807297f3 z9304653e z97f37d00 z9ebc540d",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q18",
+          "category": "paraphrase",
+          "text": "哪些預約明確要求攜帶印出來的確認文件？",
+          "relevant_uris": [
+            "mv2://notes/n04",
+            "mv2://notes/n19"
+          ],
+          "transformed_query": "z4e9b9810 z4f867684 z51fa4f86 z537051fa z54ea4e9b z5e365370 z651c5e36 z65874ef6 z660e78ba z6c42651c z768478ba z78ba8981 z78ba8a8d z7d04660e z89816c42 z8a8d6587 z98107d04",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q19",
+          "category": "mixed",
+          "text": "Photo Walk P7 幾點在哪裡集合？",
+          "relevant_uris": [
+            "mv2://notes/n19"
+          ],
+          "transformed_query": "p7 photo walk z54ea88e1 z572854ea z5e7e9ede z88e196c6 z96c65408 z9ede5728",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q20",
+          "category": "mixed",
+          "text": "Archive-2 SSD 備份了哪個月份的相簿？",
+          "relevant_uris": [
+            "mv2://notes/n20"
+          ],
+          "transformed_query": "2 archive ssd z4e8654ea z4efd4e86 z4efd7684 z500b6708 z50994efd z54ea500b z67084efd z768476f8 z76f87c3f",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q21",
+          "category": "mixed",
+          "text": "Luma R2 暖光亮度記了多少 %？",
+          "relevant_uris": [
+            "mv2://notes/n21"
+          ],
+          "transformed_query": "luma r2 z4e86591a z4eae5ea6 z51494eae z591a5c11 z5ea68a18 z66965149 z8a184e86",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q22",
+          "category": "mixed",
+          "text": "NoteBox 的 CSV 使用哪種編碼與欄位順序？",
+          "relevant_uris": [
+            "mv2://notes/n22"
+          ],
+          "transformed_query": "csv notebox z4f4d9806 z4f7f7528 z54ea7a2e z6b044f4d z752854ea z78bc8207 z7a2e7de8 z7de878bc z82076b04 z98065e8f",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q23",
+          "category": "mixed",
+          "text": "Sketch 101 的 replay 可以看幾天？",
+          "relevant_uris": [
+            "mv2://notes/n23"
+          ],
+          "transformed_query": "101 replay sketch z4ee5770b z53ef4ee5 z5e7e5929 z770b5e7e",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q24",
+          "category": "mixed",
+          "text": "Star Orchard 的繁中規則書在哪裡？",
+          "relevant_uris": [
+            "mv2://notes/n24"
+          ],
+          "transformed_query": "orchard star z4e2d898f z524766f8 z54ea88e1 z572854ea z66f85728 z76847e41 z7e414e2d z898f5247",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q25",
+          "category": "unanswerable",
+          "text": "《海邊散步》續借逾期一天要收多少費用？",
+          "relevant_uris": [],
+          "transformed_query": "z4e005929 z501f903e z591a5c11 z59298981 z5c118cbb z6536591a z65636b65 z671f4e00 z6d77908a z7e8c501f z89816536 z8cbb7528 z903e671f z908a6563",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q26",
+          "category": "unanswerable",
+          "text": "這次更換的單車後輪內胎保固到哪一天？",
+          "relevant_uris": [],
+          "transformed_query": "z4e005929 z4fdd56fa z516780ce z523054ea z54ea4e00 z55ae8eca z56fa5230 z5f8c8f2a z63db7684 z66f463db z6b2166f4 z768455ae z80ce4fdd z8eca5f8c z8f2a5167 z90196b21",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q27",
+          "category": "unanswerable",
+          "text": "山城旅行回程車站的末班火車幾點開？",
+          "relevant_uris": [],
+          "transformed_query": "z56de7a0b z57ce65c5 z5c7157ce z5e7e9ede z65c5884c z672b73ed z706b8eca z73ed706b z7684672b z7a0b8eca z7ad97684 z884c56de z8eca5e7e z8eca7ad9 z9ede958b",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q28",
+          "category": "unanswerable",
+          "text": "天文社觀星夜預定用哪一款望遠鏡？",
+          "relevant_uris": [],
+          "transformed_query": "z4e006b3e z54ea4e00 z591c9810 z59296587 z5b9a7528 z6587793e z661f591c z671b9060 z6b3e671b z752854ea z793e89c0 z89c0661f z906093e1 z98105b9a",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q29",
+          "category": "unanswerable",
+          "text": "合唱團鋼琴下一次調音日期是哪天？",
+          "relevant_uris": [],
+          "transformed_query": "z4e006b21 z4e0b4e00 z54085531 z54ea5929 z55315718 z571892fc z65e5671f z662f54ea z671f662f z6b218abf z74344e0b z8abf97f3 z92fc7434 z97f365e5",
+          "hits": [],
+          "ranked_uris": []
+        },
+        {
+          "id": "q30",
+          "category": "unanswerable",
+          "text": "遠端氣象站的雨量資料每隔幾分鐘更新？",
+          "relevant_uris": [],
+          "transformed_query": "z52069418 z5e7e5206 z65996bcf z66f465b0 z6bcf9694 z6c238c61 z768496e8 z7ad97684 z7aef6c23 z8c617ad9 z8cc76599 z90607aef z91cf8cc7 z941866f4 z96945e7e z96e891cf",
+          "hits": [],
+          "ranked_uris": []
+        }
+      ],
+      "metrics": {
+        "query_count": 30,
+        "answerable_count": 24,
+        "no_answer_count": 6,
+        "recall_at_5": 0.4583333333333333,
+        "mrr_at_5": 0.4583333333333333,
+        "source_precision": 1.0,
+        "no_answer_false_return_rate": 0.0,
+        "source_integrity": 1.0,
+        "relevant_return_count": 11,
+        "return_count": 11,
+        "raw_hit_count": 11,
+        "valid_raw_hit_count": 11
+      },
+      "source_manifest": {
+        "0": {
+          "uri": "mv2://notes/n01",
+          "title": "桂花烏龍收納",
+          "text": "桂花烏龍收納\n桂花烏龍放在廚房第二層抽屜的圓形白鐵罐。罐蓋貼著橘色圓點，旁邊的方罐裝紅茶。\n\nLab CJK index:\nz4e8c5c64 z57135f62 z57139ede z57285eda z5c5c7684 z5c6462bd z5eda623f z5f62767d z623f7b2c z62bd5c5c z65367d0d z653e5728 z65b97f50 z65c1908a z684282b1 z6a588272 z70cf9f8d z767d9435 z76845713 z768465b9 z7b2c4e8c z7d058336 z7f5084cb z7f5088dd z82725713 z82b170cf z84576a58 z84cb8cbc z88dd7d05 z8cbc8457 z908a7684 z94357f50 z9f8d6536 z9f8d653e"
+        },
+        "1": {
+          "uri": "mv2://notes/n02",
+          "title": "海邊散步取書",
+          "text": "海邊散步取書\n圖書館預約的《海邊散步》已到館，取書位置是二樓自助取書櫃的第六格。借書證放在灰色帆布袋內袋。\n\nLab CJK index:\nz4e8c6a13 z4f4d7f6e z501f66f8 z5167888b z516d683c z52309928 z52a953d6 z53d666f8 z571666f8 z57287070 z5df25230 z5e03888b z5e065e03 z653e5728 z65636b65 z662f4e8c z66f84f4d z66f86ac3 z66f88b49 z66f89928 z6a1381ea z6ac37684 z6b6553d6 z6d77908a z70708272 z76847b2c z7b2c516d z7d047684 z7f6e662f z81ea52a9 z82725e06 z888b5167 z8b49653e z908a6563 z98107d04 z99289810"
+        },
+        "2": {
+          "uri": "mv2://notes/n03",
+          "title": "單車保養收據",
+          "text": "單車保養收據\n這次單車保養更換後輪內胎，費用是二百八十元。紙本收據放在玄關藍色資料夾，前輪沒有更換。\n\nLab CJK index:\nz4e8c767e z4fdd990a z516780ce z516b5341 z524d8f2a z53415143 z55ae8eca z57287384 z5f8c8f2a z63db5f8c z64da653e z653664da z653e5728 z6599593e z662f4e8c z66f463db z670966f4 z672c6536 z6b2155ae z6c926709 z738495dc z7528662f z767e516b z7d19672c z82728cc7 z85cd8272 z8cbb7528 z8cc76599 z8eca4fdd z8f2a5167 z8f2a6c92 z90196b21 z95dc85cd z990a6536 z990a66f4"
+        },
+        "3": {
+          "uri": "mv2://notes/n04",
+          "title": "陶藝體驗報到",
+          "text": "陶藝體驗報到\n陶藝體驗預約在十一月八日下午兩點，地點是河岸工房。報到要帶紙本確認單；圍裙由工房提供。\n\nLab CJK index:\nz4e006708 z4e0b5348 z51699ede z516b65e5 z52308981 z53414e00 z53485169 z570d88d9 z57285341 z57309ede z58315230 z5cb85de5 z5de5623f z5e367d19 z623f63d0 z63d04f9b z65e54e0b z662f6cb3 z6708516b z672c78ba z6cb35cb8 z75315de5 z78ba8a8d z7d045728 z7d19672c z85dd9ad4 z88d97531 z89815e36 z8a8d55ae z967685dd z98107d04 z9a575831 z9a579810 z9ad49a57 z9ede662f"
+        },
+        "4": {
+          "uri": "mv2://notes/n05",
+          "title": "羅勒花盆標籤",
+          "text": "羅勒花盆標籤\n陽台右側長方盆種的是羅勒，白色圓盆種的是薄荷。羅勒的木牌上畫了三角形，兩盆沒有交換位置。\n\nLab CJK index:\nz4e0989d2 z4e0a756b z4e864e09 z4ea463db z4f4d7f6e z50749577 z516976c6 z52d27684 z52d282b1 z53f053f3 z53f35074 z571376c6 z63db4f4d z65b976c6 z662f7f85 z662f8584 z67094ea4 z6728724c z6a197c64 z6c926709 z724c4e0a z756b4e86 z767d8272 z7684662f z76846728 z76c66a19 z76c66c92 z76c67a2e z7a2e7684 z7f8552d2 z82725713 z82b176c6 z85848377 z89d25f62 z957765b9 z967d53f0"
+        },
+        "5": {
+          "uri": "mv2://notes/n06",
+          "title": "山城住宿備忘",
+          "text": "山城住宿備忘\n山城旅行訂了兩晚的松影客棧，房間有吹風機，沒有洗衣機。行李清單中的備用布袋已放進側袋。\n\nLab CJK index:\nz4e2d7684 z4e865169 z4f4f5bbf z5074888b z50995fd8 z50997528 z5169665a z543998a8 z55ae4e2d z57ce4f4f z57ce65c5 z5ba268e7 z5bbf5099 z5c7157ce z5df2653e z5e03888b z5f715ba2 z623f9593 z653e9032 z65c5884c z665a7684 z67095439 z67096d17 z674e6e05 z677e5f71 z6c926709 z6d178863 z6e0555ae z75285e03 z76845099 z7684677e z884c674e z884c8a02 z88636a5f z888b5df2 z8a024e86 z90325074 z95936709 z98a86a5f"
+        },
+        "6": {
+          "uri": "mv2://notes/n07",
+          "title": "外套清洗紀錄",
+          "text": "外套清洗紀錄\n米色外套清洗時用了最大的洗衣袋。洗衣袋現在掛在浴室門後，深藍色小袋仍放在洗衣籃裡。\n\nLab CJK index:\nz4e866700 z4ecd653e z5728639b z57286d17 z57286d74 z59165957 z59277684 z59576e05 z5ba49580 z5c0f888b z639b5728 z653e5728 z66427528 z67005927 z6d176642 z6d177d00 z6d178863 z6d745ba4 z6df185cd z6e056d17 z73fe5728 z75284e86 z76846d17 z7c4388e1 z7c738272 z7d009304 z82725916 z82725c0f z85cd8272 z88637c43 z8863888b z888b4ecd z888b73fe z95805f8c"
+        },
+        "7": {
+          "uri": "mv2://notes/n08",
+          "title": "包裝材料",
+          "text": "包裝材料\n生日禮物包裝剩下的星星紙膠帶收進客廳矮櫃左抽屜。透明膠帶在書桌上，兩種膠帶分開收納。\n\nLab CJK index:\nz4e0b7684 z51697a2e z5206958b z52694e0b z530588dd z572866f8 z5ba25ef3 z5de662bd z5e365206 z5e365728 z5e366536 z5ef377ee z62bd5c5c z65367d0d z65369032 z65e579ae z660e81a0 z661f661f z661f7d19 z66f8684c z67506599 z684c4e0a z6ac35de6 z72695305 z751f65e5 z7684661f z77ee6ac3 z79ae7269 z7a2e81a0 z7d1981a0 z81a05e36 z88dd5269 z88dd6750 z900f660e z90325ba2 z958b6536"
+        },
+        "8": {
+          "uri": "mv2://notes/n09",
+          "title": "週末野餐用品",
+          "text": "週末野餐用品\n綠色野餐墊已交給活動主辦的服務台保管，當天從北側入口領取。家裡留下的是灰色地墊。\n\nLab CJK index:\nz4e0b7684 z4e3b8fa6 z4ea47d66 z4fdd7ba1 z50745165 z516553e3 z52d54e3b z52d953f0 z53175074 z53e39818 z53f04fdd z5730588a z588a5df2 z59295f9e z5bb688e1 z5df24ea4 z5f9e5317 z662f7070 z670d52d9 z672b91ce z6d3b52d5 z70708272 z752854c1 z75594e0b z75765929 z7684662f z7684670d z7d666d3b z7da08272 z82725730 z827291ce z88e17559 z8fa67684 z9031672b z91ce9910 z981853d6 z9910588a z99107528"
+        },
+        "9": {
+          "uri": "mv2://notes/n10",
+          "title": "週五電影",
+          "text": "週五電影\n週五晚上的電影票是九排十二號，場次開始時間為七點二十分。取票用的紙本代碼夾在橘色記事本中。\n\nLab CJK index:\nz4e039ede z4e0a7684 z4e5d6392 z4e8b672c z4e8c5341 z4e8c865f z4e94665a z4e9496fb z4ee378bc z53414e8c z53415206 z53d67968 z57286a58 z58346b21 z593e5728 z59cb6642 z5f717968 z63925341 z662f4e5d z66429593 z665a4e0a z672c4e2d z672c4ee3 z6a588272 z6b21958b z70ba4e03 z75287684 z76847d19 z768496fb z78bc593e z7968662f z79687528 z7d19672c z82728a18 z8a184e8b z90314e94 z958b59cb z959370ba z96fb5f71 z9ede4e8c"
+        },
+        "10": {
+          "uri": "mv2://notes/n11",
+          "title": "筆芯整理",
+          "text": "筆芯整理\n黑色鋼珠筆的替換筆芯在書桌右側透明盒，盒蓋貼著黑色方塊。藍色筆芯在另一個有藍點的小盒。\n\nLab CJK index:\nz4e00500b z500b6709 z5074900f z53e64e00 z53f35074 z572853e6 z572866f8 z5c0f76d2 z63db7b46 z65747406 z65b9584a z660e76d2 z66f8684c z66ff63db z670985cd z684c53f3 z73e07b46 z76845c0f z768466ff z76d284cb z7b467684 z7b4682af z827265b9 z82727b46 z827292fc z82af5728 z82af6574 z84579ed1 z84cb8cbc z85cd8272 z85cd9ede z8cbc8457 z900f660e z92fc73e0 z9ed18272 z9ede7684"
+        },
+        "11": {
+          "uri": "mv2://notes/n12",
+          "title": "展覽帶回的書",
+          "text": "展覽帶回的書\n《光的房間》展覽圖錄放在客廳書架第三層，封面是銀灰色。展覽摺頁另放進白色文件袋。\n\nLab CJK index:\nz4e095c64 z4ef6888b z51497684 z53e6653e z56de7684 z57169304 z57285ba2 z5ba25ef3 z5c019762 z5c5589bd z5e3656de z5ef366f8 z623f9593 z647a9801 z653e5728 z653e9032 z65874ef6 z662f9280 z66f867b6 z67b67b2c z70708272 z767d8272 z7684623f z768466f8 z7b2c4e09 z82726587 z89bd5716 z89bd5e36 z89bd647a z9032767d z92807070 z9304653e z9762662f z980153e6"
+        },
+        "12": {
+          "uri": "mv2://notes/n13",
+          "title": "日語課作業",
+          "text": "日語課作業\n日語課的聽力作業錄音存在平板的「語言練習」資料夾，檔名是「第三課慢速」。課堂講義則留在綠色活頁夾。\n\nLab CJK index:\nz4e098ab2 z4f5c696d z52477559 z529b4f5c z540d662f z57285e73 z57287da0 z58028b1b z5b585728 z5e73677f z6162901f z6599593e z65e58a9e z677f7684 z696d9304 z6a94540d z6d3b9801 z75595728 z7684807d z7b2c4e09 z7da08272 z7df47fd2 z7fa95247 z807d529b z82726d3b z8a007df4 z8a9e8a00 z8a9e8ab2 z8ab24f5c z8ab25802 z8ab26162 z8ab27684 z8b1b7fa9 z8cc76599 z930497f3 z97f35b58 z9801593e"
+        },
+        "13": {
+          "uri": "mv2://notes/n14",
+          "title": "咖啡試飲",
+          "text": "咖啡試飲\n上次試飲最喜歡的咖啡豆來自霧丘烘焙，包裝標示榛果與可可風味。那包豆子的烘焙程度是中焙。\n\nLab CJK index:\nz4e0a6b21 z4e1870d8 z4e2d7119 z4f8681ea z530588dd z53058c46 z53ef53ef z53ef98a8 z54965561 z55618a66 z55618c46 z559c6b61 z5b507684 z5ea6662f z662f4e2d z6700559c z679c8207 z699b679c z6a19793a z6b218a66 z6b617684 z70d87119 z71197a0b z76845496 z768470d8 z793a699b z7a0b5ea6 z81ea9727 z820753ef z88dd6a19 z8a6698f2 z8c464f86 z8c465b50 z90a35305 z97274e18 z98a85473 z98f26700"
+        },
+        "14": {
+          "uri": "mv2://notes/n15",
+          "title": "空玻璃瓶去向",
+          "text": "空玻璃瓶去向\n家中的空玻璃瓶已送到社區西門旁的回收點。紙箱這次沒有一起搬走，仍放在儲藏室。\n\nLab CJK index:\nz4e008d77 z4e2d7684 z4ecd653e z513285cf z5230793e z5340897f z53bb5411 z56de6536 z57285132 z5bb64e2d z5df29001 z642c8d70 z65369ede z653e5728 z65c17684 z67094e00 z6b216c92 z6c926709 z73bb7483 z748374f6 z74f653bb z74f65df2 z768456de z76847a7a z793e5340 z7a7a73bb z7bb19019 z7d197bb1 z85cf5ba4 z897f9580 z8d77642c z90015230 z90196b21 z958065c1"
+        },
+        "15": {
+          "uri": "mv2://notes/n16",
+          "title": "縫紉材料位置",
+          "text": "縫紉材料位置\n做帆布收納袋剩下的黃色棉線收在紅色針線盒底層。袋子的紙樣折好放在盒蓋下。\n\nLab CJK index:\nz4e0b7684 z4f4d7f6e z505a5e06 z52694e0b z572876d2 z57287d05 z597d653e z5b507684 z5e036536 z5e065e03 z5e955c64 z6298597d z65365728 z65367d0d z653e5728 z65994f4d z67506599 z68c97dda z6a236298 z76847d19 z76849ec3 z76d25e95 z76d284cb z7d058272 z7d096750 z7d0d888b z7d196a23 z7dda6536 z7dda76d2 z7e2b7d09 z827268c9 z827291dd z84cb4e0b z888b5269 z888b5b50 z91dd7dda z9ec38272"
+        },
+        "16": {
+          "uri": "mv2://notes/n17",
+          "title": "練琴錄音備忘",
+          "text": "練琴錄音備忘\n木笛合奏的彩排錄音存在隨身錄音筆，名稱是「窗邊下午」。正式演出尚未錄音，這份只有彩排內容。\n\nLab CJK index:\nz4e0b5348 z4efd53ea z50995fd8 z51675bb9 z51fa5c1a z53ea6709 z5408594f z540d7a31 z572896a8 z594f7684 z5b585728 z5c1a672a z5f0f6f14 z5f696392 z63925167 z63929304 z67095f69 z67287b1b z672a9304 z6b635f0f z6f1451fa z74349304 z76845f69 z7a31662f z7a97908a z7b1b5408 z7df47434 z8eab9304 z90194efd z908a4e0b z930497f3 z96a88eab z97f35099 z97f35b58 z97f37b46"
+        },
+        "17": {
+          "uri": "mv2://notes/n18",
+          "title": "共享廚房筆記",
+          "text": "共享廚房筆記\n這次共享廚房聚會做了番茄麵，使用的是白色大鍋。聚會結束後，大鍋已歸還三樓器材櫃。\n\nLab CJK index:\nz4e096a13 z4e86756a z4eab5eda z4f7f7528 z505a4e86 z51714eab z56686750 z5927934b z5df26b78 z5eda623f z623f7b46 z623f805a z662f767d z6703505a z67037d50 z67506ac3 z675f5f8c z6a135668 z6b215171 z6b789084 z75287684 z756a8304 z767d8272 z7684662f z7b468a18 z7d50675f z805a6703 z82725927 z83049eb5 z90196b21 z90844e09 z934b5df2"
+        },
+        "18": {
+          "uri": "mv2://notes/n19",
+          "title": "Photo Walk 報到",
+          "text": "Photo Walk 報到\nPhoto Walk P7 的集合時間是上午九點十分，集合處為南門鐘樓。這個預約報到要帶紙本確認單，現場會發借用的識別背帶。\n\nLab CJK index:\np7 photo walk z4e0a5348 z4e5d9ede z500b9810 z501f7528 z522580cc z52308981 z53415206 z53484e5d z53579580 z54086642 z54088655 z58315230 z58346703 z5e367d19 z662f4e0a z66429593 z6703767c z672c78ba z70ba5357 z73fe5834 z75287684 z767c501f z76848b58 z768496c6 z78ba8a8d z7d045831 z7d19672c z80cc5e36 z865570ba z89815e36 z8a8d55ae z8b585225 z9019500b z94186a13 z95809418 z9593662f z96c65408 z98107d04 z9ede5341"
+        },
+        "19": {
+          "uri": "mv2://notes/n20",
+          "title": "SSD 備份紀錄",
+          "text": "SSD 備份紀錄\n相片備份存到標籤為 Archive-2 的 SSD，完成的是十月份相簿。連接線為 USB-C，SSD 收在書桌下方的防震包。\n\nLab CJK index:\n2 archive c ssd usb z4e0b65b9 z4efd5b58 z4efd76f8 z4efd7d00 z50994efd z52306a19 z53416708 z572866f8 z5b585230 z5b8c6210 z62107684 z63a57dda z65365728 z65b97684 z662f5341 z66f8684c z67084efd z684c4e0b z6a197c64 z72475099 z7684662f z76849632 z76f87247 z76f87c3f z7c6470ba z7d009304 z7dda70ba z902363a5 z96329707 z97075305"
+        },
+        "20": {
+          "uri": "mv2://notes/n21",
+          "title": "家用設備標籤",
+          "text": "家用設備標籤\n書房的閱讀燈型號是 Luma R2，暖光亮度記錄為 40%。客廳的同系列燈是 Luma R1，這次沒有記錄其亮度。\n\nLab CJK index:\n40 luma r1 r2 z4eae5ea6 z50996a19 z51494eae z51764eae z521771c8 z540c7cfb z578b865f z5ba25ef3 z5bb67528 z5ea68a18 z5ef37684 z623f7684 z66965149 z66f8623f z67098a18 z6a197c64 z6b216c92 z6c926709 z71c8578b z71c8662f z75288a2d z7684540c z768495b1 z7cfb5217 z865f662f z8a189304 z8a2d5099 z8b8071c8 z90196b21 z93045176 z930470ba z95b18b80"
+        },
+        "21": {
+          "uri": "mv2://notes/n22",
+          "title": "練習專案匯出",
+          "text": "練習專案匯出\n練習專案 NoteBox 的 CSV 匯出使用 UTF-8 編碼，欄位順序是 title、date、body。這是本機練習資料，不含帳號或聯絡資訊。\n\nLab CJK index:\n8 body csv date notebox title utf z4e0d542b z4f4d9806 z4f7f7528 z51fa4f7f z532f51fa z542b5e33 z5c086848 z5e33865f z5e8f662f z6216806f z662f672c z672c6a5f z6848532f z6a5f7df4 z6b044f4d z7d618cc7 z7de878bc z7df47fd2 z7fd25c08 z7fd28cc7 z806f7d61 z865f6216 z8cc76599 z8cc78a0a z9019662f z98065e8f"
+        },
+        "22": {
+          "uri": "mv2://notes/n23",
+          "title": "線上工作坊",
+          "text": "線上工作坊\nSketch 101 工作坊在十一月十二日 19:30 開始，報名方案包含活動後七天內可觀看的 replay。教材以 PDF 提供。\n\nLab CJK index:\n101 19 30 pdf replay sketch z4e006708 z4e035929 z4e0a5de5 z4e8c65e5 z4f5c574a z516753ef z52d55f8c z5305542b z53414e00 z53414e8c z53ef89c0 z540d65b9 z542b6d3b z57285341 z574a5728 z5831540d z59295167 z5de54f5c z5f8c4e03 z63d04f9b z65596750 z65b96848 z67085341 z67504ee5 z68485305 z6d3b52d5 z770b7684 z7dda4e0a z89c0770b z958b59cb"
+        },
+        "23": {
+          "uri": "mv2://notes/n24",
+          "title": "桌遊收藏",
+          "text": "桌遊收藏\n桌遊 Star Orchard 的繁中規則書收在盒蓋內側，遊戲人數標示為 2–4 人。擴充牌裝在獨立的紫色布袋。\n\nLab CJK index:\n2 4 orchard star z4e2d898f z4eba6578 z5145724c z51675074 z524766f8 z57287368 z572876d2 z5e03888b z62324eba z64f45145 z65365728 z653685cf z65786a19 z66f86536 z684c904a z6a19793a z724c88dd z73687acb z76847d2b z76847e41 z76d284cb z793a70ba z7acb7684 z7d2b8272 z7e414e2d z82725e03 z84cb5167 z88dd5728 z898f5247 z904a6232 z904a6536"
+        }
+      },
+      "by_category": {
+        "exact": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "source_precision": 1.0,
+          "no_answer_false_return_rate": null,
+          "source_integrity": 1.0,
+          "relevant_return_count": 6,
+          "return_count": 6,
+          "raw_hit_count": 6,
+          "valid_raw_hit_count": 6
+        },
+        "mixed": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 0.0,
+          "mrr_at_5": 0.0,
+          "source_precision": null,
+          "no_answer_false_return_rate": null,
+          "source_integrity": null,
+          "relevant_return_count": 0,
+          "return_count": 0,
+          "raw_hit_count": 0,
+          "valid_raw_hit_count": 0
+        },
+        "paraphrase": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 0.0,
+          "mrr_at_5": 0.0,
+          "source_precision": null,
+          "no_answer_false_return_rate": null,
+          "source_integrity": null,
+          "relevant_return_count": 0,
+          "return_count": 0,
+          "raw_hit_count": 0,
+          "valid_raw_hit_count": 0
+        },
+        "partial": {
+          "query_count": 6,
+          "answerable_count": 6,
+          "no_answer_count": 0,
+          "recall_at_5": 0.8333333333333334,
+          "mrr_at_5": 0.8333333333333334,
+          "source_precision": 1.0,
+          "no_answer_false_return_rate": null,
+          "source_integrity": 1.0,
+          "relevant_return_count": 5,
+          "return_count": 5,
+          "raw_hit_count": 5,
+          "valid_raw_hit_count": 5
+        },
+        "unanswerable": {
+          "query_count": 6,
+          "answerable_count": 0,
+          "no_answer_count": 6,
+          "recall_at_5": null,
+          "mrr_at_5": null,
+          "source_precision": null,
+          "no_answer_false_return_rate": 0.0,
+          "source_integrity": null,
+          "relevant_return_count": 0,
+          "return_count": 0,
+          "raw_hit_count": 0,
+          "valid_raw_hit_count": 0
+        }
+      },
+      "costs": {
+        "write_seal_seconds": 1.9196314350701869,
+        "rebuild_seconds": 0.05140121595468372,
+        "total_seconds": 1.9710326510248706,
+        "file_bytes": 293658,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "memory_sha256": "836c506e40466c7a9f72aa5eb95d28a69f724e3c07f74e527e1ae06322e65b8b",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    }
+  ],
+  "updates": [
+    {
+      "strategy": "native",
+      "initial_costs": {
+        "write_seal_seconds": 0.20532597310375422,
+        "rebuild_seconds": 0.05084374896250665,
+        "total_seconds": 0.2561697220662609,
+        "file_bytes": 85259,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "update_index_policy": {
+        "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+        "rebuild_lex_index": true,
+        "status": "healed",
+        "executed_actions": [
+          "rebuild_lex_index",
+          "recompute_toc",
+          "recompute_toc",
+          "update_header",
+          "deep_verify"
+        ],
+        "pre_rebuild_finding_codes": [],
+        "verification": "passed"
+      },
+      "current_view_passed": true,
+      "new_process_reopen": true,
+      "deleted_absent": true,
+      "old_frame_id": 0,
+      "current_frame_id": 2,
+      "history_contains_both": true,
+      "native_common_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 0,
+          "score": 1.182321548461914,
+          "text": "讀書會行程 readingclub 週一在松林教室。舊版代碼 amberold。 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        },
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 2,
+          "score": 1.182321548461914,
+          "text": "讀書會行程 readingclub 週三在海風教室。新版代碼 coppernew。 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "native_old_term_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 0,
+          "score": 1.6931471824645996,
+          "text": "讀書會行程 readingclub 週一在松林教室。舊版代碼 amberold。 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "current_view_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 2,
+          "score": 1.182321548461914,
+          "text": "讀書會行程 readingclub 週三在海風教室。新版代碼 coppernew。 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "native_new_term_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 2,
+          "score": 1.6931471824645996,
+          "text": "讀書會行程 readingclub 週三在海風教室。新版代碼 coppernew。 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "policy": "Native append preserves history; application current view filters by frame(uri).id; delete uses native remove.",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    },
+    {
+      "strategy": "cjk_bigrams",
+      "initial_costs": {
+        "write_seal_seconds": 0.17014982691034675,
+        "rebuild_seconds": 0.050745398038998246,
+        "total_seconds": 0.220895224949345,
+        "file_bytes": 88415,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "update_index_policy": {
+        "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+        "rebuild_lex_index": true,
+        "status": "healed",
+        "executed_actions": [
+          "rebuild_lex_index",
+          "recompute_toc",
+          "recompute_toc",
+          "update_header",
+          "deep_verify"
+        ],
+        "pre_rebuild_finding_codes": [],
+        "verification": "passed"
+      },
+      "current_view_passed": true,
+      "new_process_reopen": true,
+      "deleted_absent": true,
+      "old_frame_id": 0,
+      "current_frame_id": 2,
+      "history_contains_both": true,
+      "native_common_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 0,
+          "score": 1.2506921291351318,
+          "text": "讀書會行程 readingclub 週一在松林教室。舊版代碼 amberold。 Lab CJK index: amberold readingclub z4e005728 z4ee378bc z5728677e z65595ba4 z66f86703 z6703884c z677e6797 z67976559 z72484ee3 z820a7248 z884c7a0b z8b8066f8 z90314e00 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        },
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 2,
+          "score": 1.2506921291351318,
+          "text": "讀書會行程 readingclub 週三在海風教室。新版代碼 coppernew。 Lab CJK index: coppernew readingclub z4e095728 z4ee378bc z57286d77 z65595ba4 z65b07248 z66f86703 z6703884c z6d7798a8 z72484ee3 z884c7a0b z8b8066f8 z90314e09 z98a86559 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "native_old_term_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 0,
+          "score": 1.9530773162841797,
+          "text": "讀書會行程 readingclub 週一在松林教室。舊版代碼 amberold。 Lab CJK index: amberold readingclub z4e005728 z4ee378bc z5728677e z65595ba4 z66f86703 z6703884c z677e6797 z67976559 z72484ee3 z820a7248 z884c7a0b z8b8066f8 z90314e00 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "current_view_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 2,
+          "score": 1.2506921291351318,
+          "text": "讀書會行程 readingclub 週三在海風教室。新版代碼 coppernew。 Lab CJK index: coppernew readingclub z4e095728 z4ee378bc z57286d77 z65595ba4 z65b07248 z66f86703 z6703884c z6d7798a8 z72484ee3 z884c7a0b z8b8066f8 z90314e09 z98a86559 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "native_new_term_hits": [
+        {
+          "uri": "mv2://updates/meeting",
+          "frame_id": 2,
+          "score": 1.9530773162841797,
+          "text": "讀書會行程 readingclub 週三在海風教室。新版代碼 coppernew。 Lab CJK index: coppernew readingclub z4e095728 z4ee378bc z57286d77 z65595ba4 z65b07248 z66f86703 z6703884c z6d7798a8 z72484ee3 z884c7a0b z8b8066f8 z90314e09 z98a86559 title: 讀書會行程 uri: mv2://updates/meeting labels: fixture fixture: \"synthetic\"",
+          "integrity_ok": true
+        }
+      ],
+      "policy": "Native append preserves history; application current view filters by frame(uri).id; delete uses native remove.",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    }
+  ],
+  "scale": [
+    {
+      "strategy": "native",
+      "note_count": 100,
+      "costs": {
+        "write_seal_seconds": 8.624565351055935,
+        "rebuild_seconds": 0.054772859904915094,
+        "total_seconds": 8.67933821096085,
+        "file_bytes": 835317,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "query_ids": [
+        "q01",
+        "q02",
+        "q03",
+        "q04",
+        "q05",
+        "q06",
+        "q07",
+        "q08",
+        "q09",
+        "q10"
+      ],
+      "first_pass_ms": [
+        0.4514880711212754,
+        0.2916191006079316,
+        0.3301489632576704,
+        0.32132898923009634,
+        0.3072180552408099,
+        0.2694180002436042,
+        0.23017905186861753,
+        0.2434179186820984,
+        0.20225998014211655,
+        0.1822189660742879
+      ],
+      "warm_samples_ms": [
+        0.23197801783680916,
+        0.21474005188792944,
+        0.2210990060120821,
+        0.2799389185383916,
+        0.21586997900158167,
+        0.21979899611324072,
+        0.20964001305401325,
+        0.22140797227621078,
+        0.20742998458445072,
+        0.17912895418703556,
+        0.23550994228571653,
+        0.19794795662164688,
+        0.2360090147703886,
+        0.2128800842911005,
+        0.2304490189999342,
+        0.2943589352071285,
+        0.23016904015094042,
+        0.22713898215442896,
+        0.18151802942156792,
+        0.1942989183589816,
+        0.24525902699679136,
+        0.21808699239045382,
+        0.21643005311489105,
+        0.21854904480278492,
+        0.21398894023150206,
+        0.21677999757230282,
+        0.2078789984807372,
+        0.2039989922195673,
+        0.18652796279639006,
+        0.17996900714933872,
+        0.23575907107442617,
+        0.19613001495599747,
+        0.21294900216162205,
+        0.23207999765872955,
+        0.22896903101354837,
+        0.22055895533412695,
+        0.21583004854619503,
+        0.21303899120539427,
+        0.18926803022623062,
+        0.17829902935773134,
+        0.32347801607102156,
+        0.20909891463816166,
+        0.2329680137336254,
+        0.2736499300226569,
+        0.22375700064003468,
+        0.2022390253841877,
+        0.21715997718274593,
+        0.20562903955578804,
+        0.1942379167303443,
+        0.2448499435558915
+      ],
+      "warm_sample_count": 50,
+      "warm_p50_ms": 0.21643005311489105,
+      "warm_p95_ms": 0.2799389185383916,
+      "timing_scope": "find + source validation, excludes file open; first pass is not OS cold-cache; five warmed repetitions",
+      "memory_sha256": "762f851d1a25ade24ce518103533b5f452eecd3d402dc2e9d0a3979e88393914",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    },
+    {
+      "strategy": "native",
+      "note_count": 1000,
+      "costs": {
+        "write_seal_seconds": 96.66180432203691,
+        "rebuild_seconds": 0.13713190099224448,
+        "total_seconds": 96.79893622302916,
+        "file_bytes": 12132175,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "query_ids": [
+        "q01",
+        "q02",
+        "q03",
+        "q04",
+        "q05",
+        "q06",
+        "q07",
+        "q08",
+        "q09",
+        "q10"
+      ],
+      "first_pass_ms": [
+        0.6847080076113343,
+        0.3658769419416785,
+        0.5506279412657022,
+        0.4628970054909587,
+        0.45648706145584583,
+        0.3264480037614703,
+        0.4398480523377657,
+        0.5122070433571935,
+        0.41480897925794125,
+        0.37835806142538786
+      ],
+      "warm_samples_ms": [
+        0.5650779930874705,
+        0.2927390160039067,
+        0.5316679598763585,
+        0.4284769529476762,
+        0.44140894897282124,
+        0.33934798557311296,
+        0.4231589846313,
+        0.4389070672914386,
+        0.2969789784401655,
+        0.2901590196415782,
+        0.4501480143517256,
+        0.3039980074390769,
+        0.44069800060242414,
+        0.4708679625764489,
+        0.44505903497338295,
+        0.33047806937247515,
+        0.4300689324736595,
+        0.5132980877533555,
+        0.31591695733368397,
+        0.2868979936465621,
+        0.5220880266278982,
+        0.28851896058768034,
+        0.4600980319082737,
+        0.4168180748820305,
+        0.4386680666357279,
+        0.33045897725969553,
+        0.4202870186418295,
+        0.4265489988029003,
+        0.2942390274256468,
+        0.2838879590854049,
+        0.4526580451056361,
+        0.2968480112031102,
+        0.49713789485394955,
+        0.44725905172526836,
+        0.47387799713760614,
+        0.33754901960492134,
+        0.43246697168797255,
+        0.44294807594269514,
+        0.2945490414276719,
+        0.27920794673264027,
+        0.4572069738060236,
+        0.280537991784513,
+        0.43641903903335333,
+        0.42957800906151533,
+        0.46103796921670437,
+        0.3343989374116063,
+        0.4671680508181453,
+        0.4419879987835884,
+        0.3140780609101057,
+        0.28743897564709187
+      ],
+      "warm_sample_count": 50,
+      "warm_p50_ms": 0.4284769529476762,
+      "warm_p95_ms": 0.5220880266278982,
+      "timing_scope": "find + source validation, excludes file open; first pass is not OS cold-cache; five warmed repetitions",
+      "memory_sha256": "d6e86da3396f4b80f693d2b4e2534a6c82053e9e5830c53b7209c0910c2b6e76",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    },
+    {
+      "strategy": "cjk_bigrams",
+      "note_count": 100,
+      "costs": {
+        "write_seal_seconds": 7.392678854987025,
+        "rebuild_seconds": 0.06095826404634863,
+        "total_seconds": 7.453637119033374,
+        "file_bytes": 1028983,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "query_ids": [
+        "q01",
+        "q02",
+        "q03",
+        "q04",
+        "q05",
+        "q06",
+        "q07",
+        "q08",
+        "q09",
+        "q10"
+      ],
+      "first_pass_ms": [
+        0.6046770140528679,
+        0.3917369758710265,
+        0.34202798269689083,
+        0.32740901224315166,
+        0.3027890343219042,
+        0.31092995777726173,
+        0.28654804918915033,
+        0.2632490359246731,
+        0.23694895207881927,
+        0.2708790125325322
+      ],
+      "warm_samples_ms": [
+        0.31540903728455305,
+        0.29172899667173624,
+        0.3102979389950633,
+        0.36575901322066784,
+        0.3929981030523777,
+        0.429147039540112,
+        0.35870797000825405,
+        0.34497794695198536,
+        0.33047900069504976,
+        0.3316189395263791,
+        0.38732809480279684,
+        0.35630795173346996,
+        0.32646895851939917,
+        0.29454799368977547,
+        0.2997589763253927,
+        0.3065989585593343,
+        0.2703689970076084,
+        0.253938022069633,
+        0.2415400231257081,
+        0.27442898135632277,
+        0.30082790181040764,
+        0.3278590738773346,
+        0.2857890212908387,
+        0.2866999711841345,
+        0.2711779670789838,
+        0.3000679425895214,
+        0.25713001377880573,
+        0.25718798860907555,
+        0.22104999516159296,
+        0.2611080417409539,
+        0.2993979724124074,
+        0.3171779680997133,
+        0.30590908136218786,
+        0.2778000198304653,
+        0.27786800637841225,
+        0.2954390365630388,
+        0.2560890279710293,
+        0.2498190151527524,
+        0.22822001483291388,
+        0.2420279197394848,
+        0.39926799945533276,
+        0.39757706690579653,
+        0.3897889982908964,
+        0.3169790143147111,
+        0.2874199999496341,
+        0.32085797283798456,
+        0.2625079359859228,
+        0.2627900103107095,
+        0.2233490813523531,
+        0.26283995248377323
+      ],
+      "warm_sample_count": 50,
+      "warm_p50_ms": 0.2954390365630388,
+      "warm_p95_ms": 0.39757706690579653,
+      "timing_scope": "find + source validation, excludes file open; first pass is not OS cold-cache; five warmed repetitions",
+      "memory_sha256": "afa1f5e08cc7d16f2af4bf6469c207b9554bdc1adc441b4935038d9234029b3a",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    },
+    {
+      "strategy": "cjk_bigrams",
+      "note_count": 1000,
+      "costs": {
+        "write_seal_seconds": 104.46585891593713,
+        "rebuild_seconds": 0.20404056808911264,
+        "total_seconds": 104.66989948402625,
+        "file_bytes": 15776925,
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        }
+      },
+      "query_ids": [
+        "q01",
+        "q02",
+        "q03",
+        "q04",
+        "q05",
+        "q06",
+        "q07",
+        "q08",
+        "q09",
+        "q10"
+      ],
+      "first_pass_ms": [
+        1.1021060636267066,
+        0.8646058849990368,
+        0.7829460082575679,
+        0.7334870751947165,
+        0.5931269843131304,
+        0.6391870556399226,
+        0.5375570617616177,
+        0.5118569824844599,
+        0.47146796714514494,
+        0.5165089387446642
+      ],
+      "warm_samples_ms": [
+        0.5656660068780184,
+        0.5526479799300432,
+        0.5918479291722178,
+        0.505917938426137,
+        0.4129890585318208,
+        0.5709669785574079,
+        0.4891280550509691,
+        0.5503189750015736,
+        0.47724798787385225,
+        0.49448804929852486,
+        0.5368170095607638,
+        0.5470890318974853,
+        0.527419033460319,
+        0.47581701073795557,
+        0.4103980027139187,
+        0.5317280301824212,
+        0.48803805839270353,
+        0.4890770651400089,
+        0.44170801993459463,
+        0.5395989865064621,
+        0.5559070268645883,
+        0.535137951374054,
+        0.5698979366570711,
+        0.7016260642558336,
+        0.5560480058193207,
+        0.5417279899120331,
+        0.5045180441811681,
+        0.5216769641265273,
+        0.51063799764961,
+        0.4864779766649008,
+        0.5433179903775454,
+        0.5295570008456707,
+        0.5261370679363608,
+        0.4643580177798867,
+        0.41078904177993536,
+        0.5593670066446066,
+        0.548546900972724,
+        0.4907690454274416,
+        0.464119017124176,
+        0.4794179694727063,
+        0.54041703697294,
+        0.5292380228638649,
+        0.5252780392765999,
+        0.521558104082942,
+        0.4174690693616867,
+        0.5174368852749467,
+        0.493217958137393,
+        0.48086908645927906,
+        0.4564679693430662,
+        0.4670280031859875
+      ],
+      "warm_sample_count": 50,
+      "warm_p50_ms": 0.521558104082942,
+      "warm_p95_ms": 0.5709669785574079,
+      "timing_scope": "find + source validation, excludes file open; first pass is not OS cold-cache; five warmed repetitions",
+      "memory_sha256": "b5251dab7add4e821c8de05ac7c2d12ce4d0b4d6bda2820b91d73099e23f74c4",
+      "network": {
+        "mechanism": "Linux libseccomp",
+        "denied_syscalls": [
+          "socket",
+          "socketpair",
+          "connect",
+          "sendto",
+          "sendmsg",
+          "sendmmsg"
+        ],
+        "probes": {
+          "ipv4": "EPERM",
+          "ipv6": "EPERM"
+        },
+        "installed_before_sdk_import": true,
+        "inherited_by_subprocesses": true
+      }
+    }
+  ],
+  "errors": [],
+  "decisions": [
+    {
+      "strategy": "native",
+      "recommendation": "do_not_adopt_directly",
+      "checks": {
+        "recall_at_5": false,
+        "mrr_at_5": false,
+        "source_precision": true,
+        "source_integrity": true,
+        "no_answer_false_return_rate": true,
+        "current_view": true
+      },
+      "failed_criteria": [
+        "recall_at_5",
+        "mrr_at_5"
+      ]
+    },
+    {
+      "strategy": "cjk_bigrams",
+      "recommendation": "do_not_adopt_directly",
+      "checks": {
+        "recall_at_5": false,
+        "mrr_at_5": false,
+        "source_precision": true,
+        "source_integrity": true,
+        "no_answer_false_return_rate": true,
+        "current_view": true
+      },
+      "failed_criteria": [
+        "recall_at_5",
+        "mrr_at_5"
+      ]
+    }
+  ],
+  "ended_at": "2026-10-29T17:12:24.314753+00:00"
+}

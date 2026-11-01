@@ -17,6 +17,9 @@ export async function runNested(opts: { root: string; grep: string; runId?: stri
   env.KITH_E2E_PROBE = "1";
   env.KITH_E2E_ARTIFACTS_ROOT = opts.root;
   env.KITH_E2E_SKIP_WEB_BUILD = "1";
+  // Build location and explicit container connectivity capability are not per-run identity/state.
+  if (process.env.KITH_E2E_WEB_DIST_DIR) env.KITH_E2E_WEB_DIST_DIR = process.env.KITH_E2E_WEB_DIST_DIR;
+  if (process.env.KITH_E2E_LOOPBACK_ONLINE === "1") env.KITH_E2E_LOOPBACK_ONLINE = "1";
   if (opts.runId !== undefined) env.KITH_E2E_RUN_ID = opts.runId;
 
   const child = spawn(PLAYWRIGHT_BIN, ["test", "--grep", opts.grep], { cwd: E2E_DIR, env, stdio: ["ignore", "pipe", "pipe"] });

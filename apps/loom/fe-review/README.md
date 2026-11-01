@@ -1,14 +1,7 @@
-# fe-review — loom
+# Loom review-only R2
 
-這個目錄是給 LLM agent 用的前端 review 工作包：定義如何檢查 loom 的 UI、如何產生 headless 截圖，以及報告放在哪裡。它不是給人的操作教學，也不改變元件的文檔檔位。
+Approved DESIGN M1–M3 now has a review-only stateful IPC/event preload and isolated browser driver. [Report](tasks/round2/report.md) maps retained12matrix captures and loom0069remaining journey captures to the original scope; [result](tasks/round2/result.json) keeps finalreview/CI/merge pending.
 
-**狀態：** 第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動或截圖。
+Use [PROMPT](PROMPT.md) for the actual executable entry and environment contract. [targets](targets.json) records locale en-US and actual sizes/preferences; genericcapture alone cannot inject the fixture. All42paired historicalPNG hashes were checked without rerunning browsers; PNGs/rawlogs remain private and ignored.
 
-| 檔案 | 用途 |
-| --- | --- |
-| [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
-| [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
-| [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
-| `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
-
-共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)；截圖腳本：`docs/fe-review/capture.mjs`。
+Known seriousaxe/incomplete findings and closeCancel focusVisiblefalse remain in [REVIEW](REVIEW.md). SyntheticWeb proof does not accept fullRound3, nativePTY/vault/AI or productmainline.

@@ -1,0 +1,8 @@
+{
+  "command": "owned docker networknone Fleet final",
+  "exitCode": 1,
+  "error": null,
+  "elapsedSeconds": 11.37,
+  "containerRemoved": true,
+  "scriptSha256": "ef35db7dafa6f7d8b8f869b45d38ce786864c3bebc196d8286085d6723744c1e"
+}

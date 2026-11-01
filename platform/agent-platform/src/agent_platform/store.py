@@ -8,7 +8,15 @@ from uuid import uuid4
 from psycopg.types.json import Jsonb
 
 from .auth import audit
-from .domain import TERMINAL, Problem, capabilities
+from .domain import (
+    RUNTIME_BACKENDS,
+    SUBSCRIPTION_BACKENDS,
+    SUBSCRIPTION_MODELS,
+    TERMINAL,
+    Problem,
+    capabilities,
+    execution_mode,
+)
 from .task_query import decode_cursor, encode_cursor, literal_pattern, scope_key
 
 
@@ -25,20 +33,33 @@ def event(conn, run_id, kind, payload, *, source="platform", source_id=None):
     source_id = source_id or str(uuid4())
     # Row locking serializes producers; duplicate replay never consumes another seq.
     conn.execute("SELECT id FROM runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
-    old = conn.execute(
-        "SELECT * FROM run_events WHERE run_id=%s AND source=%s AND source_event_id=%s",
+    identity = conn.execute(
+        "SELECT * FROM run_event_identities WHERE run_id=%s AND source=%s AND source_event_id=%s",
         (run_id, source, source_id),
     ).fetchone()
-    if old:
-        return old
+    if identity:
+        old = conn.execute(
+            "SELECT * FROM run_events WHERE run_id=%s AND seq=%s", (run_id, identity["seq"])
+        ).fetchone()
+        return old if old is not None else {**identity, "payload": None}
     seq = conn.execute(
         "UPDATE runs SET last_event_seq=last_event_seq+1 WHERE id=%s RETURNING last_event_seq",
         (run_id,),
     ).fetchone()["last_event_seq"]
+    event_id = uuid4()
+    created_at = conn.execute("SELECT clock_timestamp() AS now").fetchone()["now"]
+    metadata = (run_id, seq, event_id, source, source_id, kind, created_at)
+    conn.execute(
+        "INSERT INTO run_event_identities(run_id,seq,event_id,source,source_event_id,"
+        "type,created_at) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s)",
+        metadata,
+    )
     return conn.execute(
-        "INSERT INTO run_events(run_id,seq,event_id,source,source_event_id,type,payload) "
-        "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING *",
-        (run_id, seq, uuid4(), source, source_id, kind, Jsonb(json_value(payload))),
+        "INSERT INTO run_events(run_id,seq,event_id,source,source_event_id,type,"
+        "created_at,payload) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *",
+        (*metadata, Jsonb(json_value(payload))),
     ).fetchone()
 
 
@@ -46,7 +67,7 @@ def run_view(row):
     return {
         **row,
         "capabilities": capabilities(row["backend"]),
-        "execution_mode": "cocoon-fixture" if row["backend"] == "openhands" else "fake",
+        "execution_mode": execution_mode(row["backend"]),
     }
 
 
@@ -114,6 +135,10 @@ class Store:
             raise Problem(409, "unsupported_capability:mock_tools")
         if data.require_approval and data.backend != "openhands":
             raise Problem(409, "unsupported_capability:approval")
+        if data.backend in SUBSCRIPTION_BACKENDS and (
+            data.deadline_seconds > 600 or data.verification.mode != "commands"
+        ):
+            raise Problem(422, "subscription_requires_bounded_verified_run")
         profile = data.profile_id or uuid4()
         revision = 1
         if data.profile_id:
@@ -130,7 +155,7 @@ class Store:
             revision = old["revision"] + 1
         template = "fixture:m1"
         egress_policy = None
-        if data.backend == "openhands":
+        if data.backend in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -152,13 +177,15 @@ class Store:
                 revision,
                 data.name,
                 data.backend,
-                "openai-compatible:chat-completions"
+                SUBSCRIPTION_MODELS[data.backend]
+                if data.backend in SUBSCRIPTION_BACKENDS
+                else "openai-compatible:chat-completions"
                 if data.backend == "openhands"
                 else "fixture:m1",
                 template,
                 Jsonb(
                     {
-                        "exec": data.backend == "openhands",
+                        "exec": data.backend in RUNTIME_BACKENDS,
                         "network": data.backend == "openhands",
                         "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
@@ -185,7 +212,7 @@ class Store:
             "profile_not_found",
         )
         egress_policy = profile["tool_policy"].get("egress_policy_sha256")
-        if profile["backend"] == "openhands":
+        if profile["backend"] in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -241,7 +268,7 @@ class Store:
             {
                 "state": "queued",
                 "state_version": 1,
-                "execution_mode": "cocoon-fixture" if profile["backend"] == "openhands" else "fake",
+                "execution_mode": execution_mode(profile["backend"]),
             },
         )
         event(
@@ -356,6 +383,7 @@ class Store:
 
     def events(self, run_id, after):
         with self.db.transaction() as conn:
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
             run = require_row(
                 conn.execute(
                     "SELECT event_floor,last_event_seq FROM runs WHERE id=%s", (run_id,)

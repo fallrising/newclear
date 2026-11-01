@@ -97,7 +97,8 @@ def validate_node(node, config, token):
     require(node.get("data_dir") == config["sandbox_data_dir"])
     require(node.get("api_token") == token and len(token) >= 32)
     require(node.get("audit_log") is True)
-    require(node.get("max_claims") == 4)
+    require(type(config.get("max_claims", 4)) is int and 1 <= config.get("max_claims", 4) <= 4)
+    require(node.get("max_claims") == config.get("max_claims", 4))
     require(
         node.get("pools")
         == [

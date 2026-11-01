@@ -68,13 +68,13 @@ export function track(child: ChildProcess, stateDir: string): void {
   writeFileSync(pidsFile, JSON.stringify(pids));
 }
 
-export async function startStack(runDir: string, stateDir: string): Promise<StackStarted> {
+export async function startStack(runDir: string, stateDir: string, preparedAssetsDir?: string): Promise<StackStarted> {
   const webMode = process.env.E2E_WEB === "dev" ? "dev" : "build";
   const env = wranglerEnv();
   const apiPort = await getFreePort();
   const inspectorPort = await getFreePort();
 
-  let assetsDir = WEB_DIST_DIR;
+  let assetsDir = preparedAssetsDir ?? WEB_DIST_DIR;
   if (webMode === "dev") {
     assetsDir = join(stateDir, "empty-assets");
     mkdirSync(assetsDir, { recursive: true });
@@ -95,6 +95,9 @@ export async function startStack(runDir: string, stateDir: string): Promise<Stac
     "--persist-to", stateDir, "--assets", assetsDir, "--env-file", join(stateDir, "wrangler.env"),
     "--show-interactive-dev-session=false",
     "--var", "ff_mcp:on", "--var", "ff_hosted_agent:on", "--var", "ff_sidecar:off", "--var", "ff_ambient:off",
+    "--var", "KITH_PAID_ENABLED:on", "--var", "KITH_MAX_PAID_ATTEMPTS_PER_DAY:1000",
+    "--var", "KITH_MAX_AGENT_ATTEMPTS_PER_DAY:1000", "--var", "KITH_MAX_PAID_CONCURRENCY:8",
+    "--var", "KITH_MAX_API_REQUESTS_PER_MINUTE:1000", "--var", "KITH_MAX_LOGIN_ATTEMPTS_PER_MINUTE:1000",
     "--var", "ff_providers:on", "--var", "ff_drafts:on", "--var", "KITH_DEV_ALLOW_HTTP_PROVIDERS:on",
   ];
   const wrangler = spawn(WRANGLER_BIN, args, { cwd: KITH_DIR, env, detached: true, stdio: ["ignore", "pipe", "pipe"] });
@@ -143,10 +146,10 @@ function groupAlive(pid: number): boolean {
   }
 }
 
-export async function stopStack(): Promise<void> {
+export async function stopStack(ownedStateDir?: string): Promise<void> {
   let pids = children.map((c) => c.pid).filter((p): p is number => p !== undefined);
   if (pids.length === 0) {
-    const file = pidsFile ?? (process.env.KITH_E2E_RUN_DIR ? join(process.env.KITH_E2E_RUN_DIR, "state", "pids.json") : null);
+    const file = ownedStateDir ? join(ownedStateDir, "pids.json") : pidsFile ?? (process.env.KITH_E2E_RUN_DIR ? join(process.env.KITH_E2E_RUN_DIR, "state", "pids.json") : null);
     if (file && existsSync(file)) pids = (JSON.parse(readFileSync(file, "utf8")) as { pid: number }[]).map((p) => p.pid);
   }
   for (const pid of [...pids].reverse()) {

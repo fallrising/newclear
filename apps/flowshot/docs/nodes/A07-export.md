@@ -12,8 +12,8 @@ depends_on:
 size: S
 revision: 1
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: []
 allowed_paths: 

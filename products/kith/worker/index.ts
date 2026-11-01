@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { getCookie } from "hono/cookie";
 import { MEMBERS_PER_ROOM } from "../src/caps.ts";
 import { rejectMemberCount } from "../src/reject.ts";
@@ -37,7 +38,7 @@ import {
 import { errorBody } from "./errors.ts";
 import { asInt, extraKeys, parseObject } from "./json.ts";
 import { handleMcpEvents } from "./events.ts";
-import { gcAllRooms } from "./gc.ts";
+import { gcTraces } from "./gc.ts";
 import { HostedGeneration } from "./hosted/generation.ts";
 import { Inbox } from "./inbox.ts";
 import { handleMcpPost } from "./mcp.ts";
@@ -48,12 +49,43 @@ import { loadAllAgentRuntimes } from "./providers/runtime.ts";
 import { mountAgentRoutes, runtimeSummary } from "./routes/agents.ts";
 import { mountProviderRoutes } from "./routes/providers.ts";
 import { mountTraceRoutes } from "./routes/traces.ts";
+import { isReadingCapturePath, mountReadingCaptureRoutes } from "./routes/reading-capture.ts";
+import { isExportEndpoint } from "./routes/reading.ts";
 
 export { HostedGeneration, Inbox, Room };
 
 type AppEnv = { Bindings: Env };
 
 const app = new Hono<AppEnv>();
+
+// All asset requests run through this guard, including encoded paths and HEAD.
+// The private bundle is accessible only through the authenticated API's internal binding.
+app.use("*", async (c,next) => {
+  let path = new URL(c.req.url).pathname;
+  try {
+    for (let depth=0;depth<8;depth++) {
+      if(path.toLowerCase().split(/[\\/]/).includes("_reading")) {
+        c.header("Cache-Control","no-store");
+        return c.json(errorBody("not_found","not found"),404);
+      }
+      const decoded=decodeURIComponent(path);
+      if(decoded===path)break;
+      path=decoded;
+      if(depth===7){c.header("Cache-Control","no-store");return c.body(null,400);}
+    }
+  } catch {c.header("Cache-Control","no-store");return c.body(null,400);}
+  const bearer = authorizationBearer(c);
+  if(bearer === "" || (bearer?.startsWith("kith_export_")&&!isExportEndpoint(c.req.method,c.req.path))) {
+    c.header("Cache-Control","no-store");return unauthorized(c);
+  }
+  return next();
+});
+
+// Apply even to early CSRF/rate-limit failures on private reading routes.
+app.use("/api/*", async (c, next) => {
+  if (isReadingCapturePath(c.req.path)) c.header("Cache-Control", "no-store");
+  await next();
+});
 
 const HANDLE_RE = /^[a-z0-9_]{2,32}$/;
 const QUOTA_CLASSES = new Set(["api_key", "operator_personal"]);
@@ -65,6 +97,22 @@ app.use("/api/*", async (c, next) => {
   }
   if (authorizationBearer(c) != null) return next();
   if (!csrfOk(c)) return unauthorized(c, "CSRF token missing or mismatch");
+  return next();
+});
+
+app.use("/api/*", bodyLimit({ maxSize: 1024 * 1024 + 16 * 1024, onError: (c) => c.json(errorBody("payload_too_large", "API body too large"), 413) }));
+app.use("/mcp", bodyLimit({ maxSize: 1024 * 1024 + 16 * 1024, onError: (c) => c.json(errorBody("payload_too_large", "MCP body too large"), 413) }));
+app.use("*", async (c, next) => {
+  const path = new URL(c.req.url).pathname;
+  if (!path.startsWith("/api/") && path !== "/mcp" && path !== "/mcp/events") return next();
+  const accounting = c.env.ROOM.get(c.env.ROOM.idFromName("cost:global")) as DurableObjectStub & { admitApiRequest(client: string, login: boolean): Promise<boolean> };
+  const client = c.req.header("CF-Connecting-IP") ?? "unknown";
+  try {
+    if (!(await accounting.admitApiRequest(client, false)) || (path === "/api/auth/login" && !(await accounting.admitApiRequest(client, true)))) {
+      c.header("Retry-After", "60");
+      return c.json(errorBody("rate_limited", "application request quota exhausted"), 429);
+    }
+  } catch { return c.json(errorBody("not_ready", "request admission unavailable"), 503); }
   return next();
 });
 
@@ -84,6 +132,7 @@ app.post("/api/auth/login", async (c) => {
     .trim();
   const password = typeof obj.password === "string" ? obj.password : "";
   if (!handle || !password) return invalid(c, "handle and password required");
+  if (!HANDLE_RE.test(handle) || password.length > 1024) return invalid(c, "invalid credentials size");
 
   const member = await c.env.DB.prepare(
     `SELECT id, kind, handle, display_name, password_hash, capabilities_json, quota_class, is_operator, disabled_at, must_change_password
@@ -742,6 +791,7 @@ app.post("/api/members/:id/password", async (c) => {
   return c.json({ ok: true });
 });
 
+mountReadingCaptureRoutes(app);
 mountProviderRoutes(app);
 mountAgentRoutes(app);
 mountTraceRoutes(app);
@@ -804,7 +854,13 @@ app.notFound(async (c) => {
 export default {
   fetch: app.fetch.bind(app),
   scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil(gcAllRooms(env.DB));
+    ctx.waitUntil((async () => {
+      const accounting = env.ROOM.get(env.ROOM.idFromName("cost:global")) as DurableObjectStub & {
+        gcCursor(): Promise<string>; advanceGcCursor(cursor: string): Promise<void>;
+      };
+      const result = await gcTraces(env.DB, { afterRoomId: await accounting.gcCursor(), tracesBucket: env.TRACES });
+      await accounting.advanceGcCursor(result.lastRoomId);
+    })());
   },
 };
 

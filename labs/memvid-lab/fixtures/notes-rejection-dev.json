@@ -1,0 +1,560 @@
+{
+  "schema_version": 1,
+  "provenance": "公開 synthetic 合成繁體中文拒答實驗 dev 資料。所有名稱、物件、活動、設定及紀錄均為虛構，不含真實人物、私人資料或專業建議。兩個新 split 由獨立資料作者在未讀取任何評估輸出、排名或分數且未執行模型檢索的情況下同時撰寫；舊 fixtures 僅供避免重複。每筆事實僅適用於指名的實體，不代表其他相似名稱。查詢及人工 oracle 理由供評估前審查與固定；這是小型人工樣本，不宣稱雙盲或母體代表性。",
+  "notes": [
+    {
+      "id": "d01",
+      "uri": "mv2://rejection-dev/d01",
+      "title": "紙鷗風箏尾帶",
+      "text": "紙鷗風箏的尾帶長一百二十公分，由三段淡紫布條接成。收線時把尾帶繞在木製線架外側。"
+    },
+    {
+      "id": "d02",
+      "uri": "mv2://rejection-dev/d02",
+      "title": "霜橋郵票護頁",
+      "text": "霜橋系列郵票共有八枚，整套裝在集郵冊的第九張黑底護頁。護頁右下角貼著方形銀標。"
+    },
+    {
+      "id": "d03",
+      "uri": "mv2://rejection-dev/d03",
+      "title": "月兔手影排演",
+      "text": "月兔手影戲排演先演森林段，再演城堡段，最後演渡河段。幕布前留出兩步寬的空位。"
+    },
+    {
+      "id": "d04",
+      "uri": "mv2://rejection-dev/d04",
+      "title": "赤磚積木吊橋",
+      "text": "赤磚積木吊橋的橋面用了十四塊長板，兩座橋塔各高七層。展示時橋頭朝向房門。"
+    },
+    {
+      "id": "d05",
+      "uri": "mv2://rejection-dev/d05",
+      "title": "石鯨迷你高爾夫",
+      "text": "石鯨迷你高爾夫體驗從第四洞開始，使用帶橘條的短球桿。打完第九洞後在拱門交還球桿。"
+    },
+    {
+      "id": "d06",
+      "uri": "mv2://rejection-dev/d06",
+      "title": "紫彗保齡球練習",
+      "text": "紫彗保齡球練習訂了六號球道，預約時段為週二下午三點到四點。練習紀錄寫在棋盤格卡片上。"
+    },
+    {
+      "id": "d07",
+      "uri": "mv2://rejection-dev/d07",
+      "title": "栗麥麵包試作",
+      "text": "栗麥麵包這次使用長方形烤模，麵糰分成四份並排放入。試作照片的備註寫著「表面撒芝麻」。"
+    },
+    {
+      "id": "d08",
+      "uri": "mv2://rejection-dev/d08",
+      "title": "燕翼紙飛機試摺",
+      "text": "燕翼紙飛機的摺法卡寫著先將紙張長邊對摺，再把兩個上角折向中線。試飛後機頭貼了一小片補強紙。"
+    },
+    {
+      "id": "d09",
+      "uri": "mv2://rejection-dev/d09",
+      "title": "彩砂萬花筒組裝",
+      "text": "彩砂萬花筒的透明圓片裝在鏡筒前端，裡面放了五顆藍珠和三顆白珠。鏡筒外包著波浪紋紙。"
+    },
+    {
+      "id": "d10",
+      "uri": "mv2://rejection-dev/d10",
+      "title": "棋格魔術方塊",
+      "text": "棋格魔術方塊練習停在第二層，完成的白色面朝下。下次從尋找紅綠邊塊開始。"
+    },
+    {
+      "id": "d11",
+      "uri": "mv2://rejection-dev/d11",
+      "title": "落葉紙屑整理",
+      "text": "落葉造型打孔器打出的紙屑分裝成十二小袋，每袋貼了棕色圓標。小袋集中放在掛式網兜。"
+    },
+    {
+      "id": "d12",
+      "uri": "mv2://rejection-dev/d12",
+      "title": "絨尾梳毛用品",
+      "text": "絨尾玩具長毛犬的專用梳子放在絨布窩旁的藤籃。梳柄繫了一條紅繩方便辨認。"
+    },
+    {
+      "id": "d13",
+      "uri": "mv2://rejection-dev/d13",
+      "title": "潮槳模型船試浮",
+      "text": "潮槳模型船試浮時在船尾加了兩片黃銅墊片，左右各一片。試浮水槽的水位畫在內壁的藍線處。"
+    },
+    {
+      "id": "d14",
+      "uri": "mv2://rejection-dev/d14",
+      "title": "旋星旋轉木馬",
+      "text": "旋星遊樂場的旋轉木馬券可在出口旁的齒輪亭兌換紀念貼紙。票根背面蓋的是雲形章。"
+    },
+    {
+      "id": "d15",
+      "uri": "mv2://rejection-dev/d15",
+      "title": "晨紋窗簾量記",
+      "text": "晨紋窗簾從掛環到下擺量得一百八十公分，下擺離地三公分。尺寸記在窗框旁的便條上。"
+    },
+    {
+      "id": "d16",
+      "uri": "mv2://rejection-dev/d16",
+      "title": "圓礁水族佈景",
+      "text": "圓礁水族佈景把空心拱石擺在缸中央，兩顆扁石靠著後壁。這次佈景的底砂選用淺褐色。"
+    },
+    {
+      "id": "d17",
+      "uri": "mv2://rejection-dev/d17",
+      "title": "晨躍跳繩記錄",
+      "text": "晨躍跳繩練習每組跳四十下，做完一組就翻一張計數卡。這次一共翻了五張卡。"
+    },
+    {
+      "id": "d18",
+      "uri": "mv2://rejection-dev/d18",
+      "title": "字港磁鐵字母",
+      "text": "字港磁鐵字母的母音集中貼在冰箱側面上半部，子音排在下半部。重複字母另外放進有格子的鐵盤。"
+    },
+    {
+      "id": "d19",
+      "uri": "mv2://rejection-dev/d19",
+      "title": "LabelMoth 列印帶",
+      "text": "LabelMoth 標籤機目前裝的是 9 mm 黃底標籤帶，字體選圓體。裁下的第一張標籤貼在機身底部。"
+    },
+    {
+      "id": "d20",
+      "uri": "mv2://rejection-dev/d20",
+      "title": "TickPebble 計時聲",
+      "text": "TickPebble 料理計時器的提示聲選為 Bell 3，倒數結束會響兩輪。旋鈕上的白點對準十二點方向。"
+    },
+    {
+      "id": "d21",
+      "uri": "mv2://rejection-dev/d21",
+      "title": "InkComet 印章盤",
+      "text": "InkComet 滾輪印章使用 Ocean Blue 墨墊，印出的花紋是連續小船。替換墨墊放在硬殼圓盒中。"
+    },
+    {
+      "id": "d22",
+      "uri": "mv2://rejection-dev/d22",
+      "title": "TileFern 像素草稿",
+      "text": "TileFern 的像素草稿畫布為 32 × 48 格，配色限用六色。這份草稿畫的是向左行走的機器人。"
+    },
+    {
+      "id": "d23",
+      "uri": "mv2://rejection-dev/d23",
+      "title": "BubbleLark 吹泡模式",
+      "text": "BubbleLark 泡泡機切到 Breeze 模式，每輪轉動八秒後停兩秒。補充液裝在帶刻度的方瓶。"
+    },
+    {
+      "id": "d24",
+      "uri": "mv2://rejection-dev/d24",
+      "title": "DustAcorn 滾筒替換",
+      "text": "DustAcorn 除塵滾筒使用 S4 替換芯，新的替換芯共有三支。外包裝上的開口記號是空心箭頭。"
+    }
+  ],
+  "queries": [
+    {
+      "id": "dq01",
+      "category": "exact",
+      "text": "紙鷗風箏的尾帶長多少公分？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d01"
+      ],
+      "rationale": "d01 明示「一百二十公分」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq02",
+      "category": "exact",
+      "text": "霜橋系列郵票整套放在哪一張護頁？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d02"
+      ],
+      "rationale": "d02 明示「第九張黑底護頁」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq03",
+      "category": "exact",
+      "text": "月兔手影戲排演先演哪一段？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d03"
+      ],
+      "rationale": "d03 明示「先演森林段」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq04",
+      "category": "exact",
+      "text": "赤磚積木吊橋的兩座橋塔各高幾層？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d04"
+      ],
+      "rationale": "d04 明示「各高七層」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq05",
+      "category": "exact",
+      "text": "石鯨迷你高爾夫體驗從第幾洞開始？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d05"
+      ],
+      "rationale": "d05 明示「從第四洞開始」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq06",
+      "category": "exact",
+      "text": "紫彗保齡球練習訂的是幾號球道？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d06"
+      ],
+      "rationale": "d06 明示「六號球道」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq07",
+      "category": "partial",
+      "text": "這次麵糰要分成幾份放進烤模？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d07"
+      ],
+      "rationale": "d07 明示「麵糰分成四份」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq08",
+      "category": "partial",
+      "text": "把兩個上角折向中線之前，要先怎麼折紙？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d08"
+      ],
+      "rationale": "d08 明示「先將紙張長邊對摺」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq09",
+      "category": "partial",
+      "text": "鏡筒前端的圓片裡放了幾顆白珠？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d09"
+      ],
+      "rationale": "d09 明示「三顆白珠」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq10",
+      "category": "partial",
+      "text": "下次要先找哪兩種顏色的邊塊？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d10"
+      ],
+      "rationale": "d10 明示「紅綠邊塊」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq11",
+      "category": "partial",
+      "text": "打孔器留下的造型紙屑總共分了幾小袋？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d11"
+      ],
+      "rationale": "d11 明示「十二小袋」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq12",
+      "category": "partial",
+      "text": "梳柄繫紅繩的那把梳子收在哪裡？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d12"
+      ],
+      "rationale": "d12 明示「絨布窩旁的藤籃」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq13",
+      "category": "paraphrase",
+      "text": "為了調整小船的平衡，配重放在船的哪個部位？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d13"
+      ],
+      "rationale": "d13 明示「在船尾加了兩片黃銅墊片」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq14",
+      "category": "paraphrase",
+      "text": "玩完旋轉木馬後，要去哪個小亭子換紀念貼紙？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d14"
+      ],
+      "rationale": "d14 明示「出口旁的齒輪亭」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq15",
+      "category": "paraphrase",
+      "text": "這幅窗邊布幔的底緣和地板相隔多遠？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d15"
+      ],
+      "rationale": "d15 明示「下擺離地三公分」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq16",
+      "category": "paraphrase",
+      "text": "水缸裡那座可以穿過去的石頭擺在什麼位置？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d16"
+      ],
+      "rationale": "d16 明示「空心拱石擺在缸中央」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq17",
+      "category": "paraphrase",
+      "text": "每完成一輪甩繩跨跳，要累積幾下才翻卡？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d17"
+      ],
+      "rationale": "d17 明示「每組跳四十下」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq18",
+      "category": "paraphrase",
+      "text": "可吸在冰箱上的字母裡，重複的那些收進哪裡？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d18"
+      ],
+      "rationale": "d18 明示「有格子的鐵盤」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq19",
+      "category": "mixed",
+      "text": "LabelMoth 現在裝的標籤帶寬幾 mm？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d19"
+      ],
+      "rationale": "d19 明示「9 mm」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq20",
+      "category": "mixed",
+      "text": "TickPebble 的提示聲選的是哪個 Bell？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d20"
+      ],
+      "rationale": "d20 明示「Bell 3」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq21",
+      "category": "mixed",
+      "text": "InkComet 使用哪個英文色名的墨墊？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d21"
+      ],
+      "rationale": "d21 明示「Ocean Blue」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq22",
+      "category": "mixed",
+      "text": "TileFern 這份畫布的寬高各有幾格？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d22"
+      ],
+      "rationale": "d22 明示「32 × 48 格」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq23",
+      "category": "mixed",
+      "text": "BubbleLark 的 Breeze 模式每輪轉動幾秒？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d23"
+      ],
+      "rationale": "d23 明示「每輪轉動八秒」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq24",
+      "category": "mixed",
+      "text": "DustAcorn 應取用哪個型號的替換芯？",
+      "relevant_uris": [
+        "mv2://rejection-dev/d24"
+      ],
+      "rationale": "d24 明示「S4 替換芯」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "dq25",
+      "category": "unanswerable",
+      "text": "琉光熱氣球賽的起飛旗是什麼顏色？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未記錄琉光熱氣球賽、起飛流程或旗幟；沒有可提供旗色的來源。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq26",
+      "category": "unanswerable",
+      "text": "銀苔擊劍社借用的面罩尺寸有哪些？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及銀苔擊劍社或擊劍面罩，沒有面罩尺寸紀錄。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq27",
+      "category": "unanswerable",
+      "text": "白磯潛水集合要在碼頭哪一端等候？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未記錄白磯潛水活動或其碼頭集合點；模型船試浮並非潛水行程。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq28",
+      "category": "unanswerable",
+      "text": "方雲漫畫配音放映使用哪一種字幕字體？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及方雲漫畫配音或放映字幕，沒有字幕字體紀錄。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq29",
+      "category": "unanswerable",
+      "text": "花塔燈謎晚會準備了多少道題目？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未記錄花塔燈謎晚會或燈謎題庫，沒有題數來源。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq30",
+      "category": "unanswerable",
+      "text": "沙羽沙雕評選把作品分成哪幾組？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及沙羽沙雕評選或沙雕組別，不能從其他遊戲活動推得分組。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq31",
+      "category": "unanswerable",
+      "text": "彩篷馬戲團的觀眾入口在哪個帳篷？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未記錄彩篷馬戲團、觀眾入口或帳篷配置。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq32",
+      "category": "unanswerable",
+      "text": "層紋岩石展把玄武岩陳列在哪一區？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及層紋岩石展或玄武岩陳列，沒有展區資料。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "dq33",
+      "category": "unanswerable",
+      "text": "紙鷺風箏的尾帶是由幾段布條接成？",
+      "relevant_uris": [],
+      "rationale": "d01 記錄的是紙鷗風箏及其三段尾帶；紙鷺是另一個未出現的風箏名稱，不能沿用紙鷗的段數。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq34",
+      "category": "unanswerable",
+      "text": "霜塔系列郵票整套有多少枚？",
+      "relevant_uris": [],
+      "rationale": "d02 只有霜橋系列的八枚郵票；霜塔系列未出現在任何筆記，兩系列的枚數不能互用。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq35",
+      "category": "unanswerable",
+      "text": "月鹿手影戲排演的最後一段叫什麼？",
+      "relevant_uris": [],
+      "rationale": "d03 記錄月兔手影戲的段落順序；沒有月鹿手影戲的排演紀錄。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq36",
+      "category": "unanswerable",
+      "text": "青磚積木吊橋的橋面用了幾塊長板？",
+      "relevant_uris": [],
+      "rationale": "d04 的十四塊長板屬於赤磚積木吊橋；沒有青磚積木吊橋的用料紀錄。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq37",
+      "category": "unanswerable",
+      "text": "石豚迷你高爾夫體驗結束後在哪裡還球桿？",
+      "relevant_uris": [],
+      "rationale": "d05 只記石鯨體驗的交還位置；石豚體驗未出現，無法推定其球桿歸還點。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq38",
+      "category": "unanswerable",
+      "text": "紫曜保齡球練習預約在星期幾？",
+      "relevant_uris": [],
+      "rationale": "d06 的週二時段屬於紫彗練習；沒有紫曜練習的預約資訊。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq39",
+      "category": "unanswerable",
+      "text": "LabelFinch 標籤機目前裝的是什麼底色的標籤帶？",
+      "relevant_uris": [],
+      "rationale": "d19 記的是 LabelMoth 的黃底標籤帶；LabelFinch 未出現，不能把另一台機器的耗材當成答案。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq40",
+      "category": "unanswerable",
+      "text": "BubbleWren 泡泡機在 Breeze 模式每輪停幾秒？",
+      "relevant_uris": [],
+      "rationale": "d23 的兩秒停頓屬於 BubbleLark；BubbleWren 沒有任何模式設定紀錄。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "dq41",
+      "category": "unanswerable",
+      "text": "紙鷗風箏整組含線架的重量是多少公克？",
+      "relevant_uris": [],
+      "rationale": "d01 提供尾帶長度、布條段數及收線方式；所有筆記都未提供紙鷗風箏或線架重量，不能由尺寸推出重量。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "dq42",
+      "category": "unanswerable",
+      "text": "紫彗保齡球練習預約了幾位參加者？",
+      "relevant_uris": [],
+      "rationale": "d06 只記球道、預約時段及記錄卡外觀，未記紫彗練習的人數。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "dq43",
+      "category": "unanswerable",
+      "text": "栗麥麵包這次烤箱設定幾度？",
+      "relevant_uris": [],
+      "rationale": "d07 記錄烤模、四份麵糰與芝麻備註；沒有烤箱溫度，不能用一般食譜補入。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "dq44",
+      "category": "unanswerable",
+      "text": "彩砂萬花筒的鏡筒直徑是多少公分？",
+      "relevant_uris": [],
+      "rationale": "d09 有圓片位置、珠子數量與外包紙紋樣，未提供鏡筒直徑。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "dq45",
+      "category": "unanswerable",
+      "text": "晨紋窗簾的布料成分是什麼？",
+      "relevant_uris": [],
+      "rationale": "d15 只提供長度、離地距離及尺寸便條位置，沒有布料纖維或成分資訊。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "dq46",
+      "category": "unanswerable",
+      "text": "晨躍跳繩練習每組之間休息幾秒？",
+      "relevant_uris": [],
+      "rationale": "d17 記每組四十下及五張計數卡，沒有組間休息時間；次數不構成秒數。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "dq47",
+      "category": "unanswerable",
+      "text": "TileFern 的機器人草稿用了哪六種顏色？",
+      "relevant_uris": [],
+      "rationale": "d22 只限制六色並記畫布尺寸及圖案方向，未列出顏色名稱或色碼。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "dq48",
+      "category": "unanswerable",
+      "text": "DustAcorn 的 S4 替換芯每支有幾張黏紙？",
+      "relevant_uris": [],
+      "rationale": "d24 記錄替換芯型號、三支庫存及包裝記號，沒有每支黏紙張數。",
+      "negative_type": "missing_attribute"
+    }
+  ]
+}

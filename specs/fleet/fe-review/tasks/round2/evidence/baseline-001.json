@@ -1,0 +1,31 @@
+{
+  "mode": "baseline",
+  "startedAt": "2026-10-24T09:55:17.744Z",
+  "passed": false,
+  "node": "v24.18.0",
+  "playwright": "1.63.0",
+  "binarySha256": "4301e12dbda0b87816cfcf8be800788e7fa5d606c25d20e8f5461e65a880f0d1",
+  "steps": [
+    {
+      "stage": "SERVER_START",
+      "passed": true
+    },
+    {
+      "stage": "SEED",
+      "passed": true
+    }
+  ],
+  "cleanup": {
+    "heartbeatStopped": true,
+    "browserClosed": true,
+    "serverExited": true,
+    "listenerAbsent": true,
+    "privateStateRemoved": true
+  },
+  "chromium": "153.0.8010.12",
+  "pageErrors": 0,
+  "error": "REVIEW_COOKIE",
+  "failedStage": "LOGIN",
+  "cleanupPassed": true,
+  "finishedAt": "2026-10-24T09:55:18.407Z"
+}

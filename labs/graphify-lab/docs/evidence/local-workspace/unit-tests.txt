@@ -1,0 +1,62 @@
+.venv/bin/python -m unittest discover -s tests -v
+test_changed_origin_and_revision_are_rejected (test_cache.GitCacheTests.test_changed_origin_and_revision_are_rejected) ... ok
+test_committed_symlink_escape_is_rejected_before_publication (test_cache.GitCacheTests.test_committed_symlink_escape_is_rejected_before_publication) ... ok
+test_concurrent_fetch_publishes_once (test_cache.GitCacheTests.test_concurrent_fetch_publishes_once) ... ok
+test_dirty_tracked_and_ignored_files_are_rejected (test_cache.GitCacheTests.test_dirty_tracked_and_ignored_files_are_rejected) ... ok
+test_subdirs_reuse_same_snapshot (test_cache.GitCacheTests.test_subdirs_reuse_same_snapshot) ... ok
+test_tampered_metadata_is_not_a_cache_hit (test_cache.GitCacheTests.test_tampered_metadata_is_not_a_cache_hit) ... ok
+test_two_consumers_and_offline_reopen_share_one_checkout (test_cache.GitCacheTests.test_two_consumers_and_offline_reopen_share_one_checkout) ... ok
+test_url_policy_sha_subdir_and_offline_miss (test_cache.GitCacheTests.test_url_policy_sha_subdir_and_offline_miss) ... ok
+test_version_change_isolated_without_moving_old_checkout (test_cache.GitCacheTests.test_version_change_isolated_without_moving_old_checkout) ... ok
+test_ambient_output_override_does_not_escape_cache (test_cache.GraphifyIndexTests.test_ambient_output_override_does_not_escape_cache) ... ok
+test_ancestor_gitignore_and_tracked_names_both_invalidate (test_cache.GraphifyIndexTests.test_ancestor_gitignore_and_tracked_names_both_invalidate) ... ok
+test_ancestor_graphifyignore_invalidates_subtree_index (test_cache.GraphifyIndexTests.test_ancestor_graphifyignore_invalidates_subtree_index) ... ok
+test_changed_source_gets_new_index_and_old_graph_survives (test_cache.GraphifyIndexTests.test_changed_source_gets_new_index_and_old_graph_survives) ... ok
+test_concurrent_real_index_build_publishes_once (test_cache.GraphifyIndexTests.test_concurrent_real_index_build_publishes_once) ... ok
+test_empty_graph_is_rejected_without_partial_publication (test_cache.GraphifyIndexTests.test_empty_graph_is_rejected_without_partial_publication) ... ok
+test_external_js_resolver_configuration_has_explicit_boundary (test_cache.GraphifyIndexTests.test_external_js_resolver_configuration_has_explicit_boundary) ... ok
+test_git_excludes_and_commit_provenance_are_context_inputs (test_cache.GraphifyIndexTests.test_git_excludes_and_commit_provenance_are_context_inputs) ... ok
+test_indexed_source_cannot_shadow_installed_graphify (test_cache.GraphifyIndexTests.test_indexed_source_cannot_shadow_installed_graphify) ... ok
+test_provenance_settings_and_fingerprint_are_part_of_key (test_cache.GraphifyIndexTests.test_provenance_settings_and_fingerprint_are_part_of_key) ... ok
+test_real_index_is_shared_and_corruption_refused (test_cache.GraphifyIndexTests.test_real_index_is_shared_and_corruption_refused) ... ok
+test_existing_run_is_preserved (test_cli.CliBoundaries.test_existing_run_is_preserved) ... ok
+test_offline_missing_reference_fails (test_cli.CliBoundaries.test_offline_missing_reference_fails) ... ok
+test_output_cannot_mutate_cache (test_cli.CliBoundaries.test_output_cannot_mutate_cache) ... ok
+test_output_cannot_mutate_fixture (test_cli.CliBoundaries.test_output_cannot_mutate_fixture) ... ok
+test_same_name_requires_file_selection (test_cli.CliBoundaries.test_same_name_requires_file_selection) ... ok
+test_source_pointer_containment_and_bounds (test_cli.CliBoundaries.test_source_pointer_containment_and_bounds) ... ok
+test_unknown_reference_does_not_fetch (test_cli.CliBoundaries.test_unknown_reference_does_not_fetch) ... ok
+test_exact_ast_declaration_and_wrong_candidate (test_pilot.PilotBoundaries.test_exact_ast_declaration_and_wrong_candidate) ... ok
+test_existing_output_is_untouched (test_pilot.PilotBoundaries.test_existing_output_is_untouched) ... ok
+test_full_lowercase_commit_required (test_pilot.PilotBoundaries.test_full_lowercase_commit_required) ... ok
+test_output_rejects_overlap_in_both_directions_and_symlink (test_pilot.PilotBoundaries.test_output_rejects_overlap_in_both_directions_and_symlink) ... ok
+test_portable_nested_output (test_pilot.PilotBoundaries.test_portable_nested_output) ... ok
+test_snapshot_is_commit_bytes_only_and_never_executes_source (test_pilot.PilotBoundaries.test_snapshot_is_commit_bytes_only_and_never_executes_source) ... ok
+test_existing_run_is_not_overwritten (test_scenarios.ScenarioBoundaryTests.test_existing_run_is_not_overwritten) ... ok
+test_external_reference_is_not_silently_counted_as_fixture_coverage (test_scenarios.ScenarioBoundaryTests.test_external_reference_is_not_silently_counted_as_fixture_coverage) ... ok
+test_ambiguous_and_missing_symbols (test_source.SourceContract.test_ambiguous_and_missing_symbols) ... ok
+test_legacy_imports_are_compatible (test_source.SourceContract.test_legacy_imports_are_compatible) ... ok
+test_rejects_symlink_escape_and_invalid_locations (test_source.SourceContract.test_rejects_symlink_escape_and_invalid_locations) ... ok
+test_unicode_line_ranges_and_last_line (test_source.SourceContract.test_unicode_line_ranges_and_last_line) ... ok
+test_ambiguity_missing_symbol_and_file_selection (test_workspace.WorkspaceContract.test_ambiguity_missing_symbol_and_file_selection) ... ok
+test_ancestor_context_change_reindexes (test_workspace.WorkspaceContract.test_ancestor_context_change_reindexes) ... ok
+test_bad_options_do_not_create_cache (test_workspace.WorkspaceContract.test_bad_options_do_not_create_cache) ... ok
+test_corrupt_graph_is_rejected (test_workspace.WorkspaceContract.test_corrupt_graph_is_rejected) ... ok
+test_excerpt_races_reject_output (test_workspace.WorkspaceContract.test_excerpt_races_reject_output) ... ok
+test_explicit_existing_directory_and_external_cache_required (test_workspace.WorkspaceContract.test_explicit_existing_directory_and_external_cache_required) ... ok
+test_native_query_ambiguity_and_no_match_are_preserved (test_workspace.WorkspaceContract.test_native_query_ambiguity_and_no_match_are_preserved) ... ok
+test_real_extraction_shared_hit_and_canonical_identity (test_workspace.WorkspaceContract.test_real_extraction_shared_hit_and_canonical_identity) ... ok
+test_real_query_explain_and_source (test_workspace.WorkspaceContract.test_real_query_explain_and_source) ... ok
+test_rename_reindexes_and_retains_old_graph (test_workspace.WorkspaceContract.test_rename_reindexes_and_retains_old_graph) ... ok
+test_serve_help_describes_snapshot (test_workspace.WorkspaceContract.test_serve_help_describes_snapshot) ... ok
+test_source_symlink_escape_is_rejected (test_workspace.WorkspaceContract.test_source_symlink_escape_is_rejected) ... ok
+test_dangling_output_symlink_is_not_a_new_directory (test_workspace_trial.TrialOutputBoundaries.test_dangling_output_symlink_is_not_a_new_directory) ... ok
+test_existing_directory_and_file_preserved (test_workspace_trial.TrialOutputBoundaries.test_existing_directory_and_file_preserved) ... ok
+test_new_work_directory_is_allowed_without_creating_it (test_workspace_trial.TrialOutputBoundaries.test_new_work_directory_is_allowed_without_creating_it) ... ok
+test_protected_trees_and_ancestors (test_workspace_trial.TrialOutputBoundaries.test_protected_trees_and_ancestors) ... ok
+test_symlink_to_protected_tree_rejected (test_workspace_trial.TrialOutputBoundaries.test_symlink_to_protected_tree_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 56 tests in 38.460s
+
+OK

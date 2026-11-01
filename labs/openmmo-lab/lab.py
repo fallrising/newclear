@@ -207,9 +207,16 @@ def doctor(workspace, lock):
     for line in (workspace / ".env").read_text().splitlines():
         if "=" in line and not line.lstrip().startswith("#"):
             key, value = line.split("=", 1)
-            values[key.strip()] = value.strip().strip("\"'")
-    if not values.get("GOOGLE_CLIENT_ID", "").endswith(".apps.googleusercontent.com"):
-        problems.append("set GOOGLE_CLIENT_ID in workspace .env (Google Web OAuth client)")
+            value = value.strip()
+            if len(value) >= 2 and value[0] in "\"'" and value[-1] == value[0]:
+                value = value[1:-1]
+            values[key.strip()] = value
+    # Syntax only: this cannot prove the client exists, is a Web client, or has
+    # authorized this origin. Reject Compose expansion and sed replacement
+    # characters before the pinned client entrypoint consumes this value.
+    if not re.fullmatch(r"[0-9]+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com",
+                        values.get("GOOGLE_CLIENT_ID", "")):
+        problems.append("set GOOGLE_CLIENT_ID in workspace .env (Google Web OAuth client; expected numeric-project-id-client-id.apps.googleusercontent.com)")
     assets = asset_problems(source)
     if assets:
         problems.append(f"{len(assets)} client assets missing or mismatched; run pinned tools/fetch-assets.sh")

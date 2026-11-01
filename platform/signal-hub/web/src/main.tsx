@@ -1,3 +1,4 @@
+import { RestoredBadge, RestoredNotice } from "./EventProvenance";
 import { createRoot } from "react-dom/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
@@ -19,6 +20,8 @@ import {
   sourceLabel,
 } from "./model";
 import type { EventDetail, Filters, Page, Source, StoredEvent } from "./model";
+import { Metrics } from "./MetricBoard";
+import { Deliveries } from "./DeliveryBoard";
 import "./style.css";
 
 type IconName =
@@ -383,9 +386,11 @@ function Login({
 function FilterPanel({
   params,
   navigate,
+  timeOnly = false,
 }: {
   params: URLSearchParams;
   navigate: (next: URLSearchParams) => void;
+  timeOnly?: boolean;
 }) {
   const [draft, setDraft] = useState(() => readFilters(params));
   const [fromLocal, setFromLocal] = useState(() =>
@@ -439,6 +444,7 @@ function FilterPanel({
       return;
     }
     if (
+      !timeOnly &&
       filters.type &&
       !/^[a-z0-9]+(?:\.[a-z0-9]+)*(?:\.\*|\*)?$/.test(filters.type)
     ) {
@@ -466,7 +472,10 @@ function FilterPanel({
     </label>
   );
   return (
-    <section className="filters" aria-label="事件篩選">
+    <section
+      className="filters"
+      aria-label={timeOnly ? "指標時間篩選" : "事件篩選"}
+    >
       <div className="range-row">
         <span className="range-label">時間範圍</span>
         <div className="segmented">
@@ -502,7 +511,9 @@ function FilterPanel({
             自訂
           </button>
         </div>
-        <span className="range-caption">依事件發生時間 · [開始, 結束)</span>
+        <span className="range-caption">
+          {timeOnly ? "依桶起點" : "依事件發生時間"} · [開始, 結束)
+        </span>
       </div>
       <form onSubmit={submit}>
         {custom && (
@@ -528,69 +539,75 @@ function FilterPanel({
             <small>套用時轉換為 UTC；留空可開放單側時間界線。</small>
           </div>
         )}
-        <div className="filter-grid">
-          {field("source", "來源（精確比對）", "urn:signalhub:release")}
-          {field("type", "事件類型", "release.deploy.*")}
-          <label>
-            最低嚴重度
-            <select
-              value={draft.severity_min}
-              onChange={(event) =>
-                setDraft({ ...draft, severity_min: event.target.value })
-              }
-            >
-              <option value="">全部嚴重度</option>
-              {severities.map((value) => (
-                <option key={value}>{value}</option>
-              ))}
-            </select>
-          </label>
-          {field("subject_prefix", "對象前綴", "服務或主機名稱")}
-          {field("correlationid", "關聯 ID", "correlationid")}
-          <label className="search-field">
-            關鍵字搜尋
-            <div>
-              <Icon name="search" size={17} />
-              <input
-                value={draft.q}
+        {!timeOnly && (
+          <div className="filter-grid">
+            {field("source", "來源（精確比對）", "urn:signalhub:release")}
+            {field("type", "事件類型", "release.deploy.*")}
+            <label>
+              最低嚴重度
+              <select
+                value={draft.severity_min}
                 onChange={(event) =>
-                  setDraft({ ...draft, q: event.target.value })
+                  setDraft({ ...draft, severity_min: event.target.value })
                 }
-                placeholder="類型、對象、摘要"
-              />
-            </div>
-          </label>
-        </div>
+              >
+                <option value="">全部嚴重度</option>
+                {severities.map((value) => (
+                  <option key={value}>{value}</option>
+                ))}
+              </select>
+            </label>
+            {field("subject_prefix", "對象前綴", "服務或主機名稱")}
+            {field("correlationid", "關聯 ID", "correlationid")}
+            <label className="search-field">
+              關鍵字搜尋
+              <div>
+                <Icon name="search" size={17} />
+                <input
+                  value={draft.q}
+                  onChange={(event) =>
+                    setDraft({ ...draft, q: event.target.value })
+                  }
+                  placeholder="類型、對象、摘要"
+                />
+              </div>
+            </label>
+          </div>
+        )}
         <div className="filter-footer">
           <span className="exact-range">
             {params.has("from") || params.has("to")
               ? `${params.get("from") || "不限開始"} → ${params.get("to") || "不限結束"}`
-              : "全部保留中的事件；不限制時間"}
+              : timeOnly
+                ? "全部保留中的指標；不限制時間"
+                : "全部保留中的事件；不限制時間"}
           </span>
           <div className="filter-actions">
-            <button
-              type="button"
-              className="text-button"
-              onClick={() =>
-                navigate(
-                  applyFilters(
-                    params,
-                    {
-                      ...readFilters(params),
-                      source: "",
-                      type: "",
-                      severity_min: "",
-                      subject_prefix: "",
-                      correlationid: "",
-                      q: "",
-                    },
-                    params.get("range") ?? "custom",
-                  ),
-                )
-              }
-            >
-              清除篩選
-            </button>
+            {!timeOnly && (
+              <button
+                type="button"
+                className="text-button"
+                onClick={() =>
+                  navigate(
+                    applyFilters(
+                      params,
+                      {
+                        ...readFilters(params),
+                        source: "",
+                        type: "",
+                        severity_min: "",
+                        subject_prefix: "",
+                        correlationid: "",
+                        q: "",
+                      },
+                      params.get("range") ?? "custom",
+                    ),
+                  )
+                }
+              >
+                清除篩選
+              </button>
+            )}
             <button className="primary" type="submit">
               套用篩選
               <Icon name="arrow" size={15} />
@@ -634,6 +651,7 @@ function EventRows({
                 <span>{formatTime(item.event.time).replace(" UTC", "")}</span>
                 <small>
                   #{item.seq}
+                  <RestoredBadge item={item} />
                   {item.clock_skew && (
                     <span
                       className="skew-mini"
@@ -902,6 +920,7 @@ function Detail({
             <p className="detail-summary">
               {detail.item.event.summary || "未提供摘要"}
             </p>
+            <RestoredNotice item={detail.item} />
             {detail.item.clock_skew && (
               <div className="notice warning">
                 <Icon name="warning" />
@@ -954,6 +973,7 @@ function Detail({
                       <div>
                         <small>
                           {item.event.time} · #{item.seq}
+                          <RestoredBadge item={item} />
                         </small>
                         <button onClick={() => open(item.seq)}>
                           {item.event.type}
@@ -1008,7 +1028,14 @@ function App() {
   const [params, navigate] = useURL();
   const [token, setToken] = useState("");
   const [authError, setAuthError] = useState<unknown>(null);
-  const view = params.get("view") === "sources" ? "sources" : "timeline";
+  const view =
+    params.get("view") === "sources"
+      ? "sources"
+      : params.get("view") === "metrics"
+        ? "metrics"
+        : params.get("view") === "deliveries"
+          ? "deliveries"
+          : "timeline";
   const denied = useCallback((error: unknown) => {
     if (
       error instanceof APIError &&
@@ -1031,7 +1058,7 @@ function App() {
   const page = view === "sources" ? sources : events;
   const setView = (name: string) => {
     const next = new URLSearchParams(params);
-    if (name === "sources") next.set("view", name);
+    if (name !== "timeline") next.set("view", name);
     else next.delete("view");
     next.delete("event");
     navigate(next);
@@ -1046,7 +1073,14 @@ function App() {
     next.delete("event");
     navigate(next);
   }, [params, navigate]);
-  const title = view === "sources" ? "來源新鮮度" : "事件時間線";
+  const title =
+    view === "sources"
+      ? "來源新鮮度"
+      : view === "metrics"
+        ? "指標趨勢"
+        : view === "deliveries"
+          ? "投遞狀態"
+          : "事件時間線";
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -1081,14 +1115,28 @@ function App() {
             <Icon name="sources" />
             來源新鮮度<span>02</span>
           </button>
+          <button
+            className={view === "metrics" ? "active" : ""}
+            onClick={() => setView("metrics")}
+          >
+            <Icon name="signal" />
+            指標趨勢<span>03</span>
+          </button>
+          <button
+            className={view === "deliveries" ? "active" : ""}
+            onClick={() => setView("deliveries")}
+          >
+            <Icon name="arrow" />
+            投遞狀態<span>04</span>
+          </button>
         </nav>
         <div className="sidebar-foot">
           <span className="readonly-tag">
             <Icon name="lock" size={13} />
-            唯讀看板
+            設定唯讀
           </span>
           <p>觀察訊號，追溯脈絡。</p>
-          <small>Signal Hub / M2</small>
+          <small>Signal Hub / M5</small>
         </div>
       </aside>
       <div className="main-shell">
@@ -1126,7 +1174,13 @@ function App() {
               <div className="page-heading">
                 <div>
                   <span className="eyebrow">
-                    {view === "sources" ? "SOURCE FRESHNESS" : "EVENT TIMELINE"}
+                    {view === "sources"
+                      ? "SOURCE FRESHNESS"
+                      : view === "metrics"
+                        ? "METRIC TRENDS"
+                        : view === "deliveries"
+                          ? "DELIVERY STATUS"
+                          : "EVENT TIMELINE"}
                   </span>
                   <h1>
                     {title}
@@ -1135,22 +1189,28 @@ function App() {
                   <p>
                     {view === "sources"
                       ? "確認訊號是否持續抵達，辨別資料延遲與來源沉默。"
-                      : "從每一筆事件，追溯跨來源的前因與後果。"}
+                      : view === "metrics"
+                        ? "依版本與分組觀察事件趨勢，確認數值與計算狀態。"
+                        : view === "deliveries"
+                          ? "查看訂閱送達狀態、失敗嘗試與需要處理的 DLQ。"
+                          : "從每一筆事件，追溯跨來源的前因與後果。"}
                   </p>
                 </div>
-                <div className="refresh-area">
-                  <button
-                    className="outline-button"
-                    onClick={page.refresh}
-                    disabled={page.loading || page.more}
-                  >
-                    <Icon name="refresh" size={16} />
-                    重新查詢
-                  </button>
-                  <small>
-                    最後成功查詢：{page.at ? formatTime(page.at) : "尚無"}
-                  </small>
-                </div>
+                {(view === "timeline" || view === "sources") && (
+                  <div className="refresh-area">
+                    <button
+                      className="outline-button"
+                      onClick={page.refresh}
+                      disabled={page.loading || page.more}
+                    >
+                      <Icon name="refresh" size={16} />
+                      重新查詢
+                    </button>
+                    <small>
+                      最後成功查詢：{page.at ? formatTime(page.at) : "尚無"}
+                    </small>
+                  </div>
+                )}
               </div>
               {view === "timeline" ? (
                 <>
@@ -1214,14 +1274,26 @@ function App() {
                     組合。時間範圍與篩選已保存於網址。
                   </p>
                 </>
-              ) : (
+              ) : view === "sources" ? (
                 <Sources page={sources} />
+              ) : view === "deliveries" ? (
+                <Deliveries
+                  key={token}
+                  token={token}
+                  denied={denied}
+                  open={open}
+                />
+              ) : (
+                <>
+                  <FilterPanel params={params} navigate={navigate} timeOnly />
+                  <Metrics params={params} token={token} denied={denied} />
+                </>
               )}
             </>
           )}
           <footer className="main-footer">
             <span>Signal Hub</span>
-            <span>事件 append-only · 看板唯讀</span>
+            <span>事件 append-only · 設定唯讀</span>
           </footer>
         </main>
       </div>

@@ -1,0 +1,2 @@
+.venv/bin/mypy src
+Success: no issues found in 40 source files

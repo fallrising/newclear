@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "evidence_kind": "synthetic",
+  "authorization_ref": null,
+  "target": {
+    "node_ref": "example:private-node-review",
+    "workload_ref": "example:private-workload-review",
+    "tailnet_acl_ref": "example:private-acl-review",
+    "archive_ref": "example:private-archive-location",
+    "backup_ref": "example:private-backup-location",
+    "rollback_ref": "example:private-compatible-rollback",
+    "binary_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "config_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "schema_version": 5
+  },
+  "launch": {
+    "service_uid": 1001,
+    "binary": "/srv/example/signalhub",
+    "config": "/srv/example/config.json",
+    "db": "/srv/example/data/hub.sqlite",
+    "owner_token_ref": "file:/srv/example/secrets/owner",
+    "readonly_token_ref": "file:/srv/example/secrets/readonly",
+    "port": 8080
+  },
+  "monitor": {
+    "outside_process": true,
+    "outside_host": true,
+    "independent_notify": true,
+    "cadence_seconds": 60,
+    "deadline_seconds": 10,
+    "failure_threshold": 2,
+    "send_budget_seconds": 60
+  },
+  "host_gates": {
+    "non_root": {
+      "status": "pending",
+      "evidence": null
+    },
+    "path_mounts": {
+      "status": "pending",
+      "evidence": null
+    },
+    "tailnet_ingress": {
+      "status": "pending",
+      "evidence": null
+    },
+    "independent_monitor": {
+      "status": "pending",
+      "evidence": null
+    }
+  },
+  "m6": {
+    "seven_days": {
+      "status": "pending",
+      "evidence": null
+    },
+    "producer_silence": {
+      "status": "pending",
+      "evidence": null
+    },
+    "hub_outage": {
+      "status": "pending",
+      "evidence": null
+    },
+    "yesterday_restore": {
+      "status": "pending",
+      "evidence": null
+    }
+  }
+}

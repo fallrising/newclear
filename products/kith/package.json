@@ -14,7 +14,7 @@
     "db:migrate:local": "wrangler d1 migrations apply kith --local",
     "db:seed:local": "node scripts/bootstrap-local.mjs",
     "db:bootstrap:local": "node scripts/bootstrap-local.mjs && wrangler d1 execute kith --local --file=.wrangler/bootstrap-local.sql",
-    "test": "vitest run --exclude 'test/m1/**' --exclude 'test/m2/**' --exclude 'test/m3/**' --exclude 'test/m4/**' --exclude 'test/m6/**' --exclude 'test/m7/**' --exclude 'test/sidecar/**' && npm run test:sidecar && npm run test:m1 && npm run test:m3 && npm run test:m4 && npm run test:m6 && npm run test:m7",
+    "test": "vitest run --exclude 'test/m1/**' --exclude 'test/m2/**' --exclude 'test/m3/**' --exclude 'test/m4/**' --exclude 'test/m6/**' --exclude 'test/m7/**' --exclude 'test/sidecar/**' && npm run test:sidecar && npm run test:m1 && npm run test:m3 && npm run test:m4 && npm run test:m6 && npm run test:m7 && npm run test:reading",
     "test:sidecar": "vitest run test/sidecar --environment node",
     "test:m1": "vitest run --config vitest.worker.config.ts --maxWorkers=1 --no-isolate",
     "test:m3": "vitest run --config vitest.m3.config.ts --maxWorkers=1 --no-isolate",
@@ -27,7 +27,8 @@
     "e2e:all": "KITH_E2E_SCOPE=full npm --prefix e2e run test --",
     "e2e:open": "npm --prefix e2e run open --",
     "e2e:validate": "npm --prefix e2e run validate --",
-    "web:build": "npm --prefix web run build"
+    "web:build": "npm --prefix web run build",
+    "test:reading": "node --test --test-isolation=none reading/reading.test.ts reading/trial.test.ts"
   },
   "dependencies": {
     "hono": "4.13.8"

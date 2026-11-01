@@ -11,10 +11,12 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fallrising/newclear/platform/signal-hub/internal/adapter"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/auth"
+	"github.com/fallrising/newclear/platform/signal-hub/internal/delivery"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/event"
 	"github.com/fallrising/newclear/platform/signal-hub/internal/store"
 )
@@ -22,9 +24,12 @@ import (
 const MaxBodyBytes = 4 << 20
 
 type Server struct {
-	db   *store.Store
-	auth *auth.Authenticator
-	now  func() time.Time
+	mu            sync.RWMutex
+	db            *store.Store
+	auth          *auth.Authenticator
+	now           func() time.Time
+	reloadOptions ReloadOptions
+	sender        *delivery.Sender
 }
 
 func New(db *store.Store, credentials *auth.Authenticator) http.Handler {
@@ -55,6 +60,15 @@ func fail(w http.ResponseWriter, status int, code, message string) {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// A request authenticated under the previous config finishes before reload
+	// commits new source policy and credentials. Background evaluators share this lock.
+	if r.Method == http.MethodPost && r.URL.Path == "/v1/config:reload" {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+	} else {
+		s.mu.RLock()
+		defer s.mu.RUnlock()
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 	r = r.WithContext(ctx)
@@ -72,8 +86,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ingest := r.Method == http.MethodPost && (path == "/v1/events" || path == "/v1/adapters/alertmanager")
-	query := r.Method == http.MethodGet && (path == "/v1/events" || path == "/v1/sources" || strings.HasPrefix(path, "/v1/events/"))
-	if !ingest && !query {
+	query := r.Method == http.MethodGet && (path == "/v1/subscriptions" || path == "/v1/deliveries" || path == "/v1/events" || path == "/v1/sources" || path == "/v1/rules" || strings.HasPrefix(path, "/v1/metrics/") || strings.HasPrefix(path, "/v1/events/"))
+	reload := r.Method == http.MethodPost && path == "/v1/config:reload"
+	replay := r.Method == http.MethodPost && strings.HasPrefix(path, "/v1/deliveries/") && strings.HasSuffix(path, ":replay")
+	if !ingest && !query && !reload && !replay {
 		fail(w, 404, "not_found", "route not found")
 		return
 	}
@@ -91,8 +107,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fail(w, 401, "unauthenticated", "valid bearer token required")
 		return
 	}
-	if (ingest && principal.Role != "source") || (query && principal.Role != "owner" && principal.Role != "readonly") {
+	if (ingest && principal.Role != "source") || (query && principal.Role != "owner" && principal.Role != "readonly") || ((reload || replay) && principal.Role != "owner") {
 		fail(w, 403, "forbidden", "token role does not permit this operation")
+		return
+	}
+	if replay {
+		s.replay(w, r)
+		return
+	}
+	if reload {
+		s.reload(w, r)
 		return
 	}
 	if query {
@@ -190,6 +214,18 @@ func (s *Server) ingest(ctx context.Context, principal auth.Principal, body []by
 }
 
 func (s *Server) query(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/v1/subscriptions" || r.URL.Path == "/v1/deliveries" {
+		s.deliveryList(w, r)
+		return
+	}
+	if r.URL.Path == "/v1/rules" {
+		s.ruleList(w, r)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/metrics/") {
+		s.metrics(w, r)
+		return
+	}
 	if r.URL.Path == "/v1/sources" {
 		s.sources(w, r)
 		return

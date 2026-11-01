@@ -1,0 +1,68 @@
+✔ review locators use the actual locked React Flow accessible control names (1.107876ms)
+✔ node separation derives the real mouse delta from observed overlap and keeps a visible gap (0.370208ms)
+✖ threshold-consuming drag preserves the measured gap after activation instead of losing its first increment (0.834326ms)
+✖ remaining displacement is recomputed from post-activation geometry (0.235289ms)
+✖ unstable activation geometry fails and releases the pointer without performing a full drag (0.599577ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 2
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111.205572
+
+✖ failing tests:
+
+test at apps/loom/fe-review/ui-steps.node.mjs:61:1
+✖ threshold-consuming drag preserves the measured gap after activation instead of losing its first increment (0.834326ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_NODE_SEPARATION
+      at separateNodes (file://<worktree>/apps/loom/fe-review/ui-steps.mjs:76:10)
+      at async TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/ui-steps.node.mjs:63:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at apps/loom/fe-review/ui-steps.node.mjs:68:1
+✖ remaining displacement is recomputed from post-activation geometry (0.235289ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_NODE_SEPARATION
+      at separateNodes (file://<worktree>/apps/loom/fe-review/ui-steps.mjs:76:10)
+      at async TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/ui-steps.node.mjs:70:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at apps/loom/fe-review/ui-steps.node.mjs:74:1
+✖ unstable activation geometry fails and releases the pointer without performing a full drag (0.599577ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /REVIEW_GEOMETRY_UNSTABLE/. Input:
+
+  'AssertionError [ERR_ASSERTION]: REVIEW_NODE_SEPARATION'
+
+      at async TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/ui-steps.node.mjs:76:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: AssertionError [ERR_ASSERTION]: REVIEW_NODE_SEPARATION
+        at separateNodes (file://<worktree>/apps/loom/fe-review/ui-steps.mjs:76:10)
+        at async waitForActual (node:assert:646:5)
+        at async strict.rejects (node:assert:769:25)
+        at async TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/ui-steps.node.mjs:76:3)
+        at async Test.run (node:internal/test_runner/test:1332:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /REVIEW_GEOMETRY_UNSTABLE/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

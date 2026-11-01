@@ -1,0 +1,179 @@
+{
+  "source": "390cb9c3459578461fcdc0fe6f35d0a43dd2add4",
+  "scope": "approved original R2 ConnectedApp review-only; no product/backend/API/commands/stream/dependency changes",
+  "versions": {
+    "node": "24.20.0",
+    "pnpm": "11.25.0",
+    "go": "1.27.1",
+    "playwright": "1.62.1",
+    "chromium": "151.0.7922.34"
+  },
+  "native": {
+    "web": "scripts/check-web.sh exit0:format/lint/30tests/build,26.3seconds",
+    "backend": "scripts/check-backend.sh and runtime build exit0:pins/modules/format/vet/full/race/build,380.839seconds",
+    "binarySha256": "955b63dd92e73b60a94b3fc1e54e0bef1c89fe8f6e583bbb0add1993e94a4af8"
+  },
+  "safety": "pinned8/8passed; meaningful Draft-only resume and independent cleanup rejection REDs retained",
+  "sourceSha256": {
+    "capture-connected.mjs": "fcfc0cea0c49d4a9b51ba97bab312a8abdb7c143fdee7fd97304f4336a38679c",
+    "safety.mjs": "89e4e5c67761b9f3772548e19ec9d022244ced70f51517fbc162abbb3a448e13",
+    "safety.test.mjs": "13de84645029fe14d4b663b8172bafc7166367f347d65ce1f6ec5a17017228f9"
+  },
+  "runs": [
+    {
+      "id": "20261024T075149072Z",
+      "status": "failed",
+      "manifestSha256": "b699363b9283b0e0097e3defe97008f65bc457a2563098b37dc69458ff1596af",
+      "driverSha256": "f6f2287554e8f7be2258bd33177df10461003843b1559a900a91a0af0b91bfb5",
+      "stepsPassed": 5,
+      "captures": 18,
+      "shutdownExits": [
+        0,
+        0
+      ],
+      "kind": "fresh scenario"
+    },
+    {
+      "id": "20261024T075447787Z",
+      "status": "failed",
+      "manifestSha256": "6166e48ee60438be9b9332dc9bb6e6ae84c91e035da74b7386cd0b67b8558635",
+      "driverSha256": "949d1a053e69be7f42eadbf080b5debd0bd4c6a679b068f69f2df006bb52422b",
+      "stepsPassed": 5,
+      "captures": 6,
+      "shutdownExits": [
+        0,
+        0
+      ],
+      "kind": "fresh scenario"
+    },
+    {
+      "id": "20261024T080157242Z",
+      "status": "failed",
+      "manifestSha256": "81da30d588a6857d15460ae1bde21772be66b98fea9b2625b112e9ebff576994",
+      "driverSha256": "1da6698b685cff3faef901405919b571b926acf7489ed95d76bf136ad0fe452b",
+      "stepsPassed": 3,
+      "captures": 6,
+      "shutdownExits": [
+        0
+      ],
+      "kind": "same scenario02 continuation"
+    },
+    {
+      "id": "20261024T080605442Z",
+      "status": "failed",
+      "manifestSha256": "ad72e9c17104f61882eb66254a780dd9238ae96f199b6f9b9bdbc60f8ddc00c6",
+      "driverSha256": "1da6698b685cff3faef901405919b571b926acf7489ed95d76bf136ad0fe452b",
+      "stepsPassed": 0,
+      "captures": 0,
+      "shutdownExits": [
+        0
+      ],
+      "kind": "same scenario02 continuation"
+    },
+    {
+      "id": "20261024T081315374Z",
+      "status": "passed",
+      "manifestSha256": "51392549dd31c7b0e864a346402455e4fa1ea816fbd6f1f69a54b51776af4742",
+      "driverSha256": "fcfc0cea0c49d4a9b51ba97bab312a8abdb7c143fdee7fd97304f4336a38679c",
+      "stepsPassed": 6,
+      "captures": 0,
+      "shutdownExits": [
+        0,
+        0
+      ],
+      "kind": "same scenario02 continuation"
+    }
+  ],
+  "visualAudit": {
+    "unique": 30,
+    "duplicates": 0,
+    "states": [
+      "developing-succeeded",
+      "draft-rejected",
+      "login-rejected",
+      "prepared-admission",
+      "projects"
+    ],
+    "viewports": [
+      "1440x900",
+      "834x1112",
+      "390x844"
+    ],
+    "themes": "actual UI button light/dark",
+    "axeViolations": 0,
+    "axeScannerErrors": 0,
+    "documentOverflow": 0,
+    "meaning": "navigation and bounded observations, not zero UI defects or full Round3"
+  },
+  "completedFlow": {
+    "admission": "real original accepted result plus mode=ro accepted/current-head receipt",
+    "readyRecovery": "1POST,1automatic original-resultGET,1manualsame-IDGET,0mutationretry",
+    "fake": "Succeeded remainsDeveloping;Done0",
+    "keyboard": {
+      "tabEntry": true,
+      "outline": {
+        "width": "3px",
+        "style": "solid",
+        "color": "rgb(13, 110, 253)"
+      },
+      "scrollBefore": 0,
+      "scrollAfter": 33
+    },
+    "disconnect": {
+      "method": "owned runtime SIGTERM/wait then same-state restart",
+      "disconnected": "Disconnected \u00b7 Last applied cursor: 1:10 \u00b7 Project version 2",
+      "statusAfter": "Connected \u00b7 Last applied cursor: 1:10 \u00b7 Project version 2",
+      "commandsDisabledWhileDisconnected": true
+    },
+    "reset": {
+      "injection": "browser EventSource reset_required event",
+      "snapshot": "real backend read",
+      "authorityDisabledWhileHeld": true
+    },
+    "sessionLoss": "cookie removed in owned browser; no global secret rotation claimed",
+    "cleanup": "8SIGTERM exits0 across5manifests; no owned containers remain; private synthetic state retained"
+  },
+  "residuals": [
+    "Board required_ac_count reads legacy table and remains0 after current accepted requirement1; not fixed",
+    "Earlier command Projection refresh unavailable announcement persists beside later Connected SSE snapshot; not fixed",
+    "No native200percent zoom/320px/coarse-pointer/full UX or fullRound3/Done/restore acceptance claimed"
+  ],
+  "healthClassification": {
+    "expected": [
+      "anonymous/wrong-token/session-loss401",
+      "headlessReady rejection422",
+      "explicit aborted Ready response/result lookup",
+      "owned runtime stop connection refusals",
+      "SSE teardown ERR_ABORTED during refresh/cleanup"
+    ],
+    "pageErrors": 0,
+    "note": "Raw error observations remain; expected classification does not erase them"
+  },
+  "localIgnoredLogSha256": {
+    "root-web.log": "322d51fbf3069b68d7ac61a3cddf1e10b98e5ed3a7accf90cd6f910bbcead67d",
+    "root-backend-final.log": "112bc0eb46f854f5c3d51b2cd448c30fe49138144c61097331510165a2ca4e7f",
+    "runtime-01.log": "695e192d32ef1ed018fc5704d09d1eb849546df340c8ab49ba245f502e163f84",
+    "runtime-02.log": "b1c9c1b27f4f037cdaecbd302047e47d314002d60f6114e77e4410d0535e8586",
+    "runtime-03.log": "7027b2cbe83958668e569fc169aebe4f51ebe7fa5c6b49422e608ee51be1ca75",
+    "runtime-04.log": "7ab7f4407ef81b662d19ef223aa116e2442ebe8cd80e1bb613dd8c120532d6bb",
+    "runtime-05.log": "a9e0f6fb3abd6d930404fd86a3ef53a2271082fc493cd0a54872dff29112d5de",
+    "resume-safety-red.log": "f9d9601dab1d1b0fd29814e7e1f5077f9c5dd95bef3f5b7938e7a4b2db8c1762",
+    "cleanup-red.log": "af31e55c9d8a311742d0e897700b818b890acd2d3d1d7183905b61580c639a76",
+    "safety-final-green-corrected.log": "41cb07aab3f235c2abe9fda9b63d1860907cf33a1b9539ef03633b10797e7d48"
+  },
+  "delivery": "local originalR2 gates passed; R12 final docs/provenance review and remoteCI/publication remain root-owned",
+  "metrics": {
+    "aggregateProviderRequests": null,
+    "aggregateActiveSeconds": null,
+    "historicalHelperHashes": null,
+    "note": "Exact provider/active aggregates and earlier helper hashes were not measured; per-run driver hashes and final3source hashes are observed."
+  },
+  "staticChecks": {
+    "relativeLinks": 63,
+    "publicTextFiles": 19,
+    "privateHostCredentialPatterns": 0,
+    "jsonParse": "passed",
+    "diffCheck": "passed",
+    "protectedBackendWebApiScriptsTraceabilityDiff": "empty"
+  }
+}

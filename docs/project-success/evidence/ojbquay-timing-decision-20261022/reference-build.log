@@ -1,0 +1,96 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+Calculating task graph as no cached configuration is available for tasks: build
+> Task :check UP-TO-DATE
+> Task :modules:common:protobufDummy UP-TO-DATE
+> Task :assemble UP-TO-DATE
+> Task :build UP-TO-DATE
+> Task :modules:common:extractProto
+> Task :modules:console-api:processResources
+> Task :modules:common:extractTestProto
+> Task :modules:common:processTestProtoResources
+> Task :modules:common:processTestResources NO-SOURCE
+> Task :modules:console-api:processTestResources NO-SOURCE
+> Task :modules:common:processProtoResources
+> Task :modules:gateway-consume:processResources NO-SOURCE
+> Task :modules:gateway-produce:processResources NO-SOURCE
+> Task :modules:scheduler:processResources NO-SOURCE
+> Task :modules:gateway-consume:processTestResources NO-SOURCE
+> Task :modules:common:processResources
+> Task :sdk:java:processResources NO-SOURCE
+> Task :modules:gateway-produce:processTestResources NO-SOURCE
+> Task :sdk:java:processTestResources NO-SOURCE
+> Task :modules:scheduler:processTestResources NO-SOURCE
+> Task :modules:common:extractIncludeProto
+> Task :modules:common:generateProto FROM-CACHE
+> Task :modules:common:compileJava FROM-CACHE
+> Task :modules:common:classes
+> Task :modules:common:jar
+> Task :modules:common:assemble
+> Task :modules:gateway-produce:compileJava FROM-CACHE
+> Task :modules:gateway-produce:classes UP-TO-DATE
+> Task :modules:gateway-consume:compileJava FROM-CACHE
+> Task :modules:gateway-consume:classes UP-TO-DATE
+> Task :modules:gateway-produce:jar
+> Task :modules:console-api:compileJava FROM-CACHE
+> Task :modules:console-api:classes
+> Task :modules:gateway-consume:jar
+> Task :modules:scheduler:compileJava FROM-CACHE
+> Task :modules:console-api:resolveMainClassName
+> Task :modules:console-api:jar
+> Task :modules:console-api:compileTestJava FROM-CACHE
+> Task :modules:console-api:testClasses UP-TO-DATE
+> Task :modules:common:extractIncludeTestProto
+> Task :modules:common:generateTestProto NO-SOURCE
+> Task :modules:common:compileTestJava FROM-CACHE
+> Task :modules:common:testClasses UP-TO-DATE
+> Task :modules:console-api:test FROM-CACHE
+> Task :modules:console-api:check UP-TO-DATE
+> Task :modules:scheduler:classes UP-TO-DATE
+> Task :modules:scheduler:jar
+> Task :modules:common:test FROM-CACHE
+> Task :modules:common:check UP-TO-DATE
+> Task :modules:common:build
+> Task :sdk:java:compileJava FROM-CACHE
+> Task :modules:gateway-consume:compileTestJava FROM-CACHE
+> Task :modules:gateway-consume:testClasses UP-TO-DATE
+> Task :sdk:java:classes UP-TO-DATE
+> Task :sdk:java:jar
+> Task :modules:gateway-consume:test FROM-CACHE
+> Task :modules:gateway-consume:check UP-TO-DATE
+> Task :modules:gateway-produce:compileTestJava FROM-CACHE
+> Task :modules:gateway-produce:testClasses UP-TO-DATE
+> Task :modules:gateway-produce:test FROM-CACHE
+> Task :modules:gateway-produce:check UP-TO-DATE
+> Task :modules:console-api:bootJar
+> Task :modules:console-api:assemble
+> Task :modules:console-api:build
+> Task :modules:scheduler:compileTestJava FROM-CACHE
+> Task :modules:scheduler:testClasses UP-TO-DATE
+> Task :modules:scheduler:test FROM-CACHE
+> Task :modules:scheduler:check UP-TO-DATE
+> Task :sdk:java:assemble
+> Task :modules:scheduler:startScripts
+> Task :modules:gateway-consume:startScripts
+> Task :modules:gateway-produce:startScripts
+> Task :sdk:java:compileTestJava FROM-CACHE
+> Task :modules:scheduler:distTar
+> Task :modules:gateway-consume:distTar
+> Task :modules:gateway-produce:distTar
+> Task :sdk:java:testClasses UP-TO-DATE
+> Task :sdk:java:test FROM-CACHE
+> Task :sdk:java:check UP-TO-DATE
+> Task :sdk:java:build
+> Task :modules:gateway-consume:distZip
+> Task :modules:gateway-consume:assemble
+> Task :modules:gateway-consume:build
+> Task :modules:scheduler:distZip
+> Task :modules:scheduler:assemble
+> Task :modules:scheduler:build
+> Task :modules:gateway-produce:distZip
+> Task :modules:gateway-produce:assemble
+> Task :modules:gateway-produce:build
+
+BUILD SUCCESSFUL in 10s
+44 actionable tasks: 25 executed, 19 from cache
+Configuration cache entry stored.

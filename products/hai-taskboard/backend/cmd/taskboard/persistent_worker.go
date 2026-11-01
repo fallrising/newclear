@@ -66,7 +66,7 @@ func (worker persistentWorker) scan(ctx context.Context) error {
 			ProjectID: candidate.Run.ProjectID, RunID: candidate.Run.ID, Holder: worker.holder,
 			ExpectedRestoreGeneration: candidate.RestoreGeneration, LeaseDuration: workerLeaseDuration,
 		})
-		if errors.Is(err, port.ErrNoPendingDispatch) || errors.Is(err, port.ErrFenceRejected) {
+		if errors.Is(err, port.ErrNoPendingDispatch) || errors.Is(err, port.ErrFenceRejected) || errors.Is(err, port.ErrStaleRunInput) {
 			continue
 		}
 		if err != nil {

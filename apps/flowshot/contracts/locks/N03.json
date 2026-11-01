@@ -1,0 +1,20 @@
+{
+  "node": "N03",
+  "schemaVersion": 1,
+  "contractKind": "pure-typescript",
+  "commandNames": [],
+  "frozenAt": "2026-10-23T03:18:15Z",
+  "sourceFiles": [
+    "src/lib/document-model/index.ts",
+    "src/lib/document-model/types.ts"
+  ],
+  "sourceHashes": {
+    "src/lib/document-model/index.ts": "066d6c92b06121d77ded7c1575349807d7e3a6f2751beb0a647bab8ef32e7b34",
+    "src/lib/document-model/types.ts": "baf372fb1eca2dde87dbb46c328f6c6cb3b54d08fe4e339533399804c52a9cc4"
+  },
+  "authorityHashes": {
+    "SPEC.md": "b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0",
+    "docs/nodes/N03-markdown-render-model.md": "b020fb564f799d0cc5c63869514916d34ffee7ecf5107c6e8532ce385f7fee77",
+    "docs/adr/ADR-002-document-model-v1.md": "b378fa3d3408adafd998c5452aff4b42935dfda309605ad9b9c74c4453b6c26c"
+  }
+}

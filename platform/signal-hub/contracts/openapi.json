@@ -927,6 +927,16 @@
                 }
               }
             }
+          },
+          "413": {
+            "description": "Request body exceeds 4 MiB or event data exceeds 16 KiB JCS UTF-8 bytes (payload_too_large).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -935,7 +945,7 @@
       "post": {
         "operationId": "reloadConfig",
         "summary": "Atomically reload git-managed configuration",
-        "description": "Owner only. No request body; reread the configured sources/rules/subscriptions files and validate the complete configuration. Reject invalid configuration with invalid_config (400), keep the old effective configuration, and emit signalhub.config.rejected. Success emits signalhub.config.reloaded and writes audit_log. This does not edit configuration or expose metadata endpoints.",
+        "description": "Owner only. Reload the same local strict JSON configuration and referenced credentials. Validate sources, rule versions, subscription identities, exact delivery URL allowlist and credentials before committing activation and switching authentication/senders. Rejection keeps the previous configuration and credentials active and records a rejected event. Takes no body or query parameters.",
         "security": [
           {
             "ownerBearer": []
@@ -1117,6 +1127,81 @@
             }
           }
         }
+      }
+    },
+    "/v1/rules": {
+      "get": {
+        "operationId": "listRules",
+        "summary": "Active rule definitions",
+        "description": "Safe active rule definitions ordered by id. Owner or read-only token required. Cursor is bound to the active definition snapshot; retry from the first page after a reload.",
+        "security": [
+          {
+            "ownerBearer": []
+          },
+          {
+            "readOnlyBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON, event/batch envelope, query, reason, or configuration as described by the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token (unauthenticated).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated token lacks permission (forbidden).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or other required local resource is unavailable (unavailable); retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/cursor"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ]
       }
     }
   },
@@ -1496,6 +1581,10 @@
           },
           "event": {
             "$ref": "./schemas/event.schema.json"
+          },
+          "restored": {
+            "type": "boolean",
+            "description": "Hub metadata: true when explicitly imported from a verified archive; never part of the CloudEvent or its content hash."
           }
         },
         "required": [
@@ -2305,6 +2394,29 @@
         ],
         "additionalProperties": true,
         "description": "M1 local Alertmanager webhook v4 mapping; up to 100 alerts, including an empty heartbeat. Real producer integration is M6."
+      },
+      "RulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "./schemas/rules.schema.json#/properties/rules/items"
+            },
+            "maxItems": 200
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "additionalProperties": false
       }
     },
     "parameters": {

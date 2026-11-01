@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="調整一條溫度校正線，對照 JavaScript 與 Handwired CPU 數值圖。">
+  <title>一條溫度校正線 · Handwired Learning</title>
+  <style>
+    :root { color-scheme: light; --ink: #243631; --muted: #536660; --paper: #f5f3eb; --line: #d3d9cf; --green: #235846; --accent: #ad4a27; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif; line-height: 1.65; }
+    main { max-width: 1320px; margin: auto; padding: 44px 32px 32px; }
+    .eyebrow { font-size: .76rem; font-weight: 700; letter-spacing: .14em; color: var(--green); }
+    header { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 30px; }
+    h1 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.2; margin: 12px 0 16px; letter-spacing: -.04em; }
+    header p { max-width: 720px; color: var(--muted); margin: 0; }
+    .workspace { display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: 20px; align-items: start; }
+    .panel { border: 1px solid var(--line); border-radius: 16px; background: #fffef9; padding: 24px; min-width: 0; }
+    .step { display: inline-grid; place-items: center; border: 1px solid var(--line); width: 28px; height: 28px; border-radius: 50%; font-size: .75rem; margin-right: 8px; }
+    h2 { font-size: 1.05rem; margin: 0 0 12px; }
+    .hint { font-size: .86rem; color: var(--muted); margin: 0 0 24px; }
+    .control + .control { margin-top: 30px; }
+    .control-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    label { font-size: .92rem; font-weight: 650; }
+    input[type="number"] { width: 112px; min-height: 42px; padding: 8px; border: 1px solid #96a99e; border-radius: 7px; color: var(--ink); background: white; font: inherit; }
+    input[aria-invalid="true"] { border: 2px solid #a33223; }
+    input[type="range"] { width: 100%; accent-color: var(--green); margin: 18px 0 0; min-height: 24px; }
+    input:focus-visible, summary:focus-visible, button:focus-visible, .history-wrap:focus-visible { outline: 3px solid #ce792a; outline-offset: 4px; }
+    .bounds { display: flex; justify-content: space-between; font-size: .76rem; color: var(--muted); }
+    .equation { text-align: center; font: 600 clamp(1.3rem, 2.1vw, 1.8rem) ui-monospace, monospace; padding: 26px 0 8px; }
+    #formula-value { text-align: center; font: .82rem ui-monospace, monospace; min-height: 42px; overflow-wrap: anywhere; color: var(--muted); }
+    .nodes { margin: 16px 0 26px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; }
+    .node { border: 1px solid #a6b9ac; border-radius: 8px; padding: 10px 12px; background: #eef3eb; font-family: ui-monospace, monospace; }
+    .node.operation { color: var(--accent); border-color: #d6b09b; background: #fff2e7; }
+    .explain { border-top: 1px solid var(--line); padding-top: 16px; font-size: .86rem; }
+    .explain p { margin: 10px 0; }
+    .results { background: #eef3eb; border-color: #b9cbbd; }
+    dl { margin: 20px 0; }
+    .result { border-top: 1px solid #cbd7c9; padding: 14px 0; }
+    dt { font-size: .8rem; color: var(--muted); }
+    dd { margin: 4px 0 0; font-family: ui-monospace, monospace; font-size: 1.2rem; overflow-wrap: anywhere; }
+    .small-result dd { font-size: .87rem; }
+    #status { padding: 14px; border: 1px solid #b1c8b4; border-radius: 9px; background: #dcebdc; font-size: .87rem; font-weight: 650; }
+    #status[data-state="error"], #status[data-state="fail"] { background: #fbe5db; border-color: #d1a28c; color: #842d19; }
+    .rule { font-size: .8rem; color: var(--muted); margin-top: 18px; overflow-wrap: anywhere; }
+    code { font-family: ui-monospace, monospace; }
+    .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 30px; font-size: .86rem; color: var(--muted); }
+    .notes h2 { color: var(--ink); font-size: .94rem; }
+    footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line); font-size: .75rem; color: var(--muted); overflow-wrap: anywhere; }
+    summary { cursor: pointer; padding: 10px 0; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .7rem; }
+    .learning { margin-top: 24px; }
+    .learning .hint { max-width: 900px; }
+    .learning-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+    button { padding: 11px 18px; min-height: 44px; border: 1px solid var(--green); border-radius: 8px; font: inherit; color: white; background: var(--green); cursor: pointer; }
+    button.secondary { background: white; color: var(--green); }
+    button.warning { border-color: var(--accent); color: var(--accent); background: #fff2e7; }
+    button:disabled { opacity: .55; cursor: default; }
+    .learning-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
+    .learning-metrics dd { font-size: .95rem; }
+    #learning-status { padding: 14px; border-radius: 8px; background: #e7eee3; overflow-wrap: anywhere; }
+    #learning-status[data-state="stopped"] { color: #842d19; background: #fbe5db; }
+    .history-wrap { overflow: auto; max-height: 350px; }
+    table { border-collapse: collapse; width: 100%; font: .8rem ui-monospace, monospace; }
+    th, td { padding: 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+    th { position: sticky; top: 0; background: #eef3eb; }
+    caption { text-align: left; padding: 8px 0; font-family: system-ui, sans-serif; }
+    @media (max-width: 1000px) { .workspace { grid-template-columns: 1fr 1fr; } .results { grid-column: 1 / -1; } .results dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; } }
+    @media (max-width: 640px) { main { padding: 26px 16px; } .workspace, .notes { grid-template-columns: 1fr; } .panel { padding: 20px; } .results { grid-column: auto; } .results dl { display: block; } .notes { gap: 16px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">HANDWIRED LEARNING / 前向對照與係數學習</div>
+    <h1>一條溫度校正線</h1>
+    <p>同一個算式，兩條計算路徑。調整輸入與係數，看看 JavaScript 和 Handwired 數值圖如何得到幾乎相同的答案。</p>
+  </header>
+  <noscript><p>請啟用 JavaScript 才能執行本機比較。此頁不需要網路。</p></noscript>
+  <div class="workspace">
+    <section class="panel" aria-labelledby="inputs-heading">
+      <h2 id="inputs-heading"><span class="step">1</span>調整輸入</h2>
+      <p class="hint">拖曳滑桿，或直接輸入數值；每次變更立即重算。</p>
+      <div class="control">
+        <div class="control-head"><label for="x-number">x · 讀值（°C）</label><input id="x-number" type="number" value="20" min="-20" max="60" step="any" aria-describedby="x-bounds status"></div>
+        <input id="x-range" type="range" aria-label="x 讀值滑桿" min="-20" max="60" step="0.1" value="20">
+        <div class="bounds" id="x-bounds"><span>−20 °C</span><span>60 °C</span></div>
+      </div>
+      <div class="control">
+        <div class="control-head"><label for="a-number">a · 比例係數</label><input id="a-number" type="number" value="1.25" min="0.5" max="2" step="any" aria-describedby="a-bounds status"></div>
+        <input id="a-range" type="range" aria-label="a 比例係數滑桿" min="0.5" max="2" step="0.01" value="1.25">
+        <div class="bounds" id="a-bounds"><span>0.5</span><span>2</span></div>
+      </div>
+      <div class="control">
+        <div class="control-head"><label for="b-number">b · 偏移（°C）</label><input id="b-number" type="number" value="-2" min="-10" max="10" step="any" aria-describedby="b-bounds status"></div>
+        <input id="b-range" type="range" aria-label="b 偏移滑桿" min="-10" max="10" step="0.1" value="-2">
+        <div class="bounds" id="b-bounds"><span>−10 °C</span><span>10 °C</span></div>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="graph-heading">
+      <h2 id="graph-heading"><span class="step">2</span>固定的運算圖</h2>
+      <p class="hint">數值會變，乘法再加法的結構不變。</p>
+      <div class="equation">y = a × x + b</div>
+      <div id="formula-value">—</div>
+      <div class="nodes" aria-label="a 與 x 相乘，再加上 b，輸出 y">
+        <span class="node">a, x</span><span aria-hidden="true">→</span><span class="node operation">×</span><span aria-hidden="true">→</span><span class="node operation">+ b</span><span aria-hidden="true">→</span><span class="node">y</span>
+      </div>
+      <div class="explain">
+        <p><strong>Builder · 建圖一次</strong><br>JavaScript 組裝輸入、乘法與加法節點。這是固定形狀的數值圖，不會把任意 JS 自動編譯成模型。</p>
+        <p><strong>Runtime · 每次執行</strong><br>把新的 x、a、b 填入 source cells，由 Handwired 的 CPU evaluator 計算輸出。</p>
+      </div>
+    </section>
+    <section class="panel results" aria-labelledby="results-heading">
+      <h2 id="results-heading"><span class="step">3</span>對照結果</h2>
+      <p class="hint">單位 °C · 以同一組輸入比較</p>
+      <dl>
+        <div class="result"><dt>JavaScript · Number</dt><dd id="reference">—</dd></div>
+        <div class="result"><dt>Handwired · CPU / FP32</dt><dd id="graph">—</dd></div>
+        <div class="result small-result"><dt>絕對差值 |graph − reference|</dt><dd id="difference">—</dd></div>
+        <div class="result small-result"><dt>本次固定規則算出的容許值</dt><dd id="tolerance">—</dd></div>
+      </dl>
+      <div id="status" role="status" aria-live="polite" aria-atomic="true" data-state="pending">等待執行</div>
+      <p class="rule">通過規則：<br><code>|graph − reference| ≤ 1e-5 + 1e-5 × |reference|</code><br>規則事先固定，不會為結果放寬。</p>
+    </section>
+  </div>
+  <section class="panel learning" aria-labelledby="learning-heading">
+    <div class="eyebrow">02 / 用梯度調整係數</div>
+    <h2 id="learning-heading">從 a = 1、b = 0 開始學習</h2>
+    <p class="hint">固定九點 x = −20、−10、0、…、60，目標是 1.25 × x − 2。Handwired CPU 計算平均平方誤差（loss），backward 計算梯度。內部使用 z = x / 40 與 alpha = 40 × a，讓更新尺度適合固定學習率；畫面仍顯示 a = alpha / 40。</p>
+    <div class="learning-controls" aria-label="係數學習操作">
+      <button id="learning-step" type="button">單步 · 0.05</button>
+      <button id="learning-run" type="button">跑到 500 步 · 0.05</button>
+      <button id="learning-reset" class="secondary" type="button">重設學習</button>
+      <button id="learning-fast" class="warning" type="button">學習率 2.0 · 從頭示範失敗</button>
+    </div>
+    <p class="rule">每次學習或重設會將已接受的係數套用至上方，保留 x；手動修改上方輸入不會改變學習狀態。跑到 500 步是累計上限。越界候選會停止並顯示原因，不會截斷成合法值。</p>
+    <dl class="learning-metrics">
+      <div><dt>已接受更新步數</dt><dd id="learning-count">—</dd></div>
+      <div><dt>目前 a = alpha / 40</dt><dd id="learning-a">—</dd></div>
+      <div><dt>目前 b（°C）</dt><dd id="learning-b">—</dd></div>
+      <div><dt>目前 loss · 平均平方誤差</dt><dd id="learning-loss">—</dd></div>
+      <div><dt>目前梯度 dL/dalpha</dt><dd id="learning-gradient-alpha">—</dd></div>
+      <div><dt>目前梯度 dL/db</dt><dd id="learning-gradient-b">—</dd></div>
+      <div><dt>九點最大絕對誤差（°C）</dt><dd id="learning-max-error">—</dd></div>
+    </dl>
+    <p class="rule">loss、梯度與最大誤差都對應同一列已接受的 a、b。下一步用目前梯度更新；重設會清除先前歷程與停止狀態。</p>
+    <p id="learning-status" role="status" aria-live="polite" aria-atomic="true" data-state="pending">等待學習</p>
+    <details>
+      <summary>查看每一步的係數、loss 與梯度</summary>
+      <div class="history-wrap" role="region" aria-label="學習歷程，可捲動查看每步數值" tabindex="0">
+        <table>
+          <caption>本輪已接受的狀態（含初始第 0 步，最多 501 列）</caption>
+          <thead><tr><th scope="col">步數</th><th scope="col">a</th><th scope="col">b</th><th scope="col">loss</th><th scope="col">dL/dalpha</th><th scope="col">dL/db</th><th scope="col">最大誤差 °C</th></tr></thead>
+          <tbody id="learning-history"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+  <aside class="notes" aria-label="理解結果與範圍">
+    <div><h2>為什麼可能有一點差距？</h2><p>JavaScript Number 使用雙精度；這裡的圖使用 FP32，輸入與運算可能有捨入誤差。差值不必是零，仍可以符合事先設定的容許值。</p></div>
+    <div><h2>loss 下降不等於一般智能</h2><p>上方前向區只比較；下方學習區只調整這條固定直線的兩個係數。九點誤差變小不代表所有輸入都正確，也不表示理解世界或具備一般智能。資料是合成教學示例，不用於醫療、工業或安全控制。</p></div>
+  </aside>
+  <footer>
+    <div>本機執行 · 無上傳 · 無網路依賴 · Handwired 固定版本 <code>257856e3b221140acb4cc4460626b850c0bd4ff1</code></div>
+    <details><summary>上游 MIT 授權 · Cheng Lou, 2026</summary><pre><!-- HANDWIRED_LICENSE --></pre></details>
+  </footer>
+</main>
+<!-- HANDWIRED_SCRIPT -->
+</body>
+</html>

@@ -71,6 +71,11 @@ func (b *Broker) metricsText(ctx context.Context) string {
 		gauge("durable_log_index", snapshot.LastLogIndex)
 		gauge("commit_index", snapshot.CommitIndex)
 		gauge("last_applied", snapshot.LastApplied)
+		for _, peer := range snapshot.Peers {
+			peerLabels := fmt.Sprintf(`%s,peer="%d"`, labels, peer.PeerID)
+			fmt.Fprintf(&out, "mkfk_peer_next_index{%s} %d\nmkfk_peer_match_index{%s} %d\nmkfk_peer_unanswered{%s} %d\nmkfk_peer_inflight{%s} %d\n",
+				peerLabels, peer.NextIndex, peerLabels, peer.MatchIndex, peerLabels, peer.Unanswered, peerLabels, peer.Inflight)
+		}
 		gauge("pending_reads", metrics.PendingReads)
 		gauge("inbox_dropped_total", metrics.InboxDropped)
 		gauge("actor_stall_total", metrics.Stalls)

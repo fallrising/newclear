@@ -3,3 +3,6 @@ runs/*/screenshots/
 runs/*/tui/
 runs/*/*.storage.json
 runs/.state/
+
+# Local redacted startup evidence; publish only reviewed summaries.
+runs/*/*.log

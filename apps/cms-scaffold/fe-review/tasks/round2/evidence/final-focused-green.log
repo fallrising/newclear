@@ -1,0 +1,30 @@
+Tool stdout retained; repository absolute paths normalized to <repo> for publication.
+✔ only explicit failed key is replaced, with source attempt provenance (1.332024ms)
+✔ reject duplicate original with fixed diagnostic (0.463357ms)
+✔ reject missing original with fixed diagnostic (0.183469ms)
+✔ reject duplicate repair with fixed diagnostic (0.171459ms)
+✔ reject missing repair with fixed diagnostic (0.159999ms)
+✔ reject unexpected repair with fixed diagnostic (0.13679ms)
+✔ reject replace green with fixed diagnostic (0.2356ms)
+✔ reject failed repair with fixed diagnostic (0.121229ms)
+✔ reject unrepaired failure with fixed diagnostic (0.431668ms)
+✔ targets map to actual current routes with explicit loaded and final URL contracts (5.103777ms)
+✔ concrete public and member fixture IDs remain present (0.645256ms)
+✔ loaded authorized page accepted (1.251714ms)
+✔ reject loginRedirect without disclosing URL (0.505108ms)
+✔ reject otherOrigin without disclosing URL (1.518304ms)
+✔ reject wrongQuery without disclosing URL (0.164259ms)
+✔ reject fragment without disclosing URL (0.139189ms)
+✔ reject staleIdentity without disclosing URL (0.15989ms)
+✔ reject skeleton without disclosing URL (0.11717ms)
+✔ reject httpError without disclosing URL (0.11155ms)
+✔ reject pageError without disclosing URL (0.661257ms)
+✔ intentional logout only accepts exact anonymous selector (0.753537ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 80.350843

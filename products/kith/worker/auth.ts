@@ -79,9 +79,11 @@ export function csrfOk(c: Context<{ Bindings: Env }>): boolean {
 }
 
 export function authorizationBearer(c: Context<{ Bindings: Env }>): string | null {
-  const header = c.req.header("Authorization") ?? "";
-  if (!header.startsWith("Bearer ")) return null;
-  return header.slice("Bearer ".length);
+  const header = c.req.header("Authorization");
+  if (header === undefined) return null;
+  // Authentication schemes are case-insensitive. A supplied unsupported or
+  // malformed credential must never silently fall back to a session cookie.
+  return /^Bearer[ \t]+(.*)$/i.exec(header)?.[1] ?? "";
 }
 
 export function unauthorized(c: Context<{ Bindings: Env }>, message = "unauthorized"): Response {

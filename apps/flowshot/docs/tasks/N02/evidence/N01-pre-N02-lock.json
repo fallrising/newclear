@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "node_id": "N01",
+  "status": "frozen",
+  "spec_version": "1.0.2",
+  "spec_sha256": "b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0",
+  "source_files": [
+    "crates/db/Cargo.toml",
+    "crates/db/src/connection.rs",
+    "crates/db/src/executor/mod.rs",
+    "crates/db/src/lib.rs",
+    "crates/db/src/migrations/001.sql",
+    "crates/db/src/migrations/mod.rs",
+    "crates/db/src/repository.rs",
+    "crates/db/src/transaction.rs",
+    "crates/db/src/types.rs"
+  ],
+  "source_hash_algorithm": "sha256(path + NUL + bytes + NUL, in source_files order)",
+  "source_sha256": "de170ddf60b425b79507287c3f8afe94846e98ced79ff9bf89a96b60d6599809",
+  "commands": [],
+  "generator_version": "n01-sha256-v1",
+  "frozen_at": "2026-10-23T02:44:08Z"
+}

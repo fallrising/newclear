@@ -1,0 +1,319 @@
+{
+  "task": "T019",
+  "scope": "original R2-AC-13 M1\u2013M3 only",
+  "candidate": "verified; R29 independent ACCEPT; current CI/publication pending",
+  "sourceHashes": {
+    "fe-review/api-fixture.mjs": "5e34c94437f8b8088b7b558239386eb4b95061610ced24f9fa36fc912bfcdbb0",
+    "fe-review/baseline.mjs": "05de3dcc256371c199dd9684c837679fde89ae4e86f946c54d00bc0c0755a090",
+    "fe-review/desktop-health.mjs": "d23e92c345923c8bc2906c0cc4a4658b3ea9e6baae25237d51d6506a3d86b813",
+    "fe-review/desktop-health.test.mjs": "fe1bf28f1a4cd754a6e4c9fcc8a4cdbe2666854193e2a3c946e60bab624a7f0d",
+    "fe-review/guards.mjs": "297fa73a790f1bbbf8b27cf907ad0a43c0b66873a98b3a252e1a6d3d52da760b",
+    "fe-review/guards.test.mjs": "45e2bd6601b782caf54dc1a0cf3183e60966ea768447c1a033b9d99318087473",
+    "fe-review/journey-health.mjs": "82a2e50062f7c0e25bc316a10d263e5627dba927381d8a2b54265c69d0859081",
+    "fe-review/journey-health.test.mjs": "4c2d69b67ad9d8d2c61c486703c45c3e172215d58272026a60afaafc051e75e4",
+    "fe-review/journey.mjs": "a58def19d8f9ca416c3dfd02969a866ff7caec44fb5579785db1557da5b99598",
+    "fe-review/run-review.mjs": "bb7f9072607c543396df3fc5267f44d2b71abb835356461d883e242e952be1a1",
+    "fe-review/shared-capture.mjs": "cde2da99148a85095326fcc78566d85262af6391e447eeb04a537d498691eb0e",
+    "fe-review/ui.test.mjs": "0316c5655bc87acf907a13bc8dacf9d6261870a99986e7d263850ec46726051f",
+    "internal/ui/index.html": "c99ad4916caee4757a14e5b6ceca2074bdab3a57f8636ddcedc51a36ff0e3bc3"
+  },
+  "runtimeAttempts": [
+    {
+      "id": "baseline-001",
+      "status": "passed",
+      "receipt": "evidence/runtime-baseline-001.json",
+      "outer": "evidence/outer-baseline-001.json"
+    },
+    {
+      "id": "final-001",
+      "status": "failed",
+      "receipt": "evidence/runtime-final-001.json",
+      "outer": "evidence/outer-final-001.json"
+    },
+    {
+      "id": "final-002",
+      "status": "passed",
+      "receipt": "evidence/runtime-final-002.json",
+      "outer": "evidence/outer-final-002.json"
+    }
+  ],
+  "shared": {
+    "uniqueKeys": 3,
+    "sourceAttempt": "final-001",
+    "geometryPassed": true,
+    "originalDesktopHealth": "failed; unchanged",
+    "supplement": "final-002 precise CDP/console/favicon classification",
+    "recaptured": false
+  },
+  "longDataViewports": 3,
+  "journeySteps": [
+    "missing-key",
+    "invalid-key",
+    "save-refresh",
+    "enqueue",
+    "use",
+    "peek",
+    "consume",
+    "empty",
+    "clear-cancel",
+    "clear-confirm",
+    "illegal-name",
+    "controlled-network-failure",
+    "recovered-refresh",
+    "five-second-focus"
+  ],
+  "axeFinal": {
+    "violations": 0,
+    "incomplete": 0,
+    "viewports": 3
+  },
+  "knownFindings": [
+    "Default browser favicon GET returns404; one console error and linked CDP network log. Retained presentation finding, not zero health."
+  ],
+  "negativeJourney": {
+    "httpErrors": 7,
+    "requestFailures": 1,
+    "consoleEvents": 8,
+    "blocked": 0,
+    "pageErrors": 0,
+    "lastStage": "five-second-focus"
+  },
+  "screenshots": [
+    {
+      "file": "runs/baseline-001/baseline-desktop.png",
+      "sha256": "a1f071f316ec084861aa5fa1e79a378eccdbba2792170b18aafa857251b171d1",
+      "width": 1440,
+      "height": 1753
+    },
+    {
+      "file": "runs/baseline-001/baseline-mobile.png",
+      "sha256": "880b60fb0d327d75af78b979863691c2967ecabcfb19be3f750dc55c0f745efd",
+      "width": 643,
+      "height": 3241
+    },
+    {
+      "file": "runs/baseline-001/baseline-tablet.png",
+      "sha256": "11675206bf8916df8dab6713d29b327bdd80741f202a3b3a48871a7f54a3ee0a",
+      "width": 834,
+      "height": 1753
+    },
+    {
+      "file": "runs/final-002/baseline-desktop.png",
+      "sha256": "d0c750fab8dfbac4a13cca9bcd1c594978bc8d3225d5cac2b743936a98bdf3bc",
+      "width": 1440,
+      "height": 1753
+    },
+    {
+      "file": "runs/final-002/baseline-mobile.png",
+      "sha256": "251585267898ebb2866c3d1ffa68f9525e5208453b2104ca414f577d49652764",
+      "width": 390,
+      "height": 3241
+    },
+    {
+      "file": "runs/final-002/baseline-tablet.png",
+      "sha256": "70b3e88377706fb70681f446f98354ecef7fc56a2b30bb55a37124e4f07b6a63",
+      "width": 834,
+      "height": 1753
+    },
+    {
+      "file": "runs/final-002/journey-clear-cancel.png",
+      "sha256": "7675c3445c538be50a992c871758538f0625abacdd93a83b506702e9aeda2fda",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-clear-confirm.png",
+      "sha256": "043e5503a3d5ff68d6b836abafb9e41589d44b5709facd2939b070be9c8529bc",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-consume.png",
+      "sha256": "9d4d32212be1209a7d320a0a674c99c848264558d5f57b5b875c0da3121f6772",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-controlled-network-failure.png",
+      "sha256": "66005903bc6c7daaf00d6df36af972725ba7286adf2ece83b293840b2ff4ae37",
+      "width": 1440,
+      "height": 1661
+    },
+    {
+      "file": "runs/final-002/journey-empty.png",
+      "sha256": "56d1a1c2b3cc53b2d170091d5f4639b9d594ab72853f959eff811d3e6674d5e9",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-enqueue.png",
+      "sha256": "8245fd5fd00a7d3bc1c6540fedf54974871dec6fc0078718cd0d84c5fb5c2e88",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-five-second-focus.png",
+      "sha256": "11e2843bc9f4ca021d1ac8ac4e3de7c8f4d5288a5e339a5c7c63a7c9457e1500",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-illegal-name.png",
+      "sha256": "ee4a2a0b0eaa1c3bd3d4986c29c7e4c41ae8e46c127e6e0b7b706b458bc86cd6",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-invalid-key.png",
+      "sha256": "5a66bd1a20c9af3dff0c48c758b4ecd5c6191c4414fc89b3e962fad66c87fb31",
+      "width": 1440,
+      "height": 940
+    },
+    {
+      "file": "runs/final-002/journey-missing-key.png",
+      "sha256": "652e56f74438b3e7500ecad9d806476f2a0c626cf90894511027225ba163c35d",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "runs/final-002/journey-peek.png",
+      "sha256": "0f4380343f3fe30a288a72f9ce97c20f640e48205cc69cdfb25846c3e3107690",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-recovered-refresh.png",
+      "sha256": "e35197a13a6e385a89670b2068b4e5e84b99f1812507f741db5ebb0d456435a0",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-002/journey-save-refresh.png",
+      "sha256": "1d5aaba6208df3070b444f8113914d612986aaf1081a82f8ae4604a5306ccf7c",
+      "width": 1440,
+      "height": 1821
+    },
+    {
+      "file": "runs/final-002/journey-use.png",
+      "sha256": "4f5ba27eb96afd5a2d42edb4c52b5afc6628163247e18b14a0b0f1224a2272b1",
+      "width": 1440,
+      "height": 1867
+    },
+    {
+      "file": "runs/final-001/shared/screenshots/admin__ui__desktop__dark.png",
+      "sha256": "f874ca61c14ea8cc19cc7437d7da202c0a04fcf90ad3594d1f936bd7cc21bbc4",
+      "width": 1440,
+      "height": 1717
+    },
+    {
+      "file": "runs/final-001/shared/screenshots/admin__ui__mobile__dark.png",
+      "sha256": "3fc0b2265974243cbd602ea58841ca7761c0fb5bfdf8d11597b38e318c080982",
+      "width": 390,
+      "height": 3205
+    },
+    {
+      "file": "runs/final-001/shared/screenshots/admin__ui__tablet__dark.png",
+      "sha256": "43477d71d9ab58a6d2989e0bb8f1cb59f3dda834b71ce2ccd85eae9f3c7252d5",
+      "width": 834,
+      "height": 1717
+    }
+  ],
+  "evidenceFiles": [
+    {
+      "file": "evidence/desktop-health-green.log",
+      "sha256": "5b81253f83e0be232692208381eb07cbeb33d4eb4f5afde22acef9d8908eafea"
+    },
+    {
+      "file": "evidence/guards-initial.log",
+      "sha256": "ad37927686168a2871bf430cded39b2af50af5a6e280f52e960e37ea447088b2"
+    },
+    {
+      "file": "evidence/journey-health-green.log",
+      "sha256": "682ad736208b7bbcdbb8b6dbd02e5427c07aa9d7ccf5d063741ada3c39082c15"
+    },
+    {
+      "file": "evidence/lifecycle-green.log",
+      "sha256": "f180c9052f68621d75fa66b1386e27578264a80f6ae76a3952ac3815146699f8"
+    },
+    {
+      "file": "evidence/lifecycle-red.log",
+      "sha256": "2dce6c3a0cfb44afa2726f1eab864774fbfa5bfef1778c562d27baa798d4dfe9"
+    },
+    {
+      "file": "evidence/native-baseline.json",
+      "sha256": "c07c35c3d90e6391660552f8cd31f750746b76a53f80ee36cabd928e5a93e316"
+    },
+    {
+      "file": "evidence/native-final-build.json",
+      "sha256": "5d8f1fb29b128617f4599d20a127537e9203c700410e0b84625318c05d88e19d"
+    },
+    {
+      "file": "evidence/native-test.log",
+      "sha256": "0b5ed61d9818a4eac9ecec64e839135599edad8ad968fef4ba9f5b48fed14c38"
+    },
+    {
+      "file": "evidence/outer-baseline-001.json",
+      "sha256": "819c9dc8db0fe56c0b9dbda1d42ed4f6d8cc0cb89c59bc76896d55bbcc5cd9c4"
+    },
+    {
+      "file": "evidence/outer-final-001.json",
+      "sha256": "5340dfa681965a63f38bf810d9a6538037987c9dd8a0074b312502348449acd7"
+    },
+    {
+      "file": "evidence/outer-final-002.json",
+      "sha256": "e78425a7e7d716c32ef07f486fcc301c0a1ddbc01fa1a22156421fd28aa5b1a4"
+    },
+    {
+      "file": "evidence/publication-provenance.json",
+      "sha256": "aac0ed72b10c592f3a27132e881e48eb91c7aa8bb766fd665c24899217f98348"
+    },
+    {
+      "file": "evidence/reuse-check.log",
+      "sha256": "8bd907b7508607420fa91d74d3f858293d477f8b03934ae299746a52cb5cc634"
+    },
+    {
+      "file": "evidence/runtime-baseline-001.json",
+      "sha256": "2a863bbf686f5f0702195f927b57a282f041be351465de4d40744435800ebd7c"
+    },
+    {
+      "file": "evidence/runtime-final-001.json",
+      "sha256": "7ad06de47958e1650f103de2794e8b016dc17ed7ef6d9a438d0be703ea9261f4"
+    },
+    {
+      "file": "evidence/runtime-final-002.json",
+      "sha256": "d807e9281f43681926bea1a095de1efb94a7092bed1e2457d1688aa3e1f163c7"
+    },
+    {
+      "file": "evidence/shared-final-001.json",
+      "sha256": "a40bb7b56af2332cb8d8659c038504c3d24457923279397a5fcb3597dbc21b4f"
+    },
+    {
+      "file": "evidence/ui-green.log",
+      "sha256": "6f4dfac90a7514df69112eff4a3c1cf31327ba4ad8c2b0a9c314ac01e517f256"
+    },
+    {
+      "file": "evidence/ui-red.log",
+      "sha256": "c5c711107470543a404feb57c4713cb1aa8ff5df349ec5e965b9b567fe80e0fb"
+    }
+  ],
+  "native": {
+    "testedPackages": 8,
+    "packagesWithoutTests": 6,
+    "baselineTestSeconds": 18.254,
+    "baselineBuildSeconds": 0.769,
+    "finalEmbeddedBuildSeconds": 0.869,
+    "noBackendSourceChange": true,
+    "fullCurrentCI": "pending"
+  },
+  "notClaimed": [
+    "full R3",
+    "production/cluster acceptance",
+    "new usable tag",
+    "all-browser-health zero",
+    "pending or duplicate submission product fix"
+  ],
+  "aggregateToolCalls": null,
+  "providerRequests": null,
+  "aggregateActiveSeconds": null,
+  "cost": null
+}

@@ -4,7 +4,7 @@
 
 本檔只適用於 `platform/signal-hub/`。先讀 repository 的 README、PORTFOLIO、docs/taxonomy.md、docs/portfolio-doc-tiers.md、docs/specs/monorepo-ci.md，再完整閱讀本專案 SDD、docs/sdd/ 全部文件與 docs/STATUS.md。
 
-目前只有文件。看到下一個里程碑，不代表取得實作、部署或主機變更的授權。使用者只要求設計時，停在設計 PR。
+目前已有 M1–M5 runtime；實際交付證據以 docs/STATUS.md 為準。看到下一個里程碑，不代表取得實作、部署或主機變更的授權。使用者只要求設計時，停在設計 PR。
 
 ## 不變量
 
@@ -23,3 +23,11 @@ PR 只改本目錄，以及必要的根目錄索引與本專案專屬 CI。本�
 每個里程碑提交：固定 commit、實際執行的測試與環境、未執行項目與原因、風險、待核准項目、下一個最小切片。自行審查不得標成獨立 reviewer 已通過。設計接受、合併、驗收、部署、實際運行是不同狀態。
 
 第一個含可執行程式碼的 PR 才加入根 `.github/workflows/signal-hub-ci.yml`：path-scoped、`contents: read`、timeout、concurrency、checkout 不保留 credentials、第三方 actions 固定到核對過的 SHA；不部署、不發布、不讀 production secret。
+
+## 主線與驗收文件先行
+
+- 接手前先讀 [SUCCESS.md](SUCCESS.md)、相關規格與最近驗證紀錄，核對目前主線及缺口。
+- 實作前先更新 SUCCESS 的本次目標、範圍、AC 與驗證計畫；不得為了完成而縮小已承諾主線。
+- 收尾逐項記錄實際命令、結果、來源版本與未通過原因，同步 README 必要入口及項目進度；未跑不可寫通過。
+- 主線全部驗收、必要 CI／審查通過並合併後，按 repo 共用規範建立 annotated `usable/<slug>/vX.Y.Z`，回讀遠端並更新索引。現行 owner 授權適用；本規則不授權部署或付費服務。
+- 參考／封存項目保留其結束條件，不以新增文件當作可執行版本，也不因此恢復開發。

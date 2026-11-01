@@ -80,8 +80,8 @@ def semantic(name, document):
                         ZoneInfo(row['digest']['timezone'])
                     except (ZoneInfoNotFoundError, ValueError) as exc:
                         raise ValueError('unknown IANA timezone') from exc
-                if name == 'config' and row['channel']['kind'] == 'webhook' and row['channel']['url'] not in document['webhook_allowlist']:
-                    raise ValueError('webhook URL is not exactly allowlisted')
+                if name == 'config' and row['channel']['url'] not in document['webhook_allowlist']:
+                    raise ValueError('delivery URL is not exactly allowlisted')
 
 def validate(name, document):
     Draft202012Validator(SCHEMAS[name], registry=REGISTRY, format_checker=FORMATS).validate(document)
@@ -150,13 +150,27 @@ def main():
         assert actual.decode() == case['canonical'] and hashlib.sha256(actual).hexdigest() == case['sha256'], case['name']
     api = loads((ROOT/'openapi.json').read_text())
     def local_reference(uri):
-        allowed = {'./schemas/event.schema.json', (ROOT/'schemas/event.schema.json').as_uri()}
-        if uri not in allowed:
-            raise ValueError(f'nonlocal or unknown reference: {uri}')
-        return SCHEMAS['event']
+        for name, schema in SCHEMAS.items():
+            if uri in {f'./schemas/{name}.schema.json', f'schemas/{name}.schema.json',
+                       f'{name}.schema.json', (ROOT/f'schemas/{name}.schema.json').as_uri()}:
+                return schema
+        raise ValueError(f'nonlocal or unknown reference: {uri}')
     document = SchemaPath.from_dict(api, base_uri=(ROOT/'openapi.json').as_uri(),
                                    handlers={'<all_urls>': local_reference})
     OpenAPIV31SpecValidator(document).validate()
+    # M5 metadata belongs on the stored response, never inside the CloudEvent.
+    stored_schema = api['components']['schemas']['StoredEvent']
+    stored = dict(seq=1, received_at='2026-10-13T00:00:00Z', clock_skew=False,
+                  event=dict(specversion='1.0', id='archive', source='urn:example:archive',
+                             type='example.archive.event', time='2026-01-01T00:00:00Z'))
+    response_registry = REGISTRY.with_resource(
+        (ROOT/'schemas/event.schema.json').as_uri(), Resource.from_contents(SCHEMAS['event']))
+    response_schema = dict(stored_schema, **{'$id': (ROOT/'openapi.json').as_uri()})
+    response_validator = Draft202012Validator(response_schema, registry=response_registry, format_checker=FORMATS)
+    for metadata in ({}, {'restored': False}, {'restored': True}):
+        response_validator.validate(dict(stored, **metadata))
+    for metadata in ({'restored': 'true'}, {'restored': None}, {'restored': 1}):
+        assert list(response_validator.iter_errors(dict(stored, **metadata))), 'invalid restored metadata accepted'
     assert set(api['paths']['/v1/events']) >= {'get','post'}
     assert not any(method in path for path in api['paths'].values() for method in ('put','patch','delete'))
     print(f'PASS: {len(SCHEMAS)} schemas; {len(cases)} positive/negative fixtures; {len(vectors)} webhook vectors; {len(hashes)} canonical vectors; strict JSON; RFC 4231; OpenAPI 3.1')

@@ -1,0 +1,7 @@
+Certificate request self-signature ok
+subject=CN = localhost
+Certificate request self-signature ok
+subject=CN = secure-mqtt-client
+Certificate request self-signature ok
+subject=CN = unauthorized-client
+Generated certs in /tmp/wotar-isolated-emuzpjb6/source/certs

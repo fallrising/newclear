@@ -236,11 +236,18 @@ def render_html(markdown: bytes, batch_id: str, source_sha256: str) -> bytes:
         f"/api/batches/{batch_id}/documents/{source_sha256}/markdown"
     )
     page = (
-        '<!doctype html><meta charset="utf-8">'
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        '<meta name="color-scheme" content="light dark">'
         "<title>Ice Maker readable document</title>"
+        '<style>body{font-family:system-ui,sans-serif;background:Canvas;color:CanvasText;'
+        'margin:0}main{max-width:64rem;margin:auto;padding:1.25rem;overflow-wrap:anywhere}'
+        'pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}'
+        ':focus-visible{outline:3px solid Highlight;outline-offset:3px}</style>'
+        '</head><body><main><h1>Readable document</h1><p><a href="/">Back to upload</a></p>'
         f"<pre>{escaped}</pre>"
         f'<p><a href="{link}" download="document-{source_sha256}.md">'
-        "Download Markdown</a></p>"
+        "Download Markdown</a></p></main></body></html>"
     )
     encoded = page.encode("utf-8")
     if len(encoded) > MAX_HTML_BYTES:

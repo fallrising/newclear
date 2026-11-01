@@ -382,8 +382,8 @@ const file_ojbk_v1_producer_proto_rawDesc = "" +
 	"\aProduce\x12\x17.ojbk.v1.ProduceRequest\x1a\x18.ojbk.v1.ProduceResponse\x12E\n" +
 	"\fProduceBatch\x12\x17.ojbk.v1.ProduceRequest\x1a\x18.ojbk.v1.ProduceResponse(\x010\x01\x12=\n" +
 	"\fProduceDelay\x12\x15.ojbk.v1.DelayRequest\x1a\x16.ojbk.v1.DelayResponse\x12B\n" +
-	"\vCancelDelay\x12\x1b.ojbk.v1.CancelDelayRequest\x1a\x16.ojbk.v1.DelayResponseBN\n" +
-	"\aojbk.v1B\bProducerP\x01Z7github.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
+	"\vCancelDelay\x12\x1b.ojbk.v1.CancelDelayRequest\x1a\x16.ojbk.v1.DelayResponseB_\n" +
+	"\aojbk.v1B\bProducerP\x01ZHgithub.com/fallrising/newclear/systems/ojbquay/sdk/go/gen/ojbk/v1;ojbkv1b\x06proto3"
 
 var (
 	file_ojbk_v1_producer_proto_rawDescOnce sync.Once

@@ -52,6 +52,6 @@ Inspection 的 Git 查詢關閉 optional locks，以免 `git status` 刷新 inde
 
 ## 驗證與後續
 
-測試只使用 temporary synthetic fixtures。[Team evidence gate](../.team/reports/T-221.md)：`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest -v test_fresh_execution test_fresh_execution_cli test_fresh_execution_review test_fresh_rebuild test_pending_generation` 通過 73 tests／2.164 秒；`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v` 通過 550 tests／69.419 秒，沒有 failures／errors／skips。獨立審查通過 73 tests／2.201 秒；原 workflow validation、compileall、team contracts 與 diff checks 通過。原 [v0.1.7 雙次 build](M3-CORE-V017-VALIDATION-2026-10-03.md)、simulation 與 barrier 已有證據，不重做。
+測試只使用 temporary synthetic fixtures。Team evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-221.md`）：`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest -v test_fresh_execution test_fresh_execution_cli test_fresh_execution_review test_fresh_rebuild test_pending_generation` 通過 73 tests／2.164 秒；`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v` 通過 550 tests／69.419 秒，沒有 failures／errors／skips。獨立審查通過 73 tests／2.201 秒；原 workflow validation、compileall、team contracts 與 diff checks 通過。原 [v0.1.7 雙次 build](M3-CORE-V017-VALIDATION-2026-10-03.md)、simulation 與 barrier 已有證據，不重做。
 
 後續仍缺 actual authorization／fence／host observation adapters、fresh stage dispatch／bootstrap／probes、barrier 專用後續 stage recovery、generation CAS／commit／accepted-run seal／barrier completion，以及三個獨立 live fresh generations。沒有讀寫真實 private 或操作 VPS，不能將本輪準備與 inspection 當成整體完成。

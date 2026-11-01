@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0 -- /home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /tmp/wotar-isolated-_37rocto/source
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5, asyncio-1.4.0, cov-7.1.0, hypothesis-6.170.5
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/integration/test_public_smoke.py::test_public_broker_encrypted_roundtrip PASSED [100%]
+
+============================== 1 passed in 5.37s ===============================

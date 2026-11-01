@@ -1,0 +1,49 @@
+{
+  "recorded_at": "2026-10-22T18:33:58.049198+00:00",
+  "checks": [
+    {
+      "name": "project-success",
+      "exit": 1,
+      "evidence": "cu997-live-docs/preserve/evidence/project-success.log"
+    },
+    {
+      "name": "live-report",
+      "exit": 0,
+      "evidence": "cu997-live-docs/preserve/evidence/live-report.log"
+    },
+    {
+      "name": "historical-report",
+      "exit": 0,
+      "evidence": "cu997-live-docs/preserve/evidence/historical-report.log"
+    },
+    {
+      "name": "diff",
+      "exit": 0,
+      "evidence": "cu997-live-docs/preserve/evidence/diff.log"
+    },
+    {
+      "name": "source_and_snapshot_hashes",
+      "result": "passed"
+    },
+    {
+      "name": "public_privacy_review",
+      "result": "passed"
+    },
+    {
+      "name": "local_links",
+      "count": 41,
+      "result": "passed"
+    },
+    {
+      "name": "component-contract",
+      "command": "python3 scripts/check_project_success.py --projects tools/codex-usage --contracts-only",
+      "exit": 0,
+      "result": "PASS: 1 project success contracts (contracts only)"
+    }
+  ],
+  "ac03": "passed",
+  "ac04": "pending_visible_status",
+  "overall": "partial",
+  "runtime_retests": "not_repeated_unchanged_reviewed_source",
+  "repository_gate": "failed_unrelated_labs_zircon_godot_AC_table_format"
+}

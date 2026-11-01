@@ -19,11 +19,12 @@ func completionQuery(value command.CompleteWorkItem) port.CompletionMaterialQuer
 
 // completionSnapshot captures metadata in a bounded transaction. Its bytes are
 // verified only after that transaction has released the SQLite writer lock.
-func (service *Service) completionSnapshot(ctx context.Context, value command.CompleteWorkItem) (port.CompletionMaterial, error) {
+func (service *Service) completionSnapshot(ctx context.Context, value command.CompleteWorkItem) (port.CompletionMaterial, inputIdentity, error) {
 	var material port.CompletionMaterial
+	var identity inputIdentity
 	err := service.unit.Within(ctx, func(tx port.Transaction) error {
 		var err error
-		material, err = tx.LoadCompletionMaterial(ctx, completionQuery(value))
+		material, identity, err = service.currentCompletionMaterial(ctx, tx, completionQuery(value))
 		if len(material.RequiredACRevisions) > 1024 || len(material.CandidateArtifacts) > 1024 || len(material.Artifacts) > 1024 ||
 			len(material.Evidence) > 1024 || len(material.Reviews) > 1024 || len(material.Approvals) > 1024 {
 			return domain.StorageCorruptionError{Reason: "completion metadata exceeds capacity"}
@@ -36,7 +37,7 @@ func (service *Service) completionSnapshot(ctx context.Context, value command.Co
 		material.Approvals = slices.Clone(material.Approvals)
 		return err
 	})
-	return material, err
+	return material, identity, err
 }
 
 func sameCompletionMaterial(left, right port.CompletionMaterial) bool {
@@ -55,7 +56,8 @@ func (service *Service) verifyCompletionMaterial(ctx context.Context, value comm
 	if !material.CandidatePresent || !material.RunPresent || !material.CandidateAvailable {
 		return nil
 	}
-	current, err := currentSubject(material, service.config.Completion)
+	policy := service.completionFor(material.WorkItem.ProjectID())
+	current, err := currentSubject(material, policy)
 	if err != nil || current.Digest() != value.Subject.Digest() || material.WorkItem.Version() != value.ExpectedVersion {
 		return nil // Preserve the existing current-subject/version gate classification.
 	}
@@ -107,13 +109,13 @@ func (service *Service) verifyCompletionMaterial(ctx context.Context, value comm
 		artifacts[artifact.Digest] = artifact
 	}
 	for _, evidence := range material.Evidence {
-		rule, required := service.config.Completion.Checks[evidence.ACID]
+		rule, required := policy.Checks[evidence.ACID]
 		bound := slices.ContainsFunc(material.RequiredACRevisions, func(ac port.ACRequirement) bool {
 			return ac.ACID == evidence.ACID && ac.RevisionDigest == evidence.ACRevisionDigest
 		})
 		if !required || !bound || evidence.SubjectDigest != current.Digest() || evidence.VerifierClass != rule.VerifierClass || evidence.Verdict != "Passed" ||
 			evidence.Applicability != "Current" || evidence.Availability != "Present" ||
-			evidence.RecipeDigest != service.config.Completion.RecipeDigest ||
+			evidence.RecipeDigest != policy.RecipeDigest ||
 			(!rule.EnvironmentDigest.IsZero() && evidence.EnvironmentDigest != rule.EnvironmentDigest) {
 			continue // The existing Done predicate rejects missing/nonpassing/stale coverage.
 		}

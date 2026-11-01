@@ -115,7 +115,7 @@ sources:
 | `originurl` | `generatorURL` |
 | `data` | `labels`、`annotations`、`groupKey` |
 
-Alertmanager 重送同一個 alert 時 `id` 相同，所以由去重吸收。
+Alertmanager 重送相同映射內容時，`id` 相同且內容雜湊相同，才由去重吸收。同一 fingerprint／startsAt／status 若改變 annotations、labels、groupKey、generatorURL 或其他映射內容，仍是不可變身分衝突，回應 member `409`；有效 envelope 的 HTTP `200` 不代表所有 alert 成功。真實接入前必須用實際重送樣本核對相容性，不能改 ID 或忽略 member 錯誤來掩蓋衝突。詳見 [M6 來源接入](../source-integration.md)。
 
 ## 5. 驗收
 

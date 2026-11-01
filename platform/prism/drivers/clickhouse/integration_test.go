@@ -679,8 +679,17 @@ func TestClickHouseMandatoryEmptyReadsAndOptionalCapabilities(t *testing.T) {
 	if _, ok := b.Metrics().(spi.SeriesDeleter); ok {
 		t.Fatal("optional delete interface exposed")
 	}
-	if _, ok := b.Logs().(spi.NativeLogQuerier); ok {
-		t.Fatal("optional log query interface exposed")
+	if !caps.Logs.NativeLogQuery || !caps.Logs.Aggregation || !caps.Logs.Pushdown.Substring || !caps.Logs.Pushdown.Regex || !caps.Logs.Pushdown.ParsedFieldJSON || !caps.Logs.Pushdown.Sort || caps.Logs.Pushdown.ParsedFieldLogfmt || caps.Logs.Pushdown.Limit || caps.Logs.LiveTail || caps.Logs.Stats {
+		t.Fatalf("log capabilities: %+v", caps.Logs)
+	}
+	if _, ok := b.Logs().(spi.NativeLogQuerier); !ok {
+		t.Fatal("NativeLogQuerier is not exposed")
+	}
+	if _, ok := b.Logs().(spi.LogTailer); ok {
+		t.Fatal("optional tail interface exposed")
+	}
+	if _, ok := b.Logs().(spi.LogStatser); ok {
+		t.Fatal("optional stats interface exposed")
 	}
 	if _, ok := b.Traces().(spi.DependencyQuerier); ok {
 		t.Fatal("optional dependency interface exposed")

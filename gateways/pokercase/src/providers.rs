@@ -1,6 +1,6 @@
 //! Subscription / free provider registry for personal use.
 //!
-//! **Active** providers: codex, claude, cursor, grok, opencode, agy (antigravity).
+//! **Active** providers: siwc, claude, cursor, grok, opencode, agy (antigravity).
 //! Full protocol executors for Cursor protobuf / Antigravity Gemini envelope
 //! are staged — tokens can be imported now; wire format completes as needed.
 //!
@@ -27,12 +27,12 @@ pub enum UpstreamFormat {
     OpenAiChat,
     /// OpenAI Responses (Codex / Grok CLI style)
     OpenAiResponses,
-    /// Anthropic Messages
-    AnthropicMessages,
+    /// Local Claude Code CLI (`claude -p`), see claude_code.rs
+    ClaudeCode,
     /// Google Antigravity cloudcode-pa generateContent
     Antigravity,
-    /// Cursor AgentService (HTTP/2 Connect+proto)
-    CursorAgent,
+    /// Local Cursor Agent CLI (`cursor-agent -p`), see cursor_cli.rs
+    CursorCli,
     /// Not yet implemented — refuse generic chat forward
     Stub,
 }
@@ -42,8 +42,6 @@ pub enum UpstreamFormat {
 #[allow(dead_code)]
 pub enum AuthScheme {
     Bearer,
-    /// Anthropic API-key style (we still send Bearer for OAuth imports).
-    BearerAnthropic,
     /// OpenCode free: Authorization: Bearer public (or token if provided)
     BearerOrPublic,
     None,
@@ -100,62 +98,46 @@ impl ProviderProfile {
 /// Providers you asked to support first.
 pub const ACTIVE: &[ProviderProfile] = &[
     ProviderProfile {
-        id: "codex",
-        aliases: &["cx", "openai_codex", "chatgpt_codex"],
-        display_name: "OpenAI Codex (ChatGPT subscription)",
+        id: "siwc",
+        aliases: &["chatgpt_siwc", "openai_siwc", "sign_in_with_chatgpt"],
+        display_name: "OpenAI API via Sign in with ChatGPT (official plan sharing)",
         category: "oauth",
         status: ProviderStatus::Active,
-        default_base_url: "https://chatgpt.com/backend-api/codex/responses",
+        default_base_url: "https://api.openai.com/v1",
         format: UpstreamFormat::OpenAiResponses,
-        default_model: Some("gpt-5.6-sol"),
+        default_model: None,
         auth: AuthScheme::Bearer,
-        extra_headers: &[
-            ("originator", "codex_cli_rs"),
-            ("User-Agent", "codex_cli_rs/0.136.0"),
-            ("OpenAI-Beta", "responses=experimental"),
-        ],
+        extra_headers: &[],
         force_stream: true,
-        notes: "Codex requires stream=true. Prefer gpt-5.6-sol (not *-codex). Token: ~/.codex/auth.json",
+        notes: "Default for OpenAI models. Sign in with `thinrouter login-siwc`; store:false + stream:true enforced, unsupported fields dropped.",
     },
     ProviderProfile {
         id: "claude",
         aliases: &["cc", "anthropic", "claude_code"],
-        display_name: "Claude Code (Anthropic subscription)",
+        display_name: "Claude subscription via the local Claude Code CLI",
         category: "oauth",
         status: ProviderStatus::Active,
-        default_base_url: "https://api.anthropic.com/v1/messages",
-        format: UpstreamFormat::AnthropicMessages,
-        default_model: Some("claude-sonnet-4-5-20250929"),
-        auth: AuthScheme::BearerAnthropic,
-        extra_headers: &[
-            ("Anthropic-Version", "2023-06-01"),
-            (
-                "Anthropic-Beta",
-                "claude-code-20250219,oauth-2025-04-20,interleaved-thinking-2025-05-14",
-            ),
-            ("Anthropic-Dangerous-Direct-Browser-Access", "true"),
-            ("User-Agent", "claude-cli/2.1.92 (external, sdk-cli)"),
-            ("X-App", "cli"),
-        ],
+        default_base_url: "local://claude-code",
+        format: UpstreamFormat::ClaudeCode,
+        default_model: Some("sonnet"),
+        auth: AuthScheme::None,
+        extra_headers: &[],
         force_stream: false,
-        notes: "Anthropic Messages + OAuth bearer. Token: ~/.claude/.credentials.json",
+        notes: "Runs the signed-in `claude` binary (claude -p); thinrouter never holds a Claude token. Client tools not bridged yet.",
     },
     ProviderProfile {
         id: "cursor",
-        aliases: &["cu"],
-        display_name: "Cursor IDE",
+        aliases: &["cu", "cursor_agent"],
+        display_name: "Cursor subscription via the local Cursor Agent CLI",
         category: "oauth",
         status: ProviderStatus::Active,
-        default_base_url: "https://agent.api5.cursor.sh",
-        format: UpstreamFormat::CursorAgent,
+        default_base_url: "local://cursor-agent",
+        format: UpstreamFormat::CursorCli,
         default_model: Some("default"),
-        auth: AuthScheme::Bearer,
-        extra_headers: &[
-            ("User-Agent", "connect-es/1.6.1"),
-            ("connect-protocol-version", "1"),
-        ],
+        auth: AuthScheme::None,
+        extra_headers: &[],
         force_stream: false,
-        notes: "AgentService HTTP/2 text chat. Token: ~/.config/cursor/auth.json. Tools not supported yet.",
+        notes: "Runs the signed-in `cursor-agent -p` read-only (ask mode, sandbox); thinrouter holds no Cursor token. Text only; no client tools or images yet.",
     },
     ProviderProfile {
         id: "grok",
@@ -207,7 +189,10 @@ pub const ACTIVE: &[ProviderProfile] = &[
 
 /// Known aliases → canonical id for wishlist / future work (not active).
 pub const WISHLIST: &[(&str, &str)] = &[
-    ("github_copilot", "GitHub Copilot — OAuth + copilot-token exchange"),
+    (
+        "github_copilot",
+        "GitHub Copilot — OAuth + copilot-token exchange",
+    ),
     ("kiro", "Kiro free/subscription — custom executor"),
     ("gemini_cli", "Google Gemini CLI OAuth"),
     ("qwen", "Qwen / DashScope OAuth or API key"),
@@ -233,9 +218,9 @@ pub fn resolve(id_or_alias: &str) -> Option<&'static ProviderProfile> {
     if key.is_empty() {
         return None;
     }
-    ACTIVE.iter().find(|p| {
-        p.id == key || p.aliases.iter().any(|a| a.eq_ignore_ascii_case(&key))
-    })
+    ACTIVE
+        .iter()
+        .find(|p| p.id == key || p.aliases.iter().any(|a| a.eq_ignore_ascii_case(&key)))
 }
 
 pub fn default_base_url(id_or_alias: &str) -> &'static str {
@@ -262,6 +247,69 @@ pub fn list_public() -> serde_json::Value {
     })
 }
 
+/// Official upstream hosts per provider. OAuth tokens are only ever sent to these
+/// (https, default port) or to an operator-supplied `--provider-base-override`.
+fn official_hosts(provider_id: &str) -> &'static [&'static str] {
+    match provider_id {
+        "siwc" => &["api.openai.com"],
+        "grok" => &["cli-chat-proxy.grok.com"],
+        "opencode" => &["opencode.ai"],
+        "agy" => &["cloudcode-pa.googleapis.com"],
+        _ => &[],
+    }
+}
+
+/// Is `base_url` an allowed upstream for this known provider?
+pub fn base_url_allowed(
+    profile: &ProviderProfile,
+    base_url: &str,
+    overrides: &[(String, String)],
+) -> bool {
+    if matches!(
+        profile.format,
+        UpstreamFormat::ClaudeCode | UpstreamFormat::CursorCli
+    ) {
+        return true; // no credential leaves the machine; base_url is not used
+    }
+    let base = base_url.trim().trim_end_matches('/');
+    let Ok(url) = reqwest::Url::parse(base) else {
+        return false;
+    };
+    if !url.username().is_empty() || url.password().is_some() {
+        return false;
+    }
+    let official = url.scheme() == "https"
+        && url.port().is_none()
+        && url
+            .host_str()
+            .is_some_and(|h| official_hosts(profile.id).contains(&h));
+    official
+        || overrides.iter().any(|(id, prefix)| {
+            id == profile.id
+                && (base == prefix
+                    || base
+                        .strip_prefix(prefix.as_str())
+                        .is_some_and(|rest| rest.starts_with('/')))
+        })
+}
+
+/// Validate a provider connection's base_url; error text is safe to return to clients.
+pub fn check_base_url(
+    profile: &ProviderProfile,
+    base_url: &str,
+    overrides: &[(String, String)],
+) -> Result<(), String> {
+    if base_url_allowed(profile, base_url, overrides) {
+        Ok(())
+    } else {
+        Err(format!(
+            "base_url for provider '{}' must be https on {} (or a --provider-base-override set by the operator)",
+            profile.id,
+            official_hosts(profile.id).join(", ")
+        ))
+    }
+}
+
 /// Build upstream POST URL for this provider + connection base_url.
 pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
     let base = base_url.trim_end_matches('/');
@@ -276,34 +324,16 @@ pub fn build_upstream_url(profile: &ProviderProfile, base_url: &str) -> String {
         UpstreamFormat::OpenAiResponses => {
             if base.ends_with("/responses") {
                 base.to_string()
-            } else if base.ends_with("/v1") {
-                format!("{base}/responses")
             } else {
-                // codex stores full …/codex/responses
                 format!("{base}/responses")
             }
         }
-        UpstreamFormat::AnthropicMessages => {
-            if base.ends_with("/messages") {
-                // Claude Code often wants ?beta=true
-                if base.contains('?') {
-                    base.to_string()
-                } else {
-                    format!("{base}?beta=true")
-                }
-            } else if base.ends_with("/v1") {
-                format!("{base}/messages?beta=true")
-            } else {
-                format!("{base}/messages?beta=true")
-            }
-        }
+        UpstreamFormat::ClaudeCode => base.to_string(),
         UpstreamFormat::Antigravity => {
             // Full URL used by agy module; base kept for connection display.
             "https://cloudcode-pa.googleapis.com/v1internal:generateContent".into()
         }
-        UpstreamFormat::CursorAgent => {
-            "https://agent.api5.cursor.sh/agent.v1.AgentService/Run".into()
-        }
+        UpstreamFormat::CursorCli => base.to_string(),
         UpstreamFormat::Stub => base.to_string(),
     }
 }
@@ -320,7 +350,7 @@ pub fn authorization_header(profile: &ProviderProfile, token: &str) -> Option<St
                 Some(format!("Bearer {token}"))
             }
         }
-        AuthScheme::Bearer | AuthScheme::BearerAnthropic => {
+        AuthScheme::Bearer => {
             if token.is_empty() {
                 None
             } else {
@@ -336,17 +366,46 @@ mod tests {
 
     #[test]
     fn resolve_aliases() {
-        assert_eq!(resolve("cx").unwrap().id, "codex");
+        assert_eq!(resolve("openai_siwc").unwrap().id, "siwc");
         assert_eq!(resolve("claude").unwrap().id, "claude");
         assert_eq!(resolve("ag").unwrap().id, "agy");
         assert_eq!(resolve("antigravity").unwrap().id, "agy");
         assert_eq!(resolve("oc").unwrap().id, "opencode");
+        assert!(resolve("codex").is_none(), "codex provider removed");
         assert!(resolve("nope").is_none());
     }
 
     #[test]
-    fn codex_url() {
-        let p = resolve("codex").unwrap();
-        assert!(build_upstream_url(p, p.default_base_url).contains("responses"));
+    fn base_url_allowlist_rejects_foreign_hosts() {
+        let siwc = resolve("siwc").unwrap();
+        assert!(base_url_allowed(siwc, siwc.default_base_url, &[]));
+        for bad in [
+            "https://evil.example/v1",
+            "http://api.openai.com/v1",
+            "https://api.openai.com:8443/v1",
+            "https://api.openai.com.evil.example/v1",
+            "https://user:pw@api.openai.com/v1",
+            "https://chatgpt.com/backend-api/codex/responses",
+            "not a url",
+        ] {
+            assert!(!base_url_allowed(siwc, bad, &[]), "{bad}");
+        }
+        let ov = vec![("siwc".to_string(), "http://127.0.0.1:9999".to_string())];
+        assert!(base_url_allowed(siwc, "http://127.0.0.1:9999/v1", &ov));
+        assert!(!base_url_allowed(siwc, "http://127.0.0.1:99990/v1", &ov));
+        let grok = resolve("grok").unwrap();
+        assert!(!base_url_allowed(grok, "http://127.0.0.1:9999/v1", &ov));
+        for p in ACTIVE {
+            assert!(base_url_allowed(p, p.default_base_url, &[]), "{}", p.id);
+        }
+    }
+
+    #[test]
+    fn siwc_url() {
+        let p = resolve("siwc").unwrap();
+        assert_eq!(
+            build_upstream_url(p, p.default_base_url),
+            "https://api.openai.com/v1/responses"
+        );
     }
 }

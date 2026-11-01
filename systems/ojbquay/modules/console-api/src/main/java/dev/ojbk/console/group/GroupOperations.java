@@ -14,5 +14,6 @@ public interface GroupOperations {
             String topic,
             int partitions,
             String mode,
-            long value);
+            long value,
+            Runnable beforeAlter);
 }

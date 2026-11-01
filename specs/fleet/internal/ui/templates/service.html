@@ -5,17 +5,19 @@
 <p>desired {{.View.DesiredState}} · health <span class="health-{{.View.Health}}">{{.View.Health}}</span> · generation {{.View.Generation}} / applied {{.View.AppliedGeneration}} · ingress {{.View.IngressStatus}}</p>
 <p>
   {{if eq .View.DesiredState "stopped"}}
-  <button hx-post="/api/v1/services/{{.View.Name}}/start" hx-refresh="true">Start</button>
+  <button aria-label="Start {{.View.Name}}" hx-disabled-elt="this" hx-post="/api/v1/services/{{.View.Name}}/start" hx-swap="none" hx-on::after-request="if(event.detail.successful) location.reload()">Start</button>
   {{else}}
-  <button hx-post="/api/v1/services/{{.View.Name}}/stop" hx-refresh="true">Stop</button>
+  <button aria-label="Stop {{.View.Name}}" hx-disabled-elt="this" hx-post="/api/v1/services/{{.View.Name}}/stop" hx-swap="none" hx-on::after-request="if(event.detail.successful) location.reload()">Stop</button>
   {{end}}
-  <button hx-post="/api/v1/services/{{.View.Name}}/redeploy" hx-refresh="true">Redeploy</button>
+  <button aria-label="Redeploy {{.View.Name}}" hx-disabled-elt="this" hx-post="/api/v1/services/{{.View.Name}}/redeploy" hx-swap="none" hx-on::after-request="if(event.detail.successful) location.reload()">Redeploy</button>
 </p>
 <h2>Instance</h2>
-<pre>{{.InstancePretty}}</pre>
+{{if and .InstancePretty (ne .InstancePretty "null") (ne .InstancePretty "[]")}}<pre>{{.InstancePretty}}</pre>{{else}}<p class="muted">No instance reported yet.</p>{{end}}
 <h2>Releases</h2>
+<div class="table-scroll">
 <table>
-  <thead><tr><th>ID</th><th>Image</th><th>SHA</th><th>At</th><th></th></tr></thead>
+  <caption class="visually-hidden">Service releases</caption>
+  <thead><tr><th scope="col">ID</th><th scope="col">Image</th><th scope="col">SHA</th><th scope="col">At</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
   <tbody>
     {{range .Releases}}
     <tr>
@@ -25,17 +27,20 @@
       <td>{{.CreatedAt}}</td>
       <td>
         {{if ne .ID $.CurrentReleaseID}}
-        <button hx-post="/api/v1/services/{{$.View.Name}}/deploy"
-                hx-headers='{"Content-Type": "application/json"}'
+        <button aria-label="Rollback {{$.View.Name}} to {{.ID}}" hx-disabled-elt="this" hx-post="/api/v1/services/{{$.View.Name}}/deploy"
+                hx-ext="json-body"
                 hx-vals='{"release_id": "{{.ID}}"}'
-                hx-refresh="true">Rollback</button>
+                hx-swap="none" hx-on::after-request="if(event.detail.successful) location.reload()">Rollback</button>
         {{end}}
       </td>
     </tr>
+    {{else}}
+    <tr><td colspan="5" class="muted">No releases yet.</td></tr>
     {{end}}
   </tbody>
 </table>
+</div>
 <h2>Audit</h2>
-<pre>{{.AuditPretty}}</pre>
+{{if and .AuditPretty (ne .AuditPretty "null") (ne .AuditPretty "[]")}}<pre>{{.AuditPretty}}</pre>{{else}}<p class="muted">No audit entries.</p>{{end}}
 {{template "footer" .}}
 {{end}}

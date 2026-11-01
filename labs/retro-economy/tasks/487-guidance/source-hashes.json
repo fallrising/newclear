@@ -1,0 +1,8 @@
+{
+  "retro/static/app.js": "2a284a3c578c56d97d7736d35a5a38b3da6e747dac98296bc15332a23353ff40",
+  "tests/test_ui.mjs": "9193ebe306bb73901e749640ae945436b79c19fd0069190c5faa90c90e247316",
+  "tests/browser_smoke.mjs": "9d3461db6fb57c32a343f90b0b17270b7f109a0ca50bd2ec8ffd20984f1a2878",
+  "retro/domain.py": "12ff0425d8cb3917b7fcdde5a3418484bbbe354c810477df4e3ef23dfa5fa5bd",
+  "retro/store.py": "42935c54acb1d816bf406b73e999e5d99300f6b7184bba9d32d478f98e7af1c4",
+  "retro/http.py": "756d9762eecdaf63c066a972d861d71784e8d6c82b1ef7e1c8a8e3e9ed93920c"
+}

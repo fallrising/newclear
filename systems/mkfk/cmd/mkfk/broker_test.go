@@ -142,12 +142,12 @@ type writer struct {
 func openWriter(t *testing.T, transport *client.ClusterTransport, partition uint32, label string) *writer {
 	t.Helper()
 	w := &writer{transport: transport, partition: partition, producerID: "7c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5" + label}
-	eventually(t, "producer to open", 30*time.Second, func() bool {
+	succeeds(t, "producer to open", 30*time.Second, func() error {
 		opened, err := transport.OpenProducer(context.Background(), "open-"+label, protocol.OpenProducerRequest{
 			Topic: "events", Partition: partition, ProducerID: w.producerID, ExpectedEpoch: -1, RequestID: "open-" + label,
 		})
 		w.epoch = uint64(opened.Epoch)
-		return err == nil
+		return err
 	})
 	return w
 }
@@ -163,13 +163,13 @@ func (w *writer) produce(t *testing.T, values ...string) protocol.ProduceRespons
 	w.batches++
 	requestID := fmt.Sprintf("p%d-%s-%d", w.partition, w.producerID[len(w.producerID)-1:], w.batches)
 	var response protocol.ProduceResponseData
-	eventually(t, "batch to be acknowledged", 30*time.Second, func() bool {
+	succeeds(t, "batch to be acknowledged", 30*time.Second, func() error {
 		var err error
 		response, err = w.transport.Produce(context.Background(), requestID, protocol.ProduceRequest{
 			Topic: "events", Partition: w.partition, ProducerID: w.producerID, Epoch: protocol.DecimalUint64(w.epoch),
 			FirstSequence: protocol.DecimalUint64(w.sequence), Acks: "all", Records: records,
 		})
-		return err == nil
+		return err
 	})
 	w.sequence = uint64(response.NextSequence)
 	return response

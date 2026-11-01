@@ -287,7 +287,12 @@ func (partition *PartitionLog) appendEntriesLocked(entries []Frame) error {
 	partition.lastLogIndex = entries[len(entries)-1].LogIndex
 	partition.leo = nextLEO
 	for segment := range touched {
+		anchorsBefore := len(segment.anchors)
 		segment.rebuildDerived()
+		// Appends only add anchors, so an unchanged count means the index file is current.
+		if segment.indexHealthy && len(segment.anchors) == anchorsBefore {
+			continue
+		}
 		if err := partition.persistSegmentIndex(segment); err != nil {
 			segment.indexHealthy = false
 		} else {

@@ -1,10 +1,11 @@
 # FE Review Prompt — agent-platform
 
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：隔離 PostgreSQL＋真 FastAPI＋fake backend；補拍覆寫不冒充真整合。 第 2 輪已依原 M1–M3 完成本機實作與兩次 fresh 實測；第 3 輪未啟動，結果與限制見 [報告](tasks/round2/report.md)。
 你是負責 **agent-platform** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
 
 先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
 
-> 狀態：**第 1 輪（文檔先行）**。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)，第 2 輪的修改範圍與驗收見 [DESIGN.md](DESIGN.md)。
+> 狀態：**第 2 輪本機實作／實測完成，待獨立審查及 CI／合併**。`targets.verified=true` 僅對應原批准 M1–M3；原失敗、複合 native 驗證及範圍界線見 [報告](tasks/round2/report.md)。
 
 ## 專案概況
 
@@ -13,16 +14,16 @@
 - **技術棧：** React 19、Vite 8、TanStack Query；後端 FastAPI、uvicorn、PostgreSQL
 - **UI 入口：** `platform/agent-platform/web/`（dev port 5173 strict，`/api` 代理到 `http://127.0.0.1:8000`；build 後由 FastAPI 以 StaticFiles 提供 `web/dist`，fe-review 使用這個單一 origin 版本）
 
-## 啟動線索（未驗證）
+## 已驗證的隔離啟動入口
 
-- 詳細步驟見 [DESIGN.md](DESIGN.md)「啟動方式」。摘要：依 `docs/quickstart.md` 建立 `.venv`；`npm --prefix web ci && npm --prefix web run build`；容器內起 PostgreSQL（只綁 `127.0.0.1`、專用資料庫 `agent_platform_test`、密碼即時產生），以 `TEST_DATABASE_URL` 執行 `scripts/browser-fixture.py serve`，在 `http://127.0.0.1:18600` 同時提供 UI 與 API。
+- 優先使用 [RUNNER.md](RUNNER.md) 的 fresh 專用隔離入口，原 fixture 保持不變。詳細設計見 [DESIGN.md](DESIGN.md)「啟動方式」。摘要：依 `docs/quickstart.md` 建立 `.venv`；`npm --prefix web ci && npm --prefix web run build`；容器內起 PostgreSQL（只綁 `127.0.0.1`、專用資料庫 `agent_platform_test`、密碼即時產生），以 `TEST_DATABASE_URL` 執行 `scripts/browser-fixture.py serve`，在 `http://127.0.0.1:18600` 同時提供 UI 與 API。
 - 合成帳號由 fixture 即時產生，寫在 git-ignored 的 `.artifacts/browser-fixture.json`；`scripts/browser-fixture.py produce` 讓預建任務跑完（100 筆事件後 `succeeded`）。
 - 沒有 `CONNECTOR_ORIGIN` 時一律使用 fake backend，不呼叫模型、不需要金鑰；不要接真實 OpenHands／KVM 或模型。
 - `npm run dev`（5173）需要另外起 API（8000）、worker 與 PostgreSQL，且 `APP_ORIGIN` 必須是 `http://127.0.0.1:5173`。
 
-## 主要流程
+## 第 3 輪主要流程（本次未全套執行）
 
-至少走通以下流程各一次，並對每一步截圖：
+未來第 3 輪至少走通以下流程各一次。本次只完成 DESIGN M1 的明列流程，未額外重做 retry／完整第 3 輪：
 
 - 登入 → 開啟任務詳情 → 事件串流載入、斷線、重連（既有 `web/e2e/reconnect.spec.ts` 的做法）→ 查看執行結果 → 以相同設定重新執行。
 - 專案、Agent 設定兩個 view → 建立任務表單（含原生驗證提示）。
@@ -35,7 +36,7 @@
 - 事件串流的 loading、斷線、重連 UI（既有 `e2e/reconnect.spec.ts`）。
 - Approvals 的危險操作確認、按鈕狀態與鍵盤可達性。
 - 長 log／事件列表的效能與捲動（fixture 產生 100 筆事件，時間軸沒有虛擬化）。
-- 狀態文字都已中文化（`App.tsx` 的 `stateNames`）。
+- 狀態文字都已中文化（`taskLocation.ts` 的 `taskStateNames`，由 App 共用）。
 - 沒有 dark mode，只擷取 light。
 
 ## 可重用的既有資產

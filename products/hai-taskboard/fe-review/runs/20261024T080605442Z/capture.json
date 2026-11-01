@@ -1,0 +1,43 @@
+{
+  "scope": "original R2 ConnectedApp local evidence only",
+  "fullProductAcceptance": false,
+  "doneAcceptance": false,
+  "runId": "20261024T080605442Z",
+  "reusedCaptureFrom": null,
+  "resumedSyntheticStateFrom": "20261024T075447787Z",
+  "driverSha256": "1da6698b685cff3faef901405919b571b926acf7489ed95d76bf136ad0fe452b",
+  "node": "v24.20.0",
+  "steps": [],
+  "captures": [],
+  "health": [
+    {
+      "type": "http",
+      "step": "resume stopped synthetic admission via real login and exact original result",
+      "method": "GET",
+      "path": "/api/v1/session",
+      "status": 401
+    },
+    {
+      "type": "consoleerror",
+      "step": "resume stopped synthetic admission via real login and exact original result",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    }
+  ],
+  "commands": [
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/prj_WBX1HSW519EAN7BS1D2H/commands/cmd_PR3ZMD0NE0YJGQTPS4S4"
+    }
+  ],
+  "shutdown": [
+    {
+      "signal": "SIGTERM",
+      "exit": 0
+    }
+  ],
+  "browser": "151.0.7922.34",
+  "status": "failed",
+  "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+  "runtimeLogSha256": "e64d8d3832b91656c4cd82958e00a53410e245b95a719f70b949781df7e64bcb",
+  "runtimeLogLines": 1
+}

@@ -1,6 +1,6 @@
 ---
 document_id: PROTOCOL-LLM-EXECUTION
-version: 1.0.0
+version: 1.0.1
 status: approved
 authority: execution-process
 ---
@@ -15,7 +15,7 @@ authority: execution-process
 
 Agent 只可領取 `docs/graph.yaml` 中符合以下條件的 node：
 
-1. 所有 `depends_on` 狀態為 `done`。
+1. 所有 `depends_on` 狀態為 `done`（開發驗收，見 SPEC §13.1；Mac 發行驗收另追蹤）。
 2. Node front matter 的 `source_sha256` 等於目前 `SPEC.md` SHA-256。
 3. Node 狀態為 `ready` 或被 orchestrator 明確指派。
 4. Dependency contract 已凍結。

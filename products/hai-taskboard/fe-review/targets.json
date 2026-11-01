@@ -1,7 +1,7 @@
 {
   "project": "hai-taskboard",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verified": true,
+  "verifiedNote": "僅原批准R2本機驗證：真同源ConnectedApp session/project/Draft/explicit admission/Ready/Fake/SSE與有界faults通過，30唯一actualtheme/viewport畫面；native web30/backendfull+race及safety8通過。通用target仍只代表login，board證據來自capture-connected.mjs。legacyACcount0與較早refresh警告並列後續Connected未修；不代表完整產品／Round3，最終review/CI/交付另追蹤。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light"
@@ -11,17 +11,17 @@
       "name": "web",
       "kind": "spa",
       "cwd": "products/hai-taskboard/web",
-      "install": "corepack pnpm install --frozen-lockfile",
-      "start": "corepack pnpm exec vite --host 127.0.0.1 --port 5173 --strictPort",
+      "install": "corepack pnpm install --frozen-lockfile --ignore-scripts",
       "env": {},
-      "baseUrl": "http://127.0.0.1:5173",
-      "ready": "/",
+      "baseUrl": "http://127.0.0.1:8080",
+      "ready": "/healthz",
       "pages": [
         {
-          "id": "board",
+          "id": "login",
           "path": "/"
         }
       ]
     }
-  ]
+  ],
+  "verifiedAt": "2026-10-24"
 }

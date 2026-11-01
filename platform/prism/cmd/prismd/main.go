@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"maps"
+	"net/http"
 	"os"
 	"os/signal"
 	"slices"
@@ -16,6 +17,7 @@ import (
 
 	_ "github.com/fallrising/newclear/platform/prism/drivers/clickhouse"
 	_ "github.com/fallrising/newclear/platform/prism/drivers/memory"
+	"github.com/fallrising/newclear/platform/prism/internal/compat/lokiapi"
 	"github.com/fallrising/newclear/platform/prism/internal/compat/promapi"
 	"github.com/fallrising/newclear/platform/prism/internal/config"
 	prismserver "github.com/fallrising/newclear/platform/prism/internal/server"
@@ -114,6 +116,11 @@ func writef(writer io.Writer, format string, arguments ...any) bool {
 }
 
 func runService(ctx context.Context, configuration *config.Config, logger *slog.Logger) error {
+	stopRules, err := startRuleReload(ctx, configuration.Rules.Path, logger)
+	if err != nil {
+		return err
+	}
+	defer stopRules()
 	registry, err := newRuntimeRegistry()
 	if err != nil {
 		return err
@@ -182,6 +189,17 @@ func runAllInOne(ctx context.Context, configuration *config.Config, logger *slog
 	return runIngest(ctx, configuration, logger, registry, backend, metrics)
 }
 
+func newLokiQueryHandler(backend spi.Backend, configuration *config.Config) (*lokiapi.QueryHandler, error) {
+	return lokiapi.NewQueryHandler(backend, lokiapi.QueryOptions{
+		Tenant:             configuration.Tenancy.DefaultTenant,
+		APIKey:             configuration.Auth.IngestAPIKey,
+		AllowAnonymousRead: configuration.Auth.AllowAnonymousRead,
+		MaxRange:           configuration.Query.MaxRange.Std(),
+		Timeout:            configuration.Query.Timeout.Std(),
+		Clock:              spi.SystemClock,
+	})
+}
+
 func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Logger, registry *prometheus.Registry, backend spi.Backend, metrics *telemetry.Registry) error {
 	if err := configuration.Validate(ctx); err != nil {
 		return fmt.Errorf("validate query runtime: %w", err)
@@ -194,19 +212,32 @@ func runQuery(ctx context.Context, configuration *config.Config, logger *slog.Lo
 	if err != nil {
 		return fmt.Errorf("create query handler: %w", err)
 	}
-	server, err := prismserver.New(prismserver.Options{
-		Address: configuration.Server.HTTPListen, ShutdownTimeout: configuration.Server.ShutdownTimeout.Std(),
-		TLSCertFile: configuration.Server.TLSCertFile, TLSKeyFile: configuration.Server.TLSKeyFile,
-		Gatherer: registry, Handler: handler.HTTPHandler(), Logger: logger,
-		StopReceiving: handler.Stop,
-		Drain:         func(shutdown context.Context) error { return handler.Close(context.WithoutCancel(shutdown)) },
-		Ready:         notifyReady, Stopping: notifyStopping,
-	})
+	lokiHandler, err := newLokiQueryHandler(backend, configuration)
 	if err != nil {
 		handler.Stop()
 		shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), configuration.Server.ShutdownTimeout.Std())
 		defer cancel()
-		return errors.Join(fmt.Errorf("create query server: %w", err), handler.Close(shutdown))
+		return errors.Join(fmt.Errorf("create loki query handler: %w", err), handler.Close(shutdown))
+	}
+	mux := http.NewServeMux()
+	mux.Handle("/prom/api/v1/", handler.HTTPHandler())
+	mux.Handle("/loki/api/v1/", lokiHandler.HTTPHandler())
+	server, err := prismserver.New(prismserver.Options{
+		Address: configuration.Server.HTTPListen, ShutdownTimeout: configuration.Server.ShutdownTimeout.Std(),
+		TLSCertFile: configuration.Server.TLSCertFile, TLSKeyFile: configuration.Server.TLSKeyFile,
+		Gatherer: registry, Handler: mux, Logger: logger,
+		StopReceiving: func() { handler.Stop(); lokiHandler.Stop() },
+		Drain: func(shutdown context.Context) error {
+			return errors.Join(handler.Close(context.WithoutCancel(shutdown)), lokiHandler.Close(context.WithoutCancel(shutdown)))
+		},
+		Ready: notifyReady, Stopping: notifyStopping,
+	})
+	if err != nil {
+		handler.Stop()
+		lokiHandler.Stop()
+		shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), configuration.Server.ShutdownTimeout.Std())
+		defer cancel()
+		return errors.Join(fmt.Errorf("create query server: %w", err), handler.Close(shutdown), lokiHandler.Close(shutdown))
 	}
 	logger.InfoContext(ctx, "HTTP server starting", "component", "server", "address", configuration.Server.HTTPListen, "driver", configuration.Storage.Driver, "mode", configuration.Server.Mode)
 	err = server.Run(ctx)

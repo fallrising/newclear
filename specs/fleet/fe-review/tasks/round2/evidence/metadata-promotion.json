@@ -1,0 +1,6 @@
+{
+  "runtimeTargetsSha256": "fcfa76ce718301fdeb93a49ac3d7b7e3f4f5fd16df2405636d84afe32823c743",
+  "finalTargetsSha256": "a6bd6388c2bcc86a122a60b62f6b0505e431877055f3cb7e6fc42ee356ce6571",
+  "delta": "verified and verifiedNote only; routes and runtime behavior unchanged",
+  "scope": "approved R2 only; 5 axe findings retained; full R3 unverified"
+}

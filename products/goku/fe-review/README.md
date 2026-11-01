@@ -1,14 +1,13 @@
 # fe-review — goku
 
-這個目錄是給 LLM agent 用的前端 review 工作包：定義如何檢查 goku 的 UI、如何產生 headless 截圖，以及報告放在哪裡。它不是給人的操作教學，也不改變元件的文檔檔位。
+原批准 R2 M1–M3 已實作，store 回歸與原生 lint/build 通過。隔離 json-server 的主要流程已實測；最後 favicon 解碼補證已通過；M1 staged tracking 已確認，獨立審查與 current CI／merge 仍待收尾。不是完整第3輪或產品主線驗收。
 
-**狀態：** 第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動或截圖。
-
-| 檔案 | 用途 |
+| 入口 | 用途 |
 | --- | --- |
-| [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
-| [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
-| [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
-| `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
+| [本次報告](tasks/round2/report.md) | 實測結果、原失敗、已知限制 |
+| [RUNNER.md](RUNNER.md) | 無新依賴 focused checks 與 owned runtime 介面 |
+| [PROMPT.md](PROMPT.md) / [REVIEW.md](REVIEW.md) | 批准範圍與目前狀態 |
+| [targets.json](targets.json) | 真 loopback fixture 入口；僅原 R2 的隔離瀏覽器入口已實測 |
+| [DESIGN.md](DESIGN.md) | 原批准 M1–M3，保持不變 |
 
-共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)；截圖腳本：`docs/fe-review/capture.mjs`。
+原始 PNG／logs／DB 只留 ignored 私有目錄。公開 evidence 只含合成文字與去敏結果。共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)。

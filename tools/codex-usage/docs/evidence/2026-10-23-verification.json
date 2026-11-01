@@ -1,0 +1,168 @@
+{
+  "recorded_at": "2026-10-22T18:19:21.009184+00:00",
+  "baseline_commit": "b7f2a4311d1135977ba273efba8e77702b908036",
+  "python_version": "Python 3.13.5",
+  "checks": [
+    {
+      "name": "unit",
+      "command": [
+        "python3",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "cwd": "tools/codex-usage",
+      "exit": 0,
+      "tests": 33,
+      "evidence": "cu997-cleanup-green/preserve/evidence/green.log"
+    },
+    {
+      "name": "python311_syntax",
+      "result": "passed",
+      "note": "ast.parse feature_version=(3,11); not a Python 3.11 runtime test"
+    },
+    {
+      "name": "compile",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "tools/codex-usage/codex_usage.py"
+      ],
+      "exit": 0,
+      "evidence": "cu997-final-gates/preserve/evidence/compile.log"
+    },
+    {
+      "name": "task997",
+      "command": [
+        "python3",
+        "<installed-team-plugin>/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-997.md"
+      ],
+      "exit": 0,
+      "evidence": "cu997-final-gates/preserve/evidence/task997.log"
+    },
+    {
+      "name": "task998",
+      "command": [
+        "python3",
+        "<installed-team-plugin>/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-998.md"
+      ],
+      "exit": 0,
+      "evidence": "cu997-final-gates/preserve/evidence/task998.log"
+    },
+    {
+      "name": "report997",
+      "command": [
+        "python3",
+        "<installed-team-plugin>/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-997.md"
+      ],
+      "exit": 0,
+      "evidence": "cu997-final-gates/preserve/evidence/report997.log"
+    },
+    {
+      "name": "report998",
+      "command": [
+        "python3",
+        "<installed-team-plugin>/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-998.md"
+      ],
+      "exit": 0,
+      "evidence": "cu997-final-gates/preserve/evidence/report998.log"
+    },
+    {
+      "name": "local_doc_links",
+      "count": 31,
+      "result": "passed"
+    },
+    {
+      "name": "independent_review",
+      "recommendation": "ACCEPT offline AC01/02 after REWORK",
+      "tests": 33,
+      "evidence": "cu998-rereview; .team/reports/T-998.md"
+    },
+    {
+      "name": "project-success",
+      "command": [
+        "python3",
+        "scripts/check_project_success.py"
+      ],
+      "exit": 0,
+      "evidence": "cu997-docs-recheck/preserve/evidence/project-success.log"
+    },
+    {
+      "name": "delivery-report",
+      "command": [
+        "python3",
+        "<installed-team-plugin>/scripts/teamctl.py",
+        "validate-report",
+        "tools/codex-usage/docs/evidence/2026-10-23-report.md"
+      ],
+      "exit": 0,
+      "evidence": "cu997-docs-recheck/preserve/evidence/delivery-report.log"
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "evidence": "cu997-docs-recheck/preserve/evidence/diff.log"
+    }
+  ],
+  "sha256": {
+    "codex_usage.py": "f734330427d350f5e71d065e160ea20eb4b984c0802d11ee773f688aa02e4c03",
+    "tests/test_codex_usage.py": "8a3930c3217812f09180be664e613eec179d3c3b217265e4b2a76d4c3e75b144",
+    "tests/test_regressions.py": "dd69402b82be86e8843102fb2d93d954d22a79a2535e0649ee411003765466f0"
+  },
+  "live_snapshot": "collected_target_verified_exit0",
+  "visible_status_comparison": "not_run_reading_unavailable",
+  "hosted_ci": "not_run_unpublished_changes",
+  "merge": "not_authorized",
+  "evidence_gate": {
+    "offline_ac01_ac02": "accepted",
+    "overall": "partial",
+    "ac03": "passed",
+    "ac04": "pending_visible_same_account_status"
+  },
+  "historical_failed_checks": [
+    {
+      "name": "project-success",
+      "command": [
+        "python3",
+        "scripts/check_project_success.py"
+      ],
+      "exit": 1,
+      "evidence": "cu997-final-gates/preserve/evidence/project-success.log"
+    },
+    {
+      "name": "delivery-report",
+      "command": [
+        "python3",
+        "<installed-team-plugin>/scripts/teamctl.py",
+        "validate-report",
+        "tools/codex-usage/docs/evidence/2026-10-23-report.md"
+      ],
+      "exit": 1,
+      "evidence": "cu997-final-gates/preserve/evidence/delivery-report.log"
+    }
+  ],
+  "historical_live_status": {
+    "live_snapshot": "not_run_target_unspecified",
+    "ac03": "pending_target_and_real_snapshot"
+  },
+  "latest_live_receipt": "2026-10-23-live-receipt.json"
+}

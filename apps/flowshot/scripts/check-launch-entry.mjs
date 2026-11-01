@@ -2,11 +2,12 @@ import {
   readFileSync,
   statSync,
 } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const distributionDirectory = resolve(repositoryRoot, "dist");
+const distributionDirectory = process.env.AGENT_BUILD_DIR
+  ? resolve(process.env.AGENT_BUILD_DIR, "dist") : resolve(repositoryRoot, "dist");
 const indexHtml = readFileSync(
   resolve(distributionDirectory, "index.html"),
   "utf8",
@@ -39,7 +40,7 @@ if (entryBytes >= 20_000) {
 console.log(
   JSON.stringify({
     event: "launch_entry_check",
-    entry: entryPath.slice(repositoryRoot.length + 1),
+    entry: relative(distributionDirectory, entryPath),
     entryBytes,
     result: "pass",
   }),

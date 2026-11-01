@@ -1,5 +1,11 @@
 # 接續 Prompt：Mithril 四機實驗
 
+2026-10-15 接續狀態：P1a strict plan／synthetic lifecycle 已提供，見 [P1-LOCAL](P1-LOCAL.md)、[P1-CONTRACT](P1-CONTRACT.md) 與 [VALIDATION](VALIDATION.md)。P1b 接續提供 Compose/auth 產生、固定 SSH observe/down 與 purge preview，見 [P1-TOOLS](P1-TOOLS.md)；startup／cluster orchestration、purge apply 與 M1–M3 runtime 尚未驗收。接手先讀新增 P1 文件及 runtime.lock，不能把 local-fixture plan 或 demo 當作可執行實機批准。
+
+P1c 另提供 [離線 bootstrap planner](P1-BOOTSTRAP.md)，只驗證匯入的六節點觀察並產生 conditional proposal；未提供 collector／phase executor，完整 startup 與實機驗收仍缺。
+
+P1d [唯讀 collector](P1-COLLECTOR.md) 已另定契約；complete/partial collection 不授權下一階段，也不自動轉成 P1c snapshot。先讀 collector 契約與 mock 證據，再讀 P1e [獨立離線階段驗證](P1-PHASE.md)；phase-aware live validation／executor 仍缺。
+
 本 Prompt 是交接文件，不會因被閱讀就授權任何遠端操作。預設 mode 是 `plan-only`；Owner 明確選擇 `develop-only` 或批准精確實機變更計劃後，才可進入對應工作。文檔合併不是 runtime PASS。
 
 ---
@@ -26,6 +32,7 @@ docs/specs/monorepo-ci.md
 labs/mithril-research/AGENTS.md
 labs/mithril-research/README.md
 labs/mithril-research/upstream.lock.json
+labs/mithril-research/runtime.lock.json
 labs/mithril-research/docs/STATUS.md
 labs/mithril-research/docs/RESEARCH.md
 labs/mithril-research/docs/SDD.md
@@ -34,13 +41,23 @@ labs/mithril-research/docs/VALIDATION.md
 labs/mithril-research/docs/quickstart.md
 labs/mithril-research/docs/FOUR-NODE-PLAN.md
 labs/mithril-research/docs/EXECUTION_PROMPT.md
+labs/mithril-research/docs/P1-CONTRACT.md
+labs/mithril-research/docs/P1-LOCAL.md
+labs/mithril-research/docs/P1-TOOLS-CONTRACT.md
+labs/mithril-research/docs/P1-TOOLS.md
+labs/mithril-research/docs/P1-BOOTSTRAP-CONTRACT.md
+labs/mithril-research/docs/P1-BOOTSTRAP.md
+labs/mithril-research/docs/P1-COLLECTOR-CONTRACT.md
+labs/mithril-research/docs/P1-COLLECTOR.md
+labs/mithril-research/docs/P1-PHASE-CONTRACT.md
+labs/mithril-research/docs/P1-PHASE.md
 ```
 
 [四機計劃](FOUR-NODE-PLAN.md) 是目前部署順序；[SDD](SDD.md) 保持需求／測例權威；[STATUS](STATUS.md) 是唯一任務狀態帳。資料衝突先指出並作最小文件修正，不默默改變研究 commit 或驗收口徑。
 
 ## 已知狀態與第一個動作
 
-Owner 已提供「四台測試機可用」資訊，不要再問有沒有機器。H1–H4 的真實映射、資源與安全邊界尚無本項目現場 evidence；也不能直接假設就是 Eru 那四台。
+2026-09-27 歷史起點：Owner 已提供「四台測試機可用」資訊，當時 H1–H4 映射與資源尚無現場 evidence。2026-10-15 已有私有唯讀 metadata／SSH／Tailscale transport 證據；接手先核對該記錄與本次授權，不能重複假設尚未盤點。有效服務存取政策、共享 workload 保留與回復入口仍須補齊；盤點不能授權 VPS 寫入。
 
 最先處理 MR-004 / P0：核對既有 inventory 是否有明確授權可供本次使用，列出唯讀盤點方法，確認 OS／架構、host identity、SSH、runtime、Tailscale、port、資源、保留服務與回復入口。未獲准遠端讀取時，先交付可由 Owner 執行的唯讀命令；已獲准時按核准目標執行，不重複詢問已知資料。
 
@@ -50,7 +67,7 @@ Owner 已提供「四台測試機可用」資訊，不要再問有沒有機器�
 
 `plan-only`：只讀 repository／已授權盤點，整理實機差異、變更清單、風險、回復及批准需求；不安裝或啟動服務。
 
-`develop-only`：另經 Owner 指定後，實作 P1 的最小 lifecycle harness、contract tests、版本鎖定與 root path-scoped CI；使用本機 disposable fixture，不連真實 VPS。介面是待實作契約，不能宣稱檔案已存在。
+`develop-only`：另經 Owner 指定後，續作 P1 尚缺工具。P1a 的 local-fixture core／contract tests／runtime lock／root CI 已存在；只可按其文件使用。P1b tools 的 CLI／證據邊界見 P1-TOOLS；後續 startup／cluster orchestration 與 purge apply 仍須有界開發，不以工具存在授權真實 VPS 寫入。
 
 `execute-approved`：必須已有核准的 H1–H4 身分、plan hash、ports、資源配額、保留清單、credentials 與回復邊界。只做批准的 P1–P3：固定 artifacts → 六實例及交叉副本 → 真實 backend health → Mithril → 小流量使用／SDK → down/up 與精確清理驗收。批准範圍內連續推進，不逐命令要求確認；身分漂移、共享服務異常或新風險才停止。
 
@@ -71,3 +88,9 @@ Baseline 固定 cache=no、slave-mode=off、backend-sharding=no。預編譯 bina
 回報當前 MR 任務／P 階段、實際做過的動作、固定版本、測例與數量、結果分類、私有 evidence 位置的安全描述、未完成原因與下一步。更新 STATUS／VALIDATION，不增加第二份 backlog，不把合併 PR 當作部署完成。
 
 以 branch／PR 交付。只有 Owner 對本輪明確要求合併時才合併；核對完整 diff、來源／靜態檢查、適用 CI 與精確 head SHA，合併後再回讀 main 和 PR 狀態。不跳過 required checks，不改 branch protection。
+
+## P1f 本機 intent journal 邊界
+
+[P1-JOURNAL](P1-JOURNAL.md) 與[獨立契約](P1-JOURNAL-CONTRACT.md) 定義本機持久化 intent／uncertainty 基礎。它不執行 action、不推進 phase、不接收新 snapshot 或批准來清除 uncertainty；未知或部分本機狀態拒絕使用。Timeout／lost reply 不等於遠端取消。保護只涵蓋同一保留的 journal root，不能用新 root 或 rollback 取得重送授權。
+
+實機階段前後 authenticated fresh collection、逐效果身分核對、精確獨立批准、durable executor／reconciliation、runtime image provenance、有效 network／ACL、replication health／lag、保留資料 lifecycle 與 proxy smoke 仍須完成。Down 保留資料，purge 必須另有精確條件與批准。完整 P1／MR-004 尚未完成；正式計數以 STATUS 的 4 DONE／1 BLOCKED_ENV／4 TODO 為準。

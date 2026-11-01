@@ -1,0 +1,47 @@
+[
+  {
+    "argv": [
+      "curl",
+      "--fail",
+      "--location",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "120",
+      "https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64",
+      "--output",
+      "systems/mkfk/.build/qualification-tools/docker-compose-linux-x86_64"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  {
+    "argv": [
+      "curl",
+      "--fail",
+      "--location",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "120",
+      "https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64.sha256",
+      "--output",
+      "systems/mkfk/.build/qualification-tools/docker-compose-linux-x86_64.sha256"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  {
+    "sha256": "ed1917fb54db184192ea9d0717bcd59e3662ea79db48bff36d3475516c480a6b",
+    "checksum_verified": true,
+    "scope": "task-local ignored dependency; no host configuration changed"
+  },
+  {
+    "argv": [
+      "task-local docker-compose",
+      "version"
+    ],
+    "exit_code": 0,
+    "output": "Docker Compose version v2.32.4\n"
+  }
+]

@@ -6,11 +6,11 @@ derived_from:
   - ../../../SPEC.md
   - ../../nodes/N00-foundation-ci-contracts.md
   - ../../graph.yaml
-source_version: 1.0.1
+source_version: 1.0.2
 source_sha256:
-  SPEC.md: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-  N00: df7ce22a67b3262bc0324b04025fc11723065c03dd8345748f601083a60622be
-  graph: 0a3cbb28bc9794b1e624ef283bed6c61fd127c6d0284f014c53605e4e821cfd0
+  SPEC.md: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+  N00: 47754e767664fc4dd86cb2abcaa512317af42663f49546520838f5a7ce691d1a
+  graph: 9faac91e127fc70fb4be8683715f95fc71df1821d51667fcabdcb9bf8e54139e
 generated_at: 2026-07-29T15:47:01+02:00
 owner: codex
 ---
@@ -48,7 +48,7 @@ dependency boundary，以及 `get_build_info` 的完整垂直切片。
 | Node/npm | not found | blocking T03 and full CI |
 | Tauri CLI | not found | blocking T03 smoke |
 | Linux Tauri system libraries | `pkg-config` and WebKit/GTK development packages unavailable | blocking local Tauri build |
-| macOS 13+ launch | current host is not macOS | blocking final N00 verification, not documentation/scaffold planning |
+| macOS 13+ launch | current host is not macOS | pending release gate (SPEC §13.1), not a Linux development blocker |
 
 No legacy repository has been supplied to this checkout. N00 therefore uses the
 SDD contracts and structure directly; no legacy command surface will be copied.
@@ -128,7 +128,9 @@ graph LR
   T05 --> T07[Make and CI]
   T06 --> T07
   T07 --> T08[macOS launch and observability]
-  T08 --> T09[Bootstrap verification]
+  T07 --> T10[Portable foundation and Linux native verification]
+  T10 --> T09[Bootstrap verification]
+  T08 --> Release[Controlled Mac release gate]
 ```
 
 ## 8. Ownership
@@ -165,7 +167,7 @@ active task or agent.
 | ID | Missing/ambiguous fact | Authority owner | Resolution |
 |---|---|---|---|
 | SD-N00-001 | A frozen lock requires Rust source, but START-HERE requires a lock before production source exists | execution governance | create an explicitly non-frozen planned lock; freeze it in T04 before vertical-slice implementation |
-| SD-N00-002 | Target macOS launch is a pre-code fact gate, but the assigned host is Linux and the app does not exist yet | N00 verification | treat local host/tool checks as the implementation gate; require macOS build/launch evidence before N00 can be `done` |
+| SD-N00-002 | Target macOS launch is a pre-code fact gate, but the assigned host is Linux and the app does not exist yet | N00 verification | treat local host/tool checks as the implementation gate; require complete Linux native/window/IPC evidence for development `done`; controlled Mac timing remains a release gate |
 | SD-N00-003 | “Rust stable” and “Node LTS” do not pin reproducible versions | N00 implementation plan | select supported versions during T01, record them in toolchain/lock files, and keep upgrades explicit |
 
 These resolutions do not change product behavior. If implementation reveals a
@@ -186,5 +188,20 @@ from the previous Rust source; they are never repaired manually.
 - [ ] `get_build_info` works through Rust, Tauri, and the typed frontend wrapper.
 - [ ] Core dependency boundary negative test passes.
 - [ ] `make bootstrap && make ci` passes from a clean checkout.
-- [ ] macOS 13+ minimal-window launch evidence exists.
+- [ ] Linux native build/test and visible-window/frontend-IPC evidence exists.
+- [ ] Controlled macOS launch evidence tracked separately in SUCCESS AC-02 (release gate).
 - [ ] N00 verification report and G2 outcome are committed.
+
+## 2026-10-23 authorized continuation (T10)
+
+Owner activated START_DEVELOPMENT_PROMPT.md on source b7f2a431. Historical standalone checkout facts above remain historical. Current checkout is apps/flowshot in a monorepo; original N00 lock is frozen. The owner resumes development, not target-Mac acceptance. This earlier block is superseded by the owner-authorized SPEC §13.1 separation below.
+
+T10 fixes reproducible foundations while T08 waits: honor shared Cargo/frontend output directories, preserve launch artifacts, bound asynchronous window probes, wait for child cleanup, validate frozen-lock metadata, and wire the existing required build/test matrix at monorepo workflow root. No API DTO, lock bytes, product threshold, data schema or graph dependency changes. N00 allowed paths now explicitly include existing scripts and the monorepo CI entry.
+
+Failures before implementation: SDD manifest stale; local make/Rust absent; launch path source-hardcoded; audit shows blocking unbounded window probe; new Rust negative test rejects baseline because tampered schema_version was accepted. New tests cover invalid timing and spawn/termination behavior. Existing hosted timing attempts are not rerun speculatively.
+
+T10 ownership: orchestrator implements; independent read-only native audit/review uses component .team/tasks after detecting a shared-root task ID collision with unrelated Fleet work. Product progress remains docs/tasks/BOARD.md.
+
+## 2026-10-23 scheduling correction
+
+SPEC §13.1 supersedes the earlier target-Mac prerequisite for N00 development closure. Complete Linux Docker native CI and real window/IPC smoke are required; the exact controlled-Mac <1500 ms oracle remains a separately pending release gate. T08 historical results are preserved. No native skip counts as development acceptance.

@@ -1,0 +1,62 @@
+{
+  "project": "goku",
+  "targets": "products/goku/fe-review/targets.json",
+  "startedAt": "2026-10-24T10:16:58.533Z",
+  "axe": true,
+  "results": [
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5173/",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__desktop__light.png",
+      "status": 200,
+      "loadMs": 1816,
+      "title": "Glance",
+      "horizontalOverflow": false,
+      "axeViolations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Heading levels should only increase by one"
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5173/",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__tablet__light.png",
+      "status": 200,
+      "loadMs": 1767,
+      "title": "Glance",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "app": "web",
+      "page": "home",
+      "url": "http://127.0.0.1:5173/",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "screenshot": "screenshots/web__home__mobile__light.png",
+      "status": 200,
+      "loadMs": 1768,
+      "title": "Glance",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    }
+  ],
+  "finishedAt": "2026-10-24T10:17:04.752Z"
+}

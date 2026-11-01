@@ -1,0 +1,28 @@
+✖ native-compatible document acknowledgement clears dirty state and missing read is recognizable (1.888621ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.470515
+
+✖ failing tests:
+
+test at apps/loom/fe-review/preload.node.mjs:78:1
+✖ native-compatible document acknowledgement clears dirty state and missing read is recognizable (1.888621ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  1 !== 0
+
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.node.mjs:83:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

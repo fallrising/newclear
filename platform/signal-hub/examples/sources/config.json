@@ -1,0 +1,29 @@
+{
+  "sources": [
+    {
+      "name": "release",
+      "source_prefix": "urn:example:release:",
+      "allowed_types": ["release.deploy.*"],
+      "retention_days": 90,
+      "token_ref": "file:/run/secrets/signalhub-example/release.token"
+    },
+    {
+      "name": "inspection",
+      "source_prefix": "urn:example:inspection:",
+      "allowed_types": ["inspection.check.*"],
+      "expected_interval": "1h",
+      "retention_days": 90,
+      "token_ref": "file:/run/secrets/signalhub-example/inspection.token"
+    },
+    {
+      "name": "alertmanager",
+      "source_prefix": "urn:signalhub:alertmanager:example:",
+      "allowed_types": ["alertmanager.alert.*"],
+      "retention_days": 90,
+      "token_ref": "file:/run/secrets/signalhub-example/alertmanager.token"
+    }
+  ],
+  "rules": [],
+  "subscriptions": [],
+  "webhook_allowlist": []
+}

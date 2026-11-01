@@ -1,0 +1,232 @@
+{
+  "sourceCommit": "8cabc475d5dd56ff2d34f94fd3b29fe0476dca1c",
+  "dirtyScopedChanges": true,
+  "scope": "original approved R2 M1-M4 only",
+  "manifests": [
+    {
+      "path": "fe-review/runs/browser-001/result.json",
+      "sha256": "1c41f126f5b8bcde71d960834e3809e93bee73fdebc4bd6843267bf362b0e24e"
+    },
+    {
+      "path": "fe-review/runs/browser-002/result.json",
+      "sha256": "3aa96741cd26cd969f84ea076ca2c4d12c576b30a28ba81ef763f0ad916470f1"
+    },
+    {
+      "path": "fe-review/runs/browser-003/result.json",
+      "sha256": "c2a29356651f3708530ef42175cc288940726f3b69dc6bce9384d01fa5518fbb"
+    },
+    {
+      "path": "fe-review/runs/browser-004/result.json",
+      "sha256": "feb567e8b4fa66067bd72e609c142c9171912d38310bcc812ebe2819b26025cd"
+    },
+    {
+      "path": "fe-review/runs/browser-005/result.json",
+      "sha256": "1a17878ab4914565cc52f04b821af22375c4bd07e3d2fc2c193186a9c127a908"
+    },
+    {
+      "path": "fe-review/runs/browser-006/result.json",
+      "sha256": "5fba8d1a2b06e968b75ee3af3fbc370c58d00cda30ed31b7a60f69b953cf12b7"
+    },
+    {
+      "path": "fe-review/runs/browser-007/result.json",
+      "sha256": "39916f32d656b81d1ed7177d67aa149efd3651c6978f050fd18dddc4838b92f0"
+    },
+    {
+      "path": "fe-review/runs/browser-008/result.json",
+      "sha256": "42ff3bc0dd3305f01aaaebd89ecfb6638229392912794211c7af2da405faa490"
+    },
+    {
+      "path": "fe-review/runs/browser-006/desktop-states.json",
+      "sha256": "a88f5edc8f809fe1ba26258505b8b272fc9b5c9f09323d767ebe94813c91d74b"
+    },
+    {
+      "path": "fe-review/runs/browser-006/tablet-states.json",
+      "sha256": "19d95875d0bcbe31b13d8ee26b9b6d1d4fbe93953089291a25173db009fb8719"
+    },
+    {
+      "path": "fe-review/runs/browser-006/mobile-states.json",
+      "sha256": "6eab464480a5e2c31f32ac1706bba880db6dd93dee3685430eb4e513781552c9"
+    },
+    {
+      "path": "fe-review/runs/browser-007/mobile-states.json",
+      "sha256": "409b2e3c634b3412536570b218890a2a78292c1a3df1bb073456120345b3a4b9"
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/capture.json",
+      "sha256": "a841c6ba46069e70a6abcda971fd4fabaa222c9bff690dc347c8019e5e1a0e1d"
+    }
+  ],
+  "finalSourceHashes": {
+    "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+    "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+    "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+    "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+    "fe-review/browser-policy.mjs": "ef54668126746d8e8b0a425b082341f142b655923e70d49eeeb9fc2105a24712",
+    "fe-review/browser-policy.test.mjs": "4707cfa90a5d61802d9f416b28c86d5553e0ca5df56d01fc7729bcb7aa56aa2c",
+    "fe-review/browser-support.mjs": "d5d42fec740635f9ad101978988b83c66642e7e73702c5bb4865bb0e73ead99c",
+    "fe-review/child-outcome.mjs": "cdb873ecd5dd0c58966cdc4dca451db1a4f0ff40dcf7ddd65373d1992afc2c33",
+    "fe-review/child-outcome.test.mjs": "a2607612c9554d74be836452411fdb0f80d533da2820d668718e5c7c9f3d30ed",
+    "fe-review/compose.review.yaml": "4b7ea9b17da6af62444992663ef47a4d22f3116b5e2ecba21d9c6f10a5b41abb",
+    "fe-review/health.mjs": "3629aee64545315eefc32d370c822a283d7be8e458f42e0fa082787b8d6cf003",
+    "fe-review/health.test.mjs": "cd6593bbf5450612ccdb42ad47ba6e18554533d2e3a8cfd11d949568d8efdf05",
+    "fe-review/lifecycle.mjs": "f558d11fa3d37dc1d4db0c857bb20877259d4bcb03761e0801bdefd656dc7070",
+    "fe-review/lifecycle.test.mjs": "6cd4ebdbd7a5de82d59e742ac38a61d0ca3de3991657806a54cd41bf3125d769",
+    "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+    "fe-review/negative-state.mjs": "c034956749ada9465b275be967b4ada73fc727af6ba91b0a9fbdd6aaefd14f53",
+    "fe-review/negative-state.test.mjs": "3d07196e9f4d141171717ca2068b4e6e72c3c966e2047c741120ca0a2f457685",
+    "fe-review/ownership.py": "a844c78a50ac3dd3a58b7804f5950e58b91f953d34ded2c722bbe907df78fc88",
+    "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8",
+    "fe-review/playwright.config.ts": "109a951c15ca840bb0657ad0c720359b22cef320cebbc55d2deceabfa620be11",
+    "fe-review/png-mask.mjs": "496d07a55cc28c8e3dc6eab579716fa82378ec2fefbb0ef2da6430ef4a1f5517",
+    "fe-review/png-mask.test.mjs": "a0a7b57998d8104d582a8aad4cd92d9673b8e88566a5c1af40289e38e1e13b3c",
+    "fe-review/proxy.test.mjs": "dc159437cbd64fe7ae68af13d42bc897a80cf8b0feb7b4af02387c1e3f105a80",
+    "fe-review/readonly-api.test.mjs": "9c37b3756619c983c9f7cd01895c1f9868b48ed5ea8f68525a9ad678d2f5d327",
+    "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+    "fe-review/resume-plan.test.mjs": "09575c948487a87a4a08a081fd81005236dc7066657c990eef7eccb60a8c81bc",
+    "fe-review/retake-secrets.mjs": "f9b478f0722e14883ab079055a2724caf00a3bff8246a1463a18af71611d3360",
+    "fe-review/run-browser.mjs": "b43bd2b32ba607b6722661624285195ba00e5ba1d112182a4324505e5e098425",
+    "fe-review/run-isolated.py": "8514b7c41f6bbef570ba2fdfe197499d98538cf26873c0b08befbe63a4e4027c",
+    "fe-review/states.spec.ts": "ba38faeaaaab80d7ec06fae9927fcd859aa037e0a2d90859b3bec129fe47f847",
+    "fe-review/test_ownership.py": "348c35bf86d3a56a108aeefbbff8c4e21f6948d8c44af447be2932dee4ce8524",
+    "fe-review/test_private_cli.py": "f3333233ab36a9cf85cb6a9f5482650af2b104e06230a589d31b0b9b12409d3c"
+  },
+  "actualLoadedRoutes": 27,
+  "drawerMeasurements": [
+    {
+      "label": "dlq-834",
+      "viewport": 834,
+      "width": 834.0000610351562,
+      "computedWidth": "834px",
+      "wrapperClient": 834,
+      "wrapperScroll": 834,
+      "documentWidth": 834
+    },
+    {
+      "label": "group-768",
+      "viewport": 768,
+      "width": 768,
+      "computedWidth": "768px",
+      "wrapperClient": 768,
+      "wrapperScroll": 768,
+      "documentWidth": 768
+    }
+  ],
+  "chartMeasurements": [
+    {
+      "phase": "before",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 663,
+      "canvas": 663,
+      "sider": 248,
+      "toggle": "Collapse navigation",
+      "timeOrigin": 1792843697380.4
+    },
+    {
+      "phase": "after-before-screenshot",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 663,
+      "canvas": 663,
+      "sider": 248,
+      "toggle": "Collapse navigation",
+      "timeOrigin": 1792843697380.4
+    },
+    {
+      "phase": "immediately-after-collapse-click",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 689,
+      "canvas": 689,
+      "sider": 209.03125,
+      "toggle": "Expand navigation",
+      "timeOrigin": 1792843697380.4
+    },
+    {
+      "phase": "collapsed",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 780,
+      "canvas": 780,
+      "sider": 72,
+      "toggle": "Expand navigation",
+      "timeOrigin": 1792843697380.4
+    },
+    {
+      "phase": "after-collapsed-screenshot",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 780,
+      "canvas": 780,
+      "sider": 72,
+      "toggle": "Expand navigation",
+      "timeOrigin": 1792843697380.4
+    },
+    {
+      "phase": "immediately-after-expand-click",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 780,
+      "canvas": 780,
+      "sider": 72,
+      "toggle": "Collapse navigation",
+      "timeOrigin": 1792843697380.4
+    },
+    {
+      "phase": "after",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 663,
+      "canvas": 663,
+      "sider": 248,
+      "toggle": "Collapse navigation",
+      "timeOrigin": 1792843697380.4
+    },
+    {
+      "phase": "after-expanded-screenshot",
+      "window": 1440,
+      "documentWidth": 1440,
+      "container": 663,
+      "canvas": 663,
+      "sider": 248,
+      "toggle": "Collapse navigation",
+      "timeOrigin": 1792843697380.4
+    }
+  ],
+  "nativePublicationIndexSha256": "ed5a10634eab1beb2be2f3b8851fed6db80c4863e124fea4ee6343c962f4f20c",
+  "counts": {
+    "rawPng": 84,
+    "acceptedPng": 72,
+    "states": 42,
+    "routes": 27,
+    "chart": 3
+  },
+  "limitations": [
+    "No full Round3 or axe-zero claim",
+    "Existing Google Fonts dependency blocked by observer",
+    "Existing React/AntD compatibility and Modal deprecation warnings",
+    "Existing mobile Logout has no accessible name",
+    "Original failures and six superseded drawer PNGs retained privately",
+    "Narrow audit Detail tokens outside viewport; desktop actual pixel coverage verified"
+  ],
+  "reviewAndCi": "pending root independent acceptance and required exact-head CI",
+  "environmentPublicationIndexSha256": "6209d5cabf4d78878a64d9760104d58a24194176bf293d6a986918224759e597",
+  "ownedStackAbsent": true,
+  "finalMetadataHashes": {
+    "fe-review/.gitignore": "adb27d324640e633437afb17cd52c35f4dc8decb6b7d356a1354417afd8c5435",
+    "fe-review/README.md": "5a0f37da502a56ddfee87da357a244264fa31b7adb1c78e4233d26aa3514135a",
+    "fe-review/PROMPT.md": "0014b53e31276e7103bab1bceebda65f45092f7584e0285ee1db5d3d52631fa1",
+    "fe-review/REVIEW.md": "8a86e621a8bf9b856920284fee74a4e19db29ed5b56fb4688068ac53bcd9c54d",
+    "fe-review/ISOLATION.md": "9e5e658d1bb3bc9dac6ca901baa8ddb5727d9dcd628cedc7115b333c938ccbbc",
+    "fe-review/RUNNER.md": "253cd5268b12d1d9c2a24c987afde2a6ba0458cdecdea5a810606d29ebfc116c",
+    "fe-review/targets.json": "99055f745e3fd9bf10f1c5dfe129d525b8d94daf653535fece6ef64377ca1779",
+    "SUCCESS.md": "7fc06b3eacae47abf3df68fe8650448acf99f7aa5e5cd19bea2f4a7d4ebd1cd9",
+    "docs/execution-plan.md": "2edc7d8bd3c4e51b67d7910f581465fa1e40557ae0626473f455fc0ac552bb6c",
+    "fe-review/tasks/round2/report.md": "bb23b3f266e7af4353aacc9b4ae70952d27d7ecbcad4d304446db854b8789298"
+  },
+  "focusedChecks": {
+    "path": "focused-checks.json",
+    "sha256": "80adcfe58de4da50eec3f30171e68deecef6d4621115cee7e8df357c7dcbda9c"
+  },
+  "nativePublishedFiles": 17
+}

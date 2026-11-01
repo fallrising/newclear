@@ -58,7 +58,8 @@ public final class DefaultGroupOperations implements GroupOperations {
                         .describedGroups()
                         .get(group)
                         .get(
-                                REQUEST_TIMEOUT.toMillis(),
+                                Math.max(1, Math.min(REQUEST_TIMEOUT.toMillis(),
+                                        Duration.ofNanos(Math.max(0, deadline - System.nanoTime())).toMillis())),
                                 TimeUnit.MILLISECONDS);
                 if (description.groupState() == GroupState.EMPTY
                         || description.groupState()
@@ -81,7 +82,8 @@ public final class DefaultGroupOperations implements GroupOperations {
                         "consumer group state timed out", timeoutFailure);
             }
             try {
-                Thread.sleep(250);
+                Thread.sleep(Math.min(250, Math.max(1,
+                        Duration.ofNanos(Math.max(0, deadline - System.nanoTime())).toMillis())));
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException(
@@ -97,7 +99,8 @@ public final class DefaultGroupOperations implements GroupOperations {
             String topic,
             int partitions,
             String mode,
-            long value) {
+            long value,
+            Runnable beforeAlter) {
         OffsetSpec requested = switch (mode) {
             case "OFFSET" -> null;
             case "TIMESTAMP" -> OffsetSpec.forTimestamp(value);
@@ -106,6 +109,8 @@ public final class DefaultGroupOperations implements GroupOperations {
         };
         Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> ends =
                 offsets(topic, partitions, OffsetSpec.latest());
+        Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> beginnings =
+                offsets(topic, partitions, OffsetSpec.earliest());
         Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> byTime =
                 requested == null
                         ? Map.of()
@@ -121,16 +126,26 @@ public final class DefaultGroupOperations implements GroupOperations {
                     : byTime.get(id).offset() < 0
                             ? end
                             : byTime.get(id).offset();
-            if (offset < 0 || offset > end) {
+            if (offset < beginnings.get(id).offset() || offset > end) {
                 throw new IllegalArgumentException(
                         "requested offset is outside the retained range");
             }
             target.put(id, new OffsetAndMetadata(offset));
             response.add(new PartitionOffset(partition, offset));
         }
+        beforeAlter.run();
         await(
                 admin.alterConsumerGroupOffsets(group, target).all(),
                 "consumer group offsets could not be reset");
+        Map<TopicPartition, OffsetAndMetadata> actual = await(
+                admin.listConsumerGroupOffsets(group).partitionsToOffsetAndMetadata(),
+                "consumer group offset verification could not be read");
+        for (var entry : target.entrySet()) {
+            OffsetAndMetadata found = actual.get(entry.getKey());
+            if (found == null || found.offset() != entry.getValue().offset()) {
+                throw new IllegalStateException("consumer group offset verification failed");
+            }
+        }
         return new GroupOffsetReset(group, topic, response);
     }
 

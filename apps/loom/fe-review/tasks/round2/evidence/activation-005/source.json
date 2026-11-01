@@ -1,0 +1,55 @@
+{
+  "status": "READY_FOR_ROOT_ONE_RUNTIME",
+  "sourceBefore": {
+    "ui-steps.mjs": "64eee27630f0315a4841fecd2a9f391a4c7cbcf9903c81d4d821b4643cad05fe",
+    "ui-steps.node.mjs": "b391a6290fcc3f2b16f8c17f9e2555c6ef8e629ca462bb0e89d939728b606733",
+    "geometry.mjs": "bb39c8231278adc7047a92d9881c36a74ef9e8ea384bfb033d9ae46bd2eae12b",
+    "geometry.node.mjs": "830a0ef1c0d4da2b7e97597d4171c0daea1cca49b1325d4943522e6303382c74",
+    "run-review.mjs": "238caab8383d525fc0ab45361ded3954785e264b9bca77dc6f36188b4a611673"
+  },
+  "sourceAfter": {
+    "ui-steps.mjs": "74140222c555b9f7998160d2fa6c930bed6835a0fcb822927427c0b489ae445f",
+    "ui-steps.node.mjs": "19ba033ec2093be06d08cfee01313aaecc8be982f3a019dee6e1456ebac0522d",
+    "geometry.mjs": "bb39c8231278adc7047a92d9881c36a74ef9e8ea384bfb033d9ae46bd2eae12b",
+    "geometry.node.mjs": "830a0ef1c0d4da2b7e97597d4171c0daea1cca49b1325d4943522e6303382c74",
+    "run-review.mjs": "238caab8383d525fc0ab45361ded3954785e264b9bca77dc6f36188b4a611673"
+  },
+  "onlyExecutableDelta": [
+    "ui-steps.mjs"
+  ],
+  "lockedSource": {
+    "XYDragSha256": "ea94fb2be63053efdfe2637f6dab58182fbf67738aaaebeb9c3ef70e1cb489b6",
+    "startDragLines": "2171-2198",
+    "thresholdSkipLines": "2226-2243",
+    "reactDefaultThreshold": 1,
+    "reactSourceSha256": "792e335d373c37a90826e63623b77ceea68b525cb030bc9c2d578ce2ae8defd5"
+  },
+  "pureTests": {
+    "red": "2 pass, 3 fail; original helper retained; REVIEW_NODE_SEPARATION reproduced",
+    "green": "7 pass, 0 fail, 0 skipped, Node v24.18.0",
+    "command": "node --test apps/loom/fe-review/ui-steps.node.mjs apps/loom/fe-review/geometry.node.mjs"
+  },
+  "runtime": "NOT_RUN_BY_WORKER",
+  "preservedRuntimeReceipts": {
+    "loom-001": "f542c65fbb337db0b5feb0eed08adf1de01f1bea29b38d5e24aca15eb3b59aa2",
+    "loom-002": "09906953c7b8ee8a9c24859bcd10fcfffecf9f2a7d2f59d746c7dc07ca1c9058",
+    "loom-003": "211bf610af85f73b0cc6a992cd00898dda2cdd4832e2b22c058ab5a22eafe960",
+    "loom-004": "929e8419688a66fc57c1abdc3e70e790ea7ea6bb3c3f92c2ce5cb30ae52916e6"
+  },
+  "attemptLimit": "One additional root-owned journey-only run; no further issue retry",
+  "environmentPreparationFailures": [
+    "First test invocation used workspace cwd and redirection failed before execution",
+    "Pinned mise node selector absent; retained failure, selected existing PATH Node v24.18.0"
+  ],
+  "usage": {
+    "toolCallsVisibleThisWorker": 9,
+    "agentStarts": 0,
+    "browserRuns": 0,
+    "pureImplementationCorrections": 1,
+    "providerRequests": null,
+    "activeSeconds": null,
+    "tokens": null,
+    "cost": null,
+    "agentMessages": 1
+  }
+}

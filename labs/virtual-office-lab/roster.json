@@ -1,0 +1,8 @@
+{
+  "bots": [
+    {"id": "grok", "name": "Grok Bot", "role": "總調度", "color": "#00D1FF", "seat": "director"},
+    {"id": "content", "name": "內容顧問", "role": "內容規劃", "color": "#FF6B9D", "seat": "desk-1"},
+    {"id": "xstats", "name": "數據顧問", "role": "資料分析", "color": "#7CFF6B", "seat": "desk-2"},
+    {"id": "media", "name": "媒體製作", "role": "視覺產出", "color": "#FFD93D", "seat": "desk-3"}
+  ]
+}

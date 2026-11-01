@@ -1,68 +1,26 @@
-# FE Review — hai-taskboard — REVIEW
+# HAI Taskboard FE review
 
-> 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
+狀態：2026-10-24 原批准R2本機驗證通過；真實同源ConnectedApp／session／admission／Fake與30唯一畫面已實跑，targets.verified=true僅原R2。最終獨立複審／CI／交付分開追蹤，詳見 [本輪報告](tasks/round2/report.md)。
 
-## 目前輪次
+| 項目 | 目前事實與處置 |
+| --- | --- |
+| C1 入口與資料 | [main.tsx](../web/src/main.tsx) 掛載 ConnectedApp，使用真實本機 session／API／snapshot／SSE；舊 fixture App 不代表目前首頁。改採 deterministic Fake-only 同源 runtime。 |
+| C2 畫面範圍 | 同一 `/` 的登入、專案清單／建立／開啟、board／Draft、規格接納、Ready／Fake dispatch、命令結果；保留 D1 不加 router。四個舊 fixture 展示面不列為本次現有功能。 |
+| C3 錯誤回饋 | [app.tsx:336](../web/src/connected/app.tsx#L336) 已有可見 status／alert，[命令結果](../web/src/connected/app.tsx#L819) 已有拒絕與 uncertain 回饋。舊 D3 改為真實故障回歸驗證，不直接新增一套錯誤 UI。 |
+| C4 主題與窄視窗 | [頁內切換](../web/src/connected/app.tsx#L301) 控制 light／dark；需實際操作後取證。OS media、舊 fixture tests 或僅登入頁截圖不能替代 ConnectedApp 的窄視窗／zoom／鍵盤驗收。 |
+| C5 權威與命令 | snapshot 是權威，事件只觸發 revalidation；pending／uncertain 不移動 lane。遺失回應允許一次原命令結果 GET，不能再次 POST。 |
+| C6 安全啟動 | 同源 127.0.0.1:8080、prebuilt WEB_ROOT、全新合成私有 state、新 session token、精確 Host／Origin、原 cookie 屬性；規格接納另需明確合成 repository approval。詳見 [DESIGN](DESIGN.md)。 |
 
-- **第 1 輪：文檔先行（進行中）** — [`DESIGN.md`](DESIGN.md) 已草擬，待擁有者在設計 PR 確認假設（D1、D2、D3）。
-- 第 2 輪：修改（未開始）
-- 第 3 輪：完整 e2e（未開始）
+Owner 已確認的 ConnectedApp 基準及無新路由方向已納入，不再列成待批准。安全harness／合成資料／實際capture與有界故障驗證已有本輪新證據；既有歷史browser evidence沒有被冒作本輪通過。
 
-## 修改權限
+產品仍依 [SUCCESS](../SUCCESS.md) 保持未完成；完整 detail／attention／impact、QA／Done、restore 缺口未由本次文件消除。Fake 成功最多沿現有流程維持 Developing。
 
-文檔檔位 **A（active）**：第 2 輪可在 `DESIGN.md` 範圍內，依元件 `AGENTS.md` 與 PROTOCOL 第 4 節修改前端。
+後續修改依 [DESIGN](DESIGN.md) 的既有表單、狀態、focus、換行與對比範圍，以觀察到的缺陷為依據；執行後把命令、來源 revision、結果及去敏 artifacts 回填此處。不得透過降低驗證、放寬 cookie 或重送 uncertain mutation 取得成功畫面。
 
-## 矛盾點
 
-### C1 UI 只接 fixtures，沒有接後端
+## 本輪已觀測、未修正的限制
 
-`web/src/app.tsx` 的資料全部來自 `fixtures.ts`（`app.tsx:7`），原始碼中沒有任何 API 呼叫。「UI 可單獨執行」成立，
-但前後端整合目前無法驗證。
-
-### C2 沒有 URL 路由，次級狀態只能靠互動擷取
-
-四個 surface（`Board`、`Work item`、`Attention`、`Impact preview`）由導覽按鈕切換（`app.tsx:18`、`app.tsx:155-165`），
-選取、轉移與主題都是元件狀態；畫面上沒有對話框。`capture.mjs` 只能擷取首頁，其餘要用互動腳本。處理方式見 `DESIGN.md` M3。
-
-### C3 轉移被拒絕時，視覺使用者看不到回饋
-
-選取與轉移的結果訊息只放在 `sr-only` 的 live region（`app.tsx:171`）。被 guard 拒絕時（`app.tsx:100-102`），
-卡片留在原欄位、焦點回到按鈕，只有螢幕閱讀器會讀出原因。處理方式見 D3 與 `DESIGN.md` M2。
-
-### C4 深色主題不跟隨系統設定
-
-主題由畫面上的按鈕設定 `data-theme`（`app.tsx:147-150`、`styles.css:33`），不讀取 `prefers-color-scheme`；
-`capture.mjs` 以系統設定模擬 `colorSchemes`，擷取不到深色主題。`targets.json` 已改為只擷取 light，深色由 `DESIGN.md` M3 的腳本切換後擷取。
-
-## 已決定
-
-- 無
-
-## 需要放開或決定的點
-
-### D1 是否為主要狀態加上路由
-
-- 選項：(a) 加上 URL 路由，讓狀態可直接擷取、可分享；(b) 維持現狀，fe-review 以互動腳本擷取。
-- 建議：(b)。路由屬產品行為變更；等第 3 輪確認腳本成本再評估 (a)。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以 (b) 為假設。
-
-### D2 UI 何時接上後端
-
-- 屬產品路線，不屬 FE review；記錄在此，是為了提醒第 3 輪報告不能宣稱整合已驗證。
-- 建議：fe-review 不等待整合，只涵蓋 fixture 驅動的 UI；接上後端的時機由擁有者依產品規劃決定。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以建議為假設。
-
-### D3 轉移結果是否在畫面上可見
-
-- 選項：(a) 把現有的 live region 改為可見的狀態列，文字與觸發時機不變；(b) 維持 `sr-only`，視覺使用者依靠詳情面板常駐的 guard 說明。
-- 建議：(a)。拒絕是需要使用者察覺的結果；只改呈現，不改文字語意。
-- 狀態：**待擁有者決定**。`DESIGN.md` 以 (a) 為假設。
-
-## 進入第 2 輪的條件
-
-- `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
-
-## 相關 PR
-
-- fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+- 已接納的current requirement/head為1，但board讀legacy表仍顯示AC0；不得以該計數宣稱正確覆蓋，見 [唯讀狀態證據](tasks/round2/admission-state-check.json)。
+- Prepared／Developing畫面有較早command refresh的「Projection refresh unavailable」提示，同時後續SSE snapshot已恢復Connected。這是不同時間的結果並列造成的既有回饋限制；本次不改backend／commands／stream，也不隱藏提示。
+- 30張actualtheme／三尺寸畫面axe0／overflow0，不等於零UI缺陷。真Tab／3pxfocus／ArrowRight、真runtime斷線與恢復、controlledreset／sessionloss／logout均通過；完整zoom／coarse-pointer／產品UX驗收仍不在本輪完成宣告內。
+- 既有D3 status／alert已驗證拒絕與uncertain回饋，未增加重複alert。下拉選單實際accessible names與label關聯正常；原exactlabel timeout是harness對包含option文字的labeltext假設，保留於歷史FAIL。

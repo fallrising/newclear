@@ -23,18 +23,20 @@ type RecordLog interface {
 }
 
 type DataConfig struct {
-	Topic         string
-	Partition     uint32
-	Node          *raft.Node
-	Log           RecordLog
-	Replication   replication.Config
-	Producer      producer.Config
-	Clock         adapters.Clock
-	TickClock     adapters.Clock
-	Sender        Sender
-	OnRoleChange  func(raft.RoleChange)
-	OnStall       func(kind string, held time.Duration)
-	StorageFailed func() bool
+	Topic        string
+	Partition    uint32
+	Node         *raft.Node
+	Log          RecordLog
+	Replication  replication.Config
+	Producer     producer.Config
+	Clock        adapters.Clock
+	TickClock    adapters.Clock
+	Sender       Sender
+	OnRoleChange func(raft.RoleChange)
+	OnStall      func(kind string, held time.Duration)
+	// OnStepRejected, when set, observes peer messages Raft refused to step.
+	OnStepRejected func(message raft.Message, err error)
+	StorageFailed  func() bool
 	// OnISRShrink, when set, observes followers evicted from the ISR.
 	OnISRShrink    func(evicted []uint32, observations []replication.PeerObservation)
 	TickInterval   time.Duration
@@ -88,7 +90,7 @@ func NewData(config DataConfig) (*Data, error) {
 	data.actor, err = New(Config{
 		Node: config.Node, Clock: config.Clock, TickClock: config.TickClock, Sender: config.Sender,
 		TickInterval: config.TickInterval, OnRoleChange: config.OnRoleChange, OnStall: config.OnStall,
-		StorageFailed: config.StorageFailed,
+		OnStepRejected: config.OnStepRejected, StorageFailed: config.StorageFailed,
 	}, data)
 	if err != nil {
 		return nil, err

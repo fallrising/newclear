@@ -1,0 +1,39 @@
+[
+  {
+    "argv": [
+      "make",
+      "check",
+      "demo"
+    ],
+    "cwd": "labs/pg-jev-router",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:41.146681+00:00",
+    "end": "2026-10-21T15:40:41.944558+00:00",
+    "duration_seconds": 0.798,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "pg-jev-router-01.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  },
+  {
+    "argv": [
+      "make",
+      "integration"
+    ],
+    "cwd": "labs/pg-jev-router",
+    "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+    "start": "2026-10-21T15:40:41.944801+00:00",
+    "end": "2026-10-21T15:41:16.411513+00:00",
+    "duration_seconds": 34.467,
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "pg-jev-router-02.log",
+    "env_overrides": {
+      "GOMAXPROCS": "2",
+      "GOFLAGS": "-p=2"
+    }
+  }
+]

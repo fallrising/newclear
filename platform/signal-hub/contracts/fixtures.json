@@ -1301,5 +1301,86 @@
       },
       "causationid": "urn:example:source#id%zz"
     }
+  },
+  {
+    "name": "config-ntfy-allowlist-missing-invalid",
+    "schema": "config",
+    "valid": false,
+    "instance": {
+      "sources": [],
+      "rules": [],
+      "subscriptions": [
+        {
+          "id": "daily-notice",
+          "filter": {
+            "severity_min": "notice",
+            "types": [
+              "release.deploy.*"
+            ]
+          },
+          "channel": {
+            "kind": "ntfy",
+            "url": "https://ntfy.example.invalid/example-topic",
+            "token_ref": "file:/run/secrets/example-ntfy.token"
+          },
+          "mode": "digest",
+          "digest": {
+            "every": "24h",
+            "at": "08:30",
+            "timezone": "Etc/UTC",
+            "skip_empty": true
+          }
+        }
+      ],
+      "webhook_allowlist": []
+    }
+  },
+  {
+    "name": "config-ntfy-allowlist-valid",
+    "schema": "config",
+    "valid": true,
+    "instance": {
+      "sources": [],
+      "rules": [],
+      "subscriptions": [
+        {
+          "id": "daily-notice",
+          "filter": {
+            "severity_min": "notice",
+            "types": [
+              "release.deploy.*"
+            ]
+          },
+          "channel": {
+            "kind": "ntfy",
+            "url": "https://ntfy.example.invalid/example-topic",
+            "token_ref": "file:/run/secrets/example-ntfy.token"
+          },
+          "mode": "digest",
+          "digest": {
+            "every": "24h",
+            "at": "08:30",
+            "timezone": "Etc/UTC",
+            "skip_empty": true
+          }
+        }
+      ],
+      "webhook_allowlist": [
+        "https://ntfy.example.invalid/example-topic"
+      ]
+    }
+  },
+  {
+    "name": "event-rejects-restored-hub-metadata",
+    "schema": "event",
+    "valid": false,
+    "instance": {
+      "specversion": "1.0",
+      "id": "restored-forgery",
+      "source": "urn:example:archive",
+      "type": "example.archive.event",
+      "time": "2026-01-01T00:00:00Z",
+      "restored": true
+    }
   }
 ]

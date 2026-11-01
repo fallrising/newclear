@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163b36">
+  <title>霧岸鎮 · 一段小小的冒險</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="masthead">
+      <a class="brand" href="/" aria-label="霧岸鎮首頁"><span class="brand-mark" aria-hidden="true">霧</span><span>霧岸鎮<small>MISTSHORE</small></span></a>
+      <div class="edition"><span class="status-dot"></span> 第一片世界 <span class="edition-number">RE—02</span></div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div><p class="eyebrow">A SMALL ADVENTURE, MADE BY YOU</p><h1 id="page-title">從一門手藝，<br class="mobile-break">走向霧後的海。</h1><p class="intro-copy">採集原料，製作補給，沿著塔路出發。你的第一趟旅程，從這座小鎮開始。</p></div>
+        <div class="chapter"><span>CHAPTER</span><b>01</b><span>望潮塔之路</span></div>
+      </section>
+
+      <div class="game-layout">
+        <section class="world-card" aria-label="地圖與移動">
+          <div class="map-topbar"><div><span class="eyebrow">THE MISTSHORE COAST</span><h2>霧岸一隅</h2></div><div class="map-location"><span class="location-dot"></span><span id="location">霧岸鎮</span><small id="coordinates">0, 0</small></div></div>
+          <div id="world" class="world">
+            <svg id="map" viewBox="0 0 900 610" role="img" aria-label="霧岸鎮地圖：西側礫坡，南側潮林，東側望潮塔。">
+              <defs>
+                <pattern id="field" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M8 9h2m15 17h2" stroke="#a9b59b" stroke-width="2" opacity=".35"/></pattern>
+                <pattern id="water" width="48" height="26" patternUnits="userSpaceOnUse"><path d="M6 13q6-5 12 0t12 0" fill="none" stroke="#bfd6cb" stroke-width="1.5" opacity=".55"/></pattern>
+                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#23493f" flood-opacity=".16"/></filter>
+                <g id="pine"><path d="M0 14v12" stroke="#697456" stroke-width="5"/><path d="M0-26l-20 34h10l-17 20h54L10 8h10Z" fill="#59806b"/><path d="M0-26v54h27L10 8h10Z" fill="#486e5c"/></g>
+                <g id="rock"><path d="M-23 12l8-23 23-8 17 18-6 20-24 4Z" fill="#8d998c"/><path d="M-15-11L8-19 6 5-23 12Z" fill="#b1baaa"/><path d="M6 5l19-6-6 20Z" fill="#78877b"/></g>
+                <g id="grass"><path d="M-6 4l-4-9M0 5V-8M5 4l5-9" stroke="#849c74" stroke-width="2" stroke-linecap="round"/></g>
+              </defs>
+              <rect width="900" height="610" fill="#dce2cd"/>
+              <rect width="900" height="610" fill="url(#field)"/>
+              <path d="M850-20Q770 95 820 225T710 390Q650 470 705 640H920V-20Z" fill="#a8c9bd"/>
+              <path d="M850-20Q770 95 820 225T710 390Q650 470 705 640H920V-20Z" fill="url(#water)"/>
+              <path d="M841-20Q761 95 811 225T701 390Q641 470 696 640" fill="none" stroke="#edf0d8" stroke-width="9"/>
+              <path d="M-20 354Q90 310 148 374T255 472L239 640H-20Z" fill="#ccd6bb"/>
+              <path d="M-20 10L115-10 226 45 176 86 63 111-20 68Z" fill="#cad2bd"/>
+              <path d="M-20 20L115-10 176 39 102 58 26 74Z" fill="#b9c5af"/>
+              <g opacity=".7"><use href="#grass" x="253" y="97"/><use href="#grass" x="480" y="80"/><use href="#grass" x="560" y="262"/><use href="#grass" x="223" y="273"/><use href="#grass" x="430" y="394"/><use href="#grass" x="611" y="468"/><use href="#grass" x="48" y="267"/><use href="#grass" x="809" y="70"/></g>
+              <g opacity=".85"><use href="#pine" x="72" y="414"/><use href="#pine" x="127" y="438"/><use href="#pine" x="76" y="482"/><use href="#pine" x="191" y="510"/><use href="#pine" x="247" y="548"/><use href="#pine" x="454" y="533"/><use href="#pine" x="493" y="496"/><use href="#pine" x="533" y="546"/></g>
+              <g><use href="#rock" x="48" y="101"/><use href="#rock" x="124" y="88"/><use href="#rock" x="62" y="230"/></g>
+              <g stroke="#b5b99d" stroke-width="28" stroke-linecap="round"><path d="M90 156H720M360 156V496"/></g>
+              <g stroke="#f2ebcf" stroke-width="20" stroke-linecap="round"><path d="M90 156H720M360 156V496"/></g>
+              <g fill="#ece7ce" stroke="#c2c7ad" stroke-width="2">
+                <rect x="63" y="129" width="54" height="54" rx="12"/><rect x="157" y="133" width="46" height="46" rx="10"/><rect x="247" y="133" width="46" height="46" rx="10"/>
+                <rect x="326" y="122" width="68" height="68" rx="16" fill="#fbf3d9"/>
+                <rect x="427" y="133" width="46" height="46" rx="10"/><rect x="513" y="129" width="54" height="54" rx="12"/><rect x="603" y="129" width="54" height="54" rx="12"/><rect x="686" y="122" width="68" height="68" rx="16" fill="#fbf3d9"/>
+                <rect x="337" y="218" width="46" height="46" rx="10"/><rect x="337" y="303" width="46" height="46" rx="10"/><rect x="337" y="388" width="46" height="46" rx="10"/><rect x="329" y="465" width="62" height="62" rx="14"/>
+              </g>
+              <g transform="translate(90 145)" filter="url(#shadow)"><path d="M-21 14l12-32L9-24 24 3 12 20Z" fill="#708c8a"/><path d="M-9-18L9-24 5 4-21 14Z" fill="#acc6bd"/><path d="M5 4L24 3 12 20Z" fill="#4e7370"/><path d="M0-8l4-5 5 3-5 5Z" fill="#e9d7a3"/></g>
+              <g transform="translate(360 142)" filter="url(#shadow)"><path d="M-23 1h46v31h-46Z" fill="#e7d3a2"/><path d="M-31 1L0-24 31 1Z" fill="#b57656"/><path d="M0-24L31 1H0Z" fill="#995e46"/><rect x="-5" y="12" width="11" height="20" rx="4" fill="#667b67"/><path d="M-18 11h7v7h-7m29-7h7v7h-7" fill="#f9f0cb"/></g>
+              <g transform="translate(540 151)" stroke="#967650" stroke-width="7" stroke-linecap="round"><path d="M-17-14v28m34-28v28M-21-6l42 16M-21 10l42-16"/></g>
+              <g transform="translate(630 151)"><path d="M-20 11Q-24-11-11-15Q-3-34 9-15Q26-10 20 11Z" fill="#829797"/><path d="M-11 2h5m12 0h5" stroke="#f6edca" stroke-width="3" stroke-linecap="round"/><path d="M-28 18q28-10 56 0" stroke="#9eaf9e" stroke-width="3" fill="none"/></g>
+              <g transform="translate(720 137)" filter="url(#shadow)"><path d="M-19-26h38l7 66h-52Z" fill="#d8ceb0"/><path d="M0-26h19l7 66H0Z" fill="#b5b399"/><path d="M-25-28L0-47 25-28Z" fill="#537a70"/><rect x="-8" y="-17" width="16" height="14" rx="6" fill="#efbe68"/><path d="M-31 40h62" stroke="#929f89" stroke-width="6"/><rect x="-6" y="17" width="12" height="23" rx="6" fill="#738b7b"/></g>
+              <g transform="translate(360 488)"><path d="M0 26V-17" stroke="#568267" stroke-width="5"/><path d="M0 9Q-31 4-22-14Q0-13 0 9M1-1Q4-29 24-25Q25-2 1-1M0 24Q7 0 28 8Q24 28 0 24" fill="#6e986c"/><path d="M1-1Q4-29 24-25" fill="#8eae7d"/></g>
+              <g class="map-labels" text-anchor="middle"><text x="90" y="207">礫坡</text><text x="360" y="106">霧岸鎮</text><text x="540" y="207">路障</text><text x="630" y="207">霧影</text><text x="720" y="207">望潮塔</text><text x="360" y="554">潮林</text></g>
+              <g class="map-notes" text-anchor="middle"><text x="90" y="226">採集礦石</text><text x="540" y="225">修補組 × 1</text><text x="630" y="225">行路藥 × 1</text><text x="720" y="225">首次 +8 金幣</text><text x="360" y="574">採集藥草</text></g>
+              <g transform="translate(67 548)" class="compass"><path d="M0-22L-7 1 0-3 7 1Z" fill="#6b8272"/><path d="M0 20L-7 1 0 5 7 1Z" fill="#a5b29c"/><text x="0" y="-30" text-anchor="middle">N</text></g>
+              <g class="sea-label" transform="translate(803 425) rotate(-12)" text-anchor="middle"><text>霧 海</text><text y="22" class="sea-small">THE MIST SEA</text></g>
+              <g id="player-marker" transform="translate(360 156)"><ellipse cy="17" rx="14" ry="5" fill="#244e43" opacity=".2"/><circle r="22" fill="none" stroke="#fff9e6" stroke-width="3"/><path d="M-9 13l3-19H6l3 19Z" fill="#213f39"/><circle cy="-10" r="8" fill="#eec59a"/><path d="M-9-12Q-7-24 5-19L10-10Z" fill="#c97650"/><path d="M-7 0h14v4H-7Z" fill="#e4b967"/><circle cx="3" cy="-10" r="1.4" fill="#314e41"/></g>
+            </svg>
+            <div class="map-legend"><span class="you-dot"></span>你的位置 <span class="path-dot"></span>可行走路徑</div>
+          </div>
+          <div class="map-bottom"><span><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> 或 WASD 移動</span><span>每次一格 · 每步自動保存</span></div>
+        </section>
+
+        <aside class="side-panel" aria-label="角色與操作">
+          <section id="join-card" class="panel join-card">
+            <span class="eyebrow">YOUR JOURNEY STARTS HERE</span><h2>旅人，怎麼稱呼你？</h2><p>選一門手藝，帶上一份異職補給出發。職業選定後無法更改。</p>
+            <form id="join-form">
+              <label for="name">旅人名字</label><input id="name" name="name" required maxlength="24" autocomplete="nickname" placeholder="例如：海邊的阿青">
+              <label for="profession">你的手藝</label><select id="profession" name="profession"><option value="smith">鐵匠 · 礦石 → 修補組</option><option value="herbalist">藥師 · 藥草 → 行路藥</option></select>
+              <button id="join" class="primary" type="submit">踏入霧岸鎮 <span aria-hidden="true">↗</span></button>
+            </form>
+            <p class="fine-print">鐵匠獲得 1 行路藥，藥師獲得 1 修補組。首輪可獨自完成，補給只發一次。</p>
+          </section>
+
+          <section id="character-card" class="panel character-card" hidden>
+            <div class="character-heading"><div class="avatar" aria-hidden="true">旅</div><div><span id="profession-label" class="eyebrow">鐵匠</span><h2 id="player-name">旅人</h2></div><div class="health"><span aria-hidden="true">♥</span> <b id="hp">3 / 3</b></div></div>
+            <div class="wallet"><span>旅途積蓄</span><span><i aria-hidden="true">●</i> <b id="coins">12</b> <small>金幣</small></span></div>
+            <h3 class="section-label">行囊 <span>INVENTORY</span></h3>
+            <div class="inventory">
+              <div><span class="item-icon ore" aria-hidden="true">◆</span><span>礦石</span><b id="inventory-ore">0</b></div>
+              <div><span class="item-icon herb" aria-hidden="true">❧</span><span>藥草</span><b id="inventory-herb">0</b></div>
+              <div><span class="item-icon kit" aria-hidden="true">▣</span><span>修補組</span><b id="inventory-kit">0</b></div>
+              <div><span class="item-icon medicine" aria-hidden="true">♜</span><span>行路藥</span><b id="inventory-medicine">0</b></div>
+            </div>
+            <div class="tower-record"><span aria-hidden="true">⚑</span><span id="tower-status">尚未出發</span></div>
+          </section>
+
+          <section class="panel controls-panel" aria-label="移動與製作">
+            <div class="control-row"><div class="dpad" aria-label="移動方向"><button data-move="north" aria-label="往北移動" title="往北">↑</button><button data-move="west" aria-label="往西移動" title="往西">←</button><span aria-hidden="true">✦</span><button data-move="east" aria-label="往東移動" title="往東">→</button><button data-move="south" aria-label="往南移動" title="往南">↓</button></div><div class="action-buttons"><button id="gather" class="primary" disabled>採集</button><button id="craft" class="secondary" disabled>製作補給</button><small id="recipe">回鎮後製作你的專精配方</small></div></div>
+          </section>
+          <section class="feedback" aria-label="遊戲訊息"><div class="feedback-heading"><span class="eyebrow">旅途紀事</span><span id="connection" data-status="ready">等待加入</span></div><p id="message" role="status" aria-live="polite">先選一門手藝。準備好修補組與行路藥，就能登上東邊的望潮塔。</p><button id="retry" class="secondary" hidden>重試連線與待確認動作</button></section>
+        </aside>
+      </div>
+
+      <section id="market" class="market panel" aria-labelledby="market-title" hidden>
+        <div class="market-heading"><div><span class="eyebrow">SUPPLIES FOR THE NEXT JOURNEY</span><h2 id="market-title">旅人市場</h2></div><span class="market-note">每 1.5 秒更新</span></div>
+        <p class="market-intro">鐵匠的修補組、藥師的行路藥，都是下一趟旅程的補給。任何地點都能掛單與購買。</p>
+        <div class="market-layout">
+          <form id="list-form" aria-label="建立掛單">
+            <label for="list-item">出售物品</label>
+            <select id="list-item" name="item"><option value="ore">礦石</option><option value="herb">藥草</option><option value="kit">修補組</option><option value="medicine">行路藥</option></select>
+            <div class="market-amounts"><div><label for="list-quantity">數量（1–99）</label><input id="list-quantity" name="quantity" type="number" min="1" max="99" step="1" value="1" required inputmode="numeric"></div><div><label for="list-price">整筆總價（1–99 金幣）</label><input id="list-price" name="price" type="number" min="1" max="99" step="1" value="4" required inputmode="numeric"></div></div>
+            <button id="list-submit" type="submit" class="primary">刊登掛單</button>
+            <p class="market-note">價格是整筆總價，不是單價。掛單不保留或扣除物品；賣家若已使用存貨，購買會被拒絕。未售出的自己的掛單可取消。</p>
+          </form>
+          <div class="market-board"><h3 class="section-label">補給與交易紀錄</h3><p id="market-empty" class="market-note">還沒有掛單。製作多一份補給，讓另一位旅人也能出發。</p><ul id="market-list" aria-label="掛單列表"></ul></div>
+        </div>
+      </section>
+
+      <section class="journey-guide" aria-label="旅程引導"><div class="guide-copy"><span class="eyebrow">YOUR NEXT STEP</span><h2 id="guide-title">把一門手藝，帶進旅程裡。</h2><p id="guide-detail">先採集，再回鎮製作；帶齊兩種補給後向東走。登頂可獲得一次性 8 金幣。</p></div><ol class="steps"><li data-step="0" class="current"><span>01</span>採集原料</li><li data-step="1"><span>02</span>回鎮製作</li><li data-step="2"><span>03</span>向東登塔</li><li data-step="3"><span>04</span>看見霧海</li></ol></section>
+    </main>
+    <footer><p>霧岸鎮 · 本機冒險實驗 <span>／</span> 角色憑證保存在此瀏覽器，並非正式帳號登入。</p><button id="reset-session" class="text-button">重設此瀏覽器角色</button></footer>
+  </div>
+</body>
+</html>

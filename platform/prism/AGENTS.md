@@ -2,54 +2,18 @@
 
 These instructions apply to every file below `platform/prism/`.
 
-## Mission and workflow
+The implementation contract is [`docs/sdd/AGENTS.md`](docs/sdd/AGENTS.md). This file does not restate it.
 
-1. Read this file and the complete `docs/sdd/` pack before implementation.
-2. Follow `docs/sdd/12-IMPLEMENTATION-PHASES.md` in task order, one task at a
-   time. Do not expand the task scope.
-3. Before editing, restate the task scope, dependencies, allowed paths, and
-   acceptance criteria.
-4. Preserve existing changes and edit only paths allowed by the current task.
-5. Run the stated acceptance commands and report their actual output. Never
-   claim a check that was not run.
+## 工作方式
 
-## Architecture
+過程紀錄以 desk 的 [`docs/operating-method.md`](https://github.com/fallrising/desk/blob/main/docs/operating-method.md) 為準。本檔不複製該文。
 
-- `pkg/**` must not import `internal/**` or `drivers/**`.
-- `drivers/**` must not import `internal/**` or another driver.
-- `internal/compat/**` must not import `drivers/**`.
-- Business semantics live in `internal/**`; drivers only store and translate.
-- The only backend access path is the `spi.Backend` interface. Concrete driver
-  assertions are forbidden except for optional interfaces defined by `pkg/spi`.
-- Every feature must have correct behavior on the weakest `memory` driver.
+任務板 `docs/tasks/BOARD.md` 與 journal run 紀錄是允許改動的路徑。
 
-## Engineering and security
+## 主線與驗收文件先行
 
-- Use only Apache-2.0, MIT, BSD, or MPL-2.0 imported dependencies. Never import
-  `grafana/loki`, `grafana/tempo`, `grafana/grafana`, or another AGPL project.
-- Treat LogQL as clean-room work: do not read or copy Loki source code.
-- Telemetry time conversion goes through `pkg/utm/time.go`; do not perform ad hoc
-  timestamp unit arithmetic elsewhere.
-- Every I/O path accepts `context.Context` and honors cancellation. Buffers,
-  concurrency, scans, and result sets must be bounded.
-- Iterators and closers must always be closed. Errors must retain their
-  `spi.Error` classification.
-- Every store operation is tenant-scoped. Parsed user matchers may not override
-  `__`-prefixed system labels.
-- Secrets use `internal/secret.String`, support `_file` variants, and must never
-  appear in logs, errors, API responses, or serialized configuration.
-- New settings update the config type, defaults, `--config-check`, the SDD
-  example, and `deploy/prismd.yaml` together.
-- New self-telemetry is first registered in
-  `docs/sdd/20-SELF-TELEMETRY-REGISTRY.md` with a cardinality assessment.
-- Behavior changes require tests; concurrent code must pass `-race`, and
-  long-lived goroutines require leak checks.
-
-## Git and completion
-
-- Use one branch per SDD task, never force-push shared history, and reference the
-  task ID in the commit message.
-- Do not modify `pkg/spi` public interfaces or root workflows unless the current
-  task explicitly permits it; SPI interface changes require an ADR.
-- Completion reports include the task ID, changed files, commands and actual
-  outputs, acceptance mapping, unfinished work, risks, and open questions.
+- 接手前先讀 [SUCCESS.md](SUCCESS.md)、相關規格與最近驗證紀錄，核對目前主線及缺口。
+- 實作前先更新 SUCCESS 的本次目標、範圍、AC 與驗證計畫；不得為了完成而縮小已承諾主線。
+- 收尾逐項記錄實際命令、結果、來源版本與未通過原因，同步 README 必要入口及項目進度；未跑不可寫通過。
+- 主線全部驗收、必要 CI／審查通過並合併後，按 repo 共用規範建立 annotated `usable/<slug>/vX.Y.Z`，回讀遠端並更新索引。現行 owner 授權適用；本規則不授權部署或付費服務。
+- 參考／封存項目保留其結束條件，不以新增文件當作可執行版本，也不因此恢復開發。

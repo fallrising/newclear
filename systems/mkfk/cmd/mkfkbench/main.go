@@ -47,10 +47,20 @@ func main() {
 	remoteDir := flag.String("ssh-dir", "mkfk-bench", "remote working directory")
 	sshCommand := flag.String("ssh-command", "ssh -o BatchMode=yes", "ssh command and options used to reach the hosts")
 	summarize := flag.String("summarize", "", "re-render summary.md from an existing results.json and exit")
+	silentFollower := flag.Bool("silent-follower", false, "manual compose run of rf3-isr2-b1-p1; not a CI test")
+	composeProject := flag.String("compose-project", "mkfk-silent-follower", "Compose project whose brokers are already up")
+	dockerBin := flag.String("docker", "docker", "docker CLI, used only with --silent-follower")
 	flag.Parse()
 	if *summarize != "" {
 		if err := resummarize(*summarize); err != nil {
 			fmt.Fprintln(os.Stderr, "summarize failed:", err)
+			os.Exit(1)
+		}
+		return
+	}
+	if *silentFollower {
+		if err := runSilentFollower(*out, *commit, *composeProject, *dockerBin); err != nil {
+			fmt.Fprintln(os.Stderr, "silent-follower failed:", err)
 			os.Exit(1)
 		}
 		return

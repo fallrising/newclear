@@ -1,6 +1,6 @@
-import { applyD1Migrations, runDurableObjectAlarm } from "cloudflare:test";
+import { applyD1Migrations } from "cloudflare:test";
 import { env } from "cloudflare:workers";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { hashPassword } from "../../src/password.ts";
 import type { PendingAmbient } from "../../src/notify.ts";
 import {
@@ -207,27 +207,25 @@ async function agentMessageCount(roomId: string, agentId: string): Promise<numbe
 }
 
 async function waitGeneration(roomId: string, agentId: string): Promise<{ id: string; state: string }> {
-  const start = Date.now();
-  while (Date.now() - start < 8000) {
-    const row = await env.DB.prepare(
+  // runInboxAlarm awaits begin through RPC, so successful dispatch must already have inserted its row.
+  const row = await env.DB.prepare(
       `SELECT id, state FROM generations WHERE room_id = ? AND agent_id = ? ORDER BY created_at ASC`,
     )
       .bind(roomId, agentId)
       .first<{ id: string; state: string }>();
-    if (row) return row;
-    await new Promise((r) => setTimeout(r, 25));
-  }
-  throw new Error("generation row not created");
+  if (row) return row;
+  throw new Error("generation row not created after awaited ambient dispatch");
 }
 
 async function runInboxAlarm(roomId: string, memberId: string): Promise<void> {
-  const ran = await runDurableObjectAlarm(inboxStub(roomId, memberId));
-  if (!ran) await inboxRpc(roomId, memberId).runScheduled();
+  const inbox = inboxRpc(roomId, memberId);
+  const target = await inbox.alarmAt();
+  if (typeof target === "number" && target > Date.now()) vi.setSystemTime(target);
+  await inbox.runScheduled();
 }
 
 async function runHostedAlarm(generationId: string): Promise<void> {
-  const ran = await runDurableObjectAlarm(hostedStub(generationId));
-  if (!ran) await hostedRpc(generationId).runScheduled();
+  await hostedRpc(generationId).runScheduled();
 }
 
 beforeAll(async () => {
@@ -238,8 +236,12 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  // Inject a stable future Date to keep automatic platform alarms from racing explicit awaited handlers.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(Date.now() + 86_400_000);
   await resetStorage();
 });
+afterEach(() => vi.useRealTimers());
 
 describe("kith M6 Inbox ambient alarm", () => {
   it("M6-US-06: ambient human question dispatches one agent message; self-send and agent-to-agent non-@ drop", async () => {
@@ -300,6 +302,7 @@ describe("kith M6 Inbox ambient alarm", () => {
     const elapsed = await inbox.lastNotifyElapsedMs();
     expect(elapsed).toBeTypeOf("number");
     expect(elapsed!).toBeLessThan(20);
+    // Injectable-clock contract only; actual host wall-time observations are reported separately.
     expect(await inbox.lastHeuristicRan()).toBe(false);
     expect(await inbox.pendingAmbient()).not.toBeNull();
     expect(await generationCount(s.roomId, s.agentId)).toBe(0);

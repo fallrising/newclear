@@ -67,3 +67,6 @@ G2/2 real004 exit0,14/14/zero skipped/flaky, rowREAL-20261006-04 appended. Final
 ## Root evidence-gate acceptance and publication routing
 
 T961independentDONEreportactuallyread/validated, no scope/securityblocker; allrequiredlocalartifactsinspected. RootacceptsT960andT961withinboundedscopes, notjusttheirclaims. G implementation/localgateaccepted withreal14/cleanup/31contracts/static/preservation/appendonlyproof. Current-headremoteCIisaseparatependingpublicationgate; rootwillcommit/push/updatePR300, requireallnecessarychecksSUCCESSandrequiredreview, mergewithoutbypass/force/deploy, verifyremoteancestry/CMS-treeequalityandrecordpublicationreceipt/sessionhandoff. VERIFIEDstatusindocsonlytakeseffectwhenPR300isactuallymerged.
+
+## Active2026-11-01 resume
+See [bounded CMS PR333/334 resume](resume-20261101/PLAN.md); earlier plan remains historical.

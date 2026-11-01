@@ -1,0 +1,22 @@
+{
+  "recorded": "2026-10-21T15:57:32.788833+00:00",
+  "required_report_headings": true,
+  "worker_git_diff_check": {
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "worker_tracked_diff": "",
+  "evidence_files_checked": 75,
+  "missing_relative_links": [],
+  "trailing_whitespace": [],
+  "unredacted_operator_home": [
+    "docs/project-success/evidence/newclear-qualification/dim-gate-historical-source.json"
+  ],
+  "json_parse": "passed",
+  "result": "FAIL"
+}

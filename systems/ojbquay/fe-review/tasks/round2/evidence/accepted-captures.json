@@ -1,0 +1,957 @@
+{
+  "rawPngCount": 84,
+  "acceptedPngCount": 72,
+  "stateCount": 42,
+  "routeCount": 27,
+  "chartCount": 3,
+  "allPngsPrivate": true,
+  "rawPngIndex": [
+    {
+      "path": "fe-review/runs/browser-004/screenshots/baseline-dlq-834.png",
+      "sha256": "bd1634791af398e8b180001cef9db677ca82fd5b29737a0cc0883920d7166e23",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-004/screenshots/baseline-group-768.png",
+      "sha256": "8a111ac10619ece675522f41aad679b01ee2e8e1f4a023db25e8bcc3e63a5428",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-004/screenshots/chart-before.png",
+      "sha256": "2ba31a95886242d7a3a4ead31ed2a7bbfe7b87cacba5dbd620e0b411f81b2ce2",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-004/screenshots/chart-collapsed.png",
+      "sha256": "2a3feb9b0e58039b1df5cb0d4927404b3629db6ddaec0721cf2018c51da81404",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-005/screenshots/chart-before.png",
+      "sha256": "d75262fdb37a0b78cd0cd3d34e6f1957b16719406b7a2a1d464e7e8c7f25836a",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-005/screenshots/chart-collapsed.png",
+      "sha256": "6c6bdd226f3c2fc199b2d5670a7696484371bb2890ad5c6f4364007aebf45847",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/chart-after.png",
+      "sha256": "be5bc42dcc60ebc0dc0fd62bbc148359a8bf6c72978d3b6a90192178da45954b",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/chart-before.png",
+      "sha256": "be5bc42dcc60ebc0dc0fd62bbc148359a8bf6c72978d3b6a90192178da45954b",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/chart-collapsed.png",
+      "sha256": "ab78227dda33a796099c9d2d4c21d4acc95bee11ae782e5b7ab37b4fc0592562",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-bad-password.png",
+      "sha256": "f794936b500dc99ac354394f01cb58e8eaf6e50b2ef9d65b2a0f3faf559840fc",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-controlled-500.png",
+      "sha256": "06db337c28f0a717fa08baa0bf5a169ebdc15143cf673cbd262f1e1f0efdcd42",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-controlled-empty.png",
+      "sha256": "04296bf0fe08f99e433cac86842df6b59d0ad48aad5b470d522f733ffd3cae45",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-delay-present.png",
+      "sha256": "4dcc3658f23d417041d4f836d3514cbe73f7859f9409e58c26f4a377d22c82ea",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-dlq.png",
+      "sha256": "c80c2fe81a74b13073fa95d1b3adc791f66bb4f851d9d62ae842b249963b02b0",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-group.png",
+      "sha256": "3ad039037bcfa88957cde259042f63f85070d6e9bc936f677c2954ac65dc8b50",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-missing-delay.png",
+      "sha256": "5eb47d7d09e5276f7983db693a9b800c35c511e65726e2bffa73c425e2524e2f",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-topic-configuration.png",
+      "sha256": "00ab109e36013d55492e0c21dce1dedc2dfc92e6d58e63403c5cd4f213f99dce",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-topic-sample.png",
+      "sha256": "1143199f88ed8a4da215c42443f8adf248e75145ec0cdad4b7930696ce78c316",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-preview.png",
+      "sha256": "c3c7d9ca029c289bdeaf6bdc807bd44ee9f45b4d7c7221f4d81969f934359ce5",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step1.png",
+      "sha256": "82f4c590802fbe24b52f34e0a13601c7337edd7d5e6f4d3208ffa3220a418bc8",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step2.png",
+      "sha256": "e5d8b7b3dade3daa4d2fbfbf1d141f3d7be10bef7c0e89df6ee4a972c6ebce5d",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step3.png",
+      "sha256": "c1400e903a99e53d04529b41c1834b3df6fe6cee413c09eb627ebd5571c387be",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step4.png",
+      "sha256": "41e5ea013576905f80b6453a4a6bd18ab45ea7410a010e8cd60028d5431a9a47",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-controlled-500.png",
+      "sha256": "b81f2826897f84da7d7ef65f6cd081455c27cb35afb291e059d8fe528f7343ce",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-controlled-empty.png",
+      "sha256": "32a09baf9baa6e997753f4f86cf2913f90a82261f0d83dbc9b9672e3b50efcfe",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-delay-present.png",
+      "sha256": "2caf6a663b3ccc0cdfa461f30807007419799235bf1e0440846f9cd852691206",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-dlq.png",
+      "sha256": "223b25f29ba260c4ce85cb4137023a385839f61823a702c0f2f198b653b9a36b",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-group.png",
+      "sha256": "3d90e2aa3af849c6aaddb6921f5c52aada64613b325960f62611a7bd710d179c",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-missing-delay.png",
+      "sha256": "52bd7e70d96ee3dfed8b9bc8a9dd200c00c32fae3b2598b9bdf9fff2a3c0544f",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-topic-configuration.png",
+      "sha256": "79d871b422abbb0147b9467b89b0a0e3c7b8e90741b9e1879703b33de611b031",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-topic-sample.png",
+      "sha256": "0dfc668fc3f1d71b87288919808145250fca52b447ce566851d8b0810b70c64d",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-preview.png",
+      "sha256": "3fc925f52c3dda09ae8c8d39be977b15dda541052bd0167fd5b145395e081895",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step1.png",
+      "sha256": "803f8d2ca4916168fdf94f9c912edeaa5444144bc108c6e4912a142d4ef19475",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step2.png",
+      "sha256": "504a5f40dcf2e15f5313230f4cc929b5de0f9cbae5fe7a0fa7535691e3fa6088",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step3.png",
+      "sha256": "1209970953b9ef6016a0f31753d5e09e200119026e78da1c36c2a4a74cd6df6e",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step4.png",
+      "sha256": "86c46ba056c6512f25e613a74c1e6b1d825e21b031c1658e3566936137b2ff3d",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-bad-password.png",
+      "sha256": "784197b8046ee76787c38544bf0dbcca5c1e87fca600fd430adee291f26ee3d4",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-controlled-500.png",
+      "sha256": "f3a9fc73c4da44256da53c5040356f2c5b58a242578213877cedd390908122fc",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-controlled-empty.png",
+      "sha256": "8a3282e1ababe85ed9d8b193d4442bbc0e09037e7f60a1c47728b41cdc533e19",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-delay-present.png",
+      "sha256": "5549d51dcd2cb22cbedb45fd4e85d4864dede272e0780207e71200c3b29c5bd3",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-dlq.png",
+      "sha256": "9fbff947e30d75fed179e1ab2dbb6aec18d79dd9ca63c0fd66e5c20810541a82",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-group.png",
+      "sha256": "e7de95c0bac118e0d1cb087b5e070ed8370965293041443fd170618435f78c1a",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-missing-delay.png",
+      "sha256": "085602dd7987908cde3e3682f30070ef2ee36f9990e53a1dc535cfe8cbab8b5f",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-topic-configuration.png",
+      "sha256": "cdd7e11531d546eeceefe382473eb4509550c62f29a38d09668f09064e88592b",
+      "accepted": false
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-topic-sample.png",
+      "sha256": "88d3ad1aa3455102d56a844a7a106f1732dfe557c5d0a14f19ae7b14b2328ffc",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-preview.png",
+      "sha256": "e2e339a603dbf875edcf121e7e22b4ebb1ae8c9165c791c624b247cb4d937d42",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step1.png",
+      "sha256": "cd01febad872517a2163370b8217826ed05f200b0aafe567a2b61686c25777f9",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step2.png",
+      "sha256": "777fbd90bf937ece4c0c40961c1f4b33ac57628d5126398a950afa4626963969",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step3.png",
+      "sha256": "d2023048a8e1d139bae6bf4ff391236503f4de505824ae50e9a9e5af80c680e8",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step4.png",
+      "sha256": "df1aaab84217570d6b3bfe62a60cee6f4114ab21c074817b5b8d17570da21aa2",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-audit__desktop__light.png",
+      "sha256": "e5feb02d9f8818ec52a2ae9721120de8e20fe856cf5f652b2a89c9c7061c8f50",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-audit__mobile__light.png",
+      "sha256": "d84322ae1e00159800f8329219e9749f810a5fc1806b30c5ed827796a6a25022",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-audit__tablet__light.png",
+      "sha256": "e2539d666a66c7ea3fc4555821f98e742d9300c86847aff8d4ebc949a9ab607b",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-clusters__desktop__light.png",
+      "sha256": "b1f274c74f048fff721885e8c385f0b045c4e7d9755acce805f44aaed6da4c80",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-clusters__mobile__light.png",
+      "sha256": "38c8ebe9be574e06dfa5b3990e66fea7b4f2f992de8cd99d6a3e422d81d0cd2d",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-clusters__tablet__light.png",
+      "sha256": "0ed7f6967911cac1ef1774cb5c45399f809a3a0d7408cd09956a64ec56022fdd",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-users__desktop__light.png",
+      "sha256": "c25ce533c81468fa8a24137395413fc97fb5dafaf1521839d4364f6d82b4c93c",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-users__mobile__light.png",
+      "sha256": "86e982804786066fdf7a32e3fa6558e7ae26bde9d57a051e4088763b5c9dbf48",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-users__tablet__light.png",
+      "sha256": "ed9749d0494816eb893f0fe7142f30802fbfc159eeba50a71f75120f9d0d18ca",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__dashboard__desktop__light.png",
+      "sha256": "d75262fdb37a0b78cd0cd3d34e6f1957b16719406b7a2a1d464e7e8c7f25836a",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__dashboard__mobile__light.png",
+      "sha256": "673363e9b991ea0d5d7d9518c0a747cb16c5bf77939f6421cff2eb6b9ce9e225",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__dashboard__tablet__light.png",
+      "sha256": "7c830ad1e031dcb3046f1e18312f5cf449b9490f1279ada02775ceea36102e31",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__delay__desktop__light.png",
+      "sha256": "4360bd614d64d586cdd0dfb0d4baa7a22dbeaf0bedd1d0eb6761e1102d05a449",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__delay__mobile__light.png",
+      "sha256": "7febaf4ae0a2e9e498d5a82d9111a4acc4e35818885c0e936302b1ca68994b5f",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__delay__tablet__light.png",
+      "sha256": "4c4129c536dcfa60e1d99c5d747033ea5ca1324b5c62640246a186e8dd65b77a",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__groups__desktop__light.png",
+      "sha256": "6f1f5df8597c0fe7ce3da37431cecf083e08e421b596c0bfd0664ad87c707ba0",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__groups__mobile__light.png",
+      "sha256": "db5ba6fc50d36d540f2cbccc01ae27d723267b5066380d7eafa75d14b0dc5047",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__groups__tablet__light.png",
+      "sha256": "4bd2c142c6e78b292f331583282ab8b23e33d9593febcd81cd2050f6ed46bbac",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__subscriptions__desktop__light.png",
+      "sha256": "8837e278342fd81fa0282b94652b211043b0aa0a8befece2d7acc6621bad5bab",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__subscriptions__mobile__light.png",
+      "sha256": "1ae52cf3ad5a08cff3f1e6b62931cfefc8d7d89c9ce1822245120705adf31b0d",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__subscriptions__tablet__light.png",
+      "sha256": "20f550d38ff7dea5acc3a47cc2cf0cb9074e5ff0bf8047e71f14620a3e09ad72",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__topics__desktop__light.png",
+      "sha256": "03ddf53dfad8b431bb322242e05ac3f6f72a4802afce341864c6e9ad2f773b71",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__topics__mobile__light.png",
+      "sha256": "9dd2ec8bc80dde8e9ff6dbc8851eeebcd225c629d92080a39a941c78374a4aef",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__topics__tablet__light.png",
+      "sha256": "c13b0f651ef59ee889f9e4f23c0168160179dc1363253f879758cfb919f5ba3e",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/login__login__desktop__light.png",
+      "sha256": "ef3ad4cbc3e3d2922d5dfbd1b05f6c691a8f8e125bc17d85376ede2f56705fb2",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/login__login__mobile__light.png",
+      "sha256": "4dfab3407ade200ca9bfd4e776492048e9d5ecca36f250639f9961f0d31e5e0d",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/matrix/screenshots/login__login__tablet__light.png",
+      "sha256": "9e4d3b0f2b52c55afba242c35980730347be225cbcd4dd30a36e1e55413e9d41",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-007/screenshots/mobile-bad-password.png",
+      "sha256": "672efd5851c1f4f218f5228c3047b5290d55575e9111d2e0bff1cbaf2dc61242",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-008/screenshots/desktop-group.png",
+      "sha256": "c9aa9c9bb7452978e798df74f2cf5c957627a7b43ff58f5a8e1b642e31c5c057",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-008/screenshots/desktop-topic-configuration.png",
+      "sha256": "ea6f76ad3b9cd04836dd202ae8c335eb80244b7b4246c481a400505ce12be5f1",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-008/screenshots/mobile-group.png",
+      "sha256": "61faa5f1283d2adc2a40b2101921817377211bbe1374433997a84ce25a5f9611",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-008/screenshots/mobile-topic-configuration.png",
+      "sha256": "faa75d57c9708348f57265e52862f00a7ad3a6cc911d8082eb2c32a7b138ec83",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-008/screenshots/tablet-group.png",
+      "sha256": "4268ad09f63d087cbde1989966a4bf6dab51ef943dc0f32fffb07d749d2466a2",
+      "accepted": true
+    },
+    {
+      "path": "fe-review/runs/browser-008/screenshots/tablet-topic-configuration.png",
+      "sha256": "819d36c882c49c7c6f0c8e53e24e8463f0ed85d514f2b374cbfc32becc5bd857",
+      "accepted": true
+    }
+  ],
+  "accepted": [
+    {
+      "key": "desktop-topic-configuration",
+      "kind": "state",
+      "run": "browser-008",
+      "path": "fe-review/runs/browser-008/screenshots/desktop-topic-configuration.png",
+      "sha256": "ea6f76ad3b9cd04836dd202ae8c335eb80244b7b4246c481a400505ce12be5f1",
+      "supersedes": "browser-006/desktop-topic-configuration.png",
+      "pixelMaskCoverage": 1.0,
+      "fullPage": false
+    },
+    {
+      "key": "desktop-topic-sample",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-topic-sample.png",
+      "sha256": "1143199f88ed8a4da215c42443f8adf248e75145ec0cdad4b7930696ce78c316"
+    },
+    {
+      "key": "desktop-group",
+      "kind": "state",
+      "run": "browser-008",
+      "path": "fe-review/runs/browser-008/screenshots/desktop-group.png",
+      "sha256": "c9aa9c9bb7452978e798df74f2cf5c957627a7b43ff58f5a8e1b642e31c5c057",
+      "supersedes": "browser-006/desktop-group.png",
+      "pixelMaskCoverage": 1.0,
+      "fullPage": false
+    },
+    {
+      "key": "desktop-dlq",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-dlq.png",
+      "sha256": "c80c2fe81a74b13073fa95d1b3adc791f66bb4f851d9d62ae842b249963b02b0"
+    },
+    {
+      "key": "desktop-wizard-step1",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step1.png",
+      "sha256": "82f4c590802fbe24b52f34e0a13601c7337edd7d5e6f4d3208ffa3220a418bc8"
+    },
+    {
+      "key": "desktop-wizard-step2",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step2.png",
+      "sha256": "e5d8b7b3dade3daa4d2fbfbf1d141f3d7be10bef7c0e89df6ee4a972c6ebce5d"
+    },
+    {
+      "key": "desktop-wizard-step3",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step3.png",
+      "sha256": "c1400e903a99e53d04529b41c1834b3df6fe6cee413c09eb627ebd5571c387be"
+    },
+    {
+      "key": "desktop-wizard-step4",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-step4.png",
+      "sha256": "41e5ea013576905f80b6453a4a6bd18ab45ea7410a010e8cd60028d5431a9a47"
+    },
+    {
+      "key": "desktop-wizard-preview",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-wizard-preview.png",
+      "sha256": "c3c7d9ca029c289bdeaf6bdc807bd44ee9f45b4d7c7221f4d81969f934359ce5"
+    },
+    {
+      "key": "desktop-delay-present",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-delay-present.png",
+      "sha256": "4dcc3658f23d417041d4f836d3514cbe73f7859f9409e58c26f4a377d22c82ea"
+    },
+    {
+      "key": "desktop-missing-delay",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-missing-delay.png",
+      "sha256": "5eb47d7d09e5276f7983db693a9b800c35c511e65726e2bffa73c425e2524e2f"
+    },
+    {
+      "key": "desktop-controlled-empty",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-controlled-empty.png",
+      "sha256": "04296bf0fe08f99e433cac86842df6b59d0ad48aad5b470d522f733ffd3cae45"
+    },
+    {
+      "key": "desktop-controlled-500",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-controlled-500.png",
+      "sha256": "06db337c28f0a717fa08baa0bf5a169ebdc15143cf673cbd262f1e1f0efdcd42"
+    },
+    {
+      "key": "desktop-bad-password",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/desktop-bad-password.png",
+      "sha256": "f794936b500dc99ac354394f01cb58e8eaf6e50b2ef9d65b2a0f3faf559840fc"
+    },
+    {
+      "key": "tablet-topic-configuration",
+      "kind": "state",
+      "run": "browser-008",
+      "path": "fe-review/runs/browser-008/screenshots/tablet-topic-configuration.png",
+      "sha256": "819d36c882c49c7c6f0c8e53e24e8463f0ed85d514f2b374cbfc32becc5bd857",
+      "supersedes": "browser-006/tablet-topic-configuration.png",
+      "pixelMaskCoverage": 1.0,
+      "fullPage": false
+    },
+    {
+      "key": "tablet-topic-sample",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-topic-sample.png",
+      "sha256": "88d3ad1aa3455102d56a844a7a106f1732dfe557c5d0a14f19ae7b14b2328ffc"
+    },
+    {
+      "key": "tablet-group",
+      "kind": "state",
+      "run": "browser-008",
+      "path": "fe-review/runs/browser-008/screenshots/tablet-group.png",
+      "sha256": "4268ad09f63d087cbde1989966a4bf6dab51ef943dc0f32fffb07d749d2466a2",
+      "supersedes": "browser-006/tablet-group.png",
+      "pixelMaskCoverage": 1.0,
+      "fullPage": false
+    },
+    {
+      "key": "tablet-dlq",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-dlq.png",
+      "sha256": "9fbff947e30d75fed179e1ab2dbb6aec18d79dd9ca63c0fd66e5c20810541a82"
+    },
+    {
+      "key": "tablet-wizard-step1",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step1.png",
+      "sha256": "cd01febad872517a2163370b8217826ed05f200b0aafe567a2b61686c25777f9"
+    },
+    {
+      "key": "tablet-wizard-step2",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step2.png",
+      "sha256": "777fbd90bf937ece4c0c40961c1f4b33ac57628d5126398a950afa4626963969"
+    },
+    {
+      "key": "tablet-wizard-step3",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step3.png",
+      "sha256": "d2023048a8e1d139bae6bf4ff391236503f4de505824ae50e9a9e5af80c680e8"
+    },
+    {
+      "key": "tablet-wizard-step4",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-step4.png",
+      "sha256": "df1aaab84217570d6b3bfe62a60cee6f4114ab21c074817b5b8d17570da21aa2"
+    },
+    {
+      "key": "tablet-wizard-preview",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-wizard-preview.png",
+      "sha256": "e2e339a603dbf875edcf121e7e22b4ebb1ae8c9165c791c624b247cb4d937d42"
+    },
+    {
+      "key": "tablet-delay-present",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-delay-present.png",
+      "sha256": "5549d51dcd2cb22cbedb45fd4e85d4864dede272e0780207e71200c3b29c5bd3"
+    },
+    {
+      "key": "tablet-missing-delay",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-missing-delay.png",
+      "sha256": "085602dd7987908cde3e3682f30070ef2ee36f9990e53a1dc535cfe8cbab8b5f"
+    },
+    {
+      "key": "tablet-controlled-empty",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-controlled-empty.png",
+      "sha256": "8a3282e1ababe85ed9d8b193d4442bbc0e09037e7f60a1c47728b41cdc533e19"
+    },
+    {
+      "key": "tablet-controlled-500",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-controlled-500.png",
+      "sha256": "f3a9fc73c4da44256da53c5040356f2c5b58a242578213877cedd390908122fc"
+    },
+    {
+      "key": "tablet-bad-password",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/tablet-bad-password.png",
+      "sha256": "784197b8046ee76787c38544bf0dbcca5c1e87fca600fd430adee291f26ee3d4"
+    },
+    {
+      "key": "mobile-topic-configuration",
+      "kind": "state",
+      "run": "browser-008",
+      "path": "fe-review/runs/browser-008/screenshots/mobile-topic-configuration.png",
+      "sha256": "faa75d57c9708348f57265e52862f00a7ad3a6cc911d8082eb2c32a7b138ec83",
+      "supersedes": "browser-006/mobile-topic-configuration.png",
+      "pixelMaskCoverage": 1.0,
+      "fullPage": false
+    },
+    {
+      "key": "mobile-topic-sample",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-topic-sample.png",
+      "sha256": "0dfc668fc3f1d71b87288919808145250fca52b447ce566851d8b0810b70c64d"
+    },
+    {
+      "key": "mobile-group",
+      "kind": "state",
+      "run": "browser-008",
+      "path": "fe-review/runs/browser-008/screenshots/mobile-group.png",
+      "sha256": "61faa5f1283d2adc2a40b2101921817377211bbe1374433997a84ce25a5f9611",
+      "supersedes": "browser-006/mobile-group.png",
+      "pixelMaskCoverage": 1.0,
+      "fullPage": false
+    },
+    {
+      "key": "mobile-dlq",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-dlq.png",
+      "sha256": "223b25f29ba260c4ce85cb4137023a385839f61823a702c0f2f198b653b9a36b"
+    },
+    {
+      "key": "mobile-wizard-step1",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step1.png",
+      "sha256": "803f8d2ca4916168fdf94f9c912edeaa5444144bc108c6e4912a142d4ef19475"
+    },
+    {
+      "key": "mobile-wizard-step2",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step2.png",
+      "sha256": "504a5f40dcf2e15f5313230f4cc929b5de0f9cbae5fe7a0fa7535691e3fa6088"
+    },
+    {
+      "key": "mobile-wizard-step3",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step3.png",
+      "sha256": "1209970953b9ef6016a0f31753d5e09e200119026e78da1c36c2a4a74cd6df6e"
+    },
+    {
+      "key": "mobile-wizard-step4",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-step4.png",
+      "sha256": "86c46ba056c6512f25e613a74c1e6b1d825e21b031c1658e3566936137b2ff3d"
+    },
+    {
+      "key": "mobile-wizard-preview",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-wizard-preview.png",
+      "sha256": "3fc925f52c3dda09ae8c8d39be977b15dda541052bd0167fd5b145395e081895"
+    },
+    {
+      "key": "mobile-delay-present",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-delay-present.png",
+      "sha256": "2caf6a663b3ccc0cdfa461f30807007419799235bf1e0440846f9cd852691206"
+    },
+    {
+      "key": "mobile-missing-delay",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-missing-delay.png",
+      "sha256": "52bd7e70d96ee3dfed8b9bc8a9dd200c00c32fae3b2598b9bdf9fff2a3c0544f"
+    },
+    {
+      "key": "mobile-controlled-empty",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-controlled-empty.png",
+      "sha256": "32a09baf9baa6e997753f4f86cf2913f90a82261f0d83dbc9b9672e3b50efcfe"
+    },
+    {
+      "key": "mobile-controlled-500",
+      "kind": "state",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/mobile-controlled-500.png",
+      "sha256": "b81f2826897f84da7d7ef65f6cd081455c27cb35afb291e059d8fe528f7343ce"
+    },
+    {
+      "key": "mobile-bad-password",
+      "kind": "state",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/screenshots/mobile-bad-password.png",
+      "sha256": "672efd5851c1f4f218f5228c3047b5290d55575e9111d2e0bff1cbaf2dc61242"
+    },
+    {
+      "key": "login-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/login__login__desktop__light.png",
+      "sha256": "ef3ad4cbc3e3d2922d5dfbd1b05f6c691a8f8e125bc17d85376ede2f56705fb2"
+    },
+    {
+      "key": "login-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/login__login__tablet__light.png",
+      "sha256": "9e4d3b0f2b52c55afba242c35980730347be225cbcd4dd30a36e1e55413e9d41"
+    },
+    {
+      "key": "login-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/login__login__mobile__light.png",
+      "sha256": "4dfab3407ade200ca9bfd4e776492048e9d5ecca36f250639f9961f0d31e5e0d"
+    },
+    {
+      "key": "dashboard-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__dashboard__desktop__light.png",
+      "sha256": "d75262fdb37a0b78cd0cd3d34e6f1957b16719406b7a2a1d464e7e8c7f25836a"
+    },
+    {
+      "key": "dashboard-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__dashboard__tablet__light.png",
+      "sha256": "7c830ad1e031dcb3046f1e18312f5cf449b9490f1279ada02775ceea36102e31"
+    },
+    {
+      "key": "dashboard-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__dashboard__mobile__light.png",
+      "sha256": "673363e9b991ea0d5d7d9518c0a747cb16c5bf77939f6421cff2eb6b9ce9e225"
+    },
+    {
+      "key": "topics-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__topics__desktop__light.png",
+      "sha256": "03ddf53dfad8b431bb322242e05ac3f6f72a4802afce341864c6e9ad2f773b71"
+    },
+    {
+      "key": "topics-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__topics__tablet__light.png",
+      "sha256": "c13b0f651ef59ee889f9e4f23c0168160179dc1363253f879758cfb919f5ba3e"
+    },
+    {
+      "key": "topics-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__topics__mobile__light.png",
+      "sha256": "9dd2ec8bc80dde8e9ff6dbc8851eeebcd225c629d92080a39a941c78374a4aef"
+    },
+    {
+      "key": "groups-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__groups__desktop__light.png",
+      "sha256": "6f1f5df8597c0fe7ce3da37431cecf083e08e421b596c0bfd0664ad87c707ba0"
+    },
+    {
+      "key": "groups-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__groups__tablet__light.png",
+      "sha256": "4bd2c142c6e78b292f331583282ab8b23e33d9593febcd81cd2050f6ed46bbac"
+    },
+    {
+      "key": "groups-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__groups__mobile__light.png",
+      "sha256": "db5ba6fc50d36d540f2cbccc01ae27d723267b5066380d7eafa75d14b0dc5047"
+    },
+    {
+      "key": "subscriptions-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__subscriptions__desktop__light.png",
+      "sha256": "8837e278342fd81fa0282b94652b211043b0aa0a8befece2d7acc6621bad5bab"
+    },
+    {
+      "key": "subscriptions-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__subscriptions__tablet__light.png",
+      "sha256": "20f550d38ff7dea5acc3a47cc2cf0cb9074e5ff0bf8047e71f14620a3e09ad72"
+    },
+    {
+      "key": "subscriptions-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__subscriptions__mobile__light.png",
+      "sha256": "1ae52cf3ad5a08cff3f1e6b62931cfefc8d7d89c9ce1822245120705adf31b0d"
+    },
+    {
+      "key": "delay-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__delay__desktop__light.png",
+      "sha256": "4360bd614d64d586cdd0dfb0d4baa7a22dbeaf0bedd1d0eb6761e1102d05a449"
+    },
+    {
+      "key": "delay-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__delay__tablet__light.png",
+      "sha256": "4c4129c536dcfa60e1d99c5d747033ea5ca1324b5c62640246a186e8dd65b77a"
+    },
+    {
+      "key": "delay-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__delay__mobile__light.png",
+      "sha256": "7febaf4ae0a2e9e498d5a82d9111a4acc4e35818885c0e936302b1ca68994b5f"
+    },
+    {
+      "key": "admin-clusters-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-clusters__desktop__light.png",
+      "sha256": "b1f274c74f048fff721885e8c385f0b045c4e7d9755acce805f44aaed6da4c80"
+    },
+    {
+      "key": "admin-clusters-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-clusters__tablet__light.png",
+      "sha256": "0ed7f6967911cac1ef1774cb5c45399f809a3a0d7408cd09956a64ec56022fdd"
+    },
+    {
+      "key": "admin-clusters-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-clusters__mobile__light.png",
+      "sha256": "38c8ebe9be574e06dfa5b3990e66fea7b4f2f992de8cd99d6a3e422d81d0cd2d"
+    },
+    {
+      "key": "admin-audit-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-audit__desktop__light.png",
+      "sha256": "e5feb02d9f8818ec52a2ae9721120de8e20fe856cf5f652b2a89c9c7061c8f50"
+    },
+    {
+      "key": "admin-audit-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-audit__tablet__light.png",
+      "sha256": "e2539d666a66c7ea3fc4555821f98e742d9300c86847aff8d4ebc949a9ab607b"
+    },
+    {
+      "key": "admin-audit-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-audit__mobile__light.png",
+      "sha256": "d84322ae1e00159800f8329219e9749f810a5fc1806b30c5ed827796a6a25022"
+    },
+    {
+      "key": "admin-users-desktop",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-users__desktop__light.png",
+      "sha256": "c25ce533c81468fa8a24137395413fc97fb5dafaf1521839d4364f6d82b4c93c"
+    },
+    {
+      "key": "admin-users-tablet",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-users__tablet__light.png",
+      "sha256": "ed9749d0494816eb893f0fe7142f30802fbfc159eeba50a71f75120f9d0d18ca"
+    },
+    {
+      "key": "admin-users-mobile",
+      "kind": "route",
+      "run": "browser-007",
+      "path": "fe-review/runs/browser-007/matrix/screenshots/console__admin-users__mobile__light.png",
+      "sha256": "86e982804786066fdf7a32e3fa6558e7ae26bde9d57a051e4088763b5c9dbf48"
+    },
+    {
+      "key": "chart-before",
+      "kind": "chart",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/chart-before.png",
+      "sha256": "be5bc42dcc60ebc0dc0fd62bbc148359a8bf6c72978d3b6a90192178da45954b",
+      "fullPage": false
+    },
+    {
+      "key": "chart-collapsed",
+      "kind": "chart",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/chart-collapsed.png",
+      "sha256": "ab78227dda33a796099c9d2d4c21d4acc95bee11ae782e5b7ab37b4fc0592562",
+      "fullPage": false
+    },
+    {
+      "key": "chart-after",
+      "kind": "chart",
+      "run": "browser-006",
+      "path": "fe-review/runs/browser-006/screenshots/chart-after.png",
+      "sha256": "be5bc42dcc60ebc0dc0fd62bbc148359a8bf6c72978d3b6a90192178da45954b",
+      "fullPage": false
+    }
+  ]
+}

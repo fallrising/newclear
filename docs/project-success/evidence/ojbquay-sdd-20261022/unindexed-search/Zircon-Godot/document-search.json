@@ -1,0 +1,2930 @@
+{
+  "retrieved_at": "2026-10-22T05:53:36.612807+00:00",
+  "terms": [
+    "ojbquay",
+    "ddmq",
+    "SDD",
+    "ProduceDelay",
+    "retryIntervals",
+    "__ojbk.delay.inbox"
+  ],
+  "matching": "case-insensitive literal alternatives; path + UTF-8 decoded complete document contents",
+  "candidate_selection": "all tree blobs with .md/.markdown/.rst/.txt/.adoc suffix, or extensionless README/AGENTS/SDD/specification/requirements name",
+  "candidate_count": 171,
+  "successful_reads": 171,
+  "total_bytes": 3259218,
+  "api_attempts": 171,
+  "documents": [
+    {
+      "path": ".\\Config\\ExperienceList.txt",
+      "git_blob_sha": "e570f7a0252e925cf2d64d8b58d72a2454e43d99",
+      "bytes": 2169,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.\\Config\\ExperienceList.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e570f7a0252e925cf2d64d8b58d72a2454e43d99",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9d6298ad542c99d0e8a28357da6781d1388e172e6c4c72858349e7aec782412c",
+      "actual_bytes": 2169,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/godot-hud-parity-2026-10-02/EI_HUD_PRIMARY_STATIC.md",
+      "git_blob_sha": "13e9f73ba8ac39aee84c6f334e8d32e9d8adc349",
+      "bytes": 4835,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/godot-hud-parity-2026-10-02/EI_HUD_PRIMARY_STATIC.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/13e9f73ba8ac39aee84c6f334e8d32e9d8adc349",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "935a2cd978c546639f1eff5187952f94efae659450cd5e01f6841d3fc897d785",
+      "actual_bytes": 4835,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/godot-hud-parity-2026-10-02/MATRIX.md",
+      "git_blob_sha": "44da8037a1737a463df223e1a79fce3cba17afbc",
+      "bytes": 9283,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/godot-hud-parity-2026-10-02/MATRIX.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/44da8037a1737a463df223e1a79fce3cba17afbc",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "079d5925aece96a7ada85d269efd3031d9864e5e8bd2da0a604e5542c306e615",
+      "actual_bytes": 9283,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/godot-hud-parity-2026-10-02/REPORT.md",
+      "git_blob_sha": "7050876824f5a51ebe12868618ff600cfede1266",
+      "bytes": 9431,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/godot-hud-parity-2026-10-02/REPORT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/7050876824f5a51ebe12868618ff600cfede1266",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "afe5a57f82fb644eb5630be381e5494aaafc2302826fc1f478fee1e7c26ce3e4",
+      "actual_bytes": 9431,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/godot-hud-parity-2026-10-02/peer-commits.txt",
+      "git_blob_sha": "8661024f28c41e978a9ebf54585f036a715cf33e",
+      "bytes": 575,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/godot-hud-parity-2026-10-02/peer-commits.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/8661024f28c41e978a9ebf54585f036a715cf33e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2694c562679ed693bf86e5be9509370b85e9fcd3c2248f5d49e2bf95b140821b",
+      "actual_bytes": 575,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/godot-hud-parity-2026-10-02/peer-tmux-transcript.txt",
+      "git_blob_sha": "11f9cb5b28d3ef87d830bd9947de4889adf36dc6",
+      "bytes": 14402,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/godot-hud-parity-2026-10-02/peer-tmux-transcript.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/11f9cb5b28d3ef87d830bd9947de4889adf36dc6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "cf9db32bf7dd5a43c7c3d699bc9f01052e4965ecb127bc51638fc12fc7a63217",
+      "actual_bytes": 14402,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/godot-ui-audit-2026-10-02/INVENTORY.md",
+      "git_blob_sha": "bc0bc1bc683890419b9c7ce04ac2bfec6ba8ac50",
+      "bytes": 11539,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/godot-ui-audit-2026-10-02/INVENTORY.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/bc0bc1bc683890419b9c7ce04ac2bfec6ba8ac50",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "c1dbed606943da521aa5ae25f1f266421ec0ff43cf1874d23710d8fd58ba505f",
+      "actual_bytes": 11539,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/godot-ui-audit-2026-10-02/REPORT.md",
+      "git_blob_sha": "1e86aa0f4f384cc9cd76034ac1f2d079e81c1bcd",
+      "bytes": 19514,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/godot-ui-audit-2026-10-02/REPORT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/1e86aa0f4f384cc9cd76034ac1f2d079e81c1bcd",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9ed363b94e61b629869e496fcd0c3e77bec408460c7a989d9206a647ab0de82d",
+      "actual_bytes": 19514,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/hud-audit-2026-10-02/HUD_REPORT.md",
+      "git_blob_sha": "d8c83e99c5e51b152e364697b0b2869ae59c98cb",
+      "bytes": 11456,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/hud-audit-2026-10-02/HUD_REPORT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/d8c83e99c5e51b152e364697b0b2869ae59c98cb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ea8d7960c34e5864e19579a7434fceeef13bfa62a403818dde72de5b176d72bb",
+      "actual_bytes": 11456,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/npc-f1100-acceptance-2026-09-26/runtime-log.txt",
+      "git_blob_sha": "f595cdbad8f80b5a205e86daeee641b5296109a8",
+      "bytes": 1503,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/npc-f1100-acceptance-2026-09-26/runtime-log.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/f595cdbad8f80b5a205e86daeee641b5296109a8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "8296d60fc2afb671bfa4db6b083d473bda43db89600173c87ef0ce7651536aa7",
+      "actual_bytes": 1503,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".artifacts/ui-acceptance-2026-09-24/SKILL_BOOK_ACCEPTANCE_2026-09-25.md",
+      "git_blob_sha": "e81313c05aa34aa2e92927d607e68205d3e8aad2",
+      "bytes": 9113,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.artifacts/ui-acceptance-2026-09-24/SKILL_BOOK_ACCEPTANCE_2026-09-25.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e81313c05aa34aa2e92927d607e68205d3e8aad2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "69b7f76f7d370e32663f92072b8e40b98bf5c5610322e50b05d8e0f19739a07a",
+      "actual_bytes": 9113,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": ".hermes/GOAL_GODOT_HUD_PARITY_2026-10-02.md",
+      "git_blob_sha": "f6c5d9b0bc9153bacd25a77815bf4ed99323fa9c",
+      "bytes": 3780,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/.hermes/GOAL_GODOT_HUD_PARITY_2026-10-02.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/f6c5d9b0bc9153bacd25a77815bf4ed99323fa9c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ec964b3726c88d8adadf703f4e7fa535caba521aa19c2ce9e9fa69c7cb7698e6",
+      "actual_bytes": 3780,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "AGENTS.md",
+      "git_blob_sha": "3d44abd1489abf2cac56eab2e2453b702c26a6f8",
+      "bytes": 18993,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/AGENTS.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/3d44abd1489abf2cac56eab2e2453b702c26a6f8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e2105e300516f60dce0d186237bb589c87f6cea37fba3629a521a43861104480",
+      "actual_bytes": 18993,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "ClientData/Magic.exp.txt",
+      "git_blob_sha": "c48320b0a63bf96630e2b9698f175b6fe64401e1",
+      "bytes": 18816,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/ClientData/Magic.exp.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c48320b0a63bf96630e2b9698f175b6fe64401e1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "5621df088490c7afda98a5055bca7b75f2b2b1da7449ff7f37fb410f8e66f62a",
+      "actual_bytes": 18816,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "ClientData/README.md",
+      "git_blob_sha": "cf67c03dd94bfe079023c7cc15c33c698f595900",
+      "bytes": 6520,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/ClientData/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/cf67c03dd94bfe079023c7cc15c33c698f595900",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e292203a41ed18a7473ba50c0cd2954cb635dc13cd414adc7af329bc22387d94",
+      "actual_bytes": 6520,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "ClientData/zh/README.md",
+      "git_blob_sha": "ef3825c3397676205108bc799f20eee73476c78f",
+      "bytes": 2728,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/ClientData/zh/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ef3825c3397676205108bc799f20eee73476c78f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "4a2b4a92be304dce0fe1220ad0f497a8e4d04571a2aa181b837126876ae62712",
+      "actual_bytes": 2728,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Config/ExperienceList.txt",
+      "git_blob_sha": "e570f7a0252e925cf2d64d8b58d72a2454e43d99",
+      "bytes": 2169,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Config/ExperienceList.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e570f7a0252e925cf2d64d8b58d72a2454e43d99",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9d6298ad542c99d0e8a28357da6781d1388e172e6c4c72858349e7aec782412c",
+      "actual_bytes": 2169,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/CONFIG_DIALOG_AUDIT_2026-08-20.md",
+      "git_blob_sha": "5a4de762b7d4bb7e38948a198a2bc68557023d78",
+      "bytes": 10897,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/CONFIG_DIALOG_AUDIT_2026-08-20.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/5a4de762b7d4bb7e38948a198a2bc68557023d78",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "b7d408d3c5364b3be10212723aedf98d0b95c8b9270357c8e0ba1b56d819b82f",
+      "actual_bytes": 10897,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/EI_Map_WIL_WIX_to_ZL_Conversion_Spec.md",
+      "git_blob_sha": "22449d582f099d7cfa5a1edeb23a5394cb0cc378",
+      "bytes": 11405,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/EI_Map_WIL_WIX_to_ZL_Conversion_Spec.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/22449d582f099d7cfa5a1edeb23a5394cb0cc378",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "d96ae1600e781d513163f508e021a4ee4de63feab08566e55ac0097f26c43318",
+      "actual_bytes": 11405,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/FIREBALL_ORIGIN_PARITY_2026-08-20.md",
+      "git_blob_sha": "d367d002a7538185fe95eb932e93c9cb3971d558",
+      "bytes": 4335,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/FIREBALL_ORIGIN_PARITY_2026-08-20.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/d367d002a7538185fe95eb932e93c9cb3971d558",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9307e036b297ad8c3efdef0544f240704a19a682d473e67980a2473c31ee2042",
+      "actual_bytes": 4335,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/LEGACY_LOGIN_BOOT_FLOW.md",
+      "git_blob_sha": "a39c3b689b43e137f4b790b9024975b2ab8cb5dd",
+      "bytes": 3663,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/LEGACY_LOGIN_BOOT_FLOW.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a39c3b689b43e137f4b790b9024975b2ab8cb5dd",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ec2ab0311c893cfd8dbf56a9c35ca8aebd690a708394edadfb5b31b9bb8cd2a4",
+      "actual_bytes": 3663,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/MANUAL_GAME_START_GUIDE.md",
+      "git_blob_sha": "12faca384c9a4cfc0dbed0dc472f23a680e6f916",
+      "bytes": 6049,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/MANUAL_GAME_START_GUIDE.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/12faca384c9a4cfc0dbed0dc472f23a680e6f916",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9a0298fffd343204f617076e716f4501159444b6c67a3bb9fae41fcbad225831",
+      "actual_bytes": 6049,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/SPELL_MOVEMENT_CONFLICT_AUDIT_2026-08-21.md",
+      "git_blob_sha": "dfc5b58b5ddc8790c8f7c8a8af12fa0c865a67c8",
+      "bytes": 9497,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/SPELL_MOVEMENT_CONFLICT_AUDIT_2026-08-21.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/dfc5b58b5ddc8790c8f7c8a8af12fa0c865a67c8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "178eec8837c2f0484e92daed38e876511fe6461462156dd53f171e2480e1b53f",
+      "actual_bytes": 9497,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/SPELL_PIPELINE_AUDIT_2026-08-21.md",
+      "git_blob_sha": "b90e931acea68f1a98e09d77954391532c58958b",
+      "bytes": 7943,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/SPELL_PIPELINE_AUDIT_2026-08-21.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b90e931acea68f1a98e09d77954391532c58958b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "18aaa33b9afaee98167dbd1407e5f85510ac9222d6a1e4ffb0d04352c06d322a",
+      "actual_bytes": 7943,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/movement_jitter_audit_2026-08-11.md",
+      "git_blob_sha": "3b6acfc5170e3d9b91676b618014b1ddbdaab401",
+      "bytes": 3970,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/movement_jitter_audit_2026-08-11.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/3b6acfc5170e3d9b91676b618014b1ddbdaab401",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "d7ae30c22212d368307937b331531a861ef2b1893647fcad99ccf9d34c1ed193",
+      "actual_bytes": 3970,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Docs/warrior_passive_skills_analysis.md",
+      "git_blob_sha": "d24d755cd452aed8a1001622025d570bbdb208c7",
+      "bytes": 13787,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Docs/warrior_passive_skills_analysis.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/d24d755cd452aed8a1001622025d570bbdb208c7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "24a7a6f9579acd441d315398c32fcb0d34649e775fe22e3afeddc9b0ff9e788d",
+      "actual_bytes": 13787,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "GodotClient/Fonts/third_party/fusion-pixel/LICENSES/ark-pixel-OFL.txt",
+      "git_blob_sha": "264873a297a50e965af4875a4aa552fe594dd731",
+      "bytes": 4412,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/GodotClient/Fonts/third_party/fusion-pixel/LICENSES/ark-pixel-OFL.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/264873a297a50e965af4875a4aa552fe594dd731",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "3ab41567e68e3988ba1ef16dd2644eca95ca5648ea12e7d46e6287fc0bbe5aee",
+      "actual_bytes": 4412,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "GodotClient/Fonts/third_party/fusion-pixel/LICENSES/cubic-11-OFL.txt",
+      "git_blob_sha": "4e863313ebd22ae0b44ea5f9538142b6b10e8f29",
+      "bytes": 5364,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/GodotClient/Fonts/third_party/fusion-pixel/LICENSES/cubic-11-OFL.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/4e863313ebd22ae0b44ea5f9538142b6b10e8f29",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2b6e5938e5cffa0b9e183bd05f8c363e174e7ebed1a0556e2855fd1707fa2188",
+      "actual_bytes": 5364,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "GodotClient/Fonts/third_party/fusion-pixel/LICENSES/galmuri-LICENSE.txt",
+      "git_blob_sha": "ae34182f091c835710bef170e50059794377e3c4",
+      "bytes": 4360,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/GodotClient/Fonts/third_party/fusion-pixel/LICENSES/galmuri-LICENSE.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ae34182f091c835710bef170e50059794377e3c4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "86a3ee9495f942f0243f18c103da9faca27adb88142613edb8bb852e56c892c1",
+      "actual_bytes": 4360,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "GodotClient/Fonts/third_party/fusion-pixel/OFL.txt",
+      "git_blob_sha": "0427d1db87f97040016b5954b4892790878beeaa",
+      "bytes": 4418,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/GodotClient/Fonts/third_party/fusion-pixel/OFL.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/0427d1db87f97040016b5954b4892790878beeaa",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "bc518cf64b8032c07690f33cc270c35c179255a6ac8efa7c165ebae7e8f76a63",
+      "actual_bytes": 4418,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "README.ja-JP.md",
+      "git_blob_sha": "39fbc1879e02e3e80449aef395f0c5324185ef74",
+      "bytes": 4436,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/README.ja-JP.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/39fbc1879e02e3e80449aef395f0c5324185ef74",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "08359afa5428a1ba04fc26b7d3b94b33ba67d11cf488d727c444251da53d3804",
+      "actual_bytes": 4436,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "README.md",
+      "git_blob_sha": "236165b5b45addb2d0092b83334d491736fea783",
+      "bytes": 5924,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/236165b5b45addb2d0092b83334d491736fea783",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2954928d6ab4282ad7d67715d822daa95f4490fd8a3df6afa4cfe172d8121d50",
+      "actual_bytes": 5924,
+      "git_blob_verified": true,
+      "hits": [],
+      "opening_excerpt": "# Zircon-Godot — Legend of Mir 3\n\n[简体中文](README.zh-CN.md) · [日本語](README.ja-JP.md)\n\nZircon-Godot is a cross-platform Legend of Mir 3 client and server project. It preserves the original C# server rules and protocol stack while rebuilding the client with Godot/C#.\n\nThis repository is a fork of [Suprcode/Zircon](https://github.com/Suprcode/Zircon). The current direction is a Godot client connected to the original-compatible server, with local development first and remote/Web support following.\n\n## Current status\n\n`ServerCore` runs headlessly on Linux and listens on TCP port `7000`. `GodotClient` can connect, log in, select a character, enter the world, load original `.Zl` libraries and `.map` files, and render maps, objects, movement, combat, NPCs, companions, inventory, skills, lighting, weather, and the main UI. Client parity work is ongoing.\n\n| Area | Status |\n|---|---|\n| Linux server (`ServerLibrary`, `LibraryCore`, `ServerCore`) | Working and maintained |\n| Login, character selection, and entering the game | Working |\n| Godot map and `.Zl` rendering | Working; parity work continues |\n| Movement, combat, NPCs, companions, inventory, and skills | Integrated and being refined |\n| Remote server operation | Supported; validate the endpoint first |\n| Web client | Prototype and research work in Mir3-Research |\n\n## Architecture\n\n```text\n                    TCP 7000\n┌─────────────────┐  packets  ┌────────────────────────┐\n│ ServerCore      │◄──────────►│ GodotClient            │\n│ rules, accounts,│            │ rendering, input, UI,  │\n│ maps, combat    │            │ resource loading       │\n└─────────────────┘            └────────────────────────┘\n```\n\n`ServerLibrary/` owns game rules and world state. `LibraryCore/` provides shared models, packet serialization, and TCP connection code. `GodotClient/` owns rendering, input, UI, and client-side resource loading. `Client/` and `RenderingCore/` remain legacy reference implementations.\n",
+      "excerpt_note": "Opening purpose/architecture excerpt only; full content was searched and hashed. Runtime location details not copied."
+    },
+    {
+      "path": "README.zh-CN.md",
+      "git_blob_sha": "37c730f7bd6968b54f75b8dfecd9d9f51743c735",
+      "bytes": 3444,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/README.zh-CN.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/37c730f7bd6968b54f75b8dfecd9d9f51743c735",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "18e762569960b3d9ea70b566165a1804834f9f1023b7176eafe0e2d7cdf76ece",
+      "actual_bytes": 3444,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "ServerLibrary/Resources/BuyGameGold.txt",
+      "git_blob_sha": "2805472af2f4955c7cffd100b576df1b1fe7c5cd",
+      "bytes": 1457,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/ServerLibrary/Resources/BuyGameGold.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/2805472af2f4955c7cffd100b576df1b1fe7c5cd",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "a59f26456c89fee53887f9ac5542c0551852e02fa6cd24514d78cb73253f07bf",
+      "actual_bytes": 1457,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "ServerLibrary/Resources/CharacterNotFound.txt",
+      "git_blob_sha": "0cd355e4b77d9c1188fec5332d30ef9bd7495a92",
+      "bytes": 74,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/ServerLibrary/Resources/CharacterNotFound.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/0cd355e4b77d9c1188fec5332d30ef9bd7495a92",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2014193c6974eb5139eecb6ea5103d7fea8c7b50d1bff138ca834065ca2618a5",
+      "actual_bytes": 74,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Tests/GroundLootChecks/README.md",
+      "git_blob_sha": "45f9abaf6c05dbfef16d50d188a9167cb56dc201",
+      "bytes": 6928,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Tests/GroundLootChecks/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/45f9abaf6c05dbfef16d50d188a9167cb56dc201",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "d6b0f14efedd42ca9c95923f2fe70c4522f5c1bf384d8d071c1f5abaaedb6b30",
+      "actual_bytes": 6928,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Tools/LabelRenderingChecks/README.md",
+      "git_blob_sha": "cb9c781168fef53833ee3bf3cbd02a729fb6f59f",
+      "bytes": 614,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Tools/LabelRenderingChecks/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/cb9c781168fef53833ee3bf3cbd02a729fb6f59f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "54a457d49e65ea0090b455e4495882c44fb3821c742067b8f086f239f0b5a30f",
+      "actual_bytes": 614,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "Tools/LegacyUiEditor/README.md",
+      "git_blob_sha": "14b710e1b8d731593c36e6bbad330333a8e44694",
+      "bytes": 906,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/Tools/LegacyUiEditor/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/14b710e1b8d731593c36e6bbad330333a8e44694",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2877ceb274b5d53151d59277679a4a353de49b43e4bb58b9990144635067b98a",
+      "actual_bytes": 906,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/ARCHIVED_ASSETS_MANIFEST.md",
+      "git_blob_sha": "c520513a27439d2d7db89611f24f8abd927be760",
+      "bytes": 4975,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/ARCHIVED_ASSETS_MANIFEST.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c520513a27439d2d7db89611f24f8abd927be760",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1938d68b3fc506d669a97b88ce1a17aa3fb91d4183d381aba14554296568c923",
+      "actual_bytes": 4975,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/BGM_AUDIT_AND_BACKFILL_2026-08-13.md",
+      "git_blob_sha": "730699cc1f2f3180894aea0b308c87b62de5e85c",
+      "bytes": 7065,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/BGM_AUDIT_AND_BACKFILL_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/730699cc1f2f3180894aea0b308c87b62de5e85c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f1bce7f9a3573324e6b14ebe2cc7617b8ec140a1cdd6a9dc4379c29ac733b8b5",
+      "actual_bytes": 7065,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/BOT_BEHAVIOR_GOAL.md",
+      "git_blob_sha": "6187081594dcd9f7aeab52164a902bfa58dad4c9",
+      "bytes": 11200,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/BOT_BEHAVIOR_GOAL.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/6187081594dcd9f7aeab52164a902bfa58dad4c9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1f464925f0144b1c6249fe81eafcd5ee4f9b16d814a46d57448f770d4e16eaac",
+      "actual_bytes": 11200,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/BOT_BEHAVIOR_SYSTEM.md",
+      "git_blob_sha": "8f3762453b41559c80ff0a5e16dbd61a41365111",
+      "bytes": 6029,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/BOT_BEHAVIOR_SYSTEM.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/8f3762453b41559c80ff0a5e16dbd61a41365111",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "5d57ede9cf67724dbd70447ac4a7d87464c4541929f86e71330946d9b853ef84",
+      "actual_bytes": 6029,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CANONICAL_EXAMPLES.md",
+      "git_blob_sha": "89fa240e6f7a1afe0f1fd92e7946d989d6602b92",
+      "bytes": 7573,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CANONICAL_EXAMPLES.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/89fa240e6f7a1afe0f1fd92e7946d989d6602b92",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "c0667bfa8eca95f7d690568717b9c49a3bd7feaba0b5c2cb4b1dae462b237263",
+      "actual_bytes": 7573,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CHATBOX_PARITY_FIX_2026-08-13.md",
+      "git_blob_sha": "1665502cde2cb6e2d01fd7893f3f2450fbb4f032",
+      "bytes": 4427,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CHATBOX_PARITY_FIX_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/1665502cde2cb6e2d01fd7893f3f2450fbb4f032",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2069407d367160def75ebf0a9ac6cf1c013cbfe8e2113b49a069930300296255",
+      "actual_bytes": 4427,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CLIENT_RUNTIME.md",
+      "git_blob_sha": "d4a57a4bb443fc9b8cc0ba3de1b457b0862f9588",
+      "bytes": 6785,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CLIENT_RUNTIME.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/d4a57a4bb443fc9b8cc0ba3de1b457b0862f9588",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e7111a0c83b1f0f8b10b80088f7213388ee939e5c695d891826891d3ebbadfb4",
+      "actual_bytes": 6785,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CLIENT_SLIMMING_ANALYSIS_AND_PLAN.md",
+      "git_blob_sha": "50d8b5ccf6ffd58a6d3e4381d352e60f04aff52e",
+      "bytes": 3501,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CLIENT_SLIMMING_ANALYSIS_AND_PLAN.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/50d8b5ccf6ffd58a6d3e4381d352e60f04aff52e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "35682624d17f50227732520f61cad6ca6f713f6e4a63b4646afa5f48844ce835",
+      "actual_bytes": 3501,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CLIENT_UI.md",
+      "git_blob_sha": "a898df1cbbcbaff6c4c8fed93989259ed4a521e7",
+      "bytes": 5766,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CLIENT_UI.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a898df1cbbcbaff6c4c8fed93989259ed4a521e7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "3f6c5030ff281af64789ac79a00cd05118d97baa9991fdf4d07af87e86db6f9c",
+      "actual_bytes": 5766,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CLIENT_WORLD_UI_SCALING.md",
+      "git_blob_sha": "b0bbd614db09893eb3db439e5db47a0135149a96",
+      "bytes": 5969,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CLIENT_WORLD_UI_SCALING.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b0bbd614db09893eb3db439e5db47a0135149a96",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "cf570ecd55d79a2cbbc67f764ec317762859e42ab0e5ca4876d950158e7caf9c",
+      "actual_bytes": 5969,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CONFIG_DIALOG_AUDIT_2026-08-13.md",
+      "git_blob_sha": "8110be0280ee22f5046c0b308dc576250310e0e7",
+      "bytes": 14683,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CONFIG_DIALOG_AUDIT_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/8110be0280ee22f5046c0b308dc576250310e0e7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "dda76a58110148dc7f40df8b9fb7791502db36c74721d1394ed7e78bed1975ab",
+      "actual_bytes": 14683,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/CONTENT_AND_EDITORS.md",
+      "git_blob_sha": "e58b036486bc5695bbe009996b732d1aa1bcfb91",
+      "bytes": 5078,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/CONTENT_AND_EDITORS.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e58b036486bc5695bbe009996b732d1aa1bcfb91",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2fb60f378a5a90df390119df3cb11128556fa26c0519a8927f872ff7dfba6b54",
+      "actual_bytes": 5078,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/DATABASE_CLASSIC_PURITY_CLEANUP_PLAN.md",
+      "git_blob_sha": "5e97ea52d11c15c7742a25ec56b4db89908ca561",
+      "bytes": 5144,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/DATABASE_CLASSIC_PURITY_CLEANUP_PLAN.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/5e97ea52d11c15c7742a25ec56b4db89908ca561",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "69aa9360839168c2101c188ccc764ac0e0efc9572f61b75a5cd43974ae90653e",
+      "actual_bytes": 5144,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/DATA_MODEL.md",
+      "git_blob_sha": "782749dcac1f4760186cb88dbb7b7a16aa479a14",
+      "bytes": 9846,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/DATA_MODEL.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/782749dcac1f4760186cb88dbb7b7a16aa479a14",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "32091a311919fa860a428e9e5907f250dbcdffbd0b720dda25f8407f3bf3651f",
+      "actual_bytes": 9846,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_ALIGNMENT_2026-08-11.md",
+      "git_blob_sha": "16114ab9959256e3bebb971f7d5439b75f1d5a60",
+      "bytes": 9589,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_ALIGNMENT_2026-08-11.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/16114ab9959256e3bebb971f7d5439b75f1d5a60",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "074e5aaa90ea13e89e0102b2551a4cec9df490de56f05810f99508c11841ba6e",
+      "actual_bytes": 9589,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_CHARACTER_CREATE_PARITY_2026-09-28.md",
+      "git_blob_sha": "46c5d39a6638a6e3188ee224eeb8b58141940108",
+      "bytes": 27469,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_CHARACTER_CREATE_PARITY_2026-09-28.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/46c5d39a6638a6e3188ee224eeb8b58141940108",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0840307d375ab941afc0f05da1b8367d5955ddd29043a1584a51bae6c243aca7",
+      "actual_bytes": 27469,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_CHARACTER_CREATE_TEXT_AUDIO_FIX_2026-09-29.md",
+      "git_blob_sha": "9be1528487c89addec3eea0ac8808f7c5f4e29e4",
+      "bytes": 14422,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_CHARACTER_CREATE_TEXT_AUDIO_FIX_2026-09-29.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/9be1528487c89addec3eea0ac8808f7c5f4e29e4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "8de34f8b9fda38a637160005afeabf7cebaccf02be9742a34513c03de759da55",
+      "actual_bytes": 14422,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_CHARACTER_SELECT_ANIMATION_PARITY_2026-09.md",
+      "git_blob_sha": "12a444c9a004de399e53c0730972d08078166851",
+      "bytes": 38854,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_CHARACTER_SELECT_ANIMATION_PARITY_2026-09.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/12a444c9a004de399e53c0730972d08078166851",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "bcc5121fb477995f703a97276a52bc5ecca0052a1a5017972d4083b64e733527",
+      "actual_bytes": 38854,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_HUD_CHAT_PARITY_REPORT_2026-09-29.md",
+      "git_blob_sha": "99078f84ec2fe6c6ad3a2277ceaef741714b4994",
+      "bytes": 20077,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_HUD_CHAT_PARITY_REPORT_2026-09-29.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/99078f84ec2fe6c6ad3a2277ceaef741714b4994",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "20ed85180f1c0295abce5e75cd79801eb9f39099eb4486705c87a0639e3e3195",
+      "actual_bytes": 20077,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_LOGIN_CHARACTER_FLOW_REVIEW_2026-09-29.md",
+      "git_blob_sha": "a6d0031e3692cec0b00b0e12114237076d5a5b5a",
+      "bytes": 18979,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_LOGIN_CHARACTER_FLOW_REVIEW_2026-09-29.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a6d0031e3692cec0b00b0e12114237076d5a5b5a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "fdf628828398da827e0f3ee05f202a696933000a0e0d6a3eaf82197cd08fa5a8",
+      "actual_bytes": 18979,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_LOGIN_CHARACTER_FLOW_REVIEW_2026-09-30.md",
+      "git_blob_sha": "7bd9dd74f7bd50ff852d120d91083569452c437d",
+      "bytes": 25570,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_LOGIN_CHARACTER_FLOW_REVIEW_2026-09-30.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/7bd9dd74f7bd50ff852d120d91083569452c437d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "382b9790e58cad2843edd0a488353f2d2fcc9e053b55abc235766b8a905087bf",
+      "actual_bytes": 25570,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/EI_SKILLBOOK_TAB_HIGHLIGHT_FIX_2026-10-02.md",
+      "git_blob_sha": "d0734a4cc6ee74357eed056b62997155b970b027",
+      "bytes": 4740,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/EI_SKILLBOOK_TAB_HIGHLIGHT_FIX_2026-10-02.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/d0734a4cc6ee74357eed056b62997155b970b027",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "7d55a2d15362a54df62d92d38b9137ef7e5cd1b8a8f345468aa33a9943c700c4",
+      "actual_bytes": 4740,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/FEATURE_CHANGE_GUIDE.md",
+      "git_blob_sha": "067edb1538162b0a7d4ea004ec190c571ba1bca9",
+      "bytes": 20749,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/FEATURE_CHANGE_GUIDE.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/067edb1538162b0a7d4ea004ec190c571ba1bca9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "13c553eb3212c901ab5c2cfa0f5e4d1c99edfba36c229bb68cbfb90d3b464dff",
+      "actual_bytes": 20749,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/FEATURE_SCOPE_AND_TASK_LIST_2026-09-22.md",
+      "git_blob_sha": "58e8f7304e27d10febbecc08503ba0e61f650f6e",
+      "bytes": 3914,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/FEATURE_SCOPE_AND_TASK_LIST_2026-09-22.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/58e8f7304e27d10febbecc08503ba0e61f650f6e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "eb49f745d8c6b87135b3aacc74bfca98bace79159dbaf667cb97c9227f80aad2",
+      "actual_bytes": 3914,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/GAMEPLAY_SYSTEMS.md",
+      "git_blob_sha": "311f6052c7321eef7dd17609b1d9ce9ffbd10e8f",
+      "bytes": 6451,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/GAMEPLAY_SYSTEMS.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/311f6052c7321eef7dd17609b1d9ce9ffbd10e8f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "459e9ca80af8913d3608c94fd71340d54ce3cf9523ab62c9ef9f002801ae53da",
+      "actual_bytes": 6451,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/GEMINI_UI_VERIFICATION_2026-09-24.md",
+      "git_blob_sha": "a3c5a762ddc11f1d7befd635c8197edb828dc651",
+      "bytes": 7723,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/GEMINI_UI_VERIFICATION_2026-09-24.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a3c5a762ddc11f1d7befd635c8197edb828dc651",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "8e648ed863c8c6ef9586be23dbb1f34a8e546c0e5affb3c9921a28b2daacfff0",
+      "actual_bytes": 7723,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/GOAL_LEGACY_EI_LOGIN_CHARACTER_FLOW_PARITY.md",
+      "git_blob_sha": "fffc49d85069b9f3418352cfa36787cf73d05377",
+      "bytes": 12869,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/GOAL_LEGACY_EI_LOGIN_CHARACTER_FLOW_PARITY.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/fffc49d85069b9f3418352cfa36787cf73d05377",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e0ac03a363e61aff23707243274d40d5f946d87972af88cf0ba2c3d067ee2ceb",
+      "actual_bytes": 12869,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/GOAL_OPENCODE_EI_HUD_CHAT_PARITY.md",
+      "git_blob_sha": "0909383a6896793f563261f4699f4bf19fec3ff8",
+      "bytes": 8727,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/GOAL_OPENCODE_EI_HUD_CHAT_PARITY.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/0909383a6896793f563261f4699f4bf19fec3ff8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0494220b71503deca9845638bc7a951de5fe12e6134fed974e7212eb3108dc74",
+      "actual_bytes": 8727,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/GOAL_OPENCODE_EI_LOGIN_CHARACTER_FLOW_REVIEW.md",
+      "git_blob_sha": "dfc45777873d1c86c8ebf7847967b7a9e4aa9947",
+      "bytes": 8234,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/GOAL_OPENCODE_EI_LOGIN_CHARACTER_FLOW_REVIEW.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/dfc45777873d1c86c8ebf7847967b7a9e4aa9947",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "60ae5993503c8f401ebc7c634b29d9a934d4049e25cca235485c55aacd6d2970",
+      "actual_bytes": 8234,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/ITEM_DROP_AND_NPC_ASSOCIATION_ARCHITECTURE.md",
+      "git_blob_sha": "59fcea6e9fc0009201772ec6b5a094d4d62aded3",
+      "bytes": 10132,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/ITEM_DROP_AND_NPC_ASSOCIATION_ARCHITECTURE.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/59fcea6e9fc0009201772ec6b5a094d4d62aded3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ee579862fcaabbe5f0cfcda7b28262c6e52a0136af20444901df0a8cf678c3db",
+      "actual_bytes": 10132,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_DIALOG_MIGRATION_SUMMARY.md",
+      "git_blob_sha": "b168e778c33523323ed8b8674c5b8a91e26467ef",
+      "bytes": 17513,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_DIALOG_MIGRATION_SUMMARY.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b168e778c33523323ed8b8674c5b8a91e26467ef",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "8ab421f599630eedcb1454c6f1e1546bacbbdea700e51531d2d533ee3a41b639",
+      "actual_bytes": 17513,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_DIALOG_PARITY_AUDIT.md",
+      "git_blob_sha": "54f50fdee852ffe9c363db8edd3c898f8286165d",
+      "bytes": 15316,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_DIALOG_PARITY_AUDIT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/54f50fdee852ffe9c363db8edd3c898f8286165d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f727862f241d8a0cc0a983c2e44ec529e70fe8fa44f4f82eb8541f7bddf097a4",
+      "actual_bytes": 15316,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_DIALOG_TEST_REPORT.md",
+      "git_blob_sha": "c18100f5296a015ad5f218fd5d4e14af9e9bf706",
+      "bytes": 8749,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_DIALOG_TEST_REPORT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c18100f5296a015ad5f218fd5d4e14af9e9bf706",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "634c0f524608ab0ee06feb2a4d356e91f37590fadf1ba765f9c5ec85e1ed35b5",
+      "actual_bytes": 8749,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_EFFECT_TRANSPARENCY_INVESTIGATION.md",
+      "git_blob_sha": "601b8badd942e49766dadb11148cf62e4b55abf4",
+      "bytes": 12191,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_EFFECT_TRANSPARENCY_INVESTIGATION.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/601b8badd942e49766dadb11148cf62e4b55abf4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "63574e6e362d6cd19d47cd4582dc29b40bbbf2b6c11590d16f04c00ffff67ae5",
+      "actual_bytes": 12191,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_EI_UI_AUDIT_2026-09-23.md",
+      "git_blob_sha": "0a6ef924b4e7d229ba95ba449c0315a7ee0228ea",
+      "bytes": 929485,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_EI_UI_AUDIT_2026-09-23.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/0a6ef924b4e7d229ba95ba449c0315a7ee0228ea",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "dcdd415f662913dadf16404d91d04a0b413ab4108780b6dc52d52c709cec478b",
+      "actual_bytes": 929485,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_HUD_ACCEPTANCE_2026-09-24.md",
+      "git_blob_sha": "ef822307211f4aaeaf791bc2ee4290a804870e19",
+      "bytes": 3826,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_HUD_ACCEPTANCE_2026-09-24.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ef822307211f4aaeaf791bc2ee4290a804870e19",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9d39fd0e28c379c3cb8afc14a2b8286d52b35ca504ac0a5c227b1b643b304b36",
+      "actual_bytes": 3826,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_HUD_LAYOUT_LAB.md",
+      "git_blob_sha": "b81deac7f39bc3a3453b44f51902fa04aa7d3b1b",
+      "bytes": 1175,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_HUD_LAYOUT_LAB.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b81deac7f39bc3a3453b44f51902fa04aa7d3b1b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "66624bd115b9363983a8cf790b8fd16a750ce45d06e46c862780d9d068c7d98c",
+      "actual_bytes": 1175,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_HUD_PRODUCTION_MIGRATION_PLAN.md",
+      "git_blob_sha": "4912a129ae7a02524ff627d61b0ac4e64b79e821",
+      "bytes": 6962,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_HUD_PRODUCTION_MIGRATION_PLAN.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/4912a129ae7a02524ff627d61b0ac4e64b79e821",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2b63471159bfebe2dd6bf8f414ef6dbe7b2e2b30967ac52d9df8f48fabb3222e",
+      "actual_bytes": 6962,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_ITEM_GRID_AND_TEXTURE_ARCHITECTURE.md",
+      "git_blob_sha": "da5bb4fa0c55c726c1e9306288b593bc7d4cdc27",
+      "bytes": 6419,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_ITEM_GRID_AND_TEXTURE_ARCHITECTURE.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/da5bb4fa0c55c726c1e9306288b593bc7d4cdc27",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9a32fcee09342dbbc9887f0be6d3d1bb712ca102af2bebda9650f23abbfb9d02",
+      "actual_bytes": 6419,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_UI_DEFAULT_CHANGE_2026-09-28.md",
+      "git_blob_sha": "7e1875bf74b7184fe1c5de2923a0cd68fd8ad1af",
+      "bytes": 2073,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_UI_DEFAULT_CHANGE_2026-09-28.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/7e1875bf74b7184fe1c5de2923a0cd68fd8ad1af",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "c33e2fca96fa58c27ac61e652796373a97f1de5efa1763be8146eb5cb2ab5dc8",
+      "actual_bytes": 2073,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_UI_MIGRATION_LOG_2026-09-22.md",
+      "git_blob_sha": "bf3ae4a5f3ee25694e80ebd7d65147c6469c20fd",
+      "bytes": 4203,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_UI_MIGRATION_LOG_2026-09-22.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/bf3ae4a5f3ee25694e80ebd7d65147c6469c20fd",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "bd2849e9f7c4704dd5025f7b7f4c5d3d381334421b6f8de0ccfc4dd36c9a6fa4",
+      "actual_bytes": 4203,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_UI_MIGRATION_PLAN_2026-09-22.md",
+      "git_blob_sha": "4bdaa04a9326b8e75f8e63616e847013f415ef41",
+      "bytes": 3551,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_UI_MIGRATION_PLAN_2026-09-22.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/4bdaa04a9326b8e75f8e63616e847013f415ef41",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "30201233d45d449be38910859dd236ec22b969a4ede0be127c6b313440e22978",
+      "actual_bytes": 3551,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_UI_PARITY_AUDIT_2026-09-22.md",
+      "git_blob_sha": "c8175d93ebbcb7865b91f906327927b704606924",
+      "bytes": 2361,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_UI_PARITY_AUDIT_2026-09-22.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c8175d93ebbcb7865b91f906327927b704606924",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "a79999d3e83f1e0c89317afae2629aa44dd2ac7e0a57c5694a486b7b22e9aa50",
+      "actual_bytes": 2361,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LEGACY_UI_PROGRESS_2026-09-25.md",
+      "git_blob_sha": "ae0fc6bf78ed53e6c6c26efe0931880ab633bd51",
+      "bytes": 15023,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LEGACY_UI_PROGRESS_2026-09-25.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ae0fc6bf78ed53e6c6c26efe0931880ab633bd51",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "009d5b097f4a66dee94e0bfb5f91341e237bf5739f313d66cea91a87b52b3cdb",
+      "actual_bytes": 15023,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/LOCAL_TOOL_SERVICES_STATUS_2026-09-23.md",
+      "git_blob_sha": "73aef21a995f8c0854fed4a9dcdbd0cb4d1c2bfb",
+      "bytes": 2509,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/LOCAL_TOOL_SERVICES_STATUS_2026-09-23.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/73aef21a995f8c0854fed4a9dcdbd0cb4d1c2bfb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "61d138c3930d12ebda0abc5c726b85ee7b546cdd43e8f9efa13f9410b60d0e18",
+      "actual_bytes": 2509,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/MAGIC_FULL_AUDIT.md",
+      "git_blob_sha": "687b1cf8ad3ac6ad3daabcc450dd2d4e8957bc53",
+      "bytes": 4067,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/MAGIC_FULL_AUDIT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/687b1cf8ad3ac6ad3daabcc450dd2d4e8957bc53",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "94ac99ec0fe056807e913229aac7c32e6495b4e90512fee255fa5033947e94cf",
+      "actual_bytes": 4067,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/MAGIC_GROUND_EFFECT_FIXES.md",
+      "git_blob_sha": "605f3bcbbc903ddb35040891fe5668846b7b3fa5",
+      "bytes": 4712,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/MAGIC_GROUND_EFFECT_FIXES.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/605f3bcbbc903ddb35040891fe5668846b7b3fa5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "677ae11c7d905fa1d918f9183a64d84f9214fcbbcad778988a7678d0e3a7cd82",
+      "actual_bytes": 4712,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/MAGIC_PARTICLE_TRAIL_MIGRATION.md",
+      "git_blob_sha": "d7e500abf459dedd8e4f0ab8d3be30f36aa01c63",
+      "bytes": 23646,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/MAGIC_PARTICLE_TRAIL_MIGRATION.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/d7e500abf459dedd8e4f0ab8d3be30f36aa01c63",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9c54afc4646ef6fa841184009f91026fe2bef3d380578ac221382fce9a20a086",
+      "actual_bytes": 23646,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/MAP_FORMAT_COMPARISON.md",
+      "git_blob_sha": "78e8fa3772963df7993ae9d84503531bba6bebbc",
+      "bytes": 7678,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/MAP_FORMAT_COMPARISON.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/78e8fa3772963df7993ae9d84503531bba6bebbc",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "6d75605ef81f452b52dbc81a31c0fc597b328be60cbae1b703710e66786f1795",
+      "actual_bytes": 7678,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/MINE_MAP_COMPARISON.md",
+      "git_blob_sha": "42d68fec66fbbbf7d52524f1435b65357e4644c9",
+      "bytes": 4455,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/MINE_MAP_COMPARISON.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/42d68fec66fbbbf7d52524f1435b65357e4644c9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e776200aaaff973b666e195ae550dd497369ede34a61e7433732fc36a91b88a0",
+      "actual_bytes": 4455,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/MINIMAP_EI_MIGRATION.md",
+      "git_blob_sha": "92069ba40e4bef8963a6453b560a25fbf7f8b707",
+      "bytes": 12962,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/MINIMAP_EI_MIGRATION.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/92069ba40e4bef8963a6453b560a25fbf7f8b707",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2ba5f158b0b60221bf21d9dedf00cdf486518b33749231d9a26e12c476cb7a49",
+      "actual_bytes": 12962,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/MONSTER_DIALOG_PARITY_2026-08-13.md",
+      "git_blob_sha": "9f303f4c52e23caa99561a275716ced964ab8628",
+      "bytes": 4919,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/MONSTER_DIALOG_PARITY_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/9f303f4c52e23caa99561a275716ced964ab8628",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f37780b022b7ac0b4cb6008a0b4220452611bb256f56a92b058a95bae51e10ad",
+      "actual_bytes": 4919,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/NETWORKING.md",
+      "git_blob_sha": "1af5749c8e55b03ca653eb61f9166d36854da3ae",
+      "bytes": 8424,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/NETWORKING.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/1af5749c8e55b03ca653eb61f9166d36854da3ae",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "fb84d1dbf0f224b289c24a5911f2fd568a4769571f05b373eff487917bee3156",
+      "actual_bytes": 8424,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/PLUGINS.md",
+      "git_blob_sha": "e51bac541c9f7a514d323424541ba07a7635ef0c",
+      "bytes": 3174,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/PLUGINS.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e51bac541c9f7a514d323424541ba07a7635ef0c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "13af35f09276a60e8f8a8f7fa8d6392de03c59ca4550b21d5fb93ded70111bf9",
+      "actual_bytes": 3174,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/PROJECT_MAP.md",
+      "git_blob_sha": "0399b744c6ab8f2254eb7651c075b91ccb847e97",
+      "bytes": 5089,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/PROJECT_MAP.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/0399b744c6ab8f2254eb7651c075b91ccb847e97",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e5643431844dd0dc9658d47cd9e47cd1c09f500c7908e4f3d0a48395d19390ab",
+      "actual_bytes": 5089,
+      "git_blob_verified": true,
+      "hits": [],
+      "opening_excerpt": "# Project map\n\nAuthority: `Zircon Server.sln`, each named project's `.csproj`, and its `Program.cs` where executable. Main projects target .NET 10; Windows applications/rendering/plugin contracts use `net10.0-windows8.0`, while LibraryCore, ServerLibrary and ServerCore use `net10.0`.\n\n## Direct project dependencies\n\nArrow means **references**, not data flow. These are the actual `ProjectReference` edges:\n\n```text\nClient ----------> LibraryCore, RenderingCore\nServer ----------> LibraryCore, ServerLibrary, PluginCore, RenderingCore\nServerCore ------> LibraryCore, ServerLibrary\nServerLibrary ---> LibraryCore\nPluginCore ------> LibraryCore\nPluginStandalone -> PluginCore\nLibraryEditor ---> RenderingCore\nPatchManager ----> LibraryCore\nRenderingCacheChecks -> RenderingCore\nLabelRenderingChecks -> Client\nLibraryCore, RenderingCore, ImageManager, Launcher, Patcher: no ProjectReference\n```\n\nLauncher compiles linked `LibraryCore/ConfigReader.cs` and `LibraryCore/Time.cs`; this is a source dependency despite having no project reference. GroundLootChecks similarly links selected client source files. Package/binary references remain separate from this graph.\n\n## Projects and entry points\n\n| Project / output | Responsibilities and first files | Direct consumers |\n| --- | --- | --- |\n| LibraryCore / library | `LibraryCore/Globals.cs` transfer structures and registries; `SystemModels` definitions; `Network`; `MirDB`; `Enum.cs`, `Stat.cs`, `FrameSet.cs`, `ConfigReader.cs` | Client, Server, ServerCore, ServerLibrary, PluginCore, PatchManager |\n| ServerLibrary / library | `Envir/SEnvir.cs`, `SConnection.cs`; `Models` simulation, `Models/Magics`, `Models/Monsters`; `DBModels`; configuration/commands/events | Server, ServerCore |\n| Server / WinExe | `Program.Main → SMain`; `Views` edits system and user data, diagnostics, map viewing; `Helpers` supports content operations | Operator application |\n| ServerCore / Exe | `Program.Main` loads configuration/encryption, starts SEnvir and handles console cancellation | Console host |\n| Client / WinExe (`Zircon`) | `Program.Main → TargetForm`, graphics initialization/message loop; `Envir`, `Models`, `Scenes`, `Controls`, `UserModels` | Player application |\n| RenderingCore / library | `Rendering/IRenderingPipeline.cs`, `RenderingPipelineManager.cs`, backend directories; `Library/MirLibrary.cs`, `LibraryFormat` | Client, Server, LibraryEdito"
+    },
+    {
+      "path": "docs/README.md",
+      "git_blob_sha": "dc9b9b59fd8f2b5e006c78edc89d257129f8e766",
+      "bytes": 1330,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/dc9b9b59fd8f2b5e006c78edc89d257129f8e766",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "d1511d59d2b7fb1e137e4ad133a7dc951e3f8ff40db644b6407d50b3484834e9",
+      "actual_bytes": 1330,
+      "git_blob_verified": true,
+      "hits": [],
+      "opening_excerpt": "# AI source navigation\n\nRead [AGENTS](../AGENTS.md) first, then one router → one detailed section → initially 2–6 source files. This table is a menu, not a reading list. Paths are repository-relative; `File.cs: Method` is a search anchor. Source wins.\n\n| Need | Read |\n| --- | --- |\n| Where to start from a request | [TASK_ROUTER](TASK_ROUTER.md) |\n| Project / dependency | [PROJECT_MAP](PROJECT_MAP.md) |\n| Build / test / manual validation after a change | [VERIFICATION](VERIFICATION.md) |\n| Gameplay feature | [GAMEPLAY_SYSTEMS](GAMEPLAY_SYSTEMS.md) → one of six family guides |\n| Cross-project change | [FEATURE_CHANGE_GUIDE](FEATURE_CHANGE_GUIDE.md) |\n| Representative implementation | [CANONICAL_EXAMPLES](CANONICAL_EXAMPLES.md) |\n| Packets | [NETWORKING](NETWORKING.md) |\n| Definitions / MirDB | [DATA_MODEL](DATA_MODEL.md) |\n| Server simulation | [SERVER_RUNTIME](SERVER_RUNTIME.md) |\n| Client gameplay | [CLIENT_RUNTIME](CLIENT_RUNTIME.md) |\n| Dialogs / controls | [CLIENT_UI](CLIENT_UI.md) |\n| Graphics / assets | [RENDERING_AND_ASSETS](RENDERING_AND_ASSETS.md) |\n| Content tools | [CONTENT_AND_EDITORS](CONTENT_AND_EDITORS.md) |\n| Editor plugins | [PLUGINS](PLUGINS.md) |\n\nCurrent rendering ownership and historical-proposal status: [RENDERING_AND_ASSETS](RENDERING_AND_ASSETS.md#migration-context-and-checks).\n"
+    },
+    {
+      "path": "docs/REMOTE_SERVER_AND_CLIENT_SETUP.md",
+      "git_blob_sha": "95c9294b5907d0f5348c7f2ec87043d62b628624",
+      "bytes": 23241,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/REMOTE_SERVER_AND_CLIENT_SETUP.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/95c9294b5907d0f5348c7f2ec87043d62b628624",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0d6540e4e0a4456aca6dfc2254daaa3a46c84fa23c638f366396eeb5fa68b3a5",
+      "actual_bytes": 23241,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/RENDERING_AND_ASSETS.md",
+      "git_blob_sha": "f946dd156bad0c452730b9d790bc7049a5358543",
+      "bytes": 6516,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/RENDERING_AND_ASSETS.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/f946dd156bad0c452730b9d790bc7049a5358543",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e80ff7432f616ad63b53e99783f3c4eb36673bdaca2717be22d14d57fe7babad",
+      "actual_bytes": 6516,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/RESOLUTION_DEBUG_BASELINE.md",
+      "git_blob_sha": "9050cb8d78b96c6481de0e8ba0595f9de8b270cd",
+      "bytes": 1634,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/RESOLUTION_DEBUG_BASELINE.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/9050cb8d78b96c6481de0e8ba0595f9de8b270cd",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "4a5de5d33f5168065adc396f57c0ffe37e851f6ebd65826c30443641e5ae501f",
+      "actual_bytes": 1634,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/SERVER_RUNTIME.md",
+      "git_blob_sha": "60519d53e8a17d339a950da1aef87db7551fb3f9",
+      "bytes": 9643,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/SERVER_RUNTIME.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/60519d53e8a17d339a950da1aef87db7551fb3f9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "15086798c2f24ca94c57afd9f3462c977b22eb52e7c85fea3eb6887baa51c5c2",
+      "actual_bytes": 9643,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/SINGLE_PLAYER_MODE_2026-08-13.md",
+      "git_blob_sha": "73fff092f4760ad8abdc4bdd55a95faa3a4b398a",
+      "bytes": 4887,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/SINGLE_PLAYER_MODE_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/73fff092f4760ad8abdc4bdd55a95faa3a4b398a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0eb3c4cf303f402176de450602ead38aec3031fc892795c4c295cd0aac16250d",
+      "actual_bytes": 4887,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/Sabak_Map_Migration_Audit_2026-08-11.md",
+      "git_blob_sha": "9deb6137de048577eb99d99f2b0ef27736b1b12b",
+      "bytes": 3633,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/Sabak_Map_Migration_Audit_2026-08-11.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/9deb6137de048577eb99d99f2b0ef27736b1b12b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0f7743fb79bfc157a3a117a99c105405c4d42056eeebbbe329c181fd0649220a",
+      "actual_bytes": 3633,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/TASK_ROUTER.md",
+      "git_blob_sha": "80b3bdbf948e8208d1632c69c81f9b45bd5a81c3",
+      "bytes": 6095,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/TASK_ROUTER.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/80b3bdbf948e8208d1632c69c81f9b45bd5a81c3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "764514e6b3c071e70b08cace0379a850dc55ec748741c3bb474b1efdde4ae272",
+      "actual_bytes": 6095,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_BUTTON_WIRING_AUDIT_2026-08-13.md",
+      "git_blob_sha": "a0b7c0d3dd3da0dddfb3b8e2bf0d4502571c1be4",
+      "bytes": 5149,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_BUTTON_WIRING_AUDIT_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a0b7c0d3dd3da0dddfb3b8e2bf0d4502571c1be4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "b0ed76ffdc2dd3717cbafa7ef42dfd9eb3c2425a6256f0c2deac197c103961ff",
+      "actual_bytes": 5149,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_FONT_SCALE_ADAPTATION_2026-08-13.md",
+      "git_blob_sha": "298ea09edcc1a88a7523c0bf72e3665b39e71ac6",
+      "bytes": 5238,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_FONT_SCALE_ADAPTATION_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/298ea09edcc1a88a7523c0bf72e3665b39e71ac6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "c9f9e989b9f92995c6ea14455bd17312169c6da0504caa0bbe87aec008ebd20e",
+      "actual_bytes": 5238,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_INSPECT_WEAPONCRAFT_PORT_2026-08-13.md",
+      "git_blob_sha": "1f1144a75f632778669c6d74ed8e339a0ffbb97b",
+      "bytes": 7754,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_INSPECT_WEAPONCRAFT_PORT_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/1f1144a75f632778669c6d74ed8e339a0ffbb97b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "3879d08608bffddcc2406b107895b8814e210d7ad5b51f6cc733a2d1ca63e20e",
+      "actual_bytes": 7754,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_INTERACTION_GAP_AUDIT_2026-08-13.md",
+      "git_blob_sha": "1e4f06ec856935d999042b7c05b16d7f88e0cd9d",
+      "bytes": 3697,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_INTERACTION_GAP_AUDIT_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/1e4f06ec856935d999042b7c05b16d7f88e0cd9d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1ad35aaddc8aefcf3854a95cd9a91d4a27ec4d5f14335dbeaa334966f6ac1cb0",
+      "actual_bytes": 3697,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_TEXT_BASELINE_FIX_2026-08-13.md",
+      "git_blob_sha": "44a6e6ff3d245a5e060458c5bc414ff535901000",
+      "bytes": 3778,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_TEXT_BASELINE_FIX_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/44a6e6ff3d245a5e060458c5bc414ff535901000",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e246d9ec0d47687325fd71eef1f1672990917fc43a65438105b96cdf2e552931",
+      "actual_bytes": 3778,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_TEXT_FULL_AUDIT_2026-08-13.md",
+      "git_blob_sha": "a950f292454d2f8e587c1a49befa871259d5c8c6",
+      "bytes": 5463,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_TEXT_FULL_AUDIT_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a950f292454d2f8e587c1a49befa871259d5c8c6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "94b964339ac1aea17b0b85baca33184ef399085e502e7fec4061218b18b600f3",
+      "actual_bytes": 5463,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_TEXT_HOVER_FULL_SWEEP_2026-08-13.md",
+      "git_blob_sha": "7373e5e23e8de373d07c45938eec3342068b8e25",
+      "bytes": 4355,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_TEXT_HOVER_FULL_SWEEP_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/7373e5e23e8de373d07c45938eec3342068b8e25",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1056a114b40b9b0d94e091da36fd4c63e841bf83cc976d299a6e5e805901dd9f",
+      "actual_bytes": 4355,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_TRANSLATION_INTEGRATION_2026-08-13.md",
+      "git_blob_sha": "a020764397116069d8fa209e003e56cb66cef35b",
+      "bytes": 4278,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_TRANSLATION_INTEGRATION_2026-08-13.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a020764397116069d8fa209e003e56cb66cef35b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "c61f9d44ce42867167e524d1d951583e344afbf2e1fb43246362e4f30faaeaaa",
+      "actual_bytes": 4278,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UI_WEB_EDITOR_GOAL.md",
+      "git_blob_sha": "35d0b236a8359f99f218b3012c52891dcd525de2",
+      "bytes": 6320,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UI_WEB_EDITOR_GOAL.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/35d0b236a8359f99f218b3012c52891dcd525de2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "7328564a0520f10c5a3a1ca8012c0be9ba4b9944d47820fadab9cac85084c5c9",
+      "actual_bytes": 6320,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/UPSTREAM_SYNC_POLICY.md",
+      "git_blob_sha": "8841a9c8e07681aa2ea74a17a6cd5342d8b1fe88",
+      "bytes": 3995,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/UPSTREAM_SYNC_POLICY.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/8841a9c8e07681aa2ea74a17a6cd5342d8b1fe88",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "3bfb8f58b4fad89e90e4544dbf5bf806d2dd7192008f271525fe6f378d5505af",
+      "actual_bytes": 3995,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/VERIFICATION.md",
+      "git_blob_sha": "be66323ddd8585544fe4996b14a4cd12dd9216f6",
+      "bytes": 13169,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/VERIFICATION.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/be66323ddd8585544fe4996b14a4cd12dd9216f6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "b4adba78f6e7b98b25039648b16f705efb732d4367ef7bdea45fcd100fd8a0aa",
+      "actual_bytes": 13169,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/WEB_PORT_SPIKE_GOAL.md",
+      "git_blob_sha": "8220f7508a248c053621ddaa7cc380630f2d4d65",
+      "bytes": 5429,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/WEB_PORT_SPIKE_GOAL.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/8220f7508a248c053621ddaa7cc380630f2d4d65",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "e606eea7405f749cd1012cf45a9a03036e09fb8c39adb892139af98cc644eaac",
+      "actual_bytes": 5429,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/WEB_PORT_SPIKE_REPORT.md",
+      "git_blob_sha": "794ceebd1051445ae176bdae3afef35f4e29dbd1",
+      "bytes": 13663,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/WEB_PORT_SPIKE_REPORT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/794ceebd1051445ae176bdae3afef35f4e29dbd1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f24ae36e7a06a587dd2faf4ae438f285ea548b1a3a48bb02bbb31b4590cf2ec0",
+      "actual_bytes": 13663,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/ZIRCON_CODEBASE_DOCS_GOAL.md",
+      "git_blob_sha": "42aac67dc5c309c7d417b3c301d24cf69d55eca0",
+      "bytes": 6468,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/ZIRCON_CODEBASE_DOCS_GOAL.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/42aac67dc5c309c7d417b3c301d24cf69d55eca0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "fbd51228f7f80ab54ac4f11bcc6a0d7f59d5226126116cb693183230d4300e0a",
+      "actual_bytes": 6468,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/ZIRCON_EI_MAP_DIFF_2026-08-15.md",
+      "git_blob_sha": "ec5e01f5da52571bfc009bf877745cb7498f1447",
+      "bytes": 8830,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/ZIRCON_EI_MAP_DIFF_2026-08-15.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ec5e01f5da52571bfc009bf877745cb7498f1447",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "7e96c2df6ea61c8366abb6e1cecaf9c5051c3555da39b0ecd35542ce2ff07eb3",
+      "actual_bytes": 8830,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/_index.md",
+      "git_blob_sha": "017051540b46a939afabd334a5ac5e4495ef276c",
+      "bytes": 5873,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/_index.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/017051540b46a939afabd334a5ac5e4495ef276c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "45a68a7f979a676c7a313a00b046cf67c300d05e809b9d682de67df8cd3fb774",
+      "actual_bytes": 5873,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/combat/death-and-loot.md",
+      "git_blob_sha": "c97be3b104defe71b68b7f894010e899e6bd0ccb",
+      "bytes": 37090,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/combat/death-and-loot.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c97be3b104defe71b68b7f894010e899e6bd0ccb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "a5647ab3e90b2bef8377ce15bc3cccd578f69a79a48bddae299e411526a301d8",
+      "actual_bytes": 37090,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/combat/elements-and-buffs.md",
+      "git_blob_sha": "b51768cf175fe9a96788632d0fb69ee990d02591",
+      "bytes": 53908,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/combat/elements-and-buffs.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b51768cf175fe9a96788632d0fb69ee990d02591",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "05713592e604f174557e60ecd2d5bff9d3b5319bf7e1869f7515544a7454c79c",
+      "actual_bytes": 53908,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/combat/magic-damage.md",
+      "git_blob_sha": "ba348552bcaa3c48055eaba4cc2f1f88b2cd0d0c",
+      "bytes": 74523,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/combat/magic-damage.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ba348552bcaa3c48055eaba4cc2f1f88b2cd0d0c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "de36cf73111259499faf7a5ec9fb2696cc6cfcd3d058dcbefc44a5b20d0214eb",
+      "actual_bytes": 74523,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/combat/physical-damage.md",
+      "git_blob_sha": "05e2d66dd77cea5c27bffd11a42f761fb1de2340",
+      "bytes": 57816,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/combat/physical-damage.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/05e2d66dd77cea5c27bffd11a42f761fb1de2340",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ea90c7b2f4d39af7b3255ac755e098687b79763f6060b100a69e924ed35929d0",
+      "actual_bytes": 57816,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/infra/config-and-commands.md",
+      "git_blob_sha": "d8cf92e63cd4f458d9402657423288d0335f5c6a",
+      "bytes": 30637,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/infra/config-and-commands.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/d8cf92e63cd4f458d9402657423288d0335f5c6a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "857aa4f4876fdf77f36b68ec16d72acea5445d0d52db1ea256fb831e97ed643b",
+      "actual_bytes": 30637,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/infra/database.md",
+      "git_blob_sha": "f9755bb60ba6c10d40ef243ea502e5ba41f135ea",
+      "bytes": 48589,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/infra/database.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/f9755bb60ba6c10d40ef243ea502e5ba41f135ea",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "3eae6c8c3c99cda5fc93f8d8478aee826e18571ec00ed28fac49cbe6815bfe43",
+      "actual_bytes": 48589,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/infra/envir-and-spawn.md",
+      "git_blob_sha": "6b99b5aed9d101308800dc4f307e0e5d3fd06ac2",
+      "bytes": 55828,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/infra/envir-and-spawn.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/6b99b5aed9d101308800dc4f307e0e5d3fd06ac2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f7180fc556f5e9d091779208d0b203d11d7267f26fe1033768303f1bac8ae6f6",
+      "actual_bytes": 55828,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/item/drops.md",
+      "git_blob_sha": "c664d9ceaff3b0c4980ca9e681f423e5e86b38a6",
+      "bytes": 31073,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/item/drops.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c664d9ceaff3b0c4980ca9e681f423e5e86b38a6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "53122cae6a1c1bbef1ea49013e6517cc776e0d4eefd6631a7fc918e433326257",
+      "actual_bytes": 31073,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/item/economy.md",
+      "git_blob_sha": "7da9ab24eed7d722472fdafdf31ab98447549675",
+      "bytes": 30009,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/item/economy.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/7da9ab24eed7d722472fdafdf31ab98447549675",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0ba1e7f956987168a987f53536807471e8f5061a805e71ccf238060d21bb961a",
+      "actual_bytes": 30009,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/item/items-and-stats.md",
+      "git_blob_sha": "61103b1c1734f4d62e54441d7eb253f807b504cb",
+      "bytes": 60161,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/item/items-and-stats.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/61103b1c1734f4d62e54441d7eb253f807b504cb",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "43fa0ce829e5a4336a7fd44c350d22701ca6cedebfd620a4b2ca8cf68d832b4e",
+      "actual_bytes": 60161,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/map/instances.md",
+      "git_blob_sha": "e85c923b1c10e1f9c867550dcc9822c6a6ff153c",
+      "bytes": 32699,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/map/instances.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e85c923b1c10e1f9c867550dcc9822c6a6ff153c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ce9fc35f49a27e95e97fa23af02d5c347948ce3d293ebbbe434842caf0f5f0b3",
+      "actual_bytes": 32699,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/map/tiles-and-movement.md",
+      "git_blob_sha": "6f7c1c8660e45e1c5f2842e996c0ef481fb84c79",
+      "bytes": 40610,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/map/tiles-and-movement.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/6f7c1c8660e45e1c5f2842e996c0ef481fb84c79",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "d46c29b3e456cbf4f078adfc7f1bf70fceacc59f9070c10da387e3752027547b",
+      "actual_bytes": 40610,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/monster/ai-behaviors.md",
+      "git_blob_sha": "582f9a2113109c90f2dbdd9f8705a2279a22bd5c",
+      "bytes": 39075,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/monster/ai-behaviors.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/582f9a2113109c90f2dbdd9f8705a2279a22bd5c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "4e41739c229aeb5adbc4837bddbeeb588028544ee2a629fbe9cda16ddff704e7",
+      "actual_bytes": 39075,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/monster/boss-mechanics.md",
+      "git_blob_sha": "b15fede2cff821cee698364f733fbdb5340f1138",
+      "bytes": 28356,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/monster/boss-mechanics.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b15fede2cff821cee698364f733fbdb5340f1138",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "460d2d18d1cf7db485908d7f8abd0e0675d9238069575c1b8a2cf324ceca0975",
+      "actual_bytes": 28356,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/protocol/connection-lifecycle.md",
+      "git_blob_sha": "b9ae2505eb7d9be30dd84e5e3e8714cd3d5778d1",
+      "bytes": 29595,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/protocol/connection-lifecycle.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b9ae2505eb7d9be30dd84e5e3e8714cd3d5778d1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2579832d2470f664323f459778c4a3563e67507b0f4a37ea73956a6d6cb04939",
+      "actual_bytes": 29595,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/protocol/packets-c2s.md",
+      "git_blob_sha": "5103323bf60bf7207ef6f19b27d441e3df501425",
+      "bytes": 67208,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/protocol/packets-c2s.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/5103323bf60bf7207ef6f19b27d441e3df501425",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "a705e12d22dc5e4c574a47897ba93dda435ec14cfb8e55b24a7387aa2c332f11",
+      "actual_bytes": 67208,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/protocol/packets-s2c.md",
+      "git_blob_sha": "91bfef7b68754c59535fccd248bd5042588fbc64",
+      "bytes": 49746,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/protocol/packets-s2c.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/91bfef7b68754c59535fccd248bd5042588fbc64",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "12b05ebfa6b06c8a19d0655f120e87bd47a445ac1f08351b52014f29ca9325bc",
+      "actual_bytes": 49746,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/quest/quest-system.md",
+      "git_blob_sha": "2be8e7b193fb017cc6de3404c71ebd5d96baa39e",
+      "bytes": 36961,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/quest/quest-system.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/2be8e7b193fb017cc6de3404c71ebd5d96baa39e",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "a87fc8abeba61116fe797c744a59410040edaa1b55242aa9a2e7dbd21895293f",
+      "actual_bytes": 36961,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/social/chat-and-mail.md",
+      "git_blob_sha": "c52f19b39e40d71f16c35bc876c48d04cf7035b4",
+      "bytes": 39665,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/social/chat-and-mail.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c52f19b39e40d71f16c35bc876c48d04cf7035b4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "acaeb42aac3e9f12a8e7cb127e5fdeedbc0476b11d67259a3de8191a6aafee1f",
+      "actual_bytes": 39665,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/social/guild.md",
+      "git_blob_sha": "bc80a7e75cfe3f250acb18b73cce7dbd5f57741a",
+      "bytes": 34234,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/social/guild.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/bc80a7e75cfe3f250acb18b73cce7dbd5f57741a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "6669c3d813cec120c01080f69dc0411ef36e478035cdedc3dc880edf0100b190",
+      "actual_bytes": 34234,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/social/marriage-and-mentor.md",
+      "git_blob_sha": "155b5d8e301f67f57f514788e27737e699cec3b3",
+      "bytes": 24752,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/social/marriage-and-mentor.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/155b5d8e301f67f57f514788e27737e699cec3b3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "b28908a821a929751f2d05d5f4f42f919b1b65e4d2866cc391dfeece331ef9a7",
+      "actual_bytes": 24752,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/sys/conquest-sabuk.md",
+      "git_blob_sha": "95a357ca9ca63dd6a8ec5ca12adb10bdbb902b59",
+      "bytes": 46225,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/sys/conquest-sabuk.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/95a357ca9ca63dd6a8ec5ca12adb10bdbb902b59",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f7da835848f7398491735ca0249695d1a27bfb9bfe0ffd852cacc4f6e2252e54",
+      "actual_bytes": 46225,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/codebase/sys/consign-and-trade.md",
+      "git_blob_sha": "a1122fde04fa8d89908a9ba7356ff0713a019fc4",
+      "bytes": 49028,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/codebase/sys/consign-and-trade.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a1122fde04fa8d89908a9ba7356ff0713a019fc4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "0e3355d3be0c8f7c64647f4071aaa9c5adc150dd6a8255d7b387cc18557da3b7",
+      "actual_bytes": 49028,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/gameplay/COMBAT_AND_MAGIC.md",
+      "git_blob_sha": "2408e10372dadab366f80a2e3efc79acea5f194a",
+      "bytes": 4772,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/gameplay/COMBAT_AND_MAGIC.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/2408e10372dadab366f80a2e3efc79acea5f194a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "9a678cf724ac29f468b18fde40d17ce91c0c3fec7583688759c20356b876f728",
+      "actual_bytes": 4772,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/gameplay/CRAFTING_COMPANIONS_AND_ACTIVITIES.md",
+      "git_blob_sha": "6f8b74eb59145d43e5628a39ecba0f006d998d1c",
+      "bytes": 4320,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/gameplay/CRAFTING_COMPANIONS_AND_ACTIVITIES.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/6f8b74eb59145d43e5628a39ecba0f006d998d1c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "88d4ad4b2a257768d9b1c8a425c4ea7e64a666e50bf6406c641461ac1b4c8c17",
+      "actual_bytes": 4320,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/gameplay/ITEMS_AND_ECONOMY.md",
+      "git_blob_sha": "cacefea400da4069673f9d1980657e3528a0699a",
+      "bytes": 7063,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/gameplay/ITEMS_AND_ECONOMY.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/cacefea400da4069673f9d1980657e3528a0699a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "c052ad6f8139c316566696c64e5e6683701fc60c0660b78b483f57685fcc71f7",
+      "actual_bytes": 7063,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/gameplay/QUESTS_AND_PROGRESSION.md",
+      "git_blob_sha": "e1b358969f4094b6338f781e8ad11bf6a8e10b7f",
+      "bytes": 3934,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/gameplay/QUESTS_AND_PROGRESSION.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e1b358969f4094b6338f781e8ad11bf6a8e10b7f",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "09a738d08b94b0c6f8ad113ff628085481405b5f6a384969e0540b7ce1d3b274",
+      "actual_bytes": 3934,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/gameplay/SOCIAL_AND_GROUPS.md",
+      "git_blob_sha": "8dab2d4ca15403ba20ffbf04e750b4c52368ead8",
+      "bytes": 4420,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/gameplay/SOCIAL_AND_GROUPS.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/8dab2d4ca15403ba20ffbf04e750b4c52368ead8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ae998a5a3966e41c49c341ae19c531224ca8f6c818d1ac55e681217245e88468",
+      "actual_bytes": 4420,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/gameplay/WORLD_AND_MOVEMENT.md",
+      "git_blob_sha": "ef7127fdd133caa796bff2f0154af2efe6f9bbcf",
+      "bytes": 4336,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/gameplay/WORLD_AND_MOVEMENT.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ef7127fdd133caa796bff2f0154af2efe6f9bbcf",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "8802495f713349bb5f154975e19fb3b1779894fa211306f279fc23f996fb6fd1",
+      "actual_bytes": 4336,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/handoffs/CLIENT_LEGACY_HANDOFF.md",
+      "git_blob_sha": "7b441ca85271292c59aa2b48327ade07b970643a",
+      "bytes": 56663,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/handoffs/CLIENT_LEGACY_HANDOFF.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/7b441ca85271292c59aa2b48327ade07b970643a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "df4bdeca7e4a1f0daf283bff0d0df7948600ff67cef0791b1b016a365f0acb0a",
+      "actual_bytes": 56663,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/handoffs/GOAL_CLIENT_LEGACY_HANDOFF.md",
+      "git_blob_sha": "a67ecca5d63e4d7cfedfa864106cb6fe51ddf3e7",
+      "bytes": 5617,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/handoffs/GOAL_CLIENT_LEGACY_HANDOFF.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a67ecca5d63e4d7cfedfa864106cb6fe51ddf3e7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "99f73185ad96d6609dc61f0602ce68dbef6dcc9447992fd2efb76b0f7558f716",
+      "actual_bytes": 5617,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/handoffs/GOAL_GODOT_CLIENT_HANDOFF.md",
+      "git_blob_sha": "8bcab54a516c63fffa92c1cb1baa3992402f3240",
+      "bytes": 6742,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/handoffs/GOAL_GODOT_CLIENT_HANDOFF.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/8bcab54a516c63fffa92c1cb1baa3992402f3240",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "62f0b08cc15293ab0ccfa94c311fc9cfdb61b0f43f61cf778b71b70c0b078e53",
+      "actual_bytes": 6742,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/handoffs/GOAL_SERVER_HANDOFF.md",
+      "git_blob_sha": "e53609786f696ef9b629ac724145d63febe0828c",
+      "bytes": 6106,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/handoffs/GOAL_SERVER_HANDOFF.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e53609786f696ef9b629ac724145d63febe0828c",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "bc3d14817e885bec3daa16404fa198cab2e119d1b199eb5c5731c03f6d6723b3",
+      "actual_bytes": 6106,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/handoffs/GODOT_CLIENT_HANDOFF.md",
+      "git_blob_sha": "ae07760b4333c9d850261c8590bd16ceafdbd7f7",
+      "bytes": 63975,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/handoffs/GODOT_CLIENT_HANDOFF.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ae07760b4333c9d850261c8590bd16ceafdbd7f7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "baae423f4511549aab4ec44ee7e987972b10274a63d5510f8e78924eea24748c",
+      "actual_bytes": 63975,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/handoffs/LEGACY_EI_UI_AUDIT_HANDOFF_2026-09-24.md",
+      "git_blob_sha": "897e369488cbdece160e1a80b903f185a2397fb0",
+      "bytes": 11647,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/handoffs/LEGACY_EI_UI_AUDIT_HANDOFF_2026-09-24.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/897e369488cbdece160e1a80b903f185a2397fb0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "72853c34b286efebe1261230548b02aed95e28c93af052f6cd9140b0779d5481",
+      "actual_bytes": 11647,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/handoffs/SERVER_HANDOFF.md",
+      "git_blob_sha": "9aff360d8d5a390431258d7575dad3ea940a72e4",
+      "bytes": 75950,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/handoffs/SERVER_HANDOFF.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/9aff360d8d5a390431258d7575dad3ea940a72e4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "6c6330499a55f5dfb73b8b3bf99316917b80e400036d58db8d8e5f8906ac7290",
+      "actual_bytes": 75950,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/legacy-ei-login-flow-matrix.md",
+      "git_blob_sha": "c82a1b57de2ff80a332367a40b4e157c2d82f21d",
+      "bytes": 18377,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/legacy-ei-login-flow-matrix.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/c82a1b57de2ff80a332367a40b4e157c2d82f21d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "68028dd86bfe5915dc913150109ed56a3c4067e4db6c10807b29c45f8ebd524f",
+      "actual_bytes": 18377,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/pending/CONFIG_DIALOG_WHEEL_HANDLER_REVIEW_2026-10-01.md",
+      "git_blob_sha": "f68f533849317667b3d4c0c7484e0f5af822e5fc",
+      "bytes": 3083,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/pending/CONFIG_DIALOG_WHEEL_HANDLER_REVIEW_2026-10-01.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/f68f533849317667b3d4c0c7484e0f5af822e5fc",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "1ee6271d3bbb2dce0d9422077bbe71808da147efedace588d5974fe2a1a4f6c1",
+      "actual_bytes": 3083,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/pending/EI_LOGIN_CHARACTER_FLOW_BLOCKERS.md",
+      "git_blob_sha": "b3e56572f064f77796803e4a2516fb89efb7acc0",
+      "bytes": 4154,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/pending/EI_LOGIN_CHARACTER_FLOW_BLOCKERS.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/b3e56572f064f77796803e4a2516fb89efb7acc0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "8026af944fd44b898ed6b36ac1d9d59828f622edd97e550a23406fd231c7abf1",
+      "actual_bytes": 4154,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/pending/EI_PARITY_CONTINUATION_2026-10-01.md",
+      "git_blob_sha": "ec0c73410fbd7fb41845ca5e9f9b86abc6f04569",
+      "bytes": 16649,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/pending/EI_PARITY_CONTINUATION_2026-10-01.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ec0c73410fbd7fb41845ca5e9f9b86abc6f04569",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "212af105e03c2a8c5114ce6b622d4327448f33b25742bdc85d6dc13f6a262a49",
+      "actual_bytes": 16649,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/pending/EI_SKILLBOOK_TAB_HIGHLIGHT_HANDOFF_2026-10-01.md",
+      "git_blob_sha": "52ea4168702b46dc5a0be885d73f504770eb6e44",
+      "bytes": 15085,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/pending/EI_SKILLBOOK_TAB_HIGHLIGHT_HANDOFF_2026-10-01.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/52ea4168702b46dc5a0be885d73f504770eb6e44",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "c8b83f2ff5a3eaf9962a3b21ed57c37e3c8091c8150cccdd951724f60a4ab223",
+      "actual_bytes": 15085,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/pending/MUD3_CONTENT_AND_LEGACY_BAG_HANDOFF_2026-10-03.md",
+      "git_blob_sha": "442b1932c92f830c2fad27361e2e69a0e31677f1",
+      "bytes": 31233,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/pending/MUD3_CONTENT_AND_LEGACY_BAG_HANDOFF_2026-10-03.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/442b1932c92f830c2fad27361e2e69a0e31677f1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "91a1283c3aa1ec29c25c73c87978b18e5688144deba7a8ada69801bde8cd73f6",
+      "actual_bytes": 31233,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/pending/NPC_DIALOG_EI_GODOT_REVIEW_2026-10-01.md",
+      "git_blob_sha": "2804a81a9e026f7935643b09c82daffff8d42851",
+      "bytes": 7019,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/pending/NPC_DIALOG_EI_GODOT_REVIEW_2026-10-01.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/2804a81a9e026f7935643b09c82daffff8d42851",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "31e5701aaba5c6033f4680426446be454a384c135cbd03c3116b9adb9df0cc18",
+      "actual_bytes": 7019,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/project/OMP_GOAL_WATCHDOG_DESIGN.md",
+      "git_blob_sha": "ec349704e38ac85280266802b2bc90fef0140a7a",
+      "bytes": 6603,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/project/OMP_GOAL_WATCHDOG_DESIGN.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/ec349704e38ac85280266802b2bc90fef0140a7a",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "2a13462c69ab7fae856c04f5375345af20f1abab71640f07de1a015d0bc5e1f0",
+      "actual_bytes": 6603,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/reviews-objective.md",
+      "git_blob_sha": "2ecdb5577dbf9a60fd05600b1e57466d49ffa664",
+      "bytes": 3352,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/reviews-objective.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/2ecdb5577dbf9a60fd05600b1e57466d49ffa664",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "71d4077b416dc5b79c5332db77e55137f90d29e997798d2776febaa38d148726",
+      "actual_bytes": 3352,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/reviews/2026-08-16-code-review.md",
+      "git_blob_sha": "0337c5f13fb1d83a013d6d01153c91f808bf9bbd",
+      "bytes": 11064,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/reviews/2026-08-16-code-review.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/0337c5f13fb1d83a013d6d01153c91f808bf9bbd",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "ae3406b987d452ba89eeb5f40ddb135d33717ec8d4ea19a283deb2a9a8bcee81",
+      "actual_bytes": 11064,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/screenshots/ei-login-flow-2026-09-29/README.md",
+      "git_blob_sha": "e0ba554ab56f4c9cbf7e4e5d981df5799974565d",
+      "bytes": 1013,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/screenshots/ei-login-flow-2026-09-29/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/e0ba554ab56f4c9cbf7e4e5d981df5799974565d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "bd75bf763578855ba108a12c6d1e077fecfca6a9e2bd452938f0c63fd2193a80",
+      "actual_bytes": 1013,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "docs/zircon_only_maps_2026-08-15.txt",
+      "git_blob_sha": "0b583f4cf8e91d56993de1585db7e97d232e0a30",
+      "bytes": 5557,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/docs/zircon_only_maps_2026-08-15.txt",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/0b583f4cf8e91d56993de1585db7e97d232e0a30",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "58e636a0a4b98221bb9efbe5aee1b95b4eed7aed1f756c951be9e82911600b2a",
+      "actual_bytes": 5557,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "screenshots/ei-create-character-2026-09-28/README.md",
+      "git_blob_sha": "a2bac5722a4783cb0030e0ae8b837ea8ea849eb8",
+      "bytes": 5449,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/screenshots/ei-create-character-2026-09-28/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/a2bac5722a4783cb0030e0ae8b837ea8ea849eb8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "25141bbb5da7791fb635af7fecdb7d7e6b4f8250d5b392f13f6431193d8f259e",
+      "actual_bytes": 5449,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "screenshots/ei-create-text-2026-09-29/README.md",
+      "git_blob_sha": "3e2691ca62a91682192b246b33fb10135f658882",
+      "bytes": 2262,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/screenshots/ei-create-text-2026-09-29/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/3e2691ca62a91682192b246b33fb10135f658882",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "4317e479ee4124ccd3ffcfacf0235961903d4ee1cbf5767345d7b3d32460cddb",
+      "actual_bytes": 2262,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "screenshots/ei-legacy-character-selection-2026-09-28/README.md",
+      "git_blob_sha": "104e8b1001435e63518fa85574a6d53fa7f7b77d",
+      "bytes": 2085,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/screenshots/ei-legacy-character-selection-2026-09-28/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/104e8b1001435e63518fa85574a6d53fa7f7b77d",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "894c3cc20e5b41d49ba96070e086c7c8488e7cfae3c004b58665a29f2579d995",
+      "actual_bytes": 2085,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "screenshots/ei-login-animation-2026-09-28/README.md",
+      "git_blob_sha": "673f27cbe267f8574563ebdfc14ac2575b94ba96",
+      "bytes": 1111,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/screenshots/ei-login-animation-2026-09-28/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/673f27cbe267f8574563ebdfc14ac2575b94ba96",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "d61c7baea53e25f63f8b2e653655e12526d5ccdba011e8ad0840ef54b7dc92f3",
+      "actual_bytes": 1111,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "screenshots/ei-login-flow-acceptance/README.md",
+      "git_blob_sha": "3c1a0710306629e79ae7a61572a54096b62f2564",
+      "bytes": 3177,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/screenshots/ei-login-flow-acceptance/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/3c1a0710306629e79ae7a61572a54096b62f2564",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "810b0b9f23fe45c6c2b7c7e11e736cec097d9dcfb69d03e4ebe0a83ac02d3b5d",
+      "actual_bytes": 3177,
+      "git_blob_verified": true,
+      "hits": []
+    },
+    {
+      "path": "scripts/README.md",
+      "git_blob_sha": "2287208d77d45ff12c4012beb13c6dd4fb44db9b",
+      "bytes": 443,
+      "source_url": "https://github.com/fallrising/Zircon-Godot/blob/14ad6768ee6dcdffd55ffda89b76f7f1b9bc9c1e/scripts/README.md",
+      "api_query": "GET /repos/fallrising/Zircon-Godot/git/blobs/2287208d77d45ff12c4012beb13c6dd4fb44db9b",
+      "attempts": [
+        {
+          "attempt": 1,
+          "returncode": 0
+        }
+      ],
+      "sha256": "f57e5fd3b550b22e84170134cc90c888e503e60ce897096227cc773375284db2",
+      "actual_bytes": 443,
+      "git_blob_verified": true,
+      "hits": []
+    }
+  ]
+}

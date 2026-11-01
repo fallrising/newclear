@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.ojbk.gateway.consume.PushRecordHandlerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-22T10:44:24.542Z" hostname="redacted" time="0.033">
+  <properties/>
+  <testcase name="releasesWithoutHttpWhenRateWaitIsInterrupted()" classname="dev.ojbk.gateway.consume.PushRecordHandlerTest" time="0.007"/>
+  <testcase name="writesExhaustedAndPipelineFailuresToDlqBeforeAccept()" classname="dev.ojbk.gateway.consume.PushRecordHandlerTest" time="0.006"/>
+  <testcase name="acceptsFilterAndSuccessWithoutRetryIo()" classname="dev.ojbk.gateway.consume.PushRecordHandlerTest" time="0.003"/>
+  <testcase name="AC_05_preservesResponseCompletionAnchorWithAnAdvancingClock()" classname="dev.ojbk.gateway.consume.PushRecordHandlerTest" time="0.004"/>
+  <testcase name="schedulesConfiguredRetryBeforeAcceptingFailedSource()" classname="dev.ojbk.gateway.consume.PushRecordHandlerTest" time="0.002"/>
+  <testcase name="releasesRecordWhenDurableHandoffFails()" classname="dev.ojbk.gateway.consume.PushRecordHandlerTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

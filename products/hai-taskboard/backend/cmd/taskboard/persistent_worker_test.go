@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"io"
@@ -19,6 +20,7 @@ import (
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain/sqlite"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/executor/fake"
+	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/testfixture"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/transport/httpapi"
 )
 
@@ -141,7 +143,8 @@ type workerFixture struct {
 	clock     *workerClock
 }
 
-func newWorkerFixture(t *testing.T) *workerFixture {
+func newWorkerFixture(t *testing.T) *workerFixture { return newWorkerFixtureWithItems(t) }
+func newWorkerFixtureWithItems(t *testing.T, extra ...domain.WorkItemID) *workerFixture {
 	t.Helper()
 	root := privateTestRoot(t)
 	clock := &workerClock{now: time.Now().UTC()}
@@ -170,19 +173,15 @@ func newWorkerFixture(t *testing.T) *workerFixture {
 		}
 	}
 	check(app.CreateProject(t.Context(), "operator", command.CreateProject{Metadata: metadata(1, 0), ProjectID: testProjectID, Name: "Worker fixture", RepositoryRoot: root, ApprovedRef: "main"}))
-	ac := domain.HashString("worker AC")
-	err = store.Within(t.Context(), func(tx port.Transaction) error {
-		if err := tx.StoreACRevision(t.Context(), port.ACRevision{ID: "acr_worker", ProjectID: testProjectID, ACID: "AC-1", Digest: ac, Content: []byte("worker AC"), CreatedAtNS: clock.Now().UnixNano()}); err != nil {
-			return err
-		}
-		return tx.StoreDependencyRevision(t.Context(), port.DependencyRevision{ProjectID: testProjectID, Digest: domain.HashString("graph"), Content: []byte("graph"), CreatedAtNS: clock.Now().UnixNano()})
-	})
-	if err != nil {
+	items := append([]domain.WorkItemID{"wi_0000000001"}, extra...)
+	for i, id := range items {
+		check(app.CreateWorkItem(t.Context(), "operator", command.CreateWorkItem{Metadata: metadata(20+i, 0), ProjectID: testProjectID, WorkItemID: id, Title: "Worker", Goal: "Execute once", OwnerID: "operator", RequiredACRevisions: []command.ACRevision{}}))
+	}
+	if err := testfixture.Accept(t.Context(), store, testProjectID, "operator", domain.HashString("local-policy-v2"), domain.HashString("local-recipe-v1"), "local", []byte("worker AC"), items, clock.Now().UnixNano()); err != nil {
 		t.Fatal(err)
 	}
-	check(app.CreateWorkItem(t.Context(), "operator", command.CreateWorkItem{Metadata: metadata(2, 0), ProjectID: testProjectID, WorkItemID: "wi_0000000001", Title: "Worker", Goal: "Execute once", OwnerID: "operator", RequiredACRevisions: []command.ACRevision{{ACID: "AC-1", RevisionDigest: ac}}}))
-	check(app.MarkReady(t.Context(), "operator", command.MarkReady{Metadata: metadata(3, 1), ProjectID: testProjectID, WorkItemID: "wi_0000000001"}))
-	check(app.DispatchRun(t.Context(), "operator", command.DispatchRun{Metadata: metadata(4, 2), ProjectID: testProjectID, WorkItemID: "wi_0000000001", AdapterID: fake.AdapterID, ScenarioID: "local-success"}))
+	check(app.MarkReady(t.Context(), "operator", command.MarkReady{Metadata: metadata(3, 2), ProjectID: testProjectID, WorkItemID: "wi_0000000001"}))
+	check(app.DispatchRun(t.Context(), "operator", command.DispatchRun{Metadata: metadata(4, 3), ProjectID: testProjectID, WorkItemID: "wi_0000000001", AdapterID: fake.AdapterID, ScenarioID: "local-success"}))
 	candidates, err := store.DispatchCandidates(t.Context(), clock.Now(), 1)
 	if err != nil || len(candidates) != 1 {
 		t.Fatalf("pending: %v %v", candidates, err)
@@ -192,12 +191,17 @@ func newWorkerFixture(t *testing.T) *workerFixture {
 }
 
 func (fixture *workerFixture) bind(t *testing.T, store *sqlite.Store) {
+	fixture.bindPolicy(t, store, false)
+}
+func (fixture *workerFixture) bindPolicy(t *testing.T, store *sqlite.Store, approval bool) {
 	t.Helper()
 	adapter, err := newLocalFakeAdapter()
 	if err != nil {
 		t.Fatal(err)
 	}
-	app, err := service.New(store, fixture.clock, cryptoIDSource{}, adapter, fixture.artifacts, httpapi.NewHub(), service.Config{Operator: "operator", IdempotencyTTL: time.Hour, Specification: admittedTestSpecification{}, Completion: service.CompletionPolicy{RevisionDigest: domain.HashString("policy"), RecipeDigest: domain.HashString("recipe"), Checks: map[domain.ACID]service.VerificationRule{"AC-1": {VerifierClass: "independent"}}}})
+	policy := localCompletionPolicy()
+	policy.ApprovalRequired = approval
+	app, err := service.New(store, fixture.clock, cryptoIDSource{}, adapter, fixture.artifacts, httpapi.NewHub(), service.Config{Operator: "operator", IdempotencyTTL: time.Hour, Specification: admittedTestSpecification{}, Completion: policy})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -384,5 +388,67 @@ func TestPersistentRuntime_ConcurrentScansClaimOnce(t *testing.T) {
 	after := fixture.authority(t)
 	if after.Run.ObservedState != "Succeeded" || after.Lease.Fence.Epoch != 1 || after.AuditCount != before.AuditCount+4 {
 		t.Fatalf("not a single execution: %+v", after)
+	}
+}
+
+func TestPersistentRuntime_StaleInputDoesNotStarveHealthyPending(t *testing.T) {
+	fixture := newWorkerFixtureWithItems(t, "wi_0000000002")
+	store := fixture.worker.store
+	// The first immutable envelope captured ApprovalRequired=false. New policy
+	// fields under that same revision must still invalidate it.
+	fixture.bindPolicy(t, store, true)
+	metadata := func(n int, v uint64) command.Metadata {
+		return command.Metadata{CommandID: fmt.Sprintf("cmd_00000000%02d", n), IdempotencyKey: fmt.Sprintf("00000000-0000-4000-8000-%012d", n), ExpectedVersion: v, IssuedAt: fixture.clock.Now(), CorrelationID: "stale-worker"}
+	}
+	if _, err := fixture.worker.commands.MarkReady(t.Context(), "operator", command.MarkReady{Metadata: metadata(50, 2), ProjectID: testProjectID, WorkItemID: "wi_0000000002"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := fixture.worker.commands.DispatchRun(t.Context(), "operator", command.DispatchRun{Metadata: metadata(51, 3), ProjectID: testProjectID, WorkItemID: "wi_0000000002", AdapterID: fake.AdapterID, ScenarioID: "local-success"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := fixture.worker.scan(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	stale := fixture.authority(t)
+	if stale.Run.DispatchState != "Pending" || stale.Run.ReconciliationState != "NeedsReconcile" || stale.Lease.Fence.Epoch != 0 {
+		t.Fatalf("stale fact %+v", stale)
+	}
+	board, err := store.ReadBoard(t.Context(), testProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	healthy := false
+	for _, item := range board.Items {
+		if item.ID == "wi_0000000002" {
+			healthy = item.CurrentRun != nil && item.CurrentRun.ObservedState == "Succeeded"
+		}
+	}
+	if !healthy {
+		t.Fatal("stale item starved healthy Pending work")
+	}
+	if err := fixture.worker.scan(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if after := fixture.authority(t); after.AuditCount != stale.AuditCount {
+		t.Fatal("stale item retried")
+	}
+}
+func TestPersistentRuntime_CorruptInputRemainsFatal(t *testing.T) {
+	fixture := newWorkerFixture(t)
+	db, err := sql.Open("sqlite", filepath.Join(fixture.root, "state", "taskboard.sqlite"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, sql := range []string{"DROP TRIGGER run_input_envelopes_no_update", "UPDATE run_input_envelopes SET canonical_content=x'7b7d'"} {
+		if _, err := db.Exec(sql); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := fixture.worker.scan(t.Context()); !errors.Is(err, domain.ErrStorageCorruption) {
+		t.Fatalf("corrupt scan %v", err)
+	}
+	if fixture.authority(t).Lease.Fence.Epoch != 0 {
+		t.Fatal("corrupt input acquired lease")
 	}
 }

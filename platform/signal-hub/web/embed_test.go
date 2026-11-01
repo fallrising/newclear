@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -23,5 +24,21 @@ func TestBoardDoesNotReplaceAuthenticatedAPI(t *testing.T) {
 	}
 	if w.Header().Get("Cache-Control") != "no-store" || !strings.Contains(w.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
 		t.Fatal("missing browser boundary headers")
+	}
+}
+
+func TestBoardDeclaresLoadableIcon(t *testing.T) {
+	handler := Handler(http.NotFoundHandler())
+	page := httptest.NewRecorder()
+	handler.ServeHTTP(page, httptest.NewRequest("GET", "/", nil))
+	link := regexp.MustCompile(`<link\b[^>]*rel="icon"[^>]*>`).FindString(page.Body.String())
+	href := regexp.MustCompile(`href="([^"]+)"`).FindStringSubmatch(link)
+	if len(href) != 2 {
+		t.Fatal("board must declare an icon to avoid a missing default favicon request")
+	}
+	icon := httptest.NewRecorder()
+	handler.ServeHTTP(icon, httptest.NewRequest("GET", href[1], nil))
+	if icon.Code != 200 || !strings.HasPrefix(icon.Header().Get("Content-Type"), "image/svg+xml") || !strings.Contains(icon.Body.String(), "<svg") {
+		t.Fatalf("declared icon is not a loadable SVG: status=%d type=%s", icon.Code, icon.Header().Get("Content-Type"))
 	}
 }

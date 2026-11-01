@@ -70,7 +70,7 @@ export function PostCard({
   const interactionBusy = likePending || repostPending
 
   return (
-    <Card className="border-border/80 bg-card/95">
+    <Card className="relative min-w-0 shrink-0 border-border/80 bg-card/95 [overflow-wrap:anywhere]">
       <CardHeader>
         <CardTitle className="text-base">
           <AuthorLink

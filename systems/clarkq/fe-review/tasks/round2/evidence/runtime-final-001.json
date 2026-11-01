@@ -1,0 +1,166 @@
+{
+  "id": "final-001",
+  "mode": "final",
+  "status": "failed",
+  "startedAt": "2026-10-24T12:23:10.280Z",
+  "sourceHashes": {
+    "fe-review/api-fixture.mjs": "5e34c94437f8b8088b7b558239386eb4b95061610ced24f9fa36fc912bfcdbb0",
+    "fe-review/baseline.mjs": "05de3dcc256371c199dd9684c837679fde89ae4e86f946c54d00bc0c0755a090",
+    "fe-review/guards.mjs": "297fa73a790f1bbbf8b27cf907ad0a43c0b66873a98b3a252e1a6d3d52da760b",
+    "fe-review/guards.test.mjs": "45e2bd6601b782caf54dc1a0cf3183e60966ea768447c1a033b9d99318087473",
+    "fe-review/journey-health.mjs": "82a2e50062f7c0e25bc316a10d263e5627dba927381d8a2b54265c69d0859081",
+    "fe-review/journey-health.test.mjs": "4c2d69b67ad9d8d2c61c486703c45c3e172215d58272026a60afaafc051e75e4",
+    "fe-review/journey.mjs": "a58def19d8f9ca416c3dfd02969a866ff7caec44fb5579785db1557da5b99598",
+    "fe-review/run-review.mjs": "647023d38fe3906777fc1e9eb14de332d39932dfbd9f3c187f567305b721791e",
+    "fe-review/shared-capture.mjs": "dcf8a5a7b8945e74bc4d14bc09cc3d0decb72ca8761b72acbe013691c4b048f8",
+    "fe-review/ui.test.mjs": "0316c5655bc87acf907a13bc8dacf9d6261870a99986e7d263850ec46726051f",
+    "internal/ui/index.html": "c99ad4916caee4757a14e5b6ceca2074bdab3a57f8636ddcedc51a36ff0e3bc3"
+  },
+  "cleanup": [
+    {
+      "name": "settle",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "capture-processes",
+      "passed": true
+    },
+    {
+      "name": "service",
+      "passed": true
+    },
+    {
+      "name": "listener",
+      "passed": true
+    },
+    {
+      "name": "log",
+      "passed": true
+    }
+  ],
+  "binarySHA256": "7a4c942dc143fbf5128a72ee531da1523ee85a63d8b81607751d6f3845005856",
+  "loopbackListener": true,
+  "fixture": {
+    "publicUI": 200,
+    "missingKey": 401,
+    "invalidKey": 401,
+    "authenticated": 200,
+    "queues": [
+      {
+        "name": "review_00",
+        "depth": 1
+      },
+      {
+        "name": "review_01",
+        "depth": 2
+      },
+      {
+        "name": "review_02",
+        "depth": 3
+      },
+      {
+        "name": "review_03",
+        "depth": 1
+      },
+      {
+        "name": "review_04",
+        "depth": 2
+      },
+      {
+        "name": "review_05",
+        "depth": 3
+      },
+      {
+        "name": "review_06",
+        "depth": 1
+      },
+      {
+        "name": "review_07",
+        "depth": 2
+      },
+      {
+        "name": "review_08",
+        "depth": 3
+      },
+      {
+        "name": "review_09",
+        "depth": 1
+      },
+      {
+        "name": "review_10",
+        "depth": 2
+      },
+      {
+        "name": "review_11",
+        "depth": 3
+      },
+      {
+        "name": "review_empty",
+        "depth": 0
+      },
+      {
+        "name": "review_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+        "depth": 3
+      }
+    ],
+    "syntheticBody": true
+  },
+  "sharedCaptureSourceSHA256": "d00b6bf71cc68a7a540d0d832b58c9f971905848107d34f970530fe5fe2ba2ee",
+  "sharedDryRun": {
+    "code": 0,
+    "signal": null
+  },
+  "sharedExit": {
+    "code": 0,
+    "signal": null
+  },
+  "shared": [
+    {
+      "key": "admin/ui/desktop/dark",
+      "status": 200,
+      "requestedPath": "/ui/",
+      "title": "clarkQ Admin",
+      "horizontalOverflow": false,
+      "consoleEvents": 1,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__ui__desktop__dark.png",
+        "sha256": "f874ca61c14ea8cc19cc7437d7da202c0a04fcf90ad3594d1f936bd7cc21bbc4",
+        "width": 1440,
+        "height": 1717
+      }
+    }
+  ],
+  "failure": {
+    "stage": "shared-capture",
+    "code": "REVIEW_SHARED_HEALTH",
+    "site": "run-review.mjs:82:5"
+  },
+  "captureExits": [
+    {
+      "code": 0,
+      "signal": null,
+      "forcedKill": false,
+      "groupAbsent": true
+    },
+    {
+      "code": 0,
+      "signal": null,
+      "forcedKill": false,
+      "groupAbsent": true
+    }
+  ],
+  "serviceExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false,
+    "groupAbsent": true
+  },
+  "receivedSignal": null,
+  "endedAt": "2026-10-24T12:23:14.373Z"
+}

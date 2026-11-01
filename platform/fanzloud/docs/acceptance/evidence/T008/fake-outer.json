@@ -1,0 +1,15 @@
+{
+  "attempt": "fake-002",
+  "sourceCommit": "268305cceceb750be6642e446d63300a46064916",
+  "sourceManifestSha256": "9927980fe06bcf0228cdada47c8169534b78dfd73e5f4212b34928cdc47ee865",
+  "binarySha256": "9f55ac30fb9938a6d406255ec7bcb7cbb138511b77b7563f253aaadb2412ac70",
+  "image": "sha256:f659591ff6a2df30b6d644236056a7f1b185a4161852f5b6639f45f042427884",
+  "maximumSeconds": 300,
+  "startedAt": "2026-10-30T03:28:12Z",
+  "exitCode": 0,
+  "containerRemoved": true,
+  "innerPassed": true,
+  "stage": "COMPLETE",
+  "privateStateRemoved": true,
+  "elapsedSeconds": 4.745
+}

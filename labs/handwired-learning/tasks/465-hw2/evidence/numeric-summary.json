@@ -1,0 +1,42 @@
+{
+  "initial": {
+    "step": 0,
+    "alpha": 40,
+    "a": 1,
+    "b": 0,
+    "loss": 50.66666793823242,
+    "dAlpha": -11.333333015441895,
+    "dB": -6,
+    "maxError": 13,
+    "status": "ready",
+    "reason": "",
+    "historyRows": 1
+  },
+  "final": {
+    "step": 500,
+    "alpha": 49.99999833863828,
+    "a": 1.249999958465957,
+    "b": -1.9999992600290482,
+    "loss": 5.115907697472721e-13,
+    "dAlpha": 7.152557373046875e-7,
+    "dB": 0.0000014305113609225373,
+    "maxError": 9.5367431640625e-7,
+    "status": "complete",
+    "reason": "",
+    "historyRows": 501
+  },
+  "failure": {
+    "step": 0,
+    "alpha": 40,
+    "a": 1,
+    "b": 0,
+    "loss": 50.66666793823242,
+    "dAlpha": -11.333333015441895,
+    "dB": -6,
+    "maxError": 13,
+    "status": "stopped",
+    "reason": "停止：第 1 步候選 a=1.5666666507720948、b=12；b 必須介於 -10 與 10 之間。 保留上一組合法係數，未截斷。",
+    "historyRows": 1
+  },
+  "finalForwardMaxError": 9.5367431640625e-7
+}

@@ -1,5 +1,8 @@
 # Bee Swarm - AI 角色異步協作設計框架
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: D (retired / historical)** — Keep for history only. Do not extend features or write new tutorials. Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 
@@ -278,4 +281,3 @@ docs/github-agile-advanced.md
 ---
 
 *專注於 AI 協作的概念設計與模擬驗證 - 讓異步協作更高效*
-

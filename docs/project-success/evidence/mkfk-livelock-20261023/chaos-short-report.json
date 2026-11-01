@@ -1,0 +1,42 @@
+{
+  "acknowledged_records": 8754,
+  "consumer_poll_errors": 513,
+  "faults": [
+    "SIGKILL broker 2, leader of events/1",
+    "SIGKILL broker 2, follower of events/0",
+    "SIGKILL broker 1, the group coordinator",
+    "SIGSTOP broker 2 for 2s",
+    "isolate broker 2's peer links for 2.5s",
+    "cut peer link 1-\u003e3 (requests dropped; replies the other way lost) for 2.5s",
+    "delay every peer request to broker 2 by 200ms for 3s"
+  ],
+  "processed_by_group": {
+    "g1": 8786,
+    "g2": 8812
+  },
+  "profile": "short",
+  "records_per_partition": {
+    "events/0": 4048,
+    "events/1": 2230,
+    "events/2": 2476
+  },
+  "seed": "1792739049660733638",
+  "timeline": [
+    "  1.682s SIGKILL broker 2, leader of events/1",
+    "  3.295s healed: SIGKILL broker 2, leader of events/1",
+    "  4.299s SIGKILL broker 2, follower of events/0",
+    "  5.905s healed: SIGKILL broker 2, follower of events/0",
+    "  6.912s SIGKILL broker 1, the group coordinator",
+    "  8.622s healed: SIGKILL broker 1, the group coordinator",
+    "  9.623s SIGSTOP broker 2 for 2s",
+    " 11.626s healed: SIGSTOP broker 2 for 2s",
+    " 12.626s isolate broker 2's peer links for 2.5s",
+    " 15.127s healed: isolate broker 2's peer links for 2.5s",
+    " 16.127s cut peer link 1-\u003e3 (requests dropped; replies the other way lost) for 2.5s",
+    " 18.628s healed: cut peer link 1-\u003e3 (requests dropped; replies the other way lost) for 2.5s",
+    " 19.628s delay every peer request to broker 2 by 200ms for 3s",
+    " 22.628s healed: delay every peer request to broker 2 by 200ms for 3s",
+    " 22.629s faults healed; draining"
+  ],
+  "violations": null
+}

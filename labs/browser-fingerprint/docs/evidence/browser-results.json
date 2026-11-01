@@ -1,0 +1,131 @@
+{
+  "browser": "154.0.8037.57",
+  "journeys": [
+    {
+      "mode": "normal",
+      "fiveSteps": true,
+      "serverCRUD": true,
+      "status": "新增、讀取、編輯、完成、搜尋與刪除都已操作；觀測與事件已寫入實驗日誌。",
+      "denied": [
+        {
+          "route": "/observations/requests.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/.runtime/observations/events.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/fingerprints.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/api/logs",
+          "status": 404
+        },
+        {
+          "route": "/api/events",
+          "status": 405
+        },
+        {
+          "route": "/%2e%2e%2fobservations/requests.jsonl",
+          "status": 403
+        }
+      ],
+      "browserErrors": [],
+      "analysis": {
+        "steps": 5,
+        "events": 16,
+        "fingerprints": 1,
+        "mutations": {
+          "POST": 1,
+          "PATCH": 2,
+          "DELETE": 1
+        },
+        "sameSessionRunFingerprint": true,
+        "taskTextExcluded": true
+      }
+    },
+    {
+      "mode": "events-fail",
+      "fiveSteps": true,
+      "serverCRUD": true,
+      "status": "操作已完成，但觀測或事件記錄不完整；不需要重做已成功的操作。",
+      "denied": [
+        {
+          "route": "/observations/requests.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/.runtime/observations/events.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/fingerprints.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/api/logs",
+          "status": 404
+        },
+        {
+          "route": "/api/events",
+          "status": 405
+        },
+        {
+          "route": "/%2e%2e%2fobservations/requests.jsonl",
+          "status": 403
+        }
+      ],
+      "browserErrors": [],
+      "realWriteFailure": true
+    },
+    {
+      "mode": "fingerprints-fail",
+      "fiveSteps": true,
+      "serverCRUD": true,
+      "status": "操作已完成，但觀測或事件記錄不完整；不需要重做已成功的操作。",
+      "denied": [
+        {
+          "route": "/observations/requests.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/.runtime/observations/events.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/fingerprints.jsonl",
+          "status": 404
+        },
+        {
+          "route": "/api/logs",
+          "status": 404
+        },
+        {
+          "route": "/api/events",
+          "status": 405
+        },
+        {
+          "route": "/%2e%2e%2fobservations/requests.jsonl",
+          "status": 403
+        }
+      ],
+      "browserErrors": [],
+      "realWriteFailure": true
+    }
+  ],
+  "sourceHashes": {
+    "go.mod": "0e070c27be325eb5e0abbf18a6c0a733ff636cb8efc8170926df748c1bbdc272",
+    "main.go": "491e5b76c56977ee3c6500bde7b3f0f5ee7575c46b0d6dd4344476919fb55159",
+    "fingerprint.go": "bcda9eea30db98b8f94b044126f184aeba4464fd59d252ca482a8b6374a472bf",
+    "fingerprint_schema.go": "35d9c11cdd39a5424d6e280a46e2f48ddb8bb78196a1ebe78c0de3661d2404e1",
+    "analyze-observations.cjs": "f91baeaebaacac5b61ca4d057cb7aa1a530f0de2d1b63011362031c711bd1aa0",
+    "public/app.js": "982609e5da33931ca1d2a9db43b56a80b6660ddcb582a1ff50d464382f6059b7",
+    "public/experiment.css": "68655cb7d97e2cbe1034dcf7a81a3f971de05aceef805b0f714857776f44e14c",
+    "public/favicon.svg": "9ea83a558e7ca1015f36928bf5e848ccfcc2a836a99586e009e770c3e17e4d9d",
+    "public/fingerprint.js": "9961f18b3ff420956b0a2578c78fa9d88c8b1b72d70dfb1ed03ce8012738ab1d",
+    "public/index.html": "49c599aa82c69b210c1401ae27547365619c2a94a066746ae079e4ea984bc1a8",
+    "public/styles.css": "89d1d6afe292195986568a796e55b52a512380f24298b48c2e0aa2795267d587"
+  }
+}

@@ -38,7 +38,7 @@ Observation 與 host baseline 分別保存在 `private/operations/fresh-rebuild/
 
 ## 驗證結果
 
-[Worker](../.team/reports/T-222.md)、[獨立審查](../.team/reports/T-223.md) 與 [root evidence gate](../.team/reports/T-224.md) 分別保存有界證據。獨立審查重現並修復了 process leader 已退出時的子程序清理，以及真實 etcd member header 無 revision 的相容性缺陷；沒有放寬 status/range revision 檢查。
+Worker（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-222.md`）、獨立審查（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-223.md`） 與 root evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-224.md`） 分別保存有界證據。獨立審查重現並修復了 process leader 已退出時的子程序清理，以及真實 etcd member header 無 revision 的相容性缺陷；沒有放寬 status/range revision 檢查。
 
 - Root focused：`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest -v test_fresh_observation test_fresh_observation_integration test_fresh_execution test_fresh_execution_cli test_controller_preflight`，57 tests／1.979 秒通過。
 - Independent focused：上述範圍加 `test_fresh_observation_review`，68 tests／2.948 秒通過，包含實際 synthetic collector → preparation → inspection 證據鏈及 11 個獨立 adversarial cases。

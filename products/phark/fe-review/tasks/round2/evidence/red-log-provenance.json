@@ -1,0 +1,14 @@
+[
+  {
+    "name": "measured-red.log",
+    "originalSHA256": "a6d7158020a8e52520b5fa281675a22b47639aaffe816e63bd98ae8c923cb5ce",
+    "publicSHA256": "f217890a6623c75893a820a1165ee906247cf45e25fe215fa22e40d5986c1922",
+    "normalization": "exact local worktree path redacted; original retained privately"
+  },
+  {
+    "name": "notifications-red.log",
+    "originalSHA256": "b30c35647c3b9fe1426cb97c728684f11d3629075146845dfc026f347d29e5e4",
+    "publicSHA256": "08293ea3c07eb01888431ddb423914b060c36f6e637ed57cf9138bf4f5fba048",
+    "normalization": "exact local worktree path redacted; original retained privately"
+  }
+]

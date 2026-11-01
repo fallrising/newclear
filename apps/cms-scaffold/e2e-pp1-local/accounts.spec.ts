@@ -193,6 +193,7 @@ async function session(actor: Actor, id: string) {
 test("PP1-AC02 formal accounts and explicit grants", async ({ browser }) => {
   test.setTimeout(120_000);
   let group: Awaited<ReturnType<typeof actors>> | undefined;
+  let cleanupFailed = false;
   let operator: Awaited<ReturnType<typeof createPrincipal>> | undefined, guard: Awaited<ReturnType<typeof createPrincipal>> | undefined, resetPassword = "";
   try {
     check(credential); const suffix = credential.runId.slice(-8); check(/^[a-f0-9]{8}$/.test(suffix));
@@ -327,6 +328,7 @@ test("PP1-AC02 formal accounts and explicit grants", async ({ browser }) => {
   finally {
     if (credential) { credential.password = ""; credential.username = ""; } credential = undefined;
     if (operator) operator.password = ""; if (guard) guard.password = ""; resetPassword = "";
-    try { await group?.close(); } catch { throw failure(); }
+    try { await group?.close(); } catch { cleanupFailed = true; }
   }
+  check(!cleanupFailed);
 });

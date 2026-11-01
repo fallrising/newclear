@@ -2,10 +2,10 @@
 
 | ID | Milestone | Size | Depends | Status | Spec |
 |---|---|---:|---|---|---|
-| N00 | M0 | M | — | blocked | [專案骨架、CI 與 Contract Pipeline](N00-foundation-ci-contracts.md) |
-| N01 | M0 | M | N00 | todo | [SQLite Schema、Migration 與 Repository](N01-sqlite-schema-migrations.md) |
-| N02 | M1 | M | N00, N01 | todo | [Workspace、PathGuard 與 Lazy File Tree](N02-workspace-lazy-tree.md) |
-| N03 | M1 | M | N00 | todo | [Deterministic Markdown Render Model](N03-markdown-render-model.md) |
+| N00 | M0 | M | — | done | [專案骨架、CI 與 Contract Pipeline](N00-foundation-ci-contracts.md) |
+| N01 | M0 | M | N00 | done | [SQLite Schema、Migration 與 Repository](N01-sqlite-schema-migrations.md) |
+| N02 | M1 | M | N00, N01 | implementing | [Workspace、PathGuard 與 Lazy File Tree](N02-workspace-lazy-tree.md) |
+| N03 | M1 | M | N00 | blocked | [Deterministic Markdown Render Model](N03-markdown-render-model.md) |
 | N04 | M1 | S | N02, N03 | todo | [多分頁與狀態持久化](N04-tabs-state.md) |
 | N05 | M2 | L | N03 | todo | [DOM Selection 到 Anchor Capture](N05-selection-anchor-capture.md) |
 | N06 | M2 | M | N01, N04, N05 | todo | [Annotation CRUD、Sidebar 與重疊高亮](N06-annotation-crud-highlight.md) |

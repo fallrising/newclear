@@ -3,6 +3,92 @@
 Status: M1 implemented; executed results and their limits are recorded in
 [STATUS.md](STATUS.md). Created: 2026-10-07. Scope: `labs/open-compute`.
 
+## Proposed M5 kernel owner contract (T081)
+
+[SDD-M5's amendment](SDD-M5.md#m5-kernel-owner-amendment-t081-phase-a)
+defines an M5-only fresh same-PID kernel owner, exact crash/restart/cleanup APIs,
+strict additive evidence and immutable capabilities. Incomplete pre-checkpoint
+liveness never grants crash authority; strict target freeze, every generation's
+actual root-first SIGKILL/root-9, full-history nonlive and GET-only original
+readback remain mandatory. Actual ECHILD adds a restart barrier. M4 and generic
+Process/command remain frozen. Design review and root contract commit precede
+any implementation release; this proposal claims no runtime or historical fix.
+
+## Proposed M4 kernel closure contract (T077)
+
+[SDD-M4's amendment](SDD-M4.md#m4-kernel-closure-amendment-t077) defines a separate
+M4-only same-PID fresh exec runner, explicit lifecycle APIs and additive strict
+evidence. It replaces sampled ownership authority with closed launch epochs and
+actual kernel ECHILD; sampled liveness remains explicitly incomplete evidence.
+No generic Process/command or M1–M3/M5–M7 behavior changes. This is a contract
+baseline, not implementation or runtime evidence; historical AC-05 stays failed.
+
+## Current M7 lifecycle admission contract (T066, 2026-10-24)
+
+The accepted repair is implemented only in explicit integration supervision mode.
+Each existing `trial.py` invocation remains the same direct Popen child and becomes
+a checked child subreaper before workload dispatch. A separate M7-private
+`SupervisedCapture` delegates descendant closure to that first-party owner.
+Generic `lab.Process`, the existing `Capture`, M1–M6 daemon identities and M5's
+actual `-9` receipts remain unchanged. Manual mode without the private opt-in
+descriptor retains its ordinary output and lifecycle behavior.
+
+The opt-in supports checked Linux x86_64/glibc2 ABI: install and read back default
+SIGCHLD with SA_NOCLDWAIT cleared, and set/read back child-subreaper status.
+Unsupported proof refuses workload launch. This changes only a fresh first-party
+owner process, never the integration parent, account or host signal policy.
+
+The inherited Unix seqpacket channel uses strict version1 JSON packets bounded
+to4096bytes, exact keys/types and PID/start/original-deadline binding.
+READY(0) → ADMIT(1) → CLOSED(2) → ACK(3) is single-use; CANCEL/ABORT fail closed.
+CLOSED creates a fresh private32hex closure nonce after actual kernel closure;
+ACK echoes it, rejecting an ACK queued before closure. No argv, paths, raw errors,
+credentials or signal targets come from packets. Private binding/nonce facts are
+never public diagnostics. This correlates trusted first-party code, not hostile
+same-UID authentication. Control descriptors are non-inheritable and rejected in
+upstream pass_fds; actual executed-child tests verify absence.
+
+Before CLOSED, irreversibly close launches, require all registered Popen waits
+and pipe drains complete, join inner threads, verify signal/subreaper policy, and
+let the sole main-thread waiter collect adopted exits until actual ECHILD.
+WNOHANG zero, a dead root, pidfd exit or process-group disappearance is insufficient.
+A live/double-fork child prevents closure; unknown, competing waiter, late launch,
+output/history limit or deadline failure cannot become verified cleanup.
+The owner adopts the existing yielded absolute150-second cleanup end through
+`begin_cleanup`; it can only shorten its prior bound. The original wire deadline
+never changes. READY also respects the existing per-phase readiness cutoff without
+shortening the later serving lifecycle. No handshake or cancellation renews a lease.
+
+Opted init/serve shutdown completes ordinary daemon guards but saves clean=false.
+CLOSED may request a private digest of that validated dirty manifest, immutable
+manifest file metadata, root/lock identities and lock change time, trial and scope.
+Other clients, including stop, never request another owner's clean transition.
+The parent validates CLOSED while the exact owner is alive/unreaped, sends matching
+ACK, then requires actual exit0, complete bounded stdout and expected terminal
+result. Supervised serve's terminal result explicitly says clean_pending; it does
+not claim clean=true while disk is dirty.
+
+Only after those proofs does the parent acquire StateDirectory's existing lock,
+revalidate the exact binding and scope, and atomically save clean=true.
+Cancellation check/commit are serialized; cancellation before commit's lock
+linearization prevents it. Existing atomic-save interruption can leave false or
+true only after all closure/exit/output proof exists; a failed save still fails
+the operation and never supplies a passing acknowledgment. Lost/killed owner,
+EOF, stale/replayed frame, partial drain, manifest/lock drift or cancellation
+cannot substitute for proof or authorize deletion. Known-generation containment
+is distinct from verified completion.
+
+Historical T063 alternatives are superseded: a pre-reap acknowledgment alone
+cannot account for an escaped double-fork descendant; a separate proxy would
+change PID/wait semantics without an adapter; a delegated cgroup would add a
+larger environment contract. Neither sleeps/retries nor ignoring child_missing
+is an accepted repair. The unchanged generic observer still refuses that case.
+
+Offline evidence is318tests on the frozen candidate, independently repeated by
+root. T067 accepted the source; T069's separately released original M7 trial
+passed (see STATUS). Publication/CI remains a separate gate. This contract does not
+identify the vanished generation in the historical trial or qualify all M4 races.
+
 ## 1. Problem and outcome
 
 An independent developer needs evidence that a self-hosted Workers-style
@@ -231,3 +317,50 @@ the pinned source where possible. Read source is not an executed test result.
 - [Security policy and network boundary](https://github.com/elliothux/open-compute/blob/73efa56a1b1ad51a4519b2253ffaa499cb29fb2d/SECURITY.md)
 - [Backup boundaries](https://open-compute.dev/docs/ocd/backup/)
 - [Cloudflare workerd security boundary](https://github.com/cloudflare/workerd)
+
+## Issue548 maintenance: diagnostic artifact contract v1
+
+This contract precedes the diagnostic implementation. Existing runtime/ownership
+refusals, original report shapes, workload, deadlines and command exit remain unchanged.
+A separate `failure-diagnostics.json` records no raw exceptions or runtime text.
+It has exactly schema_version1, profile (restart/restore/resources/storage/crash/retry/trial),
+source_commit (40 lowercase hex or null), result (passed/failed/unknown), phase
+(fixed harness phase enum or unknown), exit_code (integer-255..255 or null),
+report_written (boolean), evidence (record/report/missing/invalid), and failures.
+Failures has exactly original/cleanup/evidence; each is null or exactly phase,
+category (fixed public error enum or unknown) and observation (fixed process-edge
+reason enum or null). Record the first failure in each slot before later cleanup
+or report projection; never replace the original with a generic later error.
+
+Only independently validated, rebuilt fields may be serialized. A private normal
+report is input data, not a trusted diagnostic object: extract only bounded known
+facts, ignore unrelated raw diagnostics, map unknown free strings to unknown, and
+never copy paths/argv/hostnames/config/nonces/credentials or their hashes. Direct
+versioned records reject extra keys, duplicates, nonfinite values, booleans-as-numbers,
+invalid enums and oversized data. Input is a no-follow, bounded regular current-UID
+file; symlink/multilink/unsafe files are invalid. Publication uses an owned safe
+parent, exclusive no-follow0600 file and finite bounds. Failed publication never
+changes the runtime's original exit or rewrites its report. CI's separate always-run
+collector supplies a minimal unknown record if evidence is missing/invalid and
+publishes only its explicit allowlisted profile basename, never raw logs.
+
+A ProcessObservationError may carry a fixed reason to distinguish parent disappearance,
+parent reuse/zombie, child disappearance/reuse/reparenting or inconsistent start order;
+recording must preserve the existing combined fail-closed condition and message.
+No new generation is admitted after refusal and unknown is not cleanup success.
+
+An already recorded fixed observation reason must survive subsequent fail-closed
+snapshot, identity, live and children reads, including shutdown's repeated scan
+and command cleanup refusal. Rethrowing a known refusal must not replace that
+reason with unknown before diagnostic capture. Missing/unrecognized reasons
+still normalize to unknown; no raw exception text becomes a public reason. This
+changes evidence propagation only, not admission, signals, cleanup authority,
+success criteria or the attribution of historical failures.
+
+CI keeps approved report artifacts and strict diagnostics for30days (subject to
+repository policy). Four-profile real qualification uses the unchanged original
+locked artifact in separate fresh non-root containers with real passwd homes,
+loopback ingress, no external runtime network and bounded owned cleanup. A new
+failure remains evidence, not permission to relax the gate. Historical logs for
+issue548 were retrievable; docs must distinguish them from ephemeral artifact
+retention, prior repairs and unproved current root cause.

@@ -1,0 +1,539 @@
+{
+  "milestone": "M2 sealed persisted-session source and bounded native fault matrix",
+  "full_m2_passed": false,
+  "source_base": "7dd0169c440cc3eec397244740d9b1cea3756cd4",
+  "python_runtime": "3.11.16",
+  "full_test_count": 299,
+  "verification_status": "Root299tests51.733s and independent299tests51.658s passed at the same frozen source. Seven bounded native cases passed their scoped oracles; final full-candidate review is recorded with delivery.",
+  "source_test_manifest_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+  "source_test_sha256": {
+    "src/agent_workforce/__init__.py": "b1acef31c4f2e4ccbaa0f60eec71d0044943fc0871bf1221e752da6afd61a34f",
+    "src/agent_workforce/__main__.py": "6aa4849df287ff3669ad5fb04958718c194287a0c96eecb924b81159b749e7c7",
+    "src/agent_workforce/admission.py": "1efcb3cdd8d07b4c8461e661c8e51075959bdc70ff9be8e0151d8c663e46f63a",
+    "src/agent_workforce/controller.py": "35997c8af8afcd134c0f9624b60eb82d42082a4af9bf60ffda2f4714142a5602",
+    "src/agent_workforce/demo.py": "35de92878f68ef551cc3c44507b0f3a59f7dd460f277ec57f0af47271c6a12e6",
+    "src/agent_workforce/domain.py": "f65243415b91047a89ed6b65c35dc1cf8d7da9cf5384a23c36f3c5d28a3eb737",
+    "src/agent_workforce/fake.py": "7677670a3dc2df9ef005f2972287f62f3fc5633a0b53997cde85bd5b6bed5edf",
+    "src/agent_workforce/native.py": "c3ac6bbba4e0fc4fe0fb3ec0bd1774f11d9b6c1a4aad2205e085e2173a23cd00",
+    "src/agent_workforce/native_events.py": "a23e57fec2021aea63b6e7b8dc5a1df60404f9ed84f9c0704e54992922f7939f",
+    "src/agent_workforce/native_process.py": "c8e2cd451787a0336f1a6953c0d9cee182eff23c6fb3005fda16b320b4c585e2",
+    "src/agent_workforce/native_reaper.py": "f2c832ea0df7df24118e53129d122439d553ce51d2202ffdde25a6a85dd0a3c0",
+    "src/agent_workforce/native_reaping.py": "e14657abc63d0d8efa4b9b5f84d9babeedac039faa7ba6d1d770983c03c5e435",
+    "src/agent_workforce/native_session_events.py": "0f3e8f304b56fc0403a9d5925dde2c517b8e8cb241e6dedcf308554b1aaf808e",
+    "src/agent_workforce/native_session_source.py": "c53a58f85141cb465704441166edeb9ff4e8eafc94133a6ae8ca539a0e59a3fa",
+    "src/agent_workforce/native_stop_proof.py": "a67557a6f9c68ad45cf4a1b49bdc15ebf99ac135e6dc8d70443a4398f9337e35",
+    "src/agent_workforce/runtime_store.py": "011f89639f29314d38fdb7227805a8d9aac4b4a5531da816b26e3e76f8fb62c5",
+    "src/agent_workforce/storage_base.py": "8d1f597adaf2022467459b863179682afbf8e0e411ff851cc30699780ced2671",
+    "src/agent_workforce/store.py": "8e49b4447a403176d1ae3648a674fb3da81cf302383e419784c6e9034dc85824",
+    "tests/support.py": "3ef34abd379a06f4795234c0df64652c85b105054c3965dfcd6d2527e1a13ef4",
+    "tests/test_admission_extensions.py": "fcf41cd4b08f808eafc7e72c9c21da7b60ec494989641bf74333a4a7371950f8",
+    "tests/test_controller.py": "2864bc554b2907ed6466a4da145311c424e3b1f43e314bf726f7aeb599b732f1",
+    "tests/test_controller_boundaries.py": "4c00ecd10927a2ab4266a27c55544a07558e2856ce86ef8369731d485b893a94",
+    "tests/test_demo.py": "319534b1a9b5db2fca0027c5125fee6339064d70ed20a4659c8cedbd97fd521f",
+    "tests/test_dispatch_guards.py": "dcb4f9fc85ed57b9afcafef978334d4baef0d71db95cdaa1c0d3e5c6278516f3",
+    "tests/test_domain.py": "a8f0d481c83837ee6606098c8569c48c77881641393556169405d38af0145f40",
+    "tests/test_input_rejection.py": "4e6ebf2bcf157d80f3f5789e76a511109a4d6e75f838d0a1de36536738cba4e9",
+    "tests/test_m1.py": "6c5cf776062ed568f7b6a06ae9359b8e477f327fd7ed11579f77295aa59fbef4",
+    "tests/test_native.py": "a0ed41abf20d69bc007dada6c0bb9cb8509dd4651d8540c594e0904daa9d2945",
+    "tests/test_native_events.py": "dc3bdabc1cede9b3e401cffd24a312969ee0ce4babc4bfe822e8e50951bc3556",
+    "tests/test_native_order.py": "068779ee2dd9e4ff9cd6fc3c1de8d640ebc33e2267bf4a0fc2876ac7350d6a0b",
+    "tests/test_native_process.py": "958b928be948c6fde1602842e259e9581802ae79486373739a9009b474236eff",
+    "tests/test_native_reaper.py": "649a6f79ed4899193ea27b264d54c4ce33066616c938c831af18fb2e356c875f",
+    "tests/test_native_reaping.py": "1f1a4028d147a0b14aafb7b18675851f81aa6f254fcefca6c4010aba3c9e268d",
+    "tests/test_native_session_events.py": "980e4db8fd226dc78a215494fe66ea182323999e055fc31a77ef92e3faed37a0",
+    "tests/test_native_session_integration.py": "e947e4cb4a9bfe1f892561afd5e9c3e89edb0f8adde9d1f60a0f2fc969db8e63",
+    "tests/test_native_session_source.py": "0249944bb6601c940323a786c11d4acbd8d59972b9a5d4400ccba6e67c824155",
+    "tests/test_native_stop_proof.py": "891a1ffea1429c49233d4e9108df97020e485974ed412381eb778fc5924d2bda",
+    "tests/test_registry_bindings.py": "28a7a7b88428933563221adc25f3b3f524736b9e824650157318bc1f6f5fd846",
+    "tests/test_runtime_extensions.py": "c12d3c641f3309f2c21fb7dcf335c094a42d1416811e2ac9801864e359bcfb76",
+    "tests/test_runtime_store.py": "a3eea905924636851cab9d47c59557f49cef73ae1d5de2a68847013999d07fa6",
+    "tests/test_storage_base.py": "60459815f3d5c695c674a8448cc6c58f47079211e1a2be033d671ed5f3576383",
+    "tests/test_store.py": "65f22135f754f7c548e1bbf04b1e1d7c0421e425f5a82b48632e72dbcd312e59",
+    "tests/test_store_core.py": "11e05fff557879c58676bc32b02200b2b05c0d4d7d72a7d4289e3340cada94d9",
+    "tests/test_store_extensions.py": "cd7656c426c1dd2ff25477c6cf692a7021e2d0717b9a8fc4157c7e7fb5045981"
+  },
+  "session_source": {
+    "protocol": "codex-session-source-v2",
+    "normalizer": "codex-session-v1",
+    "default": false,
+    "scope": "Fresh Codex only, matching reaper closure, pre-spawn intent binding and immutable sealed replay; opaque tools remain incomplete",
+    "trust_boundary": "ordinary mode-bit traversal and cooperating same-UID; explicit owned-private-ancestor policy is source-only, journal remains private",
+    "root_tests": 299,
+    "independent_tests": 299
+  },
+  "native_cases": {
+    "codex-session": {
+      "status": "unknown",
+      "stopped": true,
+      "effects_resolved": false,
+      "source_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+      "version": "0.163.0",
+      "requested_model": "gpt-6.1-sol",
+      "actual_billing": null,
+      "provider_requests": null,
+      "evidence_sha256": {
+        "check.json": "b1aaab79fe6ab4f1ceeabdea9ca259c133183b7a3cfdd1c87b746c63e0a051a5",
+        "invocation.json": "4220124be226ff477fe6b059669ae3d7594a695929d5ecdb4a3d0e6668de0532",
+        "receipt.json": "f5a2639ae04fe0cbea6d45f5ae01bd1217e6fd8cd9f14fdef013d3e54fc600a3",
+        "reconcile.json": "f5a2639ae04fe0cbea6d45f5ae01bd1217e6fd8cd9f14fdef013d3e54fc600a3",
+        "observations.json": "8dfb12b142fd3699ca7dcc4e9dc53b3de42f0dcb72e15255d231e31910868323"
+      },
+      "coverage_gaps": [
+        "opaque_tool_call",
+        "unsupported_event"
+      ],
+      "call_count": 4,
+      "event_count": 37
+    },
+    "codex-crash": {
+      "status": "unknown",
+      "stopped": true,
+      "effects_resolved": false,
+      "source_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+      "version": "0.163.0",
+      "requested_model": "gpt-6.1-sol",
+      "actual_billing": null,
+      "provider_requests": null,
+      "evidence_sha256": {
+        "check.json": "48b4ad96b2bed8d789627b6a432e3bb2852376edc86fa18d2cdad218595758e9",
+        "invocation.json": "3e95048342376a57ff4bbd759f50a915c33bcc05bad69e905136fabc5cc97b0a",
+        "receipt.json": "6466464a13316b49bb7c8158b1f2a8117e9e8f54c55365bef46386aef3449b02",
+        "reconcile.json": "6466464a13316b49bb7c8158b1f2a8117e9e8f54c55365bef46386aef3449b02",
+        "observations.json": "6c69521a1764b4a2f4cb65848f9ef46171161cb922150f18cd4c01d70df93fba"
+      },
+      "checks": {
+        "effects_unresolved": true,
+        "local_closure": true,
+        "matching_operation": true,
+        "one_execute_entry": true,
+        "original_claim_retained": true,
+        "original_process_binding_retained": true,
+        "outer_within_180s": true,
+        "reconcile_equal": true,
+        "source_unchanged": true
+      },
+      "remote_acceptance": "unknown"
+    },
+    "codex-receipt-gap": {
+      "status": "complete",
+      "stopped": true,
+      "effects_resolved": false,
+      "source_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+      "version": "0.163.0",
+      "requested_model": "gpt-6.1-sol",
+      "actual_billing": null,
+      "provider_requests": null,
+      "evidence_sha256": {
+        "check.json": "160176ba06bc750d1ff5a3886f11083f35ab4ecf940824ca9492514f672641e8",
+        "invocation.json": "1e4895f83425dcae390af5374e64f0ce0a46eddaabca140d2ea8addb37ee7d20",
+        "receipt.json": "e1bea4aedecc04f0262153cc6e829ead6ce06668b4056b4d545011a9687300d0",
+        "reconcile.json": "e1bea4aedecc04f0262153cc6e829ead6ce06668b4056b4d545011a9687300d0",
+        "observations.json": "064dec3864b40998aa20e4765ddd6b5d96b30eb1e2558e1900af350e653d5c6c"
+      },
+      "checks": {
+        "actual_receipt_write_gap": true,
+        "effects_unresolved": true,
+        "local_closure": true,
+        "matching_operation": true,
+        "one_execute_entry": true,
+        "original_claim_retained": true,
+        "original_process_binding_retained": true,
+        "outer_within_180s": true,
+        "reconcile_equal": true,
+        "source_unchanged": true
+      },
+      "remote_acceptance": "unknown"
+    },
+    "codex-lease-expiry": {
+      "status": "complete",
+      "stopped": true,
+      "effects_resolved": false,
+      "source_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+      "version": "0.163.0",
+      "requested_model": "gpt-6.1-sol",
+      "actual_billing": null,
+      "provider_requests": null,
+      "evidence_sha256": {
+        "check.json": "1d4c2bb02b76adeddd7cf668760ef608c6dec0c1e43c883c36b021a90f7196f0",
+        "invocation.json": "060ec67dfea9fe4d2990ac8c2cb04483b57d93d084e9a7536695dd63a160a010",
+        "receipt.json": "de7bbc9f48f87797f198c3409301590915ea00f05ba2caf76fb34cac67c324d2",
+        "reconcile.json": "de7bbc9f48f87797f198c3409301590915ea00f05ba2caf76fb34cac67c324d2",
+        "observations.json": "9e18bcc536fcf4528bf628bdd0a624a090c178e67223e55d17287d0053648337"
+      },
+      "checks": {
+        "effects_unresolved": true,
+        "five_holds_retained": true,
+        "lease_expired": true,
+        "local_closure": true,
+        "m1_effects_unresolved": true,
+        "matching_operation": true,
+        "one_execute_entry": true,
+        "original_claim_retained": true,
+        "original_m1_binding_retained": true,
+        "original_process_binding_retained": true,
+        "original_reservations_retained": true,
+        "outcome_unknown": true,
+        "outer_within_180s": true,
+        "reconcile_equal": true,
+        "source_unchanged": true,
+        "stale_publication_rejected": true
+      },
+      "remote_acceptance": "unknown"
+    },
+    "claude-crash": {
+      "status": "unknown",
+      "stopped": true,
+      "effects_resolved": false,
+      "source_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+      "version": "2.1.296",
+      "requested_model": "claude-sonnet-5-5",
+      "actual_billing": null,
+      "provider_requests": null,
+      "evidence_sha256": {
+        "check.json": "45bc692924cf61a9fa494983afc48f366ddea18c9da625e9c80796b772c65790",
+        "invocation.json": "aa56fd4bef42b84b86b8ace20341bffeb9638a53ac06fe4367972365dc226f65",
+        "receipt.json": "7157d1c0da676b4164c07e50c1f36b21c064dddfe51979aca7b4867abd23dd72",
+        "reconcile.json": "7157d1c0da676b4164c07e50c1f36b21c064dddfe51979aca7b4867abd23dd72",
+        "observations.json": "be92c8c203508d3765b8cab5e12f8e10df49225b4c9ee45948da2dc529c76758"
+      },
+      "checks": {
+        "effects_unresolved": true,
+        "local_closure": true,
+        "matching_operation": true,
+        "one_execute_entry": true,
+        "original_claim_retained": true,
+        "original_process_binding_retained": true,
+        "outer_within_180s": true,
+        "reconcile_equal": true,
+        "source_unchanged": true
+      },
+      "remote_acceptance": "unknown"
+    },
+    "claude-receipt-gap": {
+      "status": "complete",
+      "stopped": true,
+      "effects_resolved": false,
+      "source_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+      "version": "2.1.296",
+      "requested_model": "claude-sonnet-5-5",
+      "actual_billing": null,
+      "provider_requests": null,
+      "evidence_sha256": {
+        "check.json": "43a07831efe01170cedb8cf73c4a791321345e7f00dbdddff70027cdfad8902c",
+        "invocation.json": "5c421e407c972b1ceeedccf1421b686a4b1368912e6f390ab60562f9c017f91d",
+        "receipt.json": "f63b9560ce4f7406a75bae1ec6bf7c5aaba8597c821505aeb155cd449efd05e8",
+        "reconcile.json": "f63b9560ce4f7406a75bae1ec6bf7c5aaba8597c821505aeb155cd449efd05e8",
+        "observations.json": "ddd215321b49baa0bf6749d34ea6da9b80abf1473def400d955eae0458f6f674"
+      },
+      "checks": {
+        "actual_receipt_write_gap": true,
+        "effects_unresolved": true,
+        "local_closure": true,
+        "matching_operation": true,
+        "one_execute_entry": true,
+        "original_claim_retained": true,
+        "original_process_binding_retained": true,
+        "outer_within_180s": true,
+        "reconcile_equal": true,
+        "source_unchanged": true
+      },
+      "remote_acceptance": "unknown"
+    },
+    "claude-lease-expiry": {
+      "status": "complete",
+      "stopped": true,
+      "effects_resolved": false,
+      "source_digest": "9b01045892dedc3a3fd719234b71c0abcc52f88cf4583dec1bfadc1500ed1cac",
+      "version": "2.1.296",
+      "requested_model": "claude-sonnet-5-5",
+      "actual_billing": null,
+      "provider_requests": null,
+      "evidence_sha256": {
+        "check.json": "414c8c4ab6905e6d4963b0118c0f32f45ca632a9b9e0871d0ee0c34dc4054dd9",
+        "invocation.json": "f0ba8597fdf43388d19b64fb0f62196d2f1249a71204cd1275c6d03087f228f5",
+        "receipt.json": "3109b6c072d384da5b9aa1902c9e562b268845a7093bee299de4a84e2d513d08",
+        "reconcile.json": "3109b6c072d384da5b9aa1902c9e562b268845a7093bee299de4a84e2d513d08",
+        "observations.json": "ec27e297b24f5185b06a8d715477399156f467b84d5f92cd2363e205eef4a486"
+      },
+      "checks": {
+        "effects_unresolved": true,
+        "five_holds_retained": true,
+        "lease_expired": true,
+        "local_closure": true,
+        "m1_effects_unresolved": true,
+        "matching_operation": true,
+        "one_execute_entry": true,
+        "original_claim_retained": true,
+        "original_m1_binding_retained": true,
+        "original_process_binding_retained": true,
+        "original_reservations_retained": true,
+        "outcome_unknown": true,
+        "outer_within_180s": true,
+        "reconcile_equal": true,
+        "source_unchanged": true,
+        "stale_publication_rejected": true
+      },
+      "remote_acceptance": "unknown"
+    }
+  },
+  "historical_correction": {
+    "historical_profile_label": "0.162.1",
+    "persisted_metadata_version": "0.163.0",
+    "audit_sha256": "9855917b64878d79d0c7f341ce49720ad4cdb9add6139097df0a3b85cc70b832",
+    "historical_raw_unchanged": true,
+    "denial_limitation": "Opaque wrapper output is not authenticated nested-tool outcome; historical denial claim is not inherited as complete tool coverage."
+  },
+  "gates": {
+    "NATIVE-01": "Passed bounded prior route observations and current fresh Codex persisted-session binding; no general route promotion",
+    "NATIVE-02": "Partial: current Codex sealed source ingested37events/4opaque calls/3typed commands; intended negative fixture leaves marker absent but opaque nested failure is not authenticated. Claude prior typed refusal retained as historical evidence.",
+    "NATIVE-03": "Passed bounded current-source parent-crash, final native receipt-write gap and logical lease-expiry cases for each exact native profile. Original identity/claim and local closure retained; repeated inspection does not execute. Both lease cases reject stale fence and retain original five holds. Remote effects/acceptance/billing stay unknown; no general fault-matrix claim.",
+    "NATIVE-04": "Blocked/NotRun successful native continuity: no trusted operation-bound effects resolution or qualified resume capability; actual replacement/resume refusal passed. No old operation retried.",
+    "NATIVE-05": "Partial: historical Claude synthetic secret refusal retained. Codex per-file read isolation and both controlled native auth-expiry cases NotRun; existing profile has no qualified per-file boundary or isolated auth fixture, credentials/settings unchanged.",
+    "API": "NotRun",
+    "LIVE": "NotRun",
+    "SOAK": "NotRun"
+  },
+  "remaining_prerequisites": [
+    "Authenticated nested-tool outcome source for opaque wrappers",
+    "Trusted operation-bound effects evidence and separately qualified native resume/reconstruct",
+    "Isolated controlled native-login auth-expiry fixture without changing existing login",
+    "Qualified Codex per-file read boundary for secret-isolation case"
+  ],
+  "provider_requests": null,
+  "actual_billing": null,
+  "effects_attested": false,
+  "old_operations_promoted": false,
+  "native_qualification_scope": "Seven newly authorized independent synthetic cases at one frozen source; no replacement of unknown work. All seven retain local stopped true and effects false. Historical journals/sessions/reservations retained.",
+  "historical_stop_slice": {
+    "milestone": "M2 bounded native adapters with opt-in local subreaper stop port",
+    "full_m2_passed": false,
+    "source_base": "29595237e4996c5ae186f13477cc48f783c01a93",
+    "python_runtime": "3.11.16",
+    "full_test_count": 248,
+    "verification_status": "Root and independent Python3.11.16 suites each passed248 tests; stop prerequisite independently accepted. Final delivery review binds the full public candidate separately.",
+    "routes": {
+      "codex": {
+        "source_digest": "b7af6eb378ecac48470b09ffea97605c44639d8e7c256c23dca2cdf575e426d6",
+        "native_status": "complete",
+        "event_count": 11,
+        "allowed_tools": "Passed",
+        "intentional_denial": "Passed: bound persisted native session custom_tool_call/output, exit1 EROFS; absent from stdout",
+        "secret_leak": "NotRun: Codex workspace-write profile has no qualified per-file read prohibition",
+        "local_stop": "Passed: subreaper-v1 kernel ECHILD closure",
+        "effects_resolved": false,
+        "session_binding": "Passed",
+        "reconcile": "Passed: identical reopened receipt, no invocation",
+        "recovery_controls": "Passed: unresolved-effects resume and occupied-session replacement rejected",
+        "native_resume": "NotRun: prior effects unresolved; resume capability unqualified",
+        "native_reconstruct": "NotRun: prior effects unresolved",
+        "auth_expiry": "NotRun: fixed native-login profile has no controlled auth fixture; existing credentials untouched",
+        "evidence_sha256": {
+          "receipt.json": "63def443645ab0ec64a0707fb24590b8fadd805136ab8b03c0dddfd1c147d142",
+          "observations.json": "8c45bb044e3c6bf8489d15700d1c4396145a765744c59af162a9b8bed112bca4",
+          "invocation.json": "e9a9d34d0cec02363175a77c15bcae883060b3a78fdc2d89272549f9d712ab5e",
+          "reconcile.json": "63def443645ab0ec64a0707fb24590b8fadd805136ab8b03c0dddfd1c147d142",
+          "stop.json": "63def443645ab0ec64a0707fb24590b8fadd805136ab8b03c0dddfd1c147d142"
+        },
+        "provider_requests": null,
+        "actual_billing": null,
+        "requested_model": "gpt-6.1-sol",
+        "reported_model": null,
+        "version": "0.162.1",
+        "supplemental_denial_sha256": "9855917b64878d79d0c7f341ce49720ad4cdb9add6139097df0a3b85cc70b832",
+        "stream_limitation": "stdout reports complete but omits nested exec tool failure; separately bound persisted native session has the actual denied tool call/output. Product runner does not ingest that supplemental trace; no automatic task success or route promotion."
+      },
+      "claude": {
+        "source_digest": "b7af6eb378ecac48470b09ffea97605c44639d8e7c256c23dca2cdf575e426d6",
+        "native_status": "failed",
+        "event_count": 8,
+        "allowed_tools": "Passed",
+        "intentional_denial": "Passed: Read tool_use, matching is_error tool_result and permission_denials",
+        "secret_leak": "Passed bounded synthetic denied Read; token absent from raw native stdout, fixture unchanged",
+        "local_stop": "Passed: subreaper-v1 kernel ECHILD closure",
+        "effects_resolved": false,
+        "session_binding": "Passed",
+        "reconcile": "Passed: identical reopened receipt, no invocation",
+        "recovery_controls": "Passed: unresolved-effects resume and occupied-session replacement rejected",
+        "native_resume": "NotRun: prior effects unresolved; resume capability unqualified",
+        "native_reconstruct": "NotRun: prior effects unresolved",
+        "auth_expiry": "NotRun: fixed native-login profile has no controlled auth fixture; existing credentials untouched",
+        "evidence_sha256": {
+          "receipt.json": "7c274ebf8971c616a7a4f6d20d34e198063f1fc48c01930dd97361543ea77ca6",
+          "observations.json": "0dcca06bcddc328ea8ad2262270d964123dcf577eb2360ea9a0c230037d343f6",
+          "invocation.json": "9a2bd14b22786f4a7cd3cd16cfdd56e3db27eddded1ccdb3372c785455a4c50d",
+          "reconcile.json": "7c274ebf8971c616a7a4f6d20d34e198063f1fc48c01930dd97361543ea77ca6",
+          "stop.json": "7c274ebf8971c616a7a4f6d20d34e198063f1fc48c01930dd97361543ea77ca6"
+        },
+        "provider_requests": null,
+        "actual_billing": null,
+        "requested_model": "claude-sonnet-5-5",
+        "reported_model": "claude-sonnet-5-5",
+        "version": "2.1.296"
+      }
+    },
+    "gates": {
+      "NATIVE-01": "Passed bounded final-source native I/O/terminal/session for both fixed profiles",
+      "NATIVE-02": "Partial: positive tools and actual refusal observed for both; Codex denial needs supplemental persisted-session evidence, not its stdout-only product receipt",
+      "NATIVE-03": "Partial: both exact native profiles pass normal local closure plus independent cancel and timeout with identical reopened receipts; helper fault/receipt-gap tests passed locally. Remote acceptance/effects and original polling operations remain unknown; native parent-crash/lease fault matrix not fully qualified.",
+      "NATIVE-04": "NotRun native resume/reconstruct: prior effects unresolved and capability unqualified; actual occupied-session/recovery rejection passed",
+      "NATIVE-05": "Partial: Claude synthetic-secret denied Read passed; Codex per-file secret isolation and both controlled native auth-expiry cases NotRun",
+      "API": "NotRun",
+      "LIVE": "NotRun",
+      "SOAK": "NotRun"
+    },
+    "source_test_sha256": {
+      "src/agent_workforce/native.py": "52e0eafe5c2a1efaec6706876a7c0a85d6a20af0fe21dd5bfc27b91625816769",
+      "src/agent_workforce/native_process.py": "c8e2cd451787a0336f1a6953c0d9cee182eff23c6fb3005fda16b320b4c585e2",
+      "src/agent_workforce/native_events.py": "a23e57fec2021aea63b6e7b8dc5a1df60404f9ed84f9c0704e54992922f7939f",
+      "src/agent_workforce/controller.py": "35997c8af8afcd134c0f9624b60eb82d42082a4af9bf60ffda2f4714142a5602",
+      "tests/test_native.py": "a0ed41abf20d69bc007dada6c0bb9cb8509dd4651d8540c594e0904daa9d2945",
+      "tests/test_native_process.py": "958b928be948c6fde1602842e259e9581802ae79486373739a9009b474236eff",
+      "tests/test_native_events.py": "dc3bdabc1cede9b3e401cffd24a312969ee0ce4babc4bfe822e8e50951bc3556",
+      "tests/test_native_order.py": "068779ee2dd9e4ff9cd6fc3c1de8d640ebc33e2267bf4a0fc2876ac7350d6a0b",
+      "src/agent_workforce/native_reaper.py": "f2c832ea0df7df24118e53129d122439d553ce51d2202ffdde25a6a85dd0a3c0",
+      "src/agent_workforce/native_reaping.py": "e14657abc63d0d8efa4b9b5f84d9babeedac039faa7ba6d1d770983c03c5e435",
+      "src/agent_workforce/native_stop_proof.py": "a67557a6f9c68ad45cf4a1b49bdc15ebf99ac135e6dc8d70443a4398f9337e35",
+      "tests/test_native_reaper.py": "649a6f79ed4899193ea27b264d54c4ce33066616c938c831af18fb2e356c875f",
+      "tests/test_native_reaping.py": "1f1a4028d147a0b14aafb7b18675851f81aa6f254fcefca6c4010aba3c9e268d",
+      "tests/test_native_stop_proof.py": "891a1ffea1429c49233d4e9108df97020e485974ed412381eb778fc5924d2bda"
+    },
+    "native_qualification_scope": "Two new independent synthetic fixtures at the frozen source/test digest using the opt-in subreaper supervisor. Historical operations and evidence remain unchanged; no retries, resumes, effect attestations or releases. Explicit bounded qualification does not qualify automatic production dispatch, native continuity or full M2.",
+    "historical_adapter_slice": {
+      "milestone": "M2 bounded native adapter slice",
+      "source_base": "686b4d52ba5d505dd0ec8a5e3410abd003aecc57",
+      "full_test_count": 194,
+      "verification_status": "Fixed candidate requires root and independent checks; public source/test hashes bind this revision.",
+      "routes": {
+        "codex": {
+          "requested_model": "gpt-6.1-sol",
+          "reported_model": null,
+          "version": "0.162.1",
+          "native_terminal": "complete",
+          "event_count": 11,
+          "observed_tools": [
+            "command_execution",
+            "command_execution",
+            "command_execution"
+          ],
+          "bounded_positive": "Passed",
+          "intentional_denial": "NotRun: no structured denial event; final text is not proof",
+          "forbidden_marker_created": false,
+          "leader_exit_code": 0,
+          "full_stop": "Blocked",
+          "native_resume": "NotRun",
+          "effects_resolved": false,
+          "provider_requests": null,
+          "actual_billing": null,
+          "evidence_sha256": {
+            "invocation.json": "db36858a7c3deaf3a928106ad15761e2bd35dffb5abead7d0deb6f38e3e61d14",
+            "receipt.json": "af111f79e8b2a2dce95773b02b42c05b3fa67cc10dd2006d2f41214ed695d0e0",
+            "reconcile.json": "af111f79e8b2a2dce95773b02b42c05b3fa67cc10dd2006d2f41214ed695d0e0",
+            "observations.json": "f62da7681753131cf3a2440a95037abd31a502b7bb56f42a925a7a93a560a122"
+          }
+        },
+        "claude": {
+          "requested_model": "claude-sonnet-5-5",
+          "reported_model": "claude-sonnet-5-5",
+          "version": "2.1.296",
+          "native_terminal": "complete",
+          "event_count": 9,
+          "observed_tools": [
+            "Read"
+          ],
+          "bounded_positive": "Passed",
+          "intentional_denial": "NotRun: Write is not exposed; native init lists only Read/Glob/Grep",
+          "forbidden_marker_created": false,
+          "leader_exit_code": 0,
+          "full_stop": "Blocked",
+          "native_resume": "NotRun",
+          "effects_resolved": false,
+          "provider_requests": null,
+          "actual_billing": null,
+          "evidence_sha256": {
+            "invocation.json": "b78cfa34aa83c48baa1ccd0943bc5b080e81a3c7d8dd78d194ff4e49c7af5c70",
+            "receipt.json": "9741e1224789dd60663d89852cf46cb3e5afb589bb58c04dd9e9a43cb65c5ab1",
+            "reconcile.json": "9741e1224789dd60663d89852cf46cb3e5afb589bb58c04dd9e9a43cb65c5ab1",
+            "observations.json": "19cb8398f269f34a5d7a021514780efabc39161c79a8c968dcf857d6ca8e04f7"
+          }
+        }
+      },
+      "gates": {
+        "NATIVE-01": "Passed bounded native I/O/terminal/session observation for each exact route",
+        "NATIVE-02": "Partial: actual permitted tools passed; intentional denial NotRun for each route",
+        "NATIVE-03": "Blocked: whole descendant closure cannot be established by polling",
+        "NATIVE-04": "NotRun: stop prerequisite unproven",
+        "NATIVE-05": "NotRun: full auth expiry and secret leak cases not exercised",
+        "API": "NotRun",
+        "LIVE": "NotRun",
+        "SOAK": "NotRun"
+      },
+      "source_test_sha256": {
+        "src/agent_workforce/native.py": "52e0eafe5c2a1efaec6706876a7c0a85d6a20af0fe21dd5bfc27b91625816769",
+        "src/agent_workforce/native_process.py": "38c7069552177ee3de5da30ff4f2cdabbf0ff900936c424df1e695ed0aad3673",
+        "src/agent_workforce/native_events.py": "a23e57fec2021aea63b6e7b8dc5a1df60404f9ed84f9c0704e54992922f7939f",
+        "src/agent_workforce/controller.py": "35997c8af8afcd134c0f9624b60eb82d42082a4af9bf60ffda2f4714142a5602",
+        "tests/test_native.py": "a0ed41abf20d69bc007dada6c0bb9cb8509dd4651d8540c594e0904daa9d2945",
+        "tests/test_native_process.py": "958b928be948c6fde1602842e259e9581802ae79486373739a9009b474236eff",
+        "tests/test_native_events.py": "dc3bdabc1cede9b3e401cffd24a312969ee0ce4babc4bfe822e8e50951bc3556",
+        "tests/test_native_order.py": "068779ee2dd9e4ff9cd6fc3c1de8d640ebc33e2267bf4a0fc2876ac7350d6a0b"
+      },
+      "native_qualification_scope": "Bounded observations apply to the recorded invocation source digests. No generic route promotion or complete M2 pass; later bridge, binding and journal protections require final native revalidation after stop prerequisites."
+    },
+    "stop_port": {
+      "protocol": "subreaper-v1",
+      "default": false,
+      "trust_boundary": "cooperating same-UID private journal; not hostile sandbox, remote daemon cancellation or billing evidence",
+      "closure_oracle": "verified dedicated subreaper, one closed fork gate, sole waitpid(-1,WNOHANG|__WALL) ECHILD with leader result; strict operation/request/nonce/helper identity and durable receipt validation",
+      "python_runtime": "3.11.16",
+      "root_tests": 248,
+      "independent_tests": 248,
+      "independent_adversarial_probes": 3,
+      "source_test_manifest_digest": "b7af6eb378ecac48470b09ffea97605c44639d8e7c256c23dca2cdf575e426d6",
+      "old_operations_promoted": false,
+      "effects_attested": false,
+      "persistent_host_settings_changed": false
+    },
+    "native_interruptions": {
+      "codex": {
+        "cancel": {
+          "local_stop": "Passed",
+          "reason": "cancelled",
+          "native_stdout_bytes": 77,
+          "remote_acceptance": "unknown",
+          "effects_resolved": false,
+          "evidence_sha256": "74546c94984c2f3b8fffea7ccdbdc4d2cbbe639802cfbb5218d166d106b5bbf7",
+          "invocation_sha256": "5d73f04601336e1598d026a06198485dff7adbca3a3ec4fe2034fde02313244f"
+        },
+        "timeout": {
+          "local_stop": "Passed",
+          "reason": "timeout",
+          "native_stdout_bytes": 101,
+          "remote_acceptance": "unknown",
+          "effects_resolved": false,
+          "evidence_sha256": "9c200a6a92d28f93074ee67fc21a06efb13b77342b0708dcb8546de79e76cdfe",
+          "invocation_sha256": "c0538259f39b5120828053ef76c55354d031a13410c1a63ac6ff3fd04e9f563c"
+        }
+      },
+      "claude": {
+        "cancel": {
+          "local_stop": "Passed",
+          "reason": "cancelled",
+          "native_stdout_bytes": 0,
+          "remote_acceptance": "unknown",
+          "effects_resolved": false,
+          "evidence_sha256": "ef85208fca1a1797ebe05ff35481691a70588c03ee8378ab06ab31352cbc4f16",
+          "invocation_sha256": "471c2386bb7f27279f4aa793f47bb26457f2abf20275b511277596ead9c0f7ea"
+        },
+        "timeout": {
+          "local_stop": "Passed",
+          "reason": "timeout",
+          "native_stdout_bytes": 1379,
+          "remote_acceptance": "unknown",
+          "effects_resolved": false,
+          "evidence_sha256": "13ff9e012f2234f13b258118f8053388e41b63a50e624dff26049366206f8c53",
+          "invocation_sha256": "733135fe6e477cad554c78bcf87d08c47e437aa505eda79f7b3c7fd016c3d6af"
+        }
+      }
+    }
+  }
+}

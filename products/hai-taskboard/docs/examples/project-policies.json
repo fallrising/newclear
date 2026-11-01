@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "schema_version": 1,
+      "project_id": "prj_0000000001",
+      "recipe_digest": "31c92e9bb359a30771fcf35a409d26ea0f5d9c1769d887354ddc6d47e7eaa817",
+      "approval_required": false,
+      "integration_base": {
+        "applicability": "absent",
+        "digest": null
+      },
+      "verification_rules": [
+        {
+          "ac_id": "AC-example",
+          "verifier_class": "human",
+          "independent": true,
+          "prohibited_verifier_actor": "",
+          "prohibited_verifier_run_role": "producer",
+          "environment_digest": "72e8887200753c6592849d598fc7cdf2bf83463e7c1ce0a2fa30f5f190e089a9"
+        }
+      ]
+    }
+  ]
+}

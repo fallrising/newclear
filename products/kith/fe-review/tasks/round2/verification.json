@@ -1,0 +1,131 @@
+{
+  "source_checkout": "044e45f571334149c01337f4812b32a4fe84a457",
+  "dirty_during_verification": true,
+  "status": "PARTIAL",
+  "targets_verified": false,
+  "toolchain": {
+    "node": "24.18.0",
+    "npm": "11.16.0",
+    "playwright": "1.56.1",
+    "chromium": "141.0.7390.37",
+    "browser_build": "1194",
+    "wrangler": "4.135.0"
+  },
+  "checks": {
+    "focused_contract_tests": {
+      "passed": 3,
+      "exit": 0
+    },
+    "root_types": 0,
+    "e2e_types": 0,
+    "web_build": {
+      "exit": 0,
+      "tests_passed": 7,
+      "warning": "existing bundle >500kB"
+    },
+    "native_before_reading": {
+      "passed": 293
+    },
+    "reading_after_git_prerequisite": {
+      "passed": 37,
+      "exit": 0
+    },
+    "full_e2e": {
+      "passed": 57,
+      "failed": 2,
+      "skipped": 1,
+      "exit": 1,
+      "failure": "PT-01 paths preflight; initial artifact root was inside checkout"
+    },
+    "targeted_external_state_PT01": {
+      "passed": 2,
+      "failed": 0,
+      "exit": 0,
+      "duration_minutes": 1.8
+    },
+    "static_capture": {
+      "records": 90,
+      "status_200": 90,
+      "errors": 0,
+      "page_errors": 0,
+      "overflow": 0,
+      "axe": false
+    },
+    "corrected_flows": {
+      "captures": 96,
+      "exit": 0,
+      "page_error_records": 0,
+      "overflow_records": 0,
+      "console_entries": 17,
+      "failed_request_entries": 252,
+      "records_with_failed_requests": 78
+    },
+    "cleanup": {
+      "successful_launch_containers_exited": 2,
+      "exit_codes": [
+        0,
+        0
+      ],
+      "lock_removed": true
+    },
+    "public_artifact_secret_scan": {
+      "json_files": 8,
+      "matches": 0
+    }
+  },
+  "limits": [
+    "No global suppression of ERR_ABORTED; browser-health classification remains review work.",
+    "Optional axe unavailable: no a11y pass claim.",
+    "Artifact directory exclusivity added after matrix; positive unit and actual refusal verified, matrix not rerun for guard-only change.",
+    "Independent review, CI and publication are parent-owned."
+  ],
+  "script_sha256": {
+    "launch.mjs": "7c9b7519afe7125b3ee8c14dda6bbccca29a0e3be4db5d97bb89da77af204686",
+    "flows.mjs": "5904c7d8bbeafe468050cf317457112156d4d97212256d9093ac62404e6ece85",
+    "review.test.mjs": "23dae4bab552825d54019110439dab92e2aa15921db60d69bf0d1e36de7bc846",
+    "targets.json": "aa03485a592bd417f38a88ecf50cbc6cfe792d08337164429fcdb90ef3531000"
+  },
+  "snapshot_utc": "2026-10-24T06:18:32Z",
+  "r4_followup": {
+    "snapshot_utc": "2026-10-24T06:25:29Z",
+    "scope": "review-only R4 lifecycle and fifteen-route smoke; no product changes or broad matrix/e2e rerun",
+    "red": {
+      "passed": 3,
+      "failed": 1,
+      "exit": 1,
+      "tool_chunk": "2adecd",
+      "failure": "failed import must release owned lock: true !== false"
+    },
+    "green": {
+      "passed": 4,
+      "failed": 0,
+      "exit": 0,
+      "tool_chunk": "ae1985",
+      "command": "node --test products/kith/fe-review/review.test.mjs (inside network-none container)"
+    },
+    "route_smoke": {
+      "run_id": "20261024T062130819Z-51cc897c-2fbd-4f99-bffa-d419997cee51",
+      "command": "node products/kith/fe-review/route-smoke.mjs",
+      "exit": 0,
+      "routes": 15,
+      "final_url_equals_requested": 15,
+      "loaded_content": 15,
+      "storage": "actual targets storageState path used"
+    },
+    "cleanup": {
+      "owned_process_groups_stopped": true,
+      "stopped_at": "2026-10-24T06:24:32.847Z"
+    },
+    "script_sha256": {
+      "launch.mjs": "0723c18a2d152c5d1771af4217ea45865514eae11dd9d7bc301b44b0b9cf77fa",
+      "route-smoke.mjs": "cff241d676eb3b97cb81691e0d1dc387107c01c7f1216508113ee9f3d0ba6693",
+      "review.test.mjs": "ef059bad41a2956e48bf8ee29db32e4d19938e8c7656591dd72d87290e3355d0"
+    },
+    "remaining": [
+      "Original R3 browser-health findings retained.",
+      "axe not run.",
+      "Root independently closes historical individual-lint exit evidence gap; worker did not rerun those gates.",
+      "targets remains verified=false; independent review/CI/publication remain parent-owned."
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "collected_at": "2026-10-23T07:09:11.282345Z",
+  "providers": [
+    {
+      "provider": "codex",
+      "source_kind": "codex",
+      "pool_id": null,
+      "metric_scope": "quota",
+      "identity_verified": true,
+      "observed_at": null,
+      "age_seconds": null,
+      "stale": null,
+      "status": "ok",
+      "windows": [
+        {
+          "name": "bucket_1_primary",
+          "used_percent": 42,
+          "remaining_percent": 58,
+          "observed_used_percent": 42,
+          "observed_remaining_percent": 58,
+          "historical": false,
+          "resets_at": "2026-10-29T17:10:45Z",
+          "seconds_until_reset": 554493.717654705,
+          "window_duration_minutes": 10080,
+          "cycle_tokens": null
+        }
+      ],
+      "usage": {
+        "lifetimeTokens": 24812300005,
+        "peakDailyTokens": 2056895889,
+        "longestRunningTurnSec": 2071412,
+        "currentStreakDays": 34,
+        "longestStreakDays": 34
+      },
+      "errors": [],
+      "source_update_time_status": "unknown",
+      "usage_scope": "account_activity_not_quota_cycle"
+    },
+    {
+      "provider": "opencode-go",
+      "source_kind": "opencode-stats",
+      "pool_id": null,
+      "metric_scope": "local_activity_all_providers",
+      "identity_verified": false,
+      "observed_at": "2026-10-23T07:09:11.282345Z",
+      "age_seconds": 0.0,
+      "stale": false,
+      "status": "ok",
+      "windows": [],
+      "usage": {
+        "sessions": 8.0,
+        "messages": 22.0,
+        "cost_usd": 0.06,
+        "average_tokens_per_session": 36900.0,
+        "input_tokens": 176500.0,
+        "output_tokens": 3000.0,
+        "cache_read_tokens": 41000.0,
+        "cache_write_tokens": 25900.0
+      },
+      "errors": [],
+      "approximate": true,
+      "activity_days": 1,
+      "quota_available": false
+    }
+  ]
+}

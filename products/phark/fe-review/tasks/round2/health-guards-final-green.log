@@ -1,0 +1,12 @@
+✔ only same-origin GET abort during observed navigation or completed teardown qualifies (1.044685ms)
+✔ console 500 needs its exact observed response and cannot consume it twice (1.221065ms)
+✔ safe URL projection never retains query or unrecognized path payload (0.504378ms)
+✔ logout POST abort requires same actual Request, 204, successful null session readback and signed-out UI (0.2981ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 108.810401

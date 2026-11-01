@@ -1,0 +1,121 @@
+{
+  "initialRun": "round2-79fb3e28b3",
+  "initialExitCode": 1,
+  "initialRecords": 153,
+  "initialFailedRecords": [
+    {
+      "app": "web-back",
+      "page": "entry-new",
+      "viewport": "desktop",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "entry-new",
+      "viewport": "tablet",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "entry-new",
+      "viewport": "mobile",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "album-composer",
+      "viewport": "desktop",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "album-composer",
+      "viewport": "tablet",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "album-composer",
+      "viewport": "mobile",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "projects-board",
+      "viewport": "desktop",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "projects-board",
+      "viewport": "tablet",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    },
+    {
+      "app": "web-back",
+      "page": "projects-board",
+      "viewport": "mobile",
+      "status": 200,
+      "failure": "LOADED_SELECTOR_TIMEOUT",
+      "pageErrors": 0
+    }
+  ],
+  "initialManifestSha256": "7f1e76b98eefbe170225ca4946a8422b8a39c7469209d0c4c35312cbd1c8c3eb",
+  "repairRun": "round2-repair-59327059",
+  "repairExitCode": 0,
+  "repairRecords": 9,
+  "selectedRecords": 153,
+  "selectedOriginalRecords": 144,
+  "selectedRepairRecords": 9,
+  "originalManifestsUntouched": true,
+  "captureConsoleErrorOrWarningEvents": 24,
+  "captureFailedRequestOrHTTPErrorEvents": 27,
+  "requestClassifications": [
+    {
+      "method": "GET",
+      "category": "mock_auth_me",
+      "code": "HTTP 401",
+      "count": 18
+    },
+    {
+      "method": "GET",
+      "category": "mock_public_hero",
+      "code": "HTTP 404",
+      "count": 3
+    },
+    {
+      "method": "POST",
+      "category": "mock_auth_logout",
+      "code": "HTTP 401",
+      "count": 3
+    },
+    {
+      "method": "POST",
+      "category": "mock_auth_logout",
+      "code": "net::ERR_ABORTED",
+      "count": 3
+    }
+  ],
+  "notes": [
+    "Shared capture counts warning/error console messages and requestfailed/HTTP>=400 together. Supplemental counters use narrower event definitions, so their8console/1requestfailed totals are not interchangeable.",
+    "Anonymous auth/me401 follows the existing mock contract. Logout401 and ERR_ABORTED are observed; no global abort suppression or causal claim.",
+    "Album page/home hero404 uses the documented PageHero fallback; the populated album collection is still asserted.",
+    "No full R3 accessibility/interaction/health acceptance is claimed."
+  ]
+}

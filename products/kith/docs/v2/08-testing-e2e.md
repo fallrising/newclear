@@ -61,6 +61,12 @@ products/kith/e2e/
 - 所有測試依序執行（`workers: 1`、`retries: 0`），共用同一個 seed 資料庫。
 - 不以 `sleep` 作為正確性證明；等待條件一律是可觀察狀態（元素出現、WS 封包到達、API 回應）。
 
+### 2.3 W7 後本地 pixel oracle（#387）
+
+[D-16 後續 gate](11-visual-oracle.md) 使用獨立 `visual.playwright.config.ts`，三個既有合成桌面場景、零像素容差、固定環境及獨立批准 baseline。普通 `e2e:all` 的既有行為保留；pixel gate 另跑，不表示根 CI 已接線。新增 `E2E-W0-03` 是 evidence/reporter 的窄 VIS ID、三種比較 PNG hash、未知 ID／缺檔／越界路徑故障檢查。
+
+`KITH_E2E_WEB_DIST_DIR` 可指定 owned 外部 build 目錄（預設仍 `web/dist`），global setup build 與 Wrangler assets 使用相同路徑。此覆寫不等於隔離；新 portable gate 使用 readonly source + Docker `--network none`。既有 flags 本身不保證 OS egress denial。
+
 ## 3. 執行
 
 | 指令（工作目錄 `products/kith`） | 用途 |

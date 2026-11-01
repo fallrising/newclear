@@ -12,7 +12,7 @@ use tracing::info;
 use crate::command::apply;
 use crate::net::buffer::BufferPool;
 use crate::net::connection::{ConnContext, Connection, DriveResult};
-use crate::runtime::router::ShardRequest;
+use crate::runtime::router::ShardBatch;
 use crate::runtime::worker::{current_ms, WorkerContext};
 use crate::storage::shard::Shard;
 
@@ -23,13 +23,13 @@ const CONN_TOKEN_BASE: usize = 2;
 /// Per-worker mio/epoll reactor: only ready FDs are driven (O(ready), not O(conns)).
 pub async fn run(
     ctx: WorkerContext,
-    mut request_rx: mpsc::UnboundedReceiver<ShardRequest>,
+    mut request_rx: mpsc::UnboundedReceiver<ShardBatch>,
     shard_range: std::ops::Range<usize>,
     mut shutdown_rx: broadcast::Receiver<()>,
 ) {
     let addr = ctx.config.socket_addr().expect("valid addr");
-    let mut listener = crate::net::listener::bind_reuseport_mio(addr, ctx.config.tcp_backlog)
-        .expect("bind");
+    let mut listener =
+        crate::net::listener::bind_reuseport_mio(addr, ctx.config.tcp_backlog).expect("bind");
     info!(worker = ctx.worker_id, %addr, "listening");
 
     let mut poll = Poll::new().expect("mio poll");
@@ -62,7 +62,7 @@ pub async fn run(
 
     let mut conns: Vec<Option<Connection>> = Vec::new();
     let mut free: Vec<usize> = Vec::new();
-    // Indices of connections waiting on cross-shard oneshots (avoids O(n) scan).
+    // Indices of connections waiting on cross-shard replies (avoids O(n) scan).
     let mut async_waiters: Vec<usize> = Vec::new();
     let mut accepting = true;
     let mut drain_deadline: Option<Instant> = None;
@@ -72,6 +72,7 @@ pub async fn run(
     let shutdown_grace = Duration::from_secs(ctx.config.shutdown_deadline_secs.max(1));
 
     loop {
+        ctx.shard_client.flush();
         // Refresh coarse time at most once per ms (avoid SystemTime per turn).
         if last_time_refresh.elapsed() >= Duration::from_millis(1) {
             *ctx.now_ms.borrow_mut() = current_ms();
@@ -79,7 +80,6 @@ pub async fn run(
         }
 
         // 1) Apply inbound shard requests (folded executor).
-        ctx.shard_client.clear_wake(ctx.worker_id);
         drain_shard_requests(
             &mut request_rx,
             &ctx.shard_client,
@@ -128,6 +128,7 @@ pub async fn run(
         }
 
         // 4) Poll ready sockets (non-blocking).
+        ctx.shard_client.flush();
         if let Err(e) = poll.poll(&mut events, Some(Duration::ZERO)) {
             if e.kind() != ErrorKind::Interrupted {
                 tracing::warn!("mio poll error: {e}");
@@ -166,7 +167,10 @@ pub async fn run(
                         let writable = event.is_writable();
                         let closed = {
                             let conn = conns[idx].as_mut().unwrap();
-                            matches!(conn.drive(readable, writable, shards, false), DriveResult::Closed)
+                            matches!(
+                                conn.drive(readable, writable, shards, false),
+                                DriveResult::Closed
+                            )
                         };
                         if closed {
                             remove_conn(&mut poll, &mut conns, &mut free, idx);
@@ -183,7 +187,6 @@ pub async fn run(
 
         // Remote workers may have enqueued work OR reply wakes; apply then harvest.
         if woke_for_shards {
-            ctx.shard_client.clear_wake(ctx.worker_id);
             drain_shard_requests(
                 &mut request_rx,
                 &ctx.shard_client,
@@ -209,12 +212,12 @@ pub async fn run(
             );
         }
 
+        ctx.shard_client.flush();
+
         // 6) Drain complete?
         if !accepting {
             let live = conns.iter().filter(|c| c.is_some()).count();
-            let timed_out = drain_deadline
-                .map(|d| Instant::now() >= d)
-                .unwrap_or(false);
+            let timed_out = drain_deadline.map(|d| Instant::now() >= d).unwrap_or(false);
             if live == 0 || timed_out {
                 tracing::info!(
                     worker = ctx.worker_id,
@@ -241,7 +244,6 @@ pub async fn run(
                 _ => 2,
             };
             for _ in 0..spin_budget {
-                ctx.shard_client.clear_wake(ctx.worker_id);
                 drain_shard_requests(
                     &mut request_rx,
                     &ctx.shard_client,
@@ -253,19 +255,20 @@ pub async fn run(
                     &shard_range,
                 );
                 {
-            let mut guard = ctx.local_shards.borrow_mut();
-            harvest_async_waiters(
-                &mut poll,
-                &mut conns,
-                &mut free,
-                &mut async_waiters,
-                &mut did_work,
-                guard.as_mut_slice(),
-            );
-        }
+                    let mut guard = ctx.local_shards.borrow_mut();
+                    harvest_async_waiters(
+                        &mut poll,
+                        &mut conns,
+                        &mut free,
+                        &mut async_waiters,
+                        &mut did_work,
+                        guard.as_mut_slice(),
+                    );
+                }
                 if async_waiters.is_empty() {
                     break;
                 }
+                ctx.shard_client.flush();
                 if let Err(e) = poll.poll(&mut events, Some(Duration::ZERO)) {
                     if e.kind() != ErrorKind::Interrupted {
                         tracing::warn!("mio poll error: {e}");
@@ -314,7 +317,6 @@ pub async fn run(
                     }
                 }
                 if woke {
-                    ctx.shard_client.clear_wake(ctx.worker_id);
                     drain_shard_requests(
                         &mut request_rx,
                         &ctx.shard_client,
@@ -326,16 +328,16 @@ pub async fn run(
                         &shard_range,
                     );
                     {
-            let mut guard = ctx.local_shards.borrow_mut();
-            harvest_async_waiters(
-                &mut poll,
-                &mut conns,
-                &mut free,
-                &mut async_waiters,
-                &mut did_work,
-                guard.as_mut_slice(),
-            );
-        }
+                        let mut guard = ctx.local_shards.borrow_mut();
+                        harvest_async_waiters(
+                            &mut poll,
+                            &mut conns,
+                            &mut free,
+                            &mut async_waiters,
+                            &mut did_work,
+                            guard.as_mut_slice(),
+                        );
+                    }
                     if async_waiters.is_empty() {
                         break;
                     }
@@ -345,6 +347,7 @@ pub async fn run(
             }
             if !async_waiters.is_empty() {
                 // Short park for reply wake; yield for LocalSet multi-gather.
+                ctx.shard_client.flush();
                 if let Err(e) = poll.poll(&mut events, Some(Duration::from_micros(20))) {
                     if e.kind() != ErrorKind::Interrupted {
                         tracing::warn!("mio poll error: {e}");
@@ -393,7 +396,6 @@ pub async fn run(
                     }
                 }
                 if woke {
-                    ctx.shard_client.clear_wake(ctx.worker_id);
                     drain_shard_requests(
                         &mut request_rx,
                         &ctx.shard_client,
@@ -406,17 +408,18 @@ pub async fn run(
                     );
                 }
                 {
-            let mut guard = ctx.local_shards.borrow_mut();
-            harvest_async_waiters(
-                &mut poll,
-                &mut conns,
-                &mut free,
-                &mut async_waiters,
-                &mut did_work,
-                guard.as_mut_slice(),
-            );
-        }
+                    let mut guard = ctx.local_shards.borrow_mut();
+                    harvest_async_waiters(
+                        &mut poll,
+                        &mut conns,
+                        &mut free,
+                        &mut async_waiters,
+                        &mut did_work,
+                        guard.as_mut_slice(),
+                    );
+                }
                 tokio::task::yield_now().await;
+                ctx.shard_client.flush();
             }
             continue;
         }
@@ -424,6 +427,7 @@ pub async fn run(
         // 8) Idle wait: block in mio (no tokio sleep) so we wake on the next FD event
         // without a 50µs polling floor. Safe for the C10K local GET/SET path.
         if !did_work {
+            ctx.shard_client.flush();
             if let Err(e) = poll.poll(&mut events, Some(Duration::from_millis(1))) {
                 if e.kind() != ErrorKind::Interrupted {
                     tracing::warn!("mio poll error: {e}");
@@ -474,7 +478,6 @@ pub async fn run(
                 }
             }
             if woke_for_shards {
-                ctx.shard_client.clear_wake(ctx.worker_id);
                 drain_shard_requests(
                     &mut request_rx,
                     &ctx.shard_client,
@@ -532,55 +535,21 @@ fn harvest_async_waiters(
 }
 
 fn drain_shard_requests(
-    rx: &mut mpsc::UnboundedReceiver<ShardRequest>,
+    rx: &mut mpsc::UnboundedReceiver<ShardBatch>,
     shard_client: &crate::runtime::router::ShardClient,
-    worker_id: usize,
+    _worker_id: usize,
     shards: &Rc<RefCell<Vec<Shard>>>,
     config: &Rc<crate::config::Config>,
     info: &Rc<crate::telemetry::ServerInfo>,
     now_ms: &Rc<RefCell<u64>>,
     range: &std::ops::Range<usize>,
 ) {
-    let Ok(req0) = rx.try_recv() else {
-        return;
-    };
     let now = *now_ms.borrow();
     let mut guard = shards.borrow_mut();
-    let len = guard.len();
-    // Batch origin wakes: coalesce per distinct origin in this drain.
-    let mut wake_origins = [false; 64];
-    let mut wake_overflow: Vec<usize> = Vec::new();
-    let mut note_wake = |origin: usize| {
-        if origin == worker_id {
-            return;
-        }
-        if origin < wake_origins.len() {
-            wake_origins[origin] = true;
-        } else if !wake_overflow.contains(&origin) {
-            wake_overflow.push(origin);
-        }
-    };
-    let apply_one = |guard: &mut Vec<Shard>, req: ShardRequest, note_wake: &mut dyn FnMut(usize)| {
-        let origin = req.origin_worker;
-        let local_idx = req.shard_id.saturating_sub(range.start);
-        let shard = &mut guard[local_idx.min(len.saturating_sub(1))];
-        let reply = apply::apply(shard, req.cmd, now, config, info);
-        let _ = req.reply.send(reply);
-        note_wake(origin);
-    };
-    apply_one(&mut guard, req0, &mut note_wake);
-    while let Ok(req) = rx.try_recv() {
-        apply_one(&mut guard, req, &mut note_wake);
-    }
-    drop(guard);
-    for (origin, flagged) in wake_origins.iter().enumerate() {
-        if *flagged {
-            shard_client.wake(origin);
-        }
-    }
-    for origin in wake_overflow {
-        shard_client.wake(origin);
-    }
+    shard_client.drain(rx, |req| {
+        let shard = &mut guard[req.shard_id - range.start];
+        apply::apply(shard, req.cmd, now, config, info)
+    });
 }
 
 fn accept_ready(
@@ -634,11 +603,7 @@ fn accept_ready(
     }
 }
 
-fn track_async_waiter(
-    conns: &mut [Option<Connection>],
-    waiters: &mut Vec<usize>,
-    idx: usize,
-) {
+fn track_async_waiter(conns: &mut [Option<Connection>], waiters: &mut Vec<usize>, idx: usize) {
     let Some(conn) = conns.get_mut(idx).and_then(|c| c.as_mut()) else {
         return;
     };
@@ -674,7 +639,6 @@ fn reregister(poll: &mut Poll, conn: &mut Connection) {
         }
     }
 }
-
 
 /// Whether `RUDIS_IO_URING` requests the completion reactor.
 pub fn io_uring_enabled() -> bool {

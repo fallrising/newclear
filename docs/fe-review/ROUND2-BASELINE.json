@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "repo": "newclear",
+  "source_sha": "27a5dde13be6c7fcc057d3777558f61b1d06fa1f",
+  "observed_at": "2026-10-24T05:37:37Z",
+  "observation": "Static file/JSON inspection only. No round2 runtime verification. Historical snapshot, not current completion state.",
+  "units": [
+    {
+      "ac": "R2-AC-1",
+      "components": [
+        {
+          "component": "products/kith",
+          "design_sha256": "3c4d23d0a04c757632f51608dac28439141e58bd99a2cdb95bdbcbf270563831",
+          "targets_sha256": "491e58b20ef86ad43999f55bdc61b1e804c4de262d7d468ee95d5422d17bfc2b",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-2",
+      "components": [
+        {
+          "component": "platform/dim-gate",
+          "design_sha256": "07f6ee626dcb73eecc6ecc62d72375af45e10d8be9c305387be2558afe722106",
+          "targets_sha256": "316b49c95a800af80c67db8063f68ea41cbb056b8de4e89761df55efc272a16d",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-3",
+      "components": [
+        {
+          "component": "products/hai-taskboard",
+          "design_sha256": "524f22cd62439fad9ae5da5d694c24dbe8de6df9f7127e7d387ab7ee791618b4",
+          "targets_sha256": "0a0d83bf1bed94ca19541b86b32752d131711f35fa7899021284c88475437ee1",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-4",
+      "components": [
+        {
+          "component": "platform/agent-platform",
+          "design_sha256": "908245c6c589c599a0d31b4ae826bd09a052a816169b473604b9a625d7099c5f",
+          "targets_sha256": "3f0ff53acd417663ad1db2cdf3825a6d110fed5592ca66c4e66b1441affcc730",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-5",
+      "components": [
+        {
+          "component": "apps/cms-scaffold",
+          "design_sha256": "6782345f70a028f2119fb141223eb69be13d732d491c3083678e2bd5b996301a",
+          "targets_sha256": "931685ac9938bf84272019e6fed3702fdd2e3a8c8472891426c8efa2c8e2b0bc",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-6",
+      "components": [
+        {
+          "component": "platform/ice-maker",
+          "design_sha256": "4f33d72b47444ad7e41a8fc0e9d411592ae9dab7b1a36803da9c76d4e64dbee3",
+          "targets_sha256": "afdce5e2c12eb29e8d1cbfe473e26ee2d767a9a4cc108f4079a554c35c8c15a0",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-7",
+      "components": [
+        {
+          "component": "specs/fleet",
+          "design_sha256": "2a72a7788417430b2874864a52931862d62c768b0c07fe59ebe2cf4b3c9b4175",
+          "targets_sha256": "63dd73f5643b896b5a39e2301025114e956a03a8ba8472baac68495df860fb2d",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-8",
+      "components": [
+        {
+          "component": "systems/ojbquay",
+          "design_sha256": "0a34883649423f5658d6a2d83d24872b003f1e7278a84d41db5adbee8c23c5f3",
+          "targets_sha256": "01aca2d5473aca402feae55054d859236d8cb0be99b5fb8f224455996602f6f8",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-9",
+      "components": [
+        {
+          "component": "products/goku",
+          "design_sha256": "ca1707d01d3a0e16e1e13db389167535ddf96edb8e4cb0ef3438dc6a03c5369f",
+          "targets_sha256": "9283151a15d433f0d24161277533b44c0f56ab2746873ca562cd3e197e80b5b8",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-10",
+      "components": [
+        {
+          "component": "products/phark",
+          "design_sha256": "7414f07adfeb7f32588e0dbe52b28d01c8828a955c1af71ed25c3d38526d41f3",
+          "targets_sha256": "5419eb8afd8e3496e0a244eaa26dfc9656f80b4a76f16d3437674abcf952ba70",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-11",
+      "components": [
+        {
+          "component": "apps/flowshot",
+          "design_sha256": "8780ee2751733c9eee8e2128d60864e9bfc381a3f81ac6a13ee45128bcc27efd",
+          "targets_sha256": "7954f096e11f5151105c51574afef8335a6958613795702ed10e031130b14a75",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        },
+        {
+          "component": "apps/loom",
+          "design_sha256": "b927c3a53d51d5212493d2f21ce78b0d98dfcb0959aa45b547961c09a0037e3e",
+          "targets_sha256": "4c170429650bb52524b044d98eed90681e0d26c4272910744a914a9147d3e25a",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-12",
+      "components": [
+        {
+          "component": "gateways/pokercase",
+          "design_sha256": "09754e8bd358d8cfc260ef604252a2957140c6219276d585ffba18c88bd853b7",
+          "targets_sha256": "820cc68e55e6f5590471c8eba4d778803dea469ee1316ee211157cc0497bd2b9",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-13",
+      "components": [
+        {
+          "component": "systems/clarkq",
+          "design_sha256": "9bf1b1b06bdda07840424955edb87fddd5718e8e944179b4f2357425b3314e8c",
+          "targets_sha256": "8a6fec8b38ddcf19e28cea148bd44d4eb815d5c7203d6e5a9e169cf911da860a",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "ac": "R2-AC-14",
+      "components": [
+        {
+          "component": "platform/fanzloud",
+          "design_sha256": "40546a82228897f430fa2f42c4d666b3ee180dbd84372d6d01e14f4e6aafb07c",
+          "targets_sha256": "37d659996396c93a891f9aed056acae83e09c7c55aa59e2de69ef7e701d9b605",
+          "verified": false,
+          "runtime_status": "NOT_RUN"
+        }
+      ]
+    }
+  ]
+}

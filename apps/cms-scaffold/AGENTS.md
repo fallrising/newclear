@@ -9,7 +9,7 @@
 - 細化（施工圖）依 `docs/v2/REFINE-PROMPT.md`，只改 `docs/v2/**`，不寫程式；實作只依已是 `DOC_READY` 的施工圖 `docs/v2/waves/<波次>.md`。
 - Shopify 只借版型與互動模式；元件只用 shadcn/ui（經 `packages/ui`），不引入 Polaris 套件。
 - 後端在 `/api/v1` 上增量演進；migration 只新增、不改已合併的檔案；`openapi.yaml` 維持手寫，並且必須有完整 schema。
-- 閘門：`./gradlew test`（不需要 Docker）＋`./gradlew integrationTest`（BW0 起進 CI，Testcontainers）＋前端 `lint`／`typecheck`／`test`／`build`；v2 W0 起再加 `test:bundle` 與 `e2e:mock`（Playwright + MSW，不需要後端）。
+- 閘門：`./gradlew test`（不需要 Docker）＋`./gradlew integrationTest`（BW0 起進 CI，Testcontainers）＋前端 `lint`／`typecheck`／`test`／`build`／`test:bundle`。`e2e:mock`、`test:a11y`、`test:hardening`、`test:visual` 只在本機手動跑。
 - 接真實 API 的 `npm run e2e` 仍然不是閘門。
 
 ## P0 個人使用可靠性（2026-10-03 使用者授權）
@@ -44,7 +44,7 @@
 - 把 Back 與 Admin 做成一個應用
 - 重寫衛星規格
 - `CREATE TABLE album` 等 demo 實體表、公開靜態媒體目錄、`/albums` `/boards` 寫入 API
-- 生產部署、S3、接真實 API 的 UI e2e 當閘門（v2 的 `e2e:mock` 例外）
+- 生產部署、S3、接真實 API 的 UI e2e 或 `e2e:mock` 當 CI 閘門
 - 種子明文密碼進 Git
 
 ## 釘死
@@ -53,3 +53,11 @@
 - Session cookie：`cms_session`；公開 API：`/api/v1/public/**`
 - `./gradlew test` 不需要 Docker 或已啟動的 Postgres
 - 種子帳號沿用 Identity：`seed-operator-album` 等；密碼不進 Git
+
+## 主線與驗收文件先行
+
+- 接手前先讀 [SUCCESS.md](SUCCESS.md)、相關規格與最近驗證紀錄，核對目前主線及缺口。
+- 實作前先更新 SUCCESS 的本次目標、範圍、AC 與驗證計畫；不得為了完成而縮小已承諾主線。
+- 收尾逐項記錄實際命令、結果、來源版本與未通過原因，同步 README 必要入口及項目進度；未跑不可寫通過。
+- 主線全部驗收、必要 CI／審查通過並合併後，按 repo 共用規範建立 annotated `usable/<slug>/vX.Y.Z`，回讀遠端並更新索引。現行 owner 授權適用；本規則不授權部署或付費服務。
+- 參考／封存項目保留其結束條件，不以新增文件當作可執行版本，也不因此恢復開發。

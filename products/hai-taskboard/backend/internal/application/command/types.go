@@ -178,12 +178,20 @@ type CompleteWorkItem struct {
 }
 
 type Result struct {
-	Type       string
-	ProjectID  domain.ProjectID
-	WorkItemID domain.WorkItemID
-	RunID      domain.RunID
-	Version    uint64
-	Phase      domain.Phase
+	ReportID                string
+	ReportKind              string
+	AcceptedRevisionDigest  string
+	AcceptanceSubjectDigest string
+	ProposalDigest          string
+	GraphDigest             string
+	ObjectFormat            string
+	CommitOID               string
+	Type                    string
+	ProjectID               domain.ProjectID
+	WorkItemID              domain.WorkItemID
+	RunID                   domain.RunID
+	Version                 uint64
+	Phase                   domain.Phase
 }
 
 type Outcome struct {

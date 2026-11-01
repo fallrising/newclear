@@ -1,0 +1,52 @@
+{
+  "baseline": "6c611778a83b8e2d7198edace1dfc6a04d517516",
+  "round_start_utc": "2026-10-22T16:17:34Z",
+  "deadline_utc": "2026-10-22T16:37:34Z",
+  "gradle": {
+    "command": "./gradlew build --no-daemon --no-parallel",
+    "result": "PASS",
+    "duration_seconds": 10,
+    "tasks_executed": 25,
+    "tasks_from_cache": 19,
+    "xml_totals": {
+      "tests": 147,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "limitation": "XML results include build-cache restoration; not all tests executed freshly"
+  },
+  "tokens": null,
+  "provider_requests": null,
+  "cost": null,
+  "outer_tool_calls": null,
+  "nested_tool_calls": null,
+  "native_agents_started": 2,
+  "source_audit_observed_tools": {
+    "outer_exec": 8,
+    "nested_exec_command": 10,
+    "retries": 0,
+    "coverage": "T991 worker only"
+  },
+  "not_run": [
+    "strict amended AC05 qualification",
+    "Go SDK tests/interoperability",
+    "real full Compose/demo",
+    "browser/dual viewport qualification",
+    "ack-queue saturation and producer-deadline fault experiment"
+  ],
+  "integrated_main": "96cb12ff",
+  "integrated_build": {
+    "result": "PASS",
+    "seconds": 7,
+    "tasks_executed": 3,
+    "tasks_from_cache": 3,
+    "tasks_up_to_date": 38
+  },
+  "docs": {
+    "links": 278,
+    "ac_mappings": 11,
+    "project_contracts": 41,
+    "contract_tests": 15
+  }
+}

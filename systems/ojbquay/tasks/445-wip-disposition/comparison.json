@@ -1,0 +1,426 @@
+{
+  "base": "ceafdddcfcfe0d8c11598f821e3d32c2f2c1234d",
+  "candidate": "ae607399476891db86b3e365df4dfb822517576b",
+  "main": "8d16672837ef7a8cdc70ed015d0ca605c138b624",
+  "files": [
+    {
+      "path": ".github/workflows/ojbquay-ci.yml",
+      "status": "candidate_not_in_main",
+      "base_blob": "124785ca0a071dc78e9599f3c8eb61ba11f561ae",
+      "candidate_blob": "d5c2bfc5bd84618b39e55aa9a30e1df62109fd08",
+      "main_blob": "124785ca0a071dc78e9599f3c8eb61ba11f561ae",
+      "disposition": "diagnostic_or_ci_candidate_needs_separate_validation"
+    },
+    {
+      "path": ".team/PLAN.md",
+      "status": "divergent_requires_review",
+      "base_blob": "dc6d6cac54066295cd3c757d6955b31e3e4a853b",
+      "candidate_blob": "4d696a264dc4544558a19c3408a20543bef076bb",
+      "main_blob": "a3556bc66b0c3236f7e97e56daccde73274f2295",
+      "disposition": "historical_record_only"
+    },
+    {
+      "path": "docs/project-success/evidence/ojbquay-wip-checkpoint/last-reset-test-summary.json",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "c2efa8737168470d50df348a3cacdb29b1bdea6a",
+      "main_blob": null,
+      "disposition": "historical_record_only"
+    },
+    {
+      "path": "docs/project-success/evidence/ojbquay-wip-checkpoint/reset-source-manifest.json",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "f211c2a76457e2d0696770f0750cd00e1d073a02",
+      "main_blob": null,
+      "disposition": "historical_record_only"
+    },
+    {
+      "path": "docs/project-success/evidence/ojbquay-wip-checkpoint/retry-source-manifest.json",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "37f8e6bcde3e614d206a43cdb9603de42bc8652f",
+      "main_blob": null,
+      "disposition": "historical_record_only"
+    },
+    {
+      "path": "systems/ojbquay/SUCCESS.md",
+      "status": "divergent_requires_review",
+      "base_blob": "3c10191f8405cda629e1ce8b52ca17253446f11b",
+      "candidate_blob": "b6e3c314b16b31b4b3e77281ca12b4b712eb5350",
+      "main_blob": "80fba91f163de135b7d8cc028a6ba3dc16112a11",
+      "disposition": "historical_record_only"
+    },
+    {
+      "path": "systems/ojbquay/build.gradle.kts",
+      "status": "candidate_not_in_main",
+      "base_blob": "1d2fe8d9498326e5b5eab470cfba19e9c11bcf1e",
+      "candidate_blob": "0768c88867bcc1713f4d461136278ebe267660a2",
+      "main_blob": "1d2fe8d9498326e5b5eab470cfba19e9c11bcf1e",
+      "disposition": "diagnostic_or_ci_candidate_needs_separate_validation"
+    },
+    {
+      "path": "systems/ojbquay/deploy/compose/docker-compose.yml",
+      "status": "exact_in_main",
+      "base_blob": "e023c989d003ee02c6cc1a1e8d70ebb7f3e57edf",
+      "candidate_blob": "8354d101ad606b390e9f0ca5859dce3223595bc8",
+      "main_blob": "8354d101ad606b390e9f0ca5859dce3223595bc8",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/docs/execution-plan.md",
+      "status": "divergent_requires_review",
+      "base_blob": "5ac4825c02e52dee45dd1a3db03f6ffee2358dbc",
+      "candidate_blob": "fd525bcf62b0b1ee81402906d6057a724ea7d9c8",
+      "main_blob": "817aa6f16f9d4852a15182f8514126009314b4a3",
+      "disposition": "historical_record_only"
+    },
+    {
+      "path": "systems/ojbquay/modules/common/src/main/java/dev/ojbk/config/KafkaConfigBusClient.java",
+      "status": "exact_in_main",
+      "base_blob": "967d0bc370ff0611100f6a07e7c67e560aa1f125",
+      "candidate_blob": "3c350808392dc6bc46d21731d5942f7e20655ca5",
+      "main_blob": "3c350808392dc6bc46d21731d5942f7e20655ca5",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/common/src/main/java/dev/ojbk/config/RuntimePauseStatus.java",
+      "status": "exact_in_main",
+      "base_blob": null,
+      "candidate_blob": "bad66f5ac029b21345f1b3d0a8446b6c33815472",
+      "main_blob": "bad66f5ac029b21345f1b3d0a8446b6c33815472",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/common/src/main/java/dev/ojbk/config/RuntimeRoster.java",
+      "status": "exact_in_main",
+      "base_blob": null,
+      "candidate_blob": "dac294ece4ffebc85dc9c2def3cc9c04b3edefae",
+      "main_blob": "dac294ece4ffebc85dc9c2def3cc9c04b3edefae",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/common/src/main/java/dev/ojbk/observability/MetricsHttp.java",
+      "status": "exact_in_main",
+      "base_blob": "05c318ac8f428b2d98099e9c236d8cc7f60944d5",
+      "candidate_blob": "661460825a3b29ee212acae89288a024a7868825",
+      "main_blob": "661460825a3b29ee212acae89288a024a7868825",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/DefaultGroupOperations.java",
+      "status": "divergent_requires_review",
+      "base_blob": "b76a7579636b053461e2e6df4c02e4111bf31ae3",
+      "candidate_blob": "8ccc4c3c7fbe8ce5c14c743d22d2b37599fb5e42",
+      "main_blob": "92fdc68f3b2a939181a9c87d3868ee09ba941fef",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupMaintenanceFence.java",
+      "status": "divergent_requires_review",
+      "base_blob": null,
+      "candidate_blob": "e82c1b3bf8c3ca218f3dd87dd17a896c2f61b744",
+      "main_blob": "e7868d852749e092facb81b4585d4d30dc33ca94",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/GroupWorkflowService.java",
+      "status": "divergent_requires_review",
+      "base_blob": "b016146d67cae28167b9aa22c25c4b7d85035e00",
+      "candidate_blob": "41e4882b3702c5acbf2b3d6e968ba7c9c4d22481",
+      "main_blob": "c3f911a3c58c1cf512b88dafd7c22801e7e9c18d",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/group/RuntimePauseVerifier.java",
+      "status": "exact_in_main",
+      "base_blob": null,
+      "candidate_blob": "0f2cd48ed055db986a9f735052e6c20796ba5316",
+      "main_blob": "0f2cd48ed055db986a9f735052e6c20796ba5316",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/main/java/dev/ojbk/console/subscription/SubscriptionService.java",
+      "status": "exact_in_main",
+      "base_blob": "6dab224f1161447ff502cb76c5b7f4b758620eb3",
+      "candidate_blob": "2e1f754198c8cd90f5a1225aee6a05624d744ad2",
+      "main_blob": "2e1f754198c8cd90f5a1225aee6a05624d744ad2",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/DefaultGroupOperationsAc09Test.java",
+      "status": "divergent_requires_review",
+      "base_blob": null,
+      "candidate_blob": "4af71e6bf59fd02e52faf33239c6584622b3c4e6",
+      "main_blob": "b468d4b19b319044324df2bb0c4dfda1edb61386",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/GroupMaintenanceFenceAc09Test.java",
+      "status": "divergent_requires_review",
+      "base_blob": null,
+      "candidate_blob": "33ea633fe7c2c6991b478f1bba8e9ad79684b345",
+      "main_blob": "2f4f4b732404a0e0f8d158c8e4a3f4429fe14d85",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/group/RuntimePauseVerifierAc09Test.java",
+      "status": "exact_in_main",
+      "base_blob": null,
+      "candidate_blob": "232c5350a6237ddddc2b19b8273cea8c2b457ff7",
+      "main_blob": "232c5350a6237ddddc2b19b8273cea8c2b457ff7",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/console-api/src/test/java/dev/ojbk/console/topic/TopicApiIntegrationTest.java",
+      "status": "divergent_requires_review",
+      "base_blob": "6218a9a04037770fc016d49803d8cf8444ac455c",
+      "candidate_blob": "f9ade425d5e845303eda47f618b8c4b458862682",
+      "main_blob": "d59d3da4b8159b477c17455dbbd8b2b5f2a2349a",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/BoundedStripedExecutor.java",
+      "status": "exact_in_main",
+      "base_blob": "5b9c488a56b0730b45a7ef87f06073eec54e5e2c",
+      "candidate_blob": "94ec4a9a20ea0c97be91622f6f0710f7f3a3ef38",
+      "main_blob": "94ec4a9a20ea0c97be91622f6f0710f7f3a3ef38",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/GatewayConsumeRuntime.java",
+      "status": "exact_in_main",
+      "base_blob": "bc78d57706f526f361eabfc292fd040b013fa1da",
+      "candidate_blob": "96a2d013aa8c117f22c2404f39db8f9720f6fad9",
+      "main_blob": "96a2d013aa8c117f22c2404f39db8f9720f6fad9",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/GatewayConsumeSettings.java",
+      "status": "exact_in_main",
+      "base_blob": "01eb6afd6056a0e56e33b8523654ed995604db3c",
+      "candidate_blob": "56c438123cb1c3456d3a2df9de8768c53ffe8a23",
+      "main_blob": "56c438123cb1c3456d3a2df9de8768c53ffe8a23",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/KafkaOrderedPushWorker.java",
+      "status": "exact_in_main",
+      "base_blob": "06943494ac435871e80a07bd56d3f802d3ba9acb",
+      "candidate_blob": "e89bab9dbce6021494961c221b3db4653b747573",
+      "main_blob": "e89bab9dbce6021494961c221b3db4653b747573",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/main/java/dev/ojbk/gateway/consume/PushWorkerOrchestrator.java",
+      "status": "divergent_requires_review",
+      "base_blob": "392a156b702915f17347a67b08ad806916abcdc2",
+      "candidate_blob": "f973ebc609b6d8395b429c1e791e2ff3d6328684",
+      "main_blob": "61a937784ccc580af39ed81bbf5a526fcb505aae",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/DiagnosticKafkaContainer.java",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "91b6d1a8b7b5d9f2f83ae66f4f1c7759e69b90cd",
+      "main_blob": null,
+      "disposition": "diagnostic_or_ci_candidate_needs_separate_validation"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/DiagnosticKafkaContainerTest.java",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "d862fbdd703c54790435c117167440ff443079e9",
+      "main_blob": null,
+      "disposition": "diagnostic_or_ci_candidate_needs_separate_validation"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/KafkaOrderedPushWorkerTest.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "22f5f6c4039b56674bfac2730031a915ffc46db6",
+      "candidate_blob": "7bb0e10ffd86eb00170bc19c62752fad85ead312",
+      "main_blob": "22f5f6c4039b56674bfac2730031a915ffc46db6",
+      "disposition": "diagnostic_or_ci_candidate_needs_separate_validation"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/PauseLifecycleAc09Test.java",
+      "status": "divergent_requires_review",
+      "base_blob": null,
+      "candidate_blob": "f4d2a52249355623f5caba4b96f91e9f79a12c7f",
+      "main_blob": "a49df37b0c2c9b1fac1e34d2c2ee9dc83b4b751d",
+      "disposition": "replaced_by_reviewed_ac09_followups"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/PushRecordHandlerTest.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "47b99ab6163196a861a97ec1fc6f3ad5b2de7adc",
+      "candidate_blob": "7bba932a433b1a27e46196e846f85b4e252e4bac",
+      "main_blob": "47b99ab6163196a861a97ec1fc6f3ad5b2de7adc",
+      "disposition": "unintegrated_anchor_regression"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/PushRetryE2eTest.java",
+      "status": "divergent_requires_review",
+      "base_blob": "500118f87371f979c4abf4acfefaf52709124e25",
+      "candidate_blob": "0e2b359402fef0bb71a228e8e2b96daf4ee280be",
+      "main_blob": "420905af53915c7b2e31c7e18676b8331daff3d4",
+      "disposition": "superseded_by_approved_retry_contract"
+    },
+    {
+      "path": "systems/ojbquay/modules/gateway-consume/src/test/java/dev/ojbk/gateway/consume/RuntimeRecoveryAc09IntegrationTest.java",
+      "status": "exact_in_main",
+      "base_blob": null,
+      "candidate_blob": "fd9315674ec7f0097c4c2a9535cba9b2359cd4dc",
+      "main_blob": "fd9315674ec7f0097c4c2a9535cba9b2359cd4dc",
+      "disposition": "already_retained_exact"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/DelayDispatcher.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "f527d30ec3b8f89736959f5623fccf38e2cb7af5",
+      "candidate_blob": "c5269701b1bab890ccbe2dd0048a95d111c89d2e",
+      "main_blob": "f527d30ec3b8f89736959f5623fccf38e2cb7af5",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/DelayMetadataCodec.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "b0d0ac920ed794a4d5b2148b98049be3e235e1d3",
+      "candidate_blob": "1ffbe9add2277e4fad0ab1b0420357d49c8d748e",
+      "main_blob": "b0d0ac920ed794a4d5b2148b98049be3e235e1d3",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/DelayRepository.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "51991a83cb1cc97b0507c3844283470ea23608ee",
+      "candidate_blob": "dfa1b6e37b27130fc1fe2edd43923473f43e8937",
+      "main_blob": "51991a83cb1cc97b0507c3844283470ea23608ee",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/JdbcDelayRepository.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "4e850bdfe635f7d2559637f2b72d3276404b9ede",
+      "candidate_blob": "fdb595ad81578d269766568933e1b872deee395a",
+      "main_blob": "4e850bdfe635f7d2559637f2b72d3276404b9ede",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/KafkaDelaySender.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "a7fd8fd89b7bafdab535d365f499d0ca8ebb7f23",
+      "candidate_blob": "7b36f55f40fe516385a1b0ea3410ba91e8ade3f8",
+      "main_blob": "a7fd8fd89b7bafdab535d365f499d0ca8ebb7f23",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/SchedulerRuntime.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "6dd378799d9e8a72f5255736741362cfcb996ad3",
+      "candidate_blob": "9443d5f628fd61f565e13c3df34b74b089c15da5",
+      "main_blob": "6dd378799d9e8a72f5255736741362cfcb996ad3",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/main/java/dev/ojbk/scheduler/WorkerConnections.java",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "7b74719b1d4ec32a30e85ddacd7d139e61e2573a",
+      "main_blob": null,
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/DelayDispatcherTest.java",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "0c16af01fec8518f807bd479eb15c299f8a1dc21",
+      "main_blob": null,
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/JdbcDelayRepositoryTest.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "71b6282fbed8150e1296d589c1d63201cc17d25e",
+      "candidate_blob": "93400c5a84ad8b1a21116db7c300792cff2a86f5",
+      "main_blob": "71b6282fbed8150e1296d589c1d63201cc17d25e",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/SchedulerE2eTest.java",
+      "status": "candidate_not_in_main",
+      "base_blob": "fd32b23feb6a1bf0708222bae7eae096869a6c36",
+      "candidate_blob": "7d7ed8448aef79adad697b6b025410da06a4d737",
+      "main_blob": "fd32b23feb6a1bf0708222bae7eae096869a6c36",
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/modules/scheduler/src/test/java/dev/ojbk/scheduler/WorkerConnectionsTest.java",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "5cf1ac674909048f035a54d12a3c8c39c8f63217",
+      "main_blob": null,
+      "disposition": "unintegrated_retry_experiment"
+    },
+    {
+      "path": "systems/ojbquay/sdk/go/gen/ojbk/v1/common.pb.go",
+      "status": "divergent_requires_review",
+      "base_blob": "b29b12888e5227dc7cb5773e254b92c204f39796",
+      "candidate_blob": "3a0117bf4dee7972bbddd6e435e84cb94c716daf",
+      "main_blob": "581dfc7584ecd896d77f2ac8f89ae37213a8c162",
+      "disposition": "superseded_generator_header"
+    },
+    {
+      "path": "systems/ojbquay/sdk/go/gen/ojbk/v1/config.pb.go",
+      "status": "divergent_requires_review",
+      "base_blob": "392bb242fee4f2adb34d30ccf994305f32b258d5",
+      "candidate_blob": "e7fabdaebb7d51874fc422aaeee9c85f269f1610",
+      "main_blob": "6ca04df356ccc246890a26ed31870c61be70170e",
+      "disposition": "superseded_generator_header"
+    },
+    {
+      "path": "systems/ojbquay/sdk/go/gen/ojbk/v1/consumer.pb.go",
+      "status": "divergent_requires_review",
+      "base_blob": "338509f0aa5b66791824d23e3a0b81e5afa6f28a",
+      "candidate_blob": "3c007f42b97c9eb82c2028c4f4f0b64beae2d1d6",
+      "main_blob": "6b8f943ab224165e10c4fc49008d7cd612406bb5",
+      "disposition": "superseded_generator_header"
+    },
+    {
+      "path": "systems/ojbquay/sdk/go/gen/ojbk/v1/consumer_grpc.pb.go",
+      "status": "candidate_not_in_main",
+      "base_blob": "69965e0578206a1368d74c33f4d24f935f7ffe90",
+      "candidate_blob": "6de02ce41bca43d0a1b4888bc8b1da3354383edf",
+      "main_blob": "69965e0578206a1368d74c33f4d24f935f7ffe90",
+      "disposition": "superseded_generator_header"
+    },
+    {
+      "path": "systems/ojbquay/sdk/go/gen/ojbk/v1/producer.pb.go",
+      "status": "divergent_requires_review",
+      "base_blob": "bd346c87756a40e0ee90538324a2f629548f26b0",
+      "candidate_blob": "aad138ebc612ae600b6b584cbbab9879704d80eb",
+      "main_blob": "c2787aa678b3c38e9ee53225825c35292f9f9c91",
+      "disposition": "superseded_generator_header"
+    },
+    {
+      "path": "systems/ojbquay/sdk/go/gen/ojbk/v1/producer_grpc.pb.go",
+      "status": "candidate_not_in_main",
+      "base_blob": "f6750729b9c20d9dcca8b3161c778b028a26e34a",
+      "candidate_blob": "f95b8e26be2d88380d100a9f3cd776cf69a091ae",
+      "main_blob": "f6750729b9c20d9dcca8b3161c778b028a26e34a",
+      "disposition": "superseded_generator_header"
+    },
+    {
+      "path": "systems/ojbquay/tasks/445-retry-timing/wip-checkpoint.md",
+      "status": "candidate_only_absent_main",
+      "base_blob": null,
+      "candidate_blob": "087756da69379a05e17cccc6c0118314ca7a551e",
+      "main_blob": null,
+      "disposition": "historical_record_only"
+    }
+  ],
+  "historical_failure_job": 119829879016,
+  "historical_log_sha256": "e422f7712abdf4841a52ad119e73a32ff2d4dd1bddc781b0d456f5f6f58a8ca1",
+  "runtime_executed_this_task": false
+}

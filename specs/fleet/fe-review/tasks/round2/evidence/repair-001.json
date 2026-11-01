@@ -1,0 +1,383 @@
+{
+  "mode": "repair",
+  "startedAt": "2026-10-24T10:27:27.964Z",
+  "passed": true,
+  "node": "v24.18.0",
+  "playwright": "1.63.0",
+  "binarySha256": "8bebec96a8ba6d791c86ecc120d0dd9f8c776dd2ff3d0ead8f9bad1a85acc55c",
+  "steps": [
+    {
+      "stage": "SERVER_START",
+      "passed": true
+    },
+    {
+      "stage": "LOGIN",
+      "passed": true,
+      "status": 303,
+      "secure": true,
+      "httpOnly": true,
+      "sameSite": "Lax"
+    },
+    {
+      "stage": "SEED",
+      "passed": true
+    },
+    {
+      "stage": "REPAIR_CAPTURE",
+      "passed": true,
+      "count": 1
+    },
+    {
+      "stage": "LOADED_AXE",
+      "passed": true,
+      "loaded": 12,
+      "scans": 4
+    }
+  ],
+  "cleanup": {
+    "captureExited": true,
+    "heartbeatStopped": true,
+    "browserClosed": true,
+    "serverExited": true,
+    "listenerAbsent": true,
+    "privateStateRemoved": true
+  },
+  "sourceHashes": {
+    "internal/ui/static/app.css": "7b8bdc49399a1177a1294edb8377b55c6d1e8bb7fe89777a834b8d915073405d",
+    "internal/ui/templates/layout.html": "f935698939f1aadd73c2517262e718f767faecbabefd00068f34afd7eff20198",
+    "internal/ui/templates/login.html": "929c920e01eec14cf49329584b278f138d8192d17b128b1a952c09778b4fe87c",
+    "internal/ui/templates/catalog.html": "c7332f48982e20adc64702719de4ac911d11ae89011f1b65102dd0fbca2b000a",
+    "internal/ui/templates/node.html": "d01c9a616f56b535812116b4cf15a3503faf26acae54cf46bbb0b656487442b8",
+    "internal/ui/templates/service.html": "ab781b87bb53c0ff903cc84e1fca4f7ce95f2edc5f8a1f6ea80e9dff4dbe8fe5",
+    "internal/ui/pages.go": "87f6b0a8a691db2112dc3f8cb2942171f2550cd886d9e809bb42ac566ddd1636",
+    "internal/ui/pages_test.go": "0dacdf49122e0efdb030c97999cec8f7dbe5c6ab8a806cb5cc72bdb4d5f1afe1",
+    "internal/api/server_test.go": "a56a03eb81b0cc5e584ad7cb3a90d6f5bffc61e3a8ff90943fd6c684b2eba906",
+    "fe-review/run-review.mjs": "3812f14f9ac3aaf4df68e1f21c83c212131f01a95e6d11af424364c0ce51c791",
+    "fe-review/flow.mjs": "28c0e074d237a4a4f101047854f92b1445048d88518bb8a09505c205a6177436",
+    "fe-review/pending.mjs": "5ad6cb30c713cbcd759b0706b6eaa671d843c0d2ebe0a4082290c29391df0f56",
+    "fe-review/guards.mjs": "20e43ce61091c3c78ec88aa4bb917ac222fb4940f7000daee9b953ca9d00d304",
+    "fe-review/health.mjs": "8628584365755c86ae83b8b50591eac393bc4f517bf8f65a3a93b23152e98c37",
+    "fe-review/overflow-diagnostic.mjs": "c8d3b36fcdb11f0aa8fef26bd115eb498420f935de5b40d456fc4bb52b3f4192",
+    "fe-review/remaining.mjs": "41d9fa79ff7ed5eda14a0876934103f93d33ba764789cc4223fe004e590bf179",
+    "fe-review/focus-diagnostic.mjs": "646b957f0b4274a0048259687707d752ce9cd001a64be640be89a524ba183092",
+    "fe-review/targets.json": "fcfa76ce718301fdeb93a49ac3d7b7e3f4f5fd16df2405636d84afe32823c743"
+  },
+  "chromium": "153.0.8010.12",
+  "interactiveHealth": {
+    "events": [],
+    "overflow": 0
+  },
+  "pageErrors": 0,
+  "cookieObservation": {
+    "name": "fleet_op",
+    "domain": "127.0.0.1",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "Lax",
+    "valueEqualsExpected": true,
+    "authenticatedCatalogStatus": 200
+  },
+  "coverage": "single-replacement-and-previously-unrun-checks",
+  "captures": [
+    {
+      "key": "service/mobile/light",
+      "replaces": "final-003 service/mobile/light",
+      "status": 200,
+      "pageErrors": 0,
+      "horizontalOverflow": false,
+      "sha256": "e3edccea9e5f5dc8b113a86999cf3ede568f8edd464531edab784d6c1c902b83",
+      "consoleCount": 0,
+      "requestIssueCount": 0
+    }
+  ],
+  "loaded": [
+    {
+      "page": "login",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "login",
+      "viewport": "tablet",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "login",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "catalog",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "catalog",
+      "viewport": "tablet",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "catalog",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "node",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "node",
+      "viewport": "tablet",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "node",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "service",
+      "viewport": "desktop",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "service",
+      "viewport": "tablet",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    },
+    {
+      "page": "service",
+      "viewport": "mobile",
+      "status": 200,
+      "finalPathMatches": true,
+      "identity": true,
+      "overflow": false,
+      "health": {
+        "events": [],
+        "overflow": 0
+      }
+    }
+  ],
+  "axe": [
+    {
+      "page": "login",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "catalog",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "span"
+            ]
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "page": "node",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "span"
+            ]
+          ]
+        },
+        {
+          "id": "meta-refresh",
+          "impact": "critical",
+          "nodes": 1,
+          "targets": [
+            [
+              "meta[http-equiv=\"refresh\"]"
+            ]
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "page": "service",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "header > .muted"
+            ]
+          ]
+        },
+        {
+          "id": "meta-refresh",
+          "impact": "critical",
+          "nodes": 1,
+          "targets": [
+            [
+              "meta[http-equiv=\"refresh\"]"
+            ]
+          ]
+        }
+      ],
+      "incomplete": []
+    }
+  ],
+  "axeVersion": "4.13.0",
+  "statusStyles": [
+    {
+      "page": "login",
+      "colors": []
+    },
+    {
+      "page": "catalog",
+      "colors": [
+        {
+          "className": "health-unknown",
+          "color": "rgb(102, 102, 102)",
+          "before": "\"○\" / \"\"",
+          "text": "unknown"
+        },
+        {
+          "className": "health-healthy",
+          "color": "rgb(6, 122, 85)",
+          "before": "\"●\" / \"\"",
+          "text": "healthy"
+        }
+      ]
+    },
+    {
+      "page": "node",
+      "colors": [
+        {
+          "className": "health-unknown",
+          "color": "rgb(102, 102, 102)",
+          "before": "\"○\" / \"\"",
+          "text": "unknown"
+        },
+        {
+          "className": "health-healthy",
+          "color": "rgb(6, 122, 85)",
+          "before": "\"●\" / \"\"",
+          "text": "healthy"
+        }
+      ]
+    },
+    {
+      "page": "service",
+      "colors": [
+        {
+          "className": "health-healthy",
+          "color": "rgb(6, 122, 85)",
+          "before": "\"●\" / \"\"",
+          "text": "healthy"
+        }
+      ]
+    }
+  ],
+  "repairMetrics": {
+    "documentWidth": 390,
+    "viewport": 390,
+    "hiddenLabelContained": true,
+    "wrapperPosition": "relative",
+    "wrapperClientWidth": 350,
+    "wrapperScrollWidth": 821,
+    "actionsTextRetained": true
+  },
+  "serverExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false
+  },
+  "cleanupPassed": true,
+  "finishedAt": "2026-10-24T10:27:32.522Z"
+}

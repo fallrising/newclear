@@ -1,0 +1,9 @@
+{
+  "gate": "npm --prefix web run check && npm --prefix web run build",
+  "exit": 0,
+  "seconds": 21.517,
+  "tests": 85,
+  "testFiles": 7,
+  "node": "24.18.0",
+  "logSha256": "07e52b74dc29bb76c9662629ea9392623fdb324863cd2a7392f3cc2f3dfb46ab"
+}

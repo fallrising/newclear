@@ -1,0 +1,275 @@
+{
+  "source_commit": "b97319d74f8442b5173ef42be72a0aa757d87df0",
+  "decision": "FAIL",
+  "reason": "Original mandatory retry timing target 150ms with error <20% is unresolved; observed206–253ms. Functional completion does not discharge this NFR. No expensive runtime rerun can erase the recorded open requirement without product or approved specification change.",
+  "runtime_checks": "skipped: original mandatory criterion conclusively prevents qualification; worker prohibited from product changes.",
+  "sources": [
+    {
+      "path": "systems/ojbquay/docs/product-spec.md",
+      "sha256": "52a8161711d8976ca65ec9cd6bfacf4bdbc8b206dda0ad93666af7ec6c976686",
+      "lines": [
+        {
+          "80": ""
+        },
+        {
+          "81": "Open decisions that do not block M0:"
+        },
+        {
+          "82": ""
+        },
+        {
+          "83": "- OIDC provider and secret manager selection."
+        },
+        {
+          "84": "- Whether offset reset requires two-person approval."
+        },
+        {
+          "85": "- Tenant-level gateway deduplication beyond Kafka producer idempotence."
+        },
+        {
+          "86": "- Production quotas and delay capacity values, which require load tests."
+        },
+        {
+          "87": "- Whether the sub-second retry path needs a different scheduler mechanism to"
+        },
+        {
+          "88": "  meet the SDD's 150 ms `<20%` timeline target without weakening durable,"
+        },
+        {
+          "89": "  no-early delivery or creating an unsafe broker poll rate."
+        },
+        {
+          "90": ""
+        },
+        {
+          "91": "## Design"
+        }
+      ]
+    },
+    {
+      "path": "systems/ojbquay/docs/execution-plan.md",
+      "sha256": "99708924590f48aa84bca715a1793faa29f48573ffe6edbd103534202a17bd94",
+      "lines": [
+        {
+          "125": "    terminal `Unsafe` deprecation warning."
+        },
+        {
+          "126": ""
+        },
+        {
+          "127": "## M4: Push Consumer"
+        },
+        {
+          "128": ""
+        },
+        {
+          "129": "- Status: Complete (functional, 2026-07-29); 150 ms timing NFR open"
+        },
+        {
+          "130": "- Output: filter/transform pipeline, HTTP push, bounded backpressure, retry,"
+        },
+        {
+          "131": "  DLQ/replay, ordered key lanes."
+        },
+        {
+          "132": "- Gate: filter/transform, retry timeline, DLQ, replay, and ordering E2E pass."
+        },
+        {
+          "133": "- Evidence:"
+        },
+        {
+          "134": "  - Typed push policy validation bounds concurrency, TPS, URL/header safety,"
+        },
+        {
+          "135": "    CEL/transit, order-key sources, retry arrays, and the trailing `-1`"
+        },
+        {
+          "136": "    infinite-repeat convention."
+        },
+        {
+          "137": "  - Pipeline and HTTP tests prove shadow/tag/CEL filtering, transformed JSON,"
+        },
+        {
+          "138": "    trace/source headers, HTTP 2xx handling, transport-only 200/400 ms fast"
+        },
+        {
+          "139": "    retries, durable handoff before source acknowledgement, and release on"
+        },
+        {
+          "140": "    handoff failure."
+        },
+        {
+          "141": "  - Kafka 4.2 Share Group integration proves explicit acknowledgement with"
+        },
+        {
+          "142": "    `record_limit`, earliest group initialization, accepted-record"
+        },
+        {
+          "143": "    non-reacquisition after worker restart, and the single-node Share"
+        },
+        {
+          "144": "    coordinator broker settings required by local Compose."
+        },
+        {
+          "145": "  - Ordered Kafka integration proves same-key serialization and cross-stripe"
+        },
+        {
+          "146": "    progress using bounded virtual-thread lanes. Finite retries run inline and"
+        },
+        {
+          "147": "    exhaustion writes DLQ before the conservative batch-barrier commit."
+        },
+        {
+          "148": "  - Kafka 4.2/PostgreSQL 17/real HTTP E2E transforms the request body, preserves"
+        },
+        {
+          "149": "    trace context, performs no-early `[150,300,600]` retries through the shared"
+        },
+        {
+          "150": "    delay inbox/repository/dispatcher path within the scheduler's ±1 second"
+        },
+        {
+          "151": "    contract, and writes the fourth business failure to DLQ with original"
+        },
+        {
+          "152": "    identity."
+        },
+        {
+          "153": "  - Owner-authorized REST tests prove bounded DLQ browse, exact"
+        },
+        {
+          "154": "    partition/offset single or batch replay, retry/DLQ header removal, source"
+        },
+        {
+          "155": "    partition preservation, non-owner denial, and replay audit."
+        },
+        {
+          "156": "  - Configuration orchestration tests prove start, drain-before-replace,"
+        },
+        {
+          "157": "    disable, mode change, and tombstone stop behavior; the runtime exposes"
+        },
+        {
+          "158": "    worker, delivery, retry, DLQ, latency, and config-version metrics."
+        },
+        {
+          "159": "  - `./gradlew :modules:gateway-consume:test` passed all 25 consumer-gateway"
+        },
+        {
+          "160": "    tests. `./gradlew :modules:console-api:test` passed all 16 control-plane"
+        },
+        {
+          "161": "    tests, including the Kafka DLQ adapter and REST contract."
+        },
+        {
+          "162": "  - `./gradlew build --rerun-tasks --no-daemon` passed all 44 actionable tasks"
+        },
+        {
+          "163": "    and 93 repository tests on JDK 25."
+        },
+        {
+          "164": "  - The packaged consumer runtime replayed the local Compose config topic,"
+        },
+        {
+          "165": "    returned `UP` from `/readyz`, and exposed the expected Prometheus metric"
+        },
+        {
+          "166": "    families on port 19202."
+        },
+        {
+          "167": "  - Functional tests do not establish the push throughput NFR. The SDD's"
+        },
+        {
+          "168": "    `<20%` end-to-end target for the 150 ms retry conflicts with its 100 ms"
+        },
+        {
+          "169": "    scheduler tick and ±1 second delay contract: observed first-retry intervals"
+        },
+        {
+          "170": "    were roughly 206–253 ms, while 300/600 ms steady retries fit 20%. The"
+        },
+        {
+          "171": "    durable/no-early behavior is complete; the 150 ms percentage remains a"
+        },
+        {
+          "172": "    scheduler optimization follow-up."
+        },
+        {
+          "173": "  - Protobuf 4.35.1 continues to emit its known JDK 25 terminal `Unsafe`"
+        },
+        {
+          "174": "    deprecation warning."
+        }
+      ]
+    },
+    {
+      "path": "systems/ojbquay/docs/specs/m4-push-consumer.md",
+      "sha256": "aa81a8fe960a1ef57021bba210d6d7f54966e4872ad542082c249f32d26679d3",
+      "lines": [
+        {
+          "90": "  lower-throughput than the SDD low-watermark optimization, which remains a"
+        },
+        {
+          "91": "  demonstrated-load refactor rather than a correctness prerequisite."
+        },
+        {
+          "92": "- The SDD's `<20%` end-to-end timeline target for a 150 ms retry conflicts with"
+        },
+        {
+          "93": "  its Kafka/PostgreSQL scheduler path, 100 ms dispatcher tick, and ±1 second"
+        },
+        {
+          "94": "  delay promise. Real warm Testcontainers runs observed roughly 206–253 ms for"
+        },
+        {
+          "95": "  the first 150 ms retry while later 300/600 ms retries were within 20%."
+        },
+        {
+          "96": "  M4 preserves no-early durable scheduling; meeting the 150 ms percentage is a"
+        },
+        {
+          "97": "  measured scheduler/data-plane optimization gate, not a claimed result."
+        },
+        {
+          "98": ""
+        }
+      ]
+    },
+    {
+      "path": "systems/ojbquay/docs/specs/m4-push-consumer.md",
+      "sha256": "aa81a8fe960a1ef57021bba210d6d7f54966e4872ad542082c249f32d26679d3",
+      "lines": [
+        {
+          "130": "## Verification"
+        },
+        {
+          "131": ""
+        },
+        {
+          "132": "- `./gradlew :modules:common:test :modules:gateway-consume:test"
+        },
+        {
+          "133": "  :modules:console-api:test`"
+        },
+        {
+          "134": "- Pipeline, fast retry, retry plan, DLQ failure, key ordering, config replace,"
+        },
+        {
+          "135": "  Share acknowledgement, and full retry/DLQ E2E scenarios."
+        },
+        {
+          "136": "- Unit tests prove exact configured due times. Full E2E proves no-early"
+        },
+        {
+          "137": "  `[150,300,600]` attempts and the scheduler's ±1 second tolerance; the"
+        },
+        {
+          "138": "  conflicting 150 ms `<20%` target remains open."
+        },
+        {
+          "139": "- `./gradlew build`"
+        }
+      ]
+    }
+  ]
+}

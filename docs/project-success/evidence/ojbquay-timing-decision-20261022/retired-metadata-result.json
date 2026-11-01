@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "tests": 25,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "retry_intervals_ms": [
+    196,
+    309,
+    609
+  ],
+  "acceptance": "FAIL; no measured improvement established"
+}

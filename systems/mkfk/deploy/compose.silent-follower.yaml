@@ -1,0 +1,22 @@
+# Same three brokers, network, and published ports as deploy/compose.yaml.
+# This file only mounts the one-partition topology used by rf3-isr2-b1-p1
+# over the image's three-partition cluster.json. No delay, loss, or disk fault.
+services:
+  format-1:
+    volumes:
+      - ./silent-follower-cluster.json:/etc/mkfk/cluster.json:ro
+  format-2:
+    volumes:
+      - ./silent-follower-cluster.json:/etc/mkfk/cluster.json:ro
+  format-3:
+    volumes:
+      - ./silent-follower-cluster.json:/etc/mkfk/cluster.json:ro
+  broker-1:
+    volumes:
+      - ./silent-follower-cluster.json:/etc/mkfk/cluster.json:ro
+  broker-2:
+    volumes:
+      - ./silent-follower-cluster.json:/etc/mkfk/cluster.json:ro
+  broker-3:
+    volumes:
+      - ./silent-follower-cluster.json:/etc/mkfk/cluster.json:ro

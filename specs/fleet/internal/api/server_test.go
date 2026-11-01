@@ -20,11 +20,11 @@ import (
 )
 
 type testEnv struct {
-	s      *Server
-	op     string
-	bs     string
-	st     *store.Store
-	now    time.Time
+	s   *Server
+	op  string
+	bs  string
+	st  *store.Store
+	now time.Time
 }
 
 func newTest(t *testing.T) *testEnv {
@@ -202,9 +202,9 @@ func TestRegisterHeartbeatCreateDeployDesiredMoveAck(t *testing.T) {
 		"apiVersion": "fleet.catalog/v1", "kind": "Service",
 		"metadata": map[string]any{"name": "hello", "description": "hi"},
 		"spec": map[string]any{
-			"node": "vps-a",
-			"expose": map[string]any{"mode": "public", "hostname": "hello.example.com", "port": 8080, "healthPath": "/healthz"},
-			"env": map[string]string{"LOG_LEVEL": "info"},
+			"node":      "vps-a",
+			"expose":    map[string]any{"mode": "public", "hostname": "hello.example.com", "port": 8080, "healthPath": "/healthz"},
+			"env":       map[string]string{"LOG_LEVEL": "info"},
 			"resources": map[string]string{"memory": "64M", "cpus": "0.10"},
 		},
 	}
@@ -277,8 +277,8 @@ func TestRegisterHeartbeatCreateDeployDesiredMoveAck(t *testing.T) {
 		"apiVersion": "fleet.catalog/v1", "kind": "Service",
 		"metadata": map[string]any{"name": "hello", "description": "hi"},
 		"spec": map[string]any{
-			"node":  "vps-b",
-			"image": "ghcr.io/fallrising/hello-healthz:ccc",
+			"node":   "vps-b",
+			"image":  "ghcr.io/fallrising/hello-healthz:ccc",
 			"expose": map[string]any{"mode": "public", "hostname": "hello.example.com", "port": 8080, "healthPath": "/healthz"},
 		},
 	}
@@ -342,7 +342,7 @@ func TestCIDeployUpsertAndForbiddenCreate(t *testing.T) {
 		"apiVersion": "fleet.catalog/v1", "kind": "Service",
 		"metadata": map[string]any{"name": "hello"},
 		"spec": map[string]any{
-			"node": "vps-hel-1",
+			"node":   "vps-hel-1",
 			"expose": map[string]any{"mode": "public", "hostname": "hello.example.com", "port": 8080},
 		},
 	}
@@ -391,5 +391,56 @@ func TestNoopTunnelEmpty(t *testing.T) {
 	_ = json.Unmarshal(rr.Body.Bytes(), &out)
 	if out.Node.TunnelID != "" || out.TunnelToken != "" {
 		t.Fatalf("%+v", out)
+	}
+}
+
+func TestReviewCookieDeployJSONContract(t *testing.T) {
+	e := newTest(t)
+	e.register(t, "vps-fe-1")
+	doc := map[string]any{"apiVersion": "fleet.catalog/v1", "kind": "Service", "metadata": map[string]any{"name": "hello"}, "spec": map[string]any{"node": "vps-fe-1", "image": "registry.invalid/review:one", "expose": map[string]any{"mode": "public", "hostname": "hello.example.com", "port": 8080}}}
+	created := e.do(t, http.MethodPost, "/api/v1/services", "fleet.example.com", "", e.op, doc)
+	if created.Code != http.StatusCreated {
+		t.Fatalf("create status %d", created.Code)
+	}
+	released := e.do(t, http.MethodPost, "/api/v1/releases", "fleet.example.com", "", e.op, map[string]string{"service": "hello", "image": "registry.invalid/review:old", "git_sha": "abc"})
+	if released.Code != http.StatusCreated {
+		t.Fatalf("release status %d", released.Code)
+	}
+	var release struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(released.Body.Bytes(), &release); err != nil {
+		t.Fatal(err)
+	}
+	bad := e.do(t, http.MethodPost, "/api/v1/services/hello/deploy", "fleet.example.com", "", e.op, "release_id="+release.ID)
+	if bad.Code != http.StatusBadRequest || !strings.Contains(bad.Body.String(), `"invalid_json"`) {
+		t.Fatal("form body with JSON content type must remain invalid_json400")
+	}
+	good := e.do(t, http.MethodPost, "/api/v1/services/hello/deploy", "fleet.example.com", "", e.op, map[string]string{"release_id": release.ID})
+	if good.Code != http.StatusAccepted {
+		t.Fatalf("JSON+cookie deploy status %d", good.Code)
+	}
+	svc, err := e.st.GetService("hello")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if svc.CurrentReleaseID != release.ID {
+		t.Fatal("JSON rollback did not select the requested release")
+	}
+}
+
+func TestReviewStoppedEmptyServiceFixture(t *testing.T) {
+	e := newTest(t)
+	e.register(t, "vps-empty")
+	created := e.do(t, http.MethodPost, "/api/v1/services", "api.example.com", e.op, "", map[string]any{
+		"apiVersion": "fleet.catalog/v1", "kind": "Service", "metadata": map[string]any{"name": "empty"},
+		"spec": map[string]any{"node": "vps-empty", "desiredState": "stopped", "expose": map[string]any{"mode": "public", "hostname": "empty.example.com", "port": 8080}},
+	})
+	if created.Code != http.StatusCreated {
+		t.Fatalf("empty synthetic fixture status %d", created.Code)
+	}
+	releases, err := e.st.ListReleases("empty")
+	if err != nil || len(releases) != 0 {
+		t.Fatal("empty fixture must have no releases")
 	}
 }

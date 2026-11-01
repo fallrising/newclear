@@ -1,6 +1,10 @@
 package raft
 
-import "testing"
+import (
+	"fmt"
+	"math/rand"
+	"testing"
+)
 
 // A node with a stale log keeps campaigning with ever higher terms after a
 // partition heals. Up-to-date nodes reject its votes and must still reach
@@ -35,4 +39,234 @@ func TestM7StaleCandidateDoesNotResetUpToDateElectionTimers(t *testing.T) {
 		}
 	}
 	t.Fatalf("node 2 never campaigned while a stale candidate kept asking for votes: %+v", cluster.nodes[2].Snapshot())
+}
+
+// Two followers configured with the same election timeout lose their leader.
+// Each draws a new timeout when it follows a new term or campaigns, so one of
+// them wins instead of both campaigning on the same tick forever.
+func TestM7EqualElectionTimeoutsStillElectALeader(t *testing.T) {
+	t.Parallel()
+	for seed := int64(0); seed < 50; seed++ {
+		cluster := newMemoryCluster(t)
+		for _, id := range []uint32{2, 3} {
+			random := rand.New(rand.NewSource(seed*10 + int64(id)))
+			node, err := NewNode(Config{
+				Identity: testIdentity, NodeID: id, Voters: []uint32{1, 2, 3}, ElectionTimeoutTicks: 8, HeartbeatTicks: 1,
+				NextElectionTimeout: func() (uint64, error) { return RandomElectionTimeout(sourceOf{random}) },
+			}, cluster.logs[id])
+			if err != nil {
+				t.Fatal(err)
+			}
+			cluster.nodes[id] = node
+		}
+		cluster.enqueueReady(t, 1, cluster.campaign(t, 1))
+		cluster.drain(t, 100)
+		cluster.isolate(1)
+		if !electsWithin(t, cluster, 200) {
+			t.Fatalf("seed %d: no leader after 200 ticks: %+v", seed, cluster.nodes[2].Snapshot())
+		}
+	}
+}
+
+// electsWithin ticks nodes 2 and 3 together until one of them leads.
+func electsWithin(t *testing.T, cluster *memoryCluster, ticks int) bool {
+	t.Helper()
+	for range ticks {
+		for _, id := range []uint32{2, 3} {
+			cluster.enqueueReady(t, id, cluster.tick(t, id))
+		}
+		cluster.drain(t, 100)
+		for _, id := range []uint32{2, 3} {
+			if cluster.nodes[id].Snapshot().Role == Leader {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// Today's election, as specified in docs/sdd/02-replication.md §3 and left
+// unchanged by ADR-014. A candidate increments its term and sends RequestVote
+// before any peer has granted a vote. One such request makes the current
+// leader persist that term and step down, even when the candidate's log is
+// stale and the vote is refused. The candidate stays a candidate after that
+// refusal is delivered: it becomes leader only with a majority of granted votes.
+// Pre-vote would change this sequence; it is not implemented.
+func TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader(t *testing.T) {
+	t.Parallel()
+	cluster := newMemoryCluster(t)
+	cluster.enqueueReady(t, 1, cluster.campaign(t, 1))
+	cluster.drain(t, 100)
+	leader := cluster.nodes[1].Snapshot()
+	if leader.Role != Leader || !leader.LeaderReady {
+		t.Fatalf("node 1 did not become a ready leader: %+v", leader)
+	}
+
+	cluster.isolate(3)
+	frame := fenceFrame(0, 0, "x")
+	_, ready, err := cluster.nodes[1].ProposeFrame(frame.Kind, frame.Payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster.enqueueReady(t, 1, ready)
+	cluster.drain(t, 100)
+	if len(cluster.queue) != 0 {
+		t.Fatalf("queue not empty before the disruptive vote: %+v", cluster.queue)
+	}
+	leader = cluster.nodes[1].Snapshot()
+	behind := cluster.nodes[3].Snapshot()
+	if behind.LastLogIndex >= leader.LastLogIndex {
+		t.Fatalf("node 3 log index %d is not behind leader index %d", behind.LastLogIndex, leader.LastLogIndex)
+	}
+
+	// Keep the campaign messages. deliver drops anything still isolated, so
+	// enqueueing them now would lose the RequestVote.
+	campaign := cluster.campaign(t, 3)
+	candidate := cluster.nodes[3].Snapshot()
+	if candidate.Role != Candidate || candidate.Term != leader.Term+1 {
+		t.Fatalf("node 3 did not campaign at the next term: %+v", candidate)
+	}
+	var vote Message
+	var found bool
+	for _, message := range campaign.Messages {
+		if message.Kind == MessageRequestVote && message.To == 1 {
+			vote = message
+			found = true
+			break
+		}
+	}
+	if !found || vote.Term != candidate.Term {
+		t.Fatalf("candidate ready has no current-term RequestVote for node 1: %+v", campaign.Messages)
+	}
+
+	cluster.blocked = map[[2]uint32]bool{}
+	cluster.deliver(t, vote)
+
+	steppedDown := cluster.nodes[1].Snapshot()
+	if steppedDown.Role != Follower || steppedDown.Term != candidate.Term || steppedDown.LeaderReady {
+		t.Fatalf("leader after one unconfirmed RequestVote: %+v", steppedDown)
+	}
+	if steppedDown.VotedFor != nil {
+		t.Fatalf("leader granted the stale vote: voted for %d", *steppedDown.VotedFor)
+	}
+	persisted := cluster.logs[1].HardState()
+	if persisted.CurrentTerm != candidate.Term || persisted.VotedFor != nil {
+		t.Fatalf("persisted hard state = %+v, want term %d and no vote", persisted, candidate.Term)
+	}
+	if cluster.nodes[3].Snapshot().Role != Candidate {
+		t.Fatalf("candidate became %s without a majority of granted votes", cluster.nodes[3].Snapshot().Role)
+	}
+	selfVote := cluster.logs[3].HardState()
+	if selfVote.VotedFor == nil || *selfVote.VotedFor != 3 || selfVote.CurrentTerm != candidate.Term {
+		t.Fatalf("candidate hard state = %+v, want term %d and a vote for itself", selfVote, candidate.Term)
+	}
+	peer := cluster.nodes[2].Snapshot()
+	if peer.Role != Follower || peer.Term != leader.Term {
+		t.Fatalf("node 2 changed without receiving the vote: %+v", peer)
+	}
+	if len(cluster.queue) != 1 || cluster.queue[0].Kind != MessageRequestVoteResponse ||
+		cluster.queue[0].VoteResp == nil || cluster.queue[0].VoteResp.Granted {
+		t.Fatalf("vote response = %+v, want one refusal", cluster.queue)
+	}
+	refusal := cluster.queue[0]
+	cluster.queue = nil
+	cluster.deliver(t, refusal)
+	if after := cluster.nodes[3].Snapshot(); after.Role != Candidate || after.Term != candidate.Term {
+		t.Fatalf("candidate after the delivered refusal: %+v", after)
+	}
+}
+
+type sourceOf struct{ random *rand.Rand }
+
+func (source sourceOf) Uint64() (uint64, error) { return source.random.Uint64(), nil }
+
+// A follower that fell behind while isolated rejects the leader's appends
+// with a conflict hint. With more than one append in flight to it (a
+// heartbeat plus a retry), every reply belongs to an older RPC; the leader
+// must still back off, or the follower never catches up.
+func TestM7LaggingFollowerCatchesUpWithSeveralAppendsInFlight(t *testing.T) {
+	t.Parallel()
+	cluster := newMemoryCluster(t)
+	cluster.isolate(3)
+	cluster.enqueueReady(t, 1, cluster.campaign(t, 1))
+	cluster.drain(t, 100)
+	for index := 0; index < 5; index++ {
+		frame := fenceFrame(0, 0, "behind")
+		_, ready, err := cluster.nodes[1].ProposeFrame(frame.Kind, frame.Payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cluster.enqueueReady(t, 1, ready)
+		cluster.drain(t, 100)
+	}
+	// A new leader starts every peer at its own log end, past node 3's.
+	cluster.enqueueReady(t, 2, cluster.campaign(t, 2))
+	cluster.drain(t, 100)
+	cluster.blocked = map[[2]uint32]bool{}
+	for heartbeats := 0; heartbeats < 2; heartbeats++ {
+		cluster.tick(t, 2)
+		cluster.enqueueReady(t, 2, cluster.tick(t, 2))
+	}
+	cluster.drain(t, 200)
+	leader, follower := cluster.nodes[2].Snapshot(), cluster.nodes[3].Snapshot()
+	if follower.LastLogIndex != leader.LastLogIndex || follower.CommitIndex != leader.CommitIndex {
+		t.Fatalf("follower did not catch up: leader %#v follower %#v", leader, follower)
+	}
+}
+
+// Read barriers carry a read context, so a peer link cannot coalesce them.
+// If a follower's link holds more of them than the leader tracks
+// (MaxInflightAppends) and reads keep arriving, every reply answers an RPC
+// the leader already forgot, and the follower never catches up. The leader
+// must stop adding read barriers to a peer whose appends go unanswered.
+func TestM7ReadBarriersDoNotStarveALaggingFollower(t *testing.T) {
+	t.Parallel()
+	cluster := newMemoryCluster(t)
+	cluster.enqueueReady(t, 1, cluster.campaign(t, 1))
+	cluster.drain(t, 100)
+	cluster.isolate(3)
+	// More than one AppendEntries batch behind, so node 3 only catches up if
+	// the leader learns its progress.
+	for index := 0; index < 20*MaxAppendEntries; index++ {
+		frame := fenceFrame(0, 0, "behind")
+		_, ready, err := cluster.nodes[1].ProposeFrame(frame.Kind, frame.Payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cluster.enqueueReady(t, 1, ready)
+		cluster.drain(t, 100)
+	}
+	cluster.blocked = map[[2]uint32]bool{}
+	reads := 0
+	read := func() {
+		reads++
+		ready, err := cluster.nodes[1].RequestRead(fmt.Sprintf("read-%d", reads))
+		if err != nil {
+			t.Fatal(err)
+		}
+		cluster.enqueueReady(t, 1, ready)
+		for cluster.deliverMatching(t, func(message Message) bool { return message.To == 2 || message.From == 2 }) {
+		}
+	}
+	// The link to node 3 backs up while reads keep coming.
+	for index := 0; index < 2*MaxInflightAppends; index++ {
+		read()
+	}
+	leader := cluster.nodes[1].Snapshot()
+	for step := 0; step < 64*MaxInflightAppends; step++ {
+		// Reads arrive faster than node 3's link drains.
+		for range MaxPipelinedAppends {
+			read()
+		}
+		if step%10 == 0 {
+			cluster.enqueueReady(t, 1, cluster.tick(t, 1))
+		}
+		// Node 3's link sends its oldest message; the reply comes straight back.
+		cluster.deliverMatching(t, func(message Message) bool { return message.To == 3 })
+		cluster.deliverMatching(t, func(message Message) bool { return message.From == 3 })
+		if follower := cluster.nodes[3].Snapshot(); follower.LastLogIndex == leader.LastLogIndex && follower.CommitIndex == leader.CommitIndex {
+			return
+		}
+	}
+	t.Fatalf("follower never caught up while reads continued: leader %#v follower %#v", cluster.nodes[1].Snapshot(), cluster.nodes[3].Snapshot())
 }

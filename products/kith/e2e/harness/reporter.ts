@@ -1,5 +1,5 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { copyFileSync, existsSync, realpathSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { basename, isAbsolute, join, relative, sep } from "node:path";
 import type { FullConfig, FullResult, Reporter, Suite, TestCase, TestError, TestResult } from "@playwright/test/reporter";
 import { E2E_DIR } from "./paths.ts";
 import { readObservedSecrets, redactText, RULE_IDS, scanText } from "./redact.ts";
@@ -30,7 +30,7 @@ type RunContext = {
   started_at: string;
 };
 
-const ID_RE = /^((?:E2E|PROBE)-W[0-7]-[0-9]{2}) /;
+const ID_RE = /^((?:E2E|PROBE)-W[0-7]-[0-9]{2}|E2E-RC-0[1-7]|E2E-PT-01|E2E-VIS-0[1-3]) /;
 const FILES_EXCLUDED_DIRS = ["report", "test-output", "state", "nested"];
 const SCAN_EXCLUDED_DIRS = ["report", "test-output", "traces", "state", "nested"];
 const SCAN_EXTENSIONS = [".jsonl", ".json", ".log", ".md", ".txt"];
@@ -81,12 +81,45 @@ export default class KithReporter implements Reporter {
       .filter((a) => a.type === "evidence" && a.description !== undefined)
       .map((a) => JSON.parse(a.description!) as Evidence);
     const runDir = process.env.KITH_E2E_RUN_DIR!;
+    const visualRoles = new Map<string, string[]>();
     for (const att of result.attachments) {
+      // Playwright's native comparison attaches these three roles on pixel mismatch.
+      // Actual/diff come from this run output; expected may be one approved baseline.
+      const visual = /^([a-z0-9-]+)-(expected|actual|diff)\.png$/.exec(att.name);
+      if (id.startsWith("E2E-VIS-") && visual) {
+        const roles = visualRoles.get(visual[1]!) ?? [];
+        roles.push(visual[2]!);
+        visualRoles.set(visual[1]!, roles);
+        const output = join(runDir, "test-output");
+        const rel = att.path && existsSync(att.path) ? relative(output, realpathSync(att.path)) : "..";
+        const baseline = process.env.KITH_VISUAL_BASELINE_DIR ?? join(E2E_DIR, "visual-baselines");
+        const expected = join(baseline, visual[1]! + ".png");
+        const fromBaseline = visual[2] === "expected" && ["login", "home-empty", "people-list"].includes(visual[1]!) &&
+          att.path && existsSync(att.path) && existsSync(expected) && realpathSync(att.path) === realpathSync(expected);
+        if (!att.path || att.contentType !== "image/png" || (!fromBaseline && (rel === ".." || rel.startsWith(".." + sep) || isAbsolute(rel))) ||
+          !existsSync(att.path) || statSync(att.path).size > 10 * 1024 * 1024 ||
+          !readFileSync(att.path).subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex"))) {
+          this.errors.push("invalid visual attachment: " + att.name);
+          continue;
+        }
+        const path = "files/" + id + "/" + project + "-" + basename(att.name);
+        mkdirSync(join(runDir, "files", id), { recursive: true });
+        copyFileSync(att.path, join(runDir, path));
+        evidence.push({ kind: "visual-" + visual[2]!, path });
+      }
       if (att.name === "trace" && att.path && existsSync(att.path)) {
         const rel = "traces/" + id + "." + project + ".zip";
         mkdirSync(join(runDir, "traces"), { recursive: true });
         copyFileSync(att.path, join(runDir, rel));
         evidence.push({ kind: "trace", path: rel });
+      }
+    }
+    for (const [scene, roles] of visualRoles) {
+      // Candidate creation passes with expected/actual only. A failed comparison or diff
+      // must preserve exactly one complete same-scene triplet for forensic validation.
+      if ((result.status !== "passed" || roles.includes("diff")) &&
+        [...roles].sort().join(",") !== "actual,diff,expected") {
+        this.errors.push("incomplete visual comparison bundle: " + id + "/" + scene);
       }
     }
     this.results.push({

@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "runId": "20261024T102243844Z-b4b441d3",
+  "status": "failed",
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "steps": [
+    {
+      "name": "local-image-response",
+      "status": 200,
+      "contentType": "image/svg+xml",
+      "sha256": "a651b999860b0cca72532e8ea6a49ed4f1dc0afce19d46147d92f2ec07dff12d"
+    },
+    {
+      "name": "Edit bookmark",
+      "type": "button",
+      "outline": "solid",
+      "focusVisible": true
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "card-keyboard-focus",
+      "file": "screenshots/card-keyboard-focus.png",
+      "sha256": "dc56fe7850dcbe2b9d92032805c25a6770f46851af3f880aa8b8d5111153eb00",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "real-edited",
+      "file": "screenshots/real-edited.png",
+      "sha256": "618f1ca603f6e57dc614c4b8b419c703dae5e6834c955f38cb46c5c406a34add",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    }
+  ],
+  "axe": [],
+  "health": [],
+  "imageObservations": [
+    {
+      "phase": "after-real-url-edit",
+      "apiFavicon": "http://127.0.0.1/favicon.ico",
+      "images": [
+        {
+          "src": "http://127.0.0.1/favicon.ico",
+          "currentSrc": "http://127.0.0.1/favicon.ico",
+          "complete": true,
+          "naturalWidth": 0
+        },
+        {
+          "src": "http://127.0.0.1:5173/review.svg",
+          "currentSrc": "http://127.0.0.1:5173/review.svg",
+          "complete": true,
+          "naturalWidth": 16
+        }
+      ]
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "vite",
+      "code": 0,
+      "signal": null,
+      "listenerAbsent": true
+    },
+    {
+      "name": "mock-initial",
+      "code": null,
+      "signal": "SIGTERM",
+      "listenerAbsent": true
+    }
+  ],
+  "sourceHashes": {
+    "web/src/store/bookmarkStore.ts": "b473b497e1af243ba21887f60485737748da728a054c6de28a8f56b81a3ca1c7",
+    "web/src/components/BookmarkCard.tsx": "874333d14c2a57d0905fa413c2af4cb6a02265a6b2cc18db061011d6cbb21222",
+    "web/src/components/BookmarkGrid.tsx": "9255c012680b99a9eb8ce75cc8d6182d887757c69d36c4868a7dd40d36947d4c",
+    "web/src/components/Sidebar.tsx": "a2315ccbc6a4b55e2b26035de288c7f4766c115a461a1251408a722030c36b4d",
+    "fe-review/serve-web.mjs": "9befd54528e4c27e99a80fadd7a57e436f299b91c5a3fa2fad02c2bcef09286a",
+    "fe-review/verify-browser.mjs": "af773e8a0d3a59b54bca6172aed2670aeb5a3378b23d0c160b57aac78457f3c6",
+    "fe-review/isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476",
+    "fe-review/targets.json": "c94022ce0b7211c72e9867ba536576bbf400bcba0891a789680136dd1daede27"
+  },
+  "error": "AssertionError [ERR_ASSERTION]: edited favicon must decode",
+  "rawManifestSha256": "ee2866683887d8ea1296b31b0074cea95a285b3bf0b0f557a74765720547b489",
+  "requestSummary": {
+    "total": 1469,
+    "faviconRequests": 0,
+    "nonLoopbackOrigins": []
+  },
+  "publication": "Derived summary; original full request list retained ignored locally, no record was rewritten."
+}

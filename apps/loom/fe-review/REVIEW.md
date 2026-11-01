@@ -1,37 +1,18 @@
-# FE Review — loom — REVIEW
+# Loom FE review — current R2 evidence
 
-> 活文件：只描述目前狀態。已解決的項目直接改寫成目前的結論，不留過期描述；歷史由 Git 與 PR 保存。每次修改都走 PR。規則見 PROTOCOL.md 的「`REVIEW.md` 規則」。
+Approved [DESIGN](DESIGN.md) M1–M3 review-only preload/driver is implemented. Retained12matrixkeys plus loom006remaining9captures/12steps establish the scoped syntheticWebflow; [report](tasks/round2/report.md) records exactsource/nativeevidence and failures. Finalindependentreview/current-headCI/normalmerge/readback remainpending under [PR598](https://github.com/fallrising/newclear/pull/598). No fullRound3/product/native acceptance.
 
-## 目前輪次
+The previous missingnativeIPC andgenericcapture contradictions are resolved only through the component-ownedpreload/driver. The stateful fixture covers actualinvoke/listen/callback/nativeboundaries, rejectsunknowncommands, and records disposal. Genericcapture still cannot install it. No productionadapter/nativecontracts/schema/dependencies changed; dormantbacklog remainsclosed.
 
-- **第 1 輪：文檔先行（進行中）** — 下一步是撰寫 `DESIGN.md`（見 PROTOCOL.md「三輪節奏」與 `docs/fe-review/DESIGN-PROMPT.md`）。
-- 第 2 輪：修改（未開始）
-- 第 3 輪：完整 e2e（未開始）
+## Retained findings
 
-## 修改權限
+- Populated/documentstates report serious aria-input-field-name andcolor-contrast violations; empty/history states reportmoderate region. Allacceptedstates retain aria-prohibited-attr/color-contrast incomplete. Exactcounts remain in [audit](tasks/round2/evidence/final-docs/audit.json).
+- All21acceptedcaptures haveclean normalbrowserhealth/no pagehorizontaloverflow. This is not a fullpixel/overlap audit; canvas canpan.
+- Matrixcreation recordedvisiblekeyboardfocus. Actual006closeCancel activation hadactive=true butfocusVisible=false/outlineStyle=none; visiblefocus remains anissue.
+- Realvault/PTY/SQLite/filesystemwatcher/AI/nativewindow/crossplatform andcrashdurability areunproven bysyntheticWeb. Existing productmainline gaps remain.
 
-文檔檔位 **C（dormant）**：依 [`PORTFOLIO.md`](../../../PORTFOLIO.md)「休眠」一節的 fe-review 例外，第 2 輪可在 `DESIGN.md` 範圍內修改前端與做最小解耦。這不恢復投入，不做新功能或 major 依賴升級。
+## Resolved harness blocker and history
 
-## 矛盾點
+Previousdrag attempts failed;005mistakenlyusedlibrarydefault1px despiteactualcomponentoverride4px. Afterseparateownerapproval,006source-derived5pxactivation+1pxtranslationwitness passed, thenactualDOMedge1/sidecar1 andremainingworkflow passed. Puretests didnot overrideearlierfailures; originalreceipts remainunchanged. No newretrypermission follows fromthissuccess.
 
-### C1 前端直接依賴 Tauri IPC
-
-`src/ipc.ts` 依賴 Tauri；terminal 與檔案系統畫面在瀏覽器中無法運作。
-
-## 需要放開或決定的點
-
-### D1 IPC 解耦方式
-
-- 同 flowshot：(a) IPC adapter；(b) `addInitScript` mock。
-- 建議：(b) 先行。
-- 狀態：**待擁有者決定**。撰寫 `DESIGN.md` 時可先以建議作為「假設」，在設計 PR 中由擁有者確認。
-
-## 進入第 2 輪的條件
-
-- `DESIGN.md` 已合併，其中每個假設都已由擁有者確認，並改寫進上方「已決定」。
-- `PROMPT.md` 與 `targets.json` 已依設計更新。
-
-## 相關 PR
-
-- fallrising/newclear#141：建立工作包、REVIEW 與三輪節奏。
-- fallrising/newclear#144：記錄擁有者決定與設計文件入口。
+Next: rootfinalreview/CI/delivery fororiginalR2. NewfullRound3work orproducta11yfixes needtheir ownapprovedscope; no release/deploy/usabletag. Originaldesignapproval remains in [DESIGN](DESIGN.md) andcentral [acceptance](../../../docs/fe-review/ROUND1-ACCEPTANCE.md).

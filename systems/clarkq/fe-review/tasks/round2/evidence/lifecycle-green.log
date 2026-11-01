@@ -1,0 +1,15 @@
+✔ child environment cannot inherit config, persistence, credentials, exporters or peers (1.792263ms)
+✔ SIGTERM/SIGINT cancel without throwing from signal callback and detach listeners (2.287701ms)
+✔ late acquired resource remains owned even when cancellation preceded acquisition (0.781487ms)
+✔ stalled or rejecting browser close does not suppress service and receipt cleanup (10.965223ms)
+✔ state refuses reuse, unknown files and symlink boundary without deleting them (5.128039ms)
+✔ cleanup refuses foreign process even when its PID looks valid (0.375579ms)
+✔ receipt refuses secret values and route rejects external, credential and query variants (0.402058ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 86.057865

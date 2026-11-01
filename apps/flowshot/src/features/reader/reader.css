@@ -1,0 +1,13 @@
+.flowshot-reader { overflow-wrap: anywhere; line-height: 1.65; }
+.flowshot-reader pre { overflow-x: auto; padding: 1rem; background: #f1f3f5; }
+.flowshot-reader code { font-family: ui-monospace, monospace; white-space: pre-wrap; }
+.flowshot-reader table { border-collapse: collapse; }
+.flowshot-reader th, .flowshot-reader td { border: 1px solid #b7bec7; padding: .3rem .6rem; }
+.flowshot-reader button[role="link"] { border: 0; padding: 0; background: transparent; color: #145fa3; text-decoration: underline; font: inherit; cursor: pointer; }
+.flowshot-reader button[role="link"]:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.flowshot-reader .flowshot-image-caption { display: inline-block; }
+.flowshot-reader .flowshot-image-caption img { display: block; max-width: 100%; user-select: none; }
+.flowshot-reader .hljs-keyword, .flowshot-reader .hljs-selector-tag { color: #7044a5; }
+.flowshot-reader .hljs-string, .flowshot-reader .hljs-attr { color: #276237; }
+.flowshot-reader .hljs-number, .flowshot-reader .hljs-literal { color: #9a4c0e; }
+.flowshot-reader .hljs-comment { color: #5a6674; }

@@ -1,0 +1,42 @@
+{
+  "snapshot_utc": "2026-10-24T06:25:29Z",
+  "scope": "review-only R4 lifecycle and fifteen-route smoke; no product changes or broad matrix/e2e rerun",
+  "red": {
+    "passed": 3,
+    "failed": 1,
+    "exit": 1,
+    "tool_chunk": "2adecd",
+    "failure": "failed import must release owned lock: true !== false"
+  },
+  "green": {
+    "passed": 4,
+    "failed": 0,
+    "exit": 0,
+    "tool_chunk": "ae1985",
+    "command": "node --test products/kith/fe-review/review.test.mjs (inside network-none container)"
+  },
+  "route_smoke": {
+    "run_id": "20261024T062130819Z-51cc897c-2fbd-4f99-bffa-d419997cee51",
+    "command": "node products/kith/fe-review/route-smoke.mjs",
+    "exit": 0,
+    "routes": 15,
+    "final_url_equals_requested": 15,
+    "loaded_content": 15,
+    "storage": "actual targets storageState path used"
+  },
+  "cleanup": {
+    "owned_process_groups_stopped": true,
+    "stopped_at": "2026-10-24T06:24:32.847Z"
+  },
+  "script_sha256": {
+    "launch.mjs": "0723c18a2d152c5d1771af4217ea45865514eae11dd9d7bc301b44b0b9cf77fa",
+    "route-smoke.mjs": "cff241d676eb3b97cb81691e0d1dc387107c01c7f1216508113ee9f3d0ba6693",
+    "review.test.mjs": "ef059bad41a2956e48bf8ee29db32e4d19938e8c7656591dd72d87290e3355d0"
+  },
+  "remaining": [
+    "Original R3 browser-health findings retained.",
+    "axe not run.",
+    "Root independently closes historical individual-lint exit evidence gap; worker did not rerun those gates.",
+    "targets remains verified=false; independent review/CI/publication remain parent-owned."
+  ]
+}

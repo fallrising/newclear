@@ -1,0 +1,30 @@
+# CMS oldest-PR resume — T-0351
+
+Owner2026-11-01 explicitly resumes development and qualified PR merges. Claim deskPR363 merged a41ba4f6f23ca40c10600adbde521080eb284d23. Original PR333 source98159a86 and PR334 source68610e95; latest main merged normally with no conflicts, pending commit. Preserve all historical checkpoints and failures.
+
+Goal: qualify PP1b under already approved PR331 DOC_READY (fresh-init, initialized semantic checks, guard live negatives, trusted accounts browser, native gates/independent review/CI), and separately correct PP1c draft against its approved parent plus14findings. PP1c remains DRAFT and no product implementation until any necessary owner spec approval. No staging/deploy/release, host trust change, old-volume cleanup, new runtime dependency or unrelated BW6 work.
+
+Root owns runtime preflight, new isolated synthetic runs, source integration, tests, decisions, Git delivery/readback and desk/journal. Component plan avoids monorepo root collisions. T1101 docs-only writer in separate PP1c worktree,50minute active bound; T1102 read-only pending acceptance review in PP1b worktree,20minute bound. Neither may delegate or mutate Git/runtime. Root independent review of docs after writer; final bounded reviewer follow-up on code changes if needed. No external provider CLI. Native launches tracked here, total0 before dispatch.
+
+Estimate90–150 active minutes,20minute checkpoints. Each build/test<=15minutes, CIwait<=15minutes, two hypothesis-driven corrections after initial failure. Stop affected path on missing authority, product contract change or nonconvergent failure, retain evidence; do not weaken tests. Provider/tool/tokens/cost and complete elapsed/wait accounting unknown/null; no hard tool-count budget.
+
+Preflight:40GiB free. Node24.18.0 and Docker29.1.3 exist; JDK25,PG16/JRE base images and PP1-specific browser prerequisites not yet located. Original PP1a requires existing validated immutable image/tool inputs and forbids automatic missing-input downloads; root must resolve available inputs before dependent runtime. Existing shared fanz browser image is not yet validated for this contract.
+
+Verification: ./gradlew test integrationTest (sequential), npm lint/typecheck/test/build/test:bundle, PP1 helper/parser regressions, all remaining fixed G07/E01 acceptance checks, source-bound artifacts/owned cleanup, independent review, root indexes and required CI. No skip counted as pass.
+
+Started 2026-11-01T11:45:38Z
+
+Checkpoint:2native leaves launched (T1101/T1102), no external model CLI. Node117helper tests pass on normal host; sandbox attempt6/8file-wrapper failures preserved and not counted as product regressions. Shared-cache JDK25.0.5+8 verified against officialSHA256; root separately prepares prescribed validation images before handing immutable IDs to unchanged pull-forbidden prepare/compose/browser launch. No product dependency or host trust/config change.
+
+## Concrete local-tooling amendment proposed for owner decision
+
+Reading PP1a§5.2 in full revealed a stricter prerequisite than the initial input inventory: it fixes the old existing JRE25/curl runtime base and explicitly forbids changing base packages/installing curl. That old image is absent after machine maintenance. Root had separately prepared tool images before locating this stricter paragraph; they have NOT been used to start a CMS PP1 run or claim acceptance. Preserve this fact; do not silently treat new tooling as approved. Normal Java/Testcontainers/web gates are independent and continue.
+
+Proposed narrow addition to PP1a§5.2 (all other assertions unchanged):
+> 2026-11-01 local resume exception, effective only after owner approval: when the historical local validation images no longer exist, root may prepare the existing prescribed JDK/JRE25, PostgreSQL16 and browser/NSS validation tools in shared cache or disposable local images. Capture exact source digest, package versions and full resulting image IDs before any run; no app runtime dependency/lockfile, system trust, privileged/hostnetwork or published DB/API ports change. Product prepare/compose/browser launch still accepts only verified existing full IDs, never auto-pulls, and preserves the same-source JAR/dist/ingress checks, scoped TLS, fresh volumes, secret transport and original acceptance assertions. This exception does not authorize deployment or release.
+
+Prepared but not yet adopted JRE/curl image1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09 derives from official Temurin25.0.5 JRE; browser/NSS6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc derives from existing local Debian browser-tool base. Recipes/build logs are private tooling evidence. Until decision, no dependent PP1 runtime/browser execution or SDD amendment.
+
+Merge validation note: staged comparison against the old September/October PR parent reports inherited trailing whitespace in three unrelated current-main evidence/README files. Those three index blobs were byte-compared with MERGE_HEAD and remain identical; no historical evidence rewritten. `git diff --cached --check MERGE_HEAD` passes for the actual feature delta. Root index validation passes52contracts/9llms.
+
+Checkpoint: native Java517+201PG,web672+117helper and native build/static/bundle gates pass; E01 finally throw lint fixed and rechecked. Root evidence gate remains PARTIAL: G07/E01 await owner tooling decision; no final acceptance/merge. Exact commands, prior failures and next action in EVIDENCE.md.

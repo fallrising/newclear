@@ -1,16 +1,16 @@
 ---
 document_type: implementation-plan
 node_id: N01
-status: blocked
+status: done
 derived_from:
   - ../../../SPEC.md
   - ../../nodes/N01-sqlite-schema-migrations.md
   - ../../graph.yaml
-source_version: 1.0.1
+source_version: 1.0.2
 source_sha256:
-  SPEC.md: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-  N01: 13de68ca196fd1d302ca4df0bff5d4633cfee1a106656a43e220967f0cc660fc
-  graph: 19a504eae11034324bda758102a2d7c12567d3e55272ab3b07fbef7709f885a3
+  SPEC.md: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+  N01: b50452419cf658893fb76bbb28b891cd5377eeb79971e2933f61150a6a430fd4
+  graph: 9faac91e127fc70fb4be8683715f95fc71df1821d51667fcabdcb9bf8e54139e
 generated_at: 2026-07-30T18:26:45+02:00
 owner: codex
 ---
@@ -31,16 +31,15 @@ N01 不加入 Tauri product command、不讀寫 workspace、不實作 anchor
 
 | Fact | Evidence | Result |
 |---|---|---|
-| N00 dependency | `docs/graph.yaml` | `blocked`; N01 不得進入 implementation |
-| DB crate | `crates/db/src/lib.rs` | 只有 `DbAdapter` marker |
-| SQLite dependency | `crates/db/Cargo.toml` | 尚未加入 |
-| N01 lock | `contracts/locks/N01.json` | planned；source 尚不存在 |
+| N00 dependency | `docs/graph.yaml` | `done` per N00 verification; N01 assigned for implementation |
+| DB crate at planning start | `crates/db/src/lib.rs` | Initially only `DbAdapter`; current implementation/evidence below |
+| SQLite dependency at planning start | `crates/db/Cargo.toml` | Initially absent; pinned dependency selection below |
+| N01 lock at planning start | `contracts/locks/N01.json` | Initially planned; now frozen with strict metadata/source validation |
 | Canonical DDL | `SPEC.md` §9.2 | 11 tables、7 declared indexes |
 | Required invariants | `SPEC.md` §3、§9.3–9.5 | hard-delete、comment depth、system pin、tombstone |
 | Runtime boundary | `SPEC.md` §9.1 | single write actor、bounded reads、injectable clock/ID |
 
-本計畫是 dependency-safe preparation。所有 production task 在 N00 `done`
-前維持 blocked；不得以計畫或 mock 取代依賴證據。
+N00 已由 Docker native／window／IPC 證據及獨立審查完成開發驗收。N01 現由 orchestrator 明確指派，依 T01–T07 實作；Mac 發行驗收另追蹤。
 
 ## 3. Architecture
 
@@ -66,8 +65,8 @@ Tauri app-data path
 
 ## 4. Migration Design
 
-1. 開啟 connection 後立即套用並驗證四個 mandatory PRAGMA。
-2. 以 idempotent bootstrap 建立 `schema_migrations` metadata table。
+1. 開啟 connection 後立即套用並驗證五個 mandatory PRAGMA。
+2. 先驗證 registry，再於 serialized write transaction 內 bootstrap `schema_migrations` metadata table。
 3. migration registry 以 source order 嵌入連續 `version + SQL + SHA-256`。
 4. 啟動時拒絕：
    - duplicate 或 gap version；
@@ -185,7 +184,7 @@ Production work stays within the N01 node card:
 - `docs/tasks/N01/**` and `docs/verification/N01.md` own evidence。
 
 Generated `Cargo.lock` must change when N01 adds direct dependencies, but the
-node allowed-path list currently omits it; see SD-N01-001.
+node allowed-path list now includes it; SD-N01-001 resolved.
 
 ## 11. Risks and Spec Defects
 
@@ -208,14 +207,28 @@ before release evidence.
 
 ## 13. Exit Criteria
 
-- [ ] N00 dependency is `done` with executed evidence.
-- [ ] Node allowed-path defect for `Cargo.lock` is resolved.
-- [ ] Migration registry rejects gaps, tampering and database-ahead state.
-- [ ] Canonical schema, indexes, PRAGMAs and all triggers have executable tests.
-- [ ] Repository contract lock is frozen with zero drift.
-- [ ] Soft-delete and optimistic concurrency scenarios pass transactionally.
-- [ ] No product SQL or `rusqlite` dependency exists outside `crates/db`.
-- [ ] Tempfile WAL and bounded executor tests pass.
-- [ ] 10k release benchmark passes with hardware record.
-- [ ] Tauri uses platform app-data path and does no blocking query on async threads.
-- [ ] `make ci`, N01 verification and G2 outcome pass.
+- [x] N00 dependency is `done` with executed evidence.
+- [x] Node allowed-path defect for `Cargo.lock` is resolved.
+- [x] Migration registry rejects gaps, tampering and database-ahead state.
+- [x] Canonical schema, indexes, PRAGMAs and all triggers have executable tests.
+- [x] Repository contract lock is frozen with zero drift.
+- [x] Soft-delete and optimistic concurrency scenarios pass transactionally.
+- [x] No product SQL or `rusqlite` dependency exists outside `crates/db`.
+- [x] Tempfile WAL and bounded executor tests pass.
+- [x] 10k release benchmark passes with hardware record.
+- [x] Tauri uses platform app-data path and does no blocking query on async threads.
+- [x] `make ci`, N01 verification and G2 outcome pass.
+
+## Contract reconciliation before implementation
+
+The independent T-003 audit is resolved by the N01 node's 2026-10-23 clarification: owned actor closures, checked signed persistence range, monotonic CAS timestamps, memory-journal test exception, trigger UPDATE closure, immutable migration staging and combined migration+seed timing. SD-N01-001/006 ownership now includes Cargo.lock, graph/outcome, src-tauri manifest/lib wiring. Exact dependencies still require recorded package selection. N08 owns tag merge; N01 covers primitive binding persistence only. N00 must have real Linux native development evidence before implementation begins; Mac release evidence is independent (SPEC §13.1).
+
+## Dependency selection (2026-10-23)
+
+Pin rusqlite 0.40.2 with bundled SQLite ([official API](https://docs.rs/rusqlite/0.40.2/rusqlite/)); reuse uuid 1.24.0, sha2 0.11.0 and serde_json 1.0.151 already present in the workspace lock. Tag normalization uses unicode-normalization 0.1.26 NFKC ([API](https://docs.rs/unicode-normalization/0.1.26/unicode_normalization/)) then caseless 0.2.2 default full case folding ([API](https://docs.rs/caseless/0.2.2/caseless/fn.default_case_fold_str.html)), with trim before/after. These are persistence dependencies only; core remains pure and unchanged. Exact resolutions and checksums are committed in Cargo.lock. No network is needed at application runtime.
+
+T-006 adversarial requirements: REPLACE implicit deletes and NULL pin identity are rejected; unrelated schema with empty metadata is rejected; callbacks cannot reenter their runtime and self-deadlock; shutdown drains admitted readers/writers and closes connections. Batch commits preserve orphan original anchors and annotation kind, include all live ranges once, and audit exact original/result anchors. Native checksum-failure smoke must prove expected DB initialization failure and unchanged persisted fixture/metadata.
+
+Final review interpretation of existing SPEC §6/§9: annotation `last_resolution=unchanged` maps to anchor-event `method=none`, because unchanged is an outcome/fast path, not a matching method. Preserve `outcome=unchanged` and the exact old/new anchors; an attached annotation may not record an orphaned outcome. This reconciles existing canonical enums without changing immutable DDL. Positive and negative batch regressions must pass before acceptance.
+
+Development acceptance: [N01/M0 verification](../../verification/N01.md), final complete Docker gate and independent T-006 ACCEPT. Historical RED/rework remains in the evidence; task-board merge closure is separate.

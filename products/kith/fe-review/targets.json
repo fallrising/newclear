@@ -1,7 +1,7 @@
 {
   "project": "kith",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動。start 只起 Vite，需要另外有綁 127.0.0.1 的 worker（e2e harness 路徑，見 DESIGN.md M1）；除 /login 外的頁面需要 storageState。頁面 id 來自 e2e seed base-v1。第 2 輪依 DESIGN.md M3 拆分 app、加上 storageState，跑通後改為 true。",
+  "verified": true,
+  "verifiedNote": "2026-10-24：已隔離實跑真 worker/D1/seed/fake provider、登入、96互動capture、90靜態capture及15route finalURL+loaded-content smoke，owned cleanup與必要原生gate有證據。只由一個app啟動launcher。verified僅代表DESIGN M1–M4；第3輪完整health/視覺/axe未驗收，既有console/request findings保留。",
   "locale": "zh-TW",
   "colorSchemes": [
     "light",
@@ -9,21 +9,31 @@
   ],
   "apps": [
     {
-      "name": "web",
+      "name": "web-anon",
       "kind": "spa",
-      "cwd": "products/kith/web",
-      "install": "npm ci",
-      "start": "npm run dev -- --host 127.0.0.1 --port 5174 --strictPort",
-      "env": {
-        "KITH_API_ORIGIN": "http://127.0.0.1:8787"
-      },
+      "cwd": "products/kith",
+      "install": "npm ci && npm --prefix web ci && npm --prefix e2e ci",
+      "start": "node fe-review/launch.mjs",
+      "env": {},
       "baseUrl": "http://127.0.0.1:5174",
       "ready": "/login",
       "pages": [
         {
           "id": "login",
           "path": "/login"
-        },
+        }
+      ]
+    },
+    {
+      "name": "web",
+      "kind": "spa",
+      "cwd": "products/kith",
+      "install": "npm ci && npm --prefix web ci && npm --prefix e2e ci",
+      "start": "node fe-review/launch.mjs",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:5174",
+      "ready": "/login",
+      "pages": [
         {
           "id": "home",
           "path": "/"
@@ -80,7 +90,9 @@
           "id": "not-found",
           "path": "/does-not-exist"
         }
-      ]
+      ],
+      "storageState": "products/kith/fe-review/runs/.state/current/auth.storage.json"
     }
-  ]
+  ],
+  "verifiedDate": "2026-10-24"
 }

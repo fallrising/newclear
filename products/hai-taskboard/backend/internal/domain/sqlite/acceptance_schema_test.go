@@ -39,7 +39,7 @@ func TestAcceptanceSchema_V1UpgradePreservesHistoryAndLeavesHeadsEmpty(t *testin
 			}
 			migrationExec(t, db, "UPDATE instance_state SET restore_generation=7,stream_epoch=9,next_event_sequence=12")
 			before := acceptanceV1Snapshot(t, db)
-			store, err := migrationOpen(t.Context(), root, path)
+			store, err := acceptanceV2Open(t.Context(), root, path)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -105,7 +105,7 @@ func acceptanceV1Snapshot(t *testing.T, db *sql.DB) string {
 		if err := rows.Scan(&name); err != nil {
 			t.Fatal(err)
 		}
-		if !slices.Contains(acceptanceTables, name) {
+		if name != "run_input_envelopes" && !slices.Contains(acceptanceTables, name) {
 			names = append(names, name)
 		}
 	}
@@ -163,7 +163,7 @@ func acceptanceV1Snapshot(t *testing.T, db *sql.DB) string {
 		if err := rows.Scan(&kind, &name, &owner, &statement); err != nil {
 			t.Fatal(err)
 		}
-		if !slices.Contains(acceptanceTables, owner) {
+		if owner != "run_input_envelopes" && !slices.Contains(acceptanceTables, owner) {
 			fmt.Fprintf(&result, "schema:%s/%s/%s/%v\n", kind, name, owner, statement)
 		}
 	}
@@ -179,7 +179,7 @@ func acceptanceV1Snapshot(t *testing.T, db *sql.DB) string {
 func acceptanceSnapshot(t *testing.T, db *sql.DB) string {
 	t.Helper()
 	result := acceptanceV1Snapshot(t, db)
-	for _, table := range acceptanceTables {
+	for _, table := range append(slices.Clone(acceptanceTables), "run_input_envelopes") {
 		rows, err := db.QueryContext(t.Context(), "SELECT * FROM "+table)
 		if err != nil {
 			result += table + ":absent\n"
@@ -218,7 +218,7 @@ func acceptanceSnapshot(t *testing.T, db *sql.DB) string {
 func TestAcceptanceSchema_FreshUpgradeAndReopen(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "state.db")
-	store, err := OpenAtRootWithClock(t.Context(), root, path, func() time.Time { return fixedClockTime })
+	store, err := acceptanceV2Open(t.Context(), root, path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +230,7 @@ func TestAcceptanceSchema_FreshUpgradeAndReopen(t *testing.T) {
 		t.Fatal(err)
 	}
 	db := migrationTestDB(t, path)
-	for _, step := range compiledMigrations() {
+	for _, step := range acceptanceV2Registry() {
 		var sum string
 		var stamp int64
 		if err := db.QueryRowContext(t.Context(), "SELECT checksum,applied_at_ns FROM schema_migrations WHERE version=?", step.version).Scan(&sum, &stamp); err != nil {
@@ -250,7 +250,7 @@ func TestAcceptanceSchema_FreshUpgradeAndReopen(t *testing.T) {
 		}
 	}
 	before := acceptanceSnapshot(t, db)
-	store, err = OpenAtRootWithClock(t.Context(), root, path, func() time.Time { return fixedClockTime.Add(time.Hour) })
+	store, err = acceptanceV2OpenAt(t.Context(), root, path, fixedClockTime.Add(time.Hour).UnixNano())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,14 +279,14 @@ func TestAcceptanceSchema_RejectsUnknownAndOldBinary(t *testing.T) {
 				migrationExec(t, db, "INSERT INTO schema_migrations VALUES(2,'wrong',43)")
 				migrationExec(t, db, "UPDATE instance_state SET schema_version=2")
 			case "step2-timestamp":
-				migrationExec(t, db, "INSERT INTO schema_migrations VALUES(2,?,'bad')", compiledMigrations()[1].checksum)
+				migrationExec(t, db, "INSERT INTO schema_migrations VALUES(2,?,'bad')", acceptanceV2Registry()[1].checksum)
 				migrationExec(t, db, "UPDATE instance_state SET schema_version=2")
 			case "gap-after-v1":
 				migrationExec(t, db, "INSERT INTO schema_migrations VALUES(3,?,43)", acceptanceHash("gap"))
 				migrationExec(t, db, "UPDATE instance_state SET schema_version=3")
 			}
 			before := acceptanceSnapshot(t, db)
-			store, err := migrationOpen(t.Context(), root, path)
+			store, err := acceptanceV2Open(t.Context(), root, path)
 			if store != nil {
 				if err := store.Close(); err != nil {
 					t.Fatal(err)
@@ -305,7 +305,7 @@ func TestAcceptanceSchema_RejectsUnknownAndOldBinary(t *testing.T) {
 			root := t.TempDir()
 			path := filepath.Join(root, "state.db")
 			db := migrationTestDB(t, path)
-			if err := migrationRun(t, db, t.Context(), compiledMigrations(), 42); err != nil {
+			if err := migrationRun(t, db, t.Context(), acceptanceV2Registry(), 42); err != nil {
 				t.Fatal(err)
 			}
 			if unknown {
@@ -314,7 +314,7 @@ func TestAcceptanceSchema_RejectsUnknownAndOldBinary(t *testing.T) {
 			}
 			before := acceptanceSnapshot(t, db)
 			if unknown {
-				store, err := migrationOpen(t.Context(), root, path)
+				store, err := acceptanceV2Open(t.Context(), root, path)
 				if store != nil {
 					if err := store.Close(); err != nil {
 						t.Fatal(err)
@@ -365,7 +365,7 @@ func TestAcceptanceSchema_ActualV2RollbackRestart(t *testing.T) {
 				if acceptanceSnapshot(t, db) != before {
 					t.Fatal("actual V2 DDL/history/state failed atomic rollback")
 				}
-				store, err := migrationOpen(t.Context(), root, path)
+				store, err := acceptanceV2Open(t.Context(), root, path)
 				if err != nil {
 					t.Fatalf("actual V2 retry: %v", err)
 				}
@@ -425,7 +425,7 @@ func TestAcceptanceSchema_ActualV2CancelAndConcurrent(t *testing.T) {
 			if acceptanceSnapshot(t, db) != before {
 				t.Fatal("canceled actual V2 changed database")
 			}
-			store, err := migrationOpen(t.Context(), root, path)
+			store, err := acceptanceV2Open(t.Context(), root, path)
 			if err != nil {
 				t.Fatalf("writer release/retry: %v", err)
 			}
@@ -451,7 +451,7 @@ func TestAcceptanceSchema_ActualV2CancelAndConcurrent(t *testing.T) {
 			for range 4 {
 				wg.Go(func() {
 					<-start
-					store, err := migrationOpen(t.Context(), root, path)
+					store, err := acceptanceV2Open(t.Context(), root, path)
 					if store != nil {
 						err = errors.Join(err, store.Close())
 					}
@@ -485,7 +485,7 @@ func TestAcceptanceSchema_ActualV2CancelAndConcurrent(t *testing.T) {
 			if count != 2 || version != 2 {
 				t.Fatal("V2 startup did not converge")
 			}
-			store, err := migrationOpen(t.Context(), root, path)
+			store, err := acceptanceV2Open(t.Context(), root, path)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -521,7 +521,7 @@ func acceptanceInsert(t *testing.T, db *sql.DB, table string, row acceptanceRow)
 func acceptanceFixture(t *testing.T) *sql.DB {
 	t.Helper()
 	db := migrationTestDB(t, filepath.Join(t.TempDir(), "state.db"))
-	if err := migrationRun(t, db, t.Context(), compiledMigrations(), 42); err != nil {
+	if err := migrationRun(t, db, t.Context(), acceptanceV2Registry(), 42); err != nil {
 		t.Fatal(err)
 	}
 	for _, p := range []string{"p1", "p2"} {
@@ -960,4 +960,37 @@ func TestAcceptanceSchema_ImmutableHistoryAndReplacement(t *testing.T) {
 			}
 		})
 	}
+}
+
+// These predecessor oracles deliberately run the exact frozen V1+V2 binary
+// registry. Public latest-schema V3 behavior has separate RunInput oracles.
+func acceptanceV2Registry() []migrationStep { return compiledMigrations()[:2] }
+func acceptanceV2Open(ctx context.Context, root, path string) (*Store, error) {
+	return acceptanceV2OpenAt(ctx, root, path, fixedClockTime.UnixNano())
+}
+func acceptanceV2OpenAt(ctx context.Context, root, path string, stamp int64) (*Store, error) {
+	if !controlledPath(root, path) {
+		return nil, ErrInvalidPath
+	}
+	db, err := sql.Open("sqlite", databaseURI(path))
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+	db.SetMaxIdleConns(1)
+	store := &Store{db: db}
+	err = store.withConn(ctx, func(conn *sql.Conn) error {
+		if err := configure(conn, ctx); err != nil {
+			return err
+		}
+		if err := runMigrations(conn, ctx, acceptanceV2Registry(), stamp); err != nil {
+			return err
+		}
+		return assertEngine(conn, ctx)
+	})
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+	return store, nil
 }

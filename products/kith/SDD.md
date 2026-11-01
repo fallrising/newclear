@@ -1,5 +1,7 @@
 # kith — Software Design Document
 
+Cost safety supplement: [cost-safety.md](docs/cost-safety.md) defines explicit paid opt-in, persisted execution phases, quota reservation and bounded background work. It applies to existing hosted/ambient paths without changing INV-01–19.
+
 - Version: 0.1.0
 - Date: 2026-09-20
 - Status: M0–M6 in tree (rooms, agents, MCP, hosted mention, sidecar, ambient); M7 optional keyring (not E2EE; 不是端對端)
@@ -251,6 +253,8 @@ Secrets：`XAI_API_KEY`（可選直到 M4）、session signing key。Codex 憑�
 根 `.github/workflows/kith.yml` 與 `docs/specs/monorepo-ci.md` 已有 Kith。`worker/`、`web/`、`sidecar/`、`runner/` 已存在（`frontend/` 於 v2 W7 刪除）。線上站是 `https://kith.fallrising.workers.dev`。
 
 ## 13. 章節索引
+
+後續呈現層提案：[Agent 活動視圖與辦公室動畫](docs/plans/agent-activity-office.md)（AV-0 文件；AV-1 起尚未實作）。重用現有房間、成員與訊號，不修訂 INV-01–19、attention、quota 或執行權限。
 
 - [00 — 目的與邊界](docs/sdd/00-purpose.md)
 - [01 — 使用者故事](docs/sdd/01-user-stories.md)

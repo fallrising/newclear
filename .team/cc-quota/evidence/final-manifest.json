@@ -1,0 +1,19 @@
+{
+  "runtime": "3.13.5",
+  "checks": [
+    {
+      "check": "unittest",
+      "exit": 0
+    },
+    {
+      "check": "installer-syntax",
+      "exit": 0
+    }
+  ],
+  "sha256": {
+    "cc_quota.py": "8d08b808b74be1ca5edd74d75300a71a92636cfa144dcd5d7c7f38589bb5d803",
+    "install.sh": "ef877ada9e2b521a5c34fc3d5756f9c6906fba79aecf436891b3786a2bb383c7",
+    "tests/test_cc_quota.py": "a46de1bc23372da51f7eb13be155dccdad4e651310a6bc7117671a37a4ca58aa",
+    "tests/test_install.py": "8e8e067f77bdf11bfd694e8f5d9f3b0379eee42d95a870326c0f56b11a53311a"
+  }
+}

@@ -1,0 +1,516 @@
+{
+  "run": "fe-ojb-0afcb7f018b20564",
+  "source": "8cabc475d5dd56ff2d34f94fd3b29fe0476dca1c",
+  "passed": true,
+  "stage": "redaction-retakes",
+  "versions": {
+    "node": "v24.18.0",
+    "playwright": "1.62.0",
+    "chromium": "151.0.7922.34"
+  },
+  "sourceHashes": {
+    "console-web/src/pages/DashboardPage.tsx": "66fad2de1fca3760fa8e97be3d9616b1064f7dca6ef9ed2750e4ebcce02e791d",
+    "console-web/src/styles.css": "d53ed9356b64890bbb95f2ed4e90db0b6974b98f9f7342e8f48cbdc677cba43a",
+    "console-web/src/test/dashboard.test.tsx": "693fdbce6ad5278d7e39b1e79aca63807c8a45b42927b759e3b1a0d9b36870c7",
+    "console-web/vite.config.ts": "761d81e97076199ef7e9ec9a764be5e3e2d32c4ba12f9062f1ddbb7a28756cc0",
+    "fe-review/run-browser.mjs": "b43bd2b32ba607b6722661624285195ba00e5ba1d112182a4324505e5e098425",
+    "fe-review/browser-support.mjs": "d5d42fec740635f9ad101978988b83c66642e7e73702c5bb4865bb0e73ead99c",
+    "fe-review/states.spec.ts": "ba38faeaaaab80d7ec06fae9927fcd859aa037e0a2d90859b3bec129fe47f847",
+    "fe-review/playwright.config.ts": "109a951c15ca840bb0657ad0c720359b22cef320cebbc55d2deceabfa620be11",
+    "fe-review/loopback-proxy.mjs": "b3a724a4276c987f0deebda18b85fb029cf8f88898affb4592d5fc77ab283458",
+    "fe-review/health.mjs": "3629aee64545315eefc32d370c822a283d7be8e458f42e0fa082787b8d6cf003",
+    "fe-review/browser-policy.mjs": "ef54668126746d8e8b0a425b082341f142b655923e70d49eeeb9fc2105a24712",
+    "fe-review/resume-plan.mjs": "6f76251ce656d0041793efccb53f7b1dcd393617e1b7b604731178c360f33f61",
+    "fe-review/lifecycle.mjs": "f558d11fa3d37dc1d4db0c857bb20877259d4bcb03761e0801bdefd656dc7070",
+    "fe-review/child-outcome.mjs": "cdb873ecd5dd0c58966cdc4dca451db1a4f0ff40dcf7ddd65373d1992afc2c33",
+    "fe-review/negative-state.mjs": "c034956749ada9465b275be967b4ada73fc727af6ba91b0a9fbdd6aaefd14f53",
+    "fe-review/png-mask.mjs": "496d07a55cc28c8e3dc6eab579716fa82378ec2fefbb0ef2da6430ef4a1f5517",
+    "fe-review/retake-secrets.mjs": "f9b478f0722e14883ab079055a2724caf00a3bff8246a1463a18af71611d3360",
+    "fe-review/package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+  },
+  "cleanup": {
+    "children": true,
+    "acquisitionsDrained": true,
+    "browser": true,
+    "vite": true,
+    "proxy": true,
+    "listenersAbsent": true
+  },
+  "loaded": [],
+  "drawerMeasurements": [],
+  "chart": [],
+  "health": [
+    {
+      "kind": "external",
+      "phase": "login",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "login",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "login",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "http",
+      "phase": "login",
+      "origin": "http://127.0.0.1:5173",
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "classification": "anonymous-session"
+    },
+    {
+      "kind": "console",
+      "phase": "login",
+      "consoleMethod": "error",
+      "origin": "http://127.0.0.1:5173",
+      "path": "/api/v1/auth/me",
+      "messageSha256": "2dab3b3c098b940436be243827bea41a08b26ae85d473d0d24e77c3ce5af9718",
+      "classification": "anonymous-session"
+    },
+    {
+      "kind": "console",
+      "phase": "login",
+      "consoleMethod": "error",
+      "origin": "http://127.0.0.1:5173",
+      "path": "/@fs/state/vite-cache/deps/antd.js",
+      "messageSha256": "9ef1066055b1d67d06e6406bb8dd64a9aabdb6e4d8cee4c7fe9a96f0b3a1203d",
+      "classification": "existing-antd-react-compatibility-warning"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "http://127.0.0.1:5173",
+      "path": "/@fs/state/vite-cache/deps/antd.js",
+      "messageSha256": "40512e9a79128f835c2e0c6dc0890606203b9a67b63211454bfc5f3882f96f1f",
+      "classification": "existing-antd-modal-deprecation-warning"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "http://127.0.0.1:5173",
+      "path": "/@fs/state/vite-cache/deps/antd.js",
+      "messageSha256": "40512e9a79128f835c2e0c6dc0890606203b9a67b63211454bfc5f3882f96f1f",
+      "classification": "existing-antd-modal-deprecation-warning"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "http://127.0.0.1:5173",
+      "path": "/@fs/state/vite-cache/deps/antd.js",
+      "messageSha256": "40512e9a79128f835c2e0c6dc0890606203b9a67b63211454bfc5f3882f96f1f",
+      "classification": "existing-antd-modal-deprecation-warning"
+    },
+    {
+      "kind": "external",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "requestfailed",
+      "phase": "redaction-retakes",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "classification": "existing-google-font"
+    },
+    {
+      "kind": "console",
+      "phase": "redaction-retakes",
+      "consoleMethod": "error",
+      "origin": "https://fonts.googleapis.com",
+      "path": "/css2",
+      "messageSha256": "45427d24ad2d164eb9faf5df85dd0a36332d31f1ca61da52d0ddb04a097d105a",
+      "classification": "existing-google-font"
+    }
+  ],
+  "listeners": {
+    "vite": "127.0.0.1:5173",
+    "proxy": "127.0.0.1:8080"
+  },
+  "login": {
+    "trueUI": true,
+    "currentUser": true,
+    "admin": true
+  },
+  "seedProgress": [
+    "clusters"
+  ],
+  "resume": {
+    "sameOwnedStack": true,
+    "readOnlySeed": true,
+    "priorGrpcSha256": "cad5521ac18d0c7a4bffe11ba779b321d95ca62e9e19295bfa4065e472e5365e",
+    "ids": {
+      "topic": 1,
+      "groups": [
+        1,
+        2,
+        3
+      ],
+      "subscriptions": [
+        1,
+        2,
+        3
+      ]
+    },
+    "accepted": {
+      "code": "OK",
+      "defaultCodeOmitted": true
+    }
+  },
+  "seed": {
+    "topicCount": 1,
+    "groupCount": 3,
+    "subscriptionCount": 3,
+    "modes": [
+      "PUSH",
+      "PULL"
+    ],
+    "dlqCount": 2,
+    "delayReadback": true,
+    "delayStatus": "DONE",
+    "delayDueAt": "2026-10-24T12:19:28.850Z",
+    "noSeedMutation": true
+  },
+  "redactionRetakes": [
+    {
+      "key": "desktop-topic-configuration",
+      "sha256": "ea6f76ad3b9cd04836dd202ae8c335eb80244b7b4246c481a400505ce12be5f1",
+      "viewport": "desktop",
+      "fullPage": false,
+      "maskCoverageRequired": true
+    },
+    {
+      "key": "desktop-group",
+      "sha256": "c9aa9c9bb7452978e798df74f2cf5c957627a7b43ff58f5a8e1b642e31c5c057",
+      "viewport": "desktop",
+      "fullPage": false,
+      "maskCoverageRequired": true
+    },
+    {
+      "key": "tablet-topic-configuration",
+      "sha256": "819d36c882c49c7c6f0c8e53e24e8463f0ed85d514f2b374cbfc32becc5bd857",
+      "viewport": "tablet",
+      "fullPage": false,
+      "maskCoverageRequired": true
+    },
+    {
+      "key": "tablet-group",
+      "sha256": "4268ad09f63d087cbde1989966a4bf6dab51ef943dc0f32fffb07d749d2466a2",
+      "viewport": "tablet",
+      "fullPage": false,
+      "maskCoverageRequired": true
+    },
+    {
+      "key": "mobile-topic-configuration",
+      "sha256": "faa75d57c9708348f57265e52862f00a7ad3a6cc911d8082eb2c32a7b138ec83",
+      "viewport": "mobile",
+      "fullPage": false,
+      "maskCoverageRequired": true
+    },
+    {
+      "key": "mobile-group",
+      "sha256": "61faa5f1283d2adc2a40b2101921817377211bbe1374433997a84ce25a5f9611",
+      "viewport": "mobile",
+      "fullPage": false,
+      "maskCoverageRequired": true
+    }
+  ],
+  "auditPrivacyChecks": [
+    {
+      "viewport": "desktop",
+      "priorPngSha256": "e5feb02d9f8818ec52a2ae9721120de8e20fe856cf5f652b2a89c9c7061c8f50",
+      "sourceSame": true,
+      "deviceScale": 1,
+      "visibleSecretRectangles": 4,
+      "retaken": false,
+      "priorCoverage": [
+        {
+          "bounds": [
+            1095,
+            1440,
+            1362,
+            1590
+          ],
+          "pixels": 40050,
+          "masked": 40050,
+          "coverage": 1
+        },
+        {
+          "bounds": [
+            1095,
+            1341,
+            1360,
+            1403
+          ],
+          "pixels": 16430,
+          "masked": 16430,
+          "coverage": 1
+        },
+        {
+          "bounds": [
+            1095,
+            1242,
+            1360,
+            1304
+          ],
+          "pixels": 16430,
+          "masked": 16430,
+          "coverage": 1
+        },
+        {
+          "bounds": [
+            1095,
+            1143,
+            1360,
+            1205
+          ],
+          "pixels": 16430,
+          "masked": 16430,
+          "coverage": 1
+        }
+      ]
+    },
+    {
+      "viewport": "tablet",
+      "priorPngSha256": "e2539d666a66c7ea3fc4555821f98e742d9300c86847aff8d4ebc949a9ab607b",
+      "sourceSame": true,
+      "deviceScale": 1,
+      "visibleSecretRectangles": 0,
+      "retaken": false,
+      "note": "No token code rectangle intersects the current viewport width; historical zero-mask pixels alone are not exposure proof."
+    },
+    {
+      "viewport": "mobile",
+      "priorPngSha256": "d84322ae1e00159800f8329219e9749f810a5fc1806b30c5ed827796a6a25022",
+      "sourceSame": true,
+      "deviceScale": 1,
+      "visibleSecretRectangles": 0,
+      "retaken": false,
+      "note": "No token code rectangle intersects the current viewport width; historical zero-mask pixels alone are not exposure proof."
+    }
+  ],
+  "failureSite": "audit-privacy:mobile",
+  "lifecycle": {
+    "cancelled": false,
+    "reason": null,
+    "drainComplete": true,
+    "resources": [
+      {
+        "name": "proxy",
+        "state": "closed",
+        "closed": true
+      },
+      {
+        "name": "vite",
+        "state": "closed",
+        "closed": true
+      },
+      {
+        "name": "browser",
+        "state": "closed",
+        "closed": true
+      }
+    ]
+  }
+}

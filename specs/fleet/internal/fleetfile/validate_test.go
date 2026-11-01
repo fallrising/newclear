@@ -35,7 +35,6 @@ func TestValidExamples(t *testing.T) {
 	for _, name := range []string{
 		"valid-public.yaml",
 		"valid-access.yaml",
-		"valid-private.yaml",
 	} {
 		t.Run(name, func(t *testing.T) {
 			doc := loadYAML(t, name)
@@ -57,7 +56,7 @@ func TestRepoExamples(t *testing.T) {
 	roots := []string{
 		filepath.Join(testdata(t, ".."), "examples", "hello-healthz", "fleet.yaml"),
 		filepath.Join(testdata(t, ".."), "examples", "access-dashboard", "fleet.yaml"),
-		filepath.Join(testdata(t, ".."), "examples", "private-files", "fleet.yaml"),
+		filepath.Join(testdata(t, ".."), "examples", "access-files", "fleet.yaml"),
 	}
 	for _, p := range roots {
 		t.Run(filepath.Base(filepath.Dir(p)), func(t *testing.T) {
@@ -135,15 +134,6 @@ func TestUnsupportedVersion(t *testing.T) {
 	}
 }
 
-func TestPrivateHostnameInvalid(t *testing.T) {
-	doc := loadYAML(t, "invalid-private-hostname.yaml")
-	err := Validate(doc, TestConfig())
-	ve, ok := err.(*Error)
-	if !ok || !ve.HasCode("private_hostname_invalid") {
-		t.Fatalf("want private_hostname_invalid, got %v", err)
-	}
-}
-
 func TestImageRequired(t *testing.T) {
 	doc := loadYAML(t, "valid-public.yaml")
 	doc.Spec.Image = ""
@@ -212,26 +202,5 @@ func TestHostnameNotAllowed(t *testing.T) {
 	ve, ok := err.(*Error)
 	if !ok || !ve.HasCode("hostname_not_allowed") {
 		t.Fatalf("want hostname_not_allowed, got %v", err)
-	}
-}
-
-func TestDefaultPrivateHostname(t *testing.T) {
-	doc := &Document{
-		APIVersion: APIVersionV1,
-		Kind:       KindService,
-		Metadata:   Metadata{Name: "files"},
-		Spec: Spec{
-			Node: "vps-hel-1",
-			Expose: Expose{
-				Mode: ModePrivate,
-				Port: 8080,
-			},
-		},
-	}
-	if err := Validate(doc, TestConfig()); err != nil {
-		t.Fatal(err)
-	}
-	if doc.Spec.Expose.Hostname != "files.fleet.internal" {
-		t.Fatalf("got %q", doc.Spec.Expose.Hostname)
 	}
 }

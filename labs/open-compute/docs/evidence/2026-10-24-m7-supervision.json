@@ -1,0 +1,184 @@
+{
+  "acceptance": {
+    "M7-01": "passed",
+    "M7-02": "passed",
+    "M7-03": "passed",
+    "M7-04": "passed",
+    "M7-05": "passed"
+  },
+  "commands": [
+    {
+      "command": "init",
+      "result": "passed"
+    },
+    {
+      "command": "init",
+      "result": "failed"
+    },
+    {
+      "command": "serve",
+      "result": "passed"
+    },
+    {
+      "command": "status",
+      "result": "passed"
+    },
+    {
+      "command": "submit",
+      "result": "passed"
+    },
+    {
+      "command": "submit",
+      "result": "passed"
+    },
+    {
+      "command": "submit",
+      "result": "failed"
+    },
+    {
+      "command": "read",
+      "result": "passed"
+    },
+    {
+      "command": "workflow",
+      "result": "passed"
+    },
+    {
+      "command": "stop",
+      "result": "passed"
+    },
+    {
+      "command": "serve",
+      "result": "passed"
+    },
+    {
+      "command": "status",
+      "result": "passed"
+    },
+    {
+      "command": "read",
+      "result": "passed"
+    },
+    {
+      "command": "approve",
+      "result": "passed"
+    },
+    {
+      "command": "stop",
+      "result": "passed"
+    },
+    {
+      "command": "serve",
+      "result": "passed"
+    },
+    {
+      "command": "status",
+      "result": "passed"
+    },
+    {
+      "command": "read",
+      "result": "passed"
+    },
+    {
+      "command": "stop",
+      "result": "passed"
+    },
+    {
+      "command": "destroy",
+      "result": "passed"
+    }
+  ],
+  "daemon_generations": [
+    {
+      "pid": 92,
+      "start_ticks": 13472058
+    },
+    {
+      "pid": 289,
+      "start_ticks": 13474066
+    },
+    {
+      "pid": 461,
+      "start_ticks": 13475985
+    }
+  ],
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.12.3"
+  },
+  "error": null,
+  "evidence_file_written": true,
+  "fixture_sha256": "4618b185c706f1895856a881cd5b7426229931328f7725db7adbbda5fe7c0a37",
+  "harness_commit": "27a5dde13be6c7fcc057d3777558f61b1d06fa1f",
+  "limitations": {
+    "capacity": false,
+    "detached": false,
+    "host_installed": false,
+    "lab_ci_only": true,
+    "power_loss": false,
+    "same_boot_pending_workflow": true,
+    "same_uid_path": true,
+    "service_manager": false,
+    "soak": false,
+    "untrusted_isolation": false
+  },
+  "phase": "complete",
+  "result": "passed",
+  "retained": {
+    "after_first_stop": true,
+    "after_second_stop": true,
+    "after_third_stop": true,
+    "completed_row": true,
+    "original_identity": true,
+    "state_after_destroy": true,
+    "waiting_row": true,
+    "workflow_nonce": true
+  },
+  "scenario": "manual-retained",
+  "schema_version": 1,
+  "scope_removed": true,
+  "shutdowns": [
+    {
+      "all_owned_exited": true,
+      "exit_code": 0,
+      "forced": false,
+      "signal": "SIGTERM",
+      "was_running": true
+    },
+    {
+      "all_owned_exited": true,
+      "exit_code": 0,
+      "forced": false,
+      "signal": "SIGTERM",
+      "was_running": true
+    },
+    {
+      "all_owned_exited": true,
+      "exit_code": 0,
+      "forced": false,
+      "signal": "SIGTERM",
+      "was_running": true
+    }
+  ],
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  }
+}

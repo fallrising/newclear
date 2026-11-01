@@ -65,6 +65,35 @@ func TestCapabilitiesValidate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "AC-59 native log query allows logfmt and limit false",
+			caps: Capabilities{
+				Signals: []Signal{SignalLogs},
+				Logs: LogCaps{NativeLogQuery: true, Pushdown: LogPushdown{
+					Substring: true, Regex: true, ParsedFieldJSON: true, Sort: true,
+				}},
+			},
+		},
+		{
+			name: "AC-59 limit still needs every filter",
+			caps: Capabilities{
+				Signals: []Signal{SignalLogs},
+				Logs: LogCaps{NativeLogQuery: true, Pushdown: LogPushdown{
+					Substring: true, Regex: true, ParsedFieldJSON: true, Sort: true, Limit: true,
+				}},
+			},
+			wantErr: true,
+		},
+		{
+			name: "AC-59 substring false is inconsistent",
+			caps: Capabilities{
+				Signals: []Signal{SignalLogs},
+				Logs: LogCaps{NativeLogQuery: true, Pushdown: LogPushdown{
+					Regex: true, ParsedFieldJSON: true, Sort: true,
+				}},
+			},
+			wantErr: true,
+		},
+		{
 			name: "limit needs every filter",
 			caps: Capabilities{
 				Signals: []Signal{SignalLogs},

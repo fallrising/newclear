@@ -2,7 +2,7 @@
 
 ## Scope and authority
 
-本文件適用於 `products/kith/**`。先讀 `SDD.md`、本次 milestone 所引用章節及 `docs/sdd/08-decisions-sources.md`。目前只有規格；不要把未執行的測試、未建立的命令或預期延遲描述成已完成。
+本文件適用於 `products/kith/**`。先讀 `SDD.md`、本次 milestone 所引用章節及 `docs/sdd/08-decisions-sources.md`。目前已有 v2 W0–W7 的實作與既有驗證，詳見 SUCCESS.md 及最近狀態；不要把未執行的測試、未建立的命令或預期延遲描述成已完成。
 
 文件優先級：`SDD.md` 的安全不變量（INV）> 專題章節（`docs/sdd/00`–`08`）> roadmap 的示例命令與 PR 切片。發現互相矛盾時，先提出修訂及測試反例，不能挑較容易的版本實作。架構數字與協定以 [DESIGN.md](DESIGN.md) 為準；文風與章節形狀以 mkfk 為準。與 DESIGN 衝突時，先修文件再寫程式。
 
@@ -67,3 +67,11 @@ Planner 維護里程碑與 acceptance IDs。Room、Inbox、HostedGeneration、si
 故障測試只對本次建立的 child processes、暫存目錄及隔離 miniflare 操作。禁止用廣域 `pkill`、主機防火牆重設或刪除使用者既有 volume／`CODEX_HOME`。測試資料不得包含真實 credentials 或私人資料；log 不記錄 body、token、API key、prompt 全文。Canary secret 用於紅隊測試，不得檢入真實 key。
 
 每次交接更新 milestone 狀態，保留 `NOT_STARTED` / `IN_PROGRESS` / `VERIFIED` 的區分。可編譯、可啟動、測試通過及完整 milestone 驗收是不同狀態。本文件提交不是任何功能 milestone 的完成證明。
+
+## 主線與驗收文件先行
+
+- 接手前先讀 [SUCCESS.md](SUCCESS.md)、相關規格與最近驗證紀錄，核對目前主線及缺口。
+- 實作前先更新 SUCCESS 的本次目標、範圍、AC 與驗證計畫；不得為了完成而縮小已承諾主線。
+- 收尾逐項記錄實際命令、結果、來源版本與未通過原因，同步 README 必要入口及項目進度；未跑不可寫通過。
+- 主線全部驗收、必要 CI／審查通過並合併後，按 repo 共用規範建立 annotated `usable/<slug>/vX.Y.Z`，回讀遠端並更新索引。現行 owner 授權適用；本規則不授權部署或付費服務。
+- 參考／封存項目保留其結束條件，不以新增文件當作可執行版本，也不因此恢復開發。

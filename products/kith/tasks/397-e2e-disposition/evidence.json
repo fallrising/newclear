@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "comparison_main": "8d16672837ef7a8cdc70ed015d0ca605c138b624",
+  "historical_jobs": [
+    {
+      "job": 108562347400,
+      "run": 36298748286,
+      "commit": "631cf771c95615a6207d528355b3ef4f8b99b1f3",
+      "log_sha256": "e4bc5b42d906f40dd6ef3b4146280279443e55f808dcb0affdef116261917fc0",
+      "result": "41 passed, 2 failed, 1 skipped",
+      "artifact_list_empty_at_audit": true
+    },
+    {
+      "job": 109053717101,
+      "run": 36459357758,
+      "commit": "71033c5fc86a3f7bd42f22079c155aae09d85461",
+      "log_sha256": "9d052f4bfcb49549ff081945bfdbd9fb3554abcfe33ecfcdd5ba2466b6f438c8",
+      "result": "41 passed, 2 failed, 1 skipped",
+      "artifact_list_empty_at_audit": true
+    }
+  ],
+  "fixes": {
+    "gap": "6aca87ed360671edfc493d48b1d887de7739eb5e",
+    "shortcut": "029728ef6739b83351fd2b7d5d91f217382bf939"
+  },
+  "runtime_executed_this_task": false
+}

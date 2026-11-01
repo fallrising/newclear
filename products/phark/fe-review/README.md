@@ -1,14 +1,11 @@
 # fe-review — phark
 
-這個目錄是給 LLM agent 用的前端 review 工作包：定義如何檢查 phark 的 UI、如何產生 headless 截圖，以及報告放在哪裡。它不是給人的操作教學，也不改變元件的文檔檔位。
+**第 2 輪 M1–M3 已實作並完成限定驗證；獨立審查／CI／發布由 parent 收尾。** API fixture 保留真 Spring Session、CSRF 與 quotas；三尺寸 light、四路由12個共用擷取鍵值及真鍵盤流程已有證據。這不代表第 3 輪完整健康／對比驗收、主線 AC04 或 usable qualification 完成。
 
-**狀態：** 第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動或截圖。
+- [本輪報告](tasks/round2/report.md) 與 [證據索引](tasks/round2/result.json)：保留每次 FAIL、精確來源、12鍵值9+3替換、操作及清理結果。
+- [RUNNER.md](RUNNER.md)：隔離啟動、private state、動態 profile/auth targets 與有界執行。
+- [REVIEW.md](REVIEW.md)：目前限制；對比 incomplete、搜尋 landmark moderate，以及原始未分類事件均未抹除。
+- [PROMPT.md](PROMPT.md)、[targets.json](targets.json)：後續 agent 入口；verified 只表示原 M1–M3 範圍的實測接線。
+- [DESIGN.md](DESIGN.md)：保留原先已批准的設計與當時提案文字；執行結果以上述本輪報告為準。
 
-| 檔案 | 用途 |
-| --- | --- |
-| [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
-| [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
-| [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
-| `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
-
-共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)；截圖腳本：`docs/fe-review/capture.mjs`。
+共用規範：[PROTOCOL](../../../docs/fe-review/PROTOCOL.md)。PNG、cookies、SQLite、media、raw child logs 不提交；public JSON 僅保留合成 IDs、固定分類與雜湊。

@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-10-24T08:01:54.779787+00:00",
+  "scenario": "20261024T075447787Z",
+  "databaseAccess": "SQLite URI mode=ro after both runtime SIGTERM exits0; before approved continuation",
+  "counts": {
+    "work_item_ac_requirements": 0,
+    "accepted_spec_revisions": 1,
+    "accepted_revision_acs": 1,
+    "accepted_work_item_bindings": 1,
+    "accepted_work_item_requirements": 1,
+    "project_spec_heads": 1,
+    "work_item_spec_heads": 1,
+    "current_ac_requirements": 1
+  },
+  "items": [
+    {
+      "phase": "Draft",
+      "version": 2
+    }
+  ],
+  "projectionSource": "backend/internal/domain/sqlite/projections.go:75 reads legacy work_item_ac_requirements",
+  "interpretation": "Admission installed current accepted requirements; board legacy count remains0, unresolved existing projection limitation, not corrected here.",
+  "afterContinuation": {
+    "databaseAccess": "mode=ro after final runtime05 graceful cleanup",
+    "workItems": [
+      [
+        "Developing",
+        4
+      ]
+    ],
+    "runs": 1,
+    "completionRecords": 0,
+    "currentRequirements": 1
+  }
+}

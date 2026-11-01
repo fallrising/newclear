@@ -2139,6 +2139,42 @@ mod tests {
             .unwrap();
     }
 
+    #[test]
+    fn nr2_instruction_representation_preserves_reuse_identity() {
+        let convert = |instruction: Value| -> Value {
+            let body = Bytes::from(
+                json!({"model":"m", "messages":[
+                    {"role":"user", "content":"first"},
+                    {"role":"system", "content":instruction}
+                ]})
+                .to_string(),
+            );
+            serde_json::from_slice(&crate::claude::anthropic_to_openai(&body).unwrap()).unwrap()
+        };
+        let blocks = convert(json!([{"type":"text", "text":"instruction"}]));
+        let mut text = convert(json!("instruction"));
+        assert_eq!(signature("m", &blocks), signature("m", &text));
+        assert_eq!(
+            convo(&blocks).iter().map(norm).collect::<Vec<_>>(),
+            convo(&text).iter().map(norm).collect::<Vec<_>>()
+        );
+        assert_eq!(convo(&blocks).len(), 1, "instructions are not user turns");
+        assert_ne!(
+            signature("m", &text),
+            signature("m", &convert(json!("changed instruction")))
+        );
+        let original = signature("m", &text);
+        text["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"system", "content":"new instruction"}));
+        assert_ne!(
+            original,
+            signature("m", &text),
+            "new instructions remain ineligible for reuse"
+        );
+    }
+
     #[tokio::test]
     async fn cs1_reservation_failure_preserves_tool_results_and_capacity() {
         let (dir, cc, run) = continuation_fixture();

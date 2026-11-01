@@ -77,6 +77,7 @@
 | [`examples/bite-pi`](examples/bite-pi/) | Pi agent 公開示範 | D |
 | [`labs/agent-office-lab`](labs/agent-office-lab/) | 本地優先的三 provider Office 實驗：OpenCode 原生任務已驗證，完整 MVP 待完成 | 未分級 |
 | [`labs/memvid-lab`](labs/memvid-lab/) | 固定 Memvid 的 11 類場景＋PDF／語意／CLIP／Whisper（15 項實跑通過並已合併；繁中筆記實測不建議直接採用） | 未分級 |
+| [`labs/token-economizer-lab`](labs/token-economizer-lab/) | 真 TokenEconomizer 固定版本 hooks／CLI 離線實驗；合成 traces、無 provider 呼叫 | 未分級 |
 | [`labs/graphify-lab`](labs/graphify-lab/) | Graphify 開發場景、固定參考程式碼與索引單份共用實驗 | 未分級 |
 | [`labs/bee-swarm`](labs/bee-swarm/) | AI 角色協作 workflow 模擬（歷史） | D |
 | [`labs/aweshore`](labs/aweshore/) | 個人筆記／PKM 早期嘗試（已停止） | D |

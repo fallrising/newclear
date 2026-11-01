@@ -353,10 +353,32 @@ The primary policy delivery above remains the scope of HMPOL; closure receipts a
 Owner requested the next bounded M2 slice. Existing claim and delivered identity/policy remain valid.
 Source d3207b3a; latest HAI #880, no open HAI PR at intake.
 [Concrete proposal](../plans/m2-verified-coverage-20261101.md) fixes COV-01..04 and COV-AC-01..06.
-Owner approved D1–D3 and the fixed contract on2026-11-01; [normative entry](../sdd/verified-coverage.md). Production/API implementation is active.
+Owner approved D1–D3 and the fixed contract on2026-11-01; [normative entry](../sdd/verified-coverage.md). The bounded production/API slice is delivered; receipts follow below.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM2C | Define and review verified-coverage contract; then implement only after acceptance — approved, implementation active | COV-AC-01..06; H02 support | in_progress | 2026-11-01T04:25:19Z | — | 2026-11-01T05:41:45Z |
+| HM2C | Deliver approved authenticated verified-coverage observation API | COV-AC-01..06; H02 support | done | 2026-11-01T04:25:19Z | 2026-11-01T05:54:19Z | 2026-11-01T05:54:42Z |
 
 Full M2, completion UI and SUCCESS AC-02..04 remain incomplete. No new UI/provider/dependency/release/deploy.
+
+
+HM2C delivery: [PR #898](https://github.com/fallrising/newclear/pull/898) merged at
+`2026-11-01T05:54:19Z` as `7458d1b588c9144915d28ea2b585f5f8dafdfabf`.
+Final reviewed/integrated head `837702ddbeb6563ec8637964be53c05947ce01fd` passed
+[Project success contracts 41277890775](https://github.com/fallrising/newclear/actions/runs/41277890775) and
+[HAI Taskboard CI 41277890772](https://github.com/fallrising/newclear/actions/runs/41277890772).
+Remote readback matched all321 reviewed HAI product files. Claude Code plan REWORK→ACCEPT
+and two code ACCEPT reviews have all findings disposed; native full/focused race, web30, OpenAPI
+and document gates are detailed in the [implementation evidence](../evidence/m2-verified-coverage-20261101.md).
+
+The original head3617d95c passed complete CI but normal merge encountered a concurrent shared-PLAN
+append conflict. Both teams' records were retained in a normal main integration; all321 HAI files
+matched before refreshing only this BOARD's activity timestamp. The updated head then passed full
+required CI again. Original refusal, failures and source-bound evidence remain retained; no force,
+history rewrite or gate bypass. This BOARD resolves the evidence report's historical pending COV-AC-06
+delivery status. Its own closure CI and private desk/handoff synchronization have separate receipts.
+
+HM2C end uses the primary feature merge time. COV-AC-01..06 close only this backend observation
+slice. Full M2, completion UI, H01..H04 and SUCCESS AC-02..04 are not completed by this delivery.
+Physical byte verification is point-in-time; it does not reserve or guarantee a later completion.
+No usable tag, new dependency/migration/provider, release or deployment.

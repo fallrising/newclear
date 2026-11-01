@@ -119,6 +119,11 @@
       "source_commit": "222c1a8a736dbb3ac89f34345a7bc73fa887aba8"
     },
     {
+      "path": "labs/token-economizer-lab",
+      "last_source_update": "2026-11-01T06:20:23Z",
+      "source_commit": "f122e4f41b392d590de486ddfd2f22fa9f0c3fd7"
+    },
+    {
       "path": "labs/virtual-office-lab",
       "last_source_update": "2026-10-30T17:00:00Z",
       "source_commit": "8bf48551f524086d81fa66d946c984f8052152ff"

@@ -1,0 +1,4 @@
+.upstream/
+work/
+__pycache__/
+*.pyc

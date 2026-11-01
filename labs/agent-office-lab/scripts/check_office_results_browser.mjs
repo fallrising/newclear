@@ -39,8 +39,15 @@ try {
     assert(await page.locator('#detail').isHidden());
   }
   await page.selectOption('#provider', 'all');
-  await page.selectOption('#status', 'failed');
-  assert.equal(await page.locator('#runs tr').count(), data.runs.filter(r => r.status === 'failed').length);
+  for (const status of ['failed', 'cancelled']) {
+    await page.selectOption('#status', status);
+    const matching = data.runs.filter(r => r.status === status);
+    assert.equal(await page.locator('#runs tr').count(), matching.length);
+    if (status === 'cancelled' && matching.length) {
+      await page.locator('#runs button').first().click();
+      assert((await page.locator('#detail').innerText()).includes('已取消'));
+    }
+  }
   await page.reload();
   assert.equal(await page.locator('#runs tr').count(), data.runs.length);
   assert.deepEqual(errors, []);assert.deepEqual(external, []);

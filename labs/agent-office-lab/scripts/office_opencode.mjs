@@ -234,6 +234,7 @@ try {
       try { process.kill(pid, 0); return false; } catch (error) { return error.code === 'ESRCH'; }
     }), 10000, 'Owned worker processes survived cancellation');
     report.cancelled_processes_exited = true;
+    report.cancel_processes_exit_duration_ms = Date.now() - cancelledAt;
   }
   report.status = 'completed';
   save();

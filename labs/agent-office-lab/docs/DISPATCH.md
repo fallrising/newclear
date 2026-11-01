@@ -26,6 +26,15 @@ python3 scripts/office_dispatch.py run cursor --execute --allow-remote
 
 入口固定 provider、模型、合成任務及 argv，不接受自由 prompt、shell、自訂模型、timeout 或放大限額；不使用 shell 拼接、不自動 fallback、不自動重試。OpenCode 使用 `STRATA_HOME/source/.venv/bin/python`，其他 provider 使用目前 Python。原生 runner 的結果仍寫到 `runs/`，以[結果入口](RESULTS.md)查看。
 
+本地取消驗收可明確選擇：
+
+```sh
+python3 scripts/office_dispatch.py run opencode --check-cancel
+python3 scripts/office_dispatch.py run opencode --execute --check-cancel
+```
+
+第一行只顯示計畫。第二行會啟動本地 Strata，先完成合成檔案任務，再讓同 session 執行固定的 sleep 測試，經原生 Office 取消並核對所屬程序退出；這個選項不能用於遠端 provider。正常本地執行中按 Ctrl+C 會記為 `cancelled`、exit code 130；若清理未確認仍降為 failed 並保留執行阻擋。資源 guard 的 SIGTERM 保持 failed，不冒充使用者取消。已完成的 keep-open 預覽停止則保留 stopped。
+
 | Provider | 固定模型 | 本入口沿用的預設範圍 |
 | --- | --- | --- |
 | OpenCode | strata/qwen3.8-flash-next-q2_0 | 原本地合成 runner、32K context 與資源 guard |
@@ -53,4 +62,6 @@ python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-
 
 [本輪證據](evidence/dispatch-2026-11-01.json)：真實四 CLI 的斷網版本／help 檢查通過；離線測試覆蓋預設不執行、未授權拒絕、固定 argv、直接 runner 互斥、真實 helper 程序 exec 繼承與強制 kill 後阻擋。117 項離線測試通過。
 
-本輪沒有新模型呼叫、沒有重啟 Strata，沒有重新驗證四 provider 的推論／產物或取消時間；原歷史成功證據仍屬原受測版本。完整 AC-01、AC-08、AC-11 與 MVP 保持 pending，後續還須驗證新入口的模型任務、跨 provider 權限／取消／恢復與 UI 派工。
+上述為 T-0012 的前置驗證。T-0013 已完成[新入口本地實測](evidence/local-dispatch-2026-11-01.json)：最終 runner 整輪任務／取消驗收 54.95 秒、原生取消及程序退出 202 ms；Ctrl+C 的另一個 run 顯示 cancelled／exit 130，包含模型關閉的整體退出為 10.399 秒。所有追蹤程序退出、鎖釋放、重複派工拒絕及結果頁核對通過；122 tests 通過，沒有遠端模型呼叫。原生取消與整體 runner 中斷是不同測量，不宣稱所有中斷均在 202 ms 完成。
+
+完整 AC-01、AC-06、AC-08、AC-11 與 MVP 保持 pending，後續仍須驗證遠端新入口、跨 provider 權限／取消／恢復與 UI 派工。

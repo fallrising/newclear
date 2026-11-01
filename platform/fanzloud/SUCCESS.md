@@ -479,3 +479,7 @@ verified against AP and downloaded identically in two fresh Chromium contexts; z
 task/coding/VM, all services stopped. [Evidence](docs/acceptance/M3-fixed-candidate.md).
 Native/Web33 and project52 pass; independent ACCEPT_FIXED_CANDIDATE_C01_C05; CI/publication pending.
 T-0449 proposal remains unapproved; candidate preparation is not full FN05 acceptance.
+
+## T-0449 approved FN05 readonly dependency
+
+Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Native/actual evidence pending, no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.

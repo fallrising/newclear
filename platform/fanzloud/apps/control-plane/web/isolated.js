@@ -1,10 +1,11 @@
-import {readCandidate} from './candidate.js';
+import {readCandidate, readReview, reviewResult} from './candidate.js';
 const element = (id) => document.getElementById(id);
 const states = {queued: '排隊中', provisioning: '建立隔離工作區', running: 'Agent 執行中', finalizing: '收集 diff 與執行檢查', succeeded: '完成', failed: '失敗', interrupted: '結果不確定，已停止自動執行', cancelling: '取消中', cancelled: '已取消'};
 let csrf = '';
 let runId = sessionStorage.getItem('fanz-current-run') || '';
 let timer;
 let selected = [];
+let agents = [];
 let lastState = '';
 let pendingSubmission = null;
 try { pendingSubmission = JSON.parse(sessionStorage.getItem('fanz-submission') || 'null'); }
@@ -22,6 +23,10 @@ function clearCandidate() {
   element('candidate-status').textContent = '尚未取得固定候選；審查尚未開始。';
   element('download-candidate').disabled = true;
   element('load-candidate').disabled = true;
+  element('start-review').disabled = true;
+  element('start-rework').disabled = true;
+  element('download-review').disabled = true;
+  element('review-status').textContent = '尚無審查結果';
 }
 clearCandidate();
 let durableReady = false;
@@ -68,7 +73,7 @@ async function catalog() {
   const [projects, profiles, runtime] = await Promise.all([api('/projects'), api('/agent-profiles'), api('/runtime')]);
   selected = projects.items.flatMap(project => runtime.repositories.filter(r => r.canonical_repo === project.canonical_repo).map(r => ({...r, project_id: project.id, name: project.name})));
   element('project').replaceChildren(...selected.map((item, index) => new Option(`${item.name} · ${item.base_sha.slice(0, 12)}`, String(index))));
-  const agents = profiles.items.filter(p => ['claude-subscription', 'codex-subscription'].includes(p.backend));
+  agents = profiles.items.filter(p => ['claude-subscription', 'codex-subscription'].includes(p.backend));
   element('agent').replaceChildren(...agents.map(p => new Option(p.name, p.id)));
   element('submit-task').disabled = true;
   await recoverSubmissions();
@@ -79,6 +84,7 @@ function updateSubmitLock() {
   const localUnknown = Boolean(pendingSubmission && (pendingSubmission.unknown || typeof pendingSubmission.runId !== 'string' || !pendingSubmission.runId));
   lockedSubmission = !durableReady || durableBlocked || localUnknown;
   element('submit-task').disabled = lockedSubmission || !selected.length || !element('agent').options.length;
+  updateHandoff();
 }
 async function recoverSubmissions() {
   const requested = ++recoveryRequest;
@@ -96,7 +102,7 @@ async function recoverSubmissions() {
   }
   element('submission-history').replaceChildren(...saved.items.map(item => {
     const entry = document.createElement('li');
-    const label = `${item.request?.title || '提交'} · ${item.state === 'confirmed' ? '已受理' : item.state === 'rejected' ? '已拒絕' : '待對帳，不會重送'}`;
+    const label = `${item.request?.title || (item.request?.route?.endsWith('/reviews') ? '審查' : item.request?.route?.endsWith('/rework') ? '返工' : '提交')} · ${item.state === 'confirmed' ? '已受理' : item.state === 'rejected' ? '已拒絕' : '待對帳，不會重送'}`;
     if (item.state === 'confirmed' && item.receipt?.run?.id) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'quiet'; button.textContent = label;
       button.addEventListener('click', () => observe(item.receipt.run.id)); entry.append(button);
@@ -165,10 +171,11 @@ async function refresh() {
   if (run.result) {
     const checks = run.result.verification;
     element('verification').textContent = checks.status === 'passed' ? '檢查通過' : checks.status === 'failed' ? '檢查失敗' : '檢查結果不確定';
-    element('diff-output').textContent = run.result.diff;
-    finalDiff = run.result.diff;
-    element('download-diff').disabled = false;
+    finalDiff = typeof run.result.diff === 'string' ? run.result.diff : null;
+    element('diff-output').textContent = finalDiff ?? '此任務為唯讀審查；未產生程式 diff。';
+    element('download-diff').disabled = finalDiff === null;
   }
+  renderReview(); updateHandoff();
   if (!['succeeded', 'failed', 'cancelled'].includes(run.state) || !cleanupComplete) {
     timer = setTimeout(() => { void refresh().catch(fail); }, 500);
   } else {
@@ -232,7 +239,7 @@ element('load-candidate').addEventListener('click', async () => {
     if (generation !== candidateGeneration || !authenticated || run.id !== runId) return;
     candidate = loaded;
     element('candidate-status').textContent = `候選 SHA256：${loaded.sha256}\n來源 base：${loaded.base_sha}\nWriter profile：${loaded.profile_revision}\nDiff SHA256：${loaded.diff_sha256}\n檢查結果：${JSON.stringify(loaded.verification, null, 2)}\n此候選包含原任務、diff 與檢查結果；審查尚未開始。`;
-    element('download-candidate').disabled = false;
+    element('download-candidate').disabled = false; updateHandoff();
   } catch {
     if (generation === candidateGeneration && authenticated && run.id === runId) element('candidate-status').textContent = '固定審查候選無法確認；未開始審查，請重新讀取。';
   } finally {
@@ -253,12 +260,69 @@ element('download-candidate').addEventListener('click', async () => {
     const url = URL.createObjectURL(new Blob([saved.raw], {type: 'application/json'}));
     const link = document.createElement('a'); link.href = url; link.download = `candidate-${saved.sha256}.json`; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    element('download-candidate').disabled = false;
+    element('download-candidate').disabled = false; updateHandoff();
   } catch {
     if (generation === candidateGeneration && authenticated && saved.run_id === runId) {
       clearCandidate(); element('load-candidate').disabled = false;
       element('candidate-status').textContent = '固定審查候選無法確認；未下載，請重新讀取。';
     }
+  }
+});
+function updateHandoff() {
+  const prior = element('review-agent').value;
+  const options = agents.filter(p => currentRun && p.backend !== currentRun.backend && ['claude-subscription','codex-subscription'].includes(currentRun.backend));
+  element('review-agent').replaceChildren(...options.map(p => new Option(p.name, p.id)));
+  if (options.some(p => p.id === prior)) element('review-agent').value = prior;
+  element('start-review').disabled = !authenticated || lockedSubmission || !candidate || candidate.run_id !== runId || !options.length || currentRun?.purpose === 'review';
+  let rework = false;
+  try { rework = reviewResult(currentRun).verdict === 'request_changes' && currentRun.review_context.review_round === 1; } catch { /* Not an eligible review result. */ }
+  element('start-rework').disabled = !authenticated || lockedSubmission || !rework;
+}
+function renderReview() {
+  element('download-review').disabled = true;
+  if (currentRun?.purpose !== 'review') return;
+  const context = currentRun.review_context;
+  element('review-status').textContent = `審查第 ${context?.review_round || '?'} 輪 · ${states[currentRun.state] || currentRun.state}\n候選 SHA256：${context?.candidate_sha256 || '尚未確認'}`;
+  if (currentRun.state !== 'succeeded') return;
+  try {
+    const result = reviewResult(currentRun);
+    const verdicts = {accept:'接受候選', request_changes:'要求返工', reject:'拒絕候選'};
+    element('review-status').textContent += `\n判定：${verdicts[result.verdict]}\n${result.reasons.join('\n')}\n此判定不會自動結案。`;
+    element('download-review').disabled = false;
+  } catch { element('review-status').textContent = '審查成果綁定無法確認；未接受判定。'; }
+}
+async function handoff(action) {
+  updateHandoff();
+  if (element(action === 'reviews' ? 'start-review' : 'start-rework').disabled) return;
+  const source = currentRun, selectedAtSubmit = runId, key = crypto.randomUUID(), generation = ++submissionGeneration;
+  const body = action === 'reviews' ? {artifact_id:candidate.artifact_id,candidate_sha256:candidate.sha256,profile_revision:element('review-agent').value} : {};
+  pendingSubmission = {key, unknown:true}; sessionStorage.setItem('fanz-submission', JSON.stringify(pendingSubmission)); updateSubmitLock();
+  element('submit-status').textContent = action === 'reviews' ? '正在提交唯讀審查…' : '正在提交有界返工…';
+  try {
+    const value = await api(`/runs/${source.id}/${action}`, {method:'POST', key, body});
+    if (generation !== submissionGeneration || !authenticated) return;
+    pendingSubmission = {key,runId:value.run.id}; sessionStorage.setItem('fanz-submission',JSON.stringify(pendingSubmission)); updateSubmitLock();
+    element('submit-status').textContent = '交接已受理'; if (runId === selectedAtSubmit) observe(value.run.id);
+    try { await recent(); } catch (error) { fail(error); }
+  } catch (error) {
+    if (generation !== submissionGeneration || !authenticated) return;
+    element('submit-status').textContent = '交接結果尚未確認；請重新讀取持久紀錄，不會自動重送。'; fail(error);
+  }
+}
+element('start-review').addEventListener('click', () => handoff('reviews'));
+element('start-rework').addEventListener('click', () => handoff('rework'));
+element('download-review').addEventListener('click', async () => {
+  if (!authenticated || element('download-review').disabled) return;
+  const run = currentRun, generation = candidateGeneration;
+  element('download-review').disabled = true;
+  try {
+    const value = await readReview(run, api);
+    if (generation !== candidateGeneration || !authenticated || runId !== run.id) return;
+    const url = URL.createObjectURL(new Blob([value.raw], {type:'application/json'}));
+    const link = document.createElement('a'); link.href = url; link.download = `review-${value.sha256}.json`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url),1000); element('download-review').disabled = false;
+  } catch {
+    if (generation === candidateGeneration && authenticated && runId === run.id) element('review-status').textContent = '審查成果無法確認或已過期；未下載。';
   }
 });
 element('cancel-run').addEventListener('click', async () => {

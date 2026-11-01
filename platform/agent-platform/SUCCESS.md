@@ -241,3 +241,7 @@ Claude repair, Codex cancellation, two live isolated workspaces, secret/network/
 denials and cancelA/completeB. Both cleaned; capacity restored1 and services stopped.
 See [M2 acceptance](../fanzloud/docs/acceptance/M2-two-vendors.md). Fresh independent ACCEPT_M2_LIVE; final PR906 delivery pending.
 Earlier pending-resource text is historical. M3/AC05 not started; mainline incomplete.
+
+## T-0449 approved FN05 readonly dependency
+
+Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Native/actual evidence pending, no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.

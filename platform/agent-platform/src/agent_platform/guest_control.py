@@ -122,6 +122,7 @@ def main():
                 "guest_tool.py",
                 "guest_tool_client.py",
                 "guest_external.py",
+                "guest_review.py",
             }
         )
         path = CODE / name

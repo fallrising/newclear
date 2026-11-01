@@ -134,6 +134,15 @@ class RuntimeClient:
             "POST",
             "/v1/runs/" + str(run["id"]),
             {
+                **(
+                    {
+                        "purpose": "review",
+                        "review_candidate": run["review_candidate"].decode("utf-8"),
+                        "candidate_sha256": run["review_context"]["candidate_sha256"],
+                    }
+                    if run.get("purpose") == "review"
+                    else {}
+                ),
                 "generation": run["generation"],
                 "template": run["template_digest"],
                 "canonical_repo": run["canonical_repo"],

@@ -125,3 +125,5 @@ C05 actual retained AP archive/browser download evidence is in
 [M3 candidate acceptance](acceptance/M3-fixed-candidate.md). No Rust public API changed;
 private routing plus documented Web readCandidate only. Full FN05 waits for separately
 approved [AP readonly review dependency](specs/PROPOSAL-M3-readonly-review.md).
+
+T-0449 FN05 readonly review: [contract](specs/SPEC-M3-readonly-review.md), [acceptance](acceptance/M3-readonly-review.md); R01–05 pending actual evidence, ownerapprovedscope.

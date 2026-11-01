@@ -153,7 +153,15 @@ impl SubmissionStore {
         if let Some(raw) = observed {
             let prior = decode(raw)?;
             validate_run(&prior).map_err(|_| SubmissionStoreError::Corrupt)?;
-            for field in ["id", "task_id", "base_sha", "profile_revision", "goal"] {
+            for field in [
+                "id",
+                "task_id",
+                "base_sha",
+                "profile_revision",
+                "goal",
+                "review_context",
+                "rework_context",
+            ] {
                 if prior[field] != receipt["run"][field] {
                     return Err(SubmissionStoreError::Conflict);
                 }
@@ -247,7 +255,15 @@ impl SubmissionStore {
                 return Err(SubmissionStoreError::Corrupt);
             }
             cursor = old_cursor;
-            for field in ["id", "task_id", "base_sha", "profile_revision", "goal"] {
+            for field in [
+                "id",
+                "task_id",
+                "base_sha",
+                "profile_revision",
+                "goal",
+                "review_context",
+                "rework_context",
+            ] {
                 if old[field] != run[field] {
                     return Err(SubmissionStoreError::Conflict);
                 }
@@ -278,7 +294,15 @@ impl SubmissionStore {
         if let Some(key) = bound {
             let record = read_submission(&tx, owner, &key)?.ok_or(SubmissionStoreError::Corrupt)?;
             let original = &record["receipt"]["run"];
-            for field in ["id", "task_id", "base_sha", "profile_revision", "goal"] {
+            for field in [
+                "id",
+                "task_id",
+                "base_sha",
+                "profile_revision",
+                "goal",
+                "review_context",
+                "rework_context",
+            ] {
                 if original[field] != run[field] {
                     return Err(SubmissionStoreError::Conflict);
                 }
@@ -410,7 +434,53 @@ fn validate_base(value: &Value) -> Result<()> {
     }
     Ok(())
 }
+// New handoff intents carry their exact route; legacy coding rows retain their v1 shape.
+fn handoff(value: &Value) -> Result<(&str, &str)> {
+    let route = text_field(value, "route")?;
+    let (id, action) = route
+        .strip_prefix("/api/v1/runs/")
+        .and_then(|s| s.split_once('/'))
+        .ok_or(SubmissionStoreError::InvalidInput)?;
+    validate_uuid(id)?;
+    if !matches!(action, "reviews" | "rework") {
+        return Err(SubmissionStoreError::InvalidInput);
+    }
+    Ok((id, action))
+}
+fn validate_digest(value: &Value) -> Result<()> {
+    let s = value.as_str().ok_or(SubmissionStoreError::InvalidInput)?;
+    if s.len() != 64
+        || !s
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+    {
+        return Err(SubmissionStoreError::InvalidInput);
+    }
+    Ok(())
+}
 fn validate_request(value: &Value) -> Result<()> {
+    if value.get("route").is_some() {
+        let (_, action) = handoff(value)?;
+        if value.as_object().map(|v| v.len()) != Some(2) {
+            return Err(SubmissionStoreError::InvalidInput);
+        }
+        let body = value["body"]
+            .as_object()
+            .ok_or(SubmissionStoreError::InvalidInput)?;
+        if action == "rework" {
+            return if body.is_empty() {
+                Ok(())
+            } else {
+                Err(SubmissionStoreError::InvalidInput)
+            };
+        }
+        if body.len() != 3 {
+            return Err(SubmissionStoreError::InvalidInput);
+        }
+        validate_uuid(text_field(&value["body"], "artifact_id")?)?;
+        validate_uuid(text_field(&value["body"], "profile_revision")?)?;
+        return validate_digest(&value["body"]["candidate_sha256"]);
+    }
     let object = value
         .as_object()
         .ok_or(SubmissionStoreError::InvalidInput)?;
@@ -460,6 +530,35 @@ fn validate_receipt(receipt: &Value, request: &Value) -> Result<()> {
     validate_run(run)?;
     validate_uuid(text_field(task, "id")?)?;
     validate_uuid(text_field(task, "project_id")?)?;
+    if request.get("route").is_some() {
+        let (parent, action) = handoff(request)?;
+        if task["id"] != run["task_id"] {
+            return Err(SubmissionStoreError::Conflict);
+        }
+        let context = if action == "reviews" {
+            &run["review_context"]
+        } else {
+            &run["rework_context"]
+        };
+        validate_uuid(text_field(context, "root_writer_run_id")?)?;
+        validate_digest(&context["candidate_sha256"])?;
+        let matched = if action == "reviews" {
+            run["purpose"] == "review"
+                && context["writer_run_id"] == parent
+                && context["artifact_id"] == request["body"]["artifact_id"]
+                && context["candidate_sha256"] == request["body"]["candidate_sha256"]
+                && run["profile_revision"] == request["body"]["profile_revision"]
+                && context["reviewer_profile_revision"] == run["profile_revision"]
+                && matches!(context["review_round"].as_u64(), Some(1 | 2))
+        } else {
+            run["purpose"] == "coding" && context["review_run_id"] == parent
+        };
+        return if matched {
+            Ok(())
+        } else {
+            Err(SubmissionStoreError::Conflict)
+        };
+    }
     if task["id"] != run["task_id"]
         || task["project_id"] != request["project_id"]
         || task["title"] != request["title"]

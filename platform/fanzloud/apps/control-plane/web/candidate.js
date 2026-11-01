@@ -11,10 +11,10 @@ const bytes = value => new TextEncoder().encode(value);
 const digest = async value => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes(value))), b => b.toString(16).padStart(2, '0')).join('');
 
 /** Read and verify the exact AP archive for the captured successful writer run. */
-export async function readCandidate(run, request) {
+async function readArchive(run, request) {
   if (!run || run.state !== 'succeeded' || !uuid(run.id) || !uuid(run.task_id) || !uuid(run.profile_revision)
       || !base(run.base_sha) || !Number.isSafeInteger(run.attempt_no) || run.attempt_no < 1
-      || typeof run.goal !== 'string' || !run.result || typeof run.result.diff !== 'string') fail();
+      || typeof run.goal !== 'string' || !run.result) fail();
   const listing = await request(`/runs/${run.id}/artifacts`);
   if (!Array.isArray(listing?.items) || listing.items.length !== 1) fail();
   const meta = listing.items[0];
@@ -27,6 +27,11 @@ export async function readCandidate(run, request) {
   if (!value || value.schema_version !== 'result-archive-v1' || value.artifact_id !== meta.id
       || value.run_id !== run.id || value.task_id !== run.task_id || value.profile_revision !== run.profile_revision
       || value.base_sha !== run.base_sha || value.attempt_no !== run.attempt_no || value.goal !== run.goal) fail();
+  return {raw, value, meta};
+}
+
+export async function readCandidate(run, request) {
+  const {raw, value, meta} = await readArchive(run, request);
   const result = value.result;
   if (!result || result.base_sha !== run.base_sha || result.diff !== run.result.diff
       || !sha(result.diff_sha256) || result.diff_sha256 !== run.result.diff_sha256
@@ -36,4 +41,26 @@ export async function readCandidate(run, request) {
       || stable(result.verification) !== stable(run.result.verification)) fail();
   return {raw, sha256: meta.sha256, artifact_id: meta.id, run_id: run.id, base_sha: run.base_sha,
     profile_revision: run.profile_revision, diff_sha256: result.diff_sha256, verification: result.verification};
+}
+
+/** Validate the typed result against the immutable run admission, before presentation. */
+export function reviewResult(run) {
+  const context = run?.review_context, result = run?.result?.review;
+  if (run?.purpose !== 'review' || run.state !== 'succeeded' || !context || !result
+      || !uuid(context.root_writer_run_id) || !uuid(context.writer_run_id) || !uuid(context.artifact_id)
+      || !uuid(context.reviewer_profile_revision) || context.reviewer_profile_revision !== run.profile_revision
+      || !sha(context.candidate_sha256) || ![1,2].includes(context.review_round)
+      || result.reviewer_run_id !== run.id || !['accept','request_changes','reject'].includes(result.verdict)
+      || !Array.isArray(result.reasons) || result.reasons.length < 1 || result.reasons.length > 8
+      || result.reasons.some(x => typeof x !== 'string' || !x.trim() || Array.from(x).length > 2000)
+      || bytes(JSON.stringify(result)).length > 32768
+      || Object.keys(context).some(k => stable(result[k]) !== stable(context[k]))) fail();
+  return result;
+}
+
+export async function readReview(run, request) {
+  const expected = reviewResult(run);
+  const {raw, value, meta} = await readArchive(run, request);
+  if (stable(value.result.review) !== stable(expected)) fail();
+  return {raw, sha256: meta.sha256, review: expected};
 }

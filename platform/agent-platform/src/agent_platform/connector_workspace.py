@@ -20,7 +20,7 @@ from .domain import Input, Problem
 MAX_TEXT = 32768
 MAX_OPERATIONS = 128
 MAX_RECEIPTS = 4 * 1024 * 1024
-HELPERS = ("guest_control.py", "guest_workspace.py", "guest_external.py")
+HELPERS = ("guest_control.py", "guest_workspace.py", "guest_external.py", "guest_review.py")
 REVISION = "external-workspace-v1"
 
 
@@ -108,11 +108,22 @@ def _prepare(service, row):
     data = row["input"]
     service.guard(row)
     sb.exec("install", "-d", "-m", "0755", CODE, timeout=10)
-    sb.write_file(
-        CODE + "/source.bundle",
-        service.bundle(service.entries[(data["canonical_repo"], data["base_sha"])]),
-        mode=0o644,
-    )
+    review = data.get("purpose") == "review"
+    if review:
+        from .review import candidate_bytes
+
+        payload = candidate_bytes(
+            data["review_candidate"].encode("utf-8"), data["candidate_sha256"]
+        )
+        sb.exec("install", "-d", "-m", "0755", "/var/lib/agent-platform", timeout=10)
+        sb.exec("install", "-d", "-m", "0555", "/var/lib/agent-platform/review", timeout=10)
+        sb.write_file("/var/lib/agent-platform/review/candidate.json", payload, mode=0o444)
+    else:
+        sb.write_file(
+            CODE + "/source.bundle",
+            service.bundle(service.entries[(data["canonical_repo"], data["base_sha"])]),
+            mode=0o644,
+        )
     stage("helpers")
     for name in HELPERS:
         service.guard(row)
@@ -121,18 +132,24 @@ def _prepare(service, row):
     stage("control_setup")
     sb.exec("python3", "-I", CODE + "/guest_control.py", '{"action":"setup"}', timeout=10)
     service.guard(row)
-    stage("checkout")
+    stage("candidate" if review else "checkout")
     raw = sb.exec(
         "python3",
         "-I",
-        CODE + "/guest_external.py",
-        json.dumps({"action": "checkout", "base_sha": data["base_sha"]}),
-        timeout=95,
+        CODE + ("/guest_review.py" if review else "/guest_external.py"),
+        json.dumps(
+            {"action": "verify", "candidate_sha256": data["candidate_sha256"]}
+            if review
+            else {"action": "checkout", "base_sha": data["base_sha"]}
+        ),
+        timeout=10 if review else 95,
     )
-    stage("checkout_receipt")
     checkout = json.loads(raw)
-    if checkout != {"base_sha": data["base_sha"]}:
-        raise Problem(409, "checkout_sha_mismatch")
+    expected = (
+        {"candidate_sha256": data["candidate_sha256"]} if review else {"base_sha": data["base_sha"]}
+    )
+    if checkout != expected:
+        raise Problem(409, "review_candidate_invalid" if review else "checkout_sha_mismatch")
     row["external_isolation_revision"] = REVISION
     service.journal.write(row)
     stage("attestation")
@@ -171,6 +188,19 @@ def attest(service, row):
         "quiescent": True,
     }:
         raise Problem(409, "guest_isolation_unconfirmed")
+    if row["input"].get("purpose") == "review":
+        expected = row["input"]["candidate_sha256"]
+        checked = json.loads(
+            sb.exec(
+                "python3",
+                "-I",
+                CODE + "/guest_review.py",
+                json.dumps({"action": "verify", "candidate_sha256": expected}),
+                timeout=5,
+            )
+        )
+        if checked != {"candidate_sha256": expected}:
+            raise Problem(409, "review_candidate_invalid")
     service.network(row)
     return proof
 
@@ -185,6 +215,9 @@ def exchange(service, run_id, request):
             raise Problem(409, "external_workspace_not_enabled")
         if datetime.fromisoformat(row["input"]["deadline"]) <= datetime.now(UTC):
             raise Problem(409, "run_deadline_expired")
+        review = row["input"].get("purpose") == "review"
+        if review and (request.action != "read" or request.path != "candidate.json"):
+            raise Problem(409, "review_tool_denied")
         operations = row["operations"]
         if "result" in operations or "release" in operations:
             raise Problem(409, "workspace_admission_closed")
@@ -217,8 +250,15 @@ def exchange(service, run_id, request):
             raw = service.handle(row).exec(
                 "python3",
                 "-I",
-                CODE + "/guest_external.py",
-                json.dumps(request.model_dump(mode="json", exclude={"generation", "operation_id"})),
+                CODE + ("/guest_review.py" if review else "/guest_external.py"),
+                json.dumps(
+                    {
+                        **request.model_dump(mode="json", exclude={"generation", "operation_id"}),
+                        **(
+                            {"candidate_sha256": row["input"]["candidate_sha256"]} if review else {}
+                        ),
+                    }
+                ),
                 timeout=request.timeout_seconds + 5,
             )
             # SDK timeout/ACK is never evidence of process termination.
@@ -243,6 +283,16 @@ def exchange(service, run_id, request):
 def result(service, row):
     service.isolation(row)
     service.guard(row)
+    if row["input"].get("purpose") == "review":
+        return {
+            "execution_mode": "cocoon-external",
+            "summary": "Candidate-only review",
+            "verification": {
+                "status": "passed",
+                "name": "candidate_integrity",
+                "reason": "Exact readonly candidate hash verified; no coding checks executed.",
+            },
+        }
     verification = row["input"]["verification"]
     request = {
         "action": "result",

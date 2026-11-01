@@ -48,6 +48,15 @@
       <button id="download-candidate" type="button" disabled>下載候選</button>
       <pre id="candidate-status" class="mono" tabindex="0" aria-live="polite">尚未取得固定候選；審查尚未開始。</pre>
     </section>
+    <section class="card">
+      <h3>跨廠商唯讀審查</h3>
+      <p>審查固定候選中的原任務、diff 與檢查結果；判定不會自動修改程式或結案。</p>
+      <label for="review-agent">審查 Agent</label><select id="review-agent"></select>
+      <button id="start-review" type="button" disabled>提交固定候選審查</button>
+      <button id="start-rework" type="button" disabled>依審查要求返工一次</button>
+      <button id="download-review" type="button" disabled>下載審查成果</button>
+      <pre id="review-status" class="mono" tabindex="0" aria-live="polite">尚無審查結果</pre>
+    </section>
     <section class="card"><h3>提交紀錄</h3><ul id="submission-history"></ul></section>
     <section class="card"><h3>最近任務</h3><ul id="recent-tasks"></ul></section>
   </section>

@@ -1,7 +1,7 @@
 # Proposed bounded AP dependency for FN05 — T-0449
 
-Status: proposal awaiting explicit owner approval under SDD§3. Not implementation
-permission, no AP source edits or live reviewer execution. T-0442's Fanzloud candidate
+Status: owner explicitly approved this bounded proposal on2026-11-01 (conversation:「批准。」).
+T-0449 claim PR382 merged and remotely verified; implementation is authorized within these bounds. T-0442's Fanzloud candidate
 read/download portion uses existing APIs; it cannot pass FN05 alone.
 
 ## Current gap and precise responsibility
@@ -79,8 +79,7 @@ correction and second reviewer; if actual rework is needed, at most one new writ
 new invocations total ceiling: reviewer1 + writer1 + reviewer2). No retry of unknown.
 A single20minute live window includes launch, inspection and cleanup; reserve its last
 3minutes for stopping/cleanup, no new work then. Missing prerequisite or exceeding the
-window stops affected execution and records exact status. This window is a proposal,
-not implicit authority to run while waiting.
+window stops affected execution and records exact status. This approved window begins only after native checks, review and readiness; no automatic extension.
 
 Estimate120–180 active minutes plus CI after approval,20min progress checkpoints.
 One bounded AP implementation worker and one independent reviewer at most; no recursion.

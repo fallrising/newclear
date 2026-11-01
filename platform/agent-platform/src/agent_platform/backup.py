@@ -18,9 +18,9 @@ from . import backup_files
 
 VERSION = "agent-platform-backup-v1"
 POSTGRES_MAJOR = 18
-# Independently measured on pristine PostgreSQL18 after migrations001..020 (T0442-M2-schema1).
+# Independently measured on pristine PostgreSQL18 after migrations001..021 (T0449-readonly-schema1).
 # Schema/catalog changes require deliberate fixture re-derivation and review, never self-trust.
-SCHEMA_SHA256 = "20727fd56d86c4c253e6c3797f469965df0364f737c6f2fe93a482126bece1fd"
+SCHEMA_SHA256 = "c2f7f977bb02cbdec40ee2f27ae9f76e753887a6f47be025f869175ae88d5707"
 EPHEMERAL = ("sessions", "login_limits", "model_proxy_tokens", "tool_broker_tokens")
 EXCLUDED = (*EPHEMERAL, "maintenance_identity")
 NATIVE_TIMEOUT = 300

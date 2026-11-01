@@ -104,6 +104,10 @@ def execute_real(worker, claim):
         with worker.owned(claim) as (conn, run):
             if run["state"] in TERMINAL:
                 return
+            if run.get("purpose") == "review":
+                from .review import result_review
+
+                result = {**result, "review": result_review(run, run["review_output"])}
             persist_archive(conn, run, result)
             conn.execute("UPDATE runs SET result=%s WHERE id=%s", (Jsonb(result), run["id"]))
             event(
@@ -215,7 +219,14 @@ def execute_real(worker, claim):
                 archive_pending
                 and claim.get("recovery")
                 and run["reason"] != "artifact_persist_failed"
-                and phase == "running"
+                and (
+                    phase == "running"
+                    or (
+                        phase == "prepared"
+                        and run.get("purpose") == "review"
+                        and run.get("review_output") is not None
+                    )
+                )
             )
             if archive_pending and phase not in {"result", "stopped"} and not retrieve_pending:
                 # A failed archive is a completed-result recovery, never authority
@@ -341,8 +352,16 @@ def execute_real(worker, claim):
                 driver = worker.subscription_for(claim["backend"])
                 if claim.get("recovery") or driver is None:
                     raise Problem(409, "subscription_outcome_unknown")
-                driver.execute(worker, claim, run, lost)
+                output = driver.execute(worker, claim, run, lost)
                 with worker.owned(claim) as (conn, current):
+                    if current.get("purpose") == "review":
+                        from .review import result_review
+
+                        result_review(current, output)
+                        conn.execute(
+                            "UPDATE runs SET review_output=%s WHERE id=%s",
+                            (Jsonb(output), current["id"]),
+                        )
                     state(conn, current, "finalizing")
             elif phase in {"absent", "allocated", "prepared"}:
                 client.operation(run, "prompt")
@@ -407,6 +426,12 @@ def execute_real(worker, claim):
                     # Expired ownership/database loss follows existing reconciliation.
                     pass
                 return
+            if reason == "review_verdict_invalid":
+                try:
+                    stop_model(snapshot(), reason)
+                    return
+                except Exception:
+                    pass
             if tools:
                 try:
                     tools.close()

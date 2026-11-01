@@ -402,3 +402,80 @@ fn history_events_remain_compact_while_snapshot_preserves_large_reason() {
         Err(SubmissionStoreError::InvalidInput)
     );
 }
+
+fn review_intent() -> Value {
+    json!({"route":format!("/api/v1/runs/{}/reviews",run()["id"].as_str().unwrap()),"body":{"artifact_id":"00000000-0000-4000-8000-000000000005","candidate_sha256":"b".repeat(64),"profile_revision":request()["profile_revision"]}})
+}
+fn review_receipt() -> Value {
+    let mut v = receipt();
+    v["run"]["purpose"] = json!("review");
+    v["run"]["review_context"] = json!({"root_writer_run_id":run()["id"],"writer_run_id":run()["id"],"artifact_id":review_intent()["body"]["artifact_id"],"candidate_sha256":"b".repeat(64),"review_round":1,"reviewer_profile_revision":request()["profile_revision"]});
+    v
+}
+#[test]
+fn r04_review_route_identity_unknown_and_restart_are_durable() {
+    let root = root();
+    let path = root.path().join("s.db");
+    let k = key();
+    let store = SubmissionStore::open(path.clone()).unwrap();
+    assert_eq!(
+        store.begin("alice", &k, &review_intent()).unwrap(),
+        BeginSubmission::Started
+    );
+    drop(store);
+    let store = SubmissionStore::open(path).unwrap();
+    assert_eq!(
+        store.begin("alice", &key(), &request()).unwrap(),
+        BeginSubmission::BlockedUnknown
+    );
+    let mut other = review_intent();
+    other["route"] = json!("/api/v1/runs/00000000-0000-4000-8000-000000000006/reviews");
+    assert_eq!(
+        store.begin("alice", &k, &other),
+        Err(SubmissionStoreError::Conflict)
+    );
+    let mut wrong = review_receipt();
+    wrong["run"]["review_context"]["candidate_sha256"] = json!("c".repeat(64));
+    assert_eq!(
+        store.confirm("alice", &k, &wrong),
+        Err(SubmissionStoreError::Conflict)
+    );
+    store.confirm("alice", &k, &review_receipt()).unwrap();
+    assert!(matches!(
+        store.begin("alice", &k, &review_intent()).unwrap(),
+        BeginSubmission::Existing(_)
+    ));
+    let mut observed = review_receipt()["run"].clone();
+    store.observe("alice", &observed).unwrap();
+    observed["review_context"]["candidate_sha256"] = json!("c".repeat(64));
+    assert_eq!(
+        store.observe("alice", &observed),
+        Err(SubmissionStoreError::Conflict)
+    );
+}
+#[test]
+fn r04_rework_receipt_binds_parent_and_rejects_arbitrary_routes() {
+    let root = root();
+    let store = SubmissionStore::open(root.path().join("s.db")).unwrap();
+    let k = key();
+    let intent =
+        json!({"route":format!("/api/v1/runs/{}/rework",run()["id"].as_str().unwrap()),"body":{}});
+    assert_eq!(
+        store.begin("alice", &k, &intent).unwrap(),
+        BeginSubmission::Started
+    );
+    let mut v = receipt();
+    v["run"]["purpose"] = json!("coding");
+    v["run"]["rework_context"] = json!({"root_writer_run_id":run()["id"],"review_run_id":run()["id"],"candidate_sha256":"b".repeat(64)});
+    store.confirm("alice", &k, &v).unwrap();
+    for route in [
+        "/api/v1/tasks",
+        "/api/v1/runs/../reviews",
+        "/api/v1/runs/00000000-0000-4000-8000-000000000003/reviews?x=1",
+    ] {
+        assert_eq!(
+            store.begin("alice", &key(), &json!({"route":route,"body":{}})),
+            Err(SubmissionStoreError::InvalidInput)
+        );
+    }
+}

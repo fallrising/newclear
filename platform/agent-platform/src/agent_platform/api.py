@@ -32,6 +32,7 @@ from .domain import (
 from .export_service import ApprovalInput, ExportService, PreviewInput, ReconcileInput
 from .result_archive import list_archives, read_archive
 from .result_download import DOWNLOAD_CSP, diff_bytes
+from .review import ReviewInput, ReworkInput, admit_review, admit_rework
 from .store import Store, json_value
 from .task_query import TaskState
 
@@ -213,6 +214,44 @@ def create_app(settings=None, db=None, web_dist=None):
                 idempotency_key,
                 data,
                 lambda conn, command_id: store.retry(conn, task_id, data, command_id),
+            )
+        )
+
+    @app.post("/api/v1/runs/{run_id}/reviews", status_code=202)
+    def review(
+        run_id: UUID,
+        data: ReviewInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        operator = session["operator_id"]
+        return command_response(
+            store.command(
+                operator,
+                f"runs/{run_id}/reviews",
+                idempotency_key,
+                data,
+                lambda conn, command_id: admit_review(
+                    store, conn, operator, run_id, data, command_id
+                ),
+            )
+        )
+
+    @app.post("/api/v1/runs/{run_id}/rework", status_code=202)
+    def rework(
+        run_id: UUID,
+        data: ReworkInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        operator = session["operator_id"]
+        return command_response(
+            store.command(
+                operator,
+                f"runs/{run_id}/rework",
+                idempotency_key,
+                data,
+                lambda conn, command_id: admit_rework(store, conn, operator, run_id, command_id),
             )
         )
 

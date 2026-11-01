@@ -80,7 +80,7 @@ no resident URL; unknown intent retained for trusted manual investigation.
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | M3-C | Immutable AP candidate inspection/download; [contract](../specs/SPEC-M3-fixed-candidate.md) | FN05 preparation, C01–05 | done | 2026-11-01T15:14:00Z | 2026-11-01T15:47:06Z | 2026-11-01T15:47:06Z |
-| M3-R | Actual cross-vendor readonly review; waiting for bounded AP dependency approval under SDD§3 | FN05 | todo | | | 2026-11-01T15:42:24Z |
+| M3-R | Actual cross-vendor readonly review; approved T-0449, implementation and actual evidence pending | FN05 | in_progress | 2026-11-01T16:40:00Z | | 2026-11-01T17:02:00Z |
 
 M3-C independently ACCEPT_FIXED_CANDIDATE_C01_C05; [PR941](https://github.com/fallrising/newclear/pull/941)
 merged2026-11-01T15:47:06Z as `c7dfdde57c017ea254eb9effa670e7788339bc4b`.
@@ -90,3 +90,9 @@ two real Chromium contexts downloaded the same verified1932-byte archive;
 zero new task/coding/VM. [Acceptance](../acceptance/M3-fixed-candidate.md).
 Full FN05 remains open: T-0449 bounded AP readonly review proposal awaits owner approval
 under SDD§3. Services stopped; no resident URL.
+
+## T-0449 approved readonly review dependency
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | in_progress | 2026-11-01T16:44:02Z | | 2026-11-01T16:44:02Z |

@@ -37,10 +37,10 @@ The application resolves actor permissions, canonicalizes the request, and opens
 | Command | Guard summary | Durable result |
 | --- | --- | --- |
 | `MarkReady` | accepted AC/spec, owner, dependency and scope readiness | readiness evaluation + phase |
-| `DispatchRun` | Ready/current inputs, no active blockers/unknown mutation, budget/WIP | new Run + outbox intent + Developing |
+| `DispatchRun` | Ready, or Developing with every existing Run settled ([rework loop](rework-loop.md)); current inputs, no active blockers/unknown mutation, budget/WIP | new Run + outbox intent + Developing |
 | `SubmitCandidate` | current input, sealed candidate and manifest, complete Run report | Candidate + Review phase |
 | `RequestQA` | required Reviews approve exact subject | QA phase + verifier intents |
-| `RequestRework` | Review/QA, finding and exact subject | new work revision + Developing |
+| `RequestRework` | Review/QA, reason and exact current-Candidate subject | version+1 + Developing; history unchanged |
 | `CompleteWorkItem` | full HAI-DONE predicate | CompletionRecord + Done atomically |
 | `ReopenWorkItem` | human, reason and new work revision | Draft or Ready; old completion retained |
 | `RequestCancellation` | human policy, current mutable work | cancellation condition; no new dispatch |

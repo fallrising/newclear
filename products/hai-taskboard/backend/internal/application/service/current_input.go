@@ -124,6 +124,9 @@ func (s *Service) currentCompletionMaterial(ctx context.Context, tx port.Transac
 	if !m.CandidatePresent || !m.RunPresent {
 		return m, inputIdentity{}, nil
 	}
+	if m.Runs.LatestRunID != m.Run.ID {
+		return m, inputIdentity{}, staleCurrentInput(nil)
+	}
 	current, identity, err := s.verifyCurrentRunInput(ctx, tx, m.WorkItem, m.Run)
 	if err != nil {
 		return m, identity, err

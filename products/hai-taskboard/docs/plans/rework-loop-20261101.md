@@ -1,9 +1,11 @@
 # Proposed rework loop: RequestRework, redispatch and current Candidate
 
-Status: **Proposed; owner decision pending**. T-0339 / BOARD HRWK. Source `caad3c3a811456da767872aa6fc02d859955011c`.
-This document is a reviewable contract proposal, revised after Claude review ([dispositions](../evidence/rework-loop-plan-20261101.md)).
-It changes no production code, OpenAPI, accepted SDD, migration or dependency, and merging it does not approve
-RWK-01..05 or run RWK-AC-01..05. The accepted-document amendments that approval would authorize are listed in RWK-05.
+Status: **Owner approved D1 and recommended D2, 2026-11-01**. T-0339 / BOARD HRWK. Proposal source `caad3c3a811456da767872aa6fc02d859955011c`.
+The [normative entry](../sdd/rework-loop.md) governs implementation; this reviewed proposal and its
+[review dispositions](../evidence/rework-loop-plan-20261101.md) are retained. Implementation established three
+facts the proposal stated imprecisely, now normative in the entry: `lifecycle_rejected`/`done_gate_unsatisfied`
+use the existing HTTP 422 (not 409); the reason is recorded in the immutable `ReworkRequested` command result
+(no table stores canonical requests); CompleteWorkItem while B is in Review classifies as `stale_subject`.
 
 ## Why this is the next bounded slice
 

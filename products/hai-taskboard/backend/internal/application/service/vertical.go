@@ -435,6 +435,13 @@ func (service *Service) SubmitCandidate(ctx context.Context, principal domain.Ac
 			if item.Version() != value.ExpectedVersion {
 				return mutation{}, domain.Rejection{Code: domain.CodeVersionConflict}
 			}
+			latest, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, RunID: value.RunID})
+			if err != nil {
+				return mutation{}, err
+			}
+			if latest.Runs.LatestRunID != value.RunID || latest.Runs.LatestHasCandidate {
+				return mutation{}, command.NewError(command.CodeLifecycleRejected, "only the latest Run without a Candidate can submit one", false, nil, nil)
+			}
 			if item.Phase() != domain.PhaseDeveloping || run.Run.WorkItemID != value.WorkItemID || run.Run.ObservedState != "Succeeded" ||
 				run.Run.ReconciliationState != "None" || run.Run.SideEffectOutcome != "Confirmed" || value.Candidate.InputSubjectDigest != run.Run.InputDigest {
 				return mutation{}, port.ErrRunLifecycle
@@ -713,6 +720,54 @@ func (service *Service) RequestQA(ctx context.Context, principal domain.ActorID,
 			}
 			result := command.Result{Type: "QARequested", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: next.Version(), Phase: next.Phase()}
 			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), next.Version(), result, subject.Digest()), nil
+		})
+}
+
+// RequestRework returns the current Candidate's Review/QA work to Developing.
+// It changes only the WorkItem; earlier material stays as history and becomes
+// inapplicable because later subjects carry a new version or Candidate.
+func (service *Service) RequestRework(ctx context.Context, principal domain.ActorID, value command.RequestRework) (command.Outcome, error) {
+	request, digest, err := command.CanonicalRequestRework(value)
+	if err != nil {
+		return failureOutcome(value.Metadata, invalidRequest(err))
+	}
+	return service.execute(ctx, principal, value.Metadata, command.RequestReworkOperation, value.ProjectID, request, digest,
+		func(ctx context.Context, tx port.Transaction, _ time.Time) (mutation, error) {
+			item, err := tx.LoadWorkItem(ctx, value.ProjectID, value.WorkItemID)
+			if err != nil {
+				return mutation{}, err
+			}
+			if item.Version() != value.ExpectedVersion {
+				return mutation{}, domain.Rejection{Code: domain.CodeVersionConflict}
+			}
+			if item.Phase() != domain.PhaseReview && item.Phase() != domain.PhaseQA {
+				return mutation{}, domain.Rejection{Code: domain.CodeInvalidTransition}
+			}
+			history, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID})
+			if err != nil {
+				return mutation{}, err
+			}
+			stale := command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, nil)
+			if !history.Runs.LatestHasCandidate {
+				return mutation{}, stale
+			}
+			material, _, err := service.currentCompletionMaterial(ctx, tx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, RunID: history.Runs.LatestRunID, SubjectDigest: value.SubjectDigest})
+			if err != nil {
+				return mutation{}, err
+			}
+			subject, err := preparationSubject(material, service.completionFor(value.ProjectID))
+			if err != nil || subject.Digest() != value.SubjectDigest {
+				return mutation{}, stale
+			}
+			next, err := item.Transition(domain.PhaseDeveloping, domain.TransitionGuards{ExpectedVersion: value.ExpectedVersion, ReworkReason: value.Reason})
+			if err != nil {
+				return mutation{}, err
+			}
+			if err := tx.UpdateWorkItem(ctx, next, value.ExpectedVersion); err != nil {
+				return mutation{}, rollbackMutationError{err}
+			}
+			result := command.Result{Type: "ReworkRequested", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: next.Version(), Phase: next.Phase(), Reason: value.Reason, SubjectDigest: value.SubjectDigest}
+			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), next.Version(), result, value.SubjectDigest), nil
 		})
 }
 

@@ -81,6 +81,8 @@ type successResult struct {
 	RunID                   domain.RunID      `json:"run_id,omitempty"`
 	Version                 uint64            `json:"version,omitzero"`
 	Phase                   domain.Phase      `json:"phase,omitempty"`
+	Reason                  string            `json:"reason,omitempty"`
+	SubjectDigest           string            `json:"subject_digest,omitempty"`
 }
 
 type successAudit struct {
@@ -113,20 +115,25 @@ type failureDetails struct {
 
 func CanonicalSuccess(metadata Metadata, operation Operation, result Result, auditSequence uint64, cursor port.Cursor) ([]byte, error) {
 	if !commandIDPattern.MatchString(metadata.CommandID) || !validText(metadata.CorrelationID, 80) ||
-		!validSuccessResult(operation, successResult{
-			ReportID: result.ReportID, ReportKind: result.ReportKind, AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID,
-			RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID,
-		}) || auditSequence == 0 || cursor.Epoch == 0 || cursor.Sequence == 0 {
+		!validSuccessResult(operation, wireResult(result)) || auditSequence == 0 || cursor.Epoch == 0 || cursor.Sequence == 0 {
 		return nil, ErrInvalidCommand
 	}
 	return json.Marshal(successEnvelope{
 		APIVersion: "v1", OK: true,
 		Command:          successCommand{CommandID: metadata.CommandID, Operation: operation, Status: "recorded", Replayed: false},
-		Result:           successResult{ReportID: result.ReportID, ReportKind: result.ReportKind, AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID},
+		Result:           wireResult(result),
 		Audit:            successAudit{Sequence: auditSequence},
 		ProjectionCursor: successCursor{StreamEpoch: cursor.Epoch, EventSequence: cursor.Sequence},
 		CorrelationID:    metadata.CorrelationID,
 	})
+}
+
+func wireResult(result Result) successResult {
+	wire := successResult{ReportID: result.ReportID, ReportKind: result.ReportKind, AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID, Reason: result.Reason}
+	if !result.SubjectDigest.IsZero() {
+		wire.SubjectDigest = canonicalSHA256(result.SubjectDigest)
+	}
+	return wire
 }
 
 func CanonicalFailure(metadata Metadata, failure *Error) ([]byte, error) {
@@ -195,7 +202,7 @@ func validOperation(operation Operation) bool {
 	switch operation {
 	case SubmitHumanReportOperation, AcceptInitialSpecificationOperation, ProposeSpecificationOperation, CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
 		SubmitCandidateOperation, PublishReviewOperation, PublishEvidenceOperation, ApproveSubjectOperation,
-		RequestQAOperation, RequestCancelOperation, CompleteWorkItemOperation:
+		RequestQAOperation, RequestCancelOperation, RequestReworkOperation, CompleteWorkItemOperation:
 		return true
 	default:
 		return false
@@ -210,6 +217,9 @@ func validSuccessResult(operation Operation, result successResult) bool {
 		return false
 	}
 	if operation != ProposeSpecificationOperation && operation != AcceptInitialSpecificationOperation && (result.ProposalDigest != "" || result.GraphDigest != "" || result.ObjectFormat != "" || result.CommitOID != "") {
+		return false
+	}
+	if operation != RequestReworkOperation && (result.Reason != "" || result.SubjectDigest != "") {
 		return false
 	}
 	projectValid := projectIDPattern.MatchString(string(result.ProjectID))
@@ -258,6 +268,10 @@ func validSuccessResult(operation Operation, result successResult) bool {
 	case RequestCancelOperation:
 		return result.Type == "CancellationRequested" && projectValid && workItemValid &&
 			runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && (result.Phase == domain.PhaseDeveloping || result.Phase == domain.PhaseReview || result.Phase == domain.PhaseQA)
+	case RequestReworkOperation:
+		subject, err := domain.ParseDigest(strings.TrimPrefix(result.SubjectDigest, "sha256:"))
+		return result.Type == "ReworkRequested" && projectValid && workItemValid && result.RunID == "" && result.Version > 0 &&
+			result.Phase == domain.PhaseDeveloping && ValidReworkReason(result.Reason) && err == nil && !subject.IsZero() && canonicalSHA256(subject) == result.SubjectDigest
 	case CompleteWorkItemOperation:
 		return result.Type == "WorkItemCompleted" && projectValid && workItemValid && result.RunID == "" &&
 			result.Version > 0 && result.Phase == domain.PhaseDone

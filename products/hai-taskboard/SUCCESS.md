@@ -235,9 +235,11 @@ after independent code review, complete exact-head CI and remote source verifica
 [BOARD HMDTL](docs/tasks/BOARD.md) and [evidence](docs/evidence/work-item-material-index-20261101.md) record delivery.
 No whole-product AC or full M2 status is promoted.
 
-## Rework loop proposal — 2026-11-01
+## Rework loop — 2026-11-01
 
-[Concrete proposal](docs/plans/rework-loop-20261101.md) for the accepted but unimplemented RequestRework,
-redispatch from Developing and an explicit current-Candidate rule, so Review/QA can return to work and
-Candidate B cannot use Candidate A's material. RWK-AC-01..05 remain NotRun pending owner D1/D2; this
-documentation does not change product ACs, production behavior or the delivered M2 slices. Status: BOARD HRWK.
+Owner approved D1/D2 of the [reviewed proposal](docs/plans/rework-loop-20261101.md). The
+[normative contract](docs/sdd/rework-loop.md) implements RequestRework (Review/QA → Developing with a recorded
+reason), explicit redispatch from Developing when every Run is settled, and the latest Run's Candidate as the only
+current Candidate, so Candidate B cannot use Candidate A's material. RWK-AC-01..04 map to real SQLite/Fake/HTTP
+oracles in [evidence](docs/evidence/rework-loop-20261101.md); RWK-AC-05 is review, gates and delivery in BOARD HRWK.
+No completion UI, full M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.

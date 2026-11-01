@@ -419,14 +419,20 @@ full detail/history, completion UI, full M2 and full product remain incomplete. 
 
 Owner continues after HMDTL. Source caad3c3a; no open HAI PR at intake. Comparing remaining-work M2 with source found
 that accepted RequestRework is unimplemented, DispatchRun starts only from Ready and the current Candidate is implicit,
-so Review/QA cannot return to work and v0.2 AC-02 is lawfully unreachable. This task prepares the concrete contract first;
-implementation waits for owner D1/D2. UI, ReopenWorkItem, full detail/history, migration and providers stay out of scope.
+so Review/QA cannot return to work and v0.2 AC-02 is lawfully unreachable. HRWKP delivered the reviewed contract; HRWK
+implements it after owner approval. UI, ReopenWorkItem, full detail/history, migration and providers stay out of scope.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HRWK | Propose rework/redispatch/current-Candidate contract; 等 owner D1/D2 before implementation | RWK-PLAN-01..03; RWK-AC-01..05 proposed; H02 support | in_progress | 2026-11-01T14:15:00Z | — | 2026-11-01T14:42:00Z |
+| HRWKP | Propose and review rework/redispatch/current-Candidate contract | RWK-PLAN-01..03 | done | 2026-11-01T14:15:00Z | 2026-11-01T15:03:21Z | 2026-11-01T15:04:25Z |
+| HRWK | Implement approved rework loop: RequestRework, settled redispatch, latest-Run current Candidate | RWK-AC-01..05; H02 support | in_progress | 2026-11-01T15:07:09Z | — | 2026-11-01T15:26:00Z |
 
 RWK-PLAN-01 maps the remaining M2/Done gaps to source with evidence. RWK-PLAN-02 fixes one bounded contract,
 acceptance and the minimal owner decisions. RWK-PLAN-03 disposes Claude review, passes document checks and
-completes Git/CI/readback/ledger delivery. These are planning ACs; RWK-AC-01..05 stay NotRun until approval and
-implementation. [Proposal](../plans/rework-loop-20261101.md); [review evidence](../evidence/rework-loop-plan-20261101.md).
+completes Git/CI/readback/ledger delivery; HRWKP closed with proposal [#926](https://github.com/fallrising/newclear/pull/926)
+(merge time is its end). RWK-AC-01..05 are the HRWK implementation acceptance. [Proposal](../plans/rework-loop-20261101.md); [review evidence](../evidence/rework-loop-plan-20261101.md).
+
+2026-11-01T15:06Z: owner replied 「批准。」 to D1 and recommended D2 after proposal [#926](https://github.com/fallrising/newclear/pull/926)
+merged; the waiting point above is historical. [Normative contract](../sdd/rework-loop.md) governs implementation.
+Source 935ffbc1 (HAI identical to cc7931dd); no HAI open PR. Root-only implementation, no worker; Claude code review
+600 s plus one follow-up on actual revisions; CI 20-minute rounds. No UI, provider, dependency, migration, release or deploy.

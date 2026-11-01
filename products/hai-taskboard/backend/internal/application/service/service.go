@@ -154,8 +154,11 @@ func (service *Service) DispatchRun(ctx context.Context, principal domain.ActorI
 			if material.ActiveOrUnknownRun {
 				return mutation{}, domain.Rejection{Code: domain.CodeActiveOrUnknownRun}
 			}
+			if err := redispatchAllowed(material, value.ExpectedVersion, now); err != nil {
+				return mutation{}, err
+			}
 			next, err := material.WorkItem.Transition(domain.PhaseDeveloping, domain.TransitionGuards{
-				ExpectedVersion: value.ExpectedVersion, ExplicitStart: true,
+				ExpectedVersion: value.ExpectedVersion, ExplicitStart: true, PriorRunsSettled: true,
 			})
 			if err != nil {
 				return mutation{}, err
@@ -263,6 +266,26 @@ func (service *Service) CompleteWorkItem(ctx context.Context, principal domain.A
 			result := command.Result{Type: "WorkItemCompleted", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: completion.WorkItem.Version(), Phase: completion.WorkItem.Phase()}
 			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), completion.WorkItem.Version(), result, completion.Record.SubjectDigest()), nil
 		})
+}
+
+// redispatchAllowed applies the Developing redispatch guards before the domain
+// transition. Ready dispatch is unchanged; every other phase is not a dispatch
+// source, after the domain's version-first precedence.
+func redispatchAllowed(material port.CompletionMaterial, expectedVersion uint64, now time.Time) error {
+	item := material.WorkItem
+	switch {
+	case item.Phase() == domain.PhaseReady:
+		return nil
+	case item.Version() != expectedVersion:
+		return domain.Rejection{Code: domain.CodeVersionConflict}
+	case item.Phase() != domain.PhaseDeveloping:
+		return domain.Rejection{Code: domain.CodeInvalidTransition}
+	case material.Runs.Count == 0 || !material.Runs.AllSettled:
+		return command.NewError(command.CodeLifecycleRejected, "every existing Run must be settled before redispatch", false, nil, nil)
+	case now.UnixNano() <= material.Runs.LatestCreatedAtNS:
+		return command.NewError(command.CodeLifecycleRejected, "server clock is not after the latest Run", true, nil, nil)
+	}
+	return nil
 }
 
 func validExecutorDeclaration(declaration port.ExecutorDeclaration) bool {

@@ -145,7 +145,10 @@ whose current accepted inputs differ from its CompletionRecord; its stored histo
 - **HAI-STATE-004** — Review → QA requires all policy-required Reviews to approve the current subject;
   QA → Done is permitted only through `CompleteWorkItem` and the Done predicate.
 - **HAI-STATE-005** — Review/QA → Developing records a reason, preserves all historical evidence and marks
-  non-current evidence inapplicable rather than deleting it.
+  non-current evidence inapplicable rather than deleting it. Inapplicability is computed (subject mismatch or a
+  non-current Candidate), never stored.
+- **HAI-STATE-007** — Developing → Developing (redispatch) starts a new Run only by explicit operator command when
+  the WorkItem already has Runs and every Run is settled; it never retries automatically ([rework loop](sdd/rework-loop.md)).
 - **HAI-STATE-006** — Drag, keyboard movement and button transitions MUST call the same server
   command and guards; the client MUST NOT optimistically persist an illegal phase.
 
@@ -154,7 +157,8 @@ whose current accepted inputs differ from its CompletionRecord; its stored histo
 For requested subject `S`, `CompleteWorkItem(S)` succeeds only when all terms below are true:
 
 1. the WorkItem is in `QA`, unblocked, and its expected version matches;
-2. `S` identifies the current Candidate digest, Run input digest, complete required AC revision set,
+2. `S` identifies the current Candidate (the Candidate of the WorkItem's latest Run, see
+   [rework loop](sdd/rework-loop.md)) digest, Run input digest, complete required AC revision set,
    accepted dependency graph revision, policy version and completion recipe version;
 3. all required checks have terminal `Passed` Evidence for exactly `S` and required verifier class;
 4. no required check is `Failed`, `Skipped`, `NotRun`, `Unknown` or superseded;

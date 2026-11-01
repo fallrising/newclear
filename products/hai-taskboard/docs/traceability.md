@@ -11,8 +11,8 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 | HAI-BOUNDARY-001..004 | SDD §3 | architecture/package dependency tests; Fake capability tests | NotRun |
 | HAI-AUTH-001..006 | SDD §4, ADR-001/005 | transaction, import, artifact, migration, backup tests | Passing bounded command/artifact transaction subset (T-090); backup and full group remain NotRun |
 | HAI-DOMAIN-001..005 | SDD §5, ADR-002 | domain identity, immutability, blocker, version/idempotency tests | Passing bounded version/current-subject subset (T-090); full group remains NotRun |
-| HAI-STATE-001..006 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | NotRun |
-| HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | NotRun |
+| HAI-STATE-001..007 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | Passing bounded HAI-STATE-005/007 rework/redispatch subset (HRWK); full group and UI parity remain NotRun |
+| HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | Passing bounded lawful HAI-DONE-002/004 rework subset (HRWK); exhaustive group remains NotRun |
 | HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical and persistent polling subsets (T-073/T-089/T-099); restore remains NotRun |
 | HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | Passing bounded pure kernel (T-024); durable import/activation remains NotRun |
 | HAI-API-001,005 | SDD §8 | stable full-command error matrix; deterministic projection rebuild | NotRun |
@@ -115,10 +115,10 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 
 | Source ID | Required oracle | P0-A status |
 | --- | --- | --- |
-| AC-01 | Run success with one missing required AC cannot complete; exact gap returned | NotRun |
-| AC-02 | Candidate B cannot use Candidate A evidence; history remains | NotRun |
+| AC-01 | Run success with one missing required AC cannot complete; exact gap returned | Passing bounded lawful real SQLite/HTTP (HRWK `TestReworkLoop_CandidateBCannotUseCandidateAEvidence`); UI NotRun |
+| AC-02 | Candidate B cannot use Candidate A evidence; history remains | Passing bounded lawful real SQLite/Fake/HTTP (HRWK); UI NotRun |
 | AC-03 | Changed AC/policy makes old evidence inapplicable | NotRun |
-| AC-04 | Forged/self human or verifier identity is denied without mutation | NotRun |
+| AC-04 | Forged/self human or verifier identity is denied without mutation | Passing bounded: forged principal and producer-class reviewer refused without domain writes (HRWK); OS/provider identity NotRun |
 | AC-05 | Skipped/Error/Inconclusive required check is not Passing | NotRun |
 | AC-06 | Replaced artifact bytes fail digest and become Missing/Quarantined | NotRun |
 | AC-07 | Concurrent same key/request yields one result/event group | Passing (application T-067; HTTP boundary T-081; vertical replay T-089; concurrent vertical NotRun) |
@@ -531,3 +531,13 @@ accepted SQLite/Fake/HTTP, downstream discovered IDs, explicit completion and se
 [Evidence](evidence/work-item-material-index-20261101.md) distinguishes injected Impact rows,
 actual accepted command history, synthetic wire bounds and source-bound native gates.
 No full WorkItemDetail/history, M2 or connected completion acceptance is inferred.
+
+## Rework loop (HRWK, T-0339)
+
+[Accepted contract](sdd/rework-loop.md) RWK-01..04 implements HAI-STATE-005 RequestRework, adds HAI-STATE-007
+Developing redispatch and defines the current Candidate for Done predicate term 2. Named oracles:
+`TestRequestRework_GuardsAndHistory`, `TestDispatchRun_RedispatchFromDeveloping`,
+`TestCurrentCandidate_LatestRunOnly`, `TestReworkLoop_CandidateBCannotUseCandidateAEvidence`
+([evidence](evidence/rework-loop-20261101.md)). They cover lawful command history only; v0.2 AC-05 nonpassing
+Evidence stays domain-only, AC-03/29/30/47/48 need M4 Impact, AC-06 needs M6. Completion UI and SUCCESS
+AC-02..04 remain pending.

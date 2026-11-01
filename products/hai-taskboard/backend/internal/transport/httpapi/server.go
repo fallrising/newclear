@@ -238,6 +238,12 @@ func (server *Server) submitCommand(response http.ResponseWriter, request *http.
 		if !handled {
 			return
 		}
+	case command.RequestReworkOperation:
+		var handled bool
+		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.RequestReworkOperation, envelope.Payload)
+		if !handled {
+			return
+		}
 	case command.RequestCancelOperation:
 		var handled bool
 		outcome, err, handled = server.completionCommand(response, request, session, projectID, metadata, command.RequestCancelOperation, envelope.Payload)

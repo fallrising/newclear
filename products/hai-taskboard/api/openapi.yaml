@@ -1647,7 +1647,7 @@ components:
         - if: { properties: { operation: { const: RequestQA } } }
           then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/RequestQAPayload" } } }
         - if: { properties: { operation: { const: RequestRework } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/RequestReworkPayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/RequestReworkPayload" } } }
         - if: { properties: { operation: { const: CompleteWorkItem } } }
           then: { properties: { payload: { $ref: "#/components/schemas/CompleteWorkItemPayload" } } }
         - if: { properties: { operation: { const: ReopenWorkItem } } }
@@ -1861,6 +1861,11 @@ components:
     DispatchRunPayload:
       type: object
       additionalProperties: false
+      description: >-
+        Starts a Run from Ready, or from Developing when the WorkItem has Runs and every Run is settled
+        (Succeeded or Failed, reconciliation None, side effects Confirmed, not CancelRequested). A Developing
+        redispatch is refused with retryable lifecycle_rejected unless the server clock is strictly after every
+        existing Run. retry_of_run_id is not supported.
       required: [work_item_id, adapter_id, scenario_id]
       properties:
         work_item_id: { $ref: "#/components/schemas/WorkItemID" }
@@ -1886,6 +1891,12 @@ components:
     RequestReworkPayload:
       type: object
       additionalProperties: false
+      description: >-
+        Review or QA to Developing. The success result (type ReworkRequested, phase Developing) also records reason
+        and subject_digest. subject_digest must equal the preparation subject of
+        the current Candidate (the Candidate of the WorkItem's latest Run); otherwise 409 stale_subject. reason is
+        1..2000 code points and at most 8000 UTF-8 bytes, without NUL or control characters except tab and newline.
+        No Review, Evidence, Approval, Candidate, Run or CompletionRecord changes.
       required: [work_item_id, subject_digest, reason]
       properties:
         work_item_id: { $ref: "#/components/schemas/WorkItemID" }
@@ -2057,6 +2068,17 @@ components:
         - if:
             properties:
               command:
+                properties: { operation: { const: RequestRework } }
+          then:
+            properties:
+              result: { $ref: "#/components/schemas/ReworkRequestedResult" }
+          else:
+            properties:
+              result:
+                properties: { reason: false, subject_digest: false }
+        - if:
+            properties:
+              command:
                 properties: { operation: { const: ProposeSpecification } }
           then:
             properties:
@@ -2079,6 +2101,18 @@ components:
                     acceptance_subject_digest: false
                     object_format: false
                     commit_oid: false
+    ReworkRequestedResult:
+      type: object
+      additionalProperties: false
+      required: [type, project_id, work_item_id, version, phase, reason, subject_digest]
+      properties:
+        type: { const: ReworkRequested }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        version: { type: integer, minimum: 1 }
+        phase: { const: Developing }
+        reason: { type: string, minLength: 1, maxLength: 2000, description: Byte-exact rework reason; at most 8000 UTF-8 bytes. }
+        subject_digest: { $ref: "#/components/schemas/SHA256" }
     CommandFailure:
       type: object
       additionalProperties: false

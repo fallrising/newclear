@@ -320,6 +320,20 @@ type CompletionMaterial struct {
 	// CandidateArtifacts contains the complete digest-ordered committed binding
 	// set for the named Candidate, separate from Evidence report locators.
 	CandidateArtifacts []Artifact
+	Runs               RunHistory
+}
+
+// RunHistory summarizes every Run of the WorkItem in the material snapshot.
+// The latest Run has the greatest CreatedAtNS, ties broken by RunID bytes; only
+// its Candidate is current.
+type RunHistory struct {
+	Count              int
+	LatestRunID        domain.RunID
+	LatestCreatedAtNS  int64
+	LatestHasCandidate bool
+	// AllSettled reports Succeeded|Failed, reconciliation None, side effects
+	// Confirmed and no CancelRequested for every Run.
+	AllSettled bool
 }
 
 type Completion struct {

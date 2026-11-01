@@ -22,6 +22,7 @@ const (
 	ApproveSubjectOperation   Operation = "ApproveSubject"
 	RequestQAOperation        Operation = "RequestQA"
 	RequestCancelOperation    Operation = "RequestCancellation"
+	RequestReworkOperation    Operation = "RequestRework"
 	CompleteWorkItemOperation Operation = "CompleteWorkItem"
 )
 
@@ -162,6 +163,14 @@ type RequestQA struct {
 	SubjectDigest domain.Digest
 }
 
+type RequestRework struct {
+	Metadata
+	ProjectID     domain.ProjectID
+	WorkItemID    domain.WorkItemID
+	SubjectDigest domain.Digest
+	Reason        string
+}
+
 type RequestCancellation struct {
 	Metadata
 	ProjectID  domain.ProjectID
@@ -192,6 +201,9 @@ type Result struct {
 	RunID                   domain.RunID
 	Version                 uint64
 	Phase                   domain.Phase
+	// Reason and SubjectDigest are recorded only for ReworkRequested.
+	Reason        string
+	SubjectDigest domain.Digest
 }
 
 type Outcome struct {

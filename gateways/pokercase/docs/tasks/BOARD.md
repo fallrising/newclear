@@ -6,10 +6,15 @@ Demand:deskT0426;claim372merged. [TT-1–TT-3](T-0426-tui-trusted.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TT-01 | Trusted-directory preflight and independent review | TT-1 | in_progress | 2026-11-01T14:31:46.244293+00:00 | — | 2026-11-01T14:46:02.386692+00:00 |
-| TT-02 | Bounded real TUI lifecycle attempt | TT-2 | in_progress | 2026-11-01T14:31:46.244293+00:00 | — | 2026-11-01T14:46:02.386692+00:00 |
-| TT-03 | Actual evidence and delivery | TT-3 | in_progress | 2026-11-01T14:31:46.244293+00:00 | — | 2026-11-01T14:46:02.386692+00:00 |
+| TT-01 | Trusted-directory preflight and independent review | TT-1 | done | 2026-11-01T14:31:46.244293+00:00 | 2026-11-01T14:55:07Z | 2026-11-01T14:55:07Z |
+| TT-02 | Bounded real TUI lifecycle attempt | TT-2 | done | 2026-11-01T14:31:46.244293+00:00 | 2026-11-01T14:55:07Z | 2026-11-01T14:55:07Z |
+| TT-03 | Actual evidence and delivery | TT-3 | done | 2026-11-01T14:31:46.244293+00:00 | 2026-11-01T14:56:28.239601+00:00 | 2026-11-01T14:56:28.239601+00:00 |
 
+
+
+Product [PR928](https://github.com/fallrising/newclear/pull/928), source `edf1b32310751bf3df9a85aeb7700c092888eab7`, merged `fe5eae8a34f3759136215ae0b1e13c2330c8fd58` at 2026-11-01T14:55:07Z. Required check/validate passed;3source/merge/origin files, ancestry and Desk-Task trailers matched. TT01–02 record the accepted bounded3/3realtrial: fixedtext, samePID/birth continuation and gatewayrestart/newPID withmatching --resumeSID on retainedofficialCLI2.1.312/claude-opus-5-5,7.867seconds total. Allusage rows succeeded/historypreserved, ownedprocesses/taps/alias cleaned. GenericCLI2.1.316 wasnottrialed; no tools/dynamicdownstreamclient/allprotocol/fullproduct or billingsavings inference. Original17AC andolderfailedrecords unchanged.
+
+IndependentT001preflight/T002result-and-ledger reviews passed; local52contracts/9indexes/20repositorytests,150journalruns/30tests and448deskdocuments passed. Journal [PR218](https://github.com/fallrising/journal/pull/218) and desk [PR373](https://github.com/fallrising/desk/pull/373) passed requiredCI, normalmerge andexactreadback. TT03 records primaryclosure at 2026-11-01T14:56:28.239601+00:00: separatecompletebackup verified78payloadfiles/179754177bytes andmodes; thenfourclean mergedprimaryworktrees were normallyremoved. Branches, otherworktrees/caches, ownertrustedtarget and alloldpackets/backups preserved. FinalboardCI/readback, appendingthisreceipt tobackup and removingits soleworktree occurafterthischeckpoint, beforefinalprivatehandoff; notpreclaimedhere. New3requestallowance exhausted, no automaticnextmilestone; mainlineincomplete/usable_tagnone remain.
 
 ## T-0426 — Three-request real TUI pilot
 

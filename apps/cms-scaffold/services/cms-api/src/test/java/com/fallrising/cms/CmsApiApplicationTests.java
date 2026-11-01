@@ -21,6 +21,49 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class CmsApiApplicationTests {
 
+    @Test
+    void pp1cExactOfflineTokenNeverStartsSpring() {
+        var calls = new java.util.ArrayList<String>();
+        Integer exit = CmsApiApplication.dispatch(new String[]{"ops-inventory", "--request", "/run/pp1/request.json"},
+                args -> calls.add("spring"), args -> { calls.add("maintenance"); return 9; },
+                args -> { calls.add(String.join(" ", args)); return 0; });
+        assertThat(exit).isZero();
+        assertThat(calls).containsExactly("--request /run/pp1/request.json");
+    }
+
+    @Test
+    void pp1cMisplacedOrRepeatedOfflineTokensNeverStartSpring() {
+        for (String[] input : new String[][]{{"x", "ops-inventory"}, {"ops-inventory", "ops-inventory"},
+                {"x", "ops-revoke-restored-sessions"}, {"ops-revoke-restored-sessions"}}) {
+            var calls = new java.util.ArrayList<String>();
+            Integer exit = CmsApiApplication.dispatch(input, args -> calls.add("spring"),
+                    args -> { calls.add("maintenance"); return 9; },
+                    args -> { calls.add("inventory"); return 0; });
+            assertThat(exit).isEqualTo(2);
+            assertThat(calls).isEmpty();
+        }
+    }
+
+    @Test
+    void pp1cPreservesLegacyMaintenancePriorityAndMisplacedRejection() {
+        for (String[] input : new String[][]{{"maintenance", "fresh-init"}, {"ops-inventory", "maintenance"}}) {
+            var calls = new java.util.ArrayList<String>();
+            Integer exit = CmsApiApplication.dispatch(input, args -> calls.add("spring"),
+                    args -> { calls.add(String.join(" ", args)); return 6; },
+                    args -> { calls.add("inventory"); return 0; });
+            assertThat(exit).isEqualTo(6);
+            assertThat(calls).containsExactly(input[0].equals("maintenance") ? "fresh-init" : "");
+        }
+    }
+
+    @Test
+    void pp1cNormalStartupStillReachesSpring() {
+        var calls = new java.util.ArrayList<String>();
+        assertThat(CmsApiApplication.dispatch(new String[]{"--server.port=0"}, args -> calls.add(args[0]),
+                args -> 9, args -> 8)).isNull();
+        assertThat(calls).containsExactly("--server.port=0");
+    }
+
     @Autowired
     MockMvc mockMvc;
 

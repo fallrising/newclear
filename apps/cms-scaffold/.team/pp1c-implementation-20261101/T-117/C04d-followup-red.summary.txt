@@ -1,0 +1,9 @@
+Original local log SHA256: ac2fb88f14599079f481c12dd770958a517b58e5b96de72abf0d8bd3faf44a39
+
+> Task :services:cms-api:test FAILED
+RecoveryInventoryTests > PP1c_canonicalRejectsNonfiniteAndUnpairedSurrogates() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:238
+RecoveryInventoryIntegrationTests > PP1c_relationOutsidePublicRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryIntegrationTests.java:174
+> Task :services:cms-api:integrationTest FAILED
+BUILD FAILED in 16s

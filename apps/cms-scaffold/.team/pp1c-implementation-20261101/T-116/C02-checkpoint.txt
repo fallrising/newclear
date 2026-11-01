@@ -1,0 +1,3 @@
+C02 diff from saved C01 checkpoint (added, removed; both count toward 400):
+207	8	.team/pp1c-implementation-20261101/T-116/C01-recovery-protocol.mjs => scripts/ops/recovery-protocol.mjs
+77	4	.team/pp1c-implementation-20261101/T-116/C01-recovery-protocol.test.mjs => scripts/ops/recovery-protocol.test.mjs

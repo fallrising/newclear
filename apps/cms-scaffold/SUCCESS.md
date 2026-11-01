@@ -28,7 +28,7 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 | AC-01 | Given 有權限編輯者與三個 demo，When 編輯、發布及公開讀取，Then 共用 API／三面流程及草稿拒絕符合契約。 | historical | [W5 交付](.team/reports/W5-DELIVERY.md)：2026-10-06 real API 14/14；648 前端及 93 mock 等歷史檢查。 |
 | AC-02 | Given 版本衝突或無權限內容操作，When 寫入／讀取，Then 原子版本檢查與 RBAC 拒絕不漏資料。 | historical | [BW1c](.team/reports/BW1c-DELIVERY.md)、[BW5](.team/reports/BW5-DELIVERY.md) 與 [P0](docs/v2/waves/P0.md)。 |
 | AC-03 | Given 本地隔離環境，When 啟動 PP1a，Then HTTPS、prod 設定、DB 不對外且不植入 demo。 | historical | [PP1a](docs/v2/waves/PP1a.md)、[狀態表](docs/v2/README.md)：PR327 VERIFIED local scope。 |
-| AC-04 | Given 正式日常帳號與維護操作，When 初始化及執行 Q25 治理，Then 權限、自身保護與恢復路徑可用。 | pending | [PP1b本輪實測](.team/resume-20261101/RUNTIME-REPORT.md)已通過本地fresh/Q25；交付待CI／合併，host recover仍依PP1c，AC-04整體保持pending。 |
+| AC-04 | Given 正式日常帳號與維護操作，When 初始化及執行 Q25 治理，Then 權限、自身保護與恢復路徑可用。 | pending | [PP1b本輪實測](.team/resume-20261101/RUNTIME-REPORT.md)已通過本地fresh/Q25；PR334已通過CI並合併，host recover仍依PP1c，AC-04整體保持pending。 |
 | AC-05 | Given DB 與媒體持續使用，When 備份還原、升級失敗回復與例行維運，Then 資料一致且符合 RPO24h／RTO4h。 | pending | [PP1](docs/v2/waves/PP1.md) 與 [恢復契約](docs/v2/contracts/PP1-recovery.md)；完整操作驗收尚缺。 |
 
 ## 現況與缺口
@@ -76,3 +76,9 @@ Owner要求接續最舊PR333/334；T-0351已認領。PP1b本輪依已合併DOC_R
 PP1c僅修正舊DRAFT與14項審查缺口，與PP1b分支隔離；未批准新規格不施工或合併。完整AC-05／正式host／offsite／upgrade／ops仍pending。本輪不部署或建立usable tag。
 
 計畫與邊界見[續作計畫](.team/resume-20261101/PLAN.md)，進度見[任務板](docs/tasks/BOARD.md)。初始pure helper suite在正常主機執行117passed/0failed/0skipped；sandbox首次僅回報8file wrappers、6failed，屬不可用執行環境結果而非產品已驗收。本輪517Java unit、201PostgreSQL integration、672workspace與117helper、lint/types/build/bundle已通過；E01收尾lint修正已重驗。Owner已批准工具例外；真TTY初始化、七項SQL rollback語義負例、真guard負例與可信TLS E01現已通過。首次Java整合201/202（public p95=134ms>100ms）保留；停止其他負載後原suite隔離202/202、p95=52ms通過，mock93/93通過。最終review／CI／合併仍待完成。詳見[本輪runtime報告](.team/resume-20261101/RUNTIME-REPORT.md)，原[前置證據表](.team/resume-20261101/EVIDENCE.md)保留歷史失敗。
+
+## Approved PP1c implementation — 2026-11-01
+
+Owner approved PR333's reviewed protocol and four sequential subwaves. Implementation starts only after that PR's required CI/normal merge/readback. Scope is local-only consistent DB/media backup, protected same-host copy and fresh isolated restore with raw equality, atomic session revocation, exact browser delta and zero startup/restart mutation. AC-05 and host-recovery part of AC-04 map to approved PP1c/parent AC03 and FM08–12; offsite, upgrade, scheduler and formal host acceptance stay pending.
+
+A implements canonical manifest/receipts, immutable read-only20table/media inventory and offline dispatch; B stops writers and controls helpers; C captures/verifies/restores artifacts; D proves fresh target/session/browser/restart behavior with real tools. Red/Green, PG16, native gates, independent review and exact-head CI/merge/readback are required per subwave; mock/fake adapters do not prove restore. See [implementation plan](.team/pp1c-implementation-20261101/PLAN.md) and [board](docs/tasks/BOARD.md). No release/deploy or old runtime cleanup.

@@ -41,3 +41,11 @@ One new bounded native reviewer was launched for this docs turn; no recursive de
 Root evidence-gate decision: accept the final bounded design review for a concrete owner decision. Do not accept a whole-milestone DONE claim: protocol approval, exact-head CI/readback and implementation remain separate. The two review corrections (complete browser vector and reconstructible auth proof) were independently reread; no unresolved scoped material finding remains. Reviewed annex c3b700ae40dca760995d4c63589df7bb8eed72820cc294465a3ce0ed991cb0de and wave50ba18e39727407e4a03797e6fc677306df9cbe1c190a5ca2b39c91ba406a512 match actual bytes.
 
 Post-merge-commit tooling correction: check_docs.py now uses pinned342107f8 parent bytes and SOURCE-HASHES.mergedMain instead of temporary HEAD/MERGE_HEAD, so the same read-only checks remain reproducible after commit. Re-run passed378; spec reviewed bytes are unchanged.
+
+## Owner approval and status-only acceptance — 2026-11-01
+
+The owner's latest「批准。」answers the concrete final decision request for this reviewed protocol, normal PR333 merge and four sequential implementation subwaves. This supersedes the above historical pending-owner checkpoint for PP1c only. Technical source approved:131ed63feae0dd336d92b486320302bd6b2059bf. No new release/deploy/offsite/dependency/permission authority is inferred.
+
+Root applied codex-evidence-gate to T115 and directly reran: `python3 scripts/check_project_success.py` (52 PASS); `python3 apps/cms-scaffold/.team/pp1c-seal-20261101/check_docs.py` (378 PASS); teamctl validate-task/validate-report T115 (PASS); `git diff --check` (PASS). Independent T115 confirms technical protocol, all44card bodies and parent policy bytes unchanged, with no remaining scoped findings. Accept status-only review. Product work remains unimplemented; DOC_READY becomes effective only after required CI on the new published head and normal merge/readback. Prior-head CI is not substituted for that pending check.
+
+No new agent launch for this status review; one existing reviewer resumed. Full hosted/provider/tool/retry/token/cost/active-wait totals remain unknown/null; no hard call cap.

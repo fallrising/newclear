@@ -168,3 +168,5 @@ Java tests用@TempDir与explicitrecords；ImageIO生成32×16 PNG original，既
 ## 10 2026-11-01 local adapter細化提案
 
 [PP1c local adapters](PP1c-local-adapters.md)收斂D01–D03的工具向量、RawComparisonV1、memory-only credential/socket、合成fixture與逐列browser差異。仍是待批准的新協定；本父契約既有媒體、session transaction與RTO段落不變。PP1c新增startup/stop及restart/stop獨立零差異比較，不以live API旁的inventory冒充停寫。H03/T03/T04/C10/C16群別名各指PP1c§6的a/b串行兩卡，總44卡；沒有新增平行R卡。
+
+2026-11-01追加批准：owner本session原話「批准。」接受PR333於131ed63f的PP1c整份施工圖與local-adapters附約，包含44卡四子波，接續正常合併與實作。上節「待批准」是歷史狀態；父既有政策不改，PP1d/正式offsite仍未授權執行或驗收。

@@ -52,5 +52,5 @@ check('no obsolete media path or duplicate socket draft', all(x not in annex for
 check('phase checkpoints aligned',all(p in wave and p in annex for p in ['STARTUP_VERIFIED','RESTART_VERIFIED']))
 probes=json.loads((Path(__file__).parent / 'TOOL-PROBES.json').read_text())
 check('5 bounded tool probes succeeded',len(probes['cases']+probes['additionalCases'])==5 and all(x['exitCode']==0 for x in probes['cases']+probes['additionalCases']))
-check('docs remain explicit unapproved draft','DRAFT' in wave and '尚未取得新協定封板批准' in annex)
+check('explicit owner approval; implementation distinct','DOC_READY' in wave and 'APPROVED' in annex and '批准。' in annex)
 print(json.dumps({'result':'PASS','checks':len(checks),'cards':len(cards),'families':dict(collections.Counter(c[0] for c in cards)),'scope':'documentation structure only; not implementation or runtime'},ensure_ascii=False))

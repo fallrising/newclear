@@ -1,6 +1,6 @@
 # PP1c 本地 DB／媒體一致備份與空白還原施工圖
 
-日期：2026-11-01（DRAFT 修訂）。狀態：**DRAFT；不授權施工，不是 DOC_READY、offsite 或正式可用聲明**。依賴已合併 PP1a 的 local-isolated runtime，以及 PP1b 的帳號／Q25／同實例維護 lease 實作與驗收。設計承接 [PP1](PP1.md) §4.4–5.2 與 [PP1-recovery](../contracts/PP1-recovery.md)；本文件只把 PP1c 範圍、local adapter 接合與 blank-restore 驗收收斂。既定政策與新增待審提案分開：父契約媒體/session/RTO 政策保持原批准內容；本輪新增 protocol／schema／CLI／拆卡細節仍是待審 DRAFT，不能當作 root 或 owner 已批准。未決設計與未驗收的 implementation/environment gates 列於 §9；本文件仍待root獨立review。D01–D03 的單一具體提案、工具證據、raw receipt及browser逐列差異統一定義於 [local adapters附約](../contracts/PP1c-local-adapters.md)；本圖同步其phase與卡片責任，兩份均待owner新協定批准。
+日期：2026-11-01。狀態：**DOC_READY（owner已批准；本次PR必要CI通過並合併後生效）**。Owner本session原話「批准。」明確接受PR333於131ed63f的完整新協定、D01–D03附約及44卡四子波，接續合併並實作。T114獨立審查已完成；本次只同步批准狀態，不改技術契約。依賴已合併PP1a及PP1b PR334（2ba3e562）的本地環境／帳號／Q25／同實例維護lease。設計依 [PP1](PP1.md)、[PP1-recovery](../contracts/PP1-recovery.md) 與 [local adapters附約](../contracts/PP1c-local-adapters.md)。父媒體/session/RTO政策、v1相容性及local-only邊界保持不變；批准不等於產品實作或offsite驗收。下文「候選／提案／待封板」沿早期設計措辭所列的本地接口，均以本次批准為準；未完成實測與PP1d/正式環境gate仍須逐項證明。
 
 本波目標是可重現地從一個停寫、同批、私有本地 bundle 建立第二個**全新且隔離** DB/media target，驗證 raw rows、Flyway history、媒體檔案與匹配 release，撤銷恢復 session 後啟動同版 API並通過必要 smoke。第二個目錄仍與來源同主機／磁碟，僅為 local protected-copy fixture，不能計入 `VERIFIED_OFFSITE`、RPO離機成功或災難存活。正式離機／金鑰保管、排程、通知及 PP1-AC03 全項驗收仍未完成。
 
@@ -310,7 +310,7 @@ schemaSha256=SHA256(canonicalBytes(schema))；rowsSha256=SHA256(canonicalBytes(r
 
 Copy/encryption boundary：PP1c核心不新增archive工具／dependency；`media.package`是父契約唯一media artifact，payload需保持每個POSIX objectKey與原始bytes逐file還原相等。封裝格式唯一候選為PP1CMEDIA1，仍須root review後才能施工；目前沒有可直接copy的已實作artifact。受保護copy fixture僅同host權限＋hash核驗；若root決定要求本地加密fixture，僅可提出已版本固定的 Node 24 stdlib `crypto` envelope作獨立提案，精確format、nonce/tag/keyfile permissions與readback test待root核准；本草案沒有把它列為實作前置或安全能力。真正加密外送與金鑰災難恢復必須等PD03選定已存在工具並封板，不新增S3/套件/服務。
 
-## 6 順序任務卡（候選；DRAFT，subwave ≤30、每卡估算含手寫測試）
+## 6 順序任務卡（已批准；subwave ≤30、每卡估算含手寫測試）
 
 本文及父契約中的H03/T03/T04/C10/C16是責任群別名，分別指其a與b兩卡全部完成，不再是額外可派工卡。同群共享檔案必依a→b串行；並行worker不得同寫。
 
@@ -809,13 +809,13 @@ Local CLI composition is fixed in §4.2d; C17 fixture preparation and module inv
 
 ## 9 Open decisions and weaker-implementer walk
 
-These are not silently assumed; until root resolves the design/API questions this document stays DRAFT and PP1c cannot be handed to product workers.
+D01–D03與shared-v2本地設計已由T114審查、owner批准；其餘列項區分未實作／未實測的gate與PP1d正式環境決策，不因設計批准自動通過。
 
 | Decision/blocker | Proposal for root review | Blocks |
 | --- | --- | --- |
-| D01 本地實體 helper adapter | 選定既有批准工具；附約§1固定immutable image來源、absolute executable/argv/env/mount/network/UID/security、私有衍生pgpass與none logging。真無網路probe見附約鏈接；未來新API仍須重build/同probe，失敗ADAPTER_UNSEALED。新協定待批准，非未選工具。 | H01/H02/H04、C06/C08/C12/R04、C17 |
+| D01 本地實體 helper adapter | 選定既有批准工具；附約§1固定immutable image來源、absolute executable/argv/env/mount/network/UID/security、私有衍生pgpass與none logging。真無網路probe見附約鏈接；未來新API仍須重build/同probe，失敗ADAPTER_UNSEALED。新協定已批准，工具仍逐run驗證。 | H01/H02/H04、C06/C08/C12/R04、C17 |
 | D02 raw comparison receipt | 選定附約§2 RawComparisonV1：完整20table/schema/rows與雙向files實際比較，hash/count/lineage摘要；成功與失敗payload明列，不能只驗boolean或top-levelhash。 | C09/C10/C12/C14、ProofV1 |
-| D03 browser/socket/config/允許 delta | 選定附約§3–4：現有config recovery opt-in、同UID合作邊界下四frame one-use socket、固定child信任/origins、memory-only credentials/原始observations、private derived delta proof可從inventory重建；兩次login具名差異，startup/restart零差異。具體schemas與時序待批准，沒有留給worker選的替代通道。 | T03/T04、C15/C16/C17、smokeSha256 |
+| D03 browser/socket/config/允許 delta | 選定附約§3–4：現有config recovery opt-in、同UID合作邊界下四frame one-use socket、固定child信任/origins、memory-only credentials/原始observations、private derived delta proof可從inventory重建；兩次login具名差異，startup/restart零差異。具體schemas與時序已批准，沒有留給worker選的替代通道。 | T03/T04、C15/C16/C17、smokeSha256 |
 | Shared LeaseV2 implementation/API | Architecture is specified in §4.2 but remains unimplemented and unaccepted. Root must verify G06/G07 freeze, preserve v1 regression semantics, exact registry paths/schema and account attachment hooks before C07/L/R cards. | L01–L05, C07 onward |
 | Bundle has raw DB credentials/session/content, private inventory rows, media | local root/run/artifact roots0700; files0600; no raw inventory stdout/log; path/link checks, fixed owned copy; keep local-copy state separate from external/offsite gate. | all artifact cards |
 | Restore identity state intentionally changes sessions and app may make normal startup writes | raw all-20-table match before session transaction; after it allow only changed session revoked_at values and exactly one specified AUTH row. Startup allowance defaults to zero; any other write is STARTUP_MUTATION and returns for a new decision. PP1a/PP1b verifiers provide freshness truth. | C14–17 |
@@ -843,9 +843,9 @@ PP1d must separately detail upgrade failure before/during/after migration with m
 - [x] Source-mapped media write/decode, session-touch/scheduler writers, migration set, PP1a tool/runtime receipt and PP1b common lease/recovery gate.
 - [x] Defined candidate local bundle/release/hash/schema and full raw DB+media blank restore order; local copy explicitly not offsite.
 - [x] 44 candidate cards in four ≤30-card subwaves (9/12/9/14); C04/L02/H02 split by responsibility. Estimates include tests and remain unmeasured; split again if actual scope exceeds 400.
-- [ ] D01/D02/D03 now have one explicit proposal in the annex; root independently reviews new §4.2a–e proposals; then freezes shared v2 lease/helper/target API and account-authority prerequisite. Logical schemas alone do not make this implementable or DOC_READY.
-- [ ] Root independently reviews final card map/weak walk, source hashes and exact local interfaces before assigning any implementation work.
-- [ ] Required docs CI/PR merge occurs; only root changes document state. This DRAFT never marks itself DOC_READY.
+- [x] D01/D02/D03及§4.2a–e shared-v2接口已由T114審查、owner批准；PP1b authority prerequisite已驗收。實作仍逐run核對來源與工具。
+- [x] T114完成五群走讀、card map、source/hash與local interface獨立審查；root實際回讀並接受。
+- [ ] 本次批准狀態更新的必要CI與PR333正常合併；合併後DOC_READY生效，紀錄精確SHA。
 - [ ] Product implementation, unit/PG/integration checks and real isolated local restore evidence completed; not performed by this author.
 - [ ] Genuine offsite/key recovery/scheduling/notification and RPO/RTO; separate future acceptance, outside local PP1c.
 

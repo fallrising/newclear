@@ -1,6 +1,6 @@
 # PP1c local adapter and verification proposal
 
-2026-11-01。**DRAFT：本文件把 D01–D03 的選項收斂為單一可審查方案，尚未取得新協定封板批准。** 與 [PP1c](../waves/PP1c.md) §4–6 一起閱讀；本附約只細化 local-isolated 邊界，不改父 [PP1-recovery](PP1-recovery.md) 的媒體完整性、session 撤銷、RTO／offsite 政策。v1 bytes、Java Operation、六欄 account Result 保持原樣。文件與 no-network synthetic probe 不代表 backup/restore 產品已執行。
+2026-11-01。**APPROVED：owner本session原話「批准。」接受PR333於131ed63f的完整新協定、D01–D03與四子波施工；必要CI及正常合併後DOC_READY生效。** 與 [PP1c](../waves/PP1c.md) §4–6 一起閱讀；本附約只細化 local-isolated 邊界，不改父 [PP1-recovery](PP1-recovery.md) 的媒體完整性、session 撤銷、RTO／offsite 政策。v1 bytes、Java Operation、六欄 account Result 保持原樣。文件與 no-network synthetic probe 不代表 backup/restore 產品已執行。
 
 ## 1 D01：已觀察工具與固定參數
 
@@ -157,7 +157,7 @@ SmokeReceipt寫`operations/<op>/smoke.json`CREATE_NEW0600/fsync；`smokeSha256`�
 
 ## 5 卡片責任、反例與批准邊界
 
-D01用已批准image/Node工具；不pull、不安裝、不擴host permissions。新增fixedhelperfile/phase/derivedpgpass/duplexsocket均在本提案明列，尚待封板批准。H01做image/policy/create/inspect/lifecycle，H02做JDBC handshake，H04做PG觀察及pgpass，C06/R04做offline dispatch。H03a/H03b分pack/restore；T03a/T03b分hostsocket/NSS-containerlauncher；T04a/T04b分spec auth與content/media assertion；C10a/C10b分schema-lineage/fullraw comparison；C16a/C16b分lifecycle/exactauthdelta。各卡含tests估算≤400，實際超出先回root拆卡。波次卡表是唯一派工來源，附約不暗生平行卡。
+D01用已批准image/Node工具；不pull、不安裝、不擴host permissions。新增fixedhelperfile/phase/derivedpgpass/duplexsocket均在本提案明列，已取得本次封板批准。H01做image/policy/create/inspect/lifecycle，H02做JDBC handshake，H04做PG觀察及pgpass，C06/R04做offline dispatch。H03a/H03b分pack/restore；T03a/T03b分hostsocket/NSS-containerlauncher；T04a/T04b分spec auth與content/media assertion；C10a/C10b分schema-lineage/fullraw comparison；C16a/C16b分lifecycle/exactauthdelta。各卡含tests估算≤400，實際超出先回root拆卡。波次卡表是唯一派工來源，附約不暗生平行卡。
 
 必寫named regressions：`PP1C_D01_privateUidCannotRead`, `PP1C_D01_rawStdoutNeverLogged`, `PP1C_D01_pgpassEscaping`, `PP1C_D01_extraBackendRejected`, `PP1C_D02_equalHashesWrongPayload`, `PP1C_D02_sameCountRowDrift`, `PP1C_D02_orphanAndDeletedCompared`, `PP1C_D03_wrongSocketFrame`, `PP1C_D03_secondCredentialDelivery`, `PP1C_D03_expiredOldCookieNotRevocationProof`, `PP1C_D03_extraPrincipalOrAuditDelta`, `PP1C_D03_sessionTouchExactExpiry`, `PP1C_D03_apiRunningInventoryRejected`, `PP1C_D03_restartZeroDelta`。每個先用能import/compile的scaffold形成named行為Red，再Green；失敗不能只測mock called。真PG／media restore／socket／TLS／browser完整驗收由C17，文檔probe不能代替。
 
@@ -165,6 +165,6 @@ D01用已批准image/Node工具；不pull、不安裝、不擴host permissions�
 
 ## 6 封板決策（單一提案）
 
-待owner確認的是PR333整份PP1c施工圖：沿同一maintenance registry新增strict LeaseV2/journal/ProofV1與PP1CMEDIA1，採本附約D01工具/私有pgpass/UID向量、D02完整raw receipt、D03四frame socket與具名authdelta；按44卡分A/B/C/D四個依序子波（9/12/9/14，每波≤30）施工。不是再次詢問一般commit/push/PR權限。T0351明訂新規格先審查批准，desk運作方法§0也保留SDD重審；目前只接受文件與工具probe工作，沒有據此執行新backup/restore protocol。
+Owner已確認PR333整份PP1c施工圖：沿同一maintenance registry新增strict LeaseV2/journal/ProofV1與PP1CMEDIA1，採本附約D01工具/私有pgpass/UID向量、D02完整raw receipt、D03四frame socket與具名authdelta；按44卡分A/B/C/D四個依序子波（9/12/9/14，每波≤30）施工。不是再次詢問一般commit/push/PR權限。T0351明訂新規格先審查批准，desk運作方法§0也保留SDD重審；本次批准將範圍接續至四子波實作；截至此批准紀錄，尚未執行新backup/restore protocol。
 
-批准後，root才在必要CI與審查通過下正常合併施工圖、同步DOC_READY並按已授權範圍安排implementation。仍保留父媒體完整性、同交易全session撤銷、原RTO起點及local不等於offsite；不改v1/Java Operation/六欄Result，不擴dependency、host權限、正式部署或舊資料清理。未來真probe/PG/browser失敗須修正或回報，不因規格批准而豁免。
+Root依本次批准，在必要CI與審查通過下正常合併施工圖、同步DOC_READY並按已授權範圍安排implementation。仍保留父媒體完整性、同交易全session撤銷、原RTO起點及local不等於offsite；不改v1/Java Operation/六欄Result，不擴dependency、host權限、正式部署或舊資料清理。未來真probe/PG/browser失敗須修正或回報，不因規格批准而豁免。

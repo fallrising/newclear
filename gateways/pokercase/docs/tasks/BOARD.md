@@ -1,5 +1,16 @@
 # Pokercase 技術任務
 
+## T-0426 — Renewed TUI tool trial after owner quota report
+
+Demand:deskT0426;claim383merged. [TR-1–TR-3](T-0426-tui-tools-renewed.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| TR-01 | Pinned unchanged runner and independent preflight | TR-1 | in_progress | 2026-11-01T16:47:02.817130+00:00 | — | 2026-11-01T16:58:33.356242+00:00 |
+| TR-02 | New bounded actual MCP tool/result attempt | TR-2 | in_progress | 2026-11-01T16:47:02.817130+00:00 | — | 2026-11-01T16:58:33.356242+00:00 |
+| TR-03 | Actual evidence and delivery | TR-3 | in_progress | 2026-11-01T16:47:02.817130+00:00 | — | 2026-11-01T16:58:33.356242+00:00 |
+
+
 ## T-0426 — Two-request real TUI tool continuation
 
 Demand:deskT0426;claim378merged. [TC-1–TC-3](T-0426-tui-tools.md).

@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Renewed TUI tool trial after owner quota report
+
+Owner explicitly approved [TR-1–TR-3](docs/tasks/T-0426-tui-tools-renewed.md): a fresh2/300/60 TUI tool call/result attempt, no retries, unchangedCLI/runtime/model/profile. Prior429 andalloldbudgetsclosed; restoredcapacity remainsowner tentative untilnewresult. Actual2/2passed in4.631s: expectedtool/result, samePID/nativeMCPcallback, exactmodel/marker, durableusage/history andownedcleanup. This isonlyfixedsingletoolHTTPMessages tuple; original17AC/mainlineincomplete remain.
+
 ## T-0426 — Approved real TUI tool continuation
 
 Owner approved [TC-1–TC-3](docs/tasks/T-0426-tui-tools.md): fresh2gatewayrequests/300seconds/60seconds each, one synthetic MCP tool call/result with same-process continuation, no retries. RetainedCLI2.1.312 and acceptedruntime; priorbudgetsclosed. Independentpreflight/isolateddry passed; actualfirstrequest stoppedHTTP429,1of2admissions, no retry, toolresult/sameprocess case notrun. Cleanup passed. Original17AC/mainlineincomplete remain.

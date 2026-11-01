@@ -84,7 +84,7 @@ class Gateway:
              'http_proxy':self.fixture.proxy_url,'https_proxy':self.fixture.proxy_url,'all_proxy':self.fixture.proxy_url,
              'NO_PROXY':'','no_proxy':'','RUST_LOG':'thinrouter::server=info','NO_COLOR':'1'}
         command=[str(self.binary),'serve','--host','127.0.0.1','--port','0','--data-dir',str(self.directory),
-                 '--admin-token',self.admin,'--claude-bin',str(self.fake/'claude'),'--claude-idle-secs','120',
+                 '--admin-token',self.admin,'--claude-mode','print','--claude-bin',str(self.fake/'claude'),'--claude-idle-secs','120',
                  '--cursor-bin',str(self.fake/'cursor-agent'),'--cursor-runtime-bin',str(self.fake/'runtime'),
                  '--cursor-image',IMAGE,'--cursor-profile-volume','thinrouter-cursor-offline','--cursor-max-runs','1',
                  '--cursor-accept-account-plugins']

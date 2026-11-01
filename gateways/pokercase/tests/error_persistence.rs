@@ -93,6 +93,8 @@ impl Gateway {
                 "--admin-token",
                 "synthetic-admin",
                 "--allow-keyless-bootstrap",
+                "--claude-mode",
+                "print",
                 "--claude-bin",
                 fake.to_str().unwrap(),
             ])

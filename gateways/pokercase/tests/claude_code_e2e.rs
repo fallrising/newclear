@@ -90,6 +90,8 @@ impl Env {
             &port.to_string(),
             "--data-dir",
             dir.path().to_str().unwrap(),
+            "--claude-mode",
+            "print",
             "--claude-bin",
             bin.to_str().unwrap(),
         ]);

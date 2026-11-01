@@ -593,3 +593,21 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 初次fixture漏scope的兩項失敗、RA1把volatile D1 metadata當業務列的assertion失敗及既有SQLite ResourceWarning均保留；沒有放寬原業務列比較或跳測。50contracts／8llms／task-report／diff、222相對連結與三個qualifier語法檢查通過，API JSON確認只加header契約。
 - 正常main merge保留並行工作；PLAN尾段衝突保留雙方段落。最終本機／remote fulltree相等、工作樹乾淨、head為main祖先；64份runtime/test/tool input及七份固定部署候選均與remote main相符。未測的本輪真人／Safari／手機沒有補記通過。
 - 本卡完成RA01–04 source/local；尚未在原D1套用0002、未發布新版Worker，線上稽核未啟用。已固定原服務候選及「先新增表後Worker、回退保留表與歷史」步驟。原grant／Access／secrets／runner／Cron／授權期限與免費方案沒有本輪變動。完整mainline incomplete／usable_tag none；接續具體原服務部署及unknown/in-flight隔離還原，無需owner重測瀏覽器。本收尾只改任務板。
+
+## T-0034 — 原服務拒絕稽核接入
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0034-1 | 原狀態與固定候選 | RAL-01 | done | 2026-11-01T04:48:04Z | 2026-11-01T04:56:26Z | 2026-11-01T04:56:57Z |
+| T-0034-2 | 新增稽核schema | RAL-02 | done | 2026-11-01T04:48:04Z | 2026-11-01T04:56:26Z | 2026-11-01T04:56:57Z |
+| T-0034-3 | 原Worker更新與設定保全 | RAL-03 | done | 2026-11-01T04:48:04Z | 2026-11-01T04:56:26Z | 2026-11-01T04:56:57Z |
+| T-0034-4 | 真拒絕對帳及交付 | RAL-04 | done | 2026-11-01T04:48:04Z | 2026-11-01T04:56:26Z | 2026-11-01T04:56:57Z |
+
+### T-0034 Git交付與實際接入收尾
+
+- [PR893](https://github.com/fallrising/newclear/pull/893) head `7b0fcfdb234f87c3f20c9205125ae8e5747f0169`，merge `12c0913595c0fde1f7a3beb6b03e2f41215d01e6`，2026-11-01T04:56:26Z合併。exact-head CI全過：CloudLab `41274900572`、Project success `41274900537`、llms `41274900602`。
+- 使用已合併PR889的固定七份候選。2026-11-01T04:49:29Z原D1只新增rejection_audit／rejection_observed，原10schema objects保留；原部署無migration ledger，沿既有direct SQL及私人收據登記，沒有重跑0001或新建第二套ledger。04:49:45Z原Worker新版本100%，三modules與候選相同、三assets原manifest，原設定與secret bindings保持。
+- 真probe共兩個GET／一次診斷重試；初次非JSON且原raw/status未保留，原因unknown，D1對帳0列。對齊原runner User-Agent並先保存raw後，04:51:13Z取得403 SCOPE_DENIED／persisted，request_id唯一對應D1列、authenticated1。沒有新增健康命令、修改auth或重做部署。原失敗／缺失證據保留，不宣稱首次成功或具體WAF原因。
+- 04:51:37Z最終核對原166commands整列相同、195firings／160journal保持、active0；原unit/config/policy/Grok/bot ledger hash及journal identity相同。runner同PID／NRestarts，4grants／Access／Cron／期限保持，保守停止仍2026-11-05T07:24:25Z；沒有續權、新真人窗口或付費升級，billing仍unknown。可回退前一compatibleWorker但保留稽核表／歷史；回退未執行。
+- Lead檢查實際私人收據；T859獨立公開證據ACCEPT，未讀private或重跑live。50contracts／8llms／task-report／diff、226links、64runtimeinputs未變與173private-literal公開diff掃描通過。正常main merge保留並行工作，PLAN尾端保留雙方段落；remote fulltree相等、工作樹乾淨、head為main祖先。未要求owner重測Safari／手機。
+- RAL01–04完成；完整mainline仍incomplete／無usable tag。後續unknown/in-flight隔離恢復，不中斷原runner、不自動續權。本收尾只改任務板。

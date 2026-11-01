@@ -107,6 +107,7 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
                 &cfg.data_dir,
                 cfg.claude_max_runs,
             )
+            .with_mode(cfg.claude_mode)
             .with_idle(std::time::Duration::from_secs(cfg.claude_idle_secs.max(1)))
             .with_store(store.clone()),
             cursor_cli: crate::cursor_cli::CursorCli::new(

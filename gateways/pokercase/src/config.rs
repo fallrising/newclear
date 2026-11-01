@@ -29,6 +29,8 @@ pub struct AppConfig {
     pub provider_base_overrides: Vec<(String, String)>,
     /// Claude Code binary for the `claude` provider (`--claude-bin`).
     pub claude_bin: Option<String>,
+    /// Explicit Claude execution transport; no implicit print fallback.
+    pub claude_mode: crate::claude_code::Mode,
     /// Concurrent Claude Code processes.
     pub claude_max_runs: usize,
     /// Seconds a Claude Code run waits for tool results.
@@ -82,6 +84,7 @@ impl AppConfig {
             allowed_hosts: Vec::new(),
             provider_base_overrides: Vec::new(),
             claude_bin: None,
+            claude_mode: crate::claude_code::Mode::Tui,
             claude_max_runs: 2,
             claude_idle_secs: 600,
             cursor_bin: None,

@@ -32,3 +32,5 @@ Checkpoint2026-11-01T05:53Z: T993 bounded scope inspected/copied; root final38 n
 Final bounded T994 follow-up accepted capture/build/icon/multiline scope and found missingdoctype. Root RED/GREEN literal Honohtmlprefix,39namedNode pass9.133s,format/type/webbuildpass,originalbrowserhelperaddsCSS1Compat assertion. Reviewer report stayshonestlyPARTIAL; root owns correctionevidence and CIvisualgate. FirstCI41278663845 targetsaded283d and stillinstallstools; subsequentfinalheadrequired.
 
 CI41278663845: nativequality/realintegrationpassed; eight browserlaunches failed No usable sandbox on ubuntu-latest. Runner correction1 pins supportedubuntu22.04, retainschromiumSandboxtrue/alltests; no sysctl/AppArmor/permissionchange. Currentmain HAI changes preserved; rootPLAN uses a scoped pointer to avoid simultaneous append conflicts.
+
+CI41279099301:38Nodepass/1configfail from missingtomllib on Python3.10; add explicitPython3.12 with repo-pinned setupaction, preserveassertion. Directsandboxpreflight added; bodyfixtures/duplicateheading corrected before finalbrowsergate. No runtime dependency change.

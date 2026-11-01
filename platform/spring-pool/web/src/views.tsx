@@ -57,7 +57,7 @@ export function Errors({
   if (!error) return null;
   return (
     <section class="error" role="alert" tabindex={-1} id="errors">
-      <h2>Not saved</h2>
+      <h2>Save failed</h2>
       <p>
         {error.code === "revision_conflict" || error.code === "archived"
           ? `Not saved: this item changed (now revision ${error.current_revision ?? "unknown"}) or was archived. Review the current revision, then re-apply your changes.`

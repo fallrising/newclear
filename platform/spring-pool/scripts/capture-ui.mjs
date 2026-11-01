@@ -25,7 +25,7 @@ const response = await fetch(`${api}/v1/scripts`, {
       "Inspect the pinned revision before copying.\nRun manually in the intended environment.",
     tags: ["database", "ops"],
     language: "bash",
-    body: '#!/usr/bin/env bash\nset -euo pipefail\nprintf "%s\\n" "Review the backup target before running."\n',
+    body: '#!/usr/bin/env bash\nset -euo pipefail\nprintf "%s\\n" "Review target."\n',
   }),
 });
 if (response.status !== 201)

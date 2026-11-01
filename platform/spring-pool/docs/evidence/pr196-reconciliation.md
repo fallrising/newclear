@@ -96,3 +96,17 @@ Correction1 pins `ubuntu-22.04`, still listed in the
 instead of the Ubuntu24.04 latest image. Chromium sandbox and all acceptance
 assertions remain enabled. No sysctl, AppArmor or permissions are changed. This
 is a runner compatibility hypothesis until the new CI browser result arrives.
+
+[Run41279099301](https://github.com/fallrising/newclear/actions/runs/41279099301)
+on49e09f5b reached Node tests:38passed/1failed, because Ubuntu22.04's default
+Python3.10 lacks stdlib `tomllib` required by the unchanged API privacy config
+guard. Add the repository's pinned setup-python action with Python3.12; do not
+replace or skip the parser assertion. A sandbox launch preflight now runs before
+quality gates so browser compatibility is observed directly. Browser cases and
+rendered evidence were skipped by that failed gate, not passed.
+
+Root also removed the redundant “Not saved” heading while preserving the SDD's
+exact conflict notice; this avoids two visible matches for the original conflict
+journey. The normal screenshot fixture uses a short code line; no overflow check
+or product code-scrolling behavior changes. These two small final changes await
+the same original browser gate.

@@ -645,3 +645,12 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 真RED6fail／1existingpass，GREEN52dashboard；完整138Node＋308Python＝446tests，零fail/skip；PS1真Chromium/workerd/D1/Python16checks／114API／零browser errors，三asset hash與公開原receipt相同。兩種快照GET注入均拒絕、原D1列不變；HTTP ACK遺失及原artifact精確下載回歸保持。T861最終獨立ACCEPT。
 - 初次default-isolation只有file級失敗，不算行為RED；sandbox full的Node native assertion／35Python socket EPERM保留，正常escalation後同套測試全過，無跳測。既有SQLite warnings保留。50contracts／8indexes初驗，正常合併並行main後51contracts／9indexes通過；task/report／syntax／diff／437links與67inputs固定。回讀local/remote fulltree相等、clean、head為main祖先，67inputs皆相符。
 - 本輪只改dashboard source及驗證／文件；Worker／runner／D1 schema未改，原看板尚未部署。M0 Event/source_seq/cursor未實作，不以完整snapshot跳版冒充漏seq恢復；原要求與source/local/live差別保留，完整mainline incomplete／usable_tag none。沒有private/live操作、續權、付費升級或owner重測。後續按既有流程接入已驗證看板修正；本結案只改任務板。
+
+## T-0037 — 原看板快照順序修正接入
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0037-1 | 固定候選與現況 | PSL-01 | in_progress | 2026-11-01T11:42:24Z | — | 2026-11-01T11:48:42Z |
+| T-0037-2 | 原看板更新 | PSL-02 | in_progress | 2026-11-01T11:42:24Z | — | 2026-11-01T11:48:42Z |
+| T-0037-3 | 歷史與權限回讀 | PSL-03 | in_progress | 2026-11-01T11:42:24Z | — | 2026-11-01T11:48:42Z |
+| T-0037-4 | 審查及交付 | PSL-04 | in_progress | 2026-11-01T11:42:24Z | — | 2026-11-01T11:48:42Z |

@@ -29,3 +29,5 @@
 對owner的完成提示須明確區分「本次HL里程碑完成」、「M1主線完成」及「長期M2/M3願景完成」。目前不能宣告所有任務完成。
 
 [UR未知結案](unknown-resolution.md)source／隔離驗證與後續[ULR線上操作](evidence/m1-unknown-resolution-live.md)已完成：原命令closed_unknown、result仍null、journal保留，新Cron成功。無需重測ownerSafari或續其授權；原unknown原因仍未確定。
+
+後續[PSL原看板更新](evidence/m1-snapshot-rollout.md)已完成；PS階段「未部署」為歷史界線，不代表目前仍未接入。原服務、資料、權限與截止保持，未新增真人驗收。

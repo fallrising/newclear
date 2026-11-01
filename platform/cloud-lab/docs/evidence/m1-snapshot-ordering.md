@@ -21,3 +21,5 @@
 正式看板尚未更新；Worker／runner／D1 migration、Access、secrets、期限及免費方案未改。沒有private state讀取或live mutation；provider費用仍unknown，完整mainline incomplete／usable_tag none。遠端unknown/in-flight restore與完整主線其他門檻仍見[剩餘工作](../remaining-work.md)。
 
 最終T861獨立審查ACCEPT；主導evidence gate核對446tests、browser原收據及三asset hash、67份runtime/test/tool inputs。50contracts／8indexes／task-report／syntax／diff及437相對連結通過；Git／CI與結案以任務板為準。
+
+後續[PSL原看板更新](m1-snapshot-rollout.md)已完成；PS階段「未部署」為歷史界線，不代表目前仍未接入。原服務、資料、權限與截止保持，未新增真人驗收。

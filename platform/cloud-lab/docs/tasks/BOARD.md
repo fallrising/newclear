@@ -708,10 +708,12 @@ DIR01–03由PR[937](https://github.com/fallrising/newclear/pull/937)於2026-11-
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0040-1 | GitHub完整可見清單、固定來源及工具目錄 | CAT-01 | in_progress | 2026-11-01T16:48:38Z | — | 2026-11-01T16:55:00Z |
-| T-0040-2 | Edge Ops與node-health行為比較及處置建議 | CAT-02 | in_progress | 2026-11-01T16:48:38Z | — | 2026-11-01T16:55:00Z |
-| T-0040-3 | 第二種唯讀能力選擇、文件驗證與審查 | CAT-03 | in_progress | 2026-11-01T16:48:38Z | — | 2026-11-01T16:55:00Z |
+| T-0040-1 | GitHub完整可見清單、固定來源及工具目錄 | CAT-01 | done | 2026-11-01T16:48:38Z | 2026-11-01T17:01:05Z | 2026-11-01T17:01:43Z |
+| T-0040-2 | Edge Ops與node-health行為比較及處置建議 | CAT-02 | done | 2026-11-01T16:48:38Z | 2026-11-01T17:01:05Z | 2026-11-01T17:01:43Z |
+| T-0040-3 | 第二種唯讀能力選擇、文件驗證與審查 | CAT-03 | done | 2026-11-01T16:48:38Z | 2026-11-01T17:01:05Z | 2026-11-01T17:01:43Z |
 
 Owner批准近期計畫B。Lead為唯一writer；T866新context唯讀review，gpt-6.1-sol/high、一次≤1500token與至多一次≤700token修正、五分鐘監看／interrupt，成本未知，不讀私人來源或執行測試。Lead核對私人證據、diff、validators與evidence gate；無runtime／live／授權／付費／AGENTS變更，不搬遷或封存。結果集中[目錄](../tool-catalog.md)，不建立新同步器或複製長篇里程碑。
 
 CAT文件驗證：52contracts、9indexes、631個相對連結、公開41／私人23快照一致與公開邊界檢查通過；69runtime路徑與來源pin相同。T866先REWORK tree_sha命名，改tree_query_ref並說明connector回傳差異後ACCEPT；Lead獨立核對私人來源。原缺report forward-link與report格式驗證失敗已修正；無本機runtime測試重跑。正常PR與CI交付中，合併後填end。
+
+CAT-01–03由PR[949](https://github.com/fallrising/newclear/pull/949)於2026-11-01T17:01:05Z合併，head `9d6e0912dc9e740322b824dad94a03cb3c080e24`、merge `36d53012c9714d513bb76f33f8ab2218cd93fcd2`。Exact-head CI全過：Cloud Lab41329130798／project41329130737／llms41329130681。T866修正後ACCEPT及Lead私人來源核對通過；正常merge保留並行main，fulltree相同、工作樹乾淨。這次只完成來源目錄、Edge Ops處置建議與下一項選擇，0搬遷／0封存／0live變更；第二種能力尚未實作。後續接原inventory唯讀報告，不新增provider client／排程／付費方案。本結案PR只改任務板。

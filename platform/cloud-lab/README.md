@@ -106,3 +106,5 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [PS輪詢快照順序](docs/snapshot-ordering.md)已修正舊revision／同版本衝突與scope變動殘留；[本機證據](docs/evidence/m1-snapshot-ordering.md)涵蓋持久outbox ACK遺失及真browser拒絕／恢復。沿ADR-08完整snapshot，不宣稱M0 Event／seq相容；PS交付時尚未部署，後續PSL已接入；主線仍incomplete。
 
 [PSL原看板更新](docs/evidence/m1-snapshot-rollout.md)已完成：固定PR905，一份變更資產、新版100%，三Worker modules／設定／4grants／Access／Cron／期限保持；原193commands／222firings／186journal保留、runner未重啟。不重開真人窗口或付費方案，完整mainline仍incomplete。
+
+[RX還原對帳器](docs/evidence/m1-remote-restore.md)已實作，唯讀來源核對保留2completed／1unknown；完整匯出下載遭自動審批拒絕、等待owner明確批准。遠端export／新D1／import尚未執行，整個RX與mainline仍未完成。

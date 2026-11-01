@@ -167,3 +167,7 @@ Owner批准[BT01–04](docs/bot-activation-live.md)：實際bot-only續權、首
 [PSL原看板接入](docs/snapshot-rollout.md)開始：部署固定PR905候選，原Worker modules／D1／Access／期限及免費方案保持；實際結果另記，完整主線不由source驗證推定通過。
 
 [PSL原看板更新](docs/evidence/m1-snapshot-rollout.md)已完成：固定PR905，一份變更資產、新版100%，三Worker modules／設定／4grants／Access／Cron／期限保持；原193commands／222firings／186journal保留、runner未重啟。不重開真人窗口或付費方案，完整mainline仍incomplete。
+
+[RX遠端隔離還原](docs/remote-restore.md)開始：RF原測試D1官方export/import至新未綁定D1，保留completed與unknown/started journal；原Lab與權限不變，正式failover未驗。
+
+[RX還原對帳器](docs/evidence/m1-remote-restore.md)已實作，唯讀來源核對保留2completed／1unknown；完整匯出下載遭自動審批拒絕、等待owner明確批准。遠端export／新D1／import尚未執行，整個RX與mainline仍未完成。

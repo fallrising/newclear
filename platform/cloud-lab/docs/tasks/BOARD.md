@@ -662,3 +662,14 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 11:45:00Z final snapshot／11:45:28Z保全驗證：原193commands整列、222firings／186journal及稽核歷史／應用schema保留，最終193commands／active0；4grants、Access、Cron、settings、secret bindings及授權期限相同。runner同PID／NRestarts，本機config/policy/client ledger hash與journal identity保持。沒有額外job／重啟／續權／付費升級；resident保守截止仍2026-11-05T07:24:25Z。
 - Lead核對實際private receipts；T862初審要求四份入口把「未部署」改為歷史狀態，修正後集中複審ACCEPT。51contracts初驗／合併並行main後52contracts、9indexes、task-report／diff／402links、67inputs未變與8private-literals掃描通過；公開receipt與實際final欄位一致。正常merge保留並行工作，local/remote fulltree相等、clean、head為main祖先、67remote inputs相符。
 - 歷史PR905的446tests／16browserchecks支持source候選，不冒充本輪真人asset下載。未續human窗口或要求Console／Safari／手機；secret採繼承且metadata保持，無逐值讀回。回退request已保存未執行，原D1／歷史保留；provider用量／帳單unknown，完整mainline incomplete／無usable tag。後續遠端unknown/in-flight隔離還原及provider用量缺口；本結案只改任務板。
+
+## T-0038 — 遠端D1隔離還原對帳
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0038-1 | 有界純對帳器 | RX-01 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T14:41:42Z |
+| T-0038-2 | 官方遠端還原（等 owner 批准完整備份） | RX-02 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T14:41:42Z |
+| T-0038-3 | 遠端原結果及未知保留（等 owner） | RX-03 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T14:41:42Z |
+| T-0038-4 | 驗證審查交付 | RX-04 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T14:41:42Z |
+
+RX目前partial：純對帳器與來源唯讀核對已完成；自動審批拒絕完整敏感export下載，未執行遠端匯出／新D1／import。等待owner批准具體payload與私人保存位置，不宣稱RX02／03通過。

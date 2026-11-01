@@ -230,6 +230,7 @@ is now the bounded implementation scope: authenticated closed metadata/AC/Run/Ca
 one SQLite snapshot, exact legacy compatibility, deterministic limits and no writes/authority.
 Fixed IDX-AC-01..06 require named Red/Green, storage/concurrency and real discovery-to-completion
 regressions, backend full/race/vet/build, web/API/docs, Claude code review and normal delivery.
-The bounded implementation passes local gates and independent code review; exact-head CI and
-Git delivery remain tracked in BOARD HMDTL and [evidence](docs/evidence/work-item-material-index-20261101.md).
+The bounded implementation is delivered in [#920](https://github.com/fallrising/newclear/pull/920)
+after independent code review, complete exact-head CI and remote source verification.
+[BOARD HMDTL](docs/tasks/BOARD.md) and [evidence](docs/evidence/work-item-material-index-20261101.md) record delivery.
 No whole-product AC or full M2 status is promoted.

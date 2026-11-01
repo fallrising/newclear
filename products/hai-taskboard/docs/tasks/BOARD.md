@@ -389,7 +389,7 @@ Owner continues after HM2C. Source9f3f72af; HAI unchanged from#902, no open HAI 
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HMDTL | Implement approved backend material-index contract | DTL-PLAN-01..03; IDX-AC-01..06; H02 support | in_progress | 2026-11-01T11:00:00Z | — | 2026-11-01T12:09:30Z |
+| HMDTL | Implement approved backend material-index contract | DTL-PLAN-01..03; IDX-AC-01..06; H02 support | done | 2026-11-01T11:00:00Z | 2026-11-01T12:22:17Z | 2026-11-01T12:22:52Z |
 
 DTL-PLAN-01 maps every M2 requirement and detail field to current authority/storage and gaps. DTL-PLAN-02 defines one bounded route/shape/consistency/error/resource proposal with fixed product oracles and explicit unresolved decisions. DTL-PLAN-03 disposes Claude review, validates documents and completes required Git/CI/readback/ledger synchronization. These are planning ACs, not product acceptance; full M2 remains incomplete.
 
@@ -406,3 +406,11 @@ maps IDX-AC-01..05 to real storage/HTTP/discovery oracles; full baseline573.127s
 revision normal/race88.873s/vet/build and web30/API/docs pass. Claude initial conditional ACCEPT
 249.363s → revised ACCEPT91.023s, F1–F6 disposed. Original failures retained. IDX-AC-06 remains
 pending exact-head CI/normal merge/readback/ledger; HMDTL keeps in_progress and no end.
+
+2026-11-01T12:22:52Z: implementation [#920](https://github.com/fallrising/newclear/pull/920) merged normally at
+2026-11-01T12:22:17Z as `c545aedb054ab9d0a45317e8e25c7d7f018ff4a6`. Exact head `ab039c9afe3d638175b8ae95097257ec0ef9ce67`
+passed full HAI CI41305208581 (backend normal/race/vet/build and web) and Project success41305208583;
+no pending review threads. Remote332 product paths match reviewed source byte-for-byte. HMDTL end
+uses that actual functional merge time. This closeout changes documentation only; ledger/final private
+handoff receipts follow normal delivery. IDX-AC-01..05 and final-head implementation gates accepted;
+full detail/history, completion UI, full M2 and full product remain incomplete. T-0339 stays in_progress.

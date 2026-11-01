@@ -124,3 +124,18 @@ and migration inputs, and closed independent-review findings. IDX-AC-01..05 are 
 slice; IDX-AC-06 remains pending exact-final-head CI, normal merge/readback and BOARD/desk/handoff.
 Document gates pass52 contracts,9 indexes/0errors and11 Markdown files/239 local links/anchors.
 No browser/full-detail/current-Done applicability or whole-product acceptance is claimed.
+
+
+## Functional delivery and remote verification
+
+[#920](https://github.com/fallrising/newclear/pull/920) merged normally at2026-11-01T12:22:17Z,
+commit `c545aedb054ab9d0a45317e8e25c7d7f018ff4a6`, reviewed final head `ab039c9afe3d638175b8ae95097257ec0ef9ce67`.
+HAI CI41305208581 reran the complete native backend normal/race/vet/build and web gates successfully
+on the final reviewed revision; Project success41305208583 also passed. No pending review threads.
+This final-head CI closes the full-source qualification that the local original/revision split alone
+did not claim. All332 product paths match the reviewed source after remote fetch/readback.
+
+BOARD HMDTL records the actual functional merge time; this documentation closeout preserves all
+backend/API/test/dependency/migration/CI bytes. Desk T-0339 remains in_progress and records ledger
+synchronization; the final private handoff retains both PR receipts and every original failure.
+No full-M2/UI/full-history/current-Done applicability or whole-product completion is claimed.

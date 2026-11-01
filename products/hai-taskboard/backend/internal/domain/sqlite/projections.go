@@ -164,3 +164,9 @@ FROM projection_events WHERE stream_epoch=? AND event_sequence>? AND event_seque
 	}
 	return result, nil
 }
+
+// LoadCoverageCursor shares the material transaction's connection and snapshot.
+func (tx transaction) LoadCoverageCursor(ctx context.Context, project domain.ProjectID) (port.Cursor, error) {
+	cursor, _, err := projectionPosition(ctx, tx.conn, project)
+	return cursor, err
+}

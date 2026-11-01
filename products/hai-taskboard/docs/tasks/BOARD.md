@@ -353,10 +353,10 @@ The primary policy delivery above remains the scope of HMPOL; closure receipts a
 Owner requested the next bounded M2 slice. Existing claim and delivered identity/policy remain valid.
 Source d3207b3a; latest HAI #880, no open HAI PR at intake.
 [Concrete proposal](../plans/m2-verified-coverage-20261101.md) fixes COV-01..04 and COV-AC-01..06.
-Production/API implementation waits for owner acceptance of the new wire/observation contract.
+Owner approved D1–D3 and the fixed contract on2026-11-01; [normative entry](../sdd/verified-coverage.md). Production/API implementation is active.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM2C | Define and review verified-coverage contract; then implement only after acceptance — 等 owner D1–D3 決策 | COV-AC-01..06; H02 support | in_progress | 2026-11-01T04:25:19Z | — | 2026-11-01T04:39:48Z |
+| HM2C | Define and review verified-coverage contract; then implement only after acceptance — approved, implementation active | COV-AC-01..06; H02 support | in_progress | 2026-11-01T04:25:19Z | — | 2026-11-01T05:26:26Z |
 
 Full M2, completion UI and SUCCESS AC-02..04 remain incomplete. No new UI/provider/dependency/release/deploy.

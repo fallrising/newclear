@@ -243,5 +243,7 @@ Code review corrections and native backup31 tests passed; actual Codex Web execu
 and concurrent workspace proof remain pending. Host ceiling remains one4CPU/4GiB VM.
 
 2026-11-01 M2 pair: exact approved2VM window passed real dual-vendor overlap, boundaries,
-cancelA/completeB and cleanup; max1 restored. PR906 final review/delivery pending.
+cancelA/completeB and cleanup; max1 restored. Fresh independent ACCEPT_M2_LIVE and
+all three final-head workflows passed; PR906 merged2026-11-01T11:39:17Z as
+`d55db6a9ad4606cd7df30b2bc9411b559d04f75a`, with remote product bytes read back equal.
 No AP production code changes or M3. Earlier pending-resource snapshot superseded.

@@ -48,6 +48,10 @@ function show(run) {
     fields.append(el('dt',label),el('dd',value));
   }
   detail.append(fields);
+  if (run.retry) {
+    detail.append(el('p',run.retry.attempt===0?'首次執行':`明確重試 ${run.retry.attempt} / 2`),el('p',`原始紀錄：${run.retry.root}`));
+    if (run.retry.parent) detail.append(el('p',`前次紀錄：${run.retry.parent}`));
+  }
   if (run.test_scenario) detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.failure_check_passed?'故障測試通過；任務仍為失敗。':'故障測試未通過。'));
   if (run.artifact.content) detail.append(el('h3','result.json'),el('pre',JSON.stringify(run.artifact.content,null,2)));
   else detail.append(el('p','沒有可顯示的已核對產物。'));
@@ -64,6 +68,7 @@ function render() {
     const state=el('td',labels[run.status]);if(run.status==='completed')state.className='complete';
     const action=el('td',''),button=el('button',`${artifactLabels[run.artifact.status]} · 詳細`);button.onclick=()=>show(run);action.append(button);
     const source=el('td',run.id);if(run.test_scenario)source.append(el('br',''),el('small',scenarioLabels[run.test_scenario]));
+    if(run.retry)source.append(el('br',''),el('small',run.retry.attempt===0?'首次執行':`明確重試 ${run.retry.attempt} / 2`));
     tr.append(agent,source,state,action);body.append(tr);
   }
 }

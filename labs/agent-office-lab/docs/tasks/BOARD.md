@@ -185,3 +185,12 @@ Owner 指示繼續；本輪不呼叫遠端模型、不載入 owner API key。
 | T-0015-02 | 不自動重跑、明確新 session 啟動及結果回讀 | AC-08／09／11 子集 | done | 2026-11-01T15:24:51Z | 2026-11-01T15:31:55Z | 2026-11-01T15:32:15Z |
 
 T-0015 結案：[PR #938](https://github.com/fallrising/newclear/pull/938) 已合併，commit `599a5c743d0c4b4cd3367b04016e3cde99038f3e`，offline／validate 兩項 CI success。已回讀主線證據：141 tests、兩筆真實 Pi CLI crash 與一筆明確新 session 啟動；最終 crash／啟動各追蹤 40／38 個程序且全部退出，清理後釋放執行鎖、重複派工拒絕、觀察期無自動重跑。crash 任務仍為 failed，新 session 為 startup_only；43 筆結果瀏覽器驗證通過。零遠端模型請求、未載入 owner key 或 Strata。完成 AC-07／08／09／11 子集；原 session 續做、其他 provider、host restart、最多兩次顯式任務重試與完整 MVP 保持 pending，沒有 release／deploy／usable tag。
+
+## T-0016：Pi 有界顯式重試
+
+Owner 指示繼續下一項；本輪使用本機故障，不新增模型呼叫。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0016-01 | Pi 重試計畫／執行與持久化最多兩次限制 | AC-07／08 子集 | in_progress | 2026-11-01T16:44:12Z | — | 2026-11-01T16:52:27Z |
+| T-0016-02 | 保留 fixture／失敗來源、結果關聯與真實故障重試驗收 | AC-09／11 子集 | in_progress | 2026-11-01T16:44:12Z | — | 2026-11-01T16:52:27Z |

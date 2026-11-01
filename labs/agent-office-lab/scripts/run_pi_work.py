@@ -15,15 +15,16 @@ import sys
 import time
 from deepseek_relay import Relay, MAX_REQUESTS, MAX_OUTPUT, MAX_BODY
 from remote_cli import LAB, isolated_env, private_directory, probe, write_new_private
+import pi_retry
 from process_ownership import process_table, collect_owned, alive_owned, crash_owned
 
 
-def prepare(out, port, token):
+def prepare(out, port, token, fixture):
     workspace = private_directory(out / 'workspace')
     home = private_directory(out / 'home')
     agent = private_directory(home / 'pi')
     tmp = private_directory(out / 'tmp')
-    write_new_private(workspace / 'input.json', {'marker': secrets.token_hex(12), 'values': [7, 11, -2, 9]})
+    write_new_private(workspace / 'input.json', fixture)
     write_new_private(agent / 'auth.json', {'deepseek': {'type': 'api_key', 'key': token}})
     write_new_private(agent / 'models.json', {'providers': {'deepseek': {'baseUrl': f'http://127.0.0.1:{port}/v1',
         'api': 'openai-completions', 'models': [{'id': 'deepseek-flash', 'name': 'DeepSeek bounded fixture',
@@ -73,6 +74,12 @@ def main():
         api_key = saved['key']
     mark_started()
     out = private_directory(LAB / 'runs' / ('pi-work-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')))
+    fixture = {'marker': secrets.token_hex(12), 'values': [7, 11, -2, 9]}
+    if not args.check_startup:
+        mode = 'crash' if args.check_crash else 'http_' + str(args.check_failure) if args.check_failure else 'task'
+        _, fixture = pi_retry.register(LAB, out, mode, fixture)
+    elif pi_retry.slots.retry_parent(LAB) is not None:
+        raise ValueError('Startup cannot retry a task')
     token = secrets.token_urlsafe(32)
     relay = Relay(token, api_key, fault_status=args.check_failure, hold_request=args.check_crash)
     process = None; owned = {}
@@ -90,8 +97,8 @@ def main():
     signal.signal(signal.SIGTERM, interrupted)
     try:
         port = relay.start()
-        env = prepare(out, port, token)
-        for name in ('execution_slot.py', 'process_ownership.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'remote_cli.py'):
+        env = prepare(out, port, token, fixture)
+        for name in ('pi_retry.py', 'execution_slot.py', 'process_ownership.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'remote_cli.py'):
             shutil.copy2(LAB / 'scripts' / name, out / name)
         shutil.copy2(LAB / 'scripts/bin/pi', out / 'pi-launcher.py')
         command = [shutil.which('node'), str(LAB / 'scripts/office_pi.mjs'), str(out)]

@@ -5,8 +5,8 @@ purpose: 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Off
 kind: lab
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-11-01
-source_commit: cb6771c7017e2477460f74e0259a659bd97df940
+reviewed: 2026-11-02
+source_commit: 053e2bcd63cedb36e463c9b8f640fd2831101f23
 ---
 
 # Agent Office Lab 驗收
@@ -14,6 +14,10 @@ source_commit: cb6771c7017e2477460f74e0259a659bd97df940
 四個 provider 的合成任務已實測通過：OpenCode、Grok、Pi + DeepSeek、Cursor。各次獨立付費授權已使用，沒有自動重跑；歷史失敗及修正見 [HANDOFF](HANDOFF.md) 和 [任務板](docs/tasks/BOARD.md)。完整 MVP 保持 incomplete。
 
 ## 主線與範圍
+
+T-0016：Pi 固定任務與本機故障模式的有界顯式重試。新 run 保存 root／parent／attempt，同一任務最多兩次重試；只接受最新且已失敗、完整清理的 run，使用原 fixture、新 workspace／session，保留所有失敗。預設只顯示計畫；遠端每次均需明示授權，不沿用額度。跨 provider 重試仍待接入。
+
+驗證計畫：離線涵蓋次數、分支／重複請求、成功或中斷拒絕、路徑／符號連結、損壞 ledger、模式及來源不一致、exec 鎖繼承。以真實 Pi 的本機錯誤執行初次加兩次明確重試，確認第三次被擋、舊紀錄不改、新 session／相同 fixture、零外部模型請求與結果頁關聯。完整 AC-07／08／09／11 及 MVP 保持 pending。
 
 T-0015：真實 Pi 執行中 CLI crash 與清理後明確重新啟動驗收。用無 owner key、零上游請求的本機 relay 留住第一個請求，僅對本 run 的原生 Pi PID 注入 SIGKILL；核對原生 exited／非成功、不自動重跑、程序樹與執行鎖清理。再以明確命令啟動全新無 prompt session；不宣稱原 session 恢復或付費任務成功。
 
@@ -49,7 +53,7 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 | AC-04 | Given Pi + DeepSeek，When 執行同等任務，Then provider/model、settled 事件及檔案正確。 | passed | [Pi 原生工位實測](docs/evidence/pi-live-2026-11-01.json)：3 次 DeepSeek 請求、agent_settled、同 session/model、read/write、產物 hash 及清理通過。 |
 | AC-05 | Given 原生權限或使用者問題，When 等待與回覆，Then waiting_input 後繼續。 | pending | [OpenCode edit 權限子集通過](docs/evidence/lifecycle.md)；Grok／Pi／Cursor 與其他互動待驗。 |
 | AC-06 | Given 執行中任務，When 取消，Then 10 秒 grace 後所屬程序全部退出。 | pending | [OpenCode 新入口原生取消與 Ctrl+C](docs/evidence/local-dispatch-2026-11-01.json) 通過；Grok／Pi／Cursor 待驗。 |
-| AC-07 | Given crash／401／429，When 失敗，Then 不顯示成功且最多兩次顯式重試。 | pending | [Pi 401／429 本機注入＋原生錯誤與清理已通過](docs/FAILURES.md)；[Pi CLI crash／新 session 啟動通過](docs/CRASH.md)；其他 provider 與顯式重試流程仍待驗。 |
+| AC-07 | Given crash／401／429，When 失敗，Then 不顯示成功且最多兩次顯式重試。 | pending | [Pi 401／429 本機注入＋原生錯誤與清理已通過](docs/FAILURES.md)；[Pi CLI crash／新 session 啟動通過](docs/CRASH.md)；[Pi 明確重試限制](docs/RETRY.md) 已加入；其他 provider 的故障／重試與整合流程仍待驗。 |
 | AC-08 | Given browser refresh 或 host 重啟，When 恢復，Then 不重跑、unfinished 標 interrupted。 | pending | [OpenCode 新程序／同 session 與瀏覽器刷新通過](docs/evidence/lifecycle.md)；[host restart 與手動恢復通過](docs/evidence/restart.md)；Grok／Pi／Cursor 待驗。 |
 | AC-09 | Given 四 provider 真實 run，When 開啟結果，Then 產物、模型與來源可分辨。 | pending | [唯讀結果入口](docs/RESULTS.md) 已回讀四 provider 真實產物；尚缺派工到結果的四工位整合流程。 |
 | AC-10 | Given 本地 Strata，When 執行公開 GitHub tool loop，Then 真實 tool_call、API 結果與後續回答完成。 | pending | 獨立研究未通過，非 MVP 阻塞。 |
@@ -67,7 +71,11 @@ T-0014：完成[Pi 原生 401／429 故障驗收](docs/FAILURES.md)。本機注�
 
 T-0015：完成 [Pi CLI crash 與明確重新啟動](docs/CRASH.md)。真實 Pi working 時將第一個請求留在本機，對核對歸屬的 CLI 注入 SIGKILL，原生狀態轉 exited 而非 done；任務保持 failed。最終 crash／新 session 啟動各追蹤 40／38 個程序，全部退出後釋放執行鎖；重複派工拒絕，觀察期沒有自動重跑。明確新 session 到 idle、零請求，與原 session 不同。上游 PTY 在 SIGKILL 後回 exit code 0，沒有據此判成功。141 tests、43 筆結果瀏覽器驗證通過，零遠端模型請求、未載入 owner key 或 Strata。[證據](docs/evidence/pi-crash-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。原 session 續做、其他 provider、顯式重試與完整 MVP 仍待驗。
 
+T-0016：完成 [Pi 有界明確重試](docs/RETRY.md)。統一入口 retry 預設只顯示計畫；執行時重新核對最新失敗、完整清理、固定模式／fixture 與來源，同一任務最多兩次重試。真實 Pi 本機 429 的初次＋兩次重試通過：三個獨立 session 使用相同 input，原報告／事件不變，第三次及舊 parent 的六項請求全部拒絕且不新增 run。三次分別追蹤 41／35／46 個程序，全部退出、鎖釋放；各一次本機請求、零模型推論或外部請求。152 tests 與 46 筆結果瀏覽器關聯／分類／刷新通過。[證據](docs/evidence/pi-retry-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。其他 provider、原 session 恢復、UI 派工與完整 MVP 仍待驗。
+
 ## 現況與缺口
+
+MVP 的 11 項必要 AC（01–09、11、13）中，02／03／04／13 的四 provider 合成任務已有原受測版本成功證據；其餘 7 項仍 pending，已有多項子集通過。這不是工時百分比，也不表示最新版完整流程已驗收。主要剩餘工作為 UI 派工／原生終端／結果整合、跨 provider 權限／取消／session 恢復與重試、遠端新入口端到端實測，以及完整路徑／hooks／憑證／網路邊界。現有固定合成任務 runner 尚不能代表任意日常任務的產品可用性。
 
 四種原生 runner 各有原受測版本的真實成功證據；已提供統一 CLI，預設 plan；OpenCode 新入口真實任務與取消已重驗，遠端仍待驗。AC-01 的統一偵測／派工、AC-05–AC-08 的跨 provider 權限／取消／錯誤／恢復、AC-09 完整四工位流程仍待驗。OpenCode 的生命週期與 host 重啟子集已通過，不能代替其他 provider。
 

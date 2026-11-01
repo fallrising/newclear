@@ -49,3 +49,5 @@ node scripts/check_office_results_browser.mjs runs/combined-results.html
 本輪完成 AC-09 的唯讀結果子集與 AC-11 的讀取／顯示邊界子集。完整四工位派工、偵測、單佇列及跨 provider 生命週期尚未整合，完整 AC 和 MVP 仍 pending；本頁不是上游 Office 終端的替代品。
 
 Pi crash 注入紀錄明示來源「本機注入 CLI crash」，僅在原生崩潰、所屬 PID 核對、零外部請求及完整清理均通過時顯示故障測試通過；任務仍是失敗。後續無 prompt 的新 session 仍為啟動檢查，不算任務成功。
+
+新 Pi run 的 attempt 紀錄以白名單顯示首次執行／明確重試次數、原始及前次 run。來源 metadata 損壞時標為無效，不把不可靠關聯顯示為成功；此頁只顯示，不執行重試。完整 eligibility 與 ledger 一致性由 [retry 命令](RETRY.md) 在執行鎖內再檢查。

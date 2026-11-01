@@ -2,6 +2,7 @@
 
 本地優先的 Agent Office 實驗：OpenCode + Strata、Grok、Pi + DeepSeek、Cursor 的原生合成任務均已實測通過。提供四 provider 的唯讀結果查詢與離線頁面；統一 CLI 的本地 OpenCode 端到端任務與取消已實測，遠端新入口及跨 provider 生命週期仍待完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
 
+- [Pi 明確重試與次數限制](docs/RETRY.md)
 - [Pi CLI crash 與明確重新啟動](docs/CRASH.md)
 - [Pi 故障驗收](docs/FAILURES.md)：本機注入 401／429、原生錯誤與清理核對，不呼叫模型。
 - [統一偵測與派工](docs/DISPATCH.md)：預設計畫、明確執行、單一執行鎖與中斷阻擋。

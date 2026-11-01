@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """One explicit entry for pinned synthetic Office tasks. Default: plan only."""
+import pi_retry
 import argparse
 import json
 import os
@@ -220,7 +221,7 @@ def plan(provider, check_cancel=False, check_failure=None, check_crash=False):
             'model_task_started': False, 'automatic_fallback': False}
 
 
-def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False):
+def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False, retry_parent=None):
     validate_crash(provider, check_crash, check_cancel, check_failure, allow_remote)
     spec = SPECS[provider]
     validate_failure(provider, check_failure, check_cancel, allow_remote)
@@ -230,6 +231,11 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
         raise SlotError('explicit_remote_authorization_required' if spec['remote'] else 'local_remote_flag_forbidden')
     # Lock before preflight, then replace this process; the runner adopts the same lock/PID.
     with execution_slot(lab) as slot:
+        if retry_parent is not None:
+            meta, _, _ = pi_retry.inspect(lab, retry_parent)
+            mode = 'crash' if check_crash else 'http_' + str(check_failure) if check_failure else 'task'
+            if provider != 'pi' or check_cancel or mode != meta['mode']:
+                raise SlotError('retry_mode_mismatch')
         check = detect(provider, lab)
         ready = (check['cli_compatible'] and all(check['runtime'].values())) if check_failure is not None or check_crash else check['launch_prerequisites_present']
         if not ready:
@@ -241,8 +247,20 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
         command = [str(python), str(lab / 'scripts' / spec['runner']), *runner_args]
         if check_cancel:
             command.append('--check-cancel')
+        if retry_parent is not None: slot.select_retry(retry_parent)
         os.execve(str(python), command, slot.exec_env(os.environ))
         raise RuntimeError('exec_returned_without_replacing_process')
+
+
+def retry_plan(run_id, lab=LAB):
+    meta, _, _ = pi_retry.inspect(lab, run_id)
+    mode = meta['mode']
+    options = {'check_crash':mode == 'crash', 'check_failure':int(mode[5:]) if mode.startswith('http_') else None}
+    result = plan('pi', **options)
+    result.update(retry_of=run_id, root_run=meta['root'], attempt=meta['attempt']+1,
+                  retries_remaining_after_run=1-meta['attempt'], maximum_retries=2)
+    result['command'] = ['python3','scripts/office_dispatch.py','retry',run_id,'--execute'] + (['--allow-remote'] if result['remote'] else [])
+    return result, options
 
 
 def main(argv=None):
@@ -255,10 +273,18 @@ def main(argv=None):
     run.add_argument('--check-cancel', action='store_true', help='OpenCode only: verify a second fixed native cancellation task')
     run.add_argument('--check-failure', type=int, choices=(401, 429), help='Pi only: injected loopback HTTP failure; no remote calls')
     run.add_argument('--check-crash', action='store_true', help='Pi only: kill the owned native CLI during a held loopback request; no remote calls')
+    retry = commands.add_parser('retry'); retry.add_argument('run_id')
+    retry.add_argument('--execute', action='store_true'); retry.add_argument('--allow-remote', action='store_true')
     ack = commands.add_parser('acknowledge-interruption')
     ack.add_argument('--confirm-all-owned-processes-stopped', action='store_true', required=True)
     args = parser.parse_args(argv)
     try:
+        if args.action == 'retry':
+            preview, options = retry_plan(args.run_id)
+            if not args.execute:
+                if args.allow_remote: parser.error('--allow-remote requires --execute')
+                print(json.dumps(preview, indent=2)); return 0
+            return launch('pi', args.allow_remote, retry_parent=args.run_id, **options)
         if args.action == 'detect':
             checks = [detect(p) for p in (SPECS if args.provider == 'all' else [args.provider])]
             print(json.dumps({'checks': checks, 'model_task_started': False}, indent=2))

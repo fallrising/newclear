@@ -148,5 +148,7 @@ Owner 指示繼續開發；本輪不新增模型呼叫，完整 AC 保持 pendin
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0012-01 | 四 CLI 偵測、固定計畫與明確派工入口 | AC-01 子集 | in_progress | 2026-11-01T11:39:35Z | — | 2026-11-01T11:48:26Z |
-| T-0012-02 | 共用執行鎖、清理確認及異常退出阻擋 | AC-08／AC-11 子集 | in_progress | 2026-11-01T11:39:35Z | — | 2026-11-01T11:48:26Z |
+| T-0012-01 | 四 CLI 偵測、固定計畫與明確派工入口 | AC-01 子集 | done | 2026-11-01T11:39:35Z | 2026-11-01T11:51:09Z | 2026-11-01T11:51:32Z |
+| T-0012-02 | 共用執行鎖、清理確認及異常退出阻擋 | AC-08／AC-11 子集 | done | 2026-11-01T11:39:35Z | 2026-11-01T11:51:09Z | 2026-11-01T11:51:32Z |
+
+T-0012 結案：[PR #916](https://github.com/fallrising/newclear/pull/916) 已合併，commit `1ba325266fed588ab9388fea5cfb689b9c160c59`，offline／validate 兩項 CI success。已回讀主線證據：117 tests、四 CLI 的實際斷網版本／help 檢查通過；exec 鎖繼承、直接 runner 互斥、強制中斷後阻擋通過。0 新模型呼叫、未啟動 Strata。完成 AC-01 偵測／派工 gate 與 AC-08／AC-11 執行保護子集；完整 AC 保持 pending，歷史模型成功證據沒有冒充新入口驗收。下一步為新入口端到端任務與跨 provider 生命週期；沒有 release／deploy／usable tag。

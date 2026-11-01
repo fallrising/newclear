@@ -139,9 +139,29 @@ async function report(db,ctx,b,now){
  v.artifact=b.artifact;v.report_digest=hash;v.delivery='result_recorded';v.updated_at=iso(now);return save(db,r,v,ctx);
 }
 function publicRecord(v){const {artifact,report_digest,holder,...publicValue}=v;return publicValue;}
+function auditRoute(request){
+ const path=new URL(request.url).pathname;
+ const fixed={'/api/authorization/self':'authorization-self','/api/bootstrap':'bootstrap','/api/health-schedule':'health-schedule','/api/usage':'usage','/api/commands':'commands','/api/runner/claim':'runner-claim','/api/runner/report':'runner-report'};
+ if(Object.hasOwn(fixed,path))return fixed[path];
+ const match=path.match(/^\/api\/commands\/[A-Za-z0-9_-]{1,128}(?:\/(cancel|artifact))?$/);
+ if(match)return match[1]??'command';
+ return ['/','/styles.css','/dashboard.mjs'].includes(path)?'assets':'other';
+}
+async function auditRejection(request,db,request_id,now,status,code,authenticated){
+ if(status<400||status>499)return 'not_applicable';
+ try{
+  // One statement makes the final-slot check and insert atomic. Never evict evidence.
+  const result=await db.prepare(`INSERT INTO rejection_audit(request_id,observed_at,method,route,status,code,authenticated)
+   SELECT ?,?,?,?,?,?,? WHERE (SELECT count(*) FROM rejection_audit)<10000`).bind(
+   request_id,now,['GET','POST'].includes(request.method)?request.method:'OTHER',auditRoute(request),status,
+   /^[A-Z_]{1,64}$/.test(code)?code:'REJECTION',authenticated?1:0).run();
+  return result.meta.changes===1?'persisted':result.meta.changes===0?'full':'unavailable';
+ }catch{return 'unavailable';}
+}
 export async function handle(request,env,now=Date.now(),fetcher=fetch){
- now=Math.floor(now/1000)*1000;const request_id=crypto.randomUUID();try{
+ now=Math.floor(now/1000)*1000;const request_id=crypto.randomUUID();let authenticated=false;try{
   requireThat(['GET','POST'].includes(request.method),405,'METHOD_NOT_ALLOWED');const bytes=await readBody(request);if(request.method==='POST')requireThat(request.headers.get('content-type')?.split(';')[0]==='application/json',415,'CONTENT_TYPE_INVALID');const ctx=await authenticate(request,env,bytes,now,fetcher),url=new URL(request.url),db=env.DB;
+  authenticated=true;
   const b=request.method==='POST'?strictJSON(bytes):null;const send=(data,status)=>json({...data,request_id},status);
   if(url.pathname==='/api/authorization/self'&&request.method==='POST'){
    requireThat(!ctx.human,403,'SCOPE_DENIED');fields(b,[]);
@@ -169,7 +189,11 @@ export async function handle(request,env,now=Date.now(),fetcher=fetch){
    requireThat(ctx.human,403,'SCOPE_DENIED');capability(ctx,'commands:read');requireThat(env.ASSETS,503,'ASSETS_UNAVAILABLE');const res=await env.ASSETS.fetch(request),headers=new Headers(res.headers);headers.set('Cache-Control','no-store');headers.set('Content-Security-Policy',"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','no-referrer');return new Response(res.body,{status:res.status,headers});
   }
   throw new Fault(404,'NOT_FOUND');
- }catch(e){const status=e instanceof Fault?e.status:503;return json({code:e instanceof Fault?e.code:'TEMPORARILY_UNAVAILABLE',message:e instanceof Fault?e.code:'Service unavailable',retryable:status===503||status===429,request_id},status);}
+ }catch(e){const status=e instanceof Fault?e.status:503,code=e instanceof Fault?e.code:'TEMPORARILY_UNAVAILABLE';
+  const audit=await auditRejection(request,env.DB,request_id,now,status,code,authenticated);
+  const response=json({code,message:e instanceof Fault?e.code:'Service unavailable',retryable:status===503||status===429,request_id},status);
+  response.headers.set('X-Cloud-Lab-Audit',audit);return response;
+ }
 }
 export async function scheduled(event,env,now=Date.now()){
  now=Math.floor(now/1000)*1000;const db=env.DB,s=await db.prepare("SELECT * FROM schedules WHERE id='health-minute'").first();if(!s?.enabled)return;

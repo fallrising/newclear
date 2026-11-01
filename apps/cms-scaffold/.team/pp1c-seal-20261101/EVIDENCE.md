@@ -14,7 +14,7 @@ Scope: complete a reviewable documentation proposal for PR333. No PP1c product i
 | Physical prerequisites | [TOOL-PROBES.json](TOOL-PROBES.json), five independently created synthetic no-network helper containers, all exit0 and removed by exact fullID | PASS for the observed capabilities only |
 | Secret boundary | manual review plus common credential-pattern scan over new docs/evidence | PASS: no real passwords/cookies/keys, no runtime secret directories accessed; scan is not a general proof of absence |
 | Independent five-card review | [T114 report](../reports/T-114.md) | PASS for final scoped implementability; exact reviewed doc hashes inT114, initial PARTIAL/skipped history retained |
-| Final exact-head CMS / project-success CI | PR333 head after publication | PENDING |
+| Final exact-head CMS / project-success CI | PR333 head after publication | PENDING at pre-publication checkpoint; final exact-head result is appended to PR333 description and private ledger after remote readback |
 | Review report contract | `python3 /home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py validate-report apps/cms-scaffold/.team/reports/T-114.md` | PASS; not a product completion report |
 | Owner new protocol / four-subwave decision | [decision section](../../docs/v2/contracts/PP1c-local-adapters.md#6-封板決策單一提案) | PENDING; DRAFT retained |
 
@@ -39,3 +39,5 @@ Current milestone stays DRAFT until the concrete new protocol is approved. Same 
 One new bounded native reviewer was launched for this docs turn; no recursive delegation. Complete outer/nested/provider request/token/retry/cost and active/wait totals are unknown/null because no full mechanical session export is available; estimates and worker budgets are not measured provider counts. No hard tool-call cap. Estimated60–100active minutes,20minute checkpoints; per-probe30s and CI15min per observation round. Initial failure plus at most2reasoned corrections for the same review finding.
 
 Root evidence-gate decision: accept the final bounded design review for a concrete owner decision. Do not accept a whole-milestone DONE claim: protocol approval, exact-head CI/readback and implementation remain separate. The two review corrections (complete browser vector and reconstructible auth proof) were independently reread; no unresolved scoped material finding remains. Reviewed annex c3b700ae40dca760995d4c63589df7bb8eed72820cc294465a3ce0ed991cb0de and wave50ba18e39727407e4a03797e6fc677306df9cbe1c190a5ca2b39c91ba406a512 match actual bytes.
+
+Post-merge-commit tooling correction: check_docs.py now uses pinned342107f8 parent bytes and SOURCE-HASHES.mergedMain instead of temporary HEAD/MERGE_HEAD, so the same read-only checks remain reproducible after commit. Re-run passed378; spec reviewed bytes are unchanged.

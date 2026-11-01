@@ -43,9 +43,10 @@ for doc in DOCS:
         target=(doc.parent / file).resolve() if file else doc
         check('relative link '+doc.name+' '+href, target.exists())
         if anchor: check('anchor '+href,anchor in anchors(target.read_text()))
-prior=subprocess.check_output(['git','show','HEAD:apps/cms-scaffold/docs/v2/contracts/PP1-recovery.md'],cwd=ROOT,text=True)
+prior=subprocess.check_output(['git','show','342107f87c305ca1bca56ecb88685315d678e56c:apps/cms-scaffold/docs/v2/contracts/PP1-recovery.md'],cwd=ROOT,text=True)
 check('parent entire existing bytes retained',DOCS[1].read_text().startswith(prior))
-paths=subprocess.check_output(['git','diff','MERGE_HEAD','--name-only','--','apps/cms-scaffold'],cwd=ROOT,text=True).splitlines()
+base=json.loads((Path(__file__).parent / 'SOURCE-HASHES.json').read_text())['mergedMain']
+paths=subprocess.check_output(['git','diff',base,'--name-only','--','apps/cms-scaffold'],cwd=ROOT,text=True).splitlines()
 check('no product source change against merged main',all('/docs/' in p or '/.team/' in p for p in paths))
 check('no obsolete media path or duplicate socket draft', all(x not in annex for x in ['recovery-media.mjs','覆蓋§4.2','half-close write','H02a']))
 check('phase checkpoints aligned',all(p in wave and p in annex for p in ['STARTUP_VERIFIED','RESTART_VERIFIED']))

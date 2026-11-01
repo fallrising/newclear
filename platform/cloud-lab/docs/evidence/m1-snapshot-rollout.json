@@ -1,0 +1,77 @@
+{
+  "at": "2026-11-01T11:45:28.754756+00:00",
+  "source_pr": 905,
+  "source_head": "2c4a112351d77d40a2201044d3872fbaef7e7c22",
+  "worker_100_percent": true,
+  "worker_modules_exact_unchanged": 3,
+  "assets_manifest_entries": 3,
+  "asset_content_changed": 1,
+  "application_schema_unchanged": true,
+  "audit_history_preserved": true,
+  "settings_and_secret_bindings_preserved": true,
+  "grants_unchanged": 4,
+  "access_and_deadline_preserved": true,
+  "cron_unchanged": true,
+  "old_commands_exact": 193,
+  "old_firings_preserved": 222,
+  "old_journal_rows_preserved": 186,
+  "final_commands": 193,
+  "final_active": 0,
+  "same_runner_pid_no_restart": true,
+  "local_configs_policies_client_ledger_exact": true,
+  "runner_stop_at": "2026-11-05T07:24:25Z",
+  "human_window_extended": false,
+  "paid_upgrade": false,
+  "live_human_download_tested": false,
+  "mainline_complete": false,
+  "actual_upload_buckets": 1,
+  "actual_uploaded_assets": 1,
+  "legacy_publish_assets_uploaded_field_is_manifest_count": true,
+  "deployed_at": "2026-11-01T11:44:40.082264+00:00",
+  "snapshot_at": "2026-11-01T11:45:00.327845+00:00",
+  "candidate": {
+    "source_commit": "2c4a112351d77d40a2201044d3872fbaef7e7c22",
+    "source_pr": 905,
+    "files": [
+      {
+        "source_path": "platform/cloud-lab/apps/control/worker/index.mjs",
+        "path": "worker/index.mjs",
+        "sha256": "8c561d04e6d1c8d53962ba96f0e180898d4f12986cb01fe6e435428f6edb2b69",
+        "bytes": 26275
+      },
+      {
+        "source_path": "platform/cloud-lab/apps/control/worker/auth.mjs",
+        "path": "worker/auth.mjs",
+        "sha256": "2f1338e5f8db0bdc7b0e7a38818ef26d3b80825798ef795bc6692c67d548898a",
+        "bytes": 5276
+      },
+      {
+        "source_path": "platform/cloud-lab/apps/control/worker/protocol.mjs",
+        "path": "worker/protocol.mjs",
+        "sha256": "1328a818e0335a615635c3797b46dd9f1033a04a796592fc11a77dbf16f6abd0",
+        "bytes": 4325
+      },
+      {
+        "source_path": "platform/cloud-lab/apps/control/public/index.html",
+        "path": "public/index.html",
+        "sha256": "ab5e407b4c1ae4dc7b95fd4211c7c276995c3e63773c10c31938865561db270c",
+        "bytes": 4365
+      },
+      {
+        "source_path": "platform/cloud-lab/apps/control/public/styles.css",
+        "path": "public/styles.css",
+        "sha256": "873fbfe381ae8d30c3df23f7fc14e7067cf7ff5c4cae9f487d446c3a13ac71e1",
+        "bytes": 7148
+      },
+      {
+        "source_path": "platform/cloud-lab/apps/control/public/dashboard.mjs",
+        "path": "public/dashboard.mjs",
+        "sha256": "5f6379cbd5cb2a7564c597e54ef41a55b49b66bff3f7d137370feda52733f5ba",
+        "bytes": 32698
+      }
+    ]
+  },
+  "billing": "unknown",
+  "rollback_executed": false,
+  "deployment_attempts": 1
+}

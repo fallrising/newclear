@@ -62,3 +62,7 @@ Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，�
 ## Unknown結案的版本邊界
 
 原命令unknown先留存D1與原journal證據；只按[UR操作條件](unknown-resolution.md)準備私人plan。計畫生成不等於批准或執行。不得為使active0而直接UPDATE／刪row／清journal；先確認新Worker支援closed_unknown，再按具體批准暫停runner、排空在途、fresh完整CAS一次、回讀及恢復原service與截止。原unknown不得重跑，恢復只接受新ID；結案後舊Worker rollback不安全，需保留新護欄。
+
+## 看板資產更新的計數
+
+[PSL](evidence/m1-snapshot-rollout.md)沿用direct upload：manifest條目不等於實際上傳份數，已存在hash會重用。保存session buckets與每個upload intent／response，最終分列manifest_entries與actual_uploaded_assets；勿由舊helper欄位名稱推論上傳數量。發布後驗active100%與原modules/settings及資料保全，secret繼承不等於逐值讀回。

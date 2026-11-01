@@ -1,0 +1,119 @@
+{
+  "checks": [
+    {
+      "provider": "opencode",
+      "model": "strata/qwen3.8-flash-next-q2_0",
+      "pinned_version": "1.19.5",
+      "cli_compatible": true,
+      "version_and_help_network_denied": true,
+      "credentials": "not_required",
+      "authentication_verified": false,
+      "model_inference_verified": false,
+      "runtime": {
+        "macos_arm64": true,
+        "node": true,
+        "sandbox": true,
+        "office_build": true,
+        "strata_files": true,
+        "opencode_plugin_dependencies": true
+      },
+      "launch_prerequisites_present": true
+    },
+    {
+      "provider": "grok",
+      "model": "grok-4.6",
+      "pinned_version": "1.0.70",
+      "cli_compatible": true,
+      "version_and_help_network_denied": true,
+      "credentials": "present_unverified",
+      "authentication_verified": false,
+      "model_inference_verified": false,
+      "runtime": {
+        "macos_arm64": true,
+        "node": true,
+        "sandbox": true,
+        "office_build": true
+      },
+      "launch_prerequisites_present": true
+    },
+    {
+      "provider": "pi",
+      "model": "deepseek/deepseek-flash",
+      "pinned_version": "1.4.0",
+      "cli_compatible": true,
+      "version_and_help_network_denied": true,
+      "credentials": "missing",
+      "authentication_verified": false,
+      "model_inference_verified": false,
+      "runtime": {
+        "macos_arm64": true,
+        "node": true,
+        "sandbox": true,
+        "office_build": true
+      },
+      "launch_prerequisites_present": false
+    },
+    {
+      "provider": "cursor",
+      "model": "composer-2.5",
+      "pinned_version": "2026.10.22-27dcf5f",
+      "cli_compatible": true,
+      "version_and_help_network_denied": true,
+      "credentials": "present_unverified",
+      "authentication_verified": false,
+      "model_inference_verified": false,
+      "runtime": {
+        "macos_arm64": true,
+        "node": true,
+        "sandbox": true,
+        "office_build": true
+      },
+      "launch_prerequisites_present": true
+    }
+  ],
+  "model_task_started": false,
+  "date": "2026-11-01",
+  "baseline_commit": "211da65fffe195dc795656e31a785eceb885d9f4",
+  "scope": "native_offline_cli_detection_and_dispatch_gate",
+  "new_model_calls": 0,
+  "strata_started": false,
+  "tests": {
+    "python": 82,
+    "node": 35,
+    "total": 117
+  },
+  "checks_verified": [
+    "default_plan_no_execution",
+    "explicit_remote_authorization",
+    "fixed_runner_argv",
+    "all_four_direct_runner_entrypoints_busy_guard",
+    "real_helper_process_mutual_exclusion",
+    "real_exec_lock_inheritance",
+    "real_helper_sigkill_blocks_next_run",
+    "operator_ack_requires_idle_lock",
+    "symlink_and_unsafe_permissions_rejected",
+    "bounded_pty_probe_timeout_cleanup"
+  ],
+  "initial_findings": [
+    "isolated checkout lacked Pi/OpenCode dependencies; reused existing pinned dependency installs",
+    "OpenCode help was truncated or empty under pipe/file capture; complete output verified using a bounded PTY"
+  ],
+  "limitations": [
+    "saved historical model runs were not repeated after runner gate changes",
+    "Pi credentials are absent in this isolated checkout; its launch is blocked",
+    "credential presence is not verified authentication",
+    "lock scope is this checkout only",
+    "acknowledgement is an operator assertion, not automatic process cleanup",
+    "full AC-01/AC-08/AC-11 and MVP remain pending"
+  ],
+  "source_sha256": {
+    "execution_slot.py": "247f3ac93f8f87abbe7d693d494b3b04b81c5aac858d924f062191d17ffbacfe",
+    "office_dispatch.py": "fc2fcdb0f5b9a00a3a59ed93b145e86437bc095ae8bad31a4db68f9b8843b6be",
+    "test_execution_slot.py": "2f1d7b6e95022354da0b4c2eaac473a10a58331e409ccad9dbec2b8c5fb0b33c",
+    "test_office_dispatch.py": "c5b85553feffda3187fe6e0ce10d0e7ffe0c456e8e162d03657cae937da3ba7e",
+    "run_local_work.py": "bd1a28e7da49709fa074bf05a07c33e405d0158b10542ce70d57be7527ae4050",
+    "run_pi_work.py": "0daece61a59578048c8674c6ed857434dd3492d2977efdcca12a33633737403d",
+    "run_grok_work.py": "7e0f5452a4c66f9e360c45c8a65162c27adeff17e72aca0bd26abb5e521adebb",
+    "run_cursor_work.py": "bf88765159d251494c6fd9b44527804105a2f087715f2ab49eb53d60277b3626"
+  }
+}

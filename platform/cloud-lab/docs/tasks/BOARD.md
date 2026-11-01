@@ -645,3 +645,20 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 真RED6fail／1existingpass，GREEN52dashboard；完整138Node＋308Python＝446tests，零fail/skip；PS1真Chromium/workerd/D1/Python16checks／114API／零browser errors，三asset hash與公開原receipt相同。兩種快照GET注入均拒絕、原D1列不變；HTTP ACK遺失及原artifact精確下載回歸保持。T861最終獨立ACCEPT。
 - 初次default-isolation只有file級失敗，不算行為RED；sandbox full的Node native assertion／35Python socket EPERM保留，正常escalation後同套測試全過，無跳測。既有SQLite warnings保留。50contracts／8indexes初驗，正常合併並行main後51contracts／9indexes通過；task/report／syntax／diff／437links與67inputs固定。回讀local/remote fulltree相等、clean、head為main祖先，67inputs皆相符。
 - 本輪只改dashboard source及驗證／文件；Worker／runner／D1 schema未改，原看板尚未部署。M0 Event/source_seq/cursor未實作，不以完整snapshot跳版冒充漏seq恢復；原要求與source/local/live差別保留，完整mainline incomplete／usable_tag none。沒有private/live操作、續權、付費升級或owner重測。後續按既有流程接入已驗證看板修正；本結案只改任務板。
+
+## T-0037 — 原看板快照順序修正接入
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0037-1 | 固定候選與現況 | PSL-01 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+| T-0037-2 | 原看板更新 | PSL-02 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+| T-0037-3 | 歷史與權限回讀 | PSL-03 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+| T-0037-4 | 審查及交付 | PSL-04 | done | 2026-11-01T11:42:24Z | 2026-11-01T11:50:59Z | 2026-11-01T11:51:32Z |
+
+### T-0037 Git交付與原看板接入收尾
+
+- [PR915](https://github.com/fallrising/newclear/pull/915) head `c311f54d35206100a3a7575c489c0c9d421ccf00`，merge `39a3bab0ea45b6a7a38a270e32e35618481f4f85`，2026-11-01T11:50:59Z合併。exact-head CI全過：CloudLab `41303587929`、Project success `41303587975`、llms `41303587963`。
+- PSL01–04：固定PR905六份候選；11:44:40Z原Worker新版100%，三modules逐byte不變，只有dashboard.mjs內容改變。一次asset session、一個bucket／一份上傳、一次publish，無失敗／重播。manifest三條、實際上傳一份分列；舊helper assets_uploaded3欄位計的是manifest，原收據保留、最終按bucket證據修正解讀。
+- 11:45:00Z final snapshot／11:45:28Z保全驗證：原193commands整列、222firings／186journal及稽核歷史／應用schema保留，最終193commands／active0；4grants、Access、Cron、settings、secret bindings及授權期限相同。runner同PID／NRestarts，本機config/policy/client ledger hash與journal identity保持。沒有額外job／重啟／續權／付費升級；resident保守截止仍2026-11-05T07:24:25Z。
+- Lead核對實際private receipts；T862初審要求四份入口把「未部署」改為歷史狀態，修正後集中複審ACCEPT。51contracts初驗／合併並行main後52contracts、9indexes、task-report／diff／402links、67inputs未變與8private-literals掃描通過；公開receipt與實際final欄位一致。正常merge保留並行工作，local/remote fulltree相等、clean、head為main祖先、67remote inputs相符。
+- 歷史PR905的446tests／16browserchecks支持source候選，不冒充本輪真人asset下載。未續human窗口或要求Console／Safari／手機；secret採繼承且metadata保持，無逐值讀回。回退request已保存未執行，原D1／歷史保留；provider用量／帳單unknown，完整mainline incomplete／無usable tag。後續遠端unknown/in-flight隔離還原及provider用量缺口；本結案只改任務板。

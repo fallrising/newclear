@@ -55,6 +55,8 @@ flowchart TD
     Harness --> GH[GitHub read-only search / repo metadata]
 ```
 
+T-0012 加入[統一 CLI](DISPATCH.md)：真實斷網 detect、預設 plan、顯式 run 與四 runner 共用執行鎖。此為既有合成任務入口，尚未完成 UI 派工或新入口模型驗收；原生事件與生命週期契約不變。
+
 ## 4. Provider 接入契約
 
 | Provider | MVP 路徑 | 驗證重點 | 狀態 |

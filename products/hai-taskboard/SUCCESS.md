@@ -208,9 +208,15 @@ normal final-commit CI/merge/readback/ledger, tracked by BOARD. See [evidence](d
 No full M2/coverage/UI/provider/AC-02..04 claim.
 Status and scope: BOARD HMPOL.
 
-## M2 verified coverage proposal — 2026-11-01
+## M2 verified coverage — 2026-11-01
 
-[Proposed contract and fixed acceptance](docs/plans/m2-verified-coverage-20261101.md), BOARD HM2C:
-authenticated per-AC verified observation, separate QA eligibility, full material revalidation and zero
-read-side writes/ID allocation. Contract requires owner acceptance before production/API changes;
-COV-AC-01..06 remain NotRun. Identity/policy are already delivered; full M2 and product ACs stay pending.
+Owner approved the [reviewed contract and fixed COV-AC-01..06](docs/plans/m2-verified-coverage-20261101.md)
+and [normative entry](docs/sdd/verified-coverage.md). BOARD HM2C tracks delivery. Authenticated GET
+observes exact per-AC byte verification in Review/QA; QA eligibility shares the completion predicate.
+Reads allocate no IDs, mutate no persisted state and reserve no authority. Completion remains explicit.
+
+[Implementation evidence](docs/evidence/m2-verified-coverage-20261101.md) maps COV-AC-01..05 to passing
+focused/integration tests, full backend baseline and source-bound final revision checks. COV-AC-06
+requires final review, PR CI, normal merge and remote readback; its delivery receipt is recorded in BOARD.
+The initial proposal's NotRun checkpoint is historical, not the current test status. Full M2, completion
+UI and product AC-02..04 remain incomplete. No release, usable tag or deployment is part of this slice.

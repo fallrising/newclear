@@ -245,6 +245,17 @@ func TestAcceptedACIdentity_EvidenceAndCompletionBoundary(t *testing.T) {
 			svc.config.Completion.Checks[ac] = rule
 			svc.artifacts = artifacts
 			post(wire(65, prep.ExpectedVersion, "RequestQA", map[string]any{"work_item_id": workItemID, "candidate_id": candidate.Candidate.ID, "completion_subject_digest": prep.Digest}))
+			coverage, err := svc.DescribeVerifiedCoverage(t.Context(), operator, projectID, workItemID, candidate.Candidate.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var observed coverageTestResponse
+			if err = json.Unmarshal(coverage, &observed); err != nil {
+				t.Fatal(err)
+			}
+			if len(observed.Coverage) != 1 || observed.Coverage[0].AC != tc.id || !observed.Coverage[0].Covered || len(observed.Coverage[0].IDs) != 2 || !observed.Eligibility.Satisfied {
+				t.Fatalf("Unicode sealed report coverage: %s", coverage)
+			}
 			doneBody := wire(66, prep.ExpectedVersion+1, "CompleteWorkItem", map[string]any{"work_item_id": workItemID, "completion_subject": prep.Subject})
 			done := post(doneBody)
 			item, err := store.LoadWorkItem(t.Context(), projectID, workItemID)

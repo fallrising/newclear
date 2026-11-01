@@ -96,20 +96,24 @@ type preparationPolicyEnvelope struct {
 }
 
 func writePreparationError(w http.ResponseWriter, err error) {
-	code, message, status := command.CodeProjectionUnavailable, "completion preparation is unavailable", http.StatusServiceUnavailable
+	writeCompletionReadError(w, err, "completion preparation")
+}
+
+func writeCompletionReadError(w http.ResponseWriter, err error, name string) {
+	code, message, status := command.CodeProjectionUnavailable, name+" is unavailable", http.StatusServiceUnavailable
 	if errors.Is(err, domain.ErrStorageCorruption) {
-		code, message = command.CodeStorageCorruption, "completion preparation is invalid"
+		code, message = command.CodeStorageCorruption, name+" is invalid"
 	} else if e, ok := errors.AsType[*command.Error](err); ok {
 		// A known application classification wins over its internal dependency cause.
 		switch e.Code {
 		case command.CodeStaleSubject:
 			code, message, status = e.Code, "completion subject is stale", http.StatusConflict
 		case command.CodeLifecycleRejected:
-			code, message, status = e.Code, "completion preparation is not available in this lifecycle", http.StatusUnprocessableEntity
+			code, message, status = e.Code, name+" is not available in this lifecycle", http.StatusUnprocessableEntity
 		case command.CodeNotFound:
 			code, message, status = e.Code, "resource is unavailable", http.StatusNotFound
 		case command.CodeStorageCorruption:
-			code, message = e.Code, "completion preparation is invalid"
+			code, message = e.Code, name+" is invalid"
 		case command.CodePolicyRejected:
 			data, _ := json.Marshal(preparationPolicyEnvelope{APIVersion: "v1", Error: preparationPolicyError{Code: e.Code, Message: "verification policy is incomplete", Details: preparationPolicyDetails{Reason: "verification_policy_incomplete"}}, CorrelationID: "request"})
 			writeJSONBytes(w, http.StatusConflict, data)
@@ -118,11 +122,17 @@ func writePreparationError(w http.ResponseWriter, err error) {
 	} else if errors.Is(err, port.ErrNotFound) {
 		code, message, status = command.CodeNotFound, "resource is unavailable", http.StatusNotFound
 	} else if errors.Is(err, port.ErrRunLifecycle) {
-		code, message, status = command.CodeLifecycleRejected, "completion preparation is not available in this lifecycle", http.StatusUnprocessableEntity
+		code, message, status = command.CodeLifecycleRejected, name+" is not available in this lifecycle", http.StatusUnprocessableEntity
 	}
 	writeAPIError(w, status, code, message)
 }
 func validCompletionPreparation(data []byte, project domain.ProjectID, item domain.WorkItemID, candidate domain.CandidateID) bool {
+	return validCompletionPreparationMode(data, project, item, candidate, false)
+}
+
+// Coverage can observe the full SQLite integer range; legacy command preparation
+// retains its stricter command headroom bound.
+func validCompletionPreparationMode(data []byte, project domain.ProjectID, item domain.WorkItemID, candidate domain.CandidateID, coverage bool) bool {
 	if len(data) == 0 || len(data) > 1<<20 || strictCommandWire(data, reflect.TypeFor[completionPreparationWire]()) != nil {
 		return false
 	}
@@ -134,12 +144,12 @@ func validCompletionPreparation(data []byte, project domain.ProjectID, item doma
 	if s.ProjectID != string(project) || s.WorkItemID != string(item) || s.CandidateID != string(candidate) || !runPattern.MatchString(s.RunID) || !validPreparationCandidate(s.CandidateID) {
 		return false
 	}
-	if w.ExpectedVersion >= 1<<63-1 || s.WorkItemVersion >= 1<<63-1 {
+	if w.ExpectedVersion > 1<<63-1 || s.WorkItemVersion > 1<<63-1 || (!coverage && (w.ExpectedVersion == 1<<63-1 || s.WorkItemVersion == 1<<63-1)) {
 		return false
 	}
 	version := w.ExpectedVersion
 	if w.Phase == "Review" {
-		if version >= 1<<63-2 {
+		if version == 1<<63-1 || (!coverage && version >= 1<<63-2) {
 			return false
 		}
 		version++

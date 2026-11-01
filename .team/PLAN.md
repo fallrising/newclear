@@ -2670,6 +2670,33 @@ production approval. Root disposed all findings; final R1–R7 conditions incorp
 model call, as reviewer explicitly allowed. Product COV-ACs remain NotRun; only proposal publication
 is accepted. See product evidence/m2-coverage-proposal-20261101.md for measured/unknown accounting.
 
+
+## HAI verified coverage implementation — T-0339 / HM2C / 2026-11-01
+
+Owner approved D1–D3. Normative entry products/hai-taskboard/docs/sdd/verified-coverage.md references
+the exact accepted contract and R1–R7; COV-AC01..06 fixed. Root owns docs/OpenAPI/HTTP and acceptance.
+One isolated native T-001 backend worker (70min,20min checkpoints, no children/no Git) owns
+application/domain/SQLite/local artifact core and real-store tests. Expected root90–150active minutes;
+Claude code review exact opus5.5/high480s plus at most one material follow-up; existing plan review
+retained, no redundant model plan call. CI20min rounds; same failure initial+two new-hypothesis diagnoses.
+No UI/provider/dependency/migration/release/deploy. Raw evidence and unknown accounting retained.
+
+
+HM2C integration: root inspected13 worker files and verified byte-exact hashes before integration.
+Original worker report remains PARTIAL solely for the transferred cursor regression task; root does not
+accept that report as DONE. Full native backend baseline passed600.763s on190 stable inputs; web30,
+API and document gates pass. Claude initial code review ACCEPT294.007s requires E1 revision oracle;
+root implements E1/C1/C2/C3/C6/C8/C9 plus cursor regression and lawful SQLite numeric boundaries,
+with retained Red→Green. Separate wt revision kept the full-gate source frozen. Final focused race,
+follow-up review, CI/merge/readback remain before root evidence-gate acceptance. No new product scope.
+
+
+HM2C local evidence-gate ACCEPT: final focused race164.111s, build/format, web30, API/docs pass;
+Claude follow-up ACCEPT148.581s with schema-specific subject bound, already-enforced epoch bounds
+proved by tests, and observation/headroom text closed without a third call as explicitly allowed.
+Root closed worker cursor PARTIAL by regression Red→Green. All original failures/source manifests
+preserved; exact-head full CI/merge/readback/BOARD/desk are the remaining delivery gate.
+
 ## XR cross-snapshot restoration qualification — 2026-11-01T05:22:43Z
 
 Owner continues after RAL. Lead solewriter for XR01–04/T0035, isolated six-case actualworkerd/D1 plusPythonrunner andSQLiteonlinebackup. No live/private/networkauthority/paidchange. Test-first snapshotfixture, qualification before runtimefix if needed, fullregression and sourcehash preservation. One fresh native readonly reviewer T860, inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no tests/writes/private/network/delegation. Instructionscope notOSisolation. No originalrunnerstop or remoteexport/import claim.

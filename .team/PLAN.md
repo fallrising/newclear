@@ -2785,3 +2785,13 @@ RX scoped evidence gate ACCEPT_SOURCE_PARTIAL_REMOTE 2026-11-01T14:41:42Z:17focu
 Owner explicitly approved full RF sensitive D1 export to established privateRX destination and one new unboundD1 import. Leadsoleoperator preserves rejected preapproval attempt, source/noauthority/noLab/nopaidchanges; freshpreflight, export/import bounded, exactschema/allrows/3onlinejournalbackups/audit, independentT864 publicevidencereview thennormalGitdelivery. T864freshnative inheritedmodel/effort/permissions,<=1500tokens+one<=1000followup,five-minute monitored/nativeinterrupt,unknowncost/quota; no private/network/tests/writes/delegation. InstructionsnotOSisolation. No source changes planned; prior463tests apply only with69inputhash equality.
 
 RX remote evidence gate ACCEPT_BOUNDED_DATA_RESTORE 2026-11-01T15:04:10Z:ownerexplicitapprovalafterrejection;officialexport2polls16454bytes,onecreate/upload/ingest,4way5tables/42rows/3explicit+6implicitindexes equal;3onlinejournalbackup exactBLOB/schema/sourcebytes,2completed/1unknownactive1started,0runner.6expiredgrants,4Workersettingsnobinding,optionalPagesGET403preserved/notexpanded.69inputsunchanged→historical463tests;52contracts/9indexes/436links/9privateliteralsscan. T864onecallACCEPT,leadprivateaudit. NormalGitgatesremain,nofailover/fullmainline/knownbillingclaims.
+
+## T-0442 M3 fixed candidate — 2026-11-01
+
+Parent owns Fanzloud GET-only immutable result archive inspection/download and tests;
+SPEC-M3-fixed-candidate CU-M3-C01–04, no AP code changes. Existing AP has no readonly
+reviewer admission/result contract: concrete dependency proposal before approval.
+One fresh-context independent reviewer after implementation, bounded15min +5min correction;
+no recursive delegation.60–90min estimate,20min checkpoints, build25min/CI30min; same
+issue max2 evidence-based fixes. Actual retained result browser GET-only, zero new task/
+CLI/VM. Old dirty workers/stores preserved. FN05/fullM3 not accepted by candidate alone.

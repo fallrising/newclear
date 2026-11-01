@@ -137,7 +137,15 @@ fn allowed(method: &Method, path: &str) -> bool {
     let Some(run) = path.strip_prefix("/api/v1/runs/") else {
         return false;
     };
+    if let Some((identifier, suffix)) = run.split_once("/artifacts") {
+        return canonical_uuid(identifier)
+            && (suffix.is_empty() || suffix.strip_prefix('/').is_some_and(canonical_uuid));
+    }
     let identifier = run.strip_suffix("/result.diff").unwrap_or(run);
+    Uuid::parse_str(identifier).is_ok_and(|value| value.to_string() == identifier)
+}
+
+fn canonical_uuid(identifier: &str) -> bool {
     Uuid::parse_str(identifier).is_ok_and(|value| value.to_string() == identifier)
 }
 
@@ -206,6 +214,10 @@ fn asset(path: &str) -> Option<Response<Body>> {
         ),
         "/assets/isolated.js" => (
             include_bytes!("../web/isolated.js"),
+            "text/javascript; charset=utf-8",
+        ),
+        "/assets/candidate.js" => (
+            include_bytes!("../web/candidate.js"),
             "text/javascript; charset=utf-8",
         ),
         "/assets/p0.css" => (include_bytes!("../web/p0.css"), "text/css; charset=utf-8"),
@@ -321,7 +333,7 @@ async fn handle(State(config): State<Arc<Config>>, request: Request) -> Response
         || (parts.method == Method::POST && path == "/api/v1/tasks")
         || (parts.method == Method::GET
             && path.starts_with("/api/v1/runs/")
-            && !path.ends_with("/result.diff"))
+            && canonical_uuid(path.trim_start_matches("/api/v1/runs/")))
     {
         if let Some(store) = config.store.clone() {
             return persistence::handle(
@@ -554,6 +566,28 @@ mod tests {
             assert!(!allowed(&Method::POST, path), "{path}");
         }
     }
+    #[test]
+    fn c01_artifact_routes_are_canonical_get_only() {
+        let root = "/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/artifacts";
+        for path in [
+            root.to_owned(),
+            format!("{root}/018ff3ab-1277-7000-8000-000000000002"),
+        ] {
+            assert!(allowed(&Method::GET, &path));
+            for method in [Method::POST, Method::PUT, Method::PATCH, Method::DELETE] {
+                assert!(!allowed(&method, &path));
+            }
+            for bad in [
+                format!("{path}/"),
+                format!("{path}?limit=1"),
+                path.to_uppercase(),
+            ] {
+                assert!(!allowed(&Method::GET, &bad));
+            }
+        }
+        assert!(!allowed(&Method::GET, &format!("{root}/../../session")));
+    }
+
     #[test]
     fn isolated_cancel_route_is_exact() {
         let path = "/api/v1/runs/018ff3ab-1277-7000-8000-000000000001/actions";

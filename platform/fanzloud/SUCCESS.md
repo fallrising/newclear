@@ -463,3 +463,13 @@ unknown zero resend. Prior real M2 result/diff survives restart. Native339/Web26
 Original final-summary UUID export failed after cleanup; separate read-only reconciliation
 accepted without replay. FN05/FN07 and full M3 remain outside this slice; original Cloud
 AC04 and full mainline are not declared passed. Required CI/PR929 delivery is pending.
+
+## T-0442 M3 fixed candidate continuation — 2026-11-01
+
+[CU-M3-C01–04](docs/specs/SPEC-M3-fixed-candidate.md) fixes the independent Fanzloud
+portion of FN05: authenticated immutable AP archive inspection/download with exact
+candidate/run/base/profile/diff hashes and stale-selection guards. C01–05 NOT_RUN.
+Actual reviewer requires a bounded AP read-only admission/tool/result extension, not
+present in existing routes; SDD§3 requires separate dependency approval before AP edits.
+This continuation does not shrink FN05 acceptance or mark it done. Zero new task/coding/VM;
+no new dependencies, public URL, paid API or full M3/FN07 claim.

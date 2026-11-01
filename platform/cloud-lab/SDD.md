@@ -1,7 +1,7 @@
 # Cloud Lab — 設計總綱
 
 > 下文保留 M0 設計基線。已授權 M1 開發的實作範圍、協定差異與限制見 [M1 實作契約](docs/m1-implementation.md)；M0 提案不代表所有 operation 已實作。
-版本：0.1 proposal。日期：2026-10-26。M0 文件階段；文中 API、模組與部署均未實作。
+歷史基線：0.1 proposal，2026-10-26的M0設計。下文描述當時提案；後續M1已有實作與部署，當前狀態以[SUCCESS](SUCCESS.md)與[方向調整](docs/direction-review.md)為準。
 
 ## 1. 目標與使用情境
 

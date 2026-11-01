@@ -689,3 +689,13 @@ T864獨立審查ACCEPT bounded remote data restore；主導privateaudit接受，
 - 官方export2polls、16454bytes、單一新D1／signed PUT／ingest14:55:43Z完成；四方schema（5應用表、3explicit／6implicit indexes，僅_cf_KV排除）與42列相同。3journal onlinebackup完整schema／raw BLOB rows及source main bytes一致；2completed原artifact bytes／digest／outcome／時間保留，1unknown仍reconciling／active1／journal started。6grant已到期，schedule關閉、testtoken停用、無Cron，零runnerinvocations。
 - D1清單5→6，未刪除舊DB，四Worker settings無新binding；本輪沒有Worker／Access／Cron／Pages設定寫入或原Lab變更。額外Pages全域GET403缺page.read，沒有重試／擴權，不宣稱其盤點通過。初次自動審批拒絕與後續owner明確批准保留。
 - 本輪RX限定資料還原完成；不是活躍程序failover、新fence補報或跨系統原子快照，沒有續權／付費升級。provider用量／帳單仍unknown，完整mainline incomplete／無usable tag。後續補provider用量觀測；本收尾PR只改任務板。
+
+## T-0039 — Opus方向審查與計畫收斂
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0039-1 | 指定Opus5.5審查原始目標及成果 | DIR-01 | in_progress | 2026-11-01T15:15:09Z | — | 2026-11-01T15:28:07Z |
+| T-0039-2 | 核對發現並收斂現況入口 | DIR-02 | in_progress | 2026-11-01T15:15:09Z | — | 2026-11-01T15:28:07Z |
+| T-0039-3 | 重排近期整合工作與停止條件 | DIR-03 | in_progress | 2026-11-01T15:15:09Z | — | 2026-11-01T15:28:07Z |
+
+範圍及主導處置見[方向審查](../direction-review.md)。單次exact-model審查REPLAN；不做provider API／續權／live修改。完成審查與文件交付，不宣稱後續A授權、B盤點或C接入已執行。

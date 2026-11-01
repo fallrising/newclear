@@ -1,14 +1,19 @@
 ---
+
 project: labs/agent-office-lab
 purpose: 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Office
 kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: 75b2d3b762cbad3f8f8d32bf085b1696be728131
+source_commit: d6678d4449e24a86dee4ac06103cee2951d4d9cc
 ---
 
 # Agent Office Lab 驗收
+
+T-0009-02 的第三次獨立授權任務通過 AC-13：Composer 2.5，15.57 秒，Read(input) → Read(result) → Write(result)，原生同 session／model、completed stop、37723 input／424 output tokens、精確產物 hash 與完整清理一致。[成功證據](docs/evidence/cursor-completed-2026-11-01.json)。前兩次失敗保留；本次授權已使用，沒有自動重跑。65 項離線測試通過；PR #878 待 CI／合併，完整 MVP 仍 incomplete。
+
+前次單次批准紀錄：240 秒期限下於 34.05 秒因第二個 Read 被邊界拒絕而停止，沒有產物；session／固定模型／hooks 有證據，清理完整。第二次讀取的目標未記錄，不能確認它是否為輸出檢查。已離線準備最多四次工具規則、預建空 result.json 與檔案分類診斷；65 tests 和無 prompt 啟動通過，尚未再次跑模型。[本輪證據](docs/evidence/cursor-bounded-2026-11-01.json)。AC-13 保持 pending、PR #878 保持 draft；下一次付費任務須新批准。
 
 ## 主線與範圍
 
@@ -21,6 +26,8 @@ SDD 原 A01–A11 在公開版統一寫為 AC-01–AC-11，條件未縮減。AC-
 不包含部署、發布套件、模型權重、私人專案或雲端自動 fallback。
 
 T-0009 依 owner 要求新增第四 provider Cursor Agent；固定官方下載版本與摘要、缺失／版本／能力偵測、獨立 HOME／CURSOR_CONFIG_DIR 與 owner 登入命令，先以 OS 阻擋外網驗證原生啟動及清理。AC-13 的真實任務不以未登入或離線啟動冒充。
+
+T-0009-02：owner 已完成 Cursor 登入，原生 status 回報 authenticated；本輪準備 Composer 2.5 單一合成 prompt、最多一次 input read／一次 result write、120 秒期限、無 host 自動重試。Cursor 不提供可在此保證的請求／token／金額硬上限，配額驗收須另取得一次明確批准。63 項離線測試與[已登入無 prompt 啟動](docs/evidence/cursor-ready-2026-11-01.json)已通過。啟動須允許 HTTPS metadata；原生工具回圈與 AC-13 保持 pending，詳見[待批准的執行範圍](docs/CURSOR-WORK.md)。
 
 ## 驗收條件
 
@@ -38,11 +45,13 @@ T-0009 依 owner 要求新增第四 provider Cursor Agent；固定官方下載�
 | AC-10 | Given 本地 Strata，When 執行公開 GitHub tool loop，Then 真實 tool_call、API 結果與後續回答完成。 | pending | 獨立研究未通過，非 MVP 阻塞。 |
 | AC-11 | Given 路徑逃逸、偽造 hook 或金鑰輸出，When 操作，Then 阻擋或遮蔽。 | pending | [OpenCode sandbox probe](docs/evidence/2026-10-31.json) 僅驗證網路／寫入子集。 |
 | AC-12 | Given 公開匯入來源，When 執行 publication、policy 與 repo gates，Then 無 runtime 私人資料、導航正確且檢查通過。 | passed | [匯入驗證](docs/evidence/publication.md)；CI／交付另見任務板。 |
-| AC-13 | Given 官方 Cursor Agent 與明確登入，When 執行同等合成任務，Then 原生 session、模型來源、完成事件與產物 hash 可核對。 | pending | [Cursor 原生登入等待／隔離／清理](docs/evidence/cursor-startup-2026-11-01.json)通過；登入後 session／模型／任務仍待驗。 |
+| AC-13 | Given 官方 Cursor Agent 與明確登入，When 執行同等合成任務，Then 原生 session、模型來源、完成事件與產物 hash 可核對。 | passed | [Cursor 真實任務](docs/evidence/cursor-completed-2026-11-01.json)：同 session／模型、三次工具、completed stop、用量、產物 hash 與清理全部通過。 |
 
 ## 現況與缺口
 
-T-0009 已固定 Cursor CLI 並完成原生登入等待、workspace hooks 安裝／移除、OS 外網拒絕與程序清理，12.51 秒；55 項離線測試通過。[安裝／owner 登入命令](docs/CURSOR.md)。尚需 owner 自行登入，再準備有界真實任務驗收。
+T-0009-02 前次的 owner 授權單次任務已執行，但[驗收失敗](docs/evidence/cursor-live-2026-11-01.json)：產物正確，loop_limit=0 卻使原生 hooks 整份被忽略，沒有事件／用量證據，AC-13 保持 pending。已修正為 1、增加原生 schema 預檢並補合法讀取回歸；63 tests 與無 prompt 啟動通過。清理正確、沒有追加付費重跑；等 owner 新的一次批准。
+
+T-0009 已固定 Cursor CLI 並完成原生登入等待、workspace hooks 安裝／移除、OS 外網拒絕與程序清理，12.51 秒；55 項離線測試通過。[安裝／owner 登入命令](docs/CURSOR.md)。owner 已登入並由原生 status 核對；有界任務 runner 已準備，待一次配額／付費批准。
 
 T-0008 的無憑證 Grok 原生啟動檢查通過：12.83 秒，實際登入畫面、needs_input、外部 TCP 拒絕與完整清理；47 項離線測試通過。[命令與限制](docs/GROK-STARTUP.md)。沒有 session hook／推論／產物驗收，AC-03 保持 pending。
 

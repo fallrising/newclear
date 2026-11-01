@@ -96,3 +96,7 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 [FQ故障與保留邊界](docs/failure-retention-qualification.md)補十四列[證據矩陣](docs/failure-matrix.md)、取消／完成競爭及七天artifact存取邊界；[保留方案](docs/retention.md)維持歷史與去重，未實作刪除／歸檔。[本輪證據](docs/evidence/m1-failure-retention.md)與live層級分開，完整AC-07／08仍pending。
 
 [DI成果下載完整性](docs/artifact-integrity.md)以原生Web Crypto核對原bytes，通過才精確保存；session／expiry／digest變化保守拒絕。[425tests與真本機browser證據](docs/evidence/m1-artifact-integrity.md)區分source/local與原看板實際更新，後者以任務板及live收據為準；不重開human授權或要求Safari測試。
+
+[RA拒絕稽核](docs/rejection-audit.md)為Worker4xx保存最小metadata，以request_id查找；獨立10000列上限、無敏感內容、不自動刪除，full/unavailable明示未保存。來源／本機驗證與雲端遷移分開；不增加grant或付費服務。
+
+[RAL原服務拒絕稽核接入](docs/evidence/m1-rejection-audit-live.md)已於2026-11-01T04:51:37Z完成：原D1新增表／索引、原Worker100%、真機器GET403與D1 request_id對帳；原166commands／195firings／160journal及4grants／Access／Cron／期限保持，runner未重啟。初次非JSON及一次診斷重試保留；無付費升級，完整mainline仍incomplete。

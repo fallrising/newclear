@@ -6,10 +6,10 @@
 | --- | --- | --- |
 | F01 同key同payload | [control](../tests/control.test.mjs) `admission persists...`及FQ artifact expiry：同ID、相同整列／保留總數；[RF](evidence/m1-remote-recovery.md)原bytes重送同ID | local＋歷史remote子集；不主張所有並發拓撲已驗。 |
 | F02 同key不同payload | control admission conflict、FQ artifact expiry改parameters後409及整列不變 | local；remote changed-payload對帳未補跑。 |
-| F03 未授權caller/resource/recipe/revoked grant | control scope、grant revision、HMAC/replay/JWT guards；RF revoked submitter／runner403、Access token停用401 | local＋歷史remote撤權子集；request id／HTTP拒絕不等於持久拒絕稽核，也不證明所有真人session撤銷。 |
+| F03 未授權caller/resource/recipe/revoked grant | control scope、grant revision、HMAC/replay/JWT guards；RF revoked submitter／runner403、Access token停用401 | local＋歷史remote撤權子集；[RA](rejection-audit.md)補有界4xx持久稽核與未保存header，來源／local及[RAL一個真機器拒絕](evidence/m1-rejection-audit-live.md)對帳；不證明Access邊緣攔截或所有真人session撤銷。 |
 | F04 D1已保存但通知失敗 | [migration](../apps/control/migrations/0001.sql) command row即outbox；control admission／claim及schedule transaction rollback；[runner](../tests/test_runner.py) completed先持久化再回報 | 目前由runner輪詢，沒有獨立通知通道。持久列可領取不等於注入過「通知失敗」；原場景差異保留，不為驗收加Queues。 |
 | F05 接收後／回報途中斷線 | runner `completion_persisted_before_failed_report_and_exact_retry`、`started_restart_never_recollects`；[FR](evidence/m1-recovery.md)及RF送達前斷線／ACK遺失／started後SIGKILL | local、歷史workerd及remote具名案例；整機斷電未驗。 |
-| F06 stale fence／錯誤來源回報 | control stale fence與scope guards；FQ exact lease expiry在等號邊界409且整列不變；RF獨立reconciler舊fence409 | local＋歷史remote舊fence；完整wrong-holder／持久拒絕audit仍有缺口，不以HTTP回覆充當audit表。 |
+| F06 stale fence／錯誤來源回報 | control stale fence與scope guards；FQ exact lease expiry在等號邊界409且整列不變；RF獨立reconciler舊fence409 | local＋歷史remote舊fence；RA補wrong-holder與精確lease到期拒絕的request_id→audit及原命令整列保全，屬local／workerd驗證，非新remote故障測試。 |
 | F07 submit撤權／到期、lease過期且run不明 | control revoked submit／reduced runner；runner `expired_reconcile_still_reuses_completed_evidence`；RF獨立reconcile-only grant與保留原時間／artifact | local＋歷史remote撤權reconcile；不可新增dispatch或刷新原deadline。[ULR](evidence/m1-unknown-resolution-live.md)是另外明確批准的unknown結案，不取代原run結果。 |
 | F08 deadline後送達 | control原late case及FQ late delivery兩案例：完成恰好deadline可fresh/passed；完成超過一秒為incomplete/unknown；送達兩者皆late，原時間保留；payload自填late拒絕 | local；精確remote邊界未重演。late是接收metadata，不能把「晚送達」與「晚執行完成」混為一談。 |
 | F09 deadline／取消／完成競爭 | FQ cancellation before/after completion、same-revision barrier競爭、unknown取消、兩種首次dispatch截止、exact lease expiry | local真SQLite交錯；一寫勝出、另一409，補報不覆寫成果；取消只是意圖，結果已完成可保留成功，unknown仍active。不是多isolate或實體停止證據。 |
@@ -21,4 +21,4 @@
 
 ## 接續順序
 
-成果完整性下載已補DI source／local browser驗證，接續補拒絕稽核缺口，再設計unknown/in-flight的隔離還原演練；跨系統快照必須按identity對帳。事件seq／通知場景需先明確對齊M1輪詢設計與原契約，不能為填表加入未要求的事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。
+成果完整性下載已補DI source／local browser驗證，RA補有界拒絕稽核的source/local驗證，接續設計unknown/in-flight的隔離還原演練；跨系統快照必須按identity對帳。事件seq／通知場景需先明確對齊M1輪詢設計與原契約，不能為填表加入未要求的事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。

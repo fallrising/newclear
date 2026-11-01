@@ -1,0 +1,31 @@
+// Read the actual pinned CLI's pure hook schema validator without starting its CLI.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const pin = JSON.parse(fs.readFileSync(path.join(lab, 'tools/cursor/cli-lock.json')));
+const source = fs.readFileSync(path.join(lab, 'tools/cursor/runtime', pin.version, 'index.js'), 'utf8');
+const startMarker = '"../hooks/dist/index.js"(t,e,r){';
+const endMarker = '},"../indexing-client/dist/index.js"(t,e,r){';
+const start = source.indexOf(startMarker);
+const end = source.indexOf(endMarker, start);
+assert(start >= 0 && end > start, 'Pinned native hook validator layout changed');
+const moduleText = source.slice(start, end + 1);
+const config = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+const context = vm.createContext({ config, console: { warn() {}, info() {} } });
+const result = vm.runInContext(`
+  const nativeModule = ({${moduleText}})['../hooks/dist/index.js'];
+  const exported = {};
+  const require = () => { throw new Error('Unexpected validator dependency'); };
+  require.d = (target, definitions) => { for (const [key, get] of Object.entries(definitions)) Object.defineProperty(target, key, { get }); };
+  nativeModule({}, exported, require);
+  const valid = exported.RV(config);
+  const bad = JSON.parse(JSON.stringify(config));
+  bad.hooks.stop[0].loop_limit = 0;
+  const zero = exported.RV(bad);
+  JSON.stringify({ valid: valid.isValid, errors: valid.errors, rejects_zero_loop_limit: !zero.isValid });
+`, context, { timeout: 1000 });
+process.stdout.write(result + '\n');
+if (!JSON.parse(result).valid || !JSON.parse(result).rejects_zero_loop_limit) process.exitCode = 1;

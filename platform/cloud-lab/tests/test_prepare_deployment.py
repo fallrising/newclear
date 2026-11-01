@@ -112,6 +112,8 @@ class PrepareTests(unittest.TestCase):
         self.addCleanup(db.close)
         db.execute('PRAGMA foreign_keys=ON')
         db.executescript((self.output / 'apps/control/migrations/0001.sql').read_text())
+        db.executescript((self.output / 'apps/control/migrations/0002.sql').read_text())
+        self.assertEqual(db.execute('SELECT count(*) FROM rejection_audit').fetchone()[0], 0)
         seed = (self.output / 'grant-seed.sql').read_text()
         self.assertNotRegex(seed.upper(), r'\b(?:BEGIN|COMMIT|ROLLBACK)\b')
         statements = seed.splitlines()

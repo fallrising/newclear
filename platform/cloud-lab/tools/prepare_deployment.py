@@ -19,7 +19,7 @@ SOURCE_FILES = (
     'apps/control/worker/index.mjs', 'apps/control/worker/auth.mjs',
     'apps/control/worker/protocol.mjs', 'apps/control/public/index.html',
     'apps/control/public/styles.css', 'apps/control/public/dashboard.mjs',
-    'apps/control/migrations/0001.sql', 'recipes/node-health.json',
+    'apps/control/migrations/0001.sql', 'apps/control/migrations/0002.sql', 'recipes/node-health.json',
     'adapters/node-health/runner.py',
 )
 REQUIRED = set('schema_version account_id zone_id database_id domain worker_name access_issuer access_audience human_subject workspace_id resource_id resource_generation not_before expires_at'.split())

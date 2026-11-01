@@ -22,25 +22,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         }
       }
@@ -53,25 +88,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         }
       },
@@ -82,25 +152,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "202": {
             "description": "Durably accepted or existing byte-identical command, not execution success"
@@ -126,25 +231,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         },
         "parameters": [
@@ -168,25 +308,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         },
         "requestBody": {
@@ -223,25 +398,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         },
         "parameters": [
@@ -265,25 +475,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         },
         "requestBody": {
@@ -309,25 +554,60 @@
             "description": "Authorized durable response; request_id included except artifact bytes."
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         },
         "requestBody": {
@@ -376,16 +656,36 @@
             }
           },
           "401": {
-            "description": "Invalid, expired, revoked or replayed machine credential"
+            "description": "Invalid, expired, revoked or replayed machine credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Human identity, expired/revoked grant or scope denied"
+            "description": "Human identity, expired/revoked grant or scope denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Nonempty or invalid request"
+            "description": "Nonempty or invalid request",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Configuration or storage unavailable"
+            "description": "Configuration or storage unavailable",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         }
       }
@@ -405,25 +705,60 @@
             }
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "409": {
-            "description": "Idempotency, revision, fence or result conflict"
+            "description": "Idempotency, revision, fence or result conflict",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "422": {
-            "description": "Invalid schema or deadline"
+            "description": "Invalid schema or deadline",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "429": {
-            "description": "Single active slot or storage/admission quota"
+            "description": "Single active slot or storage/admission quota",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Unavailable; retry same immutable command"
+            "description": "Unavailable; retry same immutable command",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         }
       }
@@ -443,16 +778,36 @@
             }
           },
           "401": {
-            "description": "Invalid or replayed credential"
+            "description": "Invalid or replayed credential",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "403": {
-            "description": "Scope, revoked grant, or Origin denied"
+            "description": "Scope, revoked grant, or Origin denied",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "413": {
-            "description": "Bounded request/output exceeded"
+            "description": "Bounded request/output exceeded",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           },
           "503": {
-            "description": "Snapshot unavailable; missing values are not zero."
+            "description": "Snapshot unavailable; missing values are not zero.",
+            "headers": {
+              "X-Cloud-Lab-Audit": {
+                "$ref": "#/components/headers/RejectionAudit"
+              }
+            }
           }
         }
       }
@@ -1149,6 +1504,20 @@
               }
             }
           }
+        }
+      }
+    },
+    "headers": {
+      "RejectionAudit": {
+        "description": "Worker-generated errors only: persisted means a bounded rejection_audit row with the response request_id was saved; full or unavailable means not saved; not_applicable for 5xx. Access-edge rejection has no such guarantee. No identities or request content logged; see docs/rejection-audit.md.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "persisted",
+            "full",
+            "unavailable",
+            "not_applicable"
+          ]
         }
       }
     }

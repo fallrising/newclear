@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | AC-06：API／排程／bot與看板閉環 | 真實API及獨立Grok MCP工具→原runner→validated；[修正版HL](evidence/m1-health-schedule-window-live.md)已驗真實Cron→原runner→validated | Owner已於2026-10-31用Safari登入並讀取用量，122／84／1與管理聚合一致；human-only批准窗口12:08:10Z–12:38:10Z不自動延長。完整操作流程仍與unknown處置／模型缺口分開，手機為選測 |
 | Grok自然語言調度 | 原生client已發現兩個固定工具，真實工具提交與持久配額驗證通過 | 尚未由實際模型對話選用工具。既有接線不證明模型流程；先確認owner可用模型入口及費用限制，不能以「繼續開發」推定批准付費模型呼叫 |
-| AC-07：完整故障矩陣 | [RF](evidence/m1-remote-recovery.md)已驗遠端回報前斷線、ACK遺失、started後終止、撤權後reconcile及舊fence拒絕；本機另有正反例 | [逐列矩陣](failure-matrix.md)已完成對齊，FQ補取消／deadline／回報競爭的local隔離驗證；[DI成果下載完整性](evidence/m1-artifact-integrity.md)已補source與真本機browser驗證；接續補拒絕稽核，並設計unknown/in-flight隔離還原。事件seq與通知場景尚未實作，須對齊原契約，不自行豁免。不得以三個遠端案例替代全部矩陣；不為驗收直接中斷原live runner |
+| AC-07：完整故障矩陣 | [RF](evidence/m1-remote-recovery.md)已驗遠端回報前斷線、ACK遺失、started後終止、撤權後reconcile及舊fence拒絕；本機另有正反例 | [逐列矩陣](failure-matrix.md)已完成對齊，FQ補取消／deadline／回報競爭的local隔離驗證；[DI成果下載完整性](evidence/m1-artifact-integrity.md)已補source與真本機browser驗證；[RA拒絕稽核](rejection-audit.md)補source/local有界保存，[RAL實際接入](evidence/m1-rejection-audit-live.md)已驗原Worker拒絕與D1對帳；接續設計unknown/in-flight隔離還原。事件seq與通知場景尚未實作，須對齊原契約，不自行豁免。不得以三個遠端案例替代全部矩陣；不為驗收直接中斷原live runner |
 | AC-08：配額／成本／保留與恢復 | 隔離D1還原、journal對帳、Access service-token撤權及bot本機持久上限已有證據；[QV隔離應用上限](evidence/m1-quota-qualification.md)補API／Cron邊界、窗口及歷史保全 | [UO](evidence/m1-usage-observation.md)應用額度API／手動看板已完成source/local驗收，[UL](evidence/m1-usage-live.md)已發布，Safari真人功能讀取已確認；額外asset hash依owner指示取消，未執行不記通過；[保留方案](retention.md)已定義不自動刪除、到期不等於回收及archive/tombstone/restore前置；清理工具尚未實作，provider用量來源仍待接線。Cloudflare供應商配額實際耗盡／帳單仍未驗；不以壓滿免費額度或升級測試。刪除歷史前另有具體保留／恢復方案及批准 |
 | 最終整合驗收 | 各子里程碑都有獨立證據與Git交付 | 所有必要AC、CI及獨立審查完成並合併後，才依repo規則建立usable tag；目前仍為mainline incomplete／usable_tag none |
 

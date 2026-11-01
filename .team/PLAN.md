@@ -2626,6 +2626,12 @@ Owner continues. Lead sole writer for DI01–04/T0032: bounded rawartifact clien
 
 DI source/local evidence gate ACCEPT 2026-10-31T19:13:43Z: RED11, initialGREEN42, final121Node/304Python=425, DI1 realbrowser15checks/104API/noerrors with exactbytes/digest and tamper rejection; T857 finalACCEPT. Initial socketpathfailure retained, shorttaskID correction only. Browser3asset hashes exact, document checks passed. Originaldashboard upload to follow qualified pinned source and prior approval, without runner pause/authority renewal; any live evidence separate.
 
+## RA rejection audit — 2026-11-01T04:27:29Z
+
+Owner continues after DI. Lead sole writer for RA01–04/T0033. Additive0002, bounded minimal4xx audit, no raw identities/content, explicit persistence header; no live authority/paid change. RED→GREEN, actual SQLite reopen/capacity/races and localworkerd plus full regression. One fresh read-only native reviewer T858 with inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no private/network/writes/tests/delegation. Natural language scope is not OS isolation. Existing approved Git delivery applies; live migration requires concrete candidate/readback boundary.
+
+RA source/local evidence gate ACCEPT 2026-11-01T04:32:32Z: RED7, correctedGREEN51, full130Node/304Python=434tests, finaltest-only durabilitytightening7pass and realRA2workerd9checks/6matchinghashes. T858 finalACCEPT. Initialfixture2fail andRA1 metadataassertionfailure retained/corrected without weakeningbusiness-roworacle. Lead source/authorization/evidence audit accepts; index50contracts/8llms/task/diff passed. GitCI/merge/readback remain; no live schema/deploy/renewal or paidupgrade.
+
 T-0447/M1 actual acceptance: one official subscription invocation on33e1eb70 produced
 285byte totals.py-only patch, real checks passed, browser five states/diff/download
 and zero errors; AP cleanup plus independent0claims/VM/cgroup/processes. Reviewer
@@ -2633,3 +2639,26 @@ acceptedEX01–03/FN01/singleFN03. FN06 found reason/cancel and never-allocated 
 gaps; narrow correction plus realdenial/queuedcancel/noVM and labelledmockprojections
 passed; original success read back unchanged, no second coding CLI invocation. Final review/CI/merge
 and ledger closure remain. M2/M3/CloudAC04/AC05 not claimed.
+
+## RAL original-service audit rollout — 2026-11-01T04:48:04Z
+
+Owner continues the concrete stated next step after RA delivery. Lead applies pinnedPR889 additive0002 and originalWorker update with freshstate/history/authority preservation and one harmless machineGET rejection. No runnerstop/renewal/paidplan. Existing T858 source review applies; one fresh native readonly public-evidence reviewer T859, inheritedmodel/effort/permissions, <=1200tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no private/network/tests/writes/delegation. Scope instructions not OSisolation. Lead verifies actual private receipts; normal Git/source readback and evidencegate required.
+
+RAL evidence gate ACCEPT 2026-11-01T04:54:31Z: original166commands/195firings/160journal preserved,4grants/Access/Cron/settings/deadlines retained, samePID/NRestarts. Additive0002 at04:49:29Z, originalWorker100percent/3exactmodules at04:49:45Z; final04:51:37Z. FirstGET nonJSON raw/statusnotretained, D1audit0; one diagnostic retry alignedrunnerUA and preservedrawbeforeparse,403/persisted exactrequest-ID auditrow. Root verifiedprivate receipts; T859 independentpublic ACCEPT.50contracts/8llms/task/diff/226links/64runtimeinputs and173private-literal scan passed. No newhealthjob/restart/renewal/paidupgrade; normalGit gates remain.
+
+
+## HAI M2 verified coverage — 2026-11-01 / T-0339
+
+BOARD HM2C owns status. Root prepares the concrete contract in
+`products/hai-taskboard/docs/plans/m2-verified-coverage-20261101.md`; production/OpenAPI wait
+for owner acceptance. Claude Code2.1.312 exact claude-opus-5-5/high is a no-tools independent
+plan reviewer (480s host deadline; at most one material revision follow-up), no writers/children.
+Initial sandbox invocation failed with EAI_AGAIN, zero reported model usage; raw failure retained.
+No-model outer DNS check succeeded; same bounded reviewer was submitted through normal escalation.
+Review acceptance is not product-contract approval. Root owns disposition and evidence gate,
+document checks, required PR CI/merge/readback and desk/handoff synchronization. Full M2 pending.
+
+Claude substantive plan137.257s REWORK → follow-up186.133s ACCEPT for owner presentation, not
+production approval. Root disposed all findings; final R1–R7 conditions incorporated without another
+model call, as reviewer explicitly allowed. Product COV-ACs remain NotRun; only proposal publication
+is accepted. See product evidence/m2-coverage-proposal-20261101.md for measured/unknown accounting.

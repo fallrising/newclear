@@ -14,7 +14,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | T-0002-01 | CLI capability／版本／缺失偵測 | AC-01 | todo | — | — | — |
 | T-0002-02 | 已有 OpenCode 合成任務；移植後補完整 runtime 回歸 | AC-02 | todo | — | — | — |
-| T-0002-03 | 確認 Grok 版別，再做顯式遠端任務 | AC-03 | todo | — | — | — |
+| T-0002-03 | 官方 Grok／grok-4.6 顯式遠端任務通過 | AC-03 | done | 2026-11-01T04:50:31Z | 2026-11-01T11:02:40Z | 2026-11-01T11:03:20Z |
 | T-0002-04 | Pi + DeepSeek 顯式遠端任務 | AC-04 | done | 2026-10-31T18:03:31Z | 2026-10-31T18:19:17Z | 2026-10-31T18:19:51Z |
 | T-0002-05 | 原生權限等待、終端回覆及繼續 | AC-05 | todo | — | — | — |
 | T-0002-06 | 補 Grok／Pi 取消與所屬程序清理 | AC-06 | todo | — | — | — |
@@ -121,10 +121,12 @@ Owner 指示繼續開發；先完成原生協定、隔離憑證副本、工具 g
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0010-01 | Grok 真實任務 AC-03 通過；證據、CI 與合併交付 | AC-03 | in_progress | 2026-11-01T04:50:31Z | — | 2026-11-01T11:00:50Z |
+| T-0010-01 | Grok 真實任務 AC-03 通過並合併交付 | AC-03 | done | 2026-11-01T04:50:31Z | 2026-11-01T11:02:40Z | 2026-11-01T11:03:20Z |
 
 T-0010 已準備 Grok 1.0.70／grok-4.6 單任務 runner：原生 inspect 確認 hooks、已登入無 prompt 啟動與同 session 模型選擇、清理通過（12.52 秒）；78 項離線測試通過。[證據](../evidence/grok-ready-2026-11-01.json)、[單次範圍](../GROK-WORK.md)。沒有送模型 prompt；AC-03 仍 pending，等 owner 明確批准一次付費驗收。四工具 hook gate 會受原生 fail-open 行為限制，沒有 request／token／金額硬上限。
 
 T-0010 的一次已授權 Grok 任務已執行，12.55 秒後因 lab 只識別 file_path、未識別原生 read_file 的 target_file 而停止；兩次讀取請求被拒，seed output 未變，AC-03 未通過。原生 session／模型／prompt 正確，程序與憑證副本清理完整。[失敗與離線修正](../evidence/grok-live-2026-11-01.json)：已支援無歧義路徑別名、兩檔並行讀取、按 tool ID 核對完成，保留四次工具 gate／唯一編輯；80 tests 通過。沒有追加付費重跑；PR #897 保持 draft，等新的單次批准。
 
 T-0010 最新：owner 再批准一次翻倍範圍後，Grok 1.0.70／grok-4.6 真實任務通過 AC-03，18.00 秒完成兩個 read_file 與一個 search_replace；同 session 模型、authenticated hooks、成功工具結果、end_turn Stop、精確產物 hash 與清理一致。[成功證據](../evidence/grok-completed-2026-11-01.json)。81 項離線測試通過；先前失敗保留，本次授權已使用、沒有自動重跑。交付及結案狀態見[任務板](BOARD.md)。四 provider 各有合成任務證據，但統一產品流程、權限／取消／恢復及完整 MVP 尚未完成。
+
+T-0010／T-0002-03 結案：[PR #897](https://github.com/fallrising/newclear/pull/897) 已合併，commit `bd96e88f269d5f25d62ad38c62ded1c0d516992d`，offline／validate 兩項 CI success。已回讀主線成功證據：completed、model_inference_verified=true、三次工具、18.00 秒、cleanup completed。前次失敗及原受測來源 hash 保留；本次單次授權已用完，沒有追加模型呼叫。四 provider 各有合成任務成功證據，完整 MVP 仍 incomplete；下一步為統一工位／結果入口與剩餘權限、取消及恢復驗收，沒有 release／deploy／usable tag。

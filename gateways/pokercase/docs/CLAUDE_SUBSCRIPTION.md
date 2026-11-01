@@ -1,44 +1,40 @@
 # Claude 订阅如何接到 thinrouter
 
-> [!WARNING]
-> 用订阅额度做自动化调用仍受 Anthropic 使用条款约束。thinrouter 只降低「请求不像 Claude Code」
-> 的风险：请求一律由本机真正的 Claude Code CLI 发出，thinrouter 不持有、也不发送任何 Claude token。
-> 不要在承受不起风险的帐号上启用；不要替换 Claude Code 自己的 system prompt。
+默认使用真正的 Claude Code **交互式 TUI**，在私有 PTY 中提交输入；保留显式
+`--claude-mode print` 兼容模式。选择 TUI 后不会自动切回 `-p`，也不会把完整 transcript
+冒充增量串流。这是 [T-0426 批准的 A 方案](tasks/T-0426-claude-tui.md)。
 
 ## 原理
 
-`claude` provider 不再直接调用 `api.anthropic.com`。每个请求由本机已登录的 `claude` 二进制回答
-（做法参考 [yetone/magpie 的 Claude subscription bridge](https://github.com/yetone/magpie/blob/main/docs/subsystems/claude-subscription-bridge.md)）：
-
-```
+```text
 client (chat / messages / responses)
-        │  thinrouter 统一转成 chat 格式，再渲染成一条 user 消息
-        ▼
-claude -p --output-format stream-json --input-format stream-json
-          --include-partial-messages --verbose --model <model>
-          --tools "" --strict-mcp-config --setting-sources "" [--resume <session>]
-        │  Claude Code 用自己的登录、system prompt、billing 区块与客户端身份请求 Anthropic
-        ▼
-stream-json 的 stream_event（Anthropic Messages 事件）
-        │  thinrouter 去掉 thinking 区块，转回客户端协议
-        ▼
-client
+    → thinrouter 渲染 user 输入 → 私有 PTY → 官方 Claude Code 交互式进程
+    → 官方请求的 SSE 响应副本 → 私有 response tap → 原有协议转换与用量观察
+    → client
 ```
 
-- **呼叫方的 system prompt 不会取代 Claude Code 的**：它放在第一条 user 消息的
-  `<external_system_instructions>` 里。替换 system prompt 正是让订阅流量不像 Claude Code、
-  导致封号风险的做法。
-- 多轮对话：已回答的部分包在 `<conversation_history>`，要回答的这一轮在 `<current_turn>`；
-  消息标为 `Human:` / `Assistant:`。图片以 Anthropic image 区块（base64 或 URL）放在原位置。
-- 进程环境：移除 `ANTHROPIC_BASE_URL`、`ANTHROPIC_API_KEY`、`ANTHROPIC_AUTH_TOKEN`、
-  `CLAUDE_CODE_OAUTH_TOKEN`、`CLAUDECODE` 等，设 `DISABLE_AUTOUPDATER=1`、
-  `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`、`DISABLE_AUTO_COMPACT=1`、
-  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`、`ENABLE_CLAUDEAI_MCP_SERVERS=0`；
-  工作目录是空的 `<data_dir>/claude-work`，不读专案或使用者设定。
-- 结束：stdin 送出一条消息后关闭；回答完或客户端断线时先送 SIGTERM（让 Claude Code 清掉
-  `~/.claude/.oauth_refresh.lock`），5 秒后才强制结束。同时最多 `--claude-max-runs`（预设 2）个进程。
-- 失败：额度用尽 → 429；未登录 → 401；其它 → 502。在第一个回答事件之前的失败可 fallback 到
-  route 的下一个 target。
+- TUI 参数保留精确 model、空内建工具、严格 MCP 配置、独立工作目录和指定 session；不传
+  `-p` 或 stream-json 输出参数。CLI 自己持有登录状态并发出请求，thinrouter 不读出凭证。
+- 与 magpie 的交互式方案一样，使用 `BUN_OPTIONS` 加载自己的 response tap，观察 Bun
+  `FetchSession` 的主 Messages 响应。请求、认证标头、TLS 和 Claude Code system prompt
+  不被改写。tap 读取响应副本；这是依赖官方 CLI 内部接口的兼容层，版本变化可能使其失效。
+- tap 未载入、响应被截断或缺少原始终止证据时明确失败；不会靠 transcript 补出成功。
+  客户端在完整回答前收到增量内容，输入／输出／cache 用量仍来自原始事件。重复 message ID
+  只转发一次。TUI 屏幕、提示和 profile 路径不会作为错误诊断回传。
+- 调用方的 system 指令仍放在 user 消息的 `<external_system_instructions>`，历史与当前轮
+  分开渲染。这保留官方 system prompt，但不构成帐号安全或订阅条款合规的保证。
+- 进程移除 API token/base override、嵌套入口标记和继承的 loader 配置，仅安装本轮私有 tap；
+  保留官方 CLI 正常使用指定 profile 的能力。`<data_dir>/claude-work` 是稳定独立工作目录。
+  未完成的 trust、登录或 onboarding 必须由使用者在官方 CLI 手动处理；gateway 不自动确认。
+- 使用 bracketed paste 并等待确认后提交，拒绝终端控制字元；命令样式开头转为普通消息。
+  TUI 将 inline base64 图片写入本轮 0600 私有文件后交给 CLI。远端图片 URL 在 TUI 中明确
+  不支持，也不由 helper 下载；需要旧 URL 图片行为时由操作者显式选择 print。
+- 回答结束后保留可复用进程和输入通道。断线／失败／关闭依原有生命周期取消，TUI helper
+  负责终止所属 PTY 进程组并移除本轮私有文件；同时最多 `--claude-max-runs`（预设 2）个 run。
+  TUI 启动等待有界；tap 缺失会回报固定错误。未发出客户端回答前仍沿用 route 的 fallback。
+
+这次离线实现不能证明真实 CLI 兼容、帐号不会受限、cache 必然命中或节省固定倍数额度。
+此前六次真实 admission 的 native reuse 验收仍未通过；本次没有增加真实请求。
 
 ## 客户端工具
 
@@ -64,13 +60,12 @@ client
 
 - 回答以 `end_turn` 结束后，run 不结束而是闲置，记住它已有的对话（正规化后的讯息与刚才的回答）
   以及 model、system、工具清单。下一个请求若是同一组 model/system/工具、前面的讯息与它记住的完全
-  一致、后面只多了使用者讯息，就只把新讯息写进那个进程的 stdin（不加 `Human:` 标签），
-  Anthropic 从 cache 读其余部分。
+  一致、后面只多了使用者讯息，就只提交新讯息到同一进程（不加 `Human:` 标签）；实际 cache 命中与订阅额度由服务端决定。
 - 闲置同样受 `--claude-idle-secs` 限制；名额不够时最早闲置或等待的 run 先被结束。
 - 新进程的第一则讯息里，历史每 20 则一个区块，最后一个完整区块加 `cache_control`
   （`ephemeral`、1h）；没有完整区块时标在呼叫方的 instructions 上。之后同一段对话即使开新进程，
-  也能读到之前写入的 cache。
-- gateway 关闭时（Ctrl-C 或 SIGTERM）先对所有存活的 Claude Code 送 SIGTERM，最多等 6 秒。
+  print 模式保留这些 cache 标记；TUI 的最终缓存策略由官方 CLI 决定，不保证命中。
+- gateway 关闭时（Ctrl-C 或 SIGTERM）先对所有存活的 Claude Code 送 SIGTERM，TUI 最多等 7 秒（print 为 6 秒）。
 
 ## 存下的 session（重启后也能续接）
 
@@ -79,7 +74,7 @@ client
 - 闲置中的 run 被结束（闲置逾时、名额被让出、gateway 关闭）时，它的 session 登记到资料库的
   `claude_shelf`：只存 session_id、设定签章的 hash 与每则已知讯息的 hash，不存对话内容。
 - 新请求若续不上闲置进程，就查 shelf：设定相同、历史是已知讯息的前缀、后面只多了使用者讯息，
-  就以 `claude -p ... --resume <session_id>` 开新进程、只写入新讯息，Anthropic 照原样读 cache。
+  就以所选 transport 的 `claude ... --resume <session_id>` 开新进程、只提交新讯息；实际 cache 使用仍须实测。
   session 档不在，或 Claude Code 载入失败（例如 `No conversation found`），自动改开新进程整段重送。
 - shelf 最多 64 笔、保留 6 小时，过期或被挤出时连 session 档一起删除；其他结束的 run（等工具结果
   逾时、出错）不保留 session。gateway 启动时会删除工作目录专属 project 资料夹里 shelf 没引用的
@@ -93,15 +88,19 @@ client
 claude            # 先用 Claude Code 登录一次（Pro/Max 订阅）
 thinrouter import-local          # 侦测到 claude 就建立 local-claude 连线与 rt-claude route
 # 或在 admin 汇入 provider=claude、access_token 留空
-thinrouter serve --claude-bin /path/to/claude   # 不在 PATH 时
+thinrouter serve --claude-bin /path/to/claude   # 默认 --claude-mode tui
+# 只有操作者明确选择才使用旧 print transport：
+thinrouter serve --claude-mode print --claude-bin /path/to/claude
 ```
+
+`THINROUTER_CLAUDE_MODE=tui|print` 也可选择 transport。TUI 需要 Unix PTY 和兼容的 Bun FetchSession；不支持的平台明确拒绝 TUI，print 仍可显式选择。
 
 模型名直接交给 `claude --model`（`sonnet`、`opus` 或完整模型 ID）。
 
 ## 目前限制
 
 - 只有「对话完全一致、只多了使用者讯息」才续用闲置进程；客户端改写或截短历史、换了
-  system/工具/模型，都会开新进程重送整段对话（由 history 分块的 cache 标记减少重写）。
+  system/工具/模型，都会开新进程重送整段对话；缓存和计费效果须实际验证。
 - 闲置进程被结束后，靠存下的 session 续接（见下节）；但对话被改写时一样整段重送。
 - thinking 区块不回传；`temperature`、`max_tokens` 等取样参数不传给 Claude Code。
 - 旧版存过的 Claude token 会在开启资料库时清掉（不再使用）。

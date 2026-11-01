@@ -50,7 +50,7 @@ class BufferedGateway(ClaudeGateway):
         env = {"PATH": "/usr/bin:/bin", "HOME": str(self.directory), "CLAUDE_CONFIG_DIR": str(self.directory / "claude-config"),
                "HTTP_PROXY": self.fixture.proxy_url, "HTTPS_PROXY": self.fixture.proxy_url, "ALL_PROXY": self.fixture.proxy_url, "RUST_LOG": "warn"}
         command = [str(self.binary), "serve", "--host", "127.0.0.1", "--port", str(self.port), "--data-dir", str(self.directory),
-                   "--admin-token", self.admin, "--claude-bin", str(self.fake), "--claude-idle-secs", "120", "--cursor-bin", str(self.cursor),
+                   "--admin-token", self.admin, "--claude-mode", "print", "--claude-bin", str(self.fake), "--claude-idle-secs", "120", "--cursor-bin", str(self.cursor),
                    "--cursor-runtime-bin", str(self.runtime), "--cursor-image", IMAGE, "--cursor-profile-volume", "thinrouter-cursor-offline", "--cursor-max-runs", "1"]
         if self.cursor_enabled: command.append("--cursor-accept-account-plugins")
         self.child = subprocess.Popen(command, env=env, cwd=self.directory, stdin=subprocess.DEVNULL, stdout=self.log, stderr=self.log, start_new_session=True)

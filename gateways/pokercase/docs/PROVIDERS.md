@@ -7,7 +7,7 @@ Personal subscription / free upstreams for **Layer A** (thinrouter).
 | ID | Aliases | Status | Format | Default base |
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
-| `claude` | `cc`, `anthropic`, `claude_code` | **active** (text, images, client tools via MCP) | local Claude Code CLI (`claude -p`), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
+| `claude` | `cc`, `anthropic`, `claude_code` | **active** (text, images, client tools via MCP) | local Claude Code interactive TUI (explicit print compatibility), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
 | `cursor` | `cu`, `cursor_agent` | **opt-in** (`--cursor-accept-account-plugins`; text only) | containerized Cursor Agent CLI (`cursor-agent -p`) | `local://cursor-agent` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
@@ -37,6 +37,10 @@ Antigravity's [offline HTTP harness](ANTIGRAVITY-OFFLINE.md) provides the confin
 Generic API-key Chat, SIWC forced-SSE Responses, Grok JSON Responses and OpenCode Chat now use the same durable per-dispatch lifecycle for buffered Chat/Messages/Responses clients. Each fallback or existing legal401 retry has a distinct attempt under one request; refresh alone has no inference row. Original usage and terminal evidence are saved before conversion, independently of HTTP200 or client success. Failed collection, cancellation, timeout and finalization failure preserve their observed disposition; startup recovery never replays inference.
 
 Direct JSON leaves `first_output_ms` unknown. SIWC measures it only from a meaningful delta observed on arrival, and uses the collector's first terminal snapshot without borrowing missing counters from earlier envelopes. Native Responses preserves accepted bytes, extensions and background status. Buffered configured-rate estimates retain the existing complete-counter/price requirement; named streaming costs remain unknown. These estimates do not establish subscription consumption. [BH-1–BH-5](tasks/T-0432-buffered-http-settlement.md) provides the isolated terminal entry, matrix and remaining boundaries; CLI buffered observation and real provider/client-version verification remain outside this slice.
+
+### Claude interactive transport
+
+`--claude-mode tui` is the default on the server: genuine PTY plus incremental main-response observation, with no implicit print or whole-message fallback. Text, inline base64 images and MCP tools retain the existing parent lifecycle. TUI rejects remote image URLs; explicit print retains the old URL path. Unsupported CLI internals/platforms fail visibly. Offline PTY evidence does not establish account safety, actual savings or close the outstanding live native-reuse gap. See [transport and operator setup](CLAUDE_SUBSCRIPTION.md) and [approved TA1–TA5](tasks/T-0426-claude-tui.md).
 
 ### Existing buffered CLI observation
 
@@ -135,7 +139,7 @@ When you need one of these: open an item, implement `ProviderProfile` + forward 
 | Provider | Client → Upstream |
 |----------|-------------------|
 | siwc / grok | `/v1/responses` → forwarded natively (all items kept; siwc applies its preview limits above). `/v1/chat/completions` and `/v1/messages` → converted to a **Responses** body (tools, `tool_calls` ↔ `function_call`, tool results ↔ `function_call_output`, images ↔ `input_image`); the Responses SSE is converted back to `chat.completion.chunk` or Anthropic events (text and tool calls) |
-| claude | Every client protocol → one prompt for the local `claude -p` (caller system in `<external_system_instructions>`); its stream events → client protocol |
+| claude | Every client protocol → user input for the selected local Claude transport (default interactive TUI; explicit `--claude-mode print`) (caller system in `<external_system_instructions>`); its stream events → client protocol |
 | opencode | Chat Completions passthrough (+ `x-opencode-client`); `/v1/responses` clients get a full Responses event stream (message and `function_call` items, usage) converted from the chat chunks |
 | cursor | Every client protocol → one text prompt (caller system in `<external_system_instructions>`) for `cursor-agent -p --output-format stream-json --stream-partial-output --mode ask --sandbox disabled --trust --workspace <empty dir>`; never `--force` / `--approve-mcps`. Only streaming deltas are used (duplicate flushes and `thinking` events skipped); usage comes from the `result` line (`inputTokens`, `outputTokens`, `cacheReadTokens`); output is converted to the client protocol. Tools and images → 501 (retryable). The prompt is a command-line argument: at most 128 KiB, and visible to other local users in `ps`. |
 | agy | Antigravity `generateContent` envelope |

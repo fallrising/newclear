@@ -1,5 +1,17 @@
 # Pokercase 技術任務
 
+## T-0426 — Approved Claude TUI implementation
+
+Demand:deskT0426; ownerselectedA,claim351merged. [TA-1–TA-5](T-0426-claude-tui.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| TA-01 | PTY/tap transport and explicit print compatibility | TA-1–TA-3 | in_progress | 2026-11-01T04:48:00Z | — | 2026-11-01T05:14:58Z |
+| TA-02 | Lifecycle/protocol/offline regression evidence | TA-4 | in_progress | 2026-11-01T04:48:00Z | — | 2026-11-01T05:14:58Z |
+| TA-03 | Independent acceptance and full delivery | TA-5 | in_progress | 2026-11-01T04:48:00Z | — | 2026-11-01T05:14:58Z |
+
+Prior CT03 awaiting-owner snapshot is superseded by the owner's explicit A selection; no core or live acceptance is preclaimed.
+
 ## T-0426 — CLI transport/cache review
 
 Demand: desk T-0426; claim348 merged. [CT-1–CT-3](T-0426-cli-cache-review.md).

@@ -71,7 +71,7 @@ try {
   const response=await mf.dispatchFetch(origin+path,{method:'POST',body:raw,headers:{'Content-Type':'application/json','X-Lab-Key-Id':'runner','X-Lab-Time':time,'X-Lab-Nonce':nonce,'X-Lab-Signature':signature}});
   assert.equal(response.status,200);return response.json();
  }
- await db.batch(readFileSync(join(root,'apps/control/migrations/0001.sql'),'utf8').replace(/^--.*$/gm,'').split(';').filter(x=>x.trim()).map(x=>db.prepare(x)));
+ await db.batch(['0001.sql','0002.sql'].map(name=>readFileSync(join(root,'apps/control/migrations',name),'utf8')).join('\n').replace(/^--.*$/gm,'').split(';').filter(x=>x.trim()).map(x=>db.prepare(x)));
  for(const [id,capabilities] of [['human',caps],['runner',['dispatch:claim','runs:report','runs:reconcile']]])await db.prepare('INSERT INTO grants VALUES (?,1,0,?)').bind(id,JSON.stringify({...common,principal_id:id,capabilities})).run();
  await db.prepare('INSERT INTO grants VALUES (?,1,0,?)').bind('scheduler',JSON.stringify({...common,principal_id:'scheduler',capabilities:['commands:submit','node:health:read']})).run();
  await db.prepare('INSERT INTO schedules VALUES (?,1,0,?,NULL)').bind('health-minute','scheduler').run();

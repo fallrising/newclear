@@ -33,3 +33,7 @@ FQ的七天案例使用合成有效授權覆蓋時間旅行，原artifact bytes�
 5. 真正執行時需限制每批範圍及預期影響列數；回覆不明先對帳，不盲重試。恢復不能倒退授權、復活舊dispatch或覆蓋備份之後的新資料。
 
 本輪只完成方案與既有邊界qualification；不把未實作的歸檔／tombstone、provider用量或完整AC-08記成通過。
+
+## 拒絕稽核的獨立上限
+
+[RA拒絕稽核](rejection-audit.md)的rejection_audit與commands分開，最多10000列，不自動DELETE／覆寫。容量滿時保留原證據、回應full；DB失敗回unavailable。無限期保存不是完整安全日誌保證；Access邊緣拒絕、5xx、傳輸失敗及程序中斷未必有列。歸檔／清理仍需另訂保全與批准，不能重置表假裝所有拒絕已收集。

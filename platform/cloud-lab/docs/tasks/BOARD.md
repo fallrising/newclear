@@ -576,3 +576,12 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - 主導實際私人前後receipt核對：原127commands整列相同、156firings及123journal rows保留；最終128commands／157firings／124journal、active0，原closed_unknown與result null保持。原unit/config/policy/client/ledger及journal identity保持，runner同PID無restart，保守截止仍2026-11-05T07:24:25Z。新增排程活動沒有被部署清除或重播。
 - Live部分是管理介面發布／版本／來源與設定歷史保全；未續human窗口，未執行新真人下載或live asset HTTP bytes驗收，未要求owner重測Safari。真正下載完整性行為由本輪local Chromium/workerd驗證支持。T857未接觸私人收據，live保全由主導核對；公開不放domain/account/command IDs/secrets。
 - 本卡關閉DI01–04及此次已授權原看板更新，完整產品仍mainline incomplete／無usable tag；下一項是拒絕稽核與其他矩陣缺口。本收尾只改任務板。
+
+## T-0033 — 有界拒絕稽核
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0033-1 | 最小拒絕metadata | RA-01 | in_progress | 2026-11-01T04:27:29Z | — | 2026-11-01T04:27:29Z |
+| T-0033-2 | 隱私與可信邊界 | RA-02 | in_progress | 2026-11-01T04:27:29Z | — | 2026-11-01T04:27:29Z |
+| T-0033-3 | 容量與失敗可觀測 | RA-03 | in_progress | 2026-11-01T04:27:29Z | — | 2026-11-01T04:27:29Z |
+| T-0033-4 | 隔離驗證審查交付 | RA-04 | in_progress | 2026-11-01T04:27:29Z | — | 2026-11-01T04:27:29Z |

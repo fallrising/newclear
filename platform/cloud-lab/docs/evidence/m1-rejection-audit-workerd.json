@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "scope": "local workerd and D1 only; synthetic identities/collector; no live Cloudflare writes",
+  "miniflare": "5.20261019.2-beta",
+  "checks": [
+    "actual migration via D1 binding",
+    "D1 batch failure rolls back preceding write",
+    "concurrent CAS permits one revision transition",
+    "anonymous assets/API and wrong origin denied by actual Worker",
+    "synthetic human JWT verifies against local JWKS; actual ASSETS binding returns all three exact files with security headers",
+    "actual Worker HMAC, dedupe, claim, report, artifact ACL",
+    "actual workerd rejection request ID persists in D1; untrusted identity/query/path omitted",
+    "actual D1 concurrent final audit slot has one winner, original evidence/business unchanged, success still works at capacity",
+    "missing audit table keeps original 401 and reports unavailable; isolated evidence retained"
+  ],
+  "sources": {
+    "apps/control/worker/index.mjs": "8c561d04e6d1c8d53962ba96f0e180898d4f12986cb01fe6e435428f6edb2b69",
+    "apps/control/worker/auth.mjs": "2f1338e5f8db0bdc7b0e7a38818ef26d3b80825798ef795bc6692c67d548898a",
+    "apps/control/worker/protocol.mjs": "1328a818e0335a615635c3797b46dd9f1033a04a796592fc11a77dbf16f6abd0",
+    "apps/control/migrations/0001.sql": "67165ab7b0148900811abd596194e1701b9aa8d34a2130a362ff11776f743dbc",
+    "apps/control/migrations/0002.sql": "6fac19d185aad53fd634620f7b49974135f5f5c2d63134d19029fc85efea2578",
+    "tools/qualify_runtime.mjs": "d1bc3e6f277335da0d76b9a01d72fb0ebe2701f8b057d5b6d7f1721852c4faab"
+  }
+}

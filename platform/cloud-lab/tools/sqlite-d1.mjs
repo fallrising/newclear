@@ -8,6 +8,9 @@ export class SQLiteD1 {
     if (!this.db.prepare("SELECT name FROM sqlite_master WHERE name='commands'").get()) {
       this.db.exec(readFileSync(new URL('../apps/control/migrations/0001.sql', import.meta.url), 'utf8'));
     }
+    if (!this.db.prepare("SELECT name FROM sqlite_master WHERE name='rejection_audit'").get()) {
+      this.db.exec(readFileSync(new URL('../apps/control/migrations/0002.sql', import.meta.url), 'utf8'));
+    }
   }
   prepare(sql) {
     const db = this.db;

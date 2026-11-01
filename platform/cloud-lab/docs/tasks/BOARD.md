@@ -694,8 +694,12 @@ T864獨立審查ACCEPT bounded remote data restore；主導privateaudit接受，
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0039-1 | 指定Opus5.5審查原始目標及成果 | DIR-01 | in_progress | 2026-11-01T15:15:09Z | — | 2026-11-01T15:28:07Z |
-| T-0039-2 | 核對發現並收斂現況入口 | DIR-02 | in_progress | 2026-11-01T15:15:09Z | — | 2026-11-01T15:28:07Z |
-| T-0039-3 | 重排近期整合工作與停止條件 | DIR-03 | in_progress | 2026-11-01T15:15:09Z | — | 2026-11-01T15:28:07Z |
+| T-0039-1 | 指定Opus5.5審查原始目標及成果 | DIR-01 | done | 2026-11-01T15:15:09Z | 2026-11-01T15:30:51Z | 2026-11-01T15:31:31Z |
+| T-0039-2 | 核對發現並收斂現況入口 | DIR-02 | done | 2026-11-01T15:15:09Z | 2026-11-01T15:30:51Z | 2026-11-01T15:31:31Z |
+| T-0039-3 | 重排近期整合工作與停止條件 | DIR-03 | done | 2026-11-01T15:15:09Z | 2026-11-01T15:30:51Z | 2026-11-01T15:31:31Z |
 
 範圍及主導處置見[方向審查](../direction-review.md)。單次exact-model審查REPLAN；不做provider API／續權／live修改。完成審查與文件交付，不宣稱後續A授權、B盤點或C接入已執行。
+
+DIR01–03由PR[937](https://github.com/fallrising/newclear/pull/937)於2026-11-01T15:30:51Z合併（head `167b69c67e4afe1885caba72b94f8d7a9f21c6cd`、merge `5c02b6422ed37ebd80024a85d9f3523058c4a5d5`）。Exact-head CI通過：CloudLab41321464785／project41321464672／llms41321464719；本機52contracts／9indexes／392links、task-report／diff、9private-literals無命中，歷史SUCCESS尾段完整保存、69runtime inputs不變。正常merge/readback fulltree相同、clean、head為main祖先。
+
+實際Claude Code2.1.307／claude-opus-5-5／high、一次呼叫／一turn／124480ms／exit0、model tools與MCP空；REPLAN由主導核對後採納並修正部分推論。原文與處置分開保存，沒有把工具受限review冒充live驗證。下一個產品工作為CF工具目錄與Edge Ops重複判定；provider API與新加固層暫緩。沒有續權、封存、runtime或AGENTS變更；主線仍incomplete。本PR只補任務結案。

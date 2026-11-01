@@ -1,5 +1,7 @@
 # T-0442 Fanzloud M2 — 2026-11-01
 
+Spring Pool PR196 / T-0356: [bounded plan and evidence gate](spring-pool-pr196/PLAN.md).
+
 Owner explicitly requests M2; desk claim PR349 merged/read back 42e474182de3d64b0be8023d7f6ae26d02904ada.
 Base newclear d3207b3a97a5b223da501af1418e64e94745bf10. Preserve old dirty M1 worker tree.
 

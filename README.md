@@ -54,6 +54,7 @@
 | [`platform/agent-platform`](platform/agent-platform/) | 自託管多 agent 工作平台（OpenHands Agent Canvas 範本） | React, Python, PostgreSQL, Cocoon | A |
 | [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品數位工作者：M1 離線核心與有界 M2 原生 adapter；完整 M2／跨產品整合仍有缺口 | Python、SQLite；可替換 adapters | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
+| [`platform/spring-pool`](platform/spring-pool/) | 單人版本化腳本庫與 runbook 編排；不執行腳本（開發中） | Hono, Rust/Wasm；Workers, D1 | A |
 | [`platform/cloud-lab`](platform/cloud-lab/) | 個人 CF 工具框架：知識樹、唯讀節點檢查、持久任務與看板（雲端閉環／恢復撤權與本機瀏覽器子集通過，新版已部署，具授權管理及來源關聯整合、機器／resident短期實際觀測與停止驗證，常態runner政策與恢復已本機驗證，具離線啟用方案與用量估算，七日runner-only服務已啟用並回讀，低頻排程與看板已本機驗證，Cron延遲派送窗口已修正，15分鐘真實觸發與原runner回報通過且歷史保留，固定bot JSON及本機MCP入口、同ID恢復已本機驗證，獨立Grok已接線，bot短期續權與一筆真實檢查通過並恢復查詢模式，持久bot租期／配額及顯式續租已本機實作，首期24h bot政策與Grok工具已啟用、一筆真實檢查通過，截止2026-10-30T18:00:27Z，具不消耗額度的bot租期／待對帳查詢，API／Cron應用配額邊界已補本機隔離驗收，應用額度API與手動看板已發布（Safari真人用量讀取通過；原unknown仍阻塞排程，具離線結案方案），真人瀏覽器流程待驗） | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（M3 runtime） | Go, SQLite, React | A |

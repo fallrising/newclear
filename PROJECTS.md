@@ -44,6 +44,7 @@
 | [platform/local-ocr-services](platform/local-ocr-services/SUCCESS.md) | platform | 以可獨立部署的本機引擎提供受限且一致的 OCR HTTP 介面 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [platform/prism](platform/prism/SUCCESS.md) | platform | 以可插拔儲存提供標準遙測接收、查詢與告警相容層 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-20 |
 | [platform/signal-hub](platform/signal-hub/SUCCESS.md) | platform | 將個人來源事件持久化、聚合並可靠投遞至訂閱者 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
+| [platform/spring-pool](platform/spring-pool/SUCCESS.md) | platform | 單人版本化腳本庫、固定版本 runbook 編排與 Markdown 匯出 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-30 |
 | [products/goku](products/goku/SUCCESS.md) | products | 以命令列、訊息消費者與網頁管理書籤 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-10 |
 | [products/hai-taskboard](products/hai-taskboard/SUCCESS.md) | products | 以可追溯工作圖與證據關卡控制人機軟體交付 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [products/history-atlas](products/history-atlas/SUCCESS.md) | products | 以繁體中文互動地圖探索歷史年代、地點、人物與事件 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-23 |

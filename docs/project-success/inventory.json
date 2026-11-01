@@ -184,6 +184,11 @@
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"
     },
     {
+      "path": "platform/spring-pool",
+      "last_source_update": "2026-09-30T18:09:19Z",
+      "source_commit": "2eb29676863869a67f90dc68b8332ff1db87078e"
+    },
+    {
       "path": "products/goku",
       "last_source_update": "2026-10-10T14:36:19+00:00",
       "source_commit": "79109d62d5d8f47cfe3e673d7467e901e41467eb"

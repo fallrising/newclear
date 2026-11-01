@@ -220,3 +220,7 @@ focused/integration tests, full backend baseline and source-bound final revision
 requires final review, PR CI, normal merge and remote readback; its delivery receipt is recorded in BOARD.
 The initial proposal's NotRun checkpoint is historical, not the current test status. Full M2, completion
 UI and product AC-02..04 remain incomplete. No release, usable tag or deployment is part of this slice.
+
+## WorkItem material-index proposal — 2026-11-01
+
+[Concrete next contract](docs/plans/work-item-material-index-20261101.md) maps remaining M2/detail gaps and proposes one metadata-only discovery API. DTL-PLAN-01..03 in BOARD cover this planning delivery; IDX-AC-01..06 remain NotRun until owner acceptance and implementation. Existing full WorkItemDetail, product ACs and delivered policy/coverage contracts are unchanged.

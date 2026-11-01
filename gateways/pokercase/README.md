@@ -29,6 +29,8 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 **Providers:** siwc (OpenAI models) · claude · cursor · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)  
 **Claude 订阅原理：** [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md)
 
+Inline system/developer text blocks preserve the same instruction role as strings. Equivalent representations no longer change the Claude reuse signature or conversation prefix; genuinely changed instructions still require a new run. See [the bounded correction and remaining live-reuse limits](docs/tasks/T-0426-instruction-roles.md).
+
 **Out of scope (for now):** MITM, cloud sync, 9router.db compatibility, media APIs.
 
 > [!WARNING]

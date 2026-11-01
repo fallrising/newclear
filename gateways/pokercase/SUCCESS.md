@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Inline instruction role preservation
+
+[NR-1–NR-3](docs/tasks/T-0426-instruction-roles.md) correct the observed system text-block/string role mismatch while preserving strict reuse criteria. This bounded offline correction does not accept live native reuse or reopen the exhausted pilot budget. Original17AC remains unchanged.
+
 ## T-0426 — Approved interactive Claude transport
 
 Owner selected A: genuine interactive CLI plus response tap. [TA-1–TA-5 design and acceptance](docs/tasks/T-0426-claude-tui.md) govern the core update after claim351. This explicitly resolves the earlier pending choice. Preserve original17AC history while extending the transport; no live quota/compatibility or native-reuse acceptance is implied. The implementation has passed432Rusttests/25groups,199Python tests, formatter/Clippy and independent code review. RemoteCI/delivery and finalbackup/cleanup remain separate gates; the linked task records actual outcomes.

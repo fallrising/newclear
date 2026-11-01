@@ -235,6 +235,32 @@ export function renderUsage(document, data, bootstrap, now, confirmed = true, cl
   return panel;
 }
 
+// Compare complete M1 records, not Event/source_seq deltas. Keep no history outside
+// the current bounded view. Lease expiry is a derived view, not a new DB revision.
+export function acceptCommandSnapshot(previous, incoming, current) {
+  const fail = () => { throw new Error('命令快照版本或內容不一致，保留上次資料並等待重新讀取。'); };
+  if (!Array.isArray(incoming) || incoming.length > 20 || !Number.isFinite(utc(current))) fail();
+  const normalize = item => {
+    const copy = structuredClone(item);
+    if (copy.attempt && !TERMINAL.has(copy.delivery) && utc(copy.attempt.lease_expires_at) <= utc(current))
+      copy.delivery = 'reconciling';
+    return copy;
+  };
+  const ordered = value => Array.isArray(value) ? value.map(ordered) : value && typeof value === 'object' ?
+    Object.fromEntries(Object.keys(value).sort().map(key => [key, ordered(value[key])])) : value;
+  const canonical = value => JSON.stringify(ordered(value));
+  const known = new Map(previous.map(item => [item.command_id, normalize(item)])), seen = new Set();
+  return incoming.map(item => {
+    if (!item || typeof item.command_id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(item.command_id) ||
+        !Number.isSafeInteger(item.revision) || item.revision < 1 || seen.has(item.command_id)) fail();
+    seen.add(item.command_id);
+    const next = normalize(item), prior = known.get(item.command_id);
+    if (prior && (next.revision < prior.revision ||
+        (next.revision === prior.revision && canonical(next) !== canonical(prior)))) fail();
+    return next;
+  });
+}
+
 export function mount(document, client = createClient()) {
   const byId = id => document.getElementById(id);
   const state = { bootstrap: null, records: [], scheduleData: null, usageData: null, usageBusy: false, usageConfirmed: false, usageSignature: '', clockUncertainty: 0, pending: null, busy: false, refreshing: false, synced: false, serverTime: NaN, measuredAt: 0, renderedSignature: '', refreshError: false, authBlocked: false, authRevision: 0 };
@@ -344,7 +370,11 @@ export function mount(document, client = createClient()) {
     if (!currentSession(revision)) return false;
     if (!Number.isFinite(utc(data.now))) throw new Error('伺服器時間無效。');
     if (!Number.isFinite(roundtrip) || roundtrip < 0 || roundtrip > 10000) throw new Error('伺服器時間估計已失效，請重新整理。');
-    if (usageScope(data) !== usageScope(state.bootstrap) || !can(data.capabilities, 'commands:read')) { state.usageData = null; state.usageConfirmed = false; }
+    if (usageScope(data) !== usageScope(state.bootstrap) || !can(data.capabilities, 'commands:read')) {
+      state.usageData = null; state.usageConfirmed = false;
+      state.records = []; state.scheduleData = null; state.renderedSignature = ''; state.synced = false;
+      byId('commands').replaceChildren(); byId('schedule').replaceChildren();
+    }
     // Whole-second timestamps plus measured request latency bound a legitimate
     // newer usage timestamp; no arbitrary clock jump or negative displayed age.
     state.clockUncertainty = 1000 + Math.ceil(roundtrip / 1000) * 1000;
@@ -360,11 +390,11 @@ export function mount(document, client = createClient()) {
       if (can(state.bootstrap.capabilities, 'commands:read')) {
         const data = await client.commands();
         if (!currentSession(revision)) return;
-        if (!Array.isArray(data.commands)) throw new Error('命令回應格式無效。');
+        const records = acceptCommandSnapshot(state.records, data.commands, now());
         const scheduleData = await client.schedule();
         if (!currentSession(revision)) return;
         if (scheduleData?.schema_version !== 'cloudlab.health-schedule.v1' || !Object.hasOwn(scheduleData, 'schedule')) throw new Error('排程回應格式無效。');
-        state.records = data.commands.slice(0, 100); state.scheduleData = scheduleData;
+        state.records = records; state.scheduleData = scheduleData;
       } else { state.records = []; state.scheduleData = null; }
       state.authBlocked = false; state.synced = true;
       byId('connection').textContent = '已連線 · 每 5 秒更新';

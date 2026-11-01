@@ -4,7 +4,7 @@
 
 版本：0.1，2026-10-31。SDD 在此指規格驅動開發的設計文件（Software Design Description）。狀態：P0 基底已安裝、建置及通過 614 個測試與瀏覽器 smoke；四 provider 的 live integration 與 MVP 驗收尚未完成。見 [本機進度](OFFICE-LOCAL.md)。
 
-最新：OpenCode＋Strata 真實工位任務 **AC-02 已通過**；OpenCode 的取消及清理也通過（AC-06 的本地 provider 部分）。Grok／Pi、完整權限等待／resume／重啟與四工位 MVP 尚未完成。[證據](OPENCODE-LOCAL.md)。
+最新：OpenCode、Grok、Pi + DeepSeek、Cursor 各有真實合成任務通過 AC-02／03／04／13；OpenCode 的權限、取消及恢復已有子集證據。T-0011 新增[唯讀結果入口](RESULTS.md)，核對既有產物並呈現四種模型來源。統一偵測／派工、其他 provider 的生命週期與完整 MVP 尚未完成；原 AC 條件不變。
 
 2026-11-01 owner 擴充：新增 Cursor Agent 第四工位，沿用單執行佇列、原生 PTY／hooks、明確模型來源與禁止自動 fallback；新增 AC-13，不縮減既有 AC。
 
@@ -60,7 +60,7 @@ flowchart TD
 | Provider | MVP 路徑 | 驗證重點 | 狀態 |
 |---|---|---|---|
 | OpenCode | 原生 CLI + 上游 Office plugin；lab wrapper 保留本地 status plugin、固定 Strata | prompt、session、permission、question、error | 1.19.5 + Strata 真實檔案任務及取消通過；完整生命週期未驗收 |
-| Grok CLI | 暫採官方版，原生 CLI + 上游 Office hooks、獨立 `GROK_HOME` | session 恢復、登入與等待提示、完成／錯誤；不得與社群 `grok-dev` 混用 | 官方 Grok 1.0.70；無憑證啟動通過，真實任務待驗 |
+| Grok CLI | 暫採官方版，原生 CLI + 上游 Office hooks、獨立 `GROK_HOME` | session 恢復、登入與等待提示、完成／錯誤；不得與社群 `grok-dev` 混用 | 官方 Grok 1.0.70；grok-4.6 真實任務 AC-03 通過，完整生命週期待驗 |
 | Pi + DeepSeek | 原生 Pi + 上游 Office extension、每工位 session directory | DeepSeek model/provider 實際可用；`agent_settled` 才可結束任務 | Pi 1.4.0 + DeepSeek 有界真實任務通過（AC-04） |
 | Cursor Agent | 官方 CLI + 上游 Office 的 workspace .cursor/hooks.json；隔離 HOME 與 CURSOR_CONFIG_DIR | session、模型、完成／錯誤、登入等待；不自動轉接 Grok host | 固定官方 2026.10.22-27dcf5f；Composer 2.5 真實任務 AC-13 通過，完整生命週期待驗 |
 

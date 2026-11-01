@@ -35,8 +35,8 @@
     },
     {
       "path": "labs/agent-office-lab",
-      "last_source_update": "2026-11-01T04:30:54Z",
-      "source_commit": "d6678d4449e24a86dee4ac06103cee2951d4d9cc"
+      "last_source_update": "2026-11-01T11:18:49Z",
+      "source_commit": "22e5b66730b31963cb93b48428436ccd0fd8c981"
     },
     {
       "path": "labs/aweshore",
@@ -182,6 +182,11 @@
       "path": "platform/signal-hub",
       "last_source_update": "2026-10-18T20:39:38+08:00",
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"
+    },
+    {
+      "path": "platform/spring-pool",
+      "last_source_update": "2026-09-30T18:09:19Z",
+      "source_commit": "2eb29676863869a67f90dc68b8332ff1db87078e"
     },
     {
       "path": "products/goku",

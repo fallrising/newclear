@@ -38,6 +38,7 @@
 | `kernel/personal/relayvault` | 未知 | — | v0.2 release 需先完成 production no-overwrite cutover，並另行授權。 |
 | `newclear/products/kith` | 在用 | A | 人機群聊。不復活 `labs/bee-swarm`；不擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。 |
 | `newclear/platform/agent-platform` | 未知 | A | 自管多任務 agent Web 工作台，範本 OpenHands Agent Canvas，整合 Cocoon sandbox。與 `fanzloud`、`kith` 責任分開，不改動它們的實作；不是部署宣告。見 [README](platform/agent-platform/README.md)。 |
+| `newclear/platform/spring-pool` | 未知 | A | 有界 MVP：單人腳本版本庫、固定版本 runbook、Markdown 匯出；不含執行器或遠端命令。開發中，尚未宣稱部署或驗收。見 [README](platform/spring-pool/README.md)。 |
 | `newclear/platform/agent-workforce` | 未知 | A | 2026-10-11 本次投入限跨產品數位工作者 SDD：多帳號／權益／資源、原生調用、持久訊息／會話與恢復；重用 Kith 的聊天及可選執行後端，工作完成仍由外部工作系統決定。未實作、未配置帳號、未部署。見 [README](platform/agent-workforce/README.md)。 |
 | `newclear/platform/edge-ops` | 未知 | A | Cloudflare + Host Agent 主機監控／受控操作設計；SDD + M0 契約層（TS/Go 共用向量、D1 transaction spike），無 runtime 或 live deployment。預設 monitor-only；既有 OneVPS／OneFleet authority 不變，真實主機變更另行授權。見 [README](platform/edge-ops/README.md)。 |
 | `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：已提供事件寫入、來源新鮮度、看板、規則指標與門檻事件；投遞與封存待後續里程碑。部署另行授權。見 [README](platform/signal-hub/README.md)。 |

@@ -1,0 +1,23 @@
+[package]
+name = "spring-pool-api"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Internal spring-pool API worker (Cloudflare Workers + D1)."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Host `cargo test` covers validation and export only. The worker crate is
+# wasm32-only, so it is not a host dependency.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+worker = { version = "=0.8.7", features = ["d1"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1

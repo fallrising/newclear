@@ -628,3 +628,20 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 - RED4→GREEN4，完整130Node＋308Python＝438tests，零fail/skip；XM1去模式保護與XM2去identity核對均被oracle偵測，原runtime未改。XR1平台metadata誤計數失敗保留，只明示排除_cf_METADATA及既有_cf_KV；初次索引因新文件未stage報錯，stage後通過；既有SQLite warnings保留。T860首輪REWORK後集中複審ACCEPT。
 - 50contracts／8indexes／task-report／syntax／diff／397links通過；九份workerd來源hash與公開原摘要相符。正常main merge保留並行工作；合併回讀本機與remote fulltree相等、工作樹乾淨、head為main祖先，67份runtime/test/tool input與remote main相同。
 - 原Worker／auth／protocol／migrations／runner／看板未改；沒有原服務或private state操作、授權續期、付費升級或真人重測。此為local logical restore，官方遠端unknown/in-flight export/import與正式failover仍pending；完整mainline incomplete／usable_tag none。接續對齊事件seq／通知原契約與M1輪詢範圍；本結案只改任務板。
+
+## T-0036 — 輪詢快照順序與恢復
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0036-1 | 協定範圍對齊 | PS-01 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+| T-0036-2 | 看板版本防倒退 | PS-02 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+| T-0036-3 | 持久outbox恢復 | PS-03 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+| T-0036-4 | 驗證審查交付 | PS-04 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+
+### T-0036 Git交付與source/local收尾
+
+- [PR905](https://github.com/fallrising/newclear/pull/905) head `2c4a112351d77d40a2201044d3872fbaef7e7c22`，merge `b184ada9957cd2b97aa3566458c42c12509d51cb`，2026-11-01T11:11:21Z合併。exact-head CI全過：CloudLab `41300651110`、Project success `41300651083`、llms `41300651067`。
+- PS01–04：沿已授權ADR-08，持久outbox在commit後ACK遺失及SQLite重開仍可領取原command；同key重送與完成後重開保持原結果、無第二個assignment。看板拒絕低revision／同版衝突整批更新，保留上次資料且停操作，fresh polling恢復；scope改變清除舊view，lease到期衍生投影不偽造DB revision，最多20筆比較基準。
+- 真RED6fail／1existingpass，GREEN52dashboard；完整138Node＋308Python＝446tests，零fail/skip；PS1真Chromium/workerd/D1/Python16checks／114API／零browser errors，三asset hash與公開原receipt相同。兩種快照GET注入均拒絕、原D1列不變；HTTP ACK遺失及原artifact精確下載回歸保持。T861最終獨立ACCEPT。
+- 初次default-isolation只有file級失敗，不算行為RED；sandbox full的Node native assertion／35Python socket EPERM保留，正常escalation後同套測試全過，無跳測。既有SQLite warnings保留。50contracts／8indexes初驗，正常合併並行main後51contracts／9indexes通過；task/report／syntax／diff／437links與67inputs固定。回讀local/remote fulltree相等、clean、head為main祖先，67inputs皆相符。
+- 本輪只改dashboard source及驗證／文件；Worker／runner／D1 schema未改，原看板尚未部署。M0 Event/source_seq/cursor未實作，不以完整snapshot跳版冒充漏seq恢復；原要求與source/local/live差別保留，完整mainline incomplete／usable_tag none。沒有private/live操作、續權、付費升級或owner重測。後續按既有流程接入已驗證看板修正；本結案只改任務板。

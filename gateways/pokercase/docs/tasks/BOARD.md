@@ -1,5 +1,14 @@
 # Pokercase 技術任務
 
+## T-0426 — Inline instruction role preservation
+
+Demand:deskT0426; claim358 merged. [NR-1–NR-3](T-0426-instruction-roles.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| NR-01 | Preserve instruction roles and strict reuse boundaries | NR-1–NR-2 | in_progress | 2026-11-01T11:06:56Z | — | 2026-11-01T11:06:56Z |
+| NR-02 | Independent acceptance and delivery | NR-3 | in_progress | 2026-11-01T11:06:56Z | — | 2026-11-01T11:06:56Z |
+
 ## T-0426 — Approved Claude TUI implementation
 
 Demand:deskT0426; ownerselectedA,claim351merged. [TA-1–TA-5](T-0426-claude-tui.md).

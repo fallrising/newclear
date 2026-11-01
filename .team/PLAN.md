@@ -1,5 +1,7 @@
 # T-0442 Fanzloud M2 — 2026-11-01
 
+Spring Pool PR196 / T-0356: [bounded plan and evidence gate](spring-pool-pr196/PLAN.md).
+
 Owner explicitly requests M2; desk claim PR349 merged/read back 42e474182de3d64b0be8023d7f6ae26d02904ada.
 Base newclear d3207b3a97a5b223da501af1418e64e94745bf10. Preserve old dirty M1 worker tree.
 
@@ -44,6 +46,12 @@ no repeated code review/provider. Concurrent approval question remains pending, 
 ---
 
 # Repository team ledger
+
+## HAI detail-read contract — T-0339 / 2026-11-01
+
+Owner continues after verified coverage delivery. Root owns next bounded backend detail contract, M2 gap mapping and fixed acceptance; no UI/provider/dependency/release/deploy. One native read-only T001,10min/1800tokens/no children/no writes, audits schema/storage gaps. Root45–75active minutes with20minute checkpoints; Claude exact opus5.5/high no-tools480s initial plus one material-revision follow-up. Existing claim remains valid. New product semantics require concrete owner decision before implementation; no repeated policy/Git approval. CI20min rounds; original failures retained. BOARD HMDTL owns status.
+
+Root accepted the bounded native source inventory and Claude-reviewed proposal, not product behavior. Initial REWORK then ACCEPT; C1–C3 closed against original schema/writers. D1 asks whether to adopt separate material-index IDX-01..05/IDX-AC-01..06, retaining full detail/M2 gaps. Pending owner decision; docs delivery proceeds under existing authorization. All product oracles NotRun. Review dispositions and document evidence are in the product evidence report; aggregate tool/provider/billing/active-wait totals unknown.
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../docs/remediation/2026-09-host-info.md](../docs/remediation/2026-09-host-info.md)。
 
@@ -2721,3 +2729,9 @@ A cleanup. Original15min window retained, exactly2 new coding invocations; three
 pre-inference queued cancellations remain explicit. Capacity1 restored, no resources
 or services left. Final source/docs/CI/normal merge/readback and board closure remain.
 No M3, public URL, release or full-platform completion claim.
+
+## PS snapshot ordering — 2026-11-01T11:02:36Z
+
+Owner continues stated contract/polling alignment. Lead sole writer forPS01–04/T0036: bounded dashboard revision/consistency guard and durableoutbox ACKloss qualification, preserveM0 Event gap explicit, no live/provider/authoritychanges. RGR/fullsuite/actualbrowser. One freshnative readonlyreviewer T861, inheritedmodel/effort/permissions,<=1500tokens+one<=1000tokenfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota,no writes/tests/network/private/delegation. Instruction scope notOSisolation;lead owns evidencegate and authorizedGit delivery.
+
+PS source/local evidence gate ACCEPT 2026-11-01T11:09:00Z:6behavioralRED/1existingpass→52dashboardGREEN;138Node/308Python=446full;actualPS1browser16checks/114API/noerrors/3assethashes. T861 finalACCEPT,437links/50contracts/8indexes/task/syntax/diff,67inputsfrozen. Initialisolationtestfailure andsandboxEPERM/nativeassertion retained;unchangedfullsuite passed via normal escalation. Sourceonly, no live/authority/paidchange;GitCI/merge/readbackandboardclosurefollow.

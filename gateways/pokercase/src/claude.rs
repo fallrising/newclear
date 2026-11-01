@@ -127,6 +127,11 @@ pub fn anthropic_to_openai(body: &Bytes) -> AppResult<Bytes> {
     for m in anth_messages {
         let role = m.get("role").and_then(|r| r.as_str()).unwrap_or("user");
         match m.get("content") {
+            // The official client can inline instructions as blocks initially,
+            // then replay them as strings. Preserve their role in both forms.
+            Some(Value::Array(blocks)) if matches!(role, "system" | "developer") => {
+                messages.push(json!({"role": role, "content": blocks_to_text(blocks)}));
+            }
             Some(Value::Array(blocks)) if role == "assistant" => {
                 messages.push(assistant_blocks_to_chat(blocks));
             }
@@ -941,6 +946,40 @@ mod tests {
         assert!(out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
         assert!(stream.tools.is_empty() && stream.is_done());
         assert!(stream.on_end().is_empty());
+    }
+
+    #[test]
+    fn nr1_inline_instruction_blocks_preserve_roles_and_order() {
+        for role in ["system", "developer"] {
+            let request = |content: Value| {
+                Bytes::from(
+                    json!({
+                        "model": "m", "system": "top-level instruction",
+                        "messages": [
+                            {"role": "user", "content": "first turn"},
+                            {"role": role, "content": content},
+                            {"role": "assistant", "content": "answer"},
+                            {"role": "user", "content": "next turn"}
+                        ]
+                    })
+                    .to_string(),
+                )
+            };
+            let blocks = json!([
+                {"type": "text", "text": "instruction one", "cache_control": {"type": "ephemeral"}},
+                {"type": "text", "text": "instruction two"}
+            ]);
+            let actual: Value =
+                serde_json::from_slice(&anthropic_to_openai(&request(blocks)).unwrap()).unwrap();
+            let equivalent: Value = serde_json::from_slice(
+                &anthropic_to_openai(&request(json!("instruction one\ninstruction two"))).unwrap(),
+            )
+            .unwrap();
+            assert_eq!(actual["messages"][2]["role"], role);
+            assert_eq!(actual, equivalent);
+            assert_eq!(actual["messages"][0]["content"], "top-level instruction");
+            assert_eq!(actual["messages"][4]["content"], "next turn");
+        }
     }
 
     #[test]

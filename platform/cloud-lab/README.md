@@ -103,4 +103,6 @@ M0 不會移動 Kith／Edge Ops 程式、不合併資料庫、不啟用排程或
 
 [XR隔離還原驗證](docs/restore-qualification.md)已完成[六種真本機workerd／Python runner情境、438tests及兩個mutation](docs/evidence/m1-restore-qualification.md)：恢復後零採集，保留unknown／原結果與跨快照不一致拒絕；不操作原服務。官方遠端unknown/in-flight restore與完整主線仍pending。
 
-[PS輪詢快照順序](docs/snapshot-ordering.md)已修正舊revision／同版本衝突與scope變動殘留；[本機證據](docs/evidence/m1-snapshot-ordering.md)涵蓋持久outbox ACK遺失及真browser拒絕／恢復。沿ADR-08完整snapshot，不宣稱M0 Event／seq相容；原看板未部署，主線仍incomplete。
+[PS輪詢快照順序](docs/snapshot-ordering.md)已修正舊revision／同版本衝突與scope變動殘留；[本機證據](docs/evidence/m1-snapshot-ordering.md)涵蓋持久outbox ACK遺失及真browser拒絕／恢復。沿ADR-08完整snapshot，不宣稱M0 Event／seq相容；PS交付時尚未部署，後續PSL已接入；主線仍incomplete。
+
+[PSL原看板更新](docs/evidence/m1-snapshot-rollout.md)已完成：固定PR905，一份變更資產、新版100%，三Worker modules／設定／4grants／Access／Cron／期限保持；原193commands／222firings／186journal保留、runner未重啟。不重開真人窗口或付費方案，完整mainline仍incomplete。

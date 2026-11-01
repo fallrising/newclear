@@ -1,0 +1,247 @@
+{
+  "version": 1,
+  "labels": [
+    {
+      "name": "ready",
+      "color": "0E8A16",
+      "description": "Scoped task. Not a desk claim, and not permission to merge."
+    },
+    {
+      "name": "blocked",
+      "color": "D93F0B",
+      "description": "Progress requires a dependency or missing evidence"
+    },
+    {
+      "name": "needs-owner",
+      "color": "FBCA04",
+      "description": "Owner decision or acceptance requested"
+    },
+    {
+      "name": "duplicate",
+      "color": "CFD3D7",
+      "description": "Duplicate request; link the canonical issue"
+    },
+    {
+      "name": "project:products-goku",
+      "color": "1D76DB",
+      "description": "Component: products/goku",
+      "component": "products/goku"
+    },
+    {
+      "name": "project:products-phark",
+      "color": "1D76DB",
+      "description": "Component: products/phark",
+      "component": "products/phark"
+    },
+    {
+      "name": "project:products-kith",
+      "color": "1D76DB",
+      "description": "Component: products/kith",
+      "component": "products/kith"
+    },
+    {
+      "name": "project:products-hai-taskboard",
+      "color": "1D76DB",
+      "description": "Component: products/hai-taskboard",
+      "component": "products/hai-taskboard"
+    },
+    {
+      "name": "project:gateways-pokercase",
+      "color": "1D76DB",
+      "description": "Component: gateways/pokercase",
+      "component": "gateways/pokercase"
+    },
+    {
+      "name": "project:systems-clarkq",
+      "color": "1D76DB",
+      "description": "Component: systems/clarkq",
+      "component": "systems/clarkq"
+    },
+    {
+      "name": "project:systems-snail",
+      "color": "1D76DB",
+      "description": "Component: systems/snail",
+      "component": "systems/snail"
+    },
+    {
+      "name": "project:systems-ojbquay",
+      "color": "1D76DB",
+      "description": "Component: systems/ojbquay",
+      "component": "systems/ojbquay"
+    },
+    {
+      "name": "project:systems-wotar",
+      "color": "1D76DB",
+      "description": "Component: systems/wotar",
+      "component": "systems/wotar"
+    },
+    {
+      "name": "project:systems-mkfk",
+      "color": "1D76DB",
+      "description": "Component: systems/mkfk",
+      "component": "systems/mkfk"
+    },
+    {
+      "name": "project:platform-fanzloud",
+      "color": "1D76DB",
+      "description": "Component: platform/fanzloud",
+      "component": "platform/fanzloud"
+    },
+    {
+      "name": "project:platform-agent-platform",
+      "color": "1D76DB",
+      "description": "Component: platform/agent-platform",
+      "component": "platform/agent-platform"
+    },
+    {
+      "name": "project:platform-agent-workforce",
+      "color": "1D76DB",
+      "description": "Component: platform/agent-workforce",
+      "component": "platform/agent-workforce"
+    },
+    {
+      "name": "project:platform-dim-gate",
+      "color": "1D76DB",
+      "description": "Component: platform/dim-gate",
+      "component": "platform/dim-gate"
+    },
+    {
+      "name": "project:platform-edge-ops",
+      "color": "1D76DB",
+      "description": "Component: platform/edge-ops",
+      "component": "platform/edge-ops"
+    },
+    {
+      "name": "project:platform-signal-hub",
+      "color": "1D76DB",
+      "description": "Component: platform/signal-hub",
+      "component": "platform/signal-hub"
+    },
+    {
+      "name": "project:platform-ice-maker",
+      "color": "1D76DB",
+      "description": "Component: platform/ice-maker",
+      "component": "platform/ice-maker"
+    },
+    {
+      "name": "project:platform-local-ocr-services",
+      "color": "1D76DB",
+      "description": "Component: platform/local-ocr-services",
+      "component": "platform/local-ocr-services"
+    },
+    {
+      "name": "project:platform-prism",
+      "color": "1D76DB",
+      "description": "Component: platform/prism",
+      "component": "platform/prism"
+    },
+    {
+      "name": "project:apps-loom",
+      "color": "1D76DB",
+      "description": "Component: apps/loom",
+      "component": "apps/loom"
+    },
+    {
+      "name": "project:apps-flowshot",
+      "color": "1D76DB",
+      "description": "Component: apps/flowshot",
+      "component": "apps/flowshot"
+    },
+    {
+      "name": "project:apps-cloudform",
+      "color": "1D76DB",
+      "description": "Component: apps/cloudform",
+      "component": "apps/cloudform"
+    },
+    {
+      "name": "project:apps-cms-scaffold",
+      "color": "1D76DB",
+      "description": "Component: apps/cms-scaffold",
+      "component": "apps/cms-scaffold"
+    },
+    {
+      "name": "project:tools-cc-quota",
+      "color": "1D76DB",
+      "description": "Component: tools/cc-quota",
+      "component": "tools/cc-quota"
+    },
+    {
+      "name": "project:tools-codex-usage",
+      "color": "1D76DB",
+      "description": "Component: tools/codex-usage",
+      "component": "tools/codex-usage"
+    },
+    {
+      "name": "project:tools-streaming-converter",
+      "color": "1D76DB",
+      "description": "Component: tools/streaming-converter",
+      "component": "tools/streaming-converter"
+    },
+    {
+      "name": "project:specs-fleet",
+      "color": "1D76DB",
+      "description": "Component: specs/fleet",
+      "component": "specs/fleet"
+    },
+    {
+      "name": "project:examples-bite-pi",
+      "color": "1D76DB",
+      "description": "Component: examples/bite-pi",
+      "component": "examples/bite-pi"
+    },
+    {
+      "name": "project:labs-bee-swarm",
+      "color": "1D76DB",
+      "description": "Component: labs/bee-swarm",
+      "component": "labs/bee-swarm"
+    },
+    {
+      "name": "project:labs-aweshore",
+      "color": "1D76DB",
+      "description": "Component: labs/aweshore",
+      "component": "labs/aweshore"
+    },
+    {
+      "name": "project:labs-eru-vps-mvp",
+      "color": "1D76DB",
+      "description": "Component: labs/eru-vps-mvp",
+      "component": "labs/eru-vps-mvp"
+    },
+    {
+      "name": "project:labs-open-compute",
+      "color": "1D76DB",
+      "description": "Component: labs/open-compute",
+      "component": "labs/open-compute"
+    },
+    {
+      "name": "project:labs-openmmo-lab",
+      "color": "1D76DB",
+      "description": "Component: labs/openmmo-lab",
+      "component": "labs/openmmo-lab"
+    },
+    {
+      "name": "project:labs-mithril-research",
+      "color": "1D76DB",
+      "description": "Component: labs/mithril-research",
+      "component": "labs/mithril-research"
+    },
+    {
+      "name": "project:labs-zircon-godot",
+      "color": "1D76DB",
+      "description": "Component: labs/zircon-godot",
+      "component": "labs/zircon-godot"
+    },
+    {
+      "name": "project:labs-pg-jev-router",
+      "color": "1D76DB",
+      "description": "Component: labs/pg-jev-router",
+      "component": "labs/pg-jev-router"
+    },
+    {
+      "name": "project:labs-browser-fingerprint",
+      "color": "1D76DB",
+      "description": "Component: labs/browser-fingerprint",
+      "component": "labs/browser-fingerprint"
+    }
+  ]
+}

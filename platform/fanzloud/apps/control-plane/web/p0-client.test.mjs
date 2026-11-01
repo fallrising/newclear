@@ -281,6 +281,8 @@ class FakeSocket {
     this.url = url;
     this.sent = [];
     this.closeCalls = [];
+    this.closedCodes = [];
+    this.closed = false;
     this.onopen = null;
     this.onmessage = null;
     this.onerror = null;
@@ -301,6 +303,15 @@ class FakeSocket {
 
   close(code, reason) {
     this.closeCalls.push({ code, reason });
+    if (code !== 1000 && !(code >= 3000 && code <= 4999)) {
+      const message = `Invalid WebSocket close code: ${code}`;
+      const error = typeof DOMException === "function"
+        ? new DOMException(message, "InvalidAccessError")
+        : Object.assign(new Error(message), { name: "InvalidAccessError" });
+      throw error;
+    }
+    this.closedCodes.push(code);
+    this.closed = true;
   }
 
   peerClose(code = 1006, reason = "SECRET CLOSE CANARY") {
@@ -349,6 +360,33 @@ function bytesResponse(chunks, options = {}) {
     },
   });
   return { response, wasCanceled: () => canceled };
+}
+
+function declaredLengthResponse(bytes, declaredLength, options = {}) {
+  let readerCalls = 0;
+  let wholeBodyReads = 0;
+  const response = {
+    status: options.status ?? 200,
+    redirected: false,
+    headers: new Headers({
+      "content-type": options.contentType ?? DIFF_TYPE,
+      "content-length": String(declaredLength),
+    }),
+    body: {
+      getReader() {
+        readerCalls += 1;
+        return new Response(bytes).body.getReader();
+      },
+    },
+    async arrayBuffer() {
+      wholeBodyReads += 1;
+      if (options.failure) {
+        throw options.failure;
+      }
+      return bytes.slice().buffer;
+    },
+  };
+  return { response, readerCalls: () => readerCalls, wholeBodyReads: () => wholeBodyReads };
 }
 
 function errorResponse(
@@ -730,7 +768,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
   assert.equal(JSON.parse(storage.getItem(CURSOR_KEY)).event_seq, 5);
 
   first.message(frame({ type: "event", envelope: envelope(7) }));
-  assert.deepEqual(first.closeCalls.at(-1), { code: 1008, reason: "" });
+  assert.deepEqual(first.closeCalls.at(-1), { code: 1000, reason: "" });
   first.peerClose(1008);
   assert.deepEqual(harness.timers.delays(), [250]);
   harness.queue.push(jsonResponse(snapshot(7)), jsonResponse({ state: "logged_out" }));
@@ -747,7 +785,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
       latest_available: 10,
     }),
   );
-  assert.deepEqual(second.closeCalls.at(-1), { code: 1008, reason: "" });
+  assert.deepEqual(second.closeCalls.at(-1), { code: 1000, reason: "" });
   second.peerClose(1008);
   assert.deepEqual(harness.timers.delays(), [500]);
   harness.queue.push(jsonResponse(snapshot(10)), jsonResponse({ state: "logged_out" }));
@@ -798,7 +836,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
   assert.ok(unicodeFrame.length < JSON_LIMIT);
   assert.ok(new TextEncoder().encode(unicodeFrame).length > JSON_LIMIT);
   unicodeFrameSocket.message(unicodeFrame);
-  assert.deepEqual(unicodeFrameSocket.closeCalls.at(-1), { code: 1008, reason: "" });
+  assert.deepEqual(unicodeFrameSocket.closeCalls.at(-1), { code: 1000, reason: "" });
   assert.equal(unicodeFrameHarness.state().error, FIXED.protocol);
 
   const failingStorage = new MemoryStorage({}, { failSet: true });
@@ -953,7 +991,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
       high_water_seq: 0,
     }),
   );
-  assert.deepEqual(impossibleSocket.closeCalls.at(-1), { code: 1008, reason: "" });
+  assert.deepEqual(impossibleSocket.closeCalls.at(-1), { code: 1000, reason: "" });
   assert.equal(impossibleSnapshot.state().error, FIXED.protocol);
 
   const impossibleEvent = makeHarness();
@@ -978,7 +1016,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
       }),
     }),
   );
-  assert.deepEqual(impossibleEventSocket.closeCalls.at(-1), { code: 1008, reason: "" });
+  assert.deepEqual(impossibleEventSocket.closeCalls.at(-1), { code: 1000, reason: "" });
   assert.equal(impossibleEvent.state().error, FIXED.protocol);
 
   const terminalLatch = makeHarness();
@@ -1018,7 +1056,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
   assert.equal(terminalLatchSocket.sent.length, sendsAfterProtocolFailure);
   assert.equal(terminalLatch.state().connection, "connecting");
   assert.equal(terminalLatch.state().error, FIXED.protocol);
-  assert.deepEqual(terminalLatchSocket.closeCalls, [{ code: 1008, reason: "" }]);
+  assert.deepEqual(terminalLatchSocket.closeCalls, [{ code: 1000, reason: "" }]);
 
   for (const invalidTaskId of [
     "task_💥",
@@ -1071,7 +1109,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
       }),
     );
     assert.deepEqual(invalidEventSocket.closeCalls.at(-1), {
-      code: 1008,
+      code: 1000,
       reason: "",
     });
     assert.equal(invalidEvent.state().error, FIXED.protocol);
@@ -1096,7 +1134,7 @@ test("p0_web_stream_replays_and_reconnects_from_validated_cursor", async () => {
     const invalidSocket = await load(invalidHarness);
     invalidSocket.open();
     invalidSocket.message(invalid);
-    assert.deepEqual(invalidSocket.closeCalls.at(-1), { code: 1008, reason: "" });
+    assert.deepEqual(invalidSocket.closeCalls.at(-1), { code: 1000, reason: "" });
     assert.equal(invalidHarness.state().error, FIXED.protocol);
   }
 });
@@ -1128,6 +1166,32 @@ test("p0_web_cancel_is_explicit_and_disconnect_never_cancels", async () => {
     1,
   );
   assert.ok(!JSON.stringify(ambiguous.states).includes("SECRET NETWORK CANARY"));
+
+  for (const invalid of ["{", frame({ type: "unknown" })]) {
+    const failed = makeHarness();
+    const failedSocket = await load(failed);
+    openStream(failedSocket, 0);
+    const requestsBeforeFailure = failed.requests.length;
+    const sendsBeforeFailure = failedSocket.sent.length;
+    failedSocket.message(invalid);
+    assert.equal(failed.state().error, FIXED.protocol);
+    assert.equal(failedSocket.closed, true, "stream failure must actually close the socket");
+    assert.deepEqual(failedSocket.closedCodes, [1000]);
+    assert.deepEqual(failedSocket.closeCalls, [{ code: 1000, reason: "" }]);
+
+    // Deliver the asynchronous close event after the browser accepts close().
+    failedSocket.peerClose(failedSocket.closedCodes.at(-1), "");
+    failedSocket.open();
+    failedSocket.message(frame({ type: "event", envelope: envelope(1) }));
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(failed.state().connection, "disconnected");
+    assert.equal(failed.state().error, FIXED.protocol);
+    assert.deepEqual(failed.timers.delays(), []);
+    assert.equal(failed.sockets.length, 1);
+    assert.equal(failedSocket.sent.length, sendsBeforeFailure);
+    assert.equal(failed.requests.length, requestsBeforeFailure);
+    assert.deepEqual(failed.requests.filter(({ init }) => init.method !== "GET"), []);
+  }
 });
 
 test("p0_web_diff_is_bounded_text_and_never_html", async () => {
@@ -1198,6 +1262,57 @@ test("p0_web_diff_is_bounded_text_and_never_html", async () => {
   );
   assert.equal(await harness.controller.showDiff(), false);
   assert.equal(await harness.controller.showDiff(), false);
+
+  // A declared length is bounded before reading, so the body is drained whole:
+  // Chromium 153 can report a complete no-store stream-reader read as aborted.
+  const text = "diff --git a/x b/x\n";
+  const bytes = new TextEncoder().encode(text);
+  const declared = declaredLengthResponse(bytes, bytes.byteLength);
+  harness.queue.push(declared.response);
+  assert.equal(await harness.controller.showDiff(), true);
+  assert.equal(harness.state().diff, text);
+  assert.equal(declared.readerCalls(), 0);
+  assert.equal(declared.wholeBodyReads(), 1);
+
+  const overDeclared = declaredLengthResponse(new Uint8Array(DIFF_LIMIT + 1).fill(97), DIFF_LIMIT);
+  harness.queue.push(overDeclared.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().diff, "");
+  assert.equal(harness.state().error, FIXED.diffLimit);
+
+  const failedDrain = declaredLengthResponse(bytes, bytes.byteLength, {
+    failure: new Error("SECRET BODY CANARY"),
+  });
+  harness.queue.push(failedDrain.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().error, FIXED.request);
+
+  const invalidDeclared = declaredLengthResponse(new Uint8Array([0xff]), 1);
+  harness.queue.push(invalidDeclared.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().error, FIXED.request);
+  assert.equal(invalidDeclared.readerCalls(), 0);
+
+  const coded = declaredLengthResponse(bytes, bytes.byteLength);
+  coded.response.headers.set("content-encoding", "gzip");
+  harness.queue.push(coded.response);
+  assert.equal(await harness.controller.showDiff(), true);
+  assert.equal(harness.state().diff, text);
+  assert.equal(coded.readerCalls(), 1);
+  assert.equal(coded.wholeBodyReads(), 0);
+
+  const jsonBytes = new TextEncoder().encode(
+    JSON.stringify({ error: { code: "diff_not_ready", message: "not yet" } }),
+  );
+  const declaredJson = declaredLengthResponse(jsonBytes, jsonBytes.byteLength, {
+    status: 409,
+    contentType: JSON_TYPE,
+  });
+  harness.queue.push(declaredJson.response);
+  assert.equal(await harness.controller.showDiff(), false);
+  assert.equal(harness.state().error, FIXED.rejected);
+  assert.equal(declaredJson.readerCalls(), 0);
+  assert.equal(declaredJson.wholeBodyReads(), 1);
   assert.ok(!JSON.stringify(harness.states).includes("SECRET BODY CANARY"));
 });
 

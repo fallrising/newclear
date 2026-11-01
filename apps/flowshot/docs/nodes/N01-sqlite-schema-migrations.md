@@ -3,18 +3,25 @@ id: N01
 title: SQLite Schema、Migration 與 Repository
 kind: core
 milestone: M0
-status: todo
+status: done
 depends_on: 
   - N00
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-contract_status: draft
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+contract_status: frozen
 legacy_reference: 
   - mdread SQLite schema and migration patterns
 allowed_paths: 
+  - Cargo.lock
+  - src-tauri/Cargo.toml
+  - src-tauri/src/lib.rs
+  - src-tauri/tauri.conf.json
+  - scripts/linux-db-smoke.py
+  - docs/graph.yaml
+  - docs/metrics/node-outcomes.jsonl
   - crates/db/**
   - crates/core/src/contracts/N01*
   - src-tauri/src/db*
@@ -60,7 +67,10 @@ pub struct AnnotationId(pub Uuid);
 pub struct TagId(pub Uuid);
 
 pub trait TransactionRunner {
-    fn transaction<T>(&self, f: impl FnOnce(&mut Transaction) -> Result<T>) -> Result<T>;
+    fn transaction<T: Send + 'static>(
+        &self,
+        f: impl FnOnce(&mut Transaction) -> Result<T> + Send + 'static,
+    ) -> Result<T>;
 }
 ```
 
@@ -164,3 +174,17 @@ Repository interface 只暴露 typed method；SQL row 不得跨出 `db` crate。
 - `docs/verification/N01.md` 已附可重現命令與結果。
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
+
+## N01 契約釐清（2026-10-23）
+
+- Transaction closure/result 為 owned `Send + 'static`，只在 writer actor 借用 opaque transaction；不暴露 SQL。同步等待只可由 blocking caller 使用，Tauri async caller 必須經 `spawn_blocking`。Panic/error 回滾，不遺留半筆 mutation。
+- SQLite INTEGER 的 persisted row/revision token 限 `0..=i64::MAX`；checked conversion/increment，溢位拒絕並回滾。App-state changed mutation 使用 checked `max(clock_ms, previous_updated_at + 1)`，確保固定 clock 下 stale CAS 仍失敗；idempotent no-op 不更新 token。
+- 僅 in-memory test factory 採 memory journal，其餘 PRAGMA 不變；WAL/busy/restart 使用 tempfile。
+- T01 先驗證 migration registry，再在 serialized write transaction 內查 metadata 及套用 DDL。首個 migration 在 T02/T03 完成前只用 disposable fixtures，尚未發布，不變更已套用 checksum。
+- Comment UPDATE 必須保護 self-parent、含 replies 的 root 被降成 reply，以及 cross-annotation descendants。System pin 不可透過 kind demotion 繞過保護，annotation_tags INSERT/UPDATE 都須拒絕 pin。
+- Canonical SQL 不足以表達 AnchorV1/model version 語義時，由 typed repository input 驗證；不得宣稱 JSON CHECK 已驗證 domain。Documents 沒有 deleted_at，因此不提供 document delete primitive，missing/detached 仍保留資料。
+- 10k gate 記錄 migration、seed 及 combined 時間；以 combined `<1s` 驗收，包含 10k annotation 與 10k binding，走正式 repository transaction path。
+- 下游功能專用查詢與 tag merge 在 N08 實作；N01 提供可證明 persistence/invariant 的最小 typed primitives，不把未實作的 tag merge 測試計為通過。
+
+- Executor shutdown：先關閉新 writer/read admissions，drain 已接受的 writer jobs 與所有 read calls（含等待連線者），join writer 並釋放 read connections，重複 shutdown 冪等。同 runtime callback 內重入 blocking operations／shutdown 必須立即拒絕，避免 self-wait/self-join。`Completion::wait` 亦不可在所屬 writer thread 上等待。
+- 所有 managed connections 啟用並驗證 `recursive_triggers=ON`，讓 REPLACE 隱含刪除無法繞過 trigger；pin identity 使用 null-safe 比較。空 migration metadata 搭配任何未知既有 schema 必須拒絕，不可自動接管。

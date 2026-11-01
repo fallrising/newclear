@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,symlink,rm,chmod} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {Lifecycle,privateState} from './lifecycle.mjs';
+const pause=ms=>new Promise(r=>setTimeout(r,ms));
+test('review_fresh_state_origin_and_environment_are_contained',async()=>{const root=await mkdtemp(join(tmpdir(),'fanz-review-contract-'));try{await chmod(root,0o700);await privateState(root);await assert.rejects(privateState(root),/REVIEW_STATE_NOT_EMPTY/);const other=join(root,'other');await mkdir(other,{mode:0o700});const link=join(root,'link');await symlink(other,link);await assert.rejects(privateState(link),/REVIEW_STATE/);}finally{await rm(root,{recursive:true});}});
+test('review_late_acquisition_and_stalled_cleanup_fail_honestly',async()=>{const life=new Lifecycle({drainMs:100,closeMs:10}),closed=[];await life.acquire('stalled',async()=>({}),()=>new Promise(()=>{}));const late=life.acquire('late',async()=>{await pause(10);return{};},async()=>closed.push('late'));life.cancel('SIGTERM');await assert.rejects(late,/REVIEW_CANCELLED/);const out=await life.finish();assert(closed.includes('late'));assert.equal(out.resources.find(x=>x.name==='stalled').closed,false);assert.equal(out.resources.find(x=>x.name==='late').closed,true);});
+test('unsettled acquisition and close rejection retain false while other cleanup runs',async()=>{const life=new Lifecycle({drainMs:10,closeMs:10});await life.acquire('reject',async()=>({}),async()=>{throw Error('synthetic');});const pending=life.acquire('pending',()=>new Promise(()=>{}),async()=>{});life.cancel('SIGINT');await assert.rejects(pending,/REVIEW_CANCELLED/);const r=await life.finish();assert.equal(r.drainComplete,false);assert.equal(r.resources.every(x=>x.closed),false);});

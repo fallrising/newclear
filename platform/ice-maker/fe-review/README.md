@@ -1,14 +1,13 @@
 # fe-review — ice-maker
 
-這個目錄是給 LLM agent 用的前端 review 工作包：定義如何檢查 ice-maker 的 UI、如何產生 headless 截圖，以及報告放在哪裡。它不是給人的操作教學，也不改變元件的文檔檔位。
+已實作並實測原批准 R2 M1–M4：合成啟動器、內嵌上傳頁、錯誤與輪詢處理、結果頁外殼。必要 browser 證據已齊；獨立審查、exact-head CI 與合併由 root 收尾。第3輪完整驗收與產品 AC-04 未宣稱完成。
 
-**狀態：** 第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動或截圖。
-
-| 檔案 | 用途 |
+| 入口 | 用途 |
 | --- | --- |
-| [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
-| [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
-| [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
-| `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
+| [本次報告](tasks/round2/report.md) / [result.json](tasks/round2/result.json) | 實際命令、結果、原失敗與補證、來源 hashes |
+| [RUNNER.md](RUNNER.md) | 原生檢查與隔離 capture 介面 |
+| [PROMPT.md](PROMPT.md) / [REVIEW.md](REVIEW.md) | 工作範圍與現況 |
+| [targets.json](targets.json) | 已實測的 upload／short-result／long-result 路由 |
+| [DESIGN.md](DESIGN.md) | 已批准 M1–M4；僅補明確30分鐘 UI poll cap |
 
-共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)；截圖腳本：`docs/fe-review/capture.mjs`。
+公開 evidence 只含合成文字與 JSON；PNG、raw logs 與服務 state 留在 ignored 本機目錄。共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)。

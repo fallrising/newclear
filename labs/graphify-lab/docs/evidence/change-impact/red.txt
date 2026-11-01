@@ -1,0 +1,21 @@
+test_change_impact (unittest.loader._FailedTest.test_change_impact) ... ERROR
+
+======================================================================
+ERROR: test_change_impact (unittest.loader._FailedTest.test_change_impact)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_change_impact
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/unittest/loader.py", line 394, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/unittest/loader.py", line 337, in _get_module_from_name
+    __import__(name)
+  File "<repo>/labs/graphify-lab/tests/test_change_impact.py", line 8, in <module>
+    from graphify_lab.change_impact import change_impact
+ModuleNotFoundError: No module named 'graphify_lab.change_impact'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

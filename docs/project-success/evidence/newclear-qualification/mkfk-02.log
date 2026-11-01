@@ -1,0 +1,22 @@
+go test -count=1 ./...
+ok  	github.com/fallrising/newclear/systems/mkfk/api/schemas	0.029s
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfk	15.212s
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfkbench	0.006s
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfkctl	0.023s
+?   	github.com/fallrising/newclear/systems/mkfk/cmd/mkfkdemo	[no test files]
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/adapters	0.004s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/broker	0.030s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/config	0.008s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/group	4.037s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/jsonstrict	0.008s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/partition	1.061s
+?   	github.com/fallrising/newclear/systems/mkfk/internal/partition/partitiontest	[no test files]
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/peer	0.061s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/producer	0.068s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/protocol	0.004s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/raft	0.509s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/replication	4.121s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/storage	0.727s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/testkit	0.003s
+ok  	github.com/fallrising/newclear/systems/mkfk/internal/transport	0.285s
+ok  	github.com/fallrising/newclear/systems/mkfk/pkg/client	0.350s

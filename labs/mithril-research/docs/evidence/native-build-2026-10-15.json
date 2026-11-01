@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "source_commit": "9959fe2e5cd466614dc20ef7b710befaaf1d746a",
+  "platform": "linux/amd64",
+  "builder_base_image": "rust@sha256:4e4a7e7939c17991ab35f2b8c2e67593980f771d28f6b1254b1850f860fd0c7f",
+  "executed_local_builder_image_id": "sha256:673226848e437d232956c66bf3c154566c3982bc26bf8a82b0b25f04146be263",
+  "builder_components": [
+    "clippy",
+    "rustfmt"
+  ],
+  "binary_sha256": "f5f96aa53aa2808ef594b2ca816d04125b14661e94bdf14a3065e75d4caf4cc1",
+  "binary_bytes": 1791912,
+  "native_test_count": 121,
+  "versions": [
+    "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo 1.98.0 (797e8a9bc 2026-08-05)"
+  ],
+  "binary_version": "mithril research-0.1.7 (9959fe2e5cd466614dc20ef7b710befaaf1d746a)",
+  "stages": [
+    {
+      "label": "inspect-builder",
+      "exit_code": 0,
+      "started_utc": "2026-10-14T18:25:32.766335+00:00",
+      "finished_utc": "2026-10-14T18:25:32.787906+00:00",
+      "log_sha256": "e05b278a7d4d59bf4b981f30040ad76d9efa62a83e87841bd2c13d138a308382"
+    },
+    {
+      "label": "versions",
+      "exit_code": 0,
+      "started_utc": "2026-10-14T18:25:32.788057+00:00",
+      "finished_utc": "2026-10-14T18:25:33.137732+00:00",
+      "log_sha256": "079bb51a0c70662ba87f6aa08eacbe03fe49a9ea255c0925f16b90f2660e8c6e"
+    },
+    {
+      "label": "build-release",
+      "exit_code": 0,
+      "started_utc": "2026-10-14T18:25:33.137930+00:00",
+      "finished_utc": "2026-10-14T18:25:55.446754+00:00",
+      "log_sha256": "08911e2dc72c91507d32c916d846faf8e631de7b58be6f7ad766fb2e91675197"
+    },
+    {
+      "label": "native-tests",
+      "exit_code": 0,
+      "started_utc": "2026-10-14T18:25:55.446916+00:00",
+      "finished_utc": "2026-10-14T18:26:05.072855+00:00",
+      "log_sha256": "de8afd04201c470ad7e55fbe8569a1b2eb59665c228f808ae435ace6fa57c2ae"
+    },
+    {
+      "label": "clippy",
+      "exit_code": 0,
+      "started_utc": "2026-10-14T18:26:05.073054+00:00",
+      "finished_utc": "2026-10-14T18:26:09.530414+00:00",
+      "log_sha256": "54825893d0fb59fc2a6446b7b5f061fc1d10330d0a71217aef74c944836e8c7e"
+    },
+    {
+      "label": "fmt",
+      "exit_code": 0,
+      "started_utc": "2026-10-14T18:26:09.530602+00:00",
+      "finished_utc": "2026-10-14T18:26:09.971090+00:00",
+      "log_sha256": "c0103e3a67572f4b2307879c217d95619ca907f4800b9c047f2d3c695deef3b2"
+    },
+    {
+      "label": "binary-version",
+      "exit_code": 0,
+      "started_utc": "2026-10-14T18:26:09.971274+00:00",
+      "finished_utc": "2026-10-14T18:26:10.296112+00:00",
+      "log_sha256": "7dc9c5ebd5fe27ff517a1b4b6e6fb0bf097f1b158bba3bd263c908903c725a4e"
+    }
+  ],
+  "earlier_attempts": [
+    {
+      "attempt": "r1",
+      "result": "failed before compilation",
+      "reason": "rustup implicit sync attempted read-only image write"
+    },
+    {
+      "attempt": "r2",
+      "result": "release and 121 tests passed; clippy unavailable",
+      "reason": "base image omitted clippy/rustfmt"
+    }
+  ],
+  "runtime_acceptance": "UNEXECUTED",
+  "redis_registry_observation": {
+    "tag": "redis:7.4.11-bookworm",
+    "platform": "linux/amd64",
+    "manifest_digest": "sha256:cd745595f143052dd6a743bc5651d3ce4b03979fe5c99c7fcfab73461f6f217b",
+    "method": "docker manifest inspect",
+    "runtime_version_checked": false
+  }
+}

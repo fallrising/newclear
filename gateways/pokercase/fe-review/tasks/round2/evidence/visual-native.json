@@ -1,0 +1,111 @@
+{
+  "sourceHead": "0ad59757c24f3fe22bcc8024905097bc843a2f5b",
+  "sourceHashes": {
+    "Cargo.toml": "afc82ede18db8fa925c9c5bab37c5cb6ebac83bf7829a3e55a4408d8c21b34be",
+    "src/resolve.rs": "e29712b19338ea1b344fb52cc01e1b3bf53db624d69fa043f2089de94b281df2",
+    "src/claude_code.rs": "91a6248c7b5df8bea84069e41cb7253b14df6df93760b80b0c48f97829eb875f",
+    "src/http_client.rs": "591f1304a08ccba2eba0370606fc2ed1661708763e71aa5cc4e1c8ed5b132a8e",
+    "src/claude.rs": "bce725d7eda58705c25d308dd4b052fc813e9281fd017d7e5fb7b9c700df6ffc",
+    "src/claude_mcp.rs": "f740dbad64514fbfb413704d330b4dda3d8927f05f32eb123f901758642f1800",
+    "src/agy.rs": "084ccdd57f14b753f3712e5758b2729a6f5d3990d9cb84d5f6346d6e0d63cc77",
+    "src/templates.rs": "91e69c3c48aec5d5ec524bee126aac86f6074eec411f6fe868692340914eac3d",
+    "src/store.rs": "a4d1dc5030a7e6249d18c971266587b3f1961bbc5a940f6bbbde608bab02fafa",
+    "src/tui_app.rs": "c33c495bd8f799a00d8633a323e7eaef0fcea9ac1cb08310eb7fddc7dc6d6693",
+    "src/config.rs": "61d7a1de17655f8e65e93554c930678ee673dcca1d13f66284e2da6c27ae5088",
+    "src/secrets.rs": "27340da1055c3d1c847228107af87d95e3af2b485f0c38b63e0dad23652abfb8",
+    "src/providers.rs": "f998c0edfd18abe27a699fc5d00cd8c3dc6ebf31a7a02abbae79373f1e7fabf6",
+    "src/native_responses.rs": "badfbed4d140301843f2d4cec46020ed7d4b81ff07fe43e00bbb9728ee4da3e3",
+    "src/borrowed.rs": "bc1c1bd8fedcacb4a74fc48e8f776218b1431d82dab161f327d11b7eeb45ebdf",
+    "src/error.rs": "1a4ff541f9a7e182ac4ebaa5e908df9f74063c7f56b9b62f574890b70f613c9d",
+    "src/admin.rs": "e88ea1d7b34fac389c62f19bd47a87df5791fc1cfa6b094713695b9bb3574b82",
+    "src/main.rs": "0a6b74fee0ea4b32776822cb15ea9f8a94e23794a88f953b843482346d3b765d",
+    "src/web.rs": "8960a50f79c9ca88f15a93030441e5c52f957027142c5c58ab267ea27f958aeb",
+    "src/server.rs": "4d6b23f3861e5f4d66225da20dfbc81245ec4c843a8b29eb43ae2d04dfd87399",
+    "src/local_import.rs": "ec57983186b01e6671eac211d359d2061214fe02309a1ca3ece78b7f0f483355",
+    "src/siwc.rs": "791714d00453c7b4c9ef328a4903b0bad2949b96e64fbb34d648beb43aa93c0f",
+    "src/cancel.rs": "bdfcaccc8420f12e7599f63190884600723e64b835d16ae622a8e34c35b3dfca",
+    "src/responses.rs": "23928e76cc1f12189ed7fa4b267356fbbc91fa194d2eee40d1fd0de00ed62a27",
+    "src/proxy.rs": "8bede93f448b2e5d95404114a11ef76cee465edf9c835ced7f74e913c3fe8259",
+    "src/oauth_refresh.rs": "653c410d5f88cc57b32dd5374caf16445925fb07f16f5280477e3608878a7b90",
+    "src/cooldown.rs": "f69c5f03917aa667916dada5466174f21d2f27688adb927876130e946840a154",
+    "src/prompt_cache.rs": "d2e0863ba0cafaa7e6c05046af150d823eca4036f640dbe81c394f96f4eec0d4",
+    "src/token_saver.rs": "f2b51ae7db4eaeb5794c6964fa7d3eb6f48ce292d95c1b76defd70a4976d8268",
+    "src/guard.rs": "5f1293fc449d71d9850c9386838b4009d38bde050e138f6d62587c8673cb1a24",
+    "src/cursor_cli.rs": "1fa056774425c1ffbee1b2220520044ce589183a868a24cd2facb2d1d7d75040",
+    "templates/login.html": "c5647f7decffe7cb588343fda364a32512130eaafd7b10a7f39569079b731540",
+    "templates/dashboard.html": "877969cdcce6b84b9da1b2215add1e747387eeb32a4a912b5d523c02db9adecc",
+    "templates/connections.html": "79d14efa6f6becf5aeabed29f3e898453134944dbb1dc3d30f840ec410e6e469",
+    "templates/layout.html": "9374edc297a60c34346305e64f5ad1733700ab34c2ce11cd77f89d286e4b2d0c",
+    "templates/style.css": "66ac524ba5844cf62caf2cec425afc5075a80c710898259e88ff064b57e2cd98",
+    "templates/usage.html": "99a0c30ee0e7b59c794f1eda693200235f87f613c682b921b0c6006e28da1a4d",
+    "templates/keys.html": "64825d33903b6f1dd7057f4dc5b5043fc13b348efa6ffdbb881b965651b014a0",
+    "templates/routes.html": "21fb408bfcc3ec8e37d414f08370f3252ce83460f0d487816f2b2ada56eeea84",
+    "tests/stream_completion_e2e.rs": "445cab4a7bcd83b64759d2afeab4e5dd474ee5288bc4e35c4ba8e15d287b453d",
+    "tests/admin_security.rs": "2660771b8a84843fdaf92713e7ef2248e611356d572eb94c16e8f4d158b5dc89",
+    "tests/chat_upstream_responses_e2e.rs": "4fc2b697be8b78860451e83788391604e65849496c94c365ed5b84998f4e708d",
+    "tests/e2e_mock.rs": "61d74b25ede86d0a998721ed3d0dec691024884d55c86007311d98ace26450f5",
+    "tests/claude_code_e2e.rs": "d64f3977326abb9c38568518594eb30a13ace47f264d4e4d0f3ca85a437247b3",
+    "tests/responses_e2e.rs": "8c581b0549be37b1f9fe6d23a65696dd6b6992ec99be36cd02fc4852695ec201",
+    "tests/claude_live_e2e.rs": "55a930a1ef8b9cc6df3021d513d44e95f6b6961adb95756dc26b4e7b25e5a164",
+    "tests/cursor_cli_e2e.rs": "89b225b28a0e0fe8018792201c99d49fdeb796b764bf7f231e078912e100d081",
+    "tests/cost_auth.rs": "3674a67e7b32e5e607fe66c2f9559aa5ee15aba4bfdfc41b5db3bd57ed437267"
+  },
+  "checks": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "fmt",
+        "--check"
+      ],
+      "exitCode": 0,
+      "failure": null,
+      "elapsedSeconds": 0.264,
+      "timeoutSeconds": 180
+    },
+    {
+      "name": "test",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "test",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "failure": null,
+      "elapsedSeconds": 23.548,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "failure": null,
+      "elapsedSeconds": 2.971,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "build",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "failure": null,
+      "elapsedSeconds": 6.692,
+      "timeoutSeconds": 600
+    }
+  ]
+}

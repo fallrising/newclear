@@ -121,6 +121,7 @@ def main():
                 "guest_model.py",
                 "guest_tool.py",
                 "guest_tool_client.py",
+                "guest_external.py",
             }
         )
         path = CODE / name
@@ -158,7 +159,8 @@ def main():
         except FileNotFoundError:
             # A racing process is not proof of a stable security boundary.
             raise RuntimeError("guest_isolation_unstable") from None
-    require(bool(controls))
+    external = request.get("external_workspace") is True
+    require(not controls and not terminals if external else bool(controls))
     if request.get("tool_transport"):
         require(len(tool_controls) == 1)
     if request.get("terminal"):
@@ -166,7 +168,8 @@ def main():
     print(
         json.dumps(
             {
-                "revision": REVISION,
+                "revision": "external-workspace-v1" if external else REVISION,
+                **({"quiescent": True} if external else {}),
                 "control_uid": 2001,
                 "terminal_uid": 2000,
                 "no_new_privileges": True,

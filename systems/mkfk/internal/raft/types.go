@@ -126,6 +126,11 @@ type Config struct {
 	Voters               []uint32
 	ElectionTimeoutTicks uint64
 	HeartbeatTicks       uint64
+	// NextElectionTimeout, when set, draws the timeout in ticks each time the
+	// node starts an election or becomes a follower; ElectionTimeoutTicks is
+	// only the first one. Without it two nodes with equal timeouts that lose
+	// their leader campaign on the same tick forever.
+	NextElectionTimeout func() (uint64, error)
 }
 
 func (config Config) validate() (Config, error) {
@@ -181,6 +186,17 @@ type Snapshot struct {
 	LastApplied  uint64
 	LeaderReady  bool
 	Quorum       int
+	// Peers is the leader's replication progress per peer, by peer ID;
+	// it is empty on followers and candidates.
+	Peers []PeerProgress
+}
+
+type PeerProgress struct {
+	PeerID     uint32
+	NextIndex  uint64
+	MatchIndex uint64
+	Unanswered int
+	Inflight   int
 }
 
 var (

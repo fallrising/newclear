@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"os"
-	"slices"
 	"strconv"
 	"sync"
 	"syscall"
@@ -132,8 +131,10 @@ func TestM7ChaosOP05RotatingCrashesPartitionsAndPauses(t *testing.T) {
 	for partition, values := range final {
 		for _, id := range brokers {
 			local := replicaValues(t, cluster, id, partition)
-			if len(local) < len(values) || !slices.Equal(local[:len(values)], values) {
-				violations = append(violations, fmt.Sprintf("broker %d's committed copy of events/%d differs from the leader's", id, partition))
+			if diverged := firstDifference(local, values); diverged >= 0 {
+				violations = append(violations, fmt.Sprintf("broker %d's copy of events/%d diverges from the committed log at record %d", id, partition, diverged))
+			} else if len(local) < len(values) {
+				violations = append(violations, fmt.Sprintf("broker %d's copy of events/%d lags: %d of %d committed records", id, partition, len(local), len(values)))
 			}
 		}
 	}
@@ -154,6 +155,17 @@ func TestM7ChaosOP05RotatingCrashesPartitionsAndPauses(t *testing.T) {
 	if len(violations) > 0 {
 		t.Fatalf("seed %d: %d violations:\n%v", seed, len(violations), violations)
 	}
+}
+
+// firstDifference returns the first index where local and committed hold
+// different records, or -1 when local is a prefix of committed or extends it.
+func firstDifference(local, committed []string) int {
+	for index := range min(len(local), len(committed)) {
+		if local[index] != committed[index] {
+			return index
+		}
+	}
+	return -1
 }
 
 func recordCounts(final map[uint32][]string) map[string]int {

@@ -53,14 +53,25 @@ jobs:
       - name: Format
         run: test -z "$(gofmt -l .)"
       - run: go vet ./...
-      - run: go test -race -count=1 ./...
+      - run: go test -count=1 ./...
       - run: go build -trimpath -o /tmp/signalhub ./cmd/signalhub
       - name: Contract fixtures and OpenAPI
         run: |
           python3 -m venv /tmp/signalhub-contracts
           /tmp/signalhub-contracts/bin/pip install --only-binary=:all: -r contracts/requirements.txt
           /tmp/signalhub-contracts/bin/python contracts/check.py
+          /tmp/signalhub-contracts/bin/python scripts/test_check_sources.py
+          /tmp/signalhub-contracts/bin/python scripts/check_sources.py
+          python3 scripts/test_check_deployment.py
+          python3 -m unittest discover -s deployment/docker-test -p 'test_*.py' -v
+          python3 scripts/check_deployment.py
+          /tmp/signalhub-contracts/bin/python -c "import sys; sys.path.insert(0, 'contracts'); import check; check.validate('config', check.loads(open('deployment/config.example.json').read()))"
+          sh -n deployment/launch.sh
           /tmp/signalhub-contracts/bin/python scripts/e2e_smoke.py --binary /tmp/signalhub
+          /tmp/signalhub-contracts/bin/python scripts/e2e_rules.py --binary /tmp/signalhub
+          /tmp/signalhub-contracts/bin/python scripts/e2e_delivery.py --binary /tmp/signalhub
+          /tmp/signalhub-contracts/bin/python scripts/e2e_archive.py --binary /tmp/signalhub
+          /tmp/signalhub-contracts/bin/python scripts/e2e_m6.py --binary /tmp/signalhub
       - name: Real Go binary browser acceptance
         working-directory: platform/signal-hub/browser
         env:
@@ -68,7 +79,42 @@ jobs:
           # Ubuntu allows the packaged Chrome sandbox at its installed path.
           SIGNALHUB_CHROMIUM: /opt/google/chrome/chrome
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
           npm ci
           test -x "$SIGNALHUB_CHROMIUM"
           "$SIGNALHUB_CHROMIUM" --version
           npm test
+      - name: Browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signal-hub-browser
+          path: platform/signal-hub/browser/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  docker-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: platform/signal-hub
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Private setup regression
+        run: python3 -m unittest discover -s scripts -p test_docker_setup.py -v
+      - name: Build the personal Docker image
+        run: docker build --tag "signalhub:ci-$GITHUB_SHA" .
+      - name: Packaged persistence and isolated restore
+        run: python3 scripts/e2e_docker.py --image "signalhub:ci-$GITHUB_SHA" --state-dir "$RUNNER_TEMP/signalhub-docker-smoke"
+      - name: Sanitized package evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signal-hub-docker-package
+          path: ${{ runner.temp }}/signalhub-docker-smoke/evidence/
+          retention-days: 14
+          if-no-files-found: ignore

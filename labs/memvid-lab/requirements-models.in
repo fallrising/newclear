@@ -1,0 +1,6 @@
+# Optional CPU-only local semantic / visual experiment dependencies.
+numpy==2.5.4
+onnxruntime==1.31.1
+tokenizers==0.23.3
+# Pin tokenizers' hub dependency to the version used for this local-only run.
+huggingface-hub==1.33.0

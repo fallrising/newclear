@@ -1,0 +1,169 @@
+{
+  "kind": "historical_allowlisted_summary",
+  "date": "2026-10-31",
+  "rerun_during_import": false,
+  "runs": [
+    {
+      "run": "local-work-20261031T094234940505Z",
+      "source_sha256": "8bdcb18e5662535aefb9b424c76571c3ee3b7bc9057e313e532b94851d88100d",
+      "status": "completed",
+      "cloud_fallback": false,
+      "model": "qwen3.8-flash-next-q2_0",
+      "context": 32768,
+      "model_inference_verified": true,
+      "file_task_passed": true,
+      "strict_network_isolation_verified": false,
+      "elapsed_s": 43.02702762489207,
+      "cleanup_errors": [],
+      "completed_turn_usage": [
+        {
+          "input_tokens": 20868,
+          "cached_input_tokens": 13861,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 203,
+          "reasoning_output_tokens": 0
+        }
+      ]
+    },
+    {
+      "run": "local-work-20261031T095312970082Z",
+      "source_sha256": "5dcee3808cb6955f7b747310b6bd90e31b1615ccd9bd706a7feb2450013407b8",
+      "status": "completed",
+      "task": "queue-repair",
+      "cloud_fallback": false,
+      "model": "qwen3.8-flash-next-q2_0",
+      "context": 32768,
+      "model_inference_verified": true,
+      "file_task_passed": true,
+      "strict_network_isolation_verified": false,
+      "code_task_passed": true,
+      "fixture_integrity": true,
+      "code_changed": true,
+      "baseline_exit_code": 1,
+      "acceptance_exit_code": 0,
+      "elapsed_s": 61.16771987499669,
+      "cleanup_errors": [],
+      "completed_turn_usage": [
+        {
+          "input_tokens": 38681,
+          "cached_input_tokens": 30665,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 629,
+          "reasoning_output_tokens": 0
+        }
+      ]
+    },
+    {
+      "run": "local-work-20261031T105338032516Z",
+      "source_sha256": "cee94bbc286d586eb6c9b71d7f2ede615522f89c1152c8937aede4f2ae373e8c",
+      "status": "completed",
+      "harness": "opencode",
+      "task": "file",
+      "cloud_fallback": false,
+      "model": "qwen3.8-flash-next-q2_0",
+      "context": 32768,
+      "model_inference_verified": true,
+      "file_task_passed": true,
+      "strict_network_isolation_verified": false,
+      "agent_exit_code": 0,
+      "elapsed_s": 40.95785624999553,
+      "cleanup_errors": [],
+      "completed_turn_usage": []
+    },
+    {
+      "run": "local-work-20261031T105721530874Z",
+      "source_sha256": "c90c6cc0f666e59f0c83b7d563cc1645d0e3d5780df021e4b1dc6e26b0c3c280",
+      "status": "completed",
+      "harness": "office-opencode",
+      "task": "file",
+      "cloud_fallback": false,
+      "model": "qwen3.8-flash-next-q2_0",
+      "context": 32768,
+      "model_inference_verified": true,
+      "file_task_passed": true,
+      "strict_network_isolation_verified": false,
+      "agent_exit_code": 0,
+      "elapsed_s": 52.948509332956746,
+      "cleanup_errors": [],
+      "completed_turn_usage": [],
+      "office": {
+        "status": "completed",
+        "states": [
+          "idle",
+          "working",
+          "done"
+        ],
+        "artifact_sha256": "5abdf3c81c04ec08b8d47192b0bf32340e65f88587b6ee7f523def586d2c85a7",
+        "file_task_passed": true,
+        "model_inference_verified": true,
+        "office_native_status_verified": true,
+        "cleanup_completed": true,
+        "session_present": true,
+        "usage": {
+          "input": 6161,
+          "output": 229,
+          "cacheWrite": 0,
+          "cacheRead": 12385,
+          "cost": 0,
+          "calls": 3,
+          "reasoning": 0,
+          "costKnown": true
+        }
+      }
+    },
+    {
+      "run": "local-work-20261031T110252914131Z",
+      "source_sha256": "19f623ad8be2cc7d11da04054cef34fd615b1fb80b15026946ee71decb8898af",
+      "status": "stopped",
+      "harness": "office-opencode",
+      "task": "file",
+      "cloud_fallback": false,
+      "model": "qwen3.8-flash-next-q2_0",
+      "context": 32768,
+      "model_inference_verified": true,
+      "file_task_passed": true,
+      "strict_network_isolation_verified": false,
+      "elapsed_s": 93.46401416696608,
+      "cleanup_errors": [],
+      "office": {
+        "status": "interrupted",
+        "states": [
+          "idle",
+          "working",
+          "done",
+          "working"
+        ],
+        "artifact_sha256": "11facfb40062d66e19bde5d1bb9b2baaff575888d88280f05552c7d068b07d01",
+        "file_task_passed": true,
+        "model_inference_verified": true,
+        "office_native_status_verified": true,
+        "cancel_duration_ms": 202,
+        "cancel_event_verified": true,
+        "cancelled_processes_exited": true,
+        "cleanup_completed": true,
+        "session_present": true,
+        "usage": {
+          "input": 6164,
+          "output": 235,
+          "cacheWrite": 0,
+          "cacheRead": 12391,
+          "cost": 0,
+          "calls": 3,
+          "reasoning": 0,
+          "costKnown": true
+        }
+      }
+    },
+    {
+      "run": "opencode-boundary-20261031T110437002728Z",
+      "source_sha256": "a13b7eb5d1683e177261c941f07414f38f9770cb06fe4606108602aa3790baf0",
+      "status": "completed",
+      "sandbox_exit_code": 0,
+      "loopback_allowed": true,
+      "external_network_denied": true,
+      "outside_write_denied": true,
+      "workspace_write_allowed": true,
+      "unavailable_fails_closed": true
+    }
+  ]
+}

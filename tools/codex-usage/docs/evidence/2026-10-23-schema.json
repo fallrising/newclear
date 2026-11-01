@@ -1,0 +1,97 @@
+{
+  "cli_version": "codex-cli 0.163.0",
+  "schema_generation": {
+    "stable_exit": 0,
+    "experimental_exit": 0
+  },
+  "live_account_verified": false,
+  "real_snapshot_collected": false,
+  "methods": [
+    {
+      "file": "ClientRequest.json",
+      "method": "initialize",
+      "params": {
+        "$ref": "#/definitions/InitializeParams"
+      },
+      "required": [
+        "id",
+        "method",
+        "params"
+      ]
+    },
+    {
+      "file": "ClientRequest.json",
+      "method": "account/rateLimits/read",
+      "params": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/GetAccountRateLimitsParams"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "required": [
+        "id",
+        "method"
+      ]
+    },
+    {
+      "file": "ClientRequest.json",
+      "method": "account/usage/read",
+      "params": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/GetAccountTokenUsageParams"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "required": [
+        "id",
+        "method"
+      ]
+    },
+    {
+      "file": "ClientRequest.json",
+      "method": "account/read",
+      "params": {
+        "$ref": "#/definitions/GetAccountParams"
+      },
+      "required": [
+        "id",
+        "method",
+        "params"
+      ]
+    },
+    {
+      "file": "ClientNotification.json",
+      "method": "initialized",
+      "params": null,
+      "required": [
+        "method"
+      ]
+    }
+  ],
+  "schema_sha256": {
+    "ClientRequest.json": "6b10888f163f569922d42c41e94a98b4261258abc7581c14eca867c3b125dc6f",
+    "ClientNotification.json": "706cf248d75027c84a3c63348d0ed507182e8eba40069dd17541793de029145a",
+    "v2/GetAccountResponse.json": "c3092dd8e52c2933c5ba5f0bf92377174f65bed627ff4ef5d7c04a189dd34fd1",
+    "v2/GetAccountRateLimitsResponse.json": "cb9655e68130116f634ed9353e45b336492e6069a6628f424d1cd52e54eda0e0",
+    "v2/GetAccountTokenUsageResponse.json": "a58e58c852c888e5de925d99a66688d55ebb2fff038e795aadf04f8a8426dff8",
+    "v2/NullableGetAccountRateLimitsParams.json": "072f813ca1c696831a7f2fbd934feaa8cad228a6b3d44a4be8877547c796341b",
+    "v2/NullableGetAccountTokenUsageParams.json": "a992c6ea0fe02b0e9f46b18afb51b8ee2635e7f0c7d546f71e7f95e2a98bebba"
+  },
+  "recorded_at": "2026-10-22T18:07:06.761194Z",
+  "authentication_preflight": {
+    "command": "codex login status",
+    "exit": 0,
+    "status": "chatgpt_login_reported",
+    "target_identity_verified": false,
+    "raw_output_retained": false,
+    "recorded_at": "2026-10-22T18:07:33.329280+00:00"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "command": "review-only unique-project Compose build (no up)",
+  "exitCode": 0,
+  "elapsedSeconds": 4.977,
+  "project": "fe-ojb-0afcb7f018b20564",
+  "configPublishedPorts": 0,
+  "imageIds": {
+    "console-api": "sha256:77418ee0364e0ab22431dda7145515457ead0605498630368a4e399f21efe28c",
+    "console-web": "sha256:def47cb0c64010d830456f2cd52de80be5cfb2f8960d901da139830b842cba7b",
+    "gateway-produce": "sha256:1afbacff9a84644c0c26731119800d92af2795c6d31b78f3f0aa91c4da91e634",
+    "gateway-consume": "sha256:3e68c1575eb1f63d7fab9c26e24a327f059fb614873974c79fcf6660948c69c7",
+    "scheduler": "sha256:98a3793bb496555334a2824d5935afbc3fc640f401aaf59cb31aa44a20cb74d2"
+  }
+}

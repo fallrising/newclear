@@ -1,3 +1,4 @@
+# Historical standalone workflow. Active monorepo entry: ../../../../.github/workflows/flowshot-ci.yml
 name: CI
 
 on:

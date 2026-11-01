@@ -1,8 +1,8 @@
 {
   "project": "loom",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
-  "locale": "zh-TW",
+  "verified": true,
+  "verifiedNote": "Scoped R2 synthetic Web runtime and retained local frontend gates passed; required current-head CI and merge remain delivery gates. Use component run-review.mjs; generic capture does not inject the fixture. Not full Round3 or native/product acceptance.",
+  "locale": "en-US",
   "colorSchemes": [
     "light",
     "dark"
@@ -20,9 +20,34 @@
       "pages": [
         {
           "id": "home",
-          "path": "/"
+          "path": "/",
+          "waitFor": ".app-header"
         }
       ]
     }
-  ]
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "tablet",
+      "width": 834,
+      "height": 1112
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "verificationScope": "R2-AC-11 synthetic Web preload/driver only; delivery requires independent review and current-head CI",
+  "verificationEvidence": [
+    "tasks/round2/report.md",
+    "tasks/round2/result.json",
+    "tasks/round2/evidence/final-docs/audit.json"
+  ],
+  "verifiedAt": "2026-10-24"
 }

@@ -1,0 +1,156 @@
+{
+  "date": "2026-11-01",
+  "status": "completed",
+  "acceptance": "AC-03",
+  "baseline_commit": "e229946c4e12ed73bdfa85b24b8bc9e2e9c4f81e",
+  "source_sha256": {
+    "run_grok_work.py": "319ed48f8e6288450f0e611588e2ef571180e7b067f270b322d14051e73aa384",
+    "grok_task_hook.py": "cf6e5fcd2d04feb961bb87f16cd54bfdcbf22dd114690fd40066835b18e80c0c",
+    "grok_work_policy.mjs": "123326e29da8351e483f1ef4439c358223cb3468bc20bb19060aa55d75b4ad80",
+    "office_grok_work.mjs": "a88518b0a383479db810210edbcaf34e886ff11a201409fde3c3d174baf15bfc",
+    "grok-work/grok": "de064da6a833aa5ee9834c15b9848c7e26f6fde55a50561dbf8bc2ce6f80a3ff",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72",
+    "cursor_task_hook.py": "55b59876b6040665e0352c94dfff2c6ffe9c19b59655a0f816e6142828d18684",
+    "grok_native_evidence.py": "d56ae4c5eb032b30baba05475b1e0e523442c21969a581b26c00a49c7093cf66"
+  },
+  "provider": "grok",
+  "version": "1.0.70",
+  "model": "grok-4.6",
+  "model_inference_verified": true,
+  "elapsed_s": 17.999429958174005,
+  "authorization": {
+    "single_attempt": true,
+    "consumed": true,
+    "budget_multiplier": 2,
+    "hook_tool_gate": 8,
+    "native_max_turns": 12,
+    "timeout_seconds": 480,
+    "host_retries": 0
+  },
+  "session_hook_verified": true,
+  "native_model_selection_verified": true,
+  "model_evidence_source": "versioned same-session native model changed log plus per-event checks",
+  "authenticated_events": [
+    "SessionStart",
+    "UserPromptSubmit",
+    "PreToolUse",
+    "PreToolUse",
+    "PostToolUse",
+    "PostToolUse",
+    "PreToolUse",
+    "PostToolUse",
+    "Stop"
+  ],
+  "events": [
+    {
+      "event": "SessionStart",
+      "model_field_present": false,
+      "allowed": true
+    },
+    {
+      "event": "UserPromptSubmit",
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "PreToolUse",
+      "path_field": "target_file",
+      "tool": "read_file",
+      "target": "input.json",
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "PreToolUse",
+      "path_field": "target_file",
+      "tool": "read_file",
+      "target": "result.json",
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "PostToolUse",
+      "tool_succeeded": true,
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "PostToolUse",
+      "tool_succeeded": true,
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "PreToolUse",
+      "path_field": "file_path",
+      "tool": "search_replace",
+      "target": "result.json",
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "PostToolUse",
+      "tool_succeeded": true,
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "Stop",
+      "reason_present": true,
+      "stop_hook_active_present": true,
+      "reason": "end_turn",
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "Stop",
+      "cleanup_event": true
+    }
+  ],
+  "calls": [
+    "read_file:input.json",
+    "read_file:result.json",
+    "search_replace:result.json"
+  ],
+  "completed": [
+    "read_file:result.json",
+    "read_file:input.json",
+    "search_replace:result.json"
+  ],
+  "native_stop_verified": true,
+  "artifact": {
+    "exact_content_verified": true,
+    "sha256": "4df84ae86ea2e03536d4ca2aa215e53781f353ad668e482cf316d20d7ab21a77",
+    "bytes": 49
+  },
+  "states": [
+    "starting",
+    "idle",
+    "working",
+    "done"
+  ],
+  "usage": {
+    "request_count": null,
+    "input_tokens": null,
+    "output_tokens": null,
+    "cost": null
+  },
+  "cleanup": {
+    "completed": true,
+    "owned_processes_seen": 29,
+    "copied_credentials_removed": true,
+    "errors": []
+  },
+  "offline_tests": {
+    "node": 35,
+    "python": 46
+  },
+  "limitations": [
+    "Hook crashes/timeouts still fail open; tool gate is not a provider hard cap.",
+    "Provider request/token/money caps and verified usage/cost remain unknown.",
+    "File task acceptance does not cover Grok permissions interaction, cancellation, restart/resume or complete egress isolation.",
+    "Prior failed paid attempt remains in grok-live-2026-11-01.json; no automatic retry was made."
+  ]
+}

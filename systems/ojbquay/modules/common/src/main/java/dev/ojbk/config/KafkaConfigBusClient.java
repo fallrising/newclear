@@ -27,6 +27,7 @@ public final class KafkaConfigBusClient implements ConfigBusClient {
     private final List<Consumer<ConfigEvent>> listeners = new CopyOnWriteArrayList<>();
     private final List<BiConsumer<ConfigEntityType, String>> deletionListeners =
             new CopyOnWriteArrayList<>();
+    private final List<Runnable> failureListeners = new CopyOnWriteArrayList<>();
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean running = new AtomicBoolean();
     private final AtomicBoolean ready = new AtomicBoolean();
@@ -77,6 +78,10 @@ public final class KafkaConfigBusClient implements ConfigBusClient {
         deletionListeners.add(java.util.Objects.requireNonNull(listener, "listener"));
     }
 
+    public void addFailureListener(Runnable listener) {
+        failureListeners.add(java.util.Objects.requireNonNull(listener, "listener"));
+    }
+
     private void poll() {
         Set<TopicPartition> bootstrapAssignment = Set.of();
         Map<TopicPartition, Long> bootstrapEndOffsets = Map.of();
@@ -105,6 +110,8 @@ public final class KafkaConfigBusClient implements ConfigBusClient {
         } catch (RuntimeException failure) {
             recordFailure(failure);
         } finally {
+            ready.set(false);
+            running.set(false);
             consumer.close();
         }
     }
@@ -153,6 +160,10 @@ public final class KafkaConfigBusClient implements ConfigBusClient {
     private void recordFailure(RuntimeException failure) {
         ready.set(false);
         lastError.set(failure.getClass().getSimpleName());
+        for (Runnable listener : failureListeners) {
+            try { listener.run(); }
+            catch (RuntimeException observerFailure) { failure.addSuppressed(observerFailure); }
+        }
     }
 
     @Override

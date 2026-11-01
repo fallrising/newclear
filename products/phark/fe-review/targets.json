@@ -1,11 +1,10 @@
 {
   "project": "phark",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
-  "locale": "zh-TW",
+  "verified": true,
+  "verifiedNote": "僅原R2 M1–M3：真Session/CSRF fixture、12 shared keys(9+3 immutable selection)、9 route guards、keyboard/paging/logout proof。完整R3/contrast/mainline/owner completion未宣稱；見tasks/round2/result.json及RUNNER.md。",
+  "locale": "en-US",
   "colorSchemes": [
-    "light",
-    "dark"
+    "light"
   ],
   "apps": [
     {
@@ -13,7 +12,7 @@
       "kind": "spa",
       "cwd": "products/phark/frontend",
       "install": "npm ci",
-      "start": "npm run dev -- --host 127.0.0.1 --port 5173 --strictPort",
+      "start": "node ../fe-review/serve-web.mjs",
       "env": {},
       "baseUrl": "http://127.0.0.1:5173",
       "ready": "/",
@@ -21,8 +20,35 @@
         {
           "id": "home",
           "path": "/"
+        },
+        {
+          "id": "notifications",
+          "path": "/notifications"
+        },
+        {
+          "id": "search",
+          "path": "/search?q=fe-review"
         }
       ]
     }
-  ]
+  ],
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "tablet",
+      "width": 834,
+      "height": 1112
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    }
+  ],
+  "runtimePreparation": "Root-owned isolated Spring/Vite namespace and fresh private state required. Static targets are a template; shared-capture.mjs generates actual profile path and private auth storageState from API responses. Do not run anonymous static capture as authenticated acceptance.",
+  "dynamicProfile": "shared-capture.mjs uses /profiles/ plus actual seed.a.handle; no fixed account or ID"
 }

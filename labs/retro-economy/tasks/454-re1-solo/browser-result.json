@@ -1,0 +1,91 @@
+{
+  "result": "PASS",
+  "observations": [
+    {
+      "browser": "Chrome/154.0.8037.57",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+    },
+    {
+      "profession": "smith",
+      "nameRenderedSafely": true,
+      "viewport": "desktop",
+      "midwayRestart": {
+        "id": 1,
+        "name": "<b>霧岸旅人</b>",
+        "x": 2,
+        "y": 0,
+        "hp": 3,
+        "profession": "smith",
+        "coins": 12,
+        "tower_stage": 1,
+        "tower_reward_claimed": false,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 1,
+          "ore": 0
+        }
+      },
+      "completedRestart": {
+        "id": 1,
+        "name": "<b>霧岸旅人</b>",
+        "x": 4,
+        "y": 0,
+        "hp": 3,
+        "profession": "smith",
+        "coins": 20,
+        "tower_stage": 2,
+        "tower_reward_claimed": true,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 0,
+          "ore": 0
+        }
+      },
+      "duplicateRewardRejected": true,
+      "missingKitRejected": true
+    },
+    {
+      "profession": "herbalist",
+      "nameRenderedSafely": true,
+      "viewport": "390px mobile",
+      "midwayRestart": {
+        "id": 2,
+        "name": "潮林藥師",
+        "x": 2,
+        "y": 0,
+        "hp": 3,
+        "profession": "herbalist",
+        "coins": 12,
+        "tower_stage": 1,
+        "tower_reward_claimed": false,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 1,
+          "ore": 0
+        }
+      },
+      "completedRestart": {
+        "id": 2,
+        "name": "潮林藥師",
+        "x": 4,
+        "y": 0,
+        "hp": 3,
+        "profession": "herbalist",
+        "coins": 20,
+        "tower_stage": 2,
+        "tower_reward_claimed": true,
+        "items": {
+          "herb": 0,
+          "kit": 0,
+          "medicine": 0,
+          "ore": 0
+        }
+      },
+      "duplicateRewardRejected": true,
+      "missingKitRejected": true
+    }
+  ]
+}

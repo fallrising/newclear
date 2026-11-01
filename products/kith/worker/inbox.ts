@@ -11,10 +11,11 @@ import {
 } from "../src/notify.ts";
 import { canWake } from "../src/quota.ts";
 import { flagOn, type Env } from "./env.ts";
+import { paidCallsEnabled } from "./cost-controls.ts";
 import type { BeginInput, BeginResult } from "./hosted/generation.ts";
 import { loadAgentRuntime, runtimeStatus } from "./providers/runtime.ts";
 import { inc } from "./metrics.ts";
-import type { AcquireAmbientResult, ConsumeWakeBudgetResult, RoomActivity } from "./room.ts";
+import type { AcquireAmbientResult, RoomActivity } from "./room.ts";
 
 /** Minimal live-tail item. M3 notify is a buffer; attention/LLM come later. */
 export type InboxNotifyPayload = {
@@ -35,10 +36,19 @@ export type InboxNotifyPayload = {
 };
 
 type Waiter = {
+  id: string;
   cursor: number;
   resolve: (items: InboxNotifyPayload[]) => void;
   settled: boolean;
+  timer: ReturnType<typeof setTimeout>;
 };
+
+type BoundedPending = PendingAmbient & { created_at_ms: number; deadline: number; rearms: number };
+export const INBOX_WAIT_MAX_MS = 30_000;
+export const INBOX_WAIT_MAX = 16;
+export const AMBIENT_PENDING_MAX_MS = 300_000;
+export const AMBIENT_REARM_MAX = 8;
+export const AMBIENT_REARM_MIN_MS = 1_000;
 
 type HostedBeginStub = DurableObjectStub & {
   begin(input: BeginInput): Promise<BeginResult>;
@@ -47,7 +57,6 @@ type HostedBeginStub = DurableObjectStub & {
 type RoomAmbientStub = DurableObjectStub & {
   activity(roomId: string): Promise<RoomActivity>;
   tryAcquireAmbient(roomId: string, agentId: string, generationId: string): Promise<AcquireAmbientResult>;
-  consumeWakeBudget(): Promise<ConsumeWakeBudgetResult>;
   releaseAmbient(generationId: string): Promise<void>;
 };
 
@@ -66,6 +75,7 @@ const ATTENTION_MODES = new Set<AttentionMode>(["silent", "mention", "keyword", 
 
 export class Inbox extends DurableObject<Env> {
   private waiters: Waiter[] = [];
+  private cancelledWaits = new Map<string, number>();
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -104,28 +114,40 @@ export class Inbox extends DurableObject<Env> {
     return items.filter((item) => item.seq > cursorSeq).sort((a, b) => a.seq - b.seq);
   }
 
-  /** Wait until the ring has seq > cursor. notify() must not sleep; this may poll. */
-  async waitAfter(cursorSeq: number): Promise<InboxNotifyPayload[]> {
+  /** Event-driven wait: no periodic storage reads; a cancelled/idle caller expires within 30 seconds. */
+  async waitAfter(cursorSeq: number, waiterId = crypto.randomUUID(), timeoutMs = INBOX_WAIT_MAX_MS): Promise<InboxNotifyPayload[]> {
+    this.pruneCancelledWaits();
+    if (this.cancelledWaits.has(waiterId)) return [];
+    if (!Number.isSafeInteger(cursorSeq) || !waiterId || !Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw new Error("invalid inbox wait");
+    }
     const existing = await this.liveAfter(cursorSeq);
     if (existing.length > 0) return existing;
+    if (this.cancelledWaits.has(waiterId)) return [];
+    if (this.waiters.length >= INBOX_WAIT_MAX || this.waiters.some((w) => w.id === waiterId)) {
+      throw new Error("inbox waiter limit");
+    }
     return new Promise<InboxNotifyPayload[]>((resolve) => {
-      const waiter: Waiter = { cursor: cursorSeq, resolve, settled: false };
-      this.waiters.push(waiter);
-      const tick = (): void => {
-        if (waiter.settled) return;
-        void this.liveAfter(cursorSeq).then((items) => {
-          if (waiter.settled) return;
-          if (items.length > 0) {
-            waiter.settled = true;
-            this.waiters = this.waiters.filter((w) => w !== waiter);
-            resolve(items);
-            return;
-          }
-          setTimeout(tick, 25);
-        });
+      const waiter: Waiter = {
+        id: waiterId, cursor: cursorSeq, resolve, settled: false,
+        timer: setTimeout(() => this.settleWaiter(waiter, []), Math.min(INBOX_WAIT_MAX_MS, timeoutMs)),
       };
-      setTimeout(tick, 25);
+      this.waiters.push(waiter);
+      // Close the read/register race once. Subsequent reads are driven only by notify().
+      void this.liveAfter(cursorSeq).then((items) => {
+        if (items.length > 0) this.settleWaiter(waiter, items);
+      }).catch(() => this.settleWaiter(waiter, []));
     });
+  }
+
+  async cancelWait(waiterId: string): Promise<void> {
+    if (!waiterId) return;
+    this.pruneCancelledWaits();
+    // Remember a cancellation that races the initial storage read, with bounded memory and lifetime.
+    if (this.cancelledWaits.size >= INBOX_WAIT_MAX * 2) this.cancelledWaits.delete(this.cancelledWaits.keys().next().value!);
+    this.cancelledWaits.set(waiterId, Date.now() + INBOX_WAIT_MAX_MS);
+    const waiter = this.waiters.find((w) => w.id === waiterId);
+    if (waiter) this.settleWaiter(waiter, []);
   }
 
   async notifyCount(): Promise<number> {
@@ -177,7 +199,7 @@ export class Inbox extends DurableObject<Env> {
   }
 
   private async maybeDispatchMention(payload: InboxNotifyPayload): Promise<void> {
-    if (!flagOn(this.env.ff_hosted_agent) && !flagOn(this.env.ff_ambient)) return;
+    if (!paidCallsEnabled(this.env)) return;
     if (payload.kind !== "message") return;
     const origin = typeof payload.origin === "string" ? payload.origin : "";
     if (origin !== "local") return;
@@ -262,24 +284,35 @@ export class Inbox extends DurableObject<Env> {
     }
 
     if (result.action === "set_alarm") {
-      if (!flagOn(this.env.ff_ambient)) return;
+      if (!flagOn(this.env.ff_ambient) || !paidCallsEnabled(this.env)) return;
       await this.ctx.storage.delete("last_reject_code");
-      const when = Date.now() + result.delayMs;
-      await this.ctx.storage.put({
-        pending: state.pending,
-        last_alarm_delay_ms: result.delayMs,
-        last_alarm_at: when,
-        last_heuristic_ran: false,
+      const now = Date.now();
+      const scheduled = await this.ctx.storage.transaction(async (txn) => {
+        const previous = await txn.get<BoundedPending>("pending");
+        if (previous) {
+          // A new notify updates the candidate without moving the original deadline or resetting rearms.
+          if (!validPending(previous, now) || now >= previous.deadline) {
+            await txn.delete("pending");
+            return { expired: true, when: null };
+          }
+          await txn.put("pending", { ...previous, ...state.pending });
+          return { expired: false, when: null };
+        }
+        const delay = Number.isFinite(result.delayMs) ? Math.min(AMBIENT_PENDING_MAX_MS, Math.max(0, result.delayMs)) : AMBIENT_PENDING_MAX_MS;
+        const when = now + delay;
+        const pending: BoundedPending = { ...state.pending!, created_at_ms: now, deadline: now + AMBIENT_PENDING_MAX_MS, rearms: 0 };
+        await txn.put({ pending, last_alarm_delay_ms: delay, last_alarm_at: when, last_heuristic_ran: false });
+        return { expired: false, when };
       });
-      // delay 0 → Date.now() next tick; epoch 0 is rejected by the runtime.
-      await this.ctx.storage.setAlarm(when);
+      if (scheduled.expired) await this.ctx.storage.deleteAlarm();
+      else if (scheduled.when !== null) await this.ctx.storage.setAlarm(scheduled.when);
       return;
     }
 
     if (result.action !== "dispatch_mention") return;
     // Keyword hosted is not this path. Ambient human uses set_alarm; agent @self uses mention.
     if (mode !== "mention" && senderKind !== "agent") return;
-    if (!flagOn(this.env.ff_hosted_agent)) return;
+    if (!paidCallsEnabled(this.env)) return;
     const gate = await this.hostedGate(self, policy.quota_class);
     if (!gate.go) {
       if (gate.code) await this.noteWakeReject(gate.code);
@@ -305,39 +338,57 @@ export class Inbox extends DurableObject<Env> {
   }
 
   private async runAmbientAlarm(): Promise<void> {
-    const pending = (await this.ctx.storage.get<PendingAmbient>("pending")) ?? null;
-    if (!pending) return;
-    if (!flagOn(this.env.ff_ambient)) {
-      await this.ctx.storage.delete("pending");
+    const pending = (await this.ctx.storage.get<BoundedPending>("pending")) ?? null;
+    if (!pending) { await this.ctx.storage.deleteAlarm(); return; }
+    if (!flagOn(this.env.ff_ambient) || !paidCallsEnabled(this.env) || !validPending(pending, Date.now()) || Date.now() >= pending.deadline) {
+      await this.clearPending();
       return;
     }
+    const scheduledAt = await this.ctx.storage.get<number>("last_alarm_at");
+    if (typeof scheduledAt === "number" && Date.now() < scheduledAt) return;
 
     const roomId = pending.envelope.room_id;
     const self = (await this.ctx.storage.get<string>("member_id")) ?? "";
     if (!roomId || !self) {
-      await this.ctx.storage.delete("pending");
+      await this.clearPending();
       return;
     }
 
     const policyRow = await this.loadPolicy(roomId, self);
     if (!policyRow || pending.policy_epoch < (Number(policyRow.policy_epoch) || 1)) {
-      await this.ctx.storage.delete("pending");
+      await this.clearPending();
       return;
     }
 
     const room = this.env.ROOM.get(this.env.ROOM.idFromName(`room:${roomId}`)) as RoomAmbientStub;
     const act = await room.activity(roomId);
     const now = Date.now();
+    if (!paidCallsEnabled(this.env) || !flagOn(this.env.ff_ambient) || now >= pending.deadline) {
+      await this.clearPending();
+      return;
+    }
     const debounceMs = pending.envelope.policy.debounce_ms;
     const lastHumanMs = act.last_human_at ? Date.parse(act.last_human_at) : Number.NaN;
     const withinDebounce = Number.isFinite(lastHumanMs) && now - lastHumanMs < debounceMs;
     if (act.humans_typing || withinDebounce) {
-      const when = now + debounceMs;
-      await this.ctx.storage.put({ last_alarm_delay_ms: debounceMs, last_alarm_at: when });
-      await this.ctx.storage.setAlarm(when);
+      const when = await this.ctx.storage.transaction(async (txn) => {
+        const current = await txn.get<BoundedPending>("pending");
+        if (!current || !validPending(current, now) || now + AMBIENT_REARM_MIN_MS > current.deadline || current.rearms >= AMBIENT_REARM_MAX) {
+          await txn.delete("pending");
+          return null;
+        }
+        const delay = Math.max(AMBIENT_REARM_MIN_MS, Number.isFinite(debounceMs) ? Math.min(AMBIENT_PENDING_MAX_MS, debounceMs) : AMBIENT_REARM_MIN_MS);
+        const target = Math.min(current.deadline, now + delay);
+        await txn.put({ pending: { ...current, rearms: current.rearms + 1 }, last_alarm_delay_ms: target - now, last_alarm_at: target });
+        return target;
+      });
+      if (when === null) await this.ctx.storage.deleteAlarm();
+      else await this.ctx.storage.setAlarm(when);
       return;
     }
 
+    // Consume pending before any CAS/begin RPC. An exception with an unknown remote result cannot replay it.
+    await this.clearPending();
     await this.ctx.storage.put("last_heuristic_ran", true);
     const event = pending.envelope.event;
     if (
@@ -347,7 +398,6 @@ export class Inbox extends DurableObject<Env> {
         recent_10_has_agent: act.recent_10_has_agent,
       })
     ) {
-      await this.ctx.storage.delete("pending");
       return;
     }
 
@@ -358,11 +408,7 @@ export class Inbox extends DurableObject<Env> {
       const cas = await room.tryAcquireAmbient(roomId, self, generationId);
       if (!cas.ok) return;
       acquired = true;
-      const budget = await room.consumeWakeBudget();
-      if (!budget.ok) {
-        await this.noteWakeReject(budget.code);
-        return;
-      }
+      // HostedGeneration.begin owns the atomic Room admission for mention and ambient alike.
       const quota = canWake({
         quota_class: pending.envelope.policy.quota_class,
         trigger_member_id: pending.envelope.trigger_member_id,
@@ -372,7 +418,7 @@ export class Inbox extends DurableObject<Env> {
         await this.noteWakeReject(quota.code);
         return;
       }
-      if (!flagOn(this.env.ff_hosted_agent)) return;
+      if (!paidCallsEnabled(this.env) || !flagOn(this.env.ff_ambient) || Date.now() >= pending.deadline) return;
       const gate = await this.hostedGate(self, pending.envelope.policy.quota_class);
       if (!gate.go) {
         if (gate.code) await this.noteWakeReject(gate.code);
@@ -393,7 +439,6 @@ export class Inbox extends DurableObject<Env> {
         return;
       }
       dispatched = true;
-      await this.ctx.storage.delete("pending");
       await this.ctx.storage.delete("last_reject_code");
       await this.ctx.storage.put({
         last_dispatch: now,
@@ -404,6 +449,13 @@ export class Inbox extends DurableObject<Env> {
         await room.releaseAmbient(generationId);
       }
     }
+  }
+
+  private async clearPending(): Promise<void> {
+    await this.ctx.blockConcurrencyWhile(async () => {
+      await this.ctx.storage.delete(["pending", "last_alarm_at", "last_alarm_delay_ms"]);
+      await this.ctx.storage.deleteAlarm();
+    });
   }
 
   private async noteWakeReject(code: string): Promise<void> {
@@ -474,19 +526,31 @@ export class Inbox extends DurableObject<Env> {
 
   private wakeWaiters(items: InboxNotifyPayload[]): void {
     if (this.waiters.length === 0) return;
-    const remaining: Waiter[] = [];
-    for (const waiter of this.waiters) {
+    for (const waiter of [...this.waiters]) {
       if (waiter.settled) continue;
       const hit = items.filter((item) => item.seq > waiter.cursor).sort((a, b) => a.seq - b.seq);
-      if (hit.length > 0) {
-        waiter.settled = true;
-        waiter.resolve(hit);
-      } else {
-        remaining.push(waiter);
-      }
+      if (hit.length > 0) this.settleWaiter(waiter, hit);
     }
-    this.waiters = remaining;
   }
+
+  private settleWaiter(waiter: Waiter, items: InboxNotifyPayload[]): void {
+    if (waiter.settled) return;
+    waiter.settled = true;
+    clearTimeout(waiter.timer);
+    this.waiters = this.waiters.filter((w) => w !== waiter);
+    waiter.resolve(items);
+  }
+
+  private pruneCancelledWaits(): void {
+    const now = Date.now();
+    for (const [id, expiry] of this.cancelledWaits) if (expiry <= now) this.cancelledWaits.delete(id);
+  }
+}
+
+function validPending(pending: BoundedPending, now: number): boolean {
+  return Number.isFinite(pending.created_at_ms) && Number.isFinite(pending.deadline)
+    && pending.created_at_ms <= now && pending.deadline - pending.created_at_ms === AMBIENT_PENDING_MAX_MS
+    && Number.isInteger(pending.rearms) && pending.rearms >= 0 && pending.rearms <= AMBIENT_REARM_MAX;
 }
 
 function parseKeywords(raw: string): string[] {

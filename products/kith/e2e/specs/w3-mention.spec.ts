@@ -108,9 +108,19 @@ test(
     await expect(page.getByTestId("quick-switcher")).toBeVisible();
     await expect(page.getByTestId("quick-switcher-input")).toBeFocused();
     await page.getByTestId("quick-switcher-input").pressSequentially("quiet");
+    const refreshedRooms = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/rooms" && response.request().method() === "GET",
+      { timeout: 10_000 },
+    );
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/r\/quiet$/);
     await expect(page.getByTestId("quick-switcher")).toHaveCount(0);
+    expect((await refreshedRooms).status()).toBe(200);
+    await expectLive(page);
+    await expect(page.locator('[data-testid="room-list-item"][data-slug="quiet"]')).toHaveAttribute("aria-current", "page");
+    // The route refresh must commit this test's message before sampling the new sidebar order.
+    await expect(page.locator('[data-testid="room-list-item"][data-slug="lobby"]').getByTestId("room-list-preview"))
+      .toContainText(rand);
 
     const slugs = await page.getByTestId("room-list-item").evaluateAll((els) => els.map((el) => el.getAttribute("data-slug")));
     const index = slugs.indexOf("quiet");

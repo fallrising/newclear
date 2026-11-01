@@ -1,5 +1,8 @@
 # Edge Ops
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A (active design)** — [文件政策](../../docs/portfolio-doc-tiers.md) · [投入決策](../../PORTFOLIO.md) · [quickstart／目前阻擋](docs/quickstart.md)。
 
 以 Cloudflare 為控制面、以主機常駐 Agent 為資料面，提供多機監控、選定日誌、受控任務與可選初始化能力。`edge-ops` 是本次採用的工作名稱；不是 CF-Server-Monitor 的 fork，也不是 LLM agent 執行平台。

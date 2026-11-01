@@ -1,5 +1,8 @@
 # dim-gate
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A (active)** — Runnable entry: [docs/quickstart.md](docs/quickstart.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md). Investment notes: [PORTFOLIO.md](../../PORTFOLIO.md).
 
 
@@ -57,7 +60,9 @@ pnpm benchmark
 pnpm test:isolation
 ```
 
-`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。127 個 operation 由共用 domain schemas、API及demo adapter定義，契約檢查防止漂移。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`，CI 保存 30 天。獨立審查與各里程碑接受決策另存於 root `.team/`。
+瀏覽器套件只在本機手動跑，不進 GitHub Actions：`pnpm exec playwright install --with-deps chromium firefox webkit`，然後 `pnpm test:e2e`、`pnpm test:smoke`、`pnpm benchmark`、`pnpm test:isolation`。Pull request CI 停在 `pnpm build --mode demo`。
+
+`pnpm generate:contracts` 從共用 Zod 產生 [OpenAPI](docs/openapi.json)；`check:contracts` 拒絕漂移與失效 reference。127 個 operation 由共用 domain schemas、API及demo adapter定義，契約檢查防止漂移。E2E 使用 production build 與 `/dim-gate/` base path；報告在 `playwright-report/`，截圖／失敗 trace 在 `test-results/`。獨立審查與各里程碑接受決策另存於 root `.team/`。
 
 ## 文件入口
 

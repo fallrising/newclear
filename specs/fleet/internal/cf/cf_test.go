@@ -13,7 +13,6 @@ import (
 
 	"github.com/fallrising/newclear/specs/fleet/internal/config"
 	"github.com/fallrising/newclear/specs/fleet/internal/db"
-	"github.com/fallrising/newclear/specs/fleet/internal/ingress"
 	"github.com/fallrising/newclear/specs/fleet/internal/model"
 	"github.com/fallrising/newclear/specs/fleet/internal/store"
 )
@@ -21,14 +20,12 @@ import (
 const bootstrapID = "11111111-1111-1111-1111-111111111111"
 
 type fakeCF struct {
-	mu       sync.Mutex
-	puts     []string
-	reqs     []string
-	tunnels  map[string]string // name -> id
-	configs  map[string]tunnelConfig
-	dns      map[string]string
-	routes   map[string]string
-	teamnet  int
+	mu      sync.Mutex
+	puts    []string
+	reqs    []string
+	tunnels map[string]string // name -> id
+	configs map[string]tunnelConfig
+	dns     map[string]string
 }
 
 func newFake(t *testing.T) (*httptest.Server, *fakeCF) {
@@ -37,16 +34,12 @@ func newFake(t *testing.T) (*httptest.Server, *fakeCF) {
 		tunnels: map[string]string{},
 		configs: map[string]tunnelConfig{},
 		dns:     map[string]string{},
-		routes:  map[string]string{},
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
 		f.mu.Lock()
 		f.reqs = append(f.reqs, r.Method+" "+r.URL.Path)
-		if strings.Contains(r.URL.Path, "teamnet") {
-			f.teamnet++
-		}
 		if r.Method == http.MethodPut {
 			f.puts = append(f.puts, r.URL.Path)
 		}
@@ -104,12 +97,6 @@ func newFake(t *testing.T) (*httptest.Server, *fakeCF) {
 				_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "result": map[string]any{"id": "dns-1"}})
 				return
 			}
-		case strings.Contains(r.URL.Path, "/zerotrust/routes/hostname"):
-			if r.Method == http.MethodGet {
-				_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "result": []any{}})
-				return
-			}
-			_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "result": map[string]any{"id": "route-1"}})
 		case strings.Contains(r.URL.Path, "/access/"):
 			_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "result": map[string]any{"id": "acc-1"}})
 		default:
@@ -175,9 +162,6 @@ func TestEnsureNodeTunnelDoesNotPut(t *testing.T) {
 			t.Fatal("put bootstrap")
 		}
 	}
-	if fake.teamnet != 0 {
-		t.Fatal("teamnet")
-	}
 }
 
 func TestBootstrapTunnelNotPut(t *testing.T) {
@@ -203,7 +187,6 @@ func TestProtectedHostnameSurvivesCatalogRebuild(t *testing.T) {
 	}
 	fake.mu.Lock()
 	fake.configs["tun-node"] = tunnelConfig{
-		WarpRouting: map[string]any{"enabled": true},
 		Ingress: []ingressRule{
 			{Hostname: "fleet.example.com", Service: "http://127.0.0.1:18765"},
 			{Hostname: "fleet-api.example.com", Service: "http://127.0.0.1:18765"},
@@ -236,50 +219,9 @@ func TestProtectedHostnameSurvivesCatalogRebuild(t *testing.T) {
 	if !hosts["hello.example.com"] {
 		t.Fatalf("catalog missing: %+v", cfg.Ingress)
 	}
-	if cfg.WarpRouting["enabled"] != true {
-		t.Fatalf("warp-routing %+v", cfg.WarpRouting)
-	}
 	last := cfg.Ingress[len(cfg.Ingress)-1]
 	if last.Service != "http_status:404" {
 		t.Fatal(last)
-	}
-}
-
-func TestNoTeamnetCIDROnPrivate(t *testing.T) {
-	srv, fake := newFake(t)
-	c, st := testClient(t, srv)
-	if err := st.CreateNode(&model.Node{ID: "vps-a", TunnelID: "tun-node"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := st.InsertService(&model.Service{
-		Name: "files", NodeID: "vps-a", Hostname: "files.fleet.internal",
-		ExposeMode: "private", DesiredState: "running", HostPort: 20014, ContainerPort: 8080,
-		FleetJSON: "{}", IngressStatus: "pending",
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if err := c.ReconcileService(context.Background(), ingress.ServiceView{
-		Name: "files", NodeID: "vps-a", TunnelID: "tun-node", DesiredState: "running",
-		ExposeMode: "private", Hostname: "files.fleet.internal", HostPort: 20014,
-	}); err != nil {
-		t.Fatal(err)
-	}
-	fake.mu.Lock()
-	defer fake.mu.Unlock()
-	if fake.teamnet != 0 {
-		t.Fatal("teamnet CIDR called")
-	}
-	var sawRoute bool
-	for _, r := range fake.reqs {
-		if strings.Contains(r, "zerotrust/routes/hostname") && strings.HasPrefix(r, "POST") {
-			sawRoute = true
-		}
-		if strings.Contains(r, "10.42") {
-			t.Fatal(r)
-		}
-	}
-	if !sawRoute {
-		t.Fatalf("expected hostname route POST: %v", fake.reqs)
 	}
 }
 

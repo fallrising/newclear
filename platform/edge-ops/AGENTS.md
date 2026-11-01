@@ -4,7 +4,7 @@
 
 本檔只適用於 `platform/edge-ops/`。先讀 repository 的 README、PORTFOLIO、docs/taxonomy.md、docs/portfolio-doc-tiers.md、docs/specs/monorepo-ci.md，再完整閱讀本專案 SDD、docs/sdd/ 下全部文件、docs/STATUS.md 與本次選定契約。
 
-目前只有 M0 契約層程式碼（`contracts/`、`backend/`、`agent/`，見 docs/STATUS.md）。看到下一個 milestone，不代表取得實作、部署、安裝、Terraform apply、重啟或主機權限變更授權。使用者只要求設計時，停在設計 PR。
+目前有 M0 契約層與 S0 loopback mock 鏈路（見 docs/STATUS.md）；真實 enrollment、簽章、collector 與 Cloudflare 邊界仍待驗證。看到下一個 milestone，不代表取得實作、部署、安裝、Terraform apply、重啟或主機權限變更授權。使用者只要求設計時，停在設計 PR。
 
 `contracts/` 由整合者維護：改變 wire、簽署位元組或上限時，同一 PR 內更新 TS（`backend/src/domain/contract/`）、Go（`agent/internal/contract/`）、`contracts/vectors/`（`npm run vectors`）與 `contracts/README.md`，兩邊測試都要通過。
 
@@ -24,3 +24,11 @@
 每個 milestone 提交：固定 commit、已執行測試與環境、未執行原因、風險、待核准項目、下一個最小切片。自行審查不得標成獨立 reviewer 已通過。accepted、merged、deployed、live-verified 是不同狀態。
 
 首個 executable 切片才加入根 `.github/workflows/edge-ops-ci.yml`：path-scoped、contents: read、timeout、concurrency、checkout 不保留 credentials、第三方 actions 固定經核對 SHA；預設不 deploy、不發布 release、不讀 production secrets。
+
+## 主線與驗收文件先行
+
+- 接手前先讀 [SUCCESS.md](SUCCESS.md)、相關規格與最近驗證紀錄，核對目前主線及缺口。
+- 實作前先更新 SUCCESS 的本次目標、範圍、AC 與驗證計畫；不得為了完成而縮小已承諾主線。
+- 收尾逐項記錄實際命令、結果、來源版本與未通過原因，同步 README 必要入口及項目進度；未跑不可寫通過。
+- 主線全部驗收、必要 CI／審查通過並合併後，按 repo 共用規範建立 annotated `usable/<slug>/vX.Y.Z`，回讀遠端並更新索引。現行 owner 授權適用；本規則不授權部署或付費服務。
+- 參考／封存項目保留其結束條件，不以新增文件當作可執行版本，也不因此恢復開發。

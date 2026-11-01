@@ -1,0 +1,59 @@
+Reusing configuration cache.
+> Task :modules:common:protobufDummy UP-TO-DATE
+> Task :modules:gateway-consume:processResources NO-SOURCE
+> Task :modules:gateway-produce:processResources NO-SOURCE
+> Task :modules:scheduler:processResources NO-SOURCE
+> Task :modules:gateway-consume:processTestResources NO-SOURCE
+> Task :modules:common:extractIncludeProto UP-TO-DATE
+> Task :modules:common:extractProto UP-TO-DATE
+> Task :modules:common:processProtoResources UP-TO-DATE
+> Task :sdk:java:processResources NO-SOURCE
+> Task :modules:common:generateProto UP-TO-DATE
+> Task :modules:common:processResources UP-TO-DATE
+> Task :modules:common:compileJava UP-TO-DATE
+> Task :modules:common:classes UP-TO-DATE
+> Task :modules:common:jar UP-TO-DATE
+> Task :modules:gateway-consume:compileJava UP-TO-DATE
+> Task :modules:scheduler:compileJava UP-TO-DATE
+> Task :modules:gateway-produce:compileJava UP-TO-DATE
+> Task :modules:gateway-produce:classes UP-TO-DATE
+> Task :modules:gateway-consume:classes UP-TO-DATE
+> Task :sdk:java:compileJava UP-TO-DATE
+> Task :sdk:java:classes UP-TO-DATE
+> Task :modules:scheduler:classes UP-TO-DATE
+> Task :modules:gateway-produce:jar UP-TO-DATE
+> Task :modules:scheduler:jar UP-TO-DATE
+> Task :sdk:java:jar UP-TO-DATE
+> Task :modules:gateway-consume:compileTestJava
+> Task :modules:gateway-consume:testClasses
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::arrayBaseOffset has been called by com.google.protobuf.UnsafeUtil (file:<HOME>/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/4.35.1/b933d3f9fc35b0356f28980c2ffc5892d297eebf/protobuf-java-4.35.1.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.protobuf.UnsafeUtil
+WARNING: sun.misc.Unsafe::arrayBaseOffset will be removed in a future release
+
+> Task :modules:gateway-consume:test
+
+PushRetryE2eTest > AC_05_schedulesThreeRetriesThenWritesFourthFailureToDlq() FAILED
+    java.lang.AssertionError:
+    Expecting actual:
+      199L
+    to be less than:
+      180L
+        at dev.ojbk.gateway.consume.PushRetryE2eTest.AC_05_schedulesThreeRetriesThenWritesFourthFailureToDlq(PushRetryE2eTest.java:186)
+
+1 test completed, 1 failed
+
+> Task :modules:gateway-consume:test FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':modules:gateway-consume:test'.
+> There were failing tests. See the report at: file://<HOME>/test/codex/wt/newclear/ojbquay-retry-repair/systems/ojbquay/modules/gateway-consume/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 16s
+16 actionable tasks: 2 executed, 14 up-to-date
+Configuration cache entry reused.

@@ -91,6 +91,7 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 	}
 	defer pushReceiver.Stop()
 	var queryHandler *promapi.QueryHandler
+	var lokiHandler *lokiapi.QueryHandler
 	if c.Server.Mode == "all-in-one" {
 		queryHandler, err = promapi.NewQueryHandler(backend, promapi.QueryOptions{
 			Tenant: c.Tenancy.DefaultTenant, APIKey: c.Auth.IngestAPIKey,
@@ -100,6 +101,13 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 		if err != nil {
 			return fmt.Errorf("create query handler: %w", err)
 		}
+		lokiHandler, err = newLokiQueryHandler(backend, c)
+		if err != nil {
+			queryHandler.Stop()
+			shutdown, cancel := context.WithTimeout(context.WithoutCancel(ctx), c.Server.ShutdownTimeout.Std())
+			defer cancel()
+			return errors.Join(fmt.Errorf("create loki query handler: %w", err), queryHandler.Close(shutdown))
+		}
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/prom/api/v1/write", writeReceiver.HTTPHandler())
@@ -107,6 +115,9 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 		mux.Handle("/prom/api/v1/", queryHandler.HTTPHandler())
 	}
 	mux.Handle("/loki/api/v1/push", pushReceiver.HTTPHandler())
+	if lokiHandler != nil {
+		mux.Handle("/loki/api/v1/", lokiHandler.HTTPHandler())
+	}
 	mux.Handle("/", receiver.HTTPHandler())
 	stopReceiving := func() {
 		receiver.Stop()
@@ -115,11 +126,17 @@ func runIngest(ctx context.Context, c *config.Config, logger *slog.Logger, regis
 		if queryHandler != nil {
 			queryHandler.Stop()
 		}
+		if lokiHandler != nil {
+			lokiHandler.Stop()
+		}
 	}
 	drain := func(shutdown context.Context) error {
 		var queryErr error
 		if queryHandler != nil {
 			queryErr = queryHandler.Close(context.WithoutCancel(shutdown))
+		}
+		if lokiHandler != nil {
+			queryErr = errors.Join(queryErr, lokiHandler.Close(context.WithoutCancel(shutdown)))
 		}
 		return errors.Join(queryErr, pipeline.Close(shutdown))
 	}

@@ -1,0 +1,15 @@
+{
+  "source": "874517a896b3be1695b8febb2a852f7e6c5f9307 + docs only",
+  "exit": 0,
+  "gradle_tasks": {
+    "executed": 25,
+    "from_cache": 19
+  },
+  "xml_counts": {
+    "tests": 119,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "note": "Restored XML; cached tests not fresh execution. Reference main broad retry only, not repair current source or original strict qualification."
+}

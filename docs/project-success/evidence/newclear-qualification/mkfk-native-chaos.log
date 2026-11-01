@@ -1,0 +1,62 @@
+=== RUN   TestM7ChaosOP05RotatingCrashesPartitionsAndPauses
+    chaos_test.go:42: profile=full seed=1792597790
+    chaos_test.go:151:   1.699s SIGKILL broker 3, follower of events/0
+    chaos_test.go:151:   3.258s healed: SIGKILL broker 3, follower of events/0
+    chaos_test.go:151:   4.258s cut peer link 3->1 (requests dropped; replies the other way lost) for 2.5s
+    chaos_test.go:151:   6.759s healed: cut peer link 3->1 (requests dropped; replies the other way lost) for 2.5s
+    chaos_test.go:151:   7.759s delay every peer request to broker 1 by 200ms for 3s
+    chaos_test.go:151:  10.760s healed: delay every peer request to broker 1 by 200ms for 3s
+    chaos_test.go:151:  11.772s SIGKILL broker 1, follower of events/0
+    chaos_test.go:151:  13.590s healed: SIGKILL broker 1, follower of events/0
+    chaos_test.go:151:  14.600s SIGKILL broker 2, leader of events/0
+    chaos_test.go:151:  16.564s healed: SIGKILL broker 2, leader of events/0
+    chaos_test.go:151:  17.572s SIGKILL broker 3, follower of events/0
+    chaos_test.go:151:  19.572s healed: SIGKILL broker 3, follower of events/0
+    chaos_test.go:151:  20.577s SIGKILL broker 1, the group coordinator
+    chaos_test.go:151:  22.601s healed: SIGKILL broker 1, the group coordinator
+    chaos_test.go:151:  23.601s SIGSTOP broker 2 for 2s
+    chaos_test.go:151:  25.604s healed: SIGSTOP broker 2 for 2s
+    chaos_test.go:151:  26.608s SIGKILL broker 2, follower of events/1
+    chaos_test.go:151:  28.518s healed: SIGKILL broker 2, follower of events/1
+    chaos_test.go:151:  29.519s isolate broker 1's peer links for 2.5s
+    chaos_test.go:151:  32.019s healed: isolate broker 1's peer links for 2.5s
+    chaos_test.go:151:  33.030s SIGKILL broker 3, the group coordinator
+    chaos_test.go:151:  35.098s healed: SIGKILL broker 3, the group coordinator
+    chaos_test.go:151:  36.098s SIGSTOP broker 3 for 2s
+    chaos_test.go:151:  38.102s healed: SIGSTOP broker 3 for 2s
+    chaos_test.go:151:  39.102s delay every peer request to broker 1 by 200ms for 3s
+    chaos_test.go:151:  42.103s healed: delay every peer request to broker 1 by 200ms for 3s
+    chaos_test.go:151:  43.103s isolate broker 3's peer links for 2.5s
+    chaos_test.go:151:  45.604s healed: isolate broker 3's peer links for 2.5s
+    chaos_test.go:151:  46.604s isolate broker 1's peer links for 2.5s
+    chaos_test.go:151:  49.105s healed: isolate broker 1's peer links for 2.5s
+    chaos_test.go:151:  50.105s isolate broker 3's peer links for 2.5s
+    chaos_test.go:151:  52.605s healed: isolate broker 3's peer links for 2.5s
+    chaos_test.go:151:  53.606s SIGSTOP broker 1 for 2s
+    chaos_test.go:151:  55.607s healed: SIGSTOP broker 1 for 2s
+    chaos_test.go:151:  56.610s SIGKILL broker 3, follower of events/1
+    chaos_test.go:151:  59.293s healed: SIGKILL broker 3, follower of events/1
+    chaos_test.go:151:  60.293s SIGSTOP broker 1 for 2s
+    chaos_test.go:151:  62.306s healed: SIGSTOP broker 1 for 2s
+    chaos_test.go:151:  63.306s isolate broker 2's peer links for 2.5s
+    chaos_test.go:151:  65.808s healed: isolate broker 2's peer links for 2.5s
+    chaos_test.go:151:  66.816s SIGKILL broker 3, leader of events/2
+    chaos_test.go:151:  69.497s healed: SIGKILL broker 3, leader of events/2
+    chaos_test.go:151:  70.503s SIGKILL broker 1, the group coordinator
+    chaos_test.go:151:  73.128s healed: SIGKILL broker 1, the group coordinator
+    chaos_test.go:151:  74.129s delay every peer request to broker 3 by 200ms for 3s
+    chaos_test.go:151:  77.130s healed: delay every peer request to broker 3 by 200ms for 3s
+    chaos_test.go:151:  78.130s SIGSTOP broker 3 for 2s
+    chaos_test.go:151:  80.132s healed: SIGSTOP broker 3 for 2s
+    chaos_test.go:151:  81.141s SIGKILL broker 2, leader of events/0
+    chaos_test.go:151:  83.985s healed: SIGKILL broker 2, leader of events/0
+    chaos_test.go:151:  84.991s SIGKILL broker 3, the group coordinator
+    chaos_test.go:151:  87.662s healed: SIGKILL broker 3, the group coordinator
+    chaos_test.go:151:  88.664s SIGKILL broker 1, the group coordinator
+    chaos_test.go:151:  91.759s healed: SIGKILL broker 1, the group coordinator
+    chaos_test.go:151:  92.760s cut peer link 3->2 (requests dropped; replies the other way lost) for 2.5s
+    chaos_test.go:151:  95.260s healed: cut peer link 3->2 (requests dropped; replies the other way lost) for 2.5s
+    chaos_test.go:151:  95.261s faults healed; draining
+--- PASS: TestM7ChaosOP05RotatingCrashesPartitionsAndPauses (97.83s)
+PASS
+ok  	github.com/fallrising/newclear/systems/mkfk/cmd/mkfk	97.839s

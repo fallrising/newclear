@@ -1,5 +1,8 @@
 # OpenViking Context Lab
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+
+
 > **Portfolio doc tier: A — bounded experiment.** [Quickstart](docs/quickstart.md) · [SDD](SDD.md) · [Evidence](docs/evidence.md) · [Policy](../../docs/portfolio-doc-tiers.md)
 
 以 OpenViking 作 AI 平台的共享 context 投影服務，先用兩份合成文件跑通「匯入 → 限定範圍檢索 → 校驗來源 → 有界 context bundle」。Python adapter 與離線測試可直接執行；真實 OpenViking/model/ACL 整合尚未驗收。

@@ -42,7 +42,7 @@ func NewNetwork(t *testing.T, brokers ...uint32) *Network {
 				remotes[to] = link{network: network, from: from, to: to}
 			}
 		}
-		outbox, err := partition.NewOutbox(network.registries[from], remotes, 0, 500*time.Millisecond)
+		outbox, err := partition.NewOutbox(network.registries[from], remotes, 0, 500*time.Millisecond, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

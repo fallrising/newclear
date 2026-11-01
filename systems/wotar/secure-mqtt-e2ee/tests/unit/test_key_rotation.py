@@ -7,13 +7,13 @@ from pathlib import Path
 import pytest
 
 from secure_mqtt.errors import InvalidKeyStateError
+from secure_mqtt.keys.file_keyring import FileKeyringProvider
 from secure_mqtt.keys.keyring_admin import (
     activate_dek,
     add_pending_dek,
     list_keys,
     validate_keyring,
 )
-from secure_mqtt.keys.file_keyring import FileKeyringProvider
 from secure_mqtt.keys.provider import KeyState
 
 

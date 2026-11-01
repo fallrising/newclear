@@ -2,7 +2,7 @@ GO ?= go
 GOFMT ?= gofmt
 GO_FILES := $(shell find . -name '*.go' -type f | sort)
 
-.PHONY: fmt-check vet test test-race test-model test-model-extended test-integration test-chaos image demo demo-down bench
+.PHONY: fmt-check vet test test-race test-model test-model-extended test-integration test-chaos image demo demo-down bench silent-follower
 
 TEST_LOG_DIR ?= $(CURDIR)/.test-output
 
@@ -79,3 +79,8 @@ bench:
 	mkdir -p .build && $(GO) build -trimpath -o .build/mkfk ./cmd/mkfk
 	$(GO) run ./cmd/mkfkbench --mkfk .build/mkfk --out $(TEST_LOG_DIR)/bench \
 		--commit "$$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" $(BENCH_ARGS)
+
+# Manual only. About three minutes of measurement plus image build.
+# Not a CI target. See docs/benchmarks/silent-follower/README.md.
+silent-follower:
+	DOCKER="$(DOCKER)" ./scripts/silent-follower.sh

@@ -1,0 +1,6 @@
+2026-10-19T15:36:10.246842745Z {"time":"2026-10-19T15:36:10.246427534Z","level":"WARN","msg":"binding non-loopback listeners without TLS or authentication","listeners":["[ip]:19091","[ip]:19191","[ip]:19291"]}
+2026-10-19T15:36:10.247723563Z {"time":"2026-10-19T15:36:10.247589661Z","level":"INFO","msg":"broker ready","cluster":"mkfk-compose","node":1,"client":"[ip]:19091","peer":"[ip]:19191","admin":"[ip]:19291"}
+2026-10-19T15:36:10.851555127Z {"time":"2026-10-19T15:36:10.851264391Z","level":"INFO","msg":"role change","cluster":"mkfk-compose","node":1,"topic":"events","partition":0,"term":1,"from":"follower","to":"candidate","leader":0}
+2026-10-19T15:36:10.856013621Z {"time":"2026-10-19T15:36:10.855911613Z","level":"INFO","msg":"role change","cluster":"mkfk-compose","node":1,"topic":"events","partition":0,"term":1,"from":"candidate","to":"leader","leader":1}
+2026-10-19T15:36:10.952865045Z {"time":"2026-10-19T15:36:10.952690982Z","level":"INFO","msg":"role change","cluster":"mkfk-compose","node":1,"topic":"__mkfk_groups","partition":0,"term":1,"from":"follower","to":"candidate","leader":0}
+2026-10-19T15:36:10.956356806Z {"time":"2026-10-19T15:36:10.956231352Z","level":"INFO","msg":"role change","cluster":"mkfk-compose","node":1,"topic":"__mkfk_groups","partition":0,"term":1,"from":"candidate","to":"leader","leader":1}

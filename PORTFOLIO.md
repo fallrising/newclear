@@ -1,9 +1,10 @@
 # Portfolio
 
-只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-09-28。
+只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-10-24。
 
-> **權威來源**：投入決策與工作追蹤（做不做、做到哪、下一步）以 owner 的私人項目帳本為準；本檔是它的**公開摘要**，
+> **權威來源**：投入決策（做不做）以 owner 的私人項目帳本為準；本檔是它的**公開摘要**，
 > 不再是第二份決策來源。兩者不一致時以帳本為準，並回頭修正本檔。帳本裡的目標、計畫與任務內容不在此公開。
+> 大需求進度（給人看）在 https://github.com/fallrising/desk 的 docs/operating-method.md（§0），這裡不重述。本 repo 技術任務照根目錄 AGENTS.md 的技術任務合約管理。不要求 `Desk-Task`。
 
 ## 怎麼讀
 
@@ -18,7 +19,7 @@
 - **檔位**：文檔深度 A–D，只決定文件深度，不決定投入。政策見 [docs/portfolio-doc-tiers.md](docs/portfolio-doc-tiers.md)，
   分類見 [docs/taxonomy.md](docs/taxonomy.md)。C 檔的 `Dormant since` 預設 2026-09-04，除非元件 README 另有更明確的日期。
   「—」表示不在 newclear 的檔位制度內（其他 repository）。
-- 進度、測試結果與 milestone 以各元件的 README、SDD、`.team/` 為準，本檔不記錄；排程與優先序在私人帳本。
+- 進度、測試結果與 milestone 以各元件的 README、SDD、`.team/` 為準，本檔不記錄。大需求進度見 https://github.com/fallrising/desk 的 docs/operating-method.md；本 repo 技術任務自己管。
 - 帳本只有「投入中」與「暫停」兩種開發狀態：「繼續投入」對應投入中；「維護」與「休眠」都是暫停（不規劃新功能，
   在用的產品出問題仍可修復），兩者的差別只在修復的積極程度。
 - `newclear/refs/` 是第三方索引，不是自有元件，不列入。
@@ -37,11 +38,13 @@
 | `kernel/personal/relayvault` | 未知 | — | v0.2 release 需先完成 production no-overwrite cutover，並另行授權。 |
 | `newclear/products/kith` | 在用 | A | 人機群聊。不復活 `labs/bee-swarm`；不擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。 |
 | `newclear/platform/agent-platform` | 未知 | A | 自管多任務 agent Web 工作台，範本 OpenHands Agent Canvas，整合 Cocoon sandbox。與 `fanzloud`、`kith` 責任分開，不改動它們的實作；不是部署宣告。見 [README](platform/agent-platform/README.md)。 |
+| `newclear/platform/spring-pool` | 未知 | A | 有界 MVP：單人腳本版本庫、固定版本 runbook、Markdown 匯出；不含執行器或遠端命令。開發中，尚未宣稱部署或驗收。見 [README](platform/spring-pool/README.md)。 |
+| `newclear/platform/agent-workforce` | 未知 | A | 2026-10-11 本次投入限跨產品數位工作者 SDD：多帳號／權益／資源、原生調用、持久訊息／會話與恢復；重用 Kith 的聊天及可選執行後端，工作完成仍由外部工作系統決定。未實作、未配置帳號、未部署。見 [README](platform/agent-workforce/README.md)。 |
 | `newclear/platform/edge-ops` | 未知 | A | Cloudflare + Host Agent 主機監控／受控操作設計；SDD + M0 契約層（TS/Go 共用向量、D1 transaction spike），無 runtime 或 live deployment。預設 monitor-only；既有 OneVPS／OneFleet authority 不變，真實主機變更另行授權。見 [README](platform/edge-ops/README.md)。 |
-| `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：只負責事件、規則生成指標與投遞；不執行動作、不承載決策（決策系統與執行器另立）。不擴充 edge-ops、dim-gate、hai-taskboard、PIF 的範圍。目前僅 SDD，部署另行授權。見 [README](platform/signal-hub/README.md)。 |
+| `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：已提供事件寫入、來源新鮮度、看板、規則指標與門檻事件；投遞與封存待後續里程碑。部署另行授權。見 [README](platform/signal-hub/README.md)。 |
 | `newclear/apps/cms-scaffold` | 未知 | A | 以 Shopify 前端為參考重寫前端，後端配套演進；總綱 `docs/sdd/00-overview.md` 的切面與技術棧不變。路線圖見 [v2 索引](apps/cms-scaffold/docs/v2/README.md)。 |
-| `newclear/tools/cc-quota` | 未知 | A | 採集與展示解耦；不刷新或轉存憑證，不自動調度任務。真實額度端點與 macOS launchd／Keychain 路徑尚未在目標機器驗證。 |
-| `newclear/tools/codex-usage` | 未知 | A | 只做 ChatGPT/Codex 訂閱用量的單次唯讀採集：不建立模型 thread/turn、不讀出 credential、不建 scheduler／SQLite／通知；不以 API Platform usage 替代，不抓私人網頁端點。live acceptance 前不得宣稱 production-ready。 |
+| `newclear/tools/cc-quota` | 封存 | D | Owner 2026-10-23 指示封存；後續開發集中 Agent Usage。保留舊來源／指令／證據，不搬移資料、不操作既有排程；原真人 Mac 缺口保留。 |
+| `newclear/tools/codex-usage` | 未知 | A | Agent Usage 統一唯讀入口，重用 Codex collector 與 Claude 快照；本機統計、API 支出與訂閱額度分開。未有穩定接口的服務僅人工觀測；原可見狀態及各服務 live gaps 保留。 |
 | `newclear/labs/openmmo-lab` | 未知 | A | 個人非商業 MMORPG 試跑；固定上游版本、獨立 checkout、小世界與雙人驗收，後續再評估 agent／上游 PR。見 [README](labs/openmmo-lab/README.md)。 |
 | `newclear/labs/open-compute` | 未知 | A | 2026-10-07 開始獨立 runtime 實驗；本輪限 SDD、固定原版 release、合成 Worker／D1／Workflow 與正常 daemon 重啟驗收。主機管理、完整還原、正式部署及平台適配另立門檻。見 [README](labs/open-compute/README.md)。 |
 | `newclear/labs/mithril-research` | 未知 | A | 只做 `projecteru2/mithril` 的原始碼／文件研究、驗證設計與隔離實驗規劃；上游源碼不匯入。不是代理產品或部署授權；不復活 `systems/snail`，不擴大 `labs/eru-vps-mvp`、`kernel` 或既有 control plane。實機變更另行決定。 |
@@ -77,7 +80,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | `newclear/systems/snail` | 未知 | C | 保留 benchmark 歷史。 |
 | `newclear/systems/ojbquay` | 未知 | C | 維持現有環境，不擴建。 |
 | `newclear/systems/wotar` | 未知 | C | security-sensitive E2EE client；恢復時不能只靠 local suite 維護。 |
-| `newclear/platform/fanzloud` | 未知 | C | 不投資 cloud execution layer。archive source 的 open PR #3/#4 保存決策待決。 |
+| `newclear/platform/fanzloud` | 開發中 | A | 2026-10-31 owner 要求廠商中立主線重校；[SDD](platform/fanzloud/SDD.md) 提案由 Fanzloud 提供 Web、優先重用 Agent Platform 隔離執行，owner 已批准（PR849）；已批准 T-0447 executor／私人 KVM 依賴，M1 真瀏覽器單任務已產生實際 diff 與通過檢查；第二廠商／並行／持久恢復尚未驗。既有 P0 fake 已驗、live 未跑；不是部署宣告。見 [SUCCESS](platform/fanzloud/SUCCESS.md)。 |
 | `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
 | `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
 | `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo；檔位仍為 A，是否降為 C 待決。 |
@@ -110,7 +113,11 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 
 | 元件 | 使用 | 檔位 | 範圍與限制 |
 | --- | --- | --- | --- |
+| `newclear/tools/motion-prompt` | 未知 | 未分級 | 完整雙語靜態圖鑑改作；固定來源與驗收規格，長期投入未分級。見 [README](tools/motion-prompt/README.md)。 |
+| `newclear/platform/cloud-lab` | 未知 | 未分級 | Owner 2026-10-26 指示文件先行後繼續 M1 開發：知識樹、共同介面、Workers/D1、唯讀 runner 與看板已有首輪真實閉環及隔離還原證據；常駐與完整驗收進行中，不搬程式或接管現有 authority。長期投入另按里程碑決定。見 [README](platform/cloud-lab/README.md)。 |
 | `newclear/labs/browser-fingerprint` | 未知 | 未分級 | 有界的瀏覽器設備／操作觀測實驗：Go mock CRUD、既有五步操作教學、分析工具與公開／私人 Quick Tunnel 啟動方式；未決定長期投入。見 [README](labs/browser-fingerprint/README.md)。 |
+| `newclear/labs/iris-lab` | 未知 | 未分級 | 本輪限固定 Iris／模型版本研究、SDD 與驗收設計；尚無 runtime 或實機出圖，長期投入待決。見 [README](labs/iris-lab/README.md)。 |
+| `newclear/labs/m4-seat` | 未知 | 未分級 | 只收錄 M4 Max 48GB 單人座位的運行方案與驗收清單。沒有 runtime，沒有在目標機器計時，不授權部署或 24/7 服務。見 [README](labs/m4-seat/README.md)。 |
 
 ## 重疊與 canonical 邊界
 
@@ -132,8 +139,10 @@ study repo 合併進去。
 
 ### Agent 與 LLM 工具
 
+`agent-workforce` 擁有跨產品的工作者／帳號／資源綁定、持久通信與調用協調；本次只到 SDD。Kith 的聊天／個人訂閱喚醒規則、Agent Platform 的隔離 Run、HAI Taskboard 的交付驗收各自保留；Workforce 只透過 adapter 與外部 references 接合，不另造工作完成權威。
+
 `kernel/agents/codex-team-superpowers` 是可驗證的 workflow canonical。`agent-platform`（自管 agent 工作台）、`kith`（人機群聊）、
-`fanzloud`（personal BYOS／Codex Cloud，休眠）責任分開。`pokercase` 不加入 agent orchestration。
+`fanzloud`（personal BYOS／Codex Cloud，僅 P0 主線復工）責任分開。`pokercase` 不加入 agent orchestration。
 
 ### 個人自動化與傳輸
 
@@ -152,7 +161,7 @@ edge 擁有 request／effect admission，policy 擁有 feature resolution／eval
 
 ## 下一步
 
-下一步與排程在私人項目帳本追蹤，本檔不列。
+大需求進度在 https://github.com/fallrising/desk 的 docs/operating-method.md，給人看；本檔不列。本 repo 技術任務自己管。
 
 ## 待決
 
@@ -161,3 +170,5 @@ edge 擁有 request／effect admission，policy 擁有 feature resolution／eval
    Goku `copilot`／`gemini`、Flowshot `agent/sdd-baseline`、Bee Swarm `project-restructure`？Phark 的保存 branch 是否視為被 PR #10/#11 取代？
 3. archived `config_center` 歷史中曝光的 n8n PostgreSQL／basic-auth credential 是否已輪換？repo 已 archive 不等於風險已解除。
 4. 繼續投入目前有 16 項，遠超過 2026-09-05 提議的 3 條戰線上限。還要設上限嗎？要的話，上限是多少？
+
+2026-10-31 T-0442：上述 Fanzloud／Agent Platform／Workforce 責任分開的基準有一份[明示調整提案](platform/fanzloud/docs/adr/ADR-0008-provider-neutral-mainline.md)。批准前不改相鄰專案責任或實作；不以跨專案整合之名同時啟動三套未完成產品。

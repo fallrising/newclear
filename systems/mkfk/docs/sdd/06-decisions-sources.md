@@ -103,11 +103,23 @@ Status: accepted；完整決策見 [ADR-012](../adr/012-replication-flow-control
 
 M7 OP-03 flood 揭露三個問題：重疊 AppendEntries 塞滿 peer link、leader sent-RPC 表在丟包時無界成長、ISR target 在每個 Ready 被拉到最新 index 導致落後一個 RTT 的健康 follower 被逐出。改為：link 以較新的 plain AppendEntries 取代佇列中的舊者；proposal 只在未回覆的 append 少於 8 時送出；每 peer 只記 64 個未回覆 RPC；follower 回報 `matched` 時視為在 leader 寫入 `matched+1` 的時刻已追上。RP-08／RP-11 語意不變，captured-A ack 規則不變。Chaos 排程另揭露：被拒的高 term RequestVote 不再重設 election timer（stale candidate 曾讓 partition 永遠選不出 leader），以及重啟 replay 由每 entry 讀 4 MiB 改為批次線性讀取。
 
-### ADR-013 — fsync 在 partition actor 上：先可觀測，結構選項待定
+### ADR-013 — fsync 在 partition actor 上：可觀測性與只在 anchor 改變時重寫 index
 
-Status: proposed（可觀測性已實作；結構選項未決）；完整內容見 [ADR-013](../adr/013-fsync-on-the-partition-actor.md)。
+Status: accepted（可觀測性與選項 1 已實作；選項 2–5 未決）；完整內容見 [ADR-013](../adr/013-fsync-on-the-partition-actor.md)。
 
-每個 acknowledged batch 每副本 5 次 sync：WAL 1、sparse index 重寫 2、commit 推進時 hard state 2。新增慢 sync（≥500 ms）與 actor 單次佔用（≥500 ms）的 log 與 metrics，不改行為。待決選項：只在 anchor 改變時重寫 index（5→約 3 次 sync，推薦先做）、延遲持久化 commit index、group commit、tick 與儲存分離、調長 election timeout；後三者屬 X2 或部署參數。
+每個 acknowledged batch 每副本 5 次 sync：WAL 1、sparse index 重寫 2、commit 推進時 hard state 2。新增慢 sync（≥500 ms）與 actor 單次佔用（≥500 ms）的 log 與 metrics，不改行為。選項 1 已實作：append 只在新增 anchor 或上次 index 寫入失敗時重寫 index，單 record batch 降為約 3 次 sync；重啟時 stale index 與 WAL 推得的 anchors 不符即重建。待決選項：延遲持久化 commit index、group commit、tick 與儲存分離、調長 election timeout；後三者屬 X2 或部署參數。
+
+### Election timeout 每次選舉重新選取
+
+Status: accepted（已實作）。沒有獨立 ADR；不改持久狀態、ack／HW／ISR、epoch 或資料格式。
+
+原本每個 replica 在 process 啟動時選一次 election timeout（6–12 tick，7 個值），之後不變。leader 消失後，剩下兩個 voter 若選到同一個值，就在同一個 tick 一起成為 candidate、各投自己，之後每一輪都相同，直到第三個 voter 回來才選得出 leader；三 process 的 failover 測試因此在 2 CPU 上 30 次失敗 9 次。改為：節點每次開始選舉，或離開 candidate／leader、或在更高 term 成為 follower 時，由注入的 random source 重新選取；收到 heartbeat 不重選。`TestM7EqualElectionTimeoutsStillElectALeader` 以固定 seed 驗證。pre-vote 與 check-quorum 仍未實作，評估見 ADR-014。
+
+### ADR-014 — Raft pre-vote：評估後不實作
+
+Status: accepted（決定不實作）；完整內容見 [ADR-014](../adr/014-raft-pre-vote-not-implemented.md)。
+
+02 §3 與程式一致，本節不改那一節。Follower 逾時即 `currentTerm+1`、持久化自票、送 `RequestVote`；較高 term 的 `RequestVote` 會先讓收到的節點（含現任 leader）持久化新 term 並退為 follower，即使這一票因 log 較舊被拒、candidate 也還沒有 quorum。`TestHigherTermRequestVoteFromUnconfirmedCandidateStepsDownLeader` 鎖住這段。Pre-vote、check-quorum、調長 election timeout、把 tick 與 fsync 拆開，都沒有實作。環境 B 的靜默 follower 不在這份決定裡。
 
 ## 4. 來源目錄
 

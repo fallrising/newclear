@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "runId": "20261024T101650485Z-28561c70",
+  "status": "passed",
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "steps": [
+    {
+      "name": "local-image-response",
+      "status": 200,
+      "contentType": "image/svg+xml",
+      "sha256": "a651b999860b0cca72532e8ea6a49ed4f1dc0afce19d46147d92f2ec07dff12d"
+    },
+    {
+      "name": "loaded-home",
+      "width": 1440,
+      "title": "Synthetic Alpha",
+      "status": 200,
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "name": "loaded-home",
+      "width": 834,
+      "title": "Synthetic Alpha",
+      "status": 200,
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "name": "loaded-home",
+      "width": 390,
+      "title": "Synthetic Alpha",
+      "status": 200,
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "name": "shared-capture",
+      "records": 3,
+      "fixtureAppIcon": "/vite.svg",
+      "faviconOrigin": "http://127.0.0.1:5173"
+    },
+    {
+      "name": "Edit bookmark",
+      "type": "button",
+      "outline": "solid",
+      "focusVisible": true
+    },
+    {
+      "name": "real-update-readback",
+      "id": "review-1",
+      "title": "Edited synthetic Alpha"
+    },
+    {
+      "name": "sidebar-keyboard-actions-visible"
+    },
+    {
+      "name": "controlled-update-failure-retains-data-and-retry-clears"
+    },
+    {
+      "name": "Delete bookmark",
+      "type": "button",
+      "outline": "solid",
+      "focusVisible": true
+    },
+    {
+      "name": "real-delete-clears-error-and-persists"
+    },
+    {
+      "name": "owned-api-stop-restart-retry",
+      "persistedRecords": 1
+    },
+    {
+      "name": "actual-empty-distinct-from-error"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "card-keyboard-focus",
+      "file": "screenshots/card-keyboard-focus.png",
+      "sha256": "dc56fe7850dcbe2b9d92032805c25a6770f46851af3f880aa8b8d5111153eb00",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "real-edited",
+      "file": "screenshots/real-edited.png",
+      "sha256": "e1f69061ed430bdbb27194eb2670a30649c595dc5250513aa7e9b869668acbc4",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "sidebar-keyboard-focus",
+      "file": "screenshots/sidebar-keyboard-focus.png",
+      "sha256": "7a8acb025b95b11383bc7b9a5a2dbde32e7c640d951ba47ea9c4b079fbd365be",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "controlled-update-error",
+      "file": "screenshots/controlled-update-error.png",
+      "sha256": "8f28577266d0d0baf98db9d2e9a5b046d0c83196b0ce6b3a51ebd6a14864829d",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "controlled-delete-error",
+      "file": "screenshots/controlled-delete-error.png",
+      "sha256": "5e08d84dbea73c52d80c6734c1bc3d97f422115445cae29a38bb34dc8561276a",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "delete-keyboard-focus",
+      "file": "screenshots/delete-keyboard-focus.png",
+      "sha256": "4db3a31ddab0874a216255dc89845f06e97cffd8d2ed25a97b6e60c2e42ad98a",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "actual-api-outage",
+      "file": "screenshots/actual-api-outage.png",
+      "sha256": "02b90abd7b0f71c527853b8209b08e257b253a513136018b03b6527a0bd560a7",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "actual-retry-recovery",
+      "file": "screenshots/actual-retry-recovery.png",
+      "sha256": "43b7626ec4e96db1ba7bc8fd9fac1c64a2e16363c2f40271c9dd855c52c946ee",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "real-empty",
+      "file": "screenshots/real-empty.png",
+      "sha256": "ffb6f7056df7c806ec484cfbbcfc3cc856e6552af1c94cc0de1ba9478ee56bd2",
+      "metrics": {
+        "viewport": 1440,
+        "scrollWidth": 1440
+      }
+    }
+  ],
+  "axe": [],
+  "health": [
+    {
+      "kind": "http",
+      "status": 500,
+      "path": "/api/bookmarks/review-1",
+      "phase": "controlled-update"
+    },
+    {
+      "kind": "http",
+      "status": 500,
+      "path": "/api/bookmarks/review-2",
+      "phase": "controlled-delete"
+    },
+    {
+      "kind": "requestfailed",
+      "path": "/api/bookmarks",
+      "phase": "actual-mock-outage"
+    },
+    {
+      "kind": "requestfailed",
+      "path": "/api/bookmarks",
+      "phase": "actual-mock-outage"
+    },
+    {
+      "kind": "requestfailed",
+      "path": "/api/bookmarks",
+      "phase": "actual-mock-outage"
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "mock-initial",
+      "code": null,
+      "signal": "SIGTERM",
+      "listenerAbsent": true
+    },
+    {
+      "name": "mock-restarted",
+      "code": null,
+      "signal": "SIGTERM",
+      "listenerAbsent": true
+    },
+    {
+      "name": "vite",
+      "code": 0,
+      "signal": null,
+      "listenerAbsent": true
+    }
+  ],
+  "sourceHashes": {
+    "web/src/store/bookmarkStore.ts": "b473b497e1af243ba21887f60485737748da728a054c6de28a8f56b81a3ca1c7",
+    "web/src/components/BookmarkCard.tsx": "874333d14c2a57d0905fa413c2af4cb6a02265a6b2cc18db061011d6cbb21222",
+    "web/src/components/BookmarkGrid.tsx": "9255c012680b99a9eb8ce75cc8d6182d887757c69d36c4868a7dd40d36947d4c",
+    "web/src/components/Sidebar.tsx": "a2315ccbc6a4b55e2b26035de288c7f4766c115a461a1251408a722030c36b4d",
+    "fe-review/serve-web.mjs": "9befd54528e4c27e99a80fadd7a57e436f299b91c5a3fa2fad02c2bcef09286a",
+    "fe-review/verify-browser.mjs": "19ea2ddf615271df9871ce71b80839800a4e482a0333c379dea669fe8d7ad5db",
+    "fe-review/isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476",
+    "fe-review/targets.json": "c94022ce0b7211c72e9867ba536576bbf400bcba0891a789680136dd1daede27"
+  }
+}

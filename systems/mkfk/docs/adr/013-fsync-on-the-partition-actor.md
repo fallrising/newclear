@@ -1,6 +1,6 @@
 # ADR-013 — Fsync on the partition actor: observability now, structural options later
 
-- Status: proposed (observability accepted and implemented; the structural options are not decided)
+- Status: accepted for observability and option 1 (both implemented); options 2–5 are not decided
 - Date: 2026-10-09
 - Applies to: after M7. No protocol, persistent-format, or invariant changes.
 
@@ -27,9 +27,15 @@ Make holds visible without changing behavior:
 
 500 ms is below the 600 ms minimum election timeout: a logged stall is one that could already cost leadership.
 
+## Decision (implemented): option 1, rewrite the index only when anchors change
+
+An append rewrites and syncs a segment's sparse index only when the append added an anchor, or when the previous index write failed and the segment's index is marked invalid. Appends never change existing anchors, so an unchanged anchor count means the file on disk is current. Single-record batches therefore cost three syncs per replica (WAL 1, hard state 2) except about once per 4 KiB of WAL, when a new anchor costs two more. Segment creation, suffix truncation, and recovery still write the index every time.
+
+Recovery is unchanged: a crash after the WAL sync but before an index write leaves an index with fewer anchors than the WAL implies; start-up compares the decoded index with the anchors rebuilt from the WAL, finds the mismatch, and rewrites it (`TestStaleIndexIsRebuiltOnRestart`). No index format, invariant, or persistence-order change. Measured on one machine: single-record batches went from 5.0 to about 3.5 syncs per batch and 1.4× throughput; batches of 100 were unchanged ([before/after](../benchmarks/adr-013-index-rewrite.md)).
+
 ## Options not yet decided
 
-1. **Skip unchanged index rewrites.** The sparse index gains an anchor only every few KiB, yet it is rewritten and synced after every append. The index is derived: a failed write marks it unhealthy and recovery rebuilds it from the WAL (01-storage). Rewriting only when anchors change would cut single-record batches from five syncs to about three. Smallest change; needs a recovery test showing a stale index file is detected and rebuilt.
+1. **Skip unchanged index rewrites** (implemented, see above). The sparse index gains an anchor only every few KiB, yet it is rewritten and synced after every append. The index is derived: a failed write marks it unhealthy and recovery rebuilds it from the WAL (01-storage). Rewriting only when anchors change would cut single-record batches from five syncs to about three. Smallest change; needs a recovery test showing a stale index file is detected and rebuilt.
 2. **Lazy commit-index persistence.** Raft does not require the commit index to be durable; recovery can relearn it from the leader. mkfk persists it as the durable commit floor that recovery uses to decide which entries apply before contact with a leader (01-storage). Dropping it from the hot path would remove two more syncs but changes recovery semantics, so it needs its own ADR and safety tests (listed under X2 in the architecture note).
 3. **Group commit.** Several proposals share one WAL sync. Largest throughput gain; X2 track.
 4. **Separate ticks from storage.** Run election and heartbeat timing on a goroutine that never waits for a sync, so one slow sync cannot trigger an election. This weakens the "one deterministic owner" model the Raft core relies on, and a leader that cannot persist should not keep claiming leadership, so a stall that delays heartbeats is arguably correct behavior. Not recommended without evidence that stalls on healthy disks are common.
@@ -37,4 +43,4 @@ Make holds visible without changing behavior:
 
 ## Recommendation
 
-Keep the observability. Do option 1 next if throughput on slow disks matters; it removes 40% of hot-path syncs without touching recovery semantics. Leave options 2–4 to the X2 track. Use the new stall logs to catch the silent-follower case before changing any timing.
+Keep the observability and option 1. Leave options 2–4 to the X2 track. Use the new stall logs to catch the silent-follower case before changing any timing.

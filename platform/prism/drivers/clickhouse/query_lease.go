@@ -103,6 +103,9 @@ func (l *readLease) classify(err error) error {
 	if err == nil {
 		return nil
 	}
+	if spiErr, ok := errors.AsType[*spi.Error](err); ok {
+		return spiErr
+	}
 	if l.b.closing.Err() != nil {
 		return closedError(l.op)
 	}

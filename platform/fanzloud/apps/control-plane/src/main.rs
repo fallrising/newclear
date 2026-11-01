@@ -20,6 +20,16 @@ async fn main() {
 }
 
 async fn run() -> Result<(), ()> {
+    match env::var("CODEBOX_MODE") {
+        Ok(mode) if mode == "isolated" => {
+            return codebox_control_plane::isolated::serve()
+                .await
+                .map_err(|_| ());
+        }
+        Ok(mode) if mode == "p0" => {}
+        Err(env::VarError::NotPresent) => {}
+        _ => return Err(()),
+    }
     let (control_plane, listen) = build_control_plane()?;
     let router = control_plane.router();
     let listener = match tokio::net::TcpListener::bind(listen).await {

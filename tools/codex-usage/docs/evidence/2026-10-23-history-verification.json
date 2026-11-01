@@ -1,0 +1,139 @@
+{
+  "checks": [
+    {
+      "check": "tests",
+      "command": [
+        "python3",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check": "compile",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "codex_usage.py",
+        "agent_usage.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "python": "3.13.5 (main, Aug 10 2026, 12:06:59) [GCC 14.2.0]",
+  "python_3_11_grammar": "passed",
+  "hashes": {
+    "agent_usage.py": "bff80c605dce772919111f7d3b9854549540cc0ccd5dc8624d71c868e46675dc",
+    "codex_usage.py": "f734330427d350f5e71d065e160ea20eb4b984c0802d11ee773f688aa02e4c03",
+    "tests/test_usage_history.py": "b468b17dadccfc4d72847e04107c516abc3865156ad54af6bf33013a95df2b8e",
+    "tests/test_agent_usage.py": "4ccbc8fc1ecef3ec0557f2684f3c87a8de7b71923251d05a93a71a82bd85f5d5",
+    "tests/test_regressions.py": "dd69402b82be86e8843102fb2d93d954d22a79a2535e0649ee411003765466f0"
+  },
+  "recorded_at": "2026-10-23T07:41:16.003569Z",
+  "unit_tests": 84,
+  "history_tests": 21,
+  "baseline_tests": 63,
+  "cli_smoke": {
+    "checks": [
+      {
+        "check": "history-json",
+        "exit_code": 2
+      },
+      {
+        "check": "history-table",
+        "exit_code": 2
+      },
+      {
+        "check": "history-range",
+        "exit_code": 0
+      },
+      {
+        "check": "history-truncated",
+        "exit_code": 2
+      },
+      {
+        "check": "history-invalid",
+        "exit_code": 1
+      }
+    ],
+    "db_hash_mtime_unchanged": true,
+    "schema_source": "archived cc_quota.db()",
+    "synthetic_only": true
+  },
+  "archive_integrity": {
+    "checks": [
+      {
+        "name": "contracts",
+        "command": [
+          "python3",
+          "scripts/check_project_success.py",
+          "--projects",
+          "tools/codex-usage",
+          "tools/cc-quota"
+        ],
+        "exit_code": 0
+      },
+      {
+        "name": "diff",
+        "command": [
+          "git",
+          "diff",
+          "--check",
+          "--",
+          "tools/cc-quota",
+          "tools/codex-usage",
+          "README.md",
+          "PROJECTS.md",
+          "PORTFOLIO.md",
+          "llms.txt",
+          "docs/specs/quota-signal.md",
+          ".github/workflows/cc-quota-ci.yml",
+          ".github/workflows/codex-usage-ci.yml"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "archive_files_unchanged": 6,
+    "links": "passed",
+    "scoped_index_matches_generator": "passed"
+  },
+  "full_repository_contracts": 41,
+  "review_history": [
+    {
+      "task": "T-973",
+      "result": "REWORK",
+      "finding": "WAL SQLite readonly open created/modified source SHM"
+    },
+    {
+      "task": "T-974",
+      "result": "ACCEPT",
+      "finding": "WAL/sidecars refused before connect; source files unchanged"
+    }
+  ],
+  "python_3_11_runtime_tested": false,
+  "live_calls_this_slice": false,
+  "git_publication": false,
+  "source_commit_baseline": "b7f2a4311d1135977ba273efba8e77702b908036",
+  "uncommitted_source": true,
+  "evidence_task_ids": [
+    "T-972-red",
+    "T-972-precision-red",
+    "T-972-wal-red",
+    "T-972-wal-freeze",
+    "T-972-root-final",
+    "T-972-root-smoke",
+    "T-972-archive-gate",
+    "T-972-repo-contract",
+    "T-973-review",
+    "T-973-wal",
+    "T-974-review",
+    "T-974-wal"
+  ]
+}

@@ -366,9 +366,34 @@ class PlatformTests(PlatformFixture):
             ).status_code,
             422,
         )
+        from agent_platform import event_retention
+
+        # Aged, terminal synthetic attempt exercises the real approved pruning path.
+        original = run_id
+        run_id = str(uuid4())
         with self.db.transaction() as conn:
-            conn.execute("DELETE FROM run_events WHERE run_id=%s AND seq<3", (run_id,))
-            conn.execute("UPDATE runs SET event_floor=3 WHERE id=%s", (run_id,))
+            conn.execute("UPDATE runs SET state='succeeded' WHERE id=%s", (original,))
+            conn.execute("UPDATE jobs SET status='done' WHERE run_id=%s", (original,))
+            conn.execute(
+                "INSERT INTO runs(id,task_id,attempt_no,base_sha,profile_revision,goal,"
+                "state,deadline,last_event_seq) SELECT %s,task_id,2,base_sha,profile_revision,"
+                "goal,'succeeded',deadline,3 FROM runs WHERE id=%s",
+                (run_id, original),
+            )
+            conn.execute(
+                "INSERT INTO run_event_identities SELECT %s,seq,gen_random_uuid(),source,"
+                "source_event_id,type,created_at-CASE WHEN seq<3 THEN interval '31 days' "
+                "ELSE interval '0' END FROM run_events WHERE run_id=%s",
+                (run_id, original),
+            )
+            conn.execute(
+                "INSERT INTO run_events SELECT i.run_id,i.seq,i.event_id,i.source,"
+                "i.source_event_id,i.type,e.payload,i.created_at FROM run_event_identities i "
+                "JOIN run_events e ON e.run_id=%s AND e.seq=i.seq WHERE i.run_id=%s",
+                (original, run_id),
+            )
+        plan = event_retention.preview(self.db)
+        event_retention.apply(self.db, plan, approval_digest=plan["approval_digest"])
         self.assertEqual(
             self.client.get(f"/api/v1/runs/{run_id}/events?follow=false").status_code, 410
         )

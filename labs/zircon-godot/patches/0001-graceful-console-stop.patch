@@ -1,0 +1,21 @@
+diff --git a/ServerCore/Program.cs b/ServerCore/Program.cs
+index 244a0881..46deaea0 100644
+--- a/ServerCore/Program.cs
++++ b/ServerCore/Program.cs
+@@ -48,8 +48,5 @@ namespace Server
+             {
+-                var command = Console.ReadLine();
+-                if (command == null)
+-                {
+-                    System.Threading.Thread.Sleep(1000);
+-                    continue;
+-                }
++                // Console input is not a command interface. Do not block shutdown
++                // waiting for a newline while the environment finishes saving.
++                System.Threading.Thread.Sleep(100);
+             }
+@@ -61,2 +58,4 @@ namespace Server
+         {
++            // Let the environment thread finish its save/commit and stop path.
++            e.Cancel = true;
+             SEnvir.Started = false;

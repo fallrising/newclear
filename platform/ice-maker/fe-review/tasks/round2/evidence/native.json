@@ -1,0 +1,36 @@
+{
+  "snapshot": "2026-10-24T09:30:36.038132+00:00",
+  "source": "65324e36 (dirty scoped inline UI/tests; source hashes below)",
+  "versions": {
+    "python": "3.12.3",
+    "Pillow": "12.3.0",
+    "fastapi": "0.141.1",
+    "uvicorn": "0.52.4",
+    "python-multipart": "0.0.32"
+  },
+  "initial": {
+    "command": "make check (activated existing document-ingestion venv)",
+    "phase0": "passed",
+    "testsRun": 320,
+    "seconds": 23.33,
+    "status": "FAILED(failures=1)",
+    "failure": "Existing publisher mocked-command-timeout test saw invalid inherited SSH_AUTH_SOCK precheck first; no product/test fix made.",
+    "logSha256": "08b08da30b00f181d06125aa1ef96737324d193d61bc3cd7364d8710776bf0a8"
+  },
+  "focused": {
+    "command": "env -u SSH_AUTH_SOCK PYTHONPATH=src:tests .venv/bin/python -m unittest -v test_study_publisher.StudyPublisherTests.test_github_command_timeout_and_partial_evidence_are_stable",
+    "tests": 1,
+    "seconds": 0.202,
+    "status": "passed",
+    "logSha256": "e1e94067f1f762c97210a9d42a30c8c95f69095bf8e0ee603f8fc122ce3b0a8c"
+  },
+  "fullCurrentHeadCI": "pending",
+  "sourceHashes": {
+    "src/ice_maker/document_service.py": "bf6008ab5a95be1da71c64eb38a21c1f5bf00cbfc39915dc36cc2770663cf4e8",
+    "src/ice_maker/readable_results.py": "536a63d00916db84c2f9b994a415736ccb28d5cd2dd28e7666467f8a3f2774c6",
+    "tests/test_document_service.py": "5f55dafd9d3449b742817f588903f69965bb0a0997891737acdae9b6ca79276c",
+    "tests/test_readable_results.py": "07d5facaec4b3bb5719a79abc1ea2f7c85e745b1eb16341298e9365c79269e93"
+  },
+  "sourceCommit": "65324e36498c4f48b341b65883f4028c8cb8d3c2",
+  "dirtyScopedChanges": true
+}

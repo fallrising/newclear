@@ -104,6 +104,18 @@ func New(options Options) (*Server, error) {
 		_, _ = response.Write([]byte("ok\n"))
 	})
 	mux.HandleFunc("/-/ready", methodNotAllowed(http.MethodGet, http.MethodHead))
+	mux.HandleFunc("GET /ready", func(response http.ResponseWriter, _ *http.Request) {
+		response.Header().Set("Cache-Control", "no-store")
+		response.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		if !ready.Load() {
+			response.WriteHeader(http.StatusServiceUnavailable)
+			_, _ = response.Write([]byte("not ready\n"))
+			return
+		}
+		response.WriteHeader(http.StatusOK)
+		_, _ = response.Write([]byte("ready\n"))
+	})
+	mux.HandleFunc("/ready", methodNotAllowed(http.MethodGet, http.MethodHead))
 	mux.Handle("GET /metrics", promhttp.HandlerFor(options.Gatherer, promhttp.HandlerOpts{EnableOpenMetrics: true}))
 	mux.HandleFunc("/metrics", methodNotAllowed(http.MethodGet, http.MethodHead))
 	if options.Handler != nil {

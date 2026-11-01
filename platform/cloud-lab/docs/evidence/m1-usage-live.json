@@ -1,0 +1,53 @@
+{
+  "at": "2026-10-31T10:08:42.882097+00:00",
+  "source_head": "98a0692e1883fdbac3b0a6f026c0223c05620461",
+  "worker_100_percent": true,
+  "modules_exact_bytes": 3,
+  "asset_access_denials": [
+    {
+      "path": "/",
+      "status": 403,
+      "code": "SCOPE_DENIED",
+      "asset_bytes_verified": false
+    },
+    {
+      "path": "/styles.css",
+      "status": 403,
+      "code": "SCOPE_DENIED",
+      "asset_bytes_verified": false
+    },
+    {
+      "path": "/dashboard.mjs",
+      "status": 403,
+      "code": "SCOPE_DENIED",
+      "asset_bytes_verified": false
+    }
+  ],
+  "asset_bytes_verified": false,
+  "management_reads": 9,
+  "settings_preserved_except_deployment_annotations": true,
+  "active_version_bindings_match": true,
+  "grants_unchanged": 4,
+  "access_and_deadline_preserved": true,
+  "cron_unchanged": "*/15 * * * *",
+  "terminal_commands_exact": 121,
+  "commands": 122,
+  "unknown_active_preserved": 1,
+  "prior_firings_preserved": 120,
+  "new_skipped_overlap": 0,
+  "journal_rows_exact": 118,
+  "unknown_journal_rows": 1,
+  "same_runner_pid_no_restart": true,
+  "local_configs_policies_client_ledger_exact": true,
+  "runner_self_verified": true,
+  "runner_stop_at": "2026-11-05T07:24:25Z",
+  "usage_runner_status": 403,
+  "expired_bot_status": 401,
+  "anonymous_access_redirects": 3,
+  "positive_usage_verified": false,
+  "human_access_verified": false,
+  "provider_analytics_connected": false,
+  "billing_verified": false,
+  "unknown_resolved": false,
+  "paid_upgrade": false
+}

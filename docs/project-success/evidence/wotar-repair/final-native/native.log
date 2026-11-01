@@ -1,0 +1,132 @@
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/ruff check src tests
+All checks passed!
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/ruff format --check src tests
+79 files already formatted
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/mypy src
+Success: no issues found in 40 source files
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/python -m secure_mqtt.cli doctor
+python: 3.12.3 (>=3.12 required)
+AESGCMSIV: available
+openssl: OpenSSL 3.0.13 30 Jan 2024
+openssl_bin: /usr/bin/openssl
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/pytest tests/ -m "not integration and not public_smoke"
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0
+rootdir: /tmp/wotar-isolated-qiyjklui/source
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5, asyncio-1.4.0, cov-7.1.0, hypothesis-6.170.5
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 199 items / 16 deselected / 183 selected
+
+tests/property/test_parser_fuzz.py ..                                    [  1%]
+tests/security/test_no_secrets.py .....                                  [  3%]
+tests/security/test_tamper_matrix.py ................................... [ 22%]
+.....                                                                    [ 25%]
+tests/security/test_tls.py ..                                            [ 26%]
+tests/security/test_tls_static.py ..                                     [ 27%]
+tests/unit/test_bootstrap_script.py .                                    [ 28%]
+tests/unit/test_bounded_queues.py ..                                     [ 29%]
+tests/unit/test_broker_readiness.py ..                                   [ 30%]
+tests/unit/test_cli_and_config.py ..........                             [ 36%]
+tests/unit/test_codec_edges.py .....                                     [ 38%]
+tests/unit/test_inbox.py ..                                              [ 39%]
+tests/unit/test_inbox_extended.py ..                                     [ 40%]
+tests/unit/test_inbox_retry.py ...                                       [ 42%]
+tests/unit/test_isolated_runner.py ...                                   [ 44%]
+tests/unit/test_key_provider.py .....                                    [ 46%]
+tests/unit/test_key_rotation.py ..                                       [ 48%]
+tests/unit/test_loader_errors.py ........                                [ 52%]
+tests/unit/test_metrics.py ..                                            [ 53%]
+tests/unit/test_mqtt_reconnect.py ....                                   [ 55%]
+tests/unit/test_mqtt_subscribe.py .                                      [ 56%]
+tests/unit/test_outbox.py ..                                             [ 57%]
+tests/unit/test_phase0_skeleton.py .....                                 [ 60%]
+tests/unit/test_phase1_docs.py .....................................     [ 80%]
+tests/unit/test_policy_loader.py ...                                     [ 81%]
+tests/unit/test_public_key_registry.py ............                      [ 88%]
+tests/unit/test_publish_ack.py ..                                        [ 89%]
+tests/unit/test_receive_worker.py ...                                    [ 91%]
+tests/unit/test_replay.py ..                                             [ 92%]
+tests/unit/test_subscriptions.py ..                                      [ 93%]
+tests/unit/test_test_vectors.py .....                                    [ 96%]
+tests/unit/test_timeouts.py ....                                         [ 98%]
+tests/unit/test_timestamps.py ...                                        [100%]
+
+====================== 183 passed, 16 deselected in 8.70s ======================
+/home/ckc/test/codex/wt/newclear/wotar-required-gates-442/systems/wotar/secure-mqtt-e2ee/.venv/bin/pytest tests/ -m "not integration and not public_smoke" --cov=secure_mqtt --cov-report=term-missing --cov-report=html
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0
+rootdir: /tmp/wotar-isolated-qiyjklui/source
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5, asyncio-1.4.0, cov-7.1.0, hypothesis-6.170.5
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 199 items / 16 deselected / 183 selected
+
+tests/property/test_parser_fuzz.py ..                                    [  1%]
+tests/security/test_no_secrets.py .....                                  [  3%]
+tests/security/test_tamper_matrix.py ................................... [ 22%]
+.....                                                                    [ 25%]
+tests/security/test_tls.py ..                                            [ 26%]
+tests/security/test_tls_static.py ..                                     [ 27%]
+tests/unit/test_bootstrap_script.py .                                    [ 28%]
+tests/unit/test_bounded_queues.py ..                                     [ 29%]
+tests/unit/test_broker_readiness.py ..                                   [ 30%]
+tests/unit/test_cli_and_config.py ..........                             [ 36%]
+tests/unit/test_codec_edges.py .....                                     [ 38%]
+tests/unit/test_inbox.py ..                                              [ 39%]
+tests/unit/test_inbox_extended.py ..                                     [ 40%]
+tests/unit/test_inbox_retry.py ...                                       [ 42%]
+tests/unit/test_isolated_runner.py ...                                   [ 44%]
+tests/unit/test_key_provider.py .....                                    [ 46%]
+tests/unit/test_key_rotation.py ..                                       [ 48%]
+tests/unit/test_loader_errors.py ........                                [ 52%]
+tests/unit/test_metrics.py ..                                            [ 53%]
+tests/unit/test_mqtt_reconnect.py ....                                   [ 55%]
+tests/unit/test_mqtt_subscribe.py .                                      [ 56%]
+tests/unit/test_outbox.py ..                                             [ 57%]
+tests/unit/test_phase0_skeleton.py .....                                 [ 60%]
+tests/unit/test_phase1_docs.py .....................................     [ 80%]
+tests/unit/test_policy_loader.py ...                                     [ 81%]
+tests/unit/test_public_key_registry.py ............                      [ 88%]
+tests/unit/test_publish_ack.py ..                                        [ 89%]
+tests/unit/test_receive_worker.py ...                                    [ 91%]
+tests/unit/test_replay.py ..                                             [ 92%]
+tests/unit/test_subscriptions.py ..                                      [ 93%]
+tests/unit/test_test_vectors.py .....                                    [ 96%]
+tests/unit/test_timeouts.py ....                                         [ 98%]
+tests/unit/test_timestamps.py ...                                        [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+Name                                          Stmts   Miss Branch BrPart  Cover   Missing
+-----------------------------------------------------------------------------------------
+src/secure_mqtt/crypto/__init__.py                0      0      0      0   100%
+src/secure_mqtt/crypto/aead.py                   28      8      4      2    69%   10-11, 18-19, 24-25, 43-44
+src/secure_mqtt/crypto/key_material.py           15      2      2      1    82%   19-20
+src/secure_mqtt/crypto/signing.py                15      0      0      0   100%
+src/secure_mqtt/errors.py                        18      0      0      0   100%
+src/secure_mqtt/keys/__init__.py                  2      0      0      0   100%
+src/secure_mqtt/keys/file_keyring.py            138     38     48     16    66%   24, 28-29, 32-33, 39-41, 71-72, 86, 88, 90, 92, 95, 100, 104, 108, 113, 135->137, 145->147, 150, 153-155, 162-169, 172-178
+src/secure_mqtt/keys/keyring_admin.py           146     22     60     20    80%   71, 73, 80, 143, 146, 150, 167, 170, 175, 183, 207, 215, 218, 220->219, 224, 232-233, 237-238, 241, 245, 248, 251
+src/secure_mqtt/keys/local_dev.py                 3      0      0      0   100%
+src/secure_mqtt/keys/memory.py                   47      0     12      1    98%   45->47
+src/secure_mqtt/keys/public_key_registry.py      61      0     22      0   100%
+src/secure_mqtt/models.py                        27      0      0      0   100%
+src/secure_mqtt/persistence/__init__.py           0      0      0      0   100%
+src/secure_mqtt/persistence/database.py          28      0      2      1    97%   100->exit
+src/secure_mqtt/persistence/inbox.py             80      5     10      3    91%   97, 148->133, 165-166, 201-202
+src/secure_mqtt/persistence/outbox.py            87      8     12      4    88%   69-74, 89, 135, 200, 203-204
+src/secure_mqtt/persistence/replay.py            17      0      0      0   100%
+src/secure_mqtt/policy/__init__.py                0      0      0      0   100%
+src/secure_mqtt/policy/loader.py                 61      0     22      0   100%
+src/secure_mqtt/policy/topic_policy.py           46      4     16      3    89%   19, 54, 67-68
+src/secure_mqtt/protocol/__init__.py              0      0      0      0   100%
+src/secure_mqtt/protocol/codec.py                86      8     28      5    89%   48-49, 52-53, 59-60, 69-70, 93->96
+src/secure_mqtt/protocol/constants.py            21      0      0      0   100%
+src/secure_mqtt/protocol/envelope.py             99      7     18      5    90%   109-110, 131-132, 155, 180, 242
+-----------------------------------------------------------------------------------------
+TOTAL                                          1025    102    256     61    86%
+Coverage HTML written to dir htmlcov
+Required test coverage of 86.0% reached. Total coverage: 86.49%
+====================== 183 passed, 16 deselected in 9.56s ======================

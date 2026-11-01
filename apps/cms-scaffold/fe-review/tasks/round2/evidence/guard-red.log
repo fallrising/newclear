@@ -1,0 +1,183 @@
+Tool stdout retained; repository absolute paths normalized to <repo> for publication.
+✔ loaded authorized page accepted (0.735988ms)
+✖ reject loginRedirect without disclosing URL (0.664796ms)
+✖ reject otherOrigin without disclosing URL (0.114359ms)
+✖ reject wrongQuery without disclosing URL (0.197429ms)
+✖ reject fragment without disclosing URL (1.902941ms)
+✖ reject staleIdentity without disclosing URL (0.133839ms)
+✖ reject skeleton without disclosing URL (0.117719ms)
+✖ reject httpError without disclosing URL (0.091569ms)
+✖ reject pageError without disclosing URL (0.14433ms)
+✖ intentional logout only accepts exact anonymous selector (0.360229ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 1
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 66.690137
+
+✖ failing tests:
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject loginRedirect without disclosing URL (0.664796ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject otherOrigin without disclosing URL (0.114359ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject wrongQuery without disclosing URL (0.197429ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject fragment without disclosing URL (1.902941ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject staleIdentity without disclosing URL (0.133839ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject skeleton without disclosing URL (0.117719ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject httpError without disclosing URL (0.091569ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:16:5
+✖ reject pageError without disclosing URL (0.14433ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:17:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /^Error: REVIEW_[A-Z_]+$/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/cms-scaffold/fe-review/route-guard.test.mjs:19:1
+✖ intentional logout only accepts exact anonymous selector (0.360229ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<repo>/apps/cms-scaffold/fe-review/route-guard.test.mjs:22:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /REVIEW_IDENTITY/,
+    operator: 'throws',
+    diff: 'simple'
+  }

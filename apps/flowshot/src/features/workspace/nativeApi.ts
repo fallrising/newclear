@@ -1,0 +1,7 @@
+import {invoke} from '@tauri-apps/api/core';
+import {listWorkspaces,createWorkspace,addWorkspaceRoot,detachWorkspaceRoot,listDirectory,readWorkspaceAsset} from '../../generated/contracts/commands';
+import type {WorkspaceApi} from './WorkspaceBrowser';
+export const workspaceApi:WorkspaceApi={listWorkspaces,createWorkspace,addWorkspaceRoot,detachWorkspaceRoot,listDirectory};
+export async function chooseWorkspaceDirectory():Promise<string|null>{const selected=await invoke<string|string[]|null>('plugin:dialog|open',{options:{directory:true,multiple:false}});return typeof selected==='string'?selected:null;}
+export function imageMime(buffer:ArrayBuffer):string|null {const bytes=new Uint8Array(buffer);const starts=(signature:number[])=>signature.every((byte,index)=>bytes[index]===byte);if(starts([137,80,78,71,13,10,26,10]))return 'image/png';if(starts([255,216,255]))return 'image/jpeg';const text=(start:number,end:number)=>String.fromCharCode(...bytes.slice(start,end));if(text(0,6)==='GIF87a'||text(0,6)==='GIF89a')return 'image/gif';if(text(0,4)==='RIFF'&&text(8,12)==='WEBP')return 'image/webp';return null;}
+export async function loadWorkspaceAsset(sourceDocumentId:string,href:string):Promise<{url:string;revoke:()=>void}>{const buffer=await readWorkspaceAsset({sourceDocumentId,href});const type=imageMime(buffer);if(!type)throw new Error('Unsupported image');const url=URL.createObjectURL(new Blob([buffer],{type}));return {url,revoke:()=>URL.revokeObjectURL(url)};}

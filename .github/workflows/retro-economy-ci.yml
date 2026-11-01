@@ -1,0 +1,59 @@
+name: Retro Economy CI
+
+on:
+  pull_request:
+    paths:
+      - labs/retro-economy/**
+      - .github/workflows/retro-economy-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - labs/retro-economy/**
+      - .github/workflows/retro-economy-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: retro-economy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  solo-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Configure isolated test output
+        run: |
+          mkdir -p "$RUNNER_TEMP/retro-build" "$RUNNER_TEMP/retro-evidence"
+          echo "AGENT_BUILD_DIR=$RUNNER_TEMP/retro-build" >> "$GITHUB_ENV"
+          echo "AGENT_EVIDENCE_DIR=$RUNNER_TEMP/retro-evidence" >> "$GITHUB_ENV"
+          echo "PYTHONPYCACHEPREFIX=$RUNNER_TEMP/retro-pycache" >> "$GITHUB_ENV"
+          echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+      - name: Domain, SQLite and HTTP tests
+        run: python3 -m unittest discover -s labs/retro-economy/tests -p 'test_*.py' -v
+      - name: Durable browser client tests
+        run: node --test --test-isolation=none labs/retro-economy/tests/test_ui.mjs
+      - name: UI-only recorder command boundary
+        run: node --test --test-isolation=none labs/retro-economy/tests/test_explorer.mjs
+      - name: Deterministic strategy and counterexample acceptance
+        run: python3 labs/retro-economy/tools/simulate.py
+      - name: Real Chromium route and restart acceptance
+        run: node labs/retro-economy/tests/browser_smoke.mjs
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: retro-economy-browser
+          path: ${{ runner.temp }}/retro-evidence
+          if-no-files-found: error

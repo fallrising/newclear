@@ -1,0 +1,72 @@
+{
+  "schema_version": "cloudlab.rejection-audit-live-evidence.v1",
+  "source_pr": 889,
+  "source_head": "b0f8190494177cd2fa7b79a5f804e74112dc4d80",
+  "migration": {
+    "at": "2026-11-01T04:49:29.648000+00:00",
+    "name": "0002.sql",
+    "sha256": "6fac19d185aad53fd634620f7b49974135f5f5c2d63134d19029fc85efea2578",
+    "original_schema_objects_preserved": 10,
+    "added_objects": 2,
+    "prior_migration_ledger": false,
+    "mode": "direct SQL, consistent with original deployment"
+  },
+  "deployment": {
+    "at": "2026-11-01T04:49:45.604730+00:00",
+    "active_percent": 100,
+    "candidate_modules_exact": 3,
+    "unchanged_assets_manifest": 3,
+    "secret_bindings_inherited": true
+  },
+  "probe": {
+    "at": "2026-11-01T04:51:13.090581+00:00",
+    "status": 403,
+    "code": "SCOPE_DENIED",
+    "persistence": "persisted",
+    "correlated_rows": 1,
+    "authenticated": true,
+    "raw_identity_or_content_stored": false,
+    "new_command_submitted": false,
+    "requests": 2,
+    "retries": 1,
+    "initial_non_json_failure_retained": true
+  },
+  "preservation": {
+    "probe_requests": 2,
+    "probe_retries": 1,
+    "initial_non_json_reason_unknown": true,
+    "schema_objects_preserved": 10,
+    "audit_objects_added": 2,
+    "at": "2026-11-01T04:51:37.723248+00:00",
+    "source_pr": 889,
+    "source_head": "b0f8190494177cd2fa7b79a5f804e74112dc4d80",
+    "worker_100_percent": true,
+    "worker_modules_exact_candidate": 3,
+    "unchanged_assets_manifest": 3,
+    "settings_and_secret_bindings_preserved": true,
+    "grants_unchanged": 4,
+    "access_and_deadline_preserved": true,
+    "cron_unchanged": true,
+    "old_commands_exact": 166,
+    "old_firings_preserved": 195,
+    "old_journal_rows_preserved": 160,
+    "final_commands": 166,
+    "final_active": 0,
+    "same_runner_pid_no_restart": true,
+    "local_configs_policies_client_ledger_exact": true,
+    "runner_stop_at": "2026-11-05T07:24:25Z",
+    "human_window_extended": false,
+    "paid_upgrade": false,
+    "live_rejection_verified": true,
+    "audit_schema_added": true,
+    "human_test_performed": false,
+    "mainline_complete": false
+  },
+  "limits": {
+    "private_receipts_verified_by": "lead",
+    "independent_review_scope": "public documents and sanitized evidence only",
+    "billing": "unknown",
+    "new_browser_test": false,
+    "mainline_complete": false
+  }
+}

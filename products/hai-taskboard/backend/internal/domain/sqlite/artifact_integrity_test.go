@@ -302,17 +302,17 @@ type hostileIntegrityUnit struct {
 
 func (unit *hostileIntegrityUnit) Within(ctx context.Context, operation func(port.Transaction) error) error {
 	return unit.delegate.Within(ctx, func(tx port.Transaction) error {
-		return operation(hostileIntegrityTransaction{Transaction: tx, unit: unit})
+		return operation(hostileIntegrityTransaction{CurrentInputTransaction: tx.(port.CurrentInputTransaction), unit: unit})
 	})
 }
 
 type hostileIntegrityTransaction struct {
-	port.Transaction
+	port.CurrentInputTransaction
 	unit *hostileIntegrityUnit
 }
 
 func (tx hostileIntegrityTransaction) LoadCompletionMaterial(ctx context.Context, query port.CompletionMaterialQuery) (port.CompletionMaterial, error) {
-	material, err := tx.Transaction.LoadCompletionMaterial(ctx, query)
+	material, err := tx.CurrentInputTransaction.LoadCompletionMaterial(ctx, query)
 	if err == nil && tx.unit.armed {
 		material.CandidateArtifacts = slices.Clone(material.CandidateArtifacts)
 		material.Artifacts = slices.Clone(material.Artifacts)

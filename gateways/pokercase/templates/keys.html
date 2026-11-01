@@ -18,12 +18,12 @@
         <a href="/admin/usage">Usage</a>
       </nav>
       {% if admin_protected %}
-      <form method="post" action="/admin/logout" class="logout"><button type="submit" class="ghost">Logout</button></form>
+      <form method="post" action="/admin/logout" class="logout"><input type="hidden" name="csrf" value="{{ csrf }}" /><button type="submit" class="ghost">Logout</button></form>
       {% endif %}
     </aside>
     <main class="content">
       <h1>API Keys</h1>
-      <p class="muted">Keys clients use to call this gateway. If no keys exist, <code>/v1</code> is open (bootstrap mode).</p>
+      <p class="muted">Gateway keys are required by default, including when the key list is empty. Local bootstrap requires an explicit operator opt-in and zero total keys; it never permits remote requests or requests carrying proxy headers.</p>
 
       {% if new_secret %}
       <div class="flash ok">
@@ -34,7 +34,7 @@
 
       <section class="panel">
         <h2>Create key</h2>
-        <form method="post" action="/admin/keys/new" class="form-grid">
+        <form method="post" action="/admin/keys/new" class="form-grid"><input type="hidden" name="csrf" value="{{ csrf }}" />
           <label>Name <input name="name" placeholder="local" /></label>
           <button type="submit">Create</button>
         </form>
@@ -43,6 +43,7 @@
       <section class="panel">
         <h2>Existing</h2>
         {% if keys %}
+        <div class="table-scroll" tabindex="0" role="region" aria-label="API keys table">
         <table>
           <thead>
             <tr>
@@ -50,7 +51,7 @@
               <th>Prefix</th>
               <th>Enabled</th>
               <th>Created</th>
-              <th></th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -61,7 +62,7 @@
               <td>{% if k.enabled %}yes{% else %}no{% endif %}</td>
               <td class="mono">{{ k.created_at }}</td>
               <td>
-                <form method="post" action="/admin/keys/{{ k.id }}/delete" onsubmit="return confirm('Delete key?')">
+                <form method="post" action="/admin/keys/{{ k.id }}/delete" onsubmit="return confirm('Delete key?')"><input type="hidden" name="csrf" value="{{ csrf }}" />
                   <button type="submit" class="danger">Delete</button>
                 </form>
               </td>
@@ -69,8 +70,9 @@
             {% endfor %}
           </tbody>
         </table>
+        </div>
         {% else %}
-        <p class="muted">No keys — gateway auth is open.</p>
+        <p class="muted">No keys — inference requests are denied by default.</p>
         {% endif %}
       </section>
     </main>

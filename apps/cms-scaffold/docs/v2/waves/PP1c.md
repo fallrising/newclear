@@ -1,6 +1,6 @@
 # PP1c 本地 DB／媒體一致備份與空白還原施工圖
 
-日期：2026-10-09。狀態：**DRAFT；不授權施工，不是 DOC_READY、offsite 或正式可用聲明**。依賴已合併 PP1a 的 local-isolated runtime，以及 PP1b 的帳號／Q25／同實例維護 lease 實作與驗收。設計承接 [PP1](PP1.md) §4.4–5.2 與 [PP1-recovery](../contracts/PP1-recovery.md)；本文件只把 PP1c 範圍、local adapter 接合與 blank-restore 驗收收斂。已選定的設計proposal與未驗收的implementation/environment gates列於 §9；本文件仍待root獨立review。
+日期：2026-11-01（DRAFT 修訂）。狀態：**DRAFT；不授權施工，不是 DOC_READY、offsite 或正式可用聲明**。依賴已合併 PP1a 的 local-isolated runtime，以及 PP1b 的帳號／Q25／同實例維護 lease 實作與驗收。設計承接 [PP1](PP1.md) §4.4–5.2 與 [PP1-recovery](../contracts/PP1-recovery.md)；本文件只把 PP1c 範圍、local adapter 接合與 blank-restore 驗收收斂。既定政策與新增待審提案分開：父契約媒體/session/RTO 政策保持原批准內容；本輪新增 protocol／schema／CLI／拆卡細節仍是待審 DRAFT，不能當作 root 或 owner 已批准。未決設計與未驗收的 implementation/environment gates 列於 §9；本文件仍待root獨立review。
 
 本波目標是可重現地從一個停寫、同批、私有本地 bundle 建立第二個**全新且隔離** DB/media target，驗證 raw rows、Flyway history、媒體檔案與匹配 release，撤銷恢復 session 後啟動同版 API並通過必要 smoke。第二個目錄仍與來源同主機／磁碟，僅為 local protected-copy fixture，不能計入 `VERIFIED_OFFSITE`、RPO離機成功或災難存活。正式離機／金鑰保管、排程、通知及 PP1-AC03 全項驗收仍未完成。
 
@@ -14,9 +14,9 @@
 
 ## 2 先決條件與實際來源
 
-施工前置：PP1a local runtime 已 VERIFIED；PP1b merged account authority依 `PP1-accounts.md` §10.1a；G06/G07 shared lease implementation必須先完成並獨立驗收，未驗收前本圖僅是施工提案。**PP1b沒有rollback-bundle verifier**：`PP1-accounts.md` §10明列 verifier 尚待PP1c，且verifier缺席時host recover-admin固定exit 6 `RECOVERY_BACKUP_REQUIRED`、零Java mutation；PP1c C18只交付本地可驗證bundle整合，不把同主機local copy改稱正式verified/offsite backup。PP1c不得另建mutex/lock/operation registry；採 §4.2 所列同一 source-owned registry strict v2 lease，不擴Java `Operation`。`PP1b` Java `Operation` enum僅列`FRESH_INIT`、`RECOVER_ADMIN`；本圖採用root選定的shared-v2 lease/helper/target proposal；G06/G07與adapter freeze是實作先決門檻，不是尚待回答的架構問題。未封板adapter固定`ADAPTER_UNSEALED` fail closed。
+施工前置：PP1a local runtime 已 VERIFIED；PP1b merged account authority依 `PP1-accounts.md` §10.1a；G06/G07 shared lease implementation必須先完成並獨立驗收，未驗收前本圖僅是施工提案。**PP1b沒有rollback-bundle verifier**：`PP1-accounts.md` §10明列 verifier 尚待PP1c，且verifier缺席時host recover-admin固定exit 6 `RECOVERY_BACKUP_REQUIRED`、零Java mutation；PP1c C18只交付本地可驗證bundle整合，不把同主機local copy改稱正式verified/offsite backup。PP1c不得另建mutex/lock/operation registry；採 §4.2 所列同一 source-owned registry strict v2 lease，不擴Java `Operation`。`PP1b` Java `Operation` enum僅列`FRESH_INIT`、`RECOVER_ADMIN`；本圖採用root選定的shared-v2 lease/helper/target proposal；G06/G07 與 adapter freeze 是實作先決門檻；§9 的未決具體接口仍須解決，不能用架構已選定替代。未封板adapter固定`ADAPTER_UNSEALED` fail closed。
 
-本地已批准／PP1a固定輸入（每次採當次 run receipt，不複製舊值）：host Node 24.18.0 binary與既有 Linux工具 image、JDK 25、PostgreSQL 16 image；三個 image 為完整 immutable image ID 並透過 PP1a 新增的 run-scoped local refs，`pull_policy: never`；獨立 compose project，DB/media 不發布 host ports；owned API jar及 source commit/dirty state、API image labels、三個 dist hash、ingress hash均有PP1a receipt來源。所有命令使用 PP1a 固定 local Docker socket/context policy；不可 pull/install。DB password仍由該次 run 私有 secret file提供，不出 argv/env/log/receipt。
+本地已批准／PP1a固定輸入（每次採當次 run receipt，不複製舊值）：host Node 24.18.0 binary與既有 Linux工具 image、JDK 25、PostgreSQL 16 image；三個 image 為完整 immutable image ID 並透過 PP1a 新增的 run-scoped local refs，`pull_policy: never`；獨立 compose project，DB/media 不發布 host ports；owned API jar及 source commit/dirty state、API image labels、三個 dist hash、ingress hash均有PP1a receipt來源。所有命令使用 PP1a 固定 local Docker socket/context policy；不可 pull/install。DB password 仍由該次 run 私有 secret file 提供。新增 offline helper 不以 secret value 放入 argv/env/log/receipt；既有 G06 account Java child 的一次性 `SPRING_DATASOURCE_PASSWORD` 環境注入保持已接受契約，spawn 後 parent finally 清 Buffer／移除 password 引用，不聲稱清掉 OS/JS 字串副本。此例外不擴張到 inventory/revoker/PG/media/browser helper。
 
 | 來源 | 本文採用的事實 |
 | --- | --- |
@@ -39,12 +39,12 @@
 | --- | --- | --- |
 | `scripts/ops/recovery-protocol.mjs` | 新；canonical manifest、bundle receipt、artifact/release binding和固定 error schema | C01/C02 |
 | `scripts/ops/recovery-protocol.test.mjs` | 新；strict JSON、hash/size、unknown/duplicate/path及secret boundary測試 | C01/C02 |
-| `services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java` | 新；read-only 20-table與media metadata/file inventory；只純核心 | C03/C04a/C04b |
+| `services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java` | 新；read-only 20-table與media metadata/file inventory；只純核心 | C03/C04a/C04b/C04c/C04d |
 | `services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java` | 新；offline subcommand runner，不建立Spring context | C05/C06 |
 | `services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java` | 修改；精確首參`ops-inventory`在Spring前分流；保留現行maintenance相容路由 | C05/C06 |
-| `services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java` | 新；TempDir、decode/unsafe path/byte drift cases | C03/C04a/C04b |
+| `services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java` | 新；TempDir、decode/unsafe path/byte drift cases | C03/C04a/C04b/C04c/C04d |
 | `services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java` | 新；輸入、mode、secret、no-Spring/no-write契約 | C05/C06 |
-| `services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java` | 新；真PG16 read-only snapshot；不重用作 restore target | C04a/C04b |
+| `services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java` | 新；真PG16 read-only snapshot；不重用作 restore target | C04a/C04d |
 | `scripts/ops/local-bundle.mjs` | 新；沿 PP1b existing lease運行本地停寫、dump/copy、重驗；不提供新 lock | C07/C08 |
 | `scripts/ops/local-bundle.test.mjs` | 新；fake command/adapter Red-Green及staging保留 | C07/C08 |
 | `scripts/ops/local-restore.mjs` | 新；fresh target restore/raw compare/session-revoke/API lifecycle orchestrator | C11–C16 |
@@ -54,7 +54,8 @@
 | `services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java` | 新；real PG atomic revoke/audit test | C13/C14 |
 | `scripts/ops/local-recovery-verify.mjs` | 新；bundle/release preflight及post-start exact allowlist verifier | C09/C10/C15/C16 |
 | `scripts/ops/local-recovery-verify.test.mjs` | 新；altered/missing receipt、release drift、smoke failure | C09/C10/C15/C16 |
-| `e2e-pp1-local/recovery.spec.ts` | 新；隔離runtime browser smoke由root-controlled owned旅程執行 | C17 |
+| `e2e-pp1-local/recovery.spec.ts` | 新；T04 寫 browser journey；C17 只執行／收證據 | T04 |
+| `playwright.pp1-local.config.ts` | 修改；restore-only opt-in 與固定 child fixture；沿 D03，禁止未審選項 | T04 |
 
 不新增套件／lockfile／workflow／compose overlay／migration／OAS／正式scheduler；使用既有 node:test、JUnit、Gradle、Playwright與PP1a local image/tool roots。若實際需要額外檔案，先由root批准更新scope，不在 worker 中擴張。
 
@@ -62,10 +63,10 @@ Shared lease/helper/target補充白名單（PP1a/PP1b接線仍須root另行核�
 
 | 路徑 | 卡 |
 |---|---|
-| `scripts/local/maintenance-guard.mjs`, `scripts/local/maintenance-guard.test.mjs` | L01–L03（v1 behavior preserve） |
-| `scripts/local/maintenance-store.mjs`, `scripts/local/maintenance-store.test.mjs` | L01–L02 |
-| `scripts/local/maintenance-workflow.mjs`, `scripts/local/maintenance-workflow.test.mjs` | L02–L03、R01–R02 |
-| `scripts/local/maintenance-helper.mjs`, `scripts/local/maintenance-helper.test.mjs`, `scripts/local/maintenance-helper-session.test.mjs` | H01–H02 |
+| `scripts/local/maintenance-guard.mjs`, `scripts/local/maintenance-guard.test.mjs` | L01/L05（v1 behavior preserve、v2 dispatcher） |
+| `scripts/local/maintenance-store.mjs`, `scripts/local/maintenance-store.test.mjs` | L01/L02/L04/L05 |
+| `scripts/local/maintenance-workflow.mjs`, `scripts/local/maintenance-workflow.test.mjs` | L03/L05、R01–R02 |
+| `scripts/local/maintenance-helper.mjs`, `scripts/local/maintenance-helper.test.mjs`, `scripts/local/maintenance-helper-session.test.mjs` | H01/H02/H04 |
 | `scripts/ops/local-media.mjs`, `scripts/ops/local-media.test.mjs` | H03 |
 | `scripts/local/prepare.mjs`, `scripts/local/prepare.test.mjs`, `scripts/local/restore-target.mjs`, `scripts/local/restore-target.test.mjs` | T01–T02 |
 | `scripts/local/maintenance-target.mjs`, `scripts/local/maintenance-target.test.mjs` | L03、T02 |
@@ -73,7 +74,7 @@ Shared lease/helper/target補充白名單（PP1a/PP1b接線仍須root另行核�
 | `scripts/ops/local-recovery-verify.mjs`, `scripts/ops/local-recovery-verify.test.mjs`, `scripts/local/maintenance.mjs`, `scripts/local/maintenance.test.mjs` | R01–R02 |
 | `services/cms-api/src/main/java/com/fallrising/cms/identity/maintenance/LocalMaintenanceGuard.java`, `services/cms-api/src/test/java/com/fallrising/cms/identity/maintenance/IdentityMaintenanceCommandTests.java` | R03（只在G06已接受後；施工前核凍結source） |
 | `services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java`, `services/cms-api/src/test/java/com/fallrising/cms/CmsApiApplicationTests.java` | C05–C06、R04 |
-| `services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevokerMain.java`, `services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevokerMainTests.java` | R04 |
+| `services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevokerMain.java`, `services/cms-api/src/test/java/com/fallrising/cms/ops/RestoreSessionRevokerMainTests.java` | R04 |
 
 PP1a compose/Docker/browser support不變：無Compose overlay/ports/host forwarder改動；如 T01無法在現有 `prepare.mjs` 以private internal API安全建立no-forwarder child target，停止並請root另開scope，不能改既有public prepare/verify語義。
 
@@ -81,7 +82,7 @@ PP1a compose/Docker/browser support不變：無Compose overlay/ports/host forwar
 
 ### 4.1 私有本地 bundle schema
 
-所有JSON嚴格遵循[PP1-recovery §4.1](../contracts/PP1-recovery.md)：UTF-8無BOM＋LF；object key依Unicode codepoint排序；array在hash前按本章欄位規則定序；拒duplicate/unknown、NaN/Infinity、非法encoding及非canonical bytes。Node與Java raw-byte入口必須先strict UTF-8 decode/parse，再比較`canonicalBytes(parsed)`與原輸入逐byte相等；schema-only validation不夠。此canonical-byte比較本身會拒絕重複key與非canonical bytes，不要求第二套duplicate-aware parser。count/size/elapsed及DB large integer以十進位字串，SHA-256 lowercase 64 hex；private inventory/dump/media含帳號、credential/session、內容和object key，全部是敏感資料。
+只有新增 bundle/offline protocol/LeaseV2/JournalV2 JSON 嚴格遵循[PP1-recovery §4.1](../contracts/PP1-recovery.md)：UTF-8無BOM＋LF；object key依Unicode codepoint排序；array在hash前按本章欄位規則定序；拒duplicate/unknown、NaN/Infinity、非法encoding及非canonical bytes。Node與Java raw-byte入口必須先strict UTF-8 decode/parse，再比較`canonicalBytes(parsed)`與原輸入逐byte相等；schema-only validation不夠。此 canonical-byte 比較本身會拒絕重複 key 與非canonical bytes，不要求第二套 duplicate-aware parser。既有 v1 target/lease/journal/result bytes 保持 `JSON.stringify(value) + "\n"` 的插入順序；v1 loader 不套此比較、不重新序列化歷史檔，六欄 principal Result 亦不套新 canonical 契約。count/size/elapsed及DB large integer以十進位字串，SHA-256 lowercase 64 hex；private inventory/dump/media含帳號、credential/session、內容和object key，全部是敏感資料。
 
 local bundle layout固定為單一新建、非symlink目錄：
 
@@ -137,7 +138,7 @@ JDBC inventory transaction固定`REPEATABLE_READ`、read-only、`autoCommit=fals
 Host API僅提供以下受控 workflow；它們是候選內部 exports，不新增使用者CLI flags：
 
 ```js
-beginWorkflow(inspection, { operationId, purpose, completionPolicy }, deps)
+beginWorkflow(inspection, { operationId, purpose, completionPolicy, targetRunId, incidentStartedAt }, deps)
 assertWorkflow(token, { side, stage }, deps)
 reserveRestoreTarget(token, { runId }, deps)
 runOwnedHelper(token, { side, kind }, deps)
@@ -148,27 +149,102 @@ finishWorkflow(token, outcome, deps)
 
 `purpose` 僅 `BACKUP_LOCAL | RESTORE_VERIFY_LOCAL | RECOVER_ADMIN`；完成政策由 workflow 固定為 `RESTORE_ORIGINAL | KEEP_STOPPED`，不是CLI可選值。沿用 PP1b 唯一 `maintenance/{operation.lock,target.json,lease.json,operations/<operationId>.json}` registry。v1 `FRESH_INIT` exports、持久格式、Java `Operation {FRESH_INIT, RECOVER_ADMIN}`、六欄 principal Result 及其 regression tests 保持原樣；只抽取內部共用 store primitives。v2 loader 嚴格接受完整 v1 或 v2 schema，未知版本/key、部分寫入、未知/COMMITTED/FAILED 狀態、現存lock皆 fail closed；不自動migration、不刪歷史、不TTL、不force unlock、不重播。每個operationId永久拒重用；unknown結果保留lock及證據待人工唯讀處置。
 
-LeaseV2所有鍵必填（不適用為null）：`{version:2,operationId,purpose,releaseId,phase,createdAt,source,sourceConnection,originalApiState,completionPolicy,target,helper,proof,account}`。`source`為原封不動TargetV1；`target`僅一個RestoreTargetV1（runId/targetId/project/sourceOperationId、creationPhase、identity、connection、preparationSha256、createdResourceSetSha256）；`helper`僅一個HelperV1（kind/side/fullContainerId/policySha256/state/endpoint/backend/startedAt）；`proof`為backup/manifest/bundle/source-inventory/source-identity/restore-target/raw-compare/revoke/smoke各SHA與完整operation lineage；`account`僅RECOVER_ADMIN的PRE_CONNECTION/BOUND/COMMITTED與pinned BackendV1。sourceConnection恰含jdbcUrl及dataGateway且不可含password。RestoreTargetV1恰含version,runId,targetId,project,sourceOperationId,creationPhase,identity,connection,preparationSha256,createdResourceSetSha256；connection為null或恰含jdbcUrl,dataGateway。HelperV1恰含kind,side,fullContainerId,policySha256,state,endpoint,backend,startedAt；endpoint為null或恰含networkId,address。BackendV1恰含pid,backendStartEpoch,db,role,clientAddr,applicationName。ProofV1恰含backupId,manifestSha256,bundleSetSha256,sourceInventorySha256,sourceIdentitySha256,restoreOperationId,restoreTargetId,rawComparisonSha256,sessionCommitSha256,smokeSha256,proofSha256。account恰為null或含operation=RECOVER_ADMIN、phase及boundBackend。每一nested key required/no-unknown；hash lowercase 64-hex、IDs canonical UUID、時間UTC RFC3339毫秒，enum與null位置固定。JournalV2恰為 `{version,operationId,purpose,sourceTargetId,releaseId,phase,at,failureCode,leaseSha256,proofSha256}`。同一lock inode/device、source與唯一child的不可序列化WeakMap capability授權動作；token不可重建。一次只准source或child一個owned helper；不巢狀 acquire。
+LeaseV2所有鍵必填（不適用為null）：`{version:2,operationId,purpose,releaseId,phase,createdAt,requestSha256,source,sourceConnection,originalApiState,completionPolicy,target,helper,proof,account}`。`source`為原封不動TargetV1；`target`僅一個RestoreTargetV1（runId/targetId/project/sourceOperationId、creationPhase、identity、connection、preparationSha256、createdResourceSetSha256）；`helper`僅一個HelperV1（kind/side/fullContainerId/policySha256/state/endpoint/backend/startedAt）；`proof`為backup/manifest/bundle/source-inventory/source-identity/restore-target/raw-compare/revoke/smoke各SHA與完整operation lineage；`account`僅RECOVER_ADMIN的PRE_CONNECTION/BOUND/COMMITTED與pinned BackendV1。sourceConnection恰含jdbcUrl及dataGateway且不可含password。RestoreTargetV1恰含version,runId,targetId,project,sourceOperationId,creationPhase,identity,connection,preparationSha256,createdResourceSetSha256；connection為null或恰含jdbcUrl,dataGateway。HelperV1恰含kind,side,fullContainerId,policySha256,state,endpoint,backend,startedAt；endpoint為null或恰含networkId,address。BackendV1恰含pid,backendStartEpoch,db,role,clientAddr,applicationName。ProofV1恰含backupId,manifestSha256,bundleSetSha256,sourceInventorySha256,sourceIdentitySha256,restoreOperationId,restoreTargetId,rawComparisonSha256,sessionCommitSha256,smokeSha256,proofSha256。account恰為null或含operation=RECOVER_ADMIN、phase及boundBackend。每一nested key required/no-unknown；hash lowercase 64-hex；各種 ID 型別、enum/null 與 journal 以 §4.2a–b 的細表為準，禁止把所有 ID 當 UUID。同一lock inode/device、source與唯一child的不可序列化WeakMap capability授權動作；token不可重建。一次只准source或child一個owned helper；不巢狀 acquire。
 
 `beginWorkflow`記原API running/stopped狀態並取得既有lock；來源與child身份在全流程持續pin。`reserveRestoreTarget`在同lease下專用新runId/project、exclusive建立 ownership marker及資源；它不呼叫 PP1a normal `prepare/verify`，不啟動Compose全服務、不碰8443、不接host forwarder，也不刪/重用失敗target。子target永標RESTORE-only，舊entrypoints拒絕adopt。backup完成依原狀態恢復；local restore proof用 `KEEP_STOPPED` 完成，recover-admin完成亦維持來源原本stopped，絕不在成功/錯誤路徑默默start。
 
 `recovery-candidate.json`是bundle/proof locator，不是授權；RECOVER_ADMIN在任何停止/Java連線前檢查完整backup+proof，取得同一registry新operationId後，在lease內重新hash所有manifest/artifact/proof、核實完整source identity及20-table+files原始snapshot完全相等，再attach現有Java帳號流程。prior complete/released proof只有完整durable lineage且目前raw相等才可用；不要求巢狀/永久佔鎖，不接受receipt-only、舊session/audit忽略或local-as-offsite。backupId僅由已驗proof綁入lease供原audit，不擴六欄Result。
 
-`runOwnedHelper`只接受workflow固定kind，不接受任意argv/path/image/network/UID。Docker每次create後、start前完整inspect；running、exit後與cleanup再以當次full container ID核對 exact name/imageID/platform/release labels/argv/env/uid:gid/read-only rootfs/restart=no/privileged=false/cap-drop ALL/no-new-privileges/no ports/socket/devices/host namespaces/精確mount+network。只有該full ID可移除，重新inspect證明不存在；不以labels/application_name豁免任意container。helper與PG工具分清：inventory/revoker在唯一JDBC connection公開ready tuple `{operationId,side,pid,backendStartEpoch,db,role,clientAddr,applicationName,readOnly:true}`，host用完整container/network/IP及pg_stat_activity核對後才送private permit；同connection、固定transaction、不換PID、不多backend。`pg_dump/pg_restore`無JDBC handshake，只接受觀察到的唯一精確tool process/container/IP/application_name與backend，結束後證明零backend；application_name單獨不算證據。不得同時掛source/target網路/卷。
+`runOwnedHelper`只接受workflow固定kind，不接受任意argv/path/image/network/UID。Docker每次create後、start前完整inspect；running、exit後與cleanup再以當次full container ID核對 exact name/imageID/platform/release labels/argv/env/uid:gid/read-only rootfs/restart=no/privileged=false/cap-drop ALL/no-new-privileges/no ports/socket/devices/host namespaces/精確mount+network。只有該full ID可移除，重新inspect證明不存在；不以labels/application_name豁免任意container。helper與PG工具分清：inventory/revoker在唯一JDBC connection公開 §4.2c ReadyV1（nested BackendV1、readOnly:true），host用完整container/network/IP及pg_stat_activity核對後才送private permit；同connection、不換 PID、不多 backend；inventory 保持唯讀 transaction；revoker 在 permit 前 rollback 唯讀準備 transaction，再在同 connection/PID 開始寫入 transaction，依 §4.2c 執行，不能一面 readOnly=true 一面 UPDATE。`pg_dump/pg_restore`無JDBC handshake，只接受觀察到的唯一精確tool process/container/IP/application_name與backend，結束後證明零backend；application_name單獨不算證據。不得同時掛source/target網路/卷。
 
 Host 0600 request/secret/output由numeric host UID擁有；需在固定image bounded no-network preflight核對API UID/GID、JRE/JDBC/media read/write權限及工具路徑，不chmod/chown舊media，不增capability。media-restore以匹配API numeric UID/GID寫新空卷，package由已驗open FD/stdin串流，不能把host secret/root bundle掛進去。無法證明即 `ADAPTER_UNSEALED`。固定保守限制：request 64KiB、manifest 1MiB、ready/permit 4KiB、helper receipt/stdout 16KiB、stderr evidence 4MiB、package header 64MiB、object count 1,000,000、key 1..4096 UTF-8 bytes；aggregate package不超private filesystem可用空間扣除max(512MiB,10%)。30s Docker管理、15s JDBC connect、30s ready-permit、10min inventory、120s API health、10min browser stage、各dump/restore/media最多2h、全workflow最多6h；RTO仍從原incidentStartedAt計算，4h是目標非強制kill deadline。
 
-Java離線分流僅新增exact first-token `ops-inventory`與`ops-revoke-restored-sessions`，位於原 `contains("maintenance")`分支之後、任何Spring啟動之前；原maintenance contains/錯位拒絕語義與Java Operation enum全保留。錯位/重複ops token在Spring前拒絕。用既有API image `/app/app.jar`，不新增Boot main/classifier/runtime依賴、不新增build.gradle JavaExec。Inventory/revoke request有固定schema、private secret path；DB password不在request/argv/env/log/artifact。啟動前僅已有明確 `RAW_VERIFIED`證據的revoke mode可進，成功同一DB transaction寫sessions+AUTH後phase `SESSIONS_REVOKED`；audit/commit失敗不start。
+Java離線分流僅新增exact first-token `ops-inventory`與`ops-revoke-restored-sessions`，位於原 `contains("maintenance")`分支之後、任何Spring啟動之前；原maintenance contains/錯位拒絕語義與Java Operation enum全保留。錯位/重複ops token在Spring前拒絕。用既有API image `/app/app.jar`，不新增Boot main/classifier/runtime依賴、不新增build.gradle JavaExec。Inventory/revoke request 提案 schema 與固定 private secret path 見 §4.2c；DB password不在request/argv/env/log/artifact。啟動前僅已有明確 `RAW_VERIFIED`證據的revoke mode可進，成功同一DB transaction寫sessions+AUTH後phase `SESSIONS_REVOKED`；audit/commit失敗不start。
 
 Child smoke只用child `web` network中的sealed ephemeral Chromium helper，alias固定 `front/back/admin/api.cms.test:8443`，只掛child CA至一次性NSS；Compose三services均無published ports，禁止改host forwarder/forward.mjs。child ingress只有在raw相等、session撤銷commit、同版API health及identity核對後才啟。browser無DB network/volume、無secret mount；一次性private Unix socket傳送合成管理員密碼，不使用argv/env/log/artifact。合成帳號密碼只在root orchestrator記憶體跨capture/restore保留，分別交付browser各stage；PP1b舊session不可作可恢復密碼。smoke後stop child ingress/API，保留child失敗資料與lease證據。
 
 Offline request/ready/permit/result均strict UTF-8 canonical JSON、LF、required keys且拒unknown/duplicate；request/ref不構成ownership證明。`instanceId`只能由32 lowercase hex runId決定性格式化為UUID，不生成隱藏random metadata。所有工具shell:false、fixed argv、bounded timeout；stdout只有固定phase/code/count/hash receipt，private artifact不得上普通log。
 
+### 4.2a ID、LeaseV2 與 null 的候選規則
+
+以下是本輪新增、待 root 獨立審查的具體提案；不是既有 PP1b v1 格式變更。所有物件 required/no-unknown；除明列欄位外不得 null。
+
+| 型別／欄位 | 候選精確規則 |
+| --- | --- |
+| operationId / restoreOperationId / sourceOperationId | canonical lowercase UUID；新 operation 永不重用 |
+| runId / instanceId | runId=`[0-9a-f]{32}`；instanceId 只插入 8-4-4-4-12 分隔符，不重新產生或改 bits |
+| targetId / restoreTargetId / sourceTargetId | `pp1-local:<runId>`；project=`cms-pp1-local-<runId>`；不是 UUID |
+| fullContainerId / networkId / hash | fullContainerId、networkId、所有 `*Sha256` 為 lowercase 64 hex；releaseId=`sha256:<jarSha256>` |
+| backupId | 父 manifest §4.2 的 `pp1-<UTCcompact>-<32hex>`；不是 UUID |
+| source / sourceConnection | source 為完整已驗 TargetV1（沿 PP1b §10.1，不改內部 schema）；connection 恰 `{jdbcUrl,dataGateway}`、兩欄非空無 credential 字串，逐字 pin 到 inspected source |
+| originalApiState / completionPolicy | running\|stopped；BACKUP_LOCAL 固定 RESTORE_ORIGINAL；RESTORE_VERIFY_LOCAL、RECOVER_ADMIN 固定 KEEP_STOPPED；recover 要求原本 stopped |
+| phase | RESTORE_VERIFY_LOCAL：§4.4 序列；BACKUP_LOCAL：PRECHECK→SOURCE_QUIESCED→LOCAL_CAPTURED→LOCAL_VERIFIED→COMPLETE；RECOVER_ADMIN：PRECHECK→SOURCE_QUIESCED→PROOF_REVALIDATED→ACCOUNT_PRE_CONNECTION→ACCOUNT_BOUND→ACCOUNT_COMMITTED→COMPLETE；任何階段可進 FAILED_OR_UNKNOWN，無 outgoing mutation |
+| target | BACKUP_LOCAL/RECOVER_ADMIN 恆 null；restore 在 TARGET_RESERVED 前 null，之後恰 RestoreTargetV1；只允一個 child，失敗不可替換 |
+| RestoreTargetV1 | version=1；creationPhase=RESERVED\|CREATED\|BLANK_VERIFIED；RESERVED 時 identity/connection/preparationSha256/createdResourceSetSha256 為 null；CREATED 起四者皆 non-null，identity=child 完整 TargetV1、connection 同 sourceConnection 型別。sourceOperationId 必等 lease.operationId；其餘 ID 與 child runId 對應；BLANK_VERIFIED 才能進 DB_RESTORED |
+| helper | 沒有在途 helper 時 null；kind=INVENTORY\|REVOKE_SESSIONS\|PG_DUMP\|PG_RESTORE\|MEDIA_PACK\|MEDIA_RESTORE\|BROWSER；side=source\|target；state=CREATED\|RUNNING\|READY\|PERMITTED\|EXITED。fullContainerId/policySha256/startedAt 必填；endpoint 無 network 時 null，否則恰 `{networkId,address}`，address 為 inspect 的非空 IP；backend 在 JDBC READY 前 null、READY/PERMITTED 必 BackendV1；工具只於觀測到 backend 時 non-null，不能偽造 ready |
+| BackendV1 | pid=positive integer；backendStartEpoch 逐字 PG `extract(epoch FROM backend_start)::text`，沿 PP1b regex，不轉 Number/ISO；db/role/clientAddr/applicationName 非空且逐字匹配 actual backend/network tuple |
+| helper allowed pair | source：INVENTORY、PG_DUMP、MEDIA_PACK；target：INVENTORY、PG_RESTORE、MEDIA_RESTORE、REVOKE_SESSIONS、BROWSER。revoke 只在 RAW_VERIFIED 後、browser 只在 INGRESS_STARTED 後；其餘固定 orchestration 順序依 §4.4，不接受 CLI 任選 kind |
+| proof | 在完整 target smoke+stop 結束前 null；TARGET_STOPPED→COMPLETE 間才可填完整 ProofV1；RECOVER_ADMIN 在 PROOF_REVALIDATED 起使用 prior complete ProofV1；BACKUP_LOCAL 恆 null；不持久化半份 proof |
+| account | 非 RECOVER_ADMIN 恆 null；該 purpose 在 ACCOUNT_PRE_CONNECTION 前 null，之後恰 `{operation:'RECOVER_ADMIN',phase,boundBackend}`；phase=PRE_CONNECTION\|BOUND\|COMMITTED，PRE_CONNECTION backend=null，其餘必 BackendV1；六欄 Result 仍獨立原格式 |
+
+metadata mutation 的實際 lease hash、source identity hash 都對完整 canonical bytes（包含尾 LF）做 SHA-256。state 並不能豁免 live inspect；持有 lease file 也不能重建 WeakMap capability。
+
+### 4.2b Journal、proof 與 locator 候選格式
+
+`operations/<operationId>.json` 的 **v2** envelope 恰 `{version:2,operationId,purpose,sourceTargetId,releaseId,records}`；`records` 是依 seq 遞增的 `JournalRecordV2[]`，初次 O_EXCL reservation 寫入空陣列後 fsync。每次更新同目錄 atomic replace＋sync directory，不改 v1 journal 的 bytes／loader。Record 恰 `{seq,event,phase,at,failureCode,leaseSha256,proofSha256}`；seq 是從 `'1'` 開始無缺口十進位字串；event=BEGIN|END|FAIL；phase 只能 §4.2a 此 purpose 的 phase；at=UTC 毫秒；leaseSha256 non-null；proofSha256 只在 lease.proof non-null 時 non-null，其餘 null；failureCode 只有 FAIL 時 non-null 且屬父 §8 local enum。
+
+每個 phase 先持久化 lease 與 BEGIN，再做 adapter；結果通過 assertion 後持久化最新 lease 再 END。下一 phase 必須前一 END；同 phase 最多一 BEGIN 和一 END 或 FAIL；BEGIN 後 crash／缺 END／partial bytes 即 JOURNAL_INCOMPLETE，保留 lock，只能唯讀 inspect。FAIL 的 lease.phase=FAILED_OR_UNKNOWN，但 record.phase 保留失敗的原 phase。COMPLETE/END 已 fsync、helper=null、target API/ingress stopped（restore/recover）及 source completion policy 已驗，才可釋放當前 owner lock。若 COMPLETE 寫成但 release 不確定，現存 lock 仍拒任何新 mutation；不自動刪鎖。只有完整 COMPLETE/END 且 lock 已不存在才是 released；前一 v2 COMMITTED/FAIL／partial 絕不當 v1 terminal。
+
+ProofV1 恰 §4.2 列出的十一欄；除 proofSha256 外所有 hash 都是獨立已驗 artifact/hash receipt。`proofSha256 = SHA256(canonicalBytes(ProofV1 without property proofSha256))`；檔案 hash 可另對完整 bytes 算，不能把自身 hash 再放進其 preimage。`bundleSetSha256=SHA256(canonicalBytes(manifest.artifacts))`（path 排序三項）；`sourceIdentitySha256=SHA256(canonicalBytes(source TargetV1))`；`sourceInventorySha256` 是 inventory.json 的完整 file hash。rawComparisonSha256/sessionCommitSha256/smokeSha256 綁各 private receipt 完整 bytes；session receipt 恰父 §5.4；raw/smoke receipt 欄位尚待 §9 D02/D03 封板，不能以任意 JSON 代替。
+
+incidentStartedAt 不只留在 CLI 記憶體：同 registry 的 `operations/<operationId>.request.json` 以 CREATE_NEW/0600/fsync＋parent sync 保存 WorkflowRequestV1，恰 `{version:1,operationId,sourceRunId,purpose,targetRunId,incidentStartedAt,startedAt,environment}`。RESTORE_VERIFY_LOCAL 的 targetRunId/incidentStartedAt 必填、environment='isolated-drill'；其餘 purpose 三欄為 null；startedAt 是命令開始 UTC 毫秒。LeaseV2.requestSha256 必等該完整 canonical file hash；beginWorkflow 在首個 phase/adaptor 前建立它，已存在 operation request 永不覆寫。restart 只能讀取，不以新 clock resume mutation；新 target retry 必須保留原 incidentStartedAt，old failure evidence 也保留。monotonic offset 只在該次命令用父公式計算，不跨 process 假造 monotonic continuity。
+
+v2 proof 寫在固定 `maintenance/operations/<restoreOperationId>.proof.json`（CREATE_NEW、0600、fsync＋parent sync）；這是同 registry 之 artifact，不是另一 lock／journal。locator 固定 `maintenance/recovery-candidate.json`，恰 `{version:1,sourceRunId,backupId,restoreOperationId,proofSha256}`；只含 identifiers，不允任意 file path。proof path 由 restoreOperationId 推導，bundle 由 sourceRunId/backupId 推導；overwrite locator 只能在新完整 proof release 後 atomic replace。locator 更新失敗不破壞原 complete proof；新 recover 再做全部驗證，不接受 locator 本身為 authority。
+
+### 4.2c Offline request／握手候選協定
+
+兩個 Java runner 的固定 argv 都是 `java -jar /app/app.jar <ops-inventory|ops-revoke-restored-sessions> --request /run/pp1/request.json`；unknown/repeated/misplaced flag 或 token 在開 JDBC 前拒絕。request 只由 host orchestrator 依已驗 lease 產生，ro mount 到固定位置；不能把任意 caller 路徑當信任來源。host 原檔固定 `maintenance/operations/<operationId>/helper/<seq>/request.json`，0700 parents、0600 regular/nlink1、CREATE_NEW；seq 為從 1 起的十進位字串，沿單一 workflow 單調遞增且不重用。此 nested directory 是同 registry 的私有材料，不能生成第二把鎖。
+
+request 恰 `{version:1,mode,operationId,side,targetId,releaseId,jdbcUrl,dbUser,passwordFile,mediaRoot,outputFile,backupId,rawProofSha256}`。mode=INVENTORY|REVOKE_SESSIONS；targetId/connection/release 與 side 的 immutable inspection 相符；dbUser 固定 cms_local；passwordFile 固定 `/run/secrets/spring.datasource.password`（私有原檔 readonly mount，值不進 request）；inventory mediaRoot=`/media`、outputFile=`/run/pp1/output/inventory.json`、backupId/rawProofSha256=null；revoker side=target、mediaRoot/outputFile=null、backupId 為本次完整 bundle ID、rawProofSha256 為已驗 RAW_VERIFIED receipt hash。禁止把 JDBC userinfo/password/query 任意擴張進 jdbcUrl。
+
+stdout 是最多兩個 canonical JSON lines（各單一尾 LF）：第一筆 ReadyV1，第二筆成功 ResultV1；host 增量讀取、按先前限制截斷即 fail，不把 output 當一般 log。stdin 恰一筆 PermitV1＋EOF；多行／多餘 bytes／逾時／EOF before permit 均拒絕，關 connection，不做 mutation。stderr 只能固定 error code，raw stack/SQL/secret 禁止。失敗為 nonzero 父 §8 exit，沒有成功 ResultV1。stdout receipt 內容只允下列 schema，不含原始 rows。
+
+- ReadyV1 恰 `{version:1,operationId,side,mode,requestSha256,backend,readOnly:true}`；backend 為 §4.2a BackendV1，host 同時核對 exact helper full ID/IP/unique DB backend，不能只信 self-report。
+- PermitV1 恰 `{version:1,operationId,requestSha256,backendSha256,action}`；backendSha256 對 Ready.backend canonical bytes；action=READ_INVENTORY|REVOKE_SESSIONS，必與 request.mode 一致。host 只在 phase／source-child／完整 helper policy 通過後送一次，不重送；Java 驗三項 binding 再採取動作。
+- Inventory ResultV1 恰 `{version:1,operationId,mode:'INVENTORY',inventorySha256,dbSnapshotSha256,assetCount,referencedFileCount,orphanFileCount,fileCount,fileBytes}`；counts 為十進位字串，output file 完整 bytes SHA 相等，artifact durable 後才 stdout。
+- Revoke ResultV1 **恰為父 §5.4 receipt** `{operationId,backupId,revokedCount,auditEventId,committed:true}`，不擴版／mode 欄位；commit 確認後才可輸出。host 還需獨立確認允許 delta 與 pinned backend 結束；stdout 丟失不重送 SQL。
+
+inventory 從 ready 到結束保持同一 read-only REPEATABLE_READ transaction，最後 rollback/close。revoker ready 用同 connection 的唯讀準備 transaction；取得匹配 permit 後先 rollback 該唯讀 transaction，再 setReadOnly(false)、autoCommit=false，核 PID/epoch 不變，在同 connection 的新寫 transaction 依父 §5.4 SQL+AUTH commit；任何換 connection／額外 backend 皆拒絕。不能把唯讀 prepared transaction 直接 UPDATE。commit 前錯誤 rollback；commit 回應未知／commit 後 receipt failure 只保持隔離，不宣稱 rollback。
+
+**尚未封板的實體 adapter**：Java executable 完整路徑、numeric UID/GID 與 host 0600 mount 可讀寫性、每 kind exact Docker argv/env/mount security vector、PG tool argv/password-file 傳遞、raw/smoke receipt 詳細字段沒有已驗來源。§9 D01/D02/D03 逐項阻擋對應卡；上述 logical schema 不表示 adapter 已可運行，未封定一律 ADAPTER_UNSEALED。
+
+### 4.2d Host CLI 候選語法
+
+host cwd 固定 component root，Node 為該 run 驗證的 Node 24 binary；以下只有單一模式，沒有任意 request path／adapter／completion-policy／shell／production flag。flags 一律唯一必填，unknown／重複／缺失在 filesystem mutation 前 exit2；ID／UTC 依本章。scripts 同時提供 module exports 與以下 CLI；import 不自動執行。
+
+```text
+node scripts/ops/local-bundle.mjs --run-id <source32hex> --operation-id <UUID>
+node scripts/ops/local-restore.mjs --run-id <source32hex> --operation-id <UUID> --target-run-id <fresh32hex> --incident-started-at <UTC-millis>
+node scripts/ops/local-recovery-verify.mjs --run-id <source32hex> --backup-id <backupId> --restore-operation-id <UUID>
+```
+
+bundle CLI 固定 BACKUP_LOCAL/RESTORE_ORIGINAL；restore CLI 固定 RESTORE_VERIFY_LOCAL/KEEP_STOPPED，單次 source capture→protected copy→fresh target 全流程，不選任意舊卷。第三個 CLI 只唯讀驗完整 bundle/proof/current source，無停止／attach／lease mutation；真正 recover 仍使用既有 `scripts/local/maintenance.mjs … -- recover-admin …`，新 operation lock 內重驗才授權。普通 CLI 成功 stdout 恰 canonical `{operationId,backupId,phase,code:null,exitCode:0}`；失敗固定 `{operationId,backupId,phase,code,exitCode}`，尚未解析 operation/backup/phase 時該欄 null。第三個 verifier operationId 採 restoreOperationId，只驗證，不建立 operation；任何未封板 adapter 都 exit7。
+
+restore environment 永遠 isolated-drill；incidentStartedAt 必填、不可晚於命令 startedAt，也不在 retry 時改寫；純演練由 root 在 capture/取回流程開始前提供。RTO math 與超時 exit11 完整採父 §5.4；不以 `Date.now()-restoreStart` 假裝事故 RTO。source/target/bundle/artifact 路徑全部由 runId、backupId 與固定 PP1a private root 推導。
+
+### 4.2e 既有 guard script 的 v2 dispatch 候選
+
+`maintenance-guard.mjs` 仍是 Java 唯一固定 entrypoint；Java 不改呼叫 `maintenance-workflow.mjs`。guard 先驗合法 runId/op，再讀對應 lease.version：v1 進原 strict schema／原 exports；v2 進 L02/L04/L05 的完整 validator，不得先取不存在的 `lease.runId`，改由 `lease.source.runId`，且與 CLI runId 相等。unknown version／partial JSON／非法 prior terminal 不回退成 v1。L01 必須保留既有 raw-byte fixtures，包括非排序 v1 keys；six-field result 不轉 canonical。
+
+v2 account bridge 只使用既有 argv：`assert --run-id <id> --operation-id <uuid> --phase pre-connection|bound` 與 `bind-backend --run-id <id> --operation-id <uuid> --pid <int> --backend-start-epoch <decimal>`；不新增 user-supplied backup/hash/lease-path。pre-connection 對應 ACCOUNT_PRE_CONNECTION，bound 對應 ACCOUNT_BOUND/ACCOUNT_COMMITTED；bind 僅一次同 PID/epoch。Java R03 嚴格讀 v2 projection（source/sourceConnection/account/proof）得到原 target/release/jdbc/backupId，同時驗完整 v2 schema；不能僅讀幾欄忽略 unknown。其 helper env 與 existing fixed helper hash/timeout 維持 G06。
+
+`inspect --run-id <id>` 只唯讀；有 active lock 或 incomplete prior operation 時拒新 operation。v1 terminal 僅依 v1 原規則，v2 terminal 僅依 §4.2b COMPLETE/END+released；無 migration、TTL 或 automatic lock cleanup。當前 target.json 仍 TargetV1、source generation 不重綁；proof 只支持已驗 local-owned source，不宣稱正式 offsite。
+
 ### 4.3 Raw inventory與媒體完整性
 
 DB必須恰為以下20個relation，缺失/額外relation或column均`SCHEMA_UNSUPPORTED`；column allowlist與完整catalog metadata見本節表與 §4.1。所有query只從已核准常數組成，逐欄執行 `SELECT "column"::text AS "column"`；同一唯讀 `REPEATABLE_READ` transaction先固定UTC、DateStyle ISO YMD、IntervalStyle iso_8601、bytea_output hex、extra_float_digits=3，再以`getString`讀nullable PostgreSQL text。原SQL schema/type/constraints/index仍從catalog取得，不能用cast後ResultSet metadata。此設計不依賴JDBC bytea/timestamp特例，array/jsonb/large numeric按PostgreSQL text與固定session設定序列化；來源及還原端使用相同PG16設定。每table row map恰含allowlist columns；rows按canonical UTF-8 bytes排序；schema hash與rows hash分開，比完整Flyway history rows/checksum/null/success，不只最高版本。
 
-精確20 relation/column allowlist即 §4.1 表格（19 cms tables + locked Flyway 11.7.2 `flyway_schema_history`）。migration新增/刪欄前必先更新此allowlist及測試；不得用「capture/restore兩側動態欄位剛好相等」接受manual drift。完整metadata包括ordinal/name/dataType/udt/nullability/length/precision/scale/time precision/default/identity/generated expression及PK/unique/FK/check/index；snapshot與target須完全相等。`cms_media`與variant內容另按 §4.1固定query驗DB；全檔案walk no-follow，path component、hardlink、regular file、before/after identity/hash均核對；declared variants、soft-deleted objects、orphans均保留及比較，從不修復或刪除source。
+精確20 relation/column allowlist即 §4.1 表格（19 cms tables + locked Flyway 11.7.2 `flyway_schema_history`）。migration新增/刪欄前必先更新此allowlist及測試；不得用「capture/restore兩側動態欄位剛好相等」接受manual drift。完整metadata包括ordinal/name/dataType/udt/nullability/length/precision/scale/time precision/default/identity/generated expression及PK/unique/FK/check/index；snapshot與target須完全相等。`cms_media`與variant內容另按 §4.1固定query驗DB；媒體完整演算法唯一來源是 [PP1-recovery §5.1](../contracts/PP1-recovery.md#51-db檔案inventory只讀) 的五步及兩個固定 SQL；不得以本段摘要代替。每 asset 恰一 original、storedBytes 等於所有 variant size 和、可解碼 image 必須恰 original/thumbnail/web 且 JPEG fit320/1600；decode-null/PDF 只有 original 且 dimensions=null；status/contentType/重複 variant/objectKey 都依父契約拒絕。soft-deleted/orphan 全保留，不修復或刪除 source。
 
 PP1a matched API image需在實際封板前以bounded no-network probe證明JRE、JDBC、ImageIO與media numeric UID/GID；目前image User未封定，不能假稱host 0600可讀。unsupported UID/GID/PG text edge/host filesystem link identity即 `ADAPTER_UNSEALED`，不得加權限或動態放寬allowlist。
 
@@ -184,7 +260,7 @@ Target流程不走normal PP1a prepare/verify；受控adapter只create fresh proj
 
 Local evidence需由root保存實際 run ID、命令（無secret）、完整 image/container/network/volume IDs的私有摘要、manifest/bundle hashes、20-table row/hash比較、media count/hash比較、exit codes與elapsed time。commit／clean worktree狀態不冒充本地證據；dirty build需以PP1a labels與jar SHA明示。
 
-固定 error codes：`INPUT_INVALID, LOCK_BUSY, ADAPTER_UNSEALED, WRITER_NOT_QUIESCED, SOURCE_CHANGED, SCHEMA_UNSUPPORTED, UNSAFE_MEDIA_PATH, MISSING_MEDIA_OBJECT, MEDIA_HASH_MISMATCH, MEDIA_SIZE_MISMATCH, IMAGE_VARIANTS_INCOMPLETE, CAPTURE_FAILED, LOCAL_VERIFY_FAILED, COPY_FAILED, BUNDLE_MISMATCH, TARGET_NOT_BLANK, TARGET_NOT_OWNED, RESTORE_FAILED, RAW_MISMATCH, SESSION_REVOKE_FAILED, STARTUP_MUTATION, SMOKE_FAILED, INTERRUPTED, OBJECTIVE_UNKNOWN`。`OpsError={code,phase,operationId}`，message恆等於code；不攜帶cause/argv/env/SQL/secret。CLI exit 2 input; 3 state/ownership/format; 4 lock/quiescence; 5 IO/hash/dump/copy failure; 6 adapter or lease unsealed; 7 restore/raw/session/startup/smoke failure; 10 interrupted/unknown outcome。通知失敗不在PP1c假設；primary code不被後續記錄覆蓋。unknown/crash只read-only inspect，沒有auto resume、force unlock或重播。
+固定 error codes（code→exit 僅父契約 §8 有權定義）：完整集合與唯一對照見 [PP1-recovery §8](../contracts/PP1-recovery.md#8-失敗模式與固定退出)，包含 `MANIFEST_MISMATCH`、`JOURNAL_INCOMPLETE`、`OBJECTIVE_MISSED`。不得依 IO/hash 類別重映射媒體錯誤或把 adapter/restore 改成另一個 exit；既有 PP1b account/guard exit 維持原值。`OpsError={code,phase,operationId}`、message=code、不攜 cause/argv/env/SQL/secret。unknown/crash 只唯讀 inspect，沒有 auto resume、force unlock 或重播。
 
 測試需逐一有named cases，至少：unsafe/missing/orphan/hash/path/link/media variant failures；source changed during inventory；additional DB writer/session／API restart；dump nonzero與zero-exit truncated dump；disk full/copy/hash mismatch；manifest-release mismatch；blank-target rejection before writes；wrong tuple/missing artifact before writes；restore DB/media crash；20-table raw mismatch；Flyway checksum mismatch；session update/audit rollback；session-commit-before-API crash；API start health/smoke failure；同批重新建立fresh second target；root source/volume never mutated。成功restore smoke重用既有 API/entry/media contract：正式測試admin login；published media original/thumbnail/web hashes；private/draft/replaced unpublished media anonymous denial；revision/ref/index/attachment readback；restart前後不變；新audit/session變化只在上述 allowlist。測試不能只assert adapter invocation；PG integration需真PostgreSQL16，local restore root acceptance須真不同DB/media volumes與PP1a isolated runtime。
 
@@ -201,7 +277,34 @@ FM對照：
 
 ## 5 檔案型別與執行元件
 
-所有Java public records放 `com.fallrising.cms.ops.RecoveryInventory`，新 records只有：`AssetRow(UUID id,String contentType,String byteSize,String storedBytes,String checksumSha256,Integer width,Integer height,String status)`；`VariantRow(UUID mediaId,String variant,String contentType,String byteSize,Integer width,Integer height,String objectKey)`；`FileRow(String objectKey,String byteSize,String sha256,String classification)`；`ColumnInfo(String ordinalPosition,String name,String dataType,String udtSchema,String udtName,boolean isNullable,String characterMaximumLength,String numericPrecision,String numericScale,String datetimePrecision,String columnDefault,boolean isIdentity,String identityGeneration,boolean isGenerated,String generationExpression)`；`TableSnapshot(String tableName,List<ColumnInfo> columns,List<Map<String,String>> rows,String snapshotSha256)`；`Inventory(int version,List<FileRow> files,List<TableSnapshot> tables,String dbSnapshotSha256)`。nullable cells原樣表示null；immutable defensive copies，不用拒絕null的`Map.copyOf`。所有byte counts以十進位字串，UUID canonical lowercase，排序規則固定。Inventory API不回DB content到log/stdout。
+所有 Java public records 放 `com.fallrising.cms.ops.RecoveryInventory`，候選完整宣告如下；不得遺漏 assets/variants 或靠另外未列的 map 放 metadata：
+
+```java
+public record AssetRow(UUID id, String contentType, String byteSize, String storedBytes,
+    String checksumSha256, Integer width, Integer height, String status) {}
+public record VariantRow(UUID mediaId, String variant, String contentType, String byteSize,
+    Integer width, Integer height, String objectKey) {}
+public record FileRow(String objectKey, String byteSize, String sha256, String classification) {}
+public record ColumnInfo(String ordinalPosition, String name, String dataType, String udtSchema,
+    String udtName, boolean isNullable, String characterMaximumLength, String numericPrecision,
+    String numericScale, String datetimePrecision, String columnDefault, boolean isIdentity,
+    String identityGeneration, boolean isGenerated, String generationExpression) {}
+public record ConstraintInfo(String name, String type, String definition,
+    boolean deferrable, boolean initiallyDeferred, boolean validated) {}
+public record IndexInfo(String name, String definition, boolean unique, boolean primary,
+    boolean valid, boolean ready) {}
+public record TableSchema(List<ColumnInfo> columns, List<ConstraintInfo> constraints,
+    List<IndexInfo> indexes) {}
+public record TableSnapshot(String tableName, TableSchema schema, List<Map<String,String>> rows,
+    String schemaSha256, String rowsSha256, String rowCount, String snapshotSha256) {}
+public record Inventory(int version, List<FileRow> files, List<TableSnapshot> tables,
+    List<AssetRow> assets, List<VariantRow> variants, String dbSnapshotSha256,
+    String mediaHeaderSha256) {}
+```
+
+version=1。TableSchema.columns 按 ordinalPosition 整數升序；constraints 按 name 排序，type=PRIMARY_KEY|UNIQUE|FOREIGN_KEY|CHECK，definition 採同 PG16 `pg_get_constraintdef(oid,false)` 原字串（含 FK/ref/check，不自行正規化），name/flags 全保留；indexes 按 name 排序、definition=`pg_get_indexdef(indexrelid,0,false)` 原字串、含 unique/primary/valid/ready，不忽略 constraint-backed index。其他 constraint type/額外 relation/column 回 SCHEMA_UNSUPPORTED，允許欄位其他 catalog metadata 完整保存。nullable ColumnInfo 值恰 §4.1 不適用者；rows 每 map 恰所有 allowlisted columns，nullable PG text，以 null-preserving unmodifiable defensive copy，不用 Map.copyOf。
+
+schemaSha256=SHA256(canonicalBytes(schema))；rowsSha256=SHA256(canonicalBytes(rows))；rowCount=rows.size 的十進位字串；snapshotSha256=SHA256(canonicalBytes({schema,rows}))；dbSnapshotSha256 的 preimage 恰 §4.1 排序的 `{tableName,schemaSha256,rowsSha256,rowCount}` 陣列。tables 按 tableName、assets 按 UUID 字串、variants 按 mediaId 然後 variant、files 按 objectKey codepoint 排序。classification=referenced|orphan；asset status=available|deleted；variant 名稱 original|thumbnail|web。所有尺寸/count 用十進位字串，UUID lowercase；asset/variant width/height 是正 integer 或父 §5.1 要求的 null。mediaHeaderSha256=SHA256(canonicalBytes({version:1,files}))，恰 PP1CMEDIA1 header bytes；file counts/bytes 從 files 算並核 manifest，header 不含自己 hash。Inventory 不把 DB rows／keys 輸出到 log/stdout。全部 list/map immutable defensive copy。
 
 `RecoveryInventory.inspect(Connection,Path): Inventory`純read-only；`RecoveryInventoryMain.run(String[],Map<String,String>,PrintStream): int`解析strict request、接明確ref/credential supplier、開關connection；不啟動Spring/seed/flyway/scheduler。Node adapter methods只接受immutable owned references與operation object，不接任意command/SQL path。Pure tests可inject假的process/filesystem/database；實際 acceptance必透過PP1a existing immutable tool images與PP1b lease，不允許test fake替代real artifact restore。
 
@@ -209,364 +312,392 @@ Copy/encryption boundary：PP1c核心不新增archive工具／dependency；`medi
 
 ## 6 順序任務卡（候選；DRAFT，subwave ≤30、每卡估算含手寫測試）
 
-33張候選卡：19張C核心（C04拆a/b）、3張L、3張H、3張T、4張R、1張E。四個子波分別7/7/9/10。所有estimate包含手寫測試，未經實測；每卡實際超400行須拆分且不可刪安全斷言。Root選定的架構為DRAFT proposal，等待獨立review及先決implementation acceptance，不是仍待回答的architecture question。
+39 張候選卡：21 張 C、5 張 L、4 張 H、4 張 T、4 張 R、1 張 E；四個子波 9/11/8/11。所有estimate包含手寫測試，未經實測；每卡實際超400行須拆分且不可刪安全斷言。新增 protocol 與拆卡都是 DRAFT proposal；§9 未決接口必須先解決，不能由 worker 補猜。
 
 ### PP1c C01 — strict manifest Red
 - 目標：canonical/schema拒絕行為先紅。
 - 輸入：§4.1與parent §4.1–4.2。
-- 精確可寫路徑：scripts/ops/recovery-protocol.mjs; scripts/ops/recovery-protocol.test.mjs。
+- 精確可寫路徑：`scripts/ops/recovery-protocol.mjs`；`scripts/ops/recovery-protocol.test.mjs`。
 - 步驟：建安全scaffold；測duplicate/unknown/noncanonical UTF-8、batch/hash/order/size/path/secret canary。
 - 可觀察完成條件：named assertion Red、無compile/import錯。
-- 驗證命令：node --test scripts/ops/recovery-protocol.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/recovery-protocol.test.mjs（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
 - AC/FM：AC03 FM08/12。
 - 預估：240 handwritten lines，含tests，上限400。
-
 
 ### PP1c C02 — manifest Green
 - 目標：strict parser/schema/hash與receipt。
 - 輸入：C01；parent canonical schema。
-- 精確可寫路徑：同C01兩檔。
+- 精確可寫路徑：`scripts/ops/recovery-protocol.mjs`；`scripts/ops/recovery-protocol.test.mjs`。
 - 步驟：canonical byte equality後schema；綁artifact/release；固定failure輸出。
 - 可觀察完成條件：所有invalid拒絕、合法bytes穩定、無canary。
-- 驗證命令：node --test scripts/ops/recovery-protocol.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/recovery-protocol.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM08/10/12。
 - 預估：280 handwritten lines，含tests，上限400。
-
 
 ### PP1c C03 — inventory Red
 - 目標：暴露media/raw unsafe/path/schema錯誤。
 - 輸入：MediaService、ImageVariants、LocalDiskMediaObjectStore、migration allowlist。
-- 精確可寫路徑：RecoveryInventory.java; RecoveryInventoryTests.java。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java`。
 - 步驟：PNG/PDF/decode-null/orphan/deleted fixtures；missing/unsafe/changed/extra-column行為。
 - 可觀察完成條件：預期安全assertion Red、source不變。
-- 驗證命令：./gradlew test --tests *RecoveryInventoryTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew test --tests *RecoveryInventoryTests --no-daemon --no-parallel（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
 - AC/FM：AC03 FM08/12。
 - 預估：340 handwritten lines，含tests，上限400。
 
-
-### PP1c C04a — DB inventory Green
-- 目標：20 relation固定column/catalog/raw snapshot。
+### PP1c C04a — DB rows Green
+- 目標：只做固定20-table row extraction、transaction/session設定與 nullable PG text；metadata/hash composition 交 C04d。
 - 輸入：C03；V2–V9、V7/V10、Flyway 11.7.2。
-- 精確可寫路徑：RecoveryInventory.java; RecoveryInventoryTests.java; RecoveryInventoryIntegrationTests.java。
-- 步驟：逐欄::text、固定session、REPEATABLE_READ；metadata另取；完整Flyway逐row compare。
-- 可觀察完成條件：PG16證query-only與schema/raw equality；unknown relation/column拒絕。
-- 驗證命令：./gradlew test --tests *RecoveryInventoryTests --no-daemon --no-parallel; ./gradlew integrationTest --tests *RecoveryInventoryIntegrationTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java`；`services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java`。
+- 步驟：固定 SELECT allowlist、read-only REPEATABLE_READ、排序／null／type-edge fixtures；不做完整 inventory Green 聲明。
+- 可觀察完成條件：PG16 證 query-only、固定欄 raw text/null 一致；unknown relation/column拒絕；完整 catalog/hash 在 C04d 才驗。
+- 驗證命令：./gradlew test --tests *RecoveryInventoryTests --no-daemon --no-parallel; ./gradlew integrationTest --tests *RecoveryInventoryIntegrationTests --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM08/12。
 - 預估：380 handwritten lines，含tests，上限400。
 
+### PP1c C04d — catalog/schema hash Green
+- 目標：只實作 TableSchema catalog constraints/indexes/排序及 schema/rows/table/DB hash；不做 media。
+- 輸入：C04a；§4.1/§5 型別與 metadata query 審查。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java`；`services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java`。
+- 步驟：先新增上述 named 行為反例並保存 Red；完成卡片內唯一子責任，再重跑指定範圍；超過400行回 root 拆卡。
+- 可觀察完成條件：真 PG extra-column/constraint/index/null/完整 Flyway drift named tests Green。
+- 驗證命令：./gradlew integrationTest --tests '*RecoveryInventoryIntegrationTests' --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC02/03；FM08/09/10/12/15 依該卡子責任。
+- 預估：360 handwritten lines，含 tests；非實測，上限400。
+
+### PP1c C04c — media filesystem Green
+- 目標：只實作 no-follow walk／link-count／before-after identity／hash 與 readonly failure；不在本卡做 ImageIO/DB composition。
+- 輸入：C03；父 §5.1 步驟1/2；D01 filesystem probe。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java`。
+- 步驟：先新增上述 named 行為反例並保存 Red；完成卡片內唯一子責任，再重跑指定範圍；超過400行回 root 拆卡。
+- 可觀察完成條件：path/symlink/hardlink/變動檔案 named tests Green；source bytes 不變。
+- 驗證命令：./gradlew test --tests '*RecoveryInventoryTests' --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC02/03；FM08/09/10/12/15 依該卡子責任。
+- 預估：330 handwritten lines，含 tests；非實測，上限400。
 
 ### PP1c C04b — media composition Green
-- 目標：同snapshot組合DB與逐檔media完整性。
-- 輸入：C04a與ImageVariants、PP1CMEDIA1 header。
-- 精確可寫路徑：RecoveryInventory.java; RecoveryInventoryTests.java; RecoveryInventoryIntegrationTests.java。
-- 步驟：核original/variant/hash/size/dimensions；no-follow files；orphan/deleted保留；null-safe records。
+- 目標：只做 AssetRow/VariantRow composition 與 ImageIO variant 純驗證；filesystem 已由 C04c 完成。
+- 輸入：C04a/C04d/C04c；父 §5.1 五步完整規則。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java`。
+- 步驟：組合 C04c 的已驗 files；核 original/variant/hash/size/dimensions、orphan/deleted 與 null-safe records；不重寫 walk。
 - 可觀察完成條件：兩側完整一致；unsafe/missing/change拒絕且不變source。
-- 驗證命令：同C04a Gradle focused命令（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew test --tests '*RecoveryInventoryTests' --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM08。
 - 預估：360 handwritten lines，含tests，上限400。
-
 
 ### PP1c C05 — offline inventory dispatch Red
 - 目標：精確首token、maintenance優先及Spring前拒絕。
 - 輸入：現有CmsApiApplication.main路由與測試。
-- 精確可寫路徑：CmsApiApplication.java; CmsApiApplicationTests.java; RecoveryInventoryMain.java; RecoveryInventoryMainTests.java。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java`；`services/cms-api/src/test/java/com/fallrising/cms/CmsApiApplicationTests.java`；`services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java`。
 - 步驟：建立compile-safe seam；測first/repeated/misplaced tokens、legacy maintenance、Spring spy=0。
 - 可觀察完成條件：行為測試Red而非compile Red；舊測試不退化。
-- 驗證命令：./gradlew test --tests *CmsApiApplicationTests --tests *RecoveryInventoryMainTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew test --tests *CmsApiApplicationTests --tests *RecoveryInventoryMainTests --no-daemon --no-parallel（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
 - AC/FM：AC03 FM08。
 - 預估：240 handwritten lines，含tests，上限400。
-
 
 ### PP1c C06 — offline inventory dispatch Green
 - 目標：用既有API image跑offline JDBC inventory。
 - 輸入：C05、C04a/b、request/ready/permit/result schema。
-- 精確可寫路徑：上述Java四檔。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java`；`services/cms-api/src/test/java/com/fallrising/cms/CmsApiApplicationTests.java`；`services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java`。
 - 步驟：maintenance後新增exact ops-inventory；strict refs/secret file；single JDBC read-only；固定receipt。
 - 可觀察完成條件：Spring不啟動、DB rollback/close、無JavaExec。
-- 驗證命令：同C05命令（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew test --tests '*RecoveryInventoryMainTests' --tests '*CmsApiApplicationTests' --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM08/12。
 - 預估：320 handwritten lines，含tests，上限400。
-
 
 ### PP1c L01 — v1 store extraction
 - 目標：抽取持久registry primitives保留v1行為。
 - 輸入：PP1b frozen v1 source/tests。
-- 精確可寫路徑：maintenance-guard.mjs/.test.mjs; maintenance-store.mjs/.test.mjs。
+- 精確可寫路徑：`scripts/local/maintenance-guard.mjs`；`scripts/local/maintenance-guard.test.mjs`；`scripts/local/maintenance-store.mjs`；`scripts/local/maintenance-store.test.mjs`。
 - 步驟：移private reserve/load/fsync/release；比較原fixture bytes與所有v1回歸。
 - 可觀察完成條件：API/schema/ordering/errors不變。
-- 驗證命令：node --test scripts/local/maintenance-guard.test.mjs scripts/local/maintenance-store.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/local/maintenance-guard.test.mjs scripts/local/maintenance-store.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02 FM09。
 - 預估：350 handwritten lines，含tests，上限400。
 
-
 ### PP1c L02 — LeaseV2 registry
-- 目標：同registry strict versioned union和永久operation ID。
+- 目標：只完成 LeaseV2/nested required/null/enum/ID validators；不含 journal I/O 或 CLI/version dispatch。
 - 輸入：L01、T002 schema proposal、G06/G07 freeze。
-- 精確可寫路徑：maintenance-store.mjs/.test.mjs; maintenance-workflow.mjs/.test.mjs。
-- 步驟：required/null schema；journal BEGIN/END hash；unknown/partial/duplicate/lock cases；no replay/migrate。
-- 可觀察完成條件：v1全綠；V2 invalid fail closed並保留lock。
-- 驗證命令：node --test scripts/local/maintenance-store.test.mjs scripts/local/maintenance-workflow.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 精確可寫路徑：`scripts/local/maintenance-store.mjs`；`scripts/local/maintenance-store.test.mjs`。
+- 步驟：§4.2a 每個 allowed/forbidden phase/null/ID fixture；canonical v2 bytes；legacy v1 bytes untouched。
+- 可觀察完成條件：nested schema cases Green；沒有主張 durable journal/version dispatch 已完成。
+- 驗證命令：node --test scripts/local/maintenance-store.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02/03 FM09/10。
 - 預估：390 handwritten lines，含tests，上限400。
 
+### PP1c L04 — durable v2 journal Green
+- 目標：只實作 §4.2b envelope、seq、BEGIN/END/FAIL、atomic replace/fsync、partial/unknown fail-closed；不做 CLI/helper。
+- 輸入：L02；D01 filesystem durability。
+- 精確可寫路徑：`scripts/local/maintenance-store.mjs`；`scripts/local/maintenance-store.test.mjs`。
+- 步驟：先新增上述 named 行為反例並保存 Red；完成卡片內唯一子責任，再重跑指定範圍；超過400行回 root 拆卡。
+- 可觀察完成條件：注入 fsync/rename/partial/crash 故障保留 lock，不能產生 released success。
+- 驗證命令：node --test scripts/local/maintenance-store.test.mjs（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC02/03；FM08/09/10/12/15 依該卡子責任。
+- 預估：360 handwritten lines，含 tests；非實測，上限400。
+
+### PP1c L05 — version dispatch and prior terminal Green
+- 目標：只接既有 guard fixed entrypoint 的 version dispatch 與 prior operation loader；不做 Java projection 或能力容器。
+- 輸入：L01/L02/L04；§4.2e。
+- 精確可寫路徑：`scripts/local/maintenance-guard.mjs`；`scripts/local/maintenance-guard.test.mjs`；`scripts/local/maintenance-store.mjs`；`scripts/local/maintenance-store.test.mjs`；`scripts/local/maintenance-workflow.mjs`；`scripts/local/maintenance-workflow.test.mjs`。
+- 步驟：先新增上述 named 行為反例並保存 Red；完成卡片內唯一子責任，再重跑指定範圍；超過400行回 root 拆卡。
+- 可觀察完成條件：v1 raw bytes/六欄 result 不變；v2 complete+released 才接受；unknown/partial/COMMITTED/FAIL 拒絕。
+- 驗證命令：node --test scripts/local/maintenance-guard.test.mjs scripts/local/maintenance-store.test.mjs scripts/local/maintenance-workflow.test.mjs（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC02/03；FM08/09/10/12/15 依該卡子責任。
+- 預估：360 handwritten lines，含 tests；非實測，上限400。
 
 ### PP1c L03 — source/child capability
 - 目標：Opaque token綁inode/device、source及單一child。
-- 輸入：L02、target ownership rules。
-- 精確可寫路徑：maintenance-workflow.mjs/.test.mjs; maintenance-target.mjs/.test.mjs。
+- 輸入：L02/L04/L05、PP1b frozen inspector API。
+- 精確可寫路徑：`scripts/local/maintenance-workflow.mjs`；`scripts/local/maintenance-workflow.test.mjs`；`scripts/local/maintenance-target.mjs`；`scripts/local/maintenance-target.test.mjs`。
 - 步驟：WeakMap capability；reserve marker；forgery/second-child/adoption/state tests。
 - 可觀察完成條件：無token仿造或target adoption；v1 assertions不變。
-- 驗證命令：node --test scripts/local/maintenance-workflow.test.mjs scripts/local/maintenance-target.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/local/maintenance-workflow.test.mjs scripts/local/maintenance-target.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02/03 FM09/12。
 - 預估：390 handwritten lines，含tests，上限400。
-
 
 ### PP1c H01 — full-ID helper lifecycle
 - 目標：安全create/inspect/start/wait/remove。
 - 輸入：L02/L03、既有probe生命周期。
-- 精確可寫路徑：maintenance-helper.mjs/.test.mjs。
+- 精確可寫路徑：`scripts/local/maintenance-helper.mjs`；`scripts/local/maintenance-helper.test.mjs`。
 - 步驟：固定kind policy；start前/運行/退出完整inspect；限owned full ID cleanup；Docker故障注入。
 - 可觀察完成條件：錯image/argv/env/mount/network/security不start。
-- 驗證命令：node --test scripts/local/maintenance-helper.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/local/maintenance-helper.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM09/10/12。
 - 預估：390 handwritten lines，含tests，上限400。
 
-
-### PP1c H02 — JDBC/tool session proof
-- 目標：Ready/permit與PG工具observational proof分流。
+### PP1c H02 — JDBC handshake proof
+- 目標：只實作 §4.2c host-side JDBC ready/permit/request/receipt binding，mock 驗同 PID transaction-switch receipt；Java 寫 transaction 由 R04/C14 實作，PG tools 交 H04。
 - 輸入：H01、PG16 inspect/activity contracts。
-- 精確可寫路徑：maintenance-helper.mjs/.test.mjs; maintenance-helper-session.test.mjs。
-- 步驟：同connection固定PID tuple；full container/network/IP核驗；PG tool唯一process/backend、結束零backend。
-- 可觀察完成條件：拒PID change/extra backend/wrong IP/application-name-only。
-- 驗證命令：node --test scripts/local/maintenance-helper.test.mjs scripts/local/maintenance-helper-session.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 精確可寫路徑：`scripts/local/maintenance-helper.mjs`；`scripts/local/maintenance-helper.test.mjs`；`scripts/local/maintenance-helper-session.test.mjs`。
+- 步驟：schema/framing/limit/timeout/duplicate permit/換 PID faults；host full-ID/IP/backend binding，不涉及 PG tool adapter。
+- 可觀察完成條件：JDBC protocol named tests Green；未宣稱 PG tool observation 完成。
+- 驗證命令：node --test scripts/local/maintenance-helper.test.mjs scripts/local/maintenance-helper-session.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM09/10。
 - 預估：390 handwritten lines，含tests，上限400。
 
-
-### PP1c C07 — backup Red
-- 目標：暴露writer race/partial capture failure。
-- 輸入：L01–L03、PP1a receipt、C01–C06。
-- 精確可寫路徑：local-bundle.mjs; local-bundle.test.mjs。
-- 步驟：scaffold + barrier faults：restart/writer/partial dump/media change/cancel/old bundle。
-- 可觀察完成條件：行為斷言Red，不是缺class compile紅。
-- 驗證命令：node --test scripts/ops/local-bundle.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
-- AC/FM：AC03 FM08/09/10。
-- 預估：320 handwritten lines，含tests，上限400。
-
-
-### PP1c C08 — lease capture Green
-- 目標：同一source LeaseV2產immutable local bundle。
-- 輸入：C07、H01–03、C02/C04b、PP1a receipt。
-- 精確可寫路徑：local-bundle.mjs; local-bundle.test.mjs。
-- 步驟：停寫；dump/media stream；pre/post DB/files compare；atomic marker；依原service state finish。
-- 可觀察完成條件：完整lineage/writer proof才LOCAL_VERIFIED；failure留lock/staging。
-- 驗證命令：node --test scripts/ops/local-bundle.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
-- AC/FM：AC03 FM08–10。
-- 預估：390 handwritten lines，含tests，上限400。
-
+### PP1c H04 — PG tool observation Green
+- 目標：只實作 pg_dump/pg_restore sealed argv、唯一 process/backend observation 與退出後零 backend；不偽造 ready/permit。
+- 輸入：H01；D01 已封板 PG adapter vectors；L03。
+- 精確可寫路徑：`scripts/local/maintenance-helper.mjs`；`scripts/local/maintenance-helper.test.mjs`；`scripts/local/maintenance-helper-session.test.mjs`。
+- 步驟：先新增上述 named 行為反例並保存 Red；完成卡片內唯一子責任，再重跑指定範圍；超過400行回 root 拆卡。
+- 可觀察完成條件：fake 異常 tuple/額外 backend/partial dump/工具非零拒絕；真 tool evidence 留 C17。
+- 驗證命令：node --test scripts/local/maintenance-helper.test.mjs scripts/local/maintenance-helper-session.test.mjs（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC02/03；FM08/09/10/12/15 依該卡子責任。
+- 預估：360 handwritten lines，含 tests；非實測，上限400。
 
 ### PP1c H03 — framed media transport
 - 目標：PP1CMEDIA1 bounded stream與UID安全。
 - 輸入：C04b、PP1a Node24.18/API UID constraints。
-- 精確可寫路徑：scripts/ops/local-media.mjs; local-media.test.mjs。
+- 精確可寫路徑：`scripts/ops/local-media.mjs`；`scripts/ops/local-media.test.mjs`。
 - 步驟：header/EOF/path/count/capacity/hash驗證；verified FD/stdin restore；拒chmod/chown。
 - 可觀察完成條件：trailing/truncated/link/hash/permission均拒絕，bytes相同。
-- 驗證命令：node --test scripts/ops/local-media.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/local-media.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM08/10。
 - 預估：390 handwritten lines，含tests，上限400。
 
+### PP1c C07 — backup Red
+- 目標：暴露writer race/partial capture failure。
+- 輸入：L01–L03、PP1a receipt、C01–C06。
+- 精確可寫路徑：`scripts/ops/local-bundle.mjs`；`scripts/ops/local-bundle.test.mjs`。
+- 步驟：scaffold + barrier faults：restart/writer/partial dump/media change/cancel/old bundle。
+- 可觀察完成條件：行為斷言Red，不是缺class compile紅。
+- 驗證命令：node --test scripts/ops/local-bundle.test.mjs（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
+- AC/FM：AC03 FM08/09/10。
+- 預估：320 handwritten lines，含tests，上限400。
 
-### PP1c C09 — proof verifier Red
-- 目標：測試locator/artifact/source錯配不寫target。
-- 輸入：schema、PP1a source hashes、L02。
-- 精確可寫路徑：local-recovery-verify.mjs; local-recovery-verify.test.mjs。
-- 步驟：改一個proof/artifact/source/raw field；receipt-only/stale sessions/audit。
-- 可觀察完成條件：所有preflight fail且stop/helper/write=0。
-- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
-- AC/FM：AC02/03 FM08/12。
-- 預估：300 handwritten lines，含tests，上限400。
-
-
-### PP1c C10 — proof verifier Green
-- 目標：完整artifact/source/20-table/files proof。
-- 輸入：C09、C02/C04a/b、H03、PP1a provenance。
-- 精確可寫路徑：同C09兩檔。
-- 步驟：重hash每bytes與lineage；比完整source/target schema/raw/files；固定proof receipt。
-- 可觀察完成條件：只有完整匹配成功；locator不能授權。
-- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
-- AC/FM：AC02/03 FM08/12。
+### PP1c C08 — lease capture Green
+- 目標：同一source LeaseV2產immutable local bundle。
+- 輸入：C07/H01/H02/H03/H04、C02/C04b、L04/L05、PP1a prerequisite、D01 封板。
+- 精確可寫路徑：`scripts/ops/local-bundle.mjs`；`scripts/ops/local-bundle.test.mjs`。
+- 步驟：停寫；dump/media stream；pre/post DB/files compare；atomic marker；依原service state finish。
+- 可觀察完成條件：完整lineage/writer proof才LOCAL_VERIFIED；failure留lock/staging。
+- 驗證命令：node --test scripts/ops/local-bundle.test.mjs（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC03 FM08–10。
 - 預估：390 handwritten lines，含tests，上限400。
-
 
 ### PP1c T01 — private restore prepare
 - 目標：新增不走正常prepare/verify的內部child prepare。
 - 輸入：PP1a source、L03。
-- 精確可寫路徑：scripts/local/prepare.mjs/.test.mjs; restore-target.mjs/.test.mjs。
+- 精確可寫路徑：`scripts/local/prepare.mjs`；`scripts/local/prepare.test.mjs`；`scripts/local/restore-target.mjs`；`scripts/local/restore-target.test.mjs`。
 - 步驟：private mode略8443/host forwarder；綁receipt/ref；normal prepare unchanged；不start services。
 - 可觀察完成條件：無publish/pull/source mutation；無法證明則ADAPTER_UNSEALED。
-- 驗證命令：node --test scripts/local/prepare.test.mjs scripts/local/restore-target.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/local/prepare.test.mjs scripts/local/restore-target.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM12。
 - 預估：380 handwritten lines，含tests，上限400。
-
 
 ### PP1c T02 — create-only blank target
 - 目標：建立distinct fresh PG/media與stopped API/ingress。
 - 輸入：T01、L03、H01。
-- 精確可寫路徑：restore-target.mjs/.test.mjs; maintenance-target.mjs/.test.mjs。
+- 精確可寫路徑：`scripts/local/restore-target.mjs`；`scripts/local/restore-target.test.mjs`；`scripts/local/maintenance-target.mjs`；`scripts/local/maintenance-target.test.mjs`。
 - 步驟：exclusive project；PG first blank query；API/ingress create-stopped；full inspect。
 - 可觀察完成條件：existing/nonblank/shared target在write前拒絕。
-- 驗證命令：node --test scripts/local/restore-target.test.mjs scripts/local/maintenance-target.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/local/restore-target.test.mjs scripts/local/maintenance-target.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM12。
 - 預估：390 handwritten lines，含tests，上限400。
 
+### PP1c C09 — proof verifier Red
+- 目標：測試locator/artifact/source錯配不寫target。
+- 輸入：schema、PP1a source hashes、L02。
+- 精確可寫路徑：`scripts/ops/local-recovery-verify.mjs`；`scripts/ops/local-recovery-verify.test.mjs`。
+- 步驟：改一個proof/artifact/source/raw field；receipt-only/stale sessions/audit。
+- 可觀察完成條件：所有preflight fail且stop/helper/write=0。
+- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
+- AC/FM：AC02/03 FM08/12。
+- 預估：300 handwritten lines，含tests，上限400。
+
+### PP1c C10 — proof verifier Green
+- 目標：完整artifact/source/20-table/files proof。
+- 輸入：C09、C02/C04a/b、H03、PP1a provenance。
+- 精確可寫路徑：`scripts/ops/local-recovery-verify.mjs`；`scripts/ops/local-recovery-verify.test.mjs`。
+- 步驟：重hash每bytes與lineage；比完整source/target schema/raw/files；固定proof receipt。
+- 可觀察完成條件：只有完整匹配成功；locator不能授權。
+- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC02/03 FM08/12。
+- 預估：390 handwritten lines，含tests，上限400。
 
 ### PP1c C11 — restore Red
 - 目標：證明restore順序/故障target不可重用。
 - 輸入：T02、C09/C10、C04a/b、H03。
-- 精確可寫路徑：local-restore.mjs; local-restore.test.mjs。
+- 精確可寫路徑：`scripts/ops/local-restore.mjs`；`scripts/ops/local-restore.test.mjs`。
 - 步驟：phase scaffold；fault dump/media/raw/revoke/API；assert source unchanged/isolation。
 - 可觀察完成條件：named behavior Red、非compile error。
-- 驗證命令：node --test scripts/ops/local-restore.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/local-restore.test.mjs（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
 - AC/FM：AC03 FM10/12。
 - 預估：340 handwritten lines，含tests，上限400。
-
 
 ### PP1c C12 — restore core Green
 - 目標：還原至空target並驗RAW_VERIFIED。
 - 輸入：C11、T02、H01–03、C10、C04a/b。
-- 精確可寫路徑：local-restore.mjs; local-restore.test.mjs。
+- 精確可寫路徑：`scripts/ops/local-restore.mjs`；`scripts/ops/local-restore.test.mjs`。
 - 步驟：PG16 single transaction restore; no clean/create/jobs；media restore；full raw/files/release compare。
 - 可觀察完成條件：只有全等到RAW_VERIFIED；retry需new target/ID。
-- 驗證命令：node --test scripts/ops/local-restore.test.mjs scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/local-restore.test.mjs scripts/ops/local-recovery-verify.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03 FM10/12。
 - 預估：390 handwritten lines，含tests，上限400。
-
 
 ### PP1c C13 — revoke Red
 - 目標：暴露sessions/audit半提交。
 - 輸入：C12、JdbcIdentityStore.insertAudit。
-- 精確可寫路徑：RestoreSessionRevoker.java; unit/PG integration tests。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RestoreSessionRevokerTests.java`；`services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java`。
 - 步驟：audit/update/commit faults；API-start=0；非session tables unchanged。
 - 可觀察完成條件：rollback assertion Red而非compile error。
-- 驗證命令：./gradlew integrationTest --tests *RestoreSessionRevokerIntegrationTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew integrationTest --tests *RestoreSessionRevokerIntegrationTests --no-daemon --no-parallel（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
 - AC/FM：AC02/03 FM10/12。
 - 預估：280 handwritten lines，含tests，上限400。
-
 
 ### PP1c C14 — revoke Green
 - 目標：atomic revoke + exact AUTH receipt。
 - 輸入：C13、parent §5.4。
-- 精確可寫路徑：同C13 Java/test paths。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RestoreSessionRevokerTests.java`；`services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java`。
 - 步驟：同transaction single timestamp；preallocated ID；revoke all active；insert exact AUTH；commit receipt。
 - 可觀察完成條件：PG證session delta + 1 AUTH；fault rollback/no API。
-- 驗證命令：同C13 PG integration command（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew integrationTest --tests '*RestoreSessionRevokerIntegrationTests' --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02/03 FM10。
 - 預估：360 handwritten lines，含tests，上限400。
-
 
 ### PP1c R01 — proof locked revalidation
 - 目標：Locator轉完整lineage，lease內驗source。
 - 輸入：C10、L02/L03、accounts §10.1a。
-- 精確可寫路徑：local-recovery-verify.mjs/.test.mjs; maintenance-workflow.mjs/.test.mjs。
+- 精確可寫路徑：`scripts/ops/local-recovery-verify.mjs`；`scripts/ops/local-recovery-verify.test.mjs`；`scripts/local/maintenance-workflow.mjs`；`scripts/local/maintenance-workflow.test.mjs`。
 - 步驟：preflight before stop；under lock rehash proof/bundle/source raw/files；reject stale/receipt-only。
 - 可觀察完成條件：只有complete released proof/current equality接受。
-- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs scripts/local/maintenance-workflow.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs scripts/local/maintenance-workflow.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02 FM09/12。
 - 預估：390 handwritten lines，含tests，上限400。
-
 
 ### PP1c R02 — recover CLI attachment
 - 目標：接現有recover命令，不改六欄result或狀態。
 - 輸入：R01、accepted G06/G07。
-- 精確可寫路徑：maintenance.mjs/.test.mjs; maintenance-workflow.mjs/.test.mjs。
+- 精確可寫路徑：`scripts/local/maintenance.mjs`；`scripts/local/maintenance.test.mjs`；`scripts/local/maintenance-workflow.mjs`；`scripts/local/maintenance-workflow.test.mjs`。
 - 步驟：proof before connection/stop；single registry attach；finish KEEP_STOPPED；no nested lock。
 - 可觀察完成條件：v1 FRESH_INIT全回歸；stopped recovery不restart。
-- 驗證命令：node --test scripts/local/maintenance.test.mjs scripts/local/maintenance-workflow.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/local/maintenance.test.mjs scripts/local/maintenance-workflow.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02 FM09。
 - 預估：380 handwritten lines，含tests，上限400。
-
 
 ### PP1c R03 — Java guard projection
 - 目標：Java只接受host驗證的proof projection。
 - 輸入：accepted G06、accounts policy、R01/R02。
-- 精確可寫路徑：LocalMaintenanceGuard.java; IdentityMaintenanceCommandTests.java。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/identity/maintenance/LocalMaintenanceGuard.java`；`services/cms-api/src/test/java/com/fallrising/cms/identity/maintenance/IdentityMaintenanceCommandTests.java`。
 - 步驟：strict V2 proof projection；backupId僅供原audit；不擴Operation。
 - 可觀察完成條件：六欄result及v1 predicate不變；無bypass。
-- 驗證命令：./gradlew test --tests *IdentityMaintenanceCommandTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew test --tests *IdentityMaintenanceCommandTests --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02 FM09/12。
 - 預估：390 handwritten lines，含tests，上限400。
-
 
 ### PP1c R04 — offline revoke dispatch
 - 目標：精確第一token在Spring前進transaction core。
 - 輸入：C13/C14、existing maintenance routing。
-- 精確可寫路徑：CmsApiApplication.java/CmsApiApplicationTests.java; RestoreSessionRevokerMain.java/tests。
+- 精確可寫路徑：`services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java`；`services/cms-api/src/test/java/com/fallrising/cms/CmsApiApplicationTests.java`；`services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevokerMain.java`；`services/cms-api/src/test/java/com/fallrising/cms/ops/RestoreSessionRevokerMainTests.java`。
 - 步驟：maintenance branch先保留；精確首token；strict request/handshake；reject misplaced/repeated。
 - 可觀察完成條件：Spring不啟動；舊路由不變；只commit success。
-- 驗證命令：./gradlew test --tests *CmsApiApplicationTests --tests *RestoreSessionRevokerMainTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：./gradlew test --tests *CmsApiApplicationTests --tests *RestoreSessionRevokerMainTests --no-daemon --no-parallel（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02/03 FM10。
 - 預估：360 handwritten lines，含tests，上限400。
 
-
 ### PP1c T03 — child Chromium/socket smoke
 - 目標：child web network內一次性Chromium與密碼傳遞。
-- 輸入：T02/C14/matched health、PP1a CA/browser。
-- 精確可寫路徑：scripts/ops/local-restore-smoke.mjs/.test.mjs; 不改forward.mjs。
+- 輸入：T02/C14；matched-health immutable contract fixture（不是 C16 真runtime結果）、D03 frozen socket contract、PP1a CA/browser。
+- 精確可寫路徑：`scripts/ops/local-restore-smoke.mjs`；`scripts/ops/local-restore-smoke.test.mjs`。
 - 步驟：eligibility gates；NSS trust；one-use Unix socket；no argv/env/mount/host route；teardown。
 - 可觀察完成條件：premature run拒絕；source/DB不可達；browser/child stopped。
-- 驗證命令：node --test scripts/ops/local-restore-smoke.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/local-restore-smoke.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03/06 FM10/15。
 - 預估：390 handwritten lines，含tests，上限400。
 
+### PP1c T04 — isolated browser journey authoring
+- 目標：作者實作 recovery.spec.ts 及既有 config 的 restore-only opt-in。不得把完整庫 secret 放 env；one-use socket 介面與精確允許 DB delta 依 D03，未封定先停卡。
+- 輸入：T03 contract fixture、D03 approved browser/socket/delta contract；不依賴 C16 runtime。
+- 精確可寫路徑：`e2e-pp1-local/recovery.spec.ts`；`playwright.pp1-local.config.ts`。
+- 步驟：先新增上述 named 行為反例並保存 Red；完成卡片內唯一子責任，再重跑指定範圍；超過400行回 root 拆卡。
+- 可觀察完成條件：named restore journey 可列出／型別檢查；socket拒絕第二取用、非child fixture不執行；真browser pass只由C17證明。
+- 驗證命令：npx --no-install playwright test --config playwright.pp1-local.config.ts --list；npm run typecheck（未來施工命令，本輪文件作者未執行）。
+- AC/FM：AC02/03；FM08/09/10/12/15 依該卡子責任。
+- 預估：380 handwritten lines，含 tests；非實測，上限400。
 
 ### PP1c C15 — lifecycle Red
 - 目標：暴露release/startup/smoke前置不足。
-- 輸入：C14/T03/PP1a receipts；zero startup delta。
-- 精確可寫路徑：local-restore.mjs/.test.mjs; local-recovery-verify.mjs/.test.mjs。
+- 輸入：C14/T03/T04 contract fixtures、PP1a receipts；zero startup delta；不等 C16 真health。
+- 精確可寫路徑：`scripts/ops/local-restore.mjs`；`scripts/ops/local-restore.test.mjs`；`scripts/ops/local-recovery-verify.mjs`；`scripts/ops/local-recovery-verify.test.mjs`。
 - 步驟：fault image/jar/dist/config/flyway/revoke/startup/health/privacy；route spy=0。
 - 可觀察完成條件：behavior Red、target retained/stopped。
-- 驗證命令：node --test scripts/ops/local-restore.test.mjs scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/local-restore.test.mjs scripts/ops/local-recovery-verify.test.mjs（Red 卡須保存 named 預期行為失敗、不得 compile/import error；本輪未執行）。
 - AC/FM：AC03/06 FM10/12/15。
 - 預估：350 handwritten lines，含tests，上限400。
 
-
 ### PP1c C16 — lifecycle Green
 - 目標：依序API health→child ingress→browser smoke。
-- 輸入：C15/T03、release and revoke receipts。
-- 精確可寫路徑：same C15 paths。
+- 輸入：C15/T03/T04、release/revoke receipts；本卡才串接真health與browser runner。
+- 精確可寫路徑：`scripts/ops/local-restore.mjs`；`scripts/ops/local-restore.test.mjs`；`scripts/ops/local-recovery-verify.mjs`；`scripts/ops/local-recovery-verify.test.mjs`。
 - 步驟：assert gate order；post-start raw delta；unexpected startup mutation fail；stop child。
 - 可觀察完成條件：exact source provenance and smoke proof; RESTORE-only target。
-- 驗證命令：same C15 Node command（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：node --test scripts/ops/local-restore.test.mjs scripts/ops/local-recovery-verify.test.mjs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03/06 FM10/12/15。
 - 預估：390 handwritten lines，含tests，上限400。
-
 
 ### PP1c C17 — root local drill
 - 目標：真實第二copy+不同空target閉環。
 - 輸入：C16、PP1a verified、accepted PP1b guards。
-- 精確可寫路徑：root evidence only; no added product paths。
+- 精確可寫路徑：無產品可寫路徑；實際 evidence/report 位置由 root task 明列，未列前不寫檔。
 - 步驟：root runs stopped source capture, fresh project/volumes restore/raw/revoke/API/child browser; preserve IDs/hashes。
 - 可觀察完成條件：actual identities/proof recorded; local only, no SLA claim。
-- 驗證命令：root-approved runtime+PG+browser commands with captured outputs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：root-approved runtime+PG+browser commands with captured outputs（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC03/06 FM08–12/15。
 - 預估：300 handwritten lines，含tests，上限400。
-
 
 ### PP1c C18 — handoff/evidence
 - 目標：獨立檢查、CI、文件交接。
 - 輸入：C01–C17 and root evidence。
-- 精確可寫路徑：no additional product paths。
+- 精確可寫路徑：無產品可寫路徑；root task 明列文檔／交接位置。
 - 步驟：scope/secret/hash checks; required tests and real evidence mapped; preserve PD follow-ups。
 - 可觀察完成條件：all required evidence visible; no offsite claim。
-- 驗證命令：root required repo gates and CI（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。
+- 驗證命令：root required repo gates and CI（未來施工命令，本輪文件作者未執行）。
 - AC/FM：AC02/03 FM08–12。
 - 預估：250 handwritten lines，含tests，上限400。
 
-
 ### PP1c E01 — independent evidence gate
 - 目標：由root完成獨立交付證據審核，不新增產品功能。
-- 輸入：C01–C18、L01–L03、H01–H03、T01–T03、R01–R04及實際run receipts。
-- 精確可寫路徑：root-owned coordination report/evidence；無產品路徑。
+- 輸入：C01–C18（含 C04a/b/c/d）、L01–L05、H01–H04、T01–T04、R01–R04及實際run receipts。
+- 精確可寫路徑：無產品可寫路徑；root task 明列獨立 review/report 位置。
 - 步驟：逐項映射CI、unit/PG/integration/browser與真restore輸出；核source hashes、scope、secret scan、停機狀態及正式未決gate。
 - 可觀察完成條件：required checks均有可追溯證據；明列failed/skipped/unrun；不把local copy說成offsite。
 - 驗證命令：root依task evidence-gate及repo-required CI執行，結果逐項記錄於root evidence。
@@ -574,10 +705,15 @@ Copy/encryption boundary：PP1c核心不新增archive工具／dependency；`medi
 - 預估：0 product lines，含root review；驗收工作不是零成本。
 
 #### 子波與依賴
-- A（7）：C01→C02；C03→C04a→C04b；C05→C06。
-- B（7）：L01→L02→L03；H01→H02；C07→C08；H03依C04b。
-- C（9）：T01→T02；C09→C10；C11→C12；C13→C14；H03。
-- D（10）：R01→R02→R03；R04依C14；T03依T02/C14；C15→C16；C17依C16；C18→E01。G06/G07先接受。
+
+39 張候選卡，每張只屬一個子波；四波 9/11/8/11，均 ≤30。每個新子波開始前重新驗 prerequisite；本文不授權一次發出全部卡。
+
+- A（9）：C01→C02；C03→C04a→C04d；C03→C04c；C04a/C04d/C04c→C04b；C05→C06。
+- B（11）：L01→L02→L04→L05→L03；L03→H01→H02/H04；C04b→H03；A+L03→C07；C07+H01/H02/H03/H04→C08。H03 僅在 B，且先於 C08。
+- C（8）：L03→T01→T02；C09→C10；T02+C09/C10+C04a/C04b/C04d+H03→C11→C12→C13→C14。
+- D（11）：C10+L04/L05→R01→R02→R03；C14→R04；T02/C14 contract fixtures→T03→T04；C14/T03/T04→C15→C16→C17→C18→E01。T03 用 health fixture，真 health 串接在 C16；無反向 C16→T03 邊。G06/G07 必須先驗收。
+
+C04a/C04d 分離 row extraction 與 catalog/hash；C04c/C04b 分離安全 filesystem 與 image/asset composition；L02/L04/L05 分離 schema/journal/version dispatcher；H02/H04 分離 JDBC handshake 與 PG tools。每卡必須只跑該子責任 named tests，再在集合收斂時跑全套；Green 卡不可把預期 Red 當成功。行數估算是候選規劃而非證據，實際含手寫 tests >400 必須停止再拆，不能弱化斷言。
 
 ## 7 測試規格與驗收命令
 
@@ -585,13 +721,13 @@ Copy/encryption boundary：PP1c核心不新增archive工具／dependency；`medi
 | --- | --- | --- |
 | `RecoveryProtocolTests.PP1c_*` node:test | strict manifests、all artifact hashes、wrong release/batch、unknown/duplicate keys、secret canary output exclusion | C01/C02 |
 | `RecoveryInventoryTests.PP1c_*` JUnit | TempDir PNG/PDF/decode-null, symlink/hardlink/orphan/deleted media, object bytes and DB metadata stay unchanged | C03/C04b |
-| `RecoveryInventoryIntegrationTests.PP1c_*` PostgreSQL16 | 20-table raw rows, full Flyway/checksum, REPEATABLE_READ, query-only behavior, DB failure no completion receipt | C04a/C04b |
+| `RecoveryInventoryIntegrationTests.PP1c_*` PostgreSQL16 | 20-table raw rows, full Flyway/checksum, REPEATABLE_READ, query-only behavior, DB failure no completion receipt | C04a/C04d |
 | `RecoveryInventoryMainTests.PP1c_*` JUnit | request refs, unreadable/unsafe secret file, no Boot context, no raw row output | C05/C06 |
 | `local-bundle.test.mjs PP1c_*` node:test | fake barrier, writer/session/API restart, pg dump command nonzero/truncated, disk full, media change, interrupted transaction; source/older bundle unchanged | C07/C08 |
 | `local-recovery-verify.test.mjs PP1c_*` node:test | exact PP1a image/jar/dist/ingress and matching manifest dump/media/Flyway hashes | C09/C10/C15/C16 |
 | `local-restore.test.mjs PP1c_*` node:test | no write before preflight; fake transaction/adapter order; fault after each stage; source never touched | C11–C16 |
-| `RestoreSessionRevokerIntegrationTests.PP1c_*` PG integration | all old sessions revoked and one AUTH event atomic; injected audit/commit failure rolls back; no API start | C13/C14 |
-| `e2e-pp1-local/recovery.spec.ts PP1cFM15_isolatedRestoreJourney` Playwright | root-owned restored project only; login via test-owned account, public/private distinction, revision/version, API process restart; no skip treated success | C17 |
+| `RestoreSessionRevokerIntegrationTests.PP1c_*` PG integration | all old sessions revoked and one AUTH event atomic; audit/pre-commit failure rolls back; unknown commit does not claim rollback; no API start | C13/C14 |
+| `e2e-pp1-local/recovery.spec.ts PP1cFM15_isolatedRestoreJourney` Playwright | root-owned restored project only; login via test-owned account, public/private distinction, revision/version, API process restart; no skip treated success | T04 作者；C17 真runtime執行 |
 
 Focused commands (future implementation only; not executed while authoring):
 
@@ -608,14 +744,14 @@ Actual local drill command composition still must be frozen against PP1b G07 too
 
 | Failure | Result | Card |
 | --- | --- | --- |
-| bad schema/secret ref/wrong run ID | exit 2/3, no spawn/write, fixed error only | C01–06 |
-| lease unavailable, duplicate operation, live API/PG session, startup/restart writer | exit 4/6, no capture; common lock/reservation follows PP1b UNKNOWN retention rule | C07–08 |
+| bad schema/secret ref/wrong run ID | exit 依父契約 §8，no spawn/write, fixed error only | C01–06 |
+| lease unavailable, duplicate operation, live API/PG session, startup/restart writer | exit 4/7，no capture; common lock/reservation follows PP1b UNKNOWN retention rule | C07–08 |
 | missing/changed/orphan unsafe bytes, image partial variants, SQL/read failure | no local-complete marker; retain all source files/rows | C03–08 |
 | dump process failure despite partial output, copy/disk/hash failure | staging retained as failure evidence, old success immutable, no destructive cleanup | C07–08 |
 | altered/mismatched manifest, dump, media, image, jar, dist, Flyway row | reject before target writes | C09–10 |
 | nonblank, source-equal, shared/unknown target project/volume | reject before first mutating command; no rm/down-v | C11–12 |
 | partial pg restore, media hash mismatch, raw 20-table difference | target remains isolated; no session revoke/API start; don't resume into same target | C12–14 |
-| revoke/audit/commit fault | same transaction rollback; API start 0; no verified receipt | C13–14 |
+| revoke/audit/commit fault | commit 前失敗 rollback；commit 回應未知不得聲稱 rollback；API start 0；無 verified receipt | C13–14 |
 | revoke committed then crash, matched API start/smoke fails | preserve target stopped/isolated; same incident time; next attempt requires new operation ID+fresh target+original complete bundle | C15–17 |
 | genuine offsite/key/notification/scheduler failure | PP1c makes no success claim; PP1d/owner decision required; current evidence remains local-only | PP1d |
 
@@ -625,7 +761,10 @@ These are not silently assumed; until root resolves the design/API questions thi
 
 | Decision/blocker | Proposal for root review | Blocks |
 | --- | --- | --- |
-| Shared LeaseV2 implementation/API | Architecture is specified in §4.2 but remains unimplemented and unaccepted. Root must verify G06/G07 freeze, preserve v1 regression semantics, exact registry paths/schema and account attachment hooks before C07/L/R cards. | L01–L03, C07 onward |
+| D01 本地實體 helper adapter（設計未封板，不只是未跑測試） | 必須提供每個 kind 的完整 image ID/executable/argv/env/mount/network/uid:gid/security vector 與 secret-file routing；JDBC proposal 只有 logical protocol。選項 A：在 PP1a 已批准 image/工具上以唯讀 probe 固定 vector；選項 B：若無法滿足，另提最小 adapter/image 變更由 root/owner 審核，不能在此擴權。沒有實測 UID/filesystem/tool 來源前不得填猜測值。 | H01/H02/H04、C06/C08/C12/R04、C17 |
+| D02 raw comparison receipt（設計未封板） | 尚需固定 raw receipt 的逐 table schema/rows/count、file comparison 與 source/target lineage 欄位，以及成功／失敗 payload。選項 A：明列固定20-table/hash比較 receipt；選項 B：只存兩份完整 Inventory hashes 並要求 verifier 重新比完整 payload；兩者都不可只以 adapter boolean 作證。未選前 rawProofSha256 不是可用 API。 | C09/C10/C12/C14、ProofV1 |
+| D03 browser/socket/config/允許 delta（設計未封板） | T04 擁有 recovery.spec.ts 與既有 config 的最小 opt-in；T03 擁有 host one-use socket。仍須固定 socket path/owner/peer驗證/request-response/EOF/timeout、child 網路 origin/CA fixture、smoke receipt assertion keys，以及具名 test-owned session/audit/entry/revision/attachment delta。選項 A：沿既有 PP1a helper 加 restore-only fixture；選項 B：若 config 無法隔離，另提獨立 config/path 白名單審查。未選不新增 arbitrary URL/env bypass。 | T03/T04、C15/C16/C17、smokeSha256 |
+| Shared LeaseV2 implementation/API | Architecture is specified in §4.2 but remains unimplemented and unaccepted. Root must verify G06/G07 freeze, preserve v1 regression semantics, exact registry paths/schema and account attachment hooks before C07/L/R cards. | L01–L05, C07 onward |
 | Bundle has raw DB credentials/session/content, private inventory rows, media | local root/run/artifact roots0700; files0600; no raw inventory stdout/log; path/link checks, fixed owned copy; keep local-copy state separate from external/offsite gate. | all artifact cards |
 | Restore identity state intentionally changes sessions and app may make normal startup writes | raw all-20-table match before session transaction; after it allow only changed session revoked_at values and exactly one specified AUTH row. Startup allowance defaults to zero; any other write is STARTUP_MUTATION and returns for a new decision. PP1a/PP1b verifiers provide freshness truth. | C14–17 |
 | Session revocation helper/API ownership unclear | The event action/detail/surface is fixed in PP1-recovery §5.4; implementation must use one datasource transaction, pre-generated audit ID and `JdbcIdentityStore.insertAudit`, with real PG rollback evidence. Adapter/class/test wiring remains unimplemented. | C13–14 |
@@ -633,12 +772,12 @@ These are not silently assumed; until root resolves the design/API questions thi
 | filesystem file identity / hardlink proof portability | component Linux PP1a scope; use `lstat`, no-follow open and link-count check; if host API cannot prove no hardlink or directory durability, reject ADAPTER_UNSEALED, do not relax on unsupported fs. | C03–08 |
 | encryption format/key source | no encryption invented for a same-host fixture. PD03 must name existing offsite tool, recipient/key custody and disaster-retrievable key proof. Any Node crypto envelope is a separate root-approved proposal with versioned format and key lifecycle; no key in source host alone. | Offsite PP1d/formal gate |
 | PP1c acceptance vs approved daily/offsite/RPO/RTO AC03 | Root must record two distinct states: local DB/media restore verified vs full AC03 not satisfied until external destination, key recovery, schedule and real measured RPO/RTO evidence. Local second directory is never marked `VERIFIED_OFFSITE`. | C17/whole PP1 |
-| RTO start and timing | use PP1 owner's incidentStartedAt; isolated drill start equals retrieval start; monotonic elapsed plus UTC consistency, include operator/tool/artifact acquisition. No reset timer across fresh-target retry. Root confirms exact receipt math before code. | C17 |
-| actual startup mutations | default allowed startup delta is zero; same-version `Flyway validate` only and no schema upgrade. Any observed non-revoke write leaves isolated and returns for a new owner decision; no prefilled allowlist. | C15–17 |
+| RTO start and timing | use PP1 owner's incidentStartedAt; isolated drill start equals retrieval start; monotonic elapsed plus UTC consistency, include operator/tool/artifact acquisition. No reset timer across fresh-target retry. Exact math is restored in parent §5.4; runtime clocks/measurements still require evidence. | C17 |
+| actual startup mutations | default allowed startup delta is zero; same-version Flyway history/checksum verification only and no schema upgrade. Any observed non-revoke write leaves isolated and returns for a new owner decision; no prefilled allowlist. | C15–17 |
 
 Five-card weaker-worker walk:
 
-1. **C04a/C04b inventory Green:** implementer knows the exact relation/column-name allowlists from the pinned migration release, catalog metadata and full Flyway checksums; C04a owns DB rows/schema, C04b composes those rows with media files/variants. Unsupported extra table/column fails before hashing. A missing declared web variant fails even if original exists; a file without DB row is copied/classified, never deleted.
+1. **C04a/C04b/C04c/C04d inventory Green:** implementer knows the exact relation/column-name allowlists from the pinned migration release, catalog metadata and full Flyway checksums; C04a owns row extraction, C04d catalog/hash, C04c safe filesystem, C04b asset/variant/image composition. Unsupported extra table/column fails before hashing. A missing declared web variant fails even if original exists; a file without DB row is copied/classified, never deleted.
 2. **C08 capture:** writer proof comes from PP1b lease/session inspector—not HTTP method filtering. A DB or API restart race invalidates quiescence. Dump, media, manifest and all PP1a artifact provenance share one backupId and release binding. Existing last bundle remains untouched; local copy cannot upgrade itself to offsite success.
 3. **C10 verifier:** checksum equality alone is not sufficient: target/source IDs, image labels/actual jar, dist/ingress, Flyway rows, dump, inventory and every media object must bind to same run/release. Corrupt marker or a different worktree dirty build rejects before restore.
 4. **C12/C14 restore:** target is newly created and distinct; never empty an existing one. Restore full DB then media, compare all 20 raw tables and file hashes. Only afterward execute one atomic session revoke+AUTH row; audit failure leaves API stopped. API never starts before commit receipt.
@@ -651,8 +790,8 @@ PP1d must separately detail upgrade failure before/during/after migration with m
 - [x] Task scope limited to PP1c and parent PP1-recovery DRAFT documents plus own report/evidence; no product tests/code/deployment/offsite action.
 - [x] Source-mapped media write/decode, session-touch/scheduler writers, migration set, PP1a tool/runtime receipt and PP1b common lease/recovery gate.
 - [x] Defined candidate local bundle/release/hash/schema and full raw DB+media blank restore order; local copy explicitly not offsite.
-- [x] 33 candidate cards in four ≤30-card subwaves; all individual estimates ≤400 including tests; C04 split before implementation because the combined scope exceeded a credible single-card estimate.
-- [ ] Root freezes shared v2 lease/helper/target API, exact ownership boundaries, and account-authority prerequisite before implementation.
+- [x] 39 candidate cards in four ≤30-card subwaves (9/11/8/11); C04/L02/H02 split by responsibility. Estimates include tests and remain unmeasured; split again if actual scope exceeds 400.
+- [ ] Root resolves D01/D02/D03 and independently reviews new §4.2a–e proposals; then freezes shared v2 lease/helper/target API and account-authority prerequisite. Logical schemas alone do not make this implementable or DOC_READY.
 - [ ] Root independently reviews final card map/weak walk, source hashes and exact local interfaces before assigning any implementation work.
 - [ ] Required docs CI/PR merge occurs; only root changes document state. This DRAFT never marks itself DOC_READY.
 - [ ] Product implementation, unit/PG/integration checks and real isolated local restore evidence completed; not performed by this author.

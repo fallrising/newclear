@@ -1,0 +1,12 @@
+{
+  "archived_at": "2026-10-23T07:31:09.173001Z",
+  "scope": "in-place source preservation; no data/settings/service mutation",
+  "files": {
+    "tools/cc-quota/cc_quota.py": "8cb0f70cc1f9670c2ad74b25d9a7e5faaaab4c1f78f1ed1ac03d9725ac02e977",
+    "tools/cc-quota/install.sh": "ef877ada9e2b521a5c34fc3d5756f9c6906fba79aecf436891b3786a2bb383c7",
+    "tools/cc-quota/tests/test_cc_quota.py": "a46de1bc23372da51f7eb13be155dccdad4e651310a6bc7117671a37a4ca58aa",
+    "tools/cc-quota/tests/test_credentials.py": "21ed1ff653992538091752b8d02cd9a78f06c7f5f8ea2b113c73d5bbcc592295",
+    "tools/cc-quota/tests/test_install.py": "8e8e067f77bdf11bfd694e8f5d9f3b0379eee42d95a870326c0f56b11a53311a",
+    "tools/cc-quota/tests_macos/test_native.py": "a0845d907738d9b85de782cca6a4076795d57b4f8a6f5ae7396b0fa492b7bf57"
+  }
+}

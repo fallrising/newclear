@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -146,13 +147,15 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 	}
 	r := &replica{topic: topic, partition: spec.ID, replicas: spec.Replicas, log: log}
 	b.replicas[peer.GroupID(topic, spec.ID)] = r
-	electionTicks, err := raft.RandomElectionTimeout(b.config.Random)
+	nextElectionTimeout := func() (uint64, error) { return raft.RandomElectionTimeout(b.config.Random) }
+	electionTicks, err := nextElectionTimeout()
 	if err != nil {
 		return err
 	}
 	node, err := raft.NewNode(raft.Config{
 		Identity: raft.Identity{ClusterID: b.manifest.ClusterID, ConfigHash: b.configHash, GroupID: peer.GroupID(topic, spec.ID)},
 		NodeID:   b.self.ID, Voters: spec.Replicas, ElectionTimeoutTicks: electionTicks, HeartbeatTicks: raft.DefaultHeartbeatTicks,
+		NextElectionTimeout: nextElectionTimeout,
 	}, log)
 	if err != nil {
 		return err
@@ -165,16 +168,16 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 				remotes[id] = b.peers[id]
 			}
 		}
-		if r.outbox, err = partition.NewOutbox(b.registry, remotes, 0, 0); err != nil {
+		if r.outbox, err = partition.NewOutbox(b.registry, remotes, 0, 0, b.sendFailureLogger(topic, spec.ID)); err != nil {
 			return err
 		}
 		sender = r.outbox
 	}
-	onRole, onStall := b.roleLogger(topic, spec.ID), b.stallLogger(topic, spec.ID)
+	onRole, onStall, onReject := b.roleLogger(topic, spec.ID), b.stallLogger(topic, spec.ID), b.rejectLogger(topic, spec.ID)
 	if topic == groupsTopic {
 		b.groups, err = group.NewService(group.ServiceConfig{
 			Node: node, Proofs: proofSource{b}, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
-			OnStall: onStall, StorageFailed: log.RecoveryRequired,
+			OnStall: onStall, OnStepRejected: onReject, StorageFailed: log.RecoveryRequired,
 			Coordinator: group.CoordinatorConfig{State: group.Config{Partitions: b.userPartitionCount}},
 		})
 		if err != nil {
@@ -184,7 +187,7 @@ func (b *Broker) openReplica(topic string, spec config.Partition) error {
 	} else {
 		r.data, err = partition.NewData(partition.DataConfig{
 			Topic: topic, Partition: spec.ID, Node: node, Log: log, Clock: b.config.Clock, Sender: sender, OnRoleChange: onRole,
-			OnStall: onStall, StorageFailed: log.RecoveryRequired, OnISRShrink: b.isrLogger(topic, spec.ID),
+			OnStall: onStall, OnStepRejected: onReject, StorageFailed: log.RecoveryRequired, OnISRShrink: b.isrLogger(topic, spec.ID),
 			Replication: replicationConfig(b.self.ID, spec),
 		})
 		if err != nil {
@@ -207,6 +210,47 @@ func (b *Broker) stallLogger(topic string, id uint32) func(string, time.Duration
 	return func(kind string, held time.Duration) {
 		b.logger.Warn("actor stall", "topic", topic, "partition", id, "kind", kind,
 			"held_ms", held.Milliseconds(), "threshold_ms", partition.StallThreshold.Milliseconds())
+	}
+}
+
+// rejectLogger logs peer messages Raft refused to step, at most once a
+// second per replica with a count of the ones it skipped. It runs on the
+// replica's actor goroutine, so its state needs no lock.
+func (b *Broker) rejectLogger(topic string, id uint32) func(raft.Message, error) {
+	var last time.Time
+	skipped := 0
+	return func(message raft.Message, err error) {
+		now := b.config.Clock.Now()
+		if now.Sub(last) < time.Second {
+			skipped++
+			return
+		}
+		b.logger.Warn("raft step rejected", "topic", topic, "partition", id, "kind", string(message.Kind),
+			"from", message.From, "term", message.Term, "skipped", skipped, "error", err.Error())
+		last, skipped = now, 0
+	}
+}
+
+// sendFailureLogger logs failed peer calls, at most once a second per peer
+// link with a count of the ones it skipped. Link workers for different
+// peers call it concurrently, so a mutex guards the per-peer state.
+func (b *Broker) sendFailureLogger(topic string, id uint32) func(uint32, raft.Message, error) {
+	var mu sync.Mutex
+	last := map[uint32]time.Time{}
+	skipped := map[uint32]int{}
+	return func(peer uint32, message raft.Message, err error) {
+		now := b.config.Clock.Now()
+		mu.Lock()
+		if now.Sub(last[peer]) < time.Second {
+			skipped[peer]++
+			mu.Unlock()
+			return
+		}
+		count := skipped[peer]
+		last[peer], skipped[peer] = now, 0
+		mu.Unlock()
+		b.logger.Warn("peer send failed", "topic", topic, "partition", id, "peer", peer, "kind", string(message.Kind),
+			"term", message.Term, "skipped", count, "error", err.Error())
 	}
 }
 

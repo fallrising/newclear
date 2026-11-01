@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "strata/qwen3.8-flash-next-q2_0",
+  "small_model": "strata/qwen3.8-flash-next-q2_0",
+  "enabled_providers": ["strata"],
+  "autoupdate": false,
+  "share": "disabled",
+  "snapshot": false,
+  "formatter": false,
+  "lsp": false,
+  "compaction": {"auto": true, "buffer": 13672},
+  "permission": {
+    "*": "deny",
+    "read": "allow", "glob": "allow", "grep": "allow", "list": "allow",
+    "edit": "allow", "bash": "allow", "todowrite": "allow"
+  },
+  "provider": {
+    "strata": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Strata localhost only",
+      "options": {"baseURL": "http://127.0.0.1:8080/v1", "apiKey": "strata-local", "timeout": 600000},
+      "models": {
+        "qwen3.8-flash-next-q2_0": {
+          "name": "Qwen3.8 Flash Next local",
+          "tool_call": true,
+          "reasoning": false,
+          "limit": {"context": 32768, "input": 28672, "output": 4096}
+        }
+      }
+    }
+  }
+}

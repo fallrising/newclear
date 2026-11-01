@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "node_id": "N02",
+  "status": "frozen",
+  "spec_version": "1.0.2",
+  "spec_sha256": "b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0",
+  "source_files": [
+    "crates/core/src/contracts/N02_workspace.rs",
+    "crates/core/src/contracts/N02_path.rs"
+  ],
+  "source_hash_algorithm": "sha256(path + NUL + bytes + NUL, in source_files order)",
+  "source_sha256": "2a8ab537487ac106d5aee92e4420a555197aee732725f42ae11fb627cb5a11c9",
+  "commands": [
+    "add_workspace_root",
+    "create_workspace",
+    "detach_workspace_root",
+    "list_directory",
+    "list_recent_documents",
+    "list_workspaces",
+    "open_document",
+    "read_workspace_asset",
+    "resolve_local_document_link"
+  ],
+  "generator_version": "1.1.0",
+  "frozen_at": "2026-10-23T03:20:43Z"
+}

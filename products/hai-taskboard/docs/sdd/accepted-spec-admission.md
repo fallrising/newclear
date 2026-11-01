@@ -5,8 +5,12 @@ Parents: `../SDD.md` HAI-AUTH-001..006, HAI-STATE-001, HAI-DONE-004 and HAI-RECO
 ADR-001/004/005; `reconciliation.md` and `domain-and-gates.md`.
 H01 is this accepted predecessor design. The ordered runner and separately assigned V2
 storage/migration child are accepted in `ordered-migrations.md` and
-`acceptance-persistence-schema.md`. Commands, ports and admission workflow oracles remain
-**Proposed/NotRun**; full H06..H09 remains **Specified/NotRun**.
+`acceptance-persistence-schema.md`. The bounded durable proposal command/ports are now accepted
+locally under `durable-proposal-command.md` HAI-PROPOSE-001..004 (T-981/T-982 and root gates,
+2026-10-23). Explicit first acceptance is accepted locally under `initial-specification-command.md`
+HAI-FIRST001..006 after T-986/989/999 and root final gates. Current-head consumers and activation
+remain **Proposed/NotRun**;
+full H06..H09 remains **Specified/NotRun**.
 
 ## Existing boundary and ownership
 
@@ -46,7 +50,7 @@ acceptance. `service.SpecificationPolicy.ValidFor` is a boolean readiness seam, 
 **HAI-ADMISSION-003**: Authenticate and authorize the project/repository binding, then resolve a
 permitted local ref once to an immutable commit. Read commit/tree/blob objects outside SQLite write
 locks, never working-tree bytes or a second moving-ref resolution. No fetch/network or execution of
-repository instructions is implied. Reject unapproved repository, dirty-tree input, symlink/submodule
+repository instructions is implied. Reject unapproved repository, working-tree input mode, symlink/submodule
 entries, absolute/traversal paths, malformed OIDs, digest mismatch, unsupported manifest schema,
 duplicate/unmapped required nodes, dangling edges, cycles and unresolved required tombstones.
 Proposed V1 limits: 1 MiB manifest, 10,000 nodes, 20,000 edges, 10 MiB per blob, 50 MiB total;
@@ -110,8 +114,9 @@ audit remains authority, with no Markdown synchronization or event-sourced recon
 ## Durable oracle contract and child scopes
 
 The migration oracle has bounded runner/V2 storage evidence in the separate mini-SDDs; it does
-not prove operator acceptance. All other oracles here remain **Proposed/NotRun**, even where
-pure-kernel tests already exist. Each child
+not prove operator acceptance. The proposal oracle has bounded durable service evidence under
+`durable-proposal-command.md`; concrete runtime composition is a separate child. Remaining
+oracles here stay **Proposed/NotRun**, even where pure-kernel tests already exist. Each child
 must receive a separate bounded assignment and write its named Red test before production behavior.
 
 | Oracle | Required positive/negative durable assertion | Child scope |

@@ -13,13 +13,13 @@ use crate::command::{primary_key, route_class, Command, RouteClass};
 use crate::config::Config;
 use crate::error::CommandError;
 use crate::protocol::frame::Reply;
-use crate::runtime::router::{ShardClient, ShardMap};
+use crate::runtime::router::{ReplyReceiver, ShardClient, ShardMap};
 use crate::storage::shard::{decode_scan_cursor, encode_scan_cursor, Shard};
 use crate::telemetry::ServerInfo;
 
 pub enum DispatchResult {
     Immediate(Reply),
-    Pending(oneshot::Receiver<Reply>),
+    Pending(ReplyReceiver),
 }
 
 pub struct Dispatcher {
@@ -49,7 +49,7 @@ impl Dispatcher {
                     };
                     let _ = tx.send(result);
                 });
-                DispatchResult::Pending(rx)
+                DispatchResult::Pending(ReplyReceiver::Local(rx))
             }
             RouteClass::Broadcast => DispatchResult::Immediate(self.dispatch_broadcast(cmd)),
             RouteClass::CursorTargeted => DispatchResult::Immediate(self.dispatch_scan(cmd)),
@@ -175,12 +175,7 @@ impl Dispatcher {
         }
     }
 
-    fn exec_local_on(
-        &self,
-        cmd: Command,
-        shards: &mut [Shard],
-        local_shard_base: usize,
-    ) -> Reply {
+    fn exec_local_on(&self, cmd: Command, shards: &mut [Shard], local_shard_base: usize) -> Reply {
         match cmd {
             Command::RandomKey => {
                 for shard in shards.iter() {
@@ -284,9 +279,10 @@ impl Dispatcher {
                 "invalid scan".into(),
             );
         };
-        let (shard_id, local_cursor) =
-            decode_scan_cursor(cursor, self.shard_map.num_shards());
-        let pat = pattern.as_ref().map(|p| String::from_utf8_lossy(p).into_owned());
+        let (shard_id, local_cursor) = decode_scan_cursor(cursor, self.shard_map.num_shards());
+        let pat = pattern
+            .as_ref()
+            .map(|p| String::from_utf8_lossy(p).into_owned());
         let mut shards = self.local_shards.borrow_mut();
         let idx = shard_id % shards.len();
         let shard = &mut shards[idx];
@@ -300,7 +296,11 @@ impl Dispatcher {
             0
         } else {
             encode_scan_cursor(
-                if next_local == 0 { next_shard } else { shard_id },
+                if next_local == 0 {
+                    next_shard
+                } else {
+                    shard_id
+                },
                 next_local,
                 self.shard_map.num_shards(),
             )
@@ -328,9 +328,10 @@ impl Dispatcher {
                 "invalid scan".into(),
             );
         };
-        let (shard_id, local_cursor) =
-            decode_scan_cursor(cursor, self.shard_map.num_shards());
-        let pat = pattern.as_ref().map(|p| String::from_utf8_lossy(p).into_owned());
+        let (shard_id, local_cursor) = decode_scan_cursor(cursor, self.shard_map.num_shards());
+        let pat = pattern
+            .as_ref()
+            .map(|p| String::from_utf8_lossy(p).into_owned());
         let idx = shard_id.saturating_sub(local_shard_base);
         let idx = idx.min(shards.len().saturating_sub(1));
         let shard = &mut shards[idx];
@@ -344,7 +345,11 @@ impl Dispatcher {
             0
         } else {
             encode_scan_cursor(
-                if next_local == 0 { next_shard } else { shard_id },
+                if next_local == 0 {
+                    next_shard
+                } else {
+                    shard_id
+                },
                 next_local,
                 self.shard_map.num_shards(),
             )
@@ -383,12 +388,8 @@ async fn multi_decompose_async(d: &Dispatcher, cmd: Command) -> Reply {
         }
         Command::MSetNx(pairs) => {
             for (k, _) in &pairs {
-                let reply = send_shard(
-                    d,
-                    d.shard_map.shard_of(k),
-                    Command::Exists(vec![k.clone()]),
-                )
-                .await;
+                let reply =
+                    send_shard(d, d.shard_map.shard_of(k), Command::Exists(vec![k.clone()])).await;
                 if let Reply::Int(n) = reply {
                     if n > 0 {
                         return Reply::Int(0);
@@ -404,10 +405,7 @@ async fn multi_decompose_async(d: &Dispatcher, cmd: Command) -> Reply {
         Command::Del(keys) => {
             let mut groups: HashMap<usize, Vec<Bytes>> = HashMap::new();
             for k in keys {
-                groups
-                    .entry(d.shard_map.shard_of(&k))
-                    .or_default()
-                    .push(k);
+                groups.entry(d.shard_map.shard_of(&k)).or_default().push(k);
             }
             let mut total = 0i64;
             for (shard_id, ks) in groups {
@@ -421,10 +419,7 @@ async fn multi_decompose_async(d: &Dispatcher, cmd: Command) -> Reply {
         Command::Exists(keys) => {
             let mut groups: HashMap<usize, Vec<Bytes>> = HashMap::new();
             for k in keys {
-                groups
-                    .entry(d.shard_map.shard_of(&k))
-                    .or_default()
-                    .push(k);
+                groups.entry(d.shard_map.shard_of(&k)).or_default().push(k);
             }
             let mut total = 0i64;
             for (shard_id, ks) in groups {
@@ -444,12 +439,8 @@ async fn multi_gather_async(d: &Dispatcher, cmd: Command) -> Reply {
         Command::SInter(keys) => set_gather_async(d, keys, SetOp::Inter).await,
         Command::SUnion(keys) => set_gather_async(d, keys, SetOp::Union).await,
         Command::SDiff(keys) => set_gather_async(d, keys, SetOp::Diff).await,
-        Command::SInterStore(dst, keys) => {
-            set_store_async(d, dst, keys, SetOp::Inter).await
-        }
-        Command::SUnionStore(dst, keys) => {
-            set_store_async(d, dst, keys, SetOp::Union).await
-        }
+        Command::SInterStore(dst, keys) => set_store_async(d, dst, keys, SetOp::Inter).await,
+        Command::SUnionStore(dst, keys) => set_store_async(d, dst, keys, SetOp::Union).await,
         Command::SDiffStore(dst, keys) => set_store_async(d, dst, keys, SetOp::Diff).await,
         other => d.apply_local(0, other),
     }

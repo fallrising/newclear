@@ -1,0 +1,42 @@
+{
+  "source_commit": "0aac18413a3b39043706f17b8e5f801f41573d70",
+  "java": "25.0.4.1+1",
+  "node": "24.18.0",
+  "gradle_build": {
+    "command": "./gradlew build --no-daemon --no-parallel --continue",
+    "exit": 0,
+    "tests": 119,
+    "fail": 0,
+    "skip": 0
+  },
+  "go": {
+    "command": "go test ./...",
+    "exit": 1,
+    "result": "import panic; not repaired in documentation slice"
+  },
+  "frontend": {
+    "commands": [
+      "pnpm install --frozen-lockfile",
+      "pnpm test",
+      "pnpm build"
+    ],
+    "exit": 0,
+    "tests": 5,
+    "files": 4
+  },
+  "deploy_models": {
+    "command": "make validate-deploy",
+    "initial_exit": 2,
+    "initial_reason": "DOCKER_CONFIG not selected; compose unavailable",
+    "configured_command": "DOCKER_CONFIG=/tmp/ojbquay-docker-config make validate-deploy",
+    "exit": 0
+  },
+  "not_run": [
+    "same-source 11-service Compose",
+    "Chromium golden path",
+    "Java-Go interop",
+    "live LKG outage",
+    "live offset-reset failure matrix",
+    "strict retry rerun"
+  ]
+}

@@ -1,0 +1,5 @@
+--- FAIL: TestReviewPollingAndActions (0.01s)
+    pages_test.go:190: row fragment root changed
+FAIL
+FAIL	github.com/fallrising/newclear/specs/fleet/internal/ui	0.011s
+FAIL

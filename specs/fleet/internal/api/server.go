@@ -19,13 +19,13 @@ import (
 )
 
 type Server struct {
-	cfg      config.Fleetd
-	st       *Store
-	ing      ingress.Reconciler
-	log      *slog.Logger
-	mux      *http.ServeMux
-	html     HTMLPages
-	now      func() time.Time
+	cfg       config.Fleetd
+	st        *Store
+	ing       ingress.Reconciler
+	log       *slog.Logger
+	mux       *http.ServeMux
+	html      HTMLPages
+	now       func() time.Time
 	ingressNA bool
 }
 
@@ -175,31 +175,30 @@ func (s *Server) enqueueService(name string) {
 			return
 		}
 		view := ingress.ServiceView{
-			Name:            svc.Name,
-			NodeID:          svc.NodeID,
-			TunnelID:        n.TunnelID,
-			DesiredState:    svc.DesiredState,
-			ExposeMode:      svc.ExposeMode,
-			Hostname:        svc.Hostname,
-			HostPort:        svc.HostPort,
-			ContainerPort:   svc.ContainerPort,
-			DNSRecordID:     svc.CFDNSRecordID,
-			AccessAppID:     svc.CFAccessAppID,
-			AccessPolicyID:  svc.CFAccessPolicyID,
-			HostnameRouteID: svc.CFHostnameRouteID,
+			Name:           svc.Name,
+			NodeID:         svc.NodeID,
+			TunnelID:       n.TunnelID,
+			DesiredState:   svc.DesiredState,
+			ExposeMode:     svc.ExposeMode,
+			Hostname:       svc.Hostname,
+			HostPort:       svc.HostPort,
+			ContainerPort:  svc.ContainerPort,
+			DNSRecordID:    svc.CFDNSRecordID,
+			AccessAppID:    svc.CFAccessAppID,
+			AccessPolicyID: svc.CFAccessPolicyID,
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 		if err := s.ing.ReconcileService(ctx, view); err != nil {
 			s.log.Error("cf_error", "service", name, "err", err.Error())
-			_ = s.st.SetIngress(name, "error", err.Error(), svc.CFDNSRecordID, svc.CFAccessAppID, svc.CFAccessPolicyID, svc.CFHostnameRouteID)
+			_ = s.st.SetIngressStatus(name, "error", err.Error())
 			return
 		}
 		st := "ok"
 		if s.ingressNA {
 			st = "na"
 		}
-		_ = s.st.SetIngress(name, st, "", svc.CFDNSRecordID, svc.CFAccessAppID, svc.CFAccessPolicyID, svc.CFHostnameRouteID)
+		_ = s.st.SetIngressStatus(name, st, "")
 	}()
 }
 

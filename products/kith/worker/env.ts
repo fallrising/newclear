@@ -1,4 +1,6 @@
 export type Env = {
+  KITH_MAX_API_REQUESTS_PER_MINUTE?: string;
+  KITH_MAX_LOGIN_ATTEMPTS_PER_MINUTE?: string;
   DB: D1Database;
   SESSIONS: KVNamespace;
   ROOM: DurableObjectNamespace;
@@ -11,6 +13,10 @@ export type Env = {
   ff_ambient: string;
   ff_providers?: string;
   ff_drafts?: string;
+  KITH_PAID_ENABLED?: string;
+  KITH_MAX_PAID_ATTEMPTS_PER_DAY?: string;
+  KITH_MAX_AGENT_ATTEMPTS_PER_DAY?: string;
+  KITH_MAX_PAID_CONCURRENCY?: string;
   KITH_DEV_ALLOW_HTTP_PROVIDERS?: string;
   KITH_SECRETS_KEY?: string;
   XAI_API_KEY?: string;

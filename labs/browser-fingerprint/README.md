@@ -1,5 +1,8 @@
 # Daylight · 瀏覽器設備觀測實驗
 
+> 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。2026-10-23 本地 Chromium 五步與記錄失敗旅程已驗證，compiler 安裝後 race 與 hosted CI 亦通過；程式整合見 [PR #533](https://github.com/fallrising/newclear/pull/533)，未部署。詳見 [本次證據](docs/evidence/2026-10-23-local.md)。
+
+
 > 有界測試 lab；投入與文件檔位尚未分級。見 [Portfolio](../../PORTFOLIO.md) 與[文件政策](../../docs/portfolio-doc-tiers.md)。
 
 繁體中文任務工作台，使用原生 HTML、CSS、JavaScript 與 Go 標準函式庫。Go 提供靜態頁面、記憶體 mock CRUD API，以及本機 JSONL 設備與操作觀測。用途是比較不同瀏覽器／computer-use 的可觀測訊號；指紋無法證明個人身分或真人／AI。
@@ -18,10 +21,12 @@ go run .
 ```sh
 go test ./...
 go vet ./...
-go build -o .runtime/daylight-server.exe .
+go build -o .runtime/daylight-server .
+node tests/analyzer.test.cjs
+node tests/tutorial.test.cjs
 ```
 
-建置範例採 Windows 檔名；其他平台可改為 `.runtime/daylight-server`。`package.json` 提供相同的 `start`、`test`、`build` 命令，需要 Go 在 PATH；服務本身不需 npm 或 Node.js。
+Windows 可加 `.exe` 副檔名。`package.json` 提供相同的 `start`、`test`、`build` 命令，需要 Go 在 PATH；服務本身不需 npm 或 Node.js。
 
 | 環境變數 | 預設 | 用途 |
 | --- | --- | --- |
@@ -88,13 +93,13 @@ PowerShell 腳本預設私人模式；實際信箱只在執行時傳入：
 - WebGL 資訊與固定 Canvas 樣本摘要；操作事件、任務 ID、搜尋字數、相對時間、`isTrusted` 等訊號。
 - 伺服器收到的時間、路徑、方法、狀態、耗時、連線來源與指定 headers。轉送欄位是未驗證的回報，標記 `forwardedHeadersTrusted: false`。
 
-事件觀測不包含搜尋或表單文字；CRUD API 仍须接收任務內容。未收集帳戶資料、驗證 cookie、精確位置、media-device IDs、WebRTC local IP 或字型清單。
+事件觀測不包含搜尋或表單文字；CRUD API 仍须接收任務內容。伺服器依 `fingerprint_schema.go` 的遞迴欄位白名單先過濾再寫入／雜湊，包含 UA-CH、plugins、MIME、rendering 陣列與物件；未知欄位丟棄，已知欄位型別錯誤回 400。可用 API 的 null 保留。未收集帳戶資料、驗證 cookie、精確位置、media-device IDs、WebRTC local IP 或字型清單。
 
 一般網頁無法完整列出瀏覽器擴充套件及其版本；`navigator.plugins` 可能僅回傳固定 PDF 相容項目，plugin 版本與擴充套件清單標為不可取得。[Plugin API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/plugins) UA 可能縮減，Windows UA-CH `platformVersion` 也不是精確 OS build。[Microsoft 版本說明](https://learn.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11)
 
 `webdriver`、事件與客戶端資料可受環境影響或被修改，不能單獨證明真人／AI。[webdriver](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/webdriver) `fingerprintId` 是選定設備欄位的實驗性摘要，排除 IP、viewport、cookie、session 與時間；不保證唯一或永久穩定。`daylight_session` cookie 關聯同一工作階段，採 `HttpOnly`、`SameSite=Lax`，HTTPS 轉送時加 `Secure`。
 
-預設 `.runtime/observations` 中有 `requests.jsonl`、`fingerprints.jsonl`、`events.jsonl`，由 `runId`／`sessionId`／`fingerprintId`／`requestId` 關聯。伺服器拒絕將日誌放入 `public`（含 symlink 別名），API 沒有讀取日誌功能。預設日誌與分析結果位於 ignored `.runtime`；自訂路徑須自行排除版本控制，請勿提交實際樣本。
+預設 `.runtime/observations` 中有 `requests.jsonl`、`fingerprints.jsonl`、`events.jsonl`，由 `runId`／`sessionId`／`fingerprintId`／`requestId` 關聯。伺服器拒絕將日誌放入 `public`（含 symlink 別名），API 沒有讀取日誌功能，靜態路由也只接受六個已知資產。預設日誌與分析結果位於 ignored `.runtime`；自訂路徑須自行排除版本控制，請勿提交實際樣本。
 
 完成瀏覽器操作後執行：
 
@@ -107,4 +112,12 @@ node analyze-observations.cjs --help
 
 目錄優先序為 `--log-dir` → `LOG_DIR` → 可選 `.runtime/active-log-dir.txt` → 本 lab 的 `.runtime/observations`。旗標／環境變數的相對路徑以執行目錄解析，pointer 的相對路徑以 lab 解析；分析工具要求實際日誌位於本 lab 內且在 `public` 外。
 
-`--sample` 預設 `computer-use-iab`，須與頁面 `?sample=...` 相符。工具只關聯該樣本的同一 session／run，輸出設備摘要、教學與 CRUD 證據至所選目錄的 `analysis.json`；`--operator` 是自填註記，不能當成已驗證身分。這份來源匯入不含真實指紋、分析結果、截圖、允許信箱或有效 tunnel URL。
+`--sample` 預設 `computer-use-iab`，須與頁面 `?sample=...` 相符。工具只關聯該樣本的同一 session／run，輸出設備摘要、教學與 CRUD 證據至所選目錄的 `analysis.json`；`--operator` 是自填註記，不能當成已驗證身分。只有五個依序、同一任務且未取消的步驟與開始／完成事件相符，分析器才標記 `completed: true`；單獨收到完成事件以 `completionEventRecorded` 表示，不能掩蓋缺漏。JSONL 解析失敗只輸出行號及固定錯誤文字。這份來源不含真實指紋、分析結果、截圖、允許信箱或有效 tunnel URL。
+
+## 可重現瀏覽器驗證
+
+`scripts/verify-browser.cjs` 使用現有 Playwright Core 與 Chromium（僅測試工具，非服務依賴），不安裝套件。透過共用 agent workspace launcher 執行，指定 `GO_BINARY`（預設 `go`）、`PLAYWRIGHT_CORE`（模組路徑）、`CHROMIUM_EXECUTABLE`；Linux 缺中文字型時可提供 `BROWSER_FONT_DIR`。所有建置、快取、私人日誌、截圖與來源 SHA-256 放在 launcher 的 build/evidence 目錄。腳本為 Chromium socket 建立短 `/tmp` symlink，資料仍位於磁碟工作目錄，結束時移除該 alias。
+
+腳本真實操作正常、event write 失敗、fingerprint write 失敗三個五步旅程；失敗注入用 Linux `/dev/full`。同時比對每步 API 狀態、隱藏任務搜尋不得前進、成功旅程 JSONL／分析器及 HTTP 私人日誌負向路徑，最後關閉自建服務與瀏覽器。這是本地 Chromium automation 證據，不是人工或跨瀏覽器／私人 tunnel 認證。一般原生測試與分析器回歸另在 component CI 執行；本地環境需有 C compiler 才可跑 `go test -race ./...`。
+
+教學提示核對 fingerprint 與 event 收據；middleware 的 requests.jsonl 另在回應後寫入，該檔單獨失敗只報 server stderr。分析時仍須檢查 CRUD request 記錄和 parseErrors，不能把 UI 提示視為所有三份日誌的完整性保證。

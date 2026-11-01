@@ -7,8 +7,10 @@
 只依賴 Python 3 標準函式庫。資料源是 Claude Code 自己使用的額度端點
 （/api/oauth/usage，未公開文件，欄位可能變動，所以原始 JSON 一併落庫）。
 """
-import argparse, glob, json, os, sqlite3, subprocess, sys, time, urllib.request
+import argparse, glob, json, math, os, sqlite3, subprocess, sys, time, urllib.request
+from contextlib import closing
 from datetime import datetime, timezone
+from pathlib import Path
 
 CLAUDE_DIR = os.path.expanduser(os.environ.get("CLAUDE_CONFIG_DIR", "~/.claude"))
 DB_PATH = os.path.expanduser(os.environ.get("CC_QUOTA_DB", "~/.local/share/cc-quota/quota.db"))
@@ -23,22 +25,47 @@ MIN_ELAPSED_PCT = 10.0  # 視窗剛開始時 pace 噪音太大，不計算
 
 
 # ---------- 資料源 ----------
+CREDENTIAL_MESSAGES = {
+    "keychain_unavailable": "Keychain未提供憑證；請確認claude登入及Keychain授權",
+    "keychain_timeout": "Keychain讀取逾時；請在Mac完成授權後重試",
+    "file_unavailable": "無法讀取Claude Code憑證檔；請先在本機登入claude",
+    "invalid_credentials": "Claude Code憑證格式無效；請確認claude登入",
+}
+
+
+class CredentialError(RuntimeError):
+    """Only fixed codes/messages can reach logs; never include source contents."""
+    def __init__(self, code):
+        self.code = code if code in CREDENTIAL_MESSAGES else "invalid_credentials"
+        super().__init__(CREDENTIAL_MESSAGES[self.code])
+
+
 def read_token():
-    """macOS 從 Keychain 讀；Linux 從 ~/.claude/.credentials.json 讀。"""
-    raw = None
+    """Read one platform's source, fail closed, and never refresh credentials."""
     if sys.platform == "darwin":
-        r = subprocess.run(["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
-                           capture_output=True, text=True)
-        if r.returncode == 0:
-            raw = r.stdout.strip()
-    if raw is None:
-        p = os.path.join(CLAUDE_DIR, ".credentials.json")
-        if os.path.exists(p):
-            with open(p) as f:
+        try:
+            r = subprocess.run(["/usr/bin/security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
+                               capture_output=True, text=True, timeout=10)
+        except subprocess.TimeoutExpired:
+            raise CredentialError("keychain_timeout") from None
+        except (OSError, UnicodeError):
+            raise CredentialError("keychain_unavailable") from None
+        if r.returncode != 0:
+            raise CredentialError("keychain_unavailable")
+        raw = r.stdout
+    else:
+        try:
+            with open(os.path.join(CLAUDE_DIR, ".credentials.json"), encoding="utf-8") as f:
                 raw = f.read()
-    if not raw:
-        raise RuntimeError("找不到 Claude Code 憑證（請先在這台電腦登入 claude）")
-    return json.loads(raw)["claudeAiOauth"]["accessToken"]
+        except (OSError, UnicodeError):
+            raise CredentialError("file_unavailable") from None
+    try:
+        token = json.loads(raw)["claudeAiOauth"]["accessToken"]
+    except (ValueError, TypeError, KeyError):
+        raise CredentialError("invalid_credentials") from None
+    if not isinstance(token, str) or not token or any(not 33 <= ord(c) <= 126 for c in token):
+        raise CredentialError("invalid_credentials")
+    return token
 
 
 def fetch_usage():
@@ -50,17 +77,20 @@ def fetch_usage():
         "anthropic-beta": "oauth-2025-04-20",
         "Content-Type": "application/json",
     })
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            return json.load(r)
-    except urllib.error.HTTPError as e:
-        if e.code == 401:
-            raise RuntimeError("憑證過期：開一次 claude 讓它自動刷新即可") from e
-        raise
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.load(r)
 
 
 def local_tokens_since(start_ts):
-    """本機 Claude Code 紀錄中、start_ts 之後的 token 加總（僅本機，不含雲端/其他裝置）。"""
+    """Count local usage once per (message ID, request ID), across all files.
+
+    A usable message ID alone is the fallback when request ID is absent. With
+    no message ID, count each valid line separately: neither a missing ID nor
+    a request ID alone proves two records are the same assistant message.
+    Malformed lines/usage (including counts outside SQLite's integer range)
+    are ignored. If valid aggregate counts overflow that range, return unknown
+    counts instead of preventing the quota snapshot from being stored.
+    """
     seen, total, out = set(), 0, 0
     for path in glob.glob(os.path.join(CLAUDE_DIR, "projects", "**", "*.jsonl"), recursive=True):
         try:
@@ -72,20 +102,33 @@ def local_tokens_since(start_ts):
                         continue
                     try:
                         e = json.loads(line)
-                        msg = e.get("message") or {}
+                        if not isinstance(e, dict) or not isinstance(e.get("message"), dict):
+                            continue
+                        msg = e["message"]
                         u = msg.get("usage")
-                        ts = datetime.fromisoformat(e["timestamp"].replace("Z", "+00:00")).timestamp()
-                    except Exception:
+                        if not isinstance(u, dict) or not u:
+                            continue
+                        timestamp = datetime.fromisoformat(e["timestamp"].replace("Z", "+00:00"))
+                        if timestamp.tzinfo is None:
+                            continue
+                        ts = timestamp.timestamp()
+                        counts = [u.get(k, 0) for k in ("input_tokens", "output_tokens", "cache_creation_input_tokens")]
+                        if any(type(n) is not int or not 0 <= n <= 2**63 - 1 for n in counts):
+                            continue
+                    except (ValueError, TypeError, KeyError, AttributeError, OverflowError):
                         continue
-                    if not u or ts < start_ts:
+                    if ts < start_ts:
                         continue
-                    key = (msg.get("id"), e.get("requestId"))  # 串流會重複寫同一則訊息
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    o = u.get("output_tokens", 0) or 0
-                    total += (u.get("input_tokens", 0) or 0) + o + (u.get("cache_creation_input_tokens", 0) or 0)
-                    out += o
+                    mid, rid = msg.get("id"), e.get("requestId")
+                    if isinstance(mid, str) and mid:
+                        key = (mid, rid if isinstance(rid, str) and rid else None)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                    total += sum(counts)
+                    out += counts[1]
+                    if total > 2**63 - 1:
+                        return None, None
         except OSError:
             continue
     return total, out
@@ -93,8 +136,24 @@ def local_tokens_since(start_ts):
 
 # ---------- 計算（純函式，無狀態） ----------
 def compute(name, win, now):
-    used = float(win.get("utilization") or 0)
-    reset = datetime.fromisoformat(win["resets_at"].replace("Z", "+00:00")).timestamp()
+    if not isinstance(win, dict):
+        raise ValueError("invalid quota window")
+    used = win.get("utilization")
+    if type(used) not in (int, float):
+        raise ValueError("invalid utilization")
+    try:
+        used = float(used)
+        if not math.isfinite(used) or used < 0:
+            raise ValueError("invalid utilization")
+        value = win.get("resets_at")
+        if not isinstance(value, str):
+            raise ValueError("invalid reset timestamp")
+        reset_dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if reset_dt.tzinfo is None:
+            raise ValueError("reset timestamp needs timezone")
+        reset = reset_dt.timestamp()
+    except (OverflowError, OSError) as exc:
+        raise ValueError("invalid quota values") from exc
     length = WINDOWS[name]
     start = reset - length
     elapsed_pct = min(100.0, max(0.0, (now - start) / length * 100))
@@ -102,14 +161,20 @@ def compute(name, win, now):
     eta = None  # 照目前速度，幾秒後用完
     if used > 0 and now > start:
         rate = used / (now - start)
-        eta = max(0.0, (100 - used) / rate)
+        if rate > 0:
+            estimate = max(0.0, (100 - used) / rate)
+            # SQLite stores seconds in a signed 64-bit integer. An estimate
+            # beyond that range is unknown, not a reason to lose valid usage.
+            if math.isfinite(estimate) and estimate < 2**63:
+                eta = estimate
     return {
         "window": name,
         "used_pct": used,
         "remaining_pct": min(100.0, max(0.0, 100 - used)),
         "reset_in_s": max(0, int(reset - now)),
-        "elapsed_pct": round(elapsed_pct, 1),
-        "pace": round(pace, 2) if pace is not None else None,
+        # Threshold decisions use full precision; only presentation rounds.
+        "elapsed_pct": elapsed_pct,
+        "pace": pace,
         "exhaust_in_s": int(eta) if eta is not None else None,
         "window_start": int(start),
         "resets_at": int(reset),
@@ -135,7 +200,7 @@ def fmt_dur(s):
 
 # ---------- 儲存 ----------
 def db():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
     c = sqlite3.connect(DB_PATH)
     c.execute("""CREATE TABLE IF NOT EXISTS snapshots(
         ts INTEGER, window TEXT, used_pct REAL, remaining_pct REAL, reset_in_s INTEGER,
@@ -150,68 +215,131 @@ def db():
 def notify(title, body):
     if sys.platform == "darwin":
         subprocess.run(["osascript", "-e",
-                        f'display notification {json.dumps(body)} with title {json.dumps(title)}'])
+                        f'display notification {json.dumps(body, ensure_ascii=False)} with title {json.dumps(title, ensure_ascii=False)}'],
+                       capture_output=True, text=True, timeout=10, check=True)
     else:
         print(f"[notify] {title}: {body}")
 
 
 # ---------- 指令 ----------
+def safe_error(stage, exc):
+    """Never persist exception text: it may contain credentials or HTTP bodies."""
+    if isinstance(exc, CredentialError):
+        return f"{stage}: {exc.code}，{CREDENTIAL_MESSAGES[exc.code]}"
+    if isinstance(exc, urllib.error.HTTPError):
+        if exc.code == 401:
+            return f"{stage}: HTTP 401，憑證過期：開一次 claude 讓它自動刷新即可"
+        return f"{stage}: HTTP {exc.code}"
+    return f"{stage}: {type(exc).__name__}"
+
+
+def send_notification(conn, now, title, body):
+    try:
+        notify(title, body)
+    except Exception as exc:
+        conn.execute("INSERT INTO errors VALUES (?,?)", (now, safe_error("notification failed", exc)))
+        conn.commit()
+
+
 def cmd_collect(args):
     now = int(time.time())
-    conn = db()
-    try:
-        data = fetch_usage()
-    except Exception as e:
-        conn.execute("INSERT INTO errors VALUES (?,?)", (now, str(e)))
+    with closing(db()) as conn:
+        try:
+            data = fetch_usage()
+        except Exception as exc:
+            message = safe_error("fetch failed", exc)
+            conn.execute("INSERT INTO errors VALUES (?,?)", (now, message))
+            conn.commit()
+            send_notification(conn, now, "Claude 額度：採集失敗", message)
+            return 1
+        # Preserve every successful JSON fetch, including invalid schemas, before
+        # validation. Snapshot writes start only after ALL windows are validated.
+        conn.execute("INSERT OR REPLACE INTO raw VALUES (?,?)", (now, json.dumps(data)))
         conn.commit()
-        notify("Claude 額度：採集失敗", str(e))
-        return 1
-    conn.execute("INSERT OR REPLACE INTO raw VALUES (?,?)", (now, json.dumps(data)))
-    alerts = []
-    for name in WINDOWS:
-        win = data.get(name)
-        if not win or not win.get("resets_at"):
-            continue
-        r = compute(name, win, now)
-        tok, out = local_tokens_since(r["window_start"]) if not args.no_tokens else (None, None)
-        v = verdict(r)
-        conn.execute("INSERT OR REPLACE INTO snapshots VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                     (now, name, r["used_pct"], r["remaining_pct"], r["reset_in_s"], r["elapsed_pct"],
-                      r["pace"], r["exhaust_in_s"], r["resets_at"], tok, out, v))
-        if v != "OK":
-            alerts.append(f"{name} {v}: 剩 {r['remaining_pct']:.0f}%，pace {r['pace']}，重置 {fmt_dur(r['reset_in_s'])}")
-    conn.commit()
-    if alerts:
-        notify("Claude 額度偏離", "\n".join(alerts))
+        try:
+            if not isinstance(data, dict):
+                raise ValueError("invalid usage source")
+            results = [compute(name, data[name], now) for name in WINDOWS
+                       if name in data and data[name] is not None]
+            if not results:
+                raise ValueError("no quota windows")
+        except (ValueError, TypeError, OverflowError) as exc:
+            message = safe_error("invalid quota data", exc)
+            conn.execute("INSERT INTO errors VALUES (?,?)", (now, message))
+            conn.commit()
+            send_notification(conn, now, "Claude 額度：採集失敗", message)
+            return 1
+        alerts = []
+        with conn:
+            # A same-second recollection replaces the complete window set,
+            # including optional windows that disappeared from the response.
+            conn.execute("DELETE FROM snapshots WHERE ts=?", (now,))
+            for r in results:
+                name = r["window"]
+                tok, out = local_tokens_since(r["window_start"]) if not args.no_tokens else (None, None)
+                v = verdict(r)
+                conn.execute("INSERT OR REPLACE INTO snapshots VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                             (now, name, r["used_pct"], r["remaining_pct"], r["reset_in_s"], r["elapsed_pct"],
+                              r["pace"], r["exhaust_in_s"], r["resets_at"], tok, out, v))
+                if v != "OK":
+                    pace_text = f"{r['pace']:.2f}" if r['pace'] is not None else "—"
+                    alerts.append(f"{name} {v}: 剩 {r['remaining_pct']:.0f}%，pace {pace_text}，重置 {fmt_dur(r['reset_in_s'])}")
+        if alerts:
+            send_notification(conn, now, "Claude 額度偏離", "\n".join(alerts))
     if args.verbose:
         cmd_report(argparse.Namespace(hours=0))
     return 0
 
 
 def cmd_report(args):
-    conn = db()
-    last = conn.execute("SELECT MAX(ts) FROM snapshots").fetchone()[0]
-    if not last:
-        print("還沒有資料，先跑一次 collect")
+    # as_uri percent-encodes '?', '#', Unicode, etc. mode=ro cannot create a DB.
+    uri = Path(DB_PATH).absolute().as_uri() + "?mode=ro"
+    try:
+        with closing(sqlite3.connect(uri, uri=True)) as conn:
+            return report(conn, args)
+    except sqlite3.Error:
+        print("無法讀取額度資料庫，請先成功執行 collect")
         return 1
-    age = int(time.time()) - last
+
+
+def report(conn, args):
+    last = conn.execute("SELECT MAX(ts) FROM snapshots").fetchone()[0]
+    err = conn.execute("SELECT ts, message FROM errors ORDER BY ts DESC LIMIT 1").fetchone()
+    if last is None:
+        print("還沒有資料，先跑一次 collect")
+        if err:
+            print(f"最近記錄的錯誤：{err[1]}")
+        return 1
+    now = int(time.time())
+    age = max(0, now - last)
     print(f"最新快照：{datetime.fromtimestamp(last).strftime('%m-%d %H:%M')}（{fmt_dur(age)} 前）")
+    print("使用量、pace、狀態均為快照時的觀測值；倒數只按時間推算。")
+    if age > 5400:
+        print("⚠ STALE：超過每小時採集的容許間隔，不能視為目前額度。")
     print(f"{'視窗':<15}{'剩餘':>6}{'時間進度':>9}{'pace':>7}{'重置':>9}{'耗盡':>9}{'本機tokens':>12}  狀態")
     for row in conn.execute("""SELECT window, remaining_pct, elapsed_pct, pace, reset_in_s,
-            exhaust_in_s, local_tokens, verdict, ts FROM snapshots WHERE ts=?""", (last,)):
-        w, rem, el, pace, rs, ex, tok, v, ts = row
-        rs_now = max(0, rs - age)  # 報表時刻重算倒數，不需重新採集
-        print(f"{w:<15}{rem:>5.0f}%{el:>8.0f}%{(pace if pace is not None else '—'):>7}"
-              f"{fmt_dur(rs_now):>9}{fmt_dur(ex):>9}{(tok if tok is not None else '—'):>12}  {v}")
+            exhaust_in_s, local_tokens, verdict, resets_at FROM snapshots WHERE ts=?""", (last,)):
+        w, rem, el, pace, rs, ex, tok, v, reset = row
+        rs_now = max(0, reset - now)
+        ex_now = max(0, ex - age) if ex is not None and rs_now > 0 else None
+        if rs_now == 0:
+            print(f"⚠ STALE {w}：快照視窗已重置，目前額度未知。")
+        pace_text = f"{pace:.2f}" if pace is not None else "—"
+        print(f"{w:<15}{rem:>5.0f}%{el:>8.0f}%{pace_text:>7}"
+              f"{fmt_dur(rs_now):>9}{fmt_dur(ex_now):>9}{(tok if tok is not None else '—'):>12}  {v}")
     if args.hours:
         print(f"\n近 {args.hours} 小時 five_hour 趨勢：")
+        previous = None
         for ts, used, pace, v in conn.execute("""SELECT ts, used_pct, pace, verdict FROM snapshots
                 WHERE window='five_hour' AND ts>=? ORDER BY ts""", (last - args.hours * 3600,)):
-            bar = "█" * int(used / 5)
-            print(f"  {datetime.fromtimestamp(ts).strftime('%m-%d %H:%M')}  {used:>5.1f}% {bar:<20} pace {pace}  {v}")
-    err = conn.execute("SELECT ts, message FROM errors ORDER BY ts DESC LIMIT 1").fetchone()
-    if err and err[0] > last:
-        print(f"\n⚠ 最近一次採集失敗：{err[1]}")
+            if previous is not None and ts - previous > 5400:
+                print(f"  ⚠ GAP：兩次快照相隔 {fmt_dur(ts - previous)}，期間用量未知。")
+            previous = ts
+            bar = "█" * int(min(100, max(0, used)) / 5)
+            pace_text = f"{pace:.2f}" if pace is not None else "—"
+            print(f"  {datetime.fromtimestamp(ts).strftime('%m-%d %H:%M')}  {used:>5.1f}% {bar:<20} pace {pace_text}  {v}")
+    if err and err[0] >= last:
+        print(f"\n⚠ 最近記錄的錯誤（快照後或同秒）：{err[1]}")
     return 0
 
 

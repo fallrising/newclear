@@ -33,7 +33,7 @@ Assessment digest 綁定這次 request 的原始檔案 SHA 與已驗證的 evide
 
 ## 驗證結果與後續
 
-[實作報告](../.team/reports/T-225.md)、[獨立審查](../.team/reports/T-226.md) 與 [evidence gate](../.team/reports/T-227.md) 保存本輪有界驗收。新模組與 CLI 均先觀察缺入口的 RED，再完成實作。獨立審查無阻擋性發現。
+實作報告（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-225.md`）、獨立審查（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-226.md`） 與 evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-227.md`） 保存本輪有界驗收。新模組與 CLI 均先觀察缺入口的 RED，再完成實作。獨立審查無阻擋性發現。
 
 - Root：`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest -v test_fresh_reimage_receipts test_fresh_reimage_receipts_cli test_fresh_execution test_reimage_host`，44 tests／2.854 秒通過。
 - Independent：`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest -v test_fresh_reimage_receipts test_fresh_reimage_receipts_review test_fresh_reimage_receipts_cli test_fresh_execution test_labctl`，138 tests／30.918 秒通過；`test_reimage_host` 另 4 tests／0.003 秒通過。

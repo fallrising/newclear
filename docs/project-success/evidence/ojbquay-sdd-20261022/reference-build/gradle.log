@@ -1,0 +1,104 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+Calculating task graph as no cached configuration is available for tasks: build
+> Task :assemble UP-TO-DATE
+> Task :check UP-TO-DATE
+> Task :build UP-TO-DATE
+> Task :modules:common:protobufDummy UP-TO-DATE
+> Task :modules:gateway-consume:processResources NO-SOURCE
+> Task :modules:console-api:processTestResources NO-SOURCE
+> Task :modules:console-api:processResources
+> Task :modules:common:extractProto
+> Task :modules:common:extractTestProto
+> Task :modules:common:processTestProtoResources
+> Task :modules:common:processProtoResources
+> Task :modules:common:processTestResources NO-SOURCE
+> Task :modules:gateway-produce:processResources NO-SOURCE
+> Task :modules:scheduler:processResources NO-SOURCE
+> Task :modules:gateway-consume:processTestResources NO-SOURCE
+> Task :sdk:java:processResources NO-SOURCE
+> Task :modules:gateway-produce:processTestResources NO-SOURCE
+> Task :modules:scheduler:processTestResources NO-SOURCE
+> Task :sdk:java:processTestResources NO-SOURCE
+> Task :modules:common:processResources
+> Task :modules:common:extractIncludeProto
+> Task :modules:common:generateProto FROM-CACHE
+> Task :modules:common:compileJava FROM-CACHE
+> Task :modules:common:classes
+> Task :modules:common:jar
+> Task :modules:common:assemble
+> Task :modules:gateway-produce:compileJava FROM-CACHE
+> Task :modules:gateway-produce:classes UP-TO-DATE
+> Task :modules:gateway-consume:compileJava FROM-CACHE
+> Task :modules:gateway-consume:classes UP-TO-DATE
+> Task :modules:console-api:compileJava FROM-CACHE
+> Task :modules:console-api:classes
+> Task :modules:gateway-produce:jar
+> Task :modules:gateway-consume:jar
+> Task :modules:console-api:resolveMainClassName
+> Task :modules:console-api:jar
+> Task :modules:console-api:compileTestJava FROM-CACHE
+> Task :modules:console-api:testClasses UP-TO-DATE
+> Task :modules:common:extractIncludeTestProto
+> Task :modules:common:generateTestProto NO-SOURCE
+> Task :modules:common:compileTestJava FROM-CACHE
+> Task :modules:common:testClasses UP-TO-DATE
+> Task :modules:console-api:test FROM-CACHE
+> Task :modules:console-api:check UP-TO-DATE
+> Task :modules:scheduler:compileJava FROM-CACHE
+> Task :modules:scheduler:classes UP-TO-DATE
+> Task :modules:common:test FROM-CACHE
+> Task :modules:common:check UP-TO-DATE
+> Task :modules:common:build
+> Task :modules:scheduler:jar
+> Task :sdk:java:compileJava FROM-CACHE
+> Task :modules:console-api:bootJar
+> Task :modules:console-api:assemble
+> Task :modules:console-api:build
+> Task :sdk:java:classes UP-TO-DATE
+> Task :sdk:java:jar
+> Task :modules:gateway-produce:startScripts
+> Task :modules:gateway-consume:startScripts
+> Task :modules:gateway-produce:compileTestJava FROM-CACHE
+> Task :modules:gateway-consume:distTar
+> Task :modules:gateway-produce:distTar
+> Task :modules:gateway-produce:testClasses UP-TO-DATE
+> Task :modules:gateway-produce:test FROM-CACHE
+> Task :modules:gateway-produce:check UP-TO-DATE
+> Task :modules:scheduler:startScripts
+> Task :modules:scheduler:distTar
+> Task :modules:gateway-consume:distZip
+> Task :modules:gateway-consume:assemble
+> Task :modules:gateway-produce:distZip
+> Task :modules:gateway-produce:assemble
+> Task :modules:gateway-produce:build
+> Task :sdk:java:assemble
+> Task :sdk:java:compileTestJava FROM-CACHE
+> Task :sdk:java:testClasses UP-TO-DATE
+> Task :sdk:java:test FROM-CACHE
+> Task :sdk:java:check UP-TO-DATE
+> Task :sdk:java:build
+> Task :modules:scheduler:distZip
+> Task :modules:scheduler:assemble
+> Task :modules:scheduler:compileTestJava
+> Task :modules:scheduler:testClasses
+> Task :modules:gateway-consume:compileTestJava
+> Task :modules:gateway-consume:testClasses
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::arrayBaseOffset has been called by com.google.protobuf.UnsafeUtil (file:<operator-home>/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/4.35.1/b933d3f9fc35b0356f28980c2ffc5892d297eebf/protobuf-java-4.35.1.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.protobuf.UnsafeUtil
+WARNING: sun.misc.Unsafe::arrayBaseOffset will be removed in a future release
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::arrayBaseOffset has been called by com.google.protobuf.UnsafeUtil (file:<operator-home>/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/4.35.1/b933d3f9fc35b0356f28980c2ffc5892d297eebf/protobuf-java-4.35.1.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.protobuf.UnsafeUtil
+WARNING: sun.misc.Unsafe::arrayBaseOffset will be removed in a future release
+> Task :modules:scheduler:test
+> Task :modules:scheduler:check
+> Task :modules:scheduler:build
+> Task :modules:gateway-consume:test
+> Task :modules:gateway-consume:check
+> Task :modules:gateway-consume:build
+
+BUILD SUCCESSFUL in 1m 20s
+44 actionable tasks: 29 executed, 15 from cache
+Configuration cache entry stored.

@@ -37,8 +37,29 @@ func (policy CompletionPolicy) clone() CompletionPolicy {
 }
 
 type Config struct {
-	Operator       domain.ActorID
-	IdempotencyTTL time.Duration
-	Specification  SpecificationPolicy
-	Completion     CompletionPolicy
+	RepositoryAuthority port.RepositoryAuthority
+	Operator            domain.ActorID
+	IdempotencyTTL      time.Duration
+	Specification       SpecificationPolicy
+	Completion          CompletionPolicy
+	ProjectPolicies     map[domain.ProjectID]port.PolicyProfile
+}
+
+// completionFor selects the whole immutable profile; missing ACs never fall back.
+func (s *Service) completionFor(project domain.ProjectID) CompletionPolicy {
+	profile, ok := s.config.ProjectPolicies[project]
+	if !ok {
+		return s.config.Completion
+	}
+	m := profile.Material()
+	recipe, _ := domain.ParseDigest(m.RecipeDigest)
+	policy := CompletionPolicy{RevisionDigest: profile.Digest(), RecipeDigest: recipe, ApprovalRequired: m.ApprovalRequired, Checks: make(map[domain.ACID]VerificationRule, len(m.Rules))}
+	if m.IntegrationBase.Digest != nil {
+		policy.IntegrationBaseDigest, _ = domain.ParseDigest(*m.IntegrationBase.Digest)
+	}
+	for _, r := range m.Rules {
+		environment, _ := domain.ParseDigest(r.EnvironmentDigest)
+		policy.Checks[r.ACID] = VerificationRule{VerifierClass: r.VerifierClass, Independent: r.Independent, ProhibitedVerifierActor: r.ProhibitedVerifierActor, ProhibitedVerifierRunRole: r.ProhibitedVerifierRunRole, EnvironmentDigest: environment}
+	}
+	return policy
 }

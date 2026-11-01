@@ -55,6 +55,10 @@ button:disabled {
   opacity: 0.45;
 }
 
+#authenticate {
+  margin-top: 0.75rem;
+}
+
 input,
 textarea {
   width: 100%;
@@ -146,6 +150,10 @@ h1 {
 .timeline,
 .diff {
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+}
+
+.mono {
+  overflow-wrap: anywhere;
 }
 
 .code {

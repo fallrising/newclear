@@ -1,0 +1,1 @@
+{"arch":"x86_64","budget_us":500000,"duration_us":14952,"files":5000,"os":"linux","page_size":500,"profile":"debug","trace":{"body_reads":0,"child_directory_opens":0,"max_retained_entries":501}}

@@ -1,0 +1,60 @@
+--- ui-steps.mjs.before
++++ ui-steps.mjs
+@@ -1,5 +1,6 @@
+ import assert from 'node:assert/strict';
+ import { observeStableHandles } from './geometry.mjs';
++import { actualDragConfiguration } from './drag-configuration.mjs';
+ import { defaultAriaLabelConfig } from '@xyflow/system';
+ export const controls = { fit: defaultAriaLabelConfig['controls.fitView.ariaLabel'], zoomOut: defaultAriaLabelConfig['controls.zoomOut.ariaLabel'] };
+ /** Real bounded keyboard traversal. No HTMLElement.focus / programmatic action. */
+@@ -53,9 +54,10 @@
+   await page.mouse.up();
+   if (receipt) receipt.edgeGeometry.afterDrag = await page.evaluate(observeStableHandles);
+ }
+-export async function separateNodes(page, receipt) {
++export async function separateNodes(page, receipt, configuration = actualDragConfiguration) {
++  assert.ok(Number.isInteger(configuration.threshold) && configuration.threshold >= 1 && configuration.threshold <= 16, 'REVIEW_DRAG_CONFIG_RANGE');
+   const before = await page.evaluate(observeStableHandles);
+-  if (receipt) receipt.nodeSeparation = { before };
++  if (receipt) receipt.nodeSeparation = { before, configuration };
+   assert.equal(before.stable, true, 'REVIEW_GEOMETRY_UNSTABLE');
+   const doc = before.last.document, terminal = before.last.terminal;
+   assert.ok(doc && terminal, 'REVIEW_NODE_BOUNDS');
+@@ -68,18 +70,30 @@
+     const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
+     await page.mouse.move(x, y); await page.mouse.down();
+     try {
+-      // Locked XYDrag starts at the first event exceeding its 1 px threshold;
+-      // that event only anchors the drag. Do not spend the required node delta
+-      // on it. Observe the actual resulting geometry before the full movement.
+-      const activationX = x + 2;
++      // The component override is parsed from actual source, never a library default.
++      // The first threshold-crossing event anchors XYDrag; the next 1px must
++      // produce visible node translation before spending the remaining gap.
++      const activationPixels = configuration.threshold + 1, activationX = x + activationPixels;
+       await page.mouse.move(activationX, y);
+       const activated = await page.evaluate(observeStableHandles);
+       if (receipt) receipt.nodeSeparation.activated = activated;
+       assert.equal(activated.stable, true, 'REVIEW_GEOMETRY_UNSTABLE');
+       assert.ok(activated.last.document && activated.last.terminal, 'REVIEW_NODE_BOUNDS');
+-      const remainingDelta = Math.max(0, activated.last.document.x + activated.last.document.width + 48 - activated.last.terminal.x);
+-      if (receipt) receipt.nodeSeparation.activation = { pixels: 2, remainingDelta };
+-      await page.mouse.move(activationX + remainingDelta, y, { steps: 12 });
++      const witnessX = activationX + 1;
++      await page.mouse.move(witnessX, y);
++      const witnessed = await page.evaluate(observeStableHandles);
++      if (receipt) receipt.nodeSeparation.witnessed = witnessed;
++      assert.equal(witnessed.stable, true, 'REVIEW_GEOMETRY_UNSTABLE');
++      assert.ok(witnessed.last.document && witnessed.last.terminal, 'REVIEW_NODE_BOUNDS');
++      assert.deepEqual(witnessed.last.document, activated.last.document, 'REVIEW_DRAG_WITNESS_DOCUMENT');
++      assert.equal(witnessed.last.transform, activated.last.transform, 'REVIEW_DRAG_WITNESS_VIEWPORT');
++      const a = activated.last.terminal, b = witnessed.last.terminal;
++      assert.deepEqual({ y: b.y, width: b.width, height: b.height }, { y: a.y, width: a.width, height: a.height }, 'REVIEW_DRAG_WITNESS_SHAPE');
++      const witnessDelta = b.x - a.x;
++      assert.ok(witnessDelta >= 0.75 && witnessDelta <= 1.25, 'REVIEW_DRAG_WITNESS_TRANSLATION');
++      const remainingDelta = Math.max(0, witnessed.last.document.x + witnessed.last.document.width + 48 - b.x);
++      if (receipt) receipt.nodeSeparation.activation = { pixels: activationPixels, witnessPixels: 1, witnessDelta, remainingDelta };
++      await page.mouse.move(witnessX + remainingDelta, y, { steps: 12 });
+     } finally {
+       await page.mouse.up();
+     }

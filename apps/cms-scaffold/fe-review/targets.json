@@ -1,7 +1,7 @@
 {
   "project": "cms-scaffold",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；頁面清單對應 v2 W0 的路由。第 2 輪依 DESIGN.md M1 驗證、M2 在 v2 前端波次完成後同步並改為 true。",
+  "verified": true,
+  "verifiedNote": "2026-10-24 R2 M1/M2 local gates passed on CMS product baseline 8df40fa0a0258c4037e159892721df8aa40a4b78 (worktree task base99ee2dae):153 selected captures (144 original +9 explicitly repaired),51 exact finalURL/identity/loaded checks, native gates and owned cleanup. Source hashes/retained initial9 failures in tasks/round2. FullR3/realAPI/PP1 and publication/owner acceptance are not implied.",
   "locale": "zh-TW",
   "colorSchemes": [
     "light"
@@ -19,39 +19,248 @@
       "pages": [
         {
           "id": "selector",
-          "path": "/"
+          "path": "/",
+          "waitFor": "[data-testid=\"selector-card\"]",
+          "review": {
+            "route": "/",
+            "finalPath": "/",
+            "identity": null,
+            "loaded": [
+              "[data-testid=\"selector-card\"]"
+            ]
+          }
         },
         {
           "id": "login",
-          "path": "/login"
+          "path": "/login",
+          "waitFor": "h1:text-is(\"會員登入\")",
+          "review": {
+            "route": "/login",
+            "finalPath": "/login",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"會員登入\")"
+            ]
+          }
+        },
+        {
+          "id": "logout",
+          "path": "/logout?mockUser=seed-member-clinic",
+          "waitFor": "[data-testid=\"selector-card\"]",
+          "review": {
+            "route": "/logout",
+            "finalPath": "/",
+            "identity": null,
+            "loaded": [
+              "[data-testid=\"selector-card\"]"
+            ]
+          }
         },
         {
           "id": "album",
-          "path": "/album"
+          "path": "/album",
+          "waitFor": "a[href=\"/album/albums/coast-light-2026\"]",
+          "review": {
+            "route": "/album",
+            "finalPath": "/album",
+            "identity": null,
+            "loaded": [
+              "[data-testid=\"site-hero\"]",
+              "a[href=\"/album/albums/coast-light-2026\"]"
+            ]
+          }
         },
         {
           "id": "albums",
-          "path": "/album/albums"
+          "path": "/album/albums",
+          "waitFor": "a[href=\"/album/albums/coast-light-2026\"]",
+          "review": {
+            "route": "/album/albums",
+            "finalPath": "/album/albums",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"全部相簿\")",
+              "a[href=\"/album/albums/coast-light-2026\"]"
+            ]
+          }
         },
         {
           "id": "album-detail",
-          "path": "/album/albums/coast-light-2026"
+          "path": "/album/albums/coast-light-2026",
+          "waitFor": "[data-testid=\"photo-tile\"]",
+          "review": {
+            "route": "/album/albums/:slug",
+            "finalPath": "/album/albums/coast-light-2026",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"Coast Light 2026\")",
+              "[data-testid=\"photo-tile\"]"
+            ]
+          }
         },
         {
           "id": "photo",
-          "path": "/album/photos/coast-harbour"
+          "path": "/album/photos/coast-harbour",
+          "waitFor": "[data-testid=\"photo-image\"]",
+          "review": {
+            "route": "/album/photos/:slug",
+            "finalPath": "/album/photos/coast-harbour",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"Harbour wall\")",
+              "[data-testid=\"photo-image\"]"
+            ]
+          }
         },
         {
           "id": "clinic",
-          "path": "/clinic"
+          "path": "/clinic",
+          "waitFor": "a[href=\"/clinic/vets/james-carter\"]",
+          "review": {
+            "route": "/clinic",
+            "finalPath": "/clinic",
+            "identity": null,
+            "loaded": [
+              "[data-testid=\"clinic-profile\"]",
+              "a[href=\"/clinic/vets/james-carter\"]"
+            ]
+          }
+        },
+        {
+          "id": "vets",
+          "path": "/clinic/vets",
+          "waitFor": "a[href=\"/clinic/vets/james-carter\"]",
+          "review": {
+            "route": "/clinic/vets",
+            "finalPath": "/clinic/vets",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"我們的獸醫\")",
+              "a[href=\"/clinic/vets/james-carter\"]"
+            ]
+          }
+        },
+        {
+          "id": "vet",
+          "path": "/clinic/vets/james-carter",
+          "waitFor": "h1:text-is(\"James Carter\")",
+          "review": {
+            "route": "/clinic/vets/:slug",
+            "finalPath": "/clinic/vets/james-carter",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"James Carter\")"
+            ]
+          }
+        },
+        {
+          "id": "member",
+          "path": "/clinic/me?mockUser=seed-member-clinic",
+          "waitFor": "[data-testid=\"member-pet-card\"]",
+          "review": {
+            "route": "/clinic/me",
+            "finalPath": "/clinic/me?mockUser=seed-member-clinic",
+            "identity": "seed-member-clinic",
+            "loaded": [
+              "[data-testid=\"member-home\"]",
+              "[data-testid=\"member-pet-card\"]"
+            ]
+          }
+        },
+        {
+          "id": "appointment-new",
+          "path": "/clinic/appointments/new?mockUser=seed-member-clinic",
+          "waitFor": "[data-testid=\"appointment-form\"]",
+          "review": {
+            "route": "/clinic/appointments/new",
+            "finalPath": "/clinic/appointments/new?mockUser=seed-member-clinic",
+            "identity": "seed-member-clinic",
+            "loaded": [
+              "[data-testid=\"appointment-form\"]"
+            ]
+          }
+        },
+        {
+          "id": "appointment",
+          "path": "/clinic/appointments/43000000-0000-4000-8000-000000000001?mockUser=seed-member-clinic",
+          "waitFor": "[data-testid=\"appointment-reason\"]",
+          "review": {
+            "route": "/clinic/appointments/:id",
+            "finalPath": "/clinic/appointments/43000000-0000-4000-8000-000000000001?mockUser=seed-member-clinic",
+            "identity": "seed-member-clinic",
+            "loaded": [
+              "[data-testid=\"appointment-detail\"]",
+              "[data-testid=\"appointment-reason\"]"
+            ]
+          }
         },
         {
           "id": "projects",
-          "path": "/projects"
+          "path": "/projects",
+          "waitFor": "a[href=\"/projects/cms-scaffold\"]",
+          "review": {
+            "route": "/projects",
+            "finalPath": "/projects",
+            "identity": null,
+            "loaded": [
+              "[data-testid=\"site-hero\"]",
+              "a[href=\"/projects/cms-scaffold\"]"
+            ]
+          }
         },
         {
-          "id": "project-detail",
-          "path": "/projects/cms-scaffold"
+          "id": "project",
+          "path": "/projects/cms-scaffold",
+          "waitFor": "a[href=\"/projects/cms-scaffold/milestones/m1-specs\"]",
+          "review": {
+            "route": "/projects/:slug",
+            "finalPath": "/projects/cms-scaffold",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"CMS Scaffold\")",
+              "a[href=\"/projects/cms-scaffold/milestones/m1-specs\"]"
+            ]
+          }
+        },
+        {
+          "id": "milestones",
+          "path": "/projects/cms-scaffold/milestones",
+          "waitFor": "a[href=\"/projects/cms-scaffold/milestones/m1-specs\"]",
+          "review": {
+            "route": "/projects/:slug/milestones",
+            "finalPath": "/projects/cms-scaffold/milestones",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"CMS Scaffold 的里程碑\")",
+              "a[href=\"/projects/cms-scaffold/milestones/m1-specs\"]"
+            ]
+          }
+        },
+        {
+          "id": "milestone",
+          "path": "/projects/cms-scaffold/milestones/m1-specs",
+          "waitFor": "h1:text-is(\"M1 Specs\")",
+          "review": {
+            "route": "/projects/:slug/milestones/:mSlug",
+            "finalPath": "/projects/cms-scaffold/milestones/m1-specs",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"M1 Specs\")"
+            ]
+          }
+        },
+        {
+          "id": "not-found",
+          "path": "/review-missing",
+          "waitFor": "[data-testid=\"not-found-public\"]",
+          "review": {
+            "route": "*",
+            "finalPath": "/review-missing",
+            "identity": null,
+            "loaded": [
+              "[data-testid=\"not-found-public\"]"
+            ]
+          }
         }
       ]
     },
@@ -67,35 +276,203 @@
       "pages": [
         {
           "id": "sign-in",
-          "path": "/sign-in"
+          "path": "/sign-in",
+          "waitFor": "h1:text-is(\"登入 CMS 作業台\")",
+          "review": {
+            "route": "/sign-in",
+            "finalPath": "/sign-in",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"登入 CMS 作業台\")"
+            ]
+          }
+        },
+        {
+          "id": "login-alias",
+          "path": "/login",
+          "waitFor": "h1:text-is(\"登入 CMS 作業台\")",
+          "review": {
+            "route": "/login",
+            "finalPath": "/sign-in",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"登入 CMS 作業台\")"
+            ]
+          }
         },
         {
           "id": "home",
-          "path": "/?mockUser=seed-operator-album"
+          "path": "/?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"home-type-album\"]",
+          "review": {
+            "route": "/",
+            "finalPath": "/?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "h1:text-is(\"作業台\")",
+              "[data-testid=\"home-type-album\"]"
+            ]
+          }
         },
         {
           "id": "entries-album",
-          "path": "/entries/album?mockUser=seed-operator-album"
+          "path": "/entries/album?mockUser=seed-operator-album",
+          "waitFor": "a[href=\"/entries/album/30000000-0000-4000-8000-000000000001\"]",
+          "review": {
+            "route": "/entries/:type",
+            "finalPath": "/entries/album?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "a[href=\"/entries/album/30000000-0000-4000-8000-000000000001\"]"
+            ]
+          }
         },
         {
           "id": "entry-new",
-          "path": "/entries/album/new?mockUser=seed-operator-album"
+          "path": "/entries/album/new?mockUser=seed-operator-album",
+          "waitFor": "#field-title",
+          "review": {
+            "route": "/entries/:type/new",
+            "finalPath": "/entries/album/new?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "h1:text-is(\"新增Album\")",
+              "#field-title"
+            ]
+          }
         },
         {
           "id": "entry-edit",
-          "path": "/entries/album/30000000-0000-4000-8000-000000000001?mockUser=seed-operator-album"
+          "path": "/entries/album/30000000-0000-4000-8000-000000000001?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"card-meta\"]",
+          "review": {
+            "route": "/entries/:type/:id",
+            "finalPath": "/entries/album/30000000-0000-4000-8000-000000000001?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "h1:text-is(\"Coast Light 2026\")",
+              "[data-testid=\"card-meta\"]"
+            ]
+          }
+        },
+        {
+          "id": "preview",
+          "path": "/entries/album/30000000-0000-4000-8000-000000000001/preview?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"preview-content\"]",
+          "review": {
+            "route": "/entries/:type/:id/preview",
+            "finalPath": "/entries/album/30000000-0000-4000-8000-000000000001/preview?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "[data-testid=\"preview-content\"]"
+            ]
+          }
+        },
+        {
+          "id": "history",
+          "path": "/entries/album/30000000-0000-4000-8000-000000000001/history?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"history-table\"]",
+          "review": {
+            "route": "/entries/:type/:id/history",
+            "finalPath": "/entries/album/30000000-0000-4000-8000-000000000001/history?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "h1:text-is(\"修訂紀錄\")",
+              "[data-testid=\"history-table\"]"
+            ]
+          }
         },
         {
           "id": "album-composer",
-          "path": "/views/album.composer?mockUser=seed-operator-album"
+          "path": "/views/album.composer?mockUser=seed-operator-album&album=30000000-0000-4000-8000-000000000001",
+          "waitFor": "[data-testid=\"composer-grid\"]",
+          "review": {
+            "route": "/views/album.composer",
+            "finalPath": "/views/album.composer?mockUser=seed-operator-album&album=30000000-0000-4000-8000-000000000001",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "[data-testid=\"composer-grid\"]"
+            ]
+          }
         },
         {
           "id": "clinic-schedule",
-          "path": "/views/clinic.schedule?mockUser=seed-operator-clinic"
+          "path": "/views/clinic.schedule?mockUser=seed-operator-clinic",
+          "waitFor": "[data-testid=\"schedule-day\"]",
+          "review": {
+            "route": "/views/clinic.schedule",
+            "finalPath": "/views/clinic.schedule?mockUser=seed-operator-clinic",
+            "identity": "seed-operator-clinic",
+            "loaded": [
+              "[data-testid=\"schedule-today\"]",
+              "[data-testid=\"schedule-day\"]"
+            ]
+          }
         },
         {
           "id": "projects-board",
-          "path": "/views/projects.board?mockUser=seed-operator-projects"
+          "path": "/views/projects.board?mockUser=seed-operator-projects&project=30000000-0000-4000-8000-000000000024",
+          "waitFor": "[data-testid=\"board-card\"]",
+          "review": {
+            "route": "/views/projects.board",
+            "finalPath": "/views/projects.board?mockUser=seed-operator-projects&project=30000000-0000-4000-8000-000000000024",
+            "identity": "seed-operator-projects",
+            "loaded": [
+              "[data-testid=\"board-card\"]"
+            ]
+          }
+        },
+        {
+          "id": "media",
+          "path": "/media?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"media-grid\"]",
+          "review": {
+            "route": "/media",
+            "finalPath": "/media?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "[data-testid=\"media-grid\"]"
+            ]
+          }
+        },
+        {
+          "id": "media-detail",
+          "path": "/media/20000000-0000-4000-8000-000000000001?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"media-info\"]",
+          "review": {
+            "route": "/media/:id",
+            "finalPath": "/media/20000000-0000-4000-8000-000000000001?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "[data-testid=\"media-info\"]"
+            ]
+          }
+        },
+        {
+          "id": "forbidden",
+          "path": "/forbidden?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"forbidden\"]",
+          "review": {
+            "route": "/forbidden",
+            "finalPath": "/forbidden?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "[data-testid=\"forbidden\"]"
+            ]
+          }
+        },
+        {
+          "id": "not-found",
+          "path": "/not-found?mockUser=seed-operator-album",
+          "waitFor": "[data-testid=\"not-found\"]",
+          "review": {
+            "route": "/not-found",
+            "finalPath": "/not-found?mockUser=seed-operator-album",
+            "identity": "seed-operator-album",
+            "loaded": [
+              "[data-testid=\"not-found\"]"
+            ]
+          }
         }
       ]
     },
@@ -111,19 +488,244 @@
       "pages": [
         {
           "id": "login",
-          "path": "/login"
+          "path": "/login",
+          "waitFor": "h1:text-is(\"登入 Admin center\")",
+          "review": {
+            "route": "/login",
+            "finalPath": "/login",
+            "identity": null,
+            "loaded": [
+              "h1:text-is(\"登入 Admin center\")"
+            ]
+          }
         },
         {
           "id": "home",
-          "path": "/?mockUser=seed-admin"
+          "path": "/?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"overview-audit\"]",
+          "review": {
+            "route": "/",
+            "finalPath": "/?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"overview-types\"]",
+              "[data-testid=\"overview-audit\"]"
+            ]
+          }
         },
         {
           "id": "types",
-          "path": "/types?mockUser=seed-admin"
+          "path": "/types?mockUser=seed-admin",
+          "waitFor": "a[href=\"/types/album\"]",
+          "review": {
+            "route": "/types",
+            "finalPath": "/types?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"types-search\"]",
+              "a[href=\"/types/album\"]"
+            ]
+          }
         },
         {
-          "id": "users",
-          "path": "/users?mockUser=seed-admin"
+          "id": "type",
+          "path": "/types/album?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"type-fields\"]",
+          "review": {
+            "route": "/types/:key",
+            "finalPath": "/types/album?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"type-fields\"]"
+            ]
+          }
+        },
+        {
+          "id": "roles",
+          "path": "/roles?mockUser=seed-admin",
+          "waitFor": "a[href=\"/roles/operator\"]",
+          "review": {
+            "route": "/roles",
+            "finalPath": "/roles?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "a[href=\"/roles/operator\"]"
+            ]
+          }
+        },
+        {
+          "id": "role",
+          "path": "/roles/operator?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"matrix-global\"]",
+          "review": {
+            "route": "/roles/:code",
+            "finalPath": "/roles/operator?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"matrix-types\"]",
+              "[data-testid=\"matrix-global\"]"
+            ]
+          }
+        },
+        {
+          "id": "principals",
+          "path": "/principals?mockUser=seed-admin",
+          "waitFor": "a[href=\"/principals/10000000-0000-4000-8000-000000000003\"]",
+          "review": {
+            "route": "/principals",
+            "finalPath": "/principals?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"principals-search\"]",
+              "a[href=\"/principals/10000000-0000-4000-8000-000000000003\"]"
+            ]
+          }
+        },
+        {
+          "id": "principal-new",
+          "path": "/principals/new?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"new-submit\"]",
+          "review": {
+            "route": "/principals/new",
+            "finalPath": "/principals/new?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"new-username\"]",
+              "[data-testid=\"new-submit\"]"
+            ]
+          }
+        },
+        {
+          "id": "principal",
+          "path": "/principals/10000000-0000-4000-8000-000000000003?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"principal-profile\"]",
+          "review": {
+            "route": "/principals/:id",
+            "finalPath": "/principals/10000000-0000-4000-8000-000000000003?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"principal-profile\"]"
+            ]
+          }
+        },
+        {
+          "id": "audit",
+          "path": "/audit?mockUser=seed-admin",
+          "waitFor": "a[href=\"/audit/70000000-0000-4000-8000-000000000012\"]",
+          "review": {
+            "route": "/audit",
+            "finalPath": "/audit?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"audit-filters\"]",
+              "a[href=\"/audit/70000000-0000-4000-8000-000000000012\"]"
+            ]
+          }
+        },
+        {
+          "id": "audit-detail",
+          "path": "/audit/70000000-0000-4000-8000-000000000012?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"audit-detail\"]",
+          "review": {
+            "route": "/audit/:id",
+            "finalPath": "/audit/70000000-0000-4000-8000-000000000012?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"audit-summary\"]",
+              "[data-testid=\"audit-detail\"]"
+            ]
+          }
+        },
+        {
+          "id": "media",
+          "path": "/media?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"media-bytes\"]",
+          "review": {
+            "route": "/media",
+            "finalPath": "/media?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"media-bytes\"]"
+            ]
+          }
+        },
+        {
+          "id": "settings",
+          "path": "/settings?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"settings-audit\"]",
+          "review": {
+            "route": "/settings",
+            "finalPath": "/settings?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"settings-audit\"]"
+            ]
+          }
+        },
+        {
+          "id": "audit-settings",
+          "path": "/settings/audit?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"retention-card\"]",
+          "review": {
+            "route": "/settings/audit",
+            "finalPath": "/settings/audit?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"retention-card\"]"
+            ]
+          }
+        },
+        {
+          "id": "entry",
+          "path": "/entries/30000000-0000-4000-8000-000000000001?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"entry-meta\"]",
+          "review": {
+            "route": "/entries/:id",
+            "finalPath": "/entries/30000000-0000-4000-8000-000000000001?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"entry-meta\"]"
+            ]
+          }
+        },
+        {
+          "id": "forbidden",
+          "path": "/403?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"forbidden\"]",
+          "review": {
+            "route": "/403",
+            "finalPath": "/403?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"forbidden\"]"
+            ]
+          }
+        },
+        {
+          "id": "not-found",
+          "path": "/404?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"not-found\"]",
+          "review": {
+            "route": "/404",
+            "finalPath": "/404?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"not-found\"]"
+            ]
+          }
+        },
+        {
+          "id": "entries",
+          "path": "/entries?mockUser=seed-admin",
+          "waitFor": "[data-testid=\"lookup-form\"]",
+          "review": {
+            "route": "/entries",
+            "finalPath": "/entries?mockUser=seed-admin",
+            "identity": "seed-admin",
+            "loaded": [
+              "[data-testid=\"lookup-form\"]"
+            ]
+          }
         }
       ]
     }

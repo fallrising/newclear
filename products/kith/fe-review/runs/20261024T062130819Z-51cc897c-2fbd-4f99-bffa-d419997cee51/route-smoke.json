@@ -1,0 +1,156 @@
+{
+  "runId": "20261024T062130819Z-51cc897c-2fbd-4f99-bffa-d419997cee51",
+  "browser": "141.0.7390.37",
+  "results": [
+    {
+      "app": "web-anon",
+      "id": "login",
+      "requestedURL": "http://127.0.0.1:5174/login",
+      "finalURL": "http://127.0.0.1:5174/login",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"login-handle\"]",
+      "loaded": true,
+      "authenticated": false
+    },
+    {
+      "app": "web",
+      "id": "home",
+      "requestedURL": "http://127.0.0.1:5174/",
+      "finalURL": "http://127.0.0.1:5174/",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"home-empty\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "room-lobby",
+      "requestedURL": "http://127.0.0.1:5174/r/lobby",
+      "finalURL": "http://127.0.0.1:5174/r/lobby",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"timeline\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "room-long-history",
+      "requestedURL": "http://127.0.0.1:5174/r/long-history",
+      "finalURL": "http://127.0.0.1:5174/r/long-history",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"timeline\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "room-quiet",
+      "requestedURL": "http://127.0.0.1:5174/r/quiet",
+      "finalURL": "http://127.0.0.1:5174/r/quiet",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"timeline\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "room-ada-private",
+      "requestedURL": "http://127.0.0.1:5174/r/ada-private",
+      "finalURL": "http://127.0.0.1:5174/r/ada-private",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"timeline\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "settings",
+      "requestedURL": "http://127.0.0.1:5174/settings",
+      "finalURL": "http://127.0.0.1:5174/settings",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"settings-profile-form\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "console-rooms",
+      "requestedURL": "http://127.0.0.1:5174/console/rooms",
+      "finalURL": "http://127.0.0.1:5174/console/rooms",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"console-rooms-list\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "console-agents",
+      "requestedURL": "http://127.0.0.1:5174/console/agents",
+      "finalURL": "http://127.0.0.1:5174/console/agents",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"agents-list\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "console-agent-grok",
+      "requestedURL": "http://127.0.0.1:5174/console/agents/m-grok",
+      "finalURL": "http://127.0.0.1:5174/console/agents/m-grok",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"agent-overview\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "console-agent-new",
+      "requestedURL": "http://127.0.0.1:5174/console/agents/new",
+      "finalURL": "http://127.0.0.1:5174/console/agents/new",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"agent-create-handle\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "console-people",
+      "requestedURL": "http://127.0.0.1:5174/console/people",
+      "finalURL": "http://127.0.0.1:5174/console/people",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"people-list\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "console-providers",
+      "requestedURL": "http://127.0.0.1:5174/console/providers",
+      "finalURL": "http://127.0.0.1:5174/console/providers",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"providers-empty\"], [data-testid=\"providers-list\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "console-provider-new",
+      "requestedURL": "http://127.0.0.1:5174/console/providers/new",
+      "finalURL": "http://127.0.0.1:5174/console/providers/new",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"provider-name\"]",
+      "loaded": true,
+      "authenticated": true
+    },
+    {
+      "app": "web",
+      "id": "not-found",
+      "requestedURL": "http://127.0.0.1:5174/does-not-exist",
+      "finalURL": "http://127.0.0.1:5174/does-not-exist",
+      "status": 200,
+      "loadedSelector": "[data-testid=\"not-found\"]",
+      "loaded": true,
+      "authenticated": true
+    }
+  ]
+}

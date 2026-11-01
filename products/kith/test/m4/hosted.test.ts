@@ -1,6 +1,6 @@
 import { applyD1Migrations, runDurableObjectAlarm, runInDurableObject } from "cloudflare:test";
 import { env } from "cloudflare:workers";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { hashPassword } from "../../src/password.ts";
 import {
   INTERNAL_HEADER,
@@ -91,6 +91,9 @@ async function roomSend(
 
 async function resetStorage(): Promise<void> {
   await env.DB.batch([
+    env.DB.prepare("DELETE FROM agent_runtime_changes"),
+    env.DB.prepare("DELETE FROM agent_runtimes"),
+    env.DB.prepare("DELETE FROM provider_connections"),
     env.DB.prepare("DELETE FROM messages"),
     env.DB.prepare("DELETE FROM bot_tokens"),
     env.DB.prepare("DELETE FROM generations"),
@@ -173,8 +176,9 @@ async function generationState(id: string): Promise<string | null> {
 }
 
 async function runHostedAlarm(generationId: string): Promise<void> {
-  const ran = await runDurableObjectAlarm(hostedStub(generationId));
-  if (!ran) await hostedRpc(generationId).runScheduled();
+  // Tests keep platform alarms in the future and await the actual handler through RPC.
+  // runDurableObjectAlarm can return while a concurrently started handler is still cleaning up.
+  await hostedRpc(generationId).runScheduled();
 }
 
 async function waitGeneration(
@@ -202,8 +206,11 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(Date.now() + 86_400_000);
   await resetStorage();
 });
+afterEach(() => vi.useRealTimers());
 
 describe("kith M4 hosted generation", () => {
   it("prompt marks UNTRUSTED_ROOM_TRANSCRIPT and hosted tool allowlist is empty", () => {
@@ -234,8 +241,6 @@ describe("kith M4 hosted generation", () => {
     expect(started.ok).toBe(true);
     expect(await generationState(generationId)).toBe("dispatched");
 
-    await runHostedAlarm(generationId);
-
     await runInDurableObject(hostedStub(generationId), async (_instance: HostedGeneration, state) => {
       const job = await state.storage.get<Record<string, unknown>>("job");
       expect(job?.generation_id).toBe(generationId);
@@ -244,6 +249,15 @@ describe("kith M4 hosted generation", () => {
       expect(JSON.stringify(job)).not.toMatch(/bot_token|XAI_API_KEY|kith_bot_/i);
       const keys = await state.storage.list();
       expect([...keys.keys()].some((k) => /token/i.test(k))).toBe(false);
+    });
+
+    await runHostedAlarm(generationId);
+    await runInDurableObject(hostedStub(generationId), async (_instance: HostedGeneration, state) => {
+      expect(await state.storage.get("job")).toBeUndefined();
+      expect(await state.storage.get("fake_llm")).toBeUndefined();
+      const execution = await state.storage.get<{ phase: string; agent_id: string }>("execution");
+      expect(execution?.phase).toBe("terminal");
+      expect(execution?.agent_id).toBe(s.agentId);
     });
 
     const row = await env.DB.prepare(
@@ -349,16 +363,16 @@ describe("kith M4 hosted generation", () => {
     const elapsed = await inbox.lastNotifyElapsedMs();
     expect(elapsed).toBeTypeOf("number");
     expect(elapsed!).toBeLessThan(20);
+    // The frozen, injectable clock checks the notify contract; it is not a host wall-time benchmark.
 
     const gen = await waitGeneration(s.roomId, s.agentId);
     expect(gen.agent_id).toBe(s.agentId);
     expect(gen.state === "dispatched" || gen.state === "streaming" || gen.state === "completed").toBe(true);
 
     const beforeAlarm = await messageCount(s.roomId, gen!.id);
-    if (beforeAlarm === 0) {
-      expect(await generationState(gen!.id)).toBe("dispatched");
-      await runHostedAlarm(gen!.id);
-    }
+    expect(beforeAlarm).toBe(0);
+    expect(await generationState(gen!.id)).toBe("dispatched");
+    await runHostedAlarm(gen!.id);
 
     const row = await env.DB.prepare(
       `SELECT sender_id, body, generation_id, kind FROM messages WHERE room_id = ? AND generation_id = ?`,

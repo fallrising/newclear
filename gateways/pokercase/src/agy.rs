@@ -13,8 +13,25 @@ const LOAD_URL: &str = "https://cloudcode-pa.googleapis.com/v1internal:loadCodeA
 /// Discover `cloudaicompanionProject` via loadCodeAssist.
 pub async fn fetch_project_id(access_token: &str) -> AppResult<String> {
     let client = http_client::build_http_client().map_err(AppError::Internal)?;
-    let resp = client
-        .post(LOAD_URL)
+    fetch_project_id_using(client.post(LOAD_URL), access_token).await
+}
+
+#[cfg(test)]
+pub(crate) async fn fetch_project_id_for_test(
+    access_token: &str,
+    transport: &crate::antigravity_test_transport::AntigravityTestTransport,
+) -> AppResult<String> {
+    let request = transport
+        .request(reqwest::Method::POST, LOAD_URL)
+        .map_err(AppError::BadRequest)?;
+    fetch_project_id_using(request, access_token).await
+}
+
+async fn fetch_project_id_using(
+    request: reqwest::RequestBuilder,
+    access_token: &str,
+) -> AppResult<String> {
+    let resp = request
         .header("authorization", format!("Bearer {access_token}"))
         .header("content-type", "application/json")
         .header("user-agent", "antigravity/ide/1.0 darwin/arm64")
@@ -36,17 +53,17 @@ pub async fn fetch_project_id(access_token: &str) -> AppResult<String> {
     let project = v
         .get("cloudaicompanionProject")
         .and_then(|p| p.as_str())
-        .ok_or_else(|| AppError::Internal(anyhow::anyhow!("no cloudaicompanionProject in loadCodeAssist")))?;
+        .ok_or_else(|| {
+            AppError::Internal(anyhow::anyhow!(
+                "no cloudaicompanionProject in loadCodeAssist"
+            ))
+        })?;
     info!(%project, "antigravity project resolved");
     Ok(project.to_string())
 }
 
 /// Convert OpenAI chat-completions JSON → Antigravity generateContent envelope.
-pub fn chat_to_agy_request(
-    body: &Bytes,
-    project: &str,
-    upstream_model: &str,
-) -> AppResult<Bytes> {
+pub fn chat_to_agy_request(body: &Bytes, project: &str, upstream_model: &str) -> AppResult<Bytes> {
     let v: Value = serde_json::from_slice(body)
         .map_err(|e| AppError::BadRequest(format!("invalid JSON: {e}")))?;
     let obj = v
@@ -125,7 +142,11 @@ fn message_text(m: &Value) -> String {
         Some(Value::String(s)) => s.clone(),
         Some(Value::Array(blocks)) => blocks
             .iter()
-            .filter_map(|b| b.get("text").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .filter_map(|b| {
+                b.get("text")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .collect::<Vec<_>>()
             .join("\n"),
         Some(other) => other.to_string(),
@@ -162,7 +183,10 @@ pub fn agy_to_chat_response(body: &Bytes, model: &str) -> AppResult<Bytes> {
     let prompt = v
         .pointer("/response/usageMetadata/promptTokenCount")
         .and_then(|n| n.as_i64())
-        .or_else(|| v.pointer("/usageMetadata/promptTokenCount").and_then(|n| n.as_i64()))
+        .or_else(|| {
+            v.pointer("/usageMetadata/promptTokenCount")
+                .and_then(|n| n.as_i64())
+        })
         .unwrap_or(0);
     let completion = v
         .pointer("/response/usageMetadata/candidatesTokenCount")

@@ -60,3 +60,8 @@
     min-height: 100vh;
   }
 }
+
+/* Notification previews retain whitespace while wrapping long post/reply text. */
+[data-view="notifications"] main .whitespace-pre-wrap {
+  overflow-wrap: anywhere;
+}

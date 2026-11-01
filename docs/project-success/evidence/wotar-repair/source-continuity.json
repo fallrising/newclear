@@ -1,0 +1,19 @@
+{
+  "isolated": {
+    "changed_since_run": [
+      "README.md",
+      "tests/integration/conftest.py"
+    ],
+    "runtime_src_identical": true
+  },
+  "readiness-fixed": {
+    "changed_since_run": [
+      "README.md"
+    ],
+    "runtime_src_identical": true
+  },
+  "final-native": {
+    "changed_since_run": [],
+    "runtime_src_identical": true
+  }
+}

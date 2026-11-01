@@ -3,3 +3,5 @@ runs/*/screenshots/
 runs/*/tui/
 runs/*/*.storage.json
 runs/.state/
+# Round 2 private raw captures, stdout and synthetic state.
+runs/round2-*/

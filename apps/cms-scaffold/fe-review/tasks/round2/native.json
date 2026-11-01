@@ -1,0 +1,32 @@
+{
+  "command": "npm run lint && npm run typecheck && npm test && npm run build && npm run test:bundle",
+  "exit": 0,
+  "node": "24.18.0",
+  "logSha256": "18202ee01dc16d293f1a4406a41784cfc86f14706592107b8d6da6844dde94fa",
+  "summaries": [
+    "v24.18.0",
+    "11.16.0",
+    "Test Files  4 passed (4)",
+    "Tests  43 passed (43)",
+    "Test Files  4 passed (4)",
+    "Tests  43 passed (43)",
+    "Test Files  11 passed (11)",
+    "Tests  61 passed (61)",
+    "Test Files  4 passed (4)",
+    "Tests  125 passed (125)",
+    "Test Files  8 passed (8)",
+    "Tests  23 passed (23)",
+    "Test Files  10 passed (10)",
+    "Tests  68 passed (68)",
+    "Test Files  13 passed (13)",
+    "Tests  138 passed (138)",
+    "Test Files  16 passed (16)",
+    "Tests  147 passed (147)",
+    "\u2139 tests 66",
+    "\u2139 pass 66",
+    "\u2139 fail 0",
+    "test:bundle passed: web-front, web-back, web-admin"
+  ],
+  "scope": "Existing frontend workspace and PP1 local unit tests with mocked Docker/owned synthetic loopback TLS; no actual PP1/Compose/backend deployment.",
+  "attribution": "Root-owned actual native run at unchanged product source; worker read receipt and did not rerun."
+}

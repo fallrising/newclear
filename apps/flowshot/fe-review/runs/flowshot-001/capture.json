@@ -1,0 +1,869 @@
+{
+  "schema": 1,
+  "unit": "flowshot",
+  "synthetic": true,
+  "status": "passed",
+  "stage": "long-ready__mobile__light",
+  "started": "2026-10-24T11:34:21.127Z",
+  "sourceHashes": {
+    "fe-review/preload.mjs": "50fd6a1cd727dcd0222643d8d988cba533e1319a8c29b8c046c88d0e81be5e37",
+    "fe-review/preload.test.mjs": "f03a6129db50820017a9914816702f8055284e89600335a51884893163b5cee7",
+    "fe-review/runtime-guards.mjs": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+    "fe-review/browser-runtime.mjs": "9e0a7638587d7dfdf1c5b3c0c6d826e747f754979ee31ce0b2ee1986839ef35d",
+    "fe-review/run-review.mjs": "7b2785a2b3216f84df3bb2ad022cd01384d2caf1e710876bc3dc74f00f1c18bf",
+    "src/main.ts": "fae059ef78005c3c097dffe9fc4626369d8fc6c2fb1fbfd2e4ada7f6833602cb",
+    "src/launch-build-info.ts": "71f4f2fccb483904a0edd7c2ae39a0745115d1258e092123b8a905d1fa00369e",
+    "src/render.tsx": "0ccdbe211db759909365f2be3a99e19172ed0a946e14de724246941a4a0520b3",
+    "src/App.tsx": "deca5131f7813114bee3cf74265fc72e9148658c8def95991c0c9dad3b49cb39",
+    "src/styles.css": "b6e236fc1b4537aab1b534a22b6bcdc90abc1a75ece8843d1a96e7d138485f90",
+    "package-lock.json": "907d9bee0913e53104240ec4aec5cbd5c1bcb2588a327a67e8667135e2dd6b9e"
+  },
+  "tools": {
+    "node": "v24.18.0",
+    "playwright": "1.63.0",
+    "browser": "153.0.8010.12"
+  },
+  "captures": [
+    {
+      "id": "loading__desktop__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/loading__desktop__light.png",
+      "sha256": "87cbdfaeb4b72dbe659c313152bd1f66ae177cd324cd98c0af733288e80bcb54",
+      "bytes": 408058,
+      "fixture": {
+        "state": "loading",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "ready__desktop__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 10
+          }
+        ]
+      },
+      "screenshot": "screenshots/ready__desktop__light.png",
+      "sha256": "5e0780ef83c0a2707facf8d505715706695870c08f7437fb6fb4a67e2f9aac33",
+      "bytes": 405370,
+      "fixture": {
+        "state": "ready",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "error__desktop__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/error__desktop__light.png",
+      "sha256": "bdcb56378b745ba2fe8590c150c6eb97ce377e7ce55bf7c70d7692d7ab7f5b6c",
+      "bytes": 408282,
+      "fixture": {
+        "state": "error",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "loading__desktop__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/loading__desktop__dark.png",
+      "sha256": "87cbdfaeb4b72dbe659c313152bd1f66ae177cd324cd98c0af733288e80bcb54",
+      "bytes": 408058,
+      "fixture": {
+        "state": "loading",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "ready__desktop__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 10
+          }
+        ]
+      },
+      "screenshot": "screenshots/ready__desktop__dark.png",
+      "sha256": "5e0780ef83c0a2707facf8d505715706695870c08f7437fb6fb4a67e2f9aac33",
+      "bytes": 405370,
+      "fixture": {
+        "state": "ready",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "error__desktop__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/error__desktop__dark.png",
+      "sha256": "bdcb56378b745ba2fe8590c150c6eb97ce377e7ce55bf7c70d7692d7ab7f5b6c",
+      "bytes": 408282,
+      "fixture": {
+        "state": "error",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "loading__tablet__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 834,
+          "height": 1112
+        },
+        "documentWidth": 834,
+        "bodyWidth": 834,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/loading__tablet__light.png",
+      "sha256": "bb63005458c66aa1e6a5ad5d90f9072885b7f10c78b1b2e304e93477545858ad",
+      "bytes": 302543,
+      "fixture": {
+        "state": "loading",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "ready__tablet__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 834,
+          "height": 1112
+        },
+        "documentWidth": 834,
+        "bodyWidth": 834,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 10
+          }
+        ]
+      },
+      "screenshot": "screenshots/ready__tablet__light.png",
+      "sha256": "27155b4cff448028f778ab4bbb9ae7a9ccf0ef527be5223c82608f2d6011b0aa",
+      "bytes": 300577,
+      "fixture": {
+        "state": "ready",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "error__tablet__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 834,
+          "height": 1112
+        },
+        "documentWidth": 834,
+        "bodyWidth": 834,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/error__tablet__light.png",
+      "sha256": "5178c80881a60b72ad3b97a5ed6cbc558d5a2bc77cdb419a6257e5978bdb908b",
+      "bytes": 303205,
+      "fixture": {
+        "state": "error",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "loading__tablet__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 834,
+          "height": 1112
+        },
+        "documentWidth": 834,
+        "bodyWidth": 834,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/loading__tablet__dark.png",
+      "sha256": "bb63005458c66aa1e6a5ad5d90f9072885b7f10c78b1b2e304e93477545858ad",
+      "bytes": 302543,
+      "fixture": {
+        "state": "loading",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "ready__tablet__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 834,
+          "height": 1112
+        },
+        "documentWidth": 834,
+        "bodyWidth": 834,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 10
+          }
+        ]
+      },
+      "screenshot": "screenshots/ready__tablet__dark.png",
+      "sha256": "27155b4cff448028f778ab4bbb9ae7a9ccf0ef527be5223c82608f2d6011b0aa",
+      "bytes": 300577,
+      "fixture": {
+        "state": "ready",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "error__tablet__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 834,
+          "height": 1112
+        },
+        "documentWidth": 834,
+        "bodyWidth": 834,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/error__tablet__dark.png",
+      "sha256": "5178c80881a60b72ad3b97a5ed6cbc558d5a2bc77cdb419a6257e5978bdb908b",
+      "bytes": 303205,
+      "fixture": {
+        "state": "error",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "loading__mobile__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/loading__mobile__light.png",
+      "sha256": "c2443f48f56ef5215f5aae1912ce42a8c1b06d265be63daaeddbcbd50cd3cd1b",
+      "bytes": 149893,
+      "fixture": {
+        "state": "loading",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "ready__mobile__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 10
+          }
+        ]
+      },
+      "screenshot": "screenshots/ready__mobile__light.png",
+      "sha256": "74f6ca4978deec28ba2c436bd946f78eae1a01ccfc9b19979604418d2902b76c",
+      "bytes": 143193,
+      "fixture": {
+        "state": "ready",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "error__mobile__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/error__mobile__light.png",
+      "sha256": "dce91019cd7eb779fc234f2dfb93225d656d77c383904482c0d7a1f7db792b6f",
+      "bytes": 149842,
+      "fixture": {
+        "state": "error",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "loading__mobile__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/loading__mobile__dark.png",
+      "sha256": "c2443f48f56ef5215f5aae1912ce42a8c1b06d265be63daaeddbcbd50cd3cd1b",
+      "bytes": 149893,
+      "fixture": {
+        "state": "loading",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "ready__mobile__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 10
+          }
+        ]
+      },
+      "screenshot": "screenshots/ready__mobile__dark.png",
+      "sha256": "74f6ca4978deec28ba2c436bd946f78eae1a01ccfc9b19979604418d2902b76c",
+      "bytes": 143193,
+      "fixture": {
+        "state": "ready",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "error__mobile__dark",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 5
+          }
+        ]
+      },
+      "screenshot": "screenshots/error__mobile__dark.png",
+      "sha256": "dce91019cd7eb779fc234f2dfb93225d656d77c383904482c0d7a1f7db792b6f",
+      "bytes": 149842,
+      "fixture": {
+        "state": "error",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    },
+    {
+      "id": "long-ready__mobile__light",
+      "url": "http://127.0.0.1:1420/",
+      "finalUrl": "http://127.0.0.1:1420/",
+      "status": 200,
+      "geometry": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "horizontalOverflow": false
+      },
+      "health": {
+        "blockedHttp": 0,
+        "blockedWebSocket": 0,
+        "pageErrors": 0,
+        "console": [],
+        "failedRequests": [],
+        "responses": []
+      },
+      "axe": {
+        "version": "4.13.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 10
+          }
+        ]
+      },
+      "screenshot": "screenshots/long-ready__mobile__light.png",
+      "sha256": "449730eb0c600ed1baf37c10bbea98d3a49d7cc046f05f70b99960b1da47d426",
+      "bytes": 144818,
+      "fixture": {
+        "state": "ready",
+        "observedLoading": true,
+        "unknownInvokes": 0,
+        "synthetic": true
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "external-http-websocket-refused",
+      "passed": true,
+      "blockedHttp": 1,
+      "blockedWebSocket": 1
+    },
+    {
+      "id": "three-shell-states-and-long-metadata",
+      "passed": true,
+      "captures": 19
+    }
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "serverClosed": true,
+    "listenerAbsent": true
+  },
+  "limits": [
+    "Web simulation only",
+    "Native/real vault/PTY/AI/Mac not verified",
+    "Full Round3 not accepted"
+  ],
+  "ended": "2026-10-24T11:34:40.570Z"
+}

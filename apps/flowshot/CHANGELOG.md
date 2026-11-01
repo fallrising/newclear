@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 — 2026-10-23
+
+- Complete M0 development: typed SQLite repositories, immutable migrations, integrity triggers, bounded execution and native app-data/startup barrier, with real restart/failure smoke and independent review.
+
+- Owner-authorized separation of Linux Docker development acceptance from controlled macOS launch release acceptance (SPEC §13.1). Keep the exact 1.5-second oracle and historical failures.
+- Require Linux native build/test and real window/IPC smoke for N00 development completion; retain all product and dogfood gates.
+
 ## 1.0.1 — 2026-07-29
 
 - 將 repository/project slug 定為 `flowshot`；應用顯示名稱維持
@@ -24,3 +31,4 @@
 - 加入 conservative rename、PathGuard、symlink 拒絕、stable read。
 - 加入安全 local link/image policy、無網路與嚴格 CSP。
 - 建立 18 個 node specs、machine-readable DAG、LLM 執行協議與模板。
+

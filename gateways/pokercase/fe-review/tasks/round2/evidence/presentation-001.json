@@ -1,0 +1,1501 @@
+{
+  "id": "presentation-001",
+  "mode": "presentation",
+  "status": "failed",
+  "startedAt": "2026-10-24T13:07:39.565Z",
+  "endedAt": "2026-10-24T13:08:29.421Z",
+  "sourceHashes": {
+    "fe-review/browser-baseline.mjs": "8b430716f167c499e26959276bf920bd3e07f6d63b2991e8277f8318a8f684af",
+    "fe-review/fixture.mjs": "1093d6c6dc127a7730bd8cb512cdbb693e040a4669be3a6d9b84e7bcbec9980a",
+    "fe-review/fixture.test.mjs": "f47fa47fd5aee5d7a7c231b243cc26e3bc70922b972babbec376b3da169ca836",
+    "fe-review/guards.mjs": "f5ad2bae0b5379937dbce7a6de8fd3bf743848f9d81599677649566a6e3ca560",
+    "fe-review/guards.test.mjs": "55818d9ef16c9e7f45f9575d80fcba0b7fb03496b2b03d755dfb26e83bc05ee0",
+    "fe-review/mock-upstream.mjs": "7ee372736faa597ae9a3c1cfa61f5dd95d6d50c044b5e0d9e4f38aa8e8fe7755",
+    "fe-review/presentation.test.mjs": "a1a890c847c0a21c01fc1a920019202c292a42c75910f3b85a792139aebf9148",
+    "fe-review/run-review.mjs": "b7e9ef6a5cab2dc7405688c181d9c99a48df6e25cf7e7f247f7f3174c01140b3",
+    "fe-review/shared-capture.mjs": "a190f3e46d02a26fdec4828fd18e6746e9db6b9c3412a5f8ed0da705aa60e454",
+    "fe-review/tui-capture.mjs": "67b40d0fad210b71e73f2d33f7b51b66ed7558585e815e86136beab45e75cc94",
+    "fe-review/tui-capture.test.mjs": "e7a9f40fdf042e88bcb47d9acfef4ce922f035d219a84d26b34dbb20ea791c7d",
+    "templates/connections.html": "79d14efa6f6becf5aeabed29f3e898453134944dbb1dc3d30f840ec410e6e469",
+    "templates/dashboard.html": "877969cdcce6b84b9da1b2215add1e747387eeb32a4a912b5d523c02db9adecc",
+    "templates/keys.html": "64825d33903b6f1dd7057f4dc5b5043fc13b348efa6ffdbb881b965651b014a0",
+    "templates/layout.html": "9374edc297a60c34346305e64f5ad1733700ab34c2ce11cd77f89d286e4b2d0c",
+    "templates/login.html": "c5647f7decffe7cb588343fda364a32512130eaafd7b10a7f39569079b731540",
+    "templates/routes.html": "21fb408bfcc3ec8e37d414f08370f3252ce83460f0d487816f2b2ada56eeea84",
+    "templates/style.css": "31830116d37bd69c979e5786d020d15f98e9afecffd8b0874dc2d9dd09ced87d",
+    "templates/usage.html": "99a0c30ee0e7b59c794f1eda693200235f87f613c682b921b0c6006e28da1a4d",
+    "src/tui_app.rs": "fb900f8600ebb17785f1a9e93747a1e562fa97973e2def7b6c0eafc530fb9876"
+  },
+  "binarySHA256": "3ef4710ff05e820fe265312a98a1b8fd203ee09bc990803df064106e62e74f1b",
+  "chromium": "153.0.8010.12",
+  "listeners": {
+    "gatewayLoopback": true,
+    "mockLoopback": true
+  },
+  "defaultDeny": {
+    "adminAPI": 401,
+    "inferenceModels": 401,
+    "upstreamRequests": 0,
+    "bootstrap": false
+  },
+  "adminSession": {
+    "httpOnly": true,
+    "sameSite": "Strict",
+    "secure": false,
+    "loopbackHTTP": true
+  },
+  "mock": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0,
+    "kind": "local OpenAI-compatible synthetic API-key upstream; configured SIWC override unused; no provider integration claim"
+  },
+  "mockFinalCounters": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0
+  },
+  "failure": {
+    "stage": "shared-capture",
+    "code": "REVIEW_SHARED_HEALTH",
+    "site": "run-review.mjs:75:56"
+  },
+  "cleanup": [
+    {
+      "name": "settle",
+      "passed": true
+    },
+    {
+      "name": "auth-context",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "capture-processes",
+      "passed": true
+    },
+    {
+      "name": "tui",
+      "passed": true
+    },
+    {
+      "name": "gateway",
+      "passed": true
+    },
+    {
+      "name": "mock",
+      "passed": true
+    },
+    {
+      "name": "listeners",
+      "passed": true
+    },
+    {
+      "name": "log",
+      "passed": true
+    }
+  ],
+  "serviceExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false,
+    "groupAbsent": true
+  },
+  "receivedSignal": null,
+  "terminal": {
+    "TERM": "xterm-256color",
+    "locale": "C.UTF-8",
+    "tmux": "tmux 3.4",
+    "captures": [
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-80x24-connections.txt",
+          "sha256": "9359f9aec7de94593433d3162c338ae389198775ead1f4b07cad446912c00ece"
+        },
+        "ansi": {
+          "file": "tui-empty-80x24-connections.ansi",
+          "sha256": "d381c1a3e426e367164f5724a4a94f29ffc19ec054bd703de995e45e9e220fe6"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-80x24-routes.txt",
+          "sha256": "c2f2bae39a5d491889c63ae09260615244bad7513431db1a452fd8584525d613"
+        },
+        "ansi": {
+          "file": "tui-empty-80x24-routes.ansi",
+          "sha256": "131aeb14d086434be2b5f71fbeda7f5ff9b2d0f55ea742456b10b7eab836518c"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-80x24-usage.txt",
+          "sha256": "15940dcbc1770cb1b6e60de7bb2623e49e717f4de456c929bfad7cc2a64a56b8"
+        },
+        "ansi": {
+          "file": "tui-empty-80x24-usage.ansi",
+          "sha256": "0c3d9feec7e8d048142f811dfa3d3163c023aa00ff36ad0f93b2e1606428e346"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-120x40-connections.txt",
+          "sha256": "022f267a949caa645866902218de060df92d28e9dc9eface564bb58ec751cf90"
+        },
+        "ansi": {
+          "file": "tui-empty-120x40-connections.ansi",
+          "sha256": "9228e29fd4691b7d677d9ba05260b7ac5fa41c39ca5004f6c2bcd9c6c034aa2f"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-120x40-routes.txt",
+          "sha256": "b5b73954ae0297837dddf274f2c3f9e745c4b5f540782f72b9b818cc009a9605"
+        },
+        "ansi": {
+          "file": "tui-empty-120x40-routes.ansi",
+          "sha256": "777fe890981788f1af421a7259c64a2ab0a9a0c648106313292520dfa35b6522"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-120x40-usage.txt",
+          "sha256": "69e434c5abfb1246e6255733347c7ea5cda54d997c88c54aa561bfa77dcad03a"
+        },
+        "ansi": {
+          "file": "tui-empty-120x40-usage.ansi",
+          "sha256": "bdb18dfa2e72acfca8ca5db40807650a4081afea1803193d46f128478af677ff"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-80x24-connections.txt",
+          "sha256": "2ad811d76a6f837ae83bb2e76675c597289abb887954fa78b5aa88aa7b0590a3"
+        },
+        "ansi": {
+          "file": "tui-populated-80x24-connections.ansi",
+          "sha256": "78b8c51689a8638b6362b7f3cb29a5999be9123b007592c4385d92a6ed31f1fa"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-80x24-routes.txt",
+          "sha256": "3f35f020218d1b122c6576ef89353c929c88cdc071fcc99f91edf5b6adad01ab"
+        },
+        "ansi": {
+          "file": "tui-populated-80x24-routes.ansi",
+          "sha256": "f7742d4f60ca51a3387ed026d3331b642d78b12df8326b9d773921b66777cf42"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-80x24-usage.txt",
+          "sha256": "b12b42661eb4e54a3f37aaec4bcd6efb44b9aebabdab221f012faea6d4ab062f"
+        },
+        "ansi": {
+          "file": "tui-populated-80x24-usage.ansi",
+          "sha256": "043ea1d8e4b2350f6d94652c62ea982d98e22370595ae7bab7f737c9cbdc6c55"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-120x40-connections.txt",
+          "sha256": "c7d5b61273930c4a0b751fb6db8905983249cd649cc434b5ea416aa60a048134"
+        },
+        "ansi": {
+          "file": "tui-populated-120x40-connections.ansi",
+          "sha256": "d12ee2ccf76a75fc9808d437dabf610a19bedbcb6f89308cc733b372ffa20791"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-120x40-routes.txt",
+          "sha256": "721054c81b713eaf0d3a67eddf0dcba51088d68c459dc99d76c4683a9ab844c8"
+        },
+        "ansi": {
+          "file": "tui-populated-120x40-routes.ansi",
+          "sha256": "d7d2257f9424cf762b66cb6c1332efc010be93e92c994f812bcaddf03c73acf6"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-120x40-usage.txt",
+          "sha256": "c07b6c73fc1157589314970156835fca5fe89fc08ee5379d20ff8883e9b68628"
+        },
+        "ansi": {
+          "file": "tui-populated-120x40-usage.ansi",
+          "sha256": "ff50a2051f7e9a74ae4715cc99822626067ccf15e7f4bbfd0998bcd893d1097d"
+        },
+        "visibleRows": 40
+      }
+    ],
+    "exits": [
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "key": "q",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "key": "Esc",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "key": "q",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "key": "Esc",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      }
+    ]
+  },
+  "tuiCleanup": [
+    {
+      "dataset": "empty",
+      "size": "80x24",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    },
+    {
+      "dataset": "empty",
+      "size": "120x40",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    },
+    {
+      "dataset": "populated",
+      "size": "80x24",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    },
+    {
+      "dataset": "populated",
+      "size": "120x40",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    }
+  ],
+  "shared": [
+    {
+      "key": "login/login/desktop/dark",
+      "status": 200,
+      "path": "/admin/login",
+      "horizontalOverflow": false,
+      "consoleEvents": 1,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/login__login__desktop__dark.png",
+        "sha256": "d2cf766ef9d8ad10988f47cf1e40bfcf436da227798423e10e29849ce1e9266a",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "key": "login/login/tablet/dark",
+      "status": 200,
+      "path": "/admin/login",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/login__login__tablet__dark.png",
+        "sha256": "238f3ac1fccd3d76159fa5bfc8eccb0b65d18e2f20f9cd2b819e9aeb342ab3ed",
+        "width": 834,
+        "height": 1112
+      }
+    },
+    {
+      "key": "login/login/mobile/dark",
+      "status": 200,
+      "path": "/admin/login",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/login__login__mobile__dark.png",
+        "sha256": "49c04a183dca13b129889eaa8fbbfa0001fd90a2b3389fe47f7e2fa599c4f15c",
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "key": "admin/dashboard/desktop/dark",
+      "status": 200,
+      "path": "/admin",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__dashboard__desktop__dark.png",
+        "sha256": "b4a84f40e469f55336e289b6f184f7f6ea1f32a82e42ecbfdc7e95e833ff865a",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "key": "admin/dashboard/tablet/dark",
+      "status": 200,
+      "path": "/admin",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__dashboard__tablet__dark.png",
+        "sha256": "fc668ef83d56fca713884f0252830d7e1892a4117a298111f344b5e85a638920",
+        "width": 834,
+        "height": 1112
+      }
+    },
+    {
+      "key": "admin/dashboard/mobile/dark",
+      "status": 200,
+      "path": "/admin",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__dashboard__mobile__dark.png",
+        "sha256": "7a6567177396108a0134ac5cb23388c76048181ff405364e319eef151e0907e1",
+        "width": 390,
+        "height": 1335
+      }
+    },
+    {
+      "key": "admin/connections/desktop/dark",
+      "status": 200,
+      "path": "/admin/connections",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__connections__desktop__dark.png",
+        "sha256": "040c65fd4b816a38ebc5a0dccbfe90990603cc27630f7d80a634ab650810c847",
+        "width": 1440,
+        "height": 2117
+      }
+    },
+    {
+      "key": "admin/connections/tablet/dark",
+      "status": 200,
+      "path": "/admin/connections",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__connections__tablet__dark.png",
+        "sha256": "4af01da99835624db60aff59930ce6e66ed9b2d35ab09ebf2f685f4ef5cdecc5",
+        "width": 834,
+        "height": 3017
+      }
+    },
+    {
+      "key": "admin/connections/mobile/dark",
+      "status": 200,
+      "path": "/admin/connections",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__connections__mobile__dark.png",
+        "sha256": "7775ec774154f0a371099f873e091671047c9cb593ff32180b589e7d455568be",
+        "width": 390,
+        "height": 4426
+      }
+    },
+    {
+      "key": "admin/routes/desktop/dark",
+      "status": 200,
+      "path": "/admin/routes",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__routes__desktop__dark.png",
+        "sha256": "8ff36c14105fb92f4cdb83ebaa172dba1d683c5791ae93131b6131864dc59c9e",
+        "width": 1440,
+        "height": 1950
+      }
+    },
+    {
+      "key": "admin/routes/tablet/dark",
+      "status": 200,
+      "path": "/admin/routes",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__routes__tablet__dark.png",
+        "sha256": "5ad7f4933117f508e019e39fab4c0a8f0d0e74a4ff92c784b7f97ca7b6717fd6",
+        "width": 834,
+        "height": 2261
+      }
+    },
+    {
+      "key": "admin/routes/mobile/dark",
+      "status": 200,
+      "path": "/admin/routes",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__routes__mobile__dark.png",
+        "sha256": "a07d8392cf81eba773a6d9b254c3baee31b8eaa5a0786ac988e634639ad68acd",
+        "width": 390,
+        "height": 3460
+      }
+    },
+    {
+      "key": "admin/keys/desktop/dark",
+      "status": 200,
+      "path": "/admin/keys",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__keys__desktop__dark.png",
+        "sha256": "e0e48b8a56f9b3a47f58ec2d4238ad68f191af0f47becc69e932997e4589b263",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "key": "admin/keys/tablet/dark",
+      "status": 200,
+      "path": "/admin/keys",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__keys__tablet__dark.png",
+        "sha256": "30d7213965f9bff98a9b05613521a57877c997153dd8a8efc6383f3c5f42e8a5",
+        "width": 834,
+        "height": 1112
+      }
+    },
+    {
+      "key": "admin/keys/mobile/dark",
+      "status": 200,
+      "path": "/admin/keys",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__keys__mobile__dark.png",
+        "sha256": "94e7a8796453b3f8ceffad20690d6b5f432663296996f6437cbd6b8aed146b90",
+        "width": 390,
+        "height": 894
+      }
+    },
+    {
+      "key": "admin/usage/desktop/dark",
+      "status": 200,
+      "path": "/admin/usage",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__usage__desktop__dark.png",
+        "sha256": "a561127f78ffc8e29f0473214e66c3aa146806c63e1eec26947e74e23cf91343",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "key": "admin/usage/tablet/dark",
+      "status": 200,
+      "path": "/admin/usage",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__usage__tablet__dark.png",
+        "sha256": "b43eebac8a8ee6f4e21dbf1e174fff7cc7ffa5bd9916125ba0250210b8fe83a6",
+        "width": 834,
+        "height": 1112
+      }
+    },
+    {
+      "key": "admin/usage/mobile/dark",
+      "status": 200,
+      "path": "/admin/usage",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__usage__mobile__dark.png",
+        "sha256": "336cc677b69d48c8e5ea7c53e673e3fc3b715a0b151f596b69064dd770c7d0c4",
+        "width": 390,
+        "height": 1124
+      }
+    },
+    {
+      "key": "admin/connection-edit/desktop/dark",
+      "status": 200,
+      "path": "/admin/connections/6b6dc0c3-16ab-4ae4-ba06-a5fdb1f6a23e/edit",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__connection-edit__desktop__dark.png",
+        "sha256": "88c3d2ebf4b1f29a1cf44562dace54f8b963e8e5943ea392f8f975de6d8161bb",
+        "width": 1440,
+        "height": 2117
+      }
+    },
+    {
+      "key": "admin/connection-edit/tablet/dark",
+      "status": 200,
+      "path": "/admin/connections/6b6dc0c3-16ab-4ae4-ba06-a5fdb1f6a23e/edit",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__connection-edit__tablet__dark.png",
+        "sha256": "9aa8040d28c5b08232e15c4a1070c76f7a6bf198376fab6f9b63e33c5c29e023",
+        "width": 834,
+        "height": 3017
+      }
+    },
+    {
+      "key": "admin/connection-edit/mobile/dark",
+      "status": 200,
+      "path": "/admin/connections/6b6dc0c3-16ab-4ae4-ba06-a5fdb1f6a23e/edit",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__connection-edit__mobile__dark.png",
+        "sha256": "ff69abcade093a0b2d125f12a2d996fcb9c0986183cc85a557d52d6744b230a8",
+        "width": 390,
+        "height": 4468
+      }
+    },
+    {
+      "key": "admin/route-edit/desktop/dark",
+      "status": 200,
+      "path": "/admin/routes/a00114ca-24a1-4a52-b66e-165c287b73df/edit",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__route-edit__desktop__dark.png",
+        "sha256": "4f144c111c7dda333075d08b411bc145bcb0564ec4b38b94a2d60d979200ef64",
+        "width": 1440,
+        "height": 1950
+      }
+    },
+    {
+      "key": "admin/route-edit/tablet/dark",
+      "status": 200,
+      "path": "/admin/routes/a00114ca-24a1-4a52-b66e-165c287b73df/edit",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__route-edit__tablet__dark.png",
+        "sha256": "65ed2b2ecf276aa95b9d27590e403c2220a9e7e844aa9a909db6d68f99814859",
+        "width": 834,
+        "height": 2261
+      }
+    },
+    {
+      "key": "admin/route-edit/mobile/dark",
+      "status": 200,
+      "path": "/admin/routes/a00114ca-24a1-4a52-b66e-165c287b73df/edit",
+      "horizontalOverflow": false,
+      "consoleEvents": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "screenshot": {
+        "file": "shared/screenshots/admin__route-edit__mobile__dark.png",
+        "sha256": "409abeb9247b5ab7fc1166d73a02ad8cd97e33171197ef67f19a41ec39a232d9",
+        "width": 390,
+        "height": 3460
+      }
+    }
+  ],
+  "sharedManifestSHA256": "3b9f1bff88defbd7cfc97935b8cf9c591a1918fa61f886c0abcad843a786df30",
+  "sharedToolSHA256": "d00b6bf71cc68a7a540d0d832b58c9f971905848107d34f970530fe5fe2ba2ee",
+  "sharedDryRun": {
+    "code": 0,
+    "signal": null
+  },
+  "sharedExit": {
+    "code": 0,
+    "signal": null
+  },
+  "fixtureSummary": {
+    "keyCount": 1,
+    "keyListPrefixOnly": true,
+    "usageStatuses": [
+      200,
+      500
+    ],
+    "syntheticOnly": true,
+    "seedVia": "real session cookie + CSRF admin API",
+    "providerCLI": false,
+    "connectionCount": 10,
+    "routeCount": 10
+  },
+  "captures": [
+    {
+      "page": "empty-keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": {
+        "file": "empty-keys-desktop.png",
+        "sha256": "b679c8c487b9e525814ecaf02bcf38d18c89a3abbfcc5aafdde84ed55df12993",
+        "width": 1440,
+        "height": 900
+      },
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "dashboard",
+      "path": "/admin",
+      "heading": "Dashboard",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "connections",
+      "path": "/admin/connections",
+      "heading": "Connections",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "routes",
+      "path": "/admin/routes",
+      "heading": "Routes",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "usage",
+      "path": "/admin/usage",
+      "heading": "Usage",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "connection-edit",
+      "path": "/admin/connections/6b6dc0c3-16ab-4ae4-ba06-a5fdb1f6a23e/edit",
+      "heading": "Edit connection",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "route-edit",
+      "path": "/admin/routes/a00114ca-24a1-4a52-b66e-165c287b73df/edit",
+      "heading": "Edit route",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 1440,
+        "viewportWidth": 1440
+      }
+    },
+    {
+      "page": "dashboard",
+      "path": "/admin",
+      "heading": "Dashboard",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "connections",
+      "path": "/admin/connections",
+      "heading": "Connections",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "routes",
+      "path": "/admin/routes",
+      "heading": "Routes",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "usage",
+      "path": "/admin/usage",
+      "heading": "Usage",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1,
+            "targets": [
+              "tr:nth-child(1) > .error-cell"
+            ]
+          }
+        ]
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "connection-edit",
+      "path": "/admin/connections/6b6dc0c3-16ab-4ae4-ba06-a5fdb1f6a23e/edit",
+      "heading": "Edit connection",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "route-edit",
+      "path": "/admin/routes/a00114ca-24a1-4a52-b66e-165c287b73df/edit",
+      "heading": "Edit route",
+      "viewport": {
+        "name": "tablet",
+        "width": 834,
+        "height": 1112
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 834,
+        "viewportWidth": 834
+      }
+    },
+    {
+      "page": "dashboard",
+      "path": "/admin",
+      "heading": "Dashboard",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "connections",
+      "path": "/admin/connections",
+      "heading": "Connections",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 42,
+            "targets": [
+              "th:nth-child(7)",
+              "th:nth-child(8)",
+              "tr:nth-child(1) > td:nth-child(7)",
+              "tr:nth-child(1) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(1) > .actions > .btn-link",
+              "tr:nth-child(1) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(2) > td:nth-child(7)",
+              "tr:nth-child(2) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(2) > .actions > .btn-link",
+              "tr:nth-child(2) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(3) > td:nth-child(7)",
+              "tr:nth-child(3) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(3) > .actions > .btn-link",
+              "tr:nth-child(3) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(4) > td:nth-child(7)",
+              "tr:nth-child(4) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(4) > .actions > .btn-link",
+              "tr:nth-child(4) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(5) > td:nth-child(7)",
+              "tr:nth-child(5) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(5) > .actions > .btn-link",
+              "tr:nth-child(5) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(6) > td:nth-child(7)",
+              "tr:nth-child(6) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(6) > .actions > .btn-link",
+              "tr:nth-child(6) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(7) > td:nth-child(7)",
+              "tr:nth-child(7) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(7) > .actions > .btn-link",
+              "tr:nth-child(7) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(8) > td:nth-child(7)",
+              "tr:nth-child(8) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(8) > .actions > .btn-link",
+              "tr:nth-child(8) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(9) > td:nth-child(7)",
+              "tr:nth-child(9) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(9) > .actions > .btn-link",
+              "tr:nth-child(9) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(10) > td:nth-child(7)",
+              "tr:nth-child(10) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(10) > .actions > .btn-link",
+              "tr:nth-child(10) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]"
+            ]
+          }
+        ]
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "routes",
+      "path": "/admin/routes",
+      "heading": "Routes",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "keys",
+      "path": "/admin/keys",
+      "heading": "API Keys",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "usage",
+      "path": "/admin/usage",
+      "heading": "Usage",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 7,
+            "targets": [
+              "div[aria-label=\"Usage by day table\"] > table > thead > tr > th:nth-child(7)",
+              "div[aria-label=\"Usage by day table\"] > table > tbody > tr > td:nth-child(7)",
+              "div[aria-label=\"Recent usage table\"] > table > thead > tr > th:nth-child(6)",
+              "div[aria-label=\"Recent usage table\"] > table > thead > tr > th:nth-child(7)",
+              "th:nth-child(8)",
+              "tr:nth-child(1) > .error-cell",
+              "tr:nth-child(2) > .mono:nth-child(6)"
+            ]
+          }
+        ]
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "connection-edit",
+      "path": "/admin/connections/6b6dc0c3-16ab-4ae4-ba06-a5fdb1f6a23e/edit",
+      "heading": "Edit connection",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 42,
+            "targets": [
+              "th:nth-child(7)",
+              "th:nth-child(8)",
+              "tr:nth-child(1) > td:nth-child(7)",
+              "tr:nth-child(1) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(1) > .actions > .btn-link",
+              "tr:nth-child(1) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(2) > td:nth-child(7)",
+              "tr:nth-child(2) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(2) > .actions > .btn-link",
+              "tr:nth-child(2) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(3) > td:nth-child(7)",
+              "tr:nth-child(3) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(3) > .actions > .btn-link",
+              "tr:nth-child(3) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(4) > td:nth-child(7)",
+              "tr:nth-child(4) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(4) > .actions > .btn-link",
+              "tr:nth-child(4) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(5) > td:nth-child(7)",
+              "tr:nth-child(5) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(5) > .actions > .btn-link",
+              "tr:nth-child(5) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(6) > td:nth-child(7)",
+              "tr:nth-child(6) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(6) > .actions > .btn-link",
+              "tr:nth-child(6) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(7) > td:nth-child(7)",
+              "tr:nth-child(7) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(7) > .actions > .btn-link",
+              "tr:nth-child(7) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(8) > td:nth-child(7)",
+              "tr:nth-child(8) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(8) > .actions > .btn-link",
+              "tr:nth-child(8) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(9) > td:nth-child(7)",
+              "tr:nth-child(9) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(9) > .actions > .btn-link",
+              "tr:nth-child(9) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+              "tr:nth-child(10) > td:nth-child(7)",
+              "tr:nth-child(10) > .actions > .secondary[type=\"button\"]",
+              "tr:nth-child(10) > .actions > .btn-link",
+              "tr:nth-child(10) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]"
+            ]
+          }
+        ]
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    },
+    {
+      "page": "route-edit",
+      "path": "/admin/routes/a00114ca-24a1-4a52-b66e-165c287b73df/edit",
+      "heading": "Edit route",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "health": {
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "pageErrors": 0,
+        "blocked": 0,
+        "http": [],
+        "failed": []
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": []
+      },
+      "screenshot": null,
+      "geometry": {
+        "documentWidth": 390,
+        "viewportWidth": 390
+      }
+    }
+  ]
+}

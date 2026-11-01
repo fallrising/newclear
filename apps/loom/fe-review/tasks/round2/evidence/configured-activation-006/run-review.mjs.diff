@@ -1,0 +1,20 @@
+--- run-review.mjs.before
++++ run-review.mjs
+@@ -2,14 +2,16 @@
+ import { readFile } from 'node:fs/promises';
+ import { fileURLToPath } from 'node:url';
+ import { installLoomFixture } from './preload.mjs';
++import { actualDragConfiguration } from './drag-configuration.mjs';
+ import { runOwned, baseURL, viewports, capture, sha256 } from '../../flowshot/fe-review/browser-runtime.mjs';
+ import { assertRuntimeHealth } from '../../flowshot/fe-review/runtime-guards.mjs';
+ import { tabActivate, addDocument, addTerminal, fit, connect, separateNodes, editDocument, assertPreserved, controls } from './ui-steps.mjs';
+
+ await runOwned({
+   component: fileURLToPath(new URL('../', import.meta.url)), unit: 'loom',
+-  sourceFiles: ['fe-review/preload.mjs', 'fe-review/preload.node.mjs', 'fe-review/run-review.mjs', 'fe-review/ui-steps.mjs', 'fe-review/geometry.mjs', 'fe-review/vite-review-config.mjs', 'vite.config.ts', '../flowshot/fe-review/browser-runtime.mjs', '../flowshot/fe-review/runtime-guards.mjs', 'src/ipc.ts', 'src/App.tsx', 'src/main.tsx', 'src/Terminal.tsx', 'src/surfaces/canvas/CanvasSurface.tsx', 'src/surfaces/canvas/persistence.ts', 'src/surfaces/canvas/history.ts', 'src/surfaces/canvas/window_close_ipc.ts', 'src/surfaces/document/DocumentSurface.tsx', 'src/surfaces/document/doc_ipc.ts', 'src/surfaces/document/ai_ipc.ts', 'package-lock.json'],
++  sourceFiles: ['fe-review/preload.mjs', 'fe-review/preload.node.mjs', 'fe-review/run-review.mjs', 'fe-review/ui-steps.mjs', 'fe-review/drag-configuration.mjs', 'fe-review/geometry.mjs', 'fe-review/vite-review-config.mjs', 'vite.config.ts', '../flowshot/fe-review/browser-runtime.mjs', '../flowshot/fe-review/runtime-guards.mjs', 'src/ipc.ts', 'src/App.tsx', 'src/main.tsx', 'src/Terminal.tsx', 'src/surfaces/canvas/CanvasSurface.tsx', 'src/surfaces/canvas/persistence.ts', 'src/surfaces/canvas/history.ts', 'src/surfaces/canvas/window_close_ipc.ts', 'src/surfaces/document/DocumentSurface.tsx', 'src/surfaces/document/doc_ipc.ts', 'src/surfaces/document/ai_ipc.ts', 'package-lock.json'],
+   async execute({ open, close, output, receipt, AxeBuilder }) {
++    assert.equal(actualDragConfiguration.sourceSha256, receipt.sourceHashes['src/surfaces/canvas/CanvasSurface.tsx'], 'REVIEW_DRAG_CONFIG_SOURCE_DRIFT');
+     const diagnostic = process.env.LOOM_REVIEW_DIAGNOSTIC;
+     if (diagnostic && diagnostic !== 'first-populated') throw new Error('REVIEW_DIAGNOSTIC_MODE');
+     if (diagnostic) receipt.diagnosticOnly = 'first-populated';

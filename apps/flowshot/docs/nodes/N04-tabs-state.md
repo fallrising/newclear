@@ -8,14 +8,23 @@ depends_on:
   - N02
   - N03
 size: S
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 contract_status: draft
 legacy_reference: 
   - mdread open_tabs persistence
 allowed_paths: 
+  - docs/adr/ADR-004-tab-session-persistence.md
+  - src/App.tsx
+  - src/App.test.tsx
+  - src/styles.css
+  - src-tauri/src/lib.rs
+  - src-tauri/src/commands/mod.rs
+  - crates/core/src/contracts/mod.rs
+  - crates/xtask/src/contracts.rs
+  - src/generated/contracts/**
   - src/features/tabs/**
   - src-tauri/src/commands/app_state*
   - crates/core/src/contracts/N04*
@@ -142,3 +151,7 @@ State JSON 必須帶 schema version；未知較新版本不得崩潰，回明確
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+
+## Initial session contract decisions
+
+Follow [ADR-004](../adr/ADR-004-tab-session-persistence.md) when deriving the initial N04 plan, DTOs, lock and tests. `expected_updated_at` is a per-key map with explicit null creation tokens; multi-entry saves are atomic. Native window-close and application-exit barriers acknowledge only after persistence, with explicit safe no-write cases. Root owns shared integration after N02/N03 acceptance. This specification preparation does not authorize implementation while either dependency remains incomplete. All original restart, lazy-read, scroll and <16ms gates remain.

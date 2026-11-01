@@ -99,7 +99,7 @@ function readJsonl(file) {
       rows.push(row);
     } catch (error) {
       // Report locations without echoing a malformed record's sensitive data.
-      parseErrors.push({ line: index + 1, error: error.message });
+      parseErrors.push({ line: index + 1, error: 'Invalid JSON object' });
     }
   }
   return { rows, parseErrors };
@@ -141,6 +141,15 @@ const tutorials = events.filter(row => row.type === 'tutorial_start').map(start 
   const matching = events.filter(row => row.sessionId === start.sessionId && row.runId === start.runId && row.details?.tutorialId === start.details?.tutorialId);
   const steps = matching.filter(row => row.type === 'tutorial_step' && row.details?.status !== 'cancelled');
   const complete = matching.find(row => row.type === 'tutorial_complete');
+  const expectedActions = ['create', 'update', 'complete', 'search', 'delete'];
+  const stepsMatchExpected = steps.length === 5 && steps.every((row, i) =>
+    row.details.step === i + 1 && row.details.action === expectedActions[i]);
+  const sameTask = Boolean(steps[0]?.details?.taskId) && steps.every(row => row.details.taskId === steps[0].details.taskId);
+  const startIndex = matching.indexOf(start);
+  const completeIndex = matching.indexOf(complete);
+  const ordered = steps.every(row => matching.indexOf(row) > startIndex && matching.indexOf(row) < completeIndex);
+  const cancelled = matching.some(row => row.details?.status === 'cancelled');
+  const recordingComplete = Boolean(start.details?.tutorialId && complete && complete.details?.step === 5 && stepsMatchExpected && sameTask && ordered && !cancelled);
   const timing = row => ({
     receivedAt: row.receivedAt,
     clientTime: row.clientTime || null,
@@ -153,12 +162,15 @@ const tutorials = events.filter(row => row.type === 'tutorial_start').map(start 
     tutorial_start: timing(start),
     tutorial_steps: steps.map(row => ({ step: row.details.step, action: row.details.action, ...timing(row) })),
     tutorial_complete: complete ? timing(complete) : null,
-    completed: Boolean(complete),
+    completionEventRecorded: Boolean(complete),
+    completed: recordingComplete,
     elapsedSeconds: complete ? secondsBetween(start.receivedAt, complete.receivedAt) : null,
     clientElapsedSeconds: complete && typeof complete.details?.elapsedMs === 'number' && typeof start.details?.elapsedMs === 'number'
       ? round((complete.details.elapsedMs - start.details.elapsedMs) / 1000) : null,
-    expectedActions: ['create', 'update', 'complete', 'search', 'delete'],
-    stepsMatchExpected: steps.map(row => row.details.action).join(',') === 'create,update,complete,search,delete',
+    expectedActions,
+    stepsMatchExpected,
+    sameTask,
+    cancelled,
   };
 });
 

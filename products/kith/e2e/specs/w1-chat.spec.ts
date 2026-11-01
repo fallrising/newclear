@@ -284,7 +284,13 @@ test(
     note(info, "the previous room's request was aborted and never written");
 
     // K. Gap fill answers with an empty page (FM-SYNC-04)
+    const lobbyCatchup = ben.page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return url.pathname === "/api/rooms/room-lobby/messages" && url.searchParams.get("order") === "asc" && response.ok();
+    });
     await ben.page.locator('[data-testid="room-list-item"][data-slug="lobby"]').click();
+    await lobbyCatchup;
+    await expect(ben.page.getByTestId("room-title")).toHaveText("Lobby");
     await expectLive(ben.page);
     const n2 = benAfterSeqRequests();
     const k1 = uniqueText("k1");

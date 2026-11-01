@@ -6,10 +6,12 @@ use tokio::signal;
 use tokio::sync::broadcast;
 
 use crate::error::ServerError;
+use crate::runtime::router::ShardTransport;
 
 pub struct ShutdownHandle {
     pub workers: Vec<std::thread::JoinHandle<()>>,
     pub shutdown_tx: broadcast::Sender<()>,
+    pub shard_transport: ShardTransport,
     pub conn_count: Arc<AtomicUsize>,
     pub deadline_secs: u64,
 }
@@ -18,6 +20,7 @@ impl ShutdownHandle {
     /// Broadcast shutdown → wait for workers to drain (or deadline) → join.
     pub async fn shutdown(self) -> Result<(), ServerError> {
         let _ = self.shutdown_tx.send(());
+        self.shard_transport.wake_all();
         let deadline = Duration::from_secs(self.deadline_secs.max(1) + 1);
         let join = tokio::task::spawn_blocking(move || {
             for w in self.workers {

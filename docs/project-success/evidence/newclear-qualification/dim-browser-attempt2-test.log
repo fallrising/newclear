@@ -1,0 +1,17 @@
+[WebServer] failed to load config from /app/vite.config.ts
+[WebServer] error when starting preview server:
+[WebServer] Error: EROFS: read-only file system, open '/app/node_modules/.vite-temp/vite.config.ts.timestamp-1792597790788-cbc29c5023449.mjs'
+[WebServer]     at async open (node:internal/fs/promises:640:25)
+[WebServer]     at async Object.writeFile (node:internal/fs/promises:1260:14)
+[WebServer]     at async loadConfigFromBundledFile (file:///app/node_modules/.pnpm/vite@8.3.0_@types+node@24.10.1_jiti@2.7.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/node.js:37497:3)
+[WebServer]     at async bundleAndLoadConfigFile (file:///app/node_modules/.pnpm/vite@8.3.0_@types+node@24.10.1_jiti@2.7.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/node.js:37345:21)
+[WebServer]     at async loadConfigFromFile (file:///app/node_modules/.pnpm/vite@8.3.0_@types+node@24.10.1_jiti@2.7.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/node.js:37305:42)
+[WebServer]     at async resolveConfig (file:///app/node_modules/.pnpm/vite@8.3.0_@types+node@24.10.1_jiti@2.7.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/node.js:36906:22)
+[WebServer]     at async preview (file:///app/node_modules/.pnpm/vite@8.3.0_@types+node@24.10.1_jiti@2.7.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/node.js:35008:17)
+[WebServer]     at async CAC.<anonymous> (file:///app/node_modules/.pnpm/vite@8.3.0_@types+node@24.10.1_jiti@2.7.0_yaml@2.9.1/node_modules/vite/dist/node/cli.js:811:18) {
+[WebServer]   errno: -30,
+[WebServer]   code: 'EROFS',
+[WebServer]   syscall: 'open',
+[WebServer]   path: '/app/node_modules/.vite-temp/vite.config.ts.timestamp-1792597790788-cbc29c5023449.mjs'
+[WebServer] }
+Error: Process from config.webServer was not able to start. Exit code: 1

@@ -1,0 +1,20 @@
+[
+  {
+    "command": "python3 scripts/check_project_success.py",
+    "exit": 0,
+    "stdout": "PASS: 41 project success contracts and navigation/index\n",
+    "stderr": ""
+  },
+  {
+    "command": "python3 -m unittest discover -s scripts/tests -p test_project_success.py -v",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "test_a_version_number_is_not_a_usable_certification (test_project_success.SuccessContractTests.test_a_version_number_is_not_a_usable_certification) ... ok\ntest_completed_project_cannot_have_unpassed_criteria (test_project_success.SuccessContractTests.test_completed_project_cannot_have_unpassed_criteria) ... ok\ntest_dangling_evidence_is_rejected (test_project_success.SuccessContractTests.test_dangling_evidence_is_rejected) ... ok\ntest_duplicate_acceptance_ids_are_rejected (test_project_success.SuccessContractTests.test_duplicate_acceptance_ids_are_rejected) ... ok\ntest_incomplete_project_is_valid_without_a_release (test_project_success.SuccessContractTests.test_incomplete_project_is_valid_without_a_release) ... ok\ntest_inventory_path_cannot_escape_repository (test_project_success.SuccessContractTests.test_inventory_path_cannot_escape_repository) ... ok\ntest_local_evidence_cannot_escape_repository (test_project_success.SuccessContractTests.test_local_evidence_cannot_escape_repository) ... ok\ntest_missing_readme_navigation_is_rejected (test_project_success.SuccessContractTests.test_missing_readme_navigation_is_rejected) ... ok\ntest_navigation_cannot_read_outside_symlink (test_project_success.SuccessContractTests.test_navigation_cannot_read_outside_symlink) ... ok\ntest_new_category_is_discovered (test_project_success.SuccessContractTests.test_new_category_is_discovered) ... ok\ntest_new_component_is_not_silently_omitted (test_project_success.SuccessContractTests.test_new_component_is_not_silently_omitted) ... ok\ntest_qualification_identity_is_exact_and_unique (test_project_success.SuccessContractTests.test_qualification_identity_is_exact_and_unique) ... ok\ntest_reference_has_explicit_non_runtime_status (test_project_success.SuccessContractTests.test_reference_has_explicit_non_runtime_status) ... ok\ntest_symlink_project_cannot_escape_repository (test_project_success.SuccessContractTests.test_symlink_project_cannot_escape_repository) ... ok\ntest_tag_requires_qualification_and_completed_scope (test_project_success.SuccessContractTests.test_tag_requires_qualification_and_completed_scope) ... ok\n\n----------------------------------------------------------------------\nRan 15 tests in 0.020s\n\nOK\n"
+  },
+  {
+    "command": "git diff --check",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

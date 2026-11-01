@@ -1,0 +1,91 @@
+✖ measured geometry 390 (1.101146ms)
+✖ measured geometry 834 (0.18874ms)
+✖ measured geometry 1440 (0.085079ms)
+✖ observed loading/errors expose status and alert semantics (0.420928ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57.587996
+
+✖ failing tests:
+
+test at products/phark/fe-review/measured-contract.test.mjs:7:40
+✖ measured geometry 390 (1.101146ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_PAGE_OVERFLOW
+      at assertLayout (file://<worktree>/products/phark/fe-review/layout-contract.mjs:4:3)
+      at TestContext.<anonymous> (file://<worktree>/products/phark/fe-review/measured-contract.test.mjs:7:96)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at products/phark/fe-review/measured-contract.test.mjs:7:40
+✖ measured geometry 834 (0.18874ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_COLUMN_HEIGHT
+      at assertLayout (file://<worktree>/products/phark/fe-review/layout-contract.mjs:6:3)
+      at TestContext.<anonymous> (file://<worktree>/products/phark/fe-review/measured-contract.test.mjs:7:96)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at products/phark/fe-review/measured-contract.test.mjs:7:40
+✖ measured geometry 1440 (0.085079ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_COLUMN_HEIGHT
+      at assertLayout (file://<worktree>/products/phark/fe-review/layout-contract.mjs:6:3)
+      at TestContext.<anonymous> (file://<worktree>/products/phark/fe-review/measured-contract.test.mjs:7:96)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at products/phark/fe-review/measured-contract.test.mjs:8:1
+✖ observed loading/errors expose status and alert semantics (0.420928ms)
+  AssertionError [ERR_ASSERTION]: REVIEW_STATE_SEMANTICS
+
+  null !== 'status'
+
+      at assertStateSemantics (file://<worktree>/products/phark/fe-review/layout-contract.mjs:13:12)
+      at TestContext.<anonymous> (file://<worktree>/products/phark/fe-review/measured-contract.test.mjs:8:73)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'status',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

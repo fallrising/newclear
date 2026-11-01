@@ -1,6 +1,6 @@
 # PP1 DB／media 恢復內核草稿
 
-日期：2026-10-09。狀態：**DRAFT，非DOC_READY，不可據此施工**。配合[PP1施工圖](../waves/PP1.md)。來源 `216643eb3f566b82b4747256034e94eb1844ebc4`；已核對 `a6ea2af92469ae82091dde394c8d62e2227128a1` 的CMS無增量。本文列出內核設計；主機adapter、session撤銷adapter、真實演練與卡片大小仍待封板。
+日期：2026-11-01（DRAFT 修訂；既定政策來源仍為 2026-10-09）。狀態：**DRAFT，非DOC_READY，不可據此施工**。配合[PP1施工圖](../waves/PP1.md)。來源 `216643eb3f566b82b4747256034e94eb1844ebc4`；已核對 `a6ea2af92469ae82091dde394c8d62e2227128a1` 的CMS無增量。本文列出內核設計；主機 adapter、PP1c D01/D02/D03、session 撤銷接線、真實演練與卡片大小仍待封板。
 
 ## 1 範圍
 
@@ -8,7 +8,7 @@
 
 只封定 manifest／媒體盤點／受控狀態機／保留選取；Node stdlib 與 Java25／既有 JDBC/Jackson/ImageIO 供 repo 內純測試。沒有新 npm／Java 依賴。Node／JDK／PG tools 在正式主機的可用性、執行包裝與安裝授權仍未知；抽象 adapter 不是已批准的工具替代品。沒有 archive extractor、PG shell、container、proxy、encryption、transfer、notification 或 scheduler 實作。
 
-12 卡只是環境無關內核。host adapter、實際離機解密／空白還原／升級三故障演練、正式配置旅程與整合交付須額外卡；不得宣稱整個 PP1 在 30 卡內。automatic pruning 不在本子集：只輸出 keep/candidate/protected 清單，不刪備份、卷或資料。
+舊十二卡拆分已失效：本地實作只使用 PP1c §6 的子波與卡片；保留選取、離機、排程與升級另屬 PP1d，不能由本文件派生施工卡。PP1c 不輸出保留候選，也不刪備份、卷或資料。
 
 ## 2 先決條件與已核實來源
 
@@ -33,6 +33,8 @@
 
 ### 4.1 統一序列化與敏感界線
 
+本節僅約束新增 bundle、offline protocol 與 LeaseV2／JournalV2 bytes。既有 PP1b v1 target/lease/journal/result 保持原 `JSON.stringify(value) + "\n"` 的欄位插入順序與六欄 Result；v1 loader 不套 canonical-byte equality，不重寫／遷移舊檔。
+
 UTF-8 JSON、無BOM、最後一個 LF。canonical(v)：object keys 按 Unicode codepoint排序；array保持已規定排序；JSON primitive不改。禁止NaN／Infinity／duplicate keys／unknown fields。原始JSON入口統一 `parseStrictJson(rawBytes)`：UTF-8解碼→JSON.parse→canonicalBytes(value)逐byte與輸入比較；輸入必須本契約canonical格式，重複key、非canonical空白／key順序／多文件／非法encoding都拒絕。重複key被JSON.parse覆蓋後重序列化不可能等於原bytes，故不是validateManifest(value)單獨宣稱能檢出。Java main也先解析再canonical bytes逐byte比對。size/count/monotonic elapsed 都是十進位字串 `0|[1-9][0-9]*`，避免JS精度截斷；hash為64位lowercase hex；sourceCommit為40位lowercase hex；digest為 `sha256:`＋64位hex；UTC RFC3339固定 `YYYY-MM-DDTHH:mm:ss.SSSZ`；UUID用lowercase canonical形式。clock不得倒退；duration使用 injected monotonic clock測量，UTC供跨artifact對帳。artifact路徑只允許固定相對file names。
 
 manifest本身不包含自身hash。`local-complete.json` 綁定manifest最終bytes的SHA256；manifest禁止其artifact list列自己／complete marker，避免hash循環。archive、inventory、DB snapshot含內容／帳號／token hash，整批都為私有敏感artifact，不因「manifest沒有secret」而公開。收據不保留username／hostname／origin值／objectKey原文／sql／stderr／cookie／password／credential hash，只有固定code／opaque IDs／hash／count／時間／exit。private manifest可保存非secret完整配置或opaque configRef；公開文件只有變數名稱。
@@ -42,7 +44,7 @@ manifest本身不包含自身hash。`local-complete.json` 綁定manifest最終by
 | 欄位 | 精確型別／約束 |
 | --- | --- |
 | manifestVersion | integer literal 1 |
-| backupId / instanceId | backupId=`pp1-`＋UTCcompact `YYYYMMDDTHHMMSSmmmZ`＋`-`＋32位random hex；instanceId為private配置的opaque UUID，不是hostname |
+| backupId / instanceId | backupId=`pp1-`＋UTCcompact `YYYYMMDDTHHMMSSmmmZ`＋`-`＋32位random hex；PP1c instanceId 由 source runId 的 32 lowercase hex 插入 8-4-4-4-12 分隔符決定（不改 UUID version/variant bits、不另生 UUID）；例如 runId `00112233445566778899aabbccddeeff` → `00112233-4455-6677-8899-aabbccddeeff`，不是 hostname |
 | release | `{sourceCommit, apiImageDigest, postgresImageDigest, javaRuntimeVersion, postgresServerVersion, frontend:{front,back,admin}, configSha256}`；每面frontend為`{artifactSha256,apiBaseConfigSha256}`；版本非空字串，PGmajor必須16，Java major25 |
 | migration | sorted `[{installedRank:string,version:string|null,description:string,type:string,script:string,checksum:string|null,success:boolean}]`，按rank整數升序；任何success=false拒絕；不假設版本永遠V10 |
 | scope | `{dbSchema:'public',tableNames:string[], dbRoleRef:string,secretRefs:string[]}`；tableNames按codepoint升序且不能漏§5的20tables；secretRefs去重升序，只opaque恢復來源，不含值 |
@@ -58,13 +60,23 @@ local-complete：`{version:1,backupId,manifestSha256,verifiedLocalAt}`，immutab
 
 ### 4.3 函式／CLI契約
 
-此parent contract定canonical bundle與跨波不變量；local runtime commands/lease/adapter只以PP1c §4.2、§4.4、§6為唯一施工來源。不得在此另定一套backup/restore CLI、lock或JavaExec。Java現有main保留`contains("maintenance")`舊路由及其錯位拒絕；PP1c只可在該分支之後新增精確首token offline `ops-inventory`／`ops-revoke-restored-sessions`，於Spring前執行，錯位或重複token拒絕。無新Java Operation、HTTP endpoint、runtime dependency或Compose公開port。詳細request/result/ready/permit與密碼界線由PP1c固定。
+此parent contract定canonical bundle與跨波不變量；local runtime commands/lease/adapter只以PP1c §4.2、§4.4、§6為唯一施工來源。不得在此另定一套backup/restore CLI、lock或JavaExec。Java現有main保留`contains("maintenance")`舊路由及其錯位拒絕；PP1c只可在該分支之後新增精確首token offline `ops-inventory`／`ops-revoke-restored-sessions`，於Spring前執行，錯位或重複token拒絕。無新Java Operation、HTTP endpoint、runtime dependency或Compose公開port。詳細 request/result/ready/permit 與密碼界線由 PP1c §4.2a–e 提案；其未決 adapter 表列項未封板前必須 ADAPTER_UNSEALED。既有 G06 account Java child 的單次 SPRING_DATASOURCE_PASSWORD 環境傳遞與 parent finally 清除引用／Buffer 保持原契約；這個既有例外不擴張至新增 offline helpers。
 
 ## 5 模組與狀態機
 
 ### 5.1 DB／檔案inventory（只讀）
 
 Raw inventory恰含PP1c §4.1列明的20 relations及其migration驗證的column allowlist。缺失/多餘table或column為`SCHEMA_UNSUPPORTED`，不能因兩端動態schema相同而接受drift。允許欄完整catalog/constraint/index metadata仍需逐項比較。每個固定column以PG `::text`輸出，採單一REPEATABLE_READ、read-only JDBC transaction及UTC/ISO/hex/extra-float固定設定；source schema metadata從catalog取，cell經`getString`取nullable PG text；不能依賴driver-specific bytea conversion或cast後ResultSet metadata。table row maps/canonical ordering/hash與media walk詳見PP1c §4.1/4.3，parent不另造第二個inventory算法。
+
+另取固定media query：`SELECT id,content_type,byte_size,stored_bytes,checksum_sha256,width,height,status FROM public.cms_media ORDER BY id`；variants query=`SELECT media_id,variant,content_type,byte_size,width,height,object_key FROM public.cms_media_variant ORDER BY media_id,variant`。DB metadata所有deleted rows仍包含；hash為original bytes。
+
+檔案演算法：
+
+1. mediaRoot本身必須real directory非symlink；walk不FOLLOW_LINKS。逐path component檢查symlink、拒絕absolute／`.`／`..`／backslash／NUL/drive prefix，root-relative POSIX objectKey。非regular文件、hardlink（link count>1）、unsafe path或無法確認link count時回UNSAFE_MEDIA_PATH，不跟到root外；link-count需host支持，未知adapter待封板，不能跨平台假設。
+2. 所有file計size/SHA256並記before/after attrs（size/mtime/file identity）；變動回WRITER_NOT_QUIESCED。異常不刪檔，檔案key唯一；variants同asset的名稱唯一且只有original/thumbnail/web，objectKey不能被兩個DBvariant共用。每declared variant需file存在且size相等。
+3. 每asset恰一個original，original.size=asset.byteSize、original.sha256=checksum；storedBytes=該asset全部variant.size總和；status只能available/deleted。original缺／checksum錯／size錯分別固定code。image original依同版ImageVariants.read解碼：非null時variant集合恰original/thumbnail/web且asset與originalwidth/height=decode尺寸；thumbnail/web都需可解碼JPEG，尺寸依既有fit的320／1600等比計算；不重新生成bytes或比較ImageIO encoder輸出。decode null：width/height均null且只有original，否則IMAGE_VARIANTS_INCOMPLETE。PDF只original且dims null。不引入新image decoder。
+4. 不被任何declared variant引用的regular file分類orphan，完整保留。無DB asset的檔案不自動造asset；soft-deleted媒體也全部驗證。未知contentType回SCHEMA_UNSUPPORTED，不猜file extension。asset/variant缺owner/attachment歷史索引不是disk完整性證明，raw DBsnapshot與§5.4 API隔離fixture還必須驗。
+5. pre/post inventory與writer proof一致，文件／rows改變時拒絕capture。拒絕任何incomplete inventory發local-complete；Main可写private failure JSON但不包含raw key／secret/cause。
 
 ### 5.2 lock／journal與adapter執行邊界
 
@@ -79,6 +91,12 @@ Parent集合狀態仍是`PRECHECK→QUIESCED→CAPTURED→VERIFIED_LOCAL→VERIF
 ### 5.4 restore／upgrade recovery狀態
 
 恢復證明流程為capture→private copy→fresh isolated target→DB/media restore→完整raw/files/Flyway/source-release equality→同transaction session revoke + 恰一AUTH event→同版API health→child-only browser smoke→target stop→durable proof。Startup delta預設為零；任何未明列owner decision的seed/catalog/purge/scheduler或其他row變更為`STARTUP_MUTATION`，停止隔離並退回設計，不能先設全表忽略清單。只允許revoke transaction明列的session revoked_at差異與一筆AUTH新增。revoke commit後任何crash/health/smoke failure，保留停機target；重試須新operationId、新blank target及原immutable backup完整重還原，RTO起點不變。
+
+RAW_VERIFIED先比較全部sessions與credentials原始備份。之後固定執行revokeRestoredSessions adapter，再啟動API；隔離drill與未來正式恢復都使用相同政策。此adapter在同一DB transaction執行 `UPDATE cms_session SET revoked_at = ? WHERE revoked_at IS NULL`（綁單一恢復時間），並在呼叫端先產生auditEventId，用同DataSource的既有JdbcIdentityStore.insertAudit寫一筆AUTH事件（不使用void AuditLog.record來取得ID），at與撤銷時間相同，targetType=restore、targetId=null、ip=null，action=`PRODUCTION_SESSIONS_INVALIDATED_AFTER_RESTORE`、actor=null、surface=admin、outcome=ok，detail僅operationId/backupId/targetRef/revokedCount，不存token；audit失敗全rollback且不得啟動。保留已撤銷列原值、principal/credentials/roles/grants原樣。輸出 `{operationId,backupId,revokedCount:string,auditEventId,committed:true}`，phase才成SESSIONS_REVOKED。這是恢復必要的明示狀態差異，不把它混入raw snapshot比對；前後只允許上述session欄位與一筆AUTH新增。所有舊恢復token在啟動後必須被拒絕，然後以正式測試管理員/operator重新login。不得靠不同API host當session失效證明。adapter的Java檔案／CLI／交易故障測試卡仍需與host維護接線共同封板；未有它就不得越過RAW_VERIFIED。
+
+commit 回應未知時不可宣稱 rollback；只有明確 commit 前失敗才能聲稱同交易回滾。DB 已 commit 但 receipt 寫入／同步失敗時，保持 target/API 停止與 lock，記未知／已提交的實際證據，不重做 mutation。
+
+RTO起点incidentStartedAt為request中由owner/操作流程宣告的服務中斷時間，receipt逐字保留；startedAt只記本命令開始，不能代替incidentStartedAt。elapsedMs=(startedAt UTC−incidentStartedAt UTC)+本命令monotonic經過毫秒；前項不得負數，任何UTC倒退／與本命令monotonic跨度不相容回OBJECTIVE_UNKNOWN，不用較短數值宣稱達標。environment欄位必須與request相等。RTO起點，不以下載或pg_restore開始重新起算；若純演練，用取回命令開始時間並标`environment=isolated-drill`。需保留等待人員/secret/image取回／解密時間，clock欄位倒退或未知回OBJECTIVE_UNKNOWN，不能宣稱達標。SERVICE_VERIFIED且elapsed<=14400000ms才withinRto=true；超時成功恢復仍記withinRto=false、exit非零/OBJECTIVE_MISSED，不能重新啟計時掩蓋。
 
 正式RECOVER_ADMIN前，fixed `recovery-candidate.json`只作locator；在停止或Java attach前預檢bundle+完整成功/released proof。取得同一registry的新operationId後，持lease重新hash所有bundle/proof bytes、核對完整source identity和所有原始rows/files equality；prior proof可使用但receipt-only或stale raw不可通過。完成保持原stopped。local-only證據永不滿足`VERIFIED_OFFSITE`。upgrade rollback、offsite restore、production switching、retention selection仍非PP1c scope，依PP1d另設卡，不借用本地restore流程自動mutation。
 
@@ -98,10 +116,10 @@ RPO age=`now - max(valid VERIFIED_OFFSITE quiescedAt)`，<=86400000為within-tar
 | 舊草稿卡 | 唯一當前責任 |
 |---|---|
 | R01–R02 manifest/canonical bundle | PP1c C01–C02 + shared §4.1 schema |
-| R03–R04 inventory/media raw | PP1c C03–C04b + H03 transport |
+| R03–R04 inventory/media raw | PP1c C03/C04a–d + H03 transport |
 | R05–R06 offline Java dispatch | PP1c C05–C06 + R04; 保留舊maintenance語義，不加JavaExec |
-| R07–R08 local capture/lease | PP1c C07–C08 + L01–L03 + H01–H02 |
-| R09–R10 restore/revoke/recover | PP1c C09–C18 + R01–R03 + T01–T03 |
+| R07–R08 local capture/lease | PP1c C07–C08 + L01–L05 + H01/H02/H04 |
+| R09–R10 restore/revoke/recover | PP1c C09–C18 + R01–R03 + T01–T04 |
 | R11–R12 selection/retention | PP1d future-only，未授權PP1c實作 |
 
 舊R01–R10的段落是被此crosswalk取代的歷史拆卡草案，不得當作第二份接口或驗收依據；施工依PP1c的actual path whitelist/card dependencies。Retention daily/weekly selector、pruning、schedule、offsite/KMS/notifications、upgrade fault recovery及正式host acceptance均保留在PP1d/owner環境決策，local completion不會關閉它們。
@@ -118,26 +136,25 @@ Java tests用@TempDir与explicitrecords；ImageIO生成32×16 PNG original，既
 
 ## 8 失敗模式與固定退出
 
-| code／FM | 精確行為／測試／卡 |
-| --- | --- |
-| INPUT_INVALID / MANIFEST_MISMATCH / PP1-FM08/12 | exit2，無targetwrites；manifestwrongbatchunsafeinput C01–02 |
-| MISSING_MEDIA_OBJECT / MEDIA_HASH_MISMATCH / MEDIA_SIZE_MISMATCH / IMAGE_VARIANTS_INCOMPLETE / PP1-FM08 | exit3，完整集合不成功、不修檔/DB；inventorytests C03–C04b |
-| UNSAFE_MEDIA_PATH / SCHEMA_UNSUPPORTED / PP1-FM08/12 | exit3，未知path/link/table/type拒絕；inventorytests C03–C04b |
-| LOCK_BUSY / WRITER_NOT_QUIESCED / SOURCE_CHANGED / PP1-FM09 | exit4，capture0，不偷unlock，不forcedstop；backuptrace C07–C08 |
-| CAPTURE_FAILED / LOCAL_VERIFY_FAILED / PP1-FM10 | exit5，無localcomplete、lastsuccess不動、有界safe恢復原state；C07–C08 |
-| OFFSITE_FAILED / OFFSITE_VERIFY_FAILED / NOTIFY_FAILED / PP1-FM11 | exit6，local保留、不更新success，通知雙failure；C07–C08 |
-| TARGET_NOT_BLANK / TARGET_NOT_OWNED / ADAPTER_UNSEALED / PP1-FM12 | exit7，所有restorewrites0；C09–C18 |
-| RESTORE_FAILED / RAW_MISMATCH / STARTUP_MUTATION / SMOKE_FAILED / PP1-FM10/15 | exit8，target停隔離、保留原卷，不出verifiedreceipt；C09–C18 |
-| UPGRADE_FAILED / RECOVERY_FAILED / WRITES_ALREADY_OPEN / PP1-FM13 | exit9，noopenwrites，oldtuplefreshrestore或hold；C09–C18 |
-| INTERRUPTED / JOURNAL_INCOMPLETE | exit10，記phase保留lock等待受控inspect；C07–C08/C09–C18 |
-| OBJECTIVE_MISSED / OBJECTIVE_UNKNOWN / NO_RECOVERABLE_BASELINE / PP1-FM14 | exit11，能用仍記RTO超時／RPOstale，selection不刪；PP1d |
+這是 PP1c 新增 local CLI／offline helper 的唯一 code→exit 對照；child 不另定義退出碼。既有 PP1b account CLI／guard 的退出碼與六欄 Result 不變。全部 code 為 enum，未知值拒絕；`OpsError={code,phase,operationId}`，message 只等於 code，不帶 cause／SQL／secret。phase 來自目前 journal，不由 message 猜測。
 
-primarycode不被notifyfailure覆蓋；Outcome保留primaryexit，notificationreceipt另有failed。phase不得以OpsError.message猜測，從journal目前phase記錄。未登入／wrong surface／versionConflict由既有APIassertions及正式smokeadapter覆蓋，不把coreerrorenum新增到HTTPErrorCode。
+| Exit | PP1c local codes | 行為 |
+| --- | --- | --- |
+| 2 | INPUT_INVALID, MANIFEST_MISMATCH | 無 target writes；輸入／批次／release 契約拒絕 |
+| 3 | SCHEMA_UNSUPPORTED, UNSAFE_MEDIA_PATH, MISSING_MEDIA_OBJECT, MEDIA_HASH_MISMATCH, MEDIA_SIZE_MISMATCH, IMAGE_VARIANTS_INCOMPLETE | 不修檔／DB；不出 complete |
+| 4 | LOCK_BUSY, WRITER_NOT_QUIESCED, SOURCE_CHANGED | capture 停止，保留未知 lock，不強停 writer |
+| 5 | CAPTURE_FAILED, LOCAL_VERIFY_FAILED, COPY_FAILED, BUNDLE_MISMATCH | 舊 bundle/source 不變，staging 保留；失敗 primary 不被 cleanup 覆蓋 |
+| 7 | TARGET_NOT_BLANK, TARGET_NOT_OWNED, ADAPTER_UNSEALED | 所有 restore writes=0；無已封定 adapter 不啟動 |
+| 8 | RESTORE_FAILED, RAW_MISMATCH, SESSION_REVOKE_FAILED, STARTUP_MUTATION, SMOKE_FAILED | target 隔離停止；不出成功證明；commit 未知不聲稱 rollback |
+| 10 | INTERRUPTED, JOURNAL_INCOMPLETE | 固定 phase、保留 lock／target，只可唯讀 inspect |
+| 11 | OBJECTIVE_MISSED, OBJECTIVE_UNKNOWN | 不宣稱 RTO 達標；成功還原但超時也非零 |
+
+未來 PP1d 才可定義：exit6 `OFFSITE_FAILED, OFFSITE_VERIFY_FAILED, NOTIFY_FAILED`；exit9 `UPGRADE_FAILED, RECOVERY_FAILED, WRITES_ALREADY_OPEN`；exit11 `NO_RECOVERABLE_BASELINE`。這些不是 PP1c 可接收／產生的 code，也不授權外送／通知／selection。primary code 不被後續 evidence failure 覆蓋。HTTP auth／surface／versionConflict 沿既有 API contract，這些 local codes 不加入 HTTPErrorCode。
 
 ## 9 整合檢查表與殘餘依賴
 
 - [x] PP1正文與PD04已更新批准數值，不寫已達SLA。
-- [ ] weeklybucket細節與RPOlatencyexposure審查；R04原390行高風險估算已拆成R04盤點、R05/R06 CLI與封裝Red/Green；各卡仍需實作前大小與接口walk，不能靠省略安全驗證壓行數。
+- [ ] PP1d weekly bucket／RPO latency exposure 審查；PP1c 卡片只依 child §6，每張含測試上限 400，拆卡不能省略安全斷言；舊 R04/R05/R06 不再派工。
 - [ ] PD01：hostOS/localfilesystem、Node/JRE工具與permissions、包裝命令、Compose版本、容器停止deadline／restartmanager／DBsession識別、空白DBrole、media readonlymount、archiveformat及safeextractor封板。
 - [ ] PD02/runtime：實际URL／HTTPS／隔離route／frontendartifacts與來源releasehash固定，no-secretconfigschema由runtime卡提供。
 - [ ] PD03：離機目的地、加密/傳輸tool版本／金鑰恢復／受保護來源驗證／回取解密hash／通知receipt具體adapter與故障；沒有provider工具 অনুম認。

@@ -1,0 +1,3199 @@
+{
+  "project": "dim-gate",
+  "scope": "R2 navigation capture; not workflow or full Round3 acceptance",
+  "resumedFrom": "20261024T063828166Z",
+  "driverSha256": "8d32f6cbda704d58135b12ed513f849143ef472dd2a3e167befc0d7e1bfcb394",
+  "browser": "153.0.8010.12",
+  "node": "v24.18.0",
+  "axe": true,
+  "results": [
+    {
+      "persona": "user-rd-commerce",
+      "page": "monitoring",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/monitoring",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__monitoring__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 監控設定",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-rd-commerce",
+      "page": "alerts",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/rd/apps/app-checkout/alerts",
+      "status": 200,
+      "screenshot": "screenshots/user-rd-commerce__alerts__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-rd-commerce",
+      "heading": "checkout-api · 告警規則",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ops",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ops__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "維運中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cmdb",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cmdb__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "配置項資源清單",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ci",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb/ci-aws-checkout-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ci__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "aws-compute-01",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "topology",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/topology",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__topology__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "依賴與影響拓撲",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/incidents",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__incidents__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "事件與恢復",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents-detail",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/incidents"
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/releases",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__releases__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "發布與審批",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases-detail",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/releases"
+    },
+    {
+      "persona": "user-ops",
+      "page": "alerting",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/alerting",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__alerting__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "告警控制",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "capacity",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/capacity",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__capacity__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "資源池容量",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 6
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "caches",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__caches__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Redis 快取",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Kafka 訊息",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "clusters",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__clusters__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Kubernetes 叢集",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cache-detail",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches/ci-idc-redis-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cache-detail__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "shared-redis-demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging-detail",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging/w2-ci-kafka-idc",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging-detail__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "IDC Kafka · Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cluster-detail",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters/w2-ci-k8s-aws",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cluster-detail__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "AWS Kubernetes · Readonly Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ops",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ops__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "維運中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cmdb",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cmdb__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "配置項資源清單",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ci",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb/ci-aws-checkout-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ci__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "aws-compute-01",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "topology",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/topology",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__topology__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "依賴與影響拓撲",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/incidents",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__incidents__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "事件與恢復",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents-detail",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/incidents"
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/releases",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__releases__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "發布與審批",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases-detail",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/releases"
+    },
+    {
+      "persona": "user-ops",
+      "page": "alerting",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/alerting",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__alerting__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "告警控制",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "capacity",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/capacity",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__capacity__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "資源池容量",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 6
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "caches",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__caches__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Redis 快取",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Kafka 訊息",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "clusters",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__clusters__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Kubernetes 叢集",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cache-detail",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches/ci-idc-redis-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cache-detail__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "shared-redis-demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging-detail",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging/w2-ci-kafka-idc",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging-detail__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "IDC Kafka · Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cluster-detail",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters/w2-ci-k8s-aws",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cluster-detail__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "AWS Kubernetes · Readonly Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ops",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ops__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "維運中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cmdb",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cmdb__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "配置項資源清單",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ci",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb/ci-aws-checkout-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ci__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "aws-compute-01",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "topology",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/topology",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__topology__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "依賴與影響拓撲",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/incidents",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__incidents__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "事件與恢復",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents-detail",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/incidents"
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/releases",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__releases__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "發布與審批",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases-detail",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/releases"
+    },
+    {
+      "persona": "user-ops",
+      "page": "alerting",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/alerting",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__alerting__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "告警控制",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "capacity",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/capacity",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__capacity__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "資源池容量",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 6
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "caches",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__caches__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Redis 快取",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Kafka 訊息",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "clusters",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__clusters__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "Kubernetes 叢集",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cache-detail",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches/ci-idc-redis-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cache-detail__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "shared-redis-demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging-detail",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging/w2-ci-kafka-idc",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging-detail__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "IDC Kafka · Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cluster-detail",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters/w2-ci-k8s-aws",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cluster-detail__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-ops",
+      "heading": "AWS Kubernetes · Readonly Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ops",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ops__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "維運中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cmdb",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cmdb__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "配置項資源清單",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ci",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb/ci-aws-checkout-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ci__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "aws-compute-01",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "topology",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/topology",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__topology__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "依賴與影響拓撲",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/incidents",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__incidents__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "事件與恢復",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents-detail",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/incidents"
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/releases",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__releases__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "發布與審批",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases-detail",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/releases"
+    },
+    {
+      "persona": "user-ops",
+      "page": "alerting",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/alerting",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__alerting__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "告警控制",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "capacity",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/capacity",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__capacity__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "資源池容量",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 6
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "caches",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__caches__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Redis 快取",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Kafka 訊息",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "clusters",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__clusters__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Kubernetes 叢集",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cache-detail",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches/ci-idc-redis-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cache-detail__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "shared-redis-demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging-detail",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging/w2-ci-kafka-idc",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging-detail__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "IDC Kafka · Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cluster-detail",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters/w2-ci-k8s-aws",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cluster-detail__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "AWS Kubernetes · Readonly Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ops",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ops__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "維運中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cmdb",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cmdb__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "配置項資源清單",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ci",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb/ci-aws-checkout-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ci__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "aws-compute-01",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "topology",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/topology",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__topology__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "依賴與影響拓撲",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/incidents",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__incidents__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "事件與恢復",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents-detail",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/incidents"
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/releases",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__releases__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "發布與審批",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases-detail",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/releases"
+    },
+    {
+      "persona": "user-ops",
+      "page": "alerting",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/alerting",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__alerting__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "告警控制",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "capacity",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/capacity",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__capacity__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "資源池容量",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 6
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "caches",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__caches__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Redis 快取",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Kafka 訊息",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "clusters",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__clusters__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Kubernetes 叢集",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cache-detail",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches/ci-idc-redis-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cache-detail__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "shared-redis-demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging-detail",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging/w2-ci-kafka-idc",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging-detail__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "IDC Kafka · Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cluster-detail",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters/w2-ci-k8s-aws",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cluster-detail__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "AWS Kubernetes · Readonly Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ops",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ops__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "維運中心",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cmdb",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cmdb__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "配置項資源清單",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "ci",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/cmdb/ci-aws-checkout-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__ci__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "aws-compute-01",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "topology",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/topology",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__topology__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "依賴與影響拓撲",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/incidents",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__incidents__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "事件與恢復",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "incidents-detail",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/incidents"
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/releases",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__releases__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "發布與審批",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "releases-detail",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "status": "not_available",
+      "reason": "fresh synthetic list has no detail link; no domain mutation performed",
+      "listURL": "http://127.0.0.1:5173/dim-gate/ops/releases"
+    },
+    {
+      "persona": "user-ops",
+      "page": "alerting",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/alerting",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__alerting__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "告警控制",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "capacity",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/capacity",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__capacity__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "資源池容量",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 6
+          },
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "caches",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__caches__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Redis 快取",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Kafka 訊息",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "clusters",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__clusters__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "Kubernetes 叢集",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cache-detail",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/caches/ci-idc-redis-01",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cache-detail__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "shared-redis-demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "messaging-detail",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/messaging/w2-ci-kafka-idc",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__messaging-detail__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "IDC Kafka · Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-ops",
+      "page": "cluster-detail",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/ops/clusters/w2-ci-k8s-aws",
+      "status": 200,
+      "screenshot": "screenshots/user-ops__cluster-detail__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-ops",
+      "heading": "AWS Kubernetes · Readonly Demo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "admin",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__admin__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "平台管理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "access",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/access",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__access__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "角色與範圍",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "users",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/users",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__users__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "使用者與團隊",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "features",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/features",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__features__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "功能灰度",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "audit",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/audit",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__audit__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "管理稽核",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "catalog",
+      "viewport": "desktop",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__catalog__desktop__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "服務目錄治理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "admin",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__admin__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "平台管理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "access",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/access",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__access__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "角色與範圍",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "users",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/users",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__users__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "使用者與團隊",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "features",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/features",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__features__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "功能灰度",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "audit",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/audit",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__audit__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "管理稽核",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "catalog",
+      "viewport": "tablet",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__catalog__tablet__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "服務目錄治理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "admin",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__admin__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "平台管理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "access",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/access",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__access__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "角色與範圍",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "users",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/users",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__users__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "使用者與團隊",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "features",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/features",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__features__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "功能灰度",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "audit",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/audit",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__audit__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "管理稽核",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "catalog",
+      "viewport": "mobile",
+      "colorScheme": "light",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__catalog__mobile__light.png",
+      "theme": "light",
+      "selectedPersona": "user-admin",
+      "heading": "服務目錄治理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "admin",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__admin__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "平台管理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "access",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/access",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__access__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "角色與範圍",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "users",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/users",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__users__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "使用者與團隊",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "features",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/features",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__features__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "功能灰度",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "audit",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/audit",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__audit__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "管理稽核",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "catalog",
+      "viewport": "desktop",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__catalog__desktop__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "服務目錄治理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "admin",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__admin__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "平台管理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "access",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/access",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__access__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "角色與範圍",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "users",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/users",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__users__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "使用者與團隊",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "features",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/features",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__features__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "功能灰度",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "audit",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/audit",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__audit__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "管理稽核",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "catalog",
+      "viewport": "tablet",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__catalog__tablet__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "服務目錄治理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "admin",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__admin__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "平台管理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "access",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/access",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__access__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "角色與範圍",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "users",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/users",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__users__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "使用者與團隊",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "features",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/features",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__features__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "功能灰度",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "audit",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/audit",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__audit__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "管理稽核",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    },
+    {
+      "persona": "user-admin",
+      "page": "catalog",
+      "viewport": "mobile",
+      "colorScheme": "dark",
+      "url": "http://127.0.0.1:5173/dim-gate/admin/catalog",
+      "status": 200,
+      "screenshot": "screenshots/user-admin__catalog__mobile__dark.png",
+      "theme": "dark",
+      "selectedPersona": "user-admin",
+      "heading": "服務目錄治理",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "axe": {
+        "violations": [
+          {
+            "id": "region",
+            "impact": "moderate",
+            "nodes": 2
+          }
+        ]
+      }
+    }
+  ]
+}

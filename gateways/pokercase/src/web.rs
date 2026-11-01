@@ -7,11 +7,10 @@ use minijinja::context;
 use serde::Deserialize;
 
 use crate::error::{AppError, AppResult};
+use crate::guard::{self, AdminAuth, ADMIN_COOKIE};
 use crate::server::AppState;
 use crate::store::ConnectionPublic;
 use crate::templates;
-
-pub const ADMIN_COOKIE: &str = "tr_admin";
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -23,10 +22,7 @@ pub fn router() -> Router<AppState> {
         .route("/admin/connections/new", post(connections_create))
         .route("/admin/connections/{id}/edit", get(connections_edit_page))
         .route("/admin/connections/{id}/update", post(connections_update))
-        .route(
-            "/admin/connections/{id}/delete",
-            post(connections_delete),
-        )
+        .route("/admin/connections/{id}/delete", post(connections_delete))
         .route("/admin/routes", get(routes_page))
         .route("/admin/routes/new", post(routes_create))
         .route("/admin/routes/{id}/edit", get(routes_edit_page))
@@ -39,56 +35,45 @@ pub fn router() -> Router<AppState> {
         .route("/admin/static/style.css", get(style_css))
 }
 
-/// True when admin token is unset, or header/cookie matches.
+/// Admin access always needs the admin token: `x-admin-token` header or a login session.
 pub fn admin_authorized(state: &AppState, headers: &HeaderMap) -> bool {
-    let Some(token) = &state.cfg.admin_token else {
-        return true;
-    };
-    if let Some(v) = headers.get("x-admin-token").and_then(|v| v.to_str().ok()) {
-        if v == token {
-            return true;
-        }
-    }
-    if let Some(cookie) = headers.get(header::COOKIE).and_then(|v| v.to_str().ok()) {
-        for part in cookie.split(';') {
-            let part = part.trim();
-            if let Some(val) = part.strip_prefix(&format!("{ADMIN_COOKIE}=")) {
-                if val == token {
-                    return true;
-                }
-            }
-        }
-    }
-    false
+    guard::admin_auth(state, headers).is_some()
 }
 
-#[allow(clippy::result_large_err)]
-fn require_admin_page(state: &AppState, headers: &HeaderMap) -> Result<(), Response> {
-    if admin_authorized(state, headers) {
-        Ok(())
-    } else {
-        Err(Redirect::to("/admin/login").into_response())
+/// Returns the session CSRF token for rendering forms (empty for header auth).
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
+fn require_admin_page(state: &AppState, headers: &HeaderMap) -> Result<String, Response> {
+    match guard::admin_auth(state, headers) {
+        Some(AdminAuth::Session { csrf }) => Ok(csrf),
+        Some(AdminAuth::Header) => Ok(String::new()),
+        None => Err(Redirect::to("/admin/login").into_response()),
     }
 }
 
-fn page(name: &str, ctx: minijinja::Value) -> AppResult<Html<String>> {
+fn page(name: &str, csrf: &str, ctx: minijinja::Value) -> AppResult<Html<String>> {
+    let ctx = context! { csrf => csrf, ..ctx };
     let body = templates::render(name, ctx).map_err(|e| AppError::Internal(e.into()))?;
     Ok(Html(body))
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn login_page(
     State(state): State<AppState>,
     headers: HeaderMap,
     Query(q): Query<LoginQuery>,
 ) -> Result<Html<String>, Response> {
-    if state.cfg.admin_token.is_none() {
-        return Err(Redirect::to("/admin").into_response());
-    }
     if admin_authorized(&state, &headers) {
         return Err(Redirect::to("/admin").into_response());
     }
     page(
         "login",
+        "",
         context! {
             title => "Admin login",
             error => q.error.unwrap_or_default(),
@@ -109,15 +94,20 @@ struct LoginForm {
 
 async fn login_submit(
     State(state): State<AppState>,
+    headers: HeaderMap,
     Form(form): Form<LoginForm>,
 ) -> Response {
-    let Some(expected) = &state.cfg.admin_token else {
-        return Redirect::to("/admin").into_response();
-    };
-    if form.token.trim() == expected {
+    let expected = state.cfg.admin_token.as_deref().unwrap_or("");
+    if !expected.is_empty() && guard::ct_eq(form.token.trim(), expected) {
+        // The cookie carries a random session id, never the admin token.
+        let (sid, _csrf) = state.sessions.create();
+        let https = headers
+            .get("x-forwarded-proto")
+            .and_then(|v| v.to_str().ok())
+            .is_some_and(|v| v.eq_ignore_ascii_case("https"));
         let cookie = format!(
-            "{ADMIN_COOKIE}={}; Path=/; HttpOnly; SameSite=Lax",
-            expected
+            "{ADMIN_COOKIE}={sid}; Path=/; HttpOnly; SameSite=Strict{}",
+            if https { "; Secure" } else { "" }
         );
         (
             StatusCode::SEE_OTHER,
@@ -128,11 +118,16 @@ async fn login_submit(
         )
             .into_response()
     } else {
+        // Slow down online guessing of weak, operator-chosen tokens.
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
         Redirect::to("/admin/login?error=invalid").into_response()
     }
 }
 
-async fn logout() -> Response {
+async fn logout(State(state): State<AppState>, headers: HeaderMap) -> Response {
+    if let Some(sid) = guard::session_cookie(&headers) {
+        state.sessions.remove(&sid);
+    }
     let cookie = format!("{ADMIN_COOKIE}=; Path=/; HttpOnly; Max-Age=0");
     (
         StatusCode::SEE_OTHER,
@@ -144,14 +139,22 @@ async fn logout() -> Response {
         .into_response()
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn dashboard(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
-    let stats = state.store.stats().map_err(|e| AppError::Internal(e).into_response())?;
+    let csrf = require_admin_page(&state, &headers)?;
+    let stats = state
+        .store
+        .stats()
+        .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "dashboard",
+        &csrf,
         context! {
             title => "Dashboard",
             active => "dashboard",
@@ -163,11 +166,15 @@ async fn dashboard(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let rows: Vec<ConnectionPublic> = state
         .store
         .list_connections()
@@ -177,6 +184,7 @@ async fn connections_page(
         .collect();
     page(
         "connections",
+        &csrf,
         context! {
             title => "Connections",
             active => "connections",
@@ -222,6 +230,10 @@ fn parse_price(s: &Option<String>) -> Option<f64> {
         .and_then(|x| x.parse().ok())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_create(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -251,12 +263,16 @@ async fn connections_create(
     Ok(Redirect::to("/admin/connections").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_edit_page(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(id): Path<String>,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let c = state
         .store
         .get_connection(&id)
@@ -271,6 +287,7 @@ async fn connections_edit_page(
         .collect();
     page(
         "connections",
+        &csrf,
         context! {
             title => "Edit connection",
             active => "connections",
@@ -293,6 +310,10 @@ async fn connections_edit_page(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_update(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -300,14 +321,13 @@ async fn connections_update(
     Form(form): Form<ConnForm>,
 ) -> Result<Response, Response> {
     require_admin_page(&state, &headers)?;
-    if state
+    let existing = state
         .store
         .get_connection(&id)
         .map_err(|e| AppError::Internal(e).into_response())?
-        .is_none()
-    {
-        return Err(AppError::NotFound("connection not found".into()).into_response());
-    }
+        .ok_or_else(|| AppError::NotFound("connection not found".into()).into_response())?;
+    crate::admin::check_connection_update(&state, &existing, &form.base_url, &form.api_key)
+        .map_err(|e| e.into_response())?;
     let default_model = if form.default_model.trim().is_empty() {
         None
     } else {
@@ -331,6 +351,10 @@ async fn connections_update(
     Ok(Redirect::to("/admin/connections").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn connections_delete(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -344,11 +368,15 @@ async fn connections_delete(
     Ok(Redirect::to("/admin/connections").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let routes = state
         .store
         .list_routes()
@@ -359,6 +387,7 @@ async fn routes_page(
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "routes",
+        &csrf,
         context! {
             title => "Routes",
             active => "routes",
@@ -433,6 +462,10 @@ fn collect_targets(form: &RouteForm) -> Vec<(String, Option<String>)> {
     out
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_create(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -455,12 +488,16 @@ async fn routes_create(
     Ok(Redirect::to("/admin/routes").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_edit_page(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(id): Path<String>,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let route = state
         .store
         .get_route(&id)
@@ -485,6 +522,7 @@ async fn routes_edit_page(
 
     page(
         "routes",
+        &csrf,
         context! {
             title => "Edit route",
             active => "routes",
@@ -512,6 +550,10 @@ async fn routes_edit_page(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_update(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -543,6 +585,10 @@ async fn routes_update(
     Ok(Redirect::to("/admin/routes").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn routes_delete(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -556,17 +602,22 @@ async fn routes_delete(
     Ok(Redirect::to("/admin/routes").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn keys_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let keys = state
         .store
         .list_api_keys()
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "keys",
+        &csrf,
         context! {
             title => "API Keys",
             active => "keys",
@@ -583,12 +634,16 @@ pub struct KeyForm {
     pub name: String,
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn keys_create(
     State(state): State<AppState>,
     headers: HeaderMap,
     Form(form): Form<KeyForm>,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let name = if form.name.trim().is_empty() {
         "default"
     } else {
@@ -604,6 +659,7 @@ async fn keys_create(
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "keys",
+        &csrf,
         context! {
             title => "API Keys",
             active => "keys",
@@ -615,6 +671,10 @@ async fn keys_create(
     .map_err(|e| e.into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn keys_delete(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -628,18 +688,22 @@ async fn keys_delete(
     Ok(Redirect::to("/admin/keys").into_response())
 }
 
+#[allow(
+    clippy::result_large_err,
+    reason = "Keep concrete Axum error responses so existing redirects and rendered errors retain their HTTP behavior"
+)]
 async fn usage_page(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Html<String>, Response> {
-    require_admin_page(&state, &headers)?;
+    let csrf = require_admin_page(&state, &headers)?;
     let events = state
         .store
         .recent_usage(50)
         .map_err(|e| AppError::Internal(e).into_response())?;
-    let daily = state
+    let measurements = state
         .store
-        .usage_by_day(14)
+        .usage_measurement_report(14)
         .map_err(|e| AppError::Internal(e).into_response())?;
     let cost_total = state
         .store
@@ -647,12 +711,14 @@ async fn usage_page(
         .map_err(|e| AppError::Internal(e).into_response())?;
     page(
         "usage",
+        &csrf,
         context! {
             title => "Usage",
             active => "usage",
             events => events,
-            daily => daily,
-            cost_total => format!("{cost_total:.6}"),
+            daily => measurements.data,
+            measurement_summary => measurements.measurement_summary,
+            cost_total => cost_total,
             admin_protected => state.cfg.admin_token.is_some(),
         },
     )

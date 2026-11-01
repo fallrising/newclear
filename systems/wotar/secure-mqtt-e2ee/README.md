@@ -68,3 +68,26 @@ bash examples/key_rotation_demo.sh
 | [self-managed-key-design.md](docs/self-managed-key-design.md) | Key ownership |
 | [operations.md](docs/operations.md) | Runbook |
 | [residual-risks.md](docs/residual-risks.md) | Limitations |
+
+### Isolated verification
+
+After `make install`, run the original gates with fresh synthetic credentials in a
+temporary copy of tracked source:
+
+```sh
+python scripts/verify_isolated.py --output /tmp/wotar-check --integration
+```
+
+This runs lint, typing, doctor, unit/security/property tests, the unchanged 86%
+coverage gate, and real EMQX integration. It needs Docker, OpenSSL and a free
+`127.0.0.1:8883`; an existing listener is never adopted or stopped. The EMQX 5.8.3
+image is pinned by digest. Credentials/configuration in this checkout remain
+untouched. The owned container and network are removed, and cleanup failures fail
+the run. Integration readiness requires an authenticated TLS handshake.
+
+Omit `--integration` for native gates only. `--public-smoke` additionally opts into
+the existing synthetic public-broker test with a fresh namespace; it sends no
+operator payload. Use a new output directory for each run. The output contains
+commands, exit codes, source hashes, logs and isolation/cleanup results, but no
+private keys. Requested tests that skip make verification fail. Preserve the
+output outside `/tmp` when it is needed as delivery evidence.

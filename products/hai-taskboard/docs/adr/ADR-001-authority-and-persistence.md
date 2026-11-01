@@ -18,8 +18,13 @@ artifacts in a digest-addressed filesystem store and bind them from SQLite only 
 publication. Treat projections as rebuildable.
 
 Audit is an append-only accountability ledger, not the state source for arbitrary event replay.
-Backup/restore uses SQLite plus the artifact manifest. Bootstrap status uses `.team/PLAN.md` until a
-single explicit authority migration; Markdown and SQLite are never bidirectionally synchronized.
+Backup/restore uses SQLite plus the artifact manifest. Bootstrap work status uses
+`docs/tasks/BOARD.md`; root `.team/PLAN.md` records routing/review rationale, and the archived
+product ledger remains immutable. Any future migration of execution-status authority to SQLite
+requires an explicit decision; Markdown and SQLite are never bidirectionally synchronized.
+
+Amendment 2026-10-30: owner approved C01 in the [M0 decision record](../plans/m0-contract-decisions-20261029.md#c01--bootstrap-工作狀態權威).
+This aligns the current repository development ledger, not product operational authority; no SQLite migration is claimed.
 
 ## Consequences
 

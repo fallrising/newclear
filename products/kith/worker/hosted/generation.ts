@@ -7,6 +7,7 @@ import {
   flagOn,
   type Env,
 } from "../env.ts";
+import { paidCallsEnabled, reservePaidAttempt, releasePaidAttempt } from "../cost-controls.ts";
 import {
   configuredModelAvailable,
   chatCompletion,
@@ -25,7 +26,6 @@ import {
   resolveConnection,
   runtimeStatus,
   viewConnectionRow,
-  type AgentRuntimeView,
 } from "../providers/runtime.ts";
 import { LlmError, type LlmErrorClass, type NormalizedResult } from "../providers/types.ts";
 
@@ -53,7 +53,21 @@ type Job = {
   v2?: V2Job;
 };
 
+type Execution = {
+  version: 1;
+  generation_id: string;
+  agent_id: string;
+  room_id: string;
+  phase: "initializing" | "pending" | "running" | "retry_wait" | "terminal";
+  attempt: 0 | 1;
+  deadline: number;
+  not_before: number;
+};
+type ClaimedJob = { job: Job; execution: Execution; expired: boolean };
+
 type RoomReleaseStub = DurableObjectStub & {
+  admitHosted(generationId: string): Promise<{ ok: boolean; code?: string }>;
+  releaseHosted(generationId: string): Promise<void>;
   releaseAmbient(generationId: string): Promise<void>;
   postStatus(
     roomId: string,
@@ -93,8 +107,8 @@ export class HostedGeneration extends DurableObject<Env> {
    * GET /v1/models is a start gate: missing grok-4.5 refuses without INSERT.
    */
   async begin(input: BeginInput): Promise<BeginResult> {
-    if (!flagOn(this.env.ff_hosted_agent)) {
-      return { ok: false, code: "not_ready", message: "hosted agent is not enabled" };
+    if (!paidCallsEnabled(this.env)) {
+      return { ok: false, code: "not_ready", message: "hosted execution requires explicit paid opt-in and limits" };
     }
     const generationId = typeof input.generation_id === "string" ? input.generation_id : "";
     const agentId = typeof input.agent_id === "string" ? input.agent_id : "";
@@ -103,63 +117,79 @@ export class HostedGeneration extends DurableObject<Env> {
       return { ok: false, code: "invalid_request", message: "generation_id, agent_id, room_id required" };
     }
 
-    const handle = await this.resolveHandle(agentId, input.handle);
-    if (!handle) {
-      return { ok: false, code: "not_found", message: "agent not found" };
-    }
-
     const job: Job = {
       generation_id: generationId,
       agent_id: agentId,
       room_id: roomId,
-      handle,
+      handle: "",
       transcript: typeof input.transcript === "string" ? input.transcript : "",
       trigger_seq: typeof input.trigger_seq === "number" ? input.trigger_seq : 0,
     };
-    if (flagOn(this.env.ff_providers)) {
-      const view = await loadAgentRuntime(this.env, agentId);
-      if (view && view.runtime !== null) return this.beginV2(input, job, view);
+    if (utf8Bytes(job.transcript) > CONTEXT_MAX_BYTES || !Number.isInteger(job.trigger_seq) || job.trigger_seq < 0) {
+      return { ok: false, code: "invalid_request", message: "invalid hosted input" };
     }
-    await this.ctx.storage.put("job", job);
+    const now = Date.now();
+    const execution: Execution = {
+      version: 1, generation_id: generationId, agent_id: agentId, room_id: roomId,
+      phase: "initializing", attempt: 0, deadline: now + GENERATION_TIMEOUT_MS, not_before: now,
+    };
+    // Identity and terminal tombstones survive restarts; a repeated begin cannot reset attempts or bindings.
+    const created = await this.ctx.storage.transaction(async (txn) => {
+      if (await txn.get("execution") || await txn.get("job")) return false;
+      // Initialization can also be interrupted before its first RPC; commit cleanup with its identity.
+      await txn.setAlarm(execution.deadline);
+      await txn.put({ execution, job });
+      return true;
+    });
+    if (!created) return { ok: false, code: "generation_dropped", message: "generation already started" };
 
     try {
-      const ids = await listModelIds(await this.fetchImpl(), this.apiKey());
-      if (!configuredModelAvailable(ids, DEFAULT_MODEL_ID)) {
-        await this.ctx.storage.delete("job");
-        return {
-          ok: false,
-          code: "not_ready",
-          message: `configured model ${DEFAULT_MODEL_ID} is not in GET /v1/models`,
-        };
+      const handle = await this.resolveHandle(agentId, input.handle);
+      if (!handle) return await this.rejectBegin(job, "not_found", "agent not found");
+      job.handle = handle;
+      const room = this.room(job);
+      const admitted = await room.admitHosted(generationId);
+      if (!admitted.ok) return await this.rejectBegin(job, admitted.code ?? "not_ready", "room hosted admission refused");
+      const view = flagOn(this.env.ff_providers) ? await loadAgentRuntime(this.env, agentId) : null;
+      if (view && view.runtime !== null) {
+        if (view.runtime !== "hosted" || runtimeStatus(this.env, view) !== "ok") {
+          return await this.rejectBegin(job, "runtime_unconfigured", "hosted runtime is not ready");
+        }
+        if (typeof input.runtime_epoch === "number" && input.runtime_epoch !== view.runtime_epoch) {
+          return await this.rejectBegin(job, "generation_dropped", "runtime changed");
+        }
+        job.v2 = { runtime_epoch: view.runtime_epoch, attempt: 0 };
+        await this.ctx.storage.put("job", job);
+        await this.env.DB.prepare(
+          `INSERT INTO generations (id, room_id, agent_id, trigger_seq, state, created_at, completed_at, connection_id, model, runtime_epoch)
+           VALUES (?, ?, ?, ?, 'dispatched', ?, NULL, ?, ?, ?)`,
+        ).bind(generationId, roomId, agentId, job.trigger_seq, new Date().toISOString(), view.connection_id, view.model, view.runtime_epoch).run();
+      } else {
+        await this.ctx.storage.put("job", job);
+        if (!(await this.reserve(job, execution)) || !paidCallsEnabled(this.env)) {
+          return await this.rejectBegin(job, "not_ready", "paid attempt admission refused");
+        }
+        const fetchImpl = await this.fetchImpl();
+        if (!paidCallsEnabled(this.env)) return await this.rejectBegin(job, "not_ready", "hosted execution stopped");
+        const ids = await listModelIds(fetchImpl, this.apiKey(), { timeoutMs: Math.min(MODEL_LIST_TIMEOUT_MS, this.remaining(execution)) });
+        if (!configuredModelAvailable(ids, DEFAULT_MODEL_ID)) {
+          return await this.rejectBegin(job, "not_ready", `configured model ${DEFAULT_MODEL_ID} is not in GET /v1/models`);
+        }
+        await this.env.DB.prepare(
+          `INSERT INTO generations (id, room_id, agent_id, trigger_seq, state, created_at, completed_at)
+           VALUES (?, ?, ?, ?, 'dispatched', ?, NULL)`,
+        ).bind(generationId, roomId, agentId, job.trigger_seq, new Date().toISOString()).run();
       }
-    } catch (err) {
-      await this.ctx.storage.delete("job");
-      const message = err instanceof Error ? err.message : String(err);
-      return { ok: false, code: "not_ready", message };
-    }
-
-    const now = new Date().toISOString();
-    try {
-      await this.env.DB.prepare(
-        `INSERT INTO generations (id, room_id, agent_id, trigger_seq, state, created_at, completed_at)
-         VALUES (?, ?, ?, ?, 'dispatched', ?, NULL)`,
-      )
-        .bind(generationId, roomId, agentId, job.trigger_seq, now)
-        .run();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      return { ok: false, code: "not_ready", message };
-    }
-
-    await this.broadcastReply(roomId, agentId, "is replying");
-    try {
-      // Next tick (delay 0). Absolute epoch 0 is rejected by the runtime.
+      if (!paidCallsEnabled(this.env) || this.remaining(execution) <= 0) {
+        return await this.rejectBegin(job, "not_ready", "hosted execution stopped");
+      }
+      await this.ctx.storage.put("execution", { ...execution, phase: "pending" });
+      await this.broadcastReply(roomId, agentId, "is replying");
       await this.ctx.storage.setAlarm(Date.now());
-    } catch (err) {
-      await this.broadcastReply(roomId, agentId, "reply ended");
-      throw err;
+      return { ok: true, generation_id: generationId };
+    } catch {
+      return this.rejectBegin(job, "not_ready", "hosted initialization failed");
     }
-    return { ok: true, generation_id: generationId };
   }
 
   /** Test RPC: run the scheduled job without calling reserved `alarm` over RPC. */
@@ -173,19 +203,33 @@ export class HostedGeneration extends DurableObject<Env> {
   }
 
   private async runJob(): Promise<void> {
-    const job = await this.ctx.storage.get<Job>("job");
-    if (!job) return;
-    if (job.v2) return this.runJobV2({ ...job, v2: job.v2 });
+    const claimed = await this.claimExecution();
+    if (!claimed) return;
+    const { job, execution } = claimed;
+    if (claimed.expired || !paidCallsEnabled(this.env)) {
+      try { await this.markGeneration(job.generation_id, "failed"); }
+      finally {
+        await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
+        await this.finish(job);
+      }
+      return;
+    }
+    if (job.v2) return this.runJobV2({ ...job, v2: job.v2 }, execution);
 
     let failedClass: HostedErrorClass | null = null;
     try {
-      await this.env.DB.prepare(
+      if (!(await this.generationCanRun(job, execution))) return;
+      const transitioned = await this.env.DB.prepare(
         `UPDATE generations SET state = 'streaming' WHERE id = ? AND state = 'dispatched'`,
       )
         .bind(job.generation_id)
         .run();
-
-      const text = await this.runModel(job);
+      if (transitioned.meta.changes !== 1) return;
+      if (!(await this.reserve(job, execution)) || !paidCallsEnabled(this.env)) {
+        await this.markGeneration(job.generation_id, "failed");
+        return;
+      }
+      const text = await this.runModel(job, execution);
       if (isNoReply(text)) {
         await this.markGeneration(job.generation_id, "dropped");
         return;
@@ -195,7 +239,7 @@ export class HostedGeneration extends DurableObject<Env> {
         failedClass = "protocol";
         return;
       }
-      const res = await this.sendToRoom(job, text);
+      const res = await beforeHostedDeadline(() => this.sendToRoom(job, truncateBody(text)), execution.deadline);
       if (!res.ok) {
         if (res.status === 409) {
           await this.markGeneration(job.generation_id, "dropped");
@@ -213,59 +257,22 @@ export class HostedGeneration extends DurableObject<Env> {
       }
       await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
       // Mention generations never acquired the lock; Room no-ops on generation_id mismatch.
-      await this.releaseAmbientLock(job);
+      await this.finish(job);
     }
   }
 
-  /**
-   * v2 path (ff_providers=on and the agent has an agent_runtimes row). No GET /models start gate:
-   * V2-INV-05 is decided by runtime_status before any INSERT.
-   */
-  private async beginV2(input: BeginInput, job: Job, view: AgentRuntimeView): Promise<BeginResult> {
-    if (view.runtime !== "hosted") {
-      return { ok: false, code: "not_ready", message: "agent runtime is not hosted" };
-    }
-    if (runtimeStatus(this.env, view) !== "ok") {
-      return { ok: false, code: "runtime_unconfigured", message: "hosted runtime is not ready" };
-    }
-    if (typeof input.runtime_epoch === "number" && input.runtime_epoch !== view.runtime_epoch) {
-      return { ok: false, code: "generation_dropped", message: "runtime changed" };
-    }
-    const v2Job: Job = { ...job, v2: { runtime_epoch: view.runtime_epoch, attempt: 0 } };
-    await this.ctx.storage.put("job", v2Job);
-    try {
-      await this.env.DB.prepare(
-        `INSERT INTO generations (id, room_id, agent_id, trigger_seq, state, created_at, completed_at, connection_id, model, runtime_epoch)
-         VALUES (?, ?, ?, ?, 'dispatched', ?, NULL, ?, ?, ?)`,
-      )
-        .bind(job.generation_id, job.room_id, job.agent_id, job.trigger_seq, new Date().toISOString(),
-          view.connection_id, view.model, view.runtime_epoch)
-        .run();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      return { ok: false, code: "not_ready", message };
-    }
-    await this.broadcastReply(job.room_id, job.agent_id, "is replying");
-    try {
-      await this.ctx.storage.setAlarm(Date.now());
-    } catch (err) {
-      await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
-      throw err;
-    }
-    return { ok: true, generation_id: job.generation_id };
-  }
-
-  private async runJobV2(job: Job & { v2: V2Job }): Promise<void> {
+  private async runJobV2(job: Job & { v2: V2Job }, execution: Execution): Promise<void> {
     let failedClass: LlmErrorClass | null = null;
     let rescheduled = false;
     let drafts: DraftThrottle | null = null;
     try {
-      await this.env.DB.prepare(
+      if (!(await this.generationCanRun(job, execution))) return;
+      const transitioned = await this.env.DB.prepare(
         `UPDATE generations SET state = 'streaming' WHERE id = ? AND state = 'dispatched'`,
       )
         .bind(job.generation_id)
         .run();
-
+      if (execution.attempt === 0 && transitioned.meta.changes !== 1) return;
       const view = await loadAgentRuntime(this.env, job.agent_id);
       // RT-01.2: runtime changed (or connection vanished) since dispatch → drop, never persist.
       if (!view || view.runtime !== "hosted" || view.runtime_epoch !== job.v2.runtime_epoch) {
@@ -281,18 +288,22 @@ export class HostedGeneration extends DurableObject<Env> {
       }
 
       const params = hostedParams(view.params_json);
+      if (!(await this.reserve(job, execution)) || !paidCallsEnabled(this.env) || this.remaining(execution) <= 0) {
+        await this.markGeneration(job.generation_id, "failed");
+        return;
+      }
       // B-10: stream only while ff_drafts=on; otherwise the runtime's stream setting is ignored.
       const streaming = params.stream && flagOn(this.env.ff_drafts);
-      drafts = streaming ? new DraftThrottle((text) => this.broadcastDraft(job, text)) : null;
+      drafts = streaming ? new DraftThrottle((text) => this.broadcastDraft(job, text, execution)) : null;
       const addendum = view.system_prompt_addendum.trim();
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
+      const timer = setTimeout(() => controller.abort(), this.remaining(execution));
       let result: NormalizedResult;
       try {
-        result = await adapter.complete(
+        result = await beforeHostedDeadline(() => adapter.complete(
           conn,
           {
-            model: view.model,
+            model: view.model!,
             system: addendum ? `${systemPrompt(job.handle)}\n\n${addendum}` : systemPrompt(job.handle),
             transcript: wrapTranscript(job.transcript),
             max_output_tokens: params.max_output_tokens,
@@ -302,10 +313,10 @@ export class HostedGeneration extends DurableObject<Env> {
           fetch,
           controller.signal,
           drafts ? (d) => drafts?.push(d.text) : undefined,
-        );
+        ), execution.deadline);
       } finally {
         clearTimeout(timer);
-        await drafts?.settle(); // every draft is delivered before the final event or the failure (FM-SYNC-14)
+        if (drafts) await beforeHostedDeadline(() => drafts!.settle(), execution.deadline);
       }
 
       // V2-INV-06: re-read the epoch after the model returns; a change during the call drops the reply.
@@ -321,7 +332,7 @@ export class HostedGeneration extends DurableObject<Env> {
         await this.markGeneration(job.generation_id, "dropped");
         return;
       }
-      const res = await this.sendToRoom(job, truncateBody(result.text));
+      const res = await beforeHostedDeadline(() => this.sendToRoom(job, truncateBody(result.text)), execution.deadline);
       if (!res.ok) {
         if (res.status === 409) {
           await this.markGeneration(job.generation_id, "dropped");
@@ -331,16 +342,29 @@ export class HostedGeneration extends DurableObject<Env> {
         }
       }
     } catch (err) {
-      const cls: LlmErrorClass = err instanceof LlmError ? err.errorClass : "unknown";
-      await drafts?.settle();
+      const cls: LlmErrorClass = err instanceof LlmError ? err.errorClass
+        : err instanceof DOMException && err.name === "TimeoutError" ? "timeout" : "unknown";
+      if (drafts) {
+        try { await beforeHostedDeadline(() => drafts!.settle(), execution.deadline); }
+        catch { /* expired or lost drafts never start more work */ }
+      }
       // No retry once a draft was shown: a second attempt would restart the visible text (03 §2.6 + B-10).
-      if (RETRYABLE.has(cls) && job.v2.attempt === 0 && !drafts?.sentAny) {
-        // 03 §2.6: one retry, scheduled with a DO alarm (never sleep).
-        const wait = err instanceof LlmError && err.retryAfterMs !== undefined ? err.retryAfterMs : RETRY_DEFAULT_MS;
-        await this.ctx.storage.put("job", { ...job, v2: { ...job.v2, attempt: 1 } });
-        await this.ctx.storage.setAlarm(Date.now() + wait);
-        rescheduled = true;
-        return;
+      if (err instanceof LlmError && RETRYABLE.has(cls) && RETRYABLE_HTTP.has(err.status ?? 0)
+        && execution.attempt === 0 && !drafts?.sentAny && paidCallsEnabled(this.env)) {
+        // A transport error/timeout has an unknown upstream outcome. Only an explicit HTTP refusal may retry.
+        const wait = Math.min(RETRY_MAX_MS, Math.max(RETRY_DEFAULT_MS, err.retryAfterMs ?? RETRY_DEFAULT_MS));
+        const when = Date.now() + wait;
+        if (when < execution.deadline) {
+          await this.ctx.storage.transaction(async (txn) => {
+            await txn.put({
+              job: { ...job, v2: { ...job.v2, attempt: 1 } },
+              execution: { ...execution, phase: "retry_wait", attempt: 1, not_before: when },
+            });
+          });
+          await this.ctx.storage.setAlarm(when);
+          rescheduled = true;
+          return;
+        }
       }
       await this.markFailed(job, cls);
       failedClass = cls;
@@ -350,16 +374,110 @@ export class HostedGeneration extends DurableObject<Env> {
           await this.broadcastReplyFailed(job.room_id, job.agent_id, failedClass);
         }
         await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
-        await this.releaseAmbientLock(job);
+        await this.finish(job);
       }
     }
   }
 
+  private remaining(execution: Execution): number {
+    return execution.deadline - Date.now();
+  }
+
+  private room(job: Pick<Job, "room_id">): RoomReleaseStub {
+    return this.env.ROOM.get(this.env.ROOM.idFromName(`room:${job.room_id}`)) as RoomReleaseStub;
+  }
+
+  private reserve(job: Job, execution: Execution): Promise<boolean> {
+    if (this.remaining(execution) <= 0) return Promise.resolve(false);
+    return reservePaidAttempt(this.env, {
+      generationId: job.generation_id, agentId: job.agent_id, roomId: job.room_id, attempt: execution.attempt,
+    });
+  }
+
+  private async generationCanRun(job: Job, execution: Execution): Promise<boolean> {
+    const row = await this.env.DB.prepare(`SELECT room_id, agent_id, state FROM generations WHERE id = ?`)
+      .bind(job.generation_id).first<{ room_id: string; agent_id: string; state: string }>();
+    return row?.room_id === job.room_id && row.agent_id === job.agent_id
+      && row.state === (execution.attempt === 0 ? "dispatched" : "streaming");
+  }
+
+  /** Claim and watchdog commit together before external work; interrupted attempts never repeat a paid result. */
+  private async claimExecution(): Promise<ClaimedJob | null> {
+    const now = Date.now();
+    return this.ctx.storage.transaction<ClaimedJob | null>(async (txn) => {
+      const job = await txn.get<Job>("job");
+      if (!job) return null;
+      const execution = await txn.get<Execution>("execution");
+      // Legacy pending jobs have no attempt claim. Fail closed rather than guessing whether a call already ran.
+      if (!execution) {
+        return { job, execution: {
+          version: 1, generation_id: job.generation_id, agent_id: job.agent_id, room_id: job.room_id,
+          phase: "terminal", attempt: 0, deadline: now, not_before: now,
+        }, expired: true };
+      }
+      if (execution.phase === "terminal") return null;
+      const invalid = execution.version !== 1 || execution.generation_id !== job.generation_id
+        || execution.agent_id !== job.agent_id || execution.room_id !== job.room_id
+        || ![0, 1].includes(execution.attempt) || !Number.isFinite(execution.deadline)
+        || execution.deadline > now + GENERATION_TIMEOUT_MS || !Number.isFinite(execution.not_before)
+        || execution.not_before > execution.deadline || (execution.attempt === 1 && !job.v2)
+        || (execution.phase === "pending" && execution.attempt !== 0)
+        || (execution.phase === "retry_wait" && execution.attempt !== 1)
+        || (job.v2 && job.v2.attempt !== execution.attempt);
+      const expired = invalid || now >= execution.deadline;
+      if (!expired && (execution.phase === "running" || execution.phase === "initializing")) {
+        // The work alarm may have been consumed before a crash. Restore cleanup without replaying inference.
+        await txn.setAlarm(execution.deadline);
+        return null;
+      }
+      if (!expired && now < execution.not_before) {
+        await txn.setAlarm(execution.not_before);
+        return null;
+      }
+      if (!expired && execution.phase !== "pending" && execution.phase !== "retry_wait") return null;
+      // A crash during the following D1 checks must still leave the original deadline watchdog scheduled.
+      if (!expired) await txn.setAlarm(execution.deadline);
+      await txn.put("execution", { ...execution, phase: "running" });
+      return { job, execution, expired };
+    });
+  }
+
+  private async rejectBegin(job: Job, code: string, message: string): Promise<BeginFail> {
+    try { await this.markGeneration(job.generation_id, "failed"); }
+    finally {
+      await this.broadcastReply(job.room_id, job.agent_id, "reply ended");
+      await this.finish(job);
+    }
+    return { ok: false, code, message };
+  }
+
+  private async finish(job: Job): Promise<void> {
+    try {
+      await this.ctx.storage.transaction(async (txn) => {
+        const prior = await txn.get<Execution>("execution");
+        const now = Date.now();
+        const terminal: Execution = {
+          version: 1, generation_id: job.generation_id, agent_id: job.agent_id, room_id: job.room_id,
+          phase: "terminal", attempt: prior?.attempt === 1 ? 1 : 0, deadline: prior?.deadline ?? now, not_before: now,
+        };
+        await txn.put("execution", terminal);
+        await txn.delete(["job", "fake_llm"]);
+      });
+      await this.ctx.storage.deleteAlarm();
+    } finally {
+      // Releases do not refund spent daily reservations. Leases also have a bounded expiry if RPC is unavailable.
+      try { await releasePaidAttempt(this.env, job.generation_id); } catch { /* bounded global lease */ }
+      try { await this.room(job).releaseHosted(job.generation_id); } catch { /* bounded room lease */ }
+      await this.releaseAmbientLock(job);
+    }
+  }
+
   /** B-10 frame through the Room; a lost draft never fails the generation. */
-  private async broadcastDraft(job: Job, text: string): Promise<void> {
+  private async broadcastDraft(job: Job, text: string, execution: Execution): Promise<void> {
+    if (this.remaining(execution) <= 0 || !paidCallsEnabled(this.env)) return;
     try {
       const stub = this.env.ROOM.get(this.env.ROOM.idFromName(`room:${job.room_id}`)) as RoomReleaseStub;
-      await stub.postDraft(job.room_id, job.agent_id, job.generation_id, text);
+      await beforeHostedDeadline(() => stub.postDraft(job.room_id, job.agent_id, job.generation_id, text), execution.deadline);
     } catch {
       /* drafts are best effort */
     }
@@ -414,9 +532,11 @@ export class HostedGeneration extends DurableObject<Env> {
     }
   }
 
-  private async runModel(job: Job): Promise<string> {
+  private async runModel(job: Job, execution: Execution): Promise<string> {
     const messages = buildMessages(job.handle, job.transcript);
-    return chatCompletion(await this.fetchImpl(), this.apiKey(), messages, DEFAULT_MODEL_ID);
+    const fetchImpl = await this.fetchImpl();
+    if (!paidCallsEnabled(this.env) || this.remaining(execution) <= 0) throw new Error("hosted execution stopped");
+    return chatCompletion(fetchImpl, this.apiKey(), messages, DEFAULT_MODEL_ID, { timeoutMs: this.remaining(execution) });
   }
 
   private async sendToRoom(job: Job, body: string): Promise<Response> {
@@ -501,12 +621,15 @@ export type HostedErrorClass =
   | "bad_request"
   | "rate_limited"
   | "overloaded"
+  | "timeout"
   | "network"
   | "protocol"
   | "unknown";
 
 /** Map the v1 client's thrown errors to 03 §2.3 LlmErrorClass names (subset available before W4). */
 export function classifyHostedError(err: unknown): HostedErrorClass {
+  if (err instanceof DOMException && (err.name === "AbortError" || err.name === "TimeoutError")) return "timeout";
+  if (err instanceof LlmError && err.errorClass === "protocol") return "protocol";
   const message = err instanceof Error ? err.message : String(err);
   const status = /failed: (\d{3})$/.exec(message);
   if (status) {
@@ -525,9 +648,27 @@ export function classifyHostedError(err: unknown): HostedErrorClass {
 type V2Job = { runtime_epoch: number; attempt: number };
 
 const GENERATION_TIMEOUT_MS = 300_000; // FM-LLM-10, v1 limit
+const MODEL_LIST_TIMEOUT_MS = 60_000;
+const CONTEXT_MAX_BYTES = 16 * 1024;
 const RETRY_DEFAULT_MS = 1_000;
-const RETRYABLE: ReadonlySet<LlmErrorClass> = new Set(["rate_limited", "overloaded", "timeout", "network"]);
+const RETRY_MAX_MS = 10_000;
+const RETRYABLE: ReadonlySet<LlmErrorClass> = new Set(["rate_limited", "overloaded"]);
+const RETRYABLE_HTTP = new Set([429, 503, 529]);
 const TRUNCATED_SUFFIX = "（已截斷）";
+
+/** Bound local waiting and refuse new work at the deadline. Already-started platform RPC may remain pending. */
+export async function beforeHostedDeadline<T>(run: () => Promise<T>, deadline: number, now: () => number = Date.now): Promise<T> {
+  const remaining = deadline - now();
+  if (!Number.isFinite(remaining) || remaining <= 0 || remaining > GENERATION_TIMEOUT_MS) {
+    throw new DOMException("hosted execution deadline reached", "TimeoutError");
+  }
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => reject(new DOMException("hosted execution deadline reached", "TimeoutError")), remaining);
+  });
+  try { return await Promise.race([run(), expired]); }
+  finally { clearTimeout(timer); }
+}
 
 /** 03 §2.5: over 8 KiB → cut on a code point boundary and append the suffix. */
 export function truncateBody(text: string): string {

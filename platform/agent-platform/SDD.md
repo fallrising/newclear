@@ -2,7 +2,7 @@
 
 - Version：0.1.0
 - Date：2026-09-21
-- Experimental addendum：2026-10-03，Agent Computer（AC）設計提案 AC-design-0.3；見 §2.4，未實作、未執行實機驗收。
+- Experimental addendum：2026-10-03，Agent Computer（AC）設計提案 AC-design-0.3；見 §2.4。2026-10-23 起保留為需求與驗收來源，AC-1～AC-4 實作移至另一個獨立項目，不屬本元件。
 - Status：設計基準已合併；M0 固定單節點／none-lane 真實 KVM gate 已通過；M2 真實 runtime／固定模擬模型驗收已通過；M3 recovery／cancel／approval／pause、控制憑證隔離及固定節點 egress 切片已通過。AT-11-A proxy、AT-11-B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收；AT-11-C2b2 的程式已合併，GitHub CI 會跑 check／control-plane／web，不跑 KVM。`mock-https-complete` 與 isolation 已在 `<kvm-host>` 通過。預設模型是本機 mock。以後的真接口暫定 OpenCode Go 的 Chat Completions（`https://opencode.ai/zen/go/v1/chat/completions`）。Go 上的 `/responses` 與 `/messages` 還不是這個 transport。AT-07／11 仍開發中
 - Repository：`fallrising/newclear`
 - Component：`platform/agent-platform`
@@ -60,13 +60,15 @@ M0–M4 的 coding MVP 不做視覺化 DAG 編輯器、RAG／知識庫產品、�
 
 ### 2.4 Agent Computer 實驗（AC，Proposed）
 
+**文件角色與歸屬（2026-10-23，#395）：本節與 AC 文件僅為需求與驗收來源。AC-1～AC-4 不在 Agent Platform 實作，已移交另一個獨立項目；目標項目名稱／公開程式碼位置未指定，不在此推測。** 下列保留的設計與歷史未執行紀錄，不代表獨立實作項目的現況，也不啟動本元件的新實作階段。
+
 2026-10-02 依 owner 指示，另立受限的 desktop computer-use 實驗，以 CocoonBox 參考畫面的功能效果為目標；詳細方案與 AC 驗收唯一入口為 [docs/AGENT-COMPUTER.md](docs/AGENT-COMPUTER.md)。本次只交付文件，並不授權安裝、VM 啟動、模型呼叫、網路變更或部署。
 
 範圍是單 operator、單 Linux/KVM worker：外部 MCP client 驅動 guest 的可見 Chromium／桌面工具，工作台同步顯示同一個桌面、工具事件與控制權；區分 Disconnect、Save now／Checkpoint、Hibernate／Restore、Branch 與 Release。先證明同一環境的觀看／控制，再驗證生命週期；headless CDP smoke、靜態 UI 或 shell 代寫 GUI 結果都不算完成。
 
 2026-10-03 的追加截圖分析見 AC §1.1–1.3，開源元件評估見 §3.1。中央 `view only` 與工具歷史截圖分開呈現，兩者須可追溯至同一 computer 與各自時間；人工接管是待驗收能力。第一輪一台 computer、一個 active writer、一種外部 client；guest agent、多 client adapter 與多 agent 協作另行規劃。保留 Cocoon 底座，候選桌面／viewer 元件未被認定已相容，也不因來源有程式碼就視為全部採開源授權。
 
-這是 §2.3 之外的獨立實驗，不是撤銷 coding MVP 的非目標，也不替換 ADR-001／002 的 OpenHands 主線。AC 暫定以外部 agent loop + 受控 MCP bridge 做功能等價驗證，不是既有 Run adapter 的 host fallback；不得悄悄放寬現有文字模型／工具契約。AC 的 ComputerSession 與聊天連線分離，M0–M4 的 Run／Attempt／lease 契約不因本提案改寫。
+這是 §2.3 之外、供另一項目實作的需求，不是撤銷 coding MVP 的非目標，也不替換 ADR-001／002 的 OpenHands 主線。AC 暫定以外部 agent loop + 受控 MCP bridge 做功能等價驗證，不是既有 Run adapter 的 host fallback；不得悄悄放寬現有文字模型／工具契約。AC 的 ComputerSession 與聊天連線分離，M0–M4 的 Run／Attempt／lease 契約不因本提案改寫。
 
 本文件其他章節的 MVP、介面、狀態與 AT-xx 均仍指 coding 主線；AC 使用獨立能力宣告與 AC-AT-xx 驗收，不能用本次文件、舊 M0 證據或上游 README 代替其實機證據。手機、通用多租戶桌面、原生 macOS 外殼、GPU／4K 效能保證及跨節點遷移仍不在此實驗內。
 
@@ -384,7 +386,7 @@ Approval 內容保存 normalized action、參數 hash、有效期限與 policy r
 | UI 事件 | DB commit 到連線中瀏覽器顯示 p95 < 1 秒 |
 | Terminal output | 單 tool 最大 10 MiB，超過截斷並標記；run 日誌上限 100 MiB |
 | Artifacts | 現有結果 JSON archive 每 run 一份、1 MiB，diff 256 KiB；未來任意 artifact 目標單檔 100 MiB／每 run 1 GiB，目前未實作 |
-| Retention | 手動 archive payload GC 至少 30 天、每批最多 100；active／interrupted／未確認 cleanup／export 引用均保護，metadata/原始 diff 保留。事件 30 天／audit 90 天仍為未實作目標 |
+| Retention | 手動 archive payload GC 至少 30 天、每批最多 100；active／interrupted／未確認 cleanup／export 引用均保護，metadata/原始 diff 保留。手動事件 GC 至少30天、100 inspected runs／1000 events／8MiB encoded records，保留 durable dedupe 與連續 cursor；[本機切片證據](docs/EVENT-RETENTION.md)，focused T088 已接受，CI 待驗收。Audit90天仍未實作 |
 
 Capacity 計算使用 configured reservations 與 observed 使用量中較保守的結果。CPU 可設明確超賣政策，RAM 初版不超賣；VM、golden template 與 warm pool 都占資源。UI 分別顯示 queue wait、provision、agent execution 與 cleanup 時間，不能用上游 warm-claim 毫秒數宣稱整體任務已就緒。
 
@@ -454,7 +456,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
 | M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 的 mock HTTPS 與 isolation 已在新主機通過；CI 不代替那次 KVM。真接口暫定 OpenCode Go Chat Completions，開發仍用本機 mock。單人版本已決定延後真實計費／硬金額上限，不作目前 gate，費用保持 unknown；完整 AT-07/11 跨切片驗收待完成。24 小時停留是 release 前整合測試，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
-| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | In progress：bounded PostgreSQL 成果封存／authenticated download 與明確授權 GitHub export 切片（fake HTTP 驗收、live 尚未執行）；離線 DB 備份／空庫還原、手動 archive payload retention 見 [備份與保留](docs/BACKUP-RETENTION.md)。單節點操作手冊與隔離 control-plane 演練見 [SINGLE-NODE](docs/SINGLE-NODE.md)；任意 artifacts、事件／審計 retention、stale VM cleanup、實際主機部署與完整 AT-09/12/13 尚未完成，見 [成果封存](docs/RESULT-ARCHIVE.md)／[GitHub 匯出](docs/GITHUB-EXPORT.md) |
+| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | In progress：bounded PostgreSQL 成果封存／authenticated download 與明確授權 GitHub export 切片（fake HTTP 驗收、live 尚未執行）；離線 DB 備份／空庫還原、手動 archive payload retention 見 [備份與保留](docs/BACKUP-RETENTION.md)，[手動事件 GC](docs/EVENT-RETENTION.md) 已有 focused/native/browser 本機證據，focused T088 已接受，CI 待驗收。單節點手冊與隔離演練見 [SINGLE-NODE](docs/SINGLE-NODE.md)；任意 artifacts、audit retention、stale VM cleanup、實際主機部署與完整 AT-09/12/13 尚未完成，見 [成果封存](docs/RESULT-ARCHIVE.md)／[GitHub 匯出](docs/GITHUB-EXPORT.md) |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |
 
@@ -464,7 +466,7 @@ M5 若啟用自動化，automation 定義具版本；webhook delivery ID 與 `(s
 
 ### 15.1 獨立 AC 實驗的進度
 
-[Agent Computer 計劃](docs/AGENT-COMPUTER.md) 的 AC-0 是本次文件設計；AC-1～AC-4 為後續、尚未執行的版本固定、桌面／工具／觀看整合及最終驗收。所有 AC 實機 gate 目前均為 Not run。上表 M0–M6 的狀態保持不變，M3 仍是 coding 主線最早未完成的里程碑，M6 的完整平台 checkpoint／fork 整合也不因 AC 局部實驗而變成 Passed。
+[Agent Computer 文件](docs/AGENT-COMPUTER.md) 的 AC-0 是已保留的文件設計；AC-1～AC-4 是另一個獨立項目的實作／驗收需求，不列入本元件後續階段。本文件原有 AC 實機 gate 的 Not run 記錄僅描述當時文件交付，不宣稱獨立項目已完成或仍未執行。目標項目的公開位置未指定，其進度由該項目自己的證據維護。上表 M0–M6 的範圍、完成條件與狀態完全不變，M3 仍是 coding 主線最早未完成的里程碑，M6 的完整平台 checkpoint／fork 整合也不因 AC 移交而變成 Passed。
 
 ## 16. 待驗證項與主要風險
 

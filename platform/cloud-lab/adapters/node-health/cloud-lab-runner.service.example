@@ -1,0 +1,21 @@
+# Replace every /ABSOLUTE placeholder and stop-at with privately verified values.
+# Use the earliest expiry of all required grants and Access credentials.
+[Unit]
+Description=Cloud Lab bounded node-health runner
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /ABSOLUTE/runner.py --config /ABSOLUTE/runner.json --stop-at 2030-01-01T00:00:00Z --poll-seconds 30
+Restart=on-abnormal
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,138 @@
+{
+  "source": "5275f4014301040c9759758d327d52fa078f01ff",
+  "scope": "T005 DESIGN M1\u2013M3 review-only; no workflow or product changes",
+  "versions": {
+    "node": "24.18.0",
+    "pnpm": "11.18.0",
+    "playwright": "1.63.0",
+    "chromium_revision": "1243",
+    "chromium": "153.0.8010.12",
+    "axe": "4.13.0"
+  },
+  "checks": {
+    "install": "pnpm install --frozen-lockfile exit0",
+    "plan_red": "node --test fe-review/capture.test.mjs exit1 missing module before implementation",
+    "plan_green": "same command exit0,2passed",
+    "native": "set-e lint/typecheck/test/check:docs/check:contracts/check:ci/build --mode demo exit0;46files426tests",
+    "updated_docs": "final pnpm check:docs exit0;44Markdown264repositorylinks; prior architecturePASS",
+    "isolated_native_initial": "SDK pnpm12 tried package-manager version resolution without network; stopped before gates",
+    "isolated_start_attempt1": "pinned pnpm11 runs but dependency store mismatch requests install; refuses removal withoutTTY",
+    "isolated_start_attempt2": "npm_config_store_dir ignored; effective store still cleanhome; same refusal; no purge performed",
+    "isolated_start_canonical": "PASS: actual targets pnpm dev,42/42 HTTP200,0pageErrors; strict verify-deps-before-run=error, canonical worktree/sharedstore mounts, config only clean container home",
+    "final_lint_resume": "pnpm lint exit0 after resume/axe-error observation change",
+    "persona_initial": "94 successful captures then axe frame.evaluate execution context destroyed; preserved failed run",
+    "review_resume_regression": "RED missing verifiedCaptureKeys export; GREEN3tests, null-theme/persona/heading excluded",
+    "review_capture_attempt1": "FAIL initial page.goto load timeout15000ms;0captures, raw20261024T070544500Z; Vite reoptimized deps; retry waits for existing E2E",
+    "review_full_lint": "FAIL534generated Playwright trace-JS errors while E2E active; no source rule/config changes; earlier full lintPASS separately",
+    "review_source_lint": "pnpm exec eslint fe-review/capture-personas.mjs fe-review/capture-plan.mjs fe-review/capture.test.mjs exit0",
+    "native_e2e": "pnpm test:e2e --output=fe-review/runs/.state/e2e-results --reporter=line;100passed(34.7m),outer session27950 exit0;ss no listeners",
+    "review_capture_retry": "PASS1capture/0errors,exit0,actualtheme light/selectedPersona user-rd-commerce,owned cleanup no listeners",
+    "final_post_e2e_lint": "pnpm lint exit0 session84750; live traces normally cleaned after E2E, no deletion/ignore changes",
+    "scope_hygiene": "worker files only fe-review/SUCCESS/STATUS; no private host paths or storageState in raw JSON; PNG/logs ignored; root-owned PLAN/BOARD writes preserved"
+  },
+  "runtime": "original R2 local gates passed;static42,216valid unique persona keys across217raw records with1superseded null-theme;100E2Epassed;targets true R2-only;final independent recheck/CI/delivery root-owned",
+  "metrics": {
+    "provider_requests": null,
+    "active_seconds": null,
+    "wait_seconds": null,
+    "note": "Tool counts not reconstructed across prior assignments; exact provider metrics unknown."
+  },
+  "historical_driver_sha256": "1d7ac76cec1f0e8b6ce6438f9072c7441c909546df614854fc540664e5a4d61c",
+  "runs": [
+    {
+      "id": "20261024T063828166Z",
+      "driverSha256": "1d7ac76cec1f0e8b6ce6438f9072c7441c909546df614854fc540664e5a4d61c",
+      "kind": "initial failure retained",
+      "captures": 94,
+      "manifestSha256": "f45f062689132a359e1a60de05a03b797b82ab8677c82195a4202557739abd2f"
+    },
+    {
+      "id": "20261024T064605334Z",
+      "kind": "continuation,driver hash in own manifest",
+      "captures": 122,
+      "driverSha256": "8d32f6cbda704d58135b12ed513f849143ef472dd2a3e167befc0d7e1bfcb394",
+      "exit": 0,
+      "manifestSha256": "df8c88da06be2e8de3b70b960eb528b6be8f0754e977980f958077a329af5542"
+    },
+    {
+      "id": "static-round2-canonical",
+      "kind": "configured --start",
+      "captures": 42,
+      "manifestSha256": "4dd7601e12603feb4351a70810c6a23f108d43a46a559d913db088750321f043"
+    },
+    {
+      "id": "20261024T070544500Z",
+      "kind": "review correction initial timeout retained",
+      "captures": 0,
+      "driverSha256": "df68de20e381f9f94f1ef5f223601eb915ca139635e66653d07081a2ed3bdf03",
+      "manifestSha256": "5c056a71ca0557500d8e3c9bb0385bf801b216cec807889f8d82f765b0660a08"
+    },
+    {
+      "id": "20261024T072323741Z",
+      "kind": "one-key theme correction passed",
+      "captures": 1,
+      "driverSha256": "0352663d5a04249a97c745b861885bbafb73e7e3e4f57537e1cb6e60b84a23b5",
+      "manifestSha256": "27770595d6e770dc96d2672f0b002d8b1fac36f355bbb894690ee60356c0bd67"
+    }
+  ],
+  "script_sha256": {
+    "capture-personas.mjs": "0352663d5a04249a97c745b861885bbafb73e7e3e4f57537e1cb6e60b84a23b5",
+    "capture-plan.mjs": "74439d0cc49a72098bb2fb191e51bc672dab48e7c49f6bc9d171c11149873d13",
+    "capture.test.mjs": "9e7edc010f15610e29d7f453a5a326a7ab13ab08ba3112270c45aab6588021dc",
+    "personas.json": "957a20dea824e3f3fcdb7ebb114fdf92041b846459c81ca0d87c83fd5030a890"
+  },
+  "matrixAudit": {
+    "planned": 216,
+    "capturedUnique": 216,
+    "duplicates": 0,
+    "missing": 0,
+    "combinations": 18,
+    "runtimeDetailsNotAvailable": 24,
+    "runtimeDetailKinds": {
+      "requests-detail": 6,
+      "pipelines-detail": 6,
+      "incidents-detail": 6,
+      "releases-detail": 6
+    },
+    "health": {
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedRequests": 0,
+      "overflow": 0,
+      "axeErrors": [],
+      "axeViolations": {
+        "region:moderate": 216,
+        "aria-prohibited-attr:serious": 6
+      }
+    },
+    "cleanup": "resume exit0; ss -ltn header only, no owned listeners",
+    "fullyVerifiedKeys": 216,
+    "incompleteEvidence": [
+      {
+        "run": "20261024T063828166Z",
+        "key": "user-rd-commerce|alerts|desktop|light",
+        "theme": null,
+        "status": "superseded by actual asserted light evidence",
+        "replacementRun": "20261024T072323741Z"
+      }
+    ],
+    "rawCaptureRecords": 217,
+    "supersededIncompleteRecords": 1
+  },
+  "evidenceGate": {
+    "decision": "ACCEPT local R2 evidence; delivery remains PARTIAL",
+    "requiredItems": {
+      "scopeAndSuccess": "SUCCESS first, scoped diff only",
+      "navigationRegression": "focused RED/GREEN3tests",
+      "nativeGates": "426tests and lint/types/docs/contracts/ci/build passed",
+      "isolatedRuntime": "common42+persona216valid+E2E100+ownedcleanup",
+      "documentationAndProvenance": "README/PROMPT/REVIEW/STATUS/report+5manifest and4source hashes"
+    },
+    "residuals": [
+      "capacity serious axe findings unresolved, outside approved R2",
+      "region moderate observations unresolved",
+      "final independent recheck and remote CI/delivery not claimed"
+    ],
+    "reportContractReference": "Skill relative docs/specs/initial-plugin.md missing locally; used explicit assigned task and skill report headings/status rules"
+  }
+}

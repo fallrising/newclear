@@ -49,6 +49,19 @@ func (l *Loop) applyOne(ctx context.Context, desired *agentclient.Desired, svc a
 	composeFile := filepath.Join(dir, "docker-compose.yml")
 
 	if svc.DesiredState == "absent" {
+		// Tombstones carry the original Compose document for recovery after file loss.
+		// Down needs env_file to exist but does not need workload secret values.
+		if err := writeFile(composeFile, []byte(svc.ComposeYAML), 0o640); err != nil {
+			rep.Error = "compose_error"
+			return rep
+		}
+		envPath := filepath.Join(dir, ".env")
+		if _, err := os.Stat(envPath); os.IsNotExist(err) {
+			if err := writeFile(envPath, []byte(svc.EnvFile), 0o600); err != nil {
+				rep.Error = "compose_error"
+				return rep
+			}
+		}
 		if err := l.Compose.Down(ctx, proj, composeFile, composeclient.DownOpts{PurgeVolumes: svc.PurgeVolumes}); err != nil {
 			rep.ActualState = "unknown"
 			rep.Error = "compose_error"
@@ -81,7 +94,9 @@ func (l *Loop) applyOne(ctx context.Context, desired *agentclient.Desired, svc a
 	}
 	h := hashOf(svc.ComposeYAML, envMerged)
 	prev := l.applied[svc.Name]
-	if h != prev.Hash {
+	_, composeErr := os.Stat(composeFile)
+	_, envErr := os.Stat(filepath.Join(dir, ".env"))
+	if h != prev.Hash || composeErr != nil || envErr != nil {
 		if err := writeFile(composeFile, []byte(svc.ComposeYAML), 0o640); err != nil {
 			rep.Error = "compose_error"
 			return rep
@@ -115,7 +130,9 @@ func (l *Loop) applyOne(ctx context.Context, desired *agentclient.Desired, svc a
 		if desired.Registry != nil && desired.Registry.Password != "" {
 			_ = l.Compose.Login(ctx, desired.Registry.URL, "x-access-token", desired.Registry.Password)
 		}
-		needPull := svc.ForceRecreate || svc.Generation != prev.Generation
+		// force_recreate describes this generation; it is not a command to replay
+		// forever. Persisted applied metadata also makes process restarts idempotent.
+		needPull := svc.Generation != prev.Generation || h != prev.Hash
 		if needPull {
 			rep.ActualState = "progressing"
 			rep.Error = "pull_in_progress"

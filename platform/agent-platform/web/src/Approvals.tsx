@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, PendingCommand, errorText, request, type Run } from './api';
 
-type Approval = {
+export type Approval = {
   id: string;
   generation: number;
   action_digest: string;
@@ -17,7 +17,12 @@ export function Approvals({ run }: { run: Run }) {
     queryFn: () => request<{ items: Approval[] }>(`/runs/${run.id}/approvals`),
     refetchInterval: 1000,
   });
-  if (query.error) return <p role="alert">{errorText(query.error)}</p>;
+  if (query.error)
+    return (
+      <p className="error" role="alert">
+        {errorText(query.error)}
+      </p>
+    );
   const latest = query.data?.items.at(-1);
   if (!latest) return null;
   return <ApprovalDecision key={latest.id} approval={latest} run={run} />;
@@ -70,7 +75,15 @@ function ApprovalDecision({ approval, run }: { approval: Approval; run: Run }) {
           <pre>{JSON.stringify(action.action, null, 2)}</pre>
         </div>
       ))}
-      <p className="muted">有效至 {new Date(approval.expires_at).toLocaleString()}</p>
+      <p className="muted">
+        有效至{' '}
+        {new Date(approval.expires_at).toLocaleString('zh-TW', {
+          month: 'numeric',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
+      </p>
       <div className="run-actions">
         {(['approve', 'deny'] as const).map((choice) => (
           <button
@@ -92,8 +105,16 @@ function ApprovalDecision({ approval, run }: { approval: Approval; run: Run }) {
           </button>
         ))}
       </div>
-      {decision.isSuccess && <p role="status">決定已受理，正在核對執行狀態。</p>}
-      {decision.error && <p role="alert">{errorText(decision.error)}</p>}
+      {decision.isSuccess && (
+        <p className="notice" role="status">
+          決定已受理，正在核對執行狀態。
+        </p>
+      )}
+      {decision.error && (
+        <p className="error" role="alert">
+          {errorText(decision.error)}
+        </p>
+      )}
     </section>
   );
 }

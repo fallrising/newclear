@@ -1,11 +1,66 @@
 {
   "commands": [
     {
+      "name": "add_workspace_root",
+      "requestType": "AddWorkspaceRootRequest",
+      "responseType": "RootDto",
+      "transport": "json"
+    },
+    {
+      "name": "create_workspace",
+      "requestType": "CreateWorkspaceRequest",
+      "responseType": "WorkspaceDto",
+      "transport": "json"
+    },
+    {
+      "name": "detach_workspace_root",
+      "requestType": "DetachWorkspaceRootRequest",
+      "responseType": "RootDto",
+      "transport": "json"
+    },
+    {
       "name": "get_build_info",
       "requestType": "EmptyRequest",
-      "responseType": "BuildInfoDto"
+      "responseType": "BuildInfoDto",
+      "transport": "json"
+    },
+    {
+      "name": "list_directory",
+      "requestType": "ListDirectoryRequest",
+      "responseType": "DirectoryPage",
+      "transport": "json"
+    },
+    {
+      "name": "list_recent_documents",
+      "requestType": "ListRecentDocumentsRequest",
+      "responseType": "RecentDocumentsPage",
+      "transport": "json"
+    },
+    {
+      "name": "list_workspaces",
+      "requestType": "ListWorkspacesRequest",
+      "responseType": "WorkspacePage",
+      "transport": "json"
+    },
+    {
+      "name": "open_document",
+      "requestType": "OpenDocumentRequest",
+      "responseType": "OpenDocumentResponse",
+      "transport": "json"
+    },
+    {
+      "name": "read_workspace_asset",
+      "requestType": "ReadWorkspaceAssetRequest",
+      "responseType": "ArrayBuffer",
+      "transport": "binary"
+    },
+    {
+      "name": "resolve_local_document_link",
+      "requestType": "ResolveLocalDocumentLinkRequest",
+      "responseType": "ResolvedDocumentLink",
+      "transport": "json"
     }
   ],
-  "generatorVersion": "1.0.0",
+  "generatorVersion": "1.1.0",
   "schemaVersion": 1
 }

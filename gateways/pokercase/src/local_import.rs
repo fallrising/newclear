@@ -22,16 +22,19 @@ fn home() -> PathBuf {
 
 /// Scan known agent credential paths and upsert oauth connections + simple routes.
 pub fn import_all_local(store: &Store, make_routes: bool) -> Result<Vec<ImportResult>> {
-    let mut out = Vec::new();
-    out.push(import_codex(store, make_routes));
-    out.push(import_claude(store, make_routes));
-    out.push(import_grok(store, make_routes));
-    out.push(import_cursor(store, make_routes));
-    out.push(import_opencode(store, make_routes));
-    out.push(import_agy(store, make_routes));
-    Ok(out)
+    Ok(vec![
+        import_claude(store, make_routes),
+        import_grok(store, make_routes),
+        import_cursor(store, make_routes),
+        import_opencode(store, make_routes),
+        import_agy(store, make_routes),
+    ])
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Keep the existing import adapter's explicit credential and route fields aligned with Store::upsert_oauth_connection"
+)]
 fn upsert(
     store: &Store,
     name: &str,
@@ -64,18 +67,17 @@ fn upsert(
         Ok(row) => {
             if make_routes {
                 let public = format!("rt-{}", profile.map(|p| p.id).unwrap_or(provider));
-                let _ = store.upsert_route(
-                    None,
-                    &public,
-                    "fallback",
-                    &[(row.id.clone(), None)],
-                );
+                let _ = store.upsert_route(None, &public, "fallback", &[(row.id.clone(), None)]);
             }
             ImportResult {
                 provider: provider.into(),
                 name: name.into(),
                 ok: true,
-                detail: format!("id={} model={}", &row.id[..8.min(row.id.len())], model.unwrap_or("-")),
+                detail: format!(
+                    "id={} model={}",
+                    &row.id[..8.min(row.id.len())],
+                    model.unwrap_or("-")
+                ),
             }
         }
         Err(e) => ImportResult {
@@ -87,163 +89,35 @@ fn upsert(
     }
 }
 
-fn import_codex(store: &Store, make_routes: bool) -> ImportResult {
-    let path = home().join(".codex/auth.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "codex".into(),
-                name: "local-codex".into(),
-                ok: false,
-                detail: format!("missing {}: {e}", path.display()),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "codex".into(),
-                name: "local-codex".into(),
-                ok: false,
-                detail: format!("parse error: {e}"),
-            };
-        }
-    };
-    let access = v
-        .pointer("/tokens/access_token")
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    let refresh = v
-        .pointer("/tokens/refresh_token")
-        .and_then(|t| t.as_str());
-    let account_id = v
-        .pointer("/tokens/account_id")
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    if access.is_empty() {
-        return ImportResult {
-            provider: "codex".into(),
-            name: "local-codex".into(),
-            ok: false,
-            detail: "no access_token".into(),
-        };
-    }
-    let meta = serde_json::json!({"account_id": account_id, "source": path.display().to_string()});
-    // Prefer model from config.toml if present
-    let model = read_codex_model().or(Some("gpt-5.6-sol".into()));
-    upsert(
-        store,
-        "local-codex",
-        "codex",
-        access,
-        refresh,
-        None,
-        Some(&meta.to_string()),
-        model.as_deref(),
-        make_routes,
-    )
-}
-
-fn read_codex_model() -> Option<String> {
-    let p = home().join(".codex/config.toml");
-    let s = std::fs::read_to_string(p).ok()?;
-    for line in s.lines() {
-        let line = line.trim();
-        if let Some(rest) = line.strip_prefix("model") {
-            let rest = rest.trim().trim_start_matches('=').trim();
-            let m = rest.trim_matches('"').trim_matches('\'').to_string();
-            if !m.is_empty() {
-                return Some(m);
-            }
-        }
-    }
-    None
-}
-
+/// Claude needs no token import: the local Claude Code CLI answers with its own login.
 fn import_claude(store: &Store, make_routes: bool) -> ImportResult {
-    // 1) Official long-lived token for CI / headless (subscription-backed)
-    if let Ok(tok) = std::env::var("CLAUDE_CODE_OAUTH_TOKEN") {
-        let tok = tok.trim();
-        if !tok.is_empty() {
-            return upsert(
-                store,
-                "local-claude",
-                "claude",
-                tok,
-                None,
-                None,
-                Some(r#"{"source":"CLAUDE_CODE_OAUTH_TOKEN"}"#),
-                Some("claude-sonnet-4-5-20250929"),
-                make_routes,
-            );
-        }
-    }
-
-    let path = home().join(".claude/.credentials.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "claude".into(),
-                name: "local-claude".into(),
-                ok: false,
-                detail: format!(
-                    "missing {} ({e}); run `claude` /login or `claude setup-token` then set CLAUDE_CODE_OAUTH_TOKEN — see docs/CLAUDE_SUBSCRIPTION.md",
-                    path.display()
-                ),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "claude".into(),
-                name: "local-claude".into(),
-                ok: false,
-                detail: format!("parse: {e}"),
-            };
-        }
-    };
-    let oauth = &v["claudeAiOauth"];
-    let access = oauth
-        .get("accessToken")
-        .or_else(|| oauth.get("access_token"))
-        .and_then(|t| t.as_str())
-        .unwrap_or("");
-    let refresh = oauth
-        .get("refreshToken")
-        .or_else(|| oauth.get("refresh_token"))
-        .and_then(|t| t.as_str())
-        .filter(|s| !s.is_empty());
-    let exp = oauth
-        .get("expiresAt")
-        .or_else(|| oauth.get("expires_at"))
-        .map(|e| match e {
-            Value::Number(n) => n.to_string(),
-            Value::String(s) => s.clone(),
-            _ => String::new(),
-        })
-        .filter(|s| !s.is_empty() && s != "0");
-    if access.is_empty() {
+    let bin = std::env::var("THINROUTER_CLAUDE_BIN").unwrap_or_else(|_| "claude".into());
+    let found = std::process::Command::new(&bin)
+        .arg("--version")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success());
+    if !found {
         return ImportResult {
             provider: "claude".into(),
             name: "local-claude".into(),
             ok: false,
-            detail: "credentials present but accessToken empty (OAuth session expired). Run `claude` then /login, or `claude setup-token` + CLAUDE_CODE_OAUTH_TOKEN. See docs/CLAUDE_SUBSCRIPTION.md".into(),
+            detail: format!(
+                "Claude Code CLI `{bin}` not found; install it and run `claude` once to sign in"
+            ),
         };
     }
     upsert(
         store,
         "local-claude",
         "claude",
-        access,
-        refresh,
-        exp.as_deref(),
-        Some(r#"{"source":"~/.claude/.credentials.json"}"#),
-        Some("claude-sonnet-4-5-20250929"),
+        "",
+        None,
+        None,
+        Some(r#"{"source":"claude-code-cli"}"#),
+        Some("sonnet"),
         make_routes,
     )
 }
@@ -273,7 +147,8 @@ fn import_grok(store: &Store, make_routes: bool) -> ImportResult {
         }
     };
     let entry = v.as_object().and_then(|m| {
-        m.values().find(|v| v.get("key").and_then(|k| k.as_str()).is_some())
+        m.values()
+            .find(|v| v.get("key").and_then(|k| k.as_str()).is_some())
     });
     let Some(entry) = entry else {
         return ImportResult {
@@ -284,63 +159,50 @@ fn import_grok(store: &Store, make_routes: bool) -> ImportResult {
         };
     };
     let access = entry.get("key").and_then(|k| k.as_str()).unwrap_or("");
-    let refresh = entry.get("refresh_token").and_then(|t| t.as_str());
     let exp = entry.get("expires_at").and_then(|t| t.as_str());
+    let meta = serde_json::json!({"source": path.display().to_string()});
     upsert(
         store,
         "local-grok",
         "grok",
         access,
-        refresh,
+        // xAI refresh tokens rotate; the Grok CLI owns them (see borrowed.rs).
+        None,
         exp,
-        Some(r#"{"source":"~/.grok/auth.json"}"#),
+        Some(&meta.to_string()),
         Some("grok-build"),
         make_routes,
     )
 }
 
+/// Cursor needs no token import: the local Cursor Agent CLI answers with its own login.
 fn import_cursor(store: &Store, make_routes: bool) -> ImportResult {
-    let path = home().join(".config/cursor/auth.json");
-    let raw = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(e) => {
-            return ImportResult {
-                provider: "cursor".into(),
-                name: "local-cursor".into(),
-                ok: false,
-                detail: format!("missing {}: {e}", path.display()),
-            };
-        }
-    };
-    let v: Value = match serde_json::from_str(&raw) {
-        Ok(v) => v,
-        Err(e) => {
-            return ImportResult {
-                provider: "cursor".into(),
-                name: "local-cursor".into(),
-                ok: false,
-                detail: format!("parse: {e}"),
-            };
-        }
-    };
-    let access = v.get("accessToken").and_then(|t| t.as_str()).unwrap_or("");
-    let refresh = v.get("refreshToken").and_then(|t| t.as_str());
-    if access.is_empty() {
+    let bin = std::env::var("THINROUTER_CURSOR_BIN").unwrap_or_else(|_| "cursor-agent".into());
+    let found = std::process::Command::new(&bin)
+        .arg("--version")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success());
+    if !found {
         return ImportResult {
             provider: "cursor".into(),
             name: "local-cursor".into(),
             ok: false,
-            detail: "no accessToken".into(),
+            detail: format!(
+                "Cursor Agent CLI `{bin}` not found; install it and run `cursor-agent login`"
+            ),
         };
     }
     upsert(
         store,
         "local-cursor",
         "cursor",
-        access,
-        refresh,
+        "",
         None,
-        Some(r#"{"source":"~/.config/cursor/auth.json"}"#),
+        None,
+        Some(r#"{"source":"cursor-agent-cli"}"#),
         Some("default"),
         make_routes,
     )
@@ -385,7 +247,10 @@ fn import_agy(store: &Store, make_routes: bool) -> ImportResult {
         }
     };
     let tok = &v["token"];
-    let access = tok.get("access_token").and_then(|t| t.as_str()).unwrap_or("");
+    let access = tok
+        .get("access_token")
+        .and_then(|t| t.as_str())
+        .unwrap_or("");
     let refresh = tok.get("refresh_token").and_then(|t| t.as_str());
     let exp = tok.get("expiry").and_then(|t| t.as_str());
     if access.is_empty() && refresh.unwrap_or("").is_empty() {
@@ -423,7 +288,15 @@ pub async fn refresh_all_oauth(store: &Store) -> Result<Vec<(String, bool, Strin
         if c.auth_type != "oauth_import" {
             continue;
         }
-        if c.oauth.as_ref().and_then(|o| o.refresh_token.as_ref()).is_none() {
+        if c.oauth
+            .as_ref()
+            .and_then(|o| o.refresh_token.as_ref())
+            .is_none()
+        {
+            continue;
+        }
+        if crate::borrowed::source(&c).is_some() {
+            out.push((c.name, true, "skipped: borrowed from the Grok CLI".into()));
             continue;
         }
         match oauth_refresh::refresh_connection(store, &c).await {

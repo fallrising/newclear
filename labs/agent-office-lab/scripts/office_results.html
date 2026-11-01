@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Agent Office · 執行結果</title>
+<style>
+:root{color-scheme:dark;font:16px/1.6 system-ui,sans-serif;background:#10151e;color:#e7edf7}
+body{max-width:1100px;margin:48px auto;padding:0 24px}h1{font-size:30px;margin-bottom:8px}
+p{color:#b5c3d8}header{border-bottom:1px solid #354257;padding-bottom:16px}
+#providers{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.card{padding:16px;background:#1b2534;border:1px solid #354257;border-radius:12px;flex:1;min-width:160px}
+.card strong{display:block;font-size:19px}label{margin-right:12px}select,button{font:inherit;color:inherit;background:#202d40;border:1px solid #6584a8;border-radius:6px;padding:6px 12px}
+button{cursor:pointer}button:hover,button:focus{background:#354b68}table{border-collapse:collapse;width:100%;margin:24px 0}th,td{border-bottom:1px solid #354257;padding:12px 8px;text-align:left}
+td{overflow-wrap:anywhere}.table-wrap{overflow-x:auto}small{color:#b5c3d8}#detail{padding:24px;border:1px solid #6584a8;border-radius:12px;background:#162130}pre{white-space:pre-wrap;overflow-wrap:anywhere}dt{color:#b5c3d8}dd{margin:0 0 12px;overflow-wrap:anywhere}.complete{color:#8ce4bb}
+</style>
+<body>
+<header><small>AGENT OFFICE LAB</small><h1>執行結果</h1>
+<p>既有任務的唯讀快照。產物會與輸入及紀錄中的 SHA-256 重新比對；執行證據來自本機 runner 紀錄。</p>
+<small id="generated"></small></header>
+<section id="providers" aria-label="四個工位"></section>
+<label for="provider">工位</label><select id="provider"><option value="all">全部</option></select>
+<label for="status">結果</label><select id="status"><option value="all">全部</option></select>
+<p id="count" role="status"></p>
+<div class="table-wrap"><table><thead><tr><th>工位／模型</th><th>執行紀錄</th><th>結果</th><th>產物</th></tr></thead><tbody id="runs"></tbody></table></div>
+<section id="detail" hidden tabindex="-1" aria-label="任務詳細結果"></section>
+<footer><p>重新整理只讀取這份快照，不啟動或重跑任務。若檔案有更新，請重新產生快照。尚未整合派工、終端互動與跨工位生命週期。</p></footer>
+<script id="data" type="application/json">__OFFICE_RESULTS_JSON__</script>
+<script>
+'use strict';
+const data = JSON.parse(document.getElementById('data').textContent);
+const labels = {completed:'完成且產物已核對',failed:'失敗',stopped:'已停止',startup_only:'僅啟動檢查',incomplete:'未完成紀錄',invalid:'無效紀錄',unverified:'證據不足'};
+const artifactLabels = {verified:'已核對',unavailable:'無產物',unverified:'未通過核對'};
+const el = (tag,text) => {const node=document.createElement(tag);node.textContent=text;return node;};
+document.getElementById('generated').textContent = `快照時間：${data.generated_at}`;
+for (const provider of data.providers) {
+  const card=el('div','');card.className='card';card.append(el('strong',provider));
+  const runs=data.runs.filter(r=>r.provider===provider);
+  card.append(el('span',`${runs.filter(r=>r.status==='completed').length} 已完成 / ${runs.length} 筆紀錄`));
+  document.getElementById('providers').append(card);
+  const option=el('option',provider);option.value=provider;document.getElementById('provider').append(option);
+}
+for (const [key,label] of Object.entries(labels)) {const option=el('option',label);option.value=key;document.getElementById('status').append(option);}
+function show(run) {
+  const detail=document.getElementById('detail');detail.replaceChildren(el('h2','任務詳細結果'));
+  const fields=el('dl','');
+  for (const [label,value] of [['執行紀錄',run.id],['工位',run.provider],['原生紀錄模型',run.model||'未記錄'],['CLI 版本',run.version||'未記錄'],['結果',labels[run.status]],['清理證據',run.cleanup_verified?'通過':'不足'],['SHA-256',run.artifact.sha256||'未通過核對']]) {
+    fields.append(el('dt',label),el('dd',value));
+  }
+  detail.append(fields);
+  if (run.artifact.content) detail.append(el('h3','result.json'),el('pre',JSON.stringify(run.artifact.content,null,2)));
+  else detail.append(el('p','沒有可顯示的已核對產物。'));
+  const close=el('button','關閉詳細結果');close.onclick=()=>{detail.hidden=true;document.getElementById('provider').focus();};detail.append(close);
+  detail.hidden=false;detail.focus();
+}
+function render() {
+  const provider=document.getElementById('provider').value,status=document.getElementById('status').value;
+  const runs=data.runs.filter(r=>(provider==='all'||r.provider===provider)&&(status==='all'||r.status===status));
+  const body=document.getElementById('runs');body.replaceChildren();document.getElementById('detail').hidden=true;
+  document.getElementById('count').textContent=runs.length?`${runs.length} 筆紀錄`:'沒有符合條件的紀錄。';
+  for (const run of runs) {
+    const tr=el('tr',''),agent=el('td',run.provider);agent.append(el('br',''),el('small',run.model||'模型未記錄'));
+    const state=el('td',labels[run.status]);if(run.status==='completed')state.className='complete';
+    const action=el('td',''),button=el('button',`${artifactLabels[run.artifact.status]} · 詳細`);button.onclick=()=>show(run);action.append(button);
+    tr.append(agent,el('td',run.id),state,action);body.append(tr);
+  }
+}
+document.getElementById('provider').onchange=render;document.getElementById('status').onchange=render;render();
+</script>
+</body></html>

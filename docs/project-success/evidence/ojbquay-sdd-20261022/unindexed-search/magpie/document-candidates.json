@@ -1,0 +1,234 @@
+[
+  {
+    "path": ".github/ui-preview/README.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "d971cf93be8c1a0ff19f3785f473178a89f8c452",
+    "size": 2890,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/d971cf93be8c1a0ff19f3785f473178a89f8c452"
+  },
+  {
+    "path": "AGENTS.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "91b7fdab9407ec72c5b158ae615f2839deeff9a1",
+    "size": 5004,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/91b7fdab9407ec72c5b158ae615f2839deeff9a1"
+  },
+  {
+    "path": "CLAUDE.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "abed7dc1c45eb8842bedc3262321c9d1ef55e72d",
+    "size": 23,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/abed7dc1c45eb8842bedc3262321c9d1ef55e72d"
+  },
+  {
+    "path": "LESSONS.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "1ff76c824fc2b0cd86363c764168ff94bb6884c5",
+    "size": 26442,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/1ff76c824fc2b0cd86363c764168ff94bb6884c5"
+  },
+  {
+    "path": "README.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "8d6881d685eff022482c8d81015fe29590f20a1c",
+    "size": 18078,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/8d6881d685eff022482c8d81015fe29590f20a1c"
+  },
+  {
+    "path": "README.zh-CN.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "551b050b77584cee1e739b7db04f2385ac0f7dde",
+    "size": 18041,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/551b050b77584cee1e739b7db04f2385ac0f7dde"
+  },
+  {
+    "path": "docs/code-standards.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "5907adff44e753c632c0f23f0ea471637a219a42",
+    "size": 14238,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/5907adff44e753c632c0f23f0ea471637a219a42"
+  },
+  {
+    "path": "docs/contributors.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "ded1ff33cdb1afe39b65b181e9aa130b5969c271",
+    "size": 4387,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/ded1ff33cdb1afe39b65b181e9aa130b5969c271"
+  },
+  {
+    "path": "docs/integrating.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "b73f950cf78a391f7daa73a098a74acb124175bb",
+    "size": 8483,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/b73f950cf78a391f7daa73a098a74acb124175bb"
+  },
+  {
+    "path": "docs/reference.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "7d14ea3371bb2ce47949bf7496cce6c0f72515fa",
+    "size": 160355,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/7d14ea3371bb2ce47949bf7496cce6c0f72515fa"
+  },
+  {
+    "path": "docs/session-relocation.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "075fa1f5576b8829db5fdd09e2e8f4c051597bfa",
+    "size": 3144,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/075fa1f5576b8829db5fdd09e2e8f4c051597bfa"
+  },
+  {
+    "path": "docs/subsystems/README.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "bd357d3d96c6d5c5c0c9828e1e105ca67ed62885",
+    "size": 3933,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/bd357d3d96c6d5c5c0c9828e1e105ca67ed62885"
+  },
+  {
+    "path": "docs/subsystems/agent-wiring.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "f83577f12ce855fab0f3674ddb5dc1315811d2f5",
+    "size": 52789,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/f83577f12ce855fab0f3674ddb5dc1315811d2f5"
+  },
+  {
+    "path": "docs/subsystems/claude-subscription-bridge.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "b38c258f147de5583d3ad97cb78284d173b9cb2a",
+    "size": 23911,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/b38c258f147de5583d3ad97cb78284d173b9cb2a"
+  },
+  {
+    "path": "docs/subsystems/gateway-middleware.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "e144d40ab04948c58ebed00320a8676aeb0884d5",
+    "size": 6228,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/e144d40ab04948c58ebed00320a8676aeb0884d5"
+  },
+  {
+    "path": "docs/subsystems/gateway-routing.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "e933212f3250b2103d036057ce235ad3f5defd0b",
+    "size": 145762,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/e933212f3250b2103d036057ce235ad3f5defd0b"
+  },
+  {
+    "path": "docs/subsystems/gateway-sessions.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "448b9fea5599e61856a47bf8b39a565a1b58af3b",
+    "size": 23451,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/448b9fea5599e61856a47bf8b39a565a1b58af3b"
+  },
+  {
+    "path": "docs/subsystems/gui-shell.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "65370a94cca0289bd0a698bb2b0e7b1e28963458",
+    "size": 51762,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/65370a94cca0289bd0a698bb2b0e7b1e28963458"
+  },
+  {
+    "path": "docs/subsystems/library.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "9e1f926e2a58311eeb07a956f93ef5a80172345e",
+    "size": 38912,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/9e1f926e2a58311eeb07a956f93ef5a80172345e"
+  },
+  {
+    "path": "docs/subsystems/plugin-runtime.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "d30d685ecffe5a25ffa4dde6aebc6243868da99c",
+    "size": 11194,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/d30d685ecffe5a25ffa4dde6aebc6243868da99c"
+  },
+  {
+    "path": "docs/subsystems/provider-plugins.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "8ff221e02d4c01420c83e0b0f144f088de3bbe76",
+    "size": 29767,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/8ff221e02d4c01420c83e0b0f144f088de3bbe76"
+  },
+  {
+    "path": "docs/subsystems/providers-accounts.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "4a79e9956e20526bb706d3aa9ffee1925455bacb",
+    "size": 77062,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/4a79e9956e20526bb706d3aa9ffee1925455bacb"
+  },
+  {
+    "path": "docs/subsystems/sync-backup.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "216d7d90d01974614b44267c6d4b270b25eb975f",
+    "size": 6127,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/216d7d90d01974614b44267c6d4b270b25eb975f"
+  },
+  {
+    "path": "internal/codexcat/codex_prompt.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "8e3f08fb514a6fe82376817aa0a0c960cfbc4656",
+    "size": 7589,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/8e3f08fb514a6fe82376817aa0a0c960cfbc4656"
+  },
+  {
+    "path": "internal/gui/tests/README.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "216005abd592e14857935cc2964e49e1ebac5f92",
+    "size": 145339,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/216005abd592e14857935cc2964e49e1ebac5f92"
+  },
+  {
+    "path": "internal/plugin/testdata/github/raw/griffinmartin/opencode-claude-auth/HEAD/README.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "d720f6d878bd92e5cd221d4bc75fb9d5c97d54e5",
+    "size": 18826,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/d720f6d878bd92e5cd221d4bc75fb9d5c97d54e5"
+  },
+  {
+    "path": "internal/sessions/testdata/claude-native-replay.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "8793af6e3fd64870f811d45b0194d32488cd0040",
+    "size": 4180,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/8793af6e3fd64870f811d45b0194d32488cd0040"
+  },
+  {
+    "path": "internal/sessions/testdata/codex-native-usage.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "e08f0cfa6a0aede491e94f1ade57f124c8baaba5",
+    "size": 1389,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/e08f0cfa6a0aede491e94f1ade57f124c8baaba5"
+  },
+  {
+    "path": "internal/sessions/testdata/traces/README.md",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "3de9bffd7a7388bbd2baef4183ad83ef22c8f7c9",
+    "size": 1107,
+    "url": "https://api.github.com/repos/fallrising/magpie/git/blobs/3de9bffd7a7388bbd2baef4183ad83ef22c8f7c9"
+  }
+]

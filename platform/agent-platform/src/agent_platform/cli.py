@@ -26,10 +26,16 @@ MAINTENANCE_COMMANDS = {
     "backup-restore",
     "archive-gc-preview",
     "archive-gc-apply",
+    "event-gc-preview",
+    "event-gc-apply",
+    "audit-gc-preview",
+    "audit-gc-apply",
+    "stale-cleanup-preview",
+    "stale-cleanup-apply",
 }
 
 
-def read_gc_plan(path):
+def read_gc_plan(path, *, code="archive_gc_plan_invalid"):
     from .private_config import read_private_text
 
     def unique(pairs):
@@ -53,7 +59,7 @@ def read_gc_plan(path):
             raise ValueError()
         return value
     except (ValueError, OSError, RecursionError):
-        raise ValueError("archive_gc_plan_invalid") from None
+        raise ValueError(code) from None
 
 
 def maintenance_command(args):
@@ -69,7 +75,19 @@ def maintenance_command(args):
         return False
 
     try:
-        plan = read_gc_plan(args.plan) if args.command == "archive-gc-apply" else None
+        plan = None
+        if args.command in {
+            "archive-gc-apply",
+            "event-gc-apply",
+            "audit-gc-apply",
+            "stale-cleanup-apply",
+        }:
+            code = (
+                "stale_cleanup_plan_invalid"
+                if args.command == "stale-cleanup-apply"
+                else args.command.split("-", 1)[0] + "_gc_plan_invalid"
+            )
+            plan = read_gc_plan(args.plan, code=code)
         if args.command == "backup-verify":
             from .backup import verify_backup
 
@@ -92,14 +110,32 @@ def maintenance_command(args):
                     confirm_database=args.confirm_database,
                 )
             else:
-                from .archive_retention import apply, preview
+                if args.command.startswith("stale-cleanup-"):
+                    from .stale_cleanup import apply, preview
+                elif args.command.startswith("audit-gc-"):
+                    from .audit_retention import apply, preview
+                elif args.command.startswith("event-gc-"):
+                    from .event_retention import apply, preview
+                else:
+                    from .archive_retention import apply, preview
 
                 conninfo_to_dict(url)
                 pool_logger.addFilter(hide_pool_details)
                 db = Database(url)
                 db.open()
-                if args.command == "archive-gc-preview":
-                    result = preview(db, retention_days=args.retention_days, limit=args.limit)
+                if args.command.startswith("stale-cleanup-"):
+                    connector = RuntimeClient.from_env()
+                    if connector is None:
+                        raise ValueError("stale_cleanup_connector_required")
+                    if args.command.endswith("-preview"):
+                        result = preview(db, connector, run_id=args.run_id)
+                    else:
+                        result = apply(db, connector, plan, approval_digest=args.approve)
+                elif args.command in {"archive-gc-preview", "event-gc-preview", "audit-gc-preview"}:
+                    options = {"retention_days": args.retention_days, "limit": args.limit}
+                    if args.command == "event-gc-preview":
+                        options["event_limit"] = args.event_limit
+                    result = preview(db, **options)
                 else:
                     result = apply(db, plan, approval_digest=args.approve)
         print(json.dumps(result, ensure_ascii=False, allow_nan=False, sort_keys=True))
@@ -136,6 +172,24 @@ def main():
     pruning = commands.add_parser("archive-gc-apply")
     pruning.add_argument("--plan", type=Path, required=True)
     pruning.add_argument("--approve", required=True)
+    event_preview = commands.add_parser("event-gc-preview")
+    event_preview.add_argument("--retention-days", type=int, default=30)
+    event_preview.add_argument("--limit", type=int, default=100)
+    event_preview.add_argument("--event-limit", type=int, default=1000)
+    event_pruning = commands.add_parser("event-gc-apply")
+    event_pruning.add_argument("--plan", type=Path, required=True)
+    event_pruning.add_argument("--approve", required=True)
+    audit_preview = commands.add_parser("audit-gc-preview")
+    audit_preview.add_argument("--retention-days", type=int, default=90)
+    audit_preview.add_argument("--limit", type=int, default=100)
+    audit_pruning = commands.add_parser("audit-gc-apply")
+    audit_pruning.add_argument("--plan", type=Path, required=True)
+    audit_pruning.add_argument("--approve", required=True)
+    stale_preview = commands.add_parser("stale-cleanup-preview")
+    stale_preview.add_argument("--run-id", required=True)
+    stale_apply = commands.add_parser("stale-cleanup-apply")
+    stale_apply.add_argument("--plan", type=Path, required=True)
+    stale_apply.add_argument("--approve", required=True)
     connector = commands.add_parser("connector")
     connector.add_argument("--config", type=Path, required=True)
     connector.add_argument("--port", type=int, default=17800)
@@ -241,7 +295,22 @@ def main():
                     runner.run_once()
                     time.sleep(1)
         elif args.command == "worker":
-            runner = Worker(db, RuntimeClient.from_env())
+            subscription = None
+            if os.environ.get("SUBSCRIPTION_CONFIG"):
+                from .subscription_claude import ClaudeSubscription
+
+                subscription = ClaudeSubscription(os.environ["SUBSCRIPTION_CONFIG"])
+            codex_subscription = None
+            if os.environ.get("CODEX_SUBSCRIPTION_CONFIG"):
+                from .subscription_codex import CodexSubscription
+
+                codex_subscription = CodexSubscription(os.environ["CODEX_SUBSCRIPTION_CONFIG"])
+            runner = Worker(
+                db,
+                RuntimeClient.from_env(),
+                subscription=subscription,
+                codex_subscription=codex_subscription,
+            )
             if args.once:
                 runner.run_once()
             else:

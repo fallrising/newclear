@@ -3,18 +3,21 @@ id: N03
 title: Deterministic Markdown Render Model
 kind: core
 milestone: M1
-status: todo
+status: blocked
 depends_on: 
   - N00
 size: M
-revision: 1
+revision: 2
 source_spec: ../../SPEC.md
-source_version: 1.0.1
-source_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
-contract_status: draft
+source_version: 1.0.2
+source_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
+contract_status: frozen
 legacy_reference: 
   - mdread GFM/TOC/highlight reader UI
 allowed_paths: 
+  - package.json
+  - package-lock.json
+  - docs/adr/ADR-002-document-model-v1.md
   - src/lib/document-model/**
   - src/features/reader/**
   - fixtures/markdown/**
@@ -162,3 +165,11 @@ buildDocumentModel(source: string): DocumentModel
 - `docs/metrics/node-outcomes.jsonl` 已追加結果。
 - 沒有未記錄的規格偏差或未處理 blocker。
 
+
+## Initial v1 contract decisions
+
+Before implementation, follow [ADR-002](../adr/ADR-002-document-model-v1.md). This is the initial schemaVersion=1 freeze, not a change to a shipped canonicalizer. Root owns shared App/native composition; this node provides a pure model and an isolated reader with injected link/asset callbacks. All original BDD/performance/security gates remain mandatory.
+
+## Current execution blocker
+
+Functional candidate and initial public API are implemented, but repeated unchanged 1MiB benchmarks fail the <300ms gate. Actual WebKitGTK confirms the failure; source-map overhead is not the bottleneck. See [candidate evidence](../verification/N03.md) and the independent T-010 review. The orchestrator marks this node blocked under execution protocol §8; N04 is not unlocked. Next work requires a separately bounded parser/pipeline performance design task with the same fixture and complete semantic equivalence, or an explicitly reviewed specification decision. Neither asynchronous UI responsiveness nor an easier fixture establishes this synchronous full-model gate.

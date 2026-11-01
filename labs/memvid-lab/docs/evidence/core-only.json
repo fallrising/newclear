@@ -1,0 +1,115 @@
+{
+  "status": "passed",
+  "scope": "core profile with only base lock installed",
+  "packages": [
+    [
+      "memvid-sdk",
+      "2.0.160"
+    ],
+    [
+      "typing_extensions",
+      "4.16.0"
+    ]
+  ],
+  "counts": {
+    "passed": 12,
+    "not_run": 3
+  },
+  "full_acceptance_passed": false,
+  "network_guard": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "source_hashes": {
+    "lab.py": "1fb777d22e302206f968cf8cf8206ee7c485c71f01aae38eac0b8f7cf8b918ff",
+    "offline.py": "dc325a1466950893319d8fd349538d62ce6e47f491bcf648e06ab86dc2183b9c",
+    "scenarios.py": "8feecb6a9dcd7b6f2503925e9d0845ec180aec356a2057cb2eab3d295b458f8a",
+    "models.py": "caebf62cdcbb9f046852ebb235bcb3f97bd5e9e24cceed1f3c36e7bd0ee2df77",
+    "advanced.py": "08feee3adf532a21dc32e340389d29fbcad03e58792a98967e8f731f586cad21",
+    "requirements.lock": "46982859187a17fdc10c405074e49b14b27fddcefb411ba597f9186b4091dbcd",
+    "requirements-models.lock": "c02e6ef0ac4b75d03b45217cdd6328a958d5d16479c5cedf909b5a75e01ee7a1",
+    "native-whisper/Cargo.toml": "4db30f37b72526ce5bc32e9de4723cd524e5fc3cd0f4858ed6fec8764aa831af",
+    "native-whisper/Cargo.lock": "0c6a779f79b1993dd2c97dae94e798bd726740a689802f18e8181b41cd256dd1",
+    "native-whisper/rust-toolchain.toml": "9cbde07377abdce69bc9580adb0315d52e2a09d6494a2005550a7e6733d9688b",
+    "native-whisper/src/main.rs": "991af72dcc408bab7f2d03b133ccf9d6081ca80201148b8e429afd2489fc8ed8",
+    "native-whisper/prepare_assets.py": "16c03029a9eb28c655e7e028379c9f2577a02eb4515ce39a0f03b60bafabf02e",
+    "native-whisper/prepare_core.py": "2f187048560db5a35acbd176194bb801ad2b3ffad834536e63c1b8439b405f7d",
+    "native-whisper/local-cache.patch": "00cd6fa9ed2a8f63fede1508b621d17ed811ac9b9a649d5df9e30715272d053b",
+    "native-whisper/test_token_guard.py": "9dbbff83b10b92e61aa5e2e07240ce198ff7f20ad94848891e17286fffbc5e33"
+  },
+  "cases": [
+    {
+      "id": "UC-01",
+      "status": "passed"
+    },
+    {
+      "id": "UC-02",
+      "status": "passed"
+    },
+    {
+      "id": "UC-03",
+      "status": "passed"
+    },
+    {
+      "id": "UC-04",
+      "status": "passed"
+    },
+    {
+      "id": "UC-05",
+      "status": "passed"
+    },
+    {
+      "id": "UC-06",
+      "status": "passed"
+    },
+    {
+      "id": "UC-07",
+      "status": "passed"
+    },
+    {
+      "id": "UC-08",
+      "status": "passed"
+    },
+    {
+      "id": "UC-09",
+      "status": "passed"
+    },
+    {
+      "id": "UC-10",
+      "status": "passed"
+    },
+    {
+      "id": "UC-11",
+      "status": "passed"
+    },
+    {
+      "id": "CAP-PDF",
+      "status": "passed"
+    },
+    {
+      "id": "CAP-SEMANTIC",
+      "status": "not_run"
+    },
+    {
+      "id": "CAP-CLIP",
+      "status": "not_run"
+    },
+    {
+      "id": "CAP-WHISPER",
+      "status": "not_run"
+    }
+  ]
+}

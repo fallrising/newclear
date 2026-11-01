@@ -1,0 +1,17 @@
+{
+  "specversion": "1.0",
+  "id": "inspection-example:run-20261014T100000Z:passed",
+  "source": "urn:example:inspection:job-example",
+  "type": "inspection.check.passed",
+  "time": "2026-10-14T10:00:00Z",
+  "subject": "job-example",
+  "severity": "info",
+  "summary": "Synthetic scheduled inspection passed",
+  "originurl": "https://inspection.example.invalid/runs/20261014T100000Z",
+  "data": {
+    "check": "example-health",
+    "environment": "example",
+    "duration_ms": 250,
+    "healthy": true
+  }
+}

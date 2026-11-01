@@ -11,7 +11,8 @@ def claim_recovery(worker, *, cancel_only=False, control_only=False):
         job = conn.execute(
             "SELECT j.* FROM jobs j JOIN runs r ON r.id=j.run_id WHERE "
             "j.status='interrupted' AND j.available_at<=clock_timestamp() "
-            "AND r.backend='openhands' AND r.cleanup_state!='confirmed' "
+            "AND r.backend IN ('openhands','claude-subscription','codex-subscription') "
+            "AND r.cleanup_state!='confirmed' "
             + ("AND r.state='cancelling' " if cancel_only else "")
             + (
                 "AND (r.state='cancelling' OR r.control_action IS NOT NULL) "
@@ -42,7 +43,7 @@ def claim_recovery(worker, *, cancel_only=False, control_only=False):
             "job_id": job["id"],
             "run_id": run["id"],
             "generation": generation,
-            "backend": "openhands",
+            "backend": run["backend"],
             "recovery": True,
         }
 

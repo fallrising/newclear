@@ -1,0 +1,2 @@
+$ node --experimental-strip-types scripts/openapi.ts --check
+OpenAPI checked: 207 operations, 398 schemas, all local references resolved.

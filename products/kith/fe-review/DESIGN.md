@@ -1,6 +1,7 @@
 # FE Review — kith — DESIGN
 
-> 活文件：描述第 2 輪要做的修改與驗收方式。狀態：**草稿**（待擁有者在設計 PR 確認假設）。每次修改都走 PR。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：沿用既有 worker/D1/seed harness 與 fake provider；不改 dev-bind 工具。 第 2／3 輪仍未由本次文件回寫執行。
+> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
 
 ## 目標
 
@@ -8,8 +9,8 @@
 
 ## 依據
 
-- REVIEW.md 已決定：無。
-- 假設（待擁有者在本 PR 確認）：
+- REVIEW.md 已決定：採用上述 owner 確認的方案。
+- 已確認的設計依據（2026-10-23）：
   - **A1（對應 D1 前端 mock 的位置）**：採用建議 (b)：不做前端 contract mock，沿用 `e2e/` harness 啟動真實 worker＋本機 D1＋固定 seed。(a) MSW 類 mock 延到第 3 輪報告顯示有需要時再提。
   - **A2（對應 D2 fake LLM provider）**：不新增任何後端 fake。原始碼已有兩個假實作（見 REVIEW.md C2）：以 harness 的外部 fake provider（`e2e/harness/fake-provider.ts`，四種 API 格式、只接受每次執行的 canary key）為主，經 console 建立指向它的 provider 連線；worker 內建的 `FAKE_LLM_TEXT` fake 只作備用。兩者都不需要後端變更，等同 D2 選項 (b)「在 harness 層處理」。
   - **A3（實作細節，隨 A1 成立）**：啟動器與流程腳本放在 `fe-review/`，以唯讀方式 import `e2e/harness`、`e2e/fixtures` 的模組；第 2 輪不修改 `e2e/`。

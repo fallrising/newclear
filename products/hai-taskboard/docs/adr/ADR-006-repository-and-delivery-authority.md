@@ -15,13 +15,17 @@ Place the component at `products/hai-taskboard`: it is a user-facing delivery co
 own web UI, service and durable data. Existing Fanzloud, Loom, Bee Swarm and Fleet code is not copied
 until a review records a compatible ownership/license/test boundary.
 
-`docs/tasks` holds immutable product task contracts and acceptance oracles. `.team/tasks` holds
-orchestrator-owned one-run worker envelopes; `.team/reports` holds evidence. Only `.team/PLAN.md`
-contains mutable bootstrap execution status. A worker cannot accept its own report. Once dogfooding
-is deliberately activated, execution-state authority migrates once to SQLite.
+`docs/tasks/HTB-P0A-*.md` holds immutable product task contracts and acceptance oracles.
+Current bootstrap execution status is recorded only in `docs/tasks/BOARD.md`. Root `.team/PLAN.md`
+records routing, review and acceptance rationale; root-scoped worker envelopes/reports support
+that routing. The archived product ledger remains immutable. A worker cannot accept its own report.
+A future migration of execution-status authority to SQLite requires an explicit decision.
+
+Amendment 2026-10-30: owner approved C01 in the [M0 decision record](../plans/m0-contract-decisions-20261029.md).
+Original G0 acceptance is retained; this does not claim dogfooding or an authority migration occurred.
 
 ## Consequences
 
-- A stopped session resumes from PLAN, accepted ADRs, traceability and HANDOFF rather than chat.
+- A stopped session resumes from BOARD, accepted ADRs, traceability and HANDOFF rather than chat.
 - Product contracts can be versioned without competing mutable status fields.
 - Shared abstractions are extracted only after demonstrated compatible use, not pre-emptively.

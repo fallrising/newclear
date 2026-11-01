@@ -1,0 +1,8 @@
+name: Valid GITHUB_ENV
+on: push
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "BUILD_DIR=${{ runner.temp }}/build" >> "$GITHUB_ENV"
+      - run: echo "$BUILD_DIR"

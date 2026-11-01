@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "relativeLinks": 44,
+  "jsonParsed": true,
+  "noPrivateHostPathsInPublishedJSONAndLogs": true,
+  "sourceHashesMatch": true,
+  "priorFailure": "README/PROMPT shared docs used one excess parent traversal; corrected to ../../../docs. Initial failed local checker observed via tool output, not claimed preserved original raw log."
+}

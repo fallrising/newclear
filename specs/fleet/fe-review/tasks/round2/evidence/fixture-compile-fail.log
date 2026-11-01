@@ -1,0 +1,5 @@
+# github.com/fallrising/newclear/specs/fleet/internal/api [github.com/fallrising/newclear/specs/fleet/internal/api.test]
+internal/api/server_test.go:434:4: e.registerNode undefined (type *testEnv has no field or method registerNode)
+FAIL	github.com/fallrising/newclear/specs/fleet/internal/api [build failed]
+ok  	github.com/fallrising/newclear/specs/fleet/internal/ui	0.029s
+FAIL

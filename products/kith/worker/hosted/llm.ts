@@ -1,4 +1,5 @@
 import { DEFAULT_MODEL_ID, HOSTED_TOOL_ALLOWLIST, type ChatMessage } from "./prompt.ts";
+import { readJsonObject } from "../providers/http.ts";
 
 /** Official xAI only. No Anthropic, thinrouter, or loopback. */
 export const XAI_BASE = "https://api.x.ai/v1";
@@ -6,6 +7,37 @@ export const XAI_MODELS_URL = `${XAI_BASE}/models`;
 export const XAI_CHAT_URL = `${XAI_BASE}/chat/completions`;
 
 export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+
+export const HOSTED_OUTPUT_DEFAULT = 1024;
+export const HOSTED_OUTPUT_MAX = 8192;
+export const HOSTED_REQUEST_TIMEOUT_MS = 60_000;
+export type LlmRequestOptions = { signal?: AbortSignal; timeoutMs?: number; maxOutputTokens?: number };
+
+async function boundedRequest<T>(options: LlmRequestOptions, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const controller = new AbortController();
+  const timeout = options.timeoutMs ?? HOSTED_REQUEST_TIMEOUT_MS;
+  if (!Number.isFinite(timeout) || timeout <= 0 || timeout > 300_000) throw new Error("invalid hosted timeout");
+  const abort = () => controller.abort();
+  options.signal?.addEventListener("abort", abort, { once: true });
+  if (options.signal?.aborted) controller.abort();
+  const timer = setTimeout(abort, timeout);
+  let rejectAbort: (() => void) | undefined;
+  try {
+    if (controller.signal.aborted) throw new DOMException("hosted request timed out", "TimeoutError");
+    const stopped = new Promise<never>((_resolve, reject) => {
+      rejectAbort = () => reject(new DOMException("hosted request timed out", "TimeoutError"));
+      controller.signal.addEventListener("abort", rejectAbort, { once: true });
+    });
+    return await Promise.race([run(controller.signal), stopped]);
+  } catch (err) {
+    if (controller.signal.aborted) throw new DOMException("hosted request timed out", "TimeoutError");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", abort);
+    if (rejectAbort) controller.signal.removeEventListener("abort", rejectAbort);
+  }
+}
 
 export type FakeLlm = {
   text: string;
@@ -75,20 +107,23 @@ export function parseFakeDirective(source: string): FakeDirective {
   return out;
 }
 
-export async function listModelIds(fetchImpl: FetchLike, apiKey: string): Promise<string[]> {
-  const res = await fetchImpl(XAI_MODELS_URL, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${apiKey}` },
+export async function listModelIds(fetchImpl: FetchLike, apiKey: string, options: LlmRequestOptions = {}): Promise<string[]> {
+  return boundedRequest(options, async (signal) => {
+    const res = await fetchImpl(XAI_MODELS_URL, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal,
+      redirect: "manual",
+    });
+    if (!res.ok) throw new Error(`GET /v1/models failed: ${res.status}`);
+    const json = await readJsonObject(res);
+    if (!json || !Array.isArray(json.data)) throw new Error("invalid hosted model list");
+    const ids: string[] = [];
+    for (const row of json.data as Array<{ id?: unknown }>) {
+      if (typeof row?.id === "string") ids.push(row.id);
+    }
+    return ids;
   });
-  if (!res.ok) {
-    throw new Error(`GET /v1/models failed: ${res.status}`);
-  }
-  const json = (await res.json()) as { data?: Array<{ id?: unknown }> };
-  const ids: string[] = [];
-  for (const row of json.data ?? []) {
-    if (typeof row?.id === "string") ids.push(row.id);
-  }
-  return ids;
 }
 
 /** Refuse start when the configured id is absent. Never silently switch to grok-4.6. */
@@ -101,26 +136,33 @@ export async function chatCompletion(
   apiKey: string,
   messages: ChatMessage[],
   modelId = DEFAULT_MODEL_ID,
+  options: LlmRequestOptions = {},
 ): Promise<string> {
-  const res = await fetchImpl(XAI_CHAT_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: modelId,
-      stream: false,
-      messages,
-      tools: [...HOSTED_TOOL_ALLOWLIST],
-    }),
+  const max = options.maxOutputTokens ?? HOSTED_OUTPUT_DEFAULT;
+  if (!Number.isInteger(max) || max < 1 || max > HOSTED_OUTPUT_MAX) throw new Error("invalid hosted output limit");
+  return boundedRequest(options, async (signal) => {
+    const res = await fetchImpl(XAI_CHAT_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: modelId,
+        stream: false,
+        max_tokens: max,
+        messages,
+        tools: [...HOSTED_TOOL_ALLOWLIST],
+      }),
+      signal,
+      redirect: "manual",
+    });
+    if (!res.ok) throw new Error(`POST /v1/chat/completions failed: ${res.status}`);
+    const json = (await readJsonObject(res)) as {
+      choices?: Array<{ message?: { content?: unknown } }>;
+    } | null;
+    if (!json) throw new Error("invalid hosted response");
+    const content = json.choices?.[0]?.message?.content;
+    return typeof content === "string" ? content : "";
   });
-  if (!res.ok) {
-    throw new Error(`POST /v1/chat/completions failed: ${res.status}`);
-  }
-  const json = (await res.json()) as {
-    choices?: Array<{ message?: { content?: unknown } }>;
-  };
-  const content = json.choices?.[0]?.message?.content;
-  return typeof content === "string" ? content : "";
 }

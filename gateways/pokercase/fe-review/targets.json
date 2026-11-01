@@ -1,27 +1,33 @@
 {
   "project": "pokercase",
-  "verified": false,
-  "verifiedNote": "由原始碼推斷，尚未實際啟動；第一次執行時驗證並修正後改為 true。",
+  "verified": true,
+  "verifiedNote": "Original Round2 M1\u2013M4 local scope only: report/result/source-qualified24 Web views,14journeys,12TUI; R31 ACCEPT/currentCI/normalmerge/readback passed via PR603. Not fullRound3 or standalone targets. Parent explicit visual/contrast-desktop modes generate private authenticated targets and actual edit IDs; original shared unlocated404 and13contrast-incomplete sets retained.",
   "locale": "zh-TW",
   "colorSchemes": [
-    "light",
     "dark"
   ],
   "apps": [
     {
-      "name": "admin",
+      "name": "login",
       "kind": "server",
       "cwd": "gateways/pokercase",
-      "install": "cargo build",
-      "start": "cargo run -- serve --host 127.0.0.1 --port 20128",
-      "env": {},
       "baseUrl": "http://127.0.0.1:20128",
       "ready": "/admin/login",
       "pages": [
         {
           "id": "login",
           "path": "/admin/login"
-        },
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "kind": "server",
+      "cwd": "gateways/pokercase",
+      "env": {},
+      "baseUrl": "http://127.0.0.1:20128",
+      "ready": "/admin",
+      "pages": [
         {
           "id": "dashboard",
           "path": "/admin"
@@ -48,12 +54,28 @@
       "name": "tui",
       "kind": "terminal",
       "cwd": "gateways/pokercase",
-      "start": "cargo run -- tui",
-      "capture": "tmux capture-pane -p -e",
+      "capture": "RUNNER.md: observed owned socket/pane ANSI+text at both sizes/datasets; use parent isolated runner, never default/global tmux.",
       "sizes": [
         "80x24",
         "120x40"
       ]
+    }
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "tablet",
+      "width": 834,
+      "height": 1112
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
     }
   ]
 }

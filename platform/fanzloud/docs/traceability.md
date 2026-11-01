@@ -73,3 +73,37 @@ evidence; separate [runtime acceptance](acceptance/T040A.acceptance.md) accepts 
 Managed storage, lease/clock guarantees and external execution remain absent. Later full tasks/specifications
 must resolve their owned gaps before Ready. Project-wide automatic rustdoc/spec drift tooling
 remains a gap; this milestone's explicit document/source review does not claim that automation.
+
+
+## T006R — approved R2 operator review
+
+Existing P0/P1 accepted rows remain unchanged. TD§15.0/§19 dependency extension for
+this review is accepted T006 + accepted T007 → [T006R](tasks/T006R.task.md), Accepted.
+Blocked T040 and its later seeds are not dependencies. Evidence per clause:
+[R2 report](../fe-review/tasks/round2/report.md); decision:
+[ACCEPT-T006R](acceptance/T006R.acceptance.md).
+
+| Requirement | CU / normative clauses | Machine evidence | Current state |
+|---|---|---|---|
+| Approved R2 M1 finite HTTPS/WSS fixture, ownership/TLS | CU-WEB-P0-01; [SPEC-T006R](specs/SPEC-T006R-fe-review.md) R01–R06/R09; consumed T005A/B/C | named fe-review oracles; C1 real loopback HTTPS/WSS; `conformance-001` browser TLS positive/negative and R06 no-resend | Accepted |
+| M2 measured presentation/keyboard/axe/contrast | CU-WEB-P0-01; R07/R10 | v7 canonical 27/27; `conformance-001` R07 keyboard, names, mobile scroll; `journeys-001` N01–N09 | Accepted, limits in report |
+| M3 no implicit actions/secrets/text-only diff | CU-WEB-P0-01; R05/R06/R08 | action/mutation counts, actual 15 s timeout, cleared fields, canary, inert diff | Accepted |
+| Evidence/native/published boundaries | R11/R12; original T006/T007 contracts | unchanged native gates and CI; `capture-002` unchanged `capture.mjs`; report | Accepted; no real backend/Cloud/mainline claim |
+
+No Rust public signature changed (one added Rust test); rustdoc projection was
+inspected. This row is not an infrastructure-only CU exemption.
+
+## T006F — favicon and focused browser follow-up (T-0440)
+
+[Specification](specs/SPEC-T006F-browser-followup.md), CU-WEB-P0-01. AC-F01 maps to `p0_web_favicon_has_exact_bytes_headers_and_method_boundary` (RED 404, then GREEN) and unchanged native security gates. AC-F02–F04 map to `followup-browser.mjs`, its pure verdict/HTTPS tests and the source-bound `followup-001` receipt. `followup-001` has passing browser/cleanup observations in the [report](../fe-review/tasks/followup/report.md); [ACCEPT-T006F](acceptance/T006F.acceptance.md) accepts AC-F01–F04. Original T006R captures and pins retain their historical meaning.
+
+## T008 actual browser P0 composition
+
+SUCCESS AC-01 is proved by actual Chromium against the production Rust binary and strict T007 fake executable. See [SPEC-T008](specs/SPEC-T008-p0-real-browser.md) and [runtime evidence](acceptance/T008.acceptance.md). No production authority or UI changed. AC-04 remains credential/environment gated; AC-05 remains outside this milestone.
+
+## Approved isolated M1 — T-0442 / T-0447
+
+EX01–03 and M1-WEB01–06 map to [SPEC-M1-isolated-web](specs/SPEC-M1-isolated-web.md),
+[external workspace contract](../../agent-platform/docs/EXTERNAL-WORKSPACE.md),
+[actual M1 acceptance](acceptance/M1-isolated.md) and PR885. FN01/FN06 and
+single/sequential FN03 are accepted; M2/M3 and full FN02–07 remain per SDD.

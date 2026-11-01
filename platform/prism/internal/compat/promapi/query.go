@@ -65,10 +65,11 @@ type QueryHandler struct {
 	tenantGate chan struct{}
 	ctx        context.Context
 	cancel     context.CancelFunc
-	mu         sync.Mutex // Protects stopped and active; held through admission registration.
+	mu         sync.Mutex // Protects stopped, active, and rules; held through admission registration.
 	stopped    bool
 	active     int
 	done       chan struct{}
+	rules      RulesSource
 }
 type queryResponseWriter struct {
 	http.ResponseWriter
@@ -208,6 +209,12 @@ func (h *QueryHandler) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	var data any
 	var warnings []string
 	switch kind {
+	case "rules":
+		h.serveRules(ctx, w, values)
+		return
+	case "alerts":
+		h.serveAlerts(ctx, w)
+		return
 	case "buildinfo":
 		if err = onlyParameters(values); err == nil {
 			data = map[string]string{"version": "2.53.0", "revision": "prism-dev", "branch": "", "buildUser": "prism", "buildDate": "", "goVersion": runtime.Version()}
@@ -263,6 +270,8 @@ func routeKind(path string) (string, []string) {
 	}
 	tail := strings.TrimPrefix(path, prefix)
 	switch tail {
+	case "rules", "alerts":
+		return tail, []string{"GET"}
 	case "query", "query_range", "series":
 		return tail, []string{"GET", "POST"}
 	case "labels", "metadata", "status/buildinfo":
@@ -474,6 +483,10 @@ func (h *QueryHandler) observeRequest(kind string, started time.Time, w http.Res
 		typ = "range"
 	case "series":
 		typ = "series"
+	case "rules":
+		typ = "rules"
+	case "alerts":
+		typ = "alerts"
 	}
 	status := "success"
 	if w.Header().Get("X-Prism-Error-Class") != "" {

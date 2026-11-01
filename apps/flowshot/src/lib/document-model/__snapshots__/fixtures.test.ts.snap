@@ -1,0 +1,389 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`four synthetic canonical regression fixtures > adapters: snapshot and 100-repeat determinism 1`] = `
+{
+  "canonicalHash": "3109e8f8a32afe622306ba877d8d4561c9b517bda4097d858cbeed1a18604383",
+  "canonicalText": "Links
+heading document external
+local caption remote caption
+graph LR
+  A --> B
+",
+  "html": "<h1 id="flowshot-heading-links"><span data-flowshot-segment="flowshot-segment-0.0.0" data-canonical-start="0" data-canonical-end="5">Links</span></h1><p><button type="button" role="link" data-flowshot-link-kind="heading" data-flowshot-target="#links"><span data-flowshot-segment="flowshot-segment-0.2.0.0" data-canonical-start="6" data-canonical-end="13">heading</span></button><span data-flowshot-segment="flowshot-segment-0.2.1" data-canonical-start="13" data-canonical-end="14"> </span><button type="button" role="link" data-flowshot-link-kind="document" data-flowshot-target="../notes.md#next"><span data-flowshot-segment="flowshot-segment-0.2.2.0" data-canonical-start="14" data-canonical-end="22">document</span></button><span data-flowshot-segment="flowshot-segment-0.2.3" data-canonical-start="22" data-canonical-end="23"> </span><button type="button" role="link" data-flowshot-link-kind="external" data-flowshot-target="https://example.test"><span data-flowshot-segment="flowshot-segment-0.2.4.0" data-canonical-start="23" data-canonical-end="31">external</span></button></p><p><span class="flowshot-image-caption" data-flowshot-asset="images/local.png"><span data-flowshot-segment="flowshot-segment-0.4.0.0" data-canonical-start="32" data-canonical-end="45">local caption</span></span><span data-flowshot-segment="flowshot-segment-0.4.1" data-canonical-start="45" data-canonical-end="46"> </span><span class="flowshot-image-caption"><span data-flowshot-segment="flowshot-segment-0.4.2.0" data-canonical-start="46" data-canonical-end="60">remote caption</span></span></p><pre><code class="hljs language-mermaid"><span data-flowshot-segment="flowshot-segment-0.6.0.0" data-canonical-start="61" data-canonical-end="80">graph LR
+  A --> B
+</span></code></pre>",
+  "schemaVersion": 1,
+  "segments": [
+    {
+      "canonicalEnd": 5,
+      "canonicalStart": 0,
+      "id": "flowshot-segment-0.0.0",
+      "kind": "prose",
+      "sourceEnd": 35,
+      "sourceEndLine": 4,
+      "sourceStart": 30,
+      "sourceStartLine": 4,
+    },
+    {
+      "canonicalEnd": 13,
+      "canonicalStart": 6,
+      "id": "flowshot-segment-0.2.0.0",
+      "kind": "prose",
+      "sourceEnd": 45,
+      "sourceEndLine": 6,
+      "sourceStart": 38,
+      "sourceStartLine": 6,
+    },
+    {
+      "canonicalEnd": 14,
+      "canonicalStart": 13,
+      "id": "flowshot-segment-0.2.1",
+      "kind": "prose",
+      "sourceEnd": 55,
+      "sourceEndLine": 6,
+      "sourceStart": 54,
+      "sourceStartLine": 6,
+    },
+    {
+      "canonicalEnd": 22,
+      "canonicalStart": 14,
+      "id": "flowshot-segment-0.2.2.0",
+      "kind": "prose",
+      "sourceEnd": 64,
+      "sourceEndLine": 6,
+      "sourceStart": 56,
+      "sourceStartLine": 6,
+    },
+    {
+      "canonicalEnd": 23,
+      "canonicalStart": 22,
+      "id": "flowshot-segment-0.2.3",
+      "kind": "prose",
+      "sourceEnd": 84,
+      "sourceEndLine": 6,
+      "sourceStart": 83,
+      "sourceStartLine": 6,
+    },
+    {
+      "canonicalEnd": 31,
+      "canonicalStart": 23,
+      "id": "flowshot-segment-0.2.4.0",
+      "kind": "prose",
+      "sourceEnd": 93,
+      "sourceEndLine": 6,
+      "sourceStart": 85,
+      "sourceStartLine": 6,
+    },
+    {
+      "canonicalEnd": 45,
+      "canonicalStart": 32,
+      "id": "flowshot-segment-0.4.0.0",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 46,
+      "canonicalStart": 45,
+      "id": "flowshot-segment-0.4.1",
+      "kind": "prose",
+      "sourceEnd": 153,
+      "sourceEndLine": 8,
+      "sourceStart": 152,
+      "sourceStartLine": 8,
+    },
+    {
+      "canonicalEnd": 60,
+      "canonicalStart": 46,
+      "id": "flowshot-segment-0.4.2.0",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 80,
+      "canonicalStart": 61,
+      "id": "flowshot-segment-0.6.0.0",
+      "kind": "code",
+    },
+  ],
+  "sourceHash": "803aa6dda2af8503fb73e8069ee0eaeaeba7fd1dde7024a4b6ce3b44a6364033",
+  "toc": [
+    {
+      "depth": 1,
+      "id": "flowshot-heading-links",
+      "text": "Links",
+    },
+  ],
+}
+`;
+
+exports[`four synthetic canonical regression fixtures > gfm: snapshot and 100-repeat determinism 1`] = `
+{
+  "canonicalHash": "c05cc8f7cb1a9c5fcf521d8c3b91ab3af7048734644650c5e8486e66aff571ae",
+  "canonicalText": "Repeated
+Repeated
+Name Value
+中文 bold
+done
+pending
+removed https://example.test",
+  "html": "<h1 id="flowshot-heading-repeated"><span data-flowshot-segment="flowshot-segment-0.0.0" data-canonical-start="0" data-canonical-end="8">Repeated</span></h1><h1 id="flowshot-heading-repeated-2"><span data-flowshot-segment="flowshot-segment-0.2.0" data-canonical-start="9" data-canonical-end="17">Repeated</span></h1><table><thead><tr><th><span data-flowshot-segment="flowshot-segment-0.4.0.0.0.0" data-canonical-start="18" data-canonical-end="22">Name</span></th><th><span data-flowshot-segment="flowshot-segment-0.4.0.0.1.0" data-canonical-start="23" data-canonical-end="28">Value</span></th></tr></thead><tbody><tr><td><span data-flowshot-segment="flowshot-segment-0.4.1.0.0.0" data-canonical-start="29" data-canonical-end="35">中文</span></td><td><strong><span data-flowshot-segment="flowshot-segment-0.4.1.0.1.0.0" data-canonical-start="36" data-canonical-end="40">bold</span></strong></td></tr></tbody></table><ul><li><input type="checkbox" checked disabled><span data-flowshot-segment="flowshot-segment-0.6.1.1" data-canonical-start="41" data-canonical-end="45">done</span></li><li><input type="checkbox" disabled><span data-flowshot-segment="flowshot-segment-0.6.3.1" data-canonical-start="46" data-canonical-end="53">pending</span></li></ul><p><del><span data-flowshot-segment="flowshot-segment-0.8.0.0" data-canonical-start="54" data-canonical-end="61">removed</span></del><span data-flowshot-segment="flowshot-segment-0.8.1" data-canonical-start="61" data-canonical-end="62"> </span><button type="button" role="link" data-flowshot-link-kind="external" data-flowshot-target="https://example.test"><span data-flowshot-segment="flowshot-segment-0.8.2.0" data-canonical-start="62" data-canonical-end="82">https://example.test</span></button></p>",
+  "schemaVersion": 1,
+  "segments": [
+    {
+      "canonicalEnd": 8,
+      "canonicalStart": 0,
+      "id": "flowshot-segment-0.0.0",
+      "kind": "prose",
+      "sourceEnd": 43,
+      "sourceEndLine": 4,
+      "sourceStart": 35,
+      "sourceStartLine": 4,
+    },
+    {
+      "canonicalEnd": 17,
+      "canonicalStart": 9,
+      "id": "flowshot-segment-0.2.0",
+      "kind": "prose",
+      "sourceEnd": 54,
+      "sourceEndLine": 5,
+      "sourceStart": 46,
+      "sourceStartLine": 5,
+    },
+    {
+      "canonicalEnd": 22,
+      "canonicalStart": 18,
+      "id": "flowshot-segment-0.4.0.0.0.0",
+      "kind": "prose",
+      "sourceEnd": 62,
+      "sourceEndLine": 7,
+      "sourceStart": 58,
+      "sourceStartLine": 7,
+    },
+    {
+      "canonicalEnd": 28,
+      "canonicalStart": 23,
+      "id": "flowshot-segment-0.4.0.0.1.0",
+      "kind": "prose",
+      "sourceEnd": 70,
+      "sourceEndLine": 7,
+      "sourceStart": 65,
+      "sourceStartLine": 7,
+    },
+    {
+      "canonicalEnd": 35,
+      "canonicalStart": 29,
+      "id": "flowshot-segment-0.4.1.0.0.0",
+      "kind": "prose",
+      "sourceEnd": 95,
+      "sourceEndLine": 9,
+      "sourceStart": 89,
+      "sourceStartLine": 9,
+    },
+    {
+      "canonicalEnd": 40,
+      "canonicalStart": 36,
+      "id": "flowshot-segment-0.4.1.0.1.0.0",
+      "kind": "prose",
+      "sourceEnd": 104,
+      "sourceEndLine": 9,
+      "sourceStart": 100,
+      "sourceStartLine": 9,
+    },
+    {
+      "canonicalEnd": 45,
+      "canonicalStart": 41,
+      "id": "flowshot-segment-0.6.1.1",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 53,
+      "canonicalStart": 46,
+      "id": "flowshot-segment-0.6.3.1",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 61,
+      "canonicalStart": 54,
+      "id": "flowshot-segment-0.8.0.0",
+      "kind": "prose",
+      "sourceEnd": 145,
+      "sourceEndLine": 14,
+      "sourceStart": 138,
+      "sourceStartLine": 14,
+    },
+    {
+      "canonicalEnd": 62,
+      "canonicalStart": 61,
+      "id": "flowshot-segment-0.8.1",
+      "kind": "prose",
+      "sourceEnd": 148,
+      "sourceEndLine": 14,
+      "sourceStart": 147,
+      "sourceStartLine": 14,
+    },
+    {
+      "canonicalEnd": 82,
+      "canonicalStart": 62,
+      "id": "flowshot-segment-0.8.2.0",
+      "kind": "prose",
+      "sourceEnd": 168,
+      "sourceEndLine": 14,
+      "sourceStart": 148,
+      "sourceStartLine": 14,
+    },
+  ],
+  "sourceHash": "bb8f56a688cf40b179362bdf7176ddfe621b2eab5f626fee0b8f4fef6691d366",
+  "toc": [
+    {
+      "depth": 1,
+      "id": "flowshot-heading-repeated",
+      "text": "Repeated",
+    },
+    {
+      "depth": 1,
+      "id": "flowshot-heading-repeated-2",
+      "text": "Repeated",
+    },
+  ],
+}
+`;
+
+exports[`four synthetic canonical regression fixtures > security: snapshot and 100-repeat determinism 1`] = `
+{
+  "canonicalHash": "13a1ee582c6f00176689c1ffd683145907773d8b9d7c8bdec3d5fd3a5c25a08b",
+  "canonicalText": "Safe
+blocked safe caption",
+  "html": "<h1 id="flowshot-heading-safe"><span data-flowshot-segment="flowshot-segment-0.0.0" data-canonical-start="0" data-canonical-end="4">Safe</span></h1><p><span><span data-flowshot-segment="flowshot-segment-0.5.0.0" data-canonical-start="5" data-canonical-end="12">blocked</span></span><span data-flowshot-segment="flowshot-segment-0.5.1" data-canonical-start="12" data-canonical-end="13"> </span><span class="flowshot-image-caption"><span data-flowshot-segment="flowshot-segment-0.5.2.0" data-canonical-start="13" data-canonical-end="25">safe caption</span></span></p>",
+  "schemaVersion": 1,
+  "segments": [
+    {
+      "canonicalEnd": 4,
+      "canonicalStart": 0,
+      "id": "flowshot-segment-0.0.0",
+      "kind": "prose",
+      "sourceEnd": 6,
+      "sourceEndLine": 1,
+      "sourceStart": 2,
+      "sourceStartLine": 1,
+    },
+    {
+      "canonicalEnd": 12,
+      "canonicalStart": 5,
+      "id": "flowshot-segment-0.5.0.0",
+      "kind": "prose",
+      "sourceEnd": 155,
+      "sourceEndLine": 7,
+      "sourceStart": 148,
+      "sourceStartLine": 7,
+    },
+    {
+      "canonicalEnd": 13,
+      "canonicalStart": 12,
+      "id": "flowshot-segment-0.5.1",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 25,
+      "canonicalStart": 13,
+      "id": "flowshot-segment-0.5.2.0",
+      "kind": "prose",
+    },
+  ],
+  "sourceHash": "c06acff12f8f963d8d6c900deba4de374405a743894880bdcb2c2a5959df22fe",
+  "toc": [
+    {
+      "depth": 1,
+      "id": "flowshot-heading-safe",
+      "text": "Safe",
+    },
+  ],
+}
+`;
+
+exports[`four synthetic canonical regression fixtures > unicode: snapshot and 100-repeat determinism 1`] = `
+{
+  "canonicalHash": "7299cb20c2fa3cb1aaa7675b2a5bc9fdb49d534ae3ae9d2b8fa3e548a9006289",
+  "canonicalText": "中文 😀
+é text soft
+hard
+  value = "中文"
+  print(value)
+ x   y ",
+  "html": "<h1 id="flowshot-heading-中文"><span data-flowshot-segment="flowshot-segment-0.0.0" data-canonical-start="0" data-canonical-end="11">中文 😀</span></h1><p><span data-flowshot-segment="flowshot-segment-0.2.0" data-canonical-start="12" data-canonical-end="14">é</span><em></em><span data-flowshot-segment="flowshot-segment-0.2.2" data-canonical-start="14" data-canonical-end="24"> text soft</span><br><span data-flowshot-segment="flowshot-segment-0.2.4" data-canonical-start="25" data-canonical-end="29">hard</span></p><pre><code class="hljs language-python"><span data-flowshot-segment="flowshot-segment-0.4.0.0" data-canonical-start="30" data-canonical-end="40">  value = </span><span class="hljs-string"><span data-flowshot-segment="flowshot-segment-0.4.0.1.0" data-canonical-start="40" data-canonical-end="48">"中文"</span></span><span data-flowshot-segment="flowshot-segment-0.4.0.2" data-canonical-start="48" data-canonical-end="51">
+  </span><span class="hljs-built_in"><span data-flowshot-segment="flowshot-segment-0.4.0.3.0" data-canonical-start="51" data-canonical-end="56">print</span></span><span data-flowshot-segment="flowshot-segment-0.4.0.4" data-canonical-start="56" data-canonical-end="64">(value)
+</span></code></pre><p><code><span data-flowshot-segment="flowshot-segment-0.6.0.0" data-canonical-start="64" data-canonical-end="71"> x   y </span></code></p>",
+  "schemaVersion": 1,
+  "segments": [
+    {
+      "canonicalEnd": 11,
+      "canonicalStart": 0,
+      "id": "flowshot-segment-0.0.0",
+      "kind": "prose",
+      "sourceEnd": 13,
+      "sourceEndLine": 1,
+      "sourceStart": 2,
+      "sourceStartLine": 1,
+    },
+    {
+      "canonicalEnd": 14,
+      "canonicalStart": 12,
+      "id": "flowshot-segment-0.2.0",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 24,
+      "canonicalStart": 14,
+      "id": "flowshot-segment-0.2.2",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 29,
+      "canonicalStart": 25,
+      "id": "flowshot-segment-0.2.4",
+      "kind": "prose",
+    },
+    {
+      "canonicalEnd": 40,
+      "canonicalStart": 30,
+      "id": "flowshot-segment-0.4.0.0",
+      "kind": "code",
+    },
+    {
+      "canonicalEnd": 48,
+      "canonicalStart": 40,
+      "id": "flowshot-segment-0.4.0.1.0",
+      "kind": "code",
+    },
+    {
+      "canonicalEnd": 51,
+      "canonicalStart": 48,
+      "id": "flowshot-segment-0.4.0.2",
+      "kind": "code",
+    },
+    {
+      "canonicalEnd": 56,
+      "canonicalStart": 51,
+      "id": "flowshot-segment-0.4.0.3.0",
+      "kind": "code",
+    },
+    {
+      "canonicalEnd": 64,
+      "canonicalStart": 56,
+      "id": "flowshot-segment-0.4.0.4",
+      "kind": "code",
+    },
+    {
+      "canonicalEnd": 71,
+      "canonicalStart": 64,
+      "id": "flowshot-segment-0.6.0.0",
+      "kind": "code",
+    },
+  ],
+  "sourceHash": "d519927a8fe21b8afcdf248ea9f17cac349f74d9ef108ef78fd9fb4f08f82685",
+  "toc": [
+    {
+      "depth": 1,
+      "id": "flowshot-heading-中文",
+      "text": "中文 😀",
+    },
+  ],
+}
+`;

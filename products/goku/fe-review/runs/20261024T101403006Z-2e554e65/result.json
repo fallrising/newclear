@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "runId": "20261024T101403006Z-2e554e65",
+  "status": "failed",
+  "versions": {
+    "node": "v24.18.0",
+    "browser": "153.0.8010.12"
+  },
+  "steps": [
+    {
+      "name": "loaded-home",
+      "width": 1440,
+      "title": "Synthetic Alpha",
+      "status": 200,
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "name": "loaded-home",
+      "width": 834,
+      "title": "Synthetic Alpha",
+      "status": 200,
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "name": "loaded-home",
+      "width": 390,
+      "title": "Synthetic Alpha",
+      "status": 200,
+      "url": "http://127.0.0.1:5173/"
+    }
+  ],
+  "screenshots": [],
+  "axe": [
+    {
+      "width": 1440,
+      "violations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "width": 834,
+      "violations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "width": 390,
+      "violations": [
+        {
+          "id": "heading-order",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": []
+    }
+  ],
+  "health": [],
+  "cleanup": [
+    {
+      "name": "vite",
+      "code": 0,
+      "signal": null,
+      "listenerAbsent": true
+    },
+    {
+      "name": "mock-initial",
+      "code": null,
+      "signal": "SIGTERM",
+      "listenerAbsent": true
+    }
+  ],
+  "sourceHashes": {
+    "web/src/store/bookmarkStore.ts": "b473b497e1af243ba21887f60485737748da728a054c6de28a8f56b81a3ca1c7",
+    "web/src/components/BookmarkCard.tsx": "874333d14c2a57d0905fa413c2af4cb6a02265a6b2cc18db061011d6cbb21222",
+    "web/src/components/BookmarkGrid.tsx": "9255c012680b99a9eb8ce75cc8d6182d887757c69d36c4868a7dd40d36947d4c",
+    "web/src/components/Sidebar.tsx": "a2315ccbc6a4b55e2b26035de288c7f4766c115a461a1251408a722030c36b4d",
+    "fe-review/serve-web.mjs": "08897b5426d09d6e5b22a81f2c675792a3f549d9d99e7fbef535bd4e2189beba",
+    "fe-review/verify-browser.mjs": "ca53dc8124f3cd686e2a2dff8313b0a4375294885fb9a5ea3a67589e0cb70187",
+    "fe-review/isolation.mjs": "7faead6617ea375b2ead844b932ec780415059635c26768caf5e7d9e5487d476",
+    "fe-review/targets.json": "c94022ce0b7211c72e9867ba536576bbf400bcba0891a789680136dd1daede27"
+  },
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'GET http://127.0.0.1:3001/review.svg net::ERR_BLOCKED_BY_ORB'\n+ ]\n- []\n"
+}

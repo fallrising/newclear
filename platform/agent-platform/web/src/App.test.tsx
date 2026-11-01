@@ -214,7 +214,10 @@ beforeEach(() => {
           expect(options.credentials).toBe('same-origin');
           return archiveDownloadStatus === 200
             ? new Response('{"schema":"result-archive-v1"}')
-            : Response.json({ error: 'artifact_invalid' }, { status: archiveDownloadStatus });
+            : Response.json(
+                { error: archiveDownloadStatus === 410 ? 'artifact_expired' : 'artifact_invalid' },
+                { status: archiveDownloadStatus },
+              );
         }
         return archiveStatus === 200
           ? Response.json({
@@ -1006,4 +1009,17 @@ it('refreshes archive availability after an expired download without creating a 
   expect(await screen.findByText('此封存已依保留期限清理；摘要與原始 diff 仍保留。')).toBeVisible();
   expect(screen.queryByRole('button', { name: '下載封存結果' })).toBeNull();
   expect(create).not.toHaveBeenCalled();
+});
+
+it('renders the existing pausing Chinese label in task badge and run selector', async () => {
+  runState = 'pausing';
+  const user = userEvent.setup();
+  mount();
+  await login(user);
+  await fillTask(user);
+  await screen.findByRole('heading', { name: 'Verify login' });
+  expect(document.querySelector('.state-pausing')).toHaveTextContent('正在暫停');
+  expect(
+    within(screen.getByLabelText('執行紀錄')).getByRole('option', { name: /正在暫停/ }),
+  ).toBeInTheDocument();
 });

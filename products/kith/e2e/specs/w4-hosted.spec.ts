@@ -226,7 +226,15 @@ test(
       await expect(page.locator(`[data-testid="agent-row"][data-handle="${handle}"]`)).toHaveAttribute("data-status", "unconfigured");
 
       await page.goto("/console/providers/" + pid);
+      const enabledResponse = page.waitForResponse(
+        (response) => new URL(response.url()).pathname === "/api/providers/" + pid && response.request().method() === "PATCH",
+        { timeout: 10_000 },
+      );
       await page.getByTestId("provider-toggle-disabled").click();
+      const enabled = await enabledResponse;
+      expect(enabled.status()).toBe(200);
+      expect((await enabled.json() as { provider: { disabled_at: string | null } }).provider.disabled_at).toBeNull();
+      await expect(page.getByTestId("provider-toggle-disabled")).toHaveText("停用");
       await sendViaComposer(ben.page, "@" + handle + " three");
       await expect(ben.page.getByTestId("message-row").filter({ hasText: "hello from fake-chat" })).toHaveCount(2, { timeout: 30_000 });
 

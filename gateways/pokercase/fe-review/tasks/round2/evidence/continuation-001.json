@@ -1,0 +1,2109 @@
+{
+  "id": "continuation-001",
+  "mode": "continuation",
+  "status": "failed",
+  "startedAt": "2026-10-24T13:22:47.255Z",
+  "endedAt": "2026-10-24T13:22:55.468Z",
+  "sourceHashes": {
+    "fe-review/browser-baseline.mjs": "8b430716f167c499e26959276bf920bd3e07f6d63b2991e8277f8318a8f684af",
+    "fe-review/contrast-review.mjs": "3637196852699106344be00568d90c34ab8df10ef3f68177a5ba0dbe8aa8ee13",
+    "fe-review/desktop-health.mjs": "2ed04aaecb1747719547665e0b3d13b8fd5fb1f97a1fea2ef7f86a999315885b",
+    "fe-review/desktop-health.test.mjs": "3fbfc3c166dc326e51b05b770f710d5e98e0eabcba6d38fdf3f6b06dbdd94ba3",
+    "fe-review/fixture.mjs": "1093d6c6dc127a7730bd8cb512cdbb693e040a4669be3a6d9b84e7bcbec9980a",
+    "fe-review/fixture.test.mjs": "f47fa47fd5aee5d7a7c231b243cc26e3bc70922b972babbec376b3da169ca836",
+    "fe-review/guards.mjs": "f5ad2bae0b5379937dbce7a6de8fd3bf743848f9d81599677649566a6e3ca560",
+    "fe-review/guards.test.mjs": "55818d9ef16c9e7f45f9575d80fcba0b7fb03496b2b03d755dfb26e83bc05ee0",
+    "fe-review/journeys.mjs": "3bab74e64e4fce77b345322365d21c05c7630d2680ff6de42cbd509b9df9aa90",
+    "fe-review/journeys.test.mjs": "88b9338b46e043a5014b0d2741fe91ea78389c746535885273a1d2d6f4ba80ec",
+    "fe-review/mock-upstream.mjs": "7ee372736faa597ae9a3c1cfa61f5dd95d6d50c044b5e0d9e4f38aa8e8fe7755",
+    "fe-review/presentation.test.mjs": "a1a890c847c0a21c01fc1a920019202c292a42c75910f3b85a792139aebf9148",
+    "fe-review/reuse-web.mjs": "d6583ae0ebfe859c0c26273a8cfe8b8c006fc654a52bd61bf392df5b4b7331a3",
+    "fe-review/run-review.mjs": "29b0e80912288c1d31640c93e2a0601da82dab07e13f23957f1280dc76e1380a",
+    "fe-review/shared-capture.mjs": "a190f3e46d02a26fdec4828fd18e6746e9db6b9c3412a5f8ed0da705aa60e454",
+    "fe-review/tui-capture.mjs": "070722cc073533724e9169c0d213ab42976373cca8a67137ce0935ec68ea3003",
+    "fe-review/tui-capture.test.mjs": "e7a9f40fdf042e88bcb47d9acfef4ce922f035d219a84d26b34dbb20ea791c7d",
+    "templates/connections.html": "79d14efa6f6becf5aeabed29f3e898453134944dbb1dc3d30f840ec410e6e469",
+    "templates/dashboard.html": "877969cdcce6b84b9da1b2215add1e747387eeb32a4a912b5d523c02db9adecc",
+    "templates/keys.html": "64825d33903b6f1dd7057f4dc5b5043fc13b348efa6ffdbb881b965651b014a0",
+    "templates/layout.html": "9374edc297a60c34346305e64f5ad1733700ab34c2ce11cd77f89d286e4b2d0c",
+    "templates/login.html": "c5647f7decffe7cb588343fda364a32512130eaafd7b10a7f39569079b731540",
+    "templates/routes.html": "21fb408bfcc3ec8e37d414f08370f3252ce83460f0d487816f2b2ada56eeea84",
+    "templates/style.css": "31830116d37bd69c979e5786d020d15f98e9afecffd8b0874dc2d9dd09ced87d",
+    "templates/usage.html": "99a0c30ee0e7b59c794f1eda693200235f87f613c682b921b0c6006e28da1a4d",
+    "src/tui_app.rs": "4cb205889cfbfcc6f557f1c4a9e5331062addfae6fa375ba6cc2794346f9f406"
+  },
+  "binarySHA256": "0309ce72287dfbca23f5a650bc9b893403e4b1b2e171c7705d9c83dceca43a90",
+  "chromium": "153.0.8010.12",
+  "listeners": {
+    "gatewayLoopback": true,
+    "mockLoopback": true
+  },
+  "defaultDeny": {
+    "adminAPI": 401,
+    "inferenceModels": 401,
+    "upstreamRequests": 0,
+    "bootstrap": false
+  },
+  "adminSession": {
+    "httpOnly": true,
+    "sameSite": "Strict",
+    "secure": false,
+    "loopbackHTTP": true
+  },
+  "mock": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0,
+    "kind": "local OpenAI-compatible synthetic API-key upstream; configured SIWC override unused; no provider integration claim"
+  },
+  "mockFinalCounters": {
+    "requests": 2,
+    "success": 1,
+    "errors": 1,
+    "rejected": 0
+  },
+  "failure": {
+    "stage": "journey-invalid-login",
+    "code": "REVIEW_LOGIN_ERROR",
+    "site": "journeys.mjs:47:5"
+  },
+  "cleanup": [
+    {
+      "name": "settle",
+      "passed": true
+    },
+    {
+      "name": "auth-context",
+      "passed": true
+    },
+    {
+      "name": "browser",
+      "passed": true
+    },
+    {
+      "name": "capture-processes",
+      "passed": true
+    },
+    {
+      "name": "tui",
+      "passed": true
+    },
+    {
+      "name": "gateway",
+      "passed": true
+    },
+    {
+      "name": "mock",
+      "passed": true
+    },
+    {
+      "name": "listeners",
+      "passed": true
+    },
+    {
+      "name": "log",
+      "passed": true
+    }
+  ],
+  "serviceExit": {
+    "code": 0,
+    "signal": null,
+    "forcedKill": false,
+    "groupAbsent": true
+  },
+  "receivedSignal": null,
+  "terminal": {
+    "TERM": "xterm-256color",
+    "locale": "C.UTF-8",
+    "tmux": "tmux 3.4",
+    "captures": [
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-80x24-connections.txt",
+          "sha256": "9a1bf59b1698613c7caa8dd1f40d6da38c78d9ee03638e440b4b683c2e6e78fb"
+        },
+        "ansi": {
+          "file": "tui-empty-80x24-connections.ansi",
+          "sha256": "000ee421b2bf34afbd0a18172f343aa0ed6b41c6a6b3ab43dba35ff0882fb4f3"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-80x24-routes.txt",
+          "sha256": "ecfcabda00d8ac663bff0253e75b760224a121cc16780b4af5568899d9e79765"
+        },
+        "ansi": {
+          "file": "tui-empty-80x24-routes.ansi",
+          "sha256": "3d39df20f113d53ea3489c6e6fb41250a13830aed6726d11cac9256a721e5790"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-80x24-usage.txt",
+          "sha256": "16a80614d31d406e92ad03a05d8390e71c7790a4ae75d7657e830cf84ee2c1ae"
+        },
+        "ansi": {
+          "file": "tui-empty-80x24-usage.ansi",
+          "sha256": "f2540563360202c973386c358f0e24e09172bdd031f31bc81efff25a9b2cc1ed"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-120x40-connections.txt",
+          "sha256": "e1e4e8cd004c43c75b41b3edc51d80389e1bce4e45b6ee657fa7cf1ca114b910"
+        },
+        "ansi": {
+          "file": "tui-empty-120x40-connections.ansi",
+          "sha256": "19b19d43197c30b8c4301b834d111b0728c2d6664bee2bcbc7e29b8d8413abf4"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-120x40-routes.txt",
+          "sha256": "a7dd8257fc26c452f894ad7d3af38aa5e33ea81e177301cfeca34805f3ff1171"
+        },
+        "ansi": {
+          "file": "tui-empty-120x40-routes.ansi",
+          "sha256": "1b3f960c1523ae5afd9a675b35f96264504c0505e789f9861e8177cc74f4119a"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-empty-120x40-usage.txt",
+          "sha256": "a1db0cf90bdf89d6f60ff390c53f89bad44b35c1afd5c72521ede6bb1dedc887"
+        },
+        "ansi": {
+          "file": "tui-empty-120x40-usage.ansi",
+          "sha256": "fc09db69136abeabb9751a52125d751430e87249f3690d1e4aa61803c7cad252"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-80x24-connections.txt",
+          "sha256": "f8ffb063692c9bc0f7a6df7ab7a3677f4be8894c91faf67c404b1c9d1cd4fbdf"
+        },
+        "ansi": {
+          "file": "tui-populated-80x24-connections.ansi",
+          "sha256": "1da7e1494ad7e8d1e4eb22ed640c741677ce262acebb9c86735da298d51e6500"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-80x24-routes.txt",
+          "sha256": "93f267be1b1100a19d4143f7281cc26626b15f99c2010073f548fd653d507f1a"
+        },
+        "ansi": {
+          "file": "tui-populated-80x24-routes.ansi",
+          "sha256": "8fed0f15e83ef259f5fcbdbec26bfd569d5f49410798f0b6ea7f48d7f73e9df0"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-80x24-usage.txt",
+          "sha256": "540c09cc819ff6ea0fa6670e45c1fd7b8fda527fcb430b72fca3db4f3b6e4f84"
+        },
+        "ansi": {
+          "file": "tui-populated-80x24-usage.ansi",
+          "sha256": "1af470509fbbd66b91606bcfad4f8fcb83791cb2721debc6e01d00322906c8ac"
+        },
+        "visibleRows": 24
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "page": "Connections",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-120x40-connections.txt",
+          "sha256": "79090863317952105c4b1fa5ab9b1036ef477561bb22a5a8c6829a9dbc6e6194"
+        },
+        "ansi": {
+          "file": "tui-populated-120x40-connections.ansi",
+          "sha256": "7b1f8d1152401ed6de7a10976fa6f2aa6f1017b4efa29041b1e868f4e4696e54"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "page": "Routes",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-120x40-routes.txt",
+          "sha256": "a6b62e2b6e7b6f34e046ef4b2e8f4568b69bc8a40a10f0a84aeb0c1b04991929"
+        },
+        "ansi": {
+          "file": "tui-populated-120x40-routes.ansi",
+          "sha256": "5f093a4015ac948230fc26df0fd0fbb2aad72bea5ff0643e480ccb96a29c6c96"
+        },
+        "visibleRows": 40
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "page": "Recent usage",
+        "alternateScreen": true,
+        "exitHintVisible": true,
+        "plain": {
+          "file": "tui-populated-120x40-usage.txt",
+          "sha256": "962604a9442b0446d22d486b914d4dce125a75b30f74e85209071164d21eadd0"
+        },
+        "ansi": {
+          "file": "tui-populated-120x40-usage.ansi",
+          "sha256": "508148c6f01fc32c2512842a46dd0a8ce98863fa0eace4803792d6585abb1329"
+        },
+        "visibleRows": 40
+      }
+    ],
+    "exits": [
+      {
+        "dataset": "empty",
+        "size": "80x24",
+        "key": "q",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      },
+      {
+        "dataset": "empty",
+        "size": "120x40",
+        "key": "Esc",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      },
+      {
+        "dataset": "populated",
+        "size": "80x24",
+        "key": "q",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      },
+      {
+        "dataset": "populated",
+        "size": "120x40",
+        "key": "Esc",
+        "code": 0,
+        "sttyRestored": true,
+        "alternateScreenRestored": true
+      }
+    ]
+  },
+  "tuiCleanup": [
+    {
+      "dataset": "empty",
+      "size": "80x24",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    },
+    {
+      "dataset": "empty",
+      "size": "120x40",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    },
+    {
+      "dataset": "populated",
+      "size": "80x24",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    },
+    {
+      "dataset": "populated",
+      "size": "120x40",
+      "serverAbsent": true,
+      "paneGroupAbsent": true
+    }
+  ],
+  "desktopHealth": {
+    "conditions": "fresh context; no route interception, matching original shared capture",
+    "requests": [
+      {
+        "id": "request-1",
+        "path": "/admin/login",
+        "exactURL": false,
+        "method": "GET",
+        "initiator": "other",
+        "status": 200,
+        "headers": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false,
+          "adminToken": false,
+          "csrf": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false,
+          "adminToken": false,
+          "csrf": false
+        },
+        "failed": false,
+        "responsePath": "/admin/login"
+      },
+      {
+        "id": "request-2",
+        "path": "/admin/static/style.css",
+        "exactURL": false,
+        "method": "GET",
+        "initiator": "parser",
+        "status": 200,
+        "headers": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false,
+          "adminToken": false,
+          "csrf": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false,
+          "adminToken": false,
+          "csrf": false
+        },
+        "failed": false,
+        "responsePath": "/admin/static/style.css"
+      },
+      {
+        "id": "request-3",
+        "path": "/favicon.ico",
+        "exactURL": true,
+        "method": "GET",
+        "initiator": "other",
+        "status": 404,
+        "headers": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false,
+          "adminToken": false,
+          "csrf": false
+        },
+        "extraHeadersSeen": true,
+        "extraHeaders": {
+          "apiKey": false,
+          "cookie": false,
+          "authorization": false,
+          "adminToken": false,
+          "csrf": false
+        },
+        "failed": false,
+        "responsePath": "/favicon.ico"
+      }
+    ],
+    "console": [
+      {
+        "type": "error",
+        "path": "/favicon.ico",
+        "code": "HTTP_404"
+      }
+    ],
+    "networkLog": [
+      {
+        "source": "network",
+        "level": "error",
+        "path": "/favicon.ico",
+        "code": "HTTP_404",
+        "request": "request-3"
+      }
+    ],
+    "pageErrors": 0,
+    "finalPath": "/admin/login",
+    "anonymous": true,
+    "classification": {
+      "favicon404": 1,
+      "consoleEvents": 1,
+      "networkLogEvents": 1,
+      "unknownRequests": 0,
+      "unknownConsole": 0,
+      "unknownNetworkLogs": 0,
+      "pageErrors": 0,
+      "classification": "existing-browser-favicon-404",
+      "passed": true
+    }
+  },
+  "contrastReview": [
+    {
+      "page": "usage",
+      "viewport": "tablet",
+      "observations": [
+        {
+          "selector": "tr:nth-child(1) > .error-cell",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 50,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        }
+      ],
+      "scope": "Computed opaque text/background pairs only; original axe incomplete retained. No claim that this calculation alone replaces visual review of clipped or overlaid content."
+    },
+    {
+      "page": "connections",
+      "viewport": "mobile",
+      "observations": [
+        {
+          "selector": "th:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 7,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "th:nth-child(8)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 7,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 2,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        }
+      ],
+      "scope": "Computed opaque text/background pairs only; original axe incomplete retained. No claim that this calculation alone replaces visual review of clipped or overlaid content."
+    },
+    {
+      "page": "usage",
+      "viewport": "mobile",
+      "observations": [
+        {
+          "selector": "div[aria-label=\"Usage by day table\"] > table > thead > tr > th:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 11,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "div[aria-label=\"Usage by day table\"] > table > tbody > tr > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "div[aria-label=\"Recent usage table\"] > table > thead > tr > th:nth-child(6)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 6,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "div[aria-label=\"Recent usage table\"] > table > thead > tr > th:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 4,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "th:nth-child(8)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 5,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > .error-cell",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 50,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > .mono:nth-child(6)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.248,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        }
+      ],
+      "scope": "Computed opaque text/background pairs only; original axe incomplete retained. No claim that this calculation alone replaces visual review of clipped or overlaid content."
+    },
+    {
+      "page": "connection-edit",
+      "viewport": "mobile",
+      "observations": [
+        {
+          "selector": "th:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 7,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "th:nth-child(8)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(139, 155, 176)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 12.8,
+              "fontWeight": "600",
+              "textLength": 7,
+              "ratio": 5.5722251664646505,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(1) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 2,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(2) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(3) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(4) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(5) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(6) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(7) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(8) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(9) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > td:nth-child(7)",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(231, 236, 243)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 14.72,
+              "fontWeight": "400",
+              "textLength": 3,
+              "ratio": 13.296957433590581,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > .actions > .secondary[type=\"button\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > .actions > .btn-link",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(91, 159, 212)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 4,
+              "ratio": 5.528274312815034,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        },
+        {
+          "selector": "tr:nth-child(10) > .actions > form[method=\"post\"] > .danger[type=\"submit\"]",
+          "count": 1,
+          "nodes": [
+            {
+              "foreground": "rgb(224, 108, 117)",
+              "background": "rgb(26, 35, 50)",
+              "backgroundImage": false,
+              "fontSize": 13.6,
+              "fontWeight": "400",
+              "textLength": 6,
+              "ratio": 4.939408500921019,
+              "threshold": 4.5,
+              "computedPairPass": true
+            }
+          ]
+        }
+      ],
+      "scope": "Computed opaque text/background pairs only; original axe incomplete retained. No claim that this calculation alone replaces visual review of clipped or overlaid content."
+    }
+  ],
+  "journey": {
+    "steps": [],
+    "health": {
+      "blocked": 0,
+      "pageErrors": 0,
+      "http": [],
+      "failed": [
+        {
+          "step": "invalid-login",
+          "path": "/admin/login",
+          "method": "GET",
+          "code": "ERR_ABORTED"
+        }
+      ],
+      "console": []
+    }
+  },
+  "fixtureSummary": {
+    "keyCount": 1,
+    "keyListPrefixOnly": true,
+    "usageStatuses": [
+      200,
+      500
+    ],
+    "syntheticOnly": true,
+    "seedVia": "real session cookie + CSRF admin API",
+    "providerCLI": false,
+    "connectionCount": 10,
+    "routeCount": 10
+  }
+}

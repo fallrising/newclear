@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {"name": "release", "source_prefix": "urn:example:release:", "allowed_types": ["release.deploy.*"], "token_ref": "file:/srv/example/secrets/release", "retention_days": 90},
+    {"name": "inspection", "source_prefix": "urn:example:inspection:", "allowed_types": ["inspection.check.*"], "token_ref": "file:/srv/example/secrets/inspection", "expected_interval": "1h", "retention_days": 90},
+    {"name": "alertmanager", "source_prefix": "urn:signalhub:alertmanager:example:", "allowed_types": ["alertmanager.alert.*"], "token_ref": "file:/srv/example/secrets/alertmanager", "retention_days": 90}
+  ],
+  "rules": [],
+  "subscriptions": [],
+  "webhook_allowlist": []
+}

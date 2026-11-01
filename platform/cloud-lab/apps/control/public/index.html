@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Cloud Lab · 節點檢查</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/dashboard.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳至主要內容</a>
+  <header class="site-header">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">CL</span><div>Cloud Lab<span class="brand-subtitle">節點觀測控制台</span></div></div>
+    <div class="session"><span class="session-dot" aria-hidden="true"></span> Access 同源工作階段 <span class="stage">M1 開發版</span></div>
+  </header>
+  <main id="main">
+    <div class="page-heading"><div><p class="eyebrow">工作區 <span id="workspace">等待連線</span></p><h1>節點檢查</h1><p class="intro">以固定、唯讀的 collector 取得證據，追蹤每一筆命令。</p></div><button id="refresh" type="button" class="button secondary-button">重新整理</button></div>
+    <div class="connection-row"><p id="connection" role="status">正在連線至控制面…</p><p id="clock">伺服器時間尚未確認</p></div>
+    <div id="message" class="message" role="status" hidden></div>
+    <noscript><p class="message error">此控制台需要 JavaScript 才能連線至 API。沒有載入任何節點資料。</p></noscript>
+    <section class="node-panel" aria-labelledby="node-heading">
+      <div class="node-info"><p class="eyebrow">目前節點</p><h2 id="node-heading"><span class="node-symbol" aria-hidden="true">▤</span> <span id="node-id">等待資源設定</span></h2><span id="health" class="badge muted">尚未觀測</span><p id="observed" class="secondary">等待具時間戳記的執行器證據</p><p id="recipe" class="recipe">等待 Recipe 設定</p></div>
+      <div class="submit-panel"><h3>檢查 collector</h3><p>只觀測非 root Python collector 是否完成。正常結果不代表整台節點或服務健康。</p><div class="actions"><button id="submit" type="button" class="button primary-button" disabled>執行節點檢查 <span aria-hidden="true">↗</span></button><button id="retry" type="button" class="button secondary-button" hidden>重試原提交</button></div><p id="submit-note" class="secondary">連線確認後即可檢查。</p></div>
+    </section>
+    <section class="history" aria-labelledby="schedule-heading"><h2 id="schedule-heading">定時健康檢查</h2><div id="schedule"><p class="secondary">等待控制面資料，尚未確認排程。</p></div></section>
+    <section class="history" aria-labelledby="usage-heading"><div class="history-heading"><h2 id="usage-heading">應用額度快照</h2><button id="usage-refresh" type="button" class="button secondary-button" disabled>讀取用量</button></div><div id="usage"><p class="secondary">尚未讀取用量；按需查詢，不會自動更新。</p></div></section>
+    <section class="stats" aria-label="最近命令摘要">
+      <div><span class="stat-label">歷史命令</span><strong id="total-count">—</strong><span class="secondary">本次回傳最多 20 筆</span></div>
+      <div><span class="stat-label">等待處理／對帳</span><strong id="active-count">—</strong><span class="secondary">包含未知結果</span></div>
+      <div><span class="stat-label">結果未知</span><strong id="unknown-count">—</strong><span class="secondary">需保留原命令對帳</span></div>
+    </section>
+    <section class="history" aria-labelledby="history-heading"><div class="history-heading"><h2 id="history-heading">命令歷史</h2><span class="secondary">觀測有效期 30 秒</span></div><p id="empty" class="empty">等待控制面資料，尚未載入命令。</p><div id="commands" class="command-list"></div></section>
+    <aside class="legend" aria-label="狀態說明"><p><strong>讀取狀態時請留意</strong></p><p>「已保存結果」是證據接收狀態；健康判斷另看執行結果、驗證與觀測時間。「未知」和「過期」都不代表正常。要求取消只記錄意圖，已派送工作仍須等候執行器證據。</p></aside>
+  </main>
+  <footer>Cloud Lab · cloudlab.m1 <span>結果與時間來自控制面 API；真實環境驗收仍待完成。</span></footer>
+</body>
+</html>

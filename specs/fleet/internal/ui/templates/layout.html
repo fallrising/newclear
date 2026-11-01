@@ -2,10 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.Title}} — Fleet Catalog</title>
-  <meta http-equiv="refresh" content="15">
+  {{if not .LivePoll}}<meta http-equiv="refresh" content="15">{{end}}
   <link rel="stylesheet" href="/static/app.css">
   <script src="/static/htmx.min.js"></script>
+  <script>
+    htmx.defineExtension("json-body", {
+      encodeParameters: function(xhr, parameters) {
+        xhr.setRequestHeader("Content-Type", "application/json");
+        return JSON.stringify(parameters);
+      }
+    });
+    document.addEventListener("htmx:responseError", function(event) {
+      var flash = document.getElementById("flash"), message = "Request failed";
+      try { message = JSON.parse(event.detail.xhr.responseText).error.message || message; } catch (_) {}
+      flash.textContent = event.detail.xhr.status + ": " + message;
+      flash.hidden = false;
+    });
+  </script>
+  <script id="catalog-action-focus">
+    var catalogFocusRequests = new WeakMap();
+    document.addEventListener("htmx:beforeRequest", function(event) {
+      var button = event.detail.elt;
+      if (button.matches("#catalog button[id]") && document.activeElement === button)
+        catalogFocusRequests.set(event.detail.xhr, button.id);
+    });
+    document.addEventListener("htmx:afterRequest", function(event) {
+      var id = catalogFocusRequests.get(event.detail.xhr);
+      catalogFocusRequests.delete(event.detail.xhr);
+      var button = id && document.getElementById(id);
+      if (button && !button.disabled && document.activeElement === document.body) button.focus();
+    });
+  </script>
 </head>
 <body>
   <header>
@@ -13,6 +42,7 @@
     <span class="muted">{{.Title}}</span>
   </header>
   <main>
+    <p id="flash" role="alert" hidden></p>
 {{end}}
 {{define "footer"}}
   </main>

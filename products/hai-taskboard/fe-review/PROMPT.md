@@ -1,64 +1,20 @@
-# FE Review Prompt — hai-taskboard
+# HAI Taskboard 後續 FE review 提示
 
-你是負責 **hai-taskboard** 前端品質的 LLM agent。目標是自主掃描這個 UI、用 headless 瀏覽器產生截圖、找出問題，並在允許範圍內優化。
+先讀 [DESIGN](DESIGN.md)、[REVIEW](REVIEW.md)、[targets](targets.json)、[local-development](../docs/local-development.md) 與 [SUCCESS](../SUCCESS.md)。Owner 已確認 2026-10-23 的 ConnectedApp 基準及 D1 不新增 router；不要重問這兩項，也不要把舊 fixture App 視為目前入口。
 
-先完整閱讀共用規範 [PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)，本檔只補充這個專案特有的資訊；兩者衝突時以元件自己的 `AGENTS.md`／`README.md` 為準，其次是 PROTOCOL.md。
+目前 main.tsx 掛載 ConnectedApp。工作限於現有同頁登入、專案、board／Draft、初始規格接納、Ready／Fake dispatch、命令結果的視覺與可用性。先確認實際問題，再調整表單分組、可讀性、focus、換行或對比；D3 可見 status／alert 已存在，應驗證而非預設需補一套錯誤 UI。不新增 detail／attention／impact／Done 功能或 URL。
 
-> 狀態：**第 1 輪（文檔先行）**，[`DESIGN.md`](DESIGN.md) 已草擬待確認。下面的啟動線索與 [`targets.json`](targets.json) 都是從原始碼推斷，未經驗證；尚未解決的矛盾與待決定事項見 [REVIEW.md](REVIEW.md)。
+啟動與資料：
 
-## 專案概況
+- 遵循[共同隔離協定](../../../docs/fe-review/PROTOCOL.md)，runtime 與瀏覽器使用同一個獨立 network namespace；禁止 `--network host` 或共用其他服務的 pod。
+- 依文件建立 pinned frontend build、backend binary 與同源 runtime；exact origin 為 `http://127.0.0.1:8080`，設定符合契約的 prebuilt WEB_ROOT。不要用沒有 API proxy 的 standalone Vite 作為整合入口。
+- 使用全新私有合成 state 與 session token、deterministic Fake；共享 caches 保持預設。只操作自己持有的程序與合成 repo，不啟用 provider／真實 agent，不讀既有使用者資料或憑證。
+- 保留 exact Host／Origin 及 Secure／HttpOnly／SameSite=Strict cookie；POST／GET／DELETE `/api/v1/session` 是既有登入／查詢／登出契約，不新增 CSRF token endpoint。禁止 token 落入 targets、URL、storage、trace、截圖、日誌或儲存庫。
+- 規格接納需先依文件批准新合成 repository，使用 immutable manifest 與實際 project／work-item IDs；repository hint 不等於 approval。明確完成 proposal、preparation、exact AC bytes、acceptance；不能假造 Ready。
+- `/healthz` 只證明健康端點；未登入 capture 只能證明登入畫面。安全runtime／session／admission harness已依 [RUNNER](RUNNER.md) 實跑，證據與限制見 [本輪報告](tasks/round2/report.md)。
 
-- **元件路徑：** `products/hai-taskboard/`
-- **一句話：** Human–AI delivery control plane 的看板：React 19 + Vite 8 + Tailwind 4 的 SPA（`web/`，目前以 fixtures 驅動），後端是 Go。
-- **技術棧：** React 19、Vite 8、Tailwind 4；Vitest、Playwright、axe；後端 Go
-- **UI 入口：** `products/hai-taskboard/web/`（單一路由 SPA，資料來自 `src/fixtures.ts`，畫面切換靠元件狀態而非 URL）
+驗收依 DESIGN：桌面／窄視窗、200% zoom、鍵盤、頁內 light／dark；包含上述真實同頁操作與錯誤 token、session revoked、拒絕、uncertain、reset／reconnect。snapshot 才是權威；pending／uncertain 不移動 lane、不重送 POST，既有自動原結果 GET 與手動 lookup 必須沿用原 command identity。確認過期 session／snapshot 回應被隔離。Fake 成功保持 Developing，不能宣稱 Done。
 
-## 啟動線索（未驗證）
+行為修正先有能失敗的窄層 regression，再跑既有 web gate；component／fixture tests 不能替代真實 browser acceptance。只保留去敏證據，記錄來源 revision、精確命令與結果；持久證據不要放 disposable tmp。停止時等待自己的 runtime graceful shutdown 才處理自己的 state。
 
-- 專案釘選 Node 24.20.0、pnpm 11.25.0（`docs/reproducibility.md`），只有 `pnpm-lock.yaml`，不能用 `npm ci`。
-- 在 `web/` 執行 `corepack pnpm install --frozen-lockfile`，再 `corepack pnpm exec vite --host 127.0.0.1 --port 5173 --strictPort`。
-
-## 主要流程
-
-至少走通以下流程各一次，並對每一步截圖：
-
-- 四個 surface（Board、Work item、Attention、Impact preview，由導覽按鈕切換）
-- Board 選取 work item → 一次被接受的轉移 → 一次被 QA guard 拒絕的轉移 → Attention 的 recovery／stale 狀態
-- 用畫面上的主題按鈕切到深色後重拍（主題不跟隨系統設定，`colorSchemes` 無效）
-
-## 專案特有檢查重點
-
-在 PROTOCOL.md 第 3 節的通用清單之外，特別檢查：
-
-- 因為沒有 URL 路由，需要在 capture 後用 Playwright 互動腳本補拍各 surface、轉移結果與深色主題（畫面上沒有對話框），腳本放在 `fe-review/`。
-- 轉移被拒絕時，畫面上是否有可見回饋（目前只有 `sr-only` 的 live region，見 REVIEW.md C3）。
-- 卡片密度、欄位捲動、拖曳或鍵盤轉移的可達性（參考既有 `board-transition-accessibility.spec.tsx`）。
-- 主題與縮放（既有 `responsive-theme-zoom.spec.tsx`）：200% zoom 下不破版。
-
-## 可重用的既有資產
-
-- `web/src/*.spec.tsx`：既有互動與 a11y 測試（Vitest + jsdom），對照其涵蓋範圍。
-- `web/package.json` 已有 `@playwright/test` 與 `@axe-core/playwright` devDependencies，擷取腳本直接使用，不另裝。
-
-## 待補的頁面
-
-無路由參數；以互動腳本擷取次級狀態。
-
-## 執行步驟
-
-先讀 [REVIEW.md](REVIEW.md) 確認目前輪次，只做該輪允許的事（PROTOCOL.md「三輪節奏」）：
-
-1. **第 1 輪（文檔先行）：** 對照原始碼打磨本檔、`targets.json` 與 `REVIEW.md`；不啟動、不修改程式碼。
-2. **第 2 輪（修改）：** 實作 `REVIEW.md` 中已決定的事項；在隔離環境確認 UI 能啟動，修正 `targets.json` 並改為 `verified: true`；跑元件自己的 lint／typecheck／test／build。
-3. **第 3 輪（完整 e2e）：** 從 repository root 執行
-   ```bash
-   node docs/fe-review/capture.mjs products/hai-taskboard/fe-review/targets.json --dry-run
-   node docs/fe-review/capture.mjs products/hai-taskboard/fe-review/targets.json
-   ```
-   需要互動才能看到的狀態，另寫 Playwright 腳本放在本目錄；走完「主要流程」，依 PROTOCOL.md 檢查，在 `runs/<YYYY-MM-DD_HHMM>/REPORT.md` 寫報告；新發現寫回 `REVIEW.md`。
-
-## 產出
-
-- 第 1 輪：`PROMPT.md`、`targets.json`、`REVIEW.md` 的修訂（每次一個 PR）
-- 第 2 輪：前端修正與已決定事項的實作，每個問題一個 commit，附驗證指令
-- 第 3 輪：`runs/<ts>/capture.json`、`runs/<ts>/REPORT.md`（提交）；`runs/<ts>/screenshots/`（不提交）
+原批准R2的startup／session／合成admission／互動／有界故障與證據核對已通過，targets.verified=true僅指這些本機門檻。既有legacyACcount及較早refresh提示／後續Connected並列限制仍在REVIEW；完整產品／第3輪／zoom與coarse-pointer驗收未完成，SUCCESS主線結論不變。

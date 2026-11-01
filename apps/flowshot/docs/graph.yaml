@@ -1,7 +1,7 @@
 schema_version: 1
 project: flowshot
-spec_version: 1.0.1
-spec_sha256: dd79293480f237ee9ff881f9b5a661d320cd65dfda66e70a256cd9309ac29b2e
+spec_version: 1.0.2
+spec_sha256: b569c2181559270221de3e81ce1d59fad136932299629f805fb10155938357b0
 critical_path:
 - N00
 - N03
@@ -17,7 +17,7 @@ nodes:
     milestone: M0
     depends_on: []
     size: M
-    status: blocked
+    status: done
     spec: docs/nodes/N00-foundation-ci-contracts.md
     contract_lock: contracts/locks/N00.json
     verification: docs/verification/N00.md
@@ -28,7 +28,7 @@ nodes:
     depends_on:
     - N00
     size: M
-    status: todo
+    status: done
     spec: docs/nodes/N01-sqlite-schema-migrations.md
     contract_lock: contracts/locks/N01.json
     verification: docs/verification/N01.md
@@ -40,7 +40,7 @@ nodes:
     - N00
     - N01
     size: M
-    status: todo
+    status: implementing
     spec: docs/nodes/N02-workspace-lazy-tree.md
     contract_lock: contracts/locks/N02.json
     verification: docs/verification/N02.md
@@ -51,7 +51,7 @@ nodes:
     depends_on:
     - N00
     size: M
-    status: todo
+    status: blocked
     spec: docs/nodes/N03-markdown-render-model.md
     contract_lock: contracts/locks/N03.json
     verification: docs/verification/N03.md
@@ -230,7 +230,7 @@ milestones:
     nodes:
     - N00
     - N01
-    gate: make ci 全綠；migration/invariant test 全綠；G2 記錄機制可用
+    gate: Linux Docker make ci/native-ci/native smoke 全綠；migration/invariant test 全綠；G2 記錄機制可用
   M1:
     title: 能讀
     nodes:
@@ -281,3 +281,6 @@ scheduling_rules:
   max_parallel_nodes: unbounded by spec; file ownership must not overlap
   failure_loop_limit: 3
   milestone_gate_blocks_next_milestone: true
+
+release_gates:
+  controlled_macos_launch: SUCCESS.md AC-02; both signals <1500ms; blocks usable/release, not development

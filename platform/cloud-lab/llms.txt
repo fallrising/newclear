@@ -1,0 +1,128 @@
+# cloud-lab
+
+> A documentation-first personal Cloudflare lab framework: capability knowledge tree, proposed interfaces, authority boundaries and staged migration of existing tools.
+
+Tier: ungraded
+Status: partial
+Interfaces: http, cli, spec
+Entrypoint: https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/SDD.md
+Auth: Access JWT and per-principal HMAC + server-side scoped grants; first live machine loop verified; full acceptance pending
+Spec: https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/contracts/m1.openapi.json
+
+M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS collector and native dashboard. An isolated Access-protected deployment has one validated real runner result; full human/mobile/fault/recovery qualification remains pending. No existing application has migrated. Existing product authorities and runtime boundaries remain unchanged. Document verification does not establish a usable product.
+
+## Interface reference
+
+- [Contracts](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/contracts/README.md): proposed identity, commands, external runs, events, artifacts and recipes.
+- [Knowledge tree](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/knowledge-tree.md): capabilities, responsibilities, source implementations and evidence gaps.
+- [SUCCESS](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/SUCCESS.md): document milestone and pending product acceptance.
+
+## Optional
+
+- [Architecture](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/architecture.md): state ownership, independent deployment and CF mapping.
+- [Migration](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/migration.md): candidate destinations, cutover, rollback and retirement gates.
+- [Verification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/verification.md): M0 document checks and future runtime acceptance.
+- [Sources](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/sources.md): pinned public sources and official documentation.
+
+- [Headless OAuth](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/headless-oauth.md): callback paste workflow and evidence-based troubleshooting.
+- [Live operations](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/live-operations.md): private receipts, provisioning order and bounded verification.
+- [First live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-first-live.md): actual runtime, one machine loop and remaining gaps.
+- [Isolated restore](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-isolated-restore.md): real D1 snapshot equality, journal reconciliation and preserved pending work; no production failover.
+
+- [Resident runner](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/resident-runner.md): bounded user-service lifecycle; automatic command pickup and same-journal restart qualified, full recovery pending.
+- [Resident evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-resident.md): 98 tests, independent review and bounded live user-service qualification.
+- [Recovery qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/recovery-qualification.md): isolated real-process crash and lost-report harness, with actual local workerd/D1 evidence and explicit remote gaps.
+
+- [Remote recovery and revocation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-remote-recovery.md): three isolated real-CF fault cases, revoked grants, disabled test Access token and preserved unknown; original resources unchanged, full acceptance pending.
+
+- [Dashboard browser evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-dashboard.md): local Chromium/workerd/D1, auth expiry, uncertain retry identity, stale-response rejection and narrow layouts; subsequent reviewed asset rollout verified automatically, real human Access pending; physical-phone testing is optional.
+
+- [Dashboard rollout](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/dashboard-rollout.md): reviewed assets deployed, original settings and application rows retained, anonymous requests return302 and machine reads pass; human browser workflow pending; physical-phone testing waived as a required gate.
+
+- [Authorization lifecycle](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-lifecycle.md): strict offline metadata status and private same-scope grant renewal/revocation plans;144local tests and synthetic CLI verified, no automatic apply/rotation; source collection is documented separately.
+
+- [Authorization collection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/authorization-collection.md): fixed read-only Worker/D1/Access metadata with source provenance and drift checks;161tests and five original-Lab reads verified, HMAC/runner unknown, no renewal.
+- [Collection evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-authorization-collection.md): independent source review and lead-verified live metadata; all four grants and selected token expired, active0 and schedules off at observation.
+
+- [Machine self authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/self-authorization.md): authenticated own-HMAC metadata and runner inspection CLI without job dispatch; subsequently deployed and checked in the bounded OL window. Standalone query omits resident and Access expiry; nonce storage still writes.
+
+- [Self-authorization evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-self-authorization.md):176local tests, real loopback inspection and cancellable slow-stream boundary; initial failures retained, no live rollout or renewal.
+
+- [Resident process observation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/resident-observation.md): opt-in Linux private Unix socket, peer/start/boot identity, loaded config digest and actual FLOCK ownership; conservative stop deadline and crash/drift rejection. Subsequently installed and observed on the original Lab; validation resident stopped after observation.
+
+- [Resident observation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-resident-observation.md):192tests, real fixture resident/kernel-lock observations, signal/restart/crash and drift checks, independent review; no original-service rollout or authorization change.
+
+- [Integrated authorization](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/integrated-authorization.md): correlates management, machine self and resident metadata with identity/config binding, before/after drift checks and conservative timestamps; private snapshot/provenance integrity status, no automatic deployment or renewal.
+
+- [Integration evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-integrated-authorization.md): real local HTTP/HMAC/SQLite and kernel socket integration with synthetic management envelopes; source-only acceptance and explicit unknown route/policy/live state.
+
+- [Observation rollout preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/observation-rollout.md): pinned source candidate, read-only baseline, bounded machine-only window proposal and compensating rollback; preparation history precedes the separately approved OL execution.
+
+- [Rollout preparation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-observation-rollout-plan.md): lead read-only metadata and private source checks, explicit failures and pending live gates.
+
+- [Bounded observation live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-observation-live.md): approved machine-only expiry changes, pinned Worker/runner update, actual AS/SA/RO observation and clean early stop; business rows/journal/policy unchanged, human/scheduler expired, no natural-expiry or full-product acceptance claim.
+
+- [Service runner](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/service-runner.md): config-bound private service policy, startup self verification, minimum fixed deadlines and journal-safe recovery; no automatic renewal or live enablement.
+
+- [Service runner evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-service-runner.md): local HTTP/subprocess expiry, rejection and journal recovery evidence; separate from real Cloudflare acceptance.
+
+- [Service activation preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/service-activation.md): offline private non-executable proposal, explicit relative windows and request estimates; pinned runner candidate and read-only baseline, no live renewal/start.
+
+- [Service activation evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-service-activation.md):249local tests, private CLI and unit validation; unknown D1/billing and stale metadata preserved.
+
+- [Routine service activation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-service-live.md): owner-confirmed Free, approved runner-only renewal and seven-day service started; self/resident verified and active at final readback, fixed ceiling2026-11-05T07:24:26Z; bot/human/scheduler expired, schedules off, future uptime/expiry and billing unverified.
+
+- [Bounded health schedule](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/health-schedule.md): revision-bound15/60/1440minute UTC-start policy, at most7days; scoped read snapshot and dashboard trigger/result states. Local265tests and12browser scenarios; first live firing expired before dispatch and was compensated; callback-window repair merged and real revision4 firing subsequently validated via original runner.
+
+- [Health schedule activation attempt](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-health-schedule-live.md): initial rollout blocked by two asset-session500 responses; approved resume reached a real firing, but its command expired before dispatch; Cron disabled, original active version and expired scheduler policy restored, failed history and original service retained.
+
+- [Fixed bot bridge](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-bridge.md): single JSON CLI health.check/status, trusted submit gate, durable exact retry and truthful freshness;283local tests with actual HTTP/collector. No Grok execution, live grant renewal or deployment.
+
+- [Local MCP stdio tools](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/mcp-stdio.md): fixed2025-11-25 lifecycle, status-only default, trusted submit flag, bounded bridge child and same-ID recovery; local synthetic-host HTTP/collector proof, no actual Grok/client installation or live renewal.
+
+- [Independent Grok connection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/grok-connection.md): existing Grok Build registered with pinned status-only MCP; native doctor and direct protocol checks pass, fresh metadata confirms expired bot grant while Access remains enabled. No model invocation, check enablement or renewal.
+
+- [Bounded bot live validation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-live.md): bot-only30minute HMAC/grant window through2026-10-29T16:59:16Z; one real MCP/API/resident command validated healthy, original records/roles/Access/runner preserved and Grok restored status-only. No model call or natural-expiry acceptance.
+
+- [Persistent bot policy](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-policy.md): private <=24h lease, <=24 new IDs/240 calls, explicit offline initialization, durable reservations and trusted MCP flag; source/local only, no live configuration or renewal.
+
+- [Explicit bot-policy renewal](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-policy-renewal.md): offline preview, expired-only digest-CAS renewal, atomic archived ledger/reservations and preserved requests; identical replay does not refill quota. No MCP renewal tool or live activation.
+
+- [Bounded bot activation preparation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-activation.md): pinned BR/BP runtime and uninstalled host candidate, original state preserved, fresh expired-bot/verified-runner observations and non-executable <=24h proposal; live bot-only activation requires explicit approval.
+
+- [First bounded bot activation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-bot-activation-live.md) — owner-approved bot-only24hour authority, first persistent24ID/240call policy and pinned Grok check/status activated until2026-10-30T18:00:27Z; one actual healthy result consumes1ID/4calls; original runner/Access limits preserved; model execution and natural expiry unverified.
+
+- [Bot policy inspection](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/bot-inspection.md): operator-only readonly original-state CLI for lease, remaining call/new-ID quota and bounded unreconciled IDs; no HTTP, quota/high-water writes, MCP catalog change or remote authority/health claim.
+
+- [Remaining work](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/remaining-work.md): concrete M1 human/model/fault/quota acceptance gaps, owner assistance and fixed deadlines; separate M2/M3 scope, no all-done claim.
+
+- [Delayed Cron window repair](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/schedule-window.md): callback-relative60/120second command deadlines, original due identity and authority limits;362local tests and independent source acceptance; renewed real firing subsequently validated; see corrected-window live evidence.
+- [Window repair evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-schedule-window.md): actual expired-before-dispatch failure, RED/GREEN regressions and bounded repair evidence.
+
+- [Corrected-window live continuation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-health-schedule-window-live.md): merged HW candidate, fresh revision4 activation and original-state preservation; distinct new provider firing required, first failed firing retained; real revision4 firing completed validated/healthy, original journal/artifact/API chain and authority preservation verified.
+
+- [Application quota qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/quota-qualification.md): isolated API/Cron retained10000 and rolling1440 boundaries, retry/history preservation and due finality; local SQLite evidence only, provider usage/billing and retention remain pending.
+- [Quota evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-quota-qualification.md): focused boundary tests and disposable mutation checks; original fixture failures retained, no live exhaustion or plan change.
+
+- [Application usage observation](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/usage-observation.md): scoped single-statement application quota snapshot and manual dashboard read; all-row scope guard, stale/auth race handling, provider usage/billing not connected and null; source/local evidence retained; subsequent deployment documented separately, no retention deletion.
+- [Usage evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-usage-observation.md): RED/GREEN, SQLite/HMAC and local Chromium/workerd qualification; real provider, human Access and full mainline remain pending.
+
+- [Usage live deployment](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-usage-live.md): Worker updated, module/settings/history preservation verified; owner subsequently confirmed Safari login/manual usage against management counters; extra asset hashes not run per owner request; pre-existing unknown was subsequently closed with its unknown result retained; see live closure evidence below.
+
+- [Unknown resolution](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/unknown-resolution.md): offline approved closure plan, exact expiring CAS, retained journal/unknown result and late-report terminal guard; source verified locally; subsequent explicitly approved live closure completed with retained history and one new healthy Cron.
+
+- [Unknown resolution live evidence](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-unknown-resolution-live.md): compatible original Worker deployment, audited unknown closure, original runner resume and one new Cron validated healthy; original deadlines/settings/history preserved, no paid upgrade.
+
+- [Failure matrix](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/failure-matrix.md): fourteen original cases mapped to named local/historical remote evidence and explicit remaining gaps.
+- [Retention design](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/retention.md): artifact access expiry retains bytes/history; no automatic deletion, archive or tombstone implementation.
+- [Failure/retention qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-failure-retention.md): controlled cancellation/report races, deadline boundaries, rejected-row preservation and seven-day access qualification; isolated only.
+
+- [Artifact download integrity](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-artifact-integrity.md): bounded raw bytes, SHA-256 verification and exact Blob; session/expiry/digest guards, 425 tests and real local browser exact-download/tamper rejection verified; actual rollout tracked separately on task board.
+
+- [Bounded rejection audit](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/rejection-audit.md): additive D1 rejection metadata keyed by request ID, no raw identity/content; atomic10000-row cap, explicit persisted/full/unavailable header; source/local qualification distinct from live migration.
+
+- [Live bounded rejection audit](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-rejection-audit-live.md): additive original-D1 schema and originalWorker100% verified; real runner GET403/persisted correlated by request ID; original166commands/195firings/160journal and authority deadlines preserved without restart. Initial non-JSON probe and one diagnostic retry retained; no paid upgrade, mainline incomplete.
+
+- [Cross-snapshot restore qualification](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-restore-qualification.md): six isolated real workerd/Python-runner cases, no restored collection, original artifact and unknown preservation; 438 tests and two detected mutations. Local logical D1 restore only; remote unknown/in-flight restore and full mainline pending.
+
+- [Polling snapshot ordering](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/evidence/m1-snapshot-ordering.md): bounded dashboard revision/conflict checks, lease-derived views and scope reset; durable outbox ACK-loss/reopen and actual browser qualification. M1 snapshot profile is distinct from unimplemented M0 Event/seq; original dashboard rollout pending.

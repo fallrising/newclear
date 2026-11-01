@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"net"
 	"net/http"
 	"os"
@@ -127,6 +128,9 @@ func newTestCluster(t *testing.T, size, partitions, replication int) *testCluste
 		}
 	}
 	t.Cleanup(func() {
+		if t.Failed() {
+			cluster.logBrokers()
+		}
 		for _, proc := range cluster.procs {
 			proc.kill()
 		}
@@ -134,20 +138,56 @@ func newTestCluster(t *testing.T, size, partitions, replication int) *testCluste
 	return cluster
 }
 
+// logBrokers records every broker's metrics and log tail, so a failed run
+// shows what the brokers were doing.
+func (c *testCluster) logBrokers() {
+	for id := uint32(1); id <= uint32(len(c.manifest.Brokers)); id++ {
+		proc, started := c.procs[id]
+		if !started {
+			continue
+		}
+		_, metrics := c.admin(id, "/metrics")
+		c.t.Logf("broker %d metrics:\n%s\nbroker %d log tail:\n%s", id, metrics, id, tail(proc.stderr.String(), 200))
+	}
+}
+
+// Test brokers bind fixed ports long after they are chosen, and bind them
+// again after every restart. A port from the kernel's ephemeral range can
+// be handed to an outgoing connection in between, so ports come from below
+// it (Linux defaults to 32768-60999), and each is handed out once per
+// test process. Each process starts at a random point in the range, so two
+// concurrent test runs rarely probe the same ports.
+const (
+	testPortFirst = 20000
+	testPortLast  = 32767
+)
+
+var testPorts = struct {
+	sync.Mutex
+	next, handed int
+}{next: testPortFirst + rand.IntN(testPortLast-testPortFirst+1)}
+
 func freePorts(t *testing.T, count int) []string {
 	t.Helper()
-	var listeners []net.Listener
+	testPorts.Lock()
+	defer testPorts.Unlock()
 	var addresses []string
-	for range count {
-		listener, err := net.Listen("tcp", "127.0.0.1:0")
-		if err != nil {
-			t.Fatal(err)
+	for len(addresses) < count {
+		if testPorts.handed > testPortLast-testPortFirst {
+			t.Fatal("test port range exhausted")
 		}
-		listeners = append(listeners, listener)
-		addresses = append(addresses, listener.Addr().String())
-	}
-	for _, listener := range listeners {
+		port := testPorts.next
+		testPorts.next, testPorts.handed = port+1, testPorts.handed+1
+		if testPorts.next > testPortLast {
+			testPorts.next = testPortFirst
+		}
+		address := fmt.Sprintf("127.0.0.1:%d", port)
+		listener, err := net.Listen("tcp", address)
+		if err != nil {
+			continue // in use by something else on this host
+		}
 		_ = listener.Close()
+		addresses = append(addresses, address)
 	}
 	return addresses
 }
@@ -252,6 +292,23 @@ func eventually(t *testing.T, what string, timeout time.Duration, condition func
 	for !condition() {
 		if time.Now().After(deadline) {
 			t.Fatalf("timed out waiting for %s", what)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
+// succeeds retries attempt until it returns nil; a timeout reports the last
+// error.
+func succeeds(t *testing.T, what string, timeout time.Duration, attempt func() error) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for {
+		err := attempt()
+		if err == nil {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("timed out waiting for %s: %v", what, err)
 		}
 		time.Sleep(50 * time.Millisecond)
 	}

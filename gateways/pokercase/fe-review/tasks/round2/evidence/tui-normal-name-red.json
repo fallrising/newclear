@@ -1,0 +1,15 @@
+{
+  "command": [
+    "cargo",
+    "+1.99.0",
+    "test",
+    "--locked",
+    "tui_app::tests::review_connection_normal_identity_suffix_remains_visible",
+    "--",
+    "--nocapture"
+  ],
+  "sourceSHA256": "8df96c1ef639be3eaffe513055d64cb10db6f6364c90c063b628a2a5ff30e069",
+  "exitCode": 101,
+  "elapsedSeconds": 9.811,
+  "timeoutSeconds": 600
+}

@@ -27,6 +27,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Python 3.11 standard-library contract
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
       - name: Offline harness contracts
         run: make -C labs/open-compute check
       - name: Original non-root runtime integration
@@ -37,6 +41,26 @@ jobs:
         run: >-
           make -C labs/open-compute integration-restore
           LAB_ARGS="--cache $RUNNER_TEMP/open-compute-cache --output $RUNNER_TEMP/open-compute-restore-evidence"
+      - name: Observed process-tree resources
+        run: >-
+          make -C labs/open-compute integration-resources
+          LAB_ARGS="--cache $RUNNER_TEMP/open-compute-cache --output $RUNNER_TEMP/open-compute-resource-evidence"
+      - name: Project bounded failure diagnostics
+        if: always()
+        run: >-
+          python3 labs/open-compute/failure_diagnostics.py ci
+          --directory "$RUNNER_TEMP" --profiles restart restore resources
+      - name: Strict failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-diagnostics-original-runtime-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/open-compute-diagnostics/restart.json
+            ${{ runner.temp }}/open-compute-diagnostics/restore.json
+            ${{ runner.temp }}/open-compute-diagnostics/resources.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Sanitized evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -44,7 +68,15 @@ jobs:
           name: open-compute-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/open-compute-evidence/report.json
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 30
+      - name: Sanitized resource evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-resource-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/open-compute-resource-evidence/report.json
+          if-no-files-found: warn
+          retention-days: 30
       - name: Sanitized cold restore evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -52,4 +84,156 @@ jobs:
           name: open-compute-restore-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/open-compute-restore-evidence/report.json
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 30
+
+  cold-storage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Python 3.11 standard-library contract
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: Bounded cold disk footprint and fixed D1 writes
+        run: >-
+          make -C labs/open-compute integration-storage
+          LAB_ARGS="--cache $RUNNER_TEMP/open-compute-storage-cache --output $RUNNER_TEMP/open-compute-storage-evidence"
+      - name: Project bounded failure diagnostics
+        if: always()
+        run: >-
+          python3 labs/open-compute/failure_diagnostics.py ci
+          --directory "$RUNNER_TEMP" --profiles storage
+      - name: Strict failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-diagnostics-cold-storage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/open-compute-diagnostics/storage.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Sanitized storage evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-storage-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/open-compute-storage-evidence/report.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  checkpoint-crash:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Python 3.11 standard-library contract
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: SIGKILL at the publicly committed waiting checkpoint
+        run: >-
+          make -C labs/open-compute integration-crash
+          LAB_ARGS="--cache $RUNNER_TEMP/open-compute-crash-cache --output $RUNNER_TEMP/open-compute-crash-evidence"
+      - name: Project bounded failure diagnostics
+        if: always()
+        run: >-
+          python3 labs/open-compute/failure_diagnostics.py ci
+          --directory "$RUNNER_TEMP" --profiles crash
+      - name: Strict failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-diagnostics-checkpoint-crash-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/open-compute-diagnostics/crash.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Sanitized checkpoint SIGKILL evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-crash-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/open-compute-crash-evidence/report.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  controlled-retries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Python 3.11 standard-library contract
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: Controlled Workflow errors and D1 effects
+        run: >-
+          make -C labs/open-compute integration-retry
+          LAB_ARGS="--cache $RUNNER_TEMP/open-compute-retry-cache --output $RUNNER_TEMP/open-compute-retry-evidence"
+      - name: Project bounded failure diagnostics
+        if: always()
+        run: >-
+          python3 labs/open-compute/failure_diagnostics.py ci
+          --directory "$RUNNER_TEMP" --profiles retry
+      - name: Strict failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-diagnostics-controlled-retries-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/open-compute-diagnostics/retry.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Sanitized controlled retry evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-retry-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/open-compute-retry-evidence/report.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  retained-manual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Python 3.11 standard-library contract
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: Separate-process retained manual lifecycle
+        run: >-
+          make -C labs/open-compute integration-trial
+          LAB_ARGS="--cache $RUNNER_TEMP/open-compute-trial-cache --output $RUNNER_TEMP/open-compute-trial-evidence"
+      - name: Project bounded failure diagnostics
+        if: always()
+        run: >-
+          python3 labs/open-compute/failure_diagnostics.py ci
+          --directory "$RUNNER_TEMP" --profiles trial
+      - name: Strict failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-diagnostics-retained-manual-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/open-compute-diagnostics/trial.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Sanitized retained manual evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: open-compute-trial-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/open-compute-trial-evidence/report.json
+          if-no-files-found: warn
+          retention-days: 30

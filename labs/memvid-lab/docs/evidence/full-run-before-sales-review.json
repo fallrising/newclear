@@ -1,0 +1,1279 @@
+{
+  "schema": 1,
+  "started_at": "2026-10-28T11:38:22.553312+00:00",
+  "profile": "full",
+  "upstream_reading_commit": "e6bd9f7b9c38cd8d5370fa0fc936ac1dcd751813",
+  "sdk_version": "2.0.160",
+  "runtime": {
+    "python": "3.12.14",
+    "system": "Linux",
+    "machine": "x86_64"
+  },
+  "native": {
+    "native_version": "2.0.160",
+    "memvid_core_version": "2.0.140",
+    "features": {
+      "lex": true,
+      "vec": true,
+      "parallel_segments": true,
+      "temporal_track": true,
+      "clip": true,
+      "logic_mesh": true,
+      "encryption": true,
+      "whisper": false
+    }
+  },
+  "network_guard": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "source_hashes": {
+    "lab.py": "1fb777d22e302206f968cf8cf8206ee7c485c71f01aae38eac0b8f7cf8b918ff",
+    "offline.py": "dc325a1466950893319d8fd349538d62ce6e47f491bcf648e06ab86dc2183b9c",
+    "scenarios.py": "8feecb6a9dcd7b6f2503925e9d0845ec180aec356a2057cb2eab3d295b458f8a",
+    "models.py": "caebf62cdcbb9f046852ebb235bcb3f97bd5e9e24cceed1f3c36e7bd0ee2df77",
+    "advanced.py": "08feee3adf532a21dc32e340389d29fbcad03e58792a98967e8f731f586cad21",
+    "requirements.lock": "46982859187a17fdc10c405074e49b14b27fddcefb411ba597f9186b4091dbcd",
+    "requirements-models.lock": "c02e6ef0ac4b75d03b45217cdd6328a958d5d16479c5cedf909b5a75e01ee7a1",
+    "native-whisper/Cargo.toml": "4db30f37b72526ce5bc32e9de4723cd524e5fc3cd0f4858ed6fec8764aa831af",
+    "native-whisper/Cargo.lock": "0c6a779f79b1993dd2c97dae94e798bd726740a689802f18e8181b41cd256dd1",
+    "native-whisper/rust-toolchain.toml": "9cbde07377abdce69bc9580adb0315d52e2a09d6494a2005550a7e6733d9688b",
+    "native-whisper/src/main.rs": "991af72dcc408bab7f2d03b133ccf9d6081ca80201148b8e429afd2489fc8ed8",
+    "native-whisper/prepare_assets.py": "16c03029a9eb28c655e7e028379c9f2577a02eb4515ce39a0f03b60bafabf02e",
+    "native-whisper/prepare_core.py": "2f187048560db5a35acbd176194bb801ad2b3ffad834536e63c1b8439b405f7d",
+    "native-whisper/local-cache.patch": "00cd6fa9ed2a8f63fede1508b621d17ed811ac9b9a649d5df9e30715272d053b",
+    "native-whisper/test_token_guard.py": "9dbbff83b10b92e61aa5e2e07240ce198ff7f20ad94848891e17286fffbc5e33"
+  },
+  "cases": [
+    {
+      "id": "UC-01",
+      "name": "Long-Running AI Agents",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "resume": {
+          "new_process": true,
+          "previous": {
+            "query": "checkpoint",
+            "hits": [
+              {
+                "frame_id": 0,
+                "uri": "mv2://agent/checkpoint",
+                "excerpt": "Agent checkpoint: inspect archive manifest before resuming. title: mv2://agent/checkpoint uri: mv2://agent/checkpoint labels: fixture fixture: \"synthetic\""
+              }
+            ],
+            "engine": "tantivy"
+          },
+          "appended_frame": 1,
+          "index_policy": {
+            "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+            "rebuild_lex_index": true,
+            "status": "healed",
+            "executed_actions": [
+              "rebuild_lex_index",
+              "recompute_toc",
+              "recompute_toc",
+              "update_header",
+              "deep_verify"
+            ],
+            "pre_rebuild_finding_codes": [],
+            "verification": "passed"
+          }
+        },
+        "old_memory_retained": {
+          "query": "checkpoint",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://agent/checkpoint",
+              "excerpt": "Agent checkpoint: inspect archive manifest before resuming. title: mv2://agent/checkpoint uri: mv2://agent/checkpoint labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "continuation": {
+          "query": "continuation",
+          "hits": [
+            {
+              "frame_id": 1,
+              "uri": "mv2://agent/continuation",
+              "excerpt": "Agent continuation completed archive verification; next step is restore drill. title: mv2://agent/continuation uri: mv2://agent/continuation labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        }
+      },
+      "elapsed_seconds": 0.3996
+    },
+    {
+      "id": "UC-02",
+      "name": "Enterprise Knowledge Bases",
+      "status": "passed",
+      "observed": {
+        "native_pre_rebuild_observation": {
+          "expected_uris": [
+            "mv2://enterprise/engineering/runbook",
+            "mv2://enterprise/engineering/unclassified",
+            "mv2://enterprise/sales/handbook"
+          ],
+          "actual_uris": [
+            "mv2://enterprise/engineering/unclassified",
+            "mv2://enterprise/sales/handbook"
+          ],
+          "matched_this_run": false
+        },
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "scope": {
+          "query": "rollback",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://enterprise/engineering/runbook",
+              "excerpt": "Rollback runbook requires health checks before switching traffic. title: mv2://enterprise/engineering/runbook uri: mv2://enterprise/engineering/runbook labels: fixture acl_read_roles: [\"engineer\"] acl_tenant_id: \"tenant-a\" acl_visibility: \""
+            },
+            {
+              "frame_id": 1,
+              "uri": "mv2://enterprise/engineering/unclassified",
+              "excerpt": "Rollback draft has no approved access policy. title: mv2://enterprise/engineering/unclassified uri: mv2://enterprise/engineering/unclassified labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "acl_enforcement": "enforce",
+        "allowed": {
+          "query": "rollback",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://enterprise/engineering/runbook",
+              "excerpt": "Rollback runbook requires health checks before switching traffic. title: mv2://enterprise/engineering/runbook uri: mv2://enterprise/engineering/runbook labels: fixture acl_read_roles: [\"engineer\"] acl_tenant_id: \"tenant-a\" acl_visibility: \""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "denied": {
+          "wrong_role": {
+            "query": "rollback",
+            "hits": [],
+            "engine": "tantivy"
+          },
+          "cross_tenant": {
+            "query": "rollback",
+            "hits": [],
+            "engine": "tantivy"
+          },
+          "missing_metadata": {
+            "query": "rollback",
+            "hits": [],
+            "engine": "tantivy"
+          }
+        }
+      },
+      "elapsed_seconds": 0.3253
+    },
+    {
+      "id": "UC-03",
+      "name": "Offline-First AI Systems",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "copied_only_mv2": true,
+        "sha256": "10f65487e07f44ab77625c271e0c15e1f53aa8a6b6c08f599827f4b1cc285f50",
+        "reopened": {
+          "new_process": true,
+          "retrieval": {
+            "query": "compass",
+            "hits": [
+              {
+                "frame_id": 0,
+                "uri": "mv2://offline/log",
+                "excerpt": "Portable capsule retains the compass calibration log. title: mv2://offline/log uri: mv2://offline/log labels: fixture fixture: \"synthetic\""
+              }
+            ],
+            "engine": "tantivy"
+          },
+          "integrity": {
+            "overall_status": "passed",
+            "checks": [
+              "TimeIndexEntryCount",
+              "TimeIndexSortOrder",
+              "LexIndexDecode",
+              "VecIndexDecode",
+              "WalPendingRecords",
+              "FrameCountConsistency"
+            ]
+          }
+        },
+        "network_policy": "inherited from the caller; see run-level isolation evidence"
+      },
+      "elapsed_seconds": 0.2323
+    },
+    {
+      "id": "UC-04",
+      "name": "Codebase Understanding",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "retrieval": {
+          "query": "retry",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://code/src/retry.py",
+              "excerpt": "def retry_backoff(attempt): return min(60, 2 ** attempt) title: mv2://code/src/retry.py uri: mv2://code/src/retry.py labels: fixture fixture: \"synthetic\" language: \"python\" revision: \"fixture-v1\""
+            },
+            {
+              "frame_id": 1,
+              "uri": "mv2://code/docs/retry-design.md",
+              "excerpt": "retry_backoff caps exponential delay at sixty seconds to bound recovery latency. title: mv2://code/docs/retry-design.md uri: mv2://code/docs/retry-design.md labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "code_content": {
+          "query": "attempt",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://code/src/retry.py",
+              "excerpt": "def retry_backoff(attempt): return min(60, 2 ** attempt) title: mv2://code/src/retry.py uri: mv2://code/src/retry.py labels: fixture fixture: \"synthetic\" language: \"python\" revision: \"fixture-v1\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "source_revision": "fixture-v1",
+        "native_exact_symbol_observation": {
+          "query": "retry_backoff",
+          "actual_uris": [
+            "mv2://code/docs/retry-design.md"
+          ],
+          "missing_expected_uris": [
+            "mv2://code/src/retry.py"
+          ]
+        },
+        "tokenizer_boundary": "Lexical tokens and code content were checked; exact underscored symbol matching is not assumed."
+      },
+      "elapsed_seconds": 0.3241
+    },
+    {
+      "id": "UC-05",
+      "name": "Customer Support Agents",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "mode": "retrieval_context_only",
+        "generated_answer": false,
+        "retrieval": {
+          "query": "refund",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://support/policy",
+              "excerpt": "Refund policy grants thirty days after purchase. title: mv2://support/policy uri: mv2://support/policy labels: fixture fixture: \"synthetic\""
+            },
+            {
+              "frame_id": 1,
+              "uri": "mv2://support/ticket-104",
+              "excerpt": "Ticket 104: customer requests refund twelve days after purchase. title: mv2://support/ticket-104 uri: mv2://support/ticket-104 labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "scoped_contexts": [
+          {
+            "citations": [
+              {
+                "frame_id": 0,
+                "uri": "mv2://support/policy",
+                "excerpt": "Refund policy grants thirty days after purchase. title: mv2://support/policy uri: mv2://support/policy labels: fixture fixture: \"synthetic\""
+              }
+            ],
+            "context_excerpt": "mv2://support/policy — mv2://support/policy\nRefund policy grants thirty days after purchase. title: mv2://support/policy uri: mv2://support/policy labels: fixture fixture: \"synthetic\""
+          },
+          {
+            "citations": [
+              {
+                "frame_id": 1,
+                "uri": "mv2://support/ticket-104",
+                "excerpt": "Ticket 104: customer requests refund twelve days after purchase. title: mv2://support/ticket-104 uri: mv2://support/ticket-104 labels: fixture fixture: \"synthetic\""
+              }
+            ],
+            "context_excerpt": "mv2://support/ticket-104 — mv2://support/ticket-104\nTicket 104: customer requests refund twelve days after purchase. title: mv2://support/ticket-104 uri: mv2://support/ticket-104 labels: fixture fixture: \"synthetic\""
+          }
+        ],
+        "unknown_hit_count": 0,
+        "scope_selection": "URIs from actual lexical retrieval hits",
+        "native_unscoped_ask_observation": {
+          "raw_hit_uris": [
+            "mv2://support/policy"
+          ],
+          "raw_hit_count": 1
+        },
+        "native_unknown_ask_observation": {
+          "raw_hit_uris": [
+            "mv2://support/policy"
+          ],
+          "raw_hit_count": 1,
+          "application_guard": "no_matching_source"
+        },
+        "ask_boundary": "Each source is explicitly scoped; unscoped ask is not assumed to retain every lexical hit."
+      },
+      "elapsed_seconds": 0.2284
+    },
+    {
+      "id": "UC-06",
+      "name": "Workflow Automation",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "latest": {
+          "query": "completed",
+          "hits": [
+            {
+              "frame_id": 1,
+              "uri": "mv2://workflow/archive-validation",
+              "excerpt": "Archive workflow state completed; manifest checksum verified. title: mv2://workflow/archive-validation uri: mv2://workflow/archive-validation labels: fixture event: \"validation-finished\" status: \"completed\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "previous": {
+          "query": "workflow",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://workflow/archive-validation",
+              "excerpt": "Archive workflow state pending; next step validate manifest. title: mv2://workflow/archive-validation uri: mv2://workflow/archive-validation labels: fixture event: \"scheduled\" status: \"pending\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "history_frame_ids": [
+          0,
+          1
+        ],
+        "application_boundary": "event persistence; no external job was executed"
+      },
+      "elapsed_seconds": 0.2209
+    },
+    {
+      "id": "UC-07",
+      "name": "Sales and Marketing Copilots",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "insertion": "manual_memory_cards",
+        "automatic_enrichment_tested": false,
+        "state": {
+          "entity": "cedar labs",
+          "found": true,
+          "slots": {
+            "requirement": {
+              "value": "offline search",
+              "kind": "fact",
+              "polarity": "neutral",
+              "source_frame_id": 1,
+              "document_date": null,
+              "engine": "manual-fixture"
+            },
+            "stage": {
+              "value": "evaluation",
+              "kind": "fact",
+              "polarity": "neutral",
+              "source_frame_id": 1,
+              "document_date": null,
+              "engine": "manual-fixture"
+            }
+          }
+        },
+        "source": {
+          "query": "customer",
+          "hits": [
+            {
+              "frame_id": 1,
+              "uri": "mv2://sales/customer-cedar",
+              "excerpt": "Cedar Labs customer requires offline search and is in evaluation. title: mv2://sales/customer-cedar uri: mv2://sales/customer-cedar labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        }
+      },
+      "elapsed_seconds": 0.2308
+    },
+    {
+      "id": "UC-08",
+      "name": "Personal Knowledge Assistants",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "note": {
+          "query": "烏龍筆記",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://personal/backup-note",
+              "excerpt": "烏龍筆記:備份完成後先驗證雜湊,再演練還原。 title: mv2://personal/backup-note uri: mv2://personal/backup-note labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "preference": {
+          "query": "後續說明使用繁體中文",
+          "hits": [
+            {
+              "frame_id": 2,
+              "uri": "mv2://personal/language",
+              "excerpt": "語言偏好:後續說明使用繁體中文,保留原始來源。 title: mv2://personal/language uri: mv2://personal/language labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "previous_preference": {
+          "query": "語言偏好",
+          "hits": [
+            {
+              "frame_id": 1,
+              "uri": "mv2://personal/language",
+              "excerpt": "語言偏好:後續說明使用英文,保留原始來源。 title: mv2://personal/language uri: mv2://personal/language labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "timestamps": [
+          1700000000,
+          1700000010,
+          1700000020
+        ],
+        "tokenizer_boundary": "Exact Chinese text spans were queried; arbitrary Chinese word segmentation is not claimed."
+      },
+      "elapsed_seconds": 0.3187
+    },
+    {
+      "id": "UC-09",
+      "name": "Medical, Legal, and Financial Agents",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "domains": {
+          "medical": {
+            "query": "reference",
+            "hits": [
+              {
+                "frame_id": 0,
+                "uri": "mv2://domain/medical/reference",
+                "excerpt": "Synthetic medical reference: training clinic desk is located in room seven. title: mv2://domain/medical/reference uri: mv2://domain/medical/reference labels: fixture domain: \"medical\" fixture: \"synthetic\""
+              }
+            ],
+            "engine": "tantivy"
+          },
+          "legal": {
+            "query": "reference",
+            "hits": [
+              {
+                "frame_id": 1,
+                "uri": "mv2://domain/legal/reference",
+                "excerpt": "Synthetic legal reference: sample agreement notice period is thirty days. title: mv2://domain/legal/reference uri: mv2://domain/legal/reference labels: fixture domain: \"legal\" fixture: \"synthetic\""
+              }
+            ],
+            "engine": "tantivy"
+          },
+          "financial": {
+            "query": "reference",
+            "hits": [
+              {
+                "frame_id": 2,
+                "uri": "mv2://domain/financial/reference",
+                "excerpt": "Synthetic financial reference: sample ledger reports seven million units. title: mv2://domain/financial/reference uri: mv2://domain/financial/reference labels: fixture domain: \"financial\" fixture: \"synthetic\""
+              }
+            ],
+            "engine": "tantivy"
+          }
+        },
+        "unknown_hit_count": 0,
+        "professional_advice_generated": false
+      },
+      "elapsed_seconds": 0.317
+    },
+    {
+      "id": "UC-10",
+      "name": "Auditable and Debuggable AI Workflows",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "historical": {
+          "query": "launch",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://audit/release-plan",
+              "excerpt": "Release plan schedules the launch on Monday. title: mv2://audit/release-plan uri: mv2://audit/release-plan labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "current": {
+          "query": "Friday",
+          "hits": [
+            {
+              "frame_id": 1,
+              "uri": "mv2://audit/release-plan",
+              "excerpt": "Release plan schedules the launch on Friday. title: mv2://audit/release-plan uri: mv2://audit/release-plan labels: fixture fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "history_frame_ids": [
+          0,
+          1
+        ],
+        "session_persisted": true,
+        "recorded_actions": 1,
+        "replay": {
+          "total_actions": 1,
+          "matched_actions": 1,
+          "mismatched_actions": 0,
+          "skipped_actions": 0
+        },
+        "integrity": {
+          "overall_status": "passed",
+          "checks": [
+            "TimeIndexEntryCount",
+            "TimeIndexSortOrder",
+            "LexIndexDecode",
+            "VecIndexDecode",
+            "WalPendingRecords",
+            "FrameCountConsistency"
+          ]
+        },
+        "boundary": "Recorded retrieval and append history were checked; arbitrary state restoration and LLM replay were not."
+      },
+      "elapsed_seconds": 0.224
+    },
+    {
+      "id": "UC-11",
+      "name": "Custom Applications",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "metadata": {
+          "retention_days": 30,
+          "category": "prototype",
+          "reviewed": true,
+          "labels": [
+            "alpha",
+            "local"
+          ]
+        },
+        "retained": {
+          "query": "retainedsapphire",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://custom/retained",
+              "excerpt": "Retainedsapphire is the active custom application record. title: mv2://custom/retained uri: mv2://custom/retained labels: fixture category: \"prototype\" labels: [\"alpha\",\"local\"] retention_days: 30 reviewed: true"
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "removed_frame_id": 1,
+        "removed_query_hits": 0,
+        "integrity": {
+          "overall_status": "passed",
+          "checks": [
+            "TimeIndexEntryCount",
+            "TimeIndexSortOrder",
+            "LexIndexDecode",
+            "VecIndexDecode",
+            "WalPendingRecords",
+            "FrameCountConsistency"
+          ]
+        }
+      },
+      "elapsed_seconds": 0.2757
+    },
+    {
+      "id": "CAP-PDF",
+      "name": "PDF Ingestion",
+      "status": "passed",
+      "observed": {
+        "index_policy": {
+          "policy": "write batch, seal, close, explicit doctor rebuild, reopen",
+          "rebuild_lex_index": true,
+          "status": "healed",
+          "executed_actions": [
+            "rebuild_lex_index",
+            "rebuild_vec_index",
+            "recompute_toc",
+            "recompute_toc",
+            "update_header",
+            "deep_verify"
+          ],
+          "pre_rebuild_finding_codes": [
+            "vec_index_corrupt"
+          ],
+          "verification": "passed"
+        },
+        "ingestion": "SDK put(file=...) native PDF extraction",
+        "frame_id": 0,
+        "fixture_sha256": "d4873e71ffe8fca7109de6115457ce3afe76723ff16e6a55f85ee3ad4322a811",
+        "retrieval": {
+          "query": "ASTER731",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://pdf/archive-handbook",
+              "excerpt": "Archive handbook: restore drills run every Thursday. Recovery code is ASTER731. title: Archive handbook uri: mv2://pdf/archive-handbook labels: pdf fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "reopened": {
+          "query": "ASTER731",
+          "hits": [
+            {
+              "frame_id": 0,
+              "uri": "mv2://pdf/archive-handbook",
+              "excerpt": "Archive handbook: restore drills run every Thursday. Recovery code is ASTER731. title: Archive handbook uri: mv2://pdf/archive-handbook labels: pdf fixture: \"synthetic\""
+            }
+          ],
+          "engine": "tantivy"
+        },
+        "integrity": {
+          "overall_status": "passed",
+          "checks": [
+            "TimeIndexEntryCount",
+            "TimeIndexSortOrder",
+            "LexIndexDecode",
+            "VecIndexDecode",
+            "WalPendingRecords",
+            "FrameCountConsistency"
+          ]
+        }
+      },
+      "elapsed_seconds": 0.2478
+    },
+    {
+      "id": "CAP-SEMANTIC",
+      "name": "Local semantic and mixed retrieval",
+      "status": "passed",
+      "observed": {
+        "model": "BAAI/bge-small-en-v1.5",
+        "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+        "dimension": 384,
+        "provider": "local ONNX Runtime CPU; supplied to the real Memvid vector index",
+        "assets": {
+          "schema_version": 1,
+          "assets": [
+            {
+              "group": "semantic",
+              "path": "bge-small-en-v1.5/model.onnx",
+              "url": "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/onnx/model.onnx",
+              "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+              "size_bytes": 133093490,
+              "sha256": "828e1496d7fabb79cfa4dcd84fa38625c0d3d21da474a00f08db0f559940cf35",
+              "license": "MIT (BAAI model card)"
+            },
+            {
+              "group": "semantic",
+              "path": "bge-small-en-v1.5/tokenizer.json",
+              "url": "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/tokenizer.json",
+              "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+              "size_bytes": 711396,
+              "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+              "license": "MIT (BAAI model card)"
+            }
+          ],
+          "total_bytes": 133804886
+        },
+        "queries": [
+          {
+            "query": "A doctor checking a baby",
+            "expected_uri": "mv2://semantic/0",
+            "requested_mode": "sem",
+            "engine": "hybrid",
+            "lexical_control_hits": 0,
+            "hits": [
+              {
+                "uri": "mv2://semantic/0",
+                "frame_id": 0,
+                "score": 0.6873083114624023
+              },
+              {
+                "uri": "mv2://semantic/1",
+                "frame_id": 1,
+                "score": 0.46378928422927856
+              },
+              {
+                "uri": "mv2://semantic/2",
+                "frame_id": 2,
+                "score": 0.4582809805870056
+              }
+            ]
+          },
+          {
+            "query": "automobile repair garage",
+            "expected_uri": "mv2://semantic/1",
+            "requested_mode": "sem",
+            "engine": "hybrid",
+            "lexical_control_hits": 0,
+            "hits": [
+              {
+                "uri": "mv2://semantic/1",
+                "frame_id": 1,
+                "score": 0.6115860939025879
+              },
+              {
+                "uri": "mv2://semantic/0",
+                "frame_id": 0,
+                "score": 0.4402022957801819
+              },
+              {
+                "uri": "mv2://semantic/2",
+                "frame_id": 2,
+                "score": 0.4081847071647644
+              }
+            ]
+          },
+          {
+            "query": "pediatric clinic",
+            "expected_uri": "mv2://semantic/0",
+            "requested_mode": "auto",
+            "engine": "hybrid",
+            "lexical_hits": [
+              {
+                "uri": "mv2://semantic/0",
+                "frame_id": 0,
+                "score": 3.044304847717285
+              }
+            ],
+            "hits": [
+              {
+                "uri": "mv2://semantic/0",
+                "frame_id": 0,
+                "score": 0.653916597366333
+              },
+              {
+                "uri": "mv2://semantic/1",
+                "frame_id": 1,
+                "score": 0.4517744183540344
+              },
+              {
+                "uri": "mv2://semantic/2",
+                "frame_id": 2,
+                "score": 0.4311010241508484
+              }
+            ]
+          }
+        ],
+        "reopen_verified": true,
+        "verification": {
+          "overall_status": "passed",
+          "checks": [
+            {
+              "details": null,
+              "name": "TimeIndexEntryCount",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "TimeIndexSortOrder",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "LexIndexDecode",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "VecIndexDecode",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "WalPendingRecords",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "FrameCountConsistency",
+              "status": "passed"
+            }
+          ]
+        },
+        "memory": {
+          "path": "semantic.mv2",
+          "sha256": "77d161d801655b2770b718d8f137033b7f91ffb407a050e59ba4de9915c95fc9"
+        },
+        "scope": "Records both requested mode and native engine label; does not infer a scoring formula from the label."
+      },
+      "elapsed_seconds": 1.0666
+    },
+    {
+      "id": "CAP-CLIP",
+      "name": "Real image/text CLIP retrieval",
+      "status": "passed",
+      "observed": {
+        "model": "mobileclip-s2",
+        "revision": "0c311c620b36a2270b851db7bef9135f3eaae5d7",
+        "dimension": 512,
+        "provider": "Memvid native ClipModel image and text encoders",
+        "assets": {
+          "schema_version": 1,
+          "assets": [
+            {
+              "group": "clip",
+              "path": "mobileclip-s2_text.onnx",
+              "url": "https://huggingface.co/Xenova/mobileclip_s2/resolve/0c311c620b36a2270b851db7bef9135f3eaae5d7/onnx/text_model_fp16.onnx",
+              "revision": "0c311c620b36a2270b851db7bef9135f3eaae5d7",
+              "size_bytes": 127118306,
+              "sha256": "0d6655b77515c4f1ccb8a4ab34ad312ead6d0e12fa68d00e327a1fe2637b4195",
+              "license": "Other; Xenova model card links to apple/ml-mobileclip",
+              "license_source": "https://huggingface.co/Xenova/mobileclip_s2/blob/0c311c620b36a2270b851db7bef9135f3eaae5d7/README.md"
+            },
+            {
+              "group": "clip",
+              "path": "mobileclip-s2_vision.onnx",
+              "url": "https://huggingface.co/Xenova/mobileclip_s2/resolve/0c311c620b36a2270b851db7bef9135f3eaae5d7/onnx/vision_model_fp16.onnx",
+              "revision": "0c311c620b36a2270b851db7bef9135f3eaae5d7",
+              "size_bytes": 71710175,
+              "sha256": "e011629d1490897f039fd8fbf1d6c677a03e0ffd1b5cea7cec5099bd8fea9476",
+              "license": "Other; Xenova model card links to apple/ml-mobileclip",
+              "license_source": "https://huggingface.co/Xenova/mobileclip_s2/blob/0c311c620b36a2270b851db7bef9135f3eaae5d7/README.md"
+            },
+            {
+              "group": "clip",
+              "path": "mobileclip-s2_tokenizer.json",
+              "url": "https://huggingface.co/Xenova/mobileclip_s2/resolve/0c311c620b36a2270b851db7bef9135f3eaae5d7/tokenizer.json",
+              "revision": "0c311c620b36a2270b851db7bef9135f3eaae5d7",
+              "size_bytes": 2224081,
+              "sha256": "72ed5c96db5729294468543e4bc75fce14ca63f58e37300290189ba1c1e52b85",
+              "license": "Other; Xenova model card links to apple/ml-mobileclip",
+              "license_source": "https://huggingface.co/Xenova/mobileclip_s2/blob/0c311c620b36a2270b851db7bef9135f3eaae5d7/README.md"
+            },
+            {
+              "group": "clip",
+              "path": "images/astronaut.png",
+              "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/e8a42ba85aaf5fd9322ef9ca51bc21063b22fcae/skimage/data/astronaut.png",
+              "revision": "e8a42ba85aaf5fd9322ef9ca51bc21063b22fcae",
+              "size_bytes": 791555,
+              "sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+              "license": "Public domain; NASA photograph of Eileen Collins",
+              "license_source": "https://github.com/scikit-image/scikit-image/blob/e8a42ba85aaf5fd9322ef9ca51bc21063b22fcae/skimage/data/_fetchers.py"
+            },
+            {
+              "group": "clip",
+              "path": "images/coffee.png",
+              "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/e8a42ba85aaf5fd9322ef9ca51bc21063b22fcae/skimage/data/coffee.png",
+              "revision": "e8a42ba85aaf5fd9322ef9ca51bc21063b22fcae",
+              "size_bytes": 466706,
+              "sha256": "cc02f8ca188b167c775a7101b5d767d1e71792cf762c33d6fa15a4599b5a8de7",
+              "license": "CC0; Rachel Michetti, courtesy of Pikolo Espresso Bar",
+              "license_source": "https://github.com/scikit-image/scikit-image/blob/e8a42ba85aaf5fd9322ef9ca51bc21063b22fcae/skimage/data/_fetchers.py"
+            }
+          ],
+          "total_bytes": 202310823
+        },
+        "queries": [
+          {
+            "query": "a photograph of an astronaut in a spacesuit",
+            "expected_uri": "mv2://images/0",
+            "requested_mode": "sem",
+            "engine": "hybrid",
+            "lexical_control_hits": 0,
+            "model_cosine_similarities": [
+              0.264844628534385,
+              0.0117096347077238
+            ],
+            "hits": [
+              {
+                "uri": "mv2://images/0",
+                "frame_id": 0,
+                "score": 0.3937181234359741
+              },
+              {
+                "uri": "mv2://images/1",
+                "frame_id": 1,
+                "score": 0.29704535007476807
+              }
+            ]
+          },
+          {
+            "query": "a cup of coffee on a wooden table",
+            "expected_uri": "mv2://images/1",
+            "requested_mode": "sem",
+            "engine": "hybrid",
+            "lexical_control_hits": 0,
+            "model_cosine_similarities": [
+              0.01500529971489044,
+              0.2734092837104613
+            ],
+            "hits": [
+              {
+                "uri": "mv2://images/1",
+                "frame_id": 1,
+                "score": 0.3972601294517517
+              },
+              {
+                "uri": "mv2://images/0",
+                "frame_id": 0,
+                "score": 0.2982184886932373
+              }
+            ]
+          }
+        ],
+        "reopen_verified": true,
+        "verification": {
+          "overall_status": "passed",
+          "checks": [
+            {
+              "details": null,
+              "name": "TimeIndexEntryCount",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "TimeIndexSortOrder",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "LexIndexDecode",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "VecIndexDecode",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "WalPendingRecords",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "FrameCountConsistency",
+              "status": "passed"
+            }
+          ]
+        },
+        "memory": {
+          "path": "clip.mv2",
+          "sha256": "bf3242356adfc5d551c54211e6229a78fb9efa641d1c74f84cd89e8c9c3d2bbe"
+        },
+        "images": [
+          {
+            "path": "clip-inputs/asset-0.png",
+            "sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5"
+          },
+          {
+            "path": "clip-inputs/asset-1.png",
+            "sha256": "cc02f8ca188b167c775a7101b5d767d1e71792cf762c33d6fa15a4599b5a8de7"
+          }
+        ],
+        "scope": "Real native CLIP embeddings use the SDK's public put_many vector interface. Original PNGs remain separate fixtures; the SDK does not expose the Rust CLIP-track insertion API."
+      },
+      "elapsed_seconds": 1.8526
+    },
+    {
+      "id": "CAP-WHISPER",
+      "name": "Native Whisper to searchable memory",
+      "status": "passed",
+      "observed": {
+        "transcription": {
+          "core_patch": "local-model-cache-v1",
+          "core_version": "2.0.140",
+          "duration_secs": 11.0,
+          "engine": "memvid-core::WhisperTranscriber",
+          "language": "en",
+          "model": "whisper-tiny-en",
+          "segments": [
+            {
+              "end": 11.0,
+              "start": 0.20000000298023224,
+              "text": "and so my fellow Americans ask not what your country can do for you ask what you can do for your country"
+            }
+          ],
+          "text": "and so my fellow Americans ask not what your country can do for you ask what you can do for your country"
+        },
+        "frame_id": "0",
+        "query": "country",
+        "hits": [
+          {
+            "uri": "mv2://audio/jfk",
+            "text": "and so my fellow Americans ask not what your country can do for you ask what you can do for your country title: Speech fixture uri: mv2://audio/jfk tags: ask can country what you americans fellow not labels: transcript Americans Ask Can Country What You extractous_metadata: {\"coverage\":1.0,\"sections_extracted\":1,\"sections_total\":1,\"skim\":false} source: \"OpenAI Whisper public test fixture\"",
+            "frame_id": 0
+          }
+        ],
+        "verification": {
+          "overall_status": "passed",
+          "checks": [
+            {
+              "details": null,
+              "name": "TimeIndexEntryCount",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "TimeIndexSortOrder",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "LexIndexDecode",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "VecIndexDecode",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "WalPendingRecords",
+              "status": "passed"
+            },
+            {
+              "details": null,
+              "name": "FrameCountConsistency",
+              "status": "passed"
+            }
+          ]
+        },
+        "reopen_verified": true,
+        "negative_cases": [
+          {
+            "case": "missing_argument",
+            "exit_code": 1
+          },
+          {
+            "case": "missing_audio",
+            "exit_code": 1
+          },
+          {
+            "case": "missing_cache",
+            "exit_code": 1
+          },
+          {
+            "case": "token_regular_file",
+            "exit_code": 1,
+            "error": "HF_HOME contains a token entry; use a credential-free model cache"
+          },
+          {
+            "case": "token_directory",
+            "exit_code": 1,
+            "error": "HF_HOME contains a token entry; use a credential-free model cache"
+          },
+          {
+            "case": "token_dangling_symlink",
+            "exit_code": 1,
+            "error": "HF_HOME contains a token entry; use a credential-free model cache"
+          }
+        ],
+        "binary_sha256": "edbae860cd5ec8467290ae84e3e683a46ca57f690abba9419928317d71fbe9c5",
+        "audio_sha256": "63a4b1e4c1dc655ac70961ffbf518acd249df237e5a0152faae9a4a836949715",
+        "memory": {
+          "path": "whisper.mv2",
+          "sha256": "9748b2aea8a97427f9a7e94be43495f82a996928807c4952145c37ee6677fcae"
+        },
+        "scope": "Native Memvid Whisper with an explicit local-cache initialization patch; real transcript ingested by the Python SDK."
+      },
+      "elapsed_seconds": 2.4483
+    }
+  ],
+  "counts": {
+    "passed": 15
+  },
+  "full_acceptance_passed": true,
+  "completed_at": "2026-10-28T11:38:31.282071+00:00"
+}

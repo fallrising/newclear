@@ -1,0 +1,36 @@
+✓ Lockfile passes supply-chain policies (verified 11h ago)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +247
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: <operator-home>/.local/share/pnpm/store/v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 247, reused 247, downloaded 0, added 247, done
+
+dependencies:
++ @ant-design/icons 6.3.2
++ @tanstack/react-query 5.101.4
++ antd 5.29.3
++ echarts 6.1.0
++ react 19.2.8
++ react-dom 19.2.8
++ react-router 8.3.0
++ zustand 5.0.14
+
+devDependencies:
++ @playwright/test 1.62.0
++ @testing-library/jest-dom 7.0.0
++ @testing-library/react 16.3.2
++ @testing-library/user-event 14.6.1
++ @types/node 26.1.2
++ @types/react 19.2.17
++ @types/react-dom 19.2.3
++ @vitejs/plugin-react 6.0.4
++ jsdom 30.0.1
++ msw 2.15.0
++ typescript 7.0.2
++ vite 8.1.5
++ vitest 4.1.10
+
+Done in 827ms using pnpm v11.18.0

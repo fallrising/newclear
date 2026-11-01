@@ -50,4 +50,4 @@ Root integration 使用真正coordinator、adapter與host helper及獨立temp ro
 
 ## 最終本機證據
 
-Root focused60 tests／10.397秒、獨立review57／0.479秒、full811／318.087秒全部通過，full無failure/error/skip。compileall、原workflow及team validators通過。[T-243 evidence gate](../.team/reports/T-243.md) 接受本輪adapter/helper；整體仍PARTIAL、正式剩餘12。下一步為獨立durable directory preparation，再接activation／bootstrap／generation與實機驗收。
+Root focused60 tests／10.397秒、獨立review57／0.479秒、full811／318.087秒全部通過，full無failure/error/skip。compileall、原workflow及team validators通過。T-243 evidence gate（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-243.md`） 接受本輪adapter/helper；整體仍PARTIAL、正式剩餘12。下一步為獨立durable directory preparation，再接activation／bootstrap／generation與實機驗收。

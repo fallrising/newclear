@@ -1,0 +1,18 @@
+{
+  "attempt": "baseline-001",
+  "exitCode": 0,
+  "error": null,
+  "elapsedSeconds": 38.571,
+  "containerRemoved": true,
+  "image": "sha256:f659591ff6a2df30b6d644236056a7f1b185a4161852f5b6639f45f042427884",
+  "binarySHA256": "d37d8c3b6a214447c7086e4360f6c44b67cdc74891eed7e0ab481393ecd3bbfe",
+  "sourceHashes": {
+    "guards.test.mjs": "55818d9ef16c9e7f45f9575d80fcba0b7fb03496b2b03d755dfb26e83bc05ee0",
+    "browser-baseline.mjs": "4c12046d96a22553fad6196ca6f0a7d8aab99f68adf8189a420a796b9d28e330",
+    "fixture.test.mjs": "f47fa47fd5aee5d7a7c231b243cc26e3bc70922b972babbec376b3da169ca836",
+    "fixture.mjs": "1093d6c6dc127a7730bd8cb512cdbb693e040a4669be3a6d9b84e7bcbec9980a",
+    "mock-upstream.mjs": "7ee372736faa597ae9a3c1cfa61f5dd95d6d50c044b5e0d9e4f38aa8e8fe7755",
+    "run-review.mjs": "9341049ea1e78716a1d57f859cff1c5b303068e82affc8a4f237eb5b5420d063",
+    "guards.mjs": "f5ad2bae0b5379937dbce7a6de8fd3bf743848f9d81599677649566a6e3ca560"
+  }
+}

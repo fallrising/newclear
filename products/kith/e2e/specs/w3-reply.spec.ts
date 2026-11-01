@@ -86,7 +86,7 @@ test(
       await expect(ben.page.getByTestId("reply-failed")).toHaveCount(0);
       note(info, "stale replying state expired after 300 s of client time");
 
-      await expect(ben.page.getByTestId("message-row").filter({ hasText: "late" })).toBeVisible({ timeout: 40_000 });
+      await expect(ben.page.getByTestId("message-body").filter({ hasText: /^late$/ })).toBeVisible({ timeout: 40_000 });
 
       await sendViaComposer(ben.page, "@grok [[fake:delay_ms=5000;text=after-drop]]");
       await expect(ben.page.getByTestId("reply-placeholder")).toBeVisible({ timeout: 20_000 });
@@ -94,7 +94,7 @@ test(
       await expect(ben.page.getByTestId("reply-placeholder")).toHaveCount(0);
       await expectLive(ben.page);
       await expect(ben.page.getByTestId("reply-placeholder")).toHaveCount(0);
-      await expect(ben.page.getByTestId("message-row").filter({ hasText: "after-drop" })).toBeVisible({ timeout: 30_000 });
+      await expect(ben.page.getByTestId("message-body").filter({ hasText: /^after-drop$/ })).toBeVisible({ timeout: 30_000 });
       note(info, "disconnect clears statuses; the reply still arrives");
     } finally {
       await ben.context.close();

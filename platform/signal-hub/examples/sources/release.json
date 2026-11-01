@@ -1,0 +1,17 @@
+{
+  "specversion": "1.0",
+  "id": "pipeline-example:run-42:attempt-1:succeeded",
+  "source": "urn:example:release:service-example",
+  "type": "release.deploy.succeeded",
+  "time": "2026-10-14T10:00:00Z",
+  "subject": "service-example",
+  "severity": "notice",
+  "summary": "Synthetic deployment completed",
+  "originurl": "https://ci.example.invalid/runs/42",
+  "correlationid": "pipeline-example:run-42:attempt-1",
+  "data": {
+    "environment": "example",
+    "revision": "0123456789abcdef0123456789abcdef01234567",
+    "duration_ms": 45000
+  }
+}

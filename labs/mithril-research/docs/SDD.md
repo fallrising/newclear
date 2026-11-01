@@ -87,6 +87,10 @@ credentials 只放私有 runtime 檔案／secret store；報告保留 hash 與�
 
 ## 7. 交付順序
 
+2026-10-17 工具實作補充：[P1c contract](P1-BOOTSTRAP-CONTRACT.md) 把初始六節點 topology 與 bootstrap proposal 落成離線驗證器；匯入的觀察、node ID map 與 digest 不能建立實機身分、freshness 或操作批准。Startup 執行與 MR-R02 runtime lifecycle 仍待後續驗收。
+
+P1d 補充：[collector contract](P1-COLLECTOR-CONTRACT.md) 定義有界唯讀 acquisition；complete 是完整回應與綁定結果，不是六節點原子 snapshot、健康或操作批准。P1e [phase contract](P1-PHASE-CONTRACT.md) 實作獨立純離線五個 barrier predicates，只驗證原始 complete collection；phase-aware live validation／execution 仍待後續，不改 P1c 只接受 pristine／already-converged 的契約。
+
 M0：來源鎖定、研究、設計與證據邊界（本次）。
 
 M1：固定版本 fixture、build/native tests、核心命令／隔離與精確清理。
@@ -102,3 +106,9 @@ M3：公平 benchmark、成本與採用／不採用 ADR。
 [S05]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/benchmarks.md
 [S06]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/configuration.md
 [S07]: https://github.com/projecteru2/mithril/blob/9959fe2e5cd466614dc20ef7b710befaaf1d746a/docs/operations.md
+
+## P1f 本機 intent journal 邊界
+
+[P1-JOURNAL](P1-JOURNAL.md) 與[獨立契約](P1-JOURNAL-CONTRACT.md) 定義本機持久化 intent／uncertainty 基礎。它不執行 action、不推進 phase、不接收新 snapshot 或批准來清除 uncertainty；未知或部分本機狀態拒絕使用。Timeout／lost reply 不等於遠端取消。保護只涵蓋同一保留的 journal root，不能用新 root 或 rollback 取得重送授權。
+
+實機階段前後 authenticated fresh collection、逐效果身分核對、精確獨立批准、durable executor／reconciliation、runtime image provenance、有效 network／ACL、replication health／lag、保留資料 lifecycle 與 proxy smoke 仍須完成。Down 保留資料，purge 必須另有精確條件與批准。完整 P1／MR-004 尚未完成；正式計數以 STATUS 的 4 DONE／1 BLOCKED_ENV／4 TODO 為準。

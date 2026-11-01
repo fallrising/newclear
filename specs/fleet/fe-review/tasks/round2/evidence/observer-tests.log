@@ -1,0 +1,11 @@
+✔ both approved status colors meet 4.5:1 on table and page backgrounds (1.131875ms)
+✔ pending browser rejection is handled immediately when the action fails first (3.907603ms)
+✔ pending success and unknown errors retain no raw payload (0.345888ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.951902

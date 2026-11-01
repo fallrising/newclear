@@ -441,3 +441,9 @@ services stopped, no resident URL, no M3/AC05 or full platform completion claim.
 round verifies M2-03 concurrent markers/boundaries, actual agent overlap, browser
 cancelA/completeB and final cleanup/max1 restoration. Previous singleCodex result
 is retained without replay. FN03 remains pending until actual evidence is accepted.
+
+M2 concurrent checkpoint2026-11-01: owner-approved bounded pair on d008fc47 passed actual
+Claude repair, Codex cancellation, two live isolated workspaces, secret/network/traversal
+denials and cancelA/completeB. Both cleaned; capacity restored1 and services stopped.
+See [M2 acceptance](docs/acceptance/M2-two-vendors.md). Fresh independent ACCEPT_M2_LIVE; final PR906 delivery pending.
+Earlier pending-resource text is historical. M3/AC05 not started; mainline incomplete.

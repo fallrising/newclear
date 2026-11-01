@@ -2713,3 +2713,11 @@ approved 2x4CPU4GiB zero-warm resources, then restore1. Native/source gates alre
 passed for unchanged AP/Fanz bytes; verify acceptance scripts, inspect actual receipts,
 fresh-context independent acceptance and required CI before normal merge/readback.
 Estimated continuation45–75min plus CI; unknown metrics remain null. No M3.
+
+M2 pair evidence gate ACCEPT_M2_LIVE: fresh independent reviewer verifies actual
+Codex/Claude streams, prior Codex repair and current Claude same fixed-base diff,
+two actual VM/workspace denials and A/B/A overlap, Web cancelA thenB success after
+A cleanup. Original15min window retained, exactly2 new coding invocations; three
+pre-inference queued cancellations remain explicit. Capacity1 restored, no resources
+or services left. Final source/docs/CI/normal merge/readback and board closure remain.
+No M3, public URL, release or full-platform completion claim.

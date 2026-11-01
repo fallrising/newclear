@@ -40,10 +40,13 @@ No Cloud catalog investigation, UI redesign or new milestone.
 
 | ID | 任務 | 對應AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M2-1 | Official Codex route qualification and same Web integration | FN-02 | in_progress | 2026-11-01T04:27:00Z | — | 2026-11-01T04:27:00Z |
+| M2-1 | Official Codex route qualification and same Web integration; PR895 merged | FN-02 | done | 2026-11-01T04:27:00Z | 2026-11-01T05:30:52Z | 2026-11-01T05:30:52Z |
 | M2-2 | Concurrent workspace denial, cancellation independence and cleanup; bounded resources approved | FN-03 | in_progress | 2026-11-01T11:05:00Z | — | 2026-11-01T11:05:00Z |
 
 
 M2 single-route checkpoint2026-11-01T05:10Z: actual Codex Web run142e9aee passed,
 fixed-base diff/check/download and cleanup confirmed; see [acceptance](../acceptance/M2-two-vendors.md).
 Concurrent FN03 remains pending explicit two-VM approval; no M3 work started.
+
+M2-2 actual pair2026-11-01T11:21:42Z passed, original15min window retained; capacity1 restored.
+Final independent acceptance and PR906 merge pending before this row is closed.

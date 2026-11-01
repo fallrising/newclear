@@ -15,7 +15,7 @@ import sys
 import time
 from deepseek_relay import Relay, MAX_REQUESTS, MAX_OUTPUT, MAX_BODY
 from remote_cli import LAB, isolated_env, private_directory, probe, write_new_private
-from process_ownership import process_table, collect_owned, alive_owned
+from process_ownership import process_table, collect_owned, alive_owned, crash_owned
 
 
 def prepare(out, port, token):
@@ -52,8 +52,9 @@ def main():
     group.add_argument('--check-startup', action='store_true', help='Real Office/Pi boot, no remote request permitted')
     group.add_argument('--allow-remote', action='store_true', help='Authorize one bounded paid DeepSeek fixture run')
     group.add_argument('--check-failure', type=int, choices=(401, 429), help='Native Pi against an injected loopback error; no credentials or external requests')
+    group.add_argument('--check-crash', action='store_true', help='Kill this run\'s working Pi CLI while its request is held locally; no remote calls')
     args = parser.parse_args()
-    if not args.allow_remote and not args.check_startup and args.check_failure is None:
+    if not args.allow_remote and not args.check_startup and args.check_failure is None and not args.check_crash:
         print(json.dumps({'mode': 'plan', 'command': 'python3 scripts/run_pi_work.py --allow-remote',
                           'provider': 'pi', 'model': 'deepseek-flash', 'max_requests': MAX_REQUESTS,
                           'max_output_tokens_per_request': MAX_OUTPUT, 'max_request_bytes': MAX_BODY,
@@ -73,12 +74,15 @@ def main():
     mark_started()
     out = private_directory(LAB / 'runs' / ('pi-work-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')))
     token = secrets.token_urlsafe(32)
-    relay = Relay(token, api_key, fault_status=args.check_failure)
+    relay = Relay(token, api_key, fault_status=args.check_failure, hold_request=args.check_crash)
     process = None; owned = {}
     report = {'status': 'starting', 'startup_only': args.check_startup, 'provider': 'pi', 'model': 'deepseek-flash',
               'model_inference_verified': False, 'cleanup_errors': [], 'cloud_fallback': False}
     if args.check_failure is not None:
         report.update(fault_injection={'source': 'loopback', 'http_status': args.check_failure}, failure_check_passed=False)
+    if args.check_crash:
+        report.update(crash_injection={'source': 'owned_cli', 'signal': 'SIGKILL'}, crash_check_passed=False,
+                      crash_target_verified=False)
     started = time.monotonic()
     def interrupted(*_):
         raise InterruptedError('Interrupted')
@@ -93,17 +97,35 @@ def main():
         command = [shutil.which('node'), str(LAB / 'scripts/office_pi.mjs'), str(out)]
         if args.check_startup: command.append('--check-startup')
         if args.check_failure is not None: command += ['--check-failure', str(args.check_failure)]
+        if args.check_crash: command.append('--check-crash')
         with (out / 'office.stdout.log').open('w') as stdout, (out / 'office.stderr.log').open('w') as stderr:
             process = subprocess.Popen(command, cwd=out, env=env, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr, start_new_session=True)
             deadline = time.monotonic() + 180
             while process.poll() is None:
                 owned = collect_owned(process_table(), owned, process.pid)
+                if args.check_crash and not report['crash_target_verified'] and relay.request_held.is_set():
+                    target_path = out / 'crash-target.json'
+                    if target_path.is_file():
+                        target = json.loads(target_path.read_text())
+                        if target.get('status') != 'working' or not isinstance(target.get('session'), str) or not target['session']:
+                            raise ValueError('Invalid native crash target')
+                        crash_owned(target.get('pid'), owned)
+                        report['crash_target_verified'] = True
                 if time.monotonic() > deadline: raise subprocess.TimeoutExpired(command, 180)
                 time.sleep(0.1)
             code = process.returncode
         office = json.loads((out / 'office-result.json').read_text())
         report['office'] = office
-        if args.check_failure is not None:
+        if args.check_crash:
+            if (code or office.get('status') != 'failed' or office.get('native_crash_verified') is not True
+                    or report['crash_target_verified'] is not True or relay.external_requests != 0
+                    or relay.client_requests != 1 or len(relay.records) != 1
+                    or relay.records[0].get('origin') != 'held_loopback'
+                    or office.get('no_automatic_restart_observation_ms', 0) < 3000
+                    or (out / 'workspace/result.json').exists()):
+                raise ValueError('Native CLI crash acceptance failed')
+            report.update(status='failed', reason='injected_cli_crash', crash_check_passed=True)
+        elif args.check_failure is not None:
             if (code or office.get('status') != 'failed' or office.get('native_error_verified') is not True
                     or office.get('failure_check_passed') is not True or relay.external_requests != 0
                     or relay.client_requests != 1 or len(relay.records) != 1
@@ -115,13 +137,14 @@ def main():
         elif code or office['status'] != 'completed':
             raise ValueError('Native Office/Pi acceptance failed')
         elif args.check_startup:
-            if relay.records: raise ValueError('Startup unexpectedly requested inference')
+            if relay.records or relay.client_requests or relay.external_requests:
+                raise ValueError('Startup unexpectedly requested inference')
         else:
             if not relay.records or any(r['status'] != 'completed' for r in relay.records): raise ValueError('Provider requests did not complete')
             if not any(r.get('output_tokens', 0) > 0 for r in relay.records): raise ValueError('No provider usage evidence')
             if not office.get('file_task_passed') or not office.get('agent_settled_verified'): raise ValueError('Missing native evidence')
             report['model_inference_verified'] = True
-        if args.check_failure is None: report['status'] = 'completed'
+        if args.check_failure is None and not args.check_crash: report['status'] = 'completed'
     except (OSError, ValueError, subprocess.SubprocessError):
         report['status'] = 'failed'; report['reason'] = 'bounded_pi_acceptance_failed'
     finally:
@@ -149,17 +172,19 @@ def main():
         if report['cleanup_errors']:
             report['status'] = 'failed'
             if args.check_failure is not None: report['failure_check_passed'] = False
+            if args.check_crash: report['crash_check_passed'] = False
         (out / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
         print(json.dumps({'status': report['status'], 'model_inference_verified': report['model_inference_verified'],
               'failure_check_passed': report.get('failure_check_passed'), 'external_requests': relay.external_requests,
+              'crash_check_passed': report.get('crash_check_passed'),
               'requests': len(relay.records), 'cleanup_errors': report['cleanup_errors'], 'artifacts': str(out)}, indent=2))
     if not report['cleanup_errors']:
         mark_clean()
-    return 0 if report['status'] == 'completed' or report.get('failure_check_passed') is True else 1
+    return 0 if report['status'] == 'completed' or report.get('failure_check_passed') is True or report.get('crash_check_passed') is True else 1
 
 
 if __name__ == '__main__':
-    try: raise SystemExit(guarded_main(main, bool(set(sys.argv[1:]) & {'--allow-remote', '--check-startup'}) or any(a == '--check-failure' or a.startswith('--check-failure=') for a in sys.argv[1:])))
+    try: raise SystemExit(guarded_main(main, bool(set(sys.argv[1:]) & {'--allow-remote', '--check-startup', '--check-crash'}) or any(a == '--check-failure' or a.startswith('--check-failure=') for a in sys.argv[1:])))
     except (OSError, ValueError):
         print('Pi fixture could not start; check preflight and isolated credentials. No secret is printed.', file=sys.stderr)
         raise SystemExit(1)

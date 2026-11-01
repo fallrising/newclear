@@ -13,10 +13,11 @@ const [out] = process.argv.slice(2);
 assert(out?.startsWith(lab + '/runs/'));
 const workspace = path.join(out, 'workspace');
 const startup = process.argv.includes('--check-startup');
+const crash = process.argv.includes('--check-crash');
 const failureIndex = process.argv.indexOf('--check-failure');
 const failure = failureIndex >= 0 ? Number(process.argv[failureIndex + 1]) : undefined;
 assert(failure === undefined || [401, 429].includes(failure));
-assert(!(startup && failure !== undefined));
+assert(Number(startup) + Number(crash) + Number(failure !== undefined) <= 1);
 const require = createRequire(path.join(lab, 'vendor/agent-office/package.json'));
 const WebSocket = require('ws');
 const report = { status: 'starting', provider: 'pi', model: 'deepseek/deepseek-flash',
@@ -25,10 +26,10 @@ const save = () => fs.writeFileSync(path.join(out, 'office-result.json'), JSON.s
 let office, ws, worker, closing;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const events = () => fs.existsSync(path.join(out, 'pi-events.jsonl')) ? fs.readFileSync(path.join(out, 'pi-events.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(s => JSON.parse(s)) : [];
-async function until(check, ms, reason, allowExpectedError = false) {
+async function until(check, ms, reason, allowExpectedError = false, allowExit = false) {
   const deadline = Date.now() + ms;
   while (Date.now() < deadline) {
-    if (worker?.status === 'exited' || (!allowExpectedError && events().some(e => e.type === 'assistant_end' && ['error', 'aborted', 'length'].includes(e.stopReason)))) throw new Error('Native Pi failed');
+    if ((!allowExit && worker?.status === 'exited') || (!allowExpectedError && events().some(e => e.type === 'assistant_end' && ['error', 'aborted', 'length'].includes(e.stopReason)))) throw new Error('Native Pi failed');
     if (check()) return;
     await sleep(100);
   }
@@ -94,7 +95,31 @@ try {
   await until(() => worker && events().some(e => e.type === 'session_start') && report.authenticated_hooks.some(e => e.type === 'session' && e.status === 'starting'), 30000, 'Native Pi session did not start', failure !== undefined);
   report.startup_verified = true;
   assert(worker.sessionId);
-  if (failure !== undefined) {
+  report.session_id = worker.sessionId;
+  if (crash) {
+    await until(() => worker.status === 'working' && report.authenticated_hooks.some(e => e.status === 'working'), 30000, 'Native Pi never started working');
+    const owners = office.floors().flatMap(f => f.workers.owners()).filter(o => o.workerId === worker.id && o.agent && o.cwd === workspace);
+    assert.equal(owners.length, 1);
+    assert(Number.isInteger(owners[0].pid) && owners[0].pid > 1);
+    // The runner checks this PID against its observed descendant identities before signalling.
+    fs.writeFileSync(path.join(out, '.crash-target.tmp'), JSON.stringify({pid: owners[0].pid, session: worker.sessionId, status: worker.status}), {flag:'wx', mode:0o600});
+    fs.renameSync(path.join(out, '.crash-target.tmp'), path.join(out, 'crash-target.json'));
+    await until(() => worker.status === 'exited', 15000, 'Native CLI exit missing', false, true);
+    const session = worker.sessionId;
+    await sleep(3000);
+    const recorded = events();
+    assert(worker.status === 'exited' && worker.sessionId === session && !report.states.includes('done'));
+    assert.equal(recorded.filter(e => e.type === 'session_start').length, 1);
+    assert(recorded.every(e => e.session === session && e.provider === 'deepseek' && e.model === 'deepseek-flash'));
+    assert(report.authenticated_hooks.every(e => e.session === session));
+    assert(!recorded.some(e => ['tool_call', 'assistant_end', 'agent_settled'].includes(e.type)));
+    assert(!fs.existsSync(path.join(workspace, 'result.json')));
+    assert(!office.floors().flatMap(f => f.workers.owners()).some(o => o.pid));
+    report.native_crash_verified = true;
+    report.native_exit_code = worker.exitCode;
+    report.no_automatic_restart_observation_ms = 3000;
+    report.status = 'failed';
+  } else if (failure !== undefined) {
     await until(() => worker.status === 'needs_input' && events().some(e => e.type === 'assistant_end' && e.stopReason === 'error')
       && events().some(e => e.type === 'agent_settled') && report.authenticated_hooks.some(e => e.type === 'error'),
       30000, 'Native Pi error evidence missing', true);
@@ -109,7 +134,10 @@ try {
     report.failure_check_passed = true;
     report.fault_injection = {source: 'loopback', http_status: failure};
     report.status = 'failed';
-  } else if (!startup) {
+  } else if (startup) {
+    await until(() => worker.status === 'idle', 15000, 'Native Pi did not reach idle');
+    assert(!report.states.includes('working') && !report.authenticated_hooks.some(e => e.type === 'prompt'));
+  } else {
     await until(() => worker.status === 'done' && events().some(e => e.type === 'agent_settled'), 150000, 'Native Pi did not settle');
     const recorded = events();
     assert(recorded.every(e => e.session === worker.sessionId && e.provider === 'deepseek' && e.model === 'deepseek-flash'));
@@ -125,7 +153,7 @@ try {
     report.artifact_sha256 = createHash('sha256').update(artifact).digest('hex');
     report.file_task_passed = true; report.agent_settled_verified = true;
   }
-  if (failure === undefined) report.status = 'completed';
+  if (failure === undefined && !crash) report.status = 'completed';
 } catch (error) {
   report.status = 'failed'; report.error = String(error); process.exitCode = 1;
 } finally {

@@ -120,6 +120,23 @@ def normalize(run_fd, run_id):
     if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
         row['elapsed_seconds'] = round(elapsed, 2)
     row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if 'crash_injection' in report:
+        if (provider != 'pi' or report['crash_injection'] != {'source': 'owned_cli', 'signal': 'SIGKILL'}
+                or 'fault_injection' in report):
+            return dict(row, status='invalid', reason='invalid_crash_test_metadata')
+        row['test_scenario'] = 'injected_cli_crash'
+        row['failure_check_passed'] = (report.get('crash_check_passed') is True
+                                      and report.get('status') == 'failed' and row['cleanup_verified']
+                                      and office.get('status') == 'failed' and model_matches
+                                      and report.get('model_inference_verified') is False
+                                      and office.get('native_crash_verified') is True
+                                      and report.get('crash_target_verified') is True
+                                      and type(report.get('client_requests')) is int and report['client_requests'] == 1
+                                      and type(report.get('external_requests')) is int and report['external_requests'] == 0
+                                      and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+                                      and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='injected_owned_cli_crash')
     if 'fault_injection' in report:
         fault = report['fault_injection']
         if (provider != 'pi' or not isinstance(fault, dict) or fault.get('source') != 'loopback'

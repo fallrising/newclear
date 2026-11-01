@@ -1,6 +1,7 @@
 import http.client
 import json
 import unittest
+import threading
 from unittest.mock import patch
 
 from deepseek_relay import Relay
@@ -43,6 +44,36 @@ class RelayFailures(unittest.TestCase):
         for status, key in ((401, 'fake-key'), (429, ''), (200, None), ('401', None), (True, None)):
             with self.assertRaises(ValueError):
                 Relay('token', key, fault_status=status)
+
+    def test_held_request_never_connects_upstream_and_blocks_concurrent_request(self):
+        relay = self.start(hold_request=True)
+        errors = []
+        def request():
+            try:
+                self.request(relay)
+            except http.client.RemoteDisconnected:
+                errors.append('closed_without_response')
+        with patch('deepseek_relay.http.client.HTTPSConnection', side_effect=AssertionError('external forbidden')) as https:
+            worker = threading.Thread(target=request)
+            worker.start()
+            try:
+                self.assertTrue(relay.request_held.wait(3))
+                self.assertTrue(worker.is_alive())
+                self.assertEqual(self.request(relay)[0], 400)
+                self.assertEqual(relay.external_requests, 0)
+                self.assertEqual(relay.records[0]['origin'], 'held_loopback')
+            finally:
+                relay.release_request.set(); worker.join(3)
+            https.assert_not_called()
+        self.assertFalse(worker.is_alive())
+        self.assertEqual(errors, ['closed_without_response'])
+        self.assertEqual(relay.records[0]['status'], 'interrupted')
+        self.assertTrue(relay.budget.stopped)
+
+    def test_held_request_cannot_mix_credentials_or_http_fault(self):
+        for options in ({'api_key':'key'}, {'api_key':''}, {'fault_status':401}):
+            with self.assertRaises(ValueError):
+                Relay('token', hold_request=True, **options)
 
     def test_auth_and_payload_validation_precede_injection(self):
         relay = self.start(fault_status=401)

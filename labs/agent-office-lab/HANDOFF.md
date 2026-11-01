@@ -1,8 +1,10 @@
 # 開發交接
 
+T-0015：完成 [Pi CLI crash 與明確重新啟動](docs/CRASH.md)。真實 Pi working 時將第一個請求留在本機，對核對歸屬的 CLI 注入 SIGKILL，原生狀態轉 exited 而非 done；任務保持 failed。最終 crash／新 session 啟動各追蹤 40／38 個程序，全部退出後釋放執行鎖；重複派工拒絕，觀察期沒有自動重跑。明確新 session 到 idle、零請求，與原 session 不同。上游 PTY 在 SIGKILL 後回 exit code 0，沒有據此判成功。141 tests、43 筆結果瀏覽器驗證通過，零遠端模型請求、未載入 owner key 或 Strata。[證據](docs/evidence/pi-crash-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。原 session 續做、其他 provider、顯式重試與完整 MVP 仍待驗。
+
 T-0014：完成[Pi 原生 401／429 故障驗收](docs/FAILURES.md)。本機注入錯誤，真實 Pi 呈現 needs_input／error 且從未 done；各一次本機請求、零外部模型請求、無產物或推論成功。發現並修正 Pi 過早判定清理：最終兩次 runner 與外層觀察均確認所屬程序全退出、鎖釋放；原兩次清理證據不足紀錄保留。結果頁標示注入來源，任務仍為失敗。135 tests 與 40 筆結果的瀏覽器核對通過。[證據](docs/evidence/pi-failures-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。完整 AC-07、其他 provider 及 MVP 仍 pending。
 
-目前剩餘主線：遠端新入口真實任務；跨 provider 權限、取消與恢復；CLI crash／其他 provider 故障與最多兩次顯式重試流程；UI 派工到結果；完整安全邊界驗收。Strata GitHub tool-loop 為獨立非 MVP 阻塞研究。
+目前剩餘主線：遠端新入口真實任務；跨 provider 權限、取消與恢復；其他 provider 的 CLI crash／故障與最多兩次顯式重試流程；UI 派工到結果；完整安全邊界驗收。Strata GitHub tool-loop 為獨立非 MVP 阻塞研究。
 
 T-0013：新派工入口的 OpenCode／Strata 真實本地任務與原生取消通過。最終 runner 整輪任務／取消驗收 54.95 秒、產物 hash 正確；原生取消與所屬程序退出 202 ms，全程追蹤 60 個程序，最後全部退出。另一次原生 working 後 Ctrl+C 正確顯示 cancelled／exit 130，10.399 秒後追蹤到的 23 個程序（含 runner）全部退出；這包含模型關閉，不是工位取消耗時。三次實測均拒絕重複派工、釋放執行鎖，資源 guard 未觸發，沒有遠端模型呼叫。122 tests 與 36 筆結果的瀏覽器篩選／產物／刷新通過。[證據](docs/evidence/local-dispatch-2026-11-01.json)，[操作](docs/DISPATCH.md)，交付狀態見[任務板](docs/tasks/BOARD.md)。遠端 provider 的新入口與取消／恢復仍待驗，完整 MVP 保持 incomplete。
 

@@ -1,0 +1,3 @@
+Original local log SHA256: 8f1c8c3674edb9a6c864c82ca5b95d5cf646286ec6cba1e8745af837c4a75e59
+
+Exception in thread "main" java.io.FileNotFoundException: /home/ckc/.gradle/wrapper/dists/gradle-9.7.1-bin/1w1c7tv4s851m17nbqdsro2tv/gradle-9.7.1-bin.zip.lck (Read-only file system)

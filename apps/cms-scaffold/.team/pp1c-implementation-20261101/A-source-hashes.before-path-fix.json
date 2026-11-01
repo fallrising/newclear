@@ -1,0 +1,13 @@
+{
+  "local/pp1c-card-checkpoints/C05/services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java": "0e33bb7346297c71a85f9299d42b76da49bef01af6921276a7c7a74cb64f94aa",
+  "local/pp1c-card-checkpoints/C05/services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java": "71d8962caa1b170b776a2ac02fb3298b81c5c7ead6bba2bd5896bba65e366fd1",
+  "scripts/ops/recovery-protocol.mjs": "c7ce6f0d8c9285a613ddbb887e29c2ca672c92afc814161769318b2d9537f06f",
+  "scripts/ops/recovery-protocol.test.mjs": "99ae9fe5d7c5d250b44451a5808b84703fd3616dc866f450b04396592f4a4b35",
+  "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java": "688d567cff5b556496b38d67fb26e32867d4d2ae12f134bb33e08cadc60f36a4",
+  "services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java": "468da7a7e41e488438669392d0810c4dd1a85084c1932247f614a11f81a464bc",
+  "services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java": "ef43791d085eb405a26d7672847aae66e5988b828b899ae5ab04cae6c6ae03e4",
+  "services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java": "136c76a39b60394aec4e48f19a9bb19f8873ba53609c2e4617710f05e9250a37",
+  "services/cms-api/src/test/java/com/fallrising/cms/CmsApiApplicationTests.java": "7d585f0272df986127aaff19ddd2d74d57b04c4a3d87f99e8668b91b3786c943",
+  "services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java": "ede7c0d7c12a080ae32629626a42d2c1a4e26bea4b581b0321bbf83bbffd147a",
+  "services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java": "a53e87ba7f504b5ac76325e7931a2cd1c97b5c75ce5a8a43dca4e01c6d4a83e1"
+}

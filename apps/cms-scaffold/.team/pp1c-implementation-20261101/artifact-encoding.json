@@ -1,0 +1,149 @@
+{
+  "reason": "Preserve exact generated patch context/test-output bytes without trailing-whitespace violations in source control. Decode each text property to recover the original byte-identical artifact; worker originals remain preserved. No tests/product bytes changed.",
+  "artifacts": [
+    {
+      "original": "T-116/C01-red-inprocess.txt",
+      "encoded": "T-116/C01-red-inprocess.txt.json",
+      "sha256": "194cb37320e12c57c257b2ef783f6e4e657f54819bb91eb2e970b241b50835d9",
+      "bytes": 84483
+    },
+    {
+      "original": "T-116/C01-red-native.txt",
+      "encoded": "T-116/C01-red-native.txt.json",
+      "sha256": "f2f090fea45f48ca5670e2d5bda7642f592d1188873c7865281a3789f6bc457d",
+      "bytes": 81796
+    },
+    {
+      "original": "T-117/C03-checkpoint.patch",
+      "encoded": "T-117/C03-checkpoint.patch.json",
+      "sha256": "614babf55c314d90353e5de9e7a768dcc357b11d893094d8da17e1a2dda8df78",
+      "bytes": 8981
+    },
+    {
+      "original": "T-117/C04a-checkpoint.patch",
+      "encoded": "T-117/C04a-checkpoint.patch.json",
+      "sha256": "04041501bb1f68df8e2b06da28c2bf3b59a5d28305b8d1a1fc165e8837ba20c0",
+      "bytes": 16047
+    },
+    {
+      "original": "T-117/C04a-diff.patch",
+      "encoded": "T-117/C04a-diff.patch.json",
+      "sha256": "b52ed33f897156c3ee353477a97b3db97e543e381dc8437c20bebe580476bd62",
+      "bytes": 10448
+    },
+    {
+      "original": "T-117/C04a-results.xml",
+      "encoded": "T-117/C04a-results.xml.json",
+      "sha256": "515768c780359ecc07e4d1e835c47373077d59e17134fce210aeb5db80af583a",
+      "bytes": 27804
+    },
+    {
+      "original": "T-117/C04b-checkpoint.patch",
+      "encoded": "T-117/C04b-checkpoint.patch.json",
+      "sha256": "c9b6fef650f0fba83aea4a990b65f3c34d407c11726f23469e6ae64167fb8d23",
+      "bytes": 15527
+    },
+    {
+      "original": "T-117/C04b-results.xml",
+      "encoded": "T-117/C04b-results.xml.json",
+      "sha256": "aeb7003538fa9aa18b664902f4e05d23da65509ff3c5a45bd91b01ad0a9a4957",
+      "bytes": 3443
+    },
+    {
+      "original": "T-117/C04c-checkpoint.patch",
+      "encoded": "T-117/C04c-checkpoint.patch.json",
+      "sha256": "a1dddaa28721191f7ae228a16915d11461f40da3f2e362e0c486041d805eeb48",
+      "bytes": 12016
+    },
+    {
+      "original": "T-117/C04c-frozen-membership-green-results.xml",
+      "encoded": "T-117/C04c-frozen-membership-green-results.xml.json",
+      "sha256": "ecc219f133cb20596211a8ee67f84fec5c7aeab24d1858aca45929c74aacfd35",
+      "bytes": 4024
+    },
+    {
+      "original": "T-117/C04c-invalid-utf8-checkpoint.patch",
+      "encoded": "T-117/C04c-invalid-utf8-checkpoint.patch.json",
+      "sha256": "b2720b2181f4efc45e8c6bd12c8158fbabc5e110e38cc5fa09816058ff1b9714",
+      "bytes": 6608
+    },
+    {
+      "original": "T-117/C04c-invalid-utf8-final-green-results.xml",
+      "encoded": "T-117/C04c-invalid-utf8-final-green-results.xml.json",
+      "sha256": "1e857ed462640b9d1b0fad5b02fb79f23487e935220be9c353668224e0739809",
+      "bytes": 5090
+    },
+    {
+      "original": "T-117/C04c-invalid-utf8-green-results.xml",
+      "encoded": "T-117/C04c-invalid-utf8-green-results.xml.json",
+      "sha256": "17f28bba38830cdabb8383d9f1d567b3ac5a337179d708371a7a2126d5892d0a",
+      "bytes": 3879
+    },
+    {
+      "original": "T-117/C04c-invalid-utf8-red-results.xml",
+      "encoded": "T-117/C04c-invalid-utf8-red-results.xml.json",
+      "sha256": "cb9acabf987ec5aaf3f40d32df6aa175ab84654dc9b1f0d407f6618166824c94",
+      "bytes": 1460
+    },
+    {
+      "original": "T-117/C04c-membership-green-results.xml",
+      "encoded": "T-117/C04c-membership-green-results.xml.json",
+      "sha256": "9c2b8e693d405c4272a3a7614f6196ea54419492c734fd88b97cdec39e8f2597",
+      "bytes": 4024
+    },
+    {
+      "original": "T-117/C04c-results.xml",
+      "encoded": "T-117/C04c-results.xml.json",
+      "sha256": "cbd3ba6ad3dcfc221ddccb4daa2f3c769278e4b0a8a8041b4a31cd5329b0180a",
+      "bytes": 1547
+    },
+    {
+      "original": "T-117/C04d-checkpoint.patch",
+      "encoded": "T-117/C04d-checkpoint.patch.json",
+      "sha256": "089f5c3ecc2871ddec8c72ea8fc54b93e57dc1da6529a3eeba4ef95c741878f7",
+      "bytes": 12454
+    },
+    {
+      "original": "T-117/C04d-followup-checkpoint.patch",
+      "encoded": "T-117/C04d-followup-checkpoint.patch.json",
+      "sha256": "a26947353620d4c870295e47aee3636c13f7f6cf6701bfa40bd76f3cdfb6b88f",
+      "bytes": 6466
+    },
+    {
+      "original": "T-117/C04d-integration.patch",
+      "encoded": "T-117/C04d-integration.patch.json",
+      "sha256": "de0d3181a7bfb84661dafe8af6ffae624818fb241efebb180e6f16b74b4d5fc8",
+      "bytes": 5334
+    },
+    {
+      "original": "T-117/C04d-main.patch",
+      "encoded": "T-117/C04d-main.patch.json",
+      "sha256": "d8dc70c1bca9621a74f4c78f32c61f079b00ffb3aca474f0000f3abecb182850",
+      "bytes": 5237
+    },
+    {
+      "original": "T-117/C04d-results.xml",
+      "encoded": "T-117/C04d-results.xml.json",
+      "sha256": "3fda15a6aae76178b0ce5b97954379410d207b19064d3a61e3721dcaffb3c7a2",
+      "bytes": 52071
+    },
+    {
+      "original": "T-117/C04d-tests.patch",
+      "encoded": "T-117/C04d-tests.patch.json",
+      "sha256": "e9b32b179bd15c8fe91145bac30a65f44216b895f6d8230350d30fb08ff541d6",
+      "bytes": 1637
+    },
+    {
+      "original": "T-117/final-integration-results.xml",
+      "encoded": "T-117/final-integration-results.xml.json",
+      "sha256": "a39bbe2ef976ebff428a4fcfd9ddc0e2e5470f19fc77ddeae66405a2aefc1854",
+      "bytes": 58125
+    },
+    {
+      "original": "T-117/final-unit-results.xml",
+      "encoded": "T-117/final-unit-results.xml.json",
+      "sha256": "e3b1ac0f02fdad9ea8f0b0a787a3fc5cd30939362338589ec7fe775d09b0cb25",
+      "bytes": 3736
+    }
+  ]
+}

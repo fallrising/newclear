@@ -1,0 +1,30 @@
+Command: JAVA_HOME=<existingJDK25> timeout900 ./gradlew test --tests *CmsApiApplicationTests --tests *RecoveryInventoryMainTests --no-daemon --no-parallel
+Observed exit1; named assertion RED, compilation passed.
+Raw log sha256: fd857835493e992c0b937089ff8fabd1081116e755a6acfca3b54e205b372339
+
+> Task :services:cms-api:compileJava
+> Task :services:cms-api:processResources
+> Task :services:cms-api:classes
+> Task :services:cms-api:compileTestJava
+> Task :services:cms-api:processTestResources
+> Task :services:cms-api:testClasses
+> Task :services:cms-api:test
+CmsApiApplicationTests > pp1cExactOfflineTokenNeverStartsSpring() FAILED
+CmsApiApplicationTests > pp1cMisplacedOrRepeatedOfflineTokensNeverStartSpring() FAILED
+RecoveryInventoryMainTests > pp1cPermitMustEndAtEof() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryMainTests.java:104
+RecoveryInventoryMainTests > pp1cFixedArgumentsRejectCallerSelectedRequest() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryMainTests.java:116
+RecoveryInventoryMainTests > pp1cDuplicateAndNoncanonicalRequestRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryMainTests.java:95
+RecoveryInventoryMainTests > pp1cPermitMismatchAndTrailingBytesNeverInspect() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryMainTests.java:101
+RecoveryInventoryMainTests > pp1cUnsafeRequestAndSecretFailBeforeDatabase() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryMainTests.java:108
+RecoveryInventoryMainTests > pp1cSuccessBindsReadyPermitAndWritesPrivateArtifactBeforeResult() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryMainTests.java:73
+RecoveryInventoryMainTests > pp1cMalformedRequestRejectedBeforeConnection() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryMainTests.java:86
+20 tests completed, 9 failed
+> Task :services:cms-api:test FAILED
+BUILD FAILED in 22s

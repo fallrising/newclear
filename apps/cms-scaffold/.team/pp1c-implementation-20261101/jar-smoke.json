@@ -1,0 +1,46 @@
+{
+  "jarSha256": "3f9e46de95da6282a695b707826bb98d71f63f9a9aa459266ec0e8ac704293a9",
+  "checkedAt": "2026-11-01T17:34:51.421965+00:00",
+  "cases": [
+    {
+      "args": [
+        "ops-inventory",
+        "--request",
+        "/tmp/caller.json"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "INPUT_INVALID",
+      "springStarted": false
+    },
+    {
+      "args": [
+        "x",
+        "ops-inventory"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "",
+      "springStarted": false
+    },
+    {
+      "args": [
+        "ops-inventory",
+        "ops-inventory"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "",
+      "springStarted": false
+    },
+    {
+      "args": [
+        "maintenance"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "{\"code\":\"INPUT_INVALID\",\"operationId\":null}",
+      "springStarted": false
+    }
+  ]
+}

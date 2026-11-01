@@ -1,0 +1,5 @@
+{
+  "services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java": "deeb34d64366a7e5bbd97273605f74935562e234802e92e2de8f67b2f1fa182b",
+  "services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java": "f84356021329eccd2a7d321c3d4b5aa9286a4ce184a7c1bbd1ef22ebaaf929ce",
+  "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java": "688d567cff5b556496b38d67fb26e32867d4d2ae12f134bb33e08cadc60f36a4"
+}

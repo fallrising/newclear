@@ -1,0 +1,186 @@
+{
+  "date": "2026-11-01",
+  "baseline_commit": "caad3c3a811456da767872aa6fc02d859955011c",
+  "scope": "local_dispatch_real_inference_cancellation_and_cleanup",
+  "remote_model_calls": 0,
+  "local_runs": 3,
+  "local_model": "strata/qwen3.8-flash-next-q2_0",
+  "context_tokens": 32768,
+  "cases": [
+    {
+      "exit_code": 0,
+      "elapsed_seconds": 62.61,
+      "concurrent_launch": {
+        "exit_code": 1,
+        "blocked": true
+      },
+      "owned_processes_seen": 55,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "new_runs": 1,
+      "run_id": "local-work-20261101T142647710358Z",
+      "report": {
+        "status": "completed",
+        "model": "qwen3.8-flash-next-q2_0",
+        "model_inference_verified": true,
+        "file_task_passed": true,
+        "cleanup_errors": [],
+        "elapsed_s": 61.36073254188523
+      },
+      "office": {
+        "status": "completed",
+        "model": "strata/qwen3.8-flash-next-q2_0",
+        "model_inference_verified": true,
+        "file_task_passed": true,
+        "office_native_status_verified": true,
+        "artifact_sha256": "12f31ad4f8ff2db954a3527659da6db9cccc97a83702a180721dab808e983c74",
+        "cancel_duration_ms": 203,
+        "cancel_event_verified": true,
+        "cancelled_processes_exited": true,
+        "cleanup_completed": true
+      },
+      "scenario": "initial_native_cancel",
+      "runtime_source_sha256": {
+        "runner.py": "bd1a28e7da49709fa074bf05a07c33e405d0158b10542ce70d57be7527ae4050",
+        "execution_slot.py": "247f3ac93f8f87abbe7d693d494b3b04b81c5aac858d924f062191d17ffbacfe",
+        "office_opencode.mjs": "652fd9e27b936ecc6923c29593943f6c1b691e8ae4bfaf3699c0f86a0e85a598"
+      },
+      "resource_guard": {
+        "max_pressure_level": 1,
+        "max_swap_delta_mib": 0.0,
+        "stopped_by_guard": false
+      }
+    },
+    {
+      "user_interrupt_after_native_working": true,
+      "interrupt_to_exit_seconds": 10.399,
+      "exit_code": 130,
+      "elapsed_seconds": 27.76,
+      "concurrent_launch": {
+        "exit_code": 1,
+        "blocked": true
+      },
+      "owned_processes_seen": 23,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "new_runs": 1,
+      "run_id": "local-work-20261101T142944596488Z",
+      "report": {
+        "status": "cancelled",
+        "model": "qwen3.8-flash-next-q2_0",
+        "model_inference_verified": false,
+        "file_task_passed": false,
+        "cleanup_errors": [],
+        "elapsed_s": 26.368136124918237
+      },
+      "office": {
+        "status": "interrupted",
+        "model": "strata/qwen3.8-flash-next-q2_0",
+        "model_inference_verified": null,
+        "file_task_passed": null,
+        "office_native_status_verified": null,
+        "artifact_sha256": null,
+        "cancel_duration_ms": null,
+        "cancel_event_verified": null,
+        "cancelled_processes_exited": null,
+        "cleanup_completed": true
+      },
+      "scenario": "user_interrupt",
+      "runtime_source_sha256": {
+        "runner.py": "84eeb9199802607cbb5a2699775eddd7e29c8a2075663553ad88f87241e9f1aa",
+        "execution_slot.py": "247f3ac93f8f87abbe7d693d494b3b04b81c5aac858d924f062191d17ffbacfe",
+        "local_run_state.py": "761d23345f830c567d1107b14bc2119d4717b020b747fb96d3d25285dfd312c7",
+        "office_opencode.mjs": "0e1cb620cf2e712f5ccae0d9db768a4725baab125bf278842b602024f24e5c18"
+      },
+      "resource_guard": {
+        "max_pressure_level": 2,
+        "max_swap_delta_mib": 0.0,
+        "stopped_by_guard": false
+      }
+    },
+    {
+      "exit_code": 0,
+      "elapsed_seconds": 56.37,
+      "concurrent_launch": {
+        "exit_code": 1,
+        "blocked": true
+      },
+      "owned_processes_seen": 60,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "new_runs": 1,
+      "run_id": "local-work-20261101T143130868645Z",
+      "report": {
+        "status": "completed",
+        "model": "qwen3.8-flash-next-q2_0",
+        "model_inference_verified": true,
+        "file_task_passed": true,
+        "cleanup_errors": [],
+        "elapsed_s": 54.95417041704059
+      },
+      "office": {
+        "status": "completed",
+        "model": "strata/qwen3.8-flash-next-q2_0",
+        "model_inference_verified": true,
+        "file_task_passed": true,
+        "office_native_status_verified": true,
+        "artifact_sha256": "04b6dc365098f207b122d4fe3a4590ddd11b113bbd3911c680609ddefe28d186",
+        "cancel_duration_ms": 202,
+        "cancel_processes_exit_duration_ms": 202,
+        "cancel_event_verified": true,
+        "cancelled_processes_exited": true,
+        "cleanup_completed": true
+      },
+      "scenario": "final_native_cancel",
+      "runtime_source_sha256": {
+        "runner.py": "84eeb9199802607cbb5a2699775eddd7e29c8a2075663553ad88f87241e9f1aa",
+        "execution_slot.py": "247f3ac93f8f87abbe7d693d494b3b04b81c5aac858d924f062191d17ffbacfe",
+        "local_run_state.py": "761d23345f830c567d1107b14bc2119d4717b020b747fb96d3d25285dfd312c7",
+        "office_opencode.mjs": "0e1cb620cf2e712f5ccae0d9db768a4725baab125bf278842b602024f24e5c18"
+      },
+      "resource_guard": {
+        "max_pressure_level": 1,
+        "max_swap_delta_mib": 0.0,
+        "stopped_by_guard": false
+      }
+    }
+  ],
+  "tests": {
+    "python": 87,
+    "node": 35,
+    "total": 122
+  },
+  "browser": {
+    "runs": 36,
+    "completed_and_cancelled_classification": true,
+    "four_provider_details_and_sha256": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "javascript_errors": 0
+  },
+  "final_cleanup": {
+    "model_and_resource_guard_processes_present": false,
+    "active_journal_present": false
+  },
+  "source_sha256": {
+    "office_dispatch.py": "447d74144c4fa9a81ccc0f26d9604815c1275ab1d3b78a9082e0616f36af71c4",
+    "run_local_work.py": "84eeb9199802607cbb5a2699775eddd7e29c8a2075663553ad88f87241e9f1aa",
+    "local_run_state.py": "761d23345f830c567d1107b14bc2119d4717b020b747fb96d3d25285dfd312c7",
+    "office_opencode.mjs": "0e1cb620cf2e712f5ccae0d9db768a4725baab125bf278842b602024f24e5c18",
+    "execution_slot.py": "247f3ac93f8f87abbe7d693d494b3b04b81c5aac858d924f062191d17ffbacfe",
+    "office_results.py": "a98a1206dfed0a79335381be9fc723a40a64a0ec7aade00e9399f679d7122e9c",
+    "office_results.html": "ac95b41a8ff359caa6b2dfa3ce96c03eab434b330a775c334ea5157cfd168140",
+    "check_office_results_browser.mjs": "25fbc13768ff0699254eabd2898a0cc5fe163c23e80bd38eaab619f4fae041b3",
+    "test_local_run_state.py": "d7bdb79763920a4e856d6fbd517f0ddf674f7fdd5ee2e1d9833b7b04ad9acd20",
+    "test_office_dispatch.py": "22b895eee6d3f2e72aea8f013153762c8846fd597749fb97754bb253e789ddf8",
+    "test_office_results.py": "3142dd28cab2567dc36af04a384ddc087133efed2b8dac6ac51153ebae69e906"
+  },
+  "limitations": [
+    "only OpenCode/Strata was run through the new entry; remote providers were not rerun",
+    "native worker cancellation was 202 ms; Ctrl+C to whole-runner exit including model shutdown was 10.399 s",
+    "a completed file task plus a cancelled second task is a successful cancellation acceptance, not a cancelled file task",
+    "original required cross-provider ACs and full MVP remain pending",
+    "initial run predates outcome classification changes; per-run source hashes preserve the distinction"
+  ]
+}

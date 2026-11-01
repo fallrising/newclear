@@ -131,6 +131,8 @@ def normalize(run_fd, run_id):
     reported = report.get('status')
     if reported == 'failed':
         row.update(status='failed', reason='runner_reported_failure')
+    elif reported == 'cancelled':
+        row.update(status='cancelled', reason='runner_reported_user_cancellation')
     elif reported in ('stopped', 'interrupted'):
         row.update(status='stopped', reason='runner_reported_stop')
     elif reported != 'completed':

@@ -57,7 +57,7 @@ class OfficeResultsTest(unittest.TestCase):
 
     def test_failure_stop_startup_and_incomplete_never_complete(self):
         for index, (status, startup, expected) in enumerate([
-            ('failed', False, 'failed'), ('stopped', False, 'stopped'),
+            ('failed', False, 'failed'), ('stopped', False, 'stopped'), ('cancelled', False, 'cancelled'),
             ('interrupted', False, 'stopped'), ('completed', True, 'startup_only'),
             ('starting', False, 'incomplete'),
         ]):

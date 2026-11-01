@@ -63,6 +63,21 @@ class DispatchTest(unittest.TestCase):
                 self.assertNotIn('--keep-open', argv)
                 self.assertNotIn('--budget-multiplier', argv)
 
+    def test_cancel_check_is_explicit_local_only_and_plan_stays_inert(self):
+        with patch.object(dispatch, 'detect') as probe, patch.object(os, 'execve') as execute:
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                self.assertEqual(dispatch.main(['run', 'opencode', '--check-cancel']), 0)
+            self.assertTrue(json.loads(output.getvalue())['native_cancel_check'])
+            for provider in ('grok', 'pi', 'cursor'):
+                with self.assertRaisesRegex(SlotError, 'local_cancel_check_only'):
+                    dispatch.launch(provider, True, self.lab, check_cancel=True)
+            probe.assert_not_called(); execute.assert_not_called()
+        with patch.object(dispatch, 'detect', return_value={'launch_prerequisites_present': True}), \
+                patch.object(os, 'execve', side_effect=OSError('test does not start model')) as execute:
+            with self.assertRaises(OSError):
+                dispatch.launch('opencode', False, self.lab, check_cancel=True)
+            self.assertEqual(execute.call_args.args[1][-1], '--check-cancel')
+
     def test_credentials_metadata_is_not_authentication(self):
         for provider, relative in [('grok', '.local/remote/grok/auth.json'),
                                    ('pi', '.local/remote/pi/auth.json'),

@@ -152,3 +152,14 @@ Owner 指示繼續開發；本輪不新增模型呼叫，完整 AC 保持 pendin
 | T-0012-02 | 共用執行鎖、清理確認及異常退出阻擋 | AC-08／AC-11 子集 | done | 2026-11-01T11:39:35Z | 2026-11-01T11:51:09Z | 2026-11-01T11:51:32Z |
 
 T-0012 結案：[PR #916](https://github.com/fallrising/newclear/pull/916) 已合併，commit `1ba325266fed588ab9388fea5cfb689b9c160c59`，offline／validate 兩項 CI success。已回讀主線證據：117 tests、四 CLI 的實際斷網版本／help 檢查通過；exec 鎖繼承、直接 runner 互斥、強制中斷後阻擋通過。0 新模型呼叫、未啟動 Strata。完成 AC-01 偵測／派工 gate 與 AC-08／AC-11 執行保護子集；完整 AC 保持 pending，歷史模型成功證據沒有冒充新入口驗收。下一步為新入口端到端任務與跨 provider 生命週期；沒有 release／deploy／usable tag。
+
+## T-0013：本地派工端到端與取消驗收
+
+Owner 指示繼續開發；本輪僅執行本地模型，不新增遠端付費呼叫。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0013-01 | 新入口本地合成任務、互斥與產物回讀 | AC-01／AC-02／AC-09 子集 | done | 2026-11-01T14:26:04Z | 2026-11-01T14:36:21Z | 2026-11-01T14:36:48Z |
+| T-0013-02 | 原生取消及 runner 中斷清理、執行鎖釋放 | AC-06／AC-08 子集 | done | 2026-11-01T14:26:04Z | 2026-11-01T14:36:21Z | 2026-11-01T14:36:48Z |
+
+T-0013 結案：[PR #923](https://github.com/fallrising/newclear/pull/923) 已合併，commit `d93067baa4da7222fddde41b688939329595c961`，offline／validate 兩項 CI success。已回讀主線證據：122 tests、三個真實本地 run（最終原生取消及程序退出 202 ms；Ctrl+C 整體退出 10.399 秒），所屬程序全部退出、執行鎖釋放、重複派工拒絕、完成／取消結果與瀏覽器核對通過。0 遠端模型呼叫，本地模型已停止。完成新入口本地 AC-01／02／09 與取消／中斷 AC-06／08 子集；遠端新入口與跨 provider 生命週期仍待驗，完整 MVP incomplete，沒有 release／deploy／usable tag。

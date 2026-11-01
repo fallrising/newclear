@@ -1,0 +1,49 @@
+{
+  "schema_version": "cloudlab.remote-restore-evidence.v1",
+  "status": "partial-awaiting-export-approval",
+  "recorded_at": "2026-11-01T14:39:54Z",
+  "local_audit": {
+    "focused_tests": 17,
+    "source_command_count": 3,
+    "source_journal_count": 3,
+    "classifications": {
+      "completed_preserved": 2,
+      "unknown_preserved": 1
+    },
+    "all_dispatch_allowed": false,
+    "full_suite": {
+      "node": 138,
+      "python": 325,
+      "total": 463,
+      "failed": 0
+    }
+  },
+  "remote_preflight": {
+    "d1_count": 5,
+    "source_commands": 3,
+    "source_active": 1,
+    "source_schedule_enabled": false,
+    "source_cron_count": 0,
+    "source_test_token_enabled": false
+  },
+  "remote_restore": {
+    "export_executed": false,
+    "database_created": false,
+    "import_executed": false,
+    "journal_backup_executed": false,
+    "source_mutation": false,
+    "reason": "Automatic approval review rejected full sensitive export payload and local destination; explicit approval requested."
+  },
+  "limits": {
+    "runner_executed": false,
+    "failover_verified": false,
+    "authority_renewed": false,
+    "paid_upgrade": false,
+    "billing": null,
+    "mainline_complete": false
+  },
+  "inputs": {
+    "tools/restore_audit.py": "531132a7da29bf1d699bc3d972b76ca7bb1839ea2d40959799e50996ef65e5b8",
+    "tests/test_restore_audit.py": "67fc43e1bae7fcc2f0894ba21682683ee12cc2567ea1ac18de04ce05c739ffbb"
+  }
+}

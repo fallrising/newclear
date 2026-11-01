@@ -2810,3 +2810,7 @@ backup/ledger. T-0449 remains proposed/unclaimed; no AP edits. Required CI/Git d
 ## T-0449 approved readonly review — 2026-11-01T16:44:02Z
 
 Claim PR382 merged; owner批准 bounded proposal. Parent owns Fanzloud specification/Web/durable route integration and live acceptance; one AP worker owns only agent-platform implementation/tests in isolated worktree. One later fresh reviewer, no recursion. Worker<=70active min,2evidenced corrections; build25min/CI30min. R01–05 gates require native tests+actual isolated cross-vendor review; max1VM4CPU/4GiB,20min window/last3cleanup,<=600s each/max3conditionalinvocations. Unknown never retry. No old dirty tree changes. Provider usage unknown.
+
+T-0449 actual checkpoint 2026-11-01T17:11:52.045902+00:00: source865ed05e, one Codex review accepted retained Claude candidate, exact result after Rust/AP restart; OS/Connector boundary and cleanup receipts passed. AP832/M0-45/finalDB12/Web38/native Rust pass. Final independent/CI pending; no new live rerun. Original unknownstore preserved; fullM3/FN07 open.
+
+T-0449 evidence gate: ACCEPT_READONLY_ACTUAL_AND_NATIVE from independent final review; R01/R04native, R02/R03actual, R05source+cleanup+sourceCI accepted. Source865ed05e all3requiredCI green. Finaldocshead CI/merge/readback/ledger remain delivery gates; no actual replay.

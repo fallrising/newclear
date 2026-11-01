@@ -8,6 +8,9 @@ reviewed: 2026-10-31
 source_commit: 391aa1aa72f1dd550d8acc7323f00c7a6229c3d4
 ---
 
+> **2026-11-01 current checkpoint**: Approved T-0449 readonly review passed its single actual window on `865ed05e`: retained Claude candidate → Codex verdict, exact result after Rust/AP restart, readonly/secret/network boundaries and cleanup. [Evidence](docs/acceptance/M3-readonly-review.md). Independent ACCEPT_READONLY_ACTUAL_AND_NATIVE; final docs-head CI/merge/readback pending; full M3/FN07 remains open. Earlier dated checkpoints are historical.
+
+
 > **2026-10-31 M1**：[真實單任務閉環](docs/acceptance/M1-isolated.md) 已通過：正式 Claude Code、真 VM、真 Rust／AP 與 Chromium，固定 base diff／檢查及清理可核對。FN-01 與 FN-03 單任務部分已驗；FN-06 已補齊有區分的失敗／取消驗證，CI／合併依該報告，M2／M3與整體 FN-01–07 未完成。舊 Cloud AC-04、持久化 AC-05 不改為通過。
 
 
@@ -478,8 +481,8 @@ C01–05 actual checkpoint: source4fa2f781, immutable1932-byte candidate hash43a
 verified against AP and downloaded identically in two fresh Chromium contexts; zero new
 task/coding/VM, all services stopped. [Evidence](docs/acceptance/M3-fixed-candidate.md).
 Native/Web33 and project52 pass; independent ACCEPT_FIXED_CANDIDATE_C01_C05; CI/publication pending.
-T-0449 proposal remains unapproved; candidate preparation is not full FN05 acceptance.
+Historical candidate-only checkpoint: proposal was then unapproved; superseded by approved T-0449 checkpoint below.
 
 ## T-0449 approved FN05 readonly dependency
 
-Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Native/actual evidence pending, no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.
+Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Actual source865ed05e: one Codex review of retained Claude candidate accepted; exact archive reopened after Rust/AP restart, readonly OS/Connector boundaries and cleanup proven. Independent ACCEPT_READONLY_ACTUAL_AND_NATIVE; final docs-head PR952 CI/merge/readback pending; no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.

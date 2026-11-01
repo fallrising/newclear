@@ -252,4 +252,4 @@ No AP production code changes or M3. Earlier pending-resource snapshot supersede
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | in_progress | 2026-11-01T16:44:02Z | | 2026-11-01T16:44:02Z |
+| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | in_progress | 2026-11-01T16:44:02Z | | 2026-11-01T17:11:52.045902+00:00 |

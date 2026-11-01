@@ -8,6 +8,9 @@ reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
 
+> **2026-11-01 current checkpoint**: Approved T-0449 readonly review passed its single actual window on `865ed05e`: retained Claude candidate → Codex verdict, exact result after Rust/AP restart, readonly/secret/network boundaries and cleanup. [Evidence](../fanzloud/docs/acceptance/M3-readonly-review.md). Independent ACCEPT_READONLY_ACTUAL_AND_NATIVE; final docs-head CI/merge/readback pending; full M3/FN07 remains open. Earlier dated checkpoints are historical.
+
+
 # Agent Platform 成功契約
 
 ## 主線與範圍
@@ -244,4 +247,4 @@ Earlier pending-resource text is historical. M3/AC05 not started; mainline incom
 
 ## T-0449 approved FN05 readonly dependency
 
-Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Native/actual evidence pending, no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.
+Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Actual source865ed05e: one Codex review of retained Claude candidate accepted; exact archive reopened after Rust/AP restart, readonly OS/Connector boundaries and cleanup proven. Independent ACCEPT_READONLY_ACTUAL_AND_NATIVE; final docs-head PR952 CI/merge/readback pending; no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.

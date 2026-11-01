@@ -62,4 +62,6 @@ release or deploy.
 The first exact-head backend job failed with `panic: test timed out after 10m0s` in the `service` package race run;
 goroutines were running SQLite work, not deadlocked. Base `935ffbc1` versus head race timings in the pinned container
 were 436.4 s and 462.7 s (+26 s, the four new oracles). The single re-run of the unchanged head passed (377.5 s).
-The package already runs close to Go's default timeout; raising it or splitting the package is a separate decision.
+The closeout PR's docs-only head (code identical to main) then failed the same way (non-race `service` 44.8 s versus
+about 23 s on normal runners), so the limit, not this slice, was the recurring cause. `scripts/check-backend.sh` now
+passes `-timeout 15m` to both test runs; the tested set and assertions are unchanged and the 20-minute job cap remains.

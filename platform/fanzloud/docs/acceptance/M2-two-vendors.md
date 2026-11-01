@@ -1,6 +1,6 @@
 # M2 second vendor and concurrent isolation — T-0442
 
-Status at initial code checkpoint: **PARTIAL / live FN02 and concurrent FN03 NOT_RUN**.
+Status2026-11-01: **PARTIAL — actual Codex Web repair PASS; concurrent FN03 pending explicit resource approval**.
 [Normative scope](../specs/SPEC-M2-two-vendors.md), [independent review](../../../../.team/fanz-m2-t0442/review-report.md).
 M1 is preserved at live33e1eb70 / final391aa1aa; no CloudAC04 or M3 acceptance is implied.
 
@@ -34,7 +34,9 @@ pinned official CLI/model metadata, three dynamic VM tools and no uncertain rela
   offline evidence parser3 and repository project-success50 passed.
 - Independent review: original REWORK findings R1–R3 corrected, then ACCEPT_CODE.
   Full AP `make platform-check` passed lint/format,45 base tests and809 platform tests
-  against a fresh real PostgreSQL instance; owned test container removed. Hosted CI pending.
+  against a fresh real PostgreSQL instance; owned test container removed. All four
+  hosted workflows passed on a51a8663: AP41275675180, Fanzloud41275675220,
+  project contracts41275675179 and workflow validation41275675200.
 
 Private raw evidence lives in the task's local handoff and eventual private backup;
 only sanitized source/run/hash/check summaries belong here. Provider requests, aggregate
@@ -61,3 +63,69 @@ cargo build --locked --workspace --bins --all-features
 python3 scripts/check_project_success.py
 git diff --check
 ```
+
+
+## Actual second-vendor single-VM result
+
+Source `a51a86634a27d84e52fe95e2d42d4ea7ac541ec0` (AP/Fanzloud bytes identical to
+reviewed/tested `6ad8261f5e2ce7beeb4896711802973f69aec089`), [PR895](https://github.com/fallrising/newclear/pull/895).
+Same Chromium153 Web offered both Codex and Claude profiles; one real Codex POST
+created run `142e9aee-179a-426e-b0c6-330df9f4a677`. Observed queued → provisioning →
+running → finalizing → succeeded, tests passed, cleanup confirmed, zero browser errors.
+Official app-server called fanz_read twice, fanz_write once, fanz_exec once. No fake
+provider or model/API fallback; existing trusted ChatGPT login, empty environments,
+effective configuration verified and CLI process group stopped.
+
+Fixed base `55bd36a47d3ca619b0a10bcad427b9fb9b8c99c5`; only totals.py changed,
+285-byte diff. Page, downloaded bytes and AP artifact share SHA256
+`c5134c8015bad2104fceb70e5c4c79086d6ec9bd85a0b4fa0f833b4ed3ef6fdb`.
+Downloaded patch applied to a fresh base archive and all3 fixture tests passed.
+Actual VM probe passed UID2000/NoNewPrivs, host/control-secret denial, no provider/control
+credentials in environment, direct public/private/metadata and HTTP/CONNECT proxy denial.
+AP unreleased reservations0; actual runtime absence proof retained separately.
+
+One new live coding CLI invocation; provider requests, tokens and billed cost unknown.
+The retained remote Connector/runtime source remains M1 `33e1eb70d66eb74644e8ad81e64e8bdc69c9fe07`;
+new current-source AP driver/lifecycle and Rust/Web are not misattributed to that source.
+M1 Claude receipt remains accepted; new simultaneous Claude/Codex and cancellation
+independence must still pass, and neither same catalog nor one Codex task proves them.
+
+Environment repairs before submission were not coding retries: missing old browser
+image was rebuilt from retained recipe and fixed Debian digest; Node24.18.0/
+Playwright1.63.0 came from existing binary/shared cache, Chromium153.0.8010.12 retained.
+New test image `sha256:05505689fab0f13b972bfe45004f20aca04bfafe20bb3f0819f711ecd73ed736`.
+PostgreSQL initialization readiness race was reconciled while database had zero public
+tables; SSH default cleared forwarding until a per-command explicit loopback override;
+node startup corrected to the existing sealed egress launcher before admission; first
+browser container mount failure occurred before process/intent/task creation. All failed
+logs preserved; exactly one task was submitted. SSH Git authentication stalled, so the
+same local commit was pushed with existing HTTPS credential helper, without secret output
+or global config changes. Current main merged normally, no rebase/force push.
+
+
+Evidence limitations retained: the config-response log redaction keyed by RPC ID also
+redacted one colliding incoming write callback request. Its official dynamicToolCall
+started/completed events, matching receipt call ID, resulting source and exact diff
+still establish the successful write; do not claim four raw request records. The first
+cleanup script counted22 kernel cgroup control files; corrected directory-only query
+returned0 VM cgroups. Both snapshots had zero claims/VMM. Neither diagnostic was hidden
+or treated as a provider/task retry.
+
+
+## Single-route closeout
+
+Independent new-evidence audit: [ACCEPT_SINGLE_LIVE](../../../../.team/fanz-m2-t0442/live-evidence-report.md),
+overall M2 remains PARTIAL. Actual runtime claims/VMM/VM-cgroup counts0. Temporary
+API/Rust/browser/tunnel/PostgreSQL and remote owned services/registry stopped;
+fixed runtime/configuration and DB volume retained. max_claims never exceeded1.
+Native AP backup of this actual completed Codex history passed creation and verification,
+118344 bytes, SHA256`813bde5b5208a2b460d4e46d023e6a4db9bfdab7bef5cb2cb71ae6192a6dadcd`.
+The initial backup destination was correctly refused for group-writable shared ancestors;
+verified in a private temporary directory and copied unchanged for retention, without
+weakening checks. This preserves evidence, not a Fanzloud M3 restart/recovery acceptance.
+
+A concrete two-VM plan was presented after single-route success. Until the owner explicitly
+approves it, no second concurrent allocation or additional coding invocation is permitted.
+The proposed window is15min,2×4vCPU/4GiB,zero-warm,at most2 new real CLI invocations;
+restore max_claims1 and prove cleanup. Six host logical CPUs means explicit CPU overcommit.
+Do not infer approval from this document, CI, merged code, or elapsed waiting time.

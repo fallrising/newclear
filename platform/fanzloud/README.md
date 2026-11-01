@@ -1,5 +1,7 @@
 # Codebox
 
+> **2026-11-01 M2 進度**：同一 Web 已提供 Claude／Codex；官方 Codex 的單 VM 修復、檢查、固定 base diff 下載與清理已實跑通過。[證據與限制](docs/acceptance/M2-two-vendors.md)。同時兩個工作區及取消互不影響仍待資源批准與驗證；目前沒有常駐操作網址。
+
 > **2026-10-31 M1**：真 Chromium → Rust → Agent Platform → 隔離 VM → 官方 Claude Code 已完成一次修復，頁面顯示進度、檢查通過並下載精確 diff。[實測證據與限制](docs/acceptance/M1-isolated.md)、[私人操作入口](docs/isolated-operator.md)。目前僅單一已登錄專案／agent，尚非完整廠商中立 MVP。
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。

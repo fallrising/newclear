@@ -42,3 +42,8 @@ No Cloud catalog investigation, UI redesign or new milestone.
 | --- | --- | --- | --- | --- | --- | --- |
 | M2-1 | Official Codex route qualification and same Web integration | FN-02 | in_progress | 2026-11-01T04:27:00Z | — | 2026-11-01T04:27:00Z |
 | M2-2 | Concurrent workspace denial, cancellation independence and cleanup; resource approval pending | FN-03 | todo | — | — | 2026-11-01T04:27:00Z |
+
+
+M2 single-route checkpoint2026-11-01T05:10Z: actual Codex Web run142e9aee passed,
+fixed-base diff/check/download and cleanup confirmed; see [acceptance](../acceptance/M2-two-vendors.md).
+Concurrent FN03 remains pending explicit two-VM approval; no M3 work started.

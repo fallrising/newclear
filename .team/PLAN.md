@@ -34,6 +34,13 @@ review then focused correction review. No recursive agents. Parent owns final li
 Initial red/config/backup failures retained; no checks weakened. Private CLI startup and
 synthetic Responses adversarial receipts distinguish actual binary from fake provider.
 
+Single-route evidence gate2026-11-01: ACCEPT_SINGLE_LIVE, overall PARTIAL. Actual
+Codex run142e9aee sourcea51a8663; four VM tools, fixed-base285-byte diffc5134c80...fdb,
+checks and downloaded patch tests passed. Hosted four workflows allgreen. AP backup
+created/verified; runtime0claims/VMM/cgroups, services stopped, capacity remains1.
+One additional10min evidence-only independent audit reviewed genuinely new live receipts;
+no repeated code review/provider. Concurrent approval question remains pending, not granted.
+
 ---
 
 # Repository team ledger

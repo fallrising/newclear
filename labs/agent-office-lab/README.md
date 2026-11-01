@@ -2,6 +2,7 @@
 
 本地優先的 Agent Office 實驗：OpenCode + Strata、Grok、Pi + DeepSeek、Cursor 的原生合成任務均已實測通過。提供四 provider 的唯讀結果查詢與離線頁面；統一 CLI 的本地 OpenCode 端到端任務與取消已實測，遠端新入口及跨 provider 生命週期仍待完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
 
+- [Pi 故障驗收](docs/FAILURES.md)：本機注入 401／429、原生錯誤與清理核對，不呼叫模型。
 - [統一偵測與派工](docs/DISPATCH.md)：預設計畫、明確執行、單一執行鎖與中斷阻擋。
 - [統一結果入口](docs/RESULTS.md)：讀取既有真實 run、核對產物、離線篩選與查看詳細結果。
 - [安裝與重跑](docs/SETUP.md)：macOS arm64、固定依賴與外部 Strata 前置條件。

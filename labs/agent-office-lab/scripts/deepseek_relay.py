@@ -11,6 +11,12 @@ MAX_BODY = 32768
 MAX_OUTPUT = 512
 
 
+def error_response(status):
+    # Preserve actionable HTTP classes, never forward provider error bodies or headers.
+    return {401: (401, 'provider_authentication_failed'),
+            429: (429, 'provider_rate_limited')}.get(status, (502, 'provider_request_failed'))
+
+
 def bounded_payload(raw):
     if len(raw) > MAX_BODY:
         raise ValueError('request_too_large')
@@ -49,9 +55,14 @@ class Budget:
 
 
 class Relay:
-    def __init__(self, token, api_key=None):
+    def __init__(self, token, api_key=None, *, fault_status=None):
+        if fault_status is not None and (type(fault_status) is not int or fault_status not in (401, 429) or api_key is not None):
+            raise ValueError('fault_injection_requires_401_or_429_and_no_api_key')
         self.token = token
         self.api_key = api_key  # None is the startup-only gate; it cannot forward any request.
+        self.fault_status = fault_status
+        self.client_requests = 0
+        self.external_requests = 0
         self.budget = Budget()
         self.records = []
         relay = self
@@ -74,7 +85,8 @@ class Relay:
                     self.error(404, 'unsupported_endpoint'); return
                 if not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + relay.token):
                     self.error(401, 'unauthorized'); return
-                if relay.api_key is None:
+                relay.client_requests += 1
+                if relay.api_key is None and relay.fault_status is None:
                     self.error(403, 'startup_only_no_remote_requests'); return
                 try:
                     if self.headers.get('Transfer-Encoding'):
@@ -92,15 +104,23 @@ class Relay:
                 record = {'request': relay.budget.requests, 'model': MODEL, 'max_output_tokens': MAX_OUTPUT,
                           'status': 'failed', 'input_bytes': length}
                 relay.records.append(record)
+                if relay.fault_status is not None:
+                    record.update(http_status=relay.fault_status, origin='injected_loopback')
+                    try:
+                        self.error(*error_response(relay.fault_status))
+                    finally:
+                        relay.budget.finish(failed=True)
+                    return
                 conn = http.client.HTTPSConnection('api.deepseek.com', timeout=60)
                 failed = True
                 try:
+                    relay.external_requests += 1
                     conn.request('POST', '/chat/completions', body, {'Authorization': 'Bearer ' + relay.api_key,
                                   'Content-Type': 'application/json', 'Accept': 'text/event-stream'})
                     response = conn.getresponse()
                     record['http_status'] = response.status
                     if response.status != 200:
-                        self.error(502, 'provider_request_failed'); return
+                        self.error(*error_response(response.status)); return
                     self.send_response(200)
                     self.send_header('Content-Type', 'text/event-stream')
                     self.end_headers()

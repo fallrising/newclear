@@ -13,6 +13,10 @@ const [out] = process.argv.slice(2);
 assert(out?.startsWith(lab + '/runs/'));
 const workspace = path.join(out, 'workspace');
 const startup = process.argv.includes('--check-startup');
+const failureIndex = process.argv.indexOf('--check-failure');
+const failure = failureIndex >= 0 ? Number(process.argv[failureIndex + 1]) : undefined;
+assert(failure === undefined || [401, 429].includes(failure));
+assert(!(startup && failure !== undefined));
 const require = createRequire(path.join(lab, 'vendor/agent-office/package.json'));
 const WebSocket = require('ws');
 const report = { status: 'starting', provider: 'pi', model: 'deepseek/deepseek-flash',
@@ -21,11 +25,11 @@ const save = () => fs.writeFileSync(path.join(out, 'office-result.json'), JSON.s
 let office, ws, worker, closing;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const events = () => fs.existsSync(path.join(out, 'pi-events.jsonl')) ? fs.readFileSync(path.join(out, 'pi-events.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(s => JSON.parse(s)) : [];
-async function until(check, ms, reason) {
+async function until(check, ms, reason, allowExpectedError = false) {
   const deadline = Date.now() + ms;
   while (Date.now() < deadline) {
+    if (worker?.status === 'exited' || (!allowExpectedError && events().some(e => e.type === 'assistant_end' && ['error', 'aborted', 'length'].includes(e.stopReason)))) throw new Error('Native Pi failed');
     if (check()) return;
-    if (worker?.status === 'exited' || events().some(e => e.type === 'assistant_end' && ['error', 'aborted', 'length'].includes(e.stopReason))) throw new Error('Native Pi failed');
     await sleep(100);
   }
   throw new Error(reason);
@@ -87,10 +91,25 @@ try {
   await until(() => welcomed, 10000, 'Office welcome missing');
   const prompt = startup ? undefined : 'Read input.json using read. Write result.json using write with exactly {"marker": the input marker, "total": the sum of input values}. Do not use other paths or tools. Then briefly confirm completion.';
   ws.send(JSON.stringify({ t: 'worker.spawn', deskId: 'desk-1', provider: 'pi', model: report.model, prompt, worktree: false }));
-  await until(() => worker && events().some(e => e.type === 'session_start') && report.authenticated_hooks.some(e => e.type === 'session' && e.status === 'starting'), 30000, 'Native Pi session did not start');
+  await until(() => worker && events().some(e => e.type === 'session_start') && report.authenticated_hooks.some(e => e.type === 'session' && e.status === 'starting'), 30000, 'Native Pi session did not start', failure !== undefined);
   report.startup_verified = true;
   assert(worker.sessionId);
-  if (!startup) {
+  if (failure !== undefined) {
+    await until(() => worker.status === 'needs_input' && events().some(e => e.type === 'assistant_end' && e.stopReason === 'error')
+      && events().some(e => e.type === 'agent_settled') && report.authenticated_hooks.some(e => e.type === 'error'),
+      30000, 'Native Pi error evidence missing', true);
+    await sleep(1000);
+    const recorded = events();
+    assert(recorded.every(e => e.session === worker.sessionId && e.provider === 'deepseek' && e.model === 'deepseek-flash'));
+    assert(report.authenticated_hooks.every(e => e.session === worker.sessionId));
+    assert(!recorded.some(e => e.type === 'tool_call' || (e.type === 'assistant_end' && e.output > 0)));
+    assert(!report.states.includes('done') && worker.status === 'needs_input');
+    assert(!fs.existsSync(path.join(workspace, 'result.json')));
+    report.native_error_verified = true;
+    report.failure_check_passed = true;
+    report.fault_injection = {source: 'loopback', http_status: failure};
+    report.status = 'failed';
+  } else if (!startup) {
     await until(() => worker.status === 'done' && events().some(e => e.type === 'agent_settled'), 150000, 'Native Pi did not settle');
     const recorded = events();
     assert(recorded.every(e => e.session === worker.sessionId && e.provider === 'deepseek' && e.model === 'deepseek-flash'));
@@ -106,7 +125,7 @@ try {
     report.artifact_sha256 = createHash('sha256').update(artifact).digest('hex');
     report.file_task_passed = true; report.agent_settled_verified = true;
   }
-  report.status = 'completed';
+  if (failure === undefined) report.status = 'completed';
 } catch (error) {
   report.status = 'failed'; report.error = String(error); process.exitCode = 1;
 } finally {

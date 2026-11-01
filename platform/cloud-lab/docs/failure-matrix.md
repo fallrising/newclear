@@ -17,8 +17,8 @@
 | F11 事件重複／亂序／漏seq | control report重送、[dashboard](../tests/dashboard.test.mjs) session失效／舊inflight處理 | [PS](evidence/m1-snapshot-ordering.md)驗M1完整snapshot重讀、拒絕低revision／同版衝突、合法跳版與重新讀取恢復；比較基準只限當前有界view。沒有seq事件consumer，不能用此證據替代M0漏seq／cursor恢復；原Event協定另保留未實作。 |
 | F12 runner/control恢復與schedule重送 | [health-schedule](../tests/health-schedule.test.mjs) concurrent due／revision CAS、same due／misfire／rollback；[quota](../tests/quota.test.mjs)不補跑舊due；[service](../tests/test_service_runner.py)真程序restart journal；FQ expiry七天後原due不改firings | local；ULR歷史remote保留舊journal／firing且新Cron成功。不是遠端整個控制面故障切換或長期uptime。 |
 | F13 瀏覽器離線／stale | dashboard freshness／unknown及[UI瀏覽器證據](evidence/m1-dashboard.md)真Chromium/workerd offline-stale；[UL](evidence/m1-usage-live.md)owner Safari登入／手動usage與D1相符 | local browser＋owner歷史功能讀取；不宣稱Safari重演全部故障。依owner指示不再要求Console hash／手機驗收。 |
-| F14 隔離備份還原 | [首次D1還原](evidence/m1-isolated-restore.md)真export/import、schema/rows/artifact一致、completed及未派送對帳 | 歷史remote限定子集；[XR六案](evidence/m1-restore-qualification.md)已驗本機unknown／in-flight、缺journal與錯位快照，恢復後零採集；官方遠端unknown/in-flight export/import及正式failover仍未驗。RF與ULR不是restore測試。 |
+| F14 隔離備份還原 | [首次D1還原](evidence/m1-isolated-restore.md)真export/import、schema/rows/artifact一致、completed及未派送對帳 | 歷史remote限定子集；[XR六案](evidence/m1-restore-qualification.md)已驗本機unknown／in-flight、缺journal與錯位快照，恢復後零採集；後續[RX](evidence/m1-remote-restore.md)已將RF歷史2completed／1reconciling-started官方export/import至新D1，四方schema／42列與三journal備份一致，unknown仍active1。沒有啟動restored runner或驗活躍程序failover；RF與ULR本身不是restore測試。 |
 
 ## 接續順序
 
-成果完整性下載已補DI source／local browser驗證，RA補有界拒絕稽核的source/local驗證，XR已補六案本機跨快照還原及identity對帳；遠端unknown/in-flight恢復仍待具體方案。[PS profile對齊](snapshot-ordering.md)明列M1輪詢的故障點及證據，M0 Event／seq／cursor仍未實作，不為填表加入事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。
+成果完整性下載已補DI source／local browser驗證，RA補有界拒絕稽核的source/local驗證，XR已補六案本機跨快照還原及identity對帳；RX已補歷史unknown/started遠端資料還原；活躍程序切換／新fence補報仍未驗。[PS profile對齊](snapshot-ordering.md)明列M1輪詢的故障點及證據，M0 Event／seq／cursor仍未實作，不為填表加入事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。

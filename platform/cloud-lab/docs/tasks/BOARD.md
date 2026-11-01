@@ -667,11 +667,17 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0038-1 | 有界純對帳器 | RX-01 | done | 2026-11-01T14:31:46Z | 2026-11-01T14:44:33Z | 2026-11-01T14:45:19Z |
-| T-0038-2 | 官方遠端還原（等 owner 批准完整備份） | RX-02 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T14:45:19Z |
-| T-0038-3 | 遠端原結果及未知保留（等 owner） | RX-03 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T14:45:19Z |
-| T-0038-4 | 驗證審查交付 | RX-04 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T14:45:19Z |
+| T-0038-1 | 有界純對帳器 | RX-01 | done | 2026-11-01T14:31:46Z | 2026-11-01T14:44:33Z | 2026-11-01T15:04:10Z |
+| T-0038-2 | 官方遠端還原（owner已批准） | RX-02 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T15:04:10Z |
+| T-0038-3 | 遠端原結果及未知保留 | RX-03 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T15:04:10Z |
+| T-0038-4 | 驗證審查交付 | RX-04 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T15:04:10Z |
 
-RX目前partial：純對帳器與來源唯讀核對已完成；自動審批拒絕完整敏感export下載，未執行遠端匯出／新D1／import。等待owner批准具體payload與私人保存位置，不宣稱RX02／03通過。
+PR925／927時RX為partial：純對帳器與來源唯讀核對已完成；自動審批拒絕完整敏感export下載，未執行遠端匯出／新D1／import。等待owner批准具體payload與私人保存位置，不宣稱RX02／03通過。
 
 RX01 source交付PR[925](https://github.com/fallrising/newclear/pull/925)於2026-11-01T14:44:33Z合併（head8b41f8b934044ce3c66044624ab233db761a186c、mergef216f48192342d491e6561b960515d48ec2db6ef）。三項exact-head CI通過：CloudLab41317523620、project41317523633、llms41317523637；本機463tests、17auditcases、T863ACCEPT、52contracts／9indexes／432links／8private-literals無命中。回讀fulltree相等、clean、69inputs相同、head為main祖先。僅RX01結案；RX02／03仍等owner批准，RX04的remote驗證與整輪交付未完成。未export／create／import／backup／部署／續權／付費升級；source-only2completed／1unknown不冒充restore。
+
+2026-11-01T14:53:29Z owner已明確批准完整RF備份payload／私人保存位置及新未綁定D1還原，RX02–04繼續；前述等批准及未執行是PR925／927時的歷史狀態。
+
+RX02／03實際完成：官方export兩poll、16454bytes、單一新D1／signed PUT／ingest；source-before／SQL／restore／source-after完整schema及42列相同、remote quick_check／FK通過。3份online journal backup／原BLOB與source main hash相同，2completed原bytes／時間保留、1unknown仍active1／started，零runner。四Worker無新D1binding；額外Pages清單缺page.read回403，不擴權、不聲稱全域盤點通過。等本輪獨立review／Gitmerge後填RX02–04 end。
+
+T864獨立審查ACCEPT bounded remote data restore；主導privateaudit接受，69inputs不變支持歷史463tests；52contracts／9indexes／436links／9private-literals掃描通過。保留Pages403／fullmainline與failover未完成，正常Git交付中。

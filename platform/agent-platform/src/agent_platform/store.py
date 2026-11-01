@@ -65,7 +65,7 @@ def event(conn, run_id, kind, payload, *, source="platform", source_id=None):
 
 def run_view(row):
     return {
-        **row,
+        **{k: v for k, v in row.items() if k not in {"review_candidate", "review_output"}},
         "capabilities": capabilities(row["backend"]),
         "execution_mode": execution_mode(row["backend"]),
     }
@@ -303,6 +303,14 @@ class Store:
         latest = conn.execute(
             "SELECT * FROM runs WHERE task_id=%s ORDER BY attempt_no DESC LIMIT 1", (task_id,)
         ).fetchone()
+        linked = conn.execute(
+            "SELECT 1 FROM review_lineages l JOIN runs r ON r.id IN "
+            "(l.root_writer_run_id,l.first_review_run_id,l.rework_run_id,l.second_review_run_id) "
+            "WHERE r.task_id=%s LIMIT 1",
+            (task_id,),
+        ).fetchone()
+        if linked:
+            raise Problem(409, "review_lineage_retry_forbidden")
         if latest["state_version"] != data.expected_state_version:
             raise Problem(409, "state_conflict")
         if latest["state"] not in TERMINAL:

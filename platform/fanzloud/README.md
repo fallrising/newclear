@@ -221,3 +221,5 @@ affected task stops until the design is repaired.
 P0 does not provide public or multi-user SaaS, arbitrary repository selection, local repository
 execution, interactive tool approval, automatic patch application or Git push, private Git
 credential management, provider-task cancellation, or crash-durable browser/session replay.
+
+T-0449 已批准跨廠商唯讀審查與一次明示返工；[契約](docs/specs/SPEC-M3-readonly-review.md)／[驗收狀態](docs/acceptance/M3-readonly-review.md)。實際審查驗收仍待本輪證據，未宣稱完整M3。

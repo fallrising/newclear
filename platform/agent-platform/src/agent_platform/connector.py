@@ -17,14 +17,14 @@ import time
 from contextlib import asynccontextmanager, contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 from urllib.parse import urlencode
 from uuid import UUID, uuid4
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import Field
+from pydantic import Field, StringConstraints, model_validator
 
 from agent_platform_m0.contracts import OPENHANDS_BINARY_SHA256, OPENHANDS_SHA, OPENHANDS_VERSION
 from agent_platform_m0.kvm_lifecycle import Host
@@ -56,6 +56,35 @@ class Allocate(Input):
     tool_transport: bool = False
     external_workspace: bool = Field(default=False, exclude_if=lambda value: value is False)
     verification: VerificationPolicy = Field(default_factory=VerificationPolicy)
+    purpose: Literal["coding", "review"] = Field(
+        default="coding", exclude_if=lambda value: value == "coding"
+    )
+    review_candidate: Annotated[str, StringConstraints(strip_whitespace=False)] | None = Field(
+        default=None, max_length=32768, exclude_if=lambda value: value is None
+    )
+    candidate_sha256: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{64}$", exclude_if=lambda value: value is None
+    )
+
+    @model_validator(mode="after")
+    def candidate_binding(self):
+        from .review import candidate_bytes
+
+        if self.purpose == "review":
+            if (
+                not self.external_workspace
+                or self.model_transport
+                or self.tool_transport
+                or self.review_candidate is None
+            ):
+                raise ValueError("review_allocation_invalid")
+            try:
+                candidate_bytes(self.review_candidate.encode("utf-8"), self.candidate_sha256)
+            except Problem:
+                raise ValueError("review_allocation_invalid") from None
+        elif self.review_candidate is not None or self.candidate_sha256 is not None:
+            raise ValueError("review_allocation_invalid")
+        return self
 
 
 class ModelExchange(Input):

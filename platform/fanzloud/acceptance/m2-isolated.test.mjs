@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
-import {readCandidate} from '../apps/control-plane/web/candidate.js';
+import {readCandidate, readReview, reviewResult} from '../apps/control-plane/web/candidate.js';
 import {webcrypto} from 'node:crypto';
-const source = (await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8')).replace("import {readCandidate} from './candidate.js';", '');
+const source = (await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8')).replace("import {readCandidate, readReview, reviewResult} from './candidate.js';", '');
 const run = id => ({id, state: 'running', state_version: 3, cleanup_state: 'pending'});
-async function page({stored, submit, action, getRun, tasks, submissions, artifacts} = {}) {
+async function page({stored, submit, action, getRun, tasks, submissions, artifacts, handoff} = {}) {
   const elements = new Map(), storage = new Map(stored || []), requests = [], timers = [];
   const node = id => {
     if (!elements.has(id)) elements.set(id, {value: '0', textContent: '', disabled: false, options: [], listeners: {}, children: [],
@@ -14,7 +14,7 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
       replaceChildren(...children) {this.children = children; this.options = children;}, append(child) {this.children.push(child);}, click() {this.clicked = true;}});
     return elements.get(id);
   };
-  const context = vm.createContext({readCandidate, Blob, URL, document: {getElementById: node, createElement: () => node(Symbol())},
+  const context = vm.createContext({readCandidate, readReview, reviewResult, Blob, URL, document: {getElementById: node, createElement: () => node(Symbol())},
     sessionStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, v) => storage.set(key, v), removeItem: key => storage.delete(key)},
     Option: function(text, value) {return {text, value};}, crypto: {randomUUID: () => `key-${requests.length}`},
     setTimeout: fn => {timers.push(fn); return timers.length;}, clearTimeout() {}, Date,
@@ -29,6 +29,7 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
       else if (url.endsWith('/tasks') && options.method === 'POST') data = await (submit ? submit() : Promise.resolve({run: run('A')}));
       else if (url.endsWith('/tasks')) data = {items: tasks ? await tasks() : [{title: 'A', run_id: 'A', state: 'running'}, {title: 'B', run_id: 'B', state: 'running'}]};
       else if (url.includes('/artifacts')) data = await artifacts(url);
+      else if (options.method === 'POST' && (url.endsWith('/reviews') || url.endsWith('/rework'))) data = await handoff(url, options);
       else if (url.endsWith('/actions')) data = await action();
       else data = getRun ? await getRun(url.split('/').at(-1)) : run(url.split('/').at(-1));
       return {ok: true, status: 200, json: async () => data, text: async () => data};
@@ -239,4 +240,63 @@ test('C04: expiry during download clears candidate without cached bypass', async
   await p.node('load-candidate').listeners.click(); gone = true; await p.node('download-candidate').listeners.click();
   assert.equal(p.node('download-candidate').disabled, true); assert.match(p.node('candidate-status').textContent, /未下載/);
   assert.equal(p.requests.filter(x => x.method !== 'GET').length, 0);
+});
+
+test('R03: fixed candidate explicitly hands off to opposite vendor once and unknown locks', async () => {
+  const f = await candidateFixture(); f.run.backend = 'claude-subscription'; let calls = 0;
+  const p = await page({stored: [['fanz-current-run', f.run.id]], getRun: () => f.run, artifacts: url => f.request(url.replace('/api/v1','')), handoff: () => {calls++; throw new Error('lost reply');}});
+  await p.node('load-candidate').listeners.click();
+  assert.deepEqual(p.node('review-agent').options.map(x => x.value), ['codex']);
+  assert.equal(p.node('start-review').disabled, false); p.node('review-agent').value = 'codex';
+  await p.node('start-review').listeners.click(); await p.node('start-review').listeners.click();
+  assert.equal(calls, 1); assert.equal(p.node('start-review').disabled, true);
+  assert.equal(p.node('submit-task').disabled, true);
+  const post=p.requests.find(x=>x.url.endsWith('/reviews'));
+  assert.deepEqual(JSON.parse(post.body), {artifact_id:f.meta.id,candidate_sha256:f.meta.sha256,profile_revision:'codex'});
+});
+test('R04: persisted unknown prevents review even after a new browser loads candidate', async () => {
+  const f=await candidateFixture(); f.run.backend='claude-subscription';
+  const p=await page({stored:[['fanz-current-run',f.run.id]],getRun:()=>f.run,artifacts:url=>f.request(url.replace('/api/v1','')),submissions:()=>({items:[],blocked:true})});
+  await p.node('load-candidate').listeners.click(); assert.equal(p.node('start-review').disabled,true);
+  await p.node('start-review').listeners.click(); assert.equal(p.requests.filter(x=>x.method==='POST').length,0);
+});
+
+async function reviewFixture(verdict = 'accept', mutate = () => {}) {
+  const f=await candidateFixture(); const run=f.run;
+  run.purpose='review'; run.backend='codex-subscription';
+  run.review_context={root_writer_run_id:candidateArtifactId,writer_run_id:candidateArtifactId,artifact_id:candidateArtifactId,candidate_sha256:'b'.repeat(64),review_round:1,reviewer_profile_revision:run.profile_revision};
+  run.result={verification:{status:'passed'},review:{...run.review_context,reviewer_run_id:run.id,verdict,reasons:['<img src=x onerror=alert(1)> 檢查與修復一致']}};
+  const archive={schema_version:'result-archive-v1',artifact_id:f.meta.id,run_id:run.id,task_id:run.task_id,profile_revision:run.profile_revision,base_sha:run.base_sha,attempt_no:run.attempt_no,goal:run.goal,result:structuredClone(run.result)};
+  mutate(archive); const raw=JSON.stringify(archive); const meta={...f.meta,sha256:await candidateHash(raw),size:new TextEncoder().encode(raw).length};
+  return {run,raw,meta,request:async url=>url.endsWith('/artifacts')?{items:[meta]}:raw};
+}
+test('R03: typed review is hash/identity bound and downloads the exact immutable archive',async()=>{
+  const f=await reviewFixture(); assert.equal((await readReview(f.run,f.request)).raw,f.raw);
+  for (const mutate of [v=>v.result.review.candidate_sha256='c'.repeat(64),v=>v.result.review.reviewer_run_id=candidateArtifactId,v=>v.result.review.verdict='accept_anything']) {
+    const bad=await reviewFixture('accept',mutate);await assert.rejects(readReview(bad.run,bad.request));
+  }
+  const wrong=structuredClone(f.run);wrong.result.review.candidate_sha256='c'.repeat(64);assert.throws(()=>reviewResult(wrong));
+  const p=await page({stored:[['fanz-current-run',f.run.id]],getRun:()=>f.run,artifacts:f.request});
+  assert.match(p.node('review-status').textContent,/接受候選/);assert.match(p.node('review-status').textContent,/<img/);
+  assert.equal(p.node('download-diff').disabled,true);assert.equal(p.node('download-review').disabled,false);assert.equal(p.node('start-rework').disabled,true);
+  await p.node('download-review').listeners.click();assert.equal(p.requests.filter(x=>x.method==='POST').length,0);
+});
+test('R04: only first request_changes exposes explicit rework, never an automatic loop',async()=>{
+  const f=await reviewFixture('request_changes'); let calls=0;
+  const p=await page({stored:[['fanz-current-run',f.run.id]],getRun:()=>f.run,handoff:async()=>{calls++;return{run:run('rework')};}});
+  assert.equal(calls,0);assert.equal(p.node('start-rework').disabled,false);
+  await p.node('start-rework').listeners.click();assert.equal(calls,1);
+  const second=await reviewFixture('request_changes');second.run.review_context.review_round=2;second.run.result.review.review_round=2;
+  const q=await page({stored:[['fanz-current-run',second.run.id]],getRun:()=>second.run});assert.equal(q.node('start-rework').disabled,true);
+});
+test('R03: late review download cannot survive selection or logout; expiry denies download',async()=>{
+  for (const logout of [false,true]) {
+    const f=await reviewFixture();let release;
+    const p=await page({stored:[['fanz-current-run',f.run.id]],getRun:id=>id===f.run.id?f.run:run(id),artifacts:url=>url.endsWith('/artifacts')?new Promise(resolve=>{release=resolve;}):f.raw});
+    const pending=p.node('download-review').listeners.click();await p.flush();
+    if(logout)await p.node('logout').listeners.click();else{p.node('recent-tasks').children[0].children[0].listeners.click();await p.flush();}
+    release({items:[f.meta]});await pending;assert.equal(p.node('download-review').disabled,true);
+  }
+  const f=await reviewFixture();const p=await page({stored:[['fanz-current-run',f.run.id]],getRun:()=>f.run,artifacts:()=>{throw new Error('410');}});
+  await p.node('download-review').listeners.click();assert.equal(p.node('download-review').disabled,true);assert.match(p.node('review-status').textContent,/未下載/);
 });

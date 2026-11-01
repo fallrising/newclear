@@ -56,7 +56,15 @@ class Bridge:
         )
         self.journal = Journal(Path(path).parent / "mcp-journal")
 
+    @property
+    def tools(self):
+        return TOOLS[:1] if self.config.get("purpose") == "review" else TOOLS
+
     def call(self, request_id, name, args):
+        if self.config.get("purpose") == "review" and (
+            name != "read" or args != {"path": "candidate.json"}
+        ):
+            raise ValueError("review_tool_denied")
         allowed = {
             "read": {"path"},
             "write": {"path", "content"},
@@ -123,7 +131,7 @@ def serve(path):
                     "serverInfo": {"name": "fanz-workspace", "version": "1"},
                 }
             elif method == "tools/list":
-                result = {"tools": TOOLS}
+                result = {"tools": bridge.tools}
             elif method == "ping":
                 result = {}
             elif method == "tools/call":

@@ -104,6 +104,33 @@ impl Fixture {
                     } else {
                         (202, receipt())
                     }
+                } else if head.starts_with("POST /api/v1/runs/") {
+                    count.fetch_add(1, Ordering::SeqCst);
+                    if mode == "lost" {
+                        continue;
+                    }
+                    let mut receipt = receipt();
+                    let input: Value = serde_json::from_slice(&body).expect("body");
+                    let parent = head
+                        .split_whitespace()
+                        .nth(1)
+                        .unwrap()
+                        .split('/')
+                        .nth(4)
+                        .unwrap();
+                    if head.contains("/reviews ") {
+                        receipt["run"]["purpose"] = json!("review");
+                        receipt["run"]["profile_revision"] = input["profile_revision"].clone();
+                        receipt["run"]["review_context"] = json!({"root_writer_run_id":parent,"writer_run_id":parent,"artifact_id":input["artifact_id"],"candidate_sha256":input["candidate_sha256"],"reviewer_profile_revision":input["profile_revision"],"review_round":1});
+                        if mode == "mismatch" {
+                            receipt["run"]["review_context"]["candidate_sha256"] =
+                                json!("c".repeat(64));
+                        }
+                    } else {
+                        receipt["run"]["purpose"] = json!("coding");
+                        receipt["run"]["rework_context"] = json!({"root_writer_run_id":parent,"review_run_id":parent,"candidate_sha256":"b".repeat(64)});
+                    }
+                    (202, receipt)
                 } else if head.starts_with("GET /api/v1/runs/") && head.contains("/artifacts") {
                     if !head.contains("cookie: auth=ok\r\n") {
                         (401, json!({"error":"authentication_required"}))
@@ -422,5 +449,144 @@ async fn c01_artifact_tcp_preserves_auth_body_and_expiry_with_store_enabled() {
             }
         }
         assert_eq!(fixture.posts.load(Ordering::SeqCst), 0);
+    }
+}
+
+#[tokio::test]
+async fn r04_handoff_routes_commit_before_post_and_reopen_without_resend() {
+    for action in ["reviews", "rework"] {
+        let f = Fixture::new("ok");
+        let path = format!("/api/v1/runs/{RUN}/{action}");
+        let body = if action == "reviews" {
+            json!({"artifact_id":TASK,"candidate_sha256":"b".repeat(64),"profile_revision":task()["profile_revision"]})
+        } else {
+            json!({})
+        };
+        for _ in 0..2 {
+            let response = f
+                .app()
+                .oneshot(request(
+                    Method::POST,
+                    &path,
+                    KEY,
+                    Some(body.clone()),
+                    true,
+                    "csrf",
+                ))
+                .await
+                .unwrap();
+            assert_eq!(response.status(), StatusCode::ACCEPTED);
+        }
+        assert_eq!(f.posts.load(Ordering::SeqCst), 1);
+        let conflict = f
+            .app()
+            .oneshot(request(
+                Method::POST,
+                "/api/v1/tasks",
+                KEY,
+                Some(task()),
+                true,
+                "csrf",
+            ))
+            .await
+            .unwrap();
+        assert_eq!(conflict.status(), StatusCode::CONFLICT);
+        let saved = value(
+            f.app()
+                .oneshot(request(
+                    Method::GET,
+                    "/api/v1/submissions",
+                    KEY,
+                    None,
+                    true,
+                    "csrf",
+                ))
+                .await
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(saved["items"][0]["request"]["route"], path);
+    }
+}
+#[tokio::test]
+async fn r04_handoff_lost_or_mismatched_reply_stays_unknown_and_auth_denies_before_post() {
+    let path = format!("/api/v1/runs/{RUN}/reviews");
+    let body = json!({"artifact_id":TASK,"candidate_sha256":"b".repeat(64),"profile_revision":task()["profile_revision"]});
+    for mode in ["lost", "mismatch"] {
+        let f = Fixture::new(mode);
+        for (auth, csrf, status) in [
+            (false, "csrf", StatusCode::UNAUTHORIZED),
+            (true, "bad", StatusCode::FORBIDDEN),
+        ] {
+            assert_eq!(
+                f.app()
+                    .oneshot(request(
+                        Method::POST,
+                        &path,
+                        KEY,
+                        Some(body.clone()),
+                        auth,
+                        csrf
+                    ))
+                    .await
+                    .unwrap()
+                    .status(),
+                status
+            );
+        }
+        assert_eq!(f.posts.load(Ordering::SeqCst), 0);
+        assert!(
+            !f.app()
+                .oneshot(request(
+                    Method::POST,
+                    &path,
+                    KEY,
+                    Some(body.clone()),
+                    true,
+                    "csrf"
+                ))
+                .await
+                .unwrap()
+                .status()
+                .is_success()
+        );
+        assert_eq!(
+            f.app()
+                .oneshot(request(
+                    Method::POST,
+                    &path,
+                    KEY,
+                    Some(body.clone()),
+                    true,
+                    "csrf"
+                ))
+                .await
+                .unwrap()
+                .status(),
+            StatusCode::CONFLICT
+        );
+        assert_eq!(f.posts.load(Ordering::SeqCst), 1);
+        let saved = value(
+            f.app()
+                .oneshot(request(
+                    Method::GET,
+                    "/api/v1/submissions",
+                    KEY,
+                    None,
+                    true,
+                    "csrf",
+                ))
+                .await
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(saved["blocked"], true);
+    }
+    for bad in [
+        format!("/api/v1/runs/{RUN}/reviews/extra"),
+        format!("/api/v1/runs/{RUN}/rework/extra"),
+        "/api/v1/runs/../reviews".into(),
+    ] {
+        assert!(!allowed(&Method::POST, &bad));
     }
 }

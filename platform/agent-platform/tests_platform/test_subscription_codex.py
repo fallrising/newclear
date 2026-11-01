@@ -149,3 +149,40 @@ class CodexDriverTests(unittest.TestCase):
         self.assertTrue(parsed["features"]["multi_agent_v2"]["disable_native_tools"])
         self.assertEqual(parsed["forced_login_method"], "chatgpt")
         self.assertEqual(parsed["model_provider"], "openai")
+
+    def test_review_has_one_read_tool_and_strict_final_hash_bound_output(self):
+        self.run.update(purpose="review", review_context={"candidate_sha256": "a" * 64})
+        value = self.driver("review-valid").execute(self.worker, {}, self.run, threading.Event())
+        self.assertEqual(
+            value,
+            {
+                "candidate_sha256": "a" * 64,
+                "verdict": "accept",
+                "reasons": ["Candidate is correct."],
+            },
+        )
+        self.bridge.call.assert_called_once_with("unique-call", "read", {"path": "candidate.json"})
+        messages = [
+            json.loads(x)
+            for x in (self.root / str(self.run["id"]) / "requests.jsonl").read_text().splitlines()
+        ]
+        thread = next(x for x in messages if x.get("method") == "thread/start")["params"]
+        self.assertEqual([tool["name"] for tool in thread["dynamicTools"]], ["fanz_read"])
+        self.assertTrue(self.receipt()["processes_stopped"])
+
+    def test_review_rejects_wrong_hash_binding_and_unadvertised_write(self):
+        self.run.update(purpose="review", review_context={"candidate_sha256": "a" * 64})
+        for mode, code in (
+            ("review-wrong-hash", "review_verdict_invalid"),
+            ("review-wrong-thread", "subscription_result_unconfirmed"),
+            ("review-write", "subscription_tool_binding_mismatch"),
+        ):
+            with self.subTest(mode=mode):
+                self.run["id"] = uuid4()
+                self.bridge.call.reset_mock()
+                with self.assertRaisesRegex(Problem, code):
+                    self.execute(mode)
+                if mode == "review-write":
+                    self.bridge.call.assert_not_called()
+                self.assertTrue(self.receipt()["processes_stopped"])
+                self.assertEqual(self.receipt()["status"], "unconfirmed")

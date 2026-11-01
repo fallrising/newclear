@@ -1,7 +1,7 @@
 //! CU-M3-01–05: product intent/readback only; no queue, recovery POST or agent lifecycle.
 use super::*;
 use codebox_event_store::{BeginSubmission, SubmissionStore, SubmissionStoreError};
-use serde_json::Value;
+use serde_json::{Value, json};
 
 async fn send(
     config: Arc<Config>,
@@ -65,7 +65,30 @@ fn valid_task(value: &Value) -> bool {
             })
 }
 
+fn valid_handoff(path: &str, body: &Value) -> bool {
+    let Some(object) = body.as_object() else {
+        return false;
+    };
+    if path.ends_with("/rework") {
+        return object.is_empty();
+    }
+    object.len() == 3
+        && canonical_id(&body["artifact_id"])
+        && canonical_id(&body["profile_revision"])
+        && body["candidate_sha256"].as_str().is_some_and(|s| {
+            s.len() == 64
+                && s.bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        })
+}
+
 fn valid_receipt(receipt: &Value, request: &Value) -> bool {
+    if request.get("route").is_some() {
+        // Full lineage/body binding is checked atomically by SubmissionStore::confirm.
+        return canonical_id(&receipt["run"]["id"])
+            && canonical_id(&receipt["task"]["id"])
+            && receipt["run"]["task_id"] == receipt["task"]["id"];
+    }
     let run = &receipt["run"];
     let task = &receipt["task"];
     canonical_id(&run["id"])
@@ -135,7 +158,10 @@ pub(super) async fn handle(
     }
     if method == Method::POST {
         let request = match serde_json::from_slice::<Value>(&body) {
-            Ok(value) if valid_task(&value) => value,
+            Ok(value) if path == "/api/v1/tasks" && valid_task(&value) => value,
+            Ok(value) if handoff_target(&path) && valid_handoff(&path, &value) => {
+                json!({"route":path,"body":value})
+            }
             _ => return error(StatusCode::BAD_REQUEST, "invalid_submission"),
         };
         let Some(key) = headers

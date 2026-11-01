@@ -122,7 +122,7 @@ fn allowed(method: &Method, path: &str) -> bool {
     if path == "/api/v1/tasks" {
         return matches!(*method, Method::GET | Method::POST);
     }
-    if method == Method::POST && cancel_target(path) {
+    if method == Method::POST && (cancel_target(path) || handoff_target(path)) {
         return true;
     }
     if method != Method::GET {
@@ -147,6 +147,12 @@ fn allowed(method: &Method, path: &str) -> bool {
 
 fn canonical_uuid(identifier: &str) -> bool {
     Uuid::parse_str(identifier).is_ok_and(|value| value.to_string() == identifier)
+}
+
+fn handoff_target(path: &str) -> bool {
+    path.strip_prefix("/api/v1/runs/")
+        .and_then(|s| s.split_once('/'))
+        .is_some_and(|(id, action)| canonical_uuid(id) && matches!(action, "reviews" | "rework"))
 }
 
 fn cancel_target(path: &str) -> bool {
@@ -330,7 +336,7 @@ async fn handle(State(config): State<Arc<Config>>, request: Request) -> Response
         return error(StatusCode::BAD_REQUEST, "invalid_cancel_request");
     }
     if path == "/api/v1/submissions"
-        || (parts.method == Method::POST && path == "/api/v1/tasks")
+        || (parts.method == Method::POST && (path == "/api/v1/tasks" || handoff_target(&path)))
         || (parts.method == Method::GET
             && path.starts_with("/api/v1/runs/")
             && canonical_uuid(path.trim_start_matches("/api/v1/runs/")))

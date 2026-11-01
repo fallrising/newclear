@@ -39,6 +39,32 @@ for line in sys.stdin:
     elif method == "turn/start":
         value = {"turn": {"id": turn}}
     elif "result" in r:
+        if mode.startswith("review-"):
+            print(
+                json.dumps(
+                    {
+                        "method": "item/completed",
+                        "params": {
+                            "threadId": "other" if mode == "review-wrong-thread" else thread,
+                            "turnId": turn,
+                            "item": {
+                                "type": "agentMessage",
+                                "phase": "final_answer",
+                                "text": json.dumps(
+                                    {
+                                        "candidate_sha256": "b" * 64
+                                        if mode == "review-wrong-hash"
+                                        else "a" * 64,
+                                        "verdict": "accept",
+                                        "reasons": ["Candidate is correct."],
+                                    }
+                                ),
+                            },
+                        },
+                    }
+                ),
+                flush=True,
+            )
         print(
             json.dumps(
                 {
@@ -81,8 +107,16 @@ for line in sys.stdin:
                             "threadId": "other" if mode == "wrong-thread" else thread,
                             "turnId": turn,
                             "callId": "unique-call",
-                            "tool": "host_exec" if mode == "wrong-tool" else "fanz_read",
-                            "arguments": {"path": "totals.py"},
+                            "tool": "host_exec"
+                            if mode == "wrong-tool"
+                            else "fanz_write"
+                            if mode == "review-write"
+                            else "fanz_read",
+                            "arguments": {
+                                "path": "candidate.json"
+                                if mode.startswith("review-")
+                                else "totals.py"
+                            },
                         },
                     }
                 ),

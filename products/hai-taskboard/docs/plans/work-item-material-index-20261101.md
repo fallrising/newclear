@@ -1,6 +1,9 @@
 # Proposed WorkItem material index
 
-Status: **Claude-reviewed proposal — owner decision required before implementation**. T-0339 / HMDTL.
+Status: **Owner approved D1, 2026-11-01; implementation in progress**. T-0339 / HMDTL.
+The owner explicitly replied “批准。” to the concrete material-index decision. IDX-01..05 and
+IDX-AC-01..06 below are accepted; the [normative entry](../sdd/work-item-material-index.md)
+records implementation seams. Original proposal/review chronology below is retained.
 Source `9f3f72af3940a106877f86c4b43e39a3dfcd72c8`; HAI unchanged from delivered #902.
 Owner requested continued development. This document makes the next contract reviewable; that request
 is not treated as approval to replace the existing full WorkItemDetail contract. No production,
@@ -221,7 +224,11 @@ writable paths and budget. Before production edits add a compiling named404 Red 
 and targeted storage/auth/capacity/concurrency tests. Existing-correct behavior gets regression coverage,
 not a fabricated Red. Pin source/gate manifests and retain every original failure.
 
-| Product AC | Fixed observable outcome / named oracle | Current result |
+The table retains the proposal checkpoint. Current implementation results are recorded in
+[implementation evidence](../evidence/work-item-material-index-20261101.md) and BOARD HMDTL;
+the observable outcomes below remain fixed.
+
+| Product AC | Fixed observable outcome / named oracle | Proposal checkpoint |
 | --- | --- | --- |
 | IDX-AC-01 | TestWorkItemMaterialIndexHTTP_AuthScopeAndClosedWire: session/project/item masking, no queries/body, method, no-store/nosniff, strict response identity/fields/bounds and safe errors | NotRun |
 | IDX-AC-02 | TestWorkItemMaterialIndex_StoredIdentityAndHistory: actual accepted multi-AC/Unicode flow plus legacy Draft, no Runs/Candidates, all phases, multiple Runs/Candidates, Initial/Impact stored heads, project-only head, exact stored digests/order, Unicode/space/slash legacy ACs, no invented current/coverage and no hidden legacy Candidate IDs | NotRun |

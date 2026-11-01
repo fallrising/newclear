@@ -86,7 +86,7 @@ func (server *Server) ServeHTTP(response http.ResponseWriter, request *http.Requ
 		writeAPIError(response, http.StatusBadRequest, command.CodeInvalidRequest, "request path is not canonical")
 		return
 	}
-	if server.interceptHumanReportRead(response, request) || server.interceptOutputRead(response, request) {
+	if server.interceptMaterialIndexRead(response, request) || server.interceptHumanReportRead(response, request) || server.interceptOutputRead(response, request) {
 		return
 	}
 	// Intercept this read before ServeMux can redirect invalid dot resource IDs.

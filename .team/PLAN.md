@@ -47,6 +47,22 @@ no repeated code review/provider. Concurrent approval question remains pending, 
 
 # Repository team ledger
 
+## HAI material-index implementation — T-0339 / 2026-11-01
+
+Owner approved reviewed D1/IDX-01..05/IDX-AC-01..06. Root owns normative/API/HTTP/integration and
+acceptance and port; one native core leaf in isolated worktree owns new SQLite files only,70minutes,
+no children/commits/network/provider calls. Model/effort inherit root. Root90–150active minutes,
+20minute checkpoints; Claude exact opus5.5/high no-tools480s+one actual-revision follow-up;
+CI20minute rounds, same failure initial+two new-hypothesis diagnoses. Named404 Red before code.
+Evidence maps fixed ACs; original failures retained. Full M2/UI/history not claimed, no new
+dependency/migration/provider/release/deploy. Aggregate tool/provider/billing/active-wait unknown.
+
+HMDTL local evidence-gate ACCEPT: root verified worker hashes/source, original194-input native
+full gate573.127s unchanged, five-file revision with actual corruption-before-capacity Red→Green,
+normal8.600s/race88.873s/vet/build5.854s. Web30/API/docs pass; Claude conditional ACCEPT249.363s
+then final ACCEPT91.023s, F1–F6 closed by source/test/doc evidence. Two code launches, no children;
+aggregate provider/tool/billing unknown. Exact-final-head full CI/merge/readback/ledger remain.
+
 ## HAI detail-read contract — T-0339 / 2026-11-01
 
 Owner continues after verified coverage delivery. Root owns next bounded backend detail contract, M2 gap mapping and fixed acceptance; no UI/provider/dependency/release/deploy. One native read-only T001,10min/1800tokens/no children/no writes, audits schema/storage gaps. Root45–75active minutes with20minute checkpoints; Claude exact opus5.5/high no-tools480s initial plus one material-revision follow-up. Existing claim remains valid. New product semantics require concrete owner decision before implementation; no repeated policy/Git approval. CI20min rounds; original failures retained. BOARD HMDTL owns status.

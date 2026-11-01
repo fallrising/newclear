@@ -28,7 +28,7 @@ FQ的七天案例使用合成有效授權覆蓋時間旅行，原artifact bytes�
 
 1. 固定schema／source／截止時間與具體候選ID，列出active、unknown及未對帳引用；第一版清理必須排除這些。closed_unknown仍有未知owner結果，不因active0即視為可刪。
 2. 對原D1與journal建立受保護的備份／manifest／原bytes digest。兩者不是跨系統原子快照，以command與immutable identity逐筆對帳，不靠筆數相等。
-3. 在無入口、排程停用的隔離目的地還原，驗schema、foreign key、原payload／artifact／result／tombstone，及same-key衝突、舊due不補跑、unknown不重做；補足目前只有completed／未派送restore的缺口。
+3. 在無入口、排程停用的隔離目的地還原，驗schema、foreign key、原payload／artifact／result／tombstone，及same-key衝突、舊due不補跑、unknown不重做；按[XR](evidence/m1-restore-qualification.md)本機六案與[RX](evidence/m1-remote-restore.md)歷史unknown/started遠端資料還原分層驗證，活躍程序failover另驗。
 4. 檢查備份可讀、還原成功與去重接替機制後，提出具名候選／精確CAS／影響與回退方案給owner。不得自動把「繼續開發」當作刪除批准。
 5. 真正執行時需限制每批範圍及預期影響列數；回覆不明先對帳，不盲重試。恢復不能倒退授權、復活舊dispatch或覆蓋備份之後的新資料。
 
@@ -39,3 +39,5 @@ FQ的七天案例使用合成有效授權覆蓋時間旅行，原artifact bytes�
 [RA拒絕稽核](rejection-audit.md)的rejection_audit與commands分開，最多10000列，不自動DELETE／覆寫。容量滿時保留原證據、回應full；DB失敗回unavailable。無限期保存不是完整安全日誌保證；Access邊緣拒絕、5xx、傳輸失敗及程序中斷未必有列。歸檔／清理仍需另訂保全與批准，不能重置表假裝所有拒絕已收集。
 
 [XR跨快照還原](evidence/m1-restore-qualification.md)補本機started／unknown／completed回報未達、缺journal、identity mismatch及較舊accepted D1六案；SQLite online backup包含已提交WAL。這不取代官方遠端還原或archive/tombstone gate，不新增清理或復活舊grant。
+
+[RX遠端資料還原](evidence/m1-remote-restore.md)已完成官方export/import、42列及三journal備份對帳；expired grants原樣保留，未執行runner或新增授權。此證據不代表archive/tombstone、跨系統原子快照或活躍程序failover完成。

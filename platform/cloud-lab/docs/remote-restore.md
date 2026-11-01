@@ -15,6 +15,14 @@
 
 官方[Free D1上限](https://developers.cloudflare.com/d1/platform/limits/)與[匯出／匯入限制](https://developers.cloudflare.com/d1/best-practices/import-export-data/)於2026-11-01核對：Free最多10DB；當前唯讀inventory5個，計畫完成後6個。碰到free quota即停止，provider帳單未知不填零；export可能阻擋該DB請求，所以只用已停止接入的RF測試來源。
 
-## 當前執行邊界
+## 當前結果及可重用流程
 
-[RX部分證據](evidence/m1-remote-restore.md)：對帳器與唯讀來源核對已實作；完整export下載遭自動審批拒絕，等待owner批准敏感payload及私人持久目的地。尚未建立新D1或匯入，也未backup journal；RX-02／03保持未完成。
+[RX實際證據](evidence/m1-remote-restore.md)：owner明確批准後已完成官方export/import、四方完整schema/data對照與三份journal online backup。歷史審批拒絕保留；不再等待同一批准。新D1只保存隔離資料，沒有入口或有效新授權。四Worker bindings回讀無匹配；額外Pages全域清單因缺page.read回403，該盤點未知，不擴權。
+
+1. 保留具體payload／私人目的地／最多一個新D1的批准，fresh查RF來源與inventory；確認grant到期、test token停用、Cron空與schedule關閉。
+2. 官方export使用output_format=polling；最多6輪，沿at_bookmark繼續，不重新起任務。signed URL只進私人檔案，下載上限10MiB；0600排他寫入／fsync，保存SHA256與MD5。
+3. SQL載入新本機SQLite，integrity／FK檢查；與source每表每欄每列比較，schema只明列排除_cf_KV，不能寬泛略過其他表。
+4. 只建立一次新D1，先確認空schema；init→signed PUT→核對ETag→ingest／至多6輪poll。未知回應先對帳，不盲目重建／重上傳／重匯入。
+5. 回讀remote restore、source-after、quick_check／FK，四方schema／資料必須相同；expired grants不能重新生成。核對inventory只多一個DB、沒有綁定寫入，回讀Worker settings。
+6. 用tests/fixtures/restore_journal.py的SQLite online backup至新檔；比原BLOB rows、source-before/after與main hash。用tools/restore_audit.py比restore commands與backup journals，所有結果必須dispatch_allowed=false；不啟動runner。
+7. 保存原始private receipts與redacted evidence；列明權限不足、未測failover／執行對帳與帳單unknown。核對已測source hashes，獨立審查／正常Git交付；不自動清除DB或備份。

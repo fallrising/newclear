@@ -30,3 +30,5 @@ python3 "$LAUNCHER" --root "$XR_WORKSPACE" run cloud-lab XR-new -- timeout --sig
 ```
 
 最後可加一個具名情境作focused診斷；只有無filter跑完六案的summary才代表完整XR。完整應用回歸沿用`python3 platform/cloud-lab/tools/check.py`，透過launcher執行。結果與初次失敗／兩個mutation見[證據](evidence/m1-restore-qualification.md)；這不是原服務備份或切換命令。
+
+後續[RX官方遠端資料還原](evidence/m1-remote-restore.md)已驗RF歷史2completed／1unknown-started的export/import及三journal備份，四方schema／42列相等；未啟動restored runner，不取代XR六案執行證據或正式failover gate。

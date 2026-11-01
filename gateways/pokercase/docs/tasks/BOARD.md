@@ -6,10 +6,16 @@ Demand:deskT0426;claim383merged. [TR-1–TR-3](T-0426-tui-tools-renewed.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| TR-01 | Pinned unchanged runner and independent preflight | TR-1 | in_progress | 2026-11-01T16:47:02.817130+00:00 | — | 2026-11-01T16:58:33.356242+00:00 |
-| TR-02 | New bounded actual MCP tool/result attempt | TR-2 | in_progress | 2026-11-01T16:47:02.817130+00:00 | — | 2026-11-01T16:58:33.356242+00:00 |
-| TR-03 | Actual evidence and delivery | TR-3 | in_progress | 2026-11-01T16:47:02.817130+00:00 | — | 2026-11-01T16:58:33.356242+00:00 |
+| TR-01 | Pinned unchanged runner and independent preflight | TR-1 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:05:45Z | 2026-11-01T17:09:08.818997+00:00 |
+| TR-02 | New bounded actual MCP tool/result attempt | TR-2 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:05:45Z | 2026-11-01T17:09:08.818997+00:00 |
+| TR-03 | Actual evidence and delivery | TR-3 | done | 2026-11-01T16:47:02.817130+00:00 | 2026-11-01T17:06:24.731898+00:00 | 2026-11-01T17:09:08.818997+00:00 |
 
+
+Product [PR950](https://github.com/fallrising/newclear/pull/950), source `18e9f18fd74327cff30f7e0fc2f92902b2d8e000`, merged `8cf0f3309a936653cb822b482c79eacc36e7b3a8` at 2026-11-01T17:05:45Z. Required component check (5m33s) and validate (9s) passed; source/merge/origin content, ancestry and Desk-Task trailers matched. TR01–02 accept the fixed single-tool HTTP Messages → official TUI 2.1.312 tuple: 2/2 HTTP200 in 4.631s, expected tool and fresh result, reported claude-opus-5-5, one PID/birth/executable and matched MCP callback without relaunch. Both admissions consumed; no retry. Two durable usage rows and first-row history preserved; owned runtime cleanup passed. No downstream official-client/dynamic-instruction, cancellation, tool-restart, account-safety, billing/cache-savings or whole-product acceptance. Original17AC/runtime/Cargo and the earlier failed429 packet remain unchanged.
+
+Independent T001 preflight and T002 result/ledger reviews passed. Local checks passed: 52 contracts, 9 indexes, 20 repository tests, 158 journal runs/30 tests and 449 desk documents. Journal [PR227](https://github.com/fallrising/journal/pull/227) and desk [PR385](https://github.com/fallrising/desk/pull/385) passed CI, normal merge and exact readback. TR03 records primary closure at 2026-11-01T17:06:24.731898+00:00: separate complete backup verified 97 payload files / 187482236 bytes and modes, then four clean merged owned worktrees were normally removed. Branches, other worktrees/caches, trusted target, old packets and backups remain preserved.
+
+Final board review/CI/normal merge/readback, backup append and removal of its sole worktree occur after this checkpoint and before the final private handoff; these later gates are not preclaimed. No owner action is required for this selected delivery, and no further milestone or real request starts automatically. Mainline incomplete / usable_tag none / desk in_progress remain.
 
 ## T-0426 — Two-request real TUI tool continuation
 

@@ -37,3 +37,7 @@ await完成且header為persisted才表示本次Worker4xx的最小metadata已寫�
 表上限限制儲存，不能限制到達Worker的流量成本；滿額不刪／覆寫、後續仍可能讀D1。Access邊緣拒絕、程序中斷、5xx與未到達handler的流量不在此稽核；不是完整exactly-once安全日誌／防竄改帳本。實際provider帳單維持unknown。
 
 0001原bytes、auth/protocol、runner與看板資產保持；0002僅新增表／索引。實際部署需先schema後Worker，回退保留表／歷史；未部署前原線上仍無此功能。未續任何授權期限。下一項接續unknown/in-flight跨D1/journal的隔離恢復，不能用此次metadata稽核替代恢復證據。
+
+## 後續實際接入
+
+上述source/local里程碑之後，owner同意繼續原服務接入；[RAL實際證據](m1-rejection-audit-live.md)記錄已完成的新增schema、原Worker更新、真拒絕對帳與歷史／期限保全。source階段的「未部署」為當時邊界，不能替代後續live證據。

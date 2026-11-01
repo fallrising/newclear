@@ -23,7 +23,7 @@ credential read, Git mutation or delegation. Only this report was written.
   source manifest. Remote Connector/runtime remains explicitly pinned to M1
   `33e1eb70d66eb74644e8ad81e64e8bdc69c9fe07`, not misrepresented as current source.
 - Single real submission and browser outcome — passed
-  
+
   `browser-results/codex-live/receipt.json` identifies one POST and run
   `142e9aee-179a-426e-b0c6-330df9f4a677`, generation1, attempt1, backend
   `codex-subscription`, sandbox `e4ddc4ed-44c1-4a3f-8c4a-5ff4b7b4429b`.
@@ -71,7 +71,7 @@ credential read, Git mutation or delegation. Only this report was written.
   bootstrap failures are not counted as coding retries. Other bootstrap details in
   the acceptance record are parent operational history, not independently re-executed.
 - Partial-delivery wording — passed
-  , with documentation housekeeping below. 
+  Documentation housekeeping noted below.
   M2 acceptance record explicitly says actual Codex single repair PASS / M2 PARTIAL;
   prior Claude M1 remains preserved and simultaneous/cancellation acceptance is still
   required. No CloudAC04, M3, usable MVP or concurrent FN03 pass is implied.

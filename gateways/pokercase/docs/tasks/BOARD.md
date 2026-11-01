@@ -6,8 +6,13 @@ Demand:deskT0426; claim358 merged. [NR-1–NR-3](T-0426-instruction-roles.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| NR-01 | Preserve instruction roles and strict reuse boundaries | NR-1–NR-2 | in_progress | 2026-11-01T11:06:56Z | — | 2026-11-01T11:06:56Z |
-| NR-02 | Independent acceptance and delivery | NR-3 | in_progress | 2026-11-01T11:06:56Z | — | 2026-11-01T11:06:56Z |
+| NR-01 | Preserve instruction roles and strict reuse boundaries | NR-1–NR-2 | done | 2026-11-01T11:06:56Z | 2026-11-01T11:20:31Z | 2026-11-01T11:20:31Z |
+| NR-02 | Independent acceptance and delivery | NR-3 | done | 2026-11-01T11:06:56Z | 2026-11-01T11:24:28.379885+00:00 | 2026-11-01T11:24:28.379885+00:00 |
+
+
+Product [PR908](https://github.com/fallrising/newclear/pull/908), source `79fb705b8a8bd46721ddda9afad82306c024e175`, merged `0e2742323533081acb789c94fb9c39e04abb0f14` at 2026-11-01T11:20:31Z. Required check/validate passed; all6source/merge/origin files, ancestry and Desk-Task trailers matched. Two new regression failures preceded the minimal role-preserving fix; focused15tests and full434Rusttests/25groups passed, with fmt/Clippy/build,51contracts/9indexes/20repository tests. Independent T001 code and T002 final ledger reviews accepted. Strict instruction/history/tool-result criteria and original17AC remain unchanged; no live native reuse/cache-savings acceptance.
+
+Journal [PR212](https://github.com/fallrising/journal/pull/212) and desk [PR360](https://github.com/fallrising/desk/pull/360) passed required CI, normal merge and exact source/merge/origin readback. NR02 records primary closure at 2026-11-01T11:24:28.379885+00:00: separate complete backup verified45payloadfiles/179563355bytes and modes, then four clean merged primary worktrees were normally removed. Branches, other worktrees/caches and old packets/backups were preserved. This final board receipt is subsequently appended to that backup and its sole worktree removed before the final private handoff; those final two actions are not preclaimed here. Retained invocation/environment/schema failures remain distinct from genuine RED. Mainline incomplete, usable_tag none; previous six live admissions remain exhausted.
 
 ## T-0426 — Approved Claude TUI implementation
 

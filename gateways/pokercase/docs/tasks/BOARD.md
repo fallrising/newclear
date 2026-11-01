@@ -1,5 +1,16 @@
 # Pokercase 技術任務
 
+## T-0426 — Fresh TUI trial after owner trust confirmation
+
+Demand:deskT0426;claim372merged. [TT-1–TT-3](T-0426-tui-trusted.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| TT-01 | Trusted-directory preflight and independent review | TT-1 | in_progress | 2026-11-01T14:31:46.244293+00:00 | — | 2026-11-01T14:46:02.386692+00:00 |
+| TT-02 | Bounded real TUI lifecycle attempt | TT-2 | in_progress | 2026-11-01T14:31:46.244293+00:00 | — | 2026-11-01T14:46:02.386692+00:00 |
+| TT-03 | Actual evidence and delivery | TT-3 | in_progress | 2026-11-01T14:31:46.244293+00:00 | — | 2026-11-01T14:46:02.386692+00:00 |
+
+
 ## T-0426 — Three-request real TUI pilot
 
 Demand:deskT0426;claim364merged. [TP-1–TP-3](T-0426-tui-pilot.md).

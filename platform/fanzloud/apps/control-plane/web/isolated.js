@@ -1,3 +1,4 @@
+import {readCandidate} from './candidate.js';
 const element = (id) => document.getElementById(id);
 const states = {queued: '排隊中', provisioning: '建立隔離工作區', running: 'Agent 執行中', finalizing: '收集 diff 與執行檢查', succeeded: '完成', failed: '失敗', interrupted: '結果不確定，已停止自動執行', cancelling: '取消中', cancelled: '已取消'};
 let csrf = '';
@@ -13,6 +14,16 @@ if (lockedSubmission) element('submit-status').textContent = '已有提交紀錄
 let finalDiff = null;
 let authenticated = false;
 let currentRun = null;
+let candidate = null;
+let candidateGeneration = 0;
+let candidateLoading = false;
+function clearCandidate() {
+  candidateGeneration++; candidate = null; candidateLoading = false;
+  element('candidate-status').textContent = '尚未取得固定候選；審查尚未開始。';
+  element('download-candidate').disabled = true;
+  element('load-candidate').disabled = true;
+}
+clearCandidate();
 let durableReady = false;
 let durableBlocked = false;
 let recoveryRequest = 0;
@@ -45,6 +56,7 @@ async function api(path, {method = 'GET', body, key, text = false} = {}) {
 }
 function fail(error) { element('error-message').textContent = error.message || '連線失敗'; }
 function showLogin() {
+  if (!authenticated) clearCandidate();
   element('login-panel').hidden = authenticated;
   element('task-panel').hidden = !authenticated;
   element('connection-status').textContent = authenticated ? '已登入私人工作區' : '請登入私人工作區';
@@ -114,6 +126,7 @@ function observe(id) {
   clearTimeout(timer); runId = id; sessionStorage.setItem('fanz-current-run', id);
   element('run-id').textContent = id; element('run-status').textContent = '讀取中';
   element('run-reason').textContent = ''; element('error-message').textContent = '';
+  clearCandidate();
   currentRun = null; element('cancel-run').disabled = true; element('cancel-status').textContent = '';
   lastState = ''; finalDiff = null; element('activity').textContent = '';
   element('diff-output').textContent = '尚無 diff'; element('download-diff').disabled = true;
@@ -135,6 +148,7 @@ async function refresh() {
   if (requested !== runId || !authenticated) return;
   element('run-id').textContent = run.id;
   currentRun = run;
+  element('load-candidate').disabled = candidateLoading || run.state !== 'succeeded' || typeof run.result?.diff !== 'string';
   element('run-status').textContent = states[run.state] || run.state;
   element('run-reason').textContent = reasonText(run.reason);
   const terminal = ['succeeded', 'failed', 'cancelled'].includes(run.state);
@@ -208,6 +222,44 @@ element('download-diff').addEventListener('click', async () => {
     const link = document.createElement('a'); link.href = url; link.download = `run-${requested}.diff`; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (error) { fail(error); }
+});
+element('load-candidate').addEventListener('click', async () => {
+  if (!authenticated || !currentRun || element('load-candidate').disabled) return;
+  const run = currentRun; clearCandidate(); const generation = candidateGeneration;
+  candidateLoading = true; element('candidate-status').textContent = '正在核對固定成果…';
+  try {
+    const loaded = await readCandidate(run, api);
+    if (generation !== candidateGeneration || !authenticated || run.id !== runId) return;
+    candidate = loaded;
+    element('candidate-status').textContent = `候選 SHA256：${loaded.sha256}\n來源 base：${loaded.base_sha}\nWriter profile：${loaded.profile_revision}\nDiff SHA256：${loaded.diff_sha256}\n檢查結果：${JSON.stringify(loaded.verification, null, 2)}\n此候選包含原任務、diff 與檢查結果；審查尚未開始。`;
+    element('download-candidate').disabled = false;
+  } catch {
+    if (generation === candidateGeneration && authenticated && run.id === runId) element('candidate-status').textContent = '固定審查候選無法確認；未開始審查，請重新讀取。';
+  } finally {
+    if (generation === candidateGeneration && authenticated && run.id === runId) {
+      candidateLoading = false; element('load-candidate').disabled = false;
+    }
+  }
+});
+element('download-candidate').addEventListener('click', async () => {
+  if (!authenticated || !candidate || candidate.run_id !== runId || element('download-candidate').disabled) return;
+  const saved = candidate, run = currentRun, generation = candidateGeneration;
+  element('download-candidate').disabled = true;
+  try {
+    // Reauthorize and enforce archive expiry again; cached bytes cannot bypass AP.
+    const checked = await readCandidate(run, api);
+    if (generation !== candidateGeneration || !authenticated || saved.run_id !== runId) return;
+    if (checked.sha256 !== saved.sha256 || checked.raw !== saved.raw) throw new Error('candidate changed');
+    const url = URL.createObjectURL(new Blob([saved.raw], {type: 'application/json'}));
+    const link = document.createElement('a'); link.href = url; link.download = `candidate-${saved.sha256}.json`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    element('download-candidate').disabled = false;
+  } catch {
+    if (generation === candidateGeneration && authenticated && saved.run_id === runId) {
+      clearCandidate(); element('load-candidate').disabled = false;
+      element('candidate-status').textContent = '固定審查候選無法確認；未下載，請重新讀取。';
+    }
+  }
 });
 element('cancel-run').addEventListener('click', async () => {
   if (!currentRun || element('cancel-run').disabled) return;

@@ -2,17 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
-const source = await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8');
+import {readCandidate} from '../apps/control-plane/web/candidate.js';
+import {webcrypto} from 'node:crypto';
+const source = (await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8')).replace("import {readCandidate} from './candidate.js';", '');
 const run = id => ({id, state: 'running', state_version: 3, cleanup_state: 'pending'});
-async function page({stored, submit, action, getRun, tasks, submissions} = {}) {
+async function page({stored, submit, action, getRun, tasks, submissions, artifacts} = {}) {
   const elements = new Map(), storage = new Map(stored || []), requests = [], timers = [];
   const node = id => {
     if (!elements.has(id)) elements.set(id, {value: '0', textContent: '', disabled: false, options: [], listeners: {}, children: [],
       addEventListener(type, fn) {this.listeners[type] = fn;},
-      replaceChildren(...children) {this.children = children; this.options = children;}, append(child) {this.children.push(child);}});
+      replaceChildren(...children) {this.children = children; this.options = children;}, append(child) {this.children.push(child);}, click() {this.clicked = true;}});
     return elements.get(id);
   };
-  const context = vm.createContext({document: {getElementById: node, createElement: () => node(Symbol())},
+  const context = vm.createContext({readCandidate, Blob, URL, document: {getElementById: node, createElement: () => node(Symbol())},
     sessionStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, v) => storage.set(key, v), removeItem: key => storage.delete(key)},
     Option: function(text, value) {return {text, value};}, crypto: {randomUUID: () => `key-${requests.length}`},
     setTimeout: fn => {timers.push(fn); return timers.length;}, clearTimeout() {}, Date,
@@ -26,9 +28,10 @@ async function page({stored, submit, action, getRun, tasks, submissions} = {}) {
       else if (url.endsWith('/runtime')) data = {repositories: [{canonical_repo: 'repo', base_sha: 'a'.repeat(40)}]};
       else if (url.endsWith('/tasks') && options.method === 'POST') data = await (submit ? submit() : Promise.resolve({run: run('A')}));
       else if (url.endsWith('/tasks')) data = {items: tasks ? await tasks() : [{title: 'A', run_id: 'A', state: 'running'}, {title: 'B', run_id: 'B', state: 'running'}]};
+      else if (url.includes('/artifacts')) data = await artifacts(url);
       else if (url.endsWith('/actions')) data = await action();
       else data = getRun ? await getRun(url.split('/').at(-1)) : run(url.split('/').at(-1));
-      return {ok: true, status: 200, json: async () => data};
+      return {ok: true, status: 200, json: async () => data, text: async () => data};
     }});
   await vm.runInContext(`(async () => {${source}\n})()`, context);
   const flush = async () => {for(let n = 0; n < 10; n++) await Promise.resolve();};
@@ -172,4 +175,68 @@ test('M3-06: confirmed 404 of stale selection falls back to durable run without 
   }});
   await p.flush(); assert.equal(p.node('run-id').textContent,'saved-run');
   assert.equal(p.requests.filter(x=>x.method==='POST').length,0);
+});
+
+test('C02: fixed candidate has an explicit authenticated read action', async () => {
+  const p = await page();
+  assert.equal(typeof p.node('load-candidate').listeners.click, 'function');
+  assert.equal(p.node('download-candidate').disabled, true);
+});
+
+const candidateRunId = '018ff3ab-1277-7000-8000-000000000001';
+const candidateArtifactId = '018ff3ab-1277-7000-8000-000000000002';
+const candidateHash = async text => Buffer.from(await webcrypto.subtle.digest('SHA-256', new TextEncoder().encode(text))).toString('hex');
+async function candidateFixture(mutate = () => {}) {
+  const result = {base_sha: 'a'.repeat(40), diff: '修正\n', diff_bytes: 7, diff_sha256: await candidateHash('修正\n'), verification: {status: 'passed', checks: [{id: 'test', status: 'passed'}]}};
+  const run = {id: candidateRunId, task_id: '018ff3ab-1277-7000-8000-000000000003', profile_revision: '018ff3ab-1277-7000-8000-000000000004', base_sha: result.base_sha, attempt_no: 1, goal: '<script>untrusted goal</script>', state: 'succeeded', state_version: 5, cleanup_state: 'confirmed', result};
+  const archive = {schema_version: 'result-archive-v1', artifact_id: candidateArtifactId, run_id: run.id, task_id: run.task_id, profile_revision: run.profile_revision, base_sha: run.base_sha, attempt_no: 1, goal: run.goal, result: structuredClone(result)};
+  mutate(archive); const raw = JSON.stringify(archive);
+  const meta = {id: candidateArtifactId, run_id: run.id, kind: 'result', mime: 'application/json', pruned_at: null, sha256: await candidateHash(raw), size: new TextEncoder().encode(raw).length};
+  const requests = [];
+  const request = async (path, options) => {requests.push({path, options}); return path.endsWith('/artifacts') ? {items: [meta]} : raw;};
+  return {run, raw, meta, request, requests};
+}
+test('C02: candidate verifies exact UTF8 archive, diff and identities without a mutation', async () => {
+  const f = await candidateFixture(); const got = await readCandidate(f.run, f.request);
+  assert.equal(got.raw, f.raw); assert.equal(got.sha256, f.meta.sha256); assert.notEqual(got.sha256, got.diff_sha256);
+  assert.deepEqual(f.requests.map(x => x.path), [`/runs/${f.run.id}/artifacts`, `/runs/${f.run.id}/artifacts/${candidateArtifactId}`]);
+  assert.equal(f.requests.some(x => x.options?.method), false);
+});
+test('C03: tampered metadata, missing/pruned archive and nonterminal writer fail closed', async () => {
+  for (const change of [f => {f.meta.sha256 = '0'.repeat(64);}, f => {f.meta.size++;}, f => {f.meta.pruned_at = 'now';}, f => {f.meta.id = '../session';}, f => {f.meta.run_id = candidateArtifactId;}, f => {f.meta.mime = 'text/html';}, f => {f.meta.size = 1024*1024+1;}, f => {f.run.state = 'running';}, f => {f.meta.size = 1.5;}]) {
+    const f = await candidateFixture(); change(f); await assert.rejects(readCandidate(f.run, f.request), /固定審查候選/);
+  }
+  const f = await candidateFixture();
+  for (const items of [[], [f.meta, f.meta], null]) await assert.rejects(readCandidate(f.run, async () => ({items})), /固定審查候選/);
+  await assert.rejects(readCandidate(f.run, async () => {throw new Error('410');}), /410/);
+});
+test('C03: rehashed foreign content cannot pass candidate identity and result binding', async () => {
+  for (const mutate of [v => {v.run_id = candidateArtifactId;}, v => {v.task_id = candidateArtifactId;}, v => {v.profile_revision = candidateArtifactId;}, v => {v.base_sha = 'b'.repeat(40);}, v => {v.attempt_no = 2;}, v => {v.goal += '!';}, v => {v.artifact_id = candidateRunId;}, v => {v.schema_version = 'unknown';}, v => {v.result.diff += '!';}, v => {v.result.diff_bytes++;}, v => {v.result.diff_sha256 = '0'.repeat(64);}, v => {v.result.verification.status = 'failed';}]) {
+    const f = await candidateFixture(mutate); await assert.rejects(readCandidate(f.run, f.request), /固定審查候選/);
+  }
+});
+test('C04: load exposes hash as text; reread and download never dispatch', async () => {
+  const f = await candidateFixture(); const p = await page({stored: [['fanz-current-run', f.run.id]], getRun: () => f.run, artifacts: url => f.request(url.replace('/api/v1',''))});
+  assert.equal(p.node('load-candidate').disabled, false); await p.node('load-candidate').listeners.click();
+  assert.match(p.node('candidate-status').textContent, new RegExp(f.meta.sha256));
+  assert.match(p.node('candidate-status').textContent, /審查尚未開始/); assert.match(p.node('candidate-status').textContent, /test/); assert.equal(p.node('download-candidate').disabled, false);
+  await p.node('download-candidate').listeners.click(); assert.equal(p.node('download-candidate').disabled, false);
+  assert.equal(p.requests.filter(x => x.method !== 'GET').length, 0);
+});
+test('C04: late candidate after selection or logout cannot restore download', async () => {
+  for (const logout of [false, true]) {
+    const f = await candidateFixture(); let release;
+    const p = await page({stored: [['fanz-current-run', f.run.id]], getRun: id => id === f.run.id ? f.run : run(id), artifacts: url => url.endsWith('/artifacts') ? new Promise(resolve => {release = resolve;}) : f.raw});
+    const load = p.node('load-candidate').listeners.click(); await p.flush();
+    if (logout) await p.node('logout').listeners.click(); else {p.node('recent-tasks').children[1].children[0].listeners.click(); await p.flush();}
+    release({items: [f.meta]}); await load;
+    assert.equal(p.node('download-candidate').disabled, true); assert.doesNotMatch(p.node('candidate-status').textContent, new RegExp(f.meta.sha256));
+  }
+});
+test('C04: expiry during download clears candidate without cached bypass', async () => {
+  const f = await candidateFixture(); let gone = false;
+  const p = await page({stored: [['fanz-current-run', f.run.id]], getRun: () => f.run, artifacts: url => {if(gone) throw new Error('410'); return f.request(url.replace('/api/v1',''));}});
+  await p.node('load-candidate').listeners.click(); gone = true; await p.node('download-candidate').listeners.click();
+  assert.equal(p.node('download-candidate').disabled, true); assert.match(p.node('candidate-status').textContent, /未下載/);
+  assert.equal(p.requests.filter(x => x.method !== 'GET').length, 0);
 });

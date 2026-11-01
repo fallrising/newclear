@@ -104,6 +104,17 @@ impl Fixture {
                     } else {
                         (202, receipt())
                     }
+                } else if head.starts_with("GET /api/v1/runs/") && head.contains("/artifacts") {
+                    if !head.contains("cookie: auth=ok\r\n") {
+                        (401, json!({"error":"authentication_required"}))
+                    } else if mode == "pruned" {
+                        (410, json!({"error":"artifact_expired"}))
+                    } else {
+                        (
+                            200,
+                            json!({"archive":"exact UTF8 原始 bytes", "run_id":RUN}),
+                        )
+                    }
                 } else if head.starts_with("GET /api/v1/runs/") {
                     (200, run())
                 } else {
@@ -377,4 +388,39 @@ async fn m3_04_observed_run_reopens_with_stable_history_without_submit() {
     assert_eq!(a["fanz_history"]["cursor"], 1);
     assert_eq!(a["fanz_history"]["events"][0]["state"], "queued");
     assert_eq!(f.posts.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn c01_artifact_tcp_preserves_auth_body_and_expiry_with_store_enabled() {
+    for (mode, auth, expected) in [
+        ("normal", true, 200),
+        ("normal", false, 401),
+        ("pruned", true, 410),
+    ] {
+        let fixture = Fixture::new(mode);
+        for path in [
+            format!("/api/v1/runs/{RUN}/artifacts"),
+            format!("/api/v1/runs/{RUN}/artifacts/{KEY}"),
+        ] {
+            let response = fixture
+                .app()
+                .oneshot(request(Method::GET, &path, KEY, None, auth, "csrf"))
+                .await
+                .expect("response");
+            assert_eq!(response.status().as_u16(), expected);
+            assert_eq!(response.headers()["cache-control"], "no-store");
+            let raw = to_bytes(response.into_body(), RESPONSE_LIMIT)
+                .await
+                .expect("body");
+            if expected == 200 {
+                assert_eq!(
+                    raw.as_ref(),
+                    json!({"archive":"exact UTF8 原始 bytes", "run_id":RUN})
+                        .to_string()
+                        .as_bytes()
+                );
+            }
+        }
+        assert_eq!(fixture.posts.load(Ordering::SeqCst), 0);
+    }
 }
